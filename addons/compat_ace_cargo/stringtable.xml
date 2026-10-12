@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="einv">
+    <Package name="compat_ace_cargo">
+        <Key ID="STR_einv_compat_ace_cargo_Button_Close">
+            <English>Close</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Button_Open">
+            <English>Open</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Damage">
+            <English>Damage %1%2</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Size">
+            <English>Size %1</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Tip_Busy">
+            <English>Already unloading something</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Tip_InAir">
+            <English>Not in the air - airdrops go through ACE's cargo menu</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Tip_NoInventory">
+            <English>It has no inventory</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Tip_Packed">
+            <English>Packed away - unload it to look inside</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Tip_Space">
+            <English>Cargo space used / in all</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Tip_Stop">
+            <English>Click to stop unloading</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Tip_TooFar">
+            <English>Too far from the vehicle</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Tip_VehicleLocked">
+            <English>The vehicle is locked</English>
+        </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Unloading">
+            <English>Unloading... %1 s</English>
+        </Key>
+    </Package>
+</Project>

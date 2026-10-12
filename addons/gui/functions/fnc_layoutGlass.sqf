@@ -1,0 +1,183 @@
+#include "..\script_component.hpp"
+#include "..\defines.hpp"
+/*
+ * Author: Miss Heda
+ * Lays out the window, Enhanced First Aid Kits' glass:
+ *
+ *   | equipment |        free        | storage | loot |
+ *
+ * On the left what the unit wears, as cards (fnc_drawEquipmentCards). On the right its uniform, vest
+ * and backpack stacked in one scrolling column, and while it loots a second column for that at the
+ * far right, titled with what is looted ("Nearby" when it only shows what lies around) - the middle gets
+ * narrower for it. The middle stays free: the camera shows the soldier there, and an open kit's window
+ * opens there (fnc_placeWindow). Kits never bring the loot column in: they float over the columns in
+ * windows of their own (fnc_drawWindows).
+ *
+ * A storage column is as wide as its grid needs (fnc_getCell), so it is the same in every look. The
+ * equipment column takes about a third of the screen; where the screen is too narrow for everything
+ * (4:3 while looting), the middle gives way first, then the equipment column - nothing overlaps.
+ *
+ * The theme decides between cards floating on their own and a pane under them ("equipmentPanel"),
+ * and whether the column titles carry icons ("titleIcons"). Every panel goes into GVAR(panels): an
+ * item let go outside all of them goes on the ground (fnc_updateDrag).
+ *
+ * A window that attached (fnc_attach) may ask for more through the context, all optional: "rightColumn"
+ * keeps the loot column's place without drawing it, "rightGrow" and "rightKeep" let that column grow
+ * (above), its rectangle comes back as "rightRect" - [x, y, w, h], not added to GVAR(panels): whoever
+ * draws there does that - and "storageSections" is what the storage column shows instead of the unit's
+ * own sections.
+ *
+ * Arguments:
+ * 0: Display <DISPLAY>
+ * 1: Theme <HASHMAP>
+ * 2: Context, see fnc_build <HASHMAP>
+ *
+ * Return Value:
+ * Where the soldier stands when the camera is on, [x, y, w, h] on the screen - [] when the middle is
+ * too narrow for it <ARRAY>
+ *
+ * Example:
+ * [_display, _theme, _context] call einv_gui_fnc_layoutGlass;
+ *
+ * Public: No
+ */
+
+disableSerialization;
+
+params ["_display", "_theme", "_context"];
+
+(call FUNC(getCell)) params ["_cellW"];
+
+private _gap = SQUARE(UNIT * 0.8);
+
+// The padding fnc_drawColumn gives its sections. The equipment column keeps to the same top, so its
+// first card lines up with the storage column's title.
+private _padY = UNIT * 0.4;
+private _padX = SQUARE(_padY);
+private _titleIcons = _theme getOrDefault ["titleIcons", true];
+
+// A storage column: the container's picture box and its compartments beside it (fnc_drawSection), the
+// column's padding - the right one wide enough for the scroll bar - and a little air.
+private _columnW = (STORAGE_COLS + 3) * _cellW + SQUARE(UNIT * 0.35) + ((_padX * 2) max (_padX + SCROLL_W + pixelW * 4)) + SQUARE(UNIT * 0.6);
+
+// The columns from the right edge inwards: loot (while looting), storage, then the middle. A window that
+// attached keeps the place of the loot column although nothing is looted (the context's "rightColumn":
+// the Arsenal's catalog stands there) and may let it grow by what the middle has beyond "rightKeep" UNITs
+// of width - at most "rightGrow" of a column - so a wide screen does not leave the soldier a hall.
+private _looting = _context getOrDefault ["looting", false];
+private _reserved = _looting || {_context getOrDefault ["rightColumn", false]};
+private _rightW = _columnW;
+
+// About a third of the screen, but no wider on ultra wide screens than the cards look good at.
+private _leftW = (safezoneW * 0.3) min SQUARE(UNIT * 22);
+
+if (_reserved) then {
+    // What the middle would be with a loot column of the usual width: three gaps, two columns.
+    private _middleW = CONTENT_W - _leftW - _gap * 3 - _columnW * 2;
+    private _keep = _context getOrDefault ["rightKeep", 0];
+    private _growBy = _context getOrDefault ["rightGrow", 0];
+    private _grow = (_middleW - SQUARE(UNIT * _keep)) max 0;
+
+    _rightW = _columnW + (_grow min (_growBy * _columnW));
+};
+
+private _right = CONTENT_X + CONTENT_W;
+private _lootX = _right - _rightW;
+
+if (_reserved) then {
+    _right = _lootX - _gap;
+    _context set ["rightRect", [_lootX, CONTENT_Y, _rightW, CONTENT_H]];
+};
+
+private _storageX = _right - _columnW;
+_right = _storageX - _gap;
+
+_leftW = _leftW min ((_right - CONTENT_X) max 0);
+
+// ----- Equipment -----
+
+GVAR(panels) pushBack [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H];
+
+// Anything let go over it goes into the slot that takes it (fnc_updateDrag).
+GVAR(equipmentRect) = [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H];
+
+private _cardsRect = if (_theme getOrDefault ["equipmentPanel", true]) then {
+    [
+        _display, controlNull, [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["panel", []],
+        _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
+    ] call FUNC(uiPanel);
+
+    [CONTENT_X + _padX, CONTENT_Y + _padY, _leftW - _padX * 2, CONTENT_H - _padY * 2]
+} else {
+    [CONTENT_X, CONTENT_Y + _padY, _leftW, CONTENT_H - _padY * 2]
+};
+
+[_display, controlNull, _cardsRect, _context, _theme] call FUNC(drawEquipmentCards);
+
+// ----- Storage -----
+
+private _ownSections = _context getOrDefault ["storageSections", _context getOrDefault ["ownSections", []]];
+
+[
+    _display, [_storageX, CONTENT_Y, _columnW, CONTENT_H], _ownSections, _theme,
+    LLSTRING(Column_Storage), ["", UI_TEX(icon_inventory_ca)] select _titleIcons, QFUNC(drawSection), "storage"
+] call FUNC(drawColumn);
+
+// Without a uniform, vest or backpack the column would stand there empty, as if something had failed.
+if (_ownSections isEqualTo []) then {
+    private _font = _theme getOrDefault ["font", "PuristaMedium"];
+    private _size = UNIT * 0.6;
+    private _textW = _columnW - _padX * 4;
+
+    [
+        _display, controlNull, [_storageX + _padX * 2, CONTENT_Y + UNIT * 2.4, _textW, UNIT],
+        [LLSTRING(Storage_Empty), _textW, _font, _size] call FUNC(fitText), _size,
+        _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]], _font, 2
+    ] call FUNC(uiLabel);
+};
+
+// ----- Loot -----
+
+if (_looting) then {
+    private _lootSections = _context getOrDefault ["lootSections", []];
+
+    // Named after what is looted: the first section is the body, the crate or the ground the window was
+    // opened on - and when that is only something lying nearby, nothing was opened: "Nearby".
+    private _first = _lootSections param [0, createHashMap];
+    private _title = _first getOrDefault ["title", ""];
+    private _icon = switch (_first getOrDefault ["id", ""]) do {
+        case "worn": {UI_TEX(icon_person_ca)};
+        case "ground": {UI_TEX(icon_ground_ca)};
+        case "container": {UI_TEX(icon_crate_ca)};
+        default {UI_TEX(icon_inventory_ca)};
+    };
+
+    // A pile opened on is "Ground" however many others lie around (its section is named by its largest
+    // item then, to tell the piles apart).
+    if ((_first getOrDefault ["id", ""]) isEqualTo "ground") then {
+        _title = localize ELSTRING(storage,Ground);
+    };
+
+    if (_first getOrDefault ["nearby", false]) then {
+        _title = LLSTRING(Column_Nearby);
+        _icon = UI_TEX(icon_ground_ca);
+    };
+
+    if (_title isEqualTo "") then {
+        _title = LLSTRING(Column_Loot);
+    };
+
+    [
+        _display, [_lootX, CONTENT_Y, _rightW, CONTENT_H], _lootSections, _theme, _title, ["", _icon] select _titleIcons,
+        QFUNC(drawSection), "loot"
+    ] call FUNC(drawColumn);
+};
+
+// ----- The middle, for the camera -----
+
+private _middleX = CONTENT_X + _leftW + _gap;
+private _middleW = _right - _middleX;
+
+if (_middleW < SQUARE(UNIT * 5)) exitWith {[]};
+
+[_middleX, CONTENT_Y, _middleW, CONTENT_H]

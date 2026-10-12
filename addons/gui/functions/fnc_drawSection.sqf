@@ -1,0 +1,759 @@
+#include "..\script_component.hpp"
+#include "..\defines.hpp"
+/*
+ * Author: Miss Heda
+ * The section drawer for a column (fnc_drawColumn): a container as a block. A caption
+ * tab on top - TACTICAL RIG, POCKETS, BACKPACK, or the crate's, the ground's or the body's name - with
+ * its load on the right; under it a square box with the container's picture and short name, and to
+ * its right the grid with a tile for every entry.
+ *
+ * The grid is Tarkov's: dark squares between lighter lines. The cells (fnc_createGrid) lie a pixel
+ * apart over a lighter surface that shows through the gaps. The compartments are laid out and drawn by
+ * fnc_flowCompartments and fnc_drawCompartments, which a kit's window (fnc_drawWindow) shares.
+ *
+ * How full the container is by weight shows in five places (einv_storage_fnc_getLoadState): the load text
+ * - warning colour when nearly full, loss colour when full or over -, with a weight icon beside it and, when
+ * full or over, a chip that says so; a load bar of two pixels instead of the caption's hairline, filled to
+ * the share of its load used; the free cells, reddish while it is full (nothing more fits whatever the grid
+ * says); and the hint over the caption or a free cell (fnc_infoHint). Lifting something marks the
+ * containers that cannot carry it (fnc_markWeight), which is why every container with a limit in play is
+ * kept in uiNamespace loadBars. A container with no limit - the ground, or with only the room counting
+ * (einv_storage_gridOnly) - keeps the hairline.
+ *
+ * Its caption tab folds the section away (fnc_toggleSection); a uniform, vest or backpack opened from
+ * inside a container gets a cross to close it (fnc_closeNested) - both by the section's container. The
+ * box of a unit's uniform, vest or backpack is that unit's slot - right click and drag work on it. A
+ * crate or vehicle shows the picture the editor has of it.
+ *
+ * A section starts folded when it says so ("folded": the crates found lying around) - the player's own
+ * clicks on the tab are kept in GVAR(collapsed) as a change from that, so folding it again goes back to
+ * the start. Folded, it keeps its caption line, load and button.
+ *
+ * Beside the tab a button moves everything in the section over in one go (fnc_takeAll, fnc_putAll): "Take
+ * all" in what is looted, "Put all in" in the unit's own uniform, vest and backpack and in containers
+ * opened from them, while the loot column has somewhere to put things. Only the inventory has it
+ * (fnc_isInventoryMode), only where at least one searched tile lies, and it is drawn disabled while a move
+ * of this section is under way. The tab gives up room to it down to three characters; below that the
+ * button is left out.
+ *
+ * A tall compartment in the loot column - a crate's or a vehicle's, up to MAX_ROWS rows - shows its rows
+ * down to the last one in use and two more (fnc_viewBlocks); the empty rows below fold into one line under the grid,
+ * "+32 empty rows (256 cells)", that opens them and folds them away again (fnc_toggleRows). Far less to
+ * scroll through, and nothing of the room hidden (Mia, 0.2.3).
+ *
+ * Four kinds of section are drawn their own way:
+ *   "drawer"            - a function name: another addon draws it (ACE cargo's cards,
+ *                         einv_compat_ace_cargo_fnc_drawSection), called with this function's six
+ *                         arguments and returning the height used
+ *   "placeholder" true  - a uniform, vest or backpack the unit does not have: the box, empty and
+ *                         hatched, and no grid; with an "owner" (the unit) the box is that unit's slot
+ *                         of the section's id - right click and drop work on it, to put one on
+ *   "worn" with "unit"  - a body's gear: its compact paper doll (fnc_drawEquipmentDoll) instead of
+ *                         a grid of what it wears
+ *   "locked" true       - locked to this player (einv_locks_fnc_decorate): the caption with a padlock
+ *                         and "notice", why, in one muted line - nothing of what it holds;
+ *                         "lockedObject" is the object behind it
+ * A section the player may open only because of who they are brings "lockTip": an open padlock left of
+ * the load, with that text as its tooltip.
+ *
+ * A section may bring what its grid shows along rather than have it read from its container
+ * (fnc_drawCompartments):
+ *   "entries"   - what it shows; a grid of them is "virtual" unless the section says otherwise
+ *   "virtual"   - false: things move in and out of its grid like a container's
+ *   "kit"       - the kit class its grid stands for (einv_compat_efak)
+ *   "layoutKey" - where its layout is kept (einv_storage_fnc_getLayout)
+ *   "side"      - "own" or "loot" (the column it is in, when left out)
+ *   "folded"    - starts folded
+ *   "root"      - whose locality decides who may change it
+ *   "loadFraction" - how full it is when it has no container to ask, 0 to 1 and more: its load bar
+ * An open kit of Enhanced First Aid Kits is no section of a column any more: it opens in a window of
+ * its own (fnc_drawWindow), so opening or closing one never moves anything in the columns.
+ *
+ * Arguments:
+ * 0: Display <DISPLAY>
+ * 1: Controls group to draw in - the column's <CONTROL>
+ * 2: Top of the section in the group <NUMBER>
+ * 3: Width the section may take <NUMBER>
+ * 4: Section, see einv_storage_fnc_getSections <HASHMAP>
+ * 5: Theme <HASHMAP>
+ *
+ * Return Value:
+ * Height used <NUMBER>
+ *
+ * Example:
+ * [_display, _group, 0, 0.3, _section, _theme] call einv_gui_fnc_drawSection;
+ *
+ * Public: No
+ */
+
+disableSerialization;
+
+params ["_display", "_parent", "_top", "_width", "_section", "_theme"];
+
+// A section another addon draws (ACE cargo's cards): its function takes the same six arguments and
+// returns the height used.
+private _drawer = _section getOrDefault ["drawer", ""];
+
+if (_drawer isNotEqualTo "") exitWith {
+    private _height = _this call (missionNamespace getVariable [_drawer, {}]);
+
+    if (isNil "_height" || {!(_height isEqualType 0)}) then {0} else {_height}
+};
+
+private _id = _section getOrDefault ["id", ""];
+private _placeholder = _section getOrDefault ["placeholder", false];
+
+private _font = _theme getOrDefault ["font", "PuristaMedium"];
+private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
+private _colorText2 = _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]];
+private _colorLine = _theme getOrDefault ["line", [1, 1, 1, 0.07]];
+
+// ---------------------------------------------------------------------------
+// The block: the box as wide as three cells where the column has the room, the grid beside it, both
+// centred in the column. Too narrow for a box of one and a half cells, the grid stands alone.
+// ---------------------------------------------------------------------------
+(call FUNC(getCell)) params ["_cellW", "_cellH"];
+
+private _gridW = STORAGE_COLS * _cellW;
+private _gapX = SQUARE(UNIT * 0.35);
+private _boxCells = (floor (((_width - _gridW - _gapX) / _cellW) * 2) / 2) min 3;
+private _hasBox = _boxCells >= 1.5;
+private _boxW = [0, _boxCells * _cellW] select _hasBox;
+private _boxH = [0, _boxCells * _cellH] select _hasBox;
+private _blockW = _gridW + ([0, _boxW + _gapX] select _hasBox);
+private _blockX = ((_width - _blockW) / 2) max 0;
+
+// A body: its paper doll, as wide as the blocks under it.
+private _body = _section getOrDefault ["unit", objNull];
+
+if (_id isEqualTo "worn" && {!isNull _body}) exitWith {
+    [_display, _parent, [_blockX, _top, _blockW min _width, -1], [_body] call EFUNC(storage,getEquipment), _theme, true, _body] call FUNC(drawEquipmentDoll)
+};
+
+// Locked to this player (einv_locks_fnc_decorate): the caption with a padlock where the chevron would
+// be, why in one muted line - and nothing of what is inside: no box, no grid, no load, no button.
+if (_section getOrDefault ["locked", false]) exitWith {
+    private _lineH = UNIT * 0.62;
+    private _lineSize = UNIT * 0.46;
+    private _tabPad = SQUARE(_lineH * 0.5);
+    private _lockW = SQUARE(_lineH);
+    private _notice = _section getOrDefault ["notice", ""];
+    private _captionText = [_section getOrDefault ["title", ""], _theme] call FUNC(caption);
+    private _shown = [_captionText, _blockW - _tabPad - _lockW, _fontBold, _lineSize] call FUNC(fitText);
+    private _tabW = (((_shown getTextWidth [_fontBold, _lineSize]) * TEXT_SLACK) + _tabPad + _lockW) min _blockW;
+    private _iconH = _lineH * 0.6;
+
+    [_display, _parent, [_blockX, _top, _tabW, _lineH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]]] call FUNC(uiPanel);
+    [
+        _display, _parent, [_blockX + (_lockW - SQUARE(_iconH)) / 2 + SQUARE(_lineH * 0.15), _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
+        UI_TEX(icon_lock_ca), _colorText2
+    ] call FUNC(uiIcon);
+    [_display, _parent, [_blockX + _lockW, _top, _tabW - _lockW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2] call FUNC(uiLabel);
+
+    // Why, when the mouse rests on the tab.
+    private _tip = [_display, "EINV_Hitbox", _parent, [_blockX, _top, _tabW, _lineH]] call FUNC(uiCreate);
+    _tip ctrlSetTooltip _notice;
+
+    [_display, _parent, [_blockX, _top + _lineH, _blockW, pixelH], _colorLine] call FUNC(uiPanel);
+
+    [
+        _display, _parent, [_blockX, _top + _lineH + UNIT * 0.25, _blockW, UNIT * 0.62],
+        [_notice, _blockW, _font, _lineSize] call FUNC(fitText), _lineSize, _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]], _font, 0
+    ] call FUNC(uiLabel);
+
+    _lineH + UNIT * 0.25 + UNIT * 0.7
+};
+
+// ---------------------------------------------------------------------------
+// What it holds - nothing to read for a placeholder.
+// ---------------------------------------------------------------------------
+private _maxLoad = _section getOrDefault ["maxLoad", -1];
+private _entries = [];
+private _layout = createHashMap;
+
+// Which column it is in: the unit's own storage or what it loots (fnc_drawColumn names the group).
+private _side = _section getOrDefault ["side", ""];
+
+if (_side isEqualTo "") then {
+    _side = switch (_parent getVariable [QGVAR(column), ""]) do {
+        case "storage": {"own"};
+        case "loot": {"loot"};
+        default {""};
+    };
+
+    _section set ["side", _side];
+};
+
+if (!_placeholder) then {
+    private _container = _section getOrDefault ["container", objNull];
+
+    _entries = if ("entries" in _section) then {
+        _section get "entries"
+    } else {
+        [_container] call EFUNC(storage,getContents)
+    };
+
+    _layout = [_section getOrDefault ["layoutKey", _container], _entries] call EFUNC(storage,getLayout);
+};
+
+// ---------------------------------------------------------------------------
+// Caption line: the tab on the left, the load on the right, a hairline under both.
+// ---------------------------------------------------------------------------
+private _caption = switch (_id) do {
+    case "vest": {LLSTRING(Tarkov_TacticalRig)};
+    case "uniform": {LLSTRING(Tarkov_Pockets)};
+    case "backpack": {LLSTRING(Tarkov_Backpack)};
+    default {_section getOrDefault ["title", ""]};
+};
+
+private _lineH = UNIT * 0.62;
+private _lineSize = UNIT * 0.46;
+private _tabPad = SQUARE(_lineH * 0.5);
+
+private _load = "";
+private _loadColor = _colorText2;
+
+// How full it is by weight: "none" with no limit in play, else "ok", "near", "full" or "over"
+// (einv_storage_fnc_getLoadState) - and how much of its load is used.
+private _state = "none";
+private _mass = 0;
+private _fraction = 0;
+private _stateMax = 0;
+private _colorWarn = _theme getOrDefault ["warn", [0.98, 0.8, 0.24, 1]];
+private _colorLoss = _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];
+
+if (!_placeholder) then {
+    ([_entries, _maxLoad] call FUNC(loadText)) params ["_text"];
+
+    _load = _text;
+    _mass = [_entries] call EFUNC(storage,getMass);
+
+    private _stateContainer = _section getOrDefault ["container", objNull];
+
+    if (!isNull _stateContainer) then {
+        private _loadState = [_stateContainer, _mass] call EFUNC(storage,getLoadState);
+
+        _state = _loadState get "state";
+        _fraction = _loadState get "fraction";
+        _stateMax = (_loadState get "maxLoad") max 0;
+    } else {
+        // A section with no container to ask brings its own fill.
+        if ("loadFraction" in _section) then {
+            _fraction = _section get "loadFraction";
+
+            _state = switch (true) do {
+                case (_fraction > 1): {"over"};
+                case (_fraction >= 0.98): {"full"};
+                case (_fraction >= NEAR_FULL): {"near"};
+                default {"ok"};
+            };
+        };
+    };
+
+    _loadColor = switch (_state) do {
+        case "near": {_colorWarn};
+        case "full";
+        case "over": {_colorLoss};
+        default {_colorText2};
+    };
+};
+
+// A click on the tab folds the section away to this line, or opens it again (fnc_toggleSection); one
+// opened from inside a container (fnc_openNested) has a cross to close it at the end of the line. Both
+// go by the section's container - a section with none folds and closes not at all. Folded is what the
+// section starts as, changed by the player's own clicks (GVAR(collapsed)).
+private _sectionContainer = _section getOrDefault ["container", objNull];
+private _foldable = !isNull _sectionContainer;
+private _collapsed = _foldable && {(_section getOrDefault ["folded", false]) isNotEqualTo (_sectionContainer in GVAR(collapsed))};
+private _nested = _foldable && {GVAR(opened) findIf {(_x select 1) isEqualTo _sectionContainer} >= 0};
+private _chevronW = [0, SQUARE(_lineH)] select _foldable;
+private _closeW = [0, SQUARE(_lineH)] select _nested;
+
+// Open to this player only because of who they are (einv_locks_fnc_decorate): an open padlock left of
+// the load says so when the mouse rests on it.
+private _lockTip = _section getOrDefault ["lockTip", ""];
+private _lockW = [0, SQUARE(_lineH)] select (_lockTip isNotEqualTo "");
+
+// ---------------------------------------------------------------------------
+// The button beside the tab: Take all out of what is looted, Put all in out of what the unit carries -
+// a container opened from the unit's own storage counts as carried. Where at least one searched tile is
+// there to move, and, for Put all in, somewhere in the loot column to put it.
+// ---------------------------------------------------------------------------
+private _buttonKind = "";
+private _buttonEligible = "";
+private _busy = false;
+
+if (
+    !_placeholder && {_foldable} && {_id in ["ground", "container", "uniform", "vest", "backpack"]}
+    && {_side in ["own", "loot"]} && {call FUNC(isInventoryMode)}
+    && {([_sectionContainer, "items"] call FUNC(checkTouch)) isEqualTo ""}
+) then {
+    private _carried = _side isEqualTo "own" || {(_section getOrDefault ["root", objNull]) isEqualTo GVAR(unit)};
+    private _placed = _layout getOrDefault ["entries", []];
+
+    // What the button would be here, and whether any searched tile is there to move: what was not
+    // searched yet does not count; searching it later brings the button.
+    if (_carried) then {
+        if ((call FUNC(putAllTarget)) isNotEqualTo []) then {
+            _buttonEligible = "put";
+        };
+    } else {
+        _buttonEligible = "take";
+    };
+
+    [_sectionContainer, _placed, false] call FUNC(markHidden);
+
+    if (_placed findIf {!(_x getOrDefault ["hidden", false])} >= 0) then {
+        _buttonKind = _buttonEligible;
+    };
+
+    // A move that takes from this section is under way: a second press would plan the same things twice.
+    // A HashMap: _y is a move's record, its sources first.
+    {
+        if (((_y param [0, []]) findIf {(_x param [0, objNull]) isEqualTo _sectionContainer}) >= 0) exitWith {
+            _busy = true;
+        };
+    } forEach GVAR(inFlight);
+};
+
+// What it is meant to be - the tab may give the button up for lack of room below.
+private _buttonIntent = _buttonKind;
+private _buttonText = "";
+private _buttonSize = _lineSize * 0.9;
+private _buttonW = 0;
+private _buttonGap = SQUARE(UNIT * 0.3);
+
+if (_buttonKind isNotEqualTo "") then {
+    _buttonText = [[LLSTRING(Section_TakeAll), LLSTRING(Section_PutAll)] select (_buttonKind isEqualTo "put"), _theme] call FUNC(caption);
+    _buttonW = (_buttonText getTextWidth [_font, _buttonSize]) * TEXT_SLACK + SQUARE(_lineH * 0.7);
+};
+
+private _loadW = [0, (_load getTextWidth [_font, _lineSize]) * TEXT_SLACK + SQUARE(UNIT * 0.3)] select (_load isNotEqualTo "");
+
+// Left of the load text when it is nearly full: a weight icon, and when full or over a chip that says so. The
+// tab gives up room to both.
+private _stateIconH = _lineH * 0.6;
+private _stateGap = SQUARE(UNIT * 0.15);
+private _stateIconW = 0;
+private _chipText = "";
+private _chipW = 0;
+
+if (_load isNotEqualTo "" && {_state in ["near", "full", "over"]}) then {
+    _stateIconW = SQUARE(_stateIconH) + _stateGap;
+
+    if (_state in ["full", "over"]) then {
+        _chipText = [[LLSTRING(Load_Full), LLSTRING(Load_Over)] select (_state isEqualTo "over"), _theme] call FUNC(caption);
+        _chipW = ((_chipText getTextWidth [_fontBold, _lineSize * 0.85]) * TEXT_SLACK) + SQUARE(_lineH * 0.7) + _stateGap;
+    };
+};
+
+private _stateW = _stateIconW + _chipW;
+
+// How many characters of a shortened text are left of it.
+private _fnc_chars = {
+    params ["_text"];
+
+    private _count = count _text;
+
+    [_count, _count - 3] select (_count >= 3 && {(_text select [_count - 3]) isEqualTo "..."})
+};
+
+private _captionText = [_caption, _theme] call FUNC(caption);
+private _tabRoom = _blockW - _loadW - _stateW - _closeW - _lockW - ([0, _buttonW + _buttonGap] select (_buttonKind isNotEqualTo ""));
+private _shown = [_captionText, _tabRoom - _tabPad - _chevronW, _fontBold, _lineSize] call FUNC(fitText);
+
+// The tab gives up room to the button down to three characters - and the button is left out below that.
+if (_buttonKind isNotEqualTo "" && {([_shown] call _fnc_chars) < (3 min count _captionText)}) then {
+    _buttonKind = "";
+    _tabRoom = _blockW - _loadW - _stateW - _closeW - _lockW;
+    _shown = [_captionText, _tabRoom - _tabPad - _chevronW, _fontBold, _lineSize] call FUNC(fitText);
+};
+
+private _tabW = (((_shown getTextWidth [_fontBold, _lineSize]) * TEXT_SLACK) + _tabPad + _chevronW) min _tabRoom;
+private _tabColor = _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]];
+private _tab = [];
+
+if (_shown isNotEqualTo "") then {
+    _tab = [_display, _parent, [_blockX, _top, _tabW, _lineH], _tabColor] call FUNC(uiPanel);
+    [_display, _parent, [_blockX + _chevronW, _top, _tabW - _chevronW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2] call FUNC(uiLabel);
+};
+
+// What a later draw of this section's tiles needs to find again (fnc_redrawTiles, fnc_applyFilter).
+private _info = createHashMapFromArray [
+    ["holder", _sectionContainer], ["id", _id], ["side", _side], ["folded", _collapsed], ["tab", _tab],
+    ["tabColor", _tabColor], ["load", controlNull], ["loadColor", _loadColor], ["maxLoad", _maxLoad],
+    ["button", _buttonIntent], ["eligible", _buttonEligible], ["loadState", _state], ["caption", _caption]
+];
+
+private _infoIndex = -1;
+
+if (_foldable && {!_placeholder}) then {
+    _infoIndex = (uiNamespace getVariable [QGVAR(sectionInfo), []]) pushBack _info;
+};
+
+if (_chevronW > 0) then {
+    private _iconH = _lineH * 0.6;
+
+    [
+        _display, _parent, [_blockX + (_chevronW - SQUARE(_iconH)) / 2 + SQUARE(_lineH * 0.15), _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
+        [UI_TEX(icon_chevron_down_ca), UI_TEX(icon_chevron_right_ca)] select _collapsed, _colorText2
+    ] call FUNC(uiIcon);
+
+    private _toggle = [_display, "EINV_Hitbox", _parent, [_blockX, _top, _tabW max _chevronW, _lineH]] call FUNC(uiCreate);
+    _toggle ctrlSetTooltip LLSTRING(Section_Toggle);
+    _toggle setVariable [QGVAR(key), _sectionContainer];
+    _toggle ctrlAddEventHandler ["ButtonClick", {
+        [{_this call FUNC(toggleSection)}, [(_this select 0) getVariable [QGVAR(key), objNull]]] call FUNC(later);
+    }];
+};
+
+// Take all / Put all in, a gap right of the tab. Its click finds the section again by its place in the
+// list of what the sections drew, in this build (GVAR(buildCount)).
+if (_buttonKind isNotEqualTo "") then {
+    private _button = [
+        _display, _parent, [_blockX + _tabW + _buttonGap, _top, _buttonW, _lineH], format ["%1|%2|%3", _buttonKind, _infoIndex, GVAR(buildCount)],
+        _buttonText, "", _theme,
+        {
+            params ["_direction", "_buttonId"];
+
+            if (_direction != 1) exitWith {};
+
+            (_buttonId splitString "|") params ["_kind", "_at", ["_build", ""]];
+
+            // The click runs a frame later (fnc_uiButton): a window built again meanwhile has other
+            // sections at those places - the click is void then.
+            if (_build isNotEqualTo str GVAR(buildCount)) exitWith {};
+
+            private _holder = ((uiNamespace getVariable [QGVAR(sectionInfo), []]) param [parseNumber _at, createHashMap]) getOrDefault ["holder", objNull];
+
+            if (isNull _holder) exitWith {};
+
+            if (_kind isEqualTo "take") then {
+                [_holder] call FUNC(takeAll);
+            } else {
+                [_holder] call FUNC(putAll);
+            };
+        },
+        _busy, _buttonSize
+    ] call FUNC(uiButton);
+
+    // What it does, when the mouse rests on it.
+    private _tooltip = LLSTRING(Section_TakeAll_Tooltip);
+
+    if (_buttonKind isEqualTo "put") then {
+        private _targetHolder = ((call FUNC(putAllTarget)) param [0, []]) param [0, objNull];
+        private _lootSections = GVAR(context) getOrDefault ["lootSections", []];
+        private _targetSection = _lootSections param [_lootSections findIf {(_x getOrDefault ["container", objNull]) isEqualTo _targetHolder}, createHashMap];
+
+        _tooltip = format [LLSTRING(Section_PutAll_Tooltip), _targetSection getOrDefault ["title", [_targetHolder] call FUNC(containerName)]];
+    };
+
+    (_button select -1) ctrlSetTooltip _tooltip;
+};
+
+// The load line: the text, and left of it - when the container is nearly full by weight - the icon and the chip.
+private _record = createHashMap;
+
+if (_load isNotEqualTo "") then {
+    private _labelRect = [_blockX + _blockW - _closeW - _loadW, _top, _loadW, _lineH];
+    private _loadLabel = [_display, _parent, _labelRect, _load, _lineSize, _loadColor, _font, 1] call FUNC(uiLabel);
+    private _extras = [];
+
+    _info set ["load", _loadLabel];
+
+    if (_stateIconW > 0) then {
+        private _iconX = (_labelRect select 0) - _stateIconW;
+
+        _extras pushBack ([
+            _display, _parent, [_iconX, _top + (_lineH - _stateIconH) / 2, SQUARE(_stateIconH), _stateIconH],
+            UI_TEX(icon_weight_ca), _loadColor
+        ] call FUNC(uiIcon));
+
+        if (_chipW > 0) then {
+            private _chipX = _iconX - _chipW;
+            private _chipRect = [_chipX, _top + _lineH * 0.12, _chipW - _stateGap, _lineH * 0.76];
+
+            _extras append ([_display, _parent, _chipRect, _colorLoss, _lineH * 0.3] call FUNC(uiPanel));
+            _extras pushBack ([
+                _display, _parent, _chipRect, _chipText, _lineSize * 0.85,
+                _theme getOrDefault ["onAccent", [0.086, 0.094, 0.114, 1]], _fontBold, 2
+            ] call FUNC(uiLabel));
+        };
+    };
+
+    // What lifting something changes about it (fnc_markWeight) and the drag puts back (fnc_clearWeightMarks).
+    if (_state isNotEqualTo "none" && {!isNull _sectionContainer}) then {
+        _record = createHashMapFromArray [
+            ["container", _sectionContainer], ["parent", _parent], ["label", _loadLabel], ["labelRect", _labelRect],
+            ["text", _load], ["color", _loadColor], ["extras", _extras], ["mass", _mass], ["maxLoad", _stateMax],
+            ["state", _state], ["grids", []], ["cellColor", [0, 0, 0, 0]], ["fill", controlNull], ["bar", [_blockX, _top + _lineH, _blockW, LOAD_BAR_H]],
+            ["preview", controlNull], ["tinted", []], ["worded", false]
+        ];
+
+        (uiNamespace getVariable [QGVAR(loadBars), []]) pushBack _record;
+    };
+};
+
+_info set ["loadRecord", _record];
+
+// The open padlock, left of the load and what goes with it.
+if (_lockTip isNotEqualTo "") then {
+    private _iconH = _lineH * 0.6;
+    private _lockX = _blockX + _blockW - _closeW - _loadW - _stateW - _lockW;
+
+    [
+        _display, _parent, [_lockX + (_lockW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
+        UI_TEX(icon_lock_open_ca), _colorText2
+    ] call FUNC(uiIcon);
+
+    private _lockHit = [_display, "EINV_Hitbox", _parent, [_lockX, _top, _lockW, _lineH]] call FUNC(uiCreate);
+    _lockHit ctrlSetTooltip _lockTip;
+};
+
+// The hint over the caption line says how full the container is (fnc_infoHint); the weight of a
+// container with no limit too.
+if (_foldable && {!_placeholder}) then {
+    private _captionAnchor = createHashMapFromArray [["rel", [_blockX, _top]], ["parent", _parent]];
+    ([_captionAnchor] call FUNC(gridOrigin)) params ["_captionX", "_captionY"];
+
+    (uiNamespace getVariable [QGVAR(infoAreas), []]) pushBack [
+        [_captionX, _captionY, _blockW, _lineH], "", "", _captionAnchor, "load", [_sectionContainer, _caption]
+    ];
+};
+
+if (_nested) then {
+    private _iconH = _lineH * 0.7;
+    private _closeX = _blockX + _blockW - _closeW;
+
+    [_display, _parent, [_closeX + (_closeW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH], UI_TEX(icon_close_ca), _colorText2] call FUNC(uiIcon);
+
+    private _close = [_display, "EINV_Hitbox", _parent, [_closeX, _top, _closeW, _lineH]] call FUNC(uiCreate);
+    _close ctrlSetTooltip LLSTRING(Section_Close);
+    _close setVariable [QGVAR(key), _sectionContainer];
+    _close ctrlAddEventHandler ["ButtonClick", {
+        [{_this call FUNC(closeNested)}, [(_this select 0) getVariable [QGVAR(key), objNull]]] call FUNC(later);
+    }];
+};
+
+// The hairline under the caption - for a container with a limit in play a load bar of two pixels, filled to the
+// share of its load used.
+if (_state isEqualTo "none") then {
+    [_display, _parent, [_blockX, _top + _lineH, _blockW, pixelH], _colorLine] call FUNC(uiPanel);
+} else {
+    [_display, _parent, [_blockX, _top + _lineH, _blockW, LOAD_BAR_H], _colorLine] call FUNC(uiPanel);
+
+    if (_fraction > 0) then {
+        private _fillColor = switch (_state) do {
+            case "near": {_colorWarn};
+            case "full";
+            case "over": {_colorLoss};
+            default {_colorText2};
+        };
+
+        private _fill = [_display, _parent, [_blockX, _top + _lineH, (_blockW * (_fraction min 1)) max pixelW, LOAD_BAR_H], _fillColor] call FUNC(uiPanel);
+
+        _record set ["fill", _fill select 0];
+        _info set ["fillColor", _fillColor];
+    };
+};
+
+// Folded away: the caption line is all there is.
+if (_collapsed) exitWith {_lineH + UNIT * 0.25};
+
+private _bodyTop = _top + _lineH + UNIT * 0.25;
+
+// A tall compartment of what is looted - a crate's, a vehicle's - shows its rows down to the last one in
+// use and a little more; the empty rows below fold into a line under the grid (fnc_viewBlocks). The view
+// only: the layout and the places stay the whole container's. The unit's own storage shows all of its
+// rows, where the player arranges what he carries.
+private _view = if (isNull _sectionContainer || {_placeholder} || {_side isNotEqualTo "loot"}) then {
+    [[], 0, false, 0]
+} else {
+    [_layout, _sectionContainer] call FUNC(viewBlocks)
+};
+_view params ["_viewBlocks", "_hiddenRows", "_rowsFoldable", "_hiddenCells"];
+
+// Whether the line is there - a later draw of the tiles alone (fnc_redrawTiles) must not change that.
+_info set ["foldable", _rowsFoldable];
+
+private _drawLayout = _layout;
+
+if (_rowsFoldable) then {
+    _drawLayout = createHashMap;
+    _drawLayout merge _layout;
+    _drawLayout set ["blocks", _viewBlocks];
+};
+
+// The compartments (einv_storage_fnc_getBlocks), side by side as far as STORAGE_COLS cells reach, then
+// on the next line - and, should anything not fit any of them, a line of its own for that.
+([_drawLayout] call FUNC(flowCompartments)) params ["_places", "_blocksH"];
+
+private _gridX = _blockX + ([0, _boxW + _gapX] select _hasBox);
+
+// ---------------------------------------------------------------------------
+// The box
+// ---------------------------------------------------------------------------
+if (_hasBox) then {
+    private _boxRect = [_blockX, _bodyTop, _boxW, _boxH];
+    private _class = _section getOrDefault ["class", ""];
+
+    // No item behind a crate, the ground or a body's gear: a plain box with what it is - a crate or a
+    // vehicle with the picture the editor shows of it (editorPreview), else its icon.
+    if (_class isEqualTo "" && {!_placeholder}) exitWith {
+        private _icon = switch (_id) do {
+            case "ground": {UI_TEX(icon_ground_ca)};
+            case "container": {UI_TEX(icon_crate_ca)};
+            case "worn": {UI_TEX(icon_person_ca)};
+            default {UI_TEX(icon_inventory_ca)};
+        };
+
+        private _preview = "";
+
+        if (_id isEqualTo "container" && {!isNull _sectionContainer}) then {
+            _preview = getText (configOf _sectionContainer >> "editorPreview");
+
+            if (_preview isNotEqualTo "" && {!fileExists _preview}) then {
+                _preview = "";
+            };
+        };
+
+        private _boxRadius = (_theme getOrDefault ["radius", 0]) min (_boxH / 4);
+
+        [_display, _parent, _boxRect, _theme getOrDefault ["slot", [1, 1, 1, 0.06]], _boxRadius, _theme getOrDefault ["slotBorder", []]] call FUNC(uiPanel);
+
+        if (_preview isEqualTo "") then {
+            [_display, _parent, [_blockX + _boxW * 0.25, _bodyTop + _boxH * 0.25, _boxW * 0.5, _boxH * 0.5], _icon, _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]]] call FUNC(uiIcon);
+        } else {
+            // The editor's picture on its own grey, filling the round box without an edge
+            // (fnc_uiPictureRounded), under a dark film so the grey sits with the glass.
+            [_display, _parent, _boxRect, _preview, _boxRadius, [0, 0, 0, 0.5]] call FUNC(uiPictureRounded);
+        };
+    };
+
+    // A uniform, vest or backpack is a slot like the doll's, so the hint names it - or, while the unit
+    // has none, says that it is empty. Its caption is already on the tab above, not again in the box.
+    private _icon = switch (_id) do {
+        case "vest": {GEAR_ICON(ui_gear_vest_gs)};
+        case "uniform": {GEAR_ICON(ui_gear_uniform_gs)};
+        case "backpack": {GEAR_ICON(ui_gear_backpack_gs)};
+        default {""};
+    };
+
+    private _boxTheme = createHashMap;
+    _boxTheme merge _theme;
+    _boxTheme set ["slotCaption", "none"];
+
+    if (_placeholder) then {
+        _boxTheme set ["slotBorder", _colorLine];
+    };
+
+    // Whose it is: the box is that unit's slot, so a right click or a drag works on it as on the card.
+    private _boxOptions = createHashMapFromArray [["caption", _caption], ["icon", _icon]];
+    ([_sectionContainer] call EFUNC(storage,getOwner)) params ["_owner", "_ownerSlot"];
+
+    if (!isNull _owner && {_ownerSlot isEqualTo _id}) then {
+        _boxOptions set ["slot", _id];
+        _boxOptions set ["unit", _owner];
+    };
+
+    // A placeholder has no container to name its owner: it brings the unit itself.
+    private _placeholderOwner = _section getOrDefault ["owner", objNull];
+
+    if (_placeholder && {!isNull _placeholderOwner}) then {
+        _boxOptions set ["slot", _id];
+        _boxOptions set ["unit", _placeholderOwner];
+    };
+
+    [_display, _parent, _boxRect, _class, _boxOptions, _boxTheme] call FUNC(drawSlot);
+
+    if (_class isEqualTo "") exitWith {};
+
+    private _padY = (_boxH * 0.08) min (UNIT * 0.25);
+    private _padX = SQUARE(_padY);
+    private _name = [[_class, true] call FUNC(itemName), _boxW - _padX * 2, _font, _lineSize] call FUNC(fitText);
+
+    [_display, _parent, [_blockX + _padX, _bodyTop + _padY * 0.5, _boxW - _padX * 2, _lineH], _name, _lineSize, _colorText2, _font, 1] call FUNC(uiLabel);
+};
+
+// ---------------------------------------------------------------------------
+// The compartments and their tiles
+// ---------------------------------------------------------------------------
+private _gridsBefore = count (uiNamespace getVariable [QGVAR(grids), []]);
+
+[_display, _parent, [_gridX, _bodyTop], _section, _drawLayout, _places, _theme] call FUNC(drawCompartments);
+
+// Full or over: nothing more fits, whatever the grid says - every cell still free turns reddish. The tiles
+// hid their cells, so what is shown now is free. The record remembers the grids and the colour they have, for
+// what lifting something does to them (fnc_markWeight).
+if (count _record > 0) then {
+    private _cellColor = _theme getOrDefault ["cell", [1, 1, 1, 0.045]];
+
+    if (_cellColor isEqualTo []) then {
+        _cellColor = [0, 0, 0, 0];
+    };
+
+    private _gridIndices = [];
+
+    for "_i" from _gridsBefore to (count (uiNamespace getVariable [QGVAR(grids), []]) - 1) do {
+        _gridIndices pushBack _i;
+    };
+
+    if (_state in ["full", "over"]) then {
+        _cellColor = _theme getOrDefault ["cellFull", [0.941, 0.333, 0.353, 0.1]];
+
+        {
+            {
+                if (ctrlShown _x) then {
+                    _x ctrlSetBackgroundColor _cellColor;
+                };
+            } forEach (((uiNamespace getVariable [QGVAR(grids), []]) select _x) get "cells");
+        } forEach _gridIndices;
+    };
+
+    _record set ["grids", _gridIndices];
+    _record set ["cellColor", _cellColor];
+};
+
+private _used = (_bodyTop - _top) + (_boxH max _blocksH);
+
+// ---------------------------------------------------------------------------
+// The empty rows folded away: one line under the grid that says how many and opens them - or, opened,
+// folds them away again (fnc_toggleRows).
+// ---------------------------------------------------------------------------
+if (_rowsFoldable) then {
+    private _rowsTop = _top + _used + UNIT * 0.15;
+    private _rowsText = if (_hiddenRows > 0) then {
+        format [LLSTRING(Rows_Show), _hiddenRows, _hiddenCells]
+    } else {
+        LLSTRING(Rows_Hide)
+    };
+    private _iconH = _lineH * 0.6;
+    private _iconW = SQUARE(_iconH);
+    private _rowsW = (STORAGE_COLS * _cellW) min (_blockX + _blockW - _gridX);
+
+    [_display, _parent, [_gridX, _rowsTop, _rowsW, _lineH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]]] call FUNC(uiPanel);
+
+    [
+        _display, _parent, [_gridX + SQUARE(_lineH * 0.2), _rowsTop + (_lineH - _iconH) / 2, _iconW, _iconH],
+        [UI_TEX(icon_chevron_down_ca), UI_TEX(icon_chevron_right_ca)] select (_hiddenRows == 0), _colorText2
+    ] call FUNC(uiIcon);
+
+    private _textX = _gridX + SQUARE(_lineH * 0.4) + _iconW;
+    private _textW = _rowsW - (_textX - _gridX) - SQUARE(_lineH * 0.2);
+
+    [
+        _display, _parent, [_textX, _rowsTop, _textW, _lineH],
+        [[_rowsText, _theme] call FUNC(caption), _textW, _font, _lineSize] call FUNC(fitText), _lineSize, _colorText2, _font, 0
+    ] call FUNC(uiLabel);
+
+    private _rowsToggle = [_display, "EINV_Hitbox", _parent, [_gridX, _rowsTop, _rowsW, _lineH]] call FUNC(uiCreate);
+    _rowsToggle ctrlSetTooltip LLSTRING(Rows_Tooltip);
+    _rowsToggle setVariable [QGVAR(key), _sectionContainer];
+    _rowsToggle ctrlAddEventHandler ["ButtonClick", {
+        [{_this call FUNC(toggleRows)}, [(_this select 0) getVariable [QGVAR(key), objNull]]] call FUNC(later);
+    }];
+
+    _used = _used + UNIT * 0.15 + _lineH;
+};
+
+_used

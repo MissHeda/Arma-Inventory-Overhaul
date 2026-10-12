@@ -1,0 +1,58 @@
+#include "..\script_component.hpp"
+#include "..\defines.hpp"
+/*
+ * Author: Miss Heda
+ * The mouse wheel while a stack is dragged, as in Enhanced First Aid Kits: up one more, down one less
+ * of the stack goes - at least one, at most all of it. The middle button takes all of it again
+ * (fnc_updateDrag). The columns do not scroll meanwhile (fnc_updateDrag holds them); a single item
+ * leaves the wheel to them. A window that attached (fnc_attach) is offered the wheel first when nothing is
+ * dragged (the "wheel" hook). A new count marks the containers anew: the ones that cannot carry that many
+ * turn red, the ones that can no longer are back to normal (fnc_markWeight).
+ *
+ * Reported by the display and by every scrolling column, both for the same turn of the wheel: one
+ * per frame counts.
+ *
+ * Arguments:
+ * 0: The event's own arguments [control or display, scroll] <ARRAY>
+ *
+ * Return Value:
+ * Handled <BOOL>
+ *
+ * Example:
+ * [_this] call einv_gui_fnc_onMouseZ;
+ *
+ * Public: No
+ */
+
+params ["_args"];
+_args params ["", ["_scroll", 0]];
+
+// Not dragging: a window that attached may use the wheel itself (the Arsenal's catalog steps one card row
+// a turn, its camera zooms) - once per turn, though the display and the column both report it. The hook
+// is told the turn and where the mouse is; a hook that scrolls a column itself sets its value every
+// frame, as fnc_updateDrag holds the columns: answering true does not stop the column's own step.
+if (!GVAR(dragging) && {_scroll != 0} && {"wheel" in GVAR(hooks)}) exitWith {
+    if (GVAR(lastWheel) isEqualTo diag_frameNo) exitWith {false};
+
+    GVAR(lastWheel) = diag_frameNo;
+
+    (["wheel", [_scroll, getMousePosition], false] call FUNC(hook)) isEqualTo true
+};
+
+// Several tiles dragged together go whole: the wheel keeps scrolling the column under them.
+if (!GVAR(dragging) || {_scroll == 0} || {GVAR(dragGroup) isNotEqualTo []}) exitWith {false};
+
+private _stack = (uiNamespace getVariable [QGVAR(dragEntry), createHashMap]) getOrDefault ["count", 1];
+
+if (_stack <= 1) exitWith {false};
+
+if (GVAR(lastWheel) isEqualTo diag_frameNo) exitWith {true};
+
+GVAR(lastWheel) = diag_frameNo;
+GVAR(dragCount) = ((GVAR(dragCount) + ([-1, 1] select (_scroll > 0))) max 1) min _stack;
+
+// The containers that cannot carry that many are marked, the others not (fnc_markWeight): only recoloured
+// - what lift made is all there is.
+[uiNamespace getVariable [QGVAR(display), displayNull], uiNamespace getVariable [QGVAR(dragEntry), createHashMap], GVAR(dragCount), false] call FUNC(markWeight);
+
+true

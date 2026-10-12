@@ -1,0 +1,12 @@
+# ArmA 3
+*.pbo
+*.bisign
+
+## Added by HEMTT
+releases/*
+keys/*
+.hemtt/local
+.hemttout
+hemtt.exe
+## Python
+__pycache__/

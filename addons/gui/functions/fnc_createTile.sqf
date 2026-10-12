@@ -1,0 +1,275 @@
+#include "..\script_component.hpp"
+#include "..\defines.hpp"
+/*
+ * Author: Miss Heda
+ * Puts an entry on a grid as a tile: a surface in its category's colour over the cells it covers, its
+ * picture, and - as the style wants them - its short name in the top right corner and its count or a
+ * magazine's rounds. An entry not searched yet is a plain surface with a "?" and a faint outline, hatched
+ * in Tarkov's look.
+ *
+ * A window that attached (fnc_attach) may mark a tile in its top left corner (the "tileBadge" hook).
+ *
+ * A magazine gets its fill bar only while it is not full and the player has the bar on
+ * (einv_gui_magazineFillBar); a full one shows its rounds alone.
+ *
+ * The picture is fitted into the tile with its own shape kept. On a tile that lies turned ("rotated",
+ * fnc_getLayout) it turns along (fnc_uiPictureTurned); what is on a weapon shows only upright.
+ *
+ * How the count shows (theme "tileCount"):
+ *   "text"  - plain words in the bottom right corner (Tarkov)
+ *   "pill"  - on a box in the bottom right corner, with round ends where the theme has round corners
+ *             and square in a square look
+ *   "badge" - on a square badge in the bottom left corner, flush with the tile's edges
+ *
+ * Arguments:
+ * 0: Display <DISPLAY>
+ * 1: Grid, see fnc_createGrid <HASHMAP>
+ * 2: Entry, see einv_storage_fnc_getContents - placed by einv_storage_fnc_getLayout <HASHMAP>
+ *   "class", "col", "row", "w", "h" - the item, its top left cell and its size in cells
+ *   "count", "ammo", "capacity" (optional) - how many, a magazine's rounds and how many it holds
+ *   "hidden" (optional) - not searched yet <BOOL>
+ * 3: Theme <HASHMAP>
+ *
+ * Return Value:
+ * None - the entry gets "controls", "background" and "color" - and "mark", the "?" of a hidden one;
+ * a magazine's "bar" (its fill bar's controls) and "barRect", and "amount" (the label of its rounds) with
+ * "amountShort" (written without the capacity), which a repack in progress draws over
+ * (einv_magazines_fnc_drawJob) - and joins the grid's "tiles"
+ *
+ * Example:
+ * [_display, _grid, _entry, _theme] call einv_gui_fnc_createTile;
+ *
+ * Public: No
+ */
+
+disableSerialization;
+
+params ["_display", "_grid", "_entry", "_theme"];
+
+private _parent = _grid get "parent";
+private _cellW = _grid get "cellW";
+private _cellH = _grid get "cellH";
+private _cols = _grid get "cols";
+private _rows = _grid get "rows";
+private _cells = _grid get "cells";
+(_grid get "rel") params ["_gridX", "_gridY"];
+
+private _info = [_entry get "class"] call EFUNC(items,getInfo);
+private _hidden = _entry getOrDefault ["hidden", false];
+(_info getOrDefault ["size", [1, 1]]) params ["_sizeW", "_sizeH"];
+
+private _col = _entry getOrDefault ["col", 0];
+private _row = _entry getOrDefault ["row", 0];
+
+// An entry wider than the grid (its "overflow") is cut at the grid's edge rather than drawn past it.
+private _w = ((_entry getOrDefault ["w", _sizeW]) min (_cols - _col)) max 1;
+private _h = (_entry getOrDefault ["h", _sizeH]) max 1;
+
+// The cells under the tile make way for it.
+for "_r" from _row to (_row + _h - 1) do {
+    for "_c" from _col to (_col + _w - 1) do {
+        if (_r < _rows && {_c < _cols}) then {
+            (_cells select (_r * _cols + _c)) ctrlShow false;
+        };
+    };
+};
+
+// As a cell ends a pixel before the next one, so does the tile.
+private _left = _gridX + _col * _cellW;
+private _top = _gridY + _row * _cellH;
+private _width = _w * _cellW - pixelW;
+private _height = _h * _cellH - pixelH;
+private _padY = _cellH * 0.07;
+private _padX = SQUARE(_padY);
+private _innerW = _width - _padX * 2;
+private _textH = _cellH * 0.28;
+private _font = _theme getOrDefault ["font", "PuristaMedium"];
+private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
+private _controls = [];
+
+private _color = if (_hidden) then {
+    // Nothing about an unsearched item shows, not even its category: a step above an empty cell.
+    private _cell = +(_theme getOrDefault ["cell", [1, 1, 1, 0.045]]);
+
+    if (_cell isEqualTo []) then {[1, 1, 1, 0.06]} else {_cell set [3, (_cell select 3) + 0.03]; _cell}
+} else {
+    (_theme getOrDefault ["tileBg", []]) param [_info getOrDefault ["category", 0], [1, 1, 1, 0.075]]
+};
+
+private _background = [_display, "EINV_PanelRect", _parent, [_left, _top, _width, _height]] call FUNC(uiCreate);
+_background ctrlSetBackgroundColor _color;
+_controls pushBack _background;
+
+if (_hidden) then {
+    if (_theme getOrDefault ["hatch", false]) then {
+        _controls append ([_display, _parent, [_left, _top, _width, _height], _theme getOrDefault ["line", [1, 1, 1, 0.07]]] call FUNC(uiHatch));
+    };
+
+    // Its outline, a little lighter than the lines between the cells: a step above an empty cell alone,
+    // tiles of different sizes side by side read as one field with "?"s strewn over it (Mia, 0.2.3 - a
+    // vehicle being searched). A look with tile borders draws its own below.
+    if ((_theme getOrDefault ["tileBorder", []]) isEqualTo []) then {
+        private _edge = +(_theme getOrDefault ["line", [1, 1, 1, 0.09]]);
+        _edge set [3, ((_edge select 3) * 1.8) min 1];
+
+        _controls pushBack ([_display, _parent, [_left, _top, _width, _height], _edge] call FUNC(uiFrame));
+    };
+
+    // The "?" - it gives way to the glass while the item is searched (fnc_showSearch).
+    private _mark = [
+        _display, _parent, [_left, _top, _width, _height], "?", _cellH * 0.55,
+        _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]], _fontBold, 2
+    ] call FUNC(uiLabel);
+
+    _controls pushBack _mark;
+    _entry set ["mark", _mark];
+} else {
+    private _turned = _entry getOrDefault ["rotated", false];
+
+    if (_turned) then {
+        _controls pushBack ([
+            _display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _info getOrDefault ["picture", ""],
+            [1, 1, 1, 1], _sizeW / (_sizeH max 1)
+        ] call FUNC(uiPictureTurned));
+    } else {
+        _controls pushBack ([_display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _info getOrDefault ["picture", ""]] call FUNC(uiPicture));
+    };
+
+    // A weapon shows what is on it (fnc_drawAttachments).
+    private _attachments = _entry getOrDefault ["attachments", []];
+
+    if (_attachments isNotEqualTo [] && {!_turned}) then {
+        _controls append ([_display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _attachments] call FUNC(drawAttachments));
+    };
+
+    if (_theme getOrDefault ["tileName", true]) then {
+        // A kit by the name its player gave it (fnc_itemName).
+        private _short = [[_entry get "class", true] call FUNC(itemName), _innerW, _font, _textH] call FUNC(fitText);
+
+        _controls pushBack ([
+            _display, _parent, [_left + _padX, _top + _padY * 0.4, _innerW, _textH * 1.15], _short, _textH,
+            _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]], _font, 1
+        ] call FUNC(uiLabel));
+    };
+
+    // A mark in the top left corner the window that attached asks for ("tileBadge": a texture, "" for none).
+    private _badge = ["tileBadge", [_entry get "class"], ""] call FUNC(hook);
+
+    if (_badge isEqualType "" && {_badge isNotEqualTo ""}) then {
+        _controls pushBack ([
+            _display, _parent, [_left + _padX * 0.5, _top + _padY * 0.5, SQUARE(UNIT * 0.42), UNIT * 0.42], _badge,
+            _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]]
+        ] call FUNC(uiIcon));
+    };
+
+    private _count = _entry getOrDefault ["count", 1];
+    private _ammo = _entry getOrDefault ["ammo", 0];
+    private _capacity = _entry getOrDefault ["capacity", _info getOrDefault ["capacity", 0]];
+    private _bottom = _top + _height;
+
+    // A magazine that is not full: how full it is, as a thin bar along the bottom edge - unless the player
+    // switched it off (einv_gui_magazineFillBar). A full one needs none: its rounds say it. A setting read
+    // from the mission namespace, not GVAR: tiles are drawn in Eden as well, where CBA runs no settings.
+    if (
+        _capacity > 1 && {_ammo < _capacity}
+        && {missionNamespace getVariable [QGVAR(magazineFillBar), true]}
+        && {_theme getOrDefault ["tileAmmoBar", true]}
+    ) then {
+        private _barH = (2 max round (_cellH * 0.06 / pixelH)) * pixelH;
+        private _barY = _bottom - _padY - _barH;
+        private _barRect = [_left + _padX, _barY, _innerW, _barH];
+        private _bar = [
+            _display, _parent, _barRect, _ammo / _capacity,
+            _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]], _theme getOrDefault ["barFill", [0.84, 0.54, 0.1, 1]], 0
+        ] call FUNC(uiBar);
+
+        _controls append _bar;
+
+        // Kept for a repack in progress, which draws its own bar over it (einv_magazines_fnc_drawJob).
+        _entry set ["bar", _bar];
+        _entry set ["barRect", _barRect];
+
+        _bottom = _barY;
+    };
+
+    private _amount = switch (true) do {
+        case (_capacity > 1): {format ["%1/%2", _ammo, _capacity]};
+        case (_count > 1): {str _count};
+        default {""};
+    };
+
+    if (_amount isEqualTo "") exitWith {};
+
+    private _style = _theme getOrDefault ["tileCount", "text"];
+    private _amountFont = [_fontBold, _font] select (_style isEqualTo "text");
+
+    // Rounds that do not fit with the capacity show on their own.
+    private _shortened = false;
+
+    if (_capacity > 1 && {(_amount getTextWidth [_amountFont, _textH]) > _innerW * 0.75}) then {
+        _amount = str _ammo;
+        _shortened = true;
+    };
+
+    private _amountW = (_amount getTextWidth [_amountFont, _textH]) * TEXT_SLACK;
+    private _boxH = _textH * 1.3;
+
+    switch (_style) do {
+        case "pill": {
+            private _pillW = (_amountW + SQUARE(_boxH * 0.5)) max SQUARE(_boxH);
+            private _pill = [_left + _width - _padX - _pillW, _bottom - _padY * 0.5 - _boxH, _pillW, _boxH];
+
+            // A square look keeps its count box square, as it keeps everything else.
+            private _pillRadius = [0, _boxH / 2] select ((_theme getOrDefault ["radius", 0]) > 0);
+
+            _controls append ([_display, _parent, _pill, _theme getOrDefault ["tileCountBg", [1, 1, 1, 0.15]], _pillRadius] call FUNC(uiPanel));
+
+            private _label = [
+                _display, _parent, _pill, _amount, _textH,
+                _theme getOrDefault ["tileCountColor", [0.925, 0.933, 0.949, 1]], _amountFont, 2
+            ] call FUNC(uiLabel);
+
+            _controls pushBack _label;
+            _entry set ["amount", _label];
+        };
+        case "badge": {
+            // Flush with the tile's corner, or sitting on the ammo bar.
+            private _badgeW = _amountW + SQUARE(_boxH * 0.4);
+            private _badge = [_left, ([_bottom - _boxH, _bottom - _padY * 0.5 - _boxH] select (_bottom < _top + _height)), _badgeW, _boxH];
+
+            _controls append ([_display, _parent, _badge, _theme getOrDefault ["tileCountBg", [0.84, 0.54, 0.1, 1]], 0] call FUNC(uiPanel));
+
+            private _label = [
+                _display, _parent, _badge, _amount, _textH,
+                _theme getOrDefault ["tileCountColor", [0.086, 0.094, 0.114, 1]], _amountFont, 2
+            ] call FUNC(uiLabel);
+
+            _controls pushBack _label;
+            _entry set ["amount", _label];
+        };
+        default {
+            private _label = [
+                _display, _parent, [_left + _padX, _bottom - _padY * 0.3 - _textH * 1.15, _innerW, _textH * 1.15], _amount, _textH,
+                _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _amountFont, 1
+            ] call FUNC(uiLabel);
+
+            _controls pushBack _label;
+            _entry set ["amount", _label];
+        };
+    };
+
+    // Whether the rounds show without the capacity, for a repack that counts them live.
+    _entry set ["amountShort", _shortened];
+};
+
+private _border = _theme getOrDefault ["tileBorder", []];
+
+if (_border isNotEqualTo []) then {
+    _controls pushBack ([_display, _parent, [_left, _top, _width, _height], _border] call FUNC(uiFrame));
+};
+
+_entry set ["controls", _controls];
+_entry set ["background", _background];
+_entry set ["color", _color];
+
+(_grid get "tiles") pushBack _entry;

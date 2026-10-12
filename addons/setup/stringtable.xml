@@ -1,0 +1,830 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="einv">
+    <Package name="setup">
+        <Key ID="STR_einv_setup_Apply">
+            <English>Apply to Addon Options</English>
+        </Key>
+        <Key ID="STR_einv_setup_Back">
+            <English>Back</English>
+        </Key>
+        <Key ID="STR_einv_setup_Banner_Changed">
+            <English>Someone else changed the setup while you were working on it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Banner_Keep">
+            <English>Keep mine</English>
+        </Key>
+        <Key ID="STR_einv_setup_Banner_Reload">
+            <English>Reload</English>
+        </Key>
+        <Key ID="STR_einv_setup_Block_Add">
+            <English>Add block</English>
+        </Key>
+        <Key ID="STR_einv_setup_Block_N">
+            <English>Block %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Builder_AddCondition">
+            <English>Add condition</English>
+        </Key>
+        <Key ID="STR_einv_setup_Builder_Create">
+            <English>Create</English>
+        </Key>
+        <Key ID="STR_einv_setup_Builder_Matches">
+            <English>%1 items match</English>
+        </Key>
+        <Key ID="STR_einv_setup_Builder_Name">
+            <English>Name</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cancel">
+            <English>Cancel</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cell_FromPreset">
+            <English>from the preset, or the Load per cell setting</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cell_Help">
+            <English>How much load one grid cell stands for. Every container gets its load divided by this as cells, and every item sized by its mass gets its cells the same way. Smaller values make bigger grids and bigger items.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cell_Own">
+            <English>your own</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cell_Reset">
+            <English>Preset's</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cell_Title">
+            <English>Cell size</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cell_Value">
+            <English>1 cell = %1 kg</English>
+        </Key>
+        <Key ID="STR_einv_setup_ChangeShape">
+            <English>Change size or shape...</English>
+        </Key>
+        <Key ID="STR_einv_setup_Chip_Changes">
+            <English>%1 changes</English>
+        </Key>
+        <Key ID="STR_einv_setup_Chip_Forced">
+            <English>forced</English>
+        </Key>
+        <Key ID="STR_einv_setup_Chip_Menu">
+            <English>%1 tab of Addon Options</English>
+        </Key>
+        <Key ID="STR_einv_setup_Chip_NoChanges">
+            <English>no changes</English>
+        </Key>
+        <Key ID="STR_einv_setup_Chip_NotStored">
+            <English>not saved there yet</English>
+        </Key>
+        <Key ID="STR_einv_setup_Chip_OneChange">
+            <English>1 change</English>
+        </Key>
+        <Key ID="STR_einv_setup_Chip_Override">
+            <English>forced over the mission</English>
+        </Key>
+        <Key ID="STR_einv_setup_Chip_ReadOnly">
+            <English>Read-only</English>
+        </Key>
+        <Key ID="STR_einv_setup_Close">
+            <English>Close</English>
+        </Key>
+        <Key ID="STR_einv_setup_Col_From">
+            <English>From</English>
+        </Key>
+        <Key ID="STR_einv_setup_Col_Grid">
+            <English>Grid</English>
+        </Key>
+        <Key ID="STR_einv_setup_Col_Group">
+            <English>Group</English>
+        </Key>
+        <Key ID="STR_einv_setup_Col_Kind">
+            <English>Kind</English>
+        </Key>
+        <Key ID="STR_einv_setup_Col_Name">
+            <English>Name</English>
+        </Key>
+        <Key ID="STR_einv_setup_Col_Shape">
+            <English>Shape</English>
+        </Key>
+        <Key ID="STR_einv_setup_Col_Size">
+            <English>Size</English>
+        </Key>
+        <Key ID="STR_einv_setup_Col_Stack">
+            <English>Stack</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_addon">
+            <English>from addon %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_addonContains">
+            <English>from an addon containing %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_cat">
+            <English>category %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_class">
+            <English>class %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_classContains">
+            <English>class contains %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_classPlus">
+            <English>%1 and everything based on it</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_for">
+            <English>fits %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_kind">
+            <English>kind %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_load">
+            <English>load %1 %2</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_mass">
+            <English>mass %1 %2</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_rounds">
+            <English>rounds %1 %2</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cond_well">
+            <English>in magazine well %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Conflict_Overwrite">
+            <English>Overwrite</English>
+        </Key>
+        <Key ID="STR_einv_setup_Conflict_Replay">
+            <English>Mine on top of theirs</English>
+        </Key>
+        <Key ID="STR_einv_setup_Conflict_Replayed">
+            <English>Your changes are on top of the new setup - look it over and save again.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Conflict_Text">
+            <English>Someone else saved the setup while you were working on it. Put your changes on top of theirs, or overwrite what they saved?</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Blocks">
+            <English>%1 compartments · %2 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Cells">
+            <English>%1 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Load">
+            <English>Load %1 (%2 kg)</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Overflow">
+            <English>%1 items don't fit</English>
+        </Key>
+        <Key ID="STR_einv_setup_Desc_Every">
+            <English>Every item</English>
+        </Key>
+        <Key ID="STR_einv_setup_Desc_Group">
+            <English>Group %1: %2</English>
+        </Key>
+        <Key ID="STR_einv_setup_Desc_Not">
+            <English>not %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Desc_Or">
+            <English>or</English>
+        </Key>
+        <Key ID="STR_einv_setup_Desc_Rule">
+            <English>%1: %2</English>
+        </Key>
+        <Key ID="STR_einv_setup_Discard_Confirm">
+            <English>Close without saving? Your changes would be lost.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Discard_Yes">
+            <English>Close</English>
+        </Key>
+        <Key ID="STR_einv_setup_Fill">
+            <English>Fill with</English>
+        </Key>
+        <Key ID="STR_einv_setup_Fill_Empty">
+            <English>Empty</English>
+        </Key>
+        <Key ID="STR_einv_setup_Fill_Medic">
+            <English>Medic</English>
+        </Key>
+        <Key ID="STR_einv_setup_Fill_Rifleman">
+            <English>Rifleman</English>
+        </Key>
+        <Key ID="STR_einv_setup_GridOnly_Off">
+            <English>Limit by room only is off: a container also has to stay within its load.</English>
+        </Key>
+        <Key ID="STR_einv_setup_GridOnly_On">
+            <English>Limit by room only is on: a container holds whatever fits its grid, however heavy - the cell size alone decides how much that is.</English>
+        </Key>
+        <Key ID="STR_einv_setup_GridOnly_Where">
+            <English>It is in Addon Options, Enhanced Inventory, Containers.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Groups_All">
+            <English>All</English>
+        </Key>
+        <Key ID="STR_einv_setup_Groups_Covers">
+            <English>covers %1 items</English>
+        </Key>
+        <Key ID="STR_einv_setup_Groups_New">
+            <English>New group</English>
+        </Key>
+        <Key ID="STR_einv_setup_Groups_Own">
+            <English>Your groups</English>
+        </Key>
+        <Key ID="STR_einv_setup_Groups_Reset">
+            <English>Back to the preset</English>
+        </Key>
+        <Key ID="STR_einv_setup_Groups_ShowItems">
+            <English>Show its items</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_PresetPicked">
+            <English>Now built on %1.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Import">
+            <English>Import...</English>
+        </Key>
+        <Key ID="STR_einv_setup_Import_Add">
+            <English>Add to mine</English>
+        </Key>
+        <Key ID="STR_einv_setup_Import_Done">
+            <English>Imported %1 statements, %2 warnings - Review lists them.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Import_Help">
+            <English>Paste a shared setup here with Ctrl+V: a rules text, or lines out of a cba_settings.sqf or CBA's Export - only the inventory's line is read.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Import_Nothing">
+            <English>Nothing to import: no rules text found.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Import_Placeholder">
+            <English>Paste here</English>
+        </Key>
+        <Key ID="STR_einv_setup_Import_Replace">
+            <English>Use instead of mine</English>
+        </Key>
+        <Key ID="STR_einv_setup_Import_Title">
+            <English>Import a setup</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Apply">
+            <English>Apply</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_ApplyTo">
+            <English>Apply to</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_ByName">
+            <English>Found by name, so saved as these %1 classes: names differ by game language.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_CanStack">
+            <English>Can stack</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Clear">
+            <English>Clear</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_CopyClass">
+            <English>Copy class</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Edit">
+            <English>Edit</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_FilterGroup">
+            <English>Filter by this group</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_FilterMod">
+            <English>Filter by this mod</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Group">
+            <English>Group</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Hidden">
+            <English>%1 hidden by the filter</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Indexing">
+            <English>Reading %1 classes...</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Inspect">
+            <English>Inspect</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Kind">
+            <English>Kind</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Matches">
+            <English>%1 matches · %2 selected</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Mixed">
+            <English>%1 (mixed)</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Mod">
+            <English>Mod</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Now">
+            <English>Now</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_OnlyChanged">
+            <English>Only changed</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_OnlyShaped">
+            <English>Only shaped</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_OnlyStackable">
+            <English>Only stackable</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_PerTile">
+            <English>Per tile</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Remove">
+            <English>Remove</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Revert">
+            <English>Revert</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Rules">
+            <English>Your rules</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Search">
+            <English>Search name or class</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_SelectAll">
+            <English>Select all</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_ShowPresets">
+            <English>Show weapon presets</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Variants">
+            <English>Include variants</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Why">
+            <English>Why?</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_Escape">
+            <English>Esc</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_Redo">
+            <English>Ctrl+Y</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_Undo">
+            <English>Ctrl+Z</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_addon">
+            <English>Addon</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_cat">
+            <English>Category</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_class">
+            <English>Class</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_for">
+            <English>Fits weapon</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_kind">
+            <English>Kind</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_load">
+            <English>Load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_mass">
+            <English>Mass</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_rounds">
+            <English>Rounds</English>
+        </Key>
+        <Key ID="STR_einv_setup_Key_well">
+            <English>Magazine well</English>
+        </Key>
+        <Key ID="STR_einv_setup_Keybind_Open">
+            <English>Open inventory setup</English>
+        </Key>
+        <Key ID="STR_einv_setup_Mode_Auto">
+            <English>By load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Mode_Blocks">
+            <English>Compartments</English>
+        </Key>
+        <Key ID="STR_einv_setup_Mode_Cells">
+            <English>Cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Mode_Pattern">
+            <English>Pattern</English>
+        </Key>
+        <Key ID="STR_einv_setup_Mode_Percent">
+            <English>% of load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Next">
+            <English>Next</English>
+        </Key>
+        <Key ID="STR_einv_setup_Op_contains">
+            <English>contains</English>
+        </Key>
+        <Key ID="STR_einv_setup_Op_ge">
+            <English>at least</English>
+        </Key>
+        <Key ID="STR_einv_setup_Op_gt">
+            <English>more than</English>
+        </Key>
+        <Key ID="STR_einv_setup_Op_is">
+            <English>is</English>
+        </Key>
+        <Key ID="STR_einv_setup_Op_isOrInherits">
+            <English>is or inherits from</English>
+        </Key>
+        <Key ID="STR_einv_setup_Op_le">
+            <English>at most</English>
+        </Key>
+        <Key ID="STR_einv_setup_Op_lt">
+            <English>less than</English>
+        </Key>
+        <Key ID="STR_einv_setup_Op_not">
+            <English>not</English>
+        </Key>
+        <Key ID="STR_einv_setup_OpenWizard">
+            <English>Inventory setup</English>
+        </Key>
+        <Key ID="STR_einv_setup_OpenWizard_ReadOnly">
+            <English>See and copy the inventory setup</English>
+        </Key>
+        <Key ID="STR_einv_setup_OpenWizard_Tooltip">
+            <English>Sizes, shapes, stacks and container grids for everyone</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pattern_long">
+            <English>Long pouches</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pattern_mixed">
+            <English>Mixed pouches</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pattern_plate">
+            <English>Plate carrier</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pattern_pockets">
+            <English>Pockets</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pattern_pockets_mixed">
+            <English>Mixed pockets</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pattern_rig">
+            <English>Magazine rig</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pattern_single">
+            <English>One compartment</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pattern_wide">
+            <English>Full width</English>
+        </Key>
+        <Key ID="STR_einv_setup_Preset_None">
+            <English>No preset</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_Delete">
+            <English>Delete</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_DeleteConfirm">
+            <English>Delete your preset %1?</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_Deleted">
+            <English>Preset %1 deleted.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_Help">
+            <English>Kept in your profile, for any mission and any server. A preset of the same name is replaced.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_Keep">
+            <English>Keep</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_Load">
+            <English>Load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_Loaded">
+            <English>Loaded %1 - save to use it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_Name">
+            <English>Name</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_NeedName">
+            <English>Give it a name first.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_None">
+            <English>None kept yet</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_Pick">
+            <English>Pick one</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_SaveAs">
+            <English>Keep as my preset...</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_SaveAs_Title">
+            <English>Keep as my preset</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_Saved">
+            <English>Kept as %1.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Presets_Title">
+            <English>My presets</English>
+        </Key>
+        <Key ID="STR_einv_setup_Reason_Client">
+            <English>client values never count for this setting - switch to the Server or Mission tab.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Reason_LockedMission">
+            <English>the mission's cba_settings.sqf sets it - a change here would be lost on the next restart.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Reason_LockedServer">
+            <English>the server's cba_settings.sqf sets it - a change here would be lost on the next restart.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Reason_NoAdmin">
+            <English>only the server or a logged-in admin can change it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Reason_NoCba">
+            <English>CBA's settings could not be reached.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Reason_NoMission">
+            <English>the mission's setup can only be changed in Eden.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Redo">
+            <English>Redo</English>
+        </Key>
+        <Key ID="STR_einv_setup_Reset">
+            <English>Reset to default</English>
+        </Key>
+        <Key ID="STR_einv_setup_Reset_Confirm">
+            <English>Back to the default preset, without any rules of your own? Undo takes it back until you close the wizard.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Reset_Done">
+            <English>Back to the default - save to use it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Reset_Yes">
+            <English>Reset</English>
+        </Key>
+        <Key ID="STR_einv_setup_Review_Header">
+            <English>Built on %1 · 1 cell = %2 kg</English>
+        </Key>
+        <Key ID="STR_einv_setup_Review_NoRules">
+            <English>No rules of your own: the preset decides everything.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Review_NoWarnings">
+            <English>None: everything in the text can be used.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Review_Remove">
+            <English>Take this rule away</English>
+        </Key>
+        <Key ID="STR_einv_setup_Review_Rules">
+            <English>Your rules (%1)</English>
+        </Key>
+        <Key ID="STR_einv_setup_Review_Warnings">
+            <English>Warnings (%1)</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save">
+            <English>Save</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_Failed">
+            <English>Could not save - the RPT says why.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_MissionWins">
+            <English>This mission sets its own setup, which wins over the server's. Force over it to use yours.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_NothingYet">
+            <English>Nothing changed yet.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_Override">
+            <English>Force over the mission's own setup</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_ReadOnly">
+            <English>Cannot save: %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_ReadOnlyHelp">
+            <English>You can still try changes, copy them as text or keep them as your own preset.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_Saved">
+            <English>Saved - in use for everyone.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_SavedMission">
+            <English>Saved into the scenario - save the scenario as well.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_SavedMissionWins">
+            <English>Saved - but this mission's own setup still wins. Force over it to use yours.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_Title">
+            <English>Save</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_ToMenu">
+            <English>Applies to the %1 tab of Addon Options: OK there keeps it, Cancel throws it away.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_ToMission">
+            <English>Saves into the scenario, for everyone who plays it. Save the scenario as well to keep it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_ToServer">
+            <English>Saves into the server's settings: for everyone at once, players who join later included.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_Tooltip">
+            <English>Saves the setup.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Save_Unchanged">
+            <English>Nothing to save: it is in use already.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Scope_Group">
+            <English>Their group</English>
+        </Key>
+        <Key ID="STR_einv_setup_Scope_Matching">
+            <English>Everything matching (%1)</English>
+        </Key>
+        <Key ID="STR_einv_setup_Scope_Selected">
+            <English>Selected (%1)</English>
+        </Key>
+        <Key ID="STR_einv_setup_Shape_Cells">
+            <English>%1 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Shape_Invalid">
+            <English>Cells must touch each other and reach every edge</English>
+        </Key>
+        <Key ID="STR_einv_setup_Shape_Mass">
+            <English>By mass</English>
+        </Key>
+        <Key ID="STR_einv_setup_Shape_Rectangle">
+            <English>Rectangle</English>
+        </Key>
+        <Key ID="STR_einv_setup_Shape_Rotate">
+            <English>Rotate (R)</English>
+        </Key>
+        <Key ID="STR_einv_setup_Source_client">
+            <English>Client</English>
+        </Key>
+        <Key ID="STR_einv_setup_Source_mission">
+            <English>Mission</English>
+        </Key>
+        <Key ID="STR_einv_setup_Source_server">
+            <English>Server</English>
+        </Key>
+        <Key ID="STR_einv_setup_Src_builtin">
+            <English>Built in</English>
+        </Key>
+        <Key ID="STR_einv_setup_Src_forced">
+            <English>Always 1 for this kind</English>
+        </Key>
+        <Key ID="STR_einv_setup_Src_mod">
+            <English>Set by its mod</English>
+        </Key>
+        <Key ID="STR_einv_setup_Src_own">
+            <English>Your rule %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Src_preset">
+            <English>Preset: %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Start_Help">
+            <English>A preset decides how big every item is, how many share a tile and how containers are split into compartments. Your own rules go on top of it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Start_KeepOwn">
+            <English>Keep my own rules when I pick another preset (%1 now)</English>
+        </Key>
+        <Key ID="STR_einv_setup_Start_NoPresets">
+            <English>No presets found. The items addon brings them (CfgEinvRulesets) - is it loaded?</English>
+        </Key>
+        <Key ID="STR_einv_setup_Start_Picked">
+            <English>Picked</English>
+        </Key>
+        <Key ID="STR_einv_setup_Start_Revision">
+            <English>Revision %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Start_Title">
+            <English>Start from a preset</English>
+        </Key>
+        <Key ID="STR_einv_setup_Start_ToReview">
+            <English>Review and save</English>
+        </Key>
+        <Key ID="STR_einv_setup_Status_Active">
+            <English>Preset %1 and %2 rules of its own</English>
+        </Key>
+        <Key ID="STR_einv_setup_Status_Default">
+            <English>nobody - the default</English>
+        </Key>
+        <Key ID="STR_einv_setup_Status_Eden">
+            <English>It goes into the scenario: save the scenario as well to keep it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Status_From">
+            <English>Set by: %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Status_ReadOnly">
+            <English>You cannot save it: %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Status_SaveTo">
+            <English>You can save to: %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Status_Title">
+            <English>Now in use</English>
+        </Key>
+        <Key ID="STR_einv_setup_Step_Containers">
+            <English>Containers</English>
+        </Key>
+        <Key ID="STR_einv_setup_Step_Groups">
+            <English>Groups</English>
+        </Key>
+        <Key ID="STR_einv_setup_Step_Items">
+            <English>Items</English>
+        </Key>
+        <Key ID="STR_einv_setup_Step_Review">
+            <English>Review</English>
+        </Key>
+        <Key ID="STR_einv_setup_Step_Soon">
+            <English>Coming in the next version</English>
+        </Key>
+        <Key ID="STR_einv_setup_Step_Start">
+            <English>Start</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tab_Backpacks">
+            <English>Backpacks</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tab_Crates">
+            <English>Crates and vehicles</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tab_Uniforms">
+            <English>Uniforms</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tab_Vests">
+            <English>Vests</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_Applied">
+            <English>Applied - %1 warnings.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_Apply">
+            <English>Apply text</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_Cba">
+            <English>CBA line</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_CbaNote">
+            <English>For a cba_settings.sqf, or CBA's own Import.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_Chars">
+            <English>%1 characters</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_Copied">
+            <English>Copied.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_Copy">
+            <English>Copy</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_Full">
+            <English>Full</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_FullNote">
+            <English>The preset written out: stays the same whatever later versions do to it. Its rules then also win over sizes a mod sets itself.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_NothingToApply">
+            <English>Nothing typed to apply.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_Own">
+            <English>Own</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_OwnNote">
+            <English>One statement per line. What you type counts once applied.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_Title">
+            <English>As text</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_Unapplied">
+            <English>Changed: Apply text to use it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Title">
+            <English>Inventory setup</English>
+        </Key>
+        <Key ID="STR_einv_setup_Undo">
+            <English>Undo</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_GridAuto">
+            <English>grid by load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_GridBlocks">
+            <English>compartments %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_GridCells">
+            <English>grid of %1 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_GridPattern">
+            <English>grid as %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_GridPatternCells">
+            <English>grid as %1, %2 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_GridPercent">
+            <English>grid of %1 percent of its load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Mass">
+            <English>sized by mass</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Name">
+            <English>called %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_NoStack">
+            <English>does not stack</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Shape">
+            <English>shape %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Size">
+            <English>%1×%2 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Stack">
+            <English>%1 per tile</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Weight">
+            <English>weighs %1 kg</English>
+        </Key>
+        <Key ID="STR_einv_setup_Warning_TooLong">
+            <English>The text is %1 characters long: more than 16,000 cannot be saved.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Why_Overridden">
+            <English>overridden</English>
+        </Key>
+        <Key ID="STR_einv_setup_Why_Title">
+            <English>Why %1 looks like this</English>
+        </Key>
+        <Key ID="STR_einv_setup_Why_Wins">
+            <English>wins</English>
+        </Key>
+    </Package>
+</Project>

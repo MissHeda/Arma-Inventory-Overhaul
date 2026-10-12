@@ -1,0 +1,176 @@
+#include "..\script_component.hpp"
+/*
+ * Author: Miss Heda
+ * Puts a payload (fnc_removeEntry, fnc_takeOff) into a container and says what of it did not arrive,
+ * counted before and after on this machine: a weapon or backpack by its class, items by their count,
+ * magazines by how many of the class came in for each number of rounds. Only that rest may go anywhere
+ * else - what arrived is here, and handing it on as well would make a copy.
+ *
+ * A uniform, vest or backpack comes with what was in it, its places and its id. The engine adds it
+ * empty - or with its default contents - as a new object, found as the one container object that was
+ * not there before (everyContainer before and after: the engine promises no order there, so "the last
+ * of its class" could be a sibling). Exactly one new object is filled from the snapshot (fnc_restore);
+ * none or several, and what it held goes loose into this container instead - never into what may be a
+ * sibling - and the RPT names it.
+ *
+ * Arguments:
+ * 0: Container <OBJECT>
+ * 1: Payload <ARRAY>
+ *
+ * Return Value:
+ * What did not arrive, a payload of the same kind - [] when all of it did <ARRAY>
+ *
+ * Example:
+ * [_box, ["magazine", "30Rnd_65x39_caseless_mag", [30, 17]]] call einv_storage_fnc_addPayload;
+ *
+ * Public: No
+ */
+
+params [["_container", objNull, [objNull]], ["_payload", [], [[]]]];
+
+if (_payload isEqualTo []) exitWith {[]};
+
+// A copy: the transaction keeps the payload in its books as well (fnc_execute, the hub).
+_payload = +_payload;
+
+if (isNull _container) exitWith {_payload};
+
+// How many of a class the container holds at its top level, of every kind of cargo.
+private _fnc_held = {
+    params ["_key"];
+
+    private _held = 0;
+
+    {
+        _x params [["_classes", [], [[]]], ["_counts", [], [[]]]];
+
+        {
+            if (toLowerANSI _x isEqualTo _key) then {_held = _held + (_counts param [_forEachIndex, 0])};
+        } forEach _classes;
+    } forEach [getItemCargo _container, getWeaponCargo _container, getBackpackCargo _container];
+
+    _held + ({toLowerANSI (_x select 0) isEqualTo _key} count (magazinesAmmoCargo _container))
+};
+
+private _fnc_objects = {
+    (everyContainer _container) apply {_x select 1}
+};
+
+// The uniform, vest or backpack that just arrived gets what it held.
+private _fnc_fill = {
+    params ["_class", "_inner", "_before"];
+
+    if (_inner isEqualTo []) exitWith {};
+
+    private _new = (call _fnc_objects) - _before;
+
+    if (count _new == 1) exitWith {
+        [_new select 0, _inner, _container] call FUNC(restore);
+    };
+
+    ERROR_3("Could not tell which %1 just went into %2 (%3 new) - what it held goes in loose.",_class,typeOf _container,count _new);
+    [_container, _inner, objNull, true] call FUNC(restore);
+};
+
+private _rest = [];
+
+switch (_payload select 0) do {
+    case "weapon": {
+        private _weapon = [_payload param [1, [], [[]]]] call FUNC(normalizeWeapon);
+        private _key = toLowerANSI (_weapon select 0);
+        private _before = [_key] call _fnc_held;
+
+        _container addWeaponWithAttachmentsCargoGlobal [_weapon, 1];
+
+        if (([_key] call _fnc_held) <= _before) then {
+            _rest = _payload;
+        };
+    };
+    case "magazine": {
+        _payload params ["", ["_class", "", [""]], ["_rounds", [], [[]]]];
+
+        private _key = toLowerANSI _class;
+        private _left = [];
+
+        // Magazines with the same rounds go in together: one add and one count for each number of
+        // rounds. Counted by class, not by rounds - should the engine change the rounds of one, it still
+        // arrived.
+        private _groups = createHashMap;
+        private _order = [];
+
+        {
+            if !(_x in _groups) then {
+                _groups set [_x, 0];
+                _order pushBack _x;
+            };
+
+            _groups set [_x, (_groups get _x) + 1];
+        } forEach _rounds;
+
+        {
+            private _count = _groups get _x;
+            private _before = [_key] call _fnc_held;
+
+            _container addMagazineAmmoCargo [_class, _count, _x];
+
+            private _arrived = ((([_key] call _fnc_held) - _before) max 0) min _count;
+
+            for "_i" from 1 to (_count - _arrived) do {
+                _left pushBack _x;
+            };
+        } forEach _order;
+
+        if (_left isNotEqualTo []) then {
+            _rest = ["magazine", _class, _left];
+        };
+    };
+    case "backpack": {
+        _payload params ["", ["_class", "", [""]], ["_inner", [], [[]]]];
+
+        private _key = toLowerANSI _class;
+        private _before = [_key] call _fnc_held;
+        private _objects = [];
+
+        if (_inner isNotEqualTo []) then {
+            _objects = call _fnc_objects;
+        };
+
+        _container addBackpackCargoGlobal [_class, 1];
+
+        if (([_key] call _fnc_held) > _before) then {
+            [_class, _inner, _objects] call _fnc_fill;
+        } else {
+            _rest = _payload;
+        };
+    };
+    case "item": {
+        _payload params ["", ["_class", "", [""]], ["_count", 1, [0]], ["_inner", [], [[]]]];
+
+        private _key = toLowerANSI _class;
+        private _before = [_key] call _fnc_held;
+        private _objects = [];
+
+        if (_inner isNotEqualTo []) then {
+            _objects = call _fnc_objects;
+        };
+
+        _container addItemCargoGlobal [_class, _count];
+
+        private _arrived = ((([_key] call _fnc_held) - _before) max 0) min _count;
+
+        if (_arrived > 0) then {
+            [_class, _inner, _objects] call _fnc_fill;
+        };
+
+        // What it held went with the one that arrived.
+        if (_arrived < _count) then {
+            _rest = ["item", _class, _count - _arrived, [_inner, []] select (_arrived > 0)];
+        };
+    };
+    default {
+        ERROR_1("Cannot put %1 anywhere - it is no payload.",_payload);
+        _rest = _payload;
+    };
+};
+
+_rest

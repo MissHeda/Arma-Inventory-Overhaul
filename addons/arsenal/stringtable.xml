@@ -1,0 +1,569 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="einv">
+    <Package name="arsenal">
+        <Key ID="STR_einv_arsenal_Blocked_OK">
+            <English>Understood</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Blocked_Setting">
+            <English>Server setting: Enhanced Inventory &gt; Vanilla Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Blocked_Text">
+            <English>This server does not allow the vanilla Virtual Arsenal.</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Blocked_Title">
+            <English>The Virtual Arsenal is not allowed here</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Button_AceArsenal">
+            <English>ACE Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Button_AceArsenal_Tooltip">
+            <English>Open this arsenal in ACE's own window</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Button_Apply">
+            <English>Apply</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Button_Apply_Tooltip">
+            <English>Put this loadout on every selected unit</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Button_Cancel">
+            <English>Cancel</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Button_Cancel_Tooltip">
+            <English>Close without changing the units</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Button_Enhanced">
+            <English>Enhanced Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Button_Enhanced_Tooltip">
+            <English>Open this arsenal in the window of Enhanced Inventory</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Button_Hide_Tooltip">
+            <English>Hide the panels (Backspace)</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Button_Vision_Tooltip">
+            <English>Normal view, night vision or thermal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Backpacks">
+            <English>Backpacks</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Binoculars">
+            <English>Binoculars</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Bipods">
+            <English>Bipods</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Compasses">
+            <English>Compasses</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Explosives">
+            <English>Explosives</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Faces">
+            <English>Faces</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Facewear">
+            <English>Facewear</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_GPS">
+            <English>GPS and terminals</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Grenades">
+            <English>Grenades</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Handguns">
+            <English>Handguns</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Headgear">
+            <English>Headgear</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Insignia">
+            <English>Insignia</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Launchers">
+            <English>Launchers</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Magazines">
+            <English>Magazines</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Maps">
+            <English>Maps</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Misc">
+            <English>Misc</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_More">
+            <English>More</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Muzzles">
+            <English>Muzzles</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_NVG">
+            <English>Night vision</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Optics">
+            <English>Optics</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Radios">
+            <English>Radios</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Rails">
+            <English>Side rails</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Rifles">
+            <English>Rifles</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Uniforms">
+            <English>Uniforms</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Vests">
+            <English>Vests</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Voices">
+            <English>Voices</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Cat_Watches">
+            <English>Watches</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Catalog_Carried">
+            <English>You carry %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Catalog_Count">
+            <English>%1 items</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Catalog_Empty">
+            <English>Nothing here</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Catalog_Loading">
+            <English>Reading the arsenal ...</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Catalog_NoMatch">
+            <English>Nothing matches the search</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Catalog_SearchAll">
+            <English>Searching every category</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Eden_Enhanced">
+            <English>Enhanced Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Editing">
+            <English>Editing %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Filter_Favorites">
+            <English>Favorites</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Filter_Fits">
+            <English>Fits: %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Filter_FitsAny">
+            <English>Fits: anything</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Filter_FitsWeapons">
+            <English>Fits: your weapons</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Filter_Placeholder">
+            <English>Search the arsenal and your gear</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Group_Ammo">
+            <English>Ammo</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Group_Gear">
+            <English>Gear</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Group_Identity">
+            <English>Identity</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Group_Items">
+            <English>Items</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Group_Parts">
+            <English>Parts</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Group_Weapons">
+            <English>Weapons</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_Added">
+            <English>%1 added</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_AddedTo">
+            <English>%1 added to %2</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_BoxGone">
+            <English>This arsenal box is gone</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_CannotOpen">
+            <English>Could not open the arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_ConfirmContents">
+            <English>%1 holds things this arsenal does not have - again to throw them away too</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_ConfirmUnique">
+            <English>%1 is not in this arsenal - again to throw it away</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_Copied">
+            <English>Copied %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_GiveBack">
+            <English>Give back</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_GivenBack">
+            <English>%1 given back</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_KitFirst">
+            <English>Add it to your gear first, then into the kit</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_KitLocked">
+            <English>This kit cannot be changed in the arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_MagsBack">
+            <English>Gave back %1 magazines of %2</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_NoRoomFor">
+            <English>No room for %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_NoRoomGaveBack">
+            <English>No room on you - %1 given back</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_NoSlot">
+            <English>Nothing on you takes %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_OnlySome">
+            <English>Only %1 of %2 fit</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_PutOn">
+            <English>Put on</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_StoredOld">
+            <English>%1 went into your %2</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_Target">
+            <English>Quick adds go here</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_Unique">
+            <English>Not in this arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_WentBack">
+            <English>Did not fit and went back: %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Inspect_InArsenal">
+            <English>In this arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Inspect_No">
+            <English>No</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Inspect_Yes">
+            <English>Yes</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Key_AddGiveBack">
+            <English>Add / give back</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Key_Backspace">
+            <English>Backspace</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Key_GiveBack">
+            <English>Give back</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Key_Hide">
+            <English>Hide</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Key_Show">
+            <English>Show</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Key_Vision">
+            <English>View</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Leave_Exit">
+            <English>Exit to the menu</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Leave_Stay">
+            <English>Stay</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Leave_Title">
+            <English>Leave the Arsenal?</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_By">
+            <English>by %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Checking">
+            <English>Checking ...</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ConfirmDelete">
+            <English>Again to delete %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ConfirmLoad">
+            <English>Loading replaces your gear - %1 is not in this arsenal and would be lost. Load again</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ConfirmOverwrite">
+            <English>Save again to overwrite %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_CopyToMine">
+            <English>Copy to mine</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Default">
+            <English>Default</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Delete">
+            <English>Delete</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Deleted">
+            <English>Deleted %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Empty">
+            <English>No loadouts yet</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ErrClipboard">
+            <English>The clipboard could not be reached</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ErrExists">
+            <English>There is already a loadout called %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ErrFormat">
+            <English>The clipboard holds no loadout</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ErrNoDefaults">
+            <English>There are no default loadouts</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ErrNoName">
+            <English>Give it a name first</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ErrShared">
+            <English>Stop sharing %1 first</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Export">
+            <English>Export</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ExportList">
+            <English>Export list</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ExportList_Tooltip">
+            <English>Copy the default loadouts to the clipboard (Shift+Ctrl+C)</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Export_Tooltip">
+            <English>Copy this loadout to the clipboard (Ctrl+C)</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Exported">
+            <English>Loadout copied</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ExportedDefaults">
+            <English>Default loadouts copied</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Import">
+            <English>Import</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ImportList">
+            <English>Import list</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ImportList_Tooltip">
+            <English>Add a list of default loadouts from the clipboard (Shift+Ctrl+V)</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Import_Tooltip">
+            <English>Put on a loadout from the clipboard (Ctrl+V)</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Imported">
+            <English>Loadout imported</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_ImportedDefaults">
+            <English>Default loadouts imported</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Load">
+            <English>Load</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Loaded">
+            <English>Loaded %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_MakeDefault">
+            <English>Make default</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Mine">
+            <English>Mine</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Missing">
+            <English>%1 missing</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_MissingList">
+            <English>Not in this game: %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Name">
+            <English>Loadout name</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_NotHere">
+            <English>%1 not here</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_NotHereList">
+            <English>Not in this arsenal: %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Public">
+            <English>Public</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Rename">
+            <English>Rename</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Renamed">
+            <English>%1 is now %2</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Save">
+            <English>Save</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Saved">
+            <English>Saved %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Share">
+            <English>Share</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_SharedHint">
+            <English>Shared %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_SharedMark">
+            <English>Shared</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_Unshare">
+            <English>Stop sharing</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Loadouts_UnsharedHint">
+            <English>%1 is no longer shared</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_Add">
+            <English>Add</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_AddHere">
+            <English>Add things here</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_AddMore">
+            <English>Add %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_AddTo">
+            <English>Add to %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_Browse">
+            <English>Show in the arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_Close">
+            <English>Close %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_CopyClass">
+            <English>Copy class name</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_Empty">
+            <English>Empty %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_Favorite">
+            <English>Add to favorites</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_Fill">
+            <English>Fill %1 with it</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_GiveBack">
+            <English>Give back</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_GiveBackAll">
+            <English>Give back all %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_Open">
+            <English>Open %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_OpenArsenal">
+            <English>Open Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_Unfavorite">
+            <English>Remove from favorites</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Menu_Use">
+            <English>Use</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_NoRoom">
+            <English>No room on the grid for %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Overflow">
+            <English>Not everything fits the grid of %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_BIArsenal">
+            <English>Vanilla Virtual Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_BIArsenal_Block">
+            <English>Not allowed</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_BIArsenal_Desc">
+            <English>What happens when something opens the\nvanilla Virtual Arsenal - the scroll\naction of a box, a script or Zeus.\n\nOpen the Enhanced Arsenal: the same\nitems, in this mod's window. Missions\nthat change the vanilla one with their\nown scripts keep it.\nNot allowed: a red screen says the\nVirtual Arsenal is not allowed here.\nLeave it alone: the vanilla one opens,\nwithout grids.\n\nZeus is never stopped. The Eden editor,\nthe main menu's Virtual Arsenal and\nWarlords always keep the vanilla one.</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_BIArsenal_Enhanced">
+            <English>Open the Enhanced Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_BIArsenal_Vanilla">
+            <English>Leave it alone</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_BIMessage">
+            <English>Message when not allowed</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_BIMessage_Desc">
+            <English>Shown under "not allowed" on the red\nscreen - where players get their gear\ninstead, say.\n\nEmpty shows nothing more.</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_ConfirmUnique">
+            <English>Ask before throwing things away</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_ConfirmUnique_Desc">
+            <English>Giving back something this arsenal\ndoes not have throws it away for good.\nWith this on, that only happens on the\nsecond click.\n\nWhat the arsenal has goes back at once.</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_QuickAddAmount">
+            <English>Shift+Ctrl+click adds</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_QuickAddAmount_Desc">
+            <English>How many of an item Shift+Ctrl+click\nadds from the arsenal at once.\n\nCtrl+click alone always adds one.</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_Window">
+            <English>Arsenal window</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_Window_Ace">
+            <English>ACE Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_Window_Desc">
+            <English>Which window opens for ACE Arsenal\nboxes, Zeus and scripts.\n\nEnhanced Arsenal: the arsenal in this\nmod's window, with its grids.\nACE Arsenal: ACE's own window.\n\nThe Enhanced Arsenal has a button to\nswitch to ACE's. The Eden editor offers\nboth in its Arsenal menu.</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Setting_Window_Enhanced">
+            <English>Enhanced Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Sort_Mod">
+            <English>Mod</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Sort_Name">
+            <English>Name</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Sort_Reverse">
+            <English>Reverse the order</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Sort_Size">
+            <English>Size</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Sort_Weight">
+            <English>Weight</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_SubCategory_Arsenal">
+            <English>Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_SubCategory_Vanilla">
+            <English>Vanilla Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Title">
+            <English>Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Title_Full">
+            <English>Full arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Title_Vanilla">
+            <English>Virtual Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_View_Items">
+            <English>Items</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_View_Loadouts">
+            <English>Loadouts</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Vision_Night">
+            <English>Night vision</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Vision_Normal">
+            <English>Normal view</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Vision_Thermal">
+            <English>Thermal imaging</English>
+        </Key>
+    </Package>
+</Project>

@@ -1,0 +1,92 @@
+#include "..\script_component.hpp"
+#include "..\defines.hpp"
+/*
+ * Author: Miss Heda
+ * How many rows of each compartment a column shows. Crates and vehicles are big - a vehicle's hold is
+ * up to MAX_ROWS rows of STORAGE_COLS cells - and Mia did not want them smaller, only far less to scroll
+ * through (0.2.3). So a tall compartment shows its rows down to the last one in use and
+ * COLLAPSE_SPARE_ROWS more to put things into, at least COLLAPSE_MIN_ROWS; the empty rows below fold
+ * into one line under the grid that says how many there are and opens them (fnc_drawSection,
+ * fnc_toggleRows). Nothing of the room is hidden that way: the line names it, the load beside the caption
+ * still counts the whole container, and moves that find a place by themselves (Take all, a quick move, a
+ * group packed in) use every row - the column grows with what lands there.
+ *
+ * Only for what the view shows: the arrangement, the places and every machine's layout stay the
+ * container's whole compartments. Rows a move under way goes to (GVAR(inFlight)) count as in use, so
+ * their outline is never cut off. A compartment that would hide fewer than COLLAPSE_HIDE_MIN rows shows
+ * all of them; one the player opened (GVAR(expanded)) as well, and it can be folded again.
+ *
+ * Arguments:
+ * 0: Layout, see einv_storage_fnc_getLayout <HASHMAP>
+ * 1: Holder its places are kept on - the container, or a key <OBJECT or STRING>
+ *
+ * Return Value:
+ * [blocks, hidden, foldable, cells] <ARRAY>
+ *   blocks   - [cols, rows] per compartment as the column shows it
+ *   hidden   - how many rows are folded away, all compartments together <NUMBER>
+ *   foldable - rows are folded away now, or would be without the player having opened them <BOOL>
+ *   cells    - how many cells those rows hold <NUMBER>
+ *
+ * Example:
+ * ([_layout, _crate] call einv_gui_fnc_viewBlocks) params ["_blocks", "_hidden", "_foldable", "_cells"];
+ *
+ * Public: No
+ */
+
+params [["_layout", createHashMap, [createHashMap]], ["_holder", objNull, [objNull, ""]]];
+
+private _blocks = _layout getOrDefault ["blocks", []];
+private _entries = _layout getOrDefault ["entries", []];
+private _expanded = _holder in GVAR(expanded);
+
+// The lowest row in use per compartment: what lies there, and what a move under way is bringing.
+private _used = _blocks apply {0};
+
+{
+    if !(_x getOrDefault ["overflow", false]) then {
+        private _block = _x getOrDefault ["block", 0];
+
+        if (_block >= 0 && {_block < count _used}) then {
+            _used set [_block, (_used select _block) max ((_x getOrDefault ["row", 0]) + (_x getOrDefault ["h", 1]))];
+        };
+    };
+} forEach _entries;
+
+// A HashMap: _y is a move's record, the cells it goes to second - [holder, block, col, row, w, h].
+{
+    {
+        _x params [["_toHolder", objNull], ["_toBlock", 0], "", ["_toRow", 0], "", ["_toH", 1]];
+
+        if (_toHolder isEqualTo _holder && {_toBlock >= 0} && {_toBlock < count _used}) then {
+            _used set [_toBlock, (_used select _toBlock) max (_toRow + _toH)];
+        };
+    } forEach (_y param [1, []]);
+} forEach GVAR(inFlight);
+
+private _hidden = 0;
+private _cells = 0;
+private _foldable = false;
+
+private _shown = [];
+
+{
+    _x params ["_cols", "_rows"];
+
+    private _want = ((_used select _forEachIndex) + COLLAPSE_SPARE_ROWS) max COLLAPSE_MIN_ROWS;
+
+    if (_rows - _want < COLLAPSE_HIDE_MIN) then {
+        _shown pushBack [_cols, _rows];
+    } else {
+        _foldable = true;
+
+        if (_expanded) then {
+            _shown pushBack [_cols, _rows];
+        } else {
+            _hidden = _hidden + _rows - _want;
+            _cells = _cells + (_rows - _want) * _cols;
+            _shown pushBack [_cols, _want];
+        };
+    };
+} forEach _blocks;
+
+[_shown, _hidden, _foldable, _cells]

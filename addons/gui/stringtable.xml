@@ -1,0 +1,680 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="einv">
+    <Package name="gui">
+        <Key ID="STR_einv_gui_Camera_Tooltip">
+            <English>Show your soldier in the middle, or not</English>
+        </Key>
+        <Key ID="STR_einv_gui_Category_Ammo">
+            <English>Ammunition</English>
+        </Key>
+        <Key ID="STR_einv_gui_Category_Gear">
+            <English>Gear</English>
+        </Key>
+        <Key ID="STR_einv_gui_Category_Medical">
+            <English>Medical</English>
+        </Key>
+        <Key ID="STR_einv_gui_Category_Misc">
+            <English>Miscellaneous</English>
+        </Key>
+        <Key ID="STR_einv_gui_Category_Weapon">
+            <English>Weapon</English>
+        </Key>
+        <Key ID="STR_einv_gui_Close">
+            <English>Close</English>
+        </Key>
+        <Key ID="STR_einv_gui_Column_Equipment">
+            <English>Equipment</English>
+        </Key>
+        <Key ID="STR_einv_gui_Column_Gear">
+            <English>Gear</English>
+        </Key>
+        <Key ID="STR_einv_gui_Column_Loot">
+            <English>Loot</English>
+        </Key>
+        <Key ID="STR_einv_gui_Column_Nearby">
+            <English>Nearby</English>
+        </Key>
+        <Key ID="STR_einv_gui_Column_Storage">
+            <English>Storage</English>
+        </Key>
+        <Key ID="STR_einv_gui_Compare_Armor">
+            <English>Armor (%1)</English>
+        </Key>
+        <Key ID="STR_einv_gui_Compare_Cells">
+            <English>%1 cells</English>
+        </Key>
+        <Key ID="STR_einv_gui_Compare_Covers">
+            <English>Covers</English>
+        </Key>
+        <Key ID="STR_einv_gui_Compare_Holds">
+            <English>Holds</English>
+        </Key>
+        <Key ID="STR_einv_gui_Compare_NoArmor">
+            <English>none</English>
+        </Key>
+        <Key ID="STR_einv_gui_Compare_Nothing">
+            <English>vs. nothing worn</English>
+        </Key>
+        <Key ID="STR_einv_gui_Compare_Same">
+            <English>the same as yours</English>
+        </Key>
+        <Key ID="STR_einv_gui_Compare_Space">
+            <English>Space</English>
+        </Key>
+        <Key ID="STR_einv_gui_Compare_Versus">
+            <English>vs. %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Compare_Weight">
+            <English>Weight</English>
+        </Key>
+        <Key ID="STR_einv_gui_Drop">
+            <English>Drop</English>
+        </Key>
+        <Key ID="STR_einv_gui_Equip">
+            <English>Equip</English>
+        </Key>
+        <Key ID="STR_einv_gui_Filter_Placeholder">
+            <English>Search items</English>
+        </Key>
+        <Key ID="STR_einv_gui_Filter_Tooltip">
+            <English>Fades everything whose name does not match. Escape empties it.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Ground_With">
+            <English>Ground - %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_All">
+            <English>Middle click: all</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Amount">
+            <English>Mouse wheel: how many</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_BodyTier">
+            <English>+%1 kg: you will be %2 (%3 kg)</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Empty">
+            <English>Empty</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Failed">
+            <English>That could not be moved</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Gone">
+            <English>Someone else was quicker</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_GroundOpen">
+            <English>Ctrl+click: open</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_GroundWear">
+            <English>Double click: put on</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Grounded">
+            <English>%1 put on the ground - no room any more</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_GroupDrag">
+            <English>Several items: no turning, whole stacks</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_GroupFits">
+            <English>%1 of %2 fit here</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_GroupNoSlot">
+            <English>Several items cannot go into one slot</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Hidden">
+            <English>Not searched yet</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Idle">
+            <English>Point at an item to see what it is</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_IntoItself">
+            <English>It cannot go into itself</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Load">
+            <English>%1: %2 / %3 kg, %4 kg left</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_LoadFull">
+            <English>%1 is full by weight: %2 kg left of %3 kg</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_LoadOver">
+            <English>%1 is %2 kg over its %3 kg</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_LoadRoomOnly">
+            <English>%1: %2 kg - only its room limits it</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_LookOnly">
+            <English>You may only look at this person's gear</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Moved">
+            <English>It moved meanwhile - try again</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_MovedSome">
+            <English>Moved %1 of %2 - no room for the rest</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_MovedSomeWeight">
+            <English>Moved %1 of %2 - the rest is too heavy for %3</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_NoAccess">
+            <English>This person cannot be searched</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_NoBackpack">
+            <English>A backpack does not go into a backpack</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_NoFit">
+            <English>That does not go there</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_NoGround">
+            <English>Nothing to put it on here</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_NoRoom">
+            <English>No room there</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_NotReady">
+            <English>Waiting for the server - try again in a moment</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_NotSearched">
+            <English>%1 not searched yet</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_NowhereToGo">
+            <English>No container has room for that</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_OutOfReach">
+            <English>Out of reach</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Overflow">
+            <English>Too wide for this grid</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_PlacedElsewhere">
+            <English>Put elsewhere - that place was just taken</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Returned">
+            <English>%1 went back - no room any more</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Rotate">
+            <English>R: rotate</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Selected">
+            <English>%1 selected - drag them together, double click to move them over, Delete drops them</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_SharedHere">
+            <English>In multiplayer, crates, the ground, vehicles and bodies always open here</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_SomeFit">
+            <English>Only %1 of %2 fit by weight into %3 - the wheel takes fewer</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Taken">
+            <English>That place was just taken</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_TooHeavy">
+            <English>Too heavy - that container cannot take the weight</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_TooHeavyEverywhere">
+            <English>Too heavy for your containers: %1 kg left at most, this weighs %2 kg</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_TooHeavyFor">
+            <English>Too heavy for %1: %2 kg left, this weighs %3 kg</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Waiting">
+            <English>Still waiting for an answer - showing what is there</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_Attached">
+            <English>Attached</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_Category">
+            <English>Category</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_Class">
+            <English>Class</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_Count">
+            <English>Count</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_Holds">
+            <English>Holds</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_Mod">
+            <English>Mod</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_Move">
+            <English>Hold to move</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_No">
+            <English>No</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_Rounds">
+            <English>Rounds</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_Size">
+            <English>Size</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_Stackable">
+            <English>Stackable</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_Weight">
+            <English>Weight</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_WeightEach">
+            <English>Weight each</English>
+        </Key>
+        <Key ID="STR_einv_gui_Inspect_YesUpTo">
+            <English>Yes, up to %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Key_AltClick">
+            <English>Alt+Click</English>
+        </Key>
+        <Key ID="STR_einv_gui_Key_CtrlClick">
+            <English>Ctrl+Click</English>
+        </Key>
+        <Key ID="STR_einv_gui_Key_Delete">
+            <English>Del</English>
+        </Key>
+        <Key ID="STR_einv_gui_Key_DoubleClick">
+            <English>Double click</English>
+        </Key>
+        <Key ID="STR_einv_gui_Key_Escape">
+            <English>Esc</English>
+        </Key>
+        <Key ID="STR_einv_gui_Key_RightClick">
+            <English>Right click</English>
+        </Key>
+        <Key ID="STR_einv_gui_Load_Full">
+            <English>Full</English>
+        </Key>
+        <Key ID="STR_einv_gui_Load_Limit">
+            <English>/ %1 kg</English>
+        </Key>
+        <Key ID="STR_einv_gui_Load_Over">
+            <English>Over</English>
+        </Key>
+        <Key ID="STR_einv_gui_Load_TooHeavy">
+            <English>Too heavy · %1 kg left</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu">
+            <English>Options</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_AttachTo">
+            <English>Attach to %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_CloseContainer">
+            <English>Close %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_Deselect">
+            <English>Deselect</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_Detach">
+            <English>Take off %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_DropSelected">
+            <English>Drop %1 items</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_Inspect">
+            <English>Inspect</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_LoadInto">
+            <English>Load into %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_MoveOver">
+            <English>Move over</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_MoveSelected">
+            <English>Move %1 items over</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_OpenContainer">
+            <English>Open %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_SelectAll">
+            <English>Select all in %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_Sort">
+            <English>Sort %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_TakeOff">
+            <English>Take off</English>
+        </Key>
+        <Key ID="STR_einv_gui_Notify_Searched">
+            <English>%1 is going through your gear</English>
+        </Key>
+        <Key ID="STR_einv_gui_Option_Everyone">
+            <English>Everyone</English>
+        </Key>
+        <Key ID="STR_einv_gui_Option_Helpless">
+            <English>Unconscious and captives</English>
+        </Key>
+        <Key ID="STR_einv_gui_Option_LookOnly">
+            <English>Nobody - look only</English>
+        </Key>
+        <Key ID="STR_einv_gui_Option_Nobody">
+            <English>Nobody</English>
+        </Key>
+        <Key ID="STR_einv_gui_Option_Unconscious">
+            <English>Only the unconscious</English>
+        </Key>
+        <Key ID="STR_einv_gui_QuickMove">
+            <English>Quick move</English>
+        </Key>
+        <Key ID="STR_einv_gui_Rows_Hide">
+            <English>Fold the empty rows away</English>
+        </Key>
+        <Key ID="STR_einv_gui_Rows_Show">
+            <English>+%1 empty rows (%2 cells)</English>
+        </Key>
+        <Key ID="STR_einv_gui_Rows_Tooltip">
+            <English>The rest of the room - click to show it or to fold it away again</English>
+        </Key>
+        <Key ID="STR_einv_gui_SearchSound_Mute">
+            <English>Mute the search sound</English>
+        </Key>
+        <Key ID="STR_einv_gui_SearchSound_Unmute">
+            <English>Play the search sound again</English>
+        </Key>
+        <Key ID="STR_einv_gui_Section_Close">
+            <English>Close</English>
+        </Key>
+        <Key ID="STR_einv_gui_Section_PutAll">
+            <English>Put all in</English>
+        </Key>
+        <Key ID="STR_einv_gui_Section_PutAll_Tooltip">
+            <English>Moves everything in here into %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Section_TakeAll">
+            <English>Take all</English>
+        </Key>
+        <Key ID="STR_einv_gui_Section_TakeAll_Tooltip">
+            <English>Moves everything searched in here into your uniform, vest and backpack</English>
+        </Key>
+        <Key ID="STR_einv_gui_Section_Toggle">
+            <English>Fold away or open</English>
+        </Key>
+        <Key ID="STR_einv_gui_Select">
+            <English>Select</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_Animation">
+            <English>Looting animation</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_Animation_Always">
+            <English>Always</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_Animation_Desc">
+            <English>While the window is open, the soldier\nlowers his weapon and looks into his\ngear, as in Arma's own inventory -\nkneeling at bodies, at piles on the\nground and at low crates - so others see\nwho is looting. A magazine loaded into\nthe weapon in hand plays its reload, a\nsuppressor is screwed on and off.\n\nWhile looting: when the window was\nopened on something, or while it\nsearches. Always: also for your own\ngear. Never while unconscious, captive,\nswimming, in a vehicle or on a ladder.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_Animation_Looting">
+            <English>While looting</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_Animation_Off">
+            <English>Off</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_CompareTooltip">
+            <English>Compare gear at the mouse</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_CompareTooltip_Desc">
+            <English>A vest, uniform, helmet or backpack at\nthe mouse shows how it differs from\nthe one you wear: armor, room and\nweight. Green is better, red worse.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MagazineFillBar">
+            <English>Fill bar on magazines</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MagazineFillBar_Desc">
+            <English>A thin bar along the bottom of every\nmagazine that is not full: how many\nrounds are left, at a glance - on its\ntile and on a weapon's magazine slot.\n\nThe rounds stay written on every\nmagazine either way.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MoveToStop">
+            <English>Moving stops looting</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MoveToStop_Desc">
+            <English>A movement key pressed while looting or\nsearching closes the window: the search\nstops and the soldier walks off. What\nwas found stays found; the item being\nsearched starts again next time.\n\nOff: movement keys do nothing in the\nwindow.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PersonItems">
+            <English>Take and put items</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PersonItems_Desc">
+            <English>Who may take items out of a living\nperson's uniform, vest and backpack,\nand put items in. Vanilla lets anyone\ntake from a backpack.\n\nNobody: the gear can only be looked at.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PersonNotify">
+            <English>Tell the searched player</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PersonNotify_Desc">
+            <English>A player whose gear is opened reads\nwho is going through it. With a\nbackpack on, everyone near hears ACE's\nzipper and the player feels a tug.\n\nSwitched off, only ACE's own backpack\ninteraction still zips.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PersonOpen">
+            <English>Open the whole person</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PersonOpen_Desc">
+            <English>Whose uniform, vest and backpack open\nwith &quot;Inventory&quot; while they are alive.\nAnyone else opens only by the backpack,\nas in vanilla - but from any side.\n\nCaptives are surrendered or handcuffed\n(ACE). The unconscious always open\nwhole, as with ACE's &quot;Inventory&quot;.\n\nMission makers can close one person\nto everyone:\n_unit setVariable [&quot;einv_noAccess&quot;, true, true];</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PersonWorn">
+            <English>Take off worn gear</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PersonWorn_Desc">
+            <English>Who may take off what a living person\nwears - weapons, helmet, uniform, vest,\nbackpack and the rest - by dragging,\nCtrl+click or the context menu.\n\nCaptives are surrendered or handcuffed\n(ACE). Bodies can always be stripped.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_ReplaceVanilla">
+            <English>Replace the vanilla inventory</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_ReplaceVanilla_Desc">
+            <English>Opens Enhanced Inventory instead of\nthe vanilla inventory.\n\nSwitched off, the vanilla inventory\nopens as before. In multiplayer only\nyour own gear opens there: crates, the\nground, vehicles and bodies always\nopen here, so everyone sees the same\nand nothing is ever taken twice.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchBodies">
+            <English>Search bodies</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchBodies_Desc">
+            <English>What a body carries shows as &quot;?&quot;\nuntil it has been searched.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchContainers">
+            <English>Search crates and vehicles</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchContainers_Desc">
+            <English>What a crate or a vehicle holds shows\nas &quot;?&quot; until it has been searched.\n\nMission makers can leave out a single\nobject (an arsenal box, base supply):\n_box setVariable [&quot;einv_noSearch&quot;, true, true];</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchGround">
+            <English>Search the ground</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchGround_Desc">
+            <English>Loose items on the ground show as &quot;?&quot;\nuntil they have been searched.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchPersons">
+            <English>Search living persons</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchPersons_Desc">
+            <English>What a living person carries shows as\n&quot;?&quot; until it has been searched - awake,\nunconscious or captive alike.\n\nBodies follow &quot;Search bodies&quot;.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTime">
+            <English>Search time per cell</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTime_Desc">
+            <English>Seconds it takes to search one grid\ncell of loot. A 2x2 item takes four\ntimes as long.\n\n0 shows everything at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_ShowNearby">
+            <English>Show everything nearby</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_ShowNearby_Desc">
+            <English>Shows every pile on the ground and\nevery crate within reach as a box of\nits own in the loot column, nearest\nfirst. Crates you did not open start\nfolded - click their name to open\nthem.\n\nOff: only what you opened shows, as\nin the vanilla inventory.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SoundVolume">
+            <English>Volume</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SoundVolume_Desc">
+            <English>How loud the inventory's sounds are for\nyou. The game's effects volume applies\non top, and so do earplugs and a blast's\ndeafness.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_Sounds">
+            <English>Sounds</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SoundsWorld">
+            <English>Others hear looting</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SoundsWorld_Desc">
+            <English>Players nearby hear someone loot: the\nrustle of a search, a rifle taken off a\nbody, a backpack dropped, a reload. Up\nto 10 to 20 metres, quieter than the\nlooter hears it.\n\nOff: only the looter hears anything.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_Sounds_Desc">
+            <English>Every kind of gear sounds like what it\nis: weapons, magazines, vests, medical\nitems, helmets, radios and more - picked\nup, put down, put on, attached, loaded,\nand containers opened and searched.\n\nOff: you hear none of them. Others near\nyou may still hear you loot.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Binocular">
+            <English>Binocular</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Bipod">
+            <English>Bipod</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Compass">
+            <English>Compass</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_GPS">
+            <English>GPS</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Goggles">
+            <English>Goggles</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Handgun">
+            <English>Handgun</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Headgear">
+            <English>Headgear</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Launcher">
+            <English>Launcher</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Magazine">
+            <English>Magazine</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Magazine2">
+            <English>Second magazine</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Map">
+            <English>Map</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Muzzle">
+            <English>Muzzle</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_NVG">
+            <English>Night vision</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Optic">
+            <English>Optic</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Primary">
+            <English>Primary</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Radio">
+            <English>Radio</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Rail">
+            <English>Rail</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Uniform">
+            <English>Uniform</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Vest">
+            <English>Vest</English>
+        </Key>
+        <Key ID="STR_einv_gui_Slot_Watch">
+            <English>Watch</English>
+        </Key>
+        <Key ID="STR_einv_gui_Stat_Weight">
+            <English>Weight</English>
+        </Key>
+        <Key ID="STR_einv_gui_Storage_Empty">
+            <English>No uniform, vest or backpack</English>
+        </Key>
+        <Key ID="STR_einv_gui_SubCategory_Animation">
+            <English>Animation</English>
+        </Key>
+        <Key ID="STR_einv_gui_SubCategory_General">
+            <English>General</English>
+        </Key>
+        <Key ID="STR_einv_gui_SubCategory_Magazines">
+            <English>Magazines</English>
+        </Key>
+        <Key ID="STR_einv_gui_SubCategory_Nearby">
+            <English>Nearby</English>
+        </Key>
+        <Key ID="STR_einv_gui_SubCategory_Persons">
+            <English>Living persons</English>
+        </Key>
+        <Key ID="STR_einv_gui_SubCategory_Searching">
+            <English>Searching</English>
+        </Key>
+        <Key ID="STR_einv_gui_SubCategory_Sounds">
+            <English>Sounds</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Backpack">
+            <English>Backpack</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Binocular">
+            <English>Binocular</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_BodyArmor">
+            <English>Body armor</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Compass">
+            <English>Compass</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Earpiece">
+            <English>Earpiece</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Eyewear">
+            <English>Eyewear</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_FaceCover">
+            <English>Face cover</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Gps">
+            <English>GPS</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Headwear">
+            <English>Headwear</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Holster">
+            <English>Holster</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Map">
+            <English>Map</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_OnBack">
+            <English>On back</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_OnSling">
+            <English>On sling</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Pockets">
+            <English>Pockets</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_TacticalRig">
+            <English>Tactical rig</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Uniform">
+            <English>Uniform</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tarkov_Watch">
+            <English>Watch</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tier_From">
+            <English>%1 from %2 kg</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tier_Now">
+            <English>%1 kg - %2</English>
+        </Key>
+        <Key ID="STR_einv_gui_Tier_NowDesc">
+            <English>%1 kg - %2: %3</English>
+        </Key>
+        <Key ID="STR_einv_gui_Title">
+            <English>Inventory</English>
+        </Key>
+        <Key ID="STR_einv_gui_Zone_Arms">
+            <English>arms</English>
+        </Key>
+        <Key ID="STR_einv_gui_Zone_Chest">
+            <English>chest</English>
+        </Key>
+        <Key ID="STR_einv_gui_Zone_Face">
+            <English>face</English>
+        </Key>
+        <Key ID="STR_einv_gui_Zone_Head">
+            <English>head</English>
+        </Key>
+        <Key ID="STR_einv_gui_Zone_Legs">
+            <English>legs</English>
+        </Key>
+        <Key ID="STR_einv_gui_Zone_Neck">
+            <English>neck</English>
+        </Key>
+        <Key ID="STR_einv_gui_Zone_Pelvis">
+            <English>pelvis</English>
+        </Key>
+        <Key ID="STR_einv_gui_Zone_Stomach">
+            <English>stomach</English>
+        </Key>
+    </Package>
+</Project>

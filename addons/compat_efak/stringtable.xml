@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="einv">
+    <Package name="compat_efak">
+        <Key ID="STR_einv_compat_efak_EmptyFirst">
+            <English>Empty it first</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_EmptyMagazine">
+            <English>An empty magazine stays out of the kit</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_Inspect_Contents">
+            <English>Contents</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_Inspect_Empty">
+            <English>Empty</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_Inspect_Filled">
+            <English>Filled</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_Inspect_More">
+            <English>+%1 more</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_Loading">
+            <English>Loading the kit's contents...</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_NotIntoItself">
+            <English>A kit cannot go into itself</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_NotYours">
+            <English>The kits of others are off limits here</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_OwnGearOnly">
+            <English>Only your own gear goes straight into a kit</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_Preparing">
+            <English>The kit is being made ready - try again in a moment</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_RestStays">
+            <English>Not everything fit - the rest stays in the kit</English>
+        </Key>
+    </Package>
+</Project>

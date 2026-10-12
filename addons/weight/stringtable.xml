@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="einv">
+    <Package name="weight">
+        <Key ID="STR_einv_weight_Effect_Critical">
+            <English>walking only</English>
+        </Key>
+        <Key ID="STR_einv_weight_Effect_Heavy">
+            <English>jogging tires you</English>
+        </Key>
+        <Key ID="STR_einv_weight_Effect_Overloaded">
+            <English>no sprinting, tiring faster</English>
+        </Key>
+        <Key ID="STR_einv_weight_Notify_Format">
+            <English>%1 - %2</English>
+        </Key>
+        <Key ID="STR_einv_weight_Setting_CriticalAt">
+            <English>Critical from (kg)</English>
+        </Key>
+        <Key ID="STR_einv_weight_Setting_CriticalAt_Desc">
+            <English>The end of the weight bar. From here
+on, soldiers can only walk.
+
+Always at least 1 kg above
+Overloaded.</English>
+        </Key>
+        <Key ID="STR_einv_weight_Setting_Effects">
+            <English>Overload slows soldiers</English>
+        </Key>
+        <Key ID="STR_einv_weight_Setting_Effects_Desc">
+            <English>Overloaded: no sprinting, and tiring
+faster the closer the load gets to
+Critical - up to half again as fast.
+Critical: walking only.
+
+Off: the bar still shows the tiers,
+but nothing happens to the soldier.</English>
+        </Key>
+        <Key ID="STR_einv_weight_Setting_HeavyAt">
+            <English>Heavy from (kg)</English>
+        </Key>
+        <Key ID="STR_einv_weight_Setting_HeavyAt_Desc">
+            <English>Where the weight bar turns yellow.
+
+0 follows ACE's Advanced Fatigue: from
+the load at which ACE's jog costs more
+than the body can keep up - jogging
+tires you from there, and ACE blocks
+the sprint once you are worn out. It
+moves with ACE's load factor and the
+soldier's performance factor.
+
+Any other value is a fixed weight.
+Never later than Overloaded.</English>
+        </Key>
+        <Key ID="STR_einv_weight_Setting_Notify">
+            <English>Tell me when my load changes tier</English>
+        </Key>
+        <Key ID="STR_einv_weight_Setting_Notify_Desc">
+            <English>A short message when you become Heavy,
+Overloaded or Critical, or lighter
+again, while the inventory is closed.
+Open, its weight bar shows it.</English>
+        </Key>
+        <Key ID="STR_einv_weight_Setting_OverloadedAt">
+            <English>Overloaded from (kg)</English>
+        </Key>
+        <Key ID="STR_einv_weight_Setting_OverloadedAt_Desc">
+            <English>Where the weight bar turns red.
+
+Overloaded soldiers cannot sprint and
+tire faster the closer they get to
+Critical - see Overload slows soldiers.
+
+Arma's own full load is 45 kg.</English>
+        </Key>
+        <Key ID="STR_einv_weight_SubCategory_Weight">
+            <English>Weight</English>
+        </Key>
+        <Key ID="STR_einv_weight_Tier_Critical">
+            <English>Critical</English>
+        </Key>
+        <Key ID="STR_einv_weight_Tier_Heavy">
+            <English>Heavy</English>
+        </Key>
+        <Key ID="STR_einv_weight_Tier_Light">
+            <English>Light</English>
+        </Key>
+        <Key ID="STR_einv_weight_Tier_Overloaded">
+            <English>Overloaded</English>
+        </Key>
+    </Package>
+</Project>

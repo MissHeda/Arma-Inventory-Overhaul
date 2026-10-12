@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="einv">
+    <Package name="magazines">
+        <Key ID="STR_einv_magazines_Hint_NoRepack">
+            <English>This magazine cannot be repacked</English>
+        </Key>
+        <Key ID="STR_einv_magazines_Hint_NotPartial">
+            <English>Only partly filled magazines can be repacked</English>
+        </Key>
+        <Key ID="STR_einv_magazines_Hint_RepackApart">
+            <English>Take it into your own gear first, then repack</English>
+        </Key>
+        <Key ID="STR_einv_magazines_Hint_RepackChanged">
+            <English>The magazines changed - nothing was repacked</English>
+        </Key>
+        <Key ID="STR_einv_magazines_Hint_RepackNothing">
+            <English>Repack stopped before a round was moved</English>
+        </Key>
+        <Key ID="STR_einv_magazines_Hint_RepackStopped">
+            <English>Repack stopped: %1 full and %2 rounds left over</English>
+        </Key>
+        <Key ID="STR_einv_magazines_Hint_Repacked">
+            <English>Repacked: %1 full and %2 rounds left over</English>
+        </Key>
+        <Key ID="STR_einv_magazines_Hint_Repacking">
+            <English>Repacking %1 (%2 s) - click or Esc to stop</English>
+        </Key>
+        <Key ID="STR_einv_magazines_Menu_RepackAll">
+            <English>Repack all %1</English>
+        </Key>
+        <Key ID="STR_einv_magazines_Setting_Repack">
+            <English>Repack magazines</English>
+        </Key>
+        <Key ID="STR_einv_magazines_Setting_Repack_Desc">
+            <English>Drop a partly filled magazine onto\nanother of the same kind, and ACE's\nMagazine Repack repacks the two - with\nits times, sounds and animation, right\nin the window. A magazine's menu offers\nRepack all, as ACE's does.\n\nOff: magazines are never repacked in\nthe window, and ACE's own Repack\nMagazines shows in the menu instead -\nfor mods with their own way to refill\nmagazines, such as GreenMag.</English>
+        </Key>
+    </Package>
+</Project>

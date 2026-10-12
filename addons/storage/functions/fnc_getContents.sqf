@@ -1,0 +1,179 @@
+#include "..\script_component.hpp"
+/*
+ * Author: Miss Heda
+ * What a container holds, one entry per tile: a uniform's, vest's or backpack's container object, a
+ * crate, a vehicle or a pile on the ground.
+ *
+ * Weapons and backpacks are each a tile of their own - every one may carry different attachments or
+ * contents. So is every magazine, as each has its own rounds; only the ones that stack (grenades and
+ * the like, einv_items_fnc_getInfo's "stack") share a tile, and only with the same rounds. Items are
+ * counted together by class and split into tiles at their stack size.
+ *
+ * Every entry gets the key of its record (fnc_entryKey). Every uniform, vest and backpack lying in the
+ * container gets two marks on this machine: its item class (einv_storage_itemClass) - its container
+ * object is only a Supply class, and its compartments go by the item (fnc_getBlocks) - and the
+ * container it lies in (einv_storage_parent), so its root and the copy of its tag and places are found
+ * from it (fnc_rootOf, fnc_readPlaces). Every machine that shows a nested container has read the one it
+ * lies in first.
+ *
+ * Arguments:
+ * 0: Container <OBJECT>
+ *
+ * Return Value:
+ * Entries, weapons first, then backpacks, magazines and items <ARRAY of HASHMAPs>
+ *   "class"       - class name <STRING>
+ *   "count"       - how many share the tile, at least 1 <NUMBER>
+ *   "ammo"        - rounds in a magazine, 0 for anything else <NUMBER>
+ *   "capacity"    - rounds a full magazine holds, 0 for anything else <NUMBER>
+ *   "attachments" - a weapon's weaponsItemsCargo entry, [] for anything else <ARRAY>
+ *   "container"   - a uniform, vest or backpack's own container object, objNull for anything else <OBJECT>
+ *   "key"         - the key of its record (fnc_entryKey) <STRING>
+ *
+ * Example:
+ * [backpackContainer player] call einv_storage_fnc_getContents;
+ *
+ * Public: No
+ */
+
+params [["_container", objNull, [objNull]]];
+
+if (isNull _container) exitWith {[]};
+
+// Uniforms, vests and backpacks lying in here hold things of their own. The engine names their
+// container objects by class but does not say which item is which, so the n-th of a class gets the
+// n-th container of that class - which one is which does not matter: each is keyed by its own id.
+private _inside = createHashMap;
+
+{
+    _x params ["_class", "_object"];
+
+    // Marks for whoever lays it out or asks for its root on this machine (fnc_getBlocks, fnc_rootOf).
+    _object setVariable [QGVAR(itemClass), _class];
+    _object setVariable [QGVAR(parent), _container];
+
+    private _key = toLowerANSI _class;
+    private _objects = _inside get _key;
+
+    if (isNil "_objects") then {
+        _objects = [];
+        _inside set [_key, _objects];
+    };
+
+    _objects pushBack _object;
+} forEach (everyContainer _container);
+
+// Copies of the nested ones' tags, for those whose tag on the object does not reach this machine
+// (fnc_tagNested) - read once for all of them.
+private _nested = [];
+
+if (isMultiplayer && {count _inside > 0}) then {
+    private _top = [_container, objNull, "top"] call FUNC(rootOf);
+
+    _nested = _top getVariable [QGVAR(nested), []];
+};
+
+private _entries = [];
+
+private _fnc_add = {
+    params ["_class", "_count", "_ammo", "_attachments"];
+
+    private _object = objNull;
+    private _objects = _inside get (toLowerANSI _class);
+
+    if (!isNil "_objects" && {_objects isNotEqualTo []}) then {
+        _object = _objects deleteAt 0;
+    };
+
+    private _entry = createHashMapFromArray [
+        ["class", _class],
+        ["count", _count],
+        ["ammo", _ammo],
+        ["capacity", ([_class] call EFUNC(items,getInfo)) get "capacity"],
+        ["attachments", _attachments],
+        ["container", _object]
+    ];
+
+    _entry set ["key", [_entry, _nested] call FUNC(entryKey)];
+    _entries pushBack _entry;
+};
+
+// Splits a pile of one kind into tiles of at most its stack size.
+private _fnc_addStacked = {
+    params ["_class", "_count", "_ammo"];
+
+    private _stack = (([_class] call EFUNC(items,getInfo)) get "stack") max 1;
+
+    while {_count > 0} do {
+        [_class, _count min _stack, _ammo, []] call _fnc_add;
+        _count = _count - _stack;
+    };
+};
+
+private _weapons = weaponsItemsCargo _container;
+
+if (isNil "_weapons") then {_weapons = []};
+
+{
+    [_x select 0, 1, 0, [_x] call FUNC(normalizeWeapon)] call _fnc_add;
+} forEach _weapons;
+
+(getBackpackCargo _container) params [["_backpacks", [], [[]]], ["_backpackCounts", [], [[]]]];
+
+{
+    for "_i" from 1 to (_backpackCounts select _forEachIndex) do {
+        [_x, 1, 0, []] call _fnc_add;
+    };
+} forEach _backpacks;
+
+// Magazines keep the engine's order. A stacking one joins the pile of its class and rounds that came
+// first; [class, rounds, count] per pile.
+private _magazines = [];
+private _piles = createHashMap;
+
+{
+    _x params ["_class", "_ammo"];
+
+    if ((([_class] call EFUNC(items,getInfo)) get "stack") > 1) then {
+        private _key = format ["%1|%2", toLowerANSI _class, _ammo];
+        private _index = _piles get _key;
+
+        if (isNil "_index") then {
+            _piles set [_key, count _magazines];
+            _magazines pushBack [_class, _ammo, 1];
+        } else {
+            private _pile = _magazines select _index;
+            _pile set [2, (_pile select 2) + 1];
+        };
+    } else {
+        _magazines pushBack [_class, _ammo, 1];
+    };
+} forEach (magazinesAmmoCargo _container);
+
+{
+    _x params ["_class", "_ammo", "_count"];
+    [_class, _count, _ammo] call _fnc_addStacked;
+} forEach _magazines;
+
+// The engine usually lists every item class once, but nothing promises it - add them up by class.
+(getItemCargo _container) params [["_items", [], [[]]], ["_itemCounts", [], [[]]]];
+
+private _itemOrder = [];
+private _itemTotals = createHashMap;
+
+{
+    private _key = toLowerANSI _x;
+    private _total = _itemTotals get _key;
+
+    if (isNil "_total") then {
+        _itemOrder pushBack _x;
+        _total = 0;
+    };
+
+    _itemTotals set [_key, _total + (_itemCounts select _forEachIndex)];
+} forEach _items;
+
+{
+    [_x, _itemTotals get (toLowerANSI _x), 0] call _fnc_addStacked;
+} forEach _itemOrder;
+
+_entries

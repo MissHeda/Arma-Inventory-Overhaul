@@ -1,0 +1,32 @@
+// What an item is
+PREP(getFacts);
+PREP(getInfo);
+
+// The rules: reading and writing their text
+PREP(parseRules);
+PREP(writeRules);
+PREP(parseGrid);
+PREP(formatGrid);
+PREP(encodeName);
+PREP(decodeName);
+PREP(sanitizeText);
+
+// The rules: compiling and applying them
+PREP(compileCond);
+PREP(compileRules);
+PREP(matches);
+PREP(resolve);
+PREP(explain);
+
+// The rules in effect
+PREP(rulesInputs);
+PREP(currentRules);
+PREP(loadRules);
+PREP(checkServerRules);
+
+// Sizes, stacks and container grids by class, from the older table settings
+PREP(parseTable);
+
+// What a vest, uniform or helmet protects: armor per body zone, as ACE's damage counts it
+PREP(getArmor);
+PREP(getProtection);

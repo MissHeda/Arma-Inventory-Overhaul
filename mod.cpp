@@ -1,0 +1,9 @@
+name = "Enhanced Inventory";
+author = "Miss Heda";
+tooltip = "Enhanced Inventory";
+tooltipOwned = "Enhanced Inventory";
+overview = "Enhanced Inventory by Miss Heda - a grid inventory built from scratch: items as tiles of their own size, drag, turn and stack them, search the loot before you see it.";
+actionName = "Support Discord";
+action = "https://discord.gg/Jud6gyzFYx";
+hideName = 0;
+hidePicture = 0;

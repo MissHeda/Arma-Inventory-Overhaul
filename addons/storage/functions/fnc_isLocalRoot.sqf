@@ -1,0 +1,33 @@
+#include "..\script_component.hpp"
+/*
+ * Author: Miss Heda
+ * Whether a phase on a root runs on this machine at once, without the hub: in single player and in Eden
+ * always; in multiplayer only on this machine's own player unit - its owner never changes while the
+ * player is connected - and, on the server, for objNull (ground work). Everything else goes through the
+ * hub, also on the hosting player's machine and for a unit remote controlled with Zeus.
+ *
+ * Arguments:
+ * 0: Root <OBJECT>
+ *
+ * Return Value:
+ * Runs here at once <BOOL>
+ *
+ * Example:
+ * [player] call einv_storage_fnc_isLocalRoot;
+ *
+ * Public: No
+ */
+
+params [["_root", objNull, [objNull]]];
+
+// Single player and Eden: every root is this machine's - a whole transaction runs in one frame.
+if (!isMultiplayer) exitWith {true};
+
+// The ground and anything else only the server does.
+if (isNull _root) exitWith {isServer};
+
+// Locality can be true on two machines for a moment while a root changes hands (the engine tells the old
+// and the new owner separately), so only a root that never changes hands takes the short way: this
+// machine's own player unit. A headless client or a dedicated server has no player - objNull, which a
+// root here never is.
+_root isEqualTo player

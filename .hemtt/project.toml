@@ -1,0 +1,67 @@
+name = "Enhanced Inventory"
+prefix = "einv"
+author = "Miss Heda"
+mainprefix = "z"
+
+[files]
+include = [
+    "mod.cpp",
+    "README.md",
+]
+
+[version]
+git_hash = 0
+
+[hemtt.config]
+preset = "Hemtt"
+
+# Mods loaded alongside for testing. hemtt launch already sets -skipIntro -noSplash
+# -showScriptErrors -debug and file patching by itself.
+#
+# Anything specific to your machine - an Arma profile, a custom mod folder - goes on the
+# command line rather than in here, so the repo stays the same for everyone:
+#
+#   hemtt launch -- -name="Your Profile"
+[hemtt.launch.default]
+workshop = [
+    "450814997",  # CBA_A3
+    "463939057",  # ACE3
+    "1779063631", # Zeus Enhanced
+    "3499977893", # Advanced Developer Tools
+    "3316254084", # ACM - Advanced Combat Medical (Experimental), as Enhanced First Aid Kits tests with
+    # "3235483358", # ACM - Advanced Combat Medical (stable)
+    # "3749759934", # ACM Extended
+    "3809430149", # Enhanced First Aid Kits
+    "894678801",  # Task Force Arrowhead Radio (BETA), for the radio compat
+]
+
+# A test scene for the inventory (.hemtt/missions/EINV_Test.VR): a soldier with full gear, a crate, an
+# ACE Arsenal box, a vehicle, a body and things on the ground. Opens in Eden - play it from there.
+#
+#   hemtt launch test
+[hemtt.launch.test]
+workshop = [
+    "450814997",  # CBA_A3
+    "463939057",  # ACE3
+    "1779063631", # Zeus Enhanced
+    "3499977893", # Advanced Developer Tools
+    "3316254084", # ACM - Advanced Combat Medical (Experimental)
+    "3809430149", # Enhanced First Aid Kits
+    "894678801",  # Task Force Arrowhead Radio (BETA)
+]
+mission = "EINV_Test.VR"
+
+# The same scene with ACRE2 instead of TFAR - the two never load together.
+#
+#   hemtt launch acre
+[hemtt.launch.acre]
+workshop = [
+    "450814997",  # CBA_A3
+    "463939057",  # ACE3
+    "1779063631", # Zeus Enhanced
+    "3499977893", # Advanced Developer Tools
+    "3316254084", # ACM - Advanced Combat Medical (Experimental)
+    "3809430149", # Enhanced First Aid Kits
+    "751965892",  # ACRE2, for the radio compat
+]
+mission = "EINV_Test.VR"

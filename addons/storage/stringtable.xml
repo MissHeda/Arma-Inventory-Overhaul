@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="einv">
+    <Package name="storage">
+        <Key ID="STR_einv_storage_Ground">
+            <English>Ground</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_ContainerTable">
+            <English>Container sizes</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_ContainerTable_Desc">
+            <English>Sets the cells of uniforms, vests,\nbackpacks, crates and vehicles, as\nclass:size pairs separated by commas.\n\nA number is that many cells, laid out\nlike the container's own pockets or\npouches. WxH is one compartment W cells\nwide and H high - join several with +.\n\nExample:\nV_PlateCarrier1_rgr:20,\nB_AssaultPack_rgr:30,\nB_Carryall_cbr:6x4+2x3+2x3\n\nUse the uniform's or vest's own class.\nA class counts for every class based on\nit, unless that one is listed itself.\n\nWins over the rules text, config and\nthe load per cell. A number goes up to\n320 cells, compartments up to 8 wide\nand 40 high, 24 of them and 320 cells\nin all. The rules text does the same:\nclass=B_Carryall_Base+ &gt; grid=6x4+2x3\n\nA mission can give one crate, vehicle\nor unit's uniform, vest or backpack\ncontainer its own grid, which wins\nover all of this: the object variable\neinv_grid, e.g. "6x4+2x3".\n\nEntries that cannot be read are left\nout and named in the RPT.</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_GridOnly">
+            <English>Limit by room only</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_GridOnly_Desc">
+            <English>Containers take whatever fits into\ntheir pockets and pouches, however\nheavy: a backpack is full when its grid\nis, not when its load is reached.\n\nItems still weigh what they weigh -\nfor the soldier carrying them. Past the\nred mark of the weight bar he is\nOverloaded (see Weight).\n\nOff: a container also has to stay\nwithin its maximum load.</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_NearbyRange">
+            <English>Reach</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_NearbyRange_Desc">
+            <English>How far from a player piles on the\nground and crates show in the loot\ncolumn on their own, in metres - and\nhow far away anything can still be\nchanged while the inventory is open.\n\nOnly what the player sees from where\nthey stand counts: nothing through\nwalls or from another floor.\n\nVehicles and bodies show when they\nare opened, as before.</English>
+        </Key>
+        <Key ID="STR_einv_storage_SubCategory_Containers">
+            <English>Containers</English>
+        </Key>
+    </Package>
+</Project>
