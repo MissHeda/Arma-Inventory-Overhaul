@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Whether the mission has handlers of its own on the vanilla arsenal's events: more of them than were
  * counted at the start (fnc_biCountHandlers). Such a mission restricts the vanilla arsenal there - it edits
- * the catalog, the tabs and the buttons - and keeps it: this window would lose all of that.
+ * the catalog, the tabs and the buttons - and keeps it: ACE Arsenal would lose all of that.
  *
  * Handlers a mission adds before the first frame after postInit (an object's init field, a function of its
  * own that runs at preInit) are counted as the mods'; a mission like that says so itself with

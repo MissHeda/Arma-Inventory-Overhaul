@@ -104,8 +104,8 @@ PREP(takeOff);
 PREP(entryToArray);
 PREP(entryFromArray);
 
-// Making what did not exist, for the Arsenal: payloads, putting new items in, counting a class, and the
-// places a loadout carries
+// Making what did not exist - what ACE Arsenal's grid panel puts in where ACE's own add was refused:
+// payloads, putting new items in, counting a class - and the places a loadout carries
 PREP(makePayload);
 PREP(addNew);
 PREP(countClass);

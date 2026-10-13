@@ -5,9 +5,11 @@
  * Makes a display the window. Everything fnc_open does once the inventory's dialog exists, for any
  * display that carries the dim layer and the first control (IDC_DIM, IDC_FIRST): the unit and the
  * containers it looks into, the window's state started afresh, the mouse handlers, the first build and
- * the frame. The inventory attaches with no hooks; the Arsenal and later editor windows attach with a
- * table of them (fnc_hook), which is how they differ from it. With no hooks every function of this addon
- * behaves as it always did (fnc_isInventoryMode).
+ * the frame. The inventory attaches with no hooks; ACE Arsenal's grid panel (einv_arsenal) and later
+ * editor windows attach with a table of them (fnc_hook), which is how they differ from it. With no hooks
+ * every function of this addon behaves as it always did (fnc_isInventoryMode). A display that belongs to
+ * another mod and carries neither the dim layer nor the first control takes part as a guest (the "guest"
+ * flag): only what this addon made there is ever swept, and that mod's handlers keep every click.
  *
  * Refuses when another display is the window already: there is one session of this addon at a time.
  *
@@ -118,10 +120,18 @@ GVAR(bandTiles) = [];
 GVAR(dragGroup) = [];
 GVAR(signatureParts) = [];
 
-// Moving items: the mouse buttons anywhere on the window (fnc_build adds the same to every group).
-_display displayAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton)}];
-_display displayAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton)}];
-_display displayAddEventHandler ["MouseZChanged", {[_this] call FUNC(onMouseZ)}];
+// Moving items: the mouse buttons anywhere on the window (fnc_build adds the same to every group). On
+// another mod's display (the "guest" flag) its own handlers and controls get every click and turn of the
+// wheel as well, whatever this addon made of them: these never answer that they took it.
+if ((["guest", [], false] call FUNC(hook)) isEqualTo true) then {
+    _display displayAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton); false}];
+    _display displayAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton); false}];
+    _display displayAddEventHandler ["MouseZChanged", {[_this] call FUNC(onMouseZ); false}];
+} else {
+    _display displayAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton)}];
+    _display displayAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton)}];
+    _display displayAddEventHandler ["MouseZChanged", {[_this] call FUNC(onMouseZ)}];
+};
 
 call FUNC(readNearby);
 [_display] call FUNC(build);

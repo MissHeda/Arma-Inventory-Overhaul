@@ -24,11 +24,13 @@
  * header and footer - still one that can be closed or swapped for the vanilla inventory - rather than
  * no window at all.
  *
- * A window that attached with hooks (fnc_attach) is asked at five places: the theme and the context may
- * be changed ("theme", "context"), the header and the layout can be its own ("header", "layout" - the
- * layout answers where the soldier stands), its camera is told that rect ("camera", and then this addon's
- * own camera stays off), and "afterBuild" comes last of all. A top-level control with the id IDC_KEEP
- * survives the sweep, with everything in it. Without hooks the build is exactly the inventory's.
+ * A window that attached with hooks (fnc_attach) is asked at six places: the theme and the context may
+ * be changed ("theme", "context"), the header, the layout and the footer can be its own ("header",
+ * "layout" - the layout answers where the soldier stands -, "footer"), its camera is told that rect
+ * ("camera", and then this addon's own camera stays off), and "afterBuild" comes last of all. A top-level
+ * control with the id IDC_KEEP survives the sweep, with everything in it; on a display of another mod
+ * (the "guest" flag) only what this addon registered is swept. Without hooks the build is exactly the
+ * inventory's.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -111,12 +113,18 @@ uiNamespace setVariable [QGVAR(created), []];
 
 // Anything made on the display without being registered goes as well - left behind, it would pile up
 // with every rebuild. A group takes its own controls with it. What is kept: the dim layer, the first
-// control, and a control a window that attached keeps across builds (IDC_KEEP).
-{
-    if (isNull ctrlParentControlsGroup _x && {!(ctrlIDC _x in [IDC_DIM, IDC_FIRST, IDC_KEEP])}) then {
-        ctrlDelete _x;
-    };
-} forEach (allControls _display);
+// control, and a control a window that attached keeps across builds (IDC_KEEP). Not on another mod's
+// display this addon is only a guest on (the "guest" flag, ACE Arsenal's): every control there but the
+// registered ones above is that mod's own.
+private _guest = ["guest", [], false] call FUNC(hook);
+
+if (_guest isNotEqualTo true) then {
+    {
+        if (isNull ctrlParentControlsGroup _x && {!(ctrlIDC _x in [IDC_DIM, IDC_FIRST, IDC_KEEP])}) then {
+            ctrlDelete _x;
+        };
+    } forEach (allControls _display);
+};
 
 uiNamespace setVariable [QGVAR(grids), []];
 uiNamespace setVariable [QGVAR(zones), []];
@@ -316,7 +324,12 @@ if ("layout" in GVAR(hooks)) then {
 // The free middle, where a kit's window likes to open (fnc_placeWindow).
 GVAR(middle) = _rect;
 
-[_display, _theme] call FUNC(drawFooter);
+// The footer is the look's too, unless the window that attached puts its own (or none) in its place.
+if ("footer" in GVAR(hooks)) then {
+    ["footer", [_display, _theme]] call FUNC(hook);
+} else {
+    [_display, _theme] call FUNC(drawFooter);
+};
 
 // What is still to be searched, one container after the other, each from the top left.
 private _containers = [];
@@ -335,7 +348,8 @@ GVAR(searchQueue) = [GVAR(searchQueue), [], {
 [_display] call FUNC(showSearch);
 
 // The scrolling columns take the clicks over them, so they report the mouse buttons as the display does.
-// A group kept from the last build (IDC_KEEP) has them already - it must not collect more.
+// A group kept from the last build (IDC_KEEP) has them already - it must not collect more. A guest only
+// hooks the groups it made: the other mod's groups keep their clicks to themselves.
 {
     if (ctrlType _x == 15 && {!(_x getVariable [QGVAR(hooked), false])}) then {
         _x setVariable [QGVAR(hooked), true];
@@ -343,7 +357,7 @@ GVAR(searchQueue) = [GVAR(searchQueue), [], {
         _x ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton)}];
         _x ctrlAddEventHandler ["MouseZChanged", {[_this] call FUNC(onMouseZ)}];
     };
-} forEach (allControls _display);
+} forEach ([allControls _display, uiNamespace getVariable [QGVAR(created), []]] select (_guest isEqualTo true));
 
 // A frame later (fnc_onFrame): right after its controls are made a group does not know its height yet,
 // and the engine puts it back to the top (seen in the game after every move, 2026-10-08).

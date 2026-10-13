@@ -2,9 +2,9 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The vanilla arsenal is asked to open (BIS_fnc_arsenal "Open", fnc_biArsenal.inc.sqf): by the setting, the
- * Enhanced Arsenal opens with the same items, a red screen says it is not allowed, or the vanilla one is
- * left alone. Eden, BI's showcase, Warlords, missions that opt out, other units than the player's own on
+ * The vanilla arsenal is asked to open (BIS_fnc_arsenal "Open", fnc_biArsenal.inc.sqf): by the setting,
+ * ACE Arsenal opens with the same items (fnc_openBI), a red screen says it is not allowed, or the vanilla
+ * one is left alone. Eden, BI's showcase, Warlords, missions that opt out, other units than the player's own on
  * foot, and a mission with handlers of its own always keep the vanilla one; Zeus is never blocked.
  *
  * Whenever the answer is false for one of those, the open is marked as meant for the vanilla window
@@ -46,7 +46,7 @@ if (
 // A mission that hooks the vanilla arsenal itself restricts it there: it keeps the one it was written for,
 // unless it says ours is fine (einv_arsenal_biPassThrough set to false). Not under "not allowed": a server
 // that forbids the vanilla arsenal forbids it for those missions too.
-if (_mode isEqualTo "enhanced" && {isNil "_passThrough"} && {call FUNC(biMissionHooks)}) exitWith {
+if (_mode isEqualTo "ace" && {isNil "_passThrough"} && {call FUNC(biMissionHooks)}) exitWith {
     GVAR(biLetThrough) = true;
 
     false
@@ -74,15 +74,16 @@ if (isNull _center || {!local _center} || {!(_center isKindOf "CAManBase")} || {
     false
 };
 
-// 5. One arsenal at a time, ours or ACE's, as the vanilla function's own "already running".
-if (GVAR(isOpen) || {!isNil QACEGVAR(arsenal,camera)} || {!isNull (findDisplay IDD_ARSENAL_BLOCKED)}) exitWith {true};
+// 5. One arsenal at a time, as the vanilla function's own "already running": ACE's camera is there while
+// its window is open.
+if (!isNil QACEGVAR(arsenal,camera) || {!isNull (findDisplay IDD_ARSENAL_BLOCKED)}) exitWith {true};
 
 // 6. The rest on the frame's own time, as ACE's openBox does.
 if (canSuspend) exitWith {
     [FUNC(handleBIOpen), _this] call CBA_fnc_directCall
 };
 
-// 7. Zeus is never stopped: with the curator's display open "not allowed" opens ours.
+// 7. Zeus is never stopped: with the curator's display open "not allowed" opens ACE's.
 private _zeus = !isNull (findDisplay 312);
 
 // 8. Not allowed.
@@ -92,17 +93,10 @@ if (_mode isEqualTo "block" && {!_zeus}) exitWith {
     true
 };
 
-// 9. The Enhanced Arsenal, with the vanilla box's items.
+// 9. ACE Arsenal, with the vanilla box's items.
 ([_cargo, _full, _center] call FUNC(biItems)) params ["_all", "_classes"];
 
-private _box = [_cargo, _center] select isNull _cargo;
-private _opened = if (_all) then {
-    [_box, _center, true, nil, displayNull, "bi"] call FUNC(openWindow)
-} else {
-    [_box, _center, false, _classes, displayNull, "bi"] call FUNC(openWindow)
-};
-
-if (_opened) exitWith {true};
+if ([[_cargo, _center] select isNull _cargo, _center, _all, _classes] call FUNC(openBI)) exitWith {true};
 
 // Could not: the vanilla one after all.
 GVAR(biLetThrough) = true;

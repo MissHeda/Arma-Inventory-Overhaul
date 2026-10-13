@@ -1,11 +1,19 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The hook table this window attaches to the inventory's engine with (einv_gui_fnc_attach): theme, context,
- * layout, header, footer keys, camera, keep open, frame, wheel, mouse, click, key, submit, drag check,
- * drop, ground, menu, filter, tile badge, hint, inspect rows, after build and the flag that has the focus
- * given back to the sink. Each is a function of this addon, found by name when it is called, so a function
- * compiled again while testing is the one used.
+ * The hook table the inventory's engine is attached to ACE Arsenal's display with (einv_gui_fnc_attach).
+ * The engine is a guest there: it sweeps only what it made, and ACE's own handlers keep every click. It
+ * draws neither the inventory's header nor its footer, only the open container's grid in the panel and a
+ * line for its hints (fnc_layout, fnc_footer); the camera is ACE's, and so is the closing.
+ *
+ * The mouse is the engine's only over the panel and while it holds something it lifted there (fnc_onMouse,
+ * fnc_onFrame); clicks that would equip or move things elsewhere are swallowed (fnc_onClick). Whatever is
+ * let go outside the panel is taken out of the container, never put on the ground (fnc_dragCheck,
+ * fnc_onDrop, the "ground" hook - Delete over a tile ends there too), and the right click has only "Remove"
+ * and "Remove all" (fnc_menu). Over nothing the hint line says what the panel does.
+ *
+ * Each is a function of this addon, found by name when it is called, so a function compiled again while
+ * testing is the one used.
  *
  * Arguments:
  * None
@@ -20,39 +28,34 @@
  */
 
 createHashMapFromArray [
-    // How it looks
-    ["theme", {_this call FUNC(theme)}],
-    ["context", {_this call FUNC(context)}],
+    // A guest on another mod's display
+    ["guest", true],
+
+    // How it looks: no header of the inventory's, the panel, and its hint line in place of the footer
+    ["header", {}],
     ["layout", {_this call FUNC(layout)}],
-    ["header", {_this call FUNC(drawHeader)}],
-    ["footerKeys", {call FUNC(footerKeys)}],
-    ["afterBuild", {_this call FUNC(afterBuild)}],
+    ["footer", {_this call FUNC(footer)}],
 
-    // The soldier and the frame
-    ["camera", {_this call FUNC(cameraRect)}],
-    ["keepOpen", {call FUNC(keepOpen)}],
+    // ACE's camera, and ACE decides when its window closes
+    ["camera", {}],
+    ["keepOpen", true],
     ["frame", {_this call FUNC(onFrame)}],
-    ["focusAll", true],
 
-    // The mouse and the keys
-    ["wheel", {_this call FUNC(onWheel)}],
-    ["mouseDown", {_this call FUNC(onMouseDown)}],
-    ["mouseUp", {_this call FUNC(onMouseUp)}],
+    // The mouse
+    ["mouseDown", {([true] + _this) call FUNC(onMouse)}],
+    ["mouseUp", {([false] + _this) call FUNC(onMouse)}],
     ["click", {_this call FUNC(onClick)}],
-    ["key", {_this call FUNC(onKey)}],
-    ["submit", {_this call FUNC(onSubmit)}],
 
-    // Dragging: where a card may go, what a drop does, and that nothing ever goes to the ground - always
-    // "handled", also when nothing was given back (a unique item waiting for its second click, a kit's
-    // item): the inventory would put it on the ground otherwise.
+    // Dragging, and what leaves the panel
     ["dragCheck", {_this call FUNC(dragCheck)}],
     ["drop", {_this call FUNC(onDrop)}],
-    ["ground", {_this call FUNC(giveBack); true}],
+    ["ground", {_this call FUNC(remove); true}],
 
-    // Menus, the search, marks and words
+    // The right click, and what the hint line says over nothing
     ["menu", {_this call FUNC(menu)}],
-    ["filter", {call FUNC(onFilter)}],
-    ["tileBadge", {_this call FUNC(tileBadge)}],
-    ["hint", {_this call FUNC(hintParts)}],
-    ["inspectRows", {_this call FUNC(inspectRows)}]
+    ["hint", {
+        params [["_kind", "", [""]]];
+
+        [[], [[LLSTRING(Hint_Idle), "muted"]]] select (_kind isEqualTo "none")
+    }]
 ]

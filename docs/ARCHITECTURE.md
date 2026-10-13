@@ -2039,6 +2039,8 @@ Mia tested 0.2.3 in the game. What changed for each finding:
 
 ## Enhanced Arsenal (0.3.0, polish 0.3.1) - supersedes the parts above it contradicts
 
+Removed in 0.4.0 - see 'ACE Arsenal panel'.
+
 ACE Arsenal's boxes open in the inventory's own window: the soldier's slots and grids on the left and in the
 middle, a catalog where the loot column would be, and everything that enters the soldier obeys the grid. Designed
 in `arsenal_design.md` (the decisions below are its D1-D17), built on the window engine of the section before
@@ -2668,3 +2670,70 @@ crate, vehicle or pile. The soldier's own weight (bar, tiers, ACE fatigue, the `
   "percent" and "pattern" default grids from it, it never limits anything. The items' `maxLoad` fact and the `load`
   selector key stay as a size proxy, as do the engine `maxLoad` asks (`canOpenPerson`, ACE cargo, ZEN).
 - Built and checked in code only: nothing of this has run in the game yet.
+
+## ACE Arsenal panel (0.4.0) - supersedes the parts above it contradicts
+
+The own arsenal window is gone (display, catalog, hand-over of ACE's display, loadouts, camera, the
+`[Enhanced Arsenal]` button, the Eden menu entry, `einv_arsenal_window`, `quickAddAmount`, `confirmUnique`,
+`einv_arsenal_opened` / `closed`, compat_efak's `arsenalEditing` / `packNew` / `onGivenBack`). ACE Arsenal is the
+arsenal; nothing of ACE is patched. While the uniform, vest or backpack tab of ACE's left bar is open (and the
+unit wears it), a panel right beside ACE's list (IDC 15) shows that one container's grid.
+
+- **Engine attached, as a guest.** `einv_gui_fnc_attach` runs on ACE's display a frame after
+  `ace_arsenal_displayOpened` (driver `"draw3d"`, so Eden too). Two engine changes made that possible: the flag
+  hook `guest` (the build sweeps only what it registered, mouse handlers go only on its own groups, the
+  display's handlers never answer "taken") and the hook `footer` (replaces `fnc_drawFooter`, like `header`).
+  Hook table (`fnc_hooks`): `guest`, `header` (none), `layout` (`fnc_layout`: `fnc_drawColumn` with the one
+  section, `einv_gui_fnc_drawSection`, column id "storage", always unfolded; ACE's list registered as the zone
+  "remove"), `footer` (`fnc_footer`: a two-line hint strip under the grid), `camera` (none), `keepOpen` (true),
+  `frame`, `mouseDown` / `mouseUp` (`fnc_onMouse`: outside the panel taken, so the engine ignores it), `click`
+  (double, Ctrl and Alt clicks swallowed - no equip or quick move past ACE), `dragCheck` (ground or zone ->
+  the remove zone in the loss colour), `drop`, `ground` (both -> `fnc_remove`), `menu` (Remove, Remove all of
+  this kind), `hint` (the idle line).
+- **Geometry** (`fnc_panelRect`): top of ACE's list, bottom at the list's or above ACE's message line (IDC 9),
+  whichever is higher; width STORAGE_COLS cells of `einv_gui_fnc_getCell` plus the column's padding and scroll bar,
+  at most a third of the screen; the column scrolls when taller.
+- **Keys:** a second KeyDown handler on ACE's display (`fnc_onKey`) hands the engine only R while dragging and
+  Delete over the panel, never while one of ACE's fields has the cursor. ACE's own handler runs untouched.
+- **Mouse:** a press on the panel empties `ace_arsenal_mouseButtonState` (at once and a frame later), and the
+  frame hook keeps it empty while the engine holds something, so ACE's camera does not pan or turn. A button let
+  go where no display event reached the engine ends the drag in the frame hook (`inputMouse 0`).
+
+Events (all registered in preInit, so Eden has them):
+
+| Event | Does |
+|---|---|
+| `ace_arsenal_displayOpened` | `fnc_onOpened`: state reset, KeyDown and list LBSelChanged handlers, attach a frame later (one more frame if the inventory is still closing) |
+| `ace_arsenal_displayClosed` | `fnc_onClosed`: `einv_gui_fnc_onUnload`, state reset, BI helper deleted, `fnc_reportOverflow` a frame later (not Eden) |
+| `ace_arsenal_cargoChanged` | `fnc_onCargoChanged`: what of an add did not land (engine refused by `maximumLoad`) is put in with `einv_storage_fnc_addNew` while there is a free spot; flags the frame-later pass |
+| `ace_arsenal_itemsChanged` | `fnc_onItemsChanged`: for the open container's tab `fnc_reconcile` at once (before ACE greys its list) |
+| `leftPanelFilled`, `rightPanelFilled`, `loadoutImported`, `onLoadoutLoad`, `showToggle` | `fnc_settle` a frame later |
+
+- **Add path.** `fnc_snapshot` normalizes the container's places (`einv_storage_fnc_normalize`) and notes its
+  counts by class, so after an add every old tile keeps its record and only the new things are laid out
+  first-fit. `fnc_reconcile`: gains against the snapshot; overflow entries of a gained class are taken back
+  out (`einv_storage_fnc_removeEntry`, at most the gained count), "No room in the vest - move things to free a
+  1x2 space" in ACE's message line and the hint strip (`fnc_sayNoRoom`), ACE told with
+  `ace_arsenal_fnc_fireItemsChangedEvent` (`fnc_tellAce`; without it the follow-up is called directly). An ACE
+  without `itemsChanged` gets the same follow-up in the frame-later pass.
+- **Remove path.** Drop outside the panel, Delete, or the menu: `fnc_remove` (the record first when the whole
+  tile goes, then `removeEntry` with the dragged count) or `fnc_removeKind`; sound "giveBack" (UI only), then
+  `fnc_tellAce`. A move inside the panel is the engine's normal place move (and stacking).
+- **Frame-later pass** (`fnc_settle`, once a frame): fallback follow-up, snapshot, `fnc_syncAce` (row counts,
+  load bar, `ace_arsenal_currentItems`, `ace_arsenal_fnc_updateRightPanel`), `fnc_ungrey` (rows ACE greyed by
+  weight lit again where a stack has room or a spot of that size is free, one grid look per item size; the
+  "+" of the picked row too, also on LBSelChanged), engine unit set to `ace_arsenal_center`, build - or after
+  the drag if something is held.
+- **Kept of the old arsenal:** the vanilla Virtual Arsenal handling (wrapper, `fnc_handleBIOpen`, safety net,
+  red screen, mission hooks, leave-alone report) with `einv_arsenal_biArsenal` now `"ace"` (default, ACE Arsenal
+  with the box's items on a local helper, `fnc_openBI`), `"block"`, `"vanilla"`; `einv_arsenal_biMessage`,
+  `einv_arsenal_biPassThrough`; `fnc_isArsenalBox` (gui's `fnc_isSearched`), `fnc_canOpen` / `fnc_open` for the
+  inventory's "Open Arsenal" (ACE's `openBox`, or BI's function for a vanilla box). Storage keeps `addNew`,
+  `makePayload`, `countClass` and the loadout places (`CBA_loadoutGet` / `Set`), which ACE's loadouts carry.
+- **Known limits.** Picking another uniform, vest or backpack in ACE's left list goes through `setUnitLoadout`:
+  the containers are new objects and their arrangement starts first-fit. ACE Arsenal Extended's option panel
+  stands where this panel does. Rows ACE leaves lit but the grid cannot take are not greyed (the add is taken
+  back with the message). The undo is after the fact: other mods see ACE's add and then the removal. ACE
+  internals read: IDCs 9, 15, 102, 701, `currentLeftPanel`, `currentItems`, `mouseButtonState`, the row alpha
+  of `updateRightPanel`.
+- Built and checked in code only: nothing of the panel has run in the game yet.

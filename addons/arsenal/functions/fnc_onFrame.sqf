@@ -1,14 +1,21 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * What the window does every frame (the "frame" hook, not while another window lies over this one): the
- * camera, the catalog's scrolling and warming, the loadouts' checking. The engine asks it also while
- * something is dragged, so the soldier turns and the catalog scrolls under a held card.
+ * Every frame of the panel (the "frame" hook), also while something is dragged. While the engine holds
+ * something lifted in the panel, ACE's camera must not take the same mouse button for a pan or a turn
+ * over the middle: ACE notes every press on its display, also those on the panel, and moves its camera
+ * while the button is down. So its note is emptied every frame meanwhile.
+ *
+ * A button let go where no event of the display reached the engine (over one of ACE's own controls) ends
+ * the drag where it stands all the same, and a press that never became a drag is forgotten - it would
+ * otherwise start one later with the button up.
+ *
+ * A build ACE's events asked for while something was held (fnc_settle) comes once it is let go.
  *
  * Arguments:
- * 0: Display <DISPLAY>
- * 1: Mouse position [x, y] <ARRAY>
- * 2: Time of the frame, diag_tickTime <NUMBER>
+ * 0: ACE Arsenal's display <DISPLAY>
+ * 1: Mouse [x, y] <ARRAY>
+ * 2: Now (diag_tickTime) <NUMBER>
  *
  * Return Value:
  * None
@@ -19,12 +26,28 @@
  * Public: No
  */
 
-params ["_display", "_mouse", "_now"];
+disableSerialization;
 
-[_mouse, _now] call FUNC(cameraFrame);
+params [["_display", displayNull, [displayNull]]];
 
-[_display, _mouse, _now] call FUNC(catalogFrame);
+private _holding = EGVAR(gui,dragging) || {EGVAR(gui,press) isNotEqualTo []};
 
-if (GVAR(view) isEqualTo "loadouts") then {
-    [_now] call FUNC(loadoutsFrame);
+if (_holding) then {
+    if (!isNil QACEGVAR(arsenal,mouseButtonState)) then {
+        ACEGVAR(arsenal,mouseButtonState) = [[], []];
+    };
+
+    if (inputMouse 0 == 0) then {
+        if (EGVAR(gui,dragging)) then {
+            [_display] call EFUNC(gui,endDrag);
+        } else {
+            EGVAR(gui,press) = [];
+        };
+    };
 };
+
+if (_holding || {!GVAR(dirty)}) exitWith {};
+
+GVAR(dirty) = false;
+
+[_display] call EFUNC(gui,build);

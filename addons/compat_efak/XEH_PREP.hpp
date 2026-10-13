@@ -6,11 +6,6 @@ PREP(hintParts);
 PREP(inspectRows);
 PREP(hideCbaOption);
 
-// Kits in the Arsenal: what it may change about a kit, packing a new item into one, taking one out
-PREP(arsenalEditing);
-PREP(packNew);
-PREP(onGivenBack);
-
 // Kits in windows of their own inside the inventory
 PREP(onWindowOpen);
 PREP(getSections);

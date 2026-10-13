@@ -1,0 +1,90 @@
+#include "..\script_component.hpp"
+#include "..\defines.hpp"
+/*
+ * Author: Miss Heda
+ * ACE Arsenal's display opened (ace_arsenal_displayOpened): the grid panel moves in. ACE raises the event
+ * before it filled its panels - in the Eden editor even before the copy of the unit it dresses exists -,
+ * so the inventory's engine is attached a frame later (einv_gui_fnc_attach, with this addon's hook table
+ * and the "draw3d" frame, which runs in the Eden editor too). Whatever the panel draws is made by the
+ * engine on ACE's display, on top of ACE's own controls, and goes with it.
+ *
+ * ACE's keys stay ACE's: the display gets one more key handler (fnc_onKey) that hands the engine R while
+ * something is dragged and Delete over the panel, nothing else. A new row picked in ACE's list has its
+ * "+" looked at again by the grid a frame later (fnc_ungrey), after ACE's own look by weight.
+ *
+ * Another window of the engine still open (the inventory, closing for this one) is waited for one frame
+ * more; then the panel stays away, with one line in the RPT.
+ *
+ * Arguments:
+ * 0: ACE Arsenal's display <DISPLAY>
+ *
+ * Return Value:
+ * None
+ *
+ * Example:
+ * [findDisplay 1127001] call einv_arsenal_fnc_onOpened;
+ *
+ * Public: No
+ */
+
+disableSerialization;
+
+params [["_display", displayNull, [displayNull]]];
+
+if (!GVAR(ready) || {isNull _display} || {ctrlIDD _display != ARSENAL_IDD}) exitWith {};
+
+uiNamespace setVariable [QGVAR(display), _display];
+
+GVAR(attached) = false;
+GVAR(shown) = true;
+GVAR(panelRect) = [];
+GVAR(hintRect) = [];
+GVAR(removeZone) = -1;
+GVAR(snapshot) = [objNull, createHashMap];
+GVAR(itemsSeen) = false;
+GVAR(cargoPending) = false;
+GVAR(dirty) = false;
+GVAR(dragZone) = "";
+
+_display displayAddEventHandler ["KeyDown", {_this call FUNC(onKey)}];
+
+private _list = _display displayCtrl ARSENAL_IDC_LIST;
+
+if (!isNull _list) then {
+    _list ctrlAddEventHandler ["LBSelChanged", {
+        [{_this call FUNC(ungrey)}, [ctrlParent (_this select 0), true]] call EFUNC(gui,later);
+    }];
+};
+
+// The engine a frame later, once ACE's own start is done; once more if another of its windows is still
+// closing.
+private _fnc_attach = {
+    params ["_display", "_tries", "_fnc_attach"];
+
+    if (isNull _display || {GVAR(attached)}) exitWith {};
+
+    private _current = uiNamespace getVariable [QEGVAR(gui,display), displayNull];
+
+    if (!isNull _current && {_current isNotEqualTo _display}) exitWith {
+        if (_tries > 0) exitWith {
+            [_fnc_attach, [_display, _tries - 1, _fnc_attach]] call EFUNC(gui,later);
+        };
+
+        WARNING("Another window of the inventory is open - ACE Arsenal opens without the grid panel.");
+    };
+
+    private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+
+    if (isNull _center) exitWith {};
+
+    if !([_display, _center, objNull, objNull, call FUNC(hooks), "draw3d"] call EFUNC(gui,attach)) exitWith {
+        WARNING("The inventory's engine did not attach to ACE Arsenal - it opens without the grid panel.");
+    };
+
+    GVAR(attached) = true;
+
+    [] call FUNC(snapshot);
+    [] call FUNC(settle);
+};
+
+[_fnc_attach, [_display, 1, _fnc_attach]] call EFUNC(gui,later);

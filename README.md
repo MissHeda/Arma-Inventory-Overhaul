@@ -10,12 +10,11 @@ all") or puts everything of yours into the box beside it ("Put all in").
   bleed most, tourniquets on the worst limb (ACE and ACM). Drag an item onto a slot of the "Hotbar" row in
   the inventory, or point at it and press the key; the bar shows on the screen in Arma's HUD style.
 
-- **Enhanced Arsenal:** ACE Arsenal boxes open in the inventory's window. Drag items straight into slots and
-  grid cells, turn them with R, pick counts with the wheel. ACE loadouts keep working and remember where things
-  lie. The inspect card shows ACE's stats, the sort menu has ACE's sorts, a slot's menu has ACE's actions (the
-  gunbag's), the soldier holds the weapon he was just given, and the night vision key cycles normal / night
-  vision / thermal. Drag items into Enhanced First Aid Kits (where the kit's arsenal setting allows it). The
-  vanilla Virtual Arsenal opens there too, or is blocked, by server setting.
+- **Grid panel in ACE Arsenal:** pick the uniform, vest or backpack tab and its grid opens beside ACE's list.
+  What you add lands in the first free cell, drag tiles to sort them (R turns, stacks merge), drag them out of
+  the panel - or right click, or Delete - to take them out. With no free cells ACE's add is taken back and the
+  message says how much room to make. The vanilla Virtual Arsenal opens ACE Arsenal too, or is blocked, by
+  server setting.
 
 **Status:** in development, all seven phases built and in testing: two looks (Tarkov, Glass), drag and
 drop between containers and equipment slots, searching loot, server-checked moves in multiplayer.
@@ -106,25 +105,15 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   the replacement off. Scripts can move items with `einv_storage_fnc_moveEntry`, `einv_storage_fnc_equip`
   and `einv_storage_fnc_unequip`; `[cursorObject] call einv_storage_fnc_dumpPlaces` writes where things lie
   to the RPT.
-- **Arsenal:** `ace_arsenal_fnc_initBox` and `ace_arsenal_fnc_openBox` stay the API - every ACE Arsenal box, ACE's
-  and ZEN's Zeus arsenal and scripts open the Enhanced Arsenal; each player can choose ACE's own window instead
-  (CBA setting `einv_arsenal_window`, a mission may force it), and the Arsenal's header has a button for it;
-  ACE's own window gets an `[Enhanced Arsenal]` button back. The Eden editor's Arsenal menu offers Enhanced,
-  ACE and BI. Each player's own: `einv_arsenal_quickAddAmount`,
-  `einv_arsenal_confirmUnique` (a second click before something this arsenal does not have is thrown away).
-  The vanilla Virtual Arsenal is a server setting, `einv_arsenal_biArsenal`: `"enhanced"` (default - BI boxes,
-  Eden's "Virtual" storage and Zeus open the Enhanced Arsenal with the same items), `"block"` (a red screen says
-  it is not allowed, with the text of `einv_arsenal_biMessage`; Zeus is never blocked) or `"vanilla"`. A mission
-  can decide per mission with `einv_arsenal_biPassThrough`: `true` - always BI's window, `false` - always ours,
-  unset - BI's only for missions with their own `arsenalOpened` / `arsenalPreOpen` handlers. It is read on each
-  client, so set it with the public flag (`missionNamespace setVariable ["einv_arsenal_biPassThrough", true, true]`)
-  or in `initPlayerLocal.sqf`. Events: `einv_arsenal_opened [display, unit, box]` and
-  `einv_arsenal_closed [unit, box]` (CBA local events); `[] call einv_arsenal_fnc_isOpen`. ACE Arsenal
-  Extended's option panel lives in ACE's window only. Kits: Enhanced First Aid Kits' per-kit setting for the
-  arsenal ("nothing", "remove only", "everything") decides whether the Enhanced Arsenal packs new items into a
-  kit or takes items out of it. ACE's own tables are honoured: stats (`ace_arsenal_fnc_addStat`), sorts
-  (`addSort`), actions (`addAction`; the Eden editor shows only those ACE allows there), the setting for mod icons
-  and for an inverted camera. With ACRE loaded, its notifications show over the window.
+- **Arsenal:** ACE Arsenal is the arsenal - `ace_arsenal_fnc_initBox` and `ace_arsenal_fnc_openBox`, its boxes,
+  loadouts and Zeus arsenal work as always; the grid panel hooks into its window (also in the Eden editor), and
+  free cells are the only limit on what goes in. The vanilla Virtual Arsenal is a server setting,
+  `einv_arsenal_biArsenal`: `"ace"` (default - BI boxes, Eden's "Virtual" storage and Zeus open ACE Arsenal with
+  the same items), `"block"` (a red screen says it is not allowed, with the text of `einv_arsenal_biMessage`;
+  Zeus is never blocked) or `"vanilla"`. A mission can decide per mission with `einv_arsenal_biPassThrough`:
+  `true` - always BI's window, `false` - always ACE's, unset - BI's only for missions with their own
+  `arsenalOpened` / `arsenalPreOpen` handlers. It is read on each client, so set it with the public flag
+  (`missionNamespace setVariable ["einv_arsenal_biPassThrough", true, true]`) or in `initPlayerLocal.sqf`.
 - **Magazines:** a partly filled magazine dropped on another of the same kind is repacked with ACE's Magazine
   Repack, in the window (a click or Escape stops it, what was moved stays moved), and "Repack all" in a
   magazine's menu repacks every one of its kind in your gear. Both magazines have to lie in your own gear or in

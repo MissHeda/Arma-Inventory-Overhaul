@@ -1,13 +1,12 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Opens the arsenal of a box, from the inventory window's context menu. An ACE box opens in this mod's
- * window when the setting says so and ACE's pieces are all there (fnc_openWindow closes the inventory
- * first and opens the window a frame later - going through ACE's openBox would show the bare game for
- * about three frames in between), else in ACE's own window, a frame after the inventory closed: two
- * dialogs on top of each other would fight over the keys, and closing it stops its camera before the
- * arsenal brings its own. A box that is only a vanilla one goes through the vanilla arsenal's function,
- * which lands in the mode the server chose (fnc_handleBIOpen).
+ * Opens the arsenal of a box, from the inventory window's context menu. The inventory closes first and
+ * the arsenal opens a frame later: two dialogs on top of each other would fight over the keys, closing it
+ * stops its camera before the arsenal brings its own, and the grid panel can only move into ACE's window
+ * once the inventory has let go of the engine (fnc_onOpened). An ACE box opens ACE Arsenal (openBox); a
+ * box that is only a vanilla one goes through the vanilla arsenal's function, which lands in the mode the
+ * server chose (fnc_handleBIOpen) - by default ACE Arsenal with the same items.
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -28,10 +27,6 @@ params [["_unit", objNull, [objNull]], ["_box", objNull, [objNull]]];
 if !([_unit, _box] call FUNC(canOpen)) exitWith {false};
 
 private _isAceBox = !isNil {_box getVariable QACEGVAR(arsenal,virtualItems)};
-
-if (_isAceBox && {GVAR(ready)} && {(missionNamespace getVariable [QGVAR(window), "enhanced"]) isEqualTo "enhanced"}) exitWith {
-    [_box, _unit] call FUNC(openWindow)
-};
 
 (uiNamespace getVariable [QEGVAR(gui,display), displayNull]) closeDisplay 2;
 

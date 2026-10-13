@@ -2,8 +2,9 @@
 /*
  * Author: Miss Heda
  * Tells the player once when a unit's uniform, vest or backpack holds more than its grid has room for
- * (fnc_checkOverflow): in the arsenal's own message line while it is open, as ACE's text on the screen
- * once it is closed. Nothing is taken out - a whole loadout is the player's to sort.
+ * (fnc_checkOverflow): in ACE Arsenal's message line while it is open, as ACE's text on the screen once it
+ * is closed - after ACE Arsenal (a loadout brought it) or the vanilla one left alone. Nothing is taken
+ * out - a whole loadout is the player's to sort.
  *
  * Arguments:
  * 0: Unit <OBJECT>

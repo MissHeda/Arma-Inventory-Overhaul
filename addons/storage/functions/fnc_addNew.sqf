@@ -1,10 +1,11 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Puts something that did not exist before into a container - what the Arsenal hands out - and says
- * whether it arrived. Checked first: it is no backpack for a backpack (fnc_backpackIntoBackpack), and, when
- * no cell is given, the grid has a free spot (fnc_hasSpace): nothing new may land beside the grid. Counted before and after (fnc_countClass): fewer than asked for arrived,
- * and it is a failure, with one line in the RPT; what did arrive stays.
+ * Puts something that did not exist before into a container - what ACE Arsenal's grid panel puts in
+ * when the engine refused ACE's own add by weight - and says whether it arrived. Checked first: it is
+ * no backpack for a backpack (fnc_backpackIntoBackpack), and, when no cell is given, the grid has a free
+ * spot (fnc_hasSpace): nothing new may land beside the grid. Counted before and after (fnc_countClass):
+ * fewer than asked for arrived, and it is a failure, with one line in the RPT; what did arrive stays.
  *
  * With a cell the entry's place is written there (fnc_setPlace) - the caller has checked that the cells are
  * free. A class of items lying in the container already is one pile: the new ones join it, and the cell is

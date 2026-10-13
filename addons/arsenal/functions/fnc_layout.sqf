@@ -2,22 +2,23 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The layout of the window (the "layout" hook): the inventory's glass layout with the catalog in the place
- * of the loot column, which grows on a wide screen (einv_gui_fnc_layoutGlass). In the Items view the
- * catalog's source grid and the give-back zone are registered, in the Loadouts view only the soldier's
- * zone, so a drop on the loadouts does nothing. The column itself is made once and kept across builds
- * (fnc_drawColumn); a build only registers it again.
+ * The layout of the panel (the "layout" hook): the uniform, vest or backpack whose tab is open in ACE's
+ * left bar, as one section of the inventory's own (einv_gui_fnc_drawColumn with einv_gui_fnc_drawSection) -
+ * titled with its name, its caption with what it holds weighs, its compartments and tiles - in the panel
+ * beside ACE's list (fnc_panelRect), and under it the line for the hints (fnc_footer). Nothing while another
+ * tab is open, that slot is empty, or ACE's panels are hidden (Backspace).
  *
- * Zones are told apart by their id, the second element: "soldier" (where the camera shows him) and
- * "giveBack" (the catalog's column).
+ * The section always opens unfolded, whatever the inventory last did with its caption. ACE's list is
+ * registered as a zone of the engine: whatever is let go outside the panel is shown going there, out of
+ * the container (fnc_dragCheck).
  *
  * Arguments:
- * 0: Display <DISPLAY>
+ * 0: ACE Arsenal's display <DISPLAY>
  * 1: Theme <HASHMAP>
  * 2: Context <HASHMAP>
  *
  * Return Value:
- * Where the soldier stands [x, y, w, h], [] when there is no room <ARRAY>
+ * Where the soldier stands - nothing: the camera is ACE's <ARRAY>
  *
  * Example:
  * [_display, _theme, _context] call einv_arsenal_fnc_layout;
@@ -25,59 +26,60 @@
  * Public: No
  */
 
+disableSerialization;
+
 params [["_display", displayNull, [displayNull]], ["_theme", createHashMap, [createHashMap]], ["_context", createHashMap, [createHashMap]]];
 
-// The catalog stands where the loot column would: reserved and allowed to grow, but nothing is looted here
-// (what lies in containers opened inside the soldier's is in the storage column already).
-_context set ["rightColumn", true];
-_context set ["rightGrow", RIGHT_GROW];
-_context set ["rightKeep", RIGHT_KEEP];
-_context set ["looting", false];
+GVAR(panelRect) = [];
+GVAR(hintRect) = [];
+GVAR(removeZone) = -1;
 
-private _rect = [_display, _theme, _context] call EFUNC(gui,layoutGlass);
-private _right = _context getOrDefault ["rightRect", []];
+(call FUNC(selected)) params ["_id", "_container"];
 
-// No column (a narrow screen): hidden panels still give the camera the whole screen.
-if (_right isEqualTo []) exitWith {[_rect, [safeZoneX, safeZoneY, safeZoneW, safeZoneH]] select GVAR(hidden)};
+if (_id isEqualTo "" || {!GVAR(shown)}) exitWith {[]};
 
-EGVAR(gui,panels) pushBack _right;
+private _index = (_context getOrDefault ["ownSections", []]) findIf {(_x getOrDefault ["container", objNull]) isEqualTo _container};
 
-// The column is made when there is none for this display, or it lies elsewhere now.
-private _column = uiNamespace getVariable [QGVAR(column), createHashMap];
-private _group = _column getOrDefault ["group", controlNull];
+if (_index < 0) exitWith {[]};
 
-if (isNull _group || {(_column getOrDefault ["rect", []]) isNotEqualTo _right} || {(_column getOrDefault ["display", displayNull]) isNotEqualTo _display}) then {
-    [_display, _right, _theme] call FUNC(drawColumn);
+private _section = (_context get "ownSections") select _index;
+private _rect = [_display] call FUNC(panelRect);
+
+if (_rect isEqualTo []) exitWith {[]};
+
+_rect params ["_left", "_top", "_width", "_height"];
+
+// Folded is what a section starts as, turned round by the inventory's clicks on its caption
+// (einv_gui_collapsed): starting as that list has it, it is always open here.
+_section set ["folded", _container in EGVAR(gui,collapsed)];
+
+private _hintH = SNAP_H(UNIT * HINT_LINE_H);
+private _gap = SNAP_H(UNIT * HINT_LINE_GAP);
+private _columnH = _height - _hintH - _gap;
+
+if (_columnH < UNIT * 4) exitWith {[]};
+
+[
+    _display, [_left, _top, _width, _columnH], [_section], _theme, _section getOrDefault ["title", ""], "",
+    QEFUNC(gui,drawSection), "storage"
+] call EFUNC(gui,drawColumn);
+
+GVAR(panelRect) = _rect;
+GVAR(hintRect) = [_left, _top + _columnH + _gap, _width, _hintH];
+
+// The hint line is part of the panel: a drag let go over it is no drop outside.
+EGVAR(gui,panels) pushBack GVAR(hintRect);
+
+// ACE's list takes back what is let go outside the panel.
+private _list = _display displayCtrl ARSENAL_IDC_LIST;
+
+if (!isNull _list) then {
+    private _zones = uiNamespace getVariable [QEGVAR(gui,zones), []];
+
+    GVAR(removeZone) = count _zones;
+    _zones pushBack [ctrlPosition _list, "remove"];
+
+    uiNamespace setVariable [QEGVAR(gui,zones), _zones];
 };
 
-// Kept across builds, so it comes back by itself after the panels were hidden (fnc_afterBuild hid it).
-if (!GVAR(hidden)) then {
-    (_column getOrDefault ["group", controlNull]) ctrlShow true;
-};
-
-private _zones = uiNamespace getVariable [QEGVAR(gui,zones), []];
-
-// Where the camera shows him: a thing dropped there is put on.
-if (_rect isNotEqualTo []) then {
-    _zones pushBack [_rect, "soldier"];
-};
-
-// The Items view: the cards are a place things come from, and the column takes things back.
-if (GVAR(view) isEqualTo "items") then {
-    private _grid = _column getOrDefault ["grid", createHashMap];
-
-    if (count _grid > 0) then {
-        (uiNamespace getVariable [QEGVAR(gui,grids), []]) pushBack _grid;
-    };
-
-    _zones pushBack [_right, "giveBack"];
-};
-
-uiNamespace setVariable [QEGVAR(gui,zones), _zones];
-
-// Hidden panels give the camera the whole screen.
-if (GVAR(hidden)) exitWith {
-    [safeZoneX, safeZoneY, safeZoneW, safeZoneH]
-};
-
-_rect
+[]
