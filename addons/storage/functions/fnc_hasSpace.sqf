@@ -6,6 +6,10 @@
  * everyone shares (fnc_readPlaces) - nothing is kept. The ground, and a grid with no object of its own (a
  * kit, "kit:" + lowercase class), always have room: they grow.
  *
+ * A stackable entry first fills the partly filled piles of its own key (fnc_entryKey: a magazine only
+ * stacks with magazines of the same rounds) - the layout never merges into a pile - and only what is left
+ * over needs free spots, one per stack's worth.
+ *
  * Arguments:
  * 0: Container, or the key of a grid with no object <OBJECT or STRING>
  * 1: Entry <HASHMAP>
@@ -26,9 +30,44 @@ if (_container isEqualType "") exitWith {_container isNotEqualTo ""};
 if (isNull _container) exitWith {false};
 if (([_container] call FUNC(getBlocks)) isEqualTo []) exitWith {true};
 
-private _probe = createHashMapFromArray [["class", _entry getOrDefault ["class", ""]], ["count", 1]];
-private _entries = ([_container] call FUNC(getContents)) + [_probe];
+private _class = _entry getOrDefault ["class", ""];
+private _count = (_entry getOrDefault ["count", 1]) max 1;
+private _stack = (([_class] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) max 1;
+private _contents = [_container] call FUNC(getContents);
+private _left = _count;
 
-[_container, _entries, false] call FUNC(getLayout);
+// What fits into piles of the same key that are not full yet.
+if (_stack > 1) then {
+    private _key = _entry getOrDefault ["key", ""];
 
-!(_probe getOrDefault ["overflow", true])
+    if (_key isEqualTo "") then {
+        _key = [_entry] call FUNC(entryKey);
+    };
+
+    private _lower = toLowerANSI _class;
+
+    {
+        private _had = _x getOrDefault ["count", 1];
+
+        if (
+            _had < _stack && {toLowerANSI (_x getOrDefault ["class", ""]) isEqualTo _lower}
+            && {([_x] call FUNC(entryKey)) isEqualTo _key}
+        ) then {
+            _left = _left - (_stack - _had);
+        };
+    } forEach _contents;
+};
+
+if (_left <= 0) exitWith {true};
+
+// The rest needs a free spot for each stack's worth.
+private _probes = [];
+
+while {_left > 0} do {
+    _probes pushBack createHashMapFromArray [["class", _class], ["count", _left min _stack]];
+    _left = _left - _stack;
+};
+
+[_container, _contents + _probes, false] call FUNC(getLayout);
+
+_probes findIf {_x getOrDefault ["overflow", true]} < 0

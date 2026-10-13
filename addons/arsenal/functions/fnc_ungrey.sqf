@@ -3,8 +3,9 @@
  * Author: Miss Heda
  * ACE greys the rows of its list that the open uniform, vest or backpack cannot take by weight, and
  * disables its "+" for them (ace_arsenal_fnc_updateRightPanel, the engine's canAdd). Cells are the only
- * limit here, so a greyed row whose item still has a free spot on the grid - or a stack of its class with
- * room left - is lit again, and so is the "+" of the row picked. Rows ACE leaves lit are left as they are:
+ * limit here, so a greyed row whose item the grid would take - a free spot, or a pile of the same kind
+ * (class and rounds) with room left, as einv_storage_fnc_hasSpace asks it for what fnc_addNew would put in -
+ * is lit again, and so is the "+" of the row picked. Rows ACE leaves lit are left as they are:
  * what then finds no cell is taken back out with a message (fnc_reconcile). Items the box does not offer
  * (ACE's unique ones) and backpacks are left to ACE.
  *
@@ -45,10 +46,11 @@ if (isNull _list || {isNull _plus}) exitWith {
     };
 };
 
-private _contents = [_container] call EFUNC(storage,getContents);
-private _bySize = createHashMap;
+private _asked = createHashMap;
 
-// Whether one more of a class has room: a stack of it with room left, else a free spot for its size.
+// Whether one more of a class would be taken: asked as fnc_addNew asks it, with a magazine full. What
+// stacks answers by its own pile, so it is asked per class; the rest only needs a free spot of its size,
+// asked once per size.
 private _fnc_fits = {
     params ["_class"];
 
@@ -56,18 +58,22 @@ private _fnc_fits = {
 
     if ((_info getOrDefault ["kind", ""]) isEqualTo "backpack") exitWith {false};
 
-    private _stack = _info getOrDefault ["stack", 1];
-    private _key = toLowerANSI _class;
-
-    if (_stack > 1 && {_contents findIf {toLowerANSI (_x getOrDefault ["class", ""]) isEqualTo _key && {(_x getOrDefault ["count", 1]) < _stack}} >= 0}) exitWith {true};
-
-    private _size = str (_info getOrDefault ["size", [1, 1]]);
-    private _known = _bySize get _size;
+    private _capacity = _info getOrDefault ["capacity", 0];
+    private _which = if ((_info getOrDefault ["stack", 1]) > 1) then {
+        toLowerANSI _class
+    } else {
+        str (_info getOrDefault ["size", [1, 1]])
+    };
+    private _known = _asked get _which;
 
     if (!isNil "_known") exitWith {_known};
 
-    private _fits = [_container, createHashMapFromArray [["class", _class]]] call EFUNC(storage,hasRoom);
-    _bySize set [_size, _fits];
+    private _fits = [_container, createHashMapFromArray [
+        ["class", _class], ["count", 1], ["ammo", _capacity], ["capacity", _capacity],
+        ["attachments", []], ["container", objNull]
+    ]] call EFUNC(storage,hasSpace);
+
+    _asked set [_which, _fits];
 
     _fits
 };
