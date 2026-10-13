@@ -2,9 +2,10 @@
 /*
  * Author: Miss Heda
  * Puts a payload (fnc_removeEntry, fnc_takeOff) into a container and says what of it did not arrive,
- * counted before and after on this machine: a weapon or backpack by its class, items by their count,
- * magazines by how many of the class came in for each number of rounds. Only that rest may go anywhere
- * else - what arrived is here, and handing it on as well would make a copy.
+ * counted before and after on this machine: a weapon by its class, a backpack by its class or by one
+ * more backpack object there, items by their count, magazines by how many of the class came in for each
+ * number of rounds. Only that rest may go anywhere else - what arrived is here, and handing it on as
+ * well would make a copy.
  *
  * A uniform, vest or backpack comes with what was in it, its places and its id. The engine adds it
  * empty - or with its default contents - as a new object, found as the one container object that was
@@ -65,7 +66,11 @@ private _fnc_fill = {
     private _new = (call _fnc_objects) - _before;
 
     if (count _new == 1) exitWith {
-        [_new select 0, _inner, _container] call FUNC(restore);
+        private _complete = [_new select 0, _inner, _container] call FUNC(restore);
+
+        if (DROP_DEBUG && {(_new select 0) isKindOf "Bag_Base"}) then {
+            diag_log text format ["einv drop: restore of %1 in %2 - complete %3, holds %4", _new select 0, _container, _complete, count ([_new select 0] call FUNC(getContents))];
+        };
     };
 
     ERROR_3("Could not tell which %1 just went into %2 (%3 new) - what it held goes in loose.",_class,typeOf _container,count _new);
@@ -129,6 +134,7 @@ switch (_payload select 0) do {
 
         private _key = toLowerANSI _class;
         private _before = [_key] call _fnc_held;
+        private _bags = everyBackpack _container;
         private _objects = [];
 
         if (_inner isNotEqualTo []) then {
@@ -137,7 +143,20 @@ switch (_payload select 0) do {
 
         _container addBackpackCargoGlobal [_class, 1];
 
-        if (([_key] call _fnc_held) > _before) then {
+        // Arrived when its class counts one more - or when one more backpack object lies there: a
+        // backpack the engine files under another class than the one added (a preset backpack under
+        // its empty one) is there all the same, and put down a second time it would be a copy.
+        private _new = (everyBackpack _container) - _bags;
+        private _arrived = ([_key] call _fnc_held) > _before || {_new isNotEqualTo []};
+
+        if (DROP_DEBUG) then {
+            diag_log text format [
+                "einv drop: addBackpackCargoGlobal %1 into %2 (%3, netId %4) - arrived %5, new backpack %6, there now %7",
+                _class, _container, typeOf _container, netId _container, _arrived, _new, everyBackpack _container
+            ];
+        };
+
+        if (_arrived) then {
             [_class, _inner, _objects] call _fnc_fill;
         } else {
             _rest = _payload;

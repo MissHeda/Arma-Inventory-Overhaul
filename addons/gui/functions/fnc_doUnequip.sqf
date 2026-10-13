@@ -85,6 +85,16 @@ if (_why isNotEqualTo "") exitWith {
     false
 };
 
-[[createHashMapFromArray [
+private _sent = [[createHashMapFromArray [
     ["kind", "unequip"], ["unit", _unit], ["slot", _slot], ["to", _to], ["cell", _cell]
-]]] call FUNC(sendMoves)
+]]] call FUNC(sendMoves);
+
+// The first line of a backpack drop in the RPT (einv_storage_debugDrop); the storage logs the rest.
+if (_slot isEqualTo "backpack" && {missionNamespace getVariable [QEGVAR(storage,debugDrop), false]}) then {
+    diag_log text format [
+        "einv drop: asked - %1 off %2 (local %3) to %4 at %5, sent %6",
+        _entry get "class", _unit, local _unit, _to, getPosASL _unit, _sent
+    ];
+};
+
+_sent

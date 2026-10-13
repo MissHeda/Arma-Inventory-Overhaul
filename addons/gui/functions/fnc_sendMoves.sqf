@@ -374,7 +374,8 @@ private _fnc_unequipSteps = {
 
 // Worn gear from one unit's slot onto another's: off the first, on the other - which hands back what it
 // wore there -, that onto the first. Only takeOff and putOn, each where its unit is local; nothing that
-// does not go on is lost: it came off a slot, so settlement puts it into the vehicle or onto the ground.
+// does not go on is lost: it came off a slot, so settlement puts it back on there while that is empty,
+// else into the vehicle or onto the ground.
 private _fnc_swapSteps = {
     params ["_move"];
 

@@ -2883,6 +2883,9 @@ Eden too: every click goes through `fnc_uiHit` / `fnc_defer` (`fnc_runDeferred`)
   `[w, h, holes, pos]` (holes: box places not its own); two red columns and a blue middle are three compartments, an
   unpainted place is no cell. Apply writes them as one canvas mask, a letter per component in that order
   (`einv_items_fnc_formatGrid`; one component alone falls back to `WxH` / `xx/x-`).
+- **Paint look.** The drawing reads like the preview: theme `panel` behind, each place the preview's empty `cell`, painted ones under a
+  `PAINT_TINT` (0.35) tint composed into one colour; each compartment framed in its colour by 2 px lines on outline sides, in a layer
+  under the hit boxes - a click recolours one control and rebuilds the lines of that place and its four neighbours (at most 20).
 - **Loading and colouring (`fnc_canvasFromBlocks [blocks, min, max, cols, painted]`):** blocks are placed as
   `einv_gui_fnc_flowCompartments` places them (canvas groups at their offsets, flowed ones with line breaks counting the
   0.22-cell gaps, no gap cells). Painted, each block takes a colour greedily in block order, trying from
@@ -2943,6 +2946,27 @@ Fixes from the owner's tests of the window; none of it has run in the game yet.
 - **Dropped backpack lost.** `einv_storage_fnc_takeOff` used `removeBackpackGlobal`, which takes the backpack off only a frame later: the
   check that it left saw it still worn, handed nothing on (the drop failed), and the engine then removed it with its contents. It uses
   `removeBackpack` now (the unit is local there; ACE drops a backpack the same way), `fnc_putOn` `addBackpack` (it fills the container at once).
+- **Backpack drop (0.4.0).** Still reported lost after the above. The sequence (menu Drop, a drag onto the ground, the
+  same for any worn slot): `einv_gui_fnc_doUnequip` -> `fnc_sendMoves` (`unequip` to `"ground"`: phase 0 `takeOff` at the
+  unit, phase 1 `putGround` at objNull = the server, its payload a ref) -> `einv_storage_fnc_request` -> `fnc_requestNext`
+  runs phase 0 here (`fnc_execute` -> `fnc_opTakeOff` -> `fnc_takeOff`: `fnc_snapshot`, `removeBackpack`, the slot read
+  again, payload `["backpack", class, snapshot]`), then phase 1 in the same frame on a server/single player, else through
+  the hub on the server (`fnc_opPutGround` -> `fnc_getGroundHolder` reuses a non-empty pile or creates a
+  `GroundWeaponHolder` and `fnc_addPayload` adds the backpack in the same call - `addBackpackCargoGlobal`, `fnc_restore`
+  of its contents -, then the phase writes the pile's places), then `fnc_settle`, the answer. No script step deletes a
+  backpack and the pile is never made in one frame and filled in another; the ground section lists backpacks; the pile
+  sits on the surface under the feet. The backpack-only steps are the engine's: the slot still reading worn right after
+  `removeBackpack` (then nothing was handed on and a late removal lost it), and `addBackpackCargoGlobal` into the pile.
+  Changes: a backpack still worn after `removeBackpack` is looked at a frame later and put back on from its snapshot when
+  the engine took it off late; `fnc_addPayload` counts a backpack as arrived also by one more `everyBackpack` object (a
+  preset backpack filed under another class is not put down twice); `fnc_settle` step 1 now has an origin for `takeOff`
+  payloads - back onto that slot (op `putOn`) while it is empty, so a drop that fails anywhere puts the backpack on the
+  back again instead of losing it after the ground step. Debug: the client setting `einv_storage_debugDrop` ("Log
+  backpack drops to the RPT", default off; a dedicated server reads its own) writes `einv drop:` lines - the request
+  (`fnc_doUnequip`), `removeBackpack` with "still worn" and the container before/after, the `takeOff` op's result with the
+  transaction id, the pile (netId, class, position, ground point, held before), `addBackpackCargoGlobal` (arrived, the new
+  object), the restore, `putGround` done, the pile and its backpacks a frame and two seconds later, and each settle step
+  that still holds a backpack. Not run in the game yet.
 
 ## Shaped items (0.4.0) - supersedes the parts above it contradicts
 

@@ -40,6 +40,8 @@ if (_payload isEqualTo []) exitWith {["Skipped", [], []]};
 
 private _where = _context getOrDefault ["where", []];
 private _requester = _context getOrDefault ["requester", objNull];
+private _debug = (_payload param [0, ""]) isEqualTo "backpack" && {DROP_DEBUG};
+private _txId = _context getOrDefault ["txId", ""];
 
 // The piles it may join are the server's own; a client cut off from the hub makes one of its own.
 private _fresh = isMultiplayer && {!isServer};
@@ -52,7 +54,20 @@ if (isNull _pile && {!isNull _requester}) then {
 
 if (isNull _pile) exitWith {
     ERROR_1("Nowhere on the ground to put %1 - it goes back.",_payload);
+
+    if (_debug) then {
+        diag_log text format ["einv drop: %1 putGround on %2 - no pile, ground point %3, bounced", _txId, clientOwner, _where param [0, []]];
+    };
+
     ["Bounced", [+_payload], []]
+};
+
+if (_debug) then {
+    diag_log text format [
+        "einv drop: %1 putGround %2 on %3 - pile %4 (%5, netId %6, local %7) at %8, ground point %9, held before %10",
+        _txId, _payload param [1, ""], clientOwner, _pile, typeOf _pile, netId _pile, local _pile, getPosASL _pile,
+        _where param [0, []], count ([_pile] call FUNC(getContents))
+    ];
 };
 
 private _piles = [_pile];
@@ -74,6 +89,27 @@ if (_rest isNotEqualTo []) then {
             _rest = [];
         };
     };
+};
+
+// Logged now, a frame later and two seconds later: whether the pile and the backpack in it are still
+// there - an engine that dropped a fresh pile it thought empty would show here and nowhere else.
+if (_debug) then {
+    diag_log text format [
+        "einv drop: %1 putGround done - left over %2, piles %3, backpacks there %4",
+        _txId, [_rest param [0, ""], _rest param [1, ""]], _piles, _piles apply {everyBackpack _x}
+    ];
+
+    private _fnc_look = {
+        params ["_txId", "_piles", "_when"];
+
+        diag_log text format [
+            "einv drop: %1 %2 - piles %3, gone %4, backpacks there %5",
+            _txId, _when, _piles, _piles apply {isNull _x}, _piles apply {if (isNull _x) then {[]} else {everyBackpack _x}}
+        ];
+    };
+
+    [_fnc_look, [_txId, _piles, "a frame later"]] call FUNC(nextFrame);
+    [_fnc_look, [_txId, _piles, "two seconds later"], 2] call CBA_fnc_waitAndExecute;
 };
 
 if (_rest isNotEqualTo []) exitWith {

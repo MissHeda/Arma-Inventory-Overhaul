@@ -10,6 +10,12 @@
         <Key ID="STR_einv_storage_Setting_ContainerTable_Desc">
             <English>Sets the cells of uniforms, vests,\nbackpacks, crates and vehicles, as\nclass:size pairs separated by commas.\n\nA number is that many cells, laid out\nlike the container's own pockets or\npouches. WxH is one compartment W cells\nwide and H high - join several with +.\n\nExample:\nV_PlateCarrier1_rgr:20,\nB_AssaultPack_rgr:30,\nB_Carryall_cbr:6x4+2x3+2x3\n\nUse the uniform's or vest's own class.\nA class counts for every class based on\nit, unless that one is listed itself.\n\nWins over the rules text, config and\nthe load per cell. A number goes up to\n320 cells, compartments up to 8 wide\nand 40 high, 24 of them and 320 cells\nin all. The rules text does the same:\nclass=B_Carryall_Base+ &gt; grid=6x4+2x3\n\nA mission can give one crate, vehicle\nor unit's uniform, vest or backpack\ncontainer its own grid, which wins\nover all of this: the object variable\neinv_grid, e.g. "6x4+2x3".\n\nEntries that cannot be read are left\nout and named in the RPT.</English>
         </Key>
+        <Key ID="STR_einv_storage_Setting_DebugDrop">
+            <English>Log backpack drops to the RPT</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_DebugDrop_Desc">
+            <English>Writes every step of taking a worn\nbackpack off onto the ground to the\nRPT, each line starting "einv drop:":\nthe request, the take-off, the pile it\ngoes onto, the backpack added there,\nits contents filled in and anything\nsettled afterwards.\n\nFor tests only - leave it off.</English>
+        </Key>
         <Key ID="STR_einv_storage_Setting_NearbyRange">
             <English>Reach</English>
         </Key>
@@ -18,6 +24,9 @@
         </Key>
         <Key ID="STR_einv_storage_SubCategory_Containers">
             <English>Containers</English>
+        </Key>
+        <Key ID="STR_einv_storage_SubCategory_Debug">
+            <English>Debug</English>
         </Key>
     </Package>
 </Project>

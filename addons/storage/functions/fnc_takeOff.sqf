@@ -7,7 +7,9 @@
  *
  * Runs where the unit is local: the commands that change a unit's gear need it. Checked afterwards:
  * what is still in the slot is not handed on. What came off is noted in the journal of the phase
- * running here the moment it left (fnc_journalNote) - fnc_putOn notes the old item itself.
+ * running here the moment it left (fnc_journalNote) - fnc_putOn notes the old item itself. A backpack
+ * still worn after removeBackpack is looked at again a frame later: gone by then, it goes back on from
+ * its snapshot rather than being lost (einv_storage_debugDrop logs each step, "einv drop:").
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -81,9 +83,48 @@ private _payload = switch (true) do {
     default {_unit unlinkItem _class; ["item", _class, 1, []]};
 };
 
+private _stillOn = toLowerANSI (([_unit, _slotId] call FUNC(getSlot)) getOrDefault ["class", ""]) isEqualTo toLowerANSI _class;
+
+if (_slotId isEqualTo "backpack" && {DROP_DEBUG}) then {
+    diag_log text format [
+        "einv drop: removeBackpack %1 off %2 (local %3) - still worn %4, container %5 -> %6",
+        _class, _unit, local _unit, _stillOn, _entry get "container", backpackContainer _unit
+    ];
+};
+
 // Still there - the engine did not take it off: hand nothing on, or it would exist twice.
-if (toLowerANSI (([_unit, _slotId] call FUNC(getSlot)) getOrDefault ["class", ""]) isEqualTo toLowerANSI _class) exitWith {
+if (_stillOn) exitWith {
     ERROR_2("Could not take %1 off %2 - nothing was moved.",_class,_slotId);
+
+    // Should the engine take the backpack off later after all - the way removeBackpackGlobal did, which
+    // lost every dropped backpack -, nothing was handed on and it would be gone with all it held: a frame
+    // later it goes back on, filled from the snapshot. Still worn then, or another one on: nothing to do.
+    if (_slotId isEqualTo "backpack") then {
+        [{
+            params ["_unit", "_class", "_old", "_snapshot"];
+
+            if (isNull _unit || {!local _unit} || {backpack _unit isNotEqualTo ""}) exitWith {
+                if (DROP_DEBUG) then {
+                    diag_log text format ["einv drop: a frame later %1 wears %2 - nothing to put back", _unit, backpackContainer _unit];
+                };
+            };
+
+            _unit addBackpack _class;
+
+            private _container = backpackContainer _unit;
+
+            if (!isNull _container) then {
+                [_container, _snapshot] call FUNC(restore);
+            };
+
+            ERROR_2("%1 came off %2 only a frame after it was asked to - it was put back on.",_class,_unit);
+
+            if (DROP_DEBUG) then {
+                diag_log text format ["einv drop: %1 went off %2 a frame late (was %3) - put back on as %4", _class, _unit, _old, _container];
+            };
+        }, [_unit, _class, _entry get "container", _payload param [2, []]]] call FUNC(nextFrame);
+    };
+
     []
 };
 

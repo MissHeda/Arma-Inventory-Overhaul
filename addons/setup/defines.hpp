@@ -117,6 +117,10 @@
 #define PAINT_COUNT 8
 #define PAINT_COLORS [[0.9, 0.3, 0.3, 1], [0.28, 0.52, 0.94, 1], [0.32, 0.74, 0.36, 1], [0.95, 0.83, 0.24, 1], [0.96, 0.55, 0.16, 1], [0.63, 0.42, 0.9, 1], [0.24, 0.8, 0.84, 1], [0.93, 0.48, 0.74, 1]]
 #define PAINT_HOVER [[0.95, 0.5, 0.5, 1], [0.48, 0.68, 0.98, 1], [0.52, 0.86, 0.56, 1], [0.99, 0.91, 0.48, 1], [0.99, 0.7, 0.4, 1], [0.76, 0.6, 0.97, 1], [0.48, 0.9, 0.92, 1], [0.97, 0.66, 0.85, 1]]
+// On the drawing a painted place is the inventory's empty cell under a tint of its colour this strong
+// (fnc_uiCanvas), stronger under the mouse; the colour itself frames each compartment.
+#define PAINT_TINT 0.35
+#define PAINT_TINT_HOVER 0.5
 // The Blocks way of the Containers step (fnc_drawCellBlocks): a compartment's hole, and a place under
 // the mouse.
 #define BLOCK_HOLE [0, 0, 0, 0.32]
