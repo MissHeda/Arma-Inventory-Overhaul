@@ -6,7 +6,8 @@ ADDON = false;
 #include "XEH_PREP.hpp"
 
 // The wizard's steps: id, name in the stringtable, the function that draws it. Group rules (@group > ...)
-// have no step of their own: they are edited in the Review step's text, like any statement.
+// have no step of their own: they are edited in the Review step's text, like any statement. The pills
+// count from 1 (the draw functions' "Step 1, Start" is the first entry), not from the array's index.
 GVAR(steps) = [
     ["start", LSTRING(Step_Start), QFUNC(drawStart)],
     ["items", LSTRING(Step_Items), QFUNC(drawItems)],

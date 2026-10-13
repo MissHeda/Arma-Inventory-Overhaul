@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Step 3, Items: how many cells an item takes and how many share a tile, class by class.
+ * Step 2, Items: how many cells an item takes and how many share a tile, class by class.
  *   - Left: every weapon, magazine, piece of gear and item of the game and its mods, to search by class or
  *     name (fnc_drawClassList over the class index, fnc_buildIndex), each with its size and stack in the
  *     draft and where they come from.

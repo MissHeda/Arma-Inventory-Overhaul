@@ -8,7 +8,9 @@
  * A grid is one compartment, and a point is on it only where it has a cell: compartments drawn on a
  * canvas may share a box (grid=aaa/aba/aaa), and the hole of the one is the cell of the other.
  * On a canvas's compartment with seams (fnc_canvasSeams) the cells lie where the grid keeps them
- * ("colX", "rowY"); a point in a seam's gap is on no cell, as one between two flowed blocks is.
+ * ("colX", "rowY"); a point in a seam's gap inside the grid belongs to the cell before it (left, above),
+ * so a tile that reaches over the seam has no dead strip; one past the last column or row is on no cell,
+ * as one between two flowed blocks is.
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>
@@ -47,8 +49,10 @@ if (!_visible) exitWith {[]};
 
 ([_grid] call FUNC(gridOrigin)) params ["_originX", "_originY"];
 
-// The last column (row) that starts at or before the point, if the point is still on its cell and not in
-// the gap of a seam after it; a cell's pitch apart where the grid keeps no offsets.
+// The last column (row) that starts at or before the point; a cell's pitch apart where the grid keeps no
+// offsets. The gap of a seam belongs to the cell before it: with a column after it in the same grid, the
+// strip is part of a tile that straddles the seam (aaa/aba/aaa, a 2x1 at (0,0)), and answering -1 there
+// would make it unhoverable and flicker the drag footprint. Only past the last column (row) is -1 right.
 private _fnc_find = {
     params ["_offsets", "_offset", "_pitch"];
 
@@ -60,7 +64,7 @@ private _fnc_find = {
         _index = _index - 1;
     };
 
-    [-1, _index] select (_index >= 0 && {_offset < (_offsets select _index) + _pitch})
+    [-1, _index] select (_index >= 0 && {_index < count _offsets - 1 || {_offset < (_offsets select _index) + _pitch}})
 };
 
 private _col = [_grid getOrDefault ["colX", []], _pointX - _originX, _grid get "cellW"] call _fnc_find;

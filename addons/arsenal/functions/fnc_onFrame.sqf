@@ -105,10 +105,13 @@ if (
 };
 
 // ----- The focus back to ACE's list once the mouse is off the panel, once: from the sink only -----
+// Not while a button is held: a scroll bar dragged out of the panel is still being used, and the list taking
+// the focus would let go of it.
 private _tip = uiNamespace getVariable [QEGVAR(gui,tipShown), controlNull];
 
 if (
-    !isNull _sink && {_focus isEqualTo _sink} && {!_holding} && {!([_mouse] call FUNC(isOver))}
+    !isNull _sink && {_focus isEqualTo _sink} && {!_holding} && {inputMouse 0 == 0 && {inputMouse 1 == 0}}
+    && {!([_mouse] call FUNC(isOver))}
     && {isNull _tip || {!ctrlShown _tip}} && {(uiNamespace getVariable [QEGVAR(gui,menu), []]) isEqualTo []}
 ) then {
     private _list = _display displayCtrl ARSENAL_IDC_LIST;

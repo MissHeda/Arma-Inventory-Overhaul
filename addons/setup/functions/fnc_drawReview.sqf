@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Step 5, Review: the draft as a whole, and where it goes.
+ * Step 4, Review: the draft as a whole, and where it goes.
  *   - Left: the own rules, each as a sentence (fnc_describeRule) with the statement itself under it and a
  *     cross to take it away; then the warnings - what the rules engine left out or could not use, a text
  *     too long to save.

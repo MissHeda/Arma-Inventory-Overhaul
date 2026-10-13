@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Step 4, Containers: the cells of uniforms, vests, backpacks, crates and vehicles, class by class.
+ * Step 3, Containers: the cells of uniforms, vests, backpacks, crates and vehicles, class by class.
  *   - Left: every container of the game and its mods, to search by class or name (fnc_drawClassList over
  *     the class index, fnc_buildIndex), each with what the draft makes of its grid and where from.
  *   - Right: the one picked, its compartments to paint - a colour per compartment - or to build block by

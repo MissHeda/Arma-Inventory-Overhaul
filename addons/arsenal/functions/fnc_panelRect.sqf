@@ -7,7 +7,9 @@
  * list, read from those controls themselves, so it follows the player's interface size and whatever ACE
  * changes about them. Without a sort bar it starts where the list does. As wide as the inventory's grid,
  * STORAGE_COLS cells of the engine's size (einv_gui_fnc_getCell) with the column's padding and scroll bar
- * beside them, at most a third of the screen.
+ * beside them - and the room for the most seams a canvas can have, (STORAGE_COLS - 1) gaps, so a canvas
+ * with seams (einv_gui_fnc_canvasSeams) is not clipped or pushed into the scroll strip - at most a third
+ * of the screen.
  *
  * It ends where the list ends, though ACE's message line (IDC 9) begins a little higher: the panel is as
  * long as the side lists, and a "no room" is said in the panel's own hint line as well.
@@ -47,7 +49,10 @@ if (!isNull _sort && {ctrlShown _sort}) then {
 (call EFUNC(gui,getCell)) params ["_cellW"];
 
 private _padX = SQUARE(UNIT * 0.4);
-private _width = STORAGE_COLS * _cellW + ((_padX * 2) max (_padX + SCROLL_W + pixelW * 4)) + pixelW * 2;
+// A seam's gap is rounded to whole pixels, as fnc_canvasSeams rounds it, so the room is exactly what the
+// widest canvas takes. The panel grows to the left only: its right edge stays beside ACE's list.
+private _seamW = round (_cellW * COMPARTMENT_GAP / pixelW) * pixelW;
+private _width = STORAGE_COLS * _cellW + (STORAGE_COLS - 1) * _seamW + ((_padX * 2) max (_padX + SCROLL_W + pixelW * 4)) + pixelW * 2;
 
 _width = _width min (safezoneW * PANEL_MAX_SHARE);
 
