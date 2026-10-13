@@ -15,7 +15,8 @@
 //
 // The group ids are what own rules refer to (@mag_rifle > size=1x3): never rename one. Nor a preset's
 // id: a text names it in base=. The one that was renamed (tarkov, now realism) is read under its new
-// name (PRESET_ALIASES, fnc_parseRules). Other mods may add presets of their own as classes here.
+// name (PRESET_ALIASES, fnc_parseRules) - unless a preset of the old name exists. Other mods may add presets
+// of their own as classes here.
 class CfgEinvRulesets {
     // Relaxed: the sizes and stacks from before rules existed, and a fifth more room in uniforms,
     // vests and backpacks than their load gives (grid=120%) - the owner found them tight once she

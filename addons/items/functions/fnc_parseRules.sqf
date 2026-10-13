@@ -544,7 +544,8 @@ private _fnc_header = {
 
                     // A preset renamed since the text was written: built on the new one, said once in
                     // the RPT - the wizard writes the new id the next time it saves.
-                    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _value};
+                    // Not when a preset of that name exists: a third party's own is not shadowed by the alias.
+                    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _value && {!isClass (configFile >> "CfgEinvRulesets" >> _value)}};
 
                     if (_alias >= 0) then {
                         _base = (PRESET_ALIASES select _alias) select 1;

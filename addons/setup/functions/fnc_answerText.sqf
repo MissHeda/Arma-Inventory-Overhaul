@@ -66,9 +66,10 @@ private _words = switch (_field) do {
                         private _canvasH = selectMax (_placed apply {((_x select 3) select 1) + (_x select 1)});
                         private _first = _blocks findIf {(_x param [3, []]) isNotEqualTo []};
 
-                        _blocks = +_blocks;
-                        _blocks deleteRange [_first, count _placed];
-                        _blocks insert [_first, [format [LLSTRING(Value_GridCanvas), count _placed, _canvasW, _canvasH]]];
+                        // select and + rather than deleteRange/insert: nothing newer than REQUIRED_VERSION is used.
+                        _blocks = (_blocks select [0, _first])
+                            + [format [LLSTRING(Value_GridCanvas), count _placed, _canvasW, _canvasH]]
+                            + (_blocks select [_first + count _placed]);
                     };
 
                     {

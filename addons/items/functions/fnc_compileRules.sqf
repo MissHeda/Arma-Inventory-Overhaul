@@ -97,8 +97,9 @@ while {_next isNotEqualTo "" && {_next isNotEqualTo "none"}} do {
     _chain pushBack _next;
     _next = toLowerANSI (getText (_rulesets >> _next >> "base"));
 
-    // Another mod's preset may still build on a preset under its old id.
-    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _next};
+    // Another mod's preset may still build on a preset under its old id - unless a preset of that very name
+    // exists: a third party's own is not shadowed by the alias.
+    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _next && {!isClass (_rulesets >> _next)}};
 
     if (_alias >= 0) then {
         _next = (PRESET_ALIASES select _alias) select 1;

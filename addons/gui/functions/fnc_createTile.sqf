@@ -256,8 +256,11 @@ if (_hidden) then {
 
         _controls append _boxControls;
 
-        // A theme without the box: the words alone, in the same corner.
-        if (_boxRect isEqualTo []) then {
+        // A theme without the box: the words alone, in the same corner. Asked before _boxRect is reassigned
+        // to the full-width rect below - or the label would always be centred over the tile.
+        private _noBox = _boxRect isEqualTo [];
+
+        if (_noBox) then {
             _boxRect = [_left + _padX, _countBottom - _textH * 1.15, _innerW, _textH * 1.15];
             _stackW = (_stackText getTextWidth [_fontBold, _textH]) * TEXT_SLACK;
         } else {
@@ -265,7 +268,7 @@ if (_hidden) then {
         };
 
         _controls pushBack ([
-            _display, _parent, _boxRect, _stackText, _textH, _stackColor, _fontBold, [2, 1] select (_boxRect isEqualTo [])
+            _display, _parent, _boxRect, _stackText, _textH, _stackColor, _fontBold, [2, 1] select _noBox
         ] call FUNC(uiLabel));
     };
 

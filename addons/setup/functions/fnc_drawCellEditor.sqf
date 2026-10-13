@@ -502,7 +502,8 @@ if (_editable) then {
         [
             _class, createHashMapFromArray [["grid", [["blocks", _blocks]] call EFUNC(items,formatGrid)]], [[], ["like"]] select (_work getOrDefault ["unlink", false])
         ] call FUNC(upsertRule);
-    }, [_class], _dirty, "accent", LLSTRING(Cont_ApplyTip)] call FUNC(uiAction);
+    // Greyed while nothing is painted: Apply would only refuse (Hint_NoCells), and the tooltip says what it is for.
+    }, [_class], _dirty && {_blocks isNotEqualTo []}, "accent", LLSTRING(Cont_ApplyTip)] call FUNC(uiAction);
 
     _buttonX = _buttonX + _buttonW + _gap;
 };

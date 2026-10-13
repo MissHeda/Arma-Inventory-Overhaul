@@ -78,7 +78,9 @@ private _ownKeys = [["footprint", "stack"], ["grid", "like"]] select _containers
 
 private _matches = ((uiNamespace getVariable QGVAR(index)) get "rows") select {
     (if (_containers) then {
-        (_x select ROW_LOAD) > 0 && {(_x select ROW_KIND) in CONTAINER_KINDS} && {_chip isEqualTo "all" || {(_x select ROW_KIND) in _chipKinds}}
+        // A backpack is listed with no load of its own on purpose (einv_setup_fnc_indexChunk): its cells are
+        // all there is to set, so it is not hidden with the load-0 rest.
+        ((_x select ROW_LOAD) > 0 || {(_x select ROW_KIND) isEqualTo "backpack"}) && {(_x select ROW_KIND) in CONTAINER_KINDS} && {_chip isEqualTo "all" || {(_x select ROW_KIND) in _chipKinds}}
     } else {
         (_x select ROW_FAMILY) isNotEqualTo "cargo" && {_chip isEqualTo "all" || {(_x select ROW_FAMILY) isEqualTo _chip}}
     })

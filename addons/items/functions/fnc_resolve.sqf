@@ -300,10 +300,11 @@ if (_footprint isEqualTo "mass") then {
 
 _footprint params ["_w", "_h", ["_holes", []]];
 
-// A shape from the rules is within SHAPE_MAX already; should a box ever be cut down here, its holes
-// would no longer fit it, and a full rectangle is the safe reading.
-private _fitW = (_w min STORAGE_COLS) max 1;
-private _fitH = (_h min MAX_ROWS) max 1;
+// A shape from the rules is within SHAPE_MAX already, and a size=mass one is cut to it here: an item is
+// never wider or taller than the Items drawing, whatever the container's columns are. Should a box ever be
+// cut down, its holes would no longer fit it, and a full rectangle is the safe reading.
+private _fitW = (_w min SHAPE_MAX) max 1;
+private _fitH = (_h min SHAPE_MAX) max 1;
 
 if (_fitW != _w || {_fitH != _h}) then {
     _holes = [];
