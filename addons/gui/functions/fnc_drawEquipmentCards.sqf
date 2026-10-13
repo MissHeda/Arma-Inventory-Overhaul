@@ -13,7 +13,7 @@
  *                            | rail| muzzle|
  *   [3] launcher ........... | mag | optic |
  *   GEAR
- *   | headgear |  | uniform |  | vest |
+ *   | headgear |  | uniform |  | vest |  | backpack |
  *   | gog | nvg | bin | map | gps | radio | compass | watch |
  *   HOTBAR
  *   | 4 | 5 | 6 | 7 | 8 | 9 | 0 |                           the keys' items (einv_hotbar), when it is loaded
@@ -89,10 +89,12 @@ private _statH = UNIT * 2.2;
 private _labelH = UNIT * 0.8;
 private _gearGap = UNIT * 0.3;
 
-// Square slots: eight small ones across a row, three big gear cards across another.
+// Square slots: eight small ones across a row, four big gear cards across another. The gear cards take what
+// the width leaves after three gaps, so on the narrowest column they only grow a little smaller - the backpack
+// never wraps into a row of its own.
 private _smallW = ((_width - _gapW * 7) / 8) min SQUARE(UNIT * 2.2);
 private _smallH = UNSQUARE(_smallW);
-private _gearW = ((_width - _gapW * 2) / 3) min SQUARE(UNIT * 4.6);
+private _gearW = ((_width - _gapW * 3) / 4) min SQUARE(UNIT * 4.6);
 private _gearH = UNSQUARE(_gearW);
 
 // The hotbar's row under the gear (einv_hotbar - only when that addon is loaded and on, and only in the
@@ -448,7 +450,7 @@ private _gearY = _smallY - _gearGap - _gearH;
     _x params ["_slot", "_slotCaption", "_slotIcon"];
 
     [
-        _display, _parent, [_left + _forEachIndex * (_width - _gearW) / 2, _gearY, _gearW, _gearH],
+        _display, _parent, [_left + _forEachIndex * (_width - _gearW) / 3, _gearY, _gearW, _gearH],
         _equipment getOrDefault [_slot, ""],
         createHashMapFromArray [["caption", _slotCaption], ["icon", _slotIcon], ["slot", _slot], ["unit", _unit]],
         _theme
@@ -456,7 +458,8 @@ private _gearY = _smallY - _gearGap - _gearH;
 } forEach [
     ["headgear", LLSTRING(Slot_Headgear), GEAR_ICON(ui_gear_helmet_gs)],
     ["uniform", LLSTRING(Slot_Uniform), GEAR_ICON(ui_gear_uniform_gs)],
-    ["vest", LLSTRING(Slot_Vest), GEAR_ICON(ui_gear_vest_gs)]
+    ["vest", LLSTRING(Slot_Vest), GEAR_ICON(ui_gear_vest_gs)],
+    ["backpack", LLSTRING(Slot_Backpack), GEAR_ICON(ui_gear_backpack_gs)]
 ];
 
 {

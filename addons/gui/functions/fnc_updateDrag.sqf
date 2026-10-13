@@ -351,8 +351,9 @@ call {
     // Not only right onto its slot (Mia, 0.2.3): a helmet let go anywhere over the cards goes on the head,
     // a magazine into the weapon that takes it (einv_storage_fnc_slotFor). A body's worn item is exchanged
     // with the player's own there (fnc_canSwap); the player's own worn gear has its slots right there.
-    // The footprint lies on that slot where the column shows one, else - the backpack, say, has its box in
-    // the storage column only while one is worn - faintly over the whole column.
+    // The footprint lies on that slot where the column shows one - every piece of worn gear has its slot in
+    // the gear row, the backpack's too, empty or not -, else (nothing here takes it) faintly over the whole
+    // column.
     if (_inArea && {(GVAR(dragTarget) param [0, ""]) isNotEqualTo "slot"} && {(_slotSource param [0, objNull]) isNotEqualTo GVAR(unit)}) then {
         GVAR(equipmentRect) params ["_areaX", "_areaY", "_areaW", "_areaH"];
 

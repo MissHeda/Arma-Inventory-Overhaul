@@ -460,6 +460,9 @@
         <Key ID="STR_einv_gui_Setting_Sounds_Desc">
             <English>Every kind of gear sounds like what it\nis: weapons, magazines, vests, medical\nitems, helmets, radios and more - picked\nup, put down, put on, attached, loaded,\nand containers opened and searched.\n\nOff: you hear none of them. Others near\nyou may still hear you loot.</English>
         </Key>
+        <Key ID="STR_einv_gui_Slot_Backpack">
+            <English>Backpack</English>
+        </Key>
         <Key ID="STR_einv_gui_Slot_Binocular">
             <English>Binocular</English>
         </Key>

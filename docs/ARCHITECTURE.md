@@ -2737,3 +2737,23 @@ Events (all registered in preInit, so Eden has them):
   internals read: IDCs 9, 15, 102, 701, `currentLeftPanel`, `currentItems`, `mouseButtonState`, the row alpha
   of `updateRightPanel`.
 - Built and checked in code only: nothing of the panel has run in the game yet.
+
+## Backpack slot (0.4.0) - supersedes the parts above it contradicts
+
+The gear row of the player's equipment column is headgear | uniform | vest | backpack: the backpack item has a slot
+of its own next to the vest, where it is put on, taken off or swapped. Its contents stay in the storage column.
+
+- **Row:** `fnc_drawEquipmentCards` draws `backpack` (caption `STR_einv_gui_Slot_Backpack`, A3's `ui_gear_backpack_gs`
+  like the other gear icons) as the fourth gear card. `_gearW` is `(width - 3 gaps) / 4`, still capped at 4.6 UNIT,
+  and the cards spread over the width by `(width - _gearW) / 3`; a narrow column makes them a little smaller, the
+  row never wraps. `_gearH` follows `_gearW`, so the height reservation (`_fixed`) is unchanged in form.
+- **Same slot as uniform and vest, no special case:** one record (`slot` "backpack", `unit`), `SWAP_SLOTS` and the
+  storage side (`slotFor`, `putOn`, `takeOff`, `unequip`) already knew it. Dropped on it a backpack goes on and the
+  worn one goes where the dragged one lay (or settles, as with the vest); dragged off, the backpack leaves with
+  its contents, never into itself or another backpack (`"IntoItself"`, `"NoBackpack"`); Ctrl+click and the menu's
+  "Take off" are `fnc_quickUnequip`; hint, inspect and the long-range radio entries read the record as before.
+- **Storage column:** the backpack section keeps its header and grid, and its box is still a slot record of the
+  same id. The gear row is drawn first, so it is the first record the drag fallback over the column finds
+  (`fnc_updateDrag`): a backpack let go anywhere there now lights the gear slot, also while none is worn (before,
+  no slot existed then and the faint whole-column footprint showed). The loot bodies' doll is unchanged.
+- Built and checked in code only: nothing of this has run in the game yet.
