@@ -90,15 +90,11 @@ private _frames = [];
 
             if ((_holders select _forEachIndex) isNotEqualTo _holder || {(_grid getOrDefault ["block", 0]) != _block}) then {continue};
 
-            (_grid getOrDefault ["rel", [0, 0]]) params ["_left", "_top"];
-
-            private _cellW = _grid getOrDefault ["cellW", 0];
-            private _cellH = _grid getOrDefault ["cellH", 0];
-
-            // As a tile ends a pixel before the next cell, so does its outline.
+            // As a tile ends a pixel before the next cell, so does its outline - over a seam's gap as the tile
+            // does (fnc_spanRect).
             _frames pushBack ([
                 _display, _grid getOrDefault ["parent", controlNull],
-                [_left + _col * _cellW, _top + _row * _cellH, _w * _cellW - pixelW, _h * _cellH - pixelH], _color
+                [_grid, _grid getOrDefault ["rel", [0, 0]], _col, _row, _w, _h] call FUNC(spanRect), _color
             ] call FUNC(uiFrame));
         } forEach _grids;
     } forEach _targets;

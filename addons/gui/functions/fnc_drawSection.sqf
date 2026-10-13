@@ -105,18 +105,31 @@ private _colorLine = _theme getOrDefault ["line", [1, 1, 1, 0.07]];
 
 // ---------------------------------------------------------------------------
 // The block: the box as wide as three cells where the column has the room, the grid beside it, both
-// centred in the column. Too narrow for a box of one and a half cells, the grid stands alone.
+// centred in the column. Too narrow for a box of one and a half cells, the grid stands alone. A canvas
+// with seams (fnc_canvasSeams) is wider than STORAGE_COLS cells by its gaps: it is laid out again below,
+// once the layout is read, the box giving up what the grid needs.
 // ---------------------------------------------------------------------------
 (call FUNC(getCell)) params ["_cellW", "_cellH"];
 
 private _gridW = STORAGE_COLS * _cellW;
 private _gapX = SQUARE(UNIT * 0.35);
-private _boxCells = (floor (((_width - _gridW - _gapX) / _cellW) * 2) / 2) min 3;
-private _hasBox = _boxCells >= 1.5;
-private _boxW = [0, _boxCells * _cellW] select _hasBox;
-private _boxH = [0, _boxCells * _cellH] select _hasBox;
-private _blockW = _gridW + ([0, _boxW + _gapX] select _hasBox);
-private _blockX = ((_width - _blockW) / 2) max 0;
+private _boxCells = 0;
+private _hasBox = false;
+private _boxW = 0;
+private _boxH = 0;
+private _blockW = 0;
+private _blockX = 0;
+
+private _fnc_block = {
+    _boxCells = (floor (((_width - _gridW - _gapX) / _cellW) * 2) / 2) min 3;
+    _hasBox = _boxCells >= 1.5;
+    _boxW = [0, _boxCells * _cellW] select _hasBox;
+    _boxH = [0, _boxCells * _cellH] select _hasBox;
+    _blockW = _gridW + ([0, _boxW + _gapX] select _hasBox);
+    _blockX = ((_width - _blockW) / 2) max 0;
+};
+
+call _fnc_block;
 
 // A body: its paper doll, as wide as the blocks under it.
 private _body = _section getOrDefault ["unit", objNull];
@@ -188,6 +201,15 @@ if (!_placeholder) then {
     };
 
     _layout = [_section getOrDefault ["layoutKey", _container], _entries] call EFUNC(storage,getLayout);
+
+    // A canvas wider than STORAGE_COLS cells with its seams' gaps: the block makes room for it. Folding
+    // takes rows only, and never a canvas's (fnc_viewBlocks), so the layout's width is the one drawn.
+    private _flowW = ([_layout] call FUNC(flowCompartments)) select 2;
+
+    if (_flowW > _gridW) then {
+        _gridW = _flowW;
+        call _fnc_block;
+    };
 };
 
 // ---------------------------------------------------------------------------

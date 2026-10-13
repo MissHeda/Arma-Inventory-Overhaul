@@ -64,10 +64,6 @@ private _padX = SQUARE(_padY);
 private _titleH = UNIT * 1.1;
 private _closeW = SQUARE(_titleH);
 
-// The grid and the extra pixel of its lines on the left.
-private _innerW = STORAGE_COLS * _cellW + pixelW;
-private _width = _padX * 2 + _innerW;
-
 // ----- What the body holds -----
 
 private _notice = _section getOrDefault ["notice", ""];
@@ -75,16 +71,24 @@ private _layout = createHashMap;
 private _places = [];
 private _contentH = UNIT * 0.7;
 
+// As wide as STORAGE_COLS cells, or a canvas with the gaps of its seams (fnc_canvasSeams).
+private _gridW = STORAGE_COLS * _cellW;
+
 if (_notice isEqualTo "") then {
     _layout = [_section getOrDefault ["layoutKey", ""], _section getOrDefault ["entries", []]] call EFUNC(storage,getLayout);
 
-    ([_layout] call FUNC(flowCompartments)) params ["_flowed", "_flowH"];
+    ([_layout] call FUNC(flowCompartments)) params ["_flowed", "_flowH", "_flowW"];
 
     _places = _flowed;
+    _gridW = _gridW max _flowW;
 
     // The grid lies a pixel in from the body's corner: its lines reach a pixel left of and above it.
     _contentH = _flowH + pixelH;
 };
+
+// The grid and the extra pixel of its lines on the left.
+private _innerW = _gridW + pixelW;
+private _width = _padX * 2 + _innerW;
 
 private _bodyH = _contentH min (CONTENT_H - _padY * 3 - _titleH);
 private _height = _padY * 3 + _titleH + _bodyH;

@@ -8,11 +8,12 @@
  * A shaped compartment's holes (einv_storage_fnc_blocksFor) are drawn as no cell at all: no surface,
  * no line, nothing to hover (fnc_createGrid).
  *
- * Compartments drawn on a canvas (grid=aab/acc) touch, a cell's pitch apart like the cells of one
- * compartment. Each still draws its own frame around its own cells, so where two meet both frames lie
- * on the one pixel between them: the line colour twice over, a border a touch brighter than the lines
- * between cells - the drawing's structure stays readable without a gap that would move a cell. Each is
- * a grid of its own, with "pos" where it lies on the canvas.
+ * Compartments drawn on a canvas (grid=aab/acc) lie where they were drawn, with the flow's gap on every
+ * seam where two of them meet (fnc_canvasSeams): their places bring each column's and row's offset, and
+ * the grid keeps them (fnc_createGrid). Each is a grid of its own, with "pos" where it lies on the
+ * canvas, and draws its frame as a flowed block does - around each piece of it between two seams, so
+ * one that reaches over a seam (the ring of grid=aaa/aba/aaa) shows the gap inside it too, and the two
+ * cases look alike.
  *
  * Each grid gets what moving items in and out of it needs (fnc_onMouseButton, fnc_endDrag):
  *   "container" - the section's container, objNull for a kit's
@@ -178,25 +179,73 @@ private _fnc_shapeLines = {
     };
 };
 
+// The runs [first, last] of a compartment's columns (rows) between the seams inside it: where the next
+// one starts more than a cell's pitch after the one before (fnc_canvasSeams) - _step, the pitch and half
+// a pixel more. One run for no seams.
+private _fnc_pieces = {
+    params ["_offsets", "_count", "_step"];
+
+    private _runs = [];
+    private _first = 0;
+
+    for "_i" from 1 to _count do {
+        if (_i == _count || {(_offsets param [_i, 0]) - (_offsets param [_i - 1, 0]) > _step}) then {
+            _runs pushBack [_first, _i - 1];
+            _first = _i;
+        };
+    };
+
+    _runs
+};
+
 private _fnc_compartment = {
     params ["_index", "_cols", "_rows", "_place", "_isOverflow", "_overflowIndex", ["_holes", []], ["_pos", []]];
-    _place params ["_dx", "_dy"];
+    _place params ["_dx", "_dy", ["_colX", []], ["_rowY", []]];
 
     private _x0 = _gridX + _dx;
     private _y0 = _bodyTop + _dy;
 
     // The lines: a surface behind the cells, a pixel bigger on the left and at the top, so every cell
-    // is outlined on all four sides. On the grid's own pixels, as fnc_createGrid places it.
+    // is outlined on all four sides. On the grid's own pixels, as fnc_createGrid places it. Seams inside
+    // a canvas's compartment cut it into pieces, each framed as a block of its own with the gap between.
     private _snapX = _originX + round ((_x0 - _originX) / pixelW) * pixelW;
     private _snapY = _originY + round ((_y0 - _originY) / pixelH) * pixelH;
 
-    if (_holes isEqualTo []) then {
-        [_display, _parent, [_snapX - pixelW, _snapY - pixelH, _cols * _cellW + pixelW, _rows * _cellH + pixelH], [_colorLine, _theme getOrDefault ["loss", [1, 0, 0, 1]]] select _isOverflow] call FUNC(uiPanel);
-    } else {
-        [_snapX, _snapY, _cols, _rows, _holes] call _fnc_shapeLines;
-    };
+    {
+        _x params ["_firstRow", "_lastRow"];
 
-    private _grid = [_display, _parent, [_x0, _y0], _rows, _theme, _id, _cols, _holes] call FUNC(createGrid);
+        private _pieceRows = _lastRow - _firstRow + 1;
+        private _pieceY = _snapY + (_rowY param [_firstRow, _firstRow * _cellH]);
+
+        {
+            _x params ["_firstCol", "_lastCol"];
+
+            private _pieceCols = _lastCol - _firstCol + 1;
+            private _pieceX = _snapX + (_colX param [_firstCol, _firstCol * _cellW]);
+            private _pieceHoles = [];
+
+            for "_row" from 0 to (_pieceRows - 1) do {
+                for "_col" from 0 to (_pieceCols - 1) do {
+                    if (((_firstRow + _row) * _cols + _firstCol + _col) in _holes) then {
+                        _pieceHoles pushBack (_row * _pieceCols + _col);
+                    };
+                };
+            };
+
+            switch (true) do {
+                // Only holes there: the cell of another compartment fills it, framed by its own grid.
+                case (count _pieceHoles == _pieceCols * _pieceRows): {};
+                case (_pieceHoles isEqualTo []): {
+                    [_display, _parent, [_pieceX - pixelW, _pieceY - pixelH, _pieceCols * _cellW + pixelW, _pieceRows * _cellH + pixelH], [_colorLine, _theme getOrDefault ["loss", [1, 0, 0, 1]]] select _isOverflow] call FUNC(uiPanel);
+                };
+                default {
+                    [_pieceX, _pieceY, _pieceCols, _pieceRows, _pieceHoles] call _fnc_shapeLines;
+                };
+            };
+        } forEach ([_colX, _cols, _cellW + pixelW / 2] call _fnc_pieces);
+    } forEach ([_rowY, _rows, _cellH + pixelH / 2] call _fnc_pieces);
+
+    private _grid = [_display, _parent, [_x0, _y0], _rows, _theme, _id, _cols, _holes, [_colX, _rowY]] call FUNC(createGrid);
 
     // What the grid shows, for moving items in and out of it (fnc_onMouseButton, fnc_endDrag): a
     // virtual section - a body's worn gear - has no container to take from; nothing can be put into

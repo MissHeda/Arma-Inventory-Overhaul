@@ -102,7 +102,10 @@ private _touched = [];
         private _rects = if (_holes isEqualTo [] || {(_x get "col") + (_x get "w") > (_grid get "cols")}) then {
             [_tileRect]
         } else {
-            [[_tileRect select 0, _tileRect select 1], _grid get "cellW", _grid get "cellH", [_x get "w", _x get "h", _holes]] call FUNC(shapeRects)
+            [
+                [_tileRect select 0, _tileRect select 1], _grid get "cellW", _grid get "cellH", [_x get "w", _x get "h", _holes], "surface", 0,
+                [_grid, _x get "col", _x get "row", _x get "w", _x get "h"] call FUNC(spanSeams)
+            ] call FUNC(shapeRects)
         };
 
         if (_rects findIf {

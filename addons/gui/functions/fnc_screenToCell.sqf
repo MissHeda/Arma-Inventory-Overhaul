@@ -7,6 +7,8 @@
  * click there - only a drag still finds the grid over one, so its footprint shows red (fnc_updateDrag).
  * A grid is one compartment, and a point is on it only where it has a cell: compartments drawn on a
  * canvas may share a box (grid=aaa/aba/aaa), and the hole of the one is the cell of the other.
+ * On a canvas's compartment with seams (fnc_canvasSeams) the cells lie where the grid keeps them
+ * ("colX", "rowY"); a point in a seam's gap is on no cell, as one between two flowed blocks is.
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>
@@ -45,8 +47,24 @@ if (!_visible) exitWith {[]};
 
 ([_grid] call FUNC(gridOrigin)) params ["_originX", "_originY"];
 
-private _col = floor ((_pointX - _originX) / (_grid get "cellW"));
-private _row = floor ((_pointY - _originY) / (_grid get "cellH"));
+// The last column (row) that starts at or before the point, if the point is still on its cell and not in
+// the gap of a seam after it; a cell's pitch apart where the grid keeps no offsets.
+private _fnc_find = {
+    params ["_offsets", "_offset", "_pitch"];
+
+    if (_offsets isEqualTo []) exitWith {floor (_offset / _pitch)};
+
+    private _index = count _offsets - 1;
+
+    while {_index >= 0 && {(_offsets select _index) > _offset}} do {
+        _index = _index - 1;
+    };
+
+    [-1, _index] select (_index >= 0 && {_offset < (_offsets select _index) + _pitch})
+};
+
+private _col = [_grid getOrDefault ["colX", []], _pointX - _originX, _grid get "cellW"] call _fnc_find;
+private _row = [_grid getOrDefault ["rowY", []], _pointY - _originY, _grid get "cellH"] call _fnc_find;
 
 if (_col < 0 || {_row < 0} || {_col >= _grid get "cols"} || {_row >= _grid get "rows"}) exitWith {[]};
 if (!_holesToo && {[_grid, _col, _row] call FUNC(hitsHole)}) exitWith {[]};

@@ -2,8 +2,9 @@
 /*
  * Author: Miss Heda
  * Where a tile is on the screen right now - through its grid's place, so a scrolled column or window is
- * taken into account (fnc_gridOrigin). As a tile ends a pixel before the next cell, so does this. A kit
- * window opens beside the tile it was opened from (einv_compat_efak_fnc_toggle, fnc_placeWindow).
+ * taken into account (fnc_gridOrigin), and on a canvas's compartment its seams (fnc_spanRect). As a
+ * tile ends a pixel before the next cell, so does this. A kit window opens beside the tile it was
+ * opened from (einv_compat_efak_fnc_toggle, fnc_placeWindow).
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>
@@ -24,10 +25,6 @@ params [["_grid", createHashMap, [createHashMap]], ["_tile", createHashMap, [cre
 
 if (count _grid == 0 || {count _tile == 0}) exitWith {[]};
 
-([_grid] call FUNC(gridOrigin)) params ["_originX", "_originY"];
-
-private _cellW = _grid get "cellW";
-private _cellH = _grid get "cellH";
 private _col = _tile getOrDefault ["col", 0];
 private _row = _tile getOrDefault ["row", 0];
 
@@ -35,4 +32,4 @@ private _row = _tile getOrDefault ["row", 0];
 private _w = ((_tile getOrDefault ["w", 1]) min ((_grid get "cols") - _col)) max 1;
 private _h = (_tile getOrDefault ["h", 1]) max 1;
 
-[_originX + _col * _cellW, _originY + _row * _cellH, _w * _cellW - pixelW, _h * _cellH - pixelH]
+[_grid, [_grid] call FUNC(gridOrigin), _col, _row, _w, _h] call FUNC(spanRect)

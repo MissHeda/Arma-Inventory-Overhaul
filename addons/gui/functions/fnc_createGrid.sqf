@@ -18,6 +18,11 @@
  * cell is still found at row * cols + col, and whatever shows or hides cells passes over a hole
  * without a word.
  *
+ * A compartment of a canvas may have seams in it (fnc_canvasSeams): its cells then lie at the offsets
+ * given, not a cell's pitch apart, with the flow's gap where a seam runs. The grid keeps them as "colX"
+ * and "rowY"; fnc_cellOffset, fnc_spanRect, fnc_spanSeams and fnc_screenToCell read them, so a tile, a
+ * footprint or a frame lies on the cells the grid drew. Empty for every other grid: the plain pitch.
+ *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Controls group to create it in, or controlNull for the display <CONTROL>
@@ -27,6 +32,8 @@
  * 5: Id of the section it shows, e.g. "vest" <STRING> (default: "")
  * 6: Columns - a compartment's own width <NUMBER> (default: STORAGE_COLS)
  * 7: Holes - the indices row * cols + col of the cells it does not have <ARRAY> (default: [])
+ * 8: Seams - [colX, rowY], each column's and row's offset from the corner, [] for the plain pitch
+ *    (fnc_flowCompartments) <ARRAY> (default: [])
  *
  * Return Value:
  * The grid <HASHMAP>
@@ -36,6 +43,7 @@
  *   "cellW", "cellH" - one cell, as screen width and height <NUMBER>
  *   "cells"   - a control per cell, row by row, controlNull for a hole <ARRAY>
  *   "holes"   - the cells it does not have, as given <ARRAY>
+ *   "colX", "rowY" - each column's and row's offset from "rel", [] for the plain pitch <ARRAY>
  *   "tiles"   - the entries lying on it, see fnc_createTile <ARRAY>
  *   "section" - the section id <STRING>
  *
@@ -47,8 +55,9 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_position", "_rows", "_theme", ["_section", ""], ["_cols", STORAGE_COLS], ["_holes", []]];
+params ["_display", "_parent", "_position", "_rows", "_theme", ["_section", ""], ["_cols", STORAGE_COLS], ["_holes", []], ["_seams", []]];
 _position params ["_relX", "_relY"];
+_seams params [["_colX", []], ["_rowY", []]];
 
 (call FUNC(getCell)) params ["_cellW", "_cellH"];
 
@@ -73,8 +82,8 @@ for "_row" from 0 to (_rows - 1) do {
         };
 
         private _cell = [_display, "EINV_PanelRect", _parent, [
-            _left + _col * _cellW,
-            _top + _row * _cellH,
+            _left + (_colX param [_col, _col * _cellW]),
+            _top + (_rowY param [_row, _row * _cellH]),
             _cellW - pixelW,
             _cellH - pixelH
         ]] call FUNC(uiCreate);
@@ -93,6 +102,8 @@ private _grid = createHashMapFromArray [
     ["cellH", _cellH],
     ["cells", _cells],
     ["holes", _holes],
+    ["colX", _colX],
+    ["rowY", _rowY],
     ["tiles", []],
     ["section", _section]
 ];

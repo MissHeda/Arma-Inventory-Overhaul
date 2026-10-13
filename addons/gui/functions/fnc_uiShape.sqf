@@ -14,6 +14,7 @@
  * 6: Colour <ARRAY>
  * 7: What to draw: "surface" or "frame" <STRING> (default: "surface")
  * 8: A frame set in by this many pixels <NUMBER> (default: 0)
+ * 9: Seams under it - [colX, rowY] from fnc_spanSeams, [] for the plain pitch <ARRAY> (default: [])
  *
  * Return Value:
  * The controls; for a surface the first is the top row's first run <ARRAY>
@@ -26,9 +27,9 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_origin", "_cellW", "_cellH", "_footprint", "_color", ["_part", "surface"], ["_inset", 0]];
+params ["_display", "_parent", "_origin", "_cellW", "_cellH", "_footprint", "_color", ["_part", "surface"], ["_inset", 0], ["_seams", []]];
 
-([_origin, _cellW, _cellH, _footprint, _part, _inset] call FUNC(shapeRects)) apply {
+([_origin, _cellW, _cellH, _footprint, _part, _inset, _seams] call FUNC(shapeRects)) apply {
     private _ctrl = [_display, "EINV_PanelRect", _parent, _x] call FUNC(uiCreate);
 
     _ctrl ctrlSetBackgroundColor _color;

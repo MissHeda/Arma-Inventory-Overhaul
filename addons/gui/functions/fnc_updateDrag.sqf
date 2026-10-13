@@ -180,11 +180,12 @@ private _dragHoles = ([_entry getOrDefault ["class", ""], GVAR(dragRot)] call EF
 
 {_x ctrlShow false} forEach _shapes;
 
-// Paints the next free shape controls: false when too few are left, and the caller draws the box.
+// Paints the next free shape controls: false when too few are left, and the caller draws the box. On a
+// canvas's compartment the seams under it (fnc_spanSeams) put each cell where the grid drew it.
 private _fnc_paintShape = {
-    params ["_origin", "_shape", "_color"];
+    params ["_origin", "_shape", "_color", ["_seams", []]];
 
-    private _rects = [_origin, _cellW, _cellH, _shape] call FUNC(shapeRects);
+    private _rects = [_origin, _cellW, _cellH, _shape, "surface", 0, _seams] call FUNC(shapeRects);
 
     if (_shapeUsed + count _rects > count _shapes) exitWith {false};
 
@@ -531,8 +532,8 @@ call {
             _control ctrlShow true;
         };
 
-        // The compartment as a whole, for every mode but "keep".
-        private _compartment = [_originX, _originY, (_target get "cols") * _cellW - pixelW, (_target get "rows") * _cellH - pixelH];
+        // The compartment as a whole, for every mode but "keep" - its seams' gaps included (fnc_spanRect).
+        private _compartment = [_target, [_originX, _originY], 0, 0, _target get "cols", _target get "rows"] call FUNC(spanRect);
 
         switch (_mode) do {
             case "keep": {
@@ -548,22 +549,20 @@ call {
 
                     if (_forEachIndex < count _footprints && {count _tile > 0}) then {
                         private _tileHoles = _tile getOrDefault ["holes", []];
+                        private _rect = [_target, [_originX, _originY], _cellCol, _cellRow, _tile get "w", _tile get "h"] call FUNC(spanRect);
 
                         // A shaped tile on its own cells, while there are controls left for it.
                         if (
                             _tileHoles isNotEqualTo []
-                            && {[[_originX + _cellCol * _cellW, _originY + _cellRow * _cellH], [_tile get "w", _tile get "h", _tileHoles], _gain] call _fnc_paintShape}
+                            && {[
+                                [_rect select 0, _rect select 1], [_tile get "w", _tile get "h", _tileHoles], _gain,
+                                [_target, _cellCol, _cellRow, _tile get "w", _tile get "h"] call FUNC(spanSeams)
+                            ] call _fnc_paintShape}
                         ) exitWith {
                             (_footprints select _forEachIndex) ctrlShow false;
                         };
 
-                        [
-                            _footprints select _forEachIndex,
-                            [
-                                _originX + _cellCol * _cellW, _originY + _cellRow * _cellH,
-                                (_tile get "w") * _cellW - pixelW, (_tile get "h") * _cellH - pixelH
-                            ], _gain
-                        ] call _fnc_paint;
+                        [_footprints select _forEachIndex, _rect, _gain] call _fnc_paint;
                     };
                 } forEach _data;
 
@@ -580,10 +579,7 @@ call {
                 private _kitTile = (_target getOrDefault ["tiles", []]) param [_data param [0, -1], createHashMap];
 
                 private _rect = if (count _kitTile > 0) then {
-                    [
-                        _originX + (_kitTile get "col") * _cellW, _originY + (_kitTile get "row") * _cellH,
-                        (_kitTile get "w") * _cellW - pixelW, (_kitTile get "h") * _cellH - pixelH
-                    ]
+                    [_target, [_originX, _originY], _kitTile get "col", _kitTile get "row", _kitTile get "w", _kitTile get "h"] call FUNC(spanRect)
                 } else {
                     _compartment
                 };
@@ -646,12 +642,7 @@ call {
         // The footprint lies on the kit's tile.
         ([_target] call FUNC(gridOrigin)) params ["_originX", "_originY"];
 
-        [[
-            _originX + (_under get "col") * _cellW,
-            _originY + (_under get "row") * _cellH,
-            (_under get "w") * _cellW - pixelW,
-            (_under get "h") * _cellH - pixelH
-        ], _fits] call _fnc_show;
+        [[_target, [_originX, _originY], _under get "col", _under get "row", _under get "w", _under get "h"] call FUNC(spanRect), _fits] call _fnc_show;
     };
 
     // ----- On a magazine of its kind: the two repacked (einv_magazines, when loaded) -----
@@ -690,12 +681,10 @@ call {
         // The footprint lies on that magazine, in the accent colour: something else happens than a move.
         ([_target] call FUNC(gridOrigin)) params ["_originX", "_originY"];
 
-        [[
-            _originX + (_under get "col") * _cellW,
-            _originY + (_under get "row") * _cellH,
-            (_under get "w") * _cellW - pixelW,
-            (_under get "h") * _cellH - pixelH
-        ], _fits, DRAG_FOOTPRINT_ALPHA, ["", "accent"] select _fits] call _fnc_show;
+        [
+            [_target, [_originX, _originY], _under get "col", _under get "row", _under get "w", _under get "h"] call FUNC(spanRect),
+            _fits, DRAG_FOOTPRINT_ALPHA, ["", "accent"] select _fits
+        ] call _fnc_show;
     };
 
     // ----- Into itself -----
@@ -831,20 +820,17 @@ call {
 
     GVAR(dragTarget) = ["grid", _targetIndex, _col, _row, _reason isEqualTo "", _reason, "", _place];
 
-    // The footprint lies on the target's cells, clipped to the grid where the item would stick out.
+    // The footprint lies on the target's cells, clipped to the grid where the item would stick out - and
+    // on a canvas's compartment over the gap of a seam it lies across (fnc_spanRect).
     ([_target] call FUNC(gridOrigin)) params ["_originX", "_originY"];
 
     private _left = (_col max 0) min ((_target get "cols") - 1);
     private _top = (_row max 0) min ((_target get "rows") - 1);
     private _right = ((_col + _w) min (_target get "cols")) max (_left + 1);
     private _bottom = ((_row + _h) min (_target get "rows")) max (_top + 1);
+    private _clipRect = [_target, [_originX, _originY], _left, _top, _right - _left, _bottom - _top] call FUNC(spanRect);
 
-    [[
-        _originX + _left * _cellW,
-        _originY + _top * _cellH,
-        (_right - _left) * _cellW - pixelW,
-        (_bottom - _top) * _cellH - pixelH
-    ], _reason isEqualTo ""] call _fnc_show;
+    [_clipRect, _reason isEqualTo ""] call _fnc_show;
 
     // A shaped item on its own cells instead, those inside the grid: a cell of the clipped box is a hole
     // where the item has none.
@@ -875,7 +861,10 @@ call {
 
         if (
             count _clipHoles < _clipW * _clipH
-            && {[[_originX + _left * _cellW, _originY + _top * _cellH], [_clipW, _clipH, _clipHoles], _color] call _fnc_paintShape}
+            && {[
+                [_clipRect select 0, _clipRect select 1], [_clipW, _clipH, _clipHoles], _color,
+                [_target, _left, _top, _clipW, _clipH] call FUNC(spanSeams)
+            ] call _fnc_paintShape}
         ) then {
             _footprint ctrlShow false;
         };

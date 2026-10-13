@@ -3030,12 +3030,24 @@ So a container drawn on the wizard's canvas looks exactly like the drawing, and 
   "_holes"]` work as before. Block order = the pieces' order, a canvas's own in reading order of each one's first cell;
   that index is the place record's block. Storage is unchanged: every compartment keeps cells of its own.
 - **Window:** `fnc_flowCompartments` (optional cell size, so `setup/fnc_drawPreview` shares it) puts a canvas's
-  compartments at their offsets, a cell's pitch apart, no gap; the canvas takes its box in the flow and what follows
-  starts below it. Each compartment stays its own grid (`"pos"` on it; `fnc_redrawTiles` compares it) and draws its own
-  frame as before, so on a seam between two both frames lie on the one pixel: the line colour twice, a border a touch
-  brighter than the cell lines, no shrinking, no extra control. Two may share a box: `fnc_screenToCell` finds a point
-  only on a grid's own cells, and `fnc_updateDrag` asks for a grid with a cell there before one with a hole there.
-  A positional compartment never folds (`fnc_viewBlocks`). The wizard's cell editor writes every drawing of two or more
+  compartments at their offsets; the canvas takes its box in the flow and what follows starts below it. Each
+  compartment stays its own grid (`"pos"` on it; `fnc_redrawTiles` compares it). Two may share a box:
+  `fnc_screenToCell` finds a point only on a grid's own cells, and `fnc_updateDrag` asks for a grid with a cell there
+  before one with a hole there. A positional compartment never folds (`fnc_viewBlocks`).
+- **Seams:** painted side by side, two compartments read as separate blocks, as in the wizard's Blocks mode. A column
+  boundary c|c+1 is a seam when some row has cells of two different compartments on its two sides (a row boundary
+  likewise; touching only at a corner is none); every seam gets the flow's gap between blocks, `COMPARTMENT_GAP`
+  (0.22 cell, pixel-rounded, `gui/defines.hpp`). A cell at column c lies at `c * cell + (seams left of c) * gap`, so
+  places and alignment are kept; a compartment reaching over a seam (the ring of `aaa/aba/aaa`) is drawn in pieces
+  with the gap inside it. `fnc_canvasSeams` builds the canvas's `colX`/`rowY` once per flow; a canvas compartment's
+  place is `[x, y, colX, rowY]` (from its corner), the canvas grows by its gaps and the flow returns its widest line
+  (the section's box gives way, a kit window widens, the preview shrinks its cells). `fnc_createGrid` keeps the maps
+  as `"colX"`/`"rowY"` ([] = plain pitch). Readers: `fnc_drawCompartments` (frames per piece between seams, as a
+  flowed block's), `fnc_createGrid` (cells), `fnc_cellOffset`/`fnc_spanRect`/`fnc_spanSeams` for `fnc_tileRect`,
+  `fnc_createTile`, `fnc_drawSelection`, `fnc_drawPending`, `fnc_updateBand`, `fnc_updateDrag` (footprints, kit and
+  repack targets), `fnc_shapeRects`/`fnc_uiShape` (optional seams: a shaped tile over a gap), `fnc_screenToCell`
+  (inverse; a point in a gap is no cell) and `setup/fnc_drawPreview` (cells at the maps; its seam lines are gone).
+  The drag ghost follows the mouse at the plain pitch. Flowed blocks (`pos = []`) are unchanged. The wizard's cell editor writes every drawing of two or more
   compartments as a canvas (`fnc_canvasBlocks` gives pos, `fnc_canvasFromBlocks` places them back and takes the board's
   width - `SHAPE_MAX` for the item editor); Apply refuses a canvas taller than `MAX_ROWS`.
 - **Width 10:** `STORAGE_COLS` 10 (item masks keep `SHAPE_MAX` 8); `MAX_CELLS` follows, 400. Everything sized by
