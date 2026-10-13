@@ -224,15 +224,18 @@ if (!_empty) then {
     };
 };
 
-// A number in the bottom right corner, over the picture: how many there are, red at none. On a dark pill
-// like a tile's count (fnc_drawCountBackdrop), as the picture under it may be white.
+// A number in the bottom right corner, over the picture: how many there are, red at none. On the same small
+// flat box as a stack's count on a tile (fnc_drawCountBackdrop), so a hotbar slot and a tile read alike -
+// and the picture under it may be white.
 private _countText = _options getOrDefault ["count", ""];
 
 if (_countText isNotEqualTo "") then {
-    private _countColor = [_colorText, _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]] select (_countText isEqualTo "0");
+    private _countColor = [
+        _theme getOrDefault ["tileCountColor", _colorText], _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
+    ] select (_countText isEqualTo "0");
 
     private _backdrop = [
-        _display, _parent, _countText, _fontBold, _lineSize, _left + _width - _padX, _top + _height - _padY * 0.5, _width - _padX * 2, _theme
+        _display, _parent, _countText, _fontBold, _lineSize, _left + _width - _padX, _top + _height - _padY * 0.5, _width - _padX * 2, _theme, true
     ] call FUNC(drawCountBackdrop);
 
     _backdrop params ["_backdropControls", "_backdropRect"];

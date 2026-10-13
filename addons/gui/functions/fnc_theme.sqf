@@ -61,6 +61,7 @@ _theme merge [createHashMapFromArray [
     ["tileCount", "text"],
     ["tileCountBg", [0.03, 0.03, 0.03, 0.75]],
     ["tileCountColor", [1, 1, 1, 1]],
+    ["raised", [0.27, 0.27, 0.27, 0.92]],
     ["tileAmmoBar", true],
     ["text", [1, 1, 1, 1]],
     ["text2", [0.78, 0.78, 0.78, 1]],

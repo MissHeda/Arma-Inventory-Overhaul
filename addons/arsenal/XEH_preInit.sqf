@@ -43,6 +43,12 @@ GVAR(dirty) = false;
 GVAR(staging) = objNull;
 GVAR(stagingCount) = 0;
 
+// The panel's folded sections while ACE's window is open, container class (or "staging") -> true, and
+// which class each section of the last build showed, [[container, class], ...] (fnc_layout, the "fold"
+// hook).
+GVAR(folded) = createHashMap;
+GVAR(foldKeys) = [];
+
 // A left press on a row of ACE's list that may yet become a drag of its item, [where, shift] or []
 // (fnc_onMouse, fnc_onFrame); a move into or out of the staging space waited for, to tell ACE,
 // [container, class, count before, until] or [] (fnc_onDrop); where the column stood when Ctrl and the

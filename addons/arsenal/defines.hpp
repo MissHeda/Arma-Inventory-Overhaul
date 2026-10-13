@@ -43,9 +43,14 @@
 
 // The staging space under the container's grid (fnc_staging): a crate of the game's own, made on this
 // machine only and hidden at the soldier's feet, with a grid of its own. A crate rather than a ground
-// holder: the ground has no grid and no limit (einv_storage_fnc_getBlocks).
+// holder: the ground has no grid and no limit (einv_storage_fnc_getBlocks). Its grid is STORAGE_COLS wide
+// and grows with what lies in it (fnc_growStaging): always STAGING_FREE_ROWS free rows under the lowest
+// one in use, never fewer than STAGING_MIN_ROWS rows, never more than STAGING_MAX_ROWS - a cap of its
+// own, as MAX_ROWS also bounds every item's and compartment's size in the rules.
 #define STAGING_CLASS "Box_NATO_Support_F"
-#define STAGING_GRID "8x4"
+#define STAGING_MIN_ROWS 4
+#define STAGING_FREE_ROWS 4
+#define STAGING_MAX_ROWS 100
 
 // The share of ACE's list, from its left edge, where a press may become a drag of its row (fnc_onMouse):
 // the list's scroll bar runs along its right edge.

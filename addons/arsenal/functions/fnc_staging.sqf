@@ -9,7 +9,8 @@
  *
  * It is a crate of the game's own, made on this machine only (createVehicleLocal), hidden and without
  * simulation at the soldier's feet - in reach, so the storage's moves accept it like any crate nearby -,
- * emptied of what the class brings along and given a grid of its own (einv_grid) and no search
+ * emptied of what the class brings along and given a grid of its own (einv_grid, which grows with what
+ * lies in it - fnc_growStaging) and no search
  * (einv_noSearch). Nobody else ever sees it, and the storage runs its moves here (einv_storage_localOnly,
  * einv_storage_fnc_isLocalRoot). It is nothing of the soldier's: loadouts never carry it, and ACE's
  * rebuilds of the uniform, vest or backpack leave it alone.
@@ -56,7 +57,8 @@ clearBackpackCargo _holder;
 
 _holder setPosATL (getPosATL _center);
 
-_holder setVariable [QGVARMAIN(grid), STAGING_GRID];
+// Its grid starts as small as it gets and grows with what is put in (fnc_growStaging).
+_holder setVariable [QGVARMAIN(grid), [[STORAGE_COLS, STAGING_MIN_ROWS]]];
 _holder setVariable [QEGVAR(storage,localOnly), true];
 
 // What the player put there himself is never searched for again (einv_gui_fnc_isSearched).

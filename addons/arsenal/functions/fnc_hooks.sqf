@@ -13,7 +13,8 @@
  * (fnc_dragCheck, fnc_onDrop, the "ground" hook - Delete over a tile ends there too); an item out of ACE's
  * list goes in only on a free spot of a grid. The right click has only "Remove" and "Remove all"
  * (fnc_menu), Ctrl and the wheel over a tile add or take out one (fnc_onWheel). Over nothing the hint line
- * says what the panel does, and what lies in the staging space while something does.
+ * says what the panel does, and what lies in the staging space while something does. A section's caption
+ * folds it, kept per container class while ACE's window is open (the "fold" hook, fnc_layout).
  *
  * Each is a function of this addon, found by name when it is called, so a function compiled again while
  * testing is the one used.
@@ -56,6 +57,27 @@ createHashMapFromArray [
     ["dragCheck", {_this call FUNC(dragCheck)}],
     ["drop", {_this call FUNC(onDrop)}],
     ["ground", {_this call FUNC(remove); true}],
+
+    // A click on a section's caption folds it per container class while ACE's window is open, not per
+    // object in the inventory's list: ACE makes a new uniform, vest or backpack for every one picked
+    // (fnc_layout keeps which class each section shows)
+    ["fold", {
+        params [["_container", objNull, [objNull]]];
+
+        private _index = GVAR(foldKeys) findIf {(_x select 0) isEqualTo _container};
+
+        if (_index < 0) exitWith {true};
+
+        private _key = (GVAR(foldKeys) select _index) select 1;
+
+        if (_key in GVAR(folded)) then {
+            GVAR(folded) deleteAt _key;
+        } else {
+            GVAR(folded) set [_key, true];
+        };
+
+        true
+    }],
 
     // The right click, and what the hint line says over nothing: what the panel does, and - while something
     // lies in the staging space - that it goes when the window closes

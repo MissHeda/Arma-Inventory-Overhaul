@@ -60,6 +60,7 @@
  *   "side"      - "own" or "loot" (the column it is in, when left out)
  *   "folded"    - starts folded
  *   "root"      - whose locality decides who may change it
+ *   "tabIcon"   - a small picture before the caption's text, in its colour (the Arsenal's staging crate)
  * An open kit of Enhanced First Aid Kits is no section of a column any more: it opens in a window of
  * its own (fnc_drawWindow), so opening or closing one never moves anything in the columns.
  *
@@ -220,6 +221,11 @@ private _nested = _foldable && {GVAR(opened) findIf {(_x select 1) isEqualTo _se
 private _chevronW = [0, SQUARE(_lineH)] select _foldable;
 private _closeW = [0, SQUARE(_lineH)] select _nested;
 
+// A small picture before the caption's text, where the section brings one ("tabIcon" - the Arsenal's
+// staging space has a crate).
+private _tabIcon = _section getOrDefault ["tabIcon", ""];
+private _tabIconW = [0, SQUARE(_lineH)] select (_tabIcon isNotEqualTo "");
+
 // Open to this player only because of who they are (einv_locks_fnc_decorate): an open padlock left of
 // the weight says so when the mouse rests on it.
 private _lockTip = _section getOrDefault ["lockTip", ""];
@@ -292,22 +298,31 @@ private _fnc_chars = {
 
 private _captionText = [_caption, _theme] call FUNC(caption);
 private _tabRoom = _blockW - _loadW - _closeW - _lockW - ([0, _buttonW + _buttonGap] select (_buttonKind isNotEqualTo ""));
-private _shown = [_captionText, _tabRoom - _tabPad - _chevronW, _fontBold, _lineSize] call FUNC(fitText);
+private _shown = [_captionText, _tabRoom - _tabPad - _chevronW - _tabIconW, _fontBold, _lineSize] call FUNC(fitText);
 
 // The tab gives up room to the button down to three characters - and the button is left out below that.
 if (_buttonKind isNotEqualTo "" && {([_shown] call _fnc_chars) < (3 min count _captionText)}) then {
     _buttonKind = "";
     _tabRoom = _blockW - _loadW - _closeW - _lockW;
-    _shown = [_captionText, _tabRoom - _tabPad - _chevronW, _fontBold, _lineSize] call FUNC(fitText);
+    _shown = [_captionText, _tabRoom - _tabPad - _chevronW - _tabIconW, _fontBold, _lineSize] call FUNC(fitText);
 };
 
-private _tabW = (((_shown getTextWidth [_fontBold, _lineSize]) * TEXT_SLACK) + _tabPad + _chevronW) min _tabRoom;
+private _tabW = (((_shown getTextWidth [_fontBold, _lineSize]) * TEXT_SLACK) + _tabPad + _chevronW + _tabIconW) min _tabRoom;
 private _tabColor = _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]];
 private _tab = [];
 
 if (_shown isNotEqualTo "") then {
     _tab = [_display, _parent, [_blockX, _top, _tabW, _lineH], _tabColor] call FUNC(uiPanel);
-    [_display, _parent, [_blockX + _chevronW, _top, _tabW - _chevronW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2] call FUNC(uiLabel);
+    [_display, _parent, [_blockX + _chevronW + _tabIconW, _top, _tabW - _chevronW - _tabIconW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2] call FUNC(uiLabel);
+
+    if (_tabIconW > 0) then {
+        private _tabIconH = _lineH * 0.7;
+
+        [
+            _display, _parent, [_blockX + _chevronW + (_tabIconW - SQUARE(_tabIconH)) / 2, _top + (_lineH - _tabIconH) / 2, SQUARE(_tabIconH), _tabIconH],
+            _tabIcon, _colorText2
+        ] call FUNC(uiIcon);
+    };
 };
 
 // What a later draw of this section's tiles needs to find again (fnc_redrawTiles, fnc_applyFilter).

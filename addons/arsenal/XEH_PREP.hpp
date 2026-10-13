@@ -21,6 +21,7 @@ PREP(menu);
 
 // The staging space under the container's grid
 PREP(staging);
+PREP(growStaging);
 
 // Dragging an item out of ACE's list, and putting new things in
 PREP(onListPress);

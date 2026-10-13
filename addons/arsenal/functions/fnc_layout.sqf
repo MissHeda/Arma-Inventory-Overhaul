@@ -9,14 +9,20 @@
  * another tab is open, that slot is empty, or ACE's panels are hidden (Backspace).
  *
  * The panel looks like ACE's own (fnc_theme): one flat block from the top of ACE's sort bar down to the
- * bottom of ACE's list (fnc_panelRect) with ACE's frame, the container's name in the band beside the sort
- * bar in the sort bar's font, a black line under it where ACE's list begins, and the column below. The
- * column draws no background of its own over the block.
+ * bottom of ACE's list (fnc_panelRect) with ACE's frame, the container's picture and name in the band
+ * beside the sort bar in the sort bar's font - one sees what is being filled -, a black line under it where
+ * ACE's list begins, and the column below, which scrolls over both sections. The column draws no background
+ * of its own over the block.
  *
- * Both sections always open unfolded, whatever the inventory last did with their captions. The staging
- * section's caption says beside its tab that it is emptied when the arsenal closes. ACE's list is
- * registered as a zone of the engine: whatever is let go outside the panel is shown going there, out of
- * the container (fnc_dragCheck).
+ * A section's caption folds it (einv_gui_fnc_toggleSection), kept per container class - the staging
+ * space as "staging" - while ACE's window is open (the "fold" hook, GVAR(folded)), whatever the inventory
+ * did with its own captions. The staging section has a crate before its caption and says beside its tab
+ * that it is emptied when the arsenal closes; its grid grows with what lies in it (fnc_growStaging). ACE's
+ * list is registered as a zone of the engine: whatever is let go outside the panel is shown going there,
+ * out of the container (fnc_dragCheck).
+ *
+ * The focus sink (GVAR(focusSink) in uiNamespace) is made here the first time: a control of no size in the
+ * screen's corner that fnc_onFrame gives the focus to, so that ACE's list loses it.
  *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
@@ -56,15 +62,43 @@ if (_rect isEqualTo []) exitWith {[]};
 
 _rect params ["_left", "_top", "_width", "_height"];
 
+// The focus goes here, away from ACE's list, while the panel is used (fnc_onFrame): a control of no size
+// that covers nothing. ACE's 3D area, where ACE puts the focus itself, covers the whole screen - focused,
+// the engine draws it over the panel, and it took the first press on a tile and the wheel. Made once and
+// never swept, so a build never hands the focus on to one of ACE's fields.
+private _sink = uiNamespace getVariable [QGVAR(focusSink), controlNull];
+
+if (isNull _sink) then {
+    _sink = _display ctrlCreate ["EINV_Hitbox", -1];
+    _sink ctrlSetPosition [safezoneX, safezoneY, 0, 0];
+    _sink ctrlCommit 0;
+
+    uiNamespace setVariable [QGVAR(focusSink), _sink];
+};
+
 // Folded is what a section starts as, turned round by the inventory's clicks on its caption
-// (einv_gui_collapsed): starting as that list has it, it is always open here.
-_section set ["folded", _container in EGVAR(gui,collapsed)];
+// (einv_gui_collapsed). Here the panel's own folds count (the "fold" hook): started against that list, a
+// section is folded exactly when its key - the container's class, or "staging" - is in GVAR(folded).
+private _fnc_fold = {
+    params ["_section", "_key"];
+
+    private _object = _section get "container";
+
+    _section set ["folded", (_key in GVAR(folded)) isNotEqualTo (_object in EGVAR(gui,collapsed))];
+    GVAR(foldKeys) pushBack [_object, _key];
+};
+
+GVAR(foldKeys) = [];
+[_section, toLowerANSI (_section getOrDefault ["class", ""])] call _fnc_fold;
 
 private _sections = [_section];
 private _holder = [] call FUNC(staging);
 
 if (!isNull _holder) then {
-    _sections pushBack createHashMapFromArray [
+    // Its rows follow what lies in it, before it is drawn.
+    [_holder] call FUNC(growStaging);
+
+    private _staging = createHashMapFromArray [
         ["id", "staging"],
         ["title", LLSTRING(Staging_Title)],
         ["class", ""],
@@ -74,8 +108,11 @@ if (!isNull _holder) then {
         ["parent", objNull],
         ["nearby", false],
         ["side", "own"],
-        ["folded", _holder in EGVAR(gui,collapsed)]
+        ["tabIcon", UI_TEX(icon_crate_ca)]
     ];
+
+    [_staging, "staging"] call _fnc_fold;
+    _sections pushBack _staging;
 
     // For the hint line: what would go with the arsenal's window.
     {
@@ -102,14 +139,23 @@ if (_columnH < UNIT * 4) exitWith {[]};
     _display, controlNull, _rect, _theme getOrDefault ["panel", []], 0, _theme getOrDefault ["panelBorder", []]
 ] call EFUNC(gui,uiPanel);
 
-// The container's name in the band, in the font and size of ACE's sort bar, and ACE's black edge under it.
+// The container's picture and name in the band, the name in the font and size of ACE's sort bar, and ACE's
+// black edge under it. The picture is as tall as the band, before the name: one sees what is being filled.
 private _padX = SQUARE(UNIT * 0.4);
 private _headFont = _theme getOrDefault ["headFont", _theme getOrDefault ["fontBold", "PuristaSemibold"]];
 private _headSize = (_theme getOrDefault ["headSize", UNIT * 0.66]) min ((_bodyTop - _top) * 0.9);
-private _title = [[_section getOrDefault ["title", ""], _theme] call EFUNC(gui,caption), _width - _padX * 2, _headFont, _headSize] call EFUNC(gui,fitText);
+private _picture = ([_section getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["picture", ""];
+private _pictureW = [0, SQUARE(_bodyTop - _top)] select (_picture isNotEqualTo "");
+
+if (_pictureW > 0) then {
+    [_display, controlNull, [_left + _padX, _top, _pictureW, _bodyTop - _top], _picture] call EFUNC(gui,uiPicture);
+    _pictureW = _pictureW + SQUARE(UNIT * 0.2);
+};
+
+private _title = [[_section getOrDefault ["title", ""], _theme] call EFUNC(gui,caption), _width - _padX * 2 - _pictureW, _headFont, _headSize] call EFUNC(gui,fitText);
 
 [
-    _display, controlNull, [_left + _padX, _top, _width - _padX * 2, _bodyTop - _top], _title, _headSize,
+    _display, controlNull, [_left + _padX + _pictureW, _top, _width - _padX * 2 - _pictureW, _bodyTop - _top], _title, _headSize,
     _theme getOrDefault ["text", [1, 1, 1, 1]], _headFont, 0
 ] call EFUNC(gui,uiLabel);
 

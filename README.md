@@ -15,8 +15,8 @@ all") or puts everything of yours into the box beside it ("Put all in").
   the panel - or right click, or Delete - to take them out. With no free cells ACE's add is taken back and the
   message says how much room to make. Drag a row out of ACE's list onto a free spot of the grid to put it in
   there (the wheel sets how many, Ctrl+wheel over a tile adds or takes out one). Under the grid a staging space
-  holds things while you rearrange a full container; whatever is left in it is deleted when the arsenal
-  closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is blocked, by server setting.
+  holds things while you rearrange a full container - it grows as you fill it -; whatever is left in it is
+  deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is blocked, by server setting.
 
 **Status:** in development, all seven phases built and in testing: two looks (Tarkov, Glass), drag and
 drop between containers and equipment slots, searching loot, server-checked moves in multiplayer.

@@ -3,9 +3,9 @@
 /*
  * Author: Miss Heda
  * Puts an entry on a grid as a tile: a surface in its category's colour over the cells it covers, its
- * picture, and - as the style wants them - its short name in the top right corner and its count or a
- * magazine's rounds. An entry not searched yet is a plain surface with a "?" and a faint outline, hatched
- * in Tarkov's look.
+ * picture, and - as the style wants them - its short name in the top right corner, what stacks its count
+ * of the stack ("3/10") and a magazine its rounds. An entry not searched yet is a plain surface with a "?"
+ * and a faint outline, hatched in Tarkov's look.
  *
  * A window that attached (fnc_attach) may mark a tile in its top left corner (the "tileBadge" hook).
  *
@@ -20,7 +20,11 @@
  * cells under its holes stay as they are - something else may lie there. Its picture, name and count
  * keep to its box, as a rectangle's do.
  *
- * How the count shows (theme "tileCount"):
+ * A class that stacks (einv_items_fnc_getInfo "stack" over 1) shows its count of the stack, "3/10", on a
+ * small flat box in the bottom right corner in the theme's raised colour (fnc_drawCountBackdrop) - also
+ * one alone, so one sees at once that it stacks; one that does not stack shows nothing there.
+ * How a magazine's rounds show (theme "tileCount") - in the bottom left corner instead of the right one
+ * when the stack's box is there:
  *   "text"  - words in the bottom right corner, on a dark pill of their own so that they read on a white
  *             picture too (tileCountBg, fnc_drawCountBackdrop); plain words where the theme has none
  *   "pill"  - on a box in the bottom right corner, with round ends where the theme has round corners
@@ -231,21 +235,52 @@ if (_hidden) then {
         _bottom = _barY;
     };
 
-    private _amount = switch (true) do {
-        case (_capacity > 1): {format ["%1/%2", _ammo, _capacity]};
-        case (_count > 1): {str _count};
-        default {""};
-    };
-
-    if (_amount isEqualTo "") exitWith {};
-
     private _style = _theme getOrDefault ["tileCount", "text"];
     private _amountFont = [_fontBold, _font] select (_style isEqualTo "text");
+    private _countBottom = _bottom - _padY * 0.3;
+
+    // What stacks says how many lie here of how many one tile takes, "3/10", on a small flat box in the
+    // bottom right corner - Arma's way, as Wardogs and Hotzone show it: one sees at once that it stacks,
+    // also with one alone. What does not stack has nothing in that corner. The same box as a hotbar slot's
+    // count (fnc_drawSlot, fnc_drawCountBackdrop).
+    private _stack = _info getOrDefault ["stack", 1];
+    private _stackW = 0;
+
+    if (_stack > 1) then {
+        private _stackText = format ["%1/%2", _count, _stack];
+        private _stackColor = _theme getOrDefault ["tileCountColor", [0.925, 0.933, 0.949, 1]];
+
+        ([
+            _display, _parent, _stackText, _fontBold, _textH, _left + _width - _padX, _countBottom, _innerW, _theme, true
+        ] call FUNC(drawCountBackdrop)) params ["_boxControls", "_boxRect"];
+
+        _controls append _boxControls;
+
+        // A theme without the box: the words alone, in the same corner.
+        if (_boxRect isEqualTo []) then {
+            _boxRect = [_left + _padX, _countBottom - _textH * 1.15, _innerW, _textH * 1.15];
+            _stackW = (_stackText getTextWidth [_fontBold, _textH]) * TEXT_SLACK;
+        } else {
+            _stackW = _boxRect select 2;
+        };
+
+        _controls pushBack ([
+            _display, _parent, _boxRect, _stackText, _textH, _stackColor, _fontBold, [2, 1] select (_boxRect isEqualTo [])
+        ] call FUNC(uiLabel));
+    };
+
+    // A magazine's rounds where they always were, in the bottom right corner - unless the stack's box has
+    // that corner: then in the bottom left one, in what the box leaves.
+    if (_capacity <= 1) exitWith {};
+
+    private _amount = format ["%1/%2", _ammo, _capacity];
+    private _leftSide = _stackW > 0;
+    private _room = [_innerW, (_innerW - _stackW - _padX) max (_innerW * 0.25)] select _leftSide;
 
     // Rounds that do not fit with the capacity show on their own.
     private _shortened = false;
 
-    if (_capacity > 1 && {(_amount getTextWidth [_amountFont, _textH]) > _innerW * 0.75}) then {
+    if ((_amount getTextWidth [_amountFont, _textH]) > ([_innerW * 0.75, _room] select _leftSide)) then {
         _amount = str _ammo;
         _shortened = true;
     };
@@ -256,7 +291,8 @@ if (_hidden) then {
     switch (_style) do {
         case "pill": {
             private _pillW = (_amountW + SQUARE(_boxH * 0.5)) max SQUARE(_boxH);
-            private _pill = [_left + _width - _padX - _pillW, _bottom - _padY * 0.5 - _boxH, _pillW, _boxH];
+            private _pillX = [_left + _width - _padX - _pillW, _left + _padX] select _leftSide;
+            private _pill = [_pillX, _bottom - _padY * 0.5 - _boxH, _pillW, _boxH];
 
             // A square look keeps its count box square, as it keeps everything else.
             private _pillRadius = [0, _boxH / 2] select ((_theme getOrDefault ["radius", 0]) > 0);
@@ -272,7 +308,7 @@ if (_hidden) then {
             _entry set ["amount", _label];
         };
         case "badge": {
-            // Flush with the tile's corner, or sitting on the ammo bar.
+            // Flush with the tile's corner, or sitting on the ammo bar - the left one already.
             private _badgeW = _amountW + SQUARE(_boxH * 0.4);
             private _badge = [_left, ([_bottom - _boxH, _bottom - _padY * 0.5 - _boxH] select (_bottom < _top + _height)), _badgeW, _boxH];
 
@@ -288,17 +324,18 @@ if (_hidden) then {
         };
         default {
             // The words stand on a dark pill of their own (fnc_drawCountBackdrop): on a white picture - a vial,
-            // a bandage - white text vanishes. It ends where the text did, in the bottom right corner, and is
-            // sized for the widest the text gets: a repack of magazines writes the rounds live into the same
-            // label (einv_magazines_fnc_drawJob), up to the capacity.
-            private _widest = [_amount, [format ["%1/%1", _capacity], str _capacity] select _shortened] select (_capacity > 1);
+            // a bandage - white text vanishes. It ends where the text did, in its corner, and is sized for the
+            // widest the text gets: a repack of magazines writes the rounds live into the same label
+            // (einv_magazines_fnc_drawJob), up to the capacity.
+            private _widest = [format ["%1/%1", _capacity], str _capacity] select _shortened;
 
             if ((_widest getTextWidth [_amountFont, _textH]) < (_amount getTextWidth [_amountFont, _textH])) then {
                 _widest = _amount;
             };
 
             private _backdrop = [
-                _display, _parent, _widest, _amountFont, _textH, _left + _width - _padX, _bottom - _padY * 0.3, _innerW, _theme
+                _display, _parent, _widest, _amountFont, _textH, [_left + _width - _padX, _left + _padX] select _leftSide,
+                _countBottom, _room, _theme, false, _leftSide
             ] call FUNC(drawCountBackdrop);
 
             _backdrop params ["_backdropControls", "_backdropRect"];
@@ -307,8 +344,8 @@ if (_hidden) then {
 
             private _label = if (_backdropRect isEqualTo []) then {
                 [
-                    _display, _parent, [_left + _padX, _bottom - _padY * 0.3 - _textH * 1.15, _innerW, _textH * 1.15], _amount, _textH,
-                    _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _amountFont, 1
+                    _display, _parent, [_left + _padX, _countBottom - _textH * 1.15, _innerW, _textH * 1.15], _amount, _textH,
+                    _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _amountFont, parseNumber !_leftSide
                 ] call FUNC(uiLabel)
             } else {
                 [

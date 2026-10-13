@@ -82,11 +82,12 @@ GVAR(dragZone) = "";
 // The press as the engine notes one on a tile of a source grid (einv_gui_fnc_onMouseButton).
 EGVAR(gui,press) = [_index, 0, _pressed, _grab, false, [], false, _shift];
 
-// The ghost lies over ACE's list as it starts: the list must not keep the focus (fnc_onFrame).
-private _mouseArea = _display displayCtrl ARSENAL_IDC_MOUSE_AREA;
+// The ghost lies over ACE's list as it starts: the list must not keep the focus - the panel's sink takes it
+// (fnc_layout, fnc_onFrame).
+private _sink = uiNamespace getVariable [QGVAR(focusSink), controlNull];
 
-if (!isNull _mouseArea) then {
-    ctrlSetFocus _mouseArea;
+if (!isNull _sink) then {
+    ctrlSetFocus _sink;
 };
 
 [_display] call EFUNC(gui,startDrag);

@@ -17,9 +17,11 @@
  *
  * The engine draws the focused control over every other, and a click into ACE's list gives it the focus:
  * the name at the mouse, the menu and the dragged ghost would lie under it where they reach over it. So
- * while the mouse is over the panel with no button held, or something is dragged, the focus goes to ACE's
- * 3D area (IDC 0) - where ACE itself puts it when it opens -, unless one of ACE's fields or sort bars has
- * it. A click into the list takes it back for the list's own keys.
+ * while the mouse is over the panel with no button held, or something is dragged, the focus goes to the
+ * panel's sink (fnc_layout), a control of no size, unless one of ACE's fields or sort bars has it. Not to
+ * ACE's 3D area (IDC 0), where ACE puts it when it opens: that covers the whole screen, and focused it lay
+ * over the panel - the first press on a tile, a caption's click and the wheel went to it instead of the
+ * panel. A click into the list takes the focus back for the list's own keys.
  *
  * Where the column stood when Ctrl and the wheel added or took out a tile is held for a few frames
  * against the wheel's own step (fnc_onWheel). A move into or out of the staging space tells ACE once
@@ -73,7 +75,9 @@ if (_holding) then {
         ACEGVAR(arsenal,mouseButtonState) = [[], []];
     };
 
-    if (inputMouse 0 == 0) then {
+    // Not in the frame the button went down in, nor the next: the press event may come before the button
+    // reads as held, and a fresh press would be forgotten before it could become a drag.
+    if (inputMouse 0 == 0 && {diag_frameNo > ((EGVAR(gui,lastButton) param [0, -1]) + 1)}) then {
         if (EGVAR(gui,dragging)) then {
             [_display] call EFUNC(gui,endDrag);
         } else {
@@ -84,14 +88,14 @@ if (_holding) then {
 
 // ----- The focus, away from ACE's list while the panel is used - not from a field (2) or a sort bar (4) -----
 private _focus = focusedCtrl _display;
-private _mouseArea = _display displayCtrl ARSENAL_IDC_MOUSE_AREA;
+private _sink = uiNamespace getVariable [QGVAR(focusSink), controlNull];
 
 if (
-    !isNull _focus && {!isNull _mouseArea} && {_focus isNotEqualTo _mouseArea}
-    && {!(ctrlType _focus in [2, 4])}
+    !isNull _sink && {_focus isNotEqualTo _sink}
+    && {isNull _focus || {!(ctrlType _focus in [2, 4])}}
     && {EGVAR(gui,dragging) || {inputMouse 0 == 0 && {inputMouse 1 == 0} && {[_mouse] call FUNC(isOver)}}}
 ) then {
-    ctrlSetFocus _mouseArea;
+    ctrlSetFocus _sink;
 };
 
 // ----- The column held where it stood against the wheel's own step -----

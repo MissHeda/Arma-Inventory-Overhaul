@@ -49,10 +49,14 @@ private _payload = switch (true) do {
     case (_base in ["uniform", "vest", "backpack"]): {
         private _snapshot = [_entry get "container", _class] call FUNC(snapshot);
 
+        // removeBackpack, not removeBackpackGlobal: the global command takes the backpack off only a frame
+        // later, so the check below still saw it worn, handed nothing on - and then the engine took it
+        // off after all, with everything in it: a dropped backpack was gone. The unit is local here, and
+        // what the local command does to a local unit every machine sees (ACE's own drop does the same).
         switch (_base) do {
             case "uniform": {removeUniform _unit};
             case "vest": {removeVest _unit};
-            default {removeBackpackGlobal _unit};
+            default {removeBackpack _unit};
         };
 
         if (_base isEqualTo "backpack") then {

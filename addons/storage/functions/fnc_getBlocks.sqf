@@ -9,7 +9,9 @@
  *   1. einv_grid on the object itself - a mission's word for this one crate, vehicle or unit's
  *      uniform, vest or backpack container: _crate setVariable ["einv_grid", "6x4+2x3", true]. Any
  *      grid the rules know (einv_items_fnc_parseGrid), shapes like "xxx/x-x" too; one that cannot be
- *      read is named in the RPT once and the rules count instead.
+ *      read is named in the RPT once and the rules count instead. A script of this mod may give the
+ *      compartments as they are instead, [[cols, rows], ...]: taken exactly, never cut to MAX_ROWS - the
+ *      Arsenal's staging space grows with what lies in it, up to its own cap (einv_arsenal_fnc_growStaging).
  *   2. the rules for its class (einv_items_fnc_getInfo "grid"): the older container table, the rules
  *      text, einv_grids[] / einv_slots in config, the preset - "auto", by its load, when none says.
  * The load is the object's own maximumLoad (fnc_getMaxLoad), the mass per cell the rules'.
@@ -93,6 +95,11 @@ if (_kind isEqualTo "crate" && {getNumber (configFile >> "CfgVehicles" >> _class
 // layout, and the rules count instead.
 private _spec = [];
 private _objectGrid = _container getVariable [QGVARMAIN(grid), ""];
+
+// Compartments given as they are: no text to read, and no cut to the rules' limits.
+if (_objectGrid isEqualType [] && {_objectGrid isNotEqualTo []} && {_objectGrid findIf {!(_x isEqualTypeParams [0, 0])} < 0}) then {
+    _spec = ["blocks", _objectGrid];
+};
 
 if (_objectGrid isEqualType "" && {_objectGrid isNotEqualTo ""}) then {
     _spec = GVAR(objectGrids) get _objectGrid;

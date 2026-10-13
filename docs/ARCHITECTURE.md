@@ -470,8 +470,9 @@ overrides (`private _theme = call FUNC(themeBase); _theme merge [createHashMapFr
 | `tileBg` | ARRAY of 5 colours, by CATEGORY_* |
 | `tileBorder` | `[]` or colour |
 | `tileName` | BOOL, short name in the top right corner |
-| `tileCount` | "text" / "pill" / "badge" - how count and ammo show |
+| `tileCount` | "text" / "pill" / "badge" - how a magazine's rounds show |
 | `tileCountBg`, `tileCountColor` | for pill/badge |
+| `raised` | the small flat box of a stack's "3/10" and a hotbar slot's count (`fnc_drawCountBackdrop`, flat) |
 | `tileAmmoBar` | BOOL, a thin bar along the bottom of a magazine |
 | `text`, `text2`, `muted`, `accent`, `accentSoft`, `line`, `gain`, `loss`, `info` | colours |
 | `barTrack`, `barFill` | weight bars |
@@ -1766,6 +1767,7 @@ All hooks are optional. "Asked in" names the function; the argument lists are th
 | `dragCheck` | `[dragTarget, entry, sourceGrid, slotSource]` | the target as it is to stand (another kind, fits or reason), `[]` for none, nil to leave it - last of everything | `fnc_updateDrag` |
 | `drop` | `[kind, sourceIndex, tileIndex, slotSource, entry, count, targetIndex, col, row, w, h, targetSlot, place]` | BOOL, true = handled - after the `!fits` exit | `fnc_endDrag` |
 | `ground` | `[source, count]` | BOOL, true = handled - `source` is `[unit, slot]` or `[grid index, tile index]`, count -1 for all | `fnc_quickUnequip`, `fnc_dropToGround`, `fnc_quickMove`, right before each falls back to the ground |
+| `fold` | `[container]` | BOOL, true = the window keeps its folds itself - `GVAR(collapsed)` is left alone, the window is drawn again | `fnc_toggleSection` |
 | `menu` | `[display]` | choices - replace the default, `[]` = no menu, nil = the default | `fnc_contextMenu`, first |
 | `filter` | `[]` | nothing - after the tiles were faded for the search | `fnc_applyFilter` |
 | `tileBadge` | `[class]` | a texture or `""` - a mark `SQUARE(UNIT * 0.42)` in the top left corner | `fnc_createTile`, `fnc_drawSlot` (filled slots) |
@@ -2685,8 +2687,11 @@ unit wears it), a panel right beside ACE's list (IDC 15) shows that one containe
   display's handlers never answer "taken") and the hook `footer` (replaces `fnc_drawFooter`, like `header`).
   Hook table (`fnc_hooks`): `guest`, `theme` (`fnc_theme`), `header` (none), `layout` (`fnc_layout`: the
   block, the title band, `fnc_drawColumn` with the container's section and the staging section,
-  `einv_gui_fnc_drawSection`, column id "storage", always unfolded; ACE's list registered as the zone
-  "remove"), `footer` (`fnc_footer`: a two-line hint strip at the bottom of the block), `camera` (none),
+  `einv_gui_fnc_drawSection`, column id "storage"; ACE's list registered as the zone "remove"), `fold` (a
+  caption's chevron folds its section, kept per container class - lowercase, the staging space as "staging" - in
+  `einv_arsenal_folded` while ACE's window is open; `fnc_layout` notes `foldKeys` [[container, key], ...] and sets
+  each section's `folded` to `key in folded` XOR `container in einv_gui_collapsed`, so the inventory's own list is
+  never touched), `footer` (`fnc_footer`: a two-line hint strip at the bottom of the block), `camera` (none),
   `keepOpen` (true), `frame`, `mouseDown` / `mouseUp` (`fnc_onMouse`: outside the panel taken, so the engine
   ignores it), `click` (double, Ctrl and Alt clicks swallowed - no equip or quick move past ACE), `wheel`
   (`fnc_onWheel`), `dragCheck`, `drop`, `ground` (both -> `fnc_remove`), `menu` (Remove, Remove all of this
@@ -2695,14 +2700,23 @@ unit wears it), a panel right beside ACE's list (IDC 15) shows that one containe
   column scrolls survive builds): `radius` 0, `panel` `[0,0,0,0.5]` (ACE's block), `panelBorder` black, `text`
   white, own keys `barBg` `[0,0,0,0.8]` (ACE's bottom bars: the hint strip), `headFont` / `headSize`
   (`RobotoCondensed`, 5 `GRID_H`: ACE's sort bar). Tiles unchanged (Glass counts are text). `fnc_layout`: one
-  flat framed block, the container's name in the band beside ACE's sort bar, a black line where the list
-  begins, the column without a background.
+  flat framed block, the container's picture (`einv_items_fnc_getInfo` "picture", as tall as the band, square)
+  and name in the band beside ACE's sort bar, a black line where the list begins, the column without a
+  background.
 - **Geometry** (`fnc_panelRect`): top at ACE's sort bar (IDC 17, else the list's top), bottom at the list's
   bottom; width STORAGE_COLS cells of `einv_gui_fnc_getCell` plus padding and scroll bar, at most a third of
   the screen; the column scrolls when taller. The title band is as tall as the sort bar.
 - **Staging space** (`fnc_staging`): `Box_NATO_Support_F` by `createVehicleLocal` at the first draw (local
-  `ace_arsenal_center` only), hidden, no simulation, emptied, at the unit's feet, `einv_grid` "8x4",
-  `einv_noSearch`, `einv_storage_localOnly` (a crate: the ground has no grid). Storage's `fnc_isLocalRoot` takes
+  `ace_arsenal_center` only), hidden, no simulation, emptied, at the unit's feet, `einv_noSearch`,
+  `einv_storage_localOnly` (a crate: the ground has no grid). Its grid grows (`fnc_growStaging`, before every draw
+  of the panel - every move in or out draws it anew): `einv_grid` `[[STORAGE_COLS, rows]]`, rows = lowest row in use
+  (plus the heights of overflow entries) + `STAGING_FREE_ROWS` 4, at least `STAGING_MIN_ROWS` 4, at most
+  `STAGING_MAX_ROWS` 100 - its own cap, since `MAX_ROWS` 40 also bounds item and compartment sizes in the rules.
+  `einv_storage_fnc_getBlocks` takes an `einv_grid` given as `[[cols, rows], ...]` exactly (blocks spec, never
+  cut to `MAX_ROWS`); a text grid is parsed as before. The column scrolls over the container and the staging
+  section (the engine's own group scroll; the wheel reaches it since the focus no longer goes to ACE's 3D area,
+  see "Hint z-order"). Its tab carries `icon_crate_ca` before the caption (section key `tabIcon`,
+  `einv_gui_fnc_drawSection`). Storage's `fnc_isLocalRoot` takes
   `localOnly` objects as local (they never change hands, the hub cannot see them), so moves between the
   container (root the player) and staging (own root) run here with the normal reach, lock and verify checks.
   Section id "staging", side "own", subtitle beside its tab. Moves are the engine's; `fnc_onDrop` notes
@@ -2725,12 +2739,17 @@ unit wears it), a panel right beside ACE's list (IDC 15) shows that one containe
 - **Keys and mouse:** `fnc_onKey` hands the engine only R while dragging and Delete over the panel, never while
   a field has the cursor. A press on the panel empties `ace_arsenal_mouseButtonState` (now and a frame later),
   the frame hook keeps it empty while something is held or a list press waits, and ends a drag whose button
-  came up where no display event reached the engine (`inputMouse 0`).
+  came up where no display event reached the engine (`inputMouse 0`) - not in the frame of the press
+  (`einv_gui_lastButton`) nor the next, so a fresh press is never forgotten before it moved.
 - **Hint z-order.** The name at the mouse is made last at every build (`einv_gui_fnc_drawTopLayer`), above
   ACE's controls; the focus put it under: the engine draws the focused control over all, and a row click
-  focuses the list (ACE and `fnc_ungrey` create or raise nothing). The frame hook gives the focus to ACE's 3D
-  area (IDC 0, ACE's own on open) while the mouse is over the panel with no button held or a drag is on,
-  unless a field (2) or sort bar (4) has it; `fnc_listDrag` does it as the ghost starts.
+  focuses the list (ACE and `fnc_ungrey` create or raise nothing). The frame hook gives the focus to the
+  panel's sink (`uiNamespace einv_arsenal_focusSink`: an `EINV_Hitbox` of no size in the screen's corner, made by
+  `fnc_layout` once per display and never swept, so no build hands the focus to one of ACE's fields) while the
+  mouse is over the panel with no button held or a drag is on, unless a field (2) or sort bar (4) has it;
+  `fnc_listDrag` does it as the ghost starts. Not ACE's 3D area (IDC 0) any more: it covers the screen, and
+  focused it lay over the panel - the first press on a tile went to ACE (a drag started only after a click), the
+  caption chevrons got no click and the wheel zoomed ACE's camera instead of scrolling the column.
 
 Events (all registered in preInit, so Eden has them):
 
@@ -2771,7 +2790,7 @@ Events (all registered in preInit, so Eden has them):
   `cargoChanged`. The panel's bottom reaches into the top of ACE's message line (B-25 to B-20 grid units), so a
   long ACE message can be partly under it. A press below the last row of ACE's list (the row height from ACE's config, found by IDC 15)
   starts no drag. After the mouse was over the panel, ACE's list has lost the focus: its arrow keys work again after a
-  click on it. ACE internals read: IDCs 0, 15, 17, 102, 701, `currentLeftPanel`, `currentItems`,
+  click on it. ACE internals read: IDCs 15, 17, 102, 701, `currentLeftPanel`, `currentItems`,
   `mouseButtonState`, `virtualItemsFlat`, the row data (`lnbData [row, 0]`, `lnbValue [row, 2]`) and the row
   alpha of `updateRightPanel`.
 - Built and checked in code only: the first version ran in the game (owner's screenshots); the ACE look,
@@ -2897,7 +2916,7 @@ Steps 2 (`items`, `fnc_drawItems`) and 3 (`containers`, `fnc_drawContainers`, 0-
 
 ## Window details (0.4.0) - supersedes the parts above it contradicts
 
-Three fixes from the owner's test of the window; none of it has run in the game yet.
+Fixes from the owner's tests of the window; none of it has run in the game yet.
 
 - **Right click with a menu open.** `fnc_openMenu` keeps the menu's rectangle (`uiNamespace menuRect`, cleared by `fnc_closeMenu`).
   In `fnc_onMouseButton` a right press beside the open menu closes it and then goes on as an ordinary right click, so the menu of
@@ -2914,6 +2933,14 @@ Three fixes from the owner's test of the window; none of it has run in the game 
   (`fnc_drawCountBackdrop`: `tileCountBg`, now `[0.03, 0.03, 0.03, 0.75]` and used by the "text" count style too; `[]` means none),
   round-ended in a round theme, in the corner the text sat in and sized for the widest text the label can show, since a repack writes
   the rounds live. Slots with a count (`fnc_drawSlot`) get the same. The "pill" and "badge" styles keep their own boxes.
+- **Stack badge** (supersedes the stack part above). A class with `stack` over 1 shows "count/stack" ("3/10", "1/10" too) in the tile's
+  bottom right corner on a small flat square box in the theme's new `raised` grey (`fnc_drawCountBackdrop` argument 9, flat), text
+  `tileCountColor`; a class that does not stack shows nothing there. A magazine keeps its rounds where they were, but in the bottom left
+  corner when its class stacks (argument 10, from the left; shortened to the rounds when the badge leaves too little room). The hotbar
+  slots' counts (`fnc_drawSlot` "count") use the same flat box, so tiles - also the Arsenal panel's - and slots read alike.
+- **Dropped backpack lost.** `einv_storage_fnc_takeOff` used `removeBackpackGlobal`, which takes the backpack off only a frame later: the
+  check that it left saw it still worn, handed nothing on (the drop failed), and the engine then removed it with its contents. It uses
+  `removeBackpack` now (the unit is local there; ACE drops a backpack the same way), `fnc_putOn` `addBackpack` (it fills the container at once).
 
 ## Shaped items (0.4.0) - supersedes the parts above it contradicts
 

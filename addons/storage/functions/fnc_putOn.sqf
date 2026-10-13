@@ -107,10 +107,12 @@ private _fnc_on = {
                 _inner = [[[], []], [], [], [[], []], [], [[], []]];
             };
 
+            // addBackpack, not addBackpackGlobal: the global command puts it on only a frame later, when
+            // the container is wanted at once to fill it (fnc_takeOff takes it off the same way).
             private _container = switch (_base) do {
                 case "uniform": {_unit forceAddUniform _class; uniformContainer _unit};
                 case "vest": {_unit addVest _class; vestContainer _unit};
-                default {_unit addBackpackGlobal _class; backpackContainer _unit};
+                default {_unit addBackpack _class; backpackContainer _unit};
             };
 
             if (!isNull _container) then {
