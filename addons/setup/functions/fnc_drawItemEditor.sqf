@@ -157,7 +157,7 @@ _cursorY = _cursorY + _picH + UNIT * 0.3;
         private _isOwn = ((_src getOrDefault [["footprint", _field] select (_field isEqualTo "stack"), ""]) select [0, 4]) isEqualTo "own:";
 
         _cursorY = _cursorY + ([
-            _display, _box, [_innerX, _cursorY, _innerW], format ["%1: %2 · %3", LLSTRING(Items_Now), _words, _from],
+            _display, _box, [_innerX, _cursorY, _innerW], format ["%1: %2", LLSTRING(Items_Now), format [LLSTRING(Answer_Line), _words, _from]],
             TEXT_BODY, [_colorText, _accent] select _isOwn, _font
         ] call FUNC(uiText)) + UNIT * 0.1;
     };
@@ -339,16 +339,7 @@ if (_dirty) then {
 // ----- Apply, Discard, Back to the preset -----
 
 private _buttonX = _innerX;
-private _fnc_buttonW = {
-    params ["_text", ["_icon", false]];
-
-    // Kept off both edges, and with an icon room for it and the gap after it (fnc_uiAction).
-    private _padding = _buttonH * ([0.6, 1.38] select _icon);
-
-    SQUARE(_padding) + (_text getTextWidth [_font, _buttonH * 0.5]) * TEXT_SLACK
-};
-
-private _applyW = [LLSTRING(Items_Apply), true] call _fnc_buttonW;
+private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
 
 [_display, _box, [_buttonX, _buttonsY, _applyW, _buttonH], LLSTRING(Items_Apply), UI_TEX(icon_check_ca), _theme, {
     params ["_class", "_canvas", "_startShape", "_startStack", "_forced"];
@@ -388,7 +379,7 @@ private _applyW = [LLSTRING(Items_Apply), true] call _fnc_buttonW;
 _buttonX = _buttonX + _applyW + _gap;
 
 if (_dirty) then {
-    private _buttonW = [LLSTRING(Cont_Discard)] call _fnc_buttonW;
+    private _buttonW = ACTION_W(LLSTRING(Cont_Discard),_buttonH,false,_font);
 
     [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], LLSTRING(Cont_Discard), "", _theme, {
         params ["_class"];
@@ -402,7 +393,7 @@ if (_dirty) then {
 };
 
 if ("footprint" in _own || {"stack" in _own}) then {
-    private _buttonW = [LLSTRING(Groups_Reset), true] call _fnc_buttonW;
+    private _buttonW = ACTION_W(LLSTRING(Groups_Reset),_buttonH,true,_font);
 
     [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], LLSTRING(Groups_Reset), UI_TEX(icon_reset_ca), _theme, {
         params ["_class"];

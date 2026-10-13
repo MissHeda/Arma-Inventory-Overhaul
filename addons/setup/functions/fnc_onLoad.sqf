@@ -59,7 +59,6 @@ GVAR(selection) = createHashMap;
 GVAR(stepKey) = {false};
 GVAR(undo) = [];
 GVAR(redo) = [];
-GVAR(startSetup) = false;
 GVAR(exportMode) = 0;
 GVAR(importText) = "";
 GVAR(presetPick) = "";
@@ -68,7 +67,7 @@ GVAR(hint) = ["", "text2"];
 GVAR(listState) = createHashMap;
 GVAR(cellWork) = createHashMap;
 GVAR(itemWork) = createHashMap;
-GVAR(likePick) = "";
+GVAR(sameAs) = createHashMap;
 
 // The draft starts as what is in use there (fnc_getActive). What the source it saves to holds right now
 // is kept beside it: should that change before Save, someone else saved in between (fnc_save).
@@ -106,5 +105,13 @@ _display displayAddEventHandler ["KeyDown", {_this call FUNC(onKeyDown)}];
 _display displayAddEventHandler ["KeyUp", {_this call FUNC(onKeyUp)}];
 _display displayAddEventHandler ["MouseMoving", {call FUNC(onMouse)}];
 _display displayAddEventHandler ["MouseHolding", {call FUNC(onMouse)}];
+
+// A stroke of paint on the Containers step's drawing ends with the button's release, wherever that is
+// (fnc_uiCanvas).
+_display displayAddEventHandler ["MouseButtonUp", {
+    uiNamespace setVariable [QGVAR(canvasStroke), []];
+
+    false
+}];
 
 [_step] call FUNC(showStep);

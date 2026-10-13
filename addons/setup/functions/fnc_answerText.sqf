@@ -4,13 +4,14 @@
  * What the rules make of a class, in a few words, and where that comes from - for the lists and editors
  * of the Items and Containers steps:
  *
- *   grid  - "6x4, 2 holes" "own rule";  "3 × 1x2" "preset";  "pockets:4" "preset";
- *           "6x4" "like V_PlateCarrier1_rgr" when the class's own rule takes it from another class;
- *           "3 compartments on a 7×7 canvas" for the ones drawn where they lie (grid=aab/acc);
+ *   grid  - "6x4, 2 holes" "your rule";  "3 × 1x2" "preset";  "Pockets, 4 cells" "preset";
+ *           "6x4" "same as V_PlateCarrier1_rgr" when the class's own rule takes it from another class;
+ *           "3 compartments in a 7×7 drawing" for the ones drawn where they lie (grid=aab/acc);
  *           "no room by default" for a grid by load on a class whose config holds nothing - a cosmetic
  *           backpack, a radio pack - which only an own grid gives cells
  *   size  - "2x3" "preset"
- *   stack - "5 per tile" "own rule"
+ *   stack - "5 per tile" "your rule"
+ * The lists and editors show the two as one line, "6x4 (your rule)" (STR_einv_setup_Answer_Line).
  *
  * Compartments that follow each other with the same size and holes are counted rather than listed again.
  *
@@ -101,7 +102,15 @@ private _words = switch (_field) do {
                 case "auto": {LLSTRING(Answer_ByLoad)};
                 case "cells": {format [LLSTRING(Cont_Cells), _spec select 1]};
                 case "percent": {format [LLSTRING(Answer_Percent), _spec select 1]};
-                case "pattern": {[_spec] call EFUNC(items,formatGrid)};
+                case "pattern": {
+                    // Its name as the wizard says it ("Magazine rig"), not as the rules write it (rig:16).
+                    _spec params ["", "_name", ["_count", -1]];
+
+                    private _key = format ["STR_einv_setup_Pattern_%1", _name];
+                    private _word = if (isLocalized _key) then {localize _key} else {_name};
+
+                    [_word, format ["%1, %2", _word, format [LLSTRING(Cont_Cells), _count]]] select (_count > 0)
+                };
                 default {"-"};
             };
         };

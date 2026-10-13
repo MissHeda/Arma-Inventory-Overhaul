@@ -106,15 +106,27 @@
 #define EDIT_STACK_MAX 999
 
 // The canvas both editors draw on (fnc_uiCanvas): a cell filled dark and a place without one light, as
-// cells picked on a sheet; each a little lighter under the mouse. A divider takes the theme's accent, a
-// seam under the mouse a faint one. The gap a click on a seam reaches into each cell beside it, as a
-// share of the cell.
+// cells picked on a sheet; each a little lighter under the mouse.
 #define CANVAS_ON [0.12, 0.13, 0.15, 0.97]
 #define CANVAS_ON_HOVER [0.22, 0.23, 0.26, 0.97]
 #define CANVAS_OFF [1, 1, 1, 0.24]
 #define CANVAS_OFF_HOVER [1, 1, 1, 0.4]
-#define CANVAS_SEAM_HOVER 0.45
-#define CANVAS_SEAM_REACH 0.2
+// The Containers step paints compartments (fnc_uiCanvas with a palette): eight colours that stay apart on
+// the dark card whatever the theme - red, blue, green, yellow, orange, purple, cyan, pink -, each a
+// little lighter under the mouse. A place holds 0 for no colour, else 1 to PAINT_COUNT.
+#define PAINT_COUNT 8
+#define PAINT_COLORS [[0.9, 0.3, 0.3, 1], [0.28, 0.52, 0.94, 1], [0.32, 0.74, 0.36, 1], [0.95, 0.83, 0.24, 1], [0.96, 0.55, 0.16, 1], [0.63, 0.42, 0.9, 1], [0.24, 0.8, 0.84, 1], [0.93, 0.48, 0.74, 1]]
+#define PAINT_HOVER [[0.95, 0.5, 0.5, 1], [0.48, 0.68, 0.98, 1], [0.52, 0.86, 0.56, 1], [0.99, 0.91, 0.48, 1], [0.99, 0.7, 0.4, 1], [0.76, 0.6, 0.97, 1], [0.48, 0.9, 0.92, 1], [0.97, 0.66, 0.85, 1]]
+// The Blocks way of the Containers step (fnc_drawCellBlocks): a compartment's hole, and a place under
+// the mouse.
+#define BLOCK_HOLE [0, 0, 0, 0.32]
+#define BLOCK_HOVER [1, 1, 1, 0.3]
 // A canvas loaded from a grid may be taller than MAX_ROWS - compartments laid out one under the other
 // with room to their right -, up to this; drawn on, it is MAX_ROWS at most.
 #define CANVAS_ROWS_LOADED (MAX_ROWS * 2)
+
+// How wide a button (fnc_uiAction) of W_TEXT on a row W_H high must be, with W_ICON (BOOL) or without: what
+// fnc_uiAction takes off for its padding and icon, the label with fitText's slack, and half a row more -
+// a button exactly that wide lost a pixel to snapping and showed "App..." at the small UI size.
+// SQUARE written out: a comma inside a macro's argument would split it.
+#define ACTION_W(W_TEXT,W_H,W_ICON,W_FONT) (((W_H) * ([0.6, 1.38] select (W_ICON)) + (W_H) * 0.5) * pixelW / pixelH + ((W_TEXT) getTextWidth [W_FONT, (W_H) * 0.5]) * TEXT_SLACK)

@@ -2860,58 +2860,60 @@ So a uniform, vest or backpack class can be given exactly the cells it has (the 
 
 Steps 2 (`items`, `fnc_drawItems`) and 3 (`containers`, `fnc_drawContainers`, 0-based) are a class list on the left
 (`fnc_drawClassList`, cards by `fnc_drawResults`) and an editor on the right (`fnc_drawItemEditor`,
-`fnc_drawCellEditor`); Groups is still greyed out. One class at a time, one rule per class.
+`fnc_drawCellEditor`); Groups is still greyed out. One class at a time, one rule per class. Everything below runs in
+Eden too: every click goes through `fnc_uiHit` / `fnc_defer` (`fnc_runDeferred`), never CBA's frame handlers.
 
-- **Start, two states (`einv_setup_startSetup`, false on every open):** the welcome (`fnc_drawWelcome`) - title, one
-  line, four cards with an icon (items are tiles on grids and free cells decide what fits; what a preset is; what Items,
-  Containers and Review do; where Save puts it, from `einv_setup_target`'s source or its read-only reason) - and a
-  primary "Start setup", plus "Review and save" when the draft has own statements. The setup state is what Start showed
-  before (preset cards, keep-own-rules, then three columns: Cell size, Now in use, What you changed) with an
-  "Introduction" link beside the title back to the welcome. The step pill stays "1 Start".
-- **What you changed (`fnc_drawChanges`):** "N rules of your own on top of <preset>" (groups + rules of the draft) or
-  "Nothing changed yet"; then every statement in engine order as `fnc_describeRule`'s sentence, the raw statement in
-  the tooltip. The cross deletes it from the parsed draft and commits (as Review). A click opens it: a rule whose only
-  condition is `class=X` (not `X+`) of a class `getFacts` knows goes to Containers when the class is a container kind
-  and the rule sets `grid`/`like` (or neither size nor stack), else to Items - `einv_setup_selection` and `listState`
-  set to that class, as `fnc_open`'s focus does; groups, other rules and unknown classes go to Review.
-- **Class index and list:** unchanged - `fnc_buildIndex` / `fnc_indexChunk` read config in `fnc_defer` pieces of
-  `INDEX_BUDGET` into uiNamespace `einv_setup_index`; search, kind chips, "only own rules", pages of `LIST_PAGE`; only
-  the cards shown ask `einv_items_fnc_getInfo [class, draftRules, draftCache]`.
-- **The canvas (`fnc_uiCanvas`), one widget for both editors.** Model (a HashMap, `fnc_canvasFromBlocks`): `cols`
-  (`STORAGE_COLS`), `rows`, and three flat bool arrays indexed `row * cols + col` - `cells` (a cell or not), `right`
-  (a divider on the seam to its right), `below` (on the seam under it). Width fixed, so indices survive a change of
-  rows. Compartments (`fnc_canvasBlocks`) are the 4-neighbour components of the cells not cut by a divider, found by
-  flood fill in reading order of their first cell; each becomes `[w, h, holes]` - its bounding box, every box place not
-  in the component a hole (another component's cell too). `fnc_canvasFromBlocks` lays blocks out as
-  `einv_gui_fnc_flowCompartments` does (line breaks counting its 0.22-cell gaps, but no gap cells), puts a divider on
-  every seam between two different blocks and leaves holes empty, so it reads back to the same blocks in the same order;
-  it may be up to `CANVAS_ROWS_LOADED` (80) rows tall. `fnc_canvasBox` gives the bounding box of all cells. Drawing:
-  a panel per place (`CANVAS_ON` dark, `CANVAS_OFF` light), an optional faint picture over the box, a `uiHit` per place,
-  then per seam a 3-pixel line (accent when set) and a hit strip `CANVAS_SEAM_REACH` (20 %) of a cell into each
-  neighbour, inset by the same at its ends so the corners stay the places' - made last, so they lie on top. A click
-  flips the bool, recolours that one control at once (no redraw: 40 rows are ~1800 controls), moves the picture and
-  calls the caller's `onChange [canvas, arguments]`. Read-only (linked like=) shows set dividers but makes no hits.
-- **Preview (`fnc_drawPreview`, "This is how it looks"):** on the theme's panel in its cell colour - an item's tile
-  (`einv_gui_fnc_uiShape` in its category's `tileBg`, picture over the box) on a piece of grid, or a container's blocks
-  flowed with the inventory's gaps (a block beside another on the canvas may wrap here). Replaces its previous one.
-- **Items editor:** working copy `einv_setup_itemWork` (lowercase class -> canvas with `stack` and `start`), an 8x8
-  (`SHAPE_MAX`) canvas always shown under the steppers, built from getInfo's `footprint`. Across/down (1-8) lay a
-  rectangle at the box's top left (moved in at the edge): places in the old box keep their state, new ones become cells,
-  the rest goes; they show the box. Every click redraws the editor (few controls). Size text "2×3 cells" or "3 cells
-  shaped in 2×2", "N cells"; more than one component or none: a warning and Apply disabled. Apply writes `size=`
-  `einv_items_fnc_formatMask` of the one block (`WxH` when full, else the trimmed mask) if the canvas changed and the
-  text differs from getInfo's `shape`, and `stack=N` if it differs; Back to the preset takes `footprint`/`stack` away.
-- **Containers editor:** working copy `einv_setup_cellWork` (lowercase class -> canvas with `start`), made by the first
-  click, which redraws once (the "not applied" line and Discard appear beside the total and the buttons, never above the
-  canvas, so nothing moves under the mouse); later clicks update only the total and the preview. Canvas 8 wide,
-  rows stepper 1-40 (more rows are empty, fewer cut), Fill (all cells, dividers kept), Clear (all off), the scroll
-  position kept across its own redraws. Apply writes `grid=` `einv_items_fnc_formatGrid [["blocks", blocks]]` -
-  each component a mask block or `WxH`, joined by `+` in reading order - after the checks: no cell, more than
-  `MAX_CELLS` cells or `MAX_BLOCKS` blocks, a block taller than `MAX_ROWS`. Patterns, auto and cells load as the
-  blocks they resolve to (`einv_storage_fnc_blocksFor`) with "Editing replaces the pattern with exactly these cells".
-  Like another class, Unlink, Back to the preset and Discard as before.
-- **Writing (`fnc_upsertRule [class, set, remove]`):** unchanged - merges every rule whose only condition is `class=X`,
-  sets and removes fields, keeps the rest, appends it last, drops it when empty, commits.
+- **Start (`fnc_drawStart`), one plain page.** The welcome state (`fnc_drawWelcome`, `einv_setup_startSetup`) is gone.
+  Title, two sentences (pick a preset; Items and Containers change single classes; Review saves), the preset cards,
+  keep-own-rules, then "Now in use" (40 %, with where Save goes, Import, Review and save) beside "What you changed"
+  (`fnc_drawChanges`). The cell size sits in a fold at the bottom ("Advanced · Cell size: 5 · 1 cell = 2.27 kg",
+  `einv_setup_startAdvanced`, closed by default, kept for the session): stepper, kg value and source, the preset's value
+  back, and the plain explanation. Its help text is measured in a throwaway group first, so the cards above get the rest.
+- **Filters:** `fnc_ownClassRules`' `named` is now class -> the keys its own rules set. "Only classes with own rules"
+  lists, on Items, classes whose rules set `footprint` (size) or `stack`; on Containers, `grid` or `like`.
+- **The canvas (`fnc_uiCanvas`):** `cols`, `rows` and per place (index `row * cols + col`) either `cells` (bool, the Items
+  step) or `paint` (0 none, 1-8 a colour, the Containers step, option `palette`). No dividers any more (`right`/`below`,
+  seam strips and `CANVAS_SEAM_*` are gone). A panel and a `uiHit` per place; a change recolours that one panel and calls
+  `onChange [canvas, arguments]`. Painting starts on `MouseButtonDown` (deferred); `MouseEnter` with `inputMouse 0` down
+  continues the stroke with the value the press decided (uiNamespace `einv_setup_canvasStroke` [scrollId, value]), so a
+  drag paints a run; any `MouseButtonUp` (place or display) ends it. Where no press arrives the click alone paints.
+- **Paint model.** Brush `einv_setup_cellBrush` (0 none, 1-8; `PAINT_COLORS` red, blue, green, yellow, orange, purple, cyan,
+  pink, theme-independent, `PAINT_HOVER` lighter): a click paints, a click with the same colour clears. Compartments
+  (`fnc_canvasBlocks`) are the 4-neighbour components of one colour, in reading order of their first cell, each
+  `[w, h, holes, pos]` (holes: box places not its own); two red columns and a blue middle are three compartments, an
+  unpainted place is no cell. Apply writes them as one canvas mask, a letter per component in that order
+  (`einv_items_fnc_formatGrid`; one component alone falls back to `WxH` / `xx/x-`).
+- **Loading and colouring (`fnc_canvasFromBlocks [blocks, min, max, cols, painted]`):** blocks are placed as
+  `einv_gui_fnc_flowCompartments` places them (canvas groups at their offsets, flowed ones with line breaks counting the
+  0.22-cell gaps, no gap cells). Painted, each block takes a colour greedily in block order, trying from
+  `index mod 8` on and skipping every colour of a block it touches, so neighbours never share one and a flowed `+` rule
+  shows each block differently. Limits: a block whose own holes split it (`x-x`) reads back as two; nine mutually
+  touching blocks would have to share. An untouched class is never rewritten: Apply is enabled only when the blocks differ
+  from the loaded ones.
+- **Blocks mode (`fnc_drawCellBlocks`, the 58ecf32 editor):** segmented "Paint | Blocks" over the editor,
+  `einv_setup_cellMode` (0/1) kept for the session. One small drawing per compartment (caption picks, a click toggles a
+  hole), width/height steppers for the picked one, Add/Remove; working copy `{blocks, picked}`; Apply writes the blocks
+  joined by `+` (flow layout). A class drawn as a canvas gets a note that Blocks loses the positions. Switching converts
+  a working copy when the editor draws: Paint -> Blocks takes the components in reading order without `pos`; Blocks ->
+  Paint lays them out and colours them as loading does. `fnc_cellChanged` updates the total and the preview after an
+  in-place change in either mode.
+- **Same as another class (`fnc_drawSameAs`):** "Same as another class..." ("Same as..." when the row is short) opens a
+  popover anchored on the button, "Pick the class to copy from": search field, the index's containers minus itself,
+  8 rows a page with arrows, Cancel. A pick shows "Follow <name>" (writes `like=X`, removes the own `grid`) and "Copy cells
+  of <name>" (X's `fnc_classBlocks` into a working copy in the current mode, `unlink` set when the class has `like=`, so
+  Apply also removes it), Back, Cancel. A linked class shows X's cells read-only and a chip "Same as <name> · Unlink" beside
+  the mode switch; a copied working copy is editable even while `like=` stands. The list's old picking mode
+  (`einv_setup_likePick`) is gone.
+- **Working copies:** `einv_setup_cellWork` (lowercase class -> painted canvas, or `blocks`/`picked`; optional `unlink`),
+  `einv_setup_itemWork` as before. The first change makes the copy and redraws once; Discard drops it; Back to the preset
+  removes `grid` and `like`. Apply checks no cell, `MAX_CELLS`, `MAX_BLOCKS`, a drawing taller than `MAX_ROWS`.
+- **Preview (`fnc_drawPreview`):** the window's own `flowCompartments` with the blocks Apply would write, so painted
+  compartments sit 1:1 where they were painted (the box around them starts at the left edge) and blocks flow.
+- **Wording:** plain sentences, "Apply keeps the change; Save at Review puts it to use"; list cards read
+  "<what> (<where from>)" (`STR_einv_setup_Answer_Line`), "size from its load (preset)", pattern names spelled out.
+  Button widths use `ACTION_W` (defines.hpp), half a row wider than the label needs, so "Apply" no longer cuts at the
+  small UI size.
+- **Writing (`fnc_upsertRule [class, set, remove]`):** unchanged.
 - Built and checked in code only: nothing of this has run in the game yet.
 
 ## Window details (0.4.0) - supersedes the parts above it contradicts

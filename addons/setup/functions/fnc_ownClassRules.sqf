@@ -5,8 +5,9 @@
  *   - exact: what the rules written for exactly one class set (class=X and no other condition) - several
  *     of them merged in text order, the later value winning, as the engine reads them. This is the rule
  *     those steps edit (fnc_upsertRule).
- *   - named: every class an own rule names at all - class=X, class=X+, class=A|B -, for "only classes with
- *     own rules".
+ *   - named: every class an own rule names at all - class=X, class=X+, class=A|B - with what those rules
+ *     set, for "only classes with own rules": the Items step lists the ones that set size or stack, the
+ *     Containers step the ones that set grid or like - a container's grid rule is no item rule.
  * Worked out once per draft text; the maps are shared, nobody changes them.
  *
  * Arguments:
@@ -15,7 +16,8 @@
  * Return Value:
  * [exact, named] <ARRAY>
  *   exact - lowercase class -> the values, as einv_items_fnc_parseRules gives a rule's <HASHMAP>
- *   named - lowercase class -> true <HASHMAP>
+ *   named - lowercase class -> the values those rules set, by key ("footprint", "stack", "grid", "like",
+ *           ...) -> true <HASHMAP>
  *
  * Example:
  * (call einv_setup_fnc_ownClassRules) params ["_exact", "_named"];
@@ -44,7 +46,13 @@ private _named = createHashMap;
                     _lc = _lc select [0, count _lc - 1];
                 };
 
-                _named set [_lc, true];
+                private _keys = _named getOrDefault [_lc, createHashMap];
+
+                {
+                    _keys set [_x, true];
+                } forEach (keys _values);
+
+                _named set [_lc, _keys];
             } forEach _names;
         };
     } forEach _conds;

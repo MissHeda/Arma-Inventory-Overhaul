@@ -58,8 +58,9 @@ Tools).
 How big items are, how many share a tile and how containers are split up is one text of rules, the
 CBA setting "Inventory rules" (`einv_items_rules`), the same for everyone. The setup wizard writes it for you
 (ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory) - you draw the cells of an item
-(an L, a T) and of a uniform, vest or backpack on a canvas, click the gaps between cells to split it into
-compartments, or link it to another class, and its start page shows what you changed -, but it is plain text.
+(an L, a T), paint the cells of a uniform, vest or backpack in colours - touching cells of one colour are one
+compartment, and it looks in the inventory exactly as painted - or build it block by block, or make it the same as
+another class, and its start page shows what you changed -, but it is plain text.
 It builds on a preset: Default (relaxed: realistic-ish sizes, containers a fifth roomier than their load),
 Realism (realistic sizes: longer rifles, magazine-rig vests, a fixed grid per backpack size, stacks as in
 Default) or Weight-like (an item takes as many cells as it weighs). Grids are ten cells wide.

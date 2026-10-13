@@ -5,8 +5,7 @@
  * The left column of the Items and Containers steps: a search over the class index (fnc_buildIndex), by
  * class and by name, a row of chips for the kind, a switch for only the classes the own rules name, and
  * under them the cards found (fnc_drawResults). A click on a card picks the class for the editor beside
- * it - or, while the Containers step is picking the class another one takes after (GVAR(likePick)),
- * links the two.
+ * it.
  *
  * Typing redraws only the cards, a moment after the last key (GVAR(searchToken)): the field keeps the
  * cursor. The chips and the switch draw the whole step again.
@@ -34,10 +33,6 @@ disableSerialization;
 params ["_display", "_group", "_rect", "_theme", ["_mode", "items", [""]]];
 _rect params ["_left", "_top", "_width", "_height"];
 
-private _font = _theme getOrDefault ["font", "PuristaMedium"];
-private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
-
 if !(_mode in GVAR(listState)) then {
     GVAR(listState) set [_mode, ["", "all", false, 0]];
 };
@@ -48,26 +43,6 @@ private _cursorY = [_display, _group, _rect, "", _theme] call FUNC(uiCard);
 private _innerX = _left + CARD_PAD_X;
 private _innerW = _width - CARD_PAD_X * 2;
 private _bottom = _top + _height - CARD_PAD_Y;
-
-// ----- Picking the class another one takes after -----
-
-if (_mode isEqualTo "containers" && {GVAR(likePick) isNotEqualTo ""}) then {
-    private _cancelW = SQUARE(UNIT * 4.2);
-    private _rowH = UNIT * 1.05;
-
-    [
-        _display, _group, [_innerX, _cursorY, _innerW - _cancelW - SQUARE(UNIT * 0.3), _rowH],
-        [format [LLSTRING(List_PickLike), GVAR(likePick)], _innerW - _cancelW, _fontBold, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL, _accent, _fontBold, 0
-    ] call EFUNC(gui,uiLabel);
-
-    [_display, _group, [_innerX + _innerW - _cancelW, _cursorY, _cancelW, _rowH], LLSTRING(List_Cancel), "", _theme, {
-        GVAR(likePick) = "";
-
-        [GVAR(step)] call FUNC(showStep);
-    }, [], true, "ghost"] call FUNC(uiAction);
-
-    _cursorY = _cursorY + _rowH + UNIT * 0.25;
-};
 
 // ----- Search -----
 
@@ -153,7 +128,7 @@ private _toggleH = UNIT * 1;
     _state set [3, 0];
 
     [GVAR(step)] call FUNC(showStep);
-}, _mode, true, LLSTRING(List_OwnOnly)] call FUNC(uiToggle);
+}, _mode, true, [LLSTRING(List_OwnOnlyItems), LLSTRING(List_OwnOnlyContainers)] select (_mode isEqualTo "containers")] call FUNC(uiToggle);
 
 _cursorY = _cursorY + _toggleH + UNIT * 0.3;
 

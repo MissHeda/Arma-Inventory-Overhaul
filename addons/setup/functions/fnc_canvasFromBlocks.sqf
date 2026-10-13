@@ -5,12 +5,18 @@
  * A canvas to draw on (fnc_uiCanvas), holding compartments where the inventory puts them
  * (einv_gui_fnc_flowCompartments): side by side as far as STORAGE_COLS cells reach, then on the next line.
  * The inventory leaves a gap between two compartments; the canvas has none, so a line breaks where the
- * inventory's does - the gap counted - and a divider lies on every seam where two compartments meet
- * instead. Read back (fnc_canvasBlocks), it gives the same compartments in the same order. A
- * compartment's holes are places without a cell. An item's footprint is one compartment: it lies in the
- * top left corner. Compartments drawn on a canvas before (a pos each, grid=aab/acc) lie where they were
- * drawn, their canvas one piece of the flow and what follows under it, as the inventory has them
- * (einv_gui_fnc_flowCompartments).
+ * inventory's does - the gap counted. A compartment's holes are places without a cell. An item's
+ * footprint is one compartment: it lies in the top left corner. Compartments drawn on a canvas before (a
+ * pos each, grid=aab/acc) lie where they were drawn, their canvas one piece of the flow and what follows
+ * under it, as the inventory has them (einv_gui_fnc_flowCompartments).
+ *
+ * Painted (the Containers step), every compartment gets a colour, and two that touch never the same
+ * one: cells of one colour that touch are one compartment (fnc_canvasBlocks), so two neighbours of one
+ * colour would read back as one. Greedy, in the order given, each one trying the colours from its own
+ * place in that order on - so compartments laid out one after the other mostly differ even where they
+ * do not touch, which is what makes a flowed grid readable at a glance. Read back, a painted canvas
+ * gives the same compartments in the same order, except one whose own holes cut it into pieces (x-x):
+ * each piece is a compartment of its own then.
  *
  * Arguments:
  * 0: Compartments [[cols, rows, holes, pos], ...], holes the indices row * cols + col, pos [x, y] on
@@ -18,22 +24,24 @@
  * 1: At least this many rows <NUMBER> (default: 1)
  * 2: At most this many rows - what lies below is cut away <NUMBER> (default: CANVAS_ROWS_LOADED)
  * 3: Columns: STORAGE_COLS for a container, SHAPE_MAX for an item's board <NUMBER> (default: STORAGE_COLS)
+ * 4: Painted: colours instead of cells <BOOL> (default: false)
  *
  * Return Value:
  * Canvas <HASHMAP>
  *   "cols"  - its columns, as given <NUMBER>
  *   "rows"  - its rows <NUMBER>
- *   "cells" - per place (index row * cols + col) whether it is a cell <ARRAY of BOOL>
- *   "right" - per place whether a divider lies on the seam to its right <ARRAY of BOOL>
- *   "below" - per place whether a divider lies on the seam under it <ARRAY of BOOL>
+ *   "cells" - not painted: per place (index row * cols + col) whether it is a cell <ARRAY of BOOL>
+ *   "paint" - painted: per place its colour, 0 for none, else 1 to PAINT_COUNT <ARRAY of NUMBER>
  *
  * Example:
- * private _canvas = [[[4, 2, [5, 6]], [2, 3, []]]] call einv_setup_fnc_canvasFromBlocks;
+ * private _canvas = [[[4, 2, [5, 6]], [2, 3, []]], 1, CANVAS_ROWS_LOADED, STORAGE_COLS, true] call einv_setup_fnc_canvasFromBlocks;
  *
  * Public: No
  */
 
-params [["_blocks", [], [[]]], ["_minRows", 1, [0]], ["_maxRows", CANVAS_ROWS_LOADED, [0]], ["_cols", STORAGE_COLS, [0]]];
+params [
+    ["_blocks", [], [[]]], ["_minRows", 1, [0]], ["_maxRows", CANVAS_ROWS_LOADED, [0]], ["_cols", STORAGE_COLS, [0]], ["_painted", false, [false]]
+];
 
 // Where each compartment goes, in cells. The gap the inventory leaves after one only decides where a
 // line breaks.
@@ -133,29 +141,55 @@ _owners = _owners apply {-1};
     };
 } forEach _blocks;
 
-// A divider wherever two compartments meet.
 private _cells = _owners apply {_x >= 0};
-private _right = _owners apply {false};
-private _below = _owners apply {false};
+
+if (!_painted) exitWith {
+    createHashMapFromArray [["cols", _cols], ["rows", _rows], ["cells", _cells]]
+};
+
+// Which compartments touch, side by side or one above the other.
+private _touching = _blocks apply {createHashMap};
 
 {
     if (_x < 0) then {continue};
 
-    if ((_forEachIndex mod _cols) < _cols - 1) then {
-        private _next = _owners select (_forEachIndex + 1);
+    private _owner = _x;
 
-        if (_next >= 0 && {_next != _x}) then {
-            _right set [_forEachIndex, true];
+    {
+        if (_x >= 0 && {_x != _owner}) then {
+            (_touching select _owner) set [_x, true];
+            (_touching select _x) set [_owner, true];
         };
-    };
-
-    if (_forEachIndex + _cols < _count) then {
-        private _under = _owners select (_forEachIndex + _cols);
-
-        if (_under >= 0 && {_under != _x}) then {
-            _below set [_forEachIndex, true];
-        };
-    };
+    } forEach [
+        [-1, _owners param [_forEachIndex + 1, -1]] select ((_forEachIndex mod _cols) < _cols - 1),
+        [-1, _owners param [_forEachIndex + _cols, -1]] select (_forEachIndex + _cols < _count)
+    ];
 } forEach _owners;
 
-createHashMapFromArray [["cols", _cols], ["rows", _rows], ["cells", _cells], ["right", _right], ["below", _below]]
+private _colors = _blocks apply {0};
+
+{
+    private _taken = (keys (_touching select _forEachIndex)) apply {_colors select _x};
+    private _first = _forEachIndex mod PAINT_COUNT;
+    private _color = 0;
+
+    for "_step" from 0 to (PAINT_COUNT - 1) do {
+        private _try = (_first + _step) mod PAINT_COUNT + 1;
+
+        if !(_try in _taken) exitWith {
+            _color = _try;
+        };
+    };
+
+    // Eight neighbours of eight colours: a drawing nobody makes. It shares one with a neighbour, which
+    // then reads back as one compartment with it.
+    if (_color == 0) then {
+        _color = _first + 1;
+    };
+
+    _colors set [_forEachIndex, _color];
+} forEach _blocks;
+
+createHashMapFromArray [
+    ["cols", _cols], ["rows", _rows], ["paint", _owners apply {if (_x < 0) then {0} else {_colors select _x}}]
+]

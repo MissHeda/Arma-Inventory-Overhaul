@@ -73,13 +73,16 @@ private _containers = _mode isEqualTo "containers";
 private _needle = toLower (trim _text);
 private _chipKinds = [[_chip], ["crate", "vehicle"]] select (_chip isEqualTo "cargo");
 
+// Own rules that count here: a container's cells, an item's size or stack.
+private _ownKeys = [["footprint", "stack"], ["grid", "like"]] select _containers;
+
 private _matches = ((uiNamespace getVariable QGVAR(index)) get "rows") select {
     (if (_containers) then {
         (_x select ROW_LOAD) > 0 && {(_x select ROW_KIND) in CONTAINER_KINDS} && {_chip isEqualTo "all" || {(_x select ROW_KIND) in _chipKinds}}
     } else {
         (_x select ROW_FAMILY) isNotEqualTo "cargo" && {_chip isEqualTo "all" || {(_x select ROW_FAMILY) isEqualTo _chip}}
     })
-    && {!_ownOnly || {(_x select ROW_LC) in _named}}
+    && {!_ownOnly || {private _keys = _named getOrDefault [_x select ROW_LC, createHashMap]; (_ownKeys findIf {_x in _keys}) >= 0}}
     && {_needle isEqualTo "" || {((_x select ROW_SEARCH) find _needle) >= 0}}
 };
 
@@ -175,7 +178,7 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
     if (_containers) then {
         ([_info, "grid", _own] call FUNC(answerText)) params ["_words", "_from"];
 
-        _answer = format ["%1 · %2", _words, _from];
+        _answer = format [LLSTRING(Answer_Line), _words, _from];
         _isOwn = (((_info get "src") getOrDefault ["grid", ""]) select [0, 4]) isEqualTo "own:";
     } else {
         ([_info, "size", _own] call FUNC(answerText)) params ["_sizeWords", "_sizeFrom"];
@@ -186,9 +189,9 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
         _isOwn = ({((_src getOrDefault [_x, ""]) select [0, 4]) isEqualTo "own:"} count ["footprint", "stack"]) > 0;
         _answer = switch (true) do {
             // Weapons, uniforms, vests and backpacks never share a tile: only the size says anything.
-            case ((_src getOrDefault ["stack", ""]) isEqualTo "forced"): {format ["%1 · %2", _sizeWords, _sizeFrom]};
-            case (_sizeFrom isEqualTo _stackFrom): {format ["%1, %2 · %3", _sizeWords, _stackWords, _sizeFrom]};
-            default {format ["%1 · %2, %3 · %4", _sizeWords, _sizeFrom, _stackWords, _stackFrom]};
+            case ((_src getOrDefault ["stack", ""]) isEqualTo "forced"): {format [LLSTRING(Answer_Line), _sizeWords, _sizeFrom]};
+            case (_sizeFrom isEqualTo _stackFrom): {format [LLSTRING(Answer_Line), format ["%1, %2", _sizeWords, _stackWords], _sizeFrom]};
+            default {format ["%1 · %2", format [LLSTRING(Answer_Line), _sizeWords, _sizeFrom], format [LLSTRING(Answer_Line), _stackWords, _stackFrom]]};
         };
     };
 
@@ -197,25 +200,9 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
         [_answer, _textW, _font, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL, [_colorText2, _accent] select _isOwn, _font, 0
     ] call EFUNC(gui,uiLabel);
 
-    // The whole card is the button: it picks the class - or, while another container is picking the
-    // class it takes after, links the two.
+    // The whole card is the button: it picks the class.
     [_display, _list, [0, _cardY, _rowW, _cardH], _surface, _cardFill, [1, 1, 1, 0.085], {
         params ["_mode", "_class"];
-
-        if (_mode isEqualTo "containers" && {GVAR(likePick) isNotEqualTo ""}) exitWith {
-            private _target = GVAR(likePick);
-
-            if (toLowerANSI _target isEqualTo toLowerANSI _class) exitWith {
-                [LLSTRING(Hint_LikeSelf), "loss"] call FUNC(setHint);
-            };
-
-            GVAR(likePick) = "";
-            GVAR(cellWork) deleteAt (toLowerANSI _target);
-
-            // Its own cells would win over the other class's: they go, the rest of its rule stays.
-            [format [LLSTRING(Hint_Linked), _target, _class], "text2"] call FUNC(setHint);
-            [_target, createHashMapFromArray [["like", _class]], ["grid"]] call FUNC(upsertRule);
-        };
 
         GVAR(selection) set [_mode, _class];
 

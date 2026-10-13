@@ -2,18 +2,18 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Step 1, Start, in two states (GVAR(startSetup)). As the wizard opens, a welcome: what the mod and the
- * setup are about and a button into it (fnc_drawWelcome). Then what the setup builds on:
- *   - The presets as cards - Default, Realism, Weight-like and any that another mod brings - each with its
+ * Step 1, Start: one plain page of what the setup builds on, top to bottom.
+ *   - The title and two sentences: pick a preset; Items and Containers change single classes; Review
+ *     saves it.
+ *   - The presets as cards - Default, Realism, Weight and any that another mod brings - each with its
  *     description; the one the draft builds on is picked. Picking another keeps the own rules on top of
  *     it, or starts without them, as the switch under the cards says.
- *   - The cell size: how much load one grid cell stands for. It sizes every container by its load and
- *     every item sized by its mass, so it is the one number that changes the most at once - said so beside
- *     it. It only sizes the default grids: what fits into a container is decided by its free cells alone.
- *   - What is in use now, set by whom, and where this wizard may save - or why it may not.
- *   - What you changed: the own rules against the preset, each in words, to open or take away
- *     (fnc_drawChanges).
- * A link beside the title goes back to the welcome.
+ *   - What is in use now, set by whom, and where this wizard may save - or why it may not -, with Import
+ *     and the way on to Review; beside it what you changed: the own rules against the preset, each in
+ *     words, to open or take away (fnc_drawChanges).
+ *   - At the bottom, folded away (GVAR(startAdvanced)): the cell size, how much load one cell stands for.
+ *     It sizes every container no rule draws, by its load, and every item the Weight preset sizes by
+ *     mass - the one number that changes the most at once, which few need to touch.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -44,29 +44,15 @@ private _muted = _theme getOrDefault ["muted", [0.522, 0.553, 0.604, 1]];
 private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
 private _radius = _theme getOrDefault ["radius", 0];
 
-// First the welcome, until "Start setup" is pressed.
-if (!GVAR(startSetup)) exitWith {
-    [_display, _group, _theme] call FUNC(drawWelcome);
-};
-
 private _padX = WIZ_PAD_X;
 private _innerW = _width - _padX * 2;
 private _gapY = UNIT * 0.5;
 private _gapX = SQUARE(_gapY);
 private _cursorY = UNIT * 0.4;
 
-// ----- Title, and the way back to the welcome -----
+// ----- Title, and what to do -----
 
-private _introH = UNIT * 1;
-private _introW = SQUARE(_introH * 1.6) + (LLSTRING(Start_Intro) getTextWidth [_font, _introH * 0.5]) * TEXT_SLACK;
-
-[_display, _group, [_padX, _cursorY, _innerW - _introW, UNIT * 1.1], LLSTRING(Start_Title), TEXT_HEAD, _colorText, _fontBold, 0] call EFUNC(gui,uiLabel);
-
-[_display, _group, [_padX + _innerW - _introW, _cursorY + UNIT * 0.05, _introW, _introH], LLSTRING(Start_Intro), UI_TEX(icon_chevron_left_ca), _theme, {
-    GVAR(startSetup) = false;
-
-    [0] call FUNC(showStep);
-}, [], true, "ghost"] call FUNC(uiAction);
+[_display, _group, [_padX, _cursorY, _innerW, UNIT * 1.1], LLSTRING(Start_Title), TEXT_HEAD, _colorText, _fontBold, 0] call EFUNC(gui,uiLabel);
 
 _cursorY = _cursorY + UNIT * 1.1;
 _cursorY = _cursorY + ([_display, _group, [_padX, _cursorY, _innerW], LLSTRING(Start_Help), TEXT_BODY, _colorText2, _font] call FUNC(uiText)) + _gapY;
@@ -158,67 +144,34 @@ private _own = count (GVAR(draft) getOrDefault ["groups", []]) + count (GVAR(dra
 
 _cursorY = _cursorY + UNIT * 1.1 + _gapY;
 
-// ----- Cell size | Now in use | What you changed -----
+// ----- Advanced, folded at the bottom: how big it is decides how tall the cards above it are -----
 
-private _cardsH = (_height - UNIT * 0.5) - _cursorY;
-private _spread = _innerW - _gapX * 2;
-private _cellCardW = _spread * 0.28;
-private _columnW = _spread * 0.34;
-private _rightX = _padX + _cellCardW + _gapX;
-private _changesX = _rightX + _columnW + _gapX;
-
-// Cell size
-private _cellY = [_display, _group, [_padX, _cursorY, _cellCardW, _cardsH], LLSTRING(Cell_Title), _theme] call FUNC(uiCard);
 private _cell = GVAR(draftRules) getOrDefault ["cell", 5];
 private _ownCell = (GVAR(draft) getOrDefault ["cell", -1]) > 0;
-private _cardInnerX = _padX + CARD_PAD_X;
-private _cardInnerW = _cellCardW - CARD_PAD_X * 2;
-private _stepperW = SQUARE(UNIT * 5.4);
-private _stepperH = UNIT * 1.2;
+private _foldH = UNIT * 1.1;
+private _cellHelpH = 0;
+private _bottom = _height - UNIT * 0.5;
 
-[_display, _group, [_cardInnerX, _cellY, _stepperW, _stepperH], _cell, [1, 50, 1], _theme, {
-    params ["_cell"];
+if (GVAR(startAdvanced)) then {
+    // Measured first, in a group thrown away again, so the cards above know how much room is left.
+    private _probe = [_display, "EINV_Group", _group, [0, 0, _innerW, UNIT * 10]] call EFUNC(gui,uiCreate);
 
-    private _ast = [GVAR(draftText)] call EFUNC(items,parseRules);
-    _ast set ["cell", _cell];
+    _cellHelpH = [_display, _probe, [0, 0, _innerW - CARD_PAD_X * 2], LLSTRING(Cell_Help), TEXT_SMALL, _colorText2, _font] call FUNC(uiText);
 
-    [_ast] call FUNC(commit);
-}] call FUNC(uiStepper);
-
-private _valueX = _cardInnerX + _stepperW + SQUARE(UNIT * 0.5);
-private _valueW = _cardInnerX + _cardInnerW - _valueX;
-
-[
-    _display, _group, [_valueX, _cellY + (_stepperH - UNIT * 0.75) / 2, _valueW, UNIT * 0.75],
-    format [LLSTRING(Cell_Value), (_cell * MASS_TO_KG) toFixed 2], TEXT_BODY, _colorText, _fontBold, 0
-] call EFUNC(gui,uiLabel);
-
-_cellY = _cellY + _stepperH + UNIT * 0.2;
-
-// Where it comes from, under the stepper: the column is narrow for it beside the value.
-_cellY = _cellY + ([
-    _display, _group, [_cardInnerX, _cellY, _cardInnerW], [LLSTRING(Cell_FromPreset), LLSTRING(Cell_Own)] select _ownCell, TEXT_SMALL, _muted, _font
-] call FUNC(uiText)) + UNIT * 0.2;
-
-if (_ownCell) then {
-    private _resetW = SQUARE(UNIT * 6.5);
-
-    [_display, _group, [_cardInnerX, _cellY, _resetW, UNIT * 1], LLSTRING(Cell_Reset), ICON(icon_reset_ca,icon_auto_ca), _theme, {
-        private _ast = [GVAR(draftText)] call EFUNC(items,parseRules);
-        _ast set ["cell", -1];
-
-        [_ast] call FUNC(commit);
-    }, [], true, "ghost"] call FUNC(uiAction);
-
-    _cellY = _cellY + UNIT * 1.2;
+    ctrlDelete _probe;
 };
 
-_cellY = _cellY + UNIT * 0.2;
-[_display, _group, [_cardInnerX, _cellY, _cardInnerW], LLSTRING(Cell_Help), TEXT_SMALL, _colorText2, _font] call FUNC(uiText);
+private _advancedH = [_foldH, _foldH + UNIT * 1.2 + UNIT * 0.3 + _cellHelpH + CARD_PAD_Y] select GVAR(startAdvanced);
+private _advancedY = _bottom - _advancedH;
 
-// Now in use
-private _statusY = [_display, _group, [_rightX, _cursorY, _columnW, _cardsH], LLSTRING(Status_Title), _theme] call FUNC(uiCard);
-private _statusX = _rightX + CARD_PAD_X;
+// ----- Now in use | What you changed -----
+
+private _cardsH = (_advancedY - _gapY) - _cursorY;
+private _columnW = (_innerW - _gapX) * 0.4;
+private _changesX = _padX + _columnW + _gapX;
+
+private _statusY = [_display, _group, [_padX, _cursorY, _columnW, _cardsH], LLSTRING(Status_Title), _theme] call FUNC(uiCard);
+private _statusX = _padX + CARD_PAD_X;
 private _statusW = _columnW - CARD_PAD_X * 2;
 
 // What the game uses now - not the draft - and who set it.
@@ -299,3 +252,56 @@ _importHit setVariable [QGVAR(action), [{
 
 // What you changed
 [_display, _group, [_changesX, _cursorY, _innerW - (_changesX - _padX), _cardsH], _theme] call FUNC(drawChanges);
+
+// ----- Advanced: the cell size -----
+
+private _foldText = format ["%1 · %2: %3 · %4", LLSTRING(Start_Advanced), LLSTRING(Cell_Title), _cell, format [LLSTRING(Cell_Value), (_cell * MASS_TO_KG) toFixed 2]];
+private _foldW = ACTION_W(_foldText,_foldH,true,_font) min _innerW;
+
+if (GVAR(startAdvanced)) then {
+    [_display, _group, [_padX, _advancedY, _innerW, _advancedH], _theme getOrDefault ["card", [1, 1, 1, 0.055]], _radius] call EFUNC(gui,uiPanel);
+};
+
+[_display, _group, [_padX, _advancedY, _foldW, _foldH], _foldText, [UI_TEX(icon_chevron_right_ca), UI_TEX(icon_chevron_down_ca)] select GVAR(startAdvanced), _theme, {
+    GVAR(startAdvanced) = !GVAR(startAdvanced);
+
+    [0] call FUNC(showStep);
+}, [], true, "ghost", [LLSTRING(Start_AdvancedOpen), LLSTRING(Start_AdvancedClose)] select GVAR(startAdvanced)] call FUNC(uiAction);
+
+if (!GVAR(startAdvanced)) exitWith {};
+
+private _cellX = _padX + CARD_PAD_X;
+private _cellW = _innerW - CARD_PAD_X * 2;
+private _cellY = _advancedY + _foldH + UNIT * 0.1;
+private _stepperW = SQUARE(UNIT * 5.4);
+private _stepperH = UNIT * 1.2;
+
+[_display, _group, [_cellX, _cellY, _stepperW, _stepperH], _cell, [1, 50, 1], _theme, {
+    params ["_cell"];
+
+    private _ast = [GVAR(draftText)] call EFUNC(items,parseRules);
+    _ast set ["cell", _cell];
+
+    [_ast] call FUNC(commit);
+}] call FUNC(uiStepper);
+
+private _valueX = _cellX + _stepperW + SQUARE(UNIT * 0.5);
+private _valueText = format ["%1 · %2", format [LLSTRING(Cell_Value), (_cell * MASS_TO_KG) toFixed 2], [LLSTRING(Cell_FromPreset), LLSTRING(Cell_Own)] select _ownCell];
+
+[
+    _display, _group, [_valueX, _cellY + (_stepperH - UNIT * 0.75) / 2, _cellW - (_valueX - _cellX), UNIT * 0.75],
+    _valueText, TEXT_BODY, _colorText, _font, 0
+] call EFUNC(gui,uiLabel);
+
+if (_ownCell) then {
+    private _resetW = ACTION_W(LLSTRING(Cell_Reset),_stepperH,true,_font);
+
+    [_display, _group, [_cellX + _cellW - _resetW, _cellY, _resetW, _stepperH], LLSTRING(Cell_Reset), ICON(icon_reset_ca,icon_auto_ca), _theme, {
+        private _ast = [GVAR(draftText)] call EFUNC(items,parseRules);
+        _ast set ["cell", -1];
+
+        [_ast] call FUNC(commit);
+    }, [], true, "ghost"] call FUNC(uiAction);
+};
+
+[_display, _group, [_cellX, _cellY + _stepperH + UNIT * 0.3, _cellW], LLSTRING(Cell_Help), TEXT_SMALL, _colorText2, _font] call FUNC(uiText);

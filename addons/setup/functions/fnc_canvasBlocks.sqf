@@ -1,10 +1,13 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The compartments a canvas (fnc_uiCanvas) holds. Cells that touch - side by side or one above the
- * other, not only at a corner - with no divider between them are one compartment; it is written as the
- * box around its cells, each place of the box that is not one of its cells a hole - another
- * compartment's cell lying in that box too. For an item, the one compartment is its shape.
+ * The compartments a canvas (fnc_uiCanvas) holds. On a painted one (the Containers step) cells of one
+ * colour that touch - side by side or one above the other, not only at a corner - are one compartment;
+ * another colour beside them is another compartment, a place without colour no cell at all. So two red
+ * columns with a blue block between them are three compartments. On one of cells (the Items step) all
+ * cells that touch are one. Each is written as the box around its cells, each place of the box that is
+ * not one of its cells a hole - another compartment's cell lying in that box too. For an item, the one
+ * compartment is its shape.
  *
  * In reading order, by each one's first cell from the top left: a canvas laid out by
  * fnc_canvasFromBlocks gives its compartments back in the order it was given them, so drawing on one
@@ -33,24 +36,29 @@ params [["_canvas", createHashMap, [createHashMap]]];
 
 private _cols = _canvas getOrDefault ["cols", 1];
 private _rows = _canvas getOrDefault ["rows", 0];
-private _cells = _canvas getOrDefault ["cells", []];
-private _right = _canvas getOrDefault ["right", []];
-private _below = _canvas getOrDefault ["below", []];
+
+// What each place holds: its colour, or 1 for a cell; 0 for nothing.
+private _values = if ("paint" in _canvas) then {
+    _canvas get "paint"
+} else {
+    (_canvas getOrDefault ["cells", []]) apply {parseNumber _x}
+};
 
 // Per place the compartment it belongs to, -1 for none yet.
-private _label = _cells apply {-1};
+private _label = _values apply {-1};
 private _blocks = [];
 
 {
-    if (!_x || {(_label select _forEachIndex) >= 0}) then {continue};
+    if (_x == 0 || {(_label select _forEachIndex) >= 0}) then {continue};
 
+    private _value = _x;
     private _id = count _blocks;
     private _members = [_forEachIndex];
     private _next = 0;
 
     _label set [_forEachIndex, _id];
 
-    // Every cell it reaches without crossing a divider.
+    // Every cell of its colour it reaches.
     while {_next < count _members} do {
         private _cell = _members select _next;
         private _col = _cell mod _cols;
@@ -61,15 +69,15 @@ private _blocks = [];
         {
             _x params ["_open", "_neighbour"];
 
-            if (_open && {_cells select _neighbour} && {(_label select _neighbour) < 0}) then {
+            if (_open && {(_values select _neighbour) == _value} && {(_label select _neighbour) < 0}) then {
                 _label set [_neighbour, _id];
                 _members pushBack _neighbour;
             };
         } forEach [
-            [_col < _cols - 1 && {!(_right select _cell)}, _cell + 1],
-            [_col > 0 && {!(_right select (_cell - 1))}, _cell - 1],
-            [_row < _rows - 1 && {!(_below select _cell)}, _cell + _cols],
-            [_row > 0 && {!(_below select (_cell - _cols))}, _cell - _cols]
+            [_col < _cols - 1, _cell + 1],
+            [_col > 0, _cell - 1],
+            [_row < _rows - 1, _cell + _cols],
+            [_row > 0, _cell - _cols]
         ];
     };
 
@@ -102,7 +110,7 @@ private _blocks = [];
     };
 
     _blocks pushBack [_w, _h, _holes, [_minCol, _minRow]];
-} forEach _cells;
+} forEach _values;
 
 if (count _blocks == 1) exitWith {
     (_blocks select 0) set [3, []];
