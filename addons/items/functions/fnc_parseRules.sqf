@@ -38,14 +38,17 @@
  *   like=V_PlateCarrier1_rgr everything the rules make of that class but its name - size, stack, grid
  *                            and weight, asked when an item is looked at (fnc_resolve), so a later
  *                            change to that class follows. The rule's other values go on top.
- *   size=2x3 (or shape=2x3)  the cells it takes, across and down; size=mass: as many as it weighs
+ *   size=2x3 (or shape=2x3)  the cells it takes, across and down; size=mass: as many as it weighs;
+ *                            size=xx/x- drawn as a grid's compartment is (fnc_parseMask): rows by /,
+ *                            x a cell, - a hole - an L of 3 cells. At most SHAPE_MAX each way
  *   stack=10                 how many share a tile, 1 to MAX_STACK
  *   grid=...                 a container's compartments, see fnc_parseGrid
  *   weight=1.25              its weight in kg instead of its config's
  *   name=Field_kit           the name it shows, written as fnc_encodeName does
  *
- * Shapes other than rectangles (L3, 10/11, a turn like @1) are kept for a later version: such a
- * value is left out with a warning, the rest of its rule stays.
+ * A shape is read to its smallest form and written back the shortest way (fnc_formatMask): xx/xx is
+ * 2x2. Named shapes and turns (L3, 10/11, @1) are not read: such a value is left out with a warning,
+ * the rest of its rule stays.
  *
  * Left out, with a warning: a statement holding a character other than letters, digits, space and
  * _ + . / % : | @ ! < > = ~ - (a semicolon, quotes, the hash or a backslash would break CBA's
@@ -67,7 +70,8 @@
  *   "warnings" - what was left out or cut down, and why <ARRAY of STRING>
  * A condition is [negated, key, op, values], the values the texts between the "|", class names as
  * written; a group in a condition is key "@", op "=" and the group ids. A rule's values are a HashMap:
- * "like" (a class name as written), "footprint" ("WxH" or "mass"), "stack" <NUMBER>, "grid" (as
+ * "like" (a class name as written), "footprint" ("WxH", a shape like "xx/x-" or "mass"), "stack"
+ * <NUMBER>, "grid" (as
  * fnc_formatGrid writes it), "weight" (kg <NUMBER>), "name" (the name as it shows).
  *
  * Example:
@@ -192,6 +196,34 @@ private _fnc_footprint = {
 
     if (_lower isEqualTo "mass") exitWith {["footprint", "mass"]};
 
+    // Drawn, with no digit in it: a shape, read the way a grid's compartment is.
+    private _codes = toArray _lower;
+
+    if (_codes isNotEqualTo [] && {_codes findIf {!(_x in [120, 45, 47])} < 0}) exitWith {
+        private _shape = [_lower] call FUNC(parseMask);
+
+        if ((_shape select 0) < 0) exitWith {
+            _notes pushBack format ["size=%1: %2 - this part is left out", _raw, _shape select 2];
+            []
+        };
+
+        // Larger than the wizard's board: its top left part, read again (fnc_parseMask cuts it).
+        if ((_shape select 0) > SHAPE_MAX || {(_shape select 1) > SHAPE_MAX}) then {
+            _shape = [_lower, SHAPE_MAX, SHAPE_MAX] call FUNC(parseMask);
+
+            if ((_shape select 0) > 0) then {
+                _notes pushBack format ["size=%1: a shape is at most %2 cells each way - cut to %3", _raw, SHAPE_MAX, _shape call FUNC(formatMask)];
+            };
+        };
+
+        if ((_shape select 0) < 1) exitWith {
+            _notes pushBack format ["size=%1: a shape is at most %2 cells each way, and its top left part has no cell - this part is left out", _raw, SHAPE_MAX];
+            []
+        };
+
+        ["footprint", _shape call FUNC(formatMask)]
+    };
+
     private _cross = _lower find "x";
     private _w = -1;
     private _h = -1;
@@ -206,12 +238,12 @@ private _fnc_footprint = {
         };
     };
 
-    // No WxH: a shape's name, a mask or a turn are for a later version, anything else is no size.
+    // No WxH and no shape: a shape's name or a turn are not read, anything else is no size.
     if (_w < 0) exitWith {
         if ((toArray _raw) findIf {!(_x in _shapeChars)} < 0) then {
-            _notes pushBack format ["size=%1: shapes come in a later version, only rectangles like 2x3 for now - this part is left out", _raw];
+            _notes pushBack format ["size=%1: named shapes and turns are not read - draw it like xx/x- or write 2x3 - this part is left out", _raw];
         } else {
-            _notes pushBack format ["size=%1 is no size like 2x3 or mass - this part is left out", _raw];
+            _notes pushBack format ["size=%1 is no size like 2x3, xx/x- or mass - this part is left out", _raw];
         };
         []
     };

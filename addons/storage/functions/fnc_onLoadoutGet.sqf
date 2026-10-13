@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * A loadout is read (CBA_fnc_getLoadout, event CBA_loadoutGet): where the unit's uniform, vest and backpack
  * keep their things goes along in its extended info, under "einv_layout" - [1, [uniform, vest, backpack]],
- * each a list of [key, col, row, w, h, block] in the records' own shape (fnc_readPlaces). So a loadout
+ * each a list of [key, col, row, w, h, block, rot] in the records' own shape (fnc_readPlaces). So a loadout
  * saved in the Arsenal or ACE's, exported, kept for a respawn, comes back with everything on its cell;
  * ACE leaves a key it does not know alone.
  *
@@ -39,10 +39,12 @@ private _lists = [uniformContainer _unit, vestContainer _unit, backpackContainer
         []
     } else {
         private _records = (([_x] call FUNC(readPlaces)) select 1) apply {
-            _x params ["_key", "_col", "_row", "_w", "_h", "_block"];
+            _x params ["_key", "_col", "_row", "_w", "_h", "_block", ["_rot", -1]];
 
-            // The class is what the key says before its first "|".
+            // The class is what the key says before its first "|". Which way round goes along when the
+            // record says it (an older one does not).
             [[(_key splitString "|") param [0, _key]] call FUNC(layoutKey), _col, _row, _w, _h, _block]
+                + ([[], [_rot]] select (_rot isEqualTo 0 || {_rot isEqualTo 1}))
         };
 
         if (_records isNotEqualTo []) then {

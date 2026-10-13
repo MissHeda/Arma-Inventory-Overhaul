@@ -50,6 +50,10 @@
 #define MAX_BLOCKS 24
 #define MAX_CELLS (STORAGE_COLS * MAX_ROWS)
 
+// An item drawn as a shape (size=xx/x-, einv_items_fnc_parseMask) is at most this many cells each way:
+// the wizard draws one on a board this size, and every free-cell test walks its cells one by one.
+#define SHAPE_MAX 8
+
 // Most item moves one transaction carries (einv_storage_fnc_request): the window sends the next chunk
 // when this one is answered (einv_gui_fnc_sendMoves), so one message never carries a whole crate.
 #define BATCH_MAX 25

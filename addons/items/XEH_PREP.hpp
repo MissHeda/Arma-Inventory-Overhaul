@@ -1,12 +1,16 @@
 // What an item is
 PREP(getFacts);
 PREP(getInfo);
+PREP(footprintAs);
+PREP(turnMask);
 
 // The rules: reading and writing their text
 PREP(parseRules);
 PREP(writeRules);
 PREP(parseGrid);
 PREP(formatGrid);
+PREP(parseMask);
+PREP(formatMask);
 PREP(encodeName);
 PREP(decodeName);
 PREP(sanitizeText);

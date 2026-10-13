@@ -38,7 +38,8 @@
  *
  * Return Value:
  * What the rules make of it <HASHMAP>
- *   "footprint" - [w, h, cells], cells [] for a full rectangle <ARRAY>
+ *   "footprint" - [w, h, holes] upright, holes the indices row * w + col of the cells a shaped item
+ *                 (size=xx/x-) does not take, [] for a full rectangle <ARRAY>
  *   "stack"     - how many share a tile, at least 1 <NUMBER>
  *   "grid"      - for uniforms, vests, backpacks, crates and vehicles the grid spec
  *                 (fnc_parseGrid), else [] <ARRAY>
@@ -297,9 +298,18 @@ if (_footprint isEqualTo "mass") then {
     _footprint = [_w, _h, []];
 };
 
-_footprint params ["_w", "_h", ["_cells", []]];
+_footprint params ["_w", "_h", ["_holes", []]];
 
-_result set ["footprint", [(_w min STORAGE_COLS) max 1, (_h min MAX_ROWS) max 1, _cells]];
+// A shape from the rules is within SHAPE_MAX already; should a box ever be cut down here, its holes
+// would no longer fit it, and a full rectangle is the safe reading.
+private _fitW = (_w min STORAGE_COLS) max 1;
+private _fitH = (_h min MAX_ROWS) max 1;
+
+if (_fitW != _w || {_fitH != _h}) then {
+    _holes = [];
+};
+
+_result set ["footprint", [_fitW, _fitH, _holes]];
 _result set ["src", _src];
 
 _result

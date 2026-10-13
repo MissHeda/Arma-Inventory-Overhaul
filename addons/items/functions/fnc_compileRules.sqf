@@ -51,7 +51,7 @@
  *                   set, fields preset rules can set] <HASHMAP>
  *   "hash"        - one value for all of it, to compare between machines <STRING>
  *   "warnings"    - everything left out or cut down <ARRAY of STRING>
- * A rule's values: "like" the class in lowercase <STRING>, "footprint" [w, h, []] or "mass", "stack"
+ * A rule's values: "like" the class in lowercase <STRING>, "footprint" [w, h, holes] or "mass", "stack"
  * <NUMBER>, "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING>. A rule with like=
  * counts in byKind as setting every one of LIKE_FIELDS, which fnc_resolve takes from that class.
  *
@@ -482,9 +482,14 @@ private _fnc_values = {
                 if (_y isEqualTo "mass") then {
                     _compiledValues set ["footprint", "mass"];
                 } else {
-                    private _sides = _y splitString "x";
+                    // WxH has digits, a drawn shape none (fnc_parseRules let only those two through).
+                    if ((toArray _y) findIf {_x >= 48 && {_x <= 57}} >= 0) then {
+                        private _sides = _y splitString "x";
 
-                    _compiledValues set ["footprint", [parseNumber (_sides select 0), parseNumber (_sides select 1), []]];
+                        _compiledValues set ["footprint", [parseNumber (_sides select 0), parseNumber (_sides select 1), []]];
+                    } else {
+                        _compiledValues set ["footprint", [_y] call FUNC(parseMask)];
+                    };
                 };
             };
             case "grid": {

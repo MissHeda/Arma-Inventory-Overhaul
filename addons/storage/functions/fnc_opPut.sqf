@@ -9,7 +9,7 @@
  * (fnc_addPayload) is "Bounced" with the rest; the record at the spot, the nested places and tag
  * restored (fnc_addPayload). The execution's view of the holder follows (fnc_findEntry).
  *
- * Extra: [landed cell [col, row, block, w, h] - [] in an overflow row -, elsewhere]; when it bounced a
+ * Extra: [landed cell [col, row, block, w, h, rot] - [] in an overflow row -, elsewhere]; when it bounced a
  * third element says why: "Gone" (nothing to put it into), "NoBackpack" (a backpack into a
  * backpack), "NoRoom", "Failed" (the engine took none of it).
  *
@@ -105,35 +105,17 @@ private _blocks = _view getOrDefault ["blocks", []];
 private _open = _view getOrDefault ["open", false];
 private _taken = [_blocks] call FUNC(seedTaken);
 
+// A shaped item (size=xx/x-) takes only its own cells, holes as it lies (einv_items_fnc_footprintAs).
 private _fnc_mark = {
-    params ["_block", "_col", "_row", "_w", "_h"];
+    params ["_block", "_col", "_row", "_w", "_h", ["_holes", []]];
 
     if (_block < 0 || {_block >= count _blocks}) exitWith {};
 
-    private _cols = (_blocks select _block) select 0;
-    private _grid = _taken select _block;
-
-    while {count _grid < _row + _h} do {
-        private _line = [];
-
-        for "_i" from 1 to _cols do {
-            _line pushBack false;
-        };
-
-        _grid pushBack _line;
-    };
-
-    for "_r" from (_row max 0) to (_row + _h - 1) do {
-        private _line = _grid select _r;
-
-        for "_c" from (_col max 0) to ((_col + _w - 1) min (_cols - 1)) do {
-            _line set [_c, true];
-        };
-    };
+    [_taken select _block, (_blocks select _block) select 0, _col, _row, _w, _h, _holes] call FUNC(takeCells);
 };
 
 private _fnc_free = {
-    params ["_block", "_col", "_row", "_w", "_h"];
+    params ["_block", "_col", "_row", "_w", "_h", ["_holes", []]];
 
     if (_block < 0 || {_block >= count _blocks}) exitWith {false};
 
@@ -141,21 +123,12 @@ private _fnc_free = {
 
     if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {!_open && {_row + _h > _rows}}) exitWith {false};
 
-    private _grid = _taken select _block;
-    private _free = true;
-
-    for "_r" from _row to ((_row + _h - 1) min (count _grid - 1)) do {
-        if (((_grid select _r) select [_col, _w]) findIf {_x} >= 0) exitWith {
-            _free = false;
-        };
-    };
-
-    _free
+    [_taken select _block, _col, _row, _w, _h, _holes] call FUNC(cellsFree)
 };
 
 // Compartment after compartment, row by row - past the last row of an open grid everything is free.
 private _fnc_firstFit = {
-    params ["_w", "_h"];
+    params ["_w", "_h", ["_holes", []]];
 
     private _found = [];
 
@@ -167,7 +140,7 @@ private _fnc_firstFit = {
 
         for "_row" from 0 to _last do {
             for "_col" from 0 to (_cols - _w) do {
-                if ([_block, _col, _row, _w, _h] call _fnc_free) exitWith {
+                if ([_block, _col, _row, _w, _h, _holes] call _fnc_free) exitWith {
                     _found = [_col, _row, _block, _w, _h];
                 };
             };
@@ -183,30 +156,48 @@ private _fnc_firstFit = {
 
 {
     if ((_x getOrDefault ["count", 1]) > 0 && {!(_x getOrDefault ["overflow", false])}) then {
-        [_x getOrDefault ["block", -1], _x getOrDefault ["col", 0], _x getOrDefault ["row", 0], _x getOrDefault ["w", 1], _x getOrDefault ["h", 1]] call _fnc_mark;
+        [_x getOrDefault ["block", -1], _x getOrDefault ["col", 0], _x getOrDefault ["row", 0], _x getOrDefault ["w", 1], _x getOrDefault ["h", 1], _x getOrDefault ["holes", []]] call _fnc_mark;
     };
 } forEach _tiles;
 
-// The requested cell when it is free - in the item's size, either way round -, else the first fit,
-// upright, then turned.
-(([_class] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]]) params [["_w", 1, [0]], ["_h", 1, [0]]];
-_cell params [["_col", -1, [0]], ["_row", -1, [0]], ["_block", 0, [0]], ["_cellW", _w, [0]], ["_cellH", _h, [0]]];
+// The requested cell when it is free - in the item's size, the way round it says (rot, 1 turned a
+// quarter clockwise; a cell without it is turned when not as wide as the item upright) -, else the
+// first fit, upright, then turned. A shaped item (size=xx/x-) is asked with its holes as it would lie,
+// and one in a square box is tried turned too when that takes other cells.
+private _info = [_class] call EFUNC(items,getInfo);
 
-if !([_cellW, _cellH] isEqualTo [_w, _h] || {[_cellW, _cellH] isEqualTo [_h, _w]}) then {
-    _cellW = _w;
-    _cellH = _h;
+(_info getOrDefault ["footprint", [1, 1, []]]) params [["_w", 1, [0]], ["_h", 1, [0]], ["_holes", [], [[]]]];
+_cell params [["_col", -1, [0]], ["_row", -1, [0]], ["_block", 0, [0]], ["_cellW", _w, [0]], ["_cellH", _h, [0]], ["_cellRot", -1, [0]]];
+
+if !(_cellRot in [0, 1]) then {
+    _cellRot = parseNumber (_cellW != _w);
 };
 
+if (([[_w, _h], [_h, _w]] select (_cellRot == 1)) isNotEqualTo [_cellW, _cellH]) then {
+    _cellW = _w;
+    _cellH = _h;
+    _cellRot = 0;
+};
+
+private _turnedHoles = (_info getOrDefault ["footprintTurned", [_h, _w, []]]) param [2, []];
 private _spot = [];
 private _elsewhere = false;
 
-if (_cell isNotEqualTo [] && {[_block, _col, _row, _cellW, _cellH] call _fnc_free}) then {
-    _spot = [_col, _row, _block, _cellW, _cellH];
+if (_cell isNotEqualTo [] && {[_block, _col, _row, _cellW, _cellH, [_holes, _turnedHoles] select (_cellRot == 1)] call _fnc_free}) then {
+    _spot = [_col, _row, _block, _cellW, _cellH, _cellRot];
 } else {
-    _spot = [_w, _h] call _fnc_firstFit;
+    _spot = [_w, _h, _holes] call _fnc_firstFit;
 
-    if (_spot isEqualTo [] && {_w != _h}) then {
-        _spot = [_h, _w] call _fnc_firstFit;
+    if (_spot isNotEqualTo []) then {
+        _spot pushBack 0;
+    } else {
+        if (_w != _h || {_holes isNotEqualTo _turnedHoles}) then {
+            _spot = [_h, _w, _turnedHoles] call _fnc_firstFit;
+
+            if (_spot isNotEqualTo []) then {
+                _spot pushBack 1;
+            };
+        };
     };
 
     _elsewhere = _cell isNotEqualTo [] && {_spot isNotEqualTo []};
@@ -262,7 +253,8 @@ if (_rest isEqualTo [] && {_type in ["weapon", "magazine"] || {_type isEqualTo "
         ["row", _spot param [1, 0]],
         ["w", _spot param [3, _w]],
         ["h", _spot param [4, _h]],
-        ["rotated", (_spot param [3, _w]) != _w],
+        ["rotated", (_spot param [5, 0]) == 1],
+        ["holes", [_holes, _turnedHoles] select ((_spot param [5, 0]) == 1)],
         ["overflow", _spot isEqualTo []]
     ];
 } else {

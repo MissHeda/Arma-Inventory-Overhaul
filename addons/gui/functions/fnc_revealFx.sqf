@@ -28,8 +28,10 @@ private _background = _tile getOrDefault ["background", controlNull];
 
 if (isNull _background || {_tile getOrDefault ["hidden", false]}) exitWith {};
 
+private _backgrounds = _tile getOrDefault ["backgrounds", [_background]];
+
 {
-    if (_x isNotEqualTo _background) then {
+    if !(_x in _backgrounds) then {
         _x ctrlSetFade 1;
         _x ctrlCommit 0;
         _x ctrlSetFade 0;

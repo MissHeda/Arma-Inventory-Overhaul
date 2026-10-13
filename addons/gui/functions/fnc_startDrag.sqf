@@ -185,6 +185,7 @@ _footprint ctrlShow false;
 private _stack = _entry getOrDefault ["count", 1];
 
 GVAR(dragSize) = [_entry getOrDefault ["w", 1], _entry getOrDefault ["h", 1]];
+GVAR(dragRot) = parseNumber (_entry getOrDefault ["rotated", false]);
 GVAR(dragCount) = [_stack, (floor (_stack / 2)) max 1] select (_shift && {_stack > 1} && {_group isEqualTo []});
 
 // From a source grid the count starts at the tile's own number (one, for the catalog) and Shift takes the
@@ -213,6 +214,43 @@ if (_group isNotEqualTo []) then {
 
     uiNamespace setVariable [QGVAR(dragFootprints), _footprints];
 };
+
+// A shaped item (size=xx/x-) shows its footprint on its own cells (fnc_shapeRects, fnc_updateDrag): the
+// controls for them, made here so they lie under the ghost as the footprint does - as many as it needs
+// held either way round, for a group as many as its shaped tiles need as they lie.
+private _shapeCount = 0;
+
+if (_group isEqualTo []) then {
+    private _shapeInfo = [_entry getOrDefault ["class", ""]] call EFUNC(items,getInfo);
+
+    {
+        if ((_x param [2, []]) isNotEqualTo []) then {
+            _shapeCount = _shapeCount max count ([[0, 0], 1, 1, _x] call FUNC(shapeRects));
+        };
+    } forEach [_shapeInfo getOrDefault ["footprint", [1, 1, []]], _shapeInfo getOrDefault ["footprintTurned", [1, 1, []]]];
+} else {
+    {
+        _x params ["_shapeGrid", "_shapeTile"];
+
+        private _tile = (((uiNamespace getVariable [QGVAR(grids), []]) param [_shapeGrid, createHashMap]) getOrDefault ["tiles", []]) param [_shapeTile, createHashMap];
+        private _tileHoles = _tile getOrDefault ["holes", []];
+
+        if (_tileHoles isNotEqualTo []) then {
+            _shapeCount = _shapeCount + count ([[0, 0], 1, 1, [_tile get "w", _tile get "h", _tileHoles]] call FUNC(shapeRects));
+        };
+    } forEach (_group select [0, 150]);
+};
+
+private _shapes = [];
+
+for "_i" from 1 to _shapeCount do {
+    private _shape = [_display, "EINV_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
+
+    _shape ctrlShow false;
+    _shapes pushBack _shape;
+};
+
+uiNamespace setVariable [QGVAR(dragShapes), _shapes];
 
 // The slots that take it light up - under the ghost, which comes last. Several tiles go into no slot; a
 // worn item lights up the same slot of the unit it may be exchanged with.

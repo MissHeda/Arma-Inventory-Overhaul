@@ -15,6 +15,11 @@
  * The picture is fitted into the tile with its own shape kept. On a tile that lies turned ("rotated",
  * fnc_getLayout) it turns along (fnc_uiPictureTurned); what is on a weapon shows only upright.
  *
+ * A shaped item (size=xx/x-, its "holes" as it lies, einv_storage_fnc_getLayout) covers only its own
+ * cells: its surface, border and the outline of a hidden one are drawn on those (fnc_uiShape), and the
+ * cells under its holes stay as they are - something else may lie there. Its picture, name and count
+ * keep to its box, as a rectangle's do.
+ *
  * How the count shows (theme "tileCount"):
  *   "text"  - words in the bottom right corner, on a dark pill of their own so that they read on a white
  *             picture too (tileCountBg, fnc_drawCountBackdrop); plain words where the theme has none
@@ -27,12 +32,14 @@
  * 1: Grid, see fnc_createGrid <HASHMAP>
  * 2: Entry, see einv_storage_fnc_getContents - placed by einv_storage_fnc_getLayout <HASHMAP>
  *   "class", "col", "row", "w", "h" - the item, its top left cell and its size in cells
+ *   "holes" (optional) - the cells of its box a shaped item does not take, as it lies
  *   "count", "ammo", "capacity" (optional) - how many, a magazine's rounds and how many it holds
  *   "hidden" (optional) - not searched yet <BOOL>
  * 3: Theme <HASHMAP>
  *
  * Return Value:
- * None - the entry gets "controls", "background" and "color" - and "mark", the "?" of a hidden one;
+ * None - the entry gets "controls", "background" and "color", "backgrounds" (every surface: a shaped
+ * one has several, "background" is the first) and "rect" (its box) - and "mark", the "?" of a hidden one;
  * a magazine's "bar" (its fill bar's controls) and "barRect", and "amount" (the label of its rounds) with
  * "amountShort" (written without the capacity), which a repack in progress draws over
  * (einv_magazines_fnc_drawJob) - and joins the grid's "tiles"
@@ -66,10 +73,20 @@ private _row = _entry getOrDefault ["row", 0];
 private _w = ((_entry getOrDefault ["w", _sizeW]) min (_cols - _col)) max 1;
 private _h = (_entry getOrDefault ["h", _sizeH]) max 1;
 
-// The cells under the tile make way for it.
+// A shaped item's holes, as it lies. Cut at the grid's edge, its cells would no longer match them: the
+// box is drawn then.
+private _holes = _entry getOrDefault ["holes", []];
+
+if (_w != (_entry getOrDefault ["w", _sizeW])) then {
+    _holes = [];
+};
+
+private _shaped = _holes isNotEqualTo [];
+
+// The cells under the tile make way for it - not those under its holes.
 for "_r" from _row to (_row + _h - 1) do {
     for "_c" from _col to (_col + _w - 1) do {
-        if (_r < _rows && {_c < _cols}) then {
+        if (_r < _rows && {_c < _cols} && {!(((_r - _row) * _w + _c - _col) in _holes)}) then {
             (_cells select (_r * _cols + _c)) ctrlShow false;
         };
     };
@@ -97,13 +114,30 @@ private _color = if (_hidden) then {
     (_theme getOrDefault ["tileBg", []]) param [_info getOrDefault ["category", 0], [1, 1, 1, 0.075]]
 };
 
-private _background = [_display, "EINV_PanelRect", _parent, [_left, _top, _width, _height]] call FUNC(uiCreate);
-_background ctrlSetBackgroundColor _color;
-_controls pushBack _background;
+private _backgrounds = if (_shaped) then {
+    [_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _color] call FUNC(uiShape)
+} else {
+    private _ctrl = [_display, "EINV_PanelRect", _parent, [_left, _top, _width, _height]] call FUNC(uiCreate);
+
+    _ctrl ctrlSetBackgroundColor _color;
+    [_ctrl]
+};
+private _background = _backgrounds select 0;
+
+_controls append _backgrounds;
 
 if (_hidden) then {
     if (_theme getOrDefault ["hatch", false]) then {
-        _controls append ([_display, _parent, [_left, _top, _width, _height], _theme getOrDefault ["line", [1, 1, 1, 0.07]]] call FUNC(uiHatch));
+        // A shaped one hatched run by run - the bridges between its rows are too thin for it.
+        private _hatched = if (_shaped) then {
+            (_backgrounds apply {ctrlPosition _x}) select {(_x select 3) > pixelH * 2}
+        } else {
+            [[_left, _top, _width, _height]]
+        };
+
+        {
+            _controls append ([_display, _parent, _x, _theme getOrDefault ["line", [1, 1, 1, 0.07]]] call FUNC(uiHatch));
+        } forEach _hatched;
     };
 
     // Its outline, a little lighter than the lines between the cells: a step above an empty cell alone,
@@ -113,7 +147,11 @@ if (_hidden) then {
         private _edge = +(_theme getOrDefault ["line", [1, 1, 1, 0.09]]);
         _edge set [3, ((_edge select 3) * 1.8) min 1];
 
-        _controls pushBack ([_display, _parent, [_left, _top, _width, _height], _edge] call FUNC(uiFrame));
+        if (_shaped) then {
+            _controls append ([_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _edge, "frame"] call FUNC(uiShape));
+        } else {
+            _controls pushBack ([_display, _parent, [_left, _top, _width, _height], _edge] call FUNC(uiFrame));
+        };
     };
 
     // The "?" - it gives way to the glass while the item is searched (fnc_showSearch).
@@ -291,11 +329,17 @@ if (_hidden) then {
 private _border = _theme getOrDefault ["tileBorder", []];
 
 if (_border isNotEqualTo []) then {
-    _controls pushBack ([_display, _parent, [_left, _top, _width, _height], _border] call FUNC(uiFrame));
+    if (_shaped) then {
+        _controls append ([_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _border, "frame"] call FUNC(uiShape));
+    } else {
+        _controls pushBack ([_display, _parent, [_left, _top, _width, _height], _border] call FUNC(uiFrame));
+    };
 };
 
 _entry set ["controls", _controls];
 _entry set ["background", _background];
+_entry set ["backgrounds", _backgrounds];
+_entry set ["rect", [_left, _top, _width, _height]];
 _entry set ["color", _color];
 
 (_grid get "tiles") pushBack _entry;

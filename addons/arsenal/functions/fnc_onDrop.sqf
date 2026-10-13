@@ -39,7 +39,7 @@
 params [
     ["_kind", "", [""]], ["_sourceIndex", -1, [0]], ["_tileIndex", -1, [0]], ["_slotSource", [], [[]]],
     ["_entry", createHashMap, [createHashMap]], ["_count", -1, [0]], ["_targetIndex", -1, [0]], ["_col", 0, [0]],
-    ["_row", 0, [0]], ["_w", 1, [0]], ["_h", 1, [0]]
+    ["_row", 0, [0]], ["_w", 1, [0]], ["_h", 1, [0]], "", "", ["_rot", 0, [0]]
 ];
 
 GVAR(dragZone) = "";
@@ -55,7 +55,7 @@ if ((_from getOrDefault ["source", ""]) isEqualTo "aceList") exitWith {
 
         [
             _target getOrDefault ["container", objNull], _entry getOrDefault ["class", ""], _amount,
-            [_col, _row, _target getOrDefault ["block", 0], _w, _h]
+            [_col, _row, _target getOrDefault ["block", 0], _w, _h, _rot]
         ] call FUNC(addTo);
     };
 

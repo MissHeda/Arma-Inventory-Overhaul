@@ -2,9 +2,10 @@
 /*
  * Author: Miss Heda
  * Where things lie in a holder, as its authority last wrote it (fnc_writePlaces): [revision, records],
- * each record [key, col, row, w, h, block] - w and h as it lies - and the records canonical, sorted by
- * key and then by the entry's index within its key, so two machines with the same data hold the same
- * array.
+ * each record [key, col, row, w, h, block, rot] - w and h as it lies, rot 1 when it lies turned a
+ * quarter clockwise (a record written before rot has six elements; fnc_getLayout reads it by its size) -
+ * and the records canonical, sorted by key and then by the entry's index within its key, so two machines
+ * with the same data hold the same array.
  *
  * A holder is a container object or the key of a grid with no object of its own ("kit:" + the lowercase
  * class, einv_compat_efak). While a phase runs here (fnc_execute), what its ops changed comes first,

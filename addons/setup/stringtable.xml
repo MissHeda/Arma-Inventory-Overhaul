@@ -1036,6 +1036,9 @@
         <Key ID="STR_einv_setup_Value_Size">
             <English>%1×%2 cells</English>
         </Key>
+        <Key ID="STR_einv_setup_Value_SizeShape">
+            <English>%3 cells shaped in %1×%2</English>
+        </Key>
         <Key ID="STR_einv_setup_Value_Stack">
             <English>%1 per tile</English>
         </Key>

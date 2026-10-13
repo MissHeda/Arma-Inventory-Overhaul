@@ -43,7 +43,8 @@ if (isNull _background) exitWith {};
 
 // On the tile, in its group, so it scrolls and clips with it.
 private _parent = ctrlParentControlsGroup _background;
-(ctrlPosition _background) params ["_left", "_top", "_width", "_height"];
+// Its box: a shaped tile's first surface is only its top row's first run (fnc_createTile).
+(_tile getOrDefault ["rect", ctrlPosition _background]) params ["_left", "_top", "_width", "_height"];
 
 private _size = ((_width / pixelW) min (_height / pixelH)) * SEARCH_RING_SIZE;
 private _centerX = _left + _width / 2;

@@ -2902,3 +2902,44 @@ Three fixes from the owner's test of the window; none of it has run in the game 
   (`fnc_drawCountBackdrop`: `tileCountBg`, now `[0.03, 0.03, 0.03, 0.75]` and used by the "text" count style too; `[]` means none),
   round-ended in a round theme, in the corner the text sat in and sized for the widest text the label can show, since a repack writes
   the rounds live. Slots with a count (`fnc_drawSlot`) get the same. The "pill" and "badge" styles keep their own boxes.
+
+## Shaped items (0.4.0) - supersedes the parts above it contradicts
+
+So an item can take exactly the cells it has - an L-shaped pistol, a T-shaped launcher - as a compartment can.
+
+- **Grammar (`fnc_parseRules`, `fnc_parseMask`, `fnc_formatMask`):** `size=` (and `shape=`) take the mask of a grid's
+  compartment, one block, no `+`: rows from the top split by `/`, `x` a cell, `-` a hole. `size=xx/x-` is an L of 3 cells in
+  a 2x2 box. A value of only `x`, `-`, `/` is a mask, else `WxH` / `mass` as before. `fnc_parseMask` is the one mask reader
+  (`fnc_parseGrid` uses it, `fnc_formatGrid` writes with `fnc_formatMask`): edge rows/columns of holes go, the shortest form
+  is written (`size=xx/xx` comes back `2x2`). Limits: a mask at most `SHAPE_MAX` (8) each way - larger keeps its top left
+  8x8, with a note - and at least one cell. The wizard says "3 cells shaped in 2×2" (`fnc_describeRule`, `fnc_answerText`).
+- **Footprint (`fnc_resolve`, `fnc_getInfo`):** `"footprint"` is `[w, h, holes]` upright, holes the indices `row * w + col`,
+  `[]` for a full rectangle, as grids. `like=` carries it; `einv_gridSize[]` stays a rectangle. getInfo adds `"footprint"`,
+  `"footprintTurned"`, `"cells"` less holes, `"shape"` shortest; `"size"` stays `[w, h]`, the box.
+- **Rotation and the place record:** turned is a quarter clockwise, as the picture turns (`ctrlSetAngle 90`): the cell
+  `(c, r)` of the upright mask lies at `(h - 1 - r, c)` of the turned one (`fnc_turnMask`); two ways round only. A place
+  record is now `[key, col, row, w, h, block, rot]`, rot 0 upright, 1 turned; a cell sent to an op `[col, row, block, w,
+  h, rot]`, and the `drop` hook gets rot as its 14th argument. Every producer writes rot (`fnc_setPlace`, `fnc_getLayout`
+  "records", `fnc_plan` turned cells, `fnc_opPut`, `fnc_opPlaceMany`, `fnc_opSort`, `fnc_opRepack`, efak `fnc_putIntoKit` /
+  `fnc_opKitPlace`, gui `fnc_endDrag` / `fnc_sendPlan`, arsenal `fnc_onDrop`); `fnc_writePlaces`, the loadout paths
+  (`fnc_onLoadoutGet` / `Set` / `Places`) and snapshots keep a valid rot and pass a six-element record unchanged. A
+  record or cell without rot (saved places, loadouts, snapshots, payloads from before) reads as before: turned when its
+  `w` is not the upright one. `fnc_getLayout` counts no drift for that alone, so old places are not all rewritten. The
+  holes come from the class at use time (`fnc_footprintAs [class, rot]`), so only rot is synced. A shape in a square box
+  turns (R, and first fit / `fnc_plan` / `fnc_opPut` try it) when turned it takes other cells; a square rectangle does
+  not. The drag keeps `GVAR(dragRot)` apart from `GVAR(dragSize)` (`fnc_startDrag`, `fnc_rotateDrag`, `fnc_makeGhost`);
+  R turns the grabbed cell along, clockwise and back, so the item stays held by the same cell.
+- **Readers of the holes:** storage - `fnc_getLayout` (every entry gets `"holes"` as it lies; exact, kin and first fit ask
+  per entry, both ways round), `fnc_plan`, `fnc_opPut`, `fnc_opPlaceMany`, all through `fnc_cellsFree` / `fnc_takeCells`
+  on the taken rows `fnc_seedTaken` starts (so `fnc_hasSpace`, `fnc_findEntry`, quick moves and the authority agree; a
+  small item may lie in the corner of an L); compat_efak `fnc_putIntoKit`, `fnc_opKitPlace` through `fnc_overlaps`. gui -
+  `fnc_createTile` (surface, border and a hidden tile's outline per run of cells with one-pixel bridges, `fnc_uiShape` /
+  `fnc_shapeRects`, each pixel once; cells under its holes stay shown; `"backgrounds"` and `"rect"` on the tile for hover,
+  flash, reveal, search ring and the repack film), `fnc_tileAt` (hover, click, kit and repack targets miss the holes),
+  `fnc_hitsHole` (an item's own hole over a grid hole is fine), `fnc_updateDrag` and `fnc_groupMode` (green/red on the mask's
+  cells from a pool of controls made in `fnc_startDrag`, clipped to the grid), `fnc_drawSelection`, `fnc_updateBand`.
+- **Keep the box on purpose:** picture (centred), name, badge, count pill, ghost; inspect card, hotbar, slots, compare
+  rows, the wizard's item editor and preview; arsenal `fnc_sayNoRoom` / `fnc_listDrag` / `fnc_ungrey`; "largest first";
+  the overflow row and a tile cut at the grid's edge; in-flight outlines and their busy check; the footprint over a kit's
+  or magazine's tile.
+- Built and checked in code only: nothing of this has run in the game yet.

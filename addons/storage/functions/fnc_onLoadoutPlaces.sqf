@@ -12,7 +12,8 @@
  *
  * Arguments:
  * 0: Unit <OBJECT>
- * 1: Records per container, [uniform, vest, backpack], each [[key, col, row, w, h, block], ...] <ARRAY>
+ * 1: Records per container, [uniform, vest, backpack], each [[key, col, row, w, h, block, rot], ...] -
+ *    rot may be missing (an older loadout) <ARRAY>
  *
  * Return Value:
  * None
@@ -54,7 +55,8 @@ if (isNull _unit) exitWith {};
 
             _order sort true;
 
-            [_container, _order apply {(_list select (_x select 1)) select [0, 6]}] call FUNC(writePlaces);
+            // Which way round goes along when a record says it (fnc_writePlaces keeps a valid rot).
+            [_container, _order apply {(_list select (_x select 1)) select [0, 7]}] call FUNC(writePlaces);
         };
     } forEach [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
 }, [_unit, _records]] call FUNC(nextFrame);

@@ -70,6 +70,19 @@ private _frames = [];
         (_tile get "h") * _cellH - pixelH
     ];
 
+    // A shaped tile (size=xx/x-) on its own cells only, as it is drawn (fnc_createTile, fnc_uiShape).
+    private _holes = _tile getOrDefault ["holes", []];
+
+    if (_holes isNotEqualTo []) then {
+        private _footprint = [_tile get "w", _tile get "h", _holes];
+        private _origin = [_rect select 0, _rect select 1];
+
+        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _fill] call FUNC(uiShape));
+        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame"] call FUNC(uiShape));
+        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame", 1] call FUNC(uiShape));
+        continue;
+    };
+
     private _filled = [_display, "EINV_PanelRect", _parent, _rect] call FUNC(uiCreate);
     _filled ctrlSetBackgroundColor _fill;
     _frames pushBack _filled;

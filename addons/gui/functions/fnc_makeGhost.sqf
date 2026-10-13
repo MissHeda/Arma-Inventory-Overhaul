@@ -60,7 +60,7 @@ if (GVAR(dragGroup) isNotEqualTo [] && {(uiNamespace getVariable [QGVAR(dragGhos
         private _tileW = _tile getOrDefault ["w", _tileSizeW];
         private _tileH = _tile getOrDefault ["h", _tileSizeH];
         private _tileRect = [0, 0, _tileW * _cellW, _tileH * _cellH];
-        private _tileTurned = _tileW != _tileSizeW && {_tileSizeW != _tileSizeH};
+        private _tileTurned = _tile getOrDefault ["rotated", _tileW != _tileSizeW && {_tileSizeW != _tileSizeH}];
         private _picture = _tileInfo getOrDefault ["picture", ""];
 
         private _ghost = if (_tileTurned) then {
@@ -84,7 +84,7 @@ GVAR(dragSize) params ["_w", "_h"];
 (_info getOrDefault ["size", [1, 1]]) params ["_sizeW", "_sizeH"];
 
 private _rect = [0, 0, _w * _cellW, _h * _cellH];
-private _turned = _w != _sizeW && {_sizeW != _sizeH};
+private _turned = GVAR(dragRot) == 1;
 private _picture = _info getOrDefault ["picture", ""];
 
 private _ghost = if (_turned) then {

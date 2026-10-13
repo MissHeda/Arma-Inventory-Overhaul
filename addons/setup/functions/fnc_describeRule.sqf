@@ -8,8 +8,8 @@
  *   @ak: kind=magazine class~762x39       Group ak: kind magazine, class contains 762x39
  *
  * Groups by their names in the items addon's stringtable or a preset's config, a group of the player's
- * own by its id. Item shapes have no words yet - they come in a later version - and show as they are
- * written; a shaped compartment (grid=xxx/x-x) is told by its size and its cells, like=X by the class.
+ * own by its id. A shaped item (size=xx/x-) is told by its cells and the box around them, "3 cells
+ * shaped in 2×2"; a shaped compartment (grid=xxx/x-x) by its size and its cells, like=X by the class.
  *
  *   class=My_Vest > like=V_PlateCarrier1_rgr grid=xxxx/x--x
  *                                         Class My_Vest: like V_PlateCarrier1_rgr, compartments
@@ -197,8 +197,16 @@ private _fnc_values = {
     if (_footprint isNotEqualTo "") then {
         private _size = (toLower _footprint) splitString "x";
 
+        // A drawn shape (size=xx/x-) has no digit: told by its cells and the box around them.
+        private _mask = if ((toArray _footprint) findIf {_x >= 48 && {_x <= 57}} < 0) then {[_footprint] call EFUNC(items,parseMask)} else {[-1]};
+
         _parts pushBack (switch (true) do {
             case (_footprint == "mass"): {LLSTRING(Value_Mass)};
+            case ((_mask select 0) > 0): {
+                _mask params ["_cols", "_rows", "_holes"];
+
+                format [LLSTRING(Value_SizeShape), _cols, _rows, _cols * _rows - count _holes]
+            };
             case (count _size == 2 && {parseNumber (_size select 0) > 0} && {parseNumber (_size select 1) > 0}): {
                 format [LLSTRING(Value_Size), _size select 0, _size select 1]
             };

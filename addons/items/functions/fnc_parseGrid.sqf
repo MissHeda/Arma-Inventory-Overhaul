@@ -15,8 +15,9 @@
  *                   "/", each the same length, "x" a cell and "-" a hole - a cell the compartment does
  *                   not have. Joined with "+" like the others, and mixed with them.
  *
- * A shape is read to its smallest form: rows and columns at its edges that are only holes go, and a
- * shape with no hole left is a plain WxH - fnc_formatGrid writes it as 2x3 again. The separator is
+ * A shape is read to its smallest form (fnc_parseMask, which reads an item's size= the same way): rows
+ * and columns at its edges that are only holes go, and a shape with no hole left is a plain WxH -
+ * fnc_formatGrid writes it as 2x3 again. The separator is
  * "/" because it is the one character the rules already allow that reads as "next row"; a row can
  * never be empty, so "//" - which a cba_settings.sqf could take for a comment - is never part of a
  * grid.
@@ -74,99 +75,15 @@ private _fnc_cells = {
     _cells
 };
 
-// A shape as [cols, rows, holes] at its smallest - the rows and columns at its edges that are only holes
-// cut away - or [-1, -1, why] when it cannot be read.
-private _fnc_shape = {
-    params ["_piece"];
-
-    private _lines = _piece splitString "/";
-
-    // splitString drops empty rows; a shape has none - and so never holds "//".
-    if (count _lines != ({_x == 47} count toArray _piece) + 1) exitWith {
-        [-1, -1, "every row of a shape holds cells or holes, like xxx/x-x"]
-    };
-
-    if ((toArray _piece) findIf {!(_x in [120, 45, 47])} >= 0) exitWith {
-        [-1, -1, "a shape is drawn with x for a cell and - for a hole, rows separated by /, like xxx/x-x"]
-    };
-
-    private _width = count (_lines select 0);
-
-    if (_lines findIf {count _x != _width} >= 0) exitWith {
-        [-1, -1, "every row of a shape is as long as the first, like xxx/x-x"]
-    };
-
-    // Where the cells are: the smallest rectangle around them.
-    private _left = _width;
-    private _right = -1;
-    private _top = -1;
-    private _bottom = -1;
-
-    {
-        private _row = _forEachIndex;
-        private _first = _x find "x";
-
-        if (_first >= 0) then {
-            private _codes = toArray _x;
-            private _last = _width - 1;
-
-            while {(_codes select _last) != 120} do {_last = _last - 1};
-
-            _left = _left min _first;
-            _right = _right max _last;
-            _bottom = _row;
-
-            if (_top < 0) then {_top = _row};
-        };
-    } forEach _lines;
-
-    if (_top < 0) exitWith {
-        [-1, -1, "a shape needs at least one cell (x)"]
-    };
-
-    private _cols = _right - _left + 1;
-    private _rows = _bottom - _top + 1;
-    private _holes = [];
-
-    for "_r" from 0 to (_rows - 1) do {
-        private _line = (_lines select (_top + _r)) select [_left, _cols];
-
-        for "_c" from 0 to (_cols - 1) do {
-            if ((_line select [_c, 1]) isEqualTo "-") then {
-                _holes pushBack (_r * _cols + _c);
-            };
-        };
-    };
-
-    [_cols, _rows, _holes]
-};
-
-// A compartment cut down to STORAGE_COLS across and MAX_ROWS down. A shape is drawn again from what
-// is left and read once more, so it comes out at its smallest as any other; with no cell left it is
-// [0, 0, []] and left out.
+// A compartment cut down to STORAGE_COLS across and MAX_ROWS down. A shape is drawn again and read once
+// more within those limits (fnc_formatMask, fnc_parseMask), so it comes out at its smallest as any
+// other; with no cell left it is [0, 0, []] and left out.
 private _fnc_cut = {
     params ["_cols", "_rows", "_holes"];
 
-    private _newCols = _cols min STORAGE_COLS;
-    private _newRows = _rows min MAX_ROWS;
+    if (_holes isEqualTo []) exitWith {[_cols min STORAGE_COLS, _rows min MAX_ROWS, []]};
 
-    if (_holes isEqualTo []) exitWith {[_newCols, _newRows, []]};
-
-    private _lines = [];
-
-    for "_r" from 0 to (_newRows - 1) do {
-        private _line = "";
-
-        for "_c" from 0 to (_newCols - 1) do {
-            _line = _line + (["x", "-"] select ((_r * _cols + _c) in _holes));
-        };
-
-        _lines pushBack _line;
-    };
-
-    private _shape = [_lines joinString "/"] call _fnc_shape;
-
-    [_shape, [0, 0, []]] select ((_shape select 0) < 1)
+    [[_cols, _rows, _holes] call FUNC(formatMask), STORAGE_COLS, MAX_ROWS] call FUNC(parseMask)
 };
 
 private _colon = _value find ":";
@@ -227,7 +144,7 @@ private _spec = switch (true) do {
         // [-1, -1, error].
         private _blocks = (_value splitString "+") apply {
             if ((toArray _x) findIf {_x >= 48 && {_x <= 57}} < 0) then {
-                [_x] call _fnc_shape
+                [_x] call FUNC(parseMask)
             } else {
                 private _cross = _x find "x";
 

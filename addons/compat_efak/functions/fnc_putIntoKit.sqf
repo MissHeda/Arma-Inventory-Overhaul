@@ -20,12 +20,13 @@
  * Arguments:
  * 0: Kit class <STRING>
  * 1: Payload, see einv_storage_fnc_removeEntry <ARRAY>
- * 2: Cell [col, row, compartment, w, h] in the kit's grid, [] to let its layout find one <ARRAY>
+ * 2: Cell [col, row, compartment, w, h, rot] in the kit's grid (rot 1 turned a quarter clockwise; left
+ *    out, by its size), [] to let its layout find one <ARRAY>
  *    (default: [])
  *
  * Return Value:
  * [why not - "" when written, else "Failed" or a reason in words, the cell it landed on [col, row,
- *  compartment, w, h] - [] when unknown, put elsewhere than asked] <ARRAY>
+ *  compartment, w, h, rot] - [] when unknown, put elsewhere than asked] <ARRAY>
  *
  * Example:
  * ["efak_ifak_7", ["item", "ACE_fieldDressing", 3, []], [2, 0, 0, 1, 1]] call einv_compat_efak_fnc_putIntoKit;
@@ -78,24 +79,31 @@ private _elsewhere = false;
 
 if (_cell isNotEqualTo []) then {
     (([_class] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]]) params [["_sizeW", 1], ["_sizeH", 1]];
-    _cell params [["_col", -1, [0]], ["_row", -1, [0]], ["_block", 0, [0]], ["_w", _sizeW, [0]], ["_h", _sizeH, [0]]];
+    _cell params [["_col", -1, [0]], ["_row", -1, [0]], ["_block", 0, [0]], ["_w", _sizeW, [0]], ["_h", _sizeH, [0]], ["_rot", -1, [0]]];
 
-    // Upright or turned a quarter (R while dragging) - never another size.
-    if !([_w, _h] in [[_sizeW, _sizeH], [_sizeH, _sizeW]]) then {
-        _w = _sizeW;
-        _h = _sizeH;
+    // Upright or turned a quarter clockwise (R while dragging; rot 1, else by its size) - never another
+    // size.
+    if !(_rot in [0, 1]) then {
+        _rot = parseNumber (_w != _sizeW);
     };
 
-    // A kit's grid is one open compartment, STORAGE_COLS wide and as long as it needs.
+    if (([[_sizeW, _sizeH], [_sizeH, _sizeW]] select (_rot == 1)) isNotEqualTo [_w, _h]) then {
+        _w = _sizeW;
+        _h = _sizeH;
+        _rot = 0;
+    };
+
+    // A kit's grid is one open compartment, STORAGE_COLS wide and as long as it needs. A shaped item
+    // takes only its own cells, as it lies (einv_storage_fnc_overlaps).
+    private _mask = [_col, _row, _w, _h, ([_class, _rot] call EFUNC(items,footprintAs)) select 2];
     private _free = _block == 0 && {_col >= 0} && {_row >= 0} && {_col + _w <= STORAGE_COLS}
         && {(_view findIf {
             (_x getOrDefault ["block", -1]) == 0
-            && {(_x get "col") < _col + _w} && {_col < (_x get "col") + (_x get "w")}
-            && {(_x get "row") < _row + _h} && {_row < (_x get "row") + (_x get "h")}
+            && {[_mask, [_x get "col", _x get "row", _x get "w", _x get "h", _x getOrDefault ["holes", []]]] call EFUNC(storage,overlaps)}
         }) < 0};
 
     if (_free) then {
-        _spot = [_col, _row, 0, _w, _h];
+        _spot = [_col, _row, 0, _w, _h, _rot];
     } else {
         _elsewhere = true;
     };
@@ -121,7 +129,7 @@ if (count _mine > _before) then {
         if (_index >= 0) then {
             private _tile = _mine select _index;
 
-            _spot = [_tile get "col", _tile get "row", 0, _tile get "w", _tile get "h"];
+            _spot = [_tile get "col", _tile get "row", 0, _tile get "w", _tile get "h", parseNumber (_tile getOrDefault ["rotated", false])];
         };
     };
 
@@ -140,7 +148,7 @@ if (count _mine > _before) then {
     if (_mine isNotEqualTo []) then {
         private _tile = _mine select 0;
 
-        _landed = [_tile get "col", _tile get "row", 0, _tile get "w", _tile get "h"];
+        _landed = [_tile get "col", _tile get "row", 0, _tile get "w", _tile get "h", parseNumber (_tile getOrDefault ["rotated", false])];
     };
 };
 

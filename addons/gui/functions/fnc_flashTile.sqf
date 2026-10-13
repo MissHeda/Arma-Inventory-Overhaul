@@ -36,11 +36,15 @@ if (isNull _background) exitWith {_tile};
 private _color = +(GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]]);
 _color set [3, _alpha];
 
-private _flash = [_display, "EINV_PanelRect", ctrlParentControlsGroup _background, ctrlPosition _background] call FUNC(uiCreate);
-_flash ctrlSetBackgroundColor _color;
-_flash ctrlSetFade 0;
-_flash ctrlCommit 0;
-_flash ctrlSetFade 1;
-_flash ctrlCommit _duration;
+// Over every surface of the tile: a shaped one has one per run of its cells (fnc_createTile), and its
+// holes do not flash.
+{
+    private _flash = [_display, "EINV_PanelRect", ctrlParentControlsGroup _x, ctrlPosition _x] call FUNC(uiCreate);
+    _flash ctrlSetBackgroundColor _color;
+    _flash ctrlSetFade 0;
+    _flash ctrlCommit 0;
+    _flash ctrlSetFade 1;
+    _flash ctrlCommit _duration;
+} forEach (_tile getOrDefault ["backgrounds", [_background]]);
 
 _tile

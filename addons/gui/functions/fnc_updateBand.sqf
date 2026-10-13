@@ -94,9 +94,22 @@ private _touched = [];
     {
         if (_x getOrDefault ["hidden", false] || {_x getOrDefault ["pending", false]}) then {continue};
 
-        ([_grid, _x] call FUNC(tileRect)) params ["_tileX", "_tileY", "_tileW", "_tileH"];
+        private _tileRect = [_grid, _x] call FUNC(tileRect);
+        private _holes = _x getOrDefault ["holes", []];
 
-        if (_tileX < _right && {_tileX + _tileW > _left} && {_tileY < _bottom} && {_tileY + _tileH > _top}) then {
+        // A shaped tile (size=xx/x-) is touched on its own cells only, not in the corner an L leaves open.
+        // Cut at the grid's edge it is drawn as its box (fnc_createTile), and touched as one.
+        private _rects = if (_holes isEqualTo [] || {(_x get "col") + (_x get "w") > (_grid get "cols")}) then {
+            [_tileRect]
+        } else {
+            [[_tileRect select 0, _tileRect select 1], _grid get "cellW", _grid get "cellH", [_x get "w", _x get "h", _holes]] call FUNC(shapeRects)
+        };
+
+        if (_rects findIf {
+            _x params ["_tileX", "_tileY", "_tileW", "_tileH"];
+
+            _tileX < _right && {_tileX + _tileW > _left} && {_tileY < _bottom} && {_tileY + _tileH > _top}
+        } >= 0) then {
             _touched pushBack [_gridIndex, _forEachIndex];
         };
     } forEach (_grid getOrDefault ["tiles", []]);

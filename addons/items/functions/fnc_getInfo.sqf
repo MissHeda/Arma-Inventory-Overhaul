@@ -42,12 +42,15 @@
  *   "kind"              - see fnc_getFacts <STRING>
  *   "mass"              - in config units (tenths of a pound): the rules' weight, else config's
  *                         <NUMBER>
- *   "size"              - [w, h] in grid cells, upright <ARRAY>
+ *   "size"              - [w, h] in grid cells, upright - the box around it <ARRAY>
+ *   "footprint"         - [w, h, holes] upright, holes the indices row * w + col of the cells a
+ *                         shaped item (size=xx/x-) does not take, [] for a full rectangle <ARRAY>
+ *   "footprintTurned"   - the same turned a quarter clockwise (fnc_turnMask, fnc_footprintAs) <ARRAY>
  *   "stack"             - how many may share one tile, at least 1 <NUMBER>
  *   "capacity"          - a magazine's rounds, 0 for everything else <NUMBER>
  *   "maxLoad"           - what a uniform, vest, backpack, crate or vehicle holds, else 0 <NUMBER>
- *   "cells"             - cells it takes, w * h <NUMBER>
- *   "shape"             - its size as the rules write it, "2x3" <STRING>
+ *   "cells"             - cells it takes, w * h less its holes <NUMBER>
+ *   "shape"             - its size as the rules write it, "2x3" or "xx/x-" <STRING>
  *   "grid"              - a container's grid spec (fnc_parseGrid), [] for anything else <ARRAY>
  *   "src"               - field -> where it came from, see fnc_resolve <HASHMAP>
  *   "configMass"        - config mass <NUMBER>
@@ -85,11 +88,17 @@ private _facts = [_class] call FUNC(getFacts);
 private _resolved = [_facts, _compiled] call FUNC(resolve);
 private _info = +_facts;
 
-(_resolved get "footprint") params ["_w", "_h"];
+private _footprint = _resolved get "footprint";
 
+_footprint params ["_w", "_h", ["_holes", []]];
+
+// The box for everything that only needs that, the cells for whatever places or draws it - turned
+// once here, so a layout trying it both ways round does not turn it again for every cell it tries.
 _info set ["size", [_w, _h]];
-_info set ["cells", _w * _h];
-_info set ["shape", format ["%1x%2", _w, _h]];
+_info set ["footprint", [_w, _h, _holes]];
+_info set ["footprintTurned", [_w, _h, _holes] call FUNC(turnMask)];
+_info set ["cells", _w * _h - count _holes];
+_info set ["shape", [_w, _h, _holes] call FUNC(formatMask)];
 _info set ["stack", _resolved get "stack"];
 _info set ["grid", _resolved get "grid"];
 _info set ["src", _resolved get "src"];

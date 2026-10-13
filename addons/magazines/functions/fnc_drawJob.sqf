@@ -143,7 +143,8 @@ private _drawn = createHashMap;
     };
 
     private _parent = ctrlParentControlsGroup _background;
-    private _rect = ctrlPosition _background;
+    // Its box: a shaped tile's first surface is only its top row's first run (einv_gui_fnc_createTile).
+    private _rect = _tile getOrDefault ["rect", ctrlPosition _background];
 
     _drawn set [_at, [_parent, _rect]];
 

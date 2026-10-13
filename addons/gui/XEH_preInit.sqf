@@ -77,6 +77,10 @@ GVAR(swallowUp) = -1;
 // What is held while dragging: its size as it is held, [w, h] - turned with R (fnc_rotateDrag) - and how
 // many of a stack go, changed with the mouse wheel (fnc_onMouseZ) or the middle button (all of it).
 GVAR(dragSize) = [1, 1];
+
+// ... and which way round: 1 turned a quarter clockwise. Apart from the size, as a shaped item in a
+// square box turns without changing it (fnc_rotateDrag).
+GVAR(dragRot) = 0;
 GVAR(dragCount) = 1;
 GVAR(middleHeld) = false;
 GVAR(lastWheel) = -1;

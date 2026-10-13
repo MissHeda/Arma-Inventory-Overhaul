@@ -27,7 +27,8 @@
  * Return Value:
  * [assigned, left] <ARRAY>
  *   assigned - [[item, holder, root, cell], ...] in the order they were planned; cell is [col, row,
- *              compartment], with [.., width, height] when it lies turned, [] for the ground <ARRAY>
+ *              compartment], with [.., width, height, 1] when it lies turned (rot 1, a quarter
+ *              clockwise), [] for the ground <ARRAY>
  *   left     - the items no target had room for <ARRAY>
  *
  * Example:
@@ -66,48 +67,21 @@ private _fnc_isLifted = {
 // ---------------------------------------------------------------------------
 private _states = _targets apply {[]};
 
+// A shaped item (size=xx/x-) takes only its own cells, holes as it lies (einv_items_fnc_footprintAs).
 private _fnc_mark = {
-    params ["_state", "_block", "_col", "_row", "_w", "_h"];
+    params ["_state", "_block", "_col", "_row", "_w", "_h", ["_holes", []]];
 
-    private _grid = (_state select 5) select _block;
-    private _cols = ((_state select 3) select _block) select 0;
-
-    while {count _grid < _row + _h} do {
-        private _line = [];
-
-        for "_i" from 1 to _cols do {
-            _line pushBack false;
-        };
-
-        _grid pushBack _line;
-    };
-
-    for "_r" from _row to (_row + _h - 1) do {
-        private _cells = _grid select _r;
-
-        for "_c" from _col to (_col + _w - 1) do {
-            _cells set [_c, true];
-        };
-    };
+    [(_state select 5) select _block, ((_state select 3) select _block) select 0, _col, _row, _w, _h, _holes] call FUNC(takeCells);
 };
 
 private _fnc_isFree = {
-    params ["_state", "_block", "_col", "_row", "_w", "_h"];
+    params ["_state", "_block", "_col", "_row", "_w", "_h", ["_holes", []]];
 
     ((_state select 3) select _block) params ["_cols", "_rows"];
 
     if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {!(_state select 4) && {_row + _h > _rows}}) exitWith {false};
 
-    private _grid = (_state select 5) select _block;
-    private _free = true;
-
-    for "_r" from _row to ((_row + _h - 1) min (count _grid - 1)) do {
-        if (((_grid select _r) select [_col, _w]) findIf {_x} >= 0) exitWith {
-            _free = false;
-        };
-    };
-
-    _free
+    [(_state select 5) select _block, _col, _row, _w, _h, _holes] call FUNC(cellsFree)
 };
 
 private _fnc_state = {
@@ -139,7 +113,7 @@ private _fnc_state = {
             if ([_x, _holder] call _fnc_isLifted) then {continue};
 
             if (!(_x getOrDefault ["overflow", false]) && {(_x getOrDefault ["block", -1]) >= 0}) then {
-                [_state, _x get "block", _x get "col", _x get "row", _x get "w", _x get "h"] call _fnc_mark;
+                [_state, _x get "block", _x get "col", _x get "row", _x get "w", _x get "h", _x getOrDefault ["holes", []]] call _fnc_mark;
             };
         } forEach (_layout get "entries");
     };
@@ -149,9 +123,10 @@ private _fnc_state = {
     _state
 };
 
-// The first free spot for a size, the given compartment first: [compartment, col, row], [] for none.
+// The first free spot for a size and its holes, the given compartment first: [compartment, col, row],
+// [] for none.
 private _fnc_find = {
-    params ["_state", "_w", "_h", "_first"];
+    params ["_state", "_w", "_h", "_first", ["_holes", []]];
 
     private _spot = [];
     private _blocks = _state select 3;
@@ -177,7 +152,7 @@ private _fnc_find = {
 
         for "_row" from 0 to _lastRow do {
             for "_col" from 0 to (_cols - _w) do {
-                if ([_state, _block, _col, _row, _w, _h] call _fnc_isFree) exitWith {
+                if ([_state, _block, _col, _row, _w, _h, _holes] call _fnc_isFree) exitWith {
                     _spot = [_block, _col, _row];
                 };
             };
@@ -218,8 +193,9 @@ private _left = [];
     private _class = _item getOrDefault ["class", ""];
     private _info = [_class] call EFUNC(items,getInfo);
 
-    (_info getOrDefault ["size", [1, 1]]) params ["_w", "_h"];
+    (_info getOrDefault ["footprint", [1, 1, []]]) params ["_w", "_h", ["_holes", []]];
 
+    private _turnedHoles = (_info getOrDefault ["footprintTurned", [_h, _w, []]]) param [2, []];
     private _isBackpack = (_info getOrDefault ["kind", ""]) isEqualTo "backpack";
     private _inside = _item getOrDefault ["container", objNull];
     private _done = false;
@@ -246,11 +222,12 @@ private _left = [];
 
         private _firstBlock = if (_start isNotEqualTo [] && {(_start select 0) isEqualTo _holder}) then {_start param [1, -1]} else {-1};
         private _turned = false;
-        private _spot = [_state, _w, _h, _firstBlock] call _fnc_find;
+        private _spot = [_state, _w, _h, _firstBlock, _holes] call _fnc_find;
 
-        // Fits nowhere upright: turned a quarter, as a player would.
-        if (_spot isEqualTo [] && {_w != _h}) then {
-            _spot = [_state, _h, _w, _firstBlock] call _fnc_find;
+        // Fits nowhere upright: turned a quarter, as a player would - a shape turns with it, and one in a
+        // square box is tried turned too when that takes other cells.
+        if (_spot isEqualTo [] && {_w != _h || {_holes isNotEqualTo _turnedHoles}}) then {
+            _spot = [_state, _h, _w, _firstBlock, _turnedHoles] call _fnc_find;
             _turned = _spot isNotEqualTo [];
         };
 
@@ -261,9 +238,9 @@ private _left = [];
         private _cellW = [_w, _h] select _turned;
         private _cellH = [_h, _w] select _turned;
 
-        [_state, _block, _col, _row, _cellW, _cellH] call _fnc_mark;
+        [_state, _block, _col, _row, _cellW, _cellH, [_holes, _turnedHoles] select _turned] call _fnc_mark;
 
-        _assigned pushBack [_item, _holder, _root, [[_col, _row, _block], [_col, _row, _block, _cellW, _cellH]] select _turned];
+        _assigned pushBack [_item, _holder, _root, [[_col, _row, _block], [_col, _row, _block, _cellW, _cellH, 1]] select _turned];
         _done = true;
     } forEach _targets;
 

@@ -67,6 +67,7 @@ GVAR(bandPress) = [];
 GVAR(band) = false;
 GVAR(bandTiles) = [];
 uiNamespace setVariable [QGVAR(dragFootprints), []];
+uiNamespace setVariable [QGVAR(dragShapes), []];
 uiNamespace setVariable [QGVAR(dragGhosts), []];
 uiNamespace setVariable [QGVAR(bandFrame), []];
 uiNamespace setVariable [QGVAR(selectionFrames), []];

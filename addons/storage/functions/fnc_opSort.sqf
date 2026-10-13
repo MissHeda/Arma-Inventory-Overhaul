@@ -60,7 +60,7 @@ private _sorted = [_holder, _entries, false, []] call FUNC(getLayout);
 
 {
     if !(_x getOrDefault ["overflow", false]) then {
-        [_holder, _x, [_x get "col", _x get "row", _x get "block", _x get "w", _x get "h"], true] call FUNC(setPlace);
+        [_holder, _x, [_x get "col", _x get "row", _x get "block", _x get "w", _x get "h", parseNumber (_x getOrDefault ["rotated", false])], true] call FUNC(setPlace);
     };
 } forEach (_sorted getOrDefault ["entries", []]);
 

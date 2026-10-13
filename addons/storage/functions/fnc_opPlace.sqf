@@ -8,7 +8,8 @@
  * Extra: [cell, false].
  *
  * Arguments:
- * 0: Args, [holder, entry array, cell [col, row, block, w, h]] <ARRAY>
+ * 0: Args, [holder, entry array, cell [col, row, block, w, h, rot]] - rot as fnc_opPlaceMany reads it
+ *    <ARRAY>
  * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:

@@ -5,7 +5,7 @@
  * text read and written again stays the same.
  *
  * A compartment with holes is drawn as its shape, rows separated by "/" ("x" a cell, "-" a hole); one
- * without is written WxH, the shorter of the two.
+ * without is written WxH, the shorter of the two (fnc_formatMask, which an item's size= shares).
  *
  * Arguments:
  * 0: Spec, as fnc_parseGrid gives it <ARRAY>
@@ -34,27 +34,7 @@ switch (_mode) do {
         [_name, format ["%1:%2", _name, _cells]] select (_cells > 0)
     };
     case "blocks": {
-        ((_spec select 1) apply {
-            _x params ["_cols", "_rows", ["_holes", []]];
-
-            if (_holes isEqualTo []) then {
-                format ["%1x%2", _cols, _rows]
-            } else {
-                private _lines = [];
-
-                for "_r" from 0 to (_rows - 1) do {
-                    private _line = "";
-
-                    for "_c" from 0 to (_cols - 1) do {
-                        _line = _line + (["x", "-"] select ((_r * _cols + _c) in _holes));
-                    };
-
-                    _lines pushBack _line;
-                };
-
-                _lines joinString "/"
-            };
-        }) joinString "+"
+        ((_spec select 1) apply {_x call FUNC(formatMask)}) joinString "+"
     };
     default {""};
 }

@@ -195,8 +195,11 @@ if (_keepOk) then {
         private _w = _tile get "w";
         private _h = _tile get "h";
 
-        // Inside the compartment, and on none of a shaped one's holes.
-        if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {_row + _h > _rows} || {[_target, _col, _row, _w, _h] call FUNC(hitsHole)}) exitWith {
+        // A shaped item (size=xx/x-) takes only its own cells, as it lies (einv_storage_fnc_overlaps).
+        private _mask = [_col, _row, _w, _h, _tile getOrDefault ["holes", []]];
+
+        // Inside the compartment, and none of its cells on a shaped compartment's holes.
+        if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {_row + _h > _rows} || {[_target, _col, _row, _w, _h, _mask select 4] call FUNC(hitsHole)}) exitWith {
             _keepOk = false;
         };
 
@@ -209,19 +212,14 @@ if (_keepOk) then {
 
             if (
                 (_group findIf {_x isEqualTo [_targetIndex, _otherIndex]}) < 0
-                && {(_other get "col") < _col + _w} && {_col < (_other get "col") + (_other get "w")}
-                && {(_other get "row") < _row + _h} && {_row < (_other get "row") + (_other get "h")}
+                && {[_mask, [_other get "col", _other get "row", _other get "w", _other get "h", _other getOrDefault ["holes", []]]] call EFUNC(storage,overlaps)}
             ) exitWith {
                 _clash = true;
             };
         } forEach (_target getOrDefault ["tiles", []]);
 
         if (!_clash) then {
-            _clash = _busy findIf {
-                _x params ["_busyCol", "_busyRow", "_busyW", "_busyH"];
-
-                _busyCol < _col + _w && {_col < _busyCol + _busyW} && {_busyRow < _row + _h} && {_row < _busyRow + _busyH}
-            } >= 0;
+            _clash = _busy findIf {[_mask, _x] call EFUNC(storage,overlaps)} >= 0;
         };
 
         if (_clash) exitWith {

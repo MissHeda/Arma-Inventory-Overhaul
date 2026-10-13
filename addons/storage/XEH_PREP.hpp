@@ -116,4 +116,7 @@ PREP(onLoadoutSet);
 PREP(blocksFor);
 PREP(getBlocks);
 PREP(seedTaken);
+PREP(cellsFree);
+PREP(takeCells);
+PREP(overlaps);
 PREP(hasSpace);

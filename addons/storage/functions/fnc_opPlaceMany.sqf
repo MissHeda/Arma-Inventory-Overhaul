@@ -7,7 +7,9 @@
  * the tile's size, either way round, else "Failed". The final arrangement is checked as a whole; only
  * places change, never the cargo.
  *
- * A cell is [col, row, block, w, h] - w and h as it will lie, the tile's own when left out.
+ * A cell is [col, row, block, w, h, rot] - w and h as it will lie, the tile's own when left out; rot 1
+ * turned a quarter clockwise, 0 upright. Without rot it lies as the tile does when it keeps the tile's
+ * size, else as its size says (turned when not as wide as the item upright).
  *
  * Arguments:
  * 0: Args, [holder, [[entry array, cell], ...]] <ARRAY>
@@ -57,15 +59,24 @@ private _status = "";
         ["_row", -1, [0]],
         ["_block", 0, [0]],
         ["_cellW", _entry getOrDefault ["w", _w], [0]],
-        ["_cellH", _entry getOrDefault ["h", _h], [0]]
+        ["_cellH", _entry getOrDefault ["h", _h], [0]],
+        ["_rot", -1, [0]]
     ];
 
-    if !([_cellW, _cellH] isEqualTo [_w, _h] || {[_cellW, _cellH] isEqualTo [_h, _w]}) exitWith {
+    if !(_rot in [0, 1]) then {
+        _rot = if ([_cellW, _cellH] isEqualTo [_entry getOrDefault ["w", _w], _entry getOrDefault ["h", _h]]) then {
+            parseNumber (_entry getOrDefault ["rotated", false])
+        } else {
+            parseNumber (_cellW != _w)
+        };
+    };
+
+    if (([[_w, _h], [_h, _w]] select (_rot == 1)) isNotEqualTo [_cellW, _cellH]) exitWith {
         _status = "Failed";
     };
 
     _entry set ["lifted", true];
-    _placing pushBack [_entry, [_col, _row, _block, _cellW, _cellH]];
+    _placing pushBack [_entry, [_col, _row, _block, _cellW, _cellH, _rot]];
 } forEach _moves;
 
 if (_status isNotEqualTo "") exitWith {
@@ -82,35 +93,17 @@ private _blocks = _view getOrDefault ["blocks", []];
 private _open = _view getOrDefault ["open", false];
 private _taken = [_blocks] call FUNC(seedTaken);
 
+// A shaped item (size=xx/x-) takes only its own cells, holes as it lies (einv_items_fnc_footprintAs).
 private _fnc_mark = {
-    params ["_block", "_col", "_row", "_w", "_h"];
+    params ["_block", "_col", "_row", "_w", "_h", ["_holes", []]];
 
     if (_block < 0 || {_block >= count _blocks}) exitWith {};
 
-    private _cols = (_blocks select _block) select 0;
-    private _grid = _taken select _block;
-
-    while {count _grid < _row + _h} do {
-        private _line = [];
-
-        for "_i" from 1 to _cols do {
-            _line pushBack false;
-        };
-
-        _grid pushBack _line;
-    };
-
-    for "_r" from (_row max 0) to (_row + _h - 1) do {
-        private _line = _grid select _r;
-
-        for "_c" from (_col max 0) to ((_col + _w - 1) min (_cols - 1)) do {
-            _line set [_c, true];
-        };
-    };
+    [_taken select _block, (_blocks select _block) select 0, _col, _row, _w, _h, _holes] call FUNC(takeCells);
 };
 
 private _fnc_free = {
-    params ["_block", "_col", "_row", "_w", "_h"];
+    params ["_block", "_col", "_row", "_w", "_h", ["_holes", []]];
 
     if (_block < 0 || {_block >= count _blocks}) exitWith {false};
 
@@ -118,16 +111,7 @@ private _fnc_free = {
 
     if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {!_open && {_row + _h > _rows}}) exitWith {false};
 
-    private _grid = _taken select _block;
-    private _free = true;
-
-    for "_r" from _row to ((_row + _h - 1) min (count _grid - 1)) do {
-        if (((_grid select _r) select [_col, _w]) findIf {_x} >= 0) exitWith {
-            _free = false;
-        };
-    };
-
-    _free
+    [_taken select _block, _col, _row, _w, _h, _holes] call FUNC(cellsFree)
 };
 
 {
@@ -136,19 +120,21 @@ private _fnc_free = {
         && {!(_x getOrDefault ["overflow", false])}
         && {!(_x getOrDefault ["lifted", false])}
     ) then {
-        [_x getOrDefault ["block", -1], _x getOrDefault ["col", 0], _x getOrDefault ["row", 0], _x getOrDefault ["w", 1], _x getOrDefault ["h", 1]] call _fnc_mark;
+        [_x getOrDefault ["block", -1], _x getOrDefault ["col", 0], _x getOrDefault ["row", 0], _x getOrDefault ["w", 1], _x getOrDefault ["h", 1], _x getOrDefault ["holes", []]] call _fnc_mark;
     };
 } forEach (_view getOrDefault ["entries", []]);
 
 // Put down one after the other: each takes its cells, so two never share one.
 {
-    (_x select 1) params ["_col", "_row", "_block", "_w", "_h"];
+    (_x select 1) params ["_col", "_row", "_block", "_w", "_h", "_rot"];
 
-    if !([_block, _col, _row, _w, _h] call _fnc_free) exitWith {
+    private _holes = ([(_x select 0) getOrDefault ["class", ""], _rot] call EFUNC(items,footprintAs)) select 2;
+
+    if !([_block, _col, _row, _w, _h, _holes] call _fnc_free) exitWith {
         _status = "Taken";
     };
 
-    [_block, _col, _row, _w, _h] call _fnc_mark;
+    [_block, _col, _row, _w, _h, _holes] call _fnc_mark;
 } forEach _placing;
 
 {
@@ -163,7 +149,7 @@ private _records = ([_holder] call FUNC(readPlaces)) param [1, []];
 
 {
     _x params ["_entry", "_cell"];
-    _cell params ["_col", "_row", "_block", "_w", "_h"];
+    _cell params ["_col", "_row", "_block", "_w", "_h", "_rot"];
 
     private _key = _entry getOrDefault ["key", ""];
     private _had = !(_entry getOrDefault ["overflow", false]) && {
@@ -182,7 +168,8 @@ private _records = ([_holder] call FUNC(readPlaces)) param [1, []];
     _entry set ["row", _row];
     _entry set ["w", _w];
     _entry set ["h", _h];
-    _entry set ["rotated", _w != _h && {_w == ((([_entry getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]]) select 1)}];
+    _entry set ["rotated", _rot == 1];
+    _entry set ["holes", ([_entry getOrDefault ["class", ""], _rot] call EFUNC(items,footprintAs)) select 2];
     _entry set ["overflow", false];
 } forEach _placing;
 

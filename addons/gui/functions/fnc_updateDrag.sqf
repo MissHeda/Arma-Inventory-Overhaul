@@ -171,8 +171,40 @@ private _band = _cellH * 0.6;
 private _footprint = uiNamespace getVariable [QGVAR(dragFootprint), controlNull];
 private _grids = uiNamespace getVariable [QGVAR(grids), []];
 
+// A shaped item (size=xx/x-) shows its footprint on a grid on its own cells only (fnc_shapeRects), in
+// controls made with the drag so they lie under the ghost (fnc_startDrag). Hidden here every frame and
+// shown again below where they mean something; turned with R, the shape turns with it.
+private _shapes = uiNamespace getVariable [QGVAR(dragShapes), []];
+private _shapeUsed = 0;
+private _dragHoles = ([_entry getOrDefault ["class", ""], GVAR(dragRot)] call EFUNC(items,footprintAs)) select 2;
+
+{_x ctrlShow false} forEach _shapes;
+
+// Paints the next free shape controls: false when too few are left, and the caller draws the box.
+private _fnc_paintShape = {
+    params ["_origin", "_shape", "_color"];
+
+    private _rects = [_origin, _cellW, _cellH, _shape] call FUNC(shapeRects);
+
+    if (_shapeUsed + count _rects > count _shapes) exitWith {false};
+
+    {
+        private _control = _shapes select _shapeUsed;
+
+        _shapeUsed = _shapeUsed + 1;
+        _control ctrlSetPosition _x;
+        _control ctrlSetBackgroundColor [_color select 0, _color select 1, _color select 2, DRAG_FOOTPRINT_ALPHA];
+        _control ctrlCommit 0;
+        _control ctrlShow true;
+    } forEach _rects;
+
+    true
+};
+
 private _fnc_show = {
     params ["_rect", "_fits", ["_alpha", DRAG_FOOTPRINT_ALPHA], ["_colorKey", ""]];
+
+    {_x ctrlShow false} forEach _shapes;
 
     private _color = if (_fits) then {
         GVAR(theme) getOrDefault ["gain", [0.298, 0.765, 0.541, 1]]
@@ -504,6 +536,16 @@ call {
                     private _tile = (((_grids param [_groupGrid, createHashMap]) getOrDefault ["tiles", []]) param [_groupTile, createHashMap]);
 
                     if (_forEachIndex < count _footprints && {count _tile > 0}) then {
+                        private _tileHoles = _tile getOrDefault ["holes", []];
+
+                        // A shaped tile on its own cells, while there are controls left for it.
+                        if (
+                            _tileHoles isNotEqualTo []
+                            && {[[_originX + _cellCol * _cellW, _originY + _cellRow * _cellH], [_tile get "w", _tile get "h", _tileHoles], _gain] call _fnc_paintShape}
+                        ) exitWith {
+                            (_footprints select _forEachIndex) ctrlShow false;
+                        };
+
                         [
                             _footprints select _forEachIndex,
                             [
@@ -667,17 +709,18 @@ call {
     };
 
     if (_reason isEqualTo "") then {
-        // Inside the compartment, on none of a shaped one's holes, and free - the dragged tile does not
-        // count where it was lifted from.
+        // Inside the compartment, none of its cells on a shaped one's holes, and free - the dragged tile
+        // does not count where it was lifted from. A shaped item takes only its own cells, and a shaped
+        // tile there only its own (einv_storage_fnc_overlaps).
+        private _mask = [_col, _row, _w, _h, _dragHoles];
         private _taken = _col < 0 || {_row < 0} || {_col + _w > _target get "cols"} || {_row + _h > _target get "rows"}
-            || {[_target, _col, _row, _w, _h] call FUNC(hitsHole)};
+            || {[_target, _col, _row, _w, _h, _dragHoles] call FUNC(hitsHole)};
 
         if (!_taken) then {
             {
                 if (
                     !(_targetIndex == _sourceIndex && {_forEachIndex == _tileIndex})
-                    && {(_x get "col") < _col + _w} && {_col < (_x get "col") + (_x get "w")}
-                    && {(_x get "row") < _row + _h} && {_row < (_x get "row") + (_x get "h")}
+                    && {[_mask, [_x get "col", _x get "row", _x get "w", _x get "h", _x getOrDefault ["holes", []]]] call EFUNC(storage,overlaps)}
                 ) exitWith {
                     _taken = true;
                 };
@@ -696,8 +739,7 @@ call {
                     _x params [["_toHolder", objNull], ["_toBlock", 0], ["_toCol", 0], ["_toRow", 0], ["_toW", 1], ["_toH", 1]];
 
                     _toHolder isEqualTo _holder && {_toBlock == _block}
-                    && {_toCol < _col + _w} && {_col < _toCol + _toW}
-                    && {_toRow < _row + _h} && {_row < _toRow + _toH}
+                    && {[_mask, [_toCol, _toRow, _toW, _toH]] call EFUNC(storage,overlaps)}
                 }) >= 0) exitWith {
                     _taken = true;
                 };
@@ -792,6 +834,41 @@ call {
         (_right - _left) * _cellW - pixelW,
         (_bottom - _top) * _cellH - pixelH
     ], _reason isEqualTo ""] call _fnc_show;
+
+    // A shaped item on its own cells instead, those inside the grid: a cell of the clipped box is a hole
+    // where the item has none.
+    if (_dragHoles isNotEqualTo []) then {
+        private _clipW = _right - _left;
+        private _clipH = _bottom - _top;
+        private _clipHoles = [];
+
+        for "_r" from 0 to (_clipH - 1) do {
+            for "_c" from 0 to (_clipW - 1) do {
+                private _itemCol = _left + _c - _col;
+                private _itemRow = _top + _r - _row;
+
+                if (
+                    _itemCol < 0 || {_itemRow < 0} || {_itemCol >= _w} || {_itemRow >= _h}
+                    || {(_itemRow * _w + _itemCol) in _dragHoles}
+                ) then {
+                    _clipHoles pushBack (_r * _clipW + _c);
+                };
+            };
+        };
+
+        private _color = if (_reason isEqualTo "") then {
+            GVAR(theme) getOrDefault ["gain", [0.298, 0.765, 0.541, 1]]
+        } else {
+            GVAR(theme) getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
+        };
+
+        if (
+            count _clipHoles < _clipW * _clipH
+            && {[[_originX + _left * _cellW, _originY + _top * _cellH], [_clipW, _clipH, _clipHoles], _color] call _fnc_paintShape}
+        ) then {
+            _footprint ctrlShow false;
+        };
+    };
 };
 
 // The hint over this target, written when it differs from what stands there.
@@ -807,7 +884,11 @@ if (!isNil "_checked" && {_checked isEqualType []}) then {
 
     switch (_checked param [0, ""]) do {
         case "";
-        case "ground": {_footprint ctrlShow false};
+        case "ground": {
+            _footprint ctrlShow false;
+
+            {_x ctrlShow false} forEach _shapes;
+        };
         case "zone": {
             private _zone = (uiNamespace getVariable [QGVAR(zones), []]) param [_checked param [1, -1], []];
 
@@ -826,6 +907,11 @@ if (!isNil "_checked" && {_checked isEqualType []}) then {
             };
 
             _footprint ctrlSetBackgroundColor [_color select 0, _color select 1, _color select 2, DRAG_FOOTPRINT_ALPHA];
+
+            // A shaped footprint as well, where one shows.
+            {
+                _x ctrlSetBackgroundColor [_color select 0, _color select 1, _color select 2, DRAG_FOOTPRINT_ALPHA];
+            } forEach _shapes;
         };
     };
 };

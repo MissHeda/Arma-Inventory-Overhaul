@@ -168,6 +168,8 @@ PREP(uiLabel);
 PREP(uiIcon);
 PREP(uiPicture);
 PREP(uiFrame);
+PREP(uiShape);
+PREP(shapeRects);
 PREP(uiRing);
 PREP(uiPictureTurned);
 PREP(uiPictureRounded);

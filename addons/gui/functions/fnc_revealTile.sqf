@@ -69,7 +69,7 @@ uiNamespace setVariable [QGVAR(searchFx), []];
 
 {
     _tile deleteAt _x;
-} forEach ["hidden", "mark", "controls", "background", "color"];
+} forEach ["hidden", "mark", "controls", "background", "backgrounds", "rect", "color"];
 
 [_display, _grid, _tile, GVAR(theme)] call FUNC(createTile);
 

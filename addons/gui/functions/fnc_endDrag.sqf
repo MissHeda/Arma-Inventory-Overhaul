@@ -70,7 +70,9 @@ uiNamespace setVariable [QGVAR(dragGlow), []];
 // The footprints and pictures of a group, and which tiles it was.
 {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(dragFootprints), []]);
 {ctrlDelete (_x select 0)} forEach (uiNamespace getVariable [QGVAR(dragGhosts), []]);
+{ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(dragShapes), []]);
 uiNamespace setVariable [QGVAR(dragFootprints), []];
+uiNamespace setVariable [QGVAR(dragShapes), []];
 uiNamespace setVariable [QGVAR(dragGhosts), []];
 
 private _group = GVAR(dragGroup);
@@ -82,6 +84,10 @@ uiNamespace setVariable [QGVAR(dragEntry), createHashMap];
 GVAR(press) params ["_sourceIndex", "_tileIndex", "", "", "", "_slotSource"];
 GVAR(dragTarget) params [["_kind", ""], ["_targetIndex", -1], ["_col", 0], ["_row", 0], ["_fits", false], ["_reason", ""], ["_targetSlot", ""], ["_place", true], ["_targetUnit", objNull]];
 GVAR(dragSize) params ["_w", "_h"];
+
+// Which way round it is held (fnc_rotateDrag): 1 turned a quarter clockwise - a shaped item in a square
+// box says so by this alone.
+private _rot = GVAR(dragRot);
 
 GVAR(press) = [];
 GVAR(dragging) = false;
@@ -128,7 +134,7 @@ private _fromKit = _fromGrid getOrDefault ["kit", ""];
 // A window that attached has the first word on where it was let go (the "drop" hook): true, it has done it
 // all. What comes from a source grid (the Arsenal's catalog) is always its to end, whatever it answers -
 // there is no container behind that tile to move from -, and a zone is nothing but its own.
-private _handled = ["drop", [_kind, _sourceIndex, _tileIndex, _slotSource, _entry, _count, _targetIndex, _col, _row, _w, _h, _targetSlot, _place], false] call FUNC(hook);
+private _handled = ["drop", [_kind, _sourceIndex, _tileIndex, _slotSource, _entry, _count, _targetIndex, _col, _row, _w, _h, _targetSlot, _place, _rot], false] call FUNC(hook);
 
 if (
     _handled isEqualTo true || {(_fromGrid getOrDefault ["source", ""]) isNotEqualTo ""} || {_kind isEqualTo "zone"}
@@ -184,7 +190,9 @@ private _sent = call {
                     _tile set ["holder", _from getOrDefault ["holder", objNull]];
                     _tile set ["root", _from getOrDefault ["root", objNull]];
 
-                    _assigned pushBack [_tile, _holder, _root, [_cellCol, _cellRow, _block, _tile get "w", _tile get "h"]];
+                    _assigned pushBack [_tile, _holder, _root, [
+                        _cellCol, _cellRow, _block, _tile get "w", _tile get "h", parseNumber (_tile getOrDefault ["rotated", false])
+                    ]];
                 } forEach _data;
 
                 _moving && {[_assigned, _total] call FUNC(sendPlan)}
@@ -281,12 +289,12 @@ private _sent = call {
 
     // The cell, with the size it lies in there - turned or not. On a taken cell of a kit's grid none:
     // its layout finds one.
-    private _cell = [[], [_col, _row, _target getOrDefault ["block", 0], _w, _h]] select _place;
+    private _cell = [[], [_col, _row, _target getOrDefault ["block", 0], _w, _h, _rot]] select _place;
 
     // Dropped where it lies already, the same way round.
     if (
         _slotSource isEqualTo [] && {_targetIndex == _sourceIndex} && {_col == (_entry get "col")} && {_row == (_entry get "row")}
-        && {_w == (_entry get "w")} && {_h == (_entry get "h")}
+        && {_w == (_entry get "w")} && {_h == (_entry get "h")} && {_rot == (parseNumber (_entry getOrDefault ["rotated", false]))}
     ) exitWith {false};
 
     // Into, out of or between kits (einv_compat_efak) - before the slot's item and before containers are

@@ -210,7 +210,10 @@ if (!_out) exitWith {
         _x params ["_entry", "_alone"];
 
         if (_alone) then {
-            [(_parts select _forEachIndex) select 0, _entry, [_entry get "col", _entry get "row", _entry getOrDefault ["block", 0], _entry get "w", _entry get "h"], true] call FUNC(setPlace);
+            [(_parts select _forEachIndex) select 0, _entry, [
+                _entry get "col", _entry get "row", _entry getOrDefault ["block", 0], _entry get "w", _entry get "h",
+                parseNumber (_entry getOrDefault ["rotated", false])
+            ], true] call FUNC(setPlace);
         };
     } forEach _tiles;
 
@@ -231,7 +234,10 @@ if (!_out) exitWith {
 
         if (_tile select 1) then {
             private _entry = _tile select 0;
-            private _cell = [_entry get "col", _entry get "row", _entry getOrDefault ["block", 0], _entry get "w", _entry get "h"];
+            private _cell = [
+                _entry get "col", _entry get "row", _entry getOrDefault ["block", 0], _entry get "w", _entry get "h",
+                parseNumber (_entry getOrDefault ["rotated", false])
+            ];
 
             [_container, createHashMapFromArray [["key", format ["%1|m%2", _key, _after]], ["w", _entry get "w"], ["h", _entry get "h"]], _cell, true] call FUNC(setPlace);
         };

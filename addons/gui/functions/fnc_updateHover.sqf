@@ -158,7 +158,10 @@ private _fnc_light = {
         _color set [3, ((_color select 3) + HOVER_ALPHA) min 1];
     };
 
-    _background ctrlSetBackgroundColor _color;
+    // A shaped tile has a surface per run of its cells (fnc_createTile): all of them light up.
+    {
+        _x ctrlSetBackgroundColor _color;
+    } forEach (_tile getOrDefault ["backgrounds", [_background]]);
 };
 
 if (!_force && {_found isEqualTo GVAR(hover)}) exitWith {

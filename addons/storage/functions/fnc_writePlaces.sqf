@@ -26,7 +26,9 @@
  *
  * Arguments:
  * 0: Holder <OBJECT or STRING>
- * 1: Records [[key, col, row, w, h, block], ...] - put in canonical order here <ARRAY>
+ * 1: Records [[key, col, row, w, h, block, rot], ...] - put in canonical order here; rot (0 upright, 1
+ *    turned a quarter clockwise) is kept when it is one of those, a record without it stays as it came
+ *    (fnc_getLayout reads it by its size) <ARRAY>
  * 2: Write even when nothing changed <BOOL> (default: false)
  *
  * Return Value:
@@ -81,7 +83,14 @@ private _keys = [];
             _keys pushBack _key;
         };
 
-        _group pushBack (_x select [0, 6]);
+        private _record = _x select [0, 6];
+        private _rot = _x param [6, -1];
+
+        if (_rot isEqualTo 0 || {_rot isEqualTo 1}) then {
+            _record pushBack _rot;
+        };
+
+        _group pushBack _record;
     };
 } forEach _records;
 

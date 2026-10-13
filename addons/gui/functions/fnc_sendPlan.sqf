@@ -73,7 +73,7 @@ private _laid = [];
         if (count _cell < 5) then {
             ((([_item getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]])) params [["_sizeW", 1], ["_sizeH", 1]];
 
-            _cell = [_cell select 0, _cell select 1, _cell param [2, 0], _sizeW, _sizeH];
+            _cell = [_cell select 0, _cell select 1, _cell param [2, 0], _sizeW, _sizeH, 0];
         };
 
         ((_laid select _at) select 2) pushBack [_item, _cell];

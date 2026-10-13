@@ -2,9 +2,11 @@
 /*
  * Author: Miss Heda
  * Where each entry lies in a holder: in which of its compartments (fnc_getBlocks) and on which cell,
- * upright or turned a quarter. Every entry gets "block", "col", "row", "w", "h" (as it lies), "rotated"
- * and "overflow" set on it, and "key" where it had none (fnc_entryKey) - the entry HashMaps change in
- * place.
+ * upright or turned a quarter. Every entry gets "block", "col", "row", "w", "h" (as it lies), "holes"
+ * (the cells of its box a shaped item does not take, as it lies, einv_items_fnc_footprintAs),
+ * "rotated" and "overflow" set on it, and "key" where it had none (fnc_entryKey) - the entry HashMaps
+ * change in place. A shaped item takes only its own cells: something else may lie in the corner an L
+ * leaves open (fnc_cellsFree, fnc_takeCells).
  *
  * A pure function of the holder's places (fnc_readPlaces), its entries and the rules: every machine
  * draws the same picture from the same data, and nothing is written here - the authority persists the
@@ -13,14 +15,17 @@
  *
  *   1. exact - the n-th record of a key goes to the n-th entry of that key (fnc_getContents gives
  *      entries of one key in a fixed order: a split stack full tiles first), when its size matches
- *      either way round, its compartment exists and its cells are free. Records are taken in their
+ *      the way round it says, its compartment exists and its cells are free. Records are taken in their
  *      order, so of two that claim the same cells the first wins everywhere.
  *   2. kin - every record still unused, in order, goes to the first unplaced entry of the same kind
  *      (fnc_layoutKey; entries sorted by key and index) whose size matches it either way round, when its
  *      cells are free: a repacked magazine, a radio that got its instance class, a kit made ready stay
  *      where they lay.
  *   3. first fit - the rest, largest first (then category, kind, key, index): compartment after
- *      compartment, row by row, upright, else turned a quarter.
+ *      compartment, row by row, upright, else turned a quarter (a square box only when it is a shape
+ *      that turned takes other cells).
+ * A record is [key, col, row, w, h, block, rot], rot 1 when it lies turned a quarter clockwise. One
+ * written before rot existed has six elements: it lies turned when its width is not the upright one.
  * An entry no compartment has room for - the engine took it from a script or another mod - is
  * "overflow": shown apart, never lost. The ground and a grid with no object of its own (a kit of
  * Enhanced First Aid Kits, einv_compat_efak) have no compartments: one STORAGE_COLS wide that grows with
@@ -41,7 +46,7 @@
  *   "blocks"   - the compartments [[cols, rows, holes], ...] (fnc_blocksFor) - the open grid's with the
  *                rows it needs now
  *   "overflow" - the entries with no room
- *   "records"  - one per placed entry, canonical (fnc_readPlaces): [key, col, row, w, h, block]. A
+ *   "records"  - one per placed entry, canonical (fnc_readPlaces): [key, col, row, w, h, block, rot]. A
  *                holder of another type that lists nothing keeps the records it was laid out from: a
  *                kit whose contents have not arrived yet would otherwise lose its arrangement
  *   "drift"    - the records laid out from are not exactly "records" - the authority should persist
@@ -86,7 +91,7 @@ if (_open) then {
 private _taken = [_blocks] call FUNC(seedTaken);
 
 private _fnc_isFree = {
-    params ["_block", "_col", "_row", "_w", "_h"];
+    params ["_block", "_col", "_row", "_w", "_h", ["_holes", []]];
 
     if (_block < 0 || {_block >= count _blocks}) exitWith {false};
 
@@ -94,51 +99,53 @@ private _fnc_isFree = {
 
     if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {_row + _h > _rows}) exitWith {false};
 
-    private _grid = _taken select _block;
-    private _free = true;
-
-    for "_r" from _row to ((_row + _h - 1) min (count _grid - 1)) do {
-        if (((_grid select _r) select [_col, _w]) findIf {_x} >= 0) exitWith {_free = false};
-    };
-
-    _free
+    [_taken select _block, _col, _row, _w, _h, _holes] call FUNC(cellsFree)
 };
 
 private _fnc_take = {
-    params ["_block", "_col", "_row", "_w", "_h"];
+    params ["_block", "_col", "_row", "_w", "_h", ["_holes", []]];
 
-    private _grid = _taken select _block;
-    private _cols = (_blocks select _block) select 0;
-
-    while {count _grid < _row + _h} do {
-        private _line = [];
-        for "_i" from 1 to _cols do {_line pushBack false};
-        _grid pushBack _line;
-    };
-
-    for "_r" from _row to (_row + _h - 1) do {
-        private _cells = _grid select _r;
-        for "_c" from _col to (_col + _w - 1) do {_cells set [_c, true]};
-    };
+    [_taken select _block, (_blocks select _block) select 0, _col, _row, _w, _h, _holes] call FUNC(takeCells);
 };
 
-// A record's size fits an entry either way round: upright as the rules size it, or turned a quarter.
+// The holes of an entry as it lies: its own upright, its turned ones turned (rot 1).
+private _fnc_holes = {
+    params ["_index", "_rot"];
+
+    ([_infos select _index, _rot] call EFUNC(items,footprintAs)) select 2
+};
+
+// The way round a record says for an entry: its rot, or for a record from before rot its size - turned
+// when it is not as wide as the entry upright.
+private _fnc_rot = {
+    params ["_rot", "_entry", "_w"];
+
+    if (_rot isEqualTo 0 || {_rot isEqualTo 1}) exitWith {_rot};
+
+    parseNumber (_w != (_entry get "w"))
+};
+
+// A record's size fits an entry the way round it says: upright as the rules size it, or turned a
+// quarter.
 private _fnc_sizeFits = {
-    params ["_entry", "_w", "_h"];
+    params ["_entry", "_w", "_h", "_rot"];
 
     private _upW = _entry get "w";
     private _upH = _entry get "h";
 
-    (_w == _upW && {_h == _upH}) || {_w == _upH && {_h == _upW}}
+    ([[_upW, _upH], [_upH, _upW]] select (_rot == 1)) isEqualTo [_w, _h]
 };
 
 private _fnc_put = {
-    params ["_entry", "_block", "_col", "_row", "_w", "_h"];
+    params ["_index", "_block", "_col", "_row", "_w", "_h", "_rot"];
 
-    [_block, _col, _row, _w, _h] call _fnc_take;
+    private _entry = _entries select _index;
+    private _holes = [_index, _rot] call _fnc_holes;
 
-    // Turned when it lies the other way round than the rules size it upright.
-    _entry set ["rotated", _w != (_entry get "w")];
+    [_block, _col, _row, _w, _h, _holes] call _fnc_take;
+
+    _entry set ["rotated", _rot == 1];
+    _entry set ["holes", _holes];
     _entry set ["w", _w];
     _entry set ["h", _h];
     _entry set ["block", _block];
@@ -151,6 +158,7 @@ private _fnc_put = {
 // ---------------------------------------------------------------------------
 private _byKey = createHashMap;     // key -> entry indices, in order
 private _meta = [];                 // per entry: [key, index within its key, kind (fnc_layoutKey), category]
+private _infos = [];                // per entry: what einv_items_fnc_getInfo gives for its class
 
 {
     private _entry = _x;
@@ -159,8 +167,10 @@ private _meta = [];                 // per entry: [key, index within its key, ki
 
     (_info get "size") params ["_w", "_h"];
 
+    _infos pushBack _info;
     _entry set ["w", _w];
     _entry set ["h", _h];
+    _entry set ["holes", (_info getOrDefault ["footprint", [_w, _h, []]]) param [2, []]];
     _entry set ["rotated", false];
     _entry set ["overflow", false];
 
@@ -192,7 +202,7 @@ private _seen = createHashMap;
 
 {
     if (_x isEqualType [] && {(_x select [0, 6]) isEqualTypeArray ["", 0, 0, 0, 0, 0]}) then {
-        _x params ["_key", "_col", "_row", "_w", "_h", "_block"];
+        _x params ["_key", "_col", "_row", "_w", "_h", "_block", ["_given", -1]];
 
         private _n = _seen getOrDefault [_key, 0];
 
@@ -202,9 +212,10 @@ private _seen = createHashMap;
 
         if (_index >= 0) then {
             private _entry = _entries select _index;
+            private _rot = [_given, _entry, _w] call _fnc_rot;
 
-            if ([_entry, _w, _h] call _fnc_sizeFits && {[_block, _col, _row, _w, _h] call _fnc_isFree}) then {
-                [_entry, _block, _col, _row, _w, _h] call _fnc_put;
+            if ([_entry, _w, _h, _rot] call _fnc_sizeFits && {[_block, _col, _row, _w, _h, [_index, _rot] call _fnc_holes] call _fnc_isFree}) then {
+                [_index, _block, _col, _row, _w, _h, _rot] call _fnc_put;
                 _placed set [_index, true];
                 _used set [_forEachIndex, true];
             };
@@ -240,19 +251,26 @@ if (count _kinOf > 0) then {
 
     {
         if (!(_used select _forEachIndex) && {_x isEqualType []} && {(_x select [0, 6]) isEqualTypeArray ["", 0, 0, 0, 0, 0]}) then {
-            _x params ["_key", "_col", "_row", "_w", "_h", "_block"];
+            _x params ["_key", "_col", "_row", "_w", "_h", "_block", ["_given", -1]];
 
             private _candidates = _kinOf getOrDefault [[(_key splitString "|") param [0, ""]] call FUNC(layoutKey), []];
 
-            if (_candidates isNotEqualTo [] && {[_block, _col, _row, _w, _h] call _fnc_isFree}) then {
+            // Kin may differ in shape within the same box: each candidate is asked with its own holes.
+            if (_candidates isNotEqualTo []) then {
+                private _rot = 0;
                 private _at = _candidates findIf {
-                    !(_placed select (_x select 2)) && {[_entries select (_x select 2), _w, _h] call _fnc_sizeFits}
+                    private _candidate = _x select 2;
+
+                    _rot = [_given, _entries select _candidate, _w] call _fnc_rot;
+
+                    !(_placed select _candidate) && {[_entries select _candidate, _w, _h, _rot] call _fnc_sizeFits}
+                    && {[_block, _col, _row, _w, _h, [_candidate, _rot] call _fnc_holes] call _fnc_isFree}
                 };
 
                 if (_at >= 0) then {
                     private _index = (_candidates select _at) select 2;
 
-                    [_entries select _index, _block, _col, _row, _w, _h] call _fnc_put;
+                    [_index, _block, _col, _row, _w, _h, _rot] call _fnc_put;
                     _placed set [_index, true];
                     _used set [_forEachIndex, true];
                 };
@@ -279,9 +297,9 @@ _order sort true;
 
 private _overflow = [];
 
-// The first free spot for that size, compartment after compartment, row by row.
+// The first free spot for that size and those holes, compartment after compartment, row by row.
 private _fnc_find = {
-    params ["_w", "_h"];
+    params ["_w", "_h", ["_holes", []]];
 
     private _spot = [];
 
@@ -294,7 +312,7 @@ private _fnc_find = {
 
         for "_row" from 0 to _lastRow do {
             for "_col" from 0 to (_cols - _w) do {
-                if ([_block, _col, _row, _w, _h] call _fnc_isFree) exitWith {_spot = [_block, _col, _row]};
+                if ([_block, _col, _row, _w, _h, _holes] call _fnc_isFree) exitWith {_spot = [_block, _col, _row]};
             };
 
             if (_spot isNotEqualTo []) exitWith {};
@@ -307,21 +325,27 @@ private _fnc_find = {
 };
 
 {
-    private _entry = _entries select (_x select 5);
+    private _index = _x select 5;
+    private _entry = _entries select _index;
     private _w = _entry get "w";
     private _h = _entry get "h";
-    private _spot = [_w, _h] call _fnc_find;
+    private _holes = [_index, 0] call _fnc_holes;
+    private _turnedHoles = [_index, 1] call _fnc_holes;
+    private _spot = [_w, _h, _holes] call _fnc_find;
 
-    // Fits nowhere upright: turned a quarter, as a player would.
-    if (_spot isEqualTo [] && {_w != _h}) then {
-        _spot = [_h, _w] call _fnc_find;
+    // Fits nowhere upright: turned a quarter, as a player would - a shape turns with it, and one in a
+    // square box is tried turned too when that takes other cells.
+    if (_spot isEqualTo [] && {_w != _h || {_holes isNotEqualTo _turnedHoles}}) then {
+        _spot = [_h, _w, _turnedHoles] call _fnc_find;
 
         if (_spot isNotEqualTo []) then {
             _entry set ["w", _h];
             _entry set ["h", _w];
             _entry set ["rotated", true];
+            _entry set ["holes", _turnedHoles];
             _w = _entry get "w";
             _h = _entry get "h";
+            _holes = _turnedHoles;
         };
     };
 
@@ -331,7 +355,7 @@ private _fnc_find = {
     } else {
         _spot params ["_block", "_col", "_row"];
 
-        [_block, _col, _row, _w, _h] call _fnc_take;
+        [_block, _col, _row, _w, _h, _holes] call _fnc_take;
         _entry set ["block", _block];
         _entry set ["col", _col];
         _entry set ["row", _row];
@@ -359,10 +383,10 @@ private _col = 0;
 // its arrangement must not be thrown away for a list that is only not there yet.
 // ---------------------------------------------------------------------------
 private _source = if (_isKey && {_entries isEqualTo []}) then {
-    (_in select {_x isEqualType [] && {(_x select [0, 6]) isEqualTypeArray ["", 0, 0, 0, 0, 0]}}) apply {_x select [0, 6]}
+    (_in select {_x isEqualType [] && {(_x select [0, 6]) isEqualTypeArray ["", 0, 0, 0, 0, 0]}}) apply {_x select [0, 7]}
 } else {
     (_entries select {!(_x get "overflow")}) apply {
-        [_x get "key", _x get "col", _x get "row", _x get "w", _x get "h", _x get "block"]
+        [_x get "key", _x get "col", _x get "row", _x get "w", _x get "h", _x get "block", parseNumber (_x get "rotated")]
     }
 };
 
@@ -390,8 +414,19 @@ private _out = [];
     _out append (_groups get _x);
 } forEach _keys;
 
-// Nothing to persist for no holder.
-private _drift = _valid && {_in isNotEqualTo _out};
+// Nothing to persist for no holder. A record from before rot says the same as one with the rot its size
+// gives: no drift for that alone, so older places are not all written again at once.
+private _drift = _valid && {
+    (_in apply {
+        if (_x isEqualType [] && {count _x == 6} && {_x isEqualTypeArray ["", 0, 0, 0, 0, 0]}) then {
+            private _size = ([((_x select 0) splitString "|") param [0, ""]] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]];
+
+            _x + [parseNumber ((_x select 3) != (_size select 0))]
+        } else {
+            _x
+        };
+    }) isNotEqualTo _out
+};
 
 createHashMapFromArray [
     ["entries", _entries],

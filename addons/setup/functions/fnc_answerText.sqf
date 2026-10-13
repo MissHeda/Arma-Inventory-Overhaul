@@ -30,7 +30,12 @@ params [["_info", createHashMap, [createHashMap]], ["_field", "grid", [""]], ["_
 private _key = ["footprint", _field] select (_field isNotEqualTo "size");
 
 private _words = switch (_field) do {
-    case "size": {_info getOrDefault ["shape", "1x1"]};
+    case "size": {
+        // A shaped item (size=xx/x-) in words: its cells and the box around them.
+        (_info getOrDefault ["footprint", [1, 1, []]]) params ["_cols", "_rows", ["_holes", []]];
+
+        [_info getOrDefault ["shape", "1x1"], format [LLSTRING(Value_SizeShape), _cols, _rows, _cols * _rows - count _holes]] select (_holes isNotEqualTo [])
+    };
     case "stack": {format [LLSTRING(Answer_Stack), _info getOrDefault ["stack", 1]]};
     default {
         private _spec = _info getOrDefault ["grid", []];
