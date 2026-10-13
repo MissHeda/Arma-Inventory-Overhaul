@@ -119,13 +119,13 @@
             <English>Default</English>
         </Key>
         <Key ID="STR_einv_items_Ruleset_Default_Desc">
-            <English>Sizes by kind and weight, grenades five to a tile and small items ten; pockets, pouches and packs sized by their load.</English>
+            <English>Relaxed: realistic-ish sizes with room to spare. Grenades five to a tile, small items ten; pockets, pouches and packs a fifth roomier than their load.</English>
         </Key>
-        <Key ID="STR_einv_items_Ruleset_Tarkov">
-            <English>Tarkov-like</English>
+        <Key ID="STR_einv_items_Ruleset_Realism">
+            <English>Realism</English>
         </Key>
-        <Key ID="STR_einv_items_Ruleset_Tarkov_Desc">
-            <English>Longer rifles, next to nothing stacks, vests as magazine rigs, four pockets and a fixed grid for each backpack size.</English>
+        <Key ID="STR_einv_items_Ruleset_Realism_Desc">
+            <English>Realistic item and container sizes: longer rifles, vests as magazine rigs, four pockets and a fixed grid for each backpack size. Stacks as in Default.</English>
         </Key>
         <Key ID="STR_einv_items_Ruleset_Weight">
             <English>Weight-like</English>

@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The presets a setup can start from (CfgEinvRulesets): this mod's own - Default, Tarkov-like,
+ * The presets a setup can start from (CfgEinvRulesets): this mod's own - Default, Realism,
  * Weight-like - and any that another mod adds, in config order.
  *
  * Arguments:

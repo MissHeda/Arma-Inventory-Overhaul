@@ -5,7 +5,10 @@
  * of the Items and Containers steps:
  *
  *   grid  - "6x4, 2 holes" "own rule";  "3 × 1x2" "preset";  "pockets:4" "preset";
- *           "6x4" "like V_PlateCarrier1_rgr" when the class's own rule takes it from another class
+ *           "6x4" "like V_PlateCarrier1_rgr" when the class's own rule takes it from another class;
+ *           "3 compartments on a 7×7 canvas" for the ones drawn where they lie (grid=aab/acc);
+ *           "no room by default" for a grid by load on a class whose config holds nothing - a cosmetic
+ *           backpack, a radio pack - which only an own grid gives cells
  *   size  - "2x3" "preset"
  *   stack - "5 per tile" "own rule"
  *
@@ -42,40 +45,65 @@ private _words = switch (_field) do {
 
         _spec params [["_mode", "", [""]]];
 
-        switch (_mode) do {
-            case "blocks": {
-                private _blocks = _spec select 1;
-                private _parts = [];
-                private _run = 0;
+        // By load, with a config that holds nothing: no cell at all, until a rule gives it some.
+        private _noRoom = (_mode in ["auto", "percent"] || {_mode isEqualTo "pattern" && {(_spec param [2, -1]) <= 0}})
+            && {(_info getOrDefault ["maxLoad", 0]) <= 0};
 
-                {
-                    _x params ["_cols", "_rows", ["_holes", []]];
+        if (_noRoom) then {
+            LLSTRING(Answer_NoRoom)
+        } else {
+            switch (_mode) do {
+                case "blocks": {
+                    private _blocks = _spec select 1;
+                    private _placed = _blocks select {(_x param [3, []]) isNotEqualTo []};
+                    private _parts = [];
+                    private _run = 0;
 
-                    _run = _run + 1;
+                    // The canvas in one go, where its first compartment stands.
+                    if (count _placed > 1) then {
+                        private _canvasW = selectMax (_placed apply {((_x select 3) select 0) + (_x select 0)});
+                        private _canvasH = selectMax (_placed apply {((_x select 3) select 1) + (_x select 1)});
+                        private _first = _blocks findIf {(_x param [3, []]) isNotEqualTo []};
 
-                    if ((_blocks param [_forEachIndex + 1, []]) isNotEqualTo _x) then {
-                        private _word = format ["%1x%2", _cols, _rows];
-
-                        if (_holes isNotEqualTo []) then {
-                            _word = format [LLSTRING(Answer_Holes), _word, count _holes];
-                        };
-
-                        if (_run > 1) then {
-                            _word = format [LLSTRING(Answer_Run), _run, _word];
-                        };
-
-                        _parts pushBack _word;
-                        _run = 0;
+                        _blocks = +_blocks;
+                        _blocks deleteRange [_first, count _placed];
+                        _blocks insert [_first, [format [LLSTRING(Value_GridCanvas), count _placed, _canvasW, _canvasH]]];
                     };
-                } forEach _blocks;
 
-                [_parts joinString " + ", "-"] select (_parts isEqualTo [])
+                    {
+                        if (_x isEqualType "") then {
+                            _parts pushBack _x;
+                            continue;
+                        };
+
+                        _x params ["_cols", "_rows", ["_holes", []]];
+
+                        _run = _run + 1;
+
+                        if ((_blocks param [_forEachIndex + 1, []]) isNotEqualTo _x) then {
+                            private _word = format ["%1x%2", _cols, _rows];
+
+                            if (_holes isNotEqualTo []) then {
+                                _word = format [LLSTRING(Answer_Holes), _word, count _holes];
+                            };
+
+                            if (_run > 1) then {
+                                _word = format [LLSTRING(Answer_Run), _run, _word];
+                            };
+
+                            _parts pushBack _word;
+                            _run = 0;
+                        };
+                    } forEach _blocks;
+
+                    [_parts joinString " + ", "-"] select (_parts isEqualTo [])
+                };
+                case "auto": {LLSTRING(Answer_ByLoad)};
+                case "cells": {format [LLSTRING(Cont_Cells), _spec select 1]};
+                case "percent": {format [LLSTRING(Answer_Percent), _spec select 1]};
+                case "pattern": {[_spec] call EFUNC(items,formatGrid)};
+                default {"-"};
             };
-            case "auto": {LLSTRING(Answer_ByLoad)};
-            case "cells": {format [LLSTRING(Cont_Cells), _spec select 1]};
-            case "percent": {format [LLSTRING(Answer_Percent), _spec select 1]};
-            case "pattern": {[_spec] call EFUNC(items,formatGrid)};
-            default {"-"};
         };
     };
 };

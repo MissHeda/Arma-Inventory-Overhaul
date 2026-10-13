@@ -43,8 +43,8 @@
  * Return Value:
  * HashMap <HASHMAP>
  *   "entries"  - all of them, placed
- *   "blocks"   - the compartments [[cols, rows, holes], ...] (fnc_blocksFor) - the open grid's with the
- *                rows it needs now
+ *   "blocks"   - the compartments [[cols, rows, holes, pos], ...] (fnc_blocksFor) - the open grid's
+ *                with the rows it needs now
  *   "overflow" - the entries with no room
  *   "records"  - one per placed entry, canonical (fnc_readPlaces): [key, col, row, w, h, block, rot]. A
  *                holder of another type that lists nothing keeps the records it was laid out from: a
@@ -82,7 +82,7 @@ private _blocks = if (_isKey) then {[]} else {[_holder] call FUNC(getBlocks)};
 private _open = _blocks isEqualTo [];
 
 if (_open) then {
-    _blocks = [[STORAGE_COLS, 1e6, []]];
+    _blocks = [[STORAGE_COLS, 1e6, [], []]];
 };
 
 // Per compartment, one array of booleans per row, true where something lies - or where a shaped
@@ -364,7 +364,7 @@ private _fnc_find = {
 
 // The open grid shows the rows it uses, one more to put things in, and never fewer than three.
 if (_open) then {
-    _blocks = [[STORAGE_COLS, (count (_taken select 0) + 1) max 3, []]];
+    _blocks = [[STORAGE_COLS, (count (_taken select 0) + 1) max 3, [], []]];
 };
 
 // Lined up in a row of their own under the compartments, each in its own cell span.

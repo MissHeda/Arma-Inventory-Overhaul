@@ -59,12 +59,20 @@ How big items are, how many share a tile and how containers are split up is one 
 CBA setting "Inventory rules" (`einv_items_rules`), the same for everyone. The setup wizard writes it for you
 (ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory) - you draw the cells of an item
 (an L, a T) and of a uniform, vest or backpack on a canvas, click the gaps between cells to split it into
-compartments, or link it to another class, and its start page shows what you changed -, but it is plain text:
+compartments, or link it to another class, and its start page shows what you changed -, but it is plain text.
+It builds on a preset: Default (relaxed: realistic-ish sizes, containers a fifth roomier than their load),
+Realism (realistic sizes: longer rifles, magazine-rig vests, a fixed grid per backpack size, stacks as in
+Default) or Weight-like (an item takes as many cells as it weighs). Grids are ten cells wide.
 
 - **Your own classes and kits:** `class=X+` covers X and every class built on it, from any mod -
   `class=My_Medic_Kit+ > size=2x2 stack=1 weight=1.5 name=Medic_kit`. A later rule beats an earlier one.
   In `name=` an `_` is a space. A compartment can be drawn cell by cell, rows split by `/`, `x` a cell and
-  `-` a hole: `class=My_Vest > grid=xxxx/x--x+2x3`, and so can an item, whose `size=xx/x-` makes an L.
+  `-` a hole: `class=My_Vest > grid=xxxx/x--x+2x3`, and so can an item, whose `size=xx/x-` makes an L. A whole
+  container can be drawn as a canvas, a letter per compartment, and its compartments stay exactly where they
+  were drawn: `class=My_Pack > grid=abbbbbc/abbbbbc/abbbbbc/-bbbbb-/-bbbbb-` is a column of three pouches
+  either side of the main compartment, `grid=aaa/aba/aaa` a ring with a cell of its own inside. A backpack
+  whose config holds nothing (a cosmetic one, some radio packs) has no cells until a rule gives it some:
+  `class=My_Radio_Pack > grid=4x3`.
   `class=My_Vest > like=V_PlateCarrier1_rgr` gives a class another one's size, stack, grid and rule weight,
   and follows it when that changes; `like=X grid=6x4` changes one.
 - **One crate, vehicle or a unit's uniform, vest or backpack:** give the object its own grid, which wins

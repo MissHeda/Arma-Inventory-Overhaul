@@ -8,16 +8,20 @@
  * inventory's does - the gap counted - and a divider lies on every seam where two compartments meet
  * instead. Read back (fnc_canvasBlocks), it gives the same compartments in the same order. A
  * compartment's holes are places without a cell. An item's footprint is one compartment: it lies in the
- * top left corner.
+ * top left corner. Compartments drawn on a canvas before (a pos each, grid=aab/acc) lie where they were
+ * drawn, their canvas one piece of the flow and what follows under it, as the inventory has them
+ * (einv_gui_fnc_flowCompartments).
  *
  * Arguments:
- * 0: Compartments [[cols, rows, holes], ...], holes the indices row * cols + col <ARRAY>
+ * 0: Compartments [[cols, rows, holes, pos], ...], holes the indices row * cols + col, pos [x, y] on
+ *    their canvas or [] (both may be left out) <ARRAY>
  * 1: At least this many rows <NUMBER> (default: 1)
  * 2: At most this many rows - what lies below is cut away <NUMBER> (default: CANVAS_ROWS_LOADED)
+ * 3: Columns: STORAGE_COLS for a container, SHAPE_MAX for an item's board <NUMBER> (default: STORAGE_COLS)
  *
  * Return Value:
  * Canvas <HASHMAP>
- *   "cols"  - STORAGE_COLS <NUMBER>
+ *   "cols"  - its columns, as given <NUMBER>
  *   "rows"  - its rows <NUMBER>
  *   "cells" - per place (index row * cols + col) whether it is a cell <ARRAY of BOOL>
  *   "right" - per place whether a divider lies on the seam to its right <ARRAY of BOOL>
@@ -29,9 +33,7 @@
  * Public: No
  */
 
-params [["_blocks", [], [[]]], ["_minRows", 1, [0]], ["_maxRows", CANVAS_ROWS_LOADED, [0]]];
-
-private _cols = STORAGE_COLS;
+params [["_blocks", [], [[]]], ["_minRows", 1, [0]], ["_maxRows", CANVAS_ROWS_LOADED, [0]], ["_cols", STORAGE_COLS, [0]]];
 
 // Where each compartment goes, in cells. The gap the inventory leaves after one only decides where a
 // line breaks.
@@ -41,13 +43,9 @@ private _lineGaps = 0;
 private _lineY = 0;
 private _lineH = 0;
 
-{
-    _x params [["_w", 0], ["_h", 0]];
-
-    if (_w < 1 || {_h < 1}) then {
-        _places pushBack [];
-        continue;
-    };
+// Where the next piece goes, _w by _h cells: [col, row].
+private _fnc_flow = {
+    params ["_w", "_h"];
 
     if (_lineX > 0 && {_lineX + _lineGaps * 0.22 + _w > _cols + 0.0001}) then {
         _lineX = 0;
@@ -56,11 +54,57 @@ private _lineH = 0;
         _lineH = 0;
     };
 
-    _places pushBack [_lineX, _lineY];
+    private _place = [_lineX, _lineY];
+
     _lineX = _lineX + _w;
     _lineGaps = _lineGaps + 1;
     _lineH = _lineH max _h;
-} forEach _blocks;
+
+    _place
+};
+
+private _index = 0;
+
+while {_index < count _blocks} do {
+    (_blocks select _index) params [["_w", 0], ["_h", 0], "", ["_pos", []]];
+
+    switch (true) do {
+        case (_w < 1 || {_h < 1}): {
+            _places pushBack [];
+            _index = _index + 1;
+        };
+        case (_pos isEqualTo []): {
+            _places pushBack ([_w, _h] call _fnc_flow);
+            _index = _index + 1;
+        };
+        default {
+            // The canvas, as one piece: this compartment and the placed ones after it.
+            private _last = _index;
+
+            while {_last + 1 < count _blocks && {((_blocks select (_last + 1)) param [3, []]) isNotEqualTo []}} do {
+                _last = _last + 1;
+            };
+
+            private _group = _blocks select [_index, _last - _index + 1];
+            private _minX = selectMin (_group apply {(_x select 3) select 0});
+            private _minY = selectMin (_group apply {(_x select 3) select 1});
+            private _groupW = selectMax (_group apply {((_x select 3) select 0) + (_x select 0)}) - _minX;
+            private _groupH = selectMax (_group apply {((_x select 3) select 1) + (_x select 1)}) - _minY;
+
+            ([_groupW, _groupH] call _fnc_flow) params ["_canvasX", "_canvasY"];
+
+            {
+                (_x select 3) params ["_posX", "_posY"];
+
+                _places pushBack [_canvasX + _posX - _minX, _canvasY + _posY - _minY];
+            } forEach _group;
+
+            // What follows starts under it.
+            _lineX = 1e6;
+            _index = _last + 1;
+        };
+    };
+};
 
 private _rows = (((_lineY + _lineH) max _minRows) min _maxRows) max 1;
 private _count = _cols * _rows;

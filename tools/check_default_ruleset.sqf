@@ -2,7 +2,10 @@
  * Author: Miss Heda
  * Checks that the shipped default ruleset (CfgEinvRulesets >> default) gives every item the size and
  * stack, and every container the compartments, that the code before the rules gave them - with
- * nothing set in the older tables and both sliders on their defaults. Also checks that the default's
+ * nothing set in the older tables and both sliders on their defaults - but for what 0.4.0 changed on
+ * purpose, which the "before" below does too: grids STORAGE_COLS (10) wide instead of 8, at most
+ * 400 cells instead of 320, and uniforms, vests and backpacks laid out from 120 % of their load
+ * (default's grid=120%, a fifth more room) instead of all of it. Also checks that the default's
  * groups are a partition (an item in two of them would let a rule for one reach into the other; only
  * medical overlaps on purpose), that texts read and written stay the same, and that names survive
  * being written into a rule.
@@ -20,7 +23,8 @@
  * kind item that weigh 10 or less do (@item_small). The two only differ for an item whose own mod
  * gives it another size than the rules would (einv_gridSize[]) without a stack of its own
  * (einv_stackSize). Compartment differences marked "caps" come from the new limits on what a mod's
- * einv_grids[] may ask for (24 compartments, 320 cells).
+ * einv_grids[] may ask for (24 compartments, 400 cells). Also checked: a text from before the preset
+ * was renamed (base=tarkov) builds on realism, and canvases (grid=aaa/aba/aaa) read and write the same.
  */
 
 private _compiled = ["einv1 base=default", false] call einv_items_fnc_compileRules;
@@ -41,7 +45,11 @@ private _fnc_count = {
     };
 };
 
-// ----- The code before the rules, with the tables empty -----
+// ----- The code before the rules, with the tables empty - ten columns and default's 120 % -----
+
+// STORAGE_COLS and MAX_CELLS, which a mission's script cannot include.
+private _storageCols = 10;
+private _maxCells = 400;
 
 // fnc_getSize: einv_gridSize[] in config, else by kind and mass.
 private _fnc_oldSize = {
@@ -107,7 +115,7 @@ private _fnc_oldSize = {
         };
     };
 
-    [(_size select 0) min 8, _size select 1]
+    [(_size select 0) min _storageCols, _size select 1]
 };
 
 // fnc_getInfo's stacks: einv_stackSize in config, grenades 5, single-cell items einv_items_stackSmall.
@@ -135,19 +143,24 @@ private _fnc_oldBlocks = {
     private _override = getArray (_config >> "einv_grids");
 
     if (_override isNotEqualTo [] && {_override findIf {!(_x isEqualTypeArray [0, 0])} < 0}) exitWith {
-        _override apply {[((floor (_x select 0)) max 1) min 8, ((floor (_x select 1)) max 1) min 40]}
+        _override apply {[((floor (_x select 0)) max 1) min _storageCols, ((floor (_x select 1)) max 1) min 40]}
     };
 
     private _cells = floor (getNumber (_config >> "einv_slots"));
     private _given = _cells > 0;
 
+    // Default's grid=120% for uniforms, vests and backpacks, as fnc_blocksFor works out a share.
     if (!_given) then {
-        _cells = ceil ((_maxLoad max 0) / (_cell max 1));
+        _cells = if (_kind in ["uniform", "vest", "backpack"]) then {
+            ceil ((_maxLoad max 0) * 120 / 100 / (_cell max 1))
+        } else {
+            ceil ((_maxLoad max 0) / (_cell max 1))
+        };
     };
 
-    if (_cells <= 0) exitWith {[[8, 0]]};
+    if (_cells <= 0) exitWith {[[_storageCols, 0]]};
 
-    _cells = _cells min 320;
+    _cells = _cells min _maxCells;
 
     private _hash = 0;
     {_hash = _hash + _x} forEach toArray toLowerANSI _class;
@@ -198,10 +211,10 @@ private _fnc_oldBlocks = {
             ] select (_hash mod 4), 16] call _fnc_fill
         };
         case "backpack": {
-            [(ceil sqrt _cells) min 8] call _fnc_rows
+            [(ceil sqrt _cells) min _storageCols] call _fnc_rows
         };
         default {
-            [8] call _fnc_rows
+            [_storageCols] call _fnc_rows
         };
     }
 };
@@ -255,8 +268,9 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
     // Compartments
     if (_kind in ["uniform", "vest", "backpack", "crate", "vehicle"]) then {
         private _blockKind = [_kind, "crate"] select (_kind in ["crate", "vehicle"]);
-        // The old compartments in the shape fnc_blocksFor gives now: [cols, rows, holes], none of them shaped.
-        private _oldBlocks = ([_class, _blockKind, _config, _facts get "maxLoad"] call _fnc_oldBlocks) apply {[_x select 0, _x select 1, []]};
+        // The old compartments in the shape fnc_blocksFor gives now: [cols, rows, holes, pos], none of them
+        // shaped or placed.
+        private _oldBlocks = ([_class, _blockKind, _config, _facts get "maxLoad"] call _fnc_oldBlocks) apply {[_x select 0, _x select 1, [], []]};
         private _newBlocks = [_class, _blockKind, _facts get "maxLoad", _info get "grid", _cell] call einv_storage_fnc_blocksFor;
 
         if (_oldBlocks isNotEqualTo _newBlocks) then {
@@ -267,7 +281,7 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
                 _total = _total + (_x select 0) * (_x select 1);
             } forEach _oldBlocks;
 
-            private _capped = count _oldBlocks > 24 || {_total > 320};
+            private _capped = count _oldBlocks > 24 || {_total > _maxCells};
 
             [["blocks", "caps"] select _capped, format ["BLOCKS%1 %2 (%3, load %4): before %5, now %6 from %7", ["", " (caps)"] select _capped, _class, _kind, _facts get "maxLoad", _oldBlocks, _newBlocks, (_info get "src") get "grid"]] call _fnc_count;
         };
@@ -294,11 +308,12 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
 } forEach [
     "",
     "einv1 base=default",
-    "einv1 base=tarkov cell=4, @ak: kind=magazine class~545x39|762x39, @ak > size=1x2, class=ACE_fieldDressing+|ACE_packingBandage+ > stack=20",
+    "einv1 base=realism cell=4, @ak: kind=magazine class~545x39|762x39, @ak > size=1x2, class=ACE_fieldDressing+|ACE_packingBandage+ > stack=20",
     "kind=grenade > stack=3 weight=0.4 name=Frag_%28M67%29, kind=vest class~platecarrier > grid=plate:20, kind=backpack load>280 > grid=120%",
     "einv1 base=none, @mag_rifle: @mag_rifle, @mag_rifle: class=30Rnd_65x39_caseless_green+, !addon~ace_ cat=medical > stack=1, class=B_Carryall_Base+ > grid=6x5+2x3+2x3, size=mass",
     "for=arifle_MX_F > size=1x2, well=CBA_556x45_STANAG > size=1x2, rounds>=100 mass>20 > size=2x3 grid=auto",
-    "class=My_Rifle_L > size=xxxx/x---, class=My_Launcher > size=-x-/xxx/---, class=My_Box > shape=xx/xx"
+    "class=My_Rifle_L > size=xxxx/x---, class=My_Launcher > size=-x-/xxx/---, class=My_Box > shape=xx/xx",
+    "class=My_Pack > grid=abbbbbc/abbbbbc/abbbbbc/-bbbbb-/-bbbbb-/-bbbbb-/-bbbbb-, class=My_Ring > grid=2x3+aaa/aba/aaa+1x1, class=My_Row > grid=aaabb"
 ] + ((getArray (configFile >> "CfgEinvRulesets" >> "default" >> "rules")) apply {"einv1 base=none, " + _x});
 
 {
@@ -308,6 +323,13 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
         ["roundTrip", format ["NAME %1 -> %2 -> %3", _x, [_x] call einv_items_fnc_encodeName, _back]] call _fnc_count;
     };
 } forEach ["Field kit", "Frag (M67), 3 pieces", "Verbandpäckchen", "a_b-c.d 100%", "Gerät; ""quoted"""];
+
+// A text from before the rename still loads, on the new preset.
+private _renamed = (["einv1 base=tarkov"] call einv_items_fnc_parseRules) get "base";
+
+if (_renamed isNotEqualTo "realism") then {
+    ["roundTrip", format ["ALIAS base=tarkov reads as base=%1, not realism", _renamed]] call _fnc_count;
+};
 
 // ----- Report -----
 

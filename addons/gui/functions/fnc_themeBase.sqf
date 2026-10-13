@@ -6,7 +6,7 @@
  * makes it that look:
  *
  *   private _theme = call FUNC(themeBase);
- *   _theme merge [createHashMapFromArray [["id", "tarkov"], ...], true];
+ *   _theme merge [createHashMapFromArray [["id", "glass"], ...], true];
  *
  * A fresh HashMap each call, with arrays of its own, so a look can change it freely. What each key
  * means is in docs/ARCHITECTURE.md (Themes); colours are RGBA, [] where a key allows "none". fnc_build

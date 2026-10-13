@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * ["einv1 base=tarkov"] call einv_setup_fnc_setDraft;
+ * ["einv1 base=realism"] call einv_setup_fnc_setDraft;
  *
  * Public: No
  */

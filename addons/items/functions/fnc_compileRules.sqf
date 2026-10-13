@@ -56,7 +56,7 @@
  * counts in byKind as setting every one of LIKE_FIELDS, which fnc_resolve takes from that class.
  *
  * Example:
- * ["einv1 base=tarkov, kind=grenade > stack=3"] call einv_items_fnc_compileRules;
+ * ["einv1 base=realism, kind=grenade > stack=3"] call einv_items_fnc_compileRules;
  *
  * Public: Yes
  */
@@ -96,6 +96,13 @@ while {_next isNotEqualTo "" && {_next isNotEqualTo "none"}} do {
 
     _chain pushBack _next;
     _next = toLowerANSI (getText (_rulesets >> _next >> "base"));
+
+    // Another mod's preset may still build on a preset under its old id.
+    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _next};
+
+    if (_alias >= 0) then {
+        _next = (PRESET_ALIASES select _alias) select 1;
+    };
 };
 
 // Read as derived first; the base goes first.

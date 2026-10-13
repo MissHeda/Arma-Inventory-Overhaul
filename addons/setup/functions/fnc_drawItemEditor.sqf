@@ -98,7 +98,7 @@ private _canvas = GVAR(itemWork) getOrDefault [_lc, createHashMap];
 // No edit yet: a canvas of what it is now, its shape in the top left corner. It becomes the working copy
 // with the first change.
 if (count _canvas == 0) then {
-    _canvas = [[_info getOrDefault ["footprint", [_sizeW, _sizeH, []]]], SHAPE_MAX, SHAPE_MAX] call FUNC(canvasFromBlocks);
+    _canvas = [[_info getOrDefault ["footprint", [_sizeW, _sizeH, []]]], SHAPE_MAX, SHAPE_MAX, SHAPE_MAX] call FUNC(canvasFromBlocks);
     _canvas set ["start", [_canvas] call FUNC(canvasBlocks)];
     _canvas set ["stack", _startStack];
 };

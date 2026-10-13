@@ -18,7 +18,7 @@
  * "tooLong" (its length) when the rules text is longer than TEXT_MAX <HASHMAP>
  *
  * Example:
- * ["force einv_items_rules = ""einv1 base=tarkov"";"] call einv_setup_fnc_importText;
+ * ["force einv_items_rules = ""einv1 base=realism"";"] call einv_setup_fnc_importText;
  *
  * Public: No
  */
@@ -56,7 +56,7 @@ if (count _rules > TEXT_MAX) exitWith {createHashMapFromArray [["tooLong", count
 private _ast = [_rules] call EFUNC(items,parseRules);
 
 // Nothing the engine could use - another mod's line, any other text - is nothing to import either, not
-// the default the engine reads it as. A header alone (einv1 base=tarkov) is something: the engine takes it
+// the default the engine reads it as. A header alone (einv1 base=realism) is something: the engine takes it
 // as the header when the first statement starts with einv and a number.
 private _first = (((_rules splitString ",") apply {trim _x}) select {_x isNotEqualTo ""}) param [0, ""];
 private _word = toLowerANSI ((_first splitString " ") param [0, ""]);

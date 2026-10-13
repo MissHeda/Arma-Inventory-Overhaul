@@ -5,8 +5,9 @@
  * "This is how it looks": what an editor's canvas (fnc_uiCanvas) gives, the way the inventory draws it -
  * on the inventory's panel, in its cells, a pixel apart.
  *   - A container's compartments laid out as the inventory lays them out (einv_gui_fnc_flowCompartments):
- *     side by side as far as STORAGE_COLS cells reach, a gap between two, then on the next line - so a
- *     compartment drawn beside another on the canvas that the inventory puts under it shows that here.
+ *     side by side as far as STORAGE_COLS cells reach, a gap between two, then on the next line - and the
+ *     ones of a canvas exactly where they were drawn, a line on every seam where two of them meet, as
+ *     the inventory's doubled frames show it.
  *   - An item's tile on a piece of grid: its surface on its cells only (einv_gui_fnc_uiShape), its
  *     picture over its box, as a tile is drawn.
  * Drawn again on its own after a click on the canvas: it replaces the one drawn before
@@ -17,7 +18,7 @@
  * 1: Controls group to create it in <CONTROL>
  * 2: Position [x, y, w, h], relative to the group <ARRAY>
  * 3: Theme <HASHMAP>
- * 4: Compartments [[cols, rows, holes], ...] - for an item its shape alone, [] for none <ARRAY>
+ * 4: Compartments [[cols, rows, holes, pos], ...] - for an item its shape alone, [] for none <ARRAY>
  * 5: For an item [picture, category]; [] for a container <ARRAY> (default: [])
  *
  * Return Value:
@@ -91,47 +92,65 @@ if (_item isNotEqualTo []) exitWith {
 // A container: the compartments where the inventory puts them.
 private _cellH = (UNIT * 0.85) min (_areaW / (STORAGE_COLS + 0.5) * pixelH / pixelW);
 private _cellW = SQUARE(_cellH);
-private _gapX = round (_cellW * 0.22 / pixelW) * pixelW;
-private _gapY = round (_cellH * 0.22 / pixelH) * pixelH;
 private _gridW = STORAGE_COLS * _cellW;
-private _lineX = 0;
-private _lineY = 0;
-private _lineH = 0;
-private _places = [];
 
-{
-    _x params ["_w", "_h"];
-
-    private _blockW = _w * _cellW;
-
-    if (_lineX > 0 && {_lineX + _blockW > _gridW + 0.0001}) then {
-        _lineX = 0;
-        _lineY = _lineY + _lineH + _gapY;
-        _lineH = 0;
-    };
-
-    _places pushBack [_lineX, _lineY];
-    _lineX = _lineX + _blockW + _gapX;
-    _lineH = _lineH max (_h * _cellH);
-} forEach _blocks;
-
-private _contentH = _lineY + _lineH;
+([createHashMapFromArray [["blocks", _blocks]], [_cellW, _cellH]] call EFUNC(gui,flowCompartments)) params ["_places", "_contentH"];
 
 [
     _display, _group, [0, 0, (_padX * 2 + _gridW) min (_width - SCROLL_W), (_padY * 2 + _contentH) max (UNIT * 1)],
     _theme getOrDefault ["panel", [0.05, 0.05, 0.05, 0.92]], (_theme getOrDefault ["radius", 0]) min (UNIT * 0.3)
 ] call EFUNC(gui,uiPanel);
 
+// Which compartment of the canvas has the cell at [x, y] on it, for the seams.
+private _owners = createHashMap;
+
 {
-    _x params ["_w", "_h", ["_holes", []]];
-    (_places select _forEachIndex) params ["_left", "_top"];
+    _x params ["_w", "_h", ["_holes", []], ["_pos", []]];
+
+    if (_pos isEqualTo []) then {continue};
 
     for "_row" from 0 to (_h - 1) do {
         for "_col" from 0 to (_w - 1) do {
             if !((_row * _w + _col) in _holes) then {
-                [
-                    _display, _group, [_padX + _left + _col * _cellW, _padY + _top + _row * _cellH, _cellW - pixelW, _cellH - pixelH], _cellColor
-                ] call EFUNC(gui,uiPanel);
+                _owners set [[(_pos select 0) + _col, (_pos select 1) + _row], _forEachIndex];
+            };
+        };
+    };
+} forEach _blocks;
+
+private _seamColor = +(_theme getOrDefault ["line", [1, 1, 1, 0.08]]);
+
+_seamColor set [3, ((_seamColor param [3, 0.08]) * 2) max 0.18];
+
+{
+    _x params ["_w", "_h", ["_holes", []], ["_pos", []]];
+    (_places param [_forEachIndex, []]) params [["_left", 0], ["_top", 0]];
+
+    if ((_places param [_forEachIndex, []]) isEqualTo []) then {continue};
+
+    private _block = _forEachIndex;
+
+    for "_row" from 0 to (_h - 1) do {
+        for "_col" from 0 to (_w - 1) do {
+            if ((_row * _w + _col) in _holes) then {continue};
+
+            private _cellX = _padX + _left + _col * _cellW;
+            private _cellY = _padY + _top + _row * _cellH;
+
+            [_display, _group, [_cellX, _cellY, _cellW - pixelW, _cellH - pixelH], _cellColor] call EFUNC(gui,uiPanel);
+
+            if (_pos isEqualTo []) then {continue};
+
+            // Another compartment's cell to the right or below: a line on the gap between them.
+            private _canvasX = (_pos select 0) + _col;
+            private _canvasY = (_pos select 1) + _row;
+
+            if ((_owners getOrDefault [[_canvasX + 1, _canvasY], _block]) != _block) then {
+                [_display, _group, [_cellX + _cellW - pixelW, _cellY, pixelW, _cellH - pixelH], _seamColor] call EFUNC(gui,uiPanel);
+            };
+
+            if ((_owners getOrDefault [[_canvasX, _canvasY + 1], _block]) != _block) then {
+                [_display, _group, [_cellX, _cellY + _cellH - pixelH, _cellW - pixelW, pixelH], _seamColor] call EFUNC(gui,uiPanel);
             };
         };
     };

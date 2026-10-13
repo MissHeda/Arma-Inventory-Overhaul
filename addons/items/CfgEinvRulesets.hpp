@@ -13,17 +13,20 @@
 //                       class for the row's picture, and overlay = 1 for a group that overlaps the
 //                       others on purpose (its rules go after theirs)
 //
-// The group ids are what own rules refer to (@mag_rifle > size=1x3): never rename one. Other mods
-// may add presets of their own as classes here.
+// The group ids are what own rules refer to (@mag_rifle > size=1x3): never rename one. Nor a preset's
+// id: a text names it in base=. The one that was renamed (tarkov, now realism) is read under its new
+// name (PRESET_ALIASES, fnc_parseRules). Other mods may add presets of their own as classes here.
 class CfgEinvRulesets {
-    // Today's sizes and stacks, as they were before rules existed - nothing changes for anyone until
-    // they write a rule. The groups are a partition: an item is in at most one of them (but medical,
-    // which is only a handle for the wizard), so that a rule for one of them never reaches into
-    // another. The magazine groups leave each other out for that reason.
+    // Relaxed: the sizes and stacks from before rules existed, and a fifth more room in uniforms,
+    // vests and backpacks than their load gives (grid=120%) - the owner found them tight once she
+    // played with them; crates and vehicles stay by their load. The groups are a partition: an item
+    // is in at most one of them (but medical, which is only a handle for the wizard), so that a rule
+    // for one of them never reaches into another. The magazine groups leave each other out for that
+    // reason.
     class default {
         name = CSTRING(Ruleset_Default);
         description = CSTRING(Ruleset_Default_Desc);
-        revision = 1;
+        revision = 2;
         base = "";
         cell = -1;
         rules[] = {
@@ -91,11 +94,11 @@ class CfgEinvRulesets {
             "@backpack_medium: kind=backpack load>160 load<=280",
             "@backpack_large: kind=backpack load>280",
             "@crate: kind=crate|vehicle",
-            "@uniform > size=2x2 grid=auto",
-            "@vest > size=3x3 grid=auto",
-            "@backpack_small > size=3x3 grid=auto",
-            "@backpack_medium > size=4x4 grid=auto",
-            "@backpack_large > size=4x5 grid=auto",
+            "@uniform > size=2x2 grid=120%",
+            "@vest > size=3x3 grid=120%",
+            "@backpack_small > size=3x3 grid=120%",
+            "@backpack_medium > size=4x4 grid=120%",
+            "@backpack_large > size=4x5 grid=120%",
             "@crate > grid=auto"
         };
 
@@ -137,17 +140,16 @@ class CfgEinvRulesets {
         };
     };
 
-    // Tarkov's feel: longer rifles, next to nothing stacks, fixed grids per backpack size, vests as
-    // magazine rigs and uniforms with four pockets.
-    class tarkov {
-        name = CSTRING(Ruleset_Tarkov);
-        description = CSTRING(Ruleset_Tarkov_Desc);
-        revision = 1;
+    // Realistic sizes: longer rifles, fixed grids per backpack size, vests as magazine rigs and
+    // uniforms with four pockets. Stacks as in default - single bandages, one to a tile, were more
+    // clicking than realism. Was "tarkov" until 0.4.0.
+    class realism {
+        name = CSTRING(Ruleset_Realism);
+        description = CSTRING(Ruleset_Realism_Desc);
+        revision = 2;
         base = "default";
         cell = -1;
         rules[] = {
-            "@grenade > stack=1",
-            "@item_small > stack=1",
             "@rifle_light > size=4x2",
             "@rifle_medium > size=5x2",
             "@rifle_heavy > size=6x2",
@@ -160,15 +162,17 @@ class CfgEinvRulesets {
         };
     };
 
-    // Room follows weight: every item takes as many cells as it weighs, so a full grid is a full load.
+    // Room follows weight: every item takes as many cells as it weighs, so a full grid is a full load -
+    // which is why its containers keep exactly their load, not default's fifth more.
     class weight {
         name = CSTRING(Ruleset_Weight);
         description = CSTRING(Ruleset_Weight_Desc);
-        revision = 1;
+        revision = 2;
         base = "default";
         cell = 4;
         rules[] = {
             "size=mass",
+            "@uniform|@vest|@backpack_small|@backpack_medium|@backpack_large > grid=auto",
             "@grenade|@item_small|@mag_small > stack=10"
         };
     };

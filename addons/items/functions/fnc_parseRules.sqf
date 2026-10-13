@@ -12,6 +12,8 @@
  *   einv1 base=default cell=5             the header, read only as the first statement: the preset to
  *                                         build on (base=none for none) and the config mass per grid
  *                                         cell. Without one, the text reads as einv1 base=default.
+ *                                         A renamed preset's old id reads as the new one
+ *                                         (PRESET_ALIASES: base=tarkov is base=realism).
  *   @rifle_mags: kind=magazine mass<=20   a group: a name for a selection, used as @rifle_mags. A name
  *                                         defined twice means either. An own group replaces the
  *                                         preset's group of the same name; @name inside it means the
@@ -42,7 +44,8 @@
  *                            size=xx/x- drawn as a grid's compartment is (fnc_parseMask): rows by /,
  *                            x a cell, - a hole - an L of 3 cells. At most SHAPE_MAX each way
  *   stack=10                 how many share a tile, 1 to MAX_STACK
- *   grid=...                 a container's compartments, see fnc_parseGrid
+ *   grid=...                 a container's compartments, see fnc_parseGrid - also a canvas,
+ *                            grid=aaa/aba/aaa, its compartments where they were drawn
  *   weight=1.25              its weight in kg instead of its config's
  *   name=Field_kit           the name it shows, written as fnc_encodeName does
  *
@@ -538,6 +541,19 @@ private _fnc_header = {
             case "base": {
                 if ([_value] call _fnc_isId) then {
                     _base = _value;
+
+                    // A preset renamed since the text was written: built on the new one, said once in
+                    // the RPT - the wizard writes the new id the next time it saves.
+                    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _value};
+
+                    if (_alias >= 0) then {
+                        _base = (PRESET_ALIASES select _alias) select 1;
+
+                        if !(missionNamespace getVariable [QGVAR(aliasWarned), false]) then {
+                            missionNamespace setVariable [QGVAR(aliasWarned), true];
+                            INFO_2("Rules: base=%1 is now base=%2 - read as that.",_value,_base);
+                        };
+                    };
                 } else {
                     _warnings pushBack format ["Header: '%1' is no preset name - built on default.", _x];
                 };

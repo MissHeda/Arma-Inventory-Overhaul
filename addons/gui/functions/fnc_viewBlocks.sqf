@@ -14,7 +14,9 @@
  * Only for what the view shows: the arrangement, the places and every machine's layout stay the
  * container's whole compartments. Rows a move under way goes to (GVAR(inFlight)) count as in use, so
  * their outline is never cut off. A compartment that would hide fewer than COLLAPSE_HIDE_MIN rows shows
- * all of them; one the player opened (GVAR(expanded)) as well, and it can be folded again.
+ * all of them; one the player opened (GVAR(expanded)) as well, and it can be folded again. A
+ * compartment drawn on a canvas (a pos of its own, einv_storage_fnc_blocksFor) never folds: its
+ * neighbours lie where they were drawn beside it, and a shorter one would leave a hole in the drawing.
  *
  * Arguments:
  * 0: Layout, see einv_storage_fnc_getLayout <HASHMAP>
@@ -22,8 +24,8 @@
  *
  * Return Value:
  * [blocks, hidden, foldable, cells] <ARRAY>
- *   blocks   - [cols, rows, holes] per compartment as the column shows it - a shaped one's holes in
- *              the rows folded away go with them
+ *   blocks   - [cols, rows, holes, pos] per compartment as the column shows it - a shaped one's
+ *              holes in the rows folded away go with them
  *   hidden   - how many rows are folded away, all compartments together <NUMBER>
  *   foldable - rows are folded away now, or would be without the player having opened them <BOOL>
  *   cells    - how many cells those rows hold, holes not counted <NUMBER>
@@ -71,17 +73,17 @@ private _foldable = false;
 private _shown = [];
 
 {
-    _x params ["_cols", "_rows", ["_holes", []]];
+    _x params ["_cols", "_rows", ["_holes", []], ["_pos", []]];
 
     private _want = ((_used select _forEachIndex) + COLLAPSE_SPARE_ROWS) max COLLAPSE_MIN_ROWS;
 
-    if (_rows - _want < COLLAPSE_HIDE_MIN) then {
-        _shown pushBack [_cols, _rows, _holes];
+    if (_rows - _want < COLLAPSE_HIDE_MIN || {_pos isNotEqualTo []}) then {
+        _shown pushBack [_cols, _rows, _holes, _pos];
     } else {
         _foldable = true;
 
         if (_expanded) then {
-            _shown pushBack [_cols, _rows, _holes];
+            _shown pushBack [_cols, _rows, _holes, _pos];
         } else {
             // The holes in the rows that stay keep their indices: a row is as wide as before.
             private _end = _want * _cols;
@@ -89,7 +91,7 @@ private _shown = [];
 
             _hidden = _hidden + _rows - _want;
             _cells = _cells + (_rows - _want) * _cols - (count _holes - count _keptHoles);
-            _shown pushBack [_cols, _want, _keptHoles];
+            _shown pushBack [_cols, _want, _keptHoles, _pos];
         };
     };
 } forEach _blocks;

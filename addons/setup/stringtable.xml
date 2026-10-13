@@ -22,6 +22,9 @@
         <Key ID="STR_einv_setup_Answer_Mod">
             <English>its mod</English>
         </Key>
+        <Key ID="STR_einv_setup_Answer_NoRoom">
+            <English>no room by default</English>
+        </Key>
         <Key ID="STR_einv_setup_Answer_Own">
             <English>own rule</English>
         </Key>
@@ -1032,6 +1035,9 @@
         </Key>
         <Key ID="STR_einv_setup_Value_GridBlocks">
             <English>compartments %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_GridCanvas">
+            <English>%1 compartments on a %2×%3 canvas</English>
         </Key>
         <Key ID="STR_einv_setup_Value_GridCells">
             <English>grid of %1 cells</English>

@@ -18,7 +18,7 @@
  *
  * Example:
  * private _ast = [einv_setup_draftText] call einv_items_fnc_parseRules;
- * _ast set ["base", "tarkov"];
+ * _ast set ["base", "realism"];
  * [_ast] call einv_setup_fnc_commit;
  *
  * Public: No

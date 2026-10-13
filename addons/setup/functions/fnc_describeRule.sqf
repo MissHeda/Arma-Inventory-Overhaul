@@ -9,7 +9,8 @@
  *
  * Groups by their names in the items addon's stringtable or a preset's config, a group of the player's
  * own by its id. A shaped item (size=xx/x-) is told by its cells and the box around them, "3 cells
- * shaped in 2×2"; a shaped compartment (grid=xxx/x-x) by its size and its cells, like=X by the class.
+ * shaped in 2×2"; a shaped compartment (grid=xxx/x-x) by its size and its cells, a canvas (grid=aab/acc)
+ * as "3 compartments on a 7×7 canvas", like=X by the class.
  *
  *   class=My_Vest > like=V_PlateCarrier1_rgr grid=xxxx/x--x
  *                                         Class My_Vest: like V_PlateCarrier1_rgr, compartments
@@ -148,6 +149,7 @@ private _fnc_grid = {
     params ["_grid"];
 
     private _lower = toLower _grid;
+    private _spec = ([_lower] call EFUNC(items,parseGrid)) select 0;
 
     switch (true) do {
         case (_lower isEqualTo "auto"): {
@@ -159,17 +161,38 @@ private _fnc_grid = {
         case (_lower regexMatch "^[0-9]+%$"): {
             format [LLSTRING(Value_GridPercent), _lower select [0, count _lower - 1]]
         };
-        // Compartments, each WxH or a shape: rows of x (a cell) and - (a hole) separated by /.
-        case (_lower regexMatch "^([0-9]+x[0-9]+|[x-]+(/[x-]+)*)([+]([0-9]+x[0-9]+|[x-]+(/[x-]+)*))*$"): {
-            format [LLSTRING(Value_GridBlocks), ((_lower splitString "+") apply {
-                if (_x regexMatch "^[0-9]+x[0-9]+$") then {
-                    (_x splitString "x") joinString "×"
-                } else {
-                    private _lines = _x splitString "/";
+        // Compartments, each WxH or a shape: rows of x (a cell) and - (a hole) separated by /; or a
+        // canvas, a letter per compartment, said in one go: "3 compartments on a 7×7 canvas".
+        case ((_spec param [0, ""]) isEqualTo "blocks"): {
+            private _blocks = _spec select 1;
+            private _placed = _blocks select {(_x param [3, []]) isNotEqualTo []};
+            private _parts = [];
+            private _canvasSaid = false;
 
-                    format [LLSTRING(Value_GridShape), count (_lines select 0), count _lines, {_x == 120} count toArray _x]
+            {
+                _x params ["_cols", "_rows", ["_holes", []], ["_pos", []]];
+
+                switch (true) do {
+                    case (_pos isNotEqualTo [] && {count _placed > 1}): {
+                        if (!_canvasSaid) then {
+                            _parts pushBack format [
+                                LLSTRING(Value_GridCanvas), count _placed,
+                                selectMax (_placed apply {((_x select 3) select 0) + (_x select 0)}),
+                                selectMax (_placed apply {((_x select 3) select 1) + (_x select 1)})
+                            ];
+                            _canvasSaid = true;
+                        };
+                    };
+                    case (_holes isEqualTo []): {
+                        _parts pushBack format ["%1×%2", _cols, _rows];
+                    };
+                    default {
+                        _parts pushBack format [LLSTRING(Value_GridShape), _cols, _rows, _cols * _rows - count _holes];
+                    };
                 };
-            }) joinString " + "]
+            } forEach _blocks;
+
+            format [LLSTRING(Value_GridBlocks), _parts joinString " + "]
         };
         default {
             // A pattern by name, perhaps with its number of cells: rig, rig:16.

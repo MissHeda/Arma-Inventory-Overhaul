@@ -2982,3 +2982,50 @@ So an item can take exactly the cells it has - an L-shaped pistol, a T-shaped la
   the overflow row and a tile cut at the grid's edge; in-flight outlines and their busy check; the footprint over a kit's
   or magazine's tile.
 - Built and checked in code only: nothing of this has run in the game yet.
+
+## Positional compartments, width 10, presets (0.4.0) - supersedes the parts above it contradicts
+
+So a container drawn on the wizard's canvas looks exactly like the drawing, and the presets fit what the owner found in testing.
+
+- **Canvas grammar (`fnc_parseMask` with letters, `fnc_parseGrid`, `fnc_formatGrid`):** a `grid=` piece may be a canvas: rows
+  split by `/`, `-` no cell, `a`-`z` a cell of that compartment; cells of one letter are one compartment wherever they lie.
+  Wardogs backpack `grid=abbbbbc/abbbbbc/abbbbbc/-bbbbb-/-bbbbb-/-bbbbb-/-bbbbb-` (1x3 left, 5x7 middle, 1x3 right, all
+  top-aligned); ring `grid=aaa/aba/aaa` (a: 3x3 with a hole, b: the cell inside). A piece of only `x` and `-` stays the old
+  one-compartment shape; `size=` takes no letters. A canvas of one row with no `-` must name its compartments a, b, c in
+  the order they start (`aaabb`), so a mistyped pattern (`rigg`) stays no grid. Joined with `+` the canvas is one piece
+  of the flow; one canvas per grid - a second one's compartments flow, with a message. Limits: `STORAGE_COLS` across,
+  `MAX_ROWS` down (a larger canvas keeps its top left part), `MAX_BLOCKS`, `MAX_CELLS`. A canvas of one compartment
+  is that compartment's shape. The writer gives letters in reading order of each compartment's first cell, puts the
+  canvas where its first compartment stood, and writes a single compartment as before (`WxH` or `x`/`-`). The wizard
+  says "3 compartments on a 7×7 canvas" (`fnc_describeRule`, `fnc_answerText`, `STR_einv_setup_Value_GridCanvas`).
+- **Blocks:** `fnc_blocksFor` (and so `fnc_getBlocks`, `fnc_getLayout` "blocks", `fnc_viewBlocks`) give
+  `[cols, rows, holes, pos]`, `pos` `[x, y]` the compartment's top left cell on its canvas (from the canvas's corner), `[]`
+  for one that flows (patterns, `WxH`, shapes, `einv_grids[]`, the open grid). Readers with `params ["_cols", "_rows",
+  "_holes"]` work as before. Block order = the pieces' order, a canvas's own in reading order of each one's first cell;
+  that index is the place record's block. Storage is unchanged: every compartment keeps cells of its own.
+- **Window:** `fnc_flowCompartments` (optional cell size, so `setup/fnc_drawPreview` shares it) puts a canvas's
+  compartments at their offsets, a cell's pitch apart, no gap; the canvas takes its box in the flow and what follows
+  starts below it. Each compartment stays its own grid (`"pos"` on it; `fnc_redrawTiles` compares it) and draws its own
+  frame as before, so on a seam between two both frames lie on the one pixel: the line colour twice, a border a touch
+  brighter than the cell lines, no shrinking, no extra control. Two may share a box: `fnc_screenToCell` finds a point
+  only on a grid's own cells, and `fnc_updateDrag` asks for a grid with a cell there before one with a hole there.
+  A positional compartment never folds (`fnc_viewBlocks`). The wizard's cell editor writes every drawing of two or more
+  compartments as a canvas (`fnc_canvasBlocks` gives pos, `fnc_canvasFromBlocks` places them back and takes the board's
+  width - `SHAPE_MAX` for the item editor); Apply refuses a canvas taller than `MAX_ROWS`.
+- **Width 10:** `STORAGE_COLS` 10 (item masks keep `SHAPE_MAX` 8); `MAX_CELLS` follows, 400. Everything sized by
+  `STORAGE_COLS` widened with it: storage and loot columns (13 cells with the box), kit windows, the Arsenal panel, the
+  staging grid, crates' and big backpacks' patterns, the wizard canvas. `fnc_getCell`: 1.45 UNIT, at most
+  `safezoneW / 52` (was 46) - 37 px at 1920x1080 instead of 39, so at 16:9 the middle keeps 5 UNIT for the soldier
+  while looting (at 39 px it would be 4 UNIT and the camera would go). Places stored at eight columns stay valid.
+- **Backpacks with load 0:** listed in the wizard's index (`fnc_indexChunk` keeps every backpack; crates and vehicles
+  still need a load); a grid by load on a class whose config holds nothing reads "no room by default". With an own
+  `grid=` they work like any backpack: sections, layout, Arsenal panel never ask the load, and every add path uses
+  the cargo commands (`addItemCargoGlobal`, `addMagazineAmmoCargo`, `addWeaponCargoGlobal`, `addBackpackCargoGlobal`),
+  never `canAdd`. `fnc_canOpenPerson` still skips another person's empty-load backpack.
+- **Presets:** `default` (revision 2) is relaxed: uniform, vest and the three backpack groups `grid=120%`, crates by
+  load. `tarkov` is now `realism` (revision 2, "Realism"): longer rifles, `pockets:4`, `rig`, fixed backpack grids,
+  stacks as default (its `stack=1` rules are gone). `weight` (revision 2) sets its containers back to `grid=auto`, so a
+  full grid stays a full load. `PRESET_ALIASES` (items) maps `base=tarkov` to `realism` in `fnc_parseRules` (one RPT
+  line, `einv_items_aliasWarned`) and in `fnc_compileRules`' chain (another mod's preset on the old id).
+  `tools/check_default_ruleset.sqf` expects the 120 % grids and ten columns and checks the alias and canvas round trips.
+- Built and checked in code only: nothing of this has run in the game yet.

@@ -29,6 +29,10 @@
 // The grid patterns a container can be laid out by (grid=rig, ...), see einv_storage_fnc_blocksFor.
 #define GRID_PATTERNS ["pockets", "pockets_mixed", "rig", "mixed", "plate", "long", "single", "wide"]
 
+// Presets that were renamed, [old id, new id]: a text written before (base=tarkov) and another mod's
+// preset that builds on the old id keep loading, on the new one (fnc_parseRules, fnc_compileRules).
+#define PRESET_ALIASES [["tarkov", "realism"]]
+
 // What like=CLASS takes from that class (fnc_resolve) - everything but its name - and how many like=
 // one item may follow, one after the other, before it gives up.
 #define LIKE_FIELDS ["footprint", "stack", "grid", "weight"]

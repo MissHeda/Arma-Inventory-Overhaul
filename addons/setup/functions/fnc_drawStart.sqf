@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * Step 1, Start, in two states (GVAR(startSetup)). As the wizard opens, a welcome: what the mod and the
  * setup are about and a button into it (fnc_drawWelcome). Then what the setup builds on:
- *   - The presets as cards - Default, Tarkov-like, Weight-like and any that another mod brings - each with its
+ *   - The presets as cards - Default, Realism, Weight-like and any that another mod brings - each with its
  *     description; the one the draft builds on is picked. Picking another keeps the own rules on top of
  *     it, or starts without them, as the switch under the cards says.
  *   - The cell size: how much load one grid cell stands for. It sizes every container by its load and

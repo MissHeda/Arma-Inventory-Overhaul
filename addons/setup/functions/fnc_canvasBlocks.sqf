@@ -10,12 +10,18 @@
  * fnc_canvasFromBlocks gives its compartments back in the order it was given them, so drawing on one
  * keeps the others where they were.
  *
+ * Two or more come back where they lie on the canvas - the owner draws a container the way it is built
+ * and the inventory shows it so, cell for cell (einv_items_fnc_formatGrid writes them as one canvas,
+ * aab/acc): a pos each, from the top left corner of the box around them all. One alone needs no place
+ * and has none, for an item's shape as for a container of one compartment.
+ *
  * Arguments:
  * 0: Canvas, see fnc_canvasFromBlocks <HASHMAP>
  *
  * Return Value:
- * Compartments [[cols, rows, holes], ...], holes the indices row * cols + col, ascending, [] for a full
- * rectangle; [] for a canvas without a cell <ARRAY>
+ * Compartments [[cols, rows, holes, pos], ...], holes the indices row * cols + col, ascending, [] for a
+ * full rectangle; pos [x, y] on the canvas, [] for a single compartment; [] for a canvas without a
+ * cell <ARRAY>
  *
  * Example:
  * private _blocks = [_canvas] call einv_setup_fnc_canvasBlocks;
@@ -95,7 +101,22 @@ private _blocks = [];
         };
     };
 
-    _blocks pushBack [_w, _h, _holes];
+    _blocks pushBack [_w, _h, _holes, [_minCol, _minRow]];
 } forEach _cells;
+
+if (count _blocks == 1) exitWith {
+    (_blocks select 0) set [3, []];
+    _blocks
+};
+
+// From the corner of the box around them all: where the canvas starts drawing is no part of it.
+private _minX = selectMin (_blocks apply {(_x select 3) select 0});
+private _minY = selectMin (_blocks apply {(_x select 3) select 1});
+
+{
+    (_x select 3) params ["_posX", "_posY"];
+
+    _x set [3, [_posX - _minX, _posY - _minY]];
+} forEach _blocks;
 
 _blocks

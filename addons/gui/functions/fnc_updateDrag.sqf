@@ -424,14 +424,25 @@ call {
     if ((GVAR(dragTarget) param [0, ""]) isEqualTo "slot") exitWith {};
 
     // ----- On a grid -----
-    // One of the topmost layer there: a kit window's own, or a column's with no window over it.
+    // One of the topmost layer there: a kit window's own, or a column's with no window over it. The grid
+    // that has a cell there first, and only then one with a hole there, so its footprint shows red: two
+    // compartments of a canvas may share a box (a ring and the cell inside it, grid=aaa/aba/aaa), and the
+    // hole of the one is the other's cell.
     private _cell = [];
-    private _targetIndex = _grids findIf {
-        !(_x getOrDefault ["virtual", true]) && {!(_x getOrDefault ["overflow", false])} && {(_x getOrDefault ["window", ""]) isEqualTo _onTop} && {
-            _cell = [_x, _mouse, true] call FUNC(screenToCell);
-            _cell isNotEqualTo []
-        }
-    };
+    private _targetIndex = -1;
+
+    {
+        private _holesToo = _x;
+
+        _targetIndex = _grids findIf {
+            !(_x getOrDefault ["virtual", true]) && {!(_x getOrDefault ["overflow", false])} && {(_x getOrDefault ["window", ""]) isEqualTo _onTop} && {
+                _cell = [_x, _mouse, _holesToo] call FUNC(screenToCell);
+                _cell isNotEqualTo []
+            }
+        };
+
+        if (_targetIndex >= 0) exitWith {};
+    } forEach [false, true];
 
     if (_targetIndex < 0) exitWith {
         _footprint ctrlShow false;

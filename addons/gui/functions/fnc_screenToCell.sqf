@@ -5,6 +5,8 @@
  * hovering, and later dragging and dropping, all go through here, so scrolling only has to be taken
  * into account once (fnc_gridOrigin). A hole of a shaped compartment is no cell: nothing to hover or
  * click there - only a drag still finds the grid over one, so its footprint shows red (fnc_updateDrag).
+ * A grid is one compartment, and a point is on it only where it has a cell: compartments drawn on a
+ * canvas may share a box (grid=aaa/aba/aaa), and the hole of the one is the cell of the other.
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>

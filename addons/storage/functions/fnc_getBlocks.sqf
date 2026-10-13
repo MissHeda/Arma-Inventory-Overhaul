@@ -22,7 +22,7 @@
  * 0: Container <OBJECT>
  *
  * Return Value:
- * Compartments [[cols, rows, holes], ...] (see fnc_blocksFor), [] for the ground <ARRAY>
+ * Compartments [[cols, rows, holes, pos], ...] (see fnc_blocksFor), [] for the ground <ARRAY>
  *
  * Example:
  * [vestContainer player] call einv_storage_fnc_getBlocks;

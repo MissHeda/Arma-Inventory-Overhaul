@@ -11,13 +11,15 @@
  *     with no divider between them are one compartment (fnc_canvasBlocks). Fill makes every place a cell,
  *     Clear takes every cell and divider away.
  *   - The class's compartments are laid on it as the inventory lays them out (fnc_canvasFromBlocks): side
- *     by side, then on the next line, a divider wherever two meet, their holes places without a cell.
+ *     by side, then on the next line - the ones of a canvas where they were drawn -, a divider wherever
+ *     two meet, their holes places without a cell.
  *   - Beside it how the inventory will show them (fnc_drawPreview), and under it the total of cells and
  *     compartments against the limits (MAX_CELLS, MAX_BLOCKS).
  *   - Apply, once something changed since the grid was loaded (an untouched class is never rewritten: a
- *     mask like x-x loads as one block and would be written back as two), writes each compartment as the
- *     box around its cells, the rest of the box holes, joined with
- *     "+" in reading order: class=X > grid=xxxx/x--x+2x3 (fnc_upsertRule); a full rectangle stays WxH.
+ *     mask like x-x loads as one block and would be written back as two), writes the compartments where
+ *     they lie on the canvas, so the inventory shows them exactly as drawn: one canvas, a letter per
+ *     compartment in reading order of its first cell, class=X > grid=abbbbbc/abbbbbc/-bbbbb- (fnc_upsertRule,
+ *     einv_items_fnc_formatGrid); a single compartment stays xxxx/x--x or WxH.
  *     Discard drops the edits, Back to the preset takes the class's own grid and like= away. "Like another
  *     class" lets the list pick the class this one takes its cells from (like=Y): the canvas then shows
  *     that class's cells and cannot be drawn on, until Unlink.
@@ -127,7 +129,7 @@ if (!isNil QEFUNC(storage,blocksFor)) then {
     ] call EFUNC(storage,blocksFor);
 };
 
-_resolved = (_resolved select {(_x select 1) > 0}) apply {[_x select 0, _x select 1, +(_x param [2, []])]};
+_resolved = (_resolved select {(_x select 1) > 0}) apply {[_x select 0, _x select 1, +(_x param [2, []]), +(_x param [3, []])]};
 
 // What is drawn: the working copy, else what it has now. Linked to another class, always what it has -
 // that class's cells.
@@ -412,8 +414,9 @@ if (_editable) then {
             [format [LLSTRING(Hint_TooMany), MAX_CELLS, MAX_BLOCKS], "loss"] call FUNC(setHint);
         };
 
-        // Only a canvas loaded taller than MAX_ROWS can hold one this tall.
-        if (_blocks findIf {(_x select 1) > MAX_ROWS} >= 0) exitWith {
+        // Only a canvas loaded taller than MAX_ROWS can hold one this tall. The compartments are written
+        // as one canvas where they lie (einv_items_fnc_formatGrid), so it is the canvas that must fit.
+        if (_blocks findIf {((_x param [3, []]) param [1, 0]) + (_x select 1) > MAX_ROWS} >= 0) exitWith {
             [format [LLSTRING(Hint_TooTall), MAX_ROWS], "loss"] call FUNC(setHint);
         };
 

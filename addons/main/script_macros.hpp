@@ -33,8 +33,10 @@
 
 // Every storage grid is this many cells wide, whatever the style. Where an item lies is stored per
 // container (einv_storage_fnc_getLayout); a grid of another width would have to lay everything out
-// anew each time the style changes.
-#define STORAGE_COLS 8
+// anew each time the style changes. Ten since 0.4.0: a backpack drawn on the wizard's canvas - a
+// column of pouches either side of the main compartment - needs the room. Places stored at eight
+// stay valid, every compartment keeps its own columns.
+#define STORAGE_COLS 10
 
 // Config mass is counted in tenths of a pound. Kilograms the way ACE shows them.
 #define MASS_TO_KG (0.1 / 2.2046)

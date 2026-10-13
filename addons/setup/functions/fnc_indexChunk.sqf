@@ -12,7 +12,8 @@
  *                  have other types and stay out.
  *   CfgMagazines - those with a picture: the ones a player carries. Vehicle magazines mostly have none.
  *   CfgGlasses   - goggles.
- *   CfgVehicles  - backpacks, crates (ReammoBox_F) and vehicles that hold something; no soldiers.
+ *   CfgVehicles  - backpacks - those that hold nothing by their config too, an own grid gives them
+ *                  room -, crates (ReammoBox_F) and vehicles that hold something; no soldiers.
  * A class in two roots counts once, under the first - the rules engine reads it there too.
  *
  * Arguments:
@@ -111,9 +112,12 @@ while {_rootId < count _roots && {diag_tickTime < _until}} do {
                 default {
                     _load = getNumber (_config >> "maximumLoad");
 
+                    // A backpack that holds nothing by its config (a cosmetic one, a radio pack) is still
+                    // listed: an own grid gives it cells like any other, and its card says it has none
+                    // until then (fnc_answerText). A crate or vehicle without a load is no container.
                     switch (true) do {
-                        case (_load <= 0): {["", ""]};
                         case (getNumber (_config >> "isBackpack") == 1): {["backpack", "gear"]};
+                        case (_load <= 0): {["", ""]};
                         case (_class isKindOf "ReammoBox_F"): {["crate", "cargo"]};
                         case (_class isKindOf "AllVehicles" && {!(_class isKindOf "CAManBase")}): {["vehicle", "cargo"]};
                         default {["", ""]};

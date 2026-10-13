@@ -104,7 +104,7 @@ private _ok = true;
             _ok = false;
         };
 
-        if (_plain findIf {(_blocks param [_x get "block", []]) isNotEqualTo [_x get "cols", _x get "rows", _x getOrDefault ["holes", []]]} >= 0) exitWith {
+        if (_plain findIf {(_blocks param [_x get "block", []]) isNotEqualTo [_x get "cols", _x get "rows", _x getOrDefault ["holes", []], _x getOrDefault ["pos", []]]} >= 0) exitWith {
             _ok = false;
         };
 

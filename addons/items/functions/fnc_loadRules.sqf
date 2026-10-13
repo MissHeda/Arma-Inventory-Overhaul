@@ -32,7 +32,7 @@
  *
  * Example:
  * [] call einv_items_fnc_loadRules;
- * ["einv1 base=tarkov"] call einv_items_fnc_loadRules;
+ * ["einv1 base=realism"] call einv_items_fnc_loadRules;
  * [""] call einv_items_fnc_loadRules;
  *
  * Public: No

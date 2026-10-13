@@ -22,7 +22,7 @@
  * The controls, the hit area last <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.15, 0.03], [["Default", "default"], ["Tarkov-like", "tarkov"]], "default", _theme, {params ["_value"]}] call einv_setup_fnc_uiDropdown;
+ * [_display, _group, [0, 0, 0.15, 0.03], [["Default", "default"], ["Realism", "realism"]], "default", _theme, {params ["_value"]}] call einv_setup_fnc_uiDropdown;
  *
  * Public: No
  */

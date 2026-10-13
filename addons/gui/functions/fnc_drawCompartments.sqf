@@ -8,6 +8,12 @@
  * A shaped compartment's holes (einv_storage_fnc_blocksFor) are drawn as no cell at all: no surface,
  * no line, nothing to hover (fnc_createGrid).
  *
+ * Compartments drawn on a canvas (grid=aab/acc) touch, a cell's pitch apart like the cells of one
+ * compartment. Each still draws its own frame around its own cells, so where two meet both frames lie
+ * on the one pixel between them: the line colour twice over, a border a touch brighter than the lines
+ * between cells - the drawing's structure stays readable without a gap that would move a cell. Each is
+ * a grid of its own, with "pos" where it lies on the canvas.
+ *
  * Each grid gets what moving items in and out of it needs (fnc_onMouseButton, fnc_endDrag):
  *   "container" - the section's container, objNull for a kit's
  *   "virtual"   - true: nothing moves in or out - a body's worn gear has no container to take from
@@ -173,7 +179,7 @@ private _fnc_shapeLines = {
 };
 
 private _fnc_compartment = {
-    params ["_index", "_cols", "_rows", "_place", "_isOverflow", "_overflowIndex", ["_holes", []]];
+    params ["_index", "_cols", "_rows", "_place", "_isOverflow", "_overflowIndex", ["_holes", []], ["_pos", []]];
     _place params ["_dx", "_dy"];
 
     private _x0 = _gridX + _dx;
@@ -204,6 +210,7 @@ private _fnc_compartment = {
     _grid set ["root", _root];
     _grid set ["unit", _section getOrDefault ["unit", objNull]];
     _grid set ["block", _index];
+    _grid set ["pos", _pos];
     _grid set ["overflow", _isOverflow];
     _grid set ["overflowIndex", _overflowIndex];
     _grid set ["window", _window];
@@ -213,11 +220,11 @@ private _fnc_compartment = {
 };
 
 {
-    _x params ["_cols", "_rows", ["_holes", []]];
+    _x params ["_cols", "_rows", ["_holes", []], ["_pos", []]];
 
     if ((_places param [_forEachIndex, []]) isEqualTo []) then {continue};
 
-    [_forEachIndex, _cols, _rows, _places select _forEachIndex, false, -1, _holes] call _fnc_compartment;
+    [_forEachIndex, _cols, _rows, _places select _forEachIndex, false, -1, _holes, _pos] call _fnc_compartment;
 } forEach _blocks;
 
 {

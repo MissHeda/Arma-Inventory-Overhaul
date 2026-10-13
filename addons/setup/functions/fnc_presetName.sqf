@@ -11,7 +11,7 @@
  * Name <STRING>
  *
  * Example:
- * ["tarkov"] call einv_setup_fnc_presetName;
+ * ["realism"] call einv_setup_fnc_presetName;
  *
  * Public: No
  */
