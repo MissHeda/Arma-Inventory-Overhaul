@@ -159,7 +159,7 @@ if (_menuOpen) exitWith {false};
 private _taken = if (_down) then {
     ["mouseDown", [_button, [_clickX, _clickY], _shift, _ctrl, _alt], false] call FUNC(hook)
 } else {
-    ["mouseUp", [_button, [_clickX, _clickY]], false] call FUNC(hook)
+    ["mouseUp", [_button, [_clickX, _clickY], _shift, _ctrl, _alt], false] call FUNC(hook)
 };
 
 if (_taken isEqualTo true) exitWith {true};

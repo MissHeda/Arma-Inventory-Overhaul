@@ -14,6 +14,10 @@
  * einv_storage_fnc_isLocalRoot). It is nothing of the soldier's: loadouts never carry it, and ACE's
  * rebuilds of the uniform, vest or backpack leave it alone.
  *
+ * Only for a soldier whose moves the storage runs on this machine at once (einv_storage_fnc_isLocalRoot:
+ * the player's own unit, any unit in single player and Eden): objNull for any other, whose moves go
+ * through the hub.
+ *
  * Arguments:
  * 0: Make it when there is none <BOOL> (default: true)
  *
@@ -32,8 +36,10 @@ if (!isNull GVAR(staging) || {!_make}) exitWith {GVAR(staging)};
 
 private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
 
-// Its moves run on this machine: the soldier has to be this machine's too.
-if (isNull _center || {!local _center}) exitWith {objNull};
+// Its moves run on this machine, without the hub (which cannot see a crate made here): so must the
+// soldier's. A unit that is local here but that the hub works on - a Zeus or ZEN loadout edit of an AI -
+// gets no staging space; the layout then shows no section for it and the footer says nothing of it.
+if (isNull _center || {!([_center] call EFUNC(storage,isLocalRoot))}) exitWith {objNull};
 
 private _holder = STAGING_CLASS createVehicleLocal [0, 0, 0];
 

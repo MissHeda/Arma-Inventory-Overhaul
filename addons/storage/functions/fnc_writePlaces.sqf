@@ -8,7 +8,8 @@
  * The player's own containers (root = the player) - from the player's own moves or outside any phase -
  * are set here at once and broadcast within OWN_WRITE_DELAY seconds (GVAR(dirty), fnc_flushPlaces); any
  * other write is public at once and takes the holder out of GVAR(dirty) - unless a nested tag or a copy
- * of nested places on it still waits there. Kits are written as a public mission variable. The Arsenal
+ * of nested places on it still waits there. Kits are written as a public mission variable; a root made on
+ * this machine only (einv_storage_localOnly) is set here and never broadcast. The Arsenal
  * and Eden write the same way, outside any phase.
  *
  * In multiplayer the authority keeps its latest write and looks again after HEAL_DELAYS whether an older
@@ -135,7 +136,9 @@ if (isMultiplayer && {hasInterface} && {!_isKey} && {_ownRoot}) then {
     _own = _bar < 0 || {(_journalKey select [0, _bar]) in GVAR(requests)};
 };
 
-private _public = isMultiplayer && {!_own};
+// A root made on this machine only (the Arsenal's staging space, einv_storage_localOnly) is never sent
+// anywhere: nobody else has the object.
+private _public = isMultiplayer && {!_own} && {!(_root getVariable [QGVAR(localOnly), false])};
 private _dirty = [];
 
 if (_isKey) then {

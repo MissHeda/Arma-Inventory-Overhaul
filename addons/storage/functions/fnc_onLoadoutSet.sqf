@@ -48,7 +48,7 @@ private _lists = [0, 1, 2] apply {
         && {(_x select [1, 5]) isEqualTypeAll 0}
     } apply {
         // Which way round (rot, 0 or 1) when the record says it; a loadout saved before has none.
-        (_x select [0, 6]) + ([[], [_x select 6]] select ((_x param [6, -1]) isEqualTo 0 || {(_x param [6, -1]) isEqualTo 1}))
+        (_x select [0, 6]) + ((_x select [6, 1]) select {_x isEqualTo 0 || {_x isEqualTo 1}})
     }
 };
 

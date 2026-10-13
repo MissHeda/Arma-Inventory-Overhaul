@@ -13,10 +13,15 @@
  * A press on ACE's list is noted by the list's own handler (fnc_onListPress); let go anywhere, the note
  * goes.
  *
+ * Whether Ctrl is held is noted with every button, pressed or let go, as with every key (fnc_onKey): a
+ * Ctrl let go while the display had no key focus is then corrected by the next click.
+ *
  * Arguments:
  * 0: Pressed (true) or let go (false) <BOOL>
  * 1: Button, 0 left, 1 right <NUMBER>
  * 2: Mouse [x, y] <ARRAY>
+ * 3: Shift (not used) <BOOL>
+ * 4: Ctrl <BOOL> (default: as last noted)
  *
  * Return Value:
  * Taken - the engine leaves it alone <BOOL>
@@ -27,7 +32,11 @@
  * Public: No
  */
 
-params [["_down", true, [true]], ["_button", 0, [0]], ["_mouse", getMousePosition, [[]]]];
+params [
+    ["_down", true, [true]], ["_button", 0, [0]], ["_mouse", getMousePosition, [[]]], "", ["_ctrl", GVAR(ctrlHeld), [true]]
+];
+
+GVAR(ctrlHeld) = _ctrl;
 
 private _over = [_mouse] call FUNC(isOver);
 

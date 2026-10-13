@@ -5,7 +5,8 @@
  * Starts a drag of the item on the row of ACE's list (IDC 15) the mouse was pressed on, once it left the
  * press sideways (fnc_onFrame): the engine's drag of a new item, which has no container behind it. The row
  * is the one ACE picked for that press (lnbCurSelRow), its class the one ACE keeps in the row's data. A row
- * ACE would not add either - an item the arsenal does not have, only the soldier - is not dragged.
+ * ACE would not add either - an item the arsenal does not have, only the soldier - is not dragged, nor is
+ * one the list no longer has (a filter shortened it since the press).
  *
  * The item is put on a source grid of its own (einv_gui's "source", here "aceList"), off the screen, as a
  * tile that brings the entry that is dragged: the item at its true size, a whole stack at most, one at
@@ -38,7 +39,7 @@ if (isNull _list || {_pressed isEqualTo []} || {EGVAR(gui,dragging)} || {GVAR(pa
 
 private _row = lnbCurSelRow _list;
 
-if (_row < 0) exitWith {false};
+if (_row < 0 || {_row >= (lnbSize _list) select 0}) exitWith {false};
 
 private _class = _list lnbData [_row, 0];
 

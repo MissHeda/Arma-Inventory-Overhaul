@@ -14,7 +14,9 @@
  *     by side, then on the next line, a divider wherever two meet, their holes places without a cell.
  *   - Beside it how the inventory will show them (fnc_drawPreview), and under it the total of cells and
  *     compartments against the limits (MAX_CELLS, MAX_BLOCKS).
- *   - Apply writes each compartment as the box around its cells, the rest of the box holes, joined with
+ *   - Apply, once something changed since the grid was loaded (an untouched class is never rewritten: a
+ *     mask like x-x loads as one block and would be written back as two), writes each compartment as the
+ *     box around its cells, the rest of the box holes, joined with
  *     "+" in reading order: class=X > grid=xxxx/x--x+2x3 (fnc_upsertRule); a full rectangle stays WxH.
  *     Discard drops the edits, Back to the preset takes the class's own grid and like= away. "Like another
  *     class" lets the list pick the class this one takes its cells from (like=Y): the canvas then shows
@@ -419,7 +421,7 @@ if (_editable) then {
 
         [format [LLSTRING(Hint_CellsApplied), _class], "text2"] call FUNC(setHint);
         [_class, createHashMapFromArray [["grid", [["blocks", _blocks]] call EFUNC(items,formatGrid)]]] call FUNC(upsertRule);
-    }, [_class, _canvas], true, "accent", LLSTRING(Cont_ApplyTip)] call FUNC(uiAction);
+    }, [_class, _canvas], _dirty, "accent", LLSTRING(Cont_ApplyTip)] call FUNC(uiAction);
 
     _buttonX = _buttonX + _buttonW + _gap;
 };

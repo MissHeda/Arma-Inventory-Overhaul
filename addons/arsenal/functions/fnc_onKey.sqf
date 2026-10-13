@@ -9,8 +9,9 @@
  * ACE's has the cursor.
  *
  * Whether Ctrl is held is noted with every key, pressed or let go (also by the display's KeyUp handler,
- * fnc_onOpened): the wheel's event does not say it, and Ctrl with the wheel over a tile adds or takes out
- * one (fnc_onWheel).
+ * fnc_onOpened), and with every mouse button (fnc_onMouse): the wheel's event does not say it, and Ctrl
+ * with the wheel over a tile adds or takes out one (fnc_onWheel), by the latest note. A Ctrl let go while
+ * the display had no focus is so corrected by the next key or click.
  *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>

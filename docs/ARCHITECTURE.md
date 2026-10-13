@@ -1759,7 +1759,7 @@ All hooks are optional. "Asked in" names the function; the argument lists are th
 | `focusAll` | a flag | true: every control with the focus but a field goes back to the sink, while no mouse button is held | `fnc_onFrame` |
 | `wheel` | `[scroll, mouse]` | BOOL - only while nothing is dragged, once per turn | `fnc_onMouseZ` |
 | `mouseDown` | `[button, mouse, shift, ctrl, alt]` | BOOL, true = taken - after the inspect card and menu checks, before the right click | `fnc_onMouseButton` |
-| `mouseUp` | `[button, mouse]` | BOOL, true = taken | `fnc_onMouseButton` |
+| `mouseUp` | `[button, mouse, shift, ctrl, alt]` | BOOL, true = taken | `fnc_onMouseButton` |
 | `click` | `[kind "single"/"double", target, shift, ctrl, alt]` | BOOL, true = handled - a click that did not become a drag, before the inventory's own handling | `fnc_onMouseButton` |
 | `key` | `[display, key, shift, ctrl, alt]` | BOOL, true = handled - after the hotbar and selection keys, before Delete and the Gear key | `fnc_onKeyDown` |
 | `submit` | `[edit]` | nothing - Return in any field, the cursor is back at the sink | `fnc_onKeyDown` |
@@ -2710,7 +2710,7 @@ unit wears it), a panel right beside ACE's list (IDC 15) shows that one containe
   once the count changed (`WATCH_TIME` s at most). `fnc_remove` / `fnc_removeKind` take staging tiles too (no
   ACE event). `fnc_onClosed` deletes it with its contents; meanwhile the idle hint counts what lies there.
 - **Drag out of ACE's list.** The list's own `MouseButtonDown` handler (`fnc_onListPress`; the display's may
-  miss presses on ACE's controls) notes a left press on its rows (not the scroll bar's 6 %). The frame hook
+  miss presses on ACE's controls) notes a left press on its rows (not the scroll bar's 6 %, not the blank area below a short list's last row). The frame hook
   starts a drag once the mouse moved more than `DRAG_THRESHOLD` and more across than along; else it stays
   ACE's click. `fnc_listDrag`: `lnbCurSelRow`, `lnbData [row, 0]`, not `lnbValue [row, 2]` 1 (unique), a virtual
   off-screen source grid `"aceList"` whose tile's `dragEntry` has `count` = the stack (Shift: all), then
@@ -2769,8 +2769,8 @@ Events (all registered in preInit, so Eden has them):
   take are not greyed (the add is taken back with the message). The undo is after the fact: other mods see
   ACE's add and then the removal; adds from the list or the wheel raise `itemsChanged` but not ACE's
   `cargoChanged`. The panel's bottom reaches into the top of ACE's message line (B-25 to B-20 grid units), so a
-  long ACE message can be partly under it. A press below the last row of ACE's list drags the row picked
-  before. After the mouse was over the panel, ACE's list has lost the focus: its arrow keys work again after a
+  long ACE message can be partly under it. A press below the last row of ACE's list (the row height from ACE's config, found by IDC 15)
+  starts no drag. After the mouse was over the panel, ACE's list has lost the focus: its arrow keys work again after a
   click on it. ACE internals read: IDCs 0, 15, 17, 102, 701, `currentLeftPanel`, `currentItems`,
   `mouseButtonState`, `virtualItemsFlat`, the row data (`lnbData [row, 0]`, `lnbValue [row, 2]`) and the row
   alpha of `updateRightPanel`.
