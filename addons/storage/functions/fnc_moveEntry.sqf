@@ -6,7 +6,7 @@
  * into the other ("take", then "put", each at its own root's authority). Kits (einv_compat_efak) move
  * with their own ops (einv_storage_holderTypes). The window no longer calls this.
  *
- * Room by the load (fnc_hasRoom) and, with einv_storage_gridOnly on and no cell given, a free spot
+ * A backpack into a backpack (fnc_backpackIntoBackpack) and, with no cell given, a free spot
  * (fnc_hasSpace) are asked here first; the machine that runs it asks again and decides.
  *
  * Arguments:
@@ -21,7 +21,7 @@
  *
  * Return Value:
  * "" when it was moved here and then, "Requested" when it went to the server and is moved shortly, else
- * why not ("TooHeavy", "NoBackpack", "NoRoom", "Gone", "Taken", "IntoItself", "OutOfReach", "Moved", "NotReady",
+ * why not ("NoBackpack", "NoRoom", "Gone", "Taken", "IntoItself", "OutOfReach", "Moved", "NotReady",
  * "Bounced" - it went back where it was -, "Failed") <STRING>
  *
  * Example:
@@ -70,20 +70,13 @@ if (isNull _fromRoot || {isNull _toRoot}) exitWith {"Failed"};
 
 if (_from isEqualTo _to && {_cell isEqualTo []}) exitWith {""};
 
-// Room by weight (a backpack into a backpack is "NoBackpack").
-private _room = createHashMapFromArray [["fits", true], ["reason", ""]];
+// A backpack never goes into a backpack.
+if (_to isEqualType objNull && {_from isNotEqualTo _to} && {[_to, _entry] call FUNC(backpackIntoBackpack)}) exitWith {"NoBackpack"};
 
-if (_to isEqualType objNull && {_from isNotEqualTo _to}) then {
-    _room = [_to, _entry, _count] call FUNC(roomByWeight);
-};
-
-if !(_room get "fits") exitWith {
-    ["TooHeavy", "NoBackpack"] select ((_room get "reason") isEqualTo "NoBackpack")
-};
-
+// Nothing may land beside the grid: with no cell given it needs a free spot.
 if (
     _to isEqualType objNull && {_from isNotEqualTo _to}
-    && {GVAR(gridOnly)} && {_cell isEqualTo []} && {!([_to, _entry] call FUNC(hasSpace))}
+    && {_cell isEqualTo []} && {!([_to, _entry] call FUNC(hasSpace))}
 ) exitWith {"NoRoom"};
 
 private _entryArray = [_entry] call FUNC(entryToArray);

@@ -10,28 +10,24 @@
  * ("Moved"), out of reach ("OutOfReach"), not into itself ("IntoItself"), several items cannot go into
  * one slot ("GroupNoSlot"), nothing to put it on here ("NoGround"), put elsewhere ("PlacedElsewhere"),
  * the server not ready yet ("NotReady"), locked to the player ("Locked", einv_locks), a backpack into a
- * backpack ("NoBackpack"). A put that
- * bounced never shows by itself - what went back or onto the ground does ("Returned", "Grounded",
- * "MovedSome", each with its counts). Any other text is a reason someone else already put into words -
- * Enhanced First Aid Kits', through einv_compat_efak - and shows as it is; "" says nothing.
- *
- * "TooHeavy" with its details says how much is missing (fnc_weightText), without them only that it is too
- * heavy.
+ * backpack ("NoBackpack"). A put that bounced never shows by itself - what went back or onto the ground
+ * does ("Returned", "Grounded", "MovedSome", each with its counts). Any other text is a reason someone
+ * else already put into words - Enhanced First Aid Kits', through einv_compat_efak - and shows as it is;
+ * "" says nothing.
  *
  * Arguments:
- * 0: Reason - "TooHeavy", "NoBackpack", "NoRoom", "NowhereToGo", "NoFit", "LookOnly" (a living person's
+ * 0: Reason - "NoBackpack", "NoRoom", "NowhereToGo", "NoFit", "LookOnly" (a living person's
  *    gear the settings let the player only look at), "Failed", "Gone", "Taken", "Moved", "OutOfReach",
  *    "IntoItself", "GroupNoSlot", "NoGround", "PlacedElsewhere", "SharedHere", "NotReady", "Locked",
  *    "Waiting", "MovedSome", "Returned", "Grounded", or a text to show <STRING>
  * 1: What the text needs filled in - "MovedSome" how many of how many, "Returned" and "Grounded" how
- *    many, "TooHeavy" the container it did not fit, the tile (a HashMap, or its array as
- *    fnc_sendMoves keeps it) and how many of a stack, -1 for all <ARRAY> (default: [])
+ *    many <ARRAY> (default: [])
  *
  * Return Value:
  * None
  *
  * Example:
- * ["TooHeavy"] call einv_gui_fnc_flashHint;
+ * ["NoRoom"] call einv_gui_fnc_flashHint;
  * ["MovedSome", [3, 5]] call einv_gui_fnc_flashHint;
  *
  * Public: No
@@ -46,22 +42,6 @@ private _hint = uiNamespace getVariable [QGVAR(hint), controlNull];
 if (isNull _hint) exitWith {};
 
 private _text = switch (_reason) do {
-    case "TooHeavy": {
-        if (_details isEqualTo []) then {
-            LLSTRING(Hint_TooHeavy)
-        } else {
-            _details params [["_container", objNull, [objNull]], ["_entry", createHashMap, [createHashMap, []]], ["_count", -1, [0]]];
-
-            if (_entry isEqualType []) then {
-                _entry = [_entry] call EFUNC(storage,entryFromArray);
-            };
-
-            // Said in full, so nothing is filled in afterwards.
-            _details = [];
-
-            ["tooHeavy", _container, _entry, _count] call FUNC(weightText)
-        }
-    };
     case "NoBackpack": {LLSTRING(Hint_NoBackpack)};
     case "Locked": {LELSTRING(locks,Hint_Locked)};
     case "NoRoom": {LLSTRING(Hint_NoRoom)};

@@ -142,12 +142,11 @@
 #define COLLAPSE_HIDE_MIN 4
 
 // ---------------------------------------------------------------------------
-// Weight: the load bar under a section's caption, what lifting something previews on it, and the
-// comparison card at the mouse (fnc_drawSection, fnc_markWeight, fnc_drawCompare)
+// Weight: what lifting something previews on the weight card, and the comparison card at the mouse
+// (fnc_previewWeight, fnc_drawCompare)
 // ---------------------------------------------------------------------------
 
-// The load bar is two pixels high; a preview of what would be added to it is this strong.
-#define LOAD_BAR_H (pixelH * 2)
+// A preview of what would be added to the weight bar is this strong.
 #define PREVIEW_ALPHA 0.6
 
 // The comparison card: its width, the room of the label, of the value and of the difference, and one row.

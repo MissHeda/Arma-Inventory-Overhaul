@@ -8,9 +8,8 @@
  * also let go anywhere over the equipment column (the slot that takes it, fnc_updateDrag); a slot's item
  * comes off onto the cells (fnc_doUnequip), or onto another unit's same slot, which gives back what it
  * wore there (fnc_doSwap). Outside every panel it goes on the ground;
- * anywhere else it goes back, saying why when it did not fit - a container too heavy for it with the kilograms
- * (the target's container, the entry and the count go along: fnc_flashHint, fnc_weightText). First of all
- * what lifting it marked about weight is put back (fnc_clearWeightMarks).
+ * anywhere else it goes back, saying why when it did not fit (fnc_flashHint). First of all
+ * what lifting it previewed about weight is put back (fnc_clearWeightPreview).
  *
  * Into, out of and between kits of Enhanced First Aid Kits - the grids of their windows and their tiles -
  * it goes through that addon (einv_compat_efak_fnc_drop, when loaded): two kits' grids both have no
@@ -55,7 +54,7 @@ disableSerialization;
 params ["_display"];
 
 // What lifting it showed about weight goes first.
-[] call FUNC(clearWeightMarks);
+[] call FUNC(clearWeightPreview);
 
 ctrlDelete (uiNamespace getVariable [QGVAR(dragGhost), controlNull]);
 ctrlDelete (uiNamespace getVariable [QGVAR(dragFootprint), controlNull]);
@@ -116,14 +115,7 @@ private _stack = _entry getOrDefault ["count", 1];
 private _count = [-1, GVAR(dragCount)] select (GVAR(dragCount) < _stack);
 
 if (!_fits) exitWith {
-    // Too heavy for a container: it is named, with the numbers.
-    private _refusedBox = if (_kind isEqualTo "grid") then {((uiNamespace getVariable [QGVAR(grids), []]) param [_targetIndex, createHashMap]) getOrDefault ["container", objNull]} else {objNull};
-
-    if (_reason isEqualTo "TooHeavy" && {!isNull _refusedBox} && {_group isEqualTo []}) then {
-        [_reason, [_refusedBox, _entry, _count]] call FUNC(flashHint);
-    } else {
-        [_reason] call FUNC(flashHint);
-    };
+    [_reason] call FUNC(flashHint);
 };
 
 private _grids = uiNamespace getVariable [QGVAR(grids), []];

@@ -71,8 +71,6 @@ _theme merge [createHashMapFromArray [
     ["warn", [0.93, 0.75, 0.2, 1]],
     ["zoneWarn", [0.93, 0.75, 0.2, 0.45]],
     ["zoneLoss", [0.86, 0.27, 0.25, 0.45]],
-    ["cellFull", [0.86, 0.27, 0.25, 0.12]],
-    ["cellBlocked", [0.86, 0.27, 0.25, 0.22]],
     ["tooltipBg", [0.03, 0.03, 0.03, 0.96]],
     ["inspectBg", [0.06, 0.06, 0.06, 0.98]],
     ["barTrack", [1, 1, 1, 0.1]],

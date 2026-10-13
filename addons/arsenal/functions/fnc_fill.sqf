@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * "Fill with it": adds as many of a class as the container has room for, by the rules of the quick add -
- * room by weight and cells on the grid for each one.
+ * cells on the grid for each one.
  *
  * Arguments:
  * 0: Class <STRING>

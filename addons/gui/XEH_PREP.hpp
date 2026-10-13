@@ -149,10 +149,10 @@ PREP(toggleCamera);
 PREP(cameraStart);
 PREP(cameraStop);
 
-// Weight: what a full container looks like, what lifting something does to it, the refusals with their
-// numbers, and the comparison of a vest, uniform, helmet or backpack with the one worn
-PREP(markWeight);
-PREP(clearWeightMarks);
+// Weight: what lifting something previews on the weight card, the words for what a pick-up makes of the
+// soldier, and the comparison of a vest, uniform, helmet or backpack with the one worn
+PREP(previewWeight);
+PREP(clearWeightPreview);
 PREP(weightText);
 PREP(dragHint);
 PREP(infoHint);

@@ -7,7 +7,7 @@
  * itself, unlike Enhanced First Aid Kits' own kit window.
  *
  * Planned here against the player's gear as it is, each tile counted against the room the ones before
- * it take (mass by einv_storage_fnc_getMass, a free spot by einv_storage_fnc_getLayout) - then sent as
+ * it take (a free spot by einv_storage_fnc_getLayout; weight limits nothing) - then sent as
  * moves of the window's transactions (einv_gui_fnc_sendMoves), out of the kit at its root's authority
  * and into the player's gear. Whatever does not fit there by then goes back into the kit
  * (einv_storage_fnc_settle). An emptied kit goes when its type says so (fnc_opKitTake). Out of a kit in
@@ -63,11 +63,9 @@ private _root = [_where] call EFUNC(storage,rootOf);
 
 if (isNull _root) exitWith {["Failed"] call _fnc_refuse};
 
-// Each own container as it is: what it holds, how much that weighs, how much it may.
+// Each own container as it is: what it holds, and below what is planned into it.
 private _targets = ([_kit] call FUNC(ownTargets)) apply {
-    private _contents = [_x] call EFUNC(storage,getContents);
-
-    [_x, _contents, [_contents] call EFUNC(storage,getMass), [_x] call EFUNC(storage,getMaxLoad), []]
+    [_x, [_x] call EFUNC(storage,getContents), []]
 };
 
 private _unit = EGVAR(gui,unit);
@@ -77,15 +75,13 @@ private _left = false;
 {
     private _entry = _x;
     private _class = _entry get "class";
-    private _need = [[_entry]] call EFUNC(storage,getMass);
     private _probe = createHashMapFromArray [["class", _class], ["count", _entry get "count"]];
 
     private _index = _targets findIf {
-        _x params ["_container", "_contents", "_held", "_maxLoad", "_planned"];
+        _x params ["_container", "_contents", "_planned"];
 
-        // By mass - as einv_storage_fnc_hasRoom asks it, with what goes in before this one.
-        [_container, _entry] call EFUNC(storage,hasRoom)
-        && {EGVAR(storage,gridOnly) || {_maxLoad < 0} || {_held + _need <= _maxLoad + 0.001}}
+        // Never a backpack into a backpack
+        !([_container, _entry] call EFUNC(storage,backpackIntoBackpack))
         // A free spot - as einv_storage_fnc_hasSpace asks it, with what goes in before this one.
         && {
             (([_container] call EFUNC(storage,getBlocks)) isEqualTo [])
@@ -103,8 +99,7 @@ private _left = false;
 
     private _target = _targets select _index;
 
-    _target set [2, (_target select 2) + _need];
-    (_target select 4) pushBack _probe;
+    (_target select 2) pushBack _probe;
 
     _moves pushBack createHashMapFromArray [
         ["kind", "move"], ["from", _key], ["fromRoot", _root], ["entry", _entry], ["count", -1],

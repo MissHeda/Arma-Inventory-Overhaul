@@ -46,9 +46,6 @@
         <Key ID="STR_einv_gui_Compare_Covers">
             <English>Covers</English>
         </Key>
-        <Key ID="STR_einv_gui_Compare_Holds">
-            <English>Holds</English>
-        </Key>
         <Key ID="STR_einv_gui_Compare_NoArmor">
             <English>none</English>
         </Key>
@@ -127,18 +124,6 @@
         <Key ID="STR_einv_gui_Hint_IntoItself">
             <English>It cannot go into itself</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Load">
-            <English>%1: %2 / %3 kg, %4 kg left</English>
-        </Key>
-        <Key ID="STR_einv_gui_Hint_LoadFull">
-            <English>%1 is full by weight: %2 kg left of %3 kg</English>
-        </Key>
-        <Key ID="STR_einv_gui_Hint_LoadOver">
-            <English>%1 is %2 kg over its %3 kg</English>
-        </Key>
-        <Key ID="STR_einv_gui_Hint_LoadRoomOnly">
-            <English>%1: %2 kg - only its room limits it</English>
-        </Key>
         <Key ID="STR_einv_gui_Hint_LookOnly">
             <English>You may only look at this person's gear</English>
         </Key>
@@ -147,9 +132,6 @@
         </Key>
         <Key ID="STR_einv_gui_Hint_MovedSome">
             <English>Moved %1 of %2 - no room for the rest</English>
-        </Key>
-        <Key ID="STR_einv_gui_Hint_MovedSomeWeight">
-            <English>Moved %1 of %2 - the rest is too heavy for %3</English>
         </Key>
         <Key ID="STR_einv_gui_Hint_NoAccess">
             <English>This person cannot be searched</English>
@@ -196,20 +178,8 @@
         <Key ID="STR_einv_gui_Hint_SharedHere">
             <English>In multiplayer, crates, the ground, vehicles and bodies always open here</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_SomeFit">
-            <English>Only %1 of %2 fit by weight into %3 - the wheel takes fewer</English>
-        </Key>
         <Key ID="STR_einv_gui_Hint_Taken">
             <English>That place was just taken</English>
-        </Key>
-        <Key ID="STR_einv_gui_Hint_TooHeavy">
-            <English>Too heavy - that container cannot take the weight</English>
-        </Key>
-        <Key ID="STR_einv_gui_Hint_TooHeavyEverywhere">
-            <English>Too heavy for your containers: %1 kg left at most, this weighs %2 kg</English>
-        </Key>
-        <Key ID="STR_einv_gui_Hint_TooHeavyFor">
-            <English>Too heavy for %1: %2 kg left, this weighs %3 kg</English>
         </Key>
         <Key ID="STR_einv_gui_Hint_Waiting">
             <English>Still waiting for an answer - showing what is there</English>
@@ -225,9 +195,6 @@
         </Key>
         <Key ID="STR_einv_gui_Inspect_Count">
             <English>Count</English>
-        </Key>
-        <Key ID="STR_einv_gui_Inspect_Holds">
-            <English>Holds</English>
         </Key>
         <Key ID="STR_einv_gui_Inspect_Mod">
             <English>Mod</English>
@@ -274,17 +241,8 @@
         <Key ID="STR_einv_gui_Key_RightClick">
             <English>Right click</English>
         </Key>
-        <Key ID="STR_einv_gui_Load_Full">
-            <English>Full</English>
-        </Key>
         <Key ID="STR_einv_gui_Load_Limit">
             <English>/ %1 kg</English>
-        </Key>
-        <Key ID="STR_einv_gui_Load_Over">
-            <English>Over</English>
-        </Key>
-        <Key ID="STR_einv_gui_Load_TooHeavy">
-            <English>Too heavy · %1 kg left</English>
         </Key>
         <Key ID="STR_einv_gui_Menu">
             <English>Options</English>

@@ -85,12 +85,13 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   see the crate as a locked box in the window, with a padlock and who it is for - nothing of what is inside -,
   and the engine's own inventory is locked for them as well. ACE's vehicle lock is respected: without the key
   a locked vehicle's inventory is shut.
-- **Weight:** the soldier's weight bar turns yellow where ACE's fatigue starts to tire a jogging soldier (26.7 kg
-  at ACE's defaults, it follows ACE's load factor and the soldier's performance), red at 45 kg (no sprinting,
-  tiring faster) and ends at 60 kg (walking only) - CBA settings Enhanced Inventory > Weight. Nothing is ever refused
-  because of the body's weight; containers keep their own maximum load and say very visibly when they are full by it
-  (chip, load bar, red free cells, "Too heavy" while you drag). With "Limit by room only" on, containers have no
-  weight limit and the body's weight is the only brake.
+- **Weight:** weight only colours the soldier's weight bar and drives ACE's fatigue: the bar turns yellow where
+  ACE's fatigue starts to tire a jogging soldier (26.7 kg at ACE's defaults, it follows ACE's load factor and the
+  soldier's performance), red at 45 kg (no sprinting, tiring faster) and ends at 60 kg (walking only) - CBA
+  settings Enhanced Inventory > Weight. Nothing is ever refused because of weight, and no container has a weight
+  limit: what fits into a uniform, vest, backpack, crate or vehicle is decided by its free cells alone (a
+  container's config load is only used to size its default grid when nobody defined one). A section's caption
+  still tells what its contents weigh.
 - **Hotbar:** the keys 4 to 0 belong to the hotbar unless the CBA setting "Hotbar" (`einv_hotbar_enabled`) is
   switched off - a server setting, the same for everyone. Only items that do something can be bound: bandages,
   tourniquets, splints and other ACE/ACM medicine are used on yourself through ACE's own treatment, grenades

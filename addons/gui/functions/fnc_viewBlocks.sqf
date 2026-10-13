@@ -7,7 +7,7 @@
  * through (0.2.3). So a tall compartment shows its rows down to the last one in use and
  * COLLAPSE_SPARE_ROWS more to put things into, at least COLLAPSE_MIN_ROWS; the empty rows below fold
  * into one line under the grid that says how many there are and opens them (fnc_drawSection,
- * fnc_toggleRows). Nothing of the room is hidden that way: the line names it, the load beside the caption
+ * fnc_toggleRows). Nothing of the room is hidden that way: the line names it, the weight beside the caption
  * still counts the whole container, and moves that find a place by themselves (Take all, a quick move, a
  * group packed in) use every row - the column grows with what lands there.
  *

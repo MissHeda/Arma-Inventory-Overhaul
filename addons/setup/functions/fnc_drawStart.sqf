@@ -8,8 +8,7 @@
  *     it, or starts without them, as the switch under the cards says.
  *   - The cell size: how much load one grid cell stands for. It sizes every container by its load and
  *     every item sized by its mass, so it is the one number that changes the most at once - said so beside
- *     it. With "Limit by room only" (einv_storage_gridOnly) on, it decides alone how much a container
- *     holds; the card says whether it is.
+ *     it. It only sizes the default grids: what fits into a container is decided by its free cells alone.
  *   - What is in use now, set by whom, and where this wizard may save - or why it may not.
  *
  * Arguments:
@@ -189,19 +188,7 @@ if (_ownCell) then {
 };
 
 _cellY = _cellY + _stepperH + UNIT * 0.4;
-_cellY = _cellY + ([_display, _group, [_cardInnerX, _cellY, _cardInnerW], LLSTRING(Cell_Help), TEXT_SMALL, _colorText2, _font] call FUNC(uiText)) + UNIT * 0.35;
-
-private _gridOnly = missionNamespace getVariable [QEGVAR(storage,gridOnly), false];
-
-if !(_gridOnly isEqualType true) then {
-    _gridOnly = false;
-};
-
-[
-    _display, _group, [_cardInnerX, _cellY, _cardInnerW],
-    format ["%1 %2", [LLSTRING(GridOnly_Off), LLSTRING(GridOnly_On)] select _gridOnly, LLSTRING(GridOnly_Where)],
-    TEXT_SMALL, [_muted, _accent] select _gridOnly, _font
-] call FUNC(uiText);
+[_display, _group, [_cardInnerX, _cellY, _cardInnerW], LLSTRING(Cell_Help), TEXT_SMALL, _colorText2, _font] call FUNC(uiText);
 
 // Now in use
 private _statusY = [_display, _group, [_rightX, _cursorY, _columnW, _cardsH], LLSTRING(Status_Title), _theme] call FUNC(uiCard);

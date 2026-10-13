@@ -29,7 +29,6 @@
  *   "title"      - the kit's name (fnc_getName, else the window's), its window's title
  *   "class"      - the kit's class, for the picture on its window's title
  *   "container"  - objNull: a kit is no container
- *   "maxLoad"    - -1
  *   "entries"    - what it holds (fnc_getEntries), [] while that has not reached this machine
  *   "virtual"    - false: things move in and out of it
  *   "kit"        - the kit's class, for its grid
@@ -45,8 +44,6 @@
  *                  kit it is packed in
  *   "load"       - how full it is, "used / capacity" in that mod's measure
  *   "loadOver"   - fuller than its capacity
- *   "loadFraction" - how full it is, used / capacity, 0 for a kit with no capacity: the load bar's fill
- *                  (einv_gui_fnc_drawSection)
  *   "notice"     - "" or, while no kit may change yet - its contents have not reached this machine
  *                  (fnc_notReady) -, a line that says why, in its window in place of the grid
  *
@@ -152,11 +149,6 @@ GVAR(opened) apply {
     private _used = [_kit] call EFAKFUNC(core,getUsedCapacity);
     private _capacity = [_kit] call EFAKFUNC(core,getCapacity);
     private _title = [_kit] call FUNC(getName);
-    private _fraction = 0;
-
-    if (_capacity > 0) then {
-        _fraction = _used / _capacity;
-    };
 
     if (_title isEqualTo "") then {
         _title = ([_kit] call EFUNC(items,getInfo)) getOrDefault ["name", _kit];
@@ -182,7 +174,6 @@ GVAR(opened) apply {
         ["title", _title],
         ["class", _kit],
         ["container", objNull],
-        ["maxLoad", -1],
         ["entries", if (_synced) then {[_kit] call FUNC(getEntries)} else {[]}],
         ["virtual", false],
         ["kit", _kit],
@@ -193,7 +184,6 @@ GVAR(opened) apply {
         ["parent", if (_parentKit isEqualTo "") then {_container} else {"kit:" + toLowerANSI _parentKit}],
         ["load", format ["%1 / %2 %3", round _used, round _capacity, localize "STR_efak_gui_MassUnit"]],
         ["loadOver", _used > _capacity + KIT_MASS_EPSILON],
-        ["loadFraction", _fraction],
         ["notice", _wait]
     ]
 }

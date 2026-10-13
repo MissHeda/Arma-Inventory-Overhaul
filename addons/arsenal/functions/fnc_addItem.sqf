@@ -66,7 +66,7 @@ private _added = ([_container, _class] call EFUNC(storage,countClass)) - _before
 
 if (_added < 1) exitWith {
     if (!_quiet) then {
-        private _reason = if (_result in ["TooHeavy", "NoRoom"]) then {format [LLSTRING(Hint_NoRoomFor), _name]} else {_result};
+        private _reason = if (_result in ["NoBackpack", "NoRoom"]) then {format [LLSTRING(Hint_NoRoomFor), _name]} else {_result};
 
         [_reason] call EFUNC(gui,flashHint);
     };

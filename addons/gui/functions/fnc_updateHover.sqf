@@ -7,10 +7,10 @@
  * for a slot what the slot is for. On nothing, the hint says what can be done - with several tiles
  * selected, what can be done with them.
  *
- * Two more places have something to say, and are found after the slots: a free cell of a container (hover
- * ["cell", grid index]) that is nearly or quite full by weight says so with the numbers, and the areas that
- * registered themselves in uiNamespace infoAreas - the weight card, a section's caption line (hover ["info",
- * index]) - explain the tiers and the container's load (fnc_infoHint). Everything else free says what can be done.
+ * One more place has something to say, and is found after the slots: the areas that registered themselves
+ * in uiNamespace infoAreas - the weight card, a section's caption line (hover ["info", index]) - explain
+ * the tiers and what the container's contents weigh (fnc_infoHint). Everything else free, a free cell
+ * included, says what can be done.
  *
  * What the pointer carries beside it: the item's name, or - over a vest, uniform, helmet or backpack, one that
  * lies in a container or hangs on a body or in the Arsenal's catalog, not the player's own worn one - the
@@ -74,9 +74,6 @@ if (_mouse isNotEqualTo [] && {_layer isNotEqualTo "inspect"}) then {
 
         if (_tileIndex >= 0) then {
             _found = ["tile", _gridIndex, _tileIndex];
-        } else {
-            // A free cell: nearly full by weight, the hint says so.
-            _found = ["cell", _gridIndex];
         };
     };
 
@@ -503,24 +500,6 @@ switch (_found param [0, ""]) do {
         {
             _x call _fnc_add;
         } forEach (["hint", ["slot", _class, _record], []] call FUNC(hook));
-    };
-    case "cell": {
-        // A free cell of a container that is nearly or quite full by weight says how full (fnc_infoHint).
-        private _container = ((uiNamespace getVariable [QGVAR(grids), []]) param [_found select 1, createHashMap]) getOrDefault ["container", objNull];
-        private _sectionInfo = (uiNamespace getVariable [QGVAR(sectionInfo), []]) param [
-            (uiNamespace getVariable [QGVAR(sectionInfo), []]) findIf {(_x getOrDefault ["holder", objNull]) isEqualTo _container}, createHashMap
-        ];
-        private _loadParts = if (isNull _container) then {[]} else {
-            ["cell", [_container, _sectionInfo getOrDefault ["caption", [_container] call FUNC(containerName)]]] call FUNC(infoHint)
-        };
-
-        if (_loadParts isEqualTo []) exitWith {
-            call _fnc_idle;
-        };
-
-        {
-            _x call _fnc_add;
-        } forEach _loadParts;
     };
     case "info": {
         private _area = (uiNamespace getVariable [QGVAR(infoAreas), []]) param [_found select 1, []];

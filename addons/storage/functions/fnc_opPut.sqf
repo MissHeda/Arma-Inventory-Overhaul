@@ -2,17 +2,15 @@
 /*
  * Author: Miss Heda
  * Op "put": a payload into a holder - one an earlier op produced (a ref, filled in by the driver) or one
- * the transaction carries. A null holder or an empty ground pile: "Bounced" with all of it. Room and a
- * spot - the cell when free, else the first fit ("elsewhere") - else "Bounced"; forced (settlement into
- * the requester's vehicle) room is not asked and an overflow row is fine. What did not arrive
+ * the transaction carries. A null holder or an empty ground pile: "Bounced" with all of it. A spot -
+ * the cell when free, else the first fit ("elsewhere") - else "Bounced", and a backpack into a backpack
+ * is "NoBackpack"; forced (settlement into the requester's vehicle) neither is asked and an overflow row
+ * is fine. What did not arrive
  * (fnc_addPayload) is "Bounced" with the rest; the record at the spot, the nested places and tag
  * restored (fnc_addPayload). The execution's view of the holder follows (fnc_findEntry).
  *
- * The room is the payload's own mass (fnc_roomByWeight) - what lies in a uniform, vest or backpack it carries
- * is not weighed here: its object is gone. "move" weighs the tile itself before it calls this.
- *
  * Extra: [landed cell [col, row, block, w, h] - [] in an overflow row -, elsewhere]; when it bounced a
- * third element says why: "Gone" (nothing to put it into), "TooHeavy", "NoBackpack" (a backpack into a
+ * third element says why: "Gone" (nothing to put it into), "NoBackpack" (a backpack into a
  * backpack), "NoRoom", "Failed" (the engine took none of it).
  *
  * Checking only (args 4): nothing changes; the status is "" or that reason, the extra [spot, elsewhere].
@@ -24,7 +22,7 @@
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
- *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "TooHeavy", "NoBackpack", "NotLocal",
+ *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "NoBackpack", "NotLocal",
  *     "Moved", "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason
  *     already in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
@@ -96,15 +94,9 @@ private _probe = createHashMapFromArray [
     ["container", objNull]
 ];
 
-// Room for it: a backpack into a backpack bounces as "NoBackpack", anything else as "TooHeavy".
-private _room = createHashMapFromArray [["fits", true], ["reason", ""]];
-
-if (!_force) then {
-    _room = [_to, _probe] call FUNC(roomByWeight);
-};
-
-if !(_room get "fits") exitWith {
-    [["TooHeavy", "NoBackpack"] select ((_room get "reason") isEqualTo "NoBackpack")] call _fnc_bounce
+// A backpack into a backpack bounces; the cells decide everything else, below.
+if (!_force && {[_to, _probe] call FUNC(backpackIntoBackpack)}) exitWith {
+    ["NoBackpack"] call _fnc_bounce
 };
 
 // The view's cells, per compartment rows of booleans, true where a tile lies.

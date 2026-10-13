@@ -3,12 +3,12 @@
  * Author: Miss Heda
  * Ctrl+click on a card: adds one, or the amount of the setting with Shift, into the container chosen as the
  * target, else where its kind belongs - magazines and grenades to the vest first, explosives to the
- * backpack, small things to the uniform, anything bigger to the backpack. Every container needs room by
- * weight and a free spot on the grid, for every item of a count: a count spreads over containers, and the
- * window is looked at once at the end.
+ * backpack, small things to the uniform, anything bigger to the backpack. Every container needs a free
+ * spot on the grid for every item of a count: a count spreads over containers, and the window is looked at
+ * once at the end.
  *
- * What fits is worked out first (the pile that still has room, the cells that are free, the weight), so
- * nothing is added that would only land in the red row at the foot of a container.
+ * What fits is worked out first (the pile that still has room, the cells that are free), so nothing is
+ * added that would only land in the red row at the foot of a container.
  *
  * Arguments:
  * 0: Class <STRING>
@@ -71,44 +71,13 @@ private _probe = createHashMapFromArray [
     ["class", _class], ["count", 1], ["ammo", _capacity], ["capacity", _capacity], ["attachments", []], ["container", objNull]
 ];
 
-// How many of the wanted ones a container takes: by weight, then by the cells the new tiles need.
+// How many of the wanted ones a container takes: by the cells the new tiles need. A backpack takes no backpack.
 private _fnc_fits = {
     params ["_target", "_wanted"];
 
-    private _fnc_room = {
-        params ["_n"];
+    private _most = [_wanted, 0] select ([_target, _probe] call EFUNC(storage,backpackIntoBackpack));
 
-        private _entry = +_probe;
-
-        _entry set ["count", _n];
-
-        [_target, _entry] call EFUNC(storage,hasRoom)
-    };
-
-    private _byMass = _wanted;
-
-    if !([_wanted] call _fnc_room) then {
-        if !([1] call _fnc_room) then {
-            _byMass = 0;
-        } else {
-            private _low = 1;
-            private _high = _wanted;
-
-            while {_high - _low > 1} do {
-                private _mid = floor ((_low + _high) / 2);
-
-                if ([_mid] call _fnc_room) then {
-                    _low = _mid;
-                } else {
-                    _high = _mid;
-                };
-            };
-
-            _byMass = _low;
-        };
-    };
-
-    if (_byMass == 0 || {([_target] call EFUNC(storage,getBlocks)) isEqualTo []}) exitWith {_byMass};
+    if (_most == 0 || {([_target] call EFUNC(storage,getBlocks)) isEqualTo []}) exitWith {_most};
 
     // Piles with room take their share without a cell; the rest needs tiles of its own.
     private _existing = [_target] call EFUNC(storage,getContents);
@@ -125,9 +94,9 @@ private _fnc_fits = {
         };
     } forEach _existing;
 
-    private _rest = _byMass - _join;
+    private _rest = _most - _join;
 
-    if (_rest <= 0) exitWith {_byMass};
+    if (_rest <= 0) exitWith {_most};
 
     private _tiles = ceil (_rest / _stack);
     private _probes = [];
@@ -148,7 +117,7 @@ private _fnc_fits = {
         _room = _room + (_x get "count");
     } forEach _placed;
 
-    _room min _byMass
+    _room min _most
 };
 
 // ----- Adding, container after container -----

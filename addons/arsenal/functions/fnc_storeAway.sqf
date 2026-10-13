@@ -5,8 +5,8 @@
  * container that is not in this arsenal - and puts it there. Without room the caller asks for the second
  * click. The target the player chose is tried first, then the uniform, the vest and the backpack.
  *
- * Room is by weight (einv_storage_fnc_hasRoom) and a free spot on the grid (einv_storage_fnc_hasSpace), and
- * the container it went into is kept in the column's "stored" for the hint.
+ * Room is a free spot on the grid (einv_storage_fnc_hasRoom), and the container it went into is kept in
+ * the column's "stored" for the hint.
  *
  * Arguments:
  * 0: The payload to store, see einv_storage_fnc_removeEntry <ARRAY>
@@ -63,9 +63,7 @@ if (!isNull _target && {_target in _containers}) then {
     _containers = [_target] + (_containers - [_target]);
 };
 
-private _index = _containers findIf {
-    [_x, _probe] call EFUNC(storage,hasRoom) && {[_x, _probe] call EFUNC(storage,hasSpace)}
-};
+private _index = _containers findIf {[_x, _probe] call EFUNC(storage,hasRoom)};
 
 if (_index < 0) exitWith {false};
 if (_test) exitWith {true};

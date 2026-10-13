@@ -7,17 +7,15 @@
  * scroll of every column, the open kit windows, the hover - stays as it is.
  *
  * Per section the layout is worked out again (einv_storage_fnc_getLayout), its tiles' controls are
- * deleted and the cells they hid shown, the tiles are drawn again (fnc_drawTiles), the caption's load
- * text is updated and its load bar filled anew, and what is searched is queued anew (fnc_markHidden); then the moves under way
+ * deleted and the cells they hid shown, the tiles are drawn again (fnc_drawTiles), the caption's weight
+ * text is updated, and what is searched is queued anew (fnc_markHidden); then the moves under way
  * (fnc_drawPending), the selection (fnc_drawSelection) and the search field's fading come back. A
- * section folded away has no tiles: only its load text changes.
+ * section folded away has no tiles: only its weight text changes.
  *
  * Only where it is certain to look right: the compartments (and the rows of an open grid, the number of
  * overflow tiles) must be the ones drawn, the Take all or Put all in button must stay what it is, the
- * ground pile must still hold something, and the container must be as full by weight as it was drawn - the
- * same state (einv_storage_fnc_getLoadState) and not "full" or "over", whose reddish free cells only a build
- * draws; the caption and the bar then change in place. The glass and ring of the item being searched go and come back
- * with the queue (fnc_showSearch), wherever it lies.
+ * ground pile must still hold something; the caption then changes in place. The glass and ring of the item
+ * being searched go and come back with the queue (fnc_showSearch), wherever it lies.
  * Anything else - a pile that vanished, a rule changed - answers false before a single control is
  * touched, and the caller builds the window anew.
  *
@@ -69,20 +67,6 @@ private _ok = true;
         _ok = false;
     };
 
-    // How full it is by weight: another state means another caption, bar and cells, and a full container keeps
-    // its free cells reddish, which only a build draws. A bar that had nothing to fill and now has, is built too.
-    private _mass = [_entries] call EFUNC(storage,getMass);
-    private _loadState = [_holder, _mass] call EFUNC(storage,getLoadState);
-    private _record = _info getOrDefault ["loadRecord", createHashMap];
-
-    if (
-        (_loadState get "state") isNotEqualTo (_info getOrDefault ["loadState", "none"])
-        || {(_loadState get "state") in ["full", "over"]}
-        || {count _record > 0 && {isNull (_record get "fill")} && {(_loadState get "fraction") > 0}}
-    ) exitWith {
-        _ok = false;
-    };
-
     private _layout = [_section getOrDefault ["layoutKey", _holder], _entries] call EFUNC(storage,getLayout);
     private _placed = _layout get "entries";
 
@@ -130,7 +114,7 @@ private _ok = true;
         };
     };
 
-    _jobs pushBack [_section, _holder, _info, _entries, _layout, _holderGrids, _mass, _loadState];
+    _jobs pushBack [_section, _holder, _info, _entries, _layout, _holderGrids];
 } forEach _numbers;
 
 if (!_ok) exitWith {false};
@@ -145,33 +129,13 @@ if (_cellColor isEqualTo []) then {
 };
 
 {
-    _x params ["_section", "_holder", "_info", "_entries", "_layout", "_holderGrids", "_mass", "_loadState"];
+    _x params ["_section", "_holder", "_info", "_entries", "_layout", "_holderGrids"];
 
-    // The load on the caption line - in the colour of the state it was drawn in, which has not changed - and
-    // the bar under it filled to its share.
-    ([_entries, _info get "maxLoad"] call FUNC(loadText)) params ["_text"];
-
+    // The weight on the caption line.
     private _label = _info get "load";
 
     if (!isNull _label) then {
-        _label ctrlSetText _text;
-        _label ctrlSetTextColor (_info get "loadColor");
-    };
-
-    private _record = _info getOrDefault ["loadRecord", createHashMap];
-
-    if (count _record > 0) then {
-        _record set ["mass", _mass];
-        _record set ["text", _text];
-
-        private _fill = _record get "fill";
-
-        if (!isNull _fill) then {
-            (_record get "bar") params ["_barX", "_barY", "_barW", "_barH"];
-
-            _fill ctrlSetPosition [_barX, _barY, (_barW * ((_loadState get "fraction") min 1)) max pixelW, _barH];
-            _fill ctrlCommit 0;
-        };
+        _label ctrlSetText ([_entries] call FUNC(loadText));
     };
 
     // Folded away: no tiles to draw.

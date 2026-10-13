@@ -281,7 +281,7 @@ private _fnc_label = {
 // under it in the colours of those two tiers from their ticks on. The fill and the word take the colour of the
 // tier the load is in. Where the ticks are comes from the weight addon (einv_weight_fnc_getLimits); this
 // card only draws it. While something from outside the soldier's own gear is dragged, a preview of its weight
-// lies on the bar (fnc_markWeight), found through uiNamespace weightBar.
+// lies on the bar (fnc_previewWeight), found through uiNamespace weightBar.
 // ---------------------------------------------------------------------------
 private _limits = [_unit] call EFUNC(weight,getLimits);
 private _mass = [_unit] call EFUNC(weight,getLoad);
@@ -389,7 +389,7 @@ if (_flat) then {
     };
 };
 
-// What a drag previews on the bar and where (fnc_markWeight), and the hint over the whole card (fnc_infoHint).
+// What a drag previews on the bar and where (fnc_previewWeight), and the hint over the whole card (fnc_infoHint).
 uiNamespace setVariable [QGVAR(weightBar), createHashMapFromArray [
     ["parent", _parent], ["rect", _barRect], ["load", _mass], ["limits", _limits], ["unit", _unit]
 ]];

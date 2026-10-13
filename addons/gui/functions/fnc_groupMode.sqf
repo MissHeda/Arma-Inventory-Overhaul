@@ -6,7 +6,7 @@
  *   "keep" - they keep their arrangement: all come from one compartment, and every tile's cell - the
  *            hovered cell less the grabbed tile's offset, plus its own offset from the grabbed tile - lies
  *            inside the hovered compartment on cells that are free or lifted by this drag; into another
- *            holder there is also room by mass for all of them together
+ *            holder none of them may be a backpack for a backpack
  *   "pack" - otherwise, over a grid: they are packed into the hovered container, largest first, the
  *            hovered compartment first, those that fit moving and the rest staying (einv_storage_fnc_plan)
  *   "kit"  - over an open kit's window or a kit's tile: the kit takes each one or not (einv_compat_efak)
@@ -14,7 +14,7 @@
  *            player may not put into: nothing moves, the reason says why
  *
  * Asked again for every cell the mouse comes to; the answer is kept for the drag in GVAR(dragRoom) under
- * "group|<grid index>|<col>|<row>", as are the room by mass and the answers of the kits.
+ * "group|<grid index>|<col>|<row>", as are the answers of the kits.
  *
  * Arguments:
  * 0: Index of the hovered grid <NUMBER>
@@ -231,34 +231,11 @@ if (_keepOk) then {
         _keepCells pushBack [(_group select _forEachIndex) select 0, (_group select _forEachIndex) select 1, _col, _row];
     } forEach _tiles;
 
-    // Into another holder there has to be room for all of them by mass, and for each of them on its own
-    // (a backpack never goes into a backpack).
+    // Into another holder none of them may be a backpack for a backpack; the cells were checked above.
     private _sourceHolder = (_grids param [_sources select 0, createHashMap]) getOrDefault ["holder", objNull];
 
     if (_keepOk && {_holder isNotEqualTo _sourceHolder}) then {
-        private _massKey = format ["groupMass|%1", _targetIndex];
-        private _room = GVAR(dragRoom) get _massKey;
-
-        if (isNil "_room") then {
-            _room = !isNull _to && {(_tiles findIf {!([_to, _x select 1, -1] call EFUNC(storage,hasRoom))}) < 0};
-
-            if (_room && {!EGVAR(storage,gridOnly)}) then {
-                private _maxLoad = [_to] call EFUNC(storage,getMaxLoad);
-
-                if (_maxLoad >= 0) then {
-                    private _held = [[_to] call EFUNC(storage,getContents)] call EFUNC(storage,getMass);
-                    private _need = [_tiles apply {_x select 1}] call EFUNC(storage,getMass);
-
-                    _room = _held + _need <= _maxLoad + 0.001;
-                };
-            };
-
-            GVAR(dragRoom) set [_massKey, _room];
-        };
-
-        if (!_room) then {
-            _keepOk = false;
-        };
+        _keepOk = !isNull _to && {(_tiles findIf {[_to, _x select 1] call EFUNC(storage,backpackIntoBackpack)}) < 0};
     };
 };
 

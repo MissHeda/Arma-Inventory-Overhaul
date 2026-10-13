@@ -2,13 +2,9 @@
 /*
  * Author: Miss Heda
  * Works out where several things go when they are moved together: for every item the first target, in the
- * order given, that has room for it - by mass as fnc_roomByWeight asks it, and by a free spot in one of its
- * compartments as fnc_hasSpace asks it - and the cell it takes there. Largest first, so a rucksack does not
- * get the cells a handful of bandages have taken.
- *
- * A stack that is too heavy for a target as a whole but not for some of it, and comes from another holder,
- * goes there in part: as many as the weight allows, the rest staying where it is. The window sends the part
- * (fnc_sendPlan).
+ * order given, that has a free spot for it in one of its compartments (as fnc_hasSpace asks it) - and the
+ * cell it takes there. Largest first, so a rucksack does not get the cells a handful of bandages have taken.
+ * Free cells are the only limit: what the items weigh decides nothing here.
  *
  * Nothing is changed and nothing is asked of any machine but this one: each target is laid out from what
  * this machine reads of it now (fnc_getContents, fnc_getLayout), and what is planned into it counts for the
@@ -30,9 +26,8 @@
  *
  * Return Value:
  * [assigned, left] <ARRAY>
- *   assigned - [[item, holder, root, cell, count], ...] in the order they were planned; cell is [col, row,
- *              compartment], with [.., width, height] when it lies turned, [] for the ground; count is how
- *              many of the item's stack go, -1 for all of it <ARRAY>
+ *   assigned - [[item, holder, root, cell], ...] in the order they were planned; cell is [col, row,
+ *              compartment], with [.., width, height] when it lies turned, [] for the ground <ARRAY>
  *   left     - the items no target had room for <ARRAY>
  *
  * Example:
@@ -65,7 +60,7 @@ private _fnc_isLifted = {
 // ---------------------------------------------------------------------------
 // A target as the planning sees it, made when the first item asks for it:
 //   ["ground"]  or  ["none"] for a holder that is neither the ground nor a container
-//   ["grid", holder, root, blocks, open, taken, held, maxLoad, isBackpack]
+//   ["grid", holder, root, blocks, open, taken, isBackpack]
 // taken is per compartment a list of rows of booleans, true where something lies; rows past the end are free.
 // ---------------------------------------------------------------------------
 private _states = _targets apply {[]};
@@ -135,22 +130,16 @@ private _fnc_state = {
         private _blocks = _layout get "blocks";
         private _open = ([_holder] call FUNC(getBlocks)) isEqualTo [];
 
-        _state = ["grid", _holder, _root, _blocks, _open, _blocks apply {[]}, 0, [_holder] call FUNC(getMaxLoad), getNumber (configOf _holder >> "isBackpack") == 1];
+        _state = ["grid", _holder, _root, _blocks, _open, _blocks apply {[]}, getNumber (configOf _holder >> "isBackpack") == 1];
 
-        // What lies there, less what is lifted away: its cells are taken, its mass counts.
-        private _staying = [];
-
+        // What lies there, less what is lifted away: its cells are taken.
         {
             if ([_x, _holder] call _fnc_isLifted) then {continue};
-
-            _staying pushBack _x;
 
             if (!(_x getOrDefault ["overflow", false]) && {(_x getOrDefault ["block", -1]) >= 0}) then {
                 [_state, _x get "block", _x get "col", _x get "row", _x get "w", _x get "h"] call _fnc_mark;
             };
         } forEach (_layout get "entries");
-
-        _state set [6, [_staying] call FUNC(getMass)];
     };
 
     _states set [_index, _state];
@@ -231,9 +220,6 @@ private _left = [];
 
     private _isBackpack = (_info getOrDefault ["kind", ""]) isEqualTo "backpack";
     private _inside = _item getOrDefault ["container", objNull];
-    private _need = [[_item]] call FUNC(getMass);
-    private _stack = (_item getOrDefault ["count", 1]) max 1;
-    private _perItem = _need / _stack;
     private _done = false;
 
     {
@@ -244,34 +230,17 @@ private _left = [];
 
         // The ground always has room and needs no cell.
         if (_kind isEqualTo "ground") exitWith {
-            _assigned pushBack [_item, "ground", (_targets select _forEachIndex) param [1, objNull], [], -1];
+            _assigned pushBack [_item, "ground", (_targets select _forEachIndex) param [1, objNull], []];
             _done = true;
         };
 
-        _state params ["", "_holder", "_root", "", "", "", "_held", "_maxLoad", "_holderIsBackpack"];
+        _state params ["", "_holder", "_root", "", "", "", "_holderIsBackpack"];
 
         // Not into itself, nor into anything lying in it.
         if (!isNull _inside && {_holder isEqualTo _inside || {[_holder, _inside] call FUNC(liesIn)}}) then {continue};
 
-        // A backpack never goes into a backpack, and mass limits unless only the grid counts.
+        // A backpack never goes into a backpack.
         if (_isBackpack && {_holderIsBackpack}) then {continue};
-
-        // Too heavy as a whole: a stack from another holder goes in as far as the weight allows.
-        private _take = -1;
-        private _taking = _need;
-
-        if (!GVAR(gridOnly) && {_maxLoad >= 0} && {_held + _need > _maxLoad + 0.001}) then {
-            private _fit = 0;
-
-            if (_stack > 1 && {_perItem > 0} && {(_item getOrDefault ["holder", objNull]) isNotEqualTo _holder}) then {
-                _fit = ((floor ((_maxLoad - _held + 0.001) / _perItem)) max 0) min (_stack - 1);
-            };
-
-            if (_fit < 1) then {continue};
-
-            _take = _fit;
-            _taking = _perItem * _fit;
-        };
 
         private _firstBlock = if (_start isNotEqualTo [] && {(_start select 0) isEqualTo _holder}) then {_start param [1, -1]} else {-1};
         private _turned = false;
@@ -291,9 +260,8 @@ private _left = [];
         private _cellH = [_h, _w] select _turned;
 
         [_state, _block, _col, _row, _cellW, _cellH] call _fnc_mark;
-        _state set [6, _held + _taking];
 
-        _assigned pushBack [_item, _holder, _root, [[_col, _row, _block], [_col, _row, _block, _cellW, _cellH]] select _turned, _take];
+        _assigned pushBack [_item, _holder, _root, [[_col, _row, _block], [_col, _row, _block, _cellW, _cellH]] select _turned];
         _done = true;
     } forEach _targets;
 

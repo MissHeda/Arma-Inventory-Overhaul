@@ -108,9 +108,6 @@ GVAR(inFlight) = createHashMap;
 GVAR(answers) = [];
 GVAR(drift) = [];
 
-// A hint a quick move of the last window left for its answer belongs to that window (fnc_quickMove).
-GVAR(pendingHint) = [];
-
 // The selection is view state of one window, and nothing is dragged out yet.
 GVAR(selection) = [];
 GVAR(selectionSide) = "";

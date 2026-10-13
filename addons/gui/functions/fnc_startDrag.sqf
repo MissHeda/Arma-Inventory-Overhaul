@@ -24,8 +24,8 @@
  *
  * What is picked up sounds like what it is (fnc_playSound "lift": a rifle, a magazine, a vest ...).
  *
- * Right away every container that cannot carry what is lifted (at the count held) is marked, and the weight card
- * previews what it would add (fnc_markWeight) - before the ghost is made, which has to stay the last control.
+ * Right away the weight card previews what it would add (fnc_previewWeight) - before the ghost is made,
+ * which has to stay the last control.
  * The key help in the hint is kept as GVAR(dragKeys): fnc_updateDrag writes it back whenever the target has
  * nothing to say (fnc_dragHint). The comparison card at the mouse goes while something is held.
  *
@@ -226,9 +226,9 @@ ctrlDelete (uiNamespace getVariable [QGVAR(compare), controlNull]);
 uiNamespace setVariable [QGVAR(compare), controlNull];
 uiNamespace setVariable [QGVAR(tipShown), controlNull];
 
-// Which containers cannot carry it: red free cells, "Too heavy", a preview on the load bars and the weight card.
+// What it would add to the soldier, on the weight card.
 if (_group isEqualTo []) then {
-    [_display, _entry, GVAR(dragCount), true] call FUNC(markWeight);
+    [_display, _entry, GVAR(dragCount), true] call FUNC(previewWeight);
 };
 
 [_display] call FUNC(makeGhost);

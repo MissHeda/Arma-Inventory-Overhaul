@@ -14,12 +14,6 @@
  * off, or the pile out of their sight or reach - becomes what the window looks into: a new pile has to
  * show up somewhere.
  *
- * A move that was refused as too heavy says by how much: the in-flight record carries, for each move in the
- * order of the moves, where it went, what it was and how many (fnc_sendMoves), and the refused one's
- * container, entry and count go to fnc_flashHint, which names the kilograms (fnc_weightText). A hint a quick
- * move left for its answer (GVAR(pendingHint)) is only for one that went: any refusal, anything put back or
- * put on the ground clears it - the refusal's hint wins.
- *
  * The sound of an answer is played here, of the first item that really moved (fnc_feelAnswer, with what
  * fnc_sendMoves worked out when the moves were sent); a refused change is silent, the hint says why. A rebuild
  * the hotbar asks for (binding a slot) is silent too.
@@ -85,11 +79,9 @@ private _fnc_adopt = {
 if ((_input param [1, objNull]) isEqualType []) exitWith {
     _input params [["_id", "", [""]], ["_summary", [], [[]]], "", ["_args", [], [[]]]];
 
-    // How its moves sound (fnc_sendMoves kept it with the record), played below once it is known how many went,
-    // and what a hint about each move needs - where it went, what, how many.
+    // How its moves sound (fnc_sendMoves kept it with the record), played below once it is known how many went.
     private _flight = GVAR(inFlight) getOrDefault [_id, []];
     private _feels = _flight param [3, []];
-    private _details = _flight param [4, []];
 
     GVAR(inFlight) deleteAt _id;
 
@@ -119,13 +111,11 @@ if ((_input param [1, objNull]) isEqualType []) exitWith {
     private _grids = uiNamespace getVariable [QGVAR(grids), []];
     private _moved = 0;
     private _reason = "";
-    private _reasonAt = -1;
     private _elsewhere = false;
     private _landed = [];
 
     {
         private _record = _x;
-        private _recordIndex = _forEachIndex;
         private _kind = _record getOrDefault ["kind", "move"];
         private _roles = _record getOrDefault ["roles", createHashMap];
         private _from = _record getOrDefault ["from", objNull];
@@ -207,7 +197,6 @@ if ((_input param [1, objNull]) isEqualType []) exitWith {
 
                     if !(_step in ["", "Skipped", "Bounced", "NotLocal"]) exitWith {
                         _reason = _step;
-                        _reasonAt = _recordIndex;
                     };
                 } forEach ["take", "land"];
 
@@ -228,24 +217,8 @@ if ((_input param [1, objNull]) isEqualType []) exitWith {
         } else {
             if (_reason isNotEqualTo "") then {
                 _hint = [_reason];
-
-                // Too heavy: for which container, what and how many (fnc_sendMoves recorded it).
-                private _detail = _details param [_reasonAt, []];
-
-                if (_reason isEqualTo "TooHeavy" && {_detail isEqualType []} && {count _detail >= 3}) then {
-                    _detail params ["_heavyTo", "_heavyEntry", "_heavyCount"];
-
-                    if (_heavyTo isEqualType objNull && {!isNull _heavyTo} && {_heavyEntry isEqualType []}) then {
-                        _hint = ["TooHeavy", [_heavyTo, [_heavyEntry] call EFUNC(storage,entryFromArray), _heavyCount]];
-                    };
-                };
             };
         };
-    };
-
-    // A refusal, or something put back, comes with its own hint: what a quick move left for its answer is void.
-    if (_moved < _total || {_back > 0} || {_vehicle + _ground > 0}) then {
-        GVAR(pendingHint) = [];
     };
 
     if (_hint isEqualTo []) then {

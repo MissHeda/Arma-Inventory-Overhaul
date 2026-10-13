@@ -18,8 +18,7 @@
  * (GVAR(nearby), fnc_readNearby) - all ordered by einv_storage_fnc_orderSections. Last of all the moves
  * under way are shown (fnc_drawPending) and the tiles selected (fnc_drawSelection), which survive every
  * build by what they stand for.
- * A repack of magazines in progress is drawn on the tiles last (einv_magazines_fnc_drawJob). A hint a quick move
- * left for its answer (GVAR(pendingHint)) is written over the hover's, once, right before that.
+ * A repack of magazines in progress is drawn on the tiles last (einv_magazines_fnc_drawJob).
  *
  * The layout is looked up by name, so a look that is missing or broken leaves a window with only its
  * header and footer - still one that can be closed or swapped for the vanilla inventory - rather than
@@ -125,9 +124,8 @@ uiNamespace setVariable [QGVAR(slots), []];
 uiNamespace setVariable [QGVAR(sectionInfo), []];
 
 // The weight registries, drawn into again by the sections and the weight card (fnc_drawSection,
-// fnc_drawEquipmentCards): what lifting something marks, what the hint explains, the comparison card and the
-// name at the mouse - their controls went with the sweep above.
-uiNamespace setVariable [QGVAR(loadBars), []];
+// fnc_drawEquipmentCards): what the hint explains, the comparison card and the name at the mouse - their
+// controls went with the sweep above.
 uiNamespace setVariable [QGVAR(infoAreas), []];
 uiNamespace setVariable [QGVAR(weightBar), createHashMap];
 uiNamespace setVariable [QGVAR(weightPreview), controlNull];
@@ -392,15 +390,6 @@ call FUNC(drawPending);
 // The tiles selected, in a frame of the accent colour: found again by what they stand for, so they
 // survive this build - those that went or are under way drop out (fnc_selectionTiles).
 [] call FUNC(drawSelection);
-
-// A hint a quick move left for after its answer (fnc_quickMove, fnc_afterAction): written over what the mouse is
-// on, once - a refusal cleared it, so it only comes with a move that went.
-if (GVAR(pendingHint) isNotEqualTo []) then {
-    [GVAR(pendingHint)] call FUNC(dragHint);
-
-    GVAR(dragHintShown) = [];
-    GVAR(pendingHint) = [];
-};
 
 // What it was built from, so fnc_onFrame sees when that changes.
 GVAR(signatureParts) = call FUNC(getSignature);

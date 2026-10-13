@@ -109,7 +109,7 @@ uiNamespace setVariable [QGVAR(dragFootprints), []];
 uiNamespace setVariable [QGVAR(dragGhosts), []];
 
 // What each section of the columns drew that a later redraw needs (fnc_drawSection): its container, the
-// load text and the button on its caption line - controls, so in uiNamespace.
+// weight text and the button on its caption line - controls, so in uiNamespace.
 uiNamespace setVariable [QGVAR(sectionInfo), []];
 
 // How many times the window was built: a button that finds its section by its place in sectionInfo
@@ -318,18 +318,13 @@ GVAR(cameraLight) = objNull;
 // loot sections only draws those again (fnc_redrawTiles).
 GVAR(signatureParts) = [];
 
-// Weight (fnc_drawSection, fnc_markWeight, fnc_drawCompare), all made by the build and gone with the next one:
-//   loadBars   - one record per section with a container and a limit in play (HashMap: container, parent,
-//                bar [x, y, w, h] in the parent, label, labelRect, text, color, extras, mass, maxLoad, state,
-//                grids - indices into grids -, cellColor, fill, preview, tinted, worded): what lifting something
-//                shows on them
+// Weight (fnc_drawSection, fnc_previewWeight, fnc_drawCompare), all made by the build and gone with the next one:
 //   infoAreas  - [[x, y, w, h], "", "", anchor, kind, args] where the hint has something to say that is
 //                no tile and no slot: the weight card and the section captions (fnc_updateHover)
 //   weightBar  - the weight card's bar: HashMap parent, rect, load, limits, unit (fnc_drawEquipmentCards)
 //   compare    - the comparison card at the mouse, or controlNull; tipShown - whichever of it and the name is
 //                on show, with its width and height (fnc_updateHover, fnc_onFrame)
 //   weightPreview - the added weight on the weight card while something is dragged
-uiNamespace setVariable [QGVAR(loadBars), []];
 uiNamespace setVariable [QGVAR(infoAreas), []];
 uiNamespace setVariable [QGVAR(weightBar), createHashMap];
 uiNamespace setVariable [QGVAR(compare), controlNull];
@@ -337,11 +332,9 @@ uiNamespace setVariable [QGVAR(tipShown), controlNull];
 uiNamespace setVariable [QGVAR(weightPreview), controlNull];
 
 // What the hint says about the keys while something is dragged, [[text, colour key], ...], and what it shows
-// now (fnc_startDrag, fnc_dragHint); a hint a move leaves for the build to write once its answer says yes
-// (fnc_quickMove, fnc_build, fnc_afterAction).
+// now (fnc_startDrag, fnc_dragHint).
 GVAR(dragKeys) = [];
 GVAR(dragHintShown) = [];
-GVAR(pendingHint) = [];
 
 // What lies around the unit and shows as boxes of its own in the loot column, read by fnc_readNearby -
 // objects, nearest first. Stays [] with the switch off and in the other windows that attach to this one

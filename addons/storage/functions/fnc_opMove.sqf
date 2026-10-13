@@ -3,9 +3,8 @@
  * Author: Miss Heda
  * Op "move": within one root - a crate into a backpack lying in it, own uniform into own backpack.
  * "IntoItself" when the target is the moved uniform, vest or backpack or lies in it (fnc_liesIn); then
- * room (fnc_roomByWeight, the tile with all it holds, else "TooHeavy" - "NoBackpack" for a backpack into a
- * backpack) and a spot - the cell when free, else
- * the first fit ("elsewhere"), with none "NoRoom" - all before anything moves. Then out as op "take"
+ * "NoBackpack" for a backpack into a backpack (fnc_backpackIntoBackpack) and a spot - the cell when free,
+ * else the first fit ("elsewhere"), with none "NoRoom" - all before anything moves. Then out as op "take"
  * does (verified) and in as op "put" does (fnc_addPayload); the record at the spot, a whole tile's record
  * gone from the source. A rest that did not arrive goes back into the source, verified; what does not go
  * back either is "Bounced" with it. The same holder twice is op "place".
@@ -18,7 +17,7 @@
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
- *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "TooHeavy", "NoBackpack", "NotLocal",
+ *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "NoBackpack", "NotLocal",
  *     "Moved", "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason
  *     already in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
@@ -59,15 +58,10 @@ private _inside = _entry getOrDefault ["container", objNull];
 
 if (!isNull _inside && {[_to, _inside] call FUNC(liesIn)}) exitWith {["IntoItself", [], []]};
 
-// The tile itself is weighed - with everything a uniform, vest or backpack holds. A backpack into a
-// backpack says so ("NoBackpack"), not that it is too heavy.
-private _room = [_to, _entry, _count] call FUNC(roomByWeight);
+// A backpack never goes into a backpack.
+if ([_to, _entry] call FUNC(backpackIntoBackpack)) exitWith {["NoBackpack", [], []]};
 
-if !(_room get "fits") exitWith {
-    [["TooHeavy", "NoBackpack"] select ((_room get "reason") isEqualTo "NoBackpack"), [], []]
-};
-
-// A spot, before anything moves (op "put" only checking, room not asked again).
+// A spot, before anything moves (op "put" only checking, the backpack rule not asked again).
 ([[_to, ["item", _entry getOrDefault ["class", ""], 1, []], _cell, true, true], _context] call FUNC(opPut)) params [
     ["_checked", "Failed", [""]],
     "",

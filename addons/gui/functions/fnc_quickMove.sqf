@@ -21,11 +21,8 @@
  * When something is being looted but all of it is locked to the player (a locked section of the loot
  * column, einv_locks), the ground is no place for it either: the hint says "Locked".
  *
- * By weight: the first container with room for all of it by weight and by the grid takes it. A stack
- * that fits nowhere whole goes in part, as much as the first container with a free spot can carry by
- * weight, and the hint says "Moved 3 of 10 - the rest is too heavy for ..." once the move went through.
- * Nothing fitting at all says how much room the best container has left (fnc_weightText), a backpack that
- * has nowhere but backpacks to go says that.
+ * Free cells decide: the first container with a free spot for all of it takes it, whatever it weighs. A
+ * backpack that has nowhere but backpacks to go says that.
  *
  * Arguments:
  * 0: Grid index <NUMBER>
@@ -63,84 +60,38 @@ if (_kit isNotEqualTo "") exitWith {
 private _unit = GVAR(unit);
 private _own = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit] select {!isNull _x};
 
-// Which of the containers takes it, and how much: [container, count - -1 for all of it, why not - a text
-// for the hint, "" for none]. The first with room by weight and a free spot takes all of it; failing that
-// a stack goes in part into the first with a free spot that carries some by weight; failing that, why
-// not is how much room the best of them has left, or that a backpack does not go into a backpack.
+// Which of the containers takes it: [container, why not - "NoBackpack" when the only room is in a backpack
+// and it is one, "" for none]. The first with a free spot takes all of it.
 private _fnc_pick = {
     params ["_targets"];
 
-    private _stack = _tile getOrDefault ["count", 1];
-    private _partial = [];
     private _whole = objNull;
-    private _bestFree = -1;
     private _noBackpack = false;
 
     {
         if (_x isEqualTo _from || {!([_x, _tile] call EFUNC(storage,hasSpace))}) then {continue};
 
-        private _room = [_x, _tile] call EFUNC(storage,roomByWeight);
-
-        if (_room get "fits") exitWith {
+        if ([_x, _tile] call EFUNC(storage,backpackIntoBackpack)) then {
+            _noBackpack = true;
+        } else {
             _whole = _x;
         };
 
-        if ((_room get "reason") isEqualTo "NoBackpack") then {
-            _noBackpack = true;
-            continue
-        };
-
-        if (_partial isEqualTo [] && {_stack > 1} && {(_room get "maxCount") >= 1}) then {
-            _partial = [_x, _room get "maxCount"];
-        };
-
-        _bestFree = _bestFree max (_room get "free");
+        if (!isNull _whole) exitWith {};
     } forEach _targets;
 
-    if (!isNull _whole) exitWith {[_whole, -1, ""]};
-    if (_partial isNotEqualTo []) exitWith {[_partial select 0, _partial select 1, ""]};
-
-    private _why = "";
-
-    if (_bestFree >= 0) then {
-        _why = ["everywhere", _tile, _bestFree] call FUNC(weightText);
-    } else {
-        if (_noBackpack) then {
-            _why = "NoBackpack";
-        };
-    };
-
-    [objNull, -1, _why]
-};
-
-// Moves it into the container the pick named. A part of a stack says so once the move went through
-// (fnc_build writes the pending hint into the new footer; fnc_afterAction drops it for a refusal).
-private _fnc_move = {
-    params ["_target", "_count"];
-
-    if (_count > 0) then {
-        GVAR(pendingHint) = [[["movedSome", _target, _count, _tile getOrDefault ["count", 1]] call FUNC(weightText), "text2"]];
-    };
-
-    private _asked = [_from, _target, _tile, _count, []] call FUNC(applyMove);
-
-    // Refused on the spot: the refusal's hint is the one to show.
-    if (!_asked) then {
-        GVAR(pendingHint) = [];
-    };
-
-    _asked
+    [_whole, ["", "NoBackpack"] select (isNull _whole && {_noBackpack})]
 };
 
 if !(_from in _own) exitWith {
-    ([_own] call _fnc_pick) params ["_target", "_count", "_why"];
+    ([_own] call _fnc_pick) params ["_target", "_why"];
 
     if (isNull _target) exitWith {
         [["NowhereToGo", _why] select (_why isNotEqualTo "")] call FUNC(flashHint);
         false
     };
 
-    [_target, _count] call _fnc_move
+    [_from, _target, _tile, -1, []] call FUNC(applyMove)
 };
 
 // From the player's own gear: the loot containers in the order the column shows them, then the open
@@ -215,10 +166,10 @@ _loot = _loot select {
     _why isEqualTo ""
 };
 
-([_loot] call _fnc_pick) params ["_target", "_count", "_weightWhy"];
+([_loot] call _fnc_pick) params ["_target", "_packWhy"];
 
 if (!isNull _target) exitWith {
-    [_target, _count] call _fnc_move
+    [_from, _target, _tile, -1, []] call FUNC(applyMove)
 };
 
 private _kitIndex = -1;
@@ -228,12 +179,12 @@ if (!isNil QEFUNC(compat_efak,canDrop)) then {
 };
 
 if (_kitIndex < 0 || {isNil QEFUNC(compat_efak,drop)}) exitWith {
-    // Every container shown was a living person's the player may not put into: that is why. Too heavy for
-    // all of them: how much room the best has left.
+    // Every container shown was a living person's the player may not put into: that is why. A backpack with
+    // only backpacks to go into: that.
     private _why = ["NowhereToGo", _refused] select (_loot isEqualTo [] && {_refused isNotEqualTo ""});
 
-    if (_weightWhy isNotEqualTo "") then {
-        _why = _weightWhy;
+    if (_packWhy isNotEqualTo "") then {
+        _why = _packWhy;
     };
 
     [_why] call FUNC(flashHint);

@@ -135,9 +135,9 @@ switch (_hover param [0, ""]) do {
 
                 _choices pushBack [LLSTRING(Menu_Add), [_class, 1], {_this call FUNC(quickAdd)}];
 
-                // Each of his containers with room for it and a cell.
+                // Each of his containers with a free cell for it.
                 {
-                    if ([_x, _probe] call EFUNC(storage,hasRoom) && {[_x, _probe] call EFUNC(storage,hasSpace)}) then {
+                    if ([_x, _probe] call EFUNC(storage,hasRoom)) then {
                         _choices pushBack [format [LLSTRING(Menu_AddTo), [_x] call EFUNC(gui,containerName)], [_class, 1, _x], {_this call FUNC(quickAdd)}];
                     };
                 } forEach _containers;

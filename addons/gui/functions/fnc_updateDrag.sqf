@@ -41,14 +41,12 @@
  * a dragged container or one that lies in it, or a slot, nothing happens (red, and the reason). The
  * hotbar's slots take a single item only (einv_hotbar - only when that addon is loaded).
  *
- * Whether a container has room is asked once per drag and count (GVAR(dragRoom)): its contents do not
- * change while the mouse moves. The answer is the whole of einv_storage_fnc_roomByWeight: when it says no,
- * the hint says why with the numbers - "Too heavy for Tactical Rig: 0.1 kg left, this weighs 0.5 kg", or
- * "Only 3 of 10 fit by weight into Backpack - the wheel takes fewer" for a stack - and the counter at the
- * ghost turns red while the wheel holds more than fit (fnc_dragHint, fnc_weightText). When it says yes
- * and the item comes from outside the soldier's own gear into it, the hint warns what it would make of him:
- * "+2.4 kg: you will be Overloaded" (an own empty slot too - a swap moves another item off, so no forecast
- * for a filled one). Anything else the target has nothing to say about, the hint is the key help lift wrote. The ghost is held as GVAR(dragSize) says - turned with R - with the
+ * Free cells are the only room there is: a cell that is taken is red, and weight refuses nothing (a backpack
+ * into a backpack is the one kind rule left, einv_storage_fnc_backpackIntoBackpack). When the item comes
+ * from outside the soldier's own gear into it, the hint warns what it would make of him: "+2.4 kg: you
+ * will be Overloaded" (fnc_dragHint, fnc_weightText; an own empty slot too - a swap moves another item off,
+ * so no forecast for a filled one), worked out once per drag, target and count (GVAR(dragRoom)). Anything
+ * else the target has nothing to say about, the hint is the key help lift wrote. The ghost is held as GVAR(dragSize) says - turned with R - with the
  * count of a stack beside it; at a column's or a kit window body's top or bottom edge it scrolls - only
  * while nothing lies over it there.
  *
@@ -91,7 +89,7 @@ private _middle = inputMouse 2 > 0;
 if (_middle && {!GVAR(middleHeld)} && {_stack > 1}) then {
     GVAR(dragCount) = _stack;
 
-    [_display, _entry, GVAR(dragCount), false] call FUNC(markWeight);
+    [_display, _entry, GVAR(dragCount), false] call FUNC(previewWeight);
 };
 
 GVAR(middleHeld) = _middle;
@@ -200,13 +198,11 @@ if (_onTop isEqualTo "inspect") exitWith {
 };
 
 // What the hint says about the target, [[text, colour key], ...] - the key help unless the target has something
-// to say about weight -, and how many of the stack the container under the mouse takes by weight, -1 when
-// nothing limits it (fnc_dragHint, the counter).
+// to say about weight (fnc_dragHint).
 private _hintParts = GVAR(dragKeys);
-private _maxCount = -1;
 
 // What a pick-up would make of the soldier, [] when it changes nothing about his tier or does not come from
-// outside his own gear (fnc_markWeight knows where it came from).
+// outside his own gear (fnc_previewWeight knows where it came from).
 private _fnc_forecast = {
     params ["_need"];
 
@@ -218,7 +214,7 @@ private _fnc_forecast = {
 
     if (_newTier <= _tier) exitWith {[]};
 
-    [[["body", _need, _newTier, _load + _need] call FUNC(weightText), ["text2", "warn", "loss", "loss"] select _newTier]]
+    [[[_need, _newTier, _load + _need] call FUNC(weightText), ["text2", "warn", "loss", "loss"] select _newTier]]
 };
 
 // Where it would land: the first that applies - the hotbar, one of the player's slots, a grid (and a kit's tile
@@ -752,43 +748,25 @@ call {
             _reason = _touch;
         };
 
-        // As many of a stack as the wheel left (fnc_onMouseZ): the whole answer of the weight rule, and what the
-        // hint says about it, worked out once per target and count.
-        private _key = format ["%1|%2", _targetIndex, GVAR(dragCount)];
-        private _room = GVAR(dragRoom) get _key;
+        // A backpack never goes into a backpack; the cells above are every other limit.
+        if ([_to, _entry] call EFUNC(storage,backpackIntoBackpack)) exitWith {
+            _reason = "NoBackpack";
+        };
 
-        if (isNil "_room") then {
-            _room = [_to, _entry, _amount] call EFUNC(storage,roomByWeight);
-            GVAR(dragRoom) set [_key, _room];
+        // Into the soldier's own gear from outside it: what that makes of him, as many of a stack as the wheel
+        // left (fnc_onMouseZ), worked out once per target and count.
+        private _key = format ["hint|%1|%2", _targetIndex, GVAR(dragCount)];
+        private _roomParts = GVAR(dragRoom) get _key;
 
-            private _parts = [];
+        if (isNil "_roomParts") then {
+            _roomParts = [];
 
-            if !(_room get "fits") then {
-                // Only some of a stack fit: the wheel can take fewer.
-                _parts = if (_stack > 1 && {(_room get "maxCount") >= 1} && {(_room get "reason") isEqualTo "TooHeavy"}) then {
-                    [[["someFit", _to, _entry, _room get "maxCount", _stack] call FUNC(weightText), "loss"]]
-                } else {
-                    [[["tooHeavy", _to, _entry, _amount] call FUNC(weightText), "loss"]]
-                };
-            } else {
-                // Into the soldier's own gear from outside it: what that makes of him.
-                if (_toKit isEqualTo "" && {[_to] call FUNC(isOwnStorage)}) then {
-                    _parts = [_room get "need"] call _fnc_forecast;
-                };
+            if (_toKit isEqualTo "" && {[_to] call FUNC(isOwnStorage)}) then {
+                _roomParts = [([[_entry]] call EFUNC(storage,getMass)) * ([_stack, _amount] select (_amount > 0)) / _stack] call _fnc_forecast;
             };
 
-            GVAR(dragRoom) set ["hint|" + _key, _parts];
+            GVAR(dragRoom) set [_key, _roomParts];
         };
-
-        if ((_room get "maxLoad") >= 0) then {
-            _maxCount = _room get "maxCount";
-        };
-
-        if !(_room get "fits") then {
-            _reason = ["TooHeavy", "NoBackpack"] select ((_room get "reason") isEqualTo "NoBackpack");
-        };
-
-        private _roomParts = GVAR(dragRoom) getOrDefault ["hint|" + _key, []];
 
         if (_roomParts isNotEqualTo []) then {
             _hintParts = _roomParts;
@@ -813,13 +791,8 @@ call {
     ], _reason isEqualTo ""] call _fnc_show;
 };
 
-// The hint over this target, written when it differs from what stands there, and the counter at the ghost: red
-// while the wheel holds more of the stack than the container under the mouse takes by weight.
+// The hint over this target, written when it differs from what stands there.
 [_hintParts] call FUNC(dragHint);
-
-if (!isNull _counter && {_dragGroup isEqualTo []}) then {
-    _counter ctrlSetTextColor (GVAR(theme) getOrDefault [["accent", "loss"] select (_maxCount >= 0 && {_maxCount < GVAR(dragCount)}), [1, 1, 1, 1]]);
-};
 
 // A window that attached has the last word on where it lands (the "dragCheck" hook): it may change
 // whether it fits and why not, or turn the target into another - the Arsenal makes the ground a

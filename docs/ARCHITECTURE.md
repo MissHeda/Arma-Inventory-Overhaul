@@ -2648,3 +2648,23 @@ and the pieces of storage they use.
   - "Use as active radio" is the mod's own swap on the player's gear, not a transaction of ours; it is local to the
     player's machine like the radio slot itself.
   - Built and checked in code only: nothing of this has run in the game yet.
+
+## Cells only (0.4.0) - supersedes the parts above it contradicts
+
+Weight limits no container any more: free cells are the only limit on what goes into a uniform, vest, backpack,
+crate, vehicle or pile. The soldier's own weight (bar, tiers, ACE fatigue, the `weight` addon) is untouched.
+
+- **Removed functions:** `einv_storage_fnc_roomByWeight`, `fnc_getLoadState`, and in gui `fnc_markWeight` /
+  `fnc_clearWeightMarks` (the weight card's preview lives on as `fnc_previewWeight` / `fnc_clearWeightPreview`;
+  `fnc_weightText` keeps only the soldier's "+2.4 kg: you will be Overloaded", `fnc_loadText` only "12.4 kg").
+- **Removed setting and macros:** `einv_storage_gridOnly` ("Limit by room only", also the setup's Start line),
+  `FULL_SHARE`, `FULL_FREE_MASS`, `NEAR_FULL`, `LOAD_BAR_H`, the theme colours `cellFull` and `cellBlocked`.
+- **Removed section key and records:** `"maxLoad"` of every section, a kit's `"loadFraction"`, uiNamespace `loadBars`
+  (no load bar, "full" chip or red free cells), the in-flight record's fifth element, the plan's fifth element
+  (partial counts) and `GVAR(pendingHint)`. The reason `"TooHeavy"` and its hint strings are gone.
+- **Now:** `fnc_hasRoom [container, entry]` is `fnc_hasSpace` plus the one kind rule left,
+  `fnc_backpackIntoBackpack` (`"NoBackpack"`); a move with no cell given needs a free spot (`"NoRoom"`).
+- **Stays:** `fnc_getMaxLoad` (config `maximumLoad`) as a sizing heuristic only - `fnc_blocksFor` sizes the "auto",
+  "percent" and "pattern" default grids from it, it never limits anything. The items' `maxLoad` fact and the `load`
+  selector key stay as a size proxy, as do the engine `maxLoad` asks (`canOpenPerson`, ACE cargo, ZEN).
+- Built and checked in code only: nothing of this has run in the game yet.

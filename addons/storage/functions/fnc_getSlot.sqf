@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * What a unit has in one of its equipment slots, as an entry like those of fnc_getContents - so a
- * slot's item can be weighed (fnc_hasRoom) and laid on a grid like any tile.
+ * slot's item can be weighed (fnc_getMass) and laid on a grid like any tile.
  *
  * Slot ids: primary, handgun, launcher, binocular, headgear, goggles, nvg, uniform, vest, backpack,
  * map, gps, radio, compass, watch - and a weapon's parts as <weapon>_<part>, part being muzzle, rail,

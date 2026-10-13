@@ -15,17 +15,6 @@
 
 // ----- Containers -----
 
-// The same for everyone: what fits into a container has to be decided alike on every machine, or a
-// move one player's window allows would be turned down on the server.
-[
-    QGVAR(gridOnly),
-    "CHECKBOX",
-    [LLSTRING(Setting_GridOnly), LLSTRING(Setting_GridOnly_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Containers)],
-    false,
-    1
-] call CBA_fnc_addSetting;
-
 // The same for everyone, like the rules: every machine has to agree on a container's compartments, or
 // a layout worked out on one would not fit on another. The older way to size containers by class -
 // the items addon reads it as rules of its own, after the rules text (einv_items_fnc_compileRules),

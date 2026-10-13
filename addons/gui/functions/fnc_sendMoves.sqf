@@ -21,10 +21,8 @@
  * in flight; the answer plays the first that went (fnc_afterAction, fnc_feelAnswer).
  *
  * Each transaction is recorded in flight (GVAR(inFlight)): its tiles fade and cannot be lifted, its
- * target cells are outlined (fnc_drawPending) until the answer and the places it names arrived; the
- * record also keeps, for each move, what a refusal for weight needs to say how much is missing - where
- * it was going, the tile and how many ([to, entry as an array, count], [] for the kinds that carry no
- * weight question). Left out with a hint: a move into itself ("IntoItself"), a drop onto the ground on
+ * target cells are outlined (fnc_drawPending) until the answer and the places it names arrived. Left out
+ * with a hint: a move into itself ("IntoItself"), a drop onto the ground on
  * foot with nothing under the feet ("NoGround"), anything that needs the server's hub before it answered
  * ("NotReady"), a holder whose root is not known ("Moved"), and a move into or out of a container that is
  * locked to the player ("Locked", einv_locks_fnc_canReach): the lock may have been set after the window
@@ -506,7 +504,6 @@ private _records = [];
 private _feels = [];
 private _sources = [];
 private _targets = [];
-private _details = [];
 private _rest = [];
 private _refused = "";
 
@@ -578,9 +575,6 @@ if (_moves isEqualTo []) exitWith {
                 ["oldClass", ""], ["oldTo", objNull], ["roles", _manyRoles]
             ];
 
-            // Laid down where it lies: no question of weight.
-            _details pushBack [];
-
             // Rearranged in its holder: it sounds like a move.
             if (count _feels < 3) then {
                 _feels pushBack ["move", _manyClass, [_manyHolder, objNull] select (_manyHolder isEqualType ""), "", objNull];
@@ -643,23 +637,6 @@ if (_moves isEqualTo []) exitWith {
         ["oldClass", _oldClass], ["oldTo", _oldTo], ["roles", _roles]
     ];
 
-    // What a refusal for weight says how much is missing with: where it was going, the tile, how many.
-    // Only into a container - the ground and a kit take no weight question here.
-    private _detail = [];
-
-    if (_landTo isEqualType objNull && {!isNull _landTo}) then {
-        switch (_kind) do {
-            case "move": {
-                _detail = [_landTo, [_entry] call EFUNC(storage,entryToArray), _move getOrDefault ["count", -1]];
-            };
-            case "unequip": {
-                _detail = [_landTo, [[_from, _move getOrDefault ["slot", ""]] call EFUNC(storage,getSlot)] call EFUNC(storage,entryToArray), 1];
-            };
-        };
-    };
-
-    _details pushBack _detail;
-
     // How it will sound once it happened (fnc_feelFor); an answer plays the first one that went, and the first
     // three are all it can come to.
     if (count _feels < 3) then {
@@ -709,7 +686,7 @@ if (_id isEqualTo "") exitWith {
 // Only while the window shows it: a chain that goes on after the window closed fades nothing. In single
 // player the answer is here already - fnc_onFrame finishes it, and this entry with it, the next frame.
 if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) then {
-    GVAR(inFlight) set [_id, [_sources, _targets, diag_tickTime, _feels, _details]];
+    GVAR(inFlight) set [_id, [_sources, _targets, diag_tickTime, _feels]];
 };
 
 // Some went, some were left out: why those were.

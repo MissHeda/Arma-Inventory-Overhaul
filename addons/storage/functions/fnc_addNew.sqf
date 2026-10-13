@@ -2,9 +2,8 @@
 /*
  * Author: Miss Heda
  * Puts something that did not exist before into a container - what the Arsenal hands out - and says
- * whether it arrived. Checked first: the container's load has room for it (fnc_hasRoom), and, when no cell
- * is given, the grid has a free spot (fnc_hasSpace) - always, not only with the grid-only setting: nothing
- * new may land beside the grid. Counted before and after (fnc_countClass): fewer than asked for arrived,
+ * whether it arrived. Checked first: it is no backpack for a backpack (fnc_backpackIntoBackpack), and, when
+ * no cell is given, the grid has a free spot (fnc_hasSpace): nothing new may land beside the grid. Counted before and after (fnc_countClass): fewer than asked for arrived,
  * and it is a failure, with one line in the RPT; what did arrive stays.
  *
  * With a cell the entry's place is written there (fnc_setPlace) - the caller has checked that the cells are
@@ -23,7 +22,7 @@
  *    wherever the layout finds a spot <ARRAY> (default: [])
  *
  * Return Value:
- * "" it is there; "TooHeavy" the container cannot carry it; "NoRoom" no free spot on the grid; "Failed" not
+ * "" it is there; "NoBackpack" a backpack for a backpack; "NoRoom" no free spot on the grid; "Failed" not
  * all of it arrived <STRING>
  *
  * Example:
@@ -47,7 +46,7 @@ private _probe = createHashMapFromArray [
     ["attachments", []], ["container", objNull]
 ];
 
-if !([_container, _probe] call FUNC(hasRoom)) exitWith {"TooHeavy"};
+if ([_container, _probe] call FUNC(backpackIntoBackpack)) exitWith {"NoBackpack"};
 
 if (_cell isEqualTo [] && {!([_container, _probe] call FUNC(hasSpace))}) exitWith {"NoRoom"};
 

@@ -197,10 +197,10 @@ if (isNull _to) exitWith {false};
 private _toTouch = [_to, "items"] call EFUNC(gui,checkTouch);
 
 if (_toTouch isNotEqualTo "") exitWith {[_toTouch] call _fnc_refuse};
-if !([_to, _entry, _count] call EFUNC(storage,hasRoom)) exitWith {["TooHeavy"] call _fnc_refuse};
+if ([_to, _entry] call EFUNC(storage,backpackIntoBackpack)) exitWith {["NoBackpack"] call _fnc_refuse};
 
-// Only the grid limits (einv_storage_gridOnly) and nobody said where: there has to be a free spot.
-if (EGVAR(storage,gridOnly) && {_cell isEqualTo []} && {!([_to, _entry] call EFUNC(storage,hasSpace))}) exitWith {
+// Free cells are the only limit: nobody said where, so there has to be a free spot.
+if (_cell isEqualTo [] && {!([_to, _entry] call EFUNC(storage,hasSpace))}) exitWith {
     ["NoRoom"] call _fnc_refuse
 };
 

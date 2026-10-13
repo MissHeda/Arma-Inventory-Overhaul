@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * [[["Too heavy for Backpack", "loss"]]] call einv_gui_fnc_dragHint;
+ * [[["+2.4 kg: you will be Overloaded", "loss"]]] call einv_gui_fnc_dragHint;
  *
  * Public: No
  */

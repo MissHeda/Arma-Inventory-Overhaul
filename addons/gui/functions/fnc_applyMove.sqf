@@ -4,9 +4,8 @@
  * Author: Miss Heda
  * Moves an item for the window: checked here first, so the hint says at once what this machine can
  * already tell - a living person's gear the player may not change or is out of reach of
- * (fnc_checkTouch), another living player's kit (einv_compat_efak_fnc_checkTile), no room for its load
- * (einv_storage_fnc_roomByWeight: too heavy says for which container and by how much, a backpack into a
- * backpack says so), no free spot when only the grid counts and nobody said where - then sent as
+ * (fnc_checkTouch), another living player's kit (einv_compat_efak_fnc_checkTile), a backpack into a
+ * backpack (einv_storage_fnc_backpackIntoBackpack), no free spot when nobody said where - then sent as
  * a transaction (fnc_sendMoves). Every change happens where the holder's root is local, checked there
  * again; places, search knowledge and the window follow the answer (fnc_afterAction).
  *
@@ -49,7 +48,6 @@ if (_to isEqualType objNull && {isNull _to}) exitWith {false};
 
 private _class = _entry getOrDefault ["class", ""];
 private _why = "";
-private _details = [];
 
 // A living person's gear only as the settings say and while in reach - also rearranged, which everyone
 // looking at them sees. Their machine asks again (fnc_personGuard).
@@ -65,27 +63,20 @@ if (_why isEqualTo "" && {_from isEqualType objNull} && {_to isNotEqualTo _from}
     _why = [_class, _from] call EFUNC(compat_efak,checkTile);
 };
 
-// Room for its load, and with only the grid counting (einv_storage_gridOnly) a free spot when nobody
-// said where. The authority asks both again against what it holds then.
+// A backpack never goes into a backpack, and with nobody saying where it needs a free spot. The authority
+// asks both again against what it holds then.
 if (_why isEqualTo "" && {_to isEqualType objNull} && {_to isNotEqualTo _from}) then {
-    private _room = [_to, _entry, _count] call EFUNC(storage,roomByWeight);
-
-    if !(_room get "fits") exitWith {
-        _why = _room get "reason";
-
-        // Which container and by how much (fnc_flashHint -> fnc_weightText).
-        if (_why isEqualTo "TooHeavy") then {
-            _details = [_to, _entry, _count];
-        };
+    if ([_to, _entry] call EFUNC(storage,backpackIntoBackpack)) exitWith {
+        _why = "NoBackpack";
     };
 
-    if (EGVAR(storage,gridOnly) && {_cell isEqualTo []} && {!([_to, _entry] call EFUNC(storage,hasSpace))}) then {
+    if (_cell isEqualTo [] && {!([_to, _entry] call EFUNC(storage,hasSpace))}) then {
         _why = "NoRoom";
     };
 };
 
 if (_why isNotEqualTo "") exitWith {
-    [_why, _details] call FUNC(flashHint);
+    [_why] call FUNC(flashHint);
 
     false
 };

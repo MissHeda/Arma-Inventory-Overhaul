@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * Draws the inspect card (GVAR(inspect), fnc_inspect): a glass window with the item's picture - what is
  * on a weapon drawn onto it -, its name in its category's colour, its description and its figures:
- * weight, size, count, rounds, what it holds, whether it stacks, its category, the mod it comes from
+ * weight, size, count, rounds, whether it stacks, its category, the mod it comes from
  * and its class name. A kit of Enhanced First Aid Kits also how full it is and what is in it
  * (einv_compat_efak), a radio its channel, frequency and state (einv_compat_tfar, einv_compat_acre -
  * whichever mod is loaded). A window that attached (fnc_attach) adds rows of its own before the mod's name (the
@@ -98,12 +98,6 @@ private _capacity = _info getOrDefault ["capacity", 0];
 
 if (_capacity > 0) then {
     _rows pushBack [LLSTRING(Inspect_Rounds), format ["%1 / %2", [_ammo, _capacity] select (_ammo < 0), _capacity]];
-};
-
-private _maxLoad = _info getOrDefault ["maxLoad", 0];
-
-if (_maxLoad > 0) then {
-    _rows pushBack [LLSTRING(Inspect_Holds), [_maxLoad] call _fnc_kg];
 };
 
 _rows pushBack [LLSTRING(Inspect_Category), [

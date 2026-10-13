@@ -202,15 +202,6 @@
         <Key ID="STR_einv_setup_Fill_Rifleman">
             <English>Rifleman</English>
         </Key>
-        <Key ID="STR_einv_setup_GridOnly_Off">
-            <English>Limit by room only is off: a container also has to stay within its load.</English>
-        </Key>
-        <Key ID="STR_einv_setup_GridOnly_On">
-            <English>Limit by room only is on: a container holds whatever fits its grid, however heavy - the cell size alone decides how much that is.</English>
-        </Key>
-        <Key ID="STR_einv_setup_GridOnly_Where">
-            <English>It is in Addon Options, Enhanced Inventory, Containers.</English>
-        </Key>
         <Key ID="STR_einv_setup_Groups_All">
             <English>All</English>
         </Key>

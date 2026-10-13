@@ -19,7 +19,7 @@
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
- *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "TooHeavy", "NotLocal", "Moved",
+ *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "NotLocal", "Moved",
  *     "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason already
  *     in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled

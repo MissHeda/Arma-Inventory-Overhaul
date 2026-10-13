@@ -52,9 +52,3 @@
 
 // MAX_ROWS, MAX_BLOCKS and MAX_CELLS live in main's script_macros.hpp: the items addon reads the
 // rules that size containers and has to keep to the same limits.
-
-// When a container counts as full by weight (fnc_getLoadState): "full" below the larger of FULL_FREE_MASS
-// (config mass, about 0.23 kg) and FULL_SHARE of its load left. NEAR_FULL, from where it is "near", is in
-// main's script_macros.hpp: the window reads it for the sections that bring their own fill.
-#define FULL_FREE_MASS 5
-#define FULL_SHARE 0.02

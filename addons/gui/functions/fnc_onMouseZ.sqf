@@ -6,8 +6,7 @@
  * of the stack goes - at least one, at most all of it. The middle button takes all of it again
  * (fnc_updateDrag). The columns do not scroll meanwhile (fnc_updateDrag holds them); a single item
  * leaves the wheel to them. A window that attached (fnc_attach) is offered the wheel first when nothing is
- * dragged (the "wheel" hook). A new count marks the containers anew: the ones that cannot carry that many
- * turn red, the ones that can no longer are back to normal (fnc_markWeight).
+ * dragged (the "wheel" hook). A new count moves the weight card's preview (fnc_previewWeight).
  *
  * Reported by the display and by every scrolling column, both for the same turn of the wheel: one
  * per frame counts.
@@ -51,8 +50,7 @@ if (GVAR(lastWheel) isEqualTo diag_frameNo) exitWith {true};
 GVAR(lastWheel) = diag_frameNo;
 GVAR(dragCount) = ((GVAR(dragCount) + ([-1, 1] select (_scroll > 0))) max 1) min _stack;
 
-// The containers that cannot carry that many are marked, the others not (fnc_markWeight): only recoloured
-// - what lift made is all there is.
-[uiNamespace getVariable [QGVAR(display), displayNull], uiNamespace getVariable [QGVAR(dragEntry), createHashMap], GVAR(dragCount), false] call FUNC(markWeight);
+// The weight card's preview follows the count (fnc_previewWeight): only moved - what lift made is all there is.
+[uiNamespace getVariable [QGVAR(display), displayNull], uiNamespace getVariable [QGVAR(dragEntry), createHashMap], GVAR(dragCount), false] call FUNC(previewWeight);
 
 true

@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Ctrl+click or a double click on a tile of an open kit (einv_gui_fnc_quickMove): into the player's own
  * gear - the kit's "take into" choice first, then uniform, vest, backpack (fnc_ownTargets) - the first
- * with room on its grid and for its load. The layout finds it a cell.
+ * with a free spot on its grid. The layout finds it a cell.
  *
  * Arguments:
  * 0: Kit class <STRING>
@@ -21,7 +21,7 @@
 params [["_kit", "", [""]], ["_tile", createHashMap, [createHashMap]]];
 
 private _targets = [_kit] call FUNC(ownTargets);
-private _index = _targets findIf {[_x, _tile] call EFUNC(storage,hasRoom) && {[_x, _tile] call EFUNC(storage,hasSpace)}};
+private _index = _targets findIf {[_x, _tile] call EFUNC(storage,hasRoom)};
 
 if (_index < 0) exitWith {
     ["NowhereToGo"] call EFUNC(gui,flashHint);

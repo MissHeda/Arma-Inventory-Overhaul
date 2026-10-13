@@ -67,8 +67,3 @@
 #define TIER_HEAVY 1
 #define TIER_OVERLOADED 2
 #define TIER_CRITICAL 3
-
-// A container is "near" full by weight from this share of its load used (einv_storage_fnc_getLoadState). The
-// window draws it in a warning colour (einv_gui_fnc_drawSection), and a section that brings its own fill
-// - a kit - is judged by it as well.
-#define NEAR_FULL 0.85
