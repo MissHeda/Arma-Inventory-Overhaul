@@ -41,11 +41,25 @@ PREP(describeRule);
 PREP(drawFrame);
 PREP(showStep);
 PREP(drawStart);
+PREP(drawItems);
+PREP(drawContainers);
 PREP(drawReview);
 PREP(setHint);
 PREP(popover);
 PREP(closePopover);
 PREP(confirm);
+
+// The Items and Containers steps: the class index, its lists, the editors, and the one rule per class
+// they write
+PREP(buildIndex);
+PREP(indexChunk);
+PREP(drawClassList);
+PREP(drawResults);
+PREP(drawItemEditor);
+PREP(drawCellEditor);
+PREP(answerText);
+PREP(ownClassRules);
+PREP(upsertRule);
 
 // Widgets, on the inventory's UI kit
 PREP(uiHit);

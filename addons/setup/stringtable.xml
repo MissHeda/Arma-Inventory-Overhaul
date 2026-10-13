@@ -1,6 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project name="einv">
     <Package name="setup">
+        <Key ID="STR_einv_setup_Answer_Builtin">
+            <English>built in</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_ByLoad">
+            <English>by load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_Forced">
+            <English>always 1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_Holes">
+            <English>%1, %2 holes</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_Legacy">
+            <English>older table setting</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_Like">
+            <English>like %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_Mod">
+            <English>its mod</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_Own">
+            <English>own rule</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_Percent">
+            <English>%1 percent of its load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_Preset">
+            <English>preset</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_Run">
+            <English>%1 × %2</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_Stack">
+            <English>%1 per tile</English>
+        </Key>
         <Key ID="STR_einv_setup_Apply">
             <English>Apply to Addon Options</English>
         </Key>
@@ -157,17 +193,95 @@
         <Key ID="STR_einv_setup_Conflict_Text">
             <English>Someone else saved the setup while you were working on it. Put your changes on top of theirs, or overwrite what they saved?</English>
         </Key>
+        <Key ID="STR_einv_setup_Cont_Add">
+            <English>Add compartment</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Apply">
+            <English>Apply</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_ApplyTip">
+            <English>Write these cells into the setup as a rule for this class. Save at Review puts it to use.</English>
+        </Key>
         <Key ID="STR_einv_setup_Cont_Blocks">
             <English>%1 compartments · %2 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_CanvasHelp">
+            <English>Click a cell to make it a hole, and again to make it a cell. Click a compartment's number to pick it without changing a cell. Rows and columns of holes at a compartment's edges are dropped on Apply.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Cells">
             <English>%1 cells</English>
         </Key>
+        <Key ID="STR_einv_setup_Cont_Cols">
+            <English>%1 across</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Discard">
+            <English>Discard</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Help">
+            <English>Pick a uniform, vest, backpack, crate or vehicle on the left. On the right, draw its compartments cell by cell, or let it take the cells of another class. Apply writes one rule for that class into the setup; Save at Review puts it to use.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_LegacyNote">
+            <English>The older container table setting answers for this class and wins over every rule: take the class out of it there for these cells to count.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Like">
+            <English>Like another class</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_LikeRest">
+            <English>Its own cells, and everything else like %1.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_LikeTip">
+            <English>Pick the class in the list whose cells this one takes. It follows that class when that class changes.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_LinkedNote">
+            <English>Takes its cells from %1 - shown as they are, and changed only there. Unlink to draw its own.</English>
+        </Key>
         <Key ID="STR_einv_setup_Cont_Load">
             <English>Load %1 (%2 kg)</English>
         </Key>
+        <Key ID="STR_einv_setup_Cont_NoBlocks">
+            <English>No compartments</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_NotContainer">
+            <English>%1 holds nothing - there are no cells to draw.</English>
+        </Key>
         <Key ID="STR_einv_setup_Cont_Overflow">
             <English>%1 items don't fit</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_PatternNote">
+            <English>These compartments are laid out by its load or by a pattern. Editing replaces the pattern with exactly these cells.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_PickBlock">
+            <English>Pick this compartment</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_PickHint">
+            <English>Pick a container on the left to see and draw its cells.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Picked">
+            <English>Compartment %1 of %2</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Remove">
+            <English>Remove compartment</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_ResetTip">
+            <English>Take this class's own cells and like= out of the setup: the preset decides again.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Rows">
+            <English>%1 down</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Title">
+            <English>Containers: the cells of uniforms, vests and backpacks</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Totals">
+            <English>%1 of %2 cells · %3 of %4 compartments</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Unapplied">
+            <English>Not applied yet - Apply writes these cells into the setup.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Unlink">
+            <English>Unlink</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_UnlinkTip">
+            <English>Stop taking the cells of another class: this class's own rule or the preset decides again.</English>
         </Key>
         <Key ID="STR_einv_setup_Desc_Every">
             <English>Every item</English>
@@ -190,6 +304,18 @@
         <Key ID="STR_einv_setup_Discard_Yes">
             <English>Close</English>
         </Key>
+        <Key ID="STR_einv_setup_Family_gear">
+            <English>Gear</English>
+        </Key>
+        <Key ID="STR_einv_setup_Family_item">
+            <English>Item</English>
+        </Key>
+        <Key ID="STR_einv_setup_Family_magazine">
+            <English>Magazine</English>
+        </Key>
+        <Key ID="STR_einv_setup_Family_weapon">
+            <English>Weapon</English>
+        </Key>
         <Key ID="STR_einv_setup_Fill">
             <English>Fill with</English>
         </Key>
@@ -201,6 +327,21 @@
         </Key>
         <Key ID="STR_einv_setup_Fill_Rifleman">
             <English>Rifleman</English>
+        </Key>
+        <Key ID="STR_einv_setup_Filter_Cargo">
+            <English>Cargo</English>
+        </Key>
+        <Key ID="STR_einv_setup_Filter_Gear">
+            <English>Gear</English>
+        </Key>
+        <Key ID="STR_einv_setup_Filter_Items">
+            <English>Items</English>
+        </Key>
+        <Key ID="STR_einv_setup_Filter_Magazines">
+            <English>Magazines</English>
+        </Key>
+        <Key ID="STR_einv_setup_Filter_Weapons">
+            <English>Weapons</English>
         </Key>
         <Key ID="STR_einv_setup_Groups_All">
             <English>All</English>
@@ -220,8 +361,38 @@
         <Key ID="STR_einv_setup_Groups_ShowItems">
             <English>Show its items</English>
         </Key>
+        <Key ID="STR_einv_setup_Hint_BadClass">
+            <English>%1 cannot be written into the rules: class names there take letters, digits and _ only.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_CellsApplied">
+            <English>The cells of %1 are in the setup - Save at Review to use them.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_LikeSelf">
+            <English>A class cannot take its cells from itself - pick another one.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_Linked">
+            <English>%1 now takes its cells from %2 - Save at Review to use it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_NoCells">
+            <English>Not one cell left - a container needs at least one.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_NothingToApply">
+            <English>Nothing differs from what it is now - nothing to apply.</English>
+        </Key>
         <Key ID="STR_einv_setup_Hint_PresetPicked">
             <English>Now built on %1.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_Reset">
+            <English>%1 is back to the preset - Save at Review to use it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_SizeApplied">
+            <English>The size of %1 is in the setup - Save at Review to use it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_TooMany">
+            <English>Too many: at most %1 cells and %2 compartments.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_Unlinked">
+            <English>%1 no longer takes the cells of another class - Save at Review to use it.</English>
         </Key>
         <Key ID="STR_einv_setup_Import">
             <English>Import...</English>
@@ -247,8 +418,14 @@
         <Key ID="STR_einv_setup_Import_Title">
             <English>Import a setup</English>
         </Key>
+        <Key ID="STR_einv_setup_Index_Reading">
+            <English>Reading the game's classes - %1 percent done...</English>
+        </Key>
         <Key ID="STR_einv_setup_Items_Apply">
             <English>Apply</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_ApplyTip">
+            <English>Write this size and stack into the setup as a rule for this class. Save at Review puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ApplyTo">
             <English>Apply to</English>
@@ -274,8 +451,14 @@
         <Key ID="STR_einv_setup_Items_FilterMod">
             <English>Filter by this mod</English>
         </Key>
+        <Key ID="STR_einv_setup_Items_Forced">
+            <English>Weapons, uniforms, vests and backpacks never share a tile.</English>
+        </Key>
         <Key ID="STR_einv_setup_Items_Group">
             <English>Group</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Help">
+            <English>Pick an item on the left. On the right, set how many cells it takes and how many share a tile. Apply writes one rule for that class into the setup; Save at Review puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Hidden">
             <English>%1 hidden by the filter</English>
@@ -313,8 +496,14 @@
         <Key ID="STR_einv_setup_Items_PerTile">
             <English>Per tile</English>
         </Key>
+        <Key ID="STR_einv_setup_Items_PickHint">
+            <English>Pick an item on the left to see and set its size.</English>
+        </Key>
         <Key ID="STR_einv_setup_Items_Remove">
             <English>Remove</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_ResetTip">
+            <English>Take this class's own size and stack out of the setup: the preset decides again.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Revert">
             <English>Revert</English>
@@ -331,8 +520,20 @@
         <Key ID="STR_einv_setup_Items_ShowPresets">
             <English>Show weapon presets</English>
         </Key>
+        <Key ID="STR_einv_setup_Items_Takes">
+            <English>%1 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Title">
+            <English>Items: how big each one is</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Unapplied">
+            <English>Not applied yet - Apply writes it into the setup.</English>
+        </Key>
         <Key ID="STR_einv_setup_Items_Variants">
             <English>Include variants</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Weight">
+            <English>%1 kg</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Why">
             <English>Why?</English>
@@ -375,6 +576,36 @@
         </Key>
         <Key ID="STR_einv_setup_Keybind_Open">
             <English>Open inventory setup</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kind_backpack">
+            <English>Backpack</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kind_crate">
+            <English>Crate</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kind_uniform">
+            <English>Uniform</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kind_vehicle">
+            <English>Vehicle</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kind_vest">
+            <English>Vest</English>
+        </Key>
+        <Key ID="STR_einv_setup_List_Cancel">
+            <English>Cancel</English>
+        </Key>
+        <Key ID="STR_einv_setup_List_None">
+            <English>Nothing found</English>
+        </Key>
+        <Key ID="STR_einv_setup_List_OwnOnly">
+            <English>Only classes with own rules</English>
+        </Key>
+        <Key ID="STR_einv_setup_List_PickLike">
+            <English>Pick the class %1 takes its cells from</English>
+        </Key>
+        <Key ID="STR_einv_setup_List_Range">
+            <English>%1-%2 of %3</English>
         </Key>
         <Key ID="STR_einv_setup_Mode_Auto">
             <English>By load</English>

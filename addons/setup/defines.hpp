@@ -20,6 +20,7 @@
 #define DIK_Y 21
 #define DIK_Z 44
 #define DIK_SPACE 57
+#define DIK_F 33
 
 // CT_EDIT and CT_CONTROLS_GROUP, as ctrlType reports them.
 #define CTRL_TYPE_EDIT 2
@@ -68,3 +69,44 @@
 #define ACCENT_HOVER [1, 0.733, 0.29, 1]
 #define DISABLED_FILL [1, 1, 1, 0.035]
 #define DISABLED_INK [1, 1, 1, 0.3]
+
+// ---------------------------------------------------------------------------
+// The Items and Containers steps.
+// ---------------------------------------------------------------------------
+
+// A row of the class index (fnc_buildIndex): the class lowercase and as config names it, what the search
+// looks through (class and name, lowercase), its name, its kind and the family the Items step filters by,
+// its picture, the mod it comes from and what it holds (config mass; 0 for what is no container).
+#define ROW_LC 0
+#define ROW_CLASS 1
+#define ROW_SEARCH 2
+#define ROW_NAME 3
+#define ROW_KIND 4
+#define ROW_FAMILY 5
+#define ROW_PICTURE 6
+#define ROW_MOD 7
+#define ROW_LOAD 8
+
+// Where the index looks, in the order the rules engine does (einv_items_fnc_getFacts).
+#define INDEX_ROOTS ["CfgWeapons", "CfgMagazines", "CfgGlasses", "CfgVehicles"]
+
+// One piece of the index may take this long (s) - the window keeps its frame rate while it is read -, and
+// looks at the clock every INDEX_STRIDE classes.
+#define INDEX_BUDGET 0.006
+#define INDEX_STRIDE 64
+
+// The kinds the Containers step lists: what holds things and has a grid.
+#define CONTAINER_KINDS ["uniform", "vest", "backpack", "crate", "vehicle"]
+
+// Cards on one page of a class list: only those are drawn and asked what the rules make of them.
+#define LIST_PAGE 30
+
+// The ends of the Items step's numbers: an item at most 8 cells down (the rules would take more, the
+// window would not show it well), and a tile holding at most what the rules engine allows (MAX_STACK).
+#define EDIT_ITEM_ROWS 8
+#define EDIT_STACK_MAX 999
+
+// The cell editor (fnc_drawCellEditor): a hole - a cell the compartment does not have - darker than the
+// glass, and a cell or hole under the mouse. A cell takes the theme's buttonHover.
+#define EDIT_HOLE [0, 0, 0, 0.32]
+#define EDIT_HOVER [1, 1, 1, 0.3]

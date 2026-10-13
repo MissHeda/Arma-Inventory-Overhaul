@@ -161,7 +161,7 @@ private _pillW = (_innerW - _gap * (count _steps - 1)) / count _steps;
     ] call FUNC(uiAction);
 
     // A dot on a step holding changes: Start for the preset and the cell size, Review for the statements.
-    private _changed = [false, _headChanged, false, false, _statementsChanged] param [_forEachIndex, false];
+    private _changed = [_headChanged, false, false, false, _statementsChanged] param [_forEachIndex, false];
 
     if (_changed) then {
         private _dotH = WIZ_STEPS_H * 0.26;

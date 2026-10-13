@@ -2797,3 +2797,49 @@ So a uniform, vest or backpack class can be given exactly the cells it has (the 
 - **Caching:** `fnc_getInfo` keeps an answer per class until the rules change; any change, the source's included,
   is a new compile and `fnc_loadRules` empties the whole store - nothing more to do.
 - Built and checked in code only: nothing of this has run in the game yet.
+
+## Wizard: Containers and Items steps (0.4.0) - supersedes the parts above it contradicts
+
+Steps 3 (`items`, `fnc_drawItems`) and 4 (`containers`, `fnc_drawContainers`) are built; Groups is still greyed out.
+Both are a class list on the left (`fnc_drawClassList`, cards by `fnc_drawResults`) and an editor on the right
+(`fnc_drawItemEditor`, `fnc_drawCellEditor`). The design's virtual list, apply scopes, CfgEinvShapes and preview fills
+were not built: one class at a time, one rule per class.
+
+- **Class index (`fnc_buildIndex`, `fnc_indexChunk`):** uiNamespace `einv_setup_index` (HashMap: `rows`, `byClass`,
+  `mods`, reading position, `token`, `tick`, `done`), built once per game session - classes do not change, and it stays
+  out of save games. Read in pieces through `fnc_defer` (Eden too), each until `INDEX_BUDGET` (6 ms) has passed, the
+  clock looked at every `INDEX_STRIDE` (64) entries; a run not seen for 1 s (the window closed and its queue was
+  emptied) is taken over by the next step that asks, the token keeps one reader. Roots as getFacts: CfgWeapons types
+  1/2/4/4096 and 131072 items (uniform 801, vest 701, headgear 605, attachments, rest), CfgMagazines with a picture,
+  CfgGlasses, CfgVehicles with `maximumLoad > 0` (backpacks, `ReammoBox_F` crates, `AllVehicles` but not `CAManBase`);
+  scope 2 only, no `..._Base`, the first root wins a name. Row (`ROW_*`, defines.hpp): lowercase class, configName,
+  search text (class + name, lowercase), displayName, kind, family (weapon, magazine, gear, item, cargo), picture,
+  mod name (`configSourceMod` -> `modParams`), load (a uniform's or vest's from its containerClass). Sorted by name when
+  done. Vanilla with ACE is some thousands of rows; big mod packs tens of thousands - a progress line meanwhile.
+- **List:** search (substring, case-insensitive over class and name, redrawn 0.15 s after the last key, the field keeps
+  focus), kind chips (Containers: all / uniform / vest / backpack / cargo; Items: all / weapon / magazine / gear /
+  item), "only classes with own rules" (any `class=` an own rule names, `fnc_ownClassRules`), pages of `LIST_PAGE`
+  (30). Only the cards shown ask `einv_items_fnc_getInfo [class, draftRules, draftCache]` - the compiled draft Review
+  uses - and say it with `fnc_answerText` ("6x4, 2 holes · own rule", "3 × 1x2 · preset", "like X"). State per step in
+  `einv_setup_listState` `[text, chip, ownOnly, page]`; the class picked in `einv_setup_selection` ("items",
+  "containers"); a class from `fnc_open`'s focus is picked and searched. Ctrl+F focuses the search.
+- **Cell editor:** shows `einv_storage_fnc_blocksFor` of the draft's answer (patterns, auto and cells as the
+  compartments they give - "Editing replaces the pattern with these cells"). Working copy `einv_setup_cellWork`
+  (lowercase class -> `[blocks, picked]`), created by the first edit; a cell click toggles the hole in place (control and
+  total updated, no redraw) unless it is the first change or another compartment; steppers 1-8 across, 1-40 down
+  (holes outside the new size go), add (2x2, 1x1 when little room) and remove. The canvases never hold more places
+  than `MAX_CELLS`; the total line shows cells against 320 and compartments against 24. Apply drops compartments
+  without a cell and writes `grid=` with `einv_items_fnc_formatGrid` (shapes for holes, `WxH` otherwise; the parser
+  trims edge rows and columns of holes). "Like another class" puts the list in picking mode (`einv_setup_likePick`); the
+  pick writes `like=Y` and takes the class's own `grid=` away. Linked (like without own grid) the canvases are
+  read-only until Unlink (takes `like` away). Back to the preset takes `grid` and `like` away.
+- **Items editor:** width 1-8, height 1-8, stack 1-999 (stepper plus 1/5/10/20/50/100), stack off for kinds that never
+  share a tile (src "forced"); working copy `einv_setup_itemWork`. Apply writes only what differs from now
+  (`size=WxH`, `stack=N`); Back to the preset takes `footprint` and `stack` away.
+- **Writing (`fnc_upsertRule [class, set, remove]`):** reads the draft text, merges every rule whose only condition is
+  `class=X` (not `X+`, case-insensitive) into one, sets and removes the fields given, keeps the rest (name, weight,
+  like), appends it as `class=X > ...` at the end - later rules win, so it beats a broader rule further down - and drops
+  it when empty; then `fnc_commit` (undo step, redraw). Class names outside letters, digits and `_` are refused with a
+  hint. Nothing reaches the game before Save. An older table setting still wins over the rules; the editor says so.
+- Also fixed: the "changed" dot of the step pills sat on Groups instead of Start.
+- Built and checked in code only: nothing of this has run in the game yet.

@@ -64,6 +64,10 @@ GVAR(importText) = "";
 GVAR(presetPick) = "";
 GVAR(banner) = false;
 GVAR(hint) = ["", "text2"];
+GVAR(listState) = createHashMap;
+GVAR(cellWork) = createHashMap;
+GVAR(itemWork) = createHashMap;
+GVAR(likePick) = "";
 
 // The draft starts as what is in use there (fnc_getActive). What the source it saves to holds right now
 // is kept beside it: should that change before Save, someone else saved in between (fnc_save).

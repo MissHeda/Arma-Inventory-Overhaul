@@ -69,6 +69,19 @@ GVAR(importText) = "";
 GVAR(banner) = false;
 GVAR(hint) = ["", "text2"];
 
+// The Items and Containers steps: per step ("items", "containers") the list's [search text, chip, own
+// rules only, page] (fnc_drawClassList), and which typing is the last (fnc_drawResults waits for it); the
+// edits not applied yet, by lowercase class - [compartments, picked] (fnc_drawCellEditor) and [w, h,
+// stack] (fnc_drawItemEditor); the container that is picking the class it takes after (like=), "" for
+// none; and the own rules by class, worked out once per draft text (fnc_ownClassRules). The class index
+// itself is in uiNamespace (fnc_buildIndex).
+GVAR(listState) = createHashMap;
+GVAR(searchToken) = 0;
+GVAR(cellWork) = createHashMap;
+GVAR(itemWork) = createHashMap;
+GVAR(likePick) = "";
+GVAR(ownClasses) = [];
+
 // Who and what the inventory showed when the wizard was opened from it, to open it again afterwards
 // (fnc_openFromGame).
 GVAR(reopenInventory) = [];
