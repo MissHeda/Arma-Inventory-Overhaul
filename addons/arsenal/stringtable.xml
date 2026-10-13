@@ -17,7 +17,16 @@
             <English>Let go to take it out</English>
         </Key>
         <Key ID="STR_einv_arsenal_Hint_Idle">
-            <English>Drag to sort - drag out of the panel to remove</English>
+            <English>Drag from the list to add - out of the panel to remove</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_ListCancel">
+            <English>Let go over a free spot of a grid to put it in</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_NotInArsenal">
+            <English>This arsenal does not have it</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_Wheel">
+            <English>Ctrl+wheel over an item: one more or less</English>
         </Key>
         <Key ID="STR_einv_arsenal_Menu_OpenArsenal">
             <English>Open Arsenal</English>
@@ -54,6 +63,18 @@
         </Key>
         <Key ID="STR_einv_arsenal_Setting_BIMessage_Desc">
             <English>Shown under "not allowed" on the red\nscreen - where players get their gear\ninstead, say.\n\nEmpty shows nothing more.</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Staging_Note">
+            <English>%1 items in staging are deleted when you close</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Staging_NoteOne">
+            <English>1 item in staging is deleted when you close</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Staging_Subtitle">
+            <English>emptied when the arsenal closes</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Staging_Title">
+            <English>Staging</English>
         </Key>
         <Key ID="STR_einv_arsenal_SubCategory_Vanilla">
             <English>Vanilla Arsenal</English>

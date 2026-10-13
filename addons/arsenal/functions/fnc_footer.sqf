@@ -3,9 +3,10 @@
 /*
  * Author: Miss Heda
  * The panel's hint line (the "footer" hook), in place of the inventory's footer, which would lie over ACE's
- * menu bar: a strip of the theme's glass under the grid (fnc_layout) with the engine's hint in it - what the
- * mouse is on, what a drag would do, why something did not go (einv_gui_fnc_updateHover,
- * einv_gui_fnc_flashHint). With no panel drawn there is no hint either.
+ * menu bar: a flat dark bar at the bottom of the panel (fnc_layout), as ACE's own bars at the bottom of its
+ * window (fnc_theme, "barBg"), with the engine's hint in it - what the mouse is on, what a drag would do,
+ * why something did not go (einv_gui_fnc_updateHover, einv_gui_fnc_flashHint). With no panel drawn there
+ * is no hint either.
  *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
@@ -31,7 +32,7 @@ if (GVAR(hintRect) isEqualTo []) exitWith {};
 GVAR(hintRect) params ["_left", "_top", "_width", "_height"];
 
 [
-    _display, controlNull, GVAR(hintRect), _theme getOrDefault ["panel", []],
+    _display, controlNull, GVAR(hintRect), _theme getOrDefault ["barBg", _theme getOrDefault ["panel", []]],
     (_theme getOrDefault ["radius", 0]) min (_height / 2)
 ] call EFUNC(gui,uiPanel);
 

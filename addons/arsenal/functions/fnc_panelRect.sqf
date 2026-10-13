@@ -3,12 +3,14 @@
 /*
  * Author: Miss Heda
  * Where the panel stands on ACE Arsenal's display: right beside ACE's list (IDC 15), over the 3D middle, as
- * high as that list - read from the list itself, so it follows the player's interface size and whatever ACE
- * changes about it. As wide as the inventory's grid, STORAGE_COLS cells of the engine's size
- * (einv_gui_fnc_getCell) with the column's padding and scroll bar beside them, at most a third of the screen.
+ * tall as ACE's right side - from the top of the sort bar over the list (IDC 17) down to the bottom of the
+ * list, read from those controls themselves, so it follows the player's interface size and whatever ACE
+ * changes about them. Without a sort bar it starts where the list does. As wide as the inventory's grid,
+ * STORAGE_COLS cells of the engine's size (einv_gui_fnc_getCell) with the column's padding and scroll bar
+ * beside them, at most a third of the screen.
  *
- * It ends above ACE's message line, which runs across the middle near the bottom: ACE's own messages and
- * this panel's "no room" stay readable.
+ * It ends where the list ends, though ACE's message line (IDC 9) begins a little higher: the panel is as
+ * long as the side lists, and a "no room" is said in the panel's own hint line as well.
  *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
@@ -32,11 +34,12 @@ if (isNull _list) exitWith {[]};
 
 (ctrlPosition _list) params ["_listX", "_listY", "", "_listH"];
 
+private _top = _listY;
 private _bottom = _listY + _listH;
-private _message = _display displayCtrl ARSENAL_IDC_MESSAGE;
+private _sort = _display displayCtrl ARSENAL_IDC_SORT;
 
-if (!isNull _message) then {
-    _bottom = _bottom min (((ctrlPosition _message) select 1) - UNIT * PANEL_GAP);
+if (!isNull _sort && {ctrlShown _sort}) then {
+    _top = _top min ((ctrlPosition _sort) select 1);
 };
 
 // The column's own padding on both sides, or on one side and its scroll bar on the other, whichever is
@@ -50,4 +53,4 @@ _width = _width min (safezoneW * PANEL_MAX_SHARE);
 
 private _left = _listX - SQUARE(UNIT * PANEL_GAP) - _width;
 
-[SNAP_X(_left), SNAP_Y(_listY), SNAP_W(_width), SNAP_H(_bottom - _listY)]
+[SNAP_X(_left), SNAP_Y(_top), SNAP_W(_width), SNAP_H(_bottom - _top)]

@@ -7,17 +7,27 @@ PREP(isOver);
 
 // The hook table the inventory's engine is attached with, and the hooks themselves
 PREP(hooks);
+PREP(theme);
 PREP(layout);
 PREP(footer);
 PREP(onFrame);
 PREP(onMouse);
 PREP(onClick);
+PREP(onWheel);
 PREP(onKey);
 PREP(dragCheck);
 PREP(onDrop);
 PREP(menu);
 
-// Taking things out of the open container
+// The staging space under the container's grid
+PREP(staging);
+
+// Dragging an item out of ACE's list, and putting new things in
+PREP(onListPress);
+PREP(listDrag);
+PREP(addTo);
+
+// Taking things out of the open container or the staging space
 PREP(remove);
 PREP(removeKind);
 

@@ -17,9 +17,10 @@ GVAR(shown) = true;
 // ACE's display while it is open - a display, so in uiNamespace.
 uiNamespace setVariable [QGVAR(display), displayNull];
 
-// Where the last build put the panel, [x, y, w, h] on the screen, [] for nowhere; the hint line under its
-// grid; which of the engine's zones is ACE's list (a drop there, or anywhere outside the panel, takes the
-// item out); and the zone the drag stood over, for its hint once ("" for none).
+// Where the last build put the panel, [x, y, w, h] on the screen, [] for nowhere; the hint line at its
+// bottom; which of the engine's zones is ACE's list (a drop there, or anywhere outside the panel, takes the
+// item out); and what the drag stood over, for its hint once ("remove", "cancel" for an item out of ACE's
+// list over no grid, "" for none).
 GVAR(panelRect) = [];
 GVAR(hintRect) = [];
 GVAR(removeZone) = -1;
@@ -36,6 +37,20 @@ GVAR(itemsSeen) = false;
 GVAR(cargoPending) = false;
 GVAR(settleQueued) = false;
 GVAR(dirty) = false;
+
+// The staging space under the container's grid (fnc_staging), a crate of this machine's own while ACE's
+// window is open, and how much lies in it at the last build, for the hint line.
+GVAR(staging) = objNull;
+GVAR(stagingCount) = 0;
+
+// A left press on a row of ACE's list that may yet become a drag of its item, [where, shift] or []
+// (fnc_onMouse, fnc_onFrame); a move into or out of the staging space waited for, to tell ACE,
+// [container, class, count before, until] or [] (fnc_onDrop); where the column stood when Ctrl and the
+// wheel changed a tile, [pixels, until frame] or [] (fnc_onWheel); Ctrl held (fnc_onKey).
+GVAR(listPress) = [];
+GVAR(watch) = [];
+GVAR(scrollHold) = [];
+GVAR(ctrlHeld) = false;
 
 // What of ACE's internals was found missing and said in the RPT already, once each.
 GVAR(missingSaid) = [];

@@ -7,6 +7,10 @@
  * container, shown as ACE's list lit in the loss colour, and the hint line says so once as the drag gets
  * there (fnc_onDrop does it).
  *
+ * An item dragged out of ACE's list (fnc_listDrag) goes in only on a grid of the panel - the open
+ * container's or the staging space's, where the engine's verdict stands as well. Anywhere else there is no
+ * target: let go there, nothing happens, which the hint line says once.
+ *
  * Arguments:
  * 0: The engine's target <ARRAY>
  * 1: What is dragged <HASHMAP>
@@ -22,16 +26,30 @@
  * Public: No
  */
 
-params [["_target", [], [[]]]];
+params [["_target", [], [[]]], ["_entry", createHashMap, [createHashMap]], ["_grid", createHashMap, [createHashMap]]];
 
 private _kind = _target param [0, ""];
+
+if ((_grid getOrDefault ["source", ""]) isEqualTo "aceList") exitWith {
+    if (_kind isEqualTo "grid") exitWith {
+        GVAR(dragZone) = "";
+        nil
+    };
+
+    if (GVAR(dragZone) isNotEqualTo "cancel") then {
+        GVAR(dragZone) = "cancel";
+        [LLSTRING(Hint_ListCancel), "muted"] call EFUNC(gui,showHint);
+    };
+
+    []
+};
 
 if (!(_kind in ["ground", "zone"]) || {GVAR(removeZone) < 0}) exitWith {
     GVAR(dragZone) = "";
     nil
 };
 
-if (GVAR(dragZone) isEqualTo "") then {
+if (GVAR(dragZone) isNotEqualTo "remove") then {
     GVAR(dragZone) = "remove";
     [LLSTRING(Hint_DropRemove), "loss"] call EFUNC(gui,showHint);
 };

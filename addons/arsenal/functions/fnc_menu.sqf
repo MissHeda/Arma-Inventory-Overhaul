@@ -2,8 +2,8 @@
 /*
  * Author: Miss Heda
  * The right click on the panel (the "menu" hook): on a tile, "Remove" takes that tile out of the container
- * (fnc_remove) and "Remove all" every one of its kind (fnc_removeKind). Nothing on free cells or on a tile
- * still on its way somewhere.
+ * (fnc_remove) and "Remove all" every one of its kind there (fnc_removeKind) - in the staging space every
+ * one lying in that. Nothing on free cells or on a tile still on its way somewhere.
  *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
@@ -30,5 +30,9 @@ private _class = _entry getOrDefault ["class", ""];
 
 [
     [LLSTRING(Menu_Remove), [[_gridIndex, _tileIndex], -1, _class], {_this call FUNC(remove)}],
-    [format [LLSTRING(Menu_RemoveAll), [_class] call EFUNC(gui,itemName)], [_class], {_this call FUNC(removeKind)}]
+    [
+        format [LLSTRING(Menu_RemoveAll), [_class] call EFUNC(gui,itemName)],
+        [_class, [objNull, GVAR(staging)] select ((_grid get "container") isEqualTo GVAR(staging))],
+        {_this call FUNC(removeKind)}
+    ]
 ]

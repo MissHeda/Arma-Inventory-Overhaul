@@ -4,10 +4,12 @@
  * Takes every one of a class out of the open uniform, vest or backpack ("Remove all" in a tile's menu):
  * tile after tile, each record first, through the storage (einv_storage_fnc_removeEntry) - read again
  * after each, as taking a weapon out puts its siblings back as new objects. ACE hears of it as of its own
- * removals (fnc_tellAce).
+ * removals (fnc_tellAce). Out of the staging space (fnc_staging) the same way, and ACE is not told -
+ * only the panel is built again.
  *
  * Arguments:
  * 0: Class <STRING>
+ * 1: The staging crate to take it out of, objNull for the open container <OBJECT> (default: objNull)
  *
  * Return Value:
  * Something was taken out <BOOL>
@@ -18,9 +20,15 @@
  * Public: No
  */
 
-params [["_class", "", [""]]];
+params [["_class", "", [""]], ["_from", objNull, [objNull]]];
 
 (call FUNC(selected)) params ["", "_container"];
+
+private _staged = !isNull _from && {_from isEqualTo GVAR(staging)};
+
+if (_staged) then {
+    _container = _from;
+};
 
 private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
 
@@ -55,6 +63,11 @@ if (_after == _before) exitWith {
 };
 
 ["giveBack", _class, objNull, false] call EFUNC(gui,playSound);
+
+if (_staged) exitWith {
+    [] call FUNC(settle);
+    true
+};
 
 [_class, _before, _after] call FUNC(tellAce);
 

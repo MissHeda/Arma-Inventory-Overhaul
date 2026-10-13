@@ -10,6 +10,9 @@
  * Let go, a drag or press that began on the panel is the engine's to end wherever the mouse is - outside
  * the panel that takes the item out (fnc_dragCheck, fnc_onDrop).
  *
+ * A press on ACE's list is noted by the list's own handler (fnc_onListPress); let go anywhere, the note
+ * goes.
+ *
  * Arguments:
  * 0: Pressed (true) or let go (false) <BOOL>
  * 1: Button, 0 left, 1 right <NUMBER>
@@ -29,6 +32,8 @@ params [["_down", true, [true]], ["_button", 0, [0]], ["_mouse", getMousePositio
 private _over = [_mouse] call FUNC(isOver);
 
 if (!_down) exitWith {
+    GVAR(listPress) = [];
+
     if (EGVAR(gui,dragging) || {EGVAR(gui,press) isNotEqualTo []}) exitWith {false};
 
     !_over

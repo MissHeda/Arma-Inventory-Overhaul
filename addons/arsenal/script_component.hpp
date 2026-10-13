@@ -19,6 +19,11 @@
 // The "Remove all" button that empties the open uniform, vest or backpack (IDC_buttonRemoveAll).
 #define ARSENAL_IDC_REMOVE_ALL 40
 
+// The sort bar over the right list (IDC_sortRightTab), whose top the panel starts at, and the 3D area
+// behind everything (IDC_mouseArea), which ACE gives the focus when it opens.
+#define ARSENAL_IDC_SORT 17
+#define ARSENAL_IDC_MOUSE_AREA 0
+
 // The left panel's buttons for uniform, vest and backpack (IDC_buttonUniform, IDC_buttonVest,
 // IDC_buttonBackpack) - what ace_arsenal_currentLeftPanel holds while one of them is open.
 #define ARSENAL_IDC_UNIFORM 2010

@@ -26,6 +26,39 @@
 #define HINT_LINE_H 1.8
 #define HINT_LINE_GAP 0.15
 
+// The panel's title band when ACE shows no sort bar above its list to line it up with, in UNITs.
+#define HEAD_LINE_H 1.1
+
+// ACE's look (ui/RscAttributes.hpp), which the panel takes on (fnc_theme): the background of the right
+// panel's block (blockRightBackground) and its frame (blockRightFrame, an RscFrame in black), the dark
+// bars at the bottom (menuBar's buttons, totalWeight), and the text of the sort bar over the list - a
+// vanilla RscCombo, RobotoCondensed at 5 of ACE's grid units (GRID_H, which ignores the interface size).
+#define ACE_PANEL_BG [0, 0, 0, 0.5]
+#define ACE_PANEL_FRAME [0, 0, 0, 1]
+#define ACE_BAR_BG [0, 0, 0, 0.8]
+#define ACE_TEXT [1, 1, 1, 1]
+#define ACE_FONT "RobotoCondensed"
+#define ACE_GRID_H (pixelH * pixelGridNoUIScale * 0.25)
+#define ACE_TEXT_SIZE (5 * ACE_GRID_H)
+
+// The staging space under the container's grid (fnc_staging): a crate of the game's own, made on this
+// machine only and hidden at the soldier's feet, with a grid of its own. A crate rather than a ground
+// holder: the ground has no grid and no limit (einv_storage_fnc_getBlocks).
+#define STAGING_CLASS "Box_NATO_Support_F"
+#define STAGING_GRID "8x4"
+
+// The share of ACE's list, from its left edge, where a press may become a drag of its row (fnc_onMouse):
+// the list's scroll bar runs along its right edge.
+#define LIST_ROWS_SHARE 0.94
+
+// How long a move into or out of the staging space is waited for before ACE's list is no longer told,
+// in seconds (fnc_onFrame).
+#define WATCH_TIME 3
+
+// The Ctrl keys, for Ctrl and the wheel over a tile (fnc_onKey, fnc_onWheel).
+#define DIK_LCONTROL 29
+#define DIK_RCONTROL 157
+
 
 // ---------------------------------------------------------------------------
 // ACE's own numbers, copied under names of ours (z\ace\addons\arsenal\defines.hpp, ACE 3.21.2)

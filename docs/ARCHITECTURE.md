@@ -2677,34 +2677,67 @@ The own arsenal window is gone (display, catalog, hand-over of ACE's display, lo
 `[Enhanced Arsenal]` button, the Eden menu entry, `einv_arsenal_window`, `quickAddAmount`, `confirmUnique`,
 `einv_arsenal_opened` / `closed`, compat_efak's `arsenalEditing` / `packNew` / `onGivenBack`). ACE Arsenal is the
 arsenal; nothing of ACE is patched. While the uniform, vest or backpack tab of ACE's left bar is open (and the
-unit wears it), a panel right beside ACE's list (IDC 15) shows that one container's grid.
+unit wears it), a panel right beside ACE's list (IDC 15) shows that one container's grid and a staging space.
 
 - **Engine attached, as a guest.** `einv_gui_fnc_attach` runs on ACE's display a frame after
   `ace_arsenal_displayOpened` (driver `"draw3d"`, so Eden too). Two engine changes made that possible: the flag
   hook `guest` (the build sweeps only what it registered, mouse handlers go only on its own groups, the
   display's handlers never answer "taken") and the hook `footer` (replaces `fnc_drawFooter`, like `header`).
-  Hook table (`fnc_hooks`): `guest`, `header` (none), `layout` (`fnc_layout`: `fnc_drawColumn` with the one
-  section, `einv_gui_fnc_drawSection`, column id "storage", always unfolded; ACE's list registered as the zone
-  "remove"), `footer` (`fnc_footer`: a two-line hint strip under the grid), `camera` (none), `keepOpen` (true),
-  `frame`, `mouseDown` / `mouseUp` (`fnc_onMouse`: outside the panel taken, so the engine ignores it), `click`
-  (double, Ctrl and Alt clicks swallowed - no equip or quick move past ACE), `dragCheck` (ground or zone ->
-  the remove zone in the loss colour), `drop`, `ground` (both -> `fnc_remove`), `menu` (Remove, Remove all of
-  this kind), `hint` (the idle line).
-- **Geometry** (`fnc_panelRect`): top of ACE's list, bottom at the list's or above ACE's message line (IDC 9),
-  whichever is higher; width STORAGE_COLS cells of `einv_gui_fnc_getCell` plus the column's padding and scroll bar,
-  at most a third of the screen; the column scrolls when taller.
-- **Keys:** a second KeyDown handler on ACE's display (`fnc_onKey`) hands the engine only R while dragging and
-  Delete over the panel, never while one of ACE's fields has the cursor. ACE's own handler runs untouched.
-- **Mouse:** a press on the panel empties `ace_arsenal_mouseButtonState` (at once and a frame later), and the
-  frame hook keeps it empty while the engine holds something, so ACE's camera does not pan or turn. A button let
-  go where no display event reached the engine ends the drag in the frame hook (`inputMouse 0`).
+  Hook table (`fnc_hooks`): `guest`, `theme` (`fnc_theme`), `header` (none), `layout` (`fnc_layout`: the
+  block, the title band, `fnc_drawColumn` with the container's section and the staging section,
+  `einv_gui_fnc_drawSection`, column id "storage", always unfolded; ACE's list registered as the zone
+  "remove"), `footer` (`fnc_footer`: a two-line hint strip at the bottom of the block), `camera` (none),
+  `keepOpen` (true), `frame`, `mouseDown` / `mouseUp` (`fnc_onMouse`: outside the panel taken, so the engine
+  ignores it), `click` (double, Ctrl and Alt clicks swallowed - no equip or quick move past ACE), `wheel`
+  (`fnc_onWheel`), `dragCheck`, `drop`, `ground` (both -> `fnc_remove`), `menu` (Remove, Remove all of this
+  kind), `hint` (the idle line: what the panel does, then the staging note or the Ctrl+wheel hint).
+- **ACE's look** (`fnc_theme`, this display only - the inventory and kit windows keep Glass; the id stays, so
+  column scrolls survive builds): `radius` 0, `panel` `[0,0,0,0.5]` (ACE's block), `panelBorder` black, `text`
+  white, own keys `barBg` `[0,0,0,0.8]` (ACE's bottom bars: the hint strip), `headFont` / `headSize`
+  (`RobotoCondensed`, 5 `GRID_H`: ACE's sort bar). Tiles unchanged (Glass counts are text). `fnc_layout`: one
+  flat framed block, the container's name in the band beside ACE's sort bar, a black line where the list
+  begins, the column without a background.
+- **Geometry** (`fnc_panelRect`): top at ACE's sort bar (IDC 17, else the list's top), bottom at the list's
+  bottom; width STORAGE_COLS cells of `einv_gui_fnc_getCell` plus padding and scroll bar, at most a third of
+  the screen; the column scrolls when taller. The title band is as tall as the sort bar.
+- **Staging space** (`fnc_staging`): `Box_NATO_Support_F` by `createVehicleLocal` at the first draw (local
+  `ace_arsenal_center` only), hidden, no simulation, emptied, at the unit's feet, `einv_grid` "8x4",
+  `einv_noSearch`, `einv_storage_localOnly` (a crate: the ground has no grid). Storage's `fnc_isLocalRoot` takes
+  `localOnly` objects as local (they never change hands, the hub cannot see them), so moves between the
+  container (root the player) and staging (own root) run here with the normal reach, lock and verify checks.
+  Section id "staging", side "own", subtitle beside its tab. Moves are the engine's; `fnc_onDrop` notes
+  `einv_arsenal_watch` [container, class, count, until] and the frame hook calls `fnc_syncAce` + `fnc_tellAce`
+  once the count changed (`WATCH_TIME` s at most). `fnc_remove` / `fnc_removeKind` take staging tiles too (no
+  ACE event). `fnc_onClosed` deletes it with its contents; meanwhile the idle hint counts what lies there.
+- **Drag out of ACE's list.** The list's own `MouseButtonDown` handler (`fnc_onListPress`; the display's may
+  miss presses on ACE's controls) notes a left press on its rows (not the scroll bar's 6 %). The frame hook
+  starts a drag once the mouse moved more than `DRAG_THRESHOLD` and more across than along; else it stays
+  ACE's click. `fnc_listDrag`: `lnbCurSelRow`, `lnbData [row, 0]`, not `lnbValue [row, 2]` 1 (unique), a virtual
+  off-screen source grid `"aceList"` whose tile's `dragEntry` has `count` = the stack (Shift: all), then
+  `einv_gui_press` and `einv_gui_fnc_startDrag`. `fnc_dragCheck`: only a grid is a target (else `[]`).
+  `fnc_onDrop` -> `fnc_addTo [container, class, count, [col, row, block, w, h]]`: `normalize`, then
+  `addItemToUniform` / `Vest` / `Backpack` for the open container, `addNew` for staging and what the engine
+  refused, the cell as a new record (`setPlace`); then `syncAce` + `tellAce` (staging: a settle).
+- **Wheel.** During a list drag the engine's wheel sets the count, 1 to the stack, on the ghost
+  (`einv_gui_fnc_onMouseZ`; no counter for non-stacking items). Else `fnc_onWheel`: plain is the column's
+  scroll; Ctrl over a tile adds one of its class (`fnc_addTo`, if in `ace_arsenal_virtualItemsFlat`) or takes
+  one out (`fnc_remove`), the column's scroll held three frames. Ctrl is tracked in `fnc_onKey` (KeyDown, KeyUp).
+- **Keys and mouse:** `fnc_onKey` hands the engine only R while dragging and Delete over the panel, never while
+  a field has the cursor. A press on the panel empties `ace_arsenal_mouseButtonState` (now and a frame later),
+  the frame hook keeps it empty while something is held or a list press waits, and ends a drag whose button
+  came up where no display event reached the engine (`inputMouse 0`).
+- **Hint z-order.** The name at the mouse is made last at every build (`einv_gui_fnc_drawTopLayer`), above
+  ACE's controls; the focus put it under: the engine draws the focused control over all, and a row click
+  focuses the list (ACE and `fnc_ungrey` create or raise nothing). The frame hook gives the focus to ACE's 3D
+  area (IDC 0, ACE's own on open) while the mouse is over the panel with no button held or a drag is on,
+  unless a field (2) or sort bar (4) has it; `fnc_listDrag` does it as the ghost starts.
 
 Events (all registered in preInit, so Eden has them):
 
 | Event | Does |
 |---|---|
-| `ace_arsenal_displayOpened` | `fnc_onOpened`: state reset, KeyDown and list LBSelChanged handlers, attach a frame later (one more frame if the inventory is still closing) |
-| `ace_arsenal_displayClosed` | `fnc_onClosed`: `einv_gui_fnc_onUnload`, state reset, BI helper deleted, `fnc_reportOverflow` a frame later (not Eden) |
+| `ace_arsenal_displayOpened` | `fnc_onOpened`: state reset, KeyDown / KeyUp and the list's LBSelChanged / MouseButtonDown handlers, attach a frame later (one more frame if the inventory is still closing) |
+| `ace_arsenal_displayClosed` | `fnc_onClosed`: `einv_gui_fnc_onUnload`, state reset, BI helper and staging crate deleted a frame later, `fnc_reportOverflow` a frame later (not Eden) |
 | `ace_arsenal_cargoChanged` | `fnc_onCargoChanged`: what of an add did not land (engine refused by `maximumLoad`) is put in with `einv_storage_fnc_addNew` while there is a free spot; flags the frame-later pass |
 | `ace_arsenal_itemsChanged` | `fnc_onItemsChanged`: for the open container's tab `fnc_reconcile` at once (before ACE greys its list) |
 | `leftPanelFilled`, `rightPanelFilled`, `loadoutImported`, `onLoadoutLoad`, `showToggle` | `fnc_settle` a frame later |
@@ -2716,9 +2749,9 @@ Events (all registered in preInit, so Eden has them):
   1x2 space" in ACE's message line and the hint strip (`fnc_sayNoRoom`), ACE told with
   `ace_arsenal_fnc_fireItemsChangedEvent` (`fnc_tellAce`; without it the follow-up is called directly). An ACE
   without `itemsChanged` gets the same follow-up in the frame-later pass.
-- **Remove path.** Drop outside the panel, Delete, or the menu: `fnc_remove` (the record first when the whole
-  tile goes, then `removeEntry` with the dragged count) or `fnc_removeKind`; sound "giveBack" (UI only), then
-  `fnc_tellAce`. A move inside the panel is the engine's normal place move (and stacking).
+- **Remove path.** Drop outside the panel, Delete, the menu or Ctrl+wheel down: `fnc_remove` (the record first
+  when the whole tile goes, then `removeEntry` with the dragged count) or `fnc_removeKind`; sound "giveBack"
+  (UI only), then `fnc_tellAce`. A move inside the panel is the engine's normal place move (and stacking).
 - **Frame-later pass** (`fnc_settle`, once a frame): fallback follow-up, snapshot, `fnc_syncAce` (row counts,
   load bar, `ace_arsenal_currentItems`, `ace_arsenal_fnc_updateRightPanel`), `fnc_ungrey` (rows ACE greyed by
   weight lit again where a stack has room or a spot of that size is free, one grid look per item size; the
@@ -2731,12 +2764,18 @@ Events (all registered in preInit, so Eden has them):
   inventory's "Open Arsenal" (ACE's `openBox`, or BI's function for a vanilla box). Storage keeps `addNew`,
   `makePayload`, `countClass` and the loadout places (`CBA_loadoutGet` / `Set`), which ACE's loadouts carry.
 - **Known limits.** Picking another uniform, vest or backpack in ACE's left list goes through `setUnitLoadout`:
-  the containers are new objects and their arrangement starts first-fit. ACE Arsenal Extended's option panel
-  stands where this panel does. Rows ACE leaves lit but the grid cannot take are not greyed (the add is taken
-  back with the message). The undo is after the fact: other mods see ACE's add and then the removal. ACE
-  internals read: IDCs 9, 15, 102, 701, `currentLeftPanel`, `currentItems`, `mouseButtonState`, the row alpha
-  of `updateRightPanel`.
-- Built and checked in code only: nothing of the panel has run in the game yet.
+  the containers are new objects and their arrangement starts first-fit (the staging space keeps its items).
+  ACE Arsenal Extended's option panel stands where this panel does. Rows ACE leaves lit but the grid cannot
+  take are not greyed (the add is taken back with the message). The undo is after the fact: other mods see
+  ACE's add and then the removal; adds from the list or the wheel raise `itemsChanged` but not ACE's
+  `cargoChanged`. The panel's bottom reaches into the top of ACE's message line (B-25 to B-20 grid units), so a
+  long ACE message can be partly under it. A press below the last row of ACE's list drags the row picked
+  before. After the mouse was over the panel, ACE's list has lost the focus: its arrow keys work again after a
+  click on it. ACE internals read: IDCs 0, 15, 17, 102, 701, `currentLeftPanel`, `currentItems`,
+  `mouseButtonState`, `virtualItemsFlat`, the row data (`lnbData [row, 0]`, `lnbValue [row, 2]`) and the row
+  alpha of `updateRightPanel`.
+- Built and checked in code only: the first version ran in the game (owner's screenshots); the ACE look,
+  staging, list drag, wheel and focus rule have not.
 
 ## Backpack slot (0.4.0) - supersedes the parts above it contradicts
 

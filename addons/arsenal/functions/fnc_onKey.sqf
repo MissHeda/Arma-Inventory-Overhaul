@@ -8,12 +8,17 @@
  * is taken out - the engine's Delete ends in the "ground" hook, fnc_remove). Nothing while a field of
  * ACE's has the cursor.
  *
+ * Whether Ctrl is held is noted with every key, pressed or let go (also by the display's KeyUp handler,
+ * fnc_onOpened): the wheel's event does not say it, and Ctrl with the wheel over a tile adds or takes out
+ * one (fnc_onWheel).
+ *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
  * 1: Key (DIK code) <NUMBER>
  * 2: Shift <BOOL>
  * 3: Ctrl <BOOL>
  * 4: Alt <BOOL>
+ * 5: Pressed (true) or let go (false) <BOOL> (default: true)
  *
  * Return Value:
  * Handled <BOOL>
@@ -26,7 +31,16 @@
 
 disableSerialization;
 
-params [["_display", displayNull, [displayNull]], ["_key", 0, [0]], ["_shift", false, [false]], ["_ctrl", false, [false]], ["_alt", false, [false]]];
+params [
+    ["_display", displayNull, [displayNull]], ["_key", 0, [0]], ["_shift", false, [false]], ["_ctrl", false, [false]],
+    ["_alt", false, [false]], ["_down", true, [true]]
+];
+
+private _isCtrl = _key in [DIK_LCONTROL, DIK_RCONTROL];
+
+GVAR(ctrlHeld) = [_ctrl && {!_isCtrl}, _ctrl || {_isCtrl}] select _down;
+
+if (!_down) exitWith {false};
 
 if (!GVAR(attached) || {(uiNamespace getVariable [QEGVAR(gui,display), displayNull]) isNotEqualTo _display}) exitWith {false};
 

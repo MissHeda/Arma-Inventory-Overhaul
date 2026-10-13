@@ -9,8 +9,10 @@
  * engine on ACE's display, on top of ACE's own controls, and goes with it.
  *
  * ACE's keys stay ACE's: the display gets one more key handler (fnc_onKey) that hands the engine R while
- * something is dragged and Delete over the panel, nothing else. A new row picked in ACE's list has its
- * "+" looked at again by the grid a frame later (fnc_ungrey), after ACE's own look by weight.
+ * something is dragged and Delete over the panel, nothing else, and notes Ctrl - pressed there and let go
+ * in a KeyUp handler - for Ctrl and the wheel (fnc_onWheel). A new row picked in ACE's list has its
+ * "+" looked at again by the grid a frame later (fnc_ungrey), after ACE's own look by weight, and a
+ * press on the list is noted, as it may become a drag of the row's item into the panel (fnc_onListPress).
  *
  * Another window of the engine still open (the inventory, closing for this one) is waited for one frame
  * more; then the panel stays away, with one line in the RPT.
@@ -45,14 +47,27 @@ GVAR(itemsSeen) = false;
 GVAR(cargoPending) = false;
 GVAR(dirty) = false;
 GVAR(dragZone) = "";
+GVAR(listPress) = [];
+GVAR(watch) = [];
+GVAR(scrollHold) = [];
+GVAR(ctrlHeld) = false;
+GVAR(stagingCount) = 0;
 
 _display displayAddEventHandler ["KeyDown", {_this call FUNC(onKey)}];
+_display displayAddEventHandler ["KeyUp", {(_this + [false]) call FUNC(onKey)}];
 
 private _list = _display displayCtrl ARSENAL_IDC_LIST;
 
 if (!isNull _list) then {
     _list ctrlAddEventHandler ["LBSelChanged", {
         [{_this call FUNC(ungrey)}, [ctrlParent (_this select 0), true]] call EFUNC(gui,later);
+    }];
+
+    // A press there may become a drag of its row's item into the panel (fnc_onListPress, fnc_listDrag).
+    _list ctrlAddEventHandler ["MouseButtonDown", {
+        params ["_list", "_button", "", "", ["_shift", false]];
+
+        [_list, _button, _shift] call FUNC(onListPress);
     }];
 };
 

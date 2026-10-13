@@ -8,6 +8,9 @@
  * what is in it). ACE hears of it as of its own removals (fnc_tellAce), which keeps its counts, load bar
  * and greyed rows right.
  *
+ * A tile of the staging space (fnc_staging) goes the same way and is gone; ACE is not told, as nothing of
+ * the soldier's changed - only the panel is built again.
+ *
  * Only on ACE's own unit where it is local, as ACE's own buttons work; never for a tile still on its way
  * somewhere.
  *
@@ -38,8 +41,10 @@ private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNul
 
 (call FUNC(selected)) params ["", "_open"];
 
+private _staged = !isNull _container && {_container isEqualTo GVAR(staging)};
+
 if (
-    count _entry == 0 || {isNull _container} || {_container isNotEqualTo _open} || {!local _center}
+    count _entry == 0 || {isNull _container} || {_container isNotEqualTo _open && {!_staged}} || {!local _center}
     || {_entry getOrDefault ["pending", false]}
 ) exitWith {false};
 
@@ -62,6 +67,11 @@ if (_payload isEqualTo []) exitWith {
 };
 
 ["giveBack", _class, objNull, false] call EFUNC(gui,playSound);
+
+if (_staged) exitWith {
+    [] call FUNC(settle);
+    true
+};
 
 [_class, _before, [_container, _class] call EFUNC(storage,countClass)] call FUNC(tellAce);
 

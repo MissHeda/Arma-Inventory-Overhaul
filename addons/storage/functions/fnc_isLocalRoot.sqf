@@ -3,8 +3,10 @@
  * Author: Miss Heda
  * Whether a phase on a root runs on this machine at once, without the hub: in single player and in Eden
  * always; in multiplayer only on this machine's own player unit - its owner never changes while the
- * player is connected - and, on the server, for objNull (ground work). Everything else goes through the
- * hub, also on the hosting player's machine and for a unit remote controlled with Zeus.
+ * player is connected -, an object made on this machine only and marked so (einv_storage_localOnly, the
+ * Arsenal's staging space: the hub could not even see it), and, on the server, for objNull (ground work).
+ * Everything else goes through the hub, also on the hosting player's machine and for a unit remote
+ * controlled with Zeus.
  *
  * Arguments:
  * 0: Root <OBJECT>
@@ -25,6 +27,10 @@ if (!isMultiplayer) exitWith {true};
 
 // The ground and anything else only the server does.
 if (isNull _root) exitWith {isServer};
+
+// An object made with createVehicleLocal exists on this machine alone and never changes hands. The mark
+// is set where it is made, never sent anywhere.
+if (_root getVariable [QGVAR(localOnly), false]) exitWith {local _root};
 
 // Locality can be true on two machines for a moment while a root changes hands (the engine tells the old
 // and the new owner separately), so only a root that never changes hands takes the short way: this
