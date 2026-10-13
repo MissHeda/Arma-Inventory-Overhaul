@@ -19,5 +19,6 @@ private _controls = uiNamespace getVariable [QGVAR(menu), []];
 
 {ctrlDelete _x} forEach _controls;
 uiNamespace setVariable [QGVAR(menu), []];
+uiNamespace setVariable [QGVAR(menuRect), []];
 
 _controls isNotEqualTo []

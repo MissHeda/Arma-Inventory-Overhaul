@@ -4,8 +4,9 @@
  * Author: Miss Heda
  * Shows, the moment something is lifted, what it would add to the soldier: when the item comes from outside
  * his own gear - another container, a body, a catalog - the weight card gets a preview of the weight it
- * would add, in the colour of the tier it would put him in. Weight limits no container, so nothing else
- * is marked: the cells alone decide where it fits.
+ * would add, as a lighter segment after the fill in the colour of the tier it would put him in
+ * (fnc_weightColor). Weight limits no container, so nothing else is marked: the cells alone decide where
+ * it fits.
  *
  * Called at lift with create true (fnc_startDrag; the preview is made before the ghost, which has to stay
  * the last control made) and again after every change of count (fnc_onMouseZ), when it only moves and
@@ -62,15 +63,14 @@ if (count _bar > 0 && {_external}) then {
     private _limits = _bar get "limits";
     private _load = _bar get "load";
     private _end = (_limits get "critical") max 1;
-    private _tier = [_bar get "unit", _load + _need] call EFUNC(weight,getTier);
-
     (_bar get "rect") params ["_barX", "_barY", "_barW", "_barH"];
 
     private _from = (_load / _end) min 1;
     private _to = ((_load + _need) / _end) min 1;
     private _rect = [_barX + _barW * _from, _barY, (_barW * (_to - _from)) max pixelW, _barH];
 
-    private _color = _theme getOrDefault [["text", "warn", "loss", "loss"] select _tier, [1, 1, 1, 1]];
+    // The colour the fill would have with it, lighter: no mark on the bar, the segment says how far it goes.
+    private _color = [_bar get "unit", _load + _need, _theme] call FUNC(weightColor);
     _color = [_color select 0, _color select 1, _color select 2, PREVIEW_ALPHA];
 
     private _preview = uiNamespace getVariable [QGVAR(weightPreview), controlNull];

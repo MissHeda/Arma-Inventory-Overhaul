@@ -21,7 +21,7 @@
  * uniform, vest or backpack lying there (fnc_openNested) - anything else is selected as everywhere. The
  * hint names both while the mouse is on such a tile (fnc_updateHover).
  * Shift held while pressing a stack drags half of it. A right click opens the item's context menu
- * (fnc_contextMenu). Selecting works in the inventory only (fnc_isInventoryMode): where other windows
+ * (fnc_contextMenu) - with another menu open, beside it, it closes that one and opens the new one at once. Selecting works in the inventory only (fnc_isInventoryMode): where other windows
  * attach, Ctrl+click moves a tile over as before.
  *
  * A window that attached with hooks (fnc_attach) is asked first: "mouseDown" and "mouseUp" before the right
@@ -137,8 +137,23 @@ if (_layer isEqualTo "inspect") exitWith {
     false
 };
 
-// An open context menu takes the clicks itself (fnc_openMenu).
-if ((uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo []) exitWith {false};
+// An open context menu takes the clicks itself (fnc_openMenu) - except a right press beside it: that one
+// closes the menu and goes on as the right click it is, so the menu of the tile under the mouse opens in
+// the same go (on empty space nothing opens, and the menu is just closed). The menu's own rows keep it.
+private _menuOpen = (uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [];
+
+if (_menuOpen && {_down} && {_button == 1}) then {
+    (uiNamespace getVariable [QGVAR(menuRect), [0, 0, 0, 0]]) params ["_menuX", "_menuY", "_menuW", "_menuH"];
+
+    private _onMenu = _clickX >= _menuX && {_clickX < _menuX + _menuW} && {_clickY >= _menuY} && {_clickY < _menuY + _menuH};
+
+    if (!_onMenu) then {
+        call FUNC(closeMenu);
+        _menuOpen = false;
+    };
+};
+
+if (_menuOpen) exitWith {false};
 
 // A window that attached may take the button first - the Arsenal's camera turns with the right one.
 private _taken = if (_down) then {

@@ -214,7 +214,7 @@ private _fnc_forecast = {
 
     if (_newTier <= _tier) exitWith {[]};
 
-    [[[_need, _newTier, _load + _need] call FUNC(weightText), ["text2", "warn", "loss", "loss"] select _newTier]]
+    [[[_need, _newTier, _load + _need] call FUNC(weightText), ["text2", "accent", "loss", "loss"] select _newTier]]
 };
 
 // Where it would land: the first that applies - the hotbar, one of the player's slots, a grid (and a kit's tile

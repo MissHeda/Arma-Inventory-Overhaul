@@ -46,7 +46,7 @@ switch (_kind) do {
         ([_tier, _limits] call EFUNC(weight,tierText)) params ["_word", "_effect"];
 
         private _loadKg = [_load] call _fnc_kg;
-        private _colors = ["text2", "warn", "loss", "loss"];
+        private _colors = ["text2", "accent", "loss", "loss"];
         private _parts = [[
             [format [LLSTRING(Tier_Now), _loadKg, _word], format [LLSTRING(Tier_NowDesc), _loadKg, _word, _effect]] select (_effect isNotEqualTo ""),
             _colors select _tier
@@ -63,7 +63,7 @@ switch (_kind) do {
                     _key
                 ];
             };
-        } forEach [[TIER_HEAVY, "warn", "heavyKg"], [TIER_OVERLOADED, "loss", "overloadedKg"], [TIER_CRITICAL, "loss", "criticalKg"]];
+        } forEach [[TIER_HEAVY, "accent", "heavyKg"], [TIER_OVERLOADED, "loss", "overloadedKg"], [TIER_CRITICAL, "loss", "criticalKg"]];
 
         _parts
     };

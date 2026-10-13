@@ -2882,3 +2882,23 @@ were not built: one class at a time, one rule per class.
   hint. Nothing reaches the game before Save. An older table setting still wins over the rules; the editor says so.
 - Also fixed: the "changed" dot of the step pills sat on Groups instead of Start.
 - Built and checked in code only: nothing of this has run in the game yet.
+
+## Window details (0.4.0) - supersedes the parts above it contradicts
+
+Three fixes from the owner's test of the window; none of it has run in the game yet.
+
+- **Right click with a menu open.** `fnc_openMenu` keeps the menu's rectangle (`uiNamespace menuRect`, cleared by `fnc_closeMenu`).
+  In `fnc_onMouseButton` a right press beside the open menu closes it and then goes on as an ordinary right click, so the menu of
+  the tile or slot under the mouse opens in the same go; on empty space nothing opens, the menu is just closed. A press on the menu
+  itself and every left press are still the menu's. The ACE Arsenal panel needs nothing of its own: its `mouseDown` hook lets the
+  press through over the panel and its `menu` hook answers as before.
+- **Weight card.** The bar has no tick marks and no zone strip any more (the theme keys `zoneWarn` / `zoneLoss` are gone). It fills by
+  load over the Critical limit; the fill, the tier text and the preview of a pick-up take `fnc_weightColor`: `text2` in Light, `accent`
+  in Heavy, `loss` in Overloaded and Critical, blending into the next tier's colour over the last 6 % of the bar before its limit.
+  The right-hand text is the tier and its effect ("Heavy · jogging tires you", from `einv_weight_fnc_tierText`), the left one the load
+  and where the next tier starts ("12.4 kg · Heavy at 26.7 kg", `Load_Next` replaces `Load_Limit`; nothing at Critical). On a narrow
+  column the next limit goes first, then the effect. The hints use `accent` for Heavy as well.
+- **Counts on white pictures.** A count or a magazine's "17/17" drawn over a tile's picture stands on a small dark pill
+  (`fnc_drawCountBackdrop`: `tileCountBg`, now `[0.03, 0.03, 0.03, 0.75]` and used by the "text" count style too; `[]` means none),
+  round-ended in a round theme, in the corner the text sat in and sized for the widest text the label can show, since a repack writes
+  the rounds live. Slots with a count (`fnc_drawSlot`) get the same. The "pill" and "badge" styles keep their own boxes.

@@ -16,7 +16,8 @@
  * fnc_getLayout) it turns along (fnc_uiPictureTurned); what is on a weapon shows only upright.
  *
  * How the count shows (theme "tileCount"):
- *   "text"  - plain words in the bottom right corner (Tarkov)
+ *   "text"  - words in the bottom right corner, on a dark pill of their own so that they read on a white
+ *             picture too (tileCountBg, fnc_drawCountBackdrop); plain words where the theme has none
  *   "pill"  - on a box in the bottom right corner, with round ends where the theme has round corners
  *             and square in a square look
  *   "badge" - on a square badge in the bottom left corner, flush with the tile's edges
@@ -248,10 +249,35 @@ if (_hidden) then {
             _entry set ["amount", _label];
         };
         default {
-            private _label = [
-                _display, _parent, [_left + _padX, _bottom - _padY * 0.3 - _textH * 1.15, _innerW, _textH * 1.15], _amount, _textH,
-                _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _amountFont, 1
-            ] call FUNC(uiLabel);
+            // The words stand on a dark pill of their own (fnc_drawCountBackdrop): on a white picture - a vial,
+            // a bandage - white text vanishes. It ends where the text did, in the bottom right corner, and is
+            // sized for the widest the text gets: a repack of magazines writes the rounds live into the same
+            // label (einv_magazines_fnc_drawJob), up to the capacity.
+            private _widest = [_amount, [format ["%1/%1", _capacity], str _capacity] select _shortened] select (_capacity > 1);
+
+            if ((_widest getTextWidth [_amountFont, _textH]) < (_amount getTextWidth [_amountFont, _textH])) then {
+                _widest = _amount;
+            };
+
+            private _backdrop = [
+                _display, _parent, _widest, _amountFont, _textH, _left + _width - _padX, _bottom - _padY * 0.3, _innerW, _theme
+            ] call FUNC(drawCountBackdrop);
+
+            _backdrop params ["_backdropControls", "_backdropRect"];
+
+            _controls append _backdropControls;
+
+            private _label = if (_backdropRect isEqualTo []) then {
+                [
+                    _display, _parent, [_left + _padX, _bottom - _padY * 0.3 - _textH * 1.15, _innerW, _textH * 1.15], _amount, _textH,
+                    _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _amountFont, 1
+                ] call FUNC(uiLabel)
+            } else {
+                [
+                    _display, _parent, _backdropRect, _amount, _textH,
+                    _theme getOrDefault ["tileCountColor", [0.925, 0.933, 0.949, 1]], _amountFont, 2
+                ] call FUNC(uiLabel)
+            };
 
             _controls pushBack _label;
             _entry set ["amount", _label];

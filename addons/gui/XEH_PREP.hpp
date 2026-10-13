@@ -154,6 +154,7 @@ PREP(cameraStop);
 PREP(previewWeight);
 PREP(clearWeightPreview);
 PREP(weightText);
+PREP(weightColor);
 PREP(dragHint);
 PREP(infoHint);
 PREP(isOwnStorage);
@@ -192,6 +193,7 @@ PREP(tileAt);
 
 // Building blocks the layouts share
 PREP(drawSlot);
+PREP(drawCountBackdrop);
 PREP(drawColumn);
 PREP(drawHeader);
 PREP(drawFooter);

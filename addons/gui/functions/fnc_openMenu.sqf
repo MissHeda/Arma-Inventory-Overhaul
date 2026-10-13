@@ -3,8 +3,10 @@
 /*
  * Author: Miss Heda
  * Opens a context menu at the mouse: a card with a row per choice. A click on a row closes the menu and
- * runs its code; a click anywhere else only closes it (a hit area over the whole screen, under the
- * menu). Kept on the screen whatever corner the mouse is in.
+ * runs its code; a left click anywhere else only closes it (a hit area over the whole screen, under the
+ * menu). A right click beside the menu closes it as well, but is then worked out as a right click of its
+ * own (fnc_onMouseButton), so that the next tile's menu opens in the same go. Kept on the screen whatever
+ * corner the mouse is in.
  *
  * A choice may bring options as a fourth element, a HashMap - the options of other mods' context menus
  * (fnc_cbaOptions) use them:
@@ -151,3 +153,6 @@ _controls append ([
 } forEach _choices;
 
 uiNamespace setVariable [QGVAR(menu), _controls];
+
+// Where it lies, so that a right click on it is told from one beside it (fnc_onMouseButton).
+uiNamespace setVariable [QGVAR(menuRect), [_left, _top, _width, _height]];
