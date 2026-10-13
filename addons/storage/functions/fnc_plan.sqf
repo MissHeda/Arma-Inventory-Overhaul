@@ -61,7 +61,8 @@ private _fnc_isLifted = {
 // A target as the planning sees it, made when the first item asks for it:
 //   ["ground"]  or  ["none"] for a holder that is neither the ground nor a container
 //   ["grid", holder, root, blocks, open, taken, isBackpack]
-// taken is per compartment a list of rows of booleans, true where something lies; rows past the end are free.
+// taken is per compartment a list of rows of booleans, true where something lies or a shaped compartment
+// has a hole; rows past the end are free.
 // ---------------------------------------------------------------------------
 private _states = _targets apply {[]};
 
@@ -130,7 +131,8 @@ private _fnc_state = {
         private _blocks = _layout get "blocks";
         private _open = ([_holder] call FUNC(getBlocks)) isEqualTo [];
 
-        _state = ["grid", _holder, _root, _blocks, _open, _blocks apply {[]}, getNumber (configOf _holder >> "isBackpack") == 1];
+        // A shaped compartment's holes are taken from the start (fnc_seedTaken).
+        _state = ["grid", _holder, _root, _blocks, _open, [_blocks] call FUNC(seedTaken), getNumber (configOf _holder >> "isBackpack") == 1];
 
         // What lies there, less what is lifted away: its cells are taken.
         {

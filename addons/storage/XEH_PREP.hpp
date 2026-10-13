@@ -115,4 +115,5 @@ PREP(onLoadoutSet);
 // Compartments
 PREP(blocksFor);
 PREP(getBlocks);
+PREP(seedTaken);
 PREP(hasSpace);

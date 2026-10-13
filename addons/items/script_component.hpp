@@ -29,6 +29,11 @@
 // The grid patterns a container can be laid out by (grid=rig, ...), see einv_storage_fnc_blocksFor.
 #define GRID_PATTERNS ["pockets", "pockets_mixed", "rig", "mixed", "plate", "long", "single", "wide"]
 
+// What like=CLASS takes from that class (fnc_resolve) - everything but its name - and how many like=
+// one item may follow, one after the other, before it gives up.
+#define LIKE_FIELDS ["footprint", "stack", "grid", "weight"]
+#define LIKE_DEPTH 8
+
 // Limits on what a text may ask for. A rules text travels to every machine and is read on each, so
 // a pasted mistake must stay cheap: statements past the limit, longer OR lists and texts over the
 // size limit are left out, with a warning in the RPT.

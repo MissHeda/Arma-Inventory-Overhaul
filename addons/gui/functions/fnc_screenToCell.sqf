@@ -3,11 +3,13 @@
  * Author: Miss Heda
  * The cell of a grid at a point on the screen. The one place that turns screen positions into cells -
  * hovering, and later dragging and dropping, all go through here, so scrolling only has to be taken
- * into account once (fnc_gridOrigin).
+ * into account once (fnc_gridOrigin). A hole of a shaped compartment is no cell: nothing to hover or
+ * click there - only a drag still finds the grid over one, so its footprint shows red (fnc_updateDrag).
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>
  * 1: Point on the screen, [x, y] - getMousePosition <ARRAY>
+ * 2: A hole counts as a cell <BOOL> (default: false)
  *
  * Return Value:
  * [column, row], or [] when the point is not on the grid <ARRAY>
@@ -20,7 +22,7 @@
 
 disableSerialization;
 
-params ["_grid", "_point"];
+params ["_grid", "_point", ["_holesToo", false]];
 _point params ["_pointX", "_pointY"];
 
 // A row scrolled out of its column is not under the mouse, even where it would lie: the point has to
@@ -45,5 +47,6 @@ private _col = floor ((_pointX - _originX) / (_grid get "cellW"));
 private _row = floor ((_pointY - _originY) / (_grid get "cellH"));
 
 if (_col < 0 || {_row < 0} || {_col >= _grid get "cols"} || {_row >= _grid get "rows"}) exitWith {[]};
+if (!_holesToo && {[_grid, _col, _row] call FUNC(hitsHole)}) exitWith {[]};
 
 [_col, _row]

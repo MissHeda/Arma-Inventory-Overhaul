@@ -784,6 +784,12 @@
         <Key ID="STR_einv_setup_Value_GridPercent">
             <English>grid of %1 percent of its load</English>
         </Key>
+        <Key ID="STR_einv_setup_Value_GridShape">
+            <English>%1×%2 shaped, %3 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Like">
+            <English>like %1</English>
+        </Key>
         <Key ID="STR_einv_setup_Value_Mass">
             <English>sized by mass</English>
         </Key>

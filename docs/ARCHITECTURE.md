@@ -2757,3 +2757,43 @@ of its own next to the vest, where it is put on, taken off or swapped. Its conte
   (`fnc_updateDrag`): a backpack let go anywhere there now lights the gear slot, also while none is worn (before,
   no slot existed then and the faint whole-column footprint showed). The loot bodies' doll is unchanged.
 - Built and checked in code only: nothing of this has run in the game yet.
+
+## Shaped grids and like= (0.4.0) - supersedes the parts above it contradicts
+
+So a uniform, vest or backpack class can be given exactly the cells it has (the wizard's cell editor writes them).
+
+- **Shaped compartments (`fnc_parseGrid`, `fnc_formatGrid`):** a piece of `grid=` (and of `einv_grid`) may be drawn
+  instead of `WxH`: its rows from the top separated by `/`, `x` a cell, `-` a hole, every row as long as the first.
+  `grid=xxxxxx/xx--xx/x----x` is one 6x3 compartment of 12 cells; `grid=xxxx/x--x+2x3` a 4x2 ring of 6 cells and a
+  plain 2x3. A piece without digits is a shape, one with digits `WxH`. A shape is read to its smallest form (edge
+  rows and columns of holes go); one with no hole left is written `WxH`, so the writer only draws what has holes.
+  `/` was already a legal character; a row is never empty, so `//` (a comment in a `cba_settings.sqf`) never
+  occurs. Limits as before, holes not counted: 8 across, 40 down, 24 compartments, 320 cells; a shape with no `x`,
+  rows of different lengths or other characters are errors like any value that cannot be read. `pockets`/`rig`
+  patterns and the older container table are rectangles only.
+- **Shape everyone reads:** `fnc_blocksFor` (and so `fnc_getBlocks`, `fnc_getLayout` "blocks", `fnc_viewBlocks`)
+  give `[[cols, rows, holes], ...]`, holes the cell indices `row * cols + col`, `[]` for a full rectangle;
+  `[cols, rows]` from `einv_grids[]` or the old table is padded. Readers with `params ["_cols", "_rows"]` work as
+  they did. Holes are taken from the start: `einv_storage_fnc_seedTaken` builds the taken-rows of `fnc_getLayout`,
+  `fnc_plan`, `fnc_opPut` and `fnc_opPlaceMany` (so `fnc_hasSpace`, `fnc_findEntry`, quick moves and the authority
+  never put anything on or across one). Cell counts subtract holes (`fnc_parseGrid`, `fnc_viewBlocks`' hidden
+  cells, the gear comparison's room). gui: `fnc_createGrid` makes no control for a hole (`controlNull` in
+  `"cells"`, `"holes"` on the grid); `fnc_drawCompartments` draws a shaped compartment's lines slot by slot,
+  each pixel once, so a hole has neither surface nor line; `fnc_screenToCell` finds no cell on a hole (nothing to
+  hover or click), except for a drag, whose footprint goes red over one (`fnc_hitsHole` in `fnc_updateDrag` and
+  `fnc_groupMode`); `fnc_redrawTiles` compares the holes too.
+- **like=CLASS (`fnc_parseRules`, `fnc_compileRules`, `fnc_resolve`):** a value key, written first (`like`, size,
+  stack, grid, weight, name); its value is a class token like `class=` (letters, digits, `_`), compiled lowercase.
+  `class=My_Vest > like=V_PlateCarrier1_rgr grid=6x4`: when the rule matches, every field of `LIKE_FIELDS`
+  (footprint, stack, grid, weight - never name) still open and not set by the rule itself takes what `fnc_resolve`
+  makes of the source class right then, through the same compiled rules - its own rules, mod config and presets. The
+  source's grid is turned into the compartments it really has (`einv_storage_fnc_blocksFor` with its class, kind and
+  load, as `["blocks", ...]`; "auto" by the target's load would be another grid; a source that is no container gives
+  "auto"); its weight only when a rule sets one on it, else -1: the target keeps its own config weight. The resolve
+  order is otherwise unchanged: a higher rule still wins a field, and the like rule closes the fields it fills. A
+  circle, more than `LIKE_DEPTH` (8) like= one after the other, or a class no config knows gives the built-in answer
+  for those fields (src "builtin") and one RPT line per problem (`GVAR(likeWarned)`). `fnc_explain` and byKind count
+  `LIKE_FIELDS` as set by such a rule. The wizard says "like V_PlateCarrier1_rgr", "4×2 shaped, 6 cells".
+- **Caching:** `fnc_getInfo` keeps an answer per class until the rules change; any change, the source's included,
+  is a new compile and `fnc_loadRules` empties the whole store - nothing more to do.
+- Built and checked in code only: nothing of this has run in the game yet.

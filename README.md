@@ -59,7 +59,9 @@ CBA setting "Inventory rules" (`einv_items_rules`), the same for everyone. The s
 
 - **Your own classes and kits:** `class=X+` covers X and every class built on it, from any mod -
   `class=My_Medic_Kit+ > size=2x2 stack=1 weight=1.5 name=Medic_kit`. A later rule beats an earlier one.
-  In `name=` an `_` is a space.
+  In `name=` an `_` is a space. A compartment can be drawn cell by cell, rows split by `/`, `x` a cell and
+  `-` a hole: `class=My_Vest > grid=xxxx/x--x+2x3`. `class=My_Vest > like=V_PlateCarrier1_rgr` gives a class
+  another one's size, stack, grid and rule weight, and follows it when that changes; `like=X grid=6x4` changes one.
 - **One crate, vehicle or a unit's uniform, vest or backpack:** give the object its own grid, which wins
   over every rule - `_crate setVariable ["einv_grid", "6x4+2x3", true];` (also `"24"`, `"rig:16"`, `"auto"`).
 - **Mods:** ship presets of your own as classes of `CfgEinvRulesets` (see `addons/items/CfgEinvRulesets.hpp`),

@@ -38,7 +38,8 @@
  * Return Value:
  * HashMap <HASHMAP>
  *   "entries"  - all of them, placed
- *   "blocks"   - the compartments [[cols, rows], ...] - the open grid's with the rows it needs now
+ *   "blocks"   - the compartments [[cols, rows, holes], ...] (fnc_blocksFor) - the open grid's with the
+ *                rows it needs now
  *   "overflow" - the entries with no room
  *   "records"  - one per placed entry, canonical (fnc_readPlaces): [key, col, row, w, h, block]. A
  *                holder of another type that lists nothing keeps the records it was laid out from: a
@@ -76,12 +77,13 @@ private _blocks = if (_isKey) then {[]} else {[_holder] call FUNC(getBlocks)};
 private _open = _blocks isEqualTo [];
 
 if (_open) then {
-    _blocks = [[STORAGE_COLS, 1e6]];
+    _blocks = [[STORAGE_COLS, 1e6, []]];
 };
 
-// Per compartment, one array of booleans per row, true where something lies. Rows are only added once
+// Per compartment, one array of booleans per row, true where something lies - or where a shaped
+// compartment has a hole, so nothing is ever placed on one (fnc_seedTaken). Rows are only added once
 // something lies in them, so every row past the end is free.
-private _taken = _blocks apply {[]};
+private _taken = [_blocks] call FUNC(seedTaken);
 
 private _fnc_isFree = {
     params ["_block", "_col", "_row", "_w", "_h"];
@@ -338,7 +340,7 @@ private _fnc_find = {
 
 // The open grid shows the rows it uses, one more to put things in, and never fewer than three.
 if (_open) then {
-    _blocks = [[STORAGE_COLS, (count (_taken select 0) + 1) max 3]];
+    _blocks = [[STORAGE_COLS, (count (_taken select 0) + 1) max 3, []]];
 };
 
 // Lined up in a row of their own under the compartments, each in its own cell span.

@@ -77,10 +77,10 @@ if (_status isNotEqualTo "") exitWith {
 };
 
 // The cells of everything else, per compartment rows of booleans - the lifted ones stand in nobody's
-// way.
+// way, a shaped compartment's holes in everybody's (fnc_seedTaken).
 private _blocks = _view getOrDefault ["blocks", []];
 private _open = _view getOrDefault ["open", false];
-private _taken = _blocks apply {[]};
+private _taken = [_blocks] call FUNC(seedTaken);
 
 private _fnc_mark = {
     params ["_block", "_col", "_row", "_w", "_h"];

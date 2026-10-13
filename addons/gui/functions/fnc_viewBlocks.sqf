@@ -22,10 +22,11 @@
  *
  * Return Value:
  * [blocks, hidden, foldable, cells] <ARRAY>
- *   blocks   - [cols, rows] per compartment as the column shows it
+ *   blocks   - [cols, rows, holes] per compartment as the column shows it - a shaped one's holes in
+ *              the rows folded away go with them
  *   hidden   - how many rows are folded away, all compartments together <NUMBER>
  *   foldable - rows are folded away now, or would be without the player having opened them <BOOL>
- *   cells    - how many cells those rows hold <NUMBER>
+ *   cells    - how many cells those rows hold, holes not counted <NUMBER>
  *
  * Example:
  * ([_layout, _crate] call einv_gui_fnc_viewBlocks) params ["_blocks", "_hidden", "_foldable", "_cells"];
@@ -70,21 +71,25 @@ private _foldable = false;
 private _shown = [];
 
 {
-    _x params ["_cols", "_rows"];
+    _x params ["_cols", "_rows", ["_holes", []]];
 
     private _want = ((_used select _forEachIndex) + COLLAPSE_SPARE_ROWS) max COLLAPSE_MIN_ROWS;
 
     if (_rows - _want < COLLAPSE_HIDE_MIN) then {
-        _shown pushBack [_cols, _rows];
+        _shown pushBack [_cols, _rows, _holes];
     } else {
         _foldable = true;
 
         if (_expanded) then {
-            _shown pushBack [_cols, _rows];
+            _shown pushBack [_cols, _rows, _holes];
         } else {
+            // The holes in the rows that stay keep their indices: a row is as wide as before.
+            private _end = _want * _cols;
+            private _keptHoles = _holes select {_x < _end};
+
             _hidden = _hidden + _rows - _want;
-            _cells = _cells + (_rows - _want) * _cols;
-            _shown pushBack [_cols, _want];
+            _cells = _cells + (_rows - _want) * _cols - (count _holes - count _keptHoles);
+            _shown pushBack [_cols, _want, _keptHoles];
         };
     };
 } forEach _blocks;

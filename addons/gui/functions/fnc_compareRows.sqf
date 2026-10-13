@@ -96,14 +96,14 @@ private _fnc_zoneName = {
     }
 };
 
-// Cells of a set of compartments, [[cols, rows], ...].
+// Cells of a set of compartments, [[cols, rows, holes], ...] - a shaped one's holes are no room.
 private _fnc_cells = {
     params ["_blocks"];
 
     private _sum = 0;
 
     {
-        _sum = _sum + (_x select 0) * (_x select 1);
+        _sum = _sum + (_x select 0) * (_x select 1) - count (_x param [2, []]);
     } forEach _blocks;
 
     _sum

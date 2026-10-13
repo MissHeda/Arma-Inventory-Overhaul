@@ -99,10 +99,11 @@ if (!_force && {[_to, _probe] call FUNC(backpackIntoBackpack)}) exitWith {
     ["NoBackpack"] call _fnc_bounce
 };
 
-// The view's cells, per compartment rows of booleans, true where a tile lies.
+// The view's cells, per compartment rows of booleans, true where a tile lies or a shaped compartment
+// has a hole (fnc_seedTaken).
 private _blocks = _view getOrDefault ["blocks", []];
 private _open = _view getOrDefault ["open", false];
-private _taken = _blocks apply {[]};
+private _taken = [_blocks] call FUNC(seedTaken);
 
 private _fnc_mark = {
     params ["_block", "_col", "_row", "_w", "_h"];

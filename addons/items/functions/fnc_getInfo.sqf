@@ -19,9 +19,11 @@
  * The engine still weighs every item by its config.
  *
  * Without compiled rules, the rules in effect are used and the result kept per class until the rules
- * change. Where no setting script runs (Eden, and the start of a mission before CBA's settings are
- * ready), those are compiled again first whenever the settings changed (fnc_currentRules), so even
- * there an item never shows by stale rules.
+ * change. An item whose rule says like=X is kept the same way: X is asked through the same compiled
+ * rules (fnc_resolve), and a change to X's rules is a change to the rules - fnc_loadRules empties
+ * the whole store, so the item follows X with nothing more to watch. Where no setting script runs
+ * (Eden, and the start of a mission before CBA's settings are ready), those are compiled again first
+ * whenever the settings changed (fnc_currentRules), so even there an item never shows by stale rules.
  *
  * Arguments:
  * 0: Class name <STRING>

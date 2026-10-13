@@ -143,7 +143,7 @@
             <English>Inventory rules</English>
         </Key>
         <Key ID="STR_einv_items_Setting_Rules_Desc">
-            <English>How big items are, how many share a\ntile and how containers are split into\ncompartments - one text for everyone.\n\nRules are separated by commas: what a\nrule is for, then what it sets. Later\nrules beat earlier ones:\nkind=grenade &gt; stack=3,\nclass=ACE_fieldDressing+ &gt; stack=20,\n@vest &gt; grid=rig\n\nweight=1.5 and name=Field_kit give an\nitem a weight in kg and a name.\n\nThe first part, einv1 base=default,\npicks the preset to build on. The setup\nwizard writes all of this for you.\n\nWhat cannot be read is left out and\nnamed in the RPT. Empty is the default.</English>
+            <English>How big items are, how many share a\ntile and how containers are split into\ncompartments - one text for everyone.\n\nRules are separated by commas: what a\nrule is for, then what it sets. Later\nrules beat earlier ones:\nkind=grenade &gt; stack=3,\nclass=ACE_fieldDressing+ &gt; stack=20,\n@vest &gt; grid=rig\n\nweight=1.5 and name=Field_kit give an\nitem a weight in kg and a name.\n\ngrid=xxx/x-x draws a compartment cell\nby cell, - is a hole. like=CLASS takes\nsize, stack, grid and rule weight from\nanother class.\n\nThe first part, einv1 base=default,\npicks the preset to build on. The setup\nwizard writes all of this for you.\n\nWhat cannot be read is left out and\nnamed in the RPT. Empty is the default.</English>
         </Key>
         <Key ID="STR_einv_items_Setting_SizeTable">
             <English>Grid sizes by class</English>

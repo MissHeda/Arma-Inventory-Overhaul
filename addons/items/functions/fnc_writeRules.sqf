@@ -3,8 +3,8 @@
  * Author: Miss Heda
  * Writes a rules text from its parts (fnc_parseRules), always the same way: the header, then the
  * groups, then the rules, each in their order, joined with ", ". A rule's conditions come before a
- * " > ", its values in the order size, stack, grid, weight, name. Reading what this wrote and writing
- * it again gives the same text, so two setups that mean the same can be compared as texts.
+ * " > ", its values in the order like, size, stack, grid, weight, name. Reading what this wrote and
+ * writing it again gives the same text, so two setups that mean the same can be compared as texts.
  *
  * Groups go before the rules: a group means the same wherever it is defined, so that changes nothing.
  * Never a ";" - see fnc_sanitizeText.
@@ -47,6 +47,7 @@ private _fnc_values = {
 
     private _texts = [];
 
+    if ("like" in _values) then {_texts pushBack ("like=" + (_values get "like"))};
     if ("footprint" in _values) then {_texts pushBack ("size=" + (_values get "footprint"))};
     if ("stack" in _values) then {_texts pushBack ("stack=" + str (_values get "stack"))};
     if ("grid" in _values) then {_texts pushBack ("grid=" + (_values get "grid"))};

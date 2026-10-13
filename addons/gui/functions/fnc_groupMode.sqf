@@ -195,8 +195,8 @@ if (_keepOk) then {
         private _w = _tile get "w";
         private _h = _tile get "h";
 
-        // Inside the compartment.
-        if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {_row + _h > _rows}) exitWith {
+        // Inside the compartment, and on none of a shaped one's holes.
+        if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {_row + _h > _rows} || {[_target, _col, _row, _w, _h] call FUNC(hitsHole)}) exitWith {
             _keepOk = false;
         };
 

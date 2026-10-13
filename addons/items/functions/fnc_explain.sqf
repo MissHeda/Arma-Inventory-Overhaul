@@ -68,7 +68,14 @@ private _fnc_walk = {
     {
         (_rules select _x) params ["_conds", "_values", "_tag", "_text"];
 
-        private _sets = (keys _values) arrayIntersect _fields;
+        private _offers = keys _values;
+
+        // like= sets what the rule does not set itself from another class (fnc_resolve).
+        if ("like" in _values) then {
+            _offers append LIKE_FIELDS;
+        };
+
+        private _sets = _offers arrayIntersect _fields;
 
         if (_sets isNotEqualTo [] && {[_facts, _conds, _compiled, _memo] call FUNC(matches)}) then {
             private _wins = _sets arrayIntersect _open;

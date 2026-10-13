@@ -8,7 +8,12 @@
  *   @ak: kind=magazine class~762x39       Group ak: kind magazine, class contains 762x39
  *
  * Groups by their names in the items addon's stringtable or a preset's config, a group of the player's
- * own by its id. Shapes have no words yet - they come in a later version - and show as they are written.
+ * own by its id. Item shapes have no words yet - they come in a later version - and show as they are
+ * written; a shaped compartment (grid=xxx/x-x) is told by its size and its cells, like=X by the class.
+ *
+ *   class=My_Vest > like=V_PlateCarrier1_rgr grid=xxxx/x--x
+ *                                         Class My_Vest: like V_PlateCarrier1_rgr, compartments
+ *                                         4×2 shaped, 6 cells
  *
  * Arguments:
  * 0: The statement: a rule, [conditions, values] as einv_items_fnc_parseRules lists them under "rules" -
@@ -154,8 +159,17 @@ private _fnc_grid = {
         case (_lower regexMatch "^[0-9]+%$"): {
             format [LLSTRING(Value_GridPercent), _lower select [0, count _lower - 1]]
         };
-        case (_lower regexMatch "^[0-9]+x[0-9]+([+][0-9]+x[0-9]+)*$"): {
-            format [LLSTRING(Value_GridBlocks), ((_lower splitString "+") apply {(_x splitString "x") joinString "×"}) joinString " + "]
+        // Compartments, each WxH or a shape: rows of x (a cell) and - (a hole) separated by /.
+        case (_lower regexMatch "^([0-9]+x[0-9]+|[x-]+(/[x-]+)*)([+]([0-9]+x[0-9]+|[x-]+(/[x-]+)*))*$"): {
+            format [LLSTRING(Value_GridBlocks), ((_lower splitString "+") apply {
+                if (_x regexMatch "^[0-9]+x[0-9]+$") then {
+                    (_x splitString "x") joinString "×"
+                } else {
+                    private _lines = _x splitString "/";
+
+                    format [LLSTRING(Value_GridShape), count (_lines select 0), count _lines, {_x == 120} count toArray _x]
+                };
+            }) joinString " + "]
         };
         default {
             // A pattern by name, perhaps with its number of cells: rig, rig:16.
@@ -174,6 +188,11 @@ private _fnc_values = {
 
     private _parts = [];
     private _footprint = _values getOrDefault ["footprint", ""];
+
+    // First, as the writer has it: what the rest goes on top of.
+    if ("like" in _values) then {
+        _parts pushBack format [LLSTRING(Value_Like), _values get "like"];
+    };
 
     if (_footprint isNotEqualTo "") then {
         private _size = (toLower _footprint) splitString "x";

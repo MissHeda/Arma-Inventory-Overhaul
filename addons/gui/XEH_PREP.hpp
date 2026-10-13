@@ -187,6 +187,7 @@ PREP(drawAttachments);
 PREP(gridOrigin);
 PREP(slotRect);
 PREP(screenToCell);
+PREP(hitsHole);
 PREP(tileAt);
 
 // Building blocks the layouts share

@@ -255,7 +255,8 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
     // Compartments
     if (_kind in ["uniform", "vest", "backpack", "crate", "vehicle"]) then {
         private _blockKind = [_kind, "crate"] select (_kind in ["crate", "vehicle"]);
-        private _oldBlocks = [_class, _blockKind, _config, _facts get "maxLoad"] call _fnc_oldBlocks;
+        // The old compartments in the shape fnc_blocksFor gives now: [cols, rows, holes], none of them shaped.
+        private _oldBlocks = ([_class, _blockKind, _config, _facts get "maxLoad"] call _fnc_oldBlocks) apply {[_x select 0, _x select 1, []]};
         private _newBlocks = [_class, _blockKind, _facts get "maxLoad", _info get "grid", _cell] call einv_storage_fnc_blocksFor;
 
         if (_oldBlocks isNotEqualTo _newBlocks) then {

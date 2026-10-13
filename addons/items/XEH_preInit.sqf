@@ -21,6 +21,10 @@ GVAR(rulesRevision) = 0;
 GVAR(hashWarned) = false;
 GVAR(versionWarned) = false;
 
+// A like= that cannot be followed - a circle, too long a chain, a class no config knows - is named in
+// the RPT once per problem, not on every item it reaches (fnc_resolve).
+GVAR(likeWarned) = createHashMap;
+
 // The server publishes what it compiled; a client compares it with its own once both are there, in
 // whichever order they arrive. One joining later finds it already set when it reads its own rules.
 if (!isServer) then {

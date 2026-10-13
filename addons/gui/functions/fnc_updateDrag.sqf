@@ -396,7 +396,7 @@ call {
     private _cell = [];
     private _targetIndex = _grids findIf {
         !(_x getOrDefault ["virtual", true]) && {!(_x getOrDefault ["overflow", false])} && {(_x getOrDefault ["window", ""]) isEqualTo _onTop} && {
-            _cell = [_x, _mouse] call FUNC(screenToCell);
+            _cell = [_x, _mouse, true] call FUNC(screenToCell);
             _cell isNotEqualTo []
         }
     };
@@ -667,8 +667,10 @@ call {
     };
 
     if (_reason isEqualTo "") then {
-        // Inside the compartment and free - the dragged tile does not count where it was lifted from.
-        private _taken = _col < 0 || {_row < 0} || {_col + _w > _target get "cols"} || {_row + _h > _target get "rows"};
+        // Inside the compartment, on none of a shaped one's holes, and free - the dragged tile does not
+        // count where it was lifted from.
+        private _taken = _col < 0 || {_row < 0} || {_col + _w > _target get "cols"} || {_row + _h > _target get "rows"}
+            || {[_target, _col, _row, _w, _h] call FUNC(hitsHole)};
 
         if (!_taken) then {
             {

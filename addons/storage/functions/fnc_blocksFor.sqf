@@ -12,7 +12,7 @@
  *   ["cells", N]             - N cells, the same way
  *   ["percent", P]           - P % of what the load gives
  *   ["pattern", name, N]     - a pattern by name; N cells, or from the load when N is -1
- *   ["blocks", [[c, r], ..]] - the compartments exactly
+ *   ["blocks", [[c, r, holes], ..]] - the compartments exactly; holes may be left out for none
  *
  * The patterns, and which a kind takes when none is named - which one is the class's own (a sum over
  * its name), so every model always looks the same and two of the same size can still differ:
@@ -36,7 +36,9 @@
  * 4: Config mass per cell <NUMBER> (default: the rules in effect)
  *
  * Return Value:
- * Compartments [[cols, rows], ...]; [[STORAGE_COLS, 0]] when there are no cells <ARRAY>
+ * Compartments [[cols, rows, holes], ...] - holes the indices row * cols + col of the cells a shaped
+ * compartment does not have (einv_items_fnc_parseGrid), [] for a full rectangle, which every pattern
+ * gives; [[STORAGE_COLS, 0, []]] when there are no cells <ARRAY>
  *
  * Example:
  * ["V_PlateCarrier1_rgr", "vest", 80, ["pattern", "rig", 20]] call einv_storage_fnc_blocksFor;
@@ -54,8 +56,11 @@ params [
 
 _spec params [["_mode", "auto", [""]]];
 
-// Compartments given exactly - a copy, the spec is shared.
-if (_mode isEqualTo "blocks") exitWith {+(_spec select 1)};
+// Compartments given exactly - a copy, the spec is shared. The older table and einv_grids[] give
+// rectangles as [cols, rows]: everyone reads three.
+if (_mode isEqualTo "blocks") exitWith {
+    (_spec select 1) apply {[_x select 0, _x select 1, +(_x param [2, []])]}
+};
 
 if (_cell <= 0) then {
     _cell = (call EFUNC(items,currentRules)) getOrDefault ["cell", 5];
@@ -104,7 +109,7 @@ switch (_mode) do {
     };
 };
 
-if (_cells <= 0) exitWith {[[STORAGE_COLS, 0]]};
+if (_cells <= 0) exitWith {[[STORAGE_COLS, 0, []]]};
 
 // Never more than MAX_CELLS cells, whatever the kind - a typo or a huge load would otherwise build a
 // control for each of thousands of cells.
@@ -168,7 +173,8 @@ private _fnc_fill = {
     _blocks
 };
 
-switch (_pattern) do {
+// A pattern's compartments are full rectangles: no holes.
+(switch (_pattern) do {
     case "single": {
         [(ceil sqrt _cells) min STORAGE_COLS, _cells] call _fnc_rows
     };
@@ -180,4 +186,4 @@ switch (_pattern) do {
 
         [_pouches, _limit] call _fnc_fill
     };
-}
+}) apply {[_x select 0, _x select 1, []]}

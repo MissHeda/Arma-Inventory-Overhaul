@@ -13,6 +13,11 @@
  * scrolling column would take the mouse wheel from it. The grid's corner sits on a pixel and a cell is
  * a whole number of them (fnc_getCell), so every edge of the grid falls on a pixel.
  *
+ * A shaped compartment's holes (einv_items_fnc_parseGrid, "xxx/x-x") get no control at all: nothing
+ * is drawn there and nothing there can be hovered. Their place in "cells" holds controlNull, so a
+ * cell is still found at row * cols + col, and whatever shows or hides cells passes over a hole
+ * without a word.
+ *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Controls group to create it in, or controlNull for the display <CONTROL>
@@ -21,6 +26,7 @@
  * 4: Theme <HASHMAP>
  * 5: Id of the section it shows, e.g. "vest" <STRING> (default: "")
  * 6: Columns - a compartment's own width <NUMBER> (default: STORAGE_COLS)
+ * 7: Holes - the indices row * cols + col of the cells it does not have <ARRAY> (default: [])
  *
  * Return Value:
  * The grid <HASHMAP>
@@ -28,7 +34,8 @@
  *   "rel"     - its top left corner in the parent, on a pixel <ARRAY>
  *   "cols", "rows" <NUMBER>
  *   "cellW", "cellH" - one cell, as screen width and height <NUMBER>
- *   "cells"   - a control per cell, row by row <ARRAY>
+ *   "cells"   - a control per cell, row by row, controlNull for a hole <ARRAY>
+ *   "holes"   - the cells it does not have, as given <ARRAY>
  *   "tiles"   - the entries lying on it, see fnc_createTile <ARRAY>
  *   "section" - the section id <STRING>
  *
@@ -40,7 +47,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_position", "_rows", "_theme", ["_section", ""], ["_cols", STORAGE_COLS]];
+params ["_display", "_parent", "_position", "_rows", "_theme", ["_section", ""], ["_cols", STORAGE_COLS], ["_holes", []]];
 _position params ["_relX", "_relY"];
 
 (call FUNC(getCell)) params ["_cellW", "_cellH"];
@@ -60,6 +67,11 @@ private _cells = [];
 
 for "_row" from 0 to (_rows - 1) do {
     for "_col" from 0 to (_cols - 1) do {
+        if ((_row * _cols + _col) in _holes) then {
+            _cells pushBack controlNull;
+            continue;
+        };
+
         private _cell = [_display, "EINV_PanelRect", _parent, [
             _left + _col * _cellW,
             _top + _row * _cellH,
@@ -80,6 +92,7 @@ private _grid = createHashMapFromArray [
     ["cellW", _cellW],
     ["cellH", _cellH],
     ["cells", _cells],
+    ["holes", _holes],
     ["tiles", []],
     ["section", _section]
 ];

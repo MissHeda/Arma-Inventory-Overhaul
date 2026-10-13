@@ -35,6 +35,9 @@
  *   @group                         a member of that group
  *
  * What a rule sets:
+ *   like=V_PlateCarrier1_rgr everything the rules make of that class but its name - size, stack, grid
+ *                            and weight, asked when an item is looked at (fnc_resolve), so a later
+ *                            change to that class follows. The rule's other values go on top.
  *   size=2x3 (or shape=2x3)  the cells it takes, across and down; size=mass: as many as it weighs
  *   stack=10                 how many share a tile, 1 to MAX_STACK
  *   grid=...                 a container's compartments, see fnc_parseGrid
@@ -64,8 +67,8 @@
  *   "warnings" - what was left out or cut down, and why <ARRAY of STRING>
  * A condition is [negated, key, op, values], the values the texts between the "|", class names as
  * written; a group in a condition is key "@", op "=" and the group ids. A rule's values are a HashMap:
- * "footprint" ("WxH" or "mass"), "stack" <NUMBER>, "grid" (as fnc_formatGrid writes it), "weight"
- * (kg <NUMBER>), "name" (the name as it shows).
+ * "like" (a class name as written), "footprint" ("WxH" or "mass"), "stack" <NUMBER>, "grid" (as
+ * fnc_formatGrid writes it), "weight" (kg <NUMBER>), "name" (the name as it shows).
  *
  * Example:
  * ["einv1 base=default, kind=grenade > stack=3"] call einv_items_fnc_parseRules;
@@ -117,7 +120,7 @@ private _classChars = createHashMap;
 private _shapeChars = createHashMap;
 {_shapeChars set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/@");
 
-private _valueKeys = ["size", "shape", "stack", "grid", "weight", "name"];
+private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name"];
 
 private _numberOps = ["=", "<", "<=", ">", ">="];
 private _keyOps = createHashMapFromArray [
@@ -227,6 +230,19 @@ private _fnc_footprint = {
     ["footprint", format ["%1x%2", _w, _h]]
 };
 
+// A class name as a condition's class= has it: letters, digits and _ only. Whether config knows it is
+// asked when an item is looked at - a mod that is not loaded is no mistake in the text.
+private _fnc_like = {
+    params ["_raw"];
+
+    if !([_raw] call _fnc_isClass) exitWith {
+        _notes pushBack format ["like=%1 is no class name - letters, digits and _ only - this part is left out", _raw];
+        []
+    };
+
+    ["like", _raw]
+};
+
 private _fnc_stack = {
     params ["_raw"];
 
@@ -306,6 +322,7 @@ private _fnc_value = {
     private _raw = _token select [_equals + 1];
 
     switch (toLowerANSI (_token select [0, _equals])) do {
+        case "like": {[_raw] call _fnc_like};
         case "size";
         case "shape": {[_raw] call _fnc_footprint};
         case "stack": {[_raw] call _fnc_stack};

@@ -51,8 +51,9 @@
  *                   set, fields preset rules can set] <HASHMAP>
  *   "hash"        - one value for all of it, to compare between machines <STRING>
  *   "warnings"    - everything left out or cut down <ARRAY of STRING>
- * A rule's values: "footprint" [w, h, []] or "mass", "stack" <NUMBER>, "grid" spec (fnc_parseGrid),
- * "weight" kg <NUMBER>, "name" <STRING>.
+ * A rule's values: "like" the class in lowercase <STRING>, "footprint" [w, h, []] or "mass", "stack"
+ * <NUMBER>, "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING>. A rule with like=
+ * counts in byKind as setting every one of LIKE_FIELDS, which fnc_resolve takes from that class.
  *
  * Example:
  * ["einv1 base=tarkov, kind=grenade > stack=3"] call einv_items_fnc_compileRules;
@@ -489,6 +490,10 @@ private _fnc_values = {
             case "grid": {
                 _compiledValues set ["grid", ([_y] call FUNC(parseGrid)) select 0];
             };
+            // Config does not mind the case of a class: lowercase, as fnc_getFacts' "lc".
+            case "like": {
+                _compiledValues set ["like", toLowerANSI _y];
+            };
             default {
                 _compiledValues set [_x, _y];
             };
@@ -644,6 +649,11 @@ private _byKind = createHashMap;
             if (_kinds isEqualType 0 || {_kind in _kinds}) then {
                 _indices pushBack _forEachIndex;
                 _fields append (keys (_x select 1));
+
+                // like= answers these from another class (fnc_resolve).
+                if ("like" in (_x select 1)) then {
+                    _fields append LIKE_FIELDS;
+                };
             };
         } forEach _x;
 
