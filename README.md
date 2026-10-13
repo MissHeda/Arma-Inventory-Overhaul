@@ -57,9 +57,9 @@ Tools).
 
 How big items are, how many share a tile and how containers are split up is one text of rules, the
 CBA setting "Inventory rules" (`einv_items_rules`), the same for everyone. The setup wizard writes it for you
-(ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory) - its Containers step draws a
-uniform's, vest's or backpack's cells and holes or links it to another class, its Items step sets sizes and
-stacks -, but it is plain text:
+(ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory) - you draw the cells of an item
+(an L, a T) and of a uniform, vest or backpack on a canvas, click the gaps between cells to split it into
+compartments, or link it to another class, and its start page shows what you changed -, but it is plain text:
 
 - **Your own classes and kits:** `class=X+` covers X and every class built on it, from any mod -
   `class=My_Medic_Kit+ > size=2x2 stack=1 weight=1.5 name=Medic_kit`. A later rule beats an earlier one.

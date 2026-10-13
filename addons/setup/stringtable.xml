@@ -94,6 +94,18 @@
         <Key ID="STR_einv_setup_ChangeShape">
             <English>Change size or shape...</English>
         </Key>
+        <Key ID="STR_einv_setup_Changes_Count">
+            <English>%1 rules of your own on top of %2</English>
+        </Key>
+        <Key ID="STR_einv_setup_Changes_Help">
+            <English>Click one to open it where it is set; the cross takes it away.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Changes_None">
+            <English>Nothing changed yet - the preset decides everything.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Changes_Title">
+            <English>What you changed</English>
+        </Key>
         <Key ID="STR_einv_setup_Chip_Changes">
             <English>%1 changes</English>
         </Key>
@@ -193,9 +205,6 @@
         <Key ID="STR_einv_setup_Conflict_Text">
             <English>Someone else saved the setup while you were working on it. Put your changes on top of theirs, or overwrite what they saved?</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Add">
-            <English>Add compartment</English>
-        </Key>
         <Key ID="STR_einv_setup_Cont_Apply">
             <English>Apply</English>
         </Key>
@@ -206,16 +215,28 @@
             <English>%1 compartments · %2 cells</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_CanvasHelp">
-            <English>Click a cell to make it a hole, and again to make it a cell. Click a compartment's number to pick it without changing a cell. Rows and columns of holes at a compartment's edges are dropped on Apply.</English>
+            <English>Click a place to make it a cell or take the cell away. Click the gap between two cells to divide them, and again to join them. Cells that touch without a divider are one compartment.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_CanvasRows">
+            <English>%1 rows</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Cells">
             <English>%1 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_ClearTip">
+            <English>Take every cell and divider away, to draw from scratch.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Cols">
             <English>%1 across</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Discard">
             <English>Discard</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Fill">
+            <English>Fill</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_FillTip">
+            <English>Make every place on the canvas a cell. The dividers stay.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Help">
             <English>Pick a uniform, vest, backpack, crate or vehicle on the left. On the right, draw its compartments cell by cell, or let it take the cells of another class. Apply writes one rule for that class into the setup; Save at Review puts it to use.</English>
@@ -238,9 +259,6 @@
         <Key ID="STR_einv_setup_Cont_Load">
             <English>Load %1 (%2 kg)</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_NoBlocks">
-            <English>No compartments</English>
-        </Key>
         <Key ID="STR_einv_setup_Cont_NotContainer">
             <English>%1 holds nothing - there are no cells to draw.</English>
         </Key>
@@ -250,17 +268,8 @@
         <Key ID="STR_einv_setup_Cont_PatternNote">
             <English>These compartments are laid out by its load or by a pattern. Editing replaces the pattern with exactly these cells.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_PickBlock">
-            <English>Pick this compartment</English>
-        </Key>
         <Key ID="STR_einv_setup_Cont_PickHint">
             <English>Pick a container on the left to see and draw its cells.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Cont_Picked">
-            <English>Compartment %1 of %2</English>
-        </Key>
-        <Key ID="STR_einv_setup_Cont_Remove">
-            <English>Remove compartment</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_ResetTip">
             <English>Take this class's own cells and like= out of the setup: the preset decides again.</English>
@@ -391,6 +400,9 @@
         <Key ID="STR_einv_setup_Hint_TooMany">
             <English>Too many: at most %1 cells and %2 compartments.</English>
         </Key>
+        <Key ID="STR_einv_setup_Hint_TooTall">
+            <English>A compartment can be at most %1 rows tall.</English>
+        </Key>
         <Key ID="STR_einv_setup_Hint_Unlinked">
             <English>%1 no longer takes the cells of another class - Save at Review to use it.</English>
         </Key>
@@ -425,7 +437,7 @@
             <English>Apply</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ApplyTip">
-            <English>Write this size and stack into the setup as a rule for this class. Save at Review puts it to use.</English>
+            <English>Write this size, shape and stack into the setup as a rule for this class. Save at Review puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ApplyTo">
             <English>Apply to</English>
@@ -435,6 +447,9 @@
         </Key>
         <Key ID="STR_einv_setup_Items_CanStack">
             <English>Can stack</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_CanvasHelp">
+            <English>Click the cells it takes - an L, a T, any shape in one piece. Across and down lay a rectangle where it is.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Clear">
             <English>Clear</English>
@@ -458,7 +473,7 @@
             <English>Group</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Help">
-            <English>Pick an item on the left. On the right, set how many cells it takes and how many share a tile. Apply writes one rule for that class into the setup; Save at Review puts it to use.</English>
+            <English>Pick an item on the left. On the right, draw the cells it takes - a rectangle or any shape - and set how many share a tile. Apply writes one rule for that class into the setup; Save at Review puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Hidden">
             <English>%1 hidden by the filter</English>
@@ -481,6 +496,15 @@
         <Key ID="STR_einv_setup_Items_Mod">
             <English>Mod</English>
         </Key>
+        <Key ID="STR_einv_setup_Items_NoCells">
+            <English>Click at least one cell.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_NoCellsTitle">
+            <English>No cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_NotConnected">
+            <English>Its cells must touch side by side or one above the other: an item is one piece.</English>
+        </Key>
         <Key ID="STR_einv_setup_Items_Now">
             <English>Now</English>
         </Key>
@@ -498,6 +522,9 @@
         </Key>
         <Key ID="STR_einv_setup_Items_PickHint">
             <English>Pick an item on the left to see and set its size.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_Pieces">
+            <English>%1 pieces</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Remove">
             <English>Remove</English>
@@ -519,9 +546,6 @@
         </Key>
         <Key ID="STR_einv_setup_Items_ShowPresets">
             <English>Show weapon presets</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_Takes">
-            <English>%1 cells</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Title">
             <English>Items: how big each one is</English>
@@ -730,6 +754,9 @@
         <Key ID="STR_einv_setup_Presets_Title">
             <English>My presets</English>
         </Key>
+        <Key ID="STR_einv_setup_Preview_Title">
+            <English>This is how it looks</English>
+        </Key>
         <Key ID="STR_einv_setup_Reason_Client">
             <English>client values never count for this setting - switch to the Server or Mission tab.</English>
         </Key>
@@ -879,6 +906,9 @@
         </Key>
         <Key ID="STR_einv_setup_Start_Help">
             <English>A preset decides how big every item is, how many share a tile and how containers are split into compartments. Your own rules go on top of it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Start_Intro">
+            <English>Introduction</English>
         </Key>
         <Key ID="STR_einv_setup_Start_KeepOwn">
             <English>Keep my own rules when I pick another preset (%1 now)</English>
@@ -1047,6 +1077,48 @@
         </Key>
         <Key ID="STR_einv_setup_Warning_TooLong">
             <English>The text is %1 characters long: more than 16,000 cannot be saved.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_GridText">
+            <English>Every item is a tile of one or more cells; every uniform, vest and backpack holds a grid of cells. What fits is decided by the free cells alone.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_GridTitle">
+            <English>Items are tiles on grids</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_Intro">
+            <English>A few steps to decide how big items are and how containers are split. Nothing changes in the game before you save.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_PresetText">
+            <English>A preset sizes every item and splits every container. Pick one, then change only what you want: your changes go on top as rules of your own.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_PresetTitle">
+            <English>A preset to start from</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_Start">
+            <English>Start setup</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_StepsText">
+            <English>Items: the size and shape of an item. Containers: the cells of a uniform, vest or backpack. Review: check what you changed and save it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_StepsTitle">
+            <English>Three steps</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_Title">
+            <English>Set up the inventory</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_WhereOwn">
+            <English>At Review you can also keep it as a preset of your own, for any mission.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_WhereReadOnly">
+            <English>You can look at everything, but not save it here: %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_WhereTitle">
+            <English>Where it goes</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_Where_mission">
+            <English>Save puts it into this mission, for everyone who plays it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Welcome_Where_server">
+            <English>Save puts it on the server, for everyone who plays there.</English>
         </Key>
         <Key ID="STR_einv_setup_Why_Overridden">
             <English>overridden</English>

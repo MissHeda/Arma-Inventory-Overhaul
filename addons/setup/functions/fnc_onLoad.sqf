@@ -59,6 +59,7 @@ GVAR(selection) = createHashMap;
 GVAR(stepKey) = {false};
 GVAR(undo) = [];
 GVAR(redo) = [];
+GVAR(startSetup) = false;
 GVAR(exportMode) = 0;
 GVAR(importText) = "";
 GVAR(presetPick) = "";

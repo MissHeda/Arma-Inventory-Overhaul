@@ -2,7 +2,8 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Step 1, Start: what the setup builds on.
+ * Step 1, Start, in two states (GVAR(startSetup)). As the wizard opens, a welcome: what the mod and the
+ * setup are about and a button into it (fnc_drawWelcome). Then what the setup builds on:
  *   - The presets as cards - Default, Tarkov-like, Weight-like and any that another mod brings - each with its
  *     description; the one the draft builds on is picked. Picking another keeps the own rules on top of
  *     it, or starts without them, as the switch under the cards says.
@@ -10,6 +11,9 @@
  *     every item sized by its mass, so it is the one number that changes the most at once - said so beside
  *     it. It only sizes the default grids: what fits into a container is decided by its free cells alone.
  *   - What is in use now, set by whom, and where this wizard may save - or why it may not.
+ *   - What you changed: the own rules against the preset, each in words, to open or take away
+ *     (fnc_drawChanges).
+ * A link beside the title goes back to the welcome.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -40,15 +44,29 @@ private _muted = _theme getOrDefault ["muted", [0.522, 0.553, 0.604, 1]];
 private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
 private _radius = _theme getOrDefault ["radius", 0];
 
+// First the welcome, until "Start setup" is pressed.
+if (!GVAR(startSetup)) exitWith {
+    [_display, _group, _theme] call FUNC(drawWelcome);
+};
+
 private _padX = WIZ_PAD_X;
 private _innerW = _width - _padX * 2;
 private _gapY = UNIT * 0.5;
 private _gapX = SQUARE(_gapY);
 private _cursorY = UNIT * 0.4;
 
-// ----- Title -----
+// ----- Title, and the way back to the welcome -----
 
-[_display, _group, [_padX, _cursorY, _innerW, UNIT * 1.1], LLSTRING(Start_Title), TEXT_HEAD, _colorText, _fontBold, 0] call EFUNC(gui,uiLabel);
+private _introH = UNIT * 1;
+private _introW = SQUARE(_introH * 1.6) + (LLSTRING(Start_Intro) getTextWidth [_font, _introH * 0.5]) * TEXT_SLACK;
+
+[_display, _group, [_padX, _cursorY, _innerW - _introW, UNIT * 1.1], LLSTRING(Start_Title), TEXT_HEAD, _colorText, _fontBold, 0] call EFUNC(gui,uiLabel);
+
+[_display, _group, [_padX + _innerW - _introW, _cursorY + UNIT * 0.05, _introW, _introH], LLSTRING(Start_Intro), UI_TEX(icon_chevron_left_ca), _theme, {
+    GVAR(startSetup) = false;
+
+    [0] call FUNC(showStep);
+}, [], true, "ghost"] call FUNC(uiAction);
 
 _cursorY = _cursorY + UNIT * 1.1;
 _cursorY = _cursorY + ([_display, _group, [_padX, _cursorY, _innerW], LLSTRING(Start_Help), TEXT_BODY, _colorText2, _font] call FUNC(uiText)) + _gapY;
@@ -140,18 +158,21 @@ private _own = count (GVAR(draft) getOrDefault ["groups", []]) + count (GVAR(dra
 
 _cursorY = _cursorY + UNIT * 1.1 + _gapY;
 
-// ----- Cell size | Now in use -----
+// ----- Cell size | Now in use | What you changed -----
 
 private _cardsH = (_height - UNIT * 0.5) - _cursorY;
-private _columnW = (_innerW - _gapX) / 2;
-private _rightX = _padX + _columnW + _gapX;
+private _spread = _innerW - _gapX * 2;
+private _cellCardW = _spread * 0.28;
+private _columnW = _spread * 0.34;
+private _rightX = _padX + _cellCardW + _gapX;
+private _changesX = _rightX + _columnW + _gapX;
 
 // Cell size
-private _cellY = [_display, _group, [_padX, _cursorY, _columnW, _cardsH], LLSTRING(Cell_Title), _theme] call FUNC(uiCard);
+private _cellY = [_display, _group, [_padX, _cursorY, _cellCardW, _cardsH], LLSTRING(Cell_Title), _theme] call FUNC(uiCard);
 private _cell = GVAR(draftRules) getOrDefault ["cell", 5];
 private _ownCell = (GVAR(draft) getOrDefault ["cell", -1]) > 0;
 private _cardInnerX = _padX + CARD_PAD_X;
-private _cardInnerW = _columnW - CARD_PAD_X * 2;
+private _cardInnerW = _cellCardW - CARD_PAD_X * 2;
 private _stepperW = SQUARE(UNIT * 5.4);
 private _stepperH = UNIT * 1.2;
 
@@ -166,28 +187,33 @@ private _stepperH = UNIT * 1.2;
 
 private _valueX = _cardInnerX + _stepperW + SQUARE(UNIT * 0.5);
 private _valueW = _cardInnerX + _cardInnerW - _valueX;
-private _resetW = [0, SQUARE(UNIT * 6.5)] select _ownCell;
 
 [
-    _display, _group, [_valueX, _cellY - UNIT * 0.05, _valueW - _resetW, UNIT * 0.75],
+    _display, _group, [_valueX, _cellY + (_stepperH - UNIT * 0.75) / 2, _valueW, UNIT * 0.75],
     format [LLSTRING(Cell_Value), (_cell * MASS_TO_KG) toFixed 2], TEXT_BODY, _colorText, _fontBold, 0
 ] call EFUNC(gui,uiLabel);
 
-[
-    _display, _group, [_valueX, _cellY + UNIT * 0.6, _valueW - _resetW, UNIT * 0.65],
-    [LLSTRING(Cell_FromPreset), LLSTRING(Cell_Own)] select _ownCell, TEXT_SMALL, _muted, _font, 0
-] call EFUNC(gui,uiLabel);
+_cellY = _cellY + _stepperH + UNIT * 0.2;
+
+// Where it comes from, under the stepper: the column is narrow for it beside the value.
+_cellY = _cellY + ([
+    _display, _group, [_cardInnerX, _cellY, _cardInnerW], [LLSTRING(Cell_FromPreset), LLSTRING(Cell_Own)] select _ownCell, TEXT_SMALL, _muted, _font
+] call FUNC(uiText)) + UNIT * 0.2;
 
 if (_ownCell) then {
-    [_display, _group, [_cardInnerX + _cardInnerW - _resetW, _cellY + UNIT * 0.1, _resetW, UNIT * 1], LLSTRING(Cell_Reset), ICON(icon_reset_ca,icon_auto_ca), _theme, {
+    private _resetW = SQUARE(UNIT * 6.5);
+
+    [_display, _group, [_cardInnerX, _cellY, _resetW, UNIT * 1], LLSTRING(Cell_Reset), ICON(icon_reset_ca,icon_auto_ca), _theme, {
         private _ast = [GVAR(draftText)] call EFUNC(items,parseRules);
         _ast set ["cell", -1];
 
         [_ast] call FUNC(commit);
     }, [], true, "ghost"] call FUNC(uiAction);
+
+    _cellY = _cellY + UNIT * 1.2;
 };
 
-_cellY = _cellY + _stepperH + UNIT * 0.4;
+_cellY = _cellY + UNIT * 0.2;
 [_display, _group, [_cardInnerX, _cellY, _cardInnerW], LLSTRING(Cell_Help), TEXT_SMALL, _colorText2, _font] call FUNC(uiText);
 
 // Now in use
@@ -270,3 +296,6 @@ _importHit setVariable [QGVAR(action), [{
 [_display, _group, [_statusX + _statusW - _buttonW, _buttonY, _buttonW, _buttonH], LLSTRING(Start_ToReview), "", _theme, {
     [4] call FUNC(showStep);
 }, [], true, "accent"] call FUNC(uiAction);
+
+// What you changed
+[_display, _group, [_changesX, _cursorY, _innerW - (_changesX - _padX), _cardsH], _theme] call FUNC(drawChanges);

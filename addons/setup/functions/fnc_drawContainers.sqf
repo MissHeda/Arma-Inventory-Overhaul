@@ -5,9 +5,9 @@
  * Step 4, Containers: the cells of uniforms, vests, backpacks, crates and vehicles, class by class.
  *   - Left: every container of the game and its mods, to search by class or name (fnc_drawClassList over
  *     the class index, fnc_buildIndex), each with what the draft makes of its grid and where from.
- *   - Right: the one picked, its compartments as canvases to draw cells and holes on, sized and added
- *     or removed, or taken from another class with like= (fnc_drawCellEditor). Apply writes one rule for
- *     exactly that class into the draft; Save at Review puts it to use.
+ *   - Right: the one picked, its compartments on one canvas to draw cells, holes and the dividers between
+ *     compartments on, or taken from another class with like= (fnc_drawCellEditor). Apply writes one rule
+ *     for exactly that class into the draft; Save at Review puts it to use.
  * Ctrl+F puts the cursor in the search.
  *
  * Opened for a class (fnc_open with a class, GVAR(focus)) that is a container, it starts with that one

@@ -6,8 +6,9 @@
  *   - Left: every weapon, magazine, piece of gear and item of the game and its mods, to search by class or
  *     name (fnc_drawClassList over the class index, fnc_buildIndex), each with its size and stack in the
  *     draft and where they come from.
- *   - Right: the one picked, with its width, height and stack to step (fnc_drawItemEditor). Apply writes
- *     one rule for exactly that class into the draft; Save at Review puts it to use.
+ *   - Right: the one picked, its cells to draw - a rectangle by its width and height, or any shape cell by
+ *     cell - and its stack (fnc_drawItemEditor). Apply writes one rule for exactly that class into the
+ *     draft; Save at Review puts it to use.
  * Ctrl+F puts the cursor in the search.
  *
  * Opened for a class (fnc_open with a class, GVAR(focus)), it starts with that one picked and found.

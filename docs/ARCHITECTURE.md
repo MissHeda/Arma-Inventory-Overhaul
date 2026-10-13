@@ -2837,50 +2837,62 @@ So a uniform, vest or backpack class can be given exactly the cells it has (the 
   is a new compile and `fnc_loadRules` empties the whole store - nothing more to do.
 - Built and checked in code only: nothing of this has run in the game yet.
 
-## Wizard: Containers and Items steps (0.4.0) - supersedes the parts above it contradicts
+## Wizard: Start, Containers and Items steps (0.4.0, revised) - supersedes the parts above it contradicts
 
-Steps 3 (`items`, `fnc_drawItems`) and 4 (`containers`, `fnc_drawContainers`) are built; Groups is still greyed out.
-Both are a class list on the left (`fnc_drawClassList`, cards by `fnc_drawResults`) and an editor on the right
-(`fnc_drawItemEditor`, `fnc_drawCellEditor`). The design's virtual list, apply scopes, CfgEinvShapes and preview fills
-were not built: one class at a time, one rule per class.
+Steps 2 (`items`, `fnc_drawItems`) and 3 (`containers`, `fnc_drawContainers`, 0-based) are a class list on the left
+(`fnc_drawClassList`, cards by `fnc_drawResults`) and an editor on the right (`fnc_drawItemEditor`,
+`fnc_drawCellEditor`); Groups is still greyed out. One class at a time, one rule per class.
 
-- **Class index (`fnc_buildIndex`, `fnc_indexChunk`):** uiNamespace `einv_setup_index` (HashMap: `rows`, `byClass`,
-  `mods`, reading position, `token`, `tick`, `done`), built once per game session - classes do not change, and it stays
-  out of save games. Read in pieces through `fnc_defer` (Eden too), each until `INDEX_BUDGET` (6 ms) has passed, the
-  clock looked at every `INDEX_STRIDE` (64) entries; a run not seen for 1 s (the window closed and its queue was
-  emptied) is taken over by the next step that asks, the token keeps one reader. Roots as getFacts: CfgWeapons types
-  1/2/4/4096 and 131072 items (uniform 801, vest 701, headgear 605, attachments, rest), CfgMagazines with a picture,
-  CfgGlasses, CfgVehicles with `maximumLoad > 0` (backpacks, `ReammoBox_F` crates, `AllVehicles` but not `CAManBase`);
-  scope 2 only, no `..._Base`, the first root wins a name. Row (`ROW_*`, defines.hpp): lowercase class, configName,
-  search text (class + name, lowercase), displayName, kind, family (weapon, magazine, gear, item, cargo), picture,
-  mod name (`configSourceMod` -> `modParams`), load (a uniform's or vest's from its containerClass). Sorted by name when
-  done. Vanilla with ACE is some thousands of rows; big mod packs tens of thousands - a progress line meanwhile.
-- **List:** search (substring, case-insensitive over class and name, redrawn 0.15 s after the last key, the field keeps
-  focus), kind chips (Containers: all / uniform / vest / backpack / cargo; Items: all / weapon / magazine / gear /
-  item), "only classes with own rules" (any `class=` an own rule names, `fnc_ownClassRules`), pages of `LIST_PAGE`
-  (30). Only the cards shown ask `einv_items_fnc_getInfo [class, draftRules, draftCache]` - the compiled draft Review
-  uses - and say it with `fnc_answerText` ("6x4, 2 holes · own rule", "3 × 1x2 · preset", "like X"). State per step in
-  `einv_setup_listState` `[text, chip, ownOnly, page]`; the class picked in `einv_setup_selection` ("items",
-  "containers"); a class from `fnc_open`'s focus is picked and searched. Ctrl+F focuses the search.
-- **Cell editor:** shows `einv_storage_fnc_blocksFor` of the draft's answer (patterns, auto and cells as the
-  compartments they give - "Editing replaces the pattern with these cells"). Working copy `einv_setup_cellWork`
-  (lowercase class -> `[blocks, picked]`), created by the first edit; a cell click toggles the hole in place (control and
-  total updated, no redraw) unless it is the first change or another compartment; steppers 1-8 across, 1-40 down
-  (holes outside the new size go), add (2x2, 1x1 when little room) and remove. The canvases never hold more places
-  than `MAX_CELLS`; the total line shows cells against 320 and compartments against 24. Apply drops compartments
-  without a cell and writes `grid=` with `einv_items_fnc_formatGrid` (shapes for holes, `WxH` otherwise; the parser
-  trims edge rows and columns of holes). "Like another class" puts the list in picking mode (`einv_setup_likePick`); the
-  pick writes `like=Y` and takes the class's own `grid=` away. Linked (like without own grid) the canvases are
-  read-only until Unlink (takes `like` away). Back to the preset takes `grid` and `like` away.
-- **Items editor:** width 1-8, height 1-8, stack 1-999 (stepper plus 1/5/10/20/50/100), stack off for kinds that never
-  share a tile (src "forced"); working copy `einv_setup_itemWork`. Apply writes only what differs from now
-  (`size=WxH`, `stack=N`); Back to the preset takes `footprint` and `stack` away.
-- **Writing (`fnc_upsertRule [class, set, remove]`):** reads the draft text, merges every rule whose only condition is
-  `class=X` (not `X+`, case-insensitive) into one, sets and removes the fields given, keeps the rest (name, weight,
-  like), appends it as `class=X > ...` at the end - later rules win, so it beats a broader rule further down - and drops
-  it when empty; then `fnc_commit` (undo step, redraw). Class names outside letters, digits and `_` are refused with a
-  hint. Nothing reaches the game before Save. An older table setting still wins over the rules; the editor says so.
-- Also fixed: the "changed" dot of the step pills sat on Groups instead of Start.
+- **Start, two states (`einv_setup_startSetup`, false on every open):** the welcome (`fnc_drawWelcome`) - title, one
+  line, four cards with an icon (items are tiles on grids and free cells decide what fits; what a preset is; what Items,
+  Containers and Review do; where Save puts it, from `einv_setup_target`'s source or its read-only reason) - and a
+  primary "Start setup", plus "Review and save" when the draft has own statements. The setup state is what Start showed
+  before (preset cards, keep-own-rules, then three columns: Cell size, Now in use, What you changed) with an
+  "Introduction" link beside the title back to the welcome. The step pill stays "1 Start".
+- **What you changed (`fnc_drawChanges`):** "N rules of your own on top of <preset>" (groups + rules of the draft) or
+  "Nothing changed yet"; then every statement in engine order as `fnc_describeRule`'s sentence, the raw statement in
+  the tooltip. The cross deletes it from the parsed draft and commits (as Review). A click opens it: a rule whose only
+  condition is `class=X` (not `X+`) of a class `getFacts` knows goes to Containers when the class is a container kind
+  and the rule sets `grid`/`like` (or neither size nor stack), else to Items - `einv_setup_selection` and `listState`
+  set to that class, as `fnc_open`'s focus does; groups, other rules and unknown classes go to Review.
+- **Class index and list:** unchanged - `fnc_buildIndex` / `fnc_indexChunk` read config in `fnc_defer` pieces of
+  `INDEX_BUDGET` into uiNamespace `einv_setup_index`; search, kind chips, "only own rules", pages of `LIST_PAGE`; only
+  the cards shown ask `einv_items_fnc_getInfo [class, draftRules, draftCache]`.
+- **The canvas (`fnc_uiCanvas`), one widget for both editors.** Model (a HashMap, `fnc_canvasFromBlocks`): `cols`
+  (`STORAGE_COLS`), `rows`, and three flat bool arrays indexed `row * cols + col` - `cells` (a cell or not), `right`
+  (a divider on the seam to its right), `below` (on the seam under it). Width fixed, so indices survive a change of
+  rows. Compartments (`fnc_canvasBlocks`) are the 4-neighbour components of the cells not cut by a divider, found by
+  flood fill in reading order of their first cell; each becomes `[w, h, holes]` - its bounding box, every box place not
+  in the component a hole (another component's cell too). `fnc_canvasFromBlocks` lays blocks out as
+  `einv_gui_fnc_flowCompartments` does (line breaks counting its 0.22-cell gaps, but no gap cells), puts a divider on
+  every seam between two different blocks and leaves holes empty, so it reads back to the same blocks in the same order;
+  it may be up to `CANVAS_ROWS_LOADED` (80) rows tall. `fnc_canvasBox` gives the bounding box of all cells. Drawing:
+  a panel per place (`CANVAS_ON` dark, `CANVAS_OFF` light), an optional faint picture over the box, a `uiHit` per place,
+  then per seam a 3-pixel line (accent when set) and a hit strip `CANVAS_SEAM_REACH` (20 %) of a cell into each
+  neighbour, inset by the same at its ends so the corners stay the places' - made last, so they lie on top. A click
+  flips the bool, recolours that one control at once (no redraw: 40 rows are ~1800 controls), moves the picture and
+  calls the caller's `onChange [canvas, arguments]`. Read-only (linked like=) shows set dividers but makes no hits.
+- **Preview (`fnc_drawPreview`, "This is how it looks"):** on the theme's panel in its cell colour - an item's tile
+  (`einv_gui_fnc_uiShape` in its category's `tileBg`, picture over the box) on a piece of grid, or a container's blocks
+  flowed with the inventory's gaps (a block beside another on the canvas may wrap here). Replaces its previous one.
+- **Items editor:** working copy `einv_setup_itemWork` (lowercase class -> canvas with `stack` and `start`), an 8x8
+  (`SHAPE_MAX`) canvas always shown under the steppers, built from getInfo's `footprint`. Across/down (1-8) lay a
+  rectangle at the box's top left (moved in at the edge): places in the old box keep their state, new ones become cells,
+  the rest goes; they show the box. Every click redraws the editor (few controls). Size text "2×3 cells" or "3 cells
+  shaped in 2×2", "N cells"; more than one component or none: a warning and Apply disabled. Apply writes `size=`
+  `einv_items_fnc_formatMask` of the one block (`WxH` when full, else the trimmed mask) if the canvas changed and the
+  text differs from getInfo's `shape`, and `stack=N` if it differs; Back to the preset takes `footprint`/`stack` away.
+- **Containers editor:** working copy `einv_setup_cellWork` (lowercase class -> canvas with `start`), made by the first
+  click, which redraws once (the "not applied" line and Discard appear beside the total and the buttons, never above the
+  canvas, so nothing moves under the mouse); later clicks update only the total and the preview. Canvas 8 wide,
+  rows stepper 1-40 (more rows are empty, fewer cut), Fill (all cells, dividers kept), Clear (all off), the scroll
+  position kept across its own redraws. Apply writes `grid=` `einv_items_fnc_formatGrid [["blocks", blocks]]` -
+  each component a mask block or `WxH`, joined by `+` in reading order - after the checks: no cell, more than
+  `MAX_CELLS` cells or `MAX_BLOCKS` blocks, a block taller than `MAX_ROWS`. Patterns, auto and cells load as the
+  blocks they resolve to (`einv_storage_fnc_blocksFor`) with "Editing replaces the pattern with exactly these cells".
+  Like another class, Unlink, Back to the preset and Discard as before.
+- **Writing (`fnc_upsertRule [class, set, remove]`):** unchanged - merges every rule whose only condition is `class=X`,
+  sets and removes fields, keeps the rest, appends it last, drops it when empty, commits.
 - Built and checked in code only: nothing of this has run in the game yet.
 
 ## Window details (0.4.0) - supersedes the parts above it contradicts

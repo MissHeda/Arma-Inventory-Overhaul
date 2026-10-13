@@ -101,12 +101,20 @@
 // Cards on one page of a class list: only those are drawn and asked what the rules make of them.
 #define LIST_PAGE 30
 
-// The ends of the Items step's numbers: an item at most 8 cells down (the rules would take more, the
-// window would not show it well), and a tile holding at most what the rules engine allows (MAX_STACK).
-#define EDIT_ITEM_ROWS 8
+// The most that share a tile in the Items step: what the rules engine allows (MAX_STACK). An item is
+// drawn on a canvas SHAPE_MAX cells each way.
 #define EDIT_STACK_MAX 999
 
-// The cell editor (fnc_drawCellEditor): a hole - a cell the compartment does not have - darker than the
-// glass, and a cell or hole under the mouse. A cell takes the theme's buttonHover.
-#define EDIT_HOLE [0, 0, 0, 0.32]
-#define EDIT_HOVER [1, 1, 1, 0.3]
+// The canvas both editors draw on (fnc_uiCanvas): a cell filled dark and a place without one light, as
+// cells picked on a sheet; each a little lighter under the mouse. A divider takes the theme's accent, a
+// seam under the mouse a faint one. The gap a click on a seam reaches into each cell beside it, as a
+// share of the cell.
+#define CANVAS_ON [0.12, 0.13, 0.15, 0.97]
+#define CANVAS_ON_HOVER [0.22, 0.23, 0.26, 0.97]
+#define CANVAS_OFF [1, 1, 1, 0.24]
+#define CANVAS_OFF_HOVER [1, 1, 1, 0.4]
+#define CANVAS_SEAM_HOVER 0.45
+#define CANVAS_SEAM_REACH 0.2
+// A canvas loaded from a grid may be taller than MAX_ROWS - compartments laid out one under the other
+// with room to their right -, up to this; drawn on, it is MAX_ROWS at most.
+#define CANVAS_ROWS_LOADED (MAX_ROWS * 2)

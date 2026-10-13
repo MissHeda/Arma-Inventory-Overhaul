@@ -56,10 +56,11 @@ GVAR(selection) = createHashMap;
 GVAR(stepKey) = {false};
 GVAR(theme) = createHashMap;
 
-// What the steps keep between their redraws: keep the own rules when picking another preset (Start); the
-// text shown at Review - 0 own, 1 full, 2 CBA line -, what is typed into it and not yet applied and what
+// What the steps keep between their redraws: the Start step past its welcome (fnc_drawWelcome) and keep
+// the own rules when picking another preset there; the text shown at Review - 0 own, 1 full, 2 CBA line -, what is typed into it and not yet applied and what
 // it was given to show; the personal preset picked; the text pasted into the import box; the banner
 // after someone else changed the setup; and the footer's hint, [text, theme colour].
+GVAR(startSetup) = false;
 GVAR(keepOwn) = true;
 GVAR(exportMode) = 0;
 GVAR(rawText) = "";
@@ -71,8 +72,8 @@ GVAR(hint) = ["", "text2"];
 
 // The Items and Containers steps: per step ("items", "containers") the list's [search text, chip, own
 // rules only, page] (fnc_drawClassList), and which typing is the last (fnc_drawResults waits for it); the
-// edits not applied yet, by lowercase class - [compartments, picked] (fnc_drawCellEditor) and [w, h,
-// stack] (fnc_drawItemEditor); the container that is picking the class it takes after (like=), "" for
+// edits not applied yet, by lowercase class - a canvas each (fnc_canvasFromBlocks; fnc_drawCellEditor,
+// and fnc_drawItemEditor with the stack); the container that is picking the class it takes after (like=), "" for
 // none; and the own rules by class, worked out once per draft text (fnc_ownClassRules). The class index
 // itself is in uiNamespace (fnc_buildIndex).
 GVAR(listState) = createHashMap;

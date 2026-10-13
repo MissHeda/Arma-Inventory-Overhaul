@@ -2,19 +2,26 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The right side of the Items step: the size and stack of the class picked in the list.
+ * The right side of the Items step: the size, shape and stack of the class picked in the list.
  *   - What it is (picture, name, class, family, mod, weight) and what the draft makes of it now, with
  *     where that comes from (fnc_answerText).
- *   - Its width (1-8) and height (1-8) in cells and how many share a tile (1-999, with a few common
- *     numbers to pick at once), and the cells it would take drawn with its picture on them. Weapons,
- *     uniforms, vests and backpacks never share a tile - their stack cannot be set.
- *   - Apply writes what differs from now as class=X > size=WxH stack=N (fnc_upsertRule) - the rest of
- *     that rule stays -, Discard drops the edits, Back to the preset takes the class's own size and stack
- *     away.
+ *   - Its width and height in cells (1-8) for a quick rectangle, and how many share a tile (1-999, with
+ *     a few common numbers to pick at once). Weapons, uniforms, vests and backpacks never share a tile -
+ *     their stack cannot be set.
+ *   - Under them the canvas (fnc_uiCanvas), SHAPE_MAX cells each way, always shown: a click makes a place
+ *     one of the item's cells or takes it away, so an L or a T is drawn cell by cell. The steppers and the
+ *     canvas are one: a stepper lays a rectangle of its size where the cells are - the places that were
+ *     in their box keep what they were, the new ones become cells, the rest goes -, and the steppers say
+ *     the box of what is drawn. Beside it how it looks as a tile (fnc_drawPreview), its size in words, and
+ *     a warning while its cells are not one piece (fnc_canvasBlocks) - then Apply cannot be pressed.
+ *   - Apply writes what differs from now as class=X > size=WxH, or size=xx/x- for a shape
+ *     (einv_items_fnc_formatMask), and stack=N (fnc_upsertRule) - the rest of that rule stays -, Discard
+ *     drops the edits, Back to the preset takes the class's own size and stack away.
  *
- * Edits go into a working copy per class (GVAR(itemWork): lowercase class -> [w, h, stack]) and reach the
- * draft only with Apply. A change draws this side again on its own (its place and arguments in uiNamespace
- * QGVAR(editorArgs)); the list stays.
+ * Edits go into a working copy per class (GVAR(itemWork): lowercase class -> the canvas, with "stack" and
+ * "start" - what it held when it was made) and reach the draft only with Apply. A change draws this side
+ * again on its own (its place and arguments in uiNamespace QGVAR(editorArgs)) - there are few controls,
+ * an 8x8 canvas -; the list stays.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -60,6 +67,7 @@ private _colorText2 = _theme getOrDefault ["text2", [0.698, 0.734, 0.784, 1]];
 private _muted = _theme getOrDefault ["muted", [0.522, 0.553, 0.604, 1]];
 private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
 private _warn = _theme getOrDefault ["warn", [0.93, 0.75, 0.2, 1]];
+private _loss = _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];
 
 [_display, _box, [0, 0, _width, _height], "", _theme] call FUNC(uiCard);
 
@@ -83,11 +91,23 @@ private _forced = (_src getOrDefault ["stack", ""]) isEqualTo "forced";
 
 (_info getOrDefault ["size", [1, 1]]) params ["_sizeW", "_sizeH"];
 
-private _start = [_sizeW, _sizeH, _info getOrDefault ["stack", 1]];
-private _work = GVAR(itemWork) getOrDefault [_lc, +_start];
-private _dirty = _work isNotEqualTo _start;
+private _startShape = _info getOrDefault ["shape", format ["%1x%2", _sizeW, _sizeH]];
+private _startStack = _info getOrDefault ["stack", 1];
+private _canvas = GVAR(itemWork) getOrDefault [_lc, createHashMap];
 
-_work params ["_workW", "_workH", "_workStack"];
+// No edit yet: a canvas of what it is now, its shape in the top left corner. It becomes the working copy
+// with the first change.
+if (count _canvas == 0) then {
+    _canvas = [[_info getOrDefault ["footprint", [_sizeW, _sizeH, []]]], SHAPE_MAX, SHAPE_MAX] call FUNC(canvasFromBlocks);
+    _canvas set ["start", [_canvas] call FUNC(canvasBlocks)];
+    _canvas set ["stack", _startStack];
+};
+
+private _blocks = [_canvas] call FUNC(canvasBlocks);
+private _workStack = _canvas getOrDefault ["stack", _startStack];
+private _dirty = _blocks isNotEqualTo (_canvas getOrDefault ["start", []]) || {_workStack != _startStack};
+
+([_canvas] call FUNC(canvasBox)) params ["", "", "_boxW", "_boxH"];
 
 // ----- What it is -----
 
@@ -147,10 +167,6 @@ if (_forced) then {
     _cursorY = _cursorY + ([_display, _box, [_innerX, _cursorY, _innerW], LLSTRING(Items_Forced), TEXT_SMALL, _muted, _font] call FUNC(uiText)) + UNIT * 0.1;
 };
 
-if (_dirty) then {
-    _cursorY = _cursorY + ([_display, _box, [_innerX, _cursorY, _innerW], LLSTRING(Items_Unapplied), TEXT_SMALL, _warn, _font] call FUNC(uiText)) + UNIT * 0.1;
-};
-
 _cursorY = _cursorY + UNIT * 0.3;
 
 // ----- Width, height and stack -----
@@ -160,16 +176,34 @@ private _labelW = SQUARE(UNIT * 3.6);
 private _stepperW = SQUARE(UNIT * 5);
 private _gap = SQUARE(UNIT * 0.3);
 
-// Every number: into the working copy, and this side drawn again.
-private _setValue = {
+// Across or down: a rectangle of that size where the cells are. The places that were in their box keep
+// what they were - an L stays an L, one column wider -, the new ones become cells, the rest goes. Moved
+// in where it would reach past the canvas.
+private _resize = {
     params ["_value", "_arguments"];
-    _arguments params ["_class", "_start", "_index"];
+    _arguments params ["_class", "_canvas", "_axis"];
 
-    private _lc = toLowerANSI _class;
-    private _work = GVAR(itemWork) getOrDefault [_lc, +_start];
+    private _cols = _canvas get "cols";
+    private _rows = _canvas get "rows";
+    private _cells = _canvas get "cells";
 
-    _work set [_index, _value];
-    GVAR(itemWork) set [_lc, _work];
+    ([_canvas] call FUNC(canvasBox)) params ["_boxCol", "_boxRow", "_boxW", "_boxH"];
+
+    private _newW = [_boxW max 1, _value] select (_axis == 0);
+    private _newH = [_boxH max 1, _value] select (_axis == 1);
+    private _left = _boxCol min (_cols - _newW);
+    private _top = _boxRow min (_rows - _newH);
+
+    {
+        private _col = _forEachIndex mod _cols;
+        private _row = floor (_forEachIndex / _cols);
+        private _inside = _col >= _left && {_col < _left + _newW} && {_row >= _top} && {_row < _top + _newH};
+        private _before = _boxW > 0 && {_col >= _boxCol} && {_col < _boxCol + _boxW} && {_row >= _boxRow} && {_row < _boxRow + _boxH};
+
+        _cells set [_forEachIndex, _inside && {!_before || {_x}}];
+    } forEach +_cells;
+
+    GVAR(itemWork) set [toLowerANSI _class, _canvas];
 
     [] call FUNC(drawItemEditor);
 };
@@ -177,22 +211,33 @@ private _setValue = {
 [_display, _box, [_innerX, _cursorY, _labelW, _rowH], LLSTRING(Col_Size), TEXT_SMALL, _colorText2, _fontBold, 0] call EFUNC(gui,uiLabel);
 
 [
-    _display, _box, [_innerX + _labelW, _cursorY, _stepperW, _rowH], _workW, [1, STORAGE_COLS max _workW, 1], _theme,
-    _setValue, [_class, _start, 0], LLSTRING(Cont_Cols)
+    _display, _box, [_innerX + _labelW, _cursorY, _stepperW, _rowH], _boxW max 1, [1, SHAPE_MAX, 1], _theme,
+    _resize, [_class, _canvas, 0], LLSTRING(Cont_Cols)
 ] call FUNC(uiStepper);
 
 [
-    _display, _box, [_innerX + _labelW + _stepperW + _gap, _cursorY, _stepperW, _rowH], _workH, [1, EDIT_ITEM_ROWS max _workH, 1], _theme,
-    _setValue, [_class, _start, 1], LLSTRING(Cont_Rows)
+    _display, _box, [_innerX + _labelW + _stepperW + _gap, _cursorY, _stepperW, _rowH], _boxH max 1, [1, SHAPE_MAX, 1], _theme,
+    _resize, [_class, _canvas, 1], LLSTRING(Cont_Rows)
 ] call FUNC(uiStepper);
 
 _cursorY = _cursorY + _rowH + UNIT * 0.3;
+
+// How many share a tile: into the working copy, and this side drawn again.
+private _setStack = {
+    params ["_value", "_arguments"];
+    _arguments params ["_class", "_canvas"];
+
+    _canvas set ["stack", _value];
+    GVAR(itemWork) set [toLowerANSI _class, _canvas];
+
+    [] call FUNC(drawItemEditor);
+};
 
 [_display, _box, [_innerX, _cursorY, _labelW, _rowH], LLSTRING(Items_PerTile), TEXT_SMALL, [_colorText2, DISABLED_INK] select _forced, _fontBold, 0] call EFUNC(gui,uiLabel);
 
 [
     _display, _box, [_innerX + _labelW, _cursorY, _stepperW, _rowH], [_workStack, 1] select _forced, [1, EDIT_STACK_MAX, 1], _theme,
-    _setValue, [_class, _start, 2], "%1", !_forced
+    _setStack, [_class, _canvas], "%1", !_forced
 ] call FUNC(uiStepper);
 
 // A few common stacks at one click - the stepper alone would take long to 100.
@@ -205,48 +250,91 @@ private _chipH = UNIT * 0.9;
 
     [_display, _box, [_chipX, _cursorY + (_rowH - _chipH) / 2, _chipW, _chipH], str _x, !_forced && {_workStack == _x}, _theme, {
         params ["", "_arguments"];
-        _arguments params ["_class", "_start", "_value"];
+        _arguments params ["_class", "_canvas", "_value"];
 
-        private _lc = toLowerANSI _class;
-        private _work = GVAR(itemWork) getOrDefault [_lc, +_start];
-
-        _work set [2, _value];
-        GVAR(itemWork) set [_lc, _work];
+        _canvas set ["stack", _value];
+        GVAR(itemWork) set [toLowerANSI _class, _canvas];
 
         [] call FUNC(drawItemEditor);
-    }, [_class, _start, _x], !_forced] call FUNC(uiChip);
+    }, [_class, _canvas, _x], !_forced] call FUNC(uiChip);
 
     _chipX = _chipX + _chipW + _gap;
 } forEach [1, 5, 10, 20, 50, 100];
 
 _cursorY = _cursorY + _rowH + UNIT * 0.5;
 
-// ----- The cells it would take, its picture on them -----
+// ----- The canvas, and beside it how it looks -----
 
 private _buttonH = UNIT * 1.15;
 private _buttonsY = _height - CARD_PAD_Y - _buttonH;
-private _cellH = ((_buttonsY - UNIT * 0.4 - _cursorY) / (_workH max 1)) min (UNIT * 1.2);
+private _cellH = ((_buttonsY - UNIT * 0.4 - _cursorY) / SHAPE_MAX) min (UNIT * 1.1);
 private _cellW = SQUARE(_cellH);
+private _canvasW = SHAPE_MAX * _cellW;
+private _canvasH = SHAPE_MAX * _cellH;
 
-if (_cellH > UNIT * 0.3) then {
-    for "_cellRow" from 0 to (_workH - 1) do {
-        for "_cellCol" from 0 to (_workW - 1) do {
-            [
-                _display, _box, [_innerX + _cellCol * _cellW, _cursorY + _cellRow * _cellH, _cellW - pixelW, _cellH - pixelH],
-                _theme getOrDefault ["buttonHover", [1, 1, 1, 0.16]]
-            ] call EFUNC(gui,uiPanel);
-        };
-    };
+[_display, _box, [_innerX, _cursorY, _canvasW, _canvasH], _canvas, _theme, createHashMapFromArray [
+    ["cellH", _cellH],
+    ["picture", _picture],
+    ["scrollId", "itemCanvas"],
+    ["arguments", [_class]],
+    ["onChange", {
+        params ["_canvas", "_arguments"];
+        _arguments params ["_class"];
 
-    if (_picture isNotEqualTo "") then {
-        [_display, _box, [_innerX, _cursorY, _workW * _cellW - pixelW, _workH * _cellH - pixelH], _picture] call EFUNC(gui,uiPicture);
-    };
+        GVAR(itemWork) set [toLowerANSI _class, _canvas];
 
-    [
-        _display, _box, [_innerX + _workW * _cellW + SQUARE(UNIT * 0.4), _cursorY, _innerW - _workW * _cellW - SQUARE(UNIT * 0.4), UNIT * 0.75],
-        format [LLSTRING(Items_Takes), _workW * _workH], TEXT_SMALL, _muted, _font, 0
-    ] call EFUNC(gui,uiLabel);
+        [] call FUNC(drawItemEditor);
+    }]
+]] call FUNC(uiCanvas);
+
+private _sideX = _innerX + _canvasW + SQUARE(UNIT * 0.6);
+private _sideW = _innerX + _innerW - _sideX;
+private _sideY = _cursorY;
+private _onePiece = count _blocks == 1;
+
+[_display, _box, [_sideX, _sideY, _sideW, UNIT * 0.75], LLSTRING(Preview_Title), TEXT_SMALL, _muted, _fontBold, 0] call EFUNC(gui,uiLabel);
+
+_sideY = _sideY + UNIT * 0.8;
+
+private _previewH = _canvasH * 0.5;
+
+[
+    _display, _box, [_sideX, _sideY, _sideW, _previewH], _theme, [[], _blocks] select _onePiece,
+    [_picture, _info getOrDefault ["category", CATEGORY_MISC]]
+] call FUNC(drawPreview);
+
+_sideY = _sideY + _previewH + UNIT * 0.3;
+
+// Its size in words: the box and its cells, or what keeps it from being one item.
+private _cellCount = {_x} count (_canvas get "cells");
+private _sizeText = LLSTRING(Items_NoCellsTitle);
+
+if (_onePiece) then {
+    (_blocks select 0) params ["_w", "_h", "_holes"];
+
+    _sizeText = [format [LLSTRING(Value_SizeShape), _w, _h, _cellCount], format [LLSTRING(Value_Size), _w, _h]] select (_holes isEqualTo []);
 };
+
+if (count _blocks > 1) then {
+    _sizeText = format [LLSTRING(Items_Pieces), count _blocks];
+};
+
+_sideY = _sideY + ([_display, _box, [_sideX, _sideY, _sideW], _sizeText, TEXT_BODY, [_colorText, _loss] select !_onePiece, _fontBold] call FUNC(uiText)) + UNIT * 0.05;
+_sideY = _sideY + ([_display, _box, [_sideX, _sideY, _sideW], format [LLSTRING(Cont_Cells), _cellCount], TEXT_SMALL, _colorText2, _font] call FUNC(uiText)) + UNIT * 0.2;
+
+if (!_onePiece) then {
+    _sideY = _sideY + ([
+        _display, _box, [_sideX, _sideY, _sideW], [LLSTRING(Items_NotConnected), LLSTRING(Items_NoCells)] select (_blocks isEqualTo []), TEXT_SMALL, _loss, _font
+    ] call FUNC(uiText)) + UNIT * 0.2;
+};
+
+// Said beside the canvas rather than above it: the canvas must not move under the mouse after the first
+// click.
+if (_dirty) then {
+    _sideY = _sideY + ([_display, _box, [_sideX, _sideY, _sideW], LLSTRING(Items_Unapplied), TEXT_SMALL, _warn, _font] call FUNC(uiText)) + UNIT * 0.2;
+};
+
+[_display, _box, [_sideX, _sideY, _sideW], LLSTRING(Items_CanvasHelp), TEXT_SMALL, _muted, _font] call FUNC(uiText);
 
 // ----- Apply, Discard, Back to the preset -----
 
@@ -263,18 +351,23 @@ private _fnc_buttonW = {
 private _applyW = [LLSTRING(Items_Apply), true] call _fnc_buttonW;
 
 [_display, _box, [_buttonX, _buttonsY, _applyW, _buttonH], LLSTRING(Items_Apply), UI_TEX(icon_check_ca), _theme, {
-    params ["_class", "_start", "_forced"];
+    params ["_class", "_canvas", "_startShape", "_startStack", "_forced"];
 
     private _lc = toLowerANSI _class;
+    private _blocks = [_canvas] call FUNC(canvasBlocks);
 
-    (GVAR(itemWork) getOrDefault [_lc, _start]) params ["_w", "_h", "_stack"];
-    _start params ["_startW", "_startH", "_startStack"];
+    if (count _blocks != 1) exitWith {
+        [LLSTRING(Items_NotConnected), "loss"] call FUNC(setHint);
+    };
 
     // Only what differs from now: a size by mass or a stack from the preset stays theirs when untouched.
+    // A shape is written as drawn, its edges trimmed; a full box as WxH.
     private _set = createHashMap;
+    private _shape = (_blocks select 0) call EFUNC(items,formatMask);
+    private _stack = _canvas getOrDefault ["stack", _startStack];
 
-    if (_w != _startW || {_h != _startH}) then {
-        _set set ["footprint", format ["%1x%2", _w, _h]];
+    if (_blocks isNotEqualTo (_canvas getOrDefault ["start", []]) && {_shape isNotEqualTo _startShape}) then {
+        _set set ["footprint", _shape];
     };
 
     if (!_forced && {_stack != _startStack}) then {
@@ -290,7 +383,7 @@ private _applyW = [LLSTRING(Items_Apply), true] call _fnc_buttonW;
 
     [format [LLSTRING(Hint_SizeApplied), _class], "text2"] call FUNC(setHint);
     [_class, _set] call FUNC(upsertRule);
-}, [_class, _start, _forced], true, "accent", LLSTRING(Items_ApplyTip)] call FUNC(uiAction);
+}, [_class, _canvas, _startShape, _startStack, _forced], _onePiece, "accent", LLSTRING(Items_ApplyTip)] call FUNC(uiAction);
 
 _buttonX = _buttonX + _applyW + _gap;
 
