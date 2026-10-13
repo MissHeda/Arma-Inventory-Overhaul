@@ -11,15 +11,17 @@ all") or puts everything of yours into the box beside it ("Put all in").
   the inventory, or point at it and press the key; the bar shows on the screen in Arma's HUD style.
 
 - **Grid panel in ACE Arsenal:** pick the uniform, vest or backpack tab and its grid opens beside ACE's list.
-  What you add lands in the first free cell, drag tiles to sort them (R turns, stacks merge), drag them out of
-  the panel - or right click, or Delete - to take them out. With no free cells ACE's add is taken back and the
-  message says how much room to make. Drag a row out of ACE's list onto a free spot of the grid to put it in
-  there (the wheel sets how many, Ctrl+wheel over a tile adds or takes out one). Under the grid a staging space
-  holds things while you rearrange a full container - it grows as you fill it -; whatever is left in it is
-  deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is blocked, by server setting.
+  What you add lands in the first free cell, drag tiles to sort them (R turns, stacks merge, a badge shows
+  n/stack), drag them out of the panel - or right click, or Delete - to take them out. With no free cells ACE's
+  add is taken back and the message says how much room to make. Drag a row out of ACE's list onto a free spot of
+  the grid to put it in there (the wheel sets how many, Ctrl+wheel over a tile adds or takes out one). Under the
+  grid a staging space holds things while you rearrange a full container - it grows as you fill it -; whatever
+  is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is
+  blocked, by server setting.
 
-**Status:** in development, all seven phases built and in testing: two looks (Tarkov, Glass), drag and
-drop between containers and equipment slots, searching loot, server-checked moves in multiplayer.
+**Status:** 0.4.0, in testing: drag and drop between containers and equipment slots, searching loot and
+server-checked moves in multiplayer are built, and this version adds the grid panel in ACE Arsenal, shaped
+grids and items, a setup wizard where you paint the compartments, and cells as the only room (no weight limit).
 The plan is in [docs/BRIEFING.md](docs/BRIEFING.md), the design in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Requirements
@@ -57,13 +59,15 @@ Tools).
 
 How big items are, how many share a tile and how containers are split up is one text of rules, the
 CBA setting "Inventory rules" (`einv_items_rules`), the same for everyone. The setup wizard writes it for you
-(ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory) - you draw the cells of an item
+(ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory): you draw the cells of an item
 (an L, a T), paint the cells of a uniform, vest or backpack in colours - touching cells of one colour are one
-compartment, and it looks in the inventory exactly as painted - or build it block by block, or make it the same as
-another class, and its start page shows what you changed -, but it is plain text.
+compartment, and it looks in the inventory exactly as painted -, build it block by block in Blocks mode, or
+make a class the same as another one (Same as: follow it with `like=` or copy its cells); its start page shows
+what you changed. It is plain text all the same.
 It builds on a preset: Default (relaxed: realistic-ish sizes, containers a fifth roomier than their load),
 Realism (realistic sizes: longer rifles, magazine-rig vests, a fixed grid per backpack size, stacks as in
-Default) or Weight-like (an item takes as many cells as it weighs). Grids are ten cells wide.
+Default; `base=tarkov` of older texts reads as Realism) or Weight-like (an item takes as many cells as it
+weighs). Grids are ten cells wide.
 
 - **Your own classes and kits:** `class=X+` covers X and every class built on it, from any mod -
   `class=My_Medic_Kit+ > size=2x2 stack=1 weight=1.5 name=Medic_kit`. A later rule beats an earlier one.
@@ -101,12 +105,12 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   and the engine's own inventory is locked for them as well. ACE's vehicle lock is respected: without the key
   a locked vehicle's inventory is shut.
 - **Weight:** weight only colours the soldier's weight bar and drives ACE's fatigue: the bar turns yellow where
-  ACE's fatigue starts to tire a jogging soldier (26.7 kg at ACE's defaults, it follows ACE's load factor and the
-  soldier's performance), red at 45 kg (no sprinting, tiring faster) and ends at 60 kg (walking only) - CBA
-  settings Enhanced Inventory > Weight. Nothing is ever refused because of weight, and no container has a weight
-  limit: what fits into a uniform, vest, backpack, crate or vehicle is decided by its free cells alone (a
-  container's config load is only used to size its default grid when nobody defined one). A section's caption
-  still tells what its contents weigh.
+  ACE's fatigue starts to tire a jogging soldier (26.7 kg at ACE's defaults, it follows ACE's load factor and
+  the soldier's performance), red at 45 kg (no sprinting, tiring faster) and ends at 60 kg (walking only), and
+  its text names the next limit and what it does to movement - CBA settings Enhanced Inventory > Weight. Nothing
+  is ever refused because of weight, and no container has a weight limit: what fits into a uniform, vest,
+  backpack, crate or vehicle is decided by its free cells alone (a container's config load is only used to size
+  its default grid when nobody defined one). A section's caption still tells what its contents weigh.
 - **Hotbar:** the keys 4 to 0 belong to the hotbar unless the CBA setting "Hotbar" (`einv_hotbar_enabled`) is
   switched off - a server setting, the same for everyone. Only items that do something can be bound: bandages,
   tourniquets, splints and other ACE/ACM medicine are used on yourself through ACE's own treatment, grenades
@@ -120,7 +124,7 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   crates, the ground, vehicles and bodies always open in Enhanced Inventory, also for players who switched
   the replacement off. Scripts can move items with `einv_storage_fnc_moveEntry`, `einv_storage_fnc_equip`
   and `einv_storage_fnc_unequip`; `[cursorObject] call einv_storage_fnc_dumpPlaces` writes where things lie
-  to the RPT.
+  to the RPT, and the client setting `einv_storage_debugDrop` writes every step of a backpack drop to it.
 - **Arsenal:** ACE Arsenal is the arsenal - `ace_arsenal_fnc_initBox` and `ace_arsenal_fnc_openBox`, its boxes,
   loadouts and Zeus arsenal work as always; the grid panel hooks into its window (also in the Eden editor), and
   free cells are the only limit on what goes in. The vanilla Virtual Arsenal is a server setting,

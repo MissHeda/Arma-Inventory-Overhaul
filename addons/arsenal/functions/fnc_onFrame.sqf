@@ -23,6 +23,12 @@
  * over the panel - the first press on a tile, a caption's click and the wheel went to it instead of the
  * panel. A click into the list takes the focus back for the list's own keys.
  *
+ * And once the mouse has left the panel with nothing held, the focus goes back to ACE's list (IDC 15) -
+ * if it was the sink's: ACE's arrow keys move the list's selection only while the list has the focus, and
+ * without this the player would have to click the list first after every visit to the panel. Not before
+ * the name at the mouse and the menu are gone: the list focused would lie over them where they reach
+ * over it, which is exactly why the sink has the focus meanwhile.
+ *
  * Where the column stood when Ctrl and the wheel added or took out a tile is held for a few frames
  * against the wheel's own step (fnc_onWheel). A move into or out of the staging space tells ACE once
  * the count in the container changed (fnc_onDrop): its list, load bar and event, as after a removal.
@@ -96,6 +102,20 @@ if (
     && {EGVAR(gui,dragging) || {inputMouse 0 == 0 && {inputMouse 1 == 0} && {[_mouse] call FUNC(isOver)}}}
 ) then {
     ctrlSetFocus _sink;
+};
+
+// ----- The focus back to ACE's list once the mouse is off the panel, once: from the sink only -----
+private _tip = uiNamespace getVariable [QEGVAR(gui,tipShown), controlNull];
+
+if (
+    !isNull _sink && {_focus isEqualTo _sink} && {!_holding} && {!([_mouse] call FUNC(isOver))}
+    && {isNull _tip || {!ctrlShown _tip}} && {(uiNamespace getVariable [QEGVAR(gui,menu), []]) isEqualTo []}
+) then {
+    private _list = _display displayCtrl ARSENAL_IDC_LIST;
+
+    if (!isNull _list && {ctrlShown _list} && {ctrlEnabled _list}) then {
+        ctrlSetFocus _list;
+    };
 };
 
 // ----- The column held where it stood against the wheel's own step -----

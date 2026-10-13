@@ -5,12 +5,10 @@ ADDON = false;
 
 #include "XEH_PREP.hpp"
 
-// The wizard's steps: id, name in the stringtable, the function that draws it. A step whose function is
-// not there is shown greyed out, "coming in the next version" - the later steps join by bringing their
-// functions, without anything here changing.
+// The wizard's steps: id, name in the stringtable, the function that draws it. Group rules (@group > ...)
+// have no step of their own: they are edited in the Review step's text, like any statement.
 GVAR(steps) = [
     ["start", LSTRING(Step_Start), QFUNC(drawStart)],
-    ["groups", LSTRING(Step_Groups), QFUNC(drawGroups)],
     ["items", LSTRING(Step_Items), QFUNC(drawItems)],
     ["containers", LSTRING(Step_Containers), QFUNC(drawContainers)],
     ["review", LSTRING(Step_Review), QFUNC(drawReview)]

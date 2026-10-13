@@ -12,7 +12,7 @@
  * quiet: they were told already), which checks reach and permission again.
  *
  * Arguments:
- * 0: Step to open at, 0 (Start) to 4 (Review) <NUMBER> (default: 0)
+ * 0: Step to open at, 0 (Start) to 3 (Review) <NUMBER> (default: 0)
  * 1: Class to look at in that step, "" for none <STRING> (default: "")
  *
  * Return Value:

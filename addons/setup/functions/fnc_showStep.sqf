@@ -6,20 +6,20 @@
  * goes, a new one is made, and the step's function draws into it ([display, group, theme, arguments]).
  * Every change of the draft ends here, so what is shown is always the draft as it is.
  *
- * A step not built yet - its function is not there - opens Start instead. Drawn again in the same step,
+ * A step that is not there (out of range) opens Start instead. Drawn again in the same step,
  * its scrolling lists keep where they were scrolled (each one named by QGVAR(scrollId) on its group),
  * put back a moment later: right after it is made a group does not know its height yet, and the engine
  * puts it back to the top (seen in the inventory, 2026-10-08).
  *
  * Arguments:
- * 0: Step, 0 (Start) to 4 (Review) <NUMBER> (default: the open step)
+ * 0: Step, 0 (Start) to 3 (Review) <NUMBER> (default: the open step)
  * 1: Arguments for the step <ARRAY> (default: [])
  *
  * Return Value:
  * None
  *
  * Example:
- * [4] call einv_setup_fnc_showStep;
+ * [3] call einv_setup_fnc_showStep;
  *
  * Public: No
  */
@@ -36,7 +36,7 @@ call FUNC(closePopover);
 
 private _steps = GVAR(steps);
 
-if (_step < 0 || {_step >= count _steps} || {isNil {missionNamespace getVariable ((_steps select _step) select 2)}}) then {
+if (_step < 0 || {_step >= count _steps}) then {
     _step = 0;
 };
 

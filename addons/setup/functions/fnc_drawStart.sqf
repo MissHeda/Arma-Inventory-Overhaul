@@ -247,7 +247,7 @@ _importHit setVariable [QGVAR(action), [{
 }, [_importHit]]];
 
 [_display, _group, [_statusX + _statusW - _buttonW, _buttonY, _buttonW, _buttonH], LLSTRING(Start_ToReview), "", _theme, {
-    [4] call FUNC(showStep);
+    [GVAR(steps) findIf {(_x select 0) isEqualTo "review"}] call FUNC(showStep);
 }, [], true, "accent"] call FUNC(uiAction);
 
 // What you changed

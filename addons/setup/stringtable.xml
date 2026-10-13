@@ -394,20 +394,8 @@
         <Key ID="STR_einv_setup_Groups_All">
             <English>All</English>
         </Key>
-        <Key ID="STR_einv_setup_Groups_Covers">
-            <English>covers %1 items</English>
-        </Key>
-        <Key ID="STR_einv_setup_Groups_New">
-            <English>New group</English>
-        </Key>
-        <Key ID="STR_einv_setup_Groups_Own">
-            <English>Your groups</English>
-        </Key>
         <Key ID="STR_einv_setup_Groups_Reset">
             <English>Back to the preset</English>
-        </Key>
-        <Key ID="STR_einv_setup_Groups_ShowItems">
-            <English>Show its items</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_BadClass">
             <English>%1 cannot be written into the rules: class names there take letters, digits and _ only.</English>
@@ -1039,17 +1027,11 @@
         <Key ID="STR_einv_setup_Step_Containers">
             <English>Containers</English>
         </Key>
-        <Key ID="STR_einv_setup_Step_Groups">
-            <English>Groups</English>
-        </Key>
         <Key ID="STR_einv_setup_Step_Items">
             <English>Items</English>
         </Key>
         <Key ID="STR_einv_setup_Step_Review">
             <English>Review</English>
-        </Key>
-        <Key ID="STR_einv_setup_Step_Soon">
-            <English>Coming in the next version</English>
         </Key>
         <Key ID="STR_einv_setup_Step_Start">
             <English>Start</English>

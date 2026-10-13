@@ -5,8 +5,7 @@
  * Draws what stays around every step, anew each time a step is drawn (fnc_showStep):
  *   - the header: the title; where it saves and how many changes wait ("Server · forced · 4 changes", or
  *     "Read-only"); Undo, Redo and Close; under it the steps - the open one in the accent, a dot on a step
- *     with changes, the steps not built yet greyed out with "Coming in the next version"; then, after
- *     someone else changed the setup, a banner to reload or keep the own changes.
+ *     with changes; then, after someone else changed the setup, a banner to reload or keep the own changes.
  *   - the footer: the keys on the left, the last message in the middle (fnc_setHint), Back, Next and Save
  *     on the right - Apply in CBA's menu, where CBA's own OK saves.
  * Each in a group of its own inside the wizard's pane, so the step between them never lies under either.
@@ -143,13 +142,11 @@ private _gap = SQUARE(UNIT * 0.3);
 private _pillW = (_innerW - _gap * (count _steps - 1)) / count _steps;
 
 {
-    _x params ["", "_nameKey", "_function"];
+    _x params ["", "_nameKey"];
 
-    private _available = !isNil {missionNamespace getVariable _function};
     private _current = _forEachIndex == GVAR(step);
     private _rect = [_padX + _forEachIndex * (_pillW + _gap), _stepsY, _pillW, WIZ_STEPS_H];
     private _label = format ["%1   %2", _forEachIndex + 1, localize _nameKey];
-    private _tooltip = ["", LLSTRING(Step_Soon)] select !_available;
 
     // The open step in the accent; a click on it only draws it again.
     [
@@ -157,11 +154,11 @@ private _pillW = (_innerW - _gap * (count _steps - 1)) / count _steps;
             params ["_step"];
 
             [_step] call FUNC(showStep);
-        }, [_forEachIndex], _available, ["", "accent"] select _current, _tooltip
+        }, [_forEachIndex], true, ["", "accent"] select _current
     ] call FUNC(uiAction);
 
     // A dot on a step holding changes: Start for the preset and the cell size, Review for the statements.
-    private _changed = [_headChanged, false, false, false, _statementsChanged] param [_forEachIndex, false];
+    private _changed = [_headChanged, false, false, _statementsChanged] param [_forEachIndex, false];
 
     if (_changed) then {
         private _dotH = WIZ_STEPS_H * 0.26;
@@ -233,22 +230,9 @@ private _keyX = _padX;
     [LLSTRING(Key_Redo), LLSTRING(Redo)]
 ];
 
-// Save, Next and Back, from the right edge inwards. Back and Next skip the steps not built yet.
-private _available = _steps apply {!isNil {missionNamespace getVariable (_x select 2)}};
-private _back = -1;
-private _next = -1;
-
-for "_index" from (GVAR(step) - 1) to 0 step -1 do {
-    if (_available select _index) exitWith {
-        _back = _index;
-    };
-};
-
-for "_index" from (GVAR(step) + 1) to (count _steps - 1) do {
-    if (_available select _index) exitWith {
-        _next = _index;
-    };
-};
+// Save, Next and Back, from the right edge inwards. Back and Next are the neighbouring steps; none at the ends.
+private _back = GVAR(step) - 1;
+private _next = [-1, GVAR(step) + 1] select (GVAR(step) + 1 < count _steps);
 
 private _fnc_buttonW = {
     params ["_text"];
