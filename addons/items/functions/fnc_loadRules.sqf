@@ -17,7 +17,7 @@
  * settings reach a client in either order. Another mod changing einv_gridSize and the like in its
  * config does not show in the hash.
  *
- * A rules text given here stands in for the setting's, for testing, on this machine only: it is kept
+ * A rules text given here stands in for the setting's, for testing, in single player or on the server only: it is kept
  * (einv_items_rulesOverride) and read in the setting's place (fnc_rulesInputs), so fnc_currentRules
  * does not compile the setting's text again behind its back and everything that asks for the rules
  * gets the test text. It holds until an empty text is given - a change to einv_items_rules shows
@@ -39,6 +39,13 @@
  */
 
 params [["_text", nil, [""]]];
+
+// The rules are the server's, the same for everyone: a client in multiplayer may not put a text of
+// its own into effect, not even from the debug console. The hook stays for single player and the server.
+if (!isNil "_text" && {isMultiplayer && {!isServer}}) then {
+    diag_log text "einv: rules override ignored on a client - the rules are the server's";
+    _text = nil;
+};
 
 if (!isNil "_text") then {
     if (_text isEqualTo "") then {
