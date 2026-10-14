@@ -8,12 +8,12 @@
  * A shaped compartment's holes (einv_storage_fnc_blocksFor) are drawn as no cell at all: no surface,
  * no line, nothing to hover (fnc_createGrid).
  *
- * Compartments drawn on a canvas (grid=aab/acc) lie where they were drawn, with the flow's gap on every
- * seam where two of them meet (fnc_canvasSeams): their places bring each column's and row's offset, and
- * the grid keeps them (fnc_createGrid). Each is a grid of its own, with "pos" where it lies on the
- * canvas, and draws its frame as a flowed block does - around each piece of it between two seams, so
- * one that reaches over a seam (the ring of grid=aaa/aba/aaa) shows the gap inside it too, and the two
- * cases look alike.
+ * Compartments drawn on a canvas (grid=aab/acc) touch, a cell's pitch apart like the cells of one
+ * compartment. Each is a grid of its own, with "pos" where it lies on the canvas, and draws its cells and
+ * its frame in by half the flow's gap on every cell side that borders another compartment's cell
+ * (fnc_canvasInsets, the place brings them, the grid keeps them): two that meet show the gap and two
+ * frames a flowed block would, while every cell keeps its place and a compartment stays one whole space
+ * however its neighbours are cut.
  *
  * Each grid gets what moving items in and out of it needs (fnc_onMouseButton, fnc_endDrag):
  *   "container" - the section's container, objNull for a kit's
@@ -179,73 +179,132 @@ private _fnc_shapeLines = {
     };
 };
 
-// The runs [first, last] of a compartment's columns (rows) between the seams inside it: where the next
-// one starts more than a cell's pitch after the one before (fnc_canvasSeams) - _step, the pitch and half
-// a pixel more. One run for no seams.
-private _fnc_pieces = {
-    params ["_offsets", "_count", "_step"];
+// The lines of a canvas's compartment drawn in beside another one (fnc_canvasInsets): every cell's own
+// frame - the cell as fnc_createGrid draws it, a pixel bigger all round - and where two cells of it meet
+// the one line between them. One surface each would overlap there and on the corners, and the
+// see-through lines would show it; so the frames are joined first: cut into bands where any of them
+// starts or ends, each band is the runs across it they cover, and bands that cover the same runs make
+// one rectangle together. A plain rectangle stays one surface, a drawn-in one a few.
+private _fnc_insetLines = {
+    params ["_snapX", "_snapY", "_cols", "_rows", "_holes", "_insets", "_color"];
 
-    private _runs = [];
-    private _first = 0;
+    private _frames = [];
 
-    for "_i" from 1 to _count do {
-        if (_i == _count || {(_offsets param [_i, 0]) - (_offsets param [_i - 1, 0]) > _step}) then {
-            _runs pushBack [_first, _i - 1];
-            _first = _i;
+    for "_row" from 0 to (_rows - 1) do {
+        for "_col" from 0 to (_cols - 1) do {
+            if ((_row * _cols + _col) in _holes) then {continue};
+
+            (_insets param [_row * _cols + _col, [0, 0, 0, 0]]) params ["_inL", "_inT", "_inR", "_inB"];
+
+            // [left, top, right, bottom], the far edges outside it.
+            _frames pushBack [
+                _snapX + _col * _cellW + _inL - pixelW,
+                _snapY + _row * _cellH + _inT - pixelH,
+                _snapX + (_col + 1) * _cellW - _inR,
+                _snapY + (_row + 1) * _cellH - _inB
+            ];
         };
     };
 
-    _runs
+    // Where a band starts or ends, a value once: within half a pixel is the same pixel.
+    private _all = [];
+
+    {
+        _all pushBack (_x select 1);
+        _all pushBack (_x select 3);
+    } forEach _frames;
+
+    _all sort true;
+
+    private _edges = [];
+
+    {
+        if (_edges isEqualTo [] || {_x - (_edges select (count _edges - 1)) > pixelH / 2}) then {
+            _edges pushBack _x;
+        };
+    } forEach _all;
+
+    // The runs [left, right] across a band; and the bands so far that cover the same, from where.
+    private _fnc_flush = {
+        params ["_runs", "_from", "_to"];
+
+        {
+            [_display, _parent, [_x select 0, _from, (_x select 1) - (_x select 0), _to - _from], _color] call FUNC(uiPanel);
+        } forEach _runs;
+    };
+
+    private _open = [];
+    private _openFrom = 0;
+
+    for "_i" from 0 to (count _edges - 2) do {
+        private _from = _edges select _i;
+        private _to = _edges select (_i + 1);
+        private _middle = (_from + _to) / 2;
+        private _across = (_frames select {(_x select 1) < _middle && {(_x select 3) > _middle}}) apply {[_x select 0, _x select 2]};
+        private _runs = [];
+
+        _across sort true;
+
+        {
+            _x params ["_left", "_right"];
+
+            if (_runs isNotEqualTo [] && {_left <= ((_runs select (count _runs - 1)) select 1) + pixelW / 2}) then {
+                private _last = _runs select (count _runs - 1);
+
+                _last set [1, (_last select 1) max _right];
+            } else {
+                _runs pushBack [_left, _right];
+            };
+        } forEach _across;
+
+        // The same runs as the band above: it goes on.
+        private _same = count _runs == count _open;
+
+        {
+            private _other = _open select _forEachIndex;
+
+            if (abs ((_x select 0) - (_other select 0)) > pixelW / 2 || {abs ((_x select 1) - (_other select 1)) > pixelW / 2}) exitWith {
+                _same = false;
+            };
+        } forEach ([[], _runs] select _same);
+
+        if (!_same) then {
+            [_open, _openFrom, _from] call _fnc_flush;
+            _open = _runs;
+            _openFrom = _from;
+        };
+    };
+
+    [_open, _openFrom, _edges param [count _edges - 1, 0]] call _fnc_flush;
 };
 
 private _fnc_compartment = {
     params ["_index", "_cols", "_rows", "_place", "_isOverflow", "_overflowIndex", ["_holes", []], ["_pos", []]];
-    _place params ["_dx", "_dy", ["_colX", []], ["_rowY", []]];
+    _place params ["_dx", "_dy", ["_insets", []]];
 
     private _x0 = _gridX + _dx;
     private _y0 = _bodyTop + _dy;
 
     // The lines: a surface behind the cells, a pixel bigger on the left and at the top, so every cell
-    // is outlined on all four sides. On the grid's own pixels, as fnc_createGrid places it. Seams inside
-    // a canvas's compartment cut it into pieces, each framed as a block of its own with the gap between.
+    // is outlined on all four sides. On the grid's own pixels, as fnc_createGrid places it. A canvas's
+    // compartment that borders another one draws them in along those sides, as its cells are.
     private _snapX = _originX + round ((_x0 - _originX) / pixelW) * pixelW;
     private _snapY = _originY + round ((_y0 - _originY) / pixelH) * pixelH;
+    private _lineColor = [_colorLine, _theme getOrDefault ["loss", [1, 0, 0, 1]]] select _isOverflow;
 
-    {
-        _x params ["_firstRow", "_lastRow"];
+    switch (true) do {
+        case (_insets isNotEqualTo []): {
+            [_snapX, _snapY, _cols, _rows, _holes, _insets, _lineColor] call _fnc_insetLines;
+        };
+        case (_holes isEqualTo []): {
+            [_display, _parent, [_snapX - pixelW, _snapY - pixelH, _cols * _cellW + pixelW, _rows * _cellH + pixelH], _lineColor] call FUNC(uiPanel);
+        };
+        default {
+            [_snapX, _snapY, _cols, _rows, _holes] call _fnc_shapeLines;
+        };
+    };
 
-        private _pieceRows = _lastRow - _firstRow + 1;
-        private _pieceY = _snapY + (_rowY param [_firstRow, _firstRow * _cellH]);
-
-        {
-            _x params ["_firstCol", "_lastCol"];
-
-            private _pieceCols = _lastCol - _firstCol + 1;
-            private _pieceX = _snapX + (_colX param [_firstCol, _firstCol * _cellW]);
-            private _pieceHoles = [];
-
-            for "_row" from 0 to (_pieceRows - 1) do {
-                for "_col" from 0 to (_pieceCols - 1) do {
-                    if (((_firstRow + _row) * _cols + _firstCol + _col) in _holes) then {
-                        _pieceHoles pushBack (_row * _pieceCols + _col);
-                    };
-                };
-            };
-
-            switch (true) do {
-                // Only holes there: the cell of another compartment fills it, framed by its own grid.
-                case (count _pieceHoles == _pieceCols * _pieceRows): {};
-                case (_pieceHoles isEqualTo []): {
-                    [_display, _parent, [_pieceX - pixelW, _pieceY - pixelH, _pieceCols * _cellW + pixelW, _pieceRows * _cellH + pixelH], [_colorLine, _theme getOrDefault ["loss", [1, 0, 0, 1]]] select _isOverflow] call FUNC(uiPanel);
-                };
-                default {
-                    [_pieceX, _pieceY, _pieceCols, _pieceRows, _pieceHoles] call _fnc_shapeLines;
-                };
-            };
-        } forEach ([_colX, _cols, _cellW + pixelW / 2] call _fnc_pieces);
-    } forEach ([_rowY, _rows, _cellH + pixelH / 2] call _fnc_pieces);
-
-    private _grid = [_display, _parent, [_x0, _y0], _rows, _theme, _id, _cols, _holes, [_colX, _rowY]] call FUNC(createGrid);
+    private _grid = [_display, _parent, [_x0, _y0], _rows, _theme, _id, _cols, _holes, _insets] call FUNC(createGrid);
 
     // What the grid shows, for moving items in and out of it (fnc_onMouseButton, fnc_endDrag): a
     // virtual section - a body's worn gear - has no container to take from; nothing can be put into

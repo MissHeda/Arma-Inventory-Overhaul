@@ -778,20 +778,22 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `fnc_drawEquipmentDoll`), `locked` (a padlock and one muted line, nothing of what it holds; `lockTip` adds an open padlock). Own
   sections start open, crates found around start folded; `einv_gui_collapsed` holds the containers the player turned the other
   way.
-- **Compartments.** `fnc_flowCompartments [layout, cell]` -> `[places, height, width]`, drawn by `fnc_drawCompartments [display,
+- **Compartments.** `fnc_flowCompartments [layout, cell]` -> `[places, height]`, drawn by `fnc_drawCompartments [display,
   parent, [left, top], section, layout, places, theme, window]`. Flowed compartments (`pos` `[]`) lie side by side as far as
   `STORAGE_COLS` cells reach, then on the next line, `COMPARTMENT_GAP` (0.22 cell, pixel-rounded) between blocks. A compartment
-  with a `pos` lies on its **canvas** exactly where it was drawn; the canvas is one piece of the flow. **Seams:** a column
-  boundary c|c+1 is a seam when some row has cells of two different compartments on its two sides (a row boundary likewise;
-  touching at a corner is none); every seam gets `COMPARTMENT_GAP`, so a cell at column c lies at `c * cell + (seams left of c) *
-  gap`, and a compartment reaching over a seam (the ring of `aaa/aba/aaa`) is drawn in pieces with the gap inside it.
-  `fnc_canvasSeams [blocks, cell]` -> `[colX, rowY, width, height]` builds the maps once per flow; a canvas compartment's place is
-  `[x, y, colX, rowY]` and its grid keeps them as `"colX"` / `"rowY"` (`[]` = plain pitch). Everything that turns a cell into a
-  place or back reads them (`fnc_cellOffset`, `fnc_tileRect`, `fnc_updateDrag`, `fnc_screenToCell`, the inverse: a point in a gap
-  is no cell, ...).
-- **Grids and tiles.** `fnc_createGrid [display, parent, [relX, relY], rows, theme, section id, cols, holes, [colX, rowY]]` -> a
-  HashMap: `parent`, `rel`, `cols`, `rows`, `cellW`, `cellH`, `cells` (a **hole** has no control: `controlNull`), `holes`, `colX`,
-  `rowY`, `tiles`, `section`, and from `fnc_drawCompartments` `container`, `virtual`, `kit`, `layoutKey`, `unit`, `block`, `pos`,
+  with a `pos` lies on its **canvas** exactly where it was drawn, every cell at the plain pitch; the canvas is one piece of the
+  flow. **Insets:** a cell side that borders a cell of *another* compartment (not a hole, the canvas's edge or its own
+  compartment's cell; a corner is no side) is drawn in by half of `COMPARTMENT_GAP`, the cell on the left/top of the seam
+  taking the smaller pixel half, so the two add up to the flow's gap and the two frames sit as two flowed blocks' do. A
+  compartment never gets a gap inside itself (the middle of `abbbbbc/abbbbbc` stays one block while its neighbours show
+  theirs). `fnc_canvasInsets [blocks, cell]` -> per compartment per cell `[left, top, right, bottom]` (`[]` when it borders
+  no other); the place is `[x, y, insets]`, the grid keeps `"insets"`, `fnc_createGrid` draws its cells and
+  `fnc_drawCompartments` its lines (each cell's frame, joined into bands without overlap) drawn in by them. Tiles and every rect
+  on a grid (`fnc_spanRect` via `fnc_tileRect`, selection, pending, band, drag footprint) shrink a side by the furthest inset of
+  their cells along it (`fnc_spanInsets`); `fnc_shapeRects` takes those four as its box's insets. `fnc_screenToCell` is plain pitch.
+- **Grids and tiles.** `fnc_createGrid [display, parent, [relX, relY], rows, theme, section id, cols, holes, insets]` -> a
+  HashMap: `parent`, `rel`, `cols`, `rows`, `cellW`, `cellH`, `cells` (a **hole** has no control: `controlNull`), `holes`,
+  `insets`, `tiles`, `section`, and from `fnc_drawCompartments` `container`, `virtual`, `kit`, `layoutKey`, `unit`, `block`, `pos`,
   `overflow`, `window`, `holder`, `root`, `side` (a source grid adds `source`). `fnc_createTile [display, grid, entry, theme]`
   draws the surface in the category's colour over the entry's cells only (a shaped tile: runs of cells with one-pixel bridges;
   `"backgrounds"` and `"rect"` kept for hover, flash, reveal and the repack film), the picture (turned along when `rotated`), the
@@ -944,7 +946,7 @@ item out.
 ### The panel
 
 - **Rect** (`fnc_panelRect`): top at ACE's sort bar (IDC 17, else the list's top), bottom at the list's bottom, like ACE's right
-  column; width `STORAGE_COLS` cells of `einv_gui_fnc_getCell` plus seams, padding and scroll bar, at most `PANEL_MAX_SHARE` 1/3
+  column; width `STORAGE_COLS` cells of `einv_gui_fnc_getCell` plus padding and scroll bar, at most `PANEL_MAX_SHARE` 1/3
   of the screen. `fnc_layout` draws one flat block in ACE's `[0,0,0,0.5]` and black frame. **Header**: from the sort bar's top, a band
   `HEAD_BAND_SCALE` 1.6 times its height (the column starts that much lower than ACE's list) and as black (`ACE_SORT_BG`), the
   container's picture (`getInfo "picture"`) at the band's height and its name in RobotoCondensed, 1.3x ACE's row text, centred. **Sections** in `einv_gui_fnc_drawColumn`
@@ -1156,8 +1158,9 @@ rules make of a class is not in it; it is asked (`getInfo` with the draft) only 
   `einv_setup_itemWork`; the first change makes the copy, Discard drops it, "Back to the preset" removes `grid` and `like`. Apply
   checks no cell, `MAX_CELLS`, `MAX_BLOCKS` and a drawing taller than `MAX_ROWS`, and writes through `fnc_upsertRule`. A grid laid
   out by load or by a pattern is shown as the compartments it gives; editing it writes those cells instead.
-- **Preview** (`fnc_drawPreview`): the window's own `flowCompartments` and `canvasSeams` with the blocks Apply would write, so
-  painted compartments sit 1:1 where they were painted and blocks flow; an item's tile on a piece of grid.
+- **Preview** (`fnc_drawPreview`): the window's own `flowCompartments` with the blocks Apply would write, so painted
+  compartments sit 1:1 where they were painted, their cells drawn in by the same insets, and blocks flow; an item's tile on a
+  piece of grid.
 
 ## 7. Other addons
 
@@ -1408,7 +1411,7 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
 
 - **All of 0.4.0 but the first version of the ACE Arsenal panel** (which the owner ran, from screenshots): cells as the only room
   and everything removed with the weight limit; the panel's ACE look, staging space, list drag, wheel and focus rule; the backpack
-  as the fourth gear slot; shaped grids, `like=`, shaped items with rotation, positional compartments with seams, width 10, the
+  as the fourth gear slot; shaped grids, `like=`, shaped items with rotation, positional compartments with insets, width 10, the
   presets `default` revision 2, `realism` and `weight` revision 2; the wizard (Start, Items, Containers with paint, Blocks and
   Same as, Review); the window details (the menu's right-click fall-through, the weight card without ticks, count pills, the
   n/stack badge); the backpack drop with its safety nets and `einv_storage_debugDrop`; `hasSpace` with partial stacks.

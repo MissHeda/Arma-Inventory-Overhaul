@@ -17,19 +17,19 @@
  * in by some pixels (a selection's second line) moves each line inward by that much: shorter by it at an
  * outer corner, longer by it at an inner one, so the two lines together have no gap.
  *
- * On a canvas's compartment with a seam under the shape (fnc_canvasSeams, fnc_spanSeams) each cell lies
- * where the grid drew it: a run reaches over a seam's gap and so does the bridge between two rows, so the
- * tile stays one surface; a line meets the one it turns into wherever that one lies.
+ * On a canvas's compartment the box may be drawn in on a side where it borders another compartment
+ * (fnc_spanInsets): the cells along that side of the box shrink by it, as a rectangle's tile does, and the
+ * lines follow the edge they are drawn in to.
  *
  * Arguments:
- * 0: Top left corner of its box [x, y] <ARRAY>
+ * 0: Top left corner of its box [x, y] - the one drawn in, as fnc_spanRect gives it <ARRAY>
  * 1: A cell's width, the gap to the next one included <NUMBER>
  * 2: A cell's height, the same way <NUMBER>
  * 3: Footprint as it lies, [w, h, holes] - holes the indices row * w + col <ARRAY>
  * 4: What: "surface" or "frame" <STRING> (default: "surface")
  * 5: A frame set in by this many pixels <NUMBER> (default: 0)
- * 6: Seams - [colX, rowY], each column's and row's offset from the corner, [] for the plain pitch
- *    (fnc_spanSeams) <ARRAY> (default: [])
+ * 6: How far the box is drawn in on each side, [left, top, right, bottom] (fnc_spanInsets) <ARRAY>
+ *    (default: [0, 0, 0, 0])
  *
  * Return Value:
  * Rectangles [x, y, w, h]; for a surface the first is the top row's first run <ARRAY>
@@ -40,14 +40,20 @@
  * Public: No
  */
 
-params ["_origin", "_cellW", "_cellH", "_footprint", ["_part", "surface"], ["_inset", 0], ["_seams", []]];
-_origin params ["_left", "_top"];
+params ["_origin", "_cellW", "_cellH", "_footprint", ["_part", "surface"], ["_inset", 0], ["_insets", [0, 0, 0, 0]]];
 _footprint params ["_w", "_h", ["_holes", []]];
-_seams params [["_colX", []], ["_rowY", []]];
+_insets params [["_inL", 0], ["_inT", 0], ["_inR", 0], ["_inB", 0]];
 
-// Where a column's and a row's cell starts (_this the index): a pitch on per cell unless seams say else.
-private _fnc_x = {_left + (_colX param [_this, _this * _cellW])};
-private _fnc_y = {_top + (_rowY param [_this, _this * _cellH])};
+// The corner given is the one drawn in: the box's own lies that much up and to the left of it.
+private _left = (_origin select 0) - _inL;
+private _top = (_origin select 1) - _inT;
+
+// Where a column's (row's) cell starts and where it ends, a pixel before the next one (_this the index):
+// a pitch on per cell, the first and the last drawn in on the box's sides that are.
+private _fnc_x = {_left + _this * _cellW + ([0, _inL] select (_this == 0))};
+private _fnc_right = {_left + (_this + 1) * _cellW - pixelW - ([0, _inR] select (_this == _w - 1))};
+private _fnc_y = {_top + _this * _cellH + ([0, _inT] select (_this == 0))};
+private _fnc_bottom = {_top + (_this + 1) * _cellH - pixelH - ([0, _inB] select (_this == _h - 1))};
 
 private _fnc_in = {
     params ["_col", "_row"];
@@ -83,20 +89,15 @@ if (_part isEqualTo "surface") then {
         {
             _x params ["_first", "_last"];
 
-            _rects pushBack [_first call _fnc_x, _row call _fnc_y, (_last call _fnc_x) - (_first call _fnc_x) + _cellW - pixelW, _cellH - pixelH];
+            _rects pushBack [_first call _fnc_x, _row call _fnc_y, (_last call _fnc_right) - (_first call _fnc_x), (_row call _fnc_bottom) - (_row call _fnc_y)];
         } forEach ([_w, {[_i, _row] call _fnc_in}] call _fnc_runs);
 
-        // The gap to the next row, where both rows have cells - a seam's gap too.
+        // The gap to the next row, where both rows have cells.
         if (_row < _h - 1) then {
-            private _bridgeY = (_row call _fnc_y) + _cellH - pixelH;
-
             {
                 _x params ["_first", "_last"];
 
-                _rects pushBack [
-                    _first call _fnc_x, _bridgeY,
-                    (_last call _fnc_x) - (_first call _fnc_x) + _cellW - pixelW, ((_row + 1) call _fnc_y) - _bridgeY
-                ];
+                _rects pushBack [_first call _fnc_x, _row call _fnc_bottom, (_last call _fnc_right) - (_first call _fnc_x), pixelH];
             } forEach ([_w, {[_i, _row] call _fnc_in && {[_i, _row + 1] call _fnc_in}}] call _fnc_runs);
         };
     };
@@ -111,16 +112,16 @@ if (_part isEqualTo "surface") then {
 
                 // To the line along the column it turns into, on the cell beyond where the tile goes on.
                 private _from = if ([_first - 1, _row] call _fnc_in) then {
-                    ((_first - 1) call _fnc_x) + _cellW - (2 + _inset) * pixelW
+                    ((_first - 1) call _fnc_right) - (1 + _inset) * pixelW
                 } else {
                     (_first call _fnc_x) + _inset * pixelW
                 };
                 private _to = if ([_last + 1, _row] call _fnc_in) then {
                     ((_last + 1) call _fnc_x) + (1 + _inset) * pixelW
                 } else {
-                    (_last call _fnc_x) + _cellW - (1 + _inset) * pixelW
+                    (_last call _fnc_right) - _inset * pixelW
                 };
-                private _lineY = [(_row call _fnc_y) + _inset * pixelH, (_row call _fnc_y) + _cellH - (2 + _inset) * pixelH] select (_side > 0);
+                private _lineY = [(_row call _fnc_y) + _inset * pixelH, (_row call _fnc_bottom) - (1 + _inset) * pixelH] select (_side > 0);
 
                 _rects pushBack [_from, _lineY, _to - _from, pixelH];
             } forEach _runs;
@@ -140,16 +141,16 @@ if (_part isEqualTo "surface") then {
                 _x params ["_first", "_last"];
 
                 private _from = if ([_col, _first - 1] call _fnc_in) then {
-                    ((_first - 1) call _fnc_y) + _cellH - (1 + _inset) * pixelH
+                    ((_first - 1) call _fnc_bottom) - _inset * pixelH
                 } else {
                     (_first call _fnc_y) + (1 + _inset) * pixelH
                 };
                 private _to = if ([_col, _last + 1] call _fnc_in) then {
                     ((_last + 1) call _fnc_y) + _inset * pixelH
                 } else {
-                    (_last call _fnc_y) + _cellH - (2 + _inset) * pixelH
+                    (_last call _fnc_bottom) - (1 + _inset) * pixelH
                 };
-                private _lineX = [(_col call _fnc_x) + _inset * pixelW, (_col call _fnc_x) + _cellW - (2 + _inset) * pixelW] select (_side > 0);
+                private _lineX = [(_col call _fnc_x) + _inset * pixelW, (_col call _fnc_right) - (1 + _inset) * pixelW] select (_side > 0);
 
                 if (_to > _from) then {
                     _rects pushBack [_lineX, _from, pixelW, _to - _from];

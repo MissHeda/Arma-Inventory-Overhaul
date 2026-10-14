@@ -3,8 +3,8 @@
  * Author: Miss Heda
  * The rectangle a span of a grid's cells covers - a tile, a footprint, a selection's frame: from the
  * first cell's corner to the last one's far edge, ending a pixel before the next cell as a cell does. On a
- * canvas's compartment with a seam inside the span (fnc_canvasSeams) it reaches over the gap, so a tile
- * lying across one reads as one piece (fnc_cellOffset says where each cell lies).
+ * canvas's compartment it is drawn in on every side where one of its cells borders another compartment's
+ * (fnc_spanInsets), as the cells are, so it stays clear of the gap between the two.
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>
@@ -26,12 +26,14 @@
 params ["_grid", "_corner", "_col", "_row", ["_w", 1], ["_h", 1]];
 _corner params ["_cornerX", "_cornerY"];
 
-([_grid, _col, _row] call FUNC(cellOffset)) params ["_left", "_top"];
-([_grid, _col + _w - 1, _row + _h - 1] call FUNC(cellOffset)) params ["_lastX", "_lastY"];
+private _cellW = _grid get "cellW";
+private _cellH = _grid get "cellH";
+
+([_grid, _col, _row, _w, _h] call FUNC(spanInsets)) params ["_left", "_top", "_right", "_bottom"];
 
 [
-    _cornerX + _left,
-    _cornerY + _top,
-    _lastX - _left + (_grid get "cellW") - pixelW,
-    _lastY - _top + (_grid get "cellH") - pixelH
+    _cornerX + _col * _cellW + _left,
+    _cornerY + _row * _cellH + _top,
+    _w * _cellW - pixelW - _left - _right,
+    _h * _cellH - pixelH - _top - _bottom
 ]

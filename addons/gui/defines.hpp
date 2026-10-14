@@ -256,8 +256,9 @@
 #define SCROLL_W 0.006
 
 // The room between two compartments of a container, a share of a cell rounded to whole pixels: between
-// blocks that flow side by side or one under another (fnc_flowCompartments), and on every seam of a
-// canvas where two compartments meet (fnc_canvasSeams) - so a painted backpack reads like its blocks.
+// blocks that flow side by side or one under another (fnc_flowCompartments), and where two compartments
+// of a canvas meet, half of it drawn in on either side (fnc_canvasInsets) - so a painted backpack reads
+// like its blocks.
 #define COMPARTMENT_GAP 0.22
 
 // ---------------------------------------------------------------------------

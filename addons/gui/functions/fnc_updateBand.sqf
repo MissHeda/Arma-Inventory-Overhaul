@@ -104,7 +104,7 @@ private _touched = [];
         } else {
             [
                 [_tileRect select 0, _tileRect select 1], _grid get "cellW", _grid get "cellH", [_x get "w", _x get "h", _holes], "surface", 0,
-                [_grid, _x get "col", _x get "row", _x get "w", _x get "h"] call FUNC(spanSeams)
+                [_grid, _x get "col", _x get "row", _x get "w", _x get "h"] call FUNC(spanInsets)
             ] call FUNC(shapeRects)
         };
 

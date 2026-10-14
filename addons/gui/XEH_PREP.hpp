@@ -191,9 +191,8 @@ PREP(drawAttachments);
 PREP(gridOrigin);
 PREP(slotRect);
 PREP(screenToCell);
-PREP(cellOffset);
 PREP(spanRect);
-PREP(spanSeams);
+PREP(spanInsets);
 PREP(hitsHole);
 PREP(tileAt);
 
@@ -206,7 +205,7 @@ PREP(drawFooter);
 
 // Floating windows: open kits and pouches
 PREP(flowCompartments);
-PREP(canvasSeams);
+PREP(canvasInsets);
 PREP(viewBlocks);
 PREP(drawCompartments);
 PREP(scrollPixels);

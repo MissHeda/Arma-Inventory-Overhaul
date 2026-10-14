@@ -5,7 +5,7 @@
  * A canvas to draw on (fnc_uiCanvas), holding compartments where the inventory puts them
  * (einv_gui_fnc_flowCompartments): side by side as far as STORAGE_COLS cells reach, then on the next line.
  * The inventory leaves a gap between two compartments; the canvas has none, so a line breaks where the
- * inventory's does - the gap counted, and the gaps of a canvas's own seams as well. A compartment's holes are places without a cell. An item's
+ * inventory's does - the gap counted. A compartment's holes are places without a cell. An item's
  * footprint is one compartment: it lies in the top left corner. Compartments drawn on a canvas before (a
  * pos each, grid=aab/acc) lie where they were drawn, their canvas one piece of the flow and what follows
  * under it, as the inventory has them (einv_gui_fnc_flowCompartments).
@@ -51,12 +51,11 @@ private _lineGaps = 0;
 private _lineY = 0;
 private _lineH = 0;
 
-// Where the next piece goes, _w by _h cells: [col, row]. _seams: the gaps inside the piece, a canvas with
-// seams (einv_gui_fnc_canvasSeams) being that much wider in the window than its cells.
+// Where the next piece goes, _w by _h cells: [col, row].
 private _fnc_flow = {
-    params ["_w", "_h", ["_seams", 0]];
+    params ["_w", "_h"];
 
-    if (_lineX > 0 && {_lineX + (_lineGaps + _seams) * COMPARTMENT_GAP + _w > _cols + 0.0001}) then {
+    if (_lineX > 0 && {_lineX + _lineGaps * COMPARTMENT_GAP + _w > _cols + 0.0001}) then {
         _lineX = 0;
         _lineGaps = 0;
         _lineY = _lineY + _lineH;
@@ -100,18 +99,7 @@ while {_index < count _blocks} do {
             private _groupW = selectMax (_group apply {((_x select 3) select 0) + (_x select 0)}) - _minX;
             private _groupH = selectMax (_group apply {((_x select 3) select 1) + (_x select 1)}) - _minY;
 
-            // The seams the window opens in it (cells of width 1, so the offsets are in cells): the columns whose
-            // left edge is more than a cell after the one before.
-            private _colX = (([_group, [1, 1]] call EFUNC(gui,canvasSeams)) select 0);
-            private _seams = 0;
-
-            for "_col" from 1 to (count _colX - 1) do {
-                if ((_colX select _col) - (_colX select (_col - 1)) > 1.0001) then {
-                    _seams = _seams + 1;
-                };
-            };
-
-            ([_groupW, _groupH, _seams] call _fnc_flow) params ["_canvasX", "_canvasY"];
+            ([_groupW, _groupH] call _fnc_flow) params ["_canvasX", "_canvasY"];
 
             {
                 (_x select 3) params ["_posX", "_posY"];

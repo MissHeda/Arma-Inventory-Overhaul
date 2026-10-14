@@ -7,10 +7,9 @@
  * click there - only a drag still finds the grid over one, so its footprint shows red (fnc_updateDrag).
  * A grid is one compartment, and a point is on it only where it has a cell: compartments drawn on a
  * canvas may share a box (grid=aaa/aba/aaa), and the hole of the one is the cell of the other.
- * On a canvas's compartment with seams (fnc_canvasSeams) the cells lie where the grid keeps them
- * ("colX", "rowY"); a point in a seam's gap inside the grid belongs to the cell before it (left, above),
- * so a tile that reaches over the seam has no dead strip; one past the last column or row is on no cell,
- * as one between two flowed blocks is.
+ * Every cell lies at the plain pitch, a canvas's compartment's too: a point where a cell is drawn in
+ * beside another compartment (fnc_canvasInsets) still belongs to that cell, so the half gap is no dead
+ * strip.
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>
@@ -49,26 +48,8 @@ if (!_visible) exitWith {[]};
 
 ([_grid] call FUNC(gridOrigin)) params ["_originX", "_originY"];
 
-// The last column (row) that starts at or before the point; a cell's pitch apart where the grid keeps no
-// offsets. The gap of a seam belongs to the cell before it: with a column after it in the same grid, the
-// strip is part of a tile that straddles the seam (aaa/aba/aaa, a 2x1 at (0,0)), and answering -1 there
-// would make it unhoverable and flicker the drag footprint. Only past the last column (row) is -1 right.
-private _fnc_find = {
-    params ["_offsets", "_offset", "_pitch"];
-
-    if (_offsets isEqualTo []) exitWith {floor (_offset / _pitch)};
-
-    private _index = count _offsets - 1;
-
-    while {_index >= 0 && {(_offsets select _index) > _offset}} do {
-        _index = _index - 1;
-    };
-
-    [-1, _index] select (_index >= 0 && {_index < count _offsets - 1 || {_offset < (_offsets select _index) + _pitch}})
-};
-
-private _col = [_grid getOrDefault ["colX", []], _pointX - _originX, _grid get "cellW"] call _fnc_find;
-private _row = [_grid getOrDefault ["rowY", []], _pointY - _originY, _grid get "cellH"] call _fnc_find;
+private _col = floor ((_pointX - _originX) / (_grid get "cellW"));
+private _row = floor ((_pointY - _originY) / (_grid get "cellH"));
 
 if (_col < 0 || {_row < 0} || {_col >= _grid get "cols"} || {_row >= _grid get "rows"}) exitWith {[]};
 if (!_holesToo && {[_grid, _col, _row] call FUNC(hitsHole)}) exitWith {[]};
