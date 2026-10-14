@@ -21,6 +21,8 @@
  *    or, with 2, a group, [id, conditions] as under "groups" <ARRAY>
  * 1: The setup it belongs to, as einv_items_fnc_parseRules returns it - its preset names the groups first <HASHMAP> (default: empty)
  * 2: It is a group <BOOL> (default: false)
+ * 3: Only what a rule sets, without whom it is for - for a list that names the class itself, by its
+ *    picture and display name (fnc_changeRows) <BOOL> (default: false)
  *
  * Return Value:
  * Sentence <STRING>
@@ -31,7 +33,7 @@
  * Public: No
  */
 
-params [["_rule", [], [[]]], ["_ast", createHashMap, [createHashMap]], ["_isGroup", false, [false]]];
+params [["_rule", [], [[]]], ["_ast", createHashMap, [createHashMap]], ["_isGroup", false, [false]], ["_valuesOnly", false, [false]]];
 
 // The word between alternatives, spaced here rather than in the stringtable, where spaces at the ends of
 // a text are easily lost.
@@ -271,6 +273,8 @@ if (_isGroup) exitWith {
 };
 
 _rule params [["_conditions", [], [[]]], ["_values", createHashMap, [createHashMap]]];
+
+if (_valuesOnly) exitWith {[_values] call _fnc_values};
 
 private _subject = if (_conditions isEqualTo []) then {
     LLSTRING(Desc_Every)

@@ -1,15 +1,16 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * How many changes the draft holds against what was last saved or loaded: each statement added or taken
- * away (a changed one counts as both), the header - preset and cell size - and the switch to force it
- * over the mission. For the header's "4 changes" and the dots on the steps.
+ * How many changes the draft holds against what was last saved or loaded - the rows Review lists
+ * (fnc_changeRows "saved"), so the header's "4 changes" and that list always agree: the preset, the cell
+ * size, the switch to force it over the mission, and each group or rule added, changed or taken away. For
+ * the header and the dots on the steps.
  *
  * Arguments:
  * None
  *
  * Return Value:
- * [all changes, header changed, statements changed] <ARRAY>
+ * [all changes, preset or cell size changed, statements changed] <ARRAY>
  *
  * Example:
  * (call einv_setup_fnc_countChanges) select 0;
@@ -17,11 +18,6 @@
  * Public: No
  */
 
-([GVAR(clean)] call FUNC(statements)) params ["_cleanHead", "_cleanStatements"];
-([GVAR(draftText)] call FUNC(statements)) params ["_draftHead", "_draftStatements"];
+private _kinds = (["saved", false] call FUNC(changeRows)) apply {_x select 0};
 
-private _statements = count (_draftStatements - _cleanStatements) + count (_cleanStatements - _draftStatements);
-private _head = _draftHead isNotEqualTo _cleanHead;
-private _count = _statements + ([0, 1] select _head) + ([0, 1] select (GVAR(override) isNotEqualTo GVAR(cleanOverride)));
-
-[_count, _head, _statements > 0]
+[count _kinds, ("preset" in _kinds) || {"cell" in _kinds}, ("group" in _kinds) || {"rule" in _kinds}]

@@ -1,10 +1,12 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The player's own presets: setups kept under a name in their profile, for any mission and any server -
- * also for players who may not save the server's setup, so they can keep one they like or one they
- * worked out to hand to their admin. Kept as [name, rules text, date], newest saves replacing an older one
- * of the same name.
+ * The player's saved drafts (Review's "Saved drafts"): setups kept under a name in their profile, for any
+ * mission and any server - also for players who may not save the server's setup, so they can keep one
+ * they like or one they worked out to hand to their admin. Kept as [name, rules text, date], newest saves
+ * replacing an older one of the same name. Shown as drafts, never as presets, so they are not taken for
+ * Default or Realism; the profile variable keeps its older name (einv_setup_presets), or what players
+ * kept before would be lost.
  *
  * Arguments:
  * 0: "list", "save" or "delete" <STRING> (default: "list")

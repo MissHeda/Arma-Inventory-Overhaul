@@ -56,16 +56,21 @@ GVAR(stepKey) = {false};
 GVAR(theme) = createHashMap;
 
 // What the steps keep between their redraws: keep the own rules when picking another preset on the
-// Start step, and whether its Advanced fold is open; the text shown at Review - 0 own, 1 full, 2 CBA
-// line -, what is typed into it and not yet applied and what it was given to show; the personal preset
-// picked; the text pasted into the import box; the banner after someone else changed the setup; and the
-// footer's hint, [text, theme colour].
+// Start step, and whether its Advanced fold is open; Review's folds - the saved drafts, the text -,
+// which text it shows - 0 own, 1 full, 2 CBA line -, whether the own one is open to typing, what is
+// typed into it and not yet applied and what it was given to show; the saved draft picked; the text
+// pasted into the import box; the banner after someone else changed the setup; and the footer's hint,
+// [text, theme colour]. And the setups the draft is compared with, read once each (fnc_changeRows).
 GVAR(keepOwn) = true;
 GVAR(startAdvanced) = false;
+GVAR(reviewDrafts) = false;
+GVAR(reviewText) = false;
 GVAR(exportMode) = 0;
+GVAR(textEdit) = false;
 GVAR(rawText) = "";
 GVAR(rawShown) = "";
-GVAR(presetPick) = "";
+GVAR(draftPick) = "";
+GVAR(changeRefs) = createHashMap;
 GVAR(importText) = "";
 GVAR(banner) = false;
 GVAR(hint) = ["", "text2"];

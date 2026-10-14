@@ -100,14 +100,47 @@
         <Key ID="STR_einv_setup_ChangeShape">
             <English>Change size or shape...</English>
         </Key>
+        <Key ID="STR_einv_setup_Change_Before">
+            <English>%1 - before: %2</English>
+        </Key>
+        <Key ID="STR_einv_setup_Change_CellPreset">
+            <English>the preset's</English>
+        </Key>
+        <Key ID="STR_einv_setup_Change_Changed">
+            <English>changed</English>
+        </Key>
+        <Key ID="STR_einv_setup_Change_From">
+            <English>%1 » %2</English>
+        </Key>
+        <Key ID="STR_einv_setup_Change_New">
+            <English>new</English>
+        </Key>
+        <Key ID="STR_einv_setup_Change_OverrideOff">
+            <English>No longer forced over the mission's own setup</English>
+        </Key>
+        <Key ID="STR_einv_setup_Change_OverrideOn">
+            <English>Forced over the mission's own setup</English>
+        </Key>
+        <Key ID="STR_einv_setup_Change_Preset">
+            <English>Preset</English>
+        </Key>
+        <Key ID="STR_einv_setup_Change_Removed">
+            <English>removed</English>
+        </Key>
+        <Key ID="STR_einv_setup_Change_Undo">
+            <English>Take this change back</English>
+        </Key>
         <Key ID="STR_einv_setup_Changes_Count">
-            <English>%1 own rules on top of %2</English>
+            <English>%1 changes against the Default preset</English>
+        </Key>
+        <Key ID="STR_einv_setup_Changes_CountOne">
+            <English>1 change against the Default preset</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_Help">
-            <English>Click one to change it. The cross removes it.</English>
+            <English>Click one to open it. The cross takes that change back.</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_None">
-            <English>Nothing changed yet. The preset decides everything.</English>
+            <English>Nothing changed yet: the Default preset decides everything.</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_Title">
             <English>What you changed</English>
@@ -352,6 +385,63 @@
         <Key ID="STR_einv_setup_Discard_Yes">
             <English>Close</English>
         </Key>
+        <Key ID="STR_einv_setup_Drafts_Delete">
+            <English>Delete</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_DeleteConfirm">
+            <English>Delete the saved draft %1?</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_Deleted">
+            <English>Draft %1 deleted.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_Help">
+            <English>Kept in your profile, for any mission and any server. A draft of the same name is replaced.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_Keep">
+            <English>Keep</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_Load">
+            <English>Load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_Loaded">
+            <English>Draft %1 loaded - save to use it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_Name">
+            <English>Name</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_NeedName">
+            <English>Give it a name first.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_None">
+            <English>No drafts kept yet</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_Pick">
+            <English>Pick a draft</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_SaveAs">
+            <English>Keep as draft...</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_SaveAs_Title">
+            <English>Keep as draft</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_Saved">
+            <English>Draft kept as %1.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_Title">
+            <English>Saved drafts</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export">
+            <English>Export</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export_ByHand">
+            <English>Copying is off for players in multiplayer: select the line below and press Ctrl+C.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export_Copied">
+            <English>Copied: paste it into cba_settings.sqf or send it to someone.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export_Tip">
+            <English>Copies the setup as one line for a cba_settings.sqf, to paste there or send to someone.</English>
+        </Key>
         <Key ID="STR_einv_setup_Family_gear">
             <English>Gear</English>
         </Key>
@@ -456,6 +546,9 @@
         </Key>
         <Key ID="STR_einv_setup_Import_Replace">
             <English>Use instead of mine</English>
+        </Key>
+        <Key ID="STR_einv_setup_Import_Tip">
+            <English>Paste a setup someone sent you. It is checked and becomes your draft.</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Title">
             <English>Import a setup</English>
@@ -763,51 +856,6 @@
         <Key ID="STR_einv_setup_Preset_None">
             <English>No preset</English>
         </Key>
-        <Key ID="STR_einv_setup_Presets_Delete">
-            <English>Delete</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_DeleteConfirm">
-            <English>Delete your preset %1?</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_Deleted">
-            <English>Preset %1 deleted.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_Help">
-            <English>Kept in your profile, for any mission and any server. A preset of the same name is replaced.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_Keep">
-            <English>Keep</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_Load">
-            <English>Load</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_Loaded">
-            <English>Loaded %1 - save to use it.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_Name">
-            <English>Name</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_NeedName">
-            <English>Give it a name first.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_None">
-            <English>None kept yet</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_Pick">
-            <English>Pick one</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_SaveAs">
-            <English>Keep as my preset...</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_SaveAs_Title">
-            <English>Keep as my preset</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_Saved">
-            <English>Kept as %1.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Presets_Title">
-            <English>My presets</English>
-        </Key>
         <Key ID="STR_einv_setup_Preview_Title">
             <English>This is how it looks</English>
         </Key>
@@ -835,29 +883,35 @@
         <Key ID="STR_einv_setup_Reset">
             <English>Reset to default</English>
         </Key>
+        <Key ID="STR_einv_setup_Reset_Already">
+            <English>This is the default already.</English>
+        </Key>
         <Key ID="STR_einv_setup_Reset_Confirm">
             <English>Back to the default preset, without any rules of your own? Undo takes it back until you close the wizard.</English>
         </Key>
         <Key ID="STR_einv_setup_Reset_Done">
             <English>Back to the default - save to use it.</English>
         </Key>
+        <Key ID="STR_einv_setup_Reset_Tip">
+            <English>Back to the Default preset, without any rules of your own.</English>
+        </Key>
         <Key ID="STR_einv_setup_Reset_Yes">
             <English>Reset</English>
         </Key>
-        <Key ID="STR_einv_setup_Review_Header">
-            <English>Built on %1 · 1 cell = %2 kg</English>
+        <Key ID="STR_einv_setup_Review_Changes">
+            <English>What changes</English>
         </Key>
-        <Key ID="STR_einv_setup_Review_NoRules">
-            <English>No rules of your own: the preset decides everything.</English>
+        <Key ID="STR_einv_setup_Review_Count">
+            <English>%1 changes against what is saved</English>
         </Key>
-        <Key ID="STR_einv_setup_Review_NoWarnings">
-            <English>None: everything in the text can be used.</English>
+        <Key ID="STR_einv_setup_Review_CountOne">
+            <English>1 change against what is saved</English>
         </Key>
-        <Key ID="STR_einv_setup_Review_Remove">
-            <English>Take this rule away</English>
+        <Key ID="STR_einv_setup_Review_None">
+            <English>Nothing changed yet: this is what is saved.</English>
         </Key>
-        <Key ID="STR_einv_setup_Review_Rules">
-            <English>Your rules (%1)</English>
+        <Key ID="STR_einv_setup_Review_NotStored">
+            <English>This setup is in use but not stored where Save goes yet: Save stores it there.</English>
         </Key>
         <Key ID="STR_einv_setup_Review_Warnings">
             <English>Warnings (%1)</English>
@@ -896,19 +950,16 @@
             <English>Cannot save: %1</English>
         </Key>
         <Key ID="STR_einv_setup_Save_ReadOnlyHelp">
-            <English>You can still try changes, copy them as text or keep them as your own preset.</English>
+            <English>You can still try changes, export them or keep them as a saved draft.</English>
         </Key>
         <Key ID="STR_einv_setup_Save_Saved">
-            <English>Saved - in use for everyone.</English>
+            <English>Saved to the server: in use for everyone.</English>
         </Key>
         <Key ID="STR_einv_setup_Save_SavedMission">
             <English>Saved into the scenario - save the scenario as well.</English>
         </Key>
         <Key ID="STR_einv_setup_Save_SavedMissionWins">
             <English>Saved - but this mission's own setup still wins. Force over it to use yours.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Save_Title">
-            <English>Save</English>
         </Key>
         <Key ID="STR_einv_setup_Save_ToMenu">
             <English>Applies to the %1 tab of Addon Options: OK there keeps it, Cancel throws it away.</English>
@@ -917,7 +968,7 @@
             <English>Saves into the scenario, for everyone who plays it. Save the scenario as well to keep it.</English>
         </Key>
         <Key ID="STR_einv_setup_Save_ToServer">
-            <English>Saves into the server's settings: for everyone at once, players who join later included.</English>
+            <English>Saves to the server, for everyone - players who join later too.</English>
         </Key>
         <Key ID="STR_einv_setup_Save_Tooltip">
             <English>Saves the setup.</English>
@@ -1069,11 +1120,17 @@
         <Key ID="STR_einv_setup_Text_Copy">
             <English>Copy</English>
         </Key>
+        <Key ID="STR_einv_setup_Text_Edit">
+            <English>Edit text</English>
+        </Key>
         <Key ID="STR_einv_setup_Text_Full">
             <English>Full</English>
         </Key>
         <Key ID="STR_einv_setup_Text_FullNote">
             <English>The whole preset written out, so later versions cannot change it. Its rules also win over sizes a mod sets itself.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Text_Intro">
+            <English>For mission makers: the same setup as text.</English>
         </Key>
         <Key ID="STR_einv_setup_Text_NothingToApply">
             <English>Nothing typed to apply.</English>
@@ -1084,8 +1141,11 @@
         <Key ID="STR_einv_setup_Text_OwnNote">
             <English>One rule per line. What you type counts once you apply it.</English>
         </Key>
+        <Key ID="STR_einv_setup_Text_OwnRead">
+            <English>One rule per line. Edit text to type into it.</English>
+        </Key>
         <Key ID="STR_einv_setup_Text_Title">
-            <English>As text</English>
+            <English>Show as text</English>
         </Key>
         <Key ID="STR_einv_setup_Text_Unapplied">
             <English>Changed: Apply text to use it.</English>

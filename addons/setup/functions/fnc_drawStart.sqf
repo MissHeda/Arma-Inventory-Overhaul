@@ -9,8 +9,9 @@
  *     description; the one the draft builds on is picked. Picking another keeps the own rules on top of
  *     it, or starts without them, as the switch under the cards says.
  *   - What is in use now, set by whom, and where this wizard may save - or why it may not -, with Import
- *     and the way on to Review; beside it what you changed: the own rules against the preset, each in
- *     words, to open or take away (fnc_drawChanges).
+ *     and the way on to Review; beside it what you changed against the Default preset - the preset, the
+ *     cell size, every own rule -, each in words, to open or take back (fnc_drawChanges, the same list
+ *     Review shows against what is saved).
  *   - At the bottom, folded away (GVAR(startAdvanced)): the cell size, how much load one cell stands for.
  *     It sizes every container no rule draws, by its load, and every item the Weight preset sizes by
  *     mass - the one number that changes the most at once, which few need to touch.
@@ -250,8 +251,8 @@ _importHit setVariable [QGVAR(action), [{
     [GVAR(steps) findIf {(_x select 0) isEqualTo "review"}] call FUNC(showStep);
 }, [], true, "accent"] call FUNC(uiAction);
 
-// What you changed
-[_display, _group, [_changesX, _cursorY, _innerW - (_changesX - _padX), _cardsH], _theme] call FUNC(drawChanges);
+// What you changed, against the Default preset
+[_display, _group, [_changesX, _cursorY, _innerW - (_changesX - _padX), _cardsH], _theme, "default"] call FUNC(drawChanges);
 
 // ----- Advanced: the cell size -----
 

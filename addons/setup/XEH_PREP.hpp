@@ -23,6 +23,7 @@ PREP(onRulesChanged);
 PREP(isDirty);
 PREP(sourceEmpty);
 PREP(countChanges);
+PREP(changeRows);
 PREP(statements);
 PREP(sanitize);
 
