@@ -26,8 +26,8 @@
 params ["_args"];
 _args params ["", ["_scroll", 0]];
 
-// Not dragging: a window that attached may use the wheel itself (the Arsenal's catalog steps one card row
-// a turn, its camera zooms) - once per turn, though the display and the column both report it. The hook
+// Not dragging: a window that attached may use the wheel itself (the Arsenal panel adds or takes out one with
+// Ctrl over a tile) - once per turn, though the display and the column both report it. The hook
 // is told the turn and where the mouse is; a hook that scrolls a column itself sets its value every
 // frame, as fnc_updateDrag holds the columns: answering true does not stop the column's own step.
 if (!GVAR(dragging) && {_scroll != 0} && {"wheel" in GVAR(hooks)}) exitWith {

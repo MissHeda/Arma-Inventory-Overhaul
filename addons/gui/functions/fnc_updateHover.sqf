@@ -13,7 +13,7 @@
  * included, says what can be done.
  *
  * What the pointer carries beside it: the item's name, or - over a vest, uniform, helmet or backpack, one that
- * lies in a container or hangs on a body or in the Arsenal's catalog, not the player's own worn one - the
+ * lies in a container or hangs on a body, not the player's own worn one - the
  * comparison card with what the player wears there (fnc_compareRows, fnc_drawCompare), unless
  * einv_gui_compareTooltip is off. Both are placed beside the pointer by fnc_onFrame; the one that shows is
  * uiNamespace tipShown. A radio of TFAR or ACRE2 brings its channel and frequency after its name, and its
@@ -384,8 +384,8 @@ switch (_shown param [0, ""]) do {
 
         [[_class] call FUNC(itemName), "text"] call _fnc_add;
 
-        // The size it takes - a catalog card (a source grid's tile) brings the item's true size, the card
-        // itself being one cell.
+        // The size it takes - a row of ACE's list (a source grid's tile) brings the item's true size, the
+        // row itself being one cell.
         [(_tile getOrDefault ["size", [_tile getOrDefault ["w", 1], _tile getOrDefault ["h", 1]]]) call _fnc_size, "muted"] call _fnc_add;
         [[_mass] call _fnc_kg, "muted"] call _fnc_add;
 

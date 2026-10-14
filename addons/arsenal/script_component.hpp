@@ -9,15 +9,11 @@
 // The arsenal's display (IDD_ace_arsenal).
 #define ARSENAL_IDD 1127001
 
-// The list of the right panel (IDC_rightTabContentListnBox), its "+" arrow (IDC_arrowPlus), the load
-// bar under it (IDC_loadIndicatorBar) and the message line across the bottom of the middle (IDC_message).
+// The list of the right panel (IDC_rightTabContentListnBox), its "+" arrow (IDC_arrowPlus) and the load
+// bar under it (IDC_loadIndicatorBar).
 #define ARSENAL_IDC_LIST 15
 #define ARSENAL_IDC_PLUS 102
 #define ARSENAL_IDC_LOAD 701
-#define ARSENAL_IDC_MESSAGE 9
-
-// The "Remove all" button that empties the open uniform, vest or backpack (IDC_buttonRemoveAll).
-#define ARSENAL_IDC_REMOVE_ALL 40
 
 // The sort bar over the right list (IDC_sortRightTab), whose top the panel starts at.
 #define ARSENAL_IDC_SORT 17

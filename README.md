@@ -122,8 +122,7 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   containers your scripts fill. Every change runs where the container is local and the server carries what
   moves between machines, so the server has to run the same version of Enhanced Inventory. Scripts can move
   items with `einv_storage_fnc_moveEntry`, `einv_storage_fnc_equip` and `einv_storage_fnc_unequip`;
-  `[cursorObject] call einv_storage_fnc_dumpPlaces` writes where things lie to the RPT, and the client setting
-  `einv_storage_debugDrop` writes every step of a backpack drop to it. The engine's own commands (`addItem`,
+  `[cursorObject] call einv_storage_fnc_dumpPlaces` writes where things lie to the RPT. The engine's own commands (`addItem`,
   `addMagazine`, `addWeapon`, loadouts, ACE) ignore the grid: what a unit's uniform, vest or backpack then holds
   beyond its cells moves on to the next container with free cells (uniform, vest, backpack) a moment later, on the
   machine the unit is local on; what fits nowhere stays shown as overflow. The server setting

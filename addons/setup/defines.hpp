@@ -76,14 +76,13 @@
 
 // A row of the class index (fnc_buildIndex): the class lowercase and as config names it, what the search
 // looks through (class and name, lowercase), its name, its kind and the family the Items step filters by,
-// its picture, the mod it comes from and what it holds (config mass; 0 for what is no container).
+// its picture, the mod it comes from and what it holds (config mass; 0 for what is no container). The
+// class as config names it (1) and the picture (6) are not read by name.
 #define ROW_LC 0
-#define ROW_CLASS 1
 #define ROW_SEARCH 2
 #define ROW_NAME 3
 #define ROW_KIND 4
 #define ROW_FAMILY 5
-#define ROW_PICTURE 6
 #define ROW_MOD 7
 #define ROW_LOAD 8
 

@@ -9,8 +9,7 @@
 #define IDC_FIRST     9602
 
 // A top-level control with this id, and everything in it, survives every build (fnc_build): a window that
-// attaches to this one (the Arsenal) keeps its catalog in such a control rather than make it again each
-// time.
+// attaches to this one may keep a control in such an id rather than make it again each time.
 #define IDC_KEEP      9603
 
 // The vanilla inventory (RscDisplayInventory), which this mod keeps closed (fnc_guardVanilla).
@@ -220,7 +219,7 @@
 // Screen geometry, relative to the safezone so it scales with the UI size. The window takes the whole
 // screen; the looks share its frame and lay out the content between header and footer themselves:
 //
-//    0.6 -  2.2   header: title, Style, camera, Close                    (in UNITs from the top)
+//    0.6 -  2.2   header: title, camera, Close                           (in UNITs from the top)
 //    3.0 - 37.4   content: whatever the look draws
 //   38.0 - 39.4   footer: key hints, the hint, the version
 // ---------------------------------------------------------------------------

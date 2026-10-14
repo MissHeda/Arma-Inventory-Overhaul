@@ -59,8 +59,8 @@ private _filterEdit = uiNamespace getVariable [QGVAR(filterEdit), controlNull];
 private _focused = focusedCtrl _display;
 private _typing = !isNull _filterEdit && {_focused isEqualTo _filterEdit};
 
-// Any field with the cursor in it - the search field, or one a window that attached brought (the
-// Arsenal's name for a loadout) - has the keys.
+// Any field with the cursor in it - the search field, or one on a display this window is a guest on
+// (ACE Arsenal's search) - has the keys.
 private _editing = !isNull _focused && {ctrlType _focused == 2};
 
 if (_key == DIK_ESCAPE && {call FUNC(closeMenu)}) exitWith {true};
@@ -177,8 +177,7 @@ if (_selecting && {_key == DIK_DELETE} && {GVAR(selection) isNotEqualTo []}) exi
     true
 };
 
-// The window that attached gets the keys the engine would act on next (the Arsenal's own: give back,
-// copy, hide, ...). True: taken.
+// The window that attached gets the keys the engine would act on next (the "key" hook). True: taken.
 if ((["key", [_display, _key, _shift, _ctrl, _alt], false] call FUNC(hook)) isEqualTo true) exitWith {true};
 
 // Delete drops what the mouse is on.

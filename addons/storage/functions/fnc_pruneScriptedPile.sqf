@@ -43,9 +43,5 @@ if (isNull _pile || {!local _pile} || {typeOf _pile != "GroundWeaponHolder_Scrip
 
     if (!_empty) exitWith {};
 
-    if (DROP_DEBUG) then {
-        diag_log text format ["einv drop: emptied scripted pile %1 (netId %2) deleted", _pile, netId _pile];
-    };
-
     deleteVehicle _pile;
 }, [_pile]] call FUNC(nextFrame);

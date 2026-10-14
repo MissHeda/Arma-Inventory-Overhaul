@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Draws the Tarkov look's paper doll: what a unit wears, as slots in rows, each with its caption on a
+ * Draws a paper doll: what a unit wears, as slots in rows, each with its caption on a
  * tab - and behind them, faintly, a soldier standing.
  *
  *   EARPIECE  | HEADWEAR   | FACE COVER
@@ -16,9 +16,10 @@
  * a body had no backpack slot to take one off or put one on).
  *
  * A weapon's slot is wide, about 2.3 squares; the three slots of each upper row spread out over the
- * same width, so the doll's edges line up. The player's doll fills the gear panel with square slots,
- * as big as the room allows. A body's doll is compact: low, wide slots in the loot column, as wide as
- * the containers under it, and no soldier behind them.
+ * same width, so the doll's edges line up. A full-size doll fills its room with square slots, as big as
+ * the room allows. A body's doll is compact: low, wide slots in the loot column, as wide as the
+ * containers under it, and no soldier behind them. Only the compact one is drawn today (fnc_drawSection):
+ * the player's own gear is drawn as cards (fnc_drawEquipmentCards).
  *
  * Weapons show their short name in the top right corner and their magazine's rounds in big digits in
  * the bottom right. Their attachments are not slots of their own here, as in Tarkov - the hint names

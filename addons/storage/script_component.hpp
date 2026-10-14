@@ -69,8 +69,3 @@
 
 // MAX_ROWS, MAX_BLOCKS and MAX_CELLS live in main's script_macros.hpp: the items addon reads the
 // rules that size containers and has to keep to the same limits.
-
-// The setting einv_storage_debugDrop: every step of a backpack drop written to the RPT as "einv drop: ..."
-// (fnc_takeOff, fnc_opTakeOff, fnc_opPutGround, fnc_addPayload, fnc_settle). Asked with a default, so a
-// line written before the settings are read costs nothing and breaks nothing.
-#define DROP_DEBUG (missionNamespace getVariable [QGVAR(debugDrop), false])

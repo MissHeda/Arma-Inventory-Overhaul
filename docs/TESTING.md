@@ -24,7 +24,7 @@ A client can see them and cannot change them.
 - [ ] Two players look into one crate: A moves a tile, B sees the new place without reopening.
 - [ ] Both grab the same item at once: one gets it, the other sees the refusal, nothing is duplicated.
 - [ ] Crate, vehicle, ground pile: take, put, Take all, Put all in; a player who joins later sees the same places.
-- [ ] A client (not the host) drops a worn backpack, picks it up, swaps backpacks. `einv_storage_debugDrop` on.
+- [ ] A client (not the host) drops a worn backpack, picks it up, swaps backpacks.
 - [ ] A client with another rules text gets the hash warning once; the rules setting cannot be changed on a client.
 - [ ] Staging in the Arsenal on a client: move in and out, the crate is deleted on close, nothing lands on the server.
 - [ ] Locks: side, group, admins, Zeus; a locked crate shows as locked for the other player.

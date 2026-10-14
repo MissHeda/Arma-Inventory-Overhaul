@@ -107,12 +107,11 @@ GVAR(rootWaits) = createHashMap;
 GVAR(gone) = [];
 GVAR(hubTickAt) = 0;
 
-// The handshake with the server: the version of Enhanced Inventory it answered with, "" until it did, and
-// when this machine greeted it, -1 before (fnc_greetServer, XEH_postInit). A client hands nothing to the
-// hub before the server answered with this very version (fnc_hubReady): a server without the hub's
-// events, or with others, would drop what the client already took out.
+// The handshake with the server: the version of Enhanced Inventory it answered with, "" until it did
+// (fnc_greetServer, XEH_postInit). A client hands nothing to the hub before the server answered with this
+// very version (fnc_hubReady): a server without the hub's events, or with others, would drop what the
+// client already took out.
 GVAR(serverVersion) = "";
-GVAR(greeted) = -1;
 
 #include "initSettings.inc.sqf"
 

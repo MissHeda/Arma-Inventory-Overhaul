@@ -58,6 +58,6 @@ if (_part in ["mag", "mag2"]) exitWith {
     (compatibleMagazines [_weapon, _muzzle]) findIf {toLowerANSI _x isEqualTo _key} >= 0
 };
 
-if !(_kind isEqualTo _part) exitWith {false};
+if (_kind isNotEqualTo _part) exitWith {false};
 
 ([_weapon] call CBA_fnc_compatibleItems) findIf {toLowerANSI _x isEqualTo _key} >= 0

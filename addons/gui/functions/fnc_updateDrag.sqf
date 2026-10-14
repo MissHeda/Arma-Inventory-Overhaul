@@ -217,7 +217,7 @@ private _fnc_show = {
         GVAR(theme) getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
     };
 
-    // A zone may name its own colour (the Arsenal's give-back zone is drawn in the loss colour whatever fits).
+    // A zone may name its own colour (the Arsenal panel's remove zone is drawn in the loss colour whatever fits).
     if (_colorKey isNotEqualTo "" && {_colorKey in GVAR(theme)}) then {
         _color = GVAR(theme) get _colorKey;
     };
@@ -937,7 +937,7 @@ call {
 
 // A window that attached has the last word on where it lands (the "dragCheck" hook): it may change
 // whether it fits and why not, or turn the target into another - the Arsenal makes the ground a
-// give-back zone, or nothing. The footprint follows the final verdict.
+// remove zone, or nothing. The footprint follows the final verdict.
 private _checked = ["dragCheck", [GVAR(dragTarget), _entry, if (_slotSource isEqualTo []) then {_grids param [_sourceIndex, createHashMap]} else {createHashMap}, _slotSource]] call FUNC(hook);
 
 if (!isNil "_checked" && {_checked isEqualType []}) then {

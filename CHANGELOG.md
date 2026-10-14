@@ -17,7 +17,6 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 - Presets Default and Realism. Default gives containers 20 % more room; Realism is the former Tarkov preset and stacks as Default does.
 - Setup wizard: paint the compartments with colours, a Blocks mode for the block-by-block editor, "Same as another class" (follow with `like=` or copy the cells), a plain preset choice on Start with the cell size under Advanced, a welcome page and a "What you changed" list that removes a rule or jumps to its class.
 - Window details: a right-click on another tile while a menu is open moves the menu, and counts and fill texts sit on a dark pill so white pictures do not hide them.
-- Client setting `einv_storage_debugDrop`: writes every step of a backpack drop to the RPT.
 
 ### Changed
 
@@ -41,7 +40,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 ### Fixed
 
 - Better Inventory (workshop 2791403093) no longer pulls its vanilla display in over the window: a vanilla inventory that loads is closed at once (display load event, plus a check every quarter second), and its Shift/Ctrl stack move, which needs state only its own display sets up, stays off while the window is open.
-- A backpack dropped to the ground no longer vanishes. The cause, found in game: `removeBackpack` leaves the backpack just taken off in a plain holder of the engine's own until the end of the frame and deletes both then - the pile search took that holder for a pile with something in it and put the new backpack into it. A backpack now joins only a pile of ours (`GroundWeaponHolder_Scripted`) or a fresh one, the backpack taken off is marked so its holder is never a target, and the RPT shows which pile a backpack goes onto and when a pile of ours is deleted.
+- A backpack dropped to the ground no longer vanishes. The cause, found in game: `removeBackpack` leaves the backpack just taken off in a plain holder of the engine's own until the end of the frame and deletes both then - the pile search took that holder for a pile with something in it and put the new backpack into it. A backpack now joins only a pile of ours (`GroundWeaponHolder_Scripted`) or a fresh one, the backpack taken off is marked so its holder is never a target, and the RPT names the pile a backpack goes onto.
 - Setup wizard, Containers: Paint and Blocks preview the same configuration identically and as the inventory shows it - a painted layout that matches the flow is handed over without positions - and the Paint canvas cells are the same size as the Blocks cells.
 - Taking a backpack off no longer loses it: the slot is read again a frame later when the engine is late, an arrived backpack is also recognised by the pile's count, and a failed drop puts the backpack back on.
 - `hasSpace` counts partial stacks, and the arsenal lights its rows by the same answer.

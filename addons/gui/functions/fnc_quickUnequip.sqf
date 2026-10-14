@@ -42,7 +42,7 @@ private _to = switch (true) do {
 };
 
 // The ground is the last resort. A window that attached takes the item itself instead (the "ground" hook:
-// the Arsenal gives it back), told where it is, [unit, slot], and how many, -1 for all.
+// the Arsenal takes it out), told where it is, [unit, slot], and how many, -1 for all.
 if (_to isEqualTo "ground" && {(["ground", [[_unit, _slot], -1], false] call FUNC(hook)) isEqualTo true}) exitWith {true};
 
 if (_to isEqualTo "") exitWith {

@@ -146,7 +146,7 @@ if (_loot isEqualTo [] && {_kits isEqualTo []}) exitWith {
         false
     };
 
-    // A window that attached takes it itself (the "ground" hook: the Arsenal gives it back).
+    // A window that attached takes it itself (the "ground" hook: the Arsenal takes it out).
     if ((["ground", [[_gridIndex, _tileIndex], -1], false] call FUNC(hook)) isEqualTo true) exitWith {true};
 
     [_from, "ground", _tile, -1, []] call FUNC(applyMove)

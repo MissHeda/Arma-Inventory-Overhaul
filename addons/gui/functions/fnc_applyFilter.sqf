@@ -29,7 +29,7 @@ disableSerialization;
 private _filter = toLower GVAR(filter);
 
 {
-    // A place things come from (a source grid, the Arsenal's catalog) shows its own list for the search.
+    // A place things come from (a source grid, as the Arsenal panel makes of ACE's list) holds no container: the search leaves it alone.
     if ((_x getOrDefault ["source", ""]) isNotEqualTo "") then {continue};
 
     {
@@ -79,5 +79,5 @@ private _filter = toLower GVAR(filter);
     } forEach _tab;
 } forEach (uiNamespace getVariable [QGVAR(sectionInfo), []]);
 
-// The window that attached shows what matches the search in its own places (the catalog's list).
+// The window that attached may show what matches the search in its own places.
 ["filter", []] call FUNC(hook);

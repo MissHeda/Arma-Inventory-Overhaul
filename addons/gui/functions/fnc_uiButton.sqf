@@ -126,7 +126,7 @@ _hit ctrlAddEventHandler ["MouseExit", {
     {_x ctrlSetTextColor _color} forEach _corners;
 }];
 
-// The code runs a frame later: a button may rebuild the window - the Style button does - and that
+// The code runs a frame later: a button may rebuild the window, and that
 // deletes this very control, which should not happen inside its own event. A button's own click event
 // is the left button's only, so the right click is taken from the right button's release.
 _hit ctrlAddEventHandler ["ButtonClick", {

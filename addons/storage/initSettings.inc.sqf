@@ -39,16 +39,3 @@
     1,
     {[] call EFUNC(items,loadRules)}
 ] call CBA_fnc_addSetting;
-
-// ----- Debug -----
-
-// Each machine's own: a test switches it on where it looks - on a dedicated server through the server's
-// settings - and nothing else changes. Off, every line costs one variable read.
-[
-    QGVAR(debugDrop),
-    "CHECKBOX",
-    [LLSTRING(Setting_DebugDrop), LLSTRING(Setting_DebugDrop_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Debug)],
-    false,
-    0
-] call CBA_fnc_addSetting;

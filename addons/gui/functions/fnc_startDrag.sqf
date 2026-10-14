@@ -14,7 +14,7 @@
  * tile the selection becomes that tile alone, as for a single item it always was.
  *
  * A tile a move under way takes from (GVAR(inFlight), fnc_drawPending) is not lifted at all. A tile of a
- * source grid (the Arsenal's catalog, "source") is lifted as the entry it brings along ("dragEntry"), one
+ * source grid (a row of ACE's list in the Arsenal panel, "source") is lifted as the entry it brings along ("dragEntry"), one
  * at a time, a whole stack with Shift; a press that recorded a click only (fnc_onMouseButton) lifts nothing.
  *
  * Nothing is lifted that could go nowhere: a living person's item or slot the player may not touch
@@ -56,7 +56,7 @@ if (_tileIndex < 0 && {_slotSource isEqualTo []}) exitWith {
     GVAR(press) = [];
 };
 
-// A tile of a source grid (the Arsenal's catalog) is a place things come from: what is dragged is the
+// A tile of a source grid (a row of ACE's list in the Arsenal panel) is a place things come from: what is dragged is the
 // entry the tile brings along ("dragEntry"), else the tile itself.
 private _sourceGrid = if (_slotSource isEqualTo []) then {(uiNamespace getVariable [QGVAR(grids), []]) param [_gridIndex, createHashMap]} else {createHashMap};
 private _fromSource = (_sourceGrid getOrDefault ["source", ""]) isNotEqualTo "";
@@ -113,7 +113,7 @@ if (_pending) exitWith {
 // A living person's gear the player may only look at, or who is out of reach by now - also a kit lying
 // in it, and another living player's kit, which stays where it is (einv_compat_efak).
 private _why = switch (true) do {
-    // Nothing to touch: the catalog is no living person's.
+    // Nothing to touch: a source grid is no living person's.
     case (_fromSource): {""};
     case (_slotSource isEqualTo []): {
         private _grid = (uiNamespace getVariable [QGVAR(grids), []]) param [_gridIndex, createHashMap];
@@ -188,7 +188,7 @@ GVAR(dragSize) = [_entry getOrDefault ["w", 1], _entry getOrDefault ["h", 1]];
 GVAR(dragRot) = parseNumber (_entry getOrDefault ["rotated", false]);
 GVAR(dragCount) = [_stack, (floor (_stack / 2)) max 1] select (_shift && {_stack > 1} && {_group isEqualTo []});
 
-// From a source grid the count starts at the tile's own number (one, for the catalog) and Shift takes the
+// From a source grid the count starts at the tile's own number (one, for a row of ACE's list) and Shift takes the
 // whole stack - the wheel and the middle button change it as for any stack.
 if (_fromSource) then {
     GVAR(dragCount) = [((_pressed getOrDefault ["dragStart", 1]) max 1) min _stack, _stack] select _shift;
@@ -291,7 +291,7 @@ if (_group isEqualTo []) then {
 private _scroll = [];
 
 // The columns this window built. A window that attached has scrolling groups of its own that stay across
-// builds (the catalog's), so every scrolling group of the display counts for it.
+// builds, so every scrolling group of the display counts for it.
 private _groups = if (call FUNC(isInventoryMode)) then {
     uiNamespace getVariable [QGVAR(created), []]
 } else {

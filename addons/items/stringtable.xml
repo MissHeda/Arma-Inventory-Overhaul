@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project name="einv">
     <Package name="items">
-        <Key ID="STR_einv_items_Family_ammo">
-            <English>Ammunition</English>
-        </Key>
-        <Key ID="STR_einv_items_Family_attachments">
-            <English>Attachments</English>
-        </Key>
-        <Key ID="STR_einv_items_Family_containers">
-            <English>Containers</English>
-        </Key>
-        <Key ID="STR_einv_items_Family_items">
-            <English>Items</English>
-        </Key>
-        <Key ID="STR_einv_items_Family_weapons">
-            <English>Weapons</English>
-        </Key>
-        <Key ID="STR_einv_items_Family_worn">
-            <English>Worn gear</English>
-        </Key>
         <Key ID="STR_einv_items_Group_assigned">
             <English>Map, compass, watch, radio and GPS</English>
         </Key>

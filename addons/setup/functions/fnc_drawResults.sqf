@@ -163,7 +163,7 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
         [_name, _textW, _fontBold, TEXT_BODY] call EFUNC(gui,fitText), TEXT_BODY, _colorText, _fontBold, 0
     ] call EFUNC(gui,uiLabel);
 
-    private _kindWord = localize format ["STR_einv_setup_%1_%2", ["Family", "Kind"] select _containers, [_family, _kind] select _containers];
+    private _kindWord = localize format [["STR_einv_setup_Family_%1", "STR_einv_setup_Kind_%1"] select _containers, [_family, _kind] select _containers];
     private _about = format ["%1 · %2 · %3", _class, _kindWord, _mod];
 
     [

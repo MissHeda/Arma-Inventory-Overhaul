@@ -38,10 +38,6 @@
  * are outlined (fnc_drawPending); where it landed lights up once the answer is finished (fnc_onFrame,
  * fnc_afterAction).
  *
- * Worn gear dragged out of its slot is traced in the RPT while einv_storage_debugDrop is on ("einv drop:"):
- * where it was let go, the target the drag found there and the call it made - onto the ground that is
- * fnc_doUnequip with "ground", exactly what the slot menu's Drop asks for.
- *
  * Arguments:
  * 0: Display <DISPLAY>
  *
@@ -98,28 +94,6 @@ GVAR(press) = [];
 GVAR(dragging) = false;
 GVAR(dragTarget) = [];
 
-// Worn gear dragged out of its slot is traced in the RPT (einv_storage_debugDrop, "einv drop:"): where it
-// was let go, what the drag found there and, below, what it asked for - the storage logs the rest. Its
-// first line is written before anything can end the drag early, so a drag that asked for nothing says so.
-private _debug = _slotSource isNotEqualTo [] && {missionNamespace getVariable [QEGVAR(storage,debugDrop), false]};
-private _asked = "";
-
-if (_debug) then {
-    getMousePosition params ["_mouseX", "_mouseY"];
-
-    private _inPanel = GVAR(panels) findIf {
-        _x params ["_panelX", "_panelY", "_panelW", "_panelH"];
-        _mouseX >= _panelX && {_mouseX < _panelX + _panelW} && {_mouseY >= _panelY} && {_mouseY < _panelY + _panelH}
-    } >= 0;
-
-    diag_log text format [
-        "einv drop: drag of %1 off %2 of %3 let go at %4 (%5, layer ""%6"") - target ""%7"" (index %8, slot ""%9"", unit %10), fits %11, reason ""%12""",
-        _entry getOrDefault ["class", ""], _slotSource param [1, ""], _slotSource param [0, objNull], [_mouseX, _mouseY],
-        ["outside every panel", "in a panel"] select _inPanel, [[_mouseX, _mouseY]] call FUNC(topAt),
-        _kind, _targetIndex, _targetSlot, _targetUnit, _fits, _reason
-    ];
-};
-
 {
     _x ctrlSetFade 0;
     _x ctrlCommit 0;
@@ -141,21 +115,13 @@ if (GVAR(filter) isNotEqualTo "") then {
 // The hint goes back to what the mouse is on - a reason why not, below, writes over it.
 [_display, getMousePosition, true] call FUNC(updateHover);
 
-if (count _entry == 0 || {_kind isEqualTo ""}) exitWith {
-    if (_debug) then {
-        diag_log text "einv drop: nothing asked - no target there, it stays where it is";
-    };
-};
+if (count _entry == 0 || {_kind isEqualTo ""}) exitWith {};
 
 // How many of a stack go: what the wheel left (fnc_onMouseZ), -1 for all of it.
 private _stack = _entry getOrDefault ["count", 1];
 private _count = [-1, GVAR(dragCount)] select (GVAR(dragCount) < _stack);
 
 if (!_fits) exitWith {
-    if (_debug) then {
-        diag_log text format ["einv drop: nothing asked - it does not go there (%1)", _reason];
-    };
-
     [_reason] call FUNC(flashHint);
 };
 
@@ -167,17 +133,13 @@ private _fromBox = _fromGrid getOrDefault ["container", objNull];
 private _fromKit = _fromGrid getOrDefault ["kit", ""];
 
 // A window that attached has the first word on where it was let go (the "drop" hook): true, it has done it
-// all. What comes from a source grid (the Arsenal's catalog) is always its to end, whatever it answers -
+// all. What comes from a source grid (ACE's list in the Arsenal panel) is always its to end, whatever it answers -
 // there is no container behind that tile to move from -, and a zone is nothing but its own.
 private _handled = ["drop", [_kind, _sourceIndex, _tileIndex, _slotSource, _entry, _count, _targetIndex, _col, _row, _w, _h, _targetSlot, _place, _rot], false] call FUNC(hook);
 
 if (
     _handled isEqualTo true || {(_fromGrid getOrDefault ["source", ""]) isNotEqualTo ""} || {_kind isEqualTo "zone"}
-) exitWith {
-    if (_debug) then {
-        diag_log text format ["einv drop: ended by the window that attached (drop hook answered %1, hooks %2)", _handled, keys GVAR(hooks)];
-    };
-};
+) exitWith {};
 
 // Onto the hotbar: the class goes on that key, nothing moves (the drag asked whether it may already).
 if (_kind isEqualTo "hotbar") exitWith {
@@ -302,10 +264,6 @@ private _sent = call {
 
         _slotSource params ["_unit", "_slot"];
 
-        if (_debug) then {
-            _asked = format ["doUnequip [%1, ""%2"", ""ground"", []]", _unit, _slot];
-        };
-
         ([_unit, _slot, "ground", []] call FUNC(doUnequip)) isEqualTo true
     };
 
@@ -317,10 +275,6 @@ private _sent = call {
 
         // Worn gear onto another unit's slot: the two exchange it (fnc_doSwap).
         if (_slotSource isNotEqualTo []) exitWith {
-            if (_debug) then {
-                _asked = format ["doSwap [%1, %2, ""%3""]", _slotSource, _targetUnit, _targetSlot];
-            };
-
             ([_slotSource, _targetUnit, _targetSlot] call FUNC(doSwap)) isEqualTo true
         };
 
@@ -356,10 +310,6 @@ private _sent = call {
     if (_slotSource isNotEqualTo []) exitWith {
         _slotSource params ["_unit", "_slot"];
 
-        if (_debug) then {
-            _asked = format ["doUnequip [%1, ""%2"", %3, %4]", _unit, _slot, _to, _cell];
-        };
-
         ([_unit, _slot, _to, _cell] call FUNC(doUnequip)) isEqualTo true
     };
 
@@ -369,14 +319,7 @@ private _sent = call {
     ([_fromBox, _to, _entry, _count, _cell] call FUNC(applyMove)) isEqualTo true
 };
 
-// What it asked for and whether that went out - a refusal before it went out flashed its own reason.
-if (_debug) then {
-    diag_log text format [
-        "einv drop: %1 -> %2, sent %3",
-        _entry getOrDefault ["class", ""], [_asked, format ["nothing of the storage's (target ""%1"")", _kind]] select (_asked isEqualTo ""), _sent
-    ];
-};
-
+// A refusal before it went out flashed its own reason.
 if (!_sent) exitWith {};
 
 // On its way: it stays where it lay, faded, and cannot be lifted again until the answer came; the cells

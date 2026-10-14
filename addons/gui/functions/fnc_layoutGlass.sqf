@@ -62,7 +62,7 @@ private _columnW = (STORAGE_COLS + 3) * _cellW + SQUARE(UNIT * 0.35) + ((_padX *
 
 // The columns from the right edge inwards: loot (while looting), storage, then the middle. A window that
 // attached keeps the place of the loot column although nothing is looted (the context's "rightColumn":
-// the Arsenal's catalog stands there) and may let it grow by what the middle has beyond "rightKeep" UNITs
+// it draws there itself) and may let it grow by what the middle has beyond "rightKeep" UNITs
 // of width - at most "rightGrow" of a column - so a wide screen does not leave the soldier a hall.
 private _looting = _context getOrDefault ["looting", false];
 private _reserved = _looting || {_context getOrDefault ["rightColumn", false]};

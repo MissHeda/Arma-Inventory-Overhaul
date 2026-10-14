@@ -85,7 +85,6 @@ PREP(doEquip);
 PREP(doUnequip);
 PREP(canSwap);
 PREP(doSwap);
-PREP(isShared);
 PREP(itemName);
 
 // The CBA item context menu: other mods' choices for an item, in this window's menu

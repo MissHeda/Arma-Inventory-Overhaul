@@ -669,16 +669,7 @@ if (_moves isEqualTo []) exitWith {
     };
 } forEach _moves;
 
-// Worn gear coming off (einv_storage_debugDrop): the transaction it became, by the id the storage's own
-// "einv drop:" lines carry - or why none was asked for.
-private _debug = (missionNamespace getVariable [QEGVAR(storage,debugDrop), false])
-    && {_moves findIf {(_x getOrDefault ["kind", ""]) in ["unequip", "swap"]} >= 0};
-
 if (_phases isEqualTo []) exitWith {
-    if (_debug) then {
-        diag_log text format ["einv drop: no transaction - refused ""%1""", _refused];
-    };
-
     if (_refused isNotEqualTo "") then {
         [_refused] call FUNC(flashHint);
     };
@@ -687,13 +678,6 @@ if (_phases isEqualTo []) exitWith {
 };
 
 private _id = [_phases, {_this call FUNC(onAnswer)}, [_records, _options, _rest]] call EFUNC(storage,request);
-
-if (_debug) then {
-    diag_log text format [
-        "einv drop: request ""%1"" - %2, phases %3",
-        _id, _records apply {[_x get "kind", _x get "class", _x get "to"]}, _phases apply {[_x select 0, (_x select 1) apply {_x select 0}]}
-    ];
-};
 
 if (_id isEqualTo "") exitWith {
     ["Failed"] call FUNC(flashHint);

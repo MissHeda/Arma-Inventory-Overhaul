@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * Shows, the moment something is lifted, what it would add to the soldier: when the item comes from outside
- * his own gear - another container, a body, a catalog - the weight card gets a preview of the weight it
+ * his own gear - another container, a body, a row of ACE's list - the weight card gets a preview of the weight it
  * would add, as a lighter segment after the fill in the colour of the tier it would put him in
  * (fnc_weightColor). Weight limits no container, so nothing else is marked: the cells alone decide where
  * it fits.

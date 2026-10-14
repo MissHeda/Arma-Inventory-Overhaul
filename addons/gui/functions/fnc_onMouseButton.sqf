@@ -157,7 +157,8 @@ if (_menuOpen && {_down} && {_button == 1}) then {
 
 if (_menuOpen) exitWith {false};
 
-// A window that attached may take the button first - the Arsenal's camera turns with the right one.
+// A window that attached may take the button first - the Arsenal panel takes every press outside its own, so the
+// engine ignores it.
 private _taken = if (_down) then {
     ["mouseDown", [_button, [_clickX, _clickY], _shift, _ctrl, _alt], false] call FUNC(hook)
 } else {
@@ -261,7 +262,7 @@ if (_down) exitWith {
 
             if (_tile getOrDefault ["hidden", false]) exitWith {};
 
-            // A tile of a source grid (the Arsenal's catalog) is lifted like one in a container, though no
+            // A tile of a source grid (ACE's list in the Arsenal panel) is lifted like one in a container, though no
             // container stands behind it: it brings the cell it is held by itself.
             if ((_grid getOrDefault ["source", ""]) isNotEqualTo "") exitWith {
                 GVAR(press) = [_gridIndex, _tileIndex, _mouse, _tile getOrDefault ["grab", [0, 0]], _ctrl, [], _alt, _shift];

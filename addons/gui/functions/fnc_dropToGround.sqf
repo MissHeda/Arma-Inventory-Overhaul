@@ -40,8 +40,8 @@ if (
     || {_tile getOrDefault ["hidden", false]} || {_tile getOrDefault ["pending", false]}
 ) exitWith {false};
 
-// A window that attached takes the item itself instead of the ground (the "ground" hook: the Arsenal gives
-// it back), told where it is, [grid index, tile index], and how many, -1 for all.
+// A window that attached takes the item itself instead of the ground (the "ground" hook: the Arsenal takes
+// it out), told where it is, [grid index, tile index], and how many, -1 for all.
 if ((["ground", [[_gridIndex, _tileIndex], _count], false] call FUNC(hook)) isEqualTo true) exitWith {true};
 
 if (_kit isNotEqualTo "") exitWith {

@@ -16,12 +16,12 @@
  *
  * Actions: "lift" (an item picked up), "move" (put into a container), "drop" (onto the ground), "equip",
  * "unequip", "attach", "detach", "loadMag", "loadMagHandgun", "loadMagLauncher", "loadMagUgl", "unloadMag",
- * "rotate", "open", "close", "search", "uncover" (an item found), "inspect" and "giveBack" (handed back to
- * the Arsenal). The old kinds keep working: "put" is "move", and ["lift"], ["search"] and ["giveBack"] with
+ * "rotate", "open", "close", "search", "uncover" (an item found), "inspect" and "giveBack" (taken out of a
+ * container in the Arsenal panel). The old kinds keep working: "put" is "move", and ["lift"], ["search"] and ["giveBack"] with
  * no class sound as an item of no family.
  *
  * Every change of the window sounds when its answer is finished (fnc_feelAnswer), a pick-up and a turn
- * at once. The settings are read with their defaults: the Enhanced Arsenal plays in Eden, where CBA's
+ * at once. The settings are read with their defaults: the Arsenal panel plays in Eden, where CBA's
  * settings may not be there.
  *
  * Arguments:

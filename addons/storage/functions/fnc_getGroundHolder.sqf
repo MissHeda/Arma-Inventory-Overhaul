@@ -89,15 +89,4 @@ if (!isNull _pile) exitWith {_pile};
 _pile = createVehicle ["GroundWeaponHolder_Scripted", [0, 0, 0], [], 0, "CAN_COLLIDE"];
 _pile setPosASL _point;
 
-// Written to the RPT when the engine or anyone deletes it (a dropped backpack went with its pile, 0.4.0):
-// the frame, what lay in it then, and whether a transaction of ours was running.
-_pile addEventHandler ["Deleted", {
-    params ["_pile"];
-
-    private _items = (getItemCargo _pile) param [0, []];
-
-    INFO_4("Pile %1 deleted at frame %2 - backpacks %3, items %4",netId _pile,diag_frameNo,everyBackpack _pile,_items);
-    INFO_2("  ... while executing %1, buffer %2",GVAR(executing),count GVAR(buffer));
-}];
-
 _pile

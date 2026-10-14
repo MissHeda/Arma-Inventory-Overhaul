@@ -185,18 +185,4 @@ if (_step == 3) then {
     _phasesOut pushBack [objNull, _left apply {["putGround", [_x]]}, 3];
 };
 
-// A backpack among what is left: where this step sends it.
-if (DROP_DEBUG) then {
-    private _bags = _left select {
-        (((((_results param [_x select 1, []]) param [_x select 2, []]) param [1, []]) param [_x select 3, []]) param [0, ""]) isEqualTo "backpack"
-    };
-
-    if (_bags isNotEqualTo []) then {
-        diag_log text format [
-            "einv drop: %1 settle step %2 - backpacks left %3, phases %4",
-            _tx param [0, ""], _step, _bags, _phasesOut apply {[_x select 0, (_x select 1) apply {_x select 0}]}
-        ];
-    };
-};
-
 _phasesOut

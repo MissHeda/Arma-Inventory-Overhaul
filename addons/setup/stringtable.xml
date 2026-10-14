@@ -58,24 +58,6 @@
         <Key ID="STR_einv_setup_Banner_Reload">
             <English>Reload</English>
         </Key>
-        <Key ID="STR_einv_setup_Block_Add">
-            <English>Add block</English>
-        </Key>
-        <Key ID="STR_einv_setup_Block_N">
-            <English>Block %1</English>
-        </Key>
-        <Key ID="STR_einv_setup_Builder_AddCondition">
-            <English>Add condition</English>
-        </Key>
-        <Key ID="STR_einv_setup_Builder_Create">
-            <English>Create</English>
-        </Key>
-        <Key ID="STR_einv_setup_Builder_Matches">
-            <English>%1 items match</English>
-        </Key>
-        <Key ID="STR_einv_setup_Builder_Name">
-            <English>Name</English>
-        </Key>
         <Key ID="STR_einv_setup_Cancel">
             <English>Cancel</English>
         </Key>
@@ -96,9 +78,6 @@
         </Key>
         <Key ID="STR_einv_setup_Cell_Value">
             <English>1 cell = %1 kg</English>
-        </Key>
-        <Key ID="STR_einv_setup_ChangeShape">
-            <English>Change size or shape...</English>
         </Key>
         <Key ID="STR_einv_setup_Change_Before">
             <English>%1 - before: %2</English>
@@ -172,29 +151,8 @@
         <Key ID="STR_einv_setup_Close">
             <English>Close</English>
         </Key>
-        <Key ID="STR_einv_setup_Col_From">
-            <English>From</English>
-        </Key>
-        <Key ID="STR_einv_setup_Col_Grid">
-            <English>Grid</English>
-        </Key>
-        <Key ID="STR_einv_setup_Col_Group">
-            <English>Group</English>
-        </Key>
-        <Key ID="STR_einv_setup_Col_Kind">
-            <English>Kind</English>
-        </Key>
-        <Key ID="STR_einv_setup_Col_Name">
-            <English>Name</English>
-        </Key>
-        <Key ID="STR_einv_setup_Col_Shape">
-            <English>Shape</English>
-        </Key>
         <Key ID="STR_einv_setup_Col_Size">
             <English>Size</English>
-        </Key>
-        <Key ID="STR_einv_setup_Col_Stack">
-            <English>Stack</English>
         </Key>
         <Key ID="STR_einv_setup_Cond_addon">
             <English>from addon %1</English>
@@ -312,9 +270,6 @@
         </Key>
         <Key ID="STR_einv_setup_Cont_NotContainer">
             <English>%1 holds nothing - there are no cells to draw.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Cont_Overflow">
-            <English>%1 items don't fit</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_PaintHelp">
             <English>Pick a colour, then click or drag over cells. Touching cells of one colour are one compartment; empty places are left out.</English>
@@ -454,18 +409,6 @@
         <Key ID="STR_einv_setup_Family_weapon">
             <English>Weapon</English>
         </Key>
-        <Key ID="STR_einv_setup_Fill">
-            <English>Fill with</English>
-        </Key>
-        <Key ID="STR_einv_setup_Fill_Empty">
-            <English>Empty</English>
-        </Key>
-        <Key ID="STR_einv_setup_Fill_Medic">
-            <English>Medic</English>
-        </Key>
-        <Key ID="STR_einv_setup_Fill_Rifleman">
-            <English>Rifleman</English>
-        </Key>
         <Key ID="STR_einv_setup_Filter_Cargo">
             <English>Cargo</English>
         </Key>
@@ -562,62 +505,17 @@
         <Key ID="STR_einv_setup_Items_ApplyTip">
             <English>Keep this size and stack for this class. Save at Review puts it to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_ApplyTo">
-            <English>Apply to</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_ByName">
-            <English>Found by name, so saved as these %1 classes: names differ by game language.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_CanStack">
-            <English>Can stack</English>
-        </Key>
         <Key ID="STR_einv_setup_Items_CanvasHelp">
             <English>Click the cells it takes: an L, a T, any shape in one piece. Across and down make a rectangle.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Clear">
             <English>Clear</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_CopyClass">
-            <English>Copy class</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_Edit">
-            <English>Edit</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_FilterGroup">
-            <English>Filter by this group</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_FilterMod">
-            <English>Filter by this mod</English>
-        </Key>
         <Key ID="STR_einv_setup_Items_Forced">
             <English>Weapons, uniforms, vests and backpacks never share a tile.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Group">
-            <English>Group</English>
-        </Key>
         <Key ID="STR_einv_setup_Items_Help">
             <English>Pick an item on the left, draw its cells and set how many share a tile. Apply keeps the change; Save at Review puts it to use.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_Hidden">
-            <English>%1 hidden by the filter</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_Indexing">
-            <English>Reading %1 classes...</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_Inspect">
-            <English>Inspect</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_Kind">
-            <English>Kind</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_Matches">
-            <English>%1 matches · %2 selected</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_Mixed">
-            <English>%1 (mixed)</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_Mod">
-            <English>Mod</English>
         </Key>
         <Key ID="STR_einv_setup_Items_NoCells">
             <English>Click at least one cell.</English>
@@ -631,15 +529,6 @@
         <Key ID="STR_einv_setup_Items_Now">
             <English>Now</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_OnlyChanged">
-            <English>Only changed</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_OnlyShaped">
-            <English>Only shaped</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_OnlyStackable">
-            <English>Only stackable</English>
-        </Key>
         <Key ID="STR_einv_setup_Items_PerTile">
             <English>Per tile</English>
         </Key>
@@ -649,26 +538,11 @@
         <Key ID="STR_einv_setup_Items_Pieces">
             <English>%1 pieces</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Remove">
-            <English>Remove</English>
-        </Key>
         <Key ID="STR_einv_setup_Items_ResetTip">
             <English>Remove its own size and stack. The preset decides again.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Revert">
-            <English>Revert</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_Rules">
-            <English>Your rules</English>
-        </Key>
         <Key ID="STR_einv_setup_Items_Search">
             <English>Search name or class</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_SelectAll">
-            <English>Select all</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_ShowPresets">
-            <English>Show weapon presets</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Title">
             <English>Items: how big each one is</English>
@@ -676,14 +550,8 @@
         <Key ID="STR_einv_setup_Items_Unapplied">
             <English>Not applied yet. Apply keeps it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Variants">
-            <English>Include variants</English>
-        </Key>
         <Key ID="STR_einv_setup_Items_Weight">
             <English>%1 kg</English>
-        </Key>
-        <Key ID="STR_einv_setup_Items_Why">
-            <English>Why?</English>
         </Key>
         <Key ID="STR_einv_setup_Key_Escape">
             <English>Esc</English>
@@ -693,33 +561,6 @@
         </Key>
         <Key ID="STR_einv_setup_Key_Undo">
             <English>Ctrl+Z</English>
-        </Key>
-        <Key ID="STR_einv_setup_Key_addon">
-            <English>Addon</English>
-        </Key>
-        <Key ID="STR_einv_setup_Key_cat">
-            <English>Category</English>
-        </Key>
-        <Key ID="STR_einv_setup_Key_class">
-            <English>Class</English>
-        </Key>
-        <Key ID="STR_einv_setup_Key_for">
-            <English>Fits weapon</English>
-        </Key>
-        <Key ID="STR_einv_setup_Key_kind">
-            <English>Kind</English>
-        </Key>
-        <Key ID="STR_einv_setup_Key_load">
-            <English>Load</English>
-        </Key>
-        <Key ID="STR_einv_setup_Key_mass">
-            <English>Mass</English>
-        </Key>
-        <Key ID="STR_einv_setup_Key_rounds">
-            <English>Rounds</English>
-        </Key>
-        <Key ID="STR_einv_setup_Key_well">
-            <English>Magazine well</English>
         </Key>
         <Key ID="STR_einv_setup_Keybind_Open">
             <English>Open inventory setup</English>
@@ -751,26 +592,8 @@
         <Key ID="STR_einv_setup_List_Range">
             <English>%1-%2 of %3</English>
         </Key>
-        <Key ID="STR_einv_setup_Mode_Auto">
-            <English>By load</English>
-        </Key>
-        <Key ID="STR_einv_setup_Mode_Blocks">
-            <English>Compartments</English>
-        </Key>
-        <Key ID="STR_einv_setup_Mode_Cells">
-            <English>Cells</English>
-        </Key>
-        <Key ID="STR_einv_setup_Mode_Pattern">
-            <English>Pattern</English>
-        </Key>
-        <Key ID="STR_einv_setup_Mode_Percent">
-            <English>% of load</English>
-        </Key>
         <Key ID="STR_einv_setup_Next">
             <English>Next</English>
-        </Key>
-        <Key ID="STR_einv_setup_Op_contains">
-            <English>contains</English>
         </Key>
         <Key ID="STR_einv_setup_Op_ge">
             <English>at least</English>
@@ -781,17 +604,11 @@
         <Key ID="STR_einv_setup_Op_is">
             <English>is</English>
         </Key>
-        <Key ID="STR_einv_setup_Op_isOrInherits">
-            <English>is or inherits from</English>
-        </Key>
         <Key ID="STR_einv_setup_Op_le">
             <English>at most</English>
         </Key>
         <Key ID="STR_einv_setup_Op_lt">
             <English>less than</English>
-        </Key>
-        <Key ID="STR_einv_setup_Op_not">
-            <English>not</English>
         </Key>
         <Key ID="STR_einv_setup_OpenWizard">
             <English>Inventory setup</English>
@@ -976,30 +793,6 @@
         <Key ID="STR_einv_setup_Save_Unchanged">
             <English>Nothing to save: it is in use already.</English>
         </Key>
-        <Key ID="STR_einv_setup_Scope_Group">
-            <English>Their group</English>
-        </Key>
-        <Key ID="STR_einv_setup_Scope_Matching">
-            <English>Everything matching (%1)</English>
-        </Key>
-        <Key ID="STR_einv_setup_Scope_Selected">
-            <English>Selected (%1)</English>
-        </Key>
-        <Key ID="STR_einv_setup_Shape_Cells">
-            <English>%1 cells</English>
-        </Key>
-        <Key ID="STR_einv_setup_Shape_Invalid">
-            <English>Cells must touch each other and reach every edge</English>
-        </Key>
-        <Key ID="STR_einv_setup_Shape_Mass">
-            <English>By mass</English>
-        </Key>
-        <Key ID="STR_einv_setup_Shape_Rectangle">
-            <English>Rectangle</English>
-        </Key>
-        <Key ID="STR_einv_setup_Shape_Rotate">
-            <English>Rotate (R)</English>
-        </Key>
         <Key ID="STR_einv_setup_Source_client">
             <English>Client</English>
         </Key>
@@ -1008,21 +801,6 @@
         </Key>
         <Key ID="STR_einv_setup_Source_server">
             <English>Server</English>
-        </Key>
-        <Key ID="STR_einv_setup_Src_builtin">
-            <English>Built in</English>
-        </Key>
-        <Key ID="STR_einv_setup_Src_forced">
-            <English>Always 1 for this kind</English>
-        </Key>
-        <Key ID="STR_einv_setup_Src_mod">
-            <English>Set by its mod</English>
-        </Key>
-        <Key ID="STR_einv_setup_Src_own">
-            <English>Your rule %1</English>
-        </Key>
-        <Key ID="STR_einv_setup_Src_preset">
-            <English>Preset: %1</English>
         </Key>
         <Key ID="STR_einv_setup_Start_Advanced">
             <English>Advanced</English>
@@ -1089,9 +867,6 @@
         </Key>
         <Key ID="STR_einv_setup_Tab_Backpacks">
             <English>Backpacks</English>
-        </Key>
-        <Key ID="STR_einv_setup_Tab_Crates">
-            <English>Crates and vehicles</English>
         </Key>
         <Key ID="STR_einv_setup_Tab_Uniforms">
             <English>Uniforms</English>
@@ -1209,15 +984,6 @@
         </Key>
         <Key ID="STR_einv_setup_Warning_TooLong">
             <English>The text is %1 characters long: more than 16,000 cannot be saved.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Why_Overridden">
-            <English>overridden</English>
-        </Key>
-        <Key ID="STR_einv_setup_Why_Title">
-            <English>Why %1 looks like this</English>
-        </Key>
-        <Key ID="STR_einv_setup_Why_Wins">
-            <English>wins</English>
         </Key>
     </Package>
 </Project>

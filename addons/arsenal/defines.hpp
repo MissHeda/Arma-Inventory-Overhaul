@@ -9,7 +9,7 @@
 #define UI_TEX(NAME) QPATHTOEF(gui,ui\NAME.paa)
 
 // The red screen for a Virtual Arsenal that is not allowed. 9601 to 9603 are the inventory's (IDC_DIM,
-// IDC_FIRST, IDC_KEEP), 9620 to 9622 the setup wizard's; 9610 was the old arsenal window's.
+// IDC_FIRST, IDC_KEEP), 9620 to 9622 the setup wizard's.
 #define IDD_ARSENAL_BLOCKED 9611
 
 // The ACE Arsenal version whose ids and internals the panel was checked against; another one is reported

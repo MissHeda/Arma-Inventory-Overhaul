@@ -66,11 +66,7 @@ private _fnc_fill = {
     private _new = (call _fnc_objects) - _before;
 
     if (count _new == 1) exitWith {
-        private _complete = [_new select 0, _inner, _container] call FUNC(restore);
-
-        if (DROP_DEBUG && {(_new select 0) isKindOf "Bag_Base"}) then {
-            diag_log text format ["einv drop: restore of %1 in %2 - complete %3, holds %4", _new select 0, _container, _complete, count ([_new select 0] call FUNC(getContents))];
-        };
+        [_new select 0, _inner, _container] call FUNC(restore);
     };
 
     ERROR_3("Could not tell which %1 just went into %2 (%3 new) - what it held goes in loose.",_class,typeOf _container,count _new);
@@ -148,21 +144,6 @@ switch (_payload select 0) do {
         // its empty one) is there all the same, and put down a second time it would be a copy.
         private _new = (everyBackpack _container) - _bags;
         private _arrived = ([_key] call _fnc_held) > _before || {_new isNotEqualTo []};
-
-        if (DROP_DEBUG) then {
-            diag_log text format [
-                "einv drop: addBackpackCargoGlobal %1 into %2 (%3, netId %4) - arrived %5, new backpack %6, there now %7",
-                _class, _container, typeOf _container, netId _container, _arrived, _new, everyBackpack _container
-            ];
-        };
-
-        // Always written, not behind the setting: the next test's RPT shows where a dropped backpack went and
-        // how many lie there, whatever was set (the second line is fnc_opPutGround's, a frame later).
-        if (_arrived && {[_container] call FUNC(isGroundHolder)}) then {
-            private _bags = count (everyBackpack _container);
-
-            INFO_3("Backpack %1 put on pile %2 (%3 backpacks there)",_class,netId _container,_bags);
-        };
 
         if (_arrived) then {
             [_class, _inner, _objects] call _fnc_fill;

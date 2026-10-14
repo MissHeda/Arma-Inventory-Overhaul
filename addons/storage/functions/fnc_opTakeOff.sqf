@@ -38,15 +38,6 @@ if (isNil "_payload" || {!(_payload isEqualType [])}) then {
     _payload = [];
 };
 
-if (_slot isEqualTo "backpack" && {DROP_DEBUG}) then {
-    diag_log text format [
-        "einv drop: %1 phase %2 on %3 - takeOff %4 (settlement %5)",
-        _context getOrDefault ["txId", ""], _context getOrDefault ["phase", -1], clientOwner,
-        ["failed, nothing handed on", "handed on " + str (_payload param [1, ""])] select (_payload isNotEqualTo []),
-        _context getOrDefault ["settlement", false]
-    ];
-};
-
 if (_payload isEqualTo []) exitWith {["Failed", [], []]};
 
 ["", [_payload], []]

@@ -1,6 +1,6 @@
 # Enhanced Inventory - architecture
 
-This is the contract every file of the mod is written against, as the mod is on this branch (version 0.4.0). Function names,
+This is the contract every file of the mod is written against, as the mod is on this branch (the 0.4 line). Function names,
 arguments, HashMap keys and settings named here are binding: several people (and agents) write different files at the same time
 and only meet through these interfaces. If something turns out wrong, fix it here and in the code together. How the mod got here
 is the dated build log `docs/HISTORY.md`; this file describes only what is true now. `docs/BRIEFING.md` has the goal and the first
@@ -54,7 +54,8 @@ The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
 - Controls cannot be saved with a game, so every control lives in `uiNamespace`. Eden runs no postInit and no CBA frame handlers:
   what must work there is registered in preInit and driven by a `Draw3D` handler or by the display's own events (sections 4 to 6).
 - Tests: `tools/check_default_ruleset.sqf` (section 2) and the mission `.hemtt/missions/EINV_Test.VR` (full gear, a crate, an ACE
-  Arsenal box, a vehicle, a body, loot on the ground); `tools/generate_ui_textures.py` draws `addons/gui/ui/`.
+  Arsenal box, a vehicle, a body, loot on the ground); `tools/generate_ui_textures.py` draws `addons/gui/ui/`; `python -I tools/find_dead_code.py` lists
+  the functions, preInit variables and defines nothing uses.
 
 ### Addons
 
@@ -532,8 +533,8 @@ makes a `GroundWeaponHolder_Scripted`; never an empty pile. In multiplayer only 
 the vehicle's cargo; with nothing under the feet (swimming, falling) it is refused.
 
 The pile is the scripted holder because the engine garbage-collects a `GroundWeaponHolder` it takes for empty, and a backpack is an
-object attached to the holder, not cargo the engine counts: a pile holding only a backpack was deleted, backpack included (0.4.0, a
-worn backpack dropped to the ground vanished, a vest did not). `GroundWeaponHolder_Scripted` is the same holder the engine never
+object attached to the holder, not cargo the engine counts: a pile holding only a backpack was deleted, backpack included (the dated
+record is in `docs/HISTORY.md`). `GroundWeaponHolder_Scripted` is the same holder the engine never
 deletes, so the mod deletes it itself: `fnc_pruneScriptedPile [pile]`, called by `fnc_execute` for every ground pile a phase touched
 and by `fnc_opPutGround` for the piles a bounced put-down left empty. A pile of that type that is local and, a frame later, still
 holds no item, weapon, magazine or backpack is deleted (a frame, so the answer and the window's rebuild finish first). Engine-made
@@ -630,20 +631,17 @@ single player, else through the hub (`fnc_opPutGround` -> `fnc_getGroundHolder` 
 the pile is never made in one frame and filled in another), then `fnc_settle` and the answer. Safety nets: a backpack still worn
 after `removeBackpack` is looked at a frame later and put back on from its snapshot if the engine took it off late;
 `fnc_addPayload` counts a backpack as arrived also by one more `everyBackpack` object; settlement step 1 puts it back on the back
-while the slot is empty. `fnc_putOn` uses `addBackpack`, which fills the container at once. The client setting
-**`einv_storage_debugDrop`** (default off; a dedicated server reads its own) writes `einv drop:` lines for each step to the RPT.
+while the slot is empty. `fnc_putOn` uses `addBackpack`, which fills the container at once.
 
-**Dragged out of the window** (0.4.0: a backpack dragged from the gear row onto the 3D middle left no pile and nothing on the ground;
-a vest did not vanish). `einv_gui_fnc_updateDrag` makes the target `["ground", -1, 0, 0, true, ""]` outside every panel, and
+**Dragged out of the window.** `einv_gui_fnc_updateDrag` makes the target `["ground", -1, 0, 0, true, ""]` outside every panel, and
 `fnc_endDrag` gives a slot's item to `fnc_doUnequip [unit, slot, "ground", []]` - the menu Drop's own call, only inside the mouse-up
 event instead of a frame later. The window makes no pile, asks no hook (`ground` is asked only by `fnc_quickUnequip`,
 `fnc_dropToGround`, `fnc_quickMove`), and `fnc_settle` works from the phases, not the window's in-flight record; with no pile in
 reach `fnc_getGroundHolder` makes one. The step that differs from a vest's is the engine's cleanup of a pile holding only a backpack,
-an object of its own and no item cargo, which the scripted holder avoids (see Ground above). `fnc_opPutGround` still looks at such a
-pile a frame later and, gone, puts the backpack down once more (an RPT error). Two RPT lines per backpack put on a pile are
-always written, whatever `einv_storage_debugDrop` says: `fnc_addPayload`'s "Backpack CLASS put on pile NETID (N backpacks there)" and
-`fnc_opPutGround`'s a frame later "Backpack CLASS on pile NETID a frame later: pile gone / there with N backpacks". The trace starts at the drag: `fnc_endDrag` (where, target, call), `fnc_doUnequip` (every slot, refusals),
-`fnc_sendMoves` (the request id the storage's lines carry), `fnc_afterAction` (each step's result, the pile, whether it shows).
+an object of its own and no item cargo, which the scripted holder avoids (see Ground above). A backpack joins only a pile of ours
+(`GroundWeaponHolder_Scripted`) or a fresh one, and the backpack just taken off is marked (`einv_storage_takenOff`) so that the plain
+holder the engine keeps it in until the end of the frame is never taken for a pile. `fnc_opPutGround` writes one RPT line per
+backpack, "Backpack CLASS goes onto pile NETID".
 
 ### Public functions and tables
 
@@ -792,6 +790,11 @@ inventory-only feature asks it: nearby boxes, selecting, the band, group drags, 
 | `tileBadge` | `[class]` | a texture or `""` - a mark `SQUARE(UNIT * 0.42)` in a tile's top left corner | `fnc_createTile`, `fnc_drawSlot` |
 | `hint` | `[kind "tile" / "slot" / "none", class, record]` | parts `[[text, colourKey], ...]` after the gui's own; for `"none"` the whole idle hint | `fnc_updateHover` |
 | `inspectRows` | `[class, count, ammo, attachments]` | rows `[label, text]` or `[label, fraction, text]` before the Mod row | `fnc_drawInspect` |
+
+ACE Arsenal's panel is the only window that attaches today. It sets `guest`, `theme`, `header`, `layout`, `footer`, `camera`,
+`keepOpen`, `frame`, `mouseDown`, `mouseUp`, `click`, `wheel`, `dragCheck`, `drop`, `ground`, `fold`, `menu` and `hint`; `context`,
+`afterBuild`, `footerKeys`, `focusAll`, `key`, `submit`, `filter`, `tileBadge` and `inspectRows` are asked for but set by nobody,
+kept as the surface for a later window.
 
 `drop`'s `place` is false when the cell is taken in a kit's grid (whose layout finds another); `rot` is 0 upright, 1 turned. **The
 click target** (the `click` hook; element 8 of `einv_gui_press`) is a HashMap: `type` (`"tile"`, `"slot"`, `"cell"`, `"none"`),
@@ -986,7 +989,7 @@ open (and the unit wears it), a panel right beside ACE's list (IDC 15) shows tha
 by the gui addon's window engine attached to ACE's display as a **guest**. The addon requires `ace_arsenal` (it is not skipped
 when that is missing: the game should say so) and `A3_Functions_F_Bootcamp`, which makes the entry for `BIS_fnc_arsenal` load
 after BI's. The ACE internals it reads are copied under names of ours in `arsenal/script_component.hpp` (display 1127001; IDCs 15
-list, 17 sort bar, 102 "+", 701 load bar, 9 message line, 40 "Remove all", 2010 / 2012 / 2014 the left tabs;
+list, 17 sort bar, 102 "+", 701 load bar, 2010 / 2012 / 2014 the left tabs;
 `ace_arsenal_currentLeftPanel`, `currentItems`, `mouseButtonState`, `virtualItemsFlat`; the row data `lnbData [row, 0]` and
 `lnbValue [row, 2]`). `fnc_compatCheck` looks once at preInit whether they exist (`ACE_TESTED` "3.21.2"; another version gets one
 RPT line); not ready, ACE Arsenal opens without the panel. Its known limits are listed in section 9.
@@ -1133,7 +1136,7 @@ Every popover (`fnc_popover`: a dropdown's list, the Same as picker, the import 
 unsaved changes) is made in the **top layer** (`fnc_topLayer`, uiNamespace `einv_setup_layer`): a controls group over the screen,
 made anew at the end of every step drawn so it is the display's last control, hidden while empty. The engine draws the focused
 control over all others, and the pane holds the focus after a redraw (its sink) or a click - popovers made on the display lay behind
-it (0.4.0). A popover therefore takes the focus into the layer (a button of no size on its card) before its content is drawn, its
+it. A popover therefore takes the focus into the layer (a button of no size on its card) before its content is drawn, its
 full-screen hit area closes it on a click beside the card and lets nothing through, and the keys wait while one is open
 (`fnc_onKeyDown`, `fnc_onKeyUp`); `fnc_closePopover` hides the layer and gives the focus back to the sink.
 
@@ -1391,7 +1394,6 @@ stringtables are wrapped as BRIEFING asks.
 | `einv_storage_migrate` | CHECKBOX | global | on | move a unit's surplus (overflow) on to its next container with room (section 3, Surplus) |
 | `einv_storage_containerTable` | EDITBOX | global | "" | `class:N` or `class:WxH+WxH`; wins over the text |
 | `einv_storage_nearbyRange` | SLIDER 1 to 5 | global | 3 | m, how far crates and piles count as nearby |
-| `einv_storage_debugDrop` | CHECKBOX | client | off | log backpack drops to the RPT |
 | `einv_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
 | `einv_gui_showNearby` | CHECKBOX | client | on | nearby piles and crates as boxes in the loot column |
 | `einv_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |
@@ -1491,7 +1493,7 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
   as the fourth gear slot; shaped grids, `like=`, shaped items with rotation, positional compartments with insets, width 10, the
   presets `default` revision 2, `realism` and `weight` revision 2; the wizard (Start, Items, Containers with paint, Blocks and
   Same as, Review); the window details (the menu's right-click fall-through, the weight card without ticks, count pills, the
-  n/stack badge); the backpack drop with its safety nets and `einv_storage_debugDrop`; `hasSpace` with partial stacks.
+  n/stack badge); the backpack drop with its safety nets; `hasSpace` with partial stacks.
 - **Features older than that but newer than the 0.2.3 test**: the sound families and the looting pose, "moving stops looting", the
   magazine fill bar and the repack, the weight tiers with their effects and the comparison card, the window's lock gates, ACE
   cargo, TFAR and ACRE2 radios, the vanilla Virtual Arsenal handling.

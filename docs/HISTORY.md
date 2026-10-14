@@ -3086,3 +3086,34 @@ So a container drawn on the wizard's canvas looks exactly like the drawing, and 
   `onLoad` calls; replacing it would skip every other mod's handler, close at the moment the handler does anyway, and race
   Better Inventory's patch of the same attribute.
 - Built and checked in code only: nothing of this has run in the game yet.
+
+## General cleanup (0.4.4, 2026-10-14) - supersedes the parts above it contradicts
+
+- **The backpack-drop trace is gone.** Cause found and fixed in 0.4.3 (`removeBackpack` leaves the backpack in the engine's
+  plain holder until the end of the frame, and the pile search took that holder for a pile), so the scaffolding that located it
+  went: the client setting `einv_storage_debugDrop` with its description and the "Debug" sub-category, the `DROP_DEBUG` define
+  and every `einv drop:` block (`fnc_endDrag`, `fnc_doUnequip`, `fnc_sendMoves`, `fnc_afterAction`, `fnc_takeOff`,
+  `fnc_opTakeOff`, `fnc_opPutGround`, `fnc_addPayload`, `fnc_settle`, `fnc_pruneScriptedPile`), the Deleted-event trace on
+  scripted piles (`fnc_getGroundHolder`), and the look at a pile a frame and two seconds later with the "put down again" net in
+  `fnc_opPutGround` (the piles are scripted holders and a backpack joins only a pile of ours, so nothing deletes them under it).
+  What stays: the `takenOff` marking in `fnc_takeOff`, the own-pile-only rule, the net that puts a backpack back on when the
+  engine took it off late (it cannot be shown dead without the game), and one RPT line per backpack put on the ground ("Backpack
+  CLASS goes onto pile NETID"). The sections above that describe the setting or the traces are history.
+- **Dead code.** `tools/find_dead_code.py` lists what nothing uses. Removed: `einv_gui_fnc_isShared` (kept "for other
+  features' rules", none ever asked it), the variables `einv_hotbar_counts` and `einv_storage_greeted` (assigned, never read), and the defines
+  `ARSENAL_IDC_MESSAGE`, `ARSENAL_IDC_REMOVE_ALL`, `ROW_CLASS` and `ROW_PICTURE`. Five functions marked Public: Yes that nothing
+  in the mod calls stay (`einv_items_fnc_explain`, `einv_storage_fnc_dumpPlaces`, `fnc_equip`, `fnc_moveEntry`, `fnc_unequip`).
+- **Stringtables.** 84 keys nothing read were removed (6 in items, 78 in setup, left over from earlier shapes of the wizard).
+  HEMTT had listed only 8 of them: `fnc_drawResults` built `STR_einv_setup_%1_%2` from two parts, which HEMTT reads as any key of
+  that shape, so it is now `STR_einv_setup_Family_%1` or `STR_einv_setup_Kind_%1`, and the lint is exact again.
+- **`class default`** in `CfgEinvRulesets` is `class Default`: the config finds classes whatever their case and every preset
+  id is read lowercased, so no text or other mod's preset is affected.
+- **The standalone Enhanced Arsenal window** (0.3.0) was already gone from `addons/arsenal` in 0.4.0; what was left were comments
+  that still named its catalog, camera and give-back zone, now rewritten. The window engine still asks for a few hooks that
+  only that window set (`context`, `afterBuild`, `footerKeys`, `focusAll`, `key`, `submit`, `filter`, `tileBadge`,
+  `inspectRows`) and reads the context keys `rightColumn`, `rightKeep`, `rightGrow` and `storageSections`; they are the
+  documented surface for another window and stay.
+- **Dated remarks taken out of ARCHITECTURE.md**, which describes only what is true now: "a worn backpack dragged out of the
+  window onto the 3D middle left no pile and nothing on the ground, a vest did not vanish" (0.4.0), "popovers made on the display
+  lay behind the pane" (0.4.0).
+- Built and checked in code only (`hemtt check`): nothing of this has run in the game yet.
