@@ -47,6 +47,7 @@ PREP(backpackIntoBackpack);
 PREP(setPlace);
 PREP(moveEntry);
 PREP(getGroundHolder);
+PREP(pruneScriptedPile);
 
 // Transactions: every move as phases on one root each, run by that root's authority
 PREP(request);

@@ -317,6 +317,15 @@ private _revisions = [];
     };
 } forEach _final;
 
+// A scripted ground pile (fnc_getGroundHolder) that this phase emptied is ours to delete: the engine leaves
+// those alone. A frame later and looked at again then, so the answer and the window's rebuild are done with
+// it first.
+{
+    if (_x isEqualType objNull) then {
+        [_x] call FUNC(pruneScriptedPile);
+    };
+} forEach _touched;
+
 // A looter's move in this player's own gear: their window waits for these places - out at once, not
 // within OWN_WRITE_DELAY.
 if (!isNull _root && {_root isEqualTo player} && {_requester isNotEqualTo player}) then {

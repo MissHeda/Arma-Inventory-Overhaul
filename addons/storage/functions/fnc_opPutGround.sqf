@@ -6,13 +6,15 @@
  * non-empty server-local pile within GROUND_RANGE, else a fresh one; a rest into a second fresh pile at
  * the same point. What even that would not take bounces (an RPT error names it) - settled like any
  * bounce, back where it came from. Never into an empty pile, never in the air; first fit on the pile -
- * the end of the phase lays it out and writes it (einv_storage_fnc_execute).
+ * the end of the phase lays it out and writes it (einv_storage_fnc_execute). A fresh pile that took
+ * nothing is deleted again (fnc_pruneScriptedPile).
  *
  * A client runs it only when it could not hand it to the hub (einv_storage_fnc_requestNext: the server
  * never answered): then onto a fresh pile of its own.
  *
- * A backpack that went onto a pile alone is looked at again a frame later: should that pile be gone, it
- * goes down once more onto a fresh one (an RPT error says so; see below).
+ * The pile a backpack went onto is looked at again a frame later and the RPT says what is there. One that
+ * went onto a pile alone, should that pile be gone, goes down once more onto a fresh one (an RPT error
+ * says so; see below).
  *
  * Extra: [the pile it went onto, the second pile when it took a rest].
  *
@@ -120,19 +122,29 @@ if (_debug) then {
     [_fnc_look, [_txId, _piles, "two seconds later"], 2] call CBA_fnc_waitAndExecute;
 };
 
-// The pile a backpack went onto alone (a fresh one, or the second) is looked at again a frame later. A
-// backpack dragged out of the window left no pile in the window and nothing on the ground (Mia, 0.4.0),
-// where a vest dropped the same way did. In a pile a backpack is an object of its own, not item cargo,
-// and the engine deletes the piles it takes for empty. Gone by then, the backpack went with it: it goes
-// down once more onto a fresh pile at the same point and the RPT says so - once only, a second loss is
-// reported. A pile still there is left alone: a backpack taken from it is whoever took it.
-if (_rest isEqualTo [] && {(_payload param [0, ""]) isEqualTo "backpack"} && {_alone || {count _piles > 1}}) then {
-    [{
-        params ["_pile", "_payload", "_where", "_requester", "_txId"];
+// The pile a backpack went onto is looked at again a frame later and the RPT says what is there - always,
+// not only with einv_storage_debugDrop. A backpack dragged out of the window left no pile in the window and
+// nothing on the ground (Mia, 0.4.0), where a vest dropped the same way did. In a pile a backpack is an
+// object of its own, not item cargo, and the engine deletes an ordinary pile it takes for empty. The piles
+// are GroundWeaponHolder_Scripted now (fnc_getGroundHolder), which the engine leaves alone, so what follows
+// is the net under that: a backpack that went onto a pile alone (a fresh one, or the second) and finds it
+// gone a frame later went with it - it goes down once more onto a fresh pile at the same point and the RPT
+// says so - once only, a second loss is reported. A pile still there is left alone: a backpack taken from
+// it is whoever took it.
+if (_rest isEqualTo [] && {(_payload param [0, ""]) isEqualTo "backpack"}) then {
+    private _last = _piles select (count _piles - 1);
 
-        if (!isNull _pile) exitWith {};
+    [{
+        params ["_pile", "_netId", "_payload", "_where", "_requester", "_txId", "_putAgain"];
 
         private _class = _payload param [1, ""];
+        private _state = if (isNull _pile) then {"gone"} else {
+            format ["there with %1 backpacks", count (everyBackpack _pile)]
+        };
+
+        INFO_3("Backpack %1 on pile %2 a frame later: pile %3",_class,_netId,_state);
+
+        if (!_putAgain || {!isNull _pile}) exitWith {};
 
         ERROR_2("The pile %1 went onto was gone a frame later - it is put down again (%2).",_class,_txId);
 
@@ -162,11 +174,16 @@ if (_rest isEqualTo [] && {(_payload param [0, ""]) isEqualTo "backpack"} && {_a
                 ERROR_2("The second pile %1 went onto was gone a frame later as well - it is lost (%2).",_class,_txId);
             };
         }, [_again, _class, _txId]] call FUNC(nextFrame);
-    }, [_piles select (count _piles - 1), +_payload, _where, _requester, _txId]] call FUNC(nextFrame);
+    }, [_last, netId _last, +_payload, _where, _requester, _txId, _alone || {count _piles > 1}]] call FUNC(nextFrame);
 };
 
 if (_rest isNotEqualTo []) exitWith {
     ERROR_1("Could not put %1 on the ground - it goes back.",_rest);
+
+    // A fresh pile that took nothing is an empty scripted one now, which the engine no longer deletes.
+    {
+        [_x] call FUNC(pruneScriptedPile);
+    } forEach _piles;
 
     if (_rest isNotEqualTo _payload) then {
         ["in", _payload] call FUNC(journalNote);

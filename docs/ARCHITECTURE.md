@@ -526,8 +526,17 @@ payloads by refs.
 
 **Ground.** `fnc_groundPos` takes the surface under the feet when the move is asked for (`where`); `fnc_getGroundHolder [where,
 ignore, fresh]` finds the nearest non-empty server-local pile within `GROUND_RANGE` 2 m that can be seen (`fnc_isNear`), else
-makes a `GroundWeaponHolder`; never an empty pile (the engine deletes those). In multiplayer only the server picks a pile. Seated,
-a drop goes into the vehicle's cargo; with nothing under the feet (swimming, falling) it is refused.
+makes a `GroundWeaponHolder_Scripted`; never an empty pile. In multiplayer only the server picks a pile. Seated, a drop goes into
+the vehicle's cargo; with nothing under the feet (swimming, falling) it is refused.
+
+The pile is the scripted holder because the engine garbage-collects a `GroundWeaponHolder` it takes for empty, and a backpack is an
+object attached to the holder, not cargo the engine counts: a pile holding only a backpack was deleted, backpack included (0.4.0, a
+worn backpack dropped to the ground vanished, a vest did not). `GroundWeaponHolder_Scripted` is the same holder the engine never
+deletes, so the mod deletes it itself: `fnc_pruneScriptedPile [pile]`, called by `fnc_execute` for every ground pile a phase touched
+and by `fnc_opPutGround` for the piles a bounced put-down left empty. A pile of that type that is local and, a frame later, still
+holds no item, weapon, magazine or backpack is deleted (a frame, so the answer and the window's rebuild finish first). Engine-made
+`GroundWeaponHolder`s and `WeaponHolderSimulated` are never touched. `fnc_getGroundHolder` still finds both kinds
+(`isKindOf "GroundWeaponHolder"`), and `fnc_getNearby` lists the scripted one (a `WeaponHolder`) only while it holds something.
 
 ### Places sync (`fnc_writePlaces`, `fnc_flushPlaces`, drift)
 
@@ -595,9 +604,11 @@ a vest did not vanish). `einv_gui_fnc_updateDrag` makes the target `["ground", -
 `fnc_endDrag` gives a slot's item to `fnc_doUnequip [unit, slot, "ground", []]` - the menu Drop's own call, only inside the mouse-up
 event instead of a frame later. The window makes no pile, asks no hook (`ground` is asked only by `fnc_quickUnequip`,
 `fnc_dropToGround`, `fnc_quickMove`), and `fnc_settle` works from the phases, not the window's in-flight record; with no pile in
-reach `fnc_getGroundHolder` makes one. The step left that differs from a vest's is the engine's: a fresh pile holding only a backpack,
-an object of its own and no item cargo. `fnc_opPutGround` looks at such a pile a frame later and, gone, puts the backpack down once
-more (an RPT error). The trace starts at the drag: `fnc_endDrag` (where, target, call), `fnc_doUnequip` (every slot, refusals),
+reach `fnc_getGroundHolder` makes one. The step that differs from a vest's is the engine's cleanup of a pile holding only a backpack,
+an object of its own and no item cargo, which the scripted holder avoids (see Ground above). `fnc_opPutGround` still looks at such a
+pile a frame later and, gone, puts the backpack down once more (an RPT error). Two RPT lines per backpack put on a pile are
+always written, whatever `einv_storage_debugDrop` says: `fnc_addPayload`'s "Backpack CLASS put on pile NETID (N backpacks there)" and
+`fnc_opPutGround`'s a frame later "Backpack CLASS on pile NETID a frame later: pile gone / there with N backpacks". The trace starts at the drag: `fnc_endDrag` (where, target, call), `fnc_doUnequip` (every slot, refusals),
 `fnc_sendMoves` (the request id the storage's lines carry), `fnc_afterAction` (each step's result, the pile, whether it shows).
 
 ### Public functions and tables

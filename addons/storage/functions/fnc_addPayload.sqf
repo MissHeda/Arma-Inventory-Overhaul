@@ -156,6 +156,14 @@ switch (_payload select 0) do {
             ];
         };
 
+        // Always written, not behind the setting: the next test's RPT shows where a dropped backpack went and
+        // how many lie there, whatever was set (the second line is fnc_opPutGround's, a frame later).
+        if (_arrived && {[_container] call FUNC(isGroundHolder)}) then {
+            private _bags = count (everyBackpack _container);
+
+            INFO_3("Backpack %1 put on pile %2 (%3 backpacks there)",_class,netId _container,_bags);
+        };
+
         if (_arrived) then {
             [_class, _inner, _objects] call _fnc_fill;
         } else {

@@ -4,7 +4,8 @@
  * Where something put on the ground goes (op putGround): the nearest pile within GROUND_RANGE of the
  * ground point that is not empty, belongs to this machine and can be seen from the eyes - the same floor,
  * nothing in the way (fnc_isNear) -, else a fresh one on the point. Never an empty pile: the engine
- * deletes those.
+ * deletes an ordinary one it takes for empty, and a fresh one is a GroundWeaponHolder_Scripted, which the
+ * engine leaves alone (fnc_pruneScriptedPile removes it once it is emptied).
  *
  * The ground point is the surface under the feet taken when the move was asked for ("where",
  * fnc_groundPos); without one - settlement for a requester who sat in a vehicle that is gone, swam or
@@ -75,7 +76,11 @@ if (!_fresh) then {
 
 if (!isNull _pile) exitWith {_pile};
 
-_pile = createVehicle ["GroundWeaponHolder", [0, 0, 0], [], 0, "CAN_COLLIDE"];
+// A scripted holder: an ordinary GroundWeaponHolder holding only a backpack - an object of its own, no cargo
+// the engine counts - is taken for empty and deleted with the backpack in it (0.4.0). The search above
+// still finds it, it is a GroundWeaponHolder as well; the empty ones are ours to delete
+// (fnc_pruneScriptedPile).
+_pile = createVehicle ["GroundWeaponHolder_Scripted", [0, 0, 0], [], 0, "CAN_COLLIDE"];
 _pile setPosASL _point;
 
 _pile

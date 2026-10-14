@@ -36,6 +36,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- A backpack dropped to the ground no longer vanishes: the pile is a `GroundWeaponHolder_Scripted`, which the engine does not delete for holding only a backpack, and the mod deletes it itself once it is emptied; two RPT lines per drop show where the backpack went.
 - Taking a backpack off no longer loses it: the slot is read again a frame later when the engine is late, an arrived backpack is also recognised by the pile's count, and a failed drop puts the backpack back on.
 - `hasSpace` counts partial stacks, and the arsenal lights its rows by the same answer.
 - A press on the blank part of ACE's list no longer drags the old selection.
