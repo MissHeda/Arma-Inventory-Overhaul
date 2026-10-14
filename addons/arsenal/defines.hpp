@@ -1,6 +1,7 @@
 // ACE Arsenal's grid panel and the vanilla Virtual Arsenal: the inventory's screen geometry and pixel
 // snapping (gui/defines.hpp), and this addon's own ids and measures. The panel is drawn by the inventory's
-// engine with the inventory's measures, and takes its colours from the inventory's theme.
+// engine with the inventory's measures, and takes its colours, fonts and corner radius from the inventory's
+// theme.
 
 #include "\z\einv\addons\gui\defines.hpp"
 
@@ -21,32 +22,31 @@
 #define PANEL_GAP 0.3
 #define PANEL_MAX_SHARE (1 / 3)
 
-// The panel's title band when ACE shows no sort bar above its list to line it up with, in UNITs.
-#define HEAD_LINE_H 1.1
+// The panel is laid out the way the inventory's columns are (einv_gui_fnc_drawColumn), in UNITs, so a container
+// reads here as it does there: a title row on top, the sections under it, the hint line last, a hairline
+// under the title and one over the hint. PANEL_PAD is the room round the block's content and between its
+// bands, high as it is - and as many pixels wide (SQUARE) -, so the picture, the section captions and the
+// grids all start on one left edge and the texts on the right end on one right edge.
+#define PANEL_PAD 0.4
 
-// The title band against ACE's sort bar beside it: taller, so the container's picture and name read at a
-// glance - the column under it starts lower by the difference.
-#define HEAD_BAND_SCALE 1.6
+// The title row (fnc_layout): the container's picture, TITLE_H high and square, and its name beside it in
+// the columns' title size (TITLE_SIZE) and bold font, centred in the row's height.
+#define TITLE_H 1.1
+#define TITLE_SIZE 0.66
 
-// ACE's look (ui/RscAttributes.hpp), which the panel takes on (fnc_theme, fnc_layout, fnc_footer): the
-// background of the right panel's block (blockRightBackground) and its frame (blockRightFrame, an RscFrame
-// in black), the sort bar over the list - a vanilla RscCombo, opaque black, 6 of ACE's grid units high
-// (GRID_H, which ignores the interface size) with RobotoCondensed at 5 -, and the text of ACE's message
-// line (IDC 9), also 5 units. The list's rows are 7 units (sizeEx of IDC 15).
-#define ACE_PANEL_BG [0, 0, 0, 0.5]
-#define ACE_PANEL_FRAME [0, 0, 0, 1]
-#define ACE_SORT_BG [0, 0, 0, 1]
-#define ACE_TEXT [1, 1, 1, 1]
-#define ACE_FONT "RobotoCondensed"
+// The hint line, the panel's last band (fnc_layout, fnc_footer): lines of the inventory's footer hint (its text
+// size is the class EINV_FooterHint's), HINT_PAD room above and below them, as high as the footer's 1.4 UNITs
+// for one line. One line; a second only while the staging space holds something, for the note that it goes
+// when the window closes.
+#define HINT_LINE_H 0.8
+#define HINT_PAD 0.3
+#define HINT_SIZE (UNIT * 0.558)
+
+// ACE's own measures, where something has to line up with its list (fnc_listDrag): its grid unit, which
+// ignores the interface size (GRID_H in ui/RscAttributes.hpp), and the rows of its list, 7 units high
+// (sizeEx of IDC 15).
 #define ACE_GRID_H (pixelH * pixelGridNoUIScale * 0.25)
-#define ACE_TEXT_SIZE (5 * ACE_GRID_H)
-#define ACE_LINE_H (6 * ACE_GRID_H)
 #define ACE_ROW_SIZE (7 * ACE_GRID_H)
-
-// The hint line, the panel's last band (fnc_layout, fnc_footer): lines as high as ACE's sort bar with
-// ACE's message text, this much room above and below them, in ACE's grid units. One line; a second only
-// while the staging space holds something, for the note that it goes when the window closes.
-#define HINT_PAD 1
 
 // The staging space under the container's grid (fnc_staging): a crate of the game's own, made on this
 // machine only and hidden at the soldier's feet, with a grid of its own. A crate rather than a ground

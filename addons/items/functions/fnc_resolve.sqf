@@ -7,7 +7,10 @@
  *
  *   own     - the rules text (later rules first), and after it the older tables (einv_items_sizeTable,
  *             einv_items_stackTable, einv_storage_containerTable), which therefore win over the text
- *   mod     - the item's own config: einv_gridSize[], einv_stackSize, einv_grids[] or einv_slots
+ *   mod     - the item's own config: einv_size, einv_stack, einv_grid, einv_weight, einv_name, and
+ *             where one of those is not set the older einv_gridSize[], einv_stackSize, einv_grids[]
+ *             or einv_slots (fnc_getFacts, fnc_readConfigKeys). A subclass has its parent's, and
+ *             the rules text above still has the last word
  *   preset  - the preset chain (a derived preset after its base, later rules first), and after it
  *             einv_items_stackSmall when it is moved off its default
  *   builtin - 1x1, alone on its tile, a grid by load, the config's weight and name
@@ -20,10 +23,10 @@
  * same compiled rules: a later change to X follows, and a rule like=X grid=6x4 takes X's answer with
  * its own grid on top. X's answer is X's in full: its grid as the compartments X really has
  * (einv_storage_fnc_blocksFor with X's class, kind and load - "auto" by this item's own load would be
- * another grid). Its weight only when a rule sets one on X - else -1, and this item keeps its own
- * config's weight. Should X be no container, its grid is "auto". A class no config knows, a like= that comes back round to a class on its way, or more
- * than LIKE_DEPTH of them one after the other give the built-in answer for those fields instead,
- * named in the RPT once.
+ * another grid). Its weight only when a rule or X's own config (einv_weight) sets one on X - else -1,
+ * and this item keeps its own config's weight. Should X be no container, its grid is "auto". A class
+ * no config knows, a like= that comes back round to a class on its way, or more than LIKE_DEPTH of
+ * them one after the other give the built-in answer for those fields instead, named in the RPT once.
  *
  * Then: weapons, binoculars, uniforms, vests and backpacks never share a tile ("forced"), whatever any
  * rule says. size=mass becomes cells by the weight - the weight of the rules, if one sets it - and the
@@ -204,48 +207,84 @@ private _fnc_walk = {
 
 [_compiled getOrDefault ["own", []], _ownIndices, _ownFields] call _fnc_walk;
 
-// What the item's own mod says, for what is still open.
+// What the item's own mod says, for what is still open. The keys written like the rules (einv_size and
+// the like) come first, the older ones only where those leave a field open.
 private _mod = _facts get "mod";
 
-if ("footprint" in _need && {"gridSize" in _mod}) then {
-    (_mod get "gridSize") params ["_w", "_h"];
+if ("footprint" in _need) then {
+    if ("size" in _mod) then {
+        _result set ["footprint", _mod get "size"];
+        _src set ["footprint", "mod:" + QGVARMAIN(size)];
+        _need = _need - ["footprint"];
+    } else {
+        if ("gridSize" in _mod) then {
+            (_mod get "gridSize") params ["_w", "_h"];
 
-    _result set ["footprint", [_w, _h, []]];
-    _src set ["footprint", "mod:einv_gridSize"];
-    _need = _need - ["footprint"];
+            _result set ["footprint", [_w, _h, []]];
+            _src set ["footprint", "mod:" + QGVARMAIN(gridSize)];
+            _need = _need - ["footprint"];
+        };
+    };
 };
 
-if ("stack" in _need && {"stackSize" in _mod}) then {
-    _result set ["stack", _mod get "stackSize"];
-    _src set ["stack", "mod:einv_stackSize"];
-    _need = _need - ["stack"];
+if ("stack" in _need) then {
+    if ("stack" in _mod) then {
+        _result set ["stack", _mod get "stack"];
+        _src set ["stack", "mod:" + QGVARMAIN(stack)];
+        _need = _need - ["stack"];
+    } else {
+        if ("stackSize" in _mod) then {
+            _result set ["stack", _mod get "stackSize"];
+            _src set ["stack", "mod:" + QGVARMAIN(stackSize)];
+            _need = _need - ["stack"];
+        };
+    };
 };
 
 if ("grid" in _need) then {
-    if ("grids" in _mod) then {
-        // Within the same limits as compartments in the rules: whole compartments only.
-        private _blocks = (_mod get "grids") apply {[((floor (_x select 0)) max 1) min STORAGE_COLS, ((floor (_x select 1)) max 1) min MAX_ROWS]};
-        private _total = 0;
-        private _kept = [];
-
-        {
-            _total = _total + (_x select 0) * (_x select 1);
-
-            if (_total > MAX_CELLS || {count _kept >= MAX_BLOCKS}) exitWith {};
-
-            _kept pushBack _x;
-        } forEach _blocks;
-
-        _result set ["grid", ["blocks", _kept]];
-        _src set ["grid", "mod:einv_grids"];
+    if ("grid" in _mod) then {
+        // Read by the rules' own reader, so already within their limits.
+        _result set ["grid", _mod get "grid"];
+        _src set ["grid", "mod:" + QGVARMAIN(grid)];
         _need = _need - ["grid"];
     } else {
-        if ("slots" in _mod) then {
-            _result set ["grid", ["cells", (_mod get "slots") min MAX_CELLS]];
-            _src set ["grid", "mod:einv_slots"];
+        if ("grids" in _mod) then {
+            // Within the same limits as compartments in the rules: whole compartments only.
+            private _blocks = (_mod get "grids") apply {[((floor (_x select 0)) max 1) min STORAGE_COLS, ((floor (_x select 1)) max 1) min MAX_ROWS]};
+            private _total = 0;
+            private _kept = [];
+
+            {
+                _total = _total + (_x select 0) * (_x select 1);
+
+                if (_total > MAX_CELLS || {count _kept >= MAX_BLOCKS}) exitWith {};
+
+                _kept pushBack _x;
+            } forEach _blocks;
+
+            _result set ["grid", ["blocks", _kept]];
+            _src set ["grid", "mod:" + QGVARMAIN(grids)];
             _need = _need - ["grid"];
+        } else {
+            if ("slots" in _mod) then {
+                _result set ["grid", ["cells", (_mod get "slots") min MAX_CELLS]];
+                _src set ["grid", "mod:" + QGVARMAIN(slots)];
+                _need = _need - ["grid"];
+            };
         };
     };
+};
+
+if ("weight" in _need && {"weight" in _mod}) then {
+    _result set ["weight", _mod get "weight"];
+    _src set ["weight", "mod:" + QGVARMAIN(weight)];
+    _need = _need - ["weight"];
+};
+
+if ("name" in _need && {"name" in _mod}) then {
+    _result set ["name", _mod get "name"];
+    _src set ["name", "mod:" + QGVARMAIN(name)];
+    _need = _need - ["name"];
 };
 
 [_compiled getOrDefault ["preset", []], _presetIndices, _presetFields] call _fnc_walk;

@@ -60,7 +60,7 @@ PREP(onAnswer);
 PREP(drawPending);
 PREP(requestNormalize);
 
-// Selecting several: click, Ctrl, Shift and a frame, moved together, Take all and Put all in
+// Selecting several: click, Ctrl, Shift and a frame, moved together, Take all, Put all in and Sort
 PREP(select);
 PREP(selectSection);
 PREP(clearSelection);
@@ -74,6 +74,7 @@ PREP(quickMoveGroup);
 PREP(takeAll);
 PREP(putAll);
 PREP(putAllTarget);
+PREP(sortHolder);
 
 // The context menu
 PREP(openMenu);
@@ -176,6 +177,7 @@ PREP(uiPictureTurned);
 PREP(uiPictureRounded);
 PREP(uiBar);
 PREP(uiButton);
+PREP(buttonWidth);
 PREP(uiKeyHint);
 PREP(uiHatch);
 PREP(caption);

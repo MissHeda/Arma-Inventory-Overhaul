@@ -14,8 +14,8 @@
  * its compiled rules and its version). A client that compiled the same settings into another hash
  * reads them differently - another version of the mod or of a preset - and says so once
  * (fnc_checkServerRules). Only the same settings are compared: the published hash and CBA's
- * settings reach a client in either order. Another mod changing einv_gridSize and the like in its
- * config does not show in the hash.
+ * settings reach a client in either order. Another mod setting einv_grid and the like in its config
+ * does not show in the hash.
  *
  * A rules text given here stands in for the setting's, for testing, in single player or on the server only: it is kept
  * (einv_items_rulesOverride) and read in the setting's place (fnc_rulesInputs), so fnc_currentRules

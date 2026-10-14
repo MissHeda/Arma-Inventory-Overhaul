@@ -18,8 +18,9 @@
  * On a tile of a selection of several only what can be done with all of them: move them over, drop them,
  * deselect (fnc_quickMoveGroup, fnc_clearSelection).
  *
- * Sort is the storage's op "sort" (fnc_sendMoves), run where the container's root is local: everyone
- * who looks into it sees it sorted. Drop goes to the ground at the feet, or into the vehicle's cargo
+ * Sort is the storage's op "sort" (fnc_sortHolder, fnc_sendMoves), run where the container's root is local:
+ * everyone who looks into it sees it sorted. The section's caption line has a button for it as well
+ * (fnc_drawSection, fnc_drawWindow). Drop goes to the ground at the feet, or into the vehicle's cargo
  * while seated. A tile a move is under way for only shows what it is, and opens or closes.
  *
  * A tile in a container or one of the player's own slots: also what other mods add to CBA's item
@@ -92,17 +93,6 @@ private _fnc_name = {
     [_class] call FUNC(itemName)
 };
 
-// Sort: the holder's places emptied and everything laid out anew - largest first, by kind - by its
-// authority, for everyone who looks into it (op "sort"). A kit's grid by the kit's key.
-private _fnc_sort = {
-    params ["_holder", "_root"];
-
-    // A rearrangement is a rummage, and it cannot be refused: it sounds when it is sent.
-    ["search", "", [_holder, objNull] select (_holder isEqualType "")] call FUNC(playSound);
-
-    [[createHashMapFromArray [["kind", "sort"], ["from", _holder], ["fromRoot", _root]]]] call FUNC(sendMoves);
-};
-
 // The holder a grid stands for, with its root when the grid knows it. Only where the player may change
 // it: a living person's as the settings say (fnc_checkTouch), a kit in their gear the same way
 // (einv_compat_efak_fnc_checkTouch).
@@ -130,8 +120,9 @@ private _fnc_addSort = {
 
     private _name = if (_kit isEqualTo "") then {[_container] call FUNC(containerName)} else {[_kit] call _fnc_name};
 
+    // The same sort as the button on the section's caption line (fnc_sortHolder): a kit's grid by the kit's key.
     _choices pushBack [
-        format [LLSTRING(Menu_Sort), _name], [_holder, _grid getOrDefault ["root", objNull]], _fnc_sort,
+        format [LLSTRING(Menu_Sort), _name], [_holder, _grid getOrDefault ["root", objNull]], {_this call FUNC(sortHolder)},
         createHashMapFromArray [["separator", _separator]]
     ];
 };

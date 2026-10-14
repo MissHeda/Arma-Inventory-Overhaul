@@ -23,9 +23,10 @@
  *   backpack - single: one big compartment, as near square as STORAGE_COLS columns allow
  *   anything else (crates, vehicles) - wide: one compartment STORAGE_COLS wide
  *
- * A number that was given (N cells, einv_slots) is met exactly: as many pockets or pouches as it
- * takes, and the last pouch or the last, unfilled row cut down to what is left. One from the load is
- * only a rough measure, so there the limits hold and the last pouch or row may be bigger than needed.
+ * A number that was given (N cells, einv_grid = "24", einv_slots) is met exactly: as many pockets or
+ * pouches as it takes, and the last pouch or the last, unfilled row cut down to what is left. One from
+ * the load is only a rough measure, so there the limits hold and the last pouch or row may be bigger
+ * than needed.
  * Either way at most MAX_CELLS cells and MAX_BLOCKS compartments: a given number that MAX_BLOCKS
  * pouches cannot cover gets MAX_BLOCKS - 2 of them and what is left as rows STORAGE_COLS wide.
  *

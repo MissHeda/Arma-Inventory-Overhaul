@@ -6,14 +6,9 @@
  * passed - and hands the one after it to the wizard's queue (fnc_defer), which also runs in Eden. Once
  * every root is read, the rows are sorted by name and the open list is drawn again.
  *
- * Kept, besides the public classes (scope 2, nothing named ..._Base):
- *   CfgWeapons   - rifles, handguns, launchers, binoculars and NVGs (weapon types 1, 2, 4, 4096) and
- *                  items (131072): uniforms, vests, headgear, attachments, the rest. Vehicle weapons
- *                  have other types and stay out.
- *   CfgMagazines - those with a picture: the ones a player carries. Vehicle magazines mostly have none.
- *   CfgGlasses   - goggles.
- *   CfgVehicles  - backpacks - those that hold nothing by their config too, an own grid gives them
- *                  room -, crates (ReammoBox_F) and vehicles that hold something; no soldiers.
+ * Kept, besides the public classes (scope 2, nothing named ..._Base), what fnc_classKind lists: weapons and
+ * items, magazines with a picture, goggles, backpacks (those that hold nothing by their config too, an own
+ * grid gives them room), crates and vehicles that hold something.
  * A class in two roots counts once, under the first - the rules engine reads it there too.
  *
  * Arguments:
@@ -47,7 +42,6 @@ private _position = _index get "position";
 private _read = _index get "read";
 private _until = diag_tickTime + INDEX_BUDGET;
 private _roots = INDEX_ROOTS;
-private _vehicles = configFile >> "CfgVehicles";
 
 // The mod a class comes from, by the name it gives itself; the base game's classes have none of their own.
 private _fnc_mod = {
@@ -81,58 +75,10 @@ while {_rootId < count _roots && {diag_tickTime < _until}} do {
         if (isClass _config && {getNumber (_config >> "scope") == 2}) then {
             private _class = configName _config;
             private _lc = toLowerANSI _class;
-            private _load = 0;
 
-            // [kind, family] - the family is what the Items step filters by; "" leaves the class out.
-            private _found = switch (_rootName) do {
-                case "CfgWeapons": {
-                    private _type = getNumber (_config >> "type");
-                    private _itemType = getNumber (_config >> "ItemInfo" >> "type");
-
-                    switch (true) do {
-                        case (_itemType == 616): {["nvg", "gear"]};
-                        case (_type == 1): {["rifle", "weapon"]};
-                        case (_type == 2): {["handgun", "weapon"]};
-                        case (_type == 4): {["launcher", "weapon"]};
-                        case (_type == 4096): {["binocular", "weapon"]};
-                        case (_type != 131072): {["", ""]};
-                        case (_itemType == 801): {["uniform", "gear"]};
-                        case (_itemType == 701): {["vest", "gear"]};
-                        case (_itemType == 605): {["headgear", "gear"]};
-                        case (_itemType in [101, 201, 301, 302]): {["attachment", "item"]};
-                        default {["item", "item"]};
-                    };
-                };
-                case "CfgMagazines": {
-                    [["", ""], ["magazine", "magazine"]] select (getText (_config >> "picture") isNotEqualTo "")
-                };
-                case "CfgGlasses": {
-                    [["goggles", "gear"], ["", ""]] select (_lc isEqualTo "none")
-                };
-                default {
-                    _load = getNumber (_config >> "maximumLoad");
-
-                    // A backpack that holds nothing by its config (a cosmetic one, a radio pack) is still
-                    // listed: an own grid gives it cells like any other, and its card says it has none
-                    // until then (fnc_answerText). A crate or vehicle without a load is no container.
-                    switch (true) do {
-                        case (getNumber (_config >> "isBackpack") == 1): {["backpack", "gear"]};
-                        case (_load <= 0): {["", ""]};
-                        case (_class isKindOf "ReammoBox_F"): {["crate", "cargo"]};
-                        case (_class isKindOf "AllVehicles" && {!(_class isKindOf "CAManBase")}): {["vehicle", "cargo"]};
-                        default {["", ""]};
-                    };
-                };
-            };
-
-            _found params ["_kind", "_family"];
+            ([_config, _rootName] call FUNC(classKind)) params ["_kind", "_family", "_load"];
 
             if (_kind isNotEqualTo "" && {!(_lc in _byClass)} && {count _lc < 5 || {(_lc select [count _lc - 5]) isNotEqualTo "_base"}}) then {
-                // A uniform or vest holds what the container class it brings along holds.
-                if (_kind in ["uniform", "vest"]) then {
-                    _load = getNumber (_vehicles >> getText (_config >> "ItemInfo" >> "containerClass") >> "maximumLoad");
-                };
-
                 private _name = getText (_config >> "displayName");
 
                 if (_name isEqualTo "") then {

@@ -10,11 +10,3 @@ class EINV_ArsenalBlocked {
     class ControlsBackground {};
     class Controls {};
 };
-
-class EINV_FooterHint;
-
-// The panel's hint line (fnc_footer) in the size of ACE's own message line (IDC 9) rather than the
-// inventory's footer: it is the last band of a panel that looks like ACE's.
-class EINV_ArsenalHint: EINV_FooterHint {
-    size = QUOTE(ACE_TEXT_SIZE);
-};

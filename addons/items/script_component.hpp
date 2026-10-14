@@ -33,6 +33,18 @@
 // preset that builds on the old id keep loading, on the new one (fnc_parseRules, fnc_compileRules).
 #define PRESET_ALIASES [["tarkov", "realism"]]
 
+// The keys an item's own config may set, each written the way the rules write the same value
+// (fnc_readConfigKeys): einv_size, einv_stack, einv_grid, einv_weight, einv_name. fnc_configEntry writes
+// them, fnc_parseConfigEntry reads them back from a snippet.
+#define CONFIG_KEYS [QGVARMAIN(size), QGVARMAIN(stack), QGVARMAIN(grid), QGVARMAIN(weight), QGVARMAIN(name)]
+
+// The config roots an item class lives in, in the order fnc_getFacts looks for it.
+#define CONFIG_ROOTS ["CfgWeapons", "CfgMagazines", "CfgVehicles", "CfgGlasses"]
+
+// Most characters of a config snippet fnc_parseConfigEntry reads: a pasted file is a mistake, and every
+// character is looked at one by one.
+#define CONFIG_TEXT_MAX 65536
+
 // What like=CLASS takes from that class (fnc_resolve) - everything but its name - and how many like=
 // one item may follow, one after the other, before it gives up.
 #define LIKE_FIELDS ["footprint", "stack", "grid", "weight"]

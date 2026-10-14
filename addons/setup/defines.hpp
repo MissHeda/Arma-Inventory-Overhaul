@@ -101,8 +101,19 @@
 #define LIST_PAGE 30
 
 // The most that share a tile in the Items step: what the rules engine allows (MAX_STACK). An item is
-// drawn on a canvas SHAPE_MAX cells each way.
+// drawn on a canvas SHAPE_MAX cells each way. Its weight (kg) and name are limited as the rules engine
+// limits them (MAX_WEIGHT, MAX_NAME).
 #define EDIT_STACK_MAX 999
+#define EDIT_WEIGHT_MAX 1000
+#define EDIT_NAME_MAX 100
+
+// The tree view of the class lists (fnc_classTree, fnc_drawTree): a row of the tree is this high, a level
+// of the tree moves it this far in (TREE_INDENT_MAX levels at most, deeper ones stay at the last), and
+// "up" stops at a parent with more classes than TREE_UP_MAX - a tree of the whole game is no use.
+#define TREE_ROW_H (UNIT * 2.3)
+#define TREE_INDENT (SQUARE(UNIT * 0.7))
+#define TREE_INDENT_MAX 5
+#define TREE_UP_MAX 2000
 
 // The canvas both editors draw on (fnc_uiCanvas): a cell filled dark and a place without one light, as
 // cells picked on a sheet; each a little lighter under the mouse.

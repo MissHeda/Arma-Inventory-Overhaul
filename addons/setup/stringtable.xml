@@ -13,6 +13,9 @@
         <Key ID="STR_einv_setup_Answer_Holes">
             <English>%1, %2 holes</English>
         </Key>
+        <Key ID="STR_einv_setup_Answer_Inherited">
+            <English>inherited from %1</English>
+        </Key>
         <Key ID="STR_einv_setup_Answer_Legacy">
             <English>old table setting</English>
         </Key>
@@ -148,6 +151,21 @@
         <Key ID="STR_einv_setup_Chip_ReadOnly">
             <English>Read-only</English>
         </Key>
+        <Key ID="STR_einv_setup_ClassImport_Apply">
+            <English>Apply</English>
+        </Key>
+        <Key ID="STR_einv_setup_ClassImport_Config">
+            <English>Imported config lines for %1 classes (%2 warnings). Save at Review puts them to use.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ClassImport_Help">
+            <English>Paste config lines (what Export gives, or what a mod's config holds) or rules here with Ctrl+V. They go into the draft; Undo takes them back.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ClassImport_Nothing">
+            <English>Nothing to import: no config lines or rules found.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ClassImport_Title">
+            <English>Import config lines or rules</English>
+        </Key>
         <Key ID="STR_einv_setup_Close">
             <English>Close</English>
         </Key>
@@ -214,6 +232,9 @@
         <Key ID="STR_einv_setup_Cont_ApplyTip">
             <English>Keep these cells for this class. Save at Review puts them to use.</English>
         </Key>
+        <Key ID="STR_einv_setup_Cont_ApplyTipTree">
+            <English>Keep these cells for this class and every class built on it, as one rule. A class with a rule of its own further down keeps it. Save at Review puts them to use.</English>
+        </Key>
         <Key ID="STR_einv_setup_Cont_Blocks">
             <English>%1 compartments · %2 cells</English>
         </Key>
@@ -245,7 +266,7 @@
             <English>Paint every empty place in the brush colour.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Help">
-            <English>Pick a uniform, vest, backpack or crate on the left and draw its cells on the right. Apply keeps the change; Save at Review puts it to use.</English>
+            <English>Pick a uniform, vest, backpack or crate on the left and draw its cells on the right. Apply keeps the change; Save at Review puts it to use. The search takes wildcards (B_Bergen*, *Carryall*); Tree shows everything built on a class, to change them all at once.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_LegacyNote">
             <English>An old table setting decides this class and wins over every rule. Remove the class there for these cells to count.</English>
@@ -294,6 +315,9 @@
         </Key>
         <Key ID="STR_einv_setup_Cont_ResetTip">
             <English>Remove its own cells and the link to another class. The preset decides again.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_ResetTipTree">
+            <English>Remove the cells of this class and of its tree, and the link to another class. The preset decides again; a class with a rule of its own keeps it.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Rows">
             <English>%1 down</English>
@@ -391,6 +415,21 @@
         <Key ID="STR_einv_setup_Export_ByHand">
             <English>Copying is off for players in multiplayer: select the line below and press Ctrl+C.</English>
         </Key>
+        <Key ID="STR_einv_setup_Export_ClassByHand">
+            <English>Copying is off for players in multiplayer: select the text below (Ctrl+A) and press Ctrl+C.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export_ClassCopied">
+            <English>Copied the config lines of %1 classes: paste them into a mod's config.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export_ClassCopiedOne">
+            <English>Copied the config line of the class: paste it into a mod's config.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export_ClassNothing">
+            <English>Nothing to export: the draft leaves this class as the game already has it, so it needs no config line.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export_ClassTitle">
+            <English>Config lines to copy</English>
+        </Key>
         <Key ID="STR_einv_setup_Export_Copied">
             <English>Copied: paste it into cba_settings.sqf or send it to someone.</English>
         </Key>
@@ -433,6 +472,9 @@
         <Key ID="STR_einv_setup_Hint_BadClass">
             <English>%1 cannot be written into the rules: class names there take letters, digits and _ only.</English>
         </Key>
+        <Key ID="STR_einv_setup_Hint_BadWeight">
+            <English>The weight is a number in kg like 0.5 - or empty, for config's own.</English>
+        </Key>
         <Key ID="STR_einv_setup_Hint_CellsApplied">
             <English>The cells of %1 are kept. Save at Review puts them to use.</English>
         </Key>
@@ -465,6 +507,12 @@
         </Key>
         <Key ID="STR_einv_setup_Hint_TooTall">
             <English>The drawing can be at most %1 rows tall.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_TreeApplied">
+            <English>%1 and the %2 classes built on it now follow one rule. Save at Review puts it to use.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_TreeReset">
+            <English>%1 and the %2 classes built on it are back to the preset. Save at Review puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_Unlinked">
             <English>%1 no longer follows another class. Save at Review puts it to use.</English>
@@ -503,7 +551,10 @@
             <English>Apply</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ApplyTip">
-            <English>Keep this size and stack for this class. Save at Review puts it to use.</English>
+            <English>Keep this size, stack, weight and name for this class. Save at Review puts it to use.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_ApplyTipTree">
+            <English>Keep this for the class and every class built on it, as one rule. A class with a rule of its own further down keeps it. Save at Review puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_CanvasHelp">
             <English>Click the cells it takes: an L, a T, any shape in one piece. Across and down make a rectangle.</English>
@@ -515,7 +566,10 @@
             <English>Weapons, uniforms, vests and backpacks never share a tile.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Help">
-            <English>Pick an item on the left, draw its cells and set how many share a tile. Apply keeps the change; Save at Review puts it to use.</English>
+            <English>Pick an item on the left, draw its cells and set how many share a tile. Apply keeps the change; Save at Review puts it to use. The search takes wildcards (B_Bergen*, *Carryall*); Tree shows everything built on a class, to change them all at once.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_NameField">
+            <English>Name</English>
         </Key>
         <Key ID="STR_einv_setup_Items_NoCells">
             <English>Click at least one cell.</English>
@@ -539,10 +593,10 @@
             <English>%1 pieces</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ResetTip">
-            <English>Remove its own size and stack. The preset decides again.</English>
+            <English>Remove its own size, stack, weight and name. The preset decides again.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Search">
-            <English>Search name or class</English>
+            <English>Search name or class (* ?)</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Title">
             <English>Items: how big each one is</English>
@@ -552,6 +606,15 @@
         </Key>
         <Key ID="STR_einv_setup_Items_Weight">
             <English>%1 kg</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_WeightConfig">
+            <English>Config: %1 kg</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_WeightField">
+            <English>Weight</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_WeightKg">
+            <English>kg</English>
         </Key>
         <Key ID="STR_einv_setup_Key_Escape">
             <English>Esc</English>
@@ -793,6 +856,12 @@
         <Key ID="STR_einv_setup_Save_Unchanged">
             <English>Nothing to save: it is in use already.</English>
         </Key>
+        <Key ID="STR_einv_setup_Scope_OnlyThis">
+            <English>Only this class</English>
+        </Key>
+        <Key ID="STR_einv_setup_Scope_TreeNote">
+            <English>Applies to %1 and the %2 classes built on it - one rule, class=%3+. A class with a rule of its own further down keeps it.</English>
+        </Key>
         <Key ID="STR_einv_setup_Source_client">
             <English>Client</English>
         </Key>
@@ -928,6 +997,54 @@
         <Key ID="STR_einv_setup_Title">
             <English>Inventory setup</English>
         </Key>
+        <Key ID="STR_einv_setup_Tools_ExportTip">
+            <English>Copy the config lines that give this class what the draft makes of it, to paste into a mod's config.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tools_ExportTipTree">
+            <English>Copy the config lines of every class in this tree, to paste into a mod's config.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tools_ImportTip">
+            <English>Paste config lines or rules and apply them to the draft.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_Below">
+            <English>%1 below</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_Count">
+            <English>%1 classes built on it</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_CountOne">
+            <English>%1 class built on it</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_Of">
+            <English>Tree of %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_PickFirst">
+            <English>Pick a class in the list, then switch to Tree to see everything built on it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_Start">
+            <English>Start the tree at this class</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_ToPicked">
+            <English>Start at picked</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_ToPickedTip">
+            <English>Show the tree of the class picked in the list again.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_Unknown">
+            <English>No class tree is known for %1.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_Up">
+            <English>Up one level</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_UpNone">
+            <English>Nothing above this class.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_UpTip">
+            <English>Start the tree at %1, the class this one is built on: its other variants are in it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tree_UpTooBroad">
+            <English>The class above it has too many classes built on it to change them at once.</English>
+        </Key>
         <Key ID="STR_einv_setup_Undo">
             <English>Undo</English>
         </Key>
@@ -981,6 +1098,12 @@
         </Key>
         <Key ID="STR_einv_setup_Value_Weight">
             <English>weighs %1 kg</English>
+        </Key>
+        <Key ID="STR_einv_setup_View_List">
+            <English>List</English>
+        </Key>
+        <Key ID="STR_einv_setup_View_Tree">
+            <English>Tree</English>
         </Key>
         <Key ID="STR_einv_setup_Warning_TooLong">
             <English>The text is %1 characters long: more than 16,000 cannot be saved.</English>

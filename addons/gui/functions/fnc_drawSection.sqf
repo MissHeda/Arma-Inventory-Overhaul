@@ -25,12 +25,16 @@
  * clicks on the tab are kept in GVAR(collapsed) as a change from that, so folding it again goes back to
  * the start. Folded, it keeps its caption line, weight and button.
  *
- * Beside the tab a button moves everything in the section over in one go (fnc_takeAll, fnc_putAll): "Take
- * all" in what is looted, "Put all in" in the unit's own uniform, vest and backpack and in containers
- * opened from them, while the loot column has somewhere to put things. Only the inventory has it
- * (fnc_isInventoryMode), only where at least one searched tile lies, and it is drawn disabled while a move
- * of this section is under way. The tab gives up room to it down to three characters; below that the
- * button is left out.
+ * Beside the tab buttons act on the whole section, as high as the tab and in the caption's own size:
+ * one moves everything over in one go (fnc_takeAll, fnc_putAll) - "Take all" in what is looted, "Put all in"
+ * in the unit's own uniform, vest and backpack and in containers opened from them, while the loot column has
+ * somewhere to put things -, "Sort" lays out its grid anew (fnc_sortHolder, the context menu's row too).
+ * Only the inventory has them (fnc_isInventoryMode). Take all and Put all in come only where at least one
+ * searched tile lies, Sort on every container the player may change - a section that holds no grid of its
+ * own, a body's gear, has none; both are drawn disabled while a move of this section is under way. Their
+ * labels are centred by the engine in the width fnc_buttonWidth gives (fnc_uiButton, "centred"). The tab
+ * gives up room to them down to three characters; below that the last button is left out, then the one
+ * before it.
  *
  * A tall compartment in the loot column - a crate's or a vehicle's, up to MAX_ROWS rows - shows its rows
  * down to the last one in use and two more (fnc_viewBlocks); the empty rows below fold into one line under the grid,
@@ -240,12 +244,15 @@ private _lockTip = _section getOrDefault ["lockTip", ""];
 private _lockW = [0, SQUARE(_lineH)] select (_lockTip isNotEqualTo "");
 
 // ---------------------------------------------------------------------------
-// The button beside the tab: Take all out of what is looted, Put all in out of what the unit carries -
-// a container opened from the unit's own storage counts as carried. Where at least one searched tile is
-// there to move, and, for Put all in, somewhere in the loot column to put it.
+// The buttons beside the tab: Take all out of what is looted, Put all in out of what the unit carries - a
+// container opened from the unit's own storage counts as carried - and Sort for a container the player may
+// change. Take all and Put all in where at least one searched tile is there to move, and, for Put all in,
+// somewhere in the loot column to put it; Sort wherever the context menu offers it on the grid, so also on
+// an empty one (fnc_contextMenu).
 // ---------------------------------------------------------------------------
 private _buttonKind = "";
 private _buttonEligible = "";
+private _sortable = false;
 private _busy = false;
 
 if (
@@ -272,6 +279,9 @@ if (
         _buttonKind = _buttonEligible;
     };
 
+    // A section that only shows what it is given has no grid of its own to sort.
+    _sortable = !(_section getOrDefault ["virtual", "entries" in _section]);
+
     // A move that takes from this section is under way: a second press would plan the same things twice.
     // A HashMap: _y is a move's record, its sources first.
     {
@@ -281,16 +291,36 @@ if (
     } forEach GVAR(inFlight);
 };
 
-// What it is meant to be - the tab may give the button up for lack of room below.
+// What it is meant to be - the tab may give the buttons up for lack of room below. The caption line is
+// _lineH high, and so is every button on it: the tab, the buttons and the cross are one row, the labels in
+// the tab's own size. A button is [id, label, icon, width]; they stand in this order beside the tab, and for
+// lack of room the last one goes first.
 private _buttonIntent = _buttonKind;
-private _buttonText = "";
-private _buttonSize = _lineSize * 0.9;
-private _buttonW = 0;
+private _buttonSize = _lineSize;
 private _buttonGap = SQUARE(UNIT * 0.3);
+private _buttons = [];
 
 if (_buttonKind isNotEqualTo "") then {
-    _buttonText = [[LLSTRING(Section_TakeAll), LLSTRING(Section_PutAll)] select (_buttonKind isEqualTo "put"), _theme] call FUNC(caption);
-    _buttonW = (_buttonText getTextWidth [_font, _buttonSize]) * TEXT_SLACK + SQUARE(_lineH * 0.7);
+    private _label = [LLSTRING(Section_TakeAll), LLSTRING(Section_PutAll)] select (_buttonKind isEqualTo "put");
+
+    _buttons pushBack [_buttonKind, _label, "", [_label, "", _lineH, _buttonSize, _theme] call FUNC(buttonWidth)];
+};
+
+if (_sortable) then {
+    private _sortIcon = UI_TEX(icon_sort_desc_ca);
+
+    _buttons pushBack ["sort", LLSTRING(Section_Sort), _sortIcon, [LLSTRING(Section_Sort), _sortIcon, _lineH, _buttonSize, _theme] call FUNC(buttonWidth)];
+};
+
+// What the buttons take, each with the gap before it.
+private _fnc_buttonsW = {
+    private _sum = 0;
+
+    {
+        _sum = _sum + (_x select 3) + _buttonGap;
+    } forEach _buttons;
+
+    _sum
 };
 
 private _loadW = [0, (_load getTextWidth [_font, _lineSize]) * TEXT_SLACK + SQUARE(UNIT * 0.3)] select (_load isNotEqualTo "");
@@ -305,13 +335,14 @@ private _fnc_chars = {
 };
 
 private _captionText = [_caption, _theme] call FUNC(caption);
-private _tabRoom = _blockW - _loadW - _closeW - _lockW - ([0, _buttonW + _buttonGap] select (_buttonKind isNotEqualTo ""));
+private _tabRoom = _blockW - _loadW - _closeW - _lockW - (call _fnc_buttonsW);
 private _shown = [_captionText, _tabRoom - _tabPad - _chevronW - _tabIconW, _fontBold, _lineSize] call FUNC(fitText);
 
-// The tab gives up room to the button down to three characters - and the button is left out below that.
-if (_buttonKind isNotEqualTo "" && {([_shown] call _fnc_chars) < (3 min count _captionText)}) then {
-    _buttonKind = "";
-    _tabRoom = _blockW - _loadW - _closeW - _lockW;
+// The tab gives up room to the buttons down to three characters - and the last button is left out below
+// that, then the one before it.
+while {_buttons isNotEqualTo [] && {([_shown] call _fnc_chars) < (3 min count _captionText)}} do {
+    _buttons deleteAt (count _buttons - 1);
+    _tabRoom = _blockW - _loadW - _closeW - _lockW - (call _fnc_buttonsW);
     _shown = [_captionText, _tabRoom - _tabPad - _chevronW - _tabIconW, _fontBold, _lineSize] call FUNC(fitText);
 };
 
@@ -362,49 +393,58 @@ if (_chevronW > 0) then {
     }];
 };
 
-// Take all / Put all in, a gap right of the tab. Its click finds the section again by its place in the
-// list of what the sections drew, in this build (GVAR(buildCount)).
-if (_buttonKind isNotEqualTo "") then {
+// The buttons, a gap right of the tab and of each other, as high as the tab, their labels centred. A click
+// finds the section again by its place in the list of what the sections drew, in this build
+// (GVAR(buildCount)); the code runs when the button is pressed, with nothing of this function around it.
+private _fnc_click = {
+    params ["_direction", "_buttonId"];
+
+    if (_direction != 1) exitWith {};
+
+    (_buttonId splitString "|") params ["_kind", "_at", ["_build", ""]];
+
+    // The click runs a frame later (fnc_uiButton): a window built again meanwhile has other
+    // sections at those places - the click is void then.
+    if (_build isNotEqualTo str GVAR(buildCount)) exitWith {};
+
+    private _holder = ((uiNamespace getVariable [QGVAR(sectionInfo), []]) param [parseNumber _at, createHashMap]) getOrDefault ["holder", objNull];
+
+    if (isNull _holder) exitWith {};
+
+    switch (_kind) do {
+        case "take": {[_holder] call FUNC(takeAll)};
+        case "put": {[_holder] call FUNC(putAll)};
+        case "sort": {[_holder] call FUNC(sortHolder)};
+    };
+};
+
+private _buttonX = _blockX + _tabW + _buttonGap;
+
+{
+    _x params ["_kind", "_label", "_icon", "_buttonW"];
+
     private _button = [
-        _display, _parent, [_blockX + _tabW + _buttonGap, _top, _buttonW, _lineH], format ["%1|%2|%3", _buttonKind, _infoIndex, GVAR(buildCount)],
-        _buttonText, "", _theme,
-        {
-            params ["_direction", "_buttonId"];
-
-            if (_direction != 1) exitWith {};
-
-            (_buttonId splitString "|") params ["_kind", "_at", ["_build", ""]];
-
-            // The click runs a frame later (fnc_uiButton): a window built again meanwhile has other
-            // sections at those places - the click is void then.
-            if (_build isNotEqualTo str GVAR(buildCount)) exitWith {};
-
-            private _holder = ((uiNamespace getVariable [QGVAR(sectionInfo), []]) param [parseNumber _at, createHashMap]) getOrDefault ["holder", objNull];
-
-            if (isNull _holder) exitWith {};
-
-            if (_kind isEqualTo "take") then {
-                [_holder] call FUNC(takeAll);
-            } else {
-                [_holder] call FUNC(putAll);
-            };
-        },
-        _busy, _buttonSize
+        _display, _parent, [_buttonX, _top, _buttonW, _lineH], format ["%1|%2|%3", _kind, _infoIndex, GVAR(buildCount)],
+        _label, _icon, _theme, _fnc_click, _busy, _buttonSize, true
     ] call FUNC(uiButton);
 
     // What it does, when the mouse rests on it.
-    private _tooltip = LLSTRING(Section_TakeAll_Tooltip);
+    private _tooltip = switch (_kind) do {
+        case "sort": {LLSTRING(Section_Sort_Tooltip)};
+        case "put": {
+            private _targetHolder = ((call FUNC(putAllTarget)) param [0, []]) param [0, objNull];
+            private _lootSections = GVAR(context) getOrDefault ["lootSections", []];
+            private _targetSection = _lootSections param [_lootSections findIf {(_x getOrDefault ["container", objNull]) isEqualTo _targetHolder}, createHashMap];
 
-    if (_buttonKind isEqualTo "put") then {
-        private _targetHolder = ((call FUNC(putAllTarget)) param [0, []]) param [0, objNull];
-        private _lootSections = GVAR(context) getOrDefault ["lootSections", []];
-        private _targetSection = _lootSections param [_lootSections findIf {(_x getOrDefault ["container", objNull]) isEqualTo _targetHolder}, createHashMap];
-
-        _tooltip = format [LLSTRING(Section_PutAll_Tooltip), _targetSection getOrDefault ["title", [_targetHolder] call FUNC(containerName)]];
+            format [LLSTRING(Section_PutAll_Tooltip), _targetSection getOrDefault ["title", [_targetHolder] call FUNC(containerName)]]
+        };
+        default {LLSTRING(Section_TakeAll_Tooltip)};
     };
 
     (_button select -1) ctrlSetTooltip _tooltip;
-};
+
+    _buttonX = _buttonX + _buttonW + _buttonGap;
+} forEach _buttons;
 
 // The weight of what it holds, right-aligned on the caption line.
 if (_load isNotEqualTo "") then {

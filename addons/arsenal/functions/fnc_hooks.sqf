@@ -5,7 +5,7 @@
  * The hook table the inventory's engine is attached to ACE Arsenal's display with (einv_gui_fnc_attach).
  * The engine is a guest there: it sweeps only what it made, and ACE's own handlers keep every click. It
  * draws neither the inventory's header nor its footer, only the open container's grid and the staging
- * space in the panel and a line for its hints (fnc_layout, fnc_footer), in ACE's look (fnc_theme); the
+ * space in the panel and a line for its hints (fnc_layout, fnc_footer), in the inventory's look; the
  * camera is ACE's, and so is the closing.
  *
  * The mouse is the engine's only over the panel and while it holds something it lifted there or out of
@@ -36,9 +36,8 @@ createHashMapFromArray [
     // A guest on another mod's display
     ["guest", true],
 
-    // How it looks: ACE's look, no header of the inventory's, the panel, and its hint line in place of the
+    // How it looks: the inventory's own look, no header of it, the panel, and its hint line in place of the
     // footer
-    ["theme", {_this call FUNC(theme)}],
     ["header", {}],
     ["layout", {_this call FUNC(layout)}],
     ["footer", {_this call FUNC(footer)}],
@@ -90,9 +89,9 @@ createHashMapFromArray [
 
         if (_kind isNotEqualTo "none" || {GVAR(hintRect) isEqualTo []}) exitWith {[]};
 
-        private _width = (GVAR(hintRect) select 2) - SQUARE(UNIT * 0.4) * 2;
+        private _width = (GVAR(hintRect) select 2) - SQUARE(UNIT * PANEL_PAD) * 2;
         private _font = EGVAR(gui,theme) getOrDefault ["font", "PuristaMedium"];
-        private _idle = [LLSTRING(Hint_Idle), _width, _font, ACE_TEXT_SIZE] call EFUNC(gui,fitText);
+        private _idle = [LLSTRING(Hint_Idle), _width, _font, HINT_SIZE] call EFUNC(gui,fitText);
         private _parts = [[_idle, "muted"]];
 
         if (GVAR(stagingCount) > 0) exitWith {
@@ -102,14 +101,14 @@ createHashMapFromArray [
                 format [LLSTRING(Staging_Note), GVAR(stagingCount)]
             };
 
-            _parts pushBack [[_note, _width, _font, ACE_TEXT_SIZE] call EFUNC(gui,fitText), "accent"];
+            _parts pushBack [[_note, _width, _font, HINT_SIZE] call EFUNC(gui,fitText), "accent"];
             _parts
         };
 
         // The engine puts four spaces between the parts.
         private _both = _idle + "    " + LLSTRING(Hint_Wheel);
 
-        if (((_both getTextWidth [_font, ACE_TEXT_SIZE]) * TEXT_SLACK) <= _width) then {
+        if (((_both getTextWidth [_font, HINT_SIZE]) * TEXT_SLACK) <= _width) then {
             _parts pushBack [LLSTRING(Hint_Wheel), "muted"];
         };
 

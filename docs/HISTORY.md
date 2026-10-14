@@ -3117,3 +3117,39 @@ So a container drawn on the wizard's canvas looks exactly like the drawing, and 
   window onto the 3D middle left no pile and nothing on the ground, a vest did not vanish" (0.4.0), "popovers made on the display
   lay behind the pane" (0.4.0).
 - Built and checked in code only (`hemtt check`): nothing of this has run in the game yet.
+
+## Caption buttons and the Arsenal panel's look (after 0.4.5) - supersedes the parts above it contradicts
+
+Mia: the "Take all" pill is not centred and Sort should be a button, not only a right click; the Arsenal panel looks poor
+(font at the picture too small, not coherent).
+
+- **Why the pill was off.** `fnc_uiButton` started a left-aligned label where the *measured* text would be centred, and
+  `getTextWidth` is short of what the engine draws (`TEXT_SLACK`), so the text stood right of the middle; the label also started at
+  the button's top with a size that is a share of the height. Now a **centred** button (new last argument of `fnc_uiButton`) hands the
+  centring to the engine: an `EINV_LabelCenter` as wide as the room between the paddings, starting above the button's middle by
+  `TEXT_MID` 0.66 of its font height (the line of capitals lies about 0.4 to 0.9 of the font height under a label's top). Beside an icon
+  the icon keeps to the left padding and the label is centred in the rest. `fnc_buttonWidth [text, icon, height, size, theme]` gives the
+  width: `2 * BUTTON_PAD` (0.3 of the height, as a width) + icon (`BUTTON_ICON` 0.56 of the height, square) + `BUTTON_GAP` (0.22) + text
+  with `TEXT_SLACK`. The old pill was `text * 1.3 + 0.7 * height` wide. Opt-in: ACE cargo's card buttons recolour their labels by class
+  and keep the old layout.
+- **Section captions** (`fnc_drawSection`): the line is `UNIT * 0.62` high; the tab, "Take all" / "Put all in" and the new **Sort** are all
+  that high, and their labels `UNIT * 0.46` (the tab's size; the pills were 0.9 of it), a gap `UNIT * 0.3` between them. Sort is the
+  `icon_sort_desc_ca` of the wizard's column headers plus "Sort" and runs `fnc_sortHolder [holder, root]` - the context menu's former
+  local `_fnc_sort`, now shared (the right-click row stays). It is on every container section the player may change - the same rule as
+  the Take all pill (`ground`, `container`, `uniform`, `vest`, `backpack`; own and loot; inventory only; `fnc_checkTouch` "items") -
+  also an empty one, as the menu offers it on free cells, so nothing in `fnc_redrawTiles` or `fnc_revealTile` has to follow it; not on a
+  `virtual` section. The buttons are `[id, label, icon, width]`; the tab keeps three characters, then the last button goes, then the
+  one before it. Both are disabled while a move out of the section is under way.
+- **Kit windows** (`fnc_drawWindow`): "Take all" and Sort are `UNIT * 1.1` high like the cross (the pill was 0.62 next to it), their
+  labels `UNIT * 0.5`, left of the fill text; the name (`UNIT * 0.66`) and the fill text are centred in the row's height by `TEXT_MID`
+  instead of hanging from its top. Sort needs `fnc_checkTouch` of the kit's mod, as the menu row does; it sorts by the kit's key.
+- **The Arsenal panel is Glass, not ACE's black.** `einv_arsenal_fnc_theme` and its hook are gone: the panel has the inventory
+  theme's `panel`, `radius`, fonts and text; the `ACE_*` look macros, `HEAD_LINE_H`, `HEAD_BAND_SCALE`, `EINV_ArsenalHint` too. Laid out
+  like `fnc_drawColumn`: `PANEL_PAD` 0.4 UNIT round the content and between the bands (as a width via `SQUARE`), the title row
+  `TITLE_H` 1.1 UNIT (the picture square at that height; the name in `fontBold` at `TITLE_SIZE` 0.66 UNIT, a gap of 0.3 of the row
+  between them, centred on the picture), a hairline 0.4 of the padding under it, the column, a hairline over the hint line, which is
+  `HINT_LINE_H` 0.8 UNIT per line (`EINV_FooterHint`, the footer's 0.558 UNIT) with `HINT_PAD` 0.3 above and below. The staging
+  subtitle is `UNIT * 0.46` like the caption. The band had been 1.6 times ACE's sort bar and the name 1.3 times ACE's row text in
+  RobotoCondensed, top-aligned. ACE's own controls are untouched; `ACE_GRID_H` and `ACE_ROW_SIZE` stay for `fnc_listDrag`.
+- Built and checked in code only (`hemtt check`): nothing of this has run in the game yet - the middle of the labels rests on `TEXT_MID`,
+  taken from a 0.2.3 screenshot (capitals 5 px under the top of an 18 px pill), and wants one look in the game.

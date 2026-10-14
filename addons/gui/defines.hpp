@@ -128,6 +128,18 @@
 // getTextWidth reports less than the engine draws: every measured text gets this much more room.
 #define TEXT_SLACK 1.3
 
+// A label draws its text from its top edge down whatever its height, so a text that has to sit in the middle of
+// a box starts a little above the box's middle: the middle of the line of capitals lies this share of the font
+// height under the label's top (Purista's capitals run from about 0.4 to 0.9 of it) - fnc_uiButton in a button,
+// the title row of the Arsenal panel.
+#define TEXT_MID 0.66
+
+// A button (fnc_uiButton, fnc_buttonWidth), as shares of its height: the room either side of what it holds,
+// the icon, and the gap between an icon and its label.
+#define BUTTON_PAD 0.3
+#define BUTTON_ICON 0.56
+#define BUTTON_GAP 0.22
+
 // How far the mouse has to move with the button held before a press on a tile becomes a drag, and how
 // faint the tile it was lifted from stays while it is dragged.
 #define DRAG_THRESHOLD 0.008

@@ -6,9 +6,12 @@
  * (einv_compat_efak): a card of the inspect card's glass floating over the columns, as Tarkov opens a
  * container in a window of its own. On top the kit's picture and name, a "Take all" button that moves
  * everything into the player's own gear (einv_compat_efak_fnc_unpackAll - the inventory only, while the
- * kit has something in it), how full it is - "12 / 60 mass" in that mod's measure, in the loss colour when
- * over - and a cross that closes it; under a hairline the kit's grid with our tiles, or the line that
- * says why nothing can go in yet (still loading, say).
+ * kit has something in it), a "Sort" button that lays its grid out anew (fnc_sortHolder - the inventory
+ * only, where the player may change the kit), how full it is - "12 / 60 mass" in that mod's measure, in
+ * the loss colour when over - and a cross that closes it; under a hairline the kit's grid with our tiles,
+ * or the line that says why nothing can go in yet (still loading, say). The buttons are as high as the
+ * cross and their labels centred (fnc_uiButton, "centred"), and the name and the fill text are centred in
+ * the row's height as the buttons are.
  *
  * One controls group of a fixed size, its content fitting it exactly - a group scrolls once its content
  * reaches past it. The grid lies in a scrolling group of its own, the body, which scrolls only for a
@@ -154,33 +157,66 @@ private _loadColor = [
     _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
 ] select (_section getOrDefault ["loadOver", false]);
 
-if (_load isNotEqualTo "") then {
-    [_display, _group, [_closeX - _loadW, _padY, _loadW, _titleH], _load, _loadSize, _loadColor, _font, 1] call FUNC(uiLabel);
+// A label draws its text from its top edge down: a text in the row's middle starts above it by TEXT_MID of
+// its font height, as the buttons' labels do (fnc_uiButton). [top, height] in the window.
+private _fnc_mid = {
+    params ["_size"];
+
+    private _labelTop = _padY + _titleH / 2 - TEXT_MID * _size;
+
+    [_labelTop, _padY + _titleH - _labelTop]
 };
 
-// Take all: everything in the kit into the player's own gear (einv_compat_efak_fnc_unpackAll), as on a
-// section of the loot column (fnc_drawSection). Drawn disabled while a move out of this kit is under way.
+if (_load isNotEqualTo "") then {
+    (_loadSize call _fnc_mid) params ["_loadTop", "_loadH"];
+
+    [_display, _group, [_closeX - _loadW, _loadTop, _loadW, _loadH], _load, _loadSize, _loadColor, _font, 1] call FUNC(uiLabel);
+};
+
+// The buttons, left of how full it is: one row of chips as high as the cross, in the size of the fill text
+// (fnc_buttonWidth, fnc_uiButton). Take all: everything in the kit into the player's own gear
+// (einv_compat_efak_fnc_unpackAll), as on a section of the loot column (fnc_drawSection). Sort: the kit's
+// grid laid out anew (fnc_sortHolder), where the player may change the kit as the context menu's row asks
+// (einv_compat_efak_fnc_checkTouch). Both only in the inventory and while the kit shows its grid, and drawn
+// disabled while a move out of this kit is under way. A button is [id, label, icon, width]; for lack of
+// room the last one goes first.
 private _kitClass = _section getOrDefault ["kit", ""];
-private _buttonW = 0;
+private _buttonSize = _loadSize;
 private _buttonGap = SQUARE(UNIT * 0.3);
-private _buttonH = UNIT * 0.62;
-private _buttonText = [LLSTRING(Section_TakeAll), _theme] call FUNC(caption);
-private _buttonSize = UNIT * 0.46 * 0.9;
+private _buttons = [];
 
-if (
-    _kitClass isNotEqualTo "" && {_notice isEqualTo ""} && {(_section getOrDefault ["entries", []]) isNotEqualTo []}
-    && {call FUNC(isInventoryMode)} && {!isNil QEFUNC(compat_efak,unpackAll)}
-) then {
-    _buttonW = (_buttonText getTextWidth [_font, _buttonSize]) * TEXT_SLACK + SQUARE(_buttonH * 0.7);
+if (_kitClass isNotEqualTo "" && {_notice isEqualTo ""} && {call FUNC(isInventoryMode)}) then {
+    if ((_section getOrDefault ["entries", []]) isNotEqualTo [] && {!isNil QEFUNC(compat_efak,unpackAll)}) then {
+        private _label = LLSTRING(Section_TakeAll);
 
-    // The name keeps room for itself first: too narrow for it, there is no button.
-    if (_closeX - _loadW - _buttonW - _buttonGap - _textX < SQUARE(UNIT * 4)) then {
-        _buttonW = 0;
+        _buttons pushBack [format ["take|%1", _kitClass], _label, "", [_label, "", _titleH, _buttonSize, _theme] call FUNC(buttonWidth)];
+    };
+
+    if (isNil QEFUNC(compat_efak,checkTouch) || {([_kitClass] call EFUNC(compat_efak,checkTouch)) isEqualTo ""}) then {
+        private _label = LLSTRING(Section_Sort);
+        private _icon = UI_TEX(icon_sort_desc_ca);
+
+        _buttons pushBack [format ["sort|%1", _key], _label, _icon, [_label, _icon, _titleH, _buttonSize, _theme] call FUNC(buttonWidth)];
     };
 };
 
-if (_buttonW > 0) then {
-    private _key = _section getOrDefault ["key", ""];
+// What the buttons take, each with the gap after it.
+private _fnc_buttonsW = {
+    private _sum = 0;
+
+    {
+        _sum = _sum + (_x select 3) + _buttonGap;
+    } forEach _buttons;
+
+    _sum
+};
+
+// The name keeps room for itself first: too narrow for it, the last button goes, then the one before it.
+while {_buttons isNotEqualTo [] && {_closeX - _loadW - (call _fnc_buttonsW) - _textX < SQUARE(UNIT * 4)}} do {
+    _buttons deleteAt (count _buttons - 1);
+};
+
+if (_buttons isNotEqualTo []) then {
     private _busy = false;
 
     // A HashMap: _y is a move's record, its sources first.
@@ -190,25 +226,39 @@ if (_buttonW > 0) then {
         };
     } forEach GVAR(inFlight);
 
-    [
-        _display, _group, [_closeX - _loadW - _buttonW - _buttonGap, _padY + (_titleH - _buttonH) / 2, _buttonW, _buttonH],
-        format ["take|%1", _kitClass], _buttonText, "", _theme,
-        {
-            params ["_direction", "_buttonId"];
+    private _buttonX = _closeX - _loadW - (call _fnc_buttonsW);
 
-            if (_direction != 1) exitWith {};
+    {
+        _x params ["_buttonId", "_label", "_icon", "_buttonW"];
 
-            [(_buttonId splitString "|") select 1] call EFUNC(compat_efak,unpackAll);
-        },
-        _busy, _buttonSize
-    ] call FUNC(uiButton);
+        [
+            _display, _group, [_buttonX, _padY, _buttonW, _titleH], _buttonId, _label, _icon, _theme,
+            {
+                params ["_direction", "_buttonId"];
+
+                if (_direction != 1) exitWith {};
+
+                (_buttonId splitString "|") params ["_kind", "_what"];
+
+                if (_kind isEqualTo "sort") then {
+                    [_what] call FUNC(sortHolder);
+                } else {
+                    [_what] call EFUNC(compat_efak,unpackAll);
+                };
+            },
+            _busy, _buttonSize, true
+        ] call FUNC(uiButton);
+
+        _buttonX = _buttonX + _buttonW + _buttonGap;
+    } forEach _buttons;
 };
 
-private _nameW = (_closeX - _loadW - _textX - ([0, _buttonW + _buttonGap] select (_buttonW > 0))) max 0;
+private _nameW = (_closeX - _loadW - _textX - (call _fnc_buttonsW)) max 0;
 private _nameSize = UNIT * 0.66;
+(_nameSize call _fnc_mid) params ["_nameTop", "_nameH"];
 
 [
-    _display, _group, [_textX, _padY, _nameW, _titleH],
+    _display, _group, [_textX, _nameTop, _nameW, _nameH],
     [[_section getOrDefault ["title", ""], _theme] call FUNC(caption), _nameW, _fontBold, _nameSize] call FUNC(fitText),
     _nameSize, _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _fontBold, 0
 ] call FUNC(uiLabel);

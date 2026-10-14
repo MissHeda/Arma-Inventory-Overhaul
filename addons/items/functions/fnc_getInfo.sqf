@@ -8,7 +8,8 @@
  *
  *   1. the older table settings (sizes, stacks, container sizes) - read as rules after the text
  *   2. the rules text, einv_items_rules
- *   3. the item's own mod: einv_gridSize[], einv_stackSize, einv_grids[], einv_slots
+ *   3. the item's own mod: einv_size, einv_stack, einv_grid, einv_weight, einv_name, and the older
+ *      einv_gridSize[], einv_stackSize, einv_grids[], einv_slots
  *   4. the preset the text builds on, with einv_items_stackSmall moved off its default
  *   5. built in: 1x1, alone on its tile, a grid by load
  * Weapons, binoculars, uniforms, vests and backpacks are always alone on their tile. A container

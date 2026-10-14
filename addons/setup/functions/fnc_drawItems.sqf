@@ -2,13 +2,16 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Step 2, Items: how many cells an item takes and how many share a tile, class by class.
+ * Step 2, Items: how many cells an item takes, how many share a tile, how much it weighs and what it is
+ * called, class by class - or a whole family at once.
  *   - Left: every weapon, magazine, piece of gear and item of the game and its mods, to search by class or
- *     name (fnc_drawClassList over the class index, fnc_buildIndex), each with its size and stack in the
- *     draft and where they come from.
+ *     name with wildcards (B_Bergen*, *Carryall*) (fnc_drawClassList over the class index,
+ *     fnc_buildIndex), each with its size and stack in the draft and where they come from - or, in the
+ *     tree view, one class and every class built on it (fnc_drawTree).
  *   - Right: the one picked, its cells to draw - a rectangle by its width and height, or any shape cell by
- *     cell - and its stack (fnc_drawItemEditor). Apply writes one rule for exactly that class into the
- *     draft; Save at Review puts it to use.
+ *     cell -, its stack, weight and name (fnc_drawItemEditor). Apply writes one rule for exactly that class
+ *     into the draft - or, for a class picked in the tree, one rule for it and everything built on it
+ *     (class=X+); Save at Review puts it to use. Export and Import work with config lines.
  * Ctrl+F puts the cursor in the search.
  *
  * Opened for a class (fnc_open with a class, GVAR(focus)), it starts with that one picked and found.
@@ -51,6 +54,7 @@ if (GVAR(focus) isNotEqualTo "") then {
 
     if ((_facts get "root") isNotEqualTo "") then {
         GVAR(selection) set ["items", _facts get "class"];
+        GVAR(editScope) set ["items", "class"];
         GVAR(listState) set ["items", [_facts get "class", "all", false, 0]];
         GVAR(focus) = "";
     };

@@ -7,7 +7,6 @@ PREP(isOver);
 
 // The hook table the inventory's engine is attached with, and the hooks themselves
 PREP(hooks);
-PREP(theme);
 PREP(layout);
 PREP(footer);
 PREP(onFrame);

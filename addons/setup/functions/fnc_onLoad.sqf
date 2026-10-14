@@ -73,6 +73,9 @@ GVAR(listState) = createHashMap;
 GVAR(cellWork) = createHashMap;
 GVAR(itemWork) = createHashMap;
 GVAR(sameAs) = createHashMap;
+GVAR(treeState) = createHashMap;
+GVAR(editScope) = createHashMap;
+GVAR(classImportText) = "";
 
 // The draft starts as what is in use there (fnc_getActive). What the source it saves to holds right now
 // is kept beside it: should that change before Save, someone else saved in between (fnc_save).

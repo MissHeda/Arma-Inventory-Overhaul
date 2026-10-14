@@ -179,8 +179,10 @@ Each field - footprint, stack, grid, weight, name - goes to the first layer that
    rules appended after the text's own, each table sorted shallow-first (fewest parents first) so the nearest class listed wins.
    They sit in the same layer as the text but come after it, so a table beats the text.
 3. **the own text** - `einv_items_rules`, a later rule before an earlier one.
-4. **the item's mod config** - `einv_gridSize[]`, `einv_stackSize`, `einv_grids[]`, then `einv_slots`. Grids and slots from config
-   stay within the limits above.
+4. **the item's mod config** - `einv_size`, `einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, written as the rules write the same
+   value ("Config keys of an item" below); for a field those leave open the older `einv_gridSize[]`, `einv_stackSize`,
+   `einv_grids[]`, then `einv_slots`. Grids and slots from config stay within the limits above. The text above still overrides all
+   of it, so a server's rules have the last word over any mod.
 5. **the preset chain** - `base=` and its own bases, up to `MAX_CHAIN` deep, a derived preset's rules before its base's, a later
    rule before an earlier one. `einv_items_stackSmall`, when moved off its default 10, is this layer's last word on `@item_small`:
    it beats the preset's stacks, not a rule or a mod.
@@ -197,6 +199,58 @@ For a container **object** (`einv_storage_fnc_getBlocks`), its own `einv_grid` b
 3). Mass per grid cell: the header's `cell=`, else the nearest preset in the chain with a `cell` over 0, else the slider
 `einv_items_massPerCell` (default 5); clamped to 1 to 50.
 
+### Config keys of an item (`fnc_getFacts`, `fnc_readConfigKeys`)
+
+A mod author predefines what an item is in the item's own class, in the language of the rules text: every value is a STRING (a
+NUMBER for stack and weight) written as the rules write the same value, so there is one grammar to learn. They are the "mod config"
+layer above: a server's rules text still beats them, and they beat a preset.
+
+| Key | On | Value | Same as |
+|---|---|---|---|
+| `einv_size = "2x1";` | any item | `WxH`, a mask like `"xx/x-"`, or `"mass"` | `size=` |
+| `einv_stack = 10;` | anything but a rifle, handgun, launcher, binocular, uniform, vest or backpack (those stay 1) | a whole number, 1 to `MAX_STACK` | `stack=` |
+| `einv_grid = "1x3+5x7+1x3";` | uniform, vest, backpack, crate, vehicle | anything `grid=` takes: `"auto"`, `"24"` (a plain number `24` too), `"120%"`, `"rig:16"`, compartments, shapes, a canvas | `grid=` |
+| `einv_weight = 0.5;` | any item | kilograms, 0 to `MAX_WEIGHT`, rounded to the gram | `weight=` (kg, not config mass) |
+| `einv_name = "Short name";` | any item | the name as it shows, at most `MAX_NAME` characters; a space is a space | `name=`, but plain text (the rules text writes `_` for a space and `%XX` for the rest) |
+
+- **Read by the rules' own readers.** `fnc_readConfigKeys` hands the size to `fnc_parseRules` and the grid to
+  `fnc_parseGrid`/`fnc_formatGrid`, so the limits, the cuts and the words of a message are those of the rules. A value that cannot be
+  read is left out, one past a limit is cut down, and the reason goes to the RPT once per class (`Config of <class>: ...`, the
+  facts are kept); one wrong key never costs the others. Spaces in a size or grid are ignored (`"1x3 + 5x7"`).
+- **Where.** On the item's own class: CfgWeapons for uniforms, vests, headgear and most items, CfgVehicles for backpacks, crates and
+  vehicles, CfgMagazines, CfgGlasses. The grid of a uniform, vest or backpack belongs to the item class, not to the container class
+  it brings along. `einv_storage_fnc_getBlocks` needs nothing of its own for it: it asks `getInfo "grid"`.
+- **Inheritance.** Config reads these as it reads everything: a subclass has its parent's value unless it sets its own, key by key
+  (`getText`, `getNumber` and `isText` walk the parents). `einv_grid = "";` (an empty text for any key) on a subclass takes an
+  inherited value back. New keys win over the older ones, so a key the parent set beats an older key (`einv_grids[]`) set on the
+  subclass: set the new key on the subclass to override.
+- **The older keys stay as aliases.** `einv_gridSize[] = {w, h}` is `einv_size`, `einv_stackSize` is `einv_stack`, `einv_grids[] =
+  {{cols, rows}, ...}` and `einv_slots = N` are `einv_grid`. For one field the new key wins; then `einv_gridSize[]` /
+  `einv_stackSize`; for the grid `einv_grids[]`, last `einv_slots`. The `src` tag says which one answered (`mod:einv_grid`,
+  `mod:einv_gridSize`, ...).
+- **One object** can still carry its own grid, which beats everything: `_crate setVariable ["einv_grid", "6x4+2x3", true]` (section
+  3). Same name, different place: the class's config key is for every object of the class, the variable for one.
+- `fnc_getFacts` keeps the readable keys in `"mod"` by field: `"size"` ([w, h, holes] or `"mass"`), `"stack"`, `"grid"` (a spec),
+  `"weight"` (kg), `"name"`, next to the older `"gridSize"`, `"stackSize"`, `"grids"`, `"slots"`.
+
+Two public functions turn the keys into a snippet and back, for mod authors and for the setup wizard's export and import:
+
+- `einv_items_fnc_configEntry [class, all = false, compiled = nil]` -> STRING: the lines for a class from its current answer, in one
+  line, `class CfgVehicles { class B_Carryall_blk { einv_grid = "1x3+5x7+1x3"; }; };`. The root is the class's own. Only the keys that
+  differ from what the class would get without the rules text and the older tables - from its own config, the preset the rules
+  are built on, and the built-in answer - are written, and only those that apply (no stack for a vest, no grid for a rifle). So a
+  vest whose size the preset gives and whose grid was painted yields its grid alone, and the preset stays the server's choice.
+  `all` writes every key that has an answer (a weight and a name only where something sets them). `compiled` reads the class by
+  another set of rules, the wizard's draft (its own rules are the ones left out). `""` for a class no config knows or when
+  nothing differs. The lines go inside the class's definition in the mod's config; another mod's class is patched with an
+  external class declaration and that mod in `requiredAddons`.
+- `einv_items_fnc_parseConfigEntry [text, messages = nil]` -> `[[class, keys], ...]`: reads such lines - one class or many, under
+  their root or without it; comments, `class X;` declarations, parents (`class X: Y`), other properties and nested classes are
+  skipped - into `keys`, a HashMap by lowercase config key (`"einv_size"`, `"einv_stack"`, `"einv_grid"`, `"einv_weight"`,
+  `"einv_name"`) with the values as the rules write them (size and grid STRING, stack and weight NUMBER, name STRING); only keys
+  that could be read, and only classes that have one. What was left out is added to the `messages` array when one is given, else
+  to the RPT. A text over `CONFIG_TEXT_MAX` 65536 characters is not read.
+
 ### like=CLASS
 
 `class=My_Vest > like=V_PlateCarrier1_rgr grid=6x4`: when the rule matches, every field of `LIKE_FIELDS` (footprint, stack, grid,
@@ -204,7 +258,7 @@ weight - never the name) that is still open and not set by the rule itself takes
 right then, through the same compiled rules (its own rules, mod config and presets). A later change to the source follows. The
 source's grid becomes the compartments it really has (`einv_storage_fnc_blocksFor` with its class, kind and load, as `["blocks",
 ...]` - "auto" by the target's load would be another grid); a source that is no container gives "auto". Its weight is taken only
-when a rule sets one on it, else -1 and the target keeps its own config weight. A higher rule still wins a field, and the like
+when a rule or its own `einv_weight` sets one on it, else -1 and the target keeps its own config weight. A higher rule still wins a field, and the like
 rule closes the fields it fills. A circle, more than `LIKE_DEPTH` 8 like= one after the other, or a class no config knows gives
 the built-in answer for those fields (src `builtin`) and one RPT line per problem (`einv_items_likeWarned`). `fnc_explain` counts
 `LIKE_FIELDS` as set by such a rule.
@@ -254,7 +308,7 @@ no cache: not kept. Callers must not modify it. The config part comes from `fnc_
 | `src` | HashMap | field -> where it came from |
 | `configMass`, `configDisplayName`, `configShort` | | config's values, whatever the rules say |
 | `weightOverride`, `nameOverride` | NUMBER, STRING | the rules' weight in kg (-1 for none), the rules' name ("" for none) |
-| `lc`, `root`, `rounds`, `lineage`, `addon`, `mod` | | from `fnc_getFacts`: lowercase class, config root, a CfgMagazines `count`, lowercase classes from itself up, the CfgPatches class, what its own config says about size, stack and grid |
+| `lc`, `root`, `rounds`, `lineage`, `addon`, `mod` | | from `fnc_getFacts`: lowercase class, config root, a CfgMagazines `count`, lowercase classes from itself up, the CfgPatches class, what its own config says (`einv_size` and the other keys, "Config keys of an item") |
 
 `fnc_getFacts` takes kinds from config by weapon `type` and ItemInfo type (its header lists them); any other CfgWeapons class is
 `item` - CBA's misc item class counts there although it inherits the bipod type; CfgMagazines with count 1 and mass up to 15 are
@@ -266,6 +320,8 @@ knows is `unknown`, under its own name.
 | Function | Public | |
 |---|---|---|
 | `fnc_getFacts [class]`, `fnc_getInfo [class, compiled, cache]` | Yes | config facts; the answer above |
+| `fnc_configEntry [class, all, compiled]`, `fnc_parseConfigEntry [text, messages]` | Yes | an item's config keys as a snippet, and back ("Config keys of an item") |
+| `fnc_readConfigKeys [found]` | No | the five config keys read by the rules' readers -> `[canonical, compiled, messages]` |
 | `fnc_footprintAs [class or info, rot]` | Yes | `[w, h, holes]` as it lies, upright or turned |
 | `fnc_parseRules [text]` | Yes | -> AST: `version`, `base`, `cell` (-1 for none), `groups` `[[id, conds], ...]`, `rules` `[[conds, values], ...]`, `warnings`; a condition is `[negated, key, op, values]` (a group reference has key `"@"`), a rule's values a HashMap of `like`, `footprint`, `stack`, `grid`, `weight`, `name` |
 | `fnc_writeRules [ast, header = true]` | Yes | -> canonical text |
@@ -308,15 +364,24 @@ All global, each runs `fnc_loadRules` when it changes: `einv_items_rules` (EDITB
 `einv_items_sizeTable` (`class:WxH, ...`), `einv_items_stackTable` (`class:N, ...`), `einv_storage_containerTable` (`class:N` or
 `class:WxH+WxH`), which still work and win over the text. Section 8 lists them all.
 
-### What the wizard writes (`einv_setup_fnc_upsertRule`)
+### What the wizard writes (`einv_setup_fnc_upsertRule`, `fnc_upsertRules`)
 
-`[class, set, remove]` writes what the Items or Containers step sets for one class into the draft, as that class's own rule
-`class=X > ...`. `set` is a HashMap of `footprint` (`"2x3"` or a mask), `stack`, `grid` (as `fnc_formatGrid` writes it) and `like`
-(a class); `remove` is an array of fields to take away. The rules written for exactly that class (`einv_setup_fnc_ownClassRules`)
-become one; whatever else they set - a name, a weight - stays. The rule goes **last**: later rules win, so a broader rule further
-down (a group, a kind) would otherwise still decide what the class gets and the step would show something other than what was just
-applied. A rule left with nothing to set goes altogether. It returns false for a class name the language cannot hold, and ends in
-`fnc_commit` (an undo step, the step drawn again).
+`fnc_upsertRule [class, set, remove, tree = false]` writes what the Items or Containers step sets for one class into the draft, as that
+class's own rule `class=X > ...`; `fnc_upsertRules [[class, set, remove, tree], ...]` does the same for several classes in one undo step
+(the editors' import). `set` is a HashMap of `footprint` (`"2x3"` or a mask), `stack`, `grid` (as `fnc_formatGrid` writes it), `like` (a
+class), `weight` (kg) and `name`; `remove` is an array of fields to take away. The rules written for exactly that class
+(`einv_setup_fnc_ownClassRules`) become one; whatever else they set stays. The rule goes **last**: later rules win, so a broader rule
+further down (a group, a kind) would otherwise still decide what the class gets and the step would show something other than what
+was just applied. A rule left with nothing to set goes altogether. It returns false for a class name the language cannot hold, and ends
+in `fnc_commit` (an undo step, the step drawn again).
+
+With `tree` the rule is `class=X+ > ...`: one rule for X and every class built on it, instead of one per class (the tree view's edits,
+see "Trees and mass edits"). The rules written for exactly `class=X+` become one in the same way. Where it goes follows the engine's
+order, later wins, field by field: it must beat what is broader (a group, a kind, a parent's `class=P+`) and lose to what is narrower,
+so a class that was set apart stays apart. The rules that are only for classes inside the tree - `class=Y` or `class=Y+` for a Y of
+`fnc_classTree`'s set below X, hidden bases included - are moved behind it; everything else stays in front. X itself is edited with its
+tree: what the edit sets or removes is also taken out of X's own rule `class=X`, which would otherwise win over the tree's rule on X
+alone. A tree that holds nothing but X is written as X alone.
 
 ### `tools/check_default_ruleset.sqf`
 
@@ -372,7 +437,7 @@ numbered from its own top left corner, wherever it is drawn. No cells at all giv
 Patterns by kind when none is named (the class's own pick is a sum over its name, so a model always looks the same): uniform -
 `pockets` (1x2) or `pockets_mixed`, at most six from the load; vest - `rig` (1x2), `mixed`, `plate` or `long`, at most sixteen;
 backpack - `single`, one compartment as near square as `STORAGE_COLS` allows; crates and vehicles - `wide`, one compartment
-`STORAGE_COLS` wide. A given number (`24`, `einv_slots`) is met exactly; one from the load is a rough measure. The load is
+`STORAGE_COLS` wide. A given number (`24`, `einv_grid = "24"`, `einv_slots`) is met exactly; one from the load is a rough measure. The load is
 `fnc_getMaxLoad` (config `maximumLoad`, -1 for a weapon holder or null): since weight limits nothing, it only sizes the "auto",
 "percent" and "pattern" grids.
 
@@ -383,8 +448,10 @@ backpack - `single`, one compartment as near square as `STORAGE_COLS` allows; cr
    ["einv_grid", "6x4+2x3", true]`. One that cannot be read is named in the RPT once (cache `einv_storage_objectGrids`) and the
    rules count instead. Scripts of this mod may give the compartments as they are, `[[cols, rows], ...]`: taken exactly, never cut
    to `MAX_ROWS` (the Arsenal's staging space).
-2. The rules for its class (`getInfo "grid"`): the older container table, the text, config `einv_grids[]` / `einv_slots`, the
-   preset, else "auto".
+2. The rules for its class (`getInfo "grid"`): the older container table, the text, the class's own config `einv_grid = "..."` (a
+   mod's word for every container of that class, a subclass inherits it; section 2, "Config keys of an item") or else the older
+   `einv_grids[]` / `einv_slots`, the preset, else "auto". For a unit's uniform, vest or backpack the class is the item's; for a
+   crate or vehicle its own, `typeOf`.
 
 The ground has no compartments and no limit: `[]`; the window draws it as one open grid, `STORAGE_COLS` wide, always a row more
 than it needs and at least three rows. A uniform or vest container's class derives from a weapon holder, so `fnc_isGroundHolder`
@@ -741,17 +808,21 @@ The camera switch is kept in the profile (`einv_gui_cameraOn`).
 | `text`, `text2`, `muted`, `accent`, `accentSoft`, `line`, `gain`, `loss`, `warn`, `info` | colours |
 | `barTrack`, `barFill`, `button`, `buttonHover`, `buttonText`, `keyBg`, `keyText`, `keyRound` | bars, buttons, key hints in the footer |
 
-**The "ace" theme** is not a second look but the `theme` hook of the Arsenal panel (`einv_arsenal_fnc_theme`), which edits the
-theme in place for that display only: `radius` 0, `panel` `[0,0,0,0.5]`, `panelBorder` black, `text` white, own keys `headBg`
-`[0,0,0,1]` and `headFont` `RobotoCondensed` (ACE's sort bar, for the panel's title band). The id stays, so
-column scrolls survive builds. Tiles keep Glass.
+The Arsenal panel has no theme of its own: it is drawn in Glass as it is, with its radius, panel colour, fonts and text colours.
 
 ### The UI kit
 
 `fnc_uiPanel`, `fnc_uiLabel`, `fnc_uiIcon`, `fnc_uiPicture`, `fnc_uiFrame`, `fnc_uiBar`, `fnc_uiRing`, `fnc_uiShape`,
-`fnc_uiHatch`, `fnc_uiKeyHint` and `fnc_uiButton [display, parent, rect, id, text, icon, theme, code]` (left click runs `code`
-with `[1, id]`, right click `[-1, id]`) take a `parent` (`controlNull` for the display, a group for relative coordinates), snap to
+`fnc_uiHatch`, `fnc_uiKeyHint` and `fnc_uiButton [display, parent, rect, id, text, icon, theme, code, disabled, textSize, centred]`
+(left click runs `code` with `[1, id]`, right click `[-1, id]`) take a `parent` (`controlNull` for the display, a group for relative coordinates), snap to
 pixels and register top-level controls in `einv_gui_created`.
+A **centred** button (`centred` true: the section buttons, the kit windows' buttons, the red Arsenal screen's OK) leaves the centring to the
+engine: its label is a centred `EINV_LabelCenter` as wide as the room between the paddings (`BUTTON_PAD` 0.3 of the height each
+side; beside an icon, which keeps to the left padding, the room right of it and its gap `BUTTON_GAP` 0.22), and starts above the
+button's middle by `TEXT_MID` 0.66 of its font height, so the line of capitals sits in the middle of the height too - a left-aligned
+label started where the *measured* text would be centred, and `getTextWidth` is short of what the engine draws, so it stood right of
+the middle. `fnc_buttonWidth [text, icon, height, size, theme]` gives the width that fits such a button (paddings, icon, gap and the
+text with `TEXT_SLACK`).
 `fnc_safePicture [path]` -> path or "": a file path (`\` or `/`) ending .paa/.jpg/.png, or none when its .paa exists, that
 `fileExists` finds - asked once per path (uiNamespace `einv_gui_pictures`); `#(...)` passes. `fnc_uiPicture` / `fnc_uiPictureTurned`
 draw nothing for ""; the wizard's index and editors, the Arsenal header and ACE cargo's cards ask it too (`picture = "picturething"`).
@@ -830,9 +901,13 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   (`fnc_scrollPixels`, restored a frame later through `einv_gui_scrollRestore`). Cells are controls created directly in the group:
   a nested group would eat the wheel.
 - **Section** (`fnc_drawSection`): a caption tab (folds it, `fnc_toggleSection`; the contents' weight on the right,
-  `fnc_loadText`, only told), a box with the container's picture and short name, and the grid. Beside the tab "Take all" (loot) or
-  "Put all in" (own) (`fnc_takeAll`, `fnc_putAll`, `fnc_putAllTarget`: from the contents, not from what is drawn; what is not
-  searched stays), and a cross on a container opened from inside another (`fnc_closeNested`). Beyond the keys of the storage's
+  `fnc_loadText`, only told), a box with the container's picture and short name, and the grid. Beside the tab, as high as it and in the
+  caption's size (0.46 UNIT, the tab 0.62), centred buttons: "Take all" (loot) or "Put all in" (own) (`fnc_takeAll`, `fnc_putAll`,
+  `fnc_putAllTarget`: from the contents, not from what is drawn; what is not searched stays) and "Sort" with `icon_sort_desc_ca`
+  (`fnc_sortHolder` [holder, root] - the storage's op "sort", the same as the context menu's "Sort" row, which stays; on every
+  container section of the inventory the player may change, also an empty one, never on a section that only shows - `virtual`).
+  The tab gives up room down to three characters, then the last button goes, then the one before it; both are drawn disabled
+  while a move out of the section is under way. A cross on a container opened from inside another (`fnc_closeNested`). Beyond the keys of the storage's
   sections (section 3) a section may say `drawer` (a function name another addon draws it with: ACE cargo's cards), `placeholder`
   (a container the unit lacks: a hatched box that is its slot when it has an `owner`), `worn` + `unit` (a body's compact doll,
   `fnc_drawEquipmentDoll`), `locked` (a padlock and one muted line, nothing of what it holds; `lockTip` adds an open padlock). Own
@@ -1006,7 +1081,7 @@ Registered in preInit, so Eden has them too.
 | `ace_arsenal_itemsChanged` | `fnc_onItemsChanged`: for the open container's tab `fnc_reconcile` at once, before ACE greys its list |
 | `leftPanelFilled`, `rightPanelFilled`, `loadoutImported`, `onLoadoutLoad`, `showToggle` | `fnc_settle` a frame later |
 
-The hook table (`einv_arsenal_fnc_hooks`, section 4) sets `guest`, `theme` (the "ace" theme), `header` (none), `layout`
+The hook table (`einv_arsenal_fnc_hooks`, section 4) sets `guest`, `header` (none), `layout`
 (`fnc_layout`), `footer` (`fnc_footer`: the hint line), `camera` (none: ACE's), `keepOpen` (true: ACE decides when it
 closes), `frame`, `mouseDown` / `mouseUp` (`fnc_onMouse`: outside the panel taken, so the engine ignores it), `click`
 (`fnc_onClick`: double, Ctrl and Alt clicks swallowed - no equip or quick move past ACE), `wheel`, `dragCheck`, `drop`, `ground`
@@ -1018,13 +1093,18 @@ item out.
 
 - **Rect** (`fnc_panelRect`): top at ACE's sort bar (IDC 17, else the list's top), bottom at the list's bottom, like ACE's right
   column; width `STORAGE_COLS` cells of `einv_gui_fnc_getCell` plus padding and scroll bar, at most `PANEL_MAX_SHARE` 1/3
-  of the screen. `fnc_layout` draws one flat block in ACE's `[0,0,0,0.5]` and black frame. **Header**: from the sort bar's top, a band
-  `HEAD_BAND_SCALE` 1.6 times its height (the column starts that much lower than ACE's list) and as black (`ACE_SORT_BG`), the
-  container's picture (`getInfo "picture"`) at the band's height and its name in RobotoCondensed, 1.3x ACE's row text, centred. **Sections** in `einv_gui_fnc_drawColumn`
+  of the screen. `fnc_layout` draws it the way the inventory's columns are drawn: one block of Glass - the theme's `panel` and
+  `radius` - laid out in UNITs on one grid, `PANEL_PAD` 0.4 UNIT of room round the content and between the bands (as many pixels wide as high),
+  so the picture, the section captions and the grids start on one left edge and the loads end on one right edge. **Title row** at the top: the
+  container's picture (`getInfo "picture"`) `TITLE_H` 1.1 UNIT high and square, its name in the theme's bold font at `TITLE_SIZE` 0.66 UNIT
+  - the columns' title size - with its capitals centred in the row's height (`TEXT_MID`), and under the row a hairline in the theme's
+  `line` colour 0.4 padding below it, as `fnc_drawColumn` draws it. **Sections** in `einv_gui_fnc_drawColumn`
   (id `"storage"`): the open container, then staging; both with `"box"` false, so `einv_gui_fnc_drawSection` draws no picture
-  box and the grid starts at the left edge (the inventory keeps its boxes). The column reaches down to the **hint line**, the
-  block's last band: no box of its own, a line in the frame colour over it, `EINV_ArsenalHint` in ACE's message size (5 units),
-  lines as tall as the sort bar - one, two while staging holds something (the note, in the accent colour, from the `hint`
+  box and the grid starts at the left edge (the inventory keeps its boxes). The caption lines are the inventory's - chevron, tab, load
+  right-aligned, the staging space's subtitle in the same 0.46 UNIT; no Take all, Put all in or Sort there (the inventory only). The column
+  reaches down to the **hint line**, the block's last band: no box of its own, a hairline over it, `EINV_FooterHint` in the footer's size
+  (0.558 UNIT, `HINT_SIZE`), a line `HINT_LINE_H` 0.8 UNIT high with `HINT_PAD` 0.3 above and below (1.4 UNIT, the footer's height) - one line,
+  two while staging holds something (the note, in the accent colour, from the `hint`
   hook; the idle text is cut to one line, Ctrl+wheel only where it fits beside). ACE's list is registered as the zone `"remove"`.
 - **Folds.** A caption's chevron folds its section (the `fold` hook), kept per container class - lowercase, the staging space as
   `"staging"` - in `einv_arsenal_folded` while ACE's window is open: ACE makes a new uniform, vest or backpack for every one
@@ -1147,7 +1227,8 @@ full-screen hit area closes it on a click beside the card and lets nothing throu
 ...`) have no step of their own: they are edited in the Review step's text. missionNamespace holds the mode, `target` (canEdit's
 answer), `readOnly`, the draft (`origin`, `originSource`, `draft` (AST), `draftText` (canonical), `draftRules` (compiled),
 `draftCache`, `parseWarnings`, `clean`, `sourceEmpty`, `undo`, `redo`), the window (`step`, `focus`, `selection`, `theme`) and
-what steps keep between redraws (`listState`, `cellWork`, `itemWork`, `cellMode`, `cellBrush`, `sameAs`, `startAdvanced`, ...);
+what steps keep between redraws (`listState`, `treeState`, `editScope`, `cellWork`, `itemWork`, `cellMode`, `cellBrush`, `sameAs`,
+`startAdvanced`, ...);
 controls stay in uiNamespace. **Every edit ends in `fnc_commit [ast, redraw = true]`** (an undo step, `fnc_setDraft`, redraw);
 `fnc_setDraft [text]` parses, writes out again, compiles with a fresh cache and raises the local event `einv_setup_draftChanged
 [draftText]`. A change that writes out the same text is no change.
@@ -1161,9 +1242,13 @@ controls stay in uiNamespace. **Every edit ends in `fnc_commit [ast, redraw = tr
   stepper, kg value and source, the preset's value back. It sizes every container no rule draws, by its load, and every item the
   Weight preset sizes by mass.
 - **Items** (`fnc_drawItems`) and **Containers** (`fnc_drawContainers`): a class list on the left (`fnc_drawClassList`, cards by
-  `fnc_drawResults`, 30 to a page) and an editor on the right. One class at a time, one rule per class. "Only classes with own
-  rules" lists, on Items, classes whose rules set `footprint` or `stack`; on Containers, `grid` or `like` (`fnc_ownClassRules`'
-  `named`).
+  `fnc_drawResults`, 30 to a page) and an editor on the right. One class at a time and one rule per class - or, picked in the tree
+  view, one rule for a class and everything built on it. The search takes wildcards (`fnc_searchFilter`, `fnc_searchHit`): `*` is
+  any run of characters (none too), `?` any one, and the pattern has to fit the class or the name as a whole - `B_Bergen*`,
+  `*Carryall*`, `*_F` -, while a plain text still finds itself anywhere; the wildcard becomes a regular expression with every other
+  character escaped, and its longest literal run is looked for first, so the expression only meets the few classes that could fit.
+  The switch List | Tree beside the search turns the cards into the tree view. "Only classes with own rules" lists, on Items,
+  classes whose rules set `footprint` or `stack`; on Containers, `grid` or `like` (`fnc_ownClassRules`' `named`).
 - **Review** (`fnc_drawReview`): one column, no rules grammar unless asked for. "What changes" (`fnc_drawChanges [.., "saved"]`)
   lists every difference between the draft and `clean` (what is saved where the wizard saves: the setup in effect when it opened,
   saved or reloaded; on a client that may not save, the one in use), each line in words and marked new / changed / removed, with
@@ -1191,6 +1276,58 @@ uiNamespace for the whole game session: every public weapon, item, magazine with
 those with a load of 0 - an own grid gives them room), crate and vehicle with a cargo space, one row each (`ROW_*`). What the
 rules make of a class is not in it; it is asked (`getInfo` with the draft) only for the rows shown.
 
+### Trees and mass edits (Items and Containers)
+
+`class=X+` already covers X and every class built on it, so editing a family is one rule; the wizard only has to find the family and
+write that rule.
+
+- **The data.** `fnc_treeIndex [root]` reads one config root once per game session (uiNamespace `treeIndex`): the parent, name and
+  scope of every class of scope 1 or 2 and of each class above it - the hidden bases (`B_Carryall_Base`, `Rifle_Base_F`) several
+  variants are built on belong in it though no list shows them -, and the children of every class, sorted. One pass
+  (`configClasses` with a scope condition, then `inheritsFrom` up to the first class already known), which is a visible moment for a
+  root of a large mod pack (not measured in the game); it runs when a tree is first asked for, not in the pieces the class index is
+  read in.
+  `fnc_classTree [class]` is a class and everything built on it in tree order (`order`: lowercase class and depth) with the same as a
+  set (`set`) - what a rule `class=X+` covers - and the class's `parent`; `fnc_treeRows [class, step]` is the list a step shows of it:
+  scope 1 or 2, not named `..._Base`, and of a kind the step lists (`fnc_classKind`, which the class index uses too: on Containers a
+  uniform, vest, backpack, crate or vehicle that holds something, a backpack always; on Items everything but the cargo), each row
+  `[class lowercase, class, name, depth, how many listed classes are built on it]`. A class that is not listed leaves its listed
+  children one level up; the first row, the class the tree starts at, is always there. The rule `class=X+` covers the unlisted classes
+  below X as well (a scope 0 variant, a kind the step does not list); the counts are of the listed ones. Both are kept in uiNamespace
+  (`treeCache`, `treeRowsCache`).
+- **The view.** `treeState` holds, per step, `on`, `root` (a lowercase class, "" for the one picked) and `page`. With the view on,
+  `fnc_drawResults` hands its box to `fnc_drawTree`: the tree's start and how many classes are built on it, "Up one level"
+  (starts the tree at the parent - how a family is found whose members share a hidden base nobody can pick; stops at a parent with
+  more than `TREE_UP_MAX` 2000 classes under it) and "Start at picked", then the rows of the page indented by `TREE_INDENT` (at most
+  `TREE_INDENT_MAX` levels): picture, name, class and "N below", and what the draft makes of the class with where from
+  (`fnc_answerLine`, the one line the cards use too). The arrow at the end of a row starts the tree at that class. The list's search
+  and "only classes with own rules" filter the rows; switching the view on starts the tree at the class picked.
+- **What an edit is for** (`editScope`, per step): `class` for the class alone, `tree` for it and everything built on it. A card of the
+  list picks "class", a row of the tree picks "tree", and so do opening the step for a class and the Start step's jump.
+  `fnc_editScope [step, class]` answers `[tree, how many listed classes are built on it]` and is a tree only when there are any. The
+  editors say so in a line (class, the number and the rule, `class=X+`) with a chip "Only this class"; Apply, Back to the preset and
+  Export then work on the tree - one `class=X+` rule through `fnc_upsertRule [.., tree = true]`, a class with a rule of its own further
+  down keeps it. "Same as another class" is for one class and is not offered then. Working copies are per class, tree or not.
+- **Which rule covers a class.** `fnc_answerText` reads the source tag of the field (`own:<i>`, i the rule's index in the draft): a
+  rule `class=X+` of a class above this one says "inherited from X", a rule for the class itself "your rule", a preset "preset", as
+  before. `fnc_ownClassRules` returns a third map, `tree` - the values of the rules written for exactly `class=X+` -, which the
+  editors use to offer Back to the preset for a tree.
+
+### Export and import at the editors
+
+Both editors have Export and Import in the corner (`fnc_editorTools`).
+
+- **Export** (`fnc_exportClasses [step, class, tree]`) asks `einv_items_fnc_configEntry [class, false, draftRules]` for the config
+  lines of the class - of every listed class of the tree, one line each, for a tree edit -, so they come from the draft and a design
+  can be exported before Save, and only the keys that differ from what the class gets without the rules text. Where `configEntry`
+  is missing the wizard writes the lines itself from the draft, every key that has an answer. They go to the clipboard where
+  `copyToClipboard` works (`isServer || !isMultiplayer`, as at Review); a client gets a box with the text to select and copy.
+- **Import** (`fnc_openClassImport`, a paste box under the button; `fnc_importClasses`) reads the text with
+  `einv_items_fnc_parseConfigEntry`: each class it finds gets the rule of its own that the editors would write (`size` -> `footprint`,
+  `stack`, `grid`, `weight`, `name`), all of them in one `fnc_upsertRules` and so one undo step. Text with no config lines is read as
+  rules, as Review's Import reads them (`fnc_importText`), and its statements join the own ones without repeating a statement that
+  is already there. Nothing is saved: Save at Review decides.
+
 ### The paint model (Containers) and the item editor (Items)
 
 - **The canvas** `fnc_uiCanvas`: `cols`, `rows` and per place (index `row * cols + col`) either `cells` (bool, Items) or `paint`
@@ -1213,8 +1350,14 @@ rules make of a class is not in it; it is asked (`getInfo` with the draft) only 
   `CANVAS_ROWS_LOADED` 80 when loaded, `MAX_ROWS` when drawn on; the item board is `SHAPE_MAX` wide. An untouched class is never
   rewritten: Apply is enabled only when the blocks differ from the loaded ones.
 - **Item editor** (`fnc_drawItemEditor`): width and height steppers (1 to 8), the stack (1 to 999; not for weapons, uniforms,
-  vests, backpacks), an 8x8 canvas where a click makes a place one of the item's cells, the tile preview, and a warning while the
-  cells are not one piece (Apply off). Apply writes `class=X > size=WxH` or `size=xx/x-`, and `stack=N`.
+  vests, backpacks), the weight in kg and the name (two text fields; empty is config's own, and config's weight is the
+  placeholder), an 8x8 canvas where a click makes a place one of the item's cells, the tile preview, and a warning while the
+  cells are not one piece (Apply off). Apply writes `class=X > size=WxH` or `size=xx/x-`, `stack=N`, `weight=KG` and `name=...`, each
+  only when it differs from now; a field emptied takes its own value away. The weight is read by `fnc_weightValue` (a dot or a comma,
+  rounded to the gram, at most `EDIT_WEIGHT_MAX` 1000; -1 for nothing typed, -2 for text that is no weight, which Apply refuses and
+  says), the name cut to `EDIT_NAME_MAX` 100 (the rules' `name=` encoding is `writeRules`' business). Typing goes into the working
+  copy (`weightText`, `nameText`) without drawing the editor again - the field would lose the cursor -, Return draws it again, and
+  Apply reads the working copy.
 - **Blocks mode** (`fnc_drawCellBlocks`): the switch "Paint | Blocks" (`einv_setup_cellMode`, 0/1, kept for the session). One
   small drawing per compartment (a click toggles a hole), width and height steppers for the picked one, Add and Remove; working
   copy `{blocks, picked}`; Apply writes the blocks joined by `+` (flow layout). A class drawn as a canvas gets a note that Blocks
@@ -1427,8 +1570,9 @@ CBA keybinds: `einv_hotbar_slot1` to `slot7` (4 to 0), `einv_hotbar_show`, `einv
 profile: `einv_gui_cameraOn`, `einv_gui_searchMuted`, `einv_hotbar_slots`.
 
 **What missions and other mods may set** (all optional): on an object `einv_grid` (a grid text, public), `einv_noSearch`,
-`einv_nearby = false`, `einv_noAccess` (a person); in a mission `einv_arsenal_biPassThrough`; in an item's config `einv_gridSize[]
-= {w, h}`, `einv_stackSize`, `einv_grids[] = {{cols, rows}, ...}`, `einv_slots`, `einv_sound = "family"`; a preset as a class of
+`einv_nearby = false`, `einv_noAccess` (a person); in a mission `einv_arsenal_biPassThrough`; in an item's config `einv_size`,
+`einv_stack`, `einv_grid`, `einv_weight`, `einv_name` (section 2, "Config keys of an item"; the older `einv_gridSize[]`,
+`einv_stackSize`, `einv_grids[]` and `einv_slots` still work), `einv_sound = "family"`; a preset as a class of
 `CfgEinvRulesets`; a sound family or action in `CfgEinvSounds`; a lock through `einv_locks_fnc_setLock` or `addProvider`; an op,
 guard or carried variable in the storage's tables (section 3).
 
@@ -1489,10 +1633,11 @@ guard or carried variable in the storage's tables (section 3).
 Built and checked in code only (`hemtt check`, reading), as far as this repository records:
 
 - **All of 0.4.0 but the first version of the ACE Arsenal panel** (which the owner ran, from screenshots): cells as the only room
-  and everything removed with the weight limit; the panel's ACE look, staging space, list drag, wheel and focus rule; the backpack
+  and everything removed with the weight limit; the panel's look, staging space, list drag, wheel and focus rule; the backpack
   as the fourth gear slot; shaped grids, `like=`, shaped items with rotation, positional compartments with insets, width 10, the
   presets `default` revision 2, `realism` and `weight` revision 2; the wizard (Start, Items, Containers with paint, Blocks and
-  Same as, Review); the window details (the menu's right-click fall-through, the weight card without ticks, count pills, the
+  Same as, Review, and later the wildcard search, the tree view with its `class=X+` edits, the weight and name fields and Export /
+  Import at the editors); the window details (the menu's right-click fall-through, the weight card without ticks, count pills, the
   n/stack badge); the backpack drop with its safety nets; `hasSpace` with partial stacks.
 - **Features older than that but newer than the 0.2.3 test**: the sound families and the looting pose, "moving stops looting", the
   magazine fill bar and the repack, the weight tiers with their effects and the comparison card, the window's lock gates, ACE

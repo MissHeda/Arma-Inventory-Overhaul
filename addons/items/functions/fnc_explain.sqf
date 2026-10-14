@@ -91,8 +91,15 @@ private _fnc_walk = {
 
 [_compiled getOrDefault ["own", []], _ownIndices] call _fnc_walk;
 
-// The item's own mod, as fnc_resolve reads it.
+// The item's own mod, as fnc_resolve reads it: the keys written like the rules first, then the older
+// ones, so the line that wins a field is the first one of that field.
 private _mod = _facts get "mod";
+
+private _fnc_size = {
+    params ["_value"];
+
+    if (_value isEqualType "") then {_value} else {_value call FUNC(formatMask)}
+};
 
 {
     _x params ["_field", "_key", "_text"];
@@ -104,10 +111,15 @@ private _mod = _facts get "mod";
         _lines pushBack ["mod", -1, _text, [_field], _wins];
     };
 } forEach [
+    ["footprint", "size", format ["%1 = %2", QGVARMAIN(size), [_mod getOrDefault ["size", ""]] call _fnc_size]],
     ["footprint", "gridSize", format ["%1[] = %2", QGVARMAIN(gridSize), str (_mod getOrDefault ["gridSize", []])]],
+    ["stack", "stack", format ["%1 = %2", QGVARMAIN(stack), _mod getOrDefault ["stack", 0]]],
     ["stack", "stackSize", format ["%1 = %2", QGVARMAIN(stackSize), _mod getOrDefault ["stackSize", 0]]],
+    ["grid", "grid", format ["%1 = %2", QGVARMAIN(grid), [_mod getOrDefault ["grid", []]] call FUNC(formatGrid)]],
     ["grid", "grids", format ["%1[] = %2", QGVARMAIN(grids), str (_mod getOrDefault ["grids", []])]],
-    ["grid", "slots", format ["%1 = %2", QGVARMAIN(slots), _mod getOrDefault ["slots", 0]]]
+    ["grid", "slots", format ["%1 = %2", QGVARMAIN(slots), _mod getOrDefault ["slots", 0]]],
+    ["weight", "weight", format ["%1 = %2", QGVARMAIN(weight), _mod getOrDefault ["weight", 0]]],
+    ["name", "name", format ["%1 = %2", QGVARMAIN(name), _mod getOrDefault ["name", ""]]]
 ];
 
 [_compiled getOrDefault ["preset", []], _presetIndices] call _fnc_walk;

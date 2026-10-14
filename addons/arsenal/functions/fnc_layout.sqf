@@ -8,21 +8,23 @@
  * (fnc_staging) as a second section, and at the bottom the line for the hints (fnc_footer). Nothing while
  * another tab is open, that slot is empty, or ACE's panels are hidden (Backspace).
  *
- * The panel looks like ACE's own (fnc_theme): one flat block from the top of ACE's sort bar down to the
- * bottom of ACE's list (fnc_panelRect) with ACE's frame and see-through. On top a band like the sort bar
- * beside it - as high, as black - with the container's picture as high as the band and its name in the
- * sort bar's font: one sees what is being filled, so the sections draw no picture box of their own and
- * their grids start at the left edge ("box" false). Under it the column, which scrolls over both sections
- * and reaches down to the hint line, the block's last band: the staging space fills what the container
- * leaves of it (fnc_growStaging). The column draws no background of its own over the block.
+ * The panel looks like one of the inventory's columns (the glass, corner radius, fonts and colours of its
+ * theme) and is laid out the way they are, on one grid of PANEL_PAD UNITs: one block from the top of ACE's
+ * sort bar down to the bottom of ACE's list (fnc_panelRect). On top the title row - the container's
+ * picture, TITLE_H UNITs high and square, and its name beside it in the title size of the columns' titles
+ * (TITLE_SIZE), centred in the row's height -, under it a hairline. Then the column, which scrolls over
+ * both sections and reaches down to the hint line, the block's last band, over which runs a hairline of
+ * its own: the staging space fills what the container leaves of it (fnc_growStaging). The picture, the
+ * sections' tabs and grids start on one left edge, the load texts end on one right edge; the sections draw
+ * no picture box of their own ("box" false), and the column draws no background over the block.
  *
  * A section's caption folds it (einv_gui_fnc_toggleSection), kept per container class - the staging
  * space as "staging" - while ACE's window is open (the "fold" hook, GVAR(folded)), whatever the inventory
  * did with its own captions. The staging section has a crate before its caption and says beside its tab
- * that it is emptied when the arsenal closes; its grid is at least STAGING_MIN_ROWS rows, as many as reach
- * down to the hint line, and grows with what lies in it (fnc_growStaging). ACE's
- * list is registered as a zone of the engine: whatever is let go outside the panel is shown going there,
- * out of the container (fnc_dragCheck).
+ * that it is emptied when the arsenal closes, in the caption's size and colour of the muted texts; its
+ * grid is at least STAGING_MIN_ROWS rows, as many as reach down to the hint line, and grows with what lies
+ * in it (fnc_growStaging). ACE's list is registered as a zone of the engine: whatever is let go outside
+ * the panel is shown going there, out of the container (fnc_dragCheck).
  *
  * The focus sink (GVAR(focusSink) in uiNamespace) is made here the first time: a control of no size in the
  * screen's corner that fnc_onFrame gives the focus to, so that ACE's list loses it.
@@ -94,7 +96,7 @@ private _fnc_fold = {
 GVAR(foldKeys) = [];
 [_section, toLowerANSI (_section getOrDefault ["class", ""])] call _fnc_fold;
 
-// The title band names and pictures the container: no box with its picture beside the grid.
+// The title row names and pictures the container: no box with its picture beside the grid.
 _section set ["box", false];
 
 private _sections = [_section];
@@ -124,52 +126,59 @@ if (!isNull _holder) then {
     } forEach ([_holder] call FUNC(countAll));
 };
 
-// The title band: HEAD_BAND_SCALE times ACE's sort bar beside it, from the same top - the column starts
-// that much lower than ACE's list.
+// The padding of the block, as the inventory's columns have it (einv_gui_fnc_drawColumn): the title row
+// starts a padding under the block's top and the column a padding under the title row, the column's own
+// padding being the one between them - so the title band reaches down to the end of the title row.
 private _list = _display displayCtrl ARSENAL_IDC_LIST;
-private _bandH = SNAP_Y((ctrlPosition _list) select 1) - _top;
-
-_bandH = if (_bandH < UNIT * 0.5) then {SNAP_H(UNIT * HEAD_LINE_H)} else {SNAP_H(_bandH * HEAD_BAND_SCALE)};
-
+private _padY = UNIT * PANEL_PAD;
+private _padX = SQUARE(_padY);
+private _titleH = UNIT * TITLE_H;
+private _bandH = SNAP_H(_padY + _titleH);
 private _bodyTop = _top + _bandH;
 
-// The hint line, the block's last band: one line as high as ACE's sort bar, a second while the staging
-// space holds something - for the note that it goes with the window (the "hint" hook) -, and room above
-// and below. The column reaches down to it.
+// The hint line, the block's last band: a line as high as the footer's key hints, a second while the
+// staging space holds something - for the note that it goes with the window (the "hint" hook) -, and room
+// above and below. The column reaches down to it.
 private _lines = [1, 2] select (GVAR(stagingCount) > 0);
-private _hintH = SNAP_H(ACE_LINE_H * _lines + HINT_PAD * ACE_GRID_H * 2);
+private _hintH = SNAP_H(UNIT * (HINT_LINE_H * _lines + HINT_PAD * 2));
 private _hintTop = _top + _height - _hintH;
 private _columnH = _hintTop - _bodyTop;
 
 if (_columnH < UNIT * 4) exitWith {[]};
 
-// The block, flat and square in ACE's colour and frame, and the band on it as black as the sort bar.
+// The block: the inventory's glass with its corner radius.
 [
-    _display, controlNull, _rect, _theme getOrDefault ["panel", []], 0, _theme getOrDefault ["panelBorder", []]
+    _display, controlNull, _rect, _theme getOrDefault ["panel", []], _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
 ] call EFUNC(gui,uiPanel);
 
-[_display, controlNull, [_left, _top, _width, _bandH], _theme getOrDefault ["headBg", []], 0] call EFUNC(gui,uiPanel);
-
-// The container's picture and name in the band, the picture as high as the band, before the name: one
-// sees what is being filled. The name in the sort bar's font, a third larger than ACE's rows as the title
-// over them (9.1 of ACE's units in a band of 9.6), centred in the band's height - never taller than it.
-private _padX = SQUARE(UNIT * 0.4);
-private _headFont = _theme getOrDefault ["headFont", _theme getOrDefault ["fontBold", "PuristaSemibold"]];
-private _headSize = (ACE_ROW_SIZE * 1.3) min _bandH;
+// The container's picture and name in the title row: one sees what is being filled. The picture is as high as
+// the row and square, the name beside it in the columns' title size and font, its line of capitals
+// centred in the row's height (TEXT_MID: a label draws its text from its top edge down).
+private _titleTop = _top + _padY;
+private _textX = _left + _padX;
 private _picture = [([_section getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]] call EFUNC(gui,safePicture);
-private _pictureW = [0, SQUARE(_bandH)] select (_picture isNotEqualTo "");
 
-if (_pictureW > 0) then {
-    [_display, controlNull, [_left + _padX, _top, _pictureW, _bandH], _picture] call EFUNC(gui,uiPicture);
-    _pictureW = _pictureW + SQUARE(UNIT * 0.2);
+if (_picture isNotEqualTo "") then {
+    [_display, controlNull, [_textX, _titleTop, SQUARE(_titleH), _titleH], _picture] call EFUNC(gui,uiPicture);
+
+    _textX = _textX + SQUARE(_titleH) + SQUARE(_titleH * 0.3);
 };
 
-private _title = [[_section getOrDefault ["title", ""], _theme] call EFUNC(gui,caption), _width - _padX * 2 - _pictureW, _headFont, _headSize] call EFUNC(gui,fitText);
+private _headFont = _theme getOrDefault ["fontBold", "PuristaSemibold"];
+private _headSize = UNIT * TITLE_SIZE;
+private _headTop = _titleTop + _titleH / 2 - TEXT_MID * _headSize;
+private _headW = _left + _width - _padX - _textX;
+private _title = [[_section getOrDefault ["title", ""], _theme] call EFUNC(gui,caption), _headW, _headFont, _headSize] call EFUNC(gui,fitText);
 
 [
-    _display, controlNull, [_left + _padX + _pictureW, _top, _width - _padX * 2 - _pictureW, _bandH], _title, _headSize,
+    _display, controlNull, [_textX, _headTop, _headW, _titleTop + _titleH - _headTop], _title, _headSize,
     _theme getOrDefault ["text", [1, 1, 1, 1]], _headFont, 0
 ] call EFUNC(gui,uiLabel);
+
+// A hairline under the title row, as the columns of the inventory have under theirs.
+[
+    _display, controlNull, [_left + _padX, _titleTop + _titleH + _padY * 0.4, _width - _padX * 2, pixelH], _theme getOrDefault ["line", []]
+] call EFUNC(gui,uiPanel);
 
 // The column over the block: the same theme, without a background of its own.
 private _columnTheme = +_theme;
@@ -221,7 +230,10 @@ private _fnc_draw = {
         private _textX = _tabRight + _gapX;
         private _textW = _end - _gapX - _textX;
         private _font = _theme getOrDefault ["font", "PuristaMedium"];
-        private _size = _tabH * 0.68;
+
+        // The caption line's own text size, from the same top as the tab's text and the weight's: one
+        // baseline all along the line (einv_gui_fnc_drawSection).
+        private _size = UNIT * 0.46;
 
         if (_textW < SQUARE(UNIT * 1.5)) exitWith {};
 
@@ -238,10 +250,10 @@ private _fnc_draw = {
 [_display, [_left, _bodyTop, _width, _columnH], _sections, _columnTheme, "", "", _fnc_draw, "storage"] call EFUNC(gui,drawColumn);
 
 GVAR(panelRect) = _rect;
-// Inside the frame, which goes on round the hint line (fnc_footer).
-GVAR(hintRect) = [_left + pixelW, _hintTop, _width - pixelW * 2, _hintH - pixelH];
+// The hint line's band (fnc_footer).
+GVAR(hintRect) = [_left, _hintTop, _width, _hintH];
 
-// The whole block is the panel, the title band and the hint line too: a drag let go over them is no drop
+// The whole block is the panel, the title row and the hint line too: a drag let go over them is no drop
 // outside.
 EGVAR(gui,panels) pushBack _rect;
 

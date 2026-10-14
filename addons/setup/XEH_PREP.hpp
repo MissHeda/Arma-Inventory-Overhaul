@@ -56,8 +56,13 @@ PREP(confirm);
 // they write
 PREP(buildIndex);
 PREP(indexChunk);
+PREP(classKind);
+PREP(searchFilter);
+PREP(searchHit);
 PREP(drawClassList);
 PREP(drawResults);
+PREP(drawPager);
+PREP(answerLine);
 PREP(drawItemEditor);
 PREP(drawCellEditor);
 PREP(drawCellBlocks);
@@ -69,8 +74,26 @@ PREP(canvasFromBlocks);
 PREP(canvasBlocks);
 PREP(canvasBox);
 PREP(answerText);
+PREP(weightText);
+PREP(weightValue);
 PREP(ownClassRules);
 PREP(upsertRule);
+PREP(upsertRules);
+
+// The inheritance tree: which classes are built on one, how the lists show them, and when an edit applies
+// to all of them
+PREP(classRoot);
+PREP(treeIndex);
+PREP(classTree);
+PREP(treeRows);
+PREP(drawTree);
+PREP(editScope);
+
+// Export and import at the editors: the config lines of a class (or a tree), and a pasted setup of them
+PREP(editorTools);
+PREP(exportClasses);
+PREP(importClasses);
+PREP(openClassImport);
 
 // Widgets, on the inventory's UI kit
 PREP(uiHit);

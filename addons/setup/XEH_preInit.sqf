@@ -91,6 +91,14 @@ GVAR(cellBrush) = 1;
 GVAR(sameAs) = createHashMap;
 GVAR(ownClasses) = [];
 
+// The inheritance tree, per step: whether the list shows the tree and from which class (treeState: "on",
+// "root" - a lowercase class, "" for the one picked -, "page"), and what an edit is for (editScope: "class"
+// for the one picked, "tree" for it and every class built on it - fnc_editScope). The text pasted into
+// the editors' import box.
+GVAR(treeState) = createHashMap;
+GVAR(editScope) = createHashMap;
+GVAR(classImportText) = "";
+
 // Who and what the inventory showed when the wizard was opened from it, to open it again afterwards
 // (fnc_openFromGame).
 GVAR(reopenInventory) = [];

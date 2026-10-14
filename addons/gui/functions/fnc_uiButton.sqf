@@ -12,6 +12,13 @@
  * while its own moves are under way (fnc_drawSection). The code always runs a frame later
  * (fnc_later): a button may rebuild the window, which deletes this very control.
  *
+ * The label sits where the measured text ends up by default, which can be a little off: getTextWidth reports
+ * less than the engine draws, and a left-aligned label starts where the measured text would be centred. A
+ * "centred" button lets the engine do the centring instead: the label is as wide as the room between the
+ * paddings (as wide as what is left of it beside an icon, which keeps to the left padding), aligned in
+ * the middle, and starts above the button's middle by TEXT_MID of its font height, so the line of capitals
+ * lies in the middle of the button's height too. fnc_buttonWidth gives the width that fits such a button.
+ *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Controls group to create it in, or controlNull for the display <CONTROL>
@@ -23,6 +30,7 @@
  * 7: Code, called with [1, id] or [-1, id] <CODE>
  * 8: Disabled <BOOL> (default: false)
  * 9: Text height - the label's size, -1 for a share of the button's height <NUMBER> (default: -1)
+ * 10: Centred - the label and an icon beside it laid out as described above <BOOL> (default: false)
  *
  * Return Value:
  * The controls, the hit area last <ARRAY>
@@ -35,7 +43,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_rect", "_id", "_text", "_icon", "_theme", "_code", ["_disabled", false], ["_textSize", -1]];
+params ["_display", "_parent", "_rect", "_id", "_text", "_icon", "_theme", "_code", ["_disabled", false], ["_textSize", -1], ["_centred", false]];
 _rect params ["_left", "_top", "_width", "_height"];
 
 private _normal = _theme getOrDefault ["button", [1, 1, 1, 0.06]];
@@ -67,33 +75,58 @@ private _corners = _controls select {ctrlClassName _x isEqualTo "EINV_PanelCorne
 private _caption = [_text, _theme] call FUNC(caption);
 private _hasIcon = _icon isNotEqualTo "";
 private _size = [_height * 0.48, _textSize] select (_textSize > 0);
-private _iconH = _height * 0.56;
+private _iconH = _height * BUTTON_ICON;
 private _iconW = [0, SQUARE(_iconH)] select _hasIcon;
-private _gap = [0, SQUARE(_height * 0.22)] select (_hasIcon && {_caption isNotEqualTo ""});
-private _pad = SQUARE(_height * 0.3);
+private _gap = [0, SQUARE(_height * BUTTON_GAP)] select (_hasIcon && {_caption isNotEqualTo ""});
+private _pad = SQUARE(_height * BUTTON_PAD);
 private _room = _width - _pad * 2 - _iconW - _gap;
 
-private _shown = "";
-private _textW = 0;
+if (_centred) then {
+    private _labelX = _left + _pad;
+    private _labelW = _width - _pad * 2;
 
-if (_caption isNotEqualTo "" && {_room > 0}) then {
-    _shown = [_caption, _room, _font, _size] call FUNC(fitText);
-    _textW = (_shown getTextWidth [_font, _size]) min _room;
-};
+    if (_hasIcon) then {
+        // An icon alone sits in the middle; with a label it keeps to the left padding, and the label is
+        // centred in the room beside it.
+        private _iconX = [_left + (_width - _iconW) / 2, _left + _pad] select (_caption isNotEqualTo "");
 
-// An icon alone sits in the middle; with a label the two keep off the edges.
-private _start = _left + (((_width - _iconW - _gap - _textW) / 2) max ([_pad, 0] select (_shown isEqualTo "")));
+        _controls pushBack ([_display, _parent, [_iconX, _top + (_height - _iconH) / 2, _iconW, _iconH], _icon, _ink] call FUNC(uiIcon));
 
-if (_hasIcon) then {
-    _controls pushBack ([_display, _parent, [_start, _top + (_height - _iconH) / 2, _iconW, _iconH], _icon, _ink] call FUNC(uiIcon));
-};
+        _labelX = _left + _pad + _iconW + _gap;
+        _labelW = _room;
+    };
 
-if (_shown isNotEqualTo "") then {
-    // Left-aligned in a box running to the button's edge: anything the engine draws wider than measured
-    // spills to the right, never off the left.
-    private _labelX = _start + _iconW + _gap;
+    if (_caption isNotEqualTo "" && {_labelW > 0}) then {
+        private _labelTop = _top + _height / 2 - TEXT_MID * _size;
 
-    _controls pushBack ([_display, _parent, [_labelX, _top, _left + _width - _labelX, _height], _shown, _size, _ink, _font, 0] call FUNC(uiLabel));
+        _controls pushBack ([
+            _display, _parent, [_labelX, _labelTop, _labelW, _top + _height - _labelTop],
+            [_caption, _labelW, _font, _size] call FUNC(fitText), _size, _ink, _font, 2
+        ] call FUNC(uiLabel));
+    };
+} else {
+    private _shown = "";
+    private _textW = 0;
+
+    if (_caption isNotEqualTo "" && {_room > 0}) then {
+        _shown = [_caption, _room, _font, _size] call FUNC(fitText);
+        _textW = (_shown getTextWidth [_font, _size]) min _room;
+    };
+
+    // An icon alone sits in the middle; with a label the two keep off the edges.
+    private _start = _left + (((_width - _iconW - _gap - _textW) / 2) max ([_pad, 0] select (_shown isEqualTo "")));
+
+    if (_hasIcon) then {
+        _controls pushBack ([_display, _parent, [_start, _top + (_height - _iconH) / 2, _iconW, _iconH], _icon, _ink] call FUNC(uiIcon));
+    };
+
+    if (_shown isNotEqualTo "") then {
+        // Left-aligned in a box running to the button's edge: anything the engine draws wider than measured
+        // spills to the right, never off the left.
+        private _labelX = _start + _iconW + _gap;
+
+        _controls pushBack ([_display, _parent, [_labelX, _top, _left + _width - _labelX, _height], _shown, _size, _ink, _font, 0] call FUNC(uiLabel));
+    };
 };
 
 private _hit = [_display, "EINV_Hitbox", _parent, _rect] call FUNC(uiCreate);

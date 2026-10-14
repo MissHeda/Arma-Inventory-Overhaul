@@ -13,7 +13,10 @@
  *      compartments as they are instead, [[cols, rows], ...]: taken exactly, never cut to MAX_ROWS - the
  *      Arsenal's staging space grows with what lies in it, up to its own cap (einv_arsenal_fnc_growStaging).
  *   2. the rules for its class (einv_items_fnc_getInfo "grid"): the older container table, the rules
- *      text, einv_grids[] / einv_slots in config, the preset - "auto", by its load, when none says.
+ *      text, the class's own config - einv_grid = "1x3+5x7+1x3"; (written as grid= is, and inherited
+ *      by a subclass), else the older einv_grids[] / einv_slots - then the preset: "auto", by its
+ *      load, when none says. The config's grid is the item class's (the uniform, vest or backpack, or
+ *      the crate's or vehicle's own class); the object's einv_grid variable above is one object's.
  * The load is the object's own maximumLoad (fnc_getMaxLoad), the mass per cell the rules'.
  *
  * The ground has no compartments and no limit: [].

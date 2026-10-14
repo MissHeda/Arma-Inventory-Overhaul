@@ -124,6 +124,7 @@ private _open = {
     private _stepId = ["items", "containers"] select _container;
 
     GVAR(selection) set [_stepId, _class];
+    GVAR(editScope) set [_stepId, "class"];
     GVAR(listState) set [_stepId, [_class, "all", false, 0]];
 
     [GVAR(steps) findIf {(_x select 0) isEqualTo _stepId}] call FUNC(showStep);

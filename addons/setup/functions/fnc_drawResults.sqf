@@ -11,6 +11,9 @@
  * search that finds thousands costs no more than one that finds thirty. While the index is still being
  * read, a line says how far it is (fnc_indexChunk keeps it up to date and calls this when done).
  *
+ * The search takes wildcards (fnc_searchFilter). With the tree view on (GVAR(treeState)) the box holds the
+ * tree of a class instead of the cards (fnc_drawTree).
+ *
  * Its place and step come from uiNamespace QGVAR(resultsArgs), which fnc_drawClassList sets; nothing is
  * drawn when the step it belongs to is gone.
  *
@@ -48,6 +51,14 @@ private _muted = _theme getOrDefault ["muted", [0.522, 0.553, 0.604, 1]];
 private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
 private _radius = (_theme getOrDefault ["radius", 0]) min (UNIT * 0.3);
 
+// ----- The tree of a class instead of the list -----
+
+if ((GVAR(treeState) getOrDefault [_mode, createHashMap]) getOrDefault ["on", false]) exitWith {
+    uiNamespace setVariable [QGVAR(indexLabel), controlNull];
+
+    [_display, _box, _width, _height, _theme, _mode] call FUNC(drawTree);
+};
+
 // ----- Still reading -----
 
 if !(call FUNC(buildIndex)) exitWith {
@@ -68,9 +79,11 @@ uiNamespace setVariable [QGVAR(indexLabel), controlNull];
 private _containers = _mode isEqualTo "containers";
 
 (GVAR(listState) getOrDefault [_mode, ["", "all", false, 0]]) params ["_text", "_chip", "_ownOnly", "_page"];
-(call FUNC(ownClassRules)) params ["_exact", "_named"];
+private _named = ([] call FUNC(ownClassRules)) select 1;
 
-private _needle = toLower (trim _text);
+private _filter = [_text] call FUNC(searchFilter);
+private _needle = _filter param [0, ""];
+private _expression = _filter param [1, ""];
 private _chipKinds = [[_chip], ["crate", "vehicle"]] select (_chip isEqualTo "cargo");
 
 // Own rules that count here: a container's cells, an item's size or stack.
@@ -85,7 +98,13 @@ private _matches = ((uiNamespace getVariable QGVAR(index)) get "rows") select {
         (_x select ROW_FAMILY) isNotEqualTo "cargo" && {_chip isEqualTo "all" || {(_x select ROW_FAMILY) isEqualTo _chip}}
     })
     && {!_ownOnly || {private _keys = _named getOrDefault [_x select ROW_LC, createHashMap]; (_ownKeys findIf {_x in _keys}) >= 0}}
-    && {_needle isEqualTo "" || {((_x select ROW_SEARCH) find _needle) >= 0}}
+    && {_needle isEqualTo "" || {
+        if (_expression isEqualTo "") then {
+            ((_x select ROW_SEARCH) find _needle) >= 0
+        } else {
+            [_filter, _x select ROW_SEARCH, _x select ROW_LC, _x select ROW_NAME] call FUNC(searchHit)
+        }
+    }}
 };
 
 private _total = count _matches;
@@ -100,30 +119,16 @@ private _shown = _matches select [_page * LIST_PAGE, LIST_PAGE];
 
 private _footH = UNIT * 1.05;
 private _footY = _height - _footH;
-private _turnW = SQUARE(_footH);
 
-[
-    _display, _box, [0, _footY, _width - _turnW * 2 - SQUARE(UNIT * 0.4), _footH],
-    [LLSTRING(List_None), format [LLSTRING(List_Range), _page * LIST_PAGE + 1, _page * LIST_PAGE + count _shown, _total]] select (_total > 0),
-    TEXT_SMALL, _muted, _font, 0
-] call EFUNC(gui,uiLabel);
+[_display, _box, [0, _footY, _width, _footH], _theme, _page, _pages, _total, count _shown, LIST_PAGE, {
+    params ["_mode", "_step"];
 
-{
-    _x params ["_icon", "_step", "_enabled", "_buttonX"];
+    private _state = GVAR(listState) get _mode;
 
-    [_display, _box, [_buttonX, _footY, _turnW, _footH], "", _icon, _theme, {
-        params ["_mode", "_step"];
+    _state set [3, ((_state select 3) + _step) max 0];
 
-        private _state = GVAR(listState) get _mode;
-
-        _state set [3, ((_state select 3) + _step) max 0];
-
-        [] call FUNC(drawResults);
-    }, [_mode, _step], _enabled, "ghost"] call FUNC(uiAction);
-} forEach [
-    [UI_TEX(icon_chevron_left_ca), -1, _page > 0, _width - _turnW * 2 - SQUARE(UNIT * 0.15)],
-    [UI_TEX(icon_chevron_right_ca), 1, _page < _pages - 1, _width - _turnW]
-];
+    [] call FUNC(drawResults);
+}, _mode] call FUNC(drawPager);
 
 // ----- The cards -----
 
@@ -172,30 +177,7 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
     ] call EFUNC(gui,uiLabel);
 
     // What the draft makes of it, in the accent where an own rule decides it.
-    private _info = [_class, GVAR(draftRules), GVAR(draftCache)] call EFUNC(items,getInfo);
-    private _own = _exact getOrDefault [_lc, createHashMap];
-    private _answer = "";
-    private _isOwn = false;
-
-    if (_containers) then {
-        ([_info, "grid", _own] call FUNC(answerText)) params ["_words", "_from"];
-
-        _answer = format [LLSTRING(Answer_Line), _words, _from];
-        _isOwn = (((_info get "src") getOrDefault ["grid", ""]) select [0, 4]) isEqualTo "own:";
-    } else {
-        ([_info, "size", _own] call FUNC(answerText)) params ["_sizeWords", "_sizeFrom"];
-        ([_info, "stack", _own] call FUNC(answerText)) params ["_stackWords", "_stackFrom"];
-
-        private _src = _info get "src";
-
-        _isOwn = ({((_src getOrDefault [_x, ""]) select [0, 4]) isEqualTo "own:"} count ["footprint", "stack"]) > 0;
-        _answer = switch (true) do {
-            // Weapons, uniforms, vests and backpacks never share a tile: only the size says anything.
-            case ((_src getOrDefault ["stack", ""]) isEqualTo "forced"): {format [LLSTRING(Answer_Line), _sizeWords, _sizeFrom]};
-            case (_sizeFrom isEqualTo _stackFrom): {format [LLSTRING(Answer_Line), format ["%1, %2", _sizeWords, _stackWords], _sizeFrom]};
-            default {format ["%1 · %2", format [LLSTRING(Answer_Line), _sizeWords, _sizeFrom], format [LLSTRING(Answer_Line), _stackWords, _stackFrom]]};
-        };
-    };
+    ([_class, _mode] call FUNC(answerLine)) params ["_answer", "_isOwn"];
 
     [
         _display, _list, [_textX, _cardY + UNIT * 1.45, _textW, UNIT * 0.65],
@@ -206,7 +188,9 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
     [_display, _list, [0, _cardY, _rowW, _cardH], _surface, _cardFill, [1, 1, 1, 0.085], {
         params ["_mode", "_class"];
 
+        // Picked here, an edit is for this class alone; the tree view picks a class with everything built on it.
         GVAR(selection) set [_mode, _class];
+        GVAR(editScope) set [_mode, "class"];
 
         [GVAR(step)] call FUNC(showStep);
     }, [_mode, _class], true, _class] call FUNC(uiHit);

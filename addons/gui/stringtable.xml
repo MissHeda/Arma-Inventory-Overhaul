@@ -328,6 +328,12 @@
         <Key ID="STR_einv_gui_Section_PutAll_Tooltip">
             <English>Moves everything in here into %1</English>
         </Key>
+        <Key ID="STR_einv_gui_Section_Sort">
+            <English>Sort</English>
+        </Key>
+        <Key ID="STR_einv_gui_Section_Sort_Tooltip">
+            <English>Lays out everything in here anew, largest first</English>
+        </Key>
         <Key ID="STR_einv_gui_Section_TakeAll">
             <English>Take all</English>
         </Key>

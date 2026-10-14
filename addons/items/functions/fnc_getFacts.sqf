@@ -3,8 +3,10 @@
  * Author: Miss Heda
  * What an item is in config, before any rule: its kind, category, mass, rounds and load, the classes
  * it is built on and the addon that brought it in - everything the rules ask about - plus its names,
- * description and picture, and what its own mod says about its grid (einv_gridSize[],
- * einv_stackSize, einv_grids[], einv_slots). fnc_getInfo puts the rules on top of this.
+ * description and picture, and what its own mod says about its size, stack, grid, weight and name:
+ * einv_size, einv_stack, einv_grid, einv_weight, einv_name (fnc_readConfigKeys), and the older
+ * einv_gridSize[], einv_stackSize, einv_grids[], einv_slots, which still work. A subclass has what
+ * its parent has, as everything in config does. fnc_getInfo puts the rules on top of this.
  *
  * Config does not change while the game runs, so this is read once per class and kept in uiNamespace:
  * not saved with the game (a setup wizard reading thousands of classes must not bloat save games),
@@ -35,8 +37,11 @@
  *                   <NUMBER>
  *   "lineage"     - lowercase classes from the class itself up to the topmost it is built on <ARRAY>
  *   "addon"       - the CfgPatches class that defined it, lowercase, "" if none <STRING>
- *   "mod"         - what its own config says, only the keys it sets: "gridSize" [w, h], "stackSize"
- *                   NUMBER, "grids" [[cols, rows], ...], "slots" NUMBER <HASHMAP>
+ *   "mod"         - what its own config says, only the keys it sets and that can be used: "size"
+ *                   [w, h, holes] or "mass", "stack" NUMBER, "grid" spec (fnc_parseGrid), "weight"
+ *                   kg NUMBER and "name" STRING (einv_size ... einv_name), and the older "gridSize"
+ *                   [w, h], "stackSize" NUMBER, "grids" [[cols, rows], ...], "slots" NUMBER
+ *                   <HASHMAP>
  *   "name"        - displayName, or the class when it has none <STRING>
  *   "short"       - displayNameShort, or else the name <STRING>
  *   "description" - descriptionShort, may contain <br/>, "" if none <STRING>
@@ -190,7 +195,7 @@ if (_lineage isEqualTo []) then {
     _lineage = [_key];
 };
 
-// What the item's own mod says about its grid - only what it really sets, and only what can be used:
+// What the item's own mod says - only what it really sets, and only what can be used. The older keys:
 // a size needs two numbers of at least one cell, compartments two numbers each.
 private _mod = createHashMap;
 private _gridSize = getArray (_config >> QGVARMAIN(gridSize));
@@ -213,6 +218,30 @@ private _slots = floor (getNumber (_config >> QGVARMAIN(slots)));
 
 if (_slots > 0) then {
     _mod set ["slots", _slots];
+};
+
+// The keys written the way the rules write the same value. They sit next to the older ones, which
+// fnc_resolve asks only for what these leave open. Config does not change while the game runs, so a
+// value that cannot be read is named once here, not on every look.
+private _found = createHashMap;
+
+{
+    private _entry = _config >> _x;
+
+    if (isText _entry) then {_found set [_x, getText _entry]};
+    if (isNumber _entry) then {_found set [_x, getNumber _entry]};
+} forEach CONFIG_KEYS;
+
+if (count _found > 0) then {
+    ([_found] call FUNC(readConfigKeys)) params ["", "_values", "_notes"];
+
+    {
+        WARNING_2("Config of %1: %2",_class,_x);
+    } forEach _notes;
+
+    {
+        _mod set [_x, _y];
+    } forEach _values;
 };
 
 private _name = getText (_config >> "displayName");

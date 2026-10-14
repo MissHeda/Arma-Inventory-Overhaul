@@ -2,12 +2,16 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Step 3, Containers: the cells of uniforms, vests, backpacks, crates and vehicles, class by class.
- *   - Left: every container of the game and its mods, to search by class or name (fnc_drawClassList over
- *     the class index, fnc_buildIndex), each with what the draft makes of its grid and where from.
+ * Step 3, Containers: the cells of uniforms, vests, backpacks, crates and vehicles, class by class - or a
+ * whole family at once.
+ *   - Left: every container of the game and its mods, to search by class or name with wildcards
+ *     (B_Bergen*, *Carryall*) (fnc_drawClassList over the class index, fnc_buildIndex), each with what the
+ *     draft makes of its grid and where from - or, in the tree view, one class and every class built on it
+ *     (fnc_drawTree).
  *   - Right: the one picked, its compartments to paint - a colour per compartment - or to build block by
  *     block, or the same as another class (fnc_drawCellEditor). Apply writes one rule for exactly that
- *     class into the draft; Save at Review puts it to use.
+ *     class into the draft - or, for a class picked in the tree, one rule for it and everything built on
+ *     it (class=X+); Save at Review puts it to use. Export and Import work with config lines.
  * Ctrl+F puts the cursor in the search.
  *
  * Opened for a class (fnc_open with a class, GVAR(focus)) that is a container, it starts with that one
@@ -51,6 +55,7 @@ if (GVAR(focus) isNotEqualTo "") then {
 
     if ((_facts get "kind") in CONTAINER_KINDS) then {
         GVAR(selection) set ["containers", _facts get "class"];
+        GVAR(editScope) set ["containers", "class"];
         GVAR(listState) set ["containers", [_facts get "class", "all", false, 0]];
         GVAR(focus) = "";
     };

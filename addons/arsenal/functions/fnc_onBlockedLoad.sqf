@@ -117,5 +117,5 @@ _buttonTheme set ["buttonText", _theme getOrDefault ["accent", [1, 1, 1, 1]]];
 
 [
     _display, _group, [_cardX + (_cardW - _buttonW) / 2, _cardY + _cardH - UNIT * 2.4, _buttonW, UNIT * 1.5], "ok", LLSTRING(Blocked_OK), "", _buttonTheme,
-    {(findDisplay IDD_ARSENAL_BLOCKED) closeDisplay 2}
+    {(findDisplay IDD_ARSENAL_BLOCKED) closeDisplay 2}, false, -1, true
 ] call EFUNC(gui,uiButton);

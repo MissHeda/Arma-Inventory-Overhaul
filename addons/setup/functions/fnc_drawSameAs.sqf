@@ -4,9 +4,9 @@
  * Author: Miss Heda
  * The popover of "Same as another class..." in the Containers step (fnc_drawCellEditor opens it with
  * fnc_popover): which class the one in the editor takes its cells from, in two steps.
- *   - Pick: a search field over the class index (fnc_buildIndex), by class and by name, every container
- *     but the one being edited, eight to a page with the page turned by the arrows; a click on one picks
- *     it. Cancel closes it.
+ *   - Pick: a search field over the class index (fnc_buildIndex), by class and by name, wildcards too
+ *     (fnc_searchFilter), every container but the one being edited, eight to a page with the page turned
+ *     by the arrows; a click on one picks it. Cancel closes it.
  *   - Then two ways, each said in a line: "Follow X" writes like=X (and takes the class's own grid away,
  *     which would win over it) - the class keeps X's cells, also when X changes, and the editor shows
  *     them without letting them be drawn on. "Copy cells of X" lays X's compartments into the editor as
@@ -200,12 +200,12 @@ if !(call FUNC(buildIndex)) exitWith {
 
 // ----- What is found, a page of eight -----
 
-private _needle = toLower (trim (GVAR(sameAs) getOrDefault ["text", ""]));
+private _filter = [GVAR(sameAs) getOrDefault ["text", ""]] call FUNC(searchFilter);
 private _self = toLowerANSI _target;
 private _matches = ((uiNamespace getVariable QGVAR(index)) get "rows") select {
     (_x select ROW_KIND) in CONTAINER_KINDS
     && {(_x select ROW_LC) isNotEqualTo _self}
-    && {_needle isEqualTo "" || {((_x select ROW_SEARCH) find _needle) >= 0}}
+    && {[_filter, _x select ROW_SEARCH, _x select ROW_LC, _x select ROW_NAME] call FUNC(searchHit)}
 };
 
 private _perPage = 8;

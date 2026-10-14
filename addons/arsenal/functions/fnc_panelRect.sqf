@@ -46,7 +46,7 @@ if (!isNull _sort && {ctrlShown _sort}) then {
 // wider (einv_gui_fnc_drawColumn), so the grid gets its full width and no box beside it.
 (call EFUNC(gui,getCell)) params ["_cellW"];
 
-private _padX = SQUARE(UNIT * 0.4);
+private _padX = SQUARE(UNIT * PANEL_PAD);
 private _width = STORAGE_COLS * _cellW + ((_padX * 2) max (_padX + SCROLL_W + pixelW * 4)) + pixelW * 2;
 
 _width = _width min (safezoneW * PANEL_MAX_SHARE);

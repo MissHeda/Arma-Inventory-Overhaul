@@ -19,6 +19,13 @@
  *     order, blocks are laid out as the inventory flows them and coloured (fnc_canvasFromBlocks).
  *   - Beside it how the inventory will show them (fnc_drawPreview), and under it the total of cells and
  *     compartments against the limits (fnc_cellChanged).
+ *   - In the corner Export and Import (fnc_editorTools): the config lines of the class, and a pasted
+ *     setup of them.
+ *   - Picked in the tree view (fnc_editScope), the edit is for the class and every class built on it: a
+ *     line says so, with how many, and Apply, Back to the preset and Export work on the whole tree - one
+ *     rule class=X+ with the cells instead of one per class, and a class with a rule of its own further
+ *     down keeps it. "Same as another class" is for one class and is not offered then. A chip returns to the
+ *     class alone.
  *   - Apply, once something changed since the cells were loaded (an untouched class is never rewritten:
  *     a mask like x-x loads as one block and would be written back as two): class=X > grid=..., painted
  *     as one canvas with a letter per compartment in reading order of its first cell
@@ -119,7 +126,12 @@ if !(_kind in CONTAINER_KINDS) exitWith {
 _class = _info get "class";
 
 private _lc = toLowerANSI _class;
-private _own = ((call FUNC(ownClassRules)) select 0) getOrDefault [_lc, createHashMap];
+([] call FUNC(ownClassRules)) params ["_exactRules", "", "_treeRules"];
+private _own = _exactRules getOrDefault [_lc, createHashMap];
+
+// For the class alone, or for it and everything built on it (the tree view picked it).
+(["containers", _class] call FUNC(editScope)) params ["_tree", "_below"];
+
 private _like = _own getOrDefault ["like", ""];
 private _spec = _info getOrDefault ["grid", ["auto"]];
 private _src = (_info getOrDefault ["src", createHashMap]) getOrDefault ["grid", "builtin"];
@@ -201,17 +213,41 @@ private _about = format ["%1 · %2 · %3", _class, localize format ["STR_einv_se
     [_info getOrDefault ["name", _class], _textW, _fontBold, TEXT_HEAD] call EFUNC(gui,fitText), TEXT_HEAD, _colorText, _fontBold, 0
 ] call EFUNC(gui,uiLabel);
 
+// Export and Import in the corner, beside the lines under the name.
+private _toolsW = [_display, _box, [_innerX + _innerW, _cursorY + UNIT * 1.05, UNIT * 1], _theme, "containers", _class, _tree] call FUNC(editorTools);
+private _aboutW = _textW - _toolsW - SQUARE(UNIT * 0.3);
+
 [
-    _display, _box, [_textX, _cursorY + UNIT * 0.85, _textW, UNIT * 0.65],
-    [_about, _textW, _font, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL, _muted, _font, 0
+    _display, _box, [_textX, _cursorY + UNIT * 0.85, _aboutW, UNIT * 0.65],
+    [_about, _aboutW, _font, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL, _muted, _font, 0
 ] call EFUNC(gui,uiLabel);
 
 [
-    _display, _box, [_textX, _cursorY + UNIT * 1.45, _textW, UNIT * 0.65],
+    _display, _box, [_textX, _cursorY + UNIT * 1.45, _aboutW, UNIT * 0.65],
     format [LLSTRING(Cont_Load), round _maxLoad, (_maxLoad * MASS_TO_KG) toFixed 1], TEXT_SMALL, _colorText2, _font, 0
 ] call EFUNC(gui,uiLabel);
 
 _cursorY = _cursorY + _picH + UNIT * 0.3;
+
+// ----- For the tree: one rule for the class and everything built on it -----
+
+if (_tree) then {
+    private _chipText = LLSTRING(Scope_OnlyThis);
+    private _chipH = UNIT * 0.95;
+    private _chipW = SQUARE(_chipH * 0.9) + (_chipText getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK;
+
+    [_display, _box, [_innerX + _innerW - _chipW, _cursorY, _chipW, _chipH], _chipText, false, _theme, {
+        // The edit goes back to the class alone; what was drawn stays.
+        GVAR(editScope) set ["containers", "class"];
+
+        [] call FUNC(drawCellEditor);
+    }] call FUNC(uiChip);
+
+    _cursorY = _cursorY + (([
+        _display, _box, [_innerX, _cursorY, _innerW - _chipW - SQUARE(UNIT * 0.4)], format [LLSTRING(Scope_TreeNote), _info getOrDefault ["name", _class], _below, _class],
+        TEXT_SMALL, _accent, _font
+    ] call FUNC(uiText)) max _chipH) + UNIT * 0.3;
+};
 
 // ----- What the draft makes of it now -----
 
@@ -476,7 +512,7 @@ if (_editable) then {
     private _buttonW = ACTION_W(LLSTRING(Cont_Apply),_buttonH,true,_font);
 
     [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], LLSTRING(Cont_Apply), UI_TEX(icon_check_ca), _theme, {
-        params ["_class"];
+        params ["_class", "_tree", "_below"];
 
         private _lc = toLowerANSI _class;
         private _work = GVAR(cellWork) getOrDefault [_lc, createHashMap];
@@ -508,12 +544,12 @@ if (_editable) then {
 
         GVAR(cellWork) deleteAt _lc;
 
-        [format [LLSTRING(Hint_CellsApplied), _class], "text2"] call FUNC(setHint);
+        [[format [LLSTRING(Hint_CellsApplied), _class], format [LLSTRING(Hint_TreeApplied), _class, _below]] select _tree, "text2"] call FUNC(setHint);
         [
-            _class, createHashMapFromArray [["grid", [["blocks", _blocks]] call EFUNC(items,formatGrid)]], [[], ["like"]] select (_work getOrDefault ["unlink", false])
+            _class, createHashMapFromArray [["grid", [["blocks", _blocks]] call EFUNC(items,formatGrid)]], [[], ["like"]] select (_work getOrDefault ["unlink", false]), _tree
         ] call FUNC(upsertRule);
     // Greyed while nothing is painted: Apply would only refuse (Hint_NoCells), and the tooltip says what it is for.
-    }, [_class], _dirty && {_blocks isNotEqualTo []}, "accent", LLSTRING(Cont_ApplyTip)] call FUNC(uiAction);
+    }, [_class, _tree, _below], _dirty && {_blocks isNotEqualTo []}, "accent", [LLSTRING(Cont_ApplyTip), LLSTRING(Cont_ApplyTipTree)] select _tree] call FUNC(uiAction);
 
     _buttonX = _buttonX + _buttonW + _gap;
 };
@@ -532,48 +568,60 @@ if (_dirty) then {
     _buttonX = _buttonX + _buttonW + _gap;
 };
 
-if ("grid" in _own || {"like" in _own}) then {
+// Something of its own to take away: its own rule, or - for the tree - the tree's.
+private _hasOwn = "grid" in _own || {"like" in _own};
+
+if (_tree) then {
+    private _treeOwn = _treeRules getOrDefault [_lc, createHashMap];
+
+    _hasOwn = _hasOwn || {"grid" in _treeOwn} || {"like" in _treeOwn};
+};
+
+if (_hasOwn) then {
     private _buttonW = ACTION_W(LLSTRING(Groups_Reset),_buttonH,true,_font);
 
     [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], LLSTRING(Groups_Reset), UI_TEX(icon_reset_ca), _theme, {
-        params ["_class"];
+        params ["_class", "_tree", "_below"];
 
         GVAR(cellWork) deleteAt (toLowerANSI _class);
 
-        [format [LLSTRING(Hint_Reset), _class], "text2"] call FUNC(setHint);
-        [_class, createHashMap, ["grid", "like"]] call FUNC(upsertRule);
-    }, [_class], true, "ghost", LLSTRING(Cont_ResetTip)] call FUNC(uiAction);
+        [[format [LLSTRING(Hint_Reset), _class], format [LLSTRING(Hint_TreeReset), _class, _below]] select _tree, "text2"] call FUNC(setHint);
+        [_class, createHashMap, ["grid", "like"], _tree] call FUNC(upsertRule);
+    }, [_class, _tree, _below], true, "ghost", [LLSTRING(Cont_ResetTip), LLSTRING(Cont_ResetTipTree)] select _tree] call FUNC(uiAction);
 
     _buttonX = _buttonX + _buttonW + _gap;
 };
 
-// Same as another class: a popover picks it (fnc_drawSameAs). The long label where it fits, else the
-// short one.
-private _sameText = LLSTRING(Cont_SameAs);
-private _sameW = ACTION_W(_sameText,_buttonH,true,_font);
+// Same as another class: a popover picks it (fnc_drawSameAs). For one class: a tree has no single class to
+// follow or copy for.
+if (!_tree) then {
+    // The long label where it fits, else the short one.
+    private _sameText = LLSTRING(Cont_SameAs);
+    private _sameW = ACTION_W(_sameText,_buttonH,true,_font);
 
-if (_sameW > _innerX + _innerW - _buttonX) then {
-    _sameText = LLSTRING(Cont_SameAsShort);
-    _sameW = ACTION_W(_sameText,_buttonH,true,_font);
+    if (_sameW > _innerX + _innerW - _buttonX) then {
+        _sameText = LLSTRING(Cont_SameAsShort);
+        _sameW = ACTION_W(_sameText,_buttonH,true,_font);
+    };
+
+    private _same = [
+        _display, _box, [_innerX + _innerW - _sameW, _buttonsY, _sameW, _buttonH], _sameText, UI_TEX(icon_swap_ca), _theme, {}, [], true, "", LLSTRING(Cont_SameAsTip)
+    ] call FUNC(uiAction);
+    private _sameHit = _same select (count _same - 1);
+
+    _sameHit setVariable [QGVAR(action), [{
+        params ["_hit", "_class"];
+
+        GVAR(sameAs) = createHashMapFromArray [["target", _class], ["text", ""], ["page", 0], ["picked", ""]];
+
+        [
+            uiNamespace getVariable [QGVAR(display), displayNull], [_hit] call FUNC(screenRect), [SQUARE(UNIT * 19), UNIT * 13.4], LLSTRING(Same_Title), {
+                params ["_display", "_inner", "_theme"];
+
+                uiNamespace setVariable [QGVAR(sameAsArgs), [_display, _inner, _theme]];
+
+                ["all"] call FUNC(drawSameAs);
+            }
+        ] call FUNC(popover);
+    }, [_sameHit, _class]]];
 };
-
-private _same = [
-    _display, _box, [_innerX + _innerW - _sameW, _buttonsY, _sameW, _buttonH], _sameText, UI_TEX(icon_swap_ca), _theme, {}, [], true, "", LLSTRING(Cont_SameAsTip)
-] call FUNC(uiAction);
-private _sameHit = _same select (count _same - 1);
-
-_sameHit setVariable [QGVAR(action), [{
-    params ["_hit", "_class"];
-
-    GVAR(sameAs) = createHashMapFromArray [["target", _class], ["text", ""], ["page", 0], ["picked", ""]];
-
-    [
-        uiNamespace getVariable [QGVAR(display), displayNull], [_hit] call FUNC(screenRect), [SQUARE(UNIT * 19), UNIT * 13.4], LLSTRING(Same_Title), {
-            params ["_display", "_inner", "_theme"];
-
-            uiNamespace setVariable [QGVAR(sameAsArgs), [_display, _inner, _theme]];
-
-            ["all"] call FUNC(drawSameAs);
-        }
-    ] call FUNC(popover);
-}, [_sameHit, _class]]];

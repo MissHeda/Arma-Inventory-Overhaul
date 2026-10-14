@@ -62,7 +62,9 @@ CBA setting "Inventory rules" (`einv_items_rules`), the same for everyone. The s
 (ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory): you draw the cells of an item
 (an L, a T), paint the cells of a uniform, vest or backpack in colours - touching cells of one colour are one
 compartment, and it looks in the inventory exactly as painted -, build it block by block in Blocks mode, or
-make a class the same as another one (Same as: follow it with `like=` or copy its cells); its start page shows
+make a class the same as another one (Same as: follow it with `like=` or copy its cells), set an item's weight and name next to its
+size, change a whole family at once - search with wildcards (`B_Bergen*`), switch the list to Tree, pick a class and everything built on
+it is edited as one rule, `class=B_Carryall_Base+` - and copy a class's config lines with Export, or paste some in with Import; its start page shows
 what you changed. It is plain text all the same.
 It builds on a preset: Default (relaxed: realistic-ish sizes, containers a fifth roomier than their load),
 Realism (realistic sizes: longer rifles, magazine-rig vests, a fixed grid per backpack size, stacks as in
@@ -83,7 +85,21 @@ weighs). Grids are ten cells wide.
 - **One crate, vehicle or a unit's uniform, vest or backpack:** give the object its own grid, which wins
   over every rule - `_crate setVariable ["einv_grid", "6x4+2x3", true];` (also `"24"`, `"rig:16"`, `"auto"`).
 - **Mods:** ship presets of your own as classes of `CfgEinvRulesets` (see `addons/items/CfgEinvRulesets.hpp`),
-  or set `einv_gridSize[]`, `einv_stackSize`, `einv_grids[]` or `einv_slots` on your items.
+  or predefine your items in their own config class, in exactly the language of the rules text - a custom vest
+  writes how its compartments are:
+  ```cpp
+  class CfgWeapons { class My_Vest { einv_grid = "1x3+5x7+1x3"; }; };       // grid=, also "xxxx/x--x+2x3", a canvas, "rig:16", "24"
+  class CfgVehicles { class My_Pack { einv_grid = "abbbbbc/abbbbbc/-bbbbb-"; }; };
+  class CfgWeapons { class My_Kit { einv_size = "2x1"; einv_stack = 1; einv_weight = 0.5; einv_name = "Short name"; }; };
+  ```
+  `einv_size` is `size=` (`"2x1"`, a mask like `"xx/x-"`, `"mass"`), `einv_stack` is `stack=` (a number), `einv_grid` is
+  `grid=` (containers: uniform, vest, backpack, crate, vehicle), `einv_weight` is `weight=` in **kilograms** (not config mass)
+  and `einv_name` is `name=` as plain text (a space is a space). A subclass inherits what its parent sets, as everything in
+  config does; `einv_grid = "";` takes it back. These sit below the server's rules text - a rule for the class still wins - and
+  above the preset. Values are cut to the same limits as in the rules, and a mistake is named in the RPT. The older
+  `einv_gridSize[]`, `einv_stackSize`, `einv_grids[]` and `einv_slots` still work (the new keys win). To get the lines for a
+  class from what it is now, call `["V_PlateCarrier1_rgr"] call einv_items_fnc_configEntry`; `einv_items_fnc_parseConfigEntry`
+  reads such lines back.
 
 The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) ("Rules engine").
 

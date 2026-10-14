@@ -11,6 +11,8 @@
  *           backpack, a radio pack - which only an own grid gives cells
  *   size  - "2x3" "preset"
  *   stack - "5 per tile" "your rule"
+ * Where it comes from is "your rule" for a rule of the draft that is for the class itself, "inherited from X"
+ * for a tree rule (class=X+) of a class above it, "same as Y" for like=Y, "preset", "its mod" and so on.
  * The lists and editors show the two as one line, "6x4 (your rule)" (STR_einv_setup_Answer_Line).
  *
  * Compartments that follow each other with the same size and holes are counted rather than listed again.
@@ -122,11 +124,59 @@ private _words = switch (_field) do {
 private _src = (_info getOrDefault ["src", createHashMap]) getOrDefault [_key, "builtin"];
 private _like = _own getOrDefault ["like", ""];
 
+// A rule of the draft that is for a class this one is built on (class=X+, X above it): the class it is for,
+// "" when the rule is for this class itself or for anything else (a group, a kind, a condition more).
+private _fnc_inheritedFrom = {
+    params ["_tag"];
+
+    private _rule = (GVAR(draft) getOrDefault ["rules", []]) param [parseNumber (_tag select [4]), []];
+    private _conds = _rule param [0, []];
+
+    if (count _conds != 1) exitWith {""};
+
+    (_conds select 0) params ["_negated", "_ruleKey", "_op", "_names"];
+
+    if (_negated || {_ruleKey isNotEqualTo "class"} || {_op isNotEqualTo "="}) exitWith {""};
+
+    // The lineage runs from the class itself up: the nearest class the rule names wins.
+    private _lineage = _info getOrDefault ["lineage", []];
+    private _found = "";
+    private _depth = 1000000;
+
+    {
+        private _name = _x;
+
+        if (count _name > 1 && {(_name select [count _name - 1]) isEqualTo "+"}) then {
+            private _at = _lineage find toLowerANSI (_name select [0, count _name - 1]);
+
+            if (_at >= 0 && {_at < _depth}) then {
+                _depth = _at;
+                _found = _name select [0, count _name - 1];
+            };
+        } else {
+            // Named itself: its own rule.
+            if (toLowerANSI _name isEqualTo (_lineage param [0, ""])) then {
+                _depth = 0;
+                _found = "";
+            };
+        };
+    } forEach _names;
+
+    // At 0 it is the class itself (class=X+ for X).
+    [_found, ""] select (_depth <= 0)
+};
+
 private _from = switch (true) do {
     case ((_src select [0, 4]) isEqualTo "own:"): {
-        // The class's own rule names another class and sets nothing of this field itself: that class
-        // gave it.
-        [LLSTRING(Answer_Own), format [LLSTRING(Answer_Like), _like]] select (_like isNotEqualTo "" && {!(_key in _own)})
+        private _inherited = [_src] call _fnc_inheritedFrom;
+
+        if (_inherited isNotEqualTo "") then {
+            format [LLSTRING(Answer_Inherited), _inherited]
+        } else {
+            // The class's own rule names another class and sets nothing of this field itself: that class
+            // gave it.
+            [LLSTRING(Answer_Own), format [LLSTRING(Answer_Like), _like]] select (_like isNotEqualTo "" && {!(_key in _own)})
+        }
     };
     case ((_src select [0, 7]) isEqualTo "legacy:"): {LLSTRING(Answer_Legacy)};
     case ((_src select [0, 7]) isEqualTo "preset:"): {LLSTRING(Answer_Preset)};
