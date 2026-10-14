@@ -1,4 +1,5 @@
 #include "..\script_component.hpp"
+#include "..\defines.hpp"
 /*
  * Author: Miss Heda
  * The compartments a canvas (fnc_uiCanvas) holds. On a painted one (the Containers step) cells of one
@@ -16,14 +17,16 @@
  * Two or more come back where they lie on the canvas - the owner draws a container the way it is built
  * and the inventory shows it so, cell for cell (einv_items_fnc_formatGrid writes them as one canvas,
  * aab/acc): a pos each, from the top left corner of the box around them all. One alone needs no place
- * and has none, for an item's shape as for a container of one compartment.
+ * and has none, for an item's shape as for a container of one compartment. So have painted ones that lie
+ * exactly where the inventory would flow them (fnc_canvasFromBlocks, only the places): they are the
+ * Blocks way's compartments, drawn and written the same.
  *
  * Arguments:
  * 0: Canvas, see fnc_canvasFromBlocks <HASHMAP>
  *
  * Return Value:
  * Compartments [[cols, rows, holes, pos], ...], holes the indices row * cols + col, ascending, [] for a
- * full rectangle; pos [x, y] on the canvas, [] for a single compartment; [] for a canvas without a
+ * full rectangle; pos [x, y] on the canvas, [] for a single or a flowed one; [] for a canvas without a
  * cell <ARRAY>
  *
  * Example:
@@ -126,5 +129,17 @@ private _minY = selectMin (_blocks apply {(_x select 3) select 1});
 
     _x set [3, [_posX - _minX, _posY - _minY]];
 } forEach _blocks;
+
+// Painted compartments that lie exactly where the inventory would flow them are the same configuration as
+// the Blocks way's: they come back with no pos, so Apply writes them joined by + and the preview draws them
+// as it draws those blocks - whichever way they were drawn, the result is one. Only a layout the flow
+// cannot make keeps its places.
+if ("paint" in _canvas) then {
+    private _flowed = [_blocks apply {[_x select 0, _x select 1, _x select 2]}, 1, CANVAS_ROWS_LOADED, _cols, false, true] call FUNC(canvasFromBlocks);
+
+    if (_flowed isEqualTo (_blocks apply {_x select 3})) then {
+        _blocks = _blocks apply {[_x select 0, _x select 1, _x select 2]};
+    };
+};
 
 _blocks

@@ -11,6 +11,9 @@
  *     separate blocks the inventory shows.
  *   - An item's tile on a piece of grid: its surface on its cells only (einv_gui_fnc_uiShape), its
  *     picture over its box, as a tile is drawn.
+ * The one routine for Paint and Blocks alike: the same cell, gap and flow for the same compartments, so
+ * the two ways give the same picture for the same configuration (fnc_canvasBlocks hands over a painted
+ * layout that lies as the flow would put it without places, the Blocks way never has any).
  * Drawn again on its own after a click on the canvas: it replaces the one drawn before
  * (uiNamespace QGVAR(preview)).
  *

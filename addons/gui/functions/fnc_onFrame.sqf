@@ -118,6 +118,12 @@ private _mouse = getMousePosition;
 private _now = diag_tickTime;
 private _check = _now >= GVAR(nextCheck);
 
+// A vanilla inventory that came up over this window - another mod's doing - is closed again. The display's
+// load event does that already; this is for one it missed.
+if (_check) then {
+    [] call FUNC(guardVanilla);
+};
+
 // The vanilla inventory closes when its unit dies or passes out, and when the player stops being it.
 // A living person walks off by themselves, unlike a crate: the window goes when they are gone, out of
 // reach, in a vehicle, taken by someone else (ACE dragging, carrying, escorting), when their backpack is

@@ -42,6 +42,11 @@ if (
 
 [] call FUNC(poseEnd);
 
+// Better Inventory's stack move may work again (fnc_open).
+if (!isNil "bettInv_stackMove") then {
+    bettInv_stackMove = 0;
+};
+
 GVAR(openedOn) = objNull;
 GVAR(openParent) = objNull;
 GVAR(openPos) = [];

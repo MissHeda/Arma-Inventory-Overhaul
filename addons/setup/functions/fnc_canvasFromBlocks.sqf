@@ -25,9 +25,11 @@
  * 2: At most this many rows - what lies below is cut away <NUMBER> (default: CANVAS_ROWS_LOADED)
  * 3: Columns: STORAGE_COLS for a container, SHAPE_MAX for an item's board <NUMBER> (default: STORAGE_COLS)
  * 4: Painted: colours instead of cells <BOOL> (default: false)
+ * 5: Only where each compartment goes, no canvas <BOOL> (default: false)
  *
  * Return Value:
- * Canvas <HASHMAP>
+ * Canvas <HASHMAP>, or with 5 set the places [[col, row], ...] - [] for a compartment with no cells -, as
+ * far as the flow puts them <ARRAY>
  *   "cols"  - its columns, as given <NUMBER>
  *   "rows"  - its rows <NUMBER>
  *   "cells" - not painted: per place (index row * cols + col) whether it is a cell <ARRAY of BOOL>
@@ -40,7 +42,8 @@
  */
 
 params [
-    ["_blocks", [], [[]]], ["_minRows", 1, [0]], ["_maxRows", CANVAS_ROWS_LOADED, [0]], ["_cols", STORAGE_COLS, [0]], ["_painted", false, [false]]
+    ["_blocks", [], [[]]], ["_minRows", 1, [0]], ["_maxRows", CANVAS_ROWS_LOADED, [0]], ["_cols", STORAGE_COLS, [0]], ["_painted", false, [false]],
+    ["_placesOnly", false, [false]]
 ];
 
 // Where each compartment goes, in cells. The gap the inventory leaves after one only decides where a
@@ -113,6 +116,9 @@ while {_index < count _blocks} do {
         };
     };
 };
+
+// fnc_canvasBlocks asks only where the flow puts them, to tell a canvas that lies as it would flow.
+if (_placesOnly) exitWith {_places};
 
 private _rows = (((_lineY + _lineH) max _minRows) min _maxRows) max 1;
 private _count = _cols * _rows;

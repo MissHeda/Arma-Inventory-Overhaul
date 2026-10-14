@@ -629,7 +629,12 @@ are public).
 
 - **Opening.** The unit's `InventoryOpened` handler (`fnc_onInventoryOpened`, put on whichever unit the player is by
   `fnc_initUnit` from the CBA `unit` event) answers true, which keeps the vanilla display away, and the window opens a frame later
-  (`fnc_open`). With `einv_gui_replaceVanilla` off the vanilla inventory opens - in multiplayer only on the player's own gear:
+  (`fnc_open`). Every true starts a 1.5 s grace time (`GVAR(blockedUntil)`, `BLOCK_GRACE`); a vanilla inventory that still loads
+  during it or while the window is open - Better Inventory patches `RscDisplayInventory` and runs its own XEH `InventoryOpened`
+  handler, any mod may `createDisplay` it - is closed by `fnc_guardVanilla` (an `Extended_DisplayLoad_EventHandlers` entry on
+  `RscDisplayInventory`, and a check each `CHECK_INTERVAL` in `fnc_onFrame`). A false answer ends the grace time, so
+  `fnc_openVanilla` and the switched-off setting are never closed. Better Inventory's put/take stack move is held off with its
+  `bettInv_stackMove` flag while the window is open. With `einv_gui_replaceVanilla` off the vanilla inventory opens - in multiplayer only on the player's own gear:
   whatever other players can reach (crate, vehicle, body, person, a pile with something in it) opens here regardless, since the
   engine's inventory is not serialised with the authorities and two players could take the same item.
 - **Attaching.** `fnc_attach [display, unit, container, secondary, hooks = createHashMap, driver = "pfh"]` -> BOOL makes any
@@ -1182,7 +1187,10 @@ rules make of a class is not in it; it is asked (`getInfo` with the draft) only 
   out by load or by a pattern is shown as the compartments it gives; editing it writes those cells instead.
 - **Preview** (`fnc_drawPreview`): the window's own `flowCompartments` with the blocks Apply would write, so painted
   compartments sit 1:1 where they were painted, their cells drawn in by the same insets, and blocks flow; an item's tile on a
-  piece of grid.
+  piece of grid. One routine for Paint and Blocks: an untouched class previews its own `classBlocks` (places included) in both
+  ways, an edited one what Apply would write. `fnc_canvasBlocks` drops the `pos` of painted compartments that lie exactly where
+  `fnc_canvasFromBlocks` (places only, 6th argument) would flow them, so they read, preview and are written as the Blocks way's
+  `6x4+...` blocks; only a layout the flow cannot make stays a canvas.
 
 ## 7. Other addons
 

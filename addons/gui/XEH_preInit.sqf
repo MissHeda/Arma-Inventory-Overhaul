@@ -21,6 +21,11 @@ GVAR(personMode) = "";
 // which asks the engine for it.
 GVAR(bypassUntil) = -1;
 
+// Until this time the engine was told the vanilla inventory stays away (fnc_initUnit), and a vanilla
+// inventory that still loads is closed again (fnc_guardVanilla) - another mod's patch of it, or a
+// handler of its own, could bring it up behind the answer.
+GVAR(blockedUntil) = -1;
+
 // What runs the open window's frame (fnc_onFrame): [driver, id] - "pfh", a CBA per-frame handler, or
 // "draw3d", a Draw3D mission event handler (fnc_startFrame, fnc_stopFrame) - and ["", -1] while none runs.
 // When it next checks whether the window should still be open, and when it next compares the contents

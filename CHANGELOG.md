@@ -36,7 +36,9 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
-- A backpack dropped to the ground no longer vanishes: the pile is a `GroundWeaponHolder_Scripted`, which the engine does not delete for holding only a backpack, and the mod deletes it itself once it is emptied; two RPT lines per drop show where the backpack went.
+- Better Inventory (workshop 2791403093) no longer pulls its vanilla display in over the window: a vanilla inventory that loads while the window is open, or right after it blocked the vanilla one, is closed again (display load event, plus a check in the frame), and its Shift/Ctrl stack move, which needs state only its own display sets up, stays off while the window is open. With the window switched off nothing is touched.
+- A backpack dropped to the ground no longer vanishes. The cause, found in game: `removeBackpack` leaves the backpack just taken off in a plain holder of the engine's own until the end of the frame and deletes both then - the pile search took that holder for a pile with something in it and put the new backpack into it. A backpack now joins only a pile of ours (`GroundWeaponHolder_Scripted`) or a fresh one, the backpack taken off is marked so its holder is never a target, and the RPT shows which pile a backpack goes onto and when a pile of ours is deleted.
+- Setup wizard, Containers: Paint and Blocks preview the same configuration identically and as the inventory shows it - a painted layout that matches the flow is handed over without positions - and the Paint canvas cells are the same size as the Blocks cells.
 - Taking a backpack off no longer loses it: the slot is read again a frame later when the engine is late, an arrived backpack is also recognised by the pile's count, and a failed drop puts the backpack back on.
 - `hasSpace` counts partial stacks, and the arsenal lights its rows by the same answer.
 - A press on the blank part of ACE's list no longer drags the old selection.

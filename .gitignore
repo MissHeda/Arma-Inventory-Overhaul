@@ -10,3 +10,5 @@ keys/*
 hemtt.exe
 ## Python
 __pycache__/
+## Eden backups of the test missions
+.hemtt/missions/~*/

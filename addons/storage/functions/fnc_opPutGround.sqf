@@ -50,11 +50,15 @@ private _txId = _context getOrDefault ["txId", ""];
 
 // The piles it may join are the server's own; a client cut off from the hub makes one of its own.
 private _fresh = isMultiplayer && {!isServer};
-private _pile = [_where, _requester, _fresh] call FUNC(getGroundHolder);
+
+// A backpack joins only a pile of ours: the plain holder the engine keeps a backpack just taken off in
+// looks like a pile with something in it and is gone at the end of the frame (fnc_getGroundHolder).
+private _ownOnly = (_payload param [0, ""]) isEqualTo "backpack";
+private _pile = [_where, _requester, _fresh, _ownOnly] call FUNC(getGroundHolder);
 
 // Not even a position to put it at (a request made with no unit): where the requester stands now.
 if (isNull _pile && {!isNull _requester}) then {
-    _pile = [_requester, _requester, _fresh] call FUNC(getGroundHolder);
+    _pile = [_requester, _requester, _fresh, _ownOnly] call FUNC(getGroundHolder);
 };
 
 if (isNull _pile) exitWith {
@@ -78,6 +82,16 @@ if (_debug) then {
 // A backpack onto a pile that holds nothing yet: the pile it lands on is looked at again a frame later
 // (below).
 private _alone = (_payload param [0, ""]) isEqualTo "backpack" && {([_pile] call FUNC(getContents)) isEqualTo []};
+
+if ((_payload param [0, ""]) isEqualTo "backpack") then {
+    private _bagClass = _payload param [1, ""];
+
+    INFO_4("Backpack %1 goes onto pile %2 (%3) at frame %4",_bagClass,netId _pile,typeOf _pile,diag_frameNo);
+    private _items = (getItemCargo _pile) param [0, []];
+    private _held = count ([_pile] call FUNC(getContents));
+
+    INFO_3("  ... pile holds backpacks %1, items %2, contents %3",everyBackpack _pile,_items,_held);
+};
 
 private _piles = [_pile];
 private _rest = [_pile, _payload] call FUNC(addPayload);

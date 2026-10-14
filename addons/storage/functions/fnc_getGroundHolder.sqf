@@ -20,6 +20,10 @@
  *    OBJECT>
  * 1: What the line of sight ignores - the requester <OBJECT> (default: objNull - the unit given as 0)
  * 2: A fresh pile, whatever lies there <BOOL> (default: false)
+ * 3: Only a pile of ours may be joined - a GroundWeaponHolder_Scripted -, else a fresh one <BOOL>
+ *    (default: false). For a backpack: the engine keeps a backpack just taken off in a plain holder of
+ *    its own for the rest of the frame and deletes both at its end - joined, a dropped backpack went
+ *    with them (0.4.1).
  *
  * Return Value:
  * Weapon holder, objNull when there is no point to put it at <OBJECT>
@@ -30,7 +34,7 @@
  * Public: No
  */
 
-params [["_where", [], [[], objNull]], ["_ignore", objNull, [objNull]], ["_fresh", false, [false]]];
+params [["_where", [], [[], objNull]], ["_ignore", objNull, [objNull]], ["_fresh", false, [false]], ["_ownOnly", false, [false]]];
 
 // Older callers hand a unit: where it stands now.
 if (_where isEqualType objNull) then {
@@ -69,6 +73,8 @@ if (!_fresh) then {
         local _x
         && {!isObjectHidden _x}
         && {isNull attachedTo _x}
+        && {!_ownOnly || {typeOf _x == "GroundWeaponHolder_Scripted"}}
+        && {(everyBackpack _x) findIf {_x getVariable [QGVAR(takenOff), false]} < 0}
         && {([_x] call FUNC(getContents)) isNotEqualTo []}
         && {[_eyes, _point, _x, GROUND_RANGE, _ignore] call FUNC(isNear)}
     }) param [0, objNull];
@@ -82,5 +88,16 @@ if (!isNull _pile) exitWith {_pile};
 // (fnc_pruneScriptedPile).
 _pile = createVehicle ["GroundWeaponHolder_Scripted", [0, 0, 0], [], 0, "CAN_COLLIDE"];
 _pile setPosASL _point;
+
+// Written to the RPT when the engine or anyone deletes it (a dropped backpack went with its pile, 0.4.0):
+// the frame, what lay in it then, and whether a transaction of ours was running.
+_pile addEventHandler ["Deleted", {
+    params ["_pile"];
+
+    private _items = (getItemCargo _pile) param [0, []];
+
+    INFO_4("Pile %1 deleted at frame %2 - backpacks %3, items %4",netId _pile,diag_frameNo,everyBackpack _pile,_items);
+    INFO_2("  ... while executing %1, buffer %2",GVAR(executing),count GVAR(buffer));
+}];
 
 _pile

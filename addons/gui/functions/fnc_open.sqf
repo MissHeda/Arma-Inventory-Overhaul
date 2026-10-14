@@ -79,6 +79,13 @@ if !([_display, _unit, _container, _secondary, createHashMap, "pfh"] call FUNC(a
     false
 };
 
+// Better Inventory (workshop 2791403093) moves a whole stack from its own put and take handlers while Shift or
+// Ctrl is held, on state its vanilla display sets up - state this window never sets. Its handlers do nothing
+// while the flag is 1 (released again in fnc_onUnload).
+if (!isNil "bettInv_stackMove") then {
+    bettInv_stackMove = 1;
+};
+
 // What the window was opened on - the soldier looks into it, kneels at it, hears it open (fnc_poseStart): the
 // first of the container and the second that is somebody else's loot. Not the unit, not its own uniform,
 // vest or backpack, and not the empty pile the engine makes at the feet for its ground panel - opening

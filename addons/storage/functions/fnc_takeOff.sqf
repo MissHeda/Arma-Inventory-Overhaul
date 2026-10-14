@@ -58,7 +58,12 @@ private _payload = switch (true) do {
         switch (_base) do {
             case "uniform": {removeUniform _unit};
             case "vest": {removeVest _unit};
-            default {removeBackpack _unit};
+            default {
+                // Marked before it goes: the engine keeps it in a plain holder of its own until the end of
+                // the frame, which fnc_getGroundHolder must not take for a pile to join.
+                (backpackContainer _unit) setVariable [QGVAR(takenOff), true];
+                removeBackpack _unit;
+            };
         };
 
         if (_base isEqualTo "backpack") then {

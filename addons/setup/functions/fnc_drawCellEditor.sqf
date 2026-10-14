@@ -169,6 +169,14 @@ if (_blocksMode) then {
     _blocks = [_canvas] call FUNC(canvasBlocks);
 };
 
+// Both ways give the preview (fnc_drawPreview, through fnc_cellChanged) the same kind of thing. While
+// nothing is changed, the class's own compartments as the inventory has them, places included. Once it is,
+// what the working copy would write: painted compartments that lie as the inventory would flow them come
+// back from fnc_canvasBlocks as flowed blocks, so one configuration looks alike whichever way it is drawn.
+if (!_hasWork) then {
+    _blocks = _resolved select {(_x select 0) * (_x select 1) > count (_x select 2)};
+};
+
 private _dirty = _hasWork && {(_blocksMode && {_shown isNotEqualTo _start}) || {!_blocksMode && {_blocks isNotEqualTo _start}}};
 
 // ----- What it is -----
@@ -292,7 +300,8 @@ private _buttonH = UNIT * 1.15;
 private _buttonsY = _height - CARD_PAD_Y - _buttonH;
 private _totalsH = UNIT * 0.8;
 private _totalsY = _buttonsY - UNIT * 0.25 - _totalsH;
-private _cellH = UNIT * 1.05;
+// The same cell as the Blocks way draws (fnc_drawCellBlocks), so switching the way never resizes the places.
+private _cellH = UNIT * 0.95;
 private _canvasW = STORAGE_COLS * SQUARE(_cellH) + SCROLL_W + SQUARE(UNIT * 0.2);
 private _areaY = _cursorY;
 

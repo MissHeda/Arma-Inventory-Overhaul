@@ -1,5 +1,6 @@
 // Taking over from the vanilla inventory
 PREP(initUnit);
+PREP(guardVanilla);
 PREP(onInventoryOpened);
 PREP(openVanilla);
 
