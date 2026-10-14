@@ -42,7 +42,8 @@ for "_i" from 0 to (SLOT_COUNT - 1) do {
 
     _kinds pushBack (_info get "kind");
 
-    (_ctrl get "picture") ctrlSetText (_info get "picture");
+    // A mod's placeholder picture would pop up "Picture not found" over the HUD.
+    (_ctrl get "picture") ctrlSetText ([_info get "picture"] call EFUNC(gui,safePicture));
     (_ctrl get "picture") ctrlSetTextColor [1, 1, 1, [1, 0.65] select (_count == 0)];
 
     (_ctrl get "key") ctrlSetText (_info get "key");

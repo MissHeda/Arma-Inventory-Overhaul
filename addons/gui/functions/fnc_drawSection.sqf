@@ -122,7 +122,9 @@ private _hasBox = _wantsBox && {_boxCells >= 1.5};
 private _boxW = [0, _boxCells * _cellW] select _hasBox;
 private _boxH = [0, _boxCells * _cellH] select _hasBox;
 private _blockW = _gridW + ([0, _boxW + _gapX] select _hasBox);
-private _blockX = [0, ((_width - _blockW) / 2) max 0] select _wantsBox;
+// One pixel in from the left for the panel's block: drawCompartments outlines a pixel outside its cells,
+// which the scroll group would clip at 0.
+private _blockX = [pixelW, ((_width - _blockW) / 2) max 0] select _wantsBox;
 
 // A body: its paper doll, as wide as the blocks under it.
 private _body = _section getOrDefault ["unit", objNull];

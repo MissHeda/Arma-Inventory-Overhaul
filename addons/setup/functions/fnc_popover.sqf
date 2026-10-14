@@ -126,9 +126,10 @@ private _inner = [_display, "EINV_Group", _card, [_padX, _padY + _titleH, _width
 uiNamespace setVariable [QGVAR(popover), _controls];
 
 // The focus into the layer, so it is drawn over the pane: a button no one sees, so Return and Space press
-// nothing. Before the content is drawn - a text field there takes it from here (the import box, the
-// Same as search).
-private _focus = [_display, "EINV_Hitbox", _card, [0, 0, 0, 0]] call EFUNC(gui,uiCreate);
+// nothing. One pixel in the card's padding, not nothing at all - the engine may refuse the focus to a
+// control with no size, and the pane would draw over the popover again. Before the content is drawn - a
+// text field there takes it from here (the import box, the Same as search).
+private _focus = [_display, "EINV_Hitbox", _card, [_padX / 2, _padY / 2, pixelW, pixelH]] call EFUNC(gui,uiCreate);
 ctrlSetFocus _focus;
 
 [_display, _inner, _theme, _arguments] call _draw;

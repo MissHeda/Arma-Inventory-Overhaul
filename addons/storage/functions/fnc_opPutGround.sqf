@@ -144,6 +144,18 @@ if (_rest isEqualTo [] && {(_payload param [0, ""]) isEqualTo "backpack"}) then 
 
         INFO_3("Backpack %1 on pile %2 a frame later: pile %3",_class,_netId,_state);
 
+        // Only looked at again, no second put-down: a pile that is there a frame later and gone after that
+        // is something else's doing, and the RPT is where it shows.
+        [{
+            params ["_pile", "_netId", "_class"];
+
+            private _state = if (isNull _pile) then {"gone"} else {
+                format ["there with %1 backpacks", count (everyBackpack _pile)]
+            };
+
+            INFO_3("Backpack %1 on pile %2 two seconds later: pile %3",_class,_netId,_state);
+        }, [_pile, _netId, _class], 2] call CBA_fnc_waitAndExecute;
+
         if (!_putAgain || {!isNull _pile}) exitWith {};
 
         ERROR_2("The pile %1 went onto was gone a frame later - it is put down again (%2).",_class,_txId);
