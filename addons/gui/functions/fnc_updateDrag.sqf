@@ -9,7 +9,10 @@
  * goes on that part (einv_storage_fnc_partFor). Anywhere else over the equipment column it goes into
  * the slot that takes it (einv_storage_fnc_slotFor). Worn gear dragged from a slot onto the same slot of
  * another unit - the player's onto a body's, a body's onto the player's or anywhere over the player's
- * equipment column - is exchanged (fnc_canSwap); the target then names that unit as its 9th element. On a grid: the cells it would cover - the grabbed cell
+ * equipment column - is exchanged (fnc_canSwap); the target then names that unit as its 9th element. A
+ * uniform, vest or backpack let go on the storage column off its grids (GVAR(storageRect)) goes into that
+ * slot as on the slot itself, the footprint faint over the column; wearing none of the three, the column
+ * shows only its placeholder and anything else is red there, "NoFit". On a grid: the cells it would cover - the grabbed cell
  * stays under the mouse - must lie inside the compartment and be free, and another container must be
  * able to carry it - and a living person's container has to be one the player may put into
  * (fnc_checkTouch). The footprint shows the answer, green or red. Outside every panel it goes on the
@@ -448,6 +451,62 @@ call {
 
     if (_targetIndex < 0) exitWith {
         _footprint ctrlShow false;
+
+        // ----- On the storage column, off its grids: into the uniform, vest or backpack slot -----
+        // The column shows what the soldier wears in those three slots, so one let go on it goes on as on its
+        // slot in the gear row - one worn there comes off onto the cell the new one lay on (fnc_doEquip) -,
+        // a body's worn one is exchanged as there (fnc_canSwap). Wearing none of them, the whole column is that
+        // target, its placeholder too, and anything else is refused there with the slot's reason; with
+        // sections a grid takes what is let go on it, so only the room around the grids is. The footprint
+        // covers the column at half strength, as the equipment column's; the slot is lit already
+        // (fnc_showTargets).
+        private _inStorage = _onTop isEqualTo "" && {_dragGroup isEqualTo []} && {call FUNC(isInventoryMode)}
+            && {(_slotSource param [0, objNull]) isNotEqualTo GVAR(unit)} && {
+                GVAR(storageRect) params [["_areaX", 0], ["_areaY", 0], ["_areaW", 0], ["_areaH", 0]];
+                _mouseX >= _areaX && {_mouseX < _areaX + _areaW} && {_mouseY >= _areaY} && {_mouseY < _areaY + _areaH}
+            };
+
+        private _storageAnswer = if (_inStorage) then {GVAR(dragRoom) get "storageArea"} else {[]};
+
+        if (isNil "_storageAnswer") then {
+            private _player = GVAR(unit);
+            private _slot = [_player, _entry getOrDefault ["class", ""]] call EFUNC(storage,slotFor);
+
+            if !(_slot in ["uniform", "vest", "backpack"]) then {
+                _slot = "";
+            };
+
+            private _why = ["NoFit", ""] select (_slot isNotEqualTo "");
+
+            if (_why isEqualTo "" && {_slotSource isNotEqualTo []}) then {
+                _why = [_slotSource, _player, _slot] call FUNC(canSwap);
+            };
+
+            // Nothing worn there: a slot that is empty takes the whole of it onto the soldier (the weight
+            // forecast, as on the slot).
+            private _empty = _slot isNotEqualTo "" && {((GVAR(context) getOrDefault ["equipment", createHashMap]) getOrDefault [_slot, ""]) isEqualTo ""};
+
+            _storageAnswer = [_slot, _why, _empty];
+            GVAR(dragRoom) set ["storageArea", _storageAnswer];
+        };
+
+        if (
+            _storageAnswer isNotEqualTo []
+            && {(_storageAnswer select 0) isNotEqualTo "" || {(GVAR(context) getOrDefault ["ownSections", []]) isEqualTo []}}
+        ) exitWith {
+            _storageAnswer params ["_slot", "_why", "_empty"];
+
+            GVAR(dragTarget) = ["slot", -1, 0, 0, _why isEqualTo "", _why, _slot, true, [objNull, GVAR(unit)] select (_slotSource isNotEqualTo [])];
+            [GVAR(storageRect), _why isEqualTo "", DRAG_FOOTPRINT_ALPHA / 2] call _fnc_show;
+
+            if (_why isEqualTo "" && {_empty} && {_slotSource isEqualTo []}) then {
+                _hintParts = [([[_entry]] call EFUNC(storage,getMass)) / ((_entry getOrDefault ["count", 1]) max 1)] call _fnc_forecast;
+
+                if (_hintParts isEqualTo []) then {
+                    _hintParts = GVAR(dragKeys);
+                };
+            };
+        };
 
         // A zone a window that attached drew (uiNamespace zones, fnc_endDrag hands it to the "drop" hook): the
         // footprint covers it at half strength.

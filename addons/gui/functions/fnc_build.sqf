@@ -74,6 +74,7 @@ uiNamespace setVariable [QGVAR(selectionFrames), []];
 GVAR(searchQueue) = [];
 GVAR(panels) = [];
 GVAR(equipmentRect) = [];
+GVAR(storageRect) = [];
 call FUNC(closeMenu);
 
 // The style, by its id - an unknown one falls back to the first.
@@ -178,8 +179,11 @@ private _now = diag_tickTime;
 // others are put back (einv_storage_fnc_removeSameClass): it is found again by its key - its own id, the
 // same on every machine (einv_storage_fnc_entryKey) - in the container it lay in, or in the new object of
 // that one. Kept a moment while it is missing - its id may reach this machine after its cargo -, then it
-// drops out. A key is only kept while no sibling there shares it.
+// drops out. A key is only kept while no sibling there shares it. One that left the container it lay in -
+// put on, taken into a crate, dropped elsewhere - drops out at once, and so does whatever was opened from
+// inside it: its box closes, and one put on shows in the storage column as the worn one it is now.
 private _keptOpened = [];
+private _gone = [];
 
 // An entry's key where it lies - set by einv_storage_fnc_getContents, made here should it be missing.
 private _fnc_keyOf = {
@@ -202,7 +206,30 @@ private _fnc_keyOf = {
         };
     };
 
+    // Opened from inside one that left where it lay: it went with it.
+    if (!isNull _parent && {_parent in _gone}) then {
+        _gone pushBack _object;
+        continue;
+    };
+
     private _contents = if (isNull _parent) then {[]} else {[_parent] call EFUNC(storage,getContents)};
+
+    // No longer listed where it lay (everyContainer): put on, moved, or that container is gone. Only while
+    // one of its class still lies there may it be that one made anew with its id still on the way - then it
+    // is missing, looked for by its key below. A crate looked into through its vehicle's cargo lies in no
+    // container: einv_compat_ace_cargo_fnc_pruneOpened sees to those (below).
+    if (
+        !isNull _object
+        && {isNull (_object getVariable [QEGVAR(compat_ace_cargo,openedFrom), objNull])}
+        && {_contents findIf {(_x getOrDefault ["container", objNull]) isEqualTo _object} < 0}
+    ) then {
+        if (_contents findIf {!isNull (_x getOrDefault ["container", objNull]) && {(_x getOrDefault ["class", ""]) == _class}} < 0) then {
+            _gone pushBack _object;
+            continue;
+        };
+
+        _object = objNull;
+    };
 
     if (isNull _object && {_key isNotEqualTo ""}) then {
         private _index = _contents findIf {!isNull (_x getOrDefault ["container", objNull]) && {([_x] call _fnc_keyOf) isEqualTo _key}};

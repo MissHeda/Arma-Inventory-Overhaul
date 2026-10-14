@@ -922,6 +922,17 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   args]` is for a dialog that does not open over another (TFAR, ACRE2): the window closes, the code runs `STEP_ASIDE_DELAY` 0.2 s
   later, and the window opens again on the same unit and containers when that dialog closes.
 
+- **Opened containers follow their object.** `fnc_build` keeps an `opened` entry only while `everyContainer` of the container it
+  was opened from still lists it: put on, taken into a crate or dropped elsewhere it drops out at once, with whatever was opened
+  from inside it (a worn one shows in the storage column). Only while one of its class still lies there is it taken for one made
+  anew and looked for by its key (`ANSWER_WAIT`); ACE cargo crates (`einv_compat_ace_cargo_openedFrom`) stay with `fnc_pruneOpened`.
+- **The storage column takes what is worn there** (`einv_gui_storageRect`, from `fnc_drawColumn`): a uniform, vest or backpack let
+  go on it off its grids is `["slot", -1, ..., slot]` - put on by `fnc_doEquip` (the worn one comes off onto its cell), a body's
+  exchanged (`fnc_canSwap`); the footprint lies faint over the column. Wearing none of the three, anything else there is `NoFit`.
+- **An opened container's box is its tile.** Its slot record carries the container (element 8, `fnc_drawSlot` option `container`);
+  `fnc_boxTile` finds that tile in the parent's grid, and the box is pressed, dragged, clicked and hinted as it
+  (`fnc_onMouseButton`, `fnc_updateHover`). Both inventory only.
+
 ## 5. ACE Arsenal panel (arsenal)
 
 ACE Arsenal is the arsenal; nothing of ACE is patched or replaced. While the uniform, vest or backpack tab of ACE's left bar is

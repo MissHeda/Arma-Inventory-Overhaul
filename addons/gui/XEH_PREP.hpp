@@ -99,6 +99,7 @@ PREP(isSearched);
 PREP(markHidden);
 PREP(learn);
 PREP(findTile);
+PREP(boxTile);
 PREP(showSearch);
 PREP(revealTile);
 PREP(animateSearch);

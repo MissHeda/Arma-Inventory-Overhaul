@@ -5,7 +5,8 @@
  * The mouse button let go of a dragged item. Where the footprint was green it is asked for: a tile
  * moves to its cells (fnc_applyMove) - as many of a stack as the wheel left, the way round it was held
  * - or is put on in a slot (fnc_doEquip), a magazine dropped on a weapon loaded, an attachment put on,
- * also let go anywhere over the equipment column (the slot that takes it, fnc_updateDrag); a slot's item
+ * also let go anywhere over the equipment column (the slot that takes it, fnc_updateDrag) or, a uniform,
+ * vest or backpack, on the storage column off its grids; a slot's item
  * comes off onto the cells (fnc_doUnequip), or onto another unit's same slot, which gives back what it
  * wore there (fnc_doSwap). Outside every panel it goes on the ground;
  * anywhere else it goes back, saying why when it did not fit (fnc_flashHint). First of all

@@ -31,6 +31,8 @@
  * is found where its scrolled group shows it now, and only on the part that shows (fnc_slotRect). A
  * tile gets brighter, a slot an outline in the accent colour that follows its round corners (fnc_uiRing).
  *
+ * The box of a uniform, vest or backpack opened from inside a container is named and hinted as its tile
+ * in that container (fnc_boxTile), the comparison card included.
  * Only what lies on top there counts (fnc_topAt): over the inspect card nothing, over a kit window only
  * that window's tiles - never a tile or slot of a column or another window under it.
  *
@@ -175,6 +177,18 @@ if (!_force && {_found isEqualTo GVAR(hover)}) exitWith {
 GVAR(hover) = _found;
 [_found, true] call _fnc_light;
 
+// The box of a uniform, vest or backpack opened from inside a container is named and hinted as its tile
+// there (fnc_boxTile) - it is lifted as that tile too -, though it lights up as the box it is.
+private _shown = _found;
+
+if ((_found param [0, ""]) isEqualTo "slot") then {
+    private _asTile = [((uiNamespace getVariable [QGVAR(slots), []]) param [_found select 1, []]) param [8, objNull]] call FUNC(boxTile);
+
+    if (_asTile isNotEqualTo []) then {
+        _shown = ["tile"] + _asTile;
+    };
+};
+
 // The name at the mouse, as in Tarkov - of what is known; fnc_onFrame keeps it beside the pointer. Over a
 // vest, uniform, helmet or backpack that is not the player's own worn one, the comparison card instead.
 private _tooltip = uiNamespace getVariable [QGVAR(tooltip), controlNull];
@@ -183,9 +197,9 @@ if (!isNull _tooltip) then {
     private _class = "";
     private _comparable = false;
 
-    switch (_found param [0, ""]) do {
+    switch (_shown param [0, ""]) do {
         case "tile": {
-            private _tile = _found call _fnc_tile;
+            private _tile = _shown call _fnc_tile;
 
             if !(_tile getOrDefault ["hidden", false]) then {
                 _class = _tile getOrDefault ["class", ""];
@@ -193,7 +207,7 @@ if (!isNull _tooltip) then {
             };
         };
         case "slot": {
-            private _record = (uiNamespace getVariable [QGVAR(slots), []]) select (_found select 1);
+            private _record = (uiNamespace getVariable [QGVAR(slots), []]) select (_shown select 1);
 
             _class = _record param [1, ""];
 
@@ -213,12 +227,12 @@ if (!isNull _tooltip) then {
     if (_name isNotEqualTo "") then {
         private _radioHolder = objNull;
 
-        switch (_found param [0, ""]) do {
+        switch (_shown param [0, ""]) do {
             case "tile": {
-                _radioHolder = (_found call _fnc_tile) getOrDefault ["container", objNull];
+                _radioHolder = (_shown call _fnc_tile) getOrDefault ["container", objNull];
             };
             case "slot": {
-                private _radioRecord = (uiNamespace getVariable [QGVAR(slots), []]) select (_found select 1);
+                private _radioRecord = (uiNamespace getVariable [QGVAR(slots), []]) select (_shown select 1);
 
                 // The long-range radio on the back: the container object of the backpack worn.
                 if ((_radioRecord param [5, ""]) isEqualTo "backpack" && {!isNull (_radioRecord param [6, objNull])}) then {
@@ -352,9 +366,9 @@ private _fnc_idle = {
     };
 };
 
-switch (_found param [0, ""]) do {
+switch (_shown param [0, ""]) do {
     case "tile": {
-        private _tile = _found call _fnc_tile;
+        private _tile = _shown call _fnc_tile;
 
         if (_tile getOrDefault ["hidden", false]) exitWith {
             [LLSTRING(Hint_Hidden), "text2"] call _fnc_add;
@@ -408,7 +422,7 @@ switch (_found param [0, ""]) do {
 
         // On the ground a double click puts on what can be worn, and Ctrl+click opens a uniform, vest or
         // backpack (fnc_onMouseButton): said here, where it differs from the footer's keys.
-        private _hoverGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_found select 1, createHashMap];
+        private _hoverGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_shown select 1, createHashMap];
 
         if (
             [] call FUNC(isInventoryMode) && {!(_hoverGrid getOrDefault ["virtual", true])}
@@ -436,7 +450,7 @@ switch (_found param [0, ""]) do {
         } forEach (["hint", ["tile", _class, _tile], []] call FUNC(hook));
     };
     case "slot": {
-        private _record = (uiNamespace getVariable [QGVAR(slots), []]) select (_found select 1);
+        private _record = (uiNamespace getVariable [QGVAR(slots), []]) select (_shown select 1);
 
         // A slot of the hotbar (einv_hotbar - only when that addon is loaded): the hotbar says what it is
         // and what its key does.
@@ -505,7 +519,7 @@ switch (_found param [0, ""]) do {
         } forEach (["hint", ["slot", _class, _record], []] call FUNC(hook));
     };
     case "info": {
-        private _area = (uiNamespace getVariable [QGVAR(infoAreas), []]) param [_found select 1, []];
+        private _area = (uiNamespace getVariable [QGVAR(infoAreas), []]) param [_shown select 1, []];
         private _infoParts = [_area param [4, ""], _area param [5, []]] call FUNC(infoHint);
 
         if (_infoParts isEqualTo []) exitWith {

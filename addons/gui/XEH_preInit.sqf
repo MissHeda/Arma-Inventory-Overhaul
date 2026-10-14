@@ -132,6 +132,11 @@ GVAR(panels) = [];
 // goes into the slot that takes it (fnc_updateDrag).
 GVAR(equipmentRect) = [];
 
+// The unit's storage column of the last build, [x, y, w, h] - [] for none (fnc_drawColumn): a uniform,
+// vest or backpack let go on it off its grids is put on; while the unit wears none of them, anything else
+// let go there is refused (fnc_updateDrag).
+GVAR(storageRect) = [];
+
 GVAR(searchStarted) = -1;
 
 // The item being searched as it stood in the queue, and when the next rustle plays (fnc_animateSearch).

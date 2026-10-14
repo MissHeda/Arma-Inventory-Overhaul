@@ -10,9 +10,11 @@
  * Opening and closing sound as the container it is: fabric and buckles for a backpack, a vest, a uniform
  * (fnc_playSound "open", "close").
  *
- * Kept in GVAR(opened) as [class, container object, container it lies in]; one that is gone - moved,
- * so the engine made a new object for it - drops out at the next build. Opening tags the container
- * object with the item's class (einv_storage_itemClass), for its compartments.
+ * Kept in GVAR(opened) as [class, container object, container it lies in]; one that is no longer
+ * listed in that container - put on, taken into a crate, dropped elsewhere - drops out at the next build
+ * (fnc_build), one the engine made anew is found again by its key. Its box stands for its tile there: it
+ * is dragged and hinted like the tile (fnc_boxTile). Opening tags the container object with the item's
+ * class (einv_storage_itemClass), for its compartments.
  *
  * Arguments:
  * 0: Grid index <NUMBER>

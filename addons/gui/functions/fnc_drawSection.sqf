@@ -17,7 +17,8 @@
  *
  * Its caption tab folds the section away (fnc_toggleSection); a uniform, vest or backpack opened from
  * inside a container gets a cross to close it (fnc_closeNested) - both by the section's container. The
- * box of a unit's uniform, vest or backpack is that unit's slot - right click and drag work on it. A
+ * box of a unit's uniform, vest or backpack is that unit's slot - right click and drag work on it; the
+ * box of one opened from inside a container stands for its tile there, dragged and hinted like it. A
  * crate or vehicle shows the picture the editor has of it.
  *
  * A section starts folded when it says so ("folded": the crates found lying around) - the player's own
@@ -548,6 +549,12 @@ if (_hasBox) then {
     if (!isNull _owner && {_ownerSlot isEqualTo _id}) then {
         _boxOptions set ["slot", _id];
         _boxOptions set ["unit", _owner];
+    };
+
+    // Opened from inside a container (fnc_openNested), nobody wears it: the box stands for its tile there,
+    // lifted and hinted as that tile (fnc_boxTile) - the same drag, wherever it is let go.
+    if (_nested && {isNull _owner}) then {
+        _boxOptions set ["container", _sectionContainer];
     };
 
     // A placeholder has no container to name its owner: it brings the unit itself.

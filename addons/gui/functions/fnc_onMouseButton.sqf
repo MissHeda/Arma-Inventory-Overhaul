@@ -20,6 +20,8 @@
  * weapon, ... (fnc_quickEquip; magazines and attachments still move over) -, and Ctrl+click opens a
  * uniform, vest or backpack lying there (fnc_openNested) - anything else is selected as everywhere. The
  * hint names both while the mouse is on such a tile (fnc_updateHover).
+ * The box of a uniform, vest or backpack opened from inside a container is pressed as its tile there
+ * (fnc_boxTile): dragged, clicked and double clicked like the tile itself.
  * Shift held while pressing a stack drags half of it. A right click opens the item's context menu
  * (fnc_contextMenu) - with another menu open, beside it, it closes that one and opens the new one at once. Selecting works in the inventory only (fnc_isInventoryMode): where other windows
  * attach, Ctrl+click moves a tile over as before.
@@ -310,6 +312,23 @@ if (_down) exitWith {
             private _record = (uiNamespace getVariable [QGVAR(slots), []]) select _slotIndex;
             private _slot = _record param [5, ""];
             private _unit = _record param [6, objNull];
+
+            // The box of a uniform, vest or backpack opened from inside a container: pressed as its tile there
+            // (fnc_boxTile), so the drag is the tile's own. Held by its middle cell - the ghost comes out
+            // centred on the mouse rather than hanging from its corner.
+            private _asTile = [_record param [8, objNull]] call FUNC(boxTile);
+
+            if (_asTile isNotEqualTo []) exitWith {
+                _asTile params ["_gridIndex", "_tileIndex"];
+
+                private _tile = (((uiNamespace getVariable [QGVAR(grids), []]) select _gridIndex) get "tiles") select _tileIndex;
+
+                GVAR(press) = [
+                    _gridIndex, _tileIndex, _mouse,
+                    [floor ((_tile getOrDefault ["w", 1]) / 2), floor ((_tile getOrDefault ["h", 1]) / 2)],
+                    _ctrl, [], _alt, _shift
+                ];
+            };
 
             if (_slot isEqualTo "" || {isNull _unit}) exitWith {};
 

@@ -36,6 +36,9 @@
  *   "hotbar"  - the number of the hotbar's slot this is (einv_hotbar), -1 for a slot of the gear: kept
  *               as the eighth element of the slot's record, which tells the mouse handling that it takes
  *               a class and holds no item <NUMBER>
+ *   "container" - the box of a uniform, vest or backpack opened from inside a container (fnc_openNested):
+ *               its container object, kept as the ninth element of the record, so the box is lifted and
+ *               hinted as its tile there (fnc_boxTile) <OBJECT>
  * 5: Theme <HASHMAP>
  *
  * Return Value:
@@ -261,6 +264,6 @@ if (!isNull _parent) then {
     _origin = [_anchor] call FUNC(gridOrigin);
 };
 
-(uiNamespace getVariable [QGVAR(slots), []]) pushBack [[_origin select 0, _origin select 1, _width, _height], _class, _captionText, _anchor, _options getOrDefault ["weapon", []], _options getOrDefault ["slot", ""], _options getOrDefault ["unit", objNull], _options getOrDefault ["hotbar", -1]];
+(uiNamespace getVariable [QGVAR(slots), []]) pushBack [[_origin select 0, _origin select 1, _width, _height], _class, _captionText, _anchor, _options getOrDefault ["weapon", []], _options getOrDefault ["slot", ""], _options getOrDefault ["unit", objNull], _options getOrDefault ["hotbar", -1], _options getOrDefault ["container", objNull]];
 
 _controls

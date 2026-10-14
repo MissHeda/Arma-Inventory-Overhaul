@@ -10,7 +10,8 @@
  * column - never sends another one back to the top, and fnc_startDrag tells the columns from the other
  * groups on the window by it. It is known from the start, so a section's drawer (fnc_drawSection) can tell
  * which side it is drawing for: "storage" is the unit's own, "loot" what it loots (selecting works on one
- * side at a time, fnc_select).
+ * side at a time, fnc_select). Where the storage column lies is kept as GVAR(storageRect): a uniform, vest
+ * or backpack let go on it goes on (fnc_updateDrag).
  *
  * The group reaches into the panel's right padding: its scroll bar runs there, beside the sections
  * rather than over them.
@@ -45,6 +46,11 @@ if (_drawer isEqualType "") then {
 };
 
 GVAR(panels) pushBack _rect;
+
+// The unit's own column is a drop target of its own: what is worn in it goes on there (fnc_updateDrag).
+if (_id isEqualTo "storage") then {
+    GVAR(storageRect) = _rect;
+};
 
 [
     _display, controlNull, _rect, _theme getOrDefault ["panel", []],
