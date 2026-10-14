@@ -175,7 +175,8 @@ private _dirty = _hasWork && {(_blocksMode && {_shown isNotEqualTo _start}) || {
 
 private _picH = UNIT * 2.2;
 private _picW = SQUARE(_picH);
-private _picture = _info getOrDefault ["picture", ""];
+// A placeholder word or a missing file in the class's config is no picture (einv_gui_fnc_safePicture).
+private _picture = [_info getOrDefault ["picture", ""]] call EFUNC(gui,safePicture);
 
 if (_picture isNotEqualTo "") then {
     [_display, _box, [_innerX, _cursorY, _picW, _picH], _picture] call EFUNC(gui,uiPicture);

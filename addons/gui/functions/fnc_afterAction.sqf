@@ -101,6 +101,24 @@ if ((_input param [1, objNull]) isEqualType []) exitWith {
         [_status, _extra]
     };
 
+    // Worn gear that came off (einv_storage_debugDrop): how its steps went and the pile the answer names -
+    // the storage's own "einv drop:" lines carry the same id.
+    private _debug = (missionNamespace getVariable [QEGVAR(storage,debugDrop), false])
+        && {_records findIf {(_x getOrDefault ["kind", ""]) in ["unequip", "swap"]} >= 0};
+
+    if (_debug) then {
+        {
+            private _roles = _x getOrDefault ["roles", createHashMap];
+
+            diag_log text format [
+                "einv drop: answer ""%1"" - %2 %3 to %4: take %5, land %6, pile %7, settled back/vehicle/ground %8",
+                _id, _x getOrDefault ["kind", ""], _x getOrDefault ["class", ""], _x getOrDefault ["to", objNull],
+                [_roles getOrDefault ["take", []]] call _fnc_result, [_roles getOrDefault ["land", []]] call _fnc_result,
+                _pile, _settled
+            ];
+        } forEach (_records select {(_x getOrDefault ["kind", ""]) in ["unequip", "swap"]});
+    };
+
     // Search knowledge is kept on containers - not on a unit, a kit or the ground.
     private _fnc_learnable = {
         params ["_holder"];
@@ -247,6 +265,13 @@ if ((_input param [1, objNull]) isEqualType []) exitWith {
 
     if !(_pile in GVAR(nearby)) then {
         [_pile] call _fnc_adopt;
+    };
+
+    if (_debug) then {
+        diag_log text format [
+            "einv drop: answer ""%1"" shown - pile %2 (gone %3) among the nearby boxes %4, looked into %5",
+            _id, _pile, isNull _pile, _pile in GVAR(nearby), _pile in [GVAR(container), GVAR(secondary)]
+        ];
     };
 
     [_display] call FUNC(build);

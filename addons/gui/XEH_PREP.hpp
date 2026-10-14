@@ -167,6 +167,7 @@ PREP(uiPanel);
 PREP(uiLabel);
 PREP(uiIcon);
 PREP(uiPicture);
+PREP(safePicture);
 PREP(uiFrame);
 PREP(uiShape);
 PREP(shapeRects);

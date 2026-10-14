@@ -55,7 +55,7 @@ private _ctrl = [_display, "EINV_PictureStretch", _parent, [
     _ctrlH
 ]] call FUNC(uiCreate);
 
-_ctrl ctrlSetText _texture;
+_ctrl ctrlSetText ([_texture] call FUNC(safePicture));
 _ctrl ctrlSetTextColor _color;
 _ctrl ctrlSetAngle [90, 0.5, 0.5];
 

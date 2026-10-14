@@ -58,6 +58,10 @@ if (_why isEqualTo "" && {_to isEqualType objNull}) then {
 };
 
 if (_why isNotEqualTo "") exitWith {
+    if (missionNamespace getVariable [QEGVAR(storage,debugDrop), false]) then {
+        diag_log text format ["einv drop: refused here - %1 off %2 of %3 to %4: %5", _entry get "class", _slot, _unit, _to, _why];
+    };
+
     [_why] call FUNC(flashHint);
     false
 };
@@ -81,6 +85,10 @@ if (_to isEqualType objNull) then {
 };
 
 if (_why isNotEqualTo "") exitWith {
+    if (missionNamespace getVariable [QEGVAR(storage,debugDrop), false]) then {
+        diag_log text format ["einv drop: refused here - %1 off %2 of %3 to %4: %5", _entry get "class", _slot, _unit, _to, _why];
+    };
+
     [_why] call FUNC(flashHint);
     false
 };
@@ -89,11 +97,12 @@ private _sent = [[createHashMapFromArray [
     ["kind", "unequip"], ["unit", _unit], ["slot", _slot], ["to", _to], ["cell", _cell]
 ]]] call FUNC(sendMoves);
 
-// The first line of a backpack drop in the RPT (einv_storage_debugDrop); the storage logs the rest.
-if (_slot isEqualTo "backpack" && {missionNamespace getVariable [QEGVAR(storage,debugDrop), false]}) then {
+// The request in the RPT (einv_storage_debugDrop), for every slot - a vest's drop reads beside a
+// backpack's; the storage logs a backpack's further steps.
+if (missionNamespace getVariable [QEGVAR(storage,debugDrop), false]) then {
     diag_log text format [
-        "einv drop: asked - %1 off %2 (local %3) to %4 at %5, sent %6",
-        _entry get "class", _unit, local _unit, _to, getPosASL _unit, _sent
+        "einv drop: asked - %1 off %2 of %3 (local %4) to %5 at %6, sent %7",
+        _entry get "class", _slot, _unit, local _unit, _to, getPosASL _unit, _sent
     ];
 };
 

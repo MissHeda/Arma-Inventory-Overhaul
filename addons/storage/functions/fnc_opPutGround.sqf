@@ -11,6 +11,9 @@
  * A client runs it only when it could not hand it to the hub (einv_storage_fnc_requestNext: the server
  * never answered): then onto a fresh pile of its own.
  *
+ * A backpack that went onto a pile alone is looked at again a frame later: should that pile be gone, it
+ * goes down once more onto a fresh one (an RPT error says so; see below).
+ *
  * Extra: [the pile it went onto, the second pile when it took a rest].
  *
  * Arguments:
@@ -70,6 +73,10 @@ if (_debug) then {
     ];
 };
 
+// A backpack onto a pile that holds nothing yet: the pile it lands on is looked at again a frame later
+// (below).
+private _alone = (_payload param [0, ""]) isEqualTo "backpack" && {([_pile] call FUNC(getContents)) isEqualTo []};
+
 private _piles = [_pile];
 private _rest = [_pile, _payload] call FUNC(addPayload);
 
@@ -103,13 +110,59 @@ if (_debug) then {
         params ["_txId", "_piles", "_when"];
 
         diag_log text format [
-            "einv drop: %1 %2 - piles %3, gone %4, backpacks there %5",
-            _txId, _when, _piles, _piles apply {isNull _x}, _piles apply {if (isNull _x) then {[]} else {everyBackpack _x}}
+            "einv drop: %1 %2 - piles %3, gone %4, backpacks there %5, at %6",
+            _txId, _when, _piles, _piles apply {isNull _x}, _piles apply {if (isNull _x) then {[]} else {everyBackpack _x}},
+            _piles apply {if (isNull _x) then {[]} else {getPosASL _x}}
         ];
     };
 
     [_fnc_look, [_txId, _piles, "a frame later"]] call FUNC(nextFrame);
     [_fnc_look, [_txId, _piles, "two seconds later"], 2] call CBA_fnc_waitAndExecute;
+};
+
+// The pile a backpack went onto alone (a fresh one, or the second) is looked at again a frame later. A
+// backpack dragged out of the window left no pile in the window and nothing on the ground (Mia, 0.4.0),
+// where a vest dropped the same way did. In a pile a backpack is an object of its own, not item cargo,
+// and the engine deletes the piles it takes for empty. Gone by then, the backpack went with it: it goes
+// down once more onto a fresh pile at the same point and the RPT says so - once only, a second loss is
+// reported. A pile still there is left alone: a backpack taken from it is whoever took it.
+if (_rest isEqualTo [] && {(_payload param [0, ""]) isEqualTo "backpack"} && {_alone || {count _piles > 1}}) then {
+    [{
+        params ["_pile", "_payload", "_where", "_requester", "_txId"];
+
+        if (!isNull _pile) exitWith {};
+
+        private _class = _payload param [1, ""];
+
+        ERROR_2("The pile %1 went onto was gone a frame later - it is put down again (%2).",_class,_txId);
+
+        private _again = [_where, _requester, true] call FUNC(getGroundHolder);
+
+        if (isNull _again && {!isNull _requester}) then {
+            _again = [_requester, _requester, true] call FUNC(getGroundHolder);
+        };
+
+        private _left = if (isNull _again) then {_payload} else {[_again, _payload] call FUNC(addPayload)};
+
+        if (DROP_DEBUG) then {
+            diag_log text format [
+                "einv drop: %1 a frame later the pile was gone - put down again on %2 at %3, left over %4",
+                _txId, _again, if (isNull _again) then {[]} else {getPosASL _again}, [_left param [0, ""], _left param [1, ""]]
+            ];
+        };
+
+        if (isNull _again || {_left isNotEqualTo []}) exitWith {
+            ERROR_1("%1 could not be put down again - it is lost.",_class);
+        };
+
+        [{
+            params ["_again", "_class", "_txId"];
+
+            if (isNull _again) then {
+                ERROR_2("The second pile %1 went onto was gone a frame later as well - it is lost (%2).",_class,_txId);
+            };
+        }, [_again, _class, _txId]] call FUNC(nextFrame);
+    }, [_piles select (count _piles - 1), +_payload, _where, _requester, _txId]] call FUNC(nextFrame);
 };
 
 if (_rest isNotEqualTo []) exitWith {

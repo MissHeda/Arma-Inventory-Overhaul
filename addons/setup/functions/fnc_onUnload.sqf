@@ -26,6 +26,7 @@ uiNamespace setVariable [QGVAR(root), controlNull];
 uiNamespace setVariable [QGVAR(content), controlNull];
 uiNamespace setVariable [QGVAR(frame), []];
 uiNamespace setVariable [QGVAR(popover), []];
+uiNamespace setVariable [QGVAR(layer), controlNull];
 uiNamespace setVariable [QGVAR(sink), controlNull];
 uiNamespace setVariable [QGVAR(hintCtrl), controlNull];
 uiNamespace setVariable [QGVAR(rawState), controlNull];

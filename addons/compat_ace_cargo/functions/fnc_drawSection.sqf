@@ -188,9 +188,9 @@ private _fnc_button = {
 
     // The picture: what the editor shows of it on its own grey, else the crate icon on a plain box.
     private _pictureRect = [_blockX, _cardTop, 2 * _cellW, _cardH];
-    private _preview = getText (configFile >> "CfgVehicles" >> _class >> "editorPreview");
+    private _preview = [getText (configFile >> "CfgVehicles" >> _class >> "editorPreview")] call EFUNC(gui,safePicture);
 
-    if (_preview isNotEqualTo "" && {fileExists _preview}) then {
+    if (_preview isNotEqualTo "") then {
         [_display, _parent, _pictureRect, _preview, _radius, [0, 0, 0, 0.5]] call EFUNC(gui,uiPictureRounded);
     } else {
         _pictureRect params ["_pictureX", "_pictureY", "_pictureW", "_pictureH"];

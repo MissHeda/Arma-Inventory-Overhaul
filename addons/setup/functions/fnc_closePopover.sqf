@@ -1,8 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Closes the open popover (fnc_popover), if there is one. Never from inside one of its own controls'
- * events - through fnc_defer, as the widgets do.
+ * Closes the open popover (fnc_popover), if there is one, and hides the top layer it lay in
+ * (fnc_topLayer) - shown, its group would take the clicks meant for the wizard. Never from inside one of
+ * its own controls' events - through fnc_defer, as the widgets do.
  *
  * Arguments:
  * None
@@ -20,6 +21,7 @@ private _controls = uiNamespace getVariable [QGVAR(popover), []];
 
 {ctrlDelete _x} forEach _controls;
 uiNamespace setVariable [QGVAR(popover), []];
+(uiNamespace getVariable [QGVAR(layer), controlNull]) ctrlShow false;
 uiNamespace setVariable [QGVAR(importEdit), controlNull];
 
 // Text areas that were on it are gone with it.

@@ -144,7 +144,7 @@ if (_columnH < UNIT * 4) exitWith {[]};
 private _padX = SQUARE(UNIT * 0.4);
 private _headFont = _theme getOrDefault ["headFont", _theme getOrDefault ["fontBold", "PuristaSemibold"]];
 private _headSize = (_theme getOrDefault ["headSize", UNIT * 0.66]) min ((_bodyTop - _top) * 0.9);
-private _picture = ([_section getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["picture", ""];
+private _picture = [([_section getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]] call EFUNC(gui,safePicture);
 private _pictureW = [0, SQUARE(_bodyTop - _top)] select (_picture isNotEqualTo "");
 
 if (_pictureW > 0) then {

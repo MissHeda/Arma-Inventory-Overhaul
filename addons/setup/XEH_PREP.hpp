@@ -48,6 +48,7 @@ PREP(drawReview);
 PREP(setHint);
 PREP(popover);
 PREP(closePopover);
+PREP(topLayer);
 PREP(confirm);
 
 // The Items and Containers steps: the class index, its lists, the editors, and the one rule per class

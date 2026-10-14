@@ -590,6 +590,16 @@ after `removeBackpack` is looked at a frame later and put back on from its snaps
 while the slot is empty. `fnc_putOn` uses `addBackpack`, which fills the container at once. The client setting
 **`einv_storage_debugDrop`** (default off; a dedicated server reads its own) writes `einv drop:` lines for each step to the RPT.
 
+**Dragged out of the window** (0.4.0: a backpack dragged from the gear row onto the 3D middle left no pile and nothing on the ground;
+a vest did not vanish). `einv_gui_fnc_updateDrag` makes the target `["ground", -1, 0, 0, true, ""]` outside every panel, and
+`fnc_endDrag` gives a slot's item to `fnc_doUnequip [unit, slot, "ground", []]` - the menu Drop's own call, only inside the mouse-up
+event instead of a frame later. The window makes no pile, asks no hook (`ground` is asked only by `fnc_quickUnequip`,
+`fnc_dropToGround`, `fnc_quickMove`), and `fnc_settle` works from the phases, not the window's in-flight record; with no pile in
+reach `fnc_getGroundHolder` makes one. The step left that differs from a vest's is the engine's: a fresh pile holding only a backpack,
+an object of its own and no item cargo. `fnc_opPutGround` looks at such a pile a frame later and, gone, puts the backpack down once
+more (an RPT error). The trace starts at the drag: `fnc_endDrag` (where, target, call), `fnc_doUnequip` (every slot, refusals),
+`fnc_sendMoves` (the request id the storage's lines carry), `fnc_afterAction` (each step's result, the pile, whether it shows).
+
 ### Public functions and tables
 
 Public: `einv_storage_fnc_request`, `fnc_moveEntry`, `fnc_equip`, `fnc_unequip`, `fnc_getEquipment`, `fnc_getNearby`,
@@ -687,6 +697,9 @@ column scrolls survive builds. Tiles keep Glass.
 `fnc_uiHatch`, `fnc_uiKeyHint` and `fnc_uiButton [display, parent, rect, id, text, icon, theme, code]` (left click runs `code`
 with `[1, id]`, right click `[-1, id]`) take a `parent` (`controlNull` for the display, a group for relative coordinates), snap to
 pixels and register top-level controls in `einv_gui_created`.
+`fnc_safePicture [path]` -> path or "": a file path (`\` or `/`) ending .paa/.jpg/.png, or none when its .paa exists, that
+`fileExists` finds - asked once per path (uiNamespace `einv_gui_pictures`); `#(...)` passes. `fnc_uiPicture` / `fnc_uiPictureTurned`
+draw nothing for ""; the wizard's index and editors, the Arsenal header and ACE cargo's cards ask it too (`picture = "picturething"`).
 
 ### The hook table (window engine for other displays)
 
@@ -1034,6 +1047,16 @@ and the queue (uiNamespace `einv_setup_deferred`) is emptied by `fnc_runDeferred
 `MouseMoving` / `MouseHolding` events (`fnc_onMouse`, every frame while the mouse is over it) or a spawned script that runs it
 unscheduled (`isNil`). The queue is taken before it runs, so code that queues more starts a new queue. **Every click of the wizard
 goes through `fnc_uiHit` / `fnc_defer`, never through CBA's frame handlers.**
+
+### Popovers and the top layer
+
+Every popover (`fnc_popover`: a dropdown's list, the Same as picker, the import box, `fnc_confirm`'s questions such as closing with
+unsaved changes) is made in the **top layer** (`fnc_topLayer`, uiNamespace `einv_setup_layer`): a controls group over the screen,
+made anew at the end of every step drawn so it is the display's last control, hidden while empty. The engine draws the focused
+control over all others, and the pane holds the focus after a redraw (its sink) or a click - popovers made on the display lay behind
+it (0.4.0). A popover therefore takes the focus into the layer (a button of no size on its card) before its content is drawn, its
+full-screen hit area closes it on a click beside the card and lets nothing through, and the keys wait while one is open
+(`fnc_onKeyDown`, `fnc_onKeyUp`); `fnc_closePopover` hides the layer and gives the focus back to the sink.
 
 ### State and the draft
 

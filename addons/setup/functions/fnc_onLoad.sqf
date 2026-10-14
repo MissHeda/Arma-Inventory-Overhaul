@@ -33,6 +33,7 @@ uiNamespace setVariable [QGVAR(openArgs), nil];
 uiNamespace setVariable [QGVAR(display), _display];
 uiNamespace setVariable [QGVAR(deferred), []];
 uiNamespace setVariable [QGVAR(popover), []];
+uiNamespace setVariable [QGVAR(layer), controlNull];
 uiNamespace setVariable [QGVAR(frame), []];
 uiNamespace setVariable [QGVAR(content), controlNull];
 uiNamespace setVariable [QGVAR(editAreas), []];

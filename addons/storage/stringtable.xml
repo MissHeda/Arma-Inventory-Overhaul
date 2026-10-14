@@ -14,7 +14,7 @@
             <English>Log backpack drops to the RPT</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_DebugDrop_Desc">
-            <English>Writes every step of taking a worn\nbackpack off onto the ground to the\nRPT, each line starting "einv drop:":\nthe request, the take-off, the pile it\ngoes onto, the backpack added there,\nits contents filled in and anything\nsettled afterwards.\n\nFor tests only - leave it off.</English>
+            <English>Writes every step of taking a worn\nbackpack off onto the ground to the\nRPT, each line starting "einv drop:":\nwhere a drag was let go and what it\nasked for (any worn item), the request,\nthe take-off, the pile it goes onto,\nthe backpack added there, its contents\nfilled in, the answer and anything\nsettled afterwards.\n\nFor tests only - leave it off.</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_NearbyRange">
             <English>Reach</English>

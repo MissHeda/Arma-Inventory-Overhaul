@@ -139,12 +139,10 @@ while {_rootId < count _roots && {diag_tickTime < _until}} do {
                     _name = _class;
                 };
 
-                // Some vehicles name an icon class instead of a texture - nothing to show for those.
-                private _picture = getText (_config >> "picture");
-
-                if ((_picture find "\") < 0 && {(_picture find ".") < 0}) then {
-                    _picture = "";
-                };
+                // Only a picture that can be shown, looked at once here (einv_gui_fnc_safePicture): some
+                // vehicles name an icon class instead of a texture, and some mod classes a placeholder word
+                // ("picturething") - the engine pops up a message over the wizard for those.
+                private _picture = [getText (_config >> "picture")] call EFUNC(gui,safePicture);
 
                 private _row = [_lc, _class, toLower (_class + " " + _name), _name, _kind, _family, _picture, [_config] call _fnc_mod, _load];
 

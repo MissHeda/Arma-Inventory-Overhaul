@@ -85,5 +85,8 @@ if (count _scroll > 0) then {
     }, [_scroll], 0.05] call FUNC(defer);
 };
 
+// The top layer anew, after everything of this step: the last control of the display (fnc_topLayer).
+[_display] call FUNC(topLayer);
+
 // The cursor goes nowhere: a text field it was in went with the old step.
 ctrlSetFocus (uiNamespace getVariable [QGVAR(sink), controlNull]);
