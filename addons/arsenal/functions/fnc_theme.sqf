@@ -4,8 +4,8 @@
  * Author: Miss Heda
  * The "ace" look of the panel (the "theme" hook): the inventory's theme, changed where ACE Arsenal's own
  * panels look different, so the panel sits in ACE's window like one of its own. Flat and square, in the
- * colour and see-through of ACE's right panel with its black frame, ACE's white text, ACE's dark bars for
- * the hint line (fnc_footer), and the font and size of the text in ACE's sort bar for the panel's title
+ * colour and see-through of ACE's right panel with its black frame (also the line over the hint line,
+ * fnc_footer), ACE's white text, and the black and the font of ACE's sort bar for the panel's title band
  * (fnc_layout). The tiles keep the inventory's colours, fonts and names, so an item reads the same here
  * as in the inventory.
  *
@@ -32,7 +32,6 @@ _theme merge [createHashMapFromArray [
     ["panel", ACE_PANEL_BG],
     ["panelBorder", ACE_PANEL_FRAME],
     ["text", ACE_TEXT],
-    ["barBg", ACE_BAR_BG],
-    ["headFont", ACE_FONT],
-    ["headSize", ACE_TEXT_SIZE]
+    ["headBg", ACE_SORT_BG],
+    ["headFont", ACE_FONT]
 ], true];

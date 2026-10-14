@@ -21,34 +21,42 @@
 #define PANEL_GAP 0.3
 #define PANEL_MAX_SHARE (1 / 3)
 
-// The strip for the hints under the panel's grid (fnc_layout, fnc_footer), in UNITs - two lines of the
-// inventory's footer text, as the panel is narrow -, and the gap above it.
-#define HINT_LINE_H 1.8
-#define HINT_LINE_GAP 0.15
-
 // The panel's title band when ACE shows no sort bar above its list to line it up with, in UNITs.
 #define HEAD_LINE_H 1.1
 
-// ACE's look (ui/RscAttributes.hpp), which the panel takes on (fnc_theme): the background of the right
-// panel's block (blockRightBackground) and its frame (blockRightFrame, an RscFrame in black), the dark
-// bars at the bottom (menuBar's buttons, totalWeight), and the text of the sort bar over the list - a
-// vanilla RscCombo, RobotoCondensed at 5 of ACE's grid units (GRID_H, which ignores the interface size).
+// The title band against ACE's sort bar beside it: taller, so the container's picture and name read at a
+// glance - the column under it starts lower by the difference.
+#define HEAD_BAND_SCALE 1.6
+
+// ACE's look (ui/RscAttributes.hpp), which the panel takes on (fnc_theme, fnc_layout, fnc_footer): the
+// background of the right panel's block (blockRightBackground) and its frame (blockRightFrame, an RscFrame
+// in black), the sort bar over the list - a vanilla RscCombo, opaque black, 6 of ACE's grid units high
+// (GRID_H, which ignores the interface size) with RobotoCondensed at 5 -, and the text of ACE's message
+// line (IDC 9), also 5 units. The list's rows are 7 units (sizeEx of IDC 15).
 #define ACE_PANEL_BG [0, 0, 0, 0.5]
 #define ACE_PANEL_FRAME [0, 0, 0, 1]
-#define ACE_BAR_BG [0, 0, 0, 0.8]
+#define ACE_SORT_BG [0, 0, 0, 1]
 #define ACE_TEXT [1, 1, 1, 1]
 #define ACE_FONT "RobotoCondensed"
 #define ACE_GRID_H (pixelH * pixelGridNoUIScale * 0.25)
 #define ACE_TEXT_SIZE (5 * ACE_GRID_H)
+#define ACE_LINE_H (6 * ACE_GRID_H)
+#define ACE_ROW_SIZE (7 * ACE_GRID_H)
+
+// The hint line, the panel's last band (fnc_layout, fnc_footer): lines as high as ACE's sort bar with
+// ACE's message text, this much room above and below them, in ACE's grid units. One line; a second only
+// while the staging space holds something, for the note that it goes when the window closes.
+#define HINT_PAD 1
 
 // The staging space under the container's grid (fnc_staging): a crate of the game's own, made on this
 // machine only and hidden at the soldier's feet, with a grid of its own. A crate rather than a ground
 // holder: the ground has no grid and no limit (einv_storage_fnc_getBlocks). Its grid is STORAGE_COLS wide
 // and grows with what lies in it (fnc_growStaging): always STAGING_FREE_ROWS free rows under the lowest
-// one in use, never fewer than STAGING_MIN_ROWS rows, never more than STAGING_MAX_ROWS - a cap of its
-// own, as MAX_ROWS also bounds every item's and compartment's size in the rules.
+// one in use, never fewer than STAGING_MIN_ROWS rows nor than fill the panel down to its hint line, never
+// more than STAGING_MAX_ROWS - a cap of its own, as MAX_ROWS also bounds every item's and compartment's
+// size in the rules.
 #define STAGING_CLASS "Box_NATO_Support_F"
-#define STAGING_MIN_ROWS 4
+#define STAGING_MIN_ROWS 10
 #define STAGING_FREE_ROWS 4
 #define STAGING_MAX_ROWS 100
 

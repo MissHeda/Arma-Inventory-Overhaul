@@ -50,6 +50,7 @@ GVAR(dragZone) = "";
 GVAR(folded) = createHashMap;
 GVAR(foldKeys) = [];
 GVAR(listPress) = [];
+GVAR(listSel) = [];
 GVAR(watch) = [];
 GVAR(scrollHold) = [];
 GVAR(ctrlHeld) = false;
@@ -61,7 +62,11 @@ _display displayAddEventHandler ["KeyUp", {(_this + [false]) call FUNC(onKey)}];
 private _list = _display displayCtrl ARSENAL_IDC_LIST;
 
 if (!isNull _list) then {
+    // The row picked and when: a drag from the list takes the row picked only when it was picked since the
+    // press (fnc_listDrag).
     _list ctrlAddEventHandler ["LBSelChanged", {
+        GVAR(listSel) = [_this select 1, diag_frameNo];
+
         [{_this call FUNC(ungrey)}, [ctrlParent (_this select 0), true]] call EFUNC(gui,later);
     }];
 

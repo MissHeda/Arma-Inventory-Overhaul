@@ -9,15 +9,18 @@
  * another tab is open, that slot is empty, or ACE's panels are hidden (Backspace).
  *
  * The panel looks like ACE's own (fnc_theme): one flat block from the top of ACE's sort bar down to the
- * bottom of ACE's list (fnc_panelRect) with ACE's frame, the container's picture and name in the band
- * beside the sort bar in the sort bar's font - one sees what is being filled -, a black line under it where
- * ACE's list begins, and the column below, which scrolls over both sections. The column draws no background
- * of its own over the block.
+ * bottom of ACE's list (fnc_panelRect) with ACE's frame and see-through. On top a band like the sort bar
+ * beside it - as high, as black - with the container's picture as high as the band and its name in the
+ * sort bar's font: one sees what is being filled, so the sections draw no picture box of their own and
+ * their grids start at the left edge ("box" false). Under it the column, which scrolls over both sections
+ * and reaches down to the hint line, the block's last band: the staging space fills what the container
+ * leaves of it (fnc_growStaging). The column draws no background of its own over the block.
  *
  * A section's caption folds it (einv_gui_fnc_toggleSection), kept per container class - the staging
  * space as "staging" - while ACE's window is open (the "fold" hook, GVAR(folded)), whatever the inventory
  * did with its own captions. The staging section has a crate before its caption and says beside its tab
- * that it is emptied when the arsenal closes; its grid grows with what lies in it (fnc_growStaging). ACE's
+ * that it is emptied when the arsenal closes; its grid is at least STAGING_MIN_ROWS rows, as many as reach
+ * down to the hint line, and grows with what lies in it (fnc_growStaging). ACE's
  * list is registered as a zone of the engine: whatever is let go outside the panel is shown going there,
  * out of the container (fnc_dragCheck).
  *
@@ -91,13 +94,13 @@ private _fnc_fold = {
 GVAR(foldKeys) = [];
 [_section, toLowerANSI (_section getOrDefault ["class", ""])] call _fnc_fold;
 
+// The title band names and pictures the container: no box with its picture beside the grid.
+_section set ["box", false];
+
 private _sections = [_section];
 private _holder = [] call FUNC(staging);
 
 if (!isNull _holder) then {
-    // Its rows follow what lies in it, before it is drawn.
-    [_holder] call FUNC(growStaging);
-
     private _staging = createHashMapFromArray [
         ["id", "staging"],
         ["title", LLSTRING(Staging_Title)],
@@ -108,6 +111,7 @@ if (!isNull _holder) then {
         ["parent", objNull],
         ["nearby", false],
         ["side", "own"],
+        ["box", false],
         ["tabIcon", UI_TEX(icon_crate_ca)]
     ];
 
@@ -120,51 +124,52 @@ if (!isNull _holder) then {
     } forEach ([_holder] call FUNC(countAll));
 };
 
-// The title band: as tall as ACE's sort bar beside it, so the column starts where ACE's list does.
+// The title band: HEAD_BAND_SCALE times ACE's sort bar beside it, from the same top - the column starts
+// that much lower than ACE's list.
 private _list = _display displayCtrl ARSENAL_IDC_LIST;
-private _bodyTop = SNAP_Y((ctrlPosition _list) select 1);
+private _bandH = SNAP_Y((ctrlPosition _list) select 1) - _top;
 
-if (_bodyTop - _top < UNIT * 0.5) then {
-    _bodyTop = _top + SNAP_H(UNIT * HEAD_LINE_H);
-};
+_bandH = if (_bandH < UNIT * 0.5) then {SNAP_H(UNIT * HEAD_LINE_H)} else {SNAP_H(_bandH * HEAD_BAND_SCALE)};
 
-private _hintH = SNAP_H(UNIT * HINT_LINE_H);
-private _gap = SNAP_H(UNIT * HINT_LINE_GAP);
-private _columnH = _top + _height - _bodyTop - _hintH - _gap;
+private _bodyTop = _top + _bandH;
+
+// The hint line, the block's last band: one line as high as ACE's sort bar, a second while the staging
+// space holds something - for the note that it goes with the window (the "hint" hook) -, and room above
+// and below. The column reaches down to it.
+private _lines = [1, 2] select (GVAR(stagingCount) > 0);
+private _hintH = SNAP_H(ACE_LINE_H * _lines + HINT_PAD * ACE_GRID_H * 2);
+private _hintTop = _top + _height - _hintH;
+private _columnH = _hintTop - _bodyTop;
 
 if (_columnH < UNIT * 4) exitWith {[]};
 
-// The block, flat and square in ACE's colour and frame.
+// The block, flat and square in ACE's colour and frame, and the band on it as black as the sort bar.
 [
     _display, controlNull, _rect, _theme getOrDefault ["panel", []], 0, _theme getOrDefault ["panelBorder", []]
 ] call EFUNC(gui,uiPanel);
 
-// The container's picture and name in the band, the name in the font and size of ACE's sort bar, and ACE's
-// black edge under it. The picture is as tall as the band, before the name: one sees what is being filled.
+[_display, controlNull, [_left, _top, _width, _bandH], _theme getOrDefault ["headBg", []], 0] call EFUNC(gui,uiPanel);
+
+// The container's picture and name in the band, the picture as high as the band, before the name: one
+// sees what is being filled. The name in the sort bar's font, a third larger than ACE's rows as the title
+// over them (9.1 of ACE's units in a band of 9.6), centred in the band's height - never taller than it.
 private _padX = SQUARE(UNIT * 0.4);
 private _headFont = _theme getOrDefault ["headFont", _theme getOrDefault ["fontBold", "PuristaSemibold"]];
-private _headSize = (_theme getOrDefault ["headSize", UNIT * 0.66]) min ((_bodyTop - _top) * 0.9);
+private _headSize = (ACE_ROW_SIZE * 1.3) min _bandH;
 private _picture = [([_section getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]] call EFUNC(gui,safePicture);
-private _pictureW = [0, SQUARE(_bodyTop - _top)] select (_picture isNotEqualTo "");
+private _pictureW = [0, SQUARE(_bandH)] select (_picture isNotEqualTo "");
 
 if (_pictureW > 0) then {
-    [_display, controlNull, [_left + _padX, _top, _pictureW, _bodyTop - _top], _picture] call EFUNC(gui,uiPicture);
+    [_display, controlNull, [_left + _padX, _top, _pictureW, _bandH], _picture] call EFUNC(gui,uiPicture);
     _pictureW = _pictureW + SQUARE(UNIT * 0.2);
 };
 
 private _title = [[_section getOrDefault ["title", ""], _theme] call EFUNC(gui,caption), _width - _padX * 2 - _pictureW, _headFont, _headSize] call EFUNC(gui,fitText);
 
 [
-    _display, controlNull, [_left + _padX + _pictureW, _top, _width - _padX * 2 - _pictureW, _bodyTop - _top], _title, _headSize,
+    _display, controlNull, [_left + _padX + _pictureW, _top, _width - _padX * 2 - _pictureW, _bandH], _title, _headSize,
     _theme getOrDefault ["text", [1, 1, 1, 1]], _headFont, 0
 ] call EFUNC(gui,uiLabel);
-
-private _edgeColor = _theme getOrDefault ["panelBorder", []];
-
-if (_edgeColor isNotEqualTo []) then {
-    private _edge = [_display, "EINV_PanelRect", controlNull, [_left, _bodyTop - pixelH, _width, pixelH]] call EFUNC(gui,uiCreate);
-    _edge ctrlSetBackgroundColor _edgeColor;
-};
 
 // The column over the block: the same theme, without a background of its own.
 private _columnTheme = +_theme;
@@ -175,6 +180,17 @@ _columnTheme set ["panelBorder", []];
 // between the tab and the weight - left out where the panel is too narrow for it.
 private _fnc_draw = {
     params ["_display", "_group", "_top", "_width", "_section", "_theme"];
+
+    // The staging space reaches down to the hint line: at least the rows that fill what the sections above
+    // leave of the column - under its caption line and the gap below it, as einv_gui_fnc_drawSection draws
+    // them -, more as what lies in it needs (fnc_growStaging), and those scroll. Sized before it is drawn.
+    if ((_section getOrDefault ["id", ""]) isEqualTo "staging") then {
+        (call EFUNC(gui,getCell)) params ["", "_cellH"];
+
+        private _free = ((ctrlPosition _group) select 3) - _top - UNIT * (0.62 + 0.25) - pixelH * 2;
+
+        [_section get "container", floor (_free / _cellH)] call FUNC(growStaging);
+    };
 
     private _used = _this call EFUNC(gui,drawSection);
 
@@ -222,8 +238,8 @@ private _fnc_draw = {
 [_display, [_left, _bodyTop, _width, _columnH], _sections, _columnTheme, "", "", _fnc_draw, "storage"] call EFUNC(gui,drawColumn);
 
 GVAR(panelRect) = _rect;
-// Inside the frame, which stays visible round the hint line's darker bar.
-GVAR(hintRect) = [_left + pixelW, _bodyTop + _columnH + _gap, _width - pixelW * 2, _hintH - pixelH];
+// Inside the frame, which goes on round the hint line (fnc_footer).
+GVAR(hintRect) = [_left + pixelW, _hintTop, _width - pixelW * 2, _hintH - pixelH];
 
 // The whole block is the panel, the title band and the hint line too: a drag let go over them is no drop
 // outside.

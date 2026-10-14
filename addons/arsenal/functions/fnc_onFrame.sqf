@@ -8,8 +8,8 @@
  * moves its camera while the button is down. So its note is emptied every frame meanwhile.
  *
  * A press on ACE's list that the mouse leaves sideways, further than the engine's own drag threshold and
- * more across than along the list, becomes a drag of that row's item (fnc_onMouse, fnc_listDrag); one
- * that moves along the list first - a scroll, a pick of the next row - stays ACE's.
+ * more across than along the list, becomes a drag of the pressed row's item (fnc_onListPress,
+ * fnc_listDrag); one that moves along the list first - a scroll, a pick of the next row - stays ACE's.
  *
  * A button let go where no event of the display reached the engine (over one of ACE's own controls) ends
  * the drag where it stands all the same, and a press that never became a drag is forgotten - it would
@@ -59,14 +59,14 @@ if (GVAR(listPress) isNotEqualTo []) then {
         GVAR(listPress) = [];
     };
 
-    GVAR(listPress) params ["_pressed", "_shift"];
+    GVAR(listPress) params ["_pressed", "_shift", ["_frame", -1]];
 
     private _across = abs ((_mouse select 0) - (_pressed select 0));
     private _along = abs ((_mouse select 1) - (_pressed select 1));
 
     if (_across > DRAG_THRESHOLD && {_across >= _along}) exitWith {
         GVAR(listPress) = [];
-        [_display, _pressed, _shift] call FUNC(listDrag);
+        [_display, _pressed, _shift, _frame] call FUNC(listDrag);
     };
 
     if (_along > DRAG_THRESHOLD) then {

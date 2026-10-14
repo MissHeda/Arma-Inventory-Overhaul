@@ -61,6 +61,8 @@
  *   "folded"    - starts folded
  *   "root"      - whose locality decides who may change it
  *   "tabIcon"   - a small picture before the caption's text, in its colour (the Arsenal's staging crate)
+ *   "box"       - false: no box with the container's picture, the grid at the section's left edge (the
+ *                 Arsenal's panel, whose title band shows the container)
  * An open kit of Enhanced First Aid Kits is no section of a column any more: it opens in a window of
  * its own (fnc_drawWindow), so opening or closing one never moves anything in the columns.
  *
@@ -105,7 +107,9 @@ private _colorLine = _theme getOrDefault ["line", [1, 1, 1, 0.07]];
 
 // ---------------------------------------------------------------------------
 // The block: the box as wide as three cells where the column has the room, the grid beside it, both
-// centred in the column. Too narrow for a box of one and a half cells, the grid stands alone. A canvas
+// centred in the column. Too narrow for a box of one and a half cells, the grid stands alone. A section
+// that says "box" false has none and its grid starts at its left edge: the Arsenal's panel names and
+// pictures the container in its own title band already. A canvas
 // with seams (fnc_canvasSeams) is wider than STORAGE_COLS cells by its gaps: it is laid out again below,
 // once the layout is read, the box giving up what the grid needs.
 // ---------------------------------------------------------------------------
@@ -120,13 +124,15 @@ private _boxH = 0;
 private _blockW = 0;
 private _blockX = 0;
 
+private _wantsBox = _section getOrDefault ["box", true];
+
 private _fnc_block = {
     _boxCells = (floor (((_width - _gridW - _gapX) / _cellW) * 2) / 2) min 3;
-    _hasBox = _boxCells >= 1.5;
+    _hasBox = _wantsBox && {_boxCells >= 1.5};
     _boxW = [0, _boxCells * _cellW] select _hasBox;
     _boxH = [0, _boxCells * _cellH] select _hasBox;
     _blockW = _gridW + ([0, _boxW + _gapX] select _hasBox);
-    _blockX = ((_width - _blockW) / 2) max 0;
+    _blockX = [0, ((_width - _blockW) / 2) max 0] select _wantsBox;
 };
 
 call _fnc_block;

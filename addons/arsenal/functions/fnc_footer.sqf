@@ -3,10 +3,10 @@
 /*
  * Author: Miss Heda
  * The panel's hint line (the "footer" hook), in place of the inventory's footer, which would lie over ACE's
- * menu bar: a flat dark bar at the bottom of the panel (fnc_layout), as ACE's own bars at the bottom of its
- * window (fnc_theme, "barBg"), with the engine's hint in it - what the mouse is on, what a drag would do,
- * why something did not go (einv_gui_fnc_updateHover, einv_gui_fnc_flashHint). With no panel drawn there
- * is no hint either.
+ * menu bar: the panel's last band (fnc_layout), on the panel's own background like the rest of it, under a
+ * line in the colour of ACE's frame, with the engine's hint in it in the size of ACE's message line - what
+ * the mouse is on, what a drag would do, why something did not go (einv_gui_fnc_updateHover,
+ * einv_gui_fnc_flashHint). With no panel drawn there is no hint either.
  *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
@@ -31,18 +31,20 @@ if (GVAR(hintRect) isEqualTo []) exitWith {};
 
 GVAR(hintRect) params ["_left", "_top", "_width", "_height"];
 
-[
-    _display, controlNull, GVAR(hintRect), _theme getOrDefault ["barBg", _theme getOrDefault ["panel", []]],
-    (_theme getOrDefault ["radius", 0]) min (_height / 2)
-] call EFUNC(gui,uiPanel);
+// Where the column ends: a line as thin and dark as the frame round the panel, so the hint line reads as
+// part of the block rather than a bar of its own.
+private _lineColor = _theme getOrDefault ["panelBorder", []];
 
-// In the inventory's footer size, two lines of it: the panel is narrow, and a longer hint wraps rather
-// than being cut off.
-private _size = UNIT * 0.558;
+if (_lineColor isNotEqualTo []) then {
+    private _line = [_display, "EINV_PanelRect", controlNull, [_left, _top, _width, pixelH]] call EFUNC(gui,uiCreate);
+    _line ctrlSetBackgroundColor _lineColor;
+};
+
+// The text, centred, its lines as high as ACE's sort bar (fnc_layout gives the band one or two of them).
 private _padX = SQUARE(UNIT * 0.4);
-private _padY = (_height - _size * 2.6) / 2;
+private _padY = SNAP_H(HINT_PAD * ACE_GRID_H);
 
 uiNamespace setVariable [QEGVAR(gui,hint), [
-    _display, "EINV_FooterHint", controlNull,
-    [_left + _padX, _top + _padY, _width - _padX * 2, _size * 2.6]
+    _display, "EINV_ArsenalHint", controlNull,
+    [_left + _padX, _top + _padY, _width - _padX * 2, _height - _padY * 2]
 ] call EFUNC(gui,uiCreate)];

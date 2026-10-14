@@ -42,6 +42,7 @@ GVAR(cargoPending) = false;
 GVAR(dirty) = false;
 GVAR(dragZone) = "";
 GVAR(listPress) = [];
+GVAR(listSel) = [];
 GVAR(watch) = [];
 GVAR(scrollHold) = [];
 GVAR(ctrlHeld) = false;

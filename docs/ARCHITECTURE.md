@@ -687,8 +687,8 @@ The camera switch is kept in the profile (`einv_gui_cameraOn`).
 | `barTrack`, `barFill`, `button`, `buttonHover`, `buttonText`, `keyBg`, `keyText`, `keyRound` | bars, buttons, key hints in the footer |
 
 **The "ace" theme** is not a second look but the `theme` hook of the Arsenal panel (`einv_arsenal_fnc_theme`), which edits the
-theme in place for that display only: `radius` 0, `panel` `[0,0,0,0.5]`, `panelBorder` black, `text` white, own keys `barBg`
-`[0,0,0,0.8]` (the hint strip) and `headFont` / `headSize` (`RobotoCondensed`, 5 grid heights: ACE's sort bar). The id stays, so
+theme in place for that display only: `radius` 0, `panel` `[0,0,0,0.5]`, `panelBorder` black, `text` white, own keys `headBg`
+`[0,0,0,1]` and `headFont` `RobotoCondensed` (ACE's sort bar, for the panel's title band). The id stays, so
 column scrolls survive builds. Tiles keep Glass.
 
 ### The UI kit
@@ -934,7 +934,7 @@ Registered in preInit, so Eden has them too.
 | `leftPanelFilled`, `rightPanelFilled`, `loadoutImported`, `onLoadoutLoad`, `showToggle` | `fnc_settle` a frame later |
 
 The hook table (`einv_arsenal_fnc_hooks`, section 4) sets `guest`, `theme` (the "ace" theme), `header` (none), `layout`
-(`fnc_layout`), `footer` (`fnc_footer`: a two-line hint strip), `camera` (none: ACE's), `keepOpen` (true: ACE decides when it
+(`fnc_layout`), `footer` (`fnc_footer`: the hint line), `camera` (none: ACE's), `keepOpen` (true: ACE decides when it
 closes), `frame`, `mouseDown` / `mouseUp` (`fnc_onMouse`: outside the panel taken, so the engine ignores it), `click`
 (`fnc_onClick`: double, Ctrl and Alt clicks swallowed - no equip or quick move past ACE), `wheel`, `dragCheck`, `drop`, `ground`
 (-> `fnc_remove`), `fold`, `menu` (Remove, Remove all of this kind) and `hint`. `fnc_onKey` hands the engine only R while dragging
@@ -943,11 +943,16 @@ item out.
 
 ### The panel
 
-- **Rect** (`fnc_panelRect`): top at ACE's sort bar (IDC 17, else the list's top), bottom at the list's bottom; width
-  `STORAGE_COLS` cells of `einv_gui_fnc_getCell` plus padding and scroll bar, at most `PANEL_MAX_SHARE` 1/3 of the screen; the
-  column scrolls when taller. `fnc_layout` draws one flat framed block: the container's picture (`getInfo "picture"`) and name in
-  a band as tall as the sort bar, a black line where the list begins, the open container's section and the staging section in
-  `einv_gui_fnc_drawColumn` (id `"storage"`). ACE's list is registered as the zone `"remove"`.
+- **Rect** (`fnc_panelRect`): top at ACE's sort bar (IDC 17, else the list's top), bottom at the list's bottom, like ACE's right
+  column; width `STORAGE_COLS` cells of `einv_gui_fnc_getCell` plus seams, padding and scroll bar, at most `PANEL_MAX_SHARE` 1/3
+  of the screen. `fnc_layout` draws one flat block in ACE's `[0,0,0,0.5]` and black frame. **Header**: from the sort bar's top, a band
+  `HEAD_BAND_SCALE` 1.6 times its height (the column starts that much lower than ACE's list) and as black (`ACE_SORT_BG`), the
+  container's picture (`getInfo "picture"`) at the band's height and its name in RobotoCondensed, 1.3x ACE's row text, centred. **Sections** in `einv_gui_fnc_drawColumn`
+  (id `"storage"`): the open container, then staging; both with `"box"` false, so `einv_gui_fnc_drawSection` draws no picture
+  box and the grid starts at the left edge (the inventory keeps its boxes). The column reaches down to the **hint line**, the
+  block's last band: no box of its own, a line in the frame colour over it, `EINV_ArsenalHint` in ACE's message size (5 units),
+  lines as tall as the sort bar - one, two while staging holds something (the note, in the accent colour, from the `hint`
+  hook; the idle text is cut to one line, Ctrl+wheel only where it fits beside). ACE's list is registered as the zone `"remove"`.
 - **Folds.** A caption's chevron folds its section (the `fold` hook), kept per container class - lowercase, the staging space as
   `"staging"` - in `einv_arsenal_folded` while ACE's window is open: ACE makes a new uniform, vest or backpack for every one
   picked, so folding per object would be lost. `fnc_layout` notes `foldKeys` `[[container, key], ...]` and sets each section's
@@ -956,10 +961,11 @@ item out.
   emptied, at the unit's feet (in reach), `einv_noSearch`, **`einv_storage_localOnly`**. Only for a soldier whose moves the
   storage runs on this machine at once (`fnc_isLocalRoot`: the player's own unit, any unit in single player and Eden); objNull for
   any other. Because `localOnly` objects count as local roots, moves between the container (root: the player) and staging (its own
-  root) run here with the normal reach, lock and verify checks. Its grid grows (`fnc_growStaging`, before every draw): `einv_grid
-  = [[STORAGE_COLS, rows]]` with rows = the lowest row in use (plus the heights of overflow entries) + `STAGING_FREE_ROWS` 4, at
-  least `STAGING_MIN_ROWS` 4, at most `STAGING_MAX_ROWS` 100 (its own cap, since `MAX_ROWS` 40 also bounds item and compartment
-  sizes in the rules); `getBlocks` takes that form exactly. Section id `"staging"`, side `"own"`, a crate icon (`tabIcon`) before
+  root) run here with the normal reach, lock and verify checks. Its grid grows (`fnc_growStaging`, from `fnc_layout`'s drawer
+  just before its section): `einv_grid = [[STORAGE_COLS, rows]]` with rows = the lowest row in use (plus the heights of overflow
+  entries) + `STAGING_FREE_ROWS` 4, at least `STAGING_MIN_ROWS` 10 and the rows that fill the column down to the hint line, at
+  most `STAGING_MAX_ROWS` 100 (its own cap, since `MAX_ROWS` 40 also bounds item and compartment sizes in the rules); rows past
+  the column scroll; `getBlocks` takes that form exactly. Section id `"staging"`, side `"own"`, a crate icon (`tabIcon`) before
   its caption. `fnc_onClosed` deletes it with its contents. `fnc_onDrop` notes `einv_arsenal_watch` `[container, class, count,
   until]` and the frame hook calls `fnc_syncAce` and `fnc_tellAce` once the count changed (`WATCH_TIME` 3 s at most).
 
@@ -968,13 +974,16 @@ item out.
 - **ACE's own "+"**: `fnc_snapshot` normalizes the container's places (`einv_storage_fnc_normalize`) and notes its counts by
   class, so after an add every old tile keeps its record and only the new things are laid out first-fit. `fnc_reconcile`: gains
   against the snapshot; overflow entries of a gained class are taken back out (`einv_storage_fnc_removeEntry`, at most the gained
-  count), "No room in the vest - move things to free a 1x2 space" appears in ACE's message line and the hint strip
+  count), "No room in the vest - move things to free a 1x2 space" appears in ACE's message line and the hint line
   (`fnc_sayNoRoom`), and ACE is told with `ace_arsenal_fnc_fireItemsChangedEvent` (`fnc_tellAce`; an ACE without it gets the
   follow-up in the frame-later pass). Nothing else is ever taken out.
-- **List drag.** The list's own `MouseButtonDown` handler (`fnc_onListPress`) notes a left press on its rows (not the scroll bar's
-  6 %, not the blank area below a short list). The frame hook starts a drag once the mouse moved more than `DRAG_THRESHOLD` and
-  more across than along; else it stays ACE's click. `fnc_listDrag`: the picked row (`lnbCurSelRow`), its class from `lnbData
-  [row, 0]`, not a unique item (`lnbValue [row, 2]` 1), a virtual off-screen source grid `"aceList"` whose tile carries
+- **List drag.** The list's own `MouseButtonDown` handler (`fnc_onListPress`) notes a left press on it (where, Shift, the frame;
+  not on the scroll bar's 6 %) and reads no row: the list moves its selection to the pressed row only after that handler, so
+  `lnbCurSelRow` still named the row before, and a row had to be picked before it could be dragged. The frame hook starts a drag
+  once the mouse moved more than `DRAG_THRESHOLD` and more across than along; else it stays ACE's click. `fnc_listDrag`: the row
+  `lnbCurSelRow` if the list's `LBSelChanged` (`einv_arsenal_listSel`, `fnc_onOpened`) picked one since the press, else the row
+  under the press (list top, `rowHeight` or `sizeEx` of its config, `ctrlScrollValues`; none on the blank area), its class from
+  `lnbData [row, 0]`, not a unique item (`lnbValue [row, 2]` 1), a virtual off-screen source grid `"aceList"` whose tile carries
   `dragEntry` with `count` = the stack (Shift: all); then `einv_gui_press` and `einv_gui_fnc_startDrag`. `fnc_dragCheck`: only a
   grid of the panel is a target (else `[]`). The drop (`fnc_onDrop`) calls `fnc_addTo [container, class, count, [col, row, block,
   w, h]]`: `normalize`, then `addItemToUniform` / `Vest` / `Backpack` for the open container, `addNew` for staging and for what
@@ -1082,9 +1091,25 @@ controls stay in uiNamespace. **Every edit ends in `fnc_commit [ast, redraw = tr
   `fnc_drawResults`, 30 to a page) and an editor on the right. One class at a time, one rule per class. "Only classes with own
   rules" lists, on Items, classes whose rules set `footprint` or `stack`; on Containers, `grid` or `like` (`fnc_ownClassRules`'
   `named`).
-- **Review** (`fnc_drawReview`): the own rules as sentences with a cross, the warnings, the text (own, full, or a
-  `cba_settings.sqf` line) to edit and Apply, Import, Copy, Save (Apply in CBA's menu), Reset to default, and the player's own
-  presets (kept in their profile).
+- **Review** (`fnc_drawReview`): one column, no rules grammar unless asked for. "What changes" (`fnc_drawChanges [.., "saved"]`)
+  lists every difference between the draft and `clean` (what is saved where the wizard saves: the setup in effect when it opened,
+  saved or reloaded; on a client that may not save, the one in use), each line in words and marked new / changed / removed, with
+  a cross that takes that one change back, and under it the count against the Default preset. Warnings only when there are any.
+  Then where Save goes (or why it may not, in red), the force-over-the-mission switch where `canEdit` allows it, and one row:
+  Export (copies `fnc_exportText "cba"` where `copyToClipboard` works - server, single player, Eden; an MP client gets the text
+  fold opened on the CBA line to copy by hand), Import... (`fnc_openImport`, anchored under the button), Reset to default
+  (`fnc_confirm`, then `RULES_DEFAULT`), Save on the right. Two folds, closed whenever the wizard opens (`reviewDrafts`,
+  `reviewText`): "Saved drafts" (`fnc_personalPresets`, still stored as `einv_setup_presets` in the profile, shown as drafts so
+  they are not taken for Default / Realism) and "Show as text" (own / full / CBA line, read only until Edit text sets `textEdit`;
+  Apply text commits and closes the editing).
+- **`fnc_changeRows [against = "saved" | "default", describe = true]`** is the one diff behind both lists and the header count:
+  rows `[kind, status, label, words, picture, before, class, statement, undo]` for the preset, the cell size, the override switch
+  (saved only), then every group and rule matched by what it is for (a group by name, a rule by its conditions), so a class given
+  another size is one "changed" row. A single-class rule shows the class's picture and display name plus `fnc_describeRule [..,
+  valuesOnly = true]`. `undo` is `[code, args]` and ends in `fnc_commit` (undo/redo keep working); a removed statement goes back
+  after the one it followed, since a later rule wins. Reference setups are parsed once per text (`changeRefs`).
+  `fnc_countChanges` counts these rows (`describe = false`), so the header chip, the step dots and Review agree. Start's "What you
+  changed" is the same card against the Default preset (`"default"`): preset, cell size and every own rule.
 
 ### The class index
 
