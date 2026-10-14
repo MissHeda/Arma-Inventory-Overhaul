@@ -2,7 +2,6 @@
 PREP(initUnit);
 PREP(guardVanilla);
 PREP(onInventoryOpened);
-PREP(openVanilla);
 
 // Living persons: the scroll action, who may do what, and their gear changed where they are local
 PREP(addPersonAction);

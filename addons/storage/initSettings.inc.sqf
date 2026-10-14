@@ -15,6 +15,17 @@
 
 // ----- Containers -----
 
+// The same for everyone: the machine that owns a unit moves its surplus, the server's AI included
+// (fnc_opMigrate). A switch for a mission that wants the engine's overfilled containers left alone.
+[
+    QGVAR(migrate),
+    "CHECKBOX",
+    [LLSTRING(Setting_Migrate), LLSTRING(Setting_Migrate_Desc)],
+    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Containers)],
+    true,
+    1
+] call CBA_fnc_addSetting;
+
 // The same for everyone, like the rules: every machine has to agree on a container's compartments, or
 // a layout worked out on one would not fit on another. The older way to size containers by class -
 // the items addon reads it as rules of its own, after the rules text (einv_items_fnc_compileRules),

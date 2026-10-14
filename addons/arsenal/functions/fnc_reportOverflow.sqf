@@ -4,7 +4,9 @@
  * Tells the player once when a unit's uniform, vest or backpack holds more than its grid has room for
  * (fnc_checkOverflow): in ACE Arsenal's message line while it is open, as ACE's text on the screen once it
  * is closed - after ACE Arsenal (a loadout brought it) or the vanilla one left alone. Nothing is taken
- * out - a whole loadout is the player's to sort.
+ * out. Once the arsenal is closed, what has somewhere to go has been moved on to the unit's next
+ * container with room just before (einv_storage_fnc_requestMigrate), so what is named then is what the
+ * containers cannot take between them - the player's to sort.
  *
  * Arguments:
  * 0: Unit <OBJECT>

@@ -16,6 +16,12 @@
         <Key ID="STR_einv_storage_Setting_DebugDrop_Desc">
             <English>Writes every step of taking a worn\nbackpack off onto the ground to the\nRPT, each line starting "einv drop:":\nwhere a drag was let go and what it\nasked for (any worn item), the request,\nthe take-off, the pile it goes onto,\nthe backpack added there, its contents\nfilled in, the answer and anything\nsettled afterwards.\n\nFor tests only - leave it off.</English>
         </Key>
+        <Key ID="STR_einv_storage_Setting_Migrate">
+            <English>Move overfull items on</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_Migrate_Desc">
+            <English>What a script, a loadout or the engine's\nown commands (addItem, addMagazine, ACE)\nput into a uniform, vest or backpack\nbeyond its cells moves on to the next\ncontainer with free cells: uniform,\nthen vest, then backpack.\n\nWhat fits nowhere stays where it is,\nshown apart in red. Nothing moves while\nan arsenal is open - the arsenal gives\nback what does not fit.\n\nSwitch it off to leave everything\nwhere the engine put it.</English>
+        </Key>
         <Key ID="STR_einv_storage_Setting_NearbyRange">
             <English>Reach</English>
         </Key>

@@ -46,8 +46,7 @@ if (
     }
 ) exitWith {false};
 
-// With the window switched off for this player (replaceVanilla), only the backpack, as vanilla.
-private _mode = [_target, GVAR(replaceVanilla)] call FUNC(canOpenPerson);
+private _mode = [_target] call FUNC(canOpenPerson);
 
 // ACE's own conditions: the person not claimed by someone else (dragged, carried, escorted), the player
 // free to reach out - not handcuffed, surrendering, dragging, carrying, on a ladder, on the map or in

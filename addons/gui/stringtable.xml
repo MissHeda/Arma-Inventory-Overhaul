@@ -175,9 +175,6 @@
         <Key ID="STR_einv_gui_Hint_Selected">
             <English>%1 selected - drag them together, double click to move them over, Delete drops them</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_SharedHere">
-            <English>In multiplayer, crates, the ground, vehicles and bodies always open here</English>
-        </Key>
         <Key ID="STR_einv_gui_Hint_Taken">
             <English>That place was just taken</English>
         </Key>
@@ -399,12 +396,6 @@
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonWorn_Desc">
             <English>Who may take off what a living person\nwears - weapons, helmet, uniform, vest,\nbackpack and the rest - by dragging,\nCtrl+click or the context menu.\n\nCaptives are surrendered or handcuffed\n(ACE). Bodies can always be stripped.</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_ReplaceVanilla">
-            <English>Replace the vanilla inventory</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_ReplaceVanilla_Desc">
-            <English>Opens Enhanced Inventory instead of\nthe vanilla inventory.\n\nSwitched off, the vanilla inventory\nopens as before. In multiplayer only\nyour own gear opens there: crates, the\nground, vehicles and bodies always\nopen here, so everyone sees the same\nand nothing is ever taken twice.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchBodies">
             <English>Search bodies</English>

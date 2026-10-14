@@ -3,11 +3,12 @@
  * Author: Miss Heda
  * Runs the ops of one phase on this machine - the root's authority -, journaled (GVAR(journal)). Each
  * op's checks first: every holder it names under the phase's root (fnc_verifyChain, else "Moved"; the
- * unit of takeOff and putOn is the root itself), the requester's reach (fnc_inReach, else
- * "OutOfReach") and every guard (GVAR(guards)) - reach and guards not for settlement -; then its
- * function (GVAR(ops)). An input an earlier op of this phase produced is filled in here; any other ref
- * still in the args was never produced, and the op says "Skipped". Every payload that leaves a
- * container is noted the moment it left, and marked consumed the moment it landed (fnc_journalNote).
+ * unit of takeOff, putOn and migrate is the root itself, the holders of migrate its three containers),
+ * the requester's reach (fnc_inReach, else "OutOfReach") and every guard (GVAR(guards)) - reach and
+ * guards not for settlement -; then its function (GVAR(ops)). An input an earlier op of this phase
+ * produced is filled in here; any other ref still in the args was never produced, and the op says
+ * "Skipped". Every payload that leaves a container is noted the moment it left, and marked consumed
+ * the moment it landed (fnc_journalNote).
  *
  * Every holder the ops touched - named, or with places changed - is laid out against the buffered
  * records and written once (fnc_writePlaces); then the continuation gets [results, revisions,
@@ -143,6 +144,16 @@ GVAR(executing) = true;
                 _units pushBack (_args param [0, objNull]);
             };
             case "putGround": {};
+            case "migrate": {
+                // The unit is the root; the containers it moves cargo between are the holders it touches.
+                private _unit = _args param [0, objNull];
+
+                _units pushBack _unit;
+
+                if (!isNull _unit) then {
+                    _holders append ([uniformContainer _unit, vestContainer _unit, backpackContainer _unit] select {!isNull _x});
+                };
+            };
             case "move": {
                 _holders append [_args param [0, objNull], _args param [1, objNull]];
             };

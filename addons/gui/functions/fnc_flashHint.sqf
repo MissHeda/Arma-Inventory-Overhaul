@@ -18,7 +18,7 @@
  * Arguments:
  * 0: Reason - "NoBackpack", "NoRoom", "NowhereToGo", "NoFit", "LookOnly" (a living person's
  *    gear the settings let the player only look at), "Failed", "Gone", "Taken", "Moved", "OutOfReach",
- *    "IntoItself", "GroupNoSlot", "NoGround", "PlacedElsewhere", "SharedHere", "NotReady", "Locked",
+ *    "IntoItself", "GroupNoSlot", "NoGround", "PlacedElsewhere", "NotReady", "Locked",
  *    "Waiting", "MovedSome", "Returned", "Grounded", or a text to show <STRING>
  * 1: What the text needs filled in - "MovedSome" how many of how many, "Returned" and "Grounded" how
  *    many <ARRAY> (default: [])
@@ -56,7 +56,6 @@ private _text = switch (_reason) do {
     case "GroupNoSlot": {LLSTRING(Hint_GroupNoSlot)};
     case "NoGround": {LLSTRING(Hint_NoGround)};
     case "PlacedElsewhere": {LLSTRING(Hint_PlacedElsewhere)};
-    case "SharedHere": {LLSTRING(Hint_SharedHere)};
     case "NotReady": {LLSTRING(Hint_NotReady)};
     case "Waiting": {LLSTRING(Hint_Waiting)};
     case "MovedSome": {LLSTRING(Hint_MovedSome)};

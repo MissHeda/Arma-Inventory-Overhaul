@@ -61,17 +61,11 @@
         <Key ID="STR_einv_hotbar_Menu_Bind">
             <English>Put on the hotbar (%1)</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Menu_BindPlain">
-            <English>Put on the hotbar</English>
-        </Key>
         <Key ID="STR_einv_hotbar_Menu_Clear">
             <English>Clear hotbar %1</English>
         </Key>
         <Key ID="STR_einv_hotbar_Menu_Unbind">
             <English>Take off the hotbar (%1)</English>
-        </Key>
-        <Key ID="STR_einv_hotbar_Menu_UnbindPlain">
-            <English>Take off the hotbar</English>
         </Key>
         <Key ID="STR_einv_hotbar_Message_InHand">
             <English>%1 in hand</English>

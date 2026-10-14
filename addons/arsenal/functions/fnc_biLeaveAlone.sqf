@@ -3,8 +3,8 @@
 /*
  * Author: Miss Heda
  * With the setting on "leave it alone": notes the unit when the vanilla arsenal is about to open and, after
- * it closed, reports what does not fit the grid (fnc_reportOverflow). Nothing is removed - the mission
- * chose the vanilla arsenal.
+ * it closed, passes what does not fit the grid on to the unit's next container with room and reports what
+ * has nowhere to go (fnc_reportOverflow). Nothing is removed - the mission chose the vanilla arsenal.
  *
  * The vanilla arsenal forgets its unit before it says it closed, so the unit is kept from the opening. The
  * Virtual Garage raises no opening, so it never reports. The Eden editor never reports: the unit there is
@@ -38,9 +38,12 @@ GVAR(biLeave) = [];
 
 if (isNull _center) exitWith {};
 
-// A frame later: the vanilla arsenal is gone, the unit's gear is as it left it.
+// A frame later: the vanilla arsenal is gone, the unit's gear is as it left it. What it holds beyond the grid
+// moves on to the next container with room first (einv_storage op "migrate", nothing moves under an open
+// arsenal), then what has nowhere to go is reported.
 [{
     params ["_center"];
 
+    [_center] call EFUNC(storage,requestMigrate);
     [_center, displayNull] call FUNC(reportOverflow);
 }, [_center]] call CBA_fnc_execNextFrame;

@@ -36,8 +36,8 @@ Phase 1 is built - read the repo before changing anything.
 ## What this is - and what it is not
 - Built from zero: our own display, our own data layer, our own rendering. Nothing is patched into
   RscDisplayInventory and no vanilla list or slot control is reused. It is not a reskin or an
-  extension of the vanilla screen like Better Inventory. The vanilla inventory only stays as a
-  fallback.
+  extension of the vanilla screen like Better Inventory. The vanilla inventory does not stay as a
+  fallback either: since 2026-10-14 it is blocked completely.
 - Tarkov-like: items are tiles of a fixed size on container grids; you drag, rotate and stack them;
   loot has to be searched before you see what it is.
 - Modern: tiles instead of text lists, instant visual feedback, short animations, consistent
@@ -174,7 +174,7 @@ Phase 1 is built - read the repo before changing anything.
 ## How the inventory works underneath
 - Take over: player addEventHandler ["InventoryOpened", {...; true}] - returning true blocks the
   vanilla display; open our own dialog with the container(s) from the event. Also hook ACE's "open
-  inventory" interactions and vehicles. Keep a CBA keybind to open the vanilla one.
+  inventory" interactions and vehicles. (No keybind to open the vanilla one - dropped 2026-10-14.)
 - No "move item" command exists. Moving = remove + add, with the right command per kind: items
   (addItemCargoGlobal), magazines with their ammo (magazinesAmmoCargo / addMagazineAmmoCargo),
   weapons with attachments (weaponsItemsCargo / addWeaponWithAttachmentsCargoGlobal), backpacks
@@ -196,7 +196,7 @@ Phase 1 is built - read the repo before changing anything.
 
 ## Compatibility to keep in mind
 - Other mods add controls to the vanilla display (ACE, TFAR/ACRE, EFAK itself). They won't appear
-  in ours - offer the vanilla fallback, and integrate the important ones.
+  in ours - integrate the important ones (there is no vanilla fallback since 2026-10-14).
 - Unique items change class (TFAR/ACRE radios, EFAK/EUP kit instances like efak_IFAK_7) - size and
   category must come from the base class.
 - EFAK/EUP: show a kit's player-given name via efak_core_fnc_getKitLabel (returns "" when there is
@@ -205,7 +205,7 @@ Phase 1 is built - read the repo before changing anything.
 
 ## Plan - one phase at a time, wait for my test before the next
 1. Skeleton: HEMTT project, main addon, the feature addon(s), CBA settings stub, check.yml. An empty
-   window in the EFAK design that opens instead of the vanilla inventory, with the fallback keybind.
+   window in the EFAK design that opens instead of the vanilla inventory.
    Plus one test grid with a few hard-coded tiles to settle cell size, pixel snapping and
    rotation early.
 2. Data layer, read-only: item sizes, container grids, layout store + reconcile. Show the slots,
@@ -219,8 +219,7 @@ Phase 1 is built - read the repo before changing anything.
 6. Multiplayer safety: server-routed changes for shared containers, layout sync, body changes where
    the body is local, search state per player.
 7. Polish and compat: search field (dims what doesn't match), context menu, ACE (weight, magazine
-   repack, medical items), TFAR/ACRE radios, EFAK/EUP names and open kit, the vanilla fallback for
-   other mods' inventory buttons.
+   repack, medical items), TFAR/ACRE radios, EFAK/EUP names and open kit.
 
 Not now, unless I ask: loading magazines round by round, quick slots / hotbar, weapon presets, a
 stash between missions, durability or armour values.

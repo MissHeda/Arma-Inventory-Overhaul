@@ -3069,3 +3069,20 @@ So a container drawn on the wizard's canvas looks exactly like the drawing, and 
   line, `einv_items_aliasWarned`) and in `fnc_compileRules`' chain (another mod's preset on the old id).
   `tools/check_default_ruleset.sqf` expects the 120 % grids and ten columns and checks the alias and canvas round trips.
 - Built and checked in code only: nothing of this has run in the game yet.
+
+## No vanilla inventory (0.4.3) - supersedes the parts above it contradicts
+
+- **Decision (Mia, 2026-10-14):** settings like "use normal inventory" go; while the mod is loaded the vanilla inventory is
+  unusable, and the normal one butting in is what made the window buggy.
+- **Gone:** the setting `einv_gui_replaceVanilla` and its stringtable keys, `fnc_openVanilla` (and `GVAR(bypassUntil)`), the
+  grace time (`GVAR(blockedUntil)`, `BLOCK_GRACE`), the fallbacks in `fnc_open`, the backpack-only vanilla view in
+  `fnc_openPerson`, the second argument of `fnc_canOpenPerson`, the vanilla route and the "SharedHere" hint of
+  `fnc_onInventoryOpened` (with `GVAR(openHint)` and `GVAR(sharedHintShown)`), the vanilla path of `einv_hotbar_fnc_useKit`,
+  the hotbar's two entries in CBA's item menu, and the lock addon's closing of display 602 (`VANILLA_CLOSE_DISTANCE`).
+- **Blocked:** the unit handler returns true for every call, also for a unit that is not `ACE_player`.
+  `fnc_guardVanilla` closes display 602 whenever it exists - no grace, no exceptions - from the display load event, from a
+  per-frame handler every `GUARD_INTERVAL` 0.25 s (`XEH_postInit`) and from `fnc_onFrame`. It hides the controls first.
+- **Not done:** a config patch of the display's `onLoad`. CBA raises its load event from `BIS_fnc_initDisplay`, which the stock
+  `onLoad` calls; replacing it would skip every other mod's handler, close at the moment the handler does anyway, and race
+  Better Inventory's patch of the same attribute.
+- Built and checked in code only: nothing of this has run in the game yet.

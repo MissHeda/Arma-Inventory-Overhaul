@@ -4,12 +4,15 @@
  * Puts the inventory handler onto a unit the player now controls.
  *
  * A plain event handler rather than a CBA class event handler: only the unit's own handler can
- * answer the engine with true and so keep the vanilla inventory from opening. Once per unit - it
- * stays on a unit the player leaves, where fnc_onInventoryOpened lets everything through.
+ * answer the engine with true and so keep the vanilla inventory from opening. It always answers true -
+ * there is no vanilla inventory to let through, this window opens in its place (fnc_onInventoryOpened).
+ * A vanilla inventory that loads anyway - another mod's handler, a script, a script error in this
+ * one - is closed at once (fnc_guardVanilla).
  *
- * Every answer of true starts a short grace time (BLOCK_GRACE) in which a vanilla inventory that
- * loads anyway is closed again (fnc_guardVanilla); an answer of false ends it, the vanilla inventory
- * was asked for.
+ * Once per unit. Called for the unit the player is now by the CBA unit event (XEH_postInit): the first
+ * body, a respawn, a team switch and the soldier a Zeus remote controls all arrive there. The handler
+ * stays on a unit the player leaves, where fnc_onInventoryOpened opens nothing but still blocks the
+ * vanilla inventory.
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -23,19 +26,13 @@
  * Public: No
  */
 
-// How long after an answer of true a vanilla inventory that still loads is closed again, in seconds
-// (fnc_guardVanilla). The window opens a frame later; once it is open the guard needs no time.
-#define BLOCK_GRACE 1.5
-
 params ["_unit"];
 
 if (isNull _unit || {(_unit getVariable [QGVAR(inventoryHandler), -1]) >= 0}) exitWith {};
 
 private _id = _unit addEventHandler ["InventoryOpened", {
-    private _blocked = _this call FUNC(onInventoryOpened);
+    _this call FUNC(onInventoryOpened);
 
-    GVAR(blockedUntil) = [-1, diag_tickTime + BLOCK_GRACE] select (_blocked isEqualTo true);
-
-    _blocked
+    true
 }];
 _unit setVariable [QGVAR(inventoryHandler), _id];

@@ -45,9 +45,18 @@ A client can see them and cannot change them.
       hovered up to the cell's edge; the ring `aaa/aba/aaa`.
 - [ ] Kits (EFAK) open and pack by drag; radios (TFAR / ACRE2) hint, menu, Open radio; ACE cargo cards, Unload.
 - [ ] Magazine repack by drop, Repack all, the fill bar.
+- [ ] Surplus moves on: `player addItemToUniform` of more than the uniform's grid holds (a loop of 30 bandages, with the window
+      shut and open): within a second the rest lies in the vest, then the backpack, none of it as overflow while a cell is
+      free; a full unit keeps it as overflow (red); `addItem` / `addMagazine` / `addWeapon` and a loadout set the same way. On
+      an AI in the group (listen server and dedicated), on a body opened from the window and on a looted person. ACE Arsenal
+      open: nothing moves, an add with no free cell is taken back; after the close the surplus moves on first and the notice
+      names only what fits nowhere. The setting "Move overfull items on" off: nothing moves. The RPT: no `Error`, no item lost
+      or doubled (count before and after).
 - [ ] Sounds, the looting pose, a movement key closes the window.
 - [ ] Hotbar 4 to 0: bind by drag, use, the HUD strip.
-- [ ] Vanilla fallback: replacement off opens the vanilla inventory; crates in multiplayer still open ours.
+- [ ] No vanilla inventory: the Gear key, ACE's "Inventory" on an unconscious soldier, ACE's "Open backpack", a crate and a
+      vehicle all open ours; after a respawn, a team switch and in Zeus remote control as well; with Better Inventory
+      loaded `findDisplay 602` stays null; the setting "Replace the vanilla inventory" is gone from the CBA menu.
 
 ## C. ACE Arsenal panel
 

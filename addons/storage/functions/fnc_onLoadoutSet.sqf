@@ -15,7 +15,8 @@
  *
  * What came over the network or from a profile is not trusted: only well-formed records are kept. A
  * loadout without the key, or of another version, changes nothing - its things lie where the layout puts
- * them first.
+ * them first. Any loadout, with the key or without, also notes its unit for the surplus check
+ * (fnc_queueMigrate): what it holds beyond the grid moves on to the next container with room.
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -34,6 +35,17 @@
 params [["_unit", objNull, [objNull]], ["_loadout", [], [[]]], ["_extended", createHashMap, [createHashMap]]];
 
 if (isNull _unit) exitWith {};
+
+// Whatever the loadout brought beyond the grid - a loadout ignores our cells, with or without places in it -
+// moves on to the unit's next container with room (fnc_opMigrate), a moment after the places below are in.
+// The unit's own machine looks: told by an event when the loadout was set somewhere else.
+if (!is3DEN) then {
+    if (local _unit) then {
+        [_unit] call FUNC(queueMigrate);
+    } else {
+        [QGVAR(migrateUnit), [_unit], _unit] call CBA_fnc_targetEvent;
+    };
+};
 
 private _layout = _extended getOrDefault ["einv_layout", []];
 

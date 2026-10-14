@@ -50,6 +50,23 @@
 // How often the server looks at held phases and re-sends, in seconds (fnc_tick, fnc_hubTick).
 #define HUB_TICK 0.25
 
+// Surplus migration (fnc_queueMigrate, fnc_tickMigrate, fnc_requestMigrate, fnc_opMigrate). A unit whose cargo
+// changed is looked at MIGRATE_DELAY seconds later, so a script adding twenty items over a few frames is one
+// look; the waiting units are looked at every MIGRATE_TICK seconds, MIGRATE_PER_TICK of them at most. A request
+// that was not carried out (the server not ready, the unit changed hands) is asked again after MIGRATE_RETRY
+// seconds, at most MIGRATE_TRIES times; under an arsenal the unit waits MIGRATE_WAIT seconds at a time.
+#define MIGRATE_DELAY 0.3
+#define MIGRATE_TICK 0.25
+#define MIGRATE_PER_TICK 3
+#define MIGRATE_RETRY 3
+#define MIGRATE_TRIES 3
+#define MIGRATE_WAIT 1
+
+// ACE Arsenal's display (1127001, ARSENAL_IDD of the arsenal addon) or the vanilla arsenal's is open. Both
+// do their own adding and taking back on the unit's cargo and read it as they go, so nothing is moved under
+// them (fnc_requestMigrate, fnc_opMigrate); the arsenal addon asks again once they are closed.
+#define ARSENAL_OPEN (!isNull (findDisplay 1127001) || {!isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull])})
+
 // MAX_ROWS, MAX_BLOCKS and MAX_CELLS live in main's script_macros.hpp: the items addon reads the
 // rules that size containers and has to keep to the same limits.
 

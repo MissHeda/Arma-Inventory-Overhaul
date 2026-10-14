@@ -20,7 +20,7 @@ GVAR(ops) = createHashMapFromArray [
     ["place", QFUNC(opPlace)], ["placeMany", QFUNC(opPlaceMany)], ["sort", QFUNC(opSort)],
     ["normalize", QFUNC(opNormalize)], ["move", QFUNC(opMove)], ["take", QFUNC(opTake)],
     ["put", QFUNC(opPut)], ["putGround", QFUNC(opPutGround)], ["takeOff", QFUNC(opTakeOff)],
-    ["putOn", QFUNC(opPutOn)], ["repack", QFUNC(opRepack)]
+    ["putOn", QFUNC(opPutOn)], ["repack", QFUNC(opRepack)], ["migrate", QFUNC(opMigrate)]
 ];
 
 // Checks every op passes on the machine that runs it: CODE [op, args, requester, root] -> "" or a reason.
@@ -50,6 +50,11 @@ GVAR(layoutKeys) = createHashMap;
 // editor runs this too.
 ["CBA_loadoutGet", {_this call FUNC(onLoadoutGet)}] call CBA_fnc_addEventHandler;
 ["CBA_loadoutSet", {_this call FUNC(onLoadoutSet)}] call CBA_fnc_addEventHandler;
+
+// Units local here whose cargo changed and whose surplus - what their uniform, vest or backpack holds beyond
+// the grid - is to be looked at, [unit, not before, tries so far, requester] each (fnc_queueMigrate,
+// fnc_tickMigrate). Filled by the triggers in XEH_postInit, fnc_onLoadoutSet and the arsenal addon.
+GVAR(migrateDue) = [];
 
 // While a phase's ops run here: the places they changed, [[holder, records], ...] - written once at the
 // end - and what the ops read of each holder, holder netId or kit key -> HashMap (fnc_execute).

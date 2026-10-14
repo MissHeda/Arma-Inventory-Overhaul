@@ -120,11 +120,14 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   scripts.
 - **Multiplayer:** where things lie syncs by itself - every player sees the same arrangement, also of
   containers your scripts fill. Every change runs where the container is local and the server carries what
-  moves between machines, so the server has to run the same version of Enhanced Inventory. In multiplayer,
-  crates, the ground, vehicles and bodies always open in Enhanced Inventory, also for players who switched
-  the replacement off. Scripts can move items with `einv_storage_fnc_moveEntry`, `einv_storage_fnc_equip`
-  and `einv_storage_fnc_unequip`; `[cursorObject] call einv_storage_fnc_dumpPlaces` writes where things lie
-  to the RPT, and the client setting `einv_storage_debugDrop` writes every step of a backpack drop to it.
+  moves between machines, so the server has to run the same version of Enhanced Inventory. Scripts can move
+  items with `einv_storage_fnc_moveEntry`, `einv_storage_fnc_equip` and `einv_storage_fnc_unequip`;
+  `[cursorObject] call einv_storage_fnc_dumpPlaces` writes where things lie to the RPT, and the client setting
+  `einv_storage_debugDrop` writes every step of a backpack drop to it. The engine's own commands (`addItem`,
+  `addMagazine`, `addWeapon`, loadouts, ACE) ignore the grid: what a unit's uniform, vest or backpack then holds
+  beyond its cells moves on to the next container with free cells (uniform, vest, backpack) a moment later, on the
+  machine the unit is local on; what fits nowhere stays shown as overflow. The server setting
+  `einv_storage_migrate` switches that off.
 - **Arsenal:** ACE Arsenal is the arsenal - `ace_arsenal_fnc_initBox` and `ace_arsenal_fnc_openBox`, its boxes,
   loadouts and Zeus arsenal work as always; the grid panel hooks into its window (also in the Eden editor), and
   free cells are the only limit on what goes in. The vanilla Virtual Arsenal is a server setting,
@@ -150,6 +153,7 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
 
 ## The vanilla inventory
 
-Replaced. Players or missions can switch the replacement off in the CBA settings ("Replace the
-vanilla inventory") - in multiplayer only for the player's own gear -, and should the window ever fail to
-open, the vanilla one opens instead.
+Gone while this mod is loaded. The Gear key, ACE's "Inventory" and "Open backpack", crates, vehicles and
+bodies all open Enhanced Inventory, and there is no setting to bring the vanilla one back. Should another
+mod or a script open it anyway (Better Inventory, `createDisplay "RscDisplayInventory"`), it is closed again
+at once; should the window ever fail to open, nothing opens and the RPT says why.

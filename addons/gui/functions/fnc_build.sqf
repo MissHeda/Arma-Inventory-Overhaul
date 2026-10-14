@@ -21,8 +21,7 @@
  * A repack of magazines in progress is drawn on the tiles last (einv_magazines_fnc_drawJob).
  *
  * The layout is looked up by name, so a look that is missing or broken leaves a window with only its
- * header and footer - still one that can be closed or swapped for the vanilla inventory - rather than
- * no window at all.
+ * header and footer - still one that can be closed - rather than no window at all.
  *
  * A window that attached with hooks (fnc_attach) is asked at six places: the theme and the context may
  * be changed ("theme", "context"), the header, the layout and the footer can be its own ("header",

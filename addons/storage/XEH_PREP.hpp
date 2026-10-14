@@ -71,6 +71,7 @@ PREP(opPutGround);
 PREP(opTakeOff);
 PREP(opPutOn);
 PREP(opRepack);
+PREP(opMigrate);
 
 // The hub on the server: carries what a transaction took out between machines until it landed
 PREP(hubStart);
@@ -112,6 +113,12 @@ PREP(addNew);
 PREP(countClass);
 PREP(onLoadoutGet);
 PREP(onLoadoutSet);
+
+// Surplus: what a unit's uniform, vest or backpack holds beyond its grid, moved on to the next container
+// with room - asked for when its cargo changed, carried out by the unit's authority (op "migrate")
+PREP(requestMigrate);
+PREP(queueMigrate);
+PREP(tickMigrate);
 
 // Compartments
 PREP(blocksFor);

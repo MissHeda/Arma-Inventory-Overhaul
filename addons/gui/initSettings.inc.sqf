@@ -2,17 +2,6 @@
 
 // ----- General -----
 
-// Each player's own choice by default - a mission can still force it. In multiplayer it only decides the
-// player's own gear (fnc_onInventoryOpened).
-[
-    QGVAR(replaceVanilla),
-    "CHECKBOX",
-    [LLSTRING(Setting_ReplaceVanilla), LLSTRING(Setting_ReplaceVanilla_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
-    true,
-    0
-] call CBA_fnc_addSetting;
-
 // Each player's own eyes.
 [
     QGVAR(compareTooltip),

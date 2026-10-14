@@ -28,6 +28,13 @@ if (!hasInterface) exitWith {};
     [_unit] call FUNC(addAgentAction);
 }, true] call CBA_fnc_addPlayerEventHandler;
 
+// The vanilla inventory is gone for good. The handler above keeps the engine from opening it, and the
+// display's load event (CfgEventHandlers) closes one that comes up anyway; this is the last net, for a
+// display that loaded without raising that event.
+[{
+    [] call FUNC(guardVanilla);
+}, GUARD_INTERVAL] call CBA_fnc_addPerFrameHandler;
+
 // One person action per soldier, on every client with a player: the units there now, those made later
 // and those that respawned. A team switch or Zeus remote control needs nothing - the condition asks
 // ACE_player - and a locality change neither: an action stays on its object.

@@ -12,8 +12,8 @@ plan; the plan behind the rules engine and the wizard is `docs/design/design_syn
 ### What the mod is
 
 Enhanced Inventory replaces the vanilla inventory (`RscDisplayInventory`) with a window of its own, built at run time from
-controls: nothing is patched into the vanilla display, and the vanilla inventory stays only as the fallback (setting
-`einv_gui_replaceVanilla`, `einv_gui_fnc_openVanilla`).
+controls: nothing is patched into the vanilla display, and the vanilla inventory never opens while the mod is loaded - there is
+no setting to bring it back and no fallback to it (section 4, Opening).
 
 - **A grid inventory.** An item is a tile with a footprint in cells (a rectangle, or a shape such as an L); a container (uniform,
   vest, backpack, crate, vehicle, pile on the ground) is a set of compartments of cells. Where an item lies is stored per
@@ -408,7 +408,9 @@ In order:
 3. **first fit** - the rest, largest first (then category, kind, key, index): compartment after compartment, row by row, upright,
    else turned. A square rectangle never turns; a shape in a square box turns when turned it takes other cells.
 
-An entry no compartment has room for (a script or another mod added it) is `overflow`: shown apart, never lost.
+An entry no compartment has room for (a script or another mod added it) is `overflow`: shown apart, never lost. On a unit's
+uniform, vest or backpack the surplus is moved on to the unit's next container with free cells (section "Surplus" below); what
+fits nowhere stays overflow.
 
 **Place records** are `[key, col, row, w, h, block, rot]`: `w` and `h` as it lies, `rot` 0 upright or 1 turned a quarter
 clockwise, always written with `rot`. A record without it (saved places, loadouts, snapshots, payloads of older shape; six
@@ -487,7 +489,7 @@ reach check (`REACH_SLACK` 2 m beyond the setting).
 
 **Requests** - `einv_storage_fnc_request [phases, callback, args, silent, requester]` (public). A phase is `[root, ops]`, ops on
 one root; an op is `[name, args]` from `einv_storage_ops`: `place` (one tile to another cell of one holder), `placeMany` (several
-lifted and put down at once, refused as a whole when any cell is not free), `sort`, `normalize`, `move` (within one root), `take`,
+lifted and put down at once, refused as a whole when any cell is not free), `sort`, `normalize`, `migrate`, `move` (within one root), `take`,
 `put`, `putGround` (on the server), `takeOff`, `putOn`, `repack`, and compat's `kitTake`, `kitPut`, `kitPlace`, `kitMove`,
 `kitRemoveIfEmpty`. An op's input may be a ref `["#ref", phase, op, n]` to the n-th payload an earlier op produced. Each op
 answers `[status, produced, extra]`, status `""` or a reason (`"Gone"`, `"Taken"`, `"NoRoom"`, `"NoBackpack"`, `"Moved"`,
@@ -553,6 +555,38 @@ body's places are public for its looters); any other write is public at once. In
 authority lays the holder out and writes the picture (`fnc_normalize`, `fnc_opNormalize`; a stale viewer copy at most every
 `FORCE_REPEAT` 30 s) - exactly what every viewer already shows, so nothing visibly moves. `fnc_dumpPlaces [holder]` (public)
 writes revision, records, nested tags and this machine's drawn view to the RPT and returns the text.
+
+### Surplus (`fnc_opMigrate`, `fnc_requestMigrate`, `fnc_queueMigrate`, `fnc_tickMigrate`)
+
+The engine's own commands (`addItem`, `addMagazine`, `addWeapon`, loadouts, ACE, the arsenals, scripts) know nothing of our cells and
+fill a uniform, vest or backpack until its mass is reached. Cells are the only room, so what the layout has no room for
+(`overflow`) is passed on: **uniform -> vest -> backpack**, to the first later container with free cells. What fits nowhere stays
+overflow, shown apart as before. Never dropped, never copied.
+
+- **Op `migrate [unit]`** (`fnc_opMigrate`; root: the unit, holders: its three containers, so they are verified and written once at
+  the end of the phase). For the uniform, then the vest: `fnc_plan` puts the overflow (largest first) into the containers after it
+  and each tile moves with op `move` (`fnc_opMove`: spot checked first, out and in verified, back into the source when it did not
+  arrive; a stray it could not land goes back into the source forced, only what even that cannot take is produced and settles).
+  Each container is planned from the places the moves before wrote (the phase's buffer), so no two moves plan one cell. The person
+  guard lets it through for any requester.
+- **Request** (`fnc_requestMigrate [unit, requester, tries]`): looks first, from the cargo and places this machine reads, and asks
+  for a silent transaction of one op only when some overflow has a free cell after it. The requester is the unit itself (a looter's
+  window passes the player); the player's own unit and single player run at once, any other unit goes through the hub to its owner;
+  an answer that says the op did not run queues the unit again (`MIGRATE_RETRY`, `MIGRATE_TRIES`).
+- **Triggers** only note a unit local here (`fnc_queueMigrate`, `MIGRATE_DELAY` 0.3 s, a waiting unit keeps its earlier time);
+  `fnc_tickMigrate`, a `MIGRATE_TICK` per-frame handler, looks at up to `MIGRATE_PER_TICK` of them. Nothing raises an event for
+  `addItem`, so: CBA's polled `loadout` and `unit` player events (the player), `Take` / `Put` / `InventoryClosed` on `CAManBase` (any
+  unit local here), every loadout set (`fnc_onLoadoutSet`; `einv_storage_migrateUnit` tells the owner when it was set elsewhere), a
+  changed rule set, and the window: `einv_gui_fnc_requestNormalize` asks for every person whose uniform, vest or backpack shows an
+  overflow tile (bodies and looted persons included), every `DRIFT_REPEAT`. An AI whose gear a script filled, and nobody looks at,
+  waits for one of these.
+- **Arsenals.** While ACE Arsenal (display 1127001) or the vanilla one is open (`ARSENAL_OPEN`) nothing migrates: they add and take
+  back on their own (section 5 - ACE's panel still takes back an add with no free cell). `fnc_onClosed` and `fnc_biLeaveAlone` ask once
+  after the close, before `fnc_reportOverflow`, which then names only what has nowhere to go.
+- **Locality, no loss, no copy.** Only the unit's authority changes its containers, one phase at a time per root, journaled (a phase
+  the hub sends again is answered from the journal and never runs twice); every move is verified by counting, and a tile that did not
+  land goes back to where it was taken from. A change of owner between request and run is `"Moved"` or runs on the new owner, which
+  plans again from what it finds. The server setting `einv_storage_migrate` (default on) switches the whole thing off.
 
 ### Equipment (`fnc_getEquipment`, slots, putting on and off)
 
@@ -622,21 +656,28 @@ preInit: `einv_storage_ops` (op name -> function name), `einv_storage_guards`, `
 ## 4. GUI window engine (gui)
 
 Everything on the window except the dim layer is created at run time; a build deletes what the last one made and makes it again.
-Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_openVanilla`, `fnc_playSound`, `fnc_requestRebuild`
-are public).
+Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_playSound`, `fnc_requestRebuild` are public).
 
 ### Opening, attaching, building
 
 - **Opening.** The unit's `InventoryOpened` handler (`fnc_onInventoryOpened`, put on whichever unit the player is by
-  `fnc_initUnit` from the CBA `unit` event) answers true, which keeps the vanilla display away, and the window opens a frame later
-  (`fnc_open`). Every true starts a 1.5 s grace time (`GVAR(blockedUntil)`, `BLOCK_GRACE`); a vanilla inventory that still loads
-  during it or while the window is open - Better Inventory patches `RscDisplayInventory` and runs its own XEH `InventoryOpened`
-  handler, any mod may `createDisplay` it - is closed by `fnc_guardVanilla` (an `Extended_DisplayLoad_EventHandlers` entry on
-  `RscDisplayInventory`, and a check each `CHECK_INTERVAL` in `fnc_onFrame`). A false answer ends the grace time, so
-  `fnc_openVanilla` and the switched-off setting are never closed. Better Inventory's put/take stack move is held off with its
-  `bettInv_stackMove` flag while the window is open. With `einv_gui_replaceVanilla` off the vanilla inventory opens - in multiplayer only on the player's own gear:
-  whatever other players can reach (crate, vehicle, body, person, a pile with something in it) opens here regardless, since the
-  engine's inventory is not serialised with the authorities and two players could take the same item.
+  `fnc_initUnit` from the CBA `unit` event: the first body, a respawn, a team switch, the soldier a Zeus remote controls) answers
+  the engine with **true, always**, which keeps the vanilla display away, and the window opens a frame later (`fnc_open`).
+  Every way into the engine's inventory ends in that handler: the Gear key, `action ["Gear" | "OpenBag", container]` from a
+  script, ACE's "Inventory" on the unconscious, ACE's backpack interaction and "Open <backpack>" on bodies, the vehicle and crate
+  actions, the setup wizard handing the inventory back. For a unit that is not `ACE_player` nothing opens (the answer is still
+  true); a person who may not be opened (`einv_noAccess`, an ACE dragging clone, out of reach) gets a hint instead of a window.
+- **No vanilla inventory.** There is no setting that brings it back, no bypass and no fallback: a window that cannot open
+  (`fnc_open` returns false, the RPT says why) opens nothing. A vanilla display that comes up anyway - Better Inventory patches
+  `RscDisplayInventory` and runs its own XEH `InventoryOpened` handler, any mod or script may `createDisplay` it - is closed at
+  once by `fnc_guardVanilla` (controls hidden, `closeDisplay 2`, and again a frame later), whether the window is open or not.
+  Three places call it: an `Extended_DisplayLoad_EventHandlers` entry on `RscDisplayInventory` (`gui/CfgEventHandlers.hpp`; CBA
+  raises that event from `BIS_fnc_initDisplay`), a per-frame handler every `GUARD_INTERVAL` 0.25 s from `XEH_postInit` for a
+  display that loaded without raising it, and the check each `CHECK_INTERVAL` in `fnc_onFrame` while the window is open. The
+  display's `onLoad` is deliberately not patched in config: it would replace the `BIS_fnc_initDisplay` call that raises CBA's
+  load event for every other mod's handler, close at the very moment the handler does, and fight Better Inventory's patch of
+  the same attribute over load order. Better Inventory's put/take stack move is held off with its `bettInv_stackMove` flag while
+  the window is open.
 - **Attaching.** `fnc_attach [display, unit, container, secondary, hooks = createHashMap, driver = "pfh"]` -> BOOL makes any
   display that carries the dim layer (`IDC_DIM` 9601) and the first control (`IDC_FIRST` 9602) **the window**: it sets the unit
   and containers, starts all window state afresh, adds the mouse handlers, builds once and starts the frame. It refuses when
@@ -910,7 +951,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 
 - **Living persons.** Every soldier carries one scroll action per client (`fnc_addPersonAction`; agents through the player's
   `fnc_addAgentAction`); `fnc_openPerson` (public) opens the window on the whole person and tells them (`fnc_notifyPerson`).
-  `fnc_canOpenPerson` -> `"whole"`, `"backpack"` or `""`; `fnc_canTouchPerson` takes `"items"` or `"worn"`; the server settings
+  `fnc_canOpenPerson [person]` -> `"whole"`, `"backpack"` or `""`; `fnc_canTouchPerson` takes `"items"` or `"worn"`; the server settings
   `einv_gui_personOpen`, `personItems`, `personWorn`, `personNotify`, `searchPersons` decide. The rule on the machine that runs
   each change is the guard `fnc_personGuard` (in `einv_storage_guards`); the looter's `fnc_checkTouch` returns a reason
   ("LookOnly") for the hint. A locked uniform, vest or backpack stays on them; the window closes beyond `PERSON_KEEP` 4 m. Bodies
@@ -957,7 +998,7 @@ Registered in preInit, so Eden has them too.
 | Event | Does |
 |---|---|
 | `ace_arsenal_displayOpened` | `fnc_onOpened`: state reset, `KeyDown` / `KeyUp` and the list's `LBSelChanged` / `MouseButtonDown` handlers, and `einv_gui_fnc_attach` a frame later (one more if the inventory is still closing), driver `"draw3d"` |
-| `ace_arsenal_displayClosed` | `fnc_onClosed`: `einv_gui_fnc_onUnload`, state reset, the BI helper and the staging crate deleted a frame later, `fnc_reportOverflow` a frame later (not in Eden) |
+| `ace_arsenal_displayClosed` | `fnc_onClosed`: `einv_gui_fnc_onUnload`, state reset, the BI helper and the staging crate deleted a frame later, `einv_storage_fnc_requestMigrate` (the surplus moves on) and `fnc_reportOverflow` (what has nowhere to go) a frame later (not in Eden) |
 | `ace_arsenal_cargoChanged` | `fnc_onCargoChanged`: what of an add the engine refused by `maximumLoad` is put in with `einv_storage_fnc_addNew` while there is a free spot; flags the frame-later pass |
 | `ace_arsenal_itemsChanged` | `fnc_onItemsChanged`: for the open container's tab `fnc_reconcile` at once, before ACE greys its list |
 | `leftPanelFilled`, `rightPanelFilled`, `loadoutImported`, `onLoadoutLoad`, `showToggle` | `fnc_settle` a frame later |
@@ -1292,7 +1333,7 @@ guard** `fnc_guard [op, args, requester, root]` is in `einv_storage_guards`, run
 it, and answers `"Locked"`; settlement skips it. **Eden** (`Cfg3DEN.hpp`): "Inventory locked to" and "Group callsign" on crates
 and vehicles, applied at mission start (`fnc_applyEden`). **In the window** `fnc_decorate [unit, sections, opened]` turns a
 section the unit may not reach into a `locked` one; the other gates are the engine lock, `fnc_onInventoryOpened`,
-`fnc_openVanilla`, `fnc_sendMoves`, `fnc_quickMove` and the guard.
+`fnc_sendMoves`, `fnc_quickMove` and the guard.
 
 ### compat_efak (Enhanced First Aid Kits and Enhanced Utility Pouches)
 
@@ -1347,10 +1388,10 @@ stringtables are wrapped as BRIEFING asks.
 | `einv_items_massPerCell` | SLIDER 2 to 20 | global | 5 | fallback mass per cell |
 | `einv_items_stackSmall` | SLIDER 1 to 50 | global | 10 | `@item_small`'s stack, only when moved off 10 |
 | `einv_items_sizeTable`, `einv_items_stackTable` | EDITBOX | global | "" | older tables, `class:WxH` / `class:N`; win over the text |
+| `einv_storage_migrate` | CHECKBOX | global | on | move a unit's surplus (overflow) on to its next container with room (section 3, Surplus) |
 | `einv_storage_containerTable` | EDITBOX | global | "" | `class:N` or `class:WxH+WxH`; wins over the text |
 | `einv_storage_nearbyRange` | SLIDER 1 to 5 | global | 3 | m, how far crates and piles count as nearby |
 | `einv_storage_debugDrop` | CHECKBOX | client | off | log backpack drops to the RPT |
-| `einv_gui_replaceVanilla` | CHECKBOX | client | on | the window instead of the vanilla inventory |
 | `einv_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
 | `einv_gui_showNearby` | CHECKBOX | client | on | nearby piles and crates as boxes in the loot column |
 | `einv_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |
@@ -1397,12 +1438,18 @@ guard or carried variable in the storage's tables (section 3).
   put again (the hub names it in the RPT). Changes outside this machinery - ACE medical treatment, EFAK's own pouch, the engine's
   scroll-menu actions, scripts - are not serialised with ours; a script error in our own code exactly between an engine change and
   its journal line returns that payload once more. A machine that holds a phase and hangs holds it until it answers or leaves (the
-  hub re-sends every 10 s, the window stops showing it as pending after 15 s; nothing is re-added on a timeout). The vanilla
-  inventory in multiplayer opens only on own gear. The player's own arrangement reaches others up to 2 s after their moves; moves
-  in the last 2 s before a player quits (not dies) with the window closed are never broadcast. A client whose rules differ from
+  hub re-sends every 10 s, the window stops showing it as pending after 15 s; nothing is re-added on a timeout). The player's
+  own arrangement reaches others up to 2 s after their moves; moves in the last 2 s before a player quits (not dies) with the
+  window closed are never broadcast. A client whose rules differ from
   the server's draws other sizes and asks for normalises (at most every 30 s): fix the settings. Nested containers rely on the
   same `netId` on every machine. Settlement skips guards by design: an item can go back into a container that was locked meanwhile -
   it came from there.
+- **Surplus.** Nothing raises an event for a script's `addItem`: a unit's cargo is found changed through CBA's polled `loadout`
+  event (the player), the engine's `Take` / `Put` / `InventoryClosed`, a loadout set, and a window showing the overflow - an AI
+  whose gear a script filled and nobody looks at keeps its surplus until one of those happens. Up to 0.3 s plus a tick pass
+  before the surplus moves. A stack that would only fit by joining a partly filled pile of the same class (no free cell) is not
+  moved: the plan needs a free cell per tile. Mid-move changes by other players in the same network moment can make a planned
+  cell taken; the op then takes the first fit or leaves the tile where it is.
 - **Kits.** Another living player's kits do not open or move. EFAK itself writes kits on whichever machine acts (its medical use,
   its own window, ACE actions on a kit outside the actor's gear); such a write in the same network moment as a write of this
   window can lose one of the two. EFAK's `syncAll` replaces the whole table on a joining machine even once synced; the window

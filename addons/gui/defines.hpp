@@ -13,9 +13,12 @@
 // time.
 #define IDC_KEEP      9603
 
-// The vanilla inventory (RscDisplayInventory), where a player who switched this window off still opens
-// persons (fnc_openPerson).
+// The vanilla inventory (RscDisplayInventory), which this mod keeps closed (fnc_guardVanilla).
 #define IDD_VANILLA_INVENTORY 602
+
+// How often every client looks whether a vanilla inventory is on the screen that its load event missed,
+// in seconds (XEH_postInit, fnc_guardVanilla).
+#define GUARD_INTERVAL 0.25
 
 // DIK codes the window looks at itself
 #define DIK_ESCAPE 1
@@ -217,7 +220,7 @@
 // Screen geometry, relative to the safezone so it scales with the UI size. The window takes the whole
 // screen; the looks share its frame and lay out the content between header and footer themselves:
 //
-//    0.6 -  2.2   header: title, Style, camera, Vanilla, Close           (in UNITs from the top)
+//    0.6 -  2.2   header: title, Style, camera, Close                    (in UNITs from the top)
 //    3.0 - 37.4   content: whatever the look draws
 //   38.0 - 39.4   footer: key hints, the hint, the version
 // ---------------------------------------------------------------------------

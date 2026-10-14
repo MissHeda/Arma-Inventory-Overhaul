@@ -16,6 +16,33 @@
 // Queued phases, held phases and re-sends.
 [{call FUNC(tick)}, 0] call CBA_fnc_addPerFrameHandler;
 
+// Surplus. The engine's own commands (addItem and its relatives, addMagazine, addWeapon, a script's loadout,
+// ACE) ignore our cells and fill a uniform, vest or backpack until its mass is reached; what the grid has
+// no room for shows as overflow. A unit whose cargo changed is looked at a moment later, and what has
+// somewhere to go - the next of its containers with free cells - is moved there by its authority (op
+// "migrate", fnc_opMigrate). Nothing raises an event for a script's addItem, so the triggers are the
+// nearest things: all of them only note the unit (fnc_queueMigrate), this handler does the looking. Not in
+// Eden: no postInit runs there, and there is no gameplay to repair.
+[{[] call FUNC(tickMigrate)}, MIGRATE_TICK] call CBA_fnc_addPerFrameHandler;
+
+// What the engine's own inventory actions did to any unit local here: taking from the ground or a
+// container, putting away, closing the inventory (a vanilla one that another mod brought up).
+{
+    ["CAManBase", _x, {
+        params [["_unit", objNull, [objNull]]];
+
+        [_unit] call FUNC(queueMigrate);
+    }] call CBA_fnc_addClassEventHandler;
+} forEach ["Take", "Put", "InventoryClosed"];
+
+// A loadout set for a unit on another machine than the one that set it: its owner is told, and looks a
+// little later - the containers of the new loadout have to arrive there first (fnc_onLoadoutSet).
+[QGVAR(migrateUnit), {
+    params [["_unit", objNull, [objNull]]];
+
+    [_unit, 1] call FUNC(queueMigrate);
+}] call CBA_fnc_addEventHandler;
+
 if (isServer) then {
     [QGVAR(hubStart), {_this call FUNC(hubStart)}] call CBA_fnc_addEventHandler;
     [QGVAR(phaseDone), {_this call FUNC(hubPhaseDone)}] call CBA_fnc_addEventHandler;
@@ -49,6 +76,36 @@ if (hasInterface) then {
 
         if (_unit isEqualTo player) then {call FUNC(flushPlaces)};
     }] call CBA_fnc_addClassEventHandler;
+
+    // The player's own unit: any change of its loadout - a script's addItem, ACE, the arsenals, the engine's
+    // own actions (CBA polls it, and leaves the rounds in the weapons out, so firing is no change).
+    ["loadout", {
+        private _unit = _this param [0, objNull];
+
+        if !(_unit isEqualType objNull) then {
+            _unit = player;
+        };
+
+        [_unit] call FUNC(queueMigrate);
+    }] call CBA_fnc_addPlayerEventHandler;
+
+    // The unit the player is now - the start, a respawn, a team switch, a Zeus remote control - may come
+    // with more than its grid holds.
+    ["unit", {
+        private _unit = _this param [0, objNull];
+
+        if !(_unit isEqualType objNull) then {
+            _unit = player;
+        };
+
+        [_unit] call FUNC(queueMigrate);
+    }, true] call CBA_fnc_addPlayerEventHandler;
+
+    // A changed rule set may have shrunk a grid under what it holds. Raised on every machine once it has
+    // the new rules.
+    [QEGVAR(items,rulesChanged), {
+        [missionNamespace getVariable ["ACE_player", player]] call FUNC(queueMigrate);
+    }] call CBA_fnc_addEventHandler;
 };
 
 // The answer to a transaction this machine asked for.

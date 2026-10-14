@@ -8,10 +8,12 @@
  * requester still near (fnc_personInReach, lenient). Any other root: no objection. Settlement skips
  * guards: the system puts things back.
  *
- * A person changing their own gear, and a viewer's report that places and cargo disagree (op
- * "normalize", which persists what everyone already sees), are never refused. Rearranging and sorting
- * their containers changes what everyone sees of them: that is "items" as well. A uniform, vest or
- * backpack the mission locked (lockInventory) does not come off either.
+ * A person changing their own gear, a viewer's report that places and cargo disagree (op
+ * "normalize", which persists what everyone already sees) and the move of a surplus the grid has no room
+ * for on to the person's next container (op "migrate", einv_storage_fnc_opMigrate: nothing leaves the
+ * person's own containers) are never refused. Rearranging and sorting their containers changes what
+ * everyone sees of them: that is "items" as well. A uniform, vest or backpack the mission locked
+ * (lockInventory) does not come off either.
  *
  * The top container is the uniform, vest or backpack itself or the one it lies in, a few deep - found
  * the way the machine that runs the op sees the cargo, never by the window's list of what it opened. A
@@ -42,7 +44,7 @@ params [
 
 if (isNull _root || {!(_root isKindOf "CAManBase")} || {!alive _root} || {_root isEqualTo _requester}) exitWith {""};
 
-if (_op isEqualTo "normalize") exitWith {""};
+if (_op in ["normalize", "migrate"]) exitWith {""};
 
 private _tops = [uniformContainer _root, vestContainer _root, backpackContainer _root] select {!isNull _x};
 

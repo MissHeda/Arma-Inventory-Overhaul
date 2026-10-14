@@ -17,15 +17,6 @@ GVAR(openedAt) = -1;
 GVAR(person) = objNull;
 GVAR(personMode) = "";
 
-// Until this time the vanilla inventory is let through instead of taken over - set by fnc_openVanilla,
-// which asks the engine for it.
-GVAR(bypassUntil) = -1;
-
-// Until this time the engine was told the vanilla inventory stays away (fnc_initUnit), and a vanilla
-// inventory that still loads is closed again (fnc_guardVanilla) - another mod's patch of it, or a
-// handler of its own, could bring it up behind the answer.
-GVAR(blockedUntil) = -1;
-
 // What runs the open window's frame (fnc_onFrame): [driver, id] - "pfh", a CBA per-frame handler, or
 // "draw3d", a Draw3D mission event handler (fnc_startFrame, fnc_stopFrame) - and ["", -1] while none runs.
 // When it next checks whether the window should still be open, and when it next compares the contents
@@ -258,11 +249,6 @@ GVAR(driftKits) = createHashMap;
 
 // The outlines fnc_drawPending made on the cells moves are heading for - controls, so in uiNamespace.
 uiNamespace setVariable [QGVAR(pendingFrames), []];
-
-// A hint fnc_open shows once the window is up, "" for none - and whether the one saying that shared
-// containers always open here in multiplayer was shown this mission (fnc_onInventoryOpened).
-GVAR(openHint) = "";
-GVAR(sharedHintShown) = false;
 
 // A living person's gear changes only as the server's settings for persons allow, checked on the
 // machine that runs each change (einv_storage_fnc_execute). Called by name, so a function compiled again
