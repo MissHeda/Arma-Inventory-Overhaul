@@ -102,7 +102,14 @@ if (_editing) exitWith {
             ["submit", [_focused]] call FUNC(hook);
             true
         };
-        default {false};
+        default {
+            // Escape in the empty search field closes the window, as anywhere else.
+            if (_key == DIK_ESCAPE && {call FUNC(isInventoryMode)}) then {
+                GVAR(closeReason) = "Escape";
+            };
+
+            false
+        };
     };
 };
 
@@ -132,8 +139,7 @@ if (
         _action isNotEqualTo "" && {!(_action in GVAR(moveHeld))}
     }
 ) exitWith {
-    GVAR(closeReason) = "move";
-    _display closeDisplay 2;
+    ["move"] call FUNC(closeDisplay);
     true
 };
 
@@ -189,8 +195,14 @@ if (_key == DIK_DELETE) exitWith {
     true
 };
 
+// Escape is left to the engine, which closes the dialog - told as the reason first (fnc_onUnload). Not on
+// a display the window is a guest on: that one's own handlers decide what Escape does there.
+if (_key == DIK_ESCAPE && {call FUNC(isInventoryMode)}) then {
+    GVAR(closeReason) = "Escape";
+};
+
 if !(_key in actionKeys "Gear") exitWith {false};
 if (diag_tickTime - GVAR(openedAt) < GEAR_KEY_GRACE) exitWith {true};
 
-_display closeDisplay 2;
+["the Gear key"] call FUNC(closeDisplay);
 true

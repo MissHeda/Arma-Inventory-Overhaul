@@ -2,13 +2,22 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * An item's picture turned a quarter round, fitted into a box - the picture of a tile that lies turned.
+ * An item's picture turned a quarter round, fitted into a box - the picture of a tile that lies turned,
+ * and the dragged ghost of one held turned (fnc_makeGhost, also for a row dragged from ACE Arsenal's list).
  *
- * ctrlSetAngle turns a control in the screen's own units, which are not square in pixels: a picture
- * laid out upright and then turned came out squashed (phase 1 test). So the control is made in the
- * shape it needs before the turn to have the right one after it - its width, which ends up running
- * down the screen, measured in the screen's heights, its height in its widths - and the picture is
- * stretched to it (ST_PICTURE without keeping its shape), sized by the picture's own proportions.
+ * ctrlSetAngle turns what a control draws round a point of it, and on a control that is not square in
+ * pixels the picture comes out squashed or skewed: the turn works in the control's own proportions. Up to
+ * 0.4.6 the control was laid out in a shape meant to come out right after the turn; in the game the
+ * picture of a turned tile showed squashed and out of its box. So the control is a square in pixels, centred
+ * on the box, and only the turn changes what it shows: the picture keeps its own shape in the square
+ * (EINV_Picture, ST_KEEP_ASPECT_RATIO) and turns with it a quarter clockwise round its middle - the
+ * rotation convention of the storage (section 3 of docs/ARCHITECTURE.md), the way the footprint turns.
+ *
+ * The square's side is the most the turned picture may have to fit the box: kept in its shape in the
+ * square, a picture W:H takes the square's whole side along its longer edge; turned, its width runs down
+ * the box and its height across. A wide picture (a rifle, 2:1) on a box three cells high and one wide gets a square two cells
+ * on a side - its picture, turned, one cell wide and two high - not three, which would run out of the box
+ * at both sides. The square may stand out of the box where the picture leaves it empty.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -38,21 +47,21 @@ if (_info isEqualType [] && {(_info param [0, 0]) > 0} && {(_info param [1, 0]) 
     _aspect = (_info select 0) / (_info select 1);
 };
 
-// The box in pixels. Turned, the picture's width runs down it and its height across.
+if (_aspect <= 0) then {
+    _aspect = 1;
+};
+
+// The box in pixels. In the square of side S the picture is S by S / W:H when wide, S * W:H by S when tall;
+// turned, its width runs down the box and its height across.
 private _boxW = _width / pixelW;
 private _boxH = _height / pixelH;
-private _long = _boxH min (_boxW * _aspect);
-private _short = _long / _aspect;
+private _side = floor ((_boxW / ((1 / _aspect) min 1)) min (_boxH / (_aspect min 1)));
 
-// Before the turn: as wide as it will be high, in heights, and as high as it will be wide, in widths.
-private _ctrlW = _long * pixelH;
-private _ctrlH = _short * pixelW;
-
-private _ctrl = [_display, "EINV_PictureStretch", _parent, [
-    _left + (_width - _ctrlW) / 2,
-    _top + (_height - _ctrlH) / 2,
-    _ctrlW,
-    _ctrlH
+private _ctrl = [_display, "EINV_Picture", _parent, [
+    _left + (_width - _side * pixelW) / 2,
+    _top + (_height - _side * pixelH) / 2,
+    _side * pixelW,
+    _side * pixelH
 ]] call FUNC(uiCreate);
 
 _ctrl ctrlSetText ([_texture] call FUNC(safePicture));

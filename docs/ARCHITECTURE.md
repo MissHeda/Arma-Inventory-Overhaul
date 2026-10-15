@@ -734,15 +734,30 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   true); a person who may not be opened (`einv_noAccess`, an ACE dragging clone, out of reach) gets a hint instead of a window.
 - **No vanilla inventory.** There is no setting that brings it back, no bypass and no fallback: a window that cannot open
   (`fnc_open` returns false, the RPT says why) opens nothing. A vanilla display that comes up anyway - Better Inventory patches
-  `RscDisplayInventory` and runs its own XEH `InventoryOpened` handler, any mod or script may `createDisplay` it - is closed at
-  once by `fnc_guardVanilla` (controls hidden, `closeDisplay 2`, and again a frame later), whether the window is open or not.
-  Three places call it: an `Extended_DisplayLoad_EventHandlers` entry on `RscDisplayInventory` (`gui/CfgEventHandlers.hpp`; CBA
-  raises that event from `BIS_fnc_initDisplay`), a per-frame handler every `GUARD_INTERVAL` 0.25 s from `XEH_postInit` for a
-  display that loaded without raising it, and the check each `CHECK_INTERVAL` in `fnc_onFrame` while the window is open. The
-  display's `onLoad` is deliberately not patched in config: it would replace the `BIS_fnc_initDisplay` call that raises CBA's
-  load event for every other mod's handler, close at the very moment the handler does, and fight Better Inventory's patch of
-  the same attribute over load order. Better Inventory's put/take stack move is held off with its `bettInv_stackMove` flag while
-  the window is open.
+  `RscDisplayInventory` and runs its own XEH `InventoryOpened` handler, another mod's handler may answer the engine after ours,
+  any mod or script may `createDialog` it or run `action ["Gear"]` - is closed at once by `fnc_guardVanilla` (controls hidden,
+  `closeDisplay 2`, and again a frame later), whether the window is open or not. It closes only IDD 602 (`findDisplay 602`; a
+  display handed in that is not 602 is ignored), never the window or anything over it (a cutRsc, another mod's dialog), and
+  writes one INFO line per display saying where it stood: no window open, over the window, beside it, or **under** it - the
+  window was made as its child dialog and closes with it, so it is opened again a frame later on the same unit and containers
+  (at most once every `REOPEN_PAUSE` 2 s). `fnc_open` never makes the window over a vanilla inventory: while `findDisplay 602`
+  is open it closes it and tries again next frame (at most `OPEN_TRIES` 10). The unit's handler answers true and nothing depends
+  on it being the last handler. Three places call the guard: an `Extended_DisplayLoad_EventHandlers` entry on
+  `RscDisplayInventory` (`gui/CfgEventHandlers.hpp`; CBA raises that event from `BIS_fnc_initDisplay`), a per-frame handler
+  every `GUARD_INTERVAL` 0.25 s from `XEH_postInit` for a display that loaded without raising it, and the check each
+  `CHECK_INTERVAL` in `fnc_onFrame` while the window is open. The display's `onLoad` is deliberately not patched in config: it
+  would replace the `BIS_fnc_initDisplay` call that raises CBA's load event for every other mod's handler, close at the very
+  moment the handler does, and fight Better Inventory's patch of the same attribute over load order. Better Inventory's put/take
+  stack move is held off with its `bettInv_stackMove` flag while the window is open.
+- **Closing.** Every way the window closes itself goes through `fnc_closeDisplay [reason]` (sets `einv_gui_closeReason`, then
+  `closeDisplay 2`), and `fnc_onUnload` writes one INFO line `window closed: <reason>`: `a movement key` (`"move"`), `Escape`
+  (set by `fnc_onKeyDown` where it leaves Escape to the engine, inventory only), `the Gear key`, `the close button`,
+  `the soldier was taken away from what he looted` (`"taken"`, `fnc_poseCheck`), each rule of `fnc_onFrame`'s must-close
+  check by name (the unit died, is unconscious, is no longer `ACE_player`, the person out of reach, their backpack gone, may no
+  longer be opened, the `keepOpen` hook), `stepped aside for another mod's dialog`, `the vanilla inventory under it was closed`,
+  `the window could not attach`, and `display lost` (the frame found the display gone without its unload event and ends the
+  window as any close). No reason given means another mod or a script closed it (`closeDialog` / `closeDisplay`, the exit code
+  is logged); on a display the window is a guest on, that display closed. `"move"` and `"taken"` are read by `fnc_poseEnd`.
 - **Attaching.** `fnc_attach [display, unit, container, secondary, hooks = createHashMap, driver = "pfh"]` -> BOOL makes any
   display that carries the dim layer (`IDC_DIM` 9601) and the first control (`IDC_FIRST` 9602) **the window**: it sets the unit
   and containers, starts all window state afresh, adds the mouse handlers, builds once and starts the frame. It refuses when
@@ -787,14 +802,23 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
 **`fnc_getCell`** -> `[cellW, cellH]`, whole pixels, the same across and down: `round(((UNIT * 1.45) min UNSQUARE(safezoneW / 52))
 / pixelH)`. Every grid uses it. 52 cells across is what two columns of `STORAGE_COLS` 10 cells with their boxes (13 cells each),
 the equipment column and the middle take at 16:9 - 37 px at 1920x1080, which leaves the middle 5 UNIT for the soldier while
-looting.
+looting. Times the player's **tile scale** `einv_gui_cellScale` (0.8 to 1.3), capped so both columns (`COLUMN_W(cell)`, the
+same macro `fnc_layoutGlass` sizes them with), three `COLUMN_GAP`s and `CELL_FIT_LEFT` 16 UNIT of equipment column still fit
+`CONTENT_W` - never below the cell at scale 1; 1.3 just fits at 1920x1080 (48 px), 4:3 caps it at about 30 px. A cap is said
+once in the RPT. The cell is worked out at the first ask after `fnc_attach` and kept in uiNamespace `einv_gui_cell` until
+`fnc_onUnload`: a changed scale shows at the next opening, and nothing drawn meanwhile differs. A window with less room caps it
+for itself with **`fnc_capCell [pixels, where]`**: ACE Arsenal's panel (`einv_arsenal_fnc_panelRect`) so its `STORAGE_COLS`
+cells fit within a third of the screen and left of ACE's list; its grids, kit windows and ghosts follow.
 
 ### Themes
 
 `fnc_themeBase` returns a HashMap with every key; a look copies it and overrides. There is one look, **Glass** (`fnc_theme`, id
 `"main"`, in the feel of Arma's and ACE's menus and Enhanced First Aid Kits); `einv_gui_styles` holds that one entry, kept as a
 list so a look could be added. `fnc_theme` adds `equipmentPanel` (a pane under the equipment cards), `titleIcons` and `onAccent`.
-The camera switch is kept in the profile (`einv_gui_cameraOn`).
+**The camera** on the soldier in the middle (`einv_gui_cameraOn`) starts as `einv_gui_cameraDefault` says at every opening
+(`fnc_open`: `"soldier"` the third-person camera, `"off"` none - the world as seen from his eyes, darker dim); the header's
+button (`fnc_toggleCamera`) turns it for that window only, a step aside (`fnc_stepAside`, `einv_gui_cameraNext`) brings it back
+as it was. It is no longer kept in the profile.
 
 | Key | |
 |---|---|
@@ -928,15 +952,22 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   their cells along it (`fnc_spanInsets`); `fnc_shapeRects` takes those four as its box's insets. `fnc_screenToCell` is plain pitch.
 - **Grids and tiles.** `fnc_createGrid [display, parent, [relX, relY], rows, theme, section id, cols, holes, insets]` -> a
   HashMap: `parent`, `rel`, `cols`, `rows`, `cellW`, `cellH`, `cells` (a **hole** has no control: `controlNull`), `holes`,
-  `insets`, `tiles`, `section`, and from `fnc_drawCompartments` `container`, `virtual`, `kit`, `layoutKey`, `unit`, `block`, `pos`,
-  `overflow`, `window`, `holder`, `root`, `side` (a source grid adds `source`). `fnc_createTile [display, grid, entry, theme]`
-  draws the surface in the category's colour over the entry's cells only (a shaped tile: runs of cells with one-pixel bridges;
-  `"backgrounds"` and `"rect"` kept for hover, flash, reveal and the repack film), the picture (turned along when `rotated`), the
-  short name, a stack's count and a magazine's fill; `fnc_tileAt` and `fnc_hitsHole` miss holes. A class whose `stack` is over 1
-  shows **"count/stack"** ("3/10", "1/10" too) on a small flat box in the `raised` colour at the bottom right; one that does not
-  stack shows nothing; a magazine's rounds then move to the bottom left. Counts over a picture stand on a dark pill
-  (`fnc_drawCountBackdrop`, sized for the widest text the label can become, since a repack writes rounds live). The fill bar
-  (`einv_gui_magazineFillBar`) shows on magazines that are not full.
+  `insets`, `tiles`, `section`, and from `fnc_drawCompartments` `container`, `virtual`, `kit`, `layoutKey`, `unit`, `block`,
+  `pos`, `overflow`, `window`, `holder`, `root`, `side` (a source grid adds `source`). `fnc_createTile [display, grid, entry,
+  theme]` draws the surface in the category's colour over the entry's cells only (a shaped tile: runs of cells with one-pixel
+  bridges; `"backgrounds"` and `"rect"` kept for hover, flash, reveal and the repack film), the picture, the short name, a
+  stack's count and a magazine's fill. A **turned picture** (`rotated`; the dragged ghost held turned, also a row dragged from
+  ACE's list; `fnc_uiPictureTurned`) is an `EINV_Picture` (keeps its shape) made **square in pixels**, centred on the box,
+  turned `ctrlSetAngle [90, 0.5, 0.5]` - a quarter clockwise round its middle; a non-square control came out squashed and out of
+  its box. The side is the most the turned picture may have to fit the box: `min(boxW / min(1, H/W), boxH / min(1, W/H))` px, so
+  a 2:1 rifle on a 1x3 box gets a 2-cell square showing it 1 wide and 2 high; the square may stand out where it is empty. The
+  group ghosts of a drag keep their angle when moved (`fnc_updateDrag`). The hotbar and the inspect card draw upright only.
+  `fnc_tileAt` and `fnc_hitsHole` miss holes. A class whose `stack` is over 1 shows **"count/stack"** ("3/10", "1/10" too) on a
+  small flat box in the `raised` colour at the bottom right; one that does not stack shows nothing; a magazine's rounds then
+  move to the bottom left. Counts over a picture stand on a dark pill (`fnc_drawCountBackdrop`, sized for the widest text the
+  label can become, since a repack writes rounds live). The fill bar (`einv_gui_magazineFillBar`) shows on magazines that are
+  not full; the rounds as words only while `einv_gui_magazineText` is on (tiles only - a weapon's magazine slot keeps them;
+  without the label a repack writes no rounds, its bar still runs).
 - **Tall compartments.** `fnc_viewBlocks [layout, holder]` -> `[blocks, hidden, foldable, cells]` shows a tall compartment down to
   its last row in use plus `COLLAPSE_SPARE_ROWS` 2, at least `COLLAPSE_MIN_ROWS` 4, and only folds when that hides
   `COLLAPSE_HIDE_MIN` 4 rows or more; one line under the grid, "+32 empty rows (256 cells)", opens them (`fnc_toggleRows`,
@@ -987,6 +1018,18 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   **Right click with a menu open:** `fnc_openMenu` keeps the menu's rectangle (uiNamespace `einv_gui_menuRect`, cleared by
   `fnc_closeMenu`); a right press beside it closes it and goes on as an ordinary right click, so the tile under the mouse gets its
   menu in the same go (on empty space nothing opens); a press on the menu and every left press are the menu's.
+  **The menu's layer.** The menu is one full-screen `EINV_Group` (uiNamespace `einv_gui_menu` = `[layer]`) made last, with the
+  mouse handlers the columns get, and it takes the focus into a one-pixel button on its card, as the wizard's popovers do: the
+  engine draws the focused control over all others, and a column whose Sort or Take all button kept the focus after its click
+  drew its tiles over the menu. `fnc_closeMenu` hides the layer and leaves its deletion to the next frame
+  (`einv_gui_windowTrash`: a right press beside the card closes it from the layer's own event) and gives the focus back to a
+  field that had it, else to the search field's sink. Anything registered on the display after the menu (its layer no longer the
+  last of `einv_gui_created`: a slot's hover ring) makes it again on top - **`fnc_raiseMenu`**, asked twice a frame by
+  `fnc_onFrame` and by `fnc_redrawTiles`: same choices and place (`einv_gui_menuState`), the row under the mouse lit.
+  `fnc_redrawTiles` closes instead a menu opened on a tile of a section it drew anew (`einv_gui_menuFor`: its rows name the tile
+  by its index). A build closes it as ever. The focus rule of `fnc_onFrame` also sends back a non-field control in one of the
+  window's own groups once no button is held, so the name at the mouse and the inspect card are not drawn under a column either.
+  The Arsenal panel's menu (guest) is the same.
 - **Hints:** `fnc_updateHover` names what the mouse is on in the footer; `fnc_showHint [text, colourKey]`; `fnc_flashHint [reason,
   details]` (a reason key such as `"NoRoom"`, `"LookOnly"`, `"Locked"`, `"NoBackpack"`, any other text as it is, `""` nothing);
   `fnc_dragHint`; `fnc_infoHint [kind, args]` for the weight card and each caption. The **inspect card** (`fnc_inspect`,
@@ -1537,9 +1580,12 @@ stringtables are wrapped as BRIEFING asks.
 | `einv_storage_migrate` | CHECKBOX | global | on | move a unit's surplus (overflow) on to its next container with room (section 3, Surplus) |
 | `einv_storage_containerTable` | EDITBOX | global | "" | `class:N` or `class:WxH+WxH`; wins over the text |
 | `einv_storage_nearbyRange` | SLIDER 1 to 5 | global | 3 | m, how far crates and piles count as nearby |
+| `einv_gui_cellScale` | SLIDER 0.8 to 1.3 | client | 1 | tile scale: the cell size, capped where the columns no longer fit; next opening |
 | `einv_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
+| `einv_gui_cameraDefault` | LIST | client | `soldier` | the camera as the window opens: `soldier` (third person), `off` (first person) |
 | `einv_gui_showNearby` | CHECKBOX | client | on | nearby piles and crates as boxes in the loot column |
 | `einv_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |
+| `einv_gui_magazineText` | CHECKBOX | client | on | the rounds ("17/30") on magazine tiles; off leaves the bar alone |
 | `einv_gui_sounds` | CHECKBOX | client | on | the inventory's sounds |
 | `einv_gui_soundVolume` | SLIDER 0 to 2 | client | 1 | their volume |
 | `einv_gui_soundsWorld` | CHECKBOX | global | on | players nearby hear someone loot |
@@ -1567,7 +1613,7 @@ stringtables are wrapped as BRIEFING asks.
 | `einv_locks_zeusOpens` | CHECKBOX | global | on | Zeus may open locked containers |
 
 CBA keybinds: `einv_hotbar_slot1` to `slot7` (4 to 0), `einv_hotbar_show`, `einv_setup_openWizard` (unbound). Kept in the player's
-profile: `einv_gui_cameraOn`, `einv_gui_searchMuted`, `einv_hotbar_slots`.
+profile: `einv_gui_searchMuted`, `einv_hotbar_slots` (`einv_gui_cameraOn` no longer since 0.4.7: `einv_gui_cameraDefault`).
 
 **What missions and other mods may set** (all optional): on an object `einv_grid` (a grid text, public), `einv_noSearch`,
 `einv_nearby = false`, `einv_noAccess` (a person); in a mission `einv_arsenal_biPassThrough`; in an item's config `einv_size`,

@@ -1,6 +1,7 @@
 // Taking over from the vanilla inventory
 PREP(initUnit);
 PREP(guardVanilla);
+PREP(closeDisplay);
 PREP(onInventoryOpened);
 
 // Living persons: the scroll action, who may do what, and their gear changed where they are local
@@ -79,6 +80,7 @@ PREP(sortHolder);
 // The context menu
 PREP(openMenu);
 PREP(closeMenu);
+PREP(raiseMenu);
 PREP(contextMenu);
 PREP(containerName);
 PREP(flashHint);
@@ -185,6 +187,7 @@ PREP(fitText);
 
 // Grids and tiles
 PREP(getCell);
+PREP(capCell);
 PREP(createGrid);
 PREP(createTile);
 PREP(drawTiles);

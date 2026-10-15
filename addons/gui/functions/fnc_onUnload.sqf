@@ -5,6 +5,12 @@
  * unit can no longer use it, or another script. Every one of them ends here, so this is where the frame
  * is stopped (fnc_stopFrame) and the camera is given back to the player.
  *
+ * And where the RPT is told why, one line "window closed: <reason>": the reason the window's own path gave
+ * (fnc_closeDisplay - a movement key, Escape, the Gear key, the close button, a rule of fnc_onFrame, the
+ * vanilla inventory under it) or, with none given, that something else closed it - another mod's
+ * closeDialog or closeDisplay, with the exit code it used. A window that closes "at once" with another
+ * mod loaded says here which it was.
+ *
  * A repack of magazines still running ends with it, its result written (einv_magazines). What the window was
  * opened on closes with a sound, and the soldier who looked into it stands up again (fnc_poseEnd).
  *
@@ -24,6 +30,25 @@
  *
  * Public: No
  */
+
+params ["", ["_exitCode", -1]];
+
+private _reason = GVAR(closeReason);
+
+if (_reason isEqualTo "") then {
+    _reason = if ((["guest", [], false] call FUNC(hook)) isEqualTo true) then {
+        "the display it was a guest on closed"
+    } else {
+        format ["from outside - another mod or a script closed it (closeDialog or closeDisplay, exit code %1)", _exitCode]
+    };
+};
+
+// The two reasons the looting pose reads (fnc_poseEnd) by their key, in words.
+_reason = (createHashMapFromArray [
+    ["move", "a movement key"], ["taken", "the soldier was taken away from what he looted"]
+]) getOrDefault [_reason, _reason];
+
+INFO_1("window closed: %1",_reason);
 
 // A repack in progress ends with the window: what was moved so far is written (einv_magazines).
 if (!isNil QEFUNC(magazines,stop)) then {
@@ -78,6 +103,7 @@ uiNamespace setVariable [QGVAR(windows), []];
 uiNamespace setVariable [QGVAR(windowTrash), []];
 uiNamespace setVariable [QGVAR(scrollRestore), []];
 uiNamespace setVariable [QGVAR(zones), []];
+uiNamespace setVariable [QGVAR(cell), []];
 GVAR(windowMove) = [];
 GVAR(theme) = createHashMap;
 GVAR(context) = createHashMap;

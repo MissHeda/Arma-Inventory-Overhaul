@@ -628,10 +628,16 @@ call {
                 } forEach _data;
 
                 {
-                    _x params ["_ghostControl", "_offsetCellsX", "_offsetCellsY", "_pictureX", "_pictureY"];
+                    _x params ["_ghostControl", "_offsetCellsX", "_offsetCellsY", "_pictureX", "_pictureY", ["_ghostTurned", false]];
 
                     _ghostControl ctrlSetPosition [_boxX + _offsetCellsX + _pictureX, _boxY + _offsetCellsY + _pictureY];
                     _ghostControl ctrlCommit 0;
+
+                    // A tile that lies turned keeps its turned picture where it moved, as the held one does above.
+                    if (_ghostTurned) then {
+                        _ghostControl ctrlSetAngle [90, 0.5, 0.5];
+                    };
+
                     _ghostControl ctrlShow true;
                 } forEach (uiNamespace getVariable [QGVAR(dragGhosts), []]);
             };

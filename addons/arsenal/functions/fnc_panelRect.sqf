@@ -7,7 +7,9 @@
  * list, read from those controls themselves, so it follows the player's interface size and whatever ACE
  * changes about them. Without a sort bar it starts where the list does. As wide as the inventory's grid,
  * STORAGE_COLS cells of the engine's size (einv_gui_fnc_getCell) with the column's padding and scroll bar
- * beside them, at most a third of the screen.
+ * beside them, at most a third of the screen and never past the screen's left edge. A large tile scale
+ * (einv_gui_cellScale) that would not fit there is capped for this window (einv_gui_fnc_capCell): the grid
+ * keeps all its columns rather than running out of the panel.
  *
  * It ends where the list ends, though ACE's message line (IDC 9) begins a little higher: the panel is as
  * long as the side lists, and a "no room" is said in the panel's own hint line as well.
@@ -44,12 +46,15 @@ if (!isNull _sort && {ctrlShown _sort}) then {
 
 // The column's own padding on both sides, or on one side and its scroll bar on the other, whichever is
 // wider (einv_gui_fnc_drawColumn), so the grid gets its full width and no box beside it.
-(call EFUNC(gui,getCell)) params ["_cellW"];
-
 private _padX = SQUARE(UNIT * PANEL_PAD);
-private _width = STORAGE_COLS * _cellW + ((_padX * 2) max (_padX + SCROLL_W + pixelW * 4)) + pixelW * 2;
+private _padW = ((_padX * 2) max (_padX + SCROLL_W + pixelW * 4)) + pixelW * 2;
 
-_width = _width min (safezoneW * PANEL_MAX_SHARE);
+// What the grid may take: a third of the screen, and what lies left of ACE's list.
+private _room = ((safezoneW * PANEL_MAX_SHARE) min (_listX - SQUARE(UNIT * PANEL_GAP) - safezoneX)) - _padW;
+
+([_room / STORAGE_COLS / pixelW, "the Arsenal panel beside ACE's list"] call EFUNC(gui,capCell)) params ["_cellW"];
+
+private _width = (STORAGE_COLS * _cellW + _padW) min (safezoneW * PANEL_MAX_SHARE);
 
 private _left = _listX - SQUARE(UNIT * PANEL_GAP) - _width;
 

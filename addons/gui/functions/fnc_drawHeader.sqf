@@ -84,7 +84,7 @@ private _fnc_tooltip = {
 private _square = SQUARE(HEAD_H);
 
 private _close = [_display, controlNull, [_square] call _fnc_place, "close", "", UI_TEX(icon_close_ca), _theme, {
-    (uiNamespace getVariable [QGVAR(display), displayNull]) closeDisplay 2;
+    ["the close button"] call FUNC(closeDisplay);
 }] call FUNC(uiButton);
 [_close, LLSTRING(Close)] call _fnc_tooltip;
 

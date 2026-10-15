@@ -48,7 +48,7 @@ params ["_display", "_theme", "_context"];
 
 (call FUNC(getCell)) params ["_cellW"];
 
-private _gap = SQUARE(UNIT * 0.8);
+private _gap = COLUMN_GAP;
 
 // The padding fnc_drawColumn gives its sections. The equipment column keeps to the same top, so its
 // first card lines up with the storage column's title.
@@ -57,8 +57,9 @@ private _padX = SQUARE(_padY);
 private _titleIcons = _theme getOrDefault ["titleIcons", true];
 
 // A storage column: the container's picture box and its compartments beside it (fnc_drawSection), the
-// column's padding - the right one wide enough for the scroll bar - and a little air.
-private _columnW = (STORAGE_COLS + 3) * _cellW + SQUARE(UNIT * 0.35) + ((_padX * 2) max (_padX + SCROLL_W + pixelW * 4)) + SQUARE(UNIT * 0.6);
+// column's padding - the right one wide enough for the scroll bar - and a little air. The same measure
+// caps the player's tile scale (fnc_getCell), so the two can never disagree.
+private _columnW = COLUMN_W(_cellW);
 
 // The columns from the right edge inwards: loot (while looting), storage, then the middle. A window that
 // attached keeps the place of the loot column although nothing is looted (the context's "rightColumn":

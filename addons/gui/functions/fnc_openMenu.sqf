@@ -8,6 +8,15 @@
  * own (fnc_onMouseButton), so that the next tile's menu opens in the same go. Kept on the screen whatever
  * corner the mouse is in.
  *
+ * The menu is a layer of its own: one controls group over the screen, made last, with the focus taken into
+ * it (a button of a pixel on its card, as the setup wizard's popovers do). The engine draws the focused
+ * control over every other, and a column whose button kept the focus after its click (Sort, Take all) drew
+ * its tiles over the menu - "the menu hides behind items, sometimes". The layer is the display's last
+ * control as well: should anything be made on the display while it is open (fnc_redrawTiles, a slot's
+ * hover ring), fnc_raiseMenu makes it again on top - the same choices at the same place, the row under the
+ * mouse lit. Closed (fnc_closeMenu), the focus goes back to a field that had it, else to the search
+ * field's sink.
+ *
  * A choice may bring options as a fourth element, a HashMap - the options of other mods' context menus
  * (fnc_cbaOptions) use them:
  *   "icon"      - a picture before the text; every row's text moves over for it when any row has one
@@ -33,6 +42,17 @@
 disableSerialization;
 
 params ["_display", "_choices", ["_at", [], [[]]]];
+
+// A field that had the cursor before the menu took the focus, to have it back when the menu goes - the
+// first menu's, when this one replaces another or is the same made again on top (fnc_raiseMenu). Nothing
+// else is given the focus back: a button in a column that kept it is what drew the column over the menu.
+private _back = if ((uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []) then {
+    private _focused = focusedCtrl _display;
+
+    [controlNull, _focused] select (!isNull _focused && {ctrlType _focused == 2})
+} else {
+    uiNamespace getVariable [QGVAR(menuFocusBack), controlNull]
+};
 
 call FUNC(closeMenu);
 
@@ -73,43 +93,62 @@ private _height = count _choices * _rowH + _padY * 2;
 
 private _left = _mouseX min (safezoneX + safezoneW - _width);
 private _top = _mouseY min (safezoneY + safezoneH - _height);
-private _controls = [];
+private _mouse = getMousePosition;
 
-// Under the menu, over everything else: a click beside the menu closes it.
-private _catcher = [_display, "EINV_Hitbox", controlNull, [safezoneX, safezoneY, safezoneW, safezoneH]] call FUNC(uiCreate);
+// The layer over the screen; everything of the menu in it, at its place relative to the screen's corner.
+private _layer = [_display, "EINV_Group", controlNull, [safezoneX, safezoneY, safezoneW, safezoneH]] call FUNC(uiCreate);
+private _cardX = _left - safezoneX;
+private _cardY = _top - safezoneY;
+
+// A group keeps the mouse's buttons from the display's own handlers: it reports them as the columns do
+// (fnc_build), and so does the hit area over the screen in it, so a right press beside the card still
+// closes the menu and opens the next one in the same go (fnc_onMouseButton takes each press once). They
+// never answer "taken": the hit area's own click closes the menu.
+_layer setVariable [QGVAR(hooked), true];
+_layer ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton); false}];
+_layer ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton); false}];
+
+// Under the card, over everything else: a click beside the menu closes it.
+private _catcher = [_display, "EINV_Hitbox", _layer, [0, 0, safezoneW, safezoneH]] call FUNC(uiCreate);
+_catcher ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton); false}];
+_catcher ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton); false}];
 _catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closeMenu)}] call FUNC(later)}];
-_controls pushBack _catcher;
 
-_controls append ([
-    _display, controlNull, [_left, _top, _width, _height],
+[
+    _display, _layer, [_cardX, _cardY, _width, _height],
     [0.075, 0.083, 0.1, 0.97], _theme getOrDefault ["radius", 0], [1, 1, 1, 0.14]
-] call FUNC(uiPanel));
+] call FUNC(uiPanel);
 
 {
     _x params ["_text", "_arguments", "_code"];
 
     private _options = _x call _fnc_options;
     private _enabled = _options getOrDefault ["enabled", true];
-    private _rowTop = _top + _padY + _forEachIndex * _rowH;
+    private _rowTop = _cardY + _padY + _forEachIndex * _rowH;
 
     if (_options getOrDefault ["separator", false]) then {
-        _controls append ([
-            _display, controlNull, [_left + _padX * 0.3, _rowTop, _width - _padX * 0.6, pixelH],
+        [
+            _display, _layer, [_cardX + _padX * 0.3, _rowTop, _width - _padX * 0.6, pixelH],
             _theme getOrDefault ["line", [1, 1, 1, 0.07]]
-        ] call FUNC(uiPanel));
+        ] call FUNC(uiPanel);
     };
 
-    private _surface = [_display, "EINV_PanelRect", controlNull, [_left + _padX * 0.3, _rowTop, _width - _padX * 0.6, _rowH]] call FUNC(uiCreate);
-    _surface ctrlSetBackgroundColor [0, 0, 0, 0];
-    _controls pushBack _surface;
+    private _surface = [_display, "EINV_PanelRect", _layer, [_cardX + _padX * 0.3, _rowTop, _width - _padX * 0.6, _rowH]] call FUNC(uiCreate);
+
+    // The row under the mouse is lit from the start: a menu made again on top (fnc_raiseMenu) hears of no
+    // mouse entering until it moves.
+    private _lit = _enabled && {(_mouse select 0) >= _left} && {(_mouse select 0) < _left + _width}
+        && {(_mouse select 1) >= _rowTop + safezoneY} && {(_mouse select 1) < _rowTop + safezoneY + _rowH};
+
+    _surface ctrlSetBackgroundColor ([[0, 0, 0, 0], [1, 1, 1, 0.1]] select _lit);
 
     private _icon = _options getOrDefault ["icon", ""];
 
     if (_icon isNotEqualTo "") then {
-        _controls pushBack ([
-            _display, controlNull, [_left + _padX, _rowTop + (_rowH - _iconH) / 2, SQUARE(_iconH), _iconH], _icon,
+        [
+            _display, _layer, [_cardX + _padX, _rowTop + (_rowH - _iconH) / 2, SQUARE(_iconH), _iconH], _icon,
             [[1, 1, 1, 0.4], [1, 1, 1, 1]] select _enabled
-        ] call FUNC(uiPicture));
+        ] call FUNC(uiPicture);
     };
 
     private _color = _options getOrDefault ["color", []];
@@ -122,10 +161,10 @@ _controls append ([
         _color = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
     };
 
-    _controls pushBack ([_display, controlNull, [_left + _padX + _textX, _rowTop, _width - _padX * 2 - _textX, _rowH], _text, _size, _color, _font, 0] call FUNC(uiLabel));
+    [_display, _layer, [_cardX + _padX + _textX, _rowTop, _width - _padX * 2 - _textX, _rowH], _text, _size, _color, _font, 0] call FUNC(uiLabel);
 
     // A greyed-out row takes the click, so it closes nothing and runs nothing.
-    private _hit = [_display, "EINV_Hitbox", controlNull, [_left, _rowTop, _width, _rowH]] call FUNC(uiCreate);
+    private _hit = [_display, "EINV_Hitbox", _layer, [_cardX, _rowTop, _width, _rowH]] call FUNC(uiCreate);
     private _tooltip = _options getOrDefault ["tooltip", ""];
 
     if (_tooltip isEqualType "" && {_tooltip isNotEqualTo ""}) then {
@@ -148,11 +187,18 @@ _controls append ([
             }, _choice] call FUNC(later);
         }];
     };
-
-    _controls pushBack _hit;
 } forEach _choices;
 
-uiNamespace setVariable [QGVAR(menu), _controls];
+// The focus into the layer, so it is drawn over everything: a button no one sees, one pixel in the card's
+// padding - the engine may refuse the focus to a control of no size. Return and Space press nothing on it.
+private _focus = [_display, "EINV_Hitbox", _layer, [_cardX + _padX / 2, _cardY + _padY / 2, pixelW, pixelH]] call FUNC(uiCreate);
+ctrlSetFocus _focus;
+
+uiNamespace setVariable [QGVAR(menu), [_layer]];
+uiNamespace setVariable [QGVAR(menuFocusBack), _back];
 
 // Where it lies, so that a right click on it is told from one beside it (fnc_onMouseButton).
 uiNamespace setVariable [QGVAR(menuRect), [_left, _top, _width, _height]];
+
+// What it shows, to make it again on top (fnc_raiseMenu).
+GVAR(menuState) = [_choices, [_left, _top]];

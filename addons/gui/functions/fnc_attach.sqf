@@ -60,6 +60,12 @@ if (!isNull _current && {_current isNotEqualTo _display}) exitWith {false};
 
 uiNamespace setVariable [QGVAR(display), _display];
 
+// The cell is worked out afresh for this window, with the player's tile scale as it is now (fnc_getCell).
+uiNamespace setVariable [QGVAR(cell), []];
+
+// Nor does it close for a reason given to the last one (fnc_closeDisplay, fnc_onUnload).
+GVAR(closeReason) = "";
+
 GVAR(unit) = _unit;
 GVAR(container) = _container;
 GVAR(secondary) = _secondary;

@@ -9,6 +9,10 @@
  * A vanilla inventory that loads anyway - another mod's handler, a script, a script error in this
  * one - is closed at once (fnc_guardVanilla).
  *
+ * Nothing depends on being the unit's last handler. Should the engine take another mod's later answer
+ * over this one's true, or open the display for a mod that forces it, the guard closes it as it loads,
+ * and the window, made a frame later, waits until it is gone (fnc_open) rather than land on it.
+ *
  * Once per unit. Called for the unit the player is now by the CBA unit event (XEH_postInit): the first
  * body, a respawn, a team switch and the soldier a Zeus remote controls all arrive there. The handler
  * stays on a unit the player leaves, where fnc_onInventoryOpened opens nothing but still blocks the

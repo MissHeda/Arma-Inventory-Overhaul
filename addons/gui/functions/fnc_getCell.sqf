@@ -12,6 +12,16 @@
  * while looting at 16:9: 37 pixels at 1920x1080, where 46 across gave 39 at eight columns - a cell a
  * twentieth smaller rather than a fifth (eight columns' width over ten), and the column 13 cells wide.
  *
+ * Then the player's tile scale (einv_gui_cellScale, 0.8 to 1.3): small pictures are hard to make out on
+ * some screens. Larger cells widen both columns, so the scale goes only as far as both of them, their gaps
+ * and CELL_FIT_LEFT UNITs of the equipment column still fit across - the largest that fits, said once in the
+ * RPT, never less than the cell at scale 1 (a 4:3 screen keeps the layout it had). ACE Arsenal's panel, which
+ * has less room, caps it further for its window (fnc_capCell).
+ *
+ * Worked out at the first ask after a window attached (fnc_attach) and kept until it closes
+ * (uiNamespace einv_gui_cell): a changed setting takes effect at the next opening, and nothing drawn
+ * meanwhile - a tile drawn again, the dragged ghost - can differ by a pixel from the grid it lies on.
+ *
  * Arguments:
  * None
  *
@@ -24,6 +34,43 @@
  * Public: No
  */
 
-private _pixels = round (((UNIT * 1.45) min UNSQUARE(safezoneW / 52)) / pixelH);
+private _kept = uiNamespace getVariable [QGVAR(cell), []];
 
-[_pixels * pixelW, _pixels * pixelH]
+if (_kept isNotEqualTo []) exitWith {+_kept};
+
+private _base = round (((UNIT * 1.45) min UNSQUARE(safezoneW / 52)) / pixelH);
+
+// Read from the mission namespace: grids are drawn in Eden as well, where CBA runs no settings.
+private _scale = missionNamespace getVariable [QGVAR(cellScale), 1];
+
+if !(_scale isEqualType 0) then {
+    _scale = 1;
+};
+
+_scale = (_scale max CELL_SCALE_MIN) min CELL_SCALE_MAX;
+
+private _pixels = round (_base * _scale);
+
+// The most a cell may have: what is left across for the cells of two columns once their fixed parts, the
+// three gaps and the equipment column's least width are taken.
+private _room = CONTENT_W - COLUMN_GAP * 3 - (SQUARE(UNIT * CELL_FIT_LEFT) min (safezoneW * 0.3)) - COLUMN_W(0) * 2;
+private _most = (floor (_room / ((STORAGE_COLS + 3) * 2) / pixelW)) max _base;
+
+if (_pixels > _most) then {
+    private _note = format ["%1 %2 %3", _scale, _pixels, _most];
+
+    if ((missionNamespace getVariable [QGVAR(cellNote), ""]) isNotEqualTo _note) then {
+        GVAR(cellNote) = _note;
+        INFO_3("Tile scale %1 does not fit this resolution and interface size: cells of %2 px instead of %3 px.",_scale,_most,_pixels);
+    };
+
+    _pixels = _most;
+};
+
+private _cell = [_pixels * pixelW, _pixels * pixelH];
+
+if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) then {
+    uiNamespace setVariable [QGVAR(cell), +_cell];
+};
+
+_cell

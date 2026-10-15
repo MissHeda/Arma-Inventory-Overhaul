@@ -70,10 +70,18 @@
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
 // Gone without its unload handler having run - the frame must not outlive it, nor the camera
-// (fnc_stopFrame ends whichever driver called this).
+// (fnc_stopFrame ends whichever driver called this). The inventory's own dialog always runs its unload
+// handler: one that did not was taken away with no event at all, and is ended here as any other close, so
+// the RPT says so and nothing of it is left open. A display the window is a guest on ends it from its own
+// close (the Arsenal's fnc_onClosed).
 if (isNull _display) exitWith {
-    call FUNC(stopFrame);
-    call FUNC(cameraStop);
+    if (call FUNC(isInventoryMode)) then {
+        GVAR(closeReason) = "display lost - it went without its unload event";
+        [displayNull, -1] call FUNC(onUnload);
+    } else {
+        call FUNC(stopFrame);
+        call FUNC(cameraStop);
+    };
 };
 
 // Kit windows that went inside an event of their own - raised, closed, drawn again: hidden at once, and
@@ -129,26 +137,35 @@ if (_check) then {
 // reach, in a vehicle, taken by someone else (ACE dragging, carrying, escorting), when their backpack is
 // no longer on them, or when they may no longer be opened as shown (fnc_canOpenPerson). One who dies
 // meanwhile is a body now, and the window stays while it lies in reach. Asked while another window lies
-// over this one as well: the person may walk off meanwhile.
+// over this one as well: the person may walk off meanwhile. The answer is why, for the RPT (fnc_onUnload),
+// "" to stay open.
 private _fnc_mustClose = {
     // A window with its own rules for it (the Arsenal's: its unit is not ACE_player in Eden or Zeus).
     if ("keepOpen" in GVAR(hooks)) exitWith {
-        !(["keepOpen", [], false] call FUNC(hook))
+        ["", "the window's own rule (keepOpen hook)"] select !(["keepOpen", [], false] call FUNC(hook))
     };
 
-    !alive GVAR(unit)
-    || {GVAR(unit) isNotEqualTo ACE_player}
-    || {GVAR(unit) getVariable ["ACE_isUnconscious", false]}
-    || {GVAR(personMode) isNotEqualTo "" && {
-        private _person = GVAR(person);
+    if (!alive GVAR(unit)) exitWith {"the unit died"};
+    if (GVAR(unit) isNotEqualTo ACE_player) exitWith {"the player is no longer this unit (ACE_player changed)"};
+    if (GVAR(unit) getVariable ["ACE_isUnconscious", false]) exitWith {"the unit is unconscious"};
+    if (GVAR(personMode) isEqualTo "") exitWith {""};
 
-        !([GVAR(unit), _person, true] call FUNC(personInReach))
-        || {GVAR(personMode) isEqualTo "backpack" && {GVAR(container) isNotEqualTo backpackContainer _person}}
-        || {alive _person && {
-            private _mode = [_person] call FUNC(canOpenPerson);
-            _mode isEqualTo "" || {_mode isEqualTo "backpack" && {GVAR(personMode) isEqualTo "whole"}}
-        }}
-    }}
+    private _person = GVAR(person);
+
+    if !([GVAR(unit), _person, true] call FUNC(personInReach)) exitWith {"the person is out of reach"};
+
+    if (GVAR(personMode) isEqualTo "backpack" && {GVAR(container) isNotEqualTo backpackContainer _person}) exitWith {
+        "the person's backpack is no longer on them"
+    };
+
+    if (alive _person && {
+        private _mode = [_person] call FUNC(canOpenPerson);
+        _mode isEqualTo "" || {_mode isEqualTo "backpack" && {GVAR(personMode) isEqualTo "whole"}}
+    }) exitWith {
+        "the person may no longer be opened like this"
+    };
+
+    ""
 };
 
 // Another window over this one - one an option of another mod's context menu opened, or Enhanced First
@@ -191,17 +208,25 @@ if (_covered) exitWith {
 
     GVAR(nextCheck) = _now + CHECK_INTERVAL;
 
-    if (call _fnc_mustClose) then {
-        _display closeDisplay 2;
+    private _why = call _fnc_mustClose;
+
+    if (_why isNotEqualTo "") then {
+        [_why] call FUNC(closeDisplay);
     };
 };
+
+// An open context menu made again on top once something was made on the display after it (fnc_raiseMenu).
+[] call FUNC(raiseMenu);
 
 // A click into a column gives it the focus, and the engine draws the focused control over every other -
 // the context menu, the inspect card, the dragged ghost and the name at the mouse would end up under
 // it. The focus goes straight back to the search field's sink (fnc_drawFilter), unless the field is
-// being typed in. A window with buttons of its own in groups (the "focusAll" flag) has every control but
-// a field sent back - while no mouse button is held: a button pressed keeps the focus until its click
-// came, or the click would be lost.
+// being typed in. So does a button of the window's own in a group - a section's Sort or Take all, a kit
+// window's cross - once its click came: it kept the focus, and its column drew its tiles over the
+// context menu and the name at the mouse until the next build (a tester's report on 0.4.6). A window
+// with buttons of its own in groups (the "focusAll" flag) has every control but a field sent back. Both
+// only while no mouse button is held: a button pressed keeps the focus until its click came, or the
+// click would be lost. The context menu's own focus stays where it is (fnc_openMenu).
 private _focus = focusedCtrl _display;
 
 if (!isNull _focus) then {
@@ -212,6 +237,23 @@ if (!isNull _focus) then {
         || {
             (["focusAll", [], false] call FUNC(hook)) && {inputMouse 0 == 0} && {inputMouse 1 == 0}
             && {ctrlType _focus != 2} && {_focus isNotEqualTo _sink}
+        }
+        || {
+            !isNull _sink && {_focus isNotEqualTo _sink} && {inputMouse 0 == 0} && {inputMouse 1 == 0}
+            && {!(ctrlType _focus in [2, 4])} && {!isNull ctrlParentControlsGroup _focus}
+            && {
+                // The group it lies in at the top, one the window made (fnc_uiCreate) - not another mod's.
+                private _group = ctrlParentControlsGroup _focus;
+                private _outer = _group;
+
+                while {!isNull _group} do {
+                    _outer = _group;
+                    _group = ctrlParentControlsGroup _group;
+                };
+
+                _outer in (uiNamespace getVariable [QGVAR(created), []])
+                && {!(_outer in (uiNamespace getVariable [QGVAR(menu), []]))}
+            }
         }
     ) then {
         ctrlSetFocus _sink;
@@ -227,8 +269,10 @@ if (!isNil QEFUNC(magazines,isBusy) && {[] call EFUNC(magazines,isBusy)}) exitWi
 
     GVAR(nextCheck) = _now + CHECK_INTERVAL;
 
-    if (call _fnc_mustClose) exitWith {
-        _display closeDisplay 2;
+    private _why = call _fnc_mustClose;
+
+    if (_why isNotEqualTo "") exitWith {
+        [_why] call FUNC(closeDisplay);
     };
 
     if (_now < GVAR(nextSignature) || {count GVAR(inFlight) > 0}) exitWith {};
@@ -364,6 +408,9 @@ if (GVAR(press) isEqualTo []) then {
     [_display, _now] call FUNC(animateSearch);
 };
 
+// The hover above may have lit a slot with a ring made on the display: the menu goes over it in this frame.
+[] call FUNC(raiseMenu);
+
 // ----- Answers to the window's moves -----
 // Each finishes once this machine reads every revision of the places it names - a holder gone
 // meanwhile, the last item taken from a pile the engine then deleted, counts as read - or ANSWER_WAIT
@@ -408,8 +455,10 @@ if (!_check) exitWith {};
 
 GVAR(nextCheck) = _now + CHECK_INTERVAL;
 
-if (call _fnc_mustClose) exitWith {
-    _display closeDisplay 2;
+private _why = call _fnc_mustClose;
+
+if (_why isNotEqualTo "") exitWith {
+    [_why] call FUNC(closeDisplay);
 };
 
 // The looting pose: the soldier taken away from the loot closes the window; a pose that is not reached yet,

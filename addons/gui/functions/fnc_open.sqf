@@ -18,15 +18,26 @@
  * and a movement key closes the window (fnc_onKeyDown). The stance, vehicle and place he had are kept for
  * the end (fnc_poseEnd, fnc_poseCheck).
  *
- * Nothing the last window waited for carries over (fnc_attach).
+ * Nothing the last window waited for carries over (fnc_attach). The camera on the soldier starts as the
+ * player's setting says (einv_gui_cameraDefault); the header's button turns it for this window only - or
+ * across a step aside for another mod's dialog (fnc_stepAside), which opens the same window again.
+ *
+ * Never over the vanilla inventory: a dialog is made as the child of the one on top, and a child closes
+ * with its parent. Another mod can have the engine open RscDisplayInventory beside this mod's handler
+ * (fnc_onInventoryOpened answers true, but a handler of theirs may not); fnc_guardVanilla closes it as it
+ * loads and again a frame later - and a window made in between would be its child and go with that second
+ * close, "the window closes at once". So while a vanilla inventory is open it is closed first and the
+ * window opens a frame later, at most OPEN_TRIES frames on.
  *
  * Arguments:
  * 0: Unit <OBJECT>
  * 1: Container the unit opened, or objNull <OBJECT>
  * 2: Second container (the ground next to a crate), or objNull <OBJECT>
+ * 3: Frames already waited for a vanilla inventory to go - for the call itself, which waits <NUMBER>
+ *    (default: 0)
  *
  * Return Value:
- * Opened <BOOL>
+ * Opened, or opens a frame later <BOOL>
  *
  * Example:
  * [player, cursorObject, objNull] call einv_gui_fnc_open;
@@ -36,10 +47,37 @@
 
 disableSerialization;
 
-params ["_unit", ["_container", objNull], ["_secondary", objNull]];
+params ["_unit", ["_container", objNull], ["_secondary", objNull], ["_waited", 0, [0]]];
 
 if (!hasInterface || {!alive _unit}) exitWith {false};
 if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {false};
+
+private _vanilla = findDisplay IDD_VANILLA_INVENTORY;
+
+if (!isNull _vanilla) exitWith {
+    [_vanilla] call FUNC(guardVanilla);
+
+    if (_waited >= OPEN_TRIES) exitWith {
+        ERROR("The vanilla inventory does not close - another mod keeps opening it. The window stays closed.");
+        false
+    };
+
+    if (_waited == 0) then {
+        INFO("The vanilla inventory is open as the window should open - closing it and opening the window a frame later.");
+    };
+
+    [{_this call FUNC(open)}, [_unit, _container, _secondary, _waited + 1]] call CBA_fnc_execNextFrame;
+    true
+};
+
+// The camera as the player set it (einv_gui_cameraDefault), unless a step aside brings the window back as it was.
+GVAR(cameraOn) = if (isNil QGVAR(cameraNext)) then {
+    (missionNamespace getVariable [QGVAR(cameraDefault), "soldier"]) isEqualTo "soldier"
+} else {
+    GVAR(cameraNext)
+};
+
+GVAR(cameraNext) = nil;
 
 if !(createDialog "EINV_InventoryDialog") exitWith {
     ERROR("Could not create the inventory dialog.");
@@ -72,7 +110,10 @@ if (alive _wearer && {_wearer isKindOf "CAManBase"} && {_wearer isNotEqualTo _un
 // The window itself: state, mouse, first build, frame - with no hooks, the plain inventory.
 if !([_display, _unit, _container, _secondary, createHashMap, "pfh"] call FUNC(attach)) exitWith {
     ERROR("Could not attach the inventory window.");
-    closeDialog 0;
+
+    // This dialog by name, not the topmost one (closeDialog 0): that may be another mod's.
+    GVAR(closeReason) = "the window could not attach (fnc_attach)";
+    _display closeDisplay 2;
     false
 };
 

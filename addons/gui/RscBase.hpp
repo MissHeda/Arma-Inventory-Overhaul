@@ -130,8 +130,8 @@ class EINV_Picture: EINV_Icon {
     colorText[] = C_WHITE;
 };
 
-// A picture stretched over its whole box (ST_PICTURE): turned a quarter, the shape is worked out by
-// hand (fnc_uiPictureTurned) - the engine would keep it for the box before the turn.
+// A picture stretched over its whole box (ST_PICTURE). A turned picture no longer uses it: since 0.4.7 it
+// is an EINV_Picture made square and turned (fnc_uiPictureTurned).
 class EINV_PictureStretch: EINV_Icon {
     style = 48;
 };

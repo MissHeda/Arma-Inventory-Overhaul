@@ -70,8 +70,11 @@ private _mouse = [_at, getMousePosition] select (_at isEqualTo []);
 
 [_display, _mouse, true] call FUNC(updateHover);
 
-// Where it opened, to open it there again when an option of another mod asks to stay open (fnc_cbaRun).
+// Where it opened, to open it there again when an option of another mod asks to stay open (fnc_cbaRun), and
+// what for: its rows name a tile by its number in its grid, so fnc_redrawTiles closes the menu of a tile
+// whose section it draws anew.
 GVAR(menuAt) = _mouse;
+GVAR(menuFor) = +GVAR(hover);
 
 // A window that attached has its own menus (the "menu" hook): its choices replace the ones below; none, no
 // menu at all. Nothing answered, the choices below.

@@ -10,10 +10,12 @@
  * A window that attached (fnc_attach) may mark a tile in its top left corner (the "tileBadge" hook).
  *
  * A magazine gets its fill bar only while it is not full and the player has the bar on
- * (einv_gui_magazineFillBar); a full one shows its rounds alone.
+ * (einv_gui_magazineFillBar); a full one shows its rounds alone. The rounds as words ("17/30") show
+ * while the player has them on (einv_gui_magazineText).
  *
  * The picture is fitted into the tile with its own shape kept. On a tile that lies turned ("rotated",
- * fnc_getLayout) it turns along (fnc_uiPictureTurned); what is on a weapon shows only upright.
+ * fnc_getLayout) it turns along, a quarter clockwise round the box's middle and fitted into the turned box
+ * (fnc_uiPictureTurned); what is on a weapon shows only upright.
  *
  * A shaped item (size=xx/x-, its "holes" as it lies, einv_storage_fnc_getLayout) covers only its own
  * cells: its surface, border and the outline of a hidden one are drawn on those (fnc_uiShape), and the
@@ -272,8 +274,10 @@ if (_hidden) then {
     };
 
     // A magazine's rounds where they always were, in the bottom right corner - unless the stack's box has
-    // that corner: then in the bottom left one, in what the box leaves.
-    if (_capacity <= 1) exitWith {};
+    // that corner: then in the bottom left one, in what the box leaves. Not when the player keeps them off
+    // the tiles (einv_gui_magazineText): the fill bar alone tells how full it is, and a repack has no
+    // label to write into (einv_magazines_fnc_drawJob takes none).
+    if (_capacity <= 1 || {!(missionNamespace getVariable [QGVAR(magazineText), true])}) exitWith {};
 
     private _amount = format ["%1/%2", _ammo, _capacity];
     private _leftSide = _stackW > 0;

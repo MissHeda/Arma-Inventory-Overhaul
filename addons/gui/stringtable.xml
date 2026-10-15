@@ -361,6 +361,24 @@
         <Key ID="STR_einv_gui_Setting_Animation_Off">
             <English>Off</English>
         </Key>
+        <Key ID="STR_einv_gui_Setting_CameraDefault">
+            <English>Camera when opening</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_CameraDefault_Desc">
+            <English>What the middle of the inventory shows\nwhen it opens: your soldier from the\nfront, as the arsenal does, or nothing -\nthe world as seen from his eyes. The\ncamera button in the header still turns\nit on or off while it is open.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_CameraDefault_Off">
+            <English>Off (first person)</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_CameraDefault_Soldier">
+            <English>Soldier (third person)</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_CellScale">
+            <English>Tile scale</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_CellScale_Desc">
+            <English>How large the cells and the pictures on\nthem are - above 1 if items are hard to\nmake out. Takes effect the next time the\ninventory opens. Where the columns would\nno longer fit across the screen, the\nlargest scale that fits is used.</English>
+        </Key>
         <Key ID="STR_einv_gui_Setting_CompareTooltip">
             <English>Compare gear at the mouse</English>
         </Key>
@@ -371,7 +389,13 @@
             <English>Fill bar on magazines</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MagazineFillBar_Desc">
-            <English>A thin bar along the bottom of every\nmagazine that is not full: how many\nrounds are left, at a glance - on its\ntile and on a weapon's magazine slot.\n\nThe rounds stay written on every\nmagazine either way.</English>
+            <English>A thin bar along the bottom of every\nmagazine that is not full: how many\nrounds are left, at a glance - on its\ntile and on a weapon's magazine slot.\n\nThe rounds as words have a switch of\ntheir own (Rounds on magazines).</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MagazineText">
+            <English>Rounds on magazines</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MagazineText_Desc">
+            <English>The rounds left in a magazine as words\n("17/30") in a corner of its tile. Off,\nthe fill bar alone tells how full one\nis - and a full one shows neither.\n\nA weapon's magazine slot keeps them.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MoveToStop">
             <English>Moving stops looting</English>

@@ -9,8 +9,9 @@
  * Per section the layout is worked out again (einv_storage_fnc_getLayout), its tiles' controls are
  * deleted and the cells they hid shown, the tiles are drawn again (fnc_drawTiles), the caption's weight
  * text is updated, and what is searched is queued anew (fnc_markHidden); then the moves under way
- * (fnc_drawPending), the selection (fnc_drawSelection) and the search field's fading come back. A
- * section folded away has no tiles: only its weight text changes.
+ * (fnc_drawPending), the selection (fnc_drawSelection) and the search field's fading come back, and an
+ * open context menu is made again on top (fnc_raiseMenu) - or closed, when it was opened on a tile of a
+ * section drawn anew. A section folded away has no tiles: only its weight text changes.
  *
  * Only where it is certain to look right: the compartments (and the rows of an open grid, the number of
  * overflow tiles) must be the ones drawn, the Take all or Put all in button must stay what it is, the
@@ -207,6 +208,25 @@ call FUNC(drawPending);
 
 if (GVAR(filter) isNotEqualTo "") then {
     [] call FUNC(applyFilter);
+};
+
+// An open context menu (fnc_openMenu): one opened on a tile of a section drawn anew goes - its rows name
+// that tile by its number in the grid, which may be another item's now. Any other is made again on top
+// (fnc_raiseMenu), over everything drawn here.
+if ((uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo []) then {
+    GVAR(menuFor) params [["_menuKind", ""], ["_menuGrid", -1]];
+
+    private _menuHolders = _jobs apply {_x select 1};
+    private _target = if (_menuGrid isEqualType 0 && {_menuGrid >= 0}) then {_grids param [_menuGrid, createHashMap]} else {createHashMap};
+
+    if (
+        _menuKind isEqualTo "tile" && {(_target getOrDefault ["window", ""]) isEqualTo ""}
+        && {(_target getOrDefault ["holder", objNull]) in _menuHolders}
+    ) then {
+        call FUNC(closeMenu);
+    } else {
+        [true] call FUNC(raiseMenu);
+    };
 };
 
 // The mouse is on other tiles now, whatever stood still: looked at again, and no double click across it.

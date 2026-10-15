@@ -44,8 +44,7 @@ if (!isNull GVAR(openedOn) && {
     || {_unit getVariable [QACEGVAR(dragging,isCarrying), false]}
     || {isNull GVAR(openParent) && {(_unit distance2D (ASLToAGL GVAR(openPos))) > POSE_LEASH}}
 }) exitWith {
-    GVAR(closeReason) = "taken";
-    _display closeDisplay 2;
+    ["taken"] call FUNC(closeDisplay);
     true
 };
 

@@ -29,8 +29,10 @@ params [["_code", {}, [{}]], ["_args", []]];
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 private _back = [GVAR(unit), GVAR(container), GVAR(secondary)];
 
+// The window comes back as it was: the camera as the player had turned it (fnc_open).
 if (!isNull _display) then {
-    _display closeDisplay 2;
+    GVAR(cameraNext) = GVAR(cameraOn);
+    ["stepped aside for another mod's dialog - it opens again when that one closes"] call FUNC(closeDisplay);
 };
 
 [{

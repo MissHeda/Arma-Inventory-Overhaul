@@ -272,8 +272,13 @@ GVAR(cbaSlots) = createHashMapFromArray [
 ];
 
 // Where the context menu was opened, to open it there again when a choice of another mod asks to stay
-// open (fnc_cbaRun).
+// open (fnc_cbaRun); what the mouse was on then (GVAR(hover)'s form - fnc_redrawTiles closes a menu of a
+// tile it draws anew); and the open menu's choices and place [choices, [x, y]] or [], to make it again on
+// top (fnc_openMenu, fnc_raiseMenu). Its layer, where it lies and the field that had the focus before live
+// in uiNamespace (menu, menuRect, menuFocusBack).
 GVAR(menuAt) = [];
+GVAR(menuFor) = [];
+GVAR(menuState) = [];
 
 // Another window lies over this one - a dialog a choice of another mod opened, or Enhanced First Aid
 // Kits' own (fnc_isCovered). The window keeps still meanwhile (fnc_onFrame).
@@ -348,13 +353,12 @@ GVAR(styles) = [
 ];
 GVAR(style) = "main";
 
-// The player's own choice of camera, kept in the profile across missions.
-
-GVAR(cameraOn) = profileNamespace getVariable [QGVAR(cameraOn), true];
-
-if !(GVAR(cameraOn) isEqualType true) then {
-    GVAR(cameraOn) = true;
-};
+// The camera on the soldier in the window's middle: on or off for the window open now - set from the
+// player's setting at every opening (einv_gui_cameraDefault, fnc_open), turned by the header's button
+// (fnc_toggleCamera); and what a step aside for another mod's dialog brings back (fnc_stepAside) - nil
+// otherwise. No longer kept in the profile: the setting is the default now (0.4.7).
+GVAR(cameraOn) = true;
+GVAR(cameraNext) = nil;
 
 #include "initSettings.inc.sqf"
 

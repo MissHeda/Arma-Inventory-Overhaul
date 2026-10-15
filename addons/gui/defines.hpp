@@ -19,6 +19,14 @@
 // in seconds (XEH_postInit, fnc_guardVanilla).
 #define GUARD_INTERVAL 0.25
 
+// How many frames fnc_open waits for a vanilla inventory to go before it makes the window: made while
+// one is open, the window would be its child dialog and close with it (fnc_guardVanilla).
+#define OPEN_TRIES 10
+
+// The window made again after the vanilla inventory under it was closed takes it down with it
+// (fnc_guardVanilla) - not again within this many seconds, so two mods fighting over it cannot loop.
+#define REOPEN_PAUSE 2
+
 // DIK codes the window looks at itself
 #define DIK_ESCAPE 1
 #define DIK_RETURN 28
@@ -268,6 +276,21 @@
 // The scroll bar of a scrolling column (EINV_ScrollGroup). A plain number: the engine reads it from
 // config as it is.
 #define SCROLL_W 0.006
+
+// A storage column for cells CELLW wide (fnc_layoutGlass): the container's picture box and its compartments
+// beside it (STORAGE_COLS + 3 cells), the column's padding - the right one wide enough for the scroll bar -
+// and a little air; the gap between two columns. fnc_getCell sizes the player's tile scale by them.
+#define COLUMN_PAD_X SQUARE(UNIT * 0.4)
+#define COLUMN_W(CELLW) ((STORAGE_COLS + 3) * (CELLW) + SQUARE(UNIT * 0.35) + ((COLUMN_PAD_X * 2) max (COLUMN_PAD_X + SCROLL_W + pixelW * 4)) + SQUARE(UNIT * 0.6))
+#define COLUMN_GAP SQUARE(UNIT * 0.8)
+
+// The least of the equipment column, in UNITs, that a larger tile scale leaves beside the storage and loot
+// columns (fnc_getCell) - about what it gets at 4:3 with the scale at 1.
+#define CELL_FIT_LEFT 16
+
+// The tile scale's limits (einv_gui_cellScale), a share of the cell fnc_getCell works out.
+#define CELL_SCALE_MIN 0.8
+#define CELL_SCALE_MAX 1.3
 
 // The room between two compartments of a container, a share of a cell rounded to whole pixels: between
 // blocks that flow side by side or one under another (fnc_flowCompartments), and where two compartments

@@ -2,6 +2,21 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.4.7 - unreleased
+
+### Added
+
+- Tile scale (`einv_gui_cellScale`, 0.8 to 1.3, per player): larger or smaller cells and pictures, from the next opening. Where both columns would no longer fit the screen the largest scale that fits is used and the RPT says so once; ACE Arsenal's panel caps it for itself so its ten columns still fit beside ACE's list.
+- Rounds on magazines (`einv_gui_magazineText`, per player, beside the fill bar): off hides the "17/30" on magazine tiles and keeps the fill bar.
+- Camera when opening (`einv_gui_cameraDefault`, per player): the soldier (third person, as before) or off (first person). The header's camera button still turns it for the open window; the choice is no longer remembered in the profile.
+- The RPT names why the window closed, one line each time: `window closed: <reason>` (a movement key, Escape, the Gear key, the close button, the unit died or passed out, the vanilla inventory under it, another mod or script, ...).
+
+### Fixed
+
+- Turned items: the picture of a turned tile, and of a dragged item held turned (also from ACE Arsenal's list), turns a quarter clockwise round the tile's middle and fits the turned box, instead of showing squashed and out of its tile.
+- The context menu no longer hides behind the tiles: it is a layer of its own that takes the focus and is made again on top when anything is drawn after it; a menu on a tile whose crate was redrawn by another player's change closes. A section's button no longer keeps the focus after its click.
+- The window closing at once with some mods loaded: when another mod lets the engine open the vanilla inventory as well, the window no longer opens on top of it (made a frame later as its child, it was closed along with it); the guard closes only the vanilla inventory (IDD 602), never the window or another mod's display, and opens the window again should it have been closed with it.
+
 ## 0.4.0 - unreleased
 
 ### Added

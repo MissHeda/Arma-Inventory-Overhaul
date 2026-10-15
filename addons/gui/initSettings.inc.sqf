@@ -2,6 +2,17 @@
 
 // ----- General -----
 
+// Each player's own eyes and screen: some find the pictures too small to make out. Read when a window
+// opens (fnc_getCell), so a change shows at the next one; capped where the columns would not fit.
+[
+    QGVAR(cellScale),
+    "SLIDER",
+    [LLSTRING(Setting_CellScale), LLSTRING(Setting_CellScale_Desc)],
+    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    [CELL_SCALE_MIN, CELL_SCALE_MAX, 1, 1],
+    0
+] call CBA_fnc_addSetting;
+
 // Each player's own eyes.
 [
     QGVAR(compareTooltip),
@@ -9,6 +20,17 @@
     [LLSTRING(Setting_CompareTooltip), LLSTRING(Setting_CompareTooltip_Desc)],
     [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
     true,
+    0
+] call CBA_fnc_addSetting;
+
+// Each player's own taste: the soldier from the front, as ACE Arsenal shows him, or the world as seen from
+// his eyes. Read as the window opens (fnc_open); the header's button still turns it for that window.
+[
+    QGVAR(cameraDefault),
+    "LIST",
+    [LLSTRING(Setting_CameraDefault), LLSTRING(Setting_CameraDefault_Desc)],
+    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    [["soldier", "off"], [LLSTRING(Setting_CameraDefault_Soldier), LLSTRING(Setting_CameraDefault_Off)], 0],
     0
 ] call CBA_fnc_addSetting;
 
@@ -175,6 +197,16 @@
     QGVAR(magazineFillBar),
     "CHECKBOX",
     [LLSTRING(Setting_MagazineFillBar), LLSTRING(Setting_MagazineFillBar_Desc)],
+    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Magazines)],
+    true,
+    0
+] call CBA_fnc_addSetting;
+
+// Each player's own eyes, as the bar: the words take room from a small tile's picture.
+[
+    QGVAR(magazineText),
+    "CHECKBOX",
+    [LLSTRING(Setting_MagazineText), LLSTRING(Setting_MagazineText_Desc)],
     [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Magazines)],
     true,
     0
