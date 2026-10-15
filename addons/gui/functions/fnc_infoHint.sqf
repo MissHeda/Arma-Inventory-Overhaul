@@ -47,8 +47,13 @@ switch (_kind) do {
 
         private _loadKg = [_load] call _fnc_kg;
         private _colors = ["text2", "accent", "loss", "loss"];
+        // With the tiers off (einv_weight_enabled) there is no word: the kilograms alone, and no tiers above.
         private _parts = [[
-            [format [LLSTRING(Tier_Now), _loadKg, _word], format [LLSTRING(Tier_NowDesc), _loadKg, _word, _effect]] select (_effect isNotEqualTo ""),
+            if (_word isEqualTo "") then {
+                format ["%1 kg", _loadKg]
+            } else {
+                [format [LLSTRING(Tier_Now), _loadKg, _word], format [LLSTRING(Tier_NowDesc), _loadKg, _word, _effect]] select (_effect isNotEqualTo "")
+            },
             _colors select _tier
         ]];
 
@@ -57,7 +62,7 @@ switch (_kind) do {
         {
             _x params ["_tierAbove", "_key", "_kg"];
 
-            if (_tier < _tierAbove && {_tierAbove != TIER_HEAVY || {(_limits get "heavyKg") < (_limits get "overloadedKg")}}) then {
+            if (_tier < _tierAbove && {_limits getOrDefault ["enabled", true]} && {_tierAbove != TIER_HEAVY || {(_limits get "heavyKg") < (_limits get "overloadedKg")}}) then {
                 _parts pushBack [
                     format [LLSTRING(Tier_From), ([_tierAbove, _limits] call EFUNC(weight,tierText)) select 0, (_limits get _kg) toFixed 1],
                     _key

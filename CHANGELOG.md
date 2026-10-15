@@ -10,6 +10,9 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 - Rounds on magazines (`einv_gui_magazineText`, per player, beside the fill bar): off hides the "17/30" on magazine tiles and keeps the fill bar.
 - Camera when opening (`einv_gui_cameraDefault`, per player): the soldier (third person, as before) or off (first person). The header's camera button still turns it for the open window; the choice is no longer remembered in the profile.
 - The RPT names why the window closed, one line each time: `window closed: <reason>` (a movement key, Escape, the Gear key, the close button, the unit died or passed out, the vanilla inventory under it, another mod or script, ...).
+- Weight: the CBA setting "Weight tiers" (`einv_weight_enabled`) switches the tiers off completely - no sprint block, no walking only, no extra fatigue, no tier messages; the weight card shows only the kilograms and ACE's own fatigue works alone.
+- ACE interaction "Inventory" on other people (new optional addon `compat_ace_interaction`, loads with ACE's interaction menu): opens them as the action menu's "Inventory" does, under the same "Living persons" settings and reach.
+- Setup wizard: the CBA setting "Who may open the setup" (`einv_setup_access`, default Admins only) keeps the wizard to the server, logged-in admins, CBA's whitelist and Zeus; others get "Inventory setup is for admins on this server." Eden and CBA's Addon Options are unaffected.
 
 ### Fixed
 

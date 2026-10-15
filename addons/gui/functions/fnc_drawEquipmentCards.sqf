@@ -338,7 +338,7 @@ private _valueSize = UNIT * 0.66;
 private _valueW = (_valueText getTextWidth [_fontBold, _valueSize]) * TEXT_SLACK;
 private _nextText = "";
 
-if (_nextTier >= 0) then {
+if (_nextTier >= 0 && {_limits getOrDefault ["enabled", true]}) then {
     _nextText = format [
         LLSTRING(Load_Next), ([_nextTier, _limits] call EFUNC(weight,tierText)) select 0,
         (_limits get (["", "heavyKg", "overloadedKg", "criticalKg"] select _nextTier)) toFixed 1

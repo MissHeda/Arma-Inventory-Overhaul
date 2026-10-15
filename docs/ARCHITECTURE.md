@@ -74,6 +74,7 @@ The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
 | `compat_efak` | Enhanced First Aid Kits and Enhanced Utility Pouches: kits as floating windows, packing by drag and drop. |
 | `compat_ace_cargo` | what ACE cargo has loaded in a vehicle or crate, as a "Cargo" section with Open and Unload. |
 | `compat_ace_vehiclelock` | ACE's vehicle lock as one more lock of ours. |
+| `compat_ace_interaction` | ACE interaction "Inventory" on people, the action menu's entry as an ACE action. |
 | `compat_zen` | Zeus Enhanced: the "Inventory lock" menu and module. |
 | `compat_tfar` | TFAR radios: channel and frequency at the mouse, "Open radio", "Use as active radio", long-range settings kept through moves. |
 | `compat_acre` | the same for ACRE2, and the dummy radio ACRE2 keeps in the radio slot fixed. |
@@ -1233,8 +1234,17 @@ over the main menu and in Eden.
 | the inventory's cog (`einv_gui_fnc_drawHeader`) | direct | `fnc_openFromGame`; the tooltip says read-only when `fnc_canEdit` says so; the inventory comes back on close (`einv_setup_reopenInventory`), as a person window when it was one |
 
 - `fnc_open [parent = displayNull, mode = "direct", step = 0, class = ""]` (public) -> display; one wizard at a time, an open
-  inventory closes first. The wizard has no CBA settings of its own: it edits `einv_items_rules` and has one keybind,
-  `einv_setup_openWizard`. `fnc_canEdit [mode]` (public) -> HashMap `canSave`, `source` (`"server"`, `"mission"`, `""`),
+  inventory closes first. The wizard edits `einv_items_rules`, has one keybind, `einv_setup_openWizard`, and one setting of its
+  own, `einv_setup_access` (who may open it). `fnc_canOpen [mode = "direct", tell = false]` (public) -> BOOL is the one gate every
+  way in from a running mission passes: `fnc_openFromGame` (keybind, the inventory's cog; asked before the inventory closes, so a
+  refusal keeps it open), `fnc_open` (a mission's own call) and `fnc_onLoad` (ESC > Options, where the engine makes the display
+  itself: closed again through `fnc_defer`). True in Eden, in menu mode (CBA's Addon Options), with `einv_setup_access` =
+  `"everyone"`, or for the server itself (single player, the host), a logged-in admin (`serverCommandAvailable "#kick"`), CBA's
+  settings whitelist (`cba_settings_fnc_whitelisted`, who may save anyway) or a Zeus (`getAssignedCuratorLogic player`). Refused
+  with `tell`: the hint "Inventory setup is for admins on this server." (`ace_common_fnc_displayTextStructured`). CBA's pause-menu
+  entries take no condition, so ESC > Options still lists it; the cog in the inventory header (`einv_gui_fnc_drawHeader`) is not
+  drawn where it would refuse.
+  `fnc_canEdit [mode]` (public) -> HashMap `canSave`, `source` (`"server"`, `"mission"`, `""`),
   `override` (may force over the mission, priority 2, multiplayer server only), `locked` (set in a `cba_settings.sqf`), `reason`,
   `priority`, `missionWins`: direct mode saves to the mission in Eden, else to the server - as the server itself (single player
   too), a logged-in admin or CBA's whitelist; everyone else is read-only. Menu mode: the source picked in CBA's menu.
@@ -1487,6 +1497,14 @@ them, and adds the tiers.
   `OVERLOAD_DUTY_MAX` 1.5 at Critical. `einv_weight_effects` off keeps the bar and takes the effects off. No `setAnimSpeedCoef`:
   ACE resets it every second. A tier change raises the local CBA event `einv_weight_tierChanged [unit, tier, old tier]` and, with
   the inventory closed and `einv_weight_notify` on, an ACE message (`fnc_notifyTier`). Nothing is ever refused because of a tier.
+- **Off switch** (`einv_weight_enabled`, global, default on, first in the Weight category). Off: `fnc_getLimits` still works out
+  the marks (the bar needs an end) but sets `enabled` false in the map and in its `key`; `fnc_getTier` then answers `TIER_LIGHT`
+  for every load, `fnc_tierText` `["", ""]`, `fnc_notifyTier` says nothing, and `fnc_updateTier` sets duty 1 and, as the tier fell
+  to Light, takes `blockSprint` / `forceWalk` off through `fnc_applyEffects` (which also reads the switch). The duty factor
+  registered with ACE answers 1 at once while off. The flip is seen by the 1 s tier check (the limits key changed) and redraws an
+  open window (its signature holds the key). The weight card and its hint (`einv_gui_fnc_drawEquipmentCards`, `fnc_infoHint`) read
+  `enabled` too: only the kilograms, no next tier, no tiers above. What stays: the load (`fnc_getLoad`), the virtual load of the
+  rules' `weight=` overrides handed to ACE, and ACE's own fatigue, untouched.
 
 ### magazines (`einv_magazines`)
 
@@ -1539,7 +1557,7 @@ one `sendMoves` move). Prototypes (`efak_core_needsConversion`) are refused unti
 shown but neither opened nor moved (`fnc_isPlayerGear`, `fnc_checkTile`). No `efak_*` function is called outside this addon;
 `fnc_isKit` is public.
 
-### compat_ace_cargo, compat_tfar, compat_acre, compat_zen, compat_ace_vehiclelock
+### compat_ace_cargo, compat_tfar, compat_acre, compat_zen, compat_ace_vehiclelock, compat_ace_interaction
 
 - **compat_ace_cargo.** `fnc_getSections [lootSections]` adds, right under every container section with things loaded
   (`ace_cargo_loaded`), a section `id "cargo"` with `vehicle`, `parent`, `items` and `drawer` (the name of `fnc_drawSection`),
@@ -1564,6 +1582,12 @@ shown but neither opened nor moved (`fnc_isPlayerGear`, `fnc_checkTile`). No `ef
   `ace_vehiclelock_LockVehicleInventory` on, the player on foot, a Car, Tank or Helicopter, `locked` 2 or 3, and no key by
   `ace_vehiclelock_fnc_hasKeyForVehicle`. ACE blocks only the vanilla display 602, which this window never opens - without the
   provider ACE's lock would be bypassed.
+- **compat_ace_interaction.** Needs `ace_interact_menu` (skipped without it). In postInit, on machines with a screen: ACE
+  interaction "Inventory" with the inventory icon, under `ACE_MainActions` of `CAManBase` (type 0, with inheritance, so agents and
+  respawned units too). Condition `fnc_canOpen [target, player]`: not the player, `einv_gui_fnc_canOpenPerson` not "" (the
+  "Living persons" settings: whole or only the backpack) and `einv_gui_fnc_personInReach [player, target, true]` (both on foot,
+  `PERSON_KEEP`, ACE's `canInteractWith` with `isNotSwimming`). Statement: `einv_gui_fnc_openPerson [target]` a frame later
+  (`CBA_fnc_execNextFrame`), exactly as the action menu's "Inventory" (`einv_gui_fnc_addPersonAction`), which stays.
 
 ## 8. Settings
 
@@ -1605,6 +1629,8 @@ stringtables are wrapped as BRIEFING asks.
 | `einv_hotbar_hudMode` | LIST | client | While in use | Never, While in use, Always |
 | `einv_hotbar_hudTime` | SLIDER 1 to 15 | client | 4 | seconds the bar stays after a key |
 | `einv_magazines_repack` | CHECKBOX | global | on | the window's own repack |
+| `einv_setup_access` | LIST | global | `admins` | `everyone`, `admins`: who may open the setup wizard in a mission (server, logged-in admin, CBA whitelist, Zeus); Eden and CBA's menu always |
+| `einv_weight_enabled` | CHECKBOX | global | on | the tiers at all; off: plain kilograms, no effects, no duty factor, no messages (ACE's fatigue alone) |
 | `einv_weight_heavyAt` | SLIDER 0 to 100 | global | 0 | kg; 0 follows ACE's fatigue |
 | `einv_weight_overloadedAt` | SLIDER 10 to 100 | global | 45 | kg |
 | `einv_weight_criticalAt` | SLIDER 10 to 150 | global | 60 | kg, at least 1 above Overloaded |
