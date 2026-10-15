@@ -11,10 +11,10 @@
  * The panel looks like one of the inventory's columns (the glass, corner radius, fonts and colours of its
  * theme) and is laid out the way they are, on one grid of PANEL_PAD UNITs: one block from the top of ACE's
  * sort bar down to the bottom of ACE's list (fnc_panelRect). On top the title row - the container's
- * picture, TITLE_H UNITs high and square, and its name beside it in the title size of the columns' titles
- * (TITLE_SIZE), centred in the row's height -, under it a hairline. Then the column, which scrolls over
- * both sections and reaches down to the hint line, the block's last band, over which runs a hairline of
- * its own: the staging space fills what the container leaves of it (fnc_growStaging). The picture, the
+ * picture, TITLE_H high and square, and its name beside it, TITLE_SIZE high, centred in the row's height;
+ * both in ACE's grid, as the rows of ACE's list beside them are -, under it a hairline. Then the column,
+ * which scrolls over both sections and reaches down to the hint line, the block's last band, over which
+ * runs a hairline of its own: the staging space fills what the container leaves of it (fnc_growStaging). The picture, the
  * sections' tabs and grids start on one left edge, the load texts end on one right edge; the sections draw
  * no picture box of their own ("box" false), and the column draws no background over the block.
  *
@@ -132,15 +132,15 @@ if (!isNull _holder) then {
 private _list = _display displayCtrl ARSENAL_IDC_LIST;
 private _padY = UNIT * PANEL_PAD;
 private _padX = SQUARE(_padY);
-private _titleH = UNIT * TITLE_H;
+private _titleH = TITLE_H;
 private _bandH = SNAP_H(_padY + _titleH);
 private _bodyTop = _top + _bandH;
 
 // The hint line, the block's last band: a line as high as the footer's key hints, a second while the
 // staging space holds something - for the note that it goes with the window (the "hint" hook) -, and room
-// above and below. The column reaches down to it.
+// above and below, in ACE's grid as its text is. The column reaches down to it.
 private _lines = [1, 2] select (GVAR(stagingCount) > 0);
-private _hintH = SNAP_H(UNIT * (HINT_LINE_H * _lines + HINT_PAD * 2));
+private _hintH = SNAP_H(HINT_LINE_H * _lines + HINT_PAD * 2);
 private _hintTop = _top + _height - _hintH;
 private _columnH = _hintTop - _bodyTop;
 
@@ -152,7 +152,7 @@ if (_columnH < UNIT * 4) exitWith {[]};
 ] call EFUNC(gui,uiPanel);
 
 // The container's picture and name in the title row: one sees what is being filled. The picture is as high as
-// the row and square, the name beside it in the columns' title size and font, its line of capitals
+// the row and square, the name beside it in the columns' title font at TITLE_SIZE, its line of capitals
 // centred in the row's height (TEXT_MID: a label draws its text from its top edge down).
 private _titleTop = _top + _padY;
 private _textX = _left + _padX;
@@ -165,7 +165,7 @@ if (_picture isNotEqualTo "") then {
 };
 
 private _headFont = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _headSize = UNIT * TITLE_SIZE;
+private _headSize = TITLE_SIZE;
 private _headTop = _titleTop + _titleH / 2 - TEXT_MID * _headSize;
 private _headW = _left + _width - _padX - _textX;
 private _title = [[_section getOrDefault ["title", ""], _theme] call EFUNC(gui,caption), _headW, _headFont, _headSize] call EFUNC(gui,fitText);

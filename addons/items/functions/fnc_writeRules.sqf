@@ -32,6 +32,7 @@ private _fnc_conds = {
     (_conds apply {
         _x params ["_negated", "_key", "_op", "_values"];
 
+        // A group as @name, "all" as its key alone (no op, no values), the rest as key, op and values.
         private _text = if (_key isEqualTo "@") then {
             (_values apply {"@" + _x}) joinString "|"
         } else {

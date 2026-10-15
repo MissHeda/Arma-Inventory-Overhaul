@@ -62,8 +62,10 @@ private _bare = createHashMapFromArray (toArray _rules);
 private _byKind = createHashMapFromArray (toArray (_rules getOrDefault ["byKind", createHashMap]));
 private _kindRules = _byKind getOrDefault [_kind, [[], [], [], []]];
 
-_byKind set [_kind, [[], _kindRules select 1, [], _kindRules select 3]];
+_byKind set [_kind, [[], _kindRules select 1, [], _kindRules select 3, [], []]];
 _bare set ["own", []];
+// The text's "all" rules are the text's too.
+_bare set ["fallback", []];
 _bare set ["byKind", _byKind];
 
 private _plain = [_facts, _bare] call FUNC(resolve);

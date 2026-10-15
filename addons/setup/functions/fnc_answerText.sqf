@@ -180,6 +180,7 @@ private _from = switch (true) do {
     };
     case ((_src select [0, 7]) isEqualTo "legacy:"): {LLSTRING(Answer_Legacy)};
     case ((_src select [0, 7]) isEqualTo "preset:"): {LLSTRING(Answer_Preset)};
+    case ((_src select [0, 4]) isEqualTo "all:"): {LLSTRING(Answer_All)};
     case ((_src select [0, 4]) isEqualTo "mod:"): {LLSTRING(Answer_Mod)};
     case (_src isEqualTo "forced"): {LLSTRING(Answer_Forced)};
     default {LLSTRING(Answer_Builtin)};

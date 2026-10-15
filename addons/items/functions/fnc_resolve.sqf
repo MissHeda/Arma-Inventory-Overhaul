@@ -13,6 +13,11 @@
  *             the rules text above still has the last word
  *   preset  - the preset chain (a derived preset after its base, later rules first), and after it
  *             einv_items_stackSmall when it is moved off its default
+ *   all     - the text's rules with "all", everything else (later rules first): they answer only what
+ *             every layer above left open, so they fill the gaps and never override a rule, a table, a
+ *             mod or the preset - but for the preset's own everything else, its rules without any
+ *             condition (the default's first, size=1x1 stack=1, reaches every item): a field only such a
+ *             rule answered is open to them, and keeps the preset's answer where they have none
  *   builtin - 1x1, alone on its tile, a grid by load, the config's weight and name
  *
  * Only the rules that can be about the item's kind are asked (fnc_compileRules sorts them), and a
@@ -49,8 +54,8 @@
  *   "weight"    - its weight in kg by the rules, -1 when none sets one <NUMBER>
  *   "name"      - its name by the rules, "" when none sets one <STRING>
  *   "src"       - field -> where it came from: "own:<i>" (i-th rule of the text),
- *                 "legacy:<setting>:<i>", "mod:<config key>", "preset:<preset>:<i>", "builtin",
- *                 "forced" <HASHMAP>
+ *                 "legacy:<setting>:<i>", "mod:<config key>", "preset:<preset>:<i>", "all:<i>" (the
+ *                 i-th rule of the text, one with "all"), "builtin", "forced" <HASHMAP>
  *
  * Example:
  * [["arifle_MX_F"] call einv_items_fnc_getFacts, call einv_items_fnc_currentRules] call einv_items_fnc_resolve;
@@ -75,7 +80,9 @@ private _result = createHashMap;
 private _src = createHashMap;
 private _memo = createHashMap;
 
-((_compiled getOrDefault ["byKind", createHashMap]) getOrDefault [_kind, [[], [], [], []]]) params ["_ownIndices", "_presetIndices", "_ownFields", "_presetFields"];
+((_compiled getOrDefault ["byKind", createHashMap]) getOrDefault [_kind, [[], [], [], []]]) params [
+    "_ownIndices", "_presetIndices", "_ownFields", "_presetFields", ["_fallbackIndices", []], ["_fallbackFields", []]
+];
 
 private _likeAnswers = createHashMap;
 
@@ -166,10 +173,15 @@ private _fnc_like = {
     _answer
 };
 
+// The fields a preset's rule without conditions answered - the preset's own everything else, which the
+// text's "all" rules come before.
+private _caught = [];
+
 // One layer's rules, highest first; each takes the fields still open that it sets, if it matches -
-// with like=, those it leaves to that class as well.
+// with like=, those it leaves to that class as well. With the fourth argument, what a rule without
+// conditions takes is noted in _caught.
 private _fnc_walk = {
-    params ["_rules", "_indices", "_fields"];
+    params ["_rules", "_indices", "_fields", ["_noteCaught", false]];
 
     {
         if ((_need arrayIntersect _fields) isEqualTo []) exitWith {};
@@ -199,6 +211,10 @@ private _fnc_walk = {
                     _src set [_field, [_tag, "builtin"] select _builtin];
                 };
             } forEach _sets;
+
+            if (_noteCaught && {_conds isEqualTo []}) then {
+                _caught append _sets;
+            };
 
             _need = _need - _sets;
         };
@@ -287,7 +303,18 @@ if ("name" in _need && {"name" in _mod}) then {
     _need = _need - ["name"];
 };
 
-[_compiled getOrDefault ["preset", []], _presetIndices, _presetFields] call _fnc_walk;
+[_compiled getOrDefault ["preset", []], _presetIndices, _presetFields, true] call _fnc_walk;
+
+// Everything else (all): what no rule, table, mod or preset answered - the gaps, and only those - and
+// what only the preset's everything else did. Of those, what the text's has no answer for stays the
+// preset's.
+if (_fallbackIndices isNotEqualTo []) then {
+    _need append _caught;
+
+    [_compiled getOrDefault ["fallback", []], _fallbackIndices, _fallbackFields] call _fnc_walk;
+
+    _need = _need - _caught;
+};
 
 // What nothing set.
 {

@@ -9,9 +9,10 @@
 // The arsenal's display (IDD_ace_arsenal).
 #define ARSENAL_IDD 1127001
 
-// The list of the right panel (IDC_rightTabContentListnBox), its "+" arrow (IDC_arrowPlus) and the load
-// bar under it (IDC_loadIndicatorBar).
+// The list of the right panel (IDC_rightTabContentListnBox), its "-" and "+" arrows (IDC_arrowMinus,
+// IDC_arrowPlus) and the load bar under it (IDC_loadIndicatorBar).
 #define ARSENAL_IDC_LIST 15
+#define ARSENAL_IDC_MINUS 101
 #define ARSENAL_IDC_PLUS 102
 #define ARSENAL_IDC_LOAD 701
 

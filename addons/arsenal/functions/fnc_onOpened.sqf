@@ -62,8 +62,8 @@ _display displayAddEventHandler ["KeyUp", {(_this + [false]) call FUNC(onKey)}];
 private _list = _display displayCtrl ARSENAL_IDC_LIST;
 
 if (!isNull _list) then {
-    // The row picked and when: a drag from the list takes the row picked only when it was picked since the
-    // press (fnc_listDrag).
+    // The row picked and when: a drag from the list whose press found no row takes the row picked, only
+    // when it was picked since the press (fnc_listDrag).
     _list ctrlAddEventHandler ["LBSelChanged", {
         GVAR(listSel) = [_this select 1, diag_frameNo];
 

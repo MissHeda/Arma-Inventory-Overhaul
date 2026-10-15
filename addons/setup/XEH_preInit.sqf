@@ -60,9 +60,12 @@ GVAR(theme) = createHashMap;
 // which text it shows - 0 own, 1 full, 2 CBA line -, whether the own one is open to typing, what is
 // typed into it and not yet applied and what it was given to show; the saved draft picked; the text
 // pasted into the import box; the banner after someone else changed the setup; and the footer's hint,
-// [text, theme colour]. And the setups the draft is compared with, read once each (fnc_changeRows).
+// [text, theme colour]. And the setups the draft is compared with, read once each (fnc_changeRows). The
+// Start step's "Everything else" as stepped and not applied yet, with the draft text it was read from
+// ([] until it is drawn, fnc_drawStart).
 GVAR(keepOwn) = true;
 GVAR(startAdvanced) = false;
+GVAR(elseEdit) = [];
 GVAR(reviewDrafts) = false;
 GVAR(reviewText) = false;
 GVAR(exportMode) = 0;

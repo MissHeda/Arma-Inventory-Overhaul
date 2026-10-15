@@ -44,6 +44,9 @@ PREP(drawFrame);
 PREP(showStep);
 PREP(drawStart);
 PREP(drawChanges);
+// The Start step's "Everything else": the rules with "all" it writes, found by their selector
+PREP(allRule);
+PREP(upsertAll);
 PREP(drawItems);
 PREP(drawContainers);
 PREP(drawReview);

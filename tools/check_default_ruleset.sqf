@@ -24,7 +24,8 @@
  * gives it another size than the rules would (einv_gridSize[]) without a stack of its own
  * (einv_stackSize). Compartment differences marked "caps" come from the new limits on what a mod's
  * einv_grids[] may ask for (24 compartments, 400 cells). Also checked: a text from before the preset
- * was renamed (base=tarkov) builds on realism, and canvases (grid=aaa/aba/aaa) read and write the same.
+ * was renamed (base=tarkov) builds on realism, and canvases (grid=aaa/aba/aaa) read and write the same,
+ * as does everything else (all > ..., "all" written first wherever it was typed).
  */
 
 private _compiled = ["einv1 base=default", false] call einv_items_fnc_compileRules;
@@ -313,7 +314,8 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
     "einv1 base=none, @mag_rifle: @mag_rifle, @mag_rifle: class=30Rnd_65x39_caseless_green+, !addon~ace_ cat=medical > stack=1, class=B_Carryall_Base+ > grid=6x5+2x3+2x3, size=mass",
     "for=arifle_MX_F > size=1x2, well=CBA_556x45_STANAG > size=1x2, rounds>=100 mass>20 > size=2x3 grid=auto",
     "class=My_Rifle_L > size=xxxx/x---, class=My_Launcher > size=-x-/xxx/---, class=My_Box > shape=xx/xx",
-    "class=My_Pack > grid=abbbbbc/abbbbbc/abbbbbc/-bbbbb-/-bbbbb-/-bbbbb-/-bbbbb-, class=My_Ring > grid=2x3+aaa/aba/aaa+1x1, class=My_Row > grid=aaabb"
+    "class=My_Pack > grid=abbbbbc/abbbbbc/abbbbbc/-bbbbb-/-bbbbb-/-bbbbb-/-bbbbb-, class=My_Ring > grid=2x3+aaa/aba/aaa+1x1, class=My_Row > grid=aaabb",
+    "einv1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4"
 ] + ((getArray (configFile >> "CfgEinvRulesets" >> "default" >> "rules")) apply {"einv1 base=none, " + _x});
 
 {

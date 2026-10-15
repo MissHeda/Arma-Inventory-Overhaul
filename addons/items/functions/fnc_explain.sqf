@@ -12,9 +12,10 @@
  *
  * Return Value:
  * [[layer, index, statement, fields it sets, fields it wins], ...], highest first <ARRAY>
- *   layer     - "forced", "own", "legacy:<setting>", "mod", "preset:<preset>" or "builtin" <STRING>
- *   index     - the rule's place in its text, -1 for config and the fallbacks <NUMBER>
- *   statement - the rule as the writer has it, or the config value; "" for the fallbacks <STRING>
+ *   layer     - "forced", "own", "legacy:<setting>", "mod", "preset:<preset>", "all" (the text's rules
+ *               for everything else, after the preset) or "builtin" <STRING>
+ *   index     - the rule's place in its text, -1 for config, "forced" and "builtin" <NUMBER>
+ *   statement - the rule as the writer has it, or the config value; "" for "forced" and "builtin" <STRING>
  *   fields    - of "footprint", "stack", "grid", "weight", "name" <ARRAY>
  *
  * Example:
@@ -50,7 +51,9 @@ if (_kind in KINDS_SINGLE) then {
     _lines pushBack ["forced", -1, "", ["stack"], ["stack"]];
 };
 
-((_compiled getOrDefault ["byKind", createHashMap]) getOrDefault [_kind, [[], [], [], []]]) params ["_ownIndices", "_presetIndices"];
+((_compiled getOrDefault ["byKind", createHashMap]) getOrDefault [_kind, [[], [], [], []]]) params [
+    "_ownIndices", "_presetIndices", "", "", ["_fallbackIndices", []]
+];
 
 // The tag "own:3" or "preset:default:12" as [layer, index].
 private _fnc_place = {
@@ -62,8 +65,12 @@ private _fnc_place = {
     [_parts joinString ":", _index]
 };
 
+// The preset's rules without conditions, its own everything else, as fnc_resolve has them: what one of
+// them wins, the text's "all" rules may still take - [line, field] each.
+private _caught = [];
+
 private _fnc_walk = {
-    params ["_rules", "_indices"];
+    params ["_rules", "_indices", ["_noteCaught", false]];
 
     {
         (_rules select _x) params ["_conds", "_values", "_tag", "_text"];
@@ -84,7 +91,13 @@ private _fnc_walk = {
 
             ([_tag] call _fnc_place) params ["_layer", "_index"];
 
-            _lines pushBack [_layer, _index, _text, _sets, _wins];
+            private _line = _lines pushBack [_layer, _index, _text, _sets, _wins];
+
+            if (_noteCaught && {_conds isEqualTo []}) then {
+                {
+                    _caught pushBack [_line, _x];
+                } forEach _wins;
+            };
         };
     } forEach _indices;
 };
@@ -122,7 +135,29 @@ private _fnc_size = {
     ["name", "name", format ["%1 = %2", QGVARMAIN(name), _mod getOrDefault ["name", ""]]]
 ];
 
-[_compiled getOrDefault ["preset", []], _presetIndices] call _fnc_walk;
+[_compiled getOrDefault ["preset", []], _presetIndices, true] call _fnc_walk;
+
+// Everything else (all): asked after the preset, so it wins only what is still open - and what only the
+// preset's everything else won, which that line then no longer wins.
+if (_fallbackIndices isNotEqualTo []) then {
+    private _reopened = _caught apply {_x select 1};
+
+    _open append _reopened;
+
+    [_compiled getOrDefault ["fallback", []], _fallbackIndices] call _fnc_walk;
+
+    {
+        _x params ["_line", "_field"];
+
+        if !(_field in _open) then {
+            private _wins = (_lines select _line) select 4;
+
+            _wins deleteAt (_wins find _field);
+        };
+    } forEach _caught;
+
+    _open = _open - _reopened;
+};
 
 if (_open isNotEqualTo []) then {
     _lines pushBack ["builtin", -1, "", _open, _open];

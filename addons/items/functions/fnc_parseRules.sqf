@@ -20,6 +20,14 @@
  *                                         preset's group, to add to it.
  *   kind=grenade > stack=3                a rule: conditions, then what it sets. No condition means
  *                                         every item; the ">" only makes it easier to read.
+ *   all > size=1x1 stack=10               everything else: a rule for what nothing else answers. It
+ *                                         is asked last of all rules - after the preset, before the
+ *                                         built-in answer (fnc_resolve) -, so it fills only the gaps
+ *                                         where no rule of the text, table, mod or preset gives one;
+ *                                         a preset's rules without conditions (its own everything
+ *                                         else) give way to it. Further conditions narrow it, all
+ *                                         kind=vest|uniform > grid=6x4. Only in a rule, never with
+ *                                         "!", written first.
  *
  * Conditions must all hold; "|" means either, a "!" in front means not:
  *   kind=rifle|handgun             what an item is (fnc_getFacts): rifle, handgun, launcher, binocular,
@@ -72,7 +80,8 @@
  *   "rules"    - [[conditions, values], ...] in text order <ARRAY>
  *   "warnings" - what was left out or cut down, and why <ARRAY of STRING>
  * A condition is [negated, key, op, values], the values the texts between the "|", class names as
- * written; a group in a condition is key "@", op "=" and the group ids. A rule's values are a HashMap:
+ * written; a group in a condition is key "@", op "=" and the group ids; "all" is [false, "all", "", []],
+ * always the rule's first. A rule's values are a HashMap:
  * "like" (a class name as written), "footprint" ("WxH", a shape like "xx/x-" or "mass"), "stack"
  * <NUMBER>, "grid" (as
  * fnc_formatGrid writes it), "weight" (kg <NUMBER>), "name" (the name as it shows).
@@ -513,6 +522,14 @@ private _fnc_cond = {
 
     if ((_token select [0, 1]) isEqualTo "@") exitWith {[_token, _negated] call _fnc_groupCond};
 
+    // "all" is no test of the item but the rule's place: asked after every other (fnc_compileRules).
+    // Not "all" would be a rule for nothing.
+    if (toLowerANSI _token isEqualTo "all") exitWith {
+        if (_negated) exitWith {["'!all' would match nothing - 'all' means everything no other rule answers", []]};
+
+        ["", [false, "all", "", []]]
+    };
+
     [_token, _negated] call _fnc_keyCond
 };
 
@@ -618,6 +635,11 @@ private _fnc_groupDef = {
             _error = _condError;
         };
 
+        // A group is a selection; "everything else" is a rule's place, not one.
+        if ((_cond select 1) isEqualTo "all") exitWith {
+            _error = "'all' only stands in a rule, as in all > size=1x1";
+        };
+
         _conds pushBack _cond;
     } forEach _rest;
 
@@ -670,7 +692,14 @@ private _fnc_rule = {
                     ([_x] call _fnc_cond) params ["_condError", "_cond"];
 
                     if (_condError isEqualTo "") then {
-                        _conds pushBack _cond;
+                        // "all" first, and once: the writer puts it there, so a text reads back the same.
+                        if ((_cond select 1) isEqualTo "all") then {
+                            if (_conds findIf {(_x select 1) isEqualTo "all"} < 0) then {
+                                _conds = [_cond] + _conds;
+                            };
+                        } else {
+                            _conds pushBack _cond;
+                        };
                     } else {
                         _error = _condError;
                     };

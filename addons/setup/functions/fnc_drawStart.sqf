@@ -12,6 +12,11 @@
  *     and the way on to Review; beside it what you changed against the Default preset - the preset, the
  *     cell size, every own rule -, each in words, to open or take back (fnc_drawChanges, the same list
  *     Review shows against what is saved).
+ *   - Everything else: the size and stack of items no rule answers, and the grid of uniforms, vests and
+ *     backpacks no rule answers - the text's rules with "all", which the engine asks after the preset and
+ *     before its built-in answer, so they fill only the gaps (einv_items_fnc_resolve). Stepped here, written
+ *     with Apply and taken out with Clear (fnc_upsertAll); what was stepped and not applied yet is kept
+ *     while the draft stays the same (GVAR(elseEdit)).
  *   - At the bottom, folded away (GVAR(startAdvanced)): the cell size, how much load one cell stands for.
  *     It sizes every container no rule draws, by its load, and every item the Weight preset sizes by
  *     mass - the one number that changes the most at once, which few need to touch.
@@ -165,9 +170,61 @@ if (GVAR(startAdvanced)) then {
 private _advancedH = [_foldH, _foldH + UNIT * 1.2 + UNIT * 0.3 + _cellHelpH + CARD_PAD_Y] select GVAR(startAdvanced);
 private _advancedY = _bottom - _advancedH;
 
+// ----- Everything else, over Advanced: measured first, as Advanced is -----
+
+// What its steppers show: the draft's two rules for everything else (fnc_allRule), read again whenever the
+// draft changed - an Apply, an undo, a preset picked -, else what was stepped to and not applied yet,
+// [draft text read from, across, down, stack, fixed grid, grid across, grid down]. Without a rule 1x1 and
+// 10 per tile, a grid by load. A size or grid the card cannot step - a shape, a pattern typed at Review -
+// shows as that default, and only an Apply replaces it.
+private _rules = GVAR(draft) getOrDefault ["rules", []];
+private _itemIndex = [_rules] call FUNC(allRule);
+private _boxIndex = [_rules, ELSE_CONTAINER_KINDS] call FUNC(allRule);
+
+if (GVAR(elseEdit) isEqualTo [] || {(GVAR(elseEdit) select 0) isNotEqualTo GVAR(draftText)}) then {
+    private _itemValues = if (_itemIndex < 0) then {createHashMap} else {(_rules select _itemIndex) select 1};
+    private _boxValues = if (_boxIndex < 0) then {createHashMap} else {(_rules select _boxIndex) select 1};
+    private _size = toLower (_itemValues getOrDefault ["footprint", ""]);
+    private _grid = toLower (_boxValues getOrDefault ["grid", ""]);
+    private _fixed = _grid regexMatch "^[0-9]+x[0-9]+$";
+    private _sizeParts = [[1, 1], (_size splitString "x") apply {parseNumber _x}] select (_size regexMatch "^[0-9]+x[0-9]+$");
+    private _gridParts = [[6, 4], (_grid splitString "x") apply {parseNumber _x}] select _fixed;
+
+    GVAR(elseEdit) = [
+        GVAR(draftText),
+        ((_sizeParts select 0) max 1) min SHAPE_MAX, ((_sizeParts select 1) max 1) min SHAPE_MAX,
+        ((_itemValues getOrDefault ["stack", 10]) max 1) min EDIT_STACK_MAX,
+        _fixed,
+        ((_gridParts select 0) max 1) min STORAGE_COLS, ((_gridParts select 1) max 1) min MAX_ROWS
+    ];
+};
+
+// One row - the items, then the containers - where the step is wide enough, else one for each. The sizes
+// are bare numbers with a × between them; the stack says "per tile" in its stepper.
+private _elseX = _padX + CARD_PAD_X;
+private _elseW = _innerW - CARD_PAD_X * 2;
+private _elseHeadH = UNIT * 1.1;
+private _elseRowH = UNIT * 1.2;
+private _elseGap = SQUARE(UNIT * 0.3);
+private _elseSplit = SQUARE(UNIT * 1);
+private _numberW = SQUARE(_elseRowH) * 2 + ("88" getTextWidth [_fontBold, _elseRowH * 0.52]) * TEXT_SLACK;
+private _timesW = SQUARE(UNIT * 0.6);
+private _stackW = SQUARE(_elseRowH) * 2 + ((format [LLSTRING(Value_Stack), 888]) getTextWidth [_fontBold, _elseRowH * 0.52]) * TEXT_SLACK;
+private _modeLabels = [LLSTRING(Else_Auto), LLSTRING(Else_Fixed)];
+private _modeW = (selectMax (_modeLabels apply {_x getTextWidth [_fontBold, _elseRowH * 0.5]})) * TEXT_SLACK / 0.9 * 2 + SQUARE(UNIT * 0.8);
+private _itemsLabel = LLSTRING(Else_Items);
+private _boxesLabel = LLSTRING(Else_Containers);
+private _itemsLabelW = (_itemsLabel getTextWidth [_font, TEXT_BODY]) * TEXT_SLACK;
+private _boxesLabelW = (_boxesLabel getTextWidth [_font, TEXT_BODY]) * TEXT_SLACK;
+private _itemsW = _itemsLabelW + _elseGap + _numberW * 2 + _timesW + _elseGap + _stackW;
+private _boxesW = _boxesLabelW + _elseGap + _modeW + _elseGap + _numberW * 2 + _timesW;
+private _elseRows = [2, 1] select (_itemsW + _elseSplit + _boxesW <= _elseW);
+private _elseH = CARD_PAD_Y + _elseHeadH + UNIT * 0.15 + _elseRowH * _elseRows + UNIT * 0.25 * (_elseRows - 1) + CARD_PAD_Y;
+private _elseY = _advancedY - _gapY - _elseH;
+
 // ----- Now in use | What you changed -----
 
-private _cardsH = (_advancedY - _gapY) - _cursorY;
+private _cardsH = (_elseY - _gapY) - _cursorY;
 private _columnW = (_innerW - _gapX) * 0.4;
 private _changesX = _padX + _columnW + _gapX;
 
@@ -253,6 +310,96 @@ _importHit setVariable [QGVAR(action), [{
 
 // What you changed, against the Default preset
 [_display, _group, [_changesX, _cursorY, _innerW - (_changesX - _padX), _cardsH], _theme, "default"] call FUNC(drawChanges);
+
+// ----- Everything else -----
+
+[_display, _group, [_padX, _elseY, _innerW, _elseH], _theme getOrDefault ["card", [1, 1, 1, 0.055]], _radius] call EFUNC(gui,uiPanel);
+
+// The caption, what it does in one line, Clear and Apply on the right.
+private _elseHeadY = _elseY + CARD_PAD_Y;
+private _elseTitle = LLSTRING(Else_Title);
+private _elseTitleW = (_elseTitle getTextWidth [_fontBold, TEXT_HEAD]) * TEXT_SLACK;
+private _applyText = LLSTRING(Else_Apply);
+private _clearText = LLSTRING(Else_Clear);
+private _applyW = ACTION_W(_applyText,_elseHeadH,false,_font);
+private _clearW = ACTION_W(_clearText,_elseHeadH,false,_font);
+private _applyX = _elseX + _elseW - _applyW;
+private _clearX = _applyX - _elseGap - _clearW;
+private _noteX = _elseX + _elseTitleW + _elseGap;
+private _noteW = _clearX - _elseGap - _noteX;
+
+[_display, _group, [_elseX, _elseHeadY, _elseTitleW, _elseHeadH], _elseTitle, TEXT_HEAD, _colorText, _fontBold, 0] call EFUNC(gui,uiLabel);
+
+if (_noteW > SQUARE(UNIT * 2)) then {
+    [
+        _display, _group, [_noteX, _elseHeadY, _noteW, _elseHeadH],
+        [LLSTRING(Else_Note), _noteW, _font, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL, _muted, _font, 0
+    ] call EFUNC(gui,uiLabel);
+};
+
+// Clear takes out what Apply wrote; nothing to take out, nothing to click.
+[_display, _group, [_clearX, _elseHeadY, _clearW, _elseHeadH], _clearText, "", _theme, {
+    [[createHashMap, ["footprint", "stack"]], [createHashMap, ["grid"]]] call FUNC(upsertAll);
+    [LLSTRING(Hint_ElseCleared), "text2"] call FUNC(setHint);
+}, [], _itemIndex >= 0 || {_boxIndex >= 0}] call FUNC(uiAction);
+
+// Apply writes what the steppers show; a grid by load is no rule at all - the built-in answer is that.
+[_display, _group, [_applyX, _elseHeadY, _applyW, _elseHeadH], _applyText, "", _theme, {
+    GVAR(elseEdit) params ["", "_across", "_down", "_stack", "_fixed", "_gridAcross", "_gridDown"];
+
+    [
+        [createHashMapFromArray [["footprint", format ["%1x%2", _across, _down]], ["stack", _stack]], []],
+        [[createHashMap, createHashMapFromArray [["grid", format ["%1x%2", _gridAcross, _gridDown]]]] select _fixed, [["grid"], []] select _fixed]
+    ] call FUNC(upsertAll);
+
+    [LLSTRING(Hint_ElseApplied), "text2"] call FUNC(setHint);
+}, [], true, "accent"] call FUNC(uiAction);
+
+// The steppers keep what they show in GVAR(elseEdit) - its place given as their argument - until Apply.
+private _fnc_keep = {
+    params ["_value", "_slot"];
+
+    GVAR(elseEdit) set [_slot, _value];
+};
+
+GVAR(elseEdit) params ["", "_editAcross", "_editDown", "_editStack", "_editFixed", "_editGridAcross", "_editGridDown"];
+
+private _rowX = _elseX;
+private _rowY = _elseHeadY + _elseHeadH + UNIT * 0.15;
+
+[_display, _group, [_rowX, _rowY, _itemsLabelW, _elseRowH], _itemsLabel, TEXT_BODY, _colorText2, _font, 0] call EFUNC(gui,uiLabel);
+_rowX = _rowX + _itemsLabelW + _elseGap;
+
+[_display, _group, [_rowX, _rowY, _numberW, _elseRowH], _editAcross, [1, SHAPE_MAX, 1], _theme, _fnc_keep, 1] call FUNC(uiStepper);
+[_display, _group, [_rowX + _numberW, _rowY, _timesW, _elseRowH], "×", TEXT_BODY, _colorText2, _font, 2] call EFUNC(gui,uiLabel);
+[_display, _group, [_rowX + _numberW + _timesW, _rowY, _numberW, _elseRowH], _editDown, [1, SHAPE_MAX, 1], _theme, _fnc_keep, 2] call FUNC(uiStepper);
+_rowX = _rowX + _numberW * 2 + _timesW + _elseGap;
+
+[_display, _group, [_rowX, _rowY, _stackW, _elseRowH], _editStack, [1, EDIT_STACK_MAX, 1], _theme, _fnc_keep, 3, LLSTRING(Value_Stack)] call FUNC(uiStepper);
+
+if (_elseRows == 1) then {
+    _rowX = _rowX + _stackW + _elseSplit;
+} else {
+    _rowX = _elseX;
+    _rowY = _rowY + _elseRowH + UNIT * 0.25;
+};
+
+[_display, _group, [_rowX, _rowY, _boxesLabelW, _elseRowH], _boxesLabel, TEXT_BODY, _colorText2, _font, 0] call EFUNC(gui,uiLabel);
+_rowX = _rowX + _boxesLabelW + _elseGap;
+
+// By load or fixed: the steppers of a fixed grid are greyed while it goes by load.
+[_display, _group, [_rowX, _rowY, _modeW, _elseRowH], _modeLabels, parseNumber _editFixed, _theme, {
+    params ["_index"];
+
+    GVAR(elseEdit) set [4, _index == 1];
+
+    [0] call FUNC(showStep);
+}] call FUNC(uiSegmented);
+_rowX = _rowX + _modeW + _elseGap;
+
+[_display, _group, [_rowX, _rowY, _numberW, _elseRowH], _editGridAcross, [1, STORAGE_COLS, 1], _theme, _fnc_keep, 5, "%1", _editFixed] call FUNC(uiStepper);
+[_display, _group, [_rowX + _numberW, _rowY, _timesW, _elseRowH], "×", TEXT_BODY, [DISABLED_INK, _colorText2] select _editFixed, _font, 2] call EFUNC(gui,uiLabel);
+[_display, _group, [_rowX + _numberW + _timesW, _rowY, _numberW, _elseRowH], _editGridDown, [1, MAX_ROWS, 1], _theme, _fnc_keep, 6, "%1", _editFixed] call FUNC(uiStepper);
 
 // ----- Advanced: the cell size -----
 

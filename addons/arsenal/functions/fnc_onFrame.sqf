@@ -7,9 +7,12 @@
  * for a pan or a turn over the middle: ACE notes every press on its display, also those on the panel, and
  * moves its camera while the button is down. So its note is emptied every frame meanwhile.
  *
- * A press on ACE's list that the mouse leaves sideways, further than the engine's own drag threshold and
- * more across than along the list, becomes a drag of the pressed row's item (fnc_onListPress,
- * fnc_listDrag); one that moves along the list first - a scroll, a pick of the next row - stays ACE's.
+ * A press on ACE's list that the mouse moves away from with the button held, further than LIST_DRAG_PX
+ * pixels in any direction, becomes a drag of the pressed row's item (fnc_onListPress, fnc_listDrag): the
+ * list scrolls by the wheel and its bar, not by dragging its rows, so a move up or down is a drag as well.
+ * Its threshold is in pixels and smaller than the engine's own (DRAG_THRESHOLD, in screen units: 6 px at
+ * 1080p and the normal interface size, 9 px at the largest), which the first moves of a quick grab did
+ * not always pass. A press that never moved stays ACE's click.
  *
  * A button let go where no event of the display reached the engine (over one of ACE's own controls) ends
  * the drag where it stands all the same, and a press that never became a drag is forgotten - it would
@@ -53,24 +56,24 @@ disableSerialization;
 
 params [["_display", displayNull, [displayNull]], ["_mouse", getMousePosition, [[]]], ["_now", diag_tickTime, [0]]];
 
-// ----- A press on ACE's list that leaves it sideways -----
+// ----- A press on ACE's list that the mouse moves away from -----
 if (GVAR(listPress) isNotEqualTo []) then {
-    if (inputMouse 0 == 0 || {EGVAR(gui,dragging)} || {EGVAR(gui,press) isNotEqualTo []}) exitWith {
+    GVAR(listPress) params ["_pressed", "_shift", ["_frame", -1], ["_row", -1]];
+
+    // Let go, the note goes - but not in the frame of the press nor the next: the press event may come
+    // before the button reads as held, and the press was forgotten before it could become a drag (a second
+    // click then did it).
+    if ((inputMouse 0 == 0 && {diag_frameNo > _frame + 1}) || {EGVAR(gui,dragging)} || {EGVAR(gui,press) isNotEqualTo []}) exitWith {
         GVAR(listPress) = [];
     };
 
-    GVAR(listPress) params ["_pressed", "_shift", ["_frame", -1]];
+    // How far, in the screen's pixels.
+    private _moveX = ((_mouse select 0) - (_pressed select 0)) / pixelW;
+    private _moveY = ((_mouse select 1) - (_pressed select 1)) / pixelH;
 
-    private _across = abs ((_mouse select 0) - (_pressed select 0));
-    private _along = abs ((_mouse select 1) - (_pressed select 1));
-
-    if (_across > DRAG_THRESHOLD && {_across >= _along}) exitWith {
+    if (_moveX * _moveX + _moveY * _moveY > LIST_DRAG_PX * LIST_DRAG_PX) then {
         GVAR(listPress) = [];
-        [_display, _pressed, _shift, _frame] call FUNC(listDrag);
-    };
-
-    if (_along > DRAG_THRESHOLD) then {
-        GVAR(listPress) = [];
+        [_display, _pressed, _shift, _row, _frame] call FUNC(listDrag);
     };
 };
 

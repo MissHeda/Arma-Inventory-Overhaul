@@ -4,6 +4,9 @@
         <Key ID="STR_einv_setup_Access_AdminsOnly">
             <English>Inventory setup is for admins on this server.</English>
         </Key>
+        <Key ID="STR_einv_setup_Answer_All">
+            <English>everything else</English>
+        </Key>
         <Key ID="STR_einv_setup_Answer_Builtin">
             <English>built in</English>
         </Key>
@@ -346,6 +349,15 @@
         <Key ID="STR_einv_setup_Cont_Unapplied">
             <English>Not applied yet. Apply keeps it.</English>
         </Key>
+        <Key ID="STR_einv_setup_Desc_All">
+            <English>Everything else</English>
+        </Key>
+        <Key ID="STR_einv_setup_Desc_AllContainers">
+            <English>Everything else, containers</English>
+        </Key>
+        <Key ID="STR_einv_setup_Desc_AllWhere">
+            <English>Everything else, %1</English>
+        </Key>
         <Key ID="STR_einv_setup_Desc_Every">
             <English>Every item</English>
         </Key>
@@ -411,6 +423,30 @@
         </Key>
         <Key ID="STR_einv_setup_Drafts_Title">
             <English>Saved drafts</English>
+        </Key>
+        <Key ID="STR_einv_setup_Else_Apply">
+            <English>Apply</English>
+        </Key>
+        <Key ID="STR_einv_setup_Else_Auto">
+            <English>Auto</English>
+        </Key>
+        <Key ID="STR_einv_setup_Else_Clear">
+            <English>Clear</English>
+        </Key>
+        <Key ID="STR_einv_setup_Else_Containers">
+            <English>Containers without a rule:</English>
+        </Key>
+        <Key ID="STR_einv_setup_Else_Fixed">
+            <English>Fixed</English>
+        </Key>
+        <Key ID="STR_einv_setup_Else_Items">
+            <English>Items without a rule: size</English>
+        </Key>
+        <Key ID="STR_einv_setup_Else_Note">
+            <English>Applies only where no preset or own rule gives an answer.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Else_Title">
+            <English>Everything else</English>
         </Key>
         <Key ID="STR_einv_setup_Export">
             <English>Export</English>
@@ -483,6 +519,12 @@
         </Key>
         <Key ID="STR_einv_setup_Hint_Copied">
             <English>The cells of %1 are copied to %2. Apply keeps them.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_ElseApplied">
+            <English>Everything else is set - it fills what no preset or own rule answers.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Hint_ElseCleared">
+            <English>Everything else is cleared - the built-in answer fills the gaps again.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_Linked">
             <English>%1 now has the same cells as %2. Save at Review puts it to use.</English>

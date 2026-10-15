@@ -115,6 +115,8 @@ private _fnc_test = {
             }
         };
         case "@": {_data findIf {[_x] call _fnc_member} >= 0};
+        // Everything else: where such a rule is asked is what makes it a fallback (fnc_resolve).
+        case "all": {true};
         default {false};
     };
 

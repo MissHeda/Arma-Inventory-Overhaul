@@ -2,17 +2,20 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Starts a drag of the item on the row of ACE's list (IDC 15) the mouse was pressed on, once it left the
- * press sideways (fnc_onFrame): the engine's drag of a new item, which has no container behind it. Its class
- * is the one ACE keeps in the row's data. A row ACE would not add either - an item the arsenal does not
- * have, only the soldier - is not dragged, nor is one the list no longer has (a filter shortened it since
- * the press), nor the blank area under a short list.
+ * Starts a drag of the item on the row of ACE's list (IDC 15) the mouse was pressed on, once it moved
+ * LIST_DRAG_PX pixels from the press with the button held (fnc_onFrame): the engine's drag of a new item,
+ * which has no container behind it. Its class is the one ACE keeps in the row's data. A row ACE would not
+ * add either - an item the arsenal does not have, only the soldier - is not dragged, and the hint line says
+ * so, once for the press (a drag that silently does nothing reads as a press that was not heard). Nor is a
+ * row the list no longer has (a filter shortened it since the press), nor the blank area under a short list.
+ * A greyed row is dragged: ACE greys by weight, the grid has its own say at the drop, and the staging space
+ * takes what the container cannot (fnc_ungrey, fnc_addTo).
  *
- * The row is the one pressed, though the list may not have picked it yet: a press on a row that was not
- * picked found lnbCurSelRow still on the row before, and only a second press dragged. So the row ACE picked
- * counts only when the list picked one since the press (GVAR(listSel), noted by its LBSelChanged handler,
- * fnc_onOpened) - else the row under the press, from the list's top, the height of its rows and how far it
- * is scrolled.
+ * The row is the one fnc_onListPress worked out from where the press was - not the one the list picks:
+ * that comes only after the press, and may follow the mouse as it moves. Only when that row is out of range
+ * - the list shorter now, a press under its last row - does the row ACE picked count, and only when the
+ * list picked one since the press (GVAR(listSel), noted by its LBSelChanged handler, fnc_onOpened): before
+ * it, lnbCurSelRow is the row picked before.
  *
  * The item is put on a source grid of its own (einv_gui's "source", here "aceList"), off the screen, as a
  * tile that brings the entry that is dragged: the item at its true size, a whole stack at most, one at
@@ -25,64 +28,46 @@
  * 0: ACE Arsenal's display <DISPLAY>
  * 1: Where the mouse was pressed [x, y] <ARRAY>
  * 2: Shift - the whole stack <BOOL> (default: false)
- * 3: The frame of the press (diag_frameNo) <NUMBER> (default: -1, the row picked)
+ * 3: The row pressed, -1 for none (fnc_onListPress) <NUMBER> (default: -1)
+ * 4: The frame of the press (diag_frameNo) <NUMBER> (default: -1)
  *
  * Return Value:
  * A drag started <BOOL>
  *
  * Example:
- * [_display, [0.6, 0.4], false, diag_frameNo] call einv_arsenal_fnc_listDrag;
+ * [_display, [0.6, 0.4], false, 12, diag_frameNo] call einv_arsenal_fnc_listDrag;
  *
  * Public: No
  */
 
 disableSerialization;
 
-params [["_display", displayNull, [displayNull]], ["_pressed", [], [[]]], ["_shift", false, [false]], ["_frame", -1, [0]]];
+params [
+    ["_display", displayNull, [displayNull]], ["_pressed", [], [[]]], ["_shift", false, [false]], ["_row", -1, [0]], ["_frame", -1, [0]]
+];
 
 private _list = _display displayCtrl ARSENAL_IDC_LIST;
 
 if (isNull _list || {_pressed isEqualTo []} || {EGVAR(gui,dragging)} || {GVAR(panelRect) isEqualTo []}) exitWith {false};
 
 private _rows = (lnbSize _list) select 0;
-private _row = lnbCurSelRow _list;
 
-// The list picked no row since the press: lnbCurSelRow is the row before, the pressed one lies under it.
-if (_frame >= 0 && {(GVAR(listSel) param [1, -1]) < _frame}) then {
-    // The rows are all as high as the list's config says (found once, by its IDC, in ACE's display); left
-    // to the font (0), as high as its text - ACE's 7 units.
-    private _rowH = _list getVariable [QGVAR(rowHeight), -1];
-
-    if (_rowH <= 0) then {
-        private _config = (format ["getNumber (_x >> 'idc') == %1", ARSENAL_IDC_LIST] configClasses (configFile >> "ace_arsenal_display" >> "controls")) param [0, configNull];
-
-        _rowH = getNumber (_config >> "rowHeight");
-
-        if (_rowH <= 0) then {
-            _rowH = getNumber (_config >> "sizeEx");
-        };
-
-        if (_rowH <= 0) then {
-            _rowH = ACE_ROW_SIZE;
-        };
-
-        _list setVariable [QGVAR(rowHeight), _rowH];
-    };
-
-    // Scrolled, the rows above the top edge are the scroll bar's place (0 to 1) times what the rows reach
-    // past the list's height.
-    (ctrlPosition _list) params ["", "_listY", "", "_listH"];
-
-    private _offset = (((ctrlScrollValues _list) select 0) max 0) * ((_rows * _rowH - _listH) max 0);
-
-    _row = floor (((_pressed select 1) - _listY + _offset) / _rowH);
+// Out of range: the row the list picked, if it picked one since the press - else none.
+if (_row < 0 || {_row >= _rows}) then {
+    _row = [-1, lnbCurSelRow _list] select (_frame >= 0 && {(GVAR(listSel) param [1, -1]) >= _frame});
 };
 
 if (_row < 0 || {_row >= _rows}) exitWith {false};
 
 private _class = _list lnbData [_row, 0];
 
-if (_class isEqualTo "" || {(_list lnbValue [_row, 2]) == 1}) exitWith {false};
+if (_class isEqualTo "") exitWith {false};
+
+// ACE's unique items: what the soldier has and the box does not. ACE would not add one; nor does the panel.
+if ((_list lnbValue [_row, 2]) == 1) exitWith {
+    [LLSTRING(Hint_NotAllowed)] call EFUNC(gui,flashHint);
+    false
+};
 
 private _info = [_class] call EFUNC(items,getInfo);
 

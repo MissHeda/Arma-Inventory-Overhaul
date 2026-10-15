@@ -22,6 +22,9 @@
         <Key ID="STR_einv_arsenal_Hint_ListCancel">
             <English>Let go over a free spot of a grid to put it in</English>
         </Key>
+        <Key ID="STR_einv_arsenal_Hint_NotAllowed">
+            <English>ACE does not allow this item here</English>
+        </Key>
         <Key ID="STR_einv_arsenal_Hint_NotInArsenal">
             <English>This arsenal does not have it</English>
         </Key>

@@ -6,7 +6,10 @@
  * "default", an empty text is the default. The result is plain data - no code - since it is kept in
  * the mission namespace and so in save games.
  *
- * 1. The text (fnc_parseRules) is the own layer.
+ * 1. The text (fnc_parseRules) is the own layer - but for its rules with "all", everything else, which
+ *    are a layer of their own (fallback): asked after the preset - before the preset's rules without
+ *    conditions, its own everything else - and before the built-in answer (fnc_resolve). A preset's rule
+ *    with "all" is left out with a warning: its rules without conditions already are its everything else.
  * 2. Its base= and the bases of that preset (CfgEinvRulesets, MAX_CHAIN deep, no loops) are the
  *    preset layer, the base first and each derived preset after it. Read presets are kept in
  *    uiNamespace: config does not change.
@@ -47,8 +50,11 @@
  *   "own"         - [[conditions, values, tag, text, kinds], ...]: the text's rules in text order, then
  *                   the tables'; tag "own:<i>" or "legacy:<setting>:<i>", kinds -1 for any <ARRAY>
  *   "preset"      - the same for the presets, tag "preset:<preset>:<i>" <ARRAY>
+ *   "fallback"    - the same for the text's rules with "all", in text order, tag "all:<i>" (the i-th
+ *                   rule of the text, counted as for "own:<i>") <ARRAY>
  *   "byKind"      - kind -> [own indices, preset indices (both highest first), fields own rules can
- *                   set, fields preset rules can set] <HASHMAP>
+ *                   set, fields preset rules can set, fallback indices (highest first), fields
+ *                   fallback rules can set] <HASHMAP>
  *   "hash"        - one value for all of it, to compare between machines <STRING>
  *   "warnings"    - everything left out or cut down <ARRAY of STRING>
  * A rule's values: "like" the class in lowercase <STRING>, "footprint" [w, h, holes] or "mass", "stack"
@@ -518,6 +524,7 @@ private _fnc_values = {
 
 private _own = [];
 private _preset = [];
+private _fallback = [];
 
 {
     _x params ["_layerName", "_layerAst"];
@@ -529,6 +536,15 @@ private _preset = [];
         _x params ["_conds", "_values"];
 
         private _statement = [_conds, _values] call _fnc_ruleText;
+
+        // Everything else (all): the text's rules for the gaps, a layer of their own under the preset.
+        private _isFallback = _conds findIf {(_x select 1) isEqualTo "all"} >= 0;
+
+        if (_isFallback && {!_isOwn}) then {
+            _warnings pushBack format ["Preset %1: '%2': 'all' is for the rules text, not a preset - left out.", _layerName, _statement];
+            continue;
+        };
+
         private _compiledConds = [];
         private _error = "";
 
@@ -548,12 +564,20 @@ private _preset = [];
             private _entry = [
                 _compiledConds,
                 [_values] call _fnc_values,
-                [format ["preset:%1:%2", _layerName, _forEachIndex], format ["own:%1", _forEachIndex]] select _isOwn,
+                switch (true) do {
+                    case (_isFallback): {format ["all:%1", _forEachIndex]};
+                    case (_isOwn): {format ["own:%1", _forEachIndex]};
+                    default {format ["preset:%1:%2", _layerName, _forEachIndex]};
+                },
                 _statement,
                 [_compiledConds] call _fnc_condsKinds
             ];
 
-            if (_isOwn) then {_own pushBack _entry} else {_preset pushBack _entry};
+            switch (true) do {
+                case (_isFallback): {_fallback pushBack _entry};
+                case (_isOwn): {_own pushBack _entry};
+                default {_preset pushBack _entry};
+            };
         } else {
             _warnings pushBack format [["Preset %3: '%1': %2 - left out.", "'%1': %2 - left out."] select _isOwn, _statement, _error, _layerName];
         };
@@ -652,7 +676,7 @@ private _byKind = createHashMap;
 
 {
     private _kind = _x;
-    private _buckets = [_own, _preset] apply {
+    private _buckets = [_own, _preset, _fallback] apply {
         private _indices = [];
         private _fields = [];
 
@@ -676,7 +700,10 @@ private _byKind = createHashMap;
         [_indices, _fields arrayIntersect _fields]
     };
 
-    _byKind set [_kind, [(_buckets select 0) select 0, (_buckets select 1) select 0, (_buckets select 0) select 1, (_buckets select 1) select 1]];
+    _byKind set [_kind, [
+        (_buckets select 0) select 0, (_buckets select 1) select 0, (_buckets select 0) select 1, (_buckets select 1) select 1,
+        (_buckets select 2) select 0, (_buckets select 2) select 1
+    ]];
 } forEach ITEM_KINDS;
 
 // ----- All of it in one value -----
@@ -696,6 +723,7 @@ createHashMapFromArray [
     ["groupOrder", _groupOrder],
     ["own", _own],
     ["preset", _preset],
+    ["fallback", _fallback],
     ["byKind", _byKind],
     ["hash", hashValue [_cell, _chain, _layerTexts, _legacyTexts]],
     ["warnings", _warnings]

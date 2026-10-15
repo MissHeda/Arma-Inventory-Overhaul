@@ -22,31 +22,38 @@
 #define PANEL_GAP 0.3
 #define PANEL_MAX_SHARE (1 / 3)
 
-// The panel is laid out the way the inventory's columns are (einv_gui_fnc_drawColumn), in UNITs, so a container
-// reads here as it does there: a title row on top, the sections under it, the hint line last, a hairline
-// under the title and one over the hint. PANEL_PAD is the room round the block's content and between its
-// bands, high as it is - and as many pixels wide (SQUARE) -, so the picture, the section captions and the
-// grids all start on one left edge and the texts on the right end on one right edge.
-#define PANEL_PAD 0.4
-
-// The title row (fnc_layout): the container's picture, TITLE_H high and square, and its name beside it in
-// the columns' title size (TITLE_SIZE) and bold font, centred in the row's height.
-#define TITLE_H 1.1
-#define TITLE_SIZE 0.66
-
-// The hint line, the panel's last band (fnc_layout, fnc_footer): lines of the inventory's footer hint (its text
-// size is the class EINV_FooterHint's), HINT_PAD room above and below them, as high as the footer's 1.4 UNITs
-// for one line. One line; a second only while the staging space holds something, for the note that it goes
-// when the window closes.
-#define HINT_LINE_H 0.8
-#define HINT_PAD 0.3
-#define HINT_SIZE (UNIT * 0.558)
-
-// ACE's own measures, where something has to line up with its list (fnc_listDrag): its grid unit, which
-// ignores the interface size (GRID_H in ui/RscAttributes.hpp), and the rows of its list, 7 units high
-// (sizeEx of IDC 15).
+// ACE's own measures (GRID_H in its defines.hpp): its grid unit - pixelGridNoUIScale / 4 screen pixels,
+// 4 px at 1080p, the same at every interface size -, and the rows of its list, 7 units high (sizeEx of
+// IDC 15, which leaves rowHeight at RscListNBox's 0): 28 px at 1080p.
 #define ACE_GRID_H (pixelH * pixelGridNoUIScale * 0.25)
 #define ACE_ROW_SIZE (7 * ACE_GRID_H)
+
+// The panel is laid out the way the inventory's columns are (einv_gui_fnc_drawColumn), so a container reads
+// here as it does there: a title row on top, the sections under it, the hint line last, a hairline under
+// the title and one over the hint. PANEL_PAD, in UNITs, is the room round the block's content and between
+// its bands, high as it is - and as many pixels wide (SQUARE) -, so the picture, the section captions and
+// the grids all start on one left edge and the texts on the right end on one right edge. It stays on the
+// window engine's UNIT with the grids and the section captions the engine draws (einv_gui_fnc_drawSection).
+#define PANEL_PAD 0.4
+
+// The panel's own texts - the title row and the hint line - are in ACE's grid, as the rows of ACE's list
+// beside them are: the UNIT (a fortieth of the screen's height) and ACE's grid (a whole pixel count the
+// engine picks per resolution) do not keep one ratio, so texts sized in UNITs stood a size larger or
+// smaller than ACE's own on some screens. At 1080p they are what the UNITs gave there to half a pixel.
+
+// The title row (fnc_layout): the container's picture, TITLE_H high and square (30 px at 1080p, between
+// ACE's row and its sort bar with its gap), and its name beside it in the bold font, TITLE_SIZE high
+// (18 px), centred in the row's height.
+#define TITLE_H (7.5 * ACE_GRID_H)
+#define TITLE_SIZE (4.5 * ACE_GRID_H)
+
+// The hint line, the panel's last band (fnc_layout, fnc_footer): lines HINT_LINE_H high (22 px) of
+// HINT_SIZE text (15 px, the class EINV_ArsenalHint's), HINT_PAD room above and below them (8 px) - 38 px
+// for one line, the inventory footer's height. One line; a second only while the staging space holds
+// something, for the note that it goes when the window closes.
+#define HINT_LINE_H (5.5 * ACE_GRID_H)
+#define HINT_PAD (2 * ACE_GRID_H)
+#define HINT_SIZE (3.75 * ACE_GRID_H)
 
 // The staging space under the container's grid (fnc_staging): a crate of the game's own, made on this
 // machine only and hidden at the soldier's feet, with a grid of its own. A crate rather than a ground
@@ -60,9 +67,15 @@
 #define STAGING_FREE_ROWS 4
 #define STAGING_MAX_ROWS 100
 
-// The share of ACE's list, from its left edge, where a press may become a drag of its row (fnc_onMouse):
-// the list's scroll bar runs along its right edge.
+// The share of ACE's list, from its left edge, where a press may become a drag of its row
+// (fnc_onListPress): the list's scroll bar runs along its right edge.
 #define LIST_ROWS_SHARE 0.94
+
+// How far the mouse moves with the button held, in any direction and in the screen's pixels, before a
+// press on ACE's list becomes a drag of its row (fnc_onFrame). Less than the engine's DRAG_THRESHOLD,
+// which is in screen units - 6 px at 1080p and the normal interface size, 9 px at the largest - and let
+// a quick grab end before it counted; more than a hand's tremor on a click.
+#define LIST_DRAG_PX 5
 
 // How long a move into or out of the staging space is waited for before ACE's list is no longer told,
 // in seconds (fnc_onFrame).

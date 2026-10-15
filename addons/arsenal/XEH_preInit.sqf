@@ -49,8 +49,8 @@ GVAR(stagingCount) = 0;
 GVAR(folded) = createHashMap;
 GVAR(foldKeys) = [];
 
-// A left press on a row of ACE's list that may yet become a drag of its item, [where, shift, frame] or []
-// (fnc_onListPress, fnc_onFrame); the row the list picked last, [row, frame] or [] (fnc_listDrag); a move
+// A left press on a row of ACE's list that may yet become a drag of its item, [where, shift, frame, row]
+// or [] (fnc_onListPress, fnc_onFrame); the row the list picked last, [row, frame] or [] (fnc_listDrag); a move
 // into or out of the staging space waited for, to tell ACE, [container, class, count before, until] or []
 // (fnc_onDrop); where the column stood when Ctrl and the wheel changed a tile, [pixels, until frame] or []
 // (fnc_onWheel); Ctrl held (fnc_onKey).

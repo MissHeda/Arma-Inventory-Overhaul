@@ -1,4 +1,5 @@
 #include "..\script_component.hpp"
+#include "..\defines.hpp"
 /*
  * Author: Miss Heda
  * One statement of a setup as a sentence players read, rather than the rules language it is written in:
@@ -15,6 +16,14 @@
  *   class=My_Vest > like=V_PlateCarrier1_rgr grid=xxxx/x--x
  *                                         Class My_Vest: like V_PlateCarrier1_rgr, compartments
  *                                         4×2 shaped, 6 cells
+ *
+ * A rule with "all" is for everything else, what no other rule answers, and is said so - the Start step's
+ * two (fnc_allRule) as that step shows them:
+ *
+ *   all > size=1x1 stack=10               Everything else: 1×1 cells, 10 per tile
+ *   all kind=uniform|vest|backpack > grid=6x4
+ *                                         Everything else, containers: compartments 6×4
+ *   all kind=magazine > stack=30          Everything else, kind magazine: 30 per tile
  *
  * Arguments:
  * 0: The statement: a rule, [conditions, values] as einv_items_fnc_parseRules lists them under "rules" -
@@ -276,10 +285,16 @@ _rule params [["_conditions", [], [[]]], ["_values", createHashMap, [createHashM
 
 if (_valuesOnly) exitWith {[_values] call _fnc_values};
 
-private _subject = if (_conditions isEqualTo []) then {
-    LLSTRING(Desc_Every)
-} else {
-    [(_conditions apply {_x call _fnc_condition}) joinString ", "] call _fnc_capital
+// Everything else: "all" is the rule's place, not a condition to word - what else it asks narrows it.
+private _isAll = _conditions findIf {(_x param [1, ""]) isEqualTo "all"} >= 0;
+private _narrower = _conditions select {(_x param [1, ""]) isNotEqualTo "all"};
+
+private _subject = switch (true) do {
+    case (!_isAll && {_conditions isEqualTo []}): {LLSTRING(Desc_Every)};
+    case (!_isAll): {[(_conditions apply {_x call _fnc_condition}) joinString ", "] call _fnc_capital};
+    case (_narrower isEqualTo []): {LLSTRING(Desc_All)};
+    case (([[_rule], ELSE_CONTAINER_KINDS] call FUNC(allRule)) == 0): {LLSTRING(Desc_AllContainers)};
+    default {format [LLSTRING(Desc_AllWhere), (_narrower apply {_x call _fnc_condition}) joinString ", "]};
 };
 
 private _what = [_values] call _fnc_values;
