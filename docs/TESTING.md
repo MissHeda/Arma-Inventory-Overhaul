@@ -43,13 +43,14 @@ A client can see them and cannot change them.
 - [ ] Weight bar: colour by tier, the texts (next limit, effect), the preview on pick-up, no ticks.
 - [ ] Right-click on another tile while a menu is open opens the new menu; right-click on empty space closes.
 - [ ] Count badges `n/stack` only for stackable classes; magazine rounds bottom left; hotbar slots alike.
-- [ ] Searching a crate: tiles reveal one by one, the ring follows a tile drawn in beside a painted compartment's gap.
+- [ ] Searching a crate: tiles reveal one by one, the ring follows a tile on a painted compartment's cells.
 - [ ] Holes in grids: no hover on a hole, the footprint turns red over one, a drop beside a hole.
 - [ ] L-shaped items: tile border, R turns around the grabbed cell, a small item fits into the L's corner.
 - [ ] Grids 10 wide: cell 37 px at 1080p, the storage column scrolls, the camera stays visible while looting.
-- [ ] Painted compartments: 1:1 where drawn at the cell pitch, a gap only where two compartments meet, none inside one
-      (`abbbbbc/abbbbbc/-bbbbb-`: `b` one whole block); tiles, footprints and the selection drawn in beside the gap,
-      hovered up to the cell's edge; the ring `aaa/aba/aaa`.
+- [ ] Painted compartments: 1:1 where drawn at the cell pitch; every cell the same size with the same gap everywhere, also
+      where two compartments touch and for one-cell compartments (no cell narrower or cut at a seam, in the window, in a kit
+      window and in the wizard's "This is how it looks" preview); tiles, footprints and the selection exactly on their
+      cells, hovered up to the cell's edge; the ring `aaa/aba/aaa`.
 - [ ] Section captions: Take all / Put all in and Sort sit right of the tab, as high as it and in its text size, the labels in
       the middle of their buttons both ways (the same on all UI sizes), Sort with its icon; Sort lays out an own container, a
       crate, the ground and a kit window, and is greyed while a move out of that container is under way;

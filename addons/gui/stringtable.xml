@@ -371,7 +371,7 @@
             <English>Log window timings (debug)</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_DebugTiming_Desc">
-            <English>Writes to the RPT how long each build\nand each redraw of the window took, as\n"timing: build 12.3 ms" - for reports of\nstutters. Off in play.</English>
+            <English>Writes to the RPT how long each build,\nredraw and lift of an item took, as\n"timing: lift 2.1 ms" - for reports of\nstutters. Off in play.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MagazineFillBar">
             <English>Fill bar on magazines</English>

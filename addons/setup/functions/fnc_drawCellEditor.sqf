@@ -337,7 +337,8 @@ private _buttonsY = _height - CARD_PAD_Y - _buttonH;
 private _totalsH = UNIT * 0.8;
 private _totalsY = _buttonsY - UNIT * 0.25 - _totalsH;
 // The same cell as the Blocks way draws (fnc_drawCellBlocks), so switching the way never resizes the places.
-private _cellH = UNIT * 0.95;
+// A whole number of pixels: every place then has the same size and the same gap to the next.
+private _cellH = floor (UNIT * 0.95 / pixelH + 0.001) * pixelH;
 private _canvasW = STORAGE_COLS * SQUARE(_cellH) + SCROLL_W + SQUARE(UNIT * 0.2);
 private _areaY = _cursorY;
 

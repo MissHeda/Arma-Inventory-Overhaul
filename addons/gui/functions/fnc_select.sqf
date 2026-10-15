@@ -57,6 +57,9 @@ if (_ref isEqualTo [] || {(_ref select 0) isEqualType objNull && {isNull (_ref s
 
 private _side = _grid get "side";
 
+// Set when the selection stays what it was, so that its frames are not made again for nothing.
+private _unchanged = false;
+
 switch (_mode) do {
     case "toggle": {
         if (_side isNotEqualTo GVAR(selectionSide) || {GVAR(selection) isEqualTo []}) then {
@@ -111,6 +114,9 @@ switch (_mode) do {
         };
     };
     default {
+        // The tile alone is selected already - lifting a tile that was clicked before: its frames stand.
+        _unchanged = GVAR(selection) isEqualTo [_ref] && {GVAR(selectionAnchor) isEqualTo _ref} && {GVAR(selectionSide) isEqualTo _side};
+
         GVAR(selection) = [_ref];
         GVAR(selectionAnchor) = _ref;
     };
@@ -122,6 +128,8 @@ if (GVAR(selection) isEqualTo []) then {
     GVAR(selectionAnchor) = [];
 };
 
-[] call FUNC(drawSelection);
+if (!_unchanged) then {
+    [] call FUNC(drawSelection);
+};
 
 GVAR(selection) isNotEqualTo []

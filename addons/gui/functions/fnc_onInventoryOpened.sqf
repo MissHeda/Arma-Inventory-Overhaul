@@ -38,6 +38,11 @@
 
 params ["_unit", ["_container", objNull], ["_secondary", objNull]];
 
+// That this handler was asked, and when: a vanilla inventory that comes up right after it did so although the
+// handler answered, which fnc_guardVanilla tells from one this handler never heard of. Before everything
+// else here, for a unit that is not the player's and an opening that is refused as well.
+GVAR(askedFrame) = diag_frameNo;
+
 // A soldier the player no longer is - the body a team switch left behind, a unit a script ran the action on:
 // there is no window for it.
 if (_unit isNotEqualTo ACE_player) exitWith {};

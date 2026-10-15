@@ -2,9 +2,8 @@
 /*
  * Author: Miss Heda
  * The rectangle a span of a grid's cells covers - a tile, a footprint, a selection's frame: from the
- * first cell's corner to the last one's far edge, ending a pixel before the next cell as a cell does. On a
- * canvas's compartment it is drawn in on every side where one of its cells borders another compartment's
- * (fnc_spanInsets), as the cells are, so it stays clear of the gap between the two.
+ * first cell's corner to the last one's far edge, ending a pixel before the next cell as a cell does: on
+ * every grid, a canvas's compartment too, it covers exactly the cells it spans.
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>
@@ -29,11 +28,9 @@ _corner params ["_cornerX", "_cornerY"];
 private _cellW = _grid get "cellW";
 private _cellH = _grid get "cellH";
 
-([_grid, _col, _row, _w, _h] call FUNC(spanInsets)) params ["_left", "_top", "_right", "_bottom"];
-
 [
-    _cornerX + _col * _cellW + _left,
-    _cornerY + _row * _cellH + _top,
-    _w * _cellW - pixelW - _left - _right,
-    _h * _cellH - pixelH - _top - _bottom
+    _cornerX + _col * _cellW,
+    _cornerY + _row * _cellH,
+    _w * _cellW - pixelW,
+    _h * _cellH - pixelH
 ]

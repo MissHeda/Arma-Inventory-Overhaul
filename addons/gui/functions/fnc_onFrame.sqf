@@ -407,6 +407,12 @@ if (!isNull _tip && {ctrlShown _tip} && {GVAR(tooltipAt) isNotEqualTo _mouse}) t
 // up (fnc_animateSearch). Not while something is held: a rebuild would pull it from under the mouse.
 if (GVAR(press) isEqualTo []) then {
     [_display, _now] call FUNC(animateSearch);
+
+    // Nothing held, no menu open: one more slot's drag highlight is made and kept hidden, so that lifting
+    // an item makes none (fnc_warmTargets). Not while a menu is open - it would be made again over them.
+    if ((uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []) then {
+        [_display] call FUNC(warmTargets);
+    };
 };
 
 // The hover above may have lit a slot with a ring made on the display: the menu goes over it in this frame.

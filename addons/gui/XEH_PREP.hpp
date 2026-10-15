@@ -120,6 +120,8 @@ PREP(drawFilter);
 PREP(applyFilter);
 PREP(matchesFilter);
 PREP(showTargets);
+PREP(glowSlot);
+PREP(warmTargets);
 PREP(inspect);
 PREP(drawInspect);
 PREP(closeInspect);
@@ -206,7 +208,6 @@ PREP(gridOrigin);
 PREP(slotRect);
 PREP(screenToCell);
 PREP(spanRect);
-PREP(spanInsets);
 PREP(hitsHole);
 PREP(tileAt);
 
@@ -219,7 +220,6 @@ PREP(drawFooter);
 
 // Floating windows: open kits and pouches
 PREP(flowCompartments);
-PREP(canvasInsets);
 PREP(viewBlocks);
 PREP(drawCompartments);
 PREP(scrollPixels);

@@ -7,9 +7,9 @@
  * click there - only a drag still finds the grid over one, so its footprint shows red (fnc_updateDrag).
  * A grid is one compartment, and a point is on it only where it has a cell: compartments drawn on a
  * canvas may share a box (grid=aaa/aba/aaa), and the hole of the one is the cell of the other.
- * Every cell lies at the plain pitch, a canvas's compartment's too: a point where a cell is drawn in
- * beside another compartment (fnc_canvasInsets) still belongs to that cell, so the half gap is no dead
- * strip.
+ * Every cell lies at the plain pitch, a canvas's compartment's too, and is drawn there at the same size
+ * (fnc_createGrid, fnc_spanRect): the point is divided by the one cell, so the cell it finds is the cell
+ * under it.
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>

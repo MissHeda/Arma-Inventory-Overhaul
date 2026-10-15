@@ -45,7 +45,17 @@ private _sourceBox = _sourceGrid getOrDefault ["container", objNull];
 // What goes, in config mass.
 private _stack = (_entry getOrDefault ["count", 1]) max 1;
 private _taking = (_count max 1) min _stack;
-private _need = ([[_entry]] call EFUNC(storage,getMass)) * _taking / _stack;
+
+// The mass of the whole entry - a backpack's counts what it holds, read from its cargo - is worked out once per
+// drag (GVAR(dragRoom) is made new at each lift; fnc_updateDrag asks for it too).
+private _mass = GVAR(dragRoom) get "mass";
+
+if (isNil "_mass") then {
+    _mass = [[_entry]] call EFUNC(storage,getMass);
+    GVAR(dragRoom) set ["mass", _mass];
+};
+
+private _need = _mass * _taking / _stack;
 
 private _bar = uiNamespace getVariable [QGVAR(weightBar), createHashMap];
 

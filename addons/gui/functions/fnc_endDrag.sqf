@@ -65,7 +65,10 @@ uiNamespace setVariable [QGVAR(dragFootprint), controlNull];
 uiNamespace setVariable [QGVAR(dragCounter), controlNull];
 uiNamespace setVariable [QGVAR(dragScroll), []];
 
-{ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(dragGlow), []]);
+// The lit slots' highlights are kept for the next drag (fnc_glowSlot): only hidden.
+{
+    if (!isNull _x) then {_x ctrlShow false};
+} forEach (uiNamespace getVariable [QGVAR(dragGlow), []]);
 uiNamespace setVariable [QGVAR(dragGlow), []];
 
 // The footprints and pictures of a group, and which tiles it was.

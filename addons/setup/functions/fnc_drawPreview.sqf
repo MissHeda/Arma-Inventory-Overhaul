@@ -6,9 +6,10 @@
  * on the inventory's panel, in its cells, a pixel apart.
  *   - A container's compartments laid out as the inventory lays them out (einv_gui_fnc_flowCompartments):
  *     side by side as far as STORAGE_COLS cells reach, a gap between two, then on the next line - and the
- *     ones of a canvas exactly where they were drawn, each cell drawn in by half that gap on a side where
- *     it borders another compartment (einv_gui_fnc_canvasInsets), so the painted ones read as the
- *     separate blocks the inventory shows.
+ *     ones of a canvas exactly where they were drawn, on the plain pitch.
+ *   - Every cell the same size with the same gap to the next, whichever compartment it belongs to: the
+ *     cell is a whole number of pixels and so is every offset, so no cell comes out a pixel wider than
+ *     its neighbour and no gap a pixel wider than another.
  *   - An item's tile on a piece of grid: its surface on its cells only (einv_gui_fnc_uiShape), its
  *     picture over its box, as a tile is drawn.
  * The one routine for Paint and Blocks alike: the same cell, gap and flow for the same compartments, so
@@ -51,7 +52,8 @@ private _cellColor = +(_theme getOrDefault ["cell", [1, 1, 1, 0.05]]);
 // The inventory's cells are faint on its own panel; on the editor's card they would all but vanish.
 _cellColor set [3, (_cellColor param [3, 0.05]) max 0.09];
 
-private _padY = UNIT * 0.35;
+// On whole pixels, as the cells are: a pad between two pixels would put every cell on a pixel's edge.
+private _padY = round (UNIT * 0.35 / pixelH) * pixelH;
 private _padX = SQUARE(_padY);
 private _areaW = _width - _padX * 2 - SCROLL_W;
 
@@ -63,8 +65,9 @@ if (_item isNotEqualTo []) exitWith {
     // A piece of grid a cell wider than the tile all round, as wide as it fits.
     private _gridCols = STORAGE_COLS min ((_w max 1) + 2);
     private _gridRows = (_h max 1) + 2;
-    private _cellH = ((UNIT * 0.8) min ((_height - _padY * 2) / _gridRows)) min (_areaW / _gridCols * pixelH / pixelW);
-    private _cellW = SQUARE(_cellH);
+    private _cellPixels = (floor ((((UNIT * 0.8) min ((_height - _padY * 2) / _gridRows)) min (_areaW / _gridCols * pixelH / pixelW)) / pixelH)) max 1;
+    private _cellH = _cellPixels * pixelH;
+    private _cellW = _cellPixels * pixelW;
 
     [
         _display, _group, [0, 0, _padX * 2 + _gridCols * _cellW, _padY * 2 + _gridRows * _cellH],
@@ -94,8 +97,9 @@ if (_item isNotEqualTo []) exitWith {
 };
 
 // A container: the compartments where the inventory puts them.
-private _cellH = (UNIT * 0.85) min (_areaW / (STORAGE_COLS + 0.5) * pixelH / pixelW);
-private _cellW = SQUARE(_cellH);
+private _cellPixels = (floor (((UNIT * 0.85) min (_areaW / (STORAGE_COLS + 0.5) * pixelH / pixelW)) / pixelH)) max 1;
+private _cellH = _cellPixels * pixelH;
+private _cellW = _cellPixels * pixelW;
 private _gridW = STORAGE_COLS * _cellW;
 
 ([createHashMapFromArray [["blocks", _blocks]], [_cellW, _cellH]] call EFUNC(gui,flowCompartments)) params ["_places", "_contentH"];
@@ -110,20 +114,15 @@ private _gridW = STORAGE_COLS * _cellW;
 
     if ((_places param [_forEachIndex, []]) isEqualTo []) then {continue};
 
-    // A canvas's compartment brings how far each of its cells is drawn in where it borders another
-    // compartment (einv_gui_fnc_canvasInsets), as the inventory draws it; every cell at the pitch.
-    (_places select _forEachIndex) params [["_left", 0], ["_top", 0], ["_insets", []]];
+    // Every cell at the pitch from the compartment's corner, as the inventory draws it - the cells of a
+    // canvas's compartments too, which touch.
+    (_places select _forEachIndex) params ["_left", "_top"];
 
     for "_row" from 0 to (_h - 1) do {
         for "_col" from 0 to (_w - 1) do {
             if ((_row * _w + _col) in _holes) then {continue};
 
-            (_insets param [_row * _w + _col, [0, 0, 0, 0]]) params ["_inL", "_inT", "_inR", "_inB"];
-
-            private _cellX = _padX + _left + _col * _cellW + _inL;
-            private _cellY = _padY + _top + _row * _cellH + _inT;
-
-            [_display, _group, [_cellX, _cellY, _cellW - pixelW - _inL - _inR, _cellH - pixelH - _inT - _inB], _cellColor] call EFUNC(gui,uiPanel);
+            [_display, _group, [_padX + _left + _col * _cellW, _padY + _top + _row * _cellH, _cellW - pixelW, _cellH - pixelH], _cellColor] call EFUNC(gui,uiPanel);
         };
     };
 } forEach _blocks;

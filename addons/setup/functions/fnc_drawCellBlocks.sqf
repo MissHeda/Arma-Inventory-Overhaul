@@ -184,7 +184,8 @@ private _area = [_display, "EINV_ScrollGroup", _box, _areaRect] call EFUNC(gui,u
 _area setVariable [QGVAR(scrollId), "cellCanvas"];
 
 private _areaW = (_areaRect select 2) - SCROLL_W - SQUARE(UNIT * 0.2);
-private _cellH = UNIT * 0.95;
+// A whole number of pixels, as the Paint canvas's place is (fnc_drawCellEditor).
+private _cellH = floor (UNIT * 0.95 / pixelH + 0.001) * pixelH;
 private _cellW = SQUARE(_cellH);
 private _captionH = UNIT * 0.8;
 private _cellFill = _theme getOrDefault ["buttonHover", [1, 1, 1, 0.16]];

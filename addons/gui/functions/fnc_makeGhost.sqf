@@ -37,7 +37,12 @@ private _info = [_entry getOrDefault ["class", ""]] call EFUNC(items,getInfo);
 (call FUNC(getCell)) params ["_cellW", "_cellH"];
 
 // ----- The other tiles of a group, below the grabbed one's picture -----
-if (GVAR(dragGroup) isNotEqualTo [] && {(uiNamespace getVariable [QGVAR(dragGhosts), []]) isEqualTo []}) then {
+// Shown only where the tiles keep their arrangement, which needs them all in the grabbed tile's compartment
+// (fnc_groupMode) - from several none is ever shown, so none is made.
+if (
+    GVAR(dragGroup) isNotEqualTo [] && {(uiNamespace getVariable [QGVAR(dragGhosts), []]) isEqualTo []}
+    && {(GVAR(dragGroup) findIf {(_x select 0) != (GVAR(press) param [0, -1])}) < 0}
+) then {
     private _grids = uiNamespace getVariable [QGVAR(grids), []];
     private _grabbed = GVAR(press) param [0, -1];
     private _grabbedTile = ((_grids param [_grabbed, createHashMap]) getOrDefault ["tiles", []]) param [GVAR(press) param [1, -1], createHashMap];

@@ -17,19 +17,13 @@
  * in by some pixels (a selection's second line) moves each line inward by that much: shorter by it at an
  * outer corner, longer by it at an inner one, so the two lines together have no gap.
  *
- * On a canvas's compartment the box may be drawn in on a side where it borders another compartment
- * (fnc_spanInsets): the cells along that side of the box shrink by it, as a rectangle's tile does, and the
- * lines follow the edge they are drawn in to.
- *
  * Arguments:
- * 0: Top left corner of its box [x, y] - the one drawn in, as fnc_spanRect gives it <ARRAY>
+ * 0: Top left corner of its box [x, y], as fnc_spanRect gives it <ARRAY>
  * 1: A cell's width, the gap to the next one included <NUMBER>
  * 2: A cell's height, the same way <NUMBER>
  * 3: Footprint as it lies, [w, h, holes] - holes the indices row * w + col <ARRAY>
  * 4: What: "surface" or "frame" <STRING> (default: "surface")
  * 5: A frame set in by this many pixels <NUMBER> (default: 0)
- * 6: How far the box is drawn in on each side, [left, top, right, bottom] (fnc_spanInsets) <ARRAY>
- *    (default: [0, 0, 0, 0])
  *
  * Return Value:
  * Rectangles [x, y, w, h]; for a surface the first is the top row's first run <ARRAY>
@@ -40,20 +34,18 @@
  * Public: No
  */
 
-params ["_origin", "_cellW", "_cellH", "_footprint", ["_part", "surface"], ["_inset", 0], ["_insets", [0, 0, 0, 0]]];
+params ["_origin", "_cellW", "_cellH", "_footprint", ["_part", "surface"], ["_inset", 0]];
 _footprint params ["_w", "_h", ["_holes", []]];
-_insets params [["_inL", 0], ["_inT", 0], ["_inR", 0], ["_inB", 0]];
 
-// The corner given is the one drawn in: the box's own lies that much up and to the left of it.
-private _left = (_origin select 0) - _inL;
-private _top = (_origin select 1) - _inT;
+private _left = _origin select 0;
+private _top = _origin select 1;
 
 // Where a column's (row's) cell starts and where it ends, a pixel before the next one (_this the index):
-// a pitch on per cell, the first and the last drawn in on the box's sides that are.
-private _fnc_x = {_left + _this * _cellW + ([0, _inL] select (_this == 0))};
-private _fnc_right = {_left + (_this + 1) * _cellW - pixelW - ([0, _inR] select (_this == _w - 1))};
-private _fnc_y = {_top + _this * _cellH + ([0, _inT] select (_this == 0))};
-private _fnc_bottom = {_top + (_this + 1) * _cellH - pixelH - ([0, _inB] select (_this == _h - 1))};
+// a pitch on per cell.
+private _fnc_x = {_left + _this * _cellW};
+private _fnc_right = {_left + (_this + 1) * _cellW - pixelW};
+private _fnc_y = {_top + _this * _cellH};
+private _fnc_bottom = {_top + (_this + 1) * _cellH - pixelH};
 
 private _fnc_in = {
     params ["_col", "_row"];

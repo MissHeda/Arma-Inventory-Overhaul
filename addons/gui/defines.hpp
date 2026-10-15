@@ -27,6 +27,19 @@
 // (fnc_guardVanilla) - not again within this many seconds, so two mods fighting over it cannot loop.
 #define REOPEN_PAUSE 2
 
+// The unit's handler is put behind every other handler of the same event (fnc_initUnit): once this many
+// seconds after the mission's display exists - mods add theirs in their own postInit or in a script that
+// waits for that display - and again when a vanilla inventory came up although the handler had answered
+// (fnc_guardVanilla), not more often than every HANDLER_PAUSE seconds, so two mods that both want to be
+// last cannot loop.
+#define HANDLER_RECHECK 3
+#define HANDLER_PAUSE 5
+
+// A vanilla inventory that comes up within this many frames of the handler's answer belongs to that
+// opening: the handler was asked and another handler's answer let the engine open the display anyway. One
+// that comes later, or with no answer at all, was not asked for by the handler (fnc_guardVanilla).
+#define ASK_FRAMES 12
+
 // DIK codes the window looks at itself
 #define DIK_ESCAPE 1
 #define DIK_RETURN 28
@@ -303,9 +316,8 @@
 #define CELL_SCALE_MAX 1.3
 
 // The room between two compartments of a container, a share of a cell rounded to whole pixels: between
-// blocks that flow side by side or one under another (fnc_flowCompartments), and where two compartments
-// of a canvas meet, half of it drawn in on either side (fnc_canvasInsets) - so a painted backpack reads
-// like its blocks.
+// blocks that flow side by side or one under another (fnc_flowCompartments). The compartments of a canvas
+// have none: they touch at the plain cell pitch, every cell the same size with the same gap.
 #define COMPARTMENT_GAP 0.22
 
 // ---------------------------------------------------------------------------

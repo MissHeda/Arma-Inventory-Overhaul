@@ -10,12 +10,13 @@
  *
  * Compartments drawn on a canvas (grid=aab/acc, a pos of their own) are not flowed: they lie exactly
  * where they were drawn, a cell to a cell - the owner draws a backpack the way it is built and wants it
- * to look like that. Where two of them meet, each draws its edge in by half the flow's gap
- * (fnc_canvasInsets), so painted compartments read as the separate blocks the Blocks view shows while
- * every cell keeps its place at the plain pitch. Such a compartment's place brings those insets; its grid
- * keeps them (fnc_createGrid "insets"). The canvas is one piece of the flow, the box around its
- * compartments, and whatever comes after it starts below it. Two of them may share a box (a ring and the
- * cell inside it); the grids find a point by the cells they have (fnc_screenToCell), never by their box.
+ * to look like that. A canvas is one uniform grid of cells: every cell at the plain pitch, so a cell is
+ * as big, and the gap to the next as wide, wherever it lies and whichever compartment it belongs to; a
+ * compartment is only the set of cells it covers. Where two of them meet there is the cell gap and
+ * nothing else - no cell is drawn in, shifted or cut for a seam. The canvas is one piece of the flow,
+ * the box around its compartments, and whatever comes after it starts below it. Two of them may share a
+ * box (a ring and the cell inside it); the grids find a point by the cells they have
+ * (fnc_screenToCell), never by their box.
  *
  * Arguments:
  * 0: Layout, see einv_storage_fnc_getLayout <HASHMAP>
@@ -24,8 +25,7 @@
  * Return Value:
  * [places, height] <ARRAY>
  *   places - [x, y] from the block's top left corner per compartment, then per overflowing item; [] for
- *            a compartment with no rows, which takes no place. A canvas's compartment has
- *            [x, y, insets]: per cell how far each side is drawn in (fnc_canvasInsets), [] for none
+ *            a compartment with no rows, which takes no place
  *   height - how tall all of it is, 0 for nothing at all
  *
  * Example:
@@ -100,13 +100,11 @@ while {_index < count _blocks} do {
 
             ([_width * _cellW, _height * _cellH] call _fnc_flow) params ["_canvasX", "_canvasY"];
 
-            // Where its compartments meet, each draws its edges in (fnc_canvasInsets).
-            private _insets = [_group, _cell] call FUNC(canvasInsets);
-
+            // Every compartment where it was drawn, at the plain pitch from the canvas's corner.
             {
                 (_x select 3) params ["_posX", "_posY"];
 
-                _places pushBack [_canvasX + (_posX - _minX) * _cellW, _canvasY + (_posY - _minY) * _cellH, _insets select _forEachIndex];
+                _places pushBack [_canvasX + (_posX - _minX) * _cellW, _canvasY + (_posY - _minY) * _cellH];
             } forEach _group;
 
             // Nothing beside it: what follows starts under the canvas.

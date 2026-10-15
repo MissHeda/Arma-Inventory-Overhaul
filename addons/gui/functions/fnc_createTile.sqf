@@ -98,10 +98,8 @@ for "_r" from _row to (_row + _h - 1) do {
     };
 };
 
-// As a cell ends a pixel before the next one, so does the tile - and on a canvas's compartment it is
-// drawn in where its cells border another compartment, as they are (fnc_spanRect, fnc_spanInsets).
+// As a cell ends a pixel before the next one, so does the tile (fnc_spanRect).
 ([_grid, [_gridX, _gridY], _col, _row, _w, _h] call FUNC(spanRect)) params ["_left", "_top", "_width", "_height"];
-private _insets = [_grid, _col, _row, _w, _h] call FUNC(spanInsets);
 private _padY = _cellH * 0.07;
 private _padX = SQUARE(_padY);
 private _innerW = _width - _padX * 2;
@@ -120,7 +118,7 @@ private _color = if (_hidden) then {
 };
 
 private _backgrounds = if (_shaped) then {
-    [_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _color, "surface", 0, _insets] call FUNC(uiShape)
+    [_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _color, "surface"] call FUNC(uiShape)
 } else {
     private _ctrl = [_display, "EINV_PanelRect", _parent, [_left, _top, _width, _height]] call FUNC(uiCreate);
 
@@ -153,7 +151,7 @@ if (_hidden) then {
         _edge set [3, ((_edge select 3) * 1.8) min 1];
 
         if (_shaped) then {
-            _controls append ([_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _edge, "frame", 0, _insets] call FUNC(uiShape));
+            _controls append ([_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _edge, "frame"] call FUNC(uiShape));
         } else {
             _controls pushBack ([_display, _parent, [_left, _top, _width, _height], _edge] call FUNC(uiFrame));
         };
@@ -373,7 +371,7 @@ private _border = _theme getOrDefault ["tileBorder", []];
 
 if (_border isNotEqualTo []) then {
     if (_shaped) then {
-        _controls append ([_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _border, "frame", 0, _insets] call FUNC(uiShape));
+        _controls append ([_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _border, "frame"] call FUNC(uiShape));
     } else {
         _controls pushBack ([_display, _parent, [_left, _top, _width, _height], _border] call FUNC(uiFrame));
     };

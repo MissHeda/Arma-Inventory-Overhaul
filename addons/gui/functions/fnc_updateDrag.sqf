@@ -48,7 +48,11 @@
  * into a backpack is the one kind rule left, einv_storage_fnc_backpackIntoBackpack). When the item comes
  * from outside the soldier's own gear into it, the hint warns what it would make of him: "+2.4 kg: you
  * will be Overloaded" (fnc_dragHint, fnc_weightText; an own empty slot too - a swap moves another item off,
- * so no forecast for a filled one), worked out once per drag, target and count (GVAR(dragRoom)). Anything
+ * so no forecast for a filled one), worked out once per drag, target and count (GVAR(dragRoom)); so are
+ * whether a slot takes it ("slot|n"), the forecast of a weight ("forecast|kg"), the mass of what is held
+ * ("mass") and whether the cells under the footprint are taken ("taken", again only when the footprint
+ * stands on other cells) - no frame reads the loadout, asks config or passes every tile of a grid for an
+ * answer it has. Anything
  * else the target has nothing to say about, the hint is the key help lift wrote. The ghost is held as GVAR(dragSize) says - turned with R - with the
  * count of a stack beside it; at a column's or a kit window body's top or bottom edge it scrolls - only
  * while nothing lies over it there.
@@ -183,13 +187,12 @@ private _dragHoles = ([_entry getOrDefault ["class", ""], GVAR(dragRot)] call EF
 
 {_x ctrlShow false} forEach _shapes;
 
-// Paints the next free shape controls: false when too few are left, and the caller draws the box. On a
-// canvas's compartment it is drawn in where the cells under it are (fnc_spanInsets); _origin is the
-// corner drawn in (fnc_spanRect).
+// Paints the next free shape controls: false when too few are left, and the caller draws the box.
+// _origin is the corner of the cells it lies on (fnc_spanRect).
 private _fnc_paintShape = {
-    params ["_origin", "_shape", "_color", ["_insets", [0, 0, 0, 0]]];
+    params ["_origin", "_shape", "_color"];
 
-    private _rects = [_origin, _cellW, _cellH, _shape, "surface", 0, _insets] call FUNC(shapeRects);
+    private _rects = [_origin, _cellW, _cellH, _shape, "surface"] call FUNC(shapeRects);
 
     if (_shapeUsed + count _rects > count _shapes) exitWith {false};
 
@@ -245,13 +248,38 @@ private _fnc_forecast = {
 
     if !(uiNamespace getVariable [QGVAR(dragExternal), false]) exitWith {[]};
 
+    // Kept for the drag by what it adds: the soldier's load does not change while something is held, and an
+    // empty slot or the storage column asks for it every frame the mouse is on it.
+    private _forecastKey = "forecast|" + str _need;
+    private _kept = GVAR(dragRoom) get _forecastKey;
+
+    if (!isNil "_kept") exitWith {_kept};
+
     private _load = [GVAR(unit)] call EFUNC(weight,getLoad);
     private _tier = [GVAR(unit), _load] call EFUNC(weight,getTier);
     private _newTier = [GVAR(unit), _load + _need] call EFUNC(weight,getTier);
 
-    if (_newTier <= _tier) exitWith {[]};
+    private _parts = [];
 
-    [[[_need, _newTier, _load + _need] call FUNC(weightText), ["text2", "accent", "loss", "loss"] select _newTier]]
+    if (_newTier > _tier) then {
+        _parts = [[[_need, _newTier, _load + _need] call FUNC(weightText), ["text2", "accent", "loss", "loss"] select _newTier]];
+    };
+
+    GVAR(dragRoom) set [_forecastKey, _parts];
+
+    _parts
+};
+
+// What is held weighs, worked out once per drag (fnc_previewWeight made it at the lift).
+private _fnc_mass = {
+    private _mass = GVAR(dragRoom) get "mass";
+
+    if (isNil "_mass") then {
+        _mass = [[_entry]] call EFUNC(storage,getMass);
+        GVAR(dragRoom) set ["mass", _mass];
+    };
+
+    _mass
 };
 
 // Where it would land: the first that applies - the hotbar, one of the player's slots, a grid (and a kit's tile
@@ -299,30 +327,44 @@ call {
         if (_slotIndex < 0) exitWith {};
 
         private _record = _slots select _slotIndex;
-        private _slot = _record select 5;
-        private _fits = [GVAR(unit), _slot, _entry get "class"] call EFUNC(storage,slotAccepts);
 
-        // Several items cannot go into one slot.
-        if (_dragGroup isNotEqualTo []) then {
-            _fits = false;
-        };
+        // Whether the slot takes it, and the slot it goes into - worked out once per drag and slot, not on
+        // every frame the mouse is on it: a weapon's parts read the unit's loadout and the weapon's
+        // compatible magazines (einv_storage_fnc_slotAccepts, partFor).
+        private _fitKey = "slot|" + str _slotIndex;
+        private _fitAnswer = GVAR(dragRoom) get _fitKey;
 
-        // A magazine or attachment on the weapon itself goes on the part that takes it - loaded at once.
-        if (!_fits && {_dragGroup isEqualTo []} && {_slot in ["primary", "handgun", "launcher"]}) then {
-            private _part = [GVAR(unit), _slot, _entry get "class"] call EFUNC(storage,partFor);
+        if (isNil "_fitAnswer") then {
+            private _slot = _record select 5;
+            private _fits = [GVAR(unit), _slot, _entry get "class"] call EFUNC(storage,slotAccepts);
 
-            if (_part isNotEqualTo "") then {
-                _slot = _part;
-                _fits = true;
+            // Several items cannot go into one slot.
+            if (_dragGroup isNotEqualTo []) then {
+                _fits = false;
             };
+
+            // A magazine or attachment on the weapon itself goes on the part that takes it - loaded at once.
+            if (!_fits && {_dragGroup isEqualTo []} && {_slot in ["primary", "handgun", "launcher"]}) then {
+                private _part = [GVAR(unit), _slot, _entry get "class"] call EFUNC(storage,partFor);
+
+                if (_part isNotEqualTo "") then {
+                    _slot = _part;
+                    _fits = true;
+                };
+            };
+
+            _fitAnswer = [_fits, _slot];
+            GVAR(dragRoom) set [_fitKey, _fitAnswer];
         };
+
+        _fitAnswer params ["_fits", "_slot"];
 
         GVAR(dragTarget) = ["slot", _slotIndex, 0, 0, _fits, [["NoFit", "GroupNoSlot"] select (_dragGroup isNotEqualTo []), ""] select _fits, _slot];
         [[_record] call FUNC(slotRect), _fits] call _fnc_show;
 
         // An empty slot takes the whole of it onto the soldier.
         if (_fits && {(_record select 1) isEqualTo ""} && {_dragGroup isEqualTo []}) then {
-            _hintParts = [([[_entry]] call EFUNC(storage,getMass)) / ((_entry getOrDefault ["count", 1]) max 1)] call _fnc_forecast;
+            _hintParts = [([] call _fnc_mass) / ((_entry getOrDefault ["count", 1]) max 1)] call _fnc_forecast;
 
             if (_hintParts isEqualTo []) then {
                 _hintParts = GVAR(dragKeys);
@@ -500,7 +542,7 @@ call {
             [GVAR(storageRect), _why isEqualTo "", DRAG_FOOTPRINT_ALPHA / 2] call _fnc_show;
 
             if (_why isEqualTo "" && {_empty} && {_slotSource isEqualTo []}) then {
-                _hintParts = [([[_entry]] call EFUNC(storage,getMass)) / ((_entry getOrDefault ["count", 1]) max 1)] call _fnc_forecast;
+                _hintParts = [([] call _fnc_mass) / ((_entry getOrDefault ["count", 1]) max 1)] call _fnc_forecast;
 
                 if (_hintParts isEqualTo []) then {
                     _hintParts = GVAR(dragKeys);
@@ -592,8 +634,7 @@ call {
             _control ctrlShow true;
         };
 
-        // The compartment as a whole, for every mode but "keep" - drawn in where it borders another one
-        // (fnc_spanRect).
+        // The compartment as a whole, for every mode but "keep" (fnc_spanRect).
         private _compartment = [_target, [_originX, _originY], 0, 0, _target get "cols", _target get "rows"] call FUNC(spanRect);
 
         switch (_mode) do {
@@ -615,10 +656,7 @@ call {
                         // A shaped tile on its own cells, while there are controls left for it.
                         if (
                             _tileHoles isNotEqualTo []
-                            && {[
-                                [_rect select 0, _rect select 1], [_tile get "w", _tile get "h", _tileHoles], _gain,
-                                [_target, _cellCol, _cellRow, _tile get "w", _tile get "h"] call FUNC(spanInsets)
-                            ] call _fnc_paintShape}
+                            && {[[_rect select 0, _rect select 1], [_tile get "w", _tile get "h", _tileHoles], _gain] call _fnc_paintShape}
                         ) exitWith {
                             (_footprints select _forEachIndex) ctrlShow false;
                         };
@@ -779,38 +817,52 @@ call {
         // Inside the compartment, none of its cells on a shaped one's holes, and free - the dragged tile
         // does not count where it was lifted from. A shaped item takes only its own cells, and a shaped
         // tile there only its own (einv_storage_fnc_overlaps).
-        private _mask = [_col, _row, _w, _h, _dragHoles];
-        private _taken = _col < 0 || {_row < 0} || {_col + _w > _target get "cols"} || {_row + _h > _target get "rows"}
-            || {[_target, _col, _row, _w, _h, _dragHoles] call FUNC(hitsHole)};
+        // Looked at again only when the footprint stands on other cells: nothing on the grid changes while a
+        // tile is held (a build waits for it), so a mouse that stays in its cell costs one comparison instead of
+        // a pass over every tile of the grid.
+        private _takenKey = [_targetIndex, _col, _row, _w, _h, GVAR(dragRot), count GVAR(inFlight)];
+        private _takenKept = GVAR(dragRoom) get "taken";
+        private _taken = false;
 
-        if (!_taken) then {
-            {
-                if (
-                    !(_targetIndex == _sourceIndex && {_forEachIndex == _tileIndex})
-                    && {[_mask, [_x get "col", _x get "row", _x get "w", _x get "h", _x getOrDefault ["holes", []]]] call EFUNC(storage,overlaps)}
-                ) exitWith {
-                    _taken = true;
-                };
-            } forEach (_target get "tiles");
-        };
+        if (!isNil "_takenKept" && {(_takenKept select 0) isEqualTo _takenKey}) then {
+            _taken = _takenKept select 1;
+        } else {
+            private _mask = [_col, _row, _w, _h, _dragHoles];
 
-        // A cell a move under way goes to is taken as well (GVAR(inFlight), outlined by fnc_drawPending):
-        // nothing shows there before it arrived, but it will.
-        if (!_taken && {count GVAR(inFlight) > 0}) then {
-            private _holder = _target getOrDefault ["holder", objNull];
-            private _block = _target getOrDefault ["block", 0];
+            _taken = _col < 0 || {_row < 0} || {_col + _w > _target get "cols"} || {_row + _h > _target get "rows"}
+                || {[_target, _col, _row, _w, _h, _dragHoles] call FUNC(hitsHole)};
 
-            // A HashMap: _x is the request id, _y its record - the cells it goes to second.
-            {
-                if (((_y param [1, []]) findIf {
-                    _x params [["_toHolder", objNull], ["_toBlock", 0], ["_toCol", 0], ["_toRow", 0], ["_toW", 1], ["_toH", 1]];
+            if (!_taken) then {
+                {
+                    if (
+                        !(_targetIndex == _sourceIndex && {_forEachIndex == _tileIndex})
+                        && {[_mask, [_x get "col", _x get "row", _x get "w", _x get "h", _x getOrDefault ["holes", []]]] call EFUNC(storage,overlaps)}
+                    ) exitWith {
+                        _taken = true;
+                    };
+                } forEach (_target get "tiles");
+            };
 
-                    _toHolder isEqualTo _holder && {_toBlock == _block}
-                    && {[_mask, [_toCol, _toRow, _toW, _toH]] call EFUNC(storage,overlaps)}
-                }) >= 0) exitWith {
-                    _taken = true;
-                };
-            } forEach GVAR(inFlight);
+            // A cell a move under way goes to is taken as well (GVAR(inFlight), outlined by fnc_drawPending):
+            // nothing shows there before it arrived, but it will.
+            if (!_taken && {count GVAR(inFlight) > 0}) then {
+                private _holder = _target getOrDefault ["holder", objNull];
+                private _block = _target getOrDefault ["block", 0];
+
+                // A HashMap: _x is the request id, _y its record - the cells it goes to second.
+                {
+                    if (((_y param [1, []]) findIf {
+                        _x params [["_toHolder", objNull], ["_toBlock", 0], ["_toCol", 0], ["_toRow", 0], ["_toW", 1], ["_toH", 1]];
+
+                        _toHolder isEqualTo _holder && {_toBlock == _block}
+                        && {[_mask, [_toCol, _toRow, _toW, _toH]] call EFUNC(storage,overlaps)}
+                    }) >= 0) exitWith {
+                        _taken = true;
+                    };
+                } forEach GVAR(inFlight);
+            };
+
+            GVAR(dragRoom) set ["taken", [_takenKey, _taken]];
         };
 
         // In a kit's grid the cell only says where something from elsewhere would like to lie: taken, the
@@ -874,7 +926,7 @@ call {
             _roomParts = [];
 
             if (_toKit isEqualTo "" && {[_to] call FUNC(isOwnStorage)}) then {
-                _roomParts = [([[_entry]] call EFUNC(storage,getMass)) * ([_stack, _amount] select (_amount > 0)) / _stack] call _fnc_forecast;
+                _roomParts = [([] call _fnc_mass) * ([_stack, _amount] select (_amount > 0)) / _stack] call _fnc_forecast;
             };
 
             GVAR(dragRoom) set [_key, _roomParts];
@@ -887,8 +939,7 @@ call {
 
     GVAR(dragTarget) = ["grid", _targetIndex, _col, _row, _reason isEqualTo "", _reason, "", _place];
 
-    // The footprint lies on the target's cells, clipped to the grid where the item would stick out - and
-    // on a canvas's compartment drawn in where those cells border another one (fnc_spanRect).
+    // The footprint lies on the target's cells, clipped to the grid where the item would stick out.
     ([_target] call FUNC(gridOrigin)) params ["_originX", "_originY"];
 
     private _left = (_col max 0) min ((_target get "cols") - 1);
@@ -928,10 +979,7 @@ call {
 
         if (
             count _clipHoles < _clipW * _clipH
-            && {[
-                [_clipRect select 0, _clipRect select 1], [_clipW, _clipH, _clipHoles], _color,
-                [_target, _left, _top, _clipW, _clipH] call FUNC(spanInsets)
-            ] call _fnc_paintShape}
+            && {[[_clipRect select 0, _clipRect select 1], [_clipW, _clipH, _clipHoles], _color] call _fnc_paintShape}
         ) then {
             _footprint ctrlShow false;
         };

@@ -763,14 +763,34 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   writes one INFO line per display saying where it stood: no window open, over the window, beside it, or **under** it - the
   window was made as its child dialog and closes with it, so it is opened again a frame later on the same unit and containers
   (at most once every `REOPEN_PAUSE` 2 s). `fnc_open` never makes the window over a vanilla inventory: while `findDisplay 602`
-  is open it closes it and tries again next frame (at most `OPEN_TRIES` 10). The unit's handler answers true and nothing depends
-  on it being the last handler. Three places call the guard: an `Extended_DisplayLoad_EventHandlers` entry on
+  is open, or a display the guard closed is still held (uiNamespace `einv_gui_closing` - the engine may stop listing a closing
+  display and still hold it, and a dialog made then hangs under it all the same), it closes it and tries again next frame (at
+  most `OPEN_TRIES` 10; held but no longer listed after that, the window opens anyway). The guard's second close, a frame after
+  the first (a display closed inside its own load event is not always gone), is the guard called again with the display
+  (`[display, true]`), never a bare `closeDisplay`: it looks where the window stands, and a close of a display the window hangs
+  under is told and followed by the reopen. It closes the display object itself, never `closeDialog` (topmost dialog, maybe the
+  window); the window has no `InventoryClosed` handler, so the engine raising that event for the closed display touches nothing
+  of it (`einv_storage` only notes the unit for its surplus check).
+  Three places call the guard: an `Extended_DisplayLoad_EventHandlers` entry on
   `RscDisplayInventory` (`gui/CfgEventHandlers.hpp`; CBA raises that event from `BIS_fnc_initDisplay`), a per-frame handler
   every `GUARD_INTERVAL` 0.25 s from `XEH_postInit` for a display that loaded without raising it, and the check each
   `CHECK_INTERVAL` in `fnc_onFrame` while the window is open. The display's `onLoad` is deliberately not patched in config: it
   would replace the `BIS_fnc_initDisplay` call that raises CBA's load event for every other mod's handler, close at the very
   moment the handler does, and fight Better Inventory's patch of the same attribute over load order. Better Inventory's put/take
   stack move is held off with its `bettInv_stackMove` flag while the window is open.
+- **Other mods' `InventoryOpened` handlers.** A unit has any number of them, and which answer the engine goes by is the engine's
+  (Better Inventory's runs from CBA's, SFX Project: Remastered adds a plain one that only plays sounds and answers nothing, once
+  `findDisplay 46` exists - after this mod's postInit). The window does not depend on it: the display that opens anyway is closed
+  by the guard and the window opens a frame later. But the handler (`fnc_initUnit [unit, again]`) is kept behind the others: put
+  on at the CBA `unit` event with `again`, once more `HANDLER_RECHECK` 3 s after `findDisplay 46` exists (`XEH_postInit`), and
+  whenever a vanilla inventory came up although the handler had answered within `ASK_FRAMES` frames (`einv_gui_askedFrame`, set
+  first thing in `fnc_onInventoryOpened`) - the RPT says "The unit's handler had answered true for it - another handler's answer
+  let it open" and "The unit handler goes behind the other handlers of the event again" (at most every `HANDLER_PAUSE` 5 s, so two
+  mods that both want the last place cannot loop). Only this mod's handler, by its id, is removed and added again - never
+  `removeAllEventHandlers`, so the other mods' sounds and work go on. A vanilla inventory the handler was **not** asked for (a
+  script's `createDialog`, the handler taken off) with no window open opens the window in its place on the player's own gear
+  ("Nothing asked for the window"). Where the engine really takes the last handler's answer, being last keeps the display from
+  opening at all; where it does not, the guard path is all that runs.
 - **Closing.** Every way the window closes itself goes through `fnc_closeDisplay [reason]` (sets `einv_gui_closeReason`, then
   `closeDisplay 2`), and `fnc_onUnload` writes one INFO line `window closed: <reason>`: `a movement key` (`"move"`), `Escape`
   (set by `fnc_onKeyDown` where it leaves Escape to the engine, inventory only), `the Gear key`, `the close button`,
@@ -983,18 +1003,18 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   parent, [left, top], section, layout, places, theme, window]`. Flowed compartments (`pos` `[]`) lie side by side as far as
   `STORAGE_COLS` cells reach, then on the next line, `COMPARTMENT_GAP` (0.22 cell, pixel-rounded) between blocks. A compartment
   with a `pos` lies on its **canvas** exactly where it was drawn, every cell at the plain pitch; the canvas is one piece of the
-  flow. **Insets:** a cell side that borders a cell of *another* compartment (not a hole, the canvas's edge or its own
-  compartment's cell; a corner is no side) is drawn in by half of `COMPARTMENT_GAP`, the cell on the left/top of the seam
-  taking the smaller pixel half, so the two add up to the flow's gap and the two frames sit as two flowed blocks' do. A
-  compartment never gets a gap inside itself (the middle of `abbbbbc/abbbbbc` stays one block while its neighbours show
-  theirs). `fnc_canvasInsets [blocks, cell]` -> per compartment per cell `[left, top, right, bottom]` (`[]` when it borders
-  no other); the place is `[x, y, insets]`, the grid keeps `"insets"`, `fnc_createGrid` draws its cells and
-  `fnc_drawCompartments` its lines (each cell's frame, joined into bands without overlap) drawn in by them. Tiles and every rect
-  on a grid (`fnc_spanRect` via `fnc_tileRect`, selection, pending, band, drag footprint) shrink a side by the furthest inset of
-  their cells along it (`fnc_spanInsets`); `fnc_shapeRects` takes those four as its box's insets. `fnc_screenToCell` is plain pitch.
-- **Grids and tiles.** `fnc_createGrid [display, parent, [relX, relY], rows, theme, section id, cols, holes, insets]` -> a
+  flow. **One uniform grid of cells:** every cell of a canvas lies at the plain pitch and is drawn a pixel short of it, the same size
+  with the same gap to the next wherever it is and to whichever compartment it belongs; a compartment is only the set of cells it
+  covers. Where two compartments meet there is the cell gap and nothing else - no cell is drawn in, shifted or cut for a seam, and
+  a one-cell compartment is a cell like any other. The places are `[x, y]` and the grids plain. `fnc_drawCompartments` draws the
+  lines behind the cells of a whole canvas once, as one shape of all its cells (every line pixel drawn once, so they are as faint
+  at a seam as inside a compartment; a hole of one compartment that is a cell of another is no hole of the canvas), after
+  snapping the block's corner to a pixel so touching compartments keep one pitch. Tiles and every rect on a grid (`fnc_spanRect`
+  via `fnc_tileRect`, selection, pending, band, drag footprint, `fnc_shapeRects`) and `fnc_screenToCell` use that same plain
+  geometry, so a tile lands exactly on its cells.
+- **Grids and tiles.** `fnc_createGrid [display, parent, [relX, relY], rows, theme, section id, cols, holes]` -> a
   HashMap: `parent`, `rel`, `cols`, `rows`, `cellW`, `cellH`, `cells` (a **hole** has no control: `controlNull`), `holes`,
-  `insets`, `tiles`, `section`, and from `fnc_drawCompartments` `container`, `virtual`, `kit`, `layoutKey`, `unit`, `block`,
+  `tiles`, `section`, and from `fnc_drawCompartments` `container`, `virtual`, `kit`, `layoutKey`, `unit`, `block`,
   `pos`, `overflow`, `window`, `holder`, `root`, `side` (a source grid adds `source`). `fnc_createTile [display, grid, entry,
   theme]` draws the surface in the category's colour over the entry's cells only (a shaped tile: runs of cells with one-pixel
   bridges; `"backgrounds"` and `"rect"` kept for hover, flash, reveal and the repack film), the picture, the short name, a
@@ -1031,6 +1051,16 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `einv_gui_dragRot` apart from `einv_gui_dragSize`, a quarter clockwise and back, the item staying held by the same cell). Column
   and window edges scroll while dragging. Nothing is lifted that could go nowhere (a living person's item the player may not
   touch).
+- **What a lift costs.** It makes few controls and reads little: the green highlight of each slot that takes the item (some fifteen
+  controls with round corners) is made once per build by `fnc_glowSlot` into uiNamespace `einv_gui_glowCache`, ahead of time by
+  `fnc_warmTargets` (one of the player's own slots per idle frame from `fnc_onFrame`, `glowNext` remembers how far), and a drag only
+  shows it (`fnc_showTargets`, `dragGlow`) and hides it again (`fnc_endDrag`); a build empties the cache. `fnc_showTargets` reads
+  the unit's equipment once and only for an item that may go on a weapon's part; `einv_storage_fnc_slotAccepts` answers a part slot
+  from the item's kind before it looks at the weapon, and keeps what each weapon takes in `einv_storage_compatSets` (class names in
+  lower case, config read once). `fnc_select "only"` draws no frames again when the tile is the selection already; a group makes
+  footprints, shapes and pictures only when its tiles lie in one compartment (the only case `fnc_groupMode` keeps their
+  arrangement). Per frame, `fnc_updateDrag` asks a slot, the weight forecast, the mass and the cells under the footprint once per
+  drag (`dragRoom`: `slot|n`, `forecast|kg`, `mass`, `taken`) instead of every frame.
 - **Where it lands** (`fnc_updateDrag`; `einv_gui_dragTarget` is `["grid", gridIndex, col, row, fits, why not, "", place]`,
   `["slot", ...]`, `["kitTile", ...]`, `["hotbar", slot, ...]`, `["repack", ...]`, `["zone", ...]`, `["ground", ...]` or
   `["group", ...]`): on a grid the footprint must lie inside the compartment on free cells (a hole is red; an item's own holes
@@ -1512,7 +1542,8 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   checks no cell, `MAX_CELLS`, `MAX_BLOCKS` and a drawing taller than `MAX_ROWS`, and writes through `fnc_upsertRule`. A grid laid
   out by load or by a pattern is shown as the compartments it gives; editing it writes those cells instead.
 - **Preview** (`fnc_drawPreview`): the window's own `flowCompartments` with the blocks Apply would write, so painted
-  compartments sit 1:1 where they were painted, their cells drawn in by the same insets, and blocks flow; an item's tile on a
+  compartments sit 1:1 where they were painted, on the plain cell pitch like every other cell (all the same size and gap, the cell
+  and the pads whole pixels), and blocks flow; an item's tile on a
   piece of grid. One routine for Paint and Blocks: an untouched class previews its own `classBlocks` (places included) in both
   ways, an edited one what Apply would write. `fnc_canvasBlocks` drops the `pos` of painted compartments that lie exactly where
   `fnc_canvasFromBlocks` (places only, 6th argument) would flow them, so they read, preview and are written as the Blocks way's
@@ -1793,7 +1824,7 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
 
 - **All of 0.4.0 but the first version of the ACE Arsenal panel** (which the owner ran, from screenshots): cells as the only room
   and everything removed with the weight limit; the panel's look, staging space, list drag, wheel and focus rule; the backpack
-  as the fourth gear slot; shaped grids, `like=`, shaped items with rotation, positional compartments with insets, width 10, the
+  as the fourth gear slot; shaped grids, `like=`, shaped items with rotation, positional compartments (a canvas), width 10, the
   presets `default` revision 2, `realism` and `weight` revision 2; the wizard (Start, Items, Containers with paint, Blocks and
   Same as, Review, and later the wildcard search, the tree view with its `class=X+` edits, the weight and name fields and Export /
   Import at the editors); the window details (the menu's right-click fall-through, the weight card without ticks, count pills, the

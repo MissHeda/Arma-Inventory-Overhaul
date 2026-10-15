@@ -17,6 +17,14 @@ GVAR(openedAt) = -1;
 GVAR(person) = objNull;
 GVAR(personMode) = "";
 
+// The unit's InventoryOpened handler and the vanilla inventory that comes up behind it (fnc_initUnit,
+// fnc_onInventoryOpened, fnc_guardVanilla, fnc_open): the frame the handler last answered, when it was last
+// put behind the other handlers of the event, and - in uiNamespace - the vanilla inventories the guard
+// closed that may still be held, [display, ...]: no window is made while one is, it would be its child.
+GVAR(askedFrame) = -1e9;
+GVAR(handlerAgain) = -1e9;
+uiNamespace setVariable [QGVAR(closing), []];
+
 // What runs the open window's frame (fnc_onFrame): [driver, id] - "pfh", a CBA per-frame handler, or
 // "draw3d", a Draw3D mission event handler (fnc_startFrame, fnc_stopFrame) - and ["", -1] while none runs.
 // When it next checks whether the window should still be open, and when it next compares the contents
@@ -107,6 +115,14 @@ uiNamespace setVariable [QGVAR(bandFrame), []];
 GVAR(dragGroup) = [];
 uiNamespace setVariable [QGVAR(dragFootprints), []];
 uiNamespace setVariable [QGVAR(dragGhosts), []];
+
+// The green highlights of the slots that take what is dragged: made once per build by slot number (glowCache,
+// slot number -> [[box, parent], controls], fnc_glowSlot), ahead of time by fnc_warmTargets (glowNext: the next
+// slot number to look at), shown by a drag (dragGlow: the controls shown, fnc_showTargets) and only hidden by
+// its end (fnc_endDrag). A build empties all three along with the controls.
+uiNamespace setVariable [QGVAR(glowCache), createHashMap];
+uiNamespace setVariable [QGVAR(glowNext), 0];
+uiNamespace setVariable [QGVAR(dragGlow), []];
 
 // What each section of the columns drew that a later redraw needs (fnc_drawSection): its container, the
 // weight text and the button on its caption line - controls, so in uiNamespace.

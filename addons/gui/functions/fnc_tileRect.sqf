@@ -2,9 +2,9 @@
 /*
  * Author: Miss Heda
  * Where a tile is on the screen right now - through its grid's place, so a scrolled column or window is
- * taken into account (fnc_gridOrigin), and on a canvas's compartment drawn in where the tile borders
- * another one (fnc_spanRect). As a tile ends a pixel before the next cell, so does this. A kit window
- * opens beside the tile it was opened from (einv_compat_efak_fnc_toggle, fnc_placeWindow).
+ * taken into account (fnc_gridOrigin). As a tile ends a pixel before the next cell, so does this
+ * (fnc_spanRect). A kit window opens beside the tile it was opened from (einv_compat_efak_fnc_toggle,
+ * fnc_placeWindow).
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>

@@ -27,7 +27,11 @@
  * (fnc_onInventoryOpened answers true, but a handler of theirs may not); fnc_guardVanilla closes it as it
  * loads and again a frame later - and a window made in between would be its child and go with that second
  * close, "the window closes at once". So while a vanilla inventory is open it is closed first and the
- * window opens a frame later, at most OPEN_TRIES frames on.
+ * window opens a frame later, at most OPEN_TRIES frames on. "Open" includes a display the guard closed
+ * that is not gone yet: the engine may no longer list it (findDisplay) while it still holds it, and a
+ * window made then hangs under it all the same - the guard keeps those (uiNamespace einv_gui_closing) and
+ * the window waits for them too. One still held after OPEN_TRIES frames that findDisplay no longer finds
+ * does not keep the window from opening.
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -54,8 +58,24 @@ if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {f
 
 private _vanilla = findDisplay IDD_VANILLA_INVENTORY;
 
-if (!isNull _vanilla) exitWith {
-    [_vanilla] call FUNC(guardVanilla);
+// Vanilla inventories the guard closed that are not gone yet - whether findDisplay still lists them or not.
+private _closing = (uiNamespace getVariable [QGVAR(closing), []]) select {!isNull _x};
+
+uiNamespace setVariable [QGVAR(closing), _closing];
+
+private _wait = !isNull _vanilla || {_closing isNotEqualTo []};
+
+// Out of frames, with nothing the engine lists any more: the held ones are on their way out and no parent
+// to a new dialog.
+if (_wait && {_waited >= OPEN_TRIES} && {isNull _vanilla}) then {
+    INFO("A closed vanilla inventory is still held but no longer listed - opening the window anyway.");
+    _wait = false;
+};
+
+if (_wait) exitWith {
+    if (!isNull _vanilla) then {
+        [_vanilla] call FUNC(guardVanilla);
+    };
 
     if (_waited >= OPEN_TRIES) exitWith {
         ERROR("The vanilla inventory does not close - another mod keeps opening it. The window stays closed.");
@@ -63,7 +83,7 @@ if (!isNull _vanilla) exitWith {
     };
 
     if (_waited == 0) then {
-        INFO("The vanilla inventory is open as the window should open - closing it and opening the window a frame later.");
+        INFO("The vanilla inventory is open or closing as the window should open - opening the window a frame later.");
     };
 
     [{_this call FUNC(open)}, [_unit, _container, _secondary, _waited + 1]] call CBA_fnc_execNextFrame;

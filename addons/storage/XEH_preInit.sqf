@@ -44,6 +44,11 @@ GVAR(holderTypes) = createHashMap;
 // Same kind of item, class -> canonical key (fnc_layoutKey).
 GVAR(layoutKeys) = createHashMap;
 
+// What a weapon takes in one slot, "weapon|mag", "weapon|mag2" or "weapon|items" (lower case) -> a HashMap of the
+// lower case class names it takes (fnc_slotAccepts). Read from config once per weapon: config does not change
+// during a mission, and asking the engine for the compatible magazines of every slot at every lift is not cheap.
+GVAR(compatSets) = createHashMap;
+
 // Where a unit's uniform, vest and backpack keep their things travels inside its loadouts, in the extended
 // info CBA keeps with them: written when a loadout is read, read back when one is set (fnc_onLoadoutGet,
 // fnc_onLoadoutSet). On every machine - a loadout is set where the code that sets it runs, and the Eden

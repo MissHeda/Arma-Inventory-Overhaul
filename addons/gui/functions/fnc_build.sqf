@@ -134,6 +134,17 @@ if (_guest isNotEqualTo true) then {
 uiNamespace setVariable [QGVAR(grids), []];
 uiNamespace setVariable [QGVAR(zones), []];
 uiNamespace setVariable [QGVAR(slots), []];
+
+// The slots' drag highlights (fnc_glowSlot) went with the sweep above - but for a control a window that
+// attached keeps its group across builds: those are deleted here. They are made again, ahead of time, by
+// fnc_warmTargets.
+{
+    {ctrlDelete _x} forEach (_y select 1);
+} forEach (uiNamespace getVariable [QGVAR(glowCache), createHashMap]);
+
+uiNamespace setVariable [QGVAR(glowCache), createHashMap];
+uiNamespace setVariable [QGVAR(glowNext), 0];
+uiNamespace setVariable [QGVAR(dragGlow), []];
 uiNamespace setVariable [QGVAR(sectionInfo), []];
 uiNamespace setVariable [QGVAR(sortButtons), []];
 uiNamespace setVariable [QGVAR(parts), createHashMap];

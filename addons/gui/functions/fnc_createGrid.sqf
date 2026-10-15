@@ -18,10 +18,9 @@
  * cell is still found at row * cols + col, and whatever shows or hides cells passes over a hole
  * without a word.
  *
- * A compartment of a canvas may border another one (fnc_canvasInsets): a cell side on such a seam is
- * drawn in by half the flow's gap, the cell staying where the pitch puts it. The grid keeps those insets
- * as "insets"; fnc_spanInsets and fnc_spanRect read them, so a tile, a footprint or a frame stays clear of
- * the gap as the cells do. Empty for every other grid: nothing is drawn in.
+ * Every cell of every grid is the same size with the same gap to the next, whichever compartment of a
+ * container it belongs to: the compartments of a canvas (grid=aab/acc) are grids that touch at the plain
+ * pitch, and a tile or a frame on one (fnc_spanRect) is as wide as its cells are.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -32,8 +31,6 @@
  * 5: Id of the section it shows, e.g. "vest" <STRING> (default: "")
  * 6: Columns - a compartment's own width <NUMBER> (default: STORAGE_COLS)
  * 7: Holes - the indices row * cols + col of the cells it does not have <ARRAY> (default: [])
- * 8: Insets - per cell [left, top, right, bottom], how far each side is drawn in, [] for none
- *    (fnc_flowCompartments) <ARRAY> (default: [])
  *
  * Return Value:
  * The grid <HASHMAP>
@@ -43,7 +40,6 @@
  *   "cellW", "cellH" - one cell, as screen width and height <NUMBER>
  *   "cells"   - a control per cell, row by row, controlNull for a hole <ARRAY>
  *   "holes"   - the cells it does not have, as given <ARRAY>
- *   "insets"  - per cell how far each side is drawn in, as given <ARRAY>
  *   "tiles"   - the entries lying on it, see fnc_createTile <ARRAY>
  *   "section" - the section id <STRING>
  *
@@ -55,7 +51,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_position", "_rows", "_theme", ["_section", ""], ["_cols", STORAGE_COLS], ["_holes", []], ["_insets", []]];
+params ["_display", "_parent", "_position", "_rows", "_theme", ["_section", ""], ["_cols", STORAGE_COLS], ["_holes", []]];
 _position params ["_relX", "_relY"];
 
 (call FUNC(getCell)) params ["_cellW", "_cellH"];
@@ -80,13 +76,11 @@ for "_row" from 0 to (_rows - 1) do {
             continue;
         };
 
-        (_insets param [_row * _cols + _col, [0, 0, 0, 0]]) params ["_inL", "_inT", "_inR", "_inB"];
-
         private _cell = [_display, "EINV_PanelRect", _parent, [
-            _left + _col * _cellW + _inL,
-            _top + _row * _cellH + _inT,
-            _cellW - pixelW - _inL - _inR,
-            _cellH - pixelH - _inT - _inB
+            _left + _col * _cellW,
+            _top + _row * _cellH,
+            _cellW - pixelW,
+            _cellH - pixelH
         ]] call FUNC(uiCreate);
 
         _cell ctrlSetBackgroundColor _color;
@@ -103,7 +97,6 @@ private _grid = createHashMapFromArray [
     ["cellH", _cellH],
     ["cells", _cells],
     ["holes", _holes],
-    ["insets", _insets],
     ["tiles", []],
     ["section", _section]
 ];

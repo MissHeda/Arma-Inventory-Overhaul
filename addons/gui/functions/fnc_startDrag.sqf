@@ -48,6 +48,8 @@ disableSerialization;
 
 params ["_display"];
 
+private _start = diag_tickTime;
+
 GVAR(press) params ["_gridIndex", "_tileIndex", "", "", "", "_slotSource", "", ["_shift", false]];
 
 // A press that recorded a click only - on a free cell, an empty slot, nothing (fnc_onMouseButton, for the
@@ -171,13 +173,25 @@ if (_why isNotEqualTo "") exitWith {
     [_why] call FUNC(flashHint);
 };
 
-// Any other tile: the selection is that tile alone.
+// The name at the mouse and the comparison card go first: the selection drawn below would make them again
+// over its frames (fnc_raiseTooltip) just to have them hidden a moment later.
+(uiNamespace getVariable [QGVAR(tooltip), controlNull]) ctrlShow false;
+
+ctrlDelete (uiNamespace getVariable [QGVAR(compare), controlNull]);
+uiNamespace setVariable [QGVAR(compare), controlNull];
+uiNamespace setVariable [QGVAR(tipShown), controlNull];
+
+// Any other tile: the selection is that tile alone (drawn again only when that changes it).
 if (_group isEqualTo [] && {_slotSource isEqualTo []} && {call FUNC(isInventoryMode)}) then {
     [_gridIndex, _tileIndex, "only"] call FUNC(select);
 };
 
 GVAR(dragGroup) = _group;
 uiNamespace setVariable [QGVAR(dragGhosts), []];
+
+// What each target has to say is worked out once per drag, when the mouse comes to it (fnc_updateDrag); the
+// weight of what is held is the first of it (fnc_previewWeight).
+GVAR(dragRoom) = createHashMap;
 
 private _footprint = [_display, "EINV_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
 _footprint ctrlShow false;
@@ -202,7 +216,11 @@ uiNamespace setVariable [QGVAR(dragFootprint), _footprint];
 // fades where it lay.
 uiNamespace setVariable [QGVAR(dragFootprints), []];
 
-if (_group isNotEqualTo []) then {
+// They show only where the tiles keep their arrangement (fnc_groupMode), which they do only when they all lie
+// in one compartment - from several there is nothing to keep, and neither footprints nor shapes are made for them.
+private _keepable = _group isNotEqualTo [] && {(_group findIf {(_x select 0) != ((_group select 0) select 0)}) < 0};
+
+if (_keepable) then {
     private _footprints = [];
 
     for "_i" from 1 to (count _group min 150) do {
@@ -229,6 +247,8 @@ if (_group isEqualTo []) then {
         };
     } forEach [_shapeInfo getOrDefault ["footprint", [1, 1, []]], _shapeInfo getOrDefault ["footprintTurned", [1, 1, []]]];
 } else {
+    if (!_keepable) exitWith {};
+
     {
         _x params ["_shapeGrid", "_shapeTile"];
 
@@ -257,12 +277,6 @@ uiNamespace setVariable [QGVAR(dragShapes), _shapes];
 if (_group isEqualTo []) then {
     [_display, _entry, _slotSource] call FUNC(showTargets);
 };
-
-(uiNamespace getVariable [QGVAR(tooltip), controlNull]) ctrlShow false;
-
-ctrlDelete (uiNamespace getVariable [QGVAR(compare), controlNull]);
-uiNamespace setVariable [QGVAR(compare), controlNull];
-uiNamespace setVariable [QGVAR(tipShown), controlNull];
 
 // What it would add to the soldier, on the weight card.
 if (_group isEqualTo []) then {
@@ -337,9 +351,15 @@ if (!isNull _hint) then {
 
 GVAR(dragging) = true;
 GVAR(dragTarget) = [];
-GVAR(dragRoom) = createHashMap;
 
 // What was picked up sounds like what it is (fnc_playSound): a rifle like a rifle, a magazine like a magazine.
 ["lift", _entry getOrDefault ["class", ""], _sourceGrid getOrDefault ["container", objNull]] call FUNC(playSound);
 
 [_display, getMousePosition] call FUNC(updateDrag);
+
+// For the tester's numbers (einv_gui_debugTiming): the lift and the first frame of the drag.
+if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
+    private _took = ((diag_tickTime - _start) * 1000) toFixed 1;
+
+    INFO_1("timing: lift %1 ms",_took);
+};

@@ -64,8 +64,7 @@ private _frames = [];
     private _cellW = _grid get "cellW";
     private _cellH = _grid get "cellH";
 
-    // As a tile ends a pixel before the next cell, so does its frame - drawn in where the tile is, on a
-    // canvas's compartment beside another one (fnc_spanRect).
+    // As a tile ends a pixel before the next cell, so does its frame (fnc_spanRect).
     private _rect = [_grid, [_gridX, _gridY], _tile get "col", _tile get "row", _tile get "w", _tile get "h"] call FUNC(spanRect);
 
     // A shaped tile (size=xx/x-) on its own cells only, as it is drawn (fnc_createTile, fnc_uiShape).
@@ -74,11 +73,10 @@ private _frames = [];
     if (_holes isNotEqualTo []) then {
         private _footprint = [_tile get "w", _tile get "h", _holes];
         private _origin = [_rect select 0, _rect select 1];
-        private _insets = [_grid, _tile get "col", _tile get "row", _tile get "w", _tile get "h"] call FUNC(spanInsets);
 
-        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _fill, "surface", 0, _insets] call FUNC(uiShape));
-        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame", 0, _insets] call FUNC(uiShape));
-        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame", 1, _insets] call FUNC(uiShape));
+        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _fill, "surface"] call FUNC(uiShape));
+        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame", 0] call FUNC(uiShape));
+        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame", 1] call FUNC(uiShape));
         continue;
     };
 
