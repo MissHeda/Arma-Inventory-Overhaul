@@ -35,6 +35,20 @@ Critical: walking only.
 Off: the bar still shows the tiers,
 but nothing happens to the soldier.</English>
         </Key>
+        <Key ID="STR_einv_weight_Setting_Enabled">
+            <English>Weight tiers</English>
+        </Key>
+        <Key ID="STR_einv_weight_Setting_Enabled_Desc">
+            <English>Heavy, Overloaded and Critical: the
+colours of the weight bar, what they do
+to the soldier and the messages.
+
+Off: the weight card shows only the
+kilograms, nothing of this mod slows a
+soldier down, and ACE's own fatigue is
+left as it is. The other weight
+settings then do nothing.</English>
+        </Key>
         <Key ID="STR_einv_weight_Setting_HeavyAt">
             <English>Heavy from (kg)</English>
         </Key>

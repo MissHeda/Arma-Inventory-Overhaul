@@ -4,7 +4,8 @@
  * Tells the player in one line that the load changed tier - while the inventory is closed. Things are
  * picked up outside the window too (other mods, scripts, a looter filling a searched person's backpack), and
  * the player would otherwise only find out by not being able to sprint. With the window open its weight bar
- * shows it, so nothing is said then.
+ * shows it, so nothing is said then. Nor with the tiers switched off (einv_weight_enabled): there is no
+ * tier to tell about.
  *
  * ACE's own message, with the weight icon in the tier's colour: white, yellow or red.
  *
@@ -26,6 +27,7 @@ params [["_tier", TIER_LIGHT, [0]], ["_old", TIER_LIGHT, [0]], ["_limits", creat
 
 if (
     !hasInterface || {_tier == _old} || {!(missionNamespace getVariable [QGVAR(notify), true])}
+    || {!(_limits getOrDefault ["enabled", missionNamespace getVariable [QGVAR(enabled), true]])}
     || {!isNull (uiNamespace getVariable [QEGVAR(gui,display), displayNull])}
     || {isNil QACEFUNC(common,displayTextPicture)}
 ) exitWith {};

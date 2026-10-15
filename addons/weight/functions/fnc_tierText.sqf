@@ -6,6 +6,10 @@
  * unless it follows ACE's fatigue (the yellow mark is then where ACE's jog starts to tire), and Overloaded
  * and Critical do nothing while einv_weight_effects is off - the bar still shows them.
  *
+ * With the tiers switched off (einv_weight_enabled, read from the limits) there are no words at all: every
+ * load is Light then (fnc_getTier), and a "Light" beside the kilograms would suggest a scale that is not
+ * there.
+ *
  * Arguments:
  * 0: Tier, TIER_* <NUMBER>
  * 1: The unit's limits (fnc_getLimits) <HASHMAP>
@@ -20,6 +24,8 @@
  */
 
 params [["_tier", TIER_LIGHT, [0]], ["_limits", createHashMap, [createHashMap]]];
+
+if !(_limits getOrDefault ["enabled", missionNamespace getVariable [QGVAR(enabled), true]]) exitWith {["", ""]};
 
 private _effects = missionNamespace getVariable [QGVAR(effects), true];
 

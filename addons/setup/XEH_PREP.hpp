@@ -11,7 +11,8 @@ PREP(close);
 PREP(defer);
 PREP(runDeferred);
 
-// Who may save where, what is in use, and the draft being edited
+// Who may open it at all and save where, what is in use, and the draft being edited
+PREP(canOpen);
 PREP(canEdit);
 PREP(getActive);
 PREP(targetValue);

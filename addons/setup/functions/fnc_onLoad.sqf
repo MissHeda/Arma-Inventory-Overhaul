@@ -46,6 +46,12 @@ if (isNil QEFUNC(items,parseRules) || {isNil QEFUNC(items,writeRules)} || {isNil
     [{(uiNamespace getVariable [QGVAR(display), displayNull]) closeDisplay 2}] call FUNC(defer);
 };
 
+// Not for this player (einv_setup_access): the pause menu's entry makes the display without asking
+// anyone, so this is where it says no - with a hint, closed the same way.
+if !([_mode, true] call FUNC(canOpen)) exitWith {
+    [{(uiNamespace getVariable [QGVAR(display), displayNull]) closeDisplay 2}] call FUNC(defer);
+};
+
 GVAR(mode) = _mode;
 GVAR(theme) = call EFUNC(gui,theme);
 GVAR(target) = [_mode] call FUNC(canEdit);

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project name="einv">
     <Package name="setup">
+        <Key ID="STR_einv_setup_Access_AdminsOnly">
+            <English>Inventory setup is for admins on this server.</English>
+        </Key>
         <Key ID="STR_einv_setup_Answer_Builtin">
             <English>built in</English>
         </Key>
@@ -682,6 +685,12 @@
         <Key ID="STR_einv_setup_OpenWizard_Tooltip">
             <English>Sizes, shapes, stacks and container grids for everyone</English>
         </Key>
+        <Key ID="STR_einv_setup_Option_Admins">
+            <English>Admins only</English>
+        </Key>
+        <Key ID="STR_einv_setup_Option_Everyone">
+            <English>Everyone</English>
+        </Key>
         <Key ID="STR_einv_setup_Paint_1">
             <English>Red</English>
         </Key>
@@ -862,6 +871,12 @@
         <Key ID="STR_einv_setup_Scope_TreeNote">
             <English>Applies to %1 and the %2 classes built on it - one rule, class=%3+. A class with a rule of its own further down keeps it.</English>
         </Key>
+        <Key ID="STR_einv_setup_Setting_Access">
+            <English>Who may open the setup</English>
+        </Key>
+        <Key ID="STR_einv_setup_Setting_Access_Desc">
+            <English>Who may open the setup wizard: ESC &gt;\nOptions &gt; Inventory setup, its key\nand the cog in the inventory. Anyone\nelse is told it is for admins.\n\nAdmins only: the server itself (single\nplayer and the host too), a logged-in\nadmin, CBA's settings whitelist and Zeus.\nEveryone: whoever may not change the\nsetup sees it read-only.\n\nThe editor and CBA's Addon Options\nalways open it.</English>
+        </Key>
         <Key ID="STR_einv_setup_Source_client">
             <English>Client</English>
         </Key>
@@ -933,6 +948,9 @@
         </Key>
         <Key ID="STR_einv_setup_Step_Start">
             <English>Start</English>
+        </Key>
+        <Key ID="STR_einv_setup_SubCategory_Setup">
+            <English>Setup</English>
         </Key>
         <Key ID="STR_einv_setup_Tab_Backpacks">
             <English>Backpacks</English>

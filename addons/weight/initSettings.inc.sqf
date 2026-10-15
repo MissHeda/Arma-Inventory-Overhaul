@@ -2,6 +2,19 @@
 
 // ----- Weight -----
 
+// The master switch, first in the category: with it off the rest of the category does nothing. A server
+// that wants ACE's own fatigue alone, with no tiers of ours on top, should not have to know which of the
+// others to turn down. No change script either: the tier check (XEH_postInit) sees it within a second
+// and takes off what the tiers had put on.
+[
+    QGVAR(enabled),
+    "CHECKBOX",
+    [LLSTRING(Setting_Enabled), LLSTRING(Setting_Enabled_Desc)],
+    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Weight)],
+    true,
+    1
+] call CBA_fnc_addSetting;
+
 // The same for everyone: a mission decides how much its soldiers may carry. Each player's own whether to be
 // told. None of them needs a change script - the tier check looks at them every second (XEH_postInit).
 [

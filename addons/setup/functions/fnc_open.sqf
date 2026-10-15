@@ -8,7 +8,8 @@
  * saves it, its Cancel throws it away, like any other change made there. In direct mode the wizard's Save
  * writes the setting itself (fnc_save).
  *
- * The inventory and the wizard never share the screen: an open inventory window is closed first.
+ * The inventory and the wizard never share the screen: an open inventory window is closed first - unless
+ * the player may not open the wizard at all (fnc_canOpen, einv_setup_access), who gets a hint instead.
  *
  * Arguments:
  * 0: Display to open it over, displayNull for Eden's or else the game's own screen <DISPLAY> (default: displayNull)
@@ -17,7 +18,7 @@
  * 3: Class to look at in that step, "" for none <STRING> (default: "")
  *
  * Return Value:
- * The wizard's display, displayNull when it could not open <DISPLAY>
+ * The wizard's display, displayNull when it could not or may not open <DISPLAY>
  *
  * Example:
  * [findDisplay 313, "direct", 0, ""] call einv_setup_fnc_open;
@@ -36,6 +37,13 @@ private _open = uiNamespace getVariable [QGVAR(display), displayNull];
 
 if (!isNull _open) exitWith {_open};
 
+if !(_mode in ["menu", "direct"]) then {
+    _mode = "direct";
+};
+
+// Not for this player (einv_setup_access): asked before the inventory closes for nothing.
+if !([_mode, true] call FUNC(canOpen)) exitWith {displayNull};
+
 if (isNull _parent) then {
     _parent = [findDisplay 46, findDisplay 313] select is3DEN;
 };
@@ -43,10 +51,6 @@ if (isNull _parent) then {
 if (isNull _parent) exitWith {
     ERROR("No display to open the setup wizard over.");
     displayNull
-};
-
-if !(_mode in ["menu", "direct"]) then {
-    _mode = "direct";
 };
 
 private _inventory = uiNamespace getVariable [QEGVAR(gui,display), displayNull];
