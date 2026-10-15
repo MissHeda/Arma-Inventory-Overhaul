@@ -5,7 +5,12 @@
  * Builds everything on the window in the chosen look: clears what was there, reads what the unit wears
  * and carries and what it loots, draws the header, the look's layout and the footer, and turns the
  * camera on where the layout left room for the soldier. Runs again whenever the look, the camera
- * switch or the contents change.
+ * switch, a section's fold or the sections shown change; a change of what some sections hold only draws
+ * those again (fnc_refresh).
+ *
+ * The camera on the soldier is kept while it frames the same unit in the same free middle: a new camera
+ * is a new view for the engine, and starting one on every build showed as a small stutter on every move
+ * and every fold (a tester, 0.4.7). With einv_gui_debugTiming on, the RPT gets how long the build took.
  *
  * Last come what floats over the columns - the open kits' windows where they were, then the name at the
  * mouse and the inspect card (fnc_drawWindows, fnc_drawTopLayer): controls made later draw over earlier
@@ -49,12 +54,11 @@ params ["_display"];
 
 if (isNull _display) exitWith {};
 
-// The soldier's live camera is this addon's own, unless the window brings one (the "camera" hook).
-private _ownCamera = !("camera" in GVAR(hooks));
+private _start = diag_tickTime;
 
-if (_ownCamera) then {
-    call FUNC(cameraStop);
-};
+// The soldier's live camera is this addon's own, unless the window brings one (the "camera" hook). It is
+// not stopped here: a camera that still frames the same is kept (below).
+private _ownCamera = !("camera" in GVAR(hooks));
 
 // A rebuild ends any drag, and the frame being dragged out: the tiles they pointed at are about to go.
 GVAR(press) = [];
@@ -131,6 +135,7 @@ uiNamespace setVariable [QGVAR(grids), []];
 uiNamespace setVariable [QGVAR(zones), []];
 uiNamespace setVariable [QGVAR(slots), []];
 uiNamespace setVariable [QGVAR(sectionInfo), []];
+uiNamespace setVariable [QGVAR(parts), createHashMap];
 
 // The weight registries, drawn into again by the sections and the weight card (fnc_drawSection,
 // fnc_drawEquipmentCards): what the hint explains, the comparison card and the name at the mouse - their
@@ -404,7 +409,11 @@ GVAR(cameraRect) = _rect;
 
 if (_ownCamera) then {
     if ((_context get "cameraOn") && {_rect isNotEqualTo []}) then {
-        [_unit, _rect] call FUNC(cameraStart);
+        if (isNull GVAR(camera) || {GVAR(cameraFor) isNotEqualTo [_unit, _rect]}) then {
+            [_unit, _rect] call FUNC(cameraStart);
+        };
+    } else {
+        call FUNC(cameraStop);
     };
 
     if (!isNull GVAR(camera)) then {
@@ -442,3 +451,11 @@ if (!isNil QEFUNC(magazines,drawJob)) then {
 
 // The window that attached has the last word: its own controls, counts and marks on what was just built.
 ["afterBuild", [_display]] call FUNC(hook);
+
+// For the tester's numbers (einv_gui_debugTiming).
+if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
+    private _took = ((diag_tickTime - _start) * 1000) toFixed 1;
+    private _controls = count allControls _display;
+
+    INFO_2("timing: build %1 ms (%2 controls on the display)",_took,_controls);
+};

@@ -219,6 +219,16 @@
 #define POSE_REENTRIES 3
 #define POSE_MOVE_GRACE 0.6
 #define MOVE_GRACE 0.5
+
+// The weapon after the pose (fnc_poseEnd, fnc_raiseWeapon): one he held raised when the window opened and finds
+// lowered once out of the pose is raised again - looked at every POSE_RAISE_STEP seconds, POSE_RAISE_TRIES times
+// at most, while he is still bent over his gear or a reload runs. A reload in the window (fnc_reloadGesture)
+// steps out of the pose and keeps it away for RELOAD_HOLD seconds, the length of a rifle's reload gesture; the
+// gesture waits RELOAD_STEP_OUT seconds at most for him to be out of the pose.
+#define POSE_RAISE_STEP 0.25
+#define POSE_RAISE_TRIES 20
+#define RELOAD_HOLD 3
+#define RELOAD_STEP_OUT 1.5
 #define MOVE_ACTIONS ["MoveForward", "MoveBack", "TurnLeft", "TurnRight", "MoveLeft", "MoveRight", "MoveFastForward", "MoveSlowForward", "EvasiveLeft", "EvasiveRight"]
 
 // Textures, drawn by tools/generate_ui_textures.py

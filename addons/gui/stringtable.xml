@@ -353,7 +353,7 @@
             <English>Always</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_Animation_Desc">
-            <English>While the window is open, the soldier\nlowers his weapon and looks into his\ngear, as in Arma's own inventory -\nkneeling at bodies, at piles on the\nground and at low crates - so others see\nwho is looting. A magazine loaded into\nthe weapon in hand plays its reload, a\nsuppressor is screwed on and off.\n\nWhile looting: when the window was\nopened on something, or while it\nsearches. Always: also for your own\ngear. Never while unconscious, captive,\nswimming, in a vehicle or on a ladder.</English>
+            <English>While the window is open, the soldier\nlowers his weapon and looks into his\ngear, as in Arma's own inventory -\nkneeling at bodies, at piles on the\nground and at low crates - so others see\nwho is looting. A suppressor is screwed\non and off. As the window closes he\nholds his weapon as he did before.\n\nWhile looting: when the window was\nopened on something, or while it\nsearches. Always: also for your own\ngear. Never while unconscious, captive,\nswimming, in a vehicle or on a ladder.\n\nA magazine loaded into the weapon in\nhand plays its reload whatever is set\nhere.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_Animation_Looting">
             <English>While looting</English>
@@ -384,6 +384,12 @@
         </Key>
         <Key ID="STR_einv_gui_Setting_CompareTooltip_Desc">
             <English>A vest, uniform, helmet or backpack at\nthe mouse shows how it differs from\nthe one you wear: armor, room and\nweight. Green is better, red worse.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_DebugTiming">
+            <English>Log window timings (debug)</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_DebugTiming_Desc">
+            <English>Writes to the RPT how long each build\nand each redraw of the window took, as\n"timing: build 12.3 ms" - for reports of\nstutters. Off in play.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MagazineFillBar">
             <English>Fill bar on magazines</English>
@@ -585,9 +591,6 @@
         </Key>
         <Key ID="STR_einv_gui_Tarkov_Earpiece">
             <English>Earpiece</English>
-        </Key>
-        <Key ID="STR_einv_gui_Tarkov_Eyewear">
-            <English>Eyewear</English>
         </Key>
         <Key ID="STR_einv_gui_Tarkov_FaceCover">
             <English>Face cover</English>

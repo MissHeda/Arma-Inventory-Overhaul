@@ -13,6 +13,9 @@
  *   - Out of the pose and back in a plain stance - a weapon came into or left the hands: back into the
  *     pose, POSE_REENTRIES times at most. Anything else is another animation taking over - ACE's
  *     unconscious state, a mod's move: left alone, the pose forgotten.
+ *   - A reload in the window (fnc_reloadGesture) stepped out of the pose or plays beside it: nothing pulls
+ *     the soldier into the pose before GVAR(reloadHold) - the pose would cut the reload. Back into it then,
+ *     which is not one of the weapon changes counted.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -50,7 +53,10 @@ if (!isNull GVAR(openedOn) && {
 
 // While looting, a search that started later brings the pose along (nearby piles) - tried once per window.
 if (GVAR(pose) isEqualTo []) exitWith {
-    if ((missionNamespace getVariable [QGVAR(animation), 1]) == 1 && {!GVAR(poseTried)} && {GVAR(searchQueue) isNotEqualTo []}) then {
+    if (
+        (missionNamespace getVariable [QGVAR(animation), 1]) == 1 && {!GVAR(poseTried)} && {GVAR(searchQueue) isNotEqualTo []}
+        && {diag_tickTime >= GVAR(reloadHold)}
+    ) then {
         [_unit, GVAR(openedOn)] call FUNC(poseStart);
     };
 
@@ -73,6 +79,18 @@ if ([_anim] call FUNC(isPoseAnim)) exitWith {
 
     false
 };
+
+// A reload runs (fnc_reloadGesture): the pose waits for it. Once it had its time, the way back into the pose
+// below is not counted as a weapon change.
+if (GVAR(reloadHold) > 0) then {
+    if (diag_tickTime < GVAR(reloadHold)) exitWith {};
+
+    GVAR(reloadHold) = 0;
+    _reentries = (_reentries - 1) max 0;
+    GVAR(pose) set [6, _reentries];
+};
+
+if (diag_tickTime < GVAR(reloadHold)) exitWith {false};
 
 private _late = diag_tickTime - _startedAt > POSE_REACH_TIME;
 

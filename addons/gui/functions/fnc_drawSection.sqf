@@ -364,11 +364,12 @@ if (_shown isNotEqualTo "") then {
     };
 };
 
-// What a later draw of this section's tiles needs to find again (fnc_redrawTiles, fnc_applyFilter).
+// What a later draw of this section's tiles needs to find again (fnc_redrawTiles, fnc_applyFilter), and
+// whether its button was drawn held back for a move under way (fnc_refresh builds once none is left).
 private _info = createHashMapFromArray [
     ["holder", _sectionContainer], ["id", _id], ["side", _side], ["folded", _collapsed], ["tab", _tab],
     ["tabColor", _tabColor], ["load", controlNull], ["button", _buttonIntent], ["eligible", _buttonEligible],
-    ["caption", _caption]
+    ["caption", _caption], ["busy", _busy]
 ];
 
 private _infoIndex = -1;
@@ -546,12 +547,10 @@ if (_hasBox) then {
 
         private _preview = "";
 
+        // Whether the file is there is asked once per path (fnc_safePicture keeps the answer): a build asked
+        // the disk for every crate's picture again.
         if (_id isEqualTo "container" && {!isNull _sectionContainer}) then {
-            _preview = getText (configOf _sectionContainer >> "editorPreview");
-
-            if (_preview isNotEqualTo "" && {!fileExists _preview}) then {
-                _preview = "";
-            };
+            _preview = [getText (configOf _sectionContainer >> "editorPreview")] call FUNC(safePicture);
         };
 
         private _boxRadius = (_theme getOrDefault ["radius", 0]) min (_boxH / 4);

@@ -34,6 +34,17 @@
     0
 ] call CBA_fnc_addSetting;
 
+// Each player's own: how long the window takes to draw, written to the RPT for a report of stutters
+// (fnc_build, fnc_refresh). Read at every build and redraw.
+[
+    QGVAR(debugTiming),
+    "CHECKBOX",
+    [LLSTRING(Setting_DebugTiming), LLSTRING(Setting_DebugTiming_Desc)],
+    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    false,
+    0
+] call CBA_fnc_addSetting;
+
 // ----- Sounds -----
 
 // Each player's own ears.

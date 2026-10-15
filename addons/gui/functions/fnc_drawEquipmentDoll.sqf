@@ -9,11 +9,12 @@
  *   UNIFORM   | BODY ARMOR | BACKPACK
  *   ON SLING               | HOLSTER
  *   ON BACK                | BINOCULAR
- *   EYEWEAR | MAP | GPS | COMPASS | WATCH
+ *   NIGHT VISION | MAP | GPS | COMPASS | WATCH
  *
  * Uniform, body armor and backpack - the three that hold things - stand together, in the order their
- * sections follow under a body's doll; the eyewear (night vision) is one of the small slots (Mia, 0.2.3:
- * a body had no backpack slot to take one off or put one on).
+ * sections follow under a body's doll; the night vision is one of the small slots (Mia, 0.2.3:
+ * a body had no backpack slot to take one off or put one on). It is captioned "Night vision" as on the
+ * player's own gear row and in ACE's arsenal - "Eyewear" read as the goggles' slot (a tester, 0.4.7).
  *
  * A weapon's slot is wide, about 2.3 squares; the three slots of each upper row spread out over the
  * same width, so the doll's edges line up. A full-size doll fills its room with square slots, as big as
@@ -160,7 +161,7 @@ private _slots = [
     ["handgun", LLSTRING(Tarkov_Holster), GEAR_ICON(ui_gear_hgun_gs), [_sideX, [2] call _fnc_rowY, _colW, _rowH]],
     ["launcher", LLSTRING(Tarkov_OnBack), GEAR_ICON(ui_gear_secondary_gs), [_x0, [3] call _fnc_rowY, _wideW, _rowH]],
     ["binocular", LLSTRING(Tarkov_Binocular), GEAR_ICON(ui_gear_binocular_gs), [_sideX, [3] call _fnc_rowY, _colW, _rowH]],
-    ["nvg", LLSTRING(Tarkov_Eyewear), GEAR_ICON(ui_gear_nvg_gs), [[0, 5, _smallW] call _fnc_spreadX, _smallY, _smallW, _smallH]],
+    ["nvg", LLSTRING(Slot_NVG), GEAR_ICON(ui_gear_nvg_gs), [[0, 5, _smallW] call _fnc_spreadX, _smallY, _smallW, _smallH]],
     ["map", LLSTRING(Tarkov_Map), GEAR_ICON(ui_gear_map_gs), [[1, 5, _smallW] call _fnc_spreadX, _smallY, _smallW, _smallH]],
     ["gps", LLSTRING(Tarkov_Gps), GEAR_ICON(ui_gear_gps_gs), [[2, 5, _smallW] call _fnc_spreadX, _smallY, _smallW, _smallH]],
     ["compass", LLSTRING(Tarkov_Compass), GEAR_ICON(ui_gear_compass_gs), [[3, 5, _smallW] call _fnc_spreadX, _smallY, _smallW, _smallH]],

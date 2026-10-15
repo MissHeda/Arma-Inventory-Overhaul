@@ -112,6 +112,11 @@ uiNamespace setVariable [QGVAR(dragGhosts), []];
 // weight text and the button on its caption line - controls, so in uiNamespace.
 uiNamespace setVariable [QGVAR(sectionInfo), []];
 
+// The pieces of the window that are drawn again on their own - the weight card and the hotbar's counts -,
+// key -> [outer group, inner group, code, arguments, position] (fnc_drawPart, fnc_redrawPart): controls, so
+// in uiNamespace, emptied by every build.
+uiNamespace setVariable [QGVAR(parts), createHashMap];
+
 // How many times the window was built: a button that finds its section by its place in sectionInfo
 // carries the build it was drawn in, so its click a frame later never lands on another build's section.
 GVAR(buildCount) = 0;
@@ -157,8 +162,12 @@ GVAR(reloadSoundId) = -1;
 // itself ([unit, stance at opening, pose state, started, token, reached, re-entries] or []), a counter that tells
 // one window's pose from the next, whether the pose was tried at all in this window, why the window closed
 // ("move", "taken" or ""), and where the camera frames the soldier (fnc_poseStart, fnc_poseCheck, fnc_poseEnd).
+// Whether his weapon was lowered when the window opened, given back so as it closes (fnc_poseEnd,
+// fnc_raiseWeapon), and until when a reload in the window keeps the pose away (fnc_reloadGesture).
 GVAR(openedOn) = objNull;
 GVAR(openStance) = "";
+GVAR(openLowered) = false;
+GVAR(reloadHold) = 0;
 GVAR(openParent) = objNull;
 GVAR(openPos) = [];
 GVAR(pose) = [];
@@ -313,14 +322,17 @@ GVAR(aceInventoryAction) = isClass (configFile >> "CfgPatches" >> "ace_medical_s
 // (fnc_agentActionCondition, fnc_addAgentAction).
 GVAR(actionAgent) = objNull;
 
-// The live camera on the player's soldier and its light at night (fnc_cameraStart).
+// The live camera on the player's soldier and its light at night (fnc_cameraStart), and whom and which
+// rectangle it frames, [unit, rect] - a build keeps a camera that frames the same (fnc_build).
 GVAR(camera) = objNull;
 GVAR(cameraLight) = objNull;
+GVAR(cameraFor) = [];
 
-// What the containers held when the window was last built, in the three parts fnc_getSignature gives:
-// the unit's own gear, the list of sections shown, and per loot section what it holds and where it lies.
-// fnc_onFrame compares them part by part: an own or list change builds the window anew, a change in some
-// loot sections only draws those again (fnc_redrawTiles).
+// What the containers held when the window was last drawn, in the five parts fnc_getSignature gives:
+// the unit's own gear, the list of sections shown, per loot and per storage section what it holds and
+// where it lies, and what else the weight card shows. fnc_refresh compares them part by part: an own or
+// list change builds the window anew, a change in some sections only draws those again (fnc_redrawTiles),
+// with the weight card and the hotbar when they are the unit's own (fnc_redrawPart).
 GVAR(signatureParts) = [];
 
 // Weight (fnc_drawSection, fnc_previewWeight, fnc_drawCompare), all made by the build and gone with the next one:

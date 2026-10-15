@@ -143,6 +143,10 @@ GVAR(openedOn) = objNull;
 } forEach [_container, _secondary];
 
 GVAR(openStance) = stance _unit;
+
+// How he held his weapon: the pose gives it back that way when the window closes (fnc_poseEnd).
+GVAR(openLowered) = weaponLowered _unit;
+GVAR(reloadHold) = 0;
 GVAR(openParent) = objectParent _unit;
 GVAR(openPos) = getPosASL _unit;
 GVAR(closeReason) = "";

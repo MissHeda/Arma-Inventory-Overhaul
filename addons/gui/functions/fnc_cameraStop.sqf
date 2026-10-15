@@ -27,3 +27,4 @@ if (!isNull GVAR(cameraLight)) then {
 
 GVAR(camera) = objNull;
 GVAR(cameraLight) = objNull;
+GVAR(cameraFor) = [];

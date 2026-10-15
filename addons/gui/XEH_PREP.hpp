@@ -38,6 +38,10 @@ PREP(hook);
 PREP(showHint);
 PREP(readNearby);
 PREP(redrawTiles);
+PREP(refresh);
+PREP(drawPart);
+PREP(redrawPart);
+PREP(drawWeightCard);
 
 // Moving items with the mouse and keys
 PREP(onMouseButton);
@@ -145,6 +149,8 @@ PREP(poseStart);
 PREP(poseCheck);
 PREP(poseEnd);
 PREP(gesture);
+PREP(reloadGesture);
+PREP(raiseWeapon);
 
 // Styles and the camera
 PREP(themeBase);

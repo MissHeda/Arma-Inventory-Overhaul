@@ -66,6 +66,9 @@ _camera camCommit 0;
 
 GVAR(camera) = _camera;
 
+// Whom it frames and where: a build keeps a camera that still frames the same (fnc_build).
+GVAR(cameraFor) = [_unit, _rect];
+
 // A light point shines all around, so "aimed at the soldier" means: between the camera and the
 // soldier, a little above the chest. Local - nobody else sees it.
 if (sunOrMoon < CAMERA_LIGHT_SUN) then {

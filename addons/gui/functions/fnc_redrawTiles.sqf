@@ -2,9 +2,11 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Draws the tiles of some sections of the loot column anew without building the window: what another
- * player rearranged in a crate, or took out of it, shows within a second while everything else - the
- * scroll of every column, the open kit windows, the hover - stays as it is.
+ * Draws the tiles of some sections anew without building the window: what another player rearranged in a
+ * crate, or took out of it, shows within a second, and a move of the window's own redraws only the sections
+ * it touched (fnc_refresh) - while everything else - the scroll of every column, the open kit windows, the
+ * hover - stays as it is. Sections of the loot column, and in the inventory those of the unit's own storage
+ * column (a window that attached draws that column its own way).
  *
  * Per section the layout is worked out again (einv_storage_fnc_getLayout), its tiles' controls are
  * deleted and the cells they hid shown, the tiles are drawn again (fnc_drawTiles), the caption's weight
@@ -15,33 +17,41 @@
  *
  * Only where it is certain to look right: the compartments (and the rows of an open grid, the number of
  * overflow tiles) must be the ones drawn, the Take all or Put all in button must stay what it is, the
- * ground pile must still hold something; the caption then changes in place. The glass and ring of the item
+ * ground pile must still hold something, and the new weight must fit the caption's label - or there must
+ * be none when there was none; the caption then changes in place. The glass and ring of the item
  * being searched go and come back with the queue (fnc_showSearch), wherever it lies.
  * Anything else - a pile that vanished, a rule changed - answers false before a single control is
  * touched, and the caller builds the window anew.
  *
  * Arguments:
- * 0: The sections, by their number in the list of sections the last build drew
+ * 0: The loot sections, by their number in the list of sections the last build drew
  *    (GVAR(context) "lootSections", see fnc_getSignature) <ARRAY of NUMBERs>
+ * 1: The unit's own sections, by their number in GVAR(context) "ownSections" <ARRAY of NUMBERs> (default: [])
  *
  * Return Value:
  * Done - false: the window has to be built anew <BOOL>
  *
  * Example:
  * [[1, 3]] call einv_gui_fnc_redrawTiles;
+ * [[0], [2]] call einv_gui_fnc_redrawTiles;
  *
  * Public: No
  */
 
 disableSerialization;
 
-params [["_numbers", [], [[]]]];
+params [["_numbers", [], [[]]], ["_ownNumbers", [], [[]]]];
 
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
-if (isNull _display || {_numbers isEqualTo []} || {GVAR(dragging)} || {GVAR(press) isNotEqualTo []}) exitWith {false};
+if (
+    isNull _display || {_numbers isEqualTo [] && {_ownNumbers isEqualTo []}} || {GVAR(dragging)} || {GVAR(press) isNotEqualTo []}
+    || {_ownNumbers isNotEqualTo [] && {!([] call FUNC(isInventoryMode))}}
+) exitWith {false};
 
 private _lootSections = GVAR(context) getOrDefault ["lootSections", []];
+private _ownSections = GVAR(context) getOrDefault ["ownSections", []];
+private _sections = (_numbers apply {_lootSections param [_x, createHashMap]}) + (_ownNumbers apply {_ownSections param [_x, createHashMap]});
 private _grids = uiNamespace getVariable [QGVAR(grids), []];
 private _infos = uiNamespace getVariable [QGVAR(sectionInfo), []];
 private _theme = GVAR(theme);
@@ -52,8 +62,12 @@ private _theme = GVAR(theme);
 private _jobs = [];
 private _ok = true;
 
+// The caption's weight, as fnc_drawSection writes it.
+private _loadFont = _theme getOrDefault ["font", "PuristaMedium"];
+private _loadSize = UNIT * 0.46;
+
 {
-    private _section = _lootSections param [_x, createHashMap];
+    private _section = _x;
     private _holder = _section getOrDefault ["container", objNull];
     private _info = _infos param [_infos findIf {(_x getOrDefault ["holder", objNull]) isEqualTo _holder}, createHashMap];
 
@@ -64,9 +78,26 @@ private _ok = true;
     private _entries = [_holder] call EFUNC(storage,getContents);
 
     // A pile that was emptied is no section any more.
-    if ((_section get "id") isEqualTo "ground" && {_entries isEqualTo []}) exitWith {
+    if ((_section getOrDefault ["id", ""]) isEqualTo "ground" && {_entries isEqualTo []}) exitWith {
         _ok = false;
     };
+
+    // The weight on the caption line: its label is as wide as the text it was made for, and there is none
+    // for a section that held nothing.
+    private _label = _info getOrDefault ["load", controlNull];
+    private _load = [_entries] call FUNC(loadText);
+
+    if (isNull _label) then {
+        if (_load isNotEqualTo "") exitWith {
+            _ok = false;
+        };
+    } else {
+        if ((_load getTextWidth [_loadFont, _loadSize]) * TEXT_SLACK > ((ctrlPosition _label) select 2)) exitWith {
+            _ok = false;
+        };
+    };
+
+    if (!_ok) exitWith {};
 
     private _layout = [_section getOrDefault ["layoutKey", _holder], _entries] call EFUNC(storage,getLayout);
     private _placed = _layout get "entries";
@@ -115,8 +146,8 @@ private _ok = true;
         };
     };
 
-    _jobs pushBack [_section, _holder, _info, _entries, _layout, _holderGrids];
-} forEach _numbers;
+    _jobs pushBack [_section, _holder, _info, _entries, _layout, _holderGrids, _load];
+} forEach _sections;
 
 if (!_ok) exitWith {false};
 
@@ -130,13 +161,13 @@ if (_cellColor isEqualTo []) then {
 };
 
 {
-    _x params ["_section", "_holder", "_info", "_entries", "_layout", "_holderGrids"];
+    _x params ["_section", "_holder", "_info", "_entries", "_layout", "_holderGrids", "_load"];
 
     // The weight on the caption line.
     private _label = _info get "load";
 
     if (!isNull _label) then {
-        _label ctrlSetText ([_entries] call FUNC(loadText));
+        _label ctrlSetText _load;
     };
 
     // Folded away: no tiles to draw.
@@ -178,7 +209,14 @@ if (_cellColor isEqualTo []) then {
 
     if (_layout getOrDefault ["drift", false]) then {
         if (_driftIndex < 0) then {
-            GVAR(drift) pushBack [_holder, _section getOrDefault ["root", objNull], diag_tickTime];
+            // The unit's own sections carry no root: worked out as fnc_drawCompartments does.
+            private _root = _section getOrDefault ["root", objNull];
+
+            if (isNull _root) then {
+                _root = [_holder] call EFUNC(storage,rootOf);
+            };
+
+            GVAR(drift) pushBack [_holder, _root, diag_tickTime];
         };
     } else {
         if (_driftIndex >= 0) then {

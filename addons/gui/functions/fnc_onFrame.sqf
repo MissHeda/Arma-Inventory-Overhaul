@@ -7,11 +7,12 @@
  * still what the containers hold - built again when not.
  *
  * That check reads what lies around the unit anew (fnc_readNearby) and compares the signature part by
- * part (fnc_getSignature): the unit's own gear or the list of sections changed, and the window is built
- * again; only the cargo or places of some sections of the loot column changed - another player
- * rearranging a crate -, and only those sections draw their tiles again (fnc_redrawTiles), the rest of
- * the window and every column's scroll stays; a section that cannot be drawn again in place builds the
- * window after all.
+ * part (fnc_refresh, fnc_getSignature): the unit's own gear or the list of sections changed, and the window
+ * is built again; only the cargo or places of some sections changed - another player rearranging a crate -,
+ * and only those sections draw their tiles again (fnc_redrawTiles), with the weight card when they are the
+ * unit's own; the rest of the window and every column's scroll stays; a section that cannot be drawn again
+ * in place builds the window after all. Nothing of it runs more often than SIGNATURE_INTERVAL: the frame
+ * itself only follows the mouse and what is held.
  *
  * A frame dragged out from an empty cell (fnc_startBand) is followed here like a drag, and nothing is
  * built while it is held.
@@ -30,10 +31,10 @@
  *
  * The window's moves are transactions (fnc_sendMoves): their answers (GVAR(answers)) are finished here
  * once the places they name reached this machine, each by fnc_afterAction - the tiles no longer under
- * way, what moved learnt, the window built again, where it landed lit up, the hint saying what did not
- * go as asked. At each contents check it reports drift to the authorities (fnc_requestNormalize) and
- * stops waiting for moves with no answer after PENDING_TIMEOUT; while its own moves are under way it
- * does not build for a change of contents - their answers do.
+ * way, what moved learnt, the sections it touched drawn again (fnc_refresh), where it landed lit up, the
+ * hint saying what did not go as asked. At each contents check it reports drift to the authorities
+ * (fnc_requestNormalize) and stops waiting for moves with no answer after PENDING_TIMEOUT; while its own
+ * moves are under way it does not draw for a change of contents - their answers do.
  *
  * While magazines are repacked (einv_magazines - only when that addon is loaded) the hands are busy: the
  * repack is followed every frame (einv_magazines_fnc_onFrame) and nothing else is - no hover, no drag, no
@@ -444,8 +445,8 @@ if (GVAR(answers) isNotEqualTo [] && {GVAR(press) isEqualTo []}) then {
     GVAR(answers) = _waiting;
 
     // Each handed to fnc_afterAction, in the order they came: its tiles no longer under way, what moved
-    // learnt, the window built again with where it landed lit up, the hint saying what did not go as
-    // asked.
+    // learnt, the sections it touched drawn again with where it landed lit up, the hint saying what did
+    // not go as asked.
     {
         _x call FUNC(afterAction);
     } forEach _ready;
@@ -504,31 +505,7 @@ if (count GVAR(inFlight) > 0) exitWith {};
 // What lies around now - a pile that came or went changes the list of sections.
 call FUNC(readNearby);
 
-private _signature = call FUNC(getSignature);
-private _before = GVAR(signatureParts);
-
-// The unit's own gear, or which sections the loot column shows: the window is built again.
-if (
-    _before isEqualTo [] || {(_signature select 0) isNotEqualTo (_before select 0)}
-    || {(_signature select 1) isNotEqualTo (_before select 1)} || {GVAR(opened) findIf {isNull (_x select 1)} >= 0}
-    || {count (_signature select 2) != count (_before select 2)}
-) exitWith {
-    [_display] call FUNC(build);
-};
-
-// Only what some sections of the loot column hold or where it lies: those sections draw their tiles again.
-private _changed = [];
-
-{
-    if (_x isNotEqualTo ((_before select 2) param [_forEachIndex, []])) then {
-        _changed pushBack (_x select 0);
-    };
-} forEach (_signature select 2);
-
-if (_changed isEqualTo []) exitWith {};
-
-if ([_changed] call FUNC(redrawTiles)) then {
-    GVAR(signatureParts) = _signature;
-} else {
-    [_display] call FUNC(build);
-};
+// The unit's own gear, or which sections the columns show: the window is built again. Only what some
+// sections hold or where it lies: those sections draw their tiles again, and the weight card when it is the
+// unit's own (fnc_refresh).
+[_display] call FUNC(refresh);

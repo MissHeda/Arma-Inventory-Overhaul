@@ -1,9 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Plays a gesture of the soldier in the window - the upper body only, which lets him reload or screw a
- * suppressor on while he stands bent over his gear (CfgGesturesMale): a weapon's reload action
- * (GestureReloadMX, GestureReloadPistol ...) and GestureMountMuzzle / GestureDismountMuzzle. An action that
+ * Plays a gesture of the soldier in the window - the upper body only, which lets him screw a suppressor on
+ * while he stands bent over his gear (CfgGesturesMale): GestureMountMuzzle / GestureDismountMuzzle. A
+ * reload has its own way, out of the pose first (fnc_reloadGesture). An action that
  * is no gesture - launchers reload with a full-body move - is left out, so are the reload gestures lying
  * prone, which map to full-body moves that would throw the pose away, and everything while ACE's own reload
  * runs. Nothing in a window that attached (the Arsenal), without the animation setting, or when the

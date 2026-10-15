@@ -93,6 +93,7 @@ GVAR(personMode) = "";
 uiNamespace setVariable [QGVAR(created), []];
 uiNamespace setVariable [QGVAR(grids), []];
 uiNamespace setVariable [QGVAR(slots), []];
+uiNamespace setVariable [QGVAR(parts), createHashMap];
 GVAR(hover) = [];
 GVAR(lastMouse) = [];
 uiNamespace setVariable [QGVAR(hint), controlNull];
