@@ -113,6 +113,7 @@ Conditions - all must hold; `|` means either, `!` in front means not; at most `M
 | `for=X` | a magazine the weapon X loads. |
 | `mass<=20`, `rounds>=50`, `load>160` | config mass, a CfgMagazines count, a container's maximumLoad (the size proxy); `=`, `<`, `<=`, `>`, `>=`. |
 | `@group`, `@a\|@b` | a member of that group. |
+| `all` | everything else: not a test of the item but the rule's place - asked after the preset, before the built-in answer. `all > size=1x1 stack=10`; further conditions narrow it (`all kind=uniform\|vest\|backpack > grid=6x4`). Only in a rule (a group with `all` is left out), never `!all`, written first wherever it was typed, once. Parsed as `[false, "all", "", []]`; `fnc_compileCond` makes it a condition that always holds (cost 0). |
 
 Values - what a rule sets. `like` is written first, the others in any order:
 
@@ -187,14 +188,21 @@ Each field - footprint, stack, grid, weight, name - goes to the first layer that
 5. **the preset chain** - `base=` and its own bases, up to `MAX_CHAIN` deep, a derived preset's rules before its base's, a later
    rule before an earlier one. `einv_items_stackSmall`, when moved off its default 10, is this layer's last word on `@item_small`:
    it beats the preset's stacks, not a rule or a mod.
-6. **builtin** - 1x1, stack 1, `grid=auto`, config weight, config name.
+6. **everything else** - the text's rules with `all` (`fnc_compileRules` puts them in `"fallback"`, tag `all:<i>`, the i-th rule of
+   the text; `byKind` gains a fifth and sixth element, their indices and fields), later rule first. They answer only what every layer
+   above left open - never over a rule, a table, a mod or a preset rule with a condition. A preset's rules **without** conditions are
+   the preset's own everything else (the default's first rule `size=1x1 stack=1` reaches every item, so without this `all` could never
+   set a size or stack under `base=default`): a field only such a rule answered is asked of the `all` rules again and keeps the preset's
+   answer where they have none (`_caught` in `fnc_resolve`; `fnc_explain` then takes the field out of that preset line's wins). A
+   preset's own `all` rule is left out with a warning. `fnc_configEntry`'s bare answer drops `fallback` with `own`.
+7. **builtin** - 1x1, stack 1, `grid=auto`, config weight, config name.
 
 Only the rules that can be about the item's kind are asked (`fnc_compileRules` sorts them by kind), and a layer is left as soon as
 nothing it could still set is open. Afterwards `size=mass` becomes cells, stacks become whole numbers of at least 1, the footprint
 is cut to `SHAPE_MAX`, and non-containers get no grid. `fnc_explain [class, compiled]` lists every layer that has a say, highest
 first, with what it sets and wins (for the debug console; the wizard words the answer and its source with
 `einv_setup_fnc_answerText`). The `src` tags are `own:<i>`, `legacy:<setting>:<i>`, `mod:<config key>`, `preset:<id>:<i>`,
-`builtin` and `forced`.
+`all:<i>`, `builtin` and `forced`.
 
 For a container **object** (`einv_storage_fnc_getBlocks`), its own `einv_grid` beats all of these for its compartments (section
 3). Mass per grid cell: the header's `cell=`, else the nearest preset in the chain with a `cell` over 0, else the slider
@@ -383,6 +391,12 @@ so a class that was set apart stays apart. The rules that are only for classes i
 `fnc_classTree`'s set below X, hidden bases included - are moved behind it; everything else stays in front. X itself is edited with its
 tree: what the edit sets or removes is also taken out of X's own rule `class=X`, which would otherwise win over the tree's rule on X
 alone. A tree that holds nothing but X is written as X alone.
+
+`fnc_upsertAll [[set, remove], [set, remove]]` writes the Start step's two rules for everything else, keyed by their selector
+(`fnc_allRule [rules, kinds]`: `all` alone, or `all kind=` with exactly `ELSE_CONTAINER_KINDS` uniform, vest, backpack in any order),
+not by `class=X`: found anywhere in the text and edited in place (a new one goes last), other values kept, a rule left with nothing
+goes; other hand-written `all` rules are not touched. One `fnc_commit`. `tools/check_default_ruleset.sqf` round-trips
+`einv1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4`.
 
 ### `tools/check_default_ruleset.sqf`
 
@@ -605,7 +619,7 @@ object attached to the holder, not cargo the engine counts: a pile holding only 
 record is in `docs/HISTORY.md`). `GroundWeaponHolder_Scripted` is the same holder the engine never
 deletes, so the mod deletes it itself: `fnc_pruneScriptedPile [pile]`, called by `fnc_execute` for every ground pile a phase touched
 and by `fnc_opPutGround` for the piles a bounced put-down left empty. A pile of that type that is local and, a frame later, still
-holds no item, weapon, magazine or backpack is deleted (a frame, so the answer and the window's rebuild finish first). Engine-made
+holds no item, weapon, magazine or backpack is deleted (a frame, so the answer and the window's redraw finish first). Engine-made
 `GroundWeaponHolder`s and `WeaponHolderSimulated` are never touched. `fnc_getGroundHolder` still finds both kinds
 (`isKindOf "GroundWeaponHolder"`), and `fnc_getNearby` lists the scripted one (a `WeaponHolder`) only while it holds something.
 
@@ -780,13 +794,26 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   (`fnc_drawWindows`), the name at the mouse and the inspect card (`fnc_drawTopLayer`), moves under way (`fnc_drawPending`), the
   selection, a repack in progress, the hook `afterBuild`. Controls made later draw over earlier ones - the only z-order the engine
   has.
+- **Drawing only what changed** (`fnc_refresh [display]` -> `""` / `"redraw"` / `"build"`): the signature is
+  `fnc_getSignature` -> `[own, list, loot, storage, card]` - `own` the unit's loadout less what its uniform, vest and backpack
+  carry; `list` sections shown (also the worn containers as objects, and whether each opened container still lies where it was
+  opened); `loot` / `storage` per section of the loot / own storage column `[number, str [cargo all the way down, places
+  revision]]`; `card` ACE's `vLoad` on the unit and its three containers and the weight limits' key. `own` or `list` changed, or a
+  section came or went: `fnc_build`. Else `fnc_redrawTiles [lootNumbers, ownNumbers]` draws the changed sections' tiles (own
+  sections only in the inventory; false before touching anything when compartments, overflow, the button, the folded-rows line or
+  the caption's weight label no longer fit) and, when `storage` or `card` changed, the **parts** are drawn again
+  (`fnc_redrawPart`). Called once a second by `fnc_onFrame` (`SIGNATURE_INTERVAL`) and by `fnc_afterAction` after every answer -
+  a move no longer builds the window. Tiles still flagged `pending` whose request was answered fade back in (`fnc_drawPending`).
+- **Parts** (`fnc_drawPart [display, key, parent, rect, code, args]`, uiNamespace `einv_gui_parts`, emptied by each build): an
+  outer `EINV_Group` made by the build where the piece belongs (so it keeps its z-order) holding an inner group the piece is drawn
+  in; a redraw deletes the inner group, leaves its `slots` / `infoAreas` entries as dead stubs (numbers stay valid), and draws into a
+  new one. The weight card (`fnc_drawWeightCard`, split out of `fnc_drawEquipmentCards`) and the hotbar strip are parts.
+- **The camera is kept** across builds while `einv_gui_cameraFor` (`[unit, rect]`, set by `fnc_cameraStart`) is unchanged; only the
+  pose being reached (`fnc_poseCheck`), another rect, the camera switch or a vehicle start or stop it. `einv_gui_debugTiming` (client,
+  default off) writes `timing: build 12.3 ms (N controls)` / `timing: redraw 2.1 ms (...)` to the RPT.
 - **`fnc_onFrame`** each frame: hover, the drag or band, the focus rule, kit windows moving, the search animation; every
-  `CHECK_INTERVAL` 0.25 s the "stay open" checks; once a second the **signature** `fnc_getSignature` -> `[own, list, loot]`. `own`
-  (the unit's loadout, ACE's virtual load, the places revision of its containers, the weight limits' key) or `list` (sections
-  shown, what lies around, what was opened, bodies' gear, kit and lock stamps, the containers' `locked` state) changed:
-  `fnc_build`. Only some `loot` parts (cargo and places revision of a section) changed: `fnc_redrawTiles` draws those sections'
-  tiles again, and answers false before touching anything when compartments, overflow tiles, the button or the folded-rows line
-  changed. Nothing is built while a tile or frame is held. A window covered by another display (`fnc_isCovered`) keeps still and
+  `CHECK_INTERVAL` 0.25 s the "stay open" checks; once a second `fnc_refresh` with the **signature** ("Drawing only what changed"
+  above). Nothing is built while a tile or frame is held. A window covered by another display (`fnc_isCovered`) keeps still and
   only checks whether to close.
 - **Moves under way.** The window predicts nothing: `fnc_sendMoves` turns each move into phases (at most `BATCH_MAX` moves per
   transaction, the next chunk when the answer came; kinds `move`, `equip`, `unequip`, `swap`, `sort`, `placeMany`; a kit through
@@ -1068,6 +1095,13 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   piles holding something unsearched and at crates lower than `LOW_TARGET` 0.6 m. **Moving stops looting**
   (`einv_gui_moveToStop`): a movement key closes the window while it was opened on something or a search runs (not keys with Ctrl
   or Alt).
+  The weapon comes out of the pose as it went in: `fnc_open` keeps `weaponLowered` (`einv_gui_openLowered`), `fnc_poseEnd` plays the
+  raised plain state of the stance unless it was lowered (`fnc_restState [unit, stance, raised = true]`, ACE's way in
+  `ace_common_fnc_fixLoweredRifleAnimation`), and `fnc_raiseWeapon` looks again every `POSE_RAISE_STEP` until he stands still out of
+  the pose. A magazine into the weapon in the hands (`fnc_playReload`) plays its `reloadAction` with `playActionNow`
+  (`fnc_reloadGesture`: player, local, on foot, `currentWeapon`, not while ACE reloads or holds him; any animation setting); in the
+  pose he first steps out with the weapon raised, the action plays once he is out, and `einv_gui_reloadHold` keeps the pose away for
+  `RELOAD_HOLD` 3 s (the return is not counted as a re-entry).
 
 ### People, the CBA menu and other mods in the window
 
@@ -1140,16 +1174,23 @@ item out.
   of the screen. `fnc_layout` draws it the way the inventory's columns are drawn: one block of Glass - the theme's `panel` and
   `radius` - laid out in UNITs on one grid, `PANEL_PAD` 0.4 UNIT of room round the content and between the bands (as many pixels wide as high),
   so the picture, the section captions and the grids start on one left edge and the loads end on one right edge. **Title row** at the top: the
-  container's picture (`getInfo "picture"`) `TITLE_H` 1.1 UNIT high and square, its name in the theme's bold font at `TITLE_SIZE` 0.66 UNIT
-  - the columns' title size - with its capitals centred in the row's height (`TEXT_MID`), and under the row a hairline in the theme's
-  `line` colour 0.4 padding below it, as `fnc_drawColumn` draws it. **Sections** in `einv_gui_fnc_drawColumn`
+  container's picture (`getInfo "picture"`) `TITLE_H` high and square, its name in the theme's bold font at `TITLE_SIZE`
+  with its capitals centred in the row's height (`TEXT_MID`), and under the row a hairline in the theme's `line` colour 0.4
+  padding below it, as `fnc_drawColumn` draws it. **Sections** in `einv_gui_fnc_drawColumn`
   (id `"storage"`): the open container, then staging; both with `"box"` false, so `einv_gui_fnc_drawSection` draws no picture
   box and the grid starts at the left edge (the inventory keeps its boxes). The caption lines are the inventory's - chevron, tab, load
   right-aligned, the staging space's subtitle in the same 0.46 UNIT; no Take all, Put all in or Sort there (the inventory only). The column
-  reaches down to the **hint line**, the block's last band: no box of its own, a hairline over it, `EINV_FooterHint` in the footer's size
-  (0.558 UNIT, `HINT_SIZE`), a line `HINT_LINE_H` 0.8 UNIT high with `HINT_PAD` 0.3 above and below (1.4 UNIT, the footer's height) - one line,
-  two while staging holds something (the note, in the accent colour, from the `hint`
-  hook; the idle text is cut to one line, Ctrl+wheel only where it fits beside). ACE's list is registered as the zone `"remove"`.
+  reaches down to the **hint line**, the block's last band: no box of its own, a hairline over it, `EINV_ArsenalHint` at `HINT_SIZE`,
+  a line `HINT_LINE_H` high with `HINT_PAD` above and below - one line, two while staging holds something (the note, in the
+  accent colour, from the `hint` hook; the idle text is cut to one line, Ctrl+wheel only where it fits beside). ACE's list is
+  registered as the zone `"remove"`.
+  The panel's own texts are in **ACE's grid** (`ACE_GRID_H` = `pixelH * pixelGridNoUIScale * 0.25`, 4 px at 1080p at every UI
+  size), as ACE's list rows beside them (7 units, 28 px): `TITLE_H` 7.5 (30 px), `TITLE_SIZE` 4.5 (18 px), `HINT_LINE_H` 5.5
+  (22 px), `HINT_PAD` 2 (8 px), `HINT_SIZE` 3.75 (15 px, class `EINV_ArsenalHint`, a child of `EINV_FooterHint` in
+  `RscArsenal.hpp`). At 1080p that is what the UNITs gave to half a pixel; UNIT (screen height / 40) and ACE's whole-pixel grid
+  do not keep one ratio across resolutions, so UNIT-sized texts stood off ACE's on some screens. `PANEL_PAD` (0.4 UNIT), the grid
+  cells and the section captions (drawn by `einv_gui_fnc_drawSection`, 0.46 UNIT; the staging subtitle shares their baseline)
+  stay on the engine's UNIT.
 - **Folds.** A caption's chevron folds its section (the `fold` hook), kept per container class - lowercase, the staging space as
   `"staging"` - in `einv_arsenal_folded` while ACE's window is open: ACE makes a new uniform, vest or backpack for every one
   picked, so folding per object would be lost. `fnc_layout` notes `foldKeys` `[[container, key], ...]` and sets each section's
@@ -1174,14 +1215,18 @@ item out.
   count), "No room in the vest - move things to free a 1x2 space" appears in ACE's message line and the hint line
   (`fnc_sayNoRoom`), and ACE is told with `ace_arsenal_fnc_fireItemsChangedEvent` (`fnc_tellAce`; an ACE without it gets the
   follow-up in the frame-later pass). Nothing else is ever taken out.
-- **List drag.** The list's own `MouseButtonDown` handler (`fnc_onListPress`) notes a left press on it (where, Shift, the frame;
-  not on the scroll bar's 6 %) and reads no row: the list moves its selection to the pressed row only after that handler, so
-  `lnbCurSelRow` still named the row before, and a row had to be picked before it could be dragged. The frame hook starts a drag
-  once the mouse moved more than `DRAG_THRESHOLD` and more across than along; else it stays ACE's click. `fnc_listDrag`: the row
-  `lnbCurSelRow` if the list's `LBSelChanged` (`einv_arsenal_listSel`, `fnc_onOpened`) picked one since the press, else the row
-  under the press (list top, `rowHeight` or `sizeEx` of its config, `ctrlScrollValues`; none on the blank area), its class from
-  `lnbData [row, 0]`, not a unique item (`lnbValue [row, 2]` 1), a virtual off-screen source grid `"aceList"` whose tile carries
-  `dragEntry` with `count` = the stack (Shift: all); then `einv_gui_press` and `einv_gui_fnc_startDrag`. `fnc_dragCheck`: only a
+- **List drag.** The list's own `MouseButtonDown` handler (`fnc_onListPress`) notes a left press on its rows - not on the scroll
+  bar's 6 %, not on ACE's "-"/"+" (IDC 101/102, shown and not faded) - with where, Shift, the frame and **the row**, worked out
+  there: `row = floor((pressY - listY + offset) / rowH)`, `offset = clamp(ctrlScrollValues select 0, 0, 1) * max(0, rows * rowH -
+  listH)`, `rowH` the config's `rowHeight`, else its `sizeEx` (ACE leaves `rowHeight` at RscListNBox's 0; both may be expressions,
+  evaluated), else `ACE_ROW_SIZE`; a row past the last is -1. The frame hook starts the drag once the mouse moved more than
+  `LIST_DRAG_PX` 5 screen pixels **in any direction** with the button held (the list scrolls by wheel and bar, so up/down is a drag
+  too; the engine's `DRAG_THRESHOLD` is 6-9 px at 1080p), and does not drop the press in its own frame or the next for a button
+  that does not read as held yet. `fnc_listDrag` takes the press's row; only out of range the row the list picked since the press
+  (`LBSelChanged`, `einv_arsenal_listSel`). A unique row (`lnbValue [row, 2]` 1) does not drag and flashes "ACE does not allow
+  this item here" once; a greyed row drags (the staging space may take it). The row's class is read from `lnbData [row, 0]` into
+  a virtual off-screen source grid `"aceList"` whose tile carries `dragEntry` with `count` = the stack (Shift: all); then
+  `einv_gui_press` and `einv_gui_fnc_startDrag`. `fnc_dragCheck`: only a
   grid of the panel is a target (else `[]`). The drop (`fnc_onDrop`) calls `fnc_addTo [container, class, count, [col, row, block,
   w, h]]`: `normalize`, then `addItemToUniform` / `Vest` / `Backpack` for the open container, `addNew` for staging and for what
   the engine refused, the cell as a new record (`setPlace`); then `syncAce` and `tellAce`.
@@ -1291,7 +1336,18 @@ controls stay in uiNamespace. **Every edit ends in `fnc_commit [ast, redraw = tr
 - **Start** (`fnc_drawStart`): one plain page. Title and two sentences; the preset cards (`fnc_shippedPresets` plus the player's
   own, `fnc_personalPresets`) with the "keep own rules" switch; "Now in use" (with where Save goes, Import, Review and save)
   beside "What you changed" (`fnc_drawChanges`: the own rules as sentences, `fnc_describeRule`, to open at their class or take
-  away); and, folded at the bottom (`einv_setup_startAdvanced`, closed by default), "Advanced - Cell size" with "1 cell = X kg":
+  away).
+  **Everything else**, a card right over the Advanced fold (the "Now in use | What you changed" cards give up its height): the
+  caption, "Applies only where no preset or own rule gives an answer.", Clear and Apply; then "Items without a rule: size
+  [across] x [down], [N per tile]" and "Containers without a rule: [Auto | Fixed] [across] x [down]" in one row, or two where
+  the step is narrower than both. The steppers hold what was stepped in `einv_setup_elseEdit` `[draft text, across, down, stack,
+  fixed, grid across, grid down]`, read again from the draft's rules (`fnc_allRule`) whenever the draft text changed; without a
+  rule 1x1, 10 per tile, Auto (6x4 when switched to Fixed). Apply writes `all > size=WxH stack=N` and, for Fixed,
+  `all kind=uniform|vest|backpack > grid=WxH` (Auto takes the grid out: the built-in answer is a grid by load); Clear takes both
+  out (`fnc_upsertAll`). Sizes 1 to `SHAPE_MAX`, stack 1 to 999, grids `STORAGE_COLS` x `MAX_ROWS`. Review and "What you changed"
+  word them through `fnc_describeRule`: "Everything else: 1×1 cells, 10 per tile", "Everything else, containers: compartments 6×4"
+  (another `all` rule: "Everything else, kind magazine: ..."); an answer from one is "everything else" in the Items step's Why.
+  Below it, folded at the bottom (`einv_setup_startAdvanced`, closed by default), "Advanced - Cell size" with "1 cell = X kg":
   stepper, kg value and source, the preset's value back. It sizes every container no rule draws, by its load, and every item the
   Weight preset sizes by mass.
 - **Items** (`fnc_drawItems`) and **Containers** (`fnc_drawContainers`): a class list on the left (`fnc_drawClassList`, cards by
@@ -1622,6 +1678,7 @@ stringtables are wrapped as BRIEFING asks.
 | `einv_gui_personOpen` | LIST | global | Everyone | Everyone, Unconscious and captives, Only the unconscious |
 | `einv_gui_personItems` | LIST | global | Everyone | who may take items from and put into a living person's gear: Everyone, Unconscious and captives, Nobody - look only |
 | `einv_gui_personWorn` | LIST | global | Unconscious and captives | who may take off what a living person wears: Everyone, Unconscious and captives, Nobody |
+| `einv_gui_debugTiming` | CHECKBOX | client | off | "Log window timings (debug)": build and redraw times of the window to the RPT |
 | `einv_arsenal_biArsenal` | LIST | global | `ace` | the vanilla Virtual Arsenal: `ace` (ACE Arsenal with the box's items), `block`, `vanilla` |
 | `einv_arsenal_biMessage` | EDITBOX | global | "" | the line on the "not allowed" screen |
 | `einv_hotbar_enabled` | CHECKBOX | global | on | the hotbar row, bar and keys |

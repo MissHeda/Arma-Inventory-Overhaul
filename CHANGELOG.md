@@ -13,12 +13,19 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 - Weight: the CBA setting "Weight tiers" (`einv_weight_enabled`) switches the tiers off completely - no sprint block, no walking only, no extra fatigue, no tier messages; the weight card shows only the kilograms and ACE's own fatigue works alone.
 - ACE interaction "Inventory" on other people (new optional addon `compat_ace_interaction`, loads with ACE's interaction menu): opens them as the action menu's "Inventory" does, under the same "Living persons" settings and reach.
 - Setup wizard: the CBA setting "Who may open the setup" (`einv_setup_access`, default Admins only) keeps the wizard to the server, logged-in admins, CBA's whitelist and Zeus; others get "Inventory setup is for admins on this server." Eden and CBA's Addon Options are unaffected.
+- Setup wizard: "Everything else" on the Start page - one size and stack for items no rule answers, and a grid for uniforms, vests and backpacks no rule answers, with Apply and Clear. It writes the new rules selector `all` (`all > size=1x1 stack=10`, `all kind=uniform|vest|backpack > grid=6x4`), which is asked after the preset and before the built-in answer, so it fills only the gaps; a preset's rules without conditions (Default's `size=1x1 stack=1`) give way to it. Review words it.
 
 ### Fixed
 
 - Turned items: the picture of a turned tile, and of a dragged item held turned (also from ACE Arsenal's list), turns a quarter clockwise round the tile's middle and fits the turned box, instead of showing squashed and out of its tile.
 - The context menu no longer hides behind the tiles: it is a layer of its own that takes the focus and is made again on top when anything is drawn after it; a menu on a tile whose crate was redrawn by another player's change closes. A section's button no longer keeps the focus after its click.
 - The window closing at once with some mods loaded: when another mod lets the engine open the vanilla inventory as well, the window no longer opens on top of it (made a frame later as its child, it was closed along with it); the guard closes only the vanilla inventory (IDD 602), never the window or another mod's display, and opens the window again should it have been closed with it.
+- ACE Arsenal: dragging from ACE's list into the grid works on the first press: the row is taken where the press was, the drag starts after 5 pixels in any direction (up and down too), and a press is no longer forgotten in the frame it came. A press on ACE's "-"/"+" never drags; an item ACE would not add says "ACE does not allow this item here" instead of doing nothing.
+- ACE Arsenal: the panel's title, its name and the hint line are sized in ACE's own grid, as ACE's list beside them, instead of the inventory window's units, which stood a size off ACE's texts on some screens.
+- The small stutter on every move: an answered move draws again only the sections it touched (and the weight card and hotbar counts when it was the soldier's own gear) instead of building the whole window, the camera on the soldier is no longer restarted by every build or fold, and ACE's weight arriving a moment later redraws only the weight card. "Log window timings (debug)" (`einv_gui_debugTiming`, per player, off) writes build and redraw times to the RPT.
+- A magazine dragged into the weapon in the hands plays the weapon's reload animation again (with or without the looting animation; in the looting pose the soldier straightens up for it), not only its sound.
+- The weapon no longer comes out of the inventory lowered: closing the window gives the soldier his weapon back as he held it when it opened.
+- Another person's night vision slot is captioned "Night vision" (was "Eyewear", which read as the goggles' slot).
 
 ## 0.4.0 - unreleased
 
