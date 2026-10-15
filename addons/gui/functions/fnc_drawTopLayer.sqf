@@ -9,7 +9,9 @@
  * is on again.
  *
  * The context menu, the dragged ghost, its footprint and its counter are made later still, when they
- * come up, and lie over all of it.
+ * come up, and lie over all of it. The name at the mouse is the exception that is kept on top the other
+ * way: an outline made after it on the display - the hover ring of a slot - would lie over it, so
+ * fnc_raiseTooltip makes the name again after such an outline (fnc_updateHover, fnc_drawSelection).
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -29,19 +31,10 @@ params ["_display"];
 
 if (isNull _display) exitWith {};
 
-private _theme = GVAR(theme);
-
-// The name at the mouse (fnc_updateHover places it).
+// The name at the mouse (fnc_updateHover places it; fnc_raiseTooltip makes it again over a ring or frame
+// made after it).
 ctrlDelete (uiNamespace getVariable [QGVAR(tooltip), controlNull]);
-
-private _tooltip = [
-    _display, controlNull, [0, 0, 0, UNIT * 0.85], "", UNIT * 0.58,
-    _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _theme getOrDefault ["font", "PuristaMedium"], 2
-] call FUNC(uiLabel);
-
-_tooltip ctrlSetBackgroundColor (_theme getOrDefault ["tooltipBg", [0.06, 0.066, 0.08, 0.94]]);
-_tooltip ctrlShow false;
-uiNamespace setVariable [QGVAR(tooltip), _tooltip];
+uiNamespace setVariable [QGVAR(tooltip), [_display] call FUNC(makeTooltip)];
 
 // The inspect card, over everything, where it was (fnc_drawInspect).
 call FUNC(drawInspect);

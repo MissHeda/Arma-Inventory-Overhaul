@@ -135,6 +135,7 @@ uiNamespace setVariable [QGVAR(grids), []];
 uiNamespace setVariable [QGVAR(zones), []];
 uiNamespace setVariable [QGVAR(slots), []];
 uiNamespace setVariable [QGVAR(sectionInfo), []];
+uiNamespace setVariable [QGVAR(sortButtons), []];
 uiNamespace setVariable [QGVAR(parts), createHashMap];
 
 // The weight registries, drawn into again by the sections and the weight card (fnc_drawSection,

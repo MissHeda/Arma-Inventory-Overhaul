@@ -60,6 +60,13 @@
 // when this one is answered (einv_gui_fnc_sendMoves), so one message never carries a whole crate.
 #define BATCH_MAX 25
 
+// The orders a Sort lays a container out in, in the order the Sort button steps through them
+// (einv_gui_fnc_sortHolder, einv_storage_fnc_opSort, einv_storage_fnc_getLayout): by name, heaviest
+// first, largest first, by kind. "size" is what a Sort did before there were orders, and what every layout
+// of new items still does. Array literals - used in code only, never inside a macro's arguments.
+#define SORT_MODES ["name", "weight", "size", "type"]
+#define SORT_DEFAULT "size"
+
 // What lies around a player: at most this many boxes of their own, within this height of the feet - the
 // same floor (einv_storage_fnc_isNear, einv_storage_fnc_groundPos). Storage and the window both read
 // them.

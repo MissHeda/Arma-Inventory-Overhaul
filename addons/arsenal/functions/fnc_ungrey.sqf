@@ -2,20 +2,22 @@
 /*
  * Author: Miss Heda
  * ACE greys the rows of its list that the open uniform, vest or backpack cannot take by weight, and
- * disables its "+" for them (ace_arsenal_fnc_updateRightPanel, the engine's canAdd). Cells are the only
- * limit here, so a greyed row whose item the grid would take - a free spot, or a pile of the same kind
+ * disables its "+" for them (ace_arsenal_fnc_updateRightPanel, the engine's canAdd - a container whose
+ * maximumLoad is 0, like ACE's Telescopic Ladder, refuses every item, so all rows go grey). Cells are the
+ * only limit here, so a greyed row whose item the grid would take - a free spot, or a pile of the same kind
  * (class and rounds) with room left, as einv_storage_fnc_hasSpace asks it for what fnc_addNew would put in -
  * is lit again, and so is the "+" of the row picked. Rows ACE leaves lit are left as they are:
  * what then finds no cell is taken back out with a message (fnc_reconcile). Items the box does not offer
  * (ACE's unique ones) and backpacks are left to ACE.
  *
- * Run after ACE's own look, a frame after its events (fnc_settle) and after a row is picked
- * (fnc_onOpened). One look at the grid per item size, not per row. Should ACE's list or arrow not be where
- * this addon expects them, nothing is changed and the RPT says so once.
+ * Run after ACE's own look: a frame after its events (fnc_settle) and a frame after a row is picked
+ * (fnc_onOpened). ACE looks again at every pick (ace_arsenal_fnc_onSelChangedRightListnBox) and greys the
+ * whole list by weight anew, so the rows need lighting after a pick too, not only the "+". One look at the
+ * grid per item size, not per row. Should ACE's list or arrow not be where this addon expects them,
+ * nothing is changed and the RPT says so once.
  *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
- * 1: Only the "+" of the row picked <BOOL> (default: false)
  *
  * Return Value:
  * None
@@ -28,7 +30,7 @@
 
 disableSerialization;
 
-params [["_display", displayNull, [displayNull]], ["_plusOnly", false, [false]]];
+params [["_display", displayNull, [displayNull]]];
 
 if (!GVAR(attached)) exitWith {};
 
@@ -78,17 +80,15 @@ private _fnc_fits = {
     _fits
 };
 
-if (!_plusOnly) then {
-    for "_row" from 0 to ((lnbSize _list) select 0) - 1 do {
-        private _color = _list lnbColor [_row, 1];
+for "_row" from 0 to ((lnbSize _list) select 0) - 1 do {
+    private _color = _list lnbColor [_row, 1];
 
-        if ((_color param [3, 1]) >= 1 || {(_list lnbValue [_row, 2]) == 1}) then {continue};
+    if ((_color param [3, 1]) >= 1 || {(_list lnbValue [_row, 2]) == 1}) then {continue};
 
-        if ([_list lnbData [_row, 0]] call _fnc_fits) then {
-            _color set [3, 1];
-            _list lnbSetColor [[_row, 1], _color];
-            _list lnbSetColor [[_row, 2], [1, 1, 1, 1]];
-        };
+    if ([_list lnbData [_row, 0]] call _fnc_fits) then {
+        _color set [3, 1];
+        _list lnbSetColor [[_row, 1], _color];
+        _list lnbSetColor [[_row, 2], [1, 1, 1, 1]];
     };
 };
 

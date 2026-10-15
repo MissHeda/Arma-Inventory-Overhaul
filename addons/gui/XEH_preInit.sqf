@@ -236,6 +236,17 @@ if !(GVAR(searchMuted) isEqualType true) then {
     GVAR(searchMuted) = false;
 };
 
+// The order the Sort buttons lay a container out by (fnc_sortHolder, one of SORT_MODES): the one the last
+// click chose, each player's own, kept in the profile. The Sort buttons drawn on the window with their label
+// and hit area, to show it as it changes (fnc_sortButtons).
+GVAR(sortMode) = profileNamespace getVariable [QGVAR(sortMode), SORT_DEFAULT];
+
+if !(GVAR(sortMode) isEqualType "" && {GVAR(sortMode) in SORT_MODES}) then {
+    GVAR(sortMode) = SORT_DEFAULT;
+};
+
+uiNamespace setVariable [QGVAR(sortButtons), []];
+
 // The window's moves under way, request id (einv_storage_fnc_request) -> [sources, targets, time, feels,
 // details] (fnc_sendMoves): sources [[holder, key, block, col, row], ...] are faded and cannot be lifted,
 // targets [[holder, block, col, row, w, h], ...] outlined (fnc_drawPending) until the answer is finished;

@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * A double click, or "Move over" in the menu: moves an item to the other side without dragging (Ctrl+click
+ * A double click: moves an item to the other side without dragging (Ctrl+click
  * selects since 0.2.1; several selected tiles move together, fnc_quickMoveGroup). From the unit's own uniform, vest or
  * backpack it goes to what is being looted - the first container shown there with room - then into a
  * kit open in a window, the topmost window first, and to the ground only when neither is shown: the

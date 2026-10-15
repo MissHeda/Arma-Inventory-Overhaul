@@ -54,6 +54,7 @@
  *    "tiles"    - for "placeMany": [[entry, cell], ...] in the holder "from"; a cell is [col, row,
  *                 compartment] or, turned, [col, row, compartment, width, height]
  *    "kit"      - the kit class an equip comes out of, for where its old item may go (default "")
+ *    "order"    - for "sort": one of SORT_MODES, what the holder is laid out by (default "size", largest first)
  * 1: Options <HASHMAP> (default: empty)
  *    "flash" - light up where the moves landed once they did <BOOL> (default: true)
  *    "label" - a text the hint shows once everything went as asked <STRING> (default: "")
@@ -416,7 +417,8 @@ private _fnc_sortSteps = {
 
     if (isNull _root) exitWith {["Moved", []]};
 
-    ["", [[_root, "sort", [_holder], "land"]], _holder]
+    // The order the player chose goes with the op: it is laid out where the root is local.
+    ["", [[_root, "sort", [_holder, _move getOrDefault ["order", SORT_DEFAULT]], "land"]], _holder]
 };
 
 // Several tiles of one holder laid down at once: one step.

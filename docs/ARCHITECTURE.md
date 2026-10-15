@@ -474,7 +474,7 @@ excludes `ContainerSupply`: only a pile is a ground. A backpack with a load of 0
 
 ### Places and the layout (`fnc_getLayout`)
 
-`[holder, entries, _, places]` -> HashMap: `entries` (all, placed), `blocks` (as `fnc_blocksFor`; the open grid's with the rows it
+`[holder, entries, _, places, order]` -> HashMap: `entries` (all, placed), `blocks` (as `fnc_blocksFor`; the open grid's with the rows it
 needs now), `overflow` (entries with no room), `records` (canonical), `drift` (the records laid out from are not exactly
 `records`) and `revision`. A holder is a container or the key of a grid with no object, `"kit:" + lowercase class`, laid out like
 the ground.
@@ -488,8 +488,14 @@ In order:
 2. **kin** - every record still unused, in order, goes to the first unplaced entry of the same kind (`fnc_layoutKey`) whose size
    matches either way round, when free: a repacked magazine, a radio that got its instance class, a kit made ready keep their
    place.
-3. **first fit** - the rest, largest first (then category, kind, key, index): compartment after compartment, row by row, upright,
-   else turned. A square rectangle never turns; a shape in a square box turns when turned it takes other cells.
+3. **first fit** - the rest, in the `order` asked for - largest first (then category, kind, key, index) when none is: compartment
+   after compartment, row by row, upright, else turned. A square rectangle never turns; a shape in a square box turns when turned
+   it takes other cells. Only a Sort asks for another order (`fnc_opSort`), one of `SORT_MODES` (main's `script_macros.hpp`):
+   `"size"` as above, `"name"` by the item's name (`getInfo "name"`, lowercase), `"weight"` heaviest first by what the tile weighs
+   (`fnc_getMass`: attachments and a container's contents count) then by name, `"type"` weapons, ammo, gear, medical, the rest (the
+   category) then by kind, largest first and name; every order ends on key and index, so the same contents come out the same
+   everywhere. Anything else is `"size"`. The result is written to the places, so a name sorted by one machine's language reads the
+   same on all.
 
 An entry no compartment has room for (a script or another mod added it) is `overflow`: shown apart, never lost. On a unit's
 uniform, vest or backpack the surplus is moved on to the unit's next container with free cells (section "Surplus" below); what
@@ -572,7 +578,8 @@ reach check (`REACH_SLACK` 2 m beyond the setting).
 
 **Requests** - `einv_storage_fnc_request [phases, callback, args, silent, requester]` (public). A phase is `[root, ops]`, ops on
 one root; an op is `[name, args]` from `einv_storage_ops`: `place` (one tile to another cell of one holder), `placeMany` (several
-lifted and put down at once, refused as a whole when any cell is not free), `sort`, `normalize`, `migrate`, `move` (within one root), `take`,
+lifted and put down at once, refused as a whole when any cell is not free), `sort` (`[holder, order]`, the order one of `SORT_MODES` -
+name, weight, size, type; laid out where the root is local), `normalize`, `migrate`, `move` (within one root), `take`,
 `put`, `putGround` (on the server), `takeOff`, `putOn`, `repack`, and compat's `kitTake`, `kitPut`, `kitPlace`, `kitMove`,
 `kitRemoveIfEmpty`. An op's input may be a ref `["#ref", phase, op, n]` to the n-th payload an earlier op produced. Each op
 answers `[status, produced, extra]`, status `""` or a reason (`"Gone"`, `"Taken"`, `"NoRoom"`, `"NoBackpack"`, `"Moved"`,
@@ -955,9 +962,16 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 - **Section** (`fnc_drawSection`): a caption tab (folds it, `fnc_toggleSection`; the contents' weight on the right,
   `fnc_loadText`, only told), a box with the container's picture and short name, and the grid. Beside the tab, as high as it and in the
   caption's size (0.46 UNIT, the tab 0.62), centred buttons: "Take all" (loot) or "Put all in" (own) (`fnc_takeAll`, `fnc_putAll`,
-  `fnc_putAllTarget`: from the contents, not from what is drawn; what is not searched stays) and "Sort" with `icon_sort_desc_ca`
-  (`fnc_sortHolder` [holder, root] - the storage's op "sort", the same as the context menu's "Sort" row, which stays; on every
-  container section of the inventory the player may change, also an empty one, never on a section that only shows - `virtual`).
+  `fnc_putAllTarget`: from the contents, not from what is drawn; what is not searched stays) and "Sort: Name" with
+  `icon_sort_desc_ca` (`fnc_sortHolder [holder, root, step]` - the storage's op "sort"; the only way to sort, the context menu has no
+  row for it; on every container section of the inventory the player may change, also an empty one, never on a section that only
+  shows - `virtual`). **The Sort button cycles:** its label names the order the player sorts by now - Name, Weight, Size or Type
+  (`SORT_MODES`, `fnc_sortText`) - and a click steps to the next one and sorts by it (`step`). The order is each player's own,
+  `einv_gui_sortMode` in the profile, and travels as the op's second argument and the move's `"order"`; the op runs where the
+  container's root is local and writes the places everyone reads (section 3, `fnc_getLayout`). The button is as wide as the widest
+  of its four labels (`fnc_sortChip`), so the caption line never moves; every Sort button on the window - sections and kit windows
+  (`fnc_drawWindow`) - is registered with its label and hit area (`fnc_sortButtons`, uiNamespace `einv_gui_sortButtons`, emptied by
+  each build) and changes its label and tooltip in place when any of them is clicked. The tooltip says what the next click sorts by.
   The tab gives up room down to three characters, then the last button goes, then the one before it; both are drawn disabled
   while a move out of the section is under way. A cross on a container opened from inside another (`fnc_closeNested`). Beyond the keys of the storage's
   sections (section 3) a section may say `drawer` (a function name another addon draws it with: ACE cargo's cards), `placeholder`
@@ -1043,6 +1057,15 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 - **Context menu** (`fnc_contextMenu`, `fnc_openMenu [display, choices, at]`, `fnc_closeMenu`): a choice is `[text, args, code,
   options]`; options `icon`, `color`, `tooltip`, `enabled` (false: muted, the click swallowed, the menu stays), `separator`. What
   a tile, a slot and free cells offer is in `fnc_contextMenu`'s header; kits, arsenal boxes, radios and the hotbar add theirs.
+  **The menu offers only what belongs to what is under the mouse.** A tile: Inspect, the per-item rows (Equip, Attach to / Load
+  into, the magazines' Repack all, the hotbar's bind and unbind, Open / Close of a container lying there, Open kit and Unpack
+  everything, a radio's Open and Use as active, other mods' CBA rows), Drop, Select all in the container, an arsenal box's Open
+  arsenal; in an open kit's window Inspect, the per-item rows and Drop. A slot: Inspect, the radio rows, Drop (to the ground), a
+  weapon's Take off for each part, other mods' CBA rows. A selection of several: Deselect. Free cells: Select all (an open kit's
+  have no menu). There is no row for a move, for Sort or for Take off: a double click moves a tile or a selection over (a kit and
+  a uniform, vest or backpack lying in a container open on it instead, so those are dragged), a drag moves it anywhere, Delete
+  drops, Ctrl+click on a slot takes the item off into the player's own gear (`fnc_quickUnequip`), and Sort is the button on the
+  caption line.
   **Right click with a menu open:** `fnc_openMenu` keeps the menu's rectangle (uiNamespace `einv_gui_menuRect`, cleared by
   `fnc_closeMenu`); a right press beside it closes it and goes on as an ordinary right click, so the tile under the mouse gets its
   menu in the same go (on empty space nothing opens); a press on the menu and every left press are the menu's.
@@ -1063,7 +1086,14 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `fnc_dragHint`; `fnc_infoHint [kind, args]` for the weight card and each caption. The **inspect card** (`fnc_inspect`,
   `fnc_drawInspect`) and the **comparison card** (`fnc_compareRows`, `fnc_drawCompare`, `einv_gui_compareTooltip`: over a vest,
   uniform, helmet or backpack that is not the soldier's own, "vs. <worn item>" with Armor, Covers, Space, Weight) float over the
-  columns. The **search field** (`fnc_drawFilter`, `fnc_applyFilter`) fades non-matching tiles.
+  columns. **The name at the mouse lies over every highlight.** It is one label (`fnc_makeTooltip`, made by `fnc_drawTopLayer` after
+  each build, uiNamespace `einv_gui_tooltip`), and the engine draws what is made later over what is made before, so a ring made on
+  the display after it - the hover ring of a slot that lies on the display, as the equipment's gear row does (a slot in a group has
+  its ring in that group, under the label) - would cover it. `fnc_raiseTooltip` makes the label (or the comparison card, from
+  the rows kept on it) again when something live was made after it; `fnc_updateHover` asks after it made a ring on the display and
+  `fnc_drawSelection` after its frames. It does nothing while a menu is open or an item is dragged (the name is hidden then), and it
+  never uses the focus: the engine draws a focused control over everything, which is why the focus rule of `fnc_onFrame` sends
+  it back. The **search field** (`fnc_drawFilter`, `fnc_applyFilter`) fades non-matching tiles.
 - **The weight card** reads `einv_weight_fnc_getLoad` (ACE's total, the rules' weights and EFAK's kits included), the limits and
   the tier. The bar has no tick marks or zone strip; it fills by load over the Critical limit. The fill, the tier's words and the
   preview take **`fnc_weightColor [unit, load, theme]`**: `text2` in Light, `accent` in Heavy, `loss` in Overloaded and Critical,
@@ -1236,8 +1266,8 @@ item out.
   whole tile goes, then `removeEntry` with the dragged count; `fnc_removeKind`), with sound `giveBack` and `fnc_tellAce`.
 - **Frame-later pass** (`fnc_settle`, once a frame however often asked): fallback follow-up, snapshot, `fnc_syncAce` (row counts,
   load bar, `ace_arsenal_currentItems`, `ace_arsenal_fnc_updateRightPanel`), **`fnc_ungrey`** (rows ACE greyed by weight are lit
-  again where a stack has room or a spot of that size is free, one grid look per item size; also the "+" of the picked row; unique
-  items and backpacks are left to ACE), the engine unit set to `ace_arsenal_center`, build - or after the drag if something is
+  again where a stack has room or a spot of that size is free, one grid look per item size; also the "+" of the picked row, and the
+  whole list a frame after every pick, as ACE greys all rows by weight anew at each pick; unique items and backpacks are left to ACE), the engine unit set to `ace_arsenal_center`, build - or after the drag if something is
   held.
 - **Mouse and focus.** A press on the panel empties `ace_arsenal_mouseButtonState` (now and a frame later); the frame hook keeps
   it empty while something is held or a list press waits, and ends a drag whose button came up where no display event reached the

@@ -10,6 +10,8 @@
  * While a frame is dragged out from an empty cell (fnc_updateBand), the tiles it touches are shown the same
  * way before it is let go.
  *
+ * The name at the mouse always lies over the frames (fnc_raiseTooltip).
+ *
  * Arguments:
  * 0: Tiles that only look selected, [[grid index, tile index], ...] <ARRAY> (default: [])
  *
@@ -92,3 +94,7 @@ private _frames = [];
 } forEach _tiles;
 
 uiNamespace setVariable [QGVAR(selectionFrames), _frames];
+
+// A frame on a grid that is not in a group is made over the name at the mouse: the name is made again
+// over it (fnc_raiseTooltip).
+[] call FUNC(raiseTooltip);

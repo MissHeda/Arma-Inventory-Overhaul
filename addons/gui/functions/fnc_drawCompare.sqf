@@ -108,6 +108,9 @@ _cursor = _cursor + _versusH;
 _group setVariable [QGVAR(width), _width];
 _group setVariable [QGVAR(height), _height];
 
+// What it was made from, to make it again over something made after it (fnc_raiseTooltip).
+_group setVariable [QGVAR(source), _compare];
+
 uiNamespace setVariable [QGVAR(compare), _group];
 
 _group

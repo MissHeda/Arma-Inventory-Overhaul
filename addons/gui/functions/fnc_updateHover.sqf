@@ -30,6 +30,8 @@
  * it lies in its group - a fourth element, the HashMap with "rel" and "parent" fnc_gridOrigin takes -
  * is found where its scrolled group shows it now, and only on the part that shows (fnc_slotRect). A
  * tile gets brighter, a slot an outline in the accent colour that follows its round corners (fnc_uiRing).
+ * The name at the mouse always lies over that outline: one made on the display itself comes after the
+ * name, so the name is made again over it (fnc_raiseTooltip).
  *
  * The box of a uniform, vest or backpack opened from inside a container is named and hinted as its tile
  * in that container (fnc_boxTile), the comparison card included.
@@ -110,6 +112,10 @@ private _fnc_tile = {
     (((uiNamespace getVariable [QGVAR(grids), []]) param [_gridIndex, createHashMap]) getOrDefault ["tiles", []]) param [_tileIndex, createHashMap]
 };
 
+// Whether a ring was made on the display itself just now: it lies over what was made before it, the name at
+// the mouse included, which is then made again over it (fnc_raiseTooltip).
+private _ringMade = false;
+
 // A tile in its own colour, or a little brighter; the slot frame around a slot, or hidden.
 private _fnc_light = {
     params ["_hover", "_on"];
@@ -147,6 +153,11 @@ private _fnc_light = {
         uiNamespace setVariable [QGVAR(hoverRing), [
             _display, _parent, _rect, GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]], _radius
         ] call FUNC(uiRing)];
+
+        // In a group it lies under the name anyway: the group was made before it.
+        if (isNull _parent) then {
+            _ringMade = true;
+        };
     };
 
     private _tile = _hover call _fnc_tile;
@@ -167,9 +178,14 @@ private _fnc_light = {
 };
 
 if (!_force && {_found isEqualTo GVAR(hover)}) exitWith {
-    // A slot that did not change still moves when its column scrolls under a mouse that stands still.
+    // A slot that did not change still moves when its column scrolls under a mouse that stands still - and
+    // gets its ring again when a part was drawn anew under it (fnc_redrawPart), over the name at the mouse.
     if ((_found param [0, ""]) isEqualTo "slot") then {
         [_found, true] call _fnc_light;
+
+        if (_ringMade) then {
+            [] call FUNC(raiseTooltip);
+        };
     };
 };
 
@@ -280,6 +296,11 @@ if (!isNull _tooltip) then {
     };
 
     GVAR(tooltipAt) = [];
+
+    // The ring made above lies over the name just set: the name is made again over it.
+    if (_ringMade) then {
+        [] call FUNC(raiseTooltip);
+    };
 };
 
 if (isNull (uiNamespace getVariable [QGVAR(hint), controlNull])) exitWith {};

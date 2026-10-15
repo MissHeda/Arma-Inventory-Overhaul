@@ -80,6 +80,9 @@ PREP(takeAll);
 PREP(putAll);
 PREP(putAllTarget);
 PREP(sortHolder);
+PREP(sortText);
+PREP(sortChip);
+PREP(sortButtons);
 
 // The context menu
 PREP(openMenu);
@@ -224,6 +227,8 @@ PREP(drawWindows);
 PREP(drawWindow);
 PREP(clearWindows);
 PREP(drawTopLayer);
+PREP(makeTooltip);
+PREP(raiseTooltip);
 PREP(openWindow);
 PREP(closeWindow);
 PREP(raiseWindow);

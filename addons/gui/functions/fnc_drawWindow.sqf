@@ -176,10 +176,10 @@ if (_load isNotEqualTo "") then {
 // The buttons, left of how full it is: one row of chips as high as the cross, in the size of the fill text
 // (fnc_buttonWidth, fnc_uiButton). Take all: everything in the kit into the player's own gear
 // (einv_compat_efak_fnc_unpackAll), as on a section of the loot column (fnc_drawSection). Sort: the kit's
-// grid laid out anew (fnc_sortHolder), where the player may change the kit as the context menu's row asks
-// (einv_compat_efak_fnc_checkTouch). Both only in the inventory and while the kit shows its grid, and drawn
-// disabled while a move out of this kit is under way. A button is [id, label, icon, width]; for lack of
-// room the last one goes first.
+// grid laid out anew by the order the player has chosen, each click stepping to the next one (fnc_sortHolder,
+// fnc_sortChip), where the player may change the kit (einv_compat_efak_fnc_checkTouch). Both only in the
+// inventory and while the kit shows its grid, and drawn disabled while a move out of this kit is under way.
+// A button is [id, label, icon, width]; for lack of room the last one goes first.
 private _kitClass = _section getOrDefault ["kit", ""];
 private _buttonSize = _loadSize;
 private _buttonGap = SQUARE(UNIT * 0.3);
@@ -193,10 +193,10 @@ if (_kitClass isNotEqualTo "" && {_notice isEqualTo ""} && {call FUNC(isInventor
     };
 
     if (isNil QEFUNC(compat_efak,checkTouch) || {([_kitClass] call EFUNC(compat_efak,checkTouch)) isEqualTo ""}) then {
-        private _label = LLSTRING(Section_Sort);
-        private _icon = UI_TEX(icon_sort_desc_ca);
+        // "Sort: Name", the order the player sorts by now, in a button as wide as the widest label (fnc_sortChip).
+        ([_titleH, _buttonSize, _theme] call FUNC(sortChip)) params ["_sortLabel", "_sortIcon", "_sortW"];
 
-        _buttons pushBack [format ["sort|%1", _key], _label, _icon, [_label, _icon, _titleH, _buttonSize, _theme] call FUNC(buttonWidth)];
+        _buttons pushBack [format ["sort|%1", _key], _sortLabel, _sortIcon, _sortW];
     };
 };
 
@@ -231,7 +231,7 @@ if (_buttons isNotEqualTo []) then {
     {
         _x params ["_buttonId", "_label", "_icon", "_buttonW"];
 
-        [
+        private _button = [
             _display, _group, [_buttonX, _padY, _buttonW, _titleH], _buttonId, _label, _icon, _theme,
             {
                 params ["_direction", "_buttonId"];
@@ -241,13 +241,18 @@ if (_buttons isNotEqualTo []) then {
                 (_buttonId splitString "|") params ["_kind", "_what"];
 
                 if (_kind isEqualTo "sort") then {
-                    [_what] call FUNC(sortHolder);
+                    [_what, objNull, true] call FUNC(sortHolder);
                 } else {
                     [_what] call EFUNC(compat_efak,unpackAll);
                 };
             },
             _busy, _buttonSize, true
         ] call FUNC(uiButton);
+
+        // Sort says what its next click sorts by, and changes with the order (fnc_sortButtons).
+        if ((_buttonId select [0, 5]) isEqualTo "sort|") then {
+            [_button] call FUNC(sortButtons);
+        };
 
         _buttonX = _buttonX + _buttonW + _buttonGap;
     } forEach _buttons;

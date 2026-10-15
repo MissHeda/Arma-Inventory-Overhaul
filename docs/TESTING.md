@@ -32,7 +32,14 @@ A client can see them and cannot change them.
 
 ## B. Inventory window
 
-- [ ] Backpack slot: put on, swap, take off, drop (menu, Delete, drag to the ground), contents survive.
+- [ ] Backpack slot: put on, swap, take off (Ctrl+click), drop (menu Drop, Delete, drag to the ground), contents survive.
+- [ ] Context menu rows: a tile has Inspect, Equip / Attach to / Load into where they apply, Drop, Select all (and the item's own
+      rows - Open kit, Open radio, other mods' CBA rows, Repack all, the hotbar's); no "Move over", no "Sort". A worn slot has
+      Inspect and Drop only (no "Take off"); a weapon also Take off for each part. Several selected tiles: only Deselect (double
+      click, drag and Delete still move and drop them). Free cells: Select all; the free cells of an open kit's window have no menu.
+- [ ] The name at the mouse is never under a frame: hover the Backpack, Vest and Uniform slots, a weapon card and a hotbar slot - the
+      accent ring never lies over "Carryall Backpack (Coyote)"; Ctrl+click tiles while hovering one, hover a vest in a crate (the
+      comparison card) and leave the mouse still while a move redraws the window.
 - [ ] Weight bar: colour by tier, the texts (next limit, effect), the preview on pick-up, no ticks.
 - [ ] Right-click on another tile while a menu is open opens the new menu; right-click on empty space closes.
 - [ ] Count badges `n/stack` only for stackable classes; magazine rounds bottom left; hotbar slots alike.
@@ -45,9 +52,14 @@ A client can see them and cannot change them.
       hovered up to the cell's edge; the ring `aaa/aba/aaa`.
 - [ ] Section captions: Take all / Put all in and Sort sit right of the tab, as high as it and in its text size, the labels in
       the middle of their buttons both ways (the same on all UI sizes), Sort with its icon; Sort lays out an own container, a
-      crate, the ground and a kit window as the right-click row does, and is greyed while a move out of that container is under way;
+      crate, the ground and a kit window, and is greyed while a move out of that container is under way;
       none on a body's worn gear, on a living person's gear that the settings keep look-only, nor in the Arsenal; a narrow window
       drops Sort first, then Take all, before the tab is cut under three letters.
+- [ ] Sort cycles: the button reads "Sort: Size" (or the last order used) and a click sorts by the next one - Name (A to Z), Weight
+      (heaviest first), Size (largest first), Type (weapons, ammo, gear, medical, the rest) - with every Sort button of the window
+      (all sections, an open kit's window) changing its words at once and the caption line not moving; the tooltip names what the next
+      click sorts by; the order survives closing the window and restarting the game; a second player looking into the same crate sees
+      the same places; Sort on an empty container and a kit still works.
 - [ ] Kits (EFAK) open and pack by drag; the kit window's title row: Take all and Sort as tall as the cross, the fill text and
       the name centred in the row's height beside them; radios (TFAR / ACRE2) hint, menu, Open radio; ACE cargo cards, Unload.
 - [ ] Magazine repack by drop, Repack all, the fill bar.

@@ -1,15 +1,19 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Op "sort": the holder's records emptied and its contents laid out anew - everything first fit, largest
- * first. The context menu's Sort, for everyone who looks.
+ * Op "sort": the holder's records emptied and its contents laid out anew - everything first fit, in the
+ * order asked for (largest first when none is). The Sort button of a section's caption line and of a kit
+ * window, for everyone who looks.
  *
  * Every record of the view's tiles comes out, and the first-fit picture of fnc_getLayout without any
  * records goes in instead; what no tile matches any more stays unused (fnc_getLayout places every tile
- * by its own record first). The end of the phase writes it once (einv_storage_fnc_execute).
+ * by its own record first). The end of the phase writes it once (einv_storage_fnc_execute). The order
+ * travels in the op's arguments: the player who asked chose it, and it is laid out where the container's
+ * root is local, so the places that everyone reads are the same.
  *
  * Arguments:
- * 0: Args, [holder] <ARRAY>
+ * 0: Args, [holder, order] - the order one of SORT_MODES, "size" for none or anything else (fnc_getLayout)
+ *    <ARRAY>
  * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
@@ -22,14 +26,14 @@
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[cursorObject], _context] call einv_storage_fnc_opSort;
+ * [[cursorObject, "name"], _context] call einv_storage_fnc_opSort;
  *
  * Public: No
  */
 
 params [["_args", [], [[]]], ["_context", createHashMap, [createHashMap]]];
 
-_args params [["_holder", objNull, [objNull, ""]]];
+_args params [["_holder", objNull, [objNull, ""]], ["_order", SORT_DEFAULT, [""]]];
 
 private _view = [_holder, []] call FUNC(findEntry);
 
@@ -56,7 +60,7 @@ if (isNil "_entries" || {!(_entries isEqualType [])}) then {
     _entries = [];
 };
 
-private _sorted = [_holder, _entries, false, []] call FUNC(getLayout);
+private _sorted = [_holder, _entries, false, [], _order] call FUNC(getLayout);
 
 {
     if !(_x getOrDefault ["overflow", false]) then {

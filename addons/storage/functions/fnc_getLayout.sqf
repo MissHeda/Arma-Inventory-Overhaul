@@ -21,9 +21,9 @@
  *      (fnc_layoutKey; entries sorted by key and index) whose size matches it either way round, when its
  *      cells are free: a repacked magazine, a radio that got its instance class, a kit made ready stay
  *      where they lay.
- *   3. first fit - the rest, largest first (then category, kind, key, index): compartment after
- *      compartment, row by row, upright, else turned a quarter (a square box only when it is a shape
- *      that turned takes other cells).
+ *   3. first fit - the rest, in the order asked for (argument 4; largest first, then category, kind, key
+ *      and index, when none is): compartment after compartment, row by row, upright, else turned a
+ *      quarter (a square box only when it is a shape that turned takes other cells).
  * A record is [key, col, row, w, h, block, rot], rot 1 when it lies turned a quarter clockwise. One
  * written before rot existed has six elements: it lies turned when its width is not the upright one.
  * An entry no compartment has room for - the engine took it from a script or another mod - is
@@ -39,6 +39,12 @@
  *    <ANY> (default: nil)
  * 3: Places to lay out from instead of the holder's own: [revision, records] or just the records
  *    <ARRAY> (default: fnc_readPlaces)
+ * 4: The order the first fit lays the rest out in - what a Sort asks for (fnc_opSort), one of SORT_MODES:
+ *    "size" largest first, then category, kind, key and index; "name" by name; "weight" heaviest first
+ *    (what the tile weighs, fnc_getMass), then by name; "type" weapons, ammo, gear, medical and the rest,
+ *    each by kind, then largest first, then by name. Entries equal in all of it go by key and index, so
+ *    the same contents come out the same on every machine. Anything else is "size" <STRING>
+ *    (default: "size")
  *
  * Return Value:
  * HashMap <HASHMAP>
@@ -60,7 +66,7 @@
  * Public: No
  */
 
-params [["_holder", objNull, [objNull, ""]], ["_entries", [], [[]]], "", "_given"];
+params [["_holder", objNull, [objNull, ""]], ["_entries", [], [[]]], "", "_given", ["_sortBy", "size", [""]]];
 
 // A key has no compartments and no object; isNull would fail on it.
 private _isKey = _holder isEqualType "";
@@ -280,16 +286,48 @@ if (count _kinOf > 0) then {
 };
 
 // ---------------------------------------------------------------------------
-// 3. First fit: largest first, then by category, kind, key and index - so the same contents always come
-// out the same.
+// 3. First fit, in the order asked for: by default largest first, then by category, kind, key and index.
+// Whatever the order, entries that tie in all of it end up by key and index - so the same contents always
+// come out the same.
 // ---------------------------------------------------------------------------
 private _order = [];
 
+if !(_sortBy in SORT_MODES) then {
+    _sortBy = "size";
+};
+
+// The name a tile sorts by, as the machine that lays it out reads it: a Sort writes the result to the
+// places, and everyone reads it from there.
+private _fnc_nameOf = {
+    params ["_index"];
+
+    toLowerANSI ((_infos select _index) getOrDefault ["name", ""])
+};
+
+// Weapons first, then what goes into them, then what is worn, then medical items, then the rest - indexed
+// by CATEGORY_MISC to CATEGORY_MEDICAL.
+private _typeRank = [4, 2, 0, 1, 3];
+
 {
     if !(_placed select _forEachIndex) then {
-        (_meta select _forEachIndex) params ["_key", "_n", "_kind", "_category"];
+        private _index = _forEachIndex;
 
-        _order pushBack [-((_x get "w") * (_x get "h")), _category, _kind, _key, _n, _forEachIndex];
+        (_meta select _index) params ["_key", "_n", "_kind", "_category"];
+
+        private _area = (_x get "w") * (_x get "h");
+
+        // The entry's own index is the last element of every row: the loop below reads it from there.
+        _order pushBack (switch (_sortBy) do {
+            case "name": {[[_index] call _fnc_nameOf, _key, _n, _index]};
+            case "weight": {[-([[_x]] call FUNC(getMass)), [_index] call _fnc_nameOf, _key, _n, _index]};
+            case "type": {
+                [
+                    _typeRank param [_category, 4], (_infos select _index) getOrDefault ["kind", ""], -_area,
+                    [_index] call _fnc_nameOf, _key, _n, _index
+                ]
+            };
+            default {[-_area, _category, _kind, _key, _n, _index]};
+        });
     };
 } forEach _entries;
 
@@ -325,7 +363,7 @@ private _fnc_find = {
 };
 
 {
-    private _index = _x select 5;
+    private _index = _x select -1;
     private _entry = _entries select _index;
     private _w = _entry get "w";
     private _h = _entry get "h";

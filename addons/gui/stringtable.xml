@@ -256,32 +256,17 @@
         <Key ID="STR_einv_gui_Menu_Detach">
             <English>Take off %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_DropSelected">
-            <English>Drop %1 items</English>
-        </Key>
         <Key ID="STR_einv_gui_Menu_Inspect">
             <English>Inspect</English>
         </Key>
         <Key ID="STR_einv_gui_Menu_LoadInto">
             <English>Load into %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_MoveOver">
-            <English>Move over</English>
-        </Key>
-        <Key ID="STR_einv_gui_Menu_MoveSelected">
-            <English>Move %1 items over</English>
-        </Key>
         <Key ID="STR_einv_gui_Menu_OpenContainer">
             <English>Open %1</English>
         </Key>
         <Key ID="STR_einv_gui_Menu_SelectAll">
             <English>Select all in %1</English>
-        </Key>
-        <Key ID="STR_einv_gui_Menu_Sort">
-            <English>Sort %1</English>
-        </Key>
-        <Key ID="STR_einv_gui_Menu_TakeOff">
-            <English>Take off</English>
         </Key>
         <Key ID="STR_einv_gui_Notify_Searched">
             <English>%1 is going through your gear</English>
@@ -328,11 +313,8 @@
         <Key ID="STR_einv_gui_Section_PutAll_Tooltip">
             <English>Moves everything in here into %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Section_Sort">
-            <English>Sort</English>
-        </Key>
-        <Key ID="STR_einv_gui_Section_Sort_Tooltip">
-            <English>Lays out everything in here anew, largest first</English>
+        <Key ID="STR_einv_gui_Section_SortBy">
+            <English>Sort: %1</English>
         </Key>
         <Key ID="STR_einv_gui_Section_TakeAll">
             <English>Take all</English>
@@ -549,6 +531,30 @@
         </Key>
         <Key ID="STR_einv_gui_Slot_Watch">
             <English>Watch</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sort_Name">
+            <English>Name</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sort_Name_Next">
+            <English>Next click: sorts everything in here by name</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sort_Size">
+            <English>Size</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sort_Size_Next">
+            <English>Next click: sorts everything in here by size, largest first</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sort_Type">
+            <English>Type</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sort_Type_Next">
+            <English>Next click: sorts everything in here by kind - weapons, ammo, gear, medical, the rest</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sort_Weight">
+            <English>Weight</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sort_Weight_Next">
+            <English>Next click: sorts everything in here by weight, heaviest first</English>
         </Key>
         <Key ID="STR_einv_gui_Stat_Weight">
             <English>Weight</English>

@@ -28,7 +28,10 @@
  * Beside the tab buttons act on the whole section, as high as the tab and in the caption's own size:
  * one moves everything over in one go (fnc_takeAll, fnc_putAll) - "Take all" in what is looted, "Put all in"
  * in the unit's own uniform, vest and backpack and in containers opened from them, while the loot column has
- * somewhere to put things -, "Sort" lays out its grid anew (fnc_sortHolder, the context menu's row too).
+ * somewhere to put things -, "Sort: Name" lays out its grid anew by the order the player has chosen and each
+ * click steps to the next one - name, weight, size, type (fnc_sortHolder, fnc_sortChip: the label changes
+ * in place on every Sort button, which is as wide as the widest label, fnc_sortButtons). The only way to
+ * sort: the context menu has no row for it.
  * Only the inventory has them (fnc_isInventoryMode). Take all and Put all in come only where at least one
  * searched tile lies, Sort on every container the player may change - a section that holds no grid of its
  * own, a body's gear, has none; both are drawn disabled while a move of this section is under way. Their
@@ -247,8 +250,8 @@ private _lockW = [0, SQUARE(_lineH)] select (_lockTip isNotEqualTo "");
 // The buttons beside the tab: Take all out of what is looted, Put all in out of what the unit carries - a
 // container opened from the unit's own storage counts as carried - and Sort for a container the player may
 // change. Take all and Put all in where at least one searched tile is there to move, and, for Put all in,
-// somewhere in the loot column to put it; Sort wherever the context menu offers it on the grid, so also on
-// an empty one (fnc_contextMenu).
+// somewhere in the loot column to put it; Sort on every grid of its own that the player may change, so also
+// on an empty one.
 // ---------------------------------------------------------------------------
 private _buttonKind = "";
 private _buttonEligible = "";
@@ -307,9 +310,11 @@ if (_buttonKind isNotEqualTo "") then {
 };
 
 if (_sortable) then {
-    private _sortIcon = UI_TEX(icon_sort_desc_ca);
+    // "Sort: Name", the order the player sorts by now; as wide as the widest of its labels, so a click that
+    // steps to the next order changes the words in place and nothing on the line moves (fnc_sortChip).
+    ([_lineH, _buttonSize, _theme] call FUNC(sortChip)) params ["_sortLabel", "_sortIcon", "_sortW"];
 
-    _buttons pushBack ["sort", LLSTRING(Section_Sort), _sortIcon, [LLSTRING(Section_Sort), _sortIcon, _lineH, _buttonSize, _theme] call FUNC(buttonWidth)];
+    _buttons pushBack ["sort", _sortLabel, _sortIcon, _sortW];
 };
 
 // What the buttons take, each with the gap before it.
@@ -415,7 +420,7 @@ private _fnc_click = {
     switch (_kind) do {
         case "take": {[_holder] call FUNC(takeAll)};
         case "put": {[_holder] call FUNC(putAll)};
-        case "sort": {[_holder] call FUNC(sortHolder)};
+        case "sort": {[_holder, objNull, true] call FUNC(sortHolder)};
     };
 };
 
@@ -429,9 +434,10 @@ private _buttonX = _blockX + _tabW + _buttonGap;
         _label, _icon, _theme, _fnc_click, _busy, _buttonSize, true
     ] call FUNC(uiButton);
 
-    // What it does, when the mouse rests on it.
+    // What it does, when the mouse rests on it. Sort says what its next click sorts by (fnc_sortText) and is
+    // kept up to date as the order changes (fnc_sortButtons).
     private _tooltip = switch (_kind) do {
-        case "sort": {LLSTRING(Section_Sort_Tooltip)};
+        case "sort": {([GVAR(sortMode)] call FUNC(sortText)) select 1};
         case "put": {
             private _targetHolder = ((call FUNC(putAllTarget)) param [0, []]) param [0, objNull];
             private _lootSections = GVAR(context) getOrDefault ["lootSections", []];
@@ -443,6 +449,10 @@ private _buttonX = _blockX + _tabW + _buttonGap;
     };
 
     (_button select -1) ctrlSetTooltip _tooltip;
+
+    if (_kind isEqualTo "sort") then {
+        [_button] call FUNC(sortButtons);
+    };
 
     _buttonX = _buttonX + _buttonW + _buttonGap;
 } forEach _buttons;
