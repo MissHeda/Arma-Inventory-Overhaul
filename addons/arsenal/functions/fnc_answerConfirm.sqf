@@ -20,6 +20,9 @@
 
 disableSerialization;
 
+// Answered already: a second click.
+if (isNull (uiNamespace getVariable [QGVAR(confirm), controlNull])) exitWith {};
+
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 private _code = uiNamespace getVariable [QGVAR(confirmCode), 1];
 

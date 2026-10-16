@@ -38,6 +38,9 @@ if (GVAR(attached)) then {
 
 uiNamespace setVariable [QGVAR(display), displayNull];
 uiNamespace setVariable [QGVAR(confirm), controlNull];
+uiNamespace setVariable [QGVAR(confirmControls), []];
+uiNamespace setVariable [QGVAR(confirmButtons), []];
+GVAR(confirmPress) = -1;
 
 GVAR(panelRect) = [];
 GVAR(hintRect) = [];

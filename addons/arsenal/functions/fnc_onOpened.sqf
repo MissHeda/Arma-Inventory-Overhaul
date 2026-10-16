@@ -42,6 +42,9 @@ if (!GVAR(ready) || {isNull _display} || {ctrlIDD _display != ARSENAL_IDD}) exit
 
 uiNamespace setVariable [QGVAR(display), _display];
 uiNamespace setVariable [QGVAR(confirm), controlNull];
+uiNamespace setVariable [QGVAR(confirmControls), []];
+uiNamespace setVariable [QGVAR(confirmButtons), []];
+GVAR(confirmPress) = -1;
 
 GVAR(attached) = false;
 GVAR(shown) = true;
@@ -65,6 +68,12 @@ GVAR(stagingCount) = 0;
 
 _display displayAddEventHandler ["KeyDown", {_this call FUNC(onKey)}];
 _display displayAddEventHandler ["KeyUp", {(_this + [false]) call FUNC(onKey)}];
+
+// The question of fnc_confirmClose takes the mouse: the clicks on its answers (fnc_onConfirmMouse) and the wheel,
+// which would otherwise zoom ACE's camera or scroll the lists under the card. Nothing while it is not up.
+_display displayAddEventHandler ["MouseButtonDown", {([true] + _this) call FUNC(onConfirmMouse)}];
+_display displayAddEventHandler ["MouseButtonUp", {([false] + _this) call FUNC(onConfirmMouse)}];
+_display displayAddEventHandler ["MouseZChanged", {!isNull (uiNamespace getVariable [QGVAR(confirm), controlNull])}];
 
 // The Close button and Escape ask first when something does not fit (fnc_confirmClose).
 [_display] call FUNC(interceptClose);

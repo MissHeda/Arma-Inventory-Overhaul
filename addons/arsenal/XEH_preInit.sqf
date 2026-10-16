@@ -69,6 +69,11 @@ GVAR(pictureCache) = createHashMap;
 // its card, a control, so in uiNamespace (controlNull for none), and the exit code the window then closes with.
 uiNamespace setVariable [QGVAR(confirm), controlNull];
 uiNamespace setVariable [QGVAR(confirmCode), 1];
+uiNamespace setVariable [QGVAR(confirmControls), []];
+uiNamespace setVariable [QGVAR(confirmButtons), []];
+
+// The answer a press began on (fnc_onConfirmMouse): 0 Keep editing, 1 Remove and close, -1 none.
+GVAR(confirmPress) = -1;
 
 // What of ACE's internals was found missing and said in the RPT already, once each.
 GVAR(missingSaid) = [];

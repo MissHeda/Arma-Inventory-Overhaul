@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Takes the question of fnc_confirmClose off ACE Arsenal's display: its card and the glass that kept the mouse
+ * Takes the question of fnc_confirmClose off ACE Arsenal's display: its card and the dimming that kept the mouse
  * from ACE's controls under it go, and the focus goes back to ACE's list. Nothing is closed or removed.
  *
  * Arguments:
@@ -18,14 +18,19 @@
 
 disableSerialization;
 
-private _card = uiNamespace getVariable [QGVAR(confirm), controlNull];
+private _parts = uiNamespace getVariable [QGVAR(confirmControls), []];
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
 uiNamespace setVariable [QGVAR(confirm), controlNull];
+uiNamespace setVariable [QGVAR(confirmControls), []];
+uiNamespace setVariable [QGVAR(confirmButtons), []];
+GVAR(confirmPress) = -1;
 
-if (!isNull _card) then {
-    ctrlDelete _card;
-};
+{
+    if (!isNull _x) then {
+        ctrlDelete _x;
+    };
+} forEach _parts;
 
 if (!isNull _display) then {
     private _list = _display displayCtrl ARSENAL_IDC_LIST;

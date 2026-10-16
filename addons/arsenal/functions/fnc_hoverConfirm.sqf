@@ -4,7 +4,8 @@
  * Lights up the answer of fnc_confirmClose's card that the mouse is on, and puts the others back. The buttons
  * light up by their own MouseEnter and MouseExit (einv_gui_fnc_uiButton) as well, but on ACE Arsenal's display
  * those did not reach them, so every frame (fnc_onFrame) the mouse is looked for on them here: the colours
- * are the button's own, set only when the state changed.
+ * are the button's own, set only when the state changed. The card's controls lie straight on the display, so
+ * their positions are the screen's.
  *
  * Arguments:
  * 0: Mouse [x, y] <ARRAY>
@@ -22,19 +23,15 @@ disableSerialization;
 
 params [["_mouse", getMousePosition, [[]], 2]];
 
-private _group = uiNamespace getVariable [QGVAR(confirm), controlNull];
+if (isNull (uiNamespace getVariable [QGVAR(confirm), controlNull])) exitWith {};
 
-if (isNull _group) exitWith {};
-
-(ctrlPosition _group) params ["_groupX", "_groupY"];
 _mouse params ["_mouseX", "_mouseY"];
 
 {
     if (!isNull _x) then {
         (ctrlPosition _x) params ["_left", "_top", "_width", "_height"];
 
-        private _over = _mouseX >= _groupX + _left && {_mouseX < _groupX + _left + _width}
-            && {_mouseY >= _groupY + _top} && {_mouseY < _groupY + _top + _height};
+        private _over = _mouseX >= _left && {_mouseX < _left + _width} && {_mouseY >= _top} && {_mouseY < _top + _height};
 
         if (_over isNotEqualTo (_x getVariable [QGVAR(lit), false])) then {
             _x setVariable [QGVAR(lit), _over];

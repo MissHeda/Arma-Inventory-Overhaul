@@ -38,6 +38,9 @@
  *    the box itself when left out <ARRAY> (default: [])
  * 9: Report the mouse as the display does - not in the setup wizard, which has no inventory window; a group
  *    made without it only keeps the picture in it from being scrolled by the wheel <BOOL> (default: true)
+ * 10: The size the offsets are a share of, [w, h]; the rectangle's own when left out. A box drawn in pieces
+ *    (fnc_uiPictureCut) gives every piece the whole box's size, so every piece moves the picture by the same
+ *    amount <ARRAY> (default: [])
  *
  * Return Value:
  * The picture, or the group that clips it <CONTROL>
@@ -52,7 +55,7 @@ disableSerialization;
 
 params [
     "_display", "_parent", "_box", "_texture", ["_icon", ICON_PLAIN, [[]]], ["_color", [1, 1, 1, 1]], ["_turned", false],
-    ["_aspect", 1], ["_clip", []], ["_events", true]
+    ["_aspect", 1], ["_clip", []], ["_events", true], ["_share", []]
 ];
 
 _icon params [["_scale", 1], ["_across", 0], ["_down", 0]];
@@ -81,6 +84,12 @@ if (_clip isEqualTo []) then {
 
 _clip params ["_clipX", "_clipY", "_clipW", "_clipH"];
 
+if (_share isEqualTo []) then {
+    _share = [_clipW, _clipH];
+};
+
+_share params ["_shareW", "_shareH"];
+
 // The picture's own shape, width to height: where its image really ends inside the control it is fitted into.
 private _info = getTextureInfo _texture;
 private _ratio = 0;
@@ -91,12 +100,12 @@ if (_info isEqualType [] && {(_info param [0, 0]) > 0} && {(_info param [1, 0]) 
 
 // How far the picture moves on the screen. Turned a quarter clockwise, what went across now goes down and
 // what went down now goes left.
-private _shiftX = _across * _clipW;
-private _shiftY = _down * _clipH;
+private _shiftX = _across * _shareW;
+private _shiftY = _down * _shareH;
 
 if (_turned) then {
-    _shiftX = -_down * _clipW;
-    _shiftY = _across * _clipH;
+    _shiftX = -_down * _shareW;
+    _shiftY = _across * _shareH;
 };
 
 private _centerX = _boxX + _boxW / 2 + _shiftX;
@@ -130,7 +139,13 @@ if (_turned) then {
     private _width = _boxW * _scale;
     private _height = _boxH * _scale;
 
-    _rect = [_centerX - _width / 2, _centerY - _height / 2, _width, _height];
+    // On whole pixels, so a picture drawn in pieces lands on the same pixels in every piece.
+    _rect = [
+        round ((_centerX - _width / 2) / pixelW) * pixelW, round ((_centerY - _height / 2) / pixelH) * pixelH,
+        ((round (_width / pixelW)) max 1) * pixelW, ((round (_height / pixelH)) max 1) * pixelH
+    ];
+    _width = _rect select 2;
+    _height = _rect select 3;
     _imageW = _width;
     _imageH = _height;
 

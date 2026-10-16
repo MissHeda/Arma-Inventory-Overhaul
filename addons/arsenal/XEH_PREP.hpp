@@ -69,6 +69,7 @@ PREP(onAceKey);
 PREP(confirmClose);
 PREP(answerConfirm);
 PREP(closeConfirm);
+PREP(onConfirmMouse);
 
 // The vanilla Virtual Arsenal: the wrapper's question, the items of a vanilla box, the safety net, the red
 // screen, and what is left alone

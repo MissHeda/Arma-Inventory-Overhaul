@@ -5,8 +5,11 @@
  * ACE Arsenal's window is to close (its Close button, Escape): if the unit it edits carries something that
  * lies on no cell of its uniform, vest or backpack - the red tiles of the panel - a card in the middle of
  * the window asks first, in the inventory's glass look: "N items do not fit your gear and will be removed:
- * <names, counts>", with "Keep editing" and "Remove and close" (fnc_answerConfirm). A glass over the window
- * keeps the mouse from ACE's controls under it; keys are held by fnc_onAceKey. While the window is open
+ * <names, counts>", with "Keep editing" and "Remove and close" (fnc_answerConfirm). A dimming over the window
+ * keeps the mouse from ACE's controls under it - a plain rectangle, not a button (that played its click sound
+ * for every press); the clicks on the answers are taken by the display's handler (fnc_onConfirmMouse), the
+ * wheel is absorbed (fnc_onOpened); keys are held by fnc_onAceKey. All of it is made straight on the
+ * display, in no controls group - a group moved the card with the wheel. While the window is open
  * those tiles stay what they are, red and shown apart. With nothing to remove, or a unit that is not local
  * here, the window closes at once, as it always did.
  *
@@ -113,39 +116,36 @@ ctrlDelete _probe;
 private _buttonH = UNIT * 1.5;
 private _cardH = UNIT * 1 + UNIT * 1.8 + _textH + UNIT * 1.2 + _buttonH + UNIT * 1;
 private _cardX = (safezoneW - _cardW) / 2;
-private _cardY = (safezoneH - _cardH) / 2;
+private _cardY = safezoneY + (safezoneH - _cardH) / 2;
 
-// The whole screen, in one group; what is in it counts from its corner. Made with ctrlCreate and held in
-// uiNamespace, so the window engine, which sweeps only what it made, leaves it alone.
-private _group = _display ctrlCreate ["EINV_Group", -1];
+_cardX = safezoneX + _cardX;
 
-_group ctrlSetPosition [safezoneX, safezoneY, safezoneW, safezoneH];
-_group ctrlCommit 0;
+// Everything straight on the display, in no controls group: a group, even one that never scrolls, moves its
+// content a little with the wheel when the content is a pixel larger than it. What is made here is found
+// again by comparing the display's controls before and after, and taken out of the window engine's list of
+// what it made (uiCreate notes every control of the display there), so that its sweep leaves it alone.
+private _before = allControls _display;
 
-uiNamespace setVariable [QGVAR(confirm), _group];
+// Dims the window and takes every click that is not on the card: a rectangle, which has no click sound (a
+// button there played its sound for every press, and focused it lay over the answers).
+private _dim = [_display, controlNull, [safezoneX, safezoneY, safezoneW, safezoneH], [0.04, 0.045, 0.055, 0.55]] call EFUNC(gui,uiPanel);
 
-[_display, _group, [0, 0, safezoneW, safezoneH], [0.04, 0.045, 0.055, 0.55]] call EFUNC(gui,uiPanel);
+uiNamespace setVariable [QGVAR(confirm), _dim select 0];
 
-// Over the dimming, under the card: takes every click that is not on the card.
-private _glass = _display ctrlCreate ["EINV_Hitbox", -1, _group];
-
-_glass ctrlSetPosition [0, 0, safezoneW, safezoneH];
-_glass ctrlCommit 0;
-
-[_display, _group, [_cardX, _cardY, _cardW, _cardH], _theme getOrDefault ["panel", [0.04, 0.045, 0.055, 0.85]], _radius] call EFUNC(gui,uiPanel);
-[_display, _group, [_cardX, _cardY, _cardW, _cardH], _loss, _radius] call EFUNC(gui,uiRing);
+[_display, controlNull, [_cardX, _cardY, _cardW, _cardH], _theme getOrDefault ["panel", [0.04, 0.045, 0.055, 0.85]], _radius] call EFUNC(gui,uiPanel);
+[_display, controlNull, [_cardX, _cardY, _cardW, _cardH], _loss, _radius] call EFUNC(gui,uiRing);
 
 private _y = _cardY + UNIT * 1;
 private _titleSize = UNIT * 1.0;
 
 [
-    _display, _group, [_cardX + _pad, _y, _innerW, UNIT * 1.4],
+    _display, controlNull, [_cardX + _pad, _y, _innerW, UNIT * 1.4],
     [LLSTRING(Confirm_Title), _innerW, _fontBold, _titleSize] call EFUNC(gui,fitText), _titleSize, _ink, _fontBold, 2
 ] call EFUNC(gui,uiLabel);
 
 _y = _y + UNIT * 1.8;
 
-private _box = [_display, "EINV_StructuredText", _group, [_cardX + _pad, _y, _innerW, _textH]] call EFUNC(gui,uiCreate);
+private _box = [_display, "EINV_StructuredText", controlNull, [_cardX + _pad, _y, _innerW, _textH]] call EFUNC(gui,uiCreate);
 
 _box ctrlSetStructuredText _words;
 
@@ -161,16 +161,40 @@ private _buttonW = SQUARE(UNIT * 9);
 private _gap = SQUARE(UNIT * 0.5);
 private _left = _cardX + (_cardW - _buttonW * 2 - _gap) / 2;
 
-private _keep = [_display, _group, [_left, _y, _buttonW, _buttonH], "keep", LLSTRING(Confirm_Keep), "", _theme, {
-    [] call FUNC(closeConfirm);
-}, false, -1, true] call EFUNC(gui,uiButton);
+private _keep = [_display, controlNull, [_left, _y, _buttonW, _buttonH], "keep", LLSTRING(Confirm_Keep), "", _theme, {}, false, -1, true] call EFUNC(gui,uiButton);
 
-private _remove = [_display, _group, [_left + _buttonW + _gap, _y, _buttonW, _buttonH], "remove", LLSTRING(Confirm_Remove), "", _removeTheme, {
-    [] call FUNC(answerConfirm);
-}, false, -1, true] call EFUNC(gui,uiButton);
+private _remove = [_display, controlNull, [_left + _buttonW + _gap, _y, _buttonW, _buttonH], "remove", LLSTRING(Confirm_Remove), "", _removeTheme, {}, false, -1, true] call EFUNC(gui,uiButton);
 
-// The hit areas come last; fnc_hoverConfirm lights them up from the mouse every frame as well.
+// The buttons' own code is empty: their clicks are taken by the display's handler (fnc_onConfirmMouse), so a
+// click cannot answer twice. The hit areas come last; fnc_hoverConfirm lights them up from the mouse every
+// frame as well.
 uiNamespace setVariable [QGVAR(confirmButtons), [_keep deleteAt (count _keep - 1), _remove deleteAt (count _remove - 1)]];
+GVAR(confirmPress) = -1;
 
-// The keys are held by fnc_onAceKey; the focus leaves ACE's lists and fields.
-ctrlSetFocus _glass;
+private _mine = allControls _display - _before;
+private _created = uiNamespace getVariable [QEGVAR(gui,created), []];
+
+{
+    private _at = _created find _x;
+
+    if (_at >= 0) then {
+        _created deleteAt _at;
+    };
+} forEach _mine;
+
+uiNamespace setVariable [QGVAR(confirmControls), _mine];
+
+// The keys are held by fnc_onAceKey; the focus leaves ACE's lists and fields for the control of no size that
+// covers nothing (fnc_layout). Not for a control of the card: the engine draws the focused control over every
+// other and gives it the mouse first - the focused glass lay over both answers and took their clicks.
+private _sink = uiNamespace getVariable [QGVAR(focusSink), controlNull];
+
+if (isNull _sink) then {
+    _sink = _display ctrlCreate ["EINV_Hitbox", -1];
+    _sink ctrlSetPosition [safezoneX, safezoneY, 0, 0];
+    _sink ctrlCommit 0;
+
+    uiNamespace setVariable [QGVAR(focusSink), _sink];
+};
+
+ctrlSetFocus _sink;
