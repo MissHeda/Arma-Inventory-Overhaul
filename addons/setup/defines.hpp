@@ -20,7 +20,9 @@
 #define DIK_Y 21
 #define DIK_Z 44
 #define DIK_SPACE 57
+#ifndef DIK_F
 #define DIK_F 33
+#endif
 #define DIK_C 46
 
 // CT_EDIT and CT_CONTROLS_GROUP, as ctrlType reports them.
