@@ -1059,8 +1059,23 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   from the item's kind before it looks at the weapon, and keeps what each weapon takes in `einv_storage_compatSets` (class names in
   lower case, config read once). `fnc_select "only"` draws no frames again when the tile is the selection already; a group makes
   footprints, shapes and pictures only when its tiles lie in one compartment (the only case `fnc_groupMode` keeps their
-  arrangement). Per frame, `fnc_updateDrag` asks a slot, the weight forecast, the mass and the cells under the footprint once per
-  drag (`dragRoom`: `slot|n`, `forecast|kg`, `mass`, `taken`) instead of every frame.
+  arrangement).
+- **What a frame of a drag costs.** `fnc_updateDrag` works out only what changed. Every frame it reads the middle button and holds
+  or edge-scrolls the columns (each column's box is worked out at its first frame, element 3 of its `dragScroll` entry), then
+  compares the mouse and what is held (`dragCount`, `dragRot`, `count inFlight`) with the last frame (`dragRoom` "frame"); nothing
+  changed, it stops there. Mouse moved: the ghost, the counter and a kept group's pictures follow it. What lies under the mouse is
+  read from `dragRoom` "geometry" - every slot's `fnc_slotRect` and every target grid's visible box, origin and visible cells,
+  worked out at the first frame and again only after a column scrolled - and gives the "spot": the slots whose box holds the mouse,
+  the grid and cell (`fnc_screenToCell`'s rule, a cell before a hole), the equipment column, or off the grids the storage column, a
+  zone and the panels. Only when the spot or what is held changed do the target branches run, followed by the footprint and its
+  shapes, the counter's text, `fnc_dragHint` and the `dragCheck` hook. A grid cell into which no slot, other grid or the equipment
+  column reaches is held (`dragRoom` "hold"): while the mouse stays in it under the same layer (`fnc_topAt`), a frame only moves the
+  ghost. Which tile lies on each cell and which cells a tile other than the lifted one takes are worked out once per drag and grid
+  (`dragRoom` "cells|n") and answer `fnc_tileAt` and the free-cell test without a pass over the tiles. The answers per target stay
+  (`slot|n`, `forecast|kg`, `mass`, `taken`, `backpack|n`, `fromGround`, ...). A build ends the drag and `fnc_startDrag` makes a new
+  `dragRoom`, so nothing kept goes stale. With `einv_gui_debugTiming` on, `fnc_startDrag` puts `timing` into `dragRoom`, each frame
+  notes its parts (scroll, ghost, find, target, hint) and `fnc_logDrag` writes `drag: start N ms, frames N, update avg N ms max N ms
+  (slowest: ... - target anew in N frames)` - from `fnc_endDrag`, and from `fnc_build` and `fnc_onUnload`, which end a drag without it.
 - **Where it lands** (`fnc_updateDrag`; `einv_gui_dragTarget` is `["grid", gridIndex, col, row, fits, why not, "", place]`,
   `["slot", ...]`, `["kitTile", ...]`, `["hotbar", slot, ...]`, `["repack", ...]`, `["zone", ...]`, `["ground", ...]` or
   `["group", ...]`): on a grid the footprint must lie inside the compartment on free cells (a hole is red; an item's own holes

@@ -355,11 +355,11 @@ GVAR(dragTarget) = [];
 // What was picked up sounds like what it is (fnc_playSound): a rifle like a rifle, a magazine like a magazine.
 ["lift", _entry getOrDefault ["class", ""], _sourceGrid getOrDefault ["container", objNull]] call FUNC(playSound);
 
-[_display, getMousePosition] call FUNC(updateDrag);
-
-// For the tester's numbers (einv_gui_debugTiming): the lift and the first frame of the drag.
+// For the tester's numbers (einv_gui_debugTiming): the lift up to its first frame, then each frame of the drag
+// (fnc_updateDrag) - [lift ms, frames, their ms together, the slowest frame's ms, what its parts took, how many
+// worked the target out anew], written as one line when it ends (fnc_endDrag).
 if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
-    private _took = ((diag_tickTime - _start) * 1000) toFixed 1;
-
-    INFO_1("timing: lift %1 ms",_took);
+    GVAR(dragRoom) set ["timing", [(diag_tickTime - _start) * 1000, 0, 0, -1, "", 0]];
 };
+
+[_display, getMousePosition] call FUNC(updateDrag);

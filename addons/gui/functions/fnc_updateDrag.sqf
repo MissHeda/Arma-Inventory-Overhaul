@@ -51,11 +51,22 @@
  * so no forecast for a filled one), worked out once per drag, target and count (GVAR(dragRoom)); so are
  * whether a slot takes it ("slot|n"), the forecast of a weight ("forecast|kg"), the mass of what is held
  * ("mass") and whether the cells under the footprint are taken ("taken", again only when the footprint
- * stands on other cells) - no frame reads the loadout, asks config or passes every tile of a grid for an
- * answer it has. Anything
+ * stands on other cells, from the grid's cells: "cells|n") - no frame reads the loadout, asks config or passes
+ * every tile of a grid for an answer it has. Anything
  * else the target has nothing to say about, the hint is the key help lift wrote. The ghost is held as GVAR(dragSize) says - turned with R - with the
  * count of a stack beside it; at a column's or a kit window body's top or bottom edge it scrolls - only
  * while nothing lies over it there.
+ *
+ * A frame does only what changed since the last one. The mouse where it stood, and the count, the turn, the moves
+ * under way and the columns' scroll as they were: nothing at all. Where the slots and grids show on the screen is
+ * worked out at the first frame and again only after a column scrolled (GVAR(dragRoom) "geometry"); which tile
+ * lies on each cell of a grid and which cells are taken, once per grid ("cells|n"). From them a mouse that moved
+ * finds what lies under it - the slots whose box holds it, the grid and cell, the equipment and storage columns, a
+ * zone, the panels ("spot") - and only when that differs from the last frame's is the target worked out again,
+ * the footprint painted, the hint written and the window that attached asked ("dragCheck"). In a cell of a grid
+ * that no slot, other grid or the equipment column reaches into, a mouse that stays in that cell moves the ghost
+ * and nothing else ("hold"). With "Log window timings (debug)" on (einv_gui_debugTiming), each frame notes what
+ * its parts took (fnc_startDrag, fnc_endDrag).
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -75,12 +86,50 @@ disableSerialization;
 params ["_display", "_mouse"];
 _mouse params ["_mouseX", "_mouseY"];
 
-GVAR(press) params ["_sourceIndex", "_tileIndex", "", "_grab", "", "_slotSource"];
-_grab params ["_grabCol", "_grabRow"];
-
 private _entry = uiNamespace getVariable [QGVAR(dragEntry), createHashMap];
 
 if (count _entry == 0) exitWith {};
+
+// For the tester's numbers (einv_gui_debugTiming): with the setting on, fnc_startDrag put "timing" into the
+// drag's record and each part of this frame notes when it ended (fnc_endDrag writes the line). Off, nothing is.
+private _timed = "timing" in GVAR(dragRoom);
+private _marks = [];
+private _anew = false;
+
+if (_timed) then {
+    _marks pushBack ["", diag_tickTime];
+};
+
+// Called on the way out with the setting on: what this frame took, how often the target was worked out again,
+// and the parts of the slowest frame so far.
+private _fnc_noteTime = {
+    private _timing = GVAR(dragRoom) get "timing";
+    private _took = (diag_tickTime - ((_marks select 0) select 1)) * 1000;
+
+    _timing set [1, (_timing select 1) + 1];
+    _timing set [2, (_timing select 2) + _took];
+
+    if (_anew) then {
+        _timing set [5, (_timing select 5) + 1];
+    };
+
+    if (_took > (_timing select 3)) then {
+        private _parts = [];
+
+        for "_i" from 1 to (count _marks - 1) do {
+            (_marks select (_i - 1)) params ["", "_from"];
+            (_marks select _i) params ["_part", "_to"];
+
+            _parts pushBack format ["%1 %2", _part, ((_to - _from) * 1000) toFixed 2];
+        };
+
+        _timing set [3, _took];
+        _timing set [4, _parts joinString ", "];
+    };
+};
+
+GVAR(press) params ["_sourceIndex", "_tileIndex", "", "_grab", "", "_slotSource"];
+_grab params ["_grabCol", "_grabRow"];
 
 // As it is held - turned with R (fnc_rotateDrag).
 GVAR(dragSize) params ["_w", "_h"];
@@ -101,55 +150,36 @@ if (_middle && {!GVAR(middleHeld)} && {_stack > 1}) then {
 
 GVAR(middleHeld) = _middle;
 
-// The ghost, its grabbed cell under the mouse, and the count at its bottom right corner.
-private _boxX = _mouseX - (_grabCol + 0.5) * _cellW;
-private _boxY = _mouseY - (_grabRow + 0.5) * _cellH;
+// What the last frame saw: the mouse, what is held (how many, which way round, the moves under way) and what
+// lay on top there (fnc_topAt: "inspect", a kit window's key, or "" for the columns). What lies on top changes
+// only where the mouse moved - nothing moves a kit window or the inspect card while something is held.
+(GVAR(dragRoom) getOrDefault ["frame", []]) params [["_lastMouse", []], ["_lastState", []], ["_lastTop", ""]];
 
-(uiNamespace getVariable [QGVAR(dragGhostOffset), [0, 0]]) params ["_offsetX", "_offsetY"];
-
-private _ghost = uiNamespace getVariable [QGVAR(dragGhost), controlNull];
-_ghost ctrlSetPosition [_boxX + _offsetX, _boxY + _offsetY];
-_ghost ctrlCommit 0;
-
-if (uiNamespace getVariable [QGVAR(dragTurned), false]) then {
-    _ghost ctrlSetAngle [90, 0.5, 0.5];
-};
-
-private _counter = uiNamespace getVariable [QGVAR(dragCounter), controlNull];
-
-if (!isNull _counter) then {
-    (ctrlPosition _counter) params ["", "", "_counterW", "_counterH"];
-
-    // A group counts its tiles; over a container that cannot take all of them the grid below says how
-    // many fit.
-    _counter ctrlSetText ([format ["%1 / %2", GVAR(dragCount), _stack], format ["×%1", count _dragGroup]] select (_dragGroup isNotEqualTo []));
-    _counter ctrlSetPosition [_boxX + _w * _cellW - _counterW, _boxY + _h * _cellH + pixelH * 3];
-    _counter ctrlCommit 0;
-};
-
-// A group's extra footprints and pictures are shown only where they mean something, below.
-if (_dragGroup isNotEqualTo []) then {
-    {_x ctrlShow false} forEach (uiNamespace getVariable [QGVAR(dragFootprints), []]);
-    {(_x select 0) ctrlShow false} forEach (uiNamespace getVariable [QGVAR(dragGhosts), []]);
-};
-
-// What lies on top under the mouse (fnc_topAt): "inspect", a kit window's key, or "" for the columns.
-private _onTop = [_mouse] call FUNC(topAt);
+private _moved = _mouse isNotEqualTo _lastMouse;
+private _onTop = if (_moved) then {[_mouse] call FUNC(topAt)} else {_lastTop};
 
 // The columns and the kit windows' bodies: held where they stood while the wheel counts a stack
 // (fnc_onMouseZ); at the top or bottom edge of one that lies on top there they scroll, whatever is held.
-// A body lies in its window: its place on the screen comes through it (fnc_gridOrigin).
+// A body lies in its window: its place on the screen comes through it (fnc_gridOrigin). Where each stands
+// and how far it scrolls is worked out at its first frame - neither moves while something is held, only what
+// it shows. One that scrolled moved everything in it: every place on the screen is looked at again (below).
 private _band = _cellH * 0.6;
+private _scrolled = false;
 
 {
-    _x params ["_group", "_value", ["_layer", ""]];
+    _x params ["_group", "_value", ["_layer", ""], ["_box", []]];
 
     if (isNull _group) then {continue};
 
-    (ctrlPosition _group) params ["_groupRelX", "_groupRelY", "_groupW", "_groupH"];
-    ([createHashMapFromArray [["rel", [_groupRelX, _groupRelY]], ["parent", ctrlParentControlsGroup _group]]] call FUNC(gridOrigin)) params ["_groupX", "_groupY"];
+    if (_box isEqualTo []) then {
+        (ctrlPosition _group) params ["_groupRelX", "_groupRelY", "_groupW", "_groupH"];
+        ([createHashMapFromArray [["rel", [_groupRelX, _groupRelY]], ["parent", ctrlParentControlsGroup _group]]] call FUNC(gridOrigin)) params ["_groupX", "_groupY"];
 
-    private _range = (_group getVariable [QGVAR(contentH), _groupH]) - _groupH;
+        _box = [_groupX, _groupY, _groupW, _groupH, (_group getVariable [QGVAR(contentH), _groupH]) - _groupH];
+        _x set [3, _box];
+    };
+
+    _box params ["_groupX", "_groupY", "_groupW", "_groupH", "_range"];
 
     if (_range <= 0) then {continue};
 
@@ -172,15 +202,318 @@ private _band = _cellH * 0.6;
         _group ctrlSetScrollValues [_want, -1];
     };
 
+    if (abs (_want - _value) > 0.00001) then {
+        _scrolled = true;
+    };
+
     _x set [1, _want];
 } forEach (uiNamespace getVariable [QGVAR(dragScroll), []]);
 
-private _footprint = uiNamespace getVariable [QGVAR(dragFootprint), controlNull];
+// What is held: the wheel and the middle button change the count, R the way round, an answer the cells a move
+// under way goes to (GVAR(inFlight)).
+private _state = [GVAR(dragCount), GVAR(dragRot), count GVAR(inFlight)];
+private _changed = _scrolled || {_state isNotEqualTo _lastState};
+
+GVAR(dragRoom) set ["frame", [_mouse, _state, _onTop]];
+
+if (_timed) then {
+    _marks pushBack ["scroll", diag_tickTime];
+};
+
+// The mouse stands where it stood and nothing held changed: everything stays as the last frame left it.
+if (!_moved && {!_changed}) exitWith {
+    if (_timed) then {call _fnc_noteTime};
+};
+
+// ----- The ghost -----
+// Its grabbed cell under the mouse, and the count at its bottom right corner.
+private _boxX = _mouseX - (_grabCol + 0.5) * _cellW;
+private _boxY = _mouseY - (_grabRow + 0.5) * _cellH;
+
+(uiNamespace getVariable [QGVAR(dragGhostOffset), [0, 0]]) params ["_offsetX", "_offsetY"];
+
+private _ghost = uiNamespace getVariable [QGVAR(dragGhost), controlNull];
+_ghost ctrlSetPosition [_boxX + _offsetX, _boxY + _offsetY];
+_ghost ctrlCommit 0;
+
+if (uiNamespace getVariable [QGVAR(dragTurned), false]) then {
+    _ghost ctrlSetAngle [90, 0.5, 0.5];
+};
+
+private _counter = uiNamespace getVariable [QGVAR(dragCounter), controlNull];
+
+if (!isNull _counter) then {
+    (ctrlPosition _counter) params ["", "", "_counterW", "_counterH"];
+
+    _counter ctrlSetPosition [_boxX + _w * _cellW - _counterW, _boxY + _h * _cellH + pixelH * 3];
+    _counter ctrlCommit 0;
+};
+
+// The pictures of a group that keeps its arrangement, every one at its offset from the mouse - shown by the
+// grid below, and following the mouse while they show ("ghosts" in the drag's record).
+private _fnc_moveGhosts = {
+    {
+        _x params ["_ghostControl", "_offsetCellsX", "_offsetCellsY", "_pictureX", "_pictureY", ["_ghostTurned", false]];
+
+        _ghostControl ctrlSetPosition [_boxX + _offsetCellsX + _pictureX, _boxY + _offsetCellsY + _pictureY];
+        _ghostControl ctrlCommit 0;
+
+        // A tile that lies turned keeps its turned picture where it moved, as the held one does above.
+        if (_ghostTurned) then {
+            _ghostControl ctrlSetAngle [90, 0.5, 0.5];
+        };
+
+        _ghostControl ctrlShow true;
+    } forEach (uiNamespace getVariable [QGVAR(dragGhosts), []]);
+};
+
+if (GVAR(dragRoom) getOrDefault ["ghosts", false]) then {
+    call _fnc_moveGhosts;
+};
+
+if (_timed) then {
+    _marks pushBack ["ghost", diag_tickTime];
+};
+
+// ----- What lies under the mouse -----
 private _grids = uiNamespace getVariable [QGVAR(grids), []];
+private _slots = uiNamespace getVariable [QGVAR(slots), []];
+
+// Where every slot and every grid shows on the screen, worked out at the first frame and again after a column
+// scrolled ("geometry"): each slot's box (fnc_slotRect, [] for one scrolled out of sight); each grid that can
+// be a target as [the box its column shows or [] where nothing clips it, left, top, the box of its cells
+// that shows] (fnc_screenToCell, fnc_gridOrigin), [] for one that cannot (virtual, overflow). Nothing else
+// moves while something is held: a build waits for it, and one that comes ends the drag.
+private _geometry = GVAR(dragRoom) getOrDefault ["geometry", []];
+
+if (_scrolled || {_geometry isEqualTo []}) then {
+    private _gridBoxes = _grids apply {
+        if ((_x getOrDefault ["virtual", true]) || {_x getOrDefault ["overflow", false]}) then {[]} else {
+            private _parent = _x getOrDefault ["parent", controlNull];
+            private _visible = [];
+
+            if (!isNull _parent) then {
+                (ctrlPosition _parent) params ["_groupX", "_groupY", "_groupW", "_groupH"];
+                ([createHashMapFromArray [["rel", [_groupX, _groupY]], ["parent", ctrlParentControlsGroup _parent]]] call FUNC(gridOrigin)) params ["_groupLeft", "_groupTop"];
+
+                _visible = [_groupLeft, _groupTop, _groupW, _groupH];
+            };
+
+            ([_x] call FUNC(gridOrigin)) params ["_originX", "_originY"];
+
+            private _left = _originX;
+            private _top = _originY;
+            private _right = _originX + (_x get "cols") * (_x get "cellW");
+            private _bottom = _originY + (_x get "rows") * (_x get "cellH");
+
+            if (_visible isNotEqualTo []) then {
+                _visible params ["_visibleX", "_visibleY", "_visibleW", "_visibleH"];
+
+                _left = _left max _visibleX;
+                _top = _top max _visibleY;
+                _right = _right min (_visibleX + _visibleW);
+                _bottom = _bottom min (_visibleY + _visibleH);
+            };
+
+            [_visible, _originX, _originY, [_left, _top, _right - _left, _bottom - _top]]
+        }
+    };
+
+    _geometry = [_slots apply {[_x] call FUNC(slotRect)}, _gridBoxes];
+    GVAR(dragRoom) set ["geometry", _geometry];
+};
+
+_geometry params ["_slotRects", "_gridBoxes"];
+
+// The cell of grid _index under the mouse as fnc_screenToCell finds it, with or without the grid's holes; []
+// for none.
+private _fnc_cellAt = {
+    params ["_index", "_holesToo"];
+
+    private _grid = _grids select _index;
+
+    (_gridBoxes select _index) params ["_visible", "_originX", "_originY"];
+
+    if (_visible isNotEqualTo [] && {
+        _visible params ["_visibleX", "_visibleY", "_visibleW", "_visibleH"];
+        !(_mouseX >= _visibleX && {_mouseX < _visibleX + _visibleW} && {_mouseY >= _visibleY} && {_mouseY < _visibleY + _visibleH})
+    }) exitWith {[]};
+
+    private _col = floor ((_mouseX - _originX) / (_grid get "cellW"));
+    private _row = floor ((_mouseY - _originY) / (_grid get "cellH"));
+
+    if (_col < 0 || {_row < 0} || {_col >= _grid get "cols"} || {_row >= _grid get "rows"}) exitWith {[]};
+    if (!_holesToo && {[_grid, _col, _row] call FUNC(hitsHole)}) exitWith {[]};
+
+    [_col, _row]
+};
+
+// Still on the last frame's cell of a grid that nothing else reaches into ("hold", below), with nothing held
+// changed: there is nothing more to look for - the ghost moved, and that is all.
+private _hold = GVAR(dragRoom) getOrDefault ["hold", []];
+
+if (
+    !_changed && {_hold isNotEqualTo []} && {(_hold select 2) isEqualTo _onTop}
+    && {([_hold select 0, true] call _fnc_cellAt) isEqualTo (_hold select 1)}
+) exitWith {
+    if (_timed) then {
+        _marks pushBack ["find", diag_tickTime];
+        call _fnc_noteTime;
+    };
+};
+
+// The slots whose box holds the mouse, in their order: each kind of slot target below takes the first of
+// them that is its kind.
+private _slotHits = [];
+
+{
+    _x params [["_left", 0], ["_top", 0], ["_width", 0], ["_height", 0]];
+
+    if (_mouseX >= _left && {_mouseX < _left + _width} && {_mouseY >= _top} && {_mouseY < _top + _height}) then {
+        _slotHits pushBack _forEachIndex;
+    };
+} forEach _slotRects;
+
+// The grid of the topmost layer there: a kit window's own, or a column's with no window over it. The grid
+// that has a cell there first, and only then one with a hole there, so its footprint shows red: two
+// compartments of a canvas may share a box (a ring and the cell inside it, grid=aaa/aba/aaa), and the
+// hole of the one is the other's cell.
+private _hitGrid = -1;
+private _hitCell = [];
+
+// Only a grid whose cells that show lie there - a pixel wider all round, for the rounding at their edges - is
+// asked for its cell.
+{
+    private _holesToo = _x;
+
+    {
+        if (
+            _x isNotEqualTo [] && {
+                (_x select 3) params ["_cellsX", "_cellsY", "_cellsW", "_cellsH"];
+
+                _mouseX >= _cellsX - pixelW && {_mouseX < _cellsX + _cellsW + pixelW}
+                && {_mouseY >= _cellsY - pixelH} && {_mouseY < _cellsY + _cellsH + pixelH}
+            }
+            && {((_grids select _forEachIndex) getOrDefault ["window", ""]) isEqualTo _onTop} && {
+                _hitCell = [_forEachIndex, _holesToo] call _fnc_cellAt;
+                _hitCell isNotEqualTo []
+            }
+        ) exitWith {
+            _hitGrid = _forEachIndex;
+        };
+    } forEach _gridBoxes;
+
+    if (_hitGrid >= 0) exitWith {};
+} forEach [false, true];
+
+if (_hitGrid < 0) then {
+    _hitCell = [];
+};
+
+// Over the player's equipment column (fnc_layoutGlass), in the inventory.
+private _inArea = _onTop isEqualTo "" && {_dragGroup isEqualTo []} && {[] call FUNC(isInventoryMode)} && {
+    GVAR(equipmentRect) params [["_areaX", 0], ["_areaY", 0], ["_areaW", 0], ["_areaH", 0]];
+    _mouseX >= _areaX && {_mouseX < _areaX + _areaW} && {_mouseY >= _areaY} && {_mouseY < _areaY + _areaH}
+};
+
+// Off every grid only: the storage column (GVAR(storageRect)), a zone a window that attached drew
+// (uiNamespace zones), or outside every panel.
+private _inStorage = false;
+private _hitZone = -1;
+private _outside = false;
+
+if (_hitGrid < 0) then {
+    _inStorage = _onTop isEqualTo "" && {_dragGroup isEqualTo []} && {call FUNC(isInventoryMode)}
+        && {(_slotSource param [0, objNull]) isNotEqualTo GVAR(unit)} && {
+            GVAR(storageRect) params [["_areaX", 0], ["_areaY", 0], ["_areaW", 0], ["_areaH", 0]];
+            _mouseX >= _areaX && {_mouseX < _areaX + _areaW} && {_mouseY >= _areaY} && {_mouseY < _areaY + _areaH}
+        };
+
+    _hitZone = (uiNamespace getVariable [QGVAR(zones), []]) findIf {
+        (_x select 0) params [["_zoneX", 0], ["_zoneY", 0], ["_zoneW", 0], ["_zoneH", 0]];
+
+        _mouseX >= _zoneX && {_mouseX < _zoneX + _zoneW} && {_mouseY >= _zoneY} && {_mouseY < _zoneY + _zoneH}
+    };
+
+    _outside = _onTop isEqualTo "" && {GVAR(panels) findIf {
+        _x params ["_panelX", "_panelY", "_panelW", "_panelH"];
+        _mouseX >= _panelX && {_mouseX < _panelX + _panelW} && {_mouseY >= _panelY} && {_mouseY < _panelY + _panelH}
+    } < 0};
+};
+
+if (_timed) then {
+    _marks pushBack ["find", diag_tickTime];
+};
+
+// All of that as the last frame found it, with nothing held changed: the target, the footprint, the hint and
+// the answer of the window that attached stand as they are.
+private _spot = [_onTop, _slotHits, _hitGrid, _hitCell, _inArea, _inStorage, _hitZone, _outside];
+
+if (!_changed && {_spot isEqualTo (GVAR(dragRoom) getOrDefault ["spot", []])}) exitWith {
+    if (_timed) then {call _fnc_noteTime};
+};
+
+GVAR(dragRoom) set ["spot", _spot];
+_anew = true;
+
+// A grid's cell into which no slot, no other grid and not the equipment column reach is held for as long as the
+// mouse stays in it (above) - the box a pixel larger all round, for the rounding at its edges.
+private _newHold = [];
+
+if (_hitGrid >= 0 && {_slotHits isEqualTo []} && {!_inArea}) then {
+    private _grid = _grids select _hitGrid;
+
+    (_gridBoxes select _hitGrid) params ["", "_originX", "_originY"];
+
+    private _left = _originX + (_hitCell select 0) * (_grid get "cellW") - pixelW;
+    private _top = _originY + (_hitCell select 1) * (_grid get "cellH") - pixelH;
+    private _right = _left + (_grid get "cellW") + 2 * pixelW;
+    private _bottom = _top + (_grid get "cellH") + 2 * pixelH;
+
+    // Whether a box [x, y, w, h] reaches into that cell.
+    private _fnc_meets = {
+        params [["_rectX", 0], ["_rectY", 0], ["_rectW", 0], ["_rectH", 0]];
+
+        _rectW > 0 && {_rectH > 0} && {_rectX < _right} && {_rectX + _rectW > _left} && {_rectY < _bottom} && {_rectY + _rectH > _top}
+    };
+
+    if ((_slotRects findIf {_x call _fnc_meets}) >= 0 || {GVAR(equipmentRect) call _fnc_meets}) exitWith {};
+
+    private _clear = true;
+
+    {
+        if (_x isNotEqualTo [] && {_forEachIndex != _hitGrid} && {(_x select 3) call _fnc_meets}) exitWith {
+            _clear = false;
+        };
+    } forEach _gridBoxes;
+
+    if (_clear) then {
+        _newHold = [_hitGrid, _hitCell, _onTop];
+    };
+};
+
+GVAR(dragRoom) set ["hold", _newHold];
+
+// ----- Where it would land: worked out again only now that something changed -----
+// The count beside the ghost: as many of a stack as go, or how many tiles - a group's grid says below how many
+// of them fit.
+if (!isNull _counter) then {
+    _counter ctrlSetText ([format ["%1 / %2", GVAR(dragCount), _stack], format ["×%1", count _dragGroup]] select (_dragGroup isNotEqualTo []));
+};
+
+// A group's extra footprints and pictures are shown only where they mean something, below.
+if (_dragGroup isNotEqualTo []) then {
+    {_x ctrlShow false} forEach (uiNamespace getVariable [QGVAR(dragFootprints), []]);
+    {(_x select 0) ctrlShow false} forEach (uiNamespace getVariable [QGVAR(dragGhosts), []]);
+
+    GVAR(dragRoom) set ["ghosts", false];
+};
+
+private _footprint = uiNamespace getVariable [QGVAR(dragFootprint), controlNull];
 
 // A shaped item (size=xx/x-) shows its footprint on a grid on its own cells only (fnc_shapeRects), in
-// controls made with the drag so they lie under the ghost (fnc_startDrag). Hidden here every frame and
-// shown again below where they mean something; turned with R, the shape turns with it.
+// controls made with the drag so they lie under the ghost (fnc_startDrag). Hidden here and shown again below
+// where they mean something; turned with R, the shape turns with it.
 private _shapes = uiNamespace getVariable [QGVAR(dragShapes), []];
 private _shapeUsed = 0;
 private _dragHoles = ([_entry getOrDefault ["class", ""], GVAR(dragRot)] call EFUNC(items,footprintAs)) select 2;
@@ -235,6 +568,11 @@ private _fnc_show = {
 if (_onTop isEqualTo "inspect") exitWith {
     _footprint ctrlShow false;
     GVAR(dragTarget) = [];
+
+    if (_timed) then {
+        _marks pushBack ["target", diag_tickTime];
+        call _fnc_noteTime;
+    };
 };
 
 // What the hint says about the target, [[text, colour key], ...] - the key help unless the target has something
@@ -249,7 +587,7 @@ private _fnc_forecast = {
     if !(uiNamespace getVariable [QGVAR(dragExternal), false]) exitWith {[]};
 
     // Kept for the drag by what it adds: the soldier's load does not change while something is held, and an
-    // empty slot or the storage column asks for it every frame the mouse is on it.
+    // empty slot or the storage column asks for it each time the mouse comes back to it.
     private _forecastKey = "forecast|" + str _need;
     private _kept = GVAR(dragRoom) get _forecastKey;
 
@@ -282,6 +620,69 @@ private _fnc_mass = {
     _mass
 };
 
+// Which tile lies on each cell of a grid, the first as fnc_tileAt finds it, and whether a tile other than the
+// one lifted takes it ([under, taken], a cell at row * cols + col, nil for none): worked out once per drag and
+// grid, the first time the mouse comes to it ("cells|n") - nothing on a grid changes while a tile is held. A
+// cell looked up then costs one lookup instead of a pass over every tile of the grid.
+private _fnc_cells = {
+    params ["_index"];
+
+    private _key = "cells|" + str _index;
+    private _kept = GVAR(dragRoom) get _key;
+
+    if (!isNil "_kept") exitWith {_kept};
+
+    private _grid = _grids select _index;
+    private _cols = _grid get "cols";
+    private _rows = _grid get "rows";
+    private _under = [];
+    private _taken = [];
+
+    _under resize (_cols * _rows);
+    _taken resize (_cols * _rows);
+
+    {
+        private _at = _forEachIndex;
+        private _lifted = _index == _sourceIndex && {_at == _tileIndex};
+        private _left = _x get "col";
+        private _top = _x get "row";
+        private _tileW = _x get "w";
+        private _tileH = _x get "h";
+        private _tileHoles = _x getOrDefault ["holes", []];
+
+        for "_r" from 0 to (_tileH - 1) do {
+            for "_c" from 0 to (_tileW - 1) do {
+                private _col = _left + _c;
+                private _row = _top + _r;
+
+                if (_col >= 0 && {_row >= 0} && {_col < _cols} && {_row < _rows} && {!((_r * _tileW + _c) in _tileHoles)}) then {
+                    private _cellIndex = _row * _cols + _col;
+
+                    if (isNil {_under select _cellIndex}) then {
+                        _under set [_cellIndex, _at];
+                    };
+
+                    if (!_lifted) then {
+                        _taken set [_cellIndex, true];
+                    };
+                };
+            };
+        };
+    } forEach (_grid get "tiles");
+
+    _kept = [_under, _taken];
+    GVAR(dragRoom) set [_key, _kept];
+
+    _kept
+};
+
+// The tile on a cell of a grid, as fnc_tileAt answers: its index, -1 for none.
+private _fnc_tileUnder = {
+    params ["_index", "_at"];
+
+    (([_index] call _fnc_cells) select 0) param [(_at select 1) * ((_grids select _index) get "cols") + (_at select 0), -1]
+};
+
 // Where it would land: the first that applies - the hotbar, one of the player's slots, a grid (and a kit's tile
 // in it), a zone, the ground. A block of its own, so that the window that attached can look at the answer
 // whichever way it was reached (below).
@@ -292,40 +693,36 @@ call {
     private _hotbarSlot = -1;
 
     if (_dragGroup isEqualTo [] && {_onTop isEqualTo ""} && {call FUNC(isInventoryMode)} && {!isNil QEFUNC(hotbar,canBindFrom)}) then {
-        _hotbarSlot = (uiNamespace getVariable [QGVAR(slots), []]) findIf {
-            (_x param [7, -1]) >= 0 && {
-                ([_x] call FUNC(slotRect)) params [["_left", 0], ["_top", 0], ["_width", 0], ["_height", 0]];
-                _mouseX >= _left && {_mouseX < _left + _width} && {_mouseY >= _top} && {_mouseY < _top + _height}
-            }
+        private _hit = _slotHits findIf {((_slots select _x) param [7, -1]) >= 0};
+
+        if (_hit >= 0) then {
+            _hotbarSlot = _slotHits select _hit;
         };
     };
 
     if (_hotbarSlot >= 0) exitWith {
-        private _record = (uiNamespace getVariable [QGVAR(slots), []]) select _hotbarSlot;
+        private _record = _slots select _hotbarSlot;
         private _from = if (_slotSource isEqualTo []) then {["grid", _grids select _sourceIndex]} else {["slot", _slotSource]};
 
         ([_entry get "class", _from] call EFUNC(hotbar,canBindFrom)) params ["_fits", "_why"];
 
         GVAR(dragTarget) = ["hotbar", _record select 7, 0, 0, _fits, _why];
-        [[_record] call FUNC(slotRect), _fits] call _fnc_show;
+        [_slotRects select _hotbarSlot, _fits] call _fnc_show;
     };
 
     // ----- On one of the player's own slots -----
     // Where it shows now (fnc_slotRect): the uniform, vest and backpack boxes lie in a scrolling column.
     // Never under a kit window.
     if (_slotSource isEqualTo [] && {_onTop isEqualTo ""}) then {
-        private _slots = uiNamespace getVariable [QGVAR(slots), []];
-        private _slotIndex = _slots findIf {
-            (_x param [5, ""]) isNotEqualTo ""
-            && {(_x param [6, objNull]) isEqualTo GVAR(unit)}
-            && {
-                ([_x] call FUNC(slotRect)) params [["_left", 0], ["_top", 0], ["_width", 0], ["_height", 0]];
-                _mouseX >= _left && {_mouseX < _left + _width} && {_mouseY >= _top} && {_mouseY < _top + _height}
-            }
+        private _hit = _slotHits findIf {
+            private _record = _slots select _x;
+
+            (_record param [5, ""]) isNotEqualTo "" && {(_record param [6, objNull]) isEqualTo GVAR(unit)}
         };
 
-        if (_slotIndex < 0) exitWith {};
+        if (_hit < 0) exitWith {};
 
+        private _slotIndex = _slotHits select _hit;
         private _record = _slots select _slotIndex;
 
         // Whether the slot takes it, and the slot it goes into - worked out once per drag and slot, not on
@@ -360,7 +757,7 @@ call {
         _fitAnswer params ["_fits", "_slot"];
 
         GVAR(dragTarget) = ["slot", _slotIndex, 0, 0, _fits, [["NoFit", "GroupNoSlot"] select (_dragGroup isNotEqualTo []), ""] select _fits, _slot];
-        [[_record] call FUNC(slotRect), _fits] call _fnc_show;
+        [_slotRects select _slotIndex, _fits] call _fnc_show;
 
         // An empty slot takes the whole of it onto the soldier.
         if (_fits && {(_record select 1) isEqualTo ""} && {_dragGroup isEqualTo []}) then {
@@ -376,18 +773,16 @@ call {
     // A slot's item - the player's own or a body's - over the same slot of the other: the player's
     // backpack onto a body's backpack slot, a body's vest onto the player's vest box.
     if (_slotSource isNotEqualTo [] && {_onTop isEqualTo ""} && {_dragGroup isEqualTo []} && {[] call FUNC(isInventoryMode)}) then {
-        private _slots = uiNamespace getVariable [QGVAR(slots), []];
-        private _slotIndex = _slots findIf {
-            (_x param [5, ""]) isNotEqualTo "" && {(_x param [7, -1]) < 0}
-            && {!isNull (_x param [6, objNull])} && {(_x param [6, objNull]) isNotEqualTo (_slotSource select 0)}
-            && {
-                ([_x] call FUNC(slotRect)) params [["_left", 0], ["_top", 0], ["_width", 0], ["_height", 0]];
-                _mouseX >= _left && {_mouseX < _left + _width} && {_mouseY >= _top} && {_mouseY < _top + _height}
-            }
+        private _hit = _slotHits findIf {
+            private _record = _slots select _x;
+
+            (_record param [5, ""]) isNotEqualTo "" && {(_record param [7, -1]) < 0}
+            && {!isNull (_record param [6, objNull])} && {(_record param [6, objNull]) isNotEqualTo (_slotSource select 0)}
         };
 
-        if (_slotIndex < 0) exitWith {};
+        if (_hit < 0) exitWith {};
 
+        private _slotIndex = _slotHits select _hit;
         private _record = _slots select _slotIndex;
         private _toUnit = _record select 6;
         private _toSlot = _record select 5;
@@ -400,23 +795,13 @@ call {
         };
 
         GVAR(dragTarget) = ["slot", _slotIndex, 0, 0, _why isEqualTo "", _why, _toSlot, true, _toUnit];
-        [[_record] call FUNC(slotRect), _why isEqualTo ""] call _fnc_show;
-    };
-
-    // Over the player's equipment column (fnc_layoutGlass), in the inventory.
-    private _inArea = _onTop isEqualTo "" && {_dragGroup isEqualTo []} && {[] call FUNC(isInventoryMode)} && {
-        GVAR(equipmentRect) params [["_areaX", 0], ["_areaY", 0], ["_areaW", 0], ["_areaH", 0]];
-        _mouseX >= _areaX && {_mouseX < _areaX + _areaW} && {_mouseY >= _areaY} && {_mouseY < _areaY + _areaH}
+        [_slotRects select _slotIndex, _why isEqualTo ""] call _fnc_show;
     };
 
     if ((GVAR(dragTarget) param [0, ""]) isEqualTo "slot") then {
         // Still on that slot, and nothing over it there: nothing more to look for. A target that stands for
         // the whole equipment column has no slot of its own there (-1) and is looked for anew below.
-        private _targetIndex = GVAR(dragTarget) param [1, -1];
-        private _record = if (_targetIndex < 0) then {[]} else {(uiNamespace getVariable [QGVAR(slots), []]) param [_targetIndex, []]};
-        ([_record] call FUNC(slotRect)) params [["_slotX", 0], ["_slotY", 0], ["_slotW", 0], ["_slotH", 0]];
-
-        if (_onTop isNotEqualTo "" || {!(_mouseX >= _slotX && {_mouseX < _slotX + _slotW} && {_mouseY >= _slotY} && {_mouseY < _slotY + _slotH})}) then {
+        if (_onTop isNotEqualTo "" || {!((GVAR(dragTarget) param [1, -1]) in _slotHits)}) then {
             GVAR(dragTarget) = [];
         };
     };
@@ -453,11 +838,10 @@ call {
 
         _answer params ["_slot", "_why"];
 
-        private _slots = uiNamespace getVariable [QGVAR(slots), []];
         private _slotIndex = if (_slot isEqualTo "") then {-1} else {
             _slots findIf {(_x param [5, ""]) isEqualTo _slot && {(_x param [6, objNull]) isEqualTo _player} && {(_x param [7, -1]) < 0}}
         };
-        private _rect = if (_slotIndex < 0) then {[]} else {[_slots select _slotIndex] call FUNC(slotRect)};
+        private _rect = if (_slotIndex < 0) then {[]} else {_slotRects select _slotIndex};
 
         GVAR(dragTarget) = ["slot", _slotIndex, 0, 0, _why isEqualTo "", _why, _slot, true, [objNull, _player] select (_slotSource isNotEqualTo [])];
 
@@ -471,25 +855,10 @@ call {
     if ((GVAR(dragTarget) param [0, ""]) isEqualTo "slot") exitWith {};
 
     // ----- On a grid -----
-    // One of the topmost layer there: a kit window's own, or a column's with no window over it. The grid
-    // that has a cell there first, and only then one with a hole there, so its footprint shows red: two
-    // compartments of a canvas may share a box (a ring and the cell inside it, grid=aaa/aba/aaa), and the
-    // hole of the one is the other's cell.
-    private _cell = [];
-    private _targetIndex = -1;
-
-    {
-        private _holesToo = _x;
-
-        _targetIndex = _grids findIf {
-            !(_x getOrDefault ["virtual", true]) && {!(_x getOrDefault ["overflow", false])} && {(_x getOrDefault ["window", ""]) isEqualTo _onTop} && {
-                _cell = [_x, _mouse, _holesToo] call FUNC(screenToCell);
-                _cell isNotEqualTo []
-            }
-        };
-
-        if (_targetIndex >= 0) exitWith {};
-    } forEach [false, true];
+    // The one found under the mouse above: of the topmost layer there, one with a cell there before one with a
+    // hole there.
+    private _cell = _hitCell;
+    private _targetIndex = _hitGrid;
 
     if (_targetIndex < 0) exitWith {
         _footprint ctrlShow false;
@@ -502,12 +871,6 @@ call {
         // sections a grid takes what is let go on it, so only the room around the grids is. The footprint
         // covers the column at half strength, as the equipment column's; the slot is lit already
         // (fnc_showTargets).
-        private _inStorage = _onTop isEqualTo "" && {_dragGroup isEqualTo []} && {call FUNC(isInventoryMode)}
-            && {(_slotSource param [0, objNull]) isNotEqualTo GVAR(unit)} && {
-                GVAR(storageRect) params [["_areaX", 0], ["_areaY", 0], ["_areaW", 0], ["_areaH", 0]];
-                _mouseX >= _areaX && {_mouseX < _areaX + _areaW} && {_mouseY >= _areaY} && {_mouseY < _areaY + _areaH}
-            };
-
         private _storageAnswer = if (_inStorage) then {GVAR(dragRoom) get "storageArea"} else {[]};
 
         if (isNil "_storageAnswer") then {
@@ -553,33 +916,30 @@ call {
         // A zone a window that attached drew (uiNamespace zones, fnc_endDrag hands it to the "drop" hook): the
         // footprint covers it at half strength.
         private _zones = uiNamespace getVariable [QGVAR(zones), []];
-        private _zoneIndex = _zones findIf {
-            (_x select 0) params [["_zoneX", 0], ["_zoneY", 0], ["_zoneW", 0], ["_zoneH", 0]];
-
-            _mouseX >= _zoneX && {_mouseX < _zoneX + _zoneW} && {_mouseY >= _zoneY} && {_mouseY < _zoneY + _zoneH}
-        };
+        private _zoneIndex = _hitZone;
 
         if (_zoneIndex >= 0) exitWith {
             GVAR(dragTarget) = ["zone", _zoneIndex, 0, 0, true, ""];
             [(_zones select _zoneIndex) select 0, true, DRAG_FOOTPRINT_ALPHA / 2] call _fnc_show;
         };
 
-        // Outside every panel, with no kit window there either: the ground. Not for what lies on the ground
-        // already.
-        private _outside = _onTop isEqualTo "" && {GVAR(panels) findIf {
-            _x params ["_panelX", "_panelY", "_panelW", "_panelH"];
-            _mouseX >= _panelX && {_mouseX < _panelX + _panelW} && {_mouseY >= _panelY} && {_mouseY < _panelY + _panelH}
-        } < 0};
+        // Outside every panel, with no kit window there either (found above): the ground. Not for what lies on
+        // the ground already - asked once per drag.
+        private _fromGround = GVAR(dragRoom) get "fromGround";
 
-        private _fromGround = _slotSource isEqualTo [] && {
-            if (_dragGroup isEqualTo []) then {
-                [(_grids select _sourceIndex) get "container"] call EFUNC(storage,isGroundHolder)
-            } else {
-                // Several: they all lie on the ground already.
-                _dragGroup findIf {
-                    !([(_grids param [_x select 0, createHashMap]) getOrDefault ["container", objNull]] call EFUNC(storage,isGroundHolder))
-                } < 0
-            }
+        if (isNil "_fromGround") then {
+            _fromGround = _slotSource isEqualTo [] && {
+                if (_dragGroup isEqualTo []) then {
+                    [(_grids select _sourceIndex) get "container"] call EFUNC(storage,isGroundHolder)
+                } else {
+                    // Several: they all lie on the ground already.
+                    _dragGroup findIf {
+                        !([(_grids param [_x select 0, createHashMap]) getOrDefault ["container", objNull]] call EFUNC(storage,isGroundHolder))
+                    } < 0
+                }
+            };
+
+            GVAR(dragRoom) set ["fromGround", _fromGround];
         };
 
         GVAR(dragTarget) = [[], ["ground", -1, 0, 0, true, ""]] select (_outside && {!_fromGround});
@@ -619,7 +979,7 @@ call {
             format ["group|%1|%2|%3", _targetIndex, _cell select 0, _cell select 1]
         ];
 
-        ([_target] call FUNC(gridOrigin)) params ["_originX", "_originY"];
+        (_gridBoxes select _targetIndex) params ["", "_originX", "_originY"];
 
         private _gain = GVAR(theme) getOrDefault ["gain", [0.298, 0.765, 0.541, 1]];
         private _loss = GVAR(theme) getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];
@@ -665,19 +1025,9 @@ call {
                     };
                 } forEach _data;
 
-                {
-                    _x params ["_ghostControl", "_offsetCellsX", "_offsetCellsY", "_pictureX", "_pictureY", ["_ghostTurned", false]];
+                call _fnc_moveGhosts;
 
-                    _ghostControl ctrlSetPosition [_boxX + _offsetCellsX + _pictureX, _boxY + _offsetCellsY + _pictureY];
-                    _ghostControl ctrlCommit 0;
-
-                    // A tile that lies turned keeps its turned picture where it moved, as the held one does above.
-                    if (_ghostTurned) then {
-                        _ghostControl ctrlSetAngle [90, 0.5, 0.5];
-                    };
-
-                    _ghostControl ctrlShow true;
-                } forEach (uiNamespace getVariable [QGVAR(dragGhosts), []]);
+                GVAR(dragRoom) set ["ghosts", true];
             };
             case "kit": {
                 // On the kit's tile, or the kit's grid.
@@ -716,7 +1066,7 @@ call {
     private _kitTile = -1;
 
     if (!isNil QEFUNC(compat_efak,canDrop) && {(_sourceGrid getOrDefault ["source", ""]) isEqualTo ""}) then {
-        private _underIndex = [_target, _cell] call FUNC(tileAt);
+        private _underIndex = [_targetIndex, _cell] call _fnc_tileUnder;
         private _under = (_target get "tiles") param [_underIndex, createHashMap];
 
         if (
@@ -745,7 +1095,7 @@ call {
         GVAR(dragTarget) = ["kitTile", _targetIndex, _kitTile, 0, _fits, [_why, "Failed"] select (!_fits && {_why isEqualTo ""})];
 
         // The footprint lies on the kit's tile.
-        ([_target] call FUNC(gridOrigin)) params ["_originX", "_originY"];
+        (_gridBoxes select _targetIndex) params ["", "_originX", "_originY"];
 
         [[_target, [_originX, _originY], _under get "col", _under get "row", _under get "w", _under get "h"] call FUNC(spanRect), _fits] call _fnc_show;
     };
@@ -758,7 +1108,7 @@ call {
     private _repackAnswer = [false, ""];
 
     if (_slotSource isEqualTo [] && {!isNil QEFUNC(magazines,canRepack)}) then {
-        private _underIndex = [_target, _cell] call FUNC(tileAt);
+        private _underIndex = [_targetIndex, _cell] call _fnc_tileUnder;
 
         if (_underIndex < 0 || {_targetIndex == _sourceIndex && {_underIndex == _tileIndex}}) exitWith {};
 
@@ -784,7 +1134,7 @@ call {
         GVAR(dragTarget) = ["repack", _targetIndex, _repackTile, 0, _fits, _why];
 
         // The footprint lies on that magazine, in the accent colour: something else happens than a move.
-        ([_target] call FUNC(gridOrigin)) params ["_originX", "_originY"];
+        (_gridBoxes select _targetIndex) params ["", "_originX", "_originY"];
 
         [
             [_target, [_originX, _originY], _under get "col", _under get "row", _under get "w", _under get "h"] call FUNC(spanRect),
@@ -832,15 +1182,21 @@ call {
             _taken = _col < 0 || {_row < 0} || {_col + _w > _target get "cols"} || {_row + _h > _target get "rows"}
                 || {[_target, _col, _row, _w, _h, _dragHoles] call FUNC(hitsHole)};
 
+            // A cell of its own (none of its holes) that a tile other than the lifted one takes (einv_storage_fnc_overlaps,
+            // from the grid's cells above).
             if (!_taken) then {
-                {
-                    if (
-                        !(_targetIndex == _sourceIndex && {_forEachIndex == _tileIndex})
-                        && {[_mask, [_x get "col", _x get "row", _x get "w", _x get "h", _x getOrDefault ["holes", []]]] call EFUNC(storage,overlaps)}
-                    ) exitWith {
-                        _taken = true;
+                private _takenCells = ([_targetIndex] call _fnc_cells) select 1;
+                private _cols = _target get "cols";
+
+                for "_r" from 0 to (_h - 1) do {
+                    for "_c" from 0 to (_w - 1) do {
+                        if (!((_r * _w + _c) in _dragHoles) && {_takenCells param [(_row + _r) * _cols + _col + _c, false]}) exitWith {
+                            _taken = true;
+                        };
                     };
-                } forEach (_target get "tiles");
+
+                    if (_taken) exitWith {};
+                };
             };
 
             // A cell a move under way goes to is taken as well (GVAR(inFlight), outlined by fnc_drawPending):
@@ -912,8 +1268,16 @@ call {
             _reason = _touch;
         };
 
-        // A backpack never goes into a backpack; the cells above are every other limit.
-        if ([_to, _entry] call EFUNC(storage,backpackIntoBackpack)) exitWith {
+        // A backpack never goes into a backpack; the cells above are every other limit. Asked once per target.
+        private _intoKey = format ["backpack|%1", _targetIndex];
+        private _into = GVAR(dragRoom) get _intoKey;
+
+        if (isNil "_into") then {
+            _into = [_to, _entry] call EFUNC(storage,backpackIntoBackpack);
+            GVAR(dragRoom) set [_intoKey, _into];
+        };
+
+        if (_into) exitWith {
             _reason = "NoBackpack";
         };
 
@@ -940,7 +1304,7 @@ call {
     GVAR(dragTarget) = ["grid", _targetIndex, _col, _row, _reason isEqualTo "", _reason, "", _place];
 
     // The footprint lies on the target's cells, clipped to the grid where the item would stick out.
-    ([_target] call FUNC(gridOrigin)) params ["_originX", "_originY"];
+    (_gridBoxes select _targetIndex) params ["", "_originX", "_originY"];
 
     private _left = (_col max 0) min ((_target get "cols") - 1);
     private _top = (_row max 0) min ((_target get "rows") - 1);
@@ -986,6 +1350,10 @@ call {
     };
 };
 
+if (_timed) then {
+    _marks pushBack ["target", diag_tickTime];
+};
+
 // The hint over this target, written when it differs from what stands there.
 [_hintParts] call FUNC(dragHint);
 
@@ -1029,4 +1397,9 @@ if (!isNil "_checked" && {_checked isEqualType []}) then {
             } forEach _shapes;
         };
     };
+};
+
+if (_timed) then {
+    _marks pushBack ["hint", diag_tickTime];
+    call _fnc_noteTime;
 };

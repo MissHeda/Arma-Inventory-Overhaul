@@ -82,6 +82,9 @@ call FUNC(cameraStop);
 
 call EFUNC(storage,flushPlaces);
 
+// A drag under way ends with the window, without fnc_endDrag: its timing line (einv_gui_debugTiming) is written here.
+call FUNC(logDrag);
+
 GVAR(press) = [];
 GVAR(dragging) = false;
 GVAR(dragTarget) = [];

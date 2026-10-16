@@ -49,6 +49,7 @@ PREP(onMouseButton);
 PREP(startDrag);
 PREP(updateDrag);
 PREP(endDrag);
+PREP(logDrag);
 PREP(makeGhost);
 PREP(rotateDrag);
 PREP(onMouseZ);

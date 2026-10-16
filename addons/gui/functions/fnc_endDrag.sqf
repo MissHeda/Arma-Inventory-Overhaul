@@ -38,6 +38,10 @@
  * are outlined (fnc_drawPending); where it landed lights up once the answer is finished (fnc_onFrame,
  * fnc_afterAction).
  *
+ * With einv_gui_debugTiming on, the RPT gets one line for the drag before anything else: "drag: start 2.1 ms,
+ * frames 140, update avg 0.04 ms max 1.20 ms (slowest: ...)" - the lift, and what its frames cost
+ * (fnc_logDrag, fnc_startDrag, fnc_updateDrag).
+ *
  * Arguments:
  * 0: Display <DISPLAY>
  *
@@ -53,6 +57,10 @@
 disableSerialization;
 
 params ["_display"];
+
+// For the tester's numbers (einv_gui_debugTiming): the line of this drag (fnc_logDrag - a build and the window
+// closing write it too, as they end a drag without this).
+call FUNC(logDrag);
 
 // What lifting it showed about weight goes first.
 [] call FUNC(clearWeightPreview);
