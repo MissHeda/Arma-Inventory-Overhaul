@@ -119,7 +119,7 @@ private _open = {
     // A container's cells and like= are drawn at Containers; its own size and stack, as any item's, at Items.
     private _values = _statement param [1, createHashMap];
     private _container = ((_facts getOrDefault ["kind", ""]) in CONTAINER_KINDS) && {
-        "grid" in _values || {"like" in _values} || {!("footprint" in _values) && {!("stack" in _values)}}
+        "grid" in _values || {"like" in _values} || {!("footprint" in _values) && {!("stack" in _values)} && {!("icon" in _values)}}
     };
     private _stepId = ["items", "containers"] select _container;
 

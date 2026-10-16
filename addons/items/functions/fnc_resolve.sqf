@@ -1,14 +1,14 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * What the rules make of an item: its size, how many share a tile, a container's grid, a weight and a
- * name of its own. Each of these is a field of its own and goes to the first that has an answer,
- * highest first:
+ * What the rules make of an item: its size, how many share a tile, a container's grid, a weight, a
+ * name of its own and how its picture is drawn in its tile. Each of these is a field of its own and
+ * goes to the first that has an answer, highest first:
  *
  *   own     - the rules text (later rules first), and after it the older tables (einv_items_sizeTable,
  *             einv_items_stackTable, einv_storage_containerTable), which therefore win over the text
- *   mod     - the item's own config: einv_size, einv_stack, einv_grid, einv_weight, einv_name, and
- *             where one of those is not set the older einv_gridSize[], einv_stackSize, einv_grids[]
+ *   mod     - the item's own config: einv_size, einv_stack, einv_grid, einv_weight, einv_name,
+ *             einv_icon, and where one of those is not set the older einv_gridSize[], einv_stackSize, einv_grids[]
  *             or einv_slots (fnc_getFacts, fnc_readConfigKeys). A subclass has its parent's, and
  *             the rules text above still has the last word
  *   preset  - the preset chain (a derived preset after its base, later rules first), and after it
@@ -18,13 +18,13 @@
  *             mod or the preset - but for the preset's own everything else, its rules without any
  *             condition (the default's first, size=1x1 stack=1, reaches every item): a field only such a
  *             rule answered is open to them, and keeps the preset's answer where they have none
- *   builtin - 1x1, alone on its tile, a grid by load, the config's weight and name
+ *   builtin - 1x1, alone on its tile, a grid by load, the config's weight and name, the plain picture
  *
  * Only the rules that can be about the item's kind are asked (fnc_compileRules sorts them), and a
  * layer is left as soon as nothing it could still set is open.
  *
  * A rule with like=X sets, besides what it sets itself, every field of LIKE_FIELDS still open - size,
- * stack, grid and weight, never the name - to what this function makes of X, asked now through the
+ * stack, grid and weight, never the name or the picture - to what this function makes of X, asked now through the
  * same compiled rules: a later change to X follows, and a rule like=X grid=6x4 takes X's answer with
  * its own grid on top. X's answer is X's in full: its grid as the compartments X really has
  * (einv_storage_fnc_blocksFor with X's class, kind and load - "auto" by this item's own load would be
@@ -53,6 +53,8 @@
  *                 (fnc_parseGrid), else [] <ARRAY>
  *   "weight"    - its weight in kg by the rules, -1 when none sets one <NUMBER>
  *   "name"      - its name by the rules, "" when none sets one <STRING>
+ *   "icon"      - how its picture is drawn in its tile, [scale, across, down] (fnc_parseIcon), ICON_PLAIN
+ *                 [1, 0, 0] when none sets it <ARRAY>
  *   "src"       - field -> where it came from: "own:<i>" (i-th rule of the text),
  *                 "legacy:<setting>:<i>", "mod:<config key>", "preset:<preset>:<i>", "all:<i>" (the
  *                 i-th rule of the text, one with "all"), "builtin", "forced" <HASHMAP>
@@ -66,7 +68,7 @@
 params [["_facts", createHashMap, [createHashMap]], ["_compiled", createHashMap, [createHashMap]], ["_chain", [], [[]]]];
 
 private _kind = _facts get "kind";
-private _need = ["footprint", "weight", "name"];
+private _need = ["footprint", "weight", "name", "icon"];
 
 if !(_kind in KINDS_SINGLE) then {
     _need pushBack "stack";
@@ -303,6 +305,12 @@ if ("name" in _need && {"name" in _mod}) then {
     _need = _need - ["name"];
 };
 
+if ("icon" in _need && {"icon" in _mod}) then {
+    _result set ["icon", _mod get "icon"];
+    _src set ["icon", "mod:" + QGVARMAIN(icon)];
+    _need = _need - ["icon"];
+};
+
 [_compiled getOrDefault ["preset", []], _presetIndices, _presetFields, true] call _fnc_walk;
 
 // Everything else (all): what no rule, table, mod or preset answered - the gaps, and only those - and
@@ -323,6 +331,7 @@ if (_fallbackIndices isNotEqualTo []) then {
         case "stack": {1};
         case "grid": {["auto"]};
         case "weight": {-1};
+        case "icon": {ICON_PLAIN};
         default {""};
     }];
     _src set [_x, "builtin"];

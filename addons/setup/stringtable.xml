@@ -608,7 +608,7 @@
             <English>Apply</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ApplyTip">
-            <English>Keep this size, stack, weight and name for this class. Save at Review puts it to use.</English>
+            <English>Keep this size, stack, weight, name and picture zoom for this class. Save at Review puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ApplyTipTree">
             <English>Keep this for the class and every class built on it, as one rule. A class with a rule of its own further down keeps it. Save at Review puts it to use.</English>
@@ -646,11 +646,26 @@
         <Key ID="STR_einv_setup_Items_PickHint">
             <English>Pick an item on the left to see and set its size.</English>
         </Key>
+        <Key ID="STR_einv_setup_Items_PictureAcross">
+            <English>Across %1 %</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_PictureDown">
+            <English>Down %1 %</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_PictureField">
+            <English>Picture</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_PictureReset">
+            <English>Reset</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_PictureZoom">
+            <English>Zoom %1 %</English>
+        </Key>
         <Key ID="STR_einv_setup_Items_Pieces">
             <English>%1 pieces</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ResetTip">
-            <English>Remove its own size, stack, weight and name. The preset decides again.</English>
+            <English>Remove its own size, stack, weight, name and picture zoom. The preset decides again.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Search">
             <English>Search name or class (* ?)</English>
@@ -1152,6 +1167,12 @@
         </Key>
         <Key ID="STR_einv_setup_Value_GridShape">
             <English>%1×%2 shaped, %3 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Icon">
+            <English>picture at %1 %</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_IconMoved">
+            <English>picture at %1 %, moved %2 % across and %3 % down</English>
         </Key>
         <Key ID="STR_einv_setup_Value_Like">
             <English>same as %1</English>

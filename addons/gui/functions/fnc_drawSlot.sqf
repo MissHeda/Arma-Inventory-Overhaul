@@ -3,7 +3,8 @@
 /*
  * Author: Miss Heda
  * Draws a dedicated slot - a weapon, a piece of gear, an attachment or a loaded magazine: its surface,
- * its caption where the style puts it, and the item's picture - or, while the slot is empty, the
+ * its caption where the style puts it, and the item's picture - drawn as its rules say (icon=,
+ * fnc_uiItemPicture) and never out of the slot - or, while the slot is empty, the
  * silhouette of what belongs there, hatched in Tarkov's look. Registers the slot in (uiNamespace getVariable [QGVAR(slots), []]), so
  * the mouse finds it (fnc_onFrame).
  *
@@ -202,10 +203,12 @@ if (_areaH > 0) then {
             _theme getOrDefault ["slotIcon", [1, 1, 1, 0.15]]
         ] call FUNC(uiIcon));
     } else {
+        // As the rules draw it (icon=): larger, smaller or moved, and cut to the slot where it would reach out.
         _controls pushBack ([
             _display, _parent, [_left + _padX, _areaTop, _width - _padX * 2, _areaH], _info getOrDefault ["picture", ""],
-            [[1, 1, 1, 1], [1, 1, 1, 0.35]] select (_options getOrDefault ["faded", false])
-        ] call FUNC(uiPicture));
+            _info getOrDefault ["icon", ICON_PLAIN], [[1, 1, 1, 1], [1, 1, 1, 0.35]] select (_options getOrDefault ["faded", false]),
+            false, 1, [_left, _top, _width, _height]
+        ] call FUNC(uiItemPicture));
 
         private _weapon = _options getOrDefault ["weapon", []];
 

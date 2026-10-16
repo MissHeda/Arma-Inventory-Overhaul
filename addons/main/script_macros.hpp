@@ -56,6 +56,16 @@
 // the wizard draws one on a board this size, and every free-cell test walks its cells one by one.
 #define SHAPE_MAX 8
 
+// How an item's picture is drawn in its tile (icon=, einv_items_fnc_parseIcon, the "icon" of
+// einv_items_fnc_getInfo): [scale, across, down], the offsets a share of the tile's width and height.
+// ICON_PLAIN is the picture as it is fitted, nothing moved. Anything else is cut to its tile by the
+// window (einv_gui_fnc_uiItemPicture), and the wizard offers the same range (einv_setup_fnc_drawItemEditor).
+// ICON_PLAIN is an array literal - used in code only, never inside a macro's arguments.
+#define ICON_PLAIN [1, 0, 0]
+#define ICON_SCALE_MIN 0.25
+#define ICON_SCALE_MAX 4
+#define ICON_OFFSET_MAX 1
+
 // Most item moves one transaction carries (einv_storage_fnc_request): the window sends the next chunk
 // when this one is answered (einv_gui_fnc_sendMoves), so one message never carries a whole crate.
 #define BATCH_MAX 25

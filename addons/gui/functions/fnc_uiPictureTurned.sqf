@@ -26,6 +26,9 @@
  * 3: Texture <STRING>
  * 4: Colour <ARRAY> (default: [1, 1, 1, 1])
  * 5: Width to height of the picture, when the texture does not say <NUMBER> (default: 1)
+ * 6: Scale: the square, and so the picture, this many times its fitted size (an item's icon=,
+ *    fnc_uiItemPicture) <NUMBER> (default: 1)
+ * 7: Shift [x, y] of the square's middle off the box's, in screen units <ARRAY> (default: [0, 0])
  *
  * Return Value:
  * The picture <CONTROL>
@@ -38,8 +41,9 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_rect", "_texture", ["_color", [1, 1, 1, 1]], ["_aspect", 1]];
+params ["_display", "_parent", "_rect", "_texture", ["_color", [1, 1, 1, 1]], ["_aspect", 1], ["_scale", 1], ["_shift", [0, 0]]];
 _rect params ["_left", "_top", "_width", "_height"];
+_shift params ["_shiftX", "_shiftY"];
 
 private _info = getTextureInfo _texture;
 
@@ -55,11 +59,11 @@ if (_aspect <= 0) then {
 // turned, its width runs down the box and its height across.
 private _boxW = _width / pixelW;
 private _boxH = _height / pixelH;
-private _side = floor ((_boxW / ((1 / _aspect) min 1)) min (_boxH / (_aspect min 1)));
+private _side = (floor (((_boxW / ((1 / _aspect) min 1)) min (_boxH / (_aspect min 1))) * _scale)) max 1;
 
 private _ctrl = [_display, "EINV_Picture", _parent, [
-    _left + (_width - _side * pixelW) / 2,
-    _top + (_height - _side * pixelH) / 2,
+    _left + (_width - _side * pixelW) / 2 + _shiftX,
+    _top + (_height - _side * pixelH) / 2 + _shiftY,
     _side * pixelW,
     _side * pixelH
 ]] call FUNC(uiCreate);

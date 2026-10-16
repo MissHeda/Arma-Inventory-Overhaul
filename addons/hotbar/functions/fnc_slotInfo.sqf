@@ -11,7 +11,8 @@
  * Return Value:
  * The slot <HASHMAP>
  *   "class" <STRING>, "kind" <STRING> (fnc_useOf), "count" <NUMBER>, "name" <STRING>, "short" <STRING>,
- *   "picture" <STRING>, "does" <STRING>, "key" <STRING> ("" for no key)
+ *   "picture" <STRING>, "icon" [scale, across, down] <ARRAY> (how the rules draw the picture, icon=; the
+ *   plain picture when none), "does" <STRING>, "key" <STRING> ("" for no key)
  *
  * Example:
  * [2] call einv_hotbar_fnc_slotInfo;
@@ -23,7 +24,7 @@ params [["_index", 0, [0]], ["_count", -1, [0]]];
 
 private _class = GVAR(slots) param [_index, ""];
 private _info = createHashMapFromArray [
-    ["class", _class], ["kind", ""], ["count", 0], ["name", ""], ["short", ""], ["picture", ""], ["does", ""],
+    ["class", _class], ["kind", ""], ["count", 0], ["name", ""], ["short", ""], ["picture", ""], ["icon", ICON_PLAIN], ["does", ""],
     ["key", [_index] call FUNC(keyName)]
 ];
 
@@ -40,7 +41,10 @@ if (_count < 0) then {
 _info set ["count", _count];
 _info set ["name", [_class] call EFUNC(gui,itemName)];
 _info set ["short", [_class, true] call EFUNC(gui,itemName)];
-_info set ["picture", ([_class] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]];
+private _item = [_class] call EFUNC(items,getInfo);
+
+_info set ["picture", _item getOrDefault ["picture", ""]];
+_info set ["icon", _item getOrDefault ["icon", ICON_PLAIN]];
 
 // What the key does with it, in a few words.
 private _does = switch (_kind) do {

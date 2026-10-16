@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Writes a rules text from its parts (fnc_parseRules), always the same way: the header, then the
  * groups, then the rules, each in their order, joined with ", ". A rule's conditions come before a
- * " > ", its values in the order like, size, stack, grid, weight, name. Reading what this wrote and
+ * " > ", its values in the order like, size, stack, grid, weight, name, icon. Reading what this wrote and
  * writing it again gives the same text, so two setups that mean the same can be compared as texts.
  *
  * Groups go before the rules: a group means the same wherever it is defined, so that changes nothing.
@@ -54,6 +54,7 @@ private _fnc_values = {
     if ("grid" in _values) then {_texts pushBack ("grid=" + (_values get "grid"))};
     if ("weight" in _values) then {_texts pushBack ("weight=" + str (_values get "weight"))};
     if ("name" in _values) then {_texts pushBack ("name=" + ([_values get "name"] call FUNC(encodeName)))};
+    if ("icon" in _values) then {_texts pushBack ("icon=" + ([_values get "icon"] call FUNC(formatIcon)))};
 
     _texts joinString " "
 };

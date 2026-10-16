@@ -46,7 +46,7 @@ if (!isNil QEFUNC(items,parseConfigEntry)) then {
 
 if (_entries isNotEqualTo []) exitWith {
     // The config key of each value, and the field of a rule it becomes.
-    private _fields = [["einv_size", "footprint"], ["einv_stack", "stack"], ["einv_grid", "grid"], ["einv_weight", "weight"], ["einv_name", "name"]];
+    private _fields = [["einv_size", "footprint"], ["einv_stack", "stack"], ["einv_grid", "grid"], ["einv_weight", "weight"], ["einv_name", "name"], ["einv_icon", "icon"]];
     private _changes = [];
 
     {

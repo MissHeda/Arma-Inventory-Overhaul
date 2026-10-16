@@ -29,7 +29,9 @@
  * 2: Position [x, y, w, h], relative to the group <ARRAY>
  * 3: Theme <HASHMAP>
  * 4: Compartments [[cols, rows, holes, pos], ...] - for an item its shape alone, [] for none <ARRAY>
- * 5: For an item [picture, category]; [] for a container <ARRAY> (default: [])
+ * 5: For an item [picture, category, class, icon]; [] for a container <ARRAY> (default: [])
+ *    With a class, the tile is drawn for it, by the icon given ([scale, across, down], the one being edited,
+ *    not the draft's); without, its shape and picture only
  *
  * Return Value:
  * None
@@ -63,16 +65,19 @@ private _padX = SQUARE(_padY);
 private _areaW = _width - _padX * 2 - SCROLL_W;
 
 if (_item isNotEqualTo []) exitWith {
-    _item params [["_picture", ""], ["_category", CATEGORY_MISC]];
+    _item params [["_picture", ""], ["_category", CATEGORY_MISC], ["_class", ""], ["_icon", ICON_PLAIN]];
 
     (_blocks param [0, [0, 0, []]]) params ["_w", "_h", ["_holes", []]];
 
-    // A piece of grid a cell wider than the tile all round, as wide as it fits.
+    // A piece of grid a cell wider than the tile all round, as wide as it fits - and, where there is room, with
+    // the cell the inventory has, so the tile is as big here as it is there.
     private _gridCols = STORAGE_COLS min ((_w max 1) + 2);
     private _gridRows = (_h max 1) + 2;
-    private _cellPixels = (floor ((((UNIT * 0.8) min ((_height - _padY * 2) / _gridRows)) min (_areaW / _gridCols * pixelH / pixelW)) / pixelH)) max 1;
+    private _largest = if (_class isNotEqualTo "") then {([] call EFUNC(gui,getCell)) select 1} else {UNIT * 0.8};
+    private _cellPixels = (floor (((_largest min ((_height - _padY * 2) / _gridRows)) min (_areaW / _gridCols * pixelH / pixelW)) / pixelH)) max 1;
     private _cellH = _cellPixels * pixelH;
     private _cellW = _cellPixels * pixelW;
+    private _cells = [];
 
     [
         _display, _group, [0, 0, _padX * 2 + _gridCols * _cellW, _padY * 2 + _gridRows * _cellH],
@@ -81,11 +86,27 @@ if (_item isNotEqualTo []) exitWith {
 
     for "_row" from 0 to (_gridRows - 1) do {
         for "_col" from 0 to (_gridCols - 1) do {
-            [_display, _group, [_padX + _col * _cellW, _padY + _row * _cellH, _cellW - pixelW, _cellH - pixelH], _cellColor] call EFUNC(gui,uiPanel);
+            _cells pushBack (([_display, _group, [_padX + _col * _cellW, _padY + _row * _cellH, _cellW - pixelW, _cellH - pixelH], _cellColor] call EFUNC(gui,uiPanel)) param [0, controlNull]);
         };
     };
 
     if (_w < 1) exitWith {};
+
+    // The tile of the inventory itself, on this piece of grid: the cells under it make way for it as they do there.
+    if (_class isNotEqualTo "") exitWith {
+        private _grid = createHashMapFromArray [
+            ["parent", _group], ["rel", [_padX, _padY]], ["cols", _gridCols], ["rows", _gridRows], ["cellW", _cellW], ["cellH", _cellH],
+            ["cells", _cells], ["holes", []], ["tiles", []], ["section", ""]
+        ];
+
+        // A magazine full, as a tile in a container shows it, and one alone.
+        private _capacity = ([_class] call EFUNC(items,getInfo)) getOrDefault ["capacity", 0];
+
+        [_display, _grid, createHashMapFromArray [
+            ["class", _class], ["col", parseNumber (_w + 2 <= STORAGE_COLS)], ["row", 1], ["w", _w], ["h", _h], ["holes", _holes], ["count", 1],
+            ["ammo", _capacity], ["icon", _icon], ["preview", true]
+        ], _theme] call EFUNC(gui,createTile);
+    };
 
     private _origin = [_padX + ([_cellW, 0] select (_w + 2 > STORAGE_COLS)), _padY + _cellH];
     private _tileBg = (_theme getOrDefault ["tileBg", []]) param [_category, [0.15, 0.15, 0.15, 0.92]];

@@ -3,8 +3,9 @@
 /*
  * Author: Miss Heda
  * Puts the bar on the screen: the titles display (RscTitles, on its own layer) with, in its group, a box,
- * a picture, a key, a count and a bar for each slot, and a line for messages above them. The bar starts
- * faded out; fnc_hudFrame fades it in.
+ * a picture, a key, a count and a bar for each slot, and a line for messages above them. The picture has a
+ * twin in a group that cuts it (EINV_HotbarClip), for an item drawn larger or moved by its rules (icon=). The
+ * bar starts faded out; fnc_hudFrame fades it in.
  *
  * The colours are the player's own interface colours (Options > Game > Colors), read from the profile
  * here: the box's background, the text, the warning and the error colour. They are kept in
@@ -65,9 +66,20 @@ for "_i" from 0 to (SLOT_COUNT - 1) do {
     _box ctrlCommit 0;
 
     // The picture leaves the key's line at the top and the bar's at the bottom free.
+    private _pictureRect = [_x0 + _pad, _y0 + _lineH * 0.6, _slotW - _pad * 2, _slotH - _lineH * 0.6 - HUD_BAR_H - _pad];
     private _picture = _display ctrlCreate ["EINV_HotbarPicture", -1, _group];
-    _picture ctrlSetPosition [_x0 + _pad, _y0 + _lineH * 0.6, _slotW - _pad * 2, _slotH - _lineH * 0.6 - HUD_BAR_H - _pad];
+    _picture ctrlSetPosition _pictureRect;
     _picture ctrlCommit 0;
+
+    // The same picture again, for an item whose rules draw it larger, smaller or moved (icon=): in a group of
+    // the picture's place, which cuts it. Made here, in this place in the order of drawing, so the key and
+    // the count lie over it; hidden until fnc_hudDraw needs it.
+    private _clip = _display ctrlCreate ["EINV_HotbarClip", -1, _group];
+    _clip ctrlSetPosition _pictureRect;
+    _clip ctrlShow false;
+    _clip ctrlCommit 0;
+
+    private _zoom = _display ctrlCreate ["EINV_HotbarPicture", -1, _clip];
 
     private _key = _display ctrlCreate ["EINV_HotbarKey", -1, _group];
     _key ctrlSetPosition [_x0 + _pad, _y0, _slotW - _pad * 2, _lineH];
@@ -85,7 +97,10 @@ for "_i" from 0 to (SLOT_COUNT - 1) do {
     _bar progressSetPosition 0;
     _bar ctrlCommit 0;
 
-    _slots pushBack createHashMapFromArray [["box", _box], ["picture", _picture], ["key", _key], ["count", _count], ["bar", _bar]];
+    _slots pushBack createHashMapFromArray [
+        ["box", _box], ["picture", _picture], ["clip", _clip], ["zoom", _zoom], ["pictureRect", _pictureRect], ["key", _key],
+        ["count", _count], ["bar", _bar]
+    ];
 };
 
 private _message = _display ctrlCreate ["EINV_HotbarMessage", -1, _group];

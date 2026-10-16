@@ -2,7 +2,8 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Paints the seven boxes of the bar from the slots: the item's picture (faded when none is carried), the
+ * Paints the seven boxes of the bar from the slots: the item's picture (faded when none is carried; drawn
+ * larger, smaller or moved where its rules say so, icon=, and cut to its place in the box), the
  * key, the number carried (in the error colour at none), and the box itself in the interface background
  * colour, half as strong while the slot is empty. Called when what the bar shows has changed
  * (fnc_hudFrame compares), not every frame; the lit boxes of a treatment, a grenade in the hand and a
@@ -43,8 +44,35 @@ for "_i" from 0 to (SLOT_COUNT - 1) do {
     _kinds pushBack (_info get "kind");
 
     // A mod's placeholder picture would pop up "Picture not found" over the HUD.
-    (_ctrl get "picture") ctrlSetText ([_info get "picture"] call EFUNC(gui,safePicture));
-    (_ctrl get "picture") ctrlSetTextColor [1, 1, 1, [1, 0.65] select (_count == 0)];
+    private _path = [_info get "picture"] call EFUNC(gui,safePicture);
+    private _tint = [1, 1, 1, [1, 0.65] select (_count == 0)];
+
+    (_ctrl get "picture") ctrlSetText _path;
+    (_ctrl get "picture") ctrlSetTextColor _tint;
+
+    // As the rules draw it (icon=): the plain picture is the control as ever; one drawn larger, smaller or
+    // moved is its twin in the group that cuts it to the picture's place (fnc_hudCreate). The offsets are a
+    // share of the whole box, as a tile's are of the tile.
+    (_info get "icon") params ["_scale", "_across", "_down"];
+
+    private _plain = _scale == 1 && {_across == 0} && {_down == 0};
+
+    (_ctrl get "picture") ctrlShow _plain;
+    (_ctrl get "clip") ctrlShow !_plain;
+
+    if (!_plain) then {
+        (_ctrl get "pictureRect") params ["", "", "_pictureW", "_pictureH"];
+
+        private _zoomW = _pictureW * _scale;
+        private _zoomH = _pictureH * _scale;
+        private _zoomX = (_pictureW - _zoomW) / 2 + _across * HUD_SLOT_W;
+        private _zoomY = (_pictureH - _zoomH) / 2 + _down * HUD_SLOT_H;
+
+        (_ctrl get "zoom") ctrlSetPosition [_zoomX, _zoomY, _zoomW, _zoomH];
+        (_ctrl get "zoom") ctrlSetText _path;
+        (_ctrl get "zoom") ctrlSetTextColor _tint;
+        (_ctrl get "zoom") ctrlCommit 0;
+    };
 
     (_ctrl get "key") ctrlSetText (_info get "key");
 

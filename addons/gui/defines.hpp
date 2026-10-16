@@ -149,6 +149,10 @@
 // getTextWidth reports less than the engine draws: every measured text gets this much more room.
 #define TEXT_SLACK 1.3
 
+// One turn of the mouse wheel scrolls a column this far when a picture's clip group has taken the turn from it
+// (fnc_passWheel): about the three rows the engine's own step comes to.
+#define WHEEL_STEP (UNIT * 3)
+
 // A label draws its text from its top edge down whatever its height, so a text that has to sit in the middle of
 // a box starts a little above the box's middle: the middle of the line of capitals lies this share of the font
 // height under the label's top (Purista's capitals run from about 0.4 to 0.9 of it) - fnc_uiButton in a button,

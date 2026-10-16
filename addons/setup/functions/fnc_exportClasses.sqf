@@ -74,6 +74,12 @@ private _fnc_lines = {
         _lines pushBack format ["einv_name = %1%2%1;", _quote, (_info get "nameOverride") regexReplace [_quote, _quote + _quote]];
     };
 
+    private _icon = _info getOrDefault ["icon", [1, 0, 0]];
+
+    if (_icon isNotEqualTo [1, 0, 0] && {!isNil QEFUNC(items,formatIcon)}) then {
+        _lines pushBack format ["einv_icon = %1%2%1;", _quote, [_icon, ","] call EFUNC(items,formatIcon)];
+    };
+
     format ["class %1 { class %2 { %3 }; };", _root, _facts getOrDefault ["class", _class], _lines joinString " "]
 };
 

@@ -3,8 +3,9 @@
  * Author: Miss Heda
  * What an item is in config, before any rule: its kind, category, mass, rounds and load, the classes
  * it is built on and the addon that brought it in - everything the rules ask about - plus its names,
- * description and picture, and what its own mod says about its size, stack, grid, weight and name:
- * einv_size, einv_stack, einv_grid, einv_weight, einv_name (fnc_readConfigKeys), and the older
+ * description and picture, and what its own mod says about its size, stack, grid, weight, name and how
+ * its picture is drawn: einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon
+ * (fnc_readConfigKeys), and the older
  * einv_gridSize[], einv_stackSize, einv_grids[], einv_slots, which still work. A subclass has what
  * its parent has, as everything in config does. fnc_getInfo puts the rules on top of this.
  *
@@ -48,7 +49,8 @@
  *   "addon"       - the CfgPatches class that defined it, lowercase, "" if none <STRING>
  *   "mod"         - what its own config says, only the keys it sets and that can be used: "size"
  *                   [w, h, holes] or "mass", "stack" NUMBER, "grid" spec (fnc_parseGrid), "weight"
- *                   kg NUMBER and "name" STRING (einv_size ... einv_name), and the older "gridSize"
+ *                   kg NUMBER, "name" STRING and "icon" [scale, across, down] (einv_size ... einv_icon),
+ *                   and the older "gridSize"
  *                   [w, h], "stackSize" NUMBER, "grids" [[cols, rows], ...], "slots" NUMBER
  *                   <HASHMAP>
  *   "name"        - displayName, or the class when it has none <STRING>

@@ -56,6 +56,11 @@
  *                            grid=aaa/aba/aaa, its compartments where they were drawn
  *   weight=1.25              its weight in kg instead of its config's
  *   name=Field_kit           the name it shows, written as fnc_encodeName does
+ *   icon=1.4  icon=1.4@0.1:-0.05  its picture drawn 1.4 times as large in its tile, and moved a tenth of the
+ *                            tile across and a twentieth up (fnc_parseIcon): 0.25 to 4, the offsets -1 to 1.
+ *                            The comma of config's "1.4@0.1,-0.05" would end the statement here: typed in a
+ *                            text, it is read as the colon - a number on its own right after such an icon
+ *                            is its second offset
  *
  * A shape is read to its smallest form and written back the shortest way (fnc_formatMask): xx/xx is
  * 2x2. Named shapes and turns (L3, 10/11, @1) are not read: such a value is left out with a warning,
@@ -84,7 +89,8 @@
  * always the rule's first. A rule's values are a HashMap:
  * "like" (a class name as written), "footprint" ("WxH", a shape like "xx/x-" or "mass"), "stack"
  * <NUMBER>, "grid" (as
- * fnc_formatGrid writes it), "weight" (kg <NUMBER>), "name" (the name as it shows).
+ * fnc_formatGrid writes it), "weight" (kg <NUMBER>), "name" (the name as it shows), "icon" ([scale,
+ * across, down] <ARRAY>, see fnc_parseIcon).
  *
  * Example:
  * ["einv1 base=default, kind=grenade > stack=3"] call einv_items_fnc_parseRules;
@@ -136,7 +142,7 @@ private _classChars = createHashMap;
 private _shapeChars = createHashMap;
 {_shapeChars set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/@");
 
-private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name"];
+private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon"];
 
 private _numberOps = ["=", "<", "<=", ">", ">="];
 private _keyOps = createHashMapFromArray [
@@ -187,6 +193,17 @@ private _fnc_isNumber = {
     _codes findIf {_x >= 48 && {_x <= 57}} >= 0
     && {_codes findIf {(_x < 48 || {_x > 57}) && {_x != 46}} < 0}
     && {({_x == 46} count _codes) <= 1}
+};
+
+// Digits with one dot at most, a minus or a plus in front allowed: -0.05, 0.1.
+private _fnc_isSigned = {
+    params ["_digits"];
+
+    if ((_digits select [0, 1]) in ["-", "+"]) then {
+        _digits = _digits select [1];
+    };
+
+    [_digits] call _fnc_isNumber
 };
 
 private _fnc_isValue = {
@@ -359,6 +376,18 @@ private _fnc_name = {
     ["name", _name]
 };
 
+private _fnc_icon = {
+    params ["_raw"];
+
+    ([_raw] call FUNC(parseIcon)) params ["_icon", "_messages"];
+
+    _notes append _messages;
+
+    if (_icon isEqualTo []) exitWith {[]};
+
+    ["icon", _icon]
+};
+
 private _fnc_value = {
     params ["_token"];
 
@@ -373,6 +402,7 @@ private _fnc_value = {
         case "grid": {[_raw] call _fnc_grid};
         case "weight": {[_raw] call _fnc_weight};
         case "name": {[_raw] call _fnc_name};
+        case "icon": {[_raw] call _fnc_icon};
         default {[]};
     }
 };
@@ -729,13 +759,39 @@ private _fnc_rule = {
 
 // ----- The text -----
 
+// The pieces between the commas. An icon's offsets are the one thing with a comma inside: icon=1.4@0.1,-0.05
+// as config writes it. A number on its own right after an icon with one offset so far cannot be a statement
+// of its own, so it is that icon's second offset - joined with the colon the writer uses.
+private _pieces = [];
+
+{
+    private _piece = trim _x;
+
+    // Nothing between two commas, or after the last one, is no mistake.
+    if (_piece isEqualTo "") then {continue};
+
+    if (_pieces isNotEqualTo [] && {[_piece] call _fnc_isSigned}) then {
+        private _lastAt = count _pieces - 1;
+        private _last = _pieces select _lastAt;
+        private _words = _last splitString (toString [32, 9]);
+
+        reverse _words;
+
+        private _tail = toLowerANSI (_words select 0);
+
+        if ((_tail select [0, 5]) isEqualTo "icon=" && {_tail find "@" > 0} && {_tail find ":" < 0}) then {
+            _pieces set [_lastAt, _last + ":" + _piece];
+            continue;
+        };
+    };
+
+    _pieces pushBack _piece;
+} forEach (_text splitString (toString [44, 10, 13]));
+
 private _count = 0;
 
 {
-    private _statement = trim _x;
-
-    // Nothing between two commas, or after the last one, is no mistake.
-    if (_statement isEqualTo "") then {continue};
+    private _statement = _x;
 
     _count = _count + 1;
 
@@ -770,7 +826,7 @@ private _count = 0;
     };
 
     [_tokens, _short] call _fnc_rule;
-} forEach (_text splitString (toString [44, 10, 13]));
+} forEach _pieces;
 
 _ast set ["version", _version];
 _ast set ["base", _base];

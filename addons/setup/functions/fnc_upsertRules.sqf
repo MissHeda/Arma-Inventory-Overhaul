@@ -23,7 +23,8 @@
  * 0: What to write <ARRAY>, one entry per class: [class, set, remove, tree]
  *    class  - as config names it <STRING>
  *    set    - values: "footprint" ("2x3" or a mask), "stack" <NUMBER>, "grid" (as einv_items_fnc_formatGrid
- *             writes it), "like" (a class), "weight" (kg) <NUMBER>, "name" <STRING> <HASHMAP> (default: none)
+ *             writes it), "like" (a class), "weight" (kg) <NUMBER>, "name" <STRING>, "icon" ([scale, across,
+ *             down] <ARRAY>, einv_items_fnc_parseIcon) <HASHMAP> (default: none)
  *    remove - fields to take away <ARRAY of STRING> (default: [])
  *    tree   - for the class and every class built on it <BOOL> (default: false)
  *

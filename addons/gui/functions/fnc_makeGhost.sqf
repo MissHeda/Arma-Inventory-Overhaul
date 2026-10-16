@@ -68,11 +68,11 @@ if (
         private _tileTurned = _tile getOrDefault ["rotated", _tileW != _tileSizeW && {_tileSizeW != _tileSizeH}];
         private _picture = _tileInfo getOrDefault ["picture", ""];
 
-        private _ghost = if (_tileTurned) then {
-            [_display, controlNull, _tileRect, _picture, [1, 1, 1, 0.8], _tileSizeW / (_tileSizeH max 1)] call FUNC(uiPictureTurned)
-        } else {
-            [_display, controlNull, _tileRect, _picture, [1, 1, 1, 0.8]] call FUNC(uiPicture)
-        };
+        // As its tile draws it (icon=): a picture that reaches out of its footprint is cut to it by a group.
+        private _ghost = [
+            _display, controlNull, _tileRect, _picture, _tileInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.8], _tileTurned,
+            _tileSizeW / (_tileSizeH max 1), _tileRect
+        ] call FUNC(uiItemPicture);
 
         (ctrlPosition _ghost) params ["_ghostX", "_ghostY"];
 
@@ -92,11 +92,12 @@ private _rect = [0, 0, _w * _cellW, _h * _cellH];
 private _turned = GVAR(dragRot) == 1;
 private _picture = _info getOrDefault ["picture", ""];
 
-private _ghost = if (_turned) then {
-    [_display, controlNull, _rect, _picture, [1, 1, 1, 0.8], _sizeW / (_sizeH max 1)] call FUNC(uiPictureTurned)
-} else {
-    [_display, controlNull, _rect, _picture, [1, 1, 1, 0.8]] call FUNC(uiPicture)
-};
+// As its tile draws it (icon=): a picture that reaches out of its footprint is cut to it by a group, which is
+// the ghost then and has the picture in it (fnc_uiItemPicture) - the turn of a turned one goes on that.
+private _ghost = [
+    _display, controlNull, _rect, _picture, _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.8], _turned,
+    _sizeW / (_sizeH max 1), _rect
+] call FUNC(uiItemPicture);
 
 // Where the picture lies in the box it is moved by.
 (ctrlPosition _ghost) params ["_ghostX", "_ghostY"];

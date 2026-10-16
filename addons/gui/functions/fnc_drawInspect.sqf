@@ -240,7 +240,11 @@ _cursor = _cursor + _titleH + _gap;
 
 private _pictureInner = [_padX * 2, _cursor + _padY * 0.5, _innerW - _padX * 2, _pictureH - _padY];
 
-[_display, _group, _pictureInner, _info getOrDefault ["picture", ""]] call FUNC(uiPicture);
+// As the rules draw it (icon=): larger, smaller or moved, and cut to the lighter box where it would reach out.
+[
+    _display, _group, _pictureInner, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], false, 1,
+    [_padX, _cursor, _innerW, _pictureH]
+] call FUNC(uiItemPicture);
 
 if (_attachments isNotEqualTo []) then {
     [_display, _group, _pictureInner, _attachments] call FUNC(drawAttachments);

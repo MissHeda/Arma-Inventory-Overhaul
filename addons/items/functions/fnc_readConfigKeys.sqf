@@ -1,9 +1,10 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Reads what an item's own config says about its size, stack, container grid, weight and name: the keys
- * einv_size, einv_stack, einv_grid, einv_weight and einv_name (CONFIG_KEYS). A value is written the
- * way the rules text writes the same thing, so a mod author learns one language:
+ * Reads what an item's own config says about its size, stack, container grid, weight, name and how its
+ * picture is drawn: the keys einv_size, einv_stack, einv_grid, einv_weight, einv_name and einv_icon
+ * (CONFIG_KEYS). A value is written the way the rules text writes the same thing, so a mod author
+ * learns one language:
  *
  *   einv_size = "2x1";                   size=  - WxH, a mask like "xx/x-", or "mass" (fnc_parseRules)
  *   einv_stack = 10;                     stack= - a whole number, 1 to MAX_STACK
@@ -14,6 +15,9 @@
  *   einv_name = "Short name";            name=  - the name as it shows: plain text, a space is a
  *                                        space (the rules text writes it with _), at most MAX_NAME
  *                                        characters
+ *   einv_icon = "1.4@0.1,-0.05";         icon=  - how large the picture is drawn in its tile (0.25 to 4) and
+ *                                        moved across and down by a share of the tile (-1 to 1); a plain
+ *                                        number, einv_icon = 1.4;, is the scale alone (fnc_parseIcon)
  *
  * Spaces in a size or grid do not matter ("1x3 + 5x7" is "1x3+5x7"). An empty value says nothing,
  * which is how a subclass takes back what it inherited. A value that cannot be read, or is past a
@@ -29,9 +33,11 @@
  * [canonical, compiled, messages] <ARRAY>
  *   canonical - the values that could be read, as the rules write them, by config key:
  *               "einv_size" "2x1" / "xx/x-" / "mass", "einv_stack" <NUMBER>, "einv_grid" as
- *               fnc_formatGrid writes it, "einv_weight" kg <NUMBER>, "einv_name" <HASHMAP>
+ *               fnc_formatGrid writes it, "einv_weight" kg <NUMBER>, "einv_name" <STRING>, "einv_icon"
+ *               [scale, across, down] <ARRAY> <HASHMAP>
  *   compiled  - the same for fnc_resolve, by field: "size" [w, h, holes] or "mass", "stack" <NUMBER>,
- *               "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING> <HASHMAP>
+ *               "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING>, "icon" [scale,
+ *               across, down] <ARRAY> <HASHMAP>
  *   messages  - what was left out or cut down, and why <ARRAY of STRING>
  *
  * Example:
@@ -216,6 +222,32 @@ if (_name isNotEqualTo "") then {
         if (_text isNotEqualTo "") then {
             _canonical set [QGVARMAIN(name), _text];
             _compiled set ["name", _text];
+        };
+    };
+};
+
+// ----- icon -----
+// Read by the rules' own reader (fnc_parseIcon): a text, or a plain number for the scale alone.
+
+private _icon = _found getOrDefault [QGVARMAIN(icon), ""];
+
+if (_icon isEqualType 0) then {
+    _icon = if (finite _icon) then {str _icon} else {""};
+};
+
+if (_icon isNotEqualTo "") then {
+    if !(_icon isEqualType "") then {
+        _messages pushBack format ["%1 is a text like '1.4' or '1.4@0.1,-0.05' - left out", QGVARMAIN(icon)];
+    } else {
+        ([_icon] call FUNC(parseIcon)) params ["_value", "_notes"];
+
+        {
+            _messages pushBack format ["%1: %2", QGVARMAIN(icon), _x];
+        } forEach _notes;
+
+        if (_value isNotEqualTo []) then {
+            _canonical set [QGVARMAIN(icon), _value];
+            _compiled set ["icon", _value];
         };
     };
 };

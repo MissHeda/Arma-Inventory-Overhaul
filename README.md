@@ -63,7 +63,7 @@ CBA setting "Inventory rules" (`einv_items_rules`), the same for everyone. The s
 (an L, a T), paint the cells of a uniform, vest or backpack in colours - touching cells of one colour are one
 compartment, and it looks in the inventory exactly as painted -, build it block by block in Blocks mode, or
 make a class the same as another one (Same as: follow it with `like=` or copy its cells), set an item's weight and name next to its
-size, change a whole family at once - search with wildcards (`B_Bergen*`), switch the list to Tree, pick a class and everything built on
+size, zoom and shift its picture in the tile where an icon is too small or too large (`icon=`, with a live preview), change a whole family at once - search with wildcards (`B_Bergen*`), switch the list to Tree, pick a class and everything built on
 it is edited as one rule, `class=B_Carryall_Base+` - and copy a class's config lines with Export, or paste some in with Import; its start page shows
 what you changed. It is plain text all the same.
 It builds on a preset: Default (relaxed: realistic-ish sizes, containers a fifth roomier than their load),
@@ -99,11 +99,15 @@ weighs). Grids are ten cells wide.
   class CfgWeapons { class My_Vest { einv_grid = "1x3+5x7+1x3"; }; };       // grid=, also "xxxx/x--x+2x3", a canvas, "rig:16", "24"
   class CfgVehicles { class My_Pack { einv_grid = "abbbbbc/abbbbbc/-bbbbb-"; }; };
   class CfgWeapons { class My_Kit { einv_size = "2x1"; einv_stack = 1; einv_weight = 0.5; einv_name = "Short name"; }; };
+  class CfgWeapons { class My_Bandage { einv_icon = "1.4@0.1,-0.05"; }; };  // icon=, the picture 1.4 times as large, moved a tenth right and a twentieth up
   ```
   `einv_size` is `size=` (`"2x1"`, a mask like `"xx/x-"`, `"mass"`), `einv_stack` is `stack=` (a number), `einv_grid` is
   `grid=` (containers: uniform, vest, backpack, crate, vehicle, kit), `einv_weight` is `weight=` in **kilograms** (not config mass)
-  and `einv_name` is `name=` as plain text (a space is a space). A subclass inherits what its parent sets, as everything in
-  config does; `einv_grid = "";` takes it back. These sit below the server's rules text - a rule for the class still wins - and
+  and `einv_name` is `name=` as plain text (a space is a space). `einv_icon` is `icon=`: how the item's picture is drawn in its
+  tile for a picture that is too small or too large - `"1.4"` is 1.4 times as large (0.25 to 4), `"1.4@0.1,-0.05"` moves it too, a
+  tenth of the tile across (right is positive) and a twentieth down (-1 to 1; the comma is the config's, a rules text writes
+  `icon=1.4@0.1:-0.05` since its comma ends a statement). The tile cuts the picture at its edge, so it never leaves it. A subclass
+  inherits what its parent sets, as everything in config does; `einv_grid = "";` takes it back. These sit below the server's rules text - a rule for the class still wins - and
   above the preset. Values are cut to the same limits as in the rules, and a mistake is named in the RPT. The older
   `einv_gridSize[]`, `einv_stackSize`, `einv_grids[]` and `einv_slots` still work (the new keys win). To get the lines for a
   class from what it is now, call `["V_PlateCarrier1_rgr"] call einv_items_fnc_configEntry`; `einv_items_fnc_parseConfigEntry`

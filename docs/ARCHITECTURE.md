@@ -92,7 +92,7 @@ where a setup differs.
 ### The text (`fnc_parseRules`, `fnc_writeRules`)
 
 Statements are separated by commas; a line break counts as a comma. The writer always joins with `", "`, in the order header,
-groups, rules, and a rule's values in the order `like`, `size`, `stack`, `grid`, `weight`, `name`. Read and written again, a text
+groups, rules, and a rule's values in the order `like`, `size`, `stack`, `grid`, `weight`, `name`, `icon`. Read and written again, a text
 stays the same, so two setups that mean the same compare as texts.
 
 | Statement | Example | |
@@ -125,6 +125,7 @@ Values - what a rule sets. `like` is written first, the others in any order:
 | `grid=...` | containers only, see below. |
 | `weight=1.25` | the item's weight in kg instead of config's: digits and one dot, rounded to the gram, at most `MAX_WEIGHT` 1000. |
 | `name=Field_kit` | the name it shows, at most `MAX_NAME` 100 characters: `_` is a space and `%5F` an underscore; letters, digits, `-` and `.` stand as they are, every other character is `%XX` per UTF-8 byte (`Field kit (3)` is `Field_kit_%283%29`). `fnc_encodeName` writes it, `fnc_decodeName` reads it. |
+| `icon=1.4`, `icon=1.4@0.1:-0.05` | how the item's **picture** is drawn in its tile: `SCALE` or `SCALE@ACROSS:DOWN` (`fnc_parseIcon` reads it, `fnc_formatIcon` writes it). The scale is 0.25 to 4 (`ICON_SCALE_MIN`, `ICON_SCALE_MAX`) times the picture as it is fitted into the tile, about the tile's middle; the offsets are -1 to 1 (`ICON_OFFSET_MAX`) of the tile's width across (positive: right) and of its height down (positive: down); all to two decimals, a value past a limit is cut down with a warning. `icon=1` is the plain picture and a legal value (it takes back what a broader rule set). A comma ends a statement, so the text's offsets are split by `:` - the writer always writes the colon; config's `"1.4@0.1,-0.05"` is read as it stands, and a comma typed into a rules text is read as the colon (a number on its own right after an `icon=` with one offset is its second one). Parsed into the rule's values as `"icon"`, `[scale, across, down]`. Not taken by `like=`. |
 
 `grid=` takes one of these (`fnc_parseGrid`, `fnc_formatGrid`):
 
@@ -163,6 +164,7 @@ text over `TEXT_MAX` 16384 characters reads as the default. One typo never costs
 | `MAX_CELLS` | 400 (`STORAGE_COLS` x `MAX_ROWS`) | cells of all compartments together, holes not counted |
 | `SHAPE_MAX` | 8 | an item's mask or footprint, each way |
 | `MAX_STACK`, `MAX_WEIGHT`, `MAX_NAME` | 999, 1000 kg, 100 | `stack=`, `weight=`, `name=` |
+| `ICON_SCALE_MIN`, `ICON_SCALE_MAX`, `ICON_OFFSET_MAX` | 0.25, 4, 1 | `icon=` scale and offsets (`addons/main/script_macros.hpp`) |
 | `CELL_MIN`, `CELL_MAX` | 1, 50 | the header's `cell=` and the slider |
 | `PERCENT_MIN`, `PERCENT_MAX` | 10, 500 | `grid=120%` |
 | `MAX_STATEMENTS`, `TEXT_MAX` | 500, 16384 | statements and characters of a text |
@@ -173,7 +175,7 @@ which is why a typo in a rule must not build tens of thousands of them.
 
 ### Which answer wins (`fnc_resolve`)
 
-Each field - footprint, stack, grid, weight, name - goes to the first layer that has an answer, highest first:
+Each field - footprint, stack, grid, weight, name, icon - goes to the first layer that has an answer, highest first:
 
 1. **forced** - rifles, handguns, launchers, binoculars, uniforms, vests and backpacks always stack 1 (`KINDS_SINGLE`), whatever
    any rule says: each carries attachments or contents of its own, and a tile moves only one of them.
@@ -181,7 +183,7 @@ Each field - footprint, stack, grid, weight, name - goes to the first layer that
    rules appended after the text's own, each table sorted shallow-first (fewest parents first) so the nearest class listed wins.
    They sit in the same layer as the text but come after it, so a table beats the text.
 3. **the own text** - `einv_items_rules`, a later rule before an earlier one.
-4. **the item's mod config** - `einv_size`, `einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, written as the rules write the same
+4. **the item's mod config** - `einv_size`, `einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, `einv_icon`, written as the rules write the same
    value ("Config keys of an item" below); for a field those leave open the older `einv_gridSize[]`, `einv_stackSize`,
    `einv_grids[]`, then `einv_slots`. Grids and slots from config stay within the limits above. The text above still overrides all
    of it, so a server's rules have the last word over any mod.
@@ -195,7 +197,7 @@ Each field - footprint, stack, grid, weight, name - goes to the first layer that
    set a size or stack under `base=default`): a field only such a rule answered is asked of the `all` rules again and keeps the preset's
    answer where they have none (`_caught` in `fnc_resolve`; `fnc_explain` then takes the field out of that preset line's wins). A
    preset's own `all` rule is left out with a warning. `fnc_configEntry`'s bare answer drops `fallback` with `own`.
-7. **builtin** - 1x1, stack 1, `grid=auto`, config weight, config name.
+7. **builtin** - 1x1, stack 1, `grid=auto`, config weight, config name, the plain picture (`ICON_PLAIN`, `[1, 0, 0]`).
 
 Only the rules that can be about the item's kind are asked (`fnc_compileRules` sorts them by kind), and a layer is left as soon as
 nothing it could still set is open. Afterwards `size=mass` becomes cells, stacks become whole numbers of at least 1, the footprint
@@ -221,6 +223,7 @@ layer above: a server's rules text still beats them, and they beat a preset.
 | `einv_grid = "1x3+5x7+1x3";` | uniform, vest, backpack, crate, vehicle, kit | anything `grid=` takes: `"auto"`, `"24"` (a plain number `24` too), `"120%"`, `"rig:16"`, compartments, shapes, a canvas | `grid=` |
 | `einv_weight = 0.5;` | any item | kilograms, 0 to `MAX_WEIGHT`, rounded to the gram | `weight=` (kg, not config mass) |
 | `einv_name = "Short name";` | any item | the name as it shows, at most `MAX_NAME` characters; a space is a space | `name=`, but plain text (the rules text writes `_` for a space and `%XX` for the rest) |
+| `einv_icon = "1.4@0.1,-0.05";` | any item | how the picture is drawn in its tile: a scale 0.25 to 4, and after an `@` how far it is moved across and down, -1 to 1 of the tile (a comma or a colon between the two); a plain number `1.4` is the scale alone | `icon=` (config writes the comma, the rules text the colon) |
 
 - **Read by the rules' own readers.** `fnc_readConfigKeys` hands the size to `fnc_parseRules` and the grid to
   `fnc_parseGrid`/`fnc_formatGrid`, so the limits, the cuts and the words of a message are those of the rules. A value that cannot be
@@ -240,7 +243,7 @@ layer above: a server's rules text still beats them, and they beat a preset.
 - **One object** can still carry its own grid, which beats everything: `_crate setVariable ["einv_grid", "6x4+2x3", true]` (section
   3). Same name, different place: the class's config key is for every object of the class, the variable for one.
 - `fnc_getFacts` keeps the readable keys in `"mod"` by field: `"size"` ([w, h, holes] or `"mass"`), `"stack"`, `"grid"` (a spec),
-  `"weight"` (kg), `"name"`, next to the older `"gridSize"`, `"stackSize"`, `"grids"`, `"slots"`.
+  `"weight"` (kg), `"name"`, `"icon"` (`[scale, across, down]`), next to the older `"gridSize"`, `"stackSize"`, `"grids"`, `"slots"`.
 
 Two public functions turn the keys into a snippet and back, for mod authors and for the setup wizard's export and import:
 
@@ -249,21 +252,23 @@ Two public functions turn the keys into a snippet and back, for mod authors and 
   differ from what the class would get without the rules text and the older tables - from its own config, the preset the rules
   are built on, and the built-in answer - are written, and only those that apply (no stack for a vest, no grid for a rifle). So a
   vest whose size the preset gives and whose grid was painted yields its grid alone, and the preset stays the server's choice.
-  `all` writes every key that has an answer (a weight and a name only where something sets them). `compiled` reads the class by
+  `all` writes every key that has an answer (a weight, a name and an icon only where something sets them; the icon with the comma
+  config uses). `compiled` reads the class by
   another set of rules, the wizard's draft (its own rules are the ones left out). `""` for a class no config knows or when
   nothing differs. The lines go inside the class's definition in the mod's config; another mod's class is patched with an
   external class declaration and that mod in `requiredAddons`.
 - `einv_items_fnc_parseConfigEntry [text, messages = nil]` -> `[[class, keys], ...]`: reads such lines - one class or many, under
   their root or without it; comments, `class X;` declarations, parents (`class X: Y`), other properties and nested classes are
   skipped - into `keys`, a HashMap by lowercase config key (`"einv_size"`, `"einv_stack"`, `"einv_grid"`, `"einv_weight"`,
-  `"einv_name"`) with the values as the rules write them (size and grid STRING, stack and weight NUMBER, name STRING); only keys
+  `"einv_name"`, `"einv_icon"`) with the values as the rules write them (size and grid STRING, stack and weight NUMBER, name
+  STRING, icon `[scale, across, down]`); only keys
   that could be read, and only classes that have one. What was left out is added to the `messages` array when one is given, else
   to the RPT. A text over `CONFIG_TEXT_MAX` 65536 characters is not read.
 
 ### like=CLASS
 
 `class=My_Vest > like=V_PlateCarrier1_rgr grid=6x4`: when the rule matches, every field of `LIKE_FIELDS` (footprint, stack, grid,
-weight - never the name) that is still open and not set by the rule itself takes what `fnc_resolve` makes of the source class
+weight - never the name or the picture) that is still open and not set by the rule itself takes what `fnc_resolve` makes of the source class
 right then, through the same compiled rules (its own rules, mod config and presets). A later change to the source follows. The
 source's grid becomes the compartments it really has (`einv_storage_fnc_blocksFor` with its class, kind and load, as `["blocks",
 ...]` - "auto" by the target's load would be another grid); a source that is no container gives "auto". Its weight is taken only
@@ -318,6 +323,7 @@ no cache: not kept. Callers must not modify it. The config part comes from `fnc_
 | `src` | HashMap | field -> where it came from |
 | `configMass`, `configDisplayName`, `configShort` | | config's values, whatever the rules say |
 | `weightOverride`, `nameOverride` | NUMBER, STRING | the rules' weight in kg (-1 for none), the rules' name ("" for none) |
+| `icon` | ARRAY | how the picture is drawn in the item's tile: `[scale, across, down]`, the scale a factor (0.25 to 4), the offsets a share of the tile's width and height (-1 to 1); `[1, 0, 0]` (`ICON_PLAIN`) for the plain picture. From `icon=` / `einv_icon` (`fnc_parseIcon`); every picture of the window draws by it (section 4, "Grids and tiles") |
 | `lc`, `root`, `rounds`, `lineage`, `addon`, `mod` | | from `fnc_getFacts`: lowercase class, config root, a CfgMagazines `count`, lowercase classes from itself up, the CfgPatches class, what its own config says (`einv_size` and the other keys, "Config keys of an item") |
 
 `fnc_getFacts` takes kinds from config by weapon `type` and ItemInfo type (its header lists them); any other CfgWeapons class is
@@ -340,14 +346,15 @@ a config key sets it (section 7, compat_efak).
 |---|---|---|
 | `fnc_getFacts [class]`, `fnc_getInfo [class, compiled, cache]` | Yes | config facts; the answer above |
 | `fnc_configEntry [class, all, compiled]`, `fnc_parseConfigEntry [text, messages]` | Yes | an item's config keys as a snippet, and back ("Config keys of an item") |
-| `fnc_readConfigKeys [found]` | No | the five config keys read by the rules' readers -> `[canonical, compiled, messages]` |
+| `fnc_readConfigKeys [found]` | No | the six config keys read by the rules' readers -> `[canonical, compiled, messages]` |
 | `fnc_footprintAs [class or info, rot]` | Yes | `[w, h, holes]` as it lies, upright or turned |
-| `fnc_parseRules [text]` | Yes | -> AST: `version`, `base`, `cell` (-1 for none), `groups` `[[id, conds], ...]`, `rules` `[[conds, values], ...]`, `warnings`; a condition is `[negated, key, op, values]` (a group reference has key `"@"`), a rule's values a HashMap of `like`, `footprint`, `stack`, `grid`, `weight`, `name` |
+| `fnc_parseRules [text]` | Yes | -> AST: `version`, `base`, `cell` (-1 for none), `groups` `[[id, conds], ...]`, `rules` `[[conds, values], ...]`, `warnings`; a condition is `[negated, key, op, values]` (a group reference has key `"@"`), a rule's values a HashMap of `like`, `footprint`, `stack`, `grid`, `weight`, `name`, `icon` |
 | `fnc_writeRules [ast, header = true]` | Yes | -> canonical text |
 | `fnc_compileRules [text, legacy = true]` | Yes | -> compiled; `legacy` reads the tables and stackSmall too |
 | `fnc_currentRules []` | Yes | the rules in effect, compiled again first when `fnc_rulesInputs` changed |
 | `fnc_explain [class, compiled]`, `fnc_encodeName`, `fnc_decodeName`, `fnc_getProtection [class]` | Yes | every layer's say; `name=` encoding; the zones a vest, uniform or helmet covers (with `fnc_getArmor`: ACE's own armor number) |
 | `fnc_parseGrid [text]`, `fnc_formatGrid [spec]`, `fnc_parseMask`, `fnc_formatMask`, `fnc_turnMask` | No | grid specs and masks; `fnc_parseMask` is the one reader of masks, for items and compartments alike |
+| `fnc_parseIcon [text]`, `fnc_formatIcon [icon, separator = ":"]` | No | the value of `icon=` / `einv_icon`: `"1.4@0.1:-0.05"` -> `[[1.4, 0.1, -0.05], notes]` (`[]` when unreadable; limits cut with a note) and back, the colon for a text, `","` for config |
 | `fnc_compileCond`, `fnc_matches`, `fnc_parseTable [text, type, warnings]`, `fnc_sanitizeText` | No | conditions; the older tables; the EDITBOXes' sanitizer |
 | `fnc_resolve [facts, compiled]` | No | -> `footprint`, `stack`, `grid`, `weight` (kg, -1), `name` ("" none), `src` |
 | `fnc_setBy [info, field]` | Yes | who set a field, from its `src` tag: `"rule"` (`own:`, `legacy:` but the stack slider, `all:`), `"config"` (`mod:`), `"preset"` (`preset:`, the stack slider), `"default"` (`builtin`, `forced`) |
@@ -390,7 +397,7 @@ All global, each runs `fnc_loadRules` when it changes: `einv_items_rules` (EDITB
 `fnc_upsertRule [class, set, remove, tree = false]` writes what the Items or Containers step sets for one class into the draft, as that
 class's own rule `class=X > ...`; `fnc_upsertRules [[class, set, remove, tree], ...]` does the same for several classes in one undo step
 (the editors' import). `set` is a HashMap of `footprint` (`"2x3"` or a mask), `stack`, `grid` (as `fnc_formatGrid` writes it), `like` (a
-class), `weight` (kg) and `name`; `remove` is an array of fields to take away. The rules written for exactly that class
+class), `weight` (kg), `name` and `icon` (`[scale, across, down]`); `remove` is an array of fields to take away. The rules written for exactly that class
 (`einv_setup_fnc_ownClassRules`) become one; whatever else they set stays. The rule goes **last**: later rules win, so a broader rule
 further down (a group, a kind) would otherwise still decide what the class gets and the step would show something other than what
 was just applied. A rule left with nothing to set goes altogether. It returns false for a class name the language cannot hold, and ends
@@ -927,6 +934,19 @@ text with `TEXT_SLACK`).
 `fnc_safePicture [path]` -> path or "": a file path (`\` or `/`) ending .paa/.jpg/.png, or none when its .paa exists, that
 `fileExists` finds - asked once per path (uiNamespace `einv_gui_pictures`); `#(...)` passes. `fnc_uiPicture` / `fnc_uiPictureTurned`
 draw nothing for ""; the wizard's index and editors, the Arsenal header and ACE cargo's cards ask it too (`picture = "picturething"`).
+`fnc_uiItemPicture [display, parent, box, texture, icon, colour, turned, aspect, clip, events]` -> the control is how the **item's
+own picture** is drawn wherever it is (tiles, slots, the equipment cards, the inspect card, the dragged ghost; see "Grids and
+tiles"): the picture of `fnc_uiPicture` / `fnc_uiPictureTurned` made `icon` (`getInfo "icon"`, `[scale, across, down]`) larger or
+smaller about the box's middle and moved by the offsets, which are a share of the `clip` rectangle's (the tile's, the slot's)
+width and height. The plain icon (`ICON_PLAIN`) is the one control it was. Otherwise the image is measured by the texture's own
+shape (`getTextureInfo`), not by the control it is fitted into: where it stays inside `clip` (half a pixel of give) it is still one
+control, where it would reach out it is made inside an `EINV_Group` of exactly `clip`, which cuts it - the group is what comes
+back, the picture is `getVariable "einv_gui_inner"`. `fnc_uiPictureTurned` takes a `scale` (the square's side times it) and a
+`shift` of the square's middle for it; a turned picture's offsets turn with it (what moves across moves down, what moves down
+moves left). A group over a tile reports the buttons and the wheel as the display does (`events`, true except in the wizard's
+preview) and hands the wheel to the scrolling group it lies in, `fnc_passWheel` (`WHEEL_STEP` 3 `UNIT`): a group nested in a
+column takes the wheel from it (`fnc_createGrid`), and its picture, larger than it, would make it scrollable - its scroll is put
+back to the top at every turn.
 
 ### The hook table (window engine for other displays)
 
@@ -1057,7 +1077,15 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   turned `ctrlSetAngle [90, 0.5, 0.5]` - a quarter clockwise round its middle; a non-square control came out squashed and out of
   its box. The side is the most the turned picture may have to fit the box: `min(boxW / min(1, H/W), boxH / min(1, W/H))` px, so
   a 2:1 rifle on a 1x3 box gets a 2-cell square showing it 1 wide and 2 high; the square may stand out where it is empty. The
-  group ghosts of a drag keep their angle when moved (`fnc_updateDrag`). The hotbar and the inspect card draw upright only.
+  group ghosts of a drag keep their angle when moved (`fnc_updateDrag`; a ghost whose picture is cut by a group turns the picture
+  in it). The hotbar and the inspect card draw upright only.
+  **The picture is drawn by the item's `icon`** (`icon=`, `getInfo "icon"`, `fnc_uiItemPicture`): `fnc_createTile` (clip: the
+  tile's rectangle, its box for a shaped item; an entry may carry its own `"icon"`, and `"preview"` for the wizard's tile),
+  `fnc_makeGhost` (one-item ghost and the group ghosts; clip: the footprint's rectangle), `fnc_drawSlot` (clip: the slot, the
+  hotbar row of the window included), the weapon cards of `fnc_drawEquipmentCards` (the card) and `fnc_drawInspect` (the lighter
+  box round the picture) all draw through it, so a larger or moved picture never leaves its tile, slot or card. The Arsenal
+  panel's tiles and the kit windows' are `fnc_createTile`'s. The small title pictures (a kit window, the Arsenal panel, the
+  context menu) and the wizard's lists draw the plain picture. A weapon's attachment icons stay where they were.
   `fnc_tileAt` and `fnc_hitsHole` miss holes. A class whose `stack` is over 1 shows **"count/stack"** ("3/10", "1/10" too) on a
   small flat box in the `raised` colour at the bottom right; one that does not stack shows nothing; a magazine's rounds then
   move to the bottom left. Counts over a picture stand on a dark pill (`fnc_drawCountBackdrop`, sized for the widest text the
@@ -1593,8 +1621,19 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
 - **Item editor** (`fnc_drawItemEditor`): width and height steppers (1 to 8), the stack (1 to 999; not for weapons, uniforms,
   vests, backpacks), the weight in kg and the name (two text fields; empty is config's own, and config's weight is the
   placeholder), an 8x8 canvas where a click makes a place one of the item's cells, the tile preview, and a warning while the
-  cells are not one piece (Apply off). Apply writes `class=X > size=WxH` or `size=xx/x-`, `stack=N`, `weight=KG` and `name=...`, each
-  only when it differs from now; a field emptied takes its own value away. The weight is read by `fnc_weightValue` (a dot or a comma,
+  cells are not one piece (Apply off). Beside the preview, a **Picture** block: a zoom stepper (25 to 400 %, steps of 5, shown as
+  "Zoom 140 %") with chips for 50, 100, 150 and 200 %, two shift steppers, "Across" and "Down" (-100 to 100 % of the tile, steps
+  of 5), and Reset (back to 100 % and nothing shifted; enabled while it is not). The working copy holds them as `iconPercent`
+  (`[zoom, across, down]` in whole per cent; `ICON_PERCENT_PLAIN` is `[100, 0, 0]`), and the preview is `fnc_drawPreview` drawing the
+  tile with **`einv_gui_fnc_createTile`** itself - on a piece of grid, the cells under the tile made way for it, name, count and
+  full magazine as in a container, at the inventory's cell (`einv_gui_fnc_getCell`) where it fits and as big as fits where not, the
+  entry carrying the working `"icon"` - so the picture is seen as Apply will write it. Apply writes `class=X > size=WxH` or
+  `size=xx/x-`, `stack=N`, `weight=KG`, `name=...` and `icon=ZOOM@ACROSS:DOWN` (as `[scale, across, down]`, 1.4 and 0.1 for 140 % and
+  10 %), each only when it differs from now; a field emptied takes its own value away. Reset then Apply takes the class's own `icon`
+  away when nothing below draws the picture otherwise, else writes the plain picture (`icon=1`) to win over the item's `einv_icon`.
+  "Back to the preset" removes `icon` with the rest; the tree view's edits write `class=X+ > icon=...` like the other fields;
+  Export writes `einv_icon = "1.4@0.1,-0.05";` (`fnc_configEntry`) and Import reads it (`fnc_importClasses` maps `einv_icon` to
+  `icon`); Review words it ("picture at 140 %, moved 10 % across and -5 % down", `fnc_describeRule`). The weight is read by `fnc_weightValue` (a dot or a comma,
   rounded to the gram, at most `EDIT_WEIGHT_MAX` 1000; -1 for nothing typed, -2 for text that is no weight, which Apply refuses and
   says), the name cut to `EDIT_NAME_MAX` 100 (the rules' `name=` encoding is `writeRules`' business). Typing goes into the working
   copy (`weightText`, `nameText`) without drawing the editor again - the field would lose the cursor -, Return draws it again, and
@@ -1659,6 +1698,9 @@ equips or shows targets for real slots touches it.
 - **The bar on the screen** (`RscTitles >> einv_hotbar_RscHud`, `CfgUIGrids` entry `einv_hotbar_grid`, movable in Arma's layout
   editor): seven boxes (key, picture, count, a thin bar) and a message line, run by `fnc_hudPing` / `fnc_hudFrame` /
   `fnc_hudDraw`; `fnc_hudWanted` hides it in dialogs, Zeus, when unconscious, in the map; then `einv_hotbar_hudMode` decides.
+  An item whose rules draw its picture larger, smaller or moved (`icon=`; `fnc_slotInfo` has its `"icon"`) shows it in the slot's
+  twin of the picture, inside an `EINV_HotbarClip` group of the picture's place that cuts it (made with the box by `fnc_hudCreate`,
+  hidden until a slot needs it; the plain picture is hidden meanwhile, and the offsets are a share of the whole box).
   Nothing goes over the network.
 
 ### weight (`einv_weight`)
@@ -1864,7 +1906,7 @@ profile: `einv_gui_searchMuted`, `einv_hotbar_slots` (`einv_gui_cameraOn` no lon
 
 **What missions and other mods may set** (all optional): on an object `einv_grid` (a grid text, public), `einv_noSearch`,
 `einv_nearby = false`, `einv_noAccess` (a person); in a mission `einv_arsenal_biPassThrough`; in an item's config `einv_size`,
-`einv_stack`, `einv_grid`, `einv_weight`, `einv_name` (section 2, "Config keys of an item"; the older `einv_gridSize[]`,
+`einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, `einv_icon` (section 2, "Config keys of an item"; the older `einv_gridSize[]`,
 `einv_stackSize`, `einv_grids[]` and `einv_slots` still work), `einv_sound = "family"`; a preset as a class of
 `CfgEinvRulesets`; a sound family or action in `CfgEinvSounds`; a lock through `einv_locks_fnc_setLock` or `addProvider`; an op,
 guard or carried variable in the storage's tables (section 3).

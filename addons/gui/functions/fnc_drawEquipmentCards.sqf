@@ -180,7 +180,11 @@ private _fnc_weaponCard = {
         private _nameSize = UNIT * 0.5;
         private _name = [[_info getOrDefault ["name", _class], _theme] call FUNC(caption), _contentW, _font, _nameSize] call FUNC(fitText);
 
-        [_display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _info getOrDefault ["picture", ""]] call FUNC(uiPicture);
+        // As the rules draw it (icon=): larger, smaller or moved, and cut to the card where it would reach out.
+        [
+            _display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _info getOrDefault ["picture", ""],
+            _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], false, 1, _cardRect
+        ] call FUNC(uiItemPicture);
 
         // What is on the weapon shows on its picture, the way Arma's own inventory draws it.
         [_display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _weapon] call FUNC(drawAttachments);

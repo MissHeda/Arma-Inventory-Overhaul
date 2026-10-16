@@ -16,7 +16,7 @@
  *               for everything else, after the preset) or "builtin" <STRING>
  *   index     - the rule's place in its text, -1 for config, "forced" and "builtin" <NUMBER>
  *   statement - the rule as the writer has it, or the config value; "" for "forced" and "builtin" <STRING>
- *   fields    - of "footprint", "stack", "grid", "weight", "name" <ARRAY>
+ *   fields    - of "footprint", "stack", "grid", "weight", "name", "icon" <ARRAY>
  *
  * Example:
  * ["30Rnd_65x39_caseless_mag"] call einv_items_fnc_explain;
@@ -32,7 +32,7 @@ if (isNil "_compiled") then {
 
 private _facts = [_class] call FUNC(getFacts);
 private _kind = _facts get "kind";
-private _fields = ["footprint", "weight", "name"];
+private _fields = ["footprint", "weight", "name", "icon"];
 
 if !(_kind in KINDS_SINGLE) then {
     _fields pushBack "stack";
@@ -132,7 +132,8 @@ private _fnc_size = {
     ["grid", "grids", format ["%1[] = %2", QGVARMAIN(grids), str (_mod getOrDefault ["grids", []])]],
     ["grid", "slots", format ["%1 = %2", QGVARMAIN(slots), _mod getOrDefault ["slots", 0]]],
     ["weight", "weight", format ["%1 = %2", QGVARMAIN(weight), _mod getOrDefault ["weight", 0]]],
-    ["name", "name", format ["%1 = %2", QGVARMAIN(name), _mod getOrDefault ["name", ""]]]
+    ["name", "name", format ["%1 = %2", QGVARMAIN(name), _mod getOrDefault ["name", ""]]],
+    ["icon", "icon", format ["%1 = %2", QGVARMAIN(icon), [_mod getOrDefault ["icon", ICON_PLAIN], ","] call FUNC(formatIcon)]]
 ];
 
 [_compiled getOrDefault ["preset", []], _presetIndices, true] call _fnc_walk;

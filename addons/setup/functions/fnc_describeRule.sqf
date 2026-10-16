@@ -266,6 +266,16 @@ private _fnc_values = {
         _parts pushBack format [LLSTRING(Value_Name), _values get "name"];
     };
 
+    if ("icon" in _values) then {
+        (_values get "icon") params [["_scale", 1], ["_across", 0], ["_down", 0]];
+
+        // In whole per cent, as the wizard's steppers show them.
+        _parts pushBack ([
+            format [LLSTRING(Value_Icon), round (_scale * 100)],
+            format [LLSTRING(Value_IconMoved), round (_scale * 100), round (_across * 100), round (_down * 100)]
+        ] select (_across != 0 || {_down != 0}));
+    };
+
     _parts joinString ", "
 };
 

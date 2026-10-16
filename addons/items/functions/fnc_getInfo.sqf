@@ -8,7 +8,7 @@
  *
  *   1. the older table settings (sizes, stacks, container sizes) - read as rules after the text
  *   2. the rules text, einv_items_rules
- *   3. the item's own mod: einv_size, einv_stack, einv_grid, einv_weight, einv_name, and the older
+ *   3. the item's own mod: einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, and the older
  *      einv_gridSize[], einv_stackSize, einv_grids[], einv_slots
  *   4. the preset the text builds on, with einv_items_stackSmall moved off its default
  *   5. built in: 1x1, alone on its tile, a grid by load
@@ -17,7 +17,8 @@
  *
  * A rule may also give an item a weight (weight=, in kg) and a name (name=). "mass", "name" and
  * "short" are then those; "configMass", "configDisplayName" and "configShort" keep what config says.
- * The engine still weighs every item by its config.
+ * The engine still weighs every item by its config. A rule or the config may also say how large its
+ * picture is drawn and where (icon=, einv_icon): "icon".
  *
  * Without compiled rules, the rules in effect are used and the result kept per class until the rules
  * change. An item whose rule says like=X is kept the same way: X is asked through the same compiled
@@ -54,6 +55,9 @@
  *   "cells"             - cells it takes, w * h less its holes <NUMBER>
  *   "shape"             - its size as the rules write it, "2x3" or "xx/x-" <STRING>
  *   "grid"              - a container's grid spec (fnc_parseGrid), [] for anything else <ARRAY>
+ *   "icon"              - how its picture is drawn in its tile, [scale, across, down] (icon=,
+ *                         fnc_parseIcon): the scale as a factor, the offsets as a share of the tile's
+ *                         width and height; [1, 0, 0] for the plain picture <ARRAY>
  *   "src"               - field -> where it came from, see fnc_resolve <HASHMAP>
  *   "configMass"        - config mass <NUMBER>
  *   "configDisplayName", "configShort" - config's names <STRING>
@@ -103,6 +107,7 @@ _info set ["cells", _w * _h - count _holes];
 _info set ["shape", [_w, _h, _holes] call FUNC(formatMask)];
 _info set ["stack", _resolved get "stack"];
 _info set ["grid", _resolved get "grid"];
+_info set ["icon", _resolved get "icon"];
 _info set ["src", _resolved get "src"];
 
 // What config says stays readable next to what the rules make of it.

@@ -11,7 +11,8 @@
  * Arguments:
  * 0: Class, as config names it <STRING>
  * 1: Values to set: "footprint" ("2x3" or a mask), "stack" <NUMBER>, "grid" (as einv_items_fnc_formatGrid
- *    writes it), "like" (a class), "weight" (kg) <NUMBER>, "name" <STRING> <HASHMAP> (default: none)
+ *    writes it), "like" (a class), "weight" (kg) <NUMBER>, "name" <STRING>, "icon" ([scale, across, down]
+ *    <ARRAY>, einv_items_fnc_parseIcon) <HASHMAP> (default: none)
  * 2: Fields to take away <ARRAY of STRING> (default: [])
  * 3: For the class and every class built on it <BOOL> (default: false)
  *

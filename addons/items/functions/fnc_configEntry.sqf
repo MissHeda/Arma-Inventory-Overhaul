@@ -7,8 +7,8 @@
  *
  * The root is the class's own (CfgWeapons for uniforms, vests, headgear and most items, CfgVehicles for
  * backpacks, crates and vehicles, CfgMagazines, CfgGlasses), the keys are the ones an item's config may
- * set (fnc_readConfigKeys): einv_size, einv_stack, einv_grid, einv_weight and einv_name, each as
- * applicable - a container has a grid, a rifle, vest or backpack no stack. They are written as the
+ * set (fnc_readConfigKeys): einv_size, einv_stack, einv_grid, einv_weight, einv_name and einv_icon, each
+ * as applicable - a container has a grid, a rifle, vest or backpack no stack. They are written as the
  * rules write the same value, so a shaped grid or a canvas comes out as the text that draws it.
  *
  * Only what differs is written. The class's current answer is set beside what it would get without
@@ -17,7 +17,7 @@
  * gives and whose grid was painted in the wizard gets its grid and nothing else, and the lines say
  * what the mod itself has to add for the class to look like this; the preset stays the server's to
  * choose. A class that already is what the lines would make gets "". With "all" every key that has an
- * answer is written, differing or not (a weight and a name only where something sets them).
+ * answer is written, differing or not (a weight, a name and an icon only where something sets them).
  *
  * The lines go inside the class's own definition in the mod's config. Another mod's class is patched
  * with an external class declaration and its addon in requiredAddons; a subclass inherits the keys
@@ -148,6 +148,19 @@ if (_name isNotEqualTo "") then {
     if (_all || {_name isNotEqualTo _plainName}) then {
         _lines pushBack format ["%1 = %2;", QGVARMAIN(name), [_name] call _fnc_quote];
     };
+};
+
+// ----- icon -----
+// As config writes it, the comma between the offsets. Only where the rules or the config set one: the plain
+// picture needs no line.
+
+private _icon = _info get "icon";
+
+if (
+    (_all && {_icon isNotEqualTo ICON_PLAIN})
+    || {!_all && {_icon isNotEqualTo (_plain get "icon")}}
+) then {
+    _lines pushBack format ["%1 = %2;", QGVARMAIN(icon), [[_icon, ","] call FUNC(formatIcon)] call _fnc_quote];
 };
 
 if (_lines isEqualTo []) exitWith {""};

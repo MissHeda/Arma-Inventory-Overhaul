@@ -237,7 +237,9 @@ _ghost ctrlSetPosition [_boxX + _offsetX, _boxY + _offsetY];
 _ghost ctrlCommit 0;
 
 if (uiNamespace getVariable [QGVAR(dragTurned), false]) then {
-    _ghost ctrlSetAngle [90, 0.5, 0.5];
+    // A ghost whose picture reaches out of its footprint is a group with the picture in it (fnc_uiItemPicture):
+    // the picture is what turns.
+    (_ghost getVariable [QGVAR(inner), _ghost]) ctrlSetAngle [90, 0.5, 0.5];
 };
 
 private _counter = uiNamespace getVariable [QGVAR(dragCounter), controlNull];
@@ -260,7 +262,7 @@ private _fnc_moveGhosts = {
 
         // A tile that lies turned keeps its turned picture where it moved, as the held one does above.
         if (_ghostTurned) then {
-            _ghostControl ctrlSetAngle [90, 0.5, 0.5];
+            (_ghostControl getVariable [QGVAR(inner), _ghostControl]) ctrlSetAngle [90, 0.5, 0.5];
         };
 
         _ghostControl ctrlShow true;

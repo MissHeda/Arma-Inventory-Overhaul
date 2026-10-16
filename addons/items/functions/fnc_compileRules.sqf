@@ -58,7 +58,8 @@
  *   "hash"        - one value for all of it, to compare between machines <STRING>
  *   "warnings"    - everything left out or cut down <ARRAY of STRING>
  * A rule's values: "like" the class in lowercase <STRING>, "footprint" [w, h, holes] or "mass", "stack"
- * <NUMBER>, "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING>. A rule with like=
+ * <NUMBER>, "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING>, "icon" [scale, across,
+ * down] (fnc_parseIcon). A rule with like=
  * counts in byKind as setting every one of LIKE_FIELDS, which fnc_resolve takes from that class.
  *
  * Example:

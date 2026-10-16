@@ -113,6 +113,11 @@
 #define EDIT_WEIGHT_MAX 1000
 #define EDIT_NAME_MAX 100
 
+// The picture of an item (icon=, the Items step's zoom and shift) is counted in whole per cent on its
+// steppers: [zoom, across, down], 100 % and nothing shifted being the plain picture. ICON_PLAIN is the same
+// as the rules count it.
+#define ICON_PERCENT_PLAIN [100, 0, 0]
+
 // The tree view of the class lists (fnc_classTree, fnc_drawTree): a row of the tree is this high, a level
 // of the tree moves it this far in (TREE_INDENT_MAX levels at most, deeper ones stay at the last), and
 // "up" stops at a parent with more classes than TREE_UP_MAX - a tree of the whole game is no use.

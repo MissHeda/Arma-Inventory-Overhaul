@@ -15,7 +15,10 @@
  *
  * The picture is fitted into the tile with its own shape kept. On a tile that lies turned ("rotated",
  * fnc_getLayout) it turns along, a quarter clockwise round the box's middle and fitted into the turned box
- * (fnc_uiPictureTurned); what is on a weapon shows only upright.
+ * (fnc_uiPictureTurned); what is on a weapon shows only upright. An item whose rules say so (icon=, the
+ * "icon" of einv_items_fnc_getInfo) has it drawn larger, smaller or moved - turned along with the tile - and
+ * never out of the tile: a picture that would reach out is cut at the tile's edge by a controls group of
+ * the tile's size (fnc_uiItemPicture), the one control the picture is then.
  *
  * A shaped item (size=xx/x-, its "holes" as it lies, einv_storage_fnc_getLayout) covers only its own
  * cells: its surface, border and the outline of a hidden one are drawn on those (fnc_uiShape), and the
@@ -41,6 +44,8 @@
  *   "holes" (optional) - the cells of its box a shaped item does not take, as it lies
  *   "count", "ammo", "capacity" (optional) - how many, a magazine's rounds and how many it holds
  *   "hidden" (optional) - not searched yet <BOOL>
+ *   "icon" (optional) - [scale, across, down] to draw the picture by instead of the item's own; "preview"
+ *   (optional) - drawn outside the inventory window (the setup wizard), so nothing reports the mouse <BOOL>
  * 3: Theme <HASHMAP>
  *
  * Return Value:
@@ -170,14 +175,14 @@ if (_hidden) then {
 } else {
     private _turned = _entry getOrDefault ["rotated", false];
 
-    if (_turned) then {
-        _controls pushBack ([
-            _display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _info getOrDefault ["picture", ""],
-            [1, 1, 1, 1], _sizeW / (_sizeH max 1)
-        ] call FUNC(uiPictureTurned));
-    } else {
-        _controls pushBack ([_display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _info getOrDefault ["picture", ""]] call FUNC(uiPicture));
-    };
+    // The picture as its rules draw it (icon=): larger, smaller or moved, and cut to the tile where it would
+    // reach out - one control as long as it does not. An entry may carry an icon of its own (the setup
+    // wizard's preview shows the one being edited, "preview": it has no inventory window to report to).
+    _controls pushBack ([
+        _display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _info getOrDefault ["picture", ""],
+        _entry getOrDefault ["icon", _info getOrDefault ["icon", ICON_PLAIN]], [1, 1, 1, 1], _turned, _sizeW / (_sizeH max 1),
+        [_left, _top, _width, _height], !(_entry getOrDefault ["preview", false])
+    ] call FUNC(uiItemPicture));
 
     // A weapon shows what is on it (fnc_drawAttachments).
     private _attachments = _entry getOrDefault ["attachments", []];

@@ -317,8 +317,10 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
     "for=arifle_MX_F > size=1x2, well=CBA_556x45_STANAG > size=1x2, rounds>=100 mass>20 > size=2x3 grid=auto",
     "class=My_Rifle_L > size=xxxx/x---, class=My_Launcher > size=-x-/xxx/---, class=My_Box > shape=xx/xx",
     "class=My_Pack > grid=abbbbbc/abbbbbc/abbbbbc/-bbbbb-/-bbbbb-/-bbbbb-/-bbbbb-, class=My_Ring > grid=2x3+aaa/aba/aaa+1x1, class=My_Row > grid=aaabb",
-    "einv1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4"
-] + ((getArray (configFile >> "CfgEinvRulesets" >> "default" >> "rules")) apply {"einv1 base=none, " + _x});
+    "einv1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4",
+    "class=My_Kit > icon=1.4, class=My_Bandage+ > icon=1.4@0.1:-0.05 stack=3, kind=grenade > icon=0.5@-0.2:0.2, class=My_Plain > icon=1",
+    "class=My_Kit > icon=1.4@0.1,-0.05, stack=3"
+] +((getArray (configFile >> "CfgEinvRulesets" >> "default" >> "rules")) apply {"einv1 base=none, " + _x});
 
 {
     private _back = [[_x] call einv_items_fnc_encodeName] call einv_items_fnc_decodeName;
@@ -327,6 +329,25 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
         ["roundTrip", format ["NAME %1 -> %2 -> %3", _x, [_x] call einv_items_fnc_encodeName, _back]] call _fnc_count;
     };
 } forEach ["Field kit", "Frag (M67), 3 pieces", "Verbandpäckchen", "a_b-c.d 100%", "Gerät; ""quoted"""];
+
+// An icon reads as it is written, a comma typed into a text as the colon, a limit cuts it down, and an offset
+// alone (no second number) is no icon.
+{
+    _x params ["_text", "_want"];
+
+    private _rules = ([_text] call einv_items_fnc_parseRules) get "rules";
+    private _got = if (_rules isEqualTo []) then {[]} else {((_rules select 0) select 1) getOrDefault ["icon", []]};
+
+    if (_got isNotEqualTo _want) then {
+        ["roundTrip", format ["ICON %1 -> %2, wanted %3", _text, _got, _want]] call _fnc_count;
+    };
+} forEach [
+    ["icon=1.4", [1.4, 0, 0]],
+    ["icon=1.4@0.1:-0.05", [1.4, 0.1, -0.05]],
+    ["kind=grenade > icon=1.4@0.1,-0.05", [1.4, 0.1, -0.05]],
+    ["icon=9@2:-3", [4, 1, -1]],
+    ["icon=1.4@0.1", []]
+];
 
 // A text from before the rename still loads, on the new preset.
 private _renamed = (["einv1 base=tarkov"] call einv_items_fnc_parseRules) get "base";

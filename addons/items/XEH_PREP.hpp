@@ -15,6 +15,8 @@ PREP(parseGrid);
 PREP(formatGrid);
 PREP(parseMask);
 PREP(formatMask);
+PREP(parseIcon);
+PREP(formatIcon);
 PREP(encodeName);
 PREP(decodeName);
 PREP(sanitizeText);

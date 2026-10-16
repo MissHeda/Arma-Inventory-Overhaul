@@ -9,7 +9,8 @@
  * dragged (the "wheel" hook). A new count moves the weight card's preview (fnc_previewWeight).
  *
  * Reported by the display and by every scrolling column, both for the same turn of the wheel: one
- * per frame counts.
+ * per frame counts. A picture's clip group over a tile reports it too, and passes it on to the column
+ * (fnc_passWheel).
  *
  * Arguments:
  * 0: The event's own arguments [control or display, scroll] <ARRAY>
@@ -24,7 +25,18 @@
  */
 
 params ["_args"];
-_args params ["", ["_scroll", 0]];
+_args params [["_source", displayNull], ["_scroll", 0]];
+
+// A picture's clip group (fnc_uiItemPicture) lies over its tile and keeps the wheel from the column the tile
+// is in: it hands the turn on - unless the wheel is counting a stack just now.
+if (_source isEqualType controlNull && {_scroll != 0} && {_source getVariable [QGVAR(clip), false]}) then {
+    private _entry = uiNamespace getVariable [QGVAR(dragEntry), createHashMap];
+    private _counting = GVAR(dragging) && {GVAR(dragGroup) isEqualTo []} && {(_entry getOrDefault ["count", 1]) > 1};
+
+    if (!_counting) then {
+        [_source, _scroll] call FUNC(passWheel);
+    };
+};
 
 // Not dragging: a window that attached may use the wheel itself (the Arsenal panel adds or takes out one with
 // Ctrl over a tile) - once per turn, though the display and the column both report it. The hook
