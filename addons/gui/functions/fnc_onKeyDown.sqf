@@ -12,7 +12,9 @@
  *
  * A movement key pressed while looting or searching closes the window (einv_gui_moveToStop): the search
  * stops and the soldier walks off. Keys already held as the window opened count only once they were let
- * go, keys pressed with Ctrl or Alt never (Ctrl+A is the selection's). While magazines are repacked
+ * go, keys pressed with Ctrl or Alt never (Ctrl+A is the selection's). Only on foot: a soldier in a seat
+ * walks off nowhere, and there the same keys are the vehicle's - the window stays, as the vanilla
+ * inventory stays in a vehicle. While magazines are repacked
  * (einv_magazines) Escape stops the repack and the window stays, and Delete waits.
  *
  * Not the press that opened the window, which can still be held down or repeating when it arrives here.
@@ -119,7 +121,8 @@ if (_editing) exitWith {
 // movement key pressed with Ctrl or Alt is something else (Ctrl+A selects the section, and A is MoveLeft).
 // Keyboard only: KeyDown gives DIK codes, and the combos, mouse and joystick bindings are left out. A movement
 // key pressed with Ctrl or Alt counts as held until it is let go: its repeats, once Ctrl is up first, close
-// nothing (Ctrl+A held a moment too long).
+// nothing (Ctrl+A held a moment too long). Seated in a vehicle the keys close nothing: the soldier does not walk
+// off, and a driver's W, S, A and D are the vehicle's - a tap meant for it closed the window he sat looking into.
 if (_ctrl || _alt) then {
     private _action = GVAR(moveKeys) getOrDefault [_key, ""];
 
@@ -131,6 +134,7 @@ if (_ctrl || _alt) then {
 if (
     GVAR(moveToStop) && {!_ctrl} && {!_alt}
     && {!isNull GVAR(openedOn) || {GVAR(searchQueue) isNotEqualTo []}}
+    && {isNull objectParent GVAR(unit)}
     && {call FUNC(isInventoryMode)}
     && {diag_tickTime - GVAR(openedAt) > MOVE_GRACE}
     && {

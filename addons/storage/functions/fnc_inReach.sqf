@@ -5,7 +5,8 @@
  * for a requester who left (null), for the requester's own unit and for work of the server's own
  * (objNull); else the distance to the root - to what it hangs under when attached, as ACE cargo hangs
  * loaded objects under their vehicle - within the reach (einv_storage_nearbyRange, 3 m where it is not
- * set) plus REACH_SLACK plus half the root's size.
+ * set) plus REACH_SLACK plus half the root's size. A requester seated in it - or in what it hangs under -
+ * is always in reach, however fast the vehicle goes and however late its position arrives here.
  *
  * Arguments:
  * 0: Requester <OBJECT>
@@ -32,6 +33,9 @@ private _target = attachedTo _root;
 if (isNull _target) then {
     _target = _root;
 };
+
+// Seated in it: the player goes where it goes.
+if (objectParent _unit isEqualTo _target) exitWith {true};
 
 // The reach setting arrives with the nearby boxes; until then, and should a mission break it, 3 m.
 private _range = missionNamespace getVariable [QGVAR(nearbyRange), 3];

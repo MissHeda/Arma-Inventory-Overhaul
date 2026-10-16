@@ -22,6 +22,15 @@
  * anyway: ACE's click sounds, as for a locked vehicle, and the window opens all the same and shows the
  * container as a locked section - the player sees why.
  *
+ * On foot, an opening that names nothing to loot - nothing, or only the empty pile the engine makes at the
+ * feet - takes in the vehicle the player looks at, when the window may open on it (fnc_canOpenVehicle):
+ * the vanilla inventory shows the vehicle there, and an engine or a script that names none would leave
+ * the window on the soldier's own gear.
+ *
+ * Each asking is one line in the RPT ("asked: <container> - beside it <second> - the player on foot or
+ * seated in <vehicle>"), and each refusal one more ("refused: ..." and why): a report that a container
+ * does not open then says whether the engine asked at all, and where it stopped.
+ *
  * Arguments:
  * 0: Unit <OBJECT>
  * 1: Container it opened, or objNull <OBJECT>
@@ -43,20 +52,65 @@ params ["_unit", ["_container", objNull], ["_secondary", objNull]];
 // else here, for a unit that is not the player's and an opening that is refused as well.
 GVAR(askedFrame) = diag_frameNo;
 
+// What the engine named, one line per asking: a container that "does not open" shows in the RPT whether the
+// engine asked at all, with what, and where the player was - on foot or in a seat.
+private _named = [_container, _secondary] apply {["nothing", typeOf _x] select !isNull _x};
+private _seat = ["on foot", "seated in " + typeOf objectParent _unit] select !isNull objectParent _unit;
+
+INFO_3("asked: %1 - beside it %2 - the player %3.",_named select 0,_named select 1,_seat);
+
 // A soldier the player no longer is - the body a team switch left behind, a unit a script ran the action on:
 // there is no window for it.
-if (_unit isNotEqualTo ACE_player) exitWith {};
+if (_unit isNotEqualTo ACE_player) exitWith {
+    INFO_1("refused: %1 is not the player's unit (ACE_player) - nothing opens.",typeOf _unit);
+};
+
+// On foot with nothing to loot named - nothing at all, or only the empty pile the engine makes at the feet for
+// its ground panel: the vehicle the player looks at joins, when the window may open on it (fnc_canOpenVehicle:
+// in the window's reach, cells to show, not locked to him). The engine names a vehicle itself when the player
+// stands at it; this is for an opening that named none - a script's action ["Gear", objNull], an engine that
+// passed only the unit. What he looks at only, as the Gear key aims: never a vehicle behind him.
+private _own = [_unit, uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
+
+if (isNull objectParent _unit && {[_container, _secondary] findIf {
+    !isNull _x && {!(_x in _own)}
+    && {!([_x] call EFUNC(storage,isGroundHolder)) || {([_x] call EFUNC(storage,getContents)) isNotEqualTo []}}
+} < 0}) then {
+    private _looked = cursorObject;
+
+    if ([_unit, _looked] call FUNC(canOpenVehicle)) then {
+        INFO_1("added: %1 - the player looks at it in reach and the engine named nothing to loot.",typeOf _looked);
+
+        // The pile at the feet stays beside it.
+        _secondary = ([_container, _secondary] select {!isNull _x && {!(_x in _own)}}) param [0, objNull];
+        _container = _looked;
+    };
+};
 
 // Locked to this player (einv_locks). The engine's own lock keeps them out already; this is for a lock set a
-// moment ago and for any script that asks the engine anyway. ACE's click, as for a locked vehicle.
-private _refused = [_container, _secondary] select {!isNull _x && {!(([_unit, _x] call EFUNC(locks,canReach)) select 0)}};
+// moment ago and for any script that asks the engine anyway. ACE's click, as for a locked vehicle. The window
+// opens all the same and shows it as a locked section; the RPT says why.
+private _refused = [];
+
+{
+    if (!isNull _x) then {
+        ([_unit, _x] call EFUNC(locks,canReach)) params ["_reachable", "_why"];
+
+        if (!_reachable) then {
+            _refused pushBack _x;
+            INFO_2("refused: %1 is locked to this player (%2) - shown as a locked section.",typeOf _x,_why);
+        };
+    };
+} forEach [_container, _secondary];
 
 if (_refused isNotEqualTo []) then {
     playSound "ACE_Sound_Click";
 };
 
 // Already open: the engine asked again, from a script or a second key press. One window is enough.
-if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {};
+if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {
+    INFO("refused: the window is open already - nothing more opens.");
+};
 
 // A living person, opened by the engine, first or beside the ground - or a body by its backpack.
 private _person = objNull;
@@ -97,6 +151,7 @@ private _mode = if (isNull _person) then {""} else {[_person] call FUNC(canOpenP
 
 // An ACE dragging clone (a copy of a body's gear) or a person the mission closed: nothing opens.
 if (!isNull _person && {_mode isEqualTo ""}) exitWith {
+    INFO_1("refused: %1 may not be opened (a dragging clone or einv_noAccess) - nothing opens.",typeOf _person);
     [LLSTRING(Hint_NoAccess)] call ACEFUNC(common,displayTextStructured);
 };
 
@@ -104,6 +159,7 @@ if (!isNull _person && {_mode isEqualTo ""}) exitWith {
 // escorted - or the player dragging or carrying them. ACE medical's "Inventory" asks none of that, and
 // the window would close again at its first check, the person told for nothing.
 if (!isNull _person && {!([_unit, _person, true] call FUNC(personInReach))}) exitWith {
+    INFO_1("refused: %1 is out of reach - nothing opens.",typeOf _person);
     [LLSTRING(Hint_OutOfReach)] call ACEFUNC(common,displayTextStructured);
 };
 

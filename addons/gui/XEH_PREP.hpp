@@ -3,6 +3,7 @@ PREP(initUnit);
 PREP(guardVanilla);
 PREP(closeDisplay);
 PREP(onInventoryOpened);
+PREP(canOpenVehicle);
 
 // Living persons: the scroll action, who may do what, and their gear changed where they are local
 PREP(addPersonAction);

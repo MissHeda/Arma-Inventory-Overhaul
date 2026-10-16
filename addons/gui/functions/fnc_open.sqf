@@ -15,8 +15,13 @@
  *
  * What it was opened on - a crate, vehicle, body, person or pile, not the player's own gear - is noted
  * (GVAR(openedOn)): the soldier takes the looting pose (fnc_poseStart), the container opens with a sound,
- * and a movement key closes the window (fnc_onKeyDown). The stance, vehicle and place he had are kept for
+ * and a movement key closes the window on foot (fnc_onKeyDown). The stance, vehicle and place he had are kept for
  * the end (fnc_poseEnd, fnc_poseCheck).
+ *
+ * One line in the RPT per window that opens ("open: <class> kind <family> rows x cols <grid> ..."): what it
+ * was opened on and beside it, the grid each has, and whether the loot column shows it - shown, locked and
+ * why, or no section at all. With fnc_onInventoryOpened's "asked:" line before it, a container that does
+ * not open says where it stopped.
  *
  * Nothing the last window waited for carries over (fnc_attach). The camera on the soldier starts as the
  * player's setting says (einv_gui_cameraDefault); the header's button turns it for this window only - or
@@ -136,6 +141,53 @@ if !([_display, _unit, _container, _secondary, createHashMap, "pfh"] call FUNC(a
     _display closeDisplay 2;
     false
 };
+
+// What it opened on, for the RPT: each container's class, its family (fnc_containerFamily: vehicle, crate,
+// ground, body), its compartments as rows x cols (einv_storage_fnc_getBlocks - the ground's is open, it grows),
+// its load, and what the window made of it: in the loot column, locked and why, the player's own gear, or no
+// section at all - a pile with nothing in it has none, anything else without one was left out on the way.
+private _lootSections = GVAR(context) getOrDefault ["lootSections", []];
+private _ownSections = GVAR(context) getOrDefault ["ownSections", []];
+private _described = ([_container, _secondary] select {!isNull _x}) apply {
+    private _object = _x;
+    private _grid = "worn";
+
+    if !(_object isKindOf "CAManBase") then {
+        private _blocks = [_object] call EFUNC(storage,getBlocks);
+
+        _grid = if (_blocks isEqualTo []) then {
+            "open"
+        } else {
+            (_blocks apply {format ["%1x%2", _x select 1, _x select 0]}) joinString "+"
+        };
+    };
+
+    private _index = _lootSections findIf {
+        (_x getOrDefault ["container", objNull]) isEqualTo _object
+        || {(_x getOrDefault ["lockedObject", objNull]) isEqualTo _object}
+        || {(_x getOrDefault ["unit", objNull]) isEqualTo _object}
+    };
+
+    private _state = switch (true) do {
+        case (_index >= 0 && {(_lootSections select _index) getOrDefault ["locked", false]}): {
+            format ["locked: %1", (_lootSections select _index) getOrDefault ["notice", ""]]
+        };
+        case (_index >= 0): {"shown"};
+        case (_ownSections findIf {(_x getOrDefault ["container", objNull]) isEqualTo _object} >= 0): {"own gear"};
+        default {"no section"};
+    };
+
+    format [
+        "%1 kind %2 rows x cols %3 (load %4 - %5)",
+        typeOf _object, [_object] call FUNC(containerFamily), _grid, [_object] call EFUNC(storage,getMaxLoad), _state
+    ]
+};
+
+private _openedText = if (_described isEqualTo []) then {"nothing - own gear only"} else {_described joinString " + "};
+private _openSeat = ["on foot", "seated in " + typeOf objectParent _unit] select !isNull objectParent _unit;
+private _lootCount = count _lootSections;
+
+INFO_3("open: %1 - the player %2 - %3 loot sections.",_openedText,_openSeat,_lootCount);
 
 // Better Inventory (workshop 2791403093) moves a whole stack from its own put and take handlers while Shift or
 // Ctrl is held, on state its vanilla display sets up - state this window never sets. Its handlers do nothing

@@ -24,6 +24,12 @@ A client can see them and cannot change them.
 - [ ] Two players look into one crate: A moves a tile, B sees the new place without reopening.
 - [ ] Both grab the same item at once: one gets it, the other sees the refusal, nothing is duplicated.
 - [ ] Crate, vehicle, ground pile: take, put, Take all, Put all in, Sort; a player who joins later sees the same places.
+- [ ] Vehicles: from outside (Gear key and the action menu; a car, a truck, a helicopter) the cargo shows as a section with the ground
+      beside it; inside as driver and as passenger the Gear key opens the vehicle's cargo, W/S/A/D do not close the window, it stays
+      open and moves work while it drives, a drop goes into the vehicle; ACE interaction "Inventory" on a car, a helicopter, a boat
+      and a static weapon (not on a locked one, not from a seat); with ACE a "Cargo" section under it (Open a loaded crate, Unload);
+      with `ace_vehiclelock_LockVehicleInventory` on, a locked vehicle without a key shows as locked. The RPT has `asked:` and
+      `open: ... kind vehicle rows x cols ...` for each, and no `Error`.
 - [ ] A client (not the host) drops a worn backpack, picks it up, swaps backpacks.
 - [ ] A client with another rules text gets the hash warning once; the rules setting cannot be changed on a client.
 - [ ] Staging in the Arsenal on a client: move in and out, the crate is deleted on close, nothing lands on the server.

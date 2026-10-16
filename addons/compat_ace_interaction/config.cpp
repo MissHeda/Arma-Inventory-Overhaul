@@ -3,7 +3,8 @@
 // Loads only when ACE's interaction menu is there: an addon whose required addons are missing is skipped,
 // quietly - the rest of the mod works the same without it, and the action menu's "Inventory" stays. The
 // interaction menu is an ACE component a modpack may strip, so it gets an addon of its own like a mod
-// would. It loads after the window (einv_gui), whose gate and opening it calls.
+// would. It loads after the window (einv_gui), whose gates and opening it calls: "Inventory" on a person and,
+// the same entry, on a vehicle.
 class CfgPatches {
     class ADDON {
         name = COMPONENT_NAME;

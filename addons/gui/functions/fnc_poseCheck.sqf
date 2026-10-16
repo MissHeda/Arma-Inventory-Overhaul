@@ -7,7 +7,10 @@
  *
  *   - The soldier was taken away from the loot - into a vehicle, handcuffed or surrendering by ACE,
  *     dragging or carrying, or moved more than POSE_LEASH metres from where the window opened: the window
- *     closes (GVAR(closeReason) "taken", so no sound of a container closing and no end move).
+ *     closes (GVAR(closeReason) "taken", so no sound of a container closing and no end move). Seated, the
+ *     vehicle moves him and the leash is not asked: the vehicle he sits in (and the crates of its ACE
+ *     cargo) goes along, and anything else he opened from the seat is held to the window's reach from
+ *     where he sits now (einv_storage_fnc_inReach).
  *   - No pose yet while a search runs (piles nearby being searched): started late, once per window.
  *   - The pose reached: the camera finds the soldier again, kneeling or bent over his gear.
  *   - Out of the pose and back in a plain stance - a weapon came into or left the hands: back into the
@@ -39,6 +42,8 @@ if !([] call FUNC(isInventoryMode)) exitWith {false};
 private _unit = GVAR(unit);
 
 // Taken away from the loot - into a vehicle, by ACE's captives or carrying, or moved off by anything at all.
+// Seated, not by metres: the vehicle he sits in goes along (einv_storage_fnc_inReach is true for it), anything
+// else outside is left behind once out of the window's reach.
 if (!isNull GVAR(openedOn) && {
     objectParent _unit isNotEqualTo GVAR(openParent)
     || {_unit getVariable [QACEGVAR(captives,isHandcuffed), false]}
@@ -46,6 +51,7 @@ if (!isNull GVAR(openedOn) && {
     || {_unit getVariable [QACEGVAR(dragging,isDragging), false]}
     || {_unit getVariable [QACEGVAR(dragging,isCarrying), false]}
     || {isNull GVAR(openParent) && {(_unit distance2D (ASLToAGL GVAR(openPos))) > POSE_LEASH}}
+    || {!isNull GVAR(openParent) && {!([_unit, GVAR(openedOn)] call EFUNC(storage,inReach))}}
 }) exitWith {
     ["taken"] call FUNC(closeDisplay);
     true

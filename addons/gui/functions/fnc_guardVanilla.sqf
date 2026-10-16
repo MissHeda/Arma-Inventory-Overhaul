@@ -31,7 +31,9 @@
  *    (fnc_initUnit) so the next opening is answered by it last - at most every HANDLER_PAUSE seconds.
  *  - It had not: nobody asked for the window - the handler was taken off by a script, the unit is not one
  *    the handler was put on yet, a script opened the display by createDialog. The handler is put on again,
- *    and with no window open the window opens in the vanilla inventory's place, on the player's own gear.
+ *    and with no window open the window opens in the vanilla inventory's place, on the player's own gear -
+ *    and, seated, on the vehicle's cargo, which is what the vanilla inventory shows in a seat; on foot on
+ *    the vehicle the player looks at, when the window may open on it (fnc_canOpenVehicle).
  *
  * The close is made twice, in the load event and a frame later (a display closed inside its own load event
  * is not always gone): the second time through this function again, so it too looks where the window
@@ -116,8 +118,11 @@ if (_display isNotEqualTo (uiNamespace getVariable [QGVAR(guardLast), displayNul
     };
 
     // Nobody asked for the window, so nothing is opening it: it opens in the vanilla inventory's place - on
-    // the player's own gear, the display says nothing of what it was opened on. Not for a player who is out
-    // cold. fnc_open waits until the display is gone.
+    // the player's own gear, the display says nothing of what it was opened on. Seated, on the vehicle as
+    // well, when it has a cargo space: in a seat the vanilla inventory is the vehicle's cargo, and a window
+    // without it leaves the vehicle out. On foot, on the vehicle he looks at when the window may open on it
+    // (fnc_canOpenVehicle), as the vanilla inventory shows it there. Not for a player who is out cold.
+    // fnc_open waits until the display is gone.
     if (!_asked && {isNull _window}) then {
         INFO("Nothing asked for the window - opening it in place of the vanilla inventory.");
 
@@ -128,7 +133,22 @@ if (_display isNotEqualTo (uiNamespace getVariable [QGVAR(guardLast), displayNul
                 !isNull _unit && {alive _unit} && {!(_unit getVariable ["ACE_isUnconscious", false])}
                 && {isNull (uiNamespace getVariable [QGVAR(display), displayNull])}
             ) then {
-                [_unit, objNull, objNull] call FUNC(open);
+                private _vehicle = objectParent _unit;
+
+                if (!isNull _vehicle && {([_vehicle] call EFUNC(storage,getMaxLoad)) <= 0}) then {
+                    _vehicle = objNull;
+                };
+
+                // On foot: the vehicle he looks at, when the window may open on it (fnc_canOpenVehicle).
+                if (isNull objectParent _unit && {[_unit, cursorObject] call FUNC(canOpenVehicle)}) then {
+                    _vehicle = cursorObject;
+                };
+
+                if (!isNull _vehicle) then {
+                    INFO_1("The window opens on %1 as well - the vehicle the player sits in or looks at.",typeOf _vehicle);
+                };
+
+                [_unit, _vehicle, objNull] call FUNC(open);
             };
         }] call FUNC(later);
     };
