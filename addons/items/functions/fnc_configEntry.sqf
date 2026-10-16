@@ -58,8 +58,20 @@ private _kind = _facts get "kind";
 // the compiled form): the same rules, shallow-copied, with the own rules gone and the kind's index
 // list pointing at the preset's alone.
 private _rules = if (isNil "_compiled") then {[] call FUNC(currentRules)} else {_compiled};
-private _bare = createHashMapFromArray (toArray _rules);
-private _byKind = createHashMapFromArray (toArray (_rules getOrDefault ["byKind", createHashMap]));
+
+// Copied key by key, the values shared and only the entries below replaced. A copy through toArray and
+// createHashMapFromArray stopped on a hash map where it wanted a key (seen in the Containers step's "Copy as layout").
+private _bare = createHashMap;
+private _byKind = createHashMap;
+
+{
+    _bare set [_x, _y];
+} forEach _rules;
+
+{
+    _byKind set [_x, _y];
+} forEach (_rules getOrDefault ["byKind", createHashMap]);
+
 private _kindRules = _byKind getOrDefault [_kind, [[], [], [], []]];
 
 _byKind set [_kind, [[], _kindRules select 1, [], _kindRules select 3, [], []]];

@@ -27,6 +27,9 @@
 #define CTRL_TYPE_EDIT 2
 #define CTRL_TYPE_GROUP 15
 
+// How often a step's scroll positions are set again after it was drawn (fnc_restoreScroll).
+#define RESTORE_TRIES 12
+
 // ---------------------------------------------------------------------------
 // The window: a pane in the middle of the screen, as wide as fits and 35 rows high.
 //
@@ -99,10 +102,6 @@
 // The kinds the Containers step lists: what holds things and has a grid - a kit of Enhanced First Aid Kits
 // too, whose grid counts only once a rule or its config gives it one (einv_compat_efak_fnc_roomMode).
 #define CONTAINER_KINDS ["uniform", "vest", "backpack", "crate", "vehicle", "kit"]
-
-// What a saved draft (fnc_personalPresets) puts between the rules and the server settings it keeps with them: the
-// settings' text follows it. A draft kept before there were any has no such mark, only rules.
-#define DRAFT_SETTINGS_MARKER "einv-settings:"
 
 // The containers the General step sets a size for, one kind at a time (fnc_drawGeneral, fnc_kindRule): what a soldier
 // wears and what holds cargo - each a rule "all kind=... > grid=WxH" of the text, which the engine asks after

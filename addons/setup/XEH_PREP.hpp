@@ -9,6 +9,7 @@ PREP(close);
 
 // Code a moment later - also in Eden and over the menus, where CBA's frame handlers do not run
 PREP(defer);
+PREP(restoreScroll);
 PREP(runDeferred);
 
 // Who may open it at all and save where, what is in use, and the draft being edited: the rules and the server
@@ -46,9 +47,7 @@ PREP(importSettings);
 PREP(openImport);
 PREP(exportText);
 PREP(openExport);
-PREP(openDrafts);
 PREP(openChanges);
-PREP(personalPresets);
 PREP(shippedPresets);
 PREP(presetName);
 PREP(describeRule);

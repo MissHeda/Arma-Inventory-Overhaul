@@ -1827,7 +1827,7 @@ made anew at the end of every step drawn so it is the display's last control, hi
 control over all others, and the pane holds the focus after a redraw (its sink) or a click - popovers made on the display lay behind
 it. A popover therefore takes the focus into the layer (a button of no size on its card) before its content is drawn, its
 full-screen hit area closes it on a click beside the card and lets nothing through, and the keys wait while one is open
-(`fnc_onKeyDown`, `fnc_onKeyUp`); `fnc_closePopover` hides the layer and gives the focus back to the sink. A popover without an anchor sits in the middle of the screen, or - with its seventh argument - centred on a point (`fnc_confirm` centres on the wizard's middle). **`fnc_confirm`** is a card with its question centred (a bold title above it when it has one) and its answers right-aligned along the bottom with one gap, as wide as the answers need; the answer that does nothing is first on the left, Escape and a click beside the card are that answer. Closing with unsaved changes (`fnc_close`) asks "You have unsaved changes.": **Keep editing**, **Close without saving** (style `danger`) and - only when the wizard may save (`!readOnly`) - **Save and close**, which calls `fnc_save` and closes the display once the draft is no longer dirty (a conflict question or a refusal leaves it open).
+(`fnc_onKeyDown`, `fnc_onKeyUp`); `fnc_closePopover` hides the layer and gives the focus back to the sink. A popover with an anchor opens below it (above when there is no room), at the anchor's place on the screen as `fnc_screenRect` works it out: the groups around the control add their corner and take off how far each is scrolled (`ctrlScrollValues` times the content's height less the group's; a step that draws a scrolling page says its height in the group's `contentH`, else it is the lowest bottom edge of the group's controls). A step drawn again keeps where its groups were scrolled (`scrollId` on the group): `fnc_showStep` saves them and `fnc_restoreScroll` sets them again until they hold, a page that came out longer or shorter at the same distance from its top. A popover without an anchor sits in the middle of the screen, or - with its seventh argument - centred on a point (`fnc_confirm` centres on the wizard's middle). **`fnc_confirm`** is a card with its question centred (a bold title above it when it has one) and its answers right-aligned along the bottom with one gap, as wide as the answers need; the answer that does nothing is first on the left, Escape and a click beside the card are that answer. Closing with unsaved changes (`fnc_close`) asks "You have unsaved changes.": **Keep editing**, **Close without saving** (style `danger`) and - only when the wizard may save (`!readOnly`) - **Save and close**, which calls `fnc_save` and closes the display once the draft is no longer dirty (a conflict question or a refusal leaves it open).
 
 ### State and the draft
 
@@ -1842,7 +1842,7 @@ setting's name -> value), `draftSettingsText`, `cleanSettings`; `sourceEmpty`, `
 window (`step`, `focus`, `selection`, `theme`) and what steps keep between redraws (`listState`, `treeState`, `editScope`, `cellWork`,
 `itemWork`, `cellMode`, `cellBrush`, `sameAs`, `kindEdit`, `exportMode`, ...); controls stay in uiNamespace. **Every edit of the rules ends in
 `fnc_commit [ast, redraw = true]`** (an undo step, `fnc_setDraft`, redraw); **every edit of a server setting in `fnc_setSetting [name, value]`**
-(nothing for the default; `fnc_commitSettings`, `fnc_setSettingsDraft`); an import, loading a saved draft and Reset to default change both at once in one
+(nothing for the default; `fnc_commitSettings`, `fnc_setSettingsDraft`); an import and Reset to default change both at once in one
 undo step (`fnc_commitSetup`). `fnc_setDraft [text]` parses, writes out again, compiles with a fresh cache and raises the local event
 `einv_setup_draftChanged [draftText]`. A change that writes out the same text is no change.
 
@@ -1855,8 +1855,7 @@ argument, and a change of either (`einv_items_rulesChanged`, `einv_main_settings
 
 - **General** (`fnc_drawGeneral`): one page that scrolls. Its top row has the title and Import (`fnc_openImport`), Export (`fnc_openExport`: a box with
   the own rules, the whole setup written out or the lines for a `cba_settings.sqf` - the rules and, off their defaults, `einv_main_settings` -, read only,
-  with Copy where `copyToClipboard` works), Drafts (`fnc_openDrafts`: `fnc_personalPresets`, kept in the profile as `[name, text, date]`, the text
-  the rules and after `DRAFT_SETTINGS_MARKER` the server settings) and Reset to default (`fnc_resetAll`, after `fnc_confirm`); under it where Save goes,
+  with Copy where `copyToClipboard` works) and Reset to default (`fnc_resetAll`, after `fnc_confirm`); under it where Save goes,
   or why it may not (in red), and the switch to force it over the mission where `canEdit` allows it. Only when there are any: what the engine left out of
   the text it read. Then:
   - **Containers**: a row for each of `GENERAL_KINDS` (uniform, vest, backpack, vehicle, crate): Auto | Fixed, two steppers (across 1 to `STORAGE_COLS`,
@@ -2362,7 +2361,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_gui_sounds` | CHECKBOX | client | on | the inventory's sounds |
 | `einv_gui_soundVolume` | SLIDER 0 to 2 | client | 1 | their volume |
 | `einv_gui_soundsWorld` | CHECKBOX | global | on | players nearby hear someone loot |
-| `einv_gui_animation` | LIST | global | While looting | Off, While looting, Always: the looting pose |
+| `einv_gui_animation` | LIST | global | Off | Off, While looting, Always: the looting pose |
 | `einv_gui_moveToStop` | CHECKBOX | client | on | a movement key closes the window while looting |
 | `einv_gui_searchTime` | SLIDER 0 to 3 | global | 0.4 | seconds per cell searched; 0 shows everything |
 | `einv_gui_searchBodies`, `searchPersons`, `searchContainers` | CHECKBOX | global | on | what has to be searched |

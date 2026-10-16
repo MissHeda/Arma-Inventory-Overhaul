@@ -69,8 +69,7 @@ Its three pages:
   how big an item is and what stacks, and holds the load per cell (`cell=`). Then the *server settings*, by topic, each with a small
   reset button while it is off its default (see "Server settings" below). At the bottom *What you changed* lists, in words, what
   single classes change on top of all that - when all uniforms are 10x10 by their kind and one is 5x5, only that one. The page's
-  top row has Import, Export (the setup as text: your own rules, all of them written out, or the lines for a `cba_settings.sqf`),
-  Drafts (setups kept in your profile) and Reset to default. The header's "4 changes" opens the list of what Save would store, and
+  top row has Import, Export (the setup as text: your own rules, all of them written out, or the lines for a `cba_settings.sqf`) and Reset to default. The header's "4 changes" opens the list of what Save would store, and
   Save in the footer stores it.
 - **Items** and **Containers**: you draw the cells of an item
   (an L, a T), paint the cells of a uniform, vest or backpack in colours - touching cells of one colour are one

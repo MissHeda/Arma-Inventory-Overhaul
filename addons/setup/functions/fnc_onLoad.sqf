@@ -68,7 +68,6 @@ GVAR(undo) = [];
 GVAR(redo) = [];
 GVAR(exportMode) = 2;
 GVAR(importText) = "";
-GVAR(draftPick) = "";
 GVAR(changeRefs) = createHashMap;
 GVAR(kindEdit) = createHashMap;
 GVAR(defaultCache) = createHashMap;

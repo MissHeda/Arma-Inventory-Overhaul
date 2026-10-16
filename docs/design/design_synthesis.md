@@ -780,7 +780,7 @@ Applies to all packages:
 - `XEH_preInit.sqf`: state, plus `if (hasInterface) then {#include "initEntryPoints.inc.sqf"}` (WP6).
 - `RscWizard.hpp`: `einv_setup_RscWizard` and `EINV_EditArea` (`EINV_Edit` with ST_MULTI, large `maxChars`).
 - `stringtable.xml`: including every WP5 and WP6 key in 5.5.
-- `functions/`: `fnc_open`, `fnc_onLoad`, `fnc_onUnload`, `fnc_onKey`, `fnc_canEdit`, `fnc_getActive`, `fnc_commit`, `fnc_undo`, `fnc_drawFrame`, `fnc_showStep`, `fnc_drawStart`, `fnc_drawReview`, `fnc_save`, `fnc_importText`, `fnc_exportText`, `fnc_describeRule`, `fnc_popover`, `fnc_closePopover`, `fnc_confirm`, `fnc_personalPresets`, `fnc_uiToggle`, `fnc_uiStepper`, `fnc_uiEdit`, `fnc_uiChip`, `fnc_uiSegmented`, `fnc_uiDropdown` (all `.sqf`)
+- `functions/`: `fnc_open`, `fnc_onLoad`, `fnc_onUnload`, `fnc_onKey`, `fnc_canEdit`, `fnc_getActive`, `fnc_commit`, `fnc_undo`, `fnc_drawFrame`, `fnc_showStep`, `fnc_drawStart`, `fnc_drawReview`, `fnc_save`, `fnc_importText`, `fnc_exportText`, `fnc_describeRule`, `fnc_popover`, `fnc_closePopover`, `fnc_confirm`, `fnc_uiToggle`, `fnc_uiStepper`, `fnc_uiEdit`, `fnc_uiChip`, `fnc_uiSegmented`, `fnc_uiDropdown` (all `.sqf`)
 
 **Done when:**
 - The wizard opens in direct mode and in menu mode, and is read-only where the 2.7 table says so.

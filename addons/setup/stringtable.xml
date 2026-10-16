@@ -418,51 +418,6 @@
         <Key ID="STR_einv_setup_Discard_Title">
             <English>You have unsaved changes.</English>
         </Key>
-        <Key ID="STR_einv_setup_Drafts_Delete">
-            <English>Delete</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_DeleteConfirm">
-            <English>Delete the saved draft %1?</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_Deleted">
-            <English>Draft %1 deleted.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_Help">
-            <English>Kept in your profile, for any mission and any server, with the server settings that go with them. A draft of the same name is replaced.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_Keep">
-            <English>Keep</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_Load">
-            <English>Load</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_Loaded">
-            <English>Draft %1 loaded - save to use it.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_Name">
-            <English>Name</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_NeedName">
-            <English>Give it a name first.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_None">
-            <English>No drafts kept yet</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_Pick">
-            <English>Pick a draft</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_Saved">
-            <English>Draft kept as %1.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_Short">
-            <English>Drafts</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_Tip">
-            <English>Keep this setup in your profile under a name, or load one you kept.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_Title">
-            <English>Saved drafts</English>
-        </Key>
         <Key ID="STR_einv_setup_Explain_Backpacks">
             <English>One big block, as near square as %1 columns allow: a load of 280 makes %2 cells, %3 across and %4 down.</English>
         </Key>
@@ -1124,7 +1079,7 @@
             <English>Cannot save: %1</English>
         </Key>
         <Key ID="STR_einv_setup_Save_ReadOnlyHelp">
-            <English>You can still try changes, export them or keep them as a saved draft.</English>
+            <English>You can still try changes, or export them.</English>
         </Key>
         <Key ID="STR_einv_setup_Save_Saved">
             <English>Saved to the server: in use for everyone.</English>

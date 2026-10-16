@@ -5,7 +5,7 @@
  * Step 1, General: what holds for everything, top to bottom in one page that scrolls.
  *   - The title, where Save goes (or why it may not, in red), the switch to force it over the mission's own setup
  *     where that is allowed, and the buttons for the setup as a whole: Import, Export (the setup as text,
- *     fnc_openExport), the saved drafts (fnc_openDrafts) and Reset to default. Under them, only when there are
+ *     fnc_openExport) and Reset to default. Under them, only when there are
  *     any, what the rules engine left out of the text it read.
  *   - Containers: for each kind - uniforms, vests, backpacks, vehicles, crates - Auto, the size its load gives
  *     (see below), or Fixed, every container of that kind the same size across x down. The rule all kind=uniform >
@@ -106,9 +106,8 @@ private _fnc_buttonW = {
 
 private _importW = [LLSTRING(Import), true] call _fnc_buttonW;
 private _exportW = [LLSTRING(Export), true] call _fnc_buttonW;
-private _draftsW = [LLSTRING(Drafts_Short), false] call _fnc_buttonW;
 private _resetW = [LLSTRING(Reset), true] call _fnc_buttonW;
-private _buttonsW = _importW + _exportW + _draftsW + _resetW + _buttonGap * 3;
+private _buttonsW = _importW + _exportW + _resetW + _buttonGap * 2;
 private _buttonsX = _padX + _innerW - _buttonsW;
 private _titleW = (_buttonsX - _gap) - _padX;
 
@@ -131,14 +130,6 @@ _buttonsX = _buttonsX + _importW + _buttonGap;
 }, "", LLSTRING(Export_Tip)] call _fnc_anchored;
 
 _buttonsX = _buttonsX + _exportW + _buttonGap;
-
-[[_buttonsX, _cursorY, _draftsW, _buttonH], LLSTRING(Drafts_Short), "", {
-    params ["_display", "_anchor"];
-
-    [_display, _anchor] call FUNC(openDrafts);
-}, "", LLSTRING(Drafts_Tip)] call _fnc_anchored;
-
-_buttonsX = _buttonsX + _draftsW + _buttonGap;
 
 [_display, _page, [_buttonsX, _cursorY, _resetW, _buttonH], LLSTRING(Reset), ICON(icon_reset_ca,icon_auto_ca), _theme, {
     [uiNamespace getVariable [QGVAR(display), displayNull], LLSTRING(Reset_Confirm), LLSTRING(Reset_Yes), {
@@ -615,7 +606,11 @@ private _fnc_setting = {
 
 _cursorY = _cursorY + UNIT * 11 + UNIT * 0.6;
 
-// The end of the page: the scroll group is as long as its last control.
+// The end of the page: the scroll group is as long as its last control. Its length is kept on the group, for where it
+// is scrolled to be put back after a redraw (fnc_restoreScroll) and for a box that opens at a control on it
+// (fnc_screenRect).
 [_display, "EINV_Hitbox", _page, [0, _cursorY, pixelW, pixelH]] call EFUNC(gui,uiCreate);
+
+_page setVariable [QGVAR(contentH), _cursorY + pixelH];
 
 ctrlDelete _probe;

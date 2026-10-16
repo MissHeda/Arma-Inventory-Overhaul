@@ -7,9 +7,9 @@
  * Every change of the draft ends here, so what is shown is always the draft as it is.
  *
  * A step that is not there (out of range) opens General instead. Drawn again in the same step,
- * its scrolling lists keep where they were scrolled (each one named by QGVAR(scrollId) on its group),
- * put back a moment later: right after it is made a group does not know its height yet, and the engine
- * puts it back to the top (seen in the inventory, 2026-10-08).
+ * its scrolling lists - the General page too - keep where they were scrolled (each one named by QGVAR(scrollId) on its
+ * group), put back by fnc_restoreScroll a moment later and again until it holds: right after it is made a group does not
+ * know its height yet, and the engine puts it back to the top (seen in the inventory, 2026-10-08).
  *
  * Arguments:
  * 0: Step, 0 (General) to 2 (Containers) <NUMBER> (default: the open step)
@@ -49,12 +49,13 @@ if (!isNull _old && {_step == GVAR(step)}) then {
         private _id = _x getVariable [QGVAR(scrollId), ""];
 
         if (_id isNotEqualTo "") then {
-            _scroll set [_id, (ctrlScrollValues _x) select 0];
+            _scroll set [_id, [((ctrlScrollValues _x) select 0) max 0, _x getVariable [QGVAR(contentH), -1], (ctrlPosition _x) select 3]];
         };
     } forEach ((allControls _display) select {ctrlType _x == CTRL_TYPE_GROUP});
 };
 
 GVAR(step) = _step;
+GVAR(drawn) = GVAR(drawn) + 1;
 GVAR(stepKey) = {false};
 
 ctrlDelete _old;
@@ -70,19 +71,7 @@ uiNamespace setVariable [QGVAR(content), _group];
 [_display, _group, GVAR(theme), _arguments] call (missionNamespace getVariable [(_steps select _step) select 2, {}]);
 
 if (count _scroll > 0) then {
-    [{
-        params ["_scroll"];
-
-        private _display = uiNamespace getVariable [QGVAR(display), displayNull];
-
-        {
-            private _value = _scroll getOrDefault [_x getVariable [QGVAR(scrollId), ""], -1];
-
-            if (_value > 0) then {
-                _x ctrlSetScrollValues [_value, -1];
-            };
-        } forEach ((allControls _display) select {ctrlType _x == CTRL_TYPE_GROUP});
-    }, [_scroll], 0.05] call FUNC(defer);
+    [FUNC(restoreScroll), [_scroll, GVAR(drawn)], 0.03] call FUNC(defer);
 };
 
 // The top layer anew, after everything of this step: the last control of the display (fnc_topLayer).

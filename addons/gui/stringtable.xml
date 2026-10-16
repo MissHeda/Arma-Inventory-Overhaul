@@ -389,7 +389,7 @@
             <English>Always</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_Animation_Desc">
-            <English>While the window is open, the soldier\nlowers his weapon and looks into his\ngear, as in Arma's own inventory -\nkneeling at bodies, at piles on the\nground and at low crates - so others see\nwho is looting. A suppressor is screwed\non and off. As the window closes he\nholds his weapon as he did before.\n\nWhile looting: when the window was\nopened on something, or while it\nsearches. Always: also for your own\ngear. Never while unconscious, captive,\nswimming, in a vehicle or on a ladder.\n\nA magazine loaded into the weapon in\nhand plays its reload whatever is set\nhere.</English>
+            <English>Off by default. When on, the soldier\nlowers his weapon and looks into his\ngear while the window is open, as in\nArma's own inventory - kneeling at\nbodies, at piles on the ground and at\nlow crates - so others see who is\nlooting. A suppressor is screwed on and\noff. As the window closes he holds his\nweapon as he did before.\n\nWhile looting: when the window was\nopened on something, or while it\nsearches. Always: also for your own\ngear. Never while unconscious, captive,\nswimming, in a vehicle or on a ladder.\n\nA magazine loaded into the weapon in\nhand plays its reload whatever is set\nhere.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_Animation_Looting">
             <English>While looting</English>

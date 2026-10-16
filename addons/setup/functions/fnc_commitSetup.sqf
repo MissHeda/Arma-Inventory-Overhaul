@@ -1,9 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Takes a change of both parts of the setup into the draft at once, as one undo step: what an import, loading a
- * saved draft and Reset to default do - the rules and the server settings change together, and Undo takes both
- * back with one click. The setup before it goes onto the undo stack, anything undone is forgotten, and the new
+ * Takes a change of both parts of the setup into the draft at once, as one undo step: what an import and
+ * Reset to default do - the rules and the server settings change together, and Undo takes both back with one
+ * click. The setup before it goes onto the undo stack, anything undone is forgotten, and the new
  * rules (fnc_setDraft) and settings (fnc_setSettingsDraft) are the draft; then the step is drawn again. Nothing
  * that writes out the same text leaves an undo step behind.
  *

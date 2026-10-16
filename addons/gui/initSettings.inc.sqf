@@ -97,7 +97,7 @@
     QGVAR(animation),
     "LIST",
     [LLSTRING(Setting_Animation), LLSTRING(Setting_Animation_Desc)],
-    [[0, 1, 2], [LLSTRING(Setting_Animation_Off), LLSTRING(Setting_Animation_Looting), LLSTRING(Setting_Animation_Always)], 1]
+    [[0, 1, 2], [LLSTRING(Setting_Animation_Off), LLSTRING(Setting_Animation_Looting), LLSTRING(Setting_Animation_Always)], 0]
 ] call EFUNC(main,addSetting);
 
 // ----- Searching -----

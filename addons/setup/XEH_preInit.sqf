@@ -80,16 +80,16 @@ GVAR(step) = 0;
 GVAR(focus) = "";
 GVAR(selection) = createHashMap;
 GVAR(stepKey) = {false};
+GVAR(drawn) = 0;
 GVAR(theme) = createHashMap;
 
 // What the steps keep between their redraws: which text the Export box shows - 0 own rules, 1 full, 2 the
-// line for a cba_settings.sqf -; the saved draft picked; the text pasted into the import box; the banner after
+// line for a cba_settings.sqf -; the text pasted into the import box; the banner after
 // someone else changed the setup; the footer's hint, [text, theme colour]; and what the General step keeps -
 // the kind settings as stepped and not written yet, per kind: [fixed, across, down] (fnc_drawGeneral). And the
 // setups the draft is compared with, read once each (fnc_changeRows), and what a class would be without its own
 // rule, per draft text and class (fnc_classDefault).
 GVAR(exportMode) = 2;
-GVAR(draftPick) = "";
 GVAR(changeRefs) = createHashMap;
 GVAR(importText) = "";
 GVAR(banner) = false;
