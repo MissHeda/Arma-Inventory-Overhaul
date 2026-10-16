@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [3] call einv_setup_fnc_showStep;
+ * [1] call einv_setup_fnc_showStep;
  *
  * Public: No
  */

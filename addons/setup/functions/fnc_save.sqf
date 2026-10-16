@@ -42,8 +42,9 @@ if (GVAR(readOnly)) exitWith {
 private _text = GVAR(draftText);
 private _settings = GVAR(draftSettingsText);
 
-if (count _text > TEXT_MAX) exitWith {
-    [format [LLSTRING(Warning_TooLong), count _text], "loss"] call FUNC(setHint);
+// The server settings' text too: a long text box value is written five characters for each special one.
+if (count _text > TEXT_MAX || {count _settings > TEXT_MAX}) exitWith {
+    [format [LLSTRING(Warning_TooLong), (count _text) max (count _settings)], "loss"] call FUNC(setHint);
 };
 
 private _source = GVAR(target) getOrDefault ["source", ""];

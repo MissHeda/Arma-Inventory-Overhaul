@@ -195,15 +195,19 @@ private _list = [_display, "EINV_ScrollGroup", _box, [0, _cursorY, _width, _foot
 
 _list setVariable [QGVAR(scrollId), "tree_" + _mode];
 
-// The class that was asked for is a few rows down: the list is scrolled so it is in view.
-if (_focusRow > 1) then {
+// The class that was asked for is a few rows down: the list is scrolled so it is in view, the row above it at the
+// top. A scroll value is a share of how far the list can scroll (its rows' height less its own), not a height.
+private _rowPitch = TREE_ROW_H + UNIT * 0.2;
+private _travel = (count _shown) * _rowPitch - UNIT * 0.2 - (_footY - UNIT * 0.2 - _cursorY);
+
+if (_focusRow > 1 && {_travel > 0}) then {
     [{
-        params ["_list", "_y"];
+        params ["_list", "_share"];
 
         if (!isNull _list) then {
-            _list ctrlSetScrollValues [_y, -1];
+            _list ctrlSetScrollValues [_share, -1];
         };
-    }, [_list, (_focusRow - 1) * (TREE_ROW_H + UNIT * 0.2)], 0.1] call FUNC(defer);
+    }, [_list, (((_focusRow - 1) * _rowPitch) / _travel) min 1], 0.1] call FUNC(defer);
 };
 
 if (_shown isEqualTo []) then {

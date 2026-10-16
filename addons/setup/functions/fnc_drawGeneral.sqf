@@ -280,17 +280,18 @@ private _timesW = SQUARE(UNIT * 0.6);
     _rowX = _rowX + _labelW + _gap;
 
     // Auto or Fixed. A rule that is neither (a pattern typed at the text) leaves both open: either replaces it.
+    // Fixed takes the size the steppers show.
     [_display, _page, [_rowX, _rowY, _modeW, _rowH], _modeLabels, ["auto", "fixed"] find _state, _theme, {
-        params ["_index", "_kind"];
+        params ["_index", "_arguments"];
 
-        private _numbers = GVAR(kindEdit) getOrDefault [_kind, [UNIFORM_COLS, UNIFORM_ROWS_MIN]];
+        _arguments params ["_kind", "_numbers"];
 
         if (_index == 0) then {
             [[[_kind, createHashMap, ["grid"]]]] call FUNC(upsertKinds);
         } else {
             [[[_kind, createHashMapFromArray [["grid", format ["%1x%2", _numbers select 0, _numbers select 1]]], []]]] call FUNC(upsertKinds);
         };
-    }, _kind] call FUNC(uiSegmented);
+    }, [_kind, _numbers]] call FUNC(uiSegmented);
     _rowX = _rowX + _modeW + _gap;
 
     // The size of a fixed one: greyed while it goes by load.

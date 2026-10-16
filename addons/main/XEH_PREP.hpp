@@ -4,6 +4,7 @@ PREP(addSetting);
 PREP(parseValue);
 PREP(parseSettings);
 PREP(writeSettings);
+PREP(readSettings);
 PREP(applySettings);
 PREP(sanitizeSettings);
 PREP(encodeText);

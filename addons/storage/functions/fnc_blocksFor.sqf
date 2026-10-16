@@ -191,7 +191,8 @@ private _fnc_fill = {
     // A number that was given is met exactly instead, row after row.
     case "block": {
         if (_given) then {
-            [UNIFORM_COLS min STORAGE_COLS, _cells] call _fnc_rows
+            // Never more than MAX_ROWS rows: six columns reach that long before MAX_CELLS.
+            [UNIFORM_COLS min STORAGE_COLS, _cells min ((UNIFORM_COLS min STORAGE_COLS) * MAX_ROWS)] call _fnc_rows
         } else {
             [[UNIFORM_COLS min STORAGE_COLS, ((ceil (_cells / UNIFORM_COLS)) max UNIFORM_ROWS_MIN) min UNIFORM_ROWS_MAX]]
         }

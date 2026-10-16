@@ -2322,7 +2322,8 @@ stringtables are wrapped as BRIEFING asks.
 `einv_main_fnc_addSetting [name, type, [label, description], valueInfo, script = {}, hidden = false]` (the arguments of `CBA_fnc_addSetting`
 less the category and the scope, in `initSettings.inc.sqf`): `einv_main_serverSettings` (name -> definition: `type`, `label`, `tip`, `default`, `min`,
 `max`, `decimals`, `values`, `labels`, `script`, `hidden`, `key`), `einv_main_serverKeys` (key -> name), `einv_main_serverOrder`. The variable exists at
-once, set to the default. Their values are the text of **one CBA EDITBOX, `einv_main_settings`** (scope 1, default "", title "Server settings - set in
+once, set to what the box below holds for it by then (CBA has read the box before any addon registers), else the default - as CBA
+sets a row's variable at once and runs its script only later. Their values are the text of **one CBA EDITBOX, `einv_main_settings`** (scope 1, default "", title "Server settings - set in
 the setup wizard, do not edit", sanitized by `einv_main_fnc_sanitizeSettings`): `einv1, gui_searchTime=0.6, weight_enabled=0` - the header, then
 `key=value` for each setting that is off its default, in registration order, the key the name without `einv_`. A switch is `1` or `0` (also `on`, `off`,
 `true`, `false`), a slider a number cut to its range and rounded to its decimals, a list the value of one of its choices, a text box free text with
@@ -2331,10 +2332,13 @@ the setup wizard, do not edit", sanitized by `einv_main_fnc_sanitizeSettings`): 
 `fnc_parseValue [entry, text]`. **`fnc_applySettings`** is the box's change script, run by CBA on every machine when the settings are first read and
 whenever the text changes: it sets every registered variable (the default where the text says nothing), then runs each changed setting's script
 with the value (every one the first time, as CBA does) and raises CBA's `CBA_SettingChanged [name, value]` (which the hotbar listens to) and the local
-event `einv_main_settingsChanged [text]` (an open wizard takes it in). The variables, their names, their kinds of value and their scripts are those
-of the rows they replace, so no reader changed. While the box is empty and a mission's own `cba_settings.sqf` has lines for the old names (read from CBA's
-`cba_settings_missionConfig`, once the box is the default), those values are taken as if the text said them; the server's profile and file are not
-read. A scope-2 box (a setting nobody may override) would be a second EDITBOX; no setting needs one.
+event `einv_main_settingsChanged [text]` (an open wizard takes it in). Before CBA's settings are ready (`cba_settings_ready`; never in Eden)
+it only sets the variables - no script, no `CBA_SettingChanged`, and the first call once they are ready still runs every script: `XEH_preInit`
+calls it on CBA's `cba_settings_refreshSetting` for the box then, so a save in Eden reaches the variables too. The variables, their names, their kinds
+of value and their scripts are those of the rows they replace, so no reader changed. What the text says, and the old names below, is read by
+`fnc_readSettings [text, names = []]`. While the box is empty and a mission has values for the old names - lines of its own `cba_settings.sqf`
+(CBA's `cba_settings_missionConfig`), else saved in Eden (the mission attribute `cba_settings_hash`) - those values are taken as if the text said them;
+the server's profile and file are not read. A scope-2 box (a setting nobody may override) would be a second EDITBOX; no setting needs one.
 
 The setup wizard's General page draws a control for each registered setting that is not `hidden` (section 6). What stays in CBA's menu: the rules
 (`einv_items_rules`) with the three older tables, the box above, and every setting of scope 0.

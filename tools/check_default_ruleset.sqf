@@ -207,8 +207,13 @@ private _fnc_oldBlocks = {
 
     switch (_kind) do {
         case "uniform": {
-            // UNIFORM_COLS 6 wide, UNIFORM_ROWS_MIN 2 to UNIFORM_ROWS_MAX 5 rows high.
-            if (_given) then {[6] call _fnc_rows} else {[[6, ((ceil (_cells / 6)) max 2) min 5]]}
+            // UNIFORM_COLS 6 wide, UNIFORM_ROWS_MIN 2 to UNIFORM_ROWS_MAX 5 rows high; a number given at most MAX_ROWS 40 rows.
+            if (_given) then {
+                _cells = _cells min (6 * 40);
+                [6] call _fnc_rows
+            } else {
+                [[6, ((ceil (_cells / 6)) max 2) min 5]]
+            }
         };
         case "vest": {
             [[[1, 2], [2, 2]], 20] call _fnc_fill

@@ -4,10 +4,11 @@
  * Registers a setting that is the same for everyone - what a server or a mission decides, not what a player
  * sets for themselves. It takes the place of CBA_fnc_addSetting with its isGlobal at 1, and is called with
  * the same arguments but the category and the scope: the setting's variable (einv_gui_searchTime) exists
- * at once, set to the default, and every other part of the mod reads it exactly as before. What changes is
- * where the value comes from: not a row of CBA's menu of its own but the text of one setting for them all
- * (einv_main_settings), which the setup wizard's General page writes and fnc_applySettings reads - it sets the
- * variable, runs the setting's script and raises CBA's setting-changed event, as CBA did for a row of its own.
+ * at once, set to what the text holds for it or else the default, and every other part of the mod reads it
+ * exactly as before. What changes is where the value comes from: not a row of CBA's menu of its own but the
+ * text of one setting for them all (einv_main_settings), which the setup wizard's General page writes and
+ * fnc_applySettings reads - it sets the variable, runs the setting's script and raises CBA's setting-changed
+ * event, as CBA did for a row of its own.
  *
  * The wizard draws a control for it by its type: a switch, a stepper, a drop-down, a text field.
  *
@@ -113,7 +114,11 @@ GVAR(serverSettings) set [_name, _entry];
 GVAR(serverKeys) set [_key, _name];
 GVAR(serverOrder) pushBack _name;
 
-// What the mod reads until the settings are in, and for as long as nobody changes them.
-missionNamespace setVariable [_name, _default];
+// What the mod reads from now on: what the text holds already - CBA has read it from the server, the mission and the
+// profile by the time any addon registers its settings - else the default. As CBA does for a row of its own, the
+// value is there at once and the script runs only once the settings are ready (fnc_applySettings).
+private _value = ([missionNamespace getVariable [QGVAR(settings), ""], [_name]] call FUNC(readSettings)) get _name;
+
+missionNamespace setVariable [_name, [_value, _default] select (isNil "_value")];
 
 true

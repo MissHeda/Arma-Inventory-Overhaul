@@ -45,6 +45,11 @@ while {_index < _count} do {
         if (_digits findIf {_x < 0} < 0) then {
             _code = ((_digits select 0) * 4096) + ((_digits select 1) * 256) + ((_digits select 2) * 16) + (_digits select 3);
         };
+
+        // "%0000" stays as it is: a character 0 would end the text there. fnc_encodeText never writes it.
+        if (_code == 0) then {
+            _code = -1;
+        };
     };
 
     if (_code >= 0) then {

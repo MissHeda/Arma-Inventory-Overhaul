@@ -20,8 +20,8 @@
 // add presets of their own as classes here, for a text that names them in base=. Only the case of a class
 // name is free: the config finds a class whatever its case, and the ids are read lowercased.
 class CfgEinvRulesets {
-    // Realism: the sizes a rig and a rifle really take, and nothing stacks but what the owner picked by
-    // hand (the last groups, @stack_*). A rifle is a column longer than it was before presets went, a
+    // The default, the one preset: the sizes a rig and a rifle really take, and nothing stacks but what
+    // the owner picked by hand (the last groups, @stack_*). A rifle is a column longer than it was before presets went, a
     // backpack's tile as large as its room. No rule here sets a container's grid: a uniform, vest or
     // backpack with no rule, mod or setting of its own gets what the built-in answer makes of its load
     // (einv_storage_fnc_blocksFor), so the kind settings of the setup wizard's General page - the text's

@@ -95,7 +95,7 @@ their load. A text that names a preset of an older version (`base=realism`, `wei
   default. On every machine the text is read into the variables the mod has always read, under the same names, with the same scripts, so a script that sets
   `einv_weight_heavyAt` or reads `einv_gui_searchBodies` knows nothing of it. A `cba_settings.sqf` sets it with one line
   (`force force einv_main_settings = "einv1, weight_enabled=0";`); the wizard's Export gives that line. A mission whose `cba_settings.sqf` has lines for the old settings
-  (`einv_gui_searchTime = 0.6;`) keeps working as long as the text box is empty: those values are taken as if the text said them (the server's own
+  (`einv_gui_searchTime = 0.6;`), or that saved them in Eden's addon options, keeps working as long as the text box is empty: those values are taken as if the text said them (the server's own
   profile and `cba_settings.sqf` are not read - set them in the wizard again). What players set for themselves (tile scale, tile names, sounds, keys, the
   hotbar's look) stays in CBA's menu, per player. The old tables (`einv_items_sizeTable`, `stackTable`, `einv_storage_containerTable`) and the rules text stay
   CBA text boxes of their own.

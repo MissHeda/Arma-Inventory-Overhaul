@@ -8,13 +8,13 @@
  * mission decides reaches everyone and a client joining later alike. A setting whose value did not change is left
  * alone - but for the first time, when all of them count as changed, as CBA runs every setting's script once.
  *
+ * Before CBA's settings are ready - in Eden, which has no postInit, and while the mission starts - only the
+ * variables are set, as CBA sets those of its own rows then: no script runs and CBA's event is not raised, and
+ * the first call once they are ready still counts as the first (XEH_preInit calls it for a change of the text then).
+ *
  * The values reach the variables the rest of the mod has always read (einv_gui_searchTime, einv_weight_enabled,
  * ...) under the same names and as the same kinds of value, so nothing that reads them knows the difference.
- *
- * Missions that were set up before the settings moved - lines in a cba_settings.sqf for einv_gui_searchTime
- * and the like, which CBA no longer knows - keep working while the text is empty: whatever the mission's file
- * says for a registered setting is taken, as if the text said it. Once the text holds anything, only it counts.
- * What the server's own file or profile said for them is not carried over; the wizard writes it again.
+ * Missions that were set up before the settings moved keep working while the text is empty (fnc_readSettings).
  *
  * Arguments:
  * 0: The text <STRING>
@@ -30,46 +30,13 @@
 
 params [["_text", "", [""]]];
 
-private _values = ([_text] call FUNC(parseSettings)) select 0;
+private _values = [_text] call FUNC(readSettings);
+private _ready = !isNil "cba_settings_ready";
+private _first = _ready && {!GVAR(settingsApplied)};
 
-// A mission's own cba_settings.sqf lines for the old rows of CBA's menu - [value, priority] by name in CBA's
-// namespace of the mission's file. Only while nothing was ever written to the text.
-if (_text isEqualTo "") then {
-    private _legacy = missionNamespace getVariable ["cba_settings_missionConfig", objNull];
-
-    if (!isNull _legacy) then {
-        {
-            private _old = _legacy getVariable _x;
-
-            if (isNil "_old" || {!(_old isEqualType [])}) then {continue};
-
-            private _raw = _old param [0];
-
-            if (isNil "_raw") then {continue};
-
-            private _written = switch (true) do {
-                case (_raw isEqualType true): {["0", "1"] select _raw};
-                case (_raw isEqualType 0): {str _raw};
-                case (_raw isEqualType ""): {
-                    [_raw, [_raw] call FUNC(encodeText)] select (((GVAR(serverSettings) get _x) get "type") isEqualTo "EDITBOX")
-                };
-                default {nil};
-            };
-
-            if (isNil "_written") then {continue};
-
-            private _value = [GVAR(serverSettings) get _x, _written] call FUNC(parseValue);
-
-            if (!isNil "_value") then {
-                _values set [_x, _value];
-            };
-        } forEach GVAR(serverOrder);
-    };
+if (_ready) then {
+    GVAR(settingsApplied) = true;
 };
-
-private _first = !GVAR(settingsApplied);
-
-GVAR(settingsApplied) = true;
 
 // All the variables first, then the scripts: a script that reads several settings (the use-from-containers
 // ones read all three) sees them all as the text says, not some of them as they were.
@@ -87,15 +54,15 @@ private _changed = [];
     };
 } forEach GVAR(serverOrder);
 
-{
-    private _value = missionNamespace getVariable _x;
+if (_ready) then {
+    {
+        private _value = missionNamespace getVariable _x;
 
-    _value call ((GVAR(serverSettings) get _x) get "script");
+        _value call ((GVAR(serverSettings) get _x) get "script");
 
-    // The same event CBA raises for its own settings, once it is ready (the hotbar listens to it).
-    if (!isNil "cba_settings_ready") then {
+        // The same event CBA raises for its own settings (the hotbar listens to it).
         ["CBA_SettingChanged", [_x, _value]] call CBA_fnc_localEvent;
-    };
-} forEach _changed;
+    } forEach _changed;
+};
 
 [QGVAR(settingsChanged), [_text]] call CBA_fnc_localEvent;
