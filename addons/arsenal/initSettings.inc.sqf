@@ -1,4 +1,8 @@
 // Settings are ordered by topic, and within a topic numbers, then switches, then lists, then text boxes.
+//
+// What is the same for everyone (a server's or a mission's to decide) is registered with einv_main_fnc_addSetting: it
+// has no row in CBA's menu but a control on the setup wizard's General page, and its value comes from the one
+// text box einv_main_settings (addons/main). The variable, its name, its kind of value and its script are as they were.
 
 // ----- Vanilla Arsenal -----
 
@@ -10,16 +14,12 @@ private _labels = [LLSTRING(Setting_BIArsenal_Ace), LLSTRING(Setting_BIArsenal_B
     QGVAR(biArsenal),
     "LIST",
     [LLSTRING(Setting_BIArsenal), LLSTRING(Setting_BIArsenal_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Vanilla)],
-    [_modes, _labels, 0],
-    1
-] call CBA_fnc_addSetting;
+    [_modes, _labels, 0]
+] call EFUNC(main,addSetting);
 
 [
     QGVAR(biMessage),
     "EDITBOX",
     [LLSTRING(Setting_BIMessage), LLSTRING(Setting_BIMessage_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Vanilla)],
-    "",
-    1
-] call CBA_fnc_addSetting;
+    ""
+] call EFUNC(main,addSetting);

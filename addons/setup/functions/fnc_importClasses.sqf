@@ -11,7 +11,7 @@
  *     }; };, several classes at once; einv_items_fnc_parseConfigEntry reads them);
  *   - rules of single classes only (class=X > grid=..., class=X+ > ...) without a header or groups: read the
  *     same as the config lines, a class each;
- *   - else rules, as the Import at Review reads them (fnc_importText): a bare rules text or lines of a
+ *   - else rules, as the setup's Import reads them (fnc_importText): a bare rules text or lines of a
  *     cba_settings.sqf. Their statements join the own ones - the own preset and the rest stay -, and the
  *     ones that are already there are not added twice.
  *
@@ -27,7 +27,7 @@
  * Values that cannot mean anything to the selected class are left out: a grid for what is no container, a stack
  * for what never shares a tile.
  * A kit of Enhanced First Aid Kits class=X+, so the kits carried, instances of it, follow (fnc_editScope).
- * Nothing is saved: Save at Review still decides, and Undo takes the import back.
+ * Nothing is saved: Save still decides, and Undo takes the import back.
  *
  * Arguments:
  * 0: Pasted text <STRING>

@@ -5,6 +5,9 @@
  * The right side of the Containers step: the cells of the container picked in the list, to draw.
  *   - What it is (picture, name, class, kind, mod, load) and what the draft makes of it now, with where
  *     that comes from (fnc_answerText) and how many compartments and cells that gives.
+ *   - Beside that line a small reset button (fnc_uiReset), there while the cells are not what the draft would
+ *     make of the class without a grid or a link of its own (fnc_classDefault): a click takes them back at once
+ *     (fnc_resetField).
  *   - Two ways to draw them, picked above the drawing and kept for the session (GVAR(cellMode)):
  *     Paint (0) - one drawing STORAGE_COLS wide (fnc_uiCanvas with a palette): eight colours and "none"
  *       as chips, the one picked the brush (GVAR(cellBrush)); a click paints a place or takes the colour
@@ -26,7 +29,7 @@
  *   - In the corner Export and Import (fnc_editorTools): the config lines of the class, and a pasted
  *     setup of them.
  *   - Picked in the tree view (fnc_editScope), the edit is for the class and every class built on it: a
- *     line says so, with how many, and Apply, Back to the preset and Export work on the whole tree - one
+ *     line says so, with how many, and Apply, Back to the default and Export work on the whole tree - one
  *     rule class=X+ with the cells instead of one per class, and a class with a rule of its own further
  *     down keeps it. "Same as another class" is for one class and is not offered then. A chip returns to the
  *     class alone.
@@ -35,7 +38,7 @@
  *     as one canvas with a letter per compartment in reading order of its first cell
  *     (einv_items_fnc_formatGrid: abbbbbc/abbbbbc/-bbbbb-; a single compartment stays xxxx/x--x or WxH),
  *     blocks as 6x4+xxx/x-x (fnc_upsertRule), and - once the picture was changed - icon=ZOOM@ACROSS:DOWN and
- *     picture=PATH, which Apply also writes alone. Discard drops the edits, Back to the preset takes the
+ *     picture=PATH, which Apply also writes alone. Discard drops the edits, Back to the default takes the
  *     class's own grid, like=, icon and picture away.
  *   - "Same as another class..." picks a class in a popover (fnc_drawSameAs) to follow (like=) or to copy
  *     the cells of. Following, the drawing shows that class's cells and cannot be changed; a chip says so
@@ -44,7 +47,7 @@
  *     classes that mod makes of it (fnc_editScope: class=X+). Until a rule or its config gives it a grid
  *     its room is that mod's capacity (fnc_kitRoom): "Now" says "capacity 35 (EFAK)" and a note says what
  *     Apply changes - the cells drawn here, by its capacity, are only a start. With a grid, "Now" shows it
- *     and a note says the capacity no longer counts; Back to the preset returns it to the capacity.
+ *     and a note says the capacity no longer counts; Back to the default returns it to the capacity.
  *
  * Edits go into a working copy per class (GVAR(cellWork), lowercase class -> a painted canvas, or
  * "blocks" and "picked" for the Blocks way; "unlink" when Apply is to take like= away too, after cells
@@ -145,6 +148,20 @@ private _own = _exactRules getOrDefault [_lc, createHashMap];
 
 // A kit: "capacity" while that mod's capacity is its room, "cells" once a grid of its own is.
 private _kitRoom = [_info] call FUNC(kitRoom);
+
+// What the cells would be without a grid or a link of its own - what the reset button takes them back to. Only
+// worked out where it has one: else they are what they are now.
+private _hasOwnGrid = ("grid" in _own || {"like" in _own}) || {_tree && {("grid" in (_treeRules getOrDefault [_lc, createHashMap])) || {"like" in (_treeRules getOrDefault [_lc, createHashMap])}}};
+private _defaultBlocks = _resolved;
+
+if (_hasOwnGrid && {_kitRoom isEqualTo ""} && {!isNil QEFUNC(storage,blocksFor)}) then {
+    private _defaultInfo = [_class, ["grid", "like"]] call FUNC(classDefault);
+
+    _defaultBlocks = [
+        _defaultInfo getOrDefault ["class", _class], [_kind, "crate"] select (_kind in ["crate", "vehicle"]), _info getOrDefault ["maxLoad", 0],
+        _defaultInfo getOrDefault ["grid", ["auto"]], (GVAR(draftRules) getOrDefault ["cell", 5]) max 1
+    ] call EFUNC(storage,blocksFor);
+};
 
 private _like = _own getOrDefault ["like", ""];
 private _spec = _info getOrDefault ["grid", ["auto"]];
@@ -302,9 +319,27 @@ private _now = if (_kitRoom isEqualTo "capacity") then {
     ]
 };
 
-_cursorY = _cursorY + ([
-    _display, _box, [_innerX, _cursorY, _innerW], _now, TEXT_BODY, [_colorText, _accent] select ((_src select [0, 4]) isEqualTo "own:"), _font
-] call FUNC(uiText)) + UNIT * 0.15;
+// Back to the default, beside the line: the compartments, whatever way they were drawn, as three numbers each.
+private _fnc_shapes = {
+    ((_this select {(_x select 1) > 0}) apply {[_x select 0, _x select 1, _x param [2, []]]})
+};
+private _resetSize = UNIT * 1.1;
+private _canResetGrid = _kitRoom isEqualTo "" && {("like" in _own) || {(_blocks call _fnc_shapes) isNotEqualTo (_defaultBlocks call _fnc_shapes)}};
+private _nowW = _innerW - ([0, _resetSize + SQUARE(UNIT * 0.3)] select _canResetGrid);
+
+if (_canResetGrid) then {
+    [
+        _display, _box, [_innerX + _innerW - _resetSize, _cursorY, _resetSize, _resetSize], _theme, {
+            params ["_class", "_tree"];
+
+            [_class, "containers", ["grid", "like"], _tree] call FUNC(resetField);
+        }, [_class, _tree]
+    ] call FUNC(uiReset);
+};
+
+_cursorY = _cursorY + (([
+    _display, _box, [_innerX, _cursorY, _nowW], _now, TEXT_BODY, [_colorText, _accent] select ((_src select [0, 4]) isEqualTo "own:"), _font
+] call FUNC(uiText)) max (([0, _resetSize] select _canResetGrid))) + UNIT * 0.15;
 
 private _likeName = ((_byClass getOrDefault [toLowerANSI _like, []]) param [ROW_NAME, _like]);
 private _notes = [];
@@ -602,7 +637,7 @@ if (_dirty || _pictureDirty) then {
     [_display, _box, [_innerX, _totalsY, _innerW, _totalsH], LLSTRING(Cont_Unapplied), TEXT_SMALL, _warn, _font, 1] call EFUNC(gui,uiLabel);
 };
 
-// ----- Apply, Discard, Back to the preset; Same as another class -----
+// ----- Apply, Discard, Back to the default; Same as another class -----
 
 private _gap = SQUARE(UNIT * 0.3);
 private _buttonX = _innerX;

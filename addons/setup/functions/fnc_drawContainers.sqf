@@ -11,7 +11,7 @@
  *   - Right: the one picked, its compartments to paint - a colour per compartment - or to build block by
  *     block, or the same as another class (fnc_drawCellEditor). Apply writes one rule for exactly that
  *     class into the draft - or, for a class picked in the tree, one rule for it and everything built on
- *     it (class=X+); Save at Review puts it to use. Export and Import work with config lines.
+ *     it (class=X+); Save puts it to use. Export and Import work with config lines.
  * Ctrl+F puts the cursor in the search.
  *
  * Opened for a class (fnc_open with a class, GVAR(focus)) that is a container, it starts with that one

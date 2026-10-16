@@ -11,7 +11,7 @@
  *   - Right: the one picked, its cells to draw - a rectangle by its width and height, or any shape cell by
  *     cell -, its stack, weight and name (fnc_drawItemEditor). Apply writes one rule for exactly that class
  *     into the draft - or, for a class picked in the tree, one rule for it and everything built on it
- *     (class=X+); Save at Review puts it to use. Export and Import work with config lines.
+ *     (class=X+); Save puts it to use. Export and Import work with config lines.
  * Ctrl+F puts the cursor in the search.
  *
  * Opened for a class (fnc_open with a class, GVAR(focus)), it starts with that one picked and found.

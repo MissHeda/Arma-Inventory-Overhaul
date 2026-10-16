@@ -24,8 +24,8 @@
  * mods and never names a class the other player may not have. Always the class alone - a layout has no
  * tree.
  *
- * The lines go to the clipboard where the game lets a script write there - on the server and alone, as at
- * Review -; anyone else gets a box with the text, to select and copy by hand.
+ * The lines go to the clipboard where the game lets a script write there - on the server and alone, as at the
+ * setup's Export -; anyone else gets a box with the text, to select and copy by hand.
  *
  * Arguments:
  * 0: Step: "items" or "containers" <STRING>

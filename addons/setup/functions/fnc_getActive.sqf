@@ -1,7 +1,8 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The rules text the wizard starts from - what is in use where it saves:
+ * The text the wizard starts from - what is in use where it saves - for one of its two settings, the rules or
+ * the server settings:
  *   - menu mode: what CBA's menu shows for the source picked there, a change not yet confirmed in the menu
  *     first (CBA keeps those in its temporary values until OK).
  *   - direct mode: the value of the source the wizard saves to, when that source has one of its own; the
@@ -9,23 +10,26 @@
  *     Eden while the scenario has none yet.
  *
  * Arguments:
- * None
+ * 0: The setting, RULES_SETTING or SETTINGS_SETTING <STRING> (default: the rules)
  *
  * Return Value:
- * Rules text <STRING>
+ * Text <STRING>
  *
  * Example:
  * call einv_setup_fnc_getActive;
+ * [SETTINGS_SETTING] call einv_setup_fnc_getActive;
  *
  * Public: No
  */
 
-private _setting = RULES_SETTING;
+params [["_setting", RULES_SETTING, [""]]];
+
+private _default = [RULES_DEFAULT, ""] select (_setting isEqualTo SETTINGS_SETTING);
 
 if (isNil "cba_settings_fnc_get") exitWith {
-    private _value = missionNamespace getVariable [_setting, RULES_DEFAULT];
+    private _value = missionNamespace getVariable [_setting, _default];
 
-    [RULES_DEFAULT, _value] select (_value isEqualType "")
+    [_default, _value] select (_value isEqualType "")
 };
 
 private _value = if ((missionNamespace getVariable [QGVAR(mode), "direct"]) isEqualTo "menu") then {
@@ -45,7 +49,7 @@ private _value = if ((missionNamespace getVariable [QGVAR(mode), "direct"]) isEq
 };
 
 if (isNil "_value" || {!(_value isEqualType "")}) then {
-    _value = RULES_DEFAULT;
+    _value = _default;
 };
 
 _value

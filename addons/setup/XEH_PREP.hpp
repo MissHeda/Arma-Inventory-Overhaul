@@ -11,13 +11,21 @@ PREP(close);
 PREP(defer);
 PREP(runDeferred);
 
-// Who may open it at all and save where, what is in use, and the draft being edited
+// Who may open it at all and save where, what is in use, and the draft being edited: the rules and the server
+// settings, two settings that are one setup
 PREP(canOpen);
 PREP(canEdit);
 PREP(getActive);
 PREP(targetValue);
+PREP(targetValues);
 PREP(setDraft);
+PREP(setSettingsDraft);
 PREP(commit);
+PREP(commitSettings);
+PREP(commitSetup);
+PREP(setSetting);
+PREP(resetAll);
+PREP(atDefault);
 PREP(undo);
 PREP(reload);
 PREP(onRulesChanged);
@@ -25,6 +33,8 @@ PREP(isDirty);
 PREP(sourceEmpty);
 PREP(countChanges);
 PREP(changeRows);
+PREP(ruleStep);
+PREP(settingText);
 PREP(statements);
 PREP(sanitize);
 
@@ -32,8 +42,12 @@ PREP(sanitize);
 PREP(save);
 PREP(replay);
 PREP(importText);
+PREP(importSettings);
 PREP(openImport);
 PREP(exportText);
+PREP(openExport);
+PREP(openDrafts);
+PREP(openChanges);
 PREP(personalPresets);
 PREP(shippedPresets);
 PREP(presetName);
@@ -42,14 +56,14 @@ PREP(describeRule);
 // The window and its steps
 PREP(drawFrame);
 PREP(showStep);
-PREP(drawStart);
+PREP(drawGeneral);
 PREP(drawChanges);
-// The Start step's "Everything else": the rules with "all" it writes, found by their selector
+// The General step's size for each kind of container: the rules with "all kind=..." it writes, found by their selector
 PREP(allRule);
-PREP(upsertAll);
+PREP(kindRule);
+PREP(upsertKinds);
 PREP(drawItems);
 PREP(drawContainers);
-PREP(drawReview);
 PREP(setHint);
 PREP(popover);
 PREP(closePopover);
@@ -95,6 +109,8 @@ PREP(weightValue);
 PREP(ownClassRules);
 PREP(upsertRule);
 PREP(upsertRules);
+PREP(classDefault);
+PREP(resetField);
 
 // The inheritance tree: which classes are built on one, how the lists show them, and when an edit applies
 // to all of them
@@ -104,6 +120,7 @@ PREP(classTree);
 PREP(treeRows);
 PREP(drawTree);
 PREP(editScope);
+PREP(treeTop);
 
 // Export and import at the editors: the config lines of a class (or a tree), and a pasted setup of them
 PREP(editorTools);
@@ -124,6 +141,8 @@ PREP(uiToggle);
 PREP(uiStepper);
 PREP(uiEdit);
 PREP(uiNumber);
+PREP(uiField);
+PREP(uiReset);
 PREP(fitEditArea);
 PREP(uiChip);
 PREP(uiCanvas);

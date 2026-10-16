@@ -14,7 +14,7 @@
  * Arguments:
  * 0: Display to open it over, displayNull for Eden's or else the game's own screen <DISPLAY> (default: displayNull)
  * 1: Mode, "menu" or "direct" <STRING> (default: "direct")
- * 2: Step to open at, 0 (Start) to 3 (Review) - one out of range opens Start <NUMBER> (default: 0)
+ * 2: Step to open at, 0 (General) to 2 (Containers) - one out of range opens General <NUMBER> (default: 0)
  * 3: Class to look at in that step, "" for none <STRING> (default: "")
  *
  * Return Value:

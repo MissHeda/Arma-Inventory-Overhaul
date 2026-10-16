@@ -205,11 +205,14 @@ if (_hidden) then {
         (_theme getOrDefault ["tileName", true])
         && {missionNamespace getVariable [QGVAR(tileNames), false] || {_entry getOrDefault ["preview", false]}}
     ) then {
-        // A kit by the name its player gave it (fnc_itemName).
-        private _short = [[_entry get "class", true] call FUNC(itemName), _innerW, _font, _textH] call FUNC(fitText);
+        // A kit by the name its player gave it (fnc_itemName). A one-cell tile has room for a few letters
+        // only: a name that does not fit is set a fifth smaller before it is cut, so more of it shows.
+        private _name = [_entry get "class", true] call FUNC(itemName);
+        private _nameH = _textH * ([1, 0.8] select (((_name getTextWidth [_font, _textH]) * TEXT_SLACK) > _innerW));
+        private _short = [_name, _innerW, _font, _nameH] call FUNC(fitText);
 
         _controls pushBack ([
-            _display, _parent, [_left + _padX, _top + _padY * 0.4, _innerW, _textH * 1.15], _short, _textH,
+            _display, _parent, [_left + _padX, _top + _padY * 0.4, _innerW, _nameH * 1.15], _short, _nameH,
             _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _font, 1
         ] call FUNC(uiLabel));
     };

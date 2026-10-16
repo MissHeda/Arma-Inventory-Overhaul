@@ -76,8 +76,5 @@
         <Key ID="STR_einv_storage_SubCategory_Containers">
             <English>Containers</English>
         </Key>
-        <Key ID="STR_einv_storage_SubCategory_UseFrom">
-            <English>Use from containers</English>
-        </Key>
     </Package>
 </Project>

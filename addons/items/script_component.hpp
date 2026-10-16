@@ -34,12 +34,20 @@
 // The tile categories by their names in the rules (cat=), in the order of the CATEGORY_* numbers.
 #define CATEGORY_NAMES ["misc", "gear", "weapon", "ammo", "medical"]
 
-// The grid patterns a container can be laid out by (grid=rig, ...), see einv_storage_fnc_blocksFor.
-#define GRID_PATTERNS ["pockets", "pockets_mixed", "rig", "mixed", "plate", "long", "single", "wide"]
+// The grid patterns a container can be laid out by (grid=rig, ...), see einv_storage_fnc_blocksFor. "pouches"
+// is what a vest gets when no rule says otherwise, "block" a uniform.
+#define GRID_PATTERNS ["pockets", "pockets_mixed", "rig", "mixed", "plate", "long", "single", "wide", "pouches", "block"]
 
-// Presets that were renamed, [old id, new id]: a text written before (base=tarkov) and another mod's
-// preset that builds on the old id keep loading, on the new one (fnc_parseRules, fnc_compileRules).
-#define PRESET_ALIASES [["tarkov", "realism"]]
+// What a uniform, vest or backpack gets from the built-in answer when nothing says otherwise: a fifth more
+// room than its load gives (a share, as grid=120% writes it). Crates and vehicles get "auto", the load itself
+// (fnc_resolve).
+#define BUILTIN_WORN_GRID ["percent", 120]
+#define WORN_KINDS ["uniform", "vest", "backpack"]
+
+// Presets that were renamed or taken out, [old id, id read instead]: a text written before (base=tarkov,
+// base=realism, base=weight) and another mod's preset that builds on one of them keep loading, on the one
+// preset there is now (fnc_parseRules, fnc_compileRules).
+#define PRESET_ALIASES [["tarkov", "default"], ["realism", "default"], ["weight", "default"]]
 
 // The keys an item's own config may set, each written the way the rules write the same value
 // (fnc_readConfigKeys): einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture, einv_use. fnc_configEntry

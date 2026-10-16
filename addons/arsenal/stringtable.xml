@@ -100,9 +100,6 @@
         <Key ID="STR_einv_arsenal_Staging_Title">
             <English>Staging</English>
         </Key>
-        <Key ID="STR_einv_arsenal_SubCategory_Vanilla">
-            <English>Vanilla Arsenal</English>
-        </Key>
         <Key ID="STR_einv_arsenal_Word_Backpack">
             <English>backpack</English>
         </Key>

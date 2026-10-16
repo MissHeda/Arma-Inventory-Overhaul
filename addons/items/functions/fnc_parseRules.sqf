@@ -13,7 +13,7 @@
  *                                         build on (base=none for none) and the config mass per grid
  *                                         cell. Without one, the text reads as einv1 base=default.
  *                                         A renamed preset's old id reads as the new one
- *                                         (PRESET_ALIASES: base=tarkov is base=realism).
+ *                                         (PRESET_ALIASES: base=tarkov, realism and weight are base=default).
  *   @rifle_mags: kind=magazine mass<=20   a group: a name for a selection, used as @rifle_mags. A name
  *                                         defined twice means either. An own group replaces the
  *                                         preset's group of the same name; @name inside it means the

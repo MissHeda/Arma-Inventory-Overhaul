@@ -59,17 +59,46 @@ Tools).
 
 How big items are, how many share a tile and how containers are split up is one text of rules, the
 CBA setting "Inventory rules" (`einv_items_rules`), the same for everyone. The setup wizard writes it for you
-(ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory - shown only to the server, the host, single player and logged-in admins, other players never see it): you draw the cells of an item
-(an L, a T), paint the cells of a uniform, vest or backpack in colours - touching cells of one colour are one
-compartment, and it looks in the inventory exactly as painted -, build it block by block in Blocks mode, or
-make a class the same as another one (Same as: follow it with `like=` or copy its cells), set an item's weight and name next to its
-size, zoom and shift its picture in the tile where an icon is too small or too large (`icon=`, with a live preview) or give it another picture altogether (`picture=`: pick one from every item's picture, or type any texture path - the container boxes follow too), change a whole family at once - search with wildcards (`B_Bergen*`), switch the list to Tree, pick a class and everything built on
-it is edited as one rule, `class=B_Carryall_Base+` - and copy a class's config lines with Export - for a mod, or as a layout without a class name to share - or paste some in with Import (a layout goes to the class you have selected, so does a class this game does not have); its start page shows
-what you changed. It is plain text all the same.
-It builds on a preset: Default (relaxed: realistic-ish sizes, containers a fifth roomier than their load),
-Realism (realistic sizes: longer rifles, magazine-rig vests, a fixed grid per backpack size, stacks as in
-Default; `base=tarkov` of older texts reads as Realism) or Weight-like (an item takes as many cells as it
-weighs). Grids are ten cells wide.
+(ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory - shown only to the server, the host, single player and logged-in admins, other players never see it).
+Its three pages:
+
+- **General** is what holds for everything. *Containers:* for uniforms, vests, backpacks, vehicles and crates, Auto - the size
+  the container's load gives (below) - or Fixed, every container of that kind the same size across x down: all uniforms 5x5 is one row
+  of the page (the text's rule `all kind=uniform > grid=5x5`). A class with a rule of its own, and what a mod says about its own
+  classes, still wins. *How room is worked out* tells in plain words, with the numbers as they are now, how a load turns into cells,
+  how big an item is and what stacks, and holds the load per cell (`cell=`). Then the *server settings*, by topic, each with a small
+  reset button while it is off its default (see "Server settings" below). At the bottom *What you changed* lists, in words, what
+  single classes change on top of all that - when all uniforms are 10x10 by their kind and one is 5x5, only that one. The page's
+  top row has Import, Export (the setup as text: your own rules, all of them written out, or the lines for a `cba_settings.sqf`),
+  Drafts (setups kept in your profile) and Reset to default. The header's "4 changes" opens the list of what Save would store, and
+  Save in the footer stores it.
+- **Items** and **Containers**: you draw the cells of an item
+  (an L, a T), paint the cells of a uniform, vest or backpack in colours - touching cells of one colour are one
+  compartment, and it looks in the inventory exactly as painted -, build it block by block in Blocks mode, or
+  make a class the same as another one (Same as: follow it with `like=` or copy its cells), set an item's weight and name next to its
+  size, zoom and shift its picture in the tile where an icon is too small or too large (`icon=`, with a live preview) or give it another picture altogether (`picture=`: pick one from every item's picture, or type any texture path - the container boxes follow too), change a whole family at once - the Tree button
+  shows the picked class among its relatives, and a click on one of them edits it as one rule, `class=B_Carryall_Base+` - and copy a class's config lines with Export - for a mod,
+  or as a layout without a class name to share - or paste some in with Import (a layout goes to the class you have selected, so does a class this game does not have).
+  A small reset button beside a field takes it back to what the class would be without a rule of its own.
+
+It is plain text all the same. There is one preset, the default, which is realism: rifles from 4x2 to 7x2, magazines a tile or two,
+backpacks with big tiles, and **nothing stacks** but a short list of consumables - bandages, injectors and small infusions
+ten to a tile, rations, splints, bigger infusions and first aid kits five, blood bags and the biggest infusions two - and only where
+the mod that adds them (ACE, ACM) is loaded. What is worn gets a fifth more room than its load gives (a uniform is one block 6 wide and
+2 to 5 rows high, a vest is magazine pouches of 1x2 and 2x2, a backpack one near-square block); vehicles and crates get as many cells as
+their load. A text that names a preset of an older version (`base=realism`, `weight`, `tarkov`) reads as the default. Grids are ten cells wide.
+
+- **Server settings:** every setting of this mod that is the same for everyone - searching, living persons, weight, the hotbar, repacking,
+  locks, the vanilla arsenal - is a control of the wizard's General page and no row of CBA's menu. They are saved in one CBA text box, `einv_main_settings`
+  (a server's or a mission's, forced or not, like the rules), as `einv1, gui_searchTime=0.6, weight_enabled=0`: the setting's name without `einv_`, a value
+  (`1` or `0` for a switch, a number, the value of a choice, free text with a `%` and four hex digits for what is not a letter, a digit, `-` or `.`), only what is off its
+  default. On every machine the text is read into the variables the mod has always read, under the same names, with the same scripts, so a script that sets
+  `einv_weight_heavyAt` or reads `einv_gui_searchBodies` knows nothing of it. A `cba_settings.sqf` sets it with one line
+  (`force force einv_main_settings = "einv1, weight_enabled=0";`); the wizard's Export gives that line. A mission whose `cba_settings.sqf` has lines for the old settings
+  (`einv_gui_searchTime = 0.6;`) keeps working as long as the text box is empty: those values are taken as if the text said them (the server's own
+  profile and `cba_settings.sqf` are not read - set them in the wizard again). What players set for themselves (tile scale, tile names, sounds, keys, the
+  hotbar's look) stays in CBA's menu, per player. The old tables (`einv_items_sizeTable`, `stackTable`, `einv_storage_containerTable`) and the rules text stay
+  CBA text boxes of their own.
 
 - **Your own classes and kits:** `class=X+` covers X and every class built on it, from any mod -
   `class=My_Medic_Kit+ > size=2x2 stack=1 weight=1.5 name=Medic_kit`. A later rule beats an earlier one.
@@ -87,13 +116,13 @@ weighs). Grids are ten cells wide.
   capacity no longer counts, in the inventory, in kit windows ("8 / 12 cells") and in ACE Arsenal:
   `class=efak_IFAK+ > grid=4x3` (the `+` matters - the kits players carry are numbered copies of the type, `efak_IFAK_7`),
   `kind=kit > grid=12` for every kit, or `einv_grid = "4x3";` on the kit's class in a mod. The wizard's Containers step has a
-  Kits chip and writes the `+` rule for you; "Back to the preset" returns a kit to the capacity. That mod's own kit window and its
+  Kits chip and writes the `+` rule for you; "Back to the default" returns a kit to the capacity. That mod's own kit window and its
   kits tab in ACE Arsenal still go by the capacity. In ACE Arsenal an item dragged from ACE's list onto a kit's tile in the panel
   is packed into that kit, where the kit type's Arsenal setting allows filling it.
 - **One crate, vehicle or a unit's uniform, vest or backpack:** give the object its own grid, which wins
   over every rule - `_crate setVariable ["einv_grid", "6x4+2x3", true];` (also `"24"`, `"rig:16"`, `"auto"`).
-- **Mods:** ship presets of your own as classes of `CfgEinvRulesets` (see `addons/items/CfgEinvRulesets.hpp`),
-  or predefine your items in their own config class, in exactly the language of the rules text - a custom vest
+- **Mods:** add a preset of your own as a class of `CfgEinvRulesets` (see `addons/items/CfgEinvRulesets.hpp`; a text names it with
+  `base=`, the wizard offers no choice of presets), or predefine your items in their own config class, in exactly the language of the rules text - a custom vest
   writes how its compartments are:
   ```cpp
   class CfgWeapons { class My_Vest { einv_grid = "1x3+5x7+1x3"; }; };       // grid=, also "xxxx/x--x+2x3", a canvas, "rig:16", "24"
@@ -122,8 +151,7 @@ weighs). Grids are ten cells wide.
 The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) ("Rules engine").
 
 - **Living persons:** anyone can be opened from the action menu ("Inventory") - awake, unconscious or
-  captive. Who may open whom, take and put items or take off worn gear are server settings under
-  "Living persons". Close one person to everyone with `_unit setVariable ["einv_noAccess", true, true];`;
+  captive. Who may open whom, take and put items or take off worn gear are server settings on the wizard's General page, under "Living persons". Close one person to everyone with `_unit setVariable ["einv_noAccess", true, true];`;
   a container locked with `lockInventory` stays shut. A body opens whole as well, also through ACE's
   "Open <backpack>".
 - **Everything nearby:** every pile on the ground and every crate within reach (setting "Reach", 3 m by
@@ -141,18 +169,18 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
 - **Weight:** weight only colours the soldier's weight bar and drives ACE's fatigue: the bar turns yellow where
   ACE's fatigue starts to tire a jogging soldier (26.7 kg at ACE's defaults, it follows ACE's load factor and
   the soldier's performance), red at 45 kg (no sprinting, tiring faster) and ends at 60 kg (walking only), and
-  its text names the next limit and what it does to movement - CBA settings Enhanced Inventory > Weight. Nothing
+  its text names the next limit and what it does to movement - the wizard's General page, Weight. Nothing
   is ever refused because of weight, and no container has a weight limit: what fits into a uniform, vest,
   backpack, crate or vehicle is decided by its free cells alone (a container's config load is only used to size
   its default grid when nobody defined one). A section's caption still tells what its contents weigh.
-- **Hotbar:** the keys 4 to 0 belong to the hotbar unless the CBA setting "Hotbar" (`einv_hotbar_enabled`) is
+- **Hotbar:** the keys 4 to 0 belong to the hotbar unless the setting "Hotbar" (`einv_hotbar_enabled`, the wizard's General page) is
   switched off - a server setting, the same for everyone. Only items that do something can be bound: bandages,
   tourniquets, splints and other ACE/ACM medicine are used on yourself through ACE's own treatment, grenades
   go into the hand, magazines reload the weapon in the hands, food and drink use ACE's field rations,
   Enhanced First Aid Kits open. Each player moves the bar in Arma's layout editor and chooses when it shows.
   `[0, "ACE_elasticBandage"] call einv_hotbar_fnc_bind;` and `[0] call einv_hotbar_fnc_use;` drive it from
   scripts.
-- **Use from containers:** three server settings under "Use from containers", "Use items from the uniform / vest /
+- **Use from containers:** three server settings on the wizard's General page, under "Containers and use", "Use items from the uniform / vest /
   backpack" (`einv_storage_useUniform`, `useVest`, `useBackpack`), each Everything (the game's way, the default),
   Only whitelisted or Nothing. What lies in a limited container - magazines, grenades, medicine, food, kits, radios - is
   not usable from there: its tile wears a small padlock ("Cannot be used from the backpack" in the footer), the hotbar

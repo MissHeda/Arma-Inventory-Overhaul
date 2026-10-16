@@ -6,13 +6,13 @@
  * goes, a new one is made, and the step's function draws into it ([display, group, theme, arguments]).
  * Every change of the draft ends here, so what is shown is always the draft as it is.
  *
- * A step that is not there (out of range) opens Start instead. Drawn again in the same step,
+ * A step that is not there (out of range) opens General instead. Drawn again in the same step,
  * its scrolling lists keep where they were scrolled (each one named by QGVAR(scrollId) on its group),
  * put back a moment later: right after it is made a group does not know its height yet, and the engine
  * puts it back to the top (seen in the inventory, 2026-10-08).
  *
  * Arguments:
- * 0: Step, 0 (Start) to 3 (Review) <NUMBER> (default: the open step)
+ * 0: Step, 0 (General) to 2 (Containers) <NUMBER> (default: the open step)
  * 1: Arguments for the step <ARRAY> (default: [])
  *
  * Return Value:

@@ -63,7 +63,7 @@
  * counts in byKind as setting every one of LIKE_FIELDS, which fnc_resolve takes from that class.
  *
  * Example:
- * ["einv1 base=realism, kind=grenade > stack=3"] call einv_items_fnc_compileRules;
+ * ["einv1 base=default, kind=grenade > stack=3"] call einv_items_fnc_compileRules;
  *
  * Public: Yes
  */

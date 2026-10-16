@@ -3,18 +3,19 @@
 /*
  * Author: Miss Heda
  * A card listing what the draft changes, each change one line in words (fnc_changeRows) - the same list
- * on both pages, so a player learns to read it once:
- *   - "default", Start's "What you changed": against the Default preset - the preset picked, the cell
- *     size, every own rule.
- *   - "saved", Review's "What changes": against what is saved, each line marked new, changed or removed,
- *     and under the list how many there are against the Default preset, for the whole of it.
+ * wherever it is shown, so a player learns to read it once:
+ *   - "default", the General step's "What you changed": what the classes change on top of what that step sets -
+ *     every own rule that is not the General step's own, each in words. When all uniforms are 10x10 by their kind
+ *     and one is 5x5, that one is the only line.
+ *   - "saved", the box the header's "4 changes" opens: against what is saved, each line marked new, changed or
+ *     removed - the settings, the cell size, the kinds of container and the rules alike -, which is what Save
+ *     would store.
  * A rule for one class shows the class's picture and display name - "Adenosine Vial: 2×1 cells, 10 per
- * tile" -, anything else its sentence. A click on a line opens it where it is set: a rule for exactly one
- * class at the step that lists its kind: the Containers step for a uniform, vest, backpack, crate, vehicle or kit -
- * a crate or vehicle always (the Items step has none), the others when the rule sets grid= or like=, or sets
- * nothing of an item's own (size, stack, weight, name), a picture alone say -, else the Items step. The preset and
- * cell size open Start; anything else (a group, a rule for many classes, a class this game does not have) opens
- * Review's text. The cross takes that one change back.
+ * tile" -, anything else its sentence. A click on a line opens it where it is set (fnc_ruleStep): a rule for one
+ * class, or for it and everything built on it, at the step that lists its kind - Containers for a uniform,
+ * vest, backpack, crate, vehicle or kit that has grid= or like= in the rule, Items for the rest -, with the
+ * class picked; anything else - a setting, the cell size, a kind of container, a rule for several classes, a class
+ * this game does not have - at General. The cross takes that one change back.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -75,63 +76,29 @@ if (_saved && {_count == 0} && {!GVAR(readOnly)} && {GVAR(sourceEmpty)}) then {
     _cursorY = _cursorY + ([_display, _group, [_innerX, _cursorY, _innerW], LLSTRING(Review_NotStored), TEXT_SMALL, _accent, _font] call FUNC(uiText)) + UNIT * 0.15;
 };
 
-// Review: the whole of it under the list, against the Default preset - Start's count.
-if (_saved) then {
-    private _total = count (["default", false] call FUNC(changeRows));
-    private _totalH = UNIT * 0.8;
-
-    _bottom = _bottom - _totalH;
-
-    [
-        _display, _group, [_innerX, _bottom + UNIT * 0.05, _innerW, _totalH],
-        [[_total, LLSTRING(Changes_None), LLSTRING(Changes_CountOne), LLSTRING(Changes_Count)] call _fnc_count, _innerW, _font, TEXT_SMALL] call EFUNC(gui,fitText),
-        TEXT_SMALL, _muted, _font, 0
-    ] call EFUNC(gui,uiLabel);
-};
-
 if (_count == 0) exitWith {};
 
 _cursorY = _cursorY + ([_display, _group, [_innerX, _cursorY, _innerW], LLSTRING(Changes_Help), TEXT_SMALL, _muted, _font] call FUNC(uiText)) + UNIT * 0.3;
 
 private _list = [_display, "EINV_ScrollGroup", _group, [_innerX, _cursorY, _innerW, (_bottom - _cursorY) max (UNIT * 1.2)]] call EFUNC(gui,uiCreate);
 
-_list setVariable [QGVAR(scrollId), ["startChanges", "reviewChanges"] select _saved];
+_list setVariable [QGVAR(scrollId), ["generalChanges", "savedChanges"] select _saved];
 
-// A click on a line: the step and class it belongs to.
+// A click on a line: the step and class it belongs to (fnc_ruleStep). The box of what is not saved yet closes first.
 private _open = {
-    params ["_kind", "_class", "_statement"];
+    params ["_kind", "_statement"];
 
-    private _review = GVAR(steps) findIf {(_x select 0) isEqualTo "review"};
+    call FUNC(closePopover);
 
-    if (_kind in ["preset", "cell"]) exitWith {
-        GVAR(startAdvanced) = GVAR(startAdvanced) || {_kind isEqualTo "cell"};
+    private _target = if (_kind isEqualTo "rule") then {[_statement] call FUNC(ruleStep)} else {["general", "", false]};
 
-        [0] call FUNC(showStep);
+    _target params ["_stepId", "_class", "_tree"];
+
+    if (_class isNotEqualTo "") then {
+        GVAR(selection) set [_stepId, _class];
+        GVAR(editScope) set [_stepId, ["class", "tree"] select _tree];
+        GVAR(listState) set [_stepId, [_class, "all", false, 0]];
     };
-
-    private _facts = if (_class isEqualTo "") then {createHashMap} else {[_class] call EFUNC(items,getFacts)};
-
-    // Nothing to open it at: Review, its text unfolded.
-    if ((_facts getOrDefault ["root", ""]) isEqualTo "") exitWith {
-        GVAR(reviewText) = _kind isNotEqualTo "override";
-
-        [_review] call FUNC(showStep);
-    };
-
-    // By the class's kind: a container at Containers - a crate or vehicle always, any other when its rule has grid=
-    // or like=, or sets nothing an item has of its own -, anything else, and a container's own size, stack, weight
-    // and name, as any item's, at Items.
-    private _values = _statement param [1, createHashMap];
-    private _classKind = _facts getOrDefault ["kind", ""];
-    private _container = (_classKind in CONTAINER_KINDS) && {
-        _classKind in ["crate", "vehicle"] || {"grid" in _values} || {"like" in _values}
-        || {!("footprint" in _values) && {!("stack" in _values)} && {!("weight" in _values)} && {!("name" in _values)} && {!("use" in _values)}}
-    };
-    private _stepId = ["items", "containers"] select _container;
-
-    GVAR(selection) set [_stepId, _class];
-    GVAR(editScope) set [_stepId, "class"];
-    GVAR(listState) set [_stepId, [_class, "all", false, 0]];
 
     [GVAR(steps) findIf {(_x select 0) isEqualTo _stepId}] call FUNC(showStep);
 };
@@ -148,7 +115,7 @@ private _textX = SQUARE(UNIT * 0.3) + _pictureW;
 private _tags = [["new", LLSTRING(Change_New), "gain"], ["changed", LLSTRING(Change_Changed), "accent"], ["removed", LLSTRING(Change_Removed), "loss"]];
 private _tagW = 0;
 
-// Against the Default preset everything is new: only Review marks them.
+// What is listed against the default is all of one sort: only the list of what is not saved marks them.
 if (_saved) then {
     {
         _tagW = _tagW max (((_x select 1) getTextWidth [_font, TEXT_SMALL]) * TEXT_SLACK);
@@ -163,7 +130,7 @@ private _rowRadius = (_theme getOrDefault ["radius", 0]) min (UNIT * 0.3);
 private _cursor = 0;
 
 {
-    _x params ["_kind", "_status", "_label", "_words", "_picture", "_before", "_class", "_statement", "_undo"];
+    _x params ["_kind", "_status", "_label", "_words", "_picture", "_before", "", "_statement", "_undo"];
 
     private _removed = _status isEqualTo "removed";
     private _text = [_label, format ["%1: %2", _label, _words]] select (_words isNotEqualTo "");
@@ -188,7 +155,7 @@ private _cursor = 0;
     };
 
     // The line opens it; the cross on top of it takes the change back.
-    [_display, _list, _rowRect, _surface, _rowFill, _rowHover, _open, [_kind, _class, _statement], true, _tooltip] call FUNC(uiHit);
+    [_display, _list, _rowRect, _surface, _rowFill, _rowHover, _open, [_kind, _statement], true, _tooltip] call FUNC(uiHit);
 
     [
         _display, _list, [_rowW - _removeW - SQUARE(UNIT * 0.1), _cursor + (_rowH - _removeH) / 2, _removeW, _removeH], "", UI_TEX(icon_close_ca), _theme, {

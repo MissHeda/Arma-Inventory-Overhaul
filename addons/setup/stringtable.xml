@@ -2,7 +2,7 @@
 <Project name="einv">
     <Package name="setup">
         <Key ID="STR_einv_setup_Answer_All">
-            <English>everything else</English>
+            <English>set in General</English>
         </Key>
         <Key ID="STR_einv_setup_Answer_Builtin">
             <English>built in</English>
@@ -47,7 +47,7 @@
             <English>%1 percent of its load</English>
         </Key>
         <Key ID="STR_einv_setup_Answer_Preset">
-            <English>preset</English>
+            <English>default rules</English>
         </Key>
         <Key ID="STR_einv_setup_Answer_Run">
             <English>%1 × %2</English>
@@ -73,17 +73,14 @@
         <Key ID="STR_einv_setup_Cancel">
             <English>Cancel</English>
         </Key>
-        <Key ID="STR_einv_setup_Cell_FromPreset">
-            <English>set by the preset or the Load per cell option</English>
-        </Key>
-        <Key ID="STR_einv_setup_Cell_Help">
-            <English>How many cells a container gets when no rule draws it: its load from the config divided by this number. A smaller number means more cells. The Weight preset also sizes items by it.</English>
+        <Key ID="STR_einv_setup_Cell_Default">
+            <English>the default</English>
         </Key>
         <Key ID="STR_einv_setup_Cell_Own">
             <English>your own value</English>
         </Key>
-        <Key ID="STR_einv_setup_Cell_Reset">
-            <English>Use the preset's</English>
+        <Key ID="STR_einv_setup_Cell_ResetTip">
+            <English>Back to the default load per cell.</English>
         </Key>
         <Key ID="STR_einv_setup_Cell_Title">
             <English>Cell size</English>
@@ -95,7 +92,7 @@
             <English>%1 - before: %2</English>
         </Key>
         <Key ID="STR_einv_setup_Change_CellPreset">
-            <English>the preset's</English>
+            <English>the default</English>
         </Key>
         <Key ID="STR_einv_setup_Change_Changed">
             <English>changed</English>
@@ -122,16 +119,16 @@
             <English>Take this change back</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_Count">
-            <English>%1 changes against the Default preset</English>
+            <English>%1 classes differ from what the settings above give them</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_CountOne">
-            <English>1 change against the Default preset</English>
+            <English>1 class differs from what the settings above give it</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_Help">
             <English>Click one to open it. The cross takes that change back.</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_None">
-            <English>Nothing changed yet: the Default preset decides everything.</English>
+            <English>Nothing of its own yet: the settings above decide for every class.</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_Title">
             <English>What you changed</English>
@@ -160,20 +157,23 @@
         <Key ID="STR_einv_setup_Chip_ReadOnly">
             <English>Read-only</English>
         </Key>
+        <Key ID="STR_einv_setup_Chip_Tip">
+            <English>Click to see what Save would store.</English>
+        </Key>
         <Key ID="STR_einv_setup_ClassImport_Apply">
             <English>Apply</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_Config">
-            <English>Imported config lines for %1 classes (%2 warnings). Save at Review puts them to use.</English>
+            <English>Imported config lines for %1 classes (%2 warnings). Save puts them to use.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_ConfigLeft">
-            <English>Imported config lines for %1 classes (%3 warnings); %2 classes this game does not have were left out. Save at Review puts them to use.</English>
+            <English>Imported config lines for %1 classes (%3 warnings); %2 classes this game does not have were left out. Save puts them to use.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_Help">
             <English>Paste config lines, a layout (Export, Layout only) or rules here with Ctrl+V. A layout, and the values of a class this game does not have, go to the class selected in the editor. They go into the draft; Undo takes them back.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_Layout">
-            <English>Applied the layout to %1 (%2 warnings). Save at Review puts it to use.</English>
+            <English>Applied the layout to %1 (%2 warnings). Save puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_NotFit">
             <English>Nothing applied: none of the values fits %1.</English>
@@ -182,7 +182,7 @@
             <English>Nothing to import: no config lines or rules found.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_Redirected">
-            <English>%1 is not in this game: its values went to the selected class %2 instead (%3 warnings). Save at Review puts them to use.</English>
+            <English>%1 is not in this game: its values went to the selected class %2 instead (%3 warnings). Save puts them to use.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_Skipped">
             <English>Nothing applied: the text names %1 classes this game does not have. Select one class and paste a layout or a single class.</English>
@@ -254,10 +254,10 @@
             <English>Apply</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_ApplyTip">
-            <English>Keep these cells and this picture for this class. Save at Review puts them to use.</English>
+            <English>Keep these cells and this picture for this class. Save puts them to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_ApplyTipTree">
-            <English>Keep these cells for this class and every class built on it, as one rule. A class with a rule of its own further down keeps it. Save at Review puts them to use.</English>
+            <English>Keep these cells for this class and every class built on it, as one rule. A class with a rule of its own further down keeps it. Save puts them to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Blocks">
             <English>%1 compartments · %2 cells</English>
@@ -290,13 +290,13 @@
             <English>Paint every empty place in the brush colour.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Help">
-            <English>Pick a uniform, vest, backpack, crate or kit on the left and draw its cells on the right. Apply keeps the change; Save at Review puts it to use. The search takes wildcards (B_Bergen*, *Carryall*); Tree shows everything built on a class, to change them all at once.</English>
+            <English>Pick a uniform, vest, backpack, crate or kit on the left and draw its cells on the right. Apply keeps the change; Save puts it to use. The search takes wildcards (B_Bergen*, *Carryall*); the Tree button shows a class among its relatives, to change them all at once.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_KitCellsNote">
-            <English>Its own cells are all its room - Enhanced First Aid Kits' capacity no longer counts. Back to the preset returns it to the capacity.</English>
+            <English>Its own cells are all its room - Enhanced First Aid Kits' capacity no longer counts. Back to the default returns it to the capacity.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_KitNote">
-            <English>Enhanced First Aid Kits decides by its capacity now, and the kit window grows as needed. These cells are only a start: once Apply gives the kit cells of its own, they are all its room and the capacity no longer counts - in the inventory and in the ACE Arsenal. Back to the preset returns it to the capacity.</English>
+            <English>Enhanced First Aid Kits decides by its capacity now, and the kit window grows as needed. These cells are only a start: once Apply gives the kit cells of its own, they are all its room and the capacity no longer counts - in the inventory and in the ACE Arsenal. Back to the default returns it to the capacity.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_LegacyNote">
             <English>An old table setting decides this class and wins over every rule. Remove the class there for these cells to count.</English>
@@ -344,10 +344,10 @@
             <English>Remove the picked compartment.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_ResetTip">
-            <English>Remove its own cells, the link to another class and its picture settings. The preset decides again.</English>
+            <English>Remove its own cells, the link to another class and its picture settings. The default decides again.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_ResetTipTree">
-            <English>Remove the cells of this class and of its tree, and the link to another class. The preset decides again; a class with a rule of its own keeps it.</English>
+            <English>Remove the cells of this class and of its tree, and the link to another class. The default decides again; a class with a rule of its own keeps it.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Rows">
             <English>%1 down</English>
@@ -373,11 +373,17 @@
         <Key ID="STR_einv_setup_Cont_Unapplied">
             <English>Not applied yet. Apply keeps it.</English>
         </Key>
+        <Key ID="STR_einv_setup_Containers_Help">
+            <English>How many cells each kind of container gets. Auto works it out from the container's load, as explained below; Fixed gives every container of that kind the same size. A class with a rule of its own, and what a mod says about its own classes, always wins.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Containers_Title">
+            <English>Containers</English>
+        </Key>
         <Key ID="STR_einv_setup_Desc_All">
             <English>Everything else</English>
         </Key>
-        <Key ID="STR_einv_setup_Desc_AllContainers">
-            <English>Everything else, containers</English>
+        <Key ID="STR_einv_setup_Desc_AllKind">
+            <English>Every %1</English>
         </Key>
         <Key ID="STR_einv_setup_Desc_AllWhere">
             <English>Everything else, %1</English>
@@ -422,7 +428,7 @@
             <English>Draft %1 deleted.</English>
         </Key>
         <Key ID="STR_einv_setup_Drafts_Help">
-            <English>Kept in your profile, for any mission and any server. A draft of the same name is replaced.</English>
+            <English>Kept in your profile, for any mission and any server, with the server settings that go with them. A draft of the same name is replaced.</English>
         </Key>
         <Key ID="STR_einv_setup_Drafts_Keep">
             <English>Keep</English>
@@ -445,41 +451,65 @@
         <Key ID="STR_einv_setup_Drafts_Pick">
             <English>Pick a draft</English>
         </Key>
-        <Key ID="STR_einv_setup_Drafts_SaveAs">
-            <English>Keep as draft...</English>
-        </Key>
-        <Key ID="STR_einv_setup_Drafts_SaveAs_Title">
-            <English>Keep as draft</English>
-        </Key>
         <Key ID="STR_einv_setup_Drafts_Saved">
             <English>Draft kept as %1.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_Short">
+            <English>Drafts</English>
+        </Key>
+        <Key ID="STR_einv_setup_Drafts_Tip">
+            <English>Keep this setup in your profile under a name, or load one you kept.</English>
         </Key>
         <Key ID="STR_einv_setup_Drafts_Title">
             <English>Saved drafts</English>
         </Key>
-        <Key ID="STR_einv_setup_Else_Apply">
-            <English>Apply</English>
+        <Key ID="STR_einv_setup_Explain_Backpacks">
+            <English>One big block, as near square as %1 columns allow: a load of 280 makes %2 cells, %3 across and %4 down.</English>
         </Key>
-        <Key ID="STR_einv_setup_Else_Auto">
-            <English>Auto</English>
+        <Key ID="STR_einv_setup_Explain_Backpacks_Label">
+            <English>Backpacks</English>
         </Key>
-        <Key ID="STR_einv_setup_Else_Clear">
-            <English>Clear</English>
+        <Key ID="STR_einv_setup_Explain_Cargo">
+            <English>One block %1 wide with as many cells as the load gives, no more: a load of 1000 is %2 cells.</English>
         </Key>
-        <Key ID="STR_einv_setup_Else_Containers">
-            <English>Containers without a rule:</English>
+        <Key ID="STR_einv_setup_Explain_Cargo_Label">
+            <English>Vehicles, crates</English>
         </Key>
-        <Key ID="STR_einv_setup_Else_Fixed">
-            <English>Fixed</English>
+        <Key ID="STR_einv_setup_Explain_Containers">
+            <English>A container's room is its load - what its config says it can carry - divided by the load per cell and rounded up. What you wear gets a fifth more than that: a vest that carries 120 gets %3 cells, a backpack that carries 280 gets %4. One cell is %1 units of load (%2 kg) now.</English>
         </Key>
-        <Key ID="STR_einv_setup_Else_Items">
-            <English>Items without a rule: size</English>
+        <Key ID="STR_einv_setup_Explain_Containers_Label">
+            <English>Containers</English>
         </Key>
-        <Key ID="STR_einv_setup_Else_Note">
-            <English>Applies only where no preset or own rule gives an answer.</English>
+        <Key ID="STR_einv_setup_Explain_Items">
+            <English>How big an item is depends on what it is, not on what it weighs: rifles from 4×2 to 7×2, the heavier the longer; handguns 2×1; launchers 6×2; magazines 1×1 when light, 1×2, and 2×2 when heavy; grenades, optics and small things 1×1; helmets 2×2; backpacks, vests and uniforms by their kind.</English>
         </Key>
-        <Key ID="STR_einv_setup_Else_Title">
-            <English>Everything else</English>
+        <Key ID="STR_einv_setup_Explain_Items_Label">
+            <English>Items</English>
+        </Key>
+        <Key ID="STR_einv_setup_Explain_Rules">
+            <English>A rule of your own for a class, set under Items and Containers, beats all of this - and so does what a mod says about its own classes.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Explain_Rules_Label">
+            <English>Your rules</English>
+        </Key>
+        <Key ID="STR_einv_setup_Explain_Stacks">
+            <English>Nothing stacks: every magazine, grenade and item takes a tile of its own - but for a short list of consumables. Bandages, injectors and small infusions go ten to a tile (sutures and cable ties twenty), rations, splints, bigger infusions and first aid kits five, the biggest infusions and blood bags two. They stack only where the mod that adds them is loaded.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Explain_Stacks_Label">
+            <English>Stacking</English>
+        </Key>
+        <Key ID="STR_einv_setup_Explain_Uniforms">
+            <English>One block %1 cells wide and from %2 to %3 rows high, as its load asks: a plain uniform is 6×2, one that carries more is a row or two taller.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Explain_Uniforms_Label">
+            <English>Uniforms</English>
+        </Key>
+        <Key ID="STR_einv_setup_Explain_Vests">
+            <English>Magazine pouches, as a real rig has them: a tall one of 1×2 cells, then a square one of 2×2, and so on - as many as the load asks for, at most %1.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Explain_Vests_Label">
+            <English>Vests</English>
         </Key>
         <Key ID="STR_einv_setup_Export">
             <English>Export</English>
@@ -502,8 +532,8 @@
         <Key ID="STR_einv_setup_ExportChoice_Title">
             <English>Export as</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_ByHand">
-            <English>Copying is off for players in multiplayer: select the line below and press Ctrl+C.</English>
+        <Key ID="STR_einv_setup_Export_ByHandCba">
+            <English>Select the text (Ctrl+A) and copy it (Ctrl+C): copying by script is off for players in multiplayer.</English>
         </Key>
         <Key ID="STR_einv_setup_Export_ClassByHand">
             <English>Copying is off for players in multiplayer: select the text below (Ctrl+A) and press Ctrl+C.</English>
@@ -520,8 +550,8 @@
         <Key ID="STR_einv_setup_Export_ClassTitle">
             <English>Config lines to copy</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_Copied">
-            <English>Copied: paste it into cba_settings.sqf or send it to someone.</English>
+        <Key ID="STR_einv_setup_Export_Help">
+            <English>The setup as text, to keep or to share. Import takes it back.</English>
         </Key>
         <Key ID="STR_einv_setup_Export_LayoutCopied">
             <English>Copied the layout of %1: paste it into Import at the class it is for.</English>
@@ -533,7 +563,10 @@
             <English>Layout to copy</English>
         </Key>
         <Key ID="STR_einv_setup_Export_Tip">
-            <English>Copies the setup as one line for a cba_settings.sqf, to paste there or send to someone.</English>
+            <English>The setup as text: the lines for a cba_settings.sqf, the whole of it written out, or the own rules.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export_Title">
+            <English>Export the setup</English>
         </Key>
         <Key ID="STR_einv_setup_Family_gear">
             <English>Gear</English>
@@ -562,11 +595,14 @@
         <Key ID="STR_einv_setup_Filter_Weapons">
             <English>Weapons</English>
         </Key>
+        <Key ID="STR_einv_setup_General_Title">
+            <English>General</English>
+        </Key>
         <Key ID="STR_einv_setup_Groups_All">
             <English>All</English>
         </Key>
         <Key ID="STR_einv_setup_Groups_Reset">
-            <English>Back to the preset</English>
+            <English>Back to the default</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_BadClass">
             <English>%1 cannot be written into the rules: class names there take letters, digits and _ only.</English>
@@ -575,19 +611,13 @@
             <English>The weight is a number in kg like 0.5 - or empty, for config's own.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_CellsApplied">
-            <English>The cells of %1 are kept. Save at Review puts them to use.</English>
+            <English>The cells of %1 are kept. Save puts them to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_Copied">
             <English>The cells of %1 are copied to %2. Apply keeps them.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_ElseApplied">
-            <English>Everything else is set - it fills what no preset or own rule answers.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Hint_ElseCleared">
-            <English>Everything else is cleared - the built-in answer fills the gaps again.</English>
-        </Key>
         <Key ID="STR_einv_setup_Hint_Linked">
-            <English>%1 now has the same cells as %2. Save at Review puts it to use.</English>
+            <English>%1 now has the same cells as %2. Save puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_NoCells">
             <English>Not one cell left. A container needs at least one.</English>
@@ -599,16 +629,13 @@
             <English>%1 has no cells to copy.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_PictureApplied">
-            <English>The picture of %1 is kept. Save at Review puts it to use.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Hint_PresetPicked">
-            <English>Now built on %1.</English>
+            <English>The picture of %1 is kept. Save puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_Reset">
-            <English>%1 is back to the preset. Save at Review puts it to use.</English>
+            <English>%1 is back to the default. Save puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_SizeApplied">
-            <English>The size of %1 is kept. Save at Review puts it to use.</English>
+            <English>The size of %1 is kept. Save puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_TooMany">
             <English>Too many: at most %1 cells and %2 compartments.</English>
@@ -617,13 +644,13 @@
             <English>The drawing can be at most %1 rows tall.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_TreeApplied">
-            <English>%1 and the %2 classes built on it now follow one rule. Save at Review puts it to use.</English>
+            <English>%1 and the %2 classes built on it now follow one rule. Save puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_TreeReset">
-            <English>%1 and the %2 classes built on it are back to the preset. Save at Review puts it to use.</English>
+            <English>%1 and the %2 classes built on it are back to the default. Save puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Hint_Unlinked">
-            <English>%1 no longer follows another class. Save at Review puts it to use.</English>
+            <English>%1 no longer follows another class. Save puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Import">
             <English>Import...</English>
@@ -647,13 +674,13 @@
             <English>Add to mine</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Done">
-            <English>Imported %1 rules and %2 warnings. Review lists them.</English>
+            <English>Imported %1 rules, %2 settings and %3 warnings.</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Help">
-            <English>Paste a shared setup here with Ctrl+V: rules, or lines from a cba_settings.sqf or CBA's Export. Only the inventory's line is read.</English>
+            <English>Paste a shared setup here with Ctrl+V: rules, or lines from a cba_settings.sqf or CBA's Export. The rules and the server settings in them are both read; the rest of the mods' settings are left alone.</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Nothing">
-            <English>Nothing to import: no rules found.</English>
+            <English>Nothing to import: no rules or settings found.</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Placeholder">
             <English>Paste here</English>
@@ -662,7 +689,7 @@
             <English>Use instead of mine</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Tip">
-            <English>Paste a setup someone sent you. It is checked and becomes your draft.</English>
+            <English>Paste a setup someone sent you: rules and server settings. It is checked and becomes your draft.</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Title">
             <English>Import a setup</English>
@@ -674,10 +701,10 @@
             <English>Apply</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ApplyTip">
-            <English>Keep this size, stack, weight, name and picture zoom for this class. Save at Review puts it to use.</English>
+            <English>Keep this size, stack, weight, name and picture zoom for this class. Save puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ApplyTipTree">
-            <English>Keep this for the class and every class built on it, as one rule. A class with a rule of its own further down keeps it. Save at Review puts it to use.</English>
+            <English>Keep this for the class and every class built on it, as one rule. A class with a rule of its own further down keeps it. Save puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_CanvasHelp">
             <English>Click the cells it takes: an L, a T, any shape in one piece. Across and down make a rectangle.</English>
@@ -689,7 +716,7 @@
             <English>Weapons, uniforms, vests and backpacks never share a tile.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Help">
-            <English>Pick an item on the left, draw its cells and set how many share a tile. Apply keeps the change; Save at Review puts it to use. The search takes wildcards (B_Bergen*, *Carryall*); Tree shows everything built on a class, to change them all at once.</English>
+            <English>Pick an item on the left, draw its cells and set how many share a tile. Apply keeps the change; Save puts it to use. The search takes wildcards (B_Bergen*, *Carryall*); the Tree button shows a class among its relatives, to change them all at once.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_NameField">
             <English>Name</English>
@@ -755,7 +782,7 @@
             <English>%1 pieces</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ResetTip">
-            <English>Remove its own size, stack, weight, name, picture and picture zoom. The preset decides again.</English>
+            <English>Remove its own size, stack, weight, name, picture and picture zoom. The default decides again.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Search">
             <English>Search name or class (* ?)</English>
@@ -793,6 +820,27 @@
         <Key ID="STR_einv_setup_Keybind_Open">
             <English>Open inventory setup</English>
         </Key>
+        <Key ID="STR_einv_setup_Kind_Auto_backpack">
+            <English>one big block, by load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kind_Auto_crate">
+            <English>one block, 10 wide, by load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kind_Auto_uniform">
+            <English>one block, 6 wide, by load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kind_Auto_vehicle">
+            <English>one block, 10 wide, by load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kind_Auto_vest">
+            <English>pouches of 1×2 and 2×2, by load</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kind_Fixed">
+            <English>every one exactly this size</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kind_Other">
+            <English>set by a rule: %1</English>
+        </Key>
         <Key ID="STR_einv_setup_Kind_backpack">
             <English>Backpack</English>
         </Key>
@@ -810,6 +858,27 @@
         </Key>
         <Key ID="STR_einv_setup_Kind_vest">
             <English>Vest</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kinds_Auto">
+            <English>Auto</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kinds_Fixed">
+            <English>Fixed</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kinds_backpack">
+            <English>Backpacks</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kinds_crate">
+            <English>Crates</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kinds_uniform">
+            <English>Uniforms</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kinds_vehicle">
+            <English>Vehicles</English>
+        </Key>
+        <Key ID="STR_einv_setup_Kinds_vest">
+            <English>Vests</English>
         </Key>
         <Key ID="STR_einv_setup_List_None">
             <English>Nothing found</English>
@@ -848,7 +917,7 @@
             <English>See and copy the inventory setup</English>
         </Key>
         <Key ID="STR_einv_setup_OpenWizard_Tooltip">
-            <English>Sizes, shapes, stacks and container grids for everyone</English>
+            <English>The inventory rules and the server settings, for everyone</English>
         </Key>
         <Key ID="STR_einv_setup_Paint_1">
             <English>Red</English>
@@ -877,6 +946,9 @@
         <Key ID="STR_einv_setup_Paint_None">
             <English>None: takes the colour away</English>
         </Key>
+        <Key ID="STR_einv_setup_Pattern_block">
+            <English>One block</English>
+        </Key>
         <Key ID="STR_einv_setup_Pattern_long">
             <English>Long pouches</English>
         </Key>
@@ -891,6 +963,9 @@
         </Key>
         <Key ID="STR_einv_setup_Pattern_pockets_mixed">
             <English>Mixed pockets</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pattern_pouches">
+            <English>Magazine pouches</English>
         </Key>
         <Key ID="STR_einv_setup_Pattern_rig">
             <English>Magazine rig</English>
@@ -977,34 +1052,43 @@
             <English>This is the default already.</English>
         </Key>
         <Key ID="STR_einv_setup_Reset_Confirm">
-            <English>Back to the default preset, without any rules of your own? Undo takes it back until you close the wizard.</English>
+            <English>Back to the default - no rules of your own, every server setting at its default? Undo takes it back until you close the wizard.</English>
         </Key>
         <Key ID="STR_einv_setup_Reset_Done">
             <English>Back to the default - save to use it.</English>
         </Key>
+        <Key ID="STR_einv_setup_Reset_Field">
+            <English>Back to the default</English>
+        </Key>
         <Key ID="STR_einv_setup_Reset_Tip">
-            <English>Back to the Default preset, without any rules of your own.</English>
+            <English>Back to the default: no rules of your own, every server setting at its default.</English>
         </Key>
         <Key ID="STR_einv_setup_Reset_Yes">
             <English>Reset</English>
         </Key>
         <Key ID="STR_einv_setup_Review_Changes">
-            <English>What changes</English>
+            <English>Not saved yet</English>
         </Key>
         <Key ID="STR_einv_setup_Review_Count">
-            <English>%1 changes against what is saved</English>
+            <English>%1 changes not saved yet</English>
         </Key>
         <Key ID="STR_einv_setup_Review_CountOne">
-            <English>1 change against what is saved</English>
+            <English>1 change not saved yet</English>
         </Key>
         <Key ID="STR_einv_setup_Review_None">
-            <English>Nothing changed yet: this is what is saved.</English>
+            <English>Everything is saved: this is what is in use.</English>
         </Key>
         <Key ID="STR_einv_setup_Review_NotStored">
             <English>This setup is in use but not stored where Save goes yet: Save stores it there.</English>
         </Key>
         <Key ID="STR_einv_setup_Review_Warnings">
-            <English>Warnings (%1)</English>
+            <English>What the engine left out (%1)</English>
+        </Key>
+        <Key ID="STR_einv_setup_Room_Cell">
+            <English>Load per cell</English>
+        </Key>
+        <Key ID="STR_einv_setup_Room_Title">
+            <English>How room is worked out</English>
         </Key>
         <Key ID="STR_einv_setup_Same_Copy">
             <English>Copy cells of %1</English>
@@ -1084,68 +1168,14 @@
         <Key ID="STR_einv_setup_Source_server">
             <English>Server</English>
         </Key>
-        <Key ID="STR_einv_setup_Start_Advanced">
-            <English>Advanced</English>
-        </Key>
-        <Key ID="STR_einv_setup_Start_AdvancedClose">
-            <English>Hide the cell size</English>
-        </Key>
-        <Key ID="STR_einv_setup_Start_AdvancedOpen">
-            <English>Show the cell size</English>
-        </Key>
-        <Key ID="STR_einv_setup_Start_Help">
-            <English>Pick a preset. Change single items under Items and the cells of uniforms, vests and backpacks under Containers; Review saves it for the server.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Start_KeepOwn">
-            <English>Keep my own rules when I pick another preset (%1 now)</English>
-        </Key>
-        <Key ID="STR_einv_setup_Start_NoPresets">
-            <English>No presets found. Is the items addon loaded?</English>
-        </Key>
-        <Key ID="STR_einv_setup_Start_Picked">
-            <English>Picked</English>
-        </Key>
-        <Key ID="STR_einv_setup_Start_Revision">
-            <English>Revision %1</English>
-        </Key>
-        <Key ID="STR_einv_setup_Start_Title">
-            <English>Start from a preset</English>
-        </Key>
-        <Key ID="STR_einv_setup_Start_ToReview">
-            <English>Review and save</English>
-        </Key>
-        <Key ID="STR_einv_setup_Status_Active">
-            <English>%1 preset with %2 own rules</English>
-        </Key>
-        <Key ID="STR_einv_setup_Status_Default">
-            <English>nobody - the default</English>
-        </Key>
-        <Key ID="STR_einv_setup_Status_Eden">
-            <English>It goes into the scenario: save the scenario as well to keep it.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Status_From">
-            <English>Set by: %1</English>
-        </Key>
-        <Key ID="STR_einv_setup_Status_ReadOnly">
-            <English>You cannot save it: %1</English>
-        </Key>
-        <Key ID="STR_einv_setup_Status_SaveTo">
-            <English>Save goes to: %1</English>
-        </Key>
-        <Key ID="STR_einv_setup_Status_Title">
-            <English>Now in use</English>
-        </Key>
         <Key ID="STR_einv_setup_Step_Containers">
             <English>Containers</English>
         </Key>
+        <Key ID="STR_einv_setup_Step_General">
+            <English>General</English>
+        </Key>
         <Key ID="STR_einv_setup_Step_Items">
             <English>Items</English>
-        </Key>
-        <Key ID="STR_einv_setup_Step_Review">
-            <English>Review</English>
-        </Key>
-        <Key ID="STR_einv_setup_Step_Start">
-            <English>Start</English>
         </Key>
         <Key ID="STR_einv_setup_Tab_Backpacks">
             <English>Backpacks</English>
@@ -1158,12 +1188,6 @@
         </Key>
         <Key ID="STR_einv_setup_Tab_Vests">
             <English>Vests</English>
-        </Key>
-        <Key ID="STR_einv_setup_Text_Applied">
-            <English>Applied - %1 warnings.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Text_Apply">
-            <English>Apply text</English>
         </Key>
         <Key ID="STR_einv_setup_Text_Cba">
             <English>CBA line</English>
@@ -1180,35 +1204,17 @@
         <Key ID="STR_einv_setup_Text_Copy">
             <English>Copy</English>
         </Key>
-        <Key ID="STR_einv_setup_Text_Edit">
-            <English>Edit text</English>
-        </Key>
         <Key ID="STR_einv_setup_Text_Full">
             <English>Full</English>
         </Key>
         <Key ID="STR_einv_setup_Text_FullNote">
-            <English>The whole preset written out, so later versions cannot change it. Its rules also win over sizes a mod sets itself.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Text_Intro">
-            <English>For mission makers: the same setup as text.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Text_NothingToApply">
-            <English>Nothing typed to apply.</English>
+            <English>The whole default written out, so later versions cannot change it. Its rules also win over sizes a mod sets itself.</English>
         </Key>
         <Key ID="STR_einv_setup_Text_Own">
             <English>Own</English>
         </Key>
-        <Key ID="STR_einv_setup_Text_OwnNote">
-            <English>One rule per line. What you type counts once you apply it.</English>
-        </Key>
         <Key ID="STR_einv_setup_Text_OwnRead">
-            <English>One rule per line. Edit text to type into it.</English>
-        </Key>
-        <Key ID="STR_einv_setup_Text_Title">
-            <English>Show as text</English>
-        </Key>
-        <Key ID="STR_einv_setup_Text_Unapplied">
-            <English>Changed: Apply text to use it.</English>
+            <English>One rule per line. The settings are in the lines for a cba_settings.sqf.</English>
         </Key>
         <Key ID="STR_einv_setup_Title">
             <English>Inventory setup</English>
@@ -1221,6 +1227,27 @@
         </Key>
         <Key ID="STR_einv_setup_Tools_ImportTip">
             <English>Paste config lines, a layout or rules and apply them to the draft.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Topic_arsenal">
+            <English>Vanilla Arsenal</English>
+        </Key>
+        <Key ID="STR_einv_setup_Topic_containers">
+            <English>Containers and use</English>
+        </Key>
+        <Key ID="STR_einv_setup_Topic_extras">
+            <English>Hotbar, repacking and locks</English>
+        </Key>
+        <Key ID="STR_einv_setup_Topic_looting">
+            <English>Looting and searching</English>
+        </Key>
+        <Key ID="STR_einv_setup_Topic_other">
+            <English>Other</English>
+        </Key>
+        <Key ID="STR_einv_setup_Topic_persons">
+            <English>Living persons</English>
+        </Key>
+        <Key ID="STR_einv_setup_Topic_weight">
+            <English>Weight</English>
         </Key>
         <Key ID="STR_einv_setup_Tree_Below">
             <English>%1 below</English>
@@ -1235,16 +1262,16 @@
             <English>Tree of %1</English>
         </Key>
         <Key ID="STR_einv_setup_Tree_PickFirst">
-            <English>Pick a class in the list, then switch to Tree to see everything built on it.</English>
+            <English>Pick a class in the list, then open the tree to see everything built on it.</English>
         </Key>
         <Key ID="STR_einv_setup_Tree_Start">
             <English>Start the tree at this class</English>
         </Key>
         <Key ID="STR_einv_setup_Tree_ToPicked">
-            <English>Start at picked</English>
+            <English>Go to picked</English>
         </Key>
         <Key ID="STR_einv_setup_Tree_ToPickedTip">
-            <English>Show the tree of the class picked in the list again.</English>
+            <English>Show the picked class in its family again.</English>
         </Key>
         <Key ID="STR_einv_setup_Tree_Unknown">
             <English>No class tree is known for %1.</English>
@@ -1284,6 +1311,9 @@
         </Key>
         <Key ID="STR_einv_setup_Use_vest">
             <English>Vest</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Empty">
+            <English>empty</English>
         </Key>
         <Key ID="STR_einv_setup_Value_GridAuto">
             <English>cells from its load</English>
@@ -1327,6 +1357,12 @@
         <Key ID="STR_einv_setup_Value_NoStack">
             <English>does not stack</English>
         </Key>
+        <Key ID="STR_einv_setup_Value_Off">
+            <English>off</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_On">
+            <English>on</English>
+        </Key>
         <Key ID="STR_einv_setup_Value_Picture">
             <English>picture %1</English>
         </Key>
@@ -1357,8 +1393,14 @@
         <Key ID="STR_einv_setup_View_List">
             <English>List</English>
         </Key>
+        <Key ID="STR_einv_setup_View_ListTip">
+            <English>Back to the list.</English>
+        </Key>
         <Key ID="STR_einv_setup_View_Tree">
             <English>Tree</English>
+        </Key>
+        <Key ID="STR_einv_setup_View_TreeTip">
+            <English>Open the tree at the picked class: it stands among its relatives there, so a wrong pick is one click from the right one.</English>
         </Key>
         <Key ID="STR_einv_setup_Warning_TooLong">
             <English>The text is %1 characters long: more than 16,000 cannot be saved.</English>

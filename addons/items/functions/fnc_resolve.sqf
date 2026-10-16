@@ -19,7 +19,8 @@
  *             mod or the preset - but for the preset's own everything else, its rules without any
  *             condition (the default's first, size=1x1 stack=1, reaches every item): a field only such a
  *             rule answered is open to them, and keeps the preset's answer where they have none
- *   builtin - 1x1, alone on its tile, a grid by load, the config's weight and name, the plain picture
+ *   builtin - 1x1, alone on its tile, a grid by load (a fifth more for what is worn: BUILTIN_WORN_GRID), the
+ *             config's weight and name, the plain picture
  *
  * Only the rules that can be about the item's kind are asked (fnc_compileRules sorts them), and a
  * layer is left as soon as nothing it could still set is open.
@@ -345,7 +346,8 @@ if (_fallbackIndices isNotEqualTo []) then {
     _result set [_x, switch (_x) do {
         case "footprint": {[1, 1, []]};
         case "stack": {1};
-        case "grid": {["auto"]};
+        // A uniform, vest or backpack a fifth roomier than its load, the rest exactly by it.
+        case "grid": {[["auto"], BUILTIN_WORN_GRID] select (_kind in WORN_KINDS)};
         case "weight": {-1};
         case "icon": {ICON_PLAIN};
         case "use": {[]};

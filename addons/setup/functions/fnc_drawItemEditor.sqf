@@ -15,6 +15,9 @@
  *     config's, greyed - with "Pick..." (the picture picker, fnc_openPicturePicker: every picture of the game's
  *     items to search and click, or any texture path typed in) and Reset. What is picked goes into the working
  *     copy as "pictureText", the tile preview and the canvas show it at once, and Apply writes picture=PATH.
+ *   - Beside the size, the stack, the weight, the name and the use a small reset button (fnc_uiReset), there only
+ *     while the value differs from what the draft would make of the class without its own rule for it
+ *     (fnc_classDefault): a click takes that field back at once (fnc_resetField).
  *   - Under the picture a Use from row (fnc_drawUseRow): a chip each for the uniform, vest and backpack, on for the
  *     containers the item is whitelisted for (use=, einv_use) - it may be used from them even where the settings
  *     "Use items from ..." (einv_storage) close them - and a line of what those settings limit now. The working
@@ -34,12 +37,12 @@
  *     reach out of its tile at the tile's edge.
  *   - Apply writes what differs from now as class=X > size=WxH, or size=xx/x- for a shape
  *     (einv_items_fnc_formatMask), stack=N, weight=KG, name=..., picture=PATH, use=LIST and icon=ZOOM@ACROSS:DOWN (fnc_upsertRule) - the
- *     rest of that rule stays -, Discard drops the edits, Back to the preset takes the class's own size, stack,
+ *     rest of that rule stays -, Discard drops the edits, Back to the default takes the class's own size, stack,
  *     weight, name, picture, use and icon away. A field emptied takes its own value away; Reset and Apply take a class's own
  *     icon away, or write the plain picture where the item's config draws it otherwise, and a class's own
  *     picture away, or write config's own picture path where the item's config (einv_picture) sets another.
  *   - Picked in the tree view (fnc_editScope), the edit is for the class and every class built on it: a
- *     line says so, with how many, and Apply, Back to the preset and Export work on the whole tree - one
+ *     line says so, with how many, and Apply, Back to the default and Export work on the whole tree - one
  *     rule class=X+ instead of one per class. A chip returns to the class alone.
  *
  * Edits go into a working copy per class (GVAR(itemWork): lowercase class -> the canvas, with "stack",
@@ -142,6 +145,14 @@ private _ownPicture = "picture" in _own || {_tree && {"picture" in (_treeRules g
 // The containers it may be used from where a setting closes them (use=, einv_use): any of uniform, vest, backpack.
 private _startUse = _info getOrDefault ["use", []];
 private _canvas = GVAR(itemWork) getOrDefault [_lc, createHashMap];
+
+// What it would be without its own size, stack, weight, name and use - the values the small reset buttons take a
+// field back to. Only worked out where a rule of its own (or its tree's) has any of them: else it is what it is now.
+private _resetFields = ["footprint", "stack", "weight", "name", "use"];
+private _hasOwnField = (_resetFields findIf {_x in _own}) >= 0 || {_tree && {(_resetFields findIf {_x in (_treeRules getOrDefault [_lc, createHashMap])}) >= 0}};
+private _default = [_info, [_class, _resetFields] call FUNC(classDefault)] select _hasOwnField;
+private _defaultWeight = _default getOrDefault ["weightOverride", -1];
+private _defaultWeightText = ["", [_defaultWeight] call FUNC(weightText)] select (_defaultWeight >= 0);
 
 // No edit yet: a canvas of what it is now, its shape in the top left corner. It becomes the working copy
 // with the first change.
@@ -323,6 +334,20 @@ private _resize = {
     _resize, [_class, _canvas, 1], LLSTRING(Cont_Rows)
 ] call FUNC(uiStepper);
 
+// Back to the default: the cells of the class as the draft makes them without a size of its own. One piece or
+// not - cells that do not touch are no size.
+private _workShape = if (count _blocks == 1) then {(_blocks select 0) call EFUNC(items,formatMask)} else {""};
+
+if (_workShape isNotEqualTo (_default getOrDefault ["shape", "1x1"])) then {
+    [
+        _display, _box, [_innerX + _innerW - _rowH, _cursorY, _rowH, _rowH], _theme, {
+            params ["_class", "_tree"];
+
+            [_class, "items", ["footprint"], _tree] call FUNC(resetField);
+        }, [_class, _tree]
+    ] call FUNC(uiReset);
+};
+
 _cursorY = _cursorY + _rowH + UNIT * 0.3;
 
 // How many share a tile: into the working copy, and this side drawn again.
@@ -349,7 +374,7 @@ private _chipW = SQUARE(UNIT * 1.9);
 private _chipH = UNIT * 0.9;
 
 {
-    if (_chipX + _chipW > _innerX + _innerW) exitWith {};
+    if (_chipX + _chipW > _innerX + _innerW - _rowH - _gap) exitWith {};
 
     [_display, _box, [_chipX, _cursorY + (_rowH - _chipH) / 2, _chipW, _chipH], str _x, !_forced && {_workStack == _x}, _theme, {
         params ["", "_arguments"];
@@ -363,6 +388,16 @@ private _chipH = UNIT * 0.9;
 
     _chipX = _chipX + _chipW + _gap;
 } forEach [1, 5, 10, 20, 50, 100];
+
+if (!_forced && {_workStack != (_default getOrDefault ["stack", 1])}) then {
+    [
+        _display, _box, [_innerX + _innerW - _rowH, _cursorY, _rowH, _rowH], _theme, {
+            params ["_class", "_tree"];
+
+            [_class, "items", ["stack"], _tree] call FUNC(resetField);
+        }, [_class, _tree]
+    ] call FUNC(uiReset);
+};
 
 _cursorY = _cursorY + _rowH + UNIT * 0.3;
 
@@ -395,19 +430,41 @@ private _fieldW = SQUARE(UNIT * 5);
 
 private _configX = _innerX + _labelW + _fieldW + SQUARE(UNIT * 1.5) + _gap * 2;
 
+private _configW = _innerX + _innerW - _configX - _rowH - _gap;
+
 [
-    _display, _box, [_configX, _cursorY, _innerX + _innerW - _configX, _rowH],
-    [format [LLSTRING(Items_WeightConfig), [_configKg] call FUNC(weightText)], _innerX + _innerW - _configX, _font, TEXT_SMALL] call EFUNC(gui,fitText),
+    _display, _box, [_configX, _cursorY, _configW, _rowH],
+    [format [LLSTRING(Items_WeightConfig), [_configKg] call FUNC(weightText)], _configW, _font, TEXT_SMALL] call EFUNC(gui,fitText),
     TEXT_SMALL, _muted, _font, 0
 ] call EFUNC(gui,uiLabel);
+
+if (_workWeight isNotEqualTo _defaultWeightText) then {
+    [
+        _display, _box, [_innerX + _innerW - _rowH, _cursorY, _rowH, _rowH], _theme, {
+            params ["_class", "_tree"];
+
+            [_class, "items", ["weight"], _tree] call FUNC(resetField);
+        }, [_class, _tree]
+    ] call FUNC(uiReset);
+};
 
 _cursorY = _cursorY + _rowH + UNIT * 0.3;
 
 [_display, _box, [_innerX, _cursorY, _labelW, _rowH], LLSTRING(Items_NameField), TEXT_SMALL, _colorText2, _fontBold, 0] call EFUNC(gui,uiLabel);
 
 [
-    _display, _box, [_innerX + _labelW, _cursorY, _innerW - _labelW, _rowH], _workName, _info getOrDefault ["configDisplayName", _class], _theme, _typed, [_class, _canvas, "nameText"]
+    _display, _box, [_innerX + _labelW, _cursorY, _innerW - _labelW - _rowH - _gap, _rowH], _workName, _info getOrDefault ["configDisplayName", _class], _theme, _typed, [_class, _canvas, "nameText"]
 ] call FUNC(uiEdit);
+
+if (_workName isNotEqualTo (_default getOrDefault ["nameOverride", ""])) then {
+    [
+        _display, _box, [_innerX + _innerW - _rowH, _cursorY, _rowH, _rowH], _theme, {
+            params ["_class", "_tree"];
+
+            [_class, "items", ["name"], _tree] call FUNC(resetField);
+        }, [_class, _tree]
+    ] call FUNC(uiReset);
+};
 
 _cursorY = _cursorY + _rowH + UNIT * 0.3;
 
@@ -428,6 +485,16 @@ _cursorY = _cursorY + _rowH + UNIT * 0.3;
 
 // ----- Use from -----
 // The containers it may be used from where the settings close them: a chip each, and what they limit now.
+if (_workUse isNotEqualTo (_default getOrDefault ["use", []])) then {
+    [
+        _display, _box, [_innerX + _innerW - _rowH, _cursorY, _rowH, _rowH], _theme, {
+            params ["_class", "_tree"];
+
+            [_class, "items", ["use"], _tree] call FUNC(resetField);
+        }, [_class, _tree]
+    ] call FUNC(uiReset);
+};
+
 _cursorY = _cursorY + ([
     _display, _box, [_innerX, _cursorY, _innerW], _theme, _labelW, _workUse, {
         params ["_list", "_arguments"];
@@ -535,7 +602,7 @@ if (_dirty) then {
 
 [_display, _box, [_sideX, _sideY, _sideW], LLSTRING(Items_CanvasHelp), TEXT_SMALL, _muted, _font] call FUNC(uiText);
 
-// ----- Apply, Discard, Back to the preset -----
+// ----- Apply, Discard, Back to the default -----
 
 private _buttonX = _innerX;
 private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
@@ -637,7 +704,7 @@ private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
     };
 
     // The containers it may be used from (use=): only what differs from now. None is written as use=none, which
-    // takes back what a broader rule whitelisted; Back to the preset takes the class's own rule away.
+    // takes back what a broader rule whitelisted; Back to the default takes the class's own rule away.
     private _use = _canvas getOrDefault ["useList", _startUse];
 
     if (_use isNotEqualTo _startUse) then {

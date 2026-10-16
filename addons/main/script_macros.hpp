@@ -52,6 +52,15 @@
 #define MAX_BLOCKS 24
 #define MAX_CELLS (STORAGE_COLS * MAX_ROWS)
 
+// The compartments a uniform and a vest get when no rule, mod or setting says otherwise (einv_storage_fnc_blocksFor,
+// "block" and "pouches"): a uniform is one block UNIFORM_COLS wide and as many rows high as its load asks for, at least
+// UNIFORM_ROWS_MIN and at most UNIFORM_ROWS_MAX; a vest is pouches, a tall one of one cell by two and a square one of
+// two by two after another, as many as the load asks for (at most VEST_POUCHES_MAX, a pair of them being six cells).
+#define UNIFORM_COLS 6
+#define UNIFORM_ROWS_MIN 2
+#define UNIFORM_ROWS_MAX 5
+#define VEST_POUCHES_MAX 20
+
 // An item drawn as a shape (size=xx/x-, einv_items_fnc_parseMask) is at most this many cells each way:
 // the wizard draws one on a board this size, and every free-cell test walks its cells one by one.
 #define SHAPE_MAX 8

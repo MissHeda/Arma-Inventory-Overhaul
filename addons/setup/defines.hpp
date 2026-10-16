@@ -100,10 +100,15 @@
 // too, whose grid counts only once a rule or its config gives it one (einv_compat_efak_fnc_roomMode).
 #define CONTAINER_KINDS ["uniform", "vest", "backpack", "crate", "vehicle", "kit"]
 
-// The containers the Start step's "Everything else" sizes (fnc_drawStart, fnc_allRule): what a soldier wears.
-// Crates and vehicles hold far more, and a grid for a pouch would not do for them. Kits stay out: a grid for
-// them all would turn off Enhanced First Aid Kits' capacity for every kit at once.
-#define ELSE_CONTAINER_KINDS ["uniform", "vest", "backpack"]
+// What a saved draft (fnc_personalPresets) puts between the rules and the server settings it keeps with them: the
+// settings' text follows it. A draft kept before there were any has no such mark, only rules.
+#define DRAFT_SETTINGS_MARKER "einv-settings:"
+
+// The containers the General step sets a size for, one kind at a time (fnc_drawGeneral, fnc_kindRule): what a soldier
+// wears and what holds cargo - each a rule "all kind=... > grid=WxH" of the text, which the engine asks after
+// everything that is about a class (einv_items_fnc_resolve). Kits stay out: a grid for them all would turn off
+// Enhanced First Aid Kits' capacity for every kit at once.
+#define GENERAL_KINDS ["uniform", "vest", "backpack", "vehicle", "crate"]
 
 // Cards on one page of a class list: only those are drawn and asked what the rules make of them.
 #define LIST_PAGE 30

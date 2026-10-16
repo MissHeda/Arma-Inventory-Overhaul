@@ -5,7 +5,7 @@
  * the wizard compares, counts and shows it - and compiled, with an empty cache for what items come out
  * as under it. The game is not touched: what is in use changes only with Save.
  *
- * What the engine left out of the text is kept to show at Review (GVAR(parseWarnings)). Raises
+ * What the engine left out of the text is kept to show on the General step (GVAR(parseWarnings)). Raises
  * einv_setup_draftChanged with the new text, for the steps listening to it.
  *
  * Arguments:
@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * ["einv1 base=realism"] call einv_setup_fnc_setDraft;
+ * ["einv1 base=default cell=4"] call einv_setup_fnc_setDraft;
  *
  * Public: No
  */
@@ -41,6 +41,5 @@ GVAR(draftText) = _canonical;
 GVAR(draftRules) = _compiled;
 GVAR(draftCache) = createHashMap;
 GVAR(parseWarnings) = +(_ast getOrDefault ["warnings", []]);
-GVAR(rawText) = "";
 
 [QGVAR(draftChanged), [_canonical]] call CBA_fnc_localEvent;

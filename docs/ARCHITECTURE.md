@@ -25,7 +25,8 @@ no setting to bring it back and no fallback to it (section 4, Opening).
   the middle, the storage column (uniform, vest, backpack) and, only while looting, the loot column. Kits and pouches of Enhanced
   First Aid Kits float as windows of their own. Loot has to be searched before it is seen.
 - **A rules engine** decides every item's size, stack, container grid, weight and name from one text, the CBA setting
-  `einv_items_rules`, built on a preset (section 2); **a setup wizard** edits that text without writing it by hand (section 6).
+  `einv_items_rules`, built on the one preset there is, the default (section 2); **a setup wizard** edits that text - and the server
+  settings, one more text (section 8) - without writing them by hand (section 6).
 - **The ACE Arsenal panel.** There is no arsenal window of our own: while the uniform, vest or backpack tab of ACE Arsenal's left
   bar is open, the same window engine draws that container's grid and a staging space beside ACE's list (section 5).
 - **Multiplayer by authority.** Every change to a container is a transaction run by the machine where that container's root is
@@ -61,13 +62,13 @@ The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
 
 | Addon | Does |
 |---|---|
-| `main` | version, macros and the shared defines of `script_macros.hpp`. |
+| `main` | version, macros and the shared defines of `script_macros.hpp`; the registry of the server settings and the one CBA text that holds them (section 8). |
 | `items` | what an item is (`einv_items_fnc_getInfo`) and the rules engine behind it: text, presets, compile, resolve. |
 | `storage` | what a container holds and where it lies; what a unit wears; the transactions, hub, places sync and loadouts that change anything. |
 | `gui` | the window: engine, Glass theme, layout, tiles, drag, menus, searching, sounds, looting pose, people, CBA item menu, kit windows. |
 | `weight` | the soldier's load: `weight=` overrides into ACE's virtual load, the tiers Light, Heavy, Overloaded, Critical and their effects. |
 | `locks` | who may open a crate or vehicle: one side, one group or the admins; the engine lock per client and the guard on every op. |
-| `setup` | the setup wizard and its entry points. |
+| `setup` | the setup wizard (General, Items, Containers) and its entry points. |
 | `arsenal` | the grid panel on ACE Arsenal's display and the handling of the vanilla Virtual Arsenal. |
 | `hotbar` | seven keys, 4 to 0, that use what lies on them; the HUD bar and the window's hotbar row. |
 | `magazines` | repacking partly filled magazines in the window (needs `ace_magazinerepack`). |
@@ -152,7 +153,7 @@ backslash: CBA's export, import and every `cba_settings.sqf` split lines at `;`,
 EDITBOXes (rules and the three tables) use `einv_items_fnc_sanitizeText` as CBA's sanitizer, which turns `;` and line breaks into
 commas and drops quotes, `#` and backslashes as they are typed.
 
-Left out, each with a warning that names it (RPT on load, the wizard's Review): a statement with any other character, an unknown
+Left out, each with a warning that names it (RPT on load, the General page's notes): a statement with any other character, an unknown
 key, a condition after a value, a header that is not first, a statement that sets nothing, statements past `MAX_STATEMENTS` 500; a
 text over `TEXT_MAX` 16384 characters reads as the default. One typo never costs the rest.
 
@@ -200,7 +201,7 @@ Each field - footprint, stack, grid, weight, name, icon, picture, use - goes to 
    set a size or stack under `base=default`): a field only such a rule answered is asked of the `all` rules again and keeps the preset's
    answer where they have none (`_caught` in `fnc_resolve`; `fnc_explain` then takes the field out of that preset line's wins). A
    preset's own `all` rule is left out with a warning. `fnc_configEntry`'s bare answer drops `fallback` with `own`.
-7. **builtin** - 1x1, stack 1, `grid=auto`, config weight, config name, the plain picture (`ICON_PLAIN`, `[1, 0, 0]`), config's own picture (the resolved `picture` is ""), no container whitelisted (the resolved `use` is `[]`).
+7. **builtin** - 1x1, stack 1, a grid by load - `grid=120%` for a uniform, vest or backpack (`BUILTIN_WORN_GRID`: a fifth more room than the load gives), `grid=auto` for the rest -, config weight, config name, the plain picture (`ICON_PLAIN`, `[1, 0, 0]`), config's own picture (the resolved `picture` is ""), no container whitelisted (the resolved `use` is `[]`).
 
 Only the rules that can be about the item's kind are asked (`fnc_compileRules` sorts them by kind), and a layer is left as soon as
 nothing it could still set is open. Afterwards `size=mass` becomes cells, stacks become whole numbers of at least 1, the footprint
@@ -286,22 +287,23 @@ the built-in answer for those fields (src `builtin`) and one RPT line per proble
 
 A preset is a class of `CfgEinvRulesets` with `name`, `description`, `revision` (shown only; `base=` always means the preset as
 installed), `base`, `cell` (-1 to leave it to its base or the slider), `rules[]` (statements of the same language, one per
-element, no commas) and `class Groups` (the wizard's rows). The group ids are what own rules refer to and a preset's id is what a
-text names in `base=`: never rename one. Other mods may add presets as classes there.
+element, no commas) and `class Groups` (labels and examples of the groups). The group ids are what own rules refer to and a preset's id
+is what a text names in `base=`: never rename one. Other mods may add presets as classes there; the wizard offers no choice among them.
 
-- **`default`** (revision 2): relaxed. The mod's classic sizes and stacks - rifles 3x2 to 6x2 by mass, handguns 2x1, launchers
-  6x2, magazines 1x1, 1x2 or 2x2 by mass, belts 2x2, rockets 1x3 and 2x3, grenades 1x1 stack 5, small items 1x1 stack 10 (kits are
-  items to `kind=` as well, so the item groups size them; no preset gives a kit a grid) - and
-  uniforms `grid=120%`, vests `grid=120%`, the three backpack groups `grid=120%` (by load up to 160, up to 280, above), crates and
-  vehicles `grid=auto`. The groups are a partition (an item is in at most one, `medical` excepted, which is only a handle for the
-  wizard), so a rule for one never reaches into another.
-- **`realism`** (revision 2, built on `default`): longer rifles by one column, uniforms `grid=pockets:4`, vests `grid=rig`, fixed
-  backpack grids (`4x5`, `5x6`, `6x7`) with larger tiles, stacks as in `default`.
-- **`weight`** (revision 2, built on `default`, `cell=4`): `size=mass`, so every item takes as many cells as it weighs, containers
-  back to `grid=auto` so a full grid is a full load, grenades, small items and small magazines stack 10.
-- **`tarkov` is an alias for `realism`.** `PRESET_ALIASES` maps `base=tarkov` to `realism` in `fnc_parseRules` (one RPT line,
-  `einv_items_aliasWarned`) and in `fnc_compileRules`' chain (another mod's preset built on the old id), unless a preset of the
-  old name exists.
+- **`default`** (revision 3) is the one preset this mod ships, and it is realism: rifles 4x2 to 7x2 by mass, handguns 2x1,
+  launchers 6x2, magazines 1x1, 1x2 or 2x2 by mass, belts 2x2, rockets 1x3 and 2x3, grenades 1x1, optics, muzzles and small items 1x1 up
+  to 3x2 by mass, belts 2x2, helmets 2x2, uniforms 2x2, vests 3x3, backpacks 4x4, 5x5 and 5x6 by load (up to 160, up to 280, above) - and
+  **nothing stacks** but the groups `@stack_20`, `@stack_10`, `@stack_5` and `@stack_2`: consumables of ACE, ACM and the vanilla first aid kit,
+  by class (`class=ACE_fieldDressing|ACM_IV_16g+|...`). The rules are keyed by class, so a mod that is not loaded matches nothing; a name with a
+  plus is that class and everything built on it, used where all of them are of the same sort. A rule of the text for a class wins over them like
+  over any preset rule. It sets **no grid**: a uniform, vest or backpack gets the built-in answer (`grid=120%`, `einv_storage_fnc_blocksFor`),
+  a crate or vehicle `auto`, so the text's rules with `all` - the General step's kind sizes - decide for every container no class rule, table or mod
+  answers. The groups are a partition (an item is in at most one, `medical` and the `stack_*` groups excepted, which are only handles), so a rule for
+  one never reaches into another. Kits of Enhanced First Aid Kits are items to `kind=` as well, so the item groups size them; none of
+  these gives a kit a grid.
+- **`realism`, `weight` and `tarkov` are read as `default`.** `PRESET_ALIASES` maps them in `fnc_parseRules` (one RPT line,
+  `einv_items_aliasWarned`) and in `fnc_compileRules`' chain (another mod's preset built on one of them), unless a preset of that
+  name exists. A text that says `base=weight` therefore loads, without an error, with the default's sizes - the old presets' own rules are gone.
 
 ### What `fnc_getInfo` returns
 
@@ -420,19 +422,20 @@ so a class that was set apart stays apart. The rules that are only for classes i
 tree: what the edit sets or removes is also taken out of X's own rule `class=X`, which would otherwise win over the tree's rule on X
 alone. A tree that holds nothing but X is written as X alone.
 
-`fnc_upsertAll [[set, remove], [set, remove]]` writes the Start step's two rules for everything else, keyed by their selector
-(`fnc_allRule [rules, kinds]`: `all` alone, or `all kind=` with exactly `ELSE_CONTAINER_KINDS` uniform, vest, backpack in any order),
-not by `class=X`: found anywhere in the text and edited in place (a new one goes last), other values kept, a rule left with nothing
-goes; other hand-written `all` rules are not touched. One `fnc_commit`. `tools/check_default_ruleset.sqf` round-trips
-`einv1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4`.
+`fnc_upsertKinds [[kind, set, remove], ...]` writes the General step's size for a kind of container, keyed by the rule's selector
+(`fnc_allRule [rules, kinds]`: `all kind=uniform` for one of `GENERAL_KINDS`, `all` alone, in any order of kinds): found anywhere in the text and
+edited in place (a new one goes last), other values kept, a rule left with nothing goes; other hand-written `all` rules are not touched. One
+`fnc_commit`. `fnc_kindRule [kind]` reads it back as `["auto"]`, `["fixed", across, down]` or `["other"]` (a grid the row cannot show as a size).
+`tools/check_default_ruleset.sqf` round-trips `einv1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4`.
 
 ### `tools/check_default_ruleset.sqf`
 
 Not part of the mod; copied into a mission and started with `[] execVM "check_default_ruleset.sqf"` with the mods to check
 (vanilla, ACE, a large pack). It checks that the shipped `default` preset gives every item the size and stack, and every container
-the compartments, that the code before the rules gave - but for what is intended (grids 10 wide, at most 400 cells, containers at
-120 % of their load) - that the groups are a partition, that texts and names round-trip, that `base=tarkov` builds on `realism`
-and that canvases (`grid=aaa/aba/aaa`) round-trip. The summary shows as a hint; every finding goes to the RPT and the clipboard.
+the compartments, it is meant to (rifles 4x2 to 7x2, backpack tiles, nothing stacking but the `@stack_*` classes, containers from 120 % of
+their load as a block, pouches or a near-square block), that the groups are a partition, that texts and names round-trip, that
+`base=tarkov`, `realism` and `weight` read as `default` and that canvases (`grid=aaa/aba/aaa`) round-trip. The summary shows as a hint;
+every finding goes to the RPT and the clipboard.
 
 ## 3. Storage
 
@@ -487,10 +490,12 @@ Readers with `params ["_cols", "_rows"]` or `["_cols", "_rows", "_holes"]` stay 
 own in reading order of each one's first cell; that index is the place record's `block`. Every compartment keeps cells of its own,
 numbered from its own top left corner, wherever it is drawn. No cells at all gives `[[STORAGE_COLS, 0, [], []]]`.
 
-Patterns by kind when none is named (the class's own pick is a sum over its name, so a model always looks the same): uniform -
-`pockets` (1x2) or `pockets_mixed`, at most six from the load; vest - `rig` (1x2), `mixed`, `plate` or `long`, at most sixteen;
-backpack and kit - `single`, one compartment as near square as `STORAGE_COLS` allows; crates and vehicles - `wide`, one compartment
-`STORAGE_COLS` wide. A given number (`24`, `einv_grid = "24"`, `einv_slots`) is met exactly; one from the load is a rough measure. The load is
+Patterns by kind when none is named - worked out from the load alone, never from the class's name, so two containers with the same load
+look the same: uniform - `block`, one compartment `UNIFORM_COLS` 6 wide and as many rows as the load asks for, `UNIFORM_ROWS_MIN` 2 to
+`UNIFORM_ROWS_MAX` 5 (6x2 for a plain uniform); vest - `pouches`, a tall 1x2 and a square 2x2 after each other as a real magazine rig has them, as many as
+the load asks for, at most `VEST_POUCHES_MAX` 20; backpack and kit - `single`, one compartment as near square as `STORAGE_COLS` allows; crates and
+vehicles - `wide`, one compartment `STORAGE_COLS` wide. By name a rule or config key can also ask for `pockets` (1x2, at most six), `pockets_mixed`, `rig`
+(1x2), `mixed`, `plate` and `long` (at most sixteen), `pouches` and `block` (`grid=rig:16`). A given number (`24`, `einv_grid = "24"`, `einv_slots`) is met exactly; one from the load is a rough measure. The load is
 `fnc_getMaxLoad` (config `maximumLoad`, -1 for a weapon holder or null): since weight limits nothing, it only sizes the "auto",
 "percent" and "pattern" grids.
 
@@ -1826,47 +1831,63 @@ full-screen hit area closes it on a click beside the card and lets nothing throu
 
 ### State and the draft
 
-`einv_setup_steps = [[id, name key, function], ...]`: `start` (`fnc_drawStart`), `items` (`fnc_drawItems`), `containers`
-(`fnc_drawContainers`), `review` (`fnc_drawReview`); step functions get `[display, group, theme, args]`. Group rules (`@group >
-...`) have no step of their own: they are edited in the Review step's text. missionNamespace holds the mode, `target` (canEdit's
-answer), `readOnly`, the draft (`origin`, `originSource`, `draft` (AST), `draftText` (canonical), `draftRules` (compiled),
-`draftCache`, `parseWarnings`, `clean`, `sourceEmpty`, `undo`, `redo`), the window (`step`, `focus`, `selection`, `theme`) and
-what steps keep between redraws (`listState`, `treeState`, `editScope`, `cellWork`, `itemWork`, `cellMode`, `cellBrush`, `sameAs`,
-`startAdvanced`, ...);
-controls stay in uiNamespace. **Every edit ends in `fnc_commit [ast, redraw = true]`** (an undo step, `fnc_setDraft`, redraw);
-`fnc_setDraft [text]` parses, writes out again, compiles with a fresh cache and raises the local event `einv_setup_draftChanged
-[draftText]`. A change that writes out the same text is no change.
+`einv_setup_steps = [[id, name key, function], ...]`: `general` (`fnc_drawGeneral`), `items` (`fnc_drawItems`), `containers`
+(`fnc_drawContainers`); step functions get `[display, group, theme, args]`. The ids are what others look a page up by - the inventory's
+"Settings for <name>" row finds `items` and `containers` there, and `fnc_openFromGame [step, class]` takes the step's place in the list
+(0 General, 1 Items, 2 Containers). Group rules (`@group > ...`) have no step of their own: they are text, written and read through Export
+and Import. missionNamespace holds the mode, `target` (canEdit's answer), `readOnly`, the draft - two texts, the rules and the server settings:
+`origin`, `originSource` (name -> [value, priority] of the source for each of the two settings), `draft` (AST), `draftText` (canonical),
+`draftRules` (compiled), `draftCache`, `parseWarnings`, `clean`, and for the settings `originSettings`, `draftSettings` (what the text names,
+setting's name -> value), `draftSettingsText`, `cleanSettings`; `sourceEmpty`, `undo`, `redo` (entries `[rules text, settings text]`) -, the
+window (`step`, `focus`, `selection`, `theme`) and what steps keep between redraws (`listState`, `treeState`, `editScope`, `cellWork`,
+`itemWork`, `cellMode`, `cellBrush`, `sameAs`, `kindEdit`, `exportMode`, ...); controls stay in uiNamespace. **Every edit of the rules ends in
+`fnc_commit [ast, redraw = true]`** (an undo step, `fnc_setDraft`, redraw); **every edit of a server setting in `fnc_setSetting [name, value]`**
+(nothing for the default; `fnc_commitSettings`, `fnc_setSettingsDraft`); an import, loading a saved draft and Reset to default change both at once in one
+undo step (`fnc_commitSetup`). `fnc_setDraft [text]` parses, writes out again, compiles with a fresh cache and raises the local event
+`einv_setup_draftChanged [draftText]`. A change that writes out the same text is no change.
+
+**Saving** (`fnc_save`) writes each of the two settings that changed (or that the source lacks, or whose force switch turned) - `einv_items_rules`
+and `einv_main_settings` - with `CBA_settings_fnc_set` into the same source and priority; in menu mode it imports both lines into CBA's menu.
+`fnc_canEdit` is locked when a `cba_settings.sqf` sets either, `fnc_getActive`, `fnc_targetValue` and `fnc_sourceEmpty` take the setting as an
+argument, and a change of either (`einv_items_rulesChanged`, `einv_main_settingsChanged`) while the wizard is open is `fnc_onRulesChanged`'s.
 
 ### Steps
 
-- **Start** (`fnc_drawStart`): one plain page. Title and two sentences; the preset cards (`fnc_shippedPresets` plus the player's
-  own, `fnc_personalPresets`) with the "keep own rules" switch; "Now in use" (with where Save goes, Import, Review and save)
-  beside "What you changed" (`fnc_drawChanges`: the own rules as sentences, `fnc_describeRule`, to open at their class or take
-  away). A line of a rule for one class opens the step that lists its kind (the same in Review's list): Containers for a crate or
-  vehicle always (Items lists no cargo), for a uniform, vest, backpack or kit when the rule has `grid=` or `like=` or none of an item's
-  own `footprint`, `stack`, `weight`, `name`, Items otherwise; the class is picked there (`selection`, `editScope`, `listState`).
-  Percent signs in the words (`Value_Icon`, `Value_IconMoved`, the steppers' `Items_PictureZoom` ...) are the argument `%2` / `%4`,
-  not a `%` in the string: `format` drops a lone `%`.
-  **Everything else**, a card right over the Advanced fold (the "Now in use | What you changed" cards give up its height): the
-  caption, "Applies only where no preset or own rule gives an answer.", Clear and Apply; then "Items without a rule: size
-  [across] x [down], [N per tile]" and "Containers without a rule: [Auto | Fixed] [across] x [down]" in one row, or two where
-  the step is narrower than both. The steppers hold what was stepped in `einv_setup_elseEdit` `[draft text, across, down, stack,
-  fixed, grid across, grid down]`, read again from the draft's rules (`fnc_allRule`) whenever the draft text changed; without a
-  rule 1x1, 10 per tile, Auto (6x4 when switched to Fixed). Apply writes `all > size=WxH stack=N` and, for Fixed,
-  `all kind=uniform|vest|backpack > grid=WxH` (Auto takes the grid out: the built-in answer is a grid by load); Clear takes both
-  out (`fnc_upsertAll`). Sizes 1 to `SHAPE_MAX`, stack 1 to 999, grids `STORAGE_COLS` x `MAX_ROWS`. Review and "What you changed"
-  word them through `fnc_describeRule`: "Everything else: 1×1 cells, 10 per tile", "Everything else, containers: compartments 6×4"
-  (another `all` rule: "Everything else, kind magazine: ..."); an answer from one is "everything else" in the Items step's Why.
-  Below it, folded at the bottom (`einv_setup_startAdvanced`, closed by default), "Advanced - Cell size" with "1 cell = X kg":
-  stepper, kg value and source, the preset's value back. It sizes every container no rule draws, by its load, and every item the
-  Weight preset sizes by mass.
+- **General** (`fnc_drawGeneral`): one page that scrolls. Its top row has the title and Import (`fnc_openImport`), Export (`fnc_openExport`: a box with
+  the own rules, the whole setup written out or the lines for a `cba_settings.sqf` - the rules and, off their defaults, `einv_main_settings` -, read only,
+  with Copy where `copyToClipboard` works), Drafts (`fnc_openDrafts`: `fnc_personalPresets`, kept in the profile as `[name, text, date]`, the text
+  the rules and after `DRAFT_SETTINGS_MARKER` the server settings) and Reset to default (`fnc_resetAll`, after `fnc_confirm`); under it where Save goes,
+  or why it may not (in red), and the switch to force it over the mission where `canEdit` allows it. Only when there are any: what the engine left out of
+  the text it read. Then:
+  - **Containers**: a row for each of `GENERAL_KINDS` (uniform, vest, backpack, vehicle, crate): Auto | Fixed, two steppers (across 1 to `STORAGE_COLS`,
+    down 1 to `MAX_ROWS`) greyed while Auto, a reset button while there is a rule, and a few words of what Auto gives. Each is the rule `all kind=K >
+    grid=WxH` of the draft (`fnc_kindRule`, `fnc_upsertKinds`); Auto takes `grid` out of it. The engine asks these rules after everything about a class
+    (`fnc_resolve`, layer `all`), so a class rule, a table, a mod's `einv_grid` and the preset win over them. The last numbers stepped to are kept per kind
+    (`kindEdit`) for when Fixed is switched on again.
+  - **How room is worked out**: the load per cell - the header's `cell=` (`fnc_commit`), 1 to 50, with "1 cell = X kg", its source and a reset - and, in
+    words with the numbers of the moment (the cell, `UNIFORM_COLS`, `UNIFORM_ROWS_MIN`/`MAX`, `VEST_POUCHES_MAX`, a vest of load 120, a backpack of 280, a crate
+    of 1000): containers, uniforms, vests, backpacks, vehicles and crates, items, stacking, and that a rule of the class beats it all. The sizes of items and
+    the stack numbers in the words are those of the default preset - keep them together.
+  - **Server settings** by topic (`GVAR(topics)`: looting, living persons, containers, weight, hotbar/repacking/locks, vanilla arsenal; a registered setting that
+    no topic names goes under Other, one whose addon is not loaded is not shown): two to a line, a text box a line to itself. A control by the registry's type
+    (`einv_main_serverSettings`): CHECKBOX `fnc_uiToggle`, SLIDER `fnc_uiStepper` (a step of 1, or 0.5 or 0.05 for a short range with decimals; the value
+    rounded to the setting's decimals), LIST `fnc_uiDropdown`, EDITBOX `fnc_uiField` (a text box applied on Return or when it loses the cursor, not per key).
+    The label's tooltip is the setting's description, the label is in the accent and a reset button (`fnc_uiReset`) shows while the value is off its default
+    (the setting is in `draftSettings`). Settings with `hidden` (`einv_items_massPerCell`, `einv_items_stackSmall`) have none.
+  - **What you changed** (`fnc_drawChanges "default"`): the rules that are not the General step's own - `fnc_changeRows "default"` compares the draft with the
+    default that keeps the draft's `cell=` and its `all kind=...` rules - so when all uniforms are 10x10 by their kind and one is 5x5, that one is the only
+    row.
+- The header chip ("Server · forced · 4 changes", `fnc_drawFrame`) is a button: it opens `fnc_openChanges`, the list of what Save would store
+  (`fnc_drawChanges "saved"`) over whatever step is open. The footer has Back, Next and Save (Apply in menu mode); a dot on a step pill means changes
+  in it (`fnc_countChanges` -> `[count, step ids]`, a rule goes to its step by `fnc_ruleStep`).
 - **Items** (`fnc_drawItems`) and **Containers** (`fnc_drawContainers`): a class list on the left (`fnc_drawClassList`, cards by
   `fnc_drawResults`, 30 to a page) and an editor on the right. One class at a time and one rule per class - or, picked in the tree
   view, one rule for a class and everything built on it. The search takes wildcards (`fnc_searchFilter`, `fnc_searchHit`): `*` is
   any run of characters (none too), `?` any one, and the pattern has to fit the class or the name as a whole - `B_Bergen*`,
   `*Carryall*`, `*_F` -, while a plain text still finds itself anywhere; the wildcard becomes a regular expression with every other
   character escaped, and its longest literal run is looked for first, so the expression only meets the few classes that could fit.
-  The switch List | Tree beside the search turns the cards into the tree view. "Only classes with own rules" lists, on Items,
+  A button beside the search - Tree in the list, List in the tree - switches between the cards and the tree view; the tree opens where the picked class
+  stands among its relatives (`fnc_treeTop`, `focus` in `treeState`). "Only classes with own rules" lists, on Items,
   classes whose rules set `footprint` or `stack`; on Containers, `grid` or `like` (`fnc_ownClassRules`' `named`). The Containers
   chips are All, Uniforms, Vests, Backpacks, Cargo and - where Enhanced First Aid Kits brought kit types (`einv_items_fnc_kitTypes`)
   - Kits.
@@ -1878,27 +1899,21 @@ controls stay in uiNamespace. **Every edit ends in `fnc_commit [ast, redraw = tr
   `einv_compat_efak_fnc_roomMode` with the draft (else the same test on `einv_items_fnc_setBy`): by capacity, `fnc_answerText` words
   the grid "capacity 35" from "EFAK" (`einv_compat_efak_fnc_capacity`, the mission's setting included), the editor's "Now:" line
   has no compartments part and a note says the cells drawn are only a start - Apply gives the kit them and the capacity no longer
-  counts; with a grid of its own, "Now:" is the grid and a note says the capacity no longer counts; Back to the preset returns it
+  counts; with a grid of its own, "Now:" is the grid and a note says the capacity no longer counts; Back to the default returns it
   to the capacity. A kit opened for (`einv_setup_focus`) as an instance picks its type.
-- **Review** (`fnc_drawReview`): one column, no rules grammar unless asked for. "What changes" (`fnc_drawChanges [.., "saved"]`)
-  lists every difference between the draft and `clean` (what is saved where the wizard saves: the setup in effect when it opened,
-  saved or reloaded; on a client that may not save, the one in use), each line in words and marked new / changed / removed, with
-  a cross that takes that one change back, and under it the count against the Default preset. Warnings only when there are any.
-  Then where Save goes (or why it may not, in red), the force-over-the-mission switch where `canEdit` allows it, and one row:
-  Export (copies `fnc_exportText "cba"` where `copyToClipboard` works - server, single player, Eden; an MP client gets the text
-  fold opened on the CBA line to copy by hand), Import... (`fnc_openImport`, anchored under the button), Reset to default
-  (`fnc_confirm`, then `RULES_DEFAULT`), Save on the right. Two folds, closed whenever the wizard opens (`reviewDrafts`,
-  `reviewText`): "Saved drafts" (`fnc_personalPresets`, still stored as `einv_setup_presets` in the profile, shown as drafts so
-  they are not taken for Default / Realism) and "Show as text" (own / full / CBA line, read only until Edit text sets `textEdit`;
-  Apply text commits and closes the editing).
-- **`fnc_changeRows [against = "saved" | "default", describe = true]`** is the one diff behind both lists and the header count:
-  rows `[kind, status, label, words, picture, before, class, statement, undo]` for the preset, the cell size, the override switch
-  (saved only), then every group and rule matched by what it is for (a group by name, a rule by its conditions), so a class given
-  another size is one "changed" row. A single-class rule shows the class's picture and display name plus `fnc_describeRule [..,
-  valuesOnly = true]`. `undo` is `[code, args]` and ends in `fnc_commit` (undo/redo keep working); a removed statement goes back
-  after the one it followed, since a later rule wins. Reference setups are parsed once per text (`changeRefs`).
-  `fnc_countChanges` counts these rows (`describe = false`), so the header chip, the step dots and Review agree. Start's "What you
-  changed" is the same card against the Default preset (`"default"`): preset, cell size and every own rule.
+- **Per field reset** (`fnc_uiReset`, `fnc_resetField`, `fnc_classDefault`): beside the size, stack, weight, name and use of the Items editor and the
+  cells of the Containers editor, a small button shows while the value differs from what the draft makes of the class without its own rule for that field
+  (`fnc_classDefault [class, fields]`: the rules with those fields taken out of `class=X` and `class=X+`, compiled and asked once per text and class). A click
+  removes the field from the class's rule at once (`fnc_upsertRule`, an undo step) and drops what the editor held for it unapplied.
+- **`fnc_changeRows [against = "saved" | "default", describe = true]`** is the one diff behind both lists and the header count: rows `[kind, status, label,
+  words, picture, before, class, statement, undo]` for the preset (only a text can change it now), the cell size, the override switch (saved only), every server
+  setting (saved only: kind `setting`, words "before » after" by `fnc_settingText`, the cross sets it back), then every group and rule matched by what it is for
+  (a group by name, a rule by its conditions), so a class given another size is one "changed" row. Against `"saved"` the reference is `clean` and
+  `cleanSettings`; against `"default"` it is the default with the draft's own `cell=` and `all kind=...` rules, i.e. what the General step sets. A single-class
+  rule shows the class's picture and display name plus `fnc_describeRule [.. , valuesOnly = true]`; `all kind=uniform > grid=5x5` is worded "Every uniform:
+  compartments 5×5". `undo` is `[code, args]` and ends in `fnc_commit` (or `fnc_setSetting`), so undo/redo keep working; a removed statement goes back after
+  the one it followed, since a later rule wins. Reference setups are parsed once per text (`changeRefs`). `fnc_countChanges` counts these rows
+  (`describe = false`), so the header chip, the step dots and the list agree.
 
 ### The class index
 
@@ -1935,15 +1950,15 @@ write that rule.
   (`fnc_answerLine`, the one line the cards use too). The arrow at the end of a row starts the tree at that class. The list's search
   and "only classes with own rules" filter the rows; switching the view on starts the tree at the class picked.
 - **What an edit is for** (`editScope`, per step): `class` for the class alone, `tree` for it and everything built on it. A card of the
-  list picks "class", a row of the tree picks "tree", and so do opening the step for a class and the Start step's jump.
+  list picks "class", a row of the tree picks "tree", and so do opening the step for a class and a click on a line of the change lists.
   `fnc_editScope [step, class]` answers `[tree, how many listed classes are built on it]` and is a tree only when there are any. The
-  editors say so in a line (class, the number and the rule, `class=X+`) with a chip "Only this class"; Apply, Back to the preset and
+  editors say so in a line (class, the number and the rule, `class=X+`) with a chip "Only this class"; Apply, Back to the default and
   Export then work on the tree - one `class=X+` rule through `fnc_upsertRule [.., tree = true]`, a class with a rule of its own further
   down keeps it. "Same as another class" is for one class and is not offered then. Working copies are per class, tree or not.
 - **Which rule covers a class.** `fnc_answerText` reads the source tag of the field (`own:<i>`, i the rule's index in the draft): a
   rule `class=X+` of a class above this one says "inherited from X", a rule for the class itself "your rule", a preset "preset", as
   before. `fnc_ownClassRules` returns a third map, `tree` - the values of the rules written for exactly `class=X+` -, which the
-  editors use to offer Back to the preset for a tree.
+  editors use to offer Back to the default for a tree.
 
 ### Export and import at the editors
 
@@ -1958,14 +1973,14 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
     `parseConfigEntry` and `fnc_configValues` (config key -> rule field) and written as a rule without conditions
     (`einv_items_fnc_writeRules`) after the marker `LAYOUT_MARKER`: `einv-layout: grid=1x3+5x7+1x3 weight=1.2 picture=/a3/...`.
     No class name, so it works across mods.
-  They go to the clipboard where `copyToClipboard` works (`isServer || !isMultiplayer`, as at Review); a client gets a box with the text
+  They go to the clipboard where `copyToClipboard` works (`isServer || !isMultiplayer`, as at the General page's Export); a client gets a box with the text
   to select and copy.
 - **Import** (`fnc_openClassImport`, a paste box under the button, which knows the selected class and whether the edit is for its tree;
   Apply runs `fnc_applyClassImport`, which calls `fnc_importClasses [text, selected, tree, choice]` and words the result line). What
   is read, in this order: a **layout** (`LAYOUT_MARKER`; its values, no class), **config lines** (`einv_items_fnc_parseConfigEntry`; each class
   with its keys, `size` -> `footprint`, `stack`, `grid`, `weight`, `name`, `icon`, `picture`, by `fnc_configValues`), **rules of single
   classes** (every rule is exactly `class=X` or `class=X+`, no groups, no `einv` header, no setting around them: a class each, as config
-  lines), and else any **rules**, as Review's Import reads them (`fnc_importText`), whose statements join the own ones without repeating
+  lines), and else any **rules**, as the General page's Import reads them (`fnc_importText`), whose statements join the own ones without repeating
   one that is already there. A text of the first three never creates a rule for a class this game does not have (`getFacts "root"` is
   ""), and where the values go depends on the selected class:
   - a layout always goes to the selected class (the selected tree for a tree edit);
@@ -1977,7 +1992,7 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
     `fnc_applyClassImport` runs the import again with the choice (`"selected"` / `"named"`);
   - what cannot mean anything to the selected class is left out: no `grid` for what is no container, no `stack` for what never shares a
     tile, no `like`; if nothing is left the line says so (`"notFit"`).
-  All of a kind go through one `fnc_upsertRules` and so one undo step. Nothing is saved: Save at Review decides.
+  All of a kind go through one `fnc_upsertRules` and so one undo step. Nothing is saved: Save decides.
 
 ### The picture of an item and of a box (Items, Containers)
 
@@ -1992,7 +2007,7 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
 - **Apply** writes `picture=PATH` when it differs from now; Reset then Apply takes the class's own `picture` away - or, where the item's
   own config sets `einv_picture` that would win again, writes config's own picture path (`getFacts "picture"`, read by
   `fnc_parsePicture`) to win over it. The Containers step's Apply writes the cells (when changed) and `icon=` / `picture=` in one
-  `fnc_upsertRule`, and is enabled for a picture change alone; Discard and Back to the preset (`grid`, `like`, `icon`, `picture`) clear
+  `fnc_upsertRule`, and is enabled for a picture change alone; Discard and Back to the default (`grid`, `like`, `icon`, `picture`) clear
   both working copies.
 - **The picker** (`fnc_openPicturePicker [current, code, arguments, inUse, class]` -> `fnc_popover` in the middle of the wizard;
   `fnc_drawPicturePicker`; state `GVAR(picker)`): a search field, chips under it (`chip`: "Item icons" `items`, "Uniforms & gear" `gear`,
@@ -2013,7 +2028,7 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   `picture` values of the class index's rows (`ROW_PICTURE`, already looked at by `safePicture`), one entry each - `[path, lowercase
   path, search text, first owner's name, its class, how many own it (a class once, though its list and editor picture be one file), up to
   `PICKER_OWNERS` 8 classes in lowercase, their names, categories, its `fnc_pictureKey`, the class that owned it last]`,
-  sorted by the first owner's name, plus `byPath` for Review's "picture from <class>"; a ninth member lists the categories of the owners
+  sorted by the first owner's name, plus `byPath` for the change lists' "picture from <class>"; a ninth member lists the categories of the owners
   (`items`, `gear`, `vehicles`: `fnc_pictureCategory` of each owner's kind - uniform, vest, headgear and backpack are gear; crate and
   vehicle are vehicles, whose `editorPreview` is catalogued as well as their `picture`; all else, weapons, magazines, attachments,
   kits, goggles, are items), which the chips filter by. Built lazily the first time the picker opens, in
@@ -2023,7 +2038,7 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   look through the catalog again.
 - **The box** (`fnc_drawBoxPreview` -> `einv_gui_fnc_uiBoxPicture`): in the Containers step the box of the class drawn as the window draws
   it (a crate or vehicle with its editor picture unless a picture is set, a uniform, vest or backpack with its config picture or the
-  set one), by the working zoom and shift. Review words a rule's picture "picture from <class>" where the catalog knows the owner
+  set one), by the working zoom and shift. The change lists word a rule's picture "picture from <class>" where the catalog knows the owner
   (`fnc_describeRule`), else "picture <path>".
 
 ### The paint model (Containers) and the item editor (Items)
@@ -2065,9 +2080,9 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   `size=xx/x-`, `stack=N`, `weight=KG`, `name=...`, `picture=PATH`, `use=LIST` and `icon=ZOOM@ACROSS:DOWN` (as `[scale, across, down]`, 1.4 and 0.1 for 140 % and
   10 %), each only when it differs from now; a field emptied takes its own value away. Reset then Apply takes the class's own `icon`
   away when nothing below draws the picture otherwise, else writes the plain picture (`icon=1`) to win over the item's `einv_icon`.
-  "Back to the preset" removes `icon` with the rest; the tree view's edits write `class=X+ > icon=...` like the other fields;
+  "Back to the default" removes `icon` with the rest; the tree view's edits write `class=X+ > icon=...` like the other fields;
   Export writes `einv_icon = "1.4@0.1,-0.05";` (`fnc_configEntry`) and Import reads it (`fnc_configValues` maps `einv_icon` to
-  `icon`); Review words it ("picture at 140 %, moved 10 % across and -5 % down", `fnc_describeRule`). The weight is read by `fnc_weightValue` (a dot or a comma,
+  `icon`); The change lists word it ("picture at 140 %, moved 10 % across and -5 % down", `fnc_describeRule`). The weight is read by `fnc_weightValue` (a dot or a comma,
   rounded to the gram, at most `EDIT_WEIGHT_MAX` 1000; -1 for nothing typed, -2 for text that is no weight, which Apply refuses and
   says), the name cut to `EDIT_NAME_MAX` 100 (the rules' `name=` encoding is `writeRules`' business). Typing goes into the working
   copy (`weightText`, `nameText`) without drawing the editor again - the field would lose the cursor -, Return draws it again, and
@@ -2080,9 +2095,9 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   Everything its chip changes nothing in the game, and with one on Nothing a whitelisted item is not usable there either. The
   click goes into the working copy (`useList`, in the order uniform, vest, backpack), the editor is drawn again and Apply
   writes `use=` only when it differs from now - an emptied list as `use=none`, which takes back what a broader rule whitelisted
-  (Back to the preset removes the class's own `use` with the rest). The tree view's edits write `class=X+ > use=...` like the other
+  (Back to the default removes the class's own `use` with the rest). The tree view's edits write `class=X+ > use=...` like the other
   fields, so `kind=grenade` is one tree edit away. Export writes `einv_use = "backpack,vest";` (`fnc_configEntry`), Import maps
-  `einv_use` to `use` (`fnc_configValues`), Review words it ("usable from the Vest, Backpack", `fnc_describeRule`).
+  `einv_use` to `use` (`fnc_configValues`), The change lists word it ("usable from the Vest, Backpack", `fnc_describeRule`).
 - **Blocks mode** (`fnc_drawCellBlocks`): the switch "Paint | Blocks" (`einv_setup_cellMode`, 0/1, kept for the session). One
   small drawing per compartment (a click toggles a hole), width and height steppers for the picked one, Add and Remove; working
   copy `{blocks, picked}`; Apply writes the blocks joined by `+` (flow layout). A class drawn as a canvas gets a note that Blocks
@@ -2094,7 +2109,7 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   Apply also removes it). A linked class shows X's cells read-only with a chip "Same as X · Unlink"; a copied working copy is
   editable even while `like=` stands.
 - **Working copies**: `einv_setup_cellWork` (lowercase class -> a painted canvas, or `blocks` and `picked`; optional `unlink`),
-  `einv_setup_itemWork`; the first change makes the copy, Discard drops it, "Back to the preset" removes `grid` and `like`. Apply
+  `einv_setup_itemWork`; the first change makes the copy, Discard drops it, "Back to the default" removes `grid` and `like`. Apply
   checks no cell, `MAX_CELLS`, `MAX_BLOCKS` and a drawing taller than `MAX_ROWS`, and writes through `fnc_upsertRule`. A grid laid
   out by load or by a pattern is shown as the compartments it gives; editing it writes those cells instead.
 - **Preview** (`fnc_drawPreview`): the window's own `flowCompartments` with the blocks Apply would write, so painted
@@ -2299,23 +2314,43 @@ its capacity there.
 
 ## 8. Settings
 
-Every CBA setting of the mod (`initSettings.inc.sqf` of each addon), all under the category "Enhanced Inventory". Scope **client**
-is `0` (each player's own value), **global** is `1` (the same for everyone; the server or mission decides). Descriptions in the
+Every CBA setting of the mod (`initSettings.inc.sqf` of each addon), all under the category "Enhanced Inventory". Scope **client** is
+`0` (each player's own value), **global** is `1` (the same for everyone; the server or mission decides). Descriptions in the
 stringtables are wrapped as BRIEFING asks.
 
-| Setting | Type | Scope | Default | |
-|---|---|---|---|---|
+**Server settings** - the ones of scope 1 - are no rows of CBA's menu. Each addon registers its own with
+`einv_main_fnc_addSetting [name, type, [label, description], valueInfo, script = {}, hidden = false]` (the arguments of `CBA_fnc_addSetting`
+less the category and the scope, in `initSettings.inc.sqf`): `einv_main_serverSettings` (name -> definition: `type`, `label`, `tip`, `default`, `min`,
+`max`, `decimals`, `values`, `labels`, `script`, `hidden`, `key`), `einv_main_serverKeys` (key -> name), `einv_main_serverOrder`. The variable exists at
+once, set to the default. Their values are the text of **one CBA EDITBOX, `einv_main_settings`** (scope 1, default "", title "Server settings - set in
+the setup wizard, do not edit", sanitized by `einv_main_fnc_sanitizeSettings`): `einv1, gui_searchTime=0.6, weight_enabled=0` - the header, then
+`key=value` for each setting that is off its default, in registration order, the key the name without `einv_`. A switch is `1` or `0` (also `on`, `off`,
+`true`, `false`), a slider a number cut to its range and rounded to its decimals, a list the value of one of its choices, a text box free text with
+`%` and four hex digits for every character that is not a letter, a digit, `-` or `.` (`fnc_encodeText`, `fnc_decodeText`). `fnc_parseSettings [text]` ->
+`[values, warnings]` (public; a typo is left out with a warning, never the rest), `fnc_writeSettings [values]` -> the canonical text ("" for none; public),
+`fnc_parseValue [entry, text]`. **`fnc_applySettings`** is the box's change script, run by CBA on every machine when the settings are first read and
+whenever the text changes: it sets every registered variable (the default where the text says nothing), then runs each changed setting's script
+with the value (every one the first time, as CBA does) and raises CBA's `CBA_SettingChanged [name, value]` (which the hotbar listens to) and the local
+event `einv_main_settingsChanged [text]` (an open wizard takes it in). The variables, their names, their kinds of value and their scripts are those
+of the rows they replace, so no reader changed. While the box is empty and a mission's own `cba_settings.sqf` has lines for the old names (read from CBA's
+`cba_settings_missionConfig`, once the box is the default), those values are taken as if the text said them; the server's profile and file are not
+read. A scope-2 box (a setting nobody may override) would be a second EDITBOX; no setting needs one.
+
+The setup wizard's General page draws a control for each registered setting that is not `hidden` (section 6). What stays in CBA's menu: the rules
+(`einv_items_rules`) with the three older tables, the box above, and every setting of scope 0.
+
 | `einv_items_rules` | EDITBOX | global | `einv1 base=default` | the setup (section 2); runs `fnc_loadRules` |
-| `einv_items_massPerCell` | SLIDER 2 to 20 | global | 5 | fallback mass per cell |
-| `einv_items_stackSmall` | SLIDER 1 to 50 | global | 10 | `@item_small`'s stack, only when moved off 10 |
+| `einv_items_massPerCell` | SLIDER 2 to 20 | global (hidden) | 5 | fallback mass per cell, when a text has no `cell=` - the General page sets `cell=` |
+| `einv_items_stackSmall` | SLIDER 1 to 50 | global (hidden) | 10 | `@item_small`'s stack, only when moved off 10 - by hand in `einv_main_settings` |
+| `einv_main_settings` | EDITBOX | global | "" | the server settings as one text (above); runs `einv_main_fnc_applySettings` |
 | `einv_items_sizeTable`, `einv_items_stackTable` | EDITBOX | global | "" | older tables, `class:WxH` / `class:N`; win over the text |
 | `einv_storage_migrate` | CHECKBOX | global | on | move a unit's surplus (overflow) on to its next container with room (section 3, Surplus) |
 | `einv_storage_containerTable` | EDITBOX | global | "" | `class:N` or `class:WxH+WxH`; wins over the text |
 | `einv_storage_nearbyRange` | SLIDER 1 to 5 | global | 3 | m, how far crates and piles count as nearby |
 | `einv_storage_useUniform`, `useVest`, `useBackpack` | LIST | global | `all` | "Use items from the uniform / vest / backpack": `all` Everything, `list` Only whitelisted (items with `use=` for it), `none` Nothing, `strict` Strict (hidden) - Only whitelisted, and the blocked items are kept out of the cargo in the unit's hidden holder; what the padlocks, the hotbar, the window's use rows and the reload key honour (section 3, Use from containers and Strict mode) |
-| `einv_gui_cellScale` | SLIDER 0.8 to 1.3 | client | 1 | tile scale: the cell size, capped where the columns no longer fit; next opening |
+| `einv_gui_cellScale` | SLIDER 0.8 to 1.3 | client | 1.1 | tile scale: the cell size, capped where the columns no longer fit; next opening |
 | `einv_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
-| `einv_gui_tileNames` | CHECKBOX | client | off | the item's short name in the top corner of every tile (`fnc_createTile`; the setup wizard's preview always has it); the name at the mouse stays; ACE Arsenal's panel follows |
+| `einv_gui_tileNames` | CHECKBOX | client | off | the item's short name in the top corner of every tile (`fnc_createTile`, a name that does not fit set a fifth smaller before it is cut; the setup wizard's preview always has it); the name at the mouse stays; ACE Arsenal's panel follows |
 | `einv_gui_cameraDefault` | LIST | client | `soldier` | the camera as the window opens: `soldier` (third person), `off` (first person) |
 | `einv_gui_showNearby` | CHECKBOX | client | on | nearby piles and crates as boxes in the loot column |
 | `einv_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |

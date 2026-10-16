@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project name="einv">
     <Package name="main">
+        <Key ID="STR_einv_main_Setting_Settings">
+            <English>Server settings - set in the setup wizard, do not edit</English>
+        </Key>
+        <Key ID="STR_einv_main_Setting_Settings_Desc">
+            <English>Every setting that is the same for
+everyone - searching, living persons,
+weight, the hotbar and the rest - as
+one line of text.
+
+The setup wizard's General page writes
+and reads it: change them there, not
+here. The inventory rules are a setting
+of their own.
+
+A mission's cba_settings.sqf can set
+this line like any other.</English>
+        </Key>
         <Key ID="STR_einv_main_URL">
             <English>https://discord.gg/Jud6gyzFYx</English>
         </Key>

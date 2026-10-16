@@ -1,8 +1,8 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The setup in use changed while the wizard is open (einv_items_rulesChanged): saved from here, by an
- * admin, by a mission script.
+ * The setup in use changed while the wizard is open (einv_items_rulesChanged, einv_main_settingsChanged): saved from
+ * here, by an admin, by a mission script.
  *
  * With nothing changed in the draft, the wizard simply shows the new setup. With changes of its own, it
  * keeps them and shows a banner instead - Reload, or keep mine; Save then asks what to do (fnc_save).
@@ -33,15 +33,19 @@ if !(GVAR(target) getOrDefault ["override", false]) then {
 };
 
 if (call FUNC(isDirty)) then {
-    private _active = call FUNC(getActive);
+    private _active = [] call FUNC(getActive);
     private _now = [[_active] call EFUNC(items,parseRules)] call EFUNC(items,writeRules);
+    private _activeSettings = [SETTINGS_SETTING] call FUNC(getActive);
+    private _nowSettings = [([_activeSettings] call EFUNC(main,parseSettings)) select 0] call EFUNC(main,writeSettings);
 
     // What changed is what this draft says already - saved from here, or someone had the same idea.
-    if (_now isEqualTo GVAR(draftText)) then {
+    if (_now isEqualTo GVAR(draftText) && {_nowSettings isEqualTo GVAR(draftSettingsText)}) then {
         GVAR(origin) = _active;
-        GVAR(originSource) = call FUNC(targetValue);
+        GVAR(originSettings) = _nowSettings;
+        GVAR(originSource) = [] call FUNC(targetValues);
         GVAR(clean) = GVAR(draftText);
-        GVAR(sourceEmpty) = call FUNC(sourceEmpty);
+        GVAR(cleanSettings) = GVAR(draftSettingsText);
+        GVAR(sourceEmpty) = [] call FUNC(sourceEmpty);
     } else {
         GVAR(banner) = true;
     };

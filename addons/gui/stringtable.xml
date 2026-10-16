@@ -625,9 +625,6 @@
         <Key ID="STR_einv_gui_Storage_Empty">
             <English>No uniform, vest or backpack</English>
         </Key>
-        <Key ID="STR_einv_gui_SubCategory_Animation">
-            <English>Animation</English>
-        </Key>
         <Key ID="STR_einv_gui_SubCategory_General">
             <English>General</English>
         </Key>
@@ -636,9 +633,6 @@
         </Key>
         <Key ID="STR_einv_gui_SubCategory_Nearby">
             <English>Nearby</English>
-        </Key>
-        <Key ID="STR_einv_gui_SubCategory_Persons">
-            <English>Living persons</English>
         </Key>
         <Key ID="STR_einv_gui_SubCategory_Searching">
             <English>Searching</English>

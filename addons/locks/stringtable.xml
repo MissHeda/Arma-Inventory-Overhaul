@@ -52,9 +52,6 @@
         <Key ID="STR_einv_locks_Side_West">
             <English>BLUFOR</English>
         </Key>
-        <Key ID="STR_einv_locks_SubCategory_Locks">
-            <English>Locks</English>
-        </Key>
         <Key ID="STR_einv_locks_Tip_Admin">
             <English>Locked: %1 - open to you as an admin</English>
         </Key>

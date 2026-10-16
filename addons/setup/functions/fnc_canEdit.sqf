@@ -3,14 +3,14 @@
  * Author: Miss Heda
  * Whether this machine may save the setup, and where to: the CBA source the wizard writes to.
  *
- * The setting is the same for everyone (global), so a client's own value never counts - only the server's
- * and the mission's do:
+ * The two settings the wizard edits - the rules and the server settings - are the same for everyone (global), so
+ * a client's own value never counts - only the server's and the mission's do:
  *   - direct mode: in Eden the mission (it goes into the scenario), everywhere else the server - as the
  *     server itself, single player included, or as a logged-in admin or whitelisted player (CBA's
  *     cba_settings_whitelist); everyone else may only look and copy.
  *   - menu mode: the source picked at the top of CBA's menu - its Client tab only to look at.
- * A value set in a cba_settings.sqf (the server's or the mission's) locks the setting: CBA would still take
- * a new one for this session, but lose it on the next restart, so the wizard does not offer to save.
+ * A value set in a cba_settings.sqf (the server's or the mission's) for either of the two locks it: CBA would
+ * still take a new one for this session, but lose it on the next restart, so the wizard does not offer to save.
  *
  * Forcing over the mission's own setup (priority 2) is offered for the server in multiplayer only. In
  * single player "server" is the player's own profile: forced there, it would stay so for every mission
@@ -38,6 +38,7 @@
 params [["_mode", "direct", [""]]];
 
 private _setting = RULES_SETTING;
+private _settings = [RULES_SETTING, SETTINGS_SETTING];
 private _result = createHashMapFromArray [
     ["canSave", false],
     ["source", ""],
@@ -68,7 +69,7 @@ switch (_source) do {
         if (!_canServer) then {
             _result set ["reason", LLSTRING(Reason_NoAdmin)];
         } else {
-            if (!isNil {(missionNamespace getVariable ["cba_settings_serverConfig", objNull]) getVariable _setting}) then {
+            if ((_settings findIf {!isNil {(missionNamespace getVariable ["cba_settings_serverConfig", objNull]) getVariable _x}}) >= 0) then {
                 _result set ["locked", true];
                 _result set ["reason", LLSTRING(Reason_LockedServer)];
             } else {
@@ -82,7 +83,7 @@ switch (_source) do {
         if (!is3DEN) then {
             _result set ["reason", LLSTRING(Reason_NoMission)];
         } else {
-            if (!isNil {(missionNamespace getVariable ["cba_settings_missionConfig", objNull]) getVariable _setting}) then {
+            if ((_settings findIf {!isNil {(missionNamespace getVariable ["cba_settings_missionConfig", objNull]) getVariable _x}}) >= 0) then {
                 _result set ["locked", true];
                 _result set ["reason", LLSTRING(Reason_LockedMission)];
             } else {
@@ -116,7 +117,7 @@ if (_target isNotEqualTo "") then {
 
 // A server value of priority 1 ties with a mission's forced one, and CBA lets the mission win a tie.
 private _mission = missionNamespace getVariable ["cba_settings_mission", objNull];
-private _missionSets = !isNil {_mission getVariable _setting} && {([_setting, "mission"] call cba_settings_fnc_priority) >= 1};
+private _missionSets = (_settings findIf {!isNil {_mission getVariable _x} && {([_x, "mission"] call cba_settings_fnc_priority) >= 1}}) >= 0;
 
 _result set ["missionWins", _target isEqualTo "server" && {_missionSets}];
 

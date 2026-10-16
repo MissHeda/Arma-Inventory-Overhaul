@@ -4,8 +4,9 @@
  * Author: Miss Heda
  * Draws what stays around every step, anew each time a step is drawn (fnc_showStep):
  *   - the header: the title; where it saves and how many changes wait ("Server · forced · 4 changes", or
- *     "Read-only"); Undo, Redo and Close; under it the steps - the open one in the accent, a dot on a step
- *     with changes; then, after someone else changed the setup, a banner to reload or keep the own changes.
+ *     "Read-only") - a click on it lists what Save would store (fnc_openChanges); Undo, Redo and Close; under it
+ *     the steps - the open one in the accent, a dot on a step with changes; then, after someone else changed the
+ *     setup, a banner to reload or keep the own changes.
  *   - the footer: the keys on the left, the last message in the middle (fnc_setHint), Back, Next and Save
  *     on the right - Apply in CBA's menu, where CBA's own OK saves.
  * Each in a group of its own inside the wizard's pane, so the step between them never lies under either.
@@ -47,7 +48,7 @@ private _stepsY = _padY + WIZ_TITLE_H + UNIT * 0.45;
 private _lineY = _stepsY + WIZ_STEPS_H + UNIT * 0.5;
 private _headerH = _lineY + UNIT * 0.05 + ([0, WIZ_BANNER_H + UNIT * 0.3] select GVAR(banner));
 
-(call FUNC(countChanges)) params ["_changes", "_headChanged", "_statementsChanged"];
+(call FUNC(countChanges)) params ["_changes", "_changedSteps"];
 
 // ----- Header -----
 
@@ -125,14 +126,24 @@ if (_chipW > SQUARE(UNIT * 2)) then {
     private _chipRect = [_nextRight - _chipW, _padY + (WIZ_TITLE_H - _chipH) / 2, _chipW, _chipH];
     private _chipInk = [_colorText2, _theme getOrDefault ["accent", _colorText2]] select (_changes > 0 || {_notStored});
 
-    [_display, _header, _chipRect, _theme getOrDefault ["button", [1, 1, 1, 0.08]], _chipH / 2] call EFUNC(gui,uiPanel);
+    private _chipSurface = [_display, _header, _chipRect, _theme getOrDefault ["button", [1, 1, 1, 0.08]], _chipH / 2] call EFUNC(gui,uiPanel);
 
-    private _chip = [
+    [
         _display, _header, _chipRect, [_chipText, _chipW - SQUARE(_chipH * 0.6), _font, _chipSize] call EFUNC(gui,fitText), _chipSize,
         _chipInk, _font, 2
     ] call EFUNC(gui,uiLabel);
 
-    _chip ctrlSetTooltip ([format [LLSTRING(Save_ReadOnly), GVAR(target) getOrDefault ["reason", ""]], _chipText] select !GVAR(readOnly));
+    // A click on it opens what Save would store - the Review the wizard had, as a box over whatever step is open.
+    private _chipHit = [
+        _display, _header, _chipRect, _chipSurface, _theme getOrDefault ["button", [1, 1, 1, 0.08]], _theme getOrDefault ["buttonHover", [1, 1, 1, 0.12]], {},
+        [], true, ([format [LLSTRING(Save_ReadOnly), GVAR(target) getOrDefault ["reason", ""]], LLSTRING(Chip_Tip)] select !GVAR(readOnly))
+    ] call FUNC(uiHit);
+
+    _chipHit setVariable [QGVAR(action), [{
+        params ["_hit"];
+
+        [uiNamespace getVariable [QGVAR(display), displayNull], [_hit] call FUNC(screenRect)] call FUNC(openChanges);
+    }, [_chipHit]]];
 };
 
 // ----- The steps -----
@@ -157,8 +168,9 @@ private _pillW = (_innerW - _gap * (count _steps - 1)) / count _steps;
         }, [_forEachIndex], true, ["", "accent"] select _current
     ] call FUNC(uiAction);
 
-    // A dot on a step holding changes: Start for the preset and the cell size, Review for the statements.
-    private _changed = [_headChanged, false, false, _statementsChanged] param [_forEachIndex, false];
+    // A dot on a step holding changes: General for the settings, the cell size and the kinds of container, Items and
+    // Containers for the rules of single classes (fnc_countChanges).
+    private _changed = (_x select 0) in _changedSteps;
 
     if (_changed) then {
         private _dotH = WIZ_STEPS_H * 0.26;

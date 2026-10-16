@@ -13,7 +13,8 @@
  * quiet: they were told already), which checks reach and permission again.
  *
  * Arguments:
- * 0: Step to open at, 0 (Start) to 3 (Review) <NUMBER> (default: 0)
+ * 0: Step to open at, 0 (General), 1 (Items) or 2 (Containers) - by the step's place in einv_setup_steps, which is where
+ *    the ids are looked up: the inventory's "Settings for ..." row finds "items" and "containers" there <NUMBER> (default: 0)
  * 1: Class to look at in that step, "" for none <STRING> (default: "")
  *
  * Return Value:

@@ -17,12 +17,11 @@
  *                                         Class My_Vest: like V_PlateCarrier1_rgr, compartments
  *                                         4×2 shaped, 6 cells
  *
- * A rule with "all" is for everything else, what no other rule answers, and is said so - the Start step's
- * two (fnc_allRule) as that step shows them:
+ * A rule with "all" is for everything else, what no other rule answers, and is said so - the General step's
+ * (fnc_allRule), one for a kind of container, as that step shows them:
  *
+ *   all kind=uniform > grid=5x5           Every uniform: compartments 5×5
  *   all > size=1x1 stack=10               Everything else: 1×1 cells, 10 per tile
- *   all kind=uniform|vest|backpack > grid=6x4
- *                                         Everything else, containers: compartments 6×4
  *   all kind=magazine > stack=30          Everything else, kind magazine: 30 per tile
  *
  * Arguments:
@@ -325,11 +324,14 @@ if (_valuesOnly) exitWith {[_values] call _fnc_values};
 private _isAll = _conditions findIf {(_x param [1, ""]) isEqualTo "all"} >= 0;
 private _narrower = _conditions select {(_x param [1, ""]) isNotEqualTo "all"};
 
+// A kind of container the General step sets a size for.
+private _kindIndex = GENERAL_KINDS findIf {([[_rule], [_x]] call FUNC(allRule)) == 0};
+
 private _subject = switch (true) do {
     case (!_isAll && {_conditions isEqualTo []}): {LLSTRING(Desc_Every)};
     case (!_isAll): {[(_conditions apply {_x call _fnc_condition}) joinString ", "] call _fnc_capital};
     case (_narrower isEqualTo []): {LLSTRING(Desc_All)};
-    case (([[_rule], ELSE_CONTAINER_KINDS] call FUNC(allRule)) == 0): {LLSTRING(Desc_AllContainers)};
+    case (_kindIndex >= 0): {format [LLSTRING(Desc_AllKind), toLower localize format ["STR_einv_setup_Kind_%1", GENERAL_KINDS select _kindIndex]]};
     default {format [LLSTRING(Desc_AllWhere), (_narrower apply {_x call _fnc_condition}) joinString ", "]};
 };
 

@@ -10,10 +10,12 @@
  *     One thing does change: the preset's rules become own rules, which win over sizes a mod sets in its
  *     config (einv_gridSize and the like) where the preset's did not. The older table settings
  *     (einv_items_sizeTable and the like) are settings of their own and not part of either text.
- *   - "cba": a line for a cba_settings.sqf, or CBA's Import box: force einv_items_rules = "...";
- *     forced over the mission when the wizard would save it so.
+ *   - "cba": the lines for a cba_settings.sqf, or CBA's Import box: force einv_items_rules = "...";
+ *     and, when any server setting is off its default, force einv_main_settings = "..."; - forced over the
+ *     mission when the wizard would save it so.
  * "own" and "full" one statement per line, with a comma at its end - the line breaks are read as commas
- * again - so a long setup stays readable. "cba" in one line, as CBA's files want it.
+ * again - so a long setup stays readable. "cba" one line for each of the two settings, as CBA's files want
+ * them. The server settings are no part of "own" and "full": they are no rules.
  *
  * Arguments:
  * 0: "own", "full" or "cba" <STRING> (default: "own")
@@ -35,7 +37,14 @@ switch (_variant) do {
     case "cba": {
         private _forced = (GVAR(target) getOrDefault ["source", ""]) isEqualTo "server" && {GVAR(override)} && {GVAR(target) getOrDefault ["override", false]};
 
-        format ["%1%2 = %3;", ["force ", "force force "] select _forced, RULES_SETTING, str GVAR(draftText)]
+        private _prefix = ["force ", "force force "] select _forced;
+        private _lines = [format ["%1%2 = %3;", _prefix, RULES_SETTING, str GVAR(draftText)]];
+
+        if (GVAR(draftSettingsText) isNotEqualTo "") then {
+            _lines pushBack format ["%1%2 = %3;", _prefix, SETTINGS_SETTING, str GVAR(draftSettingsText)];
+        };
+
+        _lines joinString toString [10]
     };
     case "full": {
         // The layers, as the rules engine stacks them (einv_items_fnc_compileRules): the presets it builds

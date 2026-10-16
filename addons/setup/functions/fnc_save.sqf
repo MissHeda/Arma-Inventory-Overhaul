@@ -1,11 +1,12 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Saves the draft where the wizard may save it (fnc_canEdit):
+ * Saves the draft where the wizard may save it (fnc_canEdit): the rules and the server settings, two CBA
+ * settings, each written when it changed (or when the source it goes to holds none of its own yet):
  *   - direct mode: straight into CBA's setting (CBA_settings_fnc_set), stored in the server's profile or,
  *     in Eden, the scenario - CBA hands it to every machine, players joining later included, and each one
- *     takes it in at once (einv_items_fnc_loadRules). From a logged-in admin's machine CBA sends it to the
- *     server, and it comes back the same way.
+ *     takes it in at once (einv_items_fnc_loadRules, einv_main_fnc_applySettings). From a logged-in admin's
+ *     machine CBA sends it to the server, and it comes back the same way.
  *   - menu mode: into CBA's menu as a change still to be confirmed (cba_settings_fnc_import, the way CBA's
  *     own Import box does it), and the wizard closes: the setting's row turns yellow, CBA's OK keeps it,
  *     Cancel throws it away - with the player's other changes in that menu, which the wizard never
@@ -39,6 +40,7 @@ if (GVAR(readOnly)) exitWith {
 };
 
 private _text = GVAR(draftText);
+private _settings = GVAR(draftSettingsText);
 
 if (count _text > TEXT_MAX) exitWith {
     [format [LLSTRING(Warning_TooLong), count _text], "loss"] call FUNC(setHint);
@@ -47,11 +49,33 @@ if (count _text > TEXT_MAX) exitWith {
 private _source = GVAR(target) getOrDefault ["source", ""];
 private _priority = [1, 2] select (_source isEqualTo "server" && {GVAR(override)} && {GVAR(target) getOrDefault ["override", false]});
 
-if (!_force && {(call FUNC(targetValue)) isNotEqualTo GVAR(originSource)}) exitWith {
+// Someone else saved while the wizard was open, in either setting.
+private _conflict = ([RULES_SETTING, SETTINGS_SETTING] findIf {
+    ([_x] call FUNC(targetValue)) isNotEqualTo (GVAR(originSource) getOrDefault [_x, []])
+}) >= 0;
+
+if (!_force && {_conflict}) exitWith {
     [
         _display, LLSTRING(Conflict_Text), LLSTRING(Conflict_Overwrite), {[true] call FUNC(save)}, [],
         LLSTRING(Cancel), [[LLSTRING(Conflict_Replay), {call FUNC(replay)}]]
     ] call FUNC(confirm);
+};
+
+// What goes where: each setting that changed - or that its source lacks, or whose force switch was turned,
+// which changes how firmly it is stored. With nothing of that, the rules are written again all the same.
+private _overrideChanged = GVAR(override) isNotEqualTo GVAR(cleanOverride);
+private _jobs = [];
+
+if (_text isNotEqualTo GVAR(clean) || {_overrideChanged} || {[RULES_SETTING] call FUNC(sourceEmpty)}) then {
+    _jobs pushBack [RULES_SETTING, _text];
+};
+
+if (_settings isNotEqualTo GVAR(cleanSettings) || {_overrideChanged} || {[SETTINGS_SETTING] call FUNC(sourceEmpty)}) then {
+    _jobs pushBack [SETTINGS_SETTING, _settings];
+};
+
+if (_jobs isEqualTo []) then {
+    _jobs pushBack [RULES_SETTING, _text];
 };
 
 if (GVAR(mode) isEqualTo "menu") exitWith {
@@ -60,41 +84,62 @@ if (GVAR(mode) isEqualTo "menu") exitWith {
     };
 
     // Exactly what a line of a cba_settings.sqf says - CBA's own Import box takes the same.
-    private _line = format ["%1%2 = %3;", ["force ", "force force "] select (_priority >= 2), RULES_SETTING, str _text];
+    {
+        _x params ["_setting", "_value"];
 
-    [_line, _source] call cba_settings_fnc_import;
+        private _line = format ["%1%2 = %3;", ["force ", "force force "] select (_priority >= 2), _setting, str _value];
+
+        [_line, _source] call cba_settings_fnc_import;
+    } forEach _jobs;
 
     GVAR(clean) = _text;
+    GVAR(cleanSettings) = _settings;
     GVAR(cleanOverride) = GVAR(override);
 
     _display closeDisplay 1;
 };
 
-private _done = [RULES_SETTING, _text, _priority, _source, true] call CBA_settings_fnc_set;
+// Into CBA's setting. CBA says no when nothing would change, too: then the source holds that value already,
+// or it really failed.
+private _written = 0;
+private _failed = false;
 
-if (!_done) exitWith {
-    // CBA says no when nothing would change, too.
-    if ((call FUNC(targetValue)) isEqualTo [_text, _priority]) then {
-        GVAR(clean) = _text;
-        GVAR(sourceEmpty) = false;
-        GVAR(cleanOverride) = GVAR(override);
-        [GVAR(step)] call FUNC(showStep);
-        [LLSTRING(Save_Unchanged), "text2"] call FUNC(setHint);
+{
+    _x params ["_setting", "_value"];
+
+    private _done = [_setting, _value, _priority, _source, true] call CBA_settings_fnc_set;
+
+    if (_done) then {
+        _written = _written + 1;
+        GVAR(originSource) set [_setting, [_value, _priority]];
     } else {
-        [LLSTRING(Save_Failed), "loss"] call FUNC(setHint);
+        if (([_setting] call FUNC(targetValue)) isEqualTo [_value, _priority]) then {
+            GVAR(originSource) set [_setting, [_value, _priority]];
+        } else {
+            _failed = true;
+        };
     };
+} forEach _jobs;
+
+if (_failed) exitWith {
+    [LLSTRING(Save_Failed), "loss"] call FUNC(setHint);
 };
 
 // Stored there now - from an admin's machine it comes back from the server a moment later, so the source
 // is not asked again (fnc_sourceEmpty).
 GVAR(clean) = _text;
+GVAR(cleanSettings) = _settings;
 GVAR(sourceEmpty) = false;
 GVAR(cleanOverride) = GVAR(override);
 GVAR(origin) = _text;
-GVAR(originSource) = [_text, _priority];
+GVAR(originSettings) = _settings;
 GVAR(banner) = false;
 
 [GVAR(step)] call FUNC(showStep);
+
+if (_written == 0) exitWith {
+    [LLSTRING(Save_Unchanged), "text2"] call FUNC(setHint);
+};
 
 // Saved, but a mission that sets its own setup still wins over a server value of priority 1.
 private _message = switch (true) do {

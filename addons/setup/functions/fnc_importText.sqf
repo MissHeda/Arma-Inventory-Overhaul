@@ -1,9 +1,10 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Reads a shared setup pasted into the wizard: a bare rules text, or lines out of a cba_settings.sqf or
+ * Reads the rules of a shared setup pasted into the wizard: a bare rules text, or lines out of a cba_settings.sqf or
  * CBA's Export - then only the einv_items_rules line counts (read with CBA's own reader,
- * cba_settings_fnc_parse), the rest of the mods' settings are left alone. Its priority ("force") is not
+ * cba_settings_fnc_parse), the rest of the mods' settings are left alone; the server settings' own line is read by
+ * fnc_importSettings. Its priority ("force") is not
  * taken over: where and how this machine saves is the wizard's own choice.
  *
  * The text is cleaned the way the setting's own box cleans it (fnc_sanitize) before the rules engine
@@ -18,7 +19,7 @@
  * "tooLong" (its length) when the rules text is longer than TEXT_MAX <HASHMAP>
  *
  * Example:
- * ["force einv_items_rules = ""einv1 base=realism"";"] call einv_setup_fnc_importText;
+ * ["force einv_items_rules = ""einv1 base=default cell=4"";"] call einv_setup_fnc_importText;
  *
  * Public: No
  */
@@ -56,7 +57,7 @@ if (count _rules > TEXT_MAX) exitWith {createHashMapFromArray [["tooLong", count
 private _ast = [_rules] call EFUNC(items,parseRules);
 
 // Nothing the engine could use - another mod's line, any other text - is nothing to import either, not
-// the default the engine reads it as. A header alone (einv1 base=realism) is something: the engine takes it
+// the default the engine reads it as. A header alone (einv1 base=default) is something: the engine takes it
 // as the header when the first statement starts with einv and a number.
 private _first = (((_rules splitString ",") apply {trim _x}) select {_x isNotEqualTo ""}) param [0, ""];
 private _word = toLowerANSI ((_first splitString " ") param [0, ""]);

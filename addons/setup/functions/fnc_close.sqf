@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Closes the wizard - after asking, when the draft holds changes not saved: they would be gone. The card says
- * "You have unsaved changes." and offers three answers: "Save and close" (saves as Save at Review does - the
+ * "You have unsaved changes." and offers three answers: "Save and close" (saves as the footer's Save does - the
  * conflict question and the checks included - and closes once it is saved; only offered where this wizard may
  * save at all), "Close without saving" (in the loss colour) and "Keep editing", which Escape is as well.
  *
@@ -35,7 +35,7 @@ if (call FUNC(isDirty)) exitWith {
     } else {
         [
             _display, LLSTRING(Discard_Body), LLSTRING(Discard_Save), {
-                // Saved as Review's Save does it; closed once the draft is the saved one. A question on the way
+                // Saved as the footer's Save does it; closed once the draft is the saved one. A question on the way
                 // (someone else saved meanwhile) or a refusal leaves it open, with the reason in the hint.
                 [] call FUNC(save);
 

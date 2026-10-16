@@ -3,7 +3,8 @@
 /*
  * Author: Miss Heda
  * The left column of the Items and Containers steps: a search over the class index (fnc_buildIndex), by
- * class and by name, with wildcards (fnc_searchFilter), a switch between the list and the tree view, a row
+ * class and by name, with wildcards (fnc_searchFilter), a button beside it that opens the tree view where the
+ * picked class stands in its family (fnc_treeTop) - and, in the tree view, takes the list back -, a row
  * of chips for the kind, a switch for only the classes the own rules name, and under them the cards found
  * (fnc_drawResults) or the tree (fnc_drawTree). A click on a card picks the class for the editor beside
  * it; a click on a node of the tree picks it with everything built on it.
@@ -55,7 +56,8 @@ private _bottom = _top + _height - CARD_PAD_Y;
 // ----- Search, and the list or the tree -----
 
 private _searchH = UNIT * 1.2;
-private _viewW = SQUARE(UNIT * 7);
+private _font = _theme getOrDefault ["font", "PuristaMedium"];
+private _viewW = ACTION_W(LLSTRING(View_Tree),_searchH,true,_font) max ACTION_W(LLSTRING(View_List),_searchH,true,_font);
 private _search = [_display, _group, [_innerX, _cursorY, _innerW - _viewW - SQUARE(UNIT * 0.3), _searchH], _text, LLSTRING(Items_Search), _theme, {
     params ["_text", "", "_mode"];
 
@@ -81,23 +83,28 @@ private _search = [_display, _group, [_innerX, _cursorY, _innerW - _viewW - SQUA
 
 uiNamespace setVariable [QGVAR(searchEdit), _search select (count _search - 1)];
 
+// One button, no switch: in the list it opens the tree where the class picked stands among its relatives - so a
+// wrong pick is one click from the right class - and in the tree it takes the list back.
 [
-    _display, _group, [_innerX + _innerW - _viewW, _cursorY, _viewW, _searchH], [LLSTRING(View_List), LLSTRING(View_Tree)], [0, 1] select _treeView, _theme, {
-        params ["_index", "_mode"];
+    _display, _group, [_innerX + _innerW - _viewW, _cursorY, _viewW, _searchH], [LLSTRING(View_Tree), LLSTRING(View_List)] select _treeView,
+    [UI_TEX(icon_chevron_right_ca), UI_TEX(icon_chevron_left_ca)] select _treeView, _theme, {
+        params ["_mode", "_treeView"];
 
         private _state = GVAR(treeState) get _mode;
+        private _picked = GVAR(selection) getOrDefault [_mode, ""];
 
-        _state set ["on", _index == 1];
+        _state set ["on", !_treeView];
         _state set ["page", 0];
+        _state set ["focus", ""];
 
-        // The tree of the class picked.
-        if (_index == 1) then {
-            _state set ["root", toLowerANSI (GVAR(selection) getOrDefault [_mode, ""])];
+        if (!_treeView) then {
+            _state set ["root", ["", [_picked] call FUNC(treeTop)] select (_picked isNotEqualTo "")];
+            _state set ["focus", toLowerANSI _picked];
         };
 
         [GVAR(step)] call FUNC(showStep);
-    }, _mode
-] call FUNC(uiSegmented);
+    }, [_mode, _treeView], true, "", [LLSTRING(View_TreeTip), LLSTRING(View_ListTip)] select _treeView
+] call FUNC(uiAction);
 
 _cursorY = _cursorY + _searchH + UNIT * 0.35;
 

@@ -2,12 +2,12 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Finds one of the Start step's rules for everything else in a setup's rules (fnc_drawStart,
- * fnc_upsertAll): the text's rules with "all", which the engine asks after the preset, for what no other
+ * Finds one of the General step's rules for a kind of container in a setup's rules (fnc_kindRule,
+ * fnc_upsertKinds): the text's rules with "all", which the engine asks after the preset, for what no other
  * rule answers (einv_items_fnc_resolve). They are known by their selector, not by a class as the Items and
- * Containers steps know theirs (fnc_ownClassRules): "all" alone for the items, "all kind=..." with exactly
- * the kinds given - in whatever order they were typed - for the containers (ELSE_CONTAINER_KINDS). A rule
- * with "all" and any other condition is someone's own and is not one of them.
+ * Containers steps know theirs (fnc_ownClassRules): "all" alone, "all kind=uniform" with exactly the kinds given - in
+ * whatever order they were typed. A rule with "all" and any other condition is someone's own and is not one of
+ * them.
  *
  * Arguments:
  * 0: Rules, [[conditions, values], ...] as einv_items_fnc_parseRules lists them under "rules" <ARRAY>

@@ -1,4 +1,8 @@
 // Settings are ordered by topic, and within a topic numbers, then switches, then lists, then text boxes.
+//
+// What is the same for everyone (a server's or a mission's to decide) is registered with einv_main_fnc_addSetting: it
+// has no row in CBA's menu but a control on the setup wizard's General page, and its value comes from the one
+// text box einv_main_settings (addons/main). The variable, its name, its kind of value and its script are as they were.
 
 // ----- Nearby -----
 
@@ -8,10 +12,8 @@
     QGVAR(nearbyRange),
     "SLIDER",
     [LLSTRING(Setting_NearbyRange), LLSTRING(Setting_NearbyRange_Desc)],
-    [CBA_SETTINGS_EINV, LELSTRING(gui,SubCategory_Nearby)],
-    [1, 5, 3, 1],
-    1
-] call CBA_fnc_addSetting;
+    [1, 5, 3, 1]
+] call EFUNC(main,addSetting);
 
 // ----- Containers -----
 
@@ -21,10 +23,8 @@
     QGVAR(migrate),
     "CHECKBOX",
     [LLSTRING(Setting_Migrate), LLSTRING(Setting_Migrate_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Containers)],
-    true,
-    1
-] call CBA_fnc_addSetting;
+    true
+] call EFUNC(main,addSetting);
 
 // The same for everyone, like the rules: every machine has to agree on a container's compartments, or
 // a layout worked out on one would not fit on another. The older way to size containers by class -
@@ -57,30 +57,24 @@
     QGVAR(useUniform),
     "LIST",
     [LLSTRING(Setting_UseUniform), LLSTRING(Setting_UseUniform_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_UseFrom)],
     USE_OPTIONS,
-    1,
     {[] call FUNC(useRefresh)}
-] call CBA_fnc_addSetting;
+] call EFUNC(main,addSetting);
 
 [
     QGVAR(useVest),
     "LIST",
     [LLSTRING(Setting_UseVest), LLSTRING(Setting_UseVest_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_UseFrom)],
     USE_OPTIONS,
-    1,
     {[] call FUNC(useRefresh)}
-] call CBA_fnc_addSetting;
+] call EFUNC(main,addSetting);
 
 [
     QGVAR(useBackpack),
     "LIST",
     [LLSTRING(Setting_UseBackpack), LLSTRING(Setting_UseBackpack_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_UseFrom)],
     USE_OPTIONS,
-    1,
     {[] call FUNC(useRefresh)}
-] call CBA_fnc_addSetting;
+] call EFUNC(main,addSetting);
 
 #undef USE_OPTIONS

@@ -1,14 +1,14 @@
 /*
  * Author: Miss Heda
- * Checks that the shipped default ruleset (CfgEinvRulesets >> default) gives every item the size and
- * stack, and every container the compartments, that the code before the rules gave them - with
- * nothing set in the older tables and both sliders on their defaults - but for what 0.4.0 changed on
- * purpose, which the "before" below does too: grids STORAGE_COLS (10) wide instead of 8, at most
- * 400 cells instead of 320, and uniforms, vests and backpacks laid out from 120 % of their load
- * (default's grid=120%, a fifth more room) instead of all of it. Also checks that the default's
- * groups are a partition (an item in two of them would let a rule for one reach into the other; only
- * medical overlaps on purpose), that texts read and written stay the same, and that names survive
- * being written into a rule.
+ * Checks that the shipped default ruleset (CfgEinvRulesets >> default, the one preset there is) gives every
+ * item the size and stack, and every container the compartments, it is meant to: the sizes of "expected" below
+ * (rifles from 4x2 to 7x2, backpack tiles 4x4, 5x5 and 5x6, the rest as they always were), nothing stacking
+ * but the classes of the @stack_* groups with the number of their group, and containers laid out from 120 % of
+ * their load - a uniform one block 6 wide and 2 to 5 rows high, a vest pouches of 1x2 and 2x2, a backpack one
+ * near-square block, crates and vehicles as wide as the columns - with nothing set in the older tables and both
+ * sliders on their defaults. Also checks that the default's groups are a partition (an item in two of them
+ * would let a rule for one reach into the other; only medical and the stack groups overlap on purpose), that
+ * texts read and written stay the same, and that names survive being written into a rule.
  *
  * Not part of the mod. Copy it into a mission's folder - the test mission in .hemtt/missions will do -
  * start the mission with the mods to check (vanilla, ACE, a large pack), and run in the debug console:
@@ -18,14 +18,11 @@
  * It takes a few seconds with large packs. The summary shows as a hint, every finding goes to the RPT
  * and, with the summary, to the clipboard.
  *
- * Expected: no size, compartment or round-trip differences and no overlaps. Stack differences are
- * expected only in the "stackSmall" case: before, items of a single cell stacked by ten; now items of
- * kind item that weigh 10 or less do (@item_small). The two only differ for an item whose own mod
- * gives it another size than the rules would (einv_gridSize[]) without a stack of its own
- * (einv_stackSize). Compartment differences marked "caps" come from the new limits on what a mod's
- * einv_grids[] may ask for (24 compartments, 400 cells). Also checked: a text from before the preset
- * was renamed (base=tarkov) builds on realism, and canvases (grid=aaa/aba/aaa) read and write the same,
- * as does everything else (all > ..., "all" written first wherever it was typed).
+ * Expected: no size, stack, compartment or round-trip differences and no overlaps. Compartment differences
+ * marked "caps" come from the limits on what a mod's einv_grids[] may ask for (24 compartments, 400 cells). Also
+ * checked: a text that names a preset that is gone (base=tarkov, realism, weight) builds on the default, and
+ * canvases (grid=aaa/aba/aaa) read and write the same, as does everything else (all > ..., "all" written first
+ * wherever it was typed).
  */
 
 private _compiled = ["einv1 base=default", false] call einv_items_fnc_compileRules;
@@ -52,7 +49,7 @@ private _fnc_count = {
 private _storageCols = 10;
 private _maxCells = 400;
 
-// fnc_getSize: einv_gridSize[] in config, else by kind and mass.
+// The sizes the default ships: einv_gridSize[] in config, else by kind and mass.
 private _fnc_oldSize = {
     params ["_config", "_kind", "_mass", "_maxLoad", "_count"];
 
@@ -64,10 +61,10 @@ private _fnc_oldSize = {
         _size = switch (_kind) do {
             case "rifle": {
                 switch (true) do {
-                    case (_mass <= 55): {[3, 2]};
-                    case (_mass <= 90): {[4, 2]};
-                    case (_mass <= 150): {[5, 2]};
-                    default {[6, 2]};
+                    case (_mass <= 55): {[4, 2]};
+                    case (_mass <= 90): {[5, 2]};
+                    case (_mass <= 150): {[6, 2]};
+                    default {[7, 2]};
                 };
             };
             case "handgun": {[2, 1]};
@@ -94,9 +91,9 @@ private _fnc_oldSize = {
             case "binocular": {[2, 1]};
             case "backpack": {
                 switch (true) do {
-                    case (_maxLoad <= 160): {[3, 3]};
-                    case (_maxLoad <= 280): {[4, 4]};
-                    default {[4, 5]};
+                    case (_maxLoad <= 160): {[4, 4]};
+                    case (_maxLoad <= 280): {[5, 5]};
+                    default {[5, 6]};
                 };
             };
             case "map";
@@ -121,15 +118,25 @@ private _fnc_oldSize = {
     [(_size select 0) min _storageCols, _size select 1]
 };
 
-// fnc_getInfo's stacks: einv_stackSize in config, grenades 5, single-cell items einv_items_stackSmall.
+// The stacks the default ships: einv_stackSize in config, else the number of the @stack_* group the class is in,
+// else 1.
 private _fnc_oldStack = {
-    params ["_config", "_kind", "_size"];
+    params ["_config", "_kind", "_size", "_facts"];
 
     private _stack = switch (true) do {
         case (isNumber (_config >> "einv_stackSize")): {getNumber (_config >> "einv_stackSize")};
-        case (_kind == "grenade"): {5};
-        case (_kind in ["item", "kit"] && {_size isEqualTo [1, 1]}): {10};
-        default {1};
+        default {
+            private _number = 1;
+            private _memo = createHashMap;
+
+            {
+                if ([_facts, [[false, "@", "=", [format ["stack_%1", _x]]]], _compiled, _memo] call einv_items_fnc_matches) exitWith {
+                    _number = _x;
+                };
+            } forEach [20, 10, 5, 2];
+
+            _number
+        };
     };
 
     if (_kind in ["rifle", "handgun", "launcher", "binocular", "uniform", "vest", "backpack"]) then {
@@ -139,7 +146,7 @@ private _fnc_oldStack = {
     (floor _stack) max 1
 };
 
-// fnc_getBlocks: einv_grids[] in config, else einv_slots, else the load.
+// The compartments the default ships: einv_grids[] in config, else einv_slots, else the load.
 private _fnc_oldBlocks = {
     params ["_class", "_kind", "_config", "_maxLoad"];
 
@@ -152,7 +159,7 @@ private _fnc_oldBlocks = {
     private _cells = floor (getNumber (_config >> "einv_slots"));
     private _given = _cells > 0;
 
-    // Default's grid=120% for uniforms, vests and backpacks, as fnc_blocksFor works out a share.
+    // A fifth more than the load for uniforms, vests and backpacks (the built-in answer), as fnc_blocksFor works out a share.
     if (!_given) then {
         _cells = if (_kind in ["uniform", "vest", "backpack"]) then {
             ceil ((_maxLoad max 0) * 120 / 100 / (_cell max 1))
@@ -164,9 +171,6 @@ private _fnc_oldBlocks = {
     if (_cells <= 0) exitWith {[[_storageCols, 0]]};
 
     _cells = _cells min _maxCells;
-
-    private _hash = 0;
-    {_hash = _hash + _x} forEach toArray toLowerANSI _class;
 
     private _fnc_fill = {
         params ["_pattern", "_limit"];
@@ -203,15 +207,11 @@ private _fnc_oldBlocks = {
 
     switch (_kind) do {
         case "uniform": {
-            [[[[1, 2]], [[1, 1], [1, 2]]] select (_hash mod 2), 6] call _fnc_fill
+            // UNIFORM_COLS 6 wide, UNIFORM_ROWS_MIN 2 to UNIFORM_ROWS_MAX 5 rows high.
+            if (_given) then {[6] call _fnc_rows} else {[[6, ((ceil (_cells / 6)) max 2) min 5]]}
         };
         case "vest": {
-            [[
-                [[1, 2]],
-                [[1, 2], [1, 2], [1, 1], [1, 1]],
-                [[2, 2], [1, 2], [1, 2]],
-                [[1, 3], [1, 2], [1, 1]]
-            ] select (_hash mod 4), 16] call _fnc_fill
+            [[[1, 2], [2, 2]], 20] call _fnc_fill
         };
         case "backpack": {
             [(ceil sqrt _cells) min _storageCols] call _fnc_rows
@@ -239,8 +239,8 @@ private _classes = createHashMap;
     ["CfgVehicles", "getNumber (_x >> 'scope') == 2 && {getNumber (_x >> 'isBackpack') == 1 || {getNumber (_x >> 'maximumLoad') > 0}}"]
 ];
 
-// The default's groups, but medical, which overlaps on purpose.
-private _groupIds = (_compiled get "groupOrder") - ["medical"];
+// The default's groups, but medical and the stack groups, which overlap on purpose.
+private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stack_10", "stack_5", "stack_2"];
 
 {
     private _class = _y;
@@ -256,16 +256,14 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
     private _oldSize = [_config, _kind, _mass, _facts get "maxLoad", _facts get "rounds"] call _fnc_oldSize;
 
     if ((_info get "size") isNotEqualTo _oldSize) then {
-        ["size", format ["SIZE %1 (%2, mass %3): before %4, now %5 from %6", _class, _kind, _mass, _oldSize, _info get "size", (_info get "src") get "footprint"]] call _fnc_count;
+        ["size", format ["SIZE %1 (%2, mass %3): expected %4, now %5 from %6", _class, _kind, _mass, _oldSize, _info get "size", (_info get "src") get "footprint"]] call _fnc_count;
     };
 
     // Stack
-    private _oldStack = [_config, _kind, _oldSize] call _fnc_oldStack;
+    private _oldStack = [_config, _kind, _oldSize, _facts] call _fnc_oldStack;
 
     if ((_info get "stack") != _oldStack) then {
-        private _smallCase = _kind in ["item", "kit"] && {(_mass <= 10) isNotEqualTo (_oldSize isEqualTo [1, 1])};
-
-        [["stack", "stackSmall"] select _smallCase, format ["STACK%1 %2 (%3, mass %4, size %5): before %6, now %7 from %8", ["", " (stackSmall)"] select _smallCase, _class, _kind, _mass, _oldSize, _oldStack, _info get "stack", (_info get "src") get "stack"]] call _fnc_count;
+        ["stack", format ["STACK %1 (%2, mass %3, size %4): expected %5, now %6 from %7", _class, _kind, _mass, _oldSize, _oldStack, _info get "stack", (_info get "src") get "stack"]] call _fnc_count;
     };
 
     // Compartments
@@ -286,7 +284,7 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
 
             private _capped = count _oldBlocks > 24 || {_total > _maxCells};
 
-            [["blocks", "caps"] select _capped, format ["BLOCKS%1 %2 (%3, load %4): before %5, now %6 from %7", ["", " (caps)"] select _capped, _class, _kind, _facts get "maxLoad", _oldBlocks, _newBlocks, (_info get "src") get "grid"]] call _fnc_count;
+            [["blocks", "caps"] select _capped, format ["BLOCKS%1 %2 (%3, load %4): expected %5, now %6 from %7", ["", " (caps)"] select _capped, _class, _kind, _facts get "maxLoad", _oldBlocks, _newBlocks, (_info get "src") get "grid"]] call _fnc_count;
         };
     };
 
@@ -311,7 +309,7 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
 } forEach [
     "",
     "einv1 base=default",
-    "einv1 base=realism cell=4, @ak: kind=magazine class~545x39|762x39, @ak > size=1x2, class=ACE_fieldDressing+|ACE_packingBandage+ > stack=20",
+    "einv1 base=default cell=4, @ak: kind=magazine class~545x39|762x39, @ak > size=1x2, class=ACE_fieldDressing+|ACE_packingBandage+ > stack=20",
     "kind=grenade > stack=3 weight=0.4 name=Frag_%28M67%29, kind=vest class~platecarrier > grid=plate:20, kind=backpack load>280 > grid=120%",
     "einv1 base=none, @mag_rifle: @mag_rifle, @mag_rifle: class=30Rnd_65x39_caseless_green+, !addon~ace_ cat=medical > stack=1, class=B_Carryall_Base+ > grid=6x5+2x3+2x3, size=mass",
     "for=arifle_MX_F > size=1x2, well=CBA_556x45_STANAG > size=1x2, rounds>=100 mass>20 > size=2x3 grid=auto",
@@ -368,17 +366,19 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
     ["picture=my_mod/ui/nofile", ""]
 ];
 
-// A text from before the rename still loads, on the new preset.
-private _renamed = (["einv1 base=tarkov"] call einv_items_fnc_parseRules) get "base";
+// A text that names a preset that is gone still loads, on the default.
+{
+    private _renamed = (["einv1 base=" + _x] call einv_items_fnc_parseRules) get "base";
 
-if (_renamed isNotEqualTo "realism") then {
-    ["roundTrip", format ["ALIAS base=tarkov reads as base=%1, not realism", _renamed]] call _fnc_count;
-};
+    if (_renamed isNotEqualTo "default") then {
+        ["roundTrip", format ["ALIAS base=%1 reads as base=%2, not default", _x, _renamed]] call _fnc_count;
+    };
+} forEach ["tarkov", "realism", "weight"];
 
 // ----- Report -----
 
 private _summary = format [
-    "Default ruleset: %1 classes - %2 size and %3 stack differences, %4 stackSmall (expected), %5 compartment differences, %6 from the new caps, %7 overlapping groups, %8 round trips that changed. Warnings while compiling: %9.",
+    "Default ruleset: %1 classes - %2 size and %3 stack differences, %4 (not used), %5 compartment differences, %6 from the caps, %7 overlapping groups, %8 round trips that changed. Warnings while compiling: %9.",
     _counts get "classes", _counts get "size", _counts get "stack", _counts get "stackSmall", _counts get "blocks",
     _counts get "caps", _counts get "overlap", _counts get "roundTrip", count (_compiled get "warnings")
 ];

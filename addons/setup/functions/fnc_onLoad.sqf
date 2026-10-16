@@ -9,7 +9,7 @@
  * Everything is made inside the wizard's own controls group, never on the display itself: the inventory's
  * kit keeps what it makes on a display in a list its next build deletes (einv_gui_fnc_uiCreate).
  *
- * Opened by the pause menu's entry, nobody said how (fnc_open does): direct mode, at the first step.
+ * Opened by the pause menu's entry, nobody said how (fnc_open does): direct mode, at the first step, General.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -66,13 +66,12 @@ GVAR(selection) = createHashMap;
 GVAR(stepKey) = {false};
 GVAR(undo) = [];
 GVAR(redo) = [];
-GVAR(reviewDrafts) = false;
-GVAR(reviewText) = false;
-GVAR(exportMode) = 0;
-GVAR(textEdit) = false;
+GVAR(exportMode) = 2;
 GVAR(importText) = "";
 GVAR(draftPick) = "";
 GVAR(changeRefs) = createHashMap;
+GVAR(kindEdit) = createHashMap;
+GVAR(defaultCache) = createHashMap;
 GVAR(banner) = false;
 GVAR(hint) = ["", "text2"];
 GVAR(listState) = createHashMap;
@@ -85,19 +84,24 @@ GVAR(treeState) = createHashMap;
 GVAR(editScope) = createHashMap;
 GVAR(classImportText) = "";
 
-// The draft starts as what is in use there (fnc_getActive). What the source it saves to holds right now
-// is kept beside it: should that change before Save, someone else saved in between (fnc_save).
-private _active = call FUNC(getActive);
+// The draft starts as what is in use there (fnc_getActive): the rules and the server settings. What the source
+// it saves to holds right now is kept beside it: should that change before Save, someone else saved in
+// between (fnc_save).
+private _active = [] call FUNC(getActive);
 
 GVAR(origin) = _active;
-GVAR(originSource) = call FUNC(targetValue);
+GVAR(originSource) = [] call FUNC(targetValues);
 
 [_active] call FUNC(setDraft);
+[[SETTINGS_SETTING] call FUNC(getActive)] call FUNC(setSettingsDraft);
+
+GVAR(originSettings) = GVAR(draftSettingsText);
 
 // Taken from the setup in effect, it may not be stored where the wizard saves: Save is offered all the
 // same (fnc_sourceEmpty).
 GVAR(clean) = GVAR(draftText);
-GVAR(sourceEmpty) = call FUNC(sourceEmpty);
+GVAR(cleanSettings) = GVAR(draftSettingsText);
+GVAR(sourceEmpty) = [] call FUNC(sourceEmpty);
 
 // The pane, on whole pixels: every surface on it is see-through and must meet its neighbours exactly.
 private _root = _display ctrlCreate ["EINV_Group", -1];

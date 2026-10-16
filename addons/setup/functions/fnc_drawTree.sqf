@@ -13,6 +13,10 @@
  * family is found whose members share a hidden base nobody can pick (B_Carryall_Base). The tree starts at
  * the class picked in the list when the view is switched on (GVAR(treeState) "root", lowercase).
  *
+ * The tree view is opened by a button of the list (fnc_drawClassList), which starts it where the picked class stands
+ * in its family (fnc_treeTop) with that class ringed and its page - the first drawing finds it by GVAR(treeState)
+ * "focus" - turned to and scrolled to. "Go to picked" does the same again after the tree has moved away.
+ *
  * The search of the list filters the rows (wildcards too), and so does "only with own rules". The rows of
  * LIST_PAGE to a page are drawn, as the cards are.
  *
@@ -122,8 +126,9 @@ if (_root isNotEqualTo _picked && {_picked isNotEqualTo ""}) then {
 
         private _state = GVAR(treeState) get _mode;
 
-        _state set ["root", _picked];
+        _state set ["root", [_picked] call FUNC(treeTop)];
         _state set ["page", 0];
+        _state set ["focus", _picked];
 
         [] call FUNC(drawResults);
     }, [_mode, _picked], true, "", LLSTRING(Tree_ToPickedTip)] call FUNC(uiAction);
@@ -144,6 +149,21 @@ private _matches = _rows select {
 
     (!_ownOnly || {private _keys = _named getOrDefault [_lc, createHashMap]; (_ownKeys findIf {_x in _keys}) >= 0})
     && {[_filter, _lc + " " + toLower _title, _lc, _title] call FUNC(searchHit)}
+};
+
+// Opened for a class: the page it is on, and where on it. Asked once.
+private _focus = _state getOrDefault ["focus", ""];
+private _focusRow = -1;
+
+if (_focus isNotEqualTo "") then {
+    private _at = _matches findIf {(_x select 0) isEqualTo _focus};
+
+    if (_at >= 0) then {
+        _state set ["page", floor (_at / LIST_PAGE)];
+        _focusRow = _at mod LIST_PAGE;
+    };
+
+    _state set ["focus", ""];
 };
 
 private _total = count _matches;
@@ -174,6 +194,17 @@ private _footY = _height - _footH;
 private _list = [_display, "EINV_ScrollGroup", _box, [0, _cursorY, _width, _footY - UNIT * 0.2 - _cursorY]] call EFUNC(gui,uiCreate);
 
 _list setVariable [QGVAR(scrollId), "tree_" + _mode];
+
+// The class that was asked for is a few rows down: the list is scrolled so it is in view.
+if (_focusRow > 1) then {
+    [{
+        params ["_list", "_y"];
+
+        if (!isNull _list) then {
+            _list ctrlSetScrollValues [_y, -1];
+        };
+    }, [_list, (_focusRow - 1) * (TREE_ROW_H + UNIT * 0.2)], 0.1] call FUNC(defer);
+};
 
 if (_shown isEqualTo []) then {
     [_display, _list, [SQUARE(UNIT * 0.2), UNIT * 0.1, _width, UNIT * 0.8], LLSTRING(List_None), TEXT_SMALL, _muted, _font, 0] call EFUNC(gui,uiLabel);

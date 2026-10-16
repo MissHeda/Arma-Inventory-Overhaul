@@ -1,4 +1,8 @@
 // Settings are ordered by topic, and within a topic numbers, then switches, then lists, then text boxes.
+//
+// What is the same for everyone (a server's or a mission's to decide) is registered with einv_main_fnc_addSetting: it
+// has no row in CBA's menu but a control on the setup wizard's General page, and its value comes from the one
+// text box einv_main_settings (addons/main). The variable, its name, its kind of value and its script are as they were.
 
 // ----- Grids -----
 
@@ -17,22 +21,20 @@
     QGVAR(massPerCell),
     "SLIDER",
     [LLSTRING(Setting_MassPerCell), LLSTRING(Setting_MassPerCell_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Grids)],
     [2, 20, DEFAULT_MASS_PER_CELL, 0],
-    1,
-    {[] call FUNC(loadRules)}
-] call CBA_fnc_addSetting;
+    {[] call FUNC(loadRules)},
+    true
+] call EFUNC(main,addSetting);
 
 // Since the rules: the preset's small items (@item_small), as long as it is moved off its default.
 [
     QGVAR(stackSmall),
     "SLIDER",
     [LLSTRING(Setting_StackSmall), LLSTRING(Setting_StackSmall_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Grids)],
     [1, 50, DEFAULT_STACK_SMALL, 0],
-    1,
-    {[] call FUNC(loadRules)}
-] call CBA_fnc_addSetting;
+    {[] call FUNC(loadRules)},
+    true
+] call EFUNC(main,addSetting);
 
 // The setup: a short text of rules on top of a preset. The third value is CBA's sanitizer, run on
 // every key press in its row: a ";" would break CBA's own export and every cba_settings.sqf line

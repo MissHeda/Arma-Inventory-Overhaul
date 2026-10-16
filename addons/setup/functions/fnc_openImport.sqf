@@ -5,7 +5,10 @@
  * Opens the box to import a shared setup: paste a rules text or lines of a cba_settings.sqf into it with
  * Ctrl+V - a paste box, as CBA's own Import is one: it works for every player, where a script reading the
  * clipboard would not -, then take it instead of the own setup, or add its statements to the own ones
- * (fnc_importText). Either way it only changes the draft: Save is still to come, and Undo takes it back.
+ * (fnc_importText). The lines of a cba_settings.sqf or CBA's Export may carry the server settings as well
+ * (einv_main_settings, fnc_importSettings): added, the settings the text names are set and the others stay;
+ * instead of the own setup, the ones it does not name go back to their defaults. Either way it only changes the
+ * draft, rules and settings in one undo step: Save is still to come, and Undo takes it back.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -53,8 +56,10 @@ params ["_display", ["_anchor", [], [[]]]];
         };
 
         private _ast = [GVAR(importText)] call FUNC(importText);
+        private _settingsText = [GVAR(importText)] call FUNC(importSettings);
+        private _hasSettings = _settingsText isNotEqualTo "";
 
-        if (count _ast == 0) exitWith {
+        if (count _ast == 0 && {!_hasSettings}) exitWith {
             [LLSTRING(Import_Nothing), "loss"] call FUNC(setHint);
         };
 
@@ -63,36 +68,58 @@ params ["_display", ["_anchor", [], [[]]]];
             [format [LLSTRING(Warning_TooLong), _ast get "tooLong"], "loss"] call FUNC(setHint);
         };
 
-        private _imported = [[_ast] call EFUNC(items,writeRules)] call FUNC(statements);
-        private _warnings = _ast getOrDefault ["warnings", []];
+        private _imported = [[], []];
+        private _warnings = [];
 
-        if (_add) then {
-            // The own header stays; what the import says that the own rules do not, joins them.
-            ([GVAR(draftText)] call FUNC(statements)) params ["_head", "_statements"];
+        if (count _ast > 0) then {
+            _imported = [[_ast] call EFUNC(items,writeRules)] call FUNC(statements);
+            _warnings = _ast getOrDefault ["warnings", []];
 
-            private _text = (([_head] + _statements + ((_imported select 1) - _statements)) select {_x isNotEqualTo ""}) joinString ", ";
+            if (_add) then {
+                // The own header stays; what the import says that the own rules do not, joins them.
+                ([GVAR(draftText)] call FUNC(statements)) params ["_head", "_statements"];
 
-            // Together too long: the engine would read it as the bare default.
-            if (count _text > TEXT_MAX) exitWith {
-                _ast = createHashMapFromArray [["tooLong", count _text]];
+                private _text = (([_head] + _statements + ((_imported select 1) - _statements)) select {_x isNotEqualTo ""}) joinString ", ";
+
+                // Together too long: the engine would read it as the bare default.
+                if (count _text > TEXT_MAX) exitWith {
+                    _ast = createHashMapFromArray [["tooLong", count _text]];
+                };
+
+                private _merged = [_text] call EFUNC(items,parseRules);
+
+                _merged set ["warnings", +_warnings];
+                _ast = _merged;
             };
-
-            private _merged = [_text] call EFUNC(items,parseRules);
-            _merged set ["warnings", +_warnings];
-            _ast = _merged;
         };
 
         if ("tooLong" in _ast) exitWith {
             [format [LLSTRING(Warning_TooLong), _ast get "tooLong"], "loss"] call FUNC(setHint);
         };
 
+        // The server settings: set on top of the own ones, or instead of them.
+        private _values = nil;
+        private _count = 0;
+
+        if (_hasSettings) then {
+            ([_settingsText] call EFUNC(main,parseSettings)) params ["_named", "_settingWarnings"];
+
+            _warnings = _warnings + _settingWarnings;
+            _count = count _named;
+            _values = [createHashMap, +GVAR(draftSettings)] select _add;
+            _values merge [_named, true];
+        };
+
         call FUNC(closePopover);
 
-        [_ast] call FUNC(commit);
+        [_ast, _values] call FUNC(commitSetup);
 
         GVAR(importText) = "";
 
-        [format [LLSTRING(Import_Done), count (_imported select 1), count _warnings], ["gain", "accent"] select (_warnings isNotEqualTo [])] call FUNC(setHint);
+        [
+            format [LLSTRING(Import_Done), count (_imported select 1), _count, count _warnings],
+            ["gain", "accent"] select (_warnings isNotEqualTo [])
+        ] call FUNC(setHint);
     };
 
     uiNamespace setVariable [QGVAR(importEdit), _box select (count _box - 1)];

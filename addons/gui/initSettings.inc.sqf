@@ -1,15 +1,20 @@
 // Settings are ordered by topic, and within a topic numbers, then switches, then lists, then text boxes.
+//
+// What is the same for everyone (a server's or a mission's to decide) is registered with einv_main_fnc_addSetting: it
+// has no row in CBA's menu but a control on the setup wizard's General page, and its value comes from the one
+// text box einv_main_settings (addons/main). The variable, its name, its kind of value and its script are as they were.
 
 // ----- General -----
 
 // Each player's own eyes and screen: some find the pictures too small to make out. Read when a window
-// opens (fnc_getCell), so a change shows at the next one; capped where the columns would not fit.
+// opens (fnc_getCell), so a change shows at the next one; capped where the columns would not fit. A tenth
+// above the plain size by default: at 1 a one-cell tile shows two or three letters of an item's name.
 [
     QGVAR(cellScale),
     "SLIDER",
     [LLSTRING(Setting_CellScale), LLSTRING(Setting_CellScale_Desc)],
     [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
-    [CELL_SCALE_MIN, CELL_SCALE_MAX, 1, 1],
+    [CELL_SCALE_MIN, CELL_SCALE_MAX, 1.1, 1],
     0
 ] call CBA_fnc_addSetting;
 
@@ -82,10 +87,8 @@
     QGVAR(soundsWorld),
     "CHECKBOX",
     [LLSTRING(Setting_SoundsWorld), LLSTRING(Setting_SoundsWorld_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Sounds)],
-    true,
-    1
-] call CBA_fnc_addSetting;
+    true
+] call EFUNC(main,addSetting);
 
 // ----- Animation -----
 
@@ -94,10 +97,8 @@
     QGVAR(animation),
     "LIST",
     [LLSTRING(Setting_Animation), LLSTRING(Setting_Animation_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Animation)],
-    [[0, 1, 2], [LLSTRING(Setting_Animation_Off), LLSTRING(Setting_Animation_Looting), LLSTRING(Setting_Animation_Always)], 1],
-    1
-] call CBA_fnc_addSetting;
+    [[0, 1, 2], [LLSTRING(Setting_Animation_Off), LLSTRING(Setting_Animation_Looting), LLSTRING(Setting_Animation_Always)], 1]
+] call EFUNC(main,addSetting);
 
 // ----- Searching -----
 
@@ -106,47 +107,37 @@
     QGVAR(searchTime),
     "SLIDER",
     [LLSTRING(Setting_SearchTime), LLSTRING(Setting_SearchTime_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Searching)],
-    [0, 3, 0.4, 2],
-    1
-] call CBA_fnc_addSetting;
+    [0, 3, 0.4, 2]
+] call EFUNC(main,addSetting);
 
 [
     QGVAR(searchBodies),
     "CHECKBOX",
     [LLSTRING(Setting_SearchBodies), LLSTRING(Setting_SearchBodies_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Searching)],
-    true,
-    1
-] call CBA_fnc_addSetting;
+    true
+] call EFUNC(main,addSetting);
 
 // Living persons apart from bodies: a mission may want the dead searched, but not the comrade beside you.
 [
     QGVAR(searchPersons),
     "CHECKBOX",
     [LLSTRING(Setting_SearchPersons), LLSTRING(Setting_SearchPersons_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Searching)],
-    true,
-    1
-] call CBA_fnc_addSetting;
+    true
+] call EFUNC(main,addSetting);
 
 [
     QGVAR(searchContainers),
     "CHECKBOX",
     [LLSTRING(Setting_SearchContainers), LLSTRING(Setting_SearchContainers_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Searching)],
-    true,
-    1
-] call CBA_fnc_addSetting;
+    true
+] call EFUNC(main,addSetting);
 
 [
     QGVAR(searchGround),
     "CHECKBOX",
     [LLSTRING(Setting_SearchGround), LLSTRING(Setting_SearchGround_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Searching)],
-    false,
-    1
-] call CBA_fnc_addSetting;
+    false
+] call EFUNC(main,addSetting);
 
 // Each player's own: some open the window and keep walking keys under their fingers.
 [
@@ -166,28 +157,22 @@
     QGVAR(personNotify),
     "CHECKBOX",
     [LLSTRING(Setting_PersonNotify), LLSTRING(Setting_PersonNotify_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Persons)],
-    true,
-    1
-] call CBA_fnc_addSetting;
+    true
+] call EFUNC(main,addSetting);
 
 [
     QGVAR(personOpen),
     "LIST",
     [LLSTRING(Setting_PersonOpen), LLSTRING(Setting_PersonOpen_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Persons)],
-    [[ACCESS_EVERYONE, ACCESS_HELPLESS, ACCESS_NONE], [LLSTRING(Option_Everyone), LLSTRING(Option_Helpless), LLSTRING(Option_Unconscious)], 0],
-    1
-] call CBA_fnc_addSetting;
+    [[ACCESS_EVERYONE, ACCESS_HELPLESS, ACCESS_NONE], [LLSTRING(Option_Everyone), LLSTRING(Option_Helpless), LLSTRING(Option_Unconscious)], 0]
+] call EFUNC(main,addSetting);
 
 [
     QGVAR(personItems),
     "LIST",
     [LLSTRING(Setting_PersonItems), LLSTRING(Setting_PersonItems_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Persons)],
-    [[ACCESS_EVERYONE, ACCESS_HELPLESS, ACCESS_NONE], [LLSTRING(Option_Everyone), LLSTRING(Option_Helpless), LLSTRING(Option_LookOnly)], 0],
-    1
-] call CBA_fnc_addSetting;
+    [[ACCESS_EVERYONE, ACCESS_HELPLESS, ACCESS_NONE], [LLSTRING(Option_Everyone), LLSTRING(Option_Helpless), LLSTRING(Option_LookOnly)], 0]
+] call EFUNC(main,addSetting);
 
 // Not on a conscious soldier by default - as with ACE's disarming, a rifle comes out of the hands of
 // captives and the unconscious only.
@@ -195,10 +180,8 @@
     QGVAR(personWorn),
     "LIST",
     [LLSTRING(Setting_PersonWorn), LLSTRING(Setting_PersonWorn_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Persons)],
-    [[ACCESS_EVERYONE, ACCESS_HELPLESS, ACCESS_NONE], [LLSTRING(Option_Everyone), LLSTRING(Option_Helpless), LLSTRING(Option_Nobody)], 1],
-    1
-] call CBA_fnc_addSetting;
+    [[ACCESS_EVERYONE, ACCESS_HELPLESS, ACCESS_NONE], [LLSTRING(Option_Everyone), LLSTRING(Option_Helpless), LLSTRING(Option_Nobody)], 1]
+] call EFUNC(main,addSetting);
 
 // ----- Nearby -----
 
