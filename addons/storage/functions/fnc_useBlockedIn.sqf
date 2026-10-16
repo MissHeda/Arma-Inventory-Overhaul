@@ -28,10 +28,15 @@ private _in = [];
     private _kind = _x;
     private _container = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit] select _forEachIndex;
 
+    // In its cargo, or in the unit's hidden holder for it (Strict mode).
     if (
         !isNull _container
         && {([_class, _kind] call FUNC(useState)) isEqualTo "blocked"}
-        && {((itemCargo _container) findIf {_x == _class}) >= 0 || {((magazineCargo _container) findIf {_x == _class}) >= 0}}
+        && {
+            ((itemCargo _container) findIf {_x == _class}) >= 0
+            || {((magazineCargo _container) findIf {_x == _class}) >= 0}
+            || {(toLowerANSI _class) in ([_container] call FUNC(hiddenClasses))}
+        }
     ) then {
         _in pushBack _kind;
     };

@@ -148,3 +148,22 @@ PREP(throwState);
 PREP(throwSelect);
 PREP(throwGuard);
 PREP(throwTick);
+
+// Strict mode: what a setting on Strict keeps out of a unit's uniform, vest or backpack lives in a hidden
+// holder on the unit - a public variable, no object - and is shown as the container's own tiles all the
+// same (fnc_getContents). Op "strict" keeps holder and cargo in line.
+PREP(hiddenLists);
+PREP(hiddenWrite);
+PREP(hiddenAdd);
+PREP(hiddenAmmo);
+PREP(hiddenPayload);
+PREP(hiddenTake);
+PREP(hiddenPut);
+PREP(hiddenActive);
+PREP(hiddenRoute);
+PREP(hiddenCounts);
+PREP(hiddenClasses);
+PREP(hiddenReturn);
+PREP(hiddenDue);
+PREP(hiddenSweep);
+PREP(opStrict);

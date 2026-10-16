@@ -133,6 +133,12 @@ _list pushBack (GVAR(opened) select {!isNull (_x select 1)} apply {
     [_object, isNull _parent || {(everyContainer _parent) findIf {(_x select 1) isEqualTo _object} >= 0}]
 });
 
+// Strict mode's hidden holders of the people the window shows (einv_storage_hidden): a tile that went into
+// or came out of one changes no cargo the lists above read.
+_list pushBack ([GVAR(unit), GVAR(container), GVAR(secondary)] apply {
+    if (!isNull _x && {_x isKindOf "CAManBase"}) then {_x getVariable [QEGVAR(storage,hidden), []]} else {[]}
+});
+
 // A kit of Enhanced First Aid Kits the window shows changed - its contents, or the name a player gave
 // it - without any cargo changing (einv_compat_efak - only when that addon is loaded).
 if (!isNil QEFUNC(compat_efak,signature)) then {

@@ -92,3 +92,8 @@
 // again (fnc_useTrack), in seconds.
 #define THROW_TICK 0.25
 #define TRACK_TICK 1
+
+// Strict mode: how often every unit local here that carries a hidden holder is noted for a look at it
+// (fnc_hiddenSweep -> op "strict", fnc_opStrict), in seconds - the net under the events: a player who left,
+// a Zeus who let go, a setting switched away from Strict, a body whose death this machine did not see.
+#define STRICT_SWEEP 3

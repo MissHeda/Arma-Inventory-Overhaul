@@ -165,9 +165,18 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   container is taken back, the old one goes back into the weapon, and the fullest allowed one is loaded), and the throw
   key when only closed grenades are left (the key does nothing and says where to take one out; ACE Advanced Throwing is
   blocked through ACE's own throw block while nothing may be thrown, and the selected throwable moves off a closed one).
-  *Not enforced - a mod cannot change these:* ACE medical, field rations and every other mod that reads the unit's items
-  itself (they see the backpack's bandages as real items), what ACE Advanced Throwing picks to throw, a grenade of a type
-  that also lies in an open container (the game may take the copy from the closed one), a vehicle's guns, and scripts.
+  *Not enforced by Only whitelisted and Nothing - a mod cannot change these:* ACE medical, field rations and every other mod
+  that reads the unit's items itself (they see the backpack's bandages as real items), what ACE Advanced Throwing picks to
+  throw, a grenade of a type that also lies in an open container (the game may take the copy from the closed one), a vehicle's
+  guns, and scripts.
+  *Strict (hidden)*, the fourth option, is the full enforcement: the blocked items are kept out of the container altogether, in a
+  hidden holder on the unit (no object - a variable), so nothing but Enhanced Inventory can reach them. They still show as the
+  container's tiles with a small crossed eye, move, drop, go onto the ground and into crates, weigh (through ACE's virtual load)
+  and keep their places; whitelisted items stay in the container and work as usual; on death everything goes into the body, on
+  taking the backpack off into the backpack, while an arsenal is open into the containers. It can break mods or scripts that
+  expect the items in the container - loadouts saved outside an arsenal (`getUnitLoadout`, respawn scripts) do not contain them,
+  radios and kits in the holder are unknown to their mods, a Zeus editing you from afar does not see them - and may misbehave
+  on respawn or with Zeus. Use it only if you need it; the setting's text says the same.
 - **Multiplayer:** where things lie syncs by itself - every player sees the same arrangement, also of
   containers your scripts fill. Every change runs where the container is local and the server carries what
   moves between machines, so the server has to run the same version of Enhanced Inventory. Scripts can move

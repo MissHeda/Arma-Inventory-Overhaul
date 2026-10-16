@@ -41,6 +41,14 @@ if (isNull _unit) exitWith {};
 // The unit's own machine looks: told by an event when the loadout was set somewhere else.
 if (!is3DEN) then {
     if (local _unit) then {
+        // A loadout is the unit's whole gear: the old containers' contents are gone with them, and so is
+        // what Strict mode's hidden holder kept out of them (fnc_opStrict). A loadout saved in an arsenal
+        // holds everything - the holder gives everything back while one is open -, and what the new
+        // loadout brought that may not lie in a Strict container is hidden again a moment later.
+        if (!isNil {_unit getVariable QGVAR(hidden)}) then {
+            _unit setVariable [QGVAR(hidden), nil, true];
+        };
+
         [_unit] call FUNC(queueMigrate);
     } else {
         [QGVAR(migrateUnit), [_unit], _unit] call CBA_fnc_targetEvent;

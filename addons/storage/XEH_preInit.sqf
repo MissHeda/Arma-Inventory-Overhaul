@@ -20,7 +20,8 @@ GVAR(ops) = createHashMapFromArray [
     ["place", QFUNC(opPlace)], ["placeMany", QFUNC(opPlaceMany)], ["sort", QFUNC(opSort)],
     ["normalize", QFUNC(opNormalize)], ["move", QFUNC(opMove)], ["take", QFUNC(opTake)],
     ["put", QFUNC(opPut)], ["putGround", QFUNC(opPutGround)], ["takeOff", QFUNC(opTakeOff)],
-    ["putOn", QFUNC(opPutOn)], ["repack", QFUNC(opRepack)], ["migrate", QFUNC(opMigrate)]
+    ["putOn", QFUNC(opPutOn)], ["repack", QFUNC(opRepack)], ["migrate", QFUNC(opMigrate)],
+    ["strict", QFUNC(opStrict)]
 ];
 
 // Checks every op passes on the machine that runs it: CODE [op, args, requester, root] -> "" or a reason.
@@ -121,8 +122,11 @@ GVAR(hubTickAt) = 0;
 GVAR(serverVersion) = "";
 
 // Whether any of the "Use items from ..." settings limits something; set by them (fnc_useRefresh) and read
-// by everything that asks where an item may be used from, which has nothing to do while it is false.
+// by everything that asks where an item may be used from, which has nothing to do while it is false. And
+// whether any of them is on Strict: then what they block is kept out of the cargo, in a hidden holder on the
+// unit (fnc_hiddenRoute, fnc_opStrict), which costs this one read where it is not.
 GVAR(useActive) = false;
+GVAR(strictActive) = false;
 
 // Where the player's magazines lie, "creator:id" -> "uniform", "vest" or "backpack" (fnc_useTrack), so that
 // a reload the game did can be told to have come from a closed container (fnc_onReloaded); whether such a

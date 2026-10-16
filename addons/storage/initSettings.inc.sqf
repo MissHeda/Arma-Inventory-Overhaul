@@ -48,12 +48,17 @@
 // engine's own reload key is held to it (fnc_reloadGuard), a reload from the action menu is taken back
 // (fnc_onReloaded) and the throw key is held back when only closed grenades are left (fnc_throwGuard,
 // fnc_throwTick); what the hotbar, the window's menus and the padlocks on the tiles say follows fnc_useState.
+// Strict (hidden) goes further: what it blocks is kept out of the container altogether, in a hidden holder on
+// the unit (op "strict", fnc_opStrict), so nothing but this mod can reach it - the setting's text says what
+// that may break.
+#define USE_OPTIONS [[USE_ALL, USE_LIST, USE_NONE, USE_STRICT], [LLSTRING(Option_UseAll), LLSTRING(Option_UseList), LLSTRING(Option_UseNone), LLSTRING(Option_UseStrict)], 0]
+
 [
     QGVAR(useUniform),
     "LIST",
     [LLSTRING(Setting_UseUniform), LLSTRING(Setting_UseUniform_Desc)],
     [CBA_SETTINGS_EINV, LLSTRING(SubCategory_UseFrom)],
-    [[USE_ALL, USE_LIST, USE_NONE], [LLSTRING(Option_UseAll), LLSTRING(Option_UseList), LLSTRING(Option_UseNone)], 0],
+    USE_OPTIONS,
     1,
     {[] call FUNC(useRefresh)}
 ] call CBA_fnc_addSetting;
@@ -63,7 +68,7 @@
     "LIST",
     [LLSTRING(Setting_UseVest), LLSTRING(Setting_UseVest_Desc)],
     [CBA_SETTINGS_EINV, LLSTRING(SubCategory_UseFrom)],
-    [[USE_ALL, USE_LIST, USE_NONE], [LLSTRING(Option_UseAll), LLSTRING(Option_UseList), LLSTRING(Option_UseNone)], 0],
+    USE_OPTIONS,
     1,
     {[] call FUNC(useRefresh)}
 ] call CBA_fnc_addSetting;
@@ -73,7 +78,9 @@
     "LIST",
     [LLSTRING(Setting_UseBackpack), LLSTRING(Setting_UseBackpack_Desc)],
     [CBA_SETTINGS_EINV, LLSTRING(SubCategory_UseFrom)],
-    [[USE_ALL, USE_LIST, USE_NONE], [LLSTRING(Option_UseAll), LLSTRING(Option_UseList), LLSTRING(Option_UseNone)], 0],
+    USE_OPTIONS,
     1,
     {[] call FUNC(useRefresh)}
 ] call CBA_fnc_addSetting;
+
+#undef USE_OPTIONS

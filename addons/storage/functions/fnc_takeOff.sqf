@@ -49,6 +49,11 @@ private _payload = switch (true) do {
         ["item", _class, 1, []]
     };
     case (_base in ["uniform", "vest", "backpack"]): {
+        // What the hidden holder keeps for it (Strict mode) goes back into it first, so the snapshot carries
+        // it along - into the dropped backpack, as the player would expect (fnc_hiddenReturn; the holder is
+        // taken again should the item be put on again, fnc_opStrict).
+        [_unit, _base] call FUNC(hiddenReturn);
+
         private _snapshot = [_entry get "container", _class] call FUNC(snapshot);
 
         // removeBackpack, not removeBackpackGlobal: the global command takes the backpack off only a frame

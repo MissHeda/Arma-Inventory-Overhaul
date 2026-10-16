@@ -65,7 +65,9 @@ if (!isNull _root) exitWith {
 
     {
         private _container = _x;
-        private _classes = (getItemCargo _container) param [0, []];
+
+        // The cargo, and what Strict mode's hidden holder keeps for this container (lowercase classes).
+        private _classes = ((getItemCargo _container) param [0, []]) + ([_container] call EFUNC(storage,hiddenClasses));
 
         if ((_classes findIf {toLowerANSI _x isEqualTo _key}) >= 0) exitWith {
             _found = [[_container, ""], _container];

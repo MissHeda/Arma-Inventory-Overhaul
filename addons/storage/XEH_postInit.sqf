@@ -40,6 +40,23 @@
     }] call CBA_fnc_addClassEventHandler;
 } forEach ["Take", "Put", "InventoryClosed"];
 
+// Strict mode. What a setting on Strict keeps out of a unit's uniform, vest or backpack lives in a hidden
+// holder on the unit (op "strict", fnc_opStrict), asked for by the same look as the surplus
+// (fnc_requestMigrate). Every unit local here that carries a holder is noted every few seconds besides
+// (fnc_hiddenSweep): the net under the events - a player who left and whose unit stays as an AI, a Zeus who
+// let a unit go, a setting switched away from Strict, a body whose death this machine did not see.
+[{call FUNC(hiddenSweep)}, STRICT_SWEEP] call CBA_fnc_addPerFrameHandler;
+
+// On death the holder goes into the body's containers at once, where the body is local, so its looters find
+// everything (fnc_hiddenReturn). Not through a transaction: the body may change hands any moment.
+["CAManBase", "Killed", {
+    params ["_unit"];
+
+    if (local _unit && {!isNil {_unit getVariable QGVAR(hidden)}}) then {
+        [_unit] call FUNC(hiddenReturn);
+    };
+}] call CBA_fnc_addClassEventHandler;
+
 // A loadout set for a unit on another machine than the one that set it: its owner is told, and looks a
 // little later - the containers of the new loadout have to arrive there first (fnc_onLoadoutSet).
 [QGVAR(migrateUnit), {
@@ -91,6 +108,18 @@ if (hasInterface) then {
 
     [{[] call FUNC(useTrack)}, TRACK_TICK] call CBA_fnc_addPerFrameHandler;
     [{[] call FUNC(throwTick)}, THROW_TICK] call CBA_fnc_addPerFrameHandler;
+
+    // ACE Arsenal opening here on this machine's own unit: the hidden holder gives everything back to the
+    // containers at once, so the arsenal, its panel and the loadouts saved there see the real gear
+    // (fnc_hiddenReturn; fnc_hiddenActive keeps it so while it is open). Taken again once it closed
+    // (einv_arsenal_fnc_onClosed asks fnc_requestMigrate). The vanilla arsenal is caught by the sweep.
+    [QACEGVAR(arsenal,displayOpened), {
+        private _unit = missionNamespace getVariable ["ACE_player", player];
+
+        if (!isNull _unit && {local _unit}) then {
+            [_unit] call FUNC(hiddenReturn);
+        };
+    }] call CBA_fnc_addEventHandler;
 
     // A body's places must be public for its looters, also those written less than OWN_WRITE_DELAY
     // seconds before death.

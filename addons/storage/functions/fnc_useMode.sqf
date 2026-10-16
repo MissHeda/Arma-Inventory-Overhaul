@@ -2,16 +2,17 @@
 /*
  * Author: Miss Heda
  * What a setting allows to be used from one of the unit's containers: USE_ALL ("all", everything in it can
- * be used - the default), USE_LIST ("list", only items whitelisted for it, use= / einv_use) or USE_NONE
- * ("none", nothing, whitelisted or not). The settings are einv_storage_useUniform, einv_storage_useVest
- * and einv_storage_useBackpack; any other container (a crate, the ground, a body) is "all": nothing is used
- * from there.
+ * be used - the default), USE_LIST ("list", only items whitelisted for it, use= / einv_use), USE_NONE
+ * ("none", nothing, whitelisted or not) or USE_STRICT ("strict", as "list" - and what is blocked is kept out
+ * of the container's cargo altogether, in the unit's hidden holder, fnc_opStrict). The settings are
+ * einv_storage_useUniform, einv_storage_useVest and einv_storage_useBackpack; any other container (a crate,
+ * the ground, a body) is "all": nothing is used from there.
  *
  * Arguments:
  * 0: Container: "uniform", "vest" or "backpack" <STRING>
  *
  * Return Value:
- * "all", "list" or "none" <STRING>
+ * "all", "list", "none" or "strict" <STRING>
  *
  * Example:
  * ["backpack"] call einv_storage_fnc_useMode;

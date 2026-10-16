@@ -72,12 +72,15 @@
 // macro's arguments.
 #define USE_KINDS ["uniform", "vest", "backpack"]
 
-// The three answers of the settings that say what can be used from one of them (einv_storage_useUniform and
+// The four answers of the settings that say what can be used from one of them (einv_storage_useUniform and
 // the others, einv_storage_fnc_useMode): everything in the container can be used, only the items whitelisted
-// for it (use=, einv_use), nothing.
+// for it (use=, einv_use), nothing - and strict: only the whitelisted items, and the others are kept out of
+// the container altogether, in a hidden holder on the unit (einv_storage_fnc_opStrict), so nothing but this
+// mod can reach them.
 #define USE_ALL "all"
 #define USE_LIST "list"
 #define USE_NONE "none"
+#define USE_STRICT "strict"
 
 // The longest texture path a picture override may have (picture=, einv_picture; einv_items_fnc_parsePicture).
 #define PICTURE_MAX 260

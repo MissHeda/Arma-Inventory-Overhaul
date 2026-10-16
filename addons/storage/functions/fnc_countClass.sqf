@@ -38,4 +38,7 @@ private _held = 0;
     } forEach _classes;
 } forEach [getItemCargo _container, getWeaponCargo _container, getBackpackCargo _container];
 
+// And what the unit's hidden holder keeps for this container (Strict mode): the merged view fnc_getContents
+// shows.
 _held + ({toLowerANSI (_x select 0) isEqualTo _key} count (magazinesAmmoCargo _container))
+    + (([_container] call FUNC(hiddenCounts)) getOrDefault [_key, 0])

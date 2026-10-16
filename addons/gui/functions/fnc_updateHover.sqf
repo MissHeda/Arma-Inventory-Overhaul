@@ -549,7 +549,10 @@ switch (_shown param [0, ""]) do {
 
             switch ([_class, _useKind] call EFUNC(storage,useState)) do {
                 case "blocked": {
-                    [format [LLSTRING(Hint_UseBlocked), [_useKind] call EFUNC(storage,useKindName)], "warn"] call _fnc_add;
+                    // Kept out of the container altogether (Strict mode), or only not usable from it.
+                    private _hint = [LLSTRING(Hint_UseBlocked), LLSTRING(Hint_UseHidden)] select (_tile getOrDefault ["hidden", false]);
+
+                    [format [_hint, [_useKind] call EFUNC(storage,useKindName)], "warn"] call _fnc_add;
                 };
                 case "allowed": {
                     [format [LLSTRING(Hint_UseAllowed), [_useKind] call EFUNC(storage,useKindName)], "accent"] call _fnc_add;

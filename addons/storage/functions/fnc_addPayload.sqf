@@ -14,9 +14,15 @@
  * none or several, and what it held goes loose into this container instead - never into what may be a
  * sibling - and the RPT names it.
  *
+ * Strict mode: a magazine or item that the container's setting keeps out of it goes into the unit's hidden
+ * holder instead of the cargo (fnc_hiddenRoute, fnc_hiddenPut) - the window shows it as the container's
+ * all the same, and it always arrives whole. Raw puts it into the cargo whatever the settings say: for
+ * giving the holder back (fnc_hiddenReturn, fnc_opStrict).
+ *
  * Arguments:
  * 0: Container <OBJECT>
  * 1: Payload <ARRAY>
+ * 2: Raw - into the cargo, never into the hidden holder <BOOL> (default: false)
  *
  * Return Value:
  * What did not arrive, a payload of the same kind - [] when all of it did <ARRAY>
@@ -27,7 +33,7 @@
  * Public: No
  */
 
-params [["_container", objNull, [objNull]], ["_payload", [], [[]]]];
+params [["_container", objNull, [objNull]], ["_payload", [], [[]]], ["_raw", false, [false]]];
 
 if (_payload isEqualTo []) exitWith {[]};
 
@@ -35,6 +41,13 @@ if (_payload isEqualTo []) exitWith {[]};
 _payload = +_payload;
 
 if (isNull _container) exitWith {_payload};
+
+if (
+    !_raw && {(_payload select 0) in ["item", "magazine"]}
+    && {[_container, _payload param [1, ""]] call FUNC(hiddenRoute)}
+) exitWith {
+    [_container, _payload] call FUNC(hiddenPut)
+};
 
 // How many of a class the container holds at its top level, of every kind of cargo.
 private _fnc_held = {

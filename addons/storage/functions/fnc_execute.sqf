@@ -144,7 +144,8 @@ GVAR(executing) = true;
                 _units pushBack (_args param [0, objNull]);
             };
             case "putGround": {};
-            case "migrate": {
+            case "migrate";
+            case "strict": {
                 // The unit is the root; the containers it moves cargo between are the holders it touches.
                 private _unit = _args param [0, objNull];
 

@@ -86,9 +86,11 @@ private _containers = [];
     };
 } forEach (_ownSections + _lootSections);
 
+// The cargo, and what Strict mode's hidden holder keeps for the container (einv_storage_fnc_hiddenClasses):
+// a kit kept out of the backpack still opens from the window.
 private _cargo = _containers apply {
     private _container = _x;
-    private _classes = ((getItemCargo _container) param [0, []]) apply {toLowerANSI _x};
+    private _classes = (((getItemCargo _container) param [0, []]) apply {toLowerANSI _x}) + ([_container] call EFUNC(storage,hiddenClasses));
 
     [_container, _classes]
 };

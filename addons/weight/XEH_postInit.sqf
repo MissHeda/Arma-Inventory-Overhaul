@@ -79,6 +79,15 @@ if (!isNil QACEFUNC(advanced_fatigue,addDutyFactor)) then {
 
     if (isNull _unit) exitWith {};
 
+    // Strict mode's hidden holder changed (einv_storage_hidden): a tile moved out of a crate into the backpack
+    // lands in the holder and raises no loadout event, yet it weighs (fnc_getExtraLoad).
+    private _hidden = _unit getVariable [QEGVAR(storage,hidden), []];
+
+    if (_hidden isNotEqualTo GVAR(lastHidden)) then {
+        GVAR(lastHidden) = +_hidden;
+        call FUNC(queueVirtualLoad);
+    };
+
     private _state = [[_unit] call FUNC(getLoad), ([_unit] call FUNC(getLimits)) get "key", missionNamespace getVariable [QGVAR(effects), true]];
 
     if (_state isEqualTo GVAR(lastState)) exitWith {};

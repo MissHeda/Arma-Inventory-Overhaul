@@ -44,7 +44,8 @@ params [
 
 if (isNull _root || {!(_root isKindOf "CAManBase")} || {!alive _root} || {_root isEqualTo _requester}) exitWith {""};
 
-if (_op in ["normalize", "migrate"]) exitWith {""};
+// A unit's own gear between its own containers, and between them and its hidden holder (Strict mode).
+if (_op in ["normalize", "migrate", "strict"]) exitWith {""};
 
 private _tops = [uniformContainer _root, vestContainer _root, backpackContainer _root] select {!isNull _x};
 

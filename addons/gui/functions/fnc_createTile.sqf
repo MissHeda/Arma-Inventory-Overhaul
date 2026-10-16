@@ -217,8 +217,14 @@ if (_hidden) then {
         ] call FUNC(uiIcon));
     };
 
-    // The padlock of an item that cannot be used from here (einv_storage_fnc_useState): only the player's own
-    // gear is ever used from, and only while a setting limits something (one variable read).
+    // The marks of the settings "Use items from ...", in a row after the badge: the padlock of an item that
+    // cannot be used from here (einv_storage_fnc_useState) - only the player's own gear is ever used from, and
+    // only while a setting limits something (one variable read) -, and the crossed eye of one that Strict mode
+    // keeps out of the container, in the unit's hidden holder (the entry's "hidden", einv_storage_fnc_opStrict).
+    private _markSize = UNIT * 0.4;
+    private _markX = _left + _padX * 0.5 + ([0, SQUARE(UNIT * 0.42) + _padX * 0.5] select (_badge isEqualType "" && {_badge isNotEqualTo ""}));
+    private _markColor = _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]];
+
     if (
         missionNamespace getVariable [QEGVAR(storage,useActive), false]
         && {!(_entry getOrDefault ["preview", false])} && {!(_grid getOrDefault ["virtual", true])}
@@ -226,14 +232,18 @@ if (_hidden) then {
         private _useKind = [_grid getOrDefault ["container", objNull]] call EFUNC(storage,useKind);
 
         if (([_entry get "class", _useKind] call EFUNC(storage,useState)) isEqualTo "blocked") then {
-            private _lockSize = UNIT * 0.4;
-            private _lockX = _left + _padX * 0.5 + ([0, SQUARE(UNIT * 0.42) + _padX * 0.5] select (_badge isEqualType "" && {_badge isNotEqualTo ""}));
-
             _controls pushBack ([
-                _display, _parent, [_lockX, _top + _padY * 0.5, SQUARE(_lockSize), _lockSize], UI_TEX(icon_lock_ca),
-                _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]]
+                _display, _parent, [_markX, _top + _padY * 0.5, SQUARE(_markSize), _markSize], UI_TEX(icon_lock_ca), _markColor
             ] call FUNC(uiIcon));
+
+            _markX = _markX + SQUARE(_markSize) + _padX * 0.5;
         };
+    };
+
+    if (_entry getOrDefault ["hidden", false] && {!(_entry getOrDefault ["preview", false])}) then {
+        _controls pushBack ([
+            _display, _parent, [_markX, _top + _padY * 0.5, SQUARE(_markSize), _markSize], UI_TEX(icon_eye_off_ca), _markColor
+        ] call FUNC(uiIcon));
     };
 
     private _count = _entry getOrDefault ["count", 1];

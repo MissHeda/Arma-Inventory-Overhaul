@@ -768,12 +768,14 @@ backpack, "Backpack CLASS goes onto pile NETID".
 
 Three global CBA settings, topic "Use from containers" (`addons/storage/initSettings.inc.sqf`): `einv_storage_useUniform`,
 `einv_storage_useVest`, `einv_storage_useBackpack` - "Use items from the <container>" - each a list **Everything** (`USE_ALL`
-"all", the default and how the game works), **Only whitelisted** (`USE_LIST` "list") or **Nothing** (`USE_NONE` "none"). They
-decide what counts as *usable* while it lies in the player's own uniform, vest or backpack: a magazine to reload from, a
-grenade to throw, a bandage or a bottle, a kit, a radio. Items opt back in per container with the rule value `use=` (section 2;
-the wizard's "Use from" chips): on Only whitelisted an item counts when its `info "use"` lists that container, on Nothing nothing
-does, whitelisted or not. Only the kinds in `USE_ITEM_KINDS` (magazine, grenade, item, kit, radio) are ever limited - a rifle, an
-attachment or a uniform in the backpack is stowed, not used. A crate, the ground or a body are never limited.
+"all", the default and how the game works), **Only whitelisted** (`USE_LIST` "list"), **Nothing** (`USE_NONE` "none") or
+**Strict (hidden)** (`USE_STRICT` "strict": Only whitelisted, and what is blocked is kept out of the container's cargo altogether -
+the next section). They decide what counts as *usable* while it lies in the player's own uniform, vest or backpack: a magazine to
+reload from, a grenade to throw, a bandage or a bottle, a kit, a radio. Items opt back in per container with the rule value `use=`
+(section 2; the wizard's "Use from" chips): on Only whitelisted and Strict an item counts when its `info "use"` lists that
+container, on Nothing nothing does, whitelisted or not. Only the kinds in `USE_ITEM_KINDS` (magazine, grenade, item, kit, radio)
+are ever limited - a rifle, an attachment or a uniform in the backpack is stowed, not used. A crate, the ground or a body are never
+limited.
 
 - **The question** is `einv_storage_fnc_useState [class, container]` -> `""` (nothing limits it), `"allowed"` (whitelisted on a
   limited container) or `"blocked"`; `fnc_useKind [container object]` says which of the player's three a container is (`""` for any
@@ -836,9 +838,120 @@ attachment or a uniform in the backpack is stowed, not used. A crate, the ground
   they see a backpack's bandages as real items. A vehicle's guns. Scripts and other mods that use `addItem`/`removeItem`. The
   setting texts and the README say so.
 
+### Strict mode (`fnc_opStrict`, the hidden holder)
+
+The fourth answer of each "Use items from ..." setting, **Strict (hidden)** (`USE_STRICT`): everything Only whitelisted does, and
+what it blocks - items of the limited kinds (`USE_ITEM_KINDS`) that are not whitelisted for that container - does not lie in the
+container's cargo at all. Then nothing outside this mod can reach it: not ACE medical, rations, repack or any mod that reads the
+unit's items (their code is compiled final and cannot be filtered), not the engine's reload or throw, not ACE's advanced throwing,
+not a script's `items` or `magazines`. Everything else stays as it was: the window shows the items as the container's contents, they
+move, drop, weigh and keep their places; whitelisted items stay physically in the container and work. Mia's word for the setting's
+text: it can break things, say so - the setting's description does.
+
+**The holder is no object.** It is the public variable **`einv_storage_hidden`** on the unit: `[[uniform list, vest list, backpack
+list], [uniform container, vest container, backpack container]]`, each list `[[class, count, rounds], ...]` with -1 rounds for an
+item that is no magazine (`fnc_hiddenAmmo`; a magazine or grenade keeps one entry per rounds), and per list the container object
+its things were taken out of (`fnc_hiddenLists` reads it well-formed, `fnc_hiddenWrite` writes it public, empty it goes away).
+Weighed against the alternatives: a `GroundWeaponHolder_Scripted` or `WeaponHolderSimulated` attached to the unit and hidden would be
+an object in the world - found by `nearestObjects`, by every loot and cleanup script that walks weapon holders, by Zeus's "add all
+objects", kept by the engine in a plain holder of its own for the frame a backpack comes off, needing `hideObjectGlobal` on the
+server, an attach that vehicles and ragdolls can break, a deletion of its own on death, respawn and disconnect, and it would still
+exist when its unit is gone. A backpack-like container object has a load limit and all of that. A variable has none of it: it goes
+where the unit goes (locality, Zeus remote control, a player who left and whose unit stays), reaches every machine and every player
+who joins later (public object variables are synchronised to JIP), cannot be found by `fnc_getNearby`, `fnc_getGroundHolder`, ACE
+cargo, body search, drag and carry or the engine's garbage collector, and is deleted with the unit. Its things exist as data only -
+which is exactly what Strict asks for - and the kinds that are ever limited are all data: a class, a count, rounds. Weapons, clothing
+and nested containers are never limited and never in it.
+
+**Merged view.** `fnc_getContents` of a unit's uniform, vest or backpack (`fnc_getOwner` tells the unit and the kind) appends the
+holder's list of that kind after the cargo's entries, stacked like cargo (`_fnc_addStacked`), each entry marked `hidden`. The keys
+are the keys their cargo twins would have, so the places need no change when a tile goes into or comes out of the holder, the layout
+(`fnc_getLayout`), the room checks (`fnc_hasSpace`, `fnc_plan`), the mass of a section (`fnc_getMass`), `fnc_findEntry`, the Arsenal
+panel (through `fnc_getContents` and `fnc_countAll` + `fnc_hiddenCounts`), `fnc_countClass` and `fnc_addNew`, the EFAK kit finder
+(`einv_compat_efak_fnc_locate`, `fnc_getSections` + `fnc_hiddenClasses`) all see one container, and every machine the same one.
+The window draws a hidden tile with a crossed eye (`icon_eye_off_ca`) after the padlock (`fnc_createTile`) and the footer says
+"Hidden: kept out of the backpack, so nothing else can use it" (`fnc_updateHover`); `fnc_getSignature` watches the holders of the
+people shown, so a move into or out of one redraws.
+
+**Moves.** Two primitives route the physical item. `fnc_removeEntry` of an entry marked `hidden` takes it out of the holder
+(`fnc_hiddenTake`: the owner's list of that kind, the entry of that class and rounds, at most as many as are there; written public
+at once; noted "out" in the journal like any take). `fnc_addPayload [container, payload, raw]` asks `fnc_hiddenRoute [container,
+class]` first - a unit's container, its setting Strict, the holder in force for the unit (`fnc_hiddenActive`: alive, `isPlayer`, not
+in Eden, no arsenal open on this machine), the class `"blocked"` by `fnc_useState`, and the holder's list of that kind empty or
+taken out of this very container - and puts a `magazine` or `item` payload into the holder instead (`fnc_hiddenPut`: adds to the
+list, records the container, writes public; always arrives whole). `raw` skips the route: for giving the holder back. `fnc_opPut`
+marks the tile it adds to its view the same way. So every path that already existed works unchanged: a drag into a Strict backpack
+from a crate goes physically out of the crate and into the holder; a drag out of the backpack goes out of the holder and physically
+onto the ground, into a crate, into a slot; a quick move between the unit's own containers goes list to cargo or cargo to list by the
+target's whitelist; the Arsenal's adds, settlement's "back where it came from" and `fnc_moveEntry` all go through the same two
+functions. Counts are verified where the engine is involved (before and after, as always) and inherent where the list is.
+
+**Reconcile - op `strict [unit]`** (`fnc_opStrict`, root the unit, holders its three containers, in `einv_storage_ops`; the person
+guard lets it through like `migrate`, `fnc_execute` walks the containers and drops their views). Asked for by the same look as the
+surplus: `fnc_requestMigrate` puts `["strict", [unit]]` in front of `["migrate", [unit]]` when `fnc_hiddenDue` says the holder and
+the cargo disagree with the settings - the holder keeps things of a kind that is not Strict any more or while the holder is not in
+force; a list taken out of a container that is not the one worn now; a hidden entry whitelisted meanwhile; a blocked item lying in
+a Strict container's cargo (a script's `addItem`, a loadout, ACE, the engine). The triggers are the surplus's (`fnc_queueMigrate`:
+the player's loadout and unit events, `Take`/`Put`/`InventoryClosed`, loadouts, changed rules, the window's drift look, both
+arsenals closing) plus a sweep every `STRICT_SWEEP` 3 s over every unit and body local here that carries a holder
+(`fnc_hiddenSweep`; also run when a setting changes, `fnc_useRefresh`). Per container, in order: (1) *out of the holder* - what
+no longer belongs there goes back into the container raw and verified; a list whose recorded container is not the one worn now
+follows that container when it is still an object anywhere (the dropped backpack gets its things, as it got its cargo) and is gone
+with it when it was deleted (an RPT line; the cargo was gone with it as well - a `setUnitLoadout` replaced it); with no container of
+the kind another of the unit's takes it, else a pile at its feet; (2) *into the holder* - every blocked tile in a Strict container's
+cargo is taken out (`fnc_removeEntry`) and put in again (`fnc_addPayload`, which routes). The holder is written on the unit after
+every step and public once at the end, so a script error cannot give anything back twice or hide it twice; the phase is journaled
+like any other, so the hub never runs it twice. Nothing in Eden.
+
+**Moments the op cannot wait for** - `fnc_hiddenReturn [unit, kinds]`, a synchronous raw return where the unit is local, written
+after each kind: **death** (`Killed` on `CAManBase`, every machine, where the body is local: the body's containers hold everything,
+so looters find it; the body may change hands any moment, so no transaction), **a uniform, vest or backpack coming off**
+(`fnc_takeOff` returns that kind before its snapshot, so the dropped backpack carries its hidden things), **ACE Arsenal opening**
+(`ace_arsenal_displayOpened` on the own unit: the arsenal, its panel and the loadouts saved there see the real gear; `fnc_hiddenActive`
+keeps the holder out of force while any arsenal display is open, the vanilla one is caught by the sweep, and `fnc_onClosed` /
+`fnc_biLeaveAlone` ask `fnc_requestMigrate` after the close, which hides again).
+
+**Edge cases, decided.**
+
+- *Respawn:* the body got everything back at death; the new unit starts without a holder and hides what its loadout brought a moment
+  later (the unit event queues it). A loadout saved with `getUnitLoadout` or `CBA_fnc_getLoadout` **outside an arsenal** does not
+  contain hidden items - they are in no cargo -, so a mission that saves loadouts on its own and gives them back at respawn loses
+  them; one saved in an arsenal has them. Not injected into `CBA_loadoutGet` on purpose: a loadout that carried them and was set
+  with `setUnitLoadout` while the holder still kept them would double them.
+- *A loadout set by CBA (`CBA_loadoutSet`, local unit):* the holder is discarded (`fnc_onLoadoutSet`) - a loadout is the unit's whole
+  gear, the old containers' contents are gone with them, and the new one's blocked items are hidden a moment later. Set by plain
+  `setUnitLoadout` (a script, Zeus's vanilla arsenal): no event; the op finds the recorded containers deleted and discards the lists
+  (case 1 above) - the same outcome, a tick later. Should the engine ever keep a container object across a loadout set, the old
+  hidden things stay with it: the player has more than the loadout says, never less.
+- *Disconnect:* a unit deleted at disconnect takes its variable with it, as it takes its cargo. A unit kept as an AI is server-local
+  and `isPlayer` false: the server's sweep returns everything into its containers within `STRICT_SWEEP`. Nothing to do on the
+  leaving client, which gets no reliable moment.
+- *Zeus remote control:* the unit's owner changes; the variable is already everywhere; `isPlayer` stays true; the Zeus's machine runs
+  the op through the hub as for any unit that is not `player`. When the Zeus lets go the unit is an AI again and the owner's sweep
+  returns the holder. A Zeus editing a remote player's loadout through an arsenal on the Zeus's machine sees that player's cargo
+  without the hidden items (the arsenal is not open on the owner's machine).
+- *Locality change mid-transaction, JIP, the hub:* the holder is written only by the owner inside its ops; a phase answered by the
+  journal is never run twice; a public object variable reaches a new owner before any phase for it (the hub waits `LOCALITY_SETTLE`)
+  and a JIP player with the object.
+- *Weight:* `einv_weight_fnc_getExtraLoad` adds the whole rules mass of every hidden entry (not only the override's difference, since
+  no cargo weighs it) to the virtual load ACE carries, and the tier look (`TIER_CHECK_INTERVAL`) queues an update when the holder
+  changed, since a move from a crate into the holder raises no loadout event. The section header's weight counts the merged entries.
+- *Kits and radios:* a hidden EFAK kit still opens from the window (the kit finder sees the holder) and its contents live with EFAK
+  by the kit's class; EFAK's own interactions do not see it, which is the point. A hidden TFAR or ACRE radio is unknown to its mod
+  while hidden (settings are kept by class by those mods; untested whether either reclaims a radio nobody carries).
+- *A `migrate` and a `strict` op in one phase:* strict first; hidden tiles occupy cells in the merged view, so the surplus is
+  computed on the same picture every machine draws.
+
+**What Strict still cannot cover.** Loadouts read outside an arsenal (above). A mod that writes into the container with the engine's
+commands sees its item for up to `MIGRATE_DELAY` + a tick before the op hides it (ACE could use a bandage in that window). A phase
+that hits a script error between `fnc_hiddenPut`'s write and the journal's "in" note doubles that one item (same frame; the
+settlement puts the payload down as well). Whitelisted items are physical and as reachable as ever. A vehicle's guns. Untested in
+the game, like the rest of Use from containers.
+
 ### Public functions and tables
 
 Public: `einv_storage_fnc_useState`, `fnc_useKind`, `fnc_useMode`, `fnc_useCarried`, `fnc_useBlockedIn`, `fnc_useKindName`,
+`fnc_hiddenCounts`, `fnc_hiddenClasses`,
 `einv_storage_fnc_request`, `fnc_moveEntry`, `fnc_equip`, `fnc_unequip`, `fnc_getEquipment`, `fnc_getNearby`,
 `fnc_readPlaces`, `fnc_rootOf`, `fnc_dumpPlaces`, `fnc_addNew`. Other addons extend the storage only through tables they fill in
 preInit: `einv_storage_ops` (op name -> function name), `einv_storage_guards`, `einv_storage_carryVariables` and
@@ -1301,7 +1414,9 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   from there (`einv_storage_fnc_useState` is "blocked") wears a small padlock (`icon_lock_ca`) in its top left corner, beside the
   window's own badge if it has one (`fnc_createTile`; never in the wizard's preview), and its footer hint says "Cannot be used from
   the backpack", or - on a limited container where the item is whitelisted - "Whitelisted: can be used from the backpack"
-  (`fnc_updateHover`). The context menu leaves out what would use it: the hotbar's bind row (it refuses, section 7), Open radio and Use
+  (`fnc_updateHover`). A tile the Strict setting keeps in the unit's hidden holder (the entry's `hidden`, section 3, Strict mode)
+  wears a crossed eye (`icon_eye_off_ca`) after the padlock, and the hint says "Hidden: kept out of the backpack, so nothing else
+  can use it"; nothing else about it looks different. The context menu leaves out what would use it: the hotbar's bind row (it refuses, section 7), Open radio and Use
   as active radio, and CBA rows that use the item up (`fnc_cbaOptions`: the `consume` flag on `UNIFORM_CONTAINER`,
   `VEST_CONTAINER`, `BACKPACK_CONTAINER`). Moving, equipping, loading into a weapon and dropping are never limited.
 - **Hints:** `fnc_updateHover` names what the mouse is on in the footer; `fnc_showHint [text, colourKey]`; `fnc_flashHint [reason,
@@ -2098,7 +2213,7 @@ stringtables are wrapped as BRIEFING asks.
 | `einv_storage_migrate` | CHECKBOX | global | on | move a unit's surplus (overflow) on to its next container with room (section 3, Surplus) |
 | `einv_storage_containerTable` | EDITBOX | global | "" | `class:N` or `class:WxH+WxH`; wins over the text |
 | `einv_storage_nearbyRange` | SLIDER 1 to 5 | global | 3 | m, how far crates and piles count as nearby |
-| `einv_storage_useUniform`, `useVest`, `useBackpack` | LIST | global | `all` | "Use items from the uniform / vest / backpack": `all` Everything, `list` Only whitelisted (items with `use=` for it), `none` Nothing; what the padlocks, the hotbar, the window's use rows and the reload key honour (section 3, Use from containers) |
+| `einv_storage_useUniform`, `useVest`, `useBackpack` | LIST | global | `all` | "Use items from the uniform / vest / backpack": `all` Everything, `list` Only whitelisted (items with `use=` for it), `none` Nothing, `strict` Strict (hidden) - Only whitelisted, and the blocked items are kept out of the cargo in the unit's hidden holder; what the padlocks, the hotbar, the window's use rows and the reload key honour (section 3, Use from containers and Strict mode) |
 | `einv_gui_cellScale` | SLIDER 0.8 to 1.3 | client | 1 | tile scale: the cell size, capped where the columns no longer fit; next opening |
 | `einv_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
 | `einv_gui_cameraDefault` | LIST | client | `soldier` | the camera as the window opens: `soldier` (third person), `off` (first person) |
@@ -2154,10 +2269,12 @@ guard or carried variable in the storage's tables (section 3).
   items itself (they see the backpack's bandages as real items), what ACE's advanced throwing selects, a grenade of a class that
   also lies in an open container (the game may take the closed copy), a vehicle's guns, and scripts take from any container. A
   reload that was undone shows its animation and the magazine's return. Untested in the game.
-  *Possible later design:* full enforcement needs the closed items to be kept outside the unit's containers altogether - for example
-  in a hidden holder object that the window shows as the backpack's (or vest's, uniform's) contents. What is not in the unit's
-  cargo cannot be read by ACE, other mods or the engine's reload and throw. It would also change what `magazines`, `items` and the
-  loadout commands report, weight, and every mod that expects the gear in the unit; not done.
+  **Strict (hidden)** is the full enforcement: the blocked items are kept out of the unit's containers altogether, in a hidden holder
+  (section 3, Strict mode), so nothing outside this mod reaches them. Its own limits: a loadout read outside an arsenal
+  (`getUnitLoadout`, `CBA_fnc_getLoadout`, a mission's respawn loadout) does not contain them; a mod that adds into the container sees
+  its item for a moment before the op hides it; a Zeus editing a remote player through an arsenal on the Zeus's machine does not see
+  them; radios and kits in the holder are unknown to their mods while hidden; whitelisted items stay physical and reachable. The
+  setting's text says it can break mods and scripts that expect the items in the container. Untested in the game.
 - **Transactions and multiplayer.** A client's connection dropping inside one send batch can lose a payload it took, or settle a
   put again (the hub names it in the RPT). Changes outside this machinery - ACE medical treatment, EFAK's own pouch, the engine's
   scroll-menu actions, scripts - are not serialised with ours; a script error in our own code exactly between an engine change and

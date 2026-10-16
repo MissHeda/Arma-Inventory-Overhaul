@@ -36,4 +36,10 @@ if (isNull _container) exitWith {_counts};
     _counts set [_key, (_counts getOrDefault [_key, 0]) + 1];
 } forEach (magazinesAmmoCargo _container);
 
+// What Strict mode's hidden holder keeps for this container: the merged view the storage shows
+// (einv_storage_fnc_hiddenCounts).
+{
+    _counts set [_x, (_counts getOrDefault [_x, 0]) + _y];
+} forEach ([_container] call EFUNC(storage,hiddenCounts));
+
 _counts

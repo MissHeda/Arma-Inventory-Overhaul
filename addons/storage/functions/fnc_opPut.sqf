@@ -248,6 +248,7 @@ if (_rest isEqualTo [] && {_type in ["weapon", "magazine"] || {_type isEqualTo "
         ["capacity", ([_class] call EFUNC(items,getInfo)) getOrDefault ["capacity", 0]],
         ["attachments", _probe get "attachments"],
         ["container", objNull],
+        ["hidden", [_to, _class] call FUNC(hiddenRoute)],
         ["block", _spot param [2, -1]],
         ["col", _spot param [0, 0]],
         ["row", _spot param [1, 0]],

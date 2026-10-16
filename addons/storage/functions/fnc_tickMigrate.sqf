@@ -34,9 +34,11 @@ for "_n" from 1 to MIGRATE_PER_TICK do {
 
     if (isNull _unit) then {continue};
 
+    // Under an open arsenal the surplus waits and the unit is looked at again (fnc_requestMigrate asks only
+    // for Strict mode's holder then, which gives everything back for the arsenal).
     if (ARSENAL_OPEN) then {
         [_unit, MIGRATE_WAIT, _tries, _requester] call FUNC(queueMigrate);
-    } else {
-        [_unit, _requester, _tries] call FUNC(requestMigrate);
     };
+
+    [_unit, _requester, _tries] call FUNC(requestMigrate);
 };
