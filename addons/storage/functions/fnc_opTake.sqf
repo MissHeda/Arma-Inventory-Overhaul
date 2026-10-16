@@ -98,10 +98,16 @@ if (_weapon || {_wearable && {({toLowerANSI (_x select 0) isEqualTo _lower} coun
     _entry set ["claimed", true];
 
     for "_j" from (_opIndex + 1) to (count _ops - 1) do {
-        (_ops select _j) params [["_name", "", [""]], ["_jArgs", [], [[]]]];
+        // Only a later take is of interest; another op's arguments may be no array at all (sort takes a
+        // holder and an order), so they are never read as one.
+        private _name = (_ops select _j) param [0, ""];
+        private _jArgs = (_ops select _j) param [1, []];
+
+        if (_name isNotEqualTo "take" || {!(_jArgs isEqualType [])}) then {continue};
+
         _jArgs params [["_jFrom", objNull, [objNull, ""]], ["_jArray", [], [[]]]];
 
-        if (_name isEqualTo "take" && {_jFrom isEqualTo _from} && {toLowerANSI (_jArray param [0, ""]) isEqualTo _lower}) then {
+        if (_jFrom isEqualTo _from && {toLowerANSI (_jArray param [0, ""]) isEqualTo _lower}) then {
             _jArray params ["", "", "", "", "", "", ["_col", -1, [0]], ["_row", -1, [0]], "", "", ["_block", -1, [0]], ["_key", "", [""]]];
 
             if (_key isEqualTo "") then {
