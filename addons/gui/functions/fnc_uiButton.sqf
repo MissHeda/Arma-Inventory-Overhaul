@@ -16,8 +16,9 @@
  * less than the engine draws, and a left-aligned label starts where the measured text would be centred. A
  * "centred" button lets the engine do the centring instead: the label is as wide as the room between the
  * paddings (as wide as what is left of it beside an icon, which keeps to the left padding), aligned in
- * the middle, and starts above the button's middle by TEXT_MID of its font height, so the line of capitals
- * lies in the middle of the button's height too. fnc_buttonWidth gives the width that fits such a button.
+ * the middle, in a box as high as the text needs (TEXT_MID of its font height either side of the button's
+ * middle), so the line of capitals lies in the middle of the button's height too. fnc_buttonWidth gives the
+ * width that fits such a button.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -97,10 +98,13 @@ if (_centred) then {
     };
 
     if (_caption isNotEqualTo "" && {_labelW > 0}) then {
+        // A box as high as the text needs, middle on the button's middle: the line sits in it the same
+        // whether the engine draws it from the box's top or centres it in the box - in a box as high as the
+        // button the second put a larger label (the card of fnc_confirmClose) well below the middle.
         private _labelTop = _top + _height / 2 - TEXT_MID * _size;
 
         _controls pushBack ([
-            _display, _parent, [_labelX, _labelTop, _labelW, _top + _height - _labelTop],
+            _display, _parent, [_labelX, _labelTop, _labelW, TEXT_MID * _size * 2],
             [_caption, _labelW, _font, _size] call FUNC(fitText), _size, _ink, _font, 2
         ] call FUNC(uiLabel));
     };

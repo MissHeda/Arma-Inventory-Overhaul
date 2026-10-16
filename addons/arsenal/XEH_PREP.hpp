@@ -10,6 +10,7 @@ PREP(hooks);
 PREP(layout);
 PREP(footer);
 PREP(onFrame);
+PREP(hoverConfirm);
 PREP(onMouse);
 PREP(onClick);
 PREP(onWheel);

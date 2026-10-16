@@ -161,13 +161,16 @@ private _buttonW = SQUARE(UNIT * 9);
 private _gap = SQUARE(UNIT * 0.5);
 private _left = _cardX + (_cardW - _buttonW * 2 - _gap) / 2;
 
-[_display, _group, [_left, _y, _buttonW, _buttonH], "keep", LLSTRING(Confirm_Keep), "", _theme, {
+private _keep = [_display, _group, [_left, _y, _buttonW, _buttonH], "keep", LLSTRING(Confirm_Keep), "", _theme, {
     [] call FUNC(closeConfirm);
 }, false, -1, true] call EFUNC(gui,uiButton);
 
-[_display, _group, [_left + _buttonW + _gap, _y, _buttonW, _buttonH], "remove", LLSTRING(Confirm_Remove), "", _removeTheme, {
+private _remove = [_display, _group, [_left + _buttonW + _gap, _y, _buttonW, _buttonH], "remove", LLSTRING(Confirm_Remove), "", _removeTheme, {
     [] call FUNC(answerConfirm);
 }, false, -1, true] call EFUNC(gui,uiButton);
+
+// The hit areas come last; fnc_hoverConfirm lights them up from the mouse every frame as well.
+uiNamespace setVariable [QGVAR(confirmButtons), [_keep deleteAt (count _keep - 1), _remove deleteAt (count _remove - 1)]];
 
 // The keys are held by fnc_onAceKey; the focus leaves ACE's lists and fields.
 ctrlSetFocus _glass;

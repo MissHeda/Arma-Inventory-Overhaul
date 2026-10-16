@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * Creates a button the way the inventory draws them (einv_gui_fnc_uiButton): a flat surface with an icon
- * and a label centred together, lighting up under the mouse - but with the wizard's own way to run its
+ * and a label centred in the middle, lighting up under the mouse - but with the wizard's own way to run its
  * code a moment later (fnc_uiHit), which also works in Eden.
  *
  * Styles: "" a light film; "accent" filled with the accent, for the one thing a card is for (Save, Apply);
@@ -68,8 +68,11 @@ private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _controls = [_display, _parent, _rect, _fill, (_theme getOrDefault ["radius", 0]) min (_height / 2)] call EFUNC(gui,uiPanel);
 private _surface = +_controls;
 
-// Laid out as the inventory's buttons are: an icon alone in the middle, with a label both kept off the
-// edges, the label fitted with some slack - names fitted to their exact width were cut off in the game.
+// Laid out as the inventory's buttons are (einv_gui_fnc_uiButton, "centred"): an icon alone in the middle,
+// with a label it keeps to the left padding, and the label is centred by the engine in the room beside it -
+// getTextWidth says less than the engine draws, so a label placed by its measured width sat off the middle,
+// and the line stands in the middle of the button's height, not below it. The label is fitted with some slack:
+// names fitted to their exact width were cut off in the game.
 private _hasIcon = _icon isNotEqualTo "";
 private _size = _height * 0.5;
 private _iconH = _height * 0.56;
@@ -77,26 +80,21 @@ private _iconW = [0, SQUARE(_iconH)] select _hasIcon;
 private _gap = [0, SQUARE(_height * 0.22)] select (_hasIcon && {_text isNotEqualTo ""});
 private _pad = SQUARE(_height * 0.3);
 private _room = _width - _pad * 2 - _iconW - _gap;
-private _shown = "";
-private _textW = 0;
-
-if (_text isNotEqualTo "" && {_room > 0}) then {
-    _shown = [_text, _room, _font, _size] call EFUNC(gui,fitText);
-    _textW = (_shown getTextWidth [_font, _size]) min _room;
-};
-
-private _start = _left + (((_width - _iconW - _gap - _textW) / 2) max ([_pad, 0] select (_shown isEqualTo "")));
 
 if (_hasIcon) then {
-    _controls pushBack ([_display, _parent, [_start, _top + (_height - _iconH) / 2, _iconW, _iconH], _icon, _ink] call EFUNC(gui,uiIcon));
+    private _iconX = [_left + (_width - _iconW) / 2, _left + _pad] select (_text isNotEqualTo "");
+
+    _controls pushBack ([_display, _parent, [_iconX, _top + (_height - _iconH) / 2, _iconW, _iconH], _icon, _ink] call EFUNC(gui,uiIcon));
 };
 
-if (_shown isNotEqualTo "") then {
-    // Left-aligned in a box running to the button's edge: whatever the engine draws wider than measured
-    // spills to the right, never off the left.
-    private _labelX = _start + _iconW + _gap;
+if (_text isNotEqualTo "" && {_room > 0}) then {
+    // A box as high as the text needs, middle on the button's middle (as in uiButton).
+    private _labelTop = _top + _height / 2 - TEXT_MID * _size;
 
-    _controls pushBack ([_display, _parent, [_labelX, _top, _left + _width - _labelX, _height], _shown, _size, _ink, _font, 0] call EFUNC(gui,uiLabel));
+    _controls pushBack ([
+        _display, _parent, [_left + _pad + _iconW + _gap, _labelTop, _room, TEXT_MID * _size * 2],
+        [_text, _room, _font, _size] call EFUNC(gui,fitText), _size, _ink, _font, 2
+    ] call EFUNC(gui,uiLabel));
 };
 
 _controls pushBack ([_display, _parent, _rect, _surface, _fill, _fillHover, _code, _arguments, _enabled, _tooltip] call FUNC(uiHit));

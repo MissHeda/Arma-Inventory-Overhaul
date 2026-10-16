@@ -56,6 +56,11 @@ disableSerialization;
 
 params [["_display", displayNull, [displayNull]], ["_mouse", getMousePosition, [[]]], ["_now", diag_tickTime, [0]]];
 
+// ----- The answers of the question fnc_confirmClose asks, lit up under the mouse -----
+if !(isNull (uiNamespace getVariable [QGVAR(confirm), controlNull])) then {
+    [_mouse] call FUNC(hoverConfirm);
+};
+
 // ----- A press on ACE's list that the mouse moves away from -----
 if (GVAR(listPress) isNotEqualTo []) then {
     GVAR(listPress) params ["_pressed", "_shift", ["_frame", -1], ["_row", -1]];
