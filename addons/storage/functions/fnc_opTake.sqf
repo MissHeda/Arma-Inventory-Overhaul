@@ -2,8 +2,10 @@
 /*
  * Author: Miss Heda
  * Op "take": out of a holder - produced the payload. Not there with that many: "Gone" - all or nothing
- * for the count asked for. A whole tile's record leaves the holder, and the execution's view of it
- * follows (fnc_findEntry: the tile's count lowered, at 0 it is gone).
+ * for the count asked for. A whole tile's record leaves the holder; of part of a stack the tile's own
+ * record loses that many (fnc_setCount), so two stacks of one class give up their items one at a time and
+ * the right one shrinks. The execution's view of it follows (fnc_findEntry: the tile's count lowered, at 0
+ * it is gone).
  *
  * The engine picks which weapon of a class leaves, and which of two uniforms, vests or backpacks of one
  * class: those go through fnc_removeSameClass - all of the class out, the very ones asked for handed on,
@@ -54,6 +56,12 @@ private _fnc_taken = {
         [_from, _entry, []] call FUNC(setPlace);
         _entry set ["count", 0];
     } else {
+        // Of a stack that lies apart from others of its class, this tile gives the items: its record's
+        // count goes down, so the one the player took from is the one that shrinks (fnc_setCount).
+        if (!(_entry getOrDefault ["hidden", false]) && {(_entry getOrDefault ["attachments", []]) isEqualTo []}) then {
+            [_from, _entry, _have - _n] call FUNC(setCount);
+        };
+
         _entry set ["count", _have - _n];
     };
 };

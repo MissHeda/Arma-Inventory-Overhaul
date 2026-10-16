@@ -5,8 +5,9 @@
  * over it, or "Remove" in its menu - and ACE's list follows. A whole tile's record goes first (left in, the
  * tiles after it would take the record before theirs), then exactly the count asked for leaves through the
  * storage (einv_storage_fnc_removeEntry: a magazine by its rounds, a weapon with its parts, a container with
- * what is in it). ACE hears of it as of its own removals (fnc_tellAce), which keeps its counts, load bar
- * and greyed rows right.
+ * what is in it); of part of a stack the tile's record loses that many (einv_storage_fnc_setCount), so the
+ * stack that was chosen is the one that shrinks. ACE hears of it as of its own removals (fnc_tellAce),
+ * which keeps its counts, load bar and greyed rows right.
  *
  * A tile of the staging space (fnc_staging) goes the same way and is gone; ACE is not told, as nothing of
  * the soldier's changed - only the panel is built again.
@@ -64,6 +65,12 @@ private _payload = [_container, _entry, [_count, -1] select _whole] call EFUNC(s
 if (_payload isEqualTo []) exitWith {
     ["Failed"] call EFUNC(gui,flashHint);
     false
+};
+
+// Of part of a stack, this tile gives the items: its record's count goes down by as many, so a stack that
+// lies apart from others of its class is the one that shrinks (einv_storage_fnc_setCount).
+if (!_whole) then {
+    [_container, _entry, (_entry getOrDefault ["count", 1]) - _count] call EFUNC(storage,setCount);
 };
 
 ["giveBack", _class, objNull, false] call EFUNC(gui,playSound);

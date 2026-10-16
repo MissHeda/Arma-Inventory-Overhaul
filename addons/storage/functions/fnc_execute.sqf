@@ -176,6 +176,7 @@ GVAR(executing) = true;
             };
             case "place";
             case "placeMany";
+            case "split";
             case "sort";
             case "normalize";
             case "take": {
@@ -254,7 +255,7 @@ GVAR(executing) = true;
     };
 
     // What another addon's op did to a holder this execution does not follow: laid out anew when asked.
-    if !(_name in ["place", "placeMany", "normalize", "move", "take", "put", "putGround", "takeOff", "putOn"]) then {
+    if !(_name in ["place", "placeMany", "split", "normalize", "move", "take", "put", "putGround", "takeOff", "putOn"]) then {
         {
             GVAR(cache) deleteAt (if (_x isEqualType "") then {_x} else {netId _x});
         } forEach (_holders select {_x isEqualType "" || {!isNull _x}});

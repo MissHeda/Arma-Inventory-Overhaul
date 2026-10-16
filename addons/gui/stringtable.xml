@@ -127,6 +127,9 @@
         <Key ID="STR_einv_gui_Hint_LookOnly">
             <English>You may only look at this person's gear</English>
         </Key>
+        <Key ID="STR_einv_gui_Hint_Merge">
+            <English>Add to the stack of %1</English>
+        </Key>
         <Key ID="STR_einv_gui_Hint_Moved">
             <English>It moved meanwhile - try again</English>
         </Key>
@@ -410,7 +413,7 @@
             <English>Tile scale</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CellScale_Desc">
-            <English>How large the cells and the pictures on\nthem are - above 1 if items are hard to\nmake out. Takes effect the next time the\ninventory opens. Where the columns would\nno longer fit across the screen, the\nlargest scale that fits is used.</English>
+            <English>How large the cells and the pictures on\nthem are - above 1 if items are hard to\nmake out. The default, 1.1, lets a name\non a one-cell tile show more of its\nletters. Takes effect the next time the\ninventory opens. Where the columns would\nno longer fit across the screen, the\nlargest scale that fits is used.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CompareTooltip">
             <English>Compare gear at the mouse</English>

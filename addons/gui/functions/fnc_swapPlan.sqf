@@ -7,14 +7,20 @@
  * be refused as "NoRoom" otherwise; the answer is kept per footprint for the drag (dragRoom "swap|..."),
  * so it is worked out once per hovered tile, not per frame.
  *
+ * A tile of the same class is no swap but a merge, where the storage keeps stacks apart
+ * (einv_storage_stackSplits): the footprint covers exactly one other tile of the same key - the same
+ * class, and for a magazine the same rounds - that is a stack of a class that stacks and has room left,
+ * searched and not on its way, and the dragged items go onto it, as many as fit (all of them, or as many
+ * as the wheel chose: the rest stays where it lies). The same rules of any move apply. The plan then has
+ * the merge as its fourth element and the number that merge as its fifth.
+ *
  * A swap is a plain tile-on-tile drop only. The dragged tile lands where the footprint lies, which
  * must cover the cells of exactly one other tile (the rest of it on free cells, or on cells the dragged
  * tile leaves itself); that tile goes to the cell the dragged one came from, as it lies, else turned a
  * quarter - its corner on the dragged one's corner - and must find that spot free too (cells the
  * dragged tile and, on one grid, the other tile leave count as free, but the dragged tile's new cells
- * do not). Whole stacks only (the caller passes nothing for part of one), two different classes (the
- * same class would only merge, as the cargo does), neither of them a tile that was not searched or is
- * on its way. Not for a kit's grid, ACE's list, a slot's item or the Arsenal's staging space, and not
+ * do not). A swap is of whole stacks only (a count from the wheel is refused), of two different classes,
+ * neither of them a tile that was not searched or is on its way. Not for a kit's grid, ACE's list, a slot's item or the Arsenal's staging space, and not
  * where the pile on the ground would be left empty by the tile that leaves it (the engine deletes an
  * empty pile). Magazines of a kind that repack, kits and everything else that has its own answer for a
  * drop on its tile never get here (fnc_updateDrag asks them first).
@@ -33,11 +39,13 @@
  * 5: Which way round it is held, 1 turned a quarter clockwise <NUMBER>
  * 6: Which tile lies on each cell of that grid, as fnc_updateDrag keeps it ("cells|n") <ARRAY>
  * 7: The same for the grid the tile comes from <ARRAY>
+ * 8: How many of the stack are held, -1 for all of it <NUMBER> (default: -1)
  *
  * Return Value:
- * [reason, plan] - reason "" when they swap, else why not ("NoRoom" when it is no swap at all); plan
- * [index of the other tile, the cell the dragged one lands on, the cell the other lands on], each cell
- * [col, row, compartment, width, height, rot] as op place takes it, [] without a swap <ARRAY>
+ * [reason, plan] - reason "" when they swap or merge, else why not ("NoRoom" when it is neither); plan
+ * [index of the other tile, the cell the dragged one lands on, the cell the other lands on, merge, how
+ * many merge], each cell [col, row, compartment, width, height, rot] as op place takes it - the cell the
+ * other lands on is [] and merge true for a merge -, [] without either <ARRAY>
  *
  * Example:
  * [_targetIndex, 2, 1, 1, 2, 0, _underTarget, _underSource] call einv_gui_fnc_swapPlan;
@@ -47,7 +55,7 @@
 
 params [
     ["_targetIndex", -1, [0]], ["_col", 0, [0]], ["_row", 0, [0]], ["_w", 1, [0]], ["_h", 1, [0]], ["_rot", 0, [0]],
-    ["_underTarget", [], [[]]], ["_underSource", [], [[]]]
+    ["_underTarget", [], [[]]], ["_underSource", [], [[]]], ["_amount", -1, [0]]
 ];
 
 private _none = ["NoRoom", []];
@@ -124,8 +132,29 @@ if (count _tileB == 0 || {_tileB getOrDefault ["hidden", false]} || {_tileB getO
 private _classA = _entry getOrDefault ["class", ""];
 private _classB = _tileB getOrDefault ["class", ""];
 
-// The same class only merges.
-if (toLowerANSI _classA isEqualTo toLowerANSI _classB) exitWith {_none};
+// The same class merges - where stacks lie apart, into a stack of the same key that has room - and never
+// swaps; two others swap only as whole stacks.
+private _sameClass = toLowerANSI _classA isEqualTo toLowerANSI _classB;
+private _merge = false;
+private _mergeCount = 0;
+
+if (_sameClass) then {
+    private _stackSize = (([_classA] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) max 1;
+    private _roomB = _stackSize - (_tileB getOrDefault ["count", 1]);
+    private _keyA = _entry getOrDefault ["key", ""];
+
+    if (
+        (missionNamespace getVariable [QEGVAR(storage,stackSplits), false]) && {_stackSize > 1} && {_roomB >= 1}
+        && {_keyA isNotEqualTo ""} && {_keyA isEqualTo (_tileB getOrDefault ["key", ""])}
+        && {(_entry getOrDefault ["attachments", []]) isEqualTo []} && {isNull (_entry getOrDefault ["container", objNull])}
+    ) then {
+        _merge = true;
+        _mergeCount = ([_entry getOrDefault ["count", 1], _amount] select (_amount > 0)) min _roomB;
+    };
+};
+
+if (_sameClass && {!_merge}) exitWith {_none};
+if (!_sameClass && {_amount > 0}) exitWith {_none};
 
 // A move under way already goes to cells of its own (fnc_drawPending outlines them).
 private _fnc_flying = {
@@ -189,6 +218,9 @@ if (_sameGrid) then {
     _ignoreSource pushBack _indexB;
 };
 
+// Where the other tile goes: nowhere for a merge, which leaves it where it lies.
+private _cellB = [];
+
 private _originCol = _entry getOrDefault ["col", 0];
 private _originRow = _entry getOrDefault ["row", 0];
 private _holesB = _tileB getOrDefault ["holes", []];
@@ -202,25 +234,25 @@ if (_turnW != (_tileB get "w") || {_turnH != (_tileB get "h")} || {_turnHoles is
     _candidates pushBack [_turnW, _turnH, _turnHoles, 1 - _rotB];
 };
 
-private _cellB = [];
+if (!_merge) then {
+    {
+        _x params ["_cellW", "_cellH", "_cellHoles", "_cellRot"];
 
-{
-    _x params ["_cellW", "_cellH", "_cellHoles", "_cellRot"];
+        private _clash = _sameHolder && {_toBlock == _fromBlock} && {
+            [[_originCol, _originRow, _cellW, _cellH, _cellHoles], [_col, _row, _w, _h, _holesHeld]] call EFUNC(storage,overlaps)
+        };
 
-    private _clash = _sameHolder && {_toBlock == _fromBlock} && {
-        [[_originCol, _originRow, _cellW, _cellH, _cellHoles], [_col, _row, _w, _h, _holesHeld]] call EFUNC(storage,overlaps)
-    };
+        if (
+            !_clash
+            && {[_source, _underSource, _ignoreSource, _originCol, _originRow, _cellW, _cellH, _cellHoles] call _fnc_fits}
+            && {!([_source, _originCol, _originRow, _cellW, _cellH, _cellHoles] call _fnc_flying)}
+        ) exitWith {
+            _cellB = [_originCol, _originRow, _fromBlock, _cellW, _cellH, _cellRot];
+        };
+    } forEach _candidates;
+};
 
-    if (
-        !_clash
-        && {[_source, _underSource, _ignoreSource, _originCol, _originRow, _cellW, _cellH, _cellHoles] call _fnc_fits}
-        && {!([_source, _originCol, _originRow, _cellW, _cellH, _cellHoles] call _fnc_flying)}
-    ) exitWith {
-        _cellB = [_originCol, _originRow, _fromBlock, _cellW, _cellH, _cellRot];
-    };
-} forEach _candidates;
-
-if (_cellB isEqualTo []) exitWith {_none};
+if (!_merge && {_cellB isEqualTo []}) exitWith {_none};
 
 // ----- The rules of any move, for both ways -----
 private _reason = "";
@@ -273,4 +305,4 @@ if (!_sameHolder) then {
 
 if (_reason isNotEqualTo "") exitWith {[_reason, []]};
 
-["", [_indexB, [_col, _row, _toBlock, _w, _h, _rot], _cellB]]
+["", [_indexB, [_col, _row, _toBlock, _w, _h, _rot], _cellB, _merge, _mergeCount]]

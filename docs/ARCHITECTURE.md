@@ -444,7 +444,8 @@ No` unless noted. Entries and sections are HashMaps.
 One entry per tile, weapons first, then backpacks, magazines, items. Weapons and backpacks are a tile each (every one may carry
 other attachments or contents); every magazine is a tile (own rounds), except the ones that stack (grenades and the like, `getInfo
 "stack"` over 1), which share a tile only with the same rounds; plain items are counted together by class and split at their stack
-size. A null container gives `[]`.
+size - along the places' records when they carry counts (two stacks of one class can lie apart, see below). A null container gives
+`[]`.
 
 | Key | |
 |---|---|
@@ -454,6 +455,15 @@ size. A null container gives `[]`.
 | `attachments` | ARRAY, a weapon's `weaponsItemsCargo` entry, `[]` otherwise |
 | `container` | OBJECT, a uniform, vest or backpack lying here: its own container object from `everyContainer`; objNull otherwise |
 | `key` | STRING, the key of its place record (`fnc_entryKey`) |
+
+**Stacks apart** (`fnc_getContents`, `fnc_stackCounts`). A pile of one key (`fnc_entryKey`) is cut along the places' records of that
+key: the n-th record is the n-th tile and holds as many as its eighth element (the count) says, so 5 and 1 of a class that stacks
+to 10 are two tiles. The cargo is the truth for the total; records only say how it is arranged, so the two are reconciled and the
+tiles always add up to what the cargo holds (`fnc_stackCounts [total, stack, counts]`): a total below the records takes the
+difference from the last tiles first (a tile at zero is gone); a total above lets a record without a count take up to a full stack,
+tops up the last tile that has room with what is still left, then opens new tiles (full stacks, then the remainder). Records
+without a count (an older save, a loadout) stand for "as many as the cargo gives": with none at all that is the old cut - full
+stacks first, then the remainder. A tile of the hidden holder (Strict mode) and anything that does not stack have no counts.
 
 `fnc_getLayout` adds `block`, `col`, `row`, `w`, `h` (as it lies), `holes`, `rotated` and `overflow`. Every nested container gets
 two local marks as it is read: `einv_storage_itemClass` (its compartments go by the item, since its container object is only a
@@ -532,8 +542,11 @@ An entry no compartment has room for (a script or another mod added it) is `over
 uniform, vest or backpack the surplus is moved on to the unit's next container with free cells (section "Surplus" below); what
 fits nowhere stays overflow.
 
-**Place records** are `[key, col, row, w, h, block, rot]`: `w` and `h` as it lies, `rot` 0 upright or 1 turned a quarter
-clockwise, always written with `rot`. A record without it (saved places, loadouts, snapshots, payloads of older shape; six
+**Place records** are `[key, col, row, w, h, block, rot]` and, for a tile of a class that stacks in a container, `[..., count]`:
+`w` and `h` as it lies, `rot` 0 upright or 1 turned a quarter clockwise, always written with `rot`, `count` the items the tile holds
+(`fnc_writePlaces` keeps a whole number from 1 up that has a `rot` before it; a kit's records and a loadout's have none). The layout
+writes the count of every stackable tile it placed; `fnc_getLayout` reports no drift for a record that only lacks the count the
+picture gives it, so older places are not all written again at once. A record without it (saved places, loadouts, snapshots, payloads of older shape; six
 elements) reads as turned when its `w` is not the upright one, and `fnc_getLayout` counts no drift for that alone. The holes of a
 shaped item always come from its class at use time (`einv_items_fnc_footprintAs [class, rot]`), so only `rot` is stored and
 synced.
@@ -557,8 +570,9 @@ only; inside a phase through its buffer); `[]` as the cell takes the record out.
 - `fnc_hasSpace [container, entry]`: a free spot in one of the compartments, laid out once more with the entry added from the
   places everyone shares; nothing is kept. The ground and a kit without a grid of its own always have room (they grow); a kit with
   one is laid out like a container, what it holds read through its holder type's `"entries"`. A stackable entry **first fills the
-  partly filled piles of its own key** (a magazine only stacks with the same rounds) - the layout never merges into a pile - and
-  only what is left needs free spots, one per stack's worth.
+  partly filled tiles of its own key** (a magazine only stacks with the same rounds; two partial tiles of a class are two tiles,
+  each with its own room) - the layout never merges into a tile - and only what is left needs free spots, one per stack's worth.
+  That is exactly what a put without a cell does (`fnc_opPut`), so the answer holds for Quick move, Take all and the plan.
 - `fnc_hasRoom [container, entry]`: `fnc_hasSpace` plus the one kind rule left, `fnc_backpackIntoBackpack` (reason
   `"NoBackpack"`). The cargo commands add whatever they are given, so a window, mission or mod asks this before it puts anything
   in. `fnc_moveEntry` and `fnc_unequip` ask when they get no cell; the machine that runs the op asks again and decides.
@@ -566,7 +580,9 @@ only; inside a phase through its buffer); `[]` as the cell takes the record out.
   the order given, with a spot for each, largest first (option `"order"`: `"given"` keeps the order), counting what is already
   planned. Options `"start"` ([holder, compartment] tried first) and `"lifted"` (items treated as gone from where they lie).
   `"ground"` as a target always has room and takes no cell. Nothing is asked of any machine but this one. An item never goes into
-  a target that is the container it is or lies in it (`fnc_liesIn`).
+  a target that is the container it is or lies in it (`fnc_liesIn`). **A stackable tile first fills the stacks of its key in a
+  target that are not full** (what its put does) and only the rest takes a spot, one tile's worth; one that fits into the stacks
+  that are there is assigned with the cell `[]`, and what is planned into a target counts for the items after it.
 
 ### Moving what a tile stands for
 
@@ -589,6 +605,27 @@ putting in with the cargo commands.
 - `fnc_makePayload [class, count, rounds]` and `fnc_addNew [container, class, count, cell]` -> `""` / `"NoRoom"` / `"NoBackpack"`
   / `"Failed"` make what did not exist (the Arsenal's adds), a free spot when no cell is given; `fnc_countClass [container,
   class]` counts by class. `addNew` and everything else adds by the cargo commands, never by `canAdd`.
+- **Stacks apart** (`fnc_opPut`, `fnc_opTake`, `fnc_opMove`, `fnc_opSplit`, `fnc_setCount`, `fnc_findSpots`). The records are
+  changed in step with the cargo, in the phase's buffer, so the stack the player chose is the one that gains or gives items. The
+  first view of a container in a phase (`fnc_findEntry`) puts the picture's records into the buffer before any op changes the cargo,
+  so every stackable tile has a record with its count. `take` of part of a stack lowers its tile's count (`fnc_setCount`), of a whole
+  tile removes the record. `put` of a payload of a class that stacks (items, magazines of one number of rounds, not into the hidden
+  holder, not a uniform, vest or backpack): **without options it joins** the tiles of its key that have room, in their order,
+  and what is left opens new tiles (this is what Quick move, Take all, Sort, the plan and settlement do); with **`separate`**
+  (6th argument) it joins nothing and lies at the cell as a tile of its own (a count above one stack is cut into full tiles, the
+  others go to the first fit); with **`merge into`** (7th, `[col, row, compartment]` of a tile of the same key) that tile is
+  filled first, then as without. Only the tiles that open need a free spot (`fnc_findSpots`: the cell asked for, else the first fit,
+  upright then turned); a payload that fits into the room of the tiles it joins needs none, so the check of `move` asks for what
+  really moves. Extra of a put: `[landed cell (the joined tile's cell for a pure join), elsewhere]`. `move` passes both on to its
+  put. **Op `split`** `[holder, entry array, count, cell]` (within one holder, in `GVAR(ops)`; a kit type names none, so the window
+  does nothing for kits): the tile gives up `count` (its record's count down) and the same number lie as a new tile on the cell, or -
+  cell `[]` or not free - on the free spot nearest to the source tile (its compartment first, then the others; upright, then turned);
+  no spot is `"NoRoom"` with nothing changed; the cargo is not touched, so it is a change of records only (the lock and person guards
+  treat it like `place`). Stackable payloads of mixed rounds and anything that cannot be told by record (the hidden holder, an
+  overflow tile) are left to the reconciliation, which does the same sum in tile order. `GVAR(stackSplits)` (`einv_storage_stackSplits`,
+  set true in preInit on every machine) is what the window reads to ask for the new behaviour at all; false switches it off, the
+  records already written stay. The Arsenal's `fnc_remove` of part of a stack lowers its tile's count the same way and `fnc_addNew`
+  with a cell lays the new items down as a tile of their own.
 - **Nested containers.** A uniform, vest or backpack lying in a container carries a tag `[uid, itemClass, parent]`
   (`fnc_tagNested`, ids `<machine id>-<n>` from `fnc_newUid`) and travels with its places in payloads. Whether variables on nested
   objects reach every machine is not known, so both ways are kept: tag and places stay on the nested object, and in multiplayer a
@@ -612,7 +649,7 @@ reach check (`REACH_SLACK` 2 m beyond the setting).
 one root; an op is `[name, args]` from `einv_storage_ops`: `place` (one tile to another cell of one holder), `placeMany` (several
 lifted and put down at once, refused as a whole when any cell is not free), `sort` (`[holder, order]`, the order one of `SORT_MODES` -
 name, weight, size, type; laid out where the root is local), `normalize`, `migrate`, `move` (within one root), `take`,
-`put`, `putGround` (on the server), `takeOff`, `putOn`, `repack`, and compat's `kitTake`, `kitPut`, `kitPlace`, `kitMove`,
+`put`, `split` (part of a stack to a tile of its own, within one holder), `putGround` (on the server), `takeOff`, `putOn`, `repack`, and compat's `kitTake`, `kitPut`, `kitPlace`, `kitMove`,
 `kitRemoveIfEmpty`. An op's input may be a ref `["#ref", phase, op, n]` to the n-th payload an earlier op produced. Each op
 answers `[status, produced, extra]`, status `""` or a reason (`"Gone"`, `"Taken"`, `"NoRoom"`, `"NoBackpack"`, `"Moved"`,
 `"OutOfReach"`, `"Bounced"`, `"Failed"`, a guard's reason such as `"Locked"`, ...). The phases are copied; what the caller holds
@@ -957,7 +994,9 @@ Public: `einv_storage_fnc_useState`, `fnc_useKind`, `fnc_useMode`, `fnc_useCarri
 preInit: `einv_storage_ops` (op name -> function name), `einv_storage_guards`, `einv_storage_carryVariables` and
 `einv_storage_holderTypes` (a holder that is no object, by the part of its key before `:`; `kit` from compat_efak: `entries`,
 `blocks` (its compartments, `[]` for an open grid; left out, open), `root`, `verify`, and the names of its ops for `take`, `put`,
-`place`, `move`).
+`place`, `move`; it names no `split`, which tells the window that a kit's stacks are not kept apart). The mission variable
+`einv_storage_stackSplits` (true on every machine once the storage is loaded) is what the window reads before it asks for stacks
+apart, split or merge; setting it false switches that behaviour off.
 
 ## 4. GUI window engine (gui)
 
@@ -1403,9 +1442,15 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   Alt+click has no meaning of its own any more (it was the quick equip: putting on is a drag onto a slot, a double click on the
   ground and the menu's Equip). **Shift+click** on a stack (two or more) splits it - half onto the nearest free cell as a stack
   of its own (`fnc_splitStack`, an `applyMove` from = to with `separate`) - but only while `einv_storage_stackSplits` is true;
-  until the storage keeps separate stacks (`NEEDS_STORAGE.md`) it is the range select as before. In the same way a drop on a
-  free cell passes `"separate"` (`fnc_endDrag`, `fnc_applyMove`, `fnc_sendMoves`: the `put` and `move` steps get it as their last
-  argument, a part of a stack within one holder becomes the op `split`).
+  with it false it is the range select as before. In the same way a drop on a free cell passes `"separate"` (`fnc_endDrag`,
+  `fnc_applyMove`, `fnc_sendMoves`: the `put` and `move` steps get it as their sixth argument, a part of a stack within one holder
+  becomes the op `split`). **A drop onto a stack of the same key with room left merges** (`fnc_swapPlan` answers the plan with
+  `merge` true as its fourth element and the number that fit as its fifth, `fnc_updateDrag` shows the footprint in the accent
+  colour and "Add to the stack of ...", `fnc_endDrag` sends it through `fnc_applyMove` with the option `"mergeInto"`
+  `[col, row, compartment]` of that stack): as many join as fit (all, or what the wheel left), the rest stays where it lay; within
+  one container it is a take and a put with `merge into` in one phase, across containers the `move` or `put` gets it as its
+  seventh argument. A merge needs no free spot. Quick move, Take all, Sort and the group packs never ask for either option and so
+  keep filling partial stacks.
 
 ### Menus, hints, the weight card
 
@@ -2395,5 +2440,11 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
   jog speed in ACE's fatigue model that Heavy is derived from (G2; `JOG_SPEED` is ACE's number), whether the engine's "Rearm"
   respects `lockInventory` (G4). Also unconfirmed: that the topmost group takes the mouse wheel (so nothing under a kit window
   scrolls) and that a group's fade carries its controls (the kit windows' fade-in).
+- **Separate stacks** (0.4.7): the counts in the places' records and their reconciliation with the cargo, `put` with `separate` and
+  `merge into`, the op `split`, the merge drop, the plan filling partial stacks, and the Arsenal's lowering of a tile's count were
+  written and read through, not run. To try: 5 of 10 of a class on a cell, drop 1 on another cell of the same container (two
+  tiles), in another container (two tiles), onto the stack of five (merge); Shift+click; Quick move of the single into a
+  container that holds a partial stack; Take all; close and reopen; another player or a script adding the same class
+  (reconciled, nothing lost); a save from before the counts.
 - **Multiplayer on a dedicated server**: the hub, the handshake and the nested copies are designed for it; `HISTORY.md` records no
   dedicated-server run.

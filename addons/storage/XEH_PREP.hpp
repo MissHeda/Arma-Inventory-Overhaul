@@ -8,6 +8,10 @@ PREP(getMass);
 // Where things lie, for everyone: each holder's places, written by its authority
 PREP(getLayout);
 PREP(entryKey);
+PREP(stackCounts);
+PREP(setCount);
+PREP(setRecords);
+PREP(findSpots);
 PREP(payloadKey);
 PREP(layoutKey);
 PREP(readPlaces);
@@ -62,6 +66,7 @@ PREP(nextFrame);
 PREP(onAnswer);
 PREP(opPlace);
 PREP(opPlaceMany);
+PREP(opSplit);
 PREP(opSort);
 PREP(opNormalize);
 PREP(opMove);

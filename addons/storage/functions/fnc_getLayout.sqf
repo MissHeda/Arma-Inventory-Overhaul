@@ -25,7 +25,9 @@
  *      and index, when none is): compartment after compartment, row by row, upright, else turned a
  *      quarter (a square box only when it is a shape that turned takes other cells).
  * A record is [key, col, row, w, h, block, rot], rot 1 when it lies turned a quarter clockwise. One
- * written before rot existed has six elements: it lies turned when its width is not the upright one.
+ * written before rot existed has six elements: it lies turned when its width is not the upright one. The
+ * record of a tile of a class that stacks also has its count as an eighth element; the layout does not
+ * read it (fnc_getContents does, fnc_stackCounts), it writes the count of every such tile it placed.
  * An entry no compartment has room for - the engine took it from a script or another mod - is
  * "overflow": shown apart, never lost. The ground and a grid with no object of its own (a kit of
  * Enhanced First Aid Kits, einv_compat_efak) have no compartments: one STORAGE_COLS wide that grows with
@@ -53,7 +55,8 @@
  *   "blocks"   - the compartments [[cols, rows, holes, pos], ...] (fnc_blocksFor) - the open grid's
  *                with the rows it needs now
  *   "overflow" - the entries with no room
- *   "records"  - one per placed entry, canonical (fnc_readPlaces): [key, col, row, w, h, block, rot]. A
+ *   "records"  - one per placed entry, canonical (fnc_readPlaces): [key, col, row, w, h, block, rot], with
+ *                the count of a stackable tile as an eighth element. A
  *                holder of another type that lists nothing keeps the records it was laid out from: a
  *                kit whose contents have not arrived yet would otherwise lose its arrangement
  *   "drift"    - the records laid out from are not exactly "records" - the authority should persist
@@ -422,12 +425,27 @@ private _col = 0;
 // out from: a kit of Enhanced First Aid Kits lists nothing until that mod synced its contents here, and
 // its arrangement must not be thrown away for a list that is only not there yet.
 // ---------------------------------------------------------------------------
+// A stackable tile of a container also carries how many it holds (the record's eighth element): two tiles
+// of one class stay two, each with its own count (fnc_stackCounts, fnc_getContents). A tile of the hidden
+// holder, a kit's tile and every tile of a class that does not stack have none.
 private _source = if (_isKey && {_entries isEqualTo []}) then {
-    (_in select {_x isEqualType [] && {(_x select [0, 6]) isEqualTypeArray ["", 0, 0, 0, 0, 0]}}) apply {_x select [0, 7]}
+    (_in select {_x isEqualType [] && {(_x select [0, 6]) isEqualTypeArray ["", 0, 0, 0, 0, 0]}}) apply {_x select [0, 8]}
 } else {
-    (_entries select {!(_x get "overflow")}) apply {
-        [_x get "key", _x get "col", _x get "row", _x get "w", _x get "h", _x get "block", parseNumber (_x get "rotated")]
-    }
+    private _records = [];
+
+    {
+        if !(_x get "overflow") then {
+            private _record = [_x get "key", _x get "col", _x get "row", _x get "w", _x get "h", _x get "block", parseNumber (_x get "rotated")];
+
+            if (!_isKey && {((_infos select _forEachIndex) getOrDefault ["stack", 1]) > 1} && {!(_x getOrDefault ["hidden", false])}) then {
+                _record pushBack (_x getOrDefault ["count", 1]);
+            };
+
+            _records pushBack _record;
+        };
+    } forEach _entries;
+
+    _records
 };
 
 private _groups = createHashMap;
@@ -455,18 +473,30 @@ private _out = [];
 } forEach _keys;
 
 // Nothing to persist for no holder. A record from before rot says the same as one with the rot its size
-// gives: no drift for that alone, so older places are not all written again at once.
-private _drift = _valid && {
-    (_in apply {
-        if (_x isEqualType [] && {count _x == 6} && {_x isEqualTypeArray ["", 0, 0, 0, 0, 0]}) then {
-            private _size = ([((_x select 0) splitString "|") param [0, ""]] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]];
+// gives: no drift for that alone, so older places are not all written again at once. The same goes for a
+// record without a count where the picture has one that nobody changed: a tile of a stackable class that
+// never was apart reads the same either way.
+private _padded = _in apply {
+    if (_x isEqualType [] && {count _x == 6} && {_x isEqualTypeArray ["", 0, 0, 0, 0, 0]}) then {
+        private _size = ([((_x select 0) splitString "|") param [0, ""]] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]];
 
-            _x + [parseNumber ((_x select 3) != (_size select 0))]
-        } else {
-            _x
-        };
-    }) isNotEqualTo _out
+        _x + [parseNumber ((_x select 3) != (_size select 0))]
+    } else {
+        _x
+    };
 };
+
+{
+    if (_x isEqualType [] && {count _x == 7} && {_forEachIndex < count _out}) then {
+        private _counted = _out select _forEachIndex;
+
+        if (count _counted == 8 && {(_counted select [0, 7]) isEqualTo _x}) then {
+            _padded set [_forEachIndex, _counted];
+        };
+    };
+} forEach +_padded;
+
+private _drift = _valid && {_padded isNotEqualTo _out};
 
 createHashMapFromArray [
     ["entries", _entries],

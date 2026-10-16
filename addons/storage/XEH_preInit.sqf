@@ -21,7 +21,7 @@ GVAR(ops) = createHashMapFromArray [
     ["normalize", QFUNC(opNormalize)], ["move", QFUNC(opMove)], ["take", QFUNC(opTake)],
     ["put", QFUNC(opPut)], ["putGround", QFUNC(opPutGround)], ["takeOff", QFUNC(opTakeOff)],
     ["putOn", QFUNC(opPutOn)], ["repack", QFUNC(opRepack)], ["migrate", QFUNC(opMigrate)],
-    ["strict", QFUNC(opStrict)]
+    ["strict", QFUNC(opStrict)], ["split", QFUNC(opSplit)]
 ];
 
 // Checks every op passes on the machine that runs it: CODE [op, args, requester, root] -> "" or a reason.
@@ -138,5 +138,12 @@ GVAR(throwBlocked) = false;
 GVAR(throwUnit) = objNull;
 
 #include "initSettings.inc.sqf"
+
+// Two stacks of one class apart in one container: the places' records carry how many a tile holds and the
+// ops put, take and split by that (fnc_stackCounts, fnc_opSplit, fnc_opPut). The window asks for the new
+// behaviour - a drop on a cell stays a stack of its own, Shift+click splits, a drop onto a stack of the same
+// class merges - only while this is true on its machine; false switches that off again, the records already
+// written stay as they are.
+GVAR(stackSplits) = true;
 
 ADDON = true;

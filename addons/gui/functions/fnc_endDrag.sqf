@@ -20,10 +20,12 @@
  * Onto a slot of the hotbar (einv_hotbar - only when that addon is loaded) nothing moves: the item's class
  * is put on that key.
  *
- * Where the storage keeps separate stacks (einv_storage_stackSplits - NEEDS_STORAGE.md), what is let go on a
- * free cell lies there as a stack of its own: it does not join a stack of its class elsewhere in the
- * container, and part of a stack let go in the container it lies in is split off onto the cell (fnc_applyMove,
- * "separate"). Quick move and Take all still fill partial stacks.
+ * Where the storage keeps separate stacks (einv_storage_stackSplits), what is let go on a free cell lies
+ * there as a stack of its own: it does not join a stack of its class elsewhere in the container, and part
+ * of a stack let go in the container it lies in is split off onto the cell (fnc_applyMove, "separate").
+ * What is let go onto a stack of its own class that has room joins that very stack, as many as fit (the
+ * target's plan says merge, fnc_swapPlan; "mergeInto"), the rest stays where it lay. Quick move and Take
+ * all still fill partial stacks.
  *
  * Onto a tile that lies there, where the footprint showed a swap (the target's 10th element, fnc_swapPlan):
  * the two tiles change places in one transaction (fnc_applySwap) - the dragged one onto the cell it was let
@@ -312,9 +314,18 @@ private _sent = call {
 
     // Onto a tile that lies there, as the footprint showed: the two swap places (fnc_swapPlan).
     if (_swap isNotEqualTo [] && {_slotSource isEqualTo []}) exitWith {
-        _swap params ["_indexOther", "_cellEntry", "_cellOther"];
+        _swap params ["_indexOther", "_cellEntry", "_cellOther", ["_merge", false], ["_mergeCount", 0]];
 
         private _other = (_target getOrDefault ["tiles", []]) param [_indexOther, createHashMap];
+
+        // Onto a stack of its own class: as many as fit join it, the rest stays where it lay.
+        if (_merge) exitWith {
+            private _mergeAll = _mergeCount >= _stack || {_mergeCount < 1};
+
+            ([_fromBox, _to, _entry, [_mergeCount, -1] select _mergeAll, [], createHashMapFromArray [
+                ["mergeInto", [_other get "col", _other get "row", _other getOrDefault ["block", _target getOrDefault ["block", 0]]]]
+            ]] call FUNC(applyMove)) isEqualTo true
+        };
 
         ([_fromGrid, _target, _entry, _other, _cellEntry, _cellOther] call FUNC(applySwap)) isEqualTo true
     };

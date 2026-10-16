@@ -15,6 +15,11 @@
  * An item never goes into a target that is the container it is (a backpack tile) or lies in it
  * (fnc_liesIn). "ground" as a target always has room and takes no cell.
  *
+ * A stackable tile first fills the stacks of its key in a target that are not full - what a put without a
+ * cell does (fnc_opPut) - and only what is left over takes a spot, one tile's worth; what fits into the
+ * stacks that are there is assigned with the cell [] (the put joins them). The tiles planned into a target
+ * count for the ones after, so a class that is moved in pieces fills the partial stacks first.
+ *
  * Arguments:
  * 0: Items, entries as the window's tiles are - "class", "count", "key", "block", "col", "row", and
  *    "holder" for where they lie now (anything else they carry stays on them) <ARRAY of HASHMAPs>
@@ -28,7 +33,8 @@
  * [assigned, left] <ARRAY>
  *   assigned - [[item, holder, root, cell], ...] in the order they were planned; cell is [col, row,
  *              compartment], with [.., width, height, 1] when it lies turned (rot 1, a quarter
- *              clockwise), [] for the ground <ARRAY>
+ *              clockwise), [] for the ground and for a stack that joins others without a cell of its
+ *              own <ARRAY>
  *   left     - the items no target had room for <ARRAY>
  *
  * Example:
@@ -61,9 +67,10 @@ private _fnc_isLifted = {
 // ---------------------------------------------------------------------------
 // A target as the planning sees it, made when the first item asks for it:
 //   ["ground"]  or  ["none"] for a holder that is neither the ground nor a container
-//   ["grid", holder, root, blocks, open, taken, isBackpack]
+//   ["grid", holder, root, blocks, open, taken, isBackpack, rooms]
 // taken is per compartment a list of rows of booleans, true where something lies or a shaped compartment
-// has a hole; rows past the end are free.
+// has a hole; rows past the end are free. rooms is, per key of a stackable class, how much room each of
+// its tiles that is not full has left, in the order of the tiles - what a put fills first.
 // ---------------------------------------------------------------------------
 private _states = _targets apply {[]};
 
@@ -106,7 +113,7 @@ private _fnc_state = {
         private _open = ([_holder] call FUNC(getBlocks)) isEqualTo [];
 
         // A shaped compartment's holes are taken from the start (fnc_seedTaken).
-        _state = ["grid", _holder, _root, _blocks, _open, [_blocks] call FUNC(seedTaken), getNumber (configOf _holder >> "isBackpack") == 1];
+        _state = ["grid", _holder, _root, _blocks, _open, [_blocks] call FUNC(seedTaken), getNumber (configOf _holder >> "isBackpack") == 1, createHashMap];
 
         // What lies there, less what is lifted away: its cells are taken.
         {
@@ -114,6 +121,18 @@ private _fnc_state = {
 
             if (!(_x getOrDefault ["overflow", false]) && {(_x getOrDefault ["block", -1]) >= 0}) then {
                 [_state, _x get "block", _x get "col", _x get "row", _x get "w", _x get "h", _x getOrDefault ["holes", []]] call _fnc_mark;
+
+                // A stack that is not full: what a put onto this holder fills first.
+                private _tileStack = (([_x getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) max 1;
+                private _tileCount = _x getOrDefault ["count", 1];
+
+                if (_tileStack > 1 && {_tileCount < _tileStack} && {!(_x getOrDefault ["hidden", false])}) then {
+                    private _tileKey = _x getOrDefault ["key", ""];
+                    private _rooms = (_state select 7) getOrDefault [_tileKey, []];
+
+                    _rooms pushBack (_tileStack - _tileCount);
+                    (_state select 7) set [_tileKey, _rooms];
+                };
             };
         } forEach (_layout get "entries");
     };
@@ -197,6 +216,7 @@ private _left = [];
 
     private _turnedHoles = (_info getOrDefault ["footprintTurned", [_h, _w, []]]) param [2, []];
     private _isBackpack = (_info getOrDefault ["kind", ""]) isEqualTo "backpack";
+    private _stackSize = (_info getOrDefault ["stack", 1]) max 1;
     private _inside = _item getOrDefault ["container", objNull];
     private _done = false;
 
@@ -212,13 +232,58 @@ private _left = [];
             _done = true;
         };
 
-        _state params ["", "_holder", "_root", "", "", "", "_holderIsBackpack"];
+        _state params ["", "_holder", "_root", "", "", "", "_holderIsBackpack", "_rooms"];
 
         // Not into itself, nor into anything lying in it.
         if (!isNull _inside && {_holder isEqualTo _inside || {[_holder, _inside] call FUNC(liesIn)}}) then {continue};
 
         // A backpack never goes into a backpack.
         if (_isBackpack && {_holderIsBackpack}) then {continue};
+
+        // A stackable tile first fills the stacks of its key that are not full there (what its put does); only
+        // what is left over needs a spot of its own, one tile's worth.
+        private _remaining = (_item getOrDefault ["count", 1]) max 1;
+        private _fills = [];
+        private _itemKey = _item getOrDefault ["key", ""];
+
+        if (_stackSize > 1 && {isNull _inside}) then {
+            if (_itemKey isEqualTo "") then {
+                _itemKey = [_item] call FUNC(entryKey);
+            };
+
+            {
+                if (_remaining > 0 && {_x > 0}) then {
+                    private _fill = _remaining min _x;
+
+                    _fills pushBack [_forEachIndex, _fill];
+                    _remaining = _remaining - _fill;
+                };
+            } forEach (_rooms getOrDefault [_itemKey, []]);
+        };
+
+        // The rooms the tile fills are used up, and what opens beyond them is room for what comes after.
+        private _fnc_fill = {
+            if (_fills isEqualTo [] && {_remaining >= _stackSize}) exitWith {};
+
+            private _list = +(_rooms getOrDefault [_itemKey, []]);
+
+            {
+                _list set [_x select 0, (_list select (_x select 0)) - (_x select 1)];
+            } forEach _fills;
+
+            if (_stackSize > 1 && {isNull _inside} && {_remaining > 0} && {_remaining < _stackSize}) then {
+                _list pushBack (_stackSize - _remaining);
+            };
+
+            _rooms set [_itemKey, _list];
+        };
+
+        // All of it fits into stacks that are there: no cell.
+        if (_remaining <= 0) exitWith {
+            call _fnc_fill;
+            _assigned pushBack [_item, _holder, _root, []];
+            _done = true;
+        };
 
         private _firstBlock = if (_start isNotEqualTo [] && {(_start select 0) isEqualTo _holder}) then {_start param [1, -1]} else {-1};
         private _turned = false;
@@ -239,6 +304,7 @@ private _left = [];
         private _cellH = [_h, _w] select _turned;
 
         [_state, _block, _col, _row, _cellW, _cellH, [_holes, _turnedHoles] select _turned] call _fnc_mark;
+        call _fnc_fill;
 
         _assigned pushBack [_item, _holder, _root, [[_col, _row, _block], [_col, _row, _block, _cellW, _cellH, 1]] select _turned];
         _done = true;

@@ -9,8 +9,10 @@
  * a transaction (fnc_sendMoves). With the option "separate" (and only where the storage keeps separate
  * stacks, einv_storage_stackSplits) what goes to a cell lies there as a stack of its own and does not join
  * a stack of its class elsewhere in the container; part of a stack moved within its container is split off
- * onto the cell (NEEDS_STORAGE.md). Every change happens where the holder's root is local, checked there
- * again; places, search knowledge and the window follow the answer (fnc_afterAction).
+ * onto the cell (einv_storage_fnc_opSplit). With "mergeInto" - the [col, row, compartment] of a stack of
+ * the same class - what goes joins that very stack (einv_storage_fnc_opPut); it needs no free spot, the
+ * count being what fits. Every change happens where the holder's root is local, checked there again;
+ * places, search knowledge and the window follow the answer (fnc_afterAction).
  *
  * Within one container it is a rearrangement onto the cell; the ground ("ground") is the surface under
  * the feet, or the vehicle's cargo while seated. A ground pile the window does not show, or none at
@@ -23,7 +25,8 @@
  * 3: How many of a stack, -1 for all of it <NUMBER> (default: -1)
  * 4: Cell [col, row, compartment] - with [.., width, height] when it lies turned there - or [] to let
  *    the layout find one <ARRAY> (default: [])
- * 5: Options (fnc_sendMoves) <HASHMAP> (default: empty); "separate" <BOOL> as above (default: false)
+ * 5: Options (fnc_sendMoves) <HASHMAP> (default: empty); "separate" <BOOL> as above (default: false);
+ *    "mergeInto" <ARRAY> as above (default: [])
  *
  * Return Value:
  * Asked for <BOOL>
@@ -73,7 +76,7 @@ if (_why isEqualTo "" && {_to isEqualType objNull} && {_to isNotEqualTo _from}) 
         _why = "NoBackpack";
     };
 
-    if (_cell isEqualTo [] && {!([_to, _entry] call EFUNC(storage,hasSpace))}) then {
+    if (_cell isEqualTo [] && {(_options getOrDefault ["mergeInto", []]) isEqualTo []} && {!([_to, _entry] call EFUNC(storage,hasSpace))}) then {
         _why = "NoRoom";
     };
 };
@@ -86,5 +89,5 @@ if (_why isNotEqualTo "") exitWith {
 
 [[createHashMapFromArray [
     ["kind", "move"], ["from", _from], ["to", _to], ["entry", _entry], ["count", _count], ["cell", _cell],
-    ["separate", _options getOrDefault ["separate", false]]
+    ["separate", _options getOrDefault ["separate", false]], ["mergeInto", _options getOrDefault ["mergeInto", []]]
 ]], _options] call FUNC(sendMoves)

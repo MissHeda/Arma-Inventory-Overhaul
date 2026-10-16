@@ -26,6 +26,11 @@
  * magazine that repacks and a weapon's slot answer before that; anything that does not swap is refused as
  * before ("NoRoom", or the reason a rule gives).
  *
+ * Over a stack of the same class (and key) with room left, where the storage keeps stacks apart
+ * (einv_storage_stackSplits), the same plan says merge instead (its 4th element, fnc_swapPlan): the footprint
+ * lies on that stack in the accent colour, the hint says so, and fnc_endDrag adds as many as fit (the whole
+ * stack, or as many as the wheel left) to that very stack. A drop on a free cell is a stack of its own.
+ *
  * A uniform, vest or backpack never goes into its own grid or into that of anything lying in it
  * (einv_storage_fnc_liesIn): red, "It cannot go into itself". The cells a move under way goes to
  * (GVAR(inFlight)) count as taken - empty until it arrived, but not for long.
@@ -1288,22 +1293,24 @@ call {
         };
     };
 
-    // ----- On a tile that lies there: the two swap places (fnc_swapPlan) -----
-    // Only where the drop is refused for want of room and it is a plain tile-on-tile: the whole of a stack, no
-    // kit's grid, no slot's item. Worked out once per footprint and per moves under way, then kept.
+    // ----- On a tile that lies there: the two swap places, or the dragged items join a stack (fnc_swapPlan) -----
+    // Only where the drop is refused for want of room and it is a plain tile-on-tile: no kit's grid, no slot's
+    // item. A swap is of whole stacks; of the same class (where stacks lie apart) the dragged items, as many as
+    // the wheel left, go onto a stack of that class with room - a merge, the plan's fourth element. Worked out
+    // once per footprint, count and moves under way, then kept.
     private _swap = [];
 
     if (
-        _reason isEqualTo "NoRoom" && {_slotSource isEqualTo []} && {_amount < 0} && {_fromKit isEqualTo ""} && {_toKit isEqualTo ""}
+        _reason isEqualTo "NoRoom" && {_slotSource isEqualTo []} && {_fromKit isEqualTo ""} && {_toKit isEqualTo ""}
         && {(_gridBoxes param [_sourceIndex, []]) isNotEqualTo []}
     ) then {
-        private _swapKey = format ["swap|%1|%2|%3|%4|%5|%6|%7", _targetIndex, _col, _row, _w, _h, GVAR(dragRot), count GVAR(inFlight)];
+        private _swapKey = format ["swap|%1|%2|%3|%4|%5|%6|%7|%8", _targetIndex, _col, _row, _w, _h, GVAR(dragRot), count GVAR(inFlight), _amount];
         private _swapAnswer = GVAR(dragRoom) get _swapKey;
 
         if (isNil "_swapAnswer") then {
             _swapAnswer = [
                 _targetIndex, _col, _row, _w, _h, GVAR(dragRot),
-                ([_targetIndex] call _fnc_cells) select 0, ([_sourceIndex] call _fnc_cells) select 0
+                ([_targetIndex] call _fnc_cells) select 0, ([_sourceIndex] call _fnc_cells) select 0, _amount
             ] call FUNC(swapPlan);
 
             GVAR(dragRoom) set [_swapKey, _swapAnswer];
@@ -1386,11 +1393,13 @@ call {
         };
     };
 
-    // A swap says so, and with whom - not what the item would add to the soldier.
+    // A swap says so, and with whom - not what the item would add to the soldier. A merge says onto which.
+    private _merge = _swap param [3, false];
+
     if (_swap isNotEqualTo []) then {
         private _swapTile = (_target get "tiles") select (_swap select 0);
 
-        _hintParts = [[format [LLSTRING(Hint_Swap), [_swapTile get "class"] call FUNC(itemName)], "accent"]];
+        _hintParts = [[format [[LLSTRING(Hint_Swap), LLSTRING(Hint_Merge)] select _merge, [_swapTile get "class"] call FUNC(itemName)], "accent"]];
     };
 
     GVAR(dragTarget) = ["grid", _targetIndex, _col, _row, _reason isEqualTo "", _reason, "", _place, objNull, _swap];
@@ -1409,32 +1418,35 @@ call {
     if (_swap isNotEqualTo []) then {
         [_clipRect, true, DRAG_FOOTPRINT_ALPHA, "accent"] call _fnc_show;
 
-        (_gridBoxes select _sourceIndex) params [["_sourceVisible", []], ["_sourceX", 0], ["_sourceY", 0]];
+        // A merge lies on the stack it joins only; a swap on the other tile's new cells as well.
+        if (!_merge) then {
+            (_gridBoxes select _sourceIndex) params [["_sourceVisible", []], ["_sourceX", 0], ["_sourceY", 0]];
 
-        (_swap select 2) params ["_swapCol", "_swapRow", "", "_swapW", "_swapH"];
+            (_swap select 2) params ["_swapCol", "_swapRow", "", "_swapW", "_swapH"];
 
-        private _swapRect = [_sourceGrid, [_sourceX, _sourceY], _swapCol, _swapRow, _swapW, _swapH] call FUNC(spanRect);
+            private _swapRect = [_sourceGrid, [_sourceX, _sourceY], _swapCol, _swapRow, _swapW, _swapH] call FUNC(spanRect);
 
-        // Cut to what its column shows: the grid may be scrolled partly or wholly out of sight.
-        if (_sourceVisible isNotEqualTo []) then {
-            _sourceVisible params ["_visibleX", "_visibleY", "_visibleW", "_visibleH"];
-            _swapRect params ["_rectX", "_rectY", "_rectW", "_rectH"];
+            // Cut to what its column shows: the grid may be scrolled partly or wholly out of sight.
+            if (_sourceVisible isNotEqualTo []) then {
+                _sourceVisible params ["_visibleX", "_visibleY", "_visibleW", "_visibleH"];
+                _swapRect params ["_rectX", "_rectY", "_rectW", "_rectH"];
 
-            private _left = _rectX max _visibleX;
-            private _top = _rectY max _visibleY;
-            private _right = (_rectX + _rectW) min (_visibleX + _visibleW);
-            private _bottom = (_rectY + _rectH) min (_visibleY + _visibleH);
+                private _left = _rectX max _visibleX;
+                private _top = _rectY max _visibleY;
+                private _right = (_rectX + _rectW) min (_visibleX + _visibleW);
+                private _bottom = (_rectY + _rectH) min (_visibleY + _visibleH);
 
-            _swapRect = [_left, _top, (_right - _left) max 0, (_bottom - _top) max 0];
-        };
+                _swapRect = [_left, _top, (_right - _left) max 0, (_bottom - _top) max 0];
+            };
 
-        if ((_swapRect select 2) > 0 && {(_swapRect select 3) > 0}) then {
-            private _accent = GVAR(theme) getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
+            if ((_swapRect select 2) > 0 && {(_swapRect select 3) > 0}) then {
+                private _accent = GVAR(theme) getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
 
-            _swapFootprint ctrlSetPosition _swapRect;
-            _swapFootprint ctrlSetBackgroundColor [_accent select 0, _accent select 1, _accent select 2, DRAG_FOOTPRINT_ALPHA];
-            _swapFootprint ctrlCommit 0;
-            _swapFootprint ctrlShow true;
+                _swapFootprint ctrlSetPosition _swapRect;
+                _swapFootprint ctrlSetBackgroundColor [_accent select 0, _accent select 1, _accent select 2, DRAG_FOOTPRINT_ALPHA];
+                _swapFootprint ctrlCommit 0;
+                _swapFootprint ctrlShow true;
+            };
         };
     } else {
         [_clipRect, _reason isEqualTo ""] call _fnc_show;

@@ -7,7 +7,12 @@
  * Weapons and backpacks are each a tile of their own - every one may carry different attachments or
  * contents. So is every magazine, as each has its own rounds; only the ones that stack (grenades and
  * the like, einv_items_fnc_getInfo's "stack") share a tile, and only with the same rounds. Items are
- * counted together by class and split into tiles at their stack size.
+ * counted together by class and split into tiles at their stack size - along the places' records of the
+ * key when they carry counts: the n-th record of a key is the n-th tile of that key and holds as many as
+ * its count says, so a stack of five and a stack of one of a class that stacks to ten are two tiles
+ * (fnc_stackCounts reconciles them with what the cargo really holds, so nothing is lost or doubled when
+ * the engine or a script changed the cargo meanwhile). Without counts - an older save - the pile is cut
+ * into full stacks and a remainder, as it always was.
  *
  * Every entry gets the key of its record (fnc_entryKey). Every uniform, vest and backpack lying in the
  * container gets two marks on this machine: its item class (einv_storage_itemClass) - its container
@@ -108,16 +113,64 @@ private _fnc_add = {
     _entries pushBack _entry;
 };
 
-// Splits a pile of one kind into tiles of at most its stack size.
+// The counts the places' records carry, key -> the count of each record of that key in order (-1 for
+// one without a count). Read when the first stackable pile asks.
+private _recordCounts = createHashMap;
+private _recordsRead = false;
+
+// Splits a pile of one kind into tiles of at most its stack size - along the records of its key, when
+// the places have any (fnc_stackCounts). The hidden holder's piles are cut plainly: they have no records
+// of their own to follow.
 private _fnc_addStacked = {
     params ["_class", "_count", "_ammo"];
 
-    private _stack = (([_class] call EFUNC(items,getInfo)) get "stack") max 1;
+    private _info = [_class] call EFUNC(items,getInfo);
+    private _stack = (_info get "stack") max 1;
+    private _counts = [];
 
-    while {_count > 0} do {
-        [_class, _count min _stack, _ammo, []] call _fnc_add;
-        _count = _count - _stack;
+    // Only a pile of a class that stacks can lie in several tiles, and only one with no container object
+    // of its own (a uniform or vest keeps one tile each).
+    if (_stack > 1 && {!_hiddenMark} && {_count > 0} && {(_inside getOrDefault [toLowerANSI _class, []]) isEqualTo []}) then {
+        if (!_recordsRead) then {
+            _recordsRead = true;
+
+            {
+                if (_x isEqualType [] && {(_x select [0, 6]) isEqualTypeArray ["", 0, 0, 0, 0, 0]}) then {
+                    private _recordKey = _x select 0;
+                    private _list = _recordCounts get _recordKey;
+
+                    if (isNil "_list") then {
+                        _list = [];
+                        _recordCounts set [_recordKey, _list];
+                    };
+
+                    _list pushBack (_x param [7, -1]);
+                };
+            } forEach (([_container] call FUNC(readPlaces)) select 1);
+        };
+
+        if (count _recordCounts > 0) then {
+            private _probe = createHashMapFromArray [
+                ["class", _class], ["ammo", _ammo], ["capacity", _info get "capacity"], ["attachments", []], ["container", objNull]
+            ];
+            private _given = _recordCounts get ([_probe, _nested] call FUNC(entryKey));
+
+            if (!isNil "_given") then {
+                _counts = [_count, _stack, _given] call FUNC(stackCounts);
+            };
+        };
     };
+
+    if (_counts isEqualTo []) then {
+        while {_count > 0} do {
+            _counts pushBack (_count min _stack);
+            _count = _count - _stack;
+        };
+    };
+
+    {
+        [_class, _x, _ammo, []] call _fnc_add;
+    } forEach _counts;
 };
 
 private _weapons = weaponsItemsCargo _container;

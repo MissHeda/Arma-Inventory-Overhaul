@@ -8,8 +8,9 @@
  * fewer than asked for arrived, and it is a failure, with one line in the RPT; what did arrive stays.
  *
  * With a cell the entry's place is written there (fnc_setPlace) - the caller has checked that the cells are
- * free. A class of items lying in the container already is one pile: the new ones join it, and the cell is
- * only where a pile of that class would lie if it were not there yet.
+ * free. Of a class that stacks the new ones are a stack of their own there (a full stack at most, the rest
+ * joins the other stacks as the cargo's total says, fnc_getContents) beside any stack of the class that
+ * lies elsewhere. With no cell they join the last stack that has room, then open new ones.
  *
  * A uniform, vest or backpack comes empty, a magazine full, a weapon without attachments (fnc_makePayload).
  * Runs where the container is local, as the cargo commands do - the player's own gear, a unit being

@@ -5,8 +5,9 @@
  * it out, or puts a new one in - on the holder's authority only.
  *
  * A record is [key, col, row, w, h, block, rot] - always written with rot, 0 upright or 1 turned a
- * quarter clockwise; a cell that does not say it lies the way the entry lies when it keeps the entry's
- * size, else as its size says (turned when not as wide as the item upright). The places keep one record
+ * quarter clockwise - and, for a tile of a class that stacks in a container, the count it holds as an
+ * eighth element (a new record takes the entry's "count"; a record that moves keeps its own); a cell that
+ * does not say it lies the way the entry lies when it keeps the entry's size, else as its size says (turned when not as wide as the item upright). The places keep one record
  * per entry, keyed by fnc_entryKey: the n-th of a key for the n-th entry of
  * that key. An entry is found by its key and the cell it lies on now. Taking one out of the middle
  * removes its record too - left in, the entries after it would each take the record before theirs and
@@ -83,7 +84,23 @@ if (_new) then {
     // A new entry is the last of its key in the cargo, so its record goes last of its key - which the
     // canonical order keeps (fnc_writePlaces).
     if (_cell isNotEqualTo []) then {
-        _records pushBack [_key, _cell select 0, _cell select 1, _w, _h, _cell param [2, 0], _rot];
+        private _record = [_key, _cell select 0, _cell select 1, _w, _h, _cell param [2, 0], _rot];
+
+        // A tile of a class that stacks says how many it holds, a stack of its own beside any other of the
+        // class (fnc_getContents, fnc_stackCounts).
+        private _count = _entry getOrDefault ["count", -1];
+        private _class = _entry getOrDefault ["class", (_key splitString "|") param [0, ""]];
+
+        if (
+            !_isKey && {_count isEqualType 0} && {_count >= 1} && {(_entry getOrDefault ["attachments", []]) isEqualTo []}
+            && {!(_entry getOrDefault ["hidden", false])}
+            && {isNull (_entry getOrDefault ["container", objNull])}
+            && {(([_class] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) > 1}
+        ) then {
+            _record pushBack (floor (_count min ((([_class] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) max 1)));
+        };
+
+        _records pushBack _record;
         _changed = true;
     };
 } else {
@@ -124,7 +141,16 @@ if (_new) then {
         if (_cell isEqualTo []) then {
             _records deleteAt _index;
         } else {
-            _records set [_index, [_key, _cell select 0, _cell select 1, _w, _h, _cell param [2, 0], _rot]];
+            private _record = [_key, _cell select 0, _cell select 1, _w, _h, _cell param [2, 0], _rot];
+
+            // It moves; how many it holds stays.
+            private _was = _records select _index;
+
+            if (count _was >= 8) then {
+                _record pushBack (_was select 7);
+            };
+
+            _records set [_index, _record];
         };
 
         _changed = true;
@@ -133,14 +159,4 @@ if (_new) then {
 
 if (!_changed) exitWith {};
 
-if (GVAR(executing)) then {
-    private _index = GVAR(buffer) findIf {(_x select 0) isEqualTo _holder};
-
-    if (_index >= 0) then {
-        (GVAR(buffer) select _index) set [1, _records];
-    } else {
-        GVAR(buffer) pushBack [_holder, _records];
-    };
-} else {
-    [_holder, _records] call FUNC(writePlaces);
-};
+[_holder, _records] call FUNC(setRecords);

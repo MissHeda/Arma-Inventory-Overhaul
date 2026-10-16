@@ -9,7 +9,9 @@
  * Given no entry, it hands back the view itself - the layout of fnc_getLayout ("entries", "blocks",
  * "overflow", ...) plus "open" for a grid without compartments (the ground, a kit without a grid of its own) - which the ops keep
  * up to date as they change the holder: a take lowers its tile's count, a put adds the tile it placed.
- * Outside a phase nothing is kept: every call lays the holder out anew.
+ * Outside a phase nothing is kept: every call lays the holder out anew. Inside one, the first view of a
+ * container also puts the picture's records into the phase's buffer, so each stackable tile has a record
+ * with its count before an op changes the cargo.
  *
  * Arguments:
  * 0: Holder <OBJECT or STRING>
@@ -64,6 +66,14 @@ if ((_cached getOrDefault ["holder", objNull]) isEqualTo _holder) then {
 
     if (GVAR(executing)) then {
         GVAR(cache) set [_id, createHashMapFromArray [["holder", _holder], ["view", _view]]];
+
+        // The picture's records become the phase's own before any op changes the cargo: each tile of a
+        // stackable class then has a record with its count, and what the ops do to a count (a part taken, a
+        // join, a split) is a change to that record - rather than to a layout read back from a cargo that
+        // already changed.
+        if (!_isKey && {(_view get "records") isNotEqualTo (([_holder] call FUNC(readPlaces)) select 1)}) then {
+            [_holder, +(_view get "records")] call FUNC(setRecords);
+        };
     };
 };
 

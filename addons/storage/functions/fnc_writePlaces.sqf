@@ -27,9 +27,11 @@
  *
  * Arguments:
  * 0: Holder <OBJECT or STRING>
- * 1: Records [[key, col, row, w, h, block, rot], ...] - put in canonical order here; rot (0 upright, 1
- *    turned a quarter clockwise) is kept when it is one of those, a record without it stays as it came
- *    (fnc_getLayout reads it by its size) <ARRAY>
+ * 1: Records [[key, col, row, w, h, block, rot, count], ...] - put in canonical order here; rot (0
+ *    upright, 1 turned a quarter clockwise) is kept when it is one of those, a record without it stays as
+ *    it came (fnc_getLayout reads it by its size); count, how many a tile of a class that stacks holds, is
+ *    kept when there is a whole number from 1 up and a rot before it (fnc_getContents, fnc_stackCounts)
+ *    <ARRAY>
  * 2: Write even when nothing changed <BOOL> (default: false)
  *
  * Return Value:
@@ -89,6 +91,13 @@ private _keys = [];
 
         if (_rot isEqualTo 0 || {_rot isEqualTo 1}) then {
             _record pushBack _rot;
+
+            // How many a stackable tile holds, once it has a rot to stand behind.
+            private _count = _x param [7, -1];
+
+            if (_count isEqualType 0 && {_count >= 1}) then {
+                _record pushBack (floor _count);
+            };
         };
 
         _group pushBack _record;
