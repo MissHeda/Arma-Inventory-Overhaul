@@ -18,7 +18,7 @@
  * before is closed (einv_compat_efak - only when that addon is loaded).
  *
  * Nothing the last window waited for carries over (moves under way, answers, drift), nor the tiles it
- * had selected or the frame it was dragging out; what lies around is read for the first build
+ * had selected; what lies around is read for the first build
  * (fnc_readNearby, in the inventory only).
  *
  * Arguments:
@@ -120,13 +120,11 @@ GVAR(drift) = [];
 GVAR(handQueue) = [];
 GVAR(handStarted) = -1;
 
-// The selection is view state of one window, and nothing is dragged out yet.
+// The selection is view state of one window, and no press on an empty cell waits.
 GVAR(selection) = [];
 GVAR(selectionSide) = "";
 GVAR(selectionAnchor) = [];
-GVAR(bandPress) = [];
-GVAR(band) = false;
-GVAR(bandTiles) = [];
+GVAR(emptyPress) = [];
 GVAR(dragGroup) = [];
 GVAR(signatureParts) = [];
 

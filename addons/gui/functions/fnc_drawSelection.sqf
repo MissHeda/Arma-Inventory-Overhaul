@@ -7,13 +7,10 @@
  * again after every change of the selection - and at the end of a build and of a redraw of tiles
  * (fnc_build, fnc_redrawTiles), which made the tiles anew.
  *
- * While a frame is dragged out from an empty cell (fnc_updateBand), the tiles it touches are shown the same
- * way before it is let go.
- *
  * The name at the mouse always lies over the frames (fnc_raiseTooltip).
  *
  * Arguments:
- * 0: Tiles that only look selected, [[grid index, tile index], ...] <ARRAY> (default: [])
+ * None
  *
  * Return Value:
  * None
@@ -26,8 +23,6 @@
 
 disableSerialization;
 
-params [["_preview", [], [[]]]];
-
 {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(selectionFrames), []]);
 uiNamespace setVariable [QGVAR(selectionFrames), []];
 
@@ -36,10 +31,6 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 if (isNull _display) exitWith {};
 
 private _tiles = call FUNC(selectionTiles);
-
-{
-    _tiles pushBackUnique _x;
-} forEach _preview;
 
 if (_tiles isEqualTo []) exitWith {};
 

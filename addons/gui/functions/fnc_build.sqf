@@ -60,7 +60,7 @@ private _start = diag_tickTime;
 // not stopped here: a camera that still frames the same is kept (below).
 private _ownCamera = !("camera" in GVAR(hooks));
 
-// A rebuild ends any drag, and the frame being dragged out: the tiles they pointed at are about to go. The drag's
+// A rebuild ends any drag: the tiles it pointed at are about to go. The drag's
 // timing line (einv_gui_debugTiming) is written first (fnc_logDrag).
 call FUNC(logDrag);
 
@@ -70,13 +70,10 @@ GVAR(stripDrag) = [];
 ctrlDelete (uiNamespace getVariable [QGVAR(dragCounter), controlNull]);
 GVAR(dragTarget) = [];
 GVAR(dragGroup) = [];
-GVAR(bandPress) = [];
-GVAR(band) = false;
-GVAR(bandTiles) = [];
+GVAR(emptyPress) = [];
 uiNamespace setVariable [QGVAR(dragFootprints), []];
 uiNamespace setVariable [QGVAR(dragShapes), []];
 uiNamespace setVariable [QGVAR(dragGhosts), []];
-uiNamespace setVariable [QGVAR(bandFrame), []];
 uiNamespace setVariable [QGVAR(selectionFrames), []];
 GVAR(searchQueue) = [];
 GVAR(panels) = [];

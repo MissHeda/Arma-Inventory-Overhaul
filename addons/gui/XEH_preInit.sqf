@@ -115,13 +115,9 @@ GVAR(selectionSide) = "";
 GVAR(selectionAnchor) = [];
 uiNamespace setVariable [QGVAR(selectionFrames), []];
 
-// A frame dragged out from an empty cell (fnc_startBand): the press, [column group, mouse, how far the
-// column was scrolled in pixels, Ctrl held, side] or [], whether the frame is out, and the tiles it
-// touches now - drawn as selected before it is let go. Its controls are in uiNamespace (bandFrame).
-GVAR(bandPress) = [];
-GVAR(band) = false;
-GVAR(bandTiles) = [];
-uiNamespace setVariable [QGVAR(bandFrame), []];
+// A press on an empty cell of a column (fnc_onMouseButton): [Ctrl held, mouse] or [] for none. Let go in place it
+// is a click that clears the selection; dragged away it does nothing.
+GVAR(emptyPress) = [];
 
 // The tiles dragged together while several are selected, [grid index, tile index] each, or [] for a single
 // item (fnc_startDrag, fnc_updateDrag). The footprints and the pictures at the mouse are controls, so they

@@ -130,13 +130,14 @@
 
 // The hands' queue (fnc_queueMoves, fnc_drawQueue, fnc_animateQueue): each action waiting for the hands has a circle on its
 // tile, drawn like the search's ring (the same SEARCH_RING pictures). It is QUEUE_RING_SIZE of the tile's shorter side, never
-// more than QUEUE_RING_MAX pixels; the dark disc behind it QUEUE_DISC_SIZE of the ring. Only the first QUEUE_SHOWN_MAX actions
-// get one (a Take all on a big crate would make hundreds of controls). Longer than QUEUE_PAUSE between two frames of the
+// more than QUEUE_RING_MAX pixels; the dark disc behind it QUEUE_DISC_SIZE of the ring. Only the first QUEUE_DISC_MAX actions
+// get the disc (a Take all on a big crate would make hundreds of controls): every later one is marked by the faint ring and its
+// number alone, so every tile that waits shows it. Longer than QUEUE_PAUSE between two frames of the
 // queue, and it was paused (another window over this one): the time it stood still does not count.
 #define QUEUE_RING_SIZE 0.62
 #define QUEUE_RING_MAX 56
 #define QUEUE_DISC_SIZE 0.86
-#define QUEUE_SHOWN_MAX 30
+#define QUEUE_DISC_MAX 30
 #define QUEUE_PAUSE 0.25
 
 // Tiles that do not match the search field fade this far, this quickly (fnc_applyFilter).
@@ -232,12 +233,10 @@
 #define DRAG_FOOTPRINT_ALPHA 0.35
 
 // Several tiles selected (fnc_drawSelection) and dragged together (fnc_makeGhost): a selected tile gets
-// an accent frame and a fill SELECT_FILL_ALPHA strong, the frame dragged out from an empty cell
-// (fnc_startBand) a fill BAND_FILL_ALPHA strong. A group drag shows at most GROUP_GHOSTS pictures
+// an accent frame and a fill SELECT_FILL_ALPHA strong. A group drag shows at most GROUP_GHOSTS pictures
 // at the mouse - the rest still goes along, and every tile gets its footprint.
 #define GROUP_GHOSTS 12
 #define SELECT_FILL_ALPHA 0.1
-#define BAND_FILL_ALPHA 0.08
 
 // The sounds (fnc_playSound, fnc_playLayer, fnc_sendNoise). The same sound twice within SOUND_REPEAT_GAP plays
 // once. Others hear a looter at most every NOISE_GAP seconds, NOISE_GAIN as loud as he does, from NOISE_POINT on

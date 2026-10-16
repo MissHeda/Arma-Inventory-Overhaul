@@ -2,7 +2,7 @@
 
 An Arma 3 inventory built from scratch, in the look of Enhanced First Aid Kits' kit window. It replaces
 the vanilla inventory with a grid: items are tiles of their own size that you drag, stack and split, and
-loot has to be searched before you can see it. Ctrl+click, Shift+click or a frame dragged over the tiles
+loot has to be searched before you can see it. Ctrl+click or Shift+click on the tiles
 select several of them to move together, and every box has a button that takes everything out of it ("Take
 all") or puts everything of yours into the box beside it ("Put all in").
 

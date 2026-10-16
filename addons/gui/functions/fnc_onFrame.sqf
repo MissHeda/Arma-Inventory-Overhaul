@@ -14,9 +14,6 @@
  * in place builds the window after all. Nothing of it runs more often than SIGNATURE_INTERVAL: the frame
  * itself only follows the mouse and what is held.
  *
- * A frame dragged out from an empty cell (fnc_startBand) is followed here like a drag, and nothing is
- * built while it is held.
- *
  * The mouse is read here rather than from mouse events: the tiles are drawn by many small controls,
  * and which of them gets an event says little about the cell the mouse is on. The cell comes from the
  * position alone (fnc_screenToCell).
@@ -411,29 +408,10 @@ if (GVAR(dragging)) exitWith {
     [_display, _mouse] call FUNC(updateDrag);
 };
 
-// A press on an empty cell of a column becomes a frame once the mouse moves; the frame follows the mouse
-// every frame. Let go outside the window - where no event reaches - it ends all the same.
-if (GVAR(bandPress) isNotEqualTo [] && {!GVAR(band)}) then {
-    (GVAR(bandPress) select 1) params ["_bandStartX", "_bandStartY"];
-
-    if (inputMouse 0 == 0) then {
-        // The button came up where no click reached us: it was a click on an empty cell all the same.
-        GVAR(bandPress) = [];
-    } else {
-        if (abs ((_mouse select 0) - _bandStartX) > DRAG_THRESHOLD || {abs ((_mouse select 1) - _bandStartY) > DRAG_THRESHOLD}) then {
-            [_display] call FUNC(startBand);
-        };
-    };
-};
-
-if (GVAR(band)) exitWith {
-    GVAR(lastMouse) = _mouse;
-
-    if (inputMouse 0 == 0) then {
-        [_display] call FUNC(endBand);
-    } else {
-        [_display, _mouse] call FUNC(updateBand);
-    };
+// A press on an empty cell is a click and nothing more: let go outside the window, where no event reaches,
+// it is forgotten.
+if (GVAR(emptyPress) isNotEqualTo [] && {inputMouse 0 == 0}) then {
+    GVAR(emptyPress) = [];
 };
 
 // Scrolling a column moves the tiles under a mouse that stands still, so the hover is looked at again
@@ -547,9 +525,8 @@ if (_why isNotEqualTo "") exitWith {
 // or lost to a weapon change, is looked after (fnc_poseCheck).
 if ([_display] call FUNC(poseCheck)) exitWith {};
 
-// Not while a tile is held, or a frame is about to be dragged out: a rebuild would pull it from under the
-// mouse.
-if (_now < GVAR(nextSignature) || {GVAR(press) isNotEqualTo []} || {GVAR(bandPress) isNotEqualTo []}) exitWith {};
+// Not while a tile is held: a rebuild would pull it from under the mouse.
+if (_now < GVAR(nextSignature) || {GVAR(press) isNotEqualTo []}) exitWith {};
 
 GVAR(nextSignature) = _now + SIGNATURE_INTERVAL;
 

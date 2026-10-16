@@ -118,6 +118,9 @@ GVAR(press) = [];
 GVAR(dragging) = false;
 GVAR(dragTarget) = [];
 
+// Where the mouse is on is looked at in full again, so the hovered tile gets its outline back.
+uiNamespace setVariable [QGVAR(hoverHold), []];
+
 {
     _x ctrlSetFade 0;
     _x ctrlCommit 0;

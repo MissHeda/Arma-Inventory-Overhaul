@@ -46,6 +46,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 - Quick move on a key: F over a tile does what a double click does (moves it over, opens a uniform, vest or backpack lying in a container, moves a whole selection); the double click still works. The key is a CBA keybind in Configure Addons (`einv_gui_quickMove`, "Quick move (inventory window)") and the footer shows it as "F Quick move".
 - A container whose empty rows are folded away ("+34 empty rows") takes what is dragged onto it anywhere: onto its box, the fold line under the grid, or a cell that does not take the item (taken, or the item taller than the rows shown), the item is laid down in the first free spot of the whole container, folded rows included - no need to unfold it first. The footprint shows the shown compartment at half strength and the hint says "Goes to the first free spot - the folded rows too".
 - Swapping two tiles by dragging one onto the other also works in the ACE Arsenal panel between the container and the staging space (a swap, or a tile joining a stack of its own class there); ACE is told of both classes. Within the open container it already did.
+- Every item tile in the grids (containers, the ground, vehicles, kits) gets the outline a weapon or attachment slot shows when the mouse is on it: the accent colour with the same rounded corners, around the tile's whole footprint (a long, tall, turned or shaped item too). One outline at a time, made for the tile under the mouse and gone when it leaves; it also goes while the item is held, where the footprint shows instead.
 
 ### Changed
 
@@ -72,6 +73,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 - The footer's key hints show ACE's mouse pictures instead of the words "Right click", "Double click" and "Ctrl+Click" (a modifier stays a key cap before the picture), in the order Esc Close, Quick move (F), G Drop, the hotbar's 4-0, Ctrl+click Select, right click Options. Without ACE's pictures they fall back to words.
 - While the inventory window is open, keys it has no use for no longer reach the game behind it. Escape, PrintScreen and the talking keys (chat, push to talk, so TFAR and ACRE2 keep working) are left to the engine; a key typed into a field is the field's. The mouse is unchanged.
 - The setting "Looting animation" (`einv_gui_animation`) is Off by default; the code's fallback value says so too.
+- The hands' queue marks every tile that waits, however long it is: before, the items past the 30th only turned grey. The first 30 keep the dark disc, the faint ring and their number; every later one gets the faint ring (a little stronger) and the number without the disc, so a Take all on a big crate stays cheap.
 
 ### Removed
 
@@ -79,6 +81,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 - `einv_items_massPerCell` and `einv_items_stackSmall` have no control any more: the load per cell is the General page's (the header's `cell=`; the setting stays at 5 for texts without one), and nothing stacks by default but the whitelist, so "Small items per tile" only means something moved off 10 - by hand in `einv_main_settings` (`items_stackSmall=20`).
 - The context menu rows "Move over", "Move N items over", "Drop N items", "Sort <container>" and "Take off" (a worn slot keeps "Drop"; "Take off" put the item into the player's own gear first, which Ctrl+click on the slot still does).
 - Alt+click no longer puts an item on: equipping stays a drag onto a slot, a double click on the ground and the menu's Equip. The footer's "Alt+Click Equip" is gone.
+- The frame dragged out from an empty cell to select the tiles it touches is gone: pressing and dragging on an empty cell does nothing now. Ctrl+click, Shift+click and Ctrl+A still select, and a plain click on an empty cell still clears the selection.
 
 ### Fixed
 

@@ -4,16 +4,17 @@
  * Author: Miss Heda
  * Shows the hands' queue (fnc_queueMoves): every action waiting gets a circle on the tile it takes from - or
  * on the slot of the worn item it takes off -, made as the search's ring is (fnc_showSearch, the same ring
- * pictures) over a dark disc. The first, the one the hands are busy with, has the ring that fills
- * (fnc_animateQueue turns its picture on); the others wait with a faint ring and their place in the queue as a
- * number. The tiles are flagged "pending", so they cannot be lifted or acted on, and "queued" with the
- * entry's id, so a click on one cancels it (fnc_onMouseButton, fnc_cancelQueued); they fade as a move in
- * flight does.
+ * pictures) over a dark disc. Past QUEUE_DISC_MAX entries the disc is left out (two controls instead of
+ * three, so a Take all on a big crate stays cheap), the faint ring and the number still show. The first,
+ * the one the hands are busy with, has the ring that fills (fnc_animateQueue turns its picture on); the others
+ * wait with a faint ring and their place in the queue as a number. The tiles are flagged "pending", so they
+ * cannot be lifted or acted on, and "queued" with the entry's id, so a click on one cancels it
+ * (fnc_onMouseButton, fnc_cancelQueued); they fade as a move in flight does.
  *
  * Called by fnc_drawPending, which every build and every redraw of tiles ends with: the circles of the
  * last call go first, whether or not their controls are still there (a build deleted them, a redraw of the
- * section did not). Not per frame - the frame only changes the first ring's picture. Only the first
- * QUEUE_SHOWN_MAX entries get a circle; the others still wait their turn, their tiles marked.
+ * section did not). Not per frame - the frame only changes the first ring's picture. Every entry whose tile
+ * or slot the window shows is marked.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -102,7 +103,7 @@ _track set [3, ((_track select 3) * 2.2) min 1];
         };
     };
 
-    if (_target isEqualTo [] || {_position >= QUEUE_SHOWN_MAX}) then {continue};
+    if (_target isEqualTo []) then {continue};
 
     _target params ["_parent", "_rect"];
     _rect params ["_left", "_top", "_width", "_height"];
@@ -114,14 +115,23 @@ _track set [3, ((_track select 3) * 2.2) min 1];
     private _discSize = _size * QUEUE_DISC_SIZE;
     private _fx = [];
 
-    // The disc, the whole ring faint, then what says where it is in the queue.
-    _fx pushBack ([
-        _display, _parent,
-        [_centerX - _discSize * pixelW / 2, _centerY - _discSize * pixelH / 2, _discSize * pixelW, _discSize * pixelH],
-        UI_TEX(circle_ca), [0, 0, 0, [0.6, 0.45] select (_position > 0)]
-    ] call FUNC(uiIcon));
+    // The disc (not past QUEUE_DISC_MAX), the whole ring faint, then what says where it is in the queue.
+    if (_position < QUEUE_DISC_MAX) then {
+        _fx pushBack ([
+            _display, _parent,
+            [_centerX - _discSize * pixelW / 2, _centerY - _discSize * pixelH / 2, _discSize * pixelW, _discSize * pixelH],
+            UI_TEX(circle_ca), [0, 0, 0, [0.6, 0.45] select (_position > 0)]
+        ] call FUNC(uiIcon));
+    };
 
-    _fx pushBack ([_display, _parent, _ringRect, SEARCH_RING(SEARCH_FRAMES), _track] call FUNC(uiIcon));
+    // Without the disc behind it the ring is stronger, to stay readable over the picture.
+    private _ringColor = +_track;
+
+    if (_position >= QUEUE_DISC_MAX) then {
+        _ringColor set [3, ((_track select 3) * 2) min 0.7];
+    };
+
+    _fx pushBack ([_display, _parent, _ringRect, SEARCH_RING(SEARCH_FRAMES), _ringColor] call FUNC(uiIcon));
 
     if (_position == 0) then {
         // The ring that fills: as far round as the time has run (a redraw in the middle keeps it).

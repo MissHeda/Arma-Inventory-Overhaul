@@ -192,6 +192,13 @@ ctrlDelete (uiNamespace getVariable [QGVAR(compare), controlNull]);
 uiNamespace setVariable [QGVAR(compare), controlNull];
 uiNamespace setVariable [QGVAR(tipShown), controlNull];
 
+// The hover outline of the tile lifted goes: the footprint shows where it would land (fnc_updateHover looks
+// again when the drag ends, fnc_endDrag).
+if ((GVAR(hover) param [0, ""]) isEqualTo "tile") then {
+    {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(hoverRing), []]);
+    uiNamespace setVariable [QGVAR(hoverRing), []];
+};
+
 // Any other tile: the selection is that tile alone (drawn again only when that changes it).
 if (_group isEqualTo [] && {_slotSource isEqualTo []} && {call FUNC(isInventoryMode)}) then {
     [_gridIndex, _tileIndex, "only"] call FUNC(select);

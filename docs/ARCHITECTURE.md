@@ -1078,7 +1078,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
 - **State** (documented variable by variable in `gui/XEH_preInit.sqf`): who and what - `einv_gui_unit`, `container`, `secondary`,
   `person`, `personMode`; the frame - `frameDriver`, `nextCheck`, `nextSignature`, `hooks`; what the build made (controls, so in
   uiNamespace) - `created`, `grids`, `slots`, `hint`, `windows`, `scrollRestore`; the mouse - `hover`, `press`, `dragging`,
-  `dragTarget`, `dragSize`, `dragRot`, `dragCount`, `dragGroup`, `selection`, `bandPress`; the moves - `inFlight`, `answers`,
+  `dragTarget`, `dragSize`, `dragRot`, `dragCount`, `dragGroup`, `selection`, `emptyPress`; the moves - `inFlight`, `answers`,
   `drift`; view state kept for the mission - `collapsed`, `expanded`, `opened` (nested containers opened in the loot column,
   `[class, object, parent]`), `filter`; and `nearby`, `searchQueue`, `panels`, `equipmentRect`.
 - **Frame drivers.** `fnc_startFrame [driver]` / `fnc_stopFrame`, kept as `einv_gui_frameDriver = [driver, id]`: `"pfh"` is a CBA
@@ -1113,7 +1113,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   driver takes it only when the setting was on as the window opened): "hover held" is a mouse moving inside the cell it was in,
   "same" one that found what it had found, "new" one that found something else. The rest of a frame is the engine drawing the
   display's controls (and the camera's view): idle script cost against the frame time says which of the two a low FPS is.
-- **`fnc_onFrame`** each frame: hover, the drag or band, the focus rule, kit windows moving, the search animation; every
+- **`fnc_onFrame`** each frame: hover, the drag, the focus rule, kit windows moving, the search animation; every
   `CHECK_INTERVAL` 0.25 s the "stay open" checks; once a second `fnc_refresh` with the **signature** ("Drawing only what changed"
   above). Nothing is built while a tile or frame is held. A window covered by another display (`fnc_isCovered`) keeps still and
   only checks whether to close.
@@ -1144,8 +1144,9 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   every redraw of tiles, every settle) and after a kit window is drawn on its own: it deletes the last circles and makes them again - a
   dark disc, the faint full ring, and for the first entry the ring that fills (`SEARCH_RING` pictures, the accent colour), for the others their
   place as a number - on the tile's group (so they scroll and clip with it) or on the slot, flags the tiles `pending` (faded as a move in
-  flight, so nothing can lift or act on them; `fnc_startDrag` also looks in the queue) and `queued` with the entry's id; at most
-  `QUEUE_SHOWN_MAX` 30 entries get a circle. `fnc_onFrame` calls `fnc_animateQueue` each frame while the queue holds something and the
+  flight, so nothing can lift or act on them; `fnc_startDrag` also looks in the queue) and `queued` with the entry's id; every entry
+  whose tile or slot the window shows is marked, but only the first `QUEUE_DISC_MAX` 30 get the dark disc - the later ones keep the
+  faint ring (a little stronger) and their number, two controls instead of three. `fnc_onFrame` calls `fnc_animateQueue` each frame while the queue holds something and the
   window is not covered (the time it stood still does not count, as for the search): that one place changes the first ring's picture when its
   step changes and calls `fnc_runQueue` when the time is up - no control is made per frame. A left press on a queued tile or slot
   (`fnc_onMouseButton`) or "Cancel" in its menu (`fnc_contextMenu`) calls `fnc_cancelQueued [id]` (0: all): the entry leaves, the tile is
@@ -1423,6 +1424,14 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   name or card made again. Only a changed target does work: the light, the name at the mouse or the comparison card (a control
   made then, never per frame), the hint's text. Free cells and "nothing" are never held (a redraw resets the hover to `[]`, and
   a held `[]` would not notice a tile that came there).
+- **The hover outline.** A tile under the mouse gets, besides the lighter surface, the outline a slot has: the accent colour, rounded as
+  `fnc_uiRing` rounds a slot's (radius at most a quarter of a cell's height, so square corners on a plain look), around its box (`rect`,
+  w x h cells as it lies, a turned one too), or on its own cells (`fnc_uiShape` "frame", two pixels) when it is shaped. There is one
+  outline at a time, `einv_gui_hoverRing`, the slot's and the tile's: `fnc_updateHover`'s light makes it in the column's group when the
+  hover changes (so it scrolls and clips with the tile, and lies under the name at the mouse; a grid on the display itself asks
+  `fnc_raiseTooltip`) and deletes it when the hover leaves - nothing per tile, nothing per frame. `fnc_startDrag` deletes a lifted
+  tile's outline (the footprint shows instead), `fnc_endDrag` clears `hoverHold` so the next frame gives the tile under the mouse its
+  outline again; `fnc_redrawTiles` and `fnc_build` delete it with the groups it lay in. A tile waiting in the hands' queue shows it too.
 - **What a frame of a drag costs.** `fnc_updateDrag` works out only what changed. Every frame it reads the middle button and holds
   or edge-scrolls the columns (each column's box is worked out at its first frame, element 3 of its `dragScroll` entry), then
   compares the mouse and what is held (`dragCount`, `dragRot`, `count inFlight`) with the last frame (`dragRoom` "frame"); nothing
@@ -1489,8 +1498,9 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   "4 / 6" on the counter), *kit* (the kit decides) or *none* (into itself, a slot, a person's container the player may not put
   into). `fnc_sendPlan` sends keep and pack: tiles that stay in their holder are one `placeMany`, the others one move each with
   the planned cell.
-- **Selection** (inventory only): click selects, Ctrl+click toggles, Shift+click takes the range, a frame dragged from an empty
-  cell (`fnc_startBand`, `fnc_updateBand`, `fnc_endBand`) takes what it touches, Ctrl+A the section (`fnc_selectSection`). Refs
+- **Selection** (inventory only): click selects, Ctrl+click toggles, Shift+click takes the range, Ctrl+A the section
+  (`fnc_selectSection`). A press on an empty cell is only a click that clears the selection (`einv_gui_emptyPress`, `[Ctrl held, mouse]`); dragging
+  from it does nothing - there is no frame to drag out. Refs
   are `[holder, key, compartment, col, row]` (`einv_gui_selection`), found again on every build by `fnc_selectionTiles`; one side
   at a time (`own` or `loot`); searched tiles only. **Double click** - or the quick move key, F by default (CBA keybind `einv_gui_quickMove`, `fnc_isQuickKey`, read by `fnc_onKeyDown` since CBA's keys do not run in a dialog; both do `fnc_quickAction`) - moves a tile over (`fnc_quickMove`: from own gear into the
   loot column's containers in order, else the ground; from loot into uniform, vest, backpack), opens a kit or nested container, or

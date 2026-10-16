@@ -4,8 +4,8 @@
  * Author: Miss Heda
  * A mouse button went down or up anywhere on the window. Down on a tile or a filled equipment slot
  * remembers the press - moving the mouse turns it into a drag (fnc_onFrame, fnc_startDrag). Down on an
- * empty cell of a column remembers the press as well: moved, it drags out a frame that selects the tiles
- * it touches (fnc_startBand). Up ends a drag (fnc_endDrag) or a frame (fnc_endBand), or, after a press
+ * empty cell of a column remembers the press as well, but moving the mouse does nothing with it. Up ends a
+ * drag (fnc_endDrag), or, after a press
  * that never moved:
  *   a plain click - a tile is selected (fnc_select); on a tile of a selection of several it does nothing,
  *                   so that a double click can move them all; on an empty cell the selection is cleared
@@ -406,8 +406,7 @@ if (_down) exitWith {
                 GVAR(press) = [_gridIndex, -1, _mouse, [0, 0], _ctrl, [], _alt, _shift, _target];
             };
 
-            // An empty cell of a column (not under a kit window, which has no frame to drag out): the press
-            // may become a frame that selects, or a click that deselects.
+            // An empty cell of a column (not under a kit window): the press is a click that deselects.
             if (_layer isNotEqualTo "" || {!(call FUNC(isInventoryMode))}) exitWith {};
 
             private _cell = [];
@@ -430,7 +429,7 @@ if (_down) exitWith {
 
             if (isNull _column) exitWith {};
 
-            GVAR(bandPress) = [_column, _mouse, [_column] call FUNC(scrollPixels), _ctrl, _grid get "side"];
+            GVAR(emptyPress) = [_ctrl, _mouse];
         };
     };
 
@@ -448,19 +447,19 @@ if (GVAR(stripDrag) isNotEqualTo []) exitWith {
     true
 };
 
-// A frame dragged out from an empty cell comes up: the tiles it touched are the selection.
-if (GVAR(band)) exitWith {
-    [_display] call FUNC(endBand);
-    true
-};
+// A press on an empty cell comes up: a click on it, so the selection goes unless Ctrl is held. A press that
+// moved on (dragged over the cells) does nothing.
+if (GVAR(emptyPress) isNotEqualTo []) exitWith {
+    GVAR(emptyPress) params ["_ctrlAtPress", "_pressAt"];
 
-// A press on an empty cell that never moved is a click on it: the selection goes, unless Ctrl is held.
-if (GVAR(bandPress) isNotEqualTo []) exitWith {
-    private _ctrlAtBandPress = GVAR(bandPress) select 3;
+    private _now = getMousePosition;
 
-    GVAR(bandPress) = [];
+    GVAR(emptyPress) = [];
 
-    if (!_ctrl && {!_ctrlAtBandPress}) then {
+    if (
+        !_ctrl && {!_ctrlAtPress} && {abs ((_now select 0) - (_pressAt select 0)) <= DRAG_THRESHOLD}
+        && {abs ((_now select 1) - (_pressAt select 1)) <= DRAG_THRESHOLD}
+    ) then {
         call FUNC(clearSelection);
     };
 

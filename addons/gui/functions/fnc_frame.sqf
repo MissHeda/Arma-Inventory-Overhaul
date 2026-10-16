@@ -32,7 +32,7 @@ private _took = (diag_tickTime - _from) * 1000;
 
 private _moved = GVAR(hoverNote) isNotEqualTo "" && {GVAR(lastMouse) isNotEqualTo _before};
 
-private _kind = if (GVAR(dragging) || {GVAR(band)}) then {
+private _kind = if (GVAR(dragging)) then {
     "drag"
 } else {
     [GVAR(hoverNote), "idle"] select !_moved

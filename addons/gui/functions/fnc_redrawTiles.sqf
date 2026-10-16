@@ -267,7 +267,10 @@ if ((uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo []) then {
     };
 };
 
-// The mouse is on other tiles now, whatever stood still: looked at again, and no double click across it.
+// The mouse is on other tiles now, whatever stood still: looked at again, and no double click across it. The
+// hover outline of a tile lay in a group that was drawn anew.
+{ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(hoverRing), []]);
+uiNamespace setVariable [QGVAR(hoverRing), []];
 GVAR(hover) = [];
 GVAR(lastClick) = [[], -1];
 GVAR(lastMouse) = [];
