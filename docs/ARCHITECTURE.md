@@ -1073,8 +1073,8 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   above). Nothing is built while a tile or frame is held. A window covered by another display (`fnc_isCovered`) keeps still and
   only checks whether to close.
 - **Moves under way.** The window predicts nothing: `fnc_sendMoves` turns each move into phases (at most `BATCH_MAX` moves per
-  transaction, the next chunk when the answer came; kinds `move`, `equip`, `unequip`, `swap`, `sort`, `placeMany`; a kit through
-  its holder type's ops). Moved tiles stay faded and cannot be lifted, their target cells outlined (`einv_gui_inFlight`,
+  transaction, the next chunk when the answer came; kinds `move`, `equip`, `unequip`, `swap`, `sort`, `placeMany`, `exchange`; a kit
+  through its holder type's ops). Moved tiles stay faded and cannot be lifted, their target cells outlined (`einv_gui_inFlight`,
   `fnc_drawPending`) until the answer and the new places arrived (`einv_gui_answers`, finished by `fnc_afterAction`, at the latest
   `ANSWER_WAIT` 3 s after the answer; given up after `PENDING_TIMEOUT` 15 s); each sounds when finished. On
   `einv_items_rulesChanged` an open window is built again once a held tile is let go.
@@ -1367,6 +1367,26 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   (`fnc_liesIn`). On an own slot it fits when `slotAccepts` says so; worn gear over the same slot of another unit is exchanged
   (`fnc_canSwap`, `fnc_doSwap`); outside every panel it goes on the ground. `fnc_endDrag` hands the result to `fnc_sendMoves` (or
   the `drop` hook).
+- **Tile onto tile: a swap** (`fnc_swapPlan`, `fnc_applySwap`). Where a grid drop is refused as `"NoRoom"` for taken cells - and only
+  there: the whole of a stack held, nothing from a slot or a group, no kit's grid or ACE's list, not the Arsenal's staging space; a
+  kit's tile, a magazine that repacks and every other answer of a tile come first - `fnc_updateDrag` asks `fnc_swapPlan` once per
+  hovered footprint (`dragRoom` `swap|grid|col|row|w|h|rot|moves under way`, from the same `cells|n` the free-cell test uses). It is a
+  swap when the footprint, as held, covers the cells of exactly one other tile (the rest free or the dragged tile's own) of another
+  class (the same class would only merge), that tile is searched and not on its way, and it finds a free spot at the cell the dragged
+  tile came from - as it lies, else turned a quarter, its corner on the dragged tile's corner; cells the dragged tile leaves are free,
+  and on one compartment neither new footprint may touch the other. The usual rules hold both ways (`fnc_checkTouch` on each side,
+  `fnc_backpackIntoBackpack`, `fnc_liesIn`, another player's kit via `checkTile`); a pile on the ground never loses its last tile
+  that way (the engine deletes an empty pile). Weight asks nothing. The target is `["grid", ..., place, objNull, [index of the other
+  tile, cell of the dragged tile, cell of the other]]` (cells `[col, row, compartment, w, h, rot]`); both footprints are drawn in the
+  `accent` colour (`dragFootprint` on the new cells of the dragged tile, `dragSwapFootprint`, made at the lift, on the other tile's new
+  ones, cut to what its column shows) and the footer says "Swap places with <name>". `fnc_endDrag` calls `fnc_applySwap`: within one
+  container one `placeMany` of the two tiles (op `placeMany` lifts both, so each other's cells are free, and refuses as a whole);
+  between two containers one move of the kind `exchange` in `fnc_sendMoves` - four steps `take A` (A's root), `take B` (B's root),
+  `put A` at B's cell (B's root), `put B` at A's cell (A's root), placed in the phases by the usual rule (one phase when the roots are
+  the same, else A's take, B's take and put, A's put), so through the hub as any move, each machine running its own ops with its own
+  guards and reach checks. It counts for two moves in a chunk, has two records (one per tile; the answer says "moved N of 2" when one
+  failed), fades both tiles and outlines both target cells while under way. Nothing is lost or doubled: a take that did not go leaves
+  its tile where it is, a put that did not fit bounces and settlement (`fnc_settle`) puts the payload back where it came from.
 - **Group mode** (`einv_gui_dragGroup`, `fnc_groupMode`): whole stacks, no turning, no wheel; over a grid *keep* (one compartment,
   every tile's cell free or lifted), *pack* (`einv_storage_fnc_plan` into the hovered container: an outline green, amber or red,
   "4 / 6" on the counter), *kit* (the kit decides) or *none* (into itself, a slot, a person's container the player may not put

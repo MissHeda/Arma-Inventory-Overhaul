@@ -33,9 +33,17 @@
  * them all and puts them down together, so two never wait for each other's cells. It counts for as many
  * moves as it has tiles, but is never cut in two.
  *
+ * Two tiles that swap places between two containers (a tile let go on another one, fnc_swapPlan) are one
+ * move of the kind "exchange": take the first, take the second, put the first at the cell the second lay
+ * on, put the second at the cell the first lay on - four steps in the phases of their roots, so each
+ * root runs its own and nothing is put before it was taken. It has two records (one per tile), counts for
+ * two moves and is never cut in two; within one container a swap is a "placeMany" of the two. A step
+ * that does not go leaves its payload to settlement (back where it came from), so nothing is lost or
+ * doubled.
+ *
  * Arguments:
  * 0: Moves, each a HashMap <ARRAY>
- *    "kind"     - "move" (default), "equip", "unequip", "swap", "sort" or "placeMany"
+ *    "kind"     - "move" (default), "equip", "unequip", "swap", "sort", "placeMany" or "exchange"
  *    "from"     - holder it lies in: a container, or a key like "kit:..." (einv_storage_holderTypes);
  *                 for "sort" the holder to sort
  *    "fromRoot" - its root, objNull to look it up (einv_storage_fnc_rootOf)
@@ -53,6 +61,9 @@
  *                 there comes back onto "unit" (fnc_doSwap)
  *    "tiles"    - for "placeMany": [[entry, cell], ...] in the holder "from"; a cell is [col, row,
  *                 compartment] or, turned, [col, row, compartment, width, height]
+ *    "otherEntry", "otherCell" - for "exchange": the tile that lies in "to" and the cell in "from" it
+ *                 goes to; "cell" is the cell "entry" goes to in "to" (both [col, row, compartment,
+ *                 width, height, rot])
  *    "kit"      - the kit class an equip comes out of, for where its old item may go (default "")
  *    "order"    - for "sort": one of SORT_MODES, what the holder is laid out by (default "size", largest first)
  * 1: Options <HASHMAP> (default: empty)
@@ -406,6 +417,43 @@ private _fnc_swapSteps = {
     ["", _steps, _toUnit, _old getOrDefault ["class", ""], [objNull, _fromUnit] select (count _old > 0)]
 };
 
+// Two tiles of two containers that swap places: out of both, then each into the other's holder at the other's
+// cell. The takes come first, so the cells the puts want are free by then. Returns [why not or "", steps].
+private _fnc_exchangeSteps = {
+    params ["_move"];
+
+    private _from = _move getOrDefault ["from", objNull];
+    private _to = _move getOrDefault ["to", objNull];
+    private _entry = _move getOrDefault ["entry", createHashMap];
+    private _other = _move getOrDefault ["otherEntry", createHashMap];
+
+    if (
+        !(_from isEqualType objNull) || {!(_to isEqualType objNull)} || {isNull _from} || {isNull _to} || {_from isEqualTo _to}
+        || {count _entry == 0} || {count _other == 0}
+    ) exitWith {["Failed", []]};
+
+    // A uniform, vest or backpack never goes into itself or into anything lying in it - either of the two.
+    private _insideEntry = _entry getOrDefault ["container", objNull];
+    private _insideOther = _other getOrDefault ["container", objNull];
+
+    if (
+        (!isNull _insideEntry && {_to isEqualTo _insideEntry || {[_to, _insideEntry] call EFUNC(storage,liesIn)}})
+        || {!isNull _insideOther && {_from isEqualTo _insideOther || {[_from, _insideOther] call EFUNC(storage,liesIn)}}}
+    ) exitWith {["IntoItself", []]};
+
+    private _fromRoot = [_from, _move getOrDefault ["fromRoot", objNull]] call _fnc_rootOf;
+    private _toRoot = [_to, _move getOrDefault ["toRoot", objNull]] call _fnc_rootOf;
+
+    if (isNull _fromRoot || {isNull _toRoot}) exitWith {["Moved", []]};
+
+    ["", [
+        [_fromRoot, "take", [_from, [_entry] call EFUNC(storage,entryToArray), -1], "take"],
+        [_toRoot, "take", [_to, [_other] call EFUNC(storage,entryToArray), -1], "takeOther"],
+        [_toRoot, "put", [_to, ["#step", 0, 0], _move getOrDefault ["cell", []]], "land"],
+        [_fromRoot, "put", [_from, ["#step", 1, 0], _move getOrDefault ["otherCell", []]], "landOther"]
+    ]]
+};
+
 private _fnc_sortSteps = {
     params ["_move"];
 
@@ -540,6 +588,10 @@ if (_moves isEqualTo []) exitWith {
     // once is never cut in two - alone in a chunk it may be longer.
     private _weight = [1, count (_move getOrDefault ["tiles", []])] select (_kind isEqualTo "placeMany");
 
+    if (_kind isEqualTo "exchange") then {
+        _weight = 2;
+    };
+
     if (_records isNotEqualTo [] && {count _records + _weight > BATCH_MAX}) then {
         _rest pushBack _move;
         continue;
@@ -590,6 +642,60 @@ if (_moves isEqualTo []) exitWith {
                 _manyCell param [3, _manyEntry getOrDefault ["w", 1]], _manyCell param [4, _manyEntry getOrDefault ["h", 1]]
             ];
         } forEach (_move getOrDefault ["tiles", []]);
+
+        continue;
+    };
+
+    // ----- Two tiles swap places between two containers: two records, four steps -----
+    if (_kind isEqualTo "exchange") then {
+        ([_move] call _fnc_exchangeSteps) params [["_swapReason", "Failed"], ["_swapSteps", []]];
+
+        if (_swapReason isEqualTo "" && {!_ready} && {_swapSteps findIf {!([_x select 0] call EFUNC(storage,isLocalRoot))} >= 0}) then {
+            _swapReason = "NotReady";
+        };
+
+        if (_swapReason isNotEqualTo "") then {
+            if (_refused isEqualTo "") then {
+                _refused = _swapReason;
+            };
+
+            continue;
+        };
+
+        private _swapRoles = ([_swapSteps] call _fnc_addSteps) select 1;
+        private _swapFrom = _move get "from";
+        private _swapTo = _move get "to";
+
+        // One record per tile, each with the steps that are its own: what the answer reads (fnc_afterAction).
+        {
+            _x params ["_recordFrom", "_recordTo", "_recordEntry", "_recordCell", "_takeRole", "_landRole"];
+
+            _records pushBack createHashMapFromArray [
+                ["kind", "move"], ["from", _recordFrom], ["to", _recordTo], ["class", _recordEntry getOrDefault ["class", ""]],
+                ["cell", _recordCell], ["oldClass", ""], ["oldTo", objNull],
+                ["roles", createHashMapFromArray [["take", _swapRoles get _takeRole], ["land", _swapRoles get _landRole]]]
+            ];
+
+            // How it will sound: like any move (a pile on the ground drops).
+            if (count _feels < 3) then {
+                _feels pushBack ([createHashMapFromArray [["kind", "move"], ["entry", _recordEntry], ["to", _recordTo]]] call FUNC(feelFor));
+            };
+
+            private _recordKey = _recordEntry getOrDefault ["key", ""];
+
+            if (_recordKey isEqualTo "") then {
+                _recordKey = [_recordEntry] call EFUNC(storage,entryKey);
+            };
+
+            _sources pushBack [_recordFrom, _recordKey, _recordEntry getOrDefault ["block", 0], _recordEntry getOrDefault ["col", -1], _recordEntry getOrDefault ["row", -1]];
+            _targets pushBack [
+                _recordTo, _recordCell param [2, 0], _recordCell select 0, _recordCell select 1,
+                _recordCell param [3, _recordEntry getOrDefault ["w", 1]], _recordCell param [4, _recordEntry getOrDefault ["h", 1]]
+            ];
+        } forEach [
+            [_swapFrom, _swapTo, _move get "entry", _move get "cell", "take", "land"],
+            [_swapTo, _swapFrom, _move get "otherEntry", _move get "otherCell", "takeOther", "landOther"]
+        ];
 
         continue;
     };

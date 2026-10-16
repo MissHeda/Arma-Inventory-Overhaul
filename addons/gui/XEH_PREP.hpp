@@ -65,6 +65,8 @@ PREP(quickUnequip);
 // Moves as transactions: sent, shown under way, answered, and drift reported to the authorities
 PREP(sendMoves);
 PREP(sendPlan);
+PREP(applySwap);
+PREP(swapPlan);
 PREP(onAnswer);
 PREP(drawPending);
 PREP(requestNormalize);

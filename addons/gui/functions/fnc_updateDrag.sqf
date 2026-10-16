@@ -18,6 +18,14 @@
  * (fnc_checkTouch). The footprint shows the answer, green or red. Outside every panel it goes on the
  * ground; over the inspect card it goes nowhere - let go there, it goes back.
  *
+ * Over a tile that lies there (a grid's taken cells, a whole stack held, no kit, no slot's item) the two swap
+ * places when that fits (fnc_swapPlan): the dragged one lands on the footprint, which must cover the cells of
+ * exactly one other tile of another class, and that tile goes to the cell the dragged one came from, in either
+ * grid. Both footprints lie in the accent colour (GVAR(dragRoom) "swap|...", worked out once per hovered
+ * cell), the target's 10th element is the plan and fnc_endDrag sends it (fnc_applySwap). A kit's tile, a
+ * magazine that repacks and a weapon's slot answer before that; anything that does not swap is refused as
+ * before ("NoRoom", or the reason a rule gives).
+ *
  * A uniform, vest or backpack never goes into its own grid or into that of anything lying in it
  * (einv_storage_fnc_liesIn): red, "It cannot go into itself". The cells a move under way goes to
  * (GVAR(inFlight)) count as taken - empty until it arrived, but not for long.
@@ -559,6 +567,11 @@ private _shapeUsed = 0;
 private _dragHoles = ([_entry getOrDefault ["class", ""], GVAR(dragRot)] call EFUNC(items,footprintAs)) select 2;
 
 {_x ctrlShow false} forEach _shapes;
+
+// The other tile's footprint of a swap (fnc_startDrag made it), shown below only where the drop is one.
+private _swapFootprint = uiNamespace getVariable [QGVAR(dragSwapFootprint), controlNull];
+
+_swapFootprint ctrlShow false;
 
 // Paints the next free shape controls: false when too few are left, and the caller draws the box.
 // _origin is the corner of the cells it lies on (fnc_spanRect), _on [grid, column, row] of that corner, so
@@ -1275,6 +1288,37 @@ call {
         };
     };
 
+    // ----- On a tile that lies there: the two swap places (fnc_swapPlan) -----
+    // Only where the drop is refused for want of room and it is a plain tile-on-tile: the whole of a stack, no
+    // kit's grid, no slot's item. Worked out once per footprint and per moves under way, then kept.
+    private _swap = [];
+
+    if (
+        _reason isEqualTo "NoRoom" && {_slotSource isEqualTo []} && {_amount < 0} && {_fromKit isEqualTo ""} && {_toKit isEqualTo ""}
+        && {(_gridBoxes param [_sourceIndex, []]) isNotEqualTo []}
+    ) then {
+        private _swapKey = format ["swap|%1|%2|%3|%4|%5|%6|%7", _targetIndex, _col, _row, _w, _h, GVAR(dragRot), count GVAR(inFlight)];
+        private _swapAnswer = GVAR(dragRoom) get _swapKey;
+
+        if (isNil "_swapAnswer") then {
+            _swapAnswer = [
+                _targetIndex, _col, _row, _w, _h, GVAR(dragRot),
+                ([_targetIndex] call _fnc_cells) select 0, ([_sourceIndex] call _fnc_cells) select 0
+            ] call FUNC(swapPlan);
+
+            GVAR(dragRoom) set [_swapKey, _swapAnswer];
+        };
+
+        _swapAnswer params ["_swapWhy", "_swapPlan"];
+
+        if (_swapPlan isEqualTo []) then {
+            _reason = _swapWhy;
+        } else {
+            _reason = "";
+            _swap = _swapPlan;
+        };
+    };
+
     if (_reason isEqualTo "" && {[_from, _fromKit] isNotEqualTo [_to, _toKit]}) then {
         if (_toKit isNotEqualTo "") exitWith {
             // Into an open kit: what the kit takes and has room for (einv_compat_efak_fnc_canDrop).
@@ -1342,7 +1386,14 @@ call {
         };
     };
 
-    GVAR(dragTarget) = ["grid", _targetIndex, _col, _row, _reason isEqualTo "", _reason, "", _place];
+    // A swap says so, and with whom - not what the item would add to the soldier.
+    if (_swap isNotEqualTo []) then {
+        private _swapTile = (_target get "tiles") select (_swap select 0);
+
+        _hintParts = [[format [LLSTRING(Hint_Swap), [_swapTile get "class"] call FUNC(itemName)], "accent"]];
+    };
+
+    GVAR(dragTarget) = ["grid", _targetIndex, _col, _row, _reason isEqualTo "", _reason, "", _place, objNull, _swap];
 
     // The footprint lies on the target's cells, clipped to the grid where the item would stick out.
     (_gridBoxes select _targetIndex) params ["", "_originX", "_originY"];
@@ -1353,7 +1404,41 @@ call {
     private _bottom = ((_row + _h) min (_target get "rows")) max (_top + 1);
     private _clipRect = [_target, [_originX, _originY], _left, _top, _right - _left, _bottom - _top] call FUNC(spanRect);
 
-    [_clipRect, _reason isEqualTo ""] call _fnc_show;
+    // A swap lies in the accent colour, on the cells of both tiles: the dragged one's new ones, here, and the
+    // other tile's new ones, where the dragged one came from (in view of its column only).
+    if (_swap isNotEqualTo []) then {
+        [_clipRect, true, DRAG_FOOTPRINT_ALPHA, "accent"] call _fnc_show;
+
+        (_gridBoxes select _sourceIndex) params [["_sourceVisible", []], ["_sourceX", 0], ["_sourceY", 0]];
+
+        (_swap select 2) params ["_swapCol", "_swapRow", "", "_swapW", "_swapH"];
+
+        private _swapRect = [_sourceGrid, [_sourceX, _sourceY], _swapCol, _swapRow, _swapW, _swapH] call FUNC(spanRect);
+
+        // Cut to what its column shows: the grid may be scrolled partly or wholly out of sight.
+        if (_sourceVisible isNotEqualTo []) then {
+            _sourceVisible params ["_visibleX", "_visibleY", "_visibleW", "_visibleH"];
+            _swapRect params ["_rectX", "_rectY", "_rectW", "_rectH"];
+
+            private _left = _rectX max _visibleX;
+            private _top = _rectY max _visibleY;
+            private _right = (_rectX + _rectW) min (_visibleX + _visibleW);
+            private _bottom = (_rectY + _rectH) min (_visibleY + _visibleH);
+
+            _swapRect = [_left, _top, (_right - _left) max 0, (_bottom - _top) max 0];
+        };
+
+        if ((_swapRect select 2) > 0 && {(_swapRect select 3) > 0}) then {
+            private _accent = GVAR(theme) getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
+
+            _swapFootprint ctrlSetPosition _swapRect;
+            _swapFootprint ctrlSetBackgroundColor [_accent select 0, _accent select 1, _accent select 2, DRAG_FOOTPRINT_ALPHA];
+            _swapFootprint ctrlCommit 0;
+            _swapFootprint ctrlShow true;
+        };
+    } else {
+        [_clipRect, _reason isEqualTo ""] call _fnc_show;
+    };
 
     // A shaped item on its own cells instead, those inside the grid: a cell of the clipped box is a hole
     // where the item has none.
@@ -1376,10 +1461,14 @@ call {
             };
         };
 
-        private _color = if (_reason isEqualTo "") then {
-            GVAR(theme) getOrDefault ["gain", [0.298, 0.765, 0.541, 1]]
+        private _color = if (_swap isNotEqualTo []) then {
+            GVAR(theme) getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]
         } else {
-            GVAR(theme) getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
+            if (_reason isEqualTo "") then {
+                GVAR(theme) getOrDefault ["gain", [0.298, 0.765, 0.541, 1]]
+            } else {
+                GVAR(theme) getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
+            }
         };
 
         if (

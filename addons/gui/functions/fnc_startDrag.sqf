@@ -215,6 +215,17 @@ GVAR(middleHeld) = inputMouse 2 > 0;
 uiNamespace setVariable [QGVAR(dragEntry), _entry];
 uiNamespace setVariable [QGVAR(dragFootprint), _footprint];
 
+// The other tile's footprint, shown where the drop would swap the two (fnc_swapPlan, fnc_updateDrag): one
+// control, made here so it lies under the ghost as the footprint does. A group or a slot's item never swaps.
+private _swapFootprint = controlNull;
+
+if (_group isEqualTo [] && {_slotSource isEqualTo []}) then {
+    _swapFootprint = [_display, "EINV_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
+    _swapFootprint ctrlShow false;
+};
+
+uiNamespace setVariable [QGVAR(dragSwapFootprint), _swapFootprint];
+
 // Several tiles: a footprint for each, made before the ghost (which lies over them), and every tile
 // fades where it lay.
 uiNamespace setVariable [QGVAR(dragFootprints), []];

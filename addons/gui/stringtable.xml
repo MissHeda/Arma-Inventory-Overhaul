@@ -175,6 +175,9 @@
         <Key ID="STR_einv_gui_Hint_Selected">
             <English>%1 selected - drag them together, double click to move them over, Delete drops them</English>
         </Key>
+        <Key ID="STR_einv_gui_Hint_Swap">
+            <English>Swap places with %1</English>
+        </Key>
         <Key ID="STR_einv_gui_Hint_Taken">
             <English>That place was just taken</English>
         </Key>

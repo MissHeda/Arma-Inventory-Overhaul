@@ -20,6 +20,10 @@
  * Onto a slot of the hotbar (einv_hotbar - only when that addon is loaded) nothing moves: the item's class
  * is put on that key.
  *
+ * Onto a tile that lies there, where the footprint showed a swap (the target's 10th element, fnc_swapPlan):
+ * the two tiles change places in one transaction (fnc_applySwap) - the dragged one onto the cell it was let
+ * go on, the other onto the cell the dragged one came from.
+ *
  * Onto a partly filled magazine of its kind (einv_magazines - only when that addon is loaded) nothing moves
  * either: the two are repacked in the window (einv_magazines_fnc_startPair), which says in the hint why not
  * when it cannot be (a refusal above, with its reason, never gets here).
@@ -68,6 +72,8 @@ call FUNC(logDrag);
 ctrlDelete (uiNamespace getVariable [QGVAR(dragGhost), controlNull]);
 ctrlDelete (uiNamespace getVariable [QGVAR(dragFootprint), controlNull]);
 ctrlDelete (uiNamespace getVariable [QGVAR(dragCounter), controlNull]);
+ctrlDelete (uiNamespace getVariable [QGVAR(dragSwapFootprint), controlNull]);
+uiNamespace setVariable [QGVAR(dragSwapFootprint), controlNull];
 uiNamespace setVariable [QGVAR(dragGhost), controlNull];
 uiNamespace setVariable [QGVAR(dragFootprint), controlNull];
 uiNamespace setVariable [QGVAR(dragCounter), controlNull];
@@ -94,7 +100,7 @@ private _entry = uiNamespace getVariable [QGVAR(dragEntry), createHashMap];
 uiNamespace setVariable [QGVAR(dragEntry), createHashMap];
 
 GVAR(press) params ["_sourceIndex", "_tileIndex", "", "", "", "_slotSource"];
-GVAR(dragTarget) params [["_kind", ""], ["_targetIndex", -1], ["_col", 0], ["_row", 0], ["_fits", false], ["_reason", ""], ["_targetSlot", ""], ["_place", true], ["_targetUnit", objNull]];
+GVAR(dragTarget) params [["_kind", ""], ["_targetIndex", -1], ["_col", 0], ["_row", 0], ["_fits", false], ["_reason", ""], ["_targetSlot", ""], ["_place", true], ["_targetUnit", objNull], ["_swap", []]];
 GVAR(dragSize) params ["_w", "_h"];
 
 // Which way round it is held (fnc_rotateDrag): 1 turned a quarter clockwise - a shaped item in a square
@@ -298,6 +304,15 @@ private _sent = call {
 
     private _to = _target getOrDefault ["container", objNull];
     private _toKit = _target getOrDefault ["kit", ""];
+
+    // Onto a tile that lies there, as the footprint showed: the two swap places (fnc_swapPlan).
+    if (_swap isNotEqualTo [] && {_slotSource isEqualTo []}) exitWith {
+        _swap params ["_indexOther", "_cellEntry", "_cellOther"];
+
+        private _other = (_target getOrDefault ["tiles", []]) param [_indexOther, createHashMap];
+
+        ([_fromGrid, _target, _entry, _other, _cellEntry, _cellOther] call FUNC(applySwap)) isEqualTo true
+    };
 
     // The cell, with the size it lies in there - turned or not. On a taken cell of a kit's grid none:
     // its layout finds one.
