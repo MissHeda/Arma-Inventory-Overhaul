@@ -59,7 +59,7 @@ Tools).
 
 How big items are, how many share a tile and how containers are split up is one text of rules, the
 CBA setting "Inventory rules" (`einv_items_rules`), the same for everyone. The setup wizard writes it for you
-(ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory): you draw the cells of an item
+(ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory - shown only to the server, the host, single player and logged-in admins, other players never see it): you draw the cells of an item
 (an L, a T), paint the cells of a uniform, vest or backpack in colours - touching cells of one colour are one
 compartment, and it looks in the inventory exactly as painted -, build it block by block in Blocks mode, or
 make a class the same as another one (Same as: follow it with `like=` or copy its cells), set an item's weight and name next to its
@@ -156,12 +156,18 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   backpack" (`einv_storage_useUniform`, `useVest`, `useBackpack`), each Everything (the game's way, the default),
   Only whitelisted or Nothing. What lies in a limited container - magazines, grenades, medicine, food, kits, radios - is
   not usable from there: its tile wears a small padlock ("Cannot be used from the backpack" in the footer), the hotbar
-  refuses to bind it and counts only what it may use, the context menu leaves out its use rows, and the reload key loads
-  magazines only from containers that allow it. Items opt back in with the rule value `use=` - in the setup wizard's
-  Items step, the chips Uniform / Vest / Backpack in the "Use from" row (`kind=grenade > use=backpack`, or per class);
-  Only whitelisted lets exactly those through, Nothing lets nothing through. Weapons, attachments and clothing are never
-  limited. What a mod cannot do: the game's own throw key, ACE's own medical and self-interaction menus, a gamepad reload and
-  scripts still take from any container.
+  refuses to bind it and counts only what it may use, and the context menu leaves out its use rows. Items opt back in
+  with the rule value `use=` - in the setup wizard's Items step, the chips Uniform / Vest / Backpack in the "Use from"
+  row (`kind=grenade > use=backpack`, or per class); Only whitelisted lets exactly those through, Nothing lets nothing
+  through. Weapons, attachments and clothing are never limited.
+  *Enforced:* the inventory window, the hotbar, the window's menus, the reload key (it loads the fullest allowed
+  magazine instead), a reload from the scroll-wheel action menu or a gamepad (the magazine the game took from a closed
+  container is taken back, the old one goes back into the weapon, and the fullest allowed one is loaded), and the throw
+  key when only closed grenades are left (the key does nothing and says where to take one out; ACE Advanced Throwing is
+  blocked through ACE's own throw block while nothing may be thrown, and the selected throwable moves off a closed one).
+  *Not enforced - a mod cannot change these:* ACE medical, field rations and every other mod that reads the unit's items
+  itself (they see the backpack's bandages as real items), what ACE Advanced Throwing picks to throw, a grenade of a type
+  that also lies in an open container (the game may take the copy from the closed one), a vehicle's guns, and scripts.
 - **Multiplayer:** where things lie syncs by itself - every player sees the same arrangement, also of
   containers your scripts fill. Every change runs where the container is local and the server carries what
   moves between machines, so the server has to run the same version of Enhanced Inventory. Scripts can move

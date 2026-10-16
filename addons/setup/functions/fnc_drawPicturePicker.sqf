@@ -77,18 +77,6 @@ private _fnc_there = {
     _path isNotEqualTo "" && {fileExists _path || {fileExists _other}}
 };
 
-// The ways a picture of the catalog may be written for the same file: with or without the leading backslash, with
-// backslashes or slashes - the paths of the catalog are as each config has them (lowercase here).
-private _fnc_variants = {
-    params ["_path"];
-
-    private _bare = (toLowerANSI _path) regexReplace ["^[\\/]+", ""];
-    private _back = (_bare splitString "/") joinString "\";
-    private _forward = (_bare splitString "\") joinString "/";
-
-    [_back, "\" + _back, _forward, "/" + _forward]
-};
-
 // ----- The path field: its thumbnail and its line -----
 
 if (_part isEqualTo "custom") exitWith {
@@ -331,22 +319,15 @@ if (!("foundFor" in GVAR(picker)) || {(GVAR(picker) get "foundFor") isNotEqualTo
     GVAR(picker) set ["foundFor", [_typed, _chip]];
 };
 
-// Opened on the picture in use: its entry (whichever way the path is written), ringed, and the page it is on.
+// Opened on the picture in use: the entry of that very file (the whole path, however it is written -
+// fnc_pictureKey - and never another picture of a class that owns it too), ringed, and the page it is on.
 // Not in the chip's group - a uniform's picture on the items chip, say - the chip turns to All. A path the
 // catalog does not have is the path field's.
 if (GVAR(picker) getOrDefault ["reveal", false]) then {
     GVAR(picker) set ["reveal", false];
 
     private _byPath = (uiNamespace getVariable QGVAR(pictures)) getOrDefault ["byPath", createHashMap];
-    private _entry = [];
-
-    {
-        private _known = _byPath get _x;
-
-        if (!isNil "_known") exitWith {
-            _entry = _known;
-        };
-    } forEach ([GVAR(picker) getOrDefault ["picked", ""]] call _fnc_variants);
+    private _entry = _byPath getOrDefault [[GVAR(picker) getOrDefault ["picked", ""]] call FUNC(pictureKey), []];
 
     if (_entry isEqualTo []) then {
         GVAR(picker) set ["picked", ""];
@@ -382,14 +363,14 @@ private _total = count _found;
 private _pages = (ceil (_total / _perPage)) max 1;
 private _page = ((GVAR(picker) getOrDefault ["page", 0]) min (_pages - 1)) max 0;
 private _shown = _found select [_page * _perPage, _perPage];
-private _picked = ["", GVAR(picker) getOrDefault ["picked", ""]] select ((GVAR(picker) getOrDefault ["source", "list"]) isEqualTo "list");
+private _picked = ["", [GVAR(picker) getOrDefault ["picked", ""]] call FUNC(pictureKey)] select ((GVAR(picker) getOrDefault ["source", "list"]) isEqualTo "list");
 private _cellW = _width / PICKER_COLS;
 private _gap = SQUARE(UNIT * 0.2);
 
 GVAR(picker) set ["page", _page];
 
 {
-    _x params ["_path", "_lcPath", "", "_name", "", "_owners", "_classes"];
+    _x params ["_path", "", "", "_name", "", "_owners", "_classes", "", "", "_key"];
 
     private _col = _forEachIndex mod PICKER_COLS;
     private _row = floor (_forEachIndex / PICKER_COLS);
@@ -402,7 +383,7 @@ GVAR(picker) set ["page", _page];
         _display, _list, [_left + SQUARE(UNIT * 0.15), _top + UNIT * 0.15, _cardW - SQUARE(UNIT * 0.3), _thumbH - UNIT * 0.3], _path
     ] call EFUNC(gui,uiPicture);
 
-    if (_picked isNotEqualTo "" && {_lcPath isEqualTo toLowerANSI _picked}) then {
+    if (_picked isNotEqualTo "" && {_key isEqualTo _picked}) then {
         [_display, _list, [_left, _top, _cardW, _thumbH], _accent, _radius] call EFUNC(gui,uiRing);
     };
 
@@ -446,7 +427,7 @@ if (!isNull _summary) then {
     private _text = "";
 
     if (_current isNotEqualTo "" && {(GVAR(picker) getOrDefault ["source", "list"]) isEqualTo "list"}) then {
-        private _entry = (((uiNamespace getVariable QGVAR(pictures)) get "list") select {(_x select 1) isEqualTo toLowerANSI _current}) param [0, []];
+        private _entry = ((uiNamespace getVariable QGVAR(pictures)) get "byPath") getOrDefault [[_current] call FUNC(pictureKey), []];
 
         _text = [format ["%1 · %2", _entry param [3, ""], _current], _summaryW, _font, TEXT_SMALL] call EFUNC(gui,fitText);
     };

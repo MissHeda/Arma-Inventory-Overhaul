@@ -7,7 +7,8 @@
  * entry that lists its owners. A row's picture belongs to the category of its class (fnc_pictureCategory): items,
  * gear, or vehicles and boxes - for those the picture the editor shows of them (editorPreview) is catalogued as
  * well, as the box's picture is drawn from it. Once every row is read, the entries are sorted by the first
- * owner's name and the text a search looks through is made.
+ * owner's name and the text a search looks through is made. A picture is one entry however its owners write
+ * its path (fnc_pictureKey), and a class owns it once.
  *
  * Arguments:
  * 0: The run it belongs to - a run that is no longer the live one stops <NUMBER>
@@ -45,14 +46,19 @@ private _fnc_add = {
     // Only a picture that can be shown (the index has asked einv_gui_fnc_safePicture), no procedural texture.
     if (_path isEqualTo "" || {(_path select [0, 2]) isEqualTo "#("}) exitWith {};
 
-    private _lcPath = toLowerANSI _path;
-    private _entry = _entries get _lcPath;
+    // One entry per file, however its owners write the path (fnc_pictureKey).
+    private _key = [_path] call FUNC(pictureKey);
+    private _entry = _entries get _key;
 
     if (isNil "_entry") then {
-        _entry = [_path, _lcPath, "", _row select ROW_NAME, _row select 1, 0, [], [], []];
-        _entries set [_lcPath, _entry];
+        _entry = [_path, toLowerANSI _path, "", _row select ROW_NAME, _row select 1, 0, [], [], [], _key, ""];
+        _entries set [_key, _entry];
     };
 
+    // A class owns a picture once: its list picture and its editor picture may be the same file.
+    if ((_entry select 10) isEqualTo (_row select ROW_LC)) exitWith {};
+
+    _entry set [10, _row select ROW_LC];
     _entry set [5, (_entry select 5) + 1];
 
     if (count (_entry select 6) < PICKER_OWNERS) then {
@@ -105,7 +111,7 @@ private _keyed = [];
 _keyed sort true;
 
 _catalog set ["list", _keyed apply {_x select 2}];
-_catalog set ["byPath", createHashMapFromArray ((_catalog get "list") apply {[_x select 1, _x]})];
+_catalog set ["byPath", createHashMapFromArray ((_catalog get "list") apply {[_x select 9, _x]})];
 _catalog set ["entries", createHashMap];
 _catalog set ["done", true];
 

@@ -7,6 +7,12 @@
         <Key ID="STR_einv_storage_Hint_NoReload">
             <English>Cannot reload: the magazines are in the %1. Take one out first.</English>
         </Key>
+        <Key ID="STR_einv_storage_Hint_NoReloadFrom">
+            <English>Cannot reload from the %1.</English>
+        </Key>
+        <Key ID="STR_einv_storage_Hint_NoThrow">
+            <English>Cannot throw: the grenades are in the %1. Take one out first.</English>
+        </Key>
         <Key ID="STR_einv_storage_Kind_And">
             <English>and</English>
         </Key>
@@ -50,19 +56,19 @@
             <English>Use items from the backpack</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_UseBackpack_Desc">
-            <English>What can be used while it lies in the\nbackpack: magazines to reload from,\ngrenades to throw, bandages, food and\ndrink, kits and radios.\n\nEverything: as in the game.\nOnly whitelisted: only items marked &quot;Can\nbe used from&quot; the backpack in the setup\nwizard (Items step, rule use=backpack).\nNothing: nothing in the backpack can be\nused, marked or not.\n\nA blocked item wears a padlock in the\ninventory and is refused by the hotbar\nand the window's menus. The reload key\nloads magazines only from containers\nthat allow it.\n\nA mod cannot change the game itself:\nthrowing with the game's own keys and\nACE's own medical and self interaction\nmenus still take from any container.</English>
+            <English>What can be used while it lies in the\nbackpack: magazines to reload from,\ngrenades to throw, bandages, food and\ndrink, kits and radios.\n\nEverything: as in the game.\nOnly whitelisted: only items marked &quot;Can\nbe used from&quot; the backpack in the setup\nwizard (Items step, rule use=backpack).\nNothing: nothing in the backpack can be\nused, marked or not.\n\nA blocked item wears a padlock.\n\nEnforced: the inventory window, the\nhotbar, the window's menus, the reload\nkey, a reload from the action menu or a\ngamepad (the magazine is taken back and\nthe fullest allowed one is loaded) and\nthe throw key, when only blocked\ngrenades are left.\n\nNot enforced - a mod cannot change\nthem: ACE medical, rations and other\nmods that read the unit's items\nthemselves, ACE Advanced Throwing\npicking what to throw, a grenade of a\ntype that also lies elsewhere, scripts.</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_UseUniform">
             <English>Use items from the uniform</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_UseUniform_Desc">
-            <English>What can be used while it lies in the\nuniform: magazines to reload from,\ngrenades to throw, bandages, food and\ndrink, kits and radios.\n\nEverything: as in the game.\nOnly whitelisted: only items marked &quot;Can\nbe used from&quot; the uniform in the setup\nwizard (Items step, rule use=uniform).\nNothing: nothing in the uniform can be\nused, marked or not.\n\nA blocked item wears a padlock in the\ninventory and is refused by the hotbar\nand the window's menus. The reload key\nloads magazines only from containers\nthat allow it.\n\nA mod cannot change the game itself:\nthrowing with the game's own keys and\nACE's own medical and self interaction\nmenus still take from any container.</English>
+            <English>What can be used while it lies in the\nuniform: magazines to reload from,\ngrenades to throw, bandages, food and\ndrink, kits and radios.\n\nEverything: as in the game.\nOnly whitelisted: only items marked &quot;Can\nbe used from&quot; the uniform in the setup\nwizard (Items step, rule use=uniform).\nNothing: nothing in the uniform can be\nused, marked or not.\n\nA blocked item wears a padlock.\n\nEnforced: the inventory window, the\nhotbar, the window's menus, the reload\nkey, a reload from the action menu or a\ngamepad (the magazine is taken back and\nthe fullest allowed one is loaded) and\nthe throw key, when only blocked\ngrenades are left.\n\nNot enforced - a mod cannot change\nthem: ACE medical, rations and other\nmods that read the unit's items\nthemselves, ACE Advanced Throwing\npicking what to throw, a grenade of a\ntype that also lies elsewhere, scripts.</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_UseVest">
             <English>Use items from the vest</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_UseVest_Desc">
-            <English>What can be used while it lies in the\nvest: magazines to reload from, grenades\nto throw, bandages, food and drink, kits\nand radios.\n\nEverything: as in the game.\nOnly whitelisted: only items marked &quot;Can\nbe used from&quot; the vest in the setup\nwizard (Items step, rule use=vest).\nNothing: nothing in the vest can be\nused, marked or not.\n\nA blocked item wears a padlock in the\ninventory and is refused by the hotbar\nand the window's menus. The reload key\nloads magazines only from containers\nthat allow it.\n\nA mod cannot change the game itself:\nthrowing with the game's own keys and\nACE's own medical and self interaction\nmenus still take from any container.</English>
+            <English>What can be used while it lies in the\nvest: magazines to reload from, grenades\nto throw, bandages, food and drink, kits\nand radios.\n\nEverything: as in the game.\nOnly whitelisted: only items marked &quot;Can\nbe used from&quot; the vest in the setup\nwizard (Items step, rule use=vest).\nNothing: nothing in the vest can be\nused, marked or not.\n\nA blocked item wears a padlock.\n\nEnforced: the inventory window, the\nhotbar, the window's menus, the reload\nkey, a reload from the action menu or a\ngamepad (the magazine is taken back and\nthe fullest allowed one is loaded) and\nthe throw key, when only blocked\ngrenades are left.\n\nNot enforced - a mod cannot change\nthem: ACE medical, rations and other\nmods that read the unit's items\nthemselves, ACE Advanced Throwing\npicking what to throw, a grenade of a\ntype that also lies elsewhere, scripts.</English>
         </Key>
         <Key ID="STR_einv_storage_SubCategory_Containers">
             <English>Containers</English>

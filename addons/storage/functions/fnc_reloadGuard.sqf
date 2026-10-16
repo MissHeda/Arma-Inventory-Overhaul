@@ -14,8 +14,9 @@
  *     the key is left to the game, untouched
  *
  * On foot only, with a rifle, pistol or launcher in the hands, and only for the plain key - the reload from
- * a vehicle's gun, a gamepad button or the action menu entry is not caught. A handler of the main display's
- * KeyDown event (XEH_postInit); its return value true swallows the key.
+ * a vehicle's gun is not caught, and a gamepad button or the action menu entry is taken back after the
+ * fact (fnc_onReloaded). A handler of the main display's KeyDown event (XEH_postInit); its return value
+ * true swallows the key.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -90,13 +91,7 @@ if (_usable isEqualTo []) exitWith {
         } forEach ([_unit, _class] call FUNC(useBlockedIn));
     } forEach (_candidates apply {_x select 0});
 
-    private _text = format [localize "STR_einv_storage_Hint_NoReload", [USE_KINDS select {_x in _where}] call FUNC(useKindName)];
-
-    if (isNil QACEFUNC(common,displayTextStructured)) then {
-        hintSilent _text;
-    } else {
-        [_text, 2] call ACEFUNC(common,displayTextStructured);
-    };
+    [format [localize "STR_einv_storage_Hint_NoReload", [USE_KINDS select {_x in _where}] call FUNC(useKindName)]] call FUNC(useHint);
 
     true
 };

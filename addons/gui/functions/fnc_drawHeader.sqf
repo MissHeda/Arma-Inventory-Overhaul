@@ -119,11 +119,10 @@ private _sound = [
 [_display, [SQUARE(UNIT * 11)] call _fnc_place, _theme] call FUNC(drawFilter);
 
 // The cog: the setup wizard (einv_setup) - how big items are, how many share a tile, how containers are
-// split, the same for everyone. Drawn only for whoever may open it (einv_setup_fnc_canOpen, the setting
-// "Who may open the setup"); whoever may not change the server's setup sees it read-only and can still copy
-// it to share. This window closes for it and comes back when the wizard closes
-// (einv_setup_fnc_openFromGame).
-if (!isNil QEFUNC(setup,openFromGame) && {["direct"] call (missionNamespace getVariable [QEFUNC(setup,canOpen), {true}])}) then {
+// split, the same for everyone. Drawn only for whoever may open it (einv_setup_fnc_canOpen: who runs the
+// server or is logged in as admin), asked at every draw so a login shows at once. This window closes for it
+// and comes back when the wizard closes (einv_setup_fnc_openFromGame).
+if (!isNil QEFUNC(setup,openFromGame) && {call (missionNamespace getVariable [QEFUNC(setup,canOpen), {false}])}) then {
     private _target = ["direct"] call (missionNamespace getVariable [QEFUNC(setup,canEdit), {createHashMap}]);
     private _canSave = !isNil "_target" && {_target isEqualType createHashMap} && {_target getOrDefault ["canSave", false]};
 

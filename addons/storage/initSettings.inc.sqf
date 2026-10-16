@@ -45,8 +45,9 @@
 // The same for everyone: what can be used from the backpack, the vest and the uniform. Everything is how the
 // game works; the others make the carried gear matter - grenades and magazines in the backpack are reserve,
 // not at hand. Items opt back in per container with use= (the setup wizard's "Can be used from"). The
-// engine's own reload key is held to it (fnc_reloadGuard); what the hotbar, the window's menus and the
-// padlocks on the tiles say follows fnc_useState.
+// engine's own reload key is held to it (fnc_reloadGuard), a reload from the action menu is taken back
+// (fnc_onReloaded) and the throw key is held back when only closed grenades are left (fnc_throwGuard,
+// fnc_throwTick); what the hotbar, the window's menus and the padlocks on the tiles say follows fnc_useState.
 [
     QGVAR(useUniform),
     "LIST",

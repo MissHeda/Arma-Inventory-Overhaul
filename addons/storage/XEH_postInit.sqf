@@ -32,6 +32,11 @@
         params [["_unit", objNull, [objNull]]];
 
         [_unit] call FUNC(queueMigrate);
+
+        // Where the magazines lie, noted again (fnc_useTrack): the player's own only.
+        if (hasInterface && {_unit isEqualTo (missionNamespace getVariable ["ACE_player", player])}) then {
+            [_unit] call FUNC(useTrack);
+        };
     }] call CBA_fnc_addClassEventHandler;
 } forEach ["Take", "Put", "InventoryClosed"];
 
@@ -71,9 +76,21 @@ if (isServer) then {
 if (hasInterface) then {
     // The reload key in front of the engine's, once the main display exists: a magazine in a container the
     // "Use items from ..." settings close is not loaded, the fullest of the others is (fnc_reloadGuard).
+    // The throw key in front of the engine's too: with nothing to throw but closed containers' grenades it
+    // does nothing and says where to take one out (fnc_throwGuard).
     [{!isNull findDisplay 46}, {
         (findDisplay 46) displayAddEventHandler ["KeyDown", {_this call FUNC(reloadGuard)}];
+        (findDisplay 46) displayAddEventHandler ["KeyDown", {_this call FUNC(throwGuard)}];
     }] call CBA_fnc_waitUntilAndExecute;
+
+    // What the keys cannot catch. A reload by the scroll menu, a gamepad button or a script is the game's:
+    // a magazine it took from a closed container is taken back after the event (fnc_onReloaded, which needs
+    // to know where the magazines lay: fnc_useTrack, once a second and after every move). The throwing is
+    // kept to the unit's open containers by ACE's blockThrow effect and the selection (fnc_throwTick).
+    ["CAManBase", "Reloaded", {_this call FUNC(onReloaded)}] call CBA_fnc_addClassEventHandler;
+
+    [{[] call FUNC(useTrack)}, TRACK_TICK] call CBA_fnc_addPerFrameHandler;
+    [{[] call FUNC(throwTick)}, THROW_TICK] call CBA_fnc_addPerFrameHandler;
 
     // A body's places must be public for its looters, also those written less than OWN_WRITE_DELAY
     // seconds before death.

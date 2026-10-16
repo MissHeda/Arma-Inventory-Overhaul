@@ -8,6 +8,8 @@
  *
  * It opens on the picture in use - ringed, on its page - and on the chip of the class's kind (items, gear,
  * vehicles and boxes; "All" for a class the index does not list), so what a class has now is what is seen first.
+ * The picture in use is matched by its whole path (fnc_pictureKey): no card is ringed unless it is that file.
+ * For a crate or vehicle with no picture set it is the editor's picture, which is what the inventory draws.
  *
  * Arguments:
  * 0: The picture set now, "" for none - it fills the path field <STRING> (default: "")
@@ -37,6 +39,16 @@ if (_inUse isEqualTo "") then {
 // The chip of the class's kind, from the class index; "all" where it does not list the class.
 private _row = ((uiNamespace getVariable [QGVAR(index), createHashMap]) getOrDefault ["byClass", createHashMap]) getOrDefault [toLowerANSI _class, []];
 private _chip = ["all", [_row param [ROW_KIND, ""]] call FUNC(pictureCategory)] select (_row isNotEqualTo []);
+
+// A crate or a vehicle with no picture of its own is drawn by the picture the editor has of it (editorPreview),
+// not by the config picture the Picture row names - so that is the one in use, and the one ringed.
+if (_current isEqualTo "" && {_chip isEqualTo "vehicles"}) then {
+    private _preview = [getText (configFile >> "CfgVehicles" >> _class >> "editorPreview")] call EFUNC(gui,safePicture);
+
+    if (_preview isNotEqualTo "") then {
+        _inUse = _preview;
+    };
+};
 
 // text - the search; chip - "items", "gear", "vehicles" or "all"; page; picked - the thumbnail clicked, at the
 // start the picture in use; reveal - turn to the page of the picture picked as soon as the catalog is read; custom -

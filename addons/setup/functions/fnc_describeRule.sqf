@@ -280,7 +280,7 @@ private _fnc_values = {
     if ("picture" in _values) then {
         // By the class that owns the picture when the picker's catalog is read (fnc_pictureCatalog), else the path.
         private _path = _values get "picture";
-        private _entry = ((uiNamespace getVariable [QGVAR(pictures), createHashMap]) getOrDefault ["byPath", createHashMap]) getOrDefault [toLowerANSI _path, []];
+        private _entry = ((uiNamespace getVariable [QGVAR(pictures), createHashMap]) getOrDefault ["byPath", createHashMap]) getOrDefault [[_path] call FUNC(pictureKey), []];
         private _owner = "";
 
         if (_entry isNotEqualTo []) then {

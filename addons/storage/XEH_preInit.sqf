@@ -124,6 +124,15 @@ GVAR(serverVersion) = "";
 // by everything that asks where an item may be used from, which has nothing to do while it is false.
 GVAR(useActive) = false;
 
+// Where the player's magazines lie, "creator:id" -> "uniform", "vest" or "backpack" (fnc_useTrack), so that
+// a reload the game did can be told to have come from a closed container (fnc_onReloaded); whether such a
+// reload is being taken back right now (fnc_reloadUndo); and the throw block (fnc_throwTick): whether ACE's
+// blockThrow is set by us and for which unit.
+GVAR(useIds) = createHashMap;
+GVAR(undoBusy) = false;
+GVAR(throwBlocked) = false;
+GVAR(throwUnit) = objNull;
+
 #include "initSettings.inc.sqf"
 
 ADDON = true;

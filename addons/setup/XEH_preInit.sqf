@@ -109,9 +109,6 @@ GVAR(classImportText) = "";
 // (fnc_openFromGame).
 GVAR(reopenInventory) = [];
 
-// On every machine, the server's included: it is the server's value that counts (fnc_canOpen).
-#include "initSettings.inc.sqf"
-
 if (hasInterface) then {
     #include "initEntryPoints.inc.sqf"
 

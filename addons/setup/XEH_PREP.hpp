@@ -74,6 +74,7 @@ PREP(drawSameAs);
 PREP(pictureCatalog);
 PREP(pictureChunk);
 PREP(pictureCategory);
+PREP(pictureKey);
 PREP(openPicturePicker);
 PREP(drawPicturePicker);
 PREP(pickPicture);

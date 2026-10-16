@@ -9,7 +9,7 @@
  * writes the setting itself (fnc_save).
  *
  * The inventory and the wizard never share the screen: an open inventory window is closed first - unless
- * the player may not open the wizard at all (fnc_canOpen, einv_setup_access), who gets a hint instead.
+ * the player may not open the wizard at all (fnc_canOpen): nothing happens then.
  *
  * Arguments:
  * 0: Display to open it over, displayNull for Eden's or else the game's own screen <DISPLAY> (default: displayNull)
@@ -41,8 +41,8 @@ if !(_mode in ["menu", "direct"]) then {
     _mode = "direct";
 };
 
-// Not for this player (einv_setup_access): asked before the inventory closes for nothing.
-if !([_mode, true] call FUNC(canOpen)) exitWith {displayNull};
+// Not for this player (fnc_canOpen): asked before the inventory closes for nothing.
+if !(call FUNC(canOpen)) exitWith {displayNull};
 
 if (isNull _parent) then {
     _parent = [findDisplay 46, findDisplay 313] select is3DEN;

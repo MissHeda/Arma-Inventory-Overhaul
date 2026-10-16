@@ -82,3 +82,13 @@
 
 // The reload key is looked at at most this often, in seconds (fnc_reloadGuard): a key held down repeats.
 #define RELOAD_GUARD_GAP 0.6
+
+// The magazine a scroll-menu or gamepad reload took from a closed container is taken back a frame after the
+// event (fnc_reloadUndo); a magazine that may be used is then loaded this many seconds later, once the
+// weapon is back as it was.
+#define UNDO_RELOAD_WAIT 0.4
+
+// How often the throwing is looked at (fnc_throwTick), and the notes of where the magazines lie are taken
+// again (fnc_useTrack), in seconds.
+#define THROW_TICK 0.25
+#define TRACK_TICK 1

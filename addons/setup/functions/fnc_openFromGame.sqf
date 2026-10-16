@@ -4,7 +4,7 @@
  * Opens the setup wizard from a running mission - the keybind and the cog in the inventory's header. The
  * inventory window closes first: the two never share the screen. The wizard opens a frame later over the
  * game's own screen, in direct mode, so what it saves goes straight into CBA's settings. A player
- * einv_setup_access leaves out gets a hint and keeps the inventory (fnc_canOpen).
+ * who may not open it (fnc_canOpen) gets a hint and keeps the inventory.
  *
  * Opened from the inventory, the inventory comes back when the wizard closes, however it closes - the
  * player was busy with their gear and should not be left on the bare game. It comes back the way the
@@ -34,8 +34,8 @@ if (!hasInterface) exitWith {};
 // Already open: one wizard is enough.
 if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {};
 
-// Not for this player (einv_setup_access): a hint, and the inventory stays open.
-if !(["direct", true] call FUNC(canOpen)) exitWith {};
+// Not for this player (fnc_canOpen): nothing happens, and the inventory stays open.
+if !(call FUNC(canOpen)) exitWith {};
 
 // What the inventory showed, to open it again afterwards: whose it was and what it looked into. Read
 // before it closes - its unload forgets the person (einv_gui_fnc_onUnload).

@@ -795,13 +795,46 @@ attachment or a uniform in the backpack is stowed, not used. A crate, the ground
   when a magazine that the weapon takes lies in a blocked container (`magazinesAmmoFull` less `useCarried`): none lies in a usable
   one, the key does nothing and a line names the containers to take one out of; some do, the handler loads the fullest of them with
   the game's own `LoadMagazine` action (as the hotbar does) and swallows the key. Where nothing is blocked, or nothing limited, the
-  key is the game's. A full magazine in the weapon is left to the game. The reload from a gamepad button, the action menu entry
-  and a vehicle's gun are not caught.
-- **What cannot be blocked, and why.** Throwing with the game's own key (and ACE's advanced throwing): the engine takes the
-  throwable from any container once its class is selected, and nothing a mod runs before the throw can say from which; the hotbar
-  only offers a grenade it counts as usable, but the game's own throw key still finds the backpack's grenades. ACE's own medical and
-  self-interaction menus, rations and repack: they take items from any container by their own code. Scripts and other mods that
-  use `addItem`/`removeItem`. The setting texts say so.
+  key is the game's. A full magazine in the weapon is left to the game. A vehicle's gun is not caught.
+- **A reload by the scroll menu, a gamepad button or a script** (`fnc_onReloaded`, the CAManBase event `Reloaded` from postInit):
+  the engine has loaded a magazine by then and `Reloaded` cannot be cancelled, so it is undone afterwards, and only when it is sure.
+  `fnc_useTrack` keeps `GVAR(useIds)`, "creator:id" -> "uniform" | "vest" | "backpack" for every magazine of the player that
+  lies in a container, taken from the location `magazinesAmmoFull` gives (entry 4; entries 5 and 6 are the id and creator),
+  else from the containers' own lists when exactly one container holds a magazine of that class and rounds. It is renewed once a
+  second (`TRACK_TICK`), after each answered transaction (`fnc_onAnswer`) and on `Take`, `Put` and `InventoryClosed`. A loaded
+  magazine keeps its note (the animation takes seconds and a note taken in the middle must not erase the origin); notes of magazines
+  the unit no longer has go. On `Reloaded` the loaded magazine is found in `magazinesAmmoFull` by class and rounds (exactly one
+  such, else nothing is done), its id is looked up, and when the note says a container where `fnc_useState` is "blocked" for the
+  class, `fnc_reloadUndo` runs a frame later. A magazine that is not noted, or is allowed, is left to the game.
+  `fnc_reloadUndo` (on the unit's machine - the unit is local, so are its containers): checks that the weapon still holds that
+  magazine in that muzzle (`weaponsItems` entry 4, or 5 for a second muzzle), counts the magazine per container, takes it out with
+  `remove<Primary|Handgun|Secondary>WeaponItem`, counts again - the game either let it go (then it is put into the container it came
+  from with `addMagazineAmmoCargo [class, 1, rounds]`) or put it into the cargo (then it is moved to that container, or stays where
+  it is when the container will not take it) - and a magazine nowhere is put back into the weapon with `addWeaponItem`. Then the old
+  magazine (`Reloaded`'s last argument, when it has rounds) is taken out of whichever container holds one with those rounds and put
+  into the weapon, and given back to the container when that does not hold. A line says "Cannot reload from the backpack."; if a
+  magazine that may be used is left (`fnc_reloadPick`, the fullest), `UNDO_RELOAD_WAIT` later it is loaded with the `LoadMagazine`
+  action. Never done twice (`GVAR(undoBusy)`), and not when the magazine's origin is unknown. Untested in the game: the exact shape
+  of the `Reloaded` arguments and whether `removePrimaryWeaponItem` returns the magazine to the cargo are checked by counting, not
+  assumed.
+- **The throw key and ACE's advanced throwing.** The engine takes the throwable of the selected class from the unit's magazines -
+  the order of its containers is believed to be uniform, vest, backpack (the order of the unit's loadout; not verified, and not
+  relied on) - and nothing a mod runs can say from which. What is done instead keeps a closed throwable from being the choice:
+  `fnc_throwState` splits the throwables the unit carries (the magazines of the `Throw` weapon's muzzles) into those with a copy in
+  an open container and those only in closed ones. `fnc_throwGuard` (a KeyDown handler beside the reload key's): the game's "Throw"
+  key (`actionKeys "Throw"` and `"ThrowGrenade"`, plain) is swallowed with a line when only closed ones are left; if some may be
+  thrown and the selected one may not, the selection is moved on (`fnc_throwSelect`, in the order of `throwables`) and the key is the
+  game's. ACE's advanced throwing has no key to swallow - its "Prepare grenade" (`ace_advanced_throwing_prepare` in "ACE3 Weapons",
+  Shift+G by default) is a CBA keybind that runs in CBA's own handler. So `fnc_throwTick` (`THROW_TICK`) sets ACE's `blockThrow`
+  status effect (`ace_common_fnc_statusEffect_set`, reason `einv_storage`) on the unit while nothing may be thrown: ACE's
+  `canPrepare` asks it. It also puts a throwable in the hands away for the weapon then, and moves a closed selection to an open one.
+  `fnc_throwGuard` says why when ACE's key is pressed (looked up with `CBA_fnc_getKeybind`) but cannot hold it back itself.
+- **What cannot be blocked, and why.** The throwable the game takes when the selected class also lies in an open container (it may
+  take the closed copy) and what ACE's advanced throwing picks when it cycles (`ace_weaponselect_fnc_selectNextGrenade` reads
+  `throwables`; the selection is corrected a quarter of a second later). ACE's own medical, rations and repack and every other mod
+  that reads the unit's items: they use the engine's commands on the unit, their code is compiled final and cannot be filtered - and
+  they see a backpack's bandages as real items. A vehicle's guns. Scripts and other mods that use `addItem`/`removeItem`. The
+  setting texts and the README say so.
 
 ### Public functions and tables
 
@@ -1540,16 +1573,15 @@ over the main menu and in Eden.
 | the inventory's cog (`einv_gui_fnc_drawHeader`) | direct | `fnc_openFromGame`; the tooltip says read-only when `fnc_canEdit` says so; the inventory comes back on close (`einv_setup_reopenInventory`), as a person window when it was one |
 
 - `fnc_open [parent = displayNull, mode = "direct", step = 0, class = ""]` (public) -> display; one wizard at a time, an open
-  inventory closes first. The wizard edits `einv_items_rules`, has one keybind, `einv_setup_openWizard`, and one setting of its
-  own, `einv_setup_access` (who may open it). `fnc_canOpen [mode = "direct", tell = false]` (public) -> BOOL is the one gate every
-  way in from a running mission passes: `fnc_openFromGame` (keybind, the inventory's cog; asked before the inventory closes, so a
-  refusal keeps it open), `fnc_open` (a mission's own call) and `fnc_onLoad` (ESC > Options, where the engine makes the display
-  itself: closed again through `fnc_defer`). True in Eden, in menu mode (CBA's Addon Options), with `einv_setup_access` =
-  `"everyone"`, or for the server itself (single player, the host), a logged-in admin (`serverCommandAvailable "#kick"`), CBA's
-  settings whitelist (`cba_settings_fnc_whitelisted`, who may save anyway) or a Zeus (`getAssignedCuratorLogic player`). Refused
-  with `tell`: the hint "Inventory setup is for admins on this server." (`ace_common_fnc_displayTextStructured`). CBA's pause-menu
-  entries take no condition, so ESC > Options still lists it; the cog in the inventory header (`einv_gui_fnc_drawHeader`) is not
-  drawn where it would refuse.
+  inventory closes first. The wizard edits `einv_items_rules`, has one keybind, `einv_setup_openWizard`, and no setting of its
+  own. `fnc_canOpen []` (public) -> BOOL is the one gate every way in passes: `fnc_openFromGame` (keybind, the inventory's cog; asked
+  before the inventory closes, so a refusal keeps it open and says nothing), `fnc_open` (a mission's own call), `fnc_initCbaMenu` (the
+  button on CBA's Addon Options, asked at every sync) and `fnc_onLoad` (ESC > Options, where the engine makes the display itself:
+  closed again through `fnc_defer`, silently). It is `is3DEN || isServer || !isMultiplayer || serverCommandAvailable "#kick"`: the
+  editor, the server itself, the host, single player, a logged-in or voted admin. Nobody else sees the wizard: the cog in the
+  inventory header (`einv_gui_fnc_drawHeader`) is not drawn, asked at every draw, so a login shows at once (the game has no event for
+  it). CBA's pause-menu entries take no condition, so ESC > Options still lists it for everyone; it closes again at once.
+  Saving is a question of its own (`fnc_canEdit`); the read-only mode stays in the code for the CBA whitelist case.
   `fnc_canEdit [mode]` (public) -> HashMap `canSave`, `source` (`"server"`, `"mission"`, `""`),
   `override` (may force over the mission, priority 2, multiplayer server only), `locked` (set in a `cba_settings.sqf`), `reason`,
   `priority`, `missionWins`: direct mode saves to the mission in Eden, else to the server - as the server itself (single player
@@ -1760,12 +1792,14 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   engine would pop up a message. `fnc_pickPicture [path]` closes the popover and calls the editor's code with `[path, arguments]`.
   It opens on the chip of the edited class's kind (`fnc_pictureCategory` of its index row's kind; "All" for a class the index does not
   list) and on the picture in use - the one set, else config's, passed by `fnc_drawPictureRow` - as `picked`: once the catalog is read
-  (`reveal`), its entry is found by the path in any spelling (`byPath` by lowercase path, with or without the leading backslash, with
-  backslashes or slashes), ringed and its page turned to; where the chip does not hold it the chip turns to All; a path the catalog does
+  (`reveal`), its entry is found by the whole path (`byPath` by `fnc_pictureKey`: lowercase, slashes unified, leading slash dropped),
+  ringed and its page turned to - only that file, never another picture of a class that owns it too. A crate or vehicle with no picture
+  set is drawn by its `editorPreview`, so that is the one in use (config's picture is only the Picture row's text); where the chip does not hold it the chip turns to All; a path the catalog does
   not have is the path field's. A click on a chip or typing in the search before the catalog is read ends `reveal`.
 - **The catalog** (`fnc_pictureCatalog`, `fnc_pictureChunk`; uiNamespace `einv_setup_pictures`): the picker's pictures are the distinct
   `picture` values of the class index's rows (`ROW_PICTURE`, already looked at by `safePicture`), one entry each - `[path, lowercase
-  path, search text, first owner's name, its class, how many own it, up to `PICKER_OWNERS` 8 classes in lowercase, their names]`,
+  path, search text, first owner's name, its class, how many own it (a class once, though its list and editor picture be one file), up to
+  `PICKER_OWNERS` 8 classes in lowercase, their names, categories, its `fnc_pictureKey`, the class that owned it last]`,
   sorted by the first owner's name, plus `byPath` for Review's "picture from <class>"; a ninth member lists the categories of the owners
   (`items`, `gear`, `vehicles`: `fnc_pictureCategory` of each owner's kind - uniform, vest, headgear and backpack are gear; crate and
   vehicle are vehicles, whose `editorPreview` is catalogued as well as their `picture`; all else, weapons, magazines, attachments,
@@ -2091,7 +2125,6 @@ stringtables are wrapped as BRIEFING asks.
 | `einv_hotbar_hudMode` | LIST | client | While in use | Never, While in use, Always |
 | `einv_hotbar_hudTime` | SLIDER 1 to 15 | client | 4 | seconds the bar stays after a key |
 | `einv_magazines_repack` | CHECKBOX | global | on | the window's own repack |
-| `einv_setup_access` | LIST | global | `admins` | `everyone`, `admins`: who may open the setup wizard in a mission (server, logged-in admin, CBA whitelist, Zeus); Eden and CBA's menu always |
 | `einv_weight_enabled` | CHECKBOX | global | on | the tiers at all; off: plain kilograms, no effects, no duty factor, no messages (ACE's fatigue alone) |
 | `einv_weight_heavyAt` | SLIDER 0 to 100 | global | 0 | kg; 0 follows ACE's fatigue |
 | `einv_weight_overloadedAt` | SLIDER 10 to 100 | global | 45 | kg |
@@ -2115,10 +2148,16 @@ guard or carried variable in the storage's tables (section 3).
 ### Known limits
 
 - **Use from containers is not a lock the engine knows.** The settings "Use items from the uniform / vest / backpack" are honoured by
-  everything this mod draws or runs and by the keyboard's reload key (section 3), not by the game: throwing with the game's own key
-  and ACE's advanced throwing, ACE's own medical, rations and self-interaction menus, a gamepad or action-menu reload, a vehicle's
-  guns, and scripts take from any container. A grenade in the backpack can still be thrown with the game's key once its class is
-  selected, and ACE can bandage from the backpack's bandages. Untested in the game.
+  everything this mod draws or runs (the window, the hotbar), by the keyboard's reload key, by a reload from the action menu or a
+  gamepad (taken back after the fact, only for a magazine whose container is known), and by the throw key when only closed grenades
+  are left (section 3), not by the game: ACE's own medical, rations and self-interaction menus and every mod that reads the unit's
+  items itself (they see the backpack's bandages as real items), what ACE's advanced throwing selects, a grenade of a class that
+  also lies in an open container (the game may take the closed copy), a vehicle's guns, and scripts take from any container. A
+  reload that was undone shows its animation and the magazine's return. Untested in the game.
+  *Possible later design:* full enforcement needs the closed items to be kept outside the unit's containers altogether - for example
+  in a hidden holder object that the window shows as the backpack's (or vest's, uniform's) contents. What is not in the unit's
+  cargo cannot be read by ACE, other mods or the engine's reload and throw. It would also change what `magazines`, `items` and the
+  loadout commands report, weight, and every mod that expects the gear in the unit; not done.
 - **Transactions and multiplayer.** A client's connection dropping inside one send batch can lose a payload it took, or settle a
   put again (the hub names it in the RPT). Changes outside this machinery - ACE medical treatment, EFAK's own pouch, the engine's
   scroll-menu actions, scripts - are not serialised with ours; a script error in our own code exactly between an engine change and

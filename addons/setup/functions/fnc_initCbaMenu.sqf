@@ -5,7 +5,8 @@
  * Load and Import, and shows it only while this mod's page is the one open. It opens the setup wizard
  * over the menu, in menu mode: what the wizard applies arrives in the menu as a change still to be
  * confirmed - our row turns yellow - and CBA's own OK saves it, or Cancel throws it away, like any other
- * change made there.
+ * change made there. Shown only to who may see the wizard at all (fnc_canOpen), asked whenever the button
+ * is brought up to date, so a login is noticed.
  *
  * Runs when the menu loads (Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions), after CBA's
  * own handler, which made the controls looked for here. Their ids are CBA's internals, not a promise:
@@ -106,6 +107,7 @@ _display setVariable [QGVAR(cbaSync), {
     private _list = _display displayCtrl CBA_IDC_ADDONS_LIST;
     private _index = lbCurSel _list;
     private _show = ctrlShown (_display displayCtrl CBA_IDC_ADDONS_GROUP)
+        && {call (missionNamespace getVariable [QFUNC(canOpen), {false}])}
         && {_index >= 0}
         && {(_list lbData _index) isEqualTo (_display getVariable [QGVAR(cbaCategory), ""])};
 
