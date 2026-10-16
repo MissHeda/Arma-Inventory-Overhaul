@@ -1346,7 +1346,9 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   its last row in use plus `COLLAPSE_SPARE_ROWS` 2, at least `COLLAPSE_MIN_ROWS` 4, and only folds when that hides
   `COLLAPSE_HIDE_MIN` 4 rows or more; one line under the grid, "+32 empty rows (256 cells)", opens them (`fnc_toggleRows`,
   `einv_gui_expanded`). A positional compartment never folds; kit windows and the own storage column are not folded. Only the
-  view: the grid stays whole.
+  view: the grid stays whole. A container with rows folded away registers its fold line and its box in uiNamespace `einv_gui_foldAreas`
+  (`fnc_drawSection`, emptied by each build): a drag let go on either, or on a cell that does not take the item, lays it down in the
+  first free spot of the whole container (below, `fnc_updateDrag`).
 - **Kit windows** (`fnc_drawWindows`, `fnc_drawWindow [display, section, theme, fresh]`): a kit or pouch is a floating glass
   window - a title row (picture, name, Take all and Sort, "12 / 60 mass", a cross, all on the row's middle line; the buttons and
   the cross are a section caption's - 0.62 UNIT high, labels 0.46 UNIT and centred, `fnc_buttonWidth` / `fnc_sortChip` widths -,
@@ -1362,7 +1364,8 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 ### Drag, selection, quick moves
 
 - **Lift.** A press (`fnc_onMouseButton`) becomes a drag after `DRAG_THRESHOLD` 0.008 (`fnc_startDrag`: the picture follows as a
-  ghost, `fnc_makeGhost`; the source fades; a footprint shows green where it fits, red where not). A stack goes whole, **Shift**
+  ghost, `fnc_makeGhost`, **held by its middle** - the middle of the picture is the pointer whichever cell was pressed, and the press's grab is
+  set to the middle cell, `floor(w/2)`, `floor(h/2)`, again after each turn; the source fades; a footprint shows green where it fits, red where not). A stack goes whole, **Shift**
   half; the **wheel** changes the count (`fnc_onMouseZ`), the middle button takes all; **R** turns what is held (`fnc_rotateDrag`:
   `einv_gui_dragRot` apart from `einv_gui_dragSize`, a quarter clockwise and back, the item staying held by the same cell). Column
   and window edges scroll while dragging. Nothing is lifted that could go nowhere (a living person's item the player may not
@@ -1404,7 +1407,24 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `dragRoom`, so nothing kept goes stale. With `einv_gui_debugTiming` on, `fnc_startDrag` puts `timing` into `dragRoom`, each frame
   notes its parts (scroll, ghost, find, target, hint) and `fnc_logDrag` writes `timing: drag N ms avg, N ms max over N frames (start N ms;
   slowest frame: ...; target worked out anew in N frames)` - from `fnc_endDrag`, and from `fnc_build` and `fnc_onUnload`, which end a drag without it.
-- **Where it lands** (`fnc_updateDrag`; `einv_gui_dragTarget` is `["grid", gridIndex, col, row, fits, why not, "", place]`,
+- **What lies over what, and where the picture is.** The engine draws the focused control - with the group it lies in - over every other,
+  so while something is held (an item, a hotbar binding) the focus goes to the search field's sink whatever has it, mouse button down or
+  not (`fnc_takeFocus`, from `fnc_startDrag` and every frame of `fnc_onFrame`; a field being typed in keeps it): the ghost, the
+  footprint (made before it) and the name at the mouse then lie over every column, panel and tile. The ghost is moved to the pointer less
+  half its size; a position that is not a finite number (`fnc_isFinite`) is never handed to the control - the picture stays and the RPT
+  says once per drag what was not a number (mouse, cell and size, picture offset).
+- **The footprint under a held item.** A single item's corner is the cell its picture's corner is nearest to: the cell under the mouse plus
+  `floor(across - w/2 + 0.5)` (and for rows), `across` being how far the mouse is across that cell (0 to 1, `_fnc_across`) - for an even
+  width or height the half of the cell the mouse is in matters, and is part of the frame's "spot" (no "hold" then). Then it is
+  **clamped into the compartment** (`0` to `cols - w`, `0` to `rows - h`): near a border the footprint stops at the edge and stays
+  valid instead of hanging out red. Groups keep the arrangement they had by the middle cell of the grabbed tile.
+- **A folded container takes it anywhere** (`GVAR(foldAreas)`). Over a container whose empty rows are folded away, and no cell works for the
+  item (taken, or taller than the visible rows), an item from another container is laid down in the first free spot of the whole container
+  when `einv_storage_fnc_hasSpace` says there is one (asked once per drag and container, "autofit|n"): the target's place is false (no cell,
+  as for a kit's grid), `fnc_endDrag` sends a move without a cell and the layout finds it; the footprint is the visible compartment at half
+  strength and the hint says "Goes to the first free spot - the folded rows too". The same for the fold line under the grid and the
+  container's box (single items only; the fold areas' boxes are worked out with the rest of the drag's geometry). Not within one container.
+- **Where it lands** (`fnc_updateDrag`; `einv_gui_dragTarget` is `["grid", gridIndex, col, row, fits, why not, "", place, unit, swap plan, cell under the mouse]`,
   `["slot", ...]`, `["kitTile", ...]`, `["hotbar", slot, ...]`, `["repack", ...]`, `["zone", ...]`, `["ground", ...]` or
   `["group", ...]`): on a grid the footprint must lie inside the compartment on free cells (a hole is red; an item's own holes
   over free cells are fine; cells a move under way goes to count as taken), another container must be able to carry it
@@ -1413,7 +1433,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   (`fnc_canSwap`, `fnc_doSwap`); outside every panel it goes on the ground. `fnc_endDrag` hands the result to `fnc_sendMoves` (or
   the `drop` hook).
 - **Tile onto tile: a swap** (`fnc_swapPlan`, `fnc_applySwap`). Where a grid drop is refused as `"NoRoom"` for taken cells - and only
-  there: the whole of a stack held, nothing from a slot or a group, no kit's grid or ACE's list, not the Arsenal's staging space; a
+  there: the whole of a stack held, nothing from a slot or a group, no kit's grid or ACE's list; a
   kit's tile, a magazine that repacks and every other answer of a tile come first - `fnc_updateDrag` asks `fnc_swapPlan` once per
   hovered footprint (`dragRoom` `swap|grid|col|row|w|h|rot|moves under way`, from the same `cells|n` the free-cell test uses). It is a
   swap when the footprint, as held, covers the cells of exactly one other tile (the rest free or the dragged tile's own) of another
@@ -1440,7 +1460,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 - **Selection** (inventory only): click selects, Ctrl+click toggles, Shift+click takes the range, a frame dragged from an empty
   cell (`fnc_startBand`, `fnc_updateBand`, `fnc_endBand`) takes what it touches, Ctrl+A the section (`fnc_selectSection`). Refs
   are `[holder, key, compartment, col, row]` (`einv_gui_selection`), found again on every build by `fnc_selectionTiles`; one side
-  at a time (`own` or `loot`); searched tiles only. **Double click** moves a tile over (`fnc_quickMove`: from own gear into the
+  at a time (`own` or `loot`); searched tiles only. **Double click** - or the quick move key, F by default (CBA keybind `einv_gui_quickMove`, `fnc_isQuickKey`, read by `fnc_onKeyDown` since CBA's keys do not run in a dialog; both do `fnc_quickAction`) - moves a tile over (`fnc_quickMove`: from own gear into the
   loot column's containers in order, else the ground; from loot into uniform, vest, backpack), opens a kit or nested container, or
   moves a whole selection (`fnc_quickMoveGroup`); Ctrl+click on a slot takes off (`fnc_quickUnequip`); **G** (the footer's
   drop key, in the inventory only; Delete does the same everywhere) and "Drop" put the selection on the ground - with
@@ -1502,18 +1522,14 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   can use it"; nothing else about it looks different. The context menu leaves out what would use it: the hotbar's bind row (it refuses, section 7), Open radio and Use
   as active radio, and CBA rows that use the item up (`fnc_cbaOptions`: the `consume` flag on `UNIFORM_CONTAINER`,
   `VEST_CONTAINER`, `BACKPACK_CONTAINER`). Moving, equipping, loading into a weapon and dropping are never limited.
-- **Key hints at the mouse** (`fnc_hoverKeys [shown]`, `fnc_drawTipKeys [keys]`). Under the name at the mouse - or the comparison
-  card - hangs a small card of the tooltip's glass with the keys that work on exactly that tile or slot, as key badges in the
-  footer's style (`fnc_uiKeyHint`, whose 8th argument measures without creating): G Drop (not for what lies on the ground), the
-  hotbar's `4-0 Hotbar` (`einv_hotbar_fnc_bindHint`: the item may go on the bar from where it lies; the keys the player really
-  has), Double click Quick move / Open (a uniform, vest, backpack) / Equip (what can be worn, on the ground), Shift+Click Split
-  for a stack where `einv_storage_stackSplits` is true, else Shift+Drag Half stack, Right click Options; a worn slot adds
-  Ctrl+Click Take off; a hotbar slot shows G Clear and Drag Move or remove. Inventory only (a window that attached names its own
-  keys, the `footerKeys` hook), not while something is dragged or a menu is open. It is one `EINV_Group` (uiNamespace `einv_gui_tipKeys`,
-  with `width`, `height` and the keys it was made from as `source`), made by `fnc_updateHover` after the name whenever the hover
-  changes; `fnc_onFrame` shows it with the name and places the two as one block (below the name, the block above the pointer
-  near the screen's bottom, left of it near the right edge); `fnc_raiseTooltip` makes it again after the name. The footer itself
-  keeps Esc, Right click, Double click, Ctrl+Click Select, G Drop and the hotbar's range.
+- **The footer's key hints** (`fnc_drawFooter`, `fnc_uiKeyHint`): Esc Close, the quick move (the player's key, F by default - `fnc_quickKeyName` -,
+  or the double click while it has none), G Drop, the hotbar's range, Ctrl+click Select and the right mouse button Options, in that
+  order; contextual hints (R rotate, the drag's keys) come in the hint line, not here. A mouse button in a key hint is ACE's own
+  picture, not words: a key string may carry the tokens `@left`, `@right`, `@scroll` and `@double` (two left clicks), alone or after
+  modifiers joined by `+` (`"Ctrl+@left"`: a key cap `Ctrl`, then a cap with the mouse picture). The pictures are
+  `\z\ace\addons\interaction\UI\mouse_left_ca.paa`, `mouse_right_ca.paa` and `mouse_scroll_ca.paa` (`MOUSE_ICON_PATH`; ACE has no
+  double click or middle button picture); a picture that is not there (`fnc_safePicture`) falls back to the words ("Right click").
+  There is no card of keys at the mouse any more (0.4.24 had one; it was taken out again).
 - **A hotbar slot's binding is dragged** (`fnc_startStripDrag`, `fnc_updateStripDrag`, `fnc_stripTarget`, `fnc_endStripDrag`;
   `einv_gui_stripDrag` = `[slot number, ghost, strip box, ghost offset, ghost size]`): a press on a filled slot of the strip
   (`fnc_onMouseButton`) records `einv_gui_press` with the slot's number as its tenth element, and `fnc_onFrame` starts this drag
@@ -1523,6 +1539,12 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   around it): `einv_hotbar_fnc_unbind` (the item is not touched); on the strip between its slots: nothing. The press stays
   in `einv_gui_press` meanwhile, so nothing is built; a build, the window closing or another window covering this one ends it
   without a change.
+- **Keys held back.** What `fnc_onKeyDown` has no use for goes no further than the window (inventory only; it returns true, so the engine
+  does not act on it): not to the soldier's actions, the weapon, ACE's or another mod's keys behind the window. What stays the engine's:
+  Escape (it closes the dialog), PrintScreen, and talking - the keys of the actions in `PASS_ACTIONS` (Chat, the push to talk family,
+  VoiceOverNet, NextChannel, PrevChannel), which is how TFAR's and ACRE2's keys still reach their mods - and a key typed into a field
+  (decided earlier). Mouse buttons and the wheel are left as they were: the display's mouse handlers answer true only for what the window
+  took, since an answer of true on every click would keep the window's own buttons from their clicks.
 - **Hints:** `fnc_updateHover` names what the mouse is on in the footer; `fnc_showHint [text, colourKey]`; `fnc_flashHint [reason,
   details]` (a reason key such as `"NoRoom"`, `"LookOnly"`, `"Locked"`, `"NoBackpack"`, any other text as it is, `""` nothing);
   `fnc_dragHint`; `fnc_infoHint [kind, args]` for the weight card and each caption. The **inspect card** (`fnc_inspect`,
@@ -1676,7 +1698,7 @@ item out.
   entries) + `STAGING_FREE_ROWS` 4, at least `STAGING_MIN_ROWS` 10 and the rows that fill the column down to the hint line, at
   most `STAGING_MAX_ROWS` 100 (its own cap, since `MAX_ROWS` 40 also bounds item and compartment sizes in the rules); rows past
   the column scroll; `getBlocks` takes that form exactly. Section id `"staging"`, side `"own"`, a crate icon (`tabIcon`) before
-  its caption. `fnc_onClosed` deletes it with its contents. `fnc_onDrop` notes `einv_arsenal_watch` `[container, class, count,
+  its caption. `fnc_onClosed` deletes it with its contents. `fnc_onDrop` notes `einv_arsenal_watch` `[container, [[class, count], ...],
   until]` and the frame hook calls `fnc_syncAce` and `fnc_tellAce` once the count changed (`WATCH_TIME` 3 s at most). The staging
   crate is no section of the soldier's (`GVAR(context)` "ownSections"), which the engine's signature reads (`fnc_getSignature`), so a
   move that only rearranged it - a tile moved or turned inside the staging space - was never seen and its tiles stayed where they were
@@ -1737,9 +1759,15 @@ they are **taken out**, not left in or moved on, and the player is asked first.
   (`efak_core_fnc_canPackInto` with the Arsenal, always in Eden), that mod's rules, and the kit's room by `fnc_roomMode`: its
   capacity, or the free cells of its own grid and never the capacity then; green when some fit (the hint says how many), red with
   the reason when none. `fnc_onDrop` packs them with `einv_compat_efak_fnc_packNew` and runs `fnc_settle`. EFAK's own kits tab of
-  ACE's window is left as it is. The drop (`fnc_onDrop`) calls `fnc_addTo [container, class, count, [col, row, block,
+  ACE's window is left as it is. The target's 11th element is the cell under the mouse (the item is held by its middle, so the footprint's corner is no longer the cell
+  minus a fixed grab): `fnc_listToKit` takes the cell from it. The drop (`fnc_onDrop`) calls `fnc_addTo [container, class, count, [col, row, block,
   w, h]]`: `normalize`, then `addItemToUniform` / `Vest` / `Backpack` for the open container, `addNew` for staging and for what
   the engine refused, the cell as a new record (`setPlace`); then `syncAce` and `tellAce`.
+- **Swapping tiles in the panel.** Dragging a tile onto another of the open container swaps the two as in the inventory (`einv_gui_fnc_swapPlan`,
+  a `placeMany` inside one container: counts do not change, so ACE has nothing to hear). Between the container and the staging space the
+  swap is an `exchange` through the hub; `fnc_onDrop` is handed the plan (its 15th argument) and notes the counts of both classes
+  (`einv_arsenal_watch` `[container, [[class, before], ...], until]`), so the frame hook tells ACE of each (`fnc_syncAce` once, `fnc_tellAce`
+  per class) - and likewise for a tile that joins a stack of its own class there.
 - **Wheel and remove.** During a list drag the engine's wheel sets the count on the ghost. Else `fnc_onWheel`: plain is the
   column's scroll; **Ctrl** over a tile adds one of its class (`fnc_addTo`, if in `ace_arsenal_virtualItemsFlat`) or takes one out
   (`fnc_remove`). A drop outside the panel, Delete, the menu or Ctrl+wheel down remove (`fnc_remove`: the record first when the
@@ -2386,7 +2414,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_weight_notify` | CHECKBOX | client | on | a message when the tier changes with the inventory closed |
 | `einv_locks_zeusOpens` | CHECKBOX | global | on | Zeus may open locked containers |
 
-CBA keybinds: `einv_hotbar_slot1` to `slot7` (4 to 0), `einv_hotbar_show`, `einv_setup_openWizard` (unbound). Kept in the player's
+CBA keybinds: `einv_hotbar_slot1` to `slot7` (4 to 0), `einv_hotbar_show`, `einv_gui_quickMove` (F, the quick move in the inventory window), `einv_setup_openWizard` (unbound). Kept in the player's
 profile: `einv_gui_searchMuted`, `einv_hotbar_slots` (`einv_gui_cameraOn` no longer since 0.4.7: `einv_gui_cameraDefault`).
 
 **What missions and other mods may set** (all optional): on an object `einv_grid` (a grid text, public), `einv_noSearch`,

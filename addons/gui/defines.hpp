@@ -46,6 +46,7 @@
 #define DIK_NUMPADENTER 156
 #define DIK_A      30
 #define DIK_G      34
+#define DEFAULT_QUICK_KEY 33
 #define DIK_R      19
 #define DIK_DELETE 211
 
@@ -262,8 +263,17 @@
 #define RELOAD_STEP_OUT 1.5
 #define MOVE_ACTIONS ["MoveForward", "MoveBack", "TurnLeft", "TurnRight", "MoveLeft", "MoveRight", "MoveFastForward", "MoveSlowForward", "EvasiveLeft", "EvasiveRight"]
 
+// The keys the engine keeps while the inventory window is open: those of the actions in this list - talking (chat,
+// the push to talk keys, the channel keys) - and Escape and PrintScreen. Every other key the window does not use
+// itself is held back (fnc_onKeyDown), so nothing gets through to the game behind it.
+#define PASS_ACTIONS ["Chat", "PushToTalk", "PushToTalkAll", "PushToTalkCommand", "PushToTalkDirect", "PushToTalkGroup", "PushToTalkSide", "PushToTalkVehicle", "VoiceOverNet", "NextChannel", "PrevChannel"]
+#define DIK_PRINTSCREEN 183
+
 // Textures, drawn by tools/generate_ui_textures.py
 #define UI_TEX(NAME) QPATHTOF(ui\NAME.paa)
+
+// ACE's mouse pictures for the key hints (fnc_uiKeyHint): mouse_left_ca.paa, mouse_right_ca.paa, mouse_scroll_ca.paa.
+#define MOUSE_ICON_PATH "\z\ace\addons\interaction\UI"
 
 // The silhouettes of empty equipment slots are Arma's own, from its vanilla inventory: players know
 // them, and they match the game's items better than anything drawn for this mod.

@@ -94,6 +94,9 @@
         <Key ID="STR_einv_gui_Hint_Failed">
             <English>That could not be moved</English>
         </Key>
+        <Key ID="STR_einv_gui_Hint_FoldedFit">
+            <English>Goes to the first free spot - the folded rows too</English>
+        </Key>
         <Key ID="STR_einv_gui_Hint_Gone">
             <English>Someone else was quicker</English>
         </Key>
@@ -244,14 +247,8 @@
         <Key ID="STR_einv_gui_Inspect_YesUpTo">
             <English>Yes, up to %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Key_CtrlClick">
-            <English>Ctrl+Click</English>
-        </Key>
         <Key ID="STR_einv_gui_Key_DoubleClick">
             <English>Double click</English>
-        </Key>
-        <Key ID="STR_einv_gui_Key_Drag">
-            <English>Drag</English>
         </Key>
         <Key ID="STR_einv_gui_Key_Drop">
             <English>G</English>
@@ -259,32 +256,20 @@
         <Key ID="STR_einv_gui_Key_Escape">
             <English>Esc</English>
         </Key>
+        <Key ID="STR_einv_gui_Key_LeftClick">
+            <English>Left click</English>
+        </Key>
         <Key ID="STR_einv_gui_Key_RightClick">
             <English>Right click</English>
         </Key>
-        <Key ID="STR_einv_gui_Key_ShiftClick">
-            <English>Shift+Click</English>
+        <Key ID="STR_einv_gui_Key_Scroll">
+            <English>Scroll</English>
         </Key>
-        <Key ID="STR_einv_gui_Key_ShiftDrag">
-            <English>Shift+Drag</English>
+        <Key ID="STR_einv_gui_Keybind_QuickMove">
+            <English>Quick move (inventory window)</English>
         </Key>
-        <Key ID="STR_einv_gui_Keys_Clear">
-            <English>Clear</English>
-        </Key>
-        <Key ID="STR_einv_gui_Keys_Half">
-            <English>Half stack</English>
-        </Key>
-        <Key ID="STR_einv_gui_Keys_MoveOrRemove">
-            <English>Move or remove</English>
-        </Key>
-        <Key ID="STR_einv_gui_Keys_Open">
-            <English>Open</English>
-        </Key>
-        <Key ID="STR_einv_gui_Keys_Split">
-            <English>Split</English>
-        </Key>
-        <Key ID="STR_einv_gui_Keys_TakeOff">
-            <English>Take off</English>
+        <Key ID="STR_einv_gui_Keybind_QuickMove_Tooltip">
+            <English>Moves the item under the mouse over,\nas a double click does - into the\nloot, or into your gear. Several\nselected items move together.\n\nOpens a uniform, vest or backpack\nlying in a container.</English>
         </Key>
         <Key ID="STR_einv_gui_Load_Next">
             <English>· %1 at %2 kg</English>

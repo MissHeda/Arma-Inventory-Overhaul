@@ -1,0 +1,34 @@
+#include "..\script_component.hpp"
+#include "..\defines.hpp"
+/*
+ * Author: Miss Heda
+ * What the quick move's key is called now, as the player has it set in Configure Addons - "F", "Shift+F". The
+ * first of its keybinds, if it has several. The footer shows it.
+ *
+ * Arguments:
+ * None
+ *
+ * Return Value:
+ * Key name, "" when the key is not set <STRING>
+ *
+ * Example:
+ * call einv_gui_fnc_quickKeyName;
+ *
+ * Public: No
+ */
+
+if (isNil "CBA_fnc_getKeybind") exitWith {""};
+
+private _entry = [CBA_SETTINGS_EINV, QGVAR(quickMove)] call CBA_fnc_getKeybind;
+
+if (isNil "_entry") exitWith {""};
+
+private _keybind = (_entry param [8, []]) param [0, []];
+
+if (_keybind isEqualTo []) exitWith {""};
+
+_keybind params [["_key", 0, [0]], ["_modifiers", [], [[]]]];
+
+if (_key <= 0) exitWith {""};
+
+[_key, _modifiers] call CBA_fnc_localizeKey

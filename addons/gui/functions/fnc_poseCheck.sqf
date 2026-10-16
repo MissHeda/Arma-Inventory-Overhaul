@@ -60,7 +60,7 @@ if (!isNull GVAR(openedOn) && {
 // While looting, a search that started later brings the pose along (nearby piles) - tried once per window.
 if (GVAR(pose) isEqualTo []) exitWith {
     if (
-        (missionNamespace getVariable [QGVAR(animation), 1]) == 1 && {!GVAR(poseTried)} && {GVAR(searchQueue) isNotEqualTo []}
+        (missionNamespace getVariable [QGVAR(animation), 0]) == 1 && {!GVAR(poseTried)} && {GVAR(searchQueue) isNotEqualTo []}
         && {diag_tickTime >= GVAR(reloadHold)}
     ) then {
         [_unit, GVAR(openedOn)] call FUNC(poseStart);

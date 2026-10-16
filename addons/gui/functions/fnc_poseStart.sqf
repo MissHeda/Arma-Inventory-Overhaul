@@ -9,7 +9,7 @@
  * hands (fnc_poseState). It is played on the local player's own unit, where it is local: the engine
  * carries it to every machine and to players who join later. No switchMove, no custom animation.
  *
- * The setting einv_gui_animation decides: Off never, While looting (the default) when the window was opened
+ * The setting einv_gui_animation decides: Off (the default) never, While looting when the window was opened
  * on something or a search runs, Always for the own gear as well. fnc_canPose says whether ACE and the
  * soldier's state allow it at all; a pose refused or taken over by another animation is never forced back
  * (GVAR(poseTried)).
@@ -31,7 +31,7 @@ params [["_unit", objNull, [objNull]], ["_target", objNull, [objNull]]];
 
 GVAR(pose) = [];
 
-private _mode = missionNamespace getVariable [QGVAR(animation), 1];
+private _mode = missionNamespace getVariable [QGVAR(animation), 0];
 
 if (_mode == 0) exitWith {false};
 if (_mode == 1 && {isNull _target} && {GVAR(searchQueue) isEqualTo []}) exitWith {false};

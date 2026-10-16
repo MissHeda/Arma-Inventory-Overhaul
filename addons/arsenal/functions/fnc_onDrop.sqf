@@ -5,8 +5,9 @@
  * A tile of the panel let go (the "drop" hook). Within the panel the engine moves it as in the inventory -
  * to a free spot, turned or not, onto another of its kind - a move of place within the container, or a
  * move between the container and the staging space (fnc_staging), both the storage's own. For the latter
- * the count of that class in the container is noted, and the frame hook tells ACE once the move landed
- * (fnc_onFrame): the soldier gained or lost it. Let go outside the panel, where fnc_dragCheck pointed it at
+ * the count of that class in the container is noted - of both classes when two tiles swap places or one
+ * joins a stack of its own class (the engine's plan, the 15th argument) -, and the frame hook tells ACE once
+ * the move landed (fnc_onFrame): the soldier gained or lost them. Let go outside the panel, where fnc_dragCheck pointed it at
  * ACE's list, it is taken out of the container or the staging space: as much of the stack as was dragged
  * (fnc_remove).
  *
@@ -28,6 +29,8 @@
  * 8: Row of the cell <NUMBER>
  * 9: Width it lies in there <NUMBER>
  * 10: Height it lies in there <NUMBER>
+ * 13: Turned, 1 a quarter clockwise <NUMBER>
+ * 14: The swap or merge plan of the target (einv_gui_fnc_swapPlan), [] for a plain move <ARRAY>
  *
  * Return Value:
  * Handled - the engine does nothing more <BOOL>
@@ -41,7 +44,7 @@
 params [
     ["_kind", "", [""]], ["_sourceIndex", -1, [0]], ["_tileIndex", -1, [0]], ["_slotSource", [], [[]]],
     ["_entry", createHashMap, [createHashMap]], ["_count", -1, [0]], ["_targetIndex", -1, [0]], ["_col", 0, [0]],
-    ["_row", 0, [0]], ["_w", 1, [0]], ["_h", 1, [0]], "", "", ["_rot", 0, [0]]
+    ["_row", 0, [0]], ["_w", 1, [0]], ["_h", 1, [0]], "", "", ["_rot", 0, [0]], ["_swap", [], [[]]]
 ];
 
 GVAR(dragZone) = "";
@@ -100,9 +103,16 @@ if (_kind isEqualTo "grid" && {!isNull GVAR(staging)}) exitWith {
     (call FUNC(selected)) params ["", "_open"];
 
     if (_source isNotEqualTo _to && {GVAR(staging) in [_source, _to]} && {_open in [_source, _to]}) then {
-        private _class = _entry getOrDefault ["class", ""];
+        private _classes = [_entry getOrDefault ["class", ""]];
 
-        GVAR(watch) = [_open, _class, [_open, _class] call EFUNC(storage,countClass), diag_tickTime + WATCH_TIME];
+        // Two tiles swapping places between the container and staging change two classes there.
+        if (_swap isNotEqualTo []) then {
+            private _other = ((_grids param [_targetIndex, createHashMap]) getOrDefault ["tiles", []]) param [_swap select 0, createHashMap];
+
+            _classes pushBackUnique (_other getOrDefault ["class", ""]);
+        };
+
+        GVAR(watch) = [_open, _classes apply {[_x, [_open, _x] call EFUNC(storage,countClass)]}, diag_tickTime + WATCH_TIME];
     };
 
     false

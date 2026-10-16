@@ -239,15 +239,37 @@ if (!_moved && {!_changed}) exitWith {
 };
 
 // ----- The ghost -----
-// Its grabbed cell under the mouse, and the count at its bottom right corner.
-private _boxX = _mouseX - (_grabCol + 0.5) * _cellW;
-private _boxY = _mouseY - (_grabRow + 0.5) * _cellH;
+// Held by its middle: the middle of the picture is where the pointer is, whichever cell it was taken by, and
+// the count sits at its bottom right corner.
+private _boxX = _mouseX - _w * _cellW / 2;
+private _boxY = _mouseY - _h * _cellH / 2;
 
 (uiNamespace getVariable [QGVAR(dragGhostOffset), [0, 0]]) params ["_offsetX", "_offsetY"];
 
 private _ghost = uiNamespace getVariable [QGVAR(dragGhost), controlNull];
-_ghost ctrlSetPosition [_boxX + _offsetX, _boxY + _offsetY];
-_ghost ctrlCommit 0;
+
+// A position that is not a number is a script error on every frame it is asked for (a frame of a drag
+// is every frame): the picture stays where the last good frame put it, and the RPT says once per drag what
+// was not a number.
+if (([_boxX] call FUNC(isFinite)) && {[_boxY] call FUNC(isFinite)} && {[_offsetX] call FUNC(isFinite)} && {[_offsetY] call FUNC(isFinite)}) then {
+    _ghost ctrlSetPosition [_boxX + _offsetX, _boxY + _offsetY];
+    _ghost ctrlCommit 0;
+} else {
+    if (!("nanNoted" in GVAR(dragRoom))) then {
+        GVAR(dragRoom) set ["nanNoted", true];
+
+        private _cellSize = [_cellW, _cellH, _w, _h];
+        private _pictureOffset = [_offsetX, _offsetY];
+
+        WARNING_3("The dragged picture has no position: mouse %1, cell and size %2, picture offset %3 - it stays where it was.",_mouse,_cellSize,_pictureOffset);
+    };
+
+    _boxX = GVAR(dragRoom) getOrDefault ["boxX", _mouseX];
+    _boxY = GVAR(dragRoom) getOrDefault ["boxY", _mouseY];
+};
+
+GVAR(dragRoom) set ["boxX", _boxX];
+GVAR(dragRoom) set ["boxY", _boxY];
 
 if (uiNamespace getVariable [QGVAR(dragTurned), false]) then {
     // A ghost whose picture reaches out of its footprint is a group with the picture in it (fnc_uiItemPicture):
@@ -340,11 +362,37 @@ if (_scrolled || {_geometry isEqualTo []}) then {
         }
     };
 
-    _geometry = [_slots apply {[_x] call FUNC(slotRect)}, _gridBoxes];
+    // The places where a drop is laid down in the rows a folded container hides (GVAR(foldAreas): the line under
+    // its grid and its box), as [container, [x, y, w, h] on the screen where its column shows it] - [] for one
+    // scrolled out of sight.
+    private _foldBoxes = (uiNamespace getVariable [QGVAR(foldAreas), []]) apply {
+        private _parent = _x getOrDefault ["parent", controlNull];
+        private _shown = [];
+
+        if (!isNull _parent) then {
+            (ctrlPosition _parent) params ["_groupX", "_groupY", "_groupW", "_groupH"];
+            ([createHashMapFromArray [["rel", [_groupX, _groupY]], ["parent", ctrlParentControlsGroup _parent]]] call FUNC(gridOrigin)) params ["_groupLeft", "_groupTop"];
+            ([_x] call FUNC(gridOrigin)) params ["_areaX", "_areaY"];
+            (_x get "size") params ["_areaW", "_areaH"];
+
+            private _left = _areaX max _groupLeft;
+            private _top = _areaY max _groupTop;
+            private _right = (_areaX + _areaW) min (_groupLeft + _groupW);
+            private _bottom = (_areaY + _areaH) min (_groupTop + _groupH);
+
+            if (_right > _left && {_bottom > _top}) then {
+                _shown = [_left, _top, _right - _left, _bottom - _top];
+            };
+        };
+
+        [_x get "container", _shown]
+    };
+
+    _geometry = [_slots apply {[_x] call FUNC(slotRect)}, _gridBoxes, _foldBoxes];
     GVAR(dragRoom) set ["geometry", _geometry];
 };
 
-_geometry params ["_slotRects", "_gridBoxes"];
+_geometry params ["_slotRects", "_gridBoxes", ["_foldBoxes", []]];
 
 // The column (row) at _local from a grid's corner as fnc_screenToCell finds it, -1 for none, and whether it
 // lies in the room a seam opens after it: the stretch of one pitch it lies in names, in the grid's lookup
@@ -390,6 +438,27 @@ private _fnc_cellAt = {
     if (!_holesToo && {[_grid, _col, _row] call FUNC(hitsHole)}) exitWith {[]};
 
     [_col, _row]
+};
+
+// How far across a cell of a grid the mouse is, [0 to 1, 0 to 1] - from where the cell's column and row start, as
+// the grid's lookup finds them: the room of a seam past the cell counts as its far edge. An item of an even width
+// or height lies a cell further on in the half of the cell that is past the middle (below).
+private _fnc_across = {
+    params ["_index", "_at"];
+
+    private _grid = _grids select _index;
+
+    (_gridBoxes select _index) params ["", ["_originX", 0], ["_originY", 0]];
+
+    private _pitchW = _grid get "cellW";
+    private _pitchH = _grid get "cellH";
+    private _startX = (_grid getOrDefault ["colX", []]) param [_at select 0, (_at select 0) * _pitchW];
+    private _startY = (_grid getOrDefault ["rowY", []]) param [_at select 1, (_at select 1) * _pitchH];
+
+    [
+        (((_mouseX - _originX - _startX) / _pitchW) max 0) min 1,
+        (((_mouseY - _originY - _startY) / _pitchH) max 0) min 1
+    ]
 };
 
 // Still on the last frame's cell of a grid that nothing else reaches into ("hold", below), with nothing held
@@ -454,6 +523,18 @@ if (_hitGrid < 0) then {
     _hitCell = [];
 };
 
+// Off every grid, on the line or the box of a container whose empty rows are folded away: the item is laid down
+// in its first free spot, the folded rows too (below). A single item only, and only where nothing lies over it.
+private _foldHit = -1;
+
+if (_hitGrid < 0 && {_onTop isEqualTo ""} && {_dragGroup isEqualTo []}) then {
+    _foldHit = _foldBoxes findIf {
+        (_x select 1) params [["_foldX", 0], ["_foldY", 0], ["_foldW", 0], ["_foldH", 0]];
+
+        _foldW > 0 && {_mouseX >= _foldX} && {_mouseX < _foldX + _foldW} && {_mouseY >= _foldY} && {_mouseY < _foldY + _foldH}
+    };
+};
+
 // Over the player's equipment column (fnc_layoutGlass), in the inventory.
 private _inArea = _onTop isEqualTo "" && {_dragGroup isEqualTo []} && {[] call FUNC(isInventoryMode)} && {
     GVAR(equipmentRect) params [["_areaX", 0], ["_areaY", 0], ["_areaW", 0], ["_areaH", 0]];
@@ -491,7 +572,17 @@ if (_timed) then {
 
 // All of that as the last frame found it, with nothing held changed: the target, the footprint, the hint and
 // the answer of the window that attached stand as they are.
-private _spot = [_onTop, _slotHits, _hitGrid, _hitCell, _inArea, _inStorage, _hitZone, _outside];
+// Which half of its cell the mouse is in, where it matters: an item of an even width or height lies a cell further on
+// past the middle of the cell (below). Otherwise nothing - the footprint does not depend on it.
+private _halves = [];
+
+if (_hitGrid >= 0 && {_dragGroup isEqualTo []} && {(_w mod 2) == 0 || {(_h mod 2) == 0}}) then {
+    ([_hitGrid, _hitCell] call _fnc_across) params ["_acrossX", "_acrossY"];
+
+    _halves = [_acrossX >= 0.5, _acrossY >= 0.5];
+};
+
+private _spot = [_onTop, _slotHits, _hitGrid, _hitCell, _inArea, _inStorage, _hitZone, _outside, _foldHit, _halves];
 
 if (!_changed && {_spot isEqualTo (GVAR(dragRoom) getOrDefault ["spot", []])}) exitWith {
     if (_timed) then {call _fnc_noteTime};
@@ -506,7 +597,7 @@ _anew = true;
 // seam opens inside the compartment too (fnc_createGrid "colX", "rowY").
 private _newHold = [];
 
-if (_hitGrid >= 0 && {_slotHits isEqualTo []} && {!_inArea}) then {
+if (_hitGrid >= 0 && {_slotHits isEqualTo []} && {!_inArea} && {_halves isEqualTo []}) then {
     private _grid = _grids select _hitGrid;
 
     (_gridBoxes select _hitGrid) params ["", "_originX", "_originY"];
@@ -919,6 +1010,24 @@ call {
     private _cell = _hitCell;
     private _targetIndex = _hitGrid;
 
+    // On the line or the box of a folded container: its first compartment's grid stands for it, and nothing
+    // lies on a cell there - the item is laid down in the first free spot (below).
+    private _viaFold = false;
+
+    if (_targetIndex < 0 && {_foldHit >= 0}) then {
+        private _foldContainer = (_foldBoxes select _foldHit) select 0;
+
+        _targetIndex = _grids findIf {
+            (_x getOrDefault ["container", objNull]) isEqualTo _foldContainer
+            && {!(_x getOrDefault ["virtual", true])} && {!(_x getOrDefault ["overflow", false])}
+        };
+
+        if (_targetIndex >= 0) then {
+            _viaFold = true;
+            _cell = [0, 0];
+        };
+    };
+
     if (_targetIndex < 0) exitWith {
         _footprint ctrlShow false;
 
@@ -1007,6 +1116,23 @@ call {
     private _target = _grids select _targetIndex;
     private _col = (_cell select 0) - _grabCol;
     private _row = (_cell select 1) - _grabRow;
+
+    // A single item is held by its middle: its corner is the cell the picture's corner is nearest to, so the
+    // footprint lies under the picture whatever the size - not the cell under the mouse less a fixed grab. How far
+    // the mouse is across its cell says whether an item of an even width or height lies a cell further on. A group
+    // keeps its arrangement by the middle cell of the one grabbed (fnc_groupMode).
+    if (!_viaFold && {_dragGroup isEqualTo []}) then {
+        ([_targetIndex, _cell] call _fnc_across) params ["_acrossX", "_acrossY"];
+
+        _col = (_cell select 0) + floor (_acrossX - _w / 2 + 0.5);
+        _row = (_cell select 1) + floor (_acrossY - _h / 2 + 0.5);
+
+        // Near the border the footprint stops at the edge of the compartment instead of hanging out: it is
+        // pushed inside as far as it is small enough for it.
+        _col = (_col min ((_target get "cols") - _w)) max 0;
+        _row = (_row min ((_target get "rows") - _h)) max 0;
+    };
+
     private _reason = "";
     private _place = true;
 
@@ -1124,7 +1250,7 @@ call {
     // the grid below says no room, as for a tile out of an opened backpack dropped on that backpack.
     private _kitTile = -1;
 
-    if (!isNil QEFUNC(compat_efak,canDrop) && {(_sourceGrid getOrDefault ["source", ""]) isEqualTo ""}) then {
+    if (!_viaFold && {!isNil QEFUNC(compat_efak,canDrop)} && {(_sourceGrid getOrDefault ["source", ""]) isEqualTo ""}) then {
         private _underIndex = [_targetIndex, _cell] call _fnc_tileUnder;
         private _under = (_target get "tiles") param [_underIndex, createHashMap];
 
@@ -1166,7 +1292,7 @@ call {
     private _repackTile = -1;
     private _repackAnswer = [false, ""];
 
-    if (_slotSource isEqualTo [] && {!isNil QEFUNC(magazines,canRepack)}) then {
+    if (!_viaFold && {_slotSource isEqualTo []} && {!isNil QEFUNC(magazines,canRepack)}) then {
         private _underIndex = [_targetIndex, _cell] call _fnc_tileUnder;
 
         if (_underIndex < 0 || {_targetIndex == _sourceIndex && {_underIndex == _tileIndex}}) exitWith {};
@@ -1280,6 +1406,11 @@ call {
             GVAR(dragRoom) set ["taken", [_takenKey, _taken]];
         };
 
+        // Not on a cell at all: what the folded container takes is asked below.
+        if (_viaFold) then {
+            _taken = true;
+        };
+
         // In a kit's grid the cell only says where something from elsewhere would like to lie: taken, the
         // kit's layout finds it another (einv_storage_fnc_getLayout). Moved within the kit, the cell is all
         // the move is about (einv_compat_efak_fnc_drop) - there, as in a container, whose cells are its room,
@@ -1301,7 +1432,7 @@ call {
     private _swap = [];
 
     if (
-        _reason isEqualTo "NoRoom" && {_slotSource isEqualTo []} && {_fromKit isEqualTo ""} && {_toKit isEqualTo ""}
+        _reason isEqualTo "NoRoom" && {!_viaFold} && {_slotSource isEqualTo []} && {_fromKit isEqualTo ""} && {_toKit isEqualTo ""}
         && {(_gridBoxes param [_sourceIndex, []]) isNotEqualTo []}
     ) then {
         private _swapKey = format ["swap|%1|%2|%3|%4|%5|%6|%7|%8", _targetIndex, _col, _row, _w, _h, GVAR(dragRot), count GVAR(inFlight), _amount];
@@ -1323,6 +1454,33 @@ call {
         } else {
             _reason = "";
             _swap = _swapPlan;
+        };
+    };
+
+    // A container with empty rows folded away, and no cell that works for this item among the rows the column
+    // shows (a taken one, or the item taller than they are): from elsewhere it is laid down in the first free spot
+    // of the whole container, the folded rows too - the cells the player cannot see are no reason to refuse. No
+    // cell is named (the place is false, as for a kit's grid), the layout finds one when it is let go
+    // (fnc_endDrag, fnc_applyMove). Asked once per target and drag.
+    private _auto = false;
+
+    if (
+        _reason isEqualTo "NoRoom" && {_swap isEqualTo []} && {_toKit isEqualTo ""} && {_fromKit isEqualTo ""}
+        && {[_from, _fromKit] isNotEqualTo [_to, _toKit]} && {!isNull _to}
+        && {(_foldBoxes findIf {(_x select 0) isEqualTo _to}) >= 0}
+    ) then {
+        private _fitKey = format ["autofit|%1", _targetIndex];
+        private _fitAnswer = GVAR(dragRoom) get _fitKey;
+
+        if (isNil "_fitAnswer") then {
+            _fitAnswer = [_to, _entry] call EFUNC(storage,hasSpace);
+            GVAR(dragRoom) set [_fitKey, _fitAnswer];
+        };
+
+        if (_fitAnswer) then {
+            _reason = "";
+            _place = false;
+            _auto = true;
         };
     };
 
@@ -1402,7 +1560,12 @@ call {
         _hintParts = [[format [[LLSTRING(Hint_Swap), LLSTRING(Hint_Merge)] select _merge, [_swapTile get "class"] call FUNC(itemName)], "accent"]];
     };
 
-    GVAR(dragTarget) = ["grid", _targetIndex, _col, _row, _reason isEqualTo "", _reason, "", _place, objNull, _swap];
+    if (_auto) then {
+        _hintParts = [[LLSTRING(Hint_FoldedFit), "accent"]];
+    };
+
+    // The cell under the mouse comes along as the 11th element: what the window that attached asks for.
+    GVAR(dragTarget) = ["grid", _targetIndex, _col, _row, _reason isEqualTo "", _reason, "", _place, objNull, _swap, _cell];
 
     // The footprint lies on the target's cells, clipped to the grid where the item would stick out.
     (_gridBoxes select _targetIndex) params ["", "_originX", "_originY"];
@@ -1415,6 +1578,12 @@ call {
 
     // A swap lies in the accent colour, on the cells of both tiles: the dragged one's new ones, here, and the
     // other tile's new ones, where the dragged one came from (in view of its column only).
+    if (_auto || {_viaFold}) then {
+        // No cell of its own: the compartment as the column shows it, at half strength.
+        _clipRect = [_target, [_originX, _originY], 0, 0, _target get "cols", _target get "rows"] call FUNC(spanRect);
+
+        [_clipRect, _reason isEqualTo "", DRAG_FOOTPRINT_ALPHA / 2] call _fnc_show;
+    } else {
     if (_swap isNotEqualTo []) then {
         [_clipRect, true, DRAG_FOOTPRINT_ALPHA, "accent"] call _fnc_show;
 
@@ -1451,10 +1620,11 @@ call {
     } else {
         [_clipRect, _reason isEqualTo ""] call _fnc_show;
     };
+    };
 
     // A shaped item on its own cells instead, those inside the grid: a cell of the clipped box is a hole
     // where the item has none.
-    if (_dragHoles isNotEqualTo []) then {
+    if (_dragHoles isNotEqualTo [] && {!_auto} && {!_viaFold}) then {
         private _clipW = _right - _left;
         private _clipH = _bottom - _top;
         private _clipHoles = [];

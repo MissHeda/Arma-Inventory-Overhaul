@@ -6,7 +6,7 @@
  * windows and the selection, one at a time. Ctrl+A selects everything in the section under the mouse
  * (fnc_selectSection). G drops the selected tiles, else the item under the mouse (Delete still does the
  * same, but the footer names G); the Gear key closes the window again, as it closes the vanilla inventory. A key the hotbar has a use for goes to it first
- * (einv_hotbar_fnc_onWindowKey - only when that addon is loaded). A window that attached (fnc_attach) is
+ * (einv_hotbar_fnc_onWindowKey - only when that addon is loaded), then the quick move key (fnc_isQuickKey). A window that attached (fnc_attach) is
  * offered the keys after those (the "key" hook) and before the Delete and Gear keys, and hears Return in
  * any field of its own ("submit").
  *
@@ -154,6 +154,26 @@ if (
     && {[_display, _key, _shift, _ctrl, _alt] call EFUNC(hotbar,onWindowKey)}
 ) exitWith {true};
 
+// The quick move key (fnc_isQuickKey, set in Configure Addons; F): the double click's work for the tile the
+// mouse is on, or for the whole selection when the mouse is on a tile of it. Over a worn slot or free cells it
+// is the key like any other.
+if (!GVAR(dragging) && {call FUNC(isInventoryMode)} && {[_key, [_shift, _ctrl, _alt]] call FUNC(isQuickKey)}) then {
+    if ((GVAR(hover) param [0, ""]) isEqualTo "tile") then {
+        GVAR(hover) params ["", "_gridIndex", "_tileIndex"];
+
+        private _grid = (uiNamespace getVariable [QGVAR(grids), []]) param [_gridIndex, createHashMap];
+        private _tile = (_grid getOrDefault ["tiles", []]) param [_tileIndex, createHashMap];
+
+        if (count _tile > 0 && {!(_grid getOrDefault ["virtual", true])} && {!(_tile getOrDefault ["hidden", false])}) then {
+            [_gridIndex, _tileIndex] call FUNC(quickAction);
+
+            _handled = true;
+        };
+    };
+};
+
+if (_handled) exitWith {true};
+
 // Selecting several (fnc_select): Escape lets go of the selection, Ctrl+A takes the whole section under
 // the mouse, G (or Delete) drops what is selected. Not while something is dragged.
 private _selecting = !GVAR(dragging) && {call FUNC(isInventoryMode)};
@@ -222,7 +242,14 @@ if (_key == DIK_ESCAPE && {call FUNC(isInventoryMode)}) then {
     GVAR(closeReason) = "Escape";
 };
 
-if !(_key in actionKeys "Gear") exitWith {false};
+// A key the window has no use for goes no further than the window: not to the soldier's actions, the weapon, ACE's
+// or another mod's keys behind it - the inventory is a screen of its own, and a key pressed over it is not for the
+// game. What stays the engine's: Escape (it closes the dialog), PrintScreen, and talking - chat and the push to talk
+// keys (PASS_ACTIONS), so TFAR and ACRE2 still work from the window. A field with the cursor in it had its keys
+// above; a window that attached has its own handlers (the Arsenal).
+if !(_key in actionKeys "Gear") exitWith {
+    call FUNC(isInventoryMode) && {!(_key in [DIK_ESCAPE, DIK_PRINTSCREEN])} && {PASS_ACTIONS findIf {_key in actionKeys _x} < 0}
+};
 if (diag_tickTime - GVAR(openedAt) < GEAR_KEY_GRACE) exitWith {true};
 
 ["the Gear key"] call FUNC(closeDisplay);

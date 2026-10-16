@@ -13,8 +13,7 @@
  * Asked after such an outline was made (fnc_updateHover, fnc_drawSelection). It acts only when the name
  * or the card shows, no context menu is open (the menu is the topmost layer and hides the name) and
  * nothing is dragged, and only when something made after it is still there. The name keeps its text, place
- * and size; the card is drawn again from the rows it was made from (fnc_drawCompare); the key hints under
- * either are made again after it (fnc_drawTipKeys). Controls in a group -
+ * and size; the card is drawn again from the rows it was made from (fnc_drawCompare). Controls in a group -
  * the tiles' hover, selection and flash - lie under it anyway: their group was made before it.
  *
  * Arguments:
@@ -39,11 +38,9 @@ if ((uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [] || {GVAR(draggin
 
 private _created = uiNamespace getVariable [QGVAR(created), []];
 private _at = _created find _tip;
-private _keys = uiNamespace getVariable [QGVAR(tipKeys), controlNull];
 
-// Not the last live control made on the display: something went over it - not the key hints under it, which
-// are made after it on purpose.
-if (_at < 0 || {(_created select [_at + 1]) findIf {!isNull _x && {_x isNotEqualTo _keys}} < 0}) exitWith {false};
+// Not the last live control made on the display: something went over it.
+if (_at < 0 || {(_created select [_at + 1]) findIf {!isNull _x} < 0}) exitWith {false};
 
 private _position = ctrlPosition _tip;
 private _made = true;
@@ -83,19 +80,6 @@ if (_tip isEqualTo (uiNamespace getVariable [QGVAR(tooltip), controlNull])) then
         _card ctrlCommit 0;
 
         uiNamespace setVariable [QGVAR(tipShown), _card];
-    };
-};
-
-// The key hints lie over the name again (fnc_drawTipKeys): made once more from what they showed, where they stood.
-if (_made && {!isNull _keys}) then {
-    private _keysAt = ctrlPosition _keys;
-    private _shown = ctrlShown _keys;
-    private _new = [_keys getVariable [QGVAR(source), []], true] call FUNC(drawTipKeys);
-
-    if (!isNull _new) then {
-        _new ctrlSetPosition [_keysAt select 0, _keysAt select 1];
-        _new ctrlCommit 0;
-        _new ctrlShow _shown;
     };
 };
 

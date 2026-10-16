@@ -153,7 +153,8 @@ if (GVAR(scrollHold) isNotEqualTo []) then {
 
 // ----- A move into or out of the staging space, once it landed -----
 if (GVAR(watch) isNotEqualTo []) then {
-    GVAR(watch) params ["_watched", "_class", "_before", "_until"];
+    // The classes the move changes - one, or two when tiles swapped places: [[class, count before], ...].
+    GVAR(watch) params ["_watched", "_classes", "_until"];
 
     (call FUNC(selected)) params ["", "_open"];
 
@@ -161,14 +162,27 @@ if (GVAR(watch) isNotEqualTo []) then {
         GVAR(watch) = [];
     };
 
-    private _after = [_open, _class] call EFUNC(storage,countClass);
+    private _changes = [];
 
-    if (_after == _before) exitWith {};
+    {
+        _x params ["_class", "_before"];
+
+        private _after = [_open, _class] call EFUNC(storage,countClass);
+
+        if (_after != _before) then {
+            _changes pushBack [_class, _before, _after];
+        };
+    } forEach _classes;
+
+    if (_changes isEqualTo []) exitWith {};
 
     GVAR(watch) = [];
 
     [_display] call FUNC(syncAce);
-    [_class, _before, _after] call FUNC(tellAce);
+
+    {
+        _x call FUNC(tellAce);
+    } forEach _changes;
 };
 
 if (_holding || {!GVAR(dirty)}) exitWith {};

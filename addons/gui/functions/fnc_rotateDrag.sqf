@@ -2,8 +2,8 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * R while dragging: turns what is held a quarter round - its width becomes its height. The grabbed
- * cell turns along, so the item stays under the mouse, and the footprint shows where it lands now. It
+ * R while dragging: turns what is held a quarter round - its width becomes its height. It is held by its
+ * middle (fnc_startDrag), so it stays under the mouse and the footprint shows where it lands now. It
  * turns clockwise from upright and back the other way, as its picture turns (ctrlSetAngle 90) and a
  * shaped item's cells do (size=xx/x-, einv_items_fnc_turnMask) - so the cell held is still a cell of it.
  * It is put down turned (einv_storage_fnc_setPlace keeps the size it lies in). A tick sounds for the looter
@@ -42,11 +42,8 @@ private _upright = GVAR(dragRot) == 0;
 
 GVAR(dragRot) = 1 - GVAR(dragRot);
 
-(GVAR(press) param [3, [0, 0]]) params ["_grabCol", "_grabRow"];
-
-private _grab = if (_upright) then {[_h - 1 - _grabRow, _grabCol]} else {[_grabRow, _w - 1 - _grabCol]};
-
-GVAR(press) set [3, [((_grab select 0) max 0) min (_h - 1), ((_grab select 1) max 0) min (_w - 1)]];
+// Held by its middle, turned: the middle cell of the new shape.
+GVAR(press) set [3, [floor (_h / 2), floor (_w / 2)]];
 
 [_display] call FUNC(makeGhost);
 [_display, getMousePosition] call FUNC(updateDrag);

@@ -43,6 +43,8 @@
  * down to the last one in use and two more (fnc_viewBlocks); the empty rows below fold into one line under the grid,
  * "+32 empty rows (256 cells)", that opens them and folds them away again (fnc_toggleRows). Far less to
  * scroll through, and nothing of the room hidden (Mia, 0.2.3).
+ * A drag let go on that line or on the box lays the item down in the first free spot, the folded rows too
+ * (fnc_updateDrag).
  *
  * Four kinds of section are drawn their own way:
  *   "drawer"            - a function name: another addon draws it (ACE cargo's cards,
@@ -693,6 +695,20 @@ if (_rowsFoldable) then {
     _rowsToggle ctrlAddEventHandler ["ButtonClick", {
         [{_this call FUNC(toggleRows)}, [(_this select 0) getVariable [QGVAR(key), objNull]]] call FUNC(later);
     }];
+
+    // Where a drag may let go to have it laid down in the rows folded away: this line and the box of the container
+    // (fnc_updateDrag, GVAR(foldAreas) - "rel" and "parent" as fnc_gridOrigin takes them, "size", "container").
+    if (_hiddenRows > 0) then {
+        private _areas = uiNamespace getVariable [QGVAR(foldAreas), []];
+
+        _areas pushBack createHashMapFromArray [["rel", [_gridX, _rowsTop]], ["parent", _parent], ["size", [_rowsW, _lineH]], ["container", _sectionContainer]];
+
+        if (_hasBox) then {
+            _areas pushBack createHashMapFromArray [["rel", [_blockX, _bodyTop]], ["parent", _parent], ["size", [_boxW, _boxH]], ["container", _sectionContainer]];
+        };
+
+        uiNamespace setVariable [QGVAR(foldAreas), _areas];
+    };
 
     _used = _used + UNIT * 0.15 + _lineH;
 };

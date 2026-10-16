@@ -74,7 +74,6 @@ if (_box isNotEqualTo []) then {
 ctrlDelete (uiNamespace getVariable [QGVAR(compare), controlNull]);
 uiNamespace setVariable [QGVAR(compare), controlNull];
 uiNamespace setVariable [QGVAR(tipShown), controlNull];
-[] call FUNC(drawTipKeys);
 
 private _size = ((_record select 0) select [2, 2]) apply {_x max (UNIT * 1.5)};
 private _info = [_class] call EFUNC(items,getInfo);

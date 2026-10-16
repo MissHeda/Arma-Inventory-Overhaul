@@ -20,7 +20,7 @@
  * quarter - its corner on the dragged one's corner - and must find that spot free too (cells the
  * dragged tile and, on one grid, the other tile leave count as free, but the dragged tile's new cells
  * do not). A swap is of whole stacks only (a count from the wheel is refused), of two different classes,
- * neither of them a tile that was not searched or is on its way. Not for a kit's grid, ACE's list, a slot's item or the Arsenal's staging space, and not
+ * neither of them a tile that was not searched or is on its way. Not for a kit's grid, ACE's list or a slot's item, and not
  * where the pile on the ground would be left empty by the tile that leaves it (the engine deletes an
  * empty pile). Magazines of a kind that repack, kits and everything else that has its own answer for a
  * drop on its tile never get here (fnc_updateDrag asks them first).
@@ -82,9 +82,6 @@ private _to = _target getOrDefault ["container", objNull];
 private _from = _source getOrDefault ["container", objNull];
 
 if (isNull _to || {isNull _from}) exitWith {_none};
-
-// The Arsenal's staging space is told one class at a time (einv_arsenal_fnc_onDrop).
-if ((_to getVariable [QEGVAR(storage,localOnly), false]) || {_from getVariable [QEGVAR(storage,localOnly), false]}) exitWith {_none};
 
 private _sameHolder = _from isEqualTo _to;
 private _sameGrid = _targetIndex == _sourceIndex;

@@ -4,7 +4,7 @@
  * An item dragged out of ACE's list over a kit's tile in the panel (the "dragCheck" hook, fnc_dragCheck):
  * it goes into that kit, wherever the kit lies - the open container or the staging space. The cell under
  * the mouse decides, as in the inventory: the footprint's corner plus where the item was taken by
- * (einv_gui_press). The kit answers (einv_compat_efak_fnc_canPackNew): the kit type's Arsenal setting in
+ * (einv_gui_press), or the cell the engine names. The kit answers (einv_compat_efak_fnc_canPackNew): the kit type's Arsenal setting in
  * Enhanced First Aid Kits, that mod's rules for it, and its room in the measure it is counted in
  * (einv_compat_efak_fnc_roomMode) - that mod's capacity, or the free cells of a grid a rule or its config
  * gives the kit, never the capacity then. Green when some of them fit - the hint says how many -, red
@@ -32,11 +32,13 @@ private _grid = (uiNamespace getVariable [QEGVAR(gui,grids), []]) param [_target
 
 if (count _grid == 0 || {(_grid getOrDefault ["source", ""]) isNotEqualTo ""}) exitWith {[]};
 
-// The cell under the mouse: the footprint's corner and where in the item it is held.
+// The cell under the mouse: the engine's target names it as its 11th element (the item is held by its middle and
+// the footprint's corner follows from that), else the footprint's corner and where in the item it is held.
 (EGVAR(gui,press) param [3, [0, 0]]) params [["_grabCol", 0, [0]], ["_grabRow", 0, [0]]];
 
-private _col = (_target param [2, 0]) + _grabCol;
-private _row = (_target param [3, 0]) + _grabRow;
+private _under = _target param [10, []];
+private _col = [(_target param [2, 0]) + _grabCol, _under param [0, 0]] select (_under isNotEqualTo []);
+private _row = [(_target param [3, 0]) + _grabRow, _under param [1, 0]] select (_under isNotEqualTo []);
 private _tiles = _grid getOrDefault ["tiles", []];
 private _tileIndex = _tiles findIf {
     private _tileCol = _x getOrDefault ["col", -1];

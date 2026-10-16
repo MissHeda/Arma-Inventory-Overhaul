@@ -30,7 +30,8 @@
  * nothing to say (fnc_dragHint). The comparison card at the mouse goes while something is held.
  *
  * The item, as an entry, is kept in uiNamespace (dragEntry): a tile's entry holds its controls.
- * Footprint first, ghost second: created controls draw over earlier ones, and the ghost belongs on top.
+ * Footprint first, ghost second: created controls draw over earlier ones, and the ghost belongs on top - as long
+ * as no other control has the focus (fnc_takeFocus).
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -205,6 +206,10 @@ GVAR(dragSize) = [_entry getOrDefault ["w", 1], _entry getOrDefault ["h", 1]];
 GVAR(dragRot) = parseNumber (_entry getOrDefault ["rotated", false]);
 GVAR(dragCount) = [_stack, (floor (_stack / 2)) max 1] select (_shift && {_stack > 1} && {_group isEqualTo []});
 
+// Held by its middle, wherever it was pressed: the picture centres on the mouse and the footprint is worked out
+// from there (fnc_updateDrag) - the middle cell is what a group keeps its arrangement by (fnc_groupMode).
+GVAR(press) set [3, [floor ((GVAR(dragSize) select 0) / 2), floor ((GVAR(dragSize) select 1) / 2)]];
+
 // From a source grid the count starts at the tile's own number (one, for a row of ACE's list) and Shift takes the
 // whole stack - the wheel and the middle button change it as for any stack.
 if (_fromSource) then {
@@ -298,6 +303,11 @@ if (_group isEqualTo []) then {
 };
 
 [_display] call FUNC(makeGhost);
+
+// What lies on top while something is held: the engine draws a focused control over every other, and the one
+// that took the press - a button in a column's group - would put its column over the ghost and the footprint
+// (fnc_onFrame takes it back every frame as well).
+[_display] call FUNC(takeFocus);
 
 {
     _x ctrlSetFade DRAG_SOURCE_FADE;

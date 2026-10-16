@@ -41,7 +41,7 @@ GVAR(openStance) = "";
 GVAR(openLowered) = false;
 GVAR(pose) = [];
 
-if ((missionNamespace getVariable [QGVAR(animation), 1]) == 0 || {_stance isEqualTo ""}) exitWith {};
+if ((missionNamespace getVariable [QGVAR(animation), 0]) == 0 || {_stance isEqualTo ""}) exitWith {};
 if (isNull _unit || {!local _unit} || {!alive _unit} || {!isNull objectParent _unit}) exitWith {};
 if !([_unit] call ACEFUNC(common,isAwake)) exitWith {};
 

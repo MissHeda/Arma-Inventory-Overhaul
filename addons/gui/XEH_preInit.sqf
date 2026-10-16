@@ -49,6 +49,8 @@ uiNamespace setVariable [QGVAR(zones), []];
 // What is on the window, all of it made by fnc_build and gone with the next rebuild:
 //   created  - the controls made on the display itself (a group takes its own controls with it)
 //   grids    - each a HashMap (fnc_createGrid)
+//   foldAreas - where a drag may let go to be laid down in a folded container's hidden rows: HashMaps "rel", "parent",
+//              "size", "container" (fnc_drawSection, fnc_updateDrag)
 //   slots    - hover areas of the dedicated slots, [[x, y, w, h] on the screen, class, caption] and,
 //              optionally, its place in a scrolling group and its weapon array (see fnc_drawSlot)
 //   hover    - what the mouse is on: ["tile", grid index, tile index], ["slot", slot index] or []
@@ -58,6 +60,7 @@ uiNamespace setVariable [QGVAR(zones), []];
 // cannot hold controls - "does not support serialization" (seen in the ACE Arsenal, 2026-10-07).
 uiNamespace setVariable [QGVAR(created), []];
 uiNamespace setVariable [QGVAR(grids), []];
+uiNamespace setVariable [QGVAR(foldAreas), []];
 uiNamespace setVariable [QGVAR(slots), []];
 GVAR(hover) = [];
 GVAR(lastMouse) = [];
@@ -379,13 +382,11 @@ GVAR(signatureParts) = [];
 //   weightBar  - the weight card's bar: HashMap parent, rect, load, limits, unit (fnc_drawEquipmentCards)
 //   compare    - the comparison card at the mouse, or controlNull; tipShown - whichever of it and the name is
 //                on show, with its width and height (fnc_updateHover, fnc_onFrame)
-//   tipKeys    - the key hints under the name or the card (fnc_drawTipKeys), or controlNull
 //   weightPreview - the added weight on the weight card while something is dragged
 uiNamespace setVariable [QGVAR(infoAreas), []];
 uiNamespace setVariable [QGVAR(weightBar), createHashMap];
 uiNamespace setVariable [QGVAR(compare), controlNull];
 uiNamespace setVariable [QGVAR(tipShown), controlNull];
-uiNamespace setVariable [QGVAR(tipKeys), controlNull];
 uiNamespace setVariable [QGVAR(weightPreview), controlNull];
 
 // What the hint says about the keys while something is dragged, [[text, colour key], ...], and what it shows

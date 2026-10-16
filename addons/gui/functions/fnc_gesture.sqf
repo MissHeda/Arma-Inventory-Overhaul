@@ -28,7 +28,7 @@ private _lower = toLowerANSI _action;
 
 // Upper body only (CfgGesturesMale): a reload or a suppressor, never a full-body move - launchers reload
 // with ManActReloadAT, a move, and are left out by this.
-if ((missionNamespace getVariable [QGVAR(animation), 1]) == 0 || {(_lower select [0, 7]) isNotEqualTo "gesture"}) exitWith {false};
+if ((missionNamespace getVariable [QGVAR(animation), 0]) == 0 || {(_lower select [0, 7]) isNotEqualTo "gesture"}) exitWith {false};
 if !([] call FUNC(isInventoryMode)) exitWith {false};
 if !([_unit] call FUNC(canPose)) exitWith {false};
 

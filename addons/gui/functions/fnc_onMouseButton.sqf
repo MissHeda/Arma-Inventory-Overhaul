@@ -501,46 +501,15 @@ private _fnc_groundTile = {
     _tile
 };
 
-// Worn or carried in a slot of its own - never a part of a weapon, which is a slot id with an underscore.
-private _fnc_groundWear = {
-    private _tile = _this call _fnc_groundTile;
-
-    count _tile > 0 && {
-        private _slot = [GVAR(unit), _tile getOrDefault ["class", ""]] call EFUNC(storage,slotFor);
-        _slot isNotEqualTo "" && {(_slot find "_") < 0}
-    }
-};
-
 private _fnc_groundOpen = {
     private _tile = _this call _fnc_groundTile;
 
     count _tile > 0 && {!isNull (_tile getOrDefault ["container", objNull])}
 };
 
-// A double click: on a tile of a selection of several, all of them move over (fnc_quickMoveGroup). A kit
-// of Enhanced First Aid Kits or Enhanced Utility Pouches opens in a window of its own or closes
-// (einv_compat_efak_fnc_toggle - only when that addon is loaded, and only while that mod's double click
-// setting is on), so does a uniform, vest or backpack lying in a container (fnc_openNested) - anything
-// else moves over. Never other mods' context menu, which the vanilla inventory opens on a double click.
+// A double click does what the quick move key does (fnc_quickAction).
 if (_double) exitWith {
-    private _selected = if (call FUNC(isInventoryMode)) then {call FUNC(selectionTiles)} else {[]};
-
-    if (count _selected >= 2 && {[_gridIndex, _tileIndex] in _selected}) exitWith {
-        [_selected] call FUNC(quickMoveGroup);
-        true
-    };
-
-    // On the ground: what can be worn is put on.
-    if ([_gridIndex, _tileIndex] call _fnc_groundWear) exitWith {
-        [_gridIndex, _tileIndex] call FUNC(quickEquip);
-        true
-    };
-
-    private _handled = !isNil QEFUNC(compat_efak,toggle) && {[_gridIndex, _tileIndex, true] call EFUNC(compat_efak,toggle)};
-
-    if (!_handled && {!([_gridIndex, _tileIndex] call FUNC(openNested))}) then {
-        [_gridIndex, _tileIndex] call FUNC(quickMove);
-    };
+    [_gridIndex, _tileIndex] call FUNC(quickAction);
 
     true
 };

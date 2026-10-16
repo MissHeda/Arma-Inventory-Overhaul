@@ -5,9 +5,9 @@
  * Draws the footer along the bottom of the window, the same in every look but in its colours: the
  * keys that close the window on the left, the hint in the middle ((uiNamespace getVariable [QGVAR(hint), controlNull]), written by
  * fnc_updateHover), the version on the right. All of it on a strip of the window's glass, the width of
- * the content. The key hints name the quick move on the double click, the selection on
- * Ctrl+click and G to drop; the keys that depend on the item under the mouse (Shift+click to split,
- * the hotbar's number keys, ...) are not here but beside the mouse (fnc_hoverKeys). The hotbar adds
+ * the content. The key hints name G to drop, the selection on Ctrl+click and the menu on the right mouse button - in the order Esc, quick move
+ * (its key, F by default, or the double click while it has none), drop, hotbar, select, menu; the mouse buttons are ACE's pictures,
+ * not words (fnc_uiKeyHint). The hotbar adds
  * its own keys at the end (einv_hotbar_fnc_footerHint - only when that addon is loaded, and only in the
  * inventory). A window that attached names its own keys (the "footerKeys"
  * hook, [[key, text], ...]).
@@ -45,16 +45,31 @@ private _width = CONTENT_W - _pad * 2;
 private _keyX = _left;
 
 // The keys: the inventory's own, unless the window that attached names its own ("footerKeys").
-private _keys = [
-    [LLSTRING(Key_Escape), LLSTRING(Close)],
-    [LLSTRING(Key_RightClick), LLSTRING(Menu)],
-    // Selecting is the inventory's only: where another window attaches (the Arsenal) Ctrl+click still
-    // moves a tile over (fnc_onMouseButton).
-    ([[LLSTRING(Key_CtrlClick), LLSTRING(QuickMove)], [LLSTRING(Key_DoubleClick), LLSTRING(QuickMove)]] select (call FUNC(isInventoryMode))),
-    ([["", ""], [LLSTRING(Key_CtrlClick), LLSTRING(Select)]] select (call FUNC(isInventoryMode))),
-    [LLSTRING(Key_Drop), LLSTRING(Drop)],
-    (if (call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,footerHint)}) then {call EFUNC(hotbar,footerHint)} else {["", ""]})
-];
+// The mouse buttons are ACE's pictures (fnc_uiKeyHint: "@right", "Ctrl+@left"), a modifier a key cap before them.
+// The quick move is the player's key (fnc_quickKeyName), the double click while it has none.
+private _quickKey = call FUNC(quickKeyName);
+
+// Their order: Esc, the quick move, drop, the hotbar's range, select, the menu. Selecting is the inventory's only:
+// where another window attaches (the Arsenal) Ctrl+click still moves a tile over (fnc_onMouseButton).
+private _inventory = call FUNC(isInventoryMode);
+
+private _keys = if (_inventory) then {
+    [
+        [LLSTRING(Key_Escape), LLSTRING(Close)],
+        [[_quickKey, "@double"] select (_quickKey isEqualTo ""), LLSTRING(QuickMove)],
+        [LLSTRING(Key_Drop), LLSTRING(Drop)],
+        (if (!isNil QEFUNC(hotbar,footerHint)) then {call EFUNC(hotbar,footerHint)} else {["", ""]}),
+        ["Ctrl+@left", LLSTRING(Select)],
+        ["@right", LLSTRING(Menu)]
+    ]
+} else {
+    [
+        [LLSTRING(Key_Escape), LLSTRING(Close)],
+        ["Ctrl+@left", LLSTRING(QuickMove)],
+        [LLSTRING(Key_Drop), LLSTRING(Drop)],
+        ["@right", LLSTRING(Menu)]
+    ]
+};
 
 private _ownKeys = ["footerKeys", [], []] call FUNC(hook);
 

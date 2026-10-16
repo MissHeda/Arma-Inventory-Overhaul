@@ -240,8 +240,6 @@ PREP(clearWindows);
 PREP(drawTopLayer);
 PREP(makeTooltip);
 PREP(raiseTooltip);
-PREP(hoverKeys);
-PREP(drawTipKeys);
 PREP(startStripDrag);
 PREP(updateStripDrag);
 PREP(endStripDrag);
@@ -268,3 +266,8 @@ PREP(drawSection);
 // cannot stay open over
 PREP(compatCollect);
 PREP(stepAside);
+PREP(isQuickKey);
+PREP(quickKeyName);
+PREP(quickAction);
+PREP(takeFocus);
+PREP(isFinite);

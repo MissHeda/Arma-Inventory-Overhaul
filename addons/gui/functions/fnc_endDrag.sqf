@@ -159,7 +159,7 @@ private _fromKit = _fromGrid getOrDefault ["kit", ""];
 // A window that attached has the first word on where it was let go (the "drop" hook): true, it has done it
 // all. What comes from a source grid (ACE's list in the Arsenal panel) is always its to end, whatever it answers -
 // there is no container behind that tile to move from -, and a zone is nothing but its own.
-private _handled = ["drop", [_kind, _sourceIndex, _tileIndex, _slotSource, _entry, _count, _targetIndex, _col, _row, _w, _h, _targetSlot, _place, _rot], false] call FUNC(hook);
+private _handled = ["drop", [_kind, _sourceIndex, _tileIndex, _slotSource, _entry, _count, _targetIndex, _col, _row, _w, _h, _targetSlot, _place, _rot, _swap], false] call FUNC(hook);
 
 if (
     _handled isEqualTo true || {(_fromGrid getOrDefault ["source", ""]) isNotEqualTo ""} || {_kind isEqualTo "zone"}

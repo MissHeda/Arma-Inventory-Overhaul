@@ -249,6 +249,12 @@ if (GVAR(menuState) isNotEqualTo []) then {
 // with buttons of its own in groups (the "focusAll" flag) has every control but a field sent back. Both
 // only while no mouse button is held: a button pressed keeps the focus until its click came, or the
 // click would be lost. The context menu's own focus stays where it is (fnc_openMenu).
+// While something is held the focus goes back whatever the buttons say (fnc_takeFocus): the ghost and the footprint
+// lie over everything only while no other control has it.
+if (GVAR(dragging) || {GVAR(stripDrag) isNotEqualTo []}) then {
+    [_display] call FUNC(takeFocus);
+};
+
 private _focus = focusedCtrl _display;
 
 if (!isNull _focus) then {
@@ -430,14 +436,8 @@ if (_check || {_mouse isNotEqualTo GVAR(lastMouse)}) then {
 
 // The name at the mouse, or the comparison card in its place, stays beside the pointer - on its left near the
 // screen's right edge, above it near the bottom. Whichever shows (fnc_updateHover) says how wide and high it is.
-// The key hints hang under it (fnc_drawTipKeys): they show while it does, and are placed with it as one block.
 private _tip = uiNamespace getVariable [QGVAR(tipShown), controlNull];
-private _keysGroup = uiNamespace getVariable [QGVAR(tipKeys), controlNull];
 private _tipUp = !isNull _tip && {ctrlShown _tip};
-
-if (!isNull _keysGroup && {ctrlShown _keysGroup != _tipUp}) then {
-    _keysGroup ctrlShow _tipUp;
-};
 
 if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
     GVAR(tooltipAt) = _mouse;
@@ -445,16 +445,8 @@ if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
 
     private _width = _tip getVariable [QGVAR(width), 0];
     private _height = _tip getVariable [QGVAR(height), UNIT];
-    private _keysW = 0;
-    private _keysH = 0;
-
-    if (!isNull _keysGroup) then {
-        _keysW = _keysGroup getVariable [QGVAR(width), 0];
-        _keysH = (_keysGroup getVariable [QGVAR(height), 0]) + pixelH * 3;
-    };
-
-    private _blockW = _width max _keysW;
-    private _blockH = _height + _keysH;
+    private _blockW = _width;
+    private _blockH = _height;
     private _tipX = _mouseX + TOOLTIP_DX;
     private _tipY = _mouseY + TOOLTIP_DY;
 
@@ -463,11 +455,6 @@ if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
 
     _tip ctrlSetPosition [_tipX, _tipY];
     _tip ctrlCommit 0;
-
-    if (!isNull _keysGroup) then {
-        _keysGroup ctrlSetPosition [_tipX, _tipY + _height + pixelH * 3];
-        _keysGroup ctrlCommit 0;
-    };
 };
 
 // Searching, every frame: the ring fills and the glass goes round, and the item shows once its time is

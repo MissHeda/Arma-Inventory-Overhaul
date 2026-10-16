@@ -136,6 +136,7 @@ if (_guest isNotEqualTo true) then {
 };
 
 uiNamespace setVariable [QGVAR(grids), []];
+uiNamespace setVariable [QGVAR(foldAreas), []];
 uiNamespace setVariable [QGVAR(zones), []];
 uiNamespace setVariable [QGVAR(slots), []];
 
@@ -161,7 +162,6 @@ uiNamespace setVariable [QGVAR(weightBar), createHashMap];
 uiNamespace setVariable [QGVAR(weightPreview), controlNull];
 uiNamespace setVariable [QGVAR(compare), controlNull];
 uiNamespace setVariable [QGVAR(tipShown), controlNull];
-uiNamespace setVariable [QGVAR(tipKeys), controlNull];
 GVAR(buildCount) = GVAR(buildCount) + 1;
 GVAR(hover) = [];
 uiNamespace setVariable [QGVAR(hint), controlNull];
