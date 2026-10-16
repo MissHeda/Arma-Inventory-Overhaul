@@ -582,7 +582,8 @@ only; inside a phase through its buffer); `[]` as the cell takes the record out.
   `"ground"` as a target always has room and takes no cell. Nothing is asked of any machine but this one. An item never goes into
   a target that is the container it is or lies in it (`fnc_liesIn`). **A stackable tile first fills the stacks of its key in a
   target that are not full** (what its put does) and only the rest takes a spot, one tile's worth; one that fits into the stacks
-  that are there is assigned with the cell `[]`, and what is planned into a target counts for the items after it.
+  that are there is assigned with the cell `[]`, and what is planned into a target counts for the items after it. A tile planned
+  into the holder it lies in joins nothing (op `placeMany` lays it down) and always takes a spot.
 
 ### Moving what a tile stands for
 

@@ -258,10 +258,13 @@ if (!_merge && {_cellB isEqualTo []}) exitWith {_none};
 private _reason = "";
 
 if (!_sameHolder) then {
-    // The engine deletes a pile that has nothing left in it: the tile that leaves it cannot be the last.
+    // The engine deletes a pile that has nothing left in it: the tile that leaves it cannot be the last. A
+    // merge leaves the other tile where it lies and puts nothing into the source, so no pile is emptied.
     if (
-        (([_to] call EFUNC(storage,isGroundHolder)) && {count (_target get "tiles") <= 1})
-        || {([_from] call EFUNC(storage,isGroundHolder)) && {count (_source get "tiles") <= 1}}
+        !_merge && {
+            (([_to] call EFUNC(storage,isGroundHolder)) && {count (_target get "tiles") <= 1})
+            || {([_from] call EFUNC(storage,isGroundHolder)) && {count (_source get "tiles") <= 1}}
+        }
     ) then {
         _reason = "NoRoom";
     };

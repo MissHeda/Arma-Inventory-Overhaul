@@ -18,7 +18,8 @@
  * A stackable tile first fills the stacks of its key in a target that are not full - what a put without a
  * cell does (fnc_opPut) - and only what is left over takes a spot, one tile's worth; what fits into the
  * stacks that are there is assigned with the cell [] (the put joins them). The tiles planned into a target
- * count for the ones after, so a class that is moved in pieces fills the partial stacks first.
+ * count for the ones after, so a class that is moved in pieces fills the partial stacks first. A tile that
+ * stays in the holder it lies in joins nothing there (it is laid down, not put) and always takes a spot.
  *
  * Arguments:
  * 0: Items, entries as the window's tiles are - "class", "count", "key", "block", "col", "row", and
@@ -250,6 +251,10 @@ private _left = [];
             if (_itemKey isEqualTo "") then {
                 _itemKey = [_item] call FUNC(entryKey);
             };
+
+            // One that stays in the holder it lies in is laid down there (op placeMany), never put: it joins
+            // nothing and needs a cell of its own.
+            if ((_item getOrDefault ["holder", objNull]) isEqualTo _holder) exitWith {};
 
             {
                 if (_remaining > 0 && {_x > 0}) then {
