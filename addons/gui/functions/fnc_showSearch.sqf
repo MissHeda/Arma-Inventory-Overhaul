@@ -63,7 +63,7 @@ private _arc = [_display, _parent, _ringRect, SEARCH_RING(1), _theme getOrDefaul
 private _glass = [
     _display, _parent,
     [_centerX - _glassSize * pixelW / 2, _centerY - _glassSize * pixelH / 2, _glassSize * pixelW, _glassSize * pixelH],
-    UI_TEX(icon_search_ca), _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]]
+    UI_TEX(icon_search_ca), _theme getOrDefault ["text", [1, 1, 1, 1]]
 ] call FUNC(uiIcon);
 
 uiNamespace setVariable [QGVAR(searchFx), [_arc, _glass, [_centerX, _centerY], _size, 1, [_track, _arc, _glass]]];

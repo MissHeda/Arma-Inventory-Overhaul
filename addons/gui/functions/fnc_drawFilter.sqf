@@ -31,7 +31,7 @@ params ["_display", "_rect", "_theme", ["_placeholderText", LLSTRING(Filter_Plac
 _rect params ["_left", "_top", "_width", "_height"];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
-private _muted = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 
 [_display, controlNull, _rect, _theme getOrDefault ["button", [1, 1, 1, 0.06]], (_theme getOrDefault ["radius", 0]) min (_height / 2)] call FUNC(uiPanel);
 
@@ -54,7 +54,7 @@ _hit ctrlAddEventHandler ["ButtonClick", {ctrlSetFocus (uiNamespace getVariable 
 private _edit = [_display, "EINV_Edit", controlNull, [_textX, _top + (_height - _size * 1.4) / 2, _textW, _size * 1.4]] call FUNC(uiCreate);
 _edit ctrlSetFont _font;
 _edit ctrlSetFontHeight _size;
-_edit ctrlSetTextColor (_theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]]);
+_edit ctrlSetTextColor (_theme getOrDefault ["text", [1, 1, 1, 1]]);
 _edit ctrlSetText GVAR(filter);
 _edit ctrlSetTooltip LLSTRING(Filter_Tooltip);
 _edit setVariable [QGVAR(placeholder), _placeholder];

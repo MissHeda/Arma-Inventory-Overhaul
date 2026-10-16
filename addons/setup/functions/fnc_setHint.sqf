@@ -30,5 +30,5 @@ if (isNull _ctrl) exitWith {};
 
 // Fitted to its place between the keys and the buttons; the whole message is in its tooltip.
 _ctrl ctrlSetText ([_text, (ctrlPosition _ctrl) select 2, GVAR(theme) getOrDefault ["font", "PuristaMedium"], TEXT_SMALL] call EFUNC(gui,fitText));
-_ctrl ctrlSetTextColor (GVAR(theme) getOrDefault [_color, [0.698, 0.734, 0.784, 1]]);
+_ctrl ctrlSetTextColor (GVAR(theme) getOrDefault [_color, [0.78, 0.78, 0.78, 1]]);
 _ctrl ctrlSetTooltip _text;

@@ -42,7 +42,7 @@ _info params [["_first", "", [""]], ["_named", 1, [0]]];
     (ctrlPosition _inner) params ["", "", "_width", "_height"];
 
     private _font = _theme getOrDefault ["font", "PuristaMedium"];
-    private _colorText2 = _theme getOrDefault ["text2", [0.7, 0.73, 0.78, 1]];
+    private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
     private _buttonH = UNIT * 1.2;
     private _one = _named == 1;
     private _cursorY = 0;

@@ -46,8 +46,8 @@ if (isNull _display || {isNull _inner}) exitWith {};
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText2 = _theme getOrDefault ["text2", [0.698, 0.734, 0.784, 1]];
-private _muted = _theme getOrDefault ["muted", [0.522, 0.553, 0.604, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
 private _gain = _theme getOrDefault ["gain", [0.35, 0.78, 0.5, 1]];
 private _loss = _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];

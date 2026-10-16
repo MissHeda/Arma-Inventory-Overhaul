@@ -36,7 +36,7 @@ params [
 _rect params ["", "_footY", "_width", "_footH"];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
-private _muted = _theme getOrDefault ["muted", [0.522, 0.553, 0.604, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _turnW = SQUARE(_footH);
 
 [

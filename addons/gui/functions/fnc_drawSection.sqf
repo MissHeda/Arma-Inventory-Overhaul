@@ -110,7 +110,7 @@ private _placeholder = _section getOrDefault ["placeholder", false];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText2 = _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
 private _colorLine = _theme getOrDefault ["line", [1, 1, 1, 0.07]];
 
 // ---------------------------------------------------------------------------
@@ -168,7 +168,7 @@ if (_section getOrDefault ["locked", false]) exitWith {
 
     [
         _display, _parent, [_blockX, _top + _lineH + UNIT * 0.25, _blockW, UNIT * 0.62],
-        [_notice, _blockW, _font, _lineSize] call FUNC(fitText), _lineSize, _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]], _font, 0
+        [_notice, _blockW, _font, _lineSize] call FUNC(fitText), _lineSize, _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 0
     ] call FUNC(uiLabel);
 
     _lineH + UNIT * 0.25 + UNIT * 0.7
@@ -595,7 +595,7 @@ if (_hasBox) then {
 
         // The picture of the rules or the editor's (fnc_uiBoxPicture), else the icon of what the box is.
         if (([_display, _parent, _boxRect, _theme, _own, _preview, _boxIcon, _boxRadius] call FUNC(uiBoxPicture)) isEqualTo []) then {
-            [_display, _parent, [_blockX + _boxW * 0.25, _bodyTop + _boxH * 0.25, _boxW * 0.5, _boxH * 0.5], _icon, _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]]] call FUNC(uiIcon);
+            [_display, _parent, [_blockX + _boxW * 0.25, _bodyTop + _boxH * 0.25, _boxW * 0.5, _boxH * 0.5], _icon, _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]]] call FUNC(uiIcon);
         };
     };
 

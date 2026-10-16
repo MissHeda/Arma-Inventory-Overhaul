@@ -66,9 +66,9 @@ private _captionText = _options getOrDefault ["caption", ""];
 private _caption = [_captionText, _theme] call FUNC(caption);
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _colorText2 = _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]];
-private _colorMuted = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
+private _colorMuted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _radius = (_theme getOrDefault ["radius", 0]) min (_height / 4);
 
 private _padY = (_height * 0.08) min (UNIT * 0.25);

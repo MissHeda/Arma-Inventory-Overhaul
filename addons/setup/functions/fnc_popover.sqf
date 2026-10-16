@@ -107,7 +107,7 @@ _controls pushBack _card;
 
 (ctrlPosition _card) params ["", "", "_cardWidth", "_cardHeight"];
 
-[_display, _card, [0, 0, _cardWidth, _cardHeight], MENU_BG, _radius] call EFUNC(gui,uiPanel);
+[_display, _card, [0, 0, _cardWidth, _cardHeight], _theme getOrDefault ["inspectBg", MENU_BG], _radius] call EFUNC(gui,uiPanel);
 [_display, _card, [0, 0, _cardWidth, _cardHeight], MENU_EDGE, _radius] call EFUNC(gui,uiRing);
 
 if (_title isNotEqualTo "") then {
@@ -119,7 +119,7 @@ if (_title isNotEqualTo "") then {
     [
         _display, _card, [_padX, _padY, _titleW, _titleH * 0.8],
         [_title, _titleW, _fontBold, TEXT_HEAD] call EFUNC(gui,fitText), TEXT_HEAD,
-        _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _fontBold, 0
+        _theme getOrDefault ["text", [1, 1, 1, 1]], _fontBold, 0
     ] call EFUNC(gui,uiLabel);
 
     [

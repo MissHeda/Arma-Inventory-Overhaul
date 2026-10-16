@@ -48,6 +48,6 @@ if (([_display, _parent, _rect, _theme, _own, _preview, _icon, _radius, false] c
     [_display, _parent, _rect, _theme getOrDefault ["slot", [1, 1, 1, 0.06]], _radius, _theme getOrDefault ["slotBorder", []]] call EFUNC(gui,uiPanel);
     [
         _display, _parent, [_left + _width * 0.25, _top + _height * 0.25, _width * 0.5, _height * 0.5], UI_TEX(icon_crate_ca),
-        _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]]
+        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]]
     ] call EFUNC(gui,uiIcon);
 };

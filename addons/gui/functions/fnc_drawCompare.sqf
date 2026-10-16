@@ -33,8 +33,8 @@ params ["_display", ["_compare", createHashMap, [createHashMap]]];
 private _theme = GVAR(theme);
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _muted = _theme getOrDefault ["muted", [0.522, 0.553, 0.604, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 
 private _padX = SQUARE(UNIT * 0.2);
 private _padY = UNIT * 0.25;
@@ -69,7 +69,7 @@ private _height = _padY * 2 + _nameH + _versusH;
 private _group = [_display, "EINV_Group", controlNull, [-10, -10, _width + pixelW * 2, _height + pixelH * 2]] call FUNC(uiCreate);
 
 // The glass of the tooltip.
-[_display, _group, [0, 0, _width, _height], _theme getOrDefault ["tooltipBg", [0.06, 0.066, 0.08, 0.94]], (_theme getOrDefault ["radius", 0]) * 0.5] call FUNC(uiPanel);
+[_display, _group, [0, 0, _width, _height], _theme getOrDefault ["tooltipBg", [0.03, 0.03, 0.03, 0.96]], (_theme getOrDefault ["radius", 0]) * 0.5] call FUNC(uiPanel);
 
 private _cursor = _padY;
 

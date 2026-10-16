@@ -49,12 +49,12 @@ _rect params ["_left", "_top", "_width", "_height"];
 
 private _normal = _theme getOrDefault ["button", [1, 1, 1, 0.06]];
 private _hover = _theme getOrDefault ["buttonHover", [1, 1, 1, 0.1]];
-private _ink = _theme getOrDefault ["buttonText", [0.925, 0.933, 0.949, 1]];
+private _ink = _theme getOrDefault ["buttonText", [1, 1, 1, 1]];
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 
 // Muted: the label in the theme's muted ink, the surface nearly gone and no lighter under the mouse.
 if (_disabled) then {
-    _ink = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
+    _ink = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 
     if (_normal isNotEqualTo []) then {
         _normal = +_normal;

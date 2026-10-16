@@ -66,7 +66,7 @@ params ["_display", "_section", "_theme", ["_fresh", false]];
 private _key = _section getOrDefault ["key", ""];
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _muted = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _radius = _theme getOrDefault ["radius", 0];
 
 (call FUNC(getCell)) params ["_cellW"];
@@ -150,7 +150,7 @@ private _fnc_events = {
 
 // The inspect card's glass, so it reads over a column, and the context menu's edge: a dark window over a
 // dark column needs one.
-[_display, _group, [0, 0, _groupW, _groupH], _theme getOrDefault ["inspectBg", [0.075, 0.083, 0.1, 0.97]], _radius] call FUNC(uiPanel);
+[_display, _group, [0, 0, _groupW, _groupH], _theme getOrDefault ["inspectBg", [0.06, 0.06, 0.06, 0.98]], _radius] call FUNC(uiPanel);
 [_display, _group, [0, 0, _groupW, _groupH], [1, 1, 1, 0.12], _radius] call FUNC(uiRing);
 
 // ----- The title row: picture, name, Take all and Sort, how full, the cross -----
@@ -191,7 +191,7 @@ private _closeX = _groupW - _padX - _closeW;
 private _load = _section getOrDefault ["load", ""];
 private _loadW = [0, (_load getTextWidth [_font, _chipSize]) * TEXT_SLACK] select (_load isNotEqualTo "");
 private _loadColor = [
-    _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]],
+    _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]],
     _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
 ] select (_section getOrDefault ["loadOver", false]);
 
@@ -315,7 +315,7 @@ private _nameW = (_buttonsEnd - (call _fnc_buttonsW) - _textX) max 0;
 [
     _display, _group, [_textX, _nameTop, _nameW, _nameH],
     [_name, _nameW, _fontBold, _nameSize] call FUNC(fitText),
-    _nameSize, _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _fontBold, 0
+    _nameSize, _theme getOrDefault ["text", [1, 1, 1, 1]], _fontBold, 0
 ] call FUNC(uiLabel);
 
 // The cross: its click closes the window, which takes the cross along (fnc_closeWindow). Not while

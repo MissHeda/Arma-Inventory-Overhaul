@@ -45,8 +45,8 @@ params [
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText2 = _theme getOrDefault ["text2", [0.698, 0.734, 0.784, 1]];
-private _muted = _theme getOrDefault ["muted", [0.522, 0.553, 0.604, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
 
 // The working copy of the class, made from what is shown the first time something changes.

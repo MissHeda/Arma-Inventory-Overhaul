@@ -40,7 +40,7 @@ _group ctrlSetPosition [safezoneX, safezoneY, safezoneW, safezoneH];
 _group ctrlCommit 0;
 
 // Red glass: dark, with the loss colour over it.
-[_display, _group, [0, 0, safezoneW, safezoneH], [0.04, 0.045, 0.055, 0.55]] call EFUNC(gui,uiPanel);
+[_display, _group, [0, 0, safezoneW, safezoneH], [0, 0, 0, 0.55]] call EFUNC(gui,uiPanel);
 [_display, _group, [0, 0, safezoneW, safezoneH], [_loss select 0, _loss select 1, _loss select 2, 0.16]] call EFUNC(gui,uiPanel);
 
 // The card in the middle.
@@ -52,7 +52,7 @@ private _radius = _theme getOrDefault ["radius", UNIT * 0.45];
 private _pad = SQUARE(UNIT * 1.2);
 private _innerW = _cardW - _pad * 2;
 
-[_display, _group, [_cardX, _cardY, _cardW, _cardH], _theme getOrDefault ["panel", [0.04, 0.045, 0.055, 0.85]], _radius] call EFUNC(gui,uiPanel);
+[_display, _group, [_cardX, _cardY, _cardW, _cardH], _theme getOrDefault ["panel", [0.05, 0.05, 0.05, 0.92]], _radius] call EFUNC(gui,uiPanel);
 [_display, _group, [_cardX, _cardY, _cardW, _cardH], _loss, _radius] call EFUNC(gui,uiRing);
 
 private _y = _cardY + UNIT * 1;
@@ -66,7 +66,7 @@ private _titleSize = UNIT * 1.0;
 
 [
     _display, _group, [_cardX + _pad, _y, _innerW, UNIT * 1.4],
-    [LLSTRING(Blocked_Title), _innerW, _fontBold, _titleSize] call EFUNC(gui,fitText), _titleSize, _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _fontBold, 2
+    [LLSTRING(Blocked_Title), _innerW, _fontBold, _titleSize] call EFUNC(gui,fitText), _titleSize, _theme getOrDefault ["text", [1, 1, 1, 1]], _fontBold, 2
 ] call EFUNC(gui,uiLabel);
 
 _y = _y + UNIT * 1.7;
@@ -93,13 +93,13 @@ private _fnc_text = {
     _y = _y + _height;
 };
 
-[LLSTRING(Blocked_Text), _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]], 1] call _fnc_text;
+[LLSTRING(Blocked_Text), _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], 1] call _fnc_text;
 
 private _message = missionNamespace getVariable [QGVAR(biMessage), ""];
 
 if (_message isNotEqualTo "") then {
     _y = _y + UNIT * 0.3;
-    [_message, _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], 3] call _fnc_text;
+    [_message, _theme getOrDefault ["text", [1, 1, 1, 1]], 3] call _fnc_text;
 };
 
 // Where to look for the setting, small and muted at the bottom.
@@ -107,7 +107,7 @@ private _small = UNIT * 0.5;
 
 [
     _display, _group, [_cardX + _pad, _cardY + _cardH - UNIT * 3.7, _innerW, UNIT * 0.9],
-    [LLSTRING(Blocked_Setting), _innerW, _font, _small] call EFUNC(gui,fitText), _small, _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]], _font, 2
+    [LLSTRING(Blocked_Setting), _innerW, _font, _small] call EFUNC(gui,fitText), _small, _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2
 ] call EFUNC(gui,uiLabel);
 
 private _buttonW = SQUARE(UNIT * 8);

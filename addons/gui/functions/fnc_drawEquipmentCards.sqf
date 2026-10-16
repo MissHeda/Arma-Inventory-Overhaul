@@ -57,11 +57,11 @@ private _equipment = _context getOrDefault ["equipment", createHashMap];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _colorText2 = _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]];
-private _colorMuted = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
+private _colorMuted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _colorAccent = _theme getOrDefault ["slotAccent", [0.84, 0.54, 0.1, 1]];
-private _colorOnAccent = _theme getOrDefault ["onAccent", [0.086, 0.094, 0.114, 1]];
+private _colorOnAccent = _theme getOrDefault ["onAccent", [0.05, 0.05, 0.05, 1]];
 private _colorStrip = _theme getOrDefault ["slotCaptionBg", [1, 1, 1, 0.1]];
 private _border = _theme getOrDefault ["slotBorder", []];
 private _radius = _theme getOrDefault ["radius", 0];

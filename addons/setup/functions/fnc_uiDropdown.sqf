@@ -43,7 +43,7 @@ if (_index >= 0) then {
     _label = (_options select _index) select 0;
 };
 
-private _ink = _theme getOrDefault [["muted", "text"] select (_index >= 0), [0.925, 0.933, 0.949, 1]];
+private _ink = _theme getOrDefault [["muted", "text"] select (_index >= 0), [1, 1, 1, 1]];
 
 _enabled = _enabled && {_options isNotEqualTo []};
 
@@ -66,7 +66,7 @@ _controls pushBack ([
 
 _controls pushBack ([
     _display, _parent, [_left + _width - _pad - _iconW, _top + (_height - _iconH) / 2, _iconW, _iconH],
-    UI_TEX(icon_chevron_down_ca), [DISABLED_INK, _theme getOrDefault ["buttonText", [0.698, 0.734, 0.784, 1]]] select _enabled
+    UI_TEX(icon_chevron_down_ca), [DISABLED_INK, _theme getOrDefault ["buttonText", [0.88, 0.88, 0.88, 1]]] select _enabled
 ] call EFUNC(gui,uiIcon));
 
 private _hit = [_display, _parent, _rect, _surface, _fill, _theme getOrDefault ["buttonHover", [1, 1, 1, 0.12]], {}, [], _enabled] call FUNC(uiHit);
@@ -115,7 +115,7 @@ _hit setVariable [QGVAR(action), [{
 
             [
                 _display, _list, [_textX, _rowY, _rowW - _textX, _rowH], [_label, _rowW - _textX, _font, TEXT_BODY] call EFUNC(gui,fitText), TEXT_BODY,
-                _theme getOrDefault [["text2", "text"] select _picked, [0.925, 0.933, 0.949, 1]], _font, 0
+                _theme getOrDefault [["text2", "text"] select _picked, [1, 1, 1, 1]], _font, 0
             ] call EFUNC(gui,uiLabel);
 
             [_display, _list, [0, _rowY, _rowW, _rowH], _surface, [0, 0, 0, 0], [1, 1, 1, 0.1], {

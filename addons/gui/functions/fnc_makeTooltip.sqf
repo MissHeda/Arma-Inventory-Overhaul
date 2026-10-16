@@ -27,10 +27,10 @@ private _theme = GVAR(theme);
 
 private _tooltip = [
     _display, controlNull, [0, 0, 0, UNIT * 0.85], "", UNIT * 0.58,
-    _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _theme getOrDefault ["font", "PuristaMedium"], 2
+    _theme getOrDefault ["text", [1, 1, 1, 1]], _theme getOrDefault ["font", "PuristaMedium"], 2
 ] call FUNC(uiLabel);
 
-_tooltip ctrlSetBackgroundColor (_theme getOrDefault ["tooltipBg", [0.06, 0.066, 0.08, 0.94]]);
+_tooltip ctrlSetBackgroundColor (_theme getOrDefault ["tooltipBg", [0.03, 0.03, 0.03, 0.96]]);
 _tooltip ctrlShow false;
 
 _tooltip

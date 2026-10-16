@@ -42,13 +42,13 @@ _rect params ["_left", "_top", "_width", "_height"];
 
 private _fill = _theme getOrDefault ["button", [1, 1, 1, 0.08]];
 private _fillHover = _theme getOrDefault ["buttonHover", [1, 1, 1, 0.12]];
-private _ink = _theme getOrDefault ["buttonText", [0.698, 0.734, 0.784, 1]];
+private _ink = _theme getOrDefault ["buttonText", [0.88, 0.88, 0.88, 1]];
 
 switch (_style) do {
     case "accent": {
         _fill = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
         _fillHover = ACCENT_HOVER;
-        _ink = _theme getOrDefault ["onAccent", [0.086, 0.094, 0.114, 1]];
+        _ink = _theme getOrDefault ["onAccent", [0.05, 0.05, 0.05, 1]];
     };
     case "ghost": {
         _fill = [0, 0, 0, 0];

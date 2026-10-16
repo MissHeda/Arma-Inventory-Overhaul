@@ -35,8 +35,8 @@ private _root = uiNamespace getVariable [QGVAR(root), controlNull];
 private _theme = GVAR(theme);
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _colorText2 = _theme getOrDefault ["text2", [0.698, 0.734, 0.784, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
 private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
 private _line = _theme getOrDefault ["line", [1, 1, 1, 0.09]];
 
@@ -165,7 +165,7 @@ private _pillW = (_innerW - _gap * (count _steps - 1)) / count _steps;
 
         [
             _display, _header, [(_rect select 0) + _pillW - SQUARE(WIZ_STEPS_H * 0.5), _stepsY + (WIZ_STEPS_H - _dotH) / 2, SQUARE(_dotH), _dotH],
-            UI_TEX(circle_ca), [_accent, _theme getOrDefault ["onAccent", [0.086, 0.094, 0.114, 1]]] select _current
+            UI_TEX(circle_ca), [_accent, _theme getOrDefault ["onAccent", [0.05, 0.05, 0.05, 1]]] select _current
         ] call EFUNC(gui,uiIcon);
     };
 } forEach _steps;

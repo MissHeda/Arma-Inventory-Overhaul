@@ -44,7 +44,7 @@ if (_big <= 0) then {
 };
 
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _ink = [DISABLED_INK, _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]]] select _enabled;
+private _ink = [DISABLED_INK, _theme getOrDefault ["text", [1, 1, 1, 1]]] select _enabled;
 private _radius = (_theme getOrDefault ["radius", 0]) min (_height / 2);
 private _controls = [_display, _parent, _rect, [DISABLED_FILL, _theme getOrDefault ["button", [1, 1, 1, 0.08]]] select _enabled, _radius] call EFUNC(gui,uiPanel);
 
@@ -69,7 +69,7 @@ _controls pushBack _label;
     _controls append _surface;
     _controls pushBack ([
         _display, _parent, [_buttonX + (_buttonW - SQUARE(_iconH)) / 2, _top + (_height - _iconH) / 2, SQUARE(_iconH), _iconH], _icon,
-        [DISABLED_INK, _theme getOrDefault ["buttonText", [0.698, 0.734, 0.784, 1]]] select _canGo
+        [DISABLED_INK, _theme getOrDefault ["buttonText", [0.88, 0.88, 0.88, 1]]] select _canGo
     ] call EFUNC(gui,uiIcon));
 
     private _hit = [_display, _parent, [_buttonX, _top, _buttonW, _height], _surface, [0, 0, 0, 0], [1, 1, 1, 0.06], {}, [], _enabled, _tooltip] call FUNC(uiHit);

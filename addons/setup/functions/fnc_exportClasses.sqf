@@ -163,7 +163,7 @@ if (isServer || {!isMultiplayer}) exitWith {
 
         private _helpH = [
             _display, _inner, [0, 0, _width], LLSTRING(Export_ClassByHand), TEXT_BODY,
-            _theme getOrDefault ["text2", [0.7, 0.73, 0.78, 1]], _theme getOrDefault ["font", "PuristaMedium"]
+            _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _theme getOrDefault ["font", "PuristaMedium"]
         ] call FUNC(uiText);
         private _buttonH = UNIT * 1.2;
         private _boxTop = _helpH + UNIT * 0.35;

@@ -36,7 +36,7 @@ params ["_display", ["_anchor", [], [[]]], ["_class", "", [""]], ["_tree", false
 
     (ctrlPosition _inner) params ["", "", "_width", "_height"];
 
-    private _helpH = [_display, _inner, [0, 0, _width], LLSTRING(ClassImport_Help), TEXT_BODY, _theme getOrDefault ["text2", [0.7, 0.73, 0.78, 1]], _theme getOrDefault ["font", "PuristaMedium"]] call FUNC(uiText);
+    private _helpH = [_display, _inner, [0, 0, _width], LLSTRING(ClassImport_Help), TEXT_BODY, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _theme getOrDefault ["font", "PuristaMedium"]] call FUNC(uiText);
     private _buttonH = UNIT * 1.2;
     private _boxTop = _helpH + UNIT * 0.35;
     private _boxH = _height - _boxTop - _buttonH - UNIT * 0.45;

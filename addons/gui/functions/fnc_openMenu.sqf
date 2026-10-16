@@ -116,7 +116,7 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closeMenu)}] call FUNC
 
 [
     _display, _layer, [_cardX, _cardY, _width, _height],
-    [0.075, 0.083, 0.1, 0.97], _theme getOrDefault ["radius", 0], [1, 1, 1, 0.14]
+    _theme getOrDefault ["inspectBg", [0.06, 0.06, 0.06, 0.98]], _theme getOrDefault ["radius", 0], [1, 1, 1, 0.14]
 ] call FUNC(uiPanel);
 
 {
@@ -158,7 +158,7 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closeMenu)}] call FUNC
     };
 
     if (!_enabled) then {
-        _color = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
+        _color = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
     };
 
     [_display, _layer, [_cardX + _padX + _textX, _rowTop, _width - _padX * 2 - _textX, _rowH], _text, _size, _color, _font, 0] call FUNC(uiLabel);

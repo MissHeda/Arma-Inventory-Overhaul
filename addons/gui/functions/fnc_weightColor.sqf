@@ -25,7 +25,7 @@
 params [["_unit", objNull, [objNull]], ["_load", 0, [0]], ["_theme", GVAR(theme), [createHashMap]]];
 
 private _colors = [
-    _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]],
+    _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]],
     _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]],
     _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]],
     _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]

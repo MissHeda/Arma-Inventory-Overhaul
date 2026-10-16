@@ -53,7 +53,7 @@ if (_label isNotEqualTo "") then {
 
     _controls pushBack ([
         _display, _parent, [_labelX, _top, _labelW, _height], [_label, _labelW, _font, TEXT_BODY] call EFUNC(gui,fitText), TEXT_BODY,
-        [DISABLED_INK, _theme getOrDefault ["text2", [0.698, 0.734, 0.784, 1]]] select _enabled, _font, 0
+        [DISABLED_INK, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] select _enabled, _font, 0
     ] call EFUNC(gui,uiLabel));
 };
 

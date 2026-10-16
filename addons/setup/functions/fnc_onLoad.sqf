@@ -110,7 +110,7 @@ uiNamespace setVariable [QGVAR(root), _root];
 
 [
     _display, _root, [0, 0, _width, _height],
-    GVAR(theme) getOrDefault ["panel", [0.04, 0.045, 0.055, 0.85]], GVAR(theme) getOrDefault ["radius", 0]
+    GVAR(theme) getOrDefault ["panel", [0.05, 0.05, 0.05, 0.92]], GVAR(theme) getOrDefault ["radius", 0]
 ] call EFUNC(gui,uiPanel);
 
 // Somewhere for the cursor to go after every redraw: a button no one sees. Otherwise a control that had

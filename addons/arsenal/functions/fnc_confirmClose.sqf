@@ -87,7 +87,7 @@ private _theme = call EFUNC(gui,theme);
 private _font = _theme getOrDefault ["font", "RobotoCondensed"];
 private _fontBold = _theme getOrDefault ["fontBold", "RobotoCondensedBold"];
 private _loss = _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];
-private _ink = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
+private _ink = _theme getOrDefault ["text", [1, 1, 1, 1]];
 private _radius = _theme getOrDefault ["radius", UNIT * 0.45];
 
 // The colour as structured text wants it.
@@ -128,11 +128,11 @@ private _before = allControls _display;
 
 // Dims the window and takes every click that is not on the card: a rectangle, which has no click sound (a
 // button there played its sound for every press, and focused it lay over the answers).
-private _dim = [_display, controlNull, [safezoneX, safezoneY, safezoneW, safezoneH], [0.04, 0.045, 0.055, 0.55]] call EFUNC(gui,uiPanel);
+private _dim = [_display, controlNull, [safezoneX, safezoneY, safezoneW, safezoneH], [0, 0, 0, 0.55]] call EFUNC(gui,uiPanel);
 
 uiNamespace setVariable [QGVAR(confirm), _dim select 0];
 
-[_display, controlNull, [_cardX, _cardY, _cardW, _cardH], _theme getOrDefault ["panel", [0.04, 0.045, 0.055, 0.85]], _radius] call EFUNC(gui,uiPanel);
+[_display, controlNull, [_cardX, _cardY, _cardW, _cardH], _theme getOrDefault ["panel", [0.05, 0.05, 0.05, 0.92]], _radius] call EFUNC(gui,uiPanel);
 [_display, controlNull, [_cardX, _cardY, _cardW, _cardH], _loss, _radius] call EFUNC(gui,uiRing);
 
 private _y = _cardY + UNIT * 1;

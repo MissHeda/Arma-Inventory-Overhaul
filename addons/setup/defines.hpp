@@ -65,7 +65,7 @@
 
 // Colours the theme has no key for: Enhanced First Aid Kits' menus and their edge, the accent under the
 // mouse, and what is greyed out.
-#define MENU_BG [0.075, 0.083, 0.1, 0.97]
+#define MENU_BG [0.06, 0.06, 0.06, 0.98]
 #define MENU_EDGE [1, 1, 1, 0.14]
 #define ACCENT_HOVER [1, 0.733, 0.29, 1]
 #define DISABLED_FILL [1, 1, 1, 0.035]
@@ -143,8 +143,8 @@
 
 // The canvas both editors draw on (fnc_uiCanvas): a cell filled dark and a place without one light, as
 // cells picked on a sheet; each a little lighter under the mouse.
-#define CANVAS_ON [0.12, 0.13, 0.15, 0.97]
-#define CANVAS_ON_HOVER [0.22, 0.23, 0.26, 0.97]
+#define CANVAS_ON [0.12, 0.12, 0.12, 0.97]
+#define CANVAS_ON_HOVER [0.22, 0.22, 0.22, 0.97]
 #define CANVAS_OFF [1, 1, 1, 0.24]
 #define CANVAS_OFF_HOVER [1, 1, 1, 0.4]
 // The Containers step paints compartments (fnc_uiCanvas with a palette): eight colours that stay apart on

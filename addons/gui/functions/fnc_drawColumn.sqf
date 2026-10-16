@@ -66,7 +66,7 @@ if (_title isNotEqualTo "") then {
     private _textX = _left + _padX;
 
     if (_icon isNotEqualTo "") then {
-        [_display, controlNull, [_textX, _innerTop + _titleH * 0.15, SQUARE(_titleH * 0.7), _titleH * 0.7], _icon, _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]]] call FUNC(uiIcon);
+        [_display, controlNull, [_textX, _innerTop + _titleH * 0.15, SQUARE(_titleH * 0.7), _titleH * 0.7], _icon, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] call FUNC(uiIcon);
         _textX = _textX + SQUARE(_titleH * 0.7) + SQUARE(_titleH * 0.3);
     };
 
@@ -74,7 +74,7 @@ if (_title isNotEqualTo "") then {
     private _font = _theme getOrDefault ["fontBold", "PuristaSemibold"];
     private _text = [[_title, _theme] call FUNC(caption), _left + _width - _padX - _textX, _font, _size] call FUNC(fitText);
 
-    [_display, controlNull, [_textX, _innerTop, _left + _width - _padX - _textX, _titleH], _text, _size, _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _font, 0] call FUNC(uiLabel);
+    [_display, controlNull, [_textX, _innerTop, _left + _width - _padX - _textX, _titleH], _text, _size, _theme getOrDefault ["text", [1, 1, 1, 1]], _font, 0] call FUNC(uiLabel);
 
     // A hairline under the title, like the header's.
     private _line = [_display, "EINV_PanelRect", controlNull, [_left + _padX, _innerTop + _titleH + _padY * 0.4, _width - _padX * 2, pixelH]] call FUNC(uiCreate);

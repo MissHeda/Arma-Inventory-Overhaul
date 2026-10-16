@@ -62,7 +62,7 @@ private _buttonsW = 0;
 private _width = (SQUARE(UNIT * 20)) max (_buttonsW - _gap);
 
 // The words, centred: a title in bold, the question under it.
-private _color = [_theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]]] call FUNC(hex);
+private _color = [_theme getOrDefault ["text", [1, 1, 1, 1]]] call FUNC(hex);
 private _markup = format ["<t align='center' font='%1' color='%2' size='%3'>%4</t>", _font, _color, TEXT_BODY / STRUCTURED_SIZE, [_text] call FUNC(escape)];
 
 if (_title isNotEqualTo "") then {

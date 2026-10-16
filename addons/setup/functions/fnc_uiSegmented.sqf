@@ -48,7 +48,7 @@ private _insetY = pixelH * 2;
     private _current = _forEachIndex == _index;
     private _partX = _left + _forEachIndex * _partW;
     private _fill = [[0, 0, 0, 0], _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]] select _current;
-    private _ink = [_theme getOrDefault ["text2", [0.698, 0.734, 0.784, 1]], _theme getOrDefault ["onAccent", [0.086, 0.094, 0.114, 1]]] select _current;
+    private _ink = [_theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _theme getOrDefault ["onAccent", [0.05, 0.05, 0.05, 1]]] select _current;
 
     if (!_enabled) then {
         _fill = [[0, 0, 0, 0], DISABLED_FILL] select _current;

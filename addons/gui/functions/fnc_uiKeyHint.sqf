@@ -32,7 +32,7 @@ _position params ["_left", "_top"];
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
 private _keyBg = _theme getOrDefault ["keyBg", [1, 1, 1, 0.15]];
-private _keyText = _theme getOrDefault ["keyText", [0.925, 0.933, 0.949, 1]];
+private _keyText = _theme getOrDefault ["keyText", [1, 1, 1, 1]];
 private _round = _theme getOrDefault ["keyRound", false];
 
 private _keySize = _height * 0.56;
@@ -56,7 +56,7 @@ if (_text isNotEqualTo "") then {
     private _gap = SQUARE(_height * 0.3);
     private _textW = (_text getTextWidth [_font, _textSize]) * TEXT_SLACK;
 
-    [_display, _parent, [_left + _badgeW + _gap, _top, _textW, _height], _text, _textSize, _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]], _font, 0] call FUNC(uiLabel);
+    [_display, _parent, [_left + _badgeW + _gap, _top, _textW, _height], _text, _textSize, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _font, 0] call FUNC(uiLabel);
 
     _taken = _taken + _gap + _textW;
 };

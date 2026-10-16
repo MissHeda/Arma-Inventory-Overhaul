@@ -48,7 +48,7 @@ params [
 _rect params ["_left", "_top", "_width", "_height"];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
-private _muted = _theme getOrDefault ["muted", [0.522, 0.553, 0.604, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _radius = (_theme getOrDefault ["radius", 0]) min (_height / 2);
 
 if (_multiLine) then {
@@ -98,7 +98,7 @@ if (_multiLine) then {
     _edit ctrlEnable (_enabled || _selectable);
 };
 
-_edit ctrlSetTextColor (_theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]]);
+_edit ctrlSetTextColor (_theme getOrDefault ["text", [1, 1, 1, 1]]);
 _edit ctrlSetText _text;
 _edit setVariable [QGVAR(edit), [_placeholderCtrl, _code, _arguments, _multiLine, _enabled, _text]];
 _edit setVariable [QGVAR(selectable), _selectable && {!_multiLine} && {!_enabled}];

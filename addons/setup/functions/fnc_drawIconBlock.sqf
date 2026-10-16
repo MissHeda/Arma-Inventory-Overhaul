@@ -39,7 +39,7 @@ _where params ["_pictureX", "_pictureY", "_pictureW"];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText2 = _theme getOrDefault ["text2", [0.698, 0.734, 0.784, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
 private _gap = SQUARE(UNIT * 0.3);
 private _stepH = UNIT * 1.0;
 private _stepGap = UNIT * 0.28;

@@ -44,9 +44,9 @@ private _info = [_class] call EFUNC(items,getInfo);
 private _theme = GVAR(theme);
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _colorText2 = _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]];
-private _muted = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 
 private _fnc_hex = {
     params ["_color"];
@@ -197,7 +197,7 @@ _group ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseBu
 
 [
     _display, _group, [0, 0, _width, _height],
-    _theme getOrDefault ["inspectBg", [0.075, 0.083, 0.1, 0.97]], _theme getOrDefault ["radius", 0]
+    _theme getOrDefault ["inspectBg", [0.06, 0.06, 0.06, 0.98]], _theme getOrDefault ["radius", 0]
 ] call FUNC(uiPanel);
 
 private _cursor = _padY;

@@ -40,9 +40,9 @@ params ["_display", "_group", "_theme"];
 (ctrlPosition _group) params ["", "", "_width", "_height"];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _colorText2 = _theme getOrDefault ["text2", [0.698, 0.734, 0.784, 1]];
-private _muted = _theme getOrDefault ["muted", [0.522, 0.553, 0.604, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
 private _loss = _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];
 private _radius = _theme getOrDefault ["radius", 0];
@@ -358,7 +358,7 @@ if (GVAR(reviewDrafts)) then {
                 [format [LLSTRING(Drafts_Saved), _name], "gain"] call FUNC(setHint);
             };
 
-            private _helpH = [_display, _inner, [0, 0, _width], LLSTRING(Drafts_Help), TEXT_SMALL, _theme getOrDefault ["muted", [0.52, 0.55, 0.6, 1]], _theme getOrDefault ["font", "PuristaMedium"]] call FUNC(uiText);
+            private _helpH = [_display, _inner, [0, 0, _width], LLSTRING(Drafts_Help), TEXT_SMALL, _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _theme getOrDefault ["font", "PuristaMedium"]] call FUNC(uiText);
             private _field = [_display, _inner, [0, _helpH + UNIT * 0.3, _width, UNIT * 1.15], GVAR(draftPick), LLSTRING(Drafts_Name), _theme, {
                 params ["", "_submitted", "_arguments"];
 

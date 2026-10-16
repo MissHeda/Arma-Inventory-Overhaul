@@ -37,7 +37,7 @@ private _totals = uiNamespace getVariable [QGVAR(cellTotals), controlNull];
 if (!isNull _totals) then {
     _totals ctrlSetText format [LLSTRING(Cont_Totals), _cells, MAX_CELLS, count _blocks, MAX_BLOCKS];
     _totals ctrlSetTextColor ([
-        GVAR(theme) getOrDefault ["text2", [0.698, 0.734, 0.784, 1]], GVAR(theme) getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
+        GVAR(theme) getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], GVAR(theme) getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
     ] select (_cells < 1 || {_cells > MAX_CELLS} || {count _blocks > MAX_BLOCKS}));
 };
 

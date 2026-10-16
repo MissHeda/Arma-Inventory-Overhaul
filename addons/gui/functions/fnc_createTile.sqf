@@ -173,7 +173,7 @@ if (_hidden) then {
     // The "?" - it gives way to the glass while the item is searched (fnc_showSearch).
     private _mark = [
         _display, _parent, [_left, _top, _width, _height], "?", _cellH * 0.55,
-        _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]], _fontBold, 2
+        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _fontBold, 2
     ] call FUNC(uiLabel);
 
     _controls pushBack _mark;
@@ -203,7 +203,7 @@ if (_hidden) then {
 
         _controls pushBack ([
             _display, _parent, [_left + _padX, _top + _padY * 0.4, _innerW, _textH * 1.15], _short, _textH,
-            _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]], _font, 1
+            _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _font, 1
         ] call FUNC(uiLabel));
     };
 
@@ -213,7 +213,7 @@ if (_hidden) then {
     if (_badge isEqualType "" && {_badge isNotEqualTo ""}) then {
         _controls pushBack ([
             _display, _parent, [_left + _padX * 0.5, _top + _padY * 0.5, SQUARE(UNIT * 0.42), UNIT * 0.42], _badge,
-            _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]]
+            _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]
         ] call FUNC(uiIcon));
     };
 
@@ -223,7 +223,7 @@ if (_hidden) then {
     // keeps out of the container, in the unit's hidden holder (the entry's "hidden", einv_storage_fnc_opStrict).
     private _markSize = UNIT * 0.4;
     private _markX = _left + _padX * 0.5 + ([0, SQUARE(UNIT * 0.42) + _padX * 0.5] select (_badge isEqualType "" && {_badge isNotEqualTo ""}));
-    private _markColor = _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]];
+    private _markColor = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
 
     if (
         missionNamespace getVariable [QEGVAR(storage,useActive), false]
@@ -289,7 +289,7 @@ if (_hidden) then {
 
     if (_stack > 1) then {
         private _stackText = format ["%1/%2", _count, _stack];
-        private _stackColor = _theme getOrDefault ["tileCountColor", [0.925, 0.933, 0.949, 1]];
+        private _stackColor = _theme getOrDefault ["tileCountColor", [1, 1, 1, 1]];
 
         ([
             _display, _parent, _stackText, _fontBold, _textH, _left + _width - _padX, _countBottom, _innerW, _theme, true
@@ -347,7 +347,7 @@ if (_hidden) then {
 
             private _label = [
                 _display, _parent, _pill, _amount, _textH,
-                _theme getOrDefault ["tileCountColor", [0.925, 0.933, 0.949, 1]], _amountFont, 2
+                _theme getOrDefault ["tileCountColor", [1, 1, 1, 1]], _amountFont, 2
             ] call FUNC(uiLabel);
 
             _controls pushBack _label;
@@ -362,7 +362,7 @@ if (_hidden) then {
 
             private _label = [
                 _display, _parent, _badge, _amount, _textH,
-                _theme getOrDefault ["tileCountColor", [0.086, 0.094, 0.114, 1]], _amountFont, 2
+                _theme getOrDefault ["tileCountColor", [0.05, 0.05, 0.05, 1]], _amountFont, 2
             ] call FUNC(uiLabel);
 
             _controls pushBack _label;
@@ -391,12 +391,12 @@ if (_hidden) then {
             private _label = if (_backdropRect isEqualTo []) then {
                 [
                     _display, _parent, [_left + _padX, _countBottom - _textH * 1.15, _innerW, _textH * 1.15], _amount, _textH,
-                    _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _amountFont, parseNumber !_leftSide
+                    _theme getOrDefault ["text", [1, 1, 1, 1]], _amountFont, parseNumber !_leftSide
                 ] call FUNC(uiLabel)
             } else {
                 [
                     _display, _parent, _backdropRect, _amount, _textH,
-                    _theme getOrDefault ["tileCountColor", [0.925, 0.933, 0.949, 1]], _amountFont, 2
+                    _theme getOrDefault ["tileCountColor", [1, 1, 1, 1]], _amountFont, 2
                 ] call FUNC(uiLabel)
             };
 
