@@ -20,6 +20,11 @@
  * Onto a slot of the hotbar (einv_hotbar - only when that addon is loaded) nothing moves: the item's class
  * is put on that key.
  *
+ * Where the storage keeps separate stacks (einv_storage_stackSplits - NEEDS_STORAGE.md), what is let go on a
+ * free cell lies there as a stack of its own: it does not join a stack of its class elsewhere in the
+ * container, and part of a stack let go in the container it lies in is split off onto the cell (fnc_applyMove,
+ * "separate"). Quick move and Take all still fill partial stacks.
+ *
  * Onto a tile that lies there, where the footprint showed a swap (the target's 10th element, fnc_swapPlan):
  * the two tiles change places in one transaction (fnc_applySwap) - the dragged one onto the cell it was let
  * go on, the other onto the cell the dragged one came from.
@@ -339,10 +344,13 @@ private _sent = call {
         ([_unit, _slot, _to, _cell] call FUNC(doUnequip)) isEqualTo true
     };
 
-    // Part of a stack into the container it lies in changes nothing: a container holds a class as one.
-    if (_count > 0 && {_fromBox isEqualTo _to}) exitWith {false};
+    // On a cell of its own it lies as a stack of its own, where the storage keeps them apart.
+    private _separate = _place && {missionNamespace getVariable [QEGVAR(storage,stackSplits), false]};
 
-    ([_fromBox, _to, _entry, _count, _cell] call FUNC(applyMove)) isEqualTo true
+    // Part of a stack into the container it lies in changes nothing where a container holds a class as one.
+    if (_count > 0 && {_fromBox isEqualTo _to} && {!_separate}) exitWith {false};
+
+    ([_fromBox, _to, _entry, _count, _cell, createHashMapFromArray [["separate", _separate]]] call FUNC(applyMove)) isEqualTo true
 };
 
 // A refusal before it went out flashed its own reason.

@@ -6,7 +6,7 @@
  *
  * Only what belongs to the thing under the mouse is in it. The moves have their own ways and no row
  * here: a double click moves a tile - or a whole selection - over (fnc_quickMove, fnc_quickMoveGroup),
- * Delete drops what is under the mouse or selected (fnc_dropToGround, fnc_quickMoveGroup), a drag moves
+ * G drops what is under the mouse or selected (fnc_dropToGround, fnc_quickMoveGroup), a drag moves
  * one tile or a selection anywhere, Ctrl+click takes a worn item off (fnc_quickUnequip), and the Sort
  * button on a section's caption line sorts its container (fnc_sortHolder, fnc_drawSection,
  * fnc_drawWindow).
@@ -50,6 +50,13 @@
  * A living person's gear the player may only look at (fnc_checkTouch): only what changes nothing of
  * theirs - inspect, open or close a uniform, vest, backpack or kit lying there; no sorting, which
  * everyone looking at them would see, and no choices of other mods.
+ *
+ * For whoever may open the setup wizard (einv_setup_fnc_canOpen - only when that addon is loaded), a last
+ * row "Settings for <name>" on a tile, on a worn slot, on the box of an opened uniform, vest or backpack and on
+ * the free cells of a crate's or vehicle's grid: it closes this window and opens the wizard at the page of
+ * that item - the Containers page for what holds things (uniform, vest, backpack, crate, vehicle, kit), the
+ * Items page for the rest - with the class picked (einv_setup_fnc_openFromGame, which takes the step's index:
+ * found here by its id in einv_setup_steps, so a reordering of the pages does not matter).
  *
  * A window that attached (fnc_attach) gives its choices through the "menu" hook: they replace everything
  * above, an empty list means no menu at all.
@@ -96,6 +103,12 @@ if (!isNil "_hooked" && {_hooked isEqualType []}) exitWith {
 private _unit = GVAR(unit);
 private _grids = uiNamespace getVariable [QGVAR(grids), []];
 private _choices = [];
+
+// The class a "Settings for ..." row is for (see the header), the name it shows and the page of the wizard
+// when the kind of the class does not say ("items" or "containers").
+private _settingsClass = "";
+private _settingsName = "";
+private _settingsPage = "";
 
 private _fnc_name = {
     params ["_class"];
@@ -155,6 +168,8 @@ switch (GVAR(hover) param [0, ""]) do {
             [_class, _tile getOrDefault ["count", 1], _tile getOrDefault ["ammo", -1], _tile getOrDefault ["attachments", []]],
             {_this call FUNC(inspect)}
         ];
+
+        _settingsClass = _class;
 
         // A move of it is under way: what it is, and opening or closing a uniform, vest or backpack it
         // is - nothing that would plan it a second time.
@@ -282,6 +297,12 @@ switch (GVAR(hover) param [0, ""]) do {
             _choices append ([_record select 7] call EFUNC(hotbar,stripMenu));
         };
 
+        // The box of a uniform, vest or backpack opened from inside a container, and a worn slot: the setup
+        // wizard's page for the item.
+        if ((_record param [7, -1]) < 0) then {
+            _settingsClass = _record param [1, ""];
+        };
+
         if (_slot isEqualTo "" || {isNull _owner} || {(_record param [1, ""]) isEqualTo ""}) exitWith {};
 
         private _worn = [_owner, _slot] call EFUNC(storage,getSlot);
@@ -358,6 +379,40 @@ switch (GVAR(hover) param [0, ""]) do {
         [_grid] call _fnc_addSelectAll;
 
         [_container] call _fnc_addArsenal;
+
+        // A crate or a vehicle: its grid in the wizard. Not the soldier's own containers, which are items there, and
+        // not the ground.
+        if (isNull (([_container] call EFUNC(storage,getOwner)) select 0) && {!([_container] call EFUNC(storage,isGroundHolder))}) then {
+            _settingsClass = typeOf _container;
+            _settingsName = [_container] call FUNC(containerName);
+            _settingsPage = "containers";
+        };
+    };
+};
+
+// The setup wizard, for whoever may open it: at the page of this class (einv_setup).
+if (
+    _settingsClass isNotEqualTo "" && {call FUNC(isInventoryMode)} && {!isNil QEFUNC(setup,openFromGame)}
+    && {call (missionNamespace getVariable [QEFUNC(setup,canOpen), {false}])}
+) then {
+    private _kind = ([_settingsClass] call EFUNC(items,getInfo)) getOrDefault ["kind", ""];
+    private _id = _settingsPage;
+
+    if (_id isEqualTo "") then {
+        _id = ["items", "containers"] select (_kind in ["uniform", "vest", "backpack", "crate", "vehicle", "kit"]);
+    };
+
+    private _step = (missionNamespace getVariable [QEGVAR(setup,steps), []]) findIf {(_x param [0, ""]) isEqualTo _id};
+
+    if (_settingsName isEqualTo "") then {
+        _settingsName = [_settingsClass] call _fnc_name;
+    };
+
+    if (_step >= 0) then {
+        _choices pushBack [
+            format [LLSTRING(Menu_Settings), _settingsName], [_step, _settingsClass], {_this call EFUNC(setup,openFromGame)},
+            createHashMapFromArray [["separator", _choices isNotEqualTo []]]
+        ];
     };
 };
 

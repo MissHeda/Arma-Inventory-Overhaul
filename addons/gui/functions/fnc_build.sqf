@@ -66,6 +66,7 @@ call FUNC(logDrag);
 
 GVAR(press) = [];
 GVAR(dragging) = false;
+GVAR(stripDrag) = [];
 ctrlDelete (uiNamespace getVariable [QGVAR(dragCounter), controlNull]);
 GVAR(dragTarget) = [];
 GVAR(dragGroup) = [];
@@ -160,6 +161,7 @@ uiNamespace setVariable [QGVAR(weightBar), createHashMap];
 uiNamespace setVariable [QGVAR(weightPreview), controlNull];
 uiNamespace setVariable [QGVAR(compare), controlNull];
 uiNamespace setVariable [QGVAR(tipShown), controlNull];
+uiNamespace setVariable [QGVAR(tipKeys), controlNull];
 GVAR(buildCount) = GVAR(buildCount) + 1;
 GVAR(hover) = [];
 uiNamespace setVariable [QGVAR(hint), controlNull];

@@ -4,8 +4,8 @@
  * Author: Miss Heda
  * Display key down. Escape closes the window by itself - after the context menu, the inspect card, the kit
  * windows and the selection, one at a time. Ctrl+A selects everything in the section under the mouse
- * (fnc_selectSection). Delete drops the selected tiles, else the item under the mouse; the Gear key closes
- * the window again, as it closes the vanilla inventory. A key the hotbar has a use for goes to it first
+ * (fnc_selectSection). G drops the selected tiles, else the item under the mouse (Delete still does the
+ * same, but the footer names G); the Gear key closes the window again, as it closes the vanilla inventory. A key the hotbar has a use for goes to it first
  * (einv_hotbar_fnc_onWindowKey - only when that addon is loaded). A window that attached (fnc_attach) is
  * offered the keys after those (the "key" hook) and before the Delete and Gear keys, and hears Return in
  * any field of its own ("submit").
@@ -15,7 +15,7 @@
  * go, keys pressed with Ctrl or Alt never (Ctrl+A is the selection's). Only on foot: a soldier in a seat
  * walks off nowhere, and there the same keys are the vehicle's - the window stays, as the vanilla
  * inventory stays in a vehicle. While magazines are repacked
- * (einv_magazines) Escape stops the repack and the window stays, and Delete waits.
+ * (einv_magazines) Escape stops the repack and the window stays, and G and Delete wait.
  *
  * Not the press that opened the window, which can still be held down or repeating when it arrives here.
  *
@@ -37,7 +37,7 @@
 
 params ["_display", "_key", ["_shift", false], ["_ctrl", false], ["_alt", false]];
 
-// Repacking magazines (einv_magazines): Escape stops it and the window stays; Delete waits. Every other
+// Repacking magazines (einv_magazines): Escape stops it and the window stays; G and Delete wait. Every other
 // key does what it always does - the Gear key closes the window, which stops the repack too.
 private _handled = false;
 
@@ -47,7 +47,7 @@ if (!isNil QEFUNC(magazines,isBusy) && {[] call EFUNC(magazines,isBusy)}) then {
         _handled = true;
     };
 
-    if (_key == DIK_DELETE) exitWith {
+    if (_key in [DIK_G, DIK_DELETE]) exitWith {
         _handled = true;
     };
 };
@@ -148,14 +148,14 @@ if (
 };
 
 // The hotbar's keys inside this window (einv_hotbar): a key bound to a slot puts what the mouse is on there,
-// Delete on a slot of the bar empties it.
+// G (or Delete) on a slot of the bar empties it.
 if (
     !GVAR(dragging) && {call FUNC(isInventoryMode)} && {!isNil QEFUNC(hotbar,onWindowKey)}
     && {[_display, _key, _shift, _ctrl, _alt] call EFUNC(hotbar,onWindowKey)}
 ) exitWith {true};
 
 // Selecting several (fnc_select): Escape lets go of the selection, Ctrl+A takes the whole section under
-// the mouse, Delete drops what is selected. Not while something is dragged.
+// the mouse, G (or Delete) drops what is selected. Not while something is dragged.
 private _selecting = !GVAR(dragging) && {call FUNC(isInventoryMode)};
 
 if (_selecting && {_key == DIK_ESCAPE} && {call FUNC(clearSelection)}) exitWith {true};
@@ -182,7 +182,7 @@ if (_selecting && {_key == DIK_A} && {_ctrl}) exitWith {
     true
 };
 
-if (_selecting && {_key == DIK_DELETE} && {GVAR(selection) isNotEqualTo []}) exitWith {
+if (_selecting && {_key in [DIK_G, DIK_DELETE]} && {GVAR(selection) isNotEqualTo []}) exitWith {
     [call FUNC(selectionTiles), true] call FUNC(quickMoveGroup);
     true
 };
@@ -190,10 +190,27 @@ if (_selecting && {_key == DIK_DELETE} && {GVAR(selection) isNotEqualTo []}) exi
 // The window that attached gets the keys the engine would act on next (the "key" hook). True: taken.
 if ((["key", [_display, _key, _shift, _ctrl, _alt], false] call FUNC(hook)) isEqualTo true) exitWith {true};
 
-// Delete drops what the mouse is on.
-if (_key == DIK_DELETE) exitWith {
-    if ((GVAR(hover) param [0, ""]) isEqualTo "tile" && {!GVAR(dragging)}) then {
-        [GVAR(hover) select 1, GVAR(hover) select 2] call FUNC(dropToGround);
+// G (in the inventory) or Delete drops what the mouse is on: a tile, or the item of a worn slot (as the
+// slot's menu does, fnc_contextMenu; fnc_doUnequip says why not for a living person's).
+if (_key == DIK_DELETE || {_key == DIK_G && {call FUNC(isInventoryMode)}}) exitWith {
+    if (!GVAR(dragging)) then {
+        switch (GVAR(hover) param [0, ""]) do {
+            case "tile": {
+                [GVAR(hover) select 1, GVAR(hover) select 2] call FUNC(dropToGround);
+            };
+            case "slot": {
+                private _record = (uiNamespace getVariable [QGVAR(slots), []]) param [GVAR(hover) select 1, []];
+                private _owner = _record param [6, objNull];
+                private _slot = _record param [5, ""];
+
+                if (
+                    _record isNotEqualTo [] && {(_record param [7, -1]) < 0} && {_slot isNotEqualTo ""} && {!isNull _owner}
+                    && {(_record param [1, ""]) isNotEqualTo ""}
+                ) then {
+                    [_owner, _slot, "ground", []] call FUNC(doUnequip);
+                };
+            };
+        };
     };
 
     true

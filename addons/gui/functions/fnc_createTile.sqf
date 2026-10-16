@@ -3,7 +3,8 @@
 /*
  * Author: Miss Heda
  * Puts an entry on a grid as a tile: a surface in its category's colour over the cells it covers, its
- * picture, and - as the style wants them - its short name in the top right corner, what stacks its count
+ * picture, and - as the style wants them - its short name in the top right corner (only while the player has
+ * einv_gui_tileNames on, off by default; the setup wizard's preview always), what stacks its count
  * of the stack ("3/10") and a magazine its rounds. An entry not searched yet is a plain surface with a "?"
  * and a faint outline, hatched in Tarkov's look.
  *
@@ -197,7 +198,13 @@ if (_hidden) then {
         _controls append ([_display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _attachments] call FUNC(drawAttachments));
     };
 
-    if (_theme getOrDefault ["tileName", true]) then {
+    // The name in the top corner: when the look has it and the player wants it (einv_gui_tileNames, off by
+    // default; a setting read from the mission namespace, as the magazine ones below) - the preview of the
+    // setup wizard always shows it, being a picture of what the rules make of the item.
+    if (
+        (_theme getOrDefault ["tileName", true])
+        && {missionNamespace getVariable [QGVAR(tileNames), false] || {_entry getOrDefault ["preview", false]}}
+    ) then {
         // A kit by the name its player gave it (fnc_itemName).
         private _short = [[_entry get "class", true] call FUNC(itemName), _innerW, _font, _textH] call FUNC(fitText);
 

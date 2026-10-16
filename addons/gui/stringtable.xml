@@ -173,7 +173,16 @@
             <English>R: rotate</English>
         </Key>
         <Key ID="STR_einv_gui_Hint_Selected">
-            <English>%1 selected - drag them together, double click to move them over, Delete drops them</English>
+            <English>%1 selected - drag them together, double click to move them over, G drops them</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_StripMove">
+            <English>Let go to move it to this hotbar slot</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_StripRemove">
+            <English>Let go here to take it off the hotbar</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_StripStay">
+            <English>Let go to leave it where it is</English>
         </Key>
         <Key ID="STR_einv_gui_Hint_Swap">
             <English>Swap places with %1</English>
@@ -232,23 +241,47 @@
         <Key ID="STR_einv_gui_Inspect_YesUpTo">
             <English>Yes, up to %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Key_AltClick">
-            <English>Alt+Click</English>
-        </Key>
         <Key ID="STR_einv_gui_Key_CtrlClick">
             <English>Ctrl+Click</English>
         </Key>
-        <Key ID="STR_einv_gui_Key_Delete">
-            <English>Del</English>
-        </Key>
         <Key ID="STR_einv_gui_Key_DoubleClick">
             <English>Double click</English>
+        </Key>
+        <Key ID="STR_einv_gui_Key_Drag">
+            <English>Drag</English>
+        </Key>
+        <Key ID="STR_einv_gui_Key_Drop">
+            <English>G</English>
         </Key>
         <Key ID="STR_einv_gui_Key_Escape">
             <English>Esc</English>
         </Key>
         <Key ID="STR_einv_gui_Key_RightClick">
             <English>Right click</English>
+        </Key>
+        <Key ID="STR_einv_gui_Key_ShiftClick">
+            <English>Shift+Click</English>
+        </Key>
+        <Key ID="STR_einv_gui_Key_ShiftDrag">
+            <English>Shift+Drag</English>
+        </Key>
+        <Key ID="STR_einv_gui_Keys_Clear">
+            <English>Clear</English>
+        </Key>
+        <Key ID="STR_einv_gui_Keys_Half">
+            <English>Half stack</English>
+        </Key>
+        <Key ID="STR_einv_gui_Keys_MoveOrRemove">
+            <English>Move or remove</English>
+        </Key>
+        <Key ID="STR_einv_gui_Keys_Open">
+            <English>Open</English>
+        </Key>
+        <Key ID="STR_einv_gui_Keys_Split">
+            <English>Split</English>
+        </Key>
+        <Key ID="STR_einv_gui_Keys_TakeOff">
+            <English>Take off</English>
         </Key>
         <Key ID="STR_einv_gui_Load_Next">
             <English>· %1 at %2 kg</English>
@@ -279,6 +312,9 @@
         </Key>
         <Key ID="STR_einv_gui_Menu_SelectAll">
             <English>Select all in %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_Settings">
+            <English>Settings for %1</English>
         </Key>
         <Key ID="STR_einv_gui_Notify_Searched">
             <English>%1 is going through your gear</English>
@@ -483,6 +519,12 @@
         </Key>
         <Key ID="STR_einv_gui_Setting_Sounds_Desc">
             <English>Every kind of gear sounds like what it\nis: weapons, magazines, vests, medical\nitems, helmets, radios and more - picked\nup, put down, put on, attached, loaded,\nand containers opened and searched.\n\nOff: you hear none of them. Others near\nyou may still hear you loot.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_TileNames">
+            <English>Item names on tiles</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_TileNames_Desc">
+            <English>The item's short name in the top\nright corner of every tile. Off, the\ntiles show the picture alone - the\nname still shows at the mouse.\n\nThe Arsenal's panel follows it.</English>
         </Key>
         <Key ID="STR_einv_gui_Slot_Backpack">
             <English>Backpack</English>

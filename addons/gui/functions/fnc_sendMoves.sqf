@@ -55,6 +55,11 @@
  *    "toRoot"   - its root, objNull to look it up
  *    "cell"     - [col, row, compartment] - with [.., width, height] when it lies turned - or [] for the
  *                 first fit (move, unequip)
+ *    "separate" - what lands on the cell lies there as a stack of its own and joins no other stack of its
+ *                 class in the holder (move; default false). Within one holder, part of a stack moved
+ *                 with it is split off onto the cell - or, with no cell, onto the nearest free one: op
+ *                 "split" [holder, payload, count, cell]. The ops take it as their last argument
+ *                 (NEEDS_STORAGE.md); the window sends it only while einv_storage_stackSplits is true
  *    "unit", "slot" - whose slot and which (equip: the player's, unequip: anybody's, swap: where it
  *                 comes off)
  *    "toUnit", "toSlot" - for "swap": the unit it goes onto and the slot there; what that unit wore
@@ -180,6 +185,7 @@ private _fnc_moveSteps = {
     private _entry = _move getOrDefault ["entry", createHashMap];
     private _count = _move getOrDefault ["count", -1];
     private _cell = _move getOrDefault ["cell", []];
+    private _separate = _move getOrDefault ["separate", false];
 
     if (_from isEqualType objNull && {isNull _from}) exitWith {["Failed", []]};
     if (_to isEqualType objNull && {isNull _to}) exitWith {["Failed", []]};
@@ -213,8 +219,18 @@ private _fnc_moveSteps = {
         ], "ground"]
     };
 
-    // Within one holder: only somewhere else, and only a whole tile - a container holds a class as one.
+    // Within one holder: only somewhere else, and only a whole tile - a container holds a class as one -
+    // unless it keeps separate stacks: then part of a stack is split off (op "split", the cell [] for the
+    // nearest free one).
     if (_from isEqualTo _to) exitWith {
+        if (_separate && {_count > 0} && {_count < (_entry getOrDefault ["count", 1])}) exitWith {
+            private _split = [_from, "split"] call _fnc_opName;
+
+            if (_split isEqualTo "") exitWith {["", []]};
+
+            ["", [[_fromRoot, _split, [_from, _array, _count, _cell], "land"]], _to]
+        };
+
         if (_cell isEqualTo [] || {_count > 0 && {_count < (_entry getOrDefault ["count", 1])}}) exitWith {["", []]};
 
         private _place = [_from, "place"] call _fnc_opName;
@@ -239,7 +255,7 @@ private _fnc_moveSteps = {
     // that type's own, anything else as a take and a put in the same phase.
     if (_fromRoot isEqualTo _toRoot) exitWith {
         if (_from isEqualType objNull && {_to isEqualType objNull}) exitWith {
-            ["", [[_fromRoot, "move", [_from, _to, _array, _count, _cell], "land"]], _to]
+            ["", [[_fromRoot, "move", [_from, _to, _array, _count, _cell] + ([[], [true]] select _separate), "land"]], _to]
         };
 
         private _between = [_from, "move"] call _fnc_opName;
@@ -250,14 +266,14 @@ private _fnc_moveSteps = {
 
         ["", [
             [_fromRoot, _take, [_from, _array, _count], "take"],
-            [_toRoot, _put, [_to, ["#step", 0, 0], _cell], "land"]
+            [_toRoot, _put, [_to, ["#step", 0, 0], _cell] + ([[], [false, false, true]] select _separate), "land"]
         ], _to]
     };
 
     // Between two roots: out at the source's authority, in at the target's - each checked against its own.
     ["", [
         [_fromRoot, _take, [_from, _array, _count], "take"],
-        [_toRoot, _put, [_to, ["#step", 0, 0], _cell], "land"]
+        [_toRoot, _put, [_to, ["#step", 0, 0], _cell] + ([[], [false, false, true]] select _separate), "land"]
     ], _to]
 };
 

@@ -10,8 +10,9 @@
  *   a plain click - a tile is selected (fnc_select); on a tile of a selection of several it does nothing,
  *                   so that a double click can move them all; on an empty cell the selection is cleared
  *   Ctrl  - a tile is selected or not (fnc_select "toggle"), a slot's item comes off (fnc_quickUnequip)
- *   Shift - a tile and all between it and the last one clicked are selected (fnc_select "range")
- *   Alt   - a tile is put on (fnc_quickEquip)
+ *   Shift - a stack is split: half of it goes onto the nearest free cell, as a stack of its own
+ *           (fnc_splitStack - only where the storage keeps separate stacks); else a tile and all between it
+ *           and the last one clicked are selected (fnc_select "range")
  *   a double click - a kit or a uniform, vest or backpack lying in a container opens, anything else
  *                    moves over (fnc_quickMove); a tile of a selection of several moves them all
  *                    (fnc_quickMoveGroup)
@@ -22,7 +23,11 @@
  * hint names both while the mouse is on such a tile (fnc_updateHover).
  * The box of a uniform, vest or backpack opened from inside a container is pressed as its tile there
  * (fnc_boxTile): dragged, clicked and double clicked like the tile itself.
- * Shift held while pressing a stack drags half of it. A right click opens the item's context menu
+ * Shift held while pressing a stack drags half of it. Alt+click has no meaning of its own (it was the quick
+ * equip before; putting on is a drag onto a slot, a double click on the ground and the menu's Equip).
+ * A press on a filled slot of the hotbar strip (einv_hotbar) is a press of its own: moved, it becomes a drag
+ * of the binding (fnc_startStripDrag - dropped on another slot it moves there, anywhere else it is
+ * removed), let go in place it does nothing. A right click opens the item's context menu
  * (fnc_contextMenu) - with another menu open, beside it, it closes that one and opens the new one at once. Selecting works in the inventory only (fnc_isInventoryMode): where other windows
  * attach, Ctrl+click moves a tile over as before.
  *
@@ -336,6 +341,14 @@ if (_down) exitWith {
                 ];
             };
 
+            // A filled slot of the hotbar strip (einv_hotbar): its binding is dragged, not an item (fnc_startStripDrag).
+            // The press carries the slot's number as its tenth element. An empty one has nothing to lift.
+            if ((_record param [7, -1]) >= 0) exitWith {
+                if ((_record param [1, ""]) isNotEqualTo "" && {call FUNC(isInventoryMode)}) then {
+                    GVAR(press) = [-1, -1, _mouse, [0, 0], _ctrl, [], _alt, _shift, createHashMap, _record select 7];
+                };
+            };
+
             if (_slot isEqualTo "" || {isNull _unit}) exitWith {};
 
             // An empty slot cannot be lifted, but a window that attached hears the click on it.
@@ -406,6 +419,12 @@ if (_down) exitWith {
 
 if (GVAR(dragging)) exitWith {
     [_display] call FUNC(endDrag);
+    true
+};
+
+// A hotbar slot's binding dragged out: moved onto another slot, or removed (fnc_endStripDrag).
+if (GVAR(stripDrag) isNotEqualTo []) exitWith {
+    [_display] call FUNC(endStripDrag);
     true
 };
 
@@ -545,14 +564,14 @@ switch (true) do {
             };
         };
     };
-    case ((_alt || {_altAtPress}) && {_slotSource isEqualTo []}): {
-        [_gridIndex, _tileIndex] call FUNC(quickEquip);
-    };
     case (_slotSource isEqualTo [] && {call FUNC(isInventoryMode)}): {
-        // Shift: from the last tile clicked to this one. A plain click selects this one - but not when it
-        // is one of several selected: a double click on it moves them all (above).
+        // Shift: a stack is split where the storage keeps stacks apart (fnc_splitStack); else from the last
+        // tile clicked to this one. A plain click selects this one - but not when it is one of several
+        // selected: a double click on it moves them all (above).
         if (_shift) then {
-            [_gridIndex, _tileIndex, "range"] call FUNC(select);
+            if !([_gridIndex, _tileIndex] call FUNC(splitStack)) then {
+                [_gridIndex, _tileIndex, "range"] call FUNC(select);
+            };
         } else {
             private _selected = call FUNC(selectionTiles);
 

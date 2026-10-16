@@ -4,12 +4,12 @@
  * Author: Miss Heda
  * A key pressed in the inventory window (its onKeyDown asks first). CBA's keybinds do not run while a
  * dialog is open, so the window's keys are read here: the key of a slot puts what the mouse is on there,
- * Delete empties the slot the mouse is on.
+ * G (the window's drop key) or Delete empties the slot the mouse is on.
  *
  *   Over a tile, or a slot of the own equipment: the item goes on that slot, from where it lies
  *   (fnc_bind says why not).
  *   Over a slot of the hotbar: the two slots swap.
- *   Delete over a slot of the hotbar: it is emptied.
+ *   G or Delete over a slot of the hotbar: it is emptied.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -43,8 +43,8 @@ if ((_hover param [0, ""]) isEqualTo "slot" && {(_hover param [1, -1]) >= 0}) th
 
 private _onStrip = _record isNotEqualTo [] && {(_record param [7, -1]) >= 0};
 
-// Delete empties a slot of the bar.
-if (_key == DIK_DELETE && {_onStrip}) exitWith {
+// G, the drop key, or Delete empties a slot of the bar.
+if (_key in [DIK_G, DIK_DELETE] && {_onStrip}) exitWith {
     [_record select 7] call FUNC(unbind);
 
     true

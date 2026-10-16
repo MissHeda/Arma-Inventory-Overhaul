@@ -45,6 +45,7 @@
 #define DIK_RETURN 28
 #define DIK_NUMPADENTER 156
 #define DIK_A      30
+#define DIK_G      34
 #define DIK_R      19
 #define DIK_DELETE 211
 

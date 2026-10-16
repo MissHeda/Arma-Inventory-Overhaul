@@ -38,7 +38,8 @@
  * is found where its scrolled group shows it now, and only on the part that shows (fnc_slotRect). A
  * tile gets brighter, a slot an outline in the accent colour that follows its round corners (fnc_uiRing).
  * The name at the mouse always lies over that outline: one made on the display itself comes after the
- * name, so the name is made again over it (fnc_raiseTooltip).
+ * name, so the name is made again over it (fnc_raiseTooltip). Under the name hang the keys that work on this
+ * tile or slot (fnc_hoverKeys, fnc_drawTipKeys): G to drop, the hotbar's keys, Shift+click to split, ...
  *
  * The box of a uniform, vest or backpack opened from inside a container is named and hinted as its tile
  * in that container (fnc_boxTile), the comparison card included.
@@ -332,8 +333,8 @@ if (!isNull _tooltip) then {
         };
     };
 
-    // Not over a context menu or the inspect card, nor while something is dragged.
-    if ((uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [] || {GVAR(dragging)}) then {
+    // Not over a context menu or the inspect card, nor while something is dragged (a hotbar slot's binding too).
+    if ((uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [] || {GVAR(dragging)} || {GVAR(stripDrag) isNotEqualTo []}) then {
         _class = "";
     };
 
@@ -401,9 +402,18 @@ if (!isNull _tooltip) then {
     if (_ringMade) then {
         [] call FUNC(raiseTooltip);
     };
+
+    // The keys that work on it hang under the name or the card (fnc_hoverKeys, fnc_drawTipKeys) - made last,
+    // so they lie over it.
+    if (isNull (uiNamespace getVariable [QGVAR(tipShown), controlNull])) then {
+        [[]] call FUNC(drawTipKeys);
+    } else {
+        [[_shown] call FUNC(hoverKeys)] call FUNC(drawTipKeys);
+    };
 };
 
-if (isNull (uiNamespace getVariable [QGVAR(hint), controlNull])) exitWith {};
+// A hotbar slot's binding being dragged writes its own hint (fnc_updateStripDrag).
+if (isNull (uiNamespace getVariable [QGVAR(hint), controlNull]) || {GVAR(stripDrag) isNotEqualTo []}) exitWith {};
 
 // ----- The hint -----
 

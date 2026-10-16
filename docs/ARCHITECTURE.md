@@ -1175,7 +1175,7 @@ inventory-only feature asks it: nearby boxes, selecting, the band, group drags, 
 | `wheel` | `[scroll, mouse]` | BOOL, true = taken - only while nothing is dragged, once per turn | `fnc_onMouseZ` |
 | `mouseDown`, `mouseUp` | `[button, mouse, shift, ctrl, alt]` | BOOL, true = taken - before the right click | `fnc_onMouseButton` |
 | `click` | `[kind "single" / "double", target, shift, ctrl, alt]` | BOOL, true = handled - a click that did not become a drag | `fnc_onMouseButton` |
-| `key` | `[display, key, shift, ctrl, alt]` | BOOL, true = handled - after the hotbar and selection keys, before Delete and the Gear key | `fnc_onKeyDown` |
+| `key` | `[display, key, shift, ctrl, alt]` | BOOL, true = handled - after the hotbar and selection keys, before the drop keys (G, Delete) and the Gear key | `fnc_onKeyDown` |
 | `submit` | `[edit]` | nothing - Return in a field | `fnc_onKeyDown` |
 | `dragCheck` | `[dragTarget, entry, sourceGrid, slotSource]` | the target as it is to stand, `[]` for none, nil to leave it - last of everything | `fnc_updateDrag` |
 | `drop` | `[kind, sourceIndex, tileIndex, slotSource, entry, count, targetIndex, col, row, w, h, targetSlot, place, rot]` (**14**) | BOOL, true = handled - after the `!fits` exit | `fnc_endDrag` |
@@ -1397,8 +1397,15 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   are `[holder, key, compartment, col, row]` (`einv_gui_selection`), found again on every build by `fnc_selectionTiles`; one side
   at a time (`own` or `loot`); searched tiles only. **Double click** moves a tile over (`fnc_quickMove`: from own gear into the
   loot column's containers in order, else the ground; from loot into uniform, vest, backpack), opens a kit or nested container, or
-  moves a whole selection (`fnc_quickMoveGroup`); Alt+click puts on (`fnc_quickEquip`); Ctrl+click on a slot takes off
-  (`fnc_quickUnequip`); Delete and "Drop" put the selection on the ground.
+  moves a whole selection (`fnc_quickMoveGroup`); Ctrl+click on a slot takes off (`fnc_quickUnequip`); **G** (the footer's
+  drop key, in the inventory only; Delete does the same everywhere) and "Drop" put the selection on the ground - with
+  nothing selected, G drops the tile under the mouse, or the item of the worn slot there (`fnc_doUnequip` to the ground).
+  Alt+click has no meaning of its own any more (it was the quick equip: putting on is a drag onto a slot, a double click on the
+  ground and the menu's Equip). **Shift+click** on a stack (two or more) splits it - half onto the nearest free cell as a stack
+  of its own (`fnc_splitStack`, an `applyMove` from = to with `separate`) - but only while `einv_storage_stackSplits` is true;
+  until the storage keeps separate stacks (`NEEDS_STORAGE.md`) it is the range select as before. In the same way a drop on a
+  free cell passes `"separate"` (`fnc_endDrag`, `fnc_applyMove`, `fnc_sendMoves`: the `put` and `move` steps get it as their last
+  argument, a part of a stack within one holder becomes the op `split`).
 
 ### Menus, hints, the weight card
 
@@ -1411,9 +1418,14 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   arsenal; in an open kit's window Inspect, the per-item rows and Drop. A slot: Inspect, the radio rows, Drop (to the ground), a
   weapon's Take off for each part, other mods' CBA rows. A selection of several: Deselect. Free cells: Select all (an open kit's
   have no menu). There is no row for a move, for Sort or for Take off: a double click moves a tile or a selection over (a kit and
-  a uniform, vest or backpack lying in a container open on it instead, so those are dragged), a drag moves it anywhere, Delete
+  a uniform, vest or backpack lying in a container open on it instead, so those are dragged), a drag moves it anywhere, G
   drops, Ctrl+click on a slot takes the item off into the player's own gear (`fnc_quickUnequip`), and Sort is the button on the
   caption line.
+  **Settings for ...** (last row, set apart by a line): for whoever may open the wizard (`einv_setup_fnc_canOpen`, asked at every
+  menu) on a tile, a worn slot, the box of an opened uniform, vest or backpack and the free cells of a crate or vehicle. It calls
+  `einv_setup_fnc_openFromGame [step, class]`, which takes the step's *index*: the menu finds it by id (`"items"` or
+  `"containers"`, by the item's kind: uniform, vest, backpack, crate, vehicle, kit open Containers) in `einv_setup_steps`, so a
+  reordering of the pages changes nothing here.
   **Right click with a menu open:** `fnc_openMenu` keeps the menu's rectangle (uiNamespace `einv_gui_menuRect`, cleared by
   `fnc_closeMenu`); a right press beside it closes it and goes on as an ordinary right click, so the tile under the mouse gets its
   menu in the same go (on empty space nothing opens); a press on the menu and every left press are the menu's.
@@ -1439,6 +1451,27 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   can use it"; nothing else about it looks different. The context menu leaves out what would use it: the hotbar's bind row (it refuses, section 7), Open radio and Use
   as active radio, and CBA rows that use the item up (`fnc_cbaOptions`: the `consume` flag on `UNIFORM_CONTAINER`,
   `VEST_CONTAINER`, `BACKPACK_CONTAINER`). Moving, equipping, loading into a weapon and dropping are never limited.
+- **Key hints at the mouse** (`fnc_hoverKeys [shown]`, `fnc_drawTipKeys [keys]`). Under the name at the mouse - or the comparison
+  card - hangs a small card of the tooltip's glass with the keys that work on exactly that tile or slot, as key badges in the
+  footer's style (`fnc_uiKeyHint`, whose 8th argument measures without creating): G Drop (not for what lies on the ground), the
+  hotbar's `4-0 Hotbar` (`einv_hotbar_fnc_bindHint`: the item may go on the bar from where it lies; the keys the player really
+  has), Double click Quick move / Open (a uniform, vest, backpack) / Equip (what can be worn, on the ground), Shift+Click Split
+  for a stack where `einv_storage_stackSplits` is true, else Shift+Drag Half stack, Right click Options; a worn slot adds
+  Ctrl+Click Take off; a hotbar slot shows G Clear and Drag Move or remove. Inventory only (a window that attached names its own
+  keys, the `footerKeys` hook), not while something is dragged or a menu is open. It is one `EINV_Group` (uiNamespace `einv_gui_tipKeys`,
+  with `width`, `height` and the keys it was made from as `source`), made by `fnc_updateHover` after the name whenever the hover
+  changes; `fnc_onFrame` shows it with the name and places the two as one block (below the name, the block above the pointer
+  near the screen's bottom, left of it near the right edge); `fnc_raiseTooltip` makes it again after the name. The footer itself
+  keeps Esc, Right click, Double click, Ctrl+Click Select, G Drop and the hotbar's range.
+- **A hotbar slot's binding is dragged** (`fnc_startStripDrag`, `fnc_updateStripDrag`, `fnc_stripTarget`, `fnc_endStripDrag`;
+  `einv_gui_stripDrag` = `[slot number, ghost, strip box, ghost offset, ghost size]`): a press on a filled slot of the strip
+  (`fnc_onMouseButton`) records `einv_gui_press` with the slot's number as its tenth element, and `fnc_onFrame` starts this drag
+  instead of `fnc_startDrag` once the mouse moved. The item's picture follows the mouse as a ghost the size of the slot (it fades
+  where it would be removed), the slot under it lights up as any hover does, and the footer says what letting go does (`Hint_Strip*`).
+  Let go on another slot: `einv_hotbar_fnc_moveSlot` (the two swap); anywhere outside the strip's box (the slots' union, a margin
+  around it): `einv_hotbar_fnc_unbind` (the item is not touched); on the strip between its slots: nothing. The press stays
+  in `einv_gui_press` meanwhile, so nothing is built; a build, the window closing or another window covering this one ends it
+  without a change.
 - **Hints:** `fnc_updateHover` names what the mouse is on in the footer; `fnc_showHint [text, colourKey]`; `fnc_flashHint [reason,
   details]` (a reason key such as `"NoRoom"`, `"LookOnly"`, `"Locked"`, `"NoBackpack"`, any other text as it is, `""` nothing);
   `fnc_dragHint`; `fnc_infoHint [kind, args]` for the weight card and each caption. The **inspect card** (`fnc_inspect`,
@@ -2059,7 +2092,8 @@ equips or shows targets for real slots touches it.
 - **Keys** (`fnc_onKey`, a frame later `fnc_use`): left to Arma and ACE when the slot is empty, while a command menu is open, in
   Zeus or a feature camera, and - `einv_hotbar_leaderKeys` - while the player leads AI; a second press within `USE_LOCK` 0.4 s is
   ignored. CBA keybinds do not run in a dialog, so the window asks `fnc_onWindowKey` itself: over a tile or an own slot a slot's
-  key binds the item, over a hotbar slot it swaps the two, Delete empties it. `fnc_checkKeys` names, once per profile, every other
+  key binds the item, over a hotbar slot it swaps the two, G (the window's drop key) or Delete empties it. A filled slot of the
+  window's row can also be dragged: onto another slot it swaps, anywhere else it is removed (gui `fnc_startStripDrag`). `fnc_checkKeys` names, once per profile, every other
   keybind on the same keys. `fnc_bind [index, class, from, checked]`, `fnc_unbind`, `fnc_use` are public.
 - **The bar on the screen** (`RscTitles >> einv_hotbar_RscHud`, `CfgUIGrids` entry `einv_hotbar_grid`, movable in Arma's layout
   editor): seven boxes (key, picture, count, a thin bar) and a message line, run by `fnc_hudPing` / `fnc_hudFrame` /
@@ -2235,6 +2269,7 @@ stringtables are wrapped as BRIEFING asks.
 | `einv_storage_useUniform`, `useVest`, `useBackpack` | LIST | global | `all` | "Use items from the uniform / vest / backpack": `all` Everything, `list` Only whitelisted (items with `use=` for it), `none` Nothing, `strict` Strict (hidden) - Only whitelisted, and the blocked items are kept out of the cargo in the unit's hidden holder; what the padlocks, the hotbar, the window's use rows and the reload key honour (section 3, Use from containers and Strict mode) |
 | `einv_gui_cellScale` | SLIDER 0.8 to 1.3 | client | 1 | tile scale: the cell size, capped where the columns no longer fit; next opening |
 | `einv_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
+| `einv_gui_tileNames` | CHECKBOX | client | off | the item's short name in the top corner of every tile (`fnc_createTile`; the setup wizard's preview always has it); the name at the mouse stays; ACE Arsenal's panel follows |
 | `einv_gui_cameraDefault` | LIST | client | `soldier` | the camera as the window opens: `soldier` (third person), `off` (first person) |
 | `einv_gui_showNearby` | CHECKBOX | client | on | nearby piles and crates as boxes in the loot column |
 | `einv_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |

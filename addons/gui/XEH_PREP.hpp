@@ -61,6 +61,7 @@ PREP(applyMove);
 PREP(afterAction);
 PREP(quickEquip);
 PREP(quickUnequip);
+PREP(splitStack);
 
 // Moves as transactions: sent, shown under way, answered, and drift reported to the authorities
 PREP(sendMoves);
@@ -239,6 +240,12 @@ PREP(clearWindows);
 PREP(drawTopLayer);
 PREP(makeTooltip);
 PREP(raiseTooltip);
+PREP(hoverKeys);
+PREP(drawTipKeys);
+PREP(startStripDrag);
+PREP(updateStripDrag);
+PREP(endStripDrag);
+PREP(stripTarget);
 PREP(openWindow);
 PREP(closeWindow);
 PREP(raiseWindow);

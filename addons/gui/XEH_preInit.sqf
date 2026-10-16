@@ -79,6 +79,11 @@ GVAR(press) = [];
 GVAR(dragging) = false;
 GVAR(dragTarget) = [];
 GVAR(dragRoom) = createHashMap;
+
+// A hotbar slot's binding being dragged (fnc_startStripDrag): [slot number, ghost control, the strip's box
+// [left, top, right, bottom] or [], what the hint last said] - or [] when none is. The press that began it
+// stays in GVAR(press) until it ends, so nothing is built meanwhile.
+GVAR(stripDrag) = [];
 GVAR(lastButton) = [];
 
 // The button whose press stopped a repack: its release is no click (fnc_onMouseButton).
@@ -374,11 +379,13 @@ GVAR(signatureParts) = [];
 //   weightBar  - the weight card's bar: HashMap parent, rect, load, limits, unit (fnc_drawEquipmentCards)
 //   compare    - the comparison card at the mouse, or controlNull; tipShown - whichever of it and the name is
 //                on show, with its width and height (fnc_updateHover, fnc_onFrame)
+//   tipKeys    - the key hints under the name or the card (fnc_drawTipKeys), or controlNull
 //   weightPreview - the added weight on the weight card while something is dragged
 uiNamespace setVariable [QGVAR(infoAreas), []];
 uiNamespace setVariable [QGVAR(weightBar), createHashMap];
 uiNamespace setVariable [QGVAR(compare), controlNull];
 uiNamespace setVariable [QGVAR(tipShown), controlNull];
+uiNamespace setVariable [QGVAR(tipKeys), controlNull];
 uiNamespace setVariable [QGVAR(weightPreview), controlNull];
 
 // What the hint says about the keys while something is dragged, [[text, colour key], ...], and what it shows

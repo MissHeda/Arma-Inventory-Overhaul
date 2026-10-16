@@ -5,9 +5,11 @@
  * Draws the footer along the bottom of the window, the same in every look but in its colours: the
  * keys that close the window on the left, the hint in the middle ((uiNamespace getVariable [QGVAR(hint), controlNull]), written by
  * fnc_updateHover), the version on the right. All of it on a strip of the window's glass, the width of
- * the content. The key hints name the quick move on the double click and the selection on
- * Ctrl+click; the hotbar adds its own keys at the end (einv_hotbar_fnc_footerHint - only when that addon
- * is loaded, and only in the inventory). A window that attached names its own keys (the "footerKeys"
+ * the content. The key hints name the quick move on the double click, the selection on
+ * Ctrl+click and G to drop; the keys that depend on the item under the mouse (Shift+click to split,
+ * the hotbar's number keys, ...) are not here but beside the mouse (fnc_hoverKeys). The hotbar adds
+ * its own keys at the end (einv_hotbar_fnc_footerHint - only when that addon is loaded, and only in the
+ * inventory). A window that attached names its own keys (the "footerKeys"
  * hook, [[key, text], ...]).
  *
  * Arguments:
@@ -50,8 +52,7 @@ private _keys = [
     // moves a tile over (fnc_onMouseButton).
     ([[LLSTRING(Key_CtrlClick), LLSTRING(QuickMove)], [LLSTRING(Key_DoubleClick), LLSTRING(QuickMove)]] select (call FUNC(isInventoryMode))),
     ([["", ""], [LLSTRING(Key_CtrlClick), LLSTRING(Select)]] select (call FUNC(isInventoryMode))),
-    [LLSTRING(Key_AltClick), LLSTRING(Equip)],
-    [LLSTRING(Key_Delete), LLSTRING(Drop)],
+    [LLSTRING(Key_Drop), LLSTRING(Drop)],
     (if (call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,footerHint)}) then {call EFUNC(hotbar,footerHint)} else {["", ""]})
 ];
 

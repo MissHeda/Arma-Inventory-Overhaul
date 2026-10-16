@@ -199,6 +199,10 @@ if (_covered isNotEqualTo GVAR(covered)) then {
             [_display] call FUNC(endDrag);
         };
 
+        if (GVAR(stripDrag) isNotEqualTo []) then {
+            [_display, true] call FUNC(endStripDrag);
+        };
+
         GVAR(press) = [];
         GVAR(windowMove) = [];
         call FUNC(closeMenu);
@@ -350,12 +354,22 @@ if (GVAR(windowMove) isNotEqualTo []) then {
     };
 };
 
-// A press on a tile becomes a drag once the mouse moves; a drag follows the mouse every frame.
-if (GVAR(press) isNotEqualTo [] && {!GVAR(dragging)}) then {
+// A press on a tile becomes a drag once the mouse moves; a drag follows the mouse every frame. A press on a
+// filled slot of the hotbar strip carries the slot's number as its tenth element: it drags the binding.
+if (GVAR(press) isNotEqualTo [] && {!GVAR(dragging)} && {GVAR(stripDrag) isEqualTo []}) then {
     (GVAR(press) select 2) params ["_startX", "_startY"];
 
     if (abs ((_mouse select 0) - _startX) > DRAG_THRESHOLD || {abs ((_mouse select 1) - _startY) > DRAG_THRESHOLD}) then {
-        [_display] call FUNC(startDrag);
+        if ((GVAR(press) param [9, -1]) >= 0) then {
+            // The button must still be down: a press whose release never reached the window is no drag.
+            if (inputMouse 0 > 0) then {
+                [_display] call FUNC(startStripDrag);
+            } else {
+                GVAR(press) = [];
+            };
+        } else {
+            [_display] call FUNC(startDrag);
+        };
     };
 };
 
@@ -363,6 +377,18 @@ if (GVAR(press) isNotEqualTo [] && {!GVAR(dragging)}) then {
 // scrolling list).
 if ("frame" in GVAR(hooks)) then {
     ["frame", [_display, _mouse, _now]] call FUNC(hook);
+};
+
+// A hotbar slot's binding held (fnc_startStripDrag): it follows the mouse; let go outside the window - where
+// no event reaches - it ends all the same.
+if (GVAR(stripDrag) isNotEqualTo []) exitWith {
+    GVAR(lastMouse) = _mouse;
+
+    if (inputMouse 0 == 0) then {
+        [_display] call FUNC(endStripDrag);
+    } else {
+        [_display, _mouse] call FUNC(updateStripDrag);
+    };
 };
 
 if (GVAR(dragging)) exitWith {
@@ -404,22 +430,44 @@ if (_check || {_mouse isNotEqualTo GVAR(lastMouse)}) then {
 
 // The name at the mouse, or the comparison card in its place, stays beside the pointer - on its left near the
 // screen's right edge, above it near the bottom. Whichever shows (fnc_updateHover) says how wide and high it is.
+// The key hints hang under it (fnc_drawTipKeys): they show while it does, and are placed with it as one block.
 private _tip = uiNamespace getVariable [QGVAR(tipShown), controlNull];
+private _keysGroup = uiNamespace getVariable [QGVAR(tipKeys), controlNull];
+private _tipUp = !isNull _tip && {ctrlShown _tip};
 
-if (!isNull _tip && {ctrlShown _tip} && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
+if (!isNull _keysGroup && {ctrlShown _keysGroup != _tipUp}) then {
+    _keysGroup ctrlShow _tipUp;
+};
+
+if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
     GVAR(tooltipAt) = _mouse;
     _mouse params ["_mouseX", "_mouseY"];
 
     private _width = _tip getVariable [QGVAR(width), 0];
     private _height = _tip getVariable [QGVAR(height), UNIT];
+    private _keysW = 0;
+    private _keysH = 0;
+
+    if (!isNull _keysGroup) then {
+        _keysW = _keysGroup getVariable [QGVAR(width), 0];
+        _keysH = (_keysGroup getVariable [QGVAR(height), 0]) + pixelH * 3;
+    };
+
+    private _blockW = _width max _keysW;
+    private _blockH = _height + _keysH;
     private _tipX = _mouseX + TOOLTIP_DX;
     private _tipY = _mouseY + TOOLTIP_DY;
 
-    if (_tipX + _width > safezoneX + safezoneW) then {_tipX = _mouseX - TOOLTIP_DX - _width};
-    if (_tipY + _height > safezoneY + safezoneH) then {_tipY = (_mouseY - TOOLTIP_DY - _height) max safezoneY};
+    if (_tipX + _blockW > safezoneX + safezoneW) then {_tipX = _mouseX - TOOLTIP_DX - _blockW};
+    if (_tipY + _blockH > safezoneY + safezoneH) then {_tipY = (_mouseY - TOOLTIP_DY - _blockH) max safezoneY};
 
     _tip ctrlSetPosition [_tipX, _tipY];
     _tip ctrlCommit 0;
+
+    if (!isNull _keysGroup) then {
+        _keysGroup ctrlSetPosition [_tipX, _tipY + _height + pixelH * 3];
+        _keysGroup ctrlCommit 0;
+    };
 };
 
 // Searching, every frame: the ring fills and the glass goes round, and the item shows once its time is

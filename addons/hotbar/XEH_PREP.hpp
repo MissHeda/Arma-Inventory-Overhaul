@@ -49,3 +49,4 @@ PREP(menuChoices);
 PREP(stripMenu);
 PREP(onWindowKey);
 PREP(footerHint);
+PREP(bindHint);

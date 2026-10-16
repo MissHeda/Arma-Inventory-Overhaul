@@ -89,6 +89,7 @@ call FUNC(logDrag);
 
 GVAR(press) = [];
 GVAR(dragging) = false;
+GVAR(stripDrag) = [];
 GVAR(dragTarget) = [];
 
 GVAR(person) = objNull;

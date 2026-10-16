@@ -14,6 +14,7 @@
  * 4: What it does, "" for nothing <STRING>
  * 5: Theme <HASHMAP>
  * 6: Height <NUMBER> (default: UNIT * 0.9)
+ * 7: Only measure: nothing is created <BOOL> (default: false)
  *
  * Return Value:
  * Width taken, including the space before the next hint - the next one starts at x plus this <NUMBER>
@@ -26,7 +27,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_position", "_key", "_text", "_theme", ["_height", UNIT * 0.9]];
+params ["_display", "_parent", "_position", "_key", "_text", "_theme", ["_height", UNIT * 0.9], ["_measure", false]];
 _position params ["_left", "_top"];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
@@ -40,6 +41,17 @@ private _textSize = _height * 0.62;
 private _circleW = SQUARE(_height);
 private _badgeW = (((_key getTextWidth [_fontBold, _keySize]) * TEXT_SLACK) + SQUARE(_height * 0.45)) max _circleW;
 
+private _taken = _badgeW + SQUARE(_height * 0.9);
+private _gap = SQUARE(_height * 0.3);
+private _textW = 0;
+
+if (_text isNotEqualTo "") then {
+    _textW = (_text getTextWidth [_font, _textSize]) * TEXT_SLACK;
+    _taken = _taken + _gap + _textW;
+};
+
+if (_measure) exitWith {_taken};
+
 if (_round && {_badgeW <= _circleW}) then {
     [_display, _parent, [_left, _top, _circleW, _height], UI_TEX(circle_ca), _keyBg] call FUNC(uiIcon);
 } else {
@@ -50,15 +62,8 @@ if (_round && {_badgeW <= _circleW}) then {
 
 [_display, _parent, [_left, _top, _badgeW, _height], _key, _keySize, _keyText, _fontBold, 2] call FUNC(uiLabel);
 
-private _taken = _badgeW + SQUARE(_height * 0.9);
-
 if (_text isNotEqualTo "") then {
-    private _gap = SQUARE(_height * 0.3);
-    private _textW = (_text getTextWidth [_font, _textSize]) * TEXT_SLACK;
-
     [_display, _parent, [_left + _badgeW + _gap, _top, _textW, _height], _text, _textSize, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _font, 0] call FUNC(uiLabel);
-
-    _taken = _taken + _gap + _textW;
 };
 
 _taken

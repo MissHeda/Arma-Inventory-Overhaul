@@ -6,7 +6,10 @@
  * already tell - a living person's gear the player may not change or is out of reach of
  * (fnc_checkTouch), another living player's kit (einv_compat_efak_fnc_checkTile), a backpack into a
  * backpack (einv_storage_fnc_backpackIntoBackpack), no free spot when nobody said where - then sent as
- * a transaction (fnc_sendMoves). Every change happens where the holder's root is local, checked there
+ * a transaction (fnc_sendMoves). With the option "separate" (and only where the storage keeps separate
+ * stacks, einv_storage_stackSplits) what goes to a cell lies there as a stack of its own and does not join
+ * a stack of its class elsewhere in the container; part of a stack moved within its container is split off
+ * onto the cell (NEEDS_STORAGE.md). Every change happens where the holder's root is local, checked there
  * again; places, search knowledge and the window follow the answer (fnc_afterAction).
  *
  * Within one container it is a rearrangement onto the cell; the ground ("ground") is the surface under
@@ -20,7 +23,7 @@
  * 3: How many of a stack, -1 for all of it <NUMBER> (default: -1)
  * 4: Cell [col, row, compartment] - with [.., width, height] when it lies turned there - or [] to let
  *    the layout find one <ARRAY> (default: [])
- * 5: Options (fnc_sendMoves) <HASHMAP> (default: empty)
+ * 5: Options (fnc_sendMoves) <HASHMAP> (default: empty); "separate" <BOOL> as above (default: false)
  *
  * Return Value:
  * Asked for <BOOL>
@@ -82,5 +85,6 @@ if (_why isNotEqualTo "") exitWith {
 };
 
 [[createHashMapFromArray [
-    ["kind", "move"], ["from", _from], ["to", _to], ["entry", _entry], ["count", _count], ["cell", _cell]
+    ["kind", "move"], ["from", _from], ["to", _to], ["entry", _entry], ["count", _count], ["cell", _cell],
+    ["separate", _options getOrDefault ["separate", false]]
 ]], _options] call FUNC(sendMoves)

@@ -23,6 +23,17 @@
     0
 ] call CBA_fnc_addSetting;
 
+// Each player's own eyes: the name takes room from a small tile's picture, and the name at the mouse says it
+// anyway. Read as tiles are drawn (fnc_createTile), so a change shows at the next build; off unless asked for.
+[
+    QGVAR(tileNames),
+    "CHECKBOX",
+    [LLSTRING(Setting_TileNames), LLSTRING(Setting_TileNames_Desc)],
+    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    false,
+    0
+] call CBA_fnc_addSetting;
+
 // Each player's own taste: the soldier from the front, as ACE Arsenal shows him, or the world as seen from
 // his eyes. Read as the window opens (fnc_open); the header's button still turns it for that window.
 [
