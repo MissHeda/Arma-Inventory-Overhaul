@@ -2,8 +2,8 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Step 3, Containers: the cells of uniforms, vests, backpacks, crates and vehicles, class by class - or a
- * whole family at once.
+ * Step 3, Containers: the cells of uniforms, vests, backpacks, crates, vehicles and the kits of Enhanced
+ * First Aid Kits, class by class - or a whole family at once.
  *   - Left: every container of the game and its mods, to search by class or name with wildcards
  *     (B_Bergen*, *Carryall*) (fnc_drawClassList over the class index, fnc_buildIndex), each with what the
  *     draft makes of its grid and where from - or, in the tree view, one class and every class built on it
@@ -49,8 +49,15 @@ private _gapX = SQUARE(UNIT * 0.5);
 private _cursorY = UNIT * 0.4;
 private _bottom = _height - UNIT * 0.5;
 
-// Opened for a container: that one, found and picked.
+// Opened for a container: that one, found and picked. A kit someone carries is an instance class of its
+// type, which no list shows: its type's own class is picked, whose edits reach every instance.
 if (GVAR(focus) isNotEqualTo "") then {
+    private _kit = [GVAR(focus)] call EFUNC(items,kitOf);
+
+    if ((_kit param [1, 0]) > 0) then {
+        GVAR(focus) = _kit select 0;
+    };
+
     private _facts = [GVAR(focus)] call EFUNC(items,getFacts);
 
     if ((_facts get "kind") in CONTAINER_KINDS) then {

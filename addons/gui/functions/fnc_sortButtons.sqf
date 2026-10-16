@@ -11,9 +11,13 @@
  * The registry (uiNamespace sortButtons) is emptied by each build; controls gone with a window that was
  * drawn again are left out when it is read.
  *
+ * A compact Sort button (fnc_sortChip: the icon and "Sort", or the icon alone) keeps its words; its tooltip
+ * names the order instead, "Sort: Name - click for Weight" (fnc_sortText).
+ *
  * Arguments:
  * 0: The controls fnc_uiButton returned for a Sort button, to register - [] for none, only to refresh
  *    <ARRAY> (default: [])
+ * 1: Compact, as fnc_sortChip - 0 the full label, 1 or 2 the order only in its tooltip <NUMBER> (default: 0)
  *
  * Return Value:
  * None
@@ -26,24 +30,35 @@
 
 disableSerialization;
 
-params [["_button", [], [[]]]];
+params [["_button", [], [[]]], ["_compact", 0, [0]]];
 
-private _buttons = (uiNamespace getVariable [QGVAR(sortButtons), []]) select {!isNull (_x select 0)};
+private _buttons = (uiNamespace getVariable [QGVAR(sortButtons), []]) select {!isNull (_x select 1)};
 
-// The label is the control before the hit area, which comes last (fnc_uiButton).
-if (count _button >= 2 && {(ctrlClassName (_button select -2)) in ["EINV_Label", "EINV_LabelRight", "EINV_LabelCenter"]}) then {
-    _buttons pushBack [_button select -2, _button select -1];
+// The hit area comes last (fnc_uiButton), the label - where there is one - right before it. [label or
+// controlNull, hit area, compact].
+if (_button isNotEqualTo []) then {
+    private _labelControl = _button param [count _button - 2, controlNull];
+
+    if !((ctrlClassName _labelControl) in ["EINV_Label", "EINV_LabelRight", "EINV_LabelCenter"]) then {
+        _labelControl = controlNull;
+    };
+
+    _buttons pushBack [_labelControl, _button select -1, _compact];
 };
 
 uiNamespace setVariable [QGVAR(sortButtons), _buttons];
 
-([GVAR(sortMode)] call FUNC(sortText)) params ["_label", "_tip"];
+([GVAR(sortMode)] call FUNC(sortText)) params ["_label", "_tip", "_compactTip"];
 
 private _caption = [_label, GVAR(theme)] call FUNC(caption);
 
 {
-    _x params ["_labelControl", "_hit"];
+    _x params ["_labelControl", "_hit", ["_isCompact", 0]];
 
-    _labelControl ctrlSetText _caption;
-    _hit ctrlSetTooltip _tip;
+    if (_isCompact > 0) then {
+        _hit ctrlSetTooltip _compactTip;
+    } else {
+        _labelControl ctrlSetText _caption;
+        _hit ctrlSetTooltip _tip;
+    };
 } forEach _buttons;

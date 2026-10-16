@@ -683,7 +683,8 @@ private _byKind = createHashMap;
         {
             private _kinds = _x select 4;
 
-            if (_kinds isEqualType 0 || {_kind in _kinds}) then {
+            // A kit meets the rules about items too (KINDS_AS_ITEM, fnc_matches).
+            if (_kinds isEqualType 0 || {_kind in _kinds} || {_kind in KINDS_AS_ITEM && {"item" in _kinds}}) then {
                 _indices pushBack _forEachIndex;
                 _fields append (keys (_x select 1));
 

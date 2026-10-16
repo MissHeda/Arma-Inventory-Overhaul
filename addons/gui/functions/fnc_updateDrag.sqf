@@ -301,10 +301,16 @@ if (_scrolled || {_geometry isEqualTo []}) then {
 
             ([_x] call FUNC(gridOrigin)) params ["_originX", "_originY"];
 
+            // Its cells reach to where its last column and row start and a pitch on (fnc_createGrid "colX",
+            // "rowY"): further than the plain pitch where a seam of a canvas opens inside it.
+            private _colX = _x getOrDefault ["colX", []];
+            private _rowY = _x getOrDefault ["rowY", []];
+            private _lastX = if (_colX isEqualTo []) then {((_x get "cols") - 1) * (_x get "cellW")} else {_colX select (count _colX - 1)};
+            private _lastY = if (_rowY isEqualTo []) then {((_x get "rows") - 1) * (_x get "cellH")} else {_rowY select (count _rowY - 1)};
             private _left = _originX;
             private _top = _originY;
-            private _right = _originX + (_x get "cols") * (_x get "cellW");
-            private _bottom = _originY + (_x get "rows") * (_x get "cellH");
+            private _right = _originX + _lastX + (_x get "cellW");
+            private _bottom = _originY + _lastY + (_x get "cellH");
 
             if (_visible isNotEqualTo []) then {
                 _visible params ["_visibleX", "_visibleY", "_visibleW", "_visibleH"];
@@ -325,6 +331,28 @@ if (_scrolled || {_geometry isEqualTo []}) then {
 
 _geometry params ["_slotRects", "_gridBoxes"];
 
+// The column (row) at _local from a grid's corner as fnc_screenToCell finds it, -1 for none, and whether it
+// lies in the room a seam opens after it: the stretch of one pitch it lies in names, in the grid's lookup
+// (fnc_createGrid "colAt"), the last column starting there or before - it is that one or the one before. The
+// room a seam of a canvas opens inside a compartment belongs to the cell before it where the cells across it
+// are the compartment's too; the room between two compartments to no grid.
+private _fnc_find = {
+    params ["_local", "_starts", "_lookup", "_pitch"];
+
+    private _stretch = floor (_local / _pitch);
+
+    if (_lookup isEqualTo []) exitWith {[_stretch, false]};
+    if (_local < 0 || {_local >= (_starts select (count _starts - 1)) + _pitch}) exitWith {[-1, false]};
+
+    private _at = _lookup param [_stretch, count _starts - 1];
+
+    if (_local < (_starts select _at)) then {
+        _at = _at - 1;
+    };
+
+    [_at, _local >= (_starts select _at) + _pitch]
+};
+
 // The cell of grid _index under the mouse as fnc_screenToCell finds it, with or without the grid's holes; []
 // for none.
 private _fnc_cellAt = {
@@ -339,10 +367,11 @@ private _fnc_cellAt = {
         !(_mouseX >= _visibleX && {_mouseX < _visibleX + _visibleW} && {_mouseY >= _visibleY} && {_mouseY < _visibleY + _visibleH})
     }) exitWith {[]};
 
-    private _col = floor ((_mouseX - _originX) / (_grid get "cellW"));
-    private _row = floor ((_mouseY - _originY) / (_grid get "cellH"));
+    ([_mouseX - _originX, _grid getOrDefault ["colX", []], _grid getOrDefault ["colAt", []], _grid get "cellW"] call _fnc_find) params ["_col", "_gapX"];
+    ([_mouseY - _originY, _grid getOrDefault ["rowY", []], _grid getOrDefault ["rowAt", []], _grid get "cellH"] call _fnc_find) params ["_row", "_gapY"];
 
     if (_col < 0 || {_row < 0} || {_col >= _grid get "cols"} || {_row >= _grid get "rows"}) exitWith {[]};
+    if ((_gapX || {_gapY}) && {[_grid, _col, _row, [1, 2] select _gapX, [1, 2] select _gapY] call FUNC(hitsHole)}) exitWith {[]};
     if (!_holesToo && {[_grid, _col, _row] call FUNC(hitsHole)}) exitWith {[]};
 
     [_col, _row]
@@ -457,18 +486,27 @@ GVAR(dragRoom) set ["spot", _spot];
 _anew = true;
 
 // A grid's cell into which no slot, no other grid and not the equipment column reach is held for as long as the
-// mouse stays in it (above) - the box a pixel larger all round, for the rounding at its edges.
+// mouse stays in it (above) - the box a pixel larger all round, for the rounding at its edges. The box is where
+// the mouse finds that cell: from where its column and row start to where the next ones do, so over the room a
+// seam opens inside the compartment too (fnc_createGrid "colX", "rowY").
 private _newHold = [];
 
 if (_hitGrid >= 0 && {_slotHits isEqualTo []} && {!_inArea}) then {
     private _grid = _grids select _hitGrid;
 
     (_gridBoxes select _hitGrid) params ["", "_originX", "_originY"];
+    _hitCell params ["_holdCol", "_holdRow"];
 
-    private _left = _originX + (_hitCell select 0) * (_grid get "cellW") - pixelW;
-    private _top = _originY + (_hitCell select 1) * (_grid get "cellH") - pixelH;
-    private _right = _left + (_grid get "cellW") + 2 * pixelW;
-    private _bottom = _top + (_grid get "cellH") + 2 * pixelH;
+    private _pitchW = _grid get "cellW";
+    private _pitchH = _grid get "cellH";
+    private _colX = _grid getOrDefault ["colX", []];
+    private _rowY = _grid getOrDefault ["rowY", []];
+    private _cellX = _colX param [_holdCol, _holdCol * _pitchW];
+    private _cellY = _rowY param [_holdRow, _holdRow * _pitchH];
+    private _left = _originX + _cellX - pixelW;
+    private _top = _originY + _cellY - pixelH;
+    private _right = _originX + (_colX param [_holdCol + 1, _cellX + _pitchW]) + pixelW;
+    private _bottom = _originY + (_rowY param [_holdRow + 1, _cellY + _pitchH]) + pixelH;
 
     // Whether a box [x, y, w, h] reaches into that cell.
     private _fnc_meets = {
@@ -521,11 +559,12 @@ private _dragHoles = ([_entry getOrDefault ["class", ""], GVAR(dragRot)] call EF
 {_x ctrlShow false} forEach _shapes;
 
 // Paints the next free shape controls: false when too few are left, and the caller draws the box.
-// _origin is the corner of the cells it lies on (fnc_spanRect).
+// _origin is the corner of the cells it lies on (fnc_spanRect), _on [grid, column, row] of that corner, so
+// the shape follows the grid's columns and rows over a seam of a canvas (fnc_shapeRects).
 private _fnc_paintShape = {
-    params ["_origin", "_shape", "_color"];
+    params ["_origin", "_shape", "_color", ["_on", []]];
 
-    private _rects = [_origin, _cellW, _cellH, _shape, "surface"] call FUNC(shapeRects);
+    private _rects = [_origin, _cellW, _cellH, _shape, "surface", 0, _on] call FUNC(shapeRects);
 
     if (_shapeUsed + count _rects > count _shapes) exitWith {false};
 
@@ -1016,7 +1055,7 @@ call {
                         // A shaped tile on its own cells, while there are controls left for it.
                         if (
                             _tileHoles isNotEqualTo []
-                            && {[[_rect select 0, _rect select 1], [_tile get "w", _tile get "h", _tileHoles], _gain] call _fnc_paintShape}
+                            && {[[_rect select 0, _rect select 1], [_tile get "w", _tile get "h", _tileHoles], _gain, [_target, _cellCol, _cellRow]] call _fnc_paintShape}
                         ) exitWith {
                             (_footprints select _forEachIndex) ctrlShow false;
                         };
@@ -1343,7 +1382,7 @@ call {
 
         if (
             count _clipHoles < _clipW * _clipH
-            && {[[_clipRect select 0, _clipRect select 1], [_clipW, _clipH, _clipHoles], _color] call _fnc_paintShape}
+            && {[[_clipRect select 0, _clipRect select 1], [_clipW, _clipH, _clipHoles], _color, [_target, _left, _top]] call _fnc_paintShape}
         ) then {
             _footprint ctrlShow false;
         };

@@ -29,7 +29,8 @@
  * An entry no compartment has room for - the engine took it from a script or another mod - is
  * "overflow": shown apart, never lost. The ground and a grid with no object of its own (a kit of
  * Enhanced First Aid Kits, einv_compat_efak) have no compartments: one STORAGE_COLS wide that grows with
- * what lies there, always a row more than it needs.
+ * what lies there, always a row more than it needs. A kit that a rule or its config gives a grid has the
+ * compartments of that grid instead (fnc_getBlocks, GVAR(holderTypes) "blocks").
  *
  * Arguments:
  * 0: Holder - a container, or the key of a grid with no object ("kit:" + lowercase class) <OBJECT or
@@ -84,7 +85,8 @@ if (isNil "_given") then {
 
 _places params ["_revision", "_in"];
 
-private _blocks = if (_isKey) then {[]} else {[_holder] call FUNC(getBlocks)};
+// A key's compartments are those its type gives (fnc_getBlocks): none for an open grid.
+private _blocks = if (_valid) then {[_holder] call FUNC(getBlocks)} else {[]};
 private _open = _blocks isEqualTo [];
 
 if (_open) then {

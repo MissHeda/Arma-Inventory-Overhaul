@@ -97,13 +97,15 @@ private _touched = [];
         private _tileRect = [_grid, _x] call FUNC(tileRect);
         private _holes = _x getOrDefault ["holes", []];
 
-        // A shaped tile (size=xx/x-) is touched on its own cells only, not in the corner an L leaves open.
-        // Cut at the grid's edge it is drawn as its box (fnc_createTile), and touched as one.
+        // A shaped tile (size=xx/x-) is touched on its own cells only, not in the corner an L leaves open,
+        // where the grid's columns and rows lie (a canvas's seams). Cut at the grid's edge it is drawn as its
+        // box (fnc_createTile), and touched as one.
         private _rects = if (_holes isEqualTo [] || {(_x get "col") + (_x get "w") > (_grid get "cols")}) then {
             [_tileRect]
         } else {
             [
-                [_tileRect select 0, _tileRect select 1], _grid get "cellW", _grid get "cellH", [_x get "w", _x get "h", _holes], "surface"
+                [_tileRect select 0, _tileRect select 1], _grid get "cellW", _grid get "cellH", [_x get "w", _x get "h", _holes], "surface", 0,
+                [_grid, _x get "col", _x get "row"]
             ] call FUNC(shapeRects)
         };
 

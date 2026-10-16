@@ -168,9 +168,10 @@ private _taken = if (_down) then {
 if (_taken isEqualTo true) exitWith {true};
 
 // Pressed on a kit window: on its cross, the cross closes it (fnc_drawWindow) and nothing happens here,
-// nor on its body's scroll bar. Anywhere else it comes to the top first - a right click's menu then
-// opens over it, a tile pressed there is the raised window's -, and a left press on its title holds it
-// to move it.
+// nor on its Take all and Sort, whose own clicks they are (a raise would draw them anew under the mouse and
+// the click would be lost), nor on its body's scroll bar. Anywhere else it comes to the top first - a right
+// click's menu then opens over it, a tile pressed there is the raised window's -, and a left press on its
+// title holds it to move it.
 private _onWindow = "";
 
 if (_down && {_layer isNotEqualTo ""} && {!GVAR(dragging)}) then {
@@ -195,6 +196,10 @@ if (_down && {_layer isNotEqualTo ""} && {!GVAR(dragging)}) then {
 
     if ([_record getOrDefault ["close", []]] call _fnc_inside) exitWith {
         _onWindow = "close";
+    };
+
+    if ((_record getOrDefault ["buttons", []]) findIf {[_x] call _fnc_inside} >= 0) exitWith {
+        _onWindow = "button";
     };
 
     // On its body's scroll bar it stays where it lies: that bar is the engine's, and the body drawn anew
@@ -222,7 +227,7 @@ if (_down && {_layer isNotEqualTo ""} && {!GVAR(dragging)}) then {
     };
 };
 
-if (_onWindow in ["close", "scrollbar"]) exitWith {false};
+if (_onWindow in ["close", "button", "scrollbar"]) exitWith {false};
 if (_onWindow isEqualTo "title") exitWith {true};
 
 // Right click: the choices for what the mouse is on (fnc_contextMenu).

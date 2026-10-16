@@ -16,7 +16,9 @@
  *   an empty magazine         - no: the kit would hand it back full (fnc_changeKit)
  *   packing switched off     - only what came out of this kit since the window was opened
  *                               (fnc_repackable), as that mod's kit window allows
- *   the kit                   - what it takes and has room for (fnc_canPack)
+ *   the kit                   - what it takes and has room for (fnc_canPack): that mod's
+ *                               capacity, or the free cells of a grid a rule or its config gives
+ *                               it (fnc_roomMode)
  * Its reasons are that mod's words wherever it has them.
  *
  * Arguments:
@@ -101,4 +103,4 @@ if (!([_kit] call EFAKFUNC(core,canPackInto)) && {_n > ([_kit, _class, _entry ge
     [false, localize "STR_efak_core_Error_PackingDisabled"]
 };
 
-[_kit, _class, _n] call FUNC(canPack)
+[_kit, _class, _n, _entry getOrDefault ["ammo", -1]] call FUNC(canPack)

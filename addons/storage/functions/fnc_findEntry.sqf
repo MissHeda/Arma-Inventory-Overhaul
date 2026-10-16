@@ -7,7 +7,7 @@
  * same item. A tile taken earlier in the phase has a count of 0 in the view and is never found.
  *
  * Given no entry, it hands back the view itself - the layout of fnc_getLayout ("entries", "blocks",
- * "overflow", ...) plus "open" for a grid without compartments (the ground, a kit) - which the ops keep
+ * "overflow", ...) plus "open" for a grid without compartments (the ground, a kit without a grid of its own) - which the ops keep
  * up to date as they change the holder: a take lowers its tile's count, a put adds the tile it placed.
  * Outside a phase nothing is kept: every call lays the holder out anew.
  *
@@ -60,7 +60,7 @@ if ((_cached getOrDefault ["holder", objNull]) isEqualTo _holder) then {
 
     // The places as this phase changed them so far (fnc_readPlaces reads the execution's buffer first).
     _view = [_holder, _entries, false] call FUNC(getLayout);
-    _view set ["open", _isKey || {([_holder] call FUNC(getBlocks)) isEqualTo []}];
+    _view set ["open", ([_holder] call FUNC(getBlocks)) isEqualTo []];
 
     if (GVAR(executing)) then {
         GVAR(cache) set [_id, createHashMapFromArray [["holder", _holder], ["view", _view]]];

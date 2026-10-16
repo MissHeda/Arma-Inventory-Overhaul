@@ -61,7 +61,7 @@ private _index = (_context getOrDefault ["ownSections", []]) findIf {(_x getOrDe
 if (_index < 0) exitWith {[]};
 
 private _section = (_context get "ownSections") select _index;
-private _rect = [_display] call FUNC(panelRect);
+private _rect = [_display, _container] call FUNC(panelRect);
 
 if (_rect isEqualTo []) exitWith {[]};
 

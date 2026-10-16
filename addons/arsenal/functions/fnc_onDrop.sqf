@@ -11,8 +11,10 @@
  * (fnc_remove).
  *
  * An item dragged out of ACE's list (fnc_listDrag) is always this hook's to end: on a grid of the panel it
- * is put in, on the cell it was let go on and turned as it was, as many as the wheel left (fnc_addTo);
- * anywhere else it was nothing.
+ * is put in, on the cell it was let go on and turned as it was, as many as the wheel left (fnc_addTo); on
+ * a kit's tile there (fnc_listToKit) it is packed into that kit, as many as the kit takes
+ * (einv_compat_efak_fnc_packNew: its rules, and its room - its capacity, or the cells of a grid a rule or
+ * its config gives it); anywhere else it was nothing.
  *
  * Arguments:
  * 0: Kind of target <STRING>
@@ -47,8 +49,36 @@ GVAR(dragZone) = "";
 private _grids = uiNamespace getVariable [QEGVAR(gui,grids), []];
 private _from = if (_slotSource isEqualTo []) then {_grids param [_sourceIndex, createHashMap]} else {createHashMap};
 
-// Out of ACE's list: into the grid it was let go on.
+// Out of ACE's list: into the grid it was let go on, or into the kit whose tile it was let go on.
 if ((_from getOrDefault ["source", ""]) isEqualTo "aceList") exitWith {
+    // A kit's target carries the kit's tile where a grid's has its column (fnc_listToKit).
+    if (_kind isEqualTo "kitTile" && {!isNil QEFUNC(compat_efak,packNew)}) then {
+        private _target = _grids param [_targetIndex, createHashMap];
+        private _kit = ((_target getOrDefault ["tiles", []]) param [_col, createHashMap]) getOrDefault ["class", ""];
+        private _class = _entry getOrDefault ["class", ""];
+        private _amount = [_count, _entry getOrDefault ["count", 1]] select (_count < 1);
+        private _root = _target getOrDefault ["root", objNull];
+
+        if (isNull _root) then {
+            _root = [_target getOrDefault ["container", objNull]] call EFUNC(storage,rootOf);
+        };
+
+        ([_kit, _class, _amount, [], _root] call EFUNC(compat_efak,packNew)) params ["_added", "_why"];
+
+        if (_added < 1) exitWith {
+            [_why] call EFUNC(gui,flashHint);
+        };
+
+        ["move", _class, objNull, false] call EFUNC(gui,playSound);
+
+        if (_why isNotEqualTo "") then {
+            [_why, "accent"] call EFUNC(gui,showHint);
+        };
+
+        // The panel built again: the kit's tile, its hint and the load bar.
+        [] call FUNC(settle);
+    };
+
     if (_kind isEqualTo "grid") then {
         private _target = _grids param [_targetIndex, createHashMap];
         private _amount = [_count, _entry getOrDefault ["count", 1]] select (_count < 1);

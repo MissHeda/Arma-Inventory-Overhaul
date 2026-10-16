@@ -205,6 +205,19 @@ if (!_placeholder) then {
     _layout = [_section getOrDefault ["layoutKey", _container], _entries] call EFUNC(storage,getLayout);
 };
 
+// A canvas (compartments with a pos) is wider than STORAGE_COLS cells where seams open it between two of
+// them (fnc_flowCompartments): the grid takes that room and the box gives way - smaller, or none at all
+// where less than one and a half cells are left. Folding rows (fnc_viewBlocks) changes no width.
+if ((_layout getOrDefault ["blocks", []]) findIf {(_x param [3, []]) isNotEqualTo []} >= 0) then {
+    _gridW = (STORAGE_COLS * _cellW) max (([_layout] call FUNC(flowCompartments)) select 2);
+    _boxCells = (floor (((_width - _gridW - _gapX) / _cellW) * 2) / 2) min 3;
+    _hasBox = _wantsBox && {_boxCells >= 1.5};
+    _boxW = [0, _boxCells * _cellW] select _hasBox;
+    _boxH = [0, _boxCells * _cellH] select _hasBox;
+    _blockW = _gridW + ([0, _boxW + _gapX] select _hasBox);
+    _blockX = [pixelW, ((_width - _blockW) / 2) max 0] select _wantsBox;
+};
+
 // ---------------------------------------------------------------------------
 // Caption line: the tab on the left, the weight of the contents on the right, a hairline under both.
 // ---------------------------------------------------------------------------

@@ -7,9 +7,13 @@
  * click there - only a drag still finds the grid over one, so its footprint shows red (fnc_updateDrag).
  * A grid is one compartment, and a point is on it only where it has a cell: compartments drawn on a
  * canvas may share a box (grid=aaa/aba/aaa), and the hole of the one is the cell of the other.
- * Every cell lies at the plain pitch, a canvas's compartment's too, and is drawn there at the same size
- * (fnc_createGrid, fnc_spanRect): the point is divided by the one cell, so the cell it finds is the cell
- * under it.
+ * A cell lies where its column and row start (fnc_createGrid "colX", "rowY"), and so it is drawn
+ * (fnc_spanRect): the point's distance from the grid's corner, divided by the one cell, names a stretch,
+ * and the grid's lookup for it ("colAt", "rowAt") the column or row it lies in - that one or the one
+ * before, one comparison, whatever the size of the grid. The pixel after a cell belongs to it, and so does
+ * the room a seam of a canvas opens inside one compartment (fnc_flowCompartments) where the cells across
+ * it are the compartment's too: a tile over it is hovered all along. The room between two compartments -
+ * outside both grids, or beside a hole of one - is on no cell.
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>
@@ -48,10 +52,34 @@ if (!_visible) exitWith {[]};
 
 ([_grid] call FUNC(gridOrigin)) params ["_originX", "_originY"];
 
-private _col = floor ((_pointX - _originX) / (_grid get "cellW"));
-private _row = floor ((_pointY - _originY) / (_grid get "cellH"));
+// The column (row) a point _local from the corner lies in, -1 for none: the last one that starts in its
+// stretch or before it, or the one before that one; and whether it lies past that one's pitch, in the room
+// a seam opens. A grid made without the lookup has the plain pitch.
+private _fnc_find = {
+    params ["_local", "_starts", "_lookup", "_pitch"];
+
+    private _stretch = floor (_local / _pitch);
+
+    if (_lookup isEqualTo []) exitWith {[_stretch, false]};
+    if (_local < 0 || {_local >= (_starts select (count _starts - 1)) + _pitch}) exitWith {[-1, false]};
+
+    private _index = _lookup param [_stretch, count _starts - 1];
+
+    if (_local < (_starts select _index)) then {
+        _index = _index - 1;
+    };
+
+    [_index, _local >= (_starts select _index) + _pitch]
+};
+
+([_pointX - _originX, _grid getOrDefault ["colX", []], _grid getOrDefault ["colAt", []], _grid get "cellW"] call _fnc_find) params ["_col", "_gapX"];
+([_pointY - _originY, _grid getOrDefault ["rowY", []], _grid getOrDefault ["rowAt", []], _grid get "cellH"] call _fnc_find) params ["_row", "_gapY"];
 
 if (_col < 0 || {_row < 0} || {_col >= _grid get "cols"} || {_row >= _grid get "rows"}) exitWith {[]};
+
+// In the room a seam opens inside the compartment, the cell before it - where the cells across it are the
+// compartment's too, as a tile can lie over it there. Beside a hole it is room between two compartments.
+if ((_gapX || {_gapY}) && {[_grid, _col, _row, [1, 2] select _gapX, [1, 2] select _gapY] call FUNC(hitsHole)}) exitWith {[]};
 if (!_holesToo && {[_grid, _col, _row] call FUNC(hitsHole)}) exitWith {[]};
 
 [_col, _row]

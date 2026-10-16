@@ -13,6 +13,9 @@
         <Key ID="STR_einv_setup_Answer_ByLoad">
             <English>size from its load</English>
         </Key>
+        <Key ID="STR_einv_setup_Answer_Efak">
+            <English>EFAK</English>
+        </Key>
         <Key ID="STR_einv_setup_Answer_Forced">
             <English>always 1</English>
         </Key>
@@ -21,6 +24,9 @@
         </Key>
         <Key ID="STR_einv_setup_Answer_Inherited">
             <English>inherited from %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Answer_KitCapacity">
+            <English>capacity %1</English>
         </Key>
         <Key ID="STR_einv_setup_Answer_Legacy">
             <English>old table setting</English>
@@ -272,7 +278,13 @@
             <English>Paint every empty place in the brush colour.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Help">
-            <English>Pick a uniform, vest, backpack or crate on the left and draw its cells on the right. Apply keeps the change; Save at Review puts it to use. The search takes wildcards (B_Bergen*, *Carryall*); Tree shows everything built on a class, to change them all at once.</English>
+            <English>Pick a uniform, vest, backpack, crate or kit on the left and draw its cells on the right. Apply keeps the change; Save at Review puts it to use. The search takes wildcards (B_Bergen*, *Carryall*); Tree shows everything built on a class, to change them all at once.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_KitCellsNote">
+            <English>Its own cells are all its room - Enhanced First Aid Kits' capacity no longer counts. Back to the preset returns it to the capacity.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_KitNote">
+            <English>Enhanced First Aid Kits decides by its capacity now, and the kit window grows as needed. These cells are only a start: once Apply gives the kit cells of its own, they are all its room and the capacity no longer counts - in the inventory and in the ACE Arsenal. Back to the preset returns it to the capacity.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_LegacyNote">
             <English>An old table setting decides this class and wins over every rule. Remove the class there for these cells to count.</English>
@@ -679,6 +691,9 @@
         <Key ID="STR_einv_setup_Kind_crate">
             <English>Crate</English>
         </Key>
+        <Key ID="STR_einv_setup_Kind_kit">
+            <English>Kit</English>
+        </Key>
         <Key ID="STR_einv_setup_Kind_uniform">
             <English>Uniform</English>
         </Key>
@@ -907,6 +922,9 @@
         <Key ID="STR_einv_setup_Save_Unchanged">
             <English>Nothing to save: it is in use already.</English>
         </Key>
+        <Key ID="STR_einv_setup_Scope_KitNote">
+            <English>Applies to %1 and every one of them carried in the game - the %2 kits Enhanced First Aid Kits makes of it - in one rule, class=%3+.</English>
+        </Key>
         <Key ID="STR_einv_setup_Scope_OnlyThis">
             <English>Only this class</English>
         </Key>
@@ -996,6 +1014,9 @@
         </Key>
         <Key ID="STR_einv_setup_Tab_Backpacks">
             <English>Backpacks</English>
+        </Key>
+        <Key ID="STR_einv_setup_Tab_Kits">
+            <English>Kits</English>
         </Key>
         <Key ID="STR_einv_setup_Tab_Uniforms">
             <English>Uniforms</English>

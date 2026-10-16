@@ -105,13 +105,15 @@ _cursorY = _cursorY + _searchH + UNIT * 0.35;
 
 if (!_treeView) then {
     private _chips = if (_mode isEqualTo "containers") then {
+        // Kits only where Enhanced First Aid Kits or Enhanced Utility Pouches brought some
+        // (einv_items_fnc_kitTypes).
         [
             ["all", LLSTRING(Groups_All)],
             ["uniform", LLSTRING(Tab_Uniforms)],
             ["vest", LLSTRING(Tab_Vests)],
             ["backpack", LLSTRING(Tab_Backpacks)],
             ["cargo", LLSTRING(Filter_Cargo)]
-        ]
+        ] + ([[], [["kit", LLSTRING(Tab_Kits)]]] select (count ([] call EFUNC(items,kitTypes)) > 0))
     } else {
         [
             ["all", LLSTRING(Groups_All)],

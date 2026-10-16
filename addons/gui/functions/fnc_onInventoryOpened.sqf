@@ -27,6 +27,11 @@
  * the vanilla inventory shows the vehicle there, and an engine or a script that names none would leave
  * the window on the soldier's own gear.
  *
+ * What the engine names always wins over a guess. A window the guard opened in place of a vanilla
+ * inventory that came up before this handler was asked (fnc_guardVanilla: on the soldier's own gear, or
+ * the vehicle he sits in or looks at) closes when the engine now names something to loot - a vehicle, a
+ * crate, a body - and the window opens again a frame later on that (fnc_open, GVAR(openGuess)).
+ *
  * Each asking is one line in the RPT ("asked: <container> - beside it <second> - the player on foot or
  * seated in <vehicle>"), and each refusal one more ("refused: ..." and why): a report that a container
  * does not open then says whether the engine asked at all, and where it stopped.
@@ -65,17 +70,21 @@ if (_unit isNotEqualTo ACE_player) exitWith {
     INFO_1("refused: %1 is not the player's unit (ACE_player) - nothing opens.",typeOf _unit);
 };
 
-// On foot with nothing to loot named - nothing at all, or only the empty pile the engine makes at the feet for
-// its ground panel: the vehicle the player looks at joins, when the window may open on it (fnc_canOpenVehicle:
-// in the window's reach, cells to show, not locked to him). The engine names a vehicle itself when the player
-// stands at it; this is for an opening that named none - a script's action ["Gear", objNull], an engine that
-// passed only the unit. What he looks at only, as the Gear key aims: never a vehicle behind him.
+// What the engine named to loot, the first of it: not the soldier's own, not the empty pile the engine makes at
+// the feet for its ground panel.
 private _own = [_unit, uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
-
-if (isNull objectParent _unit && {[_container, _secondary] findIf {
+private _loot = ([_container, _secondary] select {
     !isNull _x && {!(_x in _own)}
     && {!([_x] call EFUNC(storage,isGroundHolder)) || {([_x] call EFUNC(storage,getContents)) isNotEqualTo []}}
-} < 0}) then {
+}) param [0, objNull];
+private _namesLoot = !isNull _loot;
+
+// On foot with nothing to loot named - nothing at all, or only the empty pile at the feet: the vehicle the
+// player looks at joins, when the window may open on it (fnc_canOpenVehicle: in the window's reach, cells to
+// show, not locked to him). The engine names a vehicle itself when the player stands at it; this is for an
+// opening that named none - a script's action ["Gear", objNull], an engine that passed only the unit. What
+// he looks at only, as the Gear key aims: never a vehicle behind him.
+if (isNull objectParent _unit && {!_namesLoot}) then {
     private _looked = cursorObject;
 
     if ([_unit, _looked] call FUNC(canOpenVehicle)) then {
@@ -84,6 +93,10 @@ if (isNull objectParent _unit && {[_container, _secondary] findIf {
         // The pile at the feet stays beside it.
         _secondary = ([_container, _secondary] select {!isNull _x && {!(_x in _own)}}) param [0, objNull];
         _container = _looked;
+
+        // It is the loot of this opening now: a window opened on a guess without it gives way to it (below).
+        _loot = _looked;
+        _namesLoot = true;
     };
 };
 
@@ -107,8 +120,30 @@ if (_refused isNotEqualTo []) then {
     playSound "ACE_Sound_Click";
 };
 
+// A window the guard opened on a guess - a vanilla inventory came up before the engine asked this handler, and
+// the window took its place on the soldier's own gear or the vehicle he sat in or looked at (fnc_guardVanilla) -
+// gives way when the engine names something to loot now that it does not show, or the vehicle the player looks
+// at joined this opening (above): what was asked for wins.
+// It closes, and the window opens again a frame later on what was named, as below - the inventory's window
+// only, never a window of another mod this addon is a guest on.
+private _window = uiNamespace getVariable [QGVAR(display), displayNull];
+
+if (!isNull _window && {GVAR(openGuess)} && {_namesLoot} && {call FUNC(isInventoryMode)}) then {
+    GVAR(openGuess) = false;
+
+    // The guess was right: the window shows it already.
+    if (_loot in [GVAR(container), GVAR(secondary)]) exitWith {};
+
+    private _lootClass = typeOf _loot;
+
+    INFO_1("replaced: the window opened on a guess gives way to %1 - the engine asked for it.",_lootClass);
+
+    ["it gave way to what the engine asked for (fnc_onInventoryOpened)"] call FUNC(closeDisplay);
+    _window = displayNull;
+};
+
 // Already open: the engine asked again, from a script or a second key press. One window is enough.
-if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {
+if (!isNull _window) exitWith {
     INFO("refused: the window is open already - nothing more opens.");
 };
 

@@ -4,6 +4,10 @@ PREP(getInfo);
 PREP(footprintAs);
 PREP(turnMask);
 
+// Kits of Enhanced First Aid Kits, by that mod's registry in config
+PREP(kitTypes);
+PREP(kitOf);
+
 // The rules: reading and writing their text
 PREP(parseRules);
 PREP(writeRules);
@@ -21,6 +25,7 @@ PREP(compileRules);
 PREP(matches);
 PREP(resolve);
 PREP(explain);
+PREP(setBy);
 
 // The rules in effect
 PREP(rulesInputs);

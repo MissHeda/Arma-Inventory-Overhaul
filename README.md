@@ -82,6 +82,14 @@ weighs). Grids are ten cells wide.
   `class=My_Radio_Pack > grid=4x3`.
   `class=My_Vest > like=V_PlateCarrier1_rgr` gives a class another one's size, stack, grid and rule weight,
   and follows it when that changes; `like=X grid=6x4` changes one.
+- **Kits and pouches (Enhanced First Aid Kits, Enhanced Utility Pouches):** by default a kit holds what that mod's
+  capacity allows and its window's grid grows as needed. Give it cells of its own and those cells are all its room - the
+  capacity no longer counts, in the inventory, in kit windows ("8 / 12 cells") and in ACE Arsenal:
+  `class=efak_IFAK+ > grid=4x3` (the `+` matters - the kits players carry are numbered copies of the type, `efak_IFAK_7`),
+  `kind=kit > grid=12` for every kit, or `einv_grid = "4x3";` on the kit's class in a mod. The wizard's Containers step has a
+  Kits chip and writes the `+` rule for you; "Back to the preset" returns a kit to the capacity. That mod's own kit window and its
+  kits tab in ACE Arsenal still go by the capacity. In ACE Arsenal an item dragged from ACE's list onto a kit's tile in the panel
+  is packed into that kit, where the kit type's Arsenal setting allows filling it.
 - **One crate, vehicle or a unit's uniform, vest or backpack:** give the object its own grid, which wins
   over every rule - `_crate setVariable ["einv_grid", "6x4+2x3", true];` (also `"24"`, `"rig:16"`, `"auto"`).
 - **Mods:** ship presets of your own as classes of `CfgEinvRulesets` (see `addons/items/CfgEinvRulesets.hpp`),
@@ -93,7 +101,7 @@ weighs). Grids are ten cells wide.
   class CfgWeapons { class My_Kit { einv_size = "2x1"; einv_stack = 1; einv_weight = 0.5; einv_name = "Short name"; }; };
   ```
   `einv_size` is `size=` (`"2x1"`, a mask like `"xx/x-"`, `"mass"`), `einv_stack` is `stack=` (a number), `einv_grid` is
-  `grid=` (containers: uniform, vest, backpack, crate, vehicle), `einv_weight` is `weight=` in **kilograms** (not config mass)
+  `grid=` (containers: uniform, vest, backpack, crate, vehicle, kit), `einv_weight` is `weight=` in **kilograms** (not config mass)
   and `einv_name` is `name=` as plain text (a space is a space). A subclass inherits what its parent sets, as everything in
   config does; `einv_grid = "";` takes it back. These sit below the server's rules text - a rule for the class still wins - and
   above the preset. Values are cut to the same limits as in the rules, and a mistake is named in the RPT. The older

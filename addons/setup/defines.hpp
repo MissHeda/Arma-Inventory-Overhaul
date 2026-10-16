@@ -94,11 +94,13 @@
 #define INDEX_BUDGET 0.006
 #define INDEX_STRIDE 64
 
-// The kinds the Containers step lists: what holds things and has a grid.
-#define CONTAINER_KINDS ["uniform", "vest", "backpack", "crate", "vehicle"]
+// The kinds the Containers step lists: what holds things and has a grid - a kit of Enhanced First Aid Kits
+// too, whose grid counts only once a rule or its config gives it one (einv_compat_efak_fnc_roomMode).
+#define CONTAINER_KINDS ["uniform", "vest", "backpack", "crate", "vehicle", "kit"]
 
 // The containers the Start step's "Everything else" sizes (fnc_drawStart, fnc_allRule): what a soldier wears.
-// Crates and vehicles hold far more, and a grid for a pouch would not do for them.
+// Crates and vehicles hold far more, and a grid for a pouch would not do for them. Kits stay out: a grid for
+// them all would turn off Enhanced First Aid Kits' capacity for every kit at once.
 #define ELSE_CONTAINER_KINDS ["uniform", "vest", "backpack"]
 
 // Cards on one page of a class list: only those are drawn and asked what the rules make of them.

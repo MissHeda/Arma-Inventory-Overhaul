@@ -36,9 +36,11 @@ GVAR(carryVariables) = [];
 
 // Holders that are no object, by the part of their key before ":" - "kit" from einv_compat_efak:
 // HashMap "entries" CODE [holder] -> entries, "root" CODE [holder, hint] -> root (fnc_rootOf hands on
-// its second argument as the hint), "verify" CODE [holder, root] -> BOOL, and the names of its ops for
-// "take", "put", "place" and "move" - settlement puts a payload back into such a holder with its "put"
-// op (fnc_settle), and the window builds its phases from them (einv_gui_fnc_sendMoves).
+// its second argument as the hint), "verify" CODE [holder, root] -> BOOL, "blocks" CODE [holder] ->
+// compartments as fnc_blocksFor gives them, [] for an open grid that grows (fnc_getBlocks; left out, the
+// grid is open), and the names of its ops for "take", "put", "place" and "move" - settlement puts a
+// payload back into such a holder with its "put" op (fnc_settle), and the window builds its phases from
+// them (einv_gui_fnc_sendMoves).
 GVAR(holderTypes) = createHashMap;
 
 // Same kind of item, class -> canonical key (fnc_layoutKey).

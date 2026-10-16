@@ -1,9 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * What the hint adds for a kit, after its name, size and weight: how full it is, in that mod's own
- * measure - what its kit window shows. Nothing for a kit nobody has carried yet, nor while its contents
- * have not reached this machine.
+ * What the hint adds for a kit, after its name, size and weight: how full it is, as its kit window shows
+ * it (fnc_fillState) - in that mod's own measure, or in cells for a kit a rule or its config gives a
+ * grid. Nothing for a kit nobody has carried yet, nor while its contents have not reached this machine.
  *
  * Arguments:
  * 0: Class <STRING>
@@ -25,9 +25,4 @@ if (
     || {!(missionNamespace getVariable [QEFAKGVAR(core,contentsSynced), true])}
 ) exitWith {[]};
 
-[[format [
-    "%1 / %2 %3",
-    round ([_class] call EFAKFUNC(core,getUsedCapacity)),
-    round ([_class] call EFAKFUNC(core,getCapacity)),
-    localize "STR_efak_gui_MassUnit"
-], "text2"]]
+[[([_class] call FUNC(fillState)) select 0, "text2"]]

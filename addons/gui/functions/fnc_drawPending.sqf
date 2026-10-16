@@ -90,7 +90,8 @@ private _frames = [];
 
             if ((_holders select _forEachIndex) isNotEqualTo _holder || {(_grid getOrDefault ["block", 0]) != _block}) then {continue};
 
-            // As a tile ends a pixel before the next cell, so does its outline (fnc_spanRect).
+            // As a tile ends a pixel before the next cell, so does its outline, where the grid's columns and rows
+            // lie (fnc_spanRect).
             _frames pushBack ([
                 _display, _grid getOrDefault ["parent", controlNull],
                 [_grid, _grid getOrDefault ["rel", [0, 0]], _col, _row, _w, _h] call FUNC(spanRect), _color

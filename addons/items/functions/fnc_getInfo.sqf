@@ -49,7 +49,8 @@
  *   "footprintTurned"   - the same turned a quarter clockwise (fnc_turnMask, fnc_footprintAs) <ARRAY>
  *   "stack"             - how many may share one tile, at least 1 <NUMBER>
  *   "capacity"          - a magazine's rounds, 0 for everything else <NUMBER>
- *   "maxLoad"           - what a uniform, vest, backpack, crate or vehicle holds, else 0 <NUMBER>
+ *   "maxLoad"           - what a uniform, vest, backpack, crate or vehicle holds, a kit's capacity,
+ *                         else 0 <NUMBER>
  *   "cells"             - cells it takes, w * h less its holes <NUMBER>
  *   "shape"             - its size as the rules write it, "2x3" or "xx/x-" <STRING>
  *   "grid"              - a container's grid spec (fnc_parseGrid), [] for anything else <ARRAY>

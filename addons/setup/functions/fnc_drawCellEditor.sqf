@@ -35,6 +35,11 @@
  *   - "Same as another class..." picks a class in a popover (fnc_drawSameAs) to follow (like=) or to copy
  *     the cells of. Following, the drawing shows that class's cells and cannot be changed; a chip says so
  *     and unlinks.
+ *   - A kit of Enhanced First Aid Kits (kind "kit") is edited like any container, always with the instance
+ *     classes that mod makes of it (fnc_editScope: class=X+). Until a rule or its config gives it a grid
+ *     its room is that mod's capacity (fnc_kitRoom): "Now" says "capacity 35 (EFAK)" and a note says what
+ *     Apply changes - the cells drawn here, by its capacity, are only a start. With a grid, "Now" shows it
+ *     and a note says the capacity no longer counts; Back to the preset returns it to the capacity.
  *
  * Edits go into a working copy per class (GVAR(cellWork), lowercase class -> a painted canvas, or
  * "blocks" and "picked" for the Blocks way; "unlink" when Apply is to take like= away too, after cells
@@ -129,8 +134,12 @@ private _lc = toLowerANSI _class;
 ([] call FUNC(ownClassRules)) params ["_exactRules", "", "_treeRules"];
 private _own = _exactRules getOrDefault [_lc, createHashMap];
 
-// For the class alone, or for it and everything built on it (the tree view picked it).
+// For the class alone, or for it and everything built on it (the tree view picked it) - a kit always with
+// its instances.
 (["containers", _class] call FUNC(editScope)) params ["_tree", "_below"];
+
+// A kit: "capacity" while that mod's capacity is its room, "cells" once a grid of its own is.
+private _kitRoom = [_info] call FUNC(kitRoom);
 
 private _like = _own getOrDefault ["like", ""];
 private _spec = _info getOrDefault ["grid", ["auto"]];
@@ -231,7 +240,15 @@ _cursorY = _cursorY + _picH + UNIT * 0.3;
 
 // ----- For the tree: one rule for the class and everything built on it -----
 
-if (_tree) then {
+// A kit's tree is the instances of it that are carried: no class alone to go back to.
+if (_tree && {_kitRoom isNotEqualTo ""}) then {
+    _cursorY = _cursorY + ([
+        _display, _box, [_innerX, _cursorY, _innerW], format [LLSTRING(Scope_KitNote), _info getOrDefault ["name", _class], _below, _class],
+        TEXT_SMALL, _accent, _font
+    ] call FUNC(uiText)) + UNIT * 0.3;
+};
+
+if (_tree && {_kitRoom isEqualTo ""}) then {
     private _chipText = LLSTRING(Scope_OnlyThis);
     private _chipH = UNIT * 0.95;
     private _chipW = SQUARE(_chipH * 0.9) + (_chipText getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK;
@@ -259,9 +276,14 @@ private _cellsNow = 0;
     _cellsNow = _cellsNow + (_x select 0) * (_x select 1) - count (_x select 2);
 } forEach _resolved;
 
-private _now = format [
-    "%1: %2 · %3", LLSTRING(Items_Now), format [LLSTRING(Answer_Line), _words, _from], format [LLSTRING(Cont_Blocks), count _resolved, _cellsNow]
-];
+// A kit by its capacity has no compartments yet: its window's grid grows with what it holds.
+private _now = if (_kitRoom isEqualTo "capacity") then {
+    format ["%1: %2", LLSTRING(Items_Now), format [LLSTRING(Answer_Line), _words, _from]]
+} else {
+    format [
+        "%1: %2 · %3", LLSTRING(Items_Now), format [LLSTRING(Answer_Line), _words, _from], format [LLSTRING(Cont_Blocks), count _resolved, _cellsNow]
+    ]
+};
 
 _cursorY = _cursorY + ([
     _display, _box, [_innerX, _cursorY, _innerW], _now, TEXT_BODY, [_colorText, _accent] select ((_src select [0, 4]) isEqualTo "own:"), _font
@@ -278,8 +300,18 @@ if (!_linked && {_like isNotEqualTo ""}) then {
     _notes pushBack [format [LLSTRING(Cont_LikeRest), _likeName], _muted];
 };
 
-if (_editable && {(_spec param [0, ""]) isNotEqualTo "blocks"}) then {
-    _notes pushBack [LLSTRING(Cont_PatternNote), _muted];
+switch (true) do {
+    // A kit by its capacity: what Apply would change.
+    case (_kitRoom isEqualTo "capacity"): {
+        _notes pushBack [LLSTRING(Cont_KitNote), _muted];
+    };
+    case (_editable && {(_spec param [0, ""]) isNotEqualTo "blocks"}): {
+        _notes pushBack [LLSTRING(Cont_PatternNote), _muted];
+    };
+};
+
+if (_kitRoom isEqualTo "cells") then {
+    _notes pushBack [LLSTRING(Cont_KitCellsNote), _muted];
 };
 
 if (_editable && {_blocksMode} && {_resolved findIf {(_x select 3) isNotEqualTo []} >= 0}) then {

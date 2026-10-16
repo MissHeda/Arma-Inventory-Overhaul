@@ -21,19 +21,37 @@
  *
  * The ground has no compartments and no limit: [].
  *
+ * A holder that is no object, the key of a grid with no object of its own ("kit:" + lowercase class),
+ * has the compartments its type gives (GVAR(holderTypes) "blocks"): a kit of Enhanced First Aid Kits
+ * those a rule or its config gives it, else none - that mod's capacity is its room, and its grid an
+ * open one that grows (einv_compat_efak_fnc_kitBlocks). A type that says nothing has none.
+ *
  * Arguments:
- * 0: Container <OBJECT>
+ * 0: Container, or the key of a grid with no object <OBJECT or STRING>
  *
  * Return Value:
- * Compartments [[cols, rows, holes, pos], ...] (see fnc_blocksFor), [] for the ground <ARRAY>
+ * Compartments [[cols, rows, holes, pos], ...] (see fnc_blocksFor), [] for the ground and an open grid
+ * <ARRAY>
  *
  * Example:
  * [vestContainer player] call einv_storage_fnc_getBlocks;
+ * ["kit:efak_ifak_7"] call einv_storage_fnc_getBlocks;
  *
  * Public: No
  */
 
-params [["_container", objNull, [objNull]]];
+params [["_container", objNull, [objNull, ""]]];
+
+// A key first: isNull fails on it.
+if (_container isEqualType "") exitWith {
+    private _type = GVAR(holderTypes) getOrDefault [(_container splitString ":") param [0, ""], createHashMap];
+    private _code = _type get "blocks";
+    private _blocks = if (isNil "_code") then {[]} else {[_container] call _code};
+
+    if (isNil "_blocks" || {!(_blocks isEqualType [])}) then {_blocks = []};
+
+    _blocks
+};
 
 if (isNull _container || {[_container] call FUNC(isGroundHolder)}) exitWith {[]};
 

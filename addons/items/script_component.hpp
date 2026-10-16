@@ -16,11 +16,19 @@
 
 // Every kind fnc_getFacts gives out. The rules are sorted by these, so an item only meets the rules
 // that can be about it.
-#define ITEM_KINDS ["rifle", "handgun", "launcher", "binocular", "muzzle", "optic", "rail", "bipod", "headgear", "nvg", "vest", "uniform", "map", "gps", "radio", "compass", "watch", "item", "magazine", "grenade", "backpack", "goggles", "crate", "vehicle", "unknown"]
+#define ITEM_KINDS ["rifle", "handgun", "launcher", "binocular", "muzzle", "optic", "rail", "bipod", "headgear", "nvg", "vest", "uniform", "map", "gps", "radio", "compass", "watch", "item", "magazine", "grenade", "backpack", "goggles", "crate", "vehicle", "kit", "unknown"]
 
 // The kinds that hold things and so get a grid, and the kinds that never share a tile: each of them
-// holds things of its own or carries attachments, and a tile moves only one of them with all that.
-#define KINDS_CONTAINER ["uniform", "vest", "backpack", "crate", "vehicle"]
+// holds things of its own or carries attachments, and a tile moves only one of them with all that. A kit
+// of Enhanced First Aid Kits or a pouch of Enhanced Utility Pouches holds things too, but its grid counts
+// only where a rule or its config gives it one (einv_compat_efak_fnc_roomMode): else that mod's capacity
+// is its room.
+#define KINDS_CONTAINER ["uniform", "vest", "backpack", "crate", "vehicle", "kit"]
+
+// Kinds that are an item to kind= as well: a kit is sized and stacked as the item it is - kind=item and the
+// presets' item groups reach it as they always did - and has a grid as a kit (kind=kit reaches only kits).
+// fnc_matches tests a condition that way, and fnc_compileRules sorts the rules that way.
+#define KINDS_AS_ITEM ["kit"]
 #define KINDS_SINGLE ["rifle", "handgun", "launcher", "binocular", "uniform", "vest", "backpack"]
 
 // The tile categories by their names in the rules (cat=), in the order of the CATEGORY_* numbers.

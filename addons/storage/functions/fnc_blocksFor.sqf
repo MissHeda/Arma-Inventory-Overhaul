@@ -21,6 +21,7 @@
  *   vest     - rig [1x2], mixed [1x2, 1x2, 1x1, 1x1], plate [2x2, 1x2, 1x2] or long [1x3, 1x2, 1x1],
  *              at most sixteen from the load
  *   backpack - single: one big compartment, as near square as STORAGE_COLS columns allow
+ *   kit      - single as well: a kit or pouch of Enhanced First Aid Kits is a bag of one space
  *   anything else (crates, vehicles) - wide: one compartment STORAGE_COLS wide
  *
  * A number that was given (N cells, einv_grid = "24", einv_slots) is met exactly: as many pockets or
@@ -32,7 +33,7 @@
  *
  * Arguments:
  * 0: Class - the uniform's or vest's item class, the backpack's, crate's or vehicle's own <STRING>
- * 1: Kind: "uniform", "vest", "backpack", or anything else for one wide compartment <STRING>
+ * 1: Kind: "uniform", "vest", "backpack", "kit", or anything else for one wide compartment <STRING>
  * 2: Maximum load <NUMBER>
  * 3: Grid spec <ARRAY> (default: ["auto"])
  * 4: Config mass per cell <NUMBER> (default: the rules in effect)
@@ -88,7 +89,8 @@ private _patterns = createHashMapFromArray [
 private _pattern = switch (_kind) do {
     case "uniform": {["pockets", "pockets_mixed"] select (_hash mod 2)};
     case "vest": {["rig", "mixed", "plate", "long"] select (_hash mod 4)};
-    case "backpack": {"single"};
+    case "backpack";
+    case "kit": {"single"};
     default {"wide"};
 };
 

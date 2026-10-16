@@ -8,12 +8,19 @@
  * A shaped compartment's holes (einv_storage_fnc_blocksFor) are drawn as no cell at all: no surface,
  * no line, nothing to hover (fnc_createGrid).
  *
- * Compartments drawn on a canvas (grid=aab/acc) touch, a cell's pitch apart like the cells of one
- * compartment. The canvas is one uniform grid: every cell is the same size with the same gap to the next
- * wherever it lies and whichever compartment it belongs to, and a compartment is only the set of cells
- * it covers. Each is a grid of its own, with "pos" where it lies on the canvas; the lines behind the
- * cells are drawn once for the whole canvas as one shape, so a pixel of line is drawn once and is as
- * faint where two compartments meet as inside one.
+ * Every compartment lies on a panel of its own: a faint card (the theme's "card") behind its cells that
+ * reaches COMPARTMENT_PAD_PX pixels past them, its corners round as far as the corner cells stay inside
+ * the round (the theme's radius, at most three times the pad; square in a look without one). The panel covers
+ * exactly the compartment's cells and the room between them; a shaped one's holes stay open, as a union
+ * of rectangles that do not overlap (fnc_uiShape "panel"), so a see-through panel is as strong
+ * everywhere. Between two panels lies the gap between blocks, or on a canvas (grid=aab/acc) the seam
+ * fnc_flowCompartments opened where two compartments touch, so each reads as the block it is: painted
+ * and flowed containers look alike. Every cell is the same size with the same gap to the next, the
+ * panel showing in that gap. Each compartment is a grid of its own, with "pos" where it lies on the
+ * canvas and its columns' and rows' places (fnc_createGrid "colX", "rowY"): one that reaches over a seam
+ * opened for two others has that room between two of its cells, inside its panel. All panels are drawn
+ * before any cell, so the panel of the cell inside a ring lies under nothing of the ring.
+ * What has no room keeps the loss colour's lines round its cells, and no panel.
  *
  * Each grid gets what moving items in and out of it needs (fnc_onMouseButton, fnc_endDrag):
  *   "container" - the section's container, objNull for a kit's
@@ -116,150 +123,69 @@ private _originY = [safezoneY, 0] select !isNull _parent;
 _gridX = _originX + round ((_gridX - _originX) / pixelW) * pixelW;
 _bodyTop = _originY + round ((_bodyTop - _originY) / pixelH) * pixelH;
 
-// The lines of a shaped compartment (einv_items_fnc_parseGrid, "xxx/x-x"): one surface behind the
-// cells would show through its holes, so a hole would read as a cell after all. Instead every line
-// pixel is drawn once, by the slot it lies in - a slot is a cell and the pixel gap to its right and
-// below it, and the slots tile the grid. A row's cells next to each other share one surface, as the
-// whole grid does otherwise. A hole draws only the gap that borders a cell: to its right, below it,
-// or the corner between; so does the slot left of the first column and above the first row, which
-// makes the outer line. Nothing overlaps, so the see-through lines are as bright everywhere.
-private _fnc_shapeLines = {
-    params ["_snapX", "_snapY", "_cols", "_rows", "_holes"];
+// The panels: COMPARTMENT_PAD_PX pixels past the cells, round up to three times that.
+private _pad = COMPARTMENT_PAD_PX(_cellW);
+private _padW = _pad * pixelW;
+private _padH = _pad * pixelH;
+private _radius = (_theme getOrDefault ["radius", 0]) min (_pad * 3 * pixelH);
+private _colorPanel = _theme getOrDefault ["card", []];
 
-    private _fnc_isCell = {
-        params ["_col", "_row"];
-
-        _col >= 0 && {_row >= 0} && {_col < _cols} && {_row < _rows} && {!((_row * _cols + _col) in _holes)}
-    };
-
-    private _fnc_line = {
-        params ["_lineX", "_lineY", "_lineW", "_lineH"];
-
-        [_display, _parent, [_lineX, _lineY, _lineW, _lineH], _colorLine] call FUNC(uiPanel);
-    };
-
-    // The cells, a run of them in a row at a time.
-    for "_row" from 0 to (_rows - 1) do {
-        private _start = -1;
-
-        for "_col" from 0 to _cols do {
-            private _isCell = [_col, _row] call _fnc_isCell;
-
-            if (_isCell && {_start < 0}) then {
-                _start = _col;
-            };
-
-            if (!_isCell && {_start >= 0}) then {
-                [_snapX + _start * _cellW, _snapY + _row * _cellH, (_col - _start) * _cellW, _cellH] call _fnc_line;
-                _start = -1;
-            };
-        };
-    };
-
-    // The holes, and the slots outside the grid's left and top edge.
-    for "_row" from -1 to (_rows - 1) do {
-        for "_col" from -1 to (_cols - 1) do {
-            if ([_col, _row] call _fnc_isCell) then {continue};
-
-            private _slotX = _snapX + _col * _cellW;
-            private _slotY = _snapY + _row * _cellH;
-            private _right = [_col + 1, _row] call _fnc_isCell;
-            private _below = [_col, _row + 1] call _fnc_isCell;
-
-            // The gap to the right, with the corner below it.
-            if (_right) then {
-                [_slotX + _cellW - pixelW, _slotY, pixelW, _cellH] call _fnc_line;
-            };
-
-            // The gap below - with the corner unless the gap to the right took it.
-            if (_below) then {
-                [_slotX, _slotY + _cellH - pixelH, _cellW - ([0, pixelW] select _right), pixelH] call _fnc_line;
-            };
-
-            // Only the corner: a cell diagonally below to the right.
-            if (!_right && {!_below} && {[_col + 1, _row + 1] call _fnc_isCell}) then {
-                [_slotX + _cellW - pixelW, _slotY + _cellH - pixelH, pixelW, pixelH] call _fnc_line;
-            };
-        };
-    };
+if (_colorPanel isEqualTo []) then {
+    _colorPanel = _colorLine;
 };
 
-// The lines behind a grid of _cols by _rows places at [_x0, _y0], holes the places without a cell: one surface
-// a pixel bigger on the left and at the top, so every cell is outlined on all four sides. On the grid's own
-// pixels, as fnc_createGrid places it.
-private _fnc_lines = {
-    params ["_x0", "_y0", "_cols", "_rows", "_holes", "_color"];
+// The places of _count columns (rows) at the plain pitch _pitch, for a compartment that flows.
+private _fnc_plain = {
+    params ["_count", "_pitch"];
 
-    private _snapX = _originX + round ((_x0 - _originX) / pixelW) * pixelW;
-    private _snapY = _originY + round ((_y0 - _originY) / pixelH) * pixelH;
+    private _starts = [];
 
-    if (_holes isEqualTo []) then {
-        [_display, _parent, [_snapX - pixelW, _snapY - pixelH, _cols * _cellW + pixelW, _rows * _cellH + pixelH], _color] call FUNC(uiPanel);
-    } else {
-        [_snapX, _snapY, _cols, _rows, _holes] call _fnc_shapeLines;
+    for "_i" from 0 to (_count - 1) do {
+        _starts pushBack (_i * _pitch);
     };
+
+    _starts
 };
 
-// The lines of a canvas: the blocks _first to _last are its compartments (each with a pos), and the cells
-// of all of them are one shape. A surface per compartment would overlap where two meet, and the see-through
-// lines would show it; as one shape every pixel is drawn once. A hole of one compartment that is a cell of
-// another (the ring and the cell inside it) is no hole of the canvas.
-private _fnc_canvasLines = {
-    params ["_first", "_last"];
+// The panel of a compartment at [_x0, _y0], its columns and rows starting at _colX and _rowY from there: a
+// round card from its first cell's corner to its last cell's far edge, the pad all round - over the room a
+// seam opens inside it too -, or for a shaped one its cells grown by the pad, its holes left open.
+private _fnc_panel = {
+    params ["_x0", "_y0", "_cols", "_rows", "_holes", "_colX", "_rowY"];
 
-    private _group = _blocks select [_first, _last - _first + 1];
-    private _minX = selectMin (_group apply {(_x select 3) select 0});
-    private _minY = selectMin (_group apply {(_x select 3) select 1});
-    private _cols = selectMax (_group apply {((_x select 3) select 0) + (_x select 0)}) - _minX;
-    private _rows = selectMax (_group apply {((_x select 3) select 1) + (_x select 1)}) - _minY;
+    if (_holes isEqualTo []) exitWith {
+        private _right = _x0 + (_colX select (_cols - 1)) + _cellW - pixelW;
+        private _bottom = _y0 + (_rowY select (_rows - 1)) + _cellH - pixelH;
 
-    // The places of the canvas some compartment has a cell on.
-    private _taken = createHashMap;
-
-    {
-        _x params ["_blockCols", "_blockRows", ["_blockHoles", []], "_pos"];
-        _pos params ["_posX", "_posY"];
-
-        for "_row" from 0 to (_blockRows - 1) do {
-            for "_col" from 0 to (_blockCols - 1) do {
-                if !((_row * _blockCols + _col) in _blockHoles) then {
-                    _taken set [(_posY - _minY + _row) * _cols + _posX - _minX + _col, true];
-                };
-            };
-        };
-    } forEach _group;
-
-    private _holes = [];
-
-    for "_place" from 0 to (_cols * _rows - 1) do {
-        if !(_place in _taken) then {
-            _holes pushBack _place;
-        };
+        [
+            _display, _parent, [_x0 - _padW, _y0 - _padH, _right - _x0 + _padW * 2, _bottom - _y0 + _padH * 2],
+            _colorPanel, _radius
+        ] call FUNC(uiPanel);
     };
-
-    // The canvas's corner: where the first compartment lies, less its own place on the canvas.
-    (_places select _first) params ["_placeX", "_placeY"];
-    ((_group select 0) select 3) params ["_firstX", "_firstY"];
 
     [
-        _gridX + _placeX - (_firstX - _minX) * _cellW, _bodyTop + _placeY - (_firstY - _minY) * _cellH,
-        _cols, _rows, _holes, _colorLine
-    ] call _fnc_lines;
+        _display, _parent, [_x0, _y0], _cellW, _cellH, [_cols, _rows, _holes], _colorPanel, "panel", _pad,
+        [createHashMapFromArray [["colX", _colX], ["rowY", _rowY]], 0, 0]
+    ] call FUNC(uiShape);
 };
 
 private _fnc_compartment = {
     params ["_index", "_cols", "_rows", "_place", "_isOverflow", "_overflowIndex", ["_holes", []], ["_pos", []]];
-    _place params ["_dx", "_dy"];
+    _place params ["_dx", "_dy", ["_colX", []], ["_rowY", []]];
 
     private _x0 = _gridX + _dx;
     private _y0 = _bodyTop + _dy;
 
-    // The lines behind its cells - those of a canvas's compartments were drawn with the whole canvas's.
-    if (_pos isEqualTo []) then {
-        [_x0, _y0, _cols, _rows, _holes, [_colorLine, _theme getOrDefault ["loss", [1, 0, 0, 1]]] select _isOverflow] call _fnc_lines;
+    // What has no room: the loss colour's lines round and between its cells, a surface a pixel bigger on the
+    // left and at the top behind them.
+    if (_isOverflow) then {
+        [
+            _display, _parent, [_x0 - pixelW, _y0 - pixelH, _cols * _cellW + pixelW, _rows * _cellH + pixelH],
+            _theme getOrDefault ["loss", [1, 0, 0, 1]]
+        ] call FUNC(uiPanel);
     };
 
-    private _grid = [_display, _parent, [_x0, _y0], _rows, _theme, _id, _cols, _holes] call FUNC(createGrid);
+    private _grid = [_display, _parent, [_x0, _y0], _rows, _theme, _id, _cols, _holes, [_colX, _rowY]] call FUNC(createGrid);
 
     // What the grid shows, for moving items in and out of it (fnc_onMouseButton, fnc_endDrag): a
     // virtual section - a body's worn gear - has no container to take from; nothing can be put into
@@ -282,26 +208,26 @@ private _fnc_compartment = {
     [_display, _grid, _layout, _theme] call FUNC(drawTiles);
 };
 
-// The lines of every canvas first, as a canvas is the compartments with a pos that follow one another
-// (fnc_flowCompartments): all of them lie behind the cells.
-private _index = 0;
+// Every compartment's panel first, behind every cell.
+{
+    _x params ["_cols", "_rows", ["_holes", []]];
 
-while {_index < count _blocks} do {
-    (_blocks select _index) params ["", "_rows", "", ["_pos", []]];
+    private _place = _places param [_forEachIndex, []];
 
-    if (_rows > 0 && {_pos isNotEqualTo []}) then {
-        private _last = _index;
+    if (_place isEqualTo [] || {_cols <= 0} || {_rows <= 0}) then {continue};
 
-        while {_last + 1 < count _blocks && {((_blocks select (_last + 1)) param [3, []]) isNotEqualTo []}} do {
-            _last = _last + 1;
-        };
+    _place params ["_dx", "_dy", ["_colX", []], ["_rowY", []]];
 
-        [_index, _last] call _fnc_canvasLines;
-        _index = _last + 1;
-    } else {
-        _index = _index + 1;
+    if (count _colX != _cols) then {
+        _colX = [_cols, _cellW] call _fnc_plain;
     };
-};
+
+    if (count _rowY != _rows) then {
+        _rowY = [_rows, _cellH] call _fnc_plain;
+    };
+
+    [_gridX + _dx, _bodyTop + _dy, _cols, _rows, _holes, _colX, _rowY] call _fnc_panel;
+} forEach _blocks;
 
 {
     _x params ["_cols", "_rows", ["_holes", []], ["_pos", []]];

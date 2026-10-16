@@ -171,7 +171,18 @@ _cursorY = _cursorY + _picH + UNIT * 0.3;
 
 // ----- For the tree: one rule for the class and everything built on it -----
 
-if (_tree) then {
+// A kit of Enhanced First Aid Kits is always edited with the instances of it that are carried
+// (fnc_editScope): no class alone to go back to.
+private _kitTree = _tree && {(_info getOrDefault ["kind", ""]) isEqualTo "kit"};
+
+if (_kitTree) then {
+    _cursorY = _cursorY + ([
+        _display, _box, [_innerX, _cursorY, _innerW], format [LLSTRING(Scope_KitNote), _info getOrDefault ["name", _class], _below, _class],
+        TEXT_SMALL, _accent, _font
+    ] call FUNC(uiText)) + UNIT * 0.3;
+};
+
+if (_tree && {!_kitTree}) then {
     private _chipText = LLSTRING(Scope_OnlyThis);
     private _chipH = UNIT * 0.95;
     private _chipW = SQUARE(_chipH * 0.9) + (_chipText getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK;

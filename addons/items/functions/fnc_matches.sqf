@@ -78,7 +78,12 @@ private _fnc_test = {
     _cond params ["_negated", "_key", "_op", "_data"];
 
     private _hit = switch (_key) do {
-        case "kind": {(_facts get "kind") in _data};
+        // A kit is an item as well (KINDS_AS_ITEM): kind=item reaches it, kind=kit only kits.
+        case "kind": {
+            private _kind = _facts get "kind";
+
+            _kind in _data || {_kind in KINDS_AS_ITEM && {"item" in _data}}
+        };
         case "cat": {(_facts get "category") in _data};
         case "class": {
             if (_op isEqualTo "~") then {

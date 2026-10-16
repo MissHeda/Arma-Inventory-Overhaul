@@ -6,7 +6,8 @@
  * to the draft in one undo step:
  *   - config lines like the ones fnc_exportClasses writes (class CfgVehicles { class X { einv_grid = ""..."";
  *     }; };, several classes at once; einv_items_fnc_parseConfigEntry reads them): each class gets a rule of
- *     its own, class=X > grid=... size=... - exactly as if it had been set in the editor.
+ *     its own, class=X > grid=... size=... - exactly as if it had been set in the editor; a kit of Enhanced
+ *     First Aid Kits class=X+, so the kits carried, instances of it, follow (fnc_editScope).
  *   - else rules, as the Import at Review reads them (fnc_importText): a bare rules text or lines of a
  *     cba_settings.sqf. Their statements join the own ones - the own preset and the rest stay -, and the
  *     ones that are already there are not added twice.
@@ -61,8 +62,10 @@ if (_entries isNotEqualTo []) exitWith {
             };
         } forEach _fields;
 
+        // A kit of Enhanced First Aid Kits for the instances of it that are carried as well, as its editors
+        // write it (fnc_editScope): class=X+.
         if (count _set > 0) then {
-            _changes pushBack [_class, _set, [], false];
+            _changes pushBack [_class, _set, [], (([_class] call EFUNC(items,kitOf)) param [1, -1]) == 0];
         };
     } forEach _entries;
 

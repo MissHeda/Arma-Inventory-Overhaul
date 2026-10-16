@@ -78,6 +78,7 @@ PREP(canvasFromBlocks);
 PREP(canvasBlocks);
 PREP(canvasBox);
 PREP(answerText);
+PREP(kitRoom);
 PREP(weightText);
 PREP(weightValue);
 PREP(ownClassRules);

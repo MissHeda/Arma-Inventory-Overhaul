@@ -53,10 +53,16 @@ A client can see them and cannot change them.
 - [ ] Holes in grids: no hover on a hole, the footprint turns red over one, a drop beside a hole.
 - [ ] L-shaped items: tile border, R turns around the grabbed cell, a small item fits into the L's corner.
 - [ ] Grids 10 wide: cell 37 px at 1080p, the storage column scrolls, the camera stays visible while looting.
-- [ ] Painted compartments: 1:1 where drawn at the cell pitch; every cell the same size with the same gap everywhere, also
-      where two compartments touch and for one-cell compartments (no cell narrower or cut at a seam, in the window, in a kit
-      window and in the wizard's "This is how it looks" preview); tiles, footprints and the selection exactly on their
-      cells, hovered up to the cell's edge; the ring `aaa/aba/aaa`.
+- [ ] Painted compartments: where two touch there is a gap as wide as between flowed blocks, along the whole column or row
+      line, and each compartment lies on its own faint rounded panel, so every compartment reads as a block (the owner's
+      15-compartment canvas: each one tellable from its neighbours); compartments line up as painted; every cell the same size
+      with the same gap, one-cell compartments too; a wide compartment under two narrow ones shows the gap between two of its
+      own cells, inside its one panel; an L-shaped one's panel follows its cells with no brighter overlap; the ring `aaa/aba/aaa`
+      (the ring's panel open in the middle, the inner cell on a panel of its own); flowed containers have the same panels. The
+      same in the window, a kit window and the wizard's "This is how it looks" preview (Paint and Blocks alike). Tiles,
+      footprints, selection frames and the band exactly on their cells, a tile over a gap inside its compartment hovered and
+      dropped on all along, the gap between two compartments no cell (no hover, no footprint); a wide canvas in a column and in
+      a kit window: nothing cut on the right.
 - [ ] Section captions: Take all / Put all in and Sort sit right of the tab, as high as it and in its text size, the labels in
       the middle of their buttons both ways (the same on all UI sizes), Sort with its icon; Sort lays out an own container, a
       crate, the ground and a kit window, and is greyed while a move out of that container is under way;
@@ -122,6 +128,16 @@ A client can see them and cannot change them.
       tree Apply; "Only this class" and Back to the preset in tree mode; Undo; the same on Items with size and weight.
 - [ ] Export / Import in both editors: Export on one class and on a tree (one line per class), alone and as a client in
       multiplayer (a box to copy by hand); Import of those lines, of rules and of nonsense ("Nothing to import"), one Undo each.
+- [ ] Kits (with Enhanced First Aid Kits and Enhanced Utility Pouches): the Kits chip lists IFAK, AFAK, MFAK and the pouches, no
+      numbered `efak_IFAK_7` anywhere, also not in Tree; the IFAK says "Now: capacity 35 (EFAK)" (the mission's capacity setting
+      shows) and the note; paint 4x3 and Apply - Review shows `class=efak_IFAK+ > grid=4x3`, the card "4x3 (your rule)"; after
+      Save a carried IFAK's window shows a 4x3 grid and "n / 12 cells", takes items only while a cell is free (never "not enough
+      space" by mass), refuses with "No room" when full, an IFAK already fuller than 12 cells shows the rest apart and loses
+      nothing; hint and inspect card say cells; Back to the preset returns the capacity and the open grid; `kind=kit > grid=12`
+      and a test addon's `einv_grid = "3x3";` on `efak_IFAK` do the same; Export and Import of the IFAK's line. ACE Arsenal: drag
+      bandages from ACE's list onto the IFAK's tile in the panel - with the grid, as many as there are cells ("Only 3 of 5 fit"),
+      without it, as many as the capacity takes; a kit type set to "nothing" in its Arsenal setting says it cannot be filled there;
+      EFAK's own kits tab still goes by the capacity. Multiplayer: two players packing the same kit of a crate one after the other.
 - [ ] Review: edit the text, Import, Copy, Save to the server (admin) and to the mission, Undo / Redo, Reset,
       personal presets.
 - [ ] After Save the inventory shows the drawn shape; an old setting with `base=tarkov` still loads.

@@ -11,8 +11,11 @@
  *   that mod's rules for the kit: kits in kits, its list, its types, medical only, its defaults
  *   (efak_core_fnc_canPackItem)
  *   no more than its default contents, where the mission limits it to them
- *   room: that mod's masses (efak_core_fnc_getItemMass) against the kit's capacity - config masses,
- *   never this mod's weight= rules, which that mod knows nothing of
+ *   room, in the measure the kit's room is counted in (fnc_roomMode):
+ *     "capacity" - that mod's masses (efak_core_fnc_getItemMass) against the kit's capacity - config
+ *                  masses, never this mod's weight= rules, which that mod knows nothing of
+ *     "cells"    - a rule or its config gives the kit a grid: free cells in it and nothing else
+ *                  (fnc_hasCells, "NoRoom"); that mod's capacity no longer counts
  * Whether packing is switched on is asked before this (fnc_canDrop): a uniform taken off for an item
  * out of the kit may go back in all the same, as in that mod's own wearItem.
  *
@@ -20,6 +23,8 @@
  * 0: Kit class <STRING>
  * 1: Item class <STRING>
  * 2: How many <NUMBER> (default: 1)
+ * 3: Rounds of the magazines, for the cells they take: one number for all, -1 for full, or one per
+ *    magazine <NUMBER or ARRAY> (default: -1)
  *
  * Return Value:
  * [takes them, reason - "" when it does] <ARRAY>
@@ -30,7 +35,7 @@
  * Public: No
  */
 
-params [["_kit", "", [""]], ["_class", "", [""]], ["_count", 1, [0]]];
+params [["_kit", "", [""]], ["_class", "", [""]], ["_count", 1, [0]], ["_rounds", -1, [0, []]]];
 
 private _wait = call FUNC(notReady);
 
@@ -51,6 +56,11 @@ private _limit = [_kit, _class] call EFAKFUNC(core,getPackLimit);
 
 if (_limit >= 0 && {(([_contents, _class] call EFAKFUNC(core,countItem)) + _count) > _limit}) exitWith {
     [false, localize "STR_efak_core_Error_DefaultsReached"]
+};
+
+// A grid of its own: its cells are all its room.
+if (([_kit] call FUNC(roomMode)) isEqualTo "cells") exitWith {
+    [[false, "NoRoom"], [true, ""]] select ([_kit, _class, _count, _rounds] call FUNC(hasCells))
 };
 
 private _mass = [_class] call EFAKFUNC(core,getItemMass);

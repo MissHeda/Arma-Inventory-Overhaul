@@ -72,6 +72,7 @@ if (!isNil "bettInv_stackMove") then {
 };
 
 GVAR(openedOn) = objNull;
+GVAR(openGuess) = false;
 GVAR(openParent) = objNull;
 GVAR(openPos) = [];
 GVAR(moveHeld) = [];

@@ -104,6 +104,8 @@ private _fnc_oldSize = {
             case "radio";
             case "compass";
             case "watch": {[1, 1]};
+            // A kit of Enhanced First Aid Kits is an item to the rules as well (kind=item reaches it).
+            case "kit";
             case "item": {
                 switch (true) do {
                     case (_mass <= 10): {[1, 1]};
@@ -126,7 +128,7 @@ private _fnc_oldStack = {
     private _stack = switch (true) do {
         case (isNumber (_config >> "einv_stackSize")): {getNumber (_config >> "einv_stackSize")};
         case (_kind == "grenade"): {5};
-        case (_kind == "item" && {_size isEqualTo [1, 1]}): {10};
+        case (_kind in ["item", "kit"] && {_size isEqualTo [1, 1]}): {10};
         default {1};
     };
 
@@ -261,7 +263,7 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
     private _oldStack = [_config, _kind, _oldSize] call _fnc_oldStack;
 
     if ((_info get "stack") != _oldStack) then {
-        private _smallCase = _kind == "item" && {(_mass <= 10) isNotEqualTo (_oldSize isEqualTo [1, 1])};
+        private _smallCase = _kind in ["item", "kit"] && {(_mass <= 10) isNotEqualTo (_oldSize isEqualTo [1, 1])};
 
         [["stack", "stackSmall"] select _smallCase, format ["STACK%1 %2 (%3, mass %4, size %5): before %6, now %7 from %8", ["", " (stackSmall)"] select _smallCase, _class, _kind, _mass, _oldSize, _oldStack, _info get "stack", (_info get "src") get "stack"]] call _fnc_count;
     };

@@ -42,8 +42,9 @@
  *                  when that is not known
  *   "parent"     - where it lies: the container its tile lies in, or "kit:" + the lowercase class of the
  *                  kit it is packed in
- *   "load"       - how full it is, "used / capacity" in that mod's measure
- *   "loadOver"   - fuller than its capacity
+ *   "load"       - how full it is (fnc_fillState): "used / capacity" in that mod's measure, or - for a
+ *                  kit a rule or its config gives a grid (fnc_roomMode "cells") - "used / total cells"
+ *   "loadOver"   - fuller than its capacity, or tiles of it that found no cell in its grid
  *   "notice"     - "" or, while no kit may change yet - its contents have not reached this machine
  *                  (fnc_notReady) -, a line that says why, in its window in place of the grid
  *
@@ -146,8 +147,6 @@ private _wait = call FUNC(notReady);
 GVAR(opened) apply {
     private _kit = _x;
     private _key = "kit:" + toLowerANSI _kit;
-    private _used = [_kit] call EFAKFUNC(core,getUsedCapacity);
-    private _capacity = [_kit] call EFAKFUNC(core,getCapacity);
     private _title = [_kit] call FUNC(getName);
 
     if (_title isEqualTo "") then {
@@ -169,6 +168,9 @@ GVAR(opened) apply {
         _outer = _nextParent;
     };
 
+    // How full: that mod's mass against its capacity, or the cells of a grid of its own.
+    ([_kit] call FUNC(fillState)) params ["_load", "_over"];
+
     createHashMapFromArray [
         ["id", "kit"],
         ["title", _title],
@@ -182,8 +184,8 @@ GVAR(opened) apply {
         ["holder", _key],
         ["root", if (isNull _top) then {objNull} else {[_top] call EFUNC(storage,rootOf)}],
         ["parent", if (_parentKit isEqualTo "") then {_container} else {"kit:" + toLowerANSI _parentKit}],
-        ["load", format ["%1 / %2 %3", round _used, round _capacity, localize "STR_efak_gui_MassUnit"]],
-        ["loadOver", _used > _capacity + KIT_MASS_EPSILON],
+        ["load", _load],
+        ["loadOver", _over],
         ["notice", _wait]
     ]
 }

@@ -38,12 +38,23 @@
  * the window waits for them too. One still held after OPEN_TRIES frames that findDisplay no longer finds
  * does not keep the window from opening.
  *
+ * What the engine asked for always wins over a guess. The guard opens the window on a guess - the soldier's
+ * own gear, the vehicle he sits in or looks at - when a vanilla inventory came up that the unit's handler
+ * was not asked for (fnc_guardVanilla). Such an opening says the frame that display came up in, and gives
+ * way, before and while it waits, as soon as the handler was asked in that frame or since: the handler's
+ * own opening names the vehicle or crate the engine opened and is on its way. So it does to an opening
+ * that was asked for and waits for that display to go as well (GVAR(openWaiting)). A window made on a
+ * guess is noted (GVAR(openGuess)), so the handler's opening that comes after it takes its place
+ * (fnc_onInventoryOpened).
+ *
  * Arguments:
  * 0: Unit <OBJECT>
  * 1: Container the unit opened, or objNull <OBJECT>
  * 2: Second container (the ground next to a crate), or objNull <OBJECT>
  * 3: Frames already waited for a vanilla inventory to go - for the call itself, which waits <NUMBER>
  *    (default: 0)
+ * 4: The frame a vanilla inventory nobody asked for came up in, when this is the guard's guess in its place
+ *    (fnc_guardVanilla); -1 for an opening something asked for <NUMBER> (default: -1)
  *
  * Return Value:
  * Opened, or opens a frame later <BOOL>
@@ -56,10 +67,27 @@
 
 disableSerialization;
 
-params ["_unit", ["_container", objNull], ["_secondary", objNull], ["_waited", 0, [0]]];
+params ["_unit", ["_container", objNull], ["_secondary", objNull], ["_waited", 0, [0]], ["_guess", -1, [0]]];
 
 if (!hasInterface || {!alive _unit}) exitWith {false};
-if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {false};
+
+// A guess gives way to the engine's own opening - the unit's handler was asked since the vanilla inventory came
+// up - and to any other opening that waits for that display to go.
+if (_guess >= 0 && {(GVAR(askedFrame) max GVAR(openWaiting)) >= _guess}) exitWith {
+    INFO("The unit's handler was asked, or another opening waits, while the window waited to open on a guess - the guess gives way to it.");
+    false
+};
+
+// One window at a time. An opening that named a container and finds one made a moment before says so in the RPT.
+if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {
+    if (!isNull _container) then {
+        private _named = typeOf _container;
+
+        INFO_1("refused: a window is open already - %1 does not open in it.",_named);
+    };
+
+    false
+};
 
 private _vanilla = findDisplay IDD_VANILLA_INVENTORY;
 
@@ -78,6 +106,11 @@ if (_wait && {_waited >= OPEN_TRIES} && {isNull _vanilla}) then {
 };
 
 if (_wait) exitWith {
+    // An opening that was asked for waits: a guess the guard makes meanwhile gives way to it (fnc_guardVanilla).
+    if (_guess < 0) then {
+        GVAR(openWaiting) = diag_frameNo;
+    };
+
     if (!isNull _vanilla) then {
         [_vanilla] call FUNC(guardVanilla);
     };
@@ -91,7 +124,7 @@ if (_wait) exitWith {
         INFO("The vanilla inventory is open or closing as the window should open - opening the window a frame later.");
     };
 
-    [{_this call FUNC(open)}, [_unit, _container, _secondary, _waited + 1]] call CBA_fnc_execNextFrame;
+    [{_this call FUNC(open)}, [_unit, _container, _secondary, _waited + 1, _guess]] call CBA_fnc_execNextFrame;
     true
 };
 
@@ -141,6 +174,9 @@ if !([_display, _unit, _container, _secondary, createHashMap, "pfh"] call FUNC(a
     _display closeDisplay 2;
     false
 };
+
+// Made on a guess: the engine's opening that comes after it takes its place (fnc_onInventoryOpened).
+GVAR(openGuess) = _guess >= 0;
 
 // What it opened on, for the RPT: each container's class, its family (fnc_containerFamily: vehicle, crate,
 // ground, body), its compartments as rows x cols (einv_storage_fnc_getBlocks - the ground's is open, it grows),

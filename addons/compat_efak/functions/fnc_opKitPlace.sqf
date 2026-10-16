@@ -77,32 +77,18 @@ if (([[_sizeW, _sizeH], [_sizeH, _sizeW]] select (_rot == 1)) isNotEqualTo [_w, 
     _rot = 0;
 };
 
-// A kit's grid is one open compartment, STORAGE_COLS wide and as long as it needs; the tile itself
-// does not count against its new cell.
-// A shaped item takes only its own cells, as it lies (einv_storage_fnc_overlaps).
-private _free = _block == 0 && {_col >= 0} && {_row >= 0} && {_col + _w <= STORAGE_COLS};
-
-if (_free) then {
-    private _mask = [_col, _row, _w, _h, ([_class, _rot] call EFUNC(items,footprintAs)) select 2];
-
-    {
-        if (
-            _forEachIndex != _index
-            && {(_x getOrDefault ["block", -1]) == 0}
-            && {[_mask, [_x get "col", _x get "row", _x get "w", _x get "h", _x getOrDefault ["holes", []]]] call EFUNC(storage,overlaps)}
-        ) exitWith {
-            _free = false;
-        };
-    } forEach _view;
+// Inside the compartment it names - the kit's own grid's (a rule or its config gives it one), or its one
+// open compartment, STORAGE_COLS wide and as long as it needs - and free; the tile itself does not count
+// against its new cell. A shaped item takes only its own cells, as it lies (fnc_cellFree).
+if !([_kit, _view, [_col, _row, _block, _w, _h], ([_class, _rot] call EFUNC(items,footprintAs)) select 2, _index] call FUNC(cellFree)) exitWith {
+    ["Taken", [], []]
 };
-
-if (!_free) exitWith {["Taken", [], []]};
 
 private _kitKey = "kit:" + toLowerANSI _kit;
 
-[_kitKey, _tile, [_col, _row, 0, _w, _h, _rot]] call EFUNC(storage,setPlace);
+[_kitKey, _tile, [_col, _row, _block, _w, _h, _rot]] call EFUNC(storage,setPlace);
 
 // What this execution read of the kit is out of date now (einv_storage_fnc_findEntry).
 EGVAR(storage,cache) deleteAt _kitKey;
 
-["", [], [[_col, _row, 0, _w, _h, _rot]]]
+["", [], [[_col, _row, _block, _w, _h, _rot]]]

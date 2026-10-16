@@ -1,7 +1,8 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * What the inspect card adds for a kit: how full it is, in that mod's own measure, and what is in it -
+ * What the inspect card adds for a kit: how full it is (fnc_fillState: in that mod's own measure, or in
+ * cells for a kit a rule or its config gives a grid), and what is in it -
  * a line per kind of item, opened magazines with their rounds, a handful at most and then how many
  * kinds more. Nothing for a kit nobody has carried yet.
  *
@@ -28,12 +29,7 @@ if !(missionNamespace getVariable [QEFAKGVAR(core,contentsSynced), true]) exitWi
     [[LLSTRING(Inspect_Contents), LLSTRING(Loading)]]
 };
 
-private _rows = [[LLSTRING(Inspect_Filled), format [
-    "%1 / %2 %3",
-    round ([_class] call EFAKFUNC(core,getUsedCapacity)),
-    round ([_class] call EFAKFUNC(core,getCapacity)),
-    localize "STR_efak_gui_MassUnit"
-]]];
+private _rows = [[LLSTRING(Inspect_Filled), ([_class] call FUNC(fillState)) select 0]];
 
 private _contents = [_class] call EFAKFUNC(core,getContents);
 

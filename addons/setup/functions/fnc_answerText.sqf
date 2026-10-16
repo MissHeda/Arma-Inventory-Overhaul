@@ -8,7 +8,10 @@
  *           "6x4" "same as V_PlateCarrier1_rgr" when the class's own rule takes it from another class;
  *           "3 compartments in a 7×7 drawing" for the ones drawn where they lie (grid=aab/acc);
  *           "no room by default" for a grid by load on a class whose config holds nothing - a cosmetic
- *           backpack, a radio pack - which only an own grid gives cells
+ *           backpack, a radio pack - which only an own grid gives cells;
+ *           "capacity 35" "EFAK" for a kit of Enhanced First Aid Kits that no rule and no config key of
+ *           its own gives a grid: that mod's capacity is its room then (fnc_kitRoom), the mission's
+ *           setting for its type included (einv_compat_efak_fnc_capacity)
  *   size  - "2x3" "preset"
  *   stack - "5 per tile" "your rule"
  * Where it comes from is "your rule" for a rule of the draft that is for the class itself, "inherited from X"
@@ -34,6 +37,18 @@
 params [["_info", createHashMap, [createHashMap]], ["_field", "grid", [""]], ["_own", createHashMap, [createHashMap]]];
 
 private _key = ["footprint", _field] select (_field isNotEqualTo "size");
+
+// A kit whose room is still that mod's capacity: that is what it has, not the grid it would get.
+if (_field isEqualTo "grid" && {([_info] call FUNC(kitRoom)) isEqualTo "capacity"}) exitWith {
+    private _class = _info getOrDefault ["class", ""];
+    private _capacity = if (isNil QEFUNC(compat_efak,capacity)) then {-1} else {[_class] call EFUNC(compat_efak,capacity)};
+
+    if (_capacity < 0) then {
+        _capacity = _info getOrDefault ["maxLoad", 0];
+    };
+
+    [format [LLSTRING(Answer_KitCapacity), round _capacity], LLSTRING(Answer_Efak)]
+};
 
 private _words = switch (_field) do {
     case "size": {

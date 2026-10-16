@@ -6,6 +6,11 @@
  * inheritance selector, class=X+ (fnc_upsertRules), instead of one rule per class. A class with nothing
  * built on it that a step lists has no tree: its edit is for that class alone.
  *
+ * A kit of Enhanced First Aid Kits is always edited with its tree, however it was picked: the kits
+ * players carry are the instance classes that mod makes of the type's own class ("efak_IFAK_7" of
+ * "efak_IFAK", einv_items_fnc_kitOf), which no list shows, and a rule for the type's class alone would
+ * never reach one of them. How many classes are built on it is then how many instances the type has.
+ *
  * Arguments:
  * 0: Step: "items" or "containers" <STRING>
  * 1: Class <STRING>
@@ -21,7 +26,13 @@
 
 params [["_mode", "items", [""]], ["_class", "", [""]]];
 
-if (_class isEqualTo "" || {(GVAR(editScope) getOrDefault [_mode, "class"]) isNotEqualTo "tree"}) exitWith {[false, 0]};
+if (_class isEqualTo "") exitWith {[false, 0]};
+
+private _kit = [_class] call EFUNC(items,kitOf);
+
+if ((_kit param [1, -1]) == 0) exitWith {[true, _kit select 2]};
+
+if ((GVAR(editScope) getOrDefault [_mode, "class"]) isNotEqualTo "tree") exitWith {[false, 0]};
 
 private _below = (count (([_class, _mode] call FUNC(treeRows)) getOrDefault ["rows", []]) - 1) max 0;
 

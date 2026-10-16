@@ -9,9 +9,18 @@
  * kit has something in it), a "Sort" button that lays its grid out anew (fnc_sortHolder - the inventory
  * only, where the player may change the kit), how full it is - "12 / 60 mass" in that mod's measure, in
  * the loss colour when over - and a cross that closes it; under a hairline the kit's grid with our tiles,
- * or the line that says why nothing can go in yet (still loading, say). The buttons are as high as the
- * cross and their labels centred (fnc_uiButton, "centred"), and the name and the fill text are centred in
- * the row's height as the buttons are.
+ * or the line that says why nothing can go in yet (still loading, say).
+ *
+ * The title row is one middle line: the picture, the name, the buttons, the fill text and the cross are
+ * all centred in the row's height. The buttons and the cross are those of a section's caption line
+ * (fnc_drawSection): as high as it, their labels in its size and centred (fnc_uiButton, "centred"), as wide
+ * as fnc_buttonWidth and fnc_sortChip make them - Sort names the order it sorts by, "Sort: Name", and
+ * changes in place with it (fnc_sortButtons). They stand together on the right, before the fill text and
+ * the cross, one gap between each of them and before the name. The name keeps its room first - all of it,
+ * or SQUARE(UNIT * 4) of a long one: a window too narrow for that makes Sort compact - the icon and "Sort",
+ * then the icon alone, the order in its tooltip -, then leaves it out, then Take all, and only then is the
+ * name cut. A press on a button is the button's: it neither raises nor moves the window
+ * (fnc_onMouseButton, "buttons").
  *
  * One controls group of a fixed size, its content fitting it exactly - a group scrolls once its content
  * reaches past it. The grid lies in a scrolling group of its own, the body, which scrolls only for a
@@ -39,7 +48,8 @@
  *   "group", "body" - the window and its scrolling body <CONTROL>
  *   "rect"          - [x, y, w, h] on the screen
  *   "title"         - [x, y, w, h] in the window: the strip that moves it
- *   "close"         - [x, y, w, h] in the window: the cross
+ *   "close"         - [x, y, w, h] in the window: the cross's column of the title row
+ *   "buttons"       - [[x, y, w, h], ...] in the window: Take all and Sort, where they are drawn
  *   "section"       - what it was drawn from, to draw it again (fnc_raiseWindow)
  *   "grids"         - the indices of its grids in the list of grids
  *
@@ -65,11 +75,13 @@ private _radius = _theme getOrDefault ["radius", 0];
 private _padY = UNIT * 0.4;
 private _padX = SQUARE(_padY);
 private _titleH = UNIT * 1.1;
-private _closeW = SQUARE(_titleH);
 
-// The grid and the extra pixel of its lines on the left.
-private _innerW = STORAGE_COLS * _cellW + pixelW;
-private _width = _padX * 2 + _innerW;
+// The buttons and the cross of the title row are a section caption's (fnc_drawSection): a caption line high,
+// their labels in its size, a gap apart.
+private _chipH = UNIT * 0.62;
+private _chipSize = UNIT * 0.46;
+private _gap = SQUARE(UNIT * 0.3);
+private _closeW = SQUARE(_chipH);
 
 // ----- What the body holds -----
 
@@ -78,16 +90,24 @@ private _layout = createHashMap;
 private _places = [];
 private _contentH = UNIT * 0.7;
 
+// The grid's block: STORAGE_COLS cells, or wider where a canvas's seams open it (fnc_flowCompartments).
+private _blockW = STORAGE_COLS * _cellW;
+
 if (_notice isEqualTo "") then {
     _layout = [_section getOrDefault ["layoutKey", ""], _section getOrDefault ["entries", []]] call EFUNC(storage,getLayout);
 
-    ([_layout] call FUNC(flowCompartments)) params ["_flowed", "_flowH"];
+    ([_layout] call FUNC(flowCompartments)) params ["_flowed", "_flowH", "_flowW"];
 
     _places = _flowed;
+    _blockW = _blockW max _flowW;
 
     // The grid lies a pixel in from the body's corner: its lines reach a pixel left of and above it.
     _contentH = _flowH + pixelH;
 };
+
+// The grid and the pixel left of it that its compartments' panels reach into.
+private _innerW = _blockW + pixelW;
+private _width = _padX * 2 + _innerW;
 
 private _bodyH = _contentH min (CONTENT_H - _padY * 3 - _titleH);
 private _height = _padY * 3 + _titleH + _bodyH;
@@ -133,7 +153,21 @@ private _fnc_events = {
 [_display, _group, [0, 0, _groupW, _groupH], _theme getOrDefault ["inspectBg", [0.075, 0.083, 0.1, 0.97]], _radius] call FUNC(uiPanel);
 [_display, _group, [0, 0, _groupW, _groupH], [1, 1, 1, 0.12], _radius] call FUNC(uiRing);
 
-// ----- The title row: picture, name, how full, the cross -----
+// ----- The title row: picture, name, Take all and Sort, how full, the cross -----
+
+// One middle line, the row's: the picture, the buttons and the cross are centred on it, the name and the fill
+// text as well - a label draws its text from its top edge down, so a text in the row's middle starts above it
+// by TEXT_MID of its font height, as the buttons' labels do (fnc_uiButton). [top, height] in the window.
+private _rowMid = _padY + _titleH / 2;
+private _chipTop = _rowMid - _chipH / 2;
+
+private _fnc_mid = {
+    params ["_size"];
+
+    private _labelTop = _rowMid - TEXT_MID * _size;
+
+    [_labelTop, _padY + _titleH - _labelTop]
+};
 
 private _class = _section getOrDefault ["class", ""];
 private _pictureH = _titleH * 0.8;
@@ -141,80 +175,87 @@ private _textX = _padX;
 
 if (_class isNotEqualTo "") then {
     [
-        _display, _group, [_padX, _padY + (_titleH - _pictureH) / 2, SQUARE(_pictureH), _pictureH],
+        _display, _group, [_padX, _rowMid - _pictureH / 2, SQUARE(_pictureH), _pictureH],
         ([_class] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]
     ] call FUNC(uiPicture);
 
-    _textX = _padX + SQUARE(_pictureH) + SQUARE(UNIT * 0.3);
+    _textX = _padX + SQUARE(_pictureH) + _gap;
 };
 
+// From the right edge: the cross, a gap, how full it is - right-aligned, in the caption's size as a section's
+// weight is -, a gap, and the buttons end there.
 private _closeX = _groupW - _padX - _closeW;
 private _load = _section getOrDefault ["load", ""];
-private _loadSize = UNIT * 0.5;
-private _loadW = [0, (_load getTextWidth [_font, _loadSize]) * TEXT_SLACK + SQUARE(UNIT * 0.3)] select (_load isNotEqualTo "");
+private _loadW = [0, (_load getTextWidth [_font, _chipSize]) * TEXT_SLACK] select (_load isNotEqualTo "");
 private _loadColor = [
     _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]],
     _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
 ] select (_section getOrDefault ["loadOver", false]);
 
-// A label draws its text from its top edge down: a text in the row's middle starts above it by TEXT_MID of
-// its font height, as the buttons' labels do (fnc_uiButton). [top, height] in the window.
-private _fnc_mid = {
-    params ["_size"];
-
-    private _labelTop = _padY + _titleH / 2 - TEXT_MID * _size;
-
-    [_labelTop, _padY + _titleH - _labelTop]
-};
+private _buttonsEnd = _closeX - _gap - ([0, _loadW + _gap] select (_loadW > 0));
 
 if (_load isNotEqualTo "") then {
-    (_loadSize call _fnc_mid) params ["_loadTop", "_loadH"];
+    (_chipSize call _fnc_mid) params ["_loadTop", "_loadH"];
 
-    [_display, _group, [_closeX - _loadW, _loadTop, _loadW, _loadH], _load, _loadSize, _loadColor, _font, 1] call FUNC(uiLabel);
+    [_display, _group, [_closeX - _gap - _loadW, _loadTop, _loadW, _loadH], _load, _chipSize, _loadColor, _font, 1] call FUNC(uiLabel);
 };
 
-// The buttons, left of how full it is: one row of chips as high as the cross, in the size of the fill text
-// (fnc_buttonWidth, fnc_uiButton). Take all: everything in the kit into the player's own gear
-// (einv_compat_efak_fnc_unpackAll), as on a section of the loot column (fnc_drawSection). Sort: the kit's
-// grid laid out anew by the order the player has chosen, each click stepping to the next one (fnc_sortHolder,
+// The buttons, right-aligned before how full it is. Take all: everything in the kit into the player's own gear
+// (einv_compat_efak_fnc_unpackAll), as on a section of the loot column (fnc_drawSection). Sort: the kit's grid
+// laid out anew by the order the player has chosen, each click stepping to the next one (fnc_sortHolder,
 // fnc_sortChip), where the player may change the kit (einv_compat_efak_fnc_checkTouch). Both only in the
 // inventory and while the kit shows its grid, and drawn disabled while a move out of this kit is under way.
-// A button is [id, label, icon, width]; for lack of room the last one goes first.
+// A button is [id, label, icon, width, compact]; for lack of room Sort gets compact first, then the last one
+// goes.
 private _kitClass = _section getOrDefault ["kit", ""];
-private _buttonSize = _loadSize;
-private _buttonGap = SQUARE(UNIT * 0.3);
 private _buttons = [];
 
 if (_kitClass isNotEqualTo "" && {_notice isEqualTo ""} && {call FUNC(isInventoryMode)}) then {
     if ((_section getOrDefault ["entries", []]) isNotEqualTo [] && {!isNil QEFUNC(compat_efak,unpackAll)}) then {
         private _label = LLSTRING(Section_TakeAll);
 
-        _buttons pushBack [format ["take|%1", _kitClass], _label, "", [_label, "", _titleH, _buttonSize, _theme] call FUNC(buttonWidth)];
+        _buttons pushBack [format ["take|%1", _kitClass], _label, "", [_label, "", _chipH, _chipSize, _theme] call FUNC(buttonWidth), 0];
     };
 
     if (isNil QEFUNC(compat_efak,checkTouch) || {([_kitClass] call EFUNC(compat_efak,checkTouch)) isEqualTo ""}) then {
         // "Sort: Name", the order the player sorts by now, in a button as wide as the widest label (fnc_sortChip).
-        ([_titleH, _buttonSize, _theme] call FUNC(sortChip)) params ["_sortLabel", "_sortIcon", "_sortW"];
+        ([_chipH, _chipSize, _theme] call FUNC(sortChip)) params ["_sortLabel", "_sortIcon", "_sortW"];
 
-        _buttons pushBack [format ["sort|%1", _key], _sortLabel, _sortIcon, _sortW];
+        _buttons pushBack [format ["sort|%1", _key], _sortLabel, _sortIcon, _sortW, 0];
     };
 };
 
-// What the buttons take, each with the gap after it.
+// What the buttons take, each with the gap before it.
 private _fnc_buttonsW = {
     private _sum = 0;
 
     {
-        _sum = _sum + (_x select 3) + _buttonGap;
+        _sum = _sum + (_x select 3) + _gap;
     } forEach _buttons;
 
     _sum
 };
 
-// The name keeps room for itself first: too narrow for it, the last button goes, then the one before it.
-while {_buttons isNotEqualTo [] && {_closeX - _loadW - (call _fnc_buttonsW) - _textX < SQUARE(UNIT * 4)}} do {
-    _buttons deleteAt (count _buttons - 1);
+// The name keeps its room first - all of it, or SQUARE(UNIT * 4) of a long one. Too narrow for that, Sort gets
+// compact - the icon and "Sort", then the icon alone, the order in its tooltip (fnc_sortChip) -, then it goes,
+// then Take all, and only then is the name cut.
+private _name = [_section getOrDefault ["title", ""], _theme] call FUNC(caption);
+private _nameSize = UNIT * 0.66;
+private _nameLeast = ((_name getTextWidth [_fontBold, _nameSize]) * TEXT_SLACK) min SQUARE(UNIT * 4);
+
+while {_buttons isNotEqualTo [] && {_buttonsEnd - (call _fnc_buttonsW) - _textX < _nameLeast}} do {
+    (_buttons select -1) params ["_lastId", "", "", "", "_lastCompact"];
+
+    if ((_lastId select [0, 5]) isEqualTo "sort|" && {_lastCompact < 2}) then {
+        ([_chipH, _chipSize, _theme, _lastCompact + 1] call FUNC(sortChip)) params ["_sortLabel", "_sortIcon", "_sortW"];
+
+        _buttons set [count _buttons - 1, [_lastId, _sortLabel, _sortIcon, _sortW, _lastCompact + 1]];
+    } else {
+        _buttons deleteAt (count _buttons - 1);
+    };
 };
+
+private _buttonRects = [];
 
 if (_buttons isNotEqualTo []) then {
     private _busy = false;
@@ -226,13 +267,15 @@ if (_buttons isNotEqualTo []) then {
         };
     } forEach GVAR(inFlight);
 
-    private _buttonX = _closeX - _loadW - (call _fnc_buttonsW);
+    private _buttonX = _buttonsEnd - (call _fnc_buttonsW) + _gap;
 
     {
-        _x params ["_buttonId", "_label", "_icon", "_buttonW"];
+        _x params ["_buttonId", "_label", "_icon", "_buttonW", "_compact"];
+
+        private _rect = [_buttonX, _chipTop, _buttonW, _chipH];
 
         private _button = [
-            _display, _group, [_buttonX, _padY, _buttonW, _titleH], _buttonId, _label, _icon, _theme,
+            _display, _group, _rect, _buttonId, _label, _icon, _theme,
             {
                 params ["_direction", "_buttonId"];
 
@@ -246,25 +289,29 @@ if (_buttons isNotEqualTo []) then {
                     [_what] call EFUNC(compat_efak,unpackAll);
                 };
             },
-            _busy, _buttonSize, true
+            _busy, _chipSize, true
         ] call FUNC(uiButton);
 
-        // Sort says what its next click sorts by, and changes with the order (fnc_sortButtons).
+        // What it does, when the mouse rests on it, as on a section's caption line. Sort says what its next
+        // click sorts by - a compact one which order it sorts by as well - and changes with the order
+        // (fnc_sortButtons).
         if ((_buttonId select [0, 5]) isEqualTo "sort|") then {
-            [_button] call FUNC(sortButtons);
+            [_button, _compact] call FUNC(sortButtons);
+        } else {
+            (_button select -1) ctrlSetTooltip LLSTRING(Section_TakeAll_Tooltip);
         };
 
-        _buttonX = _buttonX + _buttonW + _buttonGap;
+        _buttonRects pushBack _rect;
+        _buttonX = _buttonX + _buttonW + _gap;
     } forEach _buttons;
 };
 
-private _nameW = (_closeX - _loadW - _textX - (call _fnc_buttonsW)) max 0;
-private _nameSize = UNIT * 0.66;
+private _nameW = (_buttonsEnd - (call _fnc_buttonsW) - _textX) max 0;
 (_nameSize call _fnc_mid) params ["_nameTop", "_nameH"];
 
 [
     _display, _group, [_textX, _nameTop, _nameW, _nameH],
-    [[_section getOrDefault ["title", ""], _theme] call FUNC(caption), _nameW, _fontBold, _nameSize] call FUNC(fitText),
+    [_name, _nameW, _fontBold, _nameSize] call FUNC(fitText),
     _nameSize, _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _fontBold, 0
 ] call FUNC(uiLabel);
 
@@ -272,7 +319,7 @@ private _nameSize = UNIT * 0.66;
 // something is dragged, as Escape (fnc_onKeyDown) - a right click on it with the left button held: what
 // is held may come from this window, and the grids of the windows after it would take other places in
 // the list of grids - the drop would take the item out of a kit it never came from.
-private _cross = [_display, _group, [_closeX, _padY, _closeW, _titleH], _key, "", UI_TEX(icon_close_ca), _theme, {
+private _cross = [_display, _group, [_closeX, _chipTop, _closeW, _chipH], _key, "", UI_TEX(icon_close_ca), _theme, {
     params ["", "_key"];
 
     if (GVAR(dragging)) exitWith {};
@@ -300,7 +347,7 @@ if (_notice isNotEqualTo "") then {
     // Nothing to show yet: a line that says why, and no grid that could take anything.
     [
         _display, _body, [pixelW, 0, _innerW, UNIT * 0.7],
-        [_notice, _innerW, _font, _loadSize] call FUNC(fitText), _loadSize, _muted, _font, 0
+        [_notice, _innerW, _font, UNIT * 0.5] call FUNC(fitText), UNIT * 0.5, _muted, _font, 0
     ] call FUNC(uiLabel);
 } else {
     [_display, _body, [pixelW, pixelH], _section, _layout, _places, _theme, _key] call FUNC(drawCompartments);
@@ -330,10 +377,12 @@ for "_i" from _first to (count (uiNamespace getVariable [QGVAR(grids), []]) - 1)
 
 if (_fresh) then {
     // The title lights up in the accent colour and dies away, as a tile where something landed
-    // (fnc_flashTile) - made last, so it lies over the title. Not over the cross, which stays the
-    // topmost thing there for its clicks.
+    // (fnc_flashTile) - made last, so it lies over the title. Not over the buttons and the cross, which stay
+    // the topmost things there for their clicks: it ends where the first of them begins.
     private _color = +(_theme getOrDefault ["accent", [1, 1, 1, 1]]);
     _color set [3, LAND_FLASH_ALPHA];
+
+    private _flashEnd = (_buttonRects param [0, [_closeX]]) select 0;
 
     {
         _x ctrlSetFade 0;
@@ -341,7 +390,7 @@ if (_fresh) then {
         _x ctrlSetFade 1;
         _x ctrlCommit LAND_FLASH;
     } forEach ([
-        _display, _group, [_padX * 0.5, _padY * 0.5, _closeX - _padX * 0.5, _titleH + _padY], _color, _radius
+        _display, _group, [_padX * 0.5, _padY * 0.5, _flashEnd - _padX * 0.5, _titleH + _padY], _color, _radius
     ] call FUNC(uiPanel));
 
     // A group's fade carries everything in it.
@@ -358,6 +407,7 @@ createHashMapFromArray [
     ["rect", ctrlPosition _group],
     ["title", [0, 0, _closeX, _padY * 1.5 + _titleH]],
     ["close", [_closeX, _padY, _closeW, _titleH]],
+    ["buttons", _buttonRects],
     ["section", _section],
     ["grids", _made]
 ]

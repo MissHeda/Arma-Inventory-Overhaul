@@ -316,9 +316,24 @@
 #define CELL_SCALE_MAX 1.3
 
 // The room between two compartments of a container, a share of a cell rounded to whole pixels: between
-// blocks that flow side by side or one under another (fnc_flowCompartments). The compartments of a canvas
-// have none: they touch at the plain cell pitch, every cell the same size with the same gap.
+// blocks that flow side by side or one under another (fnc_flowCompartments).
 #define COMPARTMENT_GAP 0.22
+
+// Where two compartments of a canvas touch (grid=aab/acc), the drawing opens up between them: a column
+// boundary at which some row has cells of two different compartments on its two sides, and a row boundary
+// at which some column has, gets this much more room, a share of a cell rounded to whole pixels (across for
+// a column boundary, down for a row boundary). Everything beyond it moves on by that much, so the
+// compartments keep where they were painted relative to each other and every cell keeps its size and the
+// plain gap to the next; a boundary where a compartment meets an empty place gets none (fnc_flowCompartments).
+// The same room as between two flowed blocks: the wizard writes a painted drawing the flow can make as
+// flowed blocks (einv_setup_fnc_canvasBlocks), and it must look like one it cannot.
+#define SEAM_GAP COMPARTMENT_GAP
+
+// The panel behind each compartment's cells (fnc_drawCompartments): how far it reaches past them, a share of
+// a cell rounded to whole pixels, at least one. Its corners are round up to three times that, so the corner
+// cells stay inside the round. COMPARTMENT_PAD_PX gives it in pixels for a cell CELLW wide.
+#define COMPARTMENT_PAD 0.06
+#define COMPARTMENT_PAD_PX(CELLW) ((round ((CELLW) * COMPARTMENT_PAD / pixelW)) max 1)
 
 // ---------------------------------------------------------------------------
 // The live camera on the player's soldier (fnc_cameraStart). Starting values - tuned in the game.

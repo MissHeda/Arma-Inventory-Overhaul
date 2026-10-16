@@ -22,10 +22,11 @@ PREP(menu);
 PREP(staging);
 PREP(growStaging);
 
-// Dragging an item out of ACE's list, and putting new things in
+// Dragging an item out of ACE's list, and putting new things in - into a kit too
 PREP(onListPress);
 PREP(listDrag);
 PREP(addTo);
+PREP(listToKit);
 
 // Taking things out of the open container or the staging space
 PREP(remove);

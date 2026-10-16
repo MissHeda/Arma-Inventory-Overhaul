@@ -313,6 +313,9 @@
         <Key ID="STR_einv_gui_Section_PutAll_Tooltip">
             <English>Moves everything in here into %1</English>
         </Key>
+        <Key ID="STR_einv_gui_Section_Sort">
+            <English>Sort</English>
+        </Key>
         <Key ID="STR_einv_gui_Section_SortBy">
             <English>Sort: %1</English>
         </Key>
@@ -531,6 +534,9 @@
         </Key>
         <Key ID="STR_einv_gui_Slot_Watch">
             <English>Watch</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sort_Compact_Tooltip">
+            <English>%1 - click for %2</English>
         </Key>
         <Key ID="STR_einv_gui_Sort_Name">
             <English>Name</English>

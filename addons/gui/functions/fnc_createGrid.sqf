@@ -19,8 +19,13 @@
  * without a word.
  *
  * Every cell of every grid is the same size with the same gap to the next, whichever compartment of a
- * container it belongs to: the compartments of a canvas (grid=aab/acc) are grids that touch at the plain
- * pitch, and a tile or a frame on one (fnc_spanRect) is as wide as its cells are.
+ * container it belongs to. A canvas's compartment (grid=aab/acc) may reach over a seam that opens the
+ * canvas between two others (fnc_flowCompartments): its columns and rows then do not all lie at the plain
+ * pitch. Where each starts is kept on the grid ("colX", "rowY"), and so is, for finding a cell from a
+ * point at once, which column or row each stretch of one pitch from the corner holds ("colAt",
+ * "rowAt"). Every grid has them, the plain pitch where nothing opens up. A cell is its column's and its
+ * row's place from the corner, and so is everything drawn on a grid (fnc_spanRect, fnc_shapeRects) and
+ * the cell under a point (fnc_screenToCell).
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -31,6 +36,8 @@
  * 5: Id of the section it shows, e.g. "vest" <STRING> (default: "")
  * 6: Columns - a compartment's own width <NUMBER> (default: STORAGE_COLS)
  * 7: Holes - the indices row * cols + col of the cells it does not have <ARRAY> (default: [])
+ * 8: Where its columns and rows start from its corner, [colX, rowY] as fnc_flowCompartments gives a
+ *    canvas's compartment; [] for the plain pitch <ARRAY> (default: [])
  *
  * Return Value:
  * The grid <HASHMAP>
@@ -38,6 +45,9 @@
  *   "rel"     - its top left corner in the parent, on a pixel <ARRAY>
  *   "cols", "rows" <NUMBER>
  *   "cellW", "cellH" - one cell, as screen width and height <NUMBER>
+ *   "colX", "rowY" - where each column and row starts from the corner <ARRAY>
+ *   "colAt", "rowAt" - per stretch of one cell from the corner, the last column (row) that starts in it
+ *               or before it: a point there lies in that one or the one before (fnc_screenToCell) <ARRAY>
  *   "cells"   - a control per cell, row by row, controlNull for a hole <ARRAY>
  *   "holes"   - the cells it does not have, as given <ARRAY>
  *   "tiles"   - the entries lying on it, see fnc_createTile <ARRAY>
@@ -51,10 +61,55 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_position", "_rows", "_theme", ["_section", ""], ["_cols", STORAGE_COLS], ["_holes", []]];
+params ["_display", "_parent", "_position", "_rows", "_theme", ["_section", ""], ["_cols", STORAGE_COLS], ["_holes", []], ["_offsets", [], [[]]]];
 _position params ["_relX", "_relY"];
+_offsets params [["_colX", [], [[]]], ["_rowY", [], [[]]]];
 
 (call FUNC(getCell)) params ["_cellW", "_cellH"];
+
+// Where each column and row starts: as given for a canvas's compartment, else at the plain pitch.
+if (count _colX != _cols) then {
+    _colX = [];
+
+    for "_col" from 0 to (_cols - 1) do {
+        _colX pushBack (_col * _cellW);
+    };
+};
+
+if (count _rowY != _rows) then {
+    _rowY = [];
+
+    for "_row" from 0 to (_rows - 1) do {
+        _rowY pushBack (_row * _cellH);
+    };
+};
+
+// Per stretch of one pitch from the corner, the last column (row) that starts before the stretch ends. A
+// column is a pitch wide and starts at least a pitch after the one before it, so a point in that stretch
+// lies in that column or in the one before it: one look and one comparison find it (fnc_screenToCell).
+private _fnc_lookup = {
+    params ["_starts", "_pitch"];
+
+    private _lookup = [];
+    private _count = count _starts;
+
+    if (_count == 0) exitWith {_lookup};
+
+    private _index = 0;
+    private _stretches = ceil (((_starts select (_count - 1)) + _pitch) / _pitch - 0.0001);
+
+    for "_stretch" from 0 to (_stretches - 1) do {
+        private _end = (_stretch + 1) * _pitch;
+
+        while {_index + 1 < _count && {(_starts select (_index + 1)) < _end}} do {
+            _index = _index + 1;
+        };
+
+        _lookup pushBack _index;
+    };
+
+    _lookup
+};
 
 private _originX = [safezoneX, 0] select !isNull _parent;
 private _originY = [safezoneY, 0] select !isNull _parent;
@@ -77,8 +132,8 @@ for "_row" from 0 to (_rows - 1) do {
         };
 
         private _cell = [_display, "EINV_PanelRect", _parent, [
-            _left + _col * _cellW,
-            _top + _row * _cellH,
+            _left + (_colX select _col),
+            _top + (_rowY select _row),
             _cellW - pixelW,
             _cellH - pixelH
         ]] call FUNC(uiCreate);
@@ -95,6 +150,10 @@ private _grid = createHashMapFromArray [
     ["rows", _rows],
     ["cellW", _cellW],
     ["cellH", _cellH],
+    ["colX", _colX],
+    ["rowY", _rowY],
+    ["colAt", [_colX, _cellW] call _fnc_lookup],
+    ["rowAt", [_rowY, _cellH] call _fnc_lookup],
     ["cells", _cells],
     ["holes", _holes],
     ["tiles", []],

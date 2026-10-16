@@ -6,6 +6,14 @@ PREP(hintParts);
 PREP(inspectRows);
 PREP(hideCbaOption);
 
+// A kit's room: that mod's capacity, or the cells of a grid a rule or its config gives it
+PREP(roomMode);
+PREP(capacity);
+PREP(kitBlocks);
+PREP(hasCells);
+PREP(cellFree);
+PREP(fillState);
+
 // Kits in windows of their own inside the inventory
 PREP(onWindowOpen);
 PREP(getSections);
@@ -22,6 +30,8 @@ PREP(requestRebuild);
 // Moving into and out of kits
 PREP(canDrop);
 PREP(canPack);
+PREP(canPackNew);
+PREP(packNew);
 PREP(contains);
 PREP(snapshot);
 PREP(repackable);

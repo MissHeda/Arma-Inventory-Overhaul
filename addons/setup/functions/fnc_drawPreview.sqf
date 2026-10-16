@@ -6,10 +6,15 @@
  * on the inventory's panel, in its cells, a pixel apart.
  *   - A container's compartments laid out as the inventory lays them out (einv_gui_fnc_flowCompartments):
  *     side by side as far as STORAGE_COLS cells reach, a gap between two, then on the next line - and the
- *     ones of a canvas exactly where they were drawn, on the plain pitch.
+ *     ones of a canvas where they were drawn, with the seam's room opened where two of them touch, so
+ *     the painted compartments read as the blocks they are.
+ *   - Each compartment on its own panel behind its cells, as einv_gui_fnc_drawCompartments draws it: the
+ *     theme's card, COMPARTMENT_PAD_PX past the cells, round as far as the corner cells stay inside, a
+ *     shaped one's holes left open (einv_gui_fnc_uiShape "panel").
  *   - Every cell the same size with the same gap to the next, whichever compartment it belongs to: the
  *     cell is a whole number of pixels and so is every offset, so no cell comes out a pixel wider than
- *     its neighbour and no gap a pixel wider than another.
+ *     its neighbour and no gap a pixel wider than another. A canvas that its seams make wider than the
+ *     card gets smaller cells, all of them alike, rather than being cut.
  *   - An item's tile on a piece of grid: its surface on its cells only (einv_gui_fnc_uiShape), its
  *     picture over its box, as a tile is drawn.
  * The one routine for Paint and Blocks alike: the same cell, gap and flow for the same compartments, so
@@ -96,33 +101,101 @@ if (_item isNotEqualTo []) exitWith {
     };
 };
 
-// A container: the compartments where the inventory puts them.
+// A container: the compartments where the inventory puts them, as large as fits across - the seams of a
+// canvas may make it wider than STORAGE_COLS cells (einv_gui_fnc_flowCompartments says how wide).
 private _cellPixels = (floor (((UNIT * 0.85) min (_areaW / (STORAGE_COLS + 0.5) * pixelH / pixelW)) / pixelH)) max 1;
+private _layout = createHashMapFromArray [["blocks", _blocks]];
+private _flow = [_layout, [_cellPixels * pixelW, _cellPixels * pixelH]] call EFUNC(gui,flowCompartments);
+
+// Too wide: the cell that fits as near as the seams' rounding to pixels allows, then a pixel less until it does.
+if ((_flow select 2) > _areaW) then {
+    _cellPixels = (floor (_cellPixels * _areaW / (_flow select 2))) max 1;
+    _flow = [_layout, [_cellPixels * pixelW, _cellPixels * pixelH]] call EFUNC(gui,flowCompartments);
+
+    while {_cellPixels > 1 && {(_flow select 2) > _areaW}} do {
+        _cellPixels = _cellPixels - 1;
+        _flow = [_layout, [_cellPixels * pixelW, _cellPixels * pixelH]] call EFUNC(gui,flowCompartments);
+    };
+};
+
+_flow params ["_places", "_contentH", "_contentW"];
+
 private _cellH = _cellPixels * pixelH;
 private _cellW = _cellPixels * pixelW;
-private _gridW = STORAGE_COLS * _cellW;
-
-([createHashMapFromArray [["blocks", _blocks]], [_cellW, _cellH]] call EFUNC(gui,flowCompartments)) params ["_places", "_contentH"];
 
 [
-    _display, _group, [0, 0, (_padX * 2 + _gridW) min (_width - SCROLL_W), (_padY * 2 + _contentH) max (UNIT * 1)],
+    _display, _group, [0, 0, (_padX * 2 + (_contentW max (STORAGE_COLS * _cellW))) min (_width - SCROLL_W), (_padY * 2 + _contentH) max (UNIT * 1)],
     _theme getOrDefault ["panel", [0.05, 0.05, 0.05, 0.92]], (_theme getOrDefault ["radius", 0]) min (UNIT * 0.3)
 ] call EFUNC(gui,uiPanel);
+
+// The compartments' panels, as the inventory draws them (einv_gui_fnc_drawCompartments): the card, the pad
+// past the cells, round up to three times the pad.
+private _pad = COMPARTMENT_PAD_PX(_cellW);
+private _padW = _pad * pixelW;
+private _padH = _pad * pixelH;
+private _radius = (_theme getOrDefault ["radius", 0]) min (_pad * 3 * pixelH);
+private _panelColor = _theme getOrDefault ["card", [1, 1, 1, 0.045]];
+
+if (_panelColor isEqualTo []) then {
+    _panelColor = _theme getOrDefault ["line", [1, 1, 1, 0.08]];
+};
+
+// Every panel first, then the cells: [corner x, corner y, w, h, holes, colX, rowY] per compartment drawn.
+private _drawn = [];
 
 {
     _x params ["_w", "_h", ["_holes", []]];
 
-    if ((_places param [_forEachIndex, []]) isEqualTo []) then {continue};
+    private _place = _places param [_forEachIndex, []];
 
-    // Every cell at the pitch from the compartment's corner, as the inventory draws it - the cells of a
-    // canvas's compartments too, which touch.
-    (_places select _forEachIndex) params ["_left", "_top"];
+    if (_place isEqualTo [] || {_w <= 0} || {_h <= 0}) then {continue};
+
+    // A canvas's compartment brings where its columns and rows start; a flowed one has the plain pitch.
+    _place params ["_left", "_top", ["_colX", []], ["_rowY", []]];
+
+    if (count _colX != _w) then {
+        _colX = [];
+
+        for "_col" from 0 to (_w - 1) do {
+            _colX pushBack (_col * _cellW);
+        };
+    };
+
+    if (count _rowY != _h) then {
+        _rowY = [];
+
+        for "_row" from 0 to (_h - 1) do {
+            _rowY pushBack (_row * _cellH);
+        };
+    };
+
+    private _x0 = _padX + _left;
+    private _y0 = _padY + _top;
+
+    if (_holes isEqualTo []) then {
+        [
+            _display, _group,
+            [_x0 - _padW, _y0 - _padH, (_colX select (_w - 1)) + _cellW - pixelW + _padW * 2, (_rowY select (_h - 1)) + _cellH - pixelH + _padH * 2],
+            _panelColor, _radius
+        ] call EFUNC(gui,uiPanel);
+    } else {
+        [
+            _display, _group, [_x0, _y0], _cellW, _cellH, [_w, _h, _holes], _panelColor, "panel", _pad,
+            [createHashMapFromArray [["colX", _colX], ["rowY", _rowY]], 0, 0]
+        ] call EFUNC(gui,uiShape);
+    };
+
+    _drawn pushBack [_x0, _y0, _w, _h, _holes, _colX, _rowY];
+} forEach _blocks;
+
+{
+    _x params ["_x0", "_y0", "_w", "_h", "_holes", "_colX", "_rowY"];
 
     for "_row" from 0 to (_h - 1) do {
         for "_col" from 0 to (_w - 1) do {
             if ((_row * _w + _col) in _holes) then {continue};
 
-            [_display, _group, [_padX + _left + _col * _cellW, _padY + _top + _row * _cellH, _cellW - pixelW, _cellH - pixelH], _cellColor] call EFUNC(gui,uiPanel);
+            [_display, _group, [_x0 + (_colX select _col), _y0 + (_rowY select _row), _cellW - pixelW, _cellH - pixelH], _cellColor] call EFUNC(gui,uiPanel);
         };
     };
-} forEach _blocks;
+} forEach _drawn;

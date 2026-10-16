@@ -25,6 +25,12 @@ GVAR(askedFrame) = -1e9;
 GVAR(handlerAgain) = -1e9;
 uiNamespace setVariable [QGVAR(closing), []];
 
+// The open window was made on the guard's guess, not on what the engine named (fnc_guardVanilla, fnc_open): the
+// engine's opening that comes after it takes its place (fnc_onInventoryOpened). And the frame an opening that was
+// asked for last waited for a vanilla inventory to go: a guess made meanwhile gives way to it.
+GVAR(openGuess) = false;
+GVAR(openWaiting) = -1e9;
+
 // What runs the open window's frame (fnc_onFrame): [driver, id] - "pfh", a CBA per-frame handler, or
 // "draw3d", a Draw3D mission event handler (fnc_startFrame, fnc_stopFrame) - and ["", -1] while none runs.
 // When it next checks whether the window should still be open, and when it next compares the contents

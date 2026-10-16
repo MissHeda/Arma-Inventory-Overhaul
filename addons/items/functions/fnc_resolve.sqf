@@ -49,7 +49,7 @@
  *   "footprint" - [w, h, holes] upright, holes the indices row * w + col of the cells a shaped item
  *                 (size=xx/x-) does not take, [] for a full rectangle <ARRAY>
  *   "stack"     - how many share a tile, at least 1 <NUMBER>
- *   "grid"      - for uniforms, vests, backpacks, crates and vehicles the grid spec
+ *   "grid"      - for uniforms, vests, backpacks, crates, vehicles and kits the grid spec
  *                 (fnc_parseGrid), else [] <ARRAY>
  *   "weight"    - its weight in kg by the rules, -1 when none sets one <NUMBER>
  *   "name"      - its name by the rules, "" when none sets one <STRING>

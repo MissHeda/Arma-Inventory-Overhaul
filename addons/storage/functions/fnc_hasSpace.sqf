@@ -4,7 +4,9 @@
  * Whether a container has a free spot for an entry in one of its compartments - for moves that do not
  * say where (Ctrl+click, the context menu): laid out once more with the entry added, from the places
  * everyone shares (fnc_readPlaces) - nothing is kept. The ground, and a grid with no object of its own (a
- * kit, "kit:" + lowercase class), always have room: they grow.
+ * kit, "kit:" + lowercase class) that has no compartments, always have room: they grow. A kit that a rule
+ * or its config gives a grid has the room of that grid (fnc_getBlocks), what it holds read through its
+ * type (GVAR(holderTypes) "entries").
  *
  * A stackable entry first fills the partly filled piles of its own key (fnc_entryKey: a magazine only
  * stacks with magazines of the same rounds) - the layout never merges into a pile - and only what is left
@@ -26,14 +28,24 @@
 params [["_container", objNull, [objNull, ""]], ["_entry", createHashMap, [createHashMap]]];
 
 // The type first: isNull fails on a key.
-if (_container isEqualType "") exitWith {_container isNotEqualTo ""};
-if (isNull _container) exitWith {false};
+private _isKey = _container isEqualType "";
+
+if (_isKey && {_container isEqualTo ""}) exitWith {false};
+if (!_isKey && {isNull _container}) exitWith {false};
 if (([_container] call FUNC(getBlocks)) isEqualTo []) exitWith {true};
 
 private _class = _entry getOrDefault ["class", ""];
 private _count = (_entry getOrDefault ["count", 1]) max 1;
 private _stack = (([_class] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) max 1;
-private _contents = [_container] call FUNC(getContents);
+private _contents = if (_isKey) then {
+    private _type = GVAR(holderTypes) getOrDefault [(_container splitString ":") param [0, ""], createHashMap];
+    private _code = _type get "entries";
+    private _listed = if (isNil "_code") then {[]} else {[_container] call _code};
+
+    if (isNil "_listed" || {!(_listed isEqualType [])}) then {[]} else {_listed}
+} else {
+    [_container] call FUNC(getContents)
+};
 private _left = _count;
 
 // What fits into piles of the same key that are not full yet.

@@ -8,7 +8,9 @@
  * there (fnc_onDrop does it).
  *
  * An item dragged out of ACE's list (fnc_listDrag) goes in only on a grid of the panel - the open
- * container's or the staging space's, where the engine's verdict stands as well. Anywhere else there is no
+ * container's or the staging space's, where the engine's verdict stands as well -, or over a kit's tile
+ * there into that kit, as that kit says (fnc_listToKit: Enhanced First Aid Kits' rules and the kit's
+ * room - its capacity, or the cells of a grid a rule or its config gives it). Anywhere else there is no
  * target: let go there, nothing happens, which the hint line says once.
  *
  * Arguments:
@@ -32,6 +34,10 @@ private _kind = _target param [0, ""];
 
 if ((_grid getOrDefault ["source", ""]) isEqualTo "aceList") exitWith {
     if (_kind isEqualTo "grid") exitWith {
+        private _intoKit = [_target, _entry] call FUNC(listToKit);
+
+        if (_intoKit isNotEqualTo []) exitWith {_intoKit};
+
         GVAR(dragZone) = "";
         nil
     };

@@ -24,7 +24,9 @@ class CfgEinvRulesets {
     // played with them; crates and vehicles stay by their load. The groups are a partition: an item
     // is in at most one of them (but medical, which is only a handle for the wizard), so that a rule
     // for one of them never reaches into another. The magazine groups leave each other out for that
-    // reason.
+    // reason. Kits of Enhanced First Aid Kits are items to kind= too, so the item groups size them; none
+    // of these gives a kit a grid: without a rule or a config key of theirs, that mod's capacity is
+    // their room.
     class Default {
         name = CSTRING(Ruleset_Default);
         description = CSTRING(Ruleset_Default_Desc);

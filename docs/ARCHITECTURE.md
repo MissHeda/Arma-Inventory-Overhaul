@@ -105,7 +105,7 @@ Conditions - all must hold; `|` means either, `!` in front means not; at most `M
 
 | Condition | |
 |---|---|
-| `kind=rifle\|handgun` | the kinds of `fnc_getFacts`: `rifle`, `handgun`, `launcher`, `binocular`, `muzzle`, `optic`, `rail`, `bipod`, `headgear`, `nvg`, `vest`, `uniform`, `map`, `gps`, `radio`, `compass`, `watch`, `item`, `magazine`, `grenade`, `backpack`, `goggles`, `vehicle`, `crate`, `unknown`. |
+| `kind=rifle\|handgun` | the kinds of `fnc_getFacts`: `rifle`, `handgun`, `launcher`, `binocular`, `muzzle`, `optic`, `rail`, `bipod`, `headgear`, `nvg`, `vest`, `uniform`, `map`, `gps`, `radio`, `compass`, `watch`, `item`, `magazine`, `grenade`, `backpack`, `goggles`, `vehicle`, `crate`, `kit`, `unknown`. A `kit` meets `kind=item` too; `kind=kit` only kits. |
 | `cat=medical` | `misc`, `gear`, `weapon`, `ammo`, `medical` (`CATEGORY_NAMES`). |
 | `class=X`, `class=X+`, `class~abc` | that class; X and every class built on it (any mod's); a part of the class name, `MIN_SEARCH` 3 letters at least. Class case is kept in the text and matched in lowercase. |
 | `addon=x`, `addon~abc` | the CfgPatches class that brought it in. |
@@ -218,7 +218,7 @@ layer above: a server's rules text still beats them, and they beat a preset.
 |---|---|---|---|
 | `einv_size = "2x1";` | any item | `WxH`, a mask like `"xx/x-"`, or `"mass"` | `size=` |
 | `einv_stack = 10;` | anything but a rifle, handgun, launcher, binocular, uniform, vest or backpack (those stay 1) | a whole number, 1 to `MAX_STACK` | `stack=` |
-| `einv_grid = "1x3+5x7+1x3";` | uniform, vest, backpack, crate, vehicle | anything `grid=` takes: `"auto"`, `"24"` (a plain number `24` too), `"120%"`, `"rig:16"`, compartments, shapes, a canvas | `grid=` |
+| `einv_grid = "1x3+5x7+1x3";` | uniform, vest, backpack, crate, vehicle, kit | anything `grid=` takes: `"auto"`, `"24"` (a plain number `24` too), `"120%"`, `"rig:16"`, compartments, shapes, a canvas | `grid=` |
 | `einv_weight = 0.5;` | any item | kilograms, 0 to `MAX_WEIGHT`, rounded to the gram | `weight=` (kg, not config mass) |
 | `einv_name = "Short name";` | any item | the name as it shows, at most `MAX_NAME` characters; a space is a space | `name=`, but plain text (the rules text writes `_` for a space and `%XX` for the rest) |
 
@@ -280,7 +280,8 @@ element, no commas) and `class Groups` (the wizard's rows). The group ids are wh
 text names in `base=`: never rename one. Other mods may add presets as classes there.
 
 - **`default`** (revision 2): relaxed. The mod's classic sizes and stacks - rifles 3x2 to 6x2 by mass, handguns 2x1, launchers
-  6x2, magazines 1x1, 1x2 or 2x2 by mass, belts 2x2, rockets 1x3 and 2x3, grenades 1x1 stack 5, small items 1x1 stack 10 - and
+  6x2, magazines 1x1, 1x2 or 2x2 by mass, belts 2x2, rockets 1x3 and 2x3, grenades 1x1 stack 5, small items 1x1 stack 10 (kits are
+  items to `kind=` as well, so the item groups size them; no preset gives a kit a grid) - and
   uniforms `grid=120%`, vests `grid=120%`, the three backpack groups `grid=120%` (by load up to 160, up to 280, above), crates and
   vehicles `grid=auto`. The groups are a partition (an item is in at most one, `medical` excepted, which is only a handle for the
   wizard), so a rule for one never reaches into another.
@@ -322,7 +323,16 @@ no cache: not kept. Callers must not modify it. The config part comes from `fnc_
 `fnc_getFacts` takes kinds from config by weapon `type` and ItemInfo type (its header lists them); any other CfgWeapons class is
 `item` - CBA's misc item class counts there although it inherits the bipod type; CfgMagazines with count 1 and mass up to 15 are
 `grenade`; CfgVehicles with `isBackpack` 1 are `backpack`, others of `AllVehicles` `vehicle`, the rest `crate`. A class no config
-knows is `unknown`, under its own name.
+knows is `unknown`, under its own name. An `item` that Enhanced First Aid Kits registers as a kit is **`kit`** (a pouch of Enhanced
+Utility Pouches too): `fnc_kitTypes` reads that mod's registry `EFAK_Kits` from config once (uiNamespace `einv_items_kitTypes`,
+lowercase prototype -> `[prototype, instances, capacity]`), and `fnc_kitOf [class]` (public) -> `[prototype, n, instances, capacity]`
+or `[]` names the type's own class (n 0) and the instance classes that mod makes of it, `<prototype>_<n>` for n 1 to `instances` -
+the same list `efak_core_fnc_isKit` reads, without that mod's functions, so Eden and the menus know it too. A kit's `maxLoad` is the
+capacity the registry gives its type (a mission's CBA setting for it is that mod's; `einv_compat_efak_fnc_capacity` reads it). To
+`kind=` a kit is an `item` as well (`KINDS_AS_ITEM`): `fnc_matches` lets `kind=item` reach it and `fnc_compileRules` puts the item
+rules into its `byKind` bucket, so servers' `kind=item` rules and the presets' item groups size and stack it as before, while
+`kind=kit` reaches only kits. Kits are containers (`KINDS_CONTAINER`): their grid comes from the rules and config keys like any other, but only counts where a rule or
+a config key sets it (section 7, compat_efak).
 
 ### Functions
 
@@ -340,6 +350,8 @@ knows is `unknown`, under its own name.
 | `fnc_parseGrid [text]`, `fnc_formatGrid [spec]`, `fnc_parseMask`, `fnc_formatMask`, `fnc_turnMask` | No | grid specs and masks; `fnc_parseMask` is the one reader of masks, for items and compartments alike |
 | `fnc_compileCond`, `fnc_matches`, `fnc_parseTable [text, type, warnings]`, `fnc_sanitizeText` | No | conditions; the older tables; the EDITBOXes' sanitizer |
 | `fnc_resolve [facts, compiled]` | No | -> `footprint`, `stack`, `grid`, `weight` (kg, -1), `name` ("" none), `src` |
+| `fnc_setBy [info, field]` | Yes | who set a field, from its `src` tag: `"rule"` (`own:`, `legacy:` but the stack slider, `all:`), `"config"` (`mod:`), `"preset"` (`preset:`, the stack slider), `"default"` (`builtin`, `forced`) |
+| `fnc_kitTypes []`, `fnc_kitOf [class]` | No, Yes | Enhanced First Aid Kits' kit types from its config registry; which kit type a class is (above) |
 | `fnc_rulesInputs []` | No | `[rules text, size table, stack table, container table, stackSmall, massPerCell]` |
 | `fnc_loadRules [text]` | No | compiles when the inputs changed; a text stands in for the setting (testing, `einv_items_rulesOverride`), `""` ends that |
 | `fnc_checkServerRules [published]` | No | warns once when the server reads the same settings differently |
@@ -451,7 +463,7 @@ numbered from its own top left corner, wherever it is drawn. No cells at all giv
 
 Patterns by kind when none is named (the class's own pick is a sum over its name, so a model always looks the same): uniform -
 `pockets` (1x2) or `pockets_mixed`, at most six from the load; vest - `rig` (1x2), `mixed`, `plate` or `long`, at most sixteen;
-backpack - `single`, one compartment as near square as `STORAGE_COLS` allows; crates and vehicles - `wide`, one compartment
+backpack and kit - `single`, one compartment as near square as `STORAGE_COLS` allows; crates and vehicles - `wide`, one compartment
 `STORAGE_COLS` wide. A given number (`24`, `einv_grid = "24"`, `einv_slots`) is met exactly; one from the load is a rough measure. The load is
 `fnc_getMaxLoad` (config `maximumLoad`, -1 for a weapon holder or null): since weight limits nothing, it only sizes the "auto",
 "percent" and "pattern" grids.
@@ -469,7 +481,10 @@ backpack - `single`, one compartment as near square as `STORAGE_COLS` allows; cr
    crate or vehicle its own, `typeOf`.
 
 The ground has no compartments and no limit: `[]`; the window draws it as one open grid, `STORAGE_COLS` wide, always a row more
-than it needs and at least three rows. A uniform or vest container's class derives from a weapon holder, so `fnc_isGroundHolder`
+than it needs and at least three rows. A key (a holder that is no object, `"kit:..."`) has the compartments its holder type's
+`"blocks"` gives (`einv_storage_holderTypes`), `[]` - an open grid that grows - when it gives none: a kit has those of a grid a
+rule or its config gives it (`einv_compat_efak_fnc_kitBlocks`), else none. `fnc_getLayout`, `fnc_hasSpace` and `fnc_findEntry`
+(`"open"`) ask `fnc_getBlocks` for keys as for objects. A uniform or vest container's class derives from a weapon holder, so `fnc_isGroundHolder`
 excludes `ContainerSupply`: only a pile is a ground. A backpack with a load of 0 takes an own grid like any other.
 
 ### Places and the layout (`fnc_getLayout`)
@@ -524,7 +539,8 @@ only; inside a phase through its buffer); `[]` as the cell takes the record out.
 ### Room (`fnc_hasSpace`, `fnc_hasRoom`, `fnc_plan`)
 
 - `fnc_hasSpace [container, entry]`: a free spot in one of the compartments, laid out once more with the entry added from the
-  places everyone shares; nothing is kept. The ground and a kit always have room (they grow). A stackable entry **first fills the
+  places everyone shares; nothing is kept. The ground and a kit without a grid of its own always have room (they grow); a kit with
+  one is laid out like a container, what it holds read through its holder type's `"entries"`. A stackable entry **first fills the
   partly filled piles of its own key** (a magazine only stacks with the same rounds) - the layout never merges into a pile - and
   only what is left needs free spots, one per stack's worth.
 - `fnc_hasRoom [container, entry]`: `fnc_hasSpace` plus the one kind rule left, `fnc_backpackIntoBackpack` (reason
@@ -738,7 +754,8 @@ Public: `einv_storage_fnc_request`, `fnc_moveEntry`, `fnc_equip`, `fnc_unequip`,
 `fnc_readPlaces`, `fnc_rootOf`, `fnc_dumpPlaces`, `fnc_addNew`. Other addons extend the storage only through tables they fill in
 preInit: `einv_storage_ops` (op name -> function name), `einv_storage_guards`, `einv_storage_carryVariables` and
 `einv_storage_holderTypes` (a holder that is no object, by the part of its key before `:`; `kit` from compat_efak: `entries`,
-`root`, `verify`, and the names of its ops for `take`, `put`, `place`, `move`).
+`blocks` (its compartments, `[]` for an open grid; left out, open), `root`, `verify`, and the names of its ops for `take`, `put`,
+`place`, `move`).
 
 ## 4. GUI window engine (gui)
 
@@ -789,7 +806,12 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   mods that both want the last place cannot loop). Only this mod's handler, by its id, is removed and added again - never
   `removeAllEventHandlers`, so the other mods' sounds and work go on. A vanilla inventory the handler was **not** asked for (a
   script's `createDialog`, the handler taken off) with no window open opens the window in its place on the player's own gear
-  ("Nothing asked for the window"). Where the engine really takes the last handler's answer, being last keeps the display from
+  ("Nothing asked for the window"). That is a guess, and what the engine names always wins over it (in 0.4.9, a display whose
+  load came before the handler's event queued the guess first, and a vehicle opened showed only the soldier's own gear): it is made a
+  frame later and only when the handler was not asked in the frame the display came up or since and no asked opening waits for
+  the display (`einv_gui_askedFrame`, `einv_gui_openWaiting`); it gives way while it waits in `fnc_open` (argument 4, the frame
+  the display came up in); and a window made on it (`einv_gui_openGuess`) closes when the handler is then asked with something
+  to loot, which opens a frame later (RPT `replaced: ...`). Where the engine really takes the last handler's answer, being last keeps the display from
   opening at all; where it does not, the guard path is all that runs.
 - **Closing.** Every way the window closes itself goes through `fnc_closeDisplay [reason]` (sets `einv_gui_closeReason`, then
   `closeDisplay 2`), and `fnc_onUnload` writes one INFO line `window closed: <reason>`: `a movement key` (`"move"`), `Escape`
@@ -999,21 +1021,33 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `fnc_drawEquipmentDoll`), `locked` (a padlock and one muted line, nothing of what it holds; `lockTip` adds an open padlock). Own
   sections start open, crates found around start folded; `einv_gui_collapsed` holds the containers the player turned the other
   way.
-- **Compartments.** `fnc_flowCompartments [layout, cell]` -> `[places, height]`, drawn by `fnc_drawCompartments [display,
+- **Compartments.** `fnc_flowCompartments [layout, cell]` -> `[places, height, width]`, drawn by `fnc_drawCompartments [display,
   parent, [left, top], section, layout, places, theme, window]`. Flowed compartments (`pos` `[]`) lie side by side as far as
   `STORAGE_COLS` cells reach, then on the next line, `COMPARTMENT_GAP` (0.22 cell, pixel-rounded) between blocks. A compartment
-  with a `pos` lies on its **canvas** exactly where it was drawn, every cell at the plain pitch; the canvas is one piece of the
-  flow. **One uniform grid of cells:** every cell of a canvas lies at the plain pitch and is drawn a pixel short of it, the same size
-  with the same gap to the next wherever it is and to whichever compartment it belongs; a compartment is only the set of cells it
-  covers. Where two compartments meet there is the cell gap and nothing else - no cell is drawn in, shifted or cut for a seam, and
-  a one-cell compartment is a cell like any other. The places are `[x, y]` and the grids plain. `fnc_drawCompartments` draws the
-  lines behind the cells of a whole canvas once, as one shape of all its cells (every line pixel drawn once, so they are as faint
-  at a seam as inside a compartment; a hole of one compartment that is a cell of another is no hole of the canvas), after
-  snapping the block's corner to a pixel so touching compartments keep one pitch. Tiles and every rect on a grid (`fnc_spanRect`
-  via `fnc_tileRect`, selection, pending, band, drag footprint, `fnc_shapeRects`) and `fnc_screenToCell` use that same plain
-  geometry, so a tile lands exactly on its cells.
-- **Grids and tiles.** `fnc_createGrid [display, parent, [relX, relY], rows, theme, section id, cols, holes]` -> a
-  HashMap: `parent`, `rel`, `cols`, `rows`, `cellW`, `cellH`, `cells` (a **hole** has no control: `controlNull`), `holes`,
+  with a `pos` lies on its **canvas** where it was drawn; the canvas is one piece of the flow. **Seams:** every cell keeps one size
+  and the plain gap, but a column boundary at which some row has cells of two different compartments on its two sides, and a row
+  boundary at which some column has, gets `SEAM_GAP` (= `COMPARTMENT_GAP`, so painted and flowed containers look alike) more
+  room, everything beyond it moving on: column `c` starts at `c * cell + (seams before c) * gap`, rows likewise. A boundary
+  where a compartment meets an empty place is none; two that touch only at a corner open the column boundary between them.
+  Compartments keep their painted places relative to each other; one that reaches over a seam opened for two others (a wide one
+  under two narrow ones, the ring of `aaa/aba/aaa`) has that room between two of its own cells. A canvas compartment's place is
+  `[x, y, colX, rowY]` (where its columns and rows start from its corner), the canvas grows by its seams and `width` is the widest
+  line (a canvas with seams across is wider than `STORAGE_COLS` cells). **Panels:** `fnc_drawCompartments` draws every panel
+  before any cell: the theme's `card` behind a compartment's cells, `COMPARTMENT_PAD_PX` (0.06 cell, at least a pixel) past
+  them, round up to three times that (`uiPanel`); a shaped one is `fnc_uiShape "panel"` - the cells grown by the pad, the room
+  between them filled, holes open, cut into bands of non-overlapping rectangles. The flow keeps room for the pad: places move on
+  by it less the pixel callers keep left of and above the block, `height` and `width` count it on both sides. Overflow grids keep
+  the loss colour's lines and no panel. Tiles and every rect on a grid (`fnc_spanRect` via `fnc_tileRect`, selection, pending,
+  band, drag footprint, `fnc_shapeRects` with `[grid, col, row]`) and `fnc_screenToCell` use the grid's `colX`/`rowY`, so a tile
+  lands exactly on its cells and spans a seam inside its compartment as one piece. A point maps back in O(1): `floor(distance /
+  cell)` names a stretch, `colAt`/`rowAt` the last column starting in it or before, and the point lies in that one or the one
+  before; the room of a seam belongs to the cell before it only where the cells across it are the same grid's (a tile can lie
+  over it), so the room between two compartments is no cell. The drag's geometry (`dragRoom` "geometry", "hold") uses the same
+  extents and rule. `einv_setup_fnc_drawPreview` draws the same flow and panels, its cell shrinking until the width fits.
+- **Grids and tiles.** `fnc_createGrid [display, parent, [relX, relY], rows, theme, section id, cols, holes, [colX, rowY]]` -> a
+  HashMap: `parent`, `rel`, `cols`, `rows`, `cellW`, `cellH`, `colX`, `rowY` (where each column and row starts from `rel`; the
+  plain pitch unless a canvas's seams), `colAt`, `rowAt` (per stretch of one cell, the last column or row starting in it or
+  before), `cells` (a **hole** has no control: `controlNull`), `holes`,
   `tiles`, `section`, and from `fnc_drawCompartments` `container`, `virtual`, `kit`, `layoutKey`, `unit`, `block`,
   `pos`, `overflow`, `window`, `holder`, `root`, `side` (a source grid adds `source`). `fnc_createTile [display, grid, entry,
   theme]` draws the surface in the category's colour over the entry's cells only (a shaped tile: runs of cells with one-pixel
@@ -1036,8 +1070,12 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `einv_gui_expanded`). A positional compartment never folds; kit windows and the own storage column are not folded. Only the
   view: the grid stays whole.
 - **Kit windows** (`fnc_drawWindows`, `fnc_drawWindow [display, section, theme, fresh]`): a kit or pouch is a floating glass
-  window - a title row (picture, name, "12 / 60 mass", a cross) and a scroll body with the kit's grid (`window` = its key). Open
-  windows are `einv_gui_windowOrder` (bottom first), placed by `fnc_placeWindow` beside the tile they were opened from, moved by a
+  window - a title row (picture, name, Take all and Sort, "12 / 60 mass", a cross, all on the row's middle line; the buttons and
+  the cross are a section caption's - 0.62 UNIT high, labels 0.46 UNIT and centred, `fnc_buttonWidth` / `fnc_sortChip` widths -,
+  right-aligned before the fill text with one gap each; the name keeps its width up to 4 UNIT, else Sort gets compact - `fnc_sortChip` argument 3: 1 the icon and "Sort", 2 the
+  icon alone, the order in the tooltip (`fnc_sortText`'s third answer, `fnc_sortButtons [controls, compact]`) -, then goes, then Take all; a
+  press on a button neither raises nor moves the window, record key `buttons`) and a scroll body with the kit's grid (`window` =
+  its key). Open windows are `einv_gui_windowOrder` (bottom first), placed by `fnc_placeWindow` beside the tile they were opened from, moved by a
   press on the title, raised by any press (`fnc_raiseWindow`: that window alone is made again, last), opened by `fnc_openWindow
   [key, anchor]`, closed by the cross, Escape on the topmost, or `fnc_closeWindow [key]`. **Hit testing** is by layer (`fnc_topAt
   [point]` -> `"inspect"`, a window key or `""`): menu, inspect card, windows (top first), columns; hover, drag targets, press,
@@ -1302,7 +1340,13 @@ item out.
   this item here" once; a greyed row drags (the staging space may take it). The row's class is read from `lnbData [row, 0]` into
   a virtual off-screen source grid `"aceList"` whose tile carries `dragEntry` with `count` = the stack (Shift: all); then
   `einv_gui_press` and `einv_gui_fnc_startDrag`. `fnc_dragCheck`: only a
-  grid of the panel is a target (else `[]`). The drop (`fnc_onDrop`) calls `fnc_addTo [container, class, count, [col, row, block,
+  grid of the panel is a target (else `[]`) - or, with compat_efak loaded, a **kit's tile** there (`fnc_listToKit`: the cell under the
+  mouse, the footprint's corner plus `einv_gui_press`'s grab, lies on a tile `einv_compat_efak_fnc_isKit` knows): the target becomes
+  `["kitTile", grid, tile, 0, fits, why]` by `einv_compat_efak_fnc_canPackNew [kit, class, count]` - the kit type's Arsenal setting
+  (`efak_core_fnc_canPackInto` with the Arsenal, always in Eden), that mod's rules, and the kit's room by `fnc_roomMode`: its
+  capacity, or the free cells of its own grid and never the capacity then; green when some fit (the hint says how many), red with
+  the reason when none. `fnc_onDrop` packs them with `einv_compat_efak_fnc_packNew` and runs `fnc_settle`. EFAK's own kits tab of
+  ACE's window is left as it is. The drop (`fnc_onDrop`) calls `fnc_addTo [container, class, count, [col, row, block,
   w, h]]`: `normalize`, then `addItemToUniform` / `Vest` / `Backpack` for the open container, `addNew` for staging and for what
   the engine refused, the cell as a new record (`setPlace`); then `syncAce` and `tellAce`.
 - **Wheel and remove.** During a list drag the engine's wheel sets the count on the ghost. Else `fnc_onWheel`: plain is the
@@ -1432,7 +1476,19 @@ controls stay in uiNamespace. **Every edit ends in `fnc_commit [ast, redraw = tr
   `*Carryall*`, `*_F` -, while a plain text still finds itself anywhere; the wildcard becomes a regular expression with every other
   character escaped, and its longest literal run is looked for first, so the expression only meets the few classes that could fit.
   The switch List | Tree beside the search turns the cards into the tree view. "Only classes with own rules" lists, on Items,
-  classes whose rules set `footprint` or `stack`; on Containers, `grid` or `like` (`fnc_ownClassRules`' `named`).
+  classes whose rules set `footprint` or `stack`; on Containers, `grid` or `like` (`fnc_ownClassRules`' `named`). The Containers
+  chips are All, Uniforms, Vests, Backpacks, Cargo and - where Enhanced First Aid Kits brought kit types (`einv_items_fnc_kitTypes`)
+  - Kits.
+- **Kits** (kind `kit`, section 2) are containers of the Containers step and items of the Items step (family `item`): the type's own
+  class is listed, its load the type's capacity (`fnc_classKind`); the instance classes that mod makes of it are in no list and no
+  tree. An edit of a kit is always for its tree (`fnc_editScope` -> `[true, instances]`, a note instead of "Only this class"), so the
+  rule is `class=efak_IFAK+` and reaches the kits players carry; Import writes it the same way (`fnc_importClasses`), Export gives
+  the type's line, which its instances inherit in config. `fnc_kitRoom [info]` -> `"capacity"` / `"cells"` / `""` asks
+  `einv_compat_efak_fnc_roomMode` with the draft (else the same test on `einv_items_fnc_setBy`): by capacity, `fnc_answerText` words
+  the grid "capacity 35" from "EFAK" (`einv_compat_efak_fnc_capacity`, the mission's setting included), the editor's "Now:" line
+  has no compartments part and a note says the cells drawn are only a start - Apply gives the kit them and the capacity no longer
+  counts; with a grid of its own, "Now:" is the grid and a note says the capacity no longer counts; Back to the preset returns it
+  to the capacity. A kit opened for (`einv_setup_focus`) as an instance picks its type.
 - **Review** (`fnc_drawReview`): one column, no rules grammar unless asked for. "What changes" (`fnc_drawChanges [.., "saved"]`)
   lists every difference between the draft and `clean` (what is saved where the wizard saves: the setup in effect when it opened,
   saved or reloaded; on a client that may not save, the one in use), each line in words and marked new / changed / removed, with
@@ -1474,7 +1530,8 @@ write that rule.
   `fnc_classTree [class]` is a class and everything built on it in tree order (`order`: lowercase class and depth) with the same as a
   set (`set`) - what a rule `class=X+` covers - and the class's `parent`; `fnc_treeRows [class, step]` is the list a step shows of it:
   scope 1 or 2, not named `..._Base`, and of a kind the step lists (`fnc_classKind`, which the class index uses too: on Containers a
-  uniform, vest, backpack, crate or vehicle that holds something, a backpack always; on Items everything but the cargo), each row
+  uniform, vest, backpack, crate, vehicle or kit that holds something, a backpack always; on Items everything but the cargo; a kit's
+  instance classes on neither), each row
   `[class lowercase, class, name, depth, how many listed classes are built on it]`. A class that is not listed leaves its listed
   children one level up; the first row, the class the tree starts at, is always there. The rule `class=X+` covers the unlisted classes
   below X as well (a scope 0 variant, a kind the step does not list); the counts are of the listed ones. Both are kept in uiNamespace
@@ -1557,8 +1614,9 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   checks no cell, `MAX_CELLS`, `MAX_BLOCKS` and a drawing taller than `MAX_ROWS`, and writes through `fnc_upsertRule`. A grid laid
   out by load or by a pattern is shown as the compartments it gives; editing it writes those cells instead.
 - **Preview** (`fnc_drawPreview`): the window's own `flowCompartments` with the blocks Apply would write, so painted
-  compartments sit 1:1 where they were painted, on the plain cell pitch like every other cell (all the same size and gap, the cell
-  and the pads whole pixels), and blocks flow; an item's tile on a
+  compartments sit where they were painted with the window's seams between them, each on its panel as the window draws it, every
+  cell the same size and gap (the cell and the pads whole pixels; the cell a little smaller where a canvas's seams would make it
+  wider than the card), and blocks flow; an item's tile on a
   piece of grid. One routine for Paint and Blocks: an untouched class previews its own `classBlocks` (places included) in both
   ways, an edited one what Apply would write. `fnc_canvasBlocks` drops the `pos` of painted compartments that lie exactly where
   `fnc_canvasFromBlocks` (places only, 6th argument) would flow them, so they read, preview and are written as the Blocks way's
@@ -1688,6 +1746,36 @@ target, entry, count, cell, slotSource]` is the dispatcher (checks `fnc_canDrop`
 one `sendMoves` move). Prototypes (`efak_core_needsConversion`) are refused until EFAK made them. Another living player's kits are
 shown but neither opened nor moved (`fnc_isPlayerGear`, `fnc_checkTile`). No `efak_*` function is called outside this addon;
 `fnc_isKit` is public.
+
+**A kit's room** (`fnc_roomMode [kit, compiled, cache]` -> `"capacity"` / `"cells"`, public): a kit is a container of the rules
+(kind `kit`, section 2) whose grid counts only where someone set it - a rule of the rules text or the older table, or the class's
+config key (`einv_items_fnc_setBy` `"rule"` / `"config"` on the `grid` field). Then **cells**: the grid is all its room, Enhanced
+First Aid Kits' capacity counts nowhere in this mod. Else - the preset's or the built-in answer - **capacity**, as before: that mod's
+masses against its capacity, and an open grid that grows. Everything that decides what goes into a kit asks it:
+
+- `fnc_kitBlocks [kit]` -> the compartments of its grid (`einv_storage_fnc_blocksFor` with kind `kit`, its `maxLoad` the type's
+  capacity, so `grid=auto` and `grid=120%` are by capacity), `[]` by capacity; kept per class until the rules change
+  (`einv_compat_efak_blocksCache` `[revision, map]`). It is the holder type's `"blocks"`, so the storage lays the kit out in those
+  compartments (`fnc_getLayout`, `fnc_hasSpace`, `fnc_findEntry`) and the window draws them in its kit window.
+- `fnc_canPack [kit, class, count, rounds]`: that mod's rules and defaults as before, then the room - capacity, or
+  `fnc_hasCells [kit, class, count, rounds]` (the kit laid out with them added, piles of their kind filled first, magazines by their
+  rounds; `"NoRoom"`). `fnc_canDrop`, `fnc_putIntoKit` (the payload's rounds), `fnc_opKitMove` (the tile's rounds) and
+  `fnc_canPackNew` pass the rounds.
+- `fnc_cellFree [kit, view, cell, holes, skip]`: a cell inside the compartment it names (bounds, the compartment's holes) and free -
+  for `fnc_putIntoKit` and `fnc_opKitPlace`, which keep the compartment of the cell (was always 0).
+- `fnc_fillState [kit]` -> `[text, over]`: "12 / 35 mass" (over: past the capacity) or "8 / 12 cells" (over: tiles with no cell -
+  a grid given to a full kit; they show apart and are never lost), for `fnc_getSections` (`load`, `loadOver`), `fnc_hintParts` and
+  `fnc_inspectRows`. `fnc_getMass` still reports what the kit weighs.
+- `fnc_capacity [kit]` (public) -> that mod's capacity (its CBA setting over config), the registry's where its functions are not
+  there, -1 for no kit - the setup wizard's "capacity 35 (EFAK)".
+
+**ACE Arsenal** (section 5): `fnc_canPackNew [kit, class, count]` -> `[how many it takes, why not all]` (`fnc_notReady`, the
+kit type's Arsenal setting `efak_core_fnc_canPackInto [kit, true]`, `fnc_canPack`; as many as fit by halving) and `fnc_packNew
+[kit, class, count, cell, root]` -> `[added, why, landed]`: only for a root whose phases run here (`einv_storage_fnc_isLocalRoot`)
+with the kit under it (`fnc_holderVerify`), so the one writer of the kit is this machine - written where it is called, outside any
+phase, as `einv_storage_fnc_addNew` does (`einv_storage_fnc_makePayload`, `fnc_putIntoKit`, `fnc_requestRebuild`). Enhanced First
+Aid Kits' own kit window and its kits tab in ACE's window still count the capacity: a kit with a grid of its own may hold more than
+its capacity there.
 
 ### compat_ace_cargo, compat_tfar, compat_acre, compat_zen, compat_ace_vehiclelock, compat_ace_interaction
 

@@ -33,7 +33,11 @@
  *    the handler was put on yet, a script opened the display by createDialog. The handler is put on again,
  *    and with no window open the window opens in the vanilla inventory's place, on the player's own gear -
  *    and, seated, on the vehicle's cargo, which is what the vanilla inventory shows in a seat; on foot on
- *    the vehicle the player looks at, when the window may open on it (fnc_canOpenVehicle).
+ *    the vehicle the player looks at, when the window may open on it (fnc_canOpenVehicle). That is a guess,
+ *    and what the engine names always wins over it: the guess is made a frame later and only when the
+ *    handler was not asked in the frame the display came up or since (the engine may raise the display's
+ *    load before its event); it gives way while it waits for the display to go (fnc_open), and a window
+ *    already open on it closes for the engine's opening (fnc_onInventoryOpened).
  *
  * The close is made twice, in the load event and a frame later (a display closed inside its own load event
  * is not always gone): the second time through this function again, so it too looks where the window
@@ -123,11 +127,25 @@ if (_display isNotEqualTo (uiNamespace getVariable [QGVAR(guardLast), displayNul
     // without it leaves the vehicle out. On foot, on the vehicle he looks at when the window may open on it
     // (fnc_canOpenVehicle), as the vanilla inventory shows it there. Not for a player who is out cold.
     // fnc_open waits until the display is gone.
+    //
+    // Only a guess, and the engine's own opening wins over it: should the unit's handler be asked in the frame
+    // the display came up or since - the engine raised the display's load before its event, or the event came
+    // a moment late - that opening names what was opened (the vehicle, the crate) and is on its way, and this
+    // one would take its place with the soldier's own gear. So the guess is made a frame later and only if
+    // the handler was not asked by then, nor another opening waits for this display to go (fnc_open's retry
+    // is queued after this call); it gives way while it waits (fnc_open), and a window it made closes for
+    // the engine's opening (fnc_onInventoryOpened).
     if (!_asked && {isNull _window}) then {
-        INFO("Nothing asked for the window - opening it in place of the vanilla inventory.");
+        INFO("Nothing asked for the window - opening it in place of the vanilla inventory, unless the unit's handler is asked meanwhile.");
 
         [{
+            params ["_cameUp"];
+
             private _unit = ACE_player;
+
+            if ((GVAR(askedFrame) max GVAR(openWaiting)) >= _cameUp) exitWith {
+                INFO("The unit's handler was asked after the vanilla inventory came up, or an opening waits for it to go - that opening goes ahead, nothing is guessed.");
+            };
 
             if (
                 !isNull _unit && {alive _unit} && {!(_unit getVariable ["ACE_isUnconscious", false])}
@@ -148,9 +166,9 @@ if (_display isNotEqualTo (uiNamespace getVariable [QGVAR(guardLast), displayNul
                     INFO_1("The window opens on %1 as well - the vehicle the player sits in or looks at.",typeOf _vehicle);
                 };
 
-                [_unit, _vehicle, objNull] call FUNC(open);
+                [_unit, _vehicle, objNull, 0, _cameUp] call FUNC(open);
             };
-        }] call FUNC(later);
+        }, [diag_frameNo]] call FUNC(later);
     };
 };
 
