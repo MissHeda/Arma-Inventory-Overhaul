@@ -2,8 +2,8 @@
 /*
  * Author: Miss Heda
  * After ACE's events, once a frame: ACE's list is put right for what the open container holds (counts,
- * load bar, ACE's own record of it - fnc_syncAce), the rows ACE greyed by weight that still have a free
- * spot are lit again (fnc_ungrey), the rows get the pictures the rules give their items (fnc_pictures), what
+ * load bar, ACE's own record of it - fnc_syncAce), the rows are greyed or lit by whether the grid has a
+ * spot for their item (fnc_ungrey), the rows get the pictures the rules give their items (fnc_pictures), what
  * the container holds is noted for the next add (fnc_snapshot), and
  * the panel is built again for whatever tab is open now - unless something of it is held, then once it is
  * let go (fnc_onFrame).

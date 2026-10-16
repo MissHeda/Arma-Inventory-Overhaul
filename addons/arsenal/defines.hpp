@@ -74,6 +74,9 @@
 // How long a frame's turn of putting the rules' pictures on ACE's lists may take, in seconds (fnc_pictures).
 #define PICTURE_BUDGET 0.003
 
+// How long a frame's turn of asking the grid about ACE's rows may take, in seconds (fnc_ungrey).
+#define UNGREY_BUDGET 0.003
+
 // How far the mouse moves with the button held, in any direction and in the screen's pixels, before a
 // press on ACE's list becomes a drag of its row (fnc_onFrame). Less than the engine's DRAG_THRESHOLD,
 // which is in screen units - 6 px at 1080p and the normal interface size, 9 px at the largest - and let

@@ -78,6 +78,11 @@ GVAR(confirmPress) = -1;
 // What of ACE's internals was found missing and said in the RPT already, once each.
 GVAR(missingSaid) = [];
 
+// The pass that greys and lights ACE's rows by the grid (fnc_ungrey): a newer one takes over from one that is
+// still going; and the alpha ACE gave the rows it greyed, as last seen, to grey the rows it left lit alike.
+GVAR(ungreyPass) = 0;
+GVAR(greyAlpha) = 0.25;
+
 // ----- The vanilla Virtual Arsenal -----
 
 // This open goes to the vanilla window (a mission hooks it, the unit is not the player's); the player left

@@ -1661,8 +1661,7 @@ they are **taken out**, not left in or moved on, and the player is asked first.
   (`fnc_remove`). A drop outside the panel, Delete, the menu or Ctrl+wheel down remove (`fnc_remove`: the record first when the
   whole tile goes, then `removeEntry` with the dragged count; `fnc_removeKind`), with sound `giveBack` and `fnc_tellAce`.
 - **Frame-later pass** (`fnc_settle`, once a frame however often asked): fallback follow-up, snapshot, `fnc_syncAce` (row counts,
-  load bar, `ace_arsenal_currentItems`, `ace_arsenal_fnc_updateRightPanel`), **`fnc_ungrey`** (rows ACE greyed by weight are lit
-  again where a stack has room or a spot of that size is free, one grid look per item size; also the "+" of the picked row, and the
+  load bar, `ace_arsenal_currentItems`, `ace_arsenal_fnc_updateRightPanel`), **`fnc_ungrey`** (rows are greyed or lit by whether a stack has room or a spot of the item's shape is free, as an add would find it, one grid look per shape, in turns of UNGREY_BUDGET; also the "+" of the picked row, and the
   whole list a frame after every pick, as ACE greys all rows by weight anew at each pick; unique items and backpacks are left to ACE), **`fnc_pictures`**
   (the rules' `picture=` on ACE's own rows - its left list IDC 13, the right list of the weapon tabs IDC 14 with `lbSetPicture` and the
   container tabs' listnbox IDC 15 with `lnbSetPicture` -, rows by class from `getInfo`'s `pictureOverride` when it is `picture`, done
