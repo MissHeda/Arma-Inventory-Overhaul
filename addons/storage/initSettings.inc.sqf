@@ -39,3 +39,40 @@
     1,
     {[] call EFUNC(items,loadRules)}
 ] call CBA_fnc_addSetting;
+
+// ----- Use from containers -----
+
+// The same for everyone: what can be used from the backpack, the vest and the uniform. Everything is how the
+// game works; the others make the carried gear matter - grenades and magazines in the backpack are reserve,
+// not at hand. Items opt back in per container with use= (the setup wizard's "Can be used from"). The
+// engine's own reload key is held to it (fnc_reloadGuard); what the hotbar, the window's menus and the
+// padlocks on the tiles say follows fnc_useState.
+[
+    QGVAR(useUniform),
+    "LIST",
+    [LLSTRING(Setting_UseUniform), LLSTRING(Setting_UseUniform_Desc)],
+    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_UseFrom)],
+    [[USE_ALL, USE_LIST, USE_NONE], [LLSTRING(Option_UseAll), LLSTRING(Option_UseList), LLSTRING(Option_UseNone)], 0],
+    1,
+    {[] call FUNC(useRefresh)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(useVest),
+    "LIST",
+    [LLSTRING(Setting_UseVest), LLSTRING(Setting_UseVest_Desc)],
+    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_UseFrom)],
+    [[USE_ALL, USE_LIST, USE_NONE], [LLSTRING(Option_UseAll), LLSTRING(Option_UseList), LLSTRING(Option_UseNone)], 0],
+    1,
+    {[] call FUNC(useRefresh)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(useBackpack),
+    "LIST",
+    [LLSTRING(Setting_UseBackpack), LLSTRING(Setting_UseBackpack_Desc)],
+    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_UseFrom)],
+    [[USE_ALL, USE_LIST, USE_NONE], [LLSTRING(Option_UseAll), LLSTRING(Option_UseList), LLSTRING(Option_UseNone)], 0],
+    1,
+    {[] call FUNC(useRefresh)}
+] call CBA_fnc_addSetting;

@@ -69,6 +69,12 @@ if (isServer) then {
 };
 
 if (hasInterface) then {
+    // The reload key in front of the engine's, once the main display exists: a magazine in a container the
+    // "Use items from ..." settings close is not loaded, the fullest of the others is (fnc_reloadGuard).
+    [{!isNull findDisplay 46}, {
+        (findDisplay 46) displayAddEventHandler ["KeyDown", {_this call FUNC(reloadGuard)}];
+    }] call CBA_fnc_waitUntilAndExecute;
+
     // A body's places must be public for its looters, also those written less than OWN_WRITE_DELAY
     // seconds before death.
     ["CAManBase", "Killed", {

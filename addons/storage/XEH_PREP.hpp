@@ -128,3 +128,14 @@ PREP(cellsFree);
 PREP(takeCells);
 PREP(overlaps);
 PREP(hasSpace);
+
+// Use from containers: what the settings "Use items from the uniform / vest / backpack" allow, and the
+// reload key in front of the engine
+PREP(useMode);
+PREP(useRefresh);
+PREP(useState);
+PREP(useKind);
+PREP(useCarried);
+PREP(useBlockedIn);
+PREP(useKindName);
+PREP(reloadGuard);

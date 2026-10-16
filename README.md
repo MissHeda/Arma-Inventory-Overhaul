@@ -101,6 +101,7 @@ weighs). Grids are ten cells wide.
   class CfgWeapons { class My_Kit { einv_size = "2x1"; einv_stack = 1; einv_weight = 0.5; einv_name = "Short name"; }; };
   class CfgWeapons { class My_Bandage { einv_icon = "1.4@0.1,-0.05"; }; };  // icon=, the picture 1.4 times as large, moved a tenth right and a twentieth up
   class CfgWeapons { class My_Bandage { einv_picture = "my_mod\ui\bandage_ca.paa"; }; };  // picture=, shown instead of the config picture
+  class CfgWeapons { class My_Bandage { einv_use = "backpack,vest"; }; };  // use=, usable from these containers even where a setting closes them (below)
   ```
   `einv_size` is `size=` (`"2x1"`, a mask like `"xx/x-"`, `"mass"`), `einv_stack` is `stack=` (a number), `einv_grid` is
   `grid=` (containers: uniform, vest, backpack, crate, vehicle, kit), `einv_weight` is `weight=` in **kilograms** (not config mass)
@@ -109,7 +110,9 @@ weighs). Grids are ten cells wide.
   tenth of the tile across (right is positive) and a twentieth down (-1 to 1; the comma is the config's, a rules text writes
   `icon=1.4@0.1:-0.05` since its comma ends a statement). The tile cuts the picture at its edge, so it never leaves it. `einv_picture` is
   `picture=`: the texture the item shows instead of the one its config names (a file the game does not have falls back to the config
-  picture and is named once in the RPT; a rules text writes `picture=/my_mod/ui/bandage_ca.paa`, slashes and `%20` for a space). A subclass
+  picture and is named once in the RPT; a rules text writes `picture=/my_mod/ui/bandage_ca.paa`, slashes and `%20` for a space). `einv_use` is `use=`: the
+  containers the item is whitelisted for - `uniform`, `vest`, `backpack`, `all` or `none` (a comma, a plus or a bar between; a rules text writes
+  `use=backpack+vest`) - see "Use from containers". A subclass
   inherits what its parent sets, as everything in config does; `einv_grid = "";` takes it back. These sit below the server's rules text - a rule for the class still wins - and
   above the preset. Values are cut to the same limits as in the rules, and a mistake is named in the RPT. The older
   `einv_gridSize[]`, `einv_stackSize`, `einv_grids[]` and `einv_slots` still work (the new keys win). To get the lines for a
@@ -149,6 +152,16 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   Enhanced First Aid Kits open. Each player moves the bar in Arma's layout editor and chooses when it shows.
   `[0, "ACE_elasticBandage"] call einv_hotbar_fnc_bind;` and `[0] call einv_hotbar_fnc_use;` drive it from
   scripts.
+- **Use from containers:** three server settings under "Use from containers", "Use items from the uniform / vest /
+  backpack" (`einv_storage_useUniform`, `useVest`, `useBackpack`), each Everything (the game's way, the default),
+  Only whitelisted or Nothing. What lies in a limited container - magazines, grenades, medicine, food, kits, radios - is
+  not usable from there: its tile wears a small padlock ("Cannot be used from the backpack" in the footer), the hotbar
+  refuses to bind it and counts only what it may use, the context menu leaves out its use rows, and the reload key loads
+  magazines only from containers that allow it. Items opt back in with the rule value `use=` - in the setup wizard's
+  Items step, the chips Uniform / Vest / Backpack in the "Use from" row (`kind=grenade > use=backpack`, or per class);
+  Only whitelisted lets exactly those through, Nothing lets nothing through. Weapons, attachments and clothing are never
+  limited. What a mod cannot do: the game's own throw key, ACE's own medical and self-interaction menus, a gamepad reload and
+  scripts still take from any container.
 - **Multiplayer:** where things lie syncs by itself - every player sees the same arrangement, also of
   containers your scripts fill. Every change runs where the container is local and the server carries what
   moves between machines, so the server has to run the same version of Enhanced Inventory. Scripts can move

@@ -16,7 +16,7 @@
  *
  * "layout" - the values alone, without the class, as one short line that starts with LAYOUT_MARKER and is
  * meant to be shared: what the draft makes of the class that differs from the game (grid, size, stack,
- * weight, name, icon, picture), written as a rule's values (einv_items_fnc_writeRules):
+ * weight, name, icon, picture, use), written as a rule's values (einv_items_fnc_writeRules):
  *
  *   einv-layout: grid=1x3+5x7+1x3 weight=1.2 picture=/a3/ui_f/data/igui/cfg/simpletasks/types/backpack_ca.paa
  *
@@ -99,6 +99,10 @@ private _fnc_lines = {
 
     if (_picture isNotEqualTo "") then {
         _lines pushBack format ["einv_picture = %1%2%1;", _quote, _picture regexReplace [_quote, _quote + _quote]];
+    };
+
+    if ((_info getOrDefault ["use", []]) isNotEqualTo [] && {!isNil QEFUNC(items,formatUse)}) then {
+        _lines pushBack format ["einv_use = %1%2%1;", _quote, [_info get "use", ","] call EFUNC(items,formatUse)];
     };
 
     format ["class %1 { class %2 { %3 }; };", _root, _facts getOrDefault ["class", _class], _lines joinString " "]

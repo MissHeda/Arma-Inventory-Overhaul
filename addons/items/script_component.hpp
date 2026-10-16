@@ -42,9 +42,9 @@
 #define PRESET_ALIASES [["tarkov", "realism"]]
 
 // The keys an item's own config may set, each written the way the rules write the same value
-// (fnc_readConfigKeys): einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture. fnc_configEntry
+// (fnc_readConfigKeys): einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture, einv_use. fnc_configEntry
 // writes them, fnc_parseConfigEntry reads them back from a snippet.
-#define CONFIG_KEYS [QGVARMAIN(size), QGVARMAIN(stack), QGVARMAIN(grid), QGVARMAIN(weight), QGVARMAIN(name), QGVARMAIN(icon), QGVARMAIN(picture)]
+#define CONFIG_KEYS [QGVARMAIN(size), QGVARMAIN(stack), QGVARMAIN(grid), QGVARMAIN(weight), QGVARMAIN(name), QGVARMAIN(icon), QGVARMAIN(picture), QGVARMAIN(use)]
 
 // The config roots an item class lives in, in the order fnc_getFacts looks for it.
 #define CONFIG_ROOTS ["CfgWeapons", "CfgMagazines", "CfgVehicles", "CfgGlasses"]

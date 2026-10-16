@@ -125,7 +125,7 @@ private _open = {
     private _classKind = _facts getOrDefault ["kind", ""];
     private _container = (_classKind in CONTAINER_KINDS) && {
         _classKind in ["crate", "vehicle"] || {"grid" in _values} || {"like" in _values}
-        || {!("footprint" in _values) && {!("stack" in _values)} && {!("weight" in _values)} && {!("name" in _values)}}
+        || {!("footprint" in _values) && {!("stack" in _values)} && {!("weight" in _values)} && {!("name" in _values)} && {!("use" in _values)}}
     };
     private _stepId = ["items", "containers"] select _container;
 

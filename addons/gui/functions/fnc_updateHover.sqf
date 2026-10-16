@@ -541,6 +541,22 @@ switch (_shown param [0, ""]) do {
             [LLSTRING(Hint_Overflow), "loss"] call _fnc_add;
         };
 
+        // Where the settings "Use items from ..." limit what can be used: said on an item of the player's own
+        // uniform, vest or backpack that cannot be used from there, or that was whitelisted for it.
+        if (missionNamespace getVariable [QEGVAR(storage,useActive), false]) then {
+            private _useGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_shown select 1, createHashMap];
+            private _useKind = [_useGrid getOrDefault ["container", objNull]] call EFUNC(storage,useKind);
+
+            switch ([_class, _useKind] call EFUNC(storage,useState)) do {
+                case "blocked": {
+                    [format [LLSTRING(Hint_UseBlocked), [_useKind] call EFUNC(storage,useKindName)], "warn"] call _fnc_add;
+                };
+                case "allowed": {
+                    [format [LLSTRING(Hint_UseAllowed), [_useKind] call EFUNC(storage,useKindName)], "accent"] call _fnc_add;
+                };
+            };
+        };
+
         // On the ground a double click puts on what can be worn, and Ctrl+click opens a uniform, vest or
         // backpack (fnc_onMouseButton): said here, where it differs from the footer's keys.
         private _hoverGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_shown select 1, createHashMap];

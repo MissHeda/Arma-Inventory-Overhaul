@@ -59,6 +59,16 @@ PREP(canOpenBI);
 PREP(checkOverflow);
 PREP(reportOverflow);
 
+// What does not fit when ACE's window closes: asked first (ACE's Close button and Escape are taken over), then taken out
+PREP(findOverflow);
+PREP(dropOverflow);
+PREP(interceptClose);
+PREP(onCloseButton);
+PREP(onAceKey);
+PREP(confirmClose);
+PREP(answerConfirm);
+PREP(closeConfirm);
+
 // The vanilla Virtual Arsenal: the wrapper's question, the items of a vanilla box, the safety net, the red
 // screen, and what is left alone
 PREP(compatCheck);

@@ -51,8 +51,9 @@ if (_part isEqualTo (_base + "_mag2")) then {
     } forEach getArray (configFile >> "CfgWeapons" >> _weapon >> "muzzles");
 };
 
-// The fullest one of the class that is not loaded.
-private _mags = (magazinesAmmoFull _unit) select {(_x select 0) == _class && {!(_x select 2)} && {(_x select 1) > 0}};
+// The fullest one of the class that is not loaded - and not one that lies in a container the settings "Use
+// items from ..." close to it.
+private _mags = (([_unit, [[], [], magazinesAmmoFull _unit]] call EFUNC(storage,useCarried)) select 2) select {(_x select 0) == _class && {!(_x select 2)} && {(_x select 1) > 0}};
 
 if (_mags isEqualTo []) exitWith {[false, LLSTRING(Reason_NoneLeft)]};
 

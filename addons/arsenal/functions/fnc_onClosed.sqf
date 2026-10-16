@@ -8,10 +8,12 @@
  * with whatever still lies in it: it was for this fitting only, as its caption and the hint line said.
  *
  * If the soldier walks off with more in a uniform, vest or backpack than its grid has room for - a loadout
- * brought it, say - the surplus first moves on to the next of his containers with free cells (einv_storage
- * op "migrate": while an arsenal is open nothing moves it, the arsenal gives back, and this is the first
- * moment after), then what has nowhere to go is said once more on the screen (fnc_reportOverflow). Not in
- * the Eden editor, where ACE dressed a copy.
+ * brought it, say - and the window closed some way fnc_confirmClose could not ask first (a script closed
+ * it), it is taken out of the containers a frame later (fnc_dropOverflow, the unit being local here), the
+ * RPT names what went and ACE's text on the screen says it once (what the player agreed to in the question
+ * needs neither - nothing is left by then). A unit that is not local here keeps the old way: the surplus moves
+ * on to the next of his containers with free cells (einv_storage op "migrate") and what has nowhere to go is
+ * said (fnc_reportOverflow). Not in the Eden editor, where ACE dressed a copy.
  *
  * Arguments:
  * None
@@ -35,6 +37,7 @@ if (GVAR(attached)) then {
 };
 
 uiNamespace setVariable [QGVAR(display), displayNull];
+uiNamespace setVariable [QGVAR(confirm), controlNull];
 
 GVAR(panelRect) = [];
 GVAR(hintRect) = [];
@@ -67,9 +70,34 @@ if (isNull _center || {is3DEN} || {!GVAR(ready)}) exitWith {};
 [{
     params ["_center"];
 
-    // The arsenal is gone, so what it left beyond the grid is no longer its to give back: it moves on to the
-    // unit's next container with room (for the player's own unit at once), and only what has nowhere to go
-    // is reported.
-    [_center] call EFUNC(storage,requestMigrate);
+    // The arsenal is gone and with it the question: what still lies beyond the grid of a container is taken
+    // out, as the window would have done on the player's word, and said once.
+    if (local _center) then {
+        private _gone = [_center] call FUNC(dropOverflow);
+
+        if (count _gone > 0) then {
+            private _list = [];
+
+            {
+                _list pushBack (format ["%1 x%2", ([_x] call EFUNC(items,getInfo)) get "name", _y]);
+            } forEach _gone;
+
+            private _names = _list joinString ", ";
+
+            INFO_1("ACE Arsenal closed with things that did not fit - removed: %1.",_names);
+
+            private _text = format [LLSTRING(Removed), _names];
+
+            if (isNil QACEFUNC(common,displayText)) then {
+                hint _text;
+            } else {
+                [_text, false, 5, 1] call ACEFUNC(common,displayText);
+            };
+        };
+    } else {
+        // Not this machine's unit: its surplus moves on to the next container with room.
+        [_center] call EFUNC(storage,requestMigrate);
+    };
+
     [_center, displayNull] call FUNC(reportOverflow);
 }, [_center]] call EFUNC(gui,later);

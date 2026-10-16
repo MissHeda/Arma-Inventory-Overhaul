@@ -41,7 +41,8 @@
  * that addon is loaded).
  *
  * A radio of the player's own - the radio slot, the uniform, vest or backpack, the long-range backpack
- * worn: also "Open radio" (the window steps aside for TFAR's or ACRE2's dialog and comes back,
+ * worn - not one lying in a container the settings "Use items from ..." close to it (einv_storage_fnc_useState)
+ * and that it is not whitelisted for: also "Open radio" (the window steps aside for TFAR's or ACRE2's dialog and comes back,
  * einv_gui_fnc_stepAside) and "Use as active radio" for one that is not in use (einv_compat_tfar,
  * einv_compat_acre - whichever mod is loaded, through fnc_compatCollect). The dummy radio ACRE2 keeps in
  * the radio slot (einv_compat_acre_fnc_isFixedSlot) can only be inspected.
@@ -245,8 +246,9 @@ switch (GVAR(hover) param [0, ""]) do {
             ];
         };
 
-        // A radio the player carries: open it, use it (einv_compat_tfar, einv_compat_acre). Not one in a kit.
-        if (_kit isEqualTo "") then {
+        // A radio the player carries: open it, use it (einv_compat_tfar, einv_compat_acre). Not one in a kit, and
+        // not one that cannot be used from the container it lies in (the settings "Use items from ...").
+        if (_kit isEqualTo "" && {([_class, [_from] call EFUNC(storage,useKind)] call EFUNC(storage,useState)) isNotEqualTo "blocked"}) then {
             private _carried = _from in [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
 
             _choices append ([

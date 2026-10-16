@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * The keys of an item's config (einv_items_fnc_parseConfigEntry) as the values of a rule: einv_size is
  * "footprint", einv_stack "stack", einv_grid "grid", einv_weight "weight", einv_name "name", einv_icon
- * "icon" and einv_picture "picture". The one place the two names are matched - the import of config lines
+ * "icon", einv_picture "picture" and einv_use "use". The one place the two names are matched - the import of config lines
  * (fnc_importClasses) and the layout export (fnc_exportClasses) both read it.
  *
  * Arguments:
@@ -30,7 +30,7 @@ private _values = createHashMap;
     };
 } forEach [
     ["einv_size", "footprint"], ["einv_stack", "stack"], ["einv_grid", "grid"], ["einv_weight", "weight"], ["einv_name", "name"],
-    ["einv_icon", "icon"], ["einv_picture", "picture"]
+    ["einv_icon", "icon"], ["einv_picture", "picture"], ["einv_use", "use"]
 ];
 
 _values

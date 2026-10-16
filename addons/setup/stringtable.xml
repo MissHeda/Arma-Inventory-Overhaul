@@ -769,6 +769,9 @@
         <Key ID="STR_einv_setup_Items_Unapplied">
             <English>Not applied yet. Apply keeps it.</English>
         </Key>
+        <Key ID="STR_einv_setup_Items_UseField">
+            <English>Use from</English>
+        </Key>
         <Key ID="STR_einv_setup_Items_Weight">
             <English>%1 kg</English>
         </Key>
@@ -1279,6 +1282,27 @@
         <Key ID="STR_einv_setup_Undo">
             <English>Undo</English>
         </Key>
+        <Key ID="STR_einv_setup_Use_Limited">
+            <English>Limited now: %1.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Use_NoneLimited">
+            <English>No container is limited yet - the settings &quot;Use items from ...&quot; (Use from containers) do that.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Use_PartList">
+            <English>%1: only whitelisted</English>
+        </Key>
+        <Key ID="STR_einv_setup_Use_PartNone">
+            <English>%1: nothing</English>
+        </Key>
+        <Key ID="STR_einv_setup_Use_backpack">
+            <English>Backpack</English>
+        </Key>
+        <Key ID="STR_einv_setup_Use_uniform">
+            <English>Uniform</English>
+        </Key>
+        <Key ID="STR_einv_setup_Use_vest">
+            <English>Vest</English>
+        </Key>
         <Key ID="STR_einv_setup_Value_GridAuto">
             <English>cells from its load</English>
         </Key>
@@ -1338,6 +1362,12 @@
         </Key>
         <Key ID="STR_einv_setup_Value_Stack">
             <English>%1 per tile</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Use">
+            <English>usable from the %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_UseNone">
+            <English>usable from no container</English>
         </Key>
         <Key ID="STR_einv_setup_Value_Weight">
             <English>weighs %1 kg</English>

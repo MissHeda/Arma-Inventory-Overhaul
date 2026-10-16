@@ -292,6 +292,16 @@ private _fnc_values = {
         _parts pushBack ([format [LLSTRING(Value_Picture), _path], format [LLSTRING(Value_PictureFrom), _owner]] select (_owner isNotEqualTo ""));
     };
 
+    if ("use" in _values) then {
+        // The containers it may be used from where a setting closes them (use=); an empty list takes them all back.
+        private _use = _values get "use";
+
+        _parts pushBack ([
+            LLSTRING(Value_UseNone),
+            format [LLSTRING(Value_Use), (_use apply {localize format ["STR_einv_setup_Use_%1", _x]}) joinString ", "]
+        ] select (_use isNotEqualTo []));
+    };
+
     _parts joinString ", "
 };
 

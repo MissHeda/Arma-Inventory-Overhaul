@@ -7,9 +7,9 @@
  *   class CfgVehicles { class B_Carryall_blk { einv_grid = "1x3+5x7+1x3"; }; };
  *
  * Only the keys of an item (CONFIG_KEYS: einv_size, einv_stack, einv_grid, einv_weight, einv_name,
- * einv_icon, einv_picture) are taken, and each value is read the way an item's config is (fnc_readConfigKeys), so what
+ * einv_icon, einv_picture, einv_use) are taken, and each value is read the way an item's config is (fnc_readConfigKeys), so what
  * comes back is what the rules would have made of it: a grid as fnc_formatGrid writes it, a size as the
- * rules write it, the stack and the weight as numbers, an icon as [scale, across, down], and nothing
+ * rules write it, the stack and the weight as numbers, an icon as [scale, across, down], a use list as an array, and nothing
  * that could not be read. A class with no key left is not in the answer.
  *
  * The reader is lenient about the rest of the file: comments (// and a block comment) are skipped,
@@ -19,7 +19,7 @@
  * item itself, so the line "class V_X { einv_grid = ""24""; };" without its root reads too. The same
  * class twice: its keys together, the later one winning. Case does not matter in the keys.
  *
- * What cannot be read - a key that is not a text or a number, an einv_ key that is none of the seven, a
+ * What cannot be read - a key that is not a text or a number, an einv_ key that is none of the eight, a
  * value the rules would leave out - is named in the messages. Without an array for them, they go to
  * the RPT. A text over CONFIG_TEXT_MAX characters is not read at all.
  *
@@ -32,7 +32,7 @@
  *   class - the class as written <STRING>
  *   keys  - what it sets, by config key in lowercase: "einv_size" "2x1" / "xx/x-" / "mass" <STRING>,
  *           "einv_stack" <NUMBER>, "einv_grid" <STRING>, "einv_weight" kg <NUMBER>, "einv_name"
- *           <STRING>, "einv_icon" [scale, across, down] <ARRAY>, "einv_picture" <STRING> - only the ones set <HASHMAP>
+ *           <STRING>, "einv_icon" [scale, across, down] <ARRAY>, "einv_picture" <STRING>, "einv_use" [containers] <ARRAY> - only the ones set <HASHMAP>
  *
  * Example:
  * ["class CfgVehicles { class B_Carryall_blk { einv_grid = ""1x3+5x7+1x3""; }; };"] call einv_items_fnc_parseConfigEntry;

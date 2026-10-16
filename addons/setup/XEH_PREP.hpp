@@ -78,6 +78,7 @@ PREP(openPicturePicker);
 PREP(drawPicturePicker);
 PREP(pickPicture);
 PREP(drawPictureRow);
+PREP(drawUseRow);
 PREP(drawIconBlock);
 PREP(drawBoxPreview);
 PREP(cellChanged);

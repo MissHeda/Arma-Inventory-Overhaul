@@ -15,6 +15,10 @@
  *     config's, greyed - with "Pick..." (the picture picker, fnc_openPicturePicker: every picture of the game's
  *     items to search and click, or any texture path typed in) and Reset. What is picked goes into the working
  *     copy as "pictureText", the tile preview and the canvas show it at once, and Apply writes picture=PATH.
+ *   - Under the picture a Use from row (fnc_drawUseRow): a chip each for the uniform, vest and backpack, on for the
+ *     containers the item is whitelisted for (use=, einv_use) - it may be used from them even where the settings
+ *     "Use items from ..." (einv_storage) close them - and a line of what those settings limit now. The working
+ *     copy keeps the list as "useList"; Apply writes use=uniform+backpack (use=none for an emptied one).
  *   - Under them the canvas (fnc_uiCanvas), SHAPE_MAX cells each way, always shown: a click makes a place
  *     one of the item's cells or takes it away, so an L or a T is drawn cell by cell. The steppers and the
  *     canvas are one: a stepper lays a rectangle of its size where the cells are - the places that were
@@ -29,9 +33,9 @@
  *     seen is what Apply writes (icon=, einv_items_fnc_parseIcon). The inventory cuts a picture that would
  *     reach out of its tile at the tile's edge.
  *   - Apply writes what differs from now as class=X > size=WxH, or size=xx/x- for a shape
- *     (einv_items_fnc_formatMask), stack=N, weight=KG, name=..., picture=PATH and icon=ZOOM@ACROSS:DOWN (fnc_upsertRule) - the
+ *     (einv_items_fnc_formatMask), stack=N, weight=KG, name=..., picture=PATH, use=LIST and icon=ZOOM@ACROSS:DOWN (fnc_upsertRule) - the
  *     rest of that rule stays -, Discard drops the edits, Back to the preset takes the class's own size, stack,
- *     weight, name, picture and icon away. A field emptied takes its own value away; Reset and Apply take a class's own
+ *     weight, name, picture, use and icon away. A field emptied takes its own value away; Reset and Apply take a class's own
  *     icon away, or write the plain picture where the item's config draws it otherwise, and a class's own
  *     picture away, or write config's own picture path where the item's config (einv_picture) sets another.
  *   - Picked in the tree view (fnc_editScope), the edit is for the class and every class built on it: a
@@ -39,7 +43,7 @@
  *     rule class=X+ instead of one per class. A chip returns to the class alone.
  *
  * Edits go into a working copy per class (GVAR(itemWork): lowercase class -> the canvas, with "stack",
- * "weightText", "nameText", "pictureText", "iconPercent" ([zoom, across, down] in whole per cent) and "start" - what the
+ * "weightText", "nameText", "pictureText", "useList", "iconPercent" ([zoom, across, down] in whole per cent) and "start" - what the
  * shape held when it was made) and reach the draft only
  * with Apply. A change draws this side again on its own (its place and arguments in uiNamespace
  * QGVAR(editorArgs)) - there are few controls, an 8x8 canvas -; the list stays.
@@ -134,6 +138,9 @@ private _ownIcon = "icon" in _own || {_tree && {"icon" in (_treeRules getOrDefau
 private _startPicture = _info getOrDefault ["pictureOverride", ""];
 private _configPicture = _info getOrDefault ["configPicture", ""];
 private _ownPicture = "picture" in _own || {_tree && {"picture" in (_treeRules getOrDefault [_lc, createHashMap])}};
+
+// The containers it may be used from where a setting closes them (use=, einv_use): any of uniform, vest, backpack.
+private _startUse = _info getOrDefault ["use", []];
 private _canvas = GVAR(itemWork) getOrDefault [_lc, createHashMap];
 
 // No edit yet: a canvas of what it is now, its shape in the top left corner. It becomes the working copy
@@ -150,9 +157,10 @@ private _workWeight = _canvas getOrDefault ["weightText", _startWeightText];
 private _workName = _canvas getOrDefault ["nameText", _startName];
 private _workIcon = _canvas getOrDefault ["iconPercent", _startIcon];
 private _workPicture = _canvas getOrDefault ["pictureText", _startPicture];
+private _workUse = _canvas getOrDefault ["useList", _startUse];
 private _dirty = _blocks isNotEqualTo (_canvas getOrDefault ["start", []]) || {_workStack != _startStack}
     || {_workWeight isNotEqualTo _startWeightText} || {_workName isNotEqualTo _startName} || {_workIcon isNotEqualTo _startIcon}
-    || {_workPicture isNotEqualTo _startPicture};
+    || {_workPicture isNotEqualTo _startPicture} || {_workUse isNotEqualTo _startUse};
 
 ([_canvas] call FUNC(canvasBox)) params ["", "", "_boxW", "_boxH"];
 
@@ -416,7 +424,21 @@ _cursorY = _cursorY + _rowH + UNIT * 0.3;
     }, [_class, _canvas], _class
 ] call FUNC(drawPictureRow);
 
-_cursorY = _cursorY + _rowH + UNIT * 0.5;
+_cursorY = _cursorY + _rowH + UNIT * 0.3;
+
+// ----- Use from -----
+// The containers it may be used from where the settings close them: a chip each, and what they limit now.
+_cursorY = _cursorY + ([
+    _display, _box, [_innerX, _cursorY, _innerW], _theme, _labelW, _workUse, {
+        params ["_list", "_arguments"];
+        _arguments params ["_class", "_canvas"];
+
+        _canvas set ["useList", _list];
+        GVAR(itemWork) set [toLowerANSI _class, _canvas];
+
+        [] call FUNC(drawItemEditor);
+    }, [_class, _canvas]
+] call FUNC(drawUseRow)) + UNIT * 0.3;
 
 // ----- The canvas, and beside it how it looks -----
 
@@ -519,7 +541,7 @@ private _buttonX = _innerX;
 private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
 
 [_display, _box, [_buttonX, _buttonsY, _applyW, _buttonH], LLSTRING(Items_Apply), UI_TEX(icon_check_ca), _theme, {
-    params ["_class", "_canvas", "_startShape", "_startStack", "_forced", "_startWeight", "_startWeightText", "_startName", "_tree", "_below", "_startIcon", "_ownIcon", "_startPicture", "_ownPicture"];
+    params ["_class", "_canvas", "_startShape", "_startStack", "_forced", "_startWeight", "_startWeightText", "_startName", "_tree", "_below", "_startIcon", "_ownIcon", "_startPicture", "_ownPicture", "_startUse"];
 
     private _lc = toLowerANSI _class;
     private _blocks = [_canvas] call FUNC(canvasBlocks);
@@ -614,6 +636,14 @@ private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
         };
     };
 
+    // The containers it may be used from (use=): only what differs from now. None is written as use=none, which
+    // takes back what a broader rule whitelisted; Back to the preset takes the class's own rule away.
+    private _use = _canvas getOrDefault ["useList", _startUse];
+
+    if (_use isNotEqualTo _startUse) then {
+        _set set ["use", _use];
+    };
+
     GVAR(itemWork) deleteAt _lc;
 
     if (count _set == 0 && {_remove isEqualTo []}) exitWith {
@@ -625,7 +655,7 @@ private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
         [format [LLSTRING(Hint_SizeApplied), _class], format [LLSTRING(Hint_TreeApplied), _class, _below]] select _tree, "text2"
     ] call FUNC(setHint);
     [_class, _set, _remove, _tree] call FUNC(upsertRule);
-}, [_class, _canvas, _startShape, _startStack, _forced, _startWeight, _startWeightText, _startName, _tree, _below, _startIcon, _ownIcon, _startPicture, _ownPicture], _onePiece, "accent", [LLSTRING(Items_ApplyTip), LLSTRING(Items_ApplyTipTree)] select _tree] call FUNC(uiAction);
+}, [_class, _canvas, _startShape, _startStack, _forced, _startWeight, _startWeightText, _startName, _tree, _below, _startIcon, _ownIcon, _startPicture, _ownPicture, _startUse], _onePiece, "accent", [LLSTRING(Items_ApplyTip), LLSTRING(Items_ApplyTipTree)] select _tree] call FUNC(uiAction);
 
 _buttonX = _buttonX + _applyW + _gap;
 
@@ -644,7 +674,7 @@ if (_dirty) then {
 };
 
 // Something of its own to take away: its own rule, or - for the tree - the tree's.
-private _ownFields = ["footprint", "stack", "weight", "name", "icon", "picture"];
+private _ownFields = ["footprint", "stack", "weight", "name", "icon", "picture", "use"];
 private _hasOwn = (_ownFields findIf {_x in _own}) >= 0;
 
 if (_tree) then {

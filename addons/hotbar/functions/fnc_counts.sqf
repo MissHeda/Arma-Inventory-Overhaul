@@ -21,4 +21,7 @@ if (isNull _unit) exitWith {GVAR(slots) apply {0}};
 
 private _carried = [items _unit, magazines _unit, magazinesAmmoFull _unit];
 
-GVAR(slots) apply {[_x, _carried] call FUNC(count)}
+// Less what lies in a container the settings "Use items from ..." close - the same for all seven.
+private _usable = [_unit, _carried] call EFUNC(storage,useCarried);
+
+GVAR(slots) apply {[_x, _carried, _usable] call FUNC(count)}

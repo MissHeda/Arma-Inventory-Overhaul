@@ -29,8 +29,9 @@ if (isNil "efak_core_fnc_getCarriedKits" || {isNil "efak_core_fnc_openKit"}) exi
 
 ([_class] call FUNC(useOf)) params ["", "_prototype"];
 
-// The kit the slot was bound with, else the first carried one of its type.
-private _carried = [_unit] call efak_core_fnc_getCarriedKits;
+// The kit the slot was bound with, else the first carried one of its type - not one that lies in a container
+// the settings "Use items from ..." close to it.
+private _carried = ([_unit, [[_unit] call efak_core_fnc_getCarriedKits]] call EFUNC(storage,useCarried)) select 0;
 private _kit = "";
 private _found = _carried findIf {_x == _class};
 

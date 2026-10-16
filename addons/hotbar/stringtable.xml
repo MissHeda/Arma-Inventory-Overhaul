@@ -151,8 +151,14 @@
         <Key ID="STR_einv_hotbar_Reason_RationsOff">
             <English>Eating and drinking are off in this mission</English>
         </Key>
+        <Key ID="STR_einv_hotbar_Reason_TakeOut">
+            <English>Cannot be used from the %1 - take it out first</English>
+        </Key>
         <Key ID="STR_einv_hotbar_Reason_ThrowWait">
             <English>Wait a moment before the next throw</English>
+        </Key>
+        <Key ID="STR_einv_hotbar_Reason_UseBlocked">
+            <English>Cannot be used from the %1</English>
         </Key>
         <Key ID="STR_einv_hotbar_Reason_WrongWeapon">
             <English>Does not fit the weapon in your hands</English>

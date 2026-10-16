@@ -178,6 +178,12 @@
         <Key ID="STR_einv_gui_Hint_Taken">
             <English>That place was just taken</English>
         </Key>
+        <Key ID="STR_einv_gui_Hint_UseAllowed">
+            <English>Whitelisted: can be used from the %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_UseBlocked">
+            <English>Cannot be used from the %1</English>
+        </Key>
         <Key ID="STR_einv_gui_Hint_Waiting">
             <English>Still waiting for an answer - showing what is there</English>
         </Key>

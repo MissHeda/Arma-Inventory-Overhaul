@@ -19,7 +19,9 @@
  * An option a loaded compat addon replaces with a choice of its own is left out - Enhanced First Aid
  * Kits' "Open" (einv_compat_efak_fnc_hideCbaOption), ACRE2's "Open" on its radios (the window's own "Open
  * radio" steps aside first, einv_compat_acre_fnc_hideCbaOption) - and ACE's "Repack Magazines" while this
- * mod repacks magazines itself (einv_magazines_fnc_hideCbaOption).
+ * mod repacks magazines itself (einv_magazines_fnc_hideCbaOption). An option that uses the item up (field
+ * rations, medical items, ...) is left out for an item lying in the unit's uniform, vest or backpack where the
+ * settings "Use items from ..." do not let it be used (einv_storage_fnc_useState).
  *
  * Arguments:
  * 0: Unit - the player, as CBA_fnc_currentUnit gives it <OBJECT>
@@ -94,6 +96,13 @@ private _rows = [];
         if (!isNil QEFUNC(compat_efak,hideCbaOption) && {[_item, _displayName] call EFUNC(compat_efak,hideCbaOption)}) then {continue};
         if (!isNil QEFUNC(compat_acre,hideCbaOption) && {[_item, _displayName] call EFUNC(compat_acre,hideCbaOption)}) then {continue};
         if (!isNil QEFUNC(magazines,hideCbaOption) && {[_item, _displayName] call EFUNC(magazines,hideCbaOption)}) then {continue};
+
+        // Using it up is no choice for an item that cannot be used from the container it lies in.
+        if (_consume) then {
+            private _useAt = ["UNIFORM_CONTAINER", "VEST_CONTAINER", "BACKPACK_CONTAINER"] find _slot;
+
+            if (_useAt >= 0 && {([_item, USE_KINDS select _useAt] call EFUNC(storage,useState)) isEqualTo "blocked"}) then {continue};
+        };
 
         // CBA has no command to take a single item out of the ground or a crate.
         if (_consume && {_slot in ["GROUND", "CARGO"]}) then {

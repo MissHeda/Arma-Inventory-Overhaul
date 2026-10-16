@@ -69,3 +69,16 @@
 
 // MAX_ROWS, MAX_BLOCKS and MAX_CELLS live in main's script_macros.hpp: the items addon reads the
 // rules that size containers and has to keep to the same limits.
+
+// ---------------------------------------------------------------------------
+// Use from containers (the settings einv_storage_useUniform, useVest and useBackpack)
+// ---------------------------------------------------------------------------
+
+// The kinds of item (einv_items_fnc_getInfo "kind") that are used from where they lie: magazines to reload,
+// grenades to throw, medicine, food and tools (item), kits and radios. A rifle, an attachment or a piece of
+// clothing is worn or fitted, not used from a container, so the settings never touch them. An array literal -
+// used in code only, never inside a macro's arguments.
+#define USE_ITEM_KINDS ["magazine", "grenade", "item", "kit", "radio"]
+
+// The reload key is looked at at most this often, in seconds (fnc_reloadGuard): a key held down repeats.
+#define RELOAD_GUARD_GAP 0.6

@@ -120,6 +120,10 @@ GVAR(hubTickAt) = 0;
 // client already took out.
 GVAR(serverVersion) = "";
 
+// Whether any of the "Use items from ..." settings limits something; set by them (fnc_useRefresh) and read
+// by everything that asks where an item may be used from, which has nothing to do while it is false.
+GVAR(useActive) = false;
+
 #include "initSettings.inc.sqf"
 
 ADDON = true;

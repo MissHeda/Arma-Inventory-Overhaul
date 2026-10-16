@@ -13,6 +13,21 @@
         <Key ID="STR_einv_arsenal_Blocked_Title">
             <English>The Virtual Arsenal is not allowed here</English>
         </Key>
+        <Key ID="STR_einv_arsenal_Confirm_Keep">
+            <English>Keep editing</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Confirm_Remove">
+            <English>Remove and close</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Confirm_Text">
+            <English>%1 items do not fit your gear and will be removed: %2</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Confirm_TextOne">
+            <English>1 item does not fit your gear and will be removed: %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Confirm_Title">
+            <English>Gear does not fit</English>
+        </Key>
         <Key ID="STR_einv_arsenal_Hint_DropRemove">
             <English>Let go to take it out</English>
         </Key>
@@ -48,6 +63,9 @@
         </Key>
         <Key ID="STR_einv_arsenal_Overflow">
             <English>Not everything fits the grid of %1</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Removed">
+            <English>Removed, as they did not fit: %1</English>
         </Key>
         <Key ID="STR_einv_arsenal_Setting_BIArsenal">
             <English>Vanilla Virtual Arsenal</English>

@@ -2,13 +2,14 @@
 /*
  * Author: Miss Heda
  * What the rules make of an item: its size, how many share a tile, a container's grid, a weight, a
- * name of its own, how its picture is drawn in its tile and which picture it is. Each of these is a field of its own and
+ * name of its own, how its picture is drawn in its tile, which picture it is and the containers it may be
+ * used from. Each of these is a field of its own and
  * goes to the first that has an answer, highest first:
  *
  *   own     - the rules text (later rules first), and after it the older tables (einv_items_sizeTable,
  *             einv_items_stackTable, einv_storage_containerTable), which therefore win over the text
  *   mod     - the item's own config: einv_size, einv_stack, einv_grid, einv_weight, einv_name,
- *             einv_icon, einv_picture, and where one of those is not set the older einv_gridSize[], einv_stackSize, einv_grids[]
+ *             einv_icon, einv_picture, einv_use, and where one of those is not set the older einv_gridSize[], einv_stackSize, einv_grids[]
  *             or einv_slots (fnc_getFacts, fnc_readConfigKeys). A subclass has its parent's, and
  *             the rules text above still has the last word
  *   preset  - the preset chain (a derived preset after its base, later rules first), and after it
@@ -24,7 +25,7 @@
  * layer is left as soon as nothing it could still set is open.
  *
  * A rule with like=X sets, besides what it sets itself, every field of LIKE_FIELDS still open - size,
- * stack, grid and weight, never the name, icon or picture - to what this function makes of X, asked now through the
+ * stack, grid and weight, never the name, icon, picture or use - to what this function makes of X, asked now through the
  * same compiled rules: a later change to X follows, and a rule like=X grid=6x4 takes X's answer with
  * its own grid on top. X's answer is X's in full: its grid as the compartments X really has
  * (einv_storage_fnc_blocksFor with X's class, kind and load - "auto" by this item's own load would be
@@ -56,6 +57,8 @@
  *   "icon"      - how its picture is drawn in its tile, [scale, across, down] (fnc_parseIcon), ICON_PLAIN
  *                 [1, 0, 0] when none sets it <ARRAY>
  *   "picture"   - the texture the rules give it (picture=, fnc_parsePicture), "" when none does <STRING>
+ *   "use"       - the containers it may be used from where a setting limits what can be used there (use=,
+ *                 fnc_parseUse), in the order uniform, vest, backpack; [] when none says <ARRAY of STRING>
  *   "src"       - field -> where it came from: "own:<i>" (i-th rule of the text),
  *                 "legacy:<setting>:<i>", "mod:<config key>", "preset:<preset>:<i>", "all:<i>" (the
  *                 i-th rule of the text, one with "all"), "builtin", "forced" <HASHMAP>
@@ -69,7 +72,7 @@
 params [["_facts", createHashMap, [createHashMap]], ["_compiled", createHashMap, [createHashMap]], ["_chain", [], [[]]]];
 
 private _kind = _facts get "kind";
-private _need = ["footprint", "weight", "name", "icon", "picture"];
+private _need = ["footprint", "weight", "name", "icon", "picture", "use"];
 
 if !(_kind in KINDS_SINGLE) then {
     _need pushBack "stack";
@@ -318,6 +321,12 @@ if ("picture" in _need && {"picture" in _mod}) then {
     _need = _need - ["picture"];
 };
 
+if ("use" in _need && {"use" in _mod}) then {
+    _result set ["use", _mod get "use"];
+    _src set ["use", "mod:" + QGVARMAIN(use)];
+    _need = _need - ["use"];
+};
+
 [_compiled getOrDefault ["preset", []], _presetIndices, _presetFields, true] call _fnc_walk;
 
 // Everything else (all): what no rule, table, mod or preset answered - the gaps, and only those - and
@@ -339,6 +348,7 @@ if (_fallbackIndices isNotEqualTo []) then {
         case "grid": {["auto"]};
         case "weight": {-1};
         case "icon": {ICON_PLAIN};
+        case "use": {[]};
         default {""};
     }];
     _src set [_x, "builtin"];

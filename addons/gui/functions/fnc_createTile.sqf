@@ -9,6 +9,10 @@
  *
  * A window that attached (fnc_attach) may mark a tile in its top left corner (the "tileBadge" hook).
  *
+ * An item that cannot be used from the container it lies in - the player's own uniform, vest or backpack,
+ * which the settings "Use items from ..." close to it, unless it is whitelisted there - wears a small padlock
+ * in the top left corner (beside the window's badge, if it has one). Never in the setup wizard's preview.
+ *
  * A magazine gets its fill bar only while it is not full and the player has the bar on
  * (einv_gui_magazineFillBar); a full one shows its rounds alone. The rounds as words ("17/30") show
  * while the player has them on (einv_gui_magazineText).
@@ -211,6 +215,25 @@ if (_hidden) then {
             _display, _parent, [_left + _padX * 0.5, _top + _padY * 0.5, SQUARE(UNIT * 0.42), UNIT * 0.42], _badge,
             _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]]
         ] call FUNC(uiIcon));
+    };
+
+    // The padlock of an item that cannot be used from here (einv_storage_fnc_useState): only the player's own
+    // gear is ever used from, and only while a setting limits something (one variable read).
+    if (
+        missionNamespace getVariable [QEGVAR(storage,useActive), false]
+        && {!(_entry getOrDefault ["preview", false])} && {!(_grid getOrDefault ["virtual", true])}
+    ) then {
+        private _useKind = [_grid getOrDefault ["container", objNull]] call EFUNC(storage,useKind);
+
+        if (([_entry get "class", _useKind] call EFUNC(storage,useState)) isEqualTo "blocked") then {
+            private _lockSize = UNIT * 0.4;
+            private _lockX = _left + _padX * 0.5 + ([0, SQUARE(UNIT * 0.42) + _padX * 0.5] select (_badge isEqualType "" && {_badge isNotEqualTo ""}));
+
+            _controls pushBack ([
+                _display, _parent, [_lockX, _top + _padY * 0.5, SQUARE(_lockSize), _lockSize], UI_TEX(icon_lock_ca),
+                _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]]
+            ] call FUNC(uiIcon));
+        };
     };
 
     private _count = _entry getOrDefault ["count", 1];

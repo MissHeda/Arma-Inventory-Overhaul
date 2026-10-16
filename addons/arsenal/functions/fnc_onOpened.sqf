@@ -15,6 +15,10 @@
  * ACE greys every row anew at each pick -, and a press on the list is noted, as it may become a drag of
  * the row's item into the panel (fnc_onListPress).
  *
+ * ACE's Close button and Escape are taken over (fnc_interceptClose): the window closes as ever, but asks
+ * first when something does not fit the grid of the uniform, vest or backpack, and takes it out on the
+ * player's word (fnc_confirmClose).
+ *
  * Another window of the engine still open (the inventory, closing for this one) is waited for one frame
  * more; then the panel stays away, with one line in the RPT.
  *
@@ -37,6 +41,7 @@ params [["_display", displayNull, [displayNull]]];
 if (!GVAR(ready) || {isNull _display} || {ctrlIDD _display != ARSENAL_IDD}) exitWith {};
 
 uiNamespace setVariable [QGVAR(display), _display];
+uiNamespace setVariable [QGVAR(confirm), controlNull];
 
 GVAR(attached) = false;
 GVAR(shown) = true;
@@ -60,6 +65,9 @@ GVAR(stagingCount) = 0;
 
 _display displayAddEventHandler ["KeyDown", {_this call FUNC(onKey)}];
 _display displayAddEventHandler ["KeyUp", {(_this + [false]) call FUNC(onKey)}];
+
+// The Close button and Escape ask first when something does not fit (fnc_confirmClose).
+[_display] call FUNC(interceptClose);
 
 private _list = _display displayCtrl ARSENAL_IDC_LIST;
 

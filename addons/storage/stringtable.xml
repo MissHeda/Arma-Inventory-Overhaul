@@ -4,6 +4,30 @@
         <Key ID="STR_einv_storage_Ground">
             <English>Ground</English>
         </Key>
+        <Key ID="STR_einv_storage_Hint_NoReload">
+            <English>Cannot reload: the magazines are in the %1. Take one out first.</English>
+        </Key>
+        <Key ID="STR_einv_storage_Kind_And">
+            <English>and</English>
+        </Key>
+        <Key ID="STR_einv_storage_Kind_backpack">
+            <English>backpack</English>
+        </Key>
+        <Key ID="STR_einv_storage_Kind_uniform">
+            <English>uniform</English>
+        </Key>
+        <Key ID="STR_einv_storage_Kind_vest">
+            <English>vest</English>
+        </Key>
+        <Key ID="STR_einv_storage_Option_UseAll">
+            <English>Everything</English>
+        </Key>
+        <Key ID="STR_einv_storage_Option_UseList">
+            <English>Only whitelisted</English>
+        </Key>
+        <Key ID="STR_einv_storage_Option_UseNone">
+            <English>Nothing</English>
+        </Key>
         <Key ID="STR_einv_storage_Setting_ContainerTable">
             <English>Container sizes</English>
         </Key>
@@ -22,8 +46,29 @@
         <Key ID="STR_einv_storage_Setting_NearbyRange_Desc">
             <English>How far from a player piles on the\nground and crates show in the loot\ncolumn on their own, in metres - and\nhow far away anything can still be\nchanged while the inventory is open.\n\nOnly what the player sees from where\nthey stand counts: nothing through\nwalls or from another floor.\n\nVehicles and bodies show when they\nare opened, as before.</English>
         </Key>
+        <Key ID="STR_einv_storage_Setting_UseBackpack">
+            <English>Use items from the backpack</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_UseBackpack_Desc">
+            <English>What can be used while it lies in the\nbackpack: magazines to reload from,\ngrenades to throw, bandages, food and\ndrink, kits and radios.\n\nEverything: as in the game.\nOnly whitelisted: only items marked &quot;Can\nbe used from&quot; the backpack in the setup\nwizard (Items step, rule use=backpack).\nNothing: nothing in the backpack can be\nused, marked or not.\n\nA blocked item wears a padlock in the\ninventory and is refused by the hotbar\nand the window's menus. The reload key\nloads magazines only from containers\nthat allow it.\n\nA mod cannot change the game itself:\nthrowing with the game's own keys and\nACE's own medical and self interaction\nmenus still take from any container.</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_UseUniform">
+            <English>Use items from the uniform</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_UseUniform_Desc">
+            <English>What can be used while it lies in the\nuniform: magazines to reload from,\ngrenades to throw, bandages, food and\ndrink, kits and radios.\n\nEverything: as in the game.\nOnly whitelisted: only items marked &quot;Can\nbe used from&quot; the uniform in the setup\nwizard (Items step, rule use=uniform).\nNothing: nothing in the uniform can be\nused, marked or not.\n\nA blocked item wears a padlock in the\ninventory and is refused by the hotbar\nand the window's menus. The reload key\nloads magazines only from containers\nthat allow it.\n\nA mod cannot change the game itself:\nthrowing with the game's own keys and\nACE's own medical and self interaction\nmenus still take from any container.</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_UseVest">
+            <English>Use items from the vest</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_UseVest_Desc">
+            <English>What can be used while it lies in the\nvest: magazines to reload from, grenades\nto throw, bandages, food and drink, kits\nand radios.\n\nEverything: as in the game.\nOnly whitelisted: only items marked &quot;Can\nbe used from&quot; the vest in the setup\nwizard (Items step, rule use=vest).\nNothing: nothing in the vest can be\nused, marked or not.\n\nA blocked item wears a padlock in the\ninventory and is refused by the hotbar\nand the window's menus. The reload key\nloads magazines only from containers\nthat allow it.\n\nA mod cannot change the game itself:\nthrowing with the game's own keys and\nACE's own medical and self interaction\nmenus still take from any container.</English>
+        </Key>
         <Key ID="STR_einv_storage_SubCategory_Containers">
             <English>Containers</English>
+        </Key>
+        <Key ID="STR_einv_storage_SubCategory_UseFrom">
+            <English>Use from containers</English>
         </Key>
     </Package>
 </Project>

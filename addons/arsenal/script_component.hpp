@@ -18,6 +18,11 @@
 #define ARSENAL_IDC_PLUS 102
 #define ARSENAL_IDC_LOAD 701
 
+// The "Close" button of ACE's menu bar (IDC_menuBarClose), whose click closes the display with exit code 1,
+// and ACE's loadouts display (IDD_loadouts_display), which takes Escape for itself while it is open.
+#define ARSENAL_IDC_CLOSE 1001
+#define ARSENAL_IDD_LOADOUTS 1127002
+
 // The sort bar over the right list (IDC_sortRightTab), whose top the panel starts at.
 #define ARSENAL_IDC_SORT 17
 

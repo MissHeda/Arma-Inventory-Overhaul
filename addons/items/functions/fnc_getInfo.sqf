@@ -8,7 +8,7 @@
  *
  *   1. the older table settings (sizes, stacks, container sizes) - read as rules after the text
  *   2. the rules text, einv_items_rules
- *   3. the item's own mod: einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture, and the older
+ *   3. the item's own mod: einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture, einv_use, and the older
  *      einv_gridSize[], einv_stackSize, einv_grids[], einv_slots
  *   4. the preset the text builds on, with einv_items_stackSmall moved off its default
  *   5. built in: 1x1, alone on its tile, a grid by load
@@ -19,7 +19,7 @@
  * "short" are then those; "configMass", "configDisplayName" and "configShort" keep what config says.
  * The engine still weighs every item by its config. A rule or the config may also say how large its
  * picture is drawn and where (icon=, einv_icon): "icon", and a picture of its own (picture=, einv_picture):
- * "picture".
+ * "picture". A rule or the config may also whitelist it for use from a container (use=, einv_use): "use".
  *
  * Without compiled rules, the rules in effect are used and the result kept per class until the rules
  * change. An item whose rule says like=X is kept the same way: X is asked through the same compiled
@@ -65,6 +65,8 @@
  *   "configDisplayName", "configShort" - config's names <STRING>
  *   "weightOverride"    - the rules' weight in kg, -1 when none <NUMBER>
  *   "nameOverride"      - the rules' name, "" when none <STRING>
+ *   "use"               - the containers it may be used from where a setting limits what can be used there,
+ *                         any of "uniform", "vest", "backpack" in that order, [] for none <ARRAY of STRING>
  *   "pictureOverride"   - the rules' picture path, "" when none - also when the file is missing <STRING>
  *   "configPicture"     - config's picture <STRING>
  *   and from fnc_getFacts: "lc", "root", "rounds", "lineage", "addon", "mod"
@@ -112,6 +114,7 @@ _info set ["shape", [_w, _h, _holes] call FUNC(formatMask)];
 _info set ["stack", _resolved get "stack"];
 _info set ["grid", _resolved get "grid"];
 _info set ["icon", _resolved get "icon"];
+_info set ["use", _resolved get "use"];
 _info set ["src", _resolved get "src"];
 
 // What config says stays readable next to what the rules make of it.

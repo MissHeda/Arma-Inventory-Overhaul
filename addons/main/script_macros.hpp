@@ -66,6 +66,19 @@
 #define ICON_SCALE_MAX 4
 #define ICON_OFFSET_MAX 1
 
+// The containers of a person's gear an item can be used from, in the order everything lists them (use=,
+// einv_use, einv_items_fnc_parseUse; the "use" of einv_items_fnc_getInfo; the settings einv_storage_useUniform,
+// einv_storage_useVest and einv_storage_useBackpack). An array literal - used in code only, never inside a
+// macro's arguments.
+#define USE_KINDS ["uniform", "vest", "backpack"]
+
+// The three answers of the settings that say what can be used from one of them (einv_storage_useUniform and
+// the others, einv_storage_fnc_useMode): everything in the container can be used, only the items whitelisted
+// for it (use=, einv_use), nothing.
+#define USE_ALL "all"
+#define USE_LIST "list"
+#define USE_NONE "none"
+
 // The longest texture path a picture override may have (picture=, einv_picture; einv_items_fnc_parsePicture).
 #define PICTURE_MAX 260
 

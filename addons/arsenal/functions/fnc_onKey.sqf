@@ -43,6 +43,9 @@ GVAR(ctrlHeld) = [_ctrl && {!_isCtrl}, _ctrl || {_isCtrl}] select _down;
 
 if (!_down) exitWith {false};
 
+// The question of fnc_confirmClose holds the keys (fnc_onAceKey).
+if !(isNull (uiNamespace getVariable [QGVAR(confirm), controlNull])) exitWith {false};
+
 if (!GVAR(attached) || {(uiNamespace getVariable [QEGVAR(gui,display), displayNull]) isNotEqualTo _display}) exitWith {false};
 
 private _focused = focusedCtrl _display;

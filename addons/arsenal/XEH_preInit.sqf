@@ -65,6 +65,11 @@ GVAR(ctrlHeld) = false;
 GVAR(picturePass) = 0;
 GVAR(pictureCache) = createHashMap;
 
+// The question asked when ACE's window is about to close with things that do not fit (fnc_confirmClose):
+// its card, a control, so in uiNamespace (controlNull for none), and the exit code the window then closes with.
+uiNamespace setVariable [QGVAR(confirm), controlNull];
+uiNamespace setVariable [QGVAR(confirmCode), 1];
+
 // What of ACE's internals was found missing and said in the RPT already, once each.
 GVAR(missingSaid) = [];
 

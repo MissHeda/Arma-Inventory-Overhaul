@@ -92,7 +92,7 @@ where a setup differs.
 ### The text (`fnc_parseRules`, `fnc_writeRules`)
 
 Statements are separated by commas; a line break counts as a comma. The writer always joins with `", "`, in the order header,
-groups, rules, and a rule's values in the order `like`, `size`, `stack`, `grid`, `weight`, `name`, `icon`, `picture`. Read and written again, a text
+groups, rules, and a rule's values in the order `like`, `size`, `stack`, `grid`, `weight`, `name`, `icon`, `picture`, `use`. Read and written again, a text
 stays the same, so two setups that mean the same compare as texts.
 
 | Statement | Example | |
@@ -127,6 +127,7 @@ Values - what a rule sets. `like` is written first, the others in any order:
 | `name=Field_kit` | the name it shows, at most `MAX_NAME` 100 characters: `_` is a space and `%5F` an underscore; letters, digits, `-` and `.` stand as they are, every other character is `%XX` per UTF-8 byte (`Field kit (3)` is `Field_kit_%283%29`). `fnc_encodeName` writes it, `fnc_decodeName` reads it. |
 | `icon=1.4`, `icon=1.4@0.1:-0.05` | how the item's **picture** is drawn in its tile: `SCALE` or `SCALE@ACROSS:DOWN` (`fnc_parseIcon` reads it, `fnc_formatIcon` writes it). The scale is 0.25 to 4 (`ICON_SCALE_MIN`, `ICON_SCALE_MAX`) times the picture as it is fitted into the tile, about the tile's middle; the offsets are -1 to 1 (`ICON_OFFSET_MAX`) of the tile's width across (positive: right) and of its height down (positive: down); all to two decimals, a value past a limit is cut down with a warning. `icon=1` is the plain picture and a legal value (it takes back what a broader rule set). A comma ends a statement, so the text's offsets are split by `:` - the writer always writes the colon; config's `"1.4@0.1,-0.05"` is read as it stands, and a comma typed into a rules text is read as the colon (a number on its own right after an `icon=` with one offset is its second one). Parsed into the rule's values as `"icon"`, `[scale, across, down]`. Not taken by `like=`. |
 | `picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa` | **which picture** the item shows instead of the one its config names (`fnc_parsePicture` reads it): a texture path of at most `PICTURE_MAX` 260 characters with a file name that has an extension. In a rules text it is written the way `name=` is, but for a path (`fnc_encodeName` / `fnc_decodeName` with their `path` switch): letters, digits, `-`, `_`, `.` and `/` stay, a backslash is written `/` (the setting's text box cleans a backslash out - `fnc_sanitizeText` now turns one into a `/` instead of dropping it, so a path typed there keeps its folders), a space is `%20` and every other character `%XX` per UTF-8 byte; read back, `/` is the backslash of the engine's own paths. Parsed into the rule's values as `"picture"`, the path with backslashes. Whether the file exists is asked by `fnc_getInfo` (`fileExists`, with and without the leading backslash), not by the reader: a missing file falls back to the config picture and is named once per path in the RPT. Not taken by `like=`. |
+| `use=backpack+vest` | **which containers it may be used from** even where a setting closes them (`fnc_parseUse` reads it, `fnc_formatUse` writes it; section 3, "Use from containers"): any of `uniform`, `vest`, `backpack` joined with `+` (a comma would end the statement; config's `einv_use` also takes a comma or a bar), `all` for the three, `none` for no container - the one value that takes back what a broader rule whitelisted. Words are lowercase or not, plurals are read, a word that is none of these is left out with a note. Written always in the order uniform, vest, backpack. Parsed into the rule's values as `"use"`, an array of those words (`[]` for `none`). Only means something for the kinds that are used from where they lie (`USE_ITEM_KINDS` in storage: magazine, grenade, item, kit, radio). Not taken by `like=`. |
 
 `grid=` takes one of these (`fnc_parseGrid`, `fnc_formatGrid`):
 
@@ -177,7 +178,7 @@ which is why a typo in a rule must not build tens of thousands of them.
 
 ### Which answer wins (`fnc_resolve`)
 
-Each field - footprint, stack, grid, weight, name, icon, picture - goes to the first layer that has an answer, highest first:
+Each field - footprint, stack, grid, weight, name, icon, picture, use - goes to the first layer that has an answer, highest first:
 
 1. **forced** - rifles, handguns, launchers, binoculars, uniforms, vests and backpacks always stack 1 (`KINDS_SINGLE`), whatever
    any rule says: each carries attachments or contents of its own, and a tile moves only one of them.
@@ -185,7 +186,7 @@ Each field - footprint, stack, grid, weight, name, icon, picture - goes to the f
    rules appended after the text's own, each table sorted shallow-first (fewest parents first) so the nearest class listed wins.
    They sit in the same layer as the text but come after it, so a table beats the text.
 3. **the own text** - `einv_items_rules`, a later rule before an earlier one.
-4. **the item's mod config** - `einv_size`, `einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, `einv_icon`, `einv_picture`, written as the rules write the same
+4. **the item's mod config** - `einv_size`, `einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, `einv_icon`, `einv_picture`, `einv_use`, written as the rules write the same
    value ("Config keys of an item" below); for a field those leave open the older `einv_gridSize[]`, `einv_stackSize`,
    `einv_grids[]`, then `einv_slots`. Grids and slots from config stay within the limits above. The text above still overrides all
    of it, so a server's rules have the last word over any mod.
@@ -199,7 +200,7 @@ Each field - footprint, stack, grid, weight, name, icon, picture - goes to the f
    set a size or stack under `base=default`): a field only such a rule answered is asked of the `all` rules again and keeps the preset's
    answer where they have none (`_caught` in `fnc_resolve`; `fnc_explain` then takes the field out of that preset line's wins). A
    preset's own `all` rule is left out with a warning. `fnc_configEntry`'s bare answer drops `fallback` with `own`.
-7. **builtin** - 1x1, stack 1, `grid=auto`, config weight, config name, the plain picture (`ICON_PLAIN`, `[1, 0, 0]`), config's own picture (the resolved `picture` is "").
+7. **builtin** - 1x1, stack 1, `grid=auto`, config weight, config name, the plain picture (`ICON_PLAIN`, `[1, 0, 0]`), config's own picture (the resolved `picture` is ""), no container whitelisted (the resolved `use` is `[]`).
 
 Only the rules that can be about the item's kind are asked (`fnc_compileRules` sorts them by kind), and a layer is left as soon as
 nothing it could still set is open. Afterwards `size=mass` becomes cells, stacks become whole numbers of at least 1, the footprint
@@ -226,6 +227,7 @@ layer above: a server's rules text still beats them, and they beat a preset.
 | `einv_weight = 0.5;` | any item | kilograms, 0 to `MAX_WEIGHT`, rounded to the gram | `weight=` (kg, not config mass) |
 | `einv_name = "Short name";` | any item | the name as it shows, at most `MAX_NAME` characters; a space is a space | `name=`, but plain text (the rules text writes `_` for a space and `%XX` for the rest) |
 | `einv_picture = "a3\ui_f\data\gui\cfg\hints\gear_ca.paa";` | any item | the texture it shows instead of its config `picture`: backslashes or slashes, spaces as they are (`fnc_parsePicture` with `encoded = false`) | `picture=` (config writes the plain path, the rules text the encoded one) |
+| `einv_use = "backpack,vest";` | any item | the containers it may be used from where a setting closes them: `uniform`, `vest`, `backpack`, `all` or `none`, joined with a comma, a plus or a bar (`fnc_parseUse`). `""` takes an inherited value back, so `"none"` says no container | `use=` (config writes the comma, the rules text the plus) |
 | `einv_icon = "1.4@0.1,-0.05";` | any item | how the picture is drawn in its tile: a scale 0.25 to 4, and after an `@` how far it is moved across and down, -1 to 1 of the tile (a comma or a colon between the two); a plain number `1.4` is the scale alone | `icon=` (config writes the comma, the rules text the colon) |
 
 - **Read by the rules' own readers.** `fnc_readConfigKeys` hands the size to `fnc_parseRules` and the grid to
@@ -263,7 +265,7 @@ Two public functions turn the keys into a snippet and back, for mod authors and 
 - `einv_items_fnc_parseConfigEntry [text, messages = nil]` -> `[[class, keys], ...]`: reads such lines - one class or many, under
   their root or without it; comments, `class X;` declarations, parents (`class X: Y`), other properties and nested classes are
   skipped - into `keys`, a HashMap by lowercase config key (`"einv_size"`, `"einv_stack"`, `"einv_grid"`, `"einv_weight"`,
-  `"einv_name"`, `"einv_icon"`, `"einv_picture"`) with the values as the rules write them (size and grid STRING, stack and weight NUMBER, name
+  `"einv_name"`, `"einv_icon"`, `"einv_picture"`, `"einv_use"`) with the values as the rules write them (size and grid STRING, stack and weight NUMBER, name
   STRING, icon `[scale, across, down]`, picture STRING); only keys
   that could be read, and only classes that have one. What was left out is added to the `messages` array when one is given, else
   to the RPT. A text over `CONFIG_TEXT_MAX` 65536 characters is not read.
@@ -327,6 +329,7 @@ no cache: not kept. Callers must not modify it. The config part comes from `fnc_
 | `configMass`, `configDisplayName`, `configShort` | | config's values, whatever the rules say |
 | `weightOverride`, `nameOverride` | NUMBER, STRING | the rules' weight in kg (-1 for none), the rules' name ("" for none) |
 | `picture`, `pictureOverride`, `configPicture` | STRING | the texture the item shows: the rules' (`picture=`, `einv_picture`) when `fileExists` says it is there - `pictureOverride` is the rules' path whether it is or not, "" for none -, else config's `picture`, which `configPicture` keeps whatever the rules say. Every drawing of the item reads `picture` |
+| `use` | ARRAY | the containers it may be used from where a setting closes them: any of `"uniform"`, `"vest"`, `"backpack"` in that order, `[]` for none (`use=`, `einv_use`, `fnc_parseUse`). Read by `einv_storage_fnc_useState` |
 | `icon` | ARRAY | how the picture is drawn in the item's tile: `[scale, across, down]`, the scale a factor (0.25 to 4), the offsets a share of the tile's width and height (-1 to 1); `[1, 0, 0]` (`ICON_PLAIN`) for the plain picture. From `icon=` / `einv_icon` (`fnc_parseIcon`); every picture of the window draws by it (section 4, "Grids and tiles") |
 | `lc`, `root`, `rounds`, `lineage`, `addon`, `mod` | | from `fnc_getFacts`: lowercase class, config root, a CfgMagazines `count`, lowercase classes from itself up, the CfgPatches class, what its own config says (`einv_size` and the other keys, "Config keys of an item") |
 
@@ -360,6 +363,7 @@ a config key sets it (section 7, compat_efak).
 | `fnc_parseGrid [text]`, `fnc_formatGrid [spec]`, `fnc_parseMask`, `fnc_formatMask`, `fnc_turnMask` | No | grid specs and masks; `fnc_parseMask` is the one reader of masks, for items and compartments alike |
 | `fnc_parseIcon [text]`, `fnc_formatIcon [icon, separator = ":"]` | No | the value of `icon=` / `einv_icon`: `"1.4@0.1:-0.05"` -> `[[1.4, 0.1, -0.05], notes]` (`[]` when unreadable; limits cut with a note) and back, the colon for a text, `","` for config |
 | `fnc_parsePicture [text, encoded = true]` | No | the value of `picture=` / `einv_picture` -> `[path, notes]` (`""` when unreadable or too long) |
+| `fnc_parseUse [text]`, `fnc_formatUse [containers, separator = "+"]` | No | the value of `use=` / `einv_use` -> `[containers, notes, readable]` (the containers in the order uniform, vest, backpack, `[]` for none), and back (`"none"` for `[]`) |
 | `fnc_compileCond`, `fnc_matches`, `fnc_parseTable [text, type, warnings]`, `fnc_sanitizeText` | No | conditions; the older tables; the EDITBOXes' sanitizer |
 | `fnc_resolve [facts, compiled]` | No | -> `footprint`, `stack`, `grid`, `weight` (kg, -1), `name` ("" none), `src` |
 | `fnc_setBy [info, field]` | Yes | who set a field, from its `src` tag: `"rule"` (`own:`, `legacy:` but the stack slider, `all:`), `"config"` (`mod:`), `"preset"` (`preset:`, the stack slider), `"default"` (`builtin`, `forced`) |
@@ -402,7 +406,7 @@ All global, each runs `fnc_loadRules` when it changes: `einv_items_rules` (EDITB
 `fnc_upsertRule [class, set, remove, tree = false]` writes what the Items or Containers step sets for one class into the draft, as that
 class's own rule `class=X > ...`; `fnc_upsertRules [[class, set, remove, tree], ...]` does the same for several classes in one undo step
 (the editors' import). `set` is a HashMap of `footprint` (`"2x3"` or a mask), `stack`, `grid` (as `fnc_formatGrid` writes it), `like` (a
-class), `weight` (kg), `name`, `icon` (`[scale, across, down]`) and `picture` (a path); `remove` is an array of fields to take away. The rules written for exactly that class
+class), `weight` (kg), `name`, `icon` (`[scale, across, down]`), `picture` (a path) and `use` (an array of container words); `remove` is an array of fields to take away. The rules written for exactly that class
 (`einv_setup_fnc_ownClassRules`) become one; whatever else they set stays. The rule goes **last**: later rules win, so a broader rule
 further down (a group, a kind) would otherwise still decide what the class gets and the step would show something other than what
 was just applied. A rule left with nothing to set goes altogether. It returns false for a class name the language cannot hold, and ends
@@ -760,9 +764,49 @@ an object of its own and no item cargo, which the scripted holder avoids (see Gr
 holder the engine keeps it in until the end of the frame is never taken for a pile. `fnc_opPutGround` writes one RPT line per
 backpack, "Backpack CLASS goes onto pile NETID".
 
+### Use from containers (`fnc_useState`, `fnc_useCarried`, `fnc_reloadGuard`)
+
+Three global CBA settings, topic "Use from containers" (`addons/storage/initSettings.inc.sqf`): `einv_storage_useUniform`,
+`einv_storage_useVest`, `einv_storage_useBackpack` - "Use items from the <container>" - each a list **Everything** (`USE_ALL`
+"all", the default and how the game works), **Only whitelisted** (`USE_LIST` "list") or **Nothing** (`USE_NONE` "none"). They
+decide what counts as *usable* while it lies in the player's own uniform, vest or backpack: a magazine to reload from, a
+grenade to throw, a bandage or a bottle, a kit, a radio. Items opt back in per container with the rule value `use=` (section 2;
+the wizard's "Use from" chips): on Only whitelisted an item counts when its `info "use"` lists that container, on Nothing nothing
+does, whitelisted or not. Only the kinds in `USE_ITEM_KINDS` (magazine, grenade, item, kit, radio) are ever limited - a rifle, an
+attachment or a uniform in the backpack is stowed, not used. A crate, the ground or a body are never limited.
+
+- **The question** is `einv_storage_fnc_useState [class, container]` -> `""` (nothing limits it), `"allowed"` (whitelisted on a
+  limited container) or `"blocked"`; `fnc_useKind [container object]` says which of the player's three a container is (`""` for any
+  other), `fnc_useMode [container]` is the setting's answer. Each setting runs `fnc_useRefresh` when it is set or changed, which
+  keeps `GVAR(useActive)`: while all three are on Everything every function above answers at once, so the default costs one
+  variable read where it is asked.
+- **What is checked** (the practical, robust set - things this mod owns): the window's tiles (a small padlock in the corner,
+  `fnc_createTile`; the footer hint says "Cannot be used from the backpack" or "Whitelisted: can be used from the backpack",
+  `fnc_updateHover`); the context menu (the hotbar's bind row is gone because `einv_hotbar_fnc_canBindFrom` refuses, a radio's
+  Open radio and Use as active radio are not offered, and a CBA row that uses the item up - ACE rations, medical items - is left out,
+  `fnc_cbaOptions`); the hotbar (a drag or the menu cannot bind an item from a blocked container - "Cannot be used from the
+  backpack" -, and the slot's count, the magazine the key loads, the kit it opens and the grenade it takes only look at what
+  `fnc_useCarried [unit, [items, magazines, magazinesAmmoFull]]` leaves, which takes one entry out for every item lying in a
+  blocked container; a key pressed with everything blocked says "Cannot be used from the backpack - take it out first",
+  `fnc_useBlockedIn`); and the engine's reload key.
+- **The reload key** (`fnc_reloadGuard`, a KeyDown handler on the main display from postInit): the engine decides which magazine it
+  loads and takes it from any container; a mod cannot change that, and `Reloaded` cannot be cancelled. So the handler stands in
+  front of the key - the game's "Reload" action keys, plain, on foot, with a rifle, pistol or launcher in the hands - and only acts
+  when a magazine that the weapon takes lies in a blocked container (`magazinesAmmoFull` less `useCarried`): none lies in a usable
+  one, the key does nothing and a line names the containers to take one out of; some do, the handler loads the fullest of them with
+  the game's own `LoadMagazine` action (as the hotbar does) and swallows the key. Where nothing is blocked, or nothing limited, the
+  key is the game's. A full magazine in the weapon is left to the game. The reload from a gamepad button, the action menu entry
+  and a vehicle's gun are not caught.
+- **What cannot be blocked, and why.** Throwing with the game's own key (and ACE's advanced throwing): the engine takes the
+  throwable from any container once its class is selected, and nothing a mod runs before the throw can say from which; the hotbar
+  only offers a grenade it counts as usable, but the game's own throw key still finds the backpack's grenades. ACE's own medical and
+  self-interaction menus, rations and repack: they take items from any container by their own code. Scripts and other mods that
+  use `addItem`/`removeItem`. The setting texts say so.
+
 ### Public functions and tables
 
-Public: `einv_storage_fnc_request`, `fnc_moveEntry`, `fnc_equip`, `fnc_unequip`, `fnc_getEquipment`, `fnc_getNearby`,
+Public: `einv_storage_fnc_useState`, `fnc_useKind`, `fnc_useMode`, `fnc_useCarried`, `fnc_useBlockedIn`, `fnc_useKindName`,
+`einv_storage_fnc_request`, `fnc_moveEntry`, `fnc_equip`, `fnc_unequip`, `fnc_getEquipment`, `fnc_getNearby`,
 `fnc_readPlaces`, `fnc_rootOf`, `fnc_dumpPlaces`, `fnc_addNew`. Other addons extend the storage only through tables they fill in
 preInit: `einv_storage_ops` (op name -> function name), `einv_storage_guards`, `einv_storage_carryVariables` and
 `einv_storage_holderTypes` (a holder that is no object, by the part of its key before `:`; `kit` from compat_efak: `entries`,
@@ -1219,6 +1263,14 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   by its index). A build closes it as ever. The focus rule of `fnc_onFrame` also sends back a non-field control in one of the
   window's own groups once no button is held, so the name at the mouse and the inspect card are not drawn under a column either.
   The Arsenal panel's menu (guest) is the same.
+- **Use from containers in the window.** While one of the settings "Use items from ..." limits something (`einv_storage_useActive`),
+  a tile of the player's own uniform, vest or backpack (`einv_storage_fnc_useKind` of the grid's container) that cannot be used
+  from there (`einv_storage_fnc_useState` is "blocked") wears a small padlock (`icon_lock_ca`) in its top left corner, beside the
+  window's own badge if it has one (`fnc_createTile`; never in the wizard's preview), and its footer hint says "Cannot be used from
+  the backpack", or - on a limited container where the item is whitelisted - "Whitelisted: can be used from the backpack"
+  (`fnc_updateHover`). The context menu leaves out what would use it: the hotbar's bind row (it refuses, section 7), Open radio and Use
+  as active radio, and CBA rows that use the item up (`fnc_cbaOptions`: the `consume` flag on `UNIFORM_CONTAINER`,
+  `VEST_CONTAINER`, `BACKPACK_CONTAINER`). Moving, equipping, loading into a weapon and dropping are never limited.
 - **Hints:** `fnc_updateHover` names what the mouse is on in the footer; `fnc_showHint [text, colourKey]`; `fnc_flashHint [reason,
   details]` (a reason key such as `"NoRoom"`, `"LookOnly"`, `"Locked"`, `"NoBackpack"`, any other text as it is, `""` nothing);
   `fnc_dragHint`; `fnc_infoHint [kind, args]` for the weight card and each caption. The **inspect card** (`fnc_inspect`,
@@ -1322,7 +1374,7 @@ Registered in preInit, so Eden has them too.
 | Event | Does |
 |---|---|
 | `ace_arsenal_displayOpened` | `fnc_onOpened`: state reset, `KeyDown` / `KeyUp` and the list's `LBSelChanged` / `MouseButtonDown` handlers, and `einv_gui_fnc_attach` a frame later (one more if the inventory is still closing), driver `"draw3d"` |
-| `ace_arsenal_displayClosed` | `fnc_onClosed`: `einv_gui_fnc_onUnload`, state reset, the BI helper and the staging crate deleted a frame later, `einv_storage_fnc_requestMigrate` (the surplus moves on) and `fnc_reportOverflow` (what has nowhere to go) a frame later (not in Eden) |
+| `ace_arsenal_displayClosed` | `fnc_onClosed`: `einv_gui_fnc_onUnload`, state reset, the BI helper and the staging crate deleted a frame later, `fnc_dropOverflow` (what still lies on no cell is taken out, RPT INFO and ACE's text; a unit not local here keeps `einv_storage_fnc_requestMigrate`, the surplus moves on) and `fnc_reportOverflow` a frame later (not in Eden) |
 | `ace_arsenal_cargoChanged` | `fnc_onCargoChanged`: what of an add the engine refused by `maximumLoad` is put in with `einv_storage_fnc_addNew` while there is a free spot; flags the frame-later pass |
 | `ace_arsenal_itemsChanged` | `fnc_onItemsChanged`: for the open container's tab `fnc_reconcile` at once, before ACE greys its list |
 | `leftPanelFilled`, `rightPanelFilled`, `loadoutImported`, `onLoadoutLoad`, `showToggle` | `fnc_settle` a frame later |
@@ -1378,6 +1430,34 @@ item out.
   move that only rearranged it - a tile moved or turned inside the staging space - was never seen and its tiles stayed where they were
   drawn: the next lift found nothing at the old cell ("Someone else was quicker"). The `signature` hook names the crate
   (`[einv_arsenal_staging]`), its cargo and places go into the "storage" part, and a change there builds the panel.
+
+### Closing with things that do not fit
+
+While ACE's window is open the entries of a uniform, vest or backpack with no cell stay what they are, red tiles shown apart
+(`fnc_findOverflow` lists them as `[container, entry]`; `fnc_checkOverflow` only names the containers). When the window closes
+they are **taken out**, not left in or moved on, and the player is asked first.
+
+- **Taking the close over** (`fnc_interceptClose`, from `fnc_onOpened`). ACE closes with script handlers of its config: the Close
+  button (IDC 1001, `onButtonClick` = `closeDisplay 1`) and the display's `onKeyDown` (`fnc_onKeyDown` of ACE, which ends Escape in
+  `closeDisplay 2`). A display cannot be kept open once `closeDisplay` ran, so both are set anew: `ctrlSetEventHandler ["ButtonClick"]`
+  on the button (`fnc_onCloseButton`) and `displaySetEventHandler ["KeyDown"]` on the display (`fnc_onAceKey`, looked up with
+  `supportInfo` and called through `compile`, so a game without it still loads the file). `fnc_onAceKey` takes Escape - not while
+  ACE's loadouts display (IDD 1127002) is open, which closes itself on Escape - and hands every other key to
+  `ace_arsenal_fnc_onKeyDown` as `["onKeyDown", _this, "ace_arsenal_display"]`, returning its answer. A missing piece is said once
+  in the RPT and the close then goes the old way (below).
+- **The question** (`fnc_confirmClose [display, exit code]`). Without overflow, with a unit that is not local here, in Eden or with
+  the panel not `ready` it is `closeDisplay` at once. Otherwise a card on ACE's display, built like the red screen's (a controls
+  group made with `ctrlCreate` and held in uiNamespace `einv_arsenal_confirm`, so the engine's sweep leaves it alone; a dimming
+  and a full-screen `EINV_Hitbox` under the card take the mouse from ACE's controls): "N items do not fit your gear and will be
+  removed: <names x count>" (six names at most, then "+K"), **Keep editing** and **Remove and close** (loss colour). While it
+  is up `fnc_isOver` says nowhere, `fnc_onKey` does nothing and `fnc_onAceKey` holds every key: Escape is Keep editing
+  (`fnc_closeConfirm`), the rest is swallowed.
+- **Remove and close** (`fnc_answerConfirm`): `fnc_dropOverflow` - per container the first overflow entry through
+  `einv_storage_fnc_removeEntry`, the layout read again after each, `fnc_tellAce` with the class counts before and after, the
+  `giveBack` sound once -, an RPT INFO line, then `closeDisplay` with the code the player asked for.
+- **A close nothing could ask first** (a script's `closeDisplay`, a handler that could not be replaced): `fnc_onClosed`, a frame
+  after `ace_arsenal_displayClosed`, runs `fnc_dropOverflow` for a local unit, says it in the RPT (INFO) and once on the screen
+  ("Removed, as they did not fit: ..."), and `fnc_reportOverflow` names what would not come out.
 
 ### Add, remove, reconcile
 
@@ -1735,7 +1815,7 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   tile with **`einv_gui_fnc_createTile`** itself - on a piece of grid, the cells under the tile made way for it, name, count and
   full magazine as in a container, at the inventory's cell (`einv_gui_fnc_getCell`) where it fits and as big as fits where not, the
   entry carrying the working `"icon"` - so the picture is seen as Apply will write it. Apply writes `class=X > size=WxH` or
-  `size=xx/x-`, `stack=N`, `weight=KG`, `name=...`, `picture=PATH` and `icon=ZOOM@ACROSS:DOWN` (as `[scale, across, down]`, 1.4 and 0.1 for 140 % and
+  `size=xx/x-`, `stack=N`, `weight=KG`, `name=...`, `picture=PATH`, `use=LIST` and `icon=ZOOM@ACROSS:DOWN` (as `[scale, across, down]`, 1.4 and 0.1 for 140 % and
   10 %), each only when it differs from now; a field emptied takes its own value away. Reset then Apply takes the class's own `icon`
   away when nothing below draws the picture otherwise, else writes the plain picture (`icon=1`) to win over the item's `einv_icon`.
   "Back to the preset" removes `icon` with the rest; the tree view's edits write `class=X+ > icon=...` like the other fields;
@@ -1745,6 +1825,17 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   says), the name cut to `EDIT_NAME_MAX` 100 (the rules' `name=` encoding is `writeRules`' business). Typing goes into the working
   copy (`weightText`, `nameText`) without drawing the editor again - the field would lose the cursor -, Return draws it again, and
   Apply reads the working copy.
+- **Use from** (`fnc_drawUseRow`, the Items step, under the Picture row): a chip each for Uniform, Vest and Backpack, on for the
+  containers the class is whitelisted for (`use=`, `einv_use`; `info "use"`), and a muted line under them of what the settings
+  "Use items from ..." (`einv_storage_useUniform`, `useVest`, `useBackpack`) limit now - "Limited now: Backpack: only
+  whitelisted." or, when all three are on Everything, a note naming the settings. The chips are always clickable: the rule belongs to
+  the item and travels with the rules text and the config export, whatever this mission's settings are; with a container on
+  Everything its chip changes nothing in the game, and with one on Nothing a whitelisted item is not usable there either. The
+  click goes into the working copy (`useList`, in the order uniform, vest, backpack), the editor is drawn again and Apply
+  writes `use=` only when it differs from now - an emptied list as `use=none`, which takes back what a broader rule whitelisted
+  (Back to the preset removes the class's own `use` with the rest). The tree view's edits write `class=X+ > use=...` like the other
+  fields, so `kind=grenade` is one tree edit away. Export writes `einv_use = "backpack,vest";` (`fnc_configEntry`), Import maps
+  `einv_use` to `use` (`fnc_configValues`), Review words it ("usable from the Vest, Backpack", `fnc_describeRule`).
 - **Blocks mode** (`fnc_drawCellBlocks`): the switch "Paint | Blocks" (`einv_setup_cellMode`, 0/1, kept for the session). One
   small drawing per compartment (a click toggles a hole), width and height steppers for the picked one, Add and Remove; working
   copy `{blocks, picked}`; Apply writes the blocks joined by `+` (flow layout). A class drawn as a canvas gets a note that Blocks
@@ -1786,7 +1877,7 @@ equips or shows targets for real slots touches it.
   most one slot. Kept per player in the profile (`einv_hotbar_slots`), so a respawn keeps the bar.
 - **What an item does** (`fnc_useOf [class] -> [kind, data]`, public, cached): `"kit"`, `"throw"` (anything the `Throw` weapon
   takes), `"consume"` (ACE field rations), `"medical"` (an item one of ACE's treatments lists), `"reload"` (a magazine that
-  `storage fnc_partFor` puts on a carried weapon), `""` (refused). Binding is refused for what is not carried (`fnc_canBindFrom`).
+  `storage fnc_partFor` puts on a carried weapon), `""` (refused). Binding is refused for what is not carried (`fnc_canBindFrom`) and for what lies in a container the settings "Use items from ..." close to it (`einv_storage_fnc_useState`: "Cannot be used from the backpack"); counts, the magazine, the kit and the grenade only see what `einv_storage_fnc_useCarried` leaves (section 3, Use from containers).
 - **Medical** (`fnc_treatmentIndex`, `fnc_pickTreatment`, `fnc_whyNot`, `fnc_useMedical`): the index is read from
   `ace_medical_treatment_actions` (ACE's and other mods', ACM's among them); the role (bandage, tourniquet, splint, any) picks the
   part: bandage - the largest sum of wound amount times bleeding rate; tourniquet - the worst bleeding limb without one; splint -
@@ -1973,6 +2064,7 @@ stringtables are wrapped as BRIEFING asks.
 | `einv_storage_migrate` | CHECKBOX | global | on | move a unit's surplus (overflow) on to its next container with room (section 3, Surplus) |
 | `einv_storage_containerTable` | EDITBOX | global | "" | `class:N` or `class:WxH+WxH`; wins over the text |
 | `einv_storage_nearbyRange` | SLIDER 1 to 5 | global | 3 | m, how far crates and piles count as nearby |
+| `einv_storage_useUniform`, `useVest`, `useBackpack` | LIST | global | `all` | "Use items from the uniform / vest / backpack": `all` Everything, `list` Only whitelisted (items with `use=` for it), `none` Nothing; what the padlocks, the hotbar, the window's use rows and the reload key honour (section 3, Use from containers) |
 | `einv_gui_cellScale` | SLIDER 0.8 to 1.3 | client | 1 | tile scale: the cell size, capped where the columns no longer fit; next opening |
 | `einv_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
 | `einv_gui_cameraDefault` | LIST | client | `soldier` | the camera as the window opens: `soldier` (third person), `off` (first person) |
@@ -2013,7 +2105,7 @@ profile: `einv_gui_searchMuted`, `einv_hotbar_slots` (`einv_gui_cameraOn` no lon
 
 **What missions and other mods may set** (all optional): on an object `einv_grid` (a grid text, public), `einv_noSearch`,
 `einv_nearby = false`, `einv_noAccess` (a person); in a mission `einv_arsenal_biPassThrough`; in an item's config `einv_size`,
-`einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, `einv_icon` (section 2, "Config keys of an item"; the older `einv_gridSize[]`,
+`einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, `einv_icon`, `einv_picture`, `einv_use` (section 2, "Config keys of an item"; the older `einv_gridSize[]`,
 `einv_stackSize`, `einv_grids[]` and `einv_slots` still work), `einv_sound = "family"`; a preset as a class of
 `CfgEinvRulesets`; a sound family or action in `CfgEinvSounds`; a lock through `einv_locks_fnc_setLock` or `addProvider`; an op,
 guard or carried variable in the storage's tables (section 3).
@@ -2022,6 +2114,11 @@ guard or carried variable in the storage's tables (section 3).
 
 ### Known limits
 
+- **Use from containers is not a lock the engine knows.** The settings "Use items from the uniform / vest / backpack" are honoured by
+  everything this mod draws or runs and by the keyboard's reload key (section 3), not by the game: throwing with the game's own key
+  and ACE's advanced throwing, ACE's own medical, rations and self-interaction menus, a gamepad or action-menu reload, a vehicle's
+  guns, and scripts take from any container. A grenade in the backpack can still be thrown with the game's key once its class is
+  selected, and ACE can bandage from the backpack's bandages. Untested in the game.
 - **Transactions and multiplayer.** A client's connection dropping inside one send batch can lose a payload it took, or settle a
   put again (the hub names it in the RPT). Changes outside this machinery - ACE medical treatment, EFAK's own pouch, the engine's
   scroll-menu actions, scripts - are not serialised with ours; a script error in our own code exactly between an engine change and

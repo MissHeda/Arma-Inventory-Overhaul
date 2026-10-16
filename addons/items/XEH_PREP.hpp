@@ -18,6 +18,8 @@ PREP(formatMask);
 PREP(parseIcon);
 PREP(formatIcon);
 PREP(parsePicture);
+PREP(parseUse);
+PREP(formatUse);
 PREP(encodeName);
 PREP(decodeName);
 PREP(sanitizeText);

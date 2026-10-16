@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Reads what an item's own config says about its size, stack, container grid, weight, name and how its
- * picture is drawn: the keys einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon and einv_picture
+ * picture is drawn: the keys einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture and einv_use
  * (CONFIG_KEYS). A value is written the way the rules text writes the same thing, so a mod author
  * learns one language:
  *
@@ -17,6 +17,10 @@
  *                                        characters
  *   einv_picture = "a3\ui_f\x_ca.paa";  picture= - the texture to show instead of config's picture;
  *                                        backslashes or slashes, spaces as they are (fnc_parsePicture)
+ *   einv_use = "backpack,vest";         use=   - the containers it may be used from where a setting limits
+ *                                        what can be used there: uniform, vest, backpack, all or none, joined
+ *                                        with a comma, a plus or a bar (fnc_parseUse); "" takes an inherited
+ *                                        value back, so "none" says no container
  *   einv_icon = "1.4@0.1,-0.05";         icon=  - how large the picture is drawn in its tile (0.25 to 4) and
  *                                        moved across and down by a share of the tile (-1 to 1); a plain
  *                                        number, einv_icon = 1.4;, is the scale alone (fnc_parseIcon)
@@ -36,10 +40,10 @@
  *   canonical - the values that could be read, as the rules write them, by config key:
  *               "einv_size" "2x1" / "xx/x-" / "mass", "einv_stack" <NUMBER>, "einv_grid" as
  *               fnc_formatGrid writes it, "einv_weight" kg <NUMBER>, "einv_name" <STRING>, "einv_icon"
- *               [scale, across, down] <ARRAY>, "einv_picture" <STRING> <HASHMAP>
+ *               [scale, across, down] <ARRAY>, "einv_picture" <STRING>, "einv_use" [containers] <ARRAY> <HASHMAP>
  *   compiled  - the same for fnc_resolve, by field: "size" [w, h, holes] or "mass", "stack" <NUMBER>,
  *               "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING>, "icon" [scale,
- *               across, down] <ARRAY>, "picture" <STRING> <HASHMAP>
+ *               across, down] <ARRAY>, "picture" <STRING>, "use" [containers] <ARRAY> <HASHMAP>
  *   messages  - what was left out or cut down, and why <ARRAY of STRING>
  *
  * Example:
@@ -273,6 +277,28 @@ if (_picture isNotEqualTo "") then {
         if (_path isNotEqualTo "") then {
             _canonical set [QGVARMAIN(picture), _path];
             _compiled set ["picture", _path];
+        };
+    };
+};
+
+// ----- use -----
+// Read by the rules' own reader (fnc_parseUse). The canonical value is the list; [] says "none".
+
+private _use = _found getOrDefault [QGVARMAIN(use), ""];
+
+if (_use isNotEqualTo "") then {
+    if !(_use isEqualType "") then {
+        _messages pushBack format ["%1 is a text like 'backpack,vest', 'all' or 'none' - left out", QGVARMAIN(use)];
+    } else {
+        ([_use] call FUNC(parseUse)) params ["_kinds", "_notes", "_readable"];
+
+        {
+            _messages pushBack format ["%1: %2", QGVARMAIN(use), _x];
+        } forEach _notes;
+
+        if (_readable) then {
+            _canonical set [QGVARMAIN(use), _kinds];
+            _compiled set ["use", _kinds];
         };
     };
 };
