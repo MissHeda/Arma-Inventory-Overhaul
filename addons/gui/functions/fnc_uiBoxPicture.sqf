@@ -43,10 +43,11 @@ if (_own isNotEqualTo "") exitWith {
     private _controls = [_display, _parent, _rect, _theme getOrDefault ["slot", [1, 1, 1, 0.06]], _radius, _theme getOrDefault ["slotBorder", []]] call FUNC(uiPanel);
     private _inset = _height * 0.08;
 
-    _controls pushBack ([
+    // Larger than the box it is cut at the round box, not at a square one (fnc_uiPictureCut).
+    _controls append ([
         _display, _parent, [_left + SQUARE(_inset), _top + _inset, _width - SQUARE(_inset) * 2, _height - _inset * 2], _own, _icon,
-        [1, 1, 1, 1], false, 1, _rect, _events
-    ] call FUNC(uiItemPicture));
+        _rect, _radius, _events
+    ] call FUNC(uiPictureCut));
 
     _controls
 };

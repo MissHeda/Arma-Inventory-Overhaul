@@ -23,9 +23,9 @@
  *     the inventory's own routine, einv_gui_fnc_createTile, at the inventory's cell size where there is room),
  *     its size in words, and a warning while its cells are not one piece (fnc_canvasBlocks) - then Apply
  *     cannot be pressed.
- *   - Beside that tile its picture (fnc_drawIconBlock): a zoom stepper (25 to 400 %, in steps of 5, with 50, 100,
- *     150 and 200 % at one click) and two shift steppers, across and down (-100 to 100 % of the tile, steps of
- *     5), with Reset back to the plain picture. The tile follows every click: it is drawn by the working copy, so what is
+ *   - Beside that tile its picture (fnc_drawIconBlock): a zoom stepper (25 to 400 %, 1 per click, 10 with
+ *     Shift, with 50, 100, 150 and 200 % at one click) and two shift steppers, across and down (-100 to 100 % of
+ *     the tile, the same steps), each with a small box to type the number in, with Reset back to the plain picture. The tile follows every click: it is drawn by the working copy, so what is
  *     seen is what Apply writes (icon=, einv_items_fnc_parseIcon). The inventory cuts a picture that would
  *     reach out of its tile at the tile's edge.
  *   - Apply writes what differs from now as class=X > size=WxH, or size=xx/x- for a shape
@@ -413,7 +413,7 @@ _cursorY = _cursorY + _rowH + UNIT * 0.3;
         GVAR(itemWork) set [toLowerANSI _class, _canvas];
 
         [] call FUNC(drawItemEditor);
-    }, [_class, _canvas]
+    }, [_class, _canvas], _class
 ] call FUNC(drawPictureRow);
 
 _cursorY = _cursorY + _rowH + UNIT * 0.5;

@@ -3,10 +3,11 @@
 /*
  * Author: Miss Heda
  * The row "Picture" of the Items and Containers steps, under the name: the texture path the item shows - a
- * read-only field (the picture set for it, else config's own in the muted ink, with the end of a long path kept
- * and its beginning cut), "Pick..." which opens the picture picker (fnc_openPicturePicker; a click on the field
- * does the same), and Reset to take the set picture away (enabled while one is set). Nothing is written here:
- * the code gets the path and puts it into the editor's working copy, and Apply writes picture=.
+ * read-only field with the whole path in it (the picture set for it, else config's own in the muted ink), which
+ * a click puts the cursor in so the path can be selected and copied (fnc_uiEdit, selectable) -, "Pick..." which
+ * opens the picture picker (fnc_openPicturePicker) and Reset to take the set picture away (enabled while one is
+ * set). Nothing is written here: the code gets the path and puts it into the editor's working copy, and Apply
+ * writes picture=.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -18,6 +19,7 @@
  * 6: The picture its config names, "" for none <STRING>
  * 7: Code, called with [path, arguments] when a picture is taken - "" for Reset <CODE>
  * 8: Arguments <ANY> (default: [])
+ * 9: The class it is for - the picker opens on the pictures of its kind <STRING> (default: "")
  *
  * Return Value:
  * None
@@ -32,7 +34,7 @@ disableSerialization;
 
 params [
     "_display", "_parent", "_rect", ["_theme", createHashMap, [createHashMap]], ["_labelW", 0, [0]], ["_work", "", [""]], ["_config", "", [""]],
-    ["_code", {}, [{}]], ["_arguments", []]
+    ["_code", {}, [{}]], ["_arguments", []], ["_class", "", [""]]
 ];
 _rect params ["_left", "_top", "_width", "_height"];
 
@@ -56,50 +58,28 @@ private _pickX = _resetX - _gap - _pickW;
 private _fieldX = _left + _labelW;
 private _fieldW = _pickX - _gap - _fieldX;
 
-// What picking does: the picker, with the code and the arguments that come back with the path.
-private _open = {
-    params ["_work", "_code", "_arguments"];
-
-    [_work, _code, _arguments] call FUNC(openPicturePicker);
-};
-
-// The field: a film with the path on it, the end of a long one kept.
+// What picking does: the picker, with the picture in use (the one set, else config's), the code and the
+// arguments that come back with the path, and the class, whose kind decides which pictures it starts on.
 private _shown = [_config, _work] select (_work isNotEqualTo "");
-private _text = _shown;
+private _open = {
+    params ["_work", "_code", "_arguments", "_shown", "_class"];
 
-if (_shown isEqualTo "") then {
-    _text = LLSTRING(Items_PictureNone);
-} else {
-    private _padX = SQUARE(_height * 0.3);
-    private _room = _fieldW - _padX * 2;
-    private _size = _height * 0.5;
-
-    if ((_shown getTextWidth [_font, _size]) * TEXT_SLACK > _room) then {
-        private _keep = (floor ((count _shown) * _room / ((_shown getTextWidth [_font, _size]) * TEXT_SLACK))) - 3;
-
-        _text = "..." + (_shown select [(count _shown) - (_keep max 1)]);
-
-        while {_keep > 1 && {(_text getTextWidth [_font, _size]) * TEXT_SLACK > _room}} do {
-            _keep = _keep - 1;
-            _text = "..." + (_shown select [(count _shown) - _keep]);
-        };
-    };
+    [_work, _code, _arguments, _shown, _class] call FUNC(openPicturePicker);
 };
+private _pack = [_work, _code, _arguments, _shown, _class];
 
-private _surface = [_display, _parent, [_fieldX, _top, _fieldW, _height], _theme getOrDefault ["button", [1, 1, 1, 0.08]], (_theme getOrDefault ["radius", 0]) min (_height / 2)] call EFUNC(gui,uiPanel);
+// The field: the whole path as text to select and copy. Config's own is in the muted ink, the set one in the
+// plain ink; no picture at all shows a placeholder.
+private _field = [
+    _display, _parent, [_fieldX, _top, _fieldW, _height], _shown, LLSTRING(Items_PictureNone), _theme, {}, [], false, false, true
+] call FUNC(uiEdit);
 
-[
-    _display, _parent, [_fieldX + SQUARE(_height * 0.3), _top, _fieldW - SQUARE(_height * 0.3) * 2, _height], _text, _height * 0.5,
-    [_muted, _colorText] select (_work isNotEqualTo ""), _font, 0
-] call EFUNC(gui,uiLabel);
+private _edit = _field select (count _field - 1);
 
-[
-    _display, _parent, [_fieldX, _top, _fieldW, _height], _surface, _theme getOrDefault ["button", [1, 1, 1, 0.08]],
-    _theme getOrDefault ["buttonHover", [1, 1, 1, 0.16]], _open, [_work, _code, _arguments], true,
-    [LLSTRING(Items_PictureConfigTip), LLSTRING(Items_PictureOwnTip)] select (_work isNotEqualTo "")
-] call FUNC(uiHit);
+_edit ctrlSetTextColor ([_muted, _colorText] select (_work isNotEqualTo ""));
+_edit ctrlSetTooltip ([LLSTRING(Items_PictureConfigTip), LLSTRING(Items_PictureOwnTip)] select (_work isNotEqualTo ""));
 
-[_display, _parent, [_pickX, _top, _pickW, _height], _pickText, "", _theme, _open, [_work, _code, _arguments], true, "", LLSTRING(Items_PickTip)] call FUNC(uiAction);
+[_display, _parent, [_pickX, _top, _pickW, _height], _pickText, "", _theme, _open, _pack, true, "", LLSTRING(Items_PickTip)] call FUNC(uiAction);
 
 [_display, _parent, [_resetX, _top + (_height - _chipH) / 2, _resetW, _chipH], _resetText, false, _theme, {
     params ["", "_pack"];

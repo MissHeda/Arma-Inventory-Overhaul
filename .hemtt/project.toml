@@ -32,12 +32,10 @@ workshop = [
     "3316254084", # ACM - Advanced Combat Medical (Experimental), as Enhanced First Aid Kits tests with
     # "3235483358", # ACM - Advanced Combat Medical (stable)
     # "3749759934", # ACM Extended
-    # "2791403093", # Better Inventory, to test the conflict with it (this window must win)
     # "2129532219", # SFX Project: Remastered, adds an InventoryOpened handler of its own (the window must still open)
     "3809430149", # Enhanced First Aid Kits
     "894678801",  # Task Force Arrowhead Radio (BETA), for the radio compat
     "843577117", #RHS
-    "2791403093"
 ]
 
 # A test scene for the inventory (.hemtt/missions/EINV_Test.VR): a soldier with full gear, a crate, an
@@ -53,7 +51,6 @@ workshop = [
     "3316254084", # ACM - Advanced Combat Medical (Experimental)
     "3809430149", # Enhanced First Aid Kits
     "894678801",  # Task Force Arrowhead Radio (BETA)
-    # "2791403093", # Better Inventory, to test the conflict with it (this window must win)
     # "2129532219", # SFX Project: Remastered, adds an InventoryOpened handler of its own (the window must still open)
 ]
 mission = "EINV_Test.VR"
@@ -70,7 +67,6 @@ workshop = [
     "3316254084", # ACM - Advanced Combat Medical (Experimental)
     "3809430149", # Enhanced First Aid Kits
     "751965892",  # ACRE2, for the radio compat
-    # "2791403093", # Better Inventory, to test the conflict with it (this window must win)
     # "2129532219", # SFX Project: Remastered, adds an InventoryOpened handler of its own (the window must still open)
 ]
 mission = "EINV_Test.VR"

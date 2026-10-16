@@ -10,8 +10,8 @@
  *
  * Kept in uiNamespace for the whole game session, as the index is: classes do not change while the game runs.
  * An entry is [path, path in lowercase, what a search looks through, name of the first owner, class of the first
- * owner, how many classes own it, their classes in lowercase (PICKER_OWNERS at most), their names]; the list is
- * sorted by the first owner's name.
+ * owner, how many classes own it, their classes in lowercase (PICKER_OWNERS at most), their names, the categories
+ * of its owners - "items", "gear", "vehicles", fnc_pictureCategory]; the list is sorted by the first owner's name.
  *
  * Arguments:
  * None

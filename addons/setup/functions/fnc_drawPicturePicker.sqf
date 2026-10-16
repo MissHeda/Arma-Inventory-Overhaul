@@ -4,6 +4,9 @@
  * Author: Miss Heda
  * The content of the picture picker (fnc_openPicturePicker), in the style of the "Same as another class"
  * popover (fnc_drawSameAs):
+ *   - Chips under the search: "Item icons", "Uniforms & gear", "Vehicles & boxes" and "All" - which group of the
+ *     catalog is looked through (a picture's categories come from the classes that own it, fnc_pictureCategory). The
+ *     picker opens on the chip of the class being edited, and on the page of the picture it has in use, ringed.
  *   - A search field over the picture catalog (fnc_pictureCatalog: every picture of every class the wizard
  *     indexes, with the classes and names that own it), by name, class and path, wildcards too
  *     (fnc_searchFilter).
@@ -19,8 +22,8 @@
  * read it says how far, and looks again a moment later. Nothing is drawn once the popover is closed.
  *
  * Arguments:
- * 0: What to draw: "all", "list" for the thumbnails alone, "custom" for the path field's thumbnail and line
- *    <STRING> (default: "all")
+ * 0: What to draw: "all", "list" for the thumbnails alone, "chips" for the category chips alone, "custom" for
+ *    the path field's thumbnail and line <STRING> (default: "all")
  *
  * Return Value:
  * None
@@ -52,9 +55,11 @@ private _radius = (_theme getOrDefault ["radius", 0]) min (UNIT * 0.3);
 
 private _searchH = UNIT * 1.15;
 private _buttonH = UNIT * 1.15;
+private _chipsH = UNIT * 1;
+private _chipsY = _searchH + UNIT * 0.3;
 private _cellH = UNIT * 3.55;
 private _thumbH = UNIT * 2.55;
-private _gridY = _searchH + UNIT * 0.3;
+private _gridY = _chipsY + _chipsH + UNIT * 0.3;
 private _listH = PICKER_ROWS * _cellH + UNIT * 1;
 private _customY = _gridY + _listH + UNIT * 0.3;
 private _thumbSide = UNIT * 2.3;
@@ -70,6 +75,18 @@ private _fnc_there = {
     private _other = if ((_path select [0, 1]) isEqualTo "\") then {_path select [1]} else {"\" + _path};
 
     _path isNotEqualTo "" && {fileExists _path || {fileExists _other}}
+};
+
+// The ways a picture of the catalog may be written for the same file: with or without the leading backslash, with
+// backslashes or slashes - the paths of the catalog are as each config has them (lowercase here).
+private _fnc_variants = {
+    params ["_path"];
+
+    private _bare = (toLowerANSI _path) regexReplace ["^[\\/]+", ""];
+    private _back = (_bare splitString "/") joinString "\";
+    private _forward = (_bare splitString "\") joinString "/";
+
+    [_back, "\" + _back, _forward, "/" + _forward]
 };
 
 // ----- The path field: its thumbnail and its line -----
@@ -96,6 +113,43 @@ if (_part isEqualTo "custom") exitWith {
     };
 };
 
+// ----- The chips -----
+
+if (_part isEqualTo "chips") exitWith {
+    ctrlDelete (uiNamespace getVariable [QGVAR(pickerChips), controlNull]);
+
+    private _box = uiNamespace getVariable [QGVAR(pickerBox), controlNull];
+
+    if (isNull _box) exitWith {};
+
+    private _row = [_display, "EINV_Group", _box, [0, _chipsY, _width, _chipsH]] call EFUNC(gui,uiCreate);
+    private _now = GVAR(picker) getOrDefault ["chip", "all"];
+    private _chipX = 0;
+
+    uiNamespace setVariable [QGVAR(pickerChips), _row];
+
+    {
+        _x params ["_id", "_text"];
+
+        private _chipW = SQUARE(_chipsH * 0.9) + (_text getTextWidth [_fontBold, _chipsH * 0.52]) * TEXT_SLACK;
+
+        [_display, _row, [_chipX, 0, _chipW, _chipsH], _text, _id isEqualTo _now, _theme, {
+            params ["", "_id"];
+
+            GVAR(picker) set ["chip", _id];
+            GVAR(picker) set ["page", 0];
+            GVAR(picker) set ["reveal", false];
+
+            ["chips"] call FUNC(drawPicturePicker);
+            ["list"] call FUNC(drawPicturePicker);
+        }, _id] call FUNC(uiChip);
+
+        _chipX = _chipX + _chipW + SQUARE(UNIT * 0.3);
+    } forEach [
+        ["items", LLSTRING(Pic_CatItems)], ["gear", LLSTRING(Pic_CatGear)], ["vehicles", LLSTRING(Pic_CatVehicles)], ["all", LLSTRING(Pic_CatAll)]
+    ];
+};
+
 // ----- Everything: the search, the path field, the buttons -----
 
 if (_part isEqualTo "all") then {
@@ -114,12 +168,15 @@ if (_part isEqualTo "all") then {
 
             GVAR(picker) set ["text", _text];
             GVAR(picker) set ["page", 0];
+            GVAR(picker) set ["reveal", false];
 
             ["list"] call FUNC(drawPicturePicker);
         }
     ] call FUNC(uiEdit);
 
     ctrlSetFocus (_search select (count _search - 1));
+
+    ["chips"] call FUNC(drawPicturePicker);
 
     // Any texture path: the field, and beside it a thumbnail and a line that says whether the game has the file.
     private _fieldW = _width - _thumbSide - SQUARE(UNIT * 0.4);
@@ -212,7 +269,7 @@ if !(call FUNC(pictureCatalog)) exitWith {
     private _index = uiNamespace getVariable [QGVAR(index), createHashMap];
     private _catalog = uiNamespace getVariable [QGVAR(pictures), createHashMap];
     private _text = if (_index getOrDefault ["done", false]) then {
-        format [LLSTRING(Pic_Reading), floor (100 * (_catalog getOrDefault ["position", 0]) / ((count (_index getOrDefault ["rows", []])) max 1)) min 99]
+        format [LLSTRING(Pic_Reading), floor (100 * (_catalog getOrDefault ["position", 0]) / ((count (_index getOrDefault ["rows", []])) max 1)) min 99, "%"]
     } else {
         format [LLSTRING(Index_Reading), floor (100 * (_index getOrDefault ["read", 0]) / (_index getOrDefault ["total", 1])) min 99]
     };
@@ -231,36 +288,93 @@ if !(call FUNC(pictureCatalog)) exitWith {
 // ----- What is found, a page of thumbnails -----
 
 private _typed = GVAR(picker) getOrDefault ["text", ""];
+private _chip = GVAR(picker) getOrDefault ["chip", "all"];
 private _found = GVAR(picker) getOrDefault ["found", []];
 
-// Found once per text: turning a page does not look through the catalog again.
-if (!("foundFor" in GVAR(picker)) || {(GVAR(picker) get "foundFor") isNotEqualTo _typed}) then {
+// What the catalog has of a chip's group that the text finds.
+private _fnc_find = {
+    params ["_typed", "_chip"];
+
     private _all = (uiNamespace getVariable QGVAR(pictures)) get "list";
-    private _filter = [_typed] call FUNC(searchFilter);
 
-    _found = if (_filter isEqualTo []) then {
-        _all
-    } else {
-        _filter params [["_needle", "", [""]], ["_expression", "", [""]], ["_literal", "", [""]]];
-
-        if (_expression isEqualTo "") then {
-            _all select {((_x select 2) find _needle) >= 0}
-        } else {
-            // The longest plain run has to be there, whatever else the wildcard asks; then it must fit the path,
-            // a class or a name as a whole.
-            _all select {
-                (_literal isEqualTo "" || {((_x select 2) find _literal) >= 0})
-                && {
-                    (_x select 1) regexMatch _expression
-                    || {(_x select 6) findIf {_x regexMatch _expression} >= 0}
-                    || {(_x select 7) findIf {(toLower _x) regexMatch _expression} >= 0}
-                }
-            }
-        };
+    if (_chip isNotEqualTo "all") then {
+        _all = _all select {_chip in (_x select 8)};
     };
 
+    private _filter = [_typed] call FUNC(searchFilter);
+
+    if (_filter isEqualTo []) exitWith {_all};
+
+    _filter params [["_needle", "", [""]], ["_expression", "", [""]], ["_literal", "", [""]]];
+
+    if (_expression isEqualTo "") exitWith {
+        _all select {((_x select 2) find _needle) >= 0}
+    };
+
+    // The longest plain run has to be there, whatever else the wildcard asks; then it must fit the path,
+    // a class or a name as a whole.
+    _all select {
+        (_literal isEqualTo "" || {((_x select 2) find _literal) >= 0})
+        && {
+            (_x select 1) regexMatch _expression
+            || {(_x select 6) findIf {_x regexMatch _expression} >= 0}
+            || {(_x select 7) findIf {(toLower _x) regexMatch _expression} >= 0}
+        }
+    }
+};
+
+// Found once per text and chip: turning a page does not look through the catalog again.
+if (!("foundFor" in GVAR(picker)) || {(GVAR(picker) get "foundFor") isNotEqualTo [_typed, _chip]}) then {
+    _found = [_typed, _chip] call _fnc_find;
+
     GVAR(picker) set ["found", _found];
-    GVAR(picker) set ["foundFor", _typed];
+    GVAR(picker) set ["foundFor", [_typed, _chip]];
+};
+
+// Opened on the picture in use: its entry (whichever way the path is written), ringed, and the page it is on.
+// Not in the chip's group - a uniform's picture on the items chip, say - the chip turns to All. A path the
+// catalog does not have is the path field's.
+if (GVAR(picker) getOrDefault ["reveal", false]) then {
+    GVAR(picker) set ["reveal", false];
+
+    private _byPath = (uiNamespace getVariable QGVAR(pictures)) getOrDefault ["byPath", createHashMap];
+    private _entry = [];
+
+    {
+        private _known = _byPath get _x;
+
+        if (!isNil "_known") exitWith {
+            _entry = _known;
+        };
+    } forEach ([GVAR(picker) getOrDefault ["picked", ""]] call _fnc_variants);
+
+    if (_entry isEqualTo []) then {
+        GVAR(picker) set ["picked", ""];
+
+        if ((GVAR(picker) getOrDefault ["custom", ""]) isNotEqualTo "") then {
+            GVAR(picker) set ["source", "custom"];
+        };
+    } else {
+        GVAR(picker) set ["picked", _entry select 0];
+
+        private _at = _found findIf {(_x select 1) isEqualTo (_entry select 1)};
+
+        if (_at < 0 && {_chip isNotEqualTo "all"}) then {
+            _chip = "all";
+            _found = [_typed, _chip] call _fnc_find;
+            _at = _found findIf {(_x select 1) isEqualTo (_entry select 1)};
+
+            GVAR(picker) set ["chip", _chip];
+            GVAR(picker) set ["found", _found];
+            GVAR(picker) set ["foundFor", [_typed, _chip]];
+
+            ["chips"] call FUNC(drawPicturePicker);
+        };
+
+        if (_at >= 0) then {
+            GVAR(picker) set ["page", floor (_at / (PICKER_COLS * PICKER_ROWS))];
+        };
+    };
 };
 
 private _perPage = PICKER_COLS * PICKER_ROWS;

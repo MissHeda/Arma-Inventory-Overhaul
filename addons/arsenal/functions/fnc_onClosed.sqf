@@ -48,6 +48,7 @@ GVAR(listSel) = [];
 GVAR(watch) = [];
 GVAR(scrollHold) = [];
 GVAR(ctrlHeld) = false;
+GVAR(picturePass) = GVAR(picturePass) + 1;
 GVAR(stagingCount) = 0;
 
 {

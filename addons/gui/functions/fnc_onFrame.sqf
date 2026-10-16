@@ -94,6 +94,20 @@ if (_trash isNotEqualTo []) then {
     uiNamespace setVariable [QGVAR(windowTrash), []];
 };
 
+// Clip groups of pictures the wheel turned over: the engine scrolled them after the handler put them back, so
+// they go back to the top again before this frame is drawn, for UNSCROLL_FRAMES frames (fnc_unscroll).
+private _unscroll = uiNamespace getVariable [QGVAR(unscroll), []];
+
+if (_unscroll isNotEqualTo []) then {
+    _unscroll = _unscroll select {!isNull (_x select 0) && {diag_frameNo <= (_x select 1)}};
+
+    {
+        (_x select 0) ctrlSetScrollValues [0, 0];
+    } forEach _unscroll;
+
+    uiNamespace setVariable [QGVAR(unscroll), _unscroll];
+};
+
 // Groups made a frame ago know their height now: each goes back to where it was scrolled, in screen
 // height from the top - as far as its new content lets it.
 private _restore = uiNamespace getVariable [QGVAR(scrollRestore), []];

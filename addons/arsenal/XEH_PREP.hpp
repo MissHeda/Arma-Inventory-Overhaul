@@ -43,6 +43,7 @@ PREP(tellAce);
 PREP(settle);
 PREP(syncAce);
 PREP(ungrey);
+PREP(pictures);
 
 // Opening an arsenal: from the inventory's menu, and ACE's with a vanilla box's items
 PREP(canOpen);

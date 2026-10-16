@@ -722,13 +722,13 @@
             <English>Choose another picture for this item from the pictures of the game's items, or type the path of any texture.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureAcross">
-            <English>Across %1 %</English>
+            <English>Across %1 %2</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureConfigTip">
-            <English>The picture from the item's own config. Click to pick another.</English>
+            <English>The picture from the item's own config. Click to select the path, Ctrl+C copies it; Pick... chooses another.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureDown">
-            <English>Down %1 %</English>
+            <English>Down %1 %2</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureField">
             <English>Picture</English>
@@ -740,13 +740,19 @@
             <English>no picture</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureOwnTip">
-            <English>The picture set for this item. Click to pick another.</English>
+            <English>The picture set for this item. Click to select the path, Ctrl+C copies it; Pick... chooses another.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureReset">
             <English>Reset</English>
         </Key>
+        <Key ID="STR_einv_setup_Items_PictureStepTip">
+            <English>Click for one step, Shift and click for ten. Or type the number in the box beside it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_PictureTypeTip">
+            <English>Type an exact number and press Enter (or click elsewhere).</English>
+        </Key>
         <Key ID="STR_einv_setup_Items_PictureZoom">
-            <English>Zoom %1 %</English>
+            <English>Zoom %1 %2</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Pieces">
             <English>%1 pieces</English>
@@ -904,6 +910,18 @@
         <Key ID="STR_einv_setup_Pic_BadPath">
             <English>That path is no picture the game can find.</English>
         </Key>
+        <Key ID="STR_einv_setup_Pic_CatAll">
+            <English>All</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_CatGear">
+            <English>Uniforms &amp; gear</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_CatItems">
+            <English>Item icons</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_CatVehicles">
+            <English>Vehicles &amp; boxes</English>
+        </Key>
         <Key ID="STR_einv_setup_Pic_Custom">
             <English>Or type the path of any texture</English>
         </Key>
@@ -920,7 +938,7 @@
             <English>Click a picture in the list, or type a path.</English>
         </Key>
         <Key ID="STR_einv_setup_Pic_Reading">
-            <English>Collecting pictures... %1 %</English>
+            <English>Collecting pictures... %1 %2</English>
         </Key>
         <Key ID="STR_einv_setup_Pic_Search">
             <English>Search name, class or path (* ?)</English>
@@ -1286,10 +1304,10 @@
             <English>%1×%2 shaped, %3 cells</English>
         </Key>
         <Key ID="STR_einv_setup_Value_Icon">
-            <English>picture at %1 %</English>
+            <English>picture at %1 %2</English>
         </Key>
         <Key ID="STR_einv_setup_Value_IconMoved">
-            <English>picture at %1 %, moved %2 % across and %3 % down</English>
+            <English>picture at %1 %4, moved %2 %4 across and %3 %4 down</English>
         </Key>
         <Key ID="STR_einv_setup_Value_Like">
             <English>same as %1</English>

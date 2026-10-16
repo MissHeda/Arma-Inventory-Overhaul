@@ -11,6 +11,8 @@
 
 // The list of the right panel (IDC_rightTabContentListnBox), its "-" and "+" arrows (IDC_arrowMinus,
 // IDC_arrowPlus) and the load bar under it (IDC_loadIndicatorBar).
+#define ARSENAL_IDC_LEFT_LIST 13
+#define ARSENAL_IDC_RIGHT_LIST 14
 #define ARSENAL_IDC_LIST 15
 #define ARSENAL_IDC_MINUS 101
 #define ARSENAL_IDC_PLUS 102

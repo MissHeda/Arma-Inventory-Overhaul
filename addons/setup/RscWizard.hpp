@@ -27,6 +27,13 @@ class EINV_EditAreaReadOnly: EINV_EditArea {
     canModify = 0;
 };
 
+// One line to read and copy from, not to type into - a texture path (fnc_uiEdit with selectable set). Room
+// for a long path: the text is cut at maxChars.
+class EINV_EditReadOnly: EINV_Edit {
+    canModify = 0;
+    maxChars = 1024;
+};
+
 class GVAR(RscWizard) {
     idd = IDD_WIZARD;
     movingEnable = 0;

@@ -556,7 +556,7 @@ uiNamespace setVariable [QGVAR(previewArgs), [_display, _box, [_sideX, _areaY + 
         GVAR(boxWork) set [toLowerANSI _class, _boxWork];
 
         [] call FUNC(drawCellEditor);
-    }, [_class, _boxWork]
+    }, [_class, _boxWork], _class
 ] call FUNC(drawPictureRow);
 
 // What the box shows: the picture set in the working copy while the game has the file; a uniform, vest or backpack

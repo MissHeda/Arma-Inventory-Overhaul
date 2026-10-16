@@ -10,9 +10,11 @@
  *     and under the list how many there are against the Default preset, for the whole of it.
  * A rule for one class shows the class's picture and display name - "Adenosine Vial: 2×1 cells, 10 per
  * tile" -, anything else its sentence. A click on a line opens it where it is set: a rule for exactly one
- * class in the Items step, or - for a uniform, vest, backpack, crate or vehicle whose cells or like= it
- * sets - in the Containers step; the preset and cell size at Start; anything else (a group, a rule for
- * many classes, a class this game does not have) in Review's text. The cross takes that one change back.
+ * class at the step that lists its kind: the Containers step for a uniform, vest, backpack, crate, vehicle or kit -
+ * a crate or vehicle always (the Items step has none), the others when the rule sets grid= or like=, or sets
+ * nothing of an item's own (size, stack, weight, name), a picture alone say -, else the Items step. The preset and
+ * cell size open Start; anything else (a group, a rule for many classes, a class this game does not have) opens
+ * Review's text. The cross takes that one change back.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -116,10 +118,14 @@ private _open = {
         [_review] call FUNC(showStep);
     };
 
-    // A container's cells and like= are drawn at Containers; its own size and stack, as any item's, at Items.
+    // By the class's kind: a container at Containers - a crate or vehicle always, any other when its rule has grid=
+    // or like=, or sets nothing an item has of its own -, anything else, and a container's own size, stack, weight
+    // and name, as any item's, at Items.
     private _values = _statement param [1, createHashMap];
-    private _container = ((_facts getOrDefault ["kind", ""]) in CONTAINER_KINDS) && {
-        "grid" in _values || {"like" in _values} || {!("footprint" in _values) && {!("stack" in _values)} && {!("icon" in _values)} && {!("picture" in _values)}}
+    private _classKind = _facts getOrDefault ["kind", ""];
+    private _container = (_classKind in CONTAINER_KINDS) && {
+        _classKind in ["crate", "vehicle"] || {"grid" in _values} || {"like" in _values}
+        || {!("footprint" in _values) && {!("stack" in _values)} && {!("weight" in _values)} && {!("name" in _values)}}
     };
     private _stepId = ["items", "containers"] select _container;
 

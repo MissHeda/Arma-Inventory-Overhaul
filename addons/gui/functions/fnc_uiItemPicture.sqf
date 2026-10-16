@@ -22,7 +22,8 @@
  * A group over a tile takes the mouse from the column that holds the tile, so it reports the buttons and the
  * wheel as the display does, like every group of the window (fnc_build, fnc_drawPart), and hands the wheel
  * on to its column (fnc_onMouseZ, fnc_passWheel). It scrolls by nothing of its own: a picture larger than it
- * would make it scrollable.
+ * would make it scrollable, and the engine scrolls such a group by the wheel after the event's handlers ran -
+ * so the group is put back to the top at the start of the frame as well, for a few frames (fnc_unscroll).
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -189,7 +190,17 @@ if (_events) then {
     _group ctrlAddEventHandler ["MouseZChanged", {[_this] call FUNC(onMouseZ)}];
 } else {
     // No window to hand the wheel to: at least the picture stays where it is put.
-    _group ctrlAddEventHandler ["MouseZChanged", {(_this select 0) ctrlSetScrollValues [0, 0]}];
+    _group ctrlAddEventHandler ["MouseZChanged", {[_this select 0] call FUNC(unscroll)}];
 };
+
+// A turn over the picture itself reaches the group it lies in as a turn over its content: the group never
+// stays scrolled either way (fnc_unscroll).
+_picture ctrlAddEventHandler ["MouseZChanged", {
+    private _group = ctrlParentControlsGroup (_this select 0);
+
+    if (!isNull _group && {_group getVariable [QGVAR(clip), false]}) then {
+        [_group] call FUNC(unscroll);
+    };
+}];
 
 _group

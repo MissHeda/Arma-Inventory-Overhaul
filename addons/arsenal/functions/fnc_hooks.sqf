@@ -58,6 +58,10 @@ createHashMapFromArray [
     ["drop", {_this call FUNC(onDrop)}],
     ["ground", {_this call FUNC(remove); true}],
 
+    // The staging space is drawn here, not a section of the soldier's: its cargo and places go into the
+    // engine's signature too, so a move that only rearranged it draws the panel again at once
+    ["signature", {[GVAR(staging)] select {!isNull _x}}],
+
     // A click on a section's caption folds it per container class while ACE's window is open, not per
     // object in the inventory's list: ACE makes a new uniform, vest or backpack for every one picked
     // (fnc_layout keeps which class each section shows)

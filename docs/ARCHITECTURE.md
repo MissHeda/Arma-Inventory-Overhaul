@@ -954,12 +954,13 @@ smaller about the box's middle and moved by the offsets, which are a share of th
 width and height. The plain icon (`ICON_PLAIN`) is the one control it was. Otherwise the image is measured by the texture's own
 shape (`getTextureInfo`), not by the control it is fitted into: where it stays inside `clip` (half a pixel of give) it is still one
 control, where it would reach out it is made inside an `EINV_Group` of exactly `clip`, which cuts it - the group is what comes
-back, the picture is `getVariable "einv_gui_inner"`. `fnc_uiPictureRounded [display, parent, rect, texture, radius, film, backdrop, icon, events]` draws the same for the editor's picture of a crate or vehicle on its grey; `fnc_uiBoxPicture [display, parent, rect, theme, own, preview, icon, radius, events]` is what fills such a box: the rules' picture `own` (`picture=`, on the slot surface with a little air) else the editor's `preview`, both by the class's `icon=` and cut at the box; `[]` when there is neither (the caller shows its icon). `fnc_uiPictureTurned` takes a `scale` (the square's side times it) and a
+back, the picture is `getVariable "einv_gui_inner"`. `fnc_uiPictureRounded [display, parent, rect, texture, radius, film, backdrop, icon, events]` draws the same for the editor's picture of a crate or vehicle on its grey (which not every mod's pictures share - ACE's is lighter than BI's, and a script cannot read a picture's pixels - so the backdrop's colour is laid over the edges of the image in `FADE_STEPS` strips of falling strength, clipped to the round box, and no rectangle shows); `fnc_uiPictureCut [display, parent, box, texture, icon, clip, radius, events]` draws a picture by `icon=` cut at a round box: one that reaches out of the box is three groups as `fnc_uiPanel` has three rectangles (the middle and the two sides between the corners), each holding the whole picture, so the box's round corners show the backdrop instead of the group's square ones; `fnc_uiBoxPicture [display, parent, rect, theme, own, preview, icon, radius, events]` is what fills such a box: the rules' picture `own` (`picture=`, on the slot surface with a little air) else the editor's `preview`, both by the class's `icon=` and cut at the box; `[]` when there is neither (the caller shows its icon). `fnc_uiPictureTurned` takes a `scale` (the square's side times it) and a
 `shift` of the square's middle for it; a turned picture's offsets turn with it (what moves across moves down, what moves down
 moves left). A group over a tile reports the buttons and the wheel as the display does (`events`, true except in the wizard's
 preview) and hands the wheel to the scrolling group it lies in, `fnc_passWheel` (`WHEEL_STEP` 3 `UNIT`): a group nested in a
 column takes the wheel from it (`fnc_createGrid`), and its picture, larger than it, would make it scrollable - its scroll is put
-back to the top at every turn.
+back to the top at every turn, and again for `UNSCROLL_FRAMES` frames from `fnc_onFrame` (`fnc_unscroll`): the engine scrolls the group after
+the handler ran, so a reset in the handler alone left it one step down each turn.
 
 ### The hook table (window engine for other displays)
 
@@ -990,6 +991,7 @@ inventory-only feature asks it: nearby boxes, selecting, the band, group drags, 
 | `drop` | `[kind, sourceIndex, tileIndex, slotSource, entry, count, targetIndex, col, row, w, h, targetSlot, place, rot]` (**14**) | BOOL, true = handled - after the `!fits` exit | `fnc_endDrag` |
 | `ground` | `[source, count]` | BOOL, true = handled - `source` is `[unit, slot]` or `[grid index, tile index]`, count -1 for all | `fnc_quickUnequip`, `fnc_dropToGround`, `fnc_quickMove`, just before each falls back to the ground |
 | `fold` | `[container]` | BOOL, true = the window keeps its folds itself (`einv_gui_collapsed` is left alone, the window is drawn again) | `fnc_toggleSection` |
+| `signature` | `[]` | `[holder, ...]` - holders the window draws itself, beside the unit's sections; their cargo and places are part of the "storage" signature, so a change there (a move inside the Arsenal's staging space) builds the window | `fnc_getSignature` |
 | `menu` | `[display]` | choices - replace the default, `[]` = no menu, nil = the default | `fnc_contextMenu` |
 | `filter` | `[]` | nothing - after the tiles were faded for the search | `fnc_applyFilter` |
 | `tileBadge` | `[class]` | a texture or `""` - a mark `SQUARE(UNIT * 0.42)` in a tile's top left corner | `fnc_createTile`, `fnc_drawSlot` |
@@ -997,7 +999,7 @@ inventory-only feature asks it: nearby boxes, selecting, the band, group drags, 
 | `inspectRows` | `[class, count, ammo, attachments]` | rows `[label, text]` or `[label, fraction, text]` before the Mod row | `fnc_drawInspect` |
 
 ACE Arsenal's panel is the only window that attaches today. It sets `guest`, `theme`, `header`, `layout`, `footer`, `camera`,
-`keepOpen`, `frame`, `mouseDown`, `mouseUp`, `click`, `wheel`, `dragCheck`, `drop`, `ground`, `fold`, `menu` and `hint`; `context`,
+`keepOpen`, `frame`, `mouseDown`, `mouseUp`, `click`, `wheel`, `dragCheck`, `drop`, `ground`, `signature`, `fold`, `menu` and `hint`; `context`,
 `afterBuild`, `footerKeys`, `focusAll`, `key`, `submit`, `filter`, `tileBadge` and `inspectRows` are asked for but set by nobody,
 kept as the surface for a later window.
 
@@ -1371,7 +1373,11 @@ item out.
   most `STAGING_MAX_ROWS` 100 (its own cap, since `MAX_ROWS` 40 also bounds item and compartment sizes in the rules); rows past
   the column scroll; `getBlocks` takes that form exactly. Section id `"staging"`, side `"own"`, a crate icon (`tabIcon`) before
   its caption. `fnc_onClosed` deletes it with its contents. `fnc_onDrop` notes `einv_arsenal_watch` `[container, class, count,
-  until]` and the frame hook calls `fnc_syncAce` and `fnc_tellAce` once the count changed (`WATCH_TIME` 3 s at most).
+  until]` and the frame hook calls `fnc_syncAce` and `fnc_tellAce` once the count changed (`WATCH_TIME` 3 s at most). The staging
+  crate is no section of the soldier's (`GVAR(context)` "ownSections"), which the engine's signature reads (`fnc_getSignature`), so a
+  move that only rearranged it - a tile moved or turned inside the staging space - was never seen and its tiles stayed where they were
+  drawn: the next lift found nothing at the old cell ("Someone else was quicker"). The `signature` hook names the crate
+  (`[einv_arsenal_staging]`), its cargo and places go into the "storage" part, and a change there builds the panel.
 
 ### Add, remove, reconcile
 
@@ -1409,7 +1415,10 @@ item out.
 - **Frame-later pass** (`fnc_settle`, once a frame however often asked): fallback follow-up, snapshot, `fnc_syncAce` (row counts,
   load bar, `ace_arsenal_currentItems`, `ace_arsenal_fnc_updateRightPanel`), **`fnc_ungrey`** (rows ACE greyed by weight are lit
   again where a stack has room or a spot of that size is free, one grid look per item size; also the "+" of the picked row, and the
-  whole list a frame after every pick, as ACE greys all rows by weight anew at each pick; unique items and backpacks are left to ACE), the engine unit set to `ace_arsenal_center`, build - or after the drag if something is
+  whole list a frame after every pick, as ACE greys all rows by weight anew at each pick; unique items and backpacks are left to ACE), **`fnc_pictures`**
+  (the rules' `picture=` on ACE's own rows - its left list IDC 13, the right list of the weapon tabs IDC 14 with `lbSetPicture` and the
+  container tabs' listnbox IDC 15 with `lnbSetPicture` -, rows by class from `getInfo`'s `pictureOverride` when it is `picture`, done
+  `PICTURE_BUDGET` seconds a frame since the lists hold thousands of rows), the engine unit set to `ace_arsenal_center`, build - or after the drag if something is
   held.
 - **Mouse and focus.** A press on the panel empties `ace_arsenal_mouseButtonState` (now and a frame later); the frame hook keeps
   it empty while something is held or a list press waits, and ends a drag whose button came up where no display event reached the
@@ -1508,7 +1517,11 @@ controls stay in uiNamespace. **Every edit ends in `fnc_commit [ast, redraw = tr
 - **Start** (`fnc_drawStart`): one plain page. Title and two sentences; the preset cards (`fnc_shippedPresets` plus the player's
   own, `fnc_personalPresets`) with the "keep own rules" switch; "Now in use" (with where Save goes, Import, Review and save)
   beside "What you changed" (`fnc_drawChanges`: the own rules as sentences, `fnc_describeRule`, to open at their class or take
-  away).
+  away). A line of a rule for one class opens the step that lists its kind (the same in Review's list): Containers for a crate or
+  vehicle always (Items lists no cargo), for a uniform, vest, backpack or kit when the rule has `grid=` or `like=` or none of an item's
+  own `footprint`, `stack`, `weight`, `name`, Items otherwise; the class is picked there (`selection`, `editScope`, `listState`).
+  Percent signs in the words (`Value_Icon`, `Value_IconMoved`, the steppers' `Items_PictureZoom` ...) are the argument `%2` / `%4`,
+  not a `%` in the string: `format` drops a lone `%`.
   **Everything else**, a card right over the Advanced fold (the "Now in use | What you changed" cards give up its height): the
   caption, "Applies only where no preset or own rule gives an answer.", Clear and Apply; then "Items without a rule: size
   [across] x [down], [N per tile]" and "Containers without a rule: [Auto | Fixed] [across] x [down]" in one row, or two where
@@ -1644,9 +1657,10 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
 ### The picture of an item and of a box (Items, Containers)
 
 - **The Picture row** (`fnc_drawPictureRow`, under Name in the Items step and under the preview of the cells in the Containers step):
-  the label, a read-only field with the texture path - the working copy's, else config's own in the muted ink, a long path cut at its
-  beginning so the file name shows -, **Pick...** and **Reset** (enabled while a picture is set). The field is a film with a hit area,
-  so it opens the picker too. The working copy holds `pictureText` (Items: in the item's canvas under `GVAR(itemWork)`; Containers:
+  the label, a read-only field with the whole texture path as text - the working copy's, else config's own in the muted ink -,
+  **Pick...** and **Reset** (enabled while a picture is set). The field is `fnc_uiEdit` with `selectable` (`EINV_EditReadOnly`,
+  `canModify = 0`, enabled): a click puts the cursor in, Ctrl+A / Ctrl+C copy it, and Ctrl+C or Return in it gives the focus back to the sink
+  (`fnc_onLoad`) so the wizard's keys (display `KeyDown` returns early while an edit has the focus) work again; it opens nothing. The working copy holds `pictureText` (Items: in the item's canvas under `GVAR(itemWork)`; Containers:
   `GVAR(boxWork)`, per lowercase class, with `iconPercent`, apart from the cells' `GVAR(cellWork)`); the row hands every choice to
   the editor's code, which stores it and draws the editor again. Everything that shows the item by the working copy uses the
   picture at once: the tile preview (`fnc_drawPreview` passes `"picture"` in the tile's entry), the canvas, the box preview.
@@ -1655,18 +1669,27 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   `fnc_parsePicture`) to win over it. The Containers step's Apply writes the cells (when changed) and `icon=` / `picture=` in one
   `fnc_upsertRule`, and is enabled for a picture change alone; Discard and Back to the preset (`grid`, `like`, `icon`, `picture`) clear
   both working copies.
-- **The picker** (`fnc_openPicturePicker [current, code, arguments]` -> `fnc_popover` in the middle of the wizard;
-  `fnc_drawPicturePicker`; state `GVAR(picker)`): a search field, a page of `PICKER_COLS` x `PICKER_ROWS` (6 x 4) thumbnails each with the
+- **The picker** (`fnc_openPicturePicker [current, code, arguments, inUse, class]` -> `fnc_popover` in the middle of the wizard;
+  `fnc_drawPicturePicker`; state `GVAR(picker)`): a search field, chips under it (`chip`: "Item icons" `items`, "Uniforms & gear" `gear`,
+  "Vehicles & boxes" `vehicles`, "All"; the part `"chips"` draws them alone), a page of `PICKER_COLS` x `PICKER_ROWS` (6 x 4) thumbnails each with the
   first owner's name under it (`+N` for the others that share the picture; the tooltip lists the classes and the path), the range and the
   page arrows, a field for any texture path with a thumbnail and a line that says whether the game has the file, and Cancel /
   **Use picture**. A click picks (a ring), a second click on the same one within 0.6 s or Use picture takes it; of the list and the
   path field the one used last is the one Use picture takes. The path field is read by `fnc_parsePicture` with `encoded = false` and
   must name a file that `fileExists` finds (with or without the leading backslash) - a missing file is never given to a control, the
   engine would pop up a message. `fnc_pickPicture [path]` closes the popover and calls the editor's code with `[path, arguments]`.
+  It opens on the chip of the edited class's kind (`fnc_pictureCategory` of its index row's kind; "All" for a class the index does not
+  list) and on the picture in use - the one set, else config's, passed by `fnc_drawPictureRow` - as `picked`: once the catalog is read
+  (`reveal`), its entry is found by the path in any spelling (`byPath` by lowercase path, with or without the leading backslash, with
+  backslashes or slashes), ringed and its page turned to; where the chip does not hold it the chip turns to All; a path the catalog does
+  not have is the path field's. A click on a chip or typing in the search before the catalog is read ends `reveal`.
 - **The catalog** (`fnc_pictureCatalog`, `fnc_pictureChunk`; uiNamespace `einv_setup_pictures`): the picker's pictures are the distinct
   `picture` values of the class index's rows (`ROW_PICTURE`, already looked at by `safePicture`), one entry each - `[path, lowercase
   path, search text, first owner's name, its class, how many own it, up to `PICKER_OWNERS` 8 classes in lowercase, their names]`,
-  sorted by the first owner's name, plus `byPath` for Review's "picture from <class>". Built lazily the first time the picker opens, in
+  sorted by the first owner's name, plus `byPath` for Review's "picture from <class>"; a ninth member lists the categories of the owners
+  (`items`, `gear`, `vehicles`: `fnc_pictureCategory` of each owner's kind - uniform, vest, headgear and backpack are gear; crate and
+  vehicle are vehicles, whose `editorPreview` is catalogued as well as their `picture`; all else, weapons, magazines, attachments,
+  kits, goggles, are items), which the chips filter by. Built lazily the first time the picker opens, in
   pieces of `INDEX_BUDGET` seconds on the wizard's queue (like the index itself and waiting for it; a run that was dropped when the
   window closed is taken up again), and kept for the session. The search is `fnc_searchFilter`'s: a plain text anywhere in the path,
   classes and names, a wildcard on the path, a class or a name as a whole; it is worked out once per text, so turning a page does not
@@ -1700,10 +1723,15 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
 - **Item editor** (`fnc_drawItemEditor`): width and height steppers (1 to 8), the stack (1 to 999; not for weapons, uniforms,
   vests, backpacks), the weight in kg and the name (two text fields; empty is config's own, and config's weight is the
   placeholder), the **Picture row** (see below), an 8x8 canvas where a click makes a place one of the item's cells, the tile preview, and a warning while the
-  cells are not one piece (Apply off). Beside the preview, the **zoom block** (`fnc_drawIconBlock`, "Zoom and place", shared with the Containers step): a zoom stepper (25 to 400 %, steps of 5, shown as
-  "Zoom 140 %") with chips for 50, 100, 150 and 200 %, two shift steppers, "Across" and "Down" (-100 to 100 % of the tile, steps
-  of 5), and Reset (back to 100 % and nothing shifted; enabled while it is not). The working copy holds them as `iconPercent`
-  (`[zoom, across, down]` in whole per cent; `ICON_PERCENT_PLAIN` is `[100, 0, 0]`), and the preview is `fnc_drawPreview` drawing the
+  cells are not one piece (Apply off). Beside the preview, the **zoom block** (`fnc_drawIconBlock`, "Zoom and place", shared with the Containers step): a zoom stepper (25 to 400 %, shown as
+  "Zoom 140 %") with chips for 50, 100, 150 and 200 %, two shift steppers, "Across" and "Down" (-100 to 100 % of the tile), and
+  Reset (back to 100 % and nothing shifted; enabled while it is not). The working copy holds them as `iconPercent`
+  (`[zoom, across, down]` in whole per cent; `ICON_PERCENT_PLAIN` is `[100, 0, 0]`). Each stepper (`fnc_uiStepper`; range
+  `[min, max, step, step with Shift]`, here 1 and 10 - the Shift state is taken from `MouseButtonDown`, as `ButtonClick` has none) has a
+  text box beside it (`fnc_uiNumber`: `fnc_uiEdit` on a film, read on Return or `KillFocus`, cut to the range, put back when it is no
+  number; one `apply` code shared by both, run once - a `done` flag stops the redraw that follows from reading it a second time)
+  that calls the same code as the stepper with `[value, arguments]`. A blur that leaves for another control redraws the editor, so
+  that control's own click may be lost once, and the preview is `fnc_drawPreview` drawing the
   tile with **`einv_gui_fnc_createTile`** itself - on a piece of grid, the cells under the tile made way for it, name, count and
   full magazine as in a container, at the inventory's cell (`einv_gui_fnc_getCell`) where it fits and as big as fits where not, the
   entry carrying the working `"icon"` - so the picture is seen as Apply will write it. Apply writes `class=X > size=WxH` or

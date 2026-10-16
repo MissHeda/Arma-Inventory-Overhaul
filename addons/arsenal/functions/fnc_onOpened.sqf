@@ -55,6 +55,7 @@ GVAR(listSel) = [];
 GVAR(watch) = [];
 GVAR(scrollHold) = [];
 GVAR(ctrlHeld) = false;
+GVAR(pictureCache) = createHashMap;
 GVAR(stagingCount) = 0;
 
 _display displayAddEventHandler ["KeyDown", {_this call FUNC(onKey)}];

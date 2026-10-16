@@ -20,7 +20,10 @@
  *             only those sections are drawn again (fnc_redrawTiles).
  *   storage - the same per section of the unit's own storage column (GVAR(context) "ownSections"). Only
  *             some changed: those sections are drawn again, and with them the weight card and the hotbar,
- *             which count what the unit carries (fnc_redrawPart).
+ *             which count what the unit carries (fnc_redrawPart). A window that attached may name holders of
+ *             its own that it draws beside them (the "signature" hook: the Arsenal's staging space, which is
+ *             no section of the unit), read the same way past the unit's numbers: a window that attached
+ *             builds on any change there.
  *   card    - what else the weight card shows: ACE's virtual load on the unit and its uniform, vest and
  *             backpack (which its weight counts), and the key of the weight limits
  *             (einv_weight_fnc_getLimits) - the card's marks move with a changed setting, ACE's load factor
@@ -172,6 +175,14 @@ private _storage = [];
         _storage pushBack [_forEachIndex, str [[_container] call _fnc_cargo, [_container] call _fnc_revision]];
     };
 } forEach (GVAR(context) getOrDefault ["ownSections", []]);
+
+// Holders the window that attached draws itself (the "signature" hook): numbered past the unit's sections, so
+// a move that only rearranged them - the Arsenal's staging space has no section of the unit - is seen too.
+{
+    if (_x isEqualType objNull && {!isNull _x}) then {
+        _storage pushBack [1000 + _forEachIndex, str [[_x] call _fnc_cargo, [_x] call _fnc_revision]];
+    };
+} forEach (["signature", [], []] call FUNC(hook));
 
 // ----- Card -----
 

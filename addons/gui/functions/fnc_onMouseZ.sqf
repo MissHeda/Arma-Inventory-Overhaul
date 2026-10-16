@@ -36,6 +36,10 @@ if (_source isEqualType controlNull && {_scroll != 0} && {_source getVariable [Q
     if (!_counting) then {
         [_source, _scroll] call FUNC(passWheel);
     };
+
+    // The engine scrolls the group after this handler: put back at the frame's start as well (fnc_unscroll),
+    // also while the wheel counts a stack.
+    [_source] call FUNC(unscroll);
 };
 
 // Not dragging: a window that attached may use the wheel itself (the Arsenal panel adds or takes out one with

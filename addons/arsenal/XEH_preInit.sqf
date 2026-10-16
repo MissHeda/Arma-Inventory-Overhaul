@@ -60,6 +60,11 @@ GVAR(watch) = [];
 GVAR(scrollHold) = [];
 GVAR(ctrlHeld) = false;
 
+// The rules' pictures on ACE's lists (fnc_pictures): the pass that is going, and the picture of each class
+// asked about, "" for none.
+GVAR(picturePass) = 0;
+GVAR(pictureCache) = createHashMap;
+
 // What of ACE's internals was found missing and said in the RPT already, once each.
 GVAR(missingSaid) = [];
 

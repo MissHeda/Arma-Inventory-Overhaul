@@ -104,6 +104,12 @@
 // mods use as well: rgb 123 132 129 (fnc_uiPictureRounded).
 #define EDITOR_PREVIEW_BACKDROP [0.482, 0.518, 0.506, 1]
 
+// ACE's previews lie on a lighter grey (rgb 135 144 141), other mods' differ again, and a script cannot read a
+// picture's pixels: the edges of the image fade into the backdrop over FADE_SHARE of the box's height in
+// FADE_STEPS strips so no rectangle shows (fnc_uiPictureRounded).
+#define FADE_STEPS 4
+#define FADE_SHARE 0.05
+
 // Searching, as Tarkov shows it (fnc_showSearch, fnc_animateSearch, fnc_revealFx). The ring that fills
 // comes in SEARCH_FRAMES steps (search_ring_01_ca to _32_ca, drawn by tools/generate_ui_textures.py),
 // as big as SEARCH_RING_SIZE of the tile's shorter side. The glass in it is SEARCH_GLASS_SIZE of the
@@ -155,6 +161,10 @@
 // One turn of the mouse wheel scrolls a column this far when a picture's clip group has taken the turn from it
 // (fnc_passWheel): about the three rows the engine's own step comes to.
 #define WHEEL_STEP (UNIT * 3)
+
+// How many frames a clip group the wheel turned over is put back to the top, after the engine scrolled it
+// (fnc_unscroll, fnc_onFrame).
+#define UNSCROLL_FRAMES 3
 
 // A label draws its text from its top edge down whatever its height, so a text that has to sit in the middle of
 // a box starts a little above the box's middle: the middle of the line of capitals lies this share of the font

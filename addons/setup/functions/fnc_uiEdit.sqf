@@ -8,7 +8,10 @@
  * One line (EINV_Edit) - Return hands the text in (read on the key's release: the field swallows the
  * press). Several lines (EINV_EditArea) - for rules text: in a scrolling group of its own that grows with
  * the text (fnc_fitEditArea), Return starts a new line. Disabled, several lines can still be selected and
- * copied (Ctrl+A, Ctrl+C) - only typing is refused; one line is greyed out.
+ * copied (Ctrl+A, Ctrl+C) - only typing is refused; one line is greyed out - unless it is "selectable": then
+ * it is a read-only field (EINV_EditReadOnly) that is drawn as any other and can be selected and copied, a
+ * texture path say. Ctrl+C or Return in it gives the cursor back to the wizard (the sink, fnc_onLoad), so the
+ * wizard's own keys work again.
  *
  * The code runs a moment later (fnc_defer) with [text, submitted, arguments]: on every change with
  * submitted false, on Return with true.
@@ -24,6 +27,7 @@
  * 7: Arguments <ANY> (default: [])
  * 8: Several lines <BOOL> (default: false)
  * 9: Enabled <BOOL> (default: true)
+ * 10: Selectable, with Enabled false and one line: read only but not greyed out, the code is never called <BOOL> (default: false)
  *
  * Return Value:
  * The controls, the field last <ARRAY>
@@ -38,7 +42,8 @@ disableSerialization;
 
 params [
     "_display", "_parent", "_rect", ["_text", "", [""]], ["_placeholder", "", [""]], ["_theme", createHashMap, [createHashMap]],
-    ["_code", {}, [{}]], ["_arguments", []], ["_multiLine", false, [false]], ["_enabled", true, [true]]
+    ["_code", {}, [{}]], ["_arguments", []], ["_multiLine", false, [false]], ["_enabled", true, [true]],
+    ["_selectable", false, [false]]
 ];
 _rect params ["_left", "_top", "_width", "_height"];
 
@@ -85,15 +90,18 @@ if (_multiLine) then {
     (uiNamespace getVariable [QGVAR(editAreas), []]) pushBack _edit;
     uiNamespace setVariable [QGVAR(editAreas), (uiNamespace getVariable [QGVAR(editAreas), []]) select {!isNull _x}];
 } else {
-    _edit = [_display, "EINV_Edit", _parent, [_left + _padX, _top + (_height - _size * 1.4) / 2, _width - _padX * 2, _size * 1.4]] call EFUNC(gui,uiCreate);
+    private _class = ["EINV_Edit", "EINV_EditReadOnly"] select (_selectable && {!_enabled});
+
+    _edit = [_display, _class, _parent, [_left + _padX, _top + (_height - _size * 1.4) / 2, _width - _padX * 2, _size * 1.4]] call EFUNC(gui,uiCreate);
     _edit ctrlSetFont _font;
     _edit ctrlSetFontHeight _size;
-    _edit ctrlEnable _enabled;
+    _edit ctrlEnable (_enabled || _selectable);
 };
 
 _edit ctrlSetTextColor (_theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]]);
 _edit ctrlSetText _text;
 _edit setVariable [QGVAR(edit), [_placeholderCtrl, _code, _arguments, _multiLine, _enabled, _text]];
+_edit setVariable [QGVAR(selectable), _selectable && {!_multiLine} && {!_enabled}];
 
 _hit setVariable [QGVAR(edit), _edit];
 _hit ctrlAddEventHandler ["ButtonClick", {
@@ -126,9 +134,18 @@ _edit ctrlAddEventHandler ["EditChanged", {
 }];
 
 _edit ctrlAddEventHandler ["KeyUp", {
-    params ["_edit", "_key"];
+    params ["_edit", "_key", "", "_ctrl"];
 
     (_edit getVariable [QGVAR(edit), []]) params ["", ["_code", {}], ["_arguments", []], ["_multiLine", false], ["_enabled", true]];
+
+    // A path to copy: once it is copied (or Return), the wizard has its keys back.
+    if (_edit getVariable [QGVAR(selectable), false]) exitWith {
+        if (_key in [DIK_RETURN, DIK_NUMPADENTER] || {_key == DIK_C && {_ctrl}}) then {
+            ctrlSetFocus (uiNamespace getVariable [QGVAR(sink), controlNull]);
+        };
+
+        false
+    };
 
     if (_multiLine || {!_enabled} || {!(_key in [DIK_RETURN, DIK_NUMPADENTER])}) exitWith {false};
 
