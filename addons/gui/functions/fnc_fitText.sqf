@@ -25,7 +25,9 @@
 
 params ["_text", "_width", "_font", "_size"];
 
-_width = _width / TEXT_SLACK;
+// A hair of room on top: a box made exactly as wide as its text (text width times TEXT_SLACK) must keep
+// the whole text - rounding would otherwise cut "Vest" to "Ve...".
+_width = _width / TEXT_SLACK * 1.02;
 
 if ((_text getTextWidth [_font, _size]) <= _width) exitWith {_text};
 
