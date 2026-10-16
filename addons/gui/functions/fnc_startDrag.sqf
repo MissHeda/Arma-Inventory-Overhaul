@@ -105,6 +105,16 @@ private _pending = _slotSource isEqualTo [] && {!_fromSource} && {
             };
         } forEach GVAR(inFlight);
 
+        // And those waiting for the hands (fnc_queueMoves).
+        if (!_found) then {
+            _found = GVAR(handQueue) findIf {
+                (_x getOrDefault ["sources", []]) findIf {
+                    _x params [["_fromHolder", objNull], ["_fromKey", ""], ["_fromBlock", 0], ["_fromCol", 0], ["_fromRow", 0]];
+                    _fromHolder isEqualTo _holder && {[_fromKey, _fromBlock, _fromCol, _fromRow] isEqualTo _source}
+                } >= 0
+            } >= 0;
+        };
+
         _found
     }
 };

@@ -542,6 +542,11 @@ switch (_shown param [0, ""]) do {
             [LLSTRING(Hint_Overflow), "loss"] call _fnc_add;
         };
 
+        // Waiting for the hands (fnc_queueMoves): a click on it cancels.
+        if ((_tile getOrDefault ["queued", 0]) > 0) then {
+            [LLSTRING(Hint_Queued), "accent"] call _fnc_add;
+        };
+
         // Where the settings "Use items from ..." limit what can be used: said on an item of the player's own
         // uniform, vest or backpack that cannot be used from there, or that was whitelisted for it.
         if (missionNamespace getVariable [QEGVAR(storage,useActive), false]) then {
@@ -619,6 +624,11 @@ switch (_shown param [0, ""]) do {
 
         [[_class] call FUNC(itemName), "text"] call _fnc_add;
         [(_info getOrDefault ["size", [1, 1]]) call _fnc_size, "muted"] call _fnc_add;
+
+        // To be taken off once the hands are free (fnc_queueMoves): a click on the slot cancels.
+        if (([_record param [6, objNull], _record param [5, ""]] call FUNC(queuedSlot)) > 0) then {
+            [LLSTRING(Hint_Queued), "accent"] call _fnc_add;
+        };
 
         // A weapon slot that did not bring its weapon along shows the unit's own: the attachments come
         // from what the unit wears.

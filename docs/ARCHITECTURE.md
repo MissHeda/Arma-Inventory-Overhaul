@@ -1123,6 +1123,38 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   `fnc_drawPending`) until the answer and the new places arrived (`einv_gui_answers`, finished by `fnc_afterAction`, at the latest
   `ANSWER_WAIT` 3 s after the answer; given up after `PENDING_TIMEOUT` 15 s); each sounds when finished. On
   `einv_items_rulesChanged` an open window is built again once a held tile is let go.
+- **The hands' queue** (`fnc_queueMoves`, `fnc_queueTime`, `fnc_queueTiles`, `fnc_queuedSlot`, `fnc_drawQueue`, `fnc_animateQueue`,
+  `fnc_runQueue`, `fnc_cancelQueued`; state `GVAR(handQueue)`, `handStarted`, `handLast`, `handId` in `XEH_preInit.sqf`). What takes the hands is not
+  sent at once but waits in the window's own queue, one entry per move, each with a circle on its tile; only the first runs, and when its
+  circle is full it is sent through `fnc_sendMoves` as any move (so the transaction, the authority, the guards, the answer and the hint are
+  exactly those of a move that was never queued - nothing is reserved, changed or checked early; a refusal, Gone or NoRoom shows its hint and the
+  next entry goes on). The funnel is `fnc_sendMoves` itself: unless the option `"now"` is set it hands its moves to `fnc_queueMoves` first, which
+  answers `[moves to send now, how many were queued]`; the rest goes on in the same call, and the call answers true when it queued something. Every
+  caller gets it without a change: the drag (`fnc_endDrag` -> `fnc_applyMove`, `fnc_dropToGround`, `fnc_doEquip`, `fnc_doUnequip`, `fnc_doSwap`,
+  `fnc_applySwap`), the quick move and double click, G / Delete and Drop, Take all / Put all in and group drags (`fnc_sendPlan`, one entry per
+  move), the kits' ops (`einv_compat_efak`). `fnc_queueTime [move]` -> `[kind, seconds]` says what a move costs: `drop` (to `"ground"`,
+  `"vehicle"` or a pile - `einv_gui_handDrop`), `move` (to a different holder, and an `exchange` - `einv_gui_handMove`), `equip` (`equip`,
+  `unequip`, `swap` - `einv_gui_handEquip`); `""` and no wait for a move within one holder, `placeMany`, `sort`. A kind set to 0 seconds is never
+  queued (no circle, as before). Not queued either: any window that is not the inventory (ACE Arsenal's panel does not use `fnc_sendMoves`
+  anyway), a move with nothing of it on the window (no tile found by `fnc_queueTiles`, no slot drawn: say a kit unpacked from the menu with its
+  window closed), and one whose tile or worn item already waits (dropped, no second entry). An entry is a HashMap: `id`, `move`, `options`
+  (a copy with `now`; `label` only on the last entry of a call), `hand`, `time`, `sources` (`[holder, key, block, col, row]` as the moves in
+  flight name them), `slot` (`[unit, slot]` of a worn item a take off or swap lifts), `fx`, `arc`, `step`. `fnc_queueTiles [entry]` finds the
+  tiles by those sources as `fnc_drawPending` finds a move in flight's. `fnc_drawQueue` is called at the end of `fnc_drawPending` (every build,
+  every redraw of tiles, every settle) and after a kit window is drawn on its own: it deletes the last circles and makes them again - a
+  dark disc, the faint full ring, and for the first entry the ring that fills (`SEARCH_RING` pictures, the accent colour), for the others their
+  place as a number - on the tile's group (so they scroll and clip with it) or on the slot, flags the tiles `pending` (faded as a move in
+  flight, so nothing can lift or act on them; `fnc_startDrag` also looks in the queue) and `queued` with the entry's id; at most
+  `QUEUE_SHOWN_MAX` 30 entries get a circle. `fnc_onFrame` calls `fnc_animateQueue` each frame while the queue holds something and the
+  window is not covered (the time it stood still does not count, as for the search): that one place changes the first ring's picture when its
+  step changes and calls `fnc_runQueue` when the time is up - no control is made per frame. A left press on a queued tile or slot
+  (`fnc_onMouseButton`) or "Cancel" in its menu (`fnc_contextMenu`) calls `fnc_cancelQueued [id]` (0: all): the entry leaves, the tile is
+  free, the others are numbered again. The queue is dropped by `fnc_attach` and `fnc_onUnload`: closing the window (Escape, the Gear key,
+  a movement key, ...) cancels everything that still waits, which only waited - a move already sent finishes on its own. Take all / Put all in
+  skip tiles that wait (`handQueue` sources next to `inFlight`'s). Walking does not cancel (only `einv_gui_moveToStop` closes the window
+  while looting, as ever); with the looting animation on, the soldier simply stays in the pose while the window is open. The target cells
+  of a queued move are not reserved or outlined: something else put there meanwhile makes it land elsewhere ("Put elsewhere") or bounce, as
+  for any move whose cell was taken. Times do not depend on weight.
 
 ### Geometry and the cell
 
@@ -1895,7 +1927,7 @@ argument, and a change of either (`einv_items_rulesChanged`, `einv_main_settings
     words with the numbers of the moment (the cell, `UNIFORM_COLS`, `UNIFORM_ROWS_MIN`/`MAX`, `VEST_POUCHES_MAX`, a vest of load 120, a backpack of 280, a crate
     of 1000): containers, uniforms, vests, backpacks, vehicles and crates, items, stacking, and that a rule of the class beats it all. The sizes of items and
     the stack numbers in the words are those of the default preset - keep them together.
-  - **Server settings** by topic (`GVAR(topics)`: looting, living persons, containers, weight, hotbar/repacking/locks, vanilla arsenal; a registered setting that
+  - **Server settings** by topic (`GVAR(topics)`: looting, hands, living persons, containers, weight, hotbar/repacking/locks, vanilla arsenal; a registered setting that
     no topic names goes under Other, one whose addon is not loaded is not shown): two to a line, a text box a line to itself. A control by the registry's type
     (`einv_main_serverSettings`): CHECKBOX `fnc_uiToggle`, SLIDER `fnc_uiStepper` (a step of 1, or 0.5 or 0.05 for a short range with decimals; the value
     rounded to the setting's decimals), LIST `fnc_uiDropdown`, EDITBOX `fnc_uiField` (a text box applied on Return or when it loses the cursor, not per key).
@@ -2392,6 +2424,9 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_gui_animation` | LIST | global | Off | Off, While looting, Always: the looting pose |
 | `einv_gui_moveToStop` | CHECKBOX | client | on | a movement key closes the window while looting |
 | `einv_gui_searchTime` | SLIDER 0 to 3 | global | 0.4 | seconds per cell searched; 0 shows everything |
+| `einv_gui_handDrop` | SLIDER 0 to 3 | global | 0.3 | seconds the hands are busy dropping one item (hands' queue, section 4); 0 drops at once, no circle |
+| `einv_gui_handMove` | SLIDER 0 to 3 | global | 0.4 | seconds to move one item to a different container or holder (a drag, the quick move, Take all, Put all in); 0 at once |
+| `einv_gui_handEquip` | SLIDER 0 to 5 | global | 1 | seconds to put one item on or take it off (also loading a magazine, attaching a part); 0 at once |
 | `einv_gui_searchBodies`, `searchPersons`, `searchContainers` | CHECKBOX | global | on | what has to be searched |
 | `einv_gui_searchGround` | CHECKBOX | global | off | loose items on the ground too |
 | `einv_gui_personNotify` | CHECKBOX | global | on | the person whose gear is opened is told |

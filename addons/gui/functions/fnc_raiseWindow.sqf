@@ -73,6 +73,11 @@ _windows pushBack _new;
 // The same section makes as many grids again; should it not, every window is drawn anew instead.
 if (count _made != count _old) exitWith {
     [_display] call FUNC(drawWindows);
+
+    if (GVAR(handQueue) isNotEqualTo []) then {
+        [_display] call FUNC(drawQueue);
+    };
+
     true
 };
 
@@ -87,5 +92,10 @@ _grids resize (count _grids - count _made);
 _new set ["grids", +_old];
 
 [_display] call FUNC(drawTopLayer);
+
+// The circles of the hands' queue (fnc_queueMoves) on its tiles, which are new controls.
+if (GVAR(handQueue) isNotEqualTo []) then {
+    [_display] call FUNC(drawQueue);
+};
 
 true

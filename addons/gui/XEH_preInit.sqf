@@ -175,6 +175,16 @@ GVAR(searchHead) = [];
 GVAR(searchSoundAt) = 0;
 GVAR(searchLast) = 0;
 
+// The hands' queue (fnc_queueMoves): the actions waiting for the hands, in order, each a HashMap - "id", "move" (the
+// move fnc_sendMoves was given), "options", "hand" ("drop", "move" or "equip"), "time" (seconds), "sources" (the tiles it
+// takes from, as the moves in flight name them), "slot" ([unit, slot] of a worn item it takes off), "fx" (the circle's
+// controls, made by fnc_drawQueue), "arc" and "step" (the ring that fills). Only the first runs; handStarted is when it
+// began (-1: not yet), handLast the last frame of the queue, handId counts the entries made.
+GVAR(handQueue) = [];
+GVAR(handStarted) = -1;
+GVAR(handLast) = 0;
+GVAR(handId) = 0;
+
 // The sounds: each item class's family, each family's actions as read from CfgEinvSounds, when each sound last
 // played and which variant, the files found for config paths, the weapons' reload sounds, the ground under the
 // player, when others may next hear a sound and a search tick, and the reload sound playing now (fnc_playSound).

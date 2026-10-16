@@ -45,6 +45,9 @@
  * soldier taken away from the loot closes the window, the pose comes back after a weapon change
  * (fnc_poseCheck).
  *
+ * The hands' queue (fnc_queueMoves) runs every frame while it holds something (fnc_animateQueue), not while another
+ * window lies over this one.
+ *
  * The sound of each answer is played as it is finished (fnc_afterAction, fnc_feelAnswer).
  *
  * A window that attached with hooks (fnc_attach) is asked about the rest: whether it should stay open at all
@@ -232,6 +235,12 @@ if (_covered) exitWith {
     if (_why isNotEqualTo "") then {
         [_why] call FUNC(closeDisplay);
     };
+};
+
+// The hands' queue: the first action's ring fills, and it is sent when the time is up (fnc_animateQueue). Not under
+// another window, and the time it stood still does not count.
+if (GVAR(handQueue) isNotEqualTo []) then {
+    [_display, _now] call FUNC(animateQueue);
 };
 
 // An open context menu made again on top once something was made on the display after it (fnc_raiseMenu). Asked

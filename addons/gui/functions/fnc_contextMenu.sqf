@@ -24,6 +24,9 @@
  * On a tile of a selection of several nothing but deselect (fnc_clearSelection): what can be done with
  * all of them is a double click, a drag and Delete (fnc_quickMoveGroup).
  *
+ * An action waiting for the hands (fnc_queueMoves) - a tile with its circle on it, or a slot whose item is to come
+ * off - has Cancel in its menu, after Inspect (and the container rows of a tile).
+ *
  * Drop goes to the ground at the feet, or into the vehicle's cargo while seated. A tile a move is under
  * way for only shows what it is, and opens or closes.
  *
@@ -176,6 +179,11 @@ switch (GVAR(hover) param [0, ""]) do {
         private _inside = _tile getOrDefault ["container", objNull];
 
         if (_tile getOrDefault ["pending", false]) exitWith {
+            // Waiting for the hands (fnc_queueMoves): it can be cancelled.
+            if ((_tile getOrDefault ["queued", 0]) > 0) then {
+                _choices pushBack [LLSTRING(Menu_CancelQueued), [_tile get "queued"], {_this call FUNC(cancelQueued)}];
+            };
+
             if (!isNull _inside) then {
                 private _isOpen = GVAR(opened) findIf {(_x select 1) isEqualTo _inside} >= 0;
 
@@ -312,6 +320,13 @@ switch (GVAR(hover) param [0, ""]) do {
             [_record param [1, ""], 1, _worn getOrDefault ["ammo", -1], _worn getOrDefault ["attachments", []]],
             {_this call FUNC(inspect)}
         ];
+
+        // Waiting to be taken off (fnc_queueMoves): it can be cancelled, and nothing else is offered for it.
+        private _queuedId = [_owner, _slot] call FUNC(queuedSlot);
+
+        if (_queuedId > 0) exitWith {
+            _choices pushBack [LLSTRING(Menu_CancelQueued), [_queuedId], {_this call FUNC(cancelQueued)}];
+        };
 
         // The radio slot ACRE2 keeps for itself: nothing to do with it but look (einv_compat_acre).
         if (!isNil QEFUNC(compat_acre,isFixedSlot) && {[_owner, _slot] call EFUNC(compat_acre,isFixedSlot)}) exitWith {};

@@ -120,6 +120,16 @@ PREP(showSearch);
 PREP(revealTile);
 PREP(animateSearch);
 PREP(revealFx);
+
+// The hands' queue: drops, moves between containers and putting on or off wait their turn, one circle each
+PREP(queueTime);
+PREP(queueMoves);
+PREP(queueTiles);
+PREP(queuedSlot);
+PREP(drawQueue);
+PREP(animateQueue);
+PREP(runQueue);
+PREP(cancelQueued);
 PREP(flashTile);
 PREP(openNested);
 PREP(playSound);

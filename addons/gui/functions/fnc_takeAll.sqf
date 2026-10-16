@@ -42,12 +42,17 @@ private _placed = ([_holder, [_holder] call EFUNC(storage,getContents)] call EFU
 
 [_holder, _placed, false] call FUNC(markHidden);
 
-// Tiles a move of this window takes from are not planned a second time.
+// Tiles a move of this window takes from, and those waiting for the hands, are not planned a second time.
 private _pending = [];
 
 {
     _pending append (_y param [0, []]);
 } forEach GVAR(inFlight);
+
+// And those waiting for the hands (fnc_queueMoves).
+{
+    _pending append (_x getOrDefault ["sources", []]);
+} forEach GVAR(handQueue);
 
 private _items = [];
 private _hidden = 0;

@@ -49,6 +49,11 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
 if (!isNull _display) then {
     [_display] call FUNC(drawWindows);
+
+    // The circles of the hands' queue (fnc_queueMoves) on its tiles, which are new controls.
+    if (GVAR(handQueue) isNotEqualTo []) then {
+        [_display] call FUNC(drawQueue);
+    };
 };
 
 _index >= 0

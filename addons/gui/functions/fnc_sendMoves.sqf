@@ -28,6 +28,13 @@
  * locked to the player ("Locked", einv_locks_fnc_canReach): the lock may have been set after the window
  * was built, or by a script; every op asks the lock again where it runs.
  *
+ * The hands (fnc_queueMoves): a drop, a move to a different container or holder and putting on or taking
+ * off do not go out at once while the window is the inventory and the server's setting for that kind
+ * (einv_gui_handDrop, handMove, handEquip - seconds) is more than 0: each such move waits in the window's
+ * queue with a circle on its tile, and goes out through this function again, with the option "now", when the
+ * circle is full (fnc_runQueue). What needs no hands - a rearrangement within one holder, sorting - goes at
+ * once, and the function says it was asked for when it queued something.
+ *
  * Several tiles of one holder laid down at once (a group dragged within a compartment, or Take all
  * with the target already holding some of them) are one move of the kind "placeMany": op placeMany lifts
  * them all and puts them down together, so two never wait for each other's cells. It counts for as many
@@ -78,6 +85,8 @@
  * 1: Options <HASHMAP> (default: empty)
  *    "flash" - light up where the moves landed once they did <BOOL> (default: true)
  *    "label" - a text the hint shows once everything went as asked <STRING> (default: "")
+ *    "now"   - send at once, whatever the hands' settings say: the queue's own sending, and the chunks that follow
+ *              <BOOL> (default: false)
  *
  * Return Value:
  * Something was sent <BOOL>
@@ -89,6 +98,29 @@
  */
 
 params [["_moves", [], [[]]], ["_options", createHashMap, [createHashMap]]];
+
+if (_moves isEqualTo []) exitWith {false};
+
+// The hands' queue: what takes them waits there, what does not goes on at once, with the option "now" so that the
+// chunks of it that follow (fnc_onAnswer) are not looked at again.
+private _queued = 0;
+
+if !(_options getOrDefault ["now", false]) then {
+    ([_moves, _options] call FUNC(queueMoves)) params ["_instant", "_count"];
+
+    _queued = _count;
+    _moves = _instant;
+    _options = +_options;
+    _options set ["now", true];
+};
+
+if (_queued > 0) exitWith {
+    if (_moves isNotEqualTo []) then {
+        [_moves, _options] call FUNC(sendMoves);
+    };
+
+    true
+};
 
 if (_moves isEqualTo []) exitWith {false};
 

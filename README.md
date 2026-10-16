@@ -87,7 +87,7 @@ the mod that adds them (ACE, ACM) is loaded. What is worn gets a fifth more room
 2 to 5 rows high, a vest is magazine pouches of 1x2 and 2x2, a backpack one near-square block); vehicles and crates get as many cells as
 their load. A text that names a preset of an older version (`base=realism`, `weight`, `tarkov`) reads as the default. Grids are ten cells wide.
 
-- **Server settings:** every setting of this mod that is the same for everyone - searching, living persons, weight, the hotbar, repacking,
+- **Server settings:** every setting of this mod that is the same for everyone - searching, the hands' times, living persons, weight, the hotbar, repacking,
   locks, the vanilla arsenal - is a control of the wizard's General page and no row of CBA's menu. They are saved in one CBA text box, `einv_main_settings`
   (a server's or a mission's, forced or not, like the rules), as `einv1, gui_searchTime=0.6, weight_enabled=0`: the setting's name without `einv_`, a value
   (`1` or `0` for a switch, a number, the value of a choice, free text with a `%` and four hex digits for what is not a letter, a digit, `-` or `.`), only what is off its
@@ -228,6 +228,14 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   the same crate, vehicle or pile. Servers with their own way to refill magazines (GreenMag) switch "Repack
   magazines" (`einv_magazines_repack`) off; the fill bar on magazines that are not full is each player's own
   setting.
+- **Hands:** dropping an item, moving it to a different container (a drag, the quick move, Take all, Put all in) and putting on or taking off
+  gear take a moment, as in Wardogs: each such action waits its turn in the window with a circle on its tile (or on the slot) - the first one's
+  ring fills, the others wait with a faint ring and their place - and when a circle is full the action happens, exactly as it always did. Press G on
+  five items and five circles run one after another. A click on a circle (or Cancel in the right click menu) takes that action out of the queue;
+  closing the window cancels what still waits, and nothing is lost or half done, since nothing happens before its circle is full. Rearranging within
+  a container, turning an item and splitting a stack stay instant, and so does ACE Arsenal's panel. The times are server settings on the wizard's
+  General page, under "Hands" (`einv_gui_handDrop` 0.3 s, `einv_gui_handMove` 0.4 s, `einv_gui_handEquip` 1 s; 0 is no wait and no circle for that
+  kind, as before 0.4.7).
 - **Sounds and looting:** every kind of gear sounds like what it is - weapons, magazines, vests, helmets, medical
   items, radios -, using Arma's own sound files only; players within earshot hear someone loot (`einv_gui_soundsWorld`,
   a server setting). While the window looks into something (a body, a crate, a pile) the soldier lowers his weapon and

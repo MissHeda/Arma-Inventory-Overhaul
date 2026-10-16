@@ -92,6 +92,11 @@ GVAR(dragging) = false;
 GVAR(stripDrag) = [];
 GVAR(dragTarget) = [];
 
+// What still waited for the hands is dropped with the window: it was only waiting, nothing was sent or changed
+// (fnc_queueMoves). A move that already went out finishes on its own.
+GVAR(handQueue) = [];
+GVAR(handStarted) = -1;
+
 GVAR(person) = objNull;
 GVAR(personMode) = "";
 

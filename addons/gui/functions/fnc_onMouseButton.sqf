@@ -39,6 +39,9 @@
  * grid (fnc_createGrid, "source") is pressed like one in a container. A Shift double click counts as a
  * double click there.
  *
+ * An action waiting for the hands (fnc_queueMoves) has its circle on its tile or slot: a left press there
+ * cancels it (fnc_cancelQueued) and starts no drag or click.
+ *
  * While a repack of magazines runs (einv_magazines - only when that addon is loaded) the hands are busy: a
  * button going down anywhere stops it and does nothing else, and that button coming up is no click either.
  *
@@ -272,6 +275,11 @@ if (_down) exitWith {
 
             if (_tile getOrDefault ["hidden", false]) exitWith {};
 
+            // An action waiting for the hands (fnc_queueMoves): a click on its tile cancels it.
+            if ((_tile getOrDefault ["queued", 0]) > 0) exitWith {
+                [_tile get "queued"] call FUNC(cancelQueued);
+            };
+
             // A tile of a source grid (ACE's list in the Arsenal panel) is lifted like one in a container, though no
             // container stands behind it: it brings the cell it is held by itself.
             if ((_grid getOrDefault ["source", ""]) isNotEqualTo "") exitWith {
@@ -334,6 +342,11 @@ if (_down) exitWith {
 
                 private _tile = (((uiNamespace getVariable [QGVAR(grids), []]) select _gridIndex) get "tiles") select _tileIndex;
 
+                // Waiting for the hands (fnc_queueMoves): a click cancels it.
+                if ((_tile getOrDefault ["queued", 0]) > 0) exitWith {
+                    [_tile get "queued"] call FUNC(cancelQueued);
+                };
+
                 GVAR(press) = [
                     _gridIndex, _tileIndex, _mouse,
                     [floor ((_tile getOrDefault ["w", 1]) / 2), floor ((_tile getOrDefault ["h", 1]) / 2)],
@@ -356,6 +369,13 @@ if (_down) exitWith {
                 if (_listening) then {
                     GVAR(press) = [-1, -1, _mouse, [0, 0], _ctrl, [], _alt, _shift, ["slot", -1, -1, [], _slotIndex] call _fnc_target];
                 };
+            };
+
+            // Its item waits to be taken off (fnc_queueMoves): a click cancels that.
+            private _queuedId = [_unit, _slot] call FUNC(queuedSlot);
+
+            if (_queuedId > 0) exitWith {
+                [_queuedId] call FUNC(cancelQueued);
             };
 
             GVAR(press) = [-1, -1, _mouse, [0, 0], _ctrl, [_unit, _slot], _alt];

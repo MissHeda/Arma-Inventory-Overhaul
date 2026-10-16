@@ -172,6 +172,9 @@
         <Key ID="STR_einv_gui_Hint_PlacedElsewhere">
             <English>Put elsewhere - that place was just taken</English>
         </Key>
+        <Key ID="STR_einv_gui_Hint_Queued">
+            <English>Waiting for your hands - click to cancel</English>
+        </Key>
         <Key ID="STR_einv_gui_Hint_Returned">
             <English>%1 went back - no room any more</English>
         </Key>
@@ -279,6 +282,9 @@
         </Key>
         <Key ID="STR_einv_gui_Menu_AttachTo">
             <English>Attach to %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Menu_CancelQueued">
+            <English>Cancel</English>
         </Key>
         <Key ID="STR_einv_gui_Menu_CloseContainer">
             <English>Close %1</English>
@@ -411,6 +417,24 @@
         </Key>
         <Key ID="STR_einv_gui_Setting_DebugTiming_Desc">
             <English>Writes to the RPT how long each build\nand redraw took and how many controls\nthe display holds, what the window's\nframes cost in script (idle, mouse over\ntiles, dragging), and for each drag its\nlift and frames - for reports of stutters\nand low FPS. Read as the window opens.\nOff in play.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_HandDrop">
+            <English>Time to drop an item</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_HandDrop_Desc">
+            <English>Seconds the hands are busy dropping one\nitem onto the ground (G, Delete, a drag\nout of the window, Drop in the menu).\nEvery item waits its turn with a circle\non its tile: one runs at a time, the\nnext starts when it is done, and a click\non a circle cancels it. Closing the\nwindow cancels what still waits.\n\n0 drops at once, with no circle.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_HandEquip">
+            <English>Time to put on or take off</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_HandEquip_Desc">
+            <English>Seconds the hands are busy putting one\nitem on or taking it off: a drag onto a\nslot, a double click on the ground,\nEquip in the menu, Ctrl+click on a slot.\nThe circle lies on the tile or the slot;\na click on it cancels the action.\nClosing the window cancels what still\nwaits.\n\n0 does it at once, with no circle.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_HandMove">
+            <English>Time to move to another container</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_HandMove_Desc">
+            <English>Seconds the hands are busy moving one\nitem to a different container or holder:\na drag between containers, the quick\nmove, Take all and Put all in - one\ncircle per item, one after another. A\nclick on a circle cancels it.\nRearranging within a container, turning\nand splitting a stack take no time.\n\n0 moves at once, with no circle.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MagazineFillBar">
             <English>Fill bar on magazines</English>

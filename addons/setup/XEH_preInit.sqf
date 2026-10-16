@@ -26,6 +26,7 @@ GVAR(topics) = [
         "einv_gui_searchTime", "einv_storage_nearbyRange", "einv_gui_searchBodies", "einv_gui_searchPersons",
         "einv_gui_searchContainers", "einv_gui_searchGround", "einv_gui_soundsWorld", "einv_gui_animation"
     ]],
+    ["hands", ["einv_gui_handDrop", "einv_gui_handMove", "einv_gui_handEquip"]],
     ["persons", ["einv_gui_personNotify", "einv_gui_personOpen", "einv_gui_personItems", "einv_gui_personWorn"]],
     ["containers", ["einv_storage_migrate", "einv_storage_useUniform", "einv_storage_useVest", "einv_storage_useBackpack"]],
     ["weight", ["einv_weight_enabled", "einv_weight_heavyAt", "einv_weight_overloadedAt", "einv_weight_criticalAt", "einv_weight_effects"]],

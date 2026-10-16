@@ -116,6 +116,10 @@ GVAR(inFlight) = createHashMap;
 GVAR(answers) = [];
 GVAR(drift) = [];
 
+// The hands' queue went with it: nothing was sent, so nothing is lost (fnc_queueMoves).
+GVAR(handQueue) = [];
+GVAR(handStarted) = -1;
+
 // The selection is view state of one window, and nothing is dragged out yet.
 GVAR(selection) = [];
 GVAR(selectionSide) = "";

@@ -128,6 +128,17 @@
 // Longer than this between two frames of searching, and the search was paused (something held).
 #define SEARCH_PAUSE 0.25
 
+// The hands' queue (fnc_queueMoves, fnc_drawQueue, fnc_animateQueue): each action waiting for the hands has a circle on its
+// tile, drawn like the search's ring (the same SEARCH_RING pictures). It is QUEUE_RING_SIZE of the tile's shorter side, never
+// more than QUEUE_RING_MAX pixels; the dark disc behind it QUEUE_DISC_SIZE of the ring. Only the first QUEUE_SHOWN_MAX actions
+// get one (a Take all on a big crate would make hundreds of controls). Longer than QUEUE_PAUSE between two frames of the
+// queue, and it was paused (another window over this one): the time it stood still does not count.
+#define QUEUE_RING_SIZE 0.62
+#define QUEUE_RING_MAX 56
+#define QUEUE_DISC_SIZE 0.86
+#define QUEUE_SHOWN_MAX 30
+#define QUEUE_PAUSE 0.25
+
 // Tiles that do not match the search field fade this far, this quickly (fnc_applyFilter).
 #define FILTER_FADE 0.82
 #define FILTER_TIME 0.12

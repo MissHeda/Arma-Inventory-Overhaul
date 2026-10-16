@@ -149,6 +149,32 @@
     0
 ] call CBA_fnc_addSetting;
 
+// ----- Hands -----
+
+// For everyone alike: how long the hands are busy is part of a mission's pace. In seconds, 0 is no wait at all (no
+// circle, as before). Each action waits its turn in the window's queue (fnc_queueMoves, fnc_animateQueue). Read when the
+// action is queued, so a change reaches what is queued afterwards.
+[
+    QGVAR(handDrop),
+    "SLIDER",
+    [LLSTRING(Setting_HandDrop), LLSTRING(Setting_HandDrop_Desc)],
+    [0, 3, 0.3, 2]
+] call EFUNC(main,addSetting);
+
+[
+    QGVAR(handMove),
+    "SLIDER",
+    [LLSTRING(Setting_HandMove), LLSTRING(Setting_HandMove_Desc)],
+    [0, 3, 0.4, 2]
+] call EFUNC(main,addSetting);
+
+[
+    QGVAR(handEquip),
+    "SLIDER",
+    [LLSTRING(Setting_HandEquip), LLSTRING(Setting_HandEquip_Desc)],
+    [0, 5, 1, 2]
+] call EFUNC(main,addSetting);
+
 // ----- Living persons -----
 
 // For everyone alike: who may open whom and what they may change there is the mission's rule - asked by
