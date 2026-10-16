@@ -374,7 +374,7 @@
             <English>Log window timings (debug)</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_DebugTiming_Desc">
-            <English>Writes to the RPT how long each build\nand redraw took, and for each drag of an\nitem what its lift and frames cost, as\n"drag: start 2.1 ms, frames 140, update\navg 0.04 ms max 1.20 ms" - for reports\nof stutters. Off in play.</English>
+            <English>Writes to the RPT how long each build\nand redraw took and how many controls\nthe display holds, what the window's\nframes cost in script (idle, mouse over\ntiles, dragging), and for each drag its\nlift and frames - for reports of stutters\nand low FPS. Read as the window opens.\nOff in play.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MagazineFillBar">
             <English>Fill bar on magazines</English>

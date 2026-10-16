@@ -6,8 +6,12 @@
  * bytes that make no UTF-8 character come out one character each - a typo shows in the name instead
  * of losing it.
  *
+ * As a path (picture=) an underscore stays an underscore, and a "/" comes out as the backslash the engine
+ * writes its paths with.
+ *
  * Arguments:
  * 0: Name as the rules write it <STRING>
+ * 1: Read it as a path <BOOL> (default: false)
  *
  * Return Value:
  * The name as it should show <STRING>
@@ -18,7 +22,7 @@
  * Public: Yes
  */
 
-params [["_text", "", [""]]];
+params [["_text", "", [""]], ["_path", false, [false]]];
 
 private _chars = toArray _text;
 private _count = count _chars;
@@ -95,7 +99,11 @@ while {_index < _count} do {
         _index = _index + 3;
     } else {
         call _fnc_flush;
-        _out pushBack ([_char, 32] select (_char == 95));
+        _out pushBack (switch (true) do {
+            case (_path && {_char == 47}): {92};
+            case (!_path && {_char == 95}): {32};
+            default {_char};
+        });
         _index = _index + 1;
     };
 };

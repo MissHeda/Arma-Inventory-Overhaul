@@ -276,6 +276,21 @@ private _fnc_values = {
         ] select (_across != 0 || {_down != 0}));
     };
 
+    if ("picture" in _values) then {
+        // By the class that owns the picture when the picker's catalog is read (fnc_pictureCatalog), else the path.
+        private _path = _values get "picture";
+        private _entry = ((uiNamespace getVariable [QGVAR(pictures), createHashMap]) getOrDefault ["byPath", createHashMap]) getOrDefault [toLowerANSI _path, []];
+        private _owner = "";
+
+        if (_entry isNotEqualTo []) then {
+            private _first = (_entry select 6) param [0, ""];
+
+            _owner = (((uiNamespace getVariable [QGVAR(index), createHashMap]) getOrDefault ["byClass", createHashMap]) getOrDefault [_first, []]) param [1, _first];
+        };
+
+        _parts pushBack ([format [LLSTRING(Value_Picture), _path], format [LLSTRING(Value_PictureFrom), _owner]] select (_owner isNotEqualTo ""));
+    };
+
     _parts joinString ", "
 };
 

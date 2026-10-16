@@ -83,6 +83,7 @@
 #define ROW_NAME 3
 #define ROW_KIND 4
 #define ROW_FAMILY 5
+#define ROW_PICTURE 6
 #define ROW_MOD 7
 #define ROW_LOAD 8
 
@@ -117,6 +118,19 @@
 // steppers: [zoom, across, down], 100 % and nothing shifted being the plain picture. ICON_PLAIN is the same
 // as the rules count it.
 #define ICON_PERCENT_PLAIN [100, 0, 0]
+
+// What a layout text starts with (fnc_exportClasses "layout", fnc_importClasses): the values of one class
+// without its name, to share and to apply to whichever class is selected where it is imported.
+#define LAYOUT_MARKER "einv-layout:"
+
+// What fnc_drawIconBlock takes in height: its caption, the zoom row and the shift row with their gaps.
+#define ICON_BLOCK_H (UNIT * 3.46)
+
+// The picture picker (fnc_drawPicturePicker): a page of thumbnails, PICKER_COLS across and PICKER_ROWS down, a
+// thumbnail with its name under it; a picture that many classes share lists PICKER_OWNERS of them for the search.
+#define PICKER_COLS 6
+#define PICKER_ROWS 4
+#define PICKER_OWNERS 8
 
 // The tree view of the class lists (fnc_classTree, fnc_drawTree): a row of the tree is this high, a level
 // of the tree moves it this far in (TREE_INDENT_MAX levels at most, deeper ones stay at the last), and

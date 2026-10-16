@@ -4,8 +4,8 @@
  * Author: Miss Heda
  * Draws the header along the top of the window, the same in every look but in its colours: the title
  * on the left; on the right the cog of the setup wizard, the search field, the speaker for the search
- * rustle, the camera switch (in the accent colour while on) and Close, each on a piece of the window's
- * glass. A line under it, the width of the content.
+ * rustle, the camera switch (white like the rest, dimmed while off; left out where the setting is forced -
+ * fnc_cameraForced) and Close, each on a piece of the window's glass. A line under it, the width of the content.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -88,18 +88,25 @@ private _close = [_display, controlNull, [_square] call _fnc_place, "close", "",
 }] call FUNC(uiButton);
 [_close, LLSTRING(Close)] call _fnc_tooltip;
 
-// The switch shows its state in its icon's colour: the button's ink is the accent while it is on.
-private _cameraTheme = createHashMap;
-_cameraTheme merge _theme;
+// The camera switch, white like the other icons of the header. Its state shows in the icon's strength: the
+// button's ink, dimmed while the camera is off. Not drawn at all where a server or a mission forces the
+// setting (fnc_cameraForced): the player has no choice to make then.
+if !(call FUNC(cameraForced)) then {
+    private _cameraTheme = createHashMap;
+    _cameraTheme merge _theme;
 
-if (GVAR(cameraOn)) then {
-    _cameraTheme set ["buttonText", _theme get "accent"];
+    if (!GVAR(cameraOn)) then {
+        private _ink = +(_theme getOrDefault ["buttonText", [0.88, 0.88, 0.88, 1]]);
+
+        _ink set [3, (_ink param [3, 1]) * 0.45];
+        _cameraTheme set ["buttonText", _ink];
+    };
+
+    private _camera = [_display, controlNull, [_square] call _fnc_place, "camera", "", UI_TEX(icon_camera_ca), _cameraTheme, {
+        call FUNC(toggleCamera);
+    }] call FUNC(uiButton);
+    [_camera, LLSTRING(Camera_Tooltip)] call _fnc_tooltip;
 };
-
-private _camera = [_display, controlNull, [_square] call _fnc_place, "camera", "", UI_TEX(icon_camera_ca), _cameraTheme, {
-    call FUNC(toggleCamera);
-}] call FUNC(uiButton);
-[_camera, LLSTRING(Camera_Tooltip)] call _fnc_tooltip;
 
 // The speaker: the rustle while searching, on or muted (fnc_toggleSearchSound).
 private _sound = [

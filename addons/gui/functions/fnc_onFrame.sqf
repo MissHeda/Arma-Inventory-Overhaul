@@ -216,8 +216,11 @@ if (_covered) exitWith {
     };
 };
 
-// An open context menu made again on top once something was made on the display after it (fnc_raiseMenu).
-[] call FUNC(raiseMenu);
+// An open context menu made again on top once something was made on the display after it (fnc_raiseMenu). Asked
+// only while one is open: that is all it answers to, and it runs twice every frame.
+if (GVAR(menuState) isNotEqualTo []) then {
+    [] call FUNC(raiseMenu);
+};
 
 // A click into a column gives it the focus, and the engine draws the focused control over every other -
 // the context menu, the inspect card, the dragged ghost and the name at the mouse would end up under
@@ -344,7 +347,9 @@ if (GVAR(press) isNotEqualTo [] && {!GVAR(dragging)}) then {
 
 // What a window that attached has to do every frame, also while something is dragged (its camera, its
 // scrolling list).
-["frame", [_display, _mouse, _now]] call FUNC(hook);
+if ("frame" in GVAR(hooks)) then {
+    ["frame", [_display, _mouse, _now]] call FUNC(hook);
+};
 
 if (GVAR(dragging)) exitWith {
     GVAR(lastMouse) = _mouse;
@@ -406,17 +411,29 @@ if (!isNull _tip && {ctrlShown _tip} && {GVAR(tooltipAt) isNotEqualTo _mouse}) t
 // Searching, every frame: the ring fills and the glass goes round, and the item shows once its time is
 // up (fnc_animateSearch). Not while something is held: a rebuild would pull it from under the mouse.
 if (GVAR(press) isEqualTo []) then {
-    [_display, _now] call FUNC(animateSearch);
+    // Nothing being searched: only the clock of the pause is kept (fnc_animateSearch does no more than that
+    // with no search under way).
+    if (GVAR(searchQueue) isEqualTo [] && {GVAR(searchStarted) < 0}) then {
+        GVAR(searchLast) = _now;
+    } else {
+        [_display, _now] call FUNC(animateSearch);
+    };
 
     // Nothing held, no menu open: one more slot's drag highlight is made and kept hidden, so that lifting
     // an item makes none (fnc_warmTargets). Not while a menu is open - it would be made again over them.
-    if ((uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []) then {
+    // Not once every slot has had its turn.
+    if (
+        (uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []
+        && {(uiNamespace getVariable [QGVAR(glowNext), 0]) < count (uiNamespace getVariable [QGVAR(slots), []])}
+    ) then {
         [_display] call FUNC(warmTargets);
     };
 };
 
 // The hover above may have lit a slot with a ring made on the display: the menu goes over it in this frame.
-[] call FUNC(raiseMenu);
+if (GVAR(menuState) isNotEqualTo []) then {
+    [] call FUNC(raiseMenu);
+};
 
 // ----- Answers to the window's moves -----
 // Each finishes once this machine reads every revision of the places it names - a holder gone

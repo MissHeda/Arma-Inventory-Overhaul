@@ -44,8 +44,10 @@
  *   "holes" (optional) - the cells of its box a shaped item does not take, as it lies
  *   "count", "ammo", "capacity" (optional) - how many, a magazine's rounds and how many it holds
  *   "hidden" (optional) - not searched yet <BOOL>
- *   "icon" (optional) - [scale, across, down] to draw the picture by instead of the item's own; "preview"
- *   (optional) - drawn outside the inventory window (the setup wizard), so nothing reports the mouse <BOOL>
+ *   "icon" (optional) - [scale, across, down] to draw the picture by instead of the item's own; "picture"
+ *   (optional) - the texture to draw instead of the item's own (the wizard's preview of a picture being
+ *   picked); "preview" (optional) - drawn outside the inventory window (the setup wizard), so nothing
+ *   reports the mouse <BOOL>
  * 3: Theme <HASHMAP>
  *
  * Return Value:
@@ -179,7 +181,7 @@ if (_hidden) then {
     // reach out - one control as long as it does not. An entry may carry an icon of its own (the setup
     // wizard's preview shows the one being edited, "preview": it has no inventory window to report to).
     _controls pushBack ([
-        _display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _info getOrDefault ["picture", ""],
+        _display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _entry getOrDefault ["picture", _info getOrDefault ["picture", ""]],
         _entry getOrDefault ["icon", _info getOrDefault ["icon", ICON_PLAIN]], [1, 1, 1, 1], _turned, _sizeW / (_sizeH max 1),
         [_left, _top, _width, _height], !(_entry getOrDefault ["preview", false])
     ] call FUNC(uiItemPicture));

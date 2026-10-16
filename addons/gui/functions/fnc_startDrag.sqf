@@ -193,6 +193,9 @@ uiNamespace setVariable [QGVAR(dragGhosts), []];
 // weight of what is held is the first of it (fnc_previewWeight).
 GVAR(dragRoom) = createHashMap;
 
+// The frames before it are written first (fnc_logFrame), so the drag line stands beside its own.
+[""] call FUNC(logFrame);
+
 private _footprint = [_display, "EINV_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
 _footprint ctrlShow false;
 

@@ -38,8 +38,8 @@
  * are outlined (fnc_drawPending); where it landed lights up once the answer is finished (fnc_onFrame,
  * fnc_afterAction).
  *
- * With einv_gui_debugTiming on, the RPT gets one line for the drag before anything else: "drag: start 2.1 ms,
- * frames 140, update avg 0.04 ms max 1.20 ms (slowest: ...)" - the lift, and what its frames cost
+ * With einv_gui_debugTiming on, the RPT gets one line for the drag before anything else: "timing: drag 0.04 ms
+ * avg, 1.20 ms max over 140 frames (start 2.1 ms; slowest frame: ...)" - the lift, and what its frames cost
  * (fnc_logDrag, fnc_startDrag, fnc_updateDrag).
  *
  * Arguments:

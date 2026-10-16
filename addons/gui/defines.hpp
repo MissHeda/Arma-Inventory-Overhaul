@@ -55,6 +55,9 @@
 // How often the open window checks whether it should still be open, in seconds.
 #define CHECK_INTERVAL 0.25
 
+// How many timed frames make one line of the timing log (fnc_logFrame).
+#define FRAME_LOG_COUNT 1500
+
 // How often it compares what the containers hold with what it shows (fnc_getSignature), in seconds.
 // Rarely enough that reading a full crate's cargo costs nothing noticeable.
 #define SIGNATURE_INTERVAL 1

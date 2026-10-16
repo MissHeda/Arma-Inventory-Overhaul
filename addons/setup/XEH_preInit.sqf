@@ -83,7 +83,8 @@ GVAR(hint) = ["", "text2"];
 // edits not applied yet, by lowercase class - a canvas each (fnc_canvasFromBlocks; fnc_drawCellEditor,
 // and fnc_drawItemEditor with the stack); how the Containers step draws - 0 Paint, 1 Blocks - and the
 // colour it paints with (0 none, else 1 to PAINT_COUNT), both kept for the whole session; what the "Same
-// as another class" popover shows (fnc_drawSameAs); and the own rules by class, worked out once per draft
+// as another class" popover shows (fnc_drawSameAs); the picture edits of the Containers step not applied yet, by
+// lowercase class (boxWork: "iconPercent", "pictureText"), and what the picture picker shows (picker); and the own rules by class, worked out once per draft
 // text (fnc_ownClassRules). The class index itself is in uiNamespace (fnc_buildIndex).
 GVAR(listState) = createHashMap;
 GVAR(searchToken) = 0;
@@ -92,6 +93,8 @@ GVAR(itemWork) = createHashMap;
 GVAR(cellMode) = 0;
 GVAR(cellBrush) = 1;
 GVAR(sameAs) = createHashMap;
+GVAR(boxWork) = createHashMap;
+GVAR(picker) = createHashMap;
 GVAR(ownClasses) = [];
 
 // The inheritance tree, per step: whether the list shows the tree and from which class (treeState: "on",

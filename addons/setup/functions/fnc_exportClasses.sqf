@@ -2,14 +2,27 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Export at the editors of the Items and Containers steps: the config lines that give the class what the
- * draft makes of it, ready to paste into a mod's config (einv_items_fnc_configEntry):
+ * Export at the editors of the Items and Containers steps, in one of two ways (the editor asks which,
+ * fnc_openExportChoice):
+ *
+ * "config" - the config lines that give the class what the draft makes of it, ready to paste into a mod's
+ * config (einv_items_fnc_configEntry):
  *
  *   class CfgVehicles { class B_Carryall_blk { einv_grid = "1x3+5x7+1x3"; }; };
  *
  * For an edit of a whole tree, one line per class of the tree that the step lists. They are worked out from
  * the draft, not from what is saved, so a design made here can be exported before Save. A class the draft
  * leaves as the game already has it gets no line.
+ *
+ * "layout" - the values alone, without the class, as one short line that starts with LAYOUT_MARKER and is
+ * meant to be shared: what the draft makes of the class that differs from the game (grid, size, stack,
+ * weight, name, icon, picture), written as a rule's values (einv_items_fnc_writeRules):
+ *
+ *   einv-layout: grid=1x3+5x7+1x3 weight=1.2 picture=/a3/ui_f/data/igui/cfg/simpletasks/types/backpack_ca.paa
+ *
+ * Whoever imports it applies it to the class they have selected (fnc_importClasses), so it works across
+ * mods and never names a class the other player may not have. Always the class alone - a layout has no
+ * tree.
  *
  * The lines go to the clipboard where the game lets a script write there - on the server and alone, as at
  * Review -; anyone else gets a box with the text, to select and copy by hand.
@@ -18,6 +31,7 @@
  * 0: Step: "items" or "containers" <STRING>
  * 1: Class <STRING>
  * 2: The edit is for the class and everything built on it <BOOL> (default: false)
+ * 3: "config" or "layout" <STRING> (default: "config")
  *
  * Return Value:
  * The text <STRING>
@@ -30,11 +44,12 @@
 
 disableSerialization;
 
-params [["_mode", "items", [""]], ["_class", "", [""]], ["_tree", false, [false]]];
+params [["_mode", "items", [""]], ["_class", "", [""]], ["_tree", false, [false]], ["_format", "config", [""]]];
 
+private _layout = _format isEqualTo "layout";
 private _classes = [_class];
 
-if (_tree) then {
+if (_tree && {!_layout}) then {
     _classes = ((([_class, _mode] call FUNC(treeRows)) getOrDefault ["rows", []])) apply {_x select 1};
 
     if (_classes isEqualTo []) then {
@@ -80,6 +95,12 @@ private _fnc_lines = {
         _lines pushBack format ["einv_icon = %1%2%1;", _quote, [_icon, ","] call EFUNC(items,formatIcon)];
     };
 
+    private _picture = _info getOrDefault ["pictureOverride", ""];
+
+    if (_picture isNotEqualTo "") then {
+        _lines pushBack format ["einv_picture = %1%2%1;", _quote, _picture regexReplace [_quote, _quote + _quote]];
+    };
+
     format ["class %1 { class %2 { %3 }; };", _root, _facts getOrDefault ["class", _class], _lines joinString " "]
 };
 
@@ -95,10 +116,21 @@ private _lines = [];
     if (_line isNotEqualTo "") then {
         _lines pushBack _line;
     };
-} forEach _classes;
+} forEach ([_classes, []] select _layout);
+
+// A layout: the values of the class that differ from the game, without its name.
+if (_layout) then {
+    private _entry = [_class, false, GVAR(draftRules)] call EFUNC(items,configEntry);
+    private _parsed = if (_entry isEqualTo "") then {[]} else {[_entry] call EFUNC(items,parseConfigEntry)};
+    private _values = if (_parsed isEqualTo []) then {createHashMap} else {[(_parsed select 0) select 1] call FUNC(configValues)};
+
+    if (count _values > 0) then {
+        _lines pushBack (LAYOUT_MARKER + " " + ([createHashMapFromArray [["rules", [[[], _values]]]], false] call EFUNC(items,writeRules)));
+    };
+};
 
 if (_lines isEqualTo []) exitWith {
-    [LLSTRING(Export_ClassNothing), "text2"] call FUNC(setHint);
+    [[LLSTRING(Export_ClassNothing), LLSTRING(Export_LayoutNothing)] select _layout, "text2"] call FUNC(setHint);
 
     ""
 };
@@ -109,13 +141,17 @@ private _text = _lines joinString toString [10];
 if (isServer || {!isMultiplayer}) exitWith {
     copyToClipboard _text;
 
-    [format [[LLSTRING(Export_ClassCopiedOne), LLSTRING(Export_ClassCopied)] select (count _lines != 1), count _lines], "gain"] call FUNC(setHint);
+    if (_layout) then {
+        [format [LLSTRING(Export_LayoutCopied), _class], "gain"] call FUNC(setHint);
+    } else {
+        [format [[LLSTRING(Export_ClassCopiedOne), LLSTRING(Export_ClassCopied)] select (count _lines != 1), count _lines], "gain"] call FUNC(setHint);
+    };
 
     _text
 };
 
 [
-    uiNamespace getVariable [QGVAR(display), displayNull], [], [SQUARE(UNIT * 28), UNIT * 12], LLSTRING(Export_ClassTitle), {
+    uiNamespace getVariable [QGVAR(display), displayNull], [], [SQUARE(UNIT * 28), UNIT * 12], [LLSTRING(Export_ClassTitle), LLSTRING(Export_LayoutTitle)] select _layout, {
         params ["_display", "_inner", "_theme", "_arguments"];
         _arguments params ["_text"];
 

@@ -2,8 +2,8 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The right side of the Items step: the size, shape, stack, weight, name and picture zoom of the class picked
- * in the list.
+ * The right side of the Items step: the size, shape, stack, weight, name, picture and picture zoom of the class
+ * picked in the list.
  *   - What it is (picture, name, class, family, mod, weight) and what the draft makes of it now, with
  *     where that comes from (fnc_answerText). In the corner Export and Import (fnc_editorTools).
  *   - Its width and height in cells (1-8) for a quick rectangle, and how many share a tile (1-999, with
@@ -11,6 +11,10 @@
  *     their stack cannot be set.
  *   - Its weight in kg and its name, two fields (empty: config's own stays): typing changes the working
  *     copy at once and Return draws this side again.
+ *   - Under the name a Picture row (fnc_drawPictureRow): the texture the item shows - the one set for it, else
+ *     config's, greyed - with "Pick..." (the picture picker, fnc_openPicturePicker: every picture of the game's
+ *     items to search and click, or any texture path typed in) and Reset. What is picked goes into the working
+ *     copy as "pictureText", the tile preview and the canvas show it at once, and Apply writes picture=PATH.
  *   - Under them the canvas (fnc_uiCanvas), SHAPE_MAX cells each way, always shown: a click makes a place
  *     one of the item's cells or takes it away, so an L or a T is drawn cell by cell. The steppers and the
  *     canvas are one: a stepper lays a rectangle of its size where the cells are - the places that were
@@ -19,22 +23,23 @@
  *     the inventory's own routine, einv_gui_fnc_createTile, at the inventory's cell size where there is room),
  *     its size in words, and a warning while its cells are not one piece (fnc_canvasBlocks) - then Apply
  *     cannot be pressed.
- *   - Beside that tile its picture: a zoom stepper (25 to 400 %, in steps of 5, with 50, 100, 150 and 200 % at
- *     one click) and two shift steppers, across and down (-100 to 100 % of the tile, steps of 5), with Reset
- *     back to the plain picture. The tile follows every click: it is drawn by the working copy, so what is
+ *   - Beside that tile its picture (fnc_drawIconBlock): a zoom stepper (25 to 400 %, in steps of 5, with 50, 100,
+ *     150 and 200 % at one click) and two shift steppers, across and down (-100 to 100 % of the tile, steps of
+ *     5), with Reset back to the plain picture. The tile follows every click: it is drawn by the working copy, so what is
  *     seen is what Apply writes (icon=, einv_items_fnc_parseIcon). The inventory cuts a picture that would
  *     reach out of its tile at the tile's edge.
  *   - Apply writes what differs from now as class=X > size=WxH, or size=xx/x- for a shape
- *     (einv_items_fnc_formatMask), stack=N, weight=KG, name=... and icon=ZOOM@ACROSS:DOWN (fnc_upsertRule) - the
+ *     (einv_items_fnc_formatMask), stack=N, weight=KG, name=..., picture=PATH and icon=ZOOM@ACROSS:DOWN (fnc_upsertRule) - the
  *     rest of that rule stays -, Discard drops the edits, Back to the preset takes the class's own size, stack,
- *     weight, name and icon away. A field emptied takes its own value away; Reset and Apply take a class's own
- *     icon away, or write the plain picture where the item's config draws it otherwise.
+ *     weight, name, picture and icon away. A field emptied takes its own value away; Reset and Apply take a class's own
+ *     icon away, or write the plain picture where the item's config draws it otherwise, and a class's own
+ *     picture away, or write config's own picture path where the item's config (einv_picture) sets another.
  *   - Picked in the tree view (fnc_editScope), the edit is for the class and every class built on it: a
  *     line says so, with how many, and Apply, Back to the preset and Export work on the whole tree - one
  *     rule class=X+ instead of one per class. A chip returns to the class alone.
  *
  * Edits go into a working copy per class (GVAR(itemWork): lowercase class -> the canvas, with "stack",
- * "weightText", "nameText", "iconPercent" ([zoom, across, down] in whole per cent) and "start" - what the
+ * "weightText", "nameText", "pictureText", "iconPercent" ([zoom, across, down] in whole per cent) and "start" - what the
  * shape held when it was made) and reach the draft only
  * with Apply. A change draws this side again on its own (its place and arguments in uiNamespace
  * QGVAR(editorArgs)) - there are few controls, an 8x8 canvas -; the list stays.
@@ -124,6 +129,11 @@ private _startIcon = (_info getOrDefault ["icon", ICON_PLAIN]) apply {round (_x 
 
 // Whether a rule of the class's own (or the tree's) draws it, which Apply may then take away.
 private _ownIcon = "icon" in _own || {_tree && {"icon" in (_treeRules getOrDefault [_lc, createHashMap])}};
+
+// The picture it shows instead of config's (picture=, or the item's own einv_picture): the path, "" for none.
+private _startPicture = _info getOrDefault ["pictureOverride", ""];
+private _configPicture = _info getOrDefault ["configPicture", ""];
+private _ownPicture = "picture" in _own || {_tree && {"picture" in (_treeRules getOrDefault [_lc, createHashMap])}};
 private _canvas = GVAR(itemWork) getOrDefault [_lc, createHashMap];
 
 // No edit yet: a canvas of what it is now, its shape in the top left corner. It becomes the working copy
@@ -139,8 +149,10 @@ private _workStack = _canvas getOrDefault ["stack", _startStack];
 private _workWeight = _canvas getOrDefault ["weightText", _startWeightText];
 private _workName = _canvas getOrDefault ["nameText", _startName];
 private _workIcon = _canvas getOrDefault ["iconPercent", _startIcon];
+private _workPicture = _canvas getOrDefault ["pictureText", _startPicture];
 private _dirty = _blocks isNotEqualTo (_canvas getOrDefault ["start", []]) || {_workStack != _startStack}
-    || {_workWeight isNotEqualTo _startWeightText} || {_workName isNotEqualTo _startName} || {_workIcon isNotEqualTo _startIcon};
+    || {_workWeight isNotEqualTo _startWeightText} || {_workName isNotEqualTo _startName} || {_workIcon isNotEqualTo _startIcon}
+    || {_workPicture isNotEqualTo _startPicture};
 
 ([_canvas] call FUNC(canvasBox)) params ["", "", "_boxW", "_boxH"];
 
@@ -153,6 +165,18 @@ private _picture = [_info getOrDefault ["picture", ""]] call EFUNC(gui,safePictu
 
 if (_picture isNotEqualTo "") then {
     [_display, _box, [_innerX, _cursorY, _picW, _picH], _picture] call EFUNC(gui,uiPicture);
+};
+
+// The picture the tile and the canvas show: the one set in the working copy while the game has the file, else
+// config's.
+private _workShown = "";
+
+if (_workPicture isNotEqualTo "") then {
+    _workShown = [_workPicture] call EFUNC(gui,safePicture);
+};
+
+if (_workShown isEqualTo "") then {
+    _workShown = [_configPicture] call EFUNC(gui,safePicture);
 };
 
 private _textX = _innerX + _picW + SQUARE(UNIT * 0.4);
@@ -377,6 +401,21 @@ _cursorY = _cursorY + _rowH + UNIT * 0.3;
     _display, _box, [_innerX + _labelW, _cursorY, _innerW - _labelW, _rowH], _workName, _info getOrDefault ["configDisplayName", _class], _theme, _typed, [_class, _canvas, "nameText"]
 ] call FUNC(uiEdit);
 
+_cursorY = _cursorY + _rowH + UNIT * 0.3;
+
+// The picture: its path, Pick... and Reset. What is taken goes into the working copy, and this side is drawn again.
+[
+    _display, _box, [_innerX, _cursorY, _innerW, _rowH], _theme, _labelW, _workPicture, _configPicture, {
+        params ["_path", "_arguments"];
+        _arguments params ["_class", "_canvas"];
+
+        _canvas set ["pictureText", _path];
+        GVAR(itemWork) set [toLowerANSI _class, _canvas];
+
+        [] call FUNC(drawItemEditor);
+    }, [_class, _canvas]
+] call FUNC(drawPictureRow);
+
 _cursorY = _cursorY + _rowH + UNIT * 0.5;
 
 // ----- The canvas, and beside it how it looks -----
@@ -390,7 +429,7 @@ private _canvasH = SHAPE_MAX * _cellH;
 
 [_display, _box, [_innerX, _cursorY, _canvasW, _canvasH], _canvas, _theme, createHashMapFromArray [
     ["cellH", _cellH],
-    ["picture", _picture],
+    ["picture", _workShown],
     ["scrollId", "itemCanvas"],
     ["arguments", [_class]],
     ["onChange", {
@@ -418,7 +457,7 @@ private _previewW = _sideW * 0.36;
 // The tile as the inventory draws it, with the picture as it is set below (the working copy, not yet the draft's).
 [
     _display, _box, [_sideX, _sideY, _previewW, _previewH], _theme, [[], _blocks] select _onePiece,
-    [_picture, _info getOrDefault ["category", CATEGORY_MISC], _class, _workIcon apply {_x / 100}]
+    [_workShown, _info getOrDefault ["category", CATEGORY_MISC], _class, _workIcon apply {_x / 100}]
 ] call FUNC(drawPreview);
 
 // ----- Its picture: zoom and shift -----
@@ -427,94 +466,19 @@ private _previewW = _sideW * 0.36;
 
 private _pictureX = _sideX + _previewW + _gap * 2;
 private _pictureW = _sideX + _sideW - _pictureX;
-private _stepH = UNIT * 1.0;
-private _stepGap = UNIT * 0.28;
-private _captionH = UNIT * 0.9;
-private _pictureY = _sideY + (((_previewH - (_captionH + _stepGap + _stepH * 2 + _stepGap)) / 2) max 0);
-
-// A stepper sets one of the three numbers of the working copy.
-private _setIcon = {
-    params ["_value", "_arguments"];
-    _arguments params ["_class", "_canvas", "_which", "_start"];
-
-    private _work = +(_canvas getOrDefault ["iconPercent", _start]);
-
-    _work set [_which, _value];
-    _canvas set ["iconPercent", _work];
-    GVAR(itemWork) set [toLowerANSI _class, _canvas];
-
-    [] call FUNC(drawItemEditor);
-};
-
-// A chip sets all three at once: a common zoom, or back to the plain picture.
-private _putIcon = {
-    params ["", "_arguments"];
-    _arguments params ["_class", "_canvas", "_work"];
-
-    _canvas set ["iconPercent", _work];
-    GVAR(itemWork) set [toLowerANSI _class, _canvas];
-
-    [] call FUNC(drawItemEditor);
-};
-
-// What a chip of this text needs: its padding (0.45 of its height each side) and the label with fitText's slack.
-private _fnc_chipWidth = {
-    params ["_text", "_chipH"];
-
-    SQUARE(_chipH * 0.9) + (_text getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK
-};
-
-// The caption, and Reset at its end: back to the plain picture, enabled while it is not.
-private _resetText = LLSTRING(Items_PictureReset);
-private _resetH = _captionH * 0.9;
-private _resetW = [_resetText, _resetH] call _fnc_chipWidth;
-
-[_display, _box, [_pictureX, _pictureY, _pictureW - _resetW - _gap, _captionH], LLSTRING(Items_PictureField), TEXT_SMALL, _colorText2, _fontBold, 0] call EFUNC(gui,uiLabel);
+private _pictureY = _sideY + (((_previewH - ICON_BLOCK_H) / 2) max 0);
 
 [
-    _display, _box, [_pictureX + _pictureW - _resetW, _pictureY + (_captionH - _resetH) / 2, _resetW, _resetH], _resetText, false, _theme, _putIcon,
-    [_class, _canvas, +ICON_PERCENT_PLAIN], _workIcon isNotEqualTo ICON_PERCENT_PLAIN
-] call FUNC(uiChip);
+    _display, _box, [_pictureX, _pictureY, _pictureW], _theme, _workIcon, {
+        params ["_icon", "_arguments"];
+        _arguments params ["_class", "_canvas"];
 
-_pictureY = _pictureY + _captionH + _stepGap;
+        _canvas set ["iconPercent", _icon];
+        GVAR(itemWork) set [toLowerANSI _class, _canvas];
 
-// The zoom, and a few common ones at one click - the stepper alone would take long from 100 to 400.
-private _zoomW = _pictureW * 0.4;
-
-[
-    _display, _box, [_pictureX, _pictureY, _zoomW, _stepH], _workIcon select 0, [round (ICON_SCALE_MIN * 100), round (ICON_SCALE_MAX * 100), 5], _theme,
-    _setIcon, [_class, _canvas, 0, _startIcon], LLSTRING(Items_PictureZoom)
-] call FUNC(uiStepper);
-
-private _zoomChipX = _pictureX + _zoomW + _gap;
-private _zoomChipH = _stepH * 0.9;
-private _zoomChipGap = SQUARE(UNIT * 0.2);
-
-{
-    private _chipW = [str _x, _zoomChipH] call _fnc_chipWidth;
-
-    if (_zoomChipX + _chipW > _pictureX + _pictureW + pixelW) exitWith {};
-
-    [_display, _box, [_zoomChipX, _pictureY + (_stepH - _zoomChipH) / 2, _chipW, _zoomChipH], str _x, (_workIcon select 0) == _x, _theme, _putIcon, [
-        _class, _canvas, [_x, _workIcon select 1, _workIcon select 2]
-    ]] call FUNC(uiChip);
-
-    _zoomChipX = _zoomChipX + _chipW + _zoomChipGap;
-} forEach [50, 100, 150, 200];
-
-_pictureY = _pictureY + _stepH + _stepGap;
-
-// The shift: across, then down.
-private _shiftW = (_pictureW - _gap) / 2;
-
-{
-    _x params ["_which", "_format"];
-
-    [
-        _display, _box, [_pictureX + (_shiftW + _gap) * _forEachIndex, _pictureY, _shiftW, _stepH], _workIcon select _which,
-        [round (-ICON_OFFSET_MAX * 100), round (ICON_OFFSET_MAX * 100), 5], _theme, _setIcon, [_class, _canvas, _which, _startIcon], _format
-    ] call FUNC(uiStepper);
-} forEach [[1, LLSTRING(Items_PictureAcross)], [2, LLSTRING(Items_PictureDown)]];
+        [] call FUNC(drawItemEditor);
+    }, [_class, _canvas]
+] call FUNC(drawIconBlock);
 
 _sideY = _sideY + _previewH + UNIT * 0.3;
 
@@ -555,7 +519,7 @@ private _buttonX = _innerX;
 private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
 
 [_display, _box, [_buttonX, _buttonsY, _applyW, _buttonH], LLSTRING(Items_Apply), UI_TEX(icon_check_ca), _theme, {
-    params ["_class", "_canvas", "_startShape", "_startStack", "_forced", "_startWeight", "_startWeightText", "_startName", "_tree", "_below", "_startIcon", "_ownIcon"];
+    params ["_class", "_canvas", "_startShape", "_startStack", "_forced", "_startWeight", "_startWeightText", "_startName", "_tree", "_below", "_startIcon", "_ownIcon", "_startPicture", "_ownPicture"];
 
     private _lc = toLowerANSI _class;
     private _blocks = [_canvas] call FUNC(canvasBlocks);
@@ -628,6 +592,28 @@ private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
         };
     };
 
+    // The picture (picture=): only what differs from now. Reset takes the class's own away; where the item's config
+    // sets another (einv_picture) that would win again, config's own picture path is written to win over it.
+    private _picture = _canvas getOrDefault ["pictureText", _startPicture];
+
+    if (_picture isNotEqualTo _startPicture) then {
+        if (_picture isNotEqualTo "") then {
+            _set set ["picture", _picture];
+        } else {
+            private _facts = [_class] call EFUNC(items,getFacts);
+            private _modPicture = ((_facts get "mod") getOrDefault ["picture", ""]) isNotEqualTo "";
+            private _configPath = ([_facts getOrDefault ["picture", ""], false] call EFUNC(items,parsePicture)) select 0;
+
+            if (_modPicture && {_configPath isNotEqualTo ""}) then {
+                _set set ["picture", _configPath];
+            } else {
+                if (_ownPicture) then {
+                    _remove pushBack "picture";
+                };
+            };
+        };
+    };
+
     GVAR(itemWork) deleteAt _lc;
 
     if (count _set == 0 && {_remove isEqualTo []}) exitWith {
@@ -639,7 +625,7 @@ private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
         [format [LLSTRING(Hint_SizeApplied), _class], format [LLSTRING(Hint_TreeApplied), _class, _below]] select _tree, "text2"
     ] call FUNC(setHint);
     [_class, _set, _remove, _tree] call FUNC(upsertRule);
-}, [_class, _canvas, _startShape, _startStack, _forced, _startWeight, _startWeightText, _startName, _tree, _below, _startIcon, _ownIcon], _onePiece, "accent", [LLSTRING(Items_ApplyTip), LLSTRING(Items_ApplyTipTree)] select _tree] call FUNC(uiAction);
+}, [_class, _canvas, _startShape, _startStack, _forced, _startWeight, _startWeightText, _startName, _tree, _below, _startIcon, _ownIcon, _startPicture, _ownPicture], _onePiece, "accent", [LLSTRING(Items_ApplyTip), LLSTRING(Items_ApplyTipTree)] select _tree] call FUNC(uiAction);
 
 _buttonX = _buttonX + _applyW + _gap;
 
@@ -658,7 +644,7 @@ if (_dirty) then {
 };
 
 // Something of its own to take away: its own rule, or - for the tree - the tree's.
-private _ownFields = ["footprint", "stack", "weight", "name", "icon"];
+private _ownFields = ["footprint", "stack", "weight", "name", "icon", "picture"];
 private _hasOwn = (_ownFields findIf {_x in _own}) >= 0;
 
 if (_tree) then {

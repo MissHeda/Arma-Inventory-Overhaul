@@ -169,11 +169,26 @@
         <Key ID="STR_einv_setup_ClassImport_Config">
             <English>Imported config lines for %1 classes (%2 warnings). Save at Review puts them to use.</English>
         </Key>
+        <Key ID="STR_einv_setup_ClassImport_ConfigLeft">
+            <English>Imported config lines for %1 classes (%3 warnings); %2 classes this game does not have were left out. Save at Review puts them to use.</English>
+        </Key>
         <Key ID="STR_einv_setup_ClassImport_Help">
-            <English>Paste config lines (what Export gives, or what a mod's config holds) or rules here with Ctrl+V. They go into the draft; Undo takes them back.</English>
+            <English>Paste config lines, a layout (Export, Layout only) or rules here with Ctrl+V. A layout, and the values of a class this game does not have, go to the class selected in the editor. They go into the draft; Undo takes them back.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ClassImport_Layout">
+            <English>Applied the layout to %1 (%2 warnings). Save at Review puts it to use.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ClassImport_NotFit">
+            <English>Nothing applied: none of the values fits %1.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_Nothing">
             <English>Nothing to import: no config lines or rules found.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ClassImport_Redirected">
+            <English>%1 is not in this game: its values went to the selected class %2 instead (%3 warnings). Save at Review puts them to use.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ClassImport_Skipped">
+            <English>Nothing applied: the text names %1 classes this game does not have. Select one class and paste a layout or a single class.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_Title">
             <English>Import config lines or rules</English>
@@ -242,7 +257,7 @@
             <English>Apply</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_ApplyTip">
-            <English>Keep these cells for this class. Save at Review puts them to use.</English>
+            <English>Keep these cells and this picture for this class. Save at Review puts them to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_ApplyTipTree">
             <English>Keep these cells for this class and every class built on it, as one rule. A class with a rule of its own further down keeps it. Save at Review puts them to use.</English>
@@ -332,7 +347,7 @@
             <English>Remove the picked compartment.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_ResetTip">
-            <English>Remove its own cells and the link to another class. The preset decides again.</English>
+            <English>Remove its own cells, the link to another class and its picture settings. The preset decides again.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_ResetTipTree">
             <English>Remove the cells of this class and of its tree, and the link to another class. The preset decides again; a class with a rule of its own keeps it.</English>
@@ -385,11 +400,20 @@
         <Key ID="STR_einv_setup_Desc_Rule">
             <English>%1: %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Discard_Confirm">
-            <English>Close without saving? Your changes would be lost.</English>
+        <Key ID="STR_einv_setup_Discard_Body">
+            <English>If you close now, they are lost.</English>
         </Key>
-        <Key ID="STR_einv_setup_Discard_Yes">
-            <English>Close</English>
+        <Key ID="STR_einv_setup_Discard_Close">
+            <English>Close without saving</English>
+        </Key>
+        <Key ID="STR_einv_setup_Discard_Keep">
+            <English>Keep editing</English>
+        </Key>
+        <Key ID="STR_einv_setup_Discard_Save">
+            <English>Save and close</English>
+        </Key>
+        <Key ID="STR_einv_setup_Discard_Title">
+            <English>You have unsaved changes.</English>
         </Key>
         <Key ID="STR_einv_setup_Drafts_Delete">
             <English>Delete</English>
@@ -463,6 +487,24 @@
         <Key ID="STR_einv_setup_Export">
             <English>Export</English>
         </Key>
+        <Key ID="STR_einv_setup_ExportChoice_Config">
+            <English>Config entry (for a mod)</English>
+        </Key>
+        <Key ID="STR_einv_setup_ExportChoice_ConfigHelp">
+            <English>The config lines with the class name, to paste into a mod's config.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ExportChoice_Layout">
+            <English>Layout only (to share)</English>
+        </Key>
+        <Key ID="STR_einv_setup_ExportChoice_LayoutHelp">
+            <English>Just the values, no class name: one short text anyone can paste into Import at their own class, whichever mod it is from.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ExportChoice_LayoutHelpTree">
+            <English>Just the values of the picked class, no class name: one short text anyone can paste into Import at their own class, whichever mod it is from.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ExportChoice_Title">
+            <English>Export as</English>
+        </Key>
         <Key ID="STR_einv_setup_Export_ByHand">
             <English>Copying is off for players in multiplayer: select the line below and press Ctrl+C.</English>
         </Key>
@@ -483,6 +525,15 @@
         </Key>
         <Key ID="STR_einv_setup_Export_Copied">
             <English>Copied: paste it into cba_settings.sqf or send it to someone.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export_LayoutCopied">
+            <English>Copied the layout of %1: paste it into Import at the class it is for.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export_LayoutNothing">
+            <English>Nothing to export: the draft leaves this class as the game already has it, so there is no layout to share.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Export_LayoutTitle">
+            <English>Layout to copy</English>
         </Key>
         <Key ID="STR_einv_setup_Export_Tip">
             <English>Copies the setup as one line for a cba_settings.sqf, to paste there or send to someone.</English>
@@ -550,6 +601,9 @@
         <Key ID="STR_einv_setup_Hint_NothingToCopy">
             <English>%1 has no cells to copy.</English>
         </Key>
+        <Key ID="STR_einv_setup_Hint_PictureApplied">
+            <English>The picture of %1 is kept. Save at Review puts it to use.</English>
+        </Key>
         <Key ID="STR_einv_setup_Hint_PresetPicked">
             <English>Now built on %1.</English>
         </Key>
@@ -576,6 +630,21 @@
         </Key>
         <Key ID="STR_einv_setup_Import">
             <English>Import...</English>
+        </Key>
+        <Key ID="STR_einv_setup_ImportChoice_Many">
+            <English>The text names %1 classes, and you have %2 selected.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ImportChoice_Named">
+            <English>Apply to the classes named in the text (%1)</English>
+        </Key>
+        <Key ID="STR_einv_setup_ImportChoice_One">
+            <English>The text is for %1, and you have %2 selected.</English>
+        </Key>
+        <Key ID="STR_einv_setup_ImportChoice_Selected">
+            <English>Apply to the selected class (%1)</English>
+        </Key>
+        <Key ID="STR_einv_setup_ImportChoice_Title">
+            <English>Where should it go?</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Add">
             <English>Add to mine</English>
@@ -643,17 +712,35 @@
         <Key ID="STR_einv_setup_Items_PerTile">
             <English>Per tile</English>
         </Key>
+        <Key ID="STR_einv_setup_Items_PickButton">
+            <English>Pick...</English>
+        </Key>
         <Key ID="STR_einv_setup_Items_PickHint">
             <English>Pick an item on the left to see and set its size.</English>
         </Key>
+        <Key ID="STR_einv_setup_Items_PickTip">
+            <English>Choose another picture for this item from the pictures of the game's items, or type the path of any texture.</English>
+        </Key>
         <Key ID="STR_einv_setup_Items_PictureAcross">
             <English>Across %1 %</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_PictureConfigTip">
+            <English>The picture from the item's own config. Click to pick another.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureDown">
             <English>Down %1 %</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureField">
             <English>Picture</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_PictureLook">
+            <English>Zoom and place</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_PictureNone">
+            <English>no picture</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_PictureOwnTip">
+            <English>The picture set for this item. Click to pick another.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureReset">
             <English>Reset</English>
@@ -665,7 +752,7 @@
             <English>%1 pieces</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ResetTip">
-            <English>Remove its own size, stack, weight, name and picture zoom. The preset decides again.</English>
+            <English>Remove its own size, stack, weight, name, picture and picture zoom. The preset decides again.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Search">
             <English>Search name or class (* ?)</English>
@@ -813,6 +900,36 @@
         </Key>
         <Key ID="STR_einv_setup_Pattern_wide">
             <English>Full width</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_BadPath">
+            <English>That path is no picture the game can find.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_Custom">
+            <English>Or type the path of any texture</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_CustomHint">
+            <English>a3\ui_f\data\gui\cfg\hints\gear_ca.paa</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_Found">
+            <English>The game has this picture.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_Missing">
+            <English>No such picture in the game or its mods.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_Nothing">
+            <English>Click a picture in the list, or type a path.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_Reading">
+            <English>Collecting pictures... %1 %</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_Search">
+            <English>Search name, class or path (* ?)</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_Title">
+            <English>Pick a picture</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_Use">
+            <English>Use picture</English>
         </Key>
         <Key ID="STR_einv_setup_Preset_None">
             <English>No preset</English>
@@ -1094,13 +1211,13 @@
             <English>Inventory setup</English>
         </Key>
         <Key ID="STR_einv_setup_Tools_ExportTip">
-            <English>Copy the config lines that give this class what the draft makes of it, to paste into a mod's config.</English>
+            <English>Copy this class as config lines for a mod, or as a layout without a class name to share.</English>
         </Key>
         <Key ID="STR_einv_setup_Tools_ExportTipTree">
-            <English>Copy the config lines of every class in this tree, to paste into a mod's config.</English>
+            <English>Copy this tree as config lines for a mod (every class), or the picked class as a layout to share.</English>
         </Key>
         <Key ID="STR_einv_setup_Tools_ImportTip">
-            <English>Paste config lines or rules and apply them to the draft.</English>
+            <English>Paste config lines, a layout or rules and apply them to the draft.</English>
         </Key>
         <Key ID="STR_einv_setup_Tree_Below">
             <English>%1 below</English>
@@ -1185,6 +1302,12 @@
         </Key>
         <Key ID="STR_einv_setup_Value_NoStack">
             <English>does not stack</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Picture">
+            <English>picture %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_PictureFrom">
+            <English>picture from %1</English>
         </Key>
         <Key ID="STR_einv_setup_Value_Shape">
             <English>shape %1</English>

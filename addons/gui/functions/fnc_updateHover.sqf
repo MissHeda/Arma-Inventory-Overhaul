@@ -25,6 +25,13 @@
  * key], ...] written after the window's own - on nothing, the whole hint. A tile may give its size to show
  * ("size") where it is no larger than its cell.
  *
+ * A frame costs as little as it can: where every grid, slot and info area lies is kept (fnc_hoverGeometry,
+ * worked out again only when a column scrolled, a window moved or the lists changed), only the grids whose
+ * cells lie under the mouse are asked for a cell, and a mouse that moves inside the cell of the tile found
+ * last (or inside its slot), with nothing else reaching into it, finds the same and ends at once - no
+ * lookup, no hint, no name at the mouse made again. Nothing is made or deleted unless what the mouse is
+ * on changed.
+ *
  * Tiles are found through their grid (fnc_screenToCell, fnc_tileAt), so scrolling is taken into
  * account; slots through the areas they registered in (uiNamespace getVariable [QGVAR(slots), []]). A slot that also registered where
  * it lies in its group - a fourth element, the HashMap with "rel" and "parent" fnc_gridOrigin takes -
@@ -58,52 +65,143 @@ params ["_display", "_mouse", ["_force", false]];
 
 private _found = [];
 
+// What this call did, for the tally of the timing line (fnc_logFrame): "new" unless it ends sooner.
+GVAR(hoverNote) = "new";
+
 // What lies on top under the mouse: the inspect card hides all of the inventory under it (fnc_drawInspect),
 // a kit window all but its own grids - "inspect" is no grid's window.
 private _layer = [_mouse] call FUNC(topAt);
+private _held = false;
 
 if (_mouse isNotEqualTo [] && {_layer isNotEqualTo "inspect"}) then {
     _mouse params ["_mouseX", "_mouseY"];
 
+    // Where the grids, slots and info areas lie on the screen (fnc_hoverGeometry): worked out again only when
+    // something moved them, not for every mouse move.
+    private _geometry = [_force] call FUNC(hoverGeometry);
+
+    _geometry params ["_grids", "", "", "", "", "", "", "_gridBoxes", "_slotBoxes", "_areaBoxes"];
+
+    // Still on the tile or slot found last time, with nothing moved: there is nothing more to look for. The
+    // box is the cell (or the slot) with nothing else reaching into it, worked out when it was found.
+    private _hold = uiNamespace getVariable [QGVAR(hoverHold), []];
+
+    if (
+        !_force && {_hold isNotEqualTo []} && {(_hold select 0) isEqualRef _geometry} && {(_hold select 1) isEqualTo _layer}
+        && {GVAR(hover) isEqualTo (_hold select 2)} && {
+            (_hold select 3) params ["_holdLeft", "_holdTop", "_holdRight", "_holdBottom"];
+
+            _mouseX >= _holdLeft && {_mouseX < _holdRight} && {_mouseY >= _holdTop} && {_mouseY < _holdBottom}
+        }
+    ) exitWith {
+        _held = true;
+    };
+
+    // The first grid of this layer that has a cell under the mouse: only grids whose cells that show lie
+    // there are asked.
     private _cell = [];
-    private _gridIndex = (uiNamespace getVariable [QGVAR(grids), []]) findIf {
-        (_x getOrDefault ["window", ""]) isEqualTo _layer && {
-            _cell = [_x, _mouse] call FUNC(screenToCell);
+    private _gridIndex = _gridBoxes findIf {
+        _x params ["_grid", "_window", "_visible", "_originX", "_originY", "_box"];
+        _box params ["_boxLeft", "_boxTop", "_boxRight", "_boxBottom"];
+
+        _window isEqualTo _layer && {_mouseX >= _boxLeft} && {_mouseX < _boxRight} && {_mouseY >= _boxTop} && {_mouseY < _boxBottom} && {
+            _cell = [_grid, _mouse, false, [_visible, _originX, _originY]] call FUNC(screenToCell);
             _cell isNotEqualTo []
         }
     };
 
     if (_gridIndex >= 0) exitWith {
-        private _tileIndex = [(uiNamespace getVariable [QGVAR(grids), []]) select _gridIndex, _cell] call FUNC(tileAt);
+        private _tileIndex = [_grids select _gridIndex, _cell] call FUNC(tileAt);
 
         if (_tileIndex >= 0) then {
             _found = ["tile", _gridIndex, _tileIndex];
+
+            // The cell it lies on, the part of it that shows, unless an earlier grid of the layer reaches into it.
+            private _grid = _grids select _gridIndex;
+
+            (_gridBoxes select _gridIndex) params ["", "", "_visible", "_originX", "_originY"];
+            _cell params ["_col", "_row"];
+
+            private _pitchW = _grid get "cellW";
+            private _pitchH = _grid get "cellH";
+            private _holdLeft = _originX + ((_grid getOrDefault ["colX", []]) param [_col, _col * _pitchW]);
+            private _holdTop = _originY + ((_grid getOrDefault ["rowY", []]) param [_row, _row * _pitchH]);
+            private _holdRight = _holdLeft + _pitchW;
+            private _holdBottom = _holdTop + _pitchH;
+
+            if (_visible isNotEqualTo []) then {
+                _visible params ["_visibleX", "_visibleY", "_visibleW", "_visibleH"];
+
+                _holdLeft = _holdLeft max _visibleX;
+                _holdTop = _holdTop max _visibleY;
+                _holdRight = _holdRight min (_visibleX + _visibleW);
+                _holdBottom = _holdBottom min (_visibleY + _visibleH);
+            };
+
+            private _clear = true;
+
+            for "_i" from 0 to _gridIndex - 1 do {
+                (_gridBoxes select _i) params ["", "_otherWindow", "", "", "", "_otherBox"];
+                _otherBox params ["_otherLeft", "_otherTop", "_otherRight", "_otherBottom"];
+
+                if (
+                    _otherWindow isEqualTo _layer && {_otherLeft < _holdRight} && {_otherRight > _holdLeft}
+                    && {_otherTop < _holdBottom} && {_otherBottom > _holdTop}
+                ) exitWith {
+                    _clear = false;
+                };
+            };
+
+            uiNamespace setVariable [QGVAR(hoverHold), [[], [_geometry, _layer, _found, [_holdLeft, _holdTop, _holdRight, _holdBottom]]] select _clear];
         };
     };
 
     // The slots all lie in the columns and on the equipment cards, under every window.
     if (_layer isNotEqualTo "") exitWith {};
 
-    private _slotIndex = (uiNamespace getVariable [QGVAR(slots), []]) findIf {
-        ([_x] call FUNC(slotRect)) params [["_left", 0], ["_top", 0], ["_width", 0], ["_height", 0]];
+    private _slotIndex = _slotBoxes findIf {
+        _x params ["_left", "_top", "_right", "_bottom"];
 
-        _mouseX >= _left && {_mouseX < _left + _width} && {_mouseY >= _top} && {_mouseY < _top + _height}
+        _mouseX >= _left && {_mouseX < _right} && {_mouseY >= _top} && {_mouseY < _bottom}
     };
 
     if (_slotIndex >= 0) then {
         _found = ["slot", _slotIndex];
+
+        // Its box, unless a grid of the columns or an earlier slot reaches into it.
+        (_slotBoxes select _slotIndex) params ["_holdLeft", "_holdTop", "_holdRight", "_holdBottom"];
+
+        private _clear = (_gridBoxes findIf {
+            _x params ["", "_window", "", "", "", "_other"];
+            _other params ["_otherLeft", "_otherTop", "_otherRight", "_otherBottom"];
+
+            _window isEqualTo "" && {_otherLeft < _holdRight} && {_otherRight > _holdLeft} && {_otherTop < _holdBottom} && {_otherBottom > _holdTop}
+        }) < 0 && {
+            (_slotBoxes select [0, _slotIndex]) findIf {
+                _x params ["_otherLeft", "_otherTop", "_otherRight", "_otherBottom"];
+
+                _otherLeft < _holdRight && {_otherRight > _holdLeft} && {_otherTop < _holdBottom} && {_otherBottom > _holdTop}
+            } < 0
+        };
+
+        uiNamespace setVariable [QGVAR(hoverHold), [[], [_geometry, _layer, _found, [_holdLeft, _holdTop, _holdRight, _holdBottom]]] select _clear];
     } else {
         // The weight card and the captions (fnc_infoHint).
-        private _infoIndex = (uiNamespace getVariable [QGVAR(infoAreas), []]) findIf {
-            ([_x] call FUNC(slotRect)) params [["_left", 0], ["_top", 0], ["_width", 0], ["_height", 0]];
+        private _infoIndex = _areaBoxes findIf {
+            _x params ["_left", "_top", "_right", "_bottom"];
 
-            _mouseX >= _left && {_mouseX < _left + _width} && {_mouseY >= _top} && {_mouseY < _top + _height}
+            _mouseX >= _left && {_mouseX < _right} && {_mouseY >= _top} && {_mouseY < _bottom}
         };
 
         if (_infoIndex >= 0) then {
             _found = ["info", _infoIndex];
         };
     };
+};
+
+// Nothing else to do: the hover is what it was.
+if (_held) exitWith {
+    GVAR(hoverNote) = "held";
 };
 
 private _fnc_tile = {
@@ -178,6 +276,8 @@ private _fnc_light = {
 };
 
 if (!_force && {_found isEqualTo GVAR(hover)}) exitWith {
+    GVAR(hoverNote) = "same";
+
     // A slot that did not change still moves when its column scrolls under a mouse that stands still - and
     // gets its ring again when a part was drawn anew under it (fnc_redrawPart), over the name at the mouse.
     if ((_found param [0, ""]) isEqualTo "slot") then {

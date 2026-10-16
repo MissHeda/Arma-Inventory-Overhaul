@@ -20,6 +20,8 @@
  * 3: Title, "" for none <STRING>
  * 4: Code drawing the content, called with [display, content group, theme, arguments] <CODE>
  * 5: Arguments <ANY> (default: [])
+ * 6: For the middle of the screen: the point to centre the card on, [x, y] - the wizard's middle, say; the
+ *    screen's own middle when left out <ARRAY> (default: [])
  *
  * Return Value:
  * The content group <CONTROL>
@@ -32,7 +34,7 @@
 
 disableSerialization;
 
-params ["_display", ["_anchor", [], [[]]], ["_size", [0.3, 0.2], [[]]], ["_title", "", [""]], ["_draw", {}, [{}]], ["_arguments", []]];
+params ["_display", ["_anchor", [], [[]]], ["_size", [0.3, 0.2], [[]]], ["_title", "", [""]], ["_draw", {}, [{}]], ["_arguments", []], ["_centre", [], [[]]]];
 _size params ["_width", "_height"];
 
 call FUNC(closePopover);
@@ -59,6 +61,11 @@ if (_anchor isNotEqualTo []) then {
     if (_top + _cardH > safezoneY + safezoneH - UNIT * 0.5) then {
         _top = _anchorY - _cardH - UNIT * 0.15;
     };
+};
+
+if (_anchor isEqualTo [] && {count _centre == 2}) then {
+    _left = (_centre select 0) - _cardW / 2;
+    _top = (_centre select 1) - _cardH / 2;
 };
 
 _left = (_left min (safezoneX + safezoneW - _cardW - _margin)) max (safezoneX + _margin);

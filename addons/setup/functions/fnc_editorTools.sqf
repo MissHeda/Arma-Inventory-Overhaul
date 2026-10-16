@@ -3,9 +3,10 @@
 /*
  * Author: Miss Heda
  * The two buttons in the corner of an editor of the Items and Containers steps (fnc_drawItemEditor,
- * fnc_drawCellEditor): Export, which copies the config lines of the class - or of the whole tree, when the
- * edit is for one - for a mod's config (fnc_exportClasses), and Import, whose box under the button takes
- * such lines or rules and applies them (fnc_openClassImport).
+ * fnc_drawCellEditor): Export, whose box under the button asks what for (fnc_openExportChoice): the config
+ * lines of the class - or of the whole tree, when the edit is for one - for a mod's config, or the layout alone
+ * to share (fnc_exportClasses); and Import, whose box under the button takes such lines, a layout or rules and
+ * applies them (fnc_openClassImport) - to the class selected here, or to the classes the text names.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -37,20 +38,26 @@ private _importW = ACTION_W(LLSTRING(Import),_height,true,_font);
 private _importX = _right - _importW;
 private _exportX = _importX - _gap - _exportW;
 
-[_display, _parent, [_exportX, _top, _exportW, _height], LLSTRING(Export), UI_TEX(icon_export_ca), _theme, {
-    params ["_mode", "_class", "_tree"];
+// The boxes open under their buttons.
+private _exportControls = [
+    _display, _parent, [_exportX, _top, _exportW, _height], LLSTRING(Export), UI_TEX(icon_export_ca), _theme, {}, [], true, "",
+    [LLSTRING(Tools_ExportTip), LLSTRING(Tools_ExportTipTree)] select _tree
+] call FUNC(uiAction);
+private _exportHit = _exportControls select (count _exportControls - 1);
 
-    [_mode, _class, _tree] call FUNC(exportClasses);
-}, [_mode, _class, _tree], true, "", [LLSTRING(Tools_ExportTip), LLSTRING(Tools_ExportTipTree)] select _tree] call FUNC(uiAction);
+_exportHit setVariable [QGVAR(action), [{
+    params ["_hit", "_mode", "_class", "_tree"];
 
-// The import box opens under its button.
+    [uiNamespace getVariable [QGVAR(display), displayNull], [_hit] call FUNC(screenRect), _mode, _class, _tree] call FUNC(openExportChoice);
+}, [_exportHit, _mode, _class, _tree]]];
+
 private _controls = [_display, _parent, [_importX, _top, _importW, _height], LLSTRING(Import), UI_TEX(icon_import_ca), _theme, {}, [], true, "", LLSTRING(Tools_ImportTip)] call FUNC(uiAction);
 private _hit = _controls select (count _controls - 1);
 
 _hit setVariable [QGVAR(action), [{
-    params ["_hit"];
+    params ["_hit", "_mode", "_class", "_tree"];
 
-    [uiNamespace getVariable [QGVAR(display), displayNull], [_hit] call FUNC(screenRect)] call FUNC(openClassImport);
-}, [_hit]]];
+    [uiNamespace getVariable [QGVAR(display), displayNull], [_hit] call FUNC(screenRect), _class, _tree] call FUNC(openClassImport);
+}, [_hit, _mode, _class, _tree]]];
 
 _exportW + _gap + _importW

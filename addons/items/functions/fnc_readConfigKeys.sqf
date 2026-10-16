@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Reads what an item's own config says about its size, stack, container grid, weight, name and how its
- * picture is drawn: the keys einv_size, einv_stack, einv_grid, einv_weight, einv_name and einv_icon
+ * picture is drawn: the keys einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon and einv_picture
  * (CONFIG_KEYS). A value is written the way the rules text writes the same thing, so a mod author
  * learns one language:
  *
@@ -15,6 +15,8 @@
  *   einv_name = "Short name";            name=  - the name as it shows: plain text, a space is a
  *                                        space (the rules text writes it with _), at most MAX_NAME
  *                                        characters
+ *   einv_picture = "a3\ui_f\x_ca.paa";  picture= - the texture to show instead of config's picture;
+ *                                        backslashes or slashes, spaces as they are (fnc_parsePicture)
  *   einv_icon = "1.4@0.1,-0.05";         icon=  - how large the picture is drawn in its tile (0.25 to 4) and
  *                                        moved across and down by a share of the tile (-1 to 1); a plain
  *                                        number, einv_icon = 1.4;, is the scale alone (fnc_parseIcon)
@@ -34,10 +36,10 @@
  *   canonical - the values that could be read, as the rules write them, by config key:
  *               "einv_size" "2x1" / "xx/x-" / "mass", "einv_stack" <NUMBER>, "einv_grid" as
  *               fnc_formatGrid writes it, "einv_weight" kg <NUMBER>, "einv_name" <STRING>, "einv_icon"
- *               [scale, across, down] <ARRAY> <HASHMAP>
+ *               [scale, across, down] <ARRAY>, "einv_picture" <STRING> <HASHMAP>
  *   compiled  - the same for fnc_resolve, by field: "size" [w, h, holes] or "mass", "stack" <NUMBER>,
  *               "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING>, "icon" [scale,
- *               across, down] <ARRAY> <HASHMAP>
+ *               across, down] <ARRAY>, "picture" <STRING> <HASHMAP>
  *   messages  - what was left out or cut down, and why <ARRAY of STRING>
  *
  * Example:
@@ -248,6 +250,29 @@ if (_icon isNotEqualTo "") then {
         if (_value isNotEqualTo []) then {
             _canonical set [QGVARMAIN(icon), _value];
             _compiled set ["icon", _value];
+        };
+    };
+};
+
+// ----- picture -----
+// The path as the config has it, with backslashes (a forward slash is read as one); a file that is not there
+// is no matter here - fnc_getInfo asks the engine, and the picture of the config is the fallback.
+
+private _picture = _found getOrDefault [QGVARMAIN(picture), ""];
+
+if (_picture isNotEqualTo "") then {
+    if !(_picture isEqualType "") then {
+        _messages pushBack format ["%1 is a text like 'a3\ui_f\data\gui\cfg\hints\gear_ca.paa' - left out", QGVARMAIN(picture)];
+    } else {
+        ([_picture, false] call FUNC(parsePicture)) params ["_path", "_notes"];
+
+        {
+            _messages pushBack format ["%1: %2", QGVARMAIN(picture), _x];
+        } forEach _notes;
+
+        if (_path isNotEqualTo "") then {
+            _canonical set [QGVARMAIN(picture), _path];
+            _compiled set ["picture", _path];
         };
     };
 };

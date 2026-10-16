@@ -30,8 +30,8 @@
  * 3: Theme <HASHMAP>
  * 4: Compartments [[cols, rows, holes, pos], ...] - for an item its shape alone, [] for none <ARRAY>
  * 5: For an item [picture, category, class, icon]; [] for a container <ARRAY> (default: [])
- *    With a class, the tile is drawn for it, by the icon given ([scale, across, down], the one being edited,
- *    not the draft's); without, its shape and picture only
+ *    With a class, the tile is drawn for it, by the icon and the picture given ([scale, across, down], the
+ *    one being edited, not the draft's); without, its shape and picture only
  *
  * Return Value:
  * None
@@ -102,10 +102,17 @@ if (_item isNotEqualTo []) exitWith {
         // A magazine full, as a tile in a container shows it, and one alone.
         private _capacity = ([_class] call EFUNC(items,getInfo)) getOrDefault ["capacity", 0];
 
-        [_display, _grid, createHashMapFromArray [
+        private _entry = createHashMapFromArray [
             ["class", _class], ["col", parseNumber (_w + 2 <= STORAGE_COLS)], ["row", 1], ["w", _w], ["h", _h], ["holes", _holes], ["count", 1],
             ["ammo", _capacity], ["icon", _icon], ["preview", true]
-        ], _theme] call EFUNC(gui,createTile);
+        ];
+
+        // The picture being picked, not the class's own yet.
+        if (_picture isNotEqualTo "") then {
+            _entry set ["picture", _picture];
+        };
+
+        [_display, _grid, _entry, _theme] call EFUNC(gui,createTile);
     };
 
     private _origin = [_padX + ([_cellW, 0] select (_w + 2 > STORAGE_COLS)), _padY + _cellH];

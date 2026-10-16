@@ -66,6 +66,9 @@
 #define ICON_SCALE_MAX 4
 #define ICON_OFFSET_MAX 1
 
+// The longest texture path a picture override may have (picture=, einv_picture; einv_items_fnc_parsePicture).
+#define PICTURE_MAX 260
+
 // Most item moves one transaction carries (einv_storage_fnc_request): the window sends the next chunk
 // when this one is answered (einv_gui_fnc_sendMoves), so one message never carries a whole crate.
 #define BATCH_MAX 25

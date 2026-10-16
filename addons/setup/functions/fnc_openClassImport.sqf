@@ -3,30 +3,36 @@
 /*
  * Author: Miss Heda
  * Opens the box under the Import button of the Items and Containers editors: paste config lines (what
- * Export wrote, or what a mod's config holds for its classes) or rules into it with Ctrl+V - a paste box,
- * as CBA's own Import is one: it works for every player, where a script reading the clipboard would not -,
- * then Apply puts them into the draft (fnc_importClasses). It only changes the draft: Save is still to
+ * Export wrote, or what a mod's config holds for its classes), a layout (Export's "layout only", which has no
+ * class) or rules into it with Ctrl+V - a paste box, as CBA's own Import is one: it works for every player,
+ * where a script reading the clipboard would not -, then Apply puts them into the draft
+ * (fnc_applyClassImport, fnc_importClasses): a layout, and the values of a class this game does not have, go to
+ * the class selected in the editor; for classes the game has, the editor asks whether the selected class or the
+ * classes named in the text are meant (fnc_openImportChoice). It only changes the draft: Save is still to
  * come, and Undo takes it back.
  *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Screen rectangle of what opened it - the box goes below it - or [] for the middle <ARRAY> (default: [])
+ * 2: The class selected in the editor <STRING> (default: "")
+ * 3: The edit is for that class and everything built on it <BOOL> (default: false)
  *
  * Return Value:
  * None
  *
  * Example:
- * [_display, [0.5, 0.5, 0.1, 0.03]] call einv_setup_fnc_openClassImport;
+ * [_display, [0.5, 0.5, 0.1, 0.03], "B_Carryall_blk", false] call einv_setup_fnc_openClassImport;
  *
  * Public: No
  */
 
 disableSerialization;
 
-params ["_display", ["_anchor", [], [[]]]];
+params ["_display", ["_anchor", [], [[]]], ["_class", "", [""]], ["_tree", false, [false]]];
 
 [_display, _anchor, [SQUARE(UNIT * 24), UNIT * 11], LLSTRING(ClassImport_Title), {
-    params ["_display", "_inner", "_theme"];
+    params ["_display", "_inner", "_theme", "_arguments"];
+    _arguments params ["_class", "_tree"];
 
     (ctrlPosition _inner) params ["", "", "_width", "_height"];
 
@@ -52,6 +58,8 @@ params ["_display", ["_anchor", [], [[]]]];
     }, [], true, "ghost"] call FUNC(uiAction);
 
     [_display, _inner, [_width - _buttonW, _buttonY, _buttonW, _buttonH], LLSTRING(ClassImport_Apply), UI_TEX(icon_check_ca), _theme, {
+        params ["_class", "_tree"];
+
         // The box as it is now, not the last change reported.
         private _edit = uiNamespace getVariable [QGVAR(classImportEdit), controlNull];
 
@@ -59,26 +67,6 @@ params ["_display", ["_anchor", [], [[]]]];
             GVAR(classImportText) = ctrlText _edit;
         };
 
-        ([GVAR(classImportText)] call FUNC(importClasses)) params ["_kind", "_count", "_notes"];
-
-        switch (_kind) do {
-            case "none": {
-                [LLSTRING(ClassImport_Nothing), "loss"] call FUNC(setHint);
-            };
-            case "tooLong": {
-                [format [LLSTRING(Warning_TooLong), _count], "loss"] call FUNC(setHint);
-            };
-            // Said by fnc_upsertRules.
-            case "refused": {};
-            // The step is drawn again by the commit, which closes the box.
-            default {
-                GVAR(classImportText) = "";
-
-                [
-                    format [[LLSTRING(ClassImport_Config), LLSTRING(Import_Done)] select (_kind isEqualTo "rules"), _count, count _notes],
-                    ["gain", "accent"] select (_notes isNotEqualTo [])
-                ] call FUNC(setHint);
-            };
-        };
-    }, [], true, "accent"] call FUNC(uiAction);
-}] call FUNC(popover);
+        [GVAR(classImportText), _class, _tree, ""] call FUNC(applyClassImport);
+    }, [_class, _tree], true, "accent"] call FUNC(uiAction);
+}, [_class, _tree]] call FUNC(popover);

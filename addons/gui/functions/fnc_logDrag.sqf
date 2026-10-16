@@ -33,4 +33,4 @@ private _start = _lift toFixed 1;
 private _average = (_total / (_frames max 1)) toFixed 2;
 private _most = (_slowest max 0) toFixed 2;
 
-INFO_6("drag: start %1 ms, frames %2, update avg %3 ms max %4 ms (slowest: %5 - target anew in %6 frames)",_start,_frames,_average,_most,_parts,_anew);
+INFO_6("timing: drag %3 ms avg, %4 ms max over %2 frames (start %1 ms; slowest frame: %5; target worked out anew in %6 frames)",_start,_frames,_average,_most,_parts,_anew);

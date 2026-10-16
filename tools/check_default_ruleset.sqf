@@ -319,7 +319,8 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
     "class=My_Pack > grid=abbbbbc/abbbbbc/abbbbbc/-bbbbb-/-bbbbb-/-bbbbb-/-bbbbb-, class=My_Ring > grid=2x3+aaa/aba/aaa+1x1, class=My_Row > grid=aaabb",
     "einv1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4",
     "class=My_Kit > icon=1.4, class=My_Bandage+ > icon=1.4@0.1:-0.05 stack=3, kind=grenade > icon=0.5@-0.2:0.2, class=My_Plain > icon=1",
-    "class=My_Kit > icon=1.4@0.1,-0.05, stack=3"
+    "class=My_Kit > icon=1.4@0.1,-0.05, stack=3",
+    "class=My_Kit > icon=1.4 picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa, class=My_Mag > picture=/my_mod/ui/kit%201_ca.paa"
 ] +((getArray (configFile >> "CfgEinvRulesets" >> "default" >> "rules")) apply {"einv1 base=none, " + _x});
 
 {
@@ -347,6 +348,24 @@ private _groupIds = (_compiled get "groupOrder") - ["medical"];
     ["kind=grenade > icon=1.4@0.1,-0.05", [1.4, 0.1, -0.05]],
     ["icon=9@2:-3", [4, 1, -1]],
     ["icon=1.4@0.1", []]
+];
+
+// A picture reads as the engine writes a path: slashes either way, a space as %20, an underscore as it is; a text
+// that is no texture path is left out.
+{
+    _x params ["_text", "_want"];
+
+    private _rules = ([_text] call einv_items_fnc_parseRules) get "rules";
+    private _got = if (_rules isEqualTo []) then {""} else {((_rules select 0) select 1) getOrDefault ["picture", ""]};
+
+    if (_got isNotEqualTo _want) then {
+        ["roundTrip", format ["PICTURE %1 -> %2, wanted %3", _text, _got, _want]] call _fnc_count;
+    };
+} forEach [
+    ["picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa", "\A3\Weapons_F\Data\UI\gear_acc_rail_ca.paa"],
+    ["class=My_Kit > picture=a3/ui_f/data/gui/cfg/hints/gear_ca.paa", "a3\ui_f\data\gui\cfg\hints\gear_ca.paa"],
+    ["picture=my_mod/ui/kit%201_ca.paa", "my_mod\ui\kit 1_ca.paa"],
+    ["picture=my_mod/ui/nofile", ""]
 ];
 
 // A text from before the rename still loads, on the new preset.

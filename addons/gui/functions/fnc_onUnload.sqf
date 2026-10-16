@@ -85,6 +85,7 @@ call EFUNC(storage,flushPlaces);
 
 // A drag under way ends with the window, without fnc_endDrag: its timing line (einv_gui_debugTiming) is written here.
 call FUNC(logDrag);
+[""] call FUNC(logFrame);
 
 GVAR(press) = [];
 GVAR(dragging) = false;
@@ -105,6 +106,8 @@ GVAR(hover) = [];
 GVAR(lastMouse) = [];
 uiNamespace setVariable [QGVAR(hint), controlNull];
 uiNamespace setVariable [QGVAR(hoverRing), []];
+uiNamespace setVariable [QGVAR(hoverGeom), []];
+uiNamespace setVariable [QGVAR(hoverHold), []];
 uiNamespace setVariable [QGVAR(inspectGroup), controlNull];
 uiNamespace setVariable [QGVAR(inspectRect), []];
 uiNamespace setVariable [QGVAR(windows), []];

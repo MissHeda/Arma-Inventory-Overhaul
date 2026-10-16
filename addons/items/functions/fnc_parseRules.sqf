@@ -61,6 +61,10 @@
  *                            The comma of config's "1.4@0.1,-0.05" would end the statement here: typed in a
  *                            text, it is read as the colon - a number on its own right after such an icon
  *                            is its second offset
+ *   picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa   the texture it shows instead of its config's
+ *                            picture (fnc_parsePicture): a path, slashes either way, a space as %20 and any
+ *                            other special character as %XX (fnc_encodeName with the path switch). A file
+ *                            that is not there falls back to the config picture (fnc_getInfo)
  *
  * A shape is read to its smallest form and written back the shortest way (fnc_formatMask): xx/xx is
  * 2x2. Named shapes and turns (L3, 10/11, @1) are not read: such a value is left out with a warning,
@@ -90,7 +94,7 @@
  * "like" (a class name as written), "footprint" ("WxH", a shape like "xx/x-" or "mass"), "stack"
  * <NUMBER>, "grid" (as
  * fnc_formatGrid writes it), "weight" (kg <NUMBER>), "name" (the name as it shows), "icon" ([scale,
- * across, down] <ARRAY>, see fnc_parseIcon).
+ * across, down] <ARRAY>, see fnc_parseIcon), "picture" (the texture path with backslashes <STRING>).
  *
  * Example:
  * ["einv1 base=default, kind=grenade > stack=3"] call einv_items_fnc_parseRules;
@@ -142,7 +146,7 @@ private _classChars = createHashMap;
 private _shapeChars = createHashMap;
 {_shapeChars set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/@");
 
-private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon"];
+private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon", "picture"];
 
 private _numberOps = ["=", "<", "<=", ">", ">="];
 private _keyOps = createHashMapFromArray [
@@ -388,6 +392,18 @@ private _fnc_icon = {
     ["icon", _icon]
 };
 
+private _fnc_picture = {
+    params ["_raw"];
+
+    ([_raw] call FUNC(parsePicture)) params ["_path", "_messages"];
+
+    _notes append _messages;
+
+    if (_path isEqualTo "") exitWith {[]};
+
+    ["picture", _path]
+};
+
 private _fnc_value = {
     params ["_token"];
 
@@ -403,6 +419,7 @@ private _fnc_value = {
         case "weight": {[_raw] call _fnc_weight};
         case "name": {[_raw] call _fnc_name};
         case "icon": {[_raw] call _fnc_icon};
+        case "picture": {[_raw] call _fnc_picture};
         default {[]};
     }
 };

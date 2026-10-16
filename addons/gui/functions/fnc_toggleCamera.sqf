@@ -19,6 +19,9 @@
  * Public: No
  */
 
+// A setting a server or mission forces leaves nothing to switch (the header draws no button then).
+if (call FUNC(cameraForced)) exitWith {};
+
 GVAR(cameraOn) = !GVAR(cameraOn);
 
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];

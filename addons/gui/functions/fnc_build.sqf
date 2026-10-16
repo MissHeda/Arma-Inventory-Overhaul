@@ -470,7 +470,24 @@ if (!isNil QEFUNC(magazines,drawJob)) then {
 // For the tester's numbers (einv_gui_debugTiming).
 if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
     private _took = ((diag_tickTime - _start) * 1000) toFixed 1;
-    private _controls = count allControls _display;
+    private _all = allControls _display;
+    private _shown = {ctrlShown _x} count _all;
 
-    INFO_2("timing: build %1 ms (%2 controls on the display)",_took,_controls);
+    // How many of each class: what the engine has to go through every frame, shown or not.
+    private _byClass = createHashMap;
+
+    {
+        private _name = ctrlClassName _x;
+
+        _byClass set [_name, (_byClass getOrDefault [_name, 0]) + 1];
+    } forEach _all;
+
+    private _classes = (toArray _byClass) apply {[_x select 1, _x select 0]};
+
+    _classes sort false;
+
+    private _top = (_classes select [0, 8]) apply {format ["%1 %2", _x select 1, _x select 0]};
+    private _total = count _all;
+
+    INFO_4("timing: build %1 ms (%2 controls on the display, %3 of them shown: %4)",_took,_total,_shown,_top joinString ", ");
 };

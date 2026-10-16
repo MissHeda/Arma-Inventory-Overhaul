@@ -71,6 +71,14 @@ PREP(drawItemEditor);
 PREP(drawCellEditor);
 PREP(drawCellBlocks);
 PREP(drawSameAs);
+PREP(pictureCatalog);
+PREP(pictureChunk);
+PREP(openPicturePicker);
+PREP(drawPicturePicker);
+PREP(pickPicture);
+PREP(drawPictureRow);
+PREP(drawIconBlock);
+PREP(drawBoxPreview);
 PREP(cellChanged);
 PREP(classBlocks);
 PREP(drawPreview);
@@ -98,6 +106,10 @@ PREP(editScope);
 PREP(editorTools);
 PREP(exportClasses);
 PREP(importClasses);
+PREP(applyClassImport);
+PREP(configValues);
+PREP(openExportChoice);
+PREP(openImportChoice);
 PREP(openClassImport);
 
 // Widgets, on the inventory's UI kit

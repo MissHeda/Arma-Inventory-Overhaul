@@ -190,8 +190,18 @@ private _fnc_button = {
     private _pictureRect = [_blockX, _cardTop, 2 * _cellW, _cardH];
     private _preview = [getText (configFile >> "CfgVehicles" >> _class >> "editorPreview")] call EFUNC(gui,safePicture);
 
-    if (_preview isNotEqualTo "") then {
-        [_display, _parent, _pictureRect, _preview, _radius, [0, 0, 0, 0.5]] call EFUNC(gui,uiPictureRounded);
+    // As the rules draw the class (picture=, icon=): a picture of their own instead of the editor's, and either
+    // one larger, smaller or moved inside the box.
+    private _cardInfo = [_class] call EFUNC(items,getInfo);
+    private _ruled = _cardInfo getOrDefault ["pictureOverride", ""];
+    private _own = "";
+
+    if (_ruled isNotEqualTo "" && {(_cardInfo getOrDefault ["picture", ""]) == _ruled}) then {
+        _own = [_ruled] call EFUNC(gui,safePicture);
+    };
+
+    if (_own isNotEqualTo "" || {_preview isNotEqualTo ""}) then {
+        [_display, _parent, _pictureRect, _theme, _own, _preview, _cardInfo getOrDefault ["icon", ICON_PLAIN], _radius] call EFUNC(gui,uiBoxPicture);
     } else {
         _pictureRect params ["_pictureX", "_pictureY", "_pictureW", "_pictureH"];
 

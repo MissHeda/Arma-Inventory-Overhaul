@@ -569,23 +569,33 @@ if (_hasBox) then {
         };
 
         private _preview = "";
+        private _own = "";
+        private _boxIcon = ICON_PLAIN;
 
         // Whether the file is there is asked once per path (fnc_safePicture keeps the answer): a build asked
         // the disk for every crate's picture again.
         if (_id isEqualTo "container" && {!isNull _sectionContainer}) then {
             _preview = [getText (configOf _sectionContainer >> "editorPreview")] call FUNC(safePicture);
+
+            // What the rules make of the class (picture=, icon=): a picture of their own instead of the editor's,
+            // and either one larger, smaller or moved inside the box.
+            private _boxInfo = [typeOf _sectionContainer] call EFUNC(items,getInfo);
+            private _ruled = _boxInfo getOrDefault ["pictureOverride", ""];
+
+            if (_ruled isNotEqualTo "" && {(_boxInfo getOrDefault ["picture", ""]) == _ruled}) then {
+                _own = [_ruled] call FUNC(safePicture);
+            };
+
+            _boxIcon = _boxInfo getOrDefault ["icon", ICON_PLAIN];
         };
 
         private _boxRadius = (_theme getOrDefault ["radius", 0]) min (_boxH / 4);
 
         [_display, _parent, _boxRect, _theme getOrDefault ["slot", [1, 1, 1, 0.06]], _boxRadius, _theme getOrDefault ["slotBorder", []]] call FUNC(uiPanel);
 
-        if (_preview isEqualTo "") then {
+        // The picture of the rules or the editor's (fnc_uiBoxPicture), else the icon of what the box is.
+        if (([_display, _parent, _boxRect, _theme, _own, _preview, _boxIcon, _boxRadius] call FUNC(uiBoxPicture)) isEqualTo []) then {
             [_display, _parent, [_blockX + _boxW * 0.25, _bodyTop + _boxH * 0.25, _boxW * 0.5, _boxH * 0.5], _icon, _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]]] call FUNC(uiIcon);
-        } else {
-            // The editor's picture on its own grey, filling the round box without an edge
-            // (fnc_uiPictureRounded), under a dark film so the grey sits with the glass.
-            [_display, _parent, _boxRect, _preview, _boxRadius, [0, 0, 0, 0.5]] call FUNC(uiPictureRounded);
         };
     };
 

@@ -19,6 +19,8 @@
  * 0: Grid, see fnc_createGrid <HASHMAP>
  * 1: Point on the screen, [x, y] - getMousePosition <ARRAY>
  * 2: A hole counts as a cell <BOOL> (default: false)
+ * 3: Where the grid lies now, [visible box [x, y, w, h] of its column or [] for none, left, top of its cells] as
+ *    fnc_hoverGeometry worked it out - given, the group chain is not walked again <ARRAY> (default: [])
  *
  * Return Value:
  * [column, row], or [] when the point is not on the grid <ARRAY>
@@ -31,26 +33,35 @@
 
 disableSerialization;
 
-params ["_grid", "_point", ["_holesToo", false]];
+params ["_grid", "_point", ["_holesToo", false], ["_where", []]];
 _point params ["_pointX", "_pointY"];
 
-// A row scrolled out of its column is not under the mouse, even where it would lie: the point has to
-// be inside the group's visible box as well.
-private _parent = _grid getOrDefault ["parent", controlNull];
-private _visible = true;
+if (_where isEqualTo []) then {
+    // A row scrolled out of its column is not under the mouse, even where it would lie: the point has to
+    // be inside the group's visible box as well.
+    private _parent = _grid getOrDefault ["parent", controlNull];
+    private _box = [];
 
-if (!isNull _parent) then {
-    (ctrlPosition _parent) params ["_groupX", "_groupY", "_groupW", "_groupH"];
+    if (!isNull _parent) then {
+        (ctrlPosition _parent) params ["_groupX", "_groupY", "_groupW", "_groupH"];
 
-    private _outer = createHashMapFromArray [["rel", [_groupX, _groupY]], ["parent", ctrlParentControlsGroup _parent]];
-    ([_outer] call FUNC(gridOrigin)) params ["_left", "_top"];
+        private _outer = createHashMapFromArray [["rel", [_groupX, _groupY]], ["parent", ctrlParentControlsGroup _parent]];
+        ([_outer] call FUNC(gridOrigin)) params ["_left", "_top"];
 
-    _visible = _pointX >= _left && {_pointX < _left + _groupW} && {_pointY >= _top} && {_pointY < _top + _groupH};
+        _box = [_left, _top, _groupW, _groupH];
+    };
+
+    ([_grid] call FUNC(gridOrigin)) params ["_cornerX", "_cornerY"];
+
+    _where = [_box, _cornerX, _cornerY];
 };
 
-if (!_visible) exitWith {[]};
+_where params ["_box", "_originX", "_originY"];
 
-([_grid] call FUNC(gridOrigin)) params ["_originX", "_originY"];
+if (_box isNotEqualTo [] && {
+    _box params ["_left", "_top", "_boxW", "_boxH"];
+    !(_pointX >= _left && {_pointX < _left + _boxW} && {_pointY >= _top} && {_pointY < _top + _boxH})
+}) exitWith {[]};
 
 // The column (row) a point _local from the corner lies in, -1 for none: the last one that starts in its
 // stretch or before it, or the one before that one; and whether it lies past that one's pitch, in the room

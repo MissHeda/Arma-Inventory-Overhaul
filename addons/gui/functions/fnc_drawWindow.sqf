@@ -174,10 +174,13 @@ private _pictureH = _titleH * 0.8;
 private _textX = _padX;
 
 if (_class isNotEqualTo "") then {
+    // As the rules draw it (icon=): larger, smaller or moved, and cut to its square.
+    private _titleInfo = [_class] call EFUNC(items,getInfo);
+
     [
         _display, _group, [_padX, _rowMid - _pictureH / 2, SQUARE(_pictureH), _pictureH],
-        ([_class] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]
-    ] call FUNC(uiPicture);
+        _titleInfo getOrDefault ["picture", ""], _titleInfo getOrDefault ["icon", ICON_PLAIN]
+    ] call FUNC(uiItemPicture);
 
     _textX = _padX + SQUARE(_pictureH) + _gap;
 };

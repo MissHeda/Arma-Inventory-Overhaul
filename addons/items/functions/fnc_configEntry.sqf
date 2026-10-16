@@ -7,7 +7,7 @@
  *
  * The root is the class's own (CfgWeapons for uniforms, vests, headgear and most items, CfgVehicles for
  * backpacks, crates and vehicles, CfgMagazines, CfgGlasses), the keys are the ones an item's config may
- * set (fnc_readConfigKeys): einv_size, einv_stack, einv_grid, einv_weight, einv_name and einv_icon, each
+ * set (fnc_readConfigKeys): einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon and einv_picture, each
  * as applicable - a container has a grid, a rifle, vest or backpack no stack. They are written as the
  * rules write the same value, so a shaped grid or a canvas comes out as the text that draws it.
  *
@@ -17,7 +17,7 @@
  * gives and whose grid was painted in the wizard gets its grid and nothing else, and the lines say
  * what the mod itself has to add for the class to look like this; the preset stays the server's to
  * choose. A class that already is what the lines would make gets "". With "all" every key that has an
- * answer is written, differing or not (a weight, a name and an icon only where something sets them).
+ * answer is written, differing or not (a weight, a name, an icon and a picture only where something sets them).
  *
  * The lines go inside the class's own definition in the mod's config. Another mod's class is patched
  * with an external class declaration and its addon in requiredAddons; a subclass inherits the keys
@@ -94,6 +94,18 @@ private _footprint = _info get "footprint";
 
 if (_all || {_footprint isNotEqualTo (_plain get "footprint")}) then {
     _lines pushBack format ["%1 = %2;", QGVARMAIN(size), [_footprint call FUNC(formatMask)] call _fnc_quote];
+};
+
+// ----- picture -----
+// The texture path as it stands (config has no need of the rules' encoding). Only where the rules or the
+// config set one; a file that is missing is written all the same, it is what was chosen.
+
+private _picture = _info get "pictureOverride";
+
+if (_picture isNotEqualTo "") then {
+    if (_all || {_picture != (_plain get "picture")}) then {
+        _lines pushBack format ["%1 = %2;", QGVARMAIN(picture), [_picture] call _fnc_quote];
+    };
 };
 
 // ----- stack -----

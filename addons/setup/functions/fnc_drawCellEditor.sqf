@@ -19,6 +19,10 @@
  *     order, blocks are laid out as the inventory flows them and coloured (fnc_canvasFromBlocks).
  *   - Beside it how the inventory will show them (fnc_drawPreview), and under it the total of cells and
  *     compartments against the limits (fnc_cellChanged).
+ *   - Under that preview the container's picture, as in the Items step: the Picture row (fnc_drawPictureRow, with
+ *     the picture picker), and beside the box as the window draws it (fnc_drawBoxPreview) the zoom and shift
+ *     (fnc_drawIconBlock). The edits are the class's own working copy (GVAR(boxWork): "iconPercent",
+ *     "pictureText"), apart from the cells', and Apply writes icon= and picture= with the grid.
  *   - In the corner Export and Import (fnc_editorTools): the config lines of the class, and a pasted
  *     setup of them.
  *   - Picked in the tree view (fnc_editScope), the edit is for the class and every class built on it: a
@@ -30,8 +34,9 @@
  *     a mask like x-x loads as one block and would be written back as two): class=X > grid=..., painted
  *     as one canvas with a letter per compartment in reading order of its first cell
  *     (einv_items_fnc_formatGrid: abbbbbc/abbbbbc/-bbbbb-; a single compartment stays xxxx/x--x or WxH),
- *     blocks as 6x4+xxx/x-x (fnc_upsertRule). Discard drops the edits, Back to the preset takes the
- *     class's own grid and like= away.
+ *     blocks as 6x4+xxx/x-x (fnc_upsertRule), and - once the picture was changed - icon=ZOOM@ACROSS:DOWN and
+ *     picture=PATH, which Apply also writes alone. Discard drops the edits, Back to the preset takes the
+ *     class's own grid, like=, icon and picture away.
  *   - "Same as another class..." picks a class in a popover (fnc_drawSameAs) to follow (like=) or to copy
  *     the cells of. Following, the drawing shows that class's cells and cannot be changed; a chip says so
  *     and unlinks.
@@ -199,6 +204,18 @@ if (!_hasWork) then {
 };
 
 private _dirty = _hasWork && {(_blocksMode && {_shown isNotEqualTo _start}) || {!_blocksMode && {_blocks isNotEqualTo _start}}};
+
+// The picture of the box: how it is drawn (icon=, in whole per cent) and which one (picture=), their working copy
+// apart from the cells'.
+private _boxWork = GVAR(boxWork) getOrDefault [_lc, createHashMap];
+private _startIcon = (_info getOrDefault ["icon", ICON_PLAIN]) apply {round (_x * 100)};
+private _startPicture = _info getOrDefault ["pictureOverride", ""];
+private _configPicture = _info getOrDefault ["configPicture", ""];
+private _workIcon = _boxWork getOrDefault ["iconPercent", _startIcon];
+private _workPicture = _boxWork getOrDefault ["pictureText", _startPicture];
+private _pictureDirty = _workIcon isNotEqualTo _startIcon || {_workPicture isNotEqualTo _startPicture};
+private _ownIcon = "icon" in _own || {_tree && {"icon" in (_treeRules getOrDefault [_lc, createHashMap])}};
+private _ownPicture = "picture" in _own || {_tree && {"picture" in (_treeRules getOrDefault [_lc, createHashMap])}};
 
 // ----- What it is -----
 
@@ -522,7 +539,56 @@ private _sideW = _innerX + _innerW - _sideX;
 
 [_display, _box, [_sideX, _areaY, _sideW, UNIT * 0.75], LLSTRING(Preview_Title), TEXT_SMALL, _muted, _fontBold, 0] call EFUNC(gui,uiLabel);
 
-uiNamespace setVariable [QGVAR(previewArgs), [_display, _box, [_sideX, _areaY + UNIT * 0.8, _sideW, _areaH - UNIT * 0.8]]];
+// Under the preview of the cells: the picture row, and the box as the window draws it with its zoom and shift.
+private _rowH = UNIT * 1.1;
+private _pictureBlockH = _rowH + UNIT * 0.3 + ICON_BLOCK_H;
+private _previewH = (_areaH - UNIT * 0.8 - _pictureBlockH - UNIT * 0.3) max (UNIT * 3);
+private _blockY = _areaY + UNIT * 0.8 + _previewH + UNIT * 0.3;
+
+uiNamespace setVariable [QGVAR(previewArgs), [_display, _box, [_sideX, _areaY + UNIT * 0.8, _sideW, _previewH]]];
+
+[
+    _display, _box, [_sideX, _blockY, _sideW, _rowH], _theme, SQUARE(UNIT * 3), _workPicture, _configPicture, {
+        params ["_path", "_arguments"];
+        _arguments params ["_class", "_boxWork"];
+
+        _boxWork set ["pictureText", _path];
+        GVAR(boxWork) set [toLowerANSI _class, _boxWork];
+
+        [] call FUNC(drawCellEditor);
+    }, [_class, _boxWork]
+] call FUNC(drawPictureRow);
+
+// What the box shows: the picture set in the working copy while the game has the file; a uniform, vest or backpack
+// config's own otherwise, a crate or vehicle the editor's picture.
+private _boxOwn = "";
+
+if (_workPicture isNotEqualTo "") then {
+    _boxOwn = [_workPicture] call EFUNC(gui,safePicture);
+};
+
+if (_boxOwn isEqualTo "" && {!(_kind in ["crate", "vehicle"])}) then {
+    _boxOwn = [_configPicture] call EFUNC(gui,safePicture);
+};
+
+private _boxSide = ICON_BLOCK_H;
+private _boxY = _blockY + _rowH + UNIT * 0.3;
+
+[_display, _box, [_sideX, _boxY, SQUARE(_boxSide), _boxSide], _theme, _class, _boxOwn, _workIcon apply {_x / 100}] call FUNC(drawBoxPreview);
+
+private _iconX = _sideX + SQUARE(_boxSide) + SQUARE(UNIT * 0.6);
+
+[
+    _display, _box, [_iconX, _boxY, _sideX + _sideW - _iconX], _theme, _workIcon, {
+        params ["_icon", "_arguments"];
+        _arguments params ["_class", "_boxWork"];
+
+        _boxWork set ["iconPercent", _icon];
+        GVAR(boxWork) set [toLowerANSI _class, _boxWork];
+
+        [] call FUNC(drawCellEditor);
+    }, [_class, _boxWork]
+] call FUNC(drawIconBlock);
 
 private _totals = [_display, _box, [_innerX, _totalsY, _innerW, _totalsH], "", TEXT_SMALL, _colorText2, _font, 0] call EFUNC(gui,uiLabel);
 
@@ -532,7 +598,7 @@ uiNamespace setVariable [QGVAR(cellTotals), _totals];
 
 // Beside the total rather than above the drawing: the drawing must not move under the mouse after the
 // first click.
-if (_dirty) then {
+if (_dirty || _pictureDirty) then {
     [_display, _box, [_innerX, _totalsY, _innerW, _totalsH], LLSTRING(Cont_Unapplied), TEXT_SMALL, _warn, _font, 1] call EFUNC(gui,uiLabel);
 };
 
@@ -541,59 +607,116 @@ if (_dirty) then {
 private _gap = SQUARE(UNIT * 0.3);
 private _buttonX = _innerX;
 
-if (_editable) then {
+if (_editable || _pictureDirty) then {
     private _buttonW = ACTION_W(LLSTRING(Cont_Apply),_buttonH,true,_font);
 
     [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], LLSTRING(Cont_Apply), UI_TEX(icon_check_ca), _theme, {
-        params ["_class", "_tree", "_below"];
+        params ["_class", "_tree", "_below", "_gridDirty", "_startIcon", "_startPicture", "_ownIcon", "_ownPicture"];
 
         private _lc = toLowerANSI _class;
         private _work = GVAR(cellWork) getOrDefault [_lc, createHashMap];
-        private _blocks = if ("blocks" in _work) then {
-            // A compartment left without a single cell cannot be written (einv_items_fnc_parseGrid): it goes.
-            (_work get "blocks") select {(_x select 0) * (_x select 1) > count (_x select 2)}
-        } else {
-            [_work] call FUNC(canvasBlocks)
+        private _set = createHashMap;
+        private _remove = [];
+
+        // The cells, when they were changed.
+        if (_gridDirty) then {
+            private _blocks = if ("blocks" in _work) then {
+                // A compartment left without a single cell cannot be written (einv_items_fnc_parseGrid): it goes.
+                (_work get "blocks") select {(_x select 0) * (_x select 1) > count (_x select 2)}
+            } else {
+                [_work] call FUNC(canvasBlocks)
+            };
+            private _cells = 0;
+
+            {
+                _cells = _cells + (_x select 0) * (_x select 1) - count (_x select 2);
+            } forEach _blocks;
+
+            if (_blocks isEqualTo []) exitWith {
+                [LLSTRING(Hint_NoCells), "loss"] call FUNC(setHint);
+            };
+
+            if (_cells > MAX_CELLS || {count _blocks > MAX_BLOCKS}) exitWith {
+                [format [LLSTRING(Hint_TooMany), MAX_CELLS, MAX_BLOCKS], "loss"] call FUNC(setHint);
+            };
+
+            // Only a drawing loaded taller than MAX_ROWS can hold one this tall. Painted compartments are
+            // written as one canvas where they lie (einv_items_fnc_formatGrid), so it is the drawing that must fit.
+            if (_blocks findIf {((_x param [3, []]) param [1, 0]) + (_x select 1) > MAX_ROWS} >= 0) exitWith {
+                [format [LLSTRING(Hint_TooTall), MAX_ROWS], "loss"] call FUNC(setHint);
+            };
+
+            _set set ["grid", [["blocks", _blocks]] call EFUNC(items,formatGrid)];
+
+            if (_work getOrDefault ["unlink", false]) then {
+                _remove pushBack "like";
+            };
         };
-        private _cells = 0;
 
-        {
-            _cells = _cells + (_x select 0) * (_x select 1) - count (_x select 2);
-        } forEach _blocks;
+        if (_gridDirty && {!("grid" in _set)}) exitWith {};
 
-        if (_blocks isEqualTo []) exitWith {
-            [LLSTRING(Hint_NoCells), "loss"] call FUNC(setHint);
+        // The picture of the box (icon=, picture=), in per cent: only what differs from now, as the Items step
+        // writes it.
+        private _boxWork = GVAR(boxWork) getOrDefault [_lc, createHashMap];
+        private _icon = _boxWork getOrDefault ["iconPercent", _startIcon];
+
+        if (_icon isNotEqualTo _startIcon) then {
+            private _modIcon = ((([_class] call EFUNC(items,getFacts)) get "mod") getOrDefault ["icon", ICON_PLAIN]) isNotEqualTo ICON_PLAIN;
+
+            if (_icon isEqualTo ICON_PERCENT_PLAIN && {_ownIcon} && {!_modIcon}) then {
+                _remove pushBack "icon";
+            } else {
+                _set set ["icon", _icon apply {_x / 100}];
+            };
         };
 
-        if (_cells > MAX_CELLS || {count _blocks > MAX_BLOCKS}) exitWith {
-            [format [LLSTRING(Hint_TooMany), MAX_CELLS, MAX_BLOCKS], "loss"] call FUNC(setHint);
-        };
+        private _picture = _boxWork getOrDefault ["pictureText", _startPicture];
 
-        // Only a drawing loaded taller than MAX_ROWS can hold one this tall. Painted compartments are
-        // written as one canvas where they lie (einv_items_fnc_formatGrid), so it is the drawing that must fit.
-        if (_blocks findIf {((_x param [3, []]) param [1, 0]) + (_x select 1) > MAX_ROWS} >= 0) exitWith {
-            [format [LLSTRING(Hint_TooTall), MAX_ROWS], "loss"] call FUNC(setHint);
+        if (_picture isNotEqualTo _startPicture) then {
+            if (_picture isNotEqualTo "") then {
+                _set set ["picture", _picture];
+            } else {
+                private _facts = [_class] call EFUNC(items,getFacts);
+                private _modPicture = ((_facts get "mod") getOrDefault ["picture", ""]) isNotEqualTo "";
+                private _configPath = ([_facts getOrDefault ["picture", ""], false] call EFUNC(items,parsePicture)) select 0;
+
+                if (_modPicture && {_configPath isNotEqualTo ""}) then {
+                    _set set ["picture", _configPath];
+                } else {
+                    if (_ownPicture) then {
+                        _remove pushBack "picture";
+                    };
+                };
+            };
         };
 
         GVAR(cellWork) deleteAt _lc;
+        GVAR(boxWork) deleteAt _lc;
 
-        [[format [LLSTRING(Hint_CellsApplied), _class], format [LLSTRING(Hint_TreeApplied), _class, _below]] select _tree, "text2"] call FUNC(setHint);
-        [
-            _class, createHashMapFromArray [["grid", [["blocks", _blocks]] call EFUNC(items,formatGrid)]], [[], ["like"]] select (_work getOrDefault ["unlink", false]), _tree
-        ] call FUNC(upsertRule);
+        if (count _set == 0 && {_remove isEqualTo []}) exitWith {
+            [LLSTRING(Hint_NothingToApply), "text2"] call FUNC(setHint);
+            [] call FUNC(drawCellEditor);
+        };
+
+        [[
+            format [[LLSTRING(Hint_PictureApplied), LLSTRING(Hint_CellsApplied)] select _gridDirty, _class],
+            format [LLSTRING(Hint_TreeApplied), _class, _below]
+        ] select _tree, "text2"] call FUNC(setHint);
+        [_class, _set, _remove, _tree] call FUNC(upsertRule);
     // Greyed while nothing is painted: Apply would only refuse (Hint_NoCells), and the tooltip says what it is for.
-    }, [_class, _tree, _below], _dirty && {_blocks isNotEqualTo []}, "accent", [LLSTRING(Cont_ApplyTip), LLSTRING(Cont_ApplyTipTree)] select _tree] call FUNC(uiAction);
+    }, [_class, _tree, _below, _dirty, _startIcon, _startPicture, _ownIcon, _ownPicture], (_dirty && {_blocks isNotEqualTo []}) || _pictureDirty, "accent", [LLSTRING(Cont_ApplyTip), LLSTRING(Cont_ApplyTipTree)] select _tree] call FUNC(uiAction);
 
     _buttonX = _buttonX + _buttonW + _gap;
 };
 
-if (_dirty) then {
+if (_dirty || _pictureDirty) then {
     private _buttonW = ACTION_W(LLSTRING(Cont_Discard),_buttonH,false,_font);
 
     [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], LLSTRING(Cont_Discard), "", _theme, {
         params ["_class"];
 
         GVAR(cellWork) deleteAt (toLowerANSI _class);
+        GVAR(boxWork) deleteAt (toLowerANSI _class);
 
         [] call FUNC(drawCellEditor);
     }, [_class], true, "ghost"] call FUNC(uiAction);
@@ -602,25 +725,27 @@ if (_dirty) then {
 };
 
 // Something of its own to take away: its own rule, or - for the tree - the tree's.
-private _hasOwn = "grid" in _own || {"like" in _own};
+private _ownFields = ["grid", "like", "icon", "picture"];
+private _hasOwn = (_ownFields findIf {_x in _own}) >= 0;
 
 if (_tree) then {
     private _treeOwn = _treeRules getOrDefault [_lc, createHashMap];
 
-    _hasOwn = _hasOwn || {"grid" in _treeOwn} || {"like" in _treeOwn};
+    _hasOwn = _hasOwn || {(_ownFields findIf {_x in _treeOwn}) >= 0};
 };
 
 if (_hasOwn) then {
     private _buttonW = ACTION_W(LLSTRING(Groups_Reset),_buttonH,true,_font);
 
     [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], LLSTRING(Groups_Reset), UI_TEX(icon_reset_ca), _theme, {
-        params ["_class", "_tree", "_below"];
+        params ["_class", "_tree", "_below", "_ownFields"];
 
         GVAR(cellWork) deleteAt (toLowerANSI _class);
+        GVAR(boxWork) deleteAt (toLowerANSI _class);
 
         [[format [LLSTRING(Hint_Reset), _class], format [LLSTRING(Hint_TreeReset), _class, _below]] select _tree, "text2"] call FUNC(setHint);
-        [_class, createHashMap, ["grid", "like"], _tree] call FUNC(upsertRule);
-    }, [_class, _tree, _below], true, "ghost", [LLSTRING(Cont_ResetTip), LLSTRING(Cont_ResetTipTree)] select _tree] call FUNC(uiAction);
+        [_class, createHashMap, _ownFields, _tree] call FUNC(upsertRule);
+    }, [_class, _tree, _below, _ownFields], true, "ghost", [LLSTRING(Cont_ResetTip), LLSTRING(Cont_ResetTipTree)] select _tree] call FUNC(uiAction);
 
     _buttonX = _buttonX + _buttonW + _gap;
 };

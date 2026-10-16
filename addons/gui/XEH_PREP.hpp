@@ -163,6 +163,7 @@ PREP(raiseWeapon);
 // Styles and the camera
 PREP(themeBase);
 PREP(toggleCamera);
+PREP(cameraForced);
 PREP(cameraStart);
 PREP(cameraStop);
 
@@ -192,6 +193,7 @@ PREP(uiRing);
 PREP(uiPictureTurned);
 PREP(uiItemPicture);
 PREP(uiPictureRounded);
+PREP(uiBoxPicture);
 PREP(uiBar);
 PREP(uiButton);
 PREP(buttonWidth);
@@ -238,6 +240,9 @@ PREP(closeWindow);
 PREP(raiseWindow);
 PREP(placeWindow);
 PREP(topAt);
+PREP(hoverGeometry);
+PREP(frame);
+PREP(logFrame);
 PREP(tileRect);
 
 

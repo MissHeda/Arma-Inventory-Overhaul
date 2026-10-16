@@ -8,7 +8,7 @@
  *
  *   1. the older table settings (sizes, stacks, container sizes) - read as rules after the text
  *   2. the rules text, einv_items_rules
- *   3. the item's own mod: einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, and the older
+ *   3. the item's own mod: einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture, and the older
  *      einv_gridSize[], einv_stackSize, einv_grids[], einv_slots
  *   4. the preset the text builds on, with einv_items_stackSmall moved off its default
  *   5. built in: 1x1, alone on its tile, a grid by load
@@ -18,7 +18,8 @@
  * A rule may also give an item a weight (weight=, in kg) and a name (name=). "mass", "name" and
  * "short" are then those; "configMass", "configDisplayName" and "configShort" keep what config says.
  * The engine still weighs every item by its config. A rule or the config may also say how large its
- * picture is drawn and where (icon=, einv_icon): "icon".
+ * picture is drawn and where (icon=, einv_icon): "icon", and a picture of its own (picture=, einv_picture):
+ * "picture".
  *
  * Without compiled rules, the rules in effect are used and the result kept per class until the rules
  * change. An item whose rule says like=X is kept the same way: X is asked through the same compiled
@@ -39,7 +40,8 @@
  *   "class"             - configName, or the class as given when no config knows it <STRING>
  *   "name", "short"     - the rules' name, else displayName / displayNameShort (or the name) <STRING>
  *   "description"       - descriptionShort, may contain <br/>, "" if none <STRING>
- *   "picture"           - "" if none <STRING>
+ *   "picture"           - the texture it shows: the rules' picture (picture=, einv_picture) when the file is
+ *                         there, else config's; "" if none <STRING>
  *   "category"          - CATEGORY_* <NUMBER>
  *   "kind"              - see fnc_getFacts <STRING>
  *   "mass"              - in config units (tenths of a pound): the rules' weight, else config's
@@ -63,6 +65,8 @@
  *   "configDisplayName", "configShort" - config's names <STRING>
  *   "weightOverride"    - the rules' weight in kg, -1 when none <NUMBER>
  *   "nameOverride"      - the rules' name, "" when none <STRING>
+ *   "pictureOverride"   - the rules' picture path, "" when none - also when the file is missing <STRING>
+ *   "configPicture"     - config's picture <STRING>
  *   and from fnc_getFacts: "lc", "root", "rounds", "lineage", "addon", "mod"
  *
  * Example:
@@ -119,6 +123,32 @@ _info set ["configDisplayName", _facts get "name"];
 _info set ["configShort", _facts get "short"];
 _info set ["weightOverride", _weight];
 _info set ["nameOverride", _name];
+
+// A picture of its own: the texture the rules give it, if the game has the file - else config's, said once.
+private _picture = _resolved get "picture";
+
+_info set ["configPicture", _facts get "picture"];
+_info set ["pictureOverride", _picture];
+
+if (_picture isNotEqualTo "") then {
+    // The engine reads a path with or without its leading backslash.
+    private _otherForm = if ((_picture select [0, 1]) isEqualTo "\") then {_picture select [1]} else {"\" + _picture};
+
+    if (fileExists _picture || {fileExists _otherForm}) then {
+        _info set ["picture", _picture];
+    } else {
+        if (isNil QGVAR(pictureWarned)) then {
+            GVAR(pictureWarned) = createHashMap;
+        };
+
+        private _lowerPicture = toLowerANSI _picture;
+
+        if !(_lowerPicture in GVAR(pictureWarned)) then {
+            GVAR(pictureWarned) set [_lowerPicture, true];
+            WARNING_2("Picture of %1: %2 is not there - the config picture instead",_class,_picture);
+        };
+    };
+};
 
 if (_weight >= 0) then {
     _info set ["mass", _weight / MASS_TO_KG];
