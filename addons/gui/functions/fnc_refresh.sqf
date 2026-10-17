@@ -48,6 +48,7 @@ if (isNull _display) exitWith {""};
 
 private _start = diag_tickTime;
 private _signature = call FUNC(getSignature);
+private _signatureTook = (diag_tickTime - _start) * 1000;
 private _before = GVAR(signatureParts);
 
 _signature params ["_own", "_list", "_loot", "_storage", "_card"];
@@ -149,6 +150,15 @@ GVAR(signatureParts) = _signature;
 if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
     private _took = ((diag_tickTime - _start) * 1000) toFixed 1;
     private _what = format ["%1 loot and %2 storage sections%3", count _lootChanged, count _storageChanged, ["", ", weight card"] select _cardChanged];
+
+    // How many tiles stayed as they were and how many were made (fnc_redrawTiles), and the signature's share.
+    if (_lootChanged isNotEqualTo [] || {_storageChanged isNotEqualTo []}) then {
+        GVAR(redrawCounts) params [["_kept", 0], ["_made", 0], ["_tilesTook", 0]];
+
+        _what = _what + format [", %1 tiles kept, %2 made in %3 ms", _kept, _made, _tilesTook toFixed 1];
+    };
+
+    _what = _what + format [", signature %1 ms", _signatureTook toFixed 2];
 
     INFO_2("timing: redraw %1 ms (%2)",_took,_what);
 };

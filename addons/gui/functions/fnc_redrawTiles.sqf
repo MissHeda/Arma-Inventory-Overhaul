@@ -8,9 +8,9 @@
  * hover - stays as it is. Sections of the loot column, and in the inventory those of the unit's own storage
  * column (a window that attached draws that column its own way).
  *
- * Per section the layout is worked out again (einv_storage_fnc_getLayout), its tiles' controls are
- * deleted and the cells they hid shown, the tiles are drawn again (fnc_drawTiles), the caption's weight
- * text is updated, and what is searched is queued anew (fnc_markHidden); then the moves under way
+ * Per section the layout is worked out again (einv_storage_fnc_getLayout), only the tiles that changed
+ * are drawn again - a tile that looks as it did is kept with its controls, the others' controls are deleted
+ * (fnc_drawTiles) - and the cells' squares follow (fnc_drawCells), the caption's weight text is updated, and what is searched is queued anew (fnc_markHidden); then the moves under way
  * (fnc_drawPending), the selection (fnc_drawSelection) and the search field's fading come back, and an
  * open context menu is made again on top (fnc_raiseMenu) - or closed, when it was opened on a tile of a
  * section drawn anew. A section folded away has no tiles: only its weight text changes.
@@ -154,11 +154,9 @@ if (!_ok) exitWith {false};
 // ---------------------------------------------------------------------------
 // Then the sections, one by one.
 // ---------------------------------------------------------------------------
-private _cellColor = _theme getOrDefault ["cell", [1, 1, 1, 0.045]];
-
-if (_cellColor isEqualTo []) then {
-    _cellColor = [0, 0, 0, 0];
-};
+private _start = diag_tickTime;
+private _keptCount = 0;
+private _madeCount = 0;
 
 {
     _x params ["_section", "_holder", "_info", "_entries", "_layout", "_holderGrids", "_load"];
@@ -177,19 +175,11 @@ if (_cellColor isEqualTo []) then {
     // still hidden is queued again from the new arrangement.
     GVAR(searchQueue) = GVAR(searchQueue) select {(_x select 0) isNotEqualTo _holder};
 
+    // The tiles each grid had: what did not change is kept as it is (fnc_drawTiles), the rest goes below.
+    private _before = _holderGrids apply {_x get "tiles"};
+
     {
-        private _grid = _x;
-
-        {
-            {ctrlDelete _x} forEach (_x getOrDefault ["controls", []]);
-        } forEach (_grid get "tiles");
-
-        {
-            _x ctrlShow true;
-            _x ctrlSetBackgroundColor _cellColor;
-        } forEach (_grid get "cells");
-
-        _grid set ["tiles", []];
+        _x set ["tiles", []];
     } forEach _holderGrids;
 
     [_holder, _layout get "entries"] call FUNC(markHidden);
@@ -201,7 +191,20 @@ if (_cellColor isEqualTo []) then {
     } forEach (_layout get "overflow");
 
     {
-        [_display, _x, _layout, _theme] call FUNC(drawTiles);
+        private _old = _before select _forEachIndex;
+        private _left = [_display, _x, _layout, _theme, _old] call FUNC(drawTiles);
+
+        {
+            {ctrlDelete _x} forEach (_x getOrDefault ["controls", []]);
+        } forEach _left;
+
+        private _kept = count _old - count _left;
+
+        _keptCount = _keptCount + _kept;
+        _madeCount = _madeCount + count (_x get "tiles") - _kept;
+
+        // The cells' squares: shown where a tile went, hidden where one came, made where none was yet.
+        [_display, _x] call FUNC(drawCells);
     } forEach _holderGrids;
 
     // Places and cargo disagree: noted for the authority, as a build notes it (fnc_drawCompartments).
@@ -274,5 +277,8 @@ uiNamespace setVariable [QGVAR(hoverRing), []];
 GVAR(hover) = [];
 GVAR(lastClick) = [[], -1];
 GVAR(lastMouse) = [];
+
+// For the timing line of the redraw (fnc_refresh, einv_gui_debugTiming): how many tiles stayed, how many were made.
+GVAR(redrawCounts) = [_keptCount, _madeCount, (diag_tickTime - _start) * 1000];
 
 true

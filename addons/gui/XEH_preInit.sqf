@@ -386,6 +386,18 @@ GVAR(cameraFor) = [];
 // with the weight card and the hotbar when they are the unit's own (fnc_redrawPart).
 GVAR(signatureParts) = [];
 
+// "Log window timings (debug)" (einv_gui_debugTiming), nothing of it read while the setting is off:
+//   redrawCounts - the last redraw of tiles: [tiles kept, tiles made, its milliseconds] (fnc_redrawTiles,
+//                  written in the redraw's line by fnc_refresh)
+//   phase        - [part of the frame now running, when it began] while fnc_frame times a frame, nil
+//                  otherwise: fnc_onFrame says where each part begins (fnc_notePhase)
+//   phaseTally   - per part of the frame [milliseconds in all, most in one frame], and "frame" the whole
+//                  frames from one to the next, written by fnc_logFrame with the frames' line
+//   frameLast    - when the last timed frame began, -1 before the window's first (fnc_startFrame)
+GVAR(redrawCounts) = [0, 0, 0];
+GVAR(phaseTally) = createHashMap;
+GVAR(frameLast) = -1;
+
 // Weight (fnc_drawSection, fnc_previewWeight, fnc_drawCompare), all made by the build and gone with the next one:
 //   infoAreas  - [[x, y, w, h], "", "", anchor, kind, args] where the hint has something to say that is
 //                no tile and no slot: the weight card and the section captions (fnc_updateHover)

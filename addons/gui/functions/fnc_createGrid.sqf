@@ -2,21 +2,26 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Draws an empty grid - one compartment of a container: one faint square per cell, a pixel apart, and
+ * Lays out an empty grid - one compartment of a container: one faint square per cell, a pixel apart, and
  * registers it in (uiNamespace getVariable [QGVAR(grids), []]) so the mouse finds its tiles.
  *
  * One control per cell rather than lines across: the window is see-through, and two lines crossing
  * would show a brighter dot at every corner. Squares with a gap between them never overlap. A tile
  * hides the cells under it (fnc_createTile), so it reads as one piece.
  *
+ * The squares are not made here: fnc_drawCells makes them once the tiles lie on the grid, and only for the
+ * cells no tile covers - a full pile of ninety tiles would otherwise make ninety squares only to hide them.
+ * Until then "cells" holds controlNull for every cell; fnc_drawCells makes a square where a tile has gone.
+ * Whoever puts tiles on the grid calls it after them (fnc_drawCompartments, fnc_redrawTiles).
+ *
  * The cells go straight into the parent - no group of its own per grid: a group nested in the
  * scrolling column would take the mouse wheel from it. The grid's corner sits on a pixel and a cell is
  * a whole number of them (fnc_getCell), so every edge of the grid falls on a pixel.
  *
  * A shaped compartment's holes (einv_items_fnc_parseGrid, "xxx/x-x") get no control at all: nothing
- * is drawn there and nothing there can be hovered. Their place in "cells" holds controlNull, so a
- * cell is still found at row * cols + col, and whatever shows or hides cells passes over a hole
- * without a word.
+ * is drawn there and nothing there can be hovered. Their place in "cells" holds controlNull for good
+ * (fnc_drawCells passes over them), so a cell is still found at row * cols + col, and whatever shows or
+ * hides cells passes over a hole without a word.
  *
  * Every cell of every grid is the same size with the same gap to the next, whichever compartment of a
  * container it belongs to. A canvas's compartment (grid=aab/acc) may reach over a seam that opens the
@@ -48,7 +53,9 @@
  *   "colX", "rowY" - where each column and row starts from the corner <ARRAY>
  *   "colAt", "rowAt" - per stretch of one cell from the corner, the last column (row) that starts in it
  *               or before it: a point there lies in that one or the one before (fnc_screenToCell) <ARRAY>
- *   "cells"   - a control per cell, row by row, controlNull for a hole <ARRAY>
+ *   "cells"   - a control per cell, row by row, controlNull for a hole and for a cell whose square is
+ *               not made yet (fnc_drawCells) <ARRAY>
+ *   "cellColor" - the squares' colour <ARRAY>
  *   "holes"   - the cells it does not have, as given <ARRAY>
  *   "tiles"   - the entries lying on it, see fnc_createTile <ARRAY>
  *   "section" - the section id <STRING>
@@ -122,26 +129,10 @@ if (_color isEqualTo []) then {
     _color = [0, 0, 0, 0];
 };
 
+// No square yet: fnc_drawCells makes those no tile covers, once the tiles lie on the grid.
 private _cells = [];
-
-for "_row" from 0 to (_rows - 1) do {
-    for "_col" from 0 to (_cols - 1) do {
-        if ((_row * _cols + _col) in _holes) then {
-            _cells pushBack controlNull;
-            continue;
-        };
-
-        private _cell = [_display, "EINV_PanelRect", _parent, [
-            _left + (_colX select _col),
-            _top + (_rowY select _row),
-            _cellW - pixelW,
-            _cellH - pixelH
-        ]] call FUNC(uiCreate);
-
-        _cell ctrlSetBackgroundColor _color;
-        _cells pushBack _cell;
-    };
-};
+_cells resize (_rows * _cols);
+_cells = _cells apply {controlNull};
 
 private _grid = createHashMapFromArray [
     ["parent", _parent],
@@ -155,6 +146,7 @@ private _grid = createHashMapFromArray [
     ["colAt", [_colX, _cellW] call _fnc_lookup],
     ["rowAt", [_rowY, _cellH] call _fnc_lookup],
     ["cells", _cells],
+    ["cellColor", _color],
     ["holes", _holes],
     ["tiles", []],
     ["section", _section]

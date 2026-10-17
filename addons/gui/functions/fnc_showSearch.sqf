@@ -25,8 +25,13 @@ disableSerialization;
 
 params ["_display"];
 
-// The last item's glass, ring and track - gone with their group after a build, still there otherwise.
-{ctrlDelete _x} forEach ((uiNamespace getVariable [QGVAR(searchFx), []]) param [5, []]);
+// The last item's glass, ring and track - gone with their group after a build, still there otherwise - and
+// its "?" back: a redraw of tiles keeps a tile that did not change (fnc_drawTiles), and the head of the
+// queue may be another one now.
+private _lastFx = uiNamespace getVariable [QGVAR(searchFx), []];
+
+{ctrlDelete _x} forEach (_lastFx param [5, []]);
+(_lastFx param [6, controlNull]) ctrlSetText "?";
 
 uiNamespace setVariable [QGVAR(searchFx), []];
 
@@ -52,7 +57,10 @@ private _centerY = _top + _height / 2;
 private _ringRect = [_centerX - _size * pixelW / 2, _centerY - _size * pixelH / 2, _size * pixelW, _size * pixelH];
 private _glassSize = _size * SEARCH_GLASS_SIZE;
 
-(_tile getOrDefault ["mark", controlNull]) ctrlShow false;
+// The "?" gives way: its text only, as it may be the tile's surface as well (fnc_createTile).
+private _mark = _tile getOrDefault ["mark", controlNull];
+
+_mark ctrlSetText "";
 
 private _theme = GVAR(theme);
 
@@ -66,4 +74,4 @@ private _glass = [
     UI_TEX(icon_search_ca), _theme getOrDefault ["text", [1, 1, 1, 1]]
 ] call FUNC(uiIcon);
 
-uiNamespace setVariable [QGVAR(searchFx), [_arc, _glass, [_centerX, _centerY], _size, 1, [_track, _arc, _glass]]];
+uiNamespace setVariable [QGVAR(searchFx), [_arc, _glass, [_centerX, _centerY], _size, 1, [_track, _arc, _glass], _mark]];

@@ -240,19 +240,27 @@ if (_countText isNotEqualTo "") then {
         _theme getOrDefault ["tileCountColor", _colorText], _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
     ] select (_countText isEqualTo "0");
 
+    // Only measured: the label lies on exactly the box and draws it as its own background (one control).
     private _backdrop = [
-        _display, _parent, _countText, _fontBold, _lineSize, _left + _width - _padX, _top + _height - _padY * 0.5, _width - _padX * 2, _theme, true
+        _display, _parent, _countText, _fontBold, _lineSize, _left + _width - _padX, _top + _height - _padY * 0.5, _width - _padX * 2, _theme, true,
+        false, true
     ] call FUNC(drawCountBackdrop);
 
-    _backdrop params ["_backdropControls", "_backdropRect"];
+    _backdrop params ["_backdropControls", "_backdropRect", ["_backdropColor", []]];
 
     _controls append _backdropControls;
 
     private _countRect = [_backdropRect, [_left + _padX, _top + _height - _padY * 0.5 - _lineH, _width - _padX * 2, _lineH]] select (_backdropRect isEqualTo []);
 
-    _controls pushBack ([
+    private _countLabel = [
         _display, _parent, _countRect, _countText, _lineSize, _countColor, _fontBold, [2, 1] select (_backdropRect isEqualTo [])
-    ] call FUNC(uiLabel));
+    ] call FUNC(uiLabel);
+
+    if (_backdropControls isEqualTo [] && {_backdropColor isNotEqualTo []}) then {
+        _countLabel ctrlSetBackgroundColor _backdropColor;
+    };
+
+    _controls pushBack _countLabel;
 };
 
 // The hover area is kept in screen coordinates; a slot in a group counts from the group's corner, and

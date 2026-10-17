@@ -11,6 +11,13 @@
  * controls is not in these figures - with the window idle, a frame of 3.2 ms and 0.06 ms of script says
  * where the rest goes.
  *
+ * A second line follows it: "timing: frame parts - whole frame 4.02 ms avg 9.80 max (249 fps) / start 0.011 ms
+ * avg 0.05 max / hover ... / search ... / contents 0.004 ms avg 3.10 max / ... - 1432 controls on the display,
+ * 1011 shown; 96 tiles, 310 cell squares (180 shown)". The whole frame is the time from one frame of the window
+ * to the next, so the game's FPS; each part is the script's time in that part of fnc_onFrame (fnc_notePhase),
+ * on average per frame and the most one stretch of it took (the contents check runs once a second, so its
+ * average is small and its most is the stutter). The controls are what the engine draws every frame.
+ *
  * Arguments:
  * 0: What the frame was - "idle", "held", "same", "new", "drag"; "" writes the tally <STRING> (default: "")
  * 1: Milliseconds it took <NUMBER> (default: 0)
@@ -69,3 +76,62 @@ private _parts = [];
 INFO_1("timing: frames - %1",_parts joinString " / ");
 
 GVAR(frameTiming) = createHashMap;
+
+// Where the time went, per part of the frame, and what the display holds.
+private _phases = GVAR(phaseTally);
+
+GVAR(phaseTally) = createHashMap;
+
+if (count _phases == 0) exitWith {};
+
+private _phaseParts = [];
+
+(_phases getOrDefault ["frame", []]) params [["_wholeTotal", 0], ["_wholeMost", 0], ["_wholeCount", 0]];
+
+if (_wholeCount > 0) then {
+    private _wholeAvg = _wholeTotal / _wholeCount;
+
+    _phaseParts pushBack format [
+        "whole frame %1 ms avg %2 max (%3 fps)", _wholeAvg toFixed 2, _wholeMost toFixed 2, round (1000 / (_wholeAvg max 0.001))
+    ];
+};
+
+{
+    if (_x isEqualTo "frame") then {continue};
+
+    _y params ["_total", "_most"];
+
+    _phaseParts pushBack format ["%1 %2 ms avg %3 max", _x, (_total / _frames) toFixed 3, _most toFixed 2];
+} forEach _phases;
+
+// What the engine goes through every frame: the display's controls, and of those the tiles' and the cells'.
+private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+private _counts = "";
+
+if (!isNull _display) then {
+    private _all = allControls _display;
+    private _tiles = 0;
+    private _squares = 0;
+    private _squaresShown = 0;
+
+    {
+        _tiles = _tiles + count (_x getOrDefault ["tiles", []]);
+
+        {
+            if (!isNull _x) then {
+                _squares = _squares + 1;
+
+                if (ctrlShown _x) then {
+                    _squaresShown = _squaresShown + 1;
+                };
+            };
+        } forEach (_x getOrDefault ["cells", []]);
+    } forEach (uiNamespace getVariable [QGVAR(grids), []]);
+
+    _counts = format [
+        " - %1 controls on the display, %2 shown; %3 tiles, %4 cell squares (%5 shown)",
+        count _all, {ctrlShown _x} count _all, _tiles, _squares, _squaresShown
+    ];
+};
+
+INFO_2("timing: frame parts - %1%2",_phaseParts joinString " / ",_counts);

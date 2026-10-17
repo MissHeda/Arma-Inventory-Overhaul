@@ -220,6 +220,7 @@ PREP(capCell);
 PREP(createGrid);
 PREP(createTile);
 PREP(drawTiles);
+PREP(drawCells);
 PREP(loadText);
 PREP(drawAttachments);
 PREP(gridOrigin);
@@ -261,6 +262,7 @@ PREP(hoverGeometry);
 PREP(hoverOutline);
 PREP(frame);
 PREP(logFrame);
+PREP(notePhase);
 PREP(tileRect);
 
 

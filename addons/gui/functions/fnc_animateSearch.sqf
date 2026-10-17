@@ -60,11 +60,22 @@ if (_progress >= 1) exitWith {
     GVAR(searchStarted) = -1;
     GVAR(searchHead) = [];
 
-    if !([_display, _head] call FUNC(revealTile)) then {
+    private _revealFrom = diag_tickTime;
+    private _inPlace = [_display, _head] call FUNC(revealTile);
+
+    if (!_inPlace) then {
         [_display] call FUNC(build);
     };
 
     [_display, _head] call FUNC(revealFx);
+
+    // For the tester's numbers (einv_gui_debugTiming): what finding it cost - a stutter while searching is this.
+    if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
+        private _revealTook = ((diag_tickTime - _revealFrom) * 1000) toFixed 1;
+        private _revealHow = ["the window built anew, as the first find of a section brings Take all", "its tile drawn anew in place"] select _inPlace;
+
+        INFO_2("timing: search found an item - %1 ms (%2)",_revealTook,_revealHow);
+    };
 };
 
 // Rummaging: a short sound now and then, of what is searched - cloth on a body, things shifting in a crate, a

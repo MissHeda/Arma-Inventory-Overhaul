@@ -206,6 +206,9 @@ private _fnc_compartment = {
     _grid set ["side", _section getOrDefault ["side", ""]];
 
     [_display, _grid, _layout, _theme] call FUNC(drawTiles);
+
+    // The cells' squares after the tiles: only where no tile lies (fnc_drawCells).
+    [_display, _grid] call FUNC(drawCells);
 };
 
 // Every compartment's panel first, behind every cell.

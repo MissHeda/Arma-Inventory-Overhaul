@@ -54,6 +54,10 @@
  * has it ("focusAll", only while no mouse button is held: a button pressed keeps the focus until its
  * click came).
  *
+ * With "Log window timings (debug)" on, fnc_frame times it and each part says where it begins (NOTE_PHASE,
+ * fnc_notePhase): start, queue, lift, drag, hover, search, warm, answers, check, contents. Off, that is an
+ * isNil each.
+ *
  * Arguments:
  * None - it is called by the driver of the frame (fnc_startFrame)
  *
@@ -237,7 +241,9 @@ if (_covered) exitWith {
 // The hands' queue: the first action's ring fills, and it is sent when the time is up (fnc_animateQueue). Not under
 // another window, and the time it stood still does not count.
 if (GVAR(handQueue) isNotEqualTo []) then {
+    NOTE_PHASE("queue");
     [_display, _now] call FUNC(animateQueue);
+    NOTE_PHASE("start");
 };
 
 // An open context menu made again on top once something was made on the display after it (fnc_raiseMenu). Asked
@@ -369,6 +375,8 @@ if (GVAR(windowMove) isNotEqualTo []) then {
 // A press on a tile becomes a drag once the mouse moves; a drag follows the mouse every frame. A press on a
 // filled slot of the hotbar strip carries the slot's number as its tenth element: it drags the binding.
 if (GVAR(press) isNotEqualTo [] && {!GVAR(dragging)} && {GVAR(stripDrag) isEqualTo []}) then {
+    NOTE_PHASE("lift");
+
     (GVAR(press) select 2) params ["_startX", "_startY"];
 
     if (abs ((_mouse select 0) - _startX) > DRAG_THRESHOLD || {abs ((_mouse select 1) - _startY) > DRAG_THRESHOLD}) then {
@@ -393,6 +401,8 @@ if ("frame" in GVAR(hooks)) then {
 
 // A hotbar slot's binding held (fnc_startStripDrag): it follows the mouse; let go outside the window - where
 // no event reaches - it ends all the same.
+NOTE_PHASE("drag");
+
 if (GVAR(stripDrag) isNotEqualTo []) exitWith {
     GVAR(lastMouse) = _mouse;
 
@@ -413,6 +423,8 @@ if (GVAR(dragging)) exitWith {
 if (GVAR(emptyPress) isNotEqualTo [] && {inputMouse 0 == 0}) then {
     GVAR(emptyPress) = [];
 };
+
+NOTE_PHASE("hover");
 
 // Scrolling a column moves the tiles under a mouse that stands still, so the hover is looked at again
 // on every check as well.
@@ -446,6 +458,8 @@ if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
 
 // Searching, every frame: the ring fills and the glass goes round, and the item shows once its time is
 // up (fnc_animateSearch). Not while something is held: a rebuild would pull it from under the mouse.
+NOTE_PHASE("search");
+
 if (GVAR(press) isEqualTo []) then {
     // Nothing being searched: only the clock of the pause is kept (fnc_animateSearch does no more than that
     // with no search under way).
@@ -462,6 +476,7 @@ if (GVAR(press) isEqualTo []) then {
         (uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []
         && {(uiNamespace getVariable [QGVAR(glowNext), 0]) < count (uiNamespace getVariable [QGVAR(slots), []])}
     ) then {
+        NOTE_PHASE("warm");
         [_display] call FUNC(warmTargets);
     };
 };
@@ -477,6 +492,8 @@ if (GVAR(menuState) isNotEqualTo []) then {
 // seconds after it came (fnc_onAnswer): a tile never shows on a first-fit cell for a frame because its
 // cargo arrived before its place. Every frame, so a move in single player - answered in the frame it was
 // asked for - shows at once; not while something is held: a build would pull it from under the mouse.
+NOTE_PHASE("answers");
+
 if (GVAR(answers) isNotEqualTo [] && {GVAR(press) isEqualTo []}) then {
     private _ready = [];
     private _waiting = [];
@@ -513,6 +530,8 @@ if (GVAR(answers) isNotEqualTo [] && {GVAR(press) isEqualTo []}) then {
 
 if (!_check) exitWith {};
 
+NOTE_PHASE("check");
+
 GVAR(nextCheck) = _now + CHECK_INTERVAL;
 
 private _why = call _fnc_mustClose;
@@ -529,6 +548,8 @@ if ([_display] call FUNC(poseCheck)) exitWith {};
 if (_now < GVAR(nextSignature) || {GVAR(press) isNotEqualTo []}) exitWith {};
 
 GVAR(nextSignature) = _now + SIGNATURE_INTERVAL;
+
+NOTE_PHASE("contents");
 
 // Holders whose places disagree with what they hold are reported to their authorities
 // (fnc_requestNormalize, from what fnc_drawCompartments noted).

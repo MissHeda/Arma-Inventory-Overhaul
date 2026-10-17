@@ -45,7 +45,14 @@ private _found = (nearestObjects [_unit, ["WeaponHolder", "WeaponHolderSimulated
     && {isNull objectParent _x}
     && {!lockedInventory _x}
     && {(_x getVariable ["einv_nearby", true]) isNotEqualTo false}
-    && {!([_x] call FUNC(isGroundHolder)) || {([_x] call FUNC(getContents)) isNotEqualTo []}}
+    && {
+        // A pile holds something when any of its cargo lists does - asked of the engine's lists rather than of
+        // fnc_getContents, which would make every entry of a full pile only to see that there is one (the
+        // window asks this every second).
+        !([_x] call FUNC(isGroundHolder))
+        || {(weaponCargo _x) isNotEqualTo []} || {(magazineCargo _x) isNotEqualTo []}
+        || {(itemCargo _x) isNotEqualTo []} || {(backpackCargo _x) isNotEqualTo []}
+    }
     && {[_eye, _feet, _x, _range, _unit] call FUNC(isNear)}
 };
 

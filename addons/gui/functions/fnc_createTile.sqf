@@ -131,9 +131,23 @@ private _color = if (_hidden) then {
     (_theme getOrDefault ["tileBg", []]) param [_info getOrDefault ["category", 0], [1, 1, 1, 0.075]]
 };
 
+// A plain "?" tile is one label that is its surface as well (its background is the tile's colour, over the same
+// rectangle): one control fewer per item not searched yet. Not under a hatch, which lies between the two.
+private _markSurface = _hidden && {!_shaped} && {!(_theme getOrDefault ["hatch", false])};
+
 private _backgrounds = if (_shaped) then {
     [_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _color, "surface", 0, [_grid, _col, _row]] call FUNC(uiShape)
 } else {
+    if (_markSurface) exitWith {
+        private _ctrl = [
+            _display, _parent, [_left, _top, _width, _height], "?", _cellH * 0.55,
+            _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _fontBold, 2
+        ] call FUNC(uiLabel);
+
+        _ctrl ctrlSetBackgroundColor _color;
+        [_ctrl]
+    };
+
     private _ctrl = [_display, "EINV_PanelRect", _parent, [_left, _top, _width, _height]] call FUNC(uiCreate);
 
     _ctrl ctrlSetBackgroundColor _color;
@@ -171,13 +185,20 @@ if (_hidden) then {
         };
     };
 
-    // The "?" - it gives way to the glass while the item is searched (fnc_showSearch).
-    private _mark = [
-        _display, _parent, [_left, _top, _width, _height], "?", _cellH * 0.55,
-        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _fontBold, 2
-    ] call FUNC(uiLabel);
+    // The "?" - it gives way to the glass while the item is searched (fnc_showSearch takes its text away). The
+    // surface itself where it is that label already.
+    private _mark = if (_markSurface) then {
+        _background
+    } else {
+        private _label = [
+            _display, _parent, [_left, _top, _width, _height], "?", _cellH * 0.55,
+            _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _fontBold, 2
+        ] call FUNC(uiLabel);
 
-    _controls pushBack _mark;
+        _controls pushBack _label;
+        _label
+    };
+
     _entry set ["mark", _mark];
 } else {
     private _turned = _entry getOrDefault ["rotated", false];
@@ -301,9 +322,11 @@ if (_hidden) then {
         private _stackText = format ["%1/%2", _count, _stack];
         private _stackColor = _theme getOrDefault ["tileCountColor", [1, 1, 1, 1]];
 
+        // Only measured: the label lies on exactly the box and draws it as its own background - one control
+        // for the box and its words instead of two, on every stack of the window.
         ([
-            _display, _parent, _stackText, _fontBold, _textH, _left + _width - _padX, _countBottom, _innerW, _theme, true
-        ] call FUNC(drawCountBackdrop)) params ["_boxControls", "_boxRect"];
+            _display, _parent, _stackText, _fontBold, _textH, _left + _width - _padX, _countBottom, _innerW, _theme, true, false, true
+        ] call FUNC(drawCountBackdrop)) params ["_boxControls", "_boxRect", ["_boxColor", []]];
 
         _controls append _boxControls;
 
@@ -318,9 +341,15 @@ if (_hidden) then {
             _stackW = _boxRect select 2;
         };
 
-        _controls pushBack ([
+        private _stackLabel = [
             _display, _parent, _boxRect, _stackText, _textH, _stackColor, _fontBold, [2, 1] select _noBox
-        ] call FUNC(uiLabel));
+        ] call FUNC(uiLabel);
+
+        if (_boxControls isEqualTo [] && {_boxColor isNotEqualTo []}) then {
+            _stackLabel ctrlSetBackgroundColor _boxColor;
+        };
+
+        _controls pushBack _stackLabel;
     };
 
     // A magazine's rounds where they always were, in the bottom right corner - unless the stack's box has

@@ -56,6 +56,10 @@ if (isNull _display) exitWith {};
 
 private _start = diag_tickTime;
 
+// For the tester's numbers (einv_gui_debugTiming): when each part of the build ended.
+private _timed = missionNamespace getVariable [QGVAR(debugTiming), false];
+private _marks = [];
+
 // The soldier's live camera is this addon's own, unless the window brings one (the "camera" hook). It is
 // not stopped here: a camera that still frames the same is kept (below).
 private _ownCamera = !("camera" in GVAR(hooks));
@@ -131,6 +135,8 @@ if (_guest isNotEqualTo true) then {
         };
     } forEach (allControls _display);
 };
+
+if (_timed) then {_marks pushBack ["sweep", diag_tickTime]};
 
 uiNamespace setVariable [QGVAR(grids), []];
 uiNamespace setVariable [QGVAR(foldAreas), []];
@@ -336,6 +342,8 @@ private _context = createHashMapFromArray [
 GVAR(theme) = _theme;
 GVAR(context) = _context;
 
+if (_timed) then {_marks pushBack ["contents", diag_tickTime]};
+
 private _dim = _display displayCtrl IDC_DIM;
 _dim ctrlSetBackgroundColor (_theme getOrDefault ["dim", [0, 0, 0, 0.35]]);
 
@@ -369,6 +377,8 @@ if ("layout" in GVAR(hooks)) then {
 
 // The free middle, where a kit's window likes to open (fnc_placeWindow).
 GVAR(middle) = _rect;
+
+if (_timed) then {_marks pushBack ["columns", diag_tickTime]};
 
 // The footer is the look's too, unless the window that attached puts its own (or none) in its place.
 if ("footer" in GVAR(hooks)) then {
@@ -438,9 +448,13 @@ if (_ownCamera) then {
     ["camera", [_rect]] call FUNC(hook);
 };
 
+if (_timed) then {_marks pushBack ["footer and camera", diag_tickTime]};
+
 // The open kits' windows where they were, then the name at the mouse and the inspect card over them -
 // with the search field's fading and the hover (fnc_drawTopLayer).
 [_display] call FUNC(drawWindows);
+
+if (_timed) then {_marks pushBack ["kit windows and top layer", diag_tickTime]};
 
 // Drift is only reported for what is drawn: a holder no grid shows any more - closed, folded away, gone
 // - is nobody's to report now (fnc_drawCompartments notes the others).
@@ -455,8 +469,12 @@ call FUNC(drawPending);
 // survive this build - those that went or are under way drop out (fnc_selectionTiles).
 [] call FUNC(drawSelection);
 
+if (_timed) then {_marks pushBack ["under way and selection", diag_tickTime]};
+
 // What it was built from, so fnc_onFrame sees when that changes.
 GVAR(signatureParts) = call FUNC(getSignature);
+
+if (_timed) then {_marks pushBack ["signature", diag_tickTime]};
 
 // A repack in progress shows on the tiles built just now (einv_magazines).
 if (!isNil QEFUNC(magazines,drawJob)) then {
@@ -467,7 +485,7 @@ if (!isNil QEFUNC(magazines,drawJob)) then {
 ["afterBuild", [_display]] call FUNC(hook);
 
 // For the tester's numbers (einv_gui_debugTiming).
-if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
+if (_timed) then {
     private _took = ((diag_tickTime - _start) * 1000) toFixed 1;
     private _all = allControls _display;
     private _shown = {ctrlShown _x} count _all;
@@ -489,4 +507,17 @@ if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
     private _total = count _all;
 
     INFO_4("timing: build %1 ms (%2 controls on the display, %3 of them shown: %4)",_took,_total,_shown,_top joinString ", ");
+
+    // Where the build's time went, part by part.
+    private _from = _start;
+    private _parts = _marks apply {
+        _x params ["_name", "_at"];
+
+        private _part = format ["%1 %2", _name, ((_at - _from) * 1000) toFixed 1];
+
+        _from = _at;
+        _part
+    };
+
+    INFO_1("timing: build parts (ms) - %1",_parts joinString ", ");
 };

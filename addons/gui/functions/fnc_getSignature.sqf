@@ -16,8 +16,9 @@
  *             anew as well.
  *   loot    - per section of the loot column that has a container, [its number in the list of sections,
  *             what it holds and where it lies]: its cargo - and that of every uniform, vest and backpack
- *             lying in it, all the way down - and the revision of its places. Only some of these changed:
- *             only those sections are drawn again (fnc_redrawTiles).
+ *             lying in it, all the way down - and the revision of its places, kept as the engine's lists
+ *             themselves: comparing them is cheaper than writing a full crate out as text every second.
+ *             Only some of these changed: only those sections are drawn again (fnc_redrawTiles).
  *   storage - the same per section of the unit's own storage column (GVAR(context) "ownSections"). Only
  *             some changed: those sections are drawn again, and with them the weight card and the hotbar,
  *             which count what the unit carries (fnc_redrawPart). A window that attached may name holders of
@@ -166,7 +167,7 @@ private _loot = [];
     private _container = _x getOrDefault ["container", objNull];
 
     if (!isNull _container) then {
-        _loot pushBack [_forEachIndex, str [[_container] call _fnc_cargo, [_container] call _fnc_revision]];
+        _loot pushBack [_forEachIndex, [[_container] call _fnc_cargo, [_container] call _fnc_revision]];
     };
 } forEach (GVAR(context) getOrDefault ["lootSections", []]);
 
@@ -178,7 +179,7 @@ private _storage = [];
     private _container = _x getOrDefault ["container", objNull];
 
     if (!isNull _container) then {
-        _storage pushBack [_forEachIndex, str [[_container] call _fnc_cargo, [_container] call _fnc_revision]];
+        _storage pushBack [_forEachIndex, [[_container] call _fnc_cargo, [_container] call _fnc_revision]];
     };
 } forEach (GVAR(context) getOrDefault ["ownSections", []]);
 
@@ -186,7 +187,7 @@ private _storage = [];
 // a move that only rearranged them - the Arsenal's staging space has no section of the unit - is seen too.
 {
     if (_x isEqualType objNull && {!isNull _x}) then {
-        _storage pushBack [1000 + _forEachIndex, str [[_x] call _fnc_cargo, [_x] call _fnc_revision]];
+        _storage pushBack [1000 + _forEachIndex, [[_x] call _fnc_cargo, [_x] call _fnc_revision]];
     };
 } forEach (["signature", [], []] call FUNC(hook));
 

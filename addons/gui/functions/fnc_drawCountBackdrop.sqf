@@ -29,9 +29,13 @@
  * 8: Theme <HASHMAP>
  * 9: Flat - a stack's box, not a pill <BOOL> (default: false)
  * 10: From the left - argument 5 is its left edge <BOOL> (default: false)
+ * 11: Only measure - no control is made: the caller's label, which lies on exactly the box's rectangle, takes
+ *     the colour as its own background. Only for a flat box, which is square in every look; one control
+ *     instead of two per stack on the window <BOOL> (default: false)
  *
  * Return Value:
- * [Controls, Rectangle [x, y, w, h] for the number] - both empty for a theme without a backdrop <ARRAY>
+ * [Controls, Rectangle [x, y, w, h] for the number, the box's colour] - all empty for a theme without a
+ * backdrop; no controls when only measured <ARRAY>
  *
  * Example:
  * [_display, _parent, "30/30", "PuristaSemibold", 0.012, 0.5, 0.4, 0.05, _theme] call einv_gui_fnc_drawCountBackdrop;
@@ -41,7 +45,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_text", "_font", "_size", "_right", "_bottom", "_maxW", "_theme", ["_flat", false], ["_fromLeft", false]];
+params ["_display", "_parent", "_text", "_font", "_size", "_right", "_bottom", "_maxW", "_theme", ["_flat", false], ["_fromLeft", false], ["_measure", false]];
 
 private _color = if (_flat) then {
     _theme getOrDefault ["raised", _theme getOrDefault ["tileCountBg", []]]
@@ -49,7 +53,7 @@ private _color = if (_flat) then {
     _theme getOrDefault ["tileCountBg", []]
 };
 
-if (_color isEqualTo []) exitWith {[[], []]};
+if (_color isEqualTo []) exitWith {[[], [], []]};
 
 // The flat box hugs its text: small, so it covers little of the picture.
 private _height = _size * ([1.3, 1.15] select _flat);
@@ -61,4 +65,8 @@ private _rect = [[_right - _width, _right] select _fromLeft, _bottom - _height, 
 // and the flat box is square in every look.
 private _radius = [0, _height / 2] select (!_flat && {(_theme getOrDefault ["radius", 0]) > 0});
 
-[[_display, _parent, _rect, _color, _radius] call FUNC(uiPanel), _rect]
+// A square box measured only: the label made on the same rectangle is snapped to the same pixels
+// (fnc_uiCreate, as fnc_uiPanel snaps it) and draws the colour behind its text itself.
+if (_measure && {_radius == 0}) exitWith {[[], _rect, _color]};
+
+[[_display, _parent, _rect, _color, _radius] call FUNC(uiPanel), _rect, _color]

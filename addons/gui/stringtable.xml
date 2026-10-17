@@ -419,7 +419,7 @@
             <English>Log window timings (debug)</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_DebugTiming_Desc">
-            <English>Writes to the RPT how long each build\nand redraw took and how many controls\nthe display holds, what the window's\nframes cost in script (idle, mouse over\ntiles, dragging), and for each drag its\nlift and frames - for reports of stutters\nand low FPS. Read as the window opens.\nOff in play.</English>
+            <English>Writes to the RPT how long each build\nand redraw took and how many controls\nthe display holds, what the window's\nframes cost in script (idle, mouse over\ntiles, dragging) and in which part, the\nwhole frame time (FPS), what each item\nfound by searching cost, and for each\ndrag its lift and frames - for reports\nof stutters and low FPS. Read as the\nwindow opens. Off in play.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandDrop">
             <English>Time to drop an item</English>

@@ -60,6 +60,9 @@
 // How many timed frames make one line of the timing log (fnc_logFrame).
 #define FRAME_LOG_COUNT 1500
 
+// Where a timed frame's time goes (fnc_notePhase): only while fnc_frame times it, nothing but an isNil otherwise.
+#define NOTE_PHASE(NAME) if (!isNil QGVAR(phase)) then {[NAME] call FUNC(notePhase)}
+
 // How often it compares what the containers hold with what it shows (fnc_getSignature), in seconds.
 // Rarely enough that reading a full crate's cargo costs nothing noticeable.
 #define SIGNATURE_INTERVAL 1

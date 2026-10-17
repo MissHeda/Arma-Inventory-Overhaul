@@ -1127,7 +1127,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   something else. The parts line splits it: `fnc_onFrame` says where each part begins (`NOTE_PHASE` in `defines.hpp`,
   `fnc_notePhase`; an `isNil` each while the setting is off) - start, queue, lift, drag, hover, search, warm, answers, check,
   contents (the once-a-second signature with its redraws and builds) - each with its average per frame and the most one stretch
-  took, and "whole frame" is the time from one frame to the next (`einv_gui_frameLast`), the game's FPS. The rest of a frame is the
+  took, and "whole frame" is the engine's last frame (`diag_deltaTime`) each frame, the game's FPS. The rest of a frame is the
   engine drawing the display's controls (and the camera's view): idle script cost against the whole frame says which of the two a
   low FPS is, and the control counts say how much the engine has to draw.
 - **`fnc_onFrame`** each frame: hover, the drag, the focus rule, kit windows moving, the search animation; every
