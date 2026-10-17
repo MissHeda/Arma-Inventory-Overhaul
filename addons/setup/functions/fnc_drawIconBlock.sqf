@@ -142,16 +142,37 @@ private _zoomChipX = _pictureX + _zoomW + _gap + _numberW + _gap;
 
 _pictureY = _pictureY + _stepH + _stepGap;
 
-// The shift: across, then down, each with its text box.
+// The shift: across, then down, each with its text box - side by side when both fit at their full width,
+// else one under the other, lined up with the zoom stepper above. Squeezed side by side, the across row
+// would run into the down row.
+private _shiftRows = [[1, LLSTRING(Items_PictureAcross)], [2, LLSTRING(Items_PictureDown)]];
+private _shiftNeed = 0;
+
+{
+    _shiftNeed = _shiftNeed max ([_x select 1, -100] call _fnc_stepperWidth);
+} forEach _shiftRows;
+
 private _shiftW = (_pictureW - _gap) / 2;
+private _sideBySide = _shiftW - _numberW - _gap >= _shiftNeed;
 
 {
     _x params ["_which", "_format"];
 
-    [
-        _pictureX + (_shiftW + _gap) * _forEachIndex, _pictureY, (_shiftW - _numberW - _gap) max ([_format, -100] call _fnc_stepperWidth), _which,
-        [round (-ICON_OFFSET_MAX * 100), round (ICON_OFFSET_MAX * 100)], _format
-    ] call _fnc_number;
-} forEach [[1, LLSTRING(Items_PictureAcross)], [2, LLSTRING(Items_PictureDown)]];
+    if (_sideBySide) then {
+        [
+            _pictureX + (_shiftW + _gap) * _forEachIndex, _pictureY, _shiftW - _numberW - _gap, _which,
+            [round (-ICON_OFFSET_MAX * 100), round (ICON_OFFSET_MAX * 100)], _format
+        ] call _fnc_number;
+    } else {
+        [
+            _pictureX, _pictureY + (_stepH + _stepGap) * _forEachIndex, (_zoomW max _shiftNeed) min (_pictureW - _numberW - _gap), _which,
+            [round (-ICON_OFFSET_MAX * 100), round (ICON_OFFSET_MAX * 100)], _format
+        ] call _fnc_number;
+    };
+} forEach _shiftRows;
+
+if (!_sideBySide) then {
+    _pictureY = _pictureY + _stepH + _stepGap;
+};
 
 _pictureY + _stepH - _top

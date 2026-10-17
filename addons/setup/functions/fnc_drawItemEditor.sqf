@@ -557,7 +557,7 @@ private _pictureX = _sideX + _previewW + _gap * 2;
 private _pictureW = _sideX + _sideW - _pictureX;
 private _pictureY = _sideY + (((_previewH - ICON_BLOCK_H) / 2) max 0);
 
-[
+private _iconH = [
     _display, _box, [_pictureX, _pictureY, _pictureW], _theme, _workIcon, {
         params ["_icon", "_arguments"];
         _arguments params ["_class", "_canvas"];
@@ -569,7 +569,10 @@ private _pictureY = _sideY + (((_previewH - ICON_BLOCK_H) / 2) max 0);
     }, [_class, _canvas]
 ] call FUNC(drawIconBlock);
 
-_sideY = _sideY + _previewH + UNIT * 0.3;
+// Below the tile or below the picture's steppers, whichever ends lower: on a narrow card the shift steppers
+// go one under the other and the block grows past the tile.
+_sideY = (_sideY + _previewH) max (_pictureY + _iconH);
+_sideY = _sideY + UNIT * 0.3;
 
 // Its size in words: the box and its cells, or what keeps it from being one item.
 private _cellCount = {_x} count (_canvas get "cells");
