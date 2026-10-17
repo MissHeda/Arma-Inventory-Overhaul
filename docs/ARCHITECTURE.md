@@ -1092,6 +1092,24 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   (`fnc_drawWindows`), the name at the mouse and the inspect card (`fnc_drawTopLayer`), moves under way (`fnc_drawPending`), the
   selection, a repack in progress, the hook `afterBuild`. Controls made later draw over earlier ones - the only z-order the engine
   has.
+- **Clicks that are heavy run through one gate** (`fnc_coalesce [key, code, args, gap, debounce]`, `fnc_coalesceRun`, `fnc_coalesceTick`, `fnc_coalesceDrop`; state
+  `GVAR(coalesced)`, key -> `[code, args, due or -1, rests until, gap]`, emptied by `fnc_attach` and `fnc_onUnload`; Mia, 0.5.7: spamming a section's fold button took the
+  game to 15 fps because every click ran `fnc_build`). A click changes its **state at once** (cheap: `GVAR(collapsed)`, `expanded`, `opened`, `cameraOn`, `sortMode`, `groupFilters`,
+  `windowOrder`, `GVAR(filter)`, `GVAR(pageWanted)`) and asks the gate for the **work**. Throttle, the default: the first request of a quiet moment runs at once (so a single click is
+  as fast as before and runs where it did - the callers that rebuild still come through `fnc_later`); a request while the key rests only marks it due, **with the latest code and
+  arguments** (latest wins), and `fnc_onFrame` runs it through `fnc_coalesceTick` when the rest is over - one run per key however many clicks came, nothing queued per click.
+  After a run the key rests for `gap` (`COALESCE_GAP` 0.1 s; `COALESCE_REQUEST` 0.3 s for Sort, Take all / Put all in and the kit's unpack, which plan a container or reach the authority) or
+  `COALESCE_REST` 1.5 times the time the run took, whichever is longer, so a slow build is left alone longer (about two thirds of the time stays for the frames). Debounce: nothing runs until
+  `gap` after the last request (`COALESCE_TYPING` 0.15 s, the search field). Idle keys are forgotten by the tick. A window covered by another one runs nothing (the tick comes after the
+  covered exit of `fnc_onFrame`). Keys in use: `"build"` (`fnc_buildSoon`: `fnc_toggleSection`, `fnc_toggleRows`, `fnc_toggleCamera`, `fnc_openNested`, `fnc_closeNested`, ACE cargo's
+  `toggleOpen`; a direct `fnc_build` drops the waiting one with `fnc_coalesceDrop`, it draws the same state), `"windows"` (`fnc_windowsSoon`: `fnc_openWindow`, `fnc_closeWindow`; `fnc_drawWindows` drops it),
+  `"filter"` (`fnc_filterSoon`: the search field's `EditChanged` as a debounce, the category strip's `fnc_setGroup` as a throttle; Escape in the field applies at once and drops it),
+  `"page|<holder>|<compartment>"` (`fnc_pageSoon`: the page arrows and the words; `GVAR(pageWanted)` moves from where the last click left it, the run shows that page on the grid
+  looked up again then - a drag turns the page with `fnc_turnPage` directly), `"sort|<holder>"` (`fnc_sortHolder`: each click steps the order and relabels every Sort button at once,
+  one sort goes out with the latest order and the profile is saved then, not per click), `"take|<holder>"`, `"put|<holder>"`, `"unpack|<key>"`, `"soundmenu"`. Why not fold only the
+  section in place: a section's controls lie in the column's one scroll group and are positioned from a layout that also feeds the grids, panels, hover geometry, `foldAreas`, `sectionInfo`
+  and the drag's cells of everything below it; moving them would repeat all of that, so the build stays and the column-keep path (below, "Columns") keeps the scroll. Not gated: moves and
+  answers (they come from the server's pace), the quick-move key (see below) and the drag.
 - **Drawing only what changed** (`fnc_refresh [display]` -> `""` / `"redraw"` / `"build"`): the signature is
   `fnc_getSignature` -> `[own, list, loot, storage, card]` - `own` the unit's loadout less what its uniform, vest and backpack
   carry; `list` sections shown (also the worn containers as objects, and whether each opened container still lies where it was
@@ -1413,14 +1431,10 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   (a container the unit lacks: a hatched box that is its slot when it has an `owner`), `worn` + `unit` (a body's compact doll,
   `fnc_drawEquipmentDoll`), `locked` (a padlock and one muted line, nothing of what it holds; `lockTip` adds an open padlock). Own
   sections start open, crates found around start folded; `einv_gui_collapsed` holds the containers the player turned the other
-  way. **Hit areas** (loot fast, Mia, 0.5.1): the caption line is `CAPTION_LINE` 0.8 UNIT high and what is clicked on it - the tab and chevron
-  (`fnc_toggleSection`), the buttons (`fnc_uiButton`'s `hitPad`), a nested container's cross, the fold line - is a hit area larger than
-  it is drawn: `CAPTION_HIT_UP` 0.3 UNIT over the line (the gap between sections is 0.5), `CAPTION_HIT_DOWN` 0.2 under it (0.25 lie between the
-  line and the box) and half the 0.3 gap to the next button either side, so about a cell high; the fold line reaches 0.1 up (the grid is
-  just above it) and 0.2 down. The kit window's buttons and cross reach over the title row (`_hitV`, `_hitH`; their `buttons` record is the hit
-  area, so a press there still neither raises nor moves the window) and the header's four buttons 0.2 UNIT up and down and into the gaps
-  (they are 1.6 UNIT squares already). **Since 0.5.5 `fnc_uiButton` cuts every one of these to the button and 2 pixels** (see "The UI kit"), so the
-  caption buttons, the kit windows' buttons and the header's have only that; the fold line and the tab, which are not buttons, keep their zones. Nothing reaches over a grid's cells.
+  way. **Hit areas** (Mia, 0.5.5, 0.5.7): the caption line is `CAPTION_LINE` 0.8 UNIT high; its buttons are 0.6 UNIT high and centred on it, and **every hit area is the drawn
+  thing and 2 pixels on each side** - `fnc_uiButton` cuts any `hitPad` it is asked for to that (see "The UI kit"), the tab and chevron (`fnc_toggleSection`), a nested container's cross
+  and the fold line (`EINV_Hitbox` made with the same 2 pixels) the same. The kit window's buttons and cross and the header's four buttons are buttons and have only that. Nothing reaches
+  over the empty room between the lines, and nothing over a grid's cells. (The larger zones of 0.5.1 - `CAPTION_HIT_UP` and the like, a cell high - are gone.)
 - **Section bars: the activity chip and the strip of categories** (`fnc_updateStatus`, `fnc_animateStatus`, `fnc_stopStatus`, `fnc_drawGroupStrip`,
   `fnc_paintGroupStrip`, `fnc_setGroup`, `fnc_itemGroup`, `fnc_boxGroup`, `fnc_matchesGroup`). **The chip** is the one place the hands' queue and the search show
   how far they are: in the caption line of a box, right of the buttons, as high as they are, up to the weight - and over the weight (hidden while the chip stands,
@@ -1551,7 +1565,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   before, and `fnc_viewBlocks` takes a compartment left with one page for unpaged (the fold line again). (The note drawn on the free cells of the last page, with a
   "First page" button, of 0.5.4 is gone: it lay behind the tiles' background.) The grid's `pageControls` are drawn again only when what the bar says changed (`pageSig`: build, page, page count, text, the marks, the items elsewhere); `fnc_updatePageBars`,
   called at the end of `fnc_drawQueue`, has every paged box's bar compared after a queue changed or a move finished. A dragged item turns the page over the outer `PAGE_ZONE` 0.35 of
-  the bar on each side (`pageAreas`); the middle 0.3 is a `foldAreas` place where a drop is laid down in the container's first free spot. `fnc_turnPage [grid, step]` ->
+  the bar on each side (`pageAreas`); the middle 0.3 is a `foldAreas` place where a drop is laid down in the container's first free spot. a click on the bar goes through `fnc_pageSoon` ("Clicks that are heavy run through one gate"); `fnc_turnPage [grid, step]` ->
   `fnc_setPage [grid, page, bySearch]` (state, `GVAR(pagesMoved)` for the search) -> `fnc_showPage [display, grid, page]`, which draws only this box: the page left
   gives up its cell squares, **every control its tiles ever made** (the grid's `tileControls`, which `fnc_createTile` appends to and `fnc_drawTiles` prunes: a control a tile
   no longer names - a faded copy the search's fade had touched - is cleared all the same; after every redraw `fnc_drawTiles` compares the list with the controls the grid's tiles hold, deletes
@@ -1822,13 +1836,16 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   no controls: `fnc_findTile` does not find it, `fnc_revealTile` only takes its hatching from the data. **The search field** (`fnc_drawFilter`,
   `fnc_applyFilter [jump]`) fades the tiles that do not match; it looks at every page of a
   paged box (`fnc_pageCounts` reads all the grid's tiles): typed in or emptied (`jump` true) it turns each paged box to its first page with a match when the page it shows has none
-  (`fnc_setPage` with `bySearch`, remembered in `GVAR(pagesMoved)`; emptied, those pages go back, but not one the player turned since), and draws every bar again - the arrows'
+  (`fnc_setPage` with `bySearch`, remembered in `GVAR(pagesMoved)`; those pages go back box by box once nothing filters the box, but not one the player turned since), and draws every bar again - the arrows'
   marks count the matches before and after the page, the bar's text counts the matches on other pages. **The categories at the side of a loot box** work
   through the same function: `GVAR(groupFilters)` (`[[container, group], ...]`, one pair per box that has a category chosen, empty for every window) is read by
   `fnc_applyFilter` per grid (`fnc_boxGroup`) - a tile has to match the field (`fnc_matchesFilter`) and the box's category (`fnc_matchesGroup`) -, by
   `fnc_pageCounts` (the matches per page, so the arrows' marks and the jump to the first page with a match work for a category as they do for a word) and by the
   folded sections' tab tint. Every place that redid the fading when `GVAR(filter)` is not empty does so when a category is chosen too.
-  `fnc_drawPageBar`'s words ("matches on other pages") still go by the field alone: with only a category chosen it says the items on the other pages.
+  `fnc_drawPageBar`'s words ("matches on other pages") go by the field **or** the box's category (0.5.7): with only a category chosen the bar says how many matches lie on the
+  other pages, as for a word. Whether a box is filtered is per box (the field is every box's, a category the one box's): when a box is filtered no more - the field empty and its
+  own category cleared - `fnc_applyFilter [true]` gives it back the page the jump moved it from (`GVAR(pagesMoved)`), also while another box still has a category chosen; the entries
+  of boxes that are still filtered stay.
 - **Sounds** (`fnc_playSound [action, class, container, world, ui]`, public): by family from the config `CfgEinvSounds`
   (`gui/CfgEinvSounds.hpp`; its header explains the layers): `Default`, 17 item families and 4 container families (crate, vehicle,
   body, ground), Arma's own files only; the family is the item's config `einv_sound`, else `fnc_soundFamily`. Actions: `lift`,

@@ -94,6 +94,9 @@ if (_editing) exitWith {
             _filterEdit ctrlSetText "";
             GVAR(filter) = "";
             (_filterEdit getVariable [QGVAR(placeholder), controlNull]) ctrlShow true;
+
+            // Done now; a typed search still waiting (fnc_filterSoon) is this one.
+            ["filter"] call FUNC(coalesceDrop);
             [true] call FUNC(applyFilter);
             true
         };

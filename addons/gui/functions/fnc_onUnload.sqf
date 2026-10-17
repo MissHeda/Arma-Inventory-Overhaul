@@ -96,6 +96,8 @@ GVAR(dragTarget) = [];
 // What still waited for the hands is dropped with the window: it was only waiting, nothing was sent or changed
 // (fnc_queueMoves). A move that already went out finishes on its own.
 GVAR(handQueue) = [];
+GVAR(coalesced) = createHashMap;
+GVAR(pageWanted) = createHashMap;
 GVAR(handStarted) = -1;
 GVAR(queueDirty) = false;
 GVAR(queueFrom) = 0;

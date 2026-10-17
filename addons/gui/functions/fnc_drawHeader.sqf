@@ -144,7 +144,7 @@ if !(call FUNC(cameraForced)) then {
 
     private _camera = [
         _display, controlNull, _cameraRect, "camera", "", UI_TEX(icon_camera_ca),
-        [GVAR(cameraOn), !GVAR(cameraOn)] call _fnc_buttonTheme, {call FUNC(toggleCamera)}
+        [GVAR(cameraOn), !GVAR(cameraOn)] call _fnc_buttonTheme, {[] call FUNC(toggleCamera)}
     ] call FUNC(uiButton);
     [_camera, LLSTRING(Camera_Tooltip)] call _fnc_tooltip;
 };
@@ -163,7 +163,8 @@ private _sound = [
         if ((_this select 0) < 0) then {
             ["all"] call FUNC(soundSet);
         } else {
-            [uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openSoundMenu);
+            // Once per rest for a run of clicks (fnc_coalesce).
+            ["soundmenu", {[uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openSoundMenu)}, [], COALESCE_GAP] call FUNC(coalesce);
         };
     }
 ] call FUNC(uiButton);

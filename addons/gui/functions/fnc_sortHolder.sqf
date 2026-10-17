@@ -1,4 +1,5 @@
 #include "..\script_component.hpp"
+#include "..\defines.hpp"
 /*
  * Author: Miss Heda
  * Sorts a container or a kit: the holder's places emptied and everything laid out anew by the order the
@@ -11,7 +12,8 @@
  * A click on the button steps to the next order first ("step"), and every Sort button on the window shows
  * the new one at once (fnc_sortButtons).
  *
- * A rearrangement is a rummage and it cannot be refused: it sounds when it is sent.
+ * A rearrangement is a rummage and it cannot be refused: it sounds when it is sent. Clicked fast, the button steps the order with
+ * every click but sends one sort per COALESCE_REQUEST, the latest order (fnc_coalesce) - the profile is written then too.
  *
  * Arguments:
  * 0: The container, or the key of a kit's grid <OBJECT or STRING>
@@ -35,12 +37,21 @@ if (_step) then {
     GVAR(sortMode) = SORT_MODES select (((SORT_MODES find GVAR(sortMode)) + 1) mod count SORT_MODES);
 
     profileNamespace setVariable [QGVAR(sortMode), GVAR(sortMode)];
-    saveProfileNamespace;
 
     // Every Sort button shows the new order, the one that was clicked included.
     [] call FUNC(sortButtons);
 };
 
-["search", "", [_holder, objNull] select (_holder isEqualType "")] call FUNC(playSound);
+// The sort itself (a request to the authority and the profile written to disk) goes out once per rest for a run of clicks, with the
+// order the last of them left (fnc_coalesce): a click steps the order and shows it at once, what is sent is the latest.
+[format ["sort|%1", _holder], {
+    params ["_holder", "_root", "_step"];
 
-[[createHashMapFromArray [["kind", "sort"], ["from", _holder], ["fromRoot", _root], ["order", GVAR(sortMode)]]]] call FUNC(sendMoves);
+    if (_step) then {
+        saveProfileNamespace;
+    };
+
+    ["search", "", [_holder, objNull] select (_holder isEqualType "")] call FUNC(playSound);
+
+    [[createHashMapFromArray [["kind", "sort"], ["from", _holder], ["fromRoot", _root], ["order", GVAR(sortMode)]]]] call FUNC(sendMoves);
+}, [_holder, _root, _step], COALESCE_REQUEST] call FUNC(coalesce);

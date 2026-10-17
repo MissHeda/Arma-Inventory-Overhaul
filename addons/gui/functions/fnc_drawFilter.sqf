@@ -64,7 +64,9 @@ _edit ctrlAddEventHandler ["EditChanged", {
 
     GVAR(filter) = trim _text;
     (_edit getVariable [QGVAR(placeholder), controlNull]) ctrlShow (_text isEqualTo "");
-    [true] call FUNC(applyFilter);
+
+    // The tiles follow once typing pauses (fnc_filterSoon).
+    [true] call FUNC(filterSoon);
 }];
 
 // Somewhere for the cursor to go when typing is done (Return, or a click elsewhere): a button no one

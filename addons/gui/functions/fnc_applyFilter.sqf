@@ -14,8 +14,8 @@
  * tiles of the other pages are on the grid too (fnc_pageCounts). Asked to jump (the field was typed in or emptied, a
  * category chosen), each such box turns to the first page with a match when the page it stands on has none (it stays
  * where it is while it still shows one, so refining a word does not move it) - the pages it moved are kept
- * (GVAR(pagesMoved)) and given back when the field is emptied and no category is chosen, but for one the player turned
- * himself since. Its bar shows how many matches
+ * (GVAR(pagesMoved)) and given back box by box once nothing filters the box any more - the field is empty and the box has
+ * no category chosen, whether another box still has one or not -, but for one the player turned himself since. Its bar shows how many matches
  * lie before and after the page (fnc_drawPageBar). The tiles that match are the ones not faded, as ever.
  *
  * A section folded away to its caption (fnc_drawSection) shows no tile to fade, so with text in the field
@@ -44,52 +44,61 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
 // ----- Paged boxes: found on any page -----
 if (_jump && {!isNull _display}) then {
-    if (_filter isEqualTo "" && {GVAR(groupFilters) isEqualTo []}) then {
-        // Emptied: the pages the search moved go back.
-        private _moved = +GVAR(pagesMoved);
+    private _grids = uiNamespace getVariable [QGVAR(grids), []];
 
-        GVAR(pagesMoved) = [];
+    // A box is filtered while the field holds something or it has a category of its own chosen: the text is every box's, the
+    // category the one box's. The pages that were moved for a box that is filtered no more go back, whether another box still has a
+    // category chosen or not.
+    private _fnc_filtered = {
+        params ["_holder"];
 
-        {
-            _x params ["_holder", "_block", "_back"];
-
-            private _grid = (uiNamespace getVariable [QGVAR(grids), []]) param [
-                (uiNamespace getVariable [QGVAR(grids), []]) findIf {
-                    (_x getOrDefault ["holder", objNull]) isEqualTo _holder && {(_x getOrDefault ["block", -1]) == _block} && {(_x getOrDefault ["pageRanges", []]) isNotEqualTo []}
-                }, createHashMap
-            ];
-
-            if (count _grid > 0) then {
-                [_grid, _back] call FUNC(setPage);
-            } else {
-                [_holder, _block, _back] call FUNC(pageOf);
-            };
-        } forEach _moved;
-
-        // The marks on the arrows go.
-        {
-            if ((_x getOrDefault ["pageRanges", []]) isNotEqualTo []) then {
-                [_display, _x] call FUNC(drawPageBar);
-            };
-        } forEach (uiNamespace getVariable [QGVAR(grids), []]);
-    } else {
-        {
-            private _grid = _x;
-
-            if ((_grid getOrDefault ["pageRanges", []]) isEqualTo []) then {continue};
-
-            ([_grid] call FUNC(pageCounts)) params ["", "_matches"];
-
-            private _page = _grid getOrDefault ["page", 0];
-            private _first = _matches findIf {_x > 0};
-
-            if ((_matches select _page) == 0 && {_first >= 0}) then {
-                [_grid, _first, true] call FUNC(setPage);
-            } else {
-                [_display, _grid] call FUNC(drawPageBar);
-            };
-        } forEach (uiNamespace getVariable [QGVAR(grids), []]);
+        _filter isNotEqualTo "" || {([_holder] call FUNC(boxGroup)) isNotEqualTo ""}
     };
+
+    private _moved = +GVAR(pagesMoved);
+
+    GVAR(pagesMoved) = _moved select {[_x select 0] call _fnc_filtered};
+
+    {
+        _x params ["_holder", "_block", "_back"];
+
+        if ([_holder] call _fnc_filtered) then {continue};
+
+        private _grid = _grids param [
+            _grids findIf {
+                (_x getOrDefault ["holder", objNull]) isEqualTo _holder && {(_x getOrDefault ["block", -1]) == _block} && {(_x getOrDefault ["pageRanges", []]) isNotEqualTo []}
+            }, createHashMap
+        ];
+
+        if (count _grid > 0) then {
+            [_grid, _back] call FUNC(setPage);
+        } else {
+            [_holder, _block, _back] call FUNC(pageOf);
+        };
+    } forEach _moved;
+
+    {
+        private _grid = _x;
+
+        if ((_grid getOrDefault ["pageRanges", []]) isEqualTo []) then {continue};
+
+        // A box with nothing filtering it keeps its page; its bar loses the marks.
+        if !([_grid getOrDefault ["holder", _grid getOrDefault ["container", objNull]]] call _fnc_filtered) then {
+            [_display, _grid] call FUNC(drawPageBar);
+            continue
+        };
+
+        ([_grid] call FUNC(pageCounts)) params ["", "_matches"];
+
+        private _page = _grid getOrDefault ["page", 0];
+        private _first = _matches findIf {_x > 0};
+
+        if ((_matches select _page) == 0 && {_first >= 0}) then {
+            [_grid, _first, true] call FUNC(setPage);
+        } else {
+            [_display, _grid] call FUNC(drawPageBar);
+        };
+    } forEach _grids;
 };
 
 {

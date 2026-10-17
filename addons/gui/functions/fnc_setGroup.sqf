@@ -39,4 +39,5 @@ if (_new isNotEqualTo "") then {
 // The strip says which is chosen.
 [_holder] call FUNC(paintGroupStrip);
 
-[true] call FUNC(applyFilter);
+// The tiles follow once per rest for a run of clicks (fnc_filterSoon).
+[false] call FUNC(filterSoon);

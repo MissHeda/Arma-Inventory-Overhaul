@@ -7,8 +7,9 @@
  * them, one line that says where it stands and what lies elsewhere:
  *   "Page 2 / 5  ·  +180 items on other pages  ·  12 queued"
  * - the items on the pages not shown, the entries of the hands' queue waiting on tiles of those pages (they have no circle
- * while their tile is not drawn, so they are counted here), and, while the search field holds something, the matches on
- * other pages instead of the items (fnc_pageCounts) - a search is found on any page. An arrow whose side of the pages has
+ * while their tile is not drawn, so they are counted here), and, while the search field holds something or a category is
+ * chosen at the box's side (fnc_drawGroupStrip), the matches on other pages instead of the items (fnc_pageCounts) - a search
+ * and a category are found on any page. An arrow whose side of the pages has
  * matches wears a small mark with their number.
  * The arrows are round buttons of their own, a good deal bigger than the line of words, its surface fading in under the mouse and
  * out again (a pair of fades, not a jump). The hit area of each is the button and 2 pixels on every side (the rule of fnc_uiButton),
@@ -53,7 +54,9 @@ private _theme = GVAR(theme);
 
 ([_grid] call FUNC(pageCounts)) params ["_counts", "_matches"];
 
-private _searching = GVAR(filter) isNotEqualTo "";
+// The matches are counted for the search field and for the category chosen at this box's side (fnc_pageCounts): either one makes the
+// bar say how many lie on the other pages.
+private _searching = GVAR(filter) isNotEqualTo "" || {([_grid getOrDefault ["holder", _grid getOrDefault ["container", objNull]]] call FUNC(boxGroup)) isNotEqualTo ""};
 private _before = 0;
 private _after = 0;
 
@@ -173,7 +176,8 @@ private _fnc_click = {
 
     if (count _target == 0) exitWith {};
 
-    [_target, parseNumber _step] call FUNC(turnPage);
+    // Clicked fast, the pages the first and the last click asked for are drawn, not each between (fnc_pageSoon).
+    [_target, parseNumber _step] call FUNC(pageSoon);
 };
 
 // A click on the words: the same, to the first page.
@@ -190,7 +194,7 @@ private _fnc_first = {
 
     if (count _target == 0) exitWith {};
 
-    [_target, 0] call FUNC(setPage);
+    [_target, 0, false] call FUNC(pageSoon);
 };
 
 private _gridIndex = (uiNamespace getVariable [QGVAR(grids), []]) find _grid;

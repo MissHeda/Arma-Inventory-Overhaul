@@ -54,6 +54,9 @@ params ["_display"];
 
 if (isNull _display) exitWith {};
 
+// A build a click asked for (fnc_buildSoon) and not yet done is this one: it draws what the state is now.
+["build"] call FUNC(coalesceDrop);
+
 private _start = diag_tickTime;
 
 // For the tester's numbers (einv_gui_debugTiming): when each part of the build ended.

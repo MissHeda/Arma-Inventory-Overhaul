@@ -57,10 +57,7 @@ if (_index >= 0) then {
 // Open or close, as the container it is: fabric and buckles for a backpack, a vest, a uniform.
 [["open", "close"] select (_index >= 0), _class, _object] call FUNC(playSound);
 
-private _display = uiNamespace getVariable [QGVAR(display), displayNull];
-
-if (!isNull _display) then {
-    [_display] call FUNC(build);
-};
+// The state is changed; the window is built once for a run of clicks (fnc_buildSoon).
+[] call FUNC(buildSoon);
 
 true

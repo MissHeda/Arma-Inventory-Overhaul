@@ -460,8 +460,10 @@ private _fnc_click = {
     if (isNull _holder) exitWith {};
 
     switch (_kind) do {
-        case "take": {[_holder] call FUNC(takeAll)};
-        case "put": {[_holder] call FUNC(putAll)};
+        // Take all and Put all in plan a whole container; clicked fast they plan it once per rest (fnc_coalesce) - what already
+        // waits for the hands is skipped in any case. Sort steps its order at each click and sends one request (fnc_sortHolder).
+        case "take": {["take|" + str _holder, {[_this select 0] call FUNC(takeAll)}, [_holder], COALESCE_REQUEST] call FUNC(coalesce)};
+        case "put": {["put|" + str _holder, {[_this select 0] call FUNC(putAll)}, [_holder], COALESCE_REQUEST] call FUNC(coalesce)};
         case "sort": {[_holder, objNull, true] call FUNC(sortHolder)};
     };
 };

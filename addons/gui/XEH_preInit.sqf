@@ -295,6 +295,12 @@ GVAR(expanded) = [];
 GVAR(pages) = [];
 GVAR(pagesMoved) = [];
 GVAR(pageHover) = [];
+// The page a fast run of clicks on a bar has asked for so far, by container and compartment (fnc_pageSoon).
+GVAR(pageWanted) = createHashMap;
+
+// What a click asked for that is heavy to do and is run at most once per rest (fnc_coalesce): by key, [code, arguments, when it
+// is due or -1, when the key rests until, its gap]. Emptied with every window (fnc_attach, fnc_onUnload).
+GVAR(coalesced) = createHashMap;
 
 // The window's sounds, set in the dropdown under the speaker in the header (fnc_openSoundMenu): one volume per kind
 // of sound (GVAR(soundGroups), fnc_soundGroup), 0 to 1. Each level is

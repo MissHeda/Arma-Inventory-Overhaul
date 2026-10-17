@@ -24,8 +24,5 @@ if (call FUNC(cameraForced)) exitWith {};
 
 GVAR(cameraOn) = !GVAR(cameraOn);
 
-private _display = uiNamespace getVariable [QGVAR(display), displayNull];
-
-if (!isNull _display) then {
-    [_display] call FUNC(build);
-};
+// The state is changed; the window is built once for a run of clicks (fnc_buildSoon).
+[] call FUNC(buildSoon);

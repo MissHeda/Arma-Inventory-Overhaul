@@ -292,7 +292,8 @@ if (_buttons isNotEqualTo []) then {
                 if (_kind isEqualTo "sort") then {
                     [_what, objNull, true] call FUNC(sortHolder);
                 } else {
-                    [_what] call EFUNC(compat_efak,unpackAll);
+                    // Once per rest for a run of clicks (fnc_coalesce).
+                    ["unpack|" + _what, {[_this select 0] call EFUNC(compat_efak,unpackAll)}, [_what], COALESCE_REQUEST] call FUNC(coalesce);
                 };
             },
             _busy, _chipSize, true, [_hitH, _hitV]

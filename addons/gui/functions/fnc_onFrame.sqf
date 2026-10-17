@@ -41,6 +41,9 @@
  * At each check, after those whether the window should stay open, a soldier taken away from the loot
  * closes the window (fnc_checkTaken).
  *
+ * What clicks asked for that is heavy and had to rest (fnc_coalesce) is run once per key when its time is up
+ * (fnc_coalesceTick), not while another window lies over this one.
+ *
  * The hands' queue (fnc_queueMoves) runs every frame while it holds something (fnc_animateQueue), not while another
  * window lies over this one; the activity chips of the boxes' caption lines move with it and with the search
  * (fnc_animateStatus).
@@ -237,6 +240,10 @@ if (_covered) exitWith {
         [_why] call FUNC(closeDisplay);
     };
 };
+
+// What clicks asked for that is heavy - a build, the pages, the search's fade - and had to rest (fnc_coalesce): one run per
+// key when its time is up. Not under another window, which keeps still.
+[] call FUNC(coalesceTick);
 
 // The hands' queue: the first action is sent when its time is up (fnc_animateQueue). Not under
 // another window, and the time it stood still does not count.

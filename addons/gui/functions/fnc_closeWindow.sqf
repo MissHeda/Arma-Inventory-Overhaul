@@ -45,15 +45,7 @@ if ((GVAR(windowMove) param [0, ""]) isEqualTo _key) then {
     GVAR(windowMove) = [];
 };
 
-private _display = uiNamespace getVariable [QGVAR(display), displayNull];
-
-if (!isNull _display) then {
-    [_display] call FUNC(drawWindows);
-
-    // The marks of the hands' queue (fnc_queueMoves) on its tiles, which are new controls.
-    if (GVAR(handQueue) isNotEqualTo []) then {
-        [_display] call FUNC(drawQueue);
-    };
-};
+// The windows are drawn once for a run of clicks (fnc_windowsSoon).
+[] call FUNC(windowsSoon);
 
 _index >= 0

@@ -42,8 +42,5 @@ if ((["fold", [_container], false] call FUNC(hook)) isNotEqualTo true) then {
     GVAR(collapsed) = GVAR(collapsed) select {_x isEqualType objNull && {!isNull _x}};
 };
 
-private _display = uiNamespace getVariable [QGVAR(display), displayNull];
-
-if (!isNull _display) then {
-    [_display] call FUNC(build);
-};
+// The state is changed; the window is built once for a run of clicks (fnc_buildSoon).
+[] call FUNC(buildSoon);
