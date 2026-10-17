@@ -1344,7 +1344,15 @@ a drag from it is **always ended by the `drop` hook**, `fnc_endDrag` then only c
 
 ### Layout
 
-`| equipment | free middle | storage | loot |` (`fnc_layoutGlass`). The context (`fnc_build`) carries `unit`, `container`,
+`| equipment | free middle | loot | storage |` (`fnc_layoutGlass`). **Where the loot column goes** is the client setting
+`einv_gui_lootSide` (read at every build, so an open window follows at its next one): `left` (default) puts the storage column at the right
+edge always, looting or not, and the loot column left of it; `right` is the order before the setting, `| storage | loot |`, with the loot
+column at the right edge and the storage column moving in once something is looted. The columns have the same widths either way, so the
+free middle is as wide in both and only lies against the other column; the camera is told the new rectangle and moves (see "The camera is
+kept"), the storage column is made at the same x with its scroll kept by its id. A window that reserves the right edge for itself
+(`rightColumn`) always gets the `right` order. Nothing else goes by the order: quick move and the drags go by a grid's `side` (`"own"` /
+`"loot"`), kit windows (`fnc_placeWindow`) by the free middle and `GVAR(panels)` - a kit opened from the storage column while a loot
+column shows now opens in the middle, one column away from its tile - and the inspect card and the footer by the screen. The context (`fnc_build`) carries `unit`, `container`,
 `secondary`, `equipment` (`fnc_getEquipment`), `ownSections`, `lootSections`, `looting`, `cameraOn`; a window that attached may
 add `rightColumn`, `rightKeep`, `rightGrow` (reserve and grow the loot column's place; the rect comes back as `rightRect`) and
 `storageSections`. The layout answers where the soldier stands, or `[]` when the middle is too narrow; on 4:3 the middle gives way
@@ -2571,6 +2579,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
 | `einv_gui_tileNames` | CHECKBOX | client | off | the item's short name in the top corner of every tile (`fnc_createTile`, a name that does not fit set a fifth smaller before it is cut; the setup wizard's preview always has it); the name at the mouse stays; ACE Arsenal's panel follows |
 | `einv_gui_cameraDefault` | LIST | client | `soldier` | the camera as the window opens: `soldier` (third person), `off` (first person) |
+| `einv_gui_lootSide` | LIST | client | `left` | where the loot column opens: `left` of the storage column, which never moves (default), or `right`, at the right edge with the storage column moving in (`fnc_layoutGlass`); read at every build |
 | `einv_gui_showNearby` | CHECKBOX | client | on | nearby piles and crates as boxes in the loot column |
 | `einv_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |
 | `einv_gui_magazineText` | CHECKBOX | client | on | the rounds ("17/30") on magazine tiles; off leaves the bar alone |

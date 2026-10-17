@@ -448,6 +448,32 @@
         <Key ID="STR_einv_gui_Setting_HandMove_Desc">
             <English>Seconds the hands are busy moving one\nitem to a different container or holder:\na drag between containers, the quick\nmove, Take all and Put all in - one\ncircle per item, one after another. A\nclick on a circle cancels it.\nRearranging within a container, turning\nand splitting a stack take no time.\n\n0 moves at once, with no circle.</English>
         </Key>
+        <Key ID="STR_einv_gui_Setting_LootSide">
+            <English>Where other storage opens</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_LootSide_Desc">
+            <English>Where the column of what you loot (a
+crate, a vehicle, a body, the ground or
+what lies nearby) opens.
+
+Left of my storage: your own storage
+column never moves, and the new column
+opens beside it, in the middle of the
+window.
+
+Right of my storage: the new column takes
+the right edge and your storage moves
+aside for it, as in earlier versions.
+
+An open window changes at its next
+build.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_LootSide_Left">
+            <English>Left of my storage - my storage stays put</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_LootSide_Right">
+            <English>Right of my storage - my storage moves aside</English>
+        </Key>
         <Key ID="STR_einv_gui_Setting_MagazineFillBar">
             <English>Fill bar on magazines</English>
         </Key>

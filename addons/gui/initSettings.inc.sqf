@@ -62,6 +62,18 @@
     0
 ] call CBA_fnc_addSetting;
 
+// Each player's own taste: where the loot column opens - left of their storage column, which then never moves
+// (default), or at the right edge with the storage column moving in, as it did before. Read at every build
+// (fnc_layoutGlass), so an open window follows at its next one.
+[
+    QGVAR(lootSide),
+    "LIST",
+    [LLSTRING(Setting_LootSide), LLSTRING(Setting_LootSide_Desc)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
+    [["left", "right"], [LLSTRING(Setting_LootSide_Left), LLSTRING(Setting_LootSide_Right)], 0],
+    0
+] call CBA_fnc_addSetting;
+
 // Each player's own: how long the window takes to draw, written to the RPT for a report of stutters
 // (fnc_build, fnc_refresh). Read at every build and redraw.
 [

@@ -4,12 +4,14 @@
  * Author: Miss Heda
  * Lays out the window, Enhanced First Aid Kits' glass:
  *
- *   | equipment |        free        | storage | loot |
+ *   | equipment |        free        | loot | storage |
  *
  * On the left what the unit wears, as cards (fnc_drawEquipmentCards). On the right its uniform, vest
- * and backpack stacked in one scrolling column, and while it loots a second column for that at the
- * far right, titled with what is looted ("Nearby" when it only shows what lies around) - the middle gets
- * narrower for it. The middle stays free: the camera shows the soldier there, and an open kit's window
+ * and backpack stacked in one scrolling column, and while it loots a second column for that, titled with
+ * what is looted ("Nearby" when it only shows what lies around) - the middle gets narrower for it. By
+ * default the loot column opens left of the storage column, which stays where it is; the client setting
+ * einv_gui_lootSide can have it open at the right edge instead, with the storage column moving in
+ * (| storage | loot |). The middle stays free: the camera shows the soldier there, and an open kit's window
  * opens there (fnc_placeWindow). Kits never bring the loot column in: they float over the columns in
  * windows of their own (fnc_drawWindows).
  *
@@ -61,9 +63,9 @@ private _titleIcons = _theme getOrDefault ["titleIcons", true];
 // caps the player's tile scale (fnc_getCell), so the two can never disagree.
 private _columnW = COLUMN_W(_cellW);
 
-// The columns from the right edge inwards: loot (while looting), storage, then the middle. A window that
-// attached keeps the place of the loot column although nothing is looted (the context's "rightColumn":
-// it draws there itself) and may let it grow by what the middle has beyond "rightKeep" UNITs
+// The columns from the right edge inwards: storage and loot (while looting, in the order set below), then the
+// middle. A window that attached keeps the place of the loot column although nothing is looted (the context's
+// "rightColumn": it draws there itself) and may let it grow by what the middle has beyond "rightKeep" UNITs
 // of width - at most "rightGrow" of a column - so a wide screen does not leave the soldier a hall.
 private _looting = _context getOrDefault ["looting", false];
 private _reserved = _looting || {_context getOrDefault ["rightColumn", false]};
@@ -83,15 +85,38 @@ if (_reserved) then {
 };
 
 private _right = CONTENT_X + CONTENT_W;
-private _lootX = _right - _rightW;
 
-if (_reserved) then {
+// Where the loot column goes is the player's own taste (the setting einv_gui_lootSide): by default it opens
+// left of the storage column, which then never moves - looting or not, the storage column stands at the right
+// edge - and the other way round, the loot column takes the right edge and the storage column moves in. A
+// window that kept the right edge for itself ("rightColumn") has no say in it: its column stays there. The
+// column widths and the gaps are the same either way, so the free middle is just as wide, only it lies
+// against the loot column instead of the storage column.
+private _lootLeft = _looting
+    && {!(_context getOrDefault ["rightColumn", false])}
+    && {GVAR(lootSide) isNotEqualTo "right"};
+
+private _lootX = 0;
+private _storageX = 0;
+
+if (_lootLeft) then {
+    _storageX = _right - _columnW;
+    _lootX = _storageX - _gap - _rightW;
     _right = _lootX - _gap;
-    _context set ["rightRect", [_lootX, CONTENT_Y, _rightW, CONTENT_H]];
+} else {
+    _lootX = _right - _rightW;
+
+    if (_reserved) then {
+        _right = _lootX - _gap;
+    };
+
+    _storageX = _right - _columnW;
+    _right = _storageX - _gap;
 };
 
-private _storageX = _right - _columnW;
-_right = _storageX - _gap;
+if (_reserved) then {
+    _context set ["rightRect", [_lootX, CONTENT_Y, _rightW, CONTENT_H]];
+};
 
 _leftW = _leftW min ((_right - CONTENT_X) max 0);
 

@@ -242,6 +242,10 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   on another page. Quick move, Take all and placing use the whole container; the pages are only the view, and only the page shown has controls on the
   screen. The search field finds an item on any page (the box turns to its first page with a match, the arrows show how many matches lie before and after).
   Your own gear is never paged.
+- **Where other storage opens:** your own storage column stays at the right edge of the window, and the column of what you loot (the ground, a crate,
+  a vehicle, a body, what lies nearby) opens left of it, between your equipment and your storage. "Where other storage opens"
+  (`einv_gui_lootSide`, in "Enhanced Inventory - Client", General) can put it at the right edge instead, with your storage moving in as it did in earlier
+  versions. The soldier in the middle moves with the free space without leaving third person.
 - **Sounds and looting:** every kind of gear sounds like what it is - weapons, magazines, vests, helmets, medical
   items, radios -, using Arma's own sound files only; players within earshot hear someone loot (`einv_gui_soundsWorld`,
   a server setting). A movement key stops looting and closes the window (each player's setting).
