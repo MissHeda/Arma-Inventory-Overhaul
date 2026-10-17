@@ -102,6 +102,21 @@ private _cellH = _grid get "cellH";
 
 (_grid get "rel") params ["_left", "_top"];
 
+// A cell at the corner of its compartment's panel is round there (fnc_cornerRadii): its pieces are kept apart from the square
+// (the grid's "cellParts", by the cell's number), shown and hidden with it (here, fnc_createTile) and deleted with it (fnc_clearCells).
+private _parts = _grid getOrDefault ["cellParts", createHashMap];
+
+_grid set ["cellParts", _parts];
+
+// Asked inline for the cells that already have a square: a grid of hundreds of cells draws again on every redraw.
+private _fnc_pieces = {
+    params ["_index", "_show"];
+
+    {
+        _x ctrlShow _show;
+    } forEach (_parts getOrDefault [_index, []]);
+};
+
 {
     if (_x == 2) then {continue};
 
@@ -109,23 +124,36 @@ private _cellH = _grid get "cellH";
 
     if (_x == 1) then {
         _cell ctrlShow false;
+
+        if (count _parts > 0) then {
+            [_forEachIndex, false] call _fnc_pieces;
+        };
+
         continue;
     };
 
     if (isNull _cell) then {
         private _row = floor (_forEachIndex / _cols);
         private _col = _forEachIndex - _row * _cols;
-
-        _cell = [_display, "EINV_PanelRect", _parent, [
+        private _rect = [
             _left + (_colX select _col),
             _top + (_rowY select _row),
             _cellW - pixelW,
             _cellH - pixelH
-        ]] call FUNC(uiCreate);
+        ];
 
-        _cell ctrlSetBackgroundColor _color;
-        _cells set [_forEachIndex, _cell];
+        private _made = [_display, _parent, _rect, _color, [_grid, _rect] call FUNC(cornerRadii)] call FUNC(uiSurface);
+
+        _cells set [_forEachIndex, _made select 0];
+
+        if (count _made > 1) then {
+            _parts set [_forEachIndex, _made select [1]];
+        };
     } else {
         _cell ctrlShow true;
+
+        if (count _parts > 0) then {
+            [_forEachIndex, true] call _fnc_pieces;
+        };
     };
 } forEach _state;

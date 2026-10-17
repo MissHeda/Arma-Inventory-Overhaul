@@ -68,21 +68,19 @@ private _frames = [];
         private _origin = [_rect select 0, _rect select 1];
         private _on = [_grid, _tile get "col", _tile get "row"];
 
-        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _fill, "surface", 0, _on] call FUNC(uiShape));
+        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _fill, "surface", 0, _on, true] call FUNC(uiShape));
         _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame", 0, _on] call FUNC(uiShape));
         _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame", 1, _on] call FUNC(uiShape));
         continue;
     };
 
-    private _filled = [_display, "EINV_PanelRect", _parent, _rect] call FUNC(uiCreate);
-    _filled ctrlSetBackgroundColor _fill;
-    _frames pushBack _filled;
+    // At a corner of its compartment's panel the fill and the frame are round there (fnc_cornerRadii).
+    private _corners = [_grid, _rect] call FUNC(cornerRadii);
+
+    _frames append ([_display, _parent, _rect, _fill, _corners] call FUNC(uiSurface));
 
     // Two pixels thick: the frame, and another inside it.
-    _frames pushBack ([_display, _parent, _rect, _accent] call FUNC(uiFrame));
-    _frames pushBack ([
-        _display, _parent, [(_rect select 0) + pixelW, (_rect select 1) + pixelH, (_rect select 2) - pixelW * 2, (_rect select 3) - pixelH * 2], _accent
-    ] call FUNC(uiFrame));
+    _frames append ([_display, _parent, _rect, _accent, _corners, 2] call FUNC(uiOutline));
 } forEach _tiles;
 
 uiNamespace setVariable [QGVAR(selectionFrames), _frames];

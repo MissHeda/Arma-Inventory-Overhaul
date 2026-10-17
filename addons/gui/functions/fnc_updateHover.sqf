@@ -37,7 +37,7 @@
  * it lies in its group - a fourth element, the HashMap with "rel" and "parent" fnc_gridOrigin takes -
  * is found where its scrolled group shows it now, and only on the part that shows (fnc_slotRect). A
  * tile gets brighter and, as a slot does, an outline in the accent colour: a tile gets the square frame
- * of the Ctrl selection, two pixels thick (fnc_hoverOutline) - or the cells of a shaped tile (fnc_uiShape) -
+ * of the Ctrl selection, two pixels thick (fnc_hoverOutline; round at the corner of the compartment's panel it touches) - or the cells of a shaped tile (fnc_uiShape) -
  * a slot (weapon, attachment, worn gear, hotbar) a ring with its own round corners (fnc_uiRing); a free
  * cell of a grid that holds things (hover ["cell", grid, column, row]) gets the square frame around that
  * one cell, and no hint but the idle one; there is one outline at a time,
@@ -290,7 +290,7 @@ private _fnc_light = {
         private _cellParent = _cellGrid getOrDefault ["parent", controlNull];
         private _cellRect = [_cellGrid, _cellGrid get "rel", _cellCol, _cellRow] call FUNC(spanRect);
 
-        uiNamespace setVariable [QGVAR(hoverRing), [_display, _cellParent, _cellRect] call FUNC(hoverOutline)];
+        uiNamespace setVariable [QGVAR(hoverRing), [_display, _cellParent, _cellRect, _cellGrid] call FUNC(hoverOutline)];
 
         if (isNull _cellParent) then {
             _ringMade = true;
@@ -304,6 +304,14 @@ private _fnc_light = {
     if (_on && {(uiNamespace getVariable [QGVAR(hoverRing), []]) isEqualTo []}) then {
         private _tileGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_hover select 1, createHashMap];
         private _box = _tile getOrDefault ["rect", []];
+
+        // A tile that lost its box (a page turned under it) is boxed again where its cells lie.
+        if (_box isEqualTo [] && {count _tileGrid > 0} && {count _tile > 0}) then {
+            _box = [
+                _tileGrid, _tileGrid get "rel", _tile getOrDefault ["col", 0], _tile getOrDefault ["row", 0],
+                _tile getOrDefault ["w", 1], _tile getOrDefault ["h", 1]
+            ] call FUNC(spanRect);
+        };
 
         if (_box isNotEqualTo [] && {count _tileGrid > 0}) then {
             private _tileParent = _tileGrid getOrDefault ["parent", controlNull];
@@ -325,7 +333,7 @@ private _fnc_light = {
                     ] call FUNC(uiShape));
                 } forEach [0, 1];
             } else {
-                _outline = [_display, _tileParent, _box] call FUNC(hoverOutline);
+                _outline = [_display, _tileParent, _box, _tileGrid] call FUNC(hoverOutline);
             };
 
             uiNamespace setVariable [QGVAR(hoverRing), _outline];
@@ -351,9 +359,7 @@ private _fnc_light = {
     // a redraw (fnc_drawTiles) puts the colour back on the tiles that were lit and touches no other.
     _tile set ["lit", _on];
 
-    {
-        _x ctrlSetBackgroundColor _color;
-    } forEach (_tile getOrDefault ["backgrounds", [_background]]);
+    [_tile getOrDefault ["backgrounds", [_background]], _color] call FUNC(paintSurface);
 };
 
 if (!_force && {_found isEqualTo GVAR(hover)}) exitWith {

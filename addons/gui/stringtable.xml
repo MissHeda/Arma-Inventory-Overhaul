@@ -331,6 +331,9 @@
         <Key ID="STR_einv_gui_Option_Unconscious">
             <English>Only the unconscious</English>
         </Key>
+        <Key ID="STR_einv_gui_Page_First">
+            <English>First page</English>
+        </Key>
         <Key ID="STR_einv_gui_Page_Hits">
             <English>%1 matches on other pages</English>
         </Key>
@@ -339,6 +342,15 @@
         </Key>
         <Key ID="STR_einv_gui_Page_Label">
             <English>Page %1 / %2</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Last">
+            <English>Last page - the earlier pages hold %1 items</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Last_None">
+            <English>Last page</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Last_One">
+            <English>Last page - the earlier pages hold %1 item</English>
         </Key>
         <Key ID="STR_einv_gui_Page_Next">
             <English>Next page</English>

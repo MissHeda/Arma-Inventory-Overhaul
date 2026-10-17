@@ -214,8 +214,7 @@ private _madeCount = 0;
         {ctrlDelete _x} forEach (_pagedGrid getOrDefault ["tileControls", []]);
         _pagedGrid set ["tileControls", []];
 
-        {ctrlDelete _x} forEach (_pagedGrid get "cells");
-        _pagedGrid set ["cells", (_pagedGrid get "cells") apply {controlNull}];
+        [_pagedGrid] call FUNC(clearCells);
         _pagedGrid set ["tiles", []];
 
         {ctrlDelete _x} forEach (_pagedGrid getOrDefault ["panel", []]);

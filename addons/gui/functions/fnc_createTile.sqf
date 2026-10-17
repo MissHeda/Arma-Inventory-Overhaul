@@ -58,7 +58,9 @@
  *
  * Return Value:
  * None - the entry gets "controls", "background" and "color", "backgrounds" (every surface: a shaped
- * one has several, "background" is the first) and "rect" (its box) - and "mark", the "?" of a hidden one;
+ * one has several, "background" is the first, and a corner that follows its panel's round corner adds pieces, fnc_uiSurface),
+ * "rect" (its box) and "corners" (the corners of its panel it touches, fnc_cornerRadii; [] for none and for a shaped tile) - and
+ * "mark", the "?" of a hidden one;
  * a magazine's "bar" (its fill bar's controls) and "barRect", and "amount" (the label of its rounds) with
  * "amountShort" (written without the capacity), which a repack in progress draws over
  * (einv_magazines_fnc_drawJob) - and joins the grid's "tiles"
@@ -106,11 +108,19 @@ if (_w != (_entry getOrDefault ["w", _sizeW])) then {
 
 private _shaped = _holes isNotEqualTo [];
 
-// The cells under the tile make way for it - not those under its holes.
+// The cells under the tile make way for it - not those under its holes; a cell at the corner of its panel has pieces too.
+private _cellParts = _grid getOrDefault ["cellParts", createHashMap];
+
 for "_r" from _row to (_row + _h - 1) do {
     for "_c" from _col to (_col + _w - 1) do {
         if (_r < _rows && {_c < _cols} && {!(((_r - _row) * _w + _c - _col) in _holes)}) then {
-            (_cells select (_r * _cols + _c)) ctrlShow false;
+            private _cellIndex = _r * _cols + _c;
+
+            (_cells select _cellIndex) ctrlShow false;
+
+            if (count _cellParts > 0) then {
+                {_x ctrlShow false} forEach (_cellParts getOrDefault [_cellIndex, []]);
+            };
         };
     };
 };
@@ -119,6 +129,10 @@ for "_r" from _row to (_row + _h - 1) do {
 // rows lie, over a seam of a canvas inside its compartment as one piece; a shaped one's surface and border
 // follow them too (fnc_uiShape with [grid, column, row]).
 ([_grid, [_gridX, _gridY], _col, _row, _w, _h] call FUNC(spanRect)) params ["_left", "_top", "_width", "_height"];
+
+// A tile that reaches a corner of its compartment's panel is round at that corner (fnc_cornerRadii): its surface and its outline.
+// A shaped one rounds the runs of its surface that touch it (fnc_uiShape).
+private _corners = if (_shaped) then {[]} else {[_grid, [_left, _top, _width, _height]] call FUNC(cornerRadii)};
 private _padY = _cellH * 0.07;
 private _padX = SQUARE(_padY);
 private _innerW = _width - _padX * 2;
@@ -138,10 +152,13 @@ private _color = if (_hidden) then {
 
 // A plain "?" tile is one label that is its surface as well (its background is the tile's colour, over the same
 // rectangle): one control fewer per item not searched yet. Not under a hatch, which lies between the two.
-private _markSurface = _hidden && {!_shaped} && {!(_theme getOrDefault ["hatch", false])};
+private _markSurface = _hidden && {!_shaped} && {!(_theme getOrDefault ["hatch", false])} && {_corners isEqualTo []};
 
 private _backgrounds = if (_shaped) then {
-    [_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _color, "surface", 0, [_grid, _col, _row]] call FUNC(uiShape)
+    [
+        _display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _color, "surface", 0, [_grid, _col, _row],
+        !(_theme getOrDefault ["hatch", false])
+    ] call FUNC(uiShape)
 } else {
     if (_markSurface) exitWith {
         private _ctrl = [
@@ -153,10 +170,8 @@ private _backgrounds = if (_shaped) then {
         [_ctrl]
     };
 
-    private _ctrl = [_display, "EINV_PanelRect", _parent, [_left, _top, _width, _height]] call FUNC(uiCreate);
-
-    _ctrl ctrlSetBackgroundColor _color;
-    [_ctrl]
+    // The corners it touches round (a plain rectangle where it touches none).
+    [_display, _parent, [_left, _top, _width, _height], _color, _corners] call FUNC(uiSurface)
 };
 private _background = _backgrounds select 0;
 
@@ -186,7 +201,7 @@ if (_hidden) then {
         if (_shaped) then {
             _controls append ([_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _edge, "frame", 0, [_grid, _col, _row]] call FUNC(uiShape));
         } else {
-            _controls pushBack ([_display, _parent, [_left, _top, _width, _height], _edge] call FUNC(uiFrame));
+            _controls append ([_display, _parent, [_left, _top, _width, _height], _edge, _corners, 1] call FUNC(uiOutline));
         };
     };
 
@@ -461,7 +476,7 @@ if (_border isNotEqualTo []) then {
     if (_shaped) then {
         _controls append ([_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _border, "frame", 0, [_grid, _col, _row]] call FUNC(uiShape));
     } else {
-        _controls pushBack ([_display, _parent, [_left, _top, _width, _height], _border] call FUNC(uiFrame));
+        _controls append ([_display, _parent, [_left, _top, _width, _height], _border, _corners, 1] call FUNC(uiOutline));
     };
 };
 
@@ -478,6 +493,7 @@ if ((_grid getOrDefault ["pageRanges", []]) isNotEqualTo []) then {
 
 _entry set ["background", _background];
 _entry set ["backgrounds", _backgrounds];
+_entry set ["corners", _corners];
 _entry set ["rect", [_left, _top, _width, _height]];
 _entry set ["color", _color];
 

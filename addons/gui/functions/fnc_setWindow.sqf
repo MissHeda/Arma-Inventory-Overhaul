@@ -45,3 +45,6 @@ _grid set ["rowFrom", _from];
 _grid set ["rowTo", _to];
 _grid set ["rowY", _rowY];
 _grid set ["rowAt", _rowAt];
+
+// The corners of the panel behind the rows that show (fnc_gridCorner): a hole in them makes it square.
+[_grid] call FUNC(gridCorner);

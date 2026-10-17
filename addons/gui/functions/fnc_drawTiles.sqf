@@ -121,7 +121,7 @@ private _byLook = createHashMap;
 } forEach _before;
 
 // What a tile is drawn as and what marks it on the window: kept from the old tile.
-private _drawn = ["controls", "background", "backgrounds", "rect", "color", "mark", "bar", "barRect", "amount", "amountShort", "pending", "queued", "lit"];
+private _drawn = ["controls", "background", "backgrounds", "corners", "rect", "color", "mark", "bar", "barRect", "amount", "amountShort", "pending", "queued", "lit"];
 private _kept = createHashMap;
 private _tiles = _grid get "tiles";
 
@@ -159,9 +159,7 @@ private _tiles = _grid get "tiles";
         _old set ["lit", false];
 
         if (_color isNotEqualTo []) then {
-            {
-                _x ctrlSetBackgroundColor _color;
-            } forEach (_old getOrDefault ["backgrounds", []]);
+            [_old getOrDefault ["backgrounds", []], _color] call FUNC(paintSurface);
         };
     };
 

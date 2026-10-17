@@ -5,12 +5,15 @@
  * The outline of an item tile or a free cell of a grid under the mouse: the frame of a selected tile
  * (fnc_drawSelection) without its fill. Square corners, two pixels thick (a frame and another inside it), in
  * the accent colour, snapped to whole pixels. The one place that draws it, so a tile and a free cell look
- * the same as the Ctrl selection. Slots (weapon, worn gear, hotbar) get the round fnc_uiRing instead.
+ * the same as the Ctrl selection. Slots (weapon, worn gear, hotbar) get the round fnc_uiRing instead. Given the grid it
+ * lies on, a box that touches a corner of the compartment's panel is round at that corner (fnc_cornerRadii,
+ * fnc_uiOutline), as the container is.
  *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Controls group to create it in, or controlNull for the display <CONTROL>
  * 2: Position [x, y, w, h] <ARRAY>
+ * 3: The grid the box lies on, so its corners can follow the panel's - the box in the grid's group <HASHMAP> (default: none)
  *
  * Return Value:
  * The controls <ARRAY>
@@ -23,10 +26,17 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_rect"];
+params ["_display", "_parent", "_rect", ["_grid", createHashMap, [createHashMap]]];
 _rect params ["_left", "_top", "_width", "_height"];
 
 private _accent = GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]];
+
+// At a corner of the panel the outline is round there.
+private _corners = if (count _grid > 0) then {[_grid, _rect] call FUNC(cornerRadii)} else {[]};
+
+if (_corners isNotEqualTo []) exitWith {
+    [_display, _parent, _rect, _accent, _corners, 2] call FUNC(uiOutline)
+};
 
 // In a group the position counts from the group's corner, on the display from the screen's.
 private _originX = [safezoneX, 0] select !isNull _parent;

@@ -77,6 +77,7 @@ GVAR(dragGroup) = [];
 GVAR(emptyPress) = [];
 uiNamespace setVariable [QGVAR(dragFootprints), []];
 uiNamespace setVariable [QGVAR(dragShapes), []];
+uiNamespace setVariable [QGVAR(dragCorners), []];
 uiNamespace setVariable [QGVAR(dragGhosts), []];
 uiNamespace setVariable [QGVAR(selectionFrames), []];
 GVAR(searchQueue) = [];
@@ -99,6 +100,12 @@ call FUNC(clearWindows);
 // the inspect card - are no columns.
 private _scroll = createHashMap;
 
+// A column that was scrolled keeps its panel, its title and its scroll group when it is drawn again in the same place with the
+// same words (fnc_drawColumn): a group made anew shows its top until a frame later. Not on another mod's display, where only
+// the window's own controls are ours to keep (the "guest" flag, ACE Arsenal's).
+private _guest = ["guest", [], false] call FUNC(hook);
+private _keep = createHashMap;
+
 if ((GVAR(theme) getOrDefault ["id", ""]) isEqualTo _id) then {
     {
         if (isNull _x || {ctrlType _x != 15}) then {continue};
@@ -106,10 +113,28 @@ if ((GVAR(theme) getOrDefault ["id", ""]) isEqualTo _id) then {
         private _column = _x getVariable [QGVAR(column), ""];
 
         if (_column isNotEqualTo "") then {
-            _scroll set [_column, [_x] call FUNC(scrollPixels)];
+            private _pixels = [_x] call FUNC(scrollPixels);
+
+            _scroll set [_column, _pixels];
+
+            if (_pixels > 0 && {_guest isNotEqualTo true} && {(_x getVariable [QGVAR(columnKey), []]) isNotEqualTo []}) then {
+                _keep set [_column, [_x, _x getVariable [QGVAR(columnParts), []], _x getVariable [QGVAR(columnKey), []]]];
+            };
         };
     } forEach (uiNamespace getVariable [QGVAR(created), []]);
 };
+
+// What a column left from the last drawing and what it was scrolled to, for fnc_drawColumn - the controls it keeps are not swept
+// below.
+uiNamespace setVariable [QGVAR(keepColumns), _keep];
+uiNamespace setVariable [QGVAR(keepPixels), _scroll];
+
+private _keptControls = [];
+
+{
+    _keptControls pushBack (_y select 0);
+    _keptControls append (_y select 1);
+} forEach _keep;
 
 // Whatever was still to be scrolled belonged to the groups that go now.
 uiNamespace setVariable [QGVAR(scrollRestore), []];
@@ -118,19 +143,21 @@ uiNamespace setVariable [QGVAR(scrollRestore), []];
 private _filterEdit = uiNamespace getVariable [QGVAR(filterEdit), controlNull];
 GVAR(filterFocus) = !isNull _filterEdit && {focusedCtrl _display isEqualTo _filterEdit};
 
-{ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(created), []]);
+{
+    if !(_x in _keptControls) then {
+        ctrlDelete _x;
+    };
+} forEach (uiNamespace getVariable [QGVAR(created), []]);
 uiNamespace setVariable [QGVAR(created), []];
 
 // Anything made on the display without being registered goes as well - left behind, it would pile up
 // with every rebuild. A group takes its own controls with it. What is kept: the dim layer, the first
-// control, and a control a window that attached keeps across builds (IDC_KEEP). Not on another mod's
-// display this addon is only a guest on (the "guest" flag, ACE Arsenal's): every control there but the
-// registered ones above is that mod's own.
-private _guest = ["guest", [], false] call FUNC(hook);
-
+// control, and a control a window that attached keeps across builds (IDC_KEEP), and the controls of a
+// column kept above. Not on another mod's display this addon is only a guest on (the "guest" flag, ACE
+// Arsenal's): every control there but the registered ones above is that mod's own.
 if (_guest isNotEqualTo true) then {
     {
-        if (isNull ctrlParentControlsGroup _x && {!(ctrlIDC _x in [IDC_DIM, IDC_FIRST, IDC_KEEP])}) then {
+        if (isNull ctrlParentControlsGroup _x && {!(ctrlIDC _x in [IDC_DIM, IDC_FIRST, IDC_KEEP])} && {!(_x in _keptControls)}) then {
             ctrlDelete _x;
         };
     } forEach (allControls _display);
@@ -375,6 +402,16 @@ if ("layout" in GVAR(hooks)) then {
         ERROR_1("Layout function %1 is missing - the window shows only its header and footer.",_layoutName);
     };
 };
+
+// A column the layout did not draw again - it went, or the window that attached made its own - leaves its kept controls: they go
+// now (fnc_drawColumn took what it kept out of the list).
+{
+    ctrlDelete (_y select 0);
+
+    {ctrlDelete _x} forEach (_y select 1);
+} forEach (uiNamespace getVariable [QGVAR(keepColumns), createHashMap]);
+
+uiNamespace setVariable [QGVAR(keepColumns), createHashMap];
 
 // The free middle, where a kit's window likes to open (fnc_placeWindow).
 GVAR(middle) = _rect;

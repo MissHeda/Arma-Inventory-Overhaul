@@ -93,11 +93,16 @@ private _perPage = [0, call FUNC(pageRows)] select _pages;
     // does not apply (fnc_toggleRows is a line's only).
     if (_perPage > 0 && {_pos isEqualTo []} && {_domain > _perPage}) then {
         private _ranges = [_entries, _forEachIndex, _domain, _perPage] call FUNC(pageRanges);
-        private _page = (([_holder, _forEachIndex] call FUNC(pageOf)) min (count _ranges - 1)) max 0;
 
-        _shown pushBack [_cols, _domain, _holes select {_x < _domain * _cols}, _pos];
-        _paging pushBack [_page, _ranges];
-        continue;
+        // Only the spare rows past the last page's tiles would have made a page of their own (fnc_pageRanges): one page left
+        // is no paging, the compartment folds as any other.
+        if (count _ranges > 1) then {
+            private _page = (([_holder, _forEachIndex] call FUNC(pageOf)) min (count _ranges - 1)) max 0;
+
+            _shown pushBack [_cols, _domain, _holes select {_x < _domain * _cols}, _pos];
+            _paging pushBack [_page, _ranges];
+            continue;
+        };
     };
 
     _paging pushBack [];

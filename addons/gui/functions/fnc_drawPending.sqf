@@ -99,12 +99,17 @@ private _frames = [];
 
             if ((_holders select _forEachIndex) isNotEqualTo _holder || {(_grid getOrDefault ["block", 0]) != _block}) then {continue};
 
+            // The cells of another page of a paged box are not on the window: no outline lies over what is there.
+            if (_row + _h <= (_grid getOrDefault ["rowFrom", 0]) || {_row >= (_grid getOrDefault ["rowTo", 1e6])}) then {continue};
+
             // As a tile ends a pixel before the next cell, so does its outline, where the grid's columns and rows
-            // lie (fnc_spanRect).
-            _frames pushBack ([
-                _display, _grid getOrDefault ["parent", controlNull],
-                [_grid, _grid getOrDefault ["rel", [0, 0]], _col, _row, _w, _h] call FUNC(spanRect), _color
-            ] call FUNC(uiFrame));
+            // lie (fnc_spanRect); round at the corner of the compartment's panel it touches (fnc_uiOutline).
+            private _outlineRect = [_grid, _grid getOrDefault ["rel", [0, 0]], _col, _row, _w, _h] call FUNC(spanRect);
+
+            _frames append ([
+                _display, _grid getOrDefault ["parent", controlNull], _outlineRect, _color,
+                [_grid, _outlineRect] call FUNC(cornerRadii), 1
+            ] call FUNC(uiOutline));
         } forEach _grids;
     } forEach _targets;
 } forEach GVAR(inFlight);

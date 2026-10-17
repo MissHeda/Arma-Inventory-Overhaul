@@ -125,6 +125,8 @@ uiNamespace setVariable [QGVAR(inspectRect), []];
 uiNamespace setVariable [QGVAR(windows), []];
 uiNamespace setVariable [QGVAR(windowTrash), []];
 uiNamespace setVariable [QGVAR(scrollRestore), []];
+uiNamespace setVariable [QGVAR(keepColumns), createHashMap];
+uiNamespace setVariable [QGVAR(keepPixels), createHashMap];
 uiNamespace setVariable [QGVAR(zones), []];
 uiNamespace setVariable [QGVAR(cell), []];
 GVAR(windowMove) = [];

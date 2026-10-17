@@ -1376,7 +1376,11 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 - **Columns** (`fnc_drawColumn [display, rect, sections, theme, title, icon, drawer, id]`): a panel, a title row, a scroll group
   with one section per container; the column's `id` (`"storage"`, `"loot"`) is how `fnc_build` keeps its scroll
   (`fnc_scrollPixels`, restored a frame later through `einv_gui_scrollRestore`). Cells are controls created directly in the group:
-  a nested group would eat the wheel.
+  a nested group would eat the wheel. **A column scrolled down keeps its group:** `fnc_build` notes each column group with a scroll (its id, `scrollPixels`) and hands it over in
+  uiNamespace `keepColumns` (id -> [group, panel and title controls, [rect, title, icon]], what `fnc_drawColumn` stores on the group as `columnParts`/`columnKey`), spares those controls in its
+  sweep and, in `fnc_drawColumn`, a column drawn again in the same rect with the same title and icon draws its sections into the old group first, deletes what stood in it in the same call
+  (a group never stands empty, as the wizard's General page) and sets the scroll at once from `keepPixels`; the frame-later put-back (`scrollRestore`) stays. A column that moved, was named otherwise or
+  was not drawn again has its old controls deleted. Before this a fold or unfold showed the column at its top for a frame (Mia, 0.5.3).
 - **Section** (`fnc_drawSection`): a caption tab (folds it, `fnc_toggleSection`; the contents' weight on the right,
   `fnc_loadText`, only told), a box with the container's picture and short name, and the grid. Beside the tab, as high as it and in the
   caption's size (0.46 UNIT, the tab and the buttons `CAPTION_LINE` 0.8 UNIT high), centred buttons: "Take all" (loot) or "Put all in" (own) (`fnc_takeAll`, `fnc_putAll`,
@@ -1452,6 +1456,17 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   box round the picture) all draw through it, so a larger or moved picture never leaves its tile, slot or card. The Arsenal
   panel's tiles and the kit windows' are `fnc_createTile`'s. **The boxes of crates and vehicles** (`fnc_drawSection`, the loaded-cargo cards of `compat_ace_cargo`) ask `getInfo` for the object's class: `pictureOverride` shown when `picture` is it (the file is there), else `editorPreview`, drawn by `icon` (`fnc_uiBoxPicture`); a uniform, vest or backpack box is `fnc_drawSlot`, which already drew by `picture` and `icon`; a kit window's title picture is `fnc_uiItemPicture` too. `fnc_createTile`'s entry may carry its own `"picture"` (the wizard's preview of one being picked). The small title pictures (the Arsenal panel, the
   context menu) and the wizard's lists draw the plain picture. A weapon's attachment icons stay where they were.
+  **Round corners** (Mia, 0.5.3: an item at the corner of a container poked over its rounded edge): the panel behind a compartment is round by `min(theme radius, 3 pad)`; `fnc_gridCorner`
+  keeps on the grid `corner`, that radius less the pad in pixels (0 for a square look, a corner under 2 px, a compartment with a hole in the rows that show - its panel is a shape of rectangles -,
+  the overflow, a preview; `fnc_setWindow` asks again for a page's rows). `fnc_cornerRadii [grid, box, origin]` answers `[radius, [tl, tr, bl, br]]` for the corners of the box that lie on the
+  panel's (the first cell's corner to the last cell's far edge, a pixel's slack; a tile as wide as the compartment touches two), `[]` for none, in the grid's group (the default) or on the screen
+  (the drag, with `fnc_gridOrigin`). `fnc_uiSurface` draws a surface square except at those corners (the middle rectangle, a strip on a side with a round corner, the quarter circles `corner_*_ca`;
+  `fnc_paintSurface` colours the pieces: a corner by its text colour), `fnc_uiOutline` the nested frames or, round, `fnc_uiRing` with a mask (a ring as thick as `RING_SHARE` of its corner, drawn again
+  inside itself when thinner than the outline). Used by `fnc_createTile` (surface, the edge of a "?" tile, a themed border; the entry's `corners`; a "?" tile then needs a label of its own),
+  `fnc_uiShape` with its `round` argument (the runs of a shaped tile's surface and of the selection's fill; frames of shaped tiles stay square), `fnc_drawCells` (a corner cell's pieces are the grid's
+  `cellParts` by cell number, hidden and shown with the square, deleted by `fnc_clearCells`), `fnc_hoverOutline` (given the grid), `fnc_drawSelection`, `fnc_drawPending` (a target box
+  outside the rows that show draws nothing) and the drag footprint (`fnc_updateDrag`'s `_fnc_show` takes the corners: the footprint control is the middle, six hidden pieces made by `fnc_startDrag`,
+  `dragCorners`, are the strips and quarter circles; a group's footprints and a shaped item's cells stay square). `fnc_flashTile` flashes a corner as a corner.
   `fnc_tileAt` and `fnc_hitsHole` miss holes. A class whose `stack` is over 1 shows **"count/stack"** ("3/10", "1/10" too) on a
   small flat box in the `raised` colour at the bottom right - one label with the box as its own background
   (`fnc_drawCountBackdrop` with "only measure", argument 11; a hotbar slot's count the same) -; one that does not stack shows nothing; a magazine's rounds then
@@ -1480,13 +1495,20 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `fnc_swapPlan`, `fnc_drawCells`). **Every tile of the compartment stays on the grid**, in the same order, whatever page shows - the room, the queue, the
   drag's indices and the selection need them - but only the shown page's have controls: the others are bare (`offPage` true, `controls` []), skipped by
   `fnc_findTile` and `fnc_selectionTiles`/`fnc_selectSection`/`fnc_select` (selecting works on the shown page), and drawn by `fnc_createTile` when their page
-  comes (`fnc_drawTiles`; the same HashMap, put back where it stood in the grid's list). The pager is `fnc_drawPageBar`: a bar `PAGE_BAR_H` 1.15 UNIT tall under
+  comes (`fnc_drawTiles`; the same HashMap, put back where it stood in the grid's list - `fnc_showPage` walks the list **by number**, never over a copy of it: a tile made from a
+  copy would carry the controls and the box while the grid's own tile stayed bare, and the search's fading, the hover outline, the selection and the queue would not find
+  them, Mia 0.5.3). The pager is `fnc_drawPageBar`: a bar `PAGE_BAR_H` 1.15 UNIT tall under
   the box, **nothing lies over the tiles** (the fade strips and the chip over the page's edge of 0.5.0 are gone: they covered the first or last row's tiles).
-  Its left half is one button that turns back, its right half one that turns on (`fnc_uiButton` with no surface until the mouse is on it; an arrow at each end of the bar,
-  the search's mark at the arrow's corner), and the middle says in one line where it stands and what lies elsewhere: "Page 2 / 5 | +180 items on other pages | 12 queued" -
-  `fnc_pageCounts` says how many tiles and matches each page holds; while the search field holds something the matches on other pages replace the items, and the
-  queued count is the tiles of the box that are `offPage` and `queued` (the hands' queue marks them in `fnc_drawQueue` though they have no controls: an entry whose tile is
-  not drawn has no circle). The grid's `pageControls` are drawn again only when what the bar says changed (`pageSig`: build, page, page count, text, the marks); `fnc_updatePageBars`,
+  It is one control: a track with a round arrow button at each end (a surface of its own, dimmed and inert when there is no page that way, a second surface over it
+  that fades in under the mouse - `ctrlSetFade` 0.08 s in, 0.2 s out - and the search's mark at the button's corner) and, between them, one line that says where it stands and
+  what lies elsewhere: "Page 2 / 5 · +180 items on other pages · 12 queued". The hit area is the whole half of the bar and 0.1 UNIT above and below (an `EINV_Hitbox` made last,
+  so nothing lies over it), but only the button lights. `fnc_pageCounts` says how many tiles and matches each page holds; while the search field holds something the
+  matches on other pages replace the items, and the queued count is the tiles of the box that are `offPage` and `queued` (the hands' queue marks them in `fnc_drawQueue` though
+  they have no controls: an entry whose tile is not drawn has no circle). **The note on the last page:** on the last page, not the first, with free rows under the last tile of the
+  rows that show, the bar also draws on those free cells (never over a tile; `pageControls` too) "Last page - the earlier pages hold 256 items" and a `fnc_uiButton` "First page"
+  (`fnc_setPage [grid, 0]`) - with one free row the words and the button share it, with more they are stacked in the first two; `pageSig` carries the first free row so it is redrawn
+  when a tile lands there. A last page that would hold no tile at all - only the spare rows after the last item in use - is not made: `fnc_pageRanges` joins its rows to the page
+  before, and `fnc_viewBlocks` takes a compartment left with one page for unpaged (the fold line again). The grid's `pageControls` are drawn again only when what the bar says changed (`pageSig`: build, page, page count, text, the marks); `fnc_updatePageBars`,
   called at the end of `fnc_drawQueue`, has every paged box's bar compared after a queue changed or a move finished. A dragged item turns the page over the outer `PAGE_ZONE` 0.35 of
   the bar on each side (`pageAreas`); the middle 0.3 is a `foldAreas` place where a drop is laid down in the container's first free spot. `fnc_turnPage [grid, step]` ->
   `fnc_setPage [grid, page, bySearch]` (state, `GVAR(pagesMoved)` for the search) -> `fnc_showPage [display, grid, page]`, which draws only this box: the page left
@@ -1543,7 +1565,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   a held `[]` would not notice a tile that came there).
 - **The hover outline.** What the mouse is on gets, besides the lighter surface of a tile, an outline in the accent colour. An item
   tile or a free cell of a grid has the frame of the Ctrl selection (`fnc_hoverOutline`: square, two pixels thick like
-  `fnc_drawSelection`'s, no fill, snapped to whole pixels): a tile around its box (`rect`, w x h cells as it lies, a turned one too)
+  `fnc_drawSelection`'s, no fill, snapped to whole pixels - round at the corner of the compartment's panel it touches, "Round corners" above): a tile around its box (`rect`, w x h cells as it lies, a turned one too)
   or, shaped, on its own cells (`fnc_uiShape` "frame", two pixels). A slot - weapon, attachment, worn gear, the small gear slots,
   hotbar - keeps the **round ring** (`fnc_uiRing`, radius = the theme's `radius` at most a quarter of the slot's height, the same
   as the slot's own panel in `fnc_drawSlot`), so the ring follows the slot's corners; only the grids' tiles and cells are square.

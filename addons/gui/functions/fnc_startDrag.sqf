@@ -309,6 +309,28 @@ for "_i" from 1 to _shapeCount do {
 
 uiNamespace setVariable [QGVAR(dragShapes), _shapes];
 
+// The footprint of one item where it reaches a corner of its compartment's panel is round there (fnc_updateDrag, fnc_uiSurface): two
+// strips and four quarter circles that make the box up with the footprint control itself, made here so they lie under the ghost as it
+// does. Hidden until a target needs them. A group's footprints keep to squares.
+private _roundPieces = [];
+
+if (_group isEqualTo []) then {
+    for "_i" from 1 to 2 do {
+        _roundPieces pushBack ([_display, "EINV_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate));
+    };
+
+    {
+        private _piece = [_display, "EINV_PanelCorner", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
+
+        _piece ctrlSetText _x;
+        _roundPieces pushBack _piece;
+    } forEach [UI_TEX(corner_tl_ca), UI_TEX(corner_tr_ca), UI_TEX(corner_bl_ca), UI_TEX(corner_br_ca)];
+
+    {_x ctrlShow false} forEach _roundPieces;
+};
+
+uiNamespace setVariable [QGVAR(dragCorners), _roundPieces];
+
 // The slots that take it light up - under the ghost, which comes last. Several tiles go into no slot; a
 // worn item lights up the same slot of the unit it may be exchanged with.
 if (_group isEqualTo []) then {

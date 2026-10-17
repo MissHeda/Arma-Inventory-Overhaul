@@ -5,7 +5,8 @@
  * Where the pages of a compartment begin and end: the rows [from, to) of each, cut from the top in steps of
  * the page size - but never through a tile. A page ends at the row above a tile that would reach over the cut, so every
  * tile lies whole on one page (a page may be a row or two shorter than the setting says; only when one tile alone is
- * taller than a page does the page grow to take it). Worked out from the layout's entries each time the compartment is
+ * taller than a page does the page grow to take it; a last page that would hold no tile at all - only the spare rows - is joined
+ * to the page before it). Worked out from the layout's entries each time the compartment is
  * drawn: the pages follow what lies there.
  *
  * Arguments:
@@ -64,6 +65,19 @@ while {_from < _total} do {
 
     _ranges pushBack [_from, _to];
     _from = _to;
+};
+
+// A last page with no tile on it - only the spare rows after the last in use - would open a box on what looks like an empty
+// container: its rows belong to the page before, which grows by them.
+if (count _ranges > 1) then {
+    private _lastFrom = (_ranges select -1) select 0;
+
+    if (_entries findIf {
+        !(_x getOrDefault ["overflow", false]) && {(_x getOrDefault ["block", -2]) == _block} && {(_x getOrDefault ["row", 0]) >= _lastFrom}
+    } < 0) then {
+        _ranges deleteAt (count _ranges - 1);
+        (_ranges select -1) set [1, _total];
+    };
 };
 
 _ranges

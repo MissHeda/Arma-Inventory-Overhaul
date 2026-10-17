@@ -37,13 +37,23 @@ private _color = +(GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]]);
 _color set [3, _alpha];
 
 // Over every surface of the tile: a shaped one has one per run of its cells (fnc_createTile), and its
-// holes do not flash.
+// holes do not flash; a tile at the corner of its compartment's panel has the pieces of a round corner too.
 private _flashes = uiNamespace getVariable [QGVAR(flashes), []];
 private _faded = diag_tickTime + _duration;
 
 {
-    private _flash = [_display, "EINV_PanelRect", ctrlParentControlsGroup _x, ctrlPosition _x] call FUNC(uiCreate);
-    _flash ctrlSetBackgroundColor _color;
+    private _flash = controlNull;
+
+    // A round corner of the surface (fnc_uiSurface) flashes as a round corner, the rest as rectangles.
+    if (ctrlClassName _x isEqualTo "EINV_PanelCorner") then {
+        _flash = [_display, "EINV_PanelCorner", ctrlParentControlsGroup _x, ctrlPosition _x] call FUNC(uiCreate);
+        _flash ctrlSetText ctrlText _x;
+        _flash ctrlSetTextColor _color;
+    } else {
+        _flash = [_display, "EINV_PanelRect", ctrlParentControlsGroup _x, ctrlPosition _x] call FUNC(uiCreate);
+        _flash ctrlSetBackgroundColor _color;
+    };
+
     _flash ctrlSetFade 0;
     _flash ctrlCommit 0;
     _flash ctrlSetFade 1;

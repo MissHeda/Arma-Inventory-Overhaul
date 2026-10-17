@@ -221,6 +221,11 @@ private _fnc_compartment = {
     _grid set ["pos", _pos];
     _grid set ["overflow", _isOverflow];
     _grid set ["overflowIndex", _overflowIndex];
+
+    // The overflow lies on a square panel of the loss colour: nothing follows a round corner there (fnc_gridCorner).
+    if (_isOverflow) then {
+        _grid set ["corner", 0];
+    };
     _grid set ["window", _window];
     _grid set ["side", _section getOrDefault ["side", ""]];
 

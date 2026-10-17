@@ -16,6 +16,13 @@
  * The group reaches into the panel's right padding: its scroll bar runs there, beside the sections
  * rather than over them.
  *
+ * A column that was scrolled down and is drawn again in the same place with the same title (fnc_build: a section folded or
+ * unfolded, a move) keeps its panel, its title and its scroll group - fnc_build hands them over in uiNamespace keepColumns
+ * by the column's id: the sections are drawn into the group first and the controls that were in it go afterwards, in the same
+ * call, as the setup wizard's General page does (fnc_showStep). A group made anew starts at the top and learns its height a
+ * frame later, so the column showed its top for a moment before fnc_onFrame put it back (Mia, 0.5.3: the list jumped up
+ * when a section was folded). The scroll is put back all the same, now and a frame later, in screen height from the top.
+ *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Position [x, y, w, h] on the screen <ARRAY>
@@ -52,47 +59,97 @@ if (_id isEqualTo "storage") then {
     GVAR(storageRect) = _rect;
 };
 
-[
-    _display, controlNull, _rect, _theme getOrDefault ["panel", []],
-    _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
-] call FUNC(uiPanel);
+// What fnc_build kept of this column from its last drawing, when it was scrolled: [group, panel and title controls, [rect, title,
+// icon]]. The same place and words: all of it stays as it is, only the sections in the group are drawn again.
+private _keepList = uiNamespace getVariable [QGVAR(keepColumns), createHashMap];
+private _kept = _keepList getOrDefault [_id, []];
+private _key = [_rect, _title, _icon];
+
+_keepList deleteAt _id;
+
+private _reuse = _id isNotEqualTo "" && {_kept isNotEqualTo []} && {!isNull (_kept select 0)} && {(_kept select 2) isEqualTo _key}
+    && {(_kept select 1) findIf {isNull _x} < 0};
+
+// One that cannot be kept (it moved, it is named otherwise) goes now.
+if (!_reuse && {_kept isNotEqualTo []}) then {
+    ctrlDelete (_kept select 0);
+
+    {ctrlDelete _x} forEach (_kept select 1);
+};
+
+private _created = uiNamespace getVariable [QGVAR(created), []];
+private _madeFrom = count _created;
 
 private _padY = UNIT * 0.4;
 private _padX = SQUARE(_padY);
 private _innerTop = _top + _padY;
 
+if (!_reuse) then {
+    [
+        _display, controlNull, _rect, _theme getOrDefault ["panel", []],
+        _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
+    ] call FUNC(uiPanel);
+};
+
 if (_title isNotEqualTo "") then {
     private _titleH = UNIT * 1.1;
     private _textX = _left + _padX;
 
-    if (_icon isNotEqualTo "") then {
-        [_display, controlNull, [_textX, _innerTop + _titleH * 0.15, SQUARE(_titleH * 0.7), _titleH * 0.7], _icon, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] call FUNC(uiIcon);
-        _textX = _textX + SQUARE(_titleH * 0.7) + SQUARE(_titleH * 0.3);
+    if (!_reuse) then {
+        if (_icon isNotEqualTo "") then {
+            [_display, controlNull, [_textX, _innerTop + _titleH * 0.15, SQUARE(_titleH * 0.7), _titleH * 0.7], _icon, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] call FUNC(uiIcon);
+        };
+
+        private _size = UNIT * 0.66;
+        private _font = _theme getOrDefault ["fontBold", "PuristaSemibold"];
+        private _iconW = [0, SQUARE(_titleH * 0.7) + SQUARE(_titleH * 0.3)] select (_icon isNotEqualTo "");
+        private _text = [[_title, _theme] call FUNC(caption), _left + _width - _padX - _textX - _iconW, _font, _size] call FUNC(fitText);
+
+        [_display, controlNull, [_textX + _iconW, _innerTop, _left + _width - _padX - _textX - _iconW, _titleH], _text, _size, _theme getOrDefault ["text", [1, 1, 1, 1]], _font, 0] call FUNC(uiLabel);
+
+        // A hairline under the title, like the header's.
+        private _line = [_display, "EINV_PanelRect", controlNull, [_left + _padX, _innerTop + _titleH + _padY * 0.4, _width - _padX * 2, pixelH]] call FUNC(uiCreate);
+        _line ctrlSetBackgroundColor (_theme getOrDefault ["line", [1, 1, 1, 0.07]]);
     };
-
-    private _size = UNIT * 0.66;
-    private _font = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-    private _text = [[_title, _theme] call FUNC(caption), _left + _width - _padX - _textX, _font, _size] call FUNC(fitText);
-
-    [_display, controlNull, [_textX, _innerTop, _left + _width - _padX - _textX, _titleH], _text, _size, _theme getOrDefault ["text", [1, 1, 1, 1]], _font, 0] call FUNC(uiLabel);
-
-    // A hairline under the title, like the header's.
-    private _line = [_display, "EINV_PanelRect", controlNull, [_left + _padX, _innerTop + _titleH + _padY * 0.4, _width - _padX * 2, pixelH]] call FUNC(uiCreate);
-    _line ctrlSetBackgroundColor (_theme getOrDefault ["line", [1, 1, 1, 0.07]]);
 
     _innerTop = _innerTop + _titleH + _padY;
 };
 
+// Everything made above, from the panel on, is what a later drawing may keep.
+private _parts = (uiNamespace getVariable [QGVAR(created), []]) select [_madeFrom];
+
+if (_reuse) then {
+    _parts = _kept select 1;
+
+    // It is a registered control again, as every one of the window's is (fnc_build deletes them all by that list).
+    (uiNamespace getVariable [QGVAR(created), []]) append _parts;
+};
+
 private _groupW = _width - _padX - pixelW * 2;
-private _group = [_display, "EINV_ScrollGroup", controlNull, [
+private _groupRect = [
     _left + _padX,
     _innerTop,
     _groupW,
     _top + _height - _padY - _innerTop
-]] call FUNC(uiCreate);
+];
+private _group = controlNull;
+private _old = [];
+
+if (_reuse) then {
+    _group = _kept select 0;
+
+    (uiNamespace getVariable [QGVAR(created), []]) pushBack _group;
+
+    // What it holds now goes once the new sections are in: a group never stands empty between the two.
+    _old = (allControls _group) select {ctrlParentControlsGroup _x isEqualTo _group};
+} else {
+    _group = [_display, "EINV_ScrollGroup", controlNull, _groupRect] call FUNC(uiCreate);
+};
 
 // Known to the drawers from the start (fnc_drawSection reads the side from it).
 _group setVariable [QGVAR(column), _id];
+_group setVariable [QGVAR(columnParts), _parts];
+_group setVariable [QGVAR(columnKey), _key];
 
 // As wide as the padding leaves - narrower only where the scroll bar would not fit beside it.
 private _contentW = (_width - _padX * 2) min (_groupW - SCROLL_W - pixelW * 2);
@@ -112,6 +169,8 @@ private _cursor = 0;
 
 private _contentH = (_cursor - _gap) max 0;
 
+{ctrlDelete _x} forEach _old;
+
 // A clear speck at the very bottom: the engine scrolls as far as the lowest control reaches, and this
 // makes that exactly the height stored here - a grid's last cell ends a pixel short of it.
 if (_contentH > 0) then {
@@ -120,5 +179,16 @@ if (_contentH > 0) then {
 };
 
 _group setVariable [QGVAR(contentH), _contentH];
+
+// A column that stayed is put back where it was scrolled at once; fnc_build asks for it again a frame later (fnc_onFrame), when
+// the group is sure of its height.
+if (_reuse) then {
+    private _pixels = (uiNamespace getVariable [QGVAR(keepPixels), createHashMap]) getOrDefault [_id, 0];
+    private _range = _contentH - (_groupRect select 3);
+
+    if (_pixels > 0 && {_range > 0}) then {
+        _group ctrlSetScrollValues [(_pixels / _range) min 1, -1];
+    };
+};
 
 _group

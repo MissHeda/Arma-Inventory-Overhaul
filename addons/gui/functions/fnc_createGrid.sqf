@@ -63,6 +63,8 @@
  *   "holes"   - the cells it does not have, as given <ARRAY>
  *   "tiles"   - the entries lying on it, see fnc_createTile <ARRAY>
  *   "section" - the section id <STRING>
+ *   "pad", "panelR", "corner" - the pad the panel lies past the cells, its radius and the radius an item at its corner follows, in
+ *               pixels (fnc_gridCorner); the window of a page changes "corner" (fnc_setWindow) <NUMBER>
  *
  * Example:
  * [_display, _group, [0, 0.05], 6, _theme, "vest"] call einv_gui_fnc_createGrid;
@@ -173,6 +175,14 @@ private _grid = createHashMapFromArray [
     ["tiles", []],
     ["section", _section]
 ];
+
+// The panel behind the compartment (fnc_drawCompartments) is round at its corners by the theme's radius, at most three times the
+// pad it lies past the cells; an item at its corner follows it (fnc_gridCorner, fnc_cornerRadii).
+private _pad = COMPARTMENT_PAD_PX(_cellW);
+
+_grid set ["pad", _pad];
+_grid set ["panelR", floor (((_theme getOrDefault ["radius", 0]) min (_pad * 3 * pixelH)) / pixelH + 0.001)];
+[_grid] call FUNC(gridCorner);
 
 (uiNamespace getVariable [QGVAR(grids), []]) pushBack _grid;
 

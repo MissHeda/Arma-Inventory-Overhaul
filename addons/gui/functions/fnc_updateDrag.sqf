@@ -725,6 +725,11 @@ private _dragHoles = ([_entry getOrDefault ["class", ""], GVAR(dragRot)] call EF
 
 {_x ctrlShow false} forEach _shapes;
 
+// The pieces that round the footprint's corner where it reaches one of its compartment's panel (fnc_startDrag): hidden with the rest.
+private _roundPieces = uiNamespace getVariable [QGVAR(dragCorners), []];
+
+{_x ctrlShow false} forEach _roundPieces;
+
 // The other tile's footprint of a swap (fnc_startDrag made it), shown below only where the drop is one.
 private _swapFootprint = uiNamespace getVariable [QGVAR(dragSwapFootprint), controlNull];
 
@@ -754,9 +759,10 @@ private _fnc_paintShape = {
 };
 
 private _fnc_show = {
-    params ["_rect", "_fits", ["_alpha", DRAG_FOOTPRINT_ALPHA], ["_colorKey", ""]];
+    params ["_rect", "_fits", ["_alpha", DRAG_FOOTPRINT_ALPHA], ["_colorKey", ""], ["_corners", []]];
 
     {_x ctrlShow false} forEach _shapes;
+    {_x ctrlShow false} forEach _roundPieces;
 
     private _color = if (_fits) then {
         GVAR(theme) getOrDefault ["gain", [0.298, 0.765, 0.541, 1]]
@@ -769,8 +775,62 @@ private _fnc_show = {
         _color = GVAR(theme) get _colorKey;
     };
 
-    _footprint ctrlSetPosition _rect;
-    _footprint ctrlSetBackgroundColor [_color select 0, _color select 1, _color select 2, _alpha];
+    private _paint = [_color select 0, _color select 1, _color select 2, _alpha];
+    private _box = _rect;
+
+    // Where it reaches a corner of its compartment's panel (fnc_cornerRadii) the footprint is round there and nowhere else: the
+    // footprint control is the middle of the box, two strips and the quarter circles of fnc_startDrag make up the rest (as
+    // fnc_uiSurface lays it out). A shaped item draws its own cells, a group's footprints stay square.
+    if (_corners isNotEqualTo [] && {count _roundPieces == 6} && {_dragHoles isEqualTo []}) then {
+        _corners params ["_radius", "_mask"];
+        _mask params ["_topLeft", "_topRight", "_bottomLeft", "_bottomRight"];
+
+        private _x0 = safezoneX + round (((_rect select 0) - safezoneX) / pixelW) * pixelW;
+        private _y0 = safezoneY + round (((_rect select 1) - safezoneY) / pixelH) * pixelH;
+        private _x1 = safezoneX + round (((_rect select 0) + (_rect select 2) - safezoneX) / pixelW) * pixelW;
+        private _y1 = safezoneY + round (((_rect select 1) + (_rect select 3) - safezoneY) / pixelH) * pixelH;
+        private _pixels = (floor _radius) min floor (round ((_x1 - _x0) / pixelW) / 2) min floor (round ((_y1 - _y0) / pixelH) / 2);
+
+        if (_pixels >= 1) then {
+            private _cap = _pixels * pixelW;
+            private _rise = _pixels * pixelH;
+            private _capLeft = [0, _cap] select (_topLeft || _bottomLeft);
+            private _capRight = [0, _cap] select (_topRight || _bottomRight);
+            private _leftTop = [0, _rise] select _topLeft;
+            private _leftBottom = [0, _rise] select _bottomLeft;
+            private _rightTop = [0, _rise] select _topRight;
+            private _rightBottom = [0, _rise] select _bottomRight;
+
+            _box = [_x0 + _capLeft, _y0, _x1 - _x0 - _capLeft - _capRight, _y1 - _y0];
+
+            {
+                _x params ["_piece", "_on", "_pieceRect"];
+
+                if (_on) then {
+                    _piece ctrlSetPosition _pieceRect;
+
+                    if (ctrlClassName _piece isEqualTo "EINV_PanelCorner") then {
+                        _piece ctrlSetTextColor _paint;
+                    } else {
+                        _piece ctrlSetBackgroundColor _paint;
+                    };
+
+                    _piece ctrlCommit 0;
+                    _piece ctrlShow true;
+                };
+            } forEach [
+                [_roundPieces select 0, _capLeft > 0, [_x0, _y0 + _leftTop, _capLeft, _y1 - _y0 - _leftTop - _leftBottom]],
+                [_roundPieces select 1, _capRight > 0, [_x1 - _capRight, _y0 + _rightTop, _capRight, _y1 - _y0 - _rightTop - _rightBottom]],
+                [_roundPieces select 2, _topLeft, [_x0, _y0, _cap, _rise]],
+                [_roundPieces select 3, _topRight, [_x1 - _cap, _y0, _cap, _rise]],
+                [_roundPieces select 4, _bottomLeft, [_x0, _y1 - _rise, _cap, _rise]],
+                [_roundPieces select 5, _bottomRight, [_x1 - _cap, _y1 - _rise, _cap, _rise]]
+            ];
+        };
+    };
+
+    _footprint ctrlSetPosition _box;
+    _footprint ctrlSetBackgroundColor _paint;
     _footprint ctrlCommit 0;
     _footprint ctrlShow true;
 };
@@ -1346,7 +1406,9 @@ call {
         // The footprint lies on the kit's tile.
         (_gridBoxes select _targetIndex) params ["", "_originX", "_originY"];
 
-        [[_target, [_originX, _originY], _under get "col", _under get "row", _under get "w", _under get "h"] call FUNC(spanRect), _fits] call _fnc_show;
+        private _kitRect = [_target, [_originX, _originY], _under get "col", _under get "row", _under get "w", _under get "h"] call FUNC(spanRect);
+
+        [_kitRect, _fits, DRAG_FOOTPRINT_ALPHA, "", [_target, _kitRect, [_originX, _originY]] call FUNC(cornerRadii)] call _fnc_show;
     };
 
     // ----- On a magazine of its kind: the two repacked (einv_magazines, when loaded) -----
@@ -1385,9 +1447,11 @@ call {
         // The footprint lies on that magazine, in the accent colour: something else happens than a move.
         (_gridBoxes select _targetIndex) params ["", "_originX", "_originY"];
 
+        private _repackRect = [_target, [_originX, _originY], _under get "col", _under get "row", _under get "w", _under get "h"] call FUNC(spanRect);
+
         [
-            [_target, [_originX, _originY], _under get "col", _under get "row", _under get "w", _under get "h"] call FUNC(spanRect),
-            _fits, DRAG_FOOTPRINT_ALPHA, ["", "accent"] select _fits
+            _repackRect, _fits, DRAG_FOOTPRINT_ALPHA, ["", "accent"] select _fits,
+            [_target, _repackRect, [_originX, _originY]] call FUNC(cornerRadii)
         ] call _fnc_show;
     };
 
@@ -1649,10 +1713,12 @@ call {
         // No cell of its own: the compartment as the column shows it, at half strength.
         _clipRect = [_target, [_originX, _originY], 0, _viewFrom, _target get "cols", _viewTo - _viewFrom] call FUNC(spanRect);
 
-        [_clipRect, _reason isEqualTo "", DRAG_FOOTPRINT_ALPHA / 2] call _fnc_show;
+        [
+            _clipRect, _reason isEqualTo "", DRAG_FOOTPRINT_ALPHA / 2, "", [_target, _clipRect, [_originX, _originY]] call FUNC(cornerRadii)
+        ] call _fnc_show;
     } else {
     if (_swap isNotEqualTo []) then {
-        [_clipRect, true, DRAG_FOOTPRINT_ALPHA, "accent"] call _fnc_show;
+        [_clipRect, true, DRAG_FOOTPRINT_ALPHA, "accent", [_target, _clipRect, [_originX, _originY]] call FUNC(cornerRadii)] call _fnc_show;
 
         // A merge lies on the stack it joins only; a swap on the other tile's new cells as well.
         if (!_merge) then {
@@ -1685,7 +1751,9 @@ call {
             };
         };
     } else {
-        [_clipRect, _reason isEqualTo ""] call _fnc_show;
+        [
+            _clipRect, _reason isEqualTo "", DRAG_FOOTPRINT_ALPHA, "", [_target, _clipRect, [_originX, _originY]] call FUNC(cornerRadii)
+        ] call _fnc_show;
     };
     };
 

@@ -48,11 +48,10 @@ if ((_window select 0) == (_grid get "rowFrom") && {(_window select 1) == (_grid
     [_display, _grid] call FUNC(drawPageBar);
 };
 
-// What the page left shows goes: the squares of the cells, the tiles' controls, the panel.
-{ctrlDelete _x} forEach (_grid get "cells");
-_grid set ["cells", (_grid get "cells") apply {controlNull}];
+// What the page left shows goes: the squares of the cells (and the pieces that round them), the tiles' controls, the panel.
+[_grid] call FUNC(clearCells);
 
-private _gone = ["controls", "background", "backgrounds", "rect", "color", "mark", "bar", "barRect", "amount", "amountShort"];
+private _gone = ["controls", "background", "backgrounds", "corners", "rect", "color", "mark", "bar", "barRect", "amount", "amountShort"];
 
 {
     private _tile = _x;
@@ -81,20 +80,35 @@ _grid set ["tileControls", []];
 
 _grid set ["panel", [_display, _parent, [_left, _top], _grid get "cols", _window select 0, _window select 1, _grid getOrDefault ["holes", []], GVAR(theme)] call FUNC(drawPagePanel)];
 
-// The tiles of the page that shows now: drawn where they lie, in the place they have on the grid already.
-{
-    if !(_x getOrDefault ["offPage", false]) then {continue};
+// The tiles of the page that shows now: drawn where they lie, in the place they have on the grid already. Each is the very
+// HashMap the grid holds (taken by its number, never from a copy of the list - the controls and the box it gets are the grid's
+// tile's own, so the search's fading, the hover and the selection find them).
+private _count = count _tiles;
 
-    private _row = _x getOrDefault ["row", 0];
+for "_index" from 0 to (_count - 1) do {
+    private _tile = _tiles select _index;
+
+    if !(_tile getOrDefault ["offPage", false]) then {continue};
+
+    private _row = _tile getOrDefault ["row", 0];
 
     if (_row < (_window select 0) || {_row >= (_window select 1)}) then {continue};
 
-    _x deleteAt "offPage";
-    [_display, _grid, _x, GVAR(theme)] call FUNC(createTile);
+    _tile deleteAt "offPage";
+    [_display, _grid, _tile, GVAR(theme)] call FUNC(createTile);
 
     // createTile added it at the end of the list: it stands where it stood already.
     _tiles deleteAt (count _tiles - 1);
-} forEach +_tiles;
+};
+
+// Every tile of the rows that show has to be drawn now: one that is still bare here would show no fading, no outline and no selection.
+private _undrawn = _tiles select {
+    (_x getOrDefault ["offPage", false]) && {(_x getOrDefault ["row", 0]) >= (_window select 0)} && {(_x getOrDefault ["row", 0]) < (_window select 1)}
+};
+
+if (_undrawn isNotEqualTo []) then {
+    INFO_1("A paged box left %1 tiles of its page undrawn",count _undrawn);
+};
 
 [_display, _grid] call FUNC(drawCells);
 [_display, _grid] call FUNC(drawPageBar);
@@ -113,6 +127,10 @@ if ((uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo []) then {
 
 {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(hoverRing), []]);
 uiNamespace setVariable [QGVAR(hoverRing), []];
+
+// Where this box's cells lie changed with its window: the hover's picture of the grids is worked out again.
+uiNamespace setVariable [QGVAR(hoverGeom), []];
+uiNamespace setVariable [QGVAR(hoverHold), []];
 GVAR(hover) = [];
 GVAR(lastClick) = [[], -1];
 GVAR(lastMouse) = [];

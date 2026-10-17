@@ -96,8 +96,10 @@ uiNamespace setVariable [QGVAR(dragGlow), []];
 {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(dragFootprints), []]);
 {ctrlDelete (_x select 0)} forEach (uiNamespace getVariable [QGVAR(dragGhosts), []]);
 {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(dragShapes), []]);
+{ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(dragCorners), []]);
 uiNamespace setVariable [QGVAR(dragFootprints), []];
 uiNamespace setVariable [QGVAR(dragShapes), []];
+uiNamespace setVariable [QGVAR(dragCorners), []];
 uiNamespace setVariable [QGVAR(dragGhosts), []];
 
 private _group = GVAR(dragGroup);
