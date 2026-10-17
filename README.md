@@ -235,7 +235,7 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   closing the window cancels what still waits, and nothing is lost or half done, since nothing happens before its circle is full. Rearranging within
   a container, turning an item and splitting a stack stay instant, and so does ACE Arsenal's panel. The times are server settings on the wizard's
   General page, under "Looting and searching" (`einv_gui_handDrop` 0.3 s, `einv_gui_handMove` 0.4 s, `einv_gui_handEquip` 1 s; 0 is no wait and no circle for that
-  kind, as before 0.4.7).
+  kind, as before 0.5.0).
 - **Sounds and looting:** every kind of gear sounds like what it is - weapons, magazines, vests, helmets, medical
   items, radios -, using Arma's own sound files only; players within earshot hear someone loot (`einv_gui_soundsWorld`,
   a server setting). While the window looks into something (a body, a crate, a pile) the soldier lowers his weapon and

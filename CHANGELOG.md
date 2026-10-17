@@ -2,7 +2,7 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## 0.4.7 - unreleased
+## 0.5.0 - unreleased
 
 ### Added
 

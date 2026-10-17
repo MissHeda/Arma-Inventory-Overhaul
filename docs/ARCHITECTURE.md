@@ -914,7 +914,7 @@ are the keys their cargo twins would have, so the places need no change when a t
 (`fnc_getLayout`), the room checks (`fnc_hasSpace`, `fnc_plan`), the mass of a section (`fnc_getMass`), `fnc_findEntry`, the Arsenal
 panel (through `fnc_getContents` and `fnc_countAll` + `fnc_hiddenCounts`), `fnc_countClass` and `fnc_addNew`, the EFAK kit finder
 (`einv_compat_efak_fnc_locate`, `fnc_getSections` + `fnc_hiddenClasses`) all see one container, and every machine the same one.
-The window draws a `strict` tile with a crossed eye (`icon_eye_off_ca`) after the padlock (`fnc_createTile`; it was keyed `hidden` until 0.4.7, the window's "not searched yet", so the eye was never reached and a Strict tile showed as "?") and the footer says
+The window draws a `strict` tile with a crossed eye (`icon_eye_off_ca`) after the padlock (`fnc_createTile`; it was keyed `hidden` until 0.5.0, the window's "not searched yet", so the eye was never reached and a Strict tile showed as "?") and the footer says
 "Hidden: kept out of the backpack, so nothing else can use it" (`fnc_updateHover`); `fnc_getSignature` watches the holders of the
 people shown, so a move into or out of one redraws.
 
@@ -1116,7 +1116,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
 - **The camera is kept** across builds while `einv_gui_cameraFor` (`[unit, rect]`, set by `fnc_cameraStart`) is unchanged; another rect
   (a pile appearing after a drop opens the loot column and moves the free middle), the pose being reached (`fnc_poseCheck`) only move
   and re-aim the camera that is there (`camSetPos`, `camSetTarget`; the light follows) - ending it ("terminate") leaves the player in first person, which
-  made a drop throw him out of third person before 0.4.7 - and only the camera switch, another soldier or a vehicle end it
+  made a drop throw him out of third person before 0.5.0 - and only the camera switch, another soldier or a vehicle end it
   (`fnc_cameraStop`). The view the player had when the camera began (`cameraView`, kept with his unit in `einv_gui_cameraView`) is
   switched back to whenever the camera ends: window closed, camera off, a vehicle. `einv_gui_debugTiming` (client,
   default off) writes `timing: build 12.3 ms (N controls on the display, N of them shown: PanelRect N, ...)` (the controls by class,
@@ -2544,7 +2544,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_locks_zeusOpens` | CHECKBOX | global | on | Zeus may open locked containers |
 
 CBA keybinds: `einv_hotbar_slot1` to `slot7` (4 to 0), `einv_hotbar_show`, `einv_gui_quickMove` (F, the quick move in the inventory window), `einv_gui_drop` (G, the drop in the inventory window). Kept in the player's
-profile: `einv_gui_muted` (the speaker; `einv_gui_searchMuted` before 0.4.7), `einv_hotbar_slots` (`einv_gui_cameraOn` no longer since 0.4.7: `einv_gui_cameraDefault`).
+profile: `einv_gui_muted` (the speaker; `einv_gui_searchMuted` before 0.5.0), `einv_hotbar_slots` (`einv_gui_cameraOn` no longer since 0.5.0: `einv_gui_cameraDefault`).
 
 **What missions and other mods may set** (all optional): on an object `einv_grid` (a grid text, public), `einv_noSearch`,
 `einv_nearby = false`, `einv_noAccess` (a person); in a mission `einv_arsenal_biPassThrough`; in an item's config `einv_size`,
@@ -2636,7 +2636,7 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
   jog speed in ACE's fatigue model that Heavy is derived from (G2; `JOG_SPEED` is ACE's number), whether the engine's "Rearm"
   respects `lockInventory` (G4). Also unconfirmed: that the topmost group takes the mouse wheel (so nothing under a kit window
   scrolls) and that a group's fade carries its controls (the kit windows' fade-in).
-- **Separate stacks** (0.4.7): the counts in the places' records and their reconciliation with the cargo, `put` with `separate` and
+- **Separate stacks** (0.5.0): the counts in the places' records and their reconciliation with the cargo, `put` with `separate` and
   `merge into`, the op `split`, the merge drop, the plan filling partial stacks, and the Arsenal's lowering of a tile's count were
   written and read through, not run. To try: 5 of 10 of a class on a cell, drop 1 on another cell of the same container (two
   tiles), in another container (two tiles), onto the stack of five (merge); Shift+click; Quick move of the single into a
