@@ -334,8 +334,16 @@ private _spec = switch (true) do {
 
                 if ((_canvas select 0) < 1) then {continue};
 
+                // A canvas of one compartment is only a shape: what its letter says counts as said of it, together with
+                // anything said without a letter ("aa/a-:a=ammo" is "xx/x-:ammo").
                 if (count _parts <= 1) then {
-                    _blocks pushBack ([[_canvas select 0, _canvas select 1, _canvas select 2, []], _plain] call _fnc_extra);
+                    private _own = _attrs getOrDefault [_letters param [0, ""], [[], false]];
+                    private _merged = [
+                        ITEM_GROUPS select {_x in (_plain select 0) || {_x in (_own select 0)}},
+                        (_plain select 1) || {_own select 1}
+                    ];
+
+                    _blocks pushBack ([[_canvas select 0, _canvas select 1, _canvas select 2, []], _merged] call _fnc_extra);
                     continue;
                 };
 

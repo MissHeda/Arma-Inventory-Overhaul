@@ -621,8 +621,9 @@ never lands in a compartment that refuses it, on any machine:
   a cell without a size is the item's own (`opPlaceMany`). The slot's box is a plain rectangle (or a shape with holes), so every
   existing cell test, the plan's and the window's, treats it like a tile of that size.
 
-A kit's grid (`compat_efak`) honours both wherever it is laid out (room checks, first fit) but not when a tile is dragged within
-the kit (`fnc_opKitPlace` asks cells only): the next layout puts such a tile back where it is accepted.
+A kit's grid (`compat_efak`) honours both wherever it is laid out (room checks, first fit; `fnc_kitBlocks` carries the two
+elements on). A cell named in a kit (`fnc_opKitPlace`, `fnc_putIntoKit`, both through `fnc_cellFree`) is checked as the slot's box
+in a single slot, but its categories are not asked there: the next layout puts a tile in a refusing compartment where it is accepted.
 
 ### Room (`fnc_hasSpace`, `fnc_hasRoom`, `fnc_plan`)
 

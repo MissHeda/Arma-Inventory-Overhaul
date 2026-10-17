@@ -39,7 +39,21 @@ private _open = _blocks isEqualTo [];
 if (_open && {_block != 0}) exitWith {false};
 
 // The open grid is one compartment, as wide as every grid and as long as it needs.
-(([[[STORAGE_COLS, 1e6, []]], _blocks] select !_open) param [_block, []]) params [["_cols", 0], ["_rows", 0], ["_compartmentHoles", []]];
+private _compartment = ([[[STORAGE_COLS, 1e6, []]], _blocks] select !_open) param [_block, []];
+
+_compartment params [["_cols", 0], ["_rows", 0], ["_compartmentHoles", []]];
+
+// A single slot takes the tile whole, whatever its size (einv_storage_fnc_slotOf): the slot is what has to be free, as the
+// kit's layout will lay the tile there.
+if (_compartment param [5, false]) then {
+    ([_compartment] call EFUNC(storage,slotOf)) params ["_slotCol", "_slotRow", "_slotW", "_slotH", "_slotHoles"];
+
+    _col = _slotCol;
+    _row = _slotRow;
+    _w = _slotW;
+    _h = _slotH;
+    _holes = _slotHoles;
+};
 
 if (_col + _w > _cols || {_row + _h > _rows}) exitWith {false};
 

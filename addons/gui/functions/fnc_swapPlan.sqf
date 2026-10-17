@@ -337,4 +337,5 @@ if (!_sameHolder) then {
 
 if (_reason isNotEqualTo "") exitWith {[_reason, []]};
 
-["", [_indexB, [_col, _row, _toBlock, _w, _h, _rot], _cellB, _merge, _mergeCount]]
+// In a single slot the dragged tile lies upright whatever turn it is held in, as the authority lays it (einv_storage_fnc_opPlaceMany).
+["", [_indexB, [_col, _row, _toBlock, _w, _h, [_rot, 0] select _targetSingle], _cellB, _merge, _mergeCount]]

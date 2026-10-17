@@ -923,8 +923,8 @@ private _fnc_cells = {
         private _tileHoles = _x getOrDefault ["holes", []];
 
         // A tile the category or the search field hides is not there to the player: it is no tile to swap with or merge into,
-        // and no cell of it is taken. The cells it lies on are kept apart (the third element): a drop there goes to the first
-        // free spot of the box instead.
+        // and no cell of it is taken. The cells it lies on are kept apart (the third element, true at a cell's index like the
+        // second, [] while no tile is hidden): a drop there goes to the first free spot of the box instead.
         private _hiddenTile = _x getOrDefault ["filteredOut", false];
 
         for "_r" from 0 to (_tileH - 1) do {
@@ -936,7 +936,7 @@ private _fnc_cells = {
                     private _cellIndex = _row * _cols + _col;
 
                     if (_hiddenTile) then {
-                        _byHidden pushBackUnique _cellIndex;
+                        _byHidden set [_cellIndex, true];
                         continue;
                     };
 
@@ -1660,7 +1660,7 @@ call {
 
             for "_r" from 0 to (_h - 1) do {
                 for "_c" from 0 to (_w - 1) do {
-                    if (!((_r * _w + _c) in _dragHoles) && {((_row + _r) * _targetCols + _col + _c) in _hiddenCells}) exitWith {
+                    if (!((_r * _w + _c) in _dragHoles) && {_hiddenCells param [(_row + _r) * _targetCols + _col + _c, false]}) exitWith {
                         _viaHidden = true;
                     };
                 };

@@ -14,7 +14,8 @@
  * 0: Kit class <STRING>
  *
  * Return Value:
- * Compartments [[cols, rows, holes, pos], ...] - a copy -, [] for an open grid <ARRAY>
+ * Compartments [[cols, rows, holes, pos], ...] - a copy, one with attributes also with its accepts and single
+ * (einv_items_fnc_parseGrid) -, [] for an open grid <ARRAY>
  *
  * Example:
  * ["efak_IFAK_7"] call einv_compat_efak_fnc_kitBlocks;
@@ -51,4 +52,14 @@ if (isNil "_known") then {
     (GVAR(blocksCache) select 1) set [_key, _known];
 };
 
-_known apply {[_x select 0, _x select 1, +(_x param [2, []]), +(_x param [3, []])]}
+// A compartment that accepts only some categories or is a single slot keeps those two (einv_storage_fnc_blockMode): the kit's
+// layout, its room checks and its window honour them as a container's do.
+_known apply {
+    private _block = [_x select 0, _x select 1, +(_x param [2, []]), +(_x param [3, []])];
+
+    if (count _x > 4) then {
+        _block append [+(_x param [4, []]), _x param [5, false]];
+    };
+
+    _block
+}
