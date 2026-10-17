@@ -133,8 +133,12 @@ private _fnc_exact = {
     _answer
 };
 
-// A tile that stacks may join a pile, a shaped one lies on cells the plain look does not know.
-if (_stack > 1 || {(_upright select 2) isNotEqualTo []} || {(_turned select 2) isNotEqualTo []}) exitWith {
+// A tile that stacks may join a pile, a shaped one lies on cells the plain look does not know, and a compartment that
+// accepts only some categories or holds one item of any size (einv_storage_fnc_blockMode) is not a matter of free cells.
+if (
+    _stack > 1 || {(_upright select 2) isNotEqualTo []} || {(_turned select 2) isNotEqualTo []}
+    || {_blocks findIf {count _x > 4} >= 0}
+) exitWith {
     call _fnc_exact
 };
 

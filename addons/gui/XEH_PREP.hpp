@@ -129,6 +129,7 @@ PREP(revealFx);
 
 // The categories at the side of a loot box
 PREP(itemGroup);
+PREP(groupTexture);
 PREP(boxGroup);
 PREP(setGroup);
 PREP(matchesGroup);
@@ -284,6 +285,7 @@ PREP(showPage);
 PREP(setPage);
 PREP(turnPage);
 PREP(pageSoon);
+PREP(pageStep);
 PREP(drawCompartments);
 PREP(scrollPixels);
 PREP(drawWindows);

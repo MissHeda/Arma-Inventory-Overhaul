@@ -64,6 +64,10 @@
  *   use=backpack+vest        the containers the item may be used from even where a setting limits what can be
  *                            used there (fnc_parseUse): any of uniform, vest, backpack joined with +, all, or
  *                            none for no container - a comma would end the statement
+ *   cats=medical+misc        the categories the item is in instead of the built-in one (fnc_parseGroups): any of
+ *                            weapon, ammo, grenade, gear, medical, food, tool, misc joined with +. The strip at the
+ *                            side of a loot box and a compartment that accepts only some categories (grid=,
+ *                            fnc_parseGrid) read them. Not "cat=": that is the condition on the tile's colour
  *   picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa   the texture it shows instead of its config's
  *                            picture (fnc_parsePicture): a path, slashes either way, a space as %20 and any
  *                            other special character as %XX (fnc_encodeName with the path switch). A file
@@ -98,7 +102,8 @@
  * <NUMBER>, "grid" (as
  * fnc_formatGrid writes it), "weight" (kg <NUMBER>), "name" (the name as it shows), "icon" ([scale,
  * across, down] <ARRAY>, see fnc_parseIcon), "picture" (the texture path with backslashes <STRING>), "use" (the containers it may be used from, in the
- * order uniform, vest, backpack <ARRAY of STRING>, [] for none - see fnc_parseUse).
+ * order uniform, vest, backpack <ARRAY of STRING>, [] for none - see fnc_parseUse), "cats" (the categories, in the
+ * order of ITEM_GROUPS <ARRAY of STRING> - see fnc_parseGroups).
  *
  * Example:
  * ["einv1 base=default, kind=grenade > stack=3"] call einv_items_fnc_parseRules;
@@ -150,7 +155,7 @@ private _classChars = createHashMap;
 private _shapeChars = createHashMap;
 {_shapeChars set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/@");
 
-private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon", "picture", "use"];
+private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon", "picture", "use", "cats"];
 
 private _numberOps = ["=", "<", "<=", ">", ">="];
 private _keyOps = createHashMapFromArray [
@@ -420,6 +425,18 @@ private _fnc_use = {
     ["use", _kinds]
 };
 
+private _fnc_cats = {
+    params ["_raw"];
+
+    ([_raw] call FUNC(parseGroups)) params ["_groups", "_messages", "_readable"];
+
+    _notes append _messages;
+
+    if (!_readable) exitWith {[]};
+
+    ["cats", _groups]
+};
+
 private _fnc_value = {
     params ["_token"];
 
@@ -437,6 +454,7 @@ private _fnc_value = {
         case "icon": {[_raw] call _fnc_icon};
         case "picture": {[_raw] call _fnc_picture};
         case "use": {[_raw] call _fnc_use};
+        case "cats": {[_raw] call _fnc_cats};
         default {[]};
     }
 };

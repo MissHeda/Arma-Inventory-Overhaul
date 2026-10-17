@@ -22,6 +22,15 @@
  *                   cell of its own inside. Joined with "+" to the others, the canvas is one piece of
  *                   the flow, as wide and high as the box around it. One canvas per grid: the
  *                   compartments of a second one flow on their own, with a message.
+ *   1x2:ammo+1x1:grenade:one+6x4
+ *                 - attributes after a compartment's colon. A list of categories (weapon, ammo, grenade, gear,
+ *                   medical, food, tool, misc - ITEM_GROUPS, joined with |) means the compartment accepts only
+ *                   items in one of them: "2x2:ammo|grenade" takes magazines and grenades and nothing else; no
+ *                   list takes everything. The word "one" makes it a single slot: it holds one tile whatever
+ *                   its size, and the item takes the whole slot ("1x1:grenade:one", the vest's grenade loop).
+ *                   On a canvas each letter has its own, "aab/aab:a=ammo:b=grenade|one". A compartment without
+ *                   attributes is written as it always was, so no older text changes. A rig:16 pattern, a
+ *                   number of cells or a share cannot carry any: they say nothing about single compartments.
  *
  * A shape is read to its smallest form (fnc_parseMask, which reads an item's size= the same way): rows
  * and columns at its edges that are only holes go, and a shape with no hole left is a plain WxH -
@@ -50,8 +59,10 @@
  *   spec     - ["auto"], ["cells", N], ["percent", P], ["pattern", name, N or -1] or
  *              ["blocks", [[cols, rows, holes, pos], ...]] - holes the indices row * cols + col of
  *              the cells a shape does not have, ascending, [] for a full rectangle; pos [x, y] the
- *              compartment's top left cell on its canvas, [] for one that flows; [] when the text
- *              cannot be read <ARRAY>
+ *              compartment's top left cell on its canvas, [] for one that flows; and for a compartment with
+ *              attributes two more: accepts, the categories it takes ([] for all of them), and single, true
+ *              for a slot of one item of any size (fnc_blocksFor, einv_storage_fnc_blockMode). A compartment
+ *              without attributes has the four only; [] when the text cannot be read <ARRAY>
  *   messages - what was cut down, or why it cannot be read <ARRAY of STRING>
  *
  * Example:
@@ -125,6 +136,80 @@ private _name = _value;
 
 if (_colon >= 0) then {
     _name = _value select [0, _colon];
+};
+
+// What follows a compartment's geometry after a colon is its attributes: "6x4:ammo|grenade" accepts only those
+// categories, "1x1:grenade:one" holds one item of any size, and on a canvas each letter has its own, "aab/aab:a=ammo:b=one".
+// A pattern's colon (rig:16) is not one. Taken apart here, so everything below reads the geometry alone, as it always did;
+// _tails holds, per piece, the tokens after its colons.
+private _tails = [];
+
+if (_colon >= 0 && {!(_name in GRID_PATTERNS)}) then {
+    private _cores = [];
+
+    {
+        private _at = _x find ":";
+
+        _cores pushBack ([_x, _x select [0, _at]] select (_at >= 0));
+        _tails pushBack ([[], (_x select [_at + 1]) splitString ":"] select (_at >= 0));
+    } forEach (_value splitString "+");
+
+    if (_cores findIf {_x isEqualTo ""} >= 0) then {
+        _messages pushBack format ["'%1' is no grid: after a compartment may come :categories or :one, not before it", _value];
+        _value = "";
+        _tails = [];
+    } else {
+        _value = _cores joinString "+";
+    };
+};
+
+// The attributes of one piece: letter ("" for a piece without a canvas) -> [accepts, single]. A category is one of
+// ITEM_GROUPS, "one" says one item of any size; "a=" in front names the compartment of a canvas.
+private _fnc_attrs = {
+    params ["_pieceTails"];
+
+    private _map = createHashMap;
+
+    {
+        private _token = _x;
+        private _letter = "";
+
+        if ((_token select [1, 1]) isEqualTo "=") then {
+            _letter = _token select [0, 1];
+            _token = _token select [2];
+        };
+
+        private _single = false;
+        private _words = [];
+
+        {
+            if (_x in ["one", "single"]) then {
+                _single = true;
+            } else {
+                _words pushBack _x;
+            };
+        } forEach (_token splitString "|");
+
+        private _groups = [];
+
+        if (_words isNotEqualTo []) then {
+            ([_words joinString "|", "grid"] call FUNC(parseGroups)) params ["_found", "_notes", "_readable"];
+
+            _messages append _notes;
+            _groups = _found;
+        };
+
+        if (_groups isEqualTo [] && {!_single}) then {
+            _messages pushBack format ["grid=%1: ':%2' says no category and not 'one' - left out", _value, _x];
+            continue;
+        };
+
+        private _had = _map getOrDefault [_letter, [[], false]];
+
+        _map set [_letter, [ITEM_GROUPS select {_x in (_had select 0) || {_x in _groups}}, (_had select 1) || _single]];
+    } forEach _pieceTails;
+
+    _map
 };
 
 // The last character, for a share like 120%.
@@ -216,9 +301,24 @@ private _spec = switch (true) do {
             private _blocks = [];
             private _canvases = 0;
 
+            // The attributes of a block, [accepts, single], appended to it only when it has some: a grid without
+            // them is exactly what it always was.
+            private _fnc_extra = {
+                params ["_block", "_attr"];
+
+                _attr params [["_accepts", []], ["_single", false]];
+
+                if (_accepts isEqualTo [] && {!_single}) exitWith {_block};
+
+                _block + [_accepts, _single]
+            };
+
             {
+                private _attrs = [_tails param [_forEachIndex, []]] call _fnc_attrs;
+                private _plain = _attrs getOrDefault ["", [[], false]];
+
                 if (count _x <= 3) then {
-                    _blocks pushBack [_x select 0, _x select 1, _x select 2, []];
+                    _blocks pushBack ([[_x select 0, _x select 1, _x select 2, []], _plain] call _fnc_extra);
                     continue;
                 };
 
@@ -230,13 +330,21 @@ private _spec = switch (true) do {
                 };
 
                 private _parts = _canvas param [3, []];
+                private _letters = _canvas param [4, []];
 
                 if ((_canvas select 0) < 1) then {continue};
 
                 if (count _parts <= 1) then {
-                    _blocks pushBack [_canvas select 0, _canvas select 1, _canvas select 2, []];
+                    _blocks pushBack ([[_canvas select 0, _canvas select 1, _canvas select 2, []], _plain] call _fnc_extra);
                     continue;
                 };
+
+                // Each compartment of the canvas has the attributes of its letter.
+                private _lettered = [];
+
+                {
+                    _lettered pushBack ([_x, _attrs getOrDefault [_letters param [_forEachIndex, ""], [[], false]]] call _fnc_extra);
+                } forEach _parts;
 
                 // The flow keeps one canvas whole (einv_gui_fnc_flowCompartments); a second one has
                 // nothing to say where it lies against the first.
@@ -245,9 +353,11 @@ private _spec = switch (true) do {
                         _messages pushBack format ["grid=%1: one canvas per grid - the compartments of the others flow on their own", _value];
                     };
 
-                    _blocks append (_parts apply {[_x select 0, _x select 1, _x select 2, []]});
+                    _blocks append (_lettered apply {
+                        [[_x select 0, _x select 1, _x select 2, []], [_x param [4, []], _x param [5, false]]] call _fnc_extra
+                    });
                 } else {
-                    _blocks append _parts;
+                    _blocks append _lettered;
                 };
 
                 _canvases = _canvases + 1;
@@ -256,7 +366,11 @@ private _spec = switch (true) do {
             if (_blocks findIf {(_x select 0) > STORAGE_COLS || {(_x select 1) > MAX_ROWS}} >= 0) then {
                 _messages pushBack format ["grid=%1: a compartment is at most %2 across and %3 down - cut down", _value, STORAGE_COLS, MAX_ROWS];
                 _blocks = _blocks apply {
-                    if ((_x select 0) > STORAGE_COLS || {(_x select 1) > MAX_ROWS}) then {(_x call _fnc_cut) + [[]]} else {_x}
+                    if ((_x select 0) > STORAGE_COLS || {(_x select 1) > MAX_ROWS}) then {
+                        [(_x call _fnc_cut) + [[]], [_x param [4, []], _x param [5, false]]] call _fnc_extra
+                    } else {
+                        _x
+                    }
                 };
             };
 
@@ -313,6 +427,11 @@ private _spec = switch (true) do {
         _messages pushBack format ["'%1' is no grid: auto, a number of cells, a share like %3, a pattern (%2) or compartments like 6x4+2x3, xxx/x-x or aab/acc", _value, GRID_PATTERNS joinString ", ", "120%"];
         []
     };
+};
+
+// Attributes need compartments written out: "auto:ammo" says nothing about which compartment.
+if (_spec isNotEqualTo [] && {(_spec select 0) isNotEqualTo "blocks"} && {(_tails findIf {_x isNotEqualTo []}) >= 0}) then {
+    _messages pushBack format ["grid=%1: :categories and :one go with compartments written out like 6x4:ammo - left out", _value];
 };
 
 [_spec, _messages]

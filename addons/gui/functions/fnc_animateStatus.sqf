@@ -76,10 +76,13 @@ private _fnc_fit = {
         _record = GVAR(handBoxes) select _record;
 
         private _total = _record get "total";
+
+        // Parenthesised: max binds tighter than find, so without the brackets it was asked of the verb (a string) itself.
+        private _verb = (["grab", "put", "drop", "move", "gear"] find (_record get "verb")) max 0;
         private _words = format [
             [
                 LLSTRING(Status_Grab), LLSTRING(Status_Put), LLSTRING(Status_Drop), LLSTRING(Status_Move), LLSTRING(Status_Gear)
-            ] select (["grab", "put", "drop", "move", "gear"] find (_record get "verb") max 0),
+            ] select _verb,
             ((_record get "done") + 1) min _total, _total
         ];
 

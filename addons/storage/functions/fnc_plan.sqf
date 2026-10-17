@@ -145,8 +145,17 @@ private _fnc_state = {
 
 // The first free spot for a size and its holes, the given compartment first: [compartment, col, row],
 // [] for none.
+// Whether a single slot has nothing in it yet (fnc_slotOf).
+private _fnc_slotFree = {
+    params ["_state", "_block"];
+
+    ([((_state select 3) select _block)] call FUNC(slotOf)) params ["_col", "_row", "_w", "_h", "_holes"];
+
+    [(_state select 5) select _block, _col, _row, _w, _h, _holes] call FUNC(cellsFree)
+};
+
 private _fnc_find = {
-    params ["_state", "_w", "_h", "_first", ["_holes", []]];
+    params ["_state", "_w", "_h", "_first", ["_holes", []], ["_groups", []]];
 
     private _spot = [];
     private _blocks = _state select 3;
@@ -166,6 +175,23 @@ private _fnc_find = {
         private _block = _x;
 
         (_blocks select _block) params ["_cols", "_rows"];
+
+        // A compartment that refuses the item is passed over (fnc_blockMode); a single slot is one spot, whole, when it is empty.
+        if (count (_blocks select _block) > 4 && {_groups isNotEqualTo []}) then {
+            private _mode = [_blocks select _block, _groups] call FUNC(blockMode);
+
+            if (_mode < 0) then {continue};
+
+            if (_mode == 1) then {
+                if ([_state, _block] call _fnc_slotFree) then {
+                    _spot = [_block, 0, 0, true];
+
+                    break;
+                };
+
+                continue;
+            };
+        };
 
         // The open grid has no end: looking one row past the last one taken always finds room.
         private _lastRow = if (_state select 4) then {count ((_state select 5) select _block)} else {_rows - _h};
@@ -217,6 +243,7 @@ private _left = [];
 
     private _turnedHoles = (_info getOrDefault ["footprintTurned", [_h, _w, []]]) param [2, []];
     private _isBackpack = (_info getOrDefault ["kind", ""]) isEqualTo "backpack";
+    private _groups = _info getOrDefault ["groups", ["misc"]];
     private _stackSize = (_info getOrDefault ["stack", 1]) max 1;
     private _inside = _item getOrDefault ["container", objNull];
     private _done = false;
@@ -292,23 +319,34 @@ private _left = [];
 
         private _firstBlock = if (_start isNotEqualTo [] && {(_start select 0) isEqualTo _holder}) then {_start param [1, -1]} else {-1};
         private _turned = false;
-        private _spot = [_state, _w, _h, _firstBlock, _holes] call _fnc_find;
+        private _spot = [_state, _w, _h, _firstBlock, _holes, _groups] call _fnc_find;
 
         // Fits nowhere upright: turned a quarter, as a player would - a shape turns with it, and one in a
         // square box is tried turned too when that takes other cells.
         if (_spot isEqualTo [] && {_w != _h || {_holes isNotEqualTo _turnedHoles}}) then {
-            _spot = [_state, _h, _w, _firstBlock, _turnedHoles] call _fnc_find;
+            _spot = [_state, _h, _w, _firstBlock, _turnedHoles, _groups] call _fnc_find;
             _turned = _spot isNotEqualTo [];
         };
 
         if (_spot isEqualTo []) then {continue};
 
-        _spot params ["_block", "_col", "_row"];
+        _spot params ["_block", "_col", "_row", ["_slot", false]];
 
         private _cellW = [_w, _h] select _turned;
         private _cellH = [_h, _w] select _turned;
+        private _cellHoles = [_holes, _turnedHoles] select _turned;
 
-        [_state, _block, _col, _row, _cellW, _cellH, [_holes, _turnedHoles] select _turned] call _fnc_mark;
+        // A single slot takes it whole, upright (fnc_slotOf); the cell is the slot's, the size is not asked.
+        if (_slot) then {
+            ([(_state select 3) select _block] call FUNC(slotOf)) params ["", "", "_slotW", "_slotH", "_slotHoles"];
+
+            _cellW = _slotW;
+            _cellH = _slotH;
+            _cellHoles = _slotHoles;
+            _turned = false;
+        };
+
+        [_state, _block, _col, _row, _cellW, _cellH, _cellHoles] call _fnc_mark;
         call _fnc_fill;
 
         _assigned pushBack [_item, _holder, _root, [[_col, _row, _block], [_col, _row, _block, _cellW, _cellH, 1]] select _turned];

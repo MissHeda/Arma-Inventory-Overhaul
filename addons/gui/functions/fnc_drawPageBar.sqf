@@ -11,6 +11,10 @@
  * chosen at the box's side (fnc_drawGroupStrip), the matches on other pages instead of the items (fnc_pageCounts) - a search
  * and a category are found on any page. An arrow whose side of the pages has
  * matches wears a small mark with their number.
+ * With a category chosen the box shows only that kind of item (fnc_applyFilter), so the pages follow (Mia, 0.5.7): only the pages
+ * with a match count - "Page 1 / 2" is the first of the two pages that have any -, an arrow is on while a page with a match lies
+ * that way, and the arrows and the words turn to those pages (fnc_pageStep). A category with no match anywhere says "Nothing of
+ * this kind here" and has no page to turn to. The field of the search alone leaves the pages as they are (it dims, it does not hide).
  * The arrows are round buttons of their own, a good deal bigger than the line of words, its surface fading in under the mouse and
  * out again (a pair of fades, not a jump). The hit area of each is the button and 2 pixels on every side (the rule of fnc_uiButton),
  * not the half of the bar, so the bar between is free. An arrow with no page behind it is dimmed and does nothing.
@@ -56,7 +60,22 @@ private _theme = GVAR(theme);
 
 // The matches are counted for the search field and for the category chosen at this box's side (fnc_pageCounts): either one makes the
 // bar say how many lie on the other pages.
-private _searching = GVAR(filter) isNotEqualTo "" || {([_grid getOrDefault ["holder", _grid getOrDefault ["container", objNull]]] call FUNC(boxGroup)) isNotEqualTo ""};
+private _group = [_grid getOrDefault ["holder", _grid getOrDefault ["container", objNull]]] call FUNC(boxGroup);
+private _searching = GVAR(filter) isNotEqualTo "" || {_group isNotEqualTo ""};
+
+// The pages that count: all of them, or - with a category - those that hold a match; where the bar stands among them.
+private _visible = [];
+
+for "_i" from 0 to (_pages - 1) do {
+    if (_group isEqualTo "" || {(_matches select _i) > 0}) then {
+        _visible pushBack _i;
+    };
+};
+
+private _pos = (_visible find _page) max 0;
+private _total = (count _visible) max 1;
+private _hasPrev = (_visible findIf {_x < _page}) >= 0;
+private _hasNext = (_visible findIf {_x > _page}) >= 0;
 private _before = 0;
 private _after = 0;
 
@@ -84,18 +103,24 @@ private _queued = 0;
 } forEach (_grid getOrDefault ["tiles", []]);
 
 // The last page, not the first: the bar says so, and how much lies before it.
-private _last = _page > 0 && {_page == _pages - 1};
+private _last = _pos > 0 && {_pos == _total - 1};
 
-private _parts = [format [LLSTRING(Page_Label), _page + 1, _pages]];
+private _parts = [format [LLSTRING(Page_Label), _pos + 1, _total]];
 
 if (_last) then {
     _parts = [LLSTRING(Page_Last_None)];
 };
 
+// A category nothing of which lies in the box.
+if (_visible isEqualTo []) then {
+    _parts = [LLSTRING(Page_None)];
+};
+
 if (_searching && {_elsewhere > 0}) then {
     _parts pushBack format [[LLSTRING(Page_Hits), LLSTRING(Page_Hits_One)] select (_elsewhere == 1), _elsewhere];
 } else {
-    if (_others > 0) then {
+    // What a category hides is not "on other pages" any more: only the matches are told then.
+    if (_others > 0 && {_group isEqualTo ""}) then {
         if (_last) then {
             _parts pushBack format [[LLSTRING(Page_Earlier), LLSTRING(Page_Earlier_One)] select (_others == 1), _others];
         } else {
@@ -111,7 +136,7 @@ if (_queued > 0) then {
 private _text = _parts joinString "  ·  ";
 
 // Nothing it says changed since it was drawn, and the controls are all there: left as it is.
-private _signature = [GVAR(buildCount), _page, _pages, _text, _before, _after, _others];
+private _signature = [GVAR(buildCount), _page, _pages, _text, _before, _after, _others, _hasPrev, _hasNext];
 private _drawn = _grid getOrDefault ["pageControls", []];
 
 if (_drawn isNotEqualTo [] && {(_grid getOrDefault ["pageSig", []]) isEqualTo _signature} && {_drawn findIf {isNull _x} < 0}) exitWith {};
@@ -272,8 +297,8 @@ private _hits = [];
         ];
     };
 } forEach [
-    [-1, _left + SQUARE(_inset), _page > 0, LLSTRING(Page_Prev), _before, _left],
-    [1, _left + _barW - SQUARE(_inset) - _buttonW, _page < _pages - 1, LLSTRING(Page_Next), _after, _left + _barW * (1 - PAGE_ZONE)]
+    [-1, _left + SQUARE(_inset), _hasPrev, LLSTRING(Page_Prev), _before, _left],
+    [1, _left + _barW - SQUARE(_inset) - _buttonW, _hasNext, LLSTRING(Page_Next), _after, _left + _barW * (1 - PAGE_ZONE)]
 ];
 
 // ----- The hit areas -----
@@ -324,7 +349,7 @@ private _hits = [];
     }];
 } forEach _hits;
 
-if (_page > 0) then {
+if (_hasPrev) then {
     private _words = [_display, "EINV_Hitbox", _parent, [_labelRect select 0, _barTop, _labelW, _barH]] call FUNC(uiCreate);
 
     _controls pushBack _words;

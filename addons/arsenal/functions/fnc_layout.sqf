@@ -231,14 +231,14 @@ private _fnc_draw = {
         private _textW = _end - _gapX - _textX;
         private _font = _theme getOrDefault ["font", "PuristaMedium"];
 
-        // The caption line's own text size, from the same top as the tab's text and the weight's: one
-        // baseline all along the line (einv_gui_fnc_drawSection).
-        private _size = UNIT * 0.46;
+        // The tab is a pill as high as the section buttons now, its words set in the middle of its height (einv_gui_fnc_drawSection):
+        // the subtitle is set the same way, in the same size, so that the one line of capitals runs on.
+        private _size = UNIT * 0.42;
 
         if (_textW < SQUARE(UNIT * 1.5)) exitWith {};
 
         [
-            _display, _group, [_textX, _tabY, _textW, _tabH],
+            _display, _group, [_textX, _tabY + _tabH / 2 - TEXT_MID * _size, _textW, TEXT_MID * _size * 2],
             [LLSTRING(Staging_Subtitle), _textW, _font, _size] call EFUNC(gui,fitText), _size,
             _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 0
         ] call EFUNC(gui,uiLabel);

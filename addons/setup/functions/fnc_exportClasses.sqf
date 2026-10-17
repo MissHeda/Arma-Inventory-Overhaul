@@ -105,6 +105,10 @@ private _fnc_lines = {
         _lines pushBack format ["einv_use = %1%2%1;", _quote, [_info get "use", ","] call EFUNC(items,formatUse)];
     };
 
+    if ((_info getOrDefault ["cats", []]) isNotEqualTo [] && {!isNil QEFUNC(items,formatGroups)}) then {
+        _lines pushBack format ["einv_cat = %1%2%1;", _quote, [_info get "cats", ","] call EFUNC(items,formatGroups)];
+    };
+
     format ["class %1 { class %2 { %3 }; };", _root, _facts getOrDefault ["class", _class], _lines joinString " "]
 };
 

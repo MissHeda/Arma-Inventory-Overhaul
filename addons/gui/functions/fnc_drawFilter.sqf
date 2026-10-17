@@ -15,6 +15,8 @@
  * 2: Theme <HASHMAP>
  * 3: Placeholder shown while the field is empty - another window names what it searches <STRING>
  *    (default: "Search items", the inventory's)
+ * 4: The surface of the field, the one film over what lies under it - the header gives it the buttons' (fnc_headerStyle), so the
+ *    field is exactly as light as they are <ARRAY> (default: the theme's button colour)
  *
  * Return Value:
  * None
@@ -27,13 +29,17 @@
 
 disableSerialization;
 
-params ["_display", "_rect", "_theme", ["_placeholderText", LLSTRING(Filter_Placeholder), [""]]];
+params ["_display", "_rect", "_theme", ["_placeholderText", LLSTRING(Filter_Placeholder), [""]], ["_fill", [], [[]]]];
 _rect params ["_left", "_top", "_width", "_height"];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 
-[_display, controlNull, _rect, _theme getOrDefault ["button", [1, 1, 1, 0.06]], (_theme getOrDefault ["radius", 0]) min (_height / 2)] call FUNC(uiPanel);
+if (_fill isEqualTo []) then {
+    _fill = _theme getOrDefault ["button", [1, 1, 1, 0.06]];
+};
+
+[_display, controlNull, _rect, _fill, (_theme getOrDefault ["radius", 0]) min (_height / 2)] call FUNC(uiPanel);
 
 private _iconH = _height * 0.5;
 private _padX = SQUARE(_height * 0.3);

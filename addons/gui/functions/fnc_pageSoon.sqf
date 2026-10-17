@@ -4,7 +4,8 @@
  * Author: Miss Heda
  * Turns a paged compartment's page for a click on its bar (an arrow, the words) - not once per click when it is clicked fast:
  * the page the player wants is worked out at once (GVAR(pageWanted), per container and compartment: every click moves it on or
- * back from where the last one left it, to the first or the last page at the most) and shown through fnc_coalesce, so a fast
+ * back from where the last one left it, to the first or the last page at the most - or, with a category chosen at the box's side, to
+ * the first or the last page with a match, skipping the pages that show nothing: fnc_pageStep) and shown through fnc_coalesce, so a fast
  * run of clicks draws the pages the first one and the last one asked for, not each page between. A drag turns the page
  * itself (fnc_turnPage) and is not slowed by this.
  *
@@ -35,11 +36,8 @@ private _key = format ["page|%1|%2", _holder, _block];
 
 private _wanted = GVAR(pageWanted) getOrDefault [_key, _grid getOrDefault ["page", 0]];
 
-if (_relative) then {
-    _wanted = _wanted + _number;
-} else {
-    _wanted = _number;
-};
+// Each click goes on from where the last one left it, over the pages that count (all of them, or those with a match).
+_wanted = [_grid, _wanted, _number, _relative] call FUNC(pageStep);
 
 GVAR(pageWanted) set [_key, (_wanted min (count _ranges - 1)) max 0];
 

@@ -164,6 +164,12 @@ private _grabbed = ((_grids param [_sourceIndex, createHashMap]) getOrDefault ["
 private _keepCells = [];
 private _keepOk = count _sources == 1 && {count _grabbed > 0};
 
+// A compartment that takes only some categories or is a single slot (einv_storage_fnc_blockMode) is not a place to keep an arrangement in:
+// the tiles are packed by the plan, which asks every compartment what it takes.
+if (_keepOk && {(_target getOrDefault ["accepts", []]) isNotEqualTo [] || {_target getOrDefault ["single", false]}}) then {
+    _keepOk = false;
+};
+
 if (_keepOk) then {
     // Where the grabbed tile would lie, and every other tile at its offset from it.
     private _baseCol = (_cell select 0) - _grabCol - (_grabbed get "col");

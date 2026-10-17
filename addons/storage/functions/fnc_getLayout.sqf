@@ -28,6 +28,12 @@
  * written before rot existed has six elements: it lies turned when its width is not the upright one. The
  * record of a tile of a class that stacks also has its count as an eighth element; the layout does not
  * read it (fnc_getContents does, fnc_stackCounts), it writes the count of every such tile it placed.
+ * A compartment may accept only some categories (a fifth element of its block, fnc_blockMode; grid=2x2:ammo|grenade):
+ * no record, kin or first fit puts an entry there that is in none of them, so it lies in another compartment or is
+ * overflow, whatever an older record says. A single slot (a sixth element, grid=1x1:grenade:one) holds one tile whatever its
+ * size: the tile takes the compartment whole (fnc_slotOf) - its record is [key, 0, 0, the compartment's columns and rows,
+ * its block, 0] and the entry has "single" true, the window draws the item scaled into the slot -, and a record in a slot
+ * is kept for any entry the slot accepts, its own size aside.
  * An entry no compartment has room for - the engine took it from a script or another mod - is
  * "overflow": shown apart, never lost. The ground and a grid with no object of its own (a kit of
  * Enhanced First Aid Kits, einv_compat_efak) have no compartments: one STORAGE_COLS wide that grows with
@@ -92,6 +98,11 @@ _places params ["_revision", "_in"];
 private _blocks = if (_valid) then {[_holder] call FUNC(getBlocks)} else {[]};
 private _open = _blocks isEqualTo [];
 
+// Compartments that accept only some categories or hold one item of any size (grid=2x2:ammo, grid=1x1:grenade:one). Almost no
+// container has one, so none of the checks below is made for the rest.
+private _special = _blocks findIf {count _x > 4} >= 0;
+private _groupsOf = [];             // per entry: its categories (getInfo "groups")
+
 if (_open) then {
     _blocks = [[STORAGE_COLS, 1e6, [], []]];
 };
@@ -147,11 +158,44 @@ private _fnc_sizeFits = {
     ([[_upW, _upH], [_upH, _upW]] select (_rot == 1)) isEqualTo [_w, _h]
 };
 
+// What the compartment makes of an entry (fnc_blockMode): -1 it refuses it, 0 it takes it as it is, 1 it is a single slot
+// that takes it whole (fnc_slotOf). A compartment without attributes takes everything, as it always did.
+private _fnc_modeOf = {
+    params ["_index", "_block"];
+
+    if (!_special || {_block < 0} || {_block >= count _blocks}) exitWith {0};
+
+    [_blocks select _block, _groupsOf select _index] call FUNC(blockMode)
+};
+
+// Whether a single slot has nothing in it yet.
+private _fnc_slotFree = {
+    params ["_block"];
+
+    ([_blocks select _block] call FUNC(slotOf)) params ["_col", "_row", "_w", "_h", "_holes"];
+
+    [_taken select _block, _col, _row, _w, _h, _holes] call FUNC(cellsFree)
+};
+
+// Puts an entry down. In a single slot it takes the whole compartment, whatever its own size is: its box and holes are the
+// slot's, it lies upright, and "single" says so (the window draws the item scaled into the slot, and lifts it at its own size).
 private _fnc_put = {
-    params ["_index", "_block", "_col", "_row", "_w", "_h", "_rot"];
+    params ["_index", "_block", "_col", "_row", "_w", "_h", "_rot", ["_slot", false]];
 
     private _entry = _entries select _index;
     private _holes = [_index, _rot] call _fnc_holes;
+
+    if (_slot) then {
+        ([_blocks select _block] call FUNC(slotOf)) params ["", "", "_slotW", "_slotH", "_slotHoles"];
+
+        _col = 0;
+        _row = 0;
+        _w = _slotW;
+        _h = _slotH;
+        _rot = 0;
+        _holes = _slotHoles;
+        _entry set ["single", true];
+    };
 
     [_block, _col, _row, _w, _h, _holes] call _fnc_take;
 
@@ -184,6 +228,8 @@ private _infos = [];                // per entry: what einv_items_fnc_getInfo gi
     _entry set ["holes", (_info getOrDefault ["footprint", [_w, _h, []]]) param [2, []]];
     _entry set ["rotated", false];
     _entry set ["overflow", false];
+    _entry set ["single", false];
+    _groupsOf pushBack (_info getOrDefault ["groups", ["misc"]]);
 
     private _key = _entry getOrDefault ["key", ""];
 
@@ -224,11 +270,24 @@ private _seen = createHashMap;
         if (_index >= 0) then {
             private _entry = _entries select _index;
             private _rot = [_given, _entry, _w] call _fnc_rot;
+            private _mode = [_index, _block] call _fnc_modeOf;
 
-            if ([_entry, _w, _h, _rot] call _fnc_sizeFits && {[_block, _col, _row, _w, _h, [_index, _rot] call _fnc_holes] call _fnc_isFree}) then {
-                [_index, _block, _col, _row, _w, _h, _rot] call _fnc_put;
-                _placed set [_index, true];
-                _used set [_forEachIndex, true];
+            // A compartment that refuses it keeps no record of it; a single slot takes it whole, the record's size aside.
+            if (_mode == 1) then {
+                if ([_block] call _fnc_slotFree) then {
+                    [_index, _block, 0, 0, 0, 0, 0, true] call _fnc_put;
+                    _placed set [_index, true];
+                    _used set [_forEachIndex, true];
+                };
+            } else {
+                if (
+                    _mode == 0 && {[_entry, _w, _h, _rot] call _fnc_sizeFits}
+                    && {[_block, _col, _row, _w, _h, [_index, _rot] call _fnc_holes] call _fnc_isFree}
+                ) then {
+                    [_index, _block, _col, _row, _w, _h, _rot] call _fnc_put;
+                    _placed set [_index, true];
+                    _used set [_forEachIndex, true];
+                };
             };
         };
     };
@@ -269,19 +328,31 @@ if (count _kinOf > 0) then {
             // Kin may differ in shape within the same box: each candidate is asked with its own holes.
             if (_candidates isNotEqualTo []) then {
                 private _rot = 0;
+                private _slot = false;
                 private _at = _candidates findIf {
                     private _candidate = _x select 2;
 
                     _rot = [_given, _entries select _candidate, _w] call _fnc_rot;
 
-                    !(_placed select _candidate) && {[_entries select _candidate, _w, _h, _rot] call _fnc_sizeFits}
-                    && {[_block, _col, _row, _w, _h, [_candidate, _rot] call _fnc_holes] call _fnc_isFree}
+                    private _mode = [_candidate, _block] call _fnc_modeOf;
+
+                    // A single slot takes any of them whole; a compartment that refuses one is no place for it.
+                    _slot = _mode == 1;
+
+                    !(_placed select _candidate) && {_mode >= 0} && {
+                        if (_slot) then {
+                            [_block] call _fnc_slotFree
+                        } else {
+                            [_entries select _candidate, _w, _h, _rot] call _fnc_sizeFits
+                            && {[_block, _col, _row, _w, _h, [_candidate, _rot] call _fnc_holes] call _fnc_isFree}
+                        }
+                    }
                 };
 
                 if (_at >= 0) then {
                     private _index = (_candidates select _at) select 2;
 
-                    [_index, _block, _col, _row, _w, _h, _rot] call _fnc_put;
+                    [_index, _block, _col, _row, _w, _h, _rot, _slot] call _fnc_put;
                     _placed set [_index, true];
                     _used set [_forEachIndex, true];
                 };
@@ -342,13 +413,30 @@ private _overflow = [];
 
 // The first free spot for that size and those holes, compartment after compartment, row by row.
 private _fnc_find = {
-    params ["_w", "_h", ["_holes", []]];
+    params ["_w", "_h", ["_holes", []], ["_entryIndex", -1]];
 
     private _spot = [];
 
     {
         _x params ["_cols", "_rows"];
         private _block = _forEachIndex;
+
+        // A compartment that refuses the entry is passed over; a single slot is one spot, whole, when it is empty.
+        if (_special && {_entryIndex >= 0}) then {
+            private _mode = [_entryIndex, _block] call _fnc_modeOf;
+
+            if (_mode < 0) then {continue};
+
+            if (_mode == 1) then {
+                if ([_block] call _fnc_slotFree) then {
+                    _spot = [_block, 0, 0, true];
+
+                    break;
+                };
+
+                continue;
+            };
+        };
 
         // The open grid: past its last row everything is free, so looking one row further always ends.
         private _lastRow = if (_open) then {count (_taken select _block)} else {_rows - _h};
@@ -374,12 +462,12 @@ private _fnc_find = {
     private _h = _entry get "h";
     private _holes = [_index, 0] call _fnc_holes;
     private _turnedHoles = [_index, 1] call _fnc_holes;
-    private _spot = [_w, _h, _holes] call _fnc_find;
+    private _spot = [_w, _h, _holes, _index] call _fnc_find;
 
     // Fits nowhere upright: turned a quarter, as a player would - a shape turns with it, and one in a
     // square box is tried turned too when that takes other cells.
     if (_spot isEqualTo [] && {_w != _h || {_holes isNotEqualTo _turnedHoles}}) then {
-        _spot = [_h, _w, _turnedHoles] call _fnc_find;
+        _spot = [_h, _w, _turnedHoles, _index] call _fnc_find;
 
         if (_spot isNotEqualTo []) then {
             _entry set ["w", _h];
@@ -396,7 +484,23 @@ private _fnc_find = {
         _entry set ["overflow", true];
         _overflow pushBack _entry;
     } else {
-        _spot params ["_block", "_col", "_row"];
+        _spot params ["_block", "_col", "_row", ["_slot", false]];
+
+        // A single slot takes the entry whole, upright, whatever turn the search was in.
+        if (_slot) then {
+            ([_blocks select _block] call FUNC(slotOf)) params ["_slotCol", "_slotRow", "_slotW", "_slotH", "_slotHoles"];
+
+            _col = _slotCol;
+            _row = _slotRow;
+            _w = _slotW;
+            _h = _slotH;
+            _holes = _slotHoles;
+            _entry set ["w", _w];
+            _entry set ["h", _h];
+            _entry set ["holes", _holes];
+            _entry set ["rotated", false];
+            _entry set ["single", true];
+        };
 
         [_block, _col, _row, _w, _h, _holes] call _fnc_take;
         _entry set ["block", _block];

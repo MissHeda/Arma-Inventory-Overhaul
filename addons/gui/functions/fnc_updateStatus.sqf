@@ -125,8 +125,10 @@ private _live = false;
     private _chipW = _width min _needed;
     private _labelW = (_chipW - _iconW - _gap * 2 - _buttonW) max 0;
 
-    // The surface of the chip, like the tab's.
-    _controls append ([_display, _parent, [_left, _top, _chipW, _height], _info getOrDefault ["tabColor", [0, 0, 0, 0.5]]] call FUNC(uiPanel));
+    // The surface of the chip, like the tab's and as round as the buttons beside it: a pill (the theme's radius, at most half the height).
+    private _radius = (_theme getOrDefault ["radius", 0]) min (_height / 2);
+
+    _controls append ([_display, _parent, [_left, _top, _chipW, _height], _info getOrDefault ["tabColor", [0, 0, 0, 0.5]], _radius] call FUNC(uiPanel));
 
     // The ring: its track, and over it the arc that goes round (not while a search is stopped).
     private _ringH = _height * STATUS_ICON;
@@ -153,9 +155,13 @@ private _live = false;
 
     _controls pushBack _label;
 
-    // The button, at the end of the chip.
-    private _buttonX = _left + _chipW - _buttonW;
-    private _buttonRect = [_buttonX, _top, _buttonW, _height];
+    // The button, at the end of the chip: round, and a little in from the chip's edge on three sides, so that the chip's own round end shows
+    // round it and no square corner pokes out of the chip. The cross is a circle, "Search" a pill.
+    private _inset = _height * 0.12;
+    private _drawnH = _height - _inset * 2;
+    private _drawnW = if (_stopped) then {_buttonW - SQUARE(_inset) * 2} else {SQUARE(_drawnH)};
+    private _buttonX = _left + _chipW - SQUARE(_inset) - _drawnW;
+    private _buttonRect = [_buttonX, _top + _inset, _drawnW, _drawnH];
     private _buttonColor = if (_stopped) then {
         +(_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]])
     } else {
@@ -164,26 +170,26 @@ private _live = false;
 
     _buttonColor set [3, 0.5];
 
-    private _surface = [_display, _parent, _buttonRect, _buttonColor] call FUNC(uiPanel);
+    private _surface = [_display, _parent, _buttonRect, _buttonColor, _drawnH / 2] call FUNC(uiPanel);
 
     _controls append _surface;
 
     if (_stopped) then {
         _controls pushBack ([
-            _display, _parent, [_buttonX, _textTop, _buttonW, _size * 1.4], _resume, _size, [1, 1, 1, 1], _font, 2
+            _display, _parent, [_buttonX, _textTop, _drawnW, _size * 1.4], _resume, _size, [1, 1, 1, 1], _font, 2
         ] call FUNC(uiLabel));
     } else {
         private _crossH = _height * 0.5;
 
         _controls pushBack ([
-            _display, _parent, [_buttonX + (_buttonW - SQUARE(_crossH)) / 2, _top + (_height - _crossH) / 2, SQUARE(_crossH), _crossH],
+            _display, _parent, [_buttonX + (_drawnW - SQUARE(_crossH)) / 2, _top + (_height - _crossH) / 2, SQUARE(_crossH), _crossH],
             UI_TEX(icon_close_ca), [1, 1, 1, 1]
         ] call FUNC(uiIcon));
     };
 
     // Two pixels more than it is drawn, each side.
     private _hit = [_display, "EINV_Hitbox", _parent, [
-        _buttonX - pixelW * 2, _top - pixelH * 2, _buttonW + pixelW * 4, _height + pixelH * 4
+        _buttonX - pixelW * 2, _top + _inset - pixelH * 2, _drawnW + pixelW * 4, _drawnH + pixelH * 4
     ]] call FUNC(uiCreate);
 
     _hit setVariable [QGVAR(key), _holder];

@@ -301,6 +301,11 @@ private _fnc_values = {
         ] select (_use isNotEqualTo []));
     };
 
+    if ("cats" in _values) then {
+        // The categories it is in instead of the built-in one (cats=).
+        _parts pushBack format [LLSTRING(Value_Cats), ((_values get "cats") apply {localize format ["STR_einv_setup_Cat_%1", _x]}) joinString ", "];
+    };
+
     _parts joinString ", "
 };
 

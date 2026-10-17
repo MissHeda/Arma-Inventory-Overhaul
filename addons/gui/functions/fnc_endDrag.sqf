@@ -341,6 +341,16 @@ private _sent = call {
         ([_fromGrid, _target, _entry, _other, _cellEntry, _cellOther] call FUNC(applySwap)) isEqualTo true
     };
 
+    // A single slot takes the tile whole, whatever its own size and turn: its cell is the slot's (the authority decides the same,
+    // einv_storage_fnc_opPlaceMany, fnc_findSpots).
+    if (_target getOrDefault ["single", false]) then {
+        _col = 0;
+        _row = 0;
+        _w = _target get "cols";
+        _h = _target get "rows";
+        _rot = 0;
+    };
+
     // The cell, with the size it lies in there - turned or not. On a taken cell of a kit's grid none:
     // its layout finds one.
     private _cell = [[], [_col, _row, _target getOrDefault ["block", 0], _w, _h, _rot]] select _place;

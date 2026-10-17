@@ -67,6 +67,10 @@
  *   "nameOverride"      - the rules' name, "" when none <STRING>
  *   "use"               - the containers it may be used from where a setting limits what can be used there,
  *                         any of "uniform", "vest", "backpack" in that order, [] for none <ARRAY of STRING>
+ *   "cats"              - the categories the rules or the config put it in (cats=, einv_cat), [] when none does <ARRAY of STRING>
+ *   "groups"            - the categories it is in: "cats" when it has some, else the built-in one (fnc_defaultGroup) - of ITEM_GROUPS:
+ *                         weapon, ammo, grenade, gear, medical, food, tool, misc. Never empty. The strip of a loot box, the compartments
+ *                         that accept only some categories and the wizard read this <ARRAY of STRING>
  *   "pictureOverride"   - the rules' picture path, "" when none - also when the file is missing <STRING>
  *   "configPicture"     - config's picture <STRING>
  *   and from fnc_getFacts: "lc", "root", "rounds", "lineage", "addon", "mod"
@@ -115,6 +119,12 @@ _info set ["stack", _resolved get "stack"];
 _info set ["grid", _resolved get "grid"];
 _info set ["icon", _resolved get "icon"];
 _info set ["use", _resolved get "use"];
+
+// The categories: the rules' and the config's, else the built-in one.
+private _cats = _resolved get "cats";
+
+_info set ["cats", _cats];
+_info set ["groups", [[[_facts] call FUNC(defaultGroup)], _cats] select (_cats isNotEqualTo [])];
 _info set ["src", _resolved get "src"];
 
 // What config says stays readable next to what the rules make of it.

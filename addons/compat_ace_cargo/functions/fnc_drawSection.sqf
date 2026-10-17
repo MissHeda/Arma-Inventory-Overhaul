@@ -83,7 +83,10 @@ private _shown = [_caption, _tabRoom - _tabPad, _fontBold, _lineSize] call EFUNC
 private _tabW = (((_shown getTextWidth [_fontBold, _lineSize]) * TEXT_SLACK) + _tabPad) min _tabRoom;
 
 if (_shown isNotEqualTo "") then {
-    [_display, _parent, [_blockX, _top, _tabW, _lineH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]]] call EFUNC(gui,uiPanel);
+    [
+        _display, _parent, [_blockX, _top, _tabW, _lineH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]],
+        (_theme getOrDefault ["radius", 0]) min (_lineH / 2)
+    ] call EFUNC(gui,uiPanel);
     [_display, _parent, [_blockX, _top, _tabW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2] call EFUNC(gui,uiLabel);
 };
 

@@ -13,6 +13,10 @@
  * single row without a hole reads as a canvas again. The canvas stands where the first of them
  * stood among the others. A canvas of one compartment is only that compartment, written as above.
  *
+ * A compartment that accepts only some categories or is a single slot (a fifth and sixth element of its block,
+ * fnc_parseGrid) has them after a colon: "2x2:ammo|grenade", "1x1:grenade|one"; on a canvas each letter's
+ * after the canvas, "aab/aab:a=ammo:b=grenade|one". A compartment without any is written as it always was.
+ *
  * Arguments:
  * 0: Spec, as fnc_parseGrid gives it <ARRAY>
  *
@@ -43,6 +47,7 @@ private _fnc_canvas = {
     private _height = selectMax (_placed apply {((_x select 3) select 1) + (_x select 1)}) - _minY;
     private _chars = [];
     private _order = [];
+    private _letterOf = _placed apply {""};
 
     _chars resize (_width * _height);
     _chars = _chars apply {"-"};
@@ -73,6 +78,8 @@ private _fnc_canvas = {
     {
         private _letter = "abcdefghijklmnopqrstuvwxyz" select [_forEachIndex min 25, 1];
 
+        _letterOf set [_x select 1, _letter];
+
         {
             _chars set [_x, _letter];
         } forEach (_cells select (_x select 1));
@@ -84,7 +91,7 @@ private _fnc_canvas = {
         _lines pushBack ((_chars select [_r * _width, _width]) joinString "");
     };
 
-    _lines joinString "/"
+    [_lines joinString "/", _letterOf]
 };
 
 switch (_mode) do {
@@ -103,14 +110,45 @@ switch (_mode) do {
         private _parts = [];
         private _written = false;
 
+        // The attributes of a block, after a colon: its categories joined with |, and "one" for a single slot.
+        private _fnc_attrs = {
+            params ["_block"];
+
+            private _words = ITEM_GROUPS select {_x in (_block param [4, []])};
+
+            if (_block param [5, false]) then {
+                _words pushBack "one";
+            };
+
+            _words joinString "|"
+        };
+
         {
             if (_onCanvas && {(_x param [3, []]) isNotEqualTo []}) then {
                 if (!_written) then {
-                    _parts pushBack ([_placed] call _fnc_canvas);
+                    ([_placed] call _fnc_canvas) params ["_text", "_letters"];
+
+                    // Each compartment with attributes has its letter's after the canvas, in the order of the letters.
+                    private _tails = [];
+
+                    {
+                        private _attrs = [_x] call _fnc_attrs;
+
+                        if (_attrs isNotEqualTo "") then {
+                            _tails pushBack [_letters select _forEachIndex, _attrs];
+                        };
+                    } forEach _placed;
+
+                    _tails sort true;
+
+                    _parts pushBack (_text + ((_tails apply {format [":%1=%2", _x select 0, _x select 1]}) joinString ""));
                     _written = true;
                 };
             } else {
-                _parts pushBack ([_x select 0, _x select 1, _x param [2, []]] call FUNC(formatMask));
+                private _attrs = [_x] call _fnc_attrs;
+                private _piece = [_x select 0, _x select 1, _x param [2, []]] call FUNC(formatMask);
+
+                _parts pushBack ([_piece, _piece + ":" + _attrs] select (_attrs isNotEqualTo ""));
             };
         } forEach _blocks;
 

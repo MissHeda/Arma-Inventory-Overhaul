@@ -22,6 +22,9 @@
  *     containers the item is whitelisted for (use=, einv_use) - it may be used from them even where the settings
  *     "Use items from ..." (einv_storage) close them - and a line of what those settings limit now. The working
  *     copy keeps the list as "useList"; Apply writes use=uniform+backpack (use=none for an emptied one).
+ *   - Under it a Category row (fnc_drawCatRow): a chip each for the eight categories (ITEM_GROUPS), on for the ones the item is in
+ *     (cats=, einv_cat, else the built-in one), at least one on; a reset button back to the built-in one. The working copy keeps
+ *     the list as "catsList"; Apply writes cats=medical+misc, and takes the class's own cats away when it is the built-in one again.
  *   - Under them the canvas (fnc_uiCanvas), SHAPE_MAX cells each way, always shown: a click makes a place
  *     one of the item's cells or takes it away, so an L or a T is drawn cell by cell. The steppers and the
  *     canvas are one: a stepper lays a rectangle of its size where the cells are - the places that were
@@ -144,11 +147,14 @@ private _ownPicture = "picture" in _own || {_tree && {"picture" in (_treeRules g
 
 // The containers it may be used from where a setting closes them (use=, einv_use): any of uniform, vest, backpack.
 private _startUse = _info getOrDefault ["use", []];
+
+// The categories it is in now (cats=, einv_cat, else the built-in one): any of ITEM_GROUPS.
+private _startGroups = _info getOrDefault ["groups", ["misc"]];
 private _canvas = GVAR(itemWork) getOrDefault [_lc, createHashMap];
 
 // What it would be without its own size, stack, weight, name and use - the values the small reset buttons take a
 // field back to. Only worked out where a rule of its own (or its tree's) has any of them: else it is what it is now.
-private _resetFields = ["footprint", "stack", "weight", "name", "use"];
+private _resetFields = ["footprint", "stack", "weight", "name", "use", "cats"];
 private _hasOwnField = (_resetFields findIf {_x in _own}) >= 0 || {_tree && {(_resetFields findIf {_x in (_treeRules getOrDefault [_lc, createHashMap])}) >= 0}};
 private _default = [_info, [_class, _resetFields] call FUNC(classDefault)] select _hasOwnField;
 private _defaultWeight = _default getOrDefault ["weightOverride", -1];
@@ -169,9 +175,10 @@ private _workName = _canvas getOrDefault ["nameText", _startName];
 private _workIcon = _canvas getOrDefault ["iconPercent", _startIcon];
 private _workPicture = _canvas getOrDefault ["pictureText", _startPicture];
 private _workUse = _canvas getOrDefault ["useList", _startUse];
+private _workCats = _canvas getOrDefault ["catsList", _startGroups];
 private _dirty = _blocks isNotEqualTo (_canvas getOrDefault ["start", []]) || {_workStack != _startStack}
     || {_workWeight isNotEqualTo _startWeightText} || {_workName isNotEqualTo _startName} || {_workIcon isNotEqualTo _startIcon}
-    || {_workPicture isNotEqualTo _startPicture} || {_workUse isNotEqualTo _startUse};
+    || {_workPicture isNotEqualTo _startPicture} || {_workUse isNotEqualTo _startUse} || {_workCats isNotEqualTo _startGroups};
 
 ([_canvas] call FUNC(canvasBox)) params ["", "", "_boxW", "_boxH"];
 
@@ -507,6 +514,30 @@ _cursorY = _cursorY + ([
     }, [_class, _canvas]
 ] call FUNC(drawUseRow)) + UNIT * 0.3;
 
+// ----- Category -----
+// The categories it is in: a chip each, more than one on when it is in several. The reset button takes back the built-in one.
+if (_workCats isNotEqualTo (_default getOrDefault ["groups", ["misc"]])) then {
+    [
+        _display, _box, [_innerX + _innerW - _rowH, _cursorY, _rowH, _rowH], _theme, {
+            params ["_class", "_tree"];
+
+            [_class, "items", ["cats"], _tree] call FUNC(resetField);
+        }, [_class, _tree]
+    ] call FUNC(uiReset);
+};
+
+_cursorY = _cursorY + ([
+    _display, _box, [_innerX, _cursorY, _innerW - _rowH], _theme, _labelW, _workCats, {
+        params ["_list", "_arguments"];
+        _arguments params ["_class", "_canvas"];
+
+        _canvas set ["catsList", _list];
+        GVAR(itemWork) set [toLowerANSI _class, _canvas];
+
+        [] call FUNC(drawItemEditor);
+    }, [_class, _canvas]
+] call FUNC(drawCatRow)) + UNIT * 0.3;
+
 // ----- The canvas, and beside it how it looks -----
 
 private _buttonH = UNIT * 1.15;
@@ -611,7 +642,7 @@ private _buttonX = _innerX;
 private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
 
 [_display, _box, [_buttonX, _buttonsY, _applyW, _buttonH], LLSTRING(Items_Apply), UI_TEX(icon_check_ca), _theme, {
-    params ["_class", "_canvas", "_startShape", "_startStack", "_forced", "_startWeight", "_startWeightText", "_startName", "_tree", "_below", "_startIcon", "_ownIcon", "_startPicture", "_ownPicture", "_startUse"];
+    params ["_class", "_canvas", "_startShape", "_startStack", "_forced", "_startWeight", "_startWeightText", "_startName", "_tree", "_below", "_startIcon", "_ownIcon", "_startPicture", "_ownPicture", "_startUse", "_startGroups", "_defaultGroups"];
 
     private _lc = toLowerANSI _class;
     private _blocks = [_canvas] call FUNC(canvasBlocks);
@@ -714,6 +745,17 @@ private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
         _set set ["use", _use];
     };
 
+    // The categories (cats=): only what differs from now. What is the built-in one again takes the class's own away.
+    private _cats = _canvas getOrDefault ["catsList", _startGroups];
+
+    if (_cats isNotEqualTo _startGroups) then {
+        if (_cats isEqualTo _defaultGroups) then {
+            _remove pushBack "cats";
+        } else {
+            _set set ["cats", _cats];
+        };
+    };
+
     GVAR(itemWork) deleteAt _lc;
 
     if (count _set == 0 && {_remove isEqualTo []}) exitWith {
@@ -725,7 +767,7 @@ private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
         [format [LLSTRING(Hint_SizeApplied), _class], format [LLSTRING(Hint_TreeApplied), _class, _below]] select _tree, "text2"
     ] call FUNC(setHint);
     [_class, _set, _remove, _tree] call FUNC(upsertRule);
-}, [_class, _canvas, _startShape, _startStack, _forced, _startWeight, _startWeightText, _startName, _tree, _below, _startIcon, _ownIcon, _startPicture, _ownPicture, _startUse], _onePiece, "accent", [LLSTRING(Items_ApplyTip), LLSTRING(Items_ApplyTipTree)] select _tree] call FUNC(uiAction);
+}, [_class, _canvas, _startShape, _startStack, _forced, _startWeight, _startWeightText, _startName, _tree, _below, _startIcon, _ownIcon, _startPicture, _ownPicture, _startUse, _startGroups, _default getOrDefault ["groups", ["misc"]]], _onePiece, "accent", [LLSTRING(Items_ApplyTip), LLSTRING(Items_ApplyTipTree)] select _tree] call FUNC(uiAction);
 
 _buttonX = _buttonX + _applyW + _gap;
 
@@ -744,7 +786,7 @@ if (_dirty) then {
 };
 
 // Something of its own to take away: its own rule, or - for the tree - the tree's.
-private _ownFields = ["footprint", "stack", "weight", "name", "icon", "picture", "use"];
+private _ownFields = ["footprint", "stack", "weight", "name", "icon", "picture", "use", "cats"];
 private _hasOwn = (_ownFields findIf {_x in _own}) >= 0;
 
 if (_tree) then {

@@ -8,7 +8,7 @@
  * 0: The box's container <OBJECT>
  *
  * Return Value:
- * "weapon", "ammo", "gear", "medical", "food", "tool" or "misc"; "" when the box shows everything <STRING>
+ * "weapon", "ammo", "grenade", "gear", "medical", "food", "tool" or "misc" (ITEM_GROUPS); "" when the box shows everything <STRING>
  *
  * Example:
  * [_crate] call einv_gui_fnc_boxGroup;

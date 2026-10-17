@@ -5,7 +5,7 @@
  * it is built on and the addon that brought it in - everything the rules ask about - plus its names,
  * description and picture, and what its own mod says about its size, stack, grid, weight, name and how
  * its picture is drawn: einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon,
- * einv_picture, einv_use (fnc_readConfigKeys), and the older
+ * einv_picture, einv_use, einv_cat (fnc_readConfigKeys), and the older
  * einv_gridSize[], einv_stackSize, einv_grids[], einv_slots, which still work. A subclass has what
  * its parent has, as everything in config does. fnc_getInfo puts the rules on top of this.
  *
@@ -49,7 +49,7 @@
  *   "addon"       - the CfgPatches class that defined it, lowercase, "" if none <STRING>
  *   "mod"         - what its own config says, only the keys it sets and that can be used: "size"
  *                   [w, h, holes] or "mass", "stack" NUMBER, "grid" spec (fnc_parseGrid), "weight"
- *                   kg NUMBER, "name" STRING and "icon" [scale, across, down] "picture" STRING and "use" [containers] (einv_size ... einv_use),
+ *                   kg NUMBER, "name" STRING and "icon" [scale, across, down] "picture" STRING and "use" [containers] and "cats" [categories] (einv_size ... einv_cat),
  *                   and the older "gridSize"
  *                   [w, h], "stackSize" NUMBER, "grids" [[cols, rows], ...], "slots" NUMBER
  *                   <HASHMAP>

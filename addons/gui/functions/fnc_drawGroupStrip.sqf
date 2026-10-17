@@ -3,13 +3,17 @@
 /*
  * Author: Miss Heda
  * The strip of categories at the side of a loot box, as Tarkov has it left of its loot grid: one slim column of white
- * pictures - All, weapons, ammunition, gear and clothing, medical, food and drink, tools and electronics, other (the
+ * pictures - All, weapons, ammunition, grenades and explosives, gear and clothing, medical, food and drink, tools and electronics, other (the
  * groups of fnc_itemGroup). A click chooses a category (fnc_setGroup): only that kind of item shows in the box, the
- * rest fades as the search field fades it, and a paged box turns to its first page with a match; a click on it again, or
- * on All, shows everything. The chosen one is lit in the accent colour on a soft accent field; the mouse resting on one
- * lights it and shows its name (the tooltip).
+ * rest is hidden (fnc_applyFilter), and a paged box turns to its first page with a match; a click on it again, or
+ * on All, shows everything. The chosen one is a lighter field with a white picture - no accent colour (Mia, 0.5.7);
+ * the mouse resting on one lights it a little and shows its name (the tooltip).
  *
- * Three controls per picture - the field, the picture, the hit box -, kept in the section's info ("strip", [id, field,
+ * The strip is one rounded bar (the colour of the caption chips) and its fields lie exactly on it: each field is as wide
+ * as the bar and as high as its share of it, the first with the bar's round top corners, the last with its round bottom
+ * corners (fnc_uiSurface), so a chosen field ends where the bar ends and nothing shows round it.
+ *
+ * Three controls (sets) per picture - the field, the picture, the hit box -, kept in the section's info ("strip", [id, field,
  * picture]) for fnc_paintGroupStrip. Not for the player's own containers (they are small and the player knows what is in
  * them), a section with no grid of its own, or a column too narrow to spare the room (fnc_drawSection).
  *
@@ -39,6 +43,7 @@ private _groups = [
     ["all", UI_TEX(slot_cat_all_ca), LLSTRING(Group_All)],
     ["weapon", UI_TEX(slot_rifle_ca), LLSTRING(Group_Weapon)],
     ["ammo", UI_TEX(slot_magazine_ca), LLSTRING(Group_Ammo)],
+    ["grenade", UI_TEX(slot_grenade_ca), LLSTRING(Group_Grenade)],
     ["gear", UI_TEX(slot_vest_ca), LLSTRING(Group_Gear)],
     ["medical", UI_TEX(slot_cat_medical_ca), LLSTRING(Group_Medical)],
     ["food", UI_TEX(slot_cat_food_ca), LLSTRING(Group_Food)],
@@ -46,30 +51,60 @@ private _groups = [
     ["misc", UI_TEX(slot_cat_misc_ca), LLSTRING(Group_Misc)]
 ];
 
-private _pitch = _height / count _groups;
-private _size = (_pitch * 0.78) min UNSQUARE(_width);
+private _count = count _groups;
+private _pitch = _height / _count;
+private _size = (_pitch * 0.78) min (UNSQUARE(_width) * 0.78);
 private _strip = [];
+
+// The bar the fields lie on, as round as the chips of the caption line; the fields take its corners (the first its top ones, the last its
+// bottom ones) in pixels, as fnc_uiPanel works them out.
+private _radius = (_theme getOrDefault ["radius", 0]) min (UNSQUARE(_width) / 2);
+private _cornerPx = floor (_radius / pixelH);
+
+[_display, _parent, _rect, _theme getOrDefault ["slotCaptionBg", [1, 1, 1, 0.06]], _radius] call FUNC(uiPanel);
 
 {
     _x params ["_id", "_texture", "_name"];
 
     private _cellTop = _top + _forEachIndex * _pitch;
-    private _cell = [_left, _cellTop + (_pitch - _size) / 2 - _size * 0.1, _width, _size * 1.2];
+    private _first = _forEachIndex == 0;
+    private _last = _forEachIndex == _count - 1;
 
-    // The field the chosen one is lit on, the picture, and what catches the mouse.
-    private _field = [_display, _parent, _cell, [0, 0, 0, 0], (_theme getOrDefault ["radius", 0]) min (_size * 0.25)] call FUNC(uiPanel);
+    // The field: exactly this share of the bar, so a lit one ends where the bar ends.
+    private _fieldTop = [_cellTop, _top] select _first;
+    private _fieldBottom = [_cellTop + _pitch, _top + _height] select _last;
+    private _field = [
+        _display, _parent, [_left, _fieldTop, _width, _fieldBottom - _fieldTop], [0, 0, 0, 0],
+        [[], [_cornerPx, [_first, _first, _last, _last]]] select (_cornerPx >= 1 && {_first || _last})
+    ] call FUNC(uiSurface);
+
     private _picture = [
         _display, _parent, [_left + (_width - SQUARE(_size)) / 2, _cellTop + (_pitch - _size) / 2, SQUARE(_size), _size], _texture,
         _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]
     ] call FUNC(uiIcon);
-    private _hit = [_display, "EINV_Hitbox", _parent, [_left - pixelW * 2, _cell select 1, _width + pixelW * 4, _cell select 3]] call FUNC(uiCreate);
+
+    // What catches the mouse: the field, and two pixels either side (above and below it lie the neighbours' own).
+    private _hit = [_display, "EINV_Hitbox", _parent, [_left - pixelW * 2, _fieldTop, _width + pixelW * 4, _fieldBottom - _fieldTop]] call FUNC(uiCreate);
 
     _hit setVariable [QGVAR(key), _holder];
     _hit setVariable [QGVAR(kind), _id];
     _hit setVariable [QGVAR(picture), _picture];
+    _hit setVariable [QGVAR(field), _field];
     _hit ctrlSetTooltip _name;
+
+    // Under the mouse: a little lighter, the chosen one stays as it is.
     _hit ctrlAddEventHandler ["MouseEnter", {
-        ((_this select 0) getVariable [QGVAR(picture), controlNull]) ctrlSetTextColor (GVAR(theme) getOrDefault ["text", [1, 1, 1, 1]]);
+        params ["_ctrl"];
+
+        // "All" is the lit one while no category is chosen.
+        private _chosen = [_ctrl getVariable [QGVAR(key), objNull]] call FUNC(boxGroup);
+
+        if (_chosen isEqualTo "") then {_chosen = "all"};
+
+        if (_chosen isEqualTo (_ctrl getVariable [QGVAR(kind), ""])) exitWith {};
+
+        [_ctrl getVariable [QGVAR(field), []], [1, 1, 1, 0.07]] call FUNC(paintSurface);
+        (_ctrl getVariable [QGVAR(picture), controlNull]) ctrlSetTextColor (GVAR(theme) getOrDefault ["text", [1, 1, 1, 1]]);
     }];
     _hit ctrlAddEventHandler ["MouseExit", {
         [(_this select 0) getVariable [QGVAR(key), objNull]] call FUNC(paintGroupStrip);

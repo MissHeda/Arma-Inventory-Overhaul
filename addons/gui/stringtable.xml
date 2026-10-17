@@ -91,6 +91,9 @@
         <Key ID="STR_einv_gui_Group_Gear">
             <English>Gear and clothing</English>
         </Key>
+        <Key ID="STR_einv_gui_Group_Grenade">
+            <English>Grenades</English>
+        </Key>
         <Key ID="STR_einv_gui_Group_Medical">
             <English>Medical</English>
         </Key>
@@ -145,6 +148,9 @@
         <Key ID="STR_einv_gui_Hint_Hidden">
             <English>Not searched yet</English>
         </Key>
+        <Key ID="STR_einv_gui_Hint_HiddenFit">
+            <English>Goes to the first free spot of this box - not onto a hidden item</English>
+        </Key>
         <Key ID="STR_einv_gui_Hint_Idle">
             <English>Point at an item to see what it is</English>
         </Key>
@@ -186,6 +192,9 @@
         </Key>
         <Key ID="STR_einv_gui_Hint_NowhereToGo">
             <English>No container has room for that</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_Only">
+            <English>Only %1 here</English>
         </Key>
         <Key ID="STR_einv_gui_Hint_OutOfReach">
             <English>Out of reach</English>
@@ -234,6 +243,9 @@
         </Key>
         <Key ID="STR_einv_gui_Hint_Waiting">
             <English>Still waiting for an answer - showing what is there</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_WrongKind">
+            <English>This compartment takes other things</English>
         </Key>
         <Key ID="STR_einv_gui_Inspect_Attached">
             <English>Attached</English>
@@ -340,6 +352,30 @@
         <Key ID="STR_einv_gui_Notify_Searched">
             <English>%1 is going through your gear</English>
         </Key>
+        <Key ID="STR_einv_gui_Only_ammo">
+            <English>magazines</English>
+        </Key>
+        <Key ID="STR_einv_gui_Only_food">
+            <English>food and drink</English>
+        </Key>
+        <Key ID="STR_einv_gui_Only_gear">
+            <English>gear</English>
+        </Key>
+        <Key ID="STR_einv_gui_Only_grenade">
+            <English>grenades and explosives</English>
+        </Key>
+        <Key ID="STR_einv_gui_Only_medical">
+            <English>medical items</English>
+        </Key>
+        <Key ID="STR_einv_gui_Only_misc">
+            <English>other items</English>
+        </Key>
+        <Key ID="STR_einv_gui_Only_tool">
+            <English>tools</English>
+        </Key>
+        <Key ID="STR_einv_gui_Only_weapon">
+            <English>weapons and attachments</English>
+        </Key>
         <Key ID="STR_einv_gui_Option_Everyone">
             <English>Everyone</English>
         </Key>
@@ -378,6 +414,9 @@
         </Key>
         <Key ID="STR_einv_gui_Page_Next">
             <English>Next page</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_None">
+            <English>Nothing of this kind here</English>
         </Key>
         <Key ID="STR_einv_gui_Page_Other">
             <English>+%1 items on other pages</English>

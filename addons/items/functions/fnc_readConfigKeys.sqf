@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Reads what an item's own config says about its size, stack, container grid, weight, name and how its
- * picture is drawn: the keys einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture and einv_use
+ * picture is drawn: the keys einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture, einv_use and einv_cat
  * (CONFIG_KEYS). A value is written the way the rules text writes the same thing, so a mod author
  * learns one language:
  *
@@ -21,6 +21,9 @@
  *                                        what can be used there: uniform, vest, backpack, all or none, joined
  *                                        with a comma, a plus or a bar (fnc_parseUse); "" takes an inherited
  *                                        value back, so "none" says no container
+ *   einv_cat = "medical,misc";          cats=  - the categories it is in instead of the built-in one: weapon, ammo,
+ *                                        grenade, gear, medical, food, tool, misc, joined with a comma, a plus
+ *                                        or a bar (fnc_parseGroups); "" takes an inherited value back
  *   einv_icon = "1.4@0.1,-0.05";         icon=  - how large the picture is drawn in its tile (0.25 to 4) and
  *                                        moved across and down by a share of the tile (-1 to 1); a plain
  *                                        number, einv_icon = 1.4;, is the scale alone (fnc_parseIcon)
@@ -40,10 +43,10 @@
  *   canonical - the values that could be read, as the rules write them, by config key:
  *               "einv_size" "2x1" / "xx/x-" / "mass", "einv_stack" <NUMBER>, "einv_grid" as
  *               fnc_formatGrid writes it, "einv_weight" kg <NUMBER>, "einv_name" <STRING>, "einv_icon"
- *               [scale, across, down] <ARRAY>, "einv_picture" <STRING>, "einv_use" [containers] <ARRAY> <HASHMAP>
+ *               [scale, across, down] <ARRAY>, "einv_picture" <STRING>, "einv_use" [containers] <ARRAY>, "einv_cat" [categories] <ARRAY> <HASHMAP>
  *   compiled  - the same for fnc_resolve, by field: "size" [w, h, holes] or "mass", "stack" <NUMBER>,
  *               "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING>, "icon" [scale,
- *               across, down] <ARRAY>, "picture" <STRING>, "use" [containers] <ARRAY> <HASHMAP>
+ *               across, down] <ARRAY>, "picture" <STRING>, "use" [containers] <ARRAY>, "cats" [categories] <ARRAY> <HASHMAP>
  *   messages  - what was left out or cut down, and why <ARRAY of STRING>
  *
  * Example:
@@ -299,6 +302,28 @@ if (_use isNotEqualTo "") then {
         if (_readable) then {
             _canonical set [QGVARMAIN(use), _kinds];
             _compiled set ["use", _kinds];
+        };
+    };
+};
+
+// ----- cat -----
+// Read by the rules' own reader (fnc_parseGroups). The canonical value is the list in the order of ITEM_GROUPS.
+
+private _cat = _found getOrDefault [QGVARMAIN(cat), ""];
+
+if (_cat isNotEqualTo "") then {
+    if !(_cat isEqualType "") then {
+        _messages pushBack format ["%1 is a text like 'medical,misc' - left out", QGVARMAIN(cat)];
+    } else {
+        ([_cat, QGVARMAIN(cat)] call FUNC(parseGroups)) params ["_groups", "_notes", "_readable"];
+
+        {
+            _messages pushBack format ["%1: %2", QGVARMAIN(cat), _x];
+        } forEach _notes;
+
+        if (_readable) then {
+            _canonical set [QGVARMAIN(cat), _groups];
+            _compiled set ["cats", _groups];
         };
     };
 };

@@ -81,6 +81,9 @@ private _perPage = [0, call FUNC(pageRows)] select _pages;
 {
     _x params ["_cols", "_rows", ["_holes", []], ["_pos", []]];
 
+    // What a compartment accepts and whether it is a single slot (grid=2x2:ammo, einv_storage_fnc_blockMode) travels on.
+    private _extra = _x select [4];
+
     private _want = ((_used select _forEachIndex) + COLLAPSE_SPARE_ROWS) max COLLAPSE_MIN_ROWS;
     private _folds = !(_rows - _want < COLLAPSE_HIDE_MIN || {_pos isNotEqualTo []});
 
@@ -99,7 +102,7 @@ private _perPage = [0, call FUNC(pageRows)] select _pages;
         if (count _ranges > 1) then {
             private _page = (([_holder, _forEachIndex] call FUNC(pageOf)) min (count _ranges - 1)) max 0;
 
-            _shown pushBack [_cols, _domain, _holes select {_x < _domain * _cols}, _pos];
+            _shown pushBack ([_cols, _domain, _holes select {_x < _domain * _cols}, _pos] + _extra);
             _paging pushBack [_page, _ranges];
             continue;
         };
@@ -108,12 +111,12 @@ private _perPage = [0, call FUNC(pageRows)] select _pages;
     _paging pushBack [];
 
     if (!_folds) then {
-        _shown pushBack [_cols, _rows, _holes, _pos];
+        _shown pushBack ([_cols, _rows, _holes, _pos] + _extra);
     } else {
         _foldable = true;
 
         if (_expanded) then {
-            _shown pushBack [_cols, _rows, _holes, _pos];
+            _shown pushBack ([_cols, _rows, _holes, _pos] + _extra);
         } else {
             // The holes in the rows that stay keep their indices: a row is as wide as before.
             private _end = _want * _cols;
@@ -121,7 +124,7 @@ private _perPage = [0, call FUNC(pageRows)] select _pages;
 
             _hidden = _hidden + _rows - _want;
             _cells = _cells + (_rows - _want) * _cols - (count _holes - count _keptHoles);
-            _shown pushBack [_cols, _want, _keptHoles, _pos];
+            _shown pushBack ([_cols, _want, _keptHoles, _pos] + _extra);
         };
     };
 } forEach _blocks;

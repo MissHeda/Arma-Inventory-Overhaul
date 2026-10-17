@@ -134,7 +134,7 @@ private _wantsBox = _section getOrDefault ["box", true];
 // and a gap. It takes its room from the box - which gives way in half cells - and from nothing else, so the grid keeps
 // its width; where the column has not even that to spare there is no strip. Only for a container with a grid of its own in
 // the loot column (the player's own containers are small, a kit's grid and the Arsenal's panel are no loot).
-private _stripW = SQUARE(UNIT * 0.8);
+private _stripW = SQUARE(UNIT * 1);
 private _stripOn = !_placeholder && {_wantsBox} && {(_section getOrDefault ["side", _parent getVariable [QGVAR(column), ""]]) isEqualTo "loot"}
     && {!isNull (_section getOrDefault ["container", objNull])} && {!(_section getOrDefault ["virtual", "entries" in _section])}
     && {!(_section getOrDefault ["locked", false])} && {_id in ["ground", "container", "uniform", "vest", "backpack"]}
@@ -169,7 +169,10 @@ if (_section getOrDefault ["locked", false]) exitWith {
     private _tabW = (((_shown getTextWidth [_fontBold, _lineSize]) * TEXT_SLACK) + _tabPad + _lockW) min _blockW;
     private _iconH = _lineH * 0.6;
 
-    [_display, _parent, [_blockX, _top, _tabW, _lineH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]]] call FUNC(uiPanel);
+    [
+        _display, _parent, [_blockX, _top, _tabW, _lineH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]],
+        (_theme getOrDefault ["radius", 0]) min (_lineH / 2)
+    ] call FUNC(uiPanel);
     [
         _display, _parent, [_blockX + (_lockW - SQUARE(_iconH)) / 2 + SQUARE(_lineH * 0.15), _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
         UI_TEX(icon_lock_ca), _colorText2
@@ -250,13 +253,16 @@ private _caption = switch (_id) do {
 // drawing and two pixels.
 private _lineH = UNIT * CAPTION_LINE;
 private _lineSize = UNIT * 0.46;
-private _tabPad = SQUARE(_lineH * 0.5);
 
 // The buttons on the line (Take all, Put all in, Sort and the activity chip) are a little lower than the line and stand in
 // the middle of it, a clear gap above the line under it and above the container's top edge; their hit area is the button
-// and two pixels each way.
+// and two pixels each way. The caption's own tab is one of them (Mia, 0.5.7): the same height, the same text size and the same
+// round ends - a pill with the fold arrow in its left end - and so is every other chip of the line.
 private _buttonH = UNIT * 0.6;
 private _buttonTop = _top + (_lineH - _buttonH) / 2;
+private _buttonSize = UNIT * 0.42;
+private _chipRadius = (_theme getOrDefault ["radius", 0]) min (_buttonH / 2);
+private _tabPad = SQUARE(_buttonH * 0.9);
 private _hitPx = [pixelW * 2, pixelH * 2, pixelW * 2, pixelH * 2];
 
 private _load = "";
@@ -273,13 +279,13 @@ private _sectionContainer = _section getOrDefault ["container", objNull];
 private _foldable = !isNull _sectionContainer;
 private _collapsed = _foldable && {(_section getOrDefault ["folded", false]) isNotEqualTo (_sectionContainer in GVAR(collapsed))};
 private _nested = _foldable && {GVAR(opened) findIf {(_x select 1) isEqualTo _sectionContainer} >= 0};
-private _chevronW = [0, SQUARE(_lineH)] select _foldable;
+private _chevronW = [0, SQUARE(_buttonH * 0.95)] select _foldable;
 private _closeW = [0, SQUARE(_lineH)] select _nested;
 
 // A small picture before the caption's text, where the section brings one ("tabIcon" - the Arsenal's
 // staging space has a crate).
 private _tabIcon = _section getOrDefault ["tabIcon", ""];
-private _tabIconW = [0, SQUARE(_lineH)] select (_tabIcon isNotEqualTo "");
+private _tabIconW = [0, SQUARE(_buttonH * 0.95)] select (_tabIcon isNotEqualTo "");
 
 // Open to this player only because of who they are (einv_locks_fnc_decorate): an open padlock left of
 // the weight says so when the mouse rests on it.
@@ -339,7 +345,6 @@ if (
 // than the tab's. A button is [id, label, icon, width]; they stand in this order beside the tab, and for
 // lack of room the last one goes first.
 private _buttonIntent = _buttonKind;
-private _buttonSize = UNIT * 0.42;
 private _buttonGap = SQUARE(UNIT * 0.3);
 private _buttons = [];
 
@@ -381,29 +386,35 @@ private _fnc_chars = {
 
 private _captionText = [_caption, _theme] call FUNC(caption);
 private _tabRoom = _blockW - _loadW - _closeW - _lockW - (call _fnc_buttonsW);
-private _shown = [_captionText, _tabRoom - _tabPad - _chevronW - _tabIconW, _fontBold, _lineSize] call FUNC(fitText);
+private _shown = [_captionText, _tabRoom - _tabPad - _chevronW - _tabIconW, _fontBold, _buttonSize] call FUNC(fitText);
 
 // The tab gives up room to the buttons down to three characters - and the last button is left out below
 // that, then the one before it.
 while {_buttons isNotEqualTo [] && {([_shown] call _fnc_chars) < (3 min count _captionText)}} do {
     _buttons deleteAt (count _buttons - 1);
     _tabRoom = _blockW - _loadW - _closeW - _lockW - (call _fnc_buttonsW);
-    _shown = [_captionText, _tabRoom - _tabPad - _chevronW - _tabIconW, _fontBold, _lineSize] call FUNC(fitText);
+    _shown = [_captionText, _tabRoom - _tabPad - _chevronW - _tabIconW, _fontBold, _buttonSize] call FUNC(fitText);
 };
 
-private _tabW = (((_shown getTextWidth [_fontBold, _lineSize]) * TEXT_SLACK) + _tabPad + _chevronW + _tabIconW) min _tabRoom;
+private _tabW = (((_shown getTextWidth [_fontBold, _buttonSize]) * TEXT_SLACK) + _tabPad + _chevronW + _tabIconW) min _tabRoom;
 private _tabColor = _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]];
 private _tab = [];
 
 if (_shown isNotEqualTo "") then {
-    _tab = [_display, _parent, [_blockX, _top, _tabW, _lineH], _tabColor] call FUNC(uiPanel);
-    [_display, _parent, [_blockX + _chevronW + _tabIconW, _top, _tabW - _chevronW - _tabIconW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2] call FUNC(uiLabel);
+    _tab = [_display, _parent, [_blockX, _buttonTop, _tabW, _buttonH], _tabColor, _chipRadius] call FUNC(uiPanel);
+
+    // The words in the middle of the pill, set as the buttons' are (fnc_uiButton, "centred"): the line of capitals in the middle of its height.
+    [
+        _display, _parent,
+        [_blockX + _chevronW + _tabIconW, _buttonTop + _buttonH / 2 - TEXT_MID * _buttonSize, _tabW - _chevronW - _tabIconW, TEXT_MID * _buttonSize * 2],
+        _shown, _buttonSize, _colorText2, _fontBold, 2
+    ] call FUNC(uiLabel);
 
     if (_tabIconW > 0) then {
-        private _tabIconH = _lineH * 0.7;
+        private _tabIconH = _buttonH * 0.62;
 
         [
-            _display, _parent, [_blockX + _chevronW + (_tabIconW - SQUARE(_tabIconH)) / 2, _top + (_lineH - _tabIconH) / 2, SQUARE(_tabIconH), _tabIconH],
+            _display, _parent, [_blockX + _chevronW + (_tabIconW - SQUARE(_tabIconH)) / 2, _buttonTop + (_buttonH - _tabIconH) / 2, SQUARE(_tabIconH), _tabIconH],
             _tabIcon, _colorText2
         ] call FUNC(uiIcon);
     };
@@ -424,15 +435,16 @@ if (_foldable && {!_placeholder}) then {
 };
 
 if (_chevronW > 0) then {
-    private _iconH = _lineH * 0.6;
+    private _iconH = _buttonH * 0.56;
 
     [
-        _display, _parent, [_blockX + (_chevronW - SQUARE(_iconH)) / 2 + SQUARE(_lineH * 0.15), _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
+        _display, _parent, [_blockX + (_chevronW - SQUARE(_iconH)) / 2 + SQUARE(_buttonH * 0.12), _buttonTop + (_buttonH - _iconH) / 2, SQUARE(_iconH), _iconH],
         [UI_TEX(icon_chevron_down_ca), UI_TEX(icon_chevron_right_ca)] select _collapsed, _colorText2
     ] call FUNC(uiIcon);
 
+    // The drawn pill and two pixels round it.
     private _toggle = [
-        _display, "EINV_Hitbox", _parent, [_blockX - pixelW * 2, _top - pixelH * 2, (_tabW max _chevronW) + pixelW * 4, _lineH + pixelH * 4]
+        _display, "EINV_Hitbox", _parent, [_blockX - pixelW * 2, _buttonTop - pixelH * 2, (_tabW max _chevronW) + pixelW * 4, _buttonH + pixelH * 4]
     ] call FUNC(uiCreate);
     _toggle ctrlSetTooltip LLSTRING(Section_Toggle);
     _toggle setVariable [QGVAR(key), _sectionContainer];
@@ -797,7 +809,10 @@ if (_rowsFoldable) then {
     private _iconW = SQUARE(_iconH);
     private _rowsW = (STORAGE_COLS * _cellW) min (_blockX + _blockW - _gridX);
 
-    [_display, _parent, [_gridX, _rowsTop, _rowsW, _lineH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]]] call FUNC(uiPanel);
+    [
+        _display, _parent, [_gridX, _rowsTop, _rowsW, _lineH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]],
+        (_theme getOrDefault ["radius", 0]) min (_lineH / 2)
+    ] call FUNC(uiPanel);
 
     [
         _display, _parent, [_gridX + SQUARE(_lineH * 0.2), _rowsTop + (_lineH - _iconH) / 2, _iconW, _iconH],

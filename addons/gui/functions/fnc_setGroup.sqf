@@ -3,9 +3,10 @@
 /*
  * Author: Miss Heda
  * A click on an icon of the strip at the side of a loot box (fnc_drawGroupStrip), run a frame later: the box shows only
- * that category - the tiles of other categories fade as the search field's do (fnc_applyFilter) and a paged box turns to its
- * first page with a match. A click on the category that is chosen, or on "All", shows everything again (and gives back the
- * pages the choice moved). Only that box's tiles are touched; the search field works with it - a tile has to match both.
+ * that category - the tiles of other categories are hidden (fnc_applyFilter; Mia, 0.5.7, they used to fade), the pages of a paged box
+ * are those with a match (fnc_pageStep, fnc_drawPageBar) and it turns to its first page with a match. A click on the category that
+ * is chosen, or on "All", shows everything again (and gives back the pages the choice moved). Only that box's tiles are touched; the
+ * search field works with it - what the category leaves is dimmed by the field.
  *
  * Arguments:
  * 0: The box's container <OBJECT>

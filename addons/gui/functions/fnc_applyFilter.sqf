@@ -3,12 +3,21 @@
 /*
  * Author: Miss Heda
  * Fades every tile whose item does not match the search field (GVAR(filter), fnc_drawFilter) - by its
- * name or short name as the window shows them (fnc_matchesFilter) - and brings back every tile that does. A loot box
- * that has a category chosen at its side (GVAR(groupFilters), fnc_setGroup) fades what is not of that category as well:
- * its tiles have to match the field and the category both.
- * Items not searched yet match nothing: what they are is not known. An empty field and no category shows everything. The
- * tiles of a source grid (fnc_createGrid) are never faded, and a window that attached is told afterwards
- * (the "filter" hook).
+ * name or short name as the window shows them (fnc_matchesFilter) - and brings back every tile that does. The field
+ * only marks: what it does not find stays in its place, dimmed. A loot box that has a category chosen at its side
+ * (GVAR(groupFilters), fnc_setGroup) shows ONLY that kind of item (Mia, 0.5.7): the tiles of other categories are hidden
+ * (their controls not shown, the tile's "filteredOut" true) and the cells they lie on show as the empty cells they look
+ * like (their squares are made or shown here, since fnc_drawCells leaves the cells under a tile without one), so the box
+ * is a grid with the matching items in it; what is hidden is still on the grid - its cells are taken, a drop on one is
+ * refused like a drop on any tile - but the mouse does not find it (fnc_updateHover). The field's dimming works
+ * on what the category leaves.
+ * Items not searched yet match nothing: what they are is not known - with a category they are hidden, with only the field
+ * dimmed. An empty field and no category shows everything. The tiles of a source grid (fnc_createGrid) are never faded, and
+ * a window that attached is told afterwards (the "filter" hook).
+ *
+ * A tile whose controls were just made (a page turned to, a box drawn again) takes its state at once, with no fade in
+ * between: its first control carries the state it was given (einv_gui_fx: 0 shown, 1 dimmed, 2 hidden) and none yet means
+ * new - so nothing lights up for a moment on a page of a filtered box (Mia, 0.5.7).
  *
  * A tall compartment cut into pages (fnc_pageRanges) is searched on every page, not only the one shown: the
  * tiles of the other pages are on the grid too (fnc_pageCounts). Asked to jump (the field was typed in or emptied, a
@@ -101,28 +110,154 @@ if (_jump && {!isNull _display}) then {
     } forEach _grids;
 };
 
-{
-    // A place things come from (a source grid, as the Arsenal panel makes of ACE's list) holds no container: the search leaves it alone.
-    if ((_x getOrDefault ["source", ""]) isNotEqualTo "") then {continue};
+// The squares of the cells under the tiles a category hides, made or shown - and hidden again under a tile that is back. fnc_drawCells
+// makes none under a tile; a hidden tile would leave a hole in the box's grid.
+private _fnc_cells = {
+    params ["_grid", "_anyHidden"];
 
-    // The category chosen at the side of this box, if any.
-    private _group = [_x getOrDefault ["holder", _x getOrDefault ["container", objNull]]] call FUNC(boxGroup);
-    private _off = _filter isEqualTo "" && {_group isEqualTo ""};
+    private _had = _grid getOrDefault ["filterCells", false];
+
+    if (!_anyHidden && {!_had}) exitWith {};
+
+    _grid set ["filterCells", _anyHidden];
+
+    private _cols = _grid get "cols";
+    private _rows = _grid get "rows";
+    private _cells = _grid getOrDefault ["cells", []];
+
+    if (_cols < 1 || {_rows < 1} || {count _cells < _cols * _rows}) exitWith {};
+
+    private _parent = _grid getOrDefault ["parent", controlNull];
+    private _color = _grid getOrDefault ["cellColor", [1, 1, 1, 0.05]];
+    private _colX = _grid get "colX";
+    private _rowY = _grid get "rowY";
+    private _cellW = _grid get "cellW";
+    private _cellH = _grid get "cellH";
+    private _rowFrom = _grid getOrDefault ["rowFrom", 0];
+    private _rowTo = _grid getOrDefault ["rowTo", _rows];
+    private _gridHoles = _grid getOrDefault ["holes", []];
+    private _parts = _grid getOrDefault ["cellParts", createHashMap];
+
+    _grid set ["cellParts", _parts];
+
+    (_grid get "rel") params ["_left", "_top"];
 
     {
         private _tile = _x;
-        private _match = _off || {
-            !(_tile getOrDefault ["hidden", false]) && {[_tile getOrDefault ["class", ""]] call FUNC(matchesFilter)}
-            && {[_tile getOrDefault ["class", ""], _group] call FUNC(matchesGroup)}
+        private _gone = _tile getOrDefault ["filteredOut", false];
+
+        // Only tiles that are drawn have cells to look after; one that is not hidden has a square under it only if it was shown here before.
+        if ((_tile getOrDefault ["offPage", false]) || {(_tile getOrDefault ["controls", []]) isEqualTo []} || {!_gone && {!_had}}) then {continue};
+
+        private _col = _tile getOrDefault ["col", 0];
+        private _row = _tile getOrDefault ["row", 0];
+        private _fullW = _tile getOrDefault ["w", 1];
+        private _h = (_tile getOrDefault ["h", 1]) max 1;
+        private _w = (_fullW min (_cols - _col)) max 1;
+        private _holes = [[], _tile getOrDefault ["holes", []]] select (_w == _fullW);
+
+        for "_r" from (_row max _rowFrom) to ((_row + _h - 1) min (_rowTo - 1)) do {
+            for "_c" from _col to ((_col + _w - 1) min (_cols - 1)) do {
+                private _index = _r * _cols + _c;
+
+                if (((_r - _row) * _w + _c - _col) in _holes || {_index in _gridHoles}) then {continue};
+
+                private _cell = _cells select _index;
+
+                if (!_gone) then {
+                    _cell ctrlShow false;
+
+                    {_x ctrlShow false} forEach (_parts getOrDefault [_index, []]);
+
+                    continue
+                };
+
+                if (isNull _cell) then {
+                    private _rect = [_left + (_colX select _c), _top + (_rowY select _r), _cellW - pixelW, _cellH - pixelH];
+                    private _made = [_display, _parent, _rect, _color, [_grid, _rect] call FUNC(cornerRadii)] call FUNC(uiSurface);
+
+                    _cells set [_index, _made select 0];
+
+                    if (count _made > 1) then {
+                        _parts set [_index, _made select [1]];
+                    };
+                } else {
+                    _cell ctrlShow true;
+
+                    {_x ctrlShow true} forEach (_parts getOrDefault [_index, []]);
+                };
+            };
+        };
+    } forEach (_grid getOrDefault ["tiles", []]);
+};
+
+{
+    private _grid = _x;
+
+    // A place things come from (a source grid, as the Arsenal panel makes of ACE's list) holds no container: the search leaves it alone.
+    if ((_grid getOrDefault ["source", ""]) isNotEqualTo "") then {continue};
+
+    // The category chosen at the side of this box, if any.
+    private _group = [_grid getOrDefault ["holder", _grid getOrDefault ["container", objNull]]] call FUNC(boxGroup);
+    private _anyHidden = false;
+
+    // What a class is to the field and to the category, asked once per class in this pass.
+    private _byClass = createHashMap;
+
+    {
+        private _tile = _x;
+        private _class = _tile getOrDefault ["class", ""];
+        private _unsearched = _tile getOrDefault ["hidden", false];
+        private _answer = _byClass getOrDefault [_class, []];
+
+        if (_answer isEqualTo []) then {
+            _answer = [[_class] call FUNC(matchesFilter), [_class, _group] call FUNC(matchesGroup)];
+            _byClass set [_class, _answer];
+        };
+
+        // A category shows only its own kind: what is not searched yet is of no kind. The field only dims.
+        private _gone = _group isNotEqualTo "" && {_unsearched || {!(_answer select 1)}};
+        private _match = !_gone && {_filter isEqualTo "" || {!_unsearched && {_answer select 0}}};
+        private _state = [[1, 0] select _match, 2] select _gone;
+
+        _tile set ["filteredOut", _gone];
+
+        if (_gone) then {
+            _anyHidden = true;
+        };
+
+        private _controls = _tile getOrDefault ["controls", []];
+
+        if (_controls isEqualTo []) then {continue};
+
+        private _was = (_controls select 0) getVariable [QGVAR(fx), -1];
+
+        (_controls select 0) setVariable [QGVAR(fx), _state];
+
+        if (_gone) then {
+            {_x ctrlShow false} forEach _controls;
+
+            continue
+        };
+
+        // Back from hidden: shown at once, in the state it gets.
+        if (_was == 2) then {
+            {_x ctrlShow true} forEach _controls;
         };
 
         private _fade = [FILTER_FADE, 0] select _match;
 
+        // New controls take the state at once when a draw asked (no frame at full strength on a page turned to); the field and the strip
+        // (the jump) fade as ever, and so do tiles that were shown already.
+        private _time = [FILTER_TIME, 0] select ((_was < 0 && {!_jump}) || {_was == 2});
+
         {
             _x ctrlSetFade _fade;
-            _x ctrlCommit FILTER_TIME;
-        } forEach (_tile getOrDefault ["controls", []]);
-    } forEach (_x getOrDefault ["tiles", []]);
+            _x ctrlCommit _time;
+        } forEach _controls;
+    } forEach (_grid getOrDefault ["tiles", []]);
+
+    [_grid, _anyHidden] call _fnc_cells;
 } forEach (uiNamespace getVariable [QGVAR(grids), []]);
 
 // ----- The caption tabs of folded sections -----
@@ -155,9 +290,8 @@ if (_jump && {!isNull _display}) then {
         GVAR(theme) getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
     ] select _tint;
 
-    {
-        _x ctrlSetBackgroundColor _color;
-    } forEach _tab;
+    // The tab is a pill now: its round ends are pictures, painted as a surface.
+    [_tab, _color] call FUNC(paintSurface);
 } forEach (uiNamespace getVariable [QGVAR(sectionInfo), []]);
 
 // The window that attached may show what matches the search in its own places.

@@ -87,7 +87,9 @@ private _key = _entry getOrDefault ["key", ""];
 
 _entry set ["count", _have - _count];
 
-private _footprint = ([_class, _spot select 5] call EFUNC(items,footprintAs));
+private _footprint = [_class, _spot select 5] call EFUNC(items,footprintAs);
+private _spotHoles = _spot param [6, _footprint select 2];
+private _spotSingle = (((_view getOrDefault ["blocks", []]) param [_spot select 2, []]) param [5, false]);
 
 (_view getOrDefault ["entries", []]) pushBack createHashMapFromArray [
     ["class", _class],
@@ -104,7 +106,8 @@ private _footprint = ([_class, _spot select 5] call EFUNC(items,footprintAs));
     ["w", _spot select 3],
     ["h", _spot select 4],
     ["rotated", (_spot select 5) == 1],
-    ["holes", _footprint select 2],
+    ["holes", _spotHoles],
+    ["single", _spotSingle],
     ["overflow", false]
 ];
 

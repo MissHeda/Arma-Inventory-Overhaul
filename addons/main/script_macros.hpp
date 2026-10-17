@@ -36,6 +36,12 @@
 #define CATEGORY_AMMO    3
 #define CATEGORY_MEDICAL 4
 
+// The categories an item belongs to, in the order everything lists them (the "groups" of einv_items_fnc_getInfo, cats= and
+// einv_cat in the rules, the strip at the side of a loot box, the "accepts" of a compartment in grid=): a category is a
+// word, an item may be in several. The built-in mapping is einv_items_fnc_defaultGroup, the rules can move an item
+// (einv_items_fnc_parseGroups). An array literal - used in code only, never inside a macro's arguments.
+#define ITEM_GROUPS ["weapon", "ammo", "grenade", "gear", "medical", "food", "tool", "misc"]
+
 // Every storage grid is this many cells wide, whatever the style. Where an item lies is stored per
 // container (einv_storage_fnc_getLayout); a grid of another width would have to lay everything out
 // anew each time the style changes. Ten since 0.4.0: a backpack drawn on the wizard's canvas - a

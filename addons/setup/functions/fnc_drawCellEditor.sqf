@@ -18,6 +18,9 @@
  *     Blocks (1) - the compartments one by one, side by side as the inventory lines them up
  *       (fnc_drawCellBlocks): each its own small drawing, a click making a cell a hole; the one picked
  *       gets its width and height; Add and Remove. Apply writes them one after the other (+).
+ *       Under the tools of the picked compartment its attributes (fnc_drawCellAttrs): the categories it accepts and "One item, any size"
+ *       (a single slot); Apply writes them after the compartment's colon, grid=1x2:ammo+1x1:grenade|one+4x2. Paint keeps neither: a
+ *       container that has any shows a note there, and Apply in Paint writes the cells without them.
  *     Switching turns a working copy into the other way: painted compartments become blocks in reading
  *     order, blocks are laid out as the inventory flows them and coloured (fnc_canvasFromBlocks).
  *   - Beside it how the inventory will show them (fnc_drawPreview), and under it the total of cells and
@@ -200,7 +203,7 @@ private _blocks = [];
 private _start = [];
 
 if (_blocksMode) then {
-    _start = _resolved apply {[_x select 0, _x select 1, _x select 2]};
+    _start = _resolved apply {[[_x select 0, _x select 1, _x param [2, []]], _x param [4, []], _x param [5, false]] call FUNC(cellBlock)};
     _shown = [_start, _work getOrDefault ["blocks", []]] select _hasWork;
     _picked = (_work getOrDefault ["picked", 0]) min ((count _shown - 1) max 0);
     _blocks = _shown select {(_x select 0) * (_x select 1) > count (_x select 2)};
@@ -321,7 +324,7 @@ private _now = if (_kitRoom isEqualTo "capacity") then {
 
 // Back to the default, beside the line: the compartments, whatever way they were drawn, as three numbers each.
 private _fnc_shapes = {
-    ((_this select {(_x select 1) > 0}) apply {[_x select 0, _x select 1, _x param [2, []]]})
+    ((_this select {(_x select 1) > 0}) apply {[_x select 0, _x select 1, _x param [2, []], _x param [4, []], _x param [5, false]]})
 };
 private _resetSize = UNIT * 1.1;
 private _canResetGrid = _kitRoom isEqualTo "" && {("like" in _own) || {(_blocks call _fnc_shapes) isNotEqualTo (_defaultBlocks call _fnc_shapes)}};
@@ -368,6 +371,11 @@ if (_kitRoom isEqualTo "cells") then {
 
 if (_editable && {_blocksMode} && {_resolved findIf {(_x select 3) isNotEqualTo []} >= 0}) then {
     _notes pushBack [LLSTRING(Cont_BlocksFlowNote), _muted];
+};
+
+// Painting keeps no categories and no single slots: they are set on the Blocks way (fnc_drawCellAttrs).
+if (_editable && {!_blocksMode} && {_resolved findIf {count _x > 4} >= 0}) then {
+    _notes pushBack [LLSTRING(Cont_PaintAttrsNote), _loss];
 };
 
 if ((_src select [0, 7]) isEqualTo "legacy:") then {
@@ -428,6 +436,12 @@ private _areaY = _cursorY;
 
 if (_editable) then {
     _areaY = _cursorY + _toolH + UNIT * 0.25;
+
+    // Blocks: what the picked compartment takes - its categories and whether it is a single slot.
+    if (_blocksMode && {_shown isNotEqualTo []}) then {
+        _areaY = _areaY + ([_display, _box, [_innerX, _areaY, _innerW], _theme, _class, _shown, _picked] call FUNC(drawCellAttrs)) + UNIT * 0.2;
+    };
+
     _areaY = _areaY + ([
         _display, _box, [_innerX, _areaY, _innerW], [LLSTRING(Cont_PaintHelp), LLSTRING(Cont_BlocksHelp)] select _blocksMode, TEXT_SMALL, _muted, _font
     ] call FUNC(uiText)) + UNIT * 0.2;

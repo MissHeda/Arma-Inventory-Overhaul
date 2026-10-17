@@ -16,7 +16,7 @@
  * "" says nothing.
  *
  * Arguments:
- * 0: Reason - "NoBackpack", "NoRoom", "NowhereToGo", "NoFit", "LookOnly" (a living person's
+ * 0: Reason - "NoBackpack", "NoRoom", "WrongKind" (the compartment takes only other categories), "NowhereToGo", "NoFit", "LookOnly" (a living person's
  *    gear the settings let the player only look at), "Failed", "Gone", "Taken", "Moved", "OutOfReach",
  *    "IntoItself", "GroupNoSlot", "NoGround", "PlacedElsewhere", "NotReady", "Locked",
  *    "Waiting", "MovedSome", "Returned", "Grounded", or a text to show <STRING>
@@ -45,6 +45,7 @@ private _text = switch (_reason) do {
     case "NoBackpack": {LLSTRING(Hint_NoBackpack)};
     case "Locked": {LELSTRING(locks,Hint_Locked)};
     case "NoRoom": {LLSTRING(Hint_NoRoom)};
+    case "WrongKind": {LLSTRING(Hint_WrongKind)};
     case "NowhereToGo": {LLSTRING(Hint_NowhereToGo)};
     case "NoFit": {LLSTRING(Hint_NoFit)};
     case "LookOnly": {LLSTRING(Hint_LookOnly)};

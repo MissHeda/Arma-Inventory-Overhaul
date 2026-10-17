@@ -151,8 +151,8 @@
 
 // The strip of categories at the side of a loot box (fnc_drawGroupStrip): its icons are STRIP_ICON of a UNIT tall at the
 // most and at least STRIP_ICON_MIN, which the strip's room is divided by.
-#define STRIP_ICON 0.9
-#define STRIP_ICON_MIN 0.62
+#define STRIP_ICON 1.1
+#define STRIP_ICON_MIN 0.75
 
 // Tiles that do not match the search field fade this far, this quickly (fnc_applyFilter).
 #define FILTER_FADE 0.82
@@ -286,6 +286,9 @@
 #define NOISE_MARGIN 5
 #define RELOAD_GAIN 0.4
 #define SURFACE_CACHE 2
+
+// A volume slider of the dropdown under the speaker (fnc_soundSlide) moves in steps of SOUND_STEP of the full volume.
+#define SOUND_STEP 0.05
 
 // A soldier moved more than TAKEN_LEASH metres from where the window opened has left the loot (fnc_checkTaken).
 // Movement keys count only MOVE_GRACE seconds after the window opened.

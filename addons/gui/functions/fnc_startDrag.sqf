@@ -222,6 +222,12 @@ private _stack = _entry getOrDefault ["count", 1];
 
 GVAR(dragSize) = [_entry getOrDefault ["w", 1], _entry getOrDefault ["h", 1]];
 GVAR(dragRot) = parseNumber (_entry getOrDefault ["rotated", false]);
+
+// A tile in a single slot has the slot's size (einv_storage_fnc_getLayout "single"): lifted it is its own size again.
+if (_entry getOrDefault ["single", false]) then {
+    GVAR(dragSize) = (([_entry getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]]) select [0, 2];
+    GVAR(dragRot) = 0;
+};
 GVAR(dragCount) = [_stack, (floor (_stack / 2)) max 1] select (_shift && {_stack > 1} && {_group isEqualTo []});
 
 // Held by its middle, wherever it was pressed: the picture centres on the mouse and the footprint is worked out

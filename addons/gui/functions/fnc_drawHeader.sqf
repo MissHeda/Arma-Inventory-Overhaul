@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * Draws the header along the top of the window, the same in every look but in its colours: the title
- * on the left; on the right the cog of the setup wizard, the search field, the speaker (it opens the dropdown
+ * on the left; on the right the cog of the setup wizard, the search field (on the buttons' own surface), the speaker (it opens the dropdown
  * of the sound volumes, fnc_openSoundMenu; a right click mutes everything or brings it back), the camera
  * switch (left out where the setting is forced - fnc_cameraForced) and Close, each on a piece of the
  * window's glass. The buttons and the search field's frame are dark, the column panels' colour one step lighter
@@ -174,13 +174,13 @@ uiNamespace setVariable [QGVAR(soundButton), _sound];
 uiNamespace setVariable [QGVAR(soundLine), _soundLine];
 uiNamespace setVariable [QGVAR(soundAnchor), _soundRect];
 
-// The search field (fnc_drawFilter), in a frame of its own surface: the field draws its film over it.
+// The search field (fnc_drawFilter): on the window's glass that _fnc_place laid under it, with the one film of the buttons' surface over
+// it - not two (a film of its own under the field's made it lighter than the buttons beside it, Mia 0.5.7).
 private _searchRect = [SQUARE(UNIT * 11)] call _fnc_place;
 
 ([_theme, false] call FUNC(headerStyle)) params ["_searchFill"];
 
-[_display, controlNull, _searchRect, _searchFill, (_theme getOrDefault ["radius", 0]) min (HEAD_H / 2)] call FUNC(uiPanel);
-[_display, _searchRect, _theme] call FUNC(drawFilter);
+[_display, _searchRect, _theme, LLSTRING(Filter_Placeholder), _searchFill] call FUNC(drawFilter);
 
 // The cog: the setup wizard (einv_setup) - how big items are, how many share a tile, how containers are
 // split, the same for everyone. Drawn only for whoever may open it (einv_setup_fnc_canOpen: who runs the

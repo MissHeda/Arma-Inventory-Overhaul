@@ -5,7 +5,9 @@
  * whole ("Taken") when any cell is not free once all of them are lifted, or when two of them would lie
  * on one cell. Each tile is the very one at its place (fnc_findEntry, exact), else "Gone"; a cell has
  * the tile's size, either way round, else "Failed". The final arrangement is checked as a whole; only
- * places change, never the cargo.
+ * places change, never the cargo. A compartment that accepts only other categories (fnc_blockMode) is
+ * "WrongKind" for the whole; a single slot takes the tile whole, whatever size the cell names: its cell is
+ * the slot's, 0, 0 (fnc_slotOf).
  *
  * A cell is [col, row, block, w, h, rot] - w and h as it will lie, the tile's own when left out; rot 1
  * turned a quarter clockwise, 0 upright. Without rot it lies as the tile does when it keeps the tile's
@@ -17,7 +19,7 @@
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
- *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "NotLocal", "Moved",
+ *   status - "" done, else why not ("Gone", "Taken", "WrongKind", "NoRoom", "NotLocal", "Moved",
  *     "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason already
  *     in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
@@ -44,6 +46,10 @@ if (count _view == 0) exitWith {["Moved", [], []]};
 private _placing = [];
 private _status = "";
 
+// Compartments that refuse an item, or take it whole as a single slot (fnc_blockMode, fnc_slotOf), are told apart here, on the
+// authority: whatever cell and size the requester names, an item never lands where it is refused.
+private _viewBlocks = _view getOrDefault ["blocks", []];
+
 {
     _x params [["_entryArray", [], [[]]], ["_cell", [], [[]]]];
 
@@ -54,29 +60,65 @@ private _status = "";
     };
 
     (([_entry getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]]) params [["_w", 1, [0]], ["_h", 1, [0]]];
+
+    // A tile in a single slot has the slot's size (fnc_getLayout); asked for without a size it is its own again.
+    private _single = _entry getOrDefault ["single", false];
+    private _ownW = [_entry getOrDefault ["w", _w], _w] select _single;
+    private _ownH = [_entry getOrDefault ["h", _h], _h] select _single;
+    private _ownRot = [parseNumber (_entry getOrDefault ["rotated", false]), 0] select _single;
+
     _cell params [
         ["_col", -1, [0]],
         ["_row", -1, [0]],
         ["_block", 0, [0]],
-        ["_cellW", _entry getOrDefault ["w", _w], [0]],
-        ["_cellH", _entry getOrDefault ["h", _h], [0]],
+        ["_cellW", _ownW, [0]],
+        ["_cellH", _ownH, [0]],
         ["_rot", -1, [0]]
     ];
 
     if !(_rot in [0, 1]) then {
-        _rot = if ([_cellW, _cellH] isEqualTo [_entry getOrDefault ["w", _w], _entry getOrDefault ["h", _h]]) then {
-            parseNumber (_entry getOrDefault ["rotated", false])
+        _rot = if ([_cellW, _cellH] isEqualTo [_ownW, _ownH]) then {
+            _ownRot
         } else {
             parseNumber (_cellW != _w)
         };
     };
 
-    if (([[_w, _h], [_h, _w]] select (_rot == 1)) isNotEqualTo [_cellW, _cellH]) exitWith {
-        _status = "Failed";
+    private _mode = 0;
+
+    if (_block >= 0 && {_block < count _viewBlocks} && {count (_viewBlocks select _block) > 4}) then {
+        _mode = [_viewBlocks select _block, ([_entry getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["groups", ["misc"]]] call FUNC(blockMode);
     };
 
+    // A compartment that takes only other categories.
+    if (_mode < 0) exitWith {
+        _status = "WrongKind";
+    };
+
+    private _holesPut = [];
+
+    // A single slot takes it whole, whatever size it was asked for in.
+    if (_mode == 1) then {
+        ([_viewBlocks select _block] call FUNC(slotOf)) params ["_slotCol", "_slotRow", "_slotW", "_slotH", "_slotHoles"];
+
+        _col = _slotCol;
+        _row = _slotRow;
+        _cellW = _slotW;
+        _cellH = _slotH;
+        _rot = 0;
+        _holesPut = _slotHoles;
+    } else {
+        if (([[_w, _h], [_h, _w]] select (_rot == 1)) isNotEqualTo [_cellW, _cellH]) exitWith {
+            _status = "Failed";
+        };
+
+        _holesPut = ([_entry getOrDefault ["class", ""], _rot] call EFUNC(items,footprintAs)) select 2;
+    };
+
+    if (_status isNotEqualTo "") exitWith {};
+
     _entry set ["lifted", true];
-    _placing pushBack [_entry, [_col, _row, _block, _cellW, _cellH, _rot]];
+    _placing pushBack [_entry, [_col, _row, _block, _cellW, _cellH, _rot], _holesPut];
 } forEach _moves;
 
 if (_status isNotEqualTo "") exitWith {
@@ -128,7 +170,7 @@ private _fnc_free = {
 {
     (_x select 1) params ["_col", "_row", "_block", "_w", "_h", "_rot"];
 
-    private _holes = ([(_x select 0) getOrDefault ["class", ""], _rot] call EFUNC(items,footprintAs)) select 2;
+    private _holes = _x select 2;
 
     if !([_block, _col, _row, _w, _h, _holes] call _fnc_free) exitWith {
         _status = "Taken";
@@ -148,7 +190,7 @@ if (_status isNotEqualTo "") exitWith {[_status, [], []]};
 private _records = ([_holder] call FUNC(readPlaces)) param [1, []];
 
 {
-    _x params ["_entry", "_cell"];
+    _x params ["_entry", "_cell", "_holesPut"];
     _cell params ["_col", "_row", "_block", "_w", "_h", "_rot"];
 
     private _key = _entry getOrDefault ["key", ""];
@@ -169,7 +211,8 @@ private _records = ([_holder] call FUNC(readPlaces)) param [1, []];
     _entry set ["w", _w];
     _entry set ["h", _h];
     _entry set ["rotated", _rot == 1];
-    _entry set ["holes", ([_entry getOrDefault ["class", ""], _rot] call EFUNC(items,footprintAs)) select 2];
+    _entry set ["holes", _holesPut];
+    _entry set ["single", _block >= 0 && {_block < count _viewBlocks} && {(_viewBlocks select _block) param [5, false]}];
     _entry set ["overflow", false];
 } forEach _placing;
 

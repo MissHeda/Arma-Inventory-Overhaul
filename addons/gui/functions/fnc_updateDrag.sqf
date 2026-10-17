@@ -908,6 +908,7 @@ private _fnc_cells = {
     private _rows = _grid get "rows";
     private _under = [];
     private _taken = [];
+    private _byHidden = [];
 
     _under resize (_cols * _rows);
     _taken resize (_cols * _rows);
@@ -921,6 +922,11 @@ private _fnc_cells = {
         private _tileH = _x get "h";
         private _tileHoles = _x getOrDefault ["holes", []];
 
+        // A tile the category or the search field hides is not there to the player: it is no tile to swap with or merge into,
+        // and no cell of it is taken. The cells it lies on are kept apart (the third element): a drop there goes to the first
+        // free spot of the box instead.
+        private _hiddenTile = _x getOrDefault ["filteredOut", false];
+
         for "_r" from 0 to (_tileH - 1) do {
             for "_c" from 0 to (_tileW - 1) do {
                 private _col = _left + _c;
@@ -928,6 +934,11 @@ private _fnc_cells = {
 
                 if (_col >= 0 && {_row >= 0} && {_col < _cols} && {_row < _rows} && {!((_r * _tileW + _c) in _tileHoles)}) then {
                     private _cellIndex = _row * _cols + _col;
+
+                    if (_hiddenTile) then {
+                        _byHidden pushBackUnique _cellIndex;
+                        continue;
+                    };
 
                     if (isNil {_under select _cellIndex}) then {
                         _under set [_cellIndex, _at];
@@ -941,7 +952,7 @@ private _fnc_cells = {
         };
     } forEach (_grid get "tiles");
 
-    _kept = [_under, _taken];
+    _kept = [_under, _taken, _byHidden];
     GVAR(dragRoom) set [_key, _kept];
 
     _kept
@@ -1455,6 +1466,29 @@ call {
         ] call _fnc_show;
     };
 
+    // ----- What the compartment makes of it -----
+    // A compartment that takes only some categories (grid=2x2:ammo, einv_storage_fnc_blockMode) refuses the rest: red, and the
+    // hint says what it takes. A single slot holds one tile whatever its size and the tile takes it whole: the footprint is the
+    // slot, wherever in it the mouse is, whatever the item's own size and turn.
+    private _targetAccepts = _target getOrDefault ["accepts", []];
+
+    if (_targetAccepts isNotEqualTo []) then {
+        private _groups = ([_entry getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["groups", ["misc"]];
+
+        if (_groups findIf {_x in _targetAccepts} < 0) then {
+            _reason = "WrongKind";
+            _hintParts = [[format [LLSTRING(Hint_Only), (_targetAccepts apply {localize format ["STR_einv_gui_Only_%1", _x]}) joinString ", "], "loss"]];
+        };
+    };
+
+    if (_target getOrDefault ["single", false] && {_reason isEqualTo ""}) then {
+        _col = 0;
+        _row = 0;
+        _w = _target get "cols";
+        _h = _target get "rows";
+        _dragHoles = _target getOrDefault ["holes", []];
+    };
+
     // ----- Into itself -----
     // A uniform, vest or backpack - lying somewhere or worn - cannot go into its own grid, nor into that of
     // anything lying in it (einv_storage_fnc_liesIn): the footprint is red and says so.
@@ -1613,6 +1647,47 @@ call {
         };
     };
 
+    // Cells under a tile the category or the search field hides look empty, and a named cell there would be refused as taken
+    // by the authority. Never a swap or a merge with it: from elsewhere the item goes to the first free spot of the box, as
+    // when dropped on its picture (the place is false, the layout finds one when it is let go); within one box nothing moves.
+    private _viaHidden = false;
+
+    if (_reason isEqualTo "" && {!_viaFold} && {!_auto} && {_toKit isEqualTo ""} && {_fromKit isEqualTo ""}) then {
+        private _hiddenCells = ([_targetIndex] call _fnc_cells) param [2, []];
+
+        if (_hiddenCells isNotEqualTo []) then {
+            private _targetCols = _target get "cols";
+
+            for "_r" from 0 to (_h - 1) do {
+                for "_c" from 0 to (_w - 1) do {
+                    if (!((_r * _w + _c) in _dragHoles) && {((_row + _r) * _targetCols + _col + _c) in _hiddenCells}) exitWith {
+                        _viaHidden = true;
+                    };
+                };
+
+                if (_viaHidden) exitWith {};
+            };
+        };
+    };
+
+    if (_viaHidden) then {
+        private _hiddenFitKey = format ["hiddenfit|%1", _targetIndex];
+        private _hiddenFit = GVAR(dragRoom) get _hiddenFitKey;
+
+        if (isNil "_hiddenFit") then {
+            _hiddenFit = !isNull _to && {_from isNotEqualTo _to} && {[_to, _entry] call EFUNC(storage,hasSpace)};
+            GVAR(dragRoom) set [_hiddenFitKey, _hiddenFit];
+        };
+
+        if (_hiddenFit) then {
+            _place = false;
+            _auto = true;
+        } else {
+            _reason = "NoRoom";
+            _viaHidden = false;
+        };
+    };
+
     if (_reason isEqualTo "" && {[_from, _fromKit] isNotEqualTo [_to, _toKit]}) then {
         if (_toKit isNotEqualTo "") exitWith {
             // Into an open kit: what the kit takes and has room for (einv_compat_efak_fnc_canDrop).
@@ -1690,7 +1765,7 @@ call {
     };
 
     if (_auto) then {
-        _hintParts = [[LLSTRING(Hint_FoldedFit), "accent"]];
+        _hintParts = [[[LLSTRING(Hint_FoldedFit), LLSTRING(Hint_HiddenFit)] select _viaHidden, "accent"]];
     };
 
     // The cell under the mouse comes along as the 11th element: what the window that attached asks for.

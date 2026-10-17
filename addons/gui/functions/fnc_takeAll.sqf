@@ -6,7 +6,7 @@
  * container holds, not from what is drawn, so it also works on a section folded away to its caption. What
  * is not searched yet stays ("3 not searched yet"), so does a tile a move is under way for, and what finds
  * no room ("Moved 7 of 10 - no room for the rest"). A living person's gear only as the settings for it say
- * (fnc_checkTouch).
+ * (fnc_checkTouch). With a category chosen at the box or a word in the search field, only the tiles that show (that match) are taken.
  *
  * Arguments:
  * 0: The section's container <OBJECT>
@@ -53,6 +53,11 @@ private _items = [];
 private _hidden = 0;
 private _root = _section getOrDefault ["root", objNull];
 
+// Only what the player sees: with a category chosen at the box or a word in the search field, the tiles that do not match are hidden
+// (fnc_applyFilter) and stay where they lie.
+private _boxGroup = [_holder] call FUNC(boxGroup);
+private _searching = GVAR(filter) isNotEqualTo "" || {_boxGroup isNotEqualTo ""};
+
 {
     if (_x getOrDefault ["hidden", false]) then {
         _hidden = _hidden + 1;
@@ -60,6 +65,8 @@ private _root = _section getOrDefault ["root", objNull];
     };
 
     private _entry = _x;
+
+    if (_searching && {!([_entry getOrDefault ["class", ""]] call FUNC(matchesFilter)) || {!([_entry getOrDefault ["class", ""], _boxGroup] call FUNC(matchesGroup))}}) then {continue};
 
     if (_pending findIf {
         _x params [["_pendingHolder", objNull], ["_pendingKey", ""], ["_pendingBlock", 0], ["_pendingCol", -1], ["_pendingRow", -1]];

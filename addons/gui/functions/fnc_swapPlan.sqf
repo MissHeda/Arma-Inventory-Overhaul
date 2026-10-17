@@ -30,6 +30,10 @@
  * player's kit stays where it is (einv_compat_efak_fnc_checkTile). Free cells are the only room there
  * is - weight refuses nothing.
  *
+ * Categories and single slots (einv_storage_fnc_blockMode): the other tile must be taken by the compartment the dragged one
+ * comes from, else the reason is "WrongKind"; into a single slot (the footprint fnc_updateDrag brings is then the slot) a tile
+ * goes whole, its own size aside, and a tile that leaves one lies at its own size again.
+ *
  * Arguments:
  * 0: Index of the grid under the mouse <NUMBER>
  * 1: Column the footprint's corner lies on <NUMBER>
@@ -93,6 +97,14 @@ if (_sameHolder && {!_sameGrid} && {_toBlock == _fromBlock}) exitWith {_none};
 
 // ----- Where the dragged tile lands: its footprint, over exactly one other tile -----
 private _holesHeld = ([_entry getOrDefault ["class", ""], _rot] call EFUNC(items,footprintAs)) select 2;
+
+// A single slot takes a tile whole (einv_storage_fnc_slotOf): the footprint fnc_updateDrag brings is the slot, its holes the slot's.
+private _targetSingle = _target getOrDefault ["single", false];
+private _sourceSingle = _source getOrDefault ["single", false];
+
+if (_targetSingle) then {
+    _holesHeld = _target getOrDefault ["holes", []];
+};
 private _cols = _target get "cols";
 
 if (_col < 0 || {_row < (_target getOrDefault ["rowFrom", 0])} || {_col + _w > _cols} || {_row + _h > (_target getOrDefault ["rowTo", _target get "rows"])}) exitWith {_none};
@@ -220,16 +232,36 @@ private _cellB = [];
 
 private _originCol = _entry getOrDefault ["col", 0];
 private _originRow = _entry getOrDefault ["row", 0];
-private _holesB = _tileB getOrDefault ["holes", []];
-private _rotB = parseNumber (_tileB getOrDefault ["rotated", false]);
-private _candidates = [[_tileB get "w", _tileB get "h", _holesB, _rotB]];
+// B as it lies - a tile in a single slot has the slot's size, its own is the item's (einv_items_fnc_footprintAs) - and, where
+// that takes other cells, turned a quarter.
+private _rotB = [parseNumber (_tileB getOrDefault ["rotated", false]), 0] select _targetSingle;
+private _sizeB = if (_targetSingle) then {
+    [_classB, 0] call EFUNC(items,footprintAs)
+} else {
+    [_tileB get "w", _tileB get "h", _tileB getOrDefault ["holes", []]]
+};
+private _holesB = _sizeB select 2;
+private _candidates = [[_sizeB select 0, _sizeB select 1, _holesB, _rotB]];
 
-// Turned a quarter, when that takes other cells.
 ([_classB, 1 - _rotB] call EFUNC(items,footprintAs)) params ["_turnW", "_turnH", "_turnHoles"];
 
-if (_turnW != (_tileB get "w") || {_turnH != (_tileB get "h")} || {_turnHoles isNotEqualTo _holesB}) then {
+if (_turnW != (_sizeB select 0) || {_turnH != (_sizeB select 1)} || {_turnHoles isNotEqualTo _holesB}) then {
     _candidates pushBack [_turnW, _turnH, _turnHoles, 1 - _rotB];
 };
+
+// The compartment it would go to must take it: one that accepts only other categories refuses (einv_storage_fnc_blockMode), and a
+// single slot takes it whole, upright, whatever its size.
+private _sourceAccepts = _source getOrDefault ["accepts", []];
+
+if (
+    _sourceAccepts isNotEqualTo []
+    && {((([_classB] call EFUNC(items,getInfo)) getOrDefault ["groups", ["misc"]]) findIf {_x in _sourceAccepts}) < 0}
+) exitWith {["WrongKind", []]};
+
+if (_sourceSingle) then {
+    _candidates = [[_source get "cols", _source get "rows", _source getOrDefault ["holes", []], 0]];
+};
+
 
 if (!_merge) then {
     {

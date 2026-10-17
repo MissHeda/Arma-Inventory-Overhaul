@@ -131,6 +131,8 @@ PREP(getBlocks);
 PREP(seedTaken);
 PREP(cellsFree);
 PREP(takeCells);
+PREP(blockMode);
+PREP(slotOf);
 PREP(overlaps);
 PREP(hasSpace);
 

@@ -1,12 +1,15 @@
 #include "..\script_component.hpp"
+#include "..\defines.hpp"
 /*
  * Author: Miss Heda
  * Drags a volume slider of the dropdown under the speaker in the header (fnc_openSoundMenu). A press on a slider
  * ("begin") sets the volume where the mouse is and, for as long as the button is held, the display's
  * MouseMoving and MouseHolding follow the mouse - along the whole screen, not only over the slider - until the
  * release (MouseButtonUp) takes the three handlers off again. Nothing runs while no slider is held. The volume
- * is the mouse's place along the slider, 0 at its left end to 1 at its right end, to whole percents (fnc_soundSet);
- * the last bit at each end is the end. Letting go plays a sample of the kind, so the player hears what he set.
+ * is the mouse's place along the track, 0 at its left end to 1 at its right end, in steps of SOUND_STEP (5 %) - the ends are
+ * the ends (fnc_soundSet). The mouse is read with getMousePosition at the press and at every move, in the space the track's
+ * place is given in: the arguments of the control's press and of the display's move were not in it (0.5.7 gave only 0 and
+ * 100 %). Letting go plays a sample of the kind, so the player hears what he set.
  *
  * Arguments (begin):
  * 0: "begin" <STRING>
@@ -15,7 +18,7 @@
  *    1: Which volume: an index of einv_gui_soundGroups <NUMBER>
  *    2: The slider's left end on the screen <NUMBER>
  *    3: Its width <NUMBER>
- *    4: The mouse's x <NUMBER>
+ *    4: The mouse's x, only the press's own - the mouse is read again here <NUMBER> (default: 0)
  *
  * Arguments (move, up, end):
  * 0: "move", "up" or "end" <STRING>
@@ -34,17 +37,15 @@ disableSerialization;
 
 params [["_what", "", [""]], ["_argument", []]];
 
+// The volume of the mouse's place, in whole steps; the same place is asked at the press and at every move.
 private _fnc_set = {
-    params ["_state", "_mouseX"];
+    params ["_state"];
     _state params ["", "_index", "_left", "_width"];
 
+    private _mouseX = (getMousePosition) select 0;
     private _place = (((_mouseX - _left) / (_width max pixelW)) max 0) min 1;
 
-    // The last bit at each end is the end: 0 and full volume are easy to hit.
-    if (_place < 0.02) then {_place = 0};
-    if (_place > 0.98) then {_place = 1};
-
-    ["volume", [_index, _place]] call FUNC(soundSet);
+    ["volume", [_index, (round (_place * (1 / SOUND_STEP))) * SOUND_STEP]] call FUNC(soundSet);
 };
 
 if (_what isEqualTo "move") exitWith {
@@ -52,7 +53,7 @@ if (_what isEqualTo "move") exitWith {
 
     if (_state isEqualTo []) exitWith {};
 
-    [_state, _argument param [1, 0]] call _fnc_set;
+    [_state] call _fnc_set;
 };
 
 if (_what isEqualTo "end" || {_what isEqualTo "up"}) exitWith {
@@ -86,7 +87,7 @@ if (_what isEqualTo "end" || {_what isEqualTo "up"}) exitWith {
 
 // ----- A press on a slider -----
 if (_what isEqualTo "begin") exitWith {
-    _argument params ["_display", "_index", "_left", "_width", "_mouseX"];
+    _argument params ["_display", "_index", "_left", "_width"];
 
     // One at a time.
     ["end"] call FUNC(soundSlide);
@@ -103,5 +104,5 @@ if (_what isEqualTo "begin") exitWith {
 
     uiNamespace setVariable [QGVAR(soundSlideState), _state];
 
-    [_state, _mouseX] call _fnc_set;
+    [_state] call _fnc_set;
 };

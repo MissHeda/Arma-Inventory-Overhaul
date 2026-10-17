@@ -281,6 +281,10 @@ if (_rest isNotEqualTo []) then {
 if (_rest isEqualTo [] && {_type in ["weapon", "magazine"] || {_type isEqualTo "item" && {(_payload param [3, []]) isEqualTo []}}}) then {
     {
         private _spot = _spots param [_forEachIndex, []];
+        private _spotBlock = _spot param [2, -1];
+
+        // In a single slot it takes the compartment whole (fnc_slotOf); the window draws it scaled into the slot.
+        private _spotSingle = _spotBlock >= 0 && {(((_view getOrDefault ["blocks", []]) param [_spotBlock, []]) param [5, false])};
 
         _tiles pushBack createHashMapFromArray [
             ["class", _class],
@@ -297,7 +301,8 @@ if (_rest isEqualTo [] && {_type in ["weapon", "magazine"] || {_type isEqualTo "
             ["w", _spot param [3, _w]],
             ["h", _spot param [4, _h]],
             ["rotated", (_spot param [5, 0]) == 1],
-            ["holes", [_holes, _turnedHoles] select ((_spot param [5, 0]) == 1)],
+            ["holes", _spot param [6, [_holes, _turnedHoles] select ((_spot param [5, 0]) == 1)]],
+            ["single", _spotSingle],
             ["overflow", _spot isEqualTo []]
         ];
     } forEach _newCounts;

@@ -73,6 +73,30 @@
         <Key ID="STR_einv_setup_Cancel">
             <English>Cancel</English>
         </Key>
+        <Key ID="STR_einv_setup_Cat_ammo">
+            <English>Ammo</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cat_food">
+            <English>Food</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cat_gear">
+            <English>Gear</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cat_grenade">
+            <English>Grenade</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cat_medical">
+            <English>Medical</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cat_misc">
+            <English>Misc</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cat_tool">
+            <English>Tool</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cat_weapon">
+            <English>Weapon</English>
+        </Key>
         <Key ID="STR_einv_setup_Cell_Default">
             <English>the default</English>
         </Key>
@@ -244,6 +268,12 @@
         <Key ID="STR_einv_setup_Conflict_Text">
             <English>Someone else saved the setup while you were working on it. Put your changes on top of theirs, or overwrite what they saved?</English>
         </Key>
+        <Key ID="STR_einv_setup_Cont_Accepts">
+            <English>Accepts</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_AcceptsAll">
+            <English>All</English>
+        </Key>
         <Key ID="STR_einv_setup_Cont_Add">
             <English>Add</English>
         </Key>
@@ -322,6 +352,9 @@
         <Key ID="STR_einv_setup_Cont_NotContainer">
             <English>%1 holds nothing - there are no cells to draw.</English>
         </Key>
+        <Key ID="STR_einv_setup_Cont_PaintAttrsNote">
+            <English>This container has compartments that take only some categories or hold one item of any size. Painting does not keep them - set them on the Blocks way; Apply here writes the cells without them.</English>
+        </Key>
         <Key ID="STR_einv_setup_Cont_PaintHelp">
             <English>Pick a colour, then click or drag over cells. Touching cells of one colour are one compartment; empty places are left out.</English>
         </Key>
@@ -363,6 +396,15 @@
         </Key>
         <Key ID="STR_einv_setup_Cont_SameChip">
             <English>Same as %1 · Unlink</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_Single">
+            <English>Single slot</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_SingleChip">
+            <English>One item, any size</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_SingleShort">
+            <English>one item</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Title">
             <English>Containers: the cells of uniforms, vests and backpacks</English>
@@ -565,6 +607,9 @@
         <Key ID="STR_einv_setup_Hint_BadWeight">
             <English>The weight is a number in kg like 0.5 - or empty, for config's own.</English>
         </Key>
+        <Key ID="STR_einv_setup_Hint_CatOne">
+            <English>An item is in at least one category</English>
+        </Key>
         <Key ID="STR_einv_setup_Hint_CellsApplied">
             <English>The cells of %1 are kept. Save puts them to use.</English>
         </Key>
@@ -663,6 +708,9 @@
         </Key>
         <Key ID="STR_einv_setup_Items_CanvasHelp">
             <English>Click the cells it takes: an L, a T, any shape in one piece. Across and down make a rectangle.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Items_CatField">
+            <English>Category</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Clear">
             <English>Clear</English>
@@ -1263,6 +1311,9 @@
         </Key>
         <Key ID="STR_einv_setup_Use_vest">
             <English>Vest</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_Cats">
+            <English>category: %1</English>
         </Key>
         <Key ID="STR_einv_setup_Value_Empty">
             <English>empty</English>

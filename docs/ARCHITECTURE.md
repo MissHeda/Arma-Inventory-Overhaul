@@ -93,7 +93,7 @@ where a setup differs.
 ### The text (`fnc_parseRules`, `fnc_writeRules`)
 
 Statements are separated by commas; a line break counts as a comma. The writer always joins with `", "`, in the order header,
-groups, rules, and a rule's values in the order `like`, `size`, `stack`, `grid`, `weight`, `name`, `icon`, `picture`, `use`. Read and written again, a text
+groups, rules, and a rule's values in the order `like`, `size`, `stack`, `grid`, `weight`, `name`, `icon`, `picture`, `use`, `cats`. Read and written again, a text
 stays the same, so two setups that mean the same compare as texts.
 
 | Statement | Example | |
@@ -129,6 +129,7 @@ Values - what a rule sets. `like` is written first, the others in any order:
 | `icon=1.4`, `icon=1.4@0.1:-0.05` | how the item's **picture** is drawn in its tile: `SCALE` or `SCALE@ACROSS:DOWN` (`fnc_parseIcon` reads it, `fnc_formatIcon` writes it). The scale is 0.25 to 4 (`ICON_SCALE_MIN`, `ICON_SCALE_MAX`) times the picture as it is fitted into the tile, about the tile's middle; the offsets are -1 to 1 (`ICON_OFFSET_MAX`) of the tile's width across (positive: right) and of its height down (positive: down); all to two decimals, a value past a limit is cut down with a warning. `icon=1` is the plain picture and a legal value (it takes back what a broader rule set). A comma ends a statement, so the text's offsets are split by `:` - the writer always writes the colon; config's `"1.4@0.1,-0.05"` is read as it stands, and a comma typed into a rules text is read as the colon (a number on its own right after an `icon=` with one offset is its second one). Parsed into the rule's values as `"icon"`, `[scale, across, down]`. Not taken by `like=`. |
 | `picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa` | **which picture** the item shows instead of the one its config names (`fnc_parsePicture` reads it): a texture path of at most `PICTURE_MAX` 260 characters with a file name that has an extension. In a rules text it is written the way `name=` is, but for a path (`fnc_encodeName` / `fnc_decodeName` with their `path` switch): letters, digits, `-`, `_`, `.` and `/` stay, a backslash is written `/` (the setting's text box cleans a backslash out - `fnc_sanitizeText` now turns one into a `/` instead of dropping it, so a path typed there keeps its folders), a space is `%20` and every other character `%XX` per UTF-8 byte; read back, `/` is the backslash of the engine's own paths. Parsed into the rule's values as `"picture"`, the path with backslashes. Whether the file exists is asked by `fnc_getInfo` (`fileExists`, with and without the leading backslash), not by the reader: a missing file falls back to the config picture and is named once per path in the RPT. Not taken by `like=`. |
 | `use=backpack+vest` | **which containers it may be used from** even where a setting closes them (`fnc_parseUse` reads it, `fnc_formatUse` writes it; section 3, "Use from containers"): any of `uniform`, `vest`, `backpack` joined with `+` (a comma would end the statement; config's `einv_use` also takes a comma or a bar), `all` for the three, `none` for no container - the one value that takes back what a broader rule whitelisted. Words are lowercase or not, plurals are read, a word that is none of these is left out with a note. Written always in the order uniform, vest, backpack. Parsed into the rule's values as `"use"`, an array of those words (`[]` for `none`). Only means something for the kinds that are used from where they lie (`USE_ITEM_KINDS` in storage: magazine, grenade, item, kit, radio). Not taken by `like=`. |
+| `cats=medical+misc` | **which categories it is in** instead of the built-in one (`fnc_parseGroups` reads it, `fnc_formatGroups` writes it): any of `weapon`, `ammo`, `grenade`, `gear`, `medical`, `food`, `tool`, `misc` (`ITEM_GROUPS`) joined with `+`; plurals and a few words (`magazine`, `throwable`, `explosive`, `clothing`) are read, a word that is none of these is left out with a note, a value with no readable word is left out. Written in the order of `ITEM_GROUPS`. Parsed into the rule's values as `"cats"`, an array. The strip at the side of a loot box shows an item under each of its categories, and a compartment that accepts only some categories (`grid=`, below) takes it when it is in one of them. The key is `cats=`, not `cat=`: `cat=` is the condition on the tile's colour (`CATEGORY_NAMES`). Not taken by `like=`. |
 
 `grid=` takes one of these (`fnc_parseGrid`, `fnc_formatGrid`):
 
@@ -147,6 +148,22 @@ Values - what a rule sets. `like` is written first, the others in any order:
   second one flow, with a message). The writer gives letters in the reading order of each compartment's first cell, puts the
   canvas where its first compartment stood, and writes a single compartment as `WxH` or a mask. `/` is a legal character; a row is
   never empty, so `//`, which a `cba_settings.sqf` takes for a comment, never occurs.
+- **attributes** after a compartment's colon (`fnc_parseGrid` reads them, `fnc_formatGrid` writes them): a list of categories joined
+  with `|` (`ITEM_GROUPS`, as `cats=`) and the word `one`. `2x2:ammo|grenade` accepts only items in one of those categories; no list
+  accepts everything, as every compartment did. `1x1:grenade|one` (or `1x1:grenade:one`) is a **single slot**: it holds one tile
+  whatever the item's size, and the item takes the whole compartment (section 3, "Categories and single slots"). On a canvas each
+  letter has its own after the canvas, `aab/aab:a=ammo:b=grenade|one`; a canvas of one compartment is a plain piece and takes the
+  plain form. A compartment without attributes is written exactly as before, so no older text changes; the block of the parsed spec
+  then has its four elements, with attributes six (`[cols, rows, holes, pos, accepts, single]`). Only compartments written out can
+  carry them: `auto`, a number of cells, a share and a pattern say nothing about single compartments (a note, the attributes are
+  left out). Commented examples (the comments are not part of the text; a rules text has none):
+
+  ```
+  # a vest: two front pouches only for magazines, a grenade loop (one grenade of any size), the back for anything
+  grid=1x2:ammo+1x2:ammo+1x1:grenade|one+4x2
+  # a backpack on a canvas: both side pockets take medical items, the main compartment anything
+  grid=abbbbbc/abbbbbc/abbbbbc:a=medical:c=medical
+  ```
 
 What may stand in a statement: letters, digits, space, tab and `_ + . / % : | @ ! < > = ~ -`. Never a `;`, a quote, `#` or a
 backslash: CBA's export, import and every `cba_settings.sqf` split lines at `;`, and the preprocessor reads the others. The
@@ -179,7 +196,7 @@ which is why a typo in a rule must not build tens of thousands of them.
 
 ### Which answer wins (`fnc_resolve`)
 
-Each field - footprint, stack, grid, weight, name, icon, picture, use - goes to the first layer that has an answer, highest first:
+Each field - footprint, stack, grid, weight, name, icon, picture, use, cats - goes to the first layer that has an answer, highest first:
 
 1. **forced** - rifles, handguns, launchers, binoculars, uniforms, vests and backpacks always stack 1 (`KINDS_SINGLE`), whatever
    any rule says: each carries attachments or contents of its own, and a tile moves only one of them.
@@ -187,7 +204,7 @@ Each field - footprint, stack, grid, weight, name, icon, picture, use - goes to 
    rules appended after the text's own, each table sorted shallow-first (fewest parents first) so the nearest class listed wins.
    They sit in the same layer as the text but come after it, so a table beats the text.
 3. **the own text** - `einv_items_rules`, a later rule before an earlier one.
-4. **the item's mod config** - `einv_size`, `einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, `einv_icon`, `einv_picture`, `einv_use`, written as the rules write the same
+4. **the item's mod config** - `einv_size`, `einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, `einv_icon`, `einv_picture`, `einv_use`, `einv_cat`, written as the rules write the same
    value ("Config keys of an item" below); for a field those leave open the older `einv_gridSize[]`, `einv_stackSize`,
    `einv_grids[]`, then `einv_slots`. Grids and slots from config stay within the limits above. The text above still overrides all
    of it, so a server's rules have the last word over any mod.
@@ -229,6 +246,7 @@ layer above: a server's rules text still beats them, and they beat a preset.
 | `einv_name = "Short name";` | any item | the name as it shows, at most `MAX_NAME` characters; a space is a space | `name=`, but plain text (the rules text writes `_` for a space and `%XX` for the rest) |
 | `einv_picture = "a3\ui_f\data\gui\cfg\hints\gear_ca.paa";` | any item | the texture it shows instead of its config `picture`: backslashes or slashes, spaces as they are (`fnc_parsePicture` with `encoded = false`) | `picture=` (config writes the plain path, the rules text the encoded one) |
 | `einv_use = "backpack,vest";` | any item | the containers it may be used from where a setting closes them: `uniform`, `vest`, `backpack`, `all` or `none`, joined with a comma, a plus or a bar (`fnc_parseUse`). `""` takes an inherited value back, so `"none"` says no container | `use=` (config writes the comma, the rules text the plus) |
+| `einv_cat = "medical,misc";` | any item | the categories it is in instead of the built-in one: `weapon`, `ammo`, `grenade`, `gear`, `medical`, `food`, `tool`, `misc` joined with a comma, a plus or a bar (`fnc_parseGroups`). `""` takes an inherited value back | `cats=` (config writes the comma, the rules text the plus) |
 | `einv_icon = "1.4@0.1,-0.05";` | any item | how the picture is drawn in its tile: a scale 0.25 to 4, and after an `@` how far it is moved across and down, -1 to 1 of the tile (a comma or a colon between the two); a plain number `1.4` is the scale alone | `icon=` (config writes the comma, the rules text the colon) |
 
 - **Read by the rules' own readers.** `fnc_readConfigKeys` hands the size to `fnc_parseRules` and the grid to
@@ -266,7 +284,7 @@ Two public functions turn the keys into a snippet and back, for mod authors and 
 - `einv_items_fnc_parseConfigEntry [text, messages = nil]` -> `[[class, keys], ...]`: reads such lines - one class or many, under
   their root or without it; comments, `class X;` declarations, parents (`class X: Y`), other properties and nested classes are
   skipped - into `keys`, a HashMap by lowercase config key (`"einv_size"`, `"einv_stack"`, `"einv_grid"`, `"einv_weight"`,
-  `"einv_name"`, `"einv_icon"`, `"einv_picture"`, `"einv_use"`) with the values as the rules write them (size and grid STRING, stack and weight NUMBER, name
+  `"einv_name"`, `"einv_icon"`, `"einv_picture"`, `"einv_use"`, `"einv_cat"`) with the values as the rules write them (size and grid STRING, stack and weight NUMBER, name
   STRING, icon `[scale, across, down]`, picture STRING); only keys
   that could be read, and only classes that have one. What was left out is added to the `messages` array when one is given, else
   to the RPT. A text over `CONFIG_TEXT_MAX` 65536 characters is not read.
@@ -332,6 +350,8 @@ no cache: not kept. Callers must not modify it. The config part comes from `fnc_
 | `weightOverride`, `nameOverride` | NUMBER, STRING | the rules' weight in kg (-1 for none), the rules' name ("" for none) |
 | `picture`, `pictureOverride`, `configPicture` | STRING | the texture the item shows: the rules' (`picture=`, `einv_picture`) when `fileExists` says it is there - `pictureOverride` is the rules' path whether it is or not, "" for none -, else config's `picture`, which `configPicture` keeps whatever the rules say. Every drawing of the item reads `picture` |
 | `use` | ARRAY | the containers it may be used from where a setting closes them: any of `"uniform"`, `"vest"`, `"backpack"` in that order, `[]` for none (`use=`, `einv_use`, `fnc_parseUse`). Read by `einv_storage_fnc_useState` |
+| `cats` | ARRAY | the categories the rules or the item's config put it in (`cats=`, `einv_cat`, `fnc_parseGroups`), in the order of `ITEM_GROUPS`; `[]` when none does |
+| `groups` | ARRAY | the categories it is in: `cats` when it has some, else the built-in one (`fnc_defaultGroup`, worked out from the item's facts and kept there as `"group"`) - never empty. Read by the strip of a loot box, by `einv_storage_fnc_blockMode` for the compartments that accept only some categories, and by the wizard's Category row |
 | `icon` | ARRAY | how the picture is drawn in the item's tile: `[scale, across, down]`, the scale a factor (0.25 to 4), the offsets a share of the tile's width and height (-1 to 1); `[1, 0, 0]` (`ICON_PLAIN`) for the plain picture. From `icon=` / `einv_icon` (`fnc_parseIcon`); every picture of the window draws by it (section 4, "Grids and tiles") |
 | `lc`, `root`, `rounds`, `lineage`, `addon`, `mod` | | from `fnc_getFacts`: lowercase class, config root, a CfgMagazines `count`, lowercase classes from itself up, the CfgPatches class, what its own config says (`einv_size` and the other keys, "Config keys of an item") |
 
@@ -366,6 +386,7 @@ a config key sets it (section 7, compat_efak).
 | `fnc_parseIcon [text]`, `fnc_formatIcon [icon, separator = ":"]` | No | the value of `icon=` / `einv_icon`: `"1.4@0.1:-0.05"` -> `[[1.4, 0.1, -0.05], notes]` (`[]` when unreadable; limits cut with a note) and back, the colon for a text, `","` for config |
 | `fnc_parsePicture [text, encoded = true]` | No | the value of `picture=` / `einv_picture` -> `[path, notes]` (`""` when unreadable or too long) |
 | `fnc_parseUse [text]`, `fnc_formatUse [containers, separator = "+"]` | No | the value of `use=` / `einv_use` -> `[containers, notes, readable]` (the containers in the order uniform, vest, backpack, `[]` for none), and back (`"none"` for `[]`) |
+| `fnc_parseGroups [text, key]`, `fnc_formatGroups [groups, separator = "+"]`, `fnc_defaultGroup [facts]` | No | the value of `cats=` / `einv_cat` -> `[groups, notes, readable]` and back; the built-in category of an item, the mapping that used to live in the window (medical, weapon, grenade - the kind grenade and a mine or charge -, ammo, gear, food, tool, misc) |
 | `fnc_compileCond`, `fnc_matches`, `fnc_parseTable [text, type, warnings]`, `fnc_sanitizeText` | No | conditions; the older tables; the EDITBOXes' sanitizer |
 | `fnc_resolve [facts, compiled]` | No | -> `footprint`, `stack`, `grid`, `weight` (kg, -1), `name` ("" none), `src` |
 | `fnc_setBy [info, field]` | Yes | who set a field, from its `src` tag: `"rule"` (`own:`, `legacy:` but the stack slider, `all:`), `"config"` (`mod:`), `"preset"` (`preset:`, the stack slider), `"default"` (`builtin`, `forced`) |
@@ -570,6 +591,38 @@ open (`fnc_overlaps` is the same test for a kit's grid).
 **Op cells.** An op that names a cell takes `[col, row, block]` (the tile's own size, the way it lies) or `[col, row, block, w, h,
 rot]` - `w` and `h` as it will lie, `rot` 1 turned. `fnc_setPlace [holder, entry, cell, add]` changes one record (on the authority
 only; inside a phase through its buffer); `[]` as the cell takes the record out.
+
+### Categories and single slots (`fnc_blockMode`, `fnc_slotOf`)
+
+A compartment may carry two attributes (section 2, `grid=`): the categories it **accepts** and whether it is a **single slot**. They are the
+fifth and sixth element of its block, `[cols, rows, holes, pos, accepts, single]`; a block without them has four, and `count _x > 4`
+is the test for "this container has any" (`fnc_getLayout` and the others make none of the checks below for the rest, so an ordinary
+container costs nothing). `fnc_blocksFor` carries them through; the patterns and the older tables make none.
+
+`fnc_blockMode [block, groups]` -> -1 the compartment refuses the item (it accepts a list, and none of the item's `groups` is in it), 0 it
+takes it like any compartment, 1 it takes it as a single slot. It is the one question every place that looks for a spot asks, so an item
+never lands in a compartment that refuses it, on any machine:
+
+- **The layout** (`fnc_getLayout`, a pure function of places, entries and rules): a record, kin or first-fit spot in a refusing
+  compartment is passed over - a stale record (the rules changed, a script put the item there) is not honoured, the entry lies in
+  another compartment or is overflow, and `fnc_normalize` writes that picture. So `fnc_hasSpace`, `fnc_hasRoom`, the arsenals' overflow
+  checks (`getLayout` for the unit's containers), the migration of surplus and Strict mode's return from the hidden holder
+  (which only add to the cargo and let the layout place) follow without a line of their own.
+- **Ops that name a spot**: `findSpots` (op put, move, split) passes refusing compartments over - a cell asked for in one is not free,
+  the item goes to the first fit or, for a split, the nearest spot, and `elsewhere` says so; `opPlaceMany` (op place, swap, the plan's
+  moves in the same holder) answers `"WrongKind"` for a cell in a refusing compartment; `fnc_plan` (quick move, Take all, Put all,
+  the migration) skips them per target. `hasSpace` and `findSpots` agree because both go through the layout.
+- **Single slots.** A single slot holds one tile - a stack counts as one - and the tile takes the whole compartment: `fnc_slotOf [block]`
+  -> `[0, 0, cols, rows, holes]`. The layout writes the entry with that box, `rotated` false and `"single"` true, and its record is
+  `[key, 0, 0, cols, rows, block, 0]` (a record in a slot is kept for any entry the slot accepts, its own size aside); the slot is
+  free only while none of its cells is taken, so the ordinary cell logic keeps a second item out. `findSpots` returns a seventh
+  element, the spot's holes, and a single slot as `[0, 0, block, cols, rows, 0, holes]`; `opPlaceMany` replaces any cell asked for in a
+  slot by the slot's. An item lifted out lies at its own size again: the window reads `"single"` of the entry (`fnc_startDrag`) and
+  a cell without a size is the item's own (`opPlaceMany`). The slot's box is a plain rectangle (or a shape with holes), so every
+  existing cell test, the plan's and the window's, treats it like a tile of that size.
+
+A kit's grid (`compat_efak`) honours both wherever it is laid out (room checks, first fit) but not when a tile is dragged within
+the kit (`fnc_opKitPlace` asks cells only): the next layout puts such a tile back where it is accepted.
 
 ### Room (`fnc_hasSpace`, `fnc_hasRoom`, `fnc_plan`)
 
@@ -1251,9 +1304,10 @@ window's glass (the `panel` colour) with the theme's `button` film over it from 
 panel colour one step lighter, as the buttons in the columns, and one step lighter again under the mouse (`buttonHover` at 0.75 of its alpha, at least 0.04 over the
 surface) - dark like the inventory, no bright grey. A button that is on (Mia, 0.5.5) has the same surface and shows it by the `accent` ink on its icon and a thin
 accent line (2 pixels) inside its bottom edge, made before the button so its hit area lies over it; the camera draws the line only while it is on (the toggle
-rebuilds), the speaker's is kept in uiNamespace `einv_gui_soundLine` and shown by `fnc_updateSoundButton`. The search field's frame has the plain
-surface under the field's own film. The speaker's controls and its rectangle are kept in uiNamespace `einv_gui_soundButton` and `einv_gui_soundAnchor`
-(the dropdown opens under and right-aligned to it); `fnc_updateSoundButton` recolours it in place (accent icon and line while the dropdown is open, muted icon, dimmed, while nothing is audible).
+rebuilds), the speaker's is kept in uiNamespace `einv_gui_soundLine` and shown by `fnc_updateSoundButton`. The search field is on the same
+footing (Mia, 0.5.7: it was lighter): the glass `_fnc_place` lays down and ONE film, `headerStyle`'s surface, which `fnc_drawFilter` takes as its 5th argument -
+no frame of its own under the field's. The speaker's controls and its rectangle are kept in uiNamespace `einv_gui_soundButton` and `einv_gui_soundAnchor`
+(the dropdown opens under it and right-aligned to the window's right edge, `CONTENT_X + CONTENT_W`); `fnc_updateSoundButton` recolours it in place (accent icon and line while the dropdown is open, muted icon, dimmed, while nothing is audible).
 
 **`fnc_getCell`** -> `[cellW, cellH]`, whole pixels, the same across and down: `round(((UNIT * 1.45) min UNSQUARE(safezoneW / 52))
 / pixelH)`. Every grid uses it. 52 cells across is what two columns of `STORAGE_COLS` 10 cells with their boxes (13 cells each),
@@ -1356,7 +1410,7 @@ inventory-only feature asks it: nearby boxes, selecting, the band, group drags, 
 | `fold` | `[container]` | BOOL, true = the window keeps its folds itself (`einv_gui_collapsed` is left alone, the window is drawn again) | `fnc_toggleSection` |
 | `signature` | `[]` | `[holder, ...]` - holders the window draws itself, beside the unit's sections; their cargo and places are part of the "storage" signature, so a change there (a move inside the Arsenal's staging space) builds the window | `fnc_getSignature` |
 | `menu` | `[display]` | choices - replace the default, `[]` = no menu, nil = the default | `fnc_contextMenu` |
-| `filter` | `[]` | nothing - after the tiles were faded for the search | `fnc_applyFilter` |
+| `filter` | `[]` | nothing - after the tiles were dimmed and hidden for the search and the categories | `fnc_applyFilter` |
 | `tileBadge` | `[class]` | a texture or `""` - a mark `SQUARE(UNIT * 0.42)` in a tile's top left corner | `fnc_createTile`, `fnc_drawSlot` |
 | `hint` | `[kind "tile" / "slot" / "none", class, record]` | parts `[[text, colourKey], ...]` after the gui's own; for `"none"` the whole idle hint | `fnc_updateHover` |
 | `inspectRows` | `[class, count, ammo, attachments]` | rows `[label, text]` or `[label, fraction, text]` before the Mod row | `fnc_drawInspect` |
@@ -1412,9 +1466,10 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   (a group never stands empty, as the wizard's General page) and sets the scroll at once from `keepPixels`; the frame-later put-back (`scrollRestore`) stays. A column that moved, was named otherwise or
   was not drawn again has its old controls deleted. Before this a fold or unfold showed the column at its top for a frame (Mia, 0.5.3).
 - **Section** (`fnc_drawSection`): a caption tab (folds it, `fnc_toggleSection`; the contents' weight on the right,
-  `fnc_loadText`, only told), a box with the container's picture and short name, and the grid. Beside the tab, as high as it and in the
-  caption's size (0.46 UNIT for the tab, the tab `CAPTION_LINE` 0.8 UNIT high; the buttons 0.6 UNIT high and 0.42 UNIT of text, in the middle of the line with a gap above
-  the container's top edge, each hit area the drawn button and two pixels), centred buttons: "Take all" (loot) or "Put all in" (own) (`fnc_takeAll`, `fnc_putAll`,
+  `fnc_loadText`, only told), a box with the container's picture and short name, and the grid. **The tab is one of the line's chips** (Mia, 0.5.7: its edges were sharp): a pill as high as the buttons (0.6 UNIT, in the middle of the
+  `CAPTION_LINE` 0.8 UNIT line with a gap above the container's top edge), the theme's radius at most half its height, the same 0.42 UNIT of text set the way a centred button
+  sets it (`TEXT_MID`), the fold arrow in its left end; its hit area the drawn pill and two pixels; what the search tints on a folded box is its pieces, painted as a
+  surface (`fnc_paintSurface`). The fold line of a tall box (`Rows_Show`), the tab of a locked box and the tab of ACE cargo's cards are round too. Beside the tab, the buttons, centred: "Take all" (loot) or "Put all in" (own) (`fnc_takeAll`, `fnc_putAll`,
   `fnc_putAllTarget`: from the contents, not from what is drawn; what is not searched stays) and "Sort: Name" with
   `icon_sort_desc_ca` (`fnc_sortHolder [holder, root, step]` - the storage's op "sort"; the only way to sort, the context menu has no
   row for it; on every container section of the inventory the player may change, also an empty one, never on a section that only
@@ -1442,25 +1497,29 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `statusRect`, `statusSize` and `statusCover` into the section's info (`sectionInfo`) and draws nothing. `fnc_updateStatus` (the end of every `fnc_drawQueue`, so of
   every build, redraw and settle, and `fnc_revealTile`, `fnc_stopStatus`, `fnc_animateStatus` asking) makes, keeps and deletes the chips: for each info it works out
   what the box does - `hands` (a record in `GVAR(handBoxes)`, which comes first) or `search` (entries of `GVAR(searchQueue)` for its container; stopped when it is in
-  `GVAR(searchPaused)`) - and leaves a chip alone whose `signature` ([kind, stopped]) and controls are still right. A chip is a panel in the tab's colour, a ring
-  (`search_ring_32` as the track, `search_ring_08` over it as the arc, `STATUS_ARC`), a label and a button: a red cross as wide as the chip is high, or the word "Search" on
-  an accent button for a stopped box; one hit box, the button and two pixels, that lights it under the mouse and runs `fnc_stopStatus` a frame later (hands: `fnc_cancelQueued
+  `GVAR(searchPaused)`) - and leaves a chip alone whose `signature` ([kind, stopped]) and controls are still right. A chip is a pill (the theme's radius, at most half its height, like the buttons beside it) in the tab's colour, a ring
+  (`search_ring_32` as the track, `search_ring_08` over it as the arc, `STATUS_ARC`), a label and a button: a red round button (a circle with the cross; the word "Search" on an accent pill for a stopped box) set in from the chip's edge on three sides by 0.12 of its
+  height, so the chip's round end shows round it; one hit box, that button and two pixels, that lights it under the mouse and runs `fnc_stopStatus` a frame later (hands: `fnc_cancelQueued
   [0, box]`; search: stop or resume). The words are sized for their longest (the count at its largest, "99:59") so the chip does not move; where even that does not fit
   the label says the count or the time alone. `fnc_onFrame` calls `fnc_animateStatus` while `GVAR(statusLive)` (the caption lines hold a chip): one `ctrlSetAngle` on each
   ring (`STATUS_SPIN_SPEED` degrees a second) and a `ctrlSetText` only when the words changed - the hands' count when an entry finished, the search's time once a second;
-  a chip whose box has nothing left asks `fnc_updateStatus`, which deletes it and shows the weight again. **The strip** (`fnc_drawGroupStrip`) is a slim column of eight
+  a chip whose box has nothing left asks `fnc_updateStatus`, which deletes it and shows the weight again. **The strip** (`fnc_drawGroupStrip`) is one rounded bar (`slotCaptionBg`, the theme's radius at most half its width, `SQUARE(UNIT)` wide) holding a column of eight
   white pictures between a loot box's picture and its grid - All (`slot_cat_all_ca`), weapons (`slot_rifle_ca`), ammunition (`slot_magazine_ca`), gear (`slot_vest_ca`), medical
   (`slot_cat_medical_ca`), food and drink (`slot_cat_food_ca`), tools and electronics (`slot_radio_ca`), other (`slot_cat_misc_ca`), the four `slot_cat_*` drawn by
   `tools/generate_ui_textures.py` (`--only name,name` makes just those). Only for a section in the loot column with a container and a grid of its own (not the player's
   own containers, not a kit's grid, not a locked or placeholder section), and where the column can spare `strip + gap` beyond the grid: the strip takes its room from the
   box's picture (which gives way in half cells) and never from the grid; there is no dropdown where it does not fit, the strip is left out. Its height is the box's or the
-  grid's, a pitch of 0.62 to 0.9 UNIT per picture (the section grows when that is more). Each picture has a field, the picture and a hit box (tooltip: the category's name,
-  hover lights the picture, a click runs `fnc_setGroup` a frame later); the chosen one is painted in the accent colour on the soft accent field (`fnc_paintGroupStrip`).
-  `fnc_setGroup [container, group]` toggles (the chosen group again, or "all", is none), stores it in `GVAR(groupFilters)` and calls `fnc_applyFilter [true]`.
-  `fnc_itemGroup [class]` (cached per class in uiNamespace `einv_gui_itemGroups`) is the first that applies of: medical (category medical or a kit) -> weapon (rifle, handgun,
-  launcher, muzzle, optic, rail, bipod) -> ammo (magazine, grenade) -> gear (uniform, vest, backpack, headgear, nvg, goggles, binocular) -> food (ACE field rations'
-  `acex_field_rations_hungerSatiated` / `thirstQuenched` in config, or a class name that says ration, canteen, food, drink ...) -> tool (map, gps, radio, compass, watch,
-  `fnc_soundFamily` "device", or a name that says wire cutter, cable tie, flashlight, defusal kit ...) -> other. A tile not searched yet matches no category.
+  grid's, a pitch of `STRIP_ICON_MIN` 0.75 to `STRIP_ICON` 1.1 UNIT per picture (the section grows when that is more), the pictures 0.78 of the pitch or of the width at most. Each picture has a
+  field - exactly its share of the bar, as wide as the bar, the first with the bar's round top corners and the last with its bottom ones (`fnc_uiSurface` with the corner mask, so a lit field
+  ends where the bar ends: Mia, 0.5.7, the fields were a hair smaller than the element behind them) -, the picture and a hit box (tooltip: the category's name, hover lights the field a
+  little, a click runs `fnc_setGroup` a frame later); the chosen one is a lighter field (`[1,1,1,0.15]`) with a white picture, no accent colour (`fnc_paintGroupStrip`).
+  `fnc_setGroup [container, group]` toggles (the chosen group again, or "all", is none), stores it in `GVAR(groupFilters)` and calls `fnc_applyFilter [true]`. **A category hides, the
+  search field dims** (Mia, 0.5.7: "only items of this kind"): `fnc_applyFilter` sets the tile's `filteredOut` and hides the controls of every tile that is not of the chosen group (a tile not
+  searched yet is of none), makes or shows the squares of the cells such a tile lies on (grid `filterCells`; `fnc_drawCells` makes none under a tile) and hides them again under a tile that is back,
+  so the box reads as a grid with only that kind in it; `fnc_updateHover` does not find a `filteredOut` tile (its cells are found as free cells), though the cells stay taken in the layout:
+  a drop there is refused as on any tile. The state of a tile is kept on its first control (`einv_gui_fx`: 0 shown, 1 dimmed, 2 hidden, none = made new): controls made new take their state at
+  once, with no fade (a page turned to in a filtered box showed every tile at full strength for the tenth of a second the fade took), the typing and the strip's own passes (`jump`) fade as before.
+  `fnc_itemGroup [class]` is the first of the item's "groups" (`einv_items_fnc_getInfo`: what `cats=` / `einv_cat` say, else the built-in mapping `einv_items_fnc_defaultGroup`, which used to live here; section 2) and `fnc_matchesGroup [class, group]` is true when the chosen category is any of them - an item in several categories shows under each; nothing is kept here, since the rules can move an item and `getInfo` answers from its own store until they change. The built-in mapping is the first that applies of: medical (category medical or a kit) -> weapon (rifle, handgun, launcher, muzzle, optic, rail, bipod) -> grenade (the kind grenade, or a magazine whose ammo simulates a mine or a directional bomb) -> ammo (every other magazine) -> gear (uniform, vest, backpack, headgear, nvg, goggles, binocular) -> food (ACE field rations' `acex_field_rations_hungerSatiated` / `thirstQuenched` in config, or a class name that says ration, canteen, food, drink ...) -> tool (map, gps, radio, compass, watch, an ACRE or TFAR radio or `einv_sound = "device"`, or a name that says wire cutter, cable tie, flashlight, defusal kit ...) -> other. A tile not searched yet matches no category. The strip itself still lists the seven categories it had: `grenade` is an eighth that has a string (`STR_einv_gui_Group_Grenade`) and a texture (`slot_grenade_ca`) but no button yet.
 - **Compartments.** `fnc_flowCompartments [layout, cell]` -> `[places, height, width]`, drawn by `fnc_drawCompartments [display,
   parent, [left, top], section, layout, places, theme, window]`. Flowed compartments (`pos` `[]`) lie side by side as far as
   `STORAGE_COLS` cells reach, then on the next line, `COMPARTMENT_GAP` (0.22 cell, pixel-rounded) between blocks. A compartment
@@ -1551,7 +1610,9 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `fnc_findTile` and `fnc_selectionTiles`/`fnc_selectSection`/`fnc_select` (selecting works on the shown page), and drawn by `fnc_createTile` when their page
   comes (`fnc_drawTiles`; the same HashMap, put back where it stood in the grid's list - `fnc_showPage` walks the list **by number**, never over a copy of it: a tile made from a
   copy would carry the controls and the box while the grid's own tile stayed bare, and the search's fading, the hover outline, the selection and the queue would not find
-  them, Mia 0.5.3). The pager is `fnc_drawPageBar`: a bar `PAGE_BAR_H` 1.15 UNIT tall under
+  them, Mia 0.5.3). **With a category chosen** the pages follow what shows: `fnc_pageStep [grid, from, step, relative]` (used by `fnc_pageSoon` and `fnc_turnPage`) steps over the pages that hold a match
+(`fnc_pageCounts`) only, an absolute page is the first match from there on, and `fnc_drawPageBar` counts only those pages ("Page 1 / 2"), switches an arrow off when none lies that way and says
+`Page_None` when the box has no match at all; the field of the search alone leaves the pages as they are. The pager is `fnc_drawPageBar`: a bar `PAGE_BAR_H` 1.15 UNIT tall under
   the box, **nothing lies over the tiles** (the fade strips and the chip over the page's edge of 0.5.0 are gone: they covered the first or last row's tiles).
   It is one control: a track with a round arrow button at each end (0.5.5: nearly the bar's height, 1.5 times as wide as high; a surface of its own, dimmed and inert when there is no page that way, a second surface over it
   that fades in under the mouse - `ctrlSetFade` 0.08 s in, 0.2 s out - and the search's mark at the button's corner) and, between them, one line that says where it stands and
@@ -1597,6 +1658,21 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `einv_gui_dragRot` apart from `einv_gui_dragSize`, a quarter clockwise and back, the item staying held by the same cell). Column
   and window edges scroll while dragging. Nothing is lifted that could go nowhere (a living person's item the player may not
   touch).
+- **Categories, single slots and hidden tiles in a drag** (`fnc_updateDrag`, `fnc_swapPlan`, `fnc_endDrag`, `fnc_startDrag`, `fnc_groupMode`).
+  A grid carries its compartment's `"accepts"`, `"single"` and `"holes"` (`fnc_drawCompartments`). Over a compartment that accepts only
+  other categories than the item's `groups` the footprint is red, the reason is `"WrongKind"` and the hint says "Only magazines here"
+  (`Hint_Only` with `STR_einv_gui_Only_<category>`; let go, `fnc_flashHint` says "This compartment takes other things"). Over a single
+  slot the footprint is the slot, whatever the item's size or turn and wherever in it the mouse is (col 0, row 0, the compartment's
+  columns and rows, its holes), and a taken slot is the same swap or merge candidate as any tile (`fnc_swapPlan` takes the slot as the
+  footprint, sends the other tile to the cell the dragged one came from at its own size, or whole into a single slot there, and
+  refuses with `"WrongKind"` when that compartment would not take it); `fnc_endDrag` sends the slot's cell. A tile lifted out of a slot
+  is held at its own size (`fnc_startDrag` reads the entry's `"single"`). A group is never "kept" in a restricted compartment
+  (`fnc_groupMode`): it is packed by the plan, which asks every compartment. `fnc_roomFor`'s quick look at free cells gives way to
+  `hasSpace` for a container with such compartments. **A tile hidden by the chosen category or the search field** (`"filteredOut"`, set by
+  `fnc_applyFilter`) is no tile to the drag: its cells are not "taken" and not under the mouse for a swap or a merge (`"cells|n"` keeps them
+  as a third list); a footprint on them goes to the first free spot of the box from elsewhere - `place` false, the footprint is the
+  compartment at half strength, the hint "Goes to the first free spot of this box - not onto a hidden item" - and is refused within one
+  box. Take all in a box with a category or the search field active plans only the tiles that match (`fnc_takeAll`).
 - **What a lift costs.** It makes few controls and reads little: the green highlight of each slot that takes the item (some fifteen
   controls with round corners) is made once per build by `fnc_glowSlot` into uiNamespace `einv_gui_glowCache`, ahead of time by
   `fnc_warmTargets` (one of the player's own slots per idle frame from `fnc_onFrame`, `glowNext` remembers how far), and a drag only
@@ -1806,7 +1882,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   the rows kept on it) again when something live was made after it; `fnc_updateHover` asks after it made a ring on the display and
   `fnc_drawSelection` after its frames. It does nothing while a menu is open or an item is dragged (the name is hidden then), and it
   never uses the focus: the engine draws a focused control over everything, which is why the focus rule of `fnc_onFrame` sends
-  it back. The **search field** (`fnc_drawFilter`, `fnc_applyFilter`) fades non-matching tiles.
+  it back. The **search field** (`fnc_drawFilter`, `fnc_applyFilter`) dims non-matching tiles; a category chosen at a loot box's side hides them (see "Section bars").
 - **The weight card** reads `einv_weight_fnc_getLoad` (ACE's total, the rules' weights and EFAK's kits included), the limits and
   the tier. The bar has no tick marks or zone strip; it fills by load over the Critical limit. The fill, the tier's words and the
   preview take **`fnc_weightColor [unit, load, theme]`**: `text2` in Light, `accent` in Heavy, `loss` in Overloaded and Critical,
@@ -1834,12 +1910,12 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   of that box (`fnc_stopStatus`: its container is in `GVAR(searchPaused)`, which `fnc_animateSearch` passes over; the window's own state, empty for every window);
   a stopped box says "Stopped 0:07" with a still ring and a button "Search" that takes the container out of the list again. A hidden tile of a page not shown has
   no controls: `fnc_findTile` does not find it, `fnc_revealTile` only takes its hatching from the data. **The search field** (`fnc_drawFilter`,
-  `fnc_applyFilter [jump]`) fades the tiles that do not match; it looks at every page of a
+  `fnc_applyFilter [jump]`) dims the tiles that do not match; it looks at every page of a
   paged box (`fnc_pageCounts` reads all the grid's tiles): typed in or emptied (`jump` true) it turns each paged box to its first page with a match when the page it shows has none
   (`fnc_setPage` with `bySearch`, remembered in `GVAR(pagesMoved)`; those pages go back box by box once nothing filters the box, but not one the player turned since), and draws every bar again - the arrows'
   marks count the matches before and after the page, the bar's text counts the matches on other pages. **The categories at the side of a loot box** work
   through the same function: `GVAR(groupFilters)` (`[[container, group], ...]`, one pair per box that has a category chosen, empty for every window) is read by
-  `fnc_applyFilter` per grid (`fnc_boxGroup`) - a tile has to match the field (`fnc_matchesFilter`) and the box's category (`fnc_matchesGroup`) -, by
+  `fnc_applyFilter` per grid (`fnc_boxGroup`) - a tile not of the box's category (`fnc_matchesGroup`) is hidden, one the field does not find (`fnc_matchesFilter`) is dimmed (0.5.7) -, by
   `fnc_pageCounts` (the matches per page, so the arrows' marks and the jump to the first page with a match work for a category as they do for a word) and by the
   folded sections' tab tint. Every place that redid the fading when `GVAR(filter)` is not empty does so when a category is chosen too.
   `fnc_drawPageBar`'s words ("matches on other pages") go by the field **or** the box's category (0.5.7): with only a category chosen the bar says how many matches lie on the
@@ -1868,10 +1944,12 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   itself if the file cannot be found and the kind is not silenced). The dropdown is the context menu's machinery: a layer in `einv_gui_menu`, `einv_gui_menuRect`,
   `einv_gui_menuFor = ["sound", -1]` and `einv_gui_menuState = ["sound"]`, so Escape, a click or right press beside it, `fnc_build` and the
   `fnc_raiseMenu` of `fnc_onFrame`/`fnc_redrawTiles` (which makes it again from the current volumes) treat it as a menu, and `fnc_closeMenu` calls `fnc_soundSettle`
-  when it closes it. A click on the speaker while it is open lands on the layer's hit area and closes it. The card (0.5.5) is a small one: a shadow, a one-pixel border and the card inside it, darker than the panels (`0.015` grey, opaque) so it separates, right-aligned to the speaker's
-  rectangle `UNIT * 0.5` under it and never above the header's line; its rows are `UNIT * 0.95` high with a `UNIT * 0.55` font, and everything is neutral - white and grey checkboxes, tracks
+  when it closes it. A click on the speaker while it is open lands on the layer's hit area and closes it. The card (0.5.5) is a small one: a shadow, a one-pixel border and the card inside it, darker than the panels (`0.015` grey, opaque) so it separates, right-aligned to the window's right edge
+  (`CONTENT_X + CONTENT_W`, flush with the Close button: Mia, 0.5.7) `UNIT * 0.5` under the header and never above its line; it is `UNIT * 14` wide with one rhythm inside - `UNIT * 0.6` padding left and right,
+  `UNIT * 0.45` between the switch, the name, the slider and the percentage, the track ending at the knob's middle at either end, a row's hover film inset by half the padding and round -, its rows are `UNIT * 1` high with a `UNIT * 0.55` font, and everything is neutral - white and grey checkboxes, tracks
   (`[1,1,1,0.12]`) and fills, the accent is not used. Sliders are a track, a fill and a knob with a hit area (`einv_gui_soundRows` is the list of rows for `fnc_updateSoundMenu`); a left press
-  starts `fnc_soundSlide ["begin", ...]`, which adds `MouseMoving`, `MouseHolding` and `MouseButtonUp` to the display for the drag (the way `fnc_dragHandle` does) and plays
+  starts `fnc_soundSlide ["begin", ...]` (the mouse is read with `getMousePosition` there and at every move - 0.5.7 took it from the events' arguments, which were not in the space of the track's place, and gave only 0 and
+  100 %; the volume goes in steps of `SOUND_STEP` 0.05), which adds `MouseMoving`, `MouseHolding` and `MouseButtonUp` to the display for the drag (the way `fnc_dragHandle` does) and plays
   a sample of the kind when the button is let go. The profile variables `einv_gui_muted` (and `einv_gui_searchMuted` before it) are read once, only when no `einv_gui_soundMix`
   is saved: a muted speaker then starts with every kind off.
 - **Moving stops looting** (`einv_gui_moveToStop`): a movement key closes the window while it was opened on something or a search runs
@@ -2427,11 +2505,27 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   (Back to the default removes the class's own `use` with the rest). The tree view's edits write `class=X+ > use=...` like the other
   fields, so `kind=grenade` is one tree edit away. Export writes `einv_use = "backpack,vest";` (`fnc_configEntry`), Import maps
   `einv_use` to `use` (`fnc_configValues`), The change lists word it ("usable from the Vest, Backpack", `fnc_describeRule`).
+- **Category** (`fnc_drawCatRow`, the Items step, under Use from): a chip for each of the eight categories (`ITEM_GROUPS`), on for the
+  ones the class is in now (`info "groups"`: `cats=` / `einv_cat`, else the built-in one), wrapping onto a second line where they do
+  not fit; at least one stays on. A click goes into the working copy (`catsList`, in the order of `ITEM_GROUPS`), the editor is drawn
+  again, and a reset button appears while the list differs from the built-in one (`fnc_classDefault`). Apply writes `cats=` when it
+  differs from now, and takes the class's own `cats` away when the list is the built-in one again; the tree view writes
+  `class=X+ > cats=...`. Export writes `einv_cat = "medical,misc";` (`fnc_configEntry`), Import maps `einv_cat` to `cats`
+  (`fnc_configValues`), the change lists word it ("category: Medical, Misc", `fnc_describeRule`).
 - **Blocks mode** (`fnc_drawCellBlocks`): the switch "Paint | Blocks" (`einv_setup_cellMode`, 0/1, kept for the session). One
   small drawing per compartment (a click toggles a hole), width and height steppers for the picked one, Add and Remove; working
   copy `{blocks, picked}`; Apply writes the blocks joined by `+` (flow layout). A class drawn as a canvas gets a note that Blocks
   loses the positions. Switching converts the working copy: Paint -> Blocks takes the components in reading order without `pos`;
   Blocks -> Paint lays them out and colours them as loading does.
+- **Accepts and single slots in the Blocks way** (`fnc_drawCellAttrs`, `fnc_cellBlock`): under the tools row, two rows for the picked
+  compartment - "Accepts" with a chip for All and one for each category (a click on All takes the lock away, one on a category adds it
+  or takes it out, the last one out is All again) and "Single slot" with the chip "One item, any size". The working copy keeps a
+  compartment as `[cols, rows, holes]` while it takes anything and is no slot, `[cols, rows, holes, [], accepts, single]` once it
+  does (`fnc_cellBlock` is the one form, so copies compare equal and go to the preview and to `formatGrid` as they are); Apply writes
+  `grid=...:ammo+...`. Each compartment shows what it takes under its cells. The preview and the inventory draw a locked empty
+  compartment with its category's picture. The **Paint way keeps neither**: painted compartments are found again from colours, and
+  nothing ties an attribute to one of them, so a container that has any shows a note in Paint, and Apply there writes the cells without
+  them; switching Blocks to Paint drops them.
 - **Same as another class** (`fnc_drawSameAs`): a popover on the button (`fnc_popover`): a search over the index's containers
   minus itself, 8 to a page. A pick offers **Follow X** (writes `like=X` and removes the own `grid`, which would win over it) and
   **Copy cells of X** (X's `fnc_classBlocks` into a working copy in the current mode, `unlink` set when the class has `like=`, so
@@ -2740,6 +2834,12 @@ guard or carried variable in the storage's tables (section 3).
 
 ### Known limits
 
+- **Categories are per class, not per instance.** `cats=` and `einv_cat` put a class in categories; a compartment's `accepts` is by
+  category. An ACE item that two mods put in different categories is one item to the rules. A magazine of a grenade launcher is a
+  grenade only when its kind is (one round, light) or its ammo simulates a mine or a bomb - a heavy rocket is ammo. The strip of a loot
+  box has no button for `grenade` yet: such an item is found under All and, by its second category, wherever `cats=` puts it.
+- **A single slot holds one tile, not one item.** A stack in a slot is one tile with its count (`stack=` over 1 puts several grenades in a
+  slot); give grenades `stack=1` (the default preset does) for one grenade per loop.
 - **Use from containers is not a lock the engine knows.** The settings "Use items from the uniform / vest / backpack" are honoured by
   everything this mod draws or runs (the window, the hotbar), by the keyboard's reload key, by a reload from the action menu or a
   gamepad (taken back after the fact, only for a magazine whose container is known), and by the throw key when only closed grenades

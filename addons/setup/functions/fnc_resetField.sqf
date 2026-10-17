@@ -10,7 +10,7 @@
  * Arguments:
  * 0: Class <STRING>
  * 1: The step, "items" or "containers" <STRING>
- * 2: The fields to take away, as the rules write them: "footprint", "stack", "weight", "name", "use", "grid",
+ * 2: The fields to take away, as the rules write them: "footprint", "stack", "weight", "name", "use", "cats", "grid",
  *    "like" <ARRAY>
  * 3: For the class and everything built on it <BOOL> (default: false)
  *
@@ -46,7 +46,7 @@ if (_mode isEqualTo "containers") then {
                 if (!isNil "_value") then {
                     _fresh set [_x, _value];
                 };
-            } forEach ["stack", "weightText", "nameText", "iconPercent", "pictureText", "useList"];
+            } forEach ["stack", "weightText", "nameText", "iconPercent", "pictureText", "useList", "catsList"];
 
             _canvas = _fresh;
             GVAR(itemWork) set [_lc, _canvas];
@@ -54,10 +54,10 @@ if (_mode isEqualTo "containers") then {
 
         // Dropped, the field is what the draft says: the default once its rule is gone.
         {
-            private _key = ["stack", "weight", "name", "use"] find _x;
+            private _key = ["stack", "weight", "name", "use", "cats"] find _x;
 
             if (_key >= 0) then {
-                _canvas deleteAt (["stack", "weightText", "nameText", "useList"] select _key);
+                _canvas deleteAt (["stack", "weightText", "nameText", "useList", "catsList"] select _key);
             };
         } forEach _fields;
     };

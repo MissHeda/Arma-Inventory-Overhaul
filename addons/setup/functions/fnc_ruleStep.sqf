@@ -46,7 +46,7 @@ if ((_facts getOrDefault ["root", ""]) isEqualTo "") exitWith {["general", "", f
 private _kind = _facts getOrDefault ["kind", ""];
 private _container = (_kind in CONTAINER_KINDS) && {
     _kind in ["crate", "vehicle"] || {"grid" in _values} || {"like" in _values}
-    || {!("footprint" in _values) && {!("stack" in _values)} && {!("weight" in _values)} && {!("name" in _values)} && {!("use" in _values)}}
+    || {!("footprint" in _values) && {!("stack" in _values)} && {!("weight" in _values)} && {!("name" in _values)} && {!("use" in _values)} && {!("cats" in _values)}}
 };
 
 [["items", "containers"] select _container, _facts getOrDefault ["class", _name], _tree]

@@ -20,4 +20,4 @@
 
 params [["_grid", createHashMap, [createHashMap]], ["_step", 1, [0]]];
 
-[_grid, (_grid getOrDefault ["page", 0]) + _step] call FUNC(setPage)
+[_grid, [_grid, _grid getOrDefault ["page", 0], _step] call FUNC(pageStep)] call FUNC(setPage)

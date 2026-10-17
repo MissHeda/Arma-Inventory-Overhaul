@@ -176,7 +176,8 @@ private _fnc_panel = {
 };
 
 private _fnc_compartment = {
-    params ["_index", "_cols", "_rows", "_place", "_isOverflow", "_overflowIndex", ["_holes", []], ["_pos", []], ["_paged", []]];
+    params ["_index", "_cols", "_rows", "_place", "_isOverflow", "_overflowIndex", ["_holes", []], ["_pos", []], ["_paged", []], ["_extra", []]];
+    _extra params [["_accepts", []], ["_single", false]];
     _place params ["_dx", "_dy", ["_colX", []], ["_rowY", []]];
 
     private _x0 = _gridX + _dx;
@@ -195,6 +196,28 @@ private _fnc_compartment = {
 
     if (_paged isNotEqualTo []) then {
         _pageWindow = (_paged select 1) select (_paged select 0);
+    };
+
+    // A compartment that takes only some categories shows the first one's picture faintly while nothing lies in it, and a single
+    // slot holds one tile whatever its size (einv_storage_fnc_blockMode): both are behind the tiles, which come after.
+    if (_accepts isNotEqualTo [] && {!_isOverflow} && {_paged isEqualTo []}) then {
+        private _lying = _placed findIf {!(_x getOrDefault ["overflow", false]) && {(_x getOrDefault ["block", -1]) == _index}};
+
+        if (_lying < 0) then {
+            private _texture = [_accepts select 0] call FUNC(groupTexture);
+            private _width = ((_colX param [_cols - 1, (_cols - 1) * _cellW]) + _cellW) / pixelW;
+            private _height = ((_rowY param [_rows - 1, (_rows - 1) * _cellH]) + _cellH) / pixelH;
+            private _side = (_width min _height) * 0.6;
+            private _alpha = [0.12, 0.2] select _single;
+
+            if (_texture isNotEqualTo "") then {
+                [
+                    _display, _parent,
+                    [_x0 + (_width - _side) / 2 * pixelW, _y0 + (_height - _side) / 2 * pixelH, _side * pixelW, _side * pixelH],
+                    _texture, [1, 1, 1, _alpha]
+                ] call FUNC(uiPicture);
+            };
+        };
     };
 
     private _grid = [_display, _parent, [_x0, _y0], _rows, _theme, _id, _cols, _holes, [_colX, _rowY], _pageWindow] call FUNC(createGrid);
@@ -218,6 +241,8 @@ private _fnc_compartment = {
     _grid set ["root", _root];
     _grid set ["unit", _section getOrDefault ["unit", objNull]];
     _grid set ["block", _index];
+    _grid set ["accepts", _accepts];
+    _grid set ["single", _single];
     _grid set ["pos", _pos];
     _grid set ["overflow", _isOverflow];
     _grid set ["overflowIndex", _overflowIndex];
@@ -275,7 +300,7 @@ private _fnc_compartment = {
 
     if ((_places param [_forEachIndex, []]) isEqualTo []) then {continue};
 
-    [_forEachIndex, _cols, _rows, _places select _forEachIndex, false, -1, _holes, _pos, _paging param [_forEachIndex, []]] call _fnc_compartment;
+    [_forEachIndex, _cols, _rows, _places select _forEachIndex, false, -1, _holes, _pos, _paging param [_forEachIndex, []], _x select [4]] call _fnc_compartment;
 } forEach _blocks;
 
 {

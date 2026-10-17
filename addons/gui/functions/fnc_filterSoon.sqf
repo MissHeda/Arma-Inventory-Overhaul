@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Fades the tiles by the search field and the categories again (fnc_applyFilter, turning the paged boxes to what it found)
+ * Fades and hides the tiles by the search field and the categories again (fnc_applyFilter, turning the paged boxes to what it found)
  * for a change that came from a keystroke or a click on the strip of categories - not once per key or click: what is typed
  * (GVAR(filter)) and what is chosen (GVAR(groupFilters)) are already set by the caller; the tiles follow once a
  * COALESCE_TYPING after the last key, and a category click once per rest (fnc_coalesce, key "filter"). A box that

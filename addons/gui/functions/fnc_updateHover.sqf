@@ -120,6 +120,11 @@ if (_mouse isNotEqualTo [] && {_layer isNotEqualTo "inspect"}) then {
         private _grid = _grids select _gridIndex;
         private _tileIndex = [_grid, _cell] call FUNC(tileAt);
 
+        // A tile that a category hides (fnc_applyFilter) is not there for the mouse: its cells look empty, so they are found as cells.
+        if (_tileIndex >= 0 && {((_grid get "tiles") select _tileIndex) getOrDefault ["filteredOut", false]}) then {
+            _tileIndex = -1;
+        };
+
         // A free cell of a grid that holds things is found too, to get its outline; a grid that only shows
         // (a list, the overflow row) has no free cell to point at.
         if (_tileIndex >= 0) then {

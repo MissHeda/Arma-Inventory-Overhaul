@@ -59,7 +59,7 @@
  *   "warnings"    - everything left out or cut down <ARRAY of STRING>
  * A rule's values: "like" the class in lowercase <STRING>, "footprint" [w, h, holes] or "mass", "stack"
  * <NUMBER>, "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING>, "icon" [scale, across,
- * down] (fnc_parseIcon), "picture" <STRING> (fnc_parsePicture), "use" [containers] (fnc_parseUse). A rule with like=
+ * down] (fnc_parseIcon), "picture" <STRING> (fnc_parsePicture), "use" [containers] (fnc_parseUse), "cats" [categories] (fnc_parseGroups). A rule with like=
  * counts in byKind as setting every one of LIKE_FIELDS, which fnc_resolve takes from that class.
  *
  * Example:

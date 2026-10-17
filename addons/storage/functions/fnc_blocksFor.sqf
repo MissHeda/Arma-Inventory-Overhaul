@@ -13,8 +13,8 @@
  *   ["cells", N]             - N cells, the same way
  *   ["percent", P]           - P % of what the load gives
  *   ["pattern", name, N]     - a pattern by name; N cells, or from the load when N is -1
- *   ["blocks", [[c, r, holes, pos], ..]] - the compartments exactly; holes and pos may be left out
- *                            for none
+ *   ["blocks", [[c, r, holes, pos, accepts, single], ..]] - the compartments exactly; holes and pos may be left out
+ *                            for none; accepts (categories, [] for all) and single (a slot of one item of any size) too
  *
  * The patterns, and which a kind takes when none is named:
  *   uniform  - block: one compartment UNIFORM_COLS wide, as many rows as the load asks for, UNIFORM_ROWS_MIN to
@@ -67,9 +67,19 @@ params [
 _spec params [["_mode", "auto", [""]]];
 
 // Compartments given exactly - a copy, the spec is shared. The older table and einv_grids[] give
-// rectangles as [cols, rows]: everyone reads four, and whoever only wants three still finds them first.
+// rectangles as [cols, rows]: everyone reads four, and whoever only wants three still finds them first. A
+// compartment that accepts only some categories or is a single slot (grid=1x1:grenade:one) has two more, its
+// accepts and single: they are carried on as they are, and only on those.
 if (_mode isEqualTo "blocks") exitWith {
-    (_spec select 1) apply {[_x select 0, _x select 1, +(_x param [2, []]), +(_x param [3, []])]}
+    (_spec select 1) apply {
+        private _block = [_x select 0, _x select 1, +(_x param [2, []]), +(_x param [3, []])];
+
+        if (count _x > 4) then {
+            _block append [+(_x param [4, []]), _x param [5, false]];
+        };
+
+        _block
+    }
 };
 
 if (_cell <= 0) then {

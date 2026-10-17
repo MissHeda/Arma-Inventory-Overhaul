@@ -10,7 +10,8 @@
  *   - Under it every compartment as a small drawing of its own, its number and size over it: a click on
  *     a cell makes it a hole - a place the compartment does not have - or a cell again, and picks that
  *     compartment; a click on the caption only picks it. The picked one is ringed in the accent.
- * Never more places than MAX_CELLS in all, nor more compartments than MAX_BLOCKS.
+ * Under the tools of the picked compartment its attributes are set (fnc_drawCellAttrs): the categories it accepts and whether it is a
+ * single slot - drawn under its cells as text. Never more places than MAX_CELLS in all, nor more compartments than MAX_BLOCKS.
  *
  * The working copy (GVAR(cellWork), lowercase class -> "blocks", "picked") is made by the first change,
  * which draws the editor again; a later click on a cell of the picked compartment changes only that cell,
@@ -102,6 +103,8 @@ if (_editable) then {
 
         (_blocks select _block) params ["_cols", "_rows", "_holes"];
 
+        private _was = _blocks select _block;
+
         private _newCols = [_cols, _value] select (_axis == 0);
         private _newRows = [_rows, _value] select (_axis == 1);
         private _kept = [];
@@ -115,7 +118,7 @@ if (_editable) then {
             };
         } forEach _holes;
 
-        _blocks set [_block, [_newCols, _newRows, _kept]];
+        _blocks set [_block, [[_newCols, _newRows, _kept], _was param [4, []], _was param [5, false]] call FUNC(cellBlock)];
         _work set ["picked", _block];
 
         [] call FUNC(drawCellEditor);
@@ -228,6 +231,7 @@ private _toggle = {
 {
     _x params ["_cols", "_rows", "_holes"];
 
+    private _block = _x;
     private _blockIndex = _forEachIndex;
     private _blockW = (_cols * _cellW) max SQUARE(UNIT * 3);
     private _isPicked = _editable && {_blockIndex == _picked};
@@ -275,8 +279,22 @@ private _toggle = {
         [_display, _area, [_flowX - pixelW, _gridY - pixelH, _cols * _cellW + pixelW, _rows * _cellH + pixelH], _accent, 0] call EFUNC(gui,uiRing);
     };
 
+    // What it takes, under the cells: its categories and a single slot, nothing for a compartment that takes anything.
+    private _attrs = ((_x param [4, []]) apply {localize format ["STR_einv_setup_Cat_%1", _x]}) joinString "/";
+
+    if (_x param [5, false]) then {
+        _attrs = [_attrs + " · " + LLSTRING(Cont_SingleShort), LLSTRING(Cont_SingleShort)] select (_attrs isEqualTo "");
+    };
+
+    if (_attrs isNotEqualTo "") then {
+        [
+            _display, _area, [_flowX, _gridY + _rows * _cellH, _blockW, _captionH],
+            [_attrs, _blockW, _font, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL, _accent, _font, 0
+        ] call EFUNC(gui,uiLabel);
+    };
+
     _flowX = _flowX + _blockW + SQUARE(UNIT * 0.7);
-    _lineH = _lineH max (_captionH + _rows * _cellH);
+    _lineH = _lineH max (_captionH + _rows * _cellH + ([0, _captionH] select (_attrs isNotEqualTo "")));
 } forEach _shown;
 
 _area

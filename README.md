@@ -130,6 +130,7 @@ their load. A text that names a preset of an older version (`base=realism`, `wei
   class CfgWeapons { class My_Bandage { einv_icon = "1.4@0.1,-0.05"; }; };  // icon=, the picture 1.4 times as large, moved a tenth right and a twentieth up
   class CfgWeapons { class My_Bandage { einv_picture = "my_mod\ui\bandage_ca.paa"; }; };  // picture=, shown instead of the config picture
   class CfgWeapons { class My_Bandage { einv_use = "backpack,vest"; }; };  // use=, usable from these containers even where a setting closes them (below)
+  class CfgWeapons { class My_Bandage { einv_cat = "medical,misc"; }; };  // cats=, the categories it is in instead of the built-in one (below)
   ```
   `einv_size` is `size=` (`"2x1"`, a mask like `"xx/x-"`, `"mass"`), `einv_stack` is `stack=` (a number), `einv_grid` is
   `grid=` (containers: uniform, vest, backpack, crate, vehicle, kit), `einv_weight` is `weight=` in **kilograms** (not config mass)
@@ -179,6 +180,23 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   Enhanced First Aid Kits open. Each player moves the bar in Arma's layout editor and chooses when it shows.
   `[0, "ACE_elasticBandage"] call einv_hotbar_fnc_bind;` and `[0] call einv_hotbar_fnc_use;` drive it from
   scripts.
+- **Categories, locked compartments and single slots:** every item is in one or more categories - weapon, ammo (magazines), grenade
+  (throwables and explosives), gear, medical, food, tool, misc - by a built-in mapping, which a rule or a mod can change: the rule
+  value `cats=` (`class=ACE_fieldDressing > cats=medical+misc`) and the config key `einv_cat = "medical,misc";` (the wizard's Items
+  step has a Category row of chips; the key is `cats=` because `cat=` is the condition on a tile's colour). The strip at the side of a
+  loot box shows an item under each of its categories. A container can lock a compartment to categories: after a compartment's colon
+  `grid=` takes a list joined with `|`, and the word `one` makes it a single slot that holds one item of any size.
+  ```
+  # a vest: two front pouches only for magazines, a loop for one grenade of any size, the back for anything
+  class CfgWeapons { class My_Vest { einv_grid = "1x2:ammo+1x2:ammo+1x1:grenade|one+4x2"; }; };
+  # a canvas: the side pockets a and c take medical items only
+  class CfgVehicles { class My_Pack { einv_grid = "abbbbbc/abbbbbc/abbbbbc:a=medical:c=medical"; }; };
+  ```
+  Nothing is locked by default. An item never lands in a compartment that refuses it - dragging, quick move, Take all, the arsenals
+  and scripts that add to the cargo all follow it; what the compartments refuse is put in another compartment or counts as no room.
+  Over a refusing compartment the drag footprint is red with "Only magazines here", an empty locked compartment shows a faint picture of
+  its category, and a single slot draws the item scaled into it and gives it its own size back when you take it out. The wizard's
+  Containers editor sets both per compartment on the Blocks way.
 - **Use from containers:** three server settings on the wizard's General page, under "Containers and use", "Use items from the uniform / vest /
   backpack" (`einv_storage_useUniform`, `useVest`, `useBackpack`), each Everything (the game's way, the default),
   Only whitelisted or Nothing. What lies in a limited container - magazines, grenades, medicine, food, kits, radios - is

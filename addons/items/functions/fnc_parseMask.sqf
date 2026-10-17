@@ -26,11 +26,12 @@
  * [] for a full rectangle; [-1, -1, why] when the text cannot be read; [0, 0, []] when a cut to the
  * limits left no cell. A canvas has a fourth element, its compartments [[cols, rows, holes, [x, y]],
  * ...] in reading order of each one's first cell, [x, y] its top left corner on the canvas; its own
- * holes are then the places with no cell of any of them <ARRAY>
+ * holes are then the places with no cell of any of them; a fifth element, the letters of those compartments in the same
+ * order ("a", "b", ...), which fnc_parseGrid needs to hand each its attributes <ARRAY>
  *
  * Example:
  * ["xx/x-"] call einv_items_fnc_parseMask; // [2, 2, [3]]
- * ["aaa/aba/aaa", 10, 40, true] call einv_items_fnc_parseMask; // [3, 3, [], [[3, 3, [4], [0, 0]], [1, 1, [], [1, 1]]]]
+ * ["aaa/aba/aaa", 10, 40, true] call einv_items_fnc_parseMask; // [3, 3, [], [[3, 3, [4], [0, 0]], [1, 1, [], [1, 1]]], ["a", "b"]]
  *
  * Public: No
  */
@@ -169,4 +170,4 @@ private _parts = _order apply {
     [_w, _h, _own, [_minCol, _minRow]]
 };
 
-[_cols, _rows, _holes, _parts]
+[_cols, _rows, _holes, _parts, _order]

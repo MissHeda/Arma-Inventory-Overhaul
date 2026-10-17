@@ -9,10 +9,12 @@
  * was; dragging a slider up from 0 turns the kind on (fnc_soundSet, fnc_soundSlide).
  *
  * The card is darker than the panels behind it, with a one-pixel border and a soft shadow, and neutral: white and
- * grey switches, tracks and fills, no accent. It is right-aligned to the speaker's button, a small gap under the
- * header's line, so it never lies over the header. Closes on a click beside it, on Escape and on a click on the
- * speaker again (which the hit area over the screen takes): what was set is written to the profile then
- * (fnc_soundSettle).
+ * grey switches, tracks and fills, no accent. It is right-aligned to the window's right edge - the right edge of the header,
+ * flush with the Close button (Mia, 0.5.7) -, a small gap under the header's line, so it never lies over the header. Its
+ * inside has one rhythm: the same padding on the left and the right, the same gap between the switch, the name, the slider and
+ * the percentage, a row's light round the whole row and a track that ends where the knob's middle does. Closes on a click beside it,
+ * on Escape and on a click on the speaker again (which the hit area over the screen takes): what was set is written to the
+ * profile then (fnc_soundSettle).
  *
  * It is the context menu's layer (fnc_openMenu): one controls group over the screen, made last, with the focus
  * taken into it, kept in einv_gui_menu so that Escape (fnc_onKeyDown), a click beside it (fnc_onMouseButton), a
@@ -71,33 +73,33 @@ private _count = count GVAR(soundGroups);
 // ----- Sizes -----
 
 private _size = UNIT * 0.55;
-private _rowH = UNIT * 0.95;
-private _headH = UNIT * 1.05;
-private _padX = SQUARE(UNIT * 0.45);
-private _padY = UNIT * 0.2;
-private _width = SQUARE(UNIT * 13.5);
+private _rowH = UNIT * 1;
+private _headH = UNIT * 1.1;
+private _padX = SQUARE(UNIT * 0.6);
+private _padY = UNIT * 0.35;
+private _gapX = SQUARE(UNIT * 0.45);
+private _width = SQUARE(UNIT * 14);
 private _height = _padY * 2 + _headH + _count * _rowH;
 
+// Left to right: padding, switch, gap, name, gap, slider, gap, percentage, padding.
 private _boxH = UNIT * 0.58;
 private _boxW = SQUARE(_boxH);
-private _labelX = _padX + _boxW + SQUARE(UNIT * 0.4);
-private _labelW = SQUARE(UNIT * 5.2);
-private _sliderX = _labelX + _labelW + SQUARE(UNIT * 0.3);
-private _percentW = SQUARE(UNIT * 1.5);
-private _sliderW = _width - _padX - _percentW - _sliderX - SQUARE(UNIT * 0.2);
+private _labelX = _padX + _boxW + _gapX;
+private _labelW = SQUARE(UNIT * 4.6);
+private _sliderX = _labelX + _labelW + _gapX;
+private _percentW = SQUARE(UNIT * 1.6);
+private _sliderW = _width - _padX - _percentW - _gapX - _sliderX;
 private _trackH = UNIT * 0.2;
 private _thumbH = UNIT * 0.55;
 private _thumbW = SQUARE(_thumbH);
 
-// Right-aligned to the speaker's button, a small gap under the header's line, kept on the screen.
-private _anchor = uiNamespace getVariable [QGVAR(soundAnchor), []];
+// The track runs between the knob's middle at 0 and at full: the knob stays inside the slider's room at both ends.
+private _trackX = _sliderX + _thumbW / 2;
+private _trackW = _sliderW - _thumbW;
 
-if (_anchor isEqualTo []) then {
-    _anchor = [safezoneX + safezoneW - MARGIN_X - SQUARE(HEAD_H), HEAD_Y, SQUARE(HEAD_H), HEAD_H];
-};
-
-private _left = (((_anchor select 0) + (_anchor select 2) - _width) min (safezoneX + safezoneW - _width)) max safezoneX;
-private _top = (((_anchor select 1) + (_anchor select 3) + UNIT * 0.5) max (safezoneY + UNIT * 2.6 + pixelH * 3)) min (safezoneY + safezoneH - _height);
+// The right edge of the window - the header's, where the Close button ends - and a small gap under the header's line, kept on the screen.
+private _left = ((CONTENT_X + CONTENT_W - _width) min (safezoneX + safezoneW - _width)) max safezoneX;
+private _top = ((HEAD_Y + HEAD_H + UNIT * 0.5) max (safezoneY + UNIT * 2.6 + pixelH * 3)) min (safezoneY + safezoneH - _height);
 private _cardX = _left - safezoneX;
 private _cardY = _top - safezoneY;
 
@@ -130,7 +132,7 @@ private _headTop = _cardY + _padY;
 
 [_display, _layer, [_cardX + _padX, _headTop, _width - _padX * 2, _headH], LLSTRING(Sound_Title), _size, _text2, _fontBold, 0] call FUNC(uiLabel);
 
-[_display, _layer, [_cardX + _padX * 0.5, _headTop + _headH - pixelH, _width - _padX, pixelH], _line] call FUNC(uiPanel);
+[_display, _layer, [_cardX + _padX, _headTop + _headH - pixelH, _width - _padX * 2, pixelH], _line] call FUNC(uiPanel);
 
 // ----- One slider with its percentage, and the hit area that drags it -----
 
@@ -139,34 +141,36 @@ private _fnc_slider = {
 
     private _trackY = _rowTop + (_rowHeight - _trackH) / 2;
 
-    [_display, _layer, [_cardX + _sliderX, _trackY, _sliderW, _trackH], [1, 1, 1, 0.12], _trackH / 2] call FUNC(uiPanel);
+    [_display, _layer, [_cardX + _trackX, _trackY, _trackW, _trackH], [1, 1, 1, 0.12], _trackH / 2] call FUNC(uiPanel);
 
-    private _fill = [_display, "EINV_PanelRect", _layer, [_cardX + _sliderX, _trackY, _sliderW, _trackH]] call FUNC(uiCreate);
+    private _fill = [_display, "EINV_PanelRect", _layer, [_cardX + _trackX, _trackY, _trackW, _trackH]] call FUNC(uiCreate);
     private _thumbTop = _rowTop + (_rowHeight - _thumbH) / 2;
-    private _thumb = [_display, _layer, [_cardX + _sliderX, _thumbTop, _thumbW, _thumbH], UI_TEX(circle_ca), _text] call FUNC(uiIcon);
+    private _thumb = [_display, _layer, [_cardX + _trackX - _thumbW / 2, _thumbTop, _thumbW, _thumbH], UI_TEX(circle_ca), _text] call FUNC(uiIcon);
 
     private _percent = [
         _display, _layer, [_cardX + _width - _padX - _percentW, _rowTop, _percentW, _rowHeight], "", _size * 0.9, _text2, _font, 1
     ] call FUNC(uiLabel);
 
+    // The hit area is the slider's whole room, a knob's width beyond the track at each end: a press near an end is that end. The
+    // track's place on the screen goes with it, for the mouse's place along it (fnc_soundSlide).
     private _hit = [
-        _display, "EINV_Hitbox", _layer, [_cardX + _sliderX - _thumbW, _rowTop, _sliderW + _thumbW * 2, _rowHeight]
+        _display, "EINV_Hitbox", _layer, [_cardX + _sliderX, _rowTop, _sliderW, _rowHeight]
     ] call FUNC(uiCreate);
 
-    _hit setVariable [QGVAR(slider), [_index, safezoneX + _cardX + _sliderX, _sliderW]];
+    _hit setVariable [QGVAR(slider), [_index, safezoneX + _cardX + _trackX, _trackW]];
 
     _hit ctrlAddEventHandler ["MouseButtonDown", {
-        params ["_ctrl", "_button", "_mouseX"];
+        params ["_ctrl", "_button"];
 
         if (_button != 0) exitWith {};
 
         (_ctrl getVariable [QGVAR(slider), []]) params ["_index", "_left", "_width"];
 
-        ["begin", [ctrlParent _ctrl, _index, _left, _width, _mouseX]] call FUNC(soundSlide);
+        ["begin", [ctrlParent _ctrl, _index, _left, _width]] call FUNC(soundSlide);
     }];
 
-    // The slider's place relative to the layer, and the knob's, for fnc_updateSoundMenu.
-    [_fill, _thumb, _percent, [_cardX + _sliderX, _trackY, _sliderW, _trackH, _thumbW, _thumbH, _thumbTop]]
+    // The track's place relative to the layer, and the knob's, for fnc_updateSoundMenu.
+    [_fill, _thumb, _percent, [_cardX + _trackX, _trackY, _trackW, _trackH, _thumbW, _thumbH, _thumbTop]]
 };
 
 // ----- A row for each kind of sound -----
@@ -176,9 +180,12 @@ private _rows = [];
 {
     private _rowTop = _headTop + _headH + _forEachIndex * _rowH;
 
-    // The row under the mouse is lit; the whole of it but the slider takes the switch's click.
-    private _surface = [_display, "EINV_PanelRect", _layer, [_cardX + pixelW * 3, _rowTop, _width - pixelW * 6, _rowH]] call FUNC(uiCreate);
-    _surface ctrlSetBackgroundColor [0, 0, 0, 0];
+    // The row under the mouse is lit, a round film in from the card's edge by half the padding; the whole of it but the slider takes
+    // the switch's click.
+    private _rowInset = _padX / 2;
+    private _surface = [
+        _display, _layer, [_cardX + _rowInset, _rowTop, _width - _rowInset * 2, _rowH], [0, 0, 0, 0], (_radius * 0.6) min (_rowH / 2)
+    ] call FUNC(uiPanel);
 
     private _boxTop = _rowTop + (_rowH - _boxH) / 2;
     private _box = [_display, _layer, [_cardX + _padX, _boxTop, _boxW, _boxH], [1, 1, 1, 0.14], UNIT * 0.15] call FUNC(uiPanel);
@@ -195,13 +202,13 @@ private _rows = [];
     ([_forEachIndex, _rowTop, _rowH] call _fnc_slider) params ["_fill", "_thumb", "_percent", "_geo"];
 
     private _toggle = [
-        _display, "EINV_Hitbox", _layer, [_cardX + pixelW * 3, _rowTop, _sliderX - _thumbW - pixelW * 3, _rowH]
+        _display, "EINV_Hitbox", _layer, [_cardX + _rowInset, _rowTop, _sliderX - _rowInset, _rowH]
     ] call FUNC(uiCreate);
 
     _toggle setVariable [QGVAR(surface), _surface];
     _toggle setVariable [QGVAR(kind), _forEachIndex];
-    _toggle ctrlAddEventHandler ["MouseEnter", {((_this select 0) getVariable [QGVAR(surface), controlNull]) ctrlSetBackgroundColor [1, 1, 1, 0.06]}];
-    _toggle ctrlAddEventHandler ["MouseExit", {((_this select 0) getVariable [QGVAR(surface), controlNull]) ctrlSetBackgroundColor [0, 0, 0, 0]}];
+    _toggle ctrlAddEventHandler ["MouseEnter", {[(_this select 0) getVariable [QGVAR(surface), []], [1, 1, 1, 0.06]] call FUNC(paintSurface)}];
+    _toggle ctrlAddEventHandler ["MouseExit", {[(_this select 0) getVariable [QGVAR(surface), []], [0, 0, 0, 0]] call FUNC(paintSurface)}];
     _toggle ctrlAddEventHandler ["ButtonClick", {["toggle", (_this select 0) getVariable [QGVAR(kind), -1]] call FUNC(soundSet)}];
 
     _rows pushBack [_forEachIndex, _box, _check, _label, _fill, _thumb, _percent, _geo];
