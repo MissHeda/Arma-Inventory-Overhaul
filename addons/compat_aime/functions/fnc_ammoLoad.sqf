@@ -25,7 +25,7 @@
 params [["_player", objNull, [objNull]], ["_weapon", "", [""]], ["_muzzle", "", [""]], ["_class", "", [""]]];
 
 // The menu was opened for this weapon; the soldier may have changed it since.
-if (isNull _player || {currentWeapon _player isNotEqualTo _weapon} || {missionNamespace getVariable ["ace_common_isReloading", false]}) exitWith {false};
+if (isNull _player || {currentWeapon _player isNotEqualTo _weapon} || {[] call EFUNC(storage,reloadBusy)}) exitWith {false};
 
 private _all = magazinesAmmoFull _player;
 

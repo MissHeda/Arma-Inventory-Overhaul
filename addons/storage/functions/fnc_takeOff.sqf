@@ -42,6 +42,12 @@ private _payload = switch (true) do {
     };
     case (_part in ["mag", "mag2"]): {
         [_unit, _base, false, _class] call FUNC(weaponPart);
+
+        // The muzzle is empty again: nothing is expected of it any more, the reload key may act at once (a
+        // note of an earlier load, the key's repeat gap) and the notes of where the magazines lie are renewed.
+        [objNull] call FUNC(noteHandLoad);
+        GVAR(reloadAt) = 0;
+        [_unit] call FUNC(useTrack);
         ["magazine", _class, [_entry get "ammo"]]
     };
     case (_part isNotEqualTo ""): {

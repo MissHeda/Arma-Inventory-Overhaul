@@ -34,7 +34,7 @@ params [
     ["_old", [], [[]]]
 ];
 
-if (!(missionNamespace getVariable [QGVAR(useActive), false]) || {GVAR(undoBusy)}) exitWith {false};
+if (!(missionNamespace getVariable [QGVAR(useActive), false]) || {diag_tickTime < GVAR(undoUntil)}) exitWith {false};
 
 if (isNull _unit || {!local _unit} || {_unit isNotEqualTo (missionNamespace getVariable ["ACE_player", player])}) exitWith {false};
 
@@ -43,6 +43,25 @@ if (!alive _unit || {!isNull objectParent _unit} || {([primaryWeapon _unit, hand
 _new params [["_class", "", [""]], ["_rounds", 0, [0]]];
 
 if (_class isEqualTo "" || {_rounds <= 0}) exitWith {false};
+
+// A magazine the window put into the weapon by hand (a drag onto the weapon, "Load into", fnc_noteHandLoad) was
+// chosen on purpose from wherever it lay: the settings are about using items in the field, not about handling
+// the gear, so nothing is taken back. The note answers one event and runs out by itself.
+private _hand = GVAR(handLoad);
+
+if (_hand isNotEqualTo [] && {diag_tickTime >= (_hand select 3)}) then {
+    GVAR(handLoad) = [];
+    _hand = [];
+};
+
+if (
+    _hand isNotEqualTo [] && {(_hand select 0) isEqualTo _unit} && {(_hand select 1) isEqualTo (toLowerANSI _weapon)}
+    && {(_hand select 2) isEqualTo (toLowerANSI _class)}
+) exitWith {
+    GVAR(handLoad) = [];
+
+    false
+};
 
 // The magazine that is in the weapon now. The event does not say which one it was by id, so the loaded
 // magazine of this class and these rounds is looked for; more than one (the same magazine in two weapons)

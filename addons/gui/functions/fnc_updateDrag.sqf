@@ -758,6 +758,22 @@ private _fnc_paintShape = {
     true
 };
 
+// The corners of the footprint over a slot (weapon, attachment, worn gear, small gear, hotbar): all four round, with
+// the radius of the slot's own panel and ring (fnc_drawSlot, fnc_glowSlot: the theme's radius, at most a quarter of
+// the slot's height) in whole pixels - the form _fnc_show takes. The third element says it is a slot: the footprint
+// is round whatever the item's own shape is. [] for a square look and for a slot that shows nowhere.
+private _fnc_slotCorners = {
+    params [["_rect", []]];
+
+    if (_rect isEqualTo []) exitWith {[]};
+
+    private _pixels = floor ((((GVAR(theme) getOrDefault ["radius", 0]) min ((_rect select 3) / 4)) / pixelH) + 0.001);
+
+    if (_pixels < 2) exitWith {[]};
+
+    [_pixels, [true, true, true, true], true]
+};
+
 private _fnc_show = {
     params ["_rect", "_fits", ["_alpha", DRAG_FOOTPRINT_ALPHA], ["_colorKey", ""], ["_corners", []]];
 
@@ -781,7 +797,7 @@ private _fnc_show = {
     // Where it reaches a corner of its compartment's panel (fnc_cornerRadii) the footprint is round there and nowhere else: the
     // footprint control is the middle of the box, two strips and the quarter circles of fnc_startDrag make up the rest (as
     // fnc_uiSurface lays it out). A shaped item draws its own cells, a group's footprints stay square.
-    if (_corners isNotEqualTo [] && {count _roundPieces == 6} && {_dragHoles isEqualTo []}) then {
+    if (_corners isNotEqualTo [] && {count _roundPieces == 6} && {_dragHoles isEqualTo [] || {(_corners param [2, false])}}) then {
         _corners params ["_radius", "_mask"];
         _mask params ["_topLeft", "_topRight", "_bottomLeft", "_bottomRight"];
 
@@ -989,7 +1005,7 @@ call {
         ([_entry get "class", _from] call EFUNC(hotbar,canBindFrom)) params ["_fits", "_why"];
 
         GVAR(dragTarget) = ["hotbar", _record select 7, 0, 0, _fits, _why];
-        [_slotRects select _hotbarSlot, _fits] call _fnc_show;
+        [_slotRects select _hotbarSlot, _fits, DRAG_FOOTPRINT_ALPHA, "", [_slotRects select _hotbarSlot] call _fnc_slotCorners] call _fnc_show;
     };
 
     // ----- On one of the player's own slots -----
@@ -1039,7 +1055,7 @@ call {
         _fitAnswer params ["_fits", "_slot"];
 
         GVAR(dragTarget) = ["slot", _slotIndex, 0, 0, _fits, [["NoFit", "GroupNoSlot"] select (_dragGroup isNotEqualTo []), ""] select _fits, _slot];
-        [_slotRects select _slotIndex, _fits] call _fnc_show;
+        [_slotRects select _slotIndex, _fits, DRAG_FOOTPRINT_ALPHA, "", [_slotRects select _slotIndex] call _fnc_slotCorners] call _fnc_show;
 
         // An empty slot takes the whole of it onto the soldier.
         if (_fits && {(_record select 1) isEqualTo ""} && {_dragGroup isEqualTo []}) then {
@@ -1077,7 +1093,7 @@ call {
         };
 
         GVAR(dragTarget) = ["slot", _slotIndex, 0, 0, _why isEqualTo "", _why, _toSlot, true, _toUnit];
-        [_slotRects select _slotIndex, _why isEqualTo ""] call _fnc_show;
+        [_slotRects select _slotIndex, _why isEqualTo "", DRAG_FOOTPRINT_ALPHA, "", [_slotRects select _slotIndex] call _fnc_slotCorners] call _fnc_show;
     };
 
     if ((GVAR(dragTarget) param [0, ""]) isEqualTo "slot") then {
@@ -1130,7 +1146,7 @@ call {
         if (_rect isEqualTo []) then {
             [[_areaX, _areaY, _areaW, _areaH], _why isEqualTo "", DRAG_FOOTPRINT_ALPHA / 2] call _fnc_show;
         } else {
-            [_rect, _why isEqualTo ""] call _fnc_show;
+            [_rect, _why isEqualTo "", DRAG_FOOTPRINT_ALPHA, "", [_rect] call _fnc_slotCorners] call _fnc_show;
         };
     };
 

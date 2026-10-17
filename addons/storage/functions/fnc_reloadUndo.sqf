@@ -42,7 +42,7 @@ params [
 _new params [["_class", "", [""]], ["_rounds", 0, [0]]];
 _old params [["_oldClass", "", [""]], ["_oldRounds", 0, [0]]];
 
-if (isNull _unit || {!alive _unit} || {GVAR(undoBusy)} || {_class isEqualTo ""} || {!(_kind in USE_KINDS)}) exitWith {false};
+if (isNull _unit || {!alive _unit} || {diag_tickTime < GVAR(undoUntil)} || {_class isEqualTo ""} || {!(_kind in USE_KINDS)}) exitWith {false};
 
 private _which = [primaryWeapon _unit, handgunWeapon _unit, secondaryWeapon _unit] find _weapon;
 
@@ -95,7 +95,7 @@ if ((call _fnc_loaded) isNotEqualTo [_class, _rounds]) exitWith {false};
 
 private _before = [_class, _rounds] call _fnc_counts;
 
-GVAR(undoBusy) = true;
+GVAR(undoUntil) = diag_tickTime + UNDO_BUSY_MAX;
 
 // Out of the weapon. The command takes a magazine of that class out of the muzzle; whether the game puts it
 // into the cargo or lets it go, the counts say.
@@ -107,7 +107,7 @@ switch (_which) do {
 
 if ((call _fnc_loaded) isNotEqualTo []) exitWith {
     // It did not come out: nothing has changed.
-    GVAR(undoBusy) = false;
+    GVAR(undoUntil) = 0;
 
     false
 };
@@ -168,7 +168,7 @@ if (!_safe) exitWith {
         ERROR_3("Could not put %1 (%2 rounds) back anywhere after undoing a reload of %3 - it is lost.",_class,_rounds,_weapon);
     };
 
-    GVAR(undoBusy) = false;
+    GVAR(undoUntil) = 0;
 
     false
 };
@@ -194,7 +194,7 @@ if (_oldClass isNotEqualTo "" && {_oldRounds > 0}) then {
     };
 };
 
-GVAR(undoBusy) = false;
+GVAR(undoUntil) = 0;
 
 [_unit] call FUNC(queueMigrate);
 
@@ -212,7 +212,7 @@ if (_pick isEqualTo []) then {
     [{
         params [["_unit", objNull, [objNull]], ["_weapon", "", [""]], ["_muzzle", "", [""]]];
 
-        if (!alive _unit || {missionNamespace getVariable ["ace_common_isReloading", false]}) exitWith {};
+        if (!alive _unit || {[] call FUNC(reloadBusy)}) exitWith {};
 
         // Looked at again: the unit may have done something meanwhile. Loaded as every reload is
         // (fnc_loadMagazine): by hand into an empty muzzle, which the undo has just made of it when the

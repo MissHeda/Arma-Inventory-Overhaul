@@ -117,24 +117,12 @@ private _imageW = 0;
 private _imageH = 0;
 
 if (_turned) then {
-    private _shape = [_aspect, _ratio] select (_ratio > 0);
+    // The control fnc_uiPictureTurned makes, in the picture's own shape, before the turn; turned, the picture
+    // shows as wide as the control is high and as high as it is wide.
+    ([_texture, _aspect, [_boxW / pixelW, _boxH / pixelH], _scale] call FUNC(turnedSize)) params ["_ctrlW", "_ctrlH"];
 
-    if (_shape <= 0) then {
-        _shape = 1;
-    };
-
-    // The square fnc_uiPictureTurned makes, in pixels; the picture keeps its shape in it, and turned its width
-    // runs down the box and its height across.
-    private _side = (floor ((((_boxW / pixelW) / ((1 / _shape) min 1)) min ((_boxH / pixelH) / (_shape min 1))) * _scale)) max 1;
-    private _short = _side / (_shape max (1 / _shape));
-
-    if (_shape >= 1) then {
-        _imageW = _short * pixelW;
-        _imageH = _side * pixelH;
-    } else {
-        _imageW = _side * pixelW;
-        _imageH = _short * pixelH;
-    };
+    _imageW = _ctrlH * pixelW;
+    _imageH = _ctrlW * pixelH;
 } else {
     private _width = _boxW * _scale;
     private _height = _boxH * _scale;

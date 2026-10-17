@@ -12,7 +12,8 @@
  *     and put into the muzzle with addWeaponItem (fnc_weaponPart, which tries three forms of the command and
  *     looks at the weapon after each), the weapon's reload gesture and sound play as the window plays them,
  *     and a magazine that did not go in is put back into its container. Only if that fails too the game's
- *     reload action is tried. The action alone did nothing for a weapon with no magazine in it.
+ *     reload action is tried. The action alone did nothing for a weapon with no magazine in it. A hand load is
+ *     a noted one (fnc_noteHandLoad, from fnc_weaponPart): the reload undo leaves it alone.
  *
  * Arguments:
  * 0: Unit <OBJECT>

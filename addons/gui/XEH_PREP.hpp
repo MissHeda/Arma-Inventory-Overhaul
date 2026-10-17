@@ -241,6 +241,7 @@ PREP(gridCorner);
 PREP(cornerRadii);
 PREP(clearCells);
 PREP(uiPictureTurned);
+PREP(turnedSize);
 PREP(uiItemPicture);
 PREP(uiPictureCut);
 PREP(uiPictureRounded);

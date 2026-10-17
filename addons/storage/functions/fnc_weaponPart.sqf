@@ -41,10 +41,13 @@ private _kind = ([_class] call EFUNC(items,getInfo)) get "kind";
 
 if (_kind in ["magazine", "grenade"]) exitWith {
     private _muzzles = getArray (configFile >> "CfgWeapons" >> _weapon >> "muzzles");
+    // The first muzzle is "this" - the weapon's own name - on nearly every weapon; one that names it (a launcher
+    // or a mod's weapon) is asked for by that name.
+    private _first = _muzzles param [0, "this"];
     private _muzzle = if (_second) then {
-        (_muzzles select {_x != "this" && {_x != (_muzzles param [0, ""])}}) param [0, _weapon]
+        (_muzzles select {_x != "this" && {_x != _first}}) param [0, _weapon]
     } else {
-        _weapon
+        [_first, _weapon] select (_first in ["this", ""])
     };
 
     if (_ammo < 0) then {
@@ -65,6 +68,10 @@ if (_kind in ["magazine", "grenade"]) exitWith {
 
         _mag isEqualType [] && {count _mag >= 2} && {(_mag select 0) == _class}
     };
+
+    // A chosen magazine, whatever the "Use items from ..." settings say of the container it lay in: should the
+    // command raise the game's "Reloaded" event, the reload undo leaves it alone (fnc_noteHandLoad).
+    [_unit, _weapon, _class] call FUNC(noteHandLoad);
 
     // The muzzle by its name first, as the arsenal gives it; then without it for the weapon's own muzzle;
     // then the magazine of the class as it comes and its rounds set afterwards.
@@ -87,6 +94,9 @@ if (_kind in ["magazine", "grenade"]) exitWith {
 
         INFO_2("%1 went into %2 only as a plain magazine, its rounds set after.",_class,_weapon);
     } else {
+        // Nothing went in, so nothing is expected.
+        [objNull] call FUNC(noteHandLoad);
+
         WARNING_3("%1 did not go into %2 (muzzle %3) by any form of addWeaponItem.",_class,_weapon,_muzzle);
     };
 };

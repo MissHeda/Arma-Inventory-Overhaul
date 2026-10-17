@@ -23,7 +23,7 @@
 params [["_unit", objNull, [objNull]], ["_class", "", [""]]];
 
 if (!isNull objectParent _unit && {!(_unit call CBA_fnc_canUseWeapon)}) exitWith {[false, LLSTRING(Reason_NotHere)]};
-if (missionNamespace getVariable ["ace_common_isReloading", false]) exitWith {[false, LLSTRING(Reason_Busy)]};
+if ([] call EFUNC(storage,reloadBusy)) exitWith {[false, LLSTRING(Reason_Busy)]};
 if (!([_unit] call FUNC(canAct))) exitWith {[false, LLSTRING(Reason_NotNow)]};
 
 // The weapon in the hands: a rifle, a pistol or a launcher - not the binocular, not nothing.

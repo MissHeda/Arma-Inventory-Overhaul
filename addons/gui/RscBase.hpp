@@ -131,7 +131,7 @@ class EINV_Picture: EINV_Icon {
 };
 
 // A picture stretched over its whole box (ST_PICTURE). A turned picture no longer uses it: since 0.4.7 it
-// is an EINV_Picture made square and turned (fnc_uiPictureTurned).
+// is an EINV_Picture made in the picture's own shape and turned (fnc_uiPictureTurned).
 class EINV_PictureStretch: EINV_Icon {
     style = 48;
 };

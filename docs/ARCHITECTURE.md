@@ -904,6 +904,9 @@ limited.
   one, the key does nothing and a line names the containers to take one out of; some do, the handler loads the fullest of them
   (`fnc_reloadPick`, then `fnc_loadMagazine` below: the game's `LoadMagazine` action, or by hand into an empty weapon) and swallows the key. Where nothing is blocked, or nothing limited, the
   key is the game's. A full magazine in the weapon is left to the game. A vehicle's gun is not caught.
+  **An empty muzzle is the guard's whatever the settings say**: when `currentMagazine` is "" - the weapon was emptied by dragging its magazine out of the window, by a script or a loadout - the guard loads the fullest usable magazine by hand (`fnc_reloadPick`, `fnc_loadMagazine`), also with all three settings on Everything (`useCarried` then returns everything); the game's own key was seen doing nothing for a weapon emptied that way. Not while a reload is under way (`fnc_reloadBusy`, or `weaponState` entry 6, the magazine's reload phase, above 0 - a reload takes the magazine out of the muzzle for a while, and that muzzle is not "empty"). A pick that is not loaded gives the key back to the game and clears the repeat gap (`GVAR(reloadAt)`).
+- **Nothing waits for ever**. ACE's `ace_common_isReloading` is read through `einv_storage_fnc_reloadBusy` (the reload key's guard, the hotbar's magazine and throwable keys, AIME's menu, the undo's delayed load): believed for `RELOAD_BUSY_MAX` 5 s from the first time it was seen set, then ignored until it was seen cleared once (a reload that did nothing never says it is done, and the flag stayed set - every later reload was swallowed). The undo's busy mark is a time, `GVAR(undoUntil)` (`UNDO_BUSY_MAX` 3 s), not a flag, so a script error in the middle of `fnc_reloadUndo` cannot disable `fnc_onReloaded` for good. A magazine taken out of a muzzle (`fnc_takeOff`, slots `mag` and `mag2`) clears the hand-load note, the repeat gap and renews the notes of where the magazines lie (`fnc_useTrack`).
+- **Loading by hand is free of the limits**. The settings are about using items in the field (R, hotbar, ACE actions), not about handling the gear in the window: a magazine dragged from any container (also a blocked backpack, and a Strict one's hidden entries, which `fnc_removeEntry` takes out of the holder) onto a weapon or its magazine slot, or loaded with the menu's "Load into", goes in. `fnc_weaponPart` notes every magazine it puts on (`fnc_noteHandLoad`: `GVAR(handLoad)` = `[unit, weapon, class, until]`, `HAND_LOAD_WINDOW` 1.5 s), and `fnc_onReloaded` leaves a loaded magazine of that weapon and class alone while the note stands (one event answers it and clears it) - should `addWeaponItem` raise `Reloaded`, the undo would take back a load the player chose. The setting texts say so.
 - **A reload by the scroll menu, a gamepad button or a script** (`fnc_onReloaded`, the CAManBase event `Reloaded` from postInit):
   the engine has loaded a magazine by then and `Reloaded` cannot be cancelled, so it is undone afterwards, and only when it is sure.
   `fnc_useTrack` keeps `GVAR(useIds)`, "creator:id" -> "uniform" | "vest" | "backpack" for every magazine of the player that
@@ -921,7 +924,7 @@ limited.
   it is when the container will not take it) - and a magazine nowhere is put back into the weapon with `addWeaponItem`. Then the old
   magazine (`Reloaded`'s last argument, when it has rounds) is taken out of whichever container holds one with those rounds and put
   into the weapon, and given back to the container when that does not hold. A line says "Cannot reload from the backpack."; if a
-  magazine that may be used is left (`fnc_reloadPick`, the fullest), `UNDO_RELOAD_WAIT` later it is loaded with `fnc_loadMagazine`. Never done twice (`GVAR(undoBusy)`), and not when the magazine's origin is unknown. Untested in the game: the exact shape
+  magazine that may be used is left (`fnc_reloadPick`, the fullest), `UNDO_RELOAD_WAIT` later it is loaded with `fnc_loadMagazine`. Never done twice (`GVAR(undoUntil)`, a time that runs out), and not when the magazine's origin is unknown. Untested in the game: the exact shape
   of the `Reloaded` arguments and whether `removePrimaryWeaponItem` returns the magazine to the cargo are checked by counting, not
   assumed.
 - **Loading a chosen magazine** (`einv_storage_fnc_loadMagazine [unit, weapon, muzzle, entry]`, public): the one way every reload of
@@ -1070,7 +1073,7 @@ the game, like the rest of Use from containers.
 
 ### Public functions and tables
 
-Public: `einv_storage_fnc_useState`, `fnc_useKind`, `fnc_useMode`, `fnc_useCarried`, `fnc_useBlockedIn`, `fnc_useKindName`,
+Public: `einv_storage_fnc_useState`, `fnc_useKind`, `fnc_useMode`, `fnc_useCarried`, `fnc_useBlockedIn`, `fnc_useKindName`, `fnc_loadMagazine`, `fnc_reloadBusy`,
 `fnc_hiddenCounts`, `fnc_hiddenClasses`,
 `einv_storage_fnc_request`, `fnc_moveEntry`, `fnc_equip`, `fnc_unequip`, `fnc_getEquipment`, `fnc_getNearby`,
 `fnc_readPlaces`, `fnc_rootOf`, `fnc_dumpPlaces`, `fnc_addNew`. Other addons extend the storage only through tables they fill in
@@ -1578,10 +1581,9 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   theme]` draws the surface in the category's colour over the entry's cells only (a shaped tile: runs of cells with one-pixel
   bridges; `"backgrounds"` and `"rect"` kept for hover, flash, reveal and the repack film), the picture, the short name, a
   stack's count and a magazine's fill. A **turned picture** (`rotated`; the dragged ghost held turned, also a row dragged from
-  ACE's list; `fnc_uiPictureTurned`) is an `EINV_Picture` (keeps its shape) made **square in pixels**, centred on the box,
-  turned `ctrlSetAngle [90, 0.5, 0.5]` - a quarter clockwise round its middle; a non-square control came out squashed and out of
-  its box. The side is the most the turned picture may have to fit the box: `min(boxW / min(1, H/W), boxH / min(1, W/H))` px, so
-  a 2:1 rifle on a 1x3 box gets a 2-cell square showing it 1 wide and 2 high; the square may stand out where it is empty. The
+  ACE's list; `fnc_uiPictureTurned`) is an `EINV_Picture` made **in the picture's own shape** (`fnc_turnedSize`: W:H from `getTextureInfo`, else the item's cell ratio), in whole pixels, centred on the box,
+  turned `ctrlSetAngle [90, 0.5, 0.5]` - a quarter clockwise round its middle. The control keeps a picture's shape (`ST_KEEP_ASPECT_RATIO`) only at rest; turned it fills its whole rectangle, so a wide texture in a square came out squashed (0.4.7 to 0.5.16: rifles and other four-cell rectangles; a 0.4.6 layout in the swapped shape had come out squashed and out of its box). So there is nothing to fit once it turns: the control is W px wide and H px high in the picture's proportion and shows H wide and W high turned. The long edge is the most the turned picture may have to fit the box: `min(boxH, boxW * W/H)` px for a wide picture (`min(boxW, boxH * H/W)` for a tall one) times the item's zoom, so
+  a 2:1 rifle on a 1x4 box is a 2-cell by 1-cell control showing 1 wide and 2 high. The control stands out of the box only where the turned picture does not (its bounding box is within the old square's). The hover outline and every hit test are unaffected: the controls are not interactive and the tile's rectangle is the hit area. The
   group ghosts of a drag keep their angle when moved (`fnc_updateDrag`; a ghost whose picture is cut by a group turns the picture
   in it). The hotbar and the inspect card draw upright only.
   **The picture is drawn by the item's `icon`** (`icon=`, `getInfo "icon"`, `fnc_uiItemPicture`): `fnc_createTile` (clip: the
@@ -1770,7 +1772,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `["group", ...]`): on a grid the footprint must lie inside the compartment on free cells (a hole is red; an item's own holes
   over free cells are fine; cells a move under way goes to count as taken), another container must be able to carry it
   (`fnc_checkTouch`; `fnc_backpackIntoBackpack` is the one kind rule), and a uniform, vest or backpack never goes into itself
-  (`fnc_liesIn`). On an own slot it fits when `slotAccepts` says so; worn gear over the same slot of another unit is exchanged
+  (`fnc_liesIn`). On an own slot it fits when `slotAccepts` says so, and its footprint (green or red) is round like the slot - all four corners with the radius of the slot's own panel and ring (the theme's `radius`, at most a quarter of the slot's height; `_fnc_slotCorners` in `fnc_updateDrag` hands `_fnc_show` the radius in pixels and a third element true, which also rounds it for a shaped item) on weapon, attachment, worn-gear, small-gear and hotbar slots, drawn by the same six pieces as a grid footprint at a panel's corner (`dragCorners`, made at the lift); the equipment column as a whole stays a plain faint rectangle; worn gear over the same slot of another unit is exchanged
   (`fnc_canSwap`, `fnc_doSwap`); outside every panel it goes on the ground. `fnc_endDrag` hands the result to `fnc_sendMoves` (or
   the `drop` hook).
 - **Tile onto tile: a swap** (`fnc_swapPlan`, `fnc_applySwap`). Where a grid drop is refused as `"NoRoom"` for taken cells - and only

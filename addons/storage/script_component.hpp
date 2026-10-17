@@ -88,6 +88,17 @@
 // weapon is back as it was.
 #define UNDO_RELOAD_WAIT 0.4
 
+// How long a flag of a reload under way is believed, in seconds, before it counts as left behind: ACE's "is reloading"
+// (fnc_reloadBusy), whose end never comes when a reload did nothing, and the undo of a reload (fnc_reloadUndo),
+// whose steps normally take a frame or two. Nothing waits on either for ever.
+#define RELOAD_BUSY_MAX 5
+#define UNDO_BUSY_MAX 3
+
+// A magazine the window put into a weapon by hand (drag onto the weapon, "Load into", fnc_weaponPart) is a chosen
+// one: for this many seconds the reload undo (fnc_onReloaded) leaves a loaded magazine of that class alone, whatever
+// the "Use items from ..." settings say about the container it lay in.
+#define HAND_LOAD_WINDOW 1.5
+
 // How often the throwing is looked at (fnc_throwTick), and the notes of where the magazines lie are taken
 // again (fnc_useTrack), in seconds.
 #define THROW_TICK 0.25
