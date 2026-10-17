@@ -45,6 +45,9 @@
  * scroll through, and nothing of the room hidden (Mia, 0.2.3).
  * A drag let go on that line or on the box lays the item down in the first free spot, the folded rows too
  * (fnc_updateDrag).
+ * Taller than a page (the client setting einv_gui_pageRows), the compartment is cut into pages instead: a bar under it
+ * turns them, the fold line is not drawn and the pages end two rows after the last in use (fnc_pageRanges,
+ * fnc_drawPageBar); a drop on the box or on the bar's name lies in the first free spot as on the fold line.
  *
  * Four kinds of section are drawn their own way:
  *   "drawer"            - a function name: another addon draws it (ACE cargo's cards,
@@ -530,26 +533,57 @@ private _bodyTop = _top + _lineH + UNIT * 0.25;
 // only: the layout and the places stay the whole container's. The unit's own storage shows all of its
 // rows, where the player arranges what he carries.
 private _view = if (isNull _sectionContainer || {_placeholder} || {_side isNotEqualTo "loot"}) then {
-    [[], 0, false, 0]
+    [[], 0, false, 0, []]
 } else {
     [_layout, _sectionContainer] call FUNC(viewBlocks)
 };
-_view params ["_viewBlocks", "_hiddenRows", "_rowsFoldable", "_hiddenCells"];
+_view params ["_viewBlocks", "_hiddenRows", "_rowsFoldable", "_hiddenCells", ["_paging", []]];
+
+// A compartment taller than a page (einv_gui_pageRows) is cut into pages with a bar under it (fnc_drawPageBar); the
+// bar takes room in the flow, below the page's rows. Its page is as tall as the tallest of its pages, so turning one
+// never moves what lies below.
+private _anyPaged = _paging findIf {_x isNotEqualTo []} >= 0;
 
 // Whether the line is there - a later draw of the tiles alone (fnc_redrawTiles) must not change that.
 _info set ["foldable", _rowsFoldable];
 
 private _drawLayout = _layout;
 
-if (_rowsFoldable) then {
+if (_rowsFoldable || {_anyPaged}) then {
     _drawLayout = createHashMap;
     _drawLayout merge _layout;
     _drawLayout set ["blocks", _viewBlocks];
+    _drawLayout set ["paging", _paging];
 };
 
 // The compartments (einv_storage_fnc_getBlocks), side by side as far as STORAGE_COLS cells reach, then
-// on the next line - and, should anything not fit any of them, a line of its own for that.
-([_drawLayout] call FUNC(flowCompartments)) params ["_places", "_blocksH"];
+// on the next line - and, should anything not fit any of them, a line of its own for that. A paged one takes the room
+// of its tallest page and its bar.
+private _flowLayout = _drawLayout;
+
+if (_anyPaged) then {
+    _flowLayout = createHashMap;
+    _flowLayout merge _drawLayout;
+    private _flowBlocks = [];
+
+    {
+        private _pageOf = _paging param [_forEachIndex, []];
+
+        if (_pageOf isEqualTo []) then {
+            _flowBlocks pushBack _x;
+        } else {
+            _x params ["_cols", "", "_holes", "_pos"];
+
+            _flowBlocks pushBack [
+                _cols, selectMax ((_pageOf select 1) apply {(_x select 1) - (_x select 0)}) + PAGE_RESERVE(_cellW) / _cellH, _holes, _pos
+            ];
+        };
+    } forEach _viewBlocks;
+
+    _flowLayout set ["blocks", _flowBlocks];
+};
+
+([_flowLayout] call FUNC(flowCompartments)) params ["_places", "_blocksH"];
 
 private _gridX = _blockX + ([0, _boxW + _gapX] select _hasBox);
 
@@ -663,6 +697,37 @@ private _used = (_bodyTop - _top) + (_boxH max _blocksH);
 // The empty rows folded away: one line under the grid that says how many and opens them - or, opened,
 // folds them away again (fnc_toggleRows).
 // ---------------------------------------------------------------------------
+// A drop on the box of a paged container, or on the name of its bar, is laid down in its first free spot, whatever page
+// it is on (fnc_updateDrag, GVAR(foldAreas)) - the arrows turn the page instead.
+if (_anyPaged && {!isNull _sectionContainer}) then {
+    private _areas = uiNamespace getVariable [QGVAR(foldAreas), []];
+
+    if (_hasBox) then {
+        _areas pushBack createHashMapFromArray [["rel", [_blockX, _bodyTop]], ["parent", _parent], ["size", [_boxW, _boxH]], ["container", _sectionContainer]];
+    };
+
+    {
+        if (_x isEqualTo []) then {continue};
+
+        private _place = _places param [_forEachIndex, []];
+
+        if (_place isEqualTo []) then {continue};
+
+        (_viewBlocks select _forEachIndex) params ["_pagedCols"];
+
+        private _pageTall = selectMax ((_x select 1) apply {(_x select 1) - (_x select 0)});
+        private _barTop = _bodyTop + (_place select 1) + _pageTall * _cellH + COMPARTMENT_PAD_PX(_cellW) * pixelH + UNIT * PAGE_BAR_GAP;
+        private _barH = UNIT * PAGE_BAR_H;
+        private _labelW = _pagedCols * _cellW - SQUARE(_barH) * 2 - SQUARE(UNIT * 0.4);
+
+        _areas pushBack createHashMapFromArray [
+            ["rel", [_gridX + (_place select 0), _barTop]], ["parent", _parent], ["size", [_labelW max 0, _barH]], ["container", _sectionContainer]
+        ];
+    } forEach _paging;
+
+    uiNamespace setVariable [QGVAR(foldAreas), _areas];
+};
+
 if (_rowsFoldable) then {
     private _rowsTop = _top + _used + UNIT * 0.15;
     private _rowsText = if (_hiddenRows > 0) then {

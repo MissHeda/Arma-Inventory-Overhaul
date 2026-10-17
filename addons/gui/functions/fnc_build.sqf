@@ -140,6 +140,7 @@ if (_timed) then {_marks pushBack ["sweep", diag_tickTime]};
 
 uiNamespace setVariable [QGVAR(grids), []];
 uiNamespace setVariable [QGVAR(foldAreas), []];
+uiNamespace setVariable [QGVAR(pageAreas), []];
 uiNamespace setVariable [QGVAR(zones), []];
 uiNamespace setVariable [QGVAR(slots), []];
 
@@ -427,8 +428,7 @@ GVAR(searchQueue) = [GVAR(searchQueue), [], {
     };
 } forEach (uiNamespace getVariable [QGVAR(created), []]);
 
-// Where the soldier stands in the free middle, for the camera to find him again once the looting pose is
-// reached (fnc_poseCheck).
+// Where the soldier stands in the free middle.
 GVAR(cameraRect) = _rect;
 
 if (_ownCamera) then {

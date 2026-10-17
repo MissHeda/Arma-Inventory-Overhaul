@@ -12,7 +12,7 @@
  * mod loaded says here which it was.
  *
  * A repack of magazines still running ends with it, its result written (einv_magazines). What the window was
- * opened on closes with a sound, and the soldier who looked into it stands up again (fnc_poseEnd).
+ * opened on closes with a sound.
  *
  * The places of the player's own uniform, vest and backpack, set here at once by their own moves and
  * sent to everyone else at most every two seconds, go out now (einv_storage_fnc_flushPlaces): whoever
@@ -43,7 +43,7 @@ if (_reason isEqualTo "") then {
     };
 };
 
-// The two reasons the looting pose reads (fnc_poseEnd) by their key, in words.
+// The two reasons that come as a key, in words.
 _reason = (createHashMapFromArray [
     ["move", "a movement key"], ["taken", "the soldier was taken away from what he looted"]
 ]) getOrDefault [_reason, _reason];
@@ -56,15 +56,13 @@ if (!isNil QEFUNC(magazines,stop)) then {
 };
 
 // The container that was looted closes with a sound - unless the soldier was taken from it, is out cold or
-// sits in it - and he stands up from his gear (fnc_poseEnd).
+// sits in it.
 if (
     !isNull GVAR(openedOn) && {alive GVAR(unit)} && {[GVAR(unit)] call ACEFUNC(common,isAwake)}
     && {objectParent GVAR(unit) isNotEqualTo GVAR(openedOn)} && {GVAR(closeReason) isNotEqualTo "taken"}
 ) then {
     ["close", "", GVAR(openedOn)] call FUNC(playSound);
 };
-
-[] call FUNC(poseEnd);
 
 // Better Inventory's stack move may work again (fnc_open).
 if (!isNil "bettInv_stackMove") then {
@@ -97,6 +95,10 @@ GVAR(dragTarget) = [];
 GVAR(handQueue) = [];
 GVAR(handStarted) = -1;
 GVAR(queueDirty) = false;
+GVAR(queueFrom) = 0;
+GVAR(handWaiting) = createHashMap;
+GVAR(roomCache) = [];
+GVAR(quickHeldKey) = -1;
 
 GVAR(person) = objNull;
 GVAR(personMode) = "";

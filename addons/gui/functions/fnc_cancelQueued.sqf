@@ -36,6 +36,15 @@ if (_gone findIf {(_x get "id") == _headId} >= 0) then {
 
 GVAR(handQueue) = GVAR(handQueue) select {_id != 0 && {(_x get "id") != _id}};
 
+if (_id == 0) then {
+    GVAR(handWaiting) = createHashMap;
+} else {
+    [_gone, false] call FUNC(queueIndex);
+};
+
+// What the cancelled moves had room reserved for is free again (fnc_roomFor).
+GVAR(roomCache) = [];
+
 {
     {ctrlDelete _x} forEach (_x getOrDefault ["fx", []]);
 
@@ -60,6 +69,7 @@ GVAR(handQueue) = GVAR(handQueue) select {_id != 0 && {(_x get "id") != _id}};
 } forEach _gone;
 
 // The others are numbered again, in the next frame.
+GVAR(queueFrom) = 0;
 GVAR(queueDirty) = true;
 
 count _gone

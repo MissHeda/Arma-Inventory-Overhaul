@@ -337,6 +337,30 @@
         <Key ID="STR_einv_gui_Option_Unconscious">
             <English>Only the unconscious</English>
         </Key>
+        <Key ID="STR_einv_gui_Page_Chip_Tooltip">
+            <English>More lies on other pages - click to turn</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Hits">
+            <English>%1 matches on other pages</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Hits_One">
+            <English>%1 match on another page</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Label">
+            <English>Page %1 / %2</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Next">
+            <English>Next page</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Other">
+            <English>+%1 items on other pages</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Other_One">
+            <English>+%1 item on another page</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Prev">
+            <English>Previous page</English>
+        </Key>
         <Key ID="STR_einv_gui_QuickMove">
             <English>Quick move</English>
         </Key>
@@ -375,21 +399,6 @@
         </Key>
         <Key ID="STR_einv_gui_Select">
             <English>Select</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_Animation">
-            <English>Looting animation</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_Animation_Always">
-            <English>Always</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_Animation_Desc">
-            <English>Off by default. When on, the soldier\nlowers his weapon and looks into his\ngear while the window is open, as in\nArma's own inventory - kneeling at\nbodies, at piles on the ground and at\nlow crates - so others see who is\nlooting. A suppressor is screwed on and\noff. As the window closes he holds his\nweapon as he did before.\n\nWhile looting: when the window was\nopened on something, or while it\nsearches. Always: also for your own\ngear. Never while unconscious, captive,\nswimming, in a vehicle or on a ladder.\n\nA magazine loaded into the weapon in\nhand plays its reload whatever is set\nhere.</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_Animation_Looting">
-            <English>While looting</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_Animation_Off">
-            <English>Off</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CameraDefault">
             <English>Camera when opening</English>
@@ -486,6 +495,24 @@
         </Key>
         <Key ID="STR_einv_gui_Setting_MuteSearch_Desc">
             <English>The speaker in the window's header also\nsilences the rustle while loot is\nsearched and the sound of an item\nfound.\n\nOff: these keep playing while the\nspeaker is muted.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PageRows">
+            <English>Rows per page of a container</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PageRows_Desc">
+            <English>How many rows of a tall crate or vehicle
+are shown at a time. Taller than that, it
+gets pages: a bar under it turns them,
+and a fade on the page's edge with a
+chip such as +37 items on other pages
+says there is more. The search finds
+items on any page, and an item held over
+an arrow of the bar turns the page.
+
+A page is at least 4 rows. 0 or 40 shows
+the whole container, with its empty rows
+folded as before. Only for what you
+loot, not for your own gear.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonItems">
             <English>Take and put items</English>

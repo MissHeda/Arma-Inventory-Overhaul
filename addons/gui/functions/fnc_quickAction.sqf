@@ -13,6 +13,7 @@
  * Arguments:
  * 0: Index of the grid the tile lies on <NUMBER>
  * 1: Index of the tile <NUMBER>
+ * 2: A repeat of a key held down: only moves go on, what opens or puts on is left to the first press <BOOL> (default: false)
  *
  * Return Value:
  * Done <BOOL>
@@ -23,7 +24,7 @@
  * Public: No
  */
 
-params ["_gridIndex", "_tileIndex"];
+params ["_gridIndex", "_tileIndex", ["_repeat", false, [false]]];
 
 private _selected = if (call FUNC(isInventoryMode)) then {call FUNC(selectionTiles)} else {[]};
 
@@ -31,6 +32,17 @@ if (count _selected >= 2 && {[_gridIndex, _tileIndex] in _selected}) exitWith {
     [_selected] call FUNC(quickMoveGroup);
     true
 };
+
+// A repeat of a held key only moves: a container or a kit that opens, or a thing on the ground that is put on, is the
+// first press's, not every repeat's.
+private _held = (((uiNamespace getVariable [QGVAR(grids), []]) param [_gridIndex, createHashMap]) getOrDefault ["tiles", []]) param [_tileIndex, createHashMap];
+
+if (
+    _repeat && {
+        !isNull (_held getOrDefault ["container", objNull])
+        || {!isNil QEFUNC(compat_efak,isKit) && {[_held getOrDefault ["class", ""]] call EFUNC(compat_efak,isKit)}}
+    }
+) exitWith {true};
 
 // On the ground: what can be worn is put on - only in the inventory, on a pile's grid, on a searched tile
 // that is not under way.

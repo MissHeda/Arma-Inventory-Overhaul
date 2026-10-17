@@ -343,7 +343,8 @@ if (_scrolled || {_geometry isEqualTo []}) then {
             private _colX = _x getOrDefault ["colX", []];
             private _rowY = _x getOrDefault ["rowY", []];
             private _lastX = if (_colX isEqualTo []) then {((_x get "cols") - 1) * (_x get "cellW")} else {_colX select (count _colX - 1)};
-            private _lastY = if (_rowY isEqualTo []) then {((_x get "rows") - 1) * (_x get "cellH")} else {_rowY select (count _rowY - 1)};
+            private _lastRow = (_x getOrDefault ["rowTo", _x get "rows"]) - 1;
+            private _lastY = if (_rowY isEqualTo []) then {_lastRow * (_x get "cellH")} else {_rowY select _lastRow};
             private _left = _originX;
             private _top = _originY;
             private _right = _originX + _lastX + (_x get "cellW");
@@ -388,11 +389,71 @@ if (_scrolled || {_geometry isEqualTo []}) then {
         [_x get "container", _shown]
     };
 
-    _geometry = [_slots apply {[_x] call FUNC(slotRect)}, _gridBoxes, _foldBoxes];
+    // The arrows of the page bars (GVAR(pageAreas), fnc_drawPageBar), as [grid, step, [x, y, w, h] where they show] - [] for
+    // one scrolled out of sight: an item held over one turns the page (below).
+    private _pageBoxes = (uiNamespace getVariable [QGVAR(pageAreas), []]) apply {
+        private _parent = _x getOrDefault ["parent", controlNull];
+        private _shown = [];
+
+        if (!isNull _parent) then {
+            (ctrlPosition _parent) params ["_groupX", "_groupY", "_groupW", "_groupH"];
+            ([createHashMapFromArray [["rel", [_groupX, _groupY]], ["parent", ctrlParentControlsGroup _parent]]] call FUNC(gridOrigin)) params ["_groupLeft", "_groupTop"];
+            ([_x] call FUNC(gridOrigin)) params ["_areaX", "_areaY"];
+            (_x get "size") params ["_areaW", "_areaH"];
+
+            private _left = _areaX max _groupLeft;
+            private _top = _areaY max _groupTop;
+            private _right = (_areaX + _areaW) min (_groupLeft + _groupW);
+            private _bottom = (_areaY + _areaH) min (_groupTop + _groupH);
+
+            if (_right > _left && {_bottom > _top}) then {
+                _shown = [_left, _top, _right - _left, _bottom - _top];
+            };
+        };
+
+        [_x get "grid", _x get "step", _shown]
+    };
+
+    _geometry = [_slots apply {[_x] call FUNC(slotRect)}, _gridBoxes, _foldBoxes, _pageBoxes];
     GVAR(dragRoom) set ["geometry", _geometry];
 };
 
-_geometry params ["_slotRects", "_gridBoxes", ["_foldBoxes", []]];
+_geometry params ["_slotRects", "_gridBoxes", ["_foldBoxes", []], ["_pageBoxes", []]];
+
+// Held over an arrow of a page bar (and nothing lying over it): the page turns after PAGE_HOVER_TIME, and again every
+// PAGE_HOVER_TIME while the item stays - so it can be let go on a page that is not shown. Before the frame's early exits:
+// a mouse standing still on the arrow is what turns it. The turn drops what the drag knew of the grids; the next frame
+// works it out anew.
+private _pageHit = if (_onTop isEqualTo "") then {
+    _pageBoxes findIf {
+        (_x select 2) params [["_pageX", 0], ["_pageY", 0], ["_pageW", 0], ["_pageH", 0]];
+
+        _pageW > 0 && {_mouseX >= _pageX} && {_mouseX < _pageX + _pageW} && {_mouseY >= _pageY} && {_mouseY < _pageY + _pageH}
+    }
+} else {
+    -1
+};
+
+private _turned = false;
+
+if (_pageHit < 0) then {
+    if (GVAR(pageHover) isNotEqualTo []) then {
+        GVAR(pageHover) = [];
+    };
+} else {
+    if ((GVAR(pageHover) param [0, -1]) != _pageHit) then {
+        GVAR(pageHover) = [_pageHit, diag_tickTime];
+    } else {
+        if (diag_tickTime - (GVAR(pageHover) select 1) >= PAGE_HOVER_TIME) then {
+            GVAR(pageHover) = [_pageHit, diag_tickTime];
+            _turned = [(_pageBoxes select _pageHit) select 0, (_pageBoxes select _pageHit) select 1] call FUNC(turnPage);
+        };
+    };
+};
+
+if (_turned) exitWith {
+    if (_timed) then {call _fnc_noteTime};
+};
 
 // The column (row) at _local from a grid's corner as fnc_screenToCell finds it, -1 for none, and whether it
 // lies in the room a seam opens after it: the stretch of one pitch it lies in names, in the grid's lookup
@@ -433,7 +494,7 @@ private _fnc_cellAt = {
     ([_mouseX - _originX, _grid getOrDefault ["colX", []], _grid getOrDefault ["colAt", []], _grid get "cellW"] call _fnc_find) params ["_col", "_gapX"];
     ([_mouseY - _originY, _grid getOrDefault ["rowY", []], _grid getOrDefault ["rowAt", []], _grid get "cellH"] call _fnc_find) params ["_row", "_gapY"];
 
-    if (_col < 0 || {_row < 0} || {_col >= _grid get "cols"} || {_row >= _grid get "rows"}) exitWith {[]};
+    if (_col < 0 || {_row < (_grid getOrDefault ["rowFrom", 0])} || {_col >= _grid get "cols"} || {_row >= (_grid getOrDefault ["rowTo", _grid get "rows"])}) exitWith {[]};
     if ((_gapX || {_gapY}) && {[_grid, _col, _row, [1, 2] select _gapX, [1, 2] select _gapY] call FUNC(hitsHole)}) exitWith {[]};
     if (!_holesToo && {[_grid, _col, _row] call FUNC(hitsHole)}) exitWith {[]};
 
@@ -1130,7 +1191,7 @@ call {
         // Near the border the footprint stops at the edge of the compartment instead of hanging out: it is
         // pushed inside as far as it is small enough for it.
         _col = (_col min ((_target get "cols") - _w)) max 0;
-        _row = (_row min ((_target get "rows") - _h)) max 0;
+        _row = (_row min ((_target getOrDefault ["rowTo", _target get "rows"]) - _h)) max (_target getOrDefault ["rowFrom", 0]);
     };
 
     private _reason = "";
@@ -1180,7 +1241,10 @@ call {
         };
 
         // The compartment as a whole, for every mode but "keep" (fnc_spanRect).
-        private _compartment = [_target, [_originX, _originY], 0, 0, _target get "cols", _target get "rows"] call FUNC(spanRect);
+        private _compartment = [
+            _target, [_originX, _originY], 0, _target getOrDefault ["rowFrom", 0], _target get "cols",
+            (_target getOrDefault ["rowTo", _target get "rows"]) - (_target getOrDefault ["rowFrom", 0])
+        ] call FUNC(spanRect);
 
         switch (_mode) do {
             case "keep": {
@@ -1364,7 +1428,8 @@ call {
         } else {
             private _mask = [_col, _row, _w, _h, _dragHoles];
 
-            _taken = _col < 0 || {_row < 0} || {_col + _w > _target get "cols"} || {_row + _h > _target get "rows"}
+            _taken = _col < 0 || {_row < (_target getOrDefault ["rowFrom", 0])} || {_col + _w > _target get "cols"}
+                || {_row + _h > (_target getOrDefault ["rowTo", _target get "rows"])}
                 || {[_target, _col, _row, _w, _h, _dragHoles] call FUNC(hitsHole)};
 
             // A cell of its own (none of its holes) that a tile other than the lifted one takes (einv_storage_fnc_overlaps,
@@ -1571,16 +1636,18 @@ call {
     (_gridBoxes select _targetIndex) params ["", "_originX", "_originY"];
 
     private _left = (_col max 0) min ((_target get "cols") - 1);
-    private _top = (_row max 0) min ((_target get "rows") - 1);
+    private _viewFrom = _target getOrDefault ["rowFrom", 0];
+    private _viewTo = _target getOrDefault ["rowTo", _target get "rows"];
+    private _top = (_row max _viewFrom) min (_viewTo - 1);
     private _right = ((_col + _w) min (_target get "cols")) max (_left + 1);
-    private _bottom = ((_row + _h) min (_target get "rows")) max (_top + 1);
+    private _bottom = ((_row + _h) min _viewTo) max (_top + 1);
     private _clipRect = [_target, [_originX, _originY], _left, _top, _right - _left, _bottom - _top] call FUNC(spanRect);
 
     // A swap lies in the accent colour, on the cells of both tiles: the dragged one's new ones, here, and the
     // other tile's new ones, where the dragged one came from (in view of its column only).
     if (_auto || {_viaFold}) then {
         // No cell of its own: the compartment as the column shows it, at half strength.
-        _clipRect = [_target, [_originX, _originY], 0, 0, _target get "cols", _target get "rows"] call FUNC(spanRect);
+        _clipRect = [_target, [_originX, _originY], 0, _viewFrom, _target get "cols", _viewTo - _viewFrom] call FUNC(spanRect);
 
         [_clipRect, _reason isEqualTo "", DRAG_FOOTPRINT_ALPHA / 2] call _fnc_show;
     } else {

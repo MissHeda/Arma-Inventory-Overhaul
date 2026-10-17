@@ -41,7 +41,7 @@ call FUNC(drawInspect);
 
 // What the search field leaves out fades (fnc_applyFilter).
 if (GVAR(filter) isNotEqualTo "") then {
-    call FUNC(applyFilter);
+    [] call FUNC(applyFilter);
 };
 
 GVAR(lastMouse) = getMousePosition;

@@ -26,7 +26,8 @@
  * 4: Cell [col, row, compartment] - with [.., width, height] when it lies turned there - or [] to let
  *    the layout find one <ARRAY> (default: [])
  * 5: Options (fnc_sendMoves) <HASHMAP> (default: empty); "separate" <BOOL> as above (default: false);
- *    "mergeInto" <ARRAY> as above (default: [])
+ *    "mergeInto" <ARRAY> as above (default: []); "roomChecked" <BOOL> - the caller asked for room already
+ *    (fnc_roomFor), so it is not laid out again here (default: false)
  *
  * Return Value:
  * Asked for <BOOL>
@@ -76,7 +77,10 @@ if (_why isEqualTo "" && {_to isEqualType objNull} && {_to isNotEqualTo _from}) 
         _why = "NoBackpack";
     };
 
-    if (_cell isEqualTo [] && {(_options getOrDefault ["mergeInto", []]) isEqualTo []} && {!([_to, _entry] call EFUNC(storage,hasSpace))}) then {
+    if (
+        _cell isEqualTo [] && {(_options getOrDefault ["mergeInto", []]) isEqualTo []} && {!(_options getOrDefault ["roomChecked", false])}
+        && {!([_to, _entry] call EFUNC(storage,hasSpace))}
+    ) then {
         _why = "NoRoom";
     };
 };

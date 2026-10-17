@@ -64,7 +64,7 @@ _edit ctrlAddEventHandler ["EditChanged", {
 
     GVAR(filter) = trim _text;
     (_edit getVariable [QGVAR(placeholder), controlNull]) ctrlShow (_text isEqualTo "");
-    call FUNC(applyFilter);
+    [true] call FUNC(applyFilter);
 }];
 
 // Somewhere for the cursor to go when typing is done (Return, or a click elsewhere): a button no one

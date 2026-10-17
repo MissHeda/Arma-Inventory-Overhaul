@@ -86,7 +86,7 @@ private _fnc_find = {
 ([_pointX - _originX, _grid getOrDefault ["colX", []], _grid getOrDefault ["colAt", []], _grid get "cellW"] call _fnc_find) params ["_col", "_gapX"];
 ([_pointY - _originY, _grid getOrDefault ["rowY", []], _grid getOrDefault ["rowAt", []], _grid get "cellH"] call _fnc_find) params ["_row", "_gapY"];
 
-if (_col < 0 || {_row < 0} || {_col >= _grid get "cols"} || {_row >= _grid get "rows"}) exitWith {[]};
+if (_col < 0 || {_row < (_grid getOrDefault ["rowFrom", 0])} || {_col >= _grid get "cols"} || {_row >= (_grid getOrDefault ["rowTo", _grid get "rows"])}) exitWith {[]};
 
 // In the room a seam opens inside the compartment, the cell before it - where the cells across it are the
 // compartment's too, as a tile can lie over it there. Beside a hole it is room between two compartments.

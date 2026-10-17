@@ -27,6 +27,9 @@
  *
  * Arguments:
  * 0: Display <DISPLAY>
+ * 1: The first place in the queue to look at - the entries before it keep their circles untouched: entries added at
+ *    the end change nothing for those in front, so a long queue costs a pass only over what was added
+ *    (fnc_animateQueue). Whoever changed the order or the tiles asks for all (default: 0) <NUMBER>
  *
  * Return Value:
  * None
@@ -39,9 +42,10 @@
 
 disableSerialization;
 
-params [["_display", displayNull, [displayNull]]];
+params [["_display", displayNull, [displayNull]], ["_from", 0, [0]]];
 
 GVAR(queueDirty) = false;
+GVAR(queueFrom) = 0;
 
 if (isNull _display) exitWith {
     {
@@ -97,9 +101,8 @@ private _fnc_onSurfaces = {
     _same
 };
 
-{
-    private _entry = _x;
-    private _position = _forEachIndex;
+for "_position" from (_from max 0) to (count GVAR(handQueue) - 1) do {
+    private _entry = GVAR(handQueue) select _position;
 
     // What the circle is made of: the first has the ring that fills, the others a number; the disc is left out
     // past QUEUE_DISC_MAX.
@@ -258,4 +261,4 @@ private _fnc_onSurfaces = {
     };
 
     _entry set ["fx", _made];
-} forEach GVAR(handQueue);
+};

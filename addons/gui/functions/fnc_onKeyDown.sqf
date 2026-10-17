@@ -7,7 +7,8 @@
  * (fnc_selectSection). The drop key (fnc_isDropKey, set in Configure Addons; G) drops the selected tiles, else
  * the item under the mouse - Delete does so only if the player bound it; the Gear key closes the window again,
  * as it closes the vanilla inventory. A key the hotbar has a use for goes to it first
- * (einv_hotbar_fnc_onWindowKey - only when that addon is loaded), then the quick move key (fnc_isQuickKey). A window that attached (fnc_attach) is
+ * (einv_hotbar_fnc_onWindowKey - only when that addon is loaded), then the quick move key (fnc_isQuickKey; its repeats while it is held
+ * only queue, see there). A window that attached (fnc_attach) is
  * offered the keys after those (the "key" hook) and before the drop and Gear keys, and hears Return in
  * any field of its own ("submit").
  *
@@ -93,7 +94,7 @@ if (_editing) exitWith {
             _filterEdit ctrlSetText "";
             GVAR(filter) = "";
             (_filterEdit getVariable [QGVAR(placeholder), controlNull]) ctrlShow true;
-            call FUNC(applyFilter);
+            [true] call FUNC(applyFilter);
             true
         };
         case (!_typing && {_key == DIK_ESCAPE}): {
@@ -158,7 +159,16 @@ if (
 // The quick move key (fnc_isQuickKey, set in Configure Addons; F): the double click's work for the tile the
 // mouse is on, or for the whole selection when the mouse is on a tile of it. Over a worn slot or free cells it
 // is the key like any other.
+//
+// Held down the key repeats, and every repeat comes here as a press. The first press of a hold does all that a double
+// click does; the repeats (GVAR(quickHeldKey), until the key is let go - fnc_open) only queue: a tile that waits or
+// is on its way costs nothing, and one that opens (a nested container, a kit) or puts on is left to the first press,
+// so a held key sweeping over a crate never opens and closes a backpack with a build of the window each time.
 if (!GVAR(dragging) && {call FUNC(isInventoryMode)} && {[_key, [_shift, _ctrl, _alt]] call FUNC(isQuickKey)}) then {
+    private _repeat = GVAR(quickHeldKey) == _key;
+
+    GVAR(quickHeldKey) = _key;
+
     if ((GVAR(hover) param [0, ""]) isEqualTo "tile") then {
         GVAR(hover) params ["", "_gridIndex", "_tileIndex"];
 
@@ -166,9 +176,11 @@ if (!GVAR(dragging) && {call FUNC(isInventoryMode)} && {[_key, [_shift, _ctrl, _
         private _tile = (_grid getOrDefault ["tiles", []]) param [_tileIndex, createHashMap];
 
         if (count _tile > 0 && {!(_grid getOrDefault ["virtual", true])} && {!(_tile getOrDefault ["hidden", false])}) then {
-            [_gridIndex, _tileIndex] call FUNC(quickAction);
-
             _handled = true;
+
+            if (!(_repeat && {_tile getOrDefault ["pending", false]})) then {
+                [_gridIndex, _tileIndex, _repeat] call FUNC(quickAction);
+            };
         };
     };
 };

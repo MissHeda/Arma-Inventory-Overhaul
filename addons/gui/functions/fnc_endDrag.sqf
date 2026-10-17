@@ -136,7 +136,7 @@ uiNamespace setVariable [QGVAR(hoverHold), []];
 } forEach _group;
 
 if (GVAR(filter) isNotEqualTo "") then {
-    call FUNC(applyFilter);
+    [] call FUNC(applyFilter);
 };
 
 // The hint goes back to what the mouse is on - a reason why not, below, writes over it.

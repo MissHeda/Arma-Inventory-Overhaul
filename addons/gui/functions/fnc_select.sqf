@@ -35,7 +35,7 @@ private _fnc_ref = {
     params ["_grid", "_tile"];
 
     if (
-        count _tile == 0 || {_tile getOrDefault ["hidden", false]} || {_tile getOrDefault ["pending", false]}
+        count _tile == 0 || {_tile getOrDefault ["hidden", false]} || {_tile getOrDefault ["pending", false]} || {_tile getOrDefault ["offPage", false]}
         || {_grid getOrDefault ["virtual", true]} || {_grid getOrDefault ["overflow", false]}
         || {(_grid getOrDefault ["window", ""]) isNotEqualTo ""} || {(_grid getOrDefault ["side", ""]) isEqualTo ""}
     ) exitWith {[]};

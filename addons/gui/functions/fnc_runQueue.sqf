@@ -30,6 +30,8 @@ if (GVAR(handQueue) isEqualTo []) exitWith {false};
 
 private _head = GVAR(handQueue) deleteAt 0;
 
+[[_head], false] call FUNC(queueIndex);
+
 // The tiles fnc_drawQueue marked for it (found anew only when it has not been drawn yet).
 private _tiles = _head getOrDefault ["tiles", []];
 

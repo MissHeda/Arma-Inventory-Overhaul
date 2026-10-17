@@ -49,11 +49,6 @@ private _pending = [];
     _pending append (_y param [0, []]);
 } forEach GVAR(inFlight);
 
-// And those waiting for the hands (fnc_queueMoves).
-{
-    _pending append (_x getOrDefault ["sources", []]);
-} forEach GVAR(handQueue);
-
 private _items = [];
 private _hidden = 0;
 private _root = _section getOrDefault ["root", objNull];
@@ -73,6 +68,11 @@ private _root = _section getOrDefault ["root", objNull];
         && {_pendingBlock == (_entry getOrDefault ["block", 0])} && {_pendingCol == (_entry getOrDefault ["col", -1])}
         && {_pendingRow == (_entry getOrDefault ["row", -1])}
     } >= 0) then {continue};
+
+    // And those waiting for the hands (fnc_queueMoves), found in the queue's index, not by a pass over the queue.
+    if ([[
+        _holder, _entry getOrDefault ["key", ""], _entry getOrDefault ["block", 0], _entry getOrDefault ["col", -1], _entry getOrDefault ["row", -1]
+    ]] call FUNC(queueWaits)) then {continue};
 
     // Another living player's kit stays where it is, as for a single tile (einv_compat_efak).
     if (!isNil QEFUNC(compat_efak,checkTile) && {([_entry getOrDefault ["class", ""], _holder] call EFUNC(compat_efak,checkTile)) isNotEqualTo ""}) then {continue};

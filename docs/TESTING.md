@@ -16,7 +16,7 @@ HEMTT launches the dev build with file patching. Two ways:
   `hemtt launch -Q -i 2 test -- -connect=127.0.0.1 -port=2302`. Put `kickDuplicate = 0;` into `server.cfg`,
   or the second client is kicked for carrying the same Steam id.
 
-Settings the server forces (`cba_settings.sqf`): `einv_items_rules`, the presets, locks, sounds, animation, hotbar.
+Settings the server forces (`cba_settings.sqf`): `einv_items_rules`, the presets, locks, sounds, hotbar.
 A client can see them and cannot change them.
 
 ## A. Multiplayer
@@ -83,7 +83,8 @@ A client can see them and cannot change them.
       open: nothing moves, an add with no free cell is taken back; after the close the surplus moves on first and the notice
       names only what fits nowhere. The setting "Move overfull items on" off: nothing moves. The RPT: no `Error`, no item lost
       or doubled (count before and after).
-- [ ] Sounds, the looting pose, a movement key closes the window.
+- [ ] Sounds, a movement key closes the window.
+- [ ] Pages: a crate with more than 10 rows of loot shows a bar; arrows turn the page; a dragged item held over an arrow turns it; the search finds an item on another page; holding F over a crate stays smooth.
 - [ ] Hotbar 4 to 0: bind by drag, use, the HUD strip.
 - [ ] No vanilla inventory: the Gear key, ACE's "Inventory" on an unconscious soldier, ACE's "Open backpack", a crate and a
       vehicle all open ours; after a respawn, a team switch and in Zeus remote control as well; with Better Inventory

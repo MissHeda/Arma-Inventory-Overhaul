@@ -210,6 +210,7 @@ uiNamespace setVariable [QGVAR(dragGhosts), []];
 // What each target has to say is worked out once per drag, when the mouse comes to it (fnc_updateDrag); the
 // weight of what is held is the first of it (fnc_previewWeight).
 GVAR(dragRoom) = createHashMap;
+GVAR(pageHover) = [];
 
 // The frames before it are written first (fnc_logFrame), so the drag line stands beside its own.
 [""] call FUNC(logFrame);

@@ -65,7 +65,7 @@ The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
 | `main` | version, macros and the shared defines of `script_macros.hpp`; the registry of the server settings and the one CBA text that holds them (section 8). |
 | `items` | what an item is (`einv_items_fnc_getInfo`) and the rules engine behind it: text, presets, compile, resolve. |
 | `storage` | what a container holds and where it lies; what a unit wears; the transactions, hub, places sync and loadouts that change anything. |
-| `gui` | the window: engine, Glass theme, layout, tiles, drag, menus, searching, sounds, looting pose, people, CBA item menu, kit windows. |
+| `gui` | the window: engine, Glass theme, layout, tiles, drag, menus, searching, sounds, people, CBA item menu, kit windows. |
 | `weight` | the soldier's load: `weight=` overrides into ACE's virtual load, the tiers Light, Heavy, Overloaded, Critical and their effects. |
 | `locks` | who may open a crate or vehicle: one side, one group or the admins; the engine lock per client and the guard on every op. |
 | `setup` | the setup wizard (General, Items, Containers) and its entry points. |
@@ -1065,12 +1065,12 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
 - **Closing.** Every way the window closes itself goes through `fnc_closeDisplay [reason]` (sets `einv_gui_closeReason`, then
   `closeDisplay 2`), and `fnc_onUnload` writes one INFO line `window closed: <reason>`: `a movement key` (`"move"`), `Escape`
   (set by `fnc_onKeyDown` where it leaves Escape to the engine, inventory only), `the Gear key`, `the close button`,
-  `the soldier was taken away from what he looted` (`"taken"`, `fnc_poseCheck`), each rule of `fnc_onFrame`'s must-close
+  `the soldier was taken away from what he looted` (`"taken"`, `fnc_checkTaken`), each rule of `fnc_onFrame`'s must-close
   check by name (the unit died, is unconscious, is no longer `ACE_player`, the person out of reach, their backpack gone, may no
   longer be opened, the `keepOpen` hook), `stepped aside for another mod's dialog`, `the vanilla inventory under it was closed`,
   `the window could not attach`, and `display lost` (the frame found the display gone without its unload event and ends the
   window as any close). No reason given means another mod or a script closed it (`closeDialog` / `closeDisplay`, the exit code
-  is logged); on a display the window is a guest on, that display closed. `"move"` and `"taken"` are read by `fnc_poseEnd`.
+  is logged); on a display the window is a guest on, that display closed. `"move"` and `"taken"` are the two reasons that come as a key (no closing sound for `"taken"`).
 - **Attaching.** `fnc_attach [display, unit, container, secondary, hooks = createHashMap, driver = "pfh"]` -> BOOL makes any
   display that carries the dim layer (`IDC_DIM` 9601) and the first control (`IDC_FIRST` 9602) **the window**: it sets the unit
   and containers, starts all window state afresh, adds the mouse handlers, builds once and starts the frame. It refuses when
@@ -1114,8 +1114,8 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   in; a redraw deletes the inner group, leaves its `slots` / `infoAreas` entries as dead stubs (numbers stay valid), and draws into a
   new one. The weight card (`fnc_drawWeightCard`, split out of `fnc_drawEquipmentCards`) and the hotbar strip are parts.
 - **The camera is kept** across builds while `einv_gui_cameraFor` (`[unit, rect]`, set by `fnc_cameraStart`) is unchanged; another rect
-  (a pile appearing after a drop opens the loot column and moves the free middle), the pose being reached (`fnc_poseCheck`) only move
-  and re-aim the camera that is there (`camSetPos`, `camSetTarget`; the light follows) - ending it ("terminate") leaves the player in first person, which
+  (a pile appearing after a drop opens the loot column and moves the free middle) only moves
+  and re-aims the camera that is there (`camSetPos`, `camSetTarget`; the light follows) - ending it ("terminate") leaves the player in first person, which
   made a drop throw him out of third person before 0.5.0 - and only the camera switch, another soldier or a vehicle end it
   (`fnc_cameraStop`). The view the player had when the camera began (`cameraView`, kept with his unit in `einv_gui_cameraView`) is
   switched back to whenever the camera ends: window closed, camera off, a vehicle. `einv_gui_debugTiming` (client,
@@ -1161,11 +1161,12 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   anyway), a move with nothing of it on the window (no tile found by `fnc_queueTiles`, no slot drawn: say a kit unpacked from the menu with its
   window closed), and one whose tile or worn item already waits (dropped, no second entry). An entry is a HashMap: `id`, `move`, `options`
   (a copy with `now`; `label` only on the last entry of a call), `hand`, `time`, `sources` (`[holder, key, block, col, row]` as the moves in
-  flight name them), `slot` (`[unit, slot]` of a worn item a take off or swap lifts), `fx`, `arc`, `step`. `fnc_queueTiles [entry]` finds the
+  flight name them), `slot` (`[unit, slot]` of a worn item a take off or swap lifts), `fx`, `arc`, `step`. `fnc_queueTiles [entry]` takes the entry's `hint` first (the tile HashMaps the caller queued it for, which are the window's own while their
+  controls are there - no grid is looked at), else finds the
   tiles by those sources as `fnc_drawPending` finds a move in flight's, through an index of each grid's tiles by cell that the caller
   can share between the entries of a pass (`cache` argument; nothing scans every tile per entry). `fnc_drawQueue` is called at the end
   of `fnc_drawPending` (every build, every redraw of tiles, every settle), after a kit window is drawn on its own and, once a frame at
-  most, by `fnc_animateQueue` when `GVAR(queueDirty)` says entries were queued or cancelled. It **keeps the circles**: an entry's
+  most, by `fnc_animateQueue` when `GVAR(queueDirty)` says entries were queued or cancelled - from `GVAR(queueFrom)`, the first place that needs a pass: entries added at the end leave those in front alone, so a held quick move key costs a pass over what it added, not over the queue (a cancel or a finished entry asks for all). It **keeps the circles**: an entry's
   controls (`fx`) stay as long as they are all there, its place class is the same (first / others, under or past `QUEUE_DISC_MAX`) and
   its tiles still have the surfaces the circle was made over (`marks`; a redraw of a section makes new controls that would lie over the
   old circle, so those entries get new circles; a slot entry compares the slot's record, `slotAt`). Only what changed is touched: an
@@ -1178,7 +1179,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   faint ring (a little stronger) and their number, two controls instead of three. `fnc_onFrame` calls `fnc_animateQueue` each frame while the queue holds something and the
   window is not covered (the time it stood still does not count, as for the search): that one place changes the first ring's picture when its
   step changes and calls `fnc_runQueue` when the time is up - no control is made per frame, and the work of a frame does not grow with the
-  length of the queue (the head entry only). A left press on a queued tile or slot
+  length of the queue (the head entry only). What waits is also kept in an index by cell, `GVAR(handWaiting)` (`fnc_queueIndex` adds and takes out, `fnc_queueWaits [source]` asks): `fnc_queueMoves`, Take all and Put all in ask it instead of passing the queue. A left press on a queued tile or slot
   (`fnc_onMouseButton`) or "Cancel" in its menu (`fnc_contextMenu`) calls `fnc_cancelQueued [id]` (0: all): the entry leaves, the tile is
   free, the others are numbered again (in the next frame, once, through `queueDirty`). `fnc_queueMoves` adds the entries of a call without
   drawing (the circles of a Take all of N come once, in the next frame, or with the next `fnc_drawPending`); what waits is kept by cell
@@ -1187,9 +1188,22 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   gear changed, as for any move), and `fnc_drawQueue` renews the circles only of the entries on those redrawn tiles. The queue is dropped by `fnc_attach` and `fnc_onUnload`: closing the window (Escape, the Gear key,
   a movement key, ...) cancels everything that still waits, which only waited - a move already sent finishes on its own. Take all / Put all in
   skip tiles that wait (`handQueue` sources next to `inFlight`'s). Walking does not cancel (only `einv_gui_moveToStop` closes the window
-  while looting, as ever); with the looting animation on, the soldier simply stays in the pose while the window is open. The target cells
+  while looting, as ever). The target cells
   of a queued move are not reserved or outlined: something else put there meanwhile makes it land elsewhere ("Put elsewhere") or bounce, as
   for any move whose cell was taken. Times do not depend on weight.
+- **The quick move key held down** (`fnc_onKeyDown`, `fnc_quickAction` argument 3, `fnc_quickMove`, `fnc_roomFor`). What a repeat costs, and what it does not: it never reaches
+  the network - a queued move is only added to `GVAR(handQueue)`; the server hears of it when its circle is full (`fnc_runQueue` -> `fnc_sendMoves`, one transaction per
+  entry, as for a move never queued). With the hands' time at 0 a move goes out at once; `fnc_sendMoves` now flags and fades the tiles it takes from the moment it
+  records the transaction in flight (before, `fnc_drawPending` did at the next build, so a repeat before the answer sent the same tile again). Per repeat the work is
+  bounded and does not grow with the queue: a tile that is `pending` is skipped before anything is asked; a container or kit tile is left to the first press;
+  `fnc_roomFor [container, tile, reserve]` replaces `einv_storage_fnc_hasSpace` (a whole layout for each of up to three containers, and `fnc_applyMove` once more - now told
+  `roomChecked`): per container it keeps, for the container's signature (places revision and the counts of items, magazines, weapons and backpacks), the taken cells
+  (`einv_storage_fnc_seedTaken`, `takeCells`), the free cell count, the cells the waiting moves to that container take (read from the queue when the picture is made) and the exact
+  answers asked so far; a plain rectangular tile needs one look for a free spot (`cellsFree`, upright then turned) and `free - waiting` to cover it, and with `reserve` the cells it
+  takes count as waiting at once. A stackable or shaped tile, and any tile for which no spot is found, gets `hasSpace`'s exact answer, once per signature and kind of tile; room is
+  refused on the cells' word only when the waiting moves have filled it. `fnc_cancelQueued` empties the cache. The queue itself: `fnc_queueMoves` finds a tile by its `hint`
+  (no grid scan), checks `fnc_queueWaits` (index by cell) and adds to the index; `fnc_drawQueue` starts at `GVAR(queueFrom)`. Not per repeat: any build, any redraw of
+  tiles beyond the once-a-second signature, any sound.
 
 ### Geometry and the cell
 
@@ -1414,13 +1428,37 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   label can become, since a repack writes rounds live). The fill bar (`einv_gui_magazineFillBar`) shows on magazines that are
   not full; the rounds as words only while `einv_gui_magazineText` is on (tiles only - a weapon's magazine slot keeps them;
   without the label a repack writes no rounds, its bar still runs).
-- **Tall compartments.** `fnc_viewBlocks [layout, holder]` -> `[blocks, hidden, foldable, cells]` shows a tall compartment down to
+- **Tall compartments.** `fnc_viewBlocks [layout, holder]` -> `[blocks, hidden, foldable, cells, paging]` shows a tall compartment down to
   its last row in use plus `COLLAPSE_SPARE_ROWS` 2, at least `COLLAPSE_MIN_ROWS` 4, and only folds when that hides
   `COLLAPSE_HIDE_MIN` 4 rows or more; one line under the grid, "+32 empty rows (256 cells)", opens them (`fnc_toggleRows`,
   `einv_gui_expanded`). A positional compartment never folds; kit windows and the own storage column are not folded. Only the
   view: the grid stays whole. A container with rows folded away registers its fold line and its box in uiNamespace `einv_gui_foldAreas`
   (`fnc_drawSection`, emptied by each build): a drag let go on either, or on a cell that does not take the item, lays it down in the
   first free spot of the whole container (below, `fnc_updateDrag`).
+- **Pages** (`einv_gui_pageRows`, client; `fnc_pageRows`: 0 or `MAX_ROWS` 40 off, else at least `PAGE_MIN_ROWS` 4). A compartment of the loot column
+  (not canvas compartments, not the own storage, not kit windows) whose view - its rows down to the last in use plus the spare rows, or all of
+  them where the fold would hide fewer than four - is taller than the page is cut into pages: `fnc_viewBlocks` answers `paging` per compartment,
+  `[page, [[from, to], ...]]` (`fnc_pageRanges`: cut in steps of the page size, but never through a tile, so a page can be a row or two short; one tile
+  taller than the page makes it grow), its `blocks` entry holds the view's rows as ever, and it neither folds nor counts in `hidden`/`foldable`: **the
+  pages replace the fold** - no "+N empty rows" line, no `expanded` for it. The page is kept per container and compartment for the mission (`GVAR(pages)`,
+  `fnc_pageOf`) and clamped to what exists. `fnc_drawSection` flows the compartment as its tallest page plus `PAGE_RESERVE` (the panel's pad, a gap and the bar),
+  so turning never moves what lies below, and registers the box and the bar's name in `foldAreas`. **The grid is the whole compartment, only some rows
+  show**: `fnc_createGrid` takes a window (`rowFrom`, `rowTo`; `fnc_setWindow` changes it) and starts `rowY` at the window's first row, so a cell's place is
+  `(row - rowFrom) * cell` and everything built on `rowY`/`rowAt` (`fnc_spanRect`, `fnc_shapeRects`, `fnc_screenToCell`) works unchanged; the bounds that
+  were `rows` for what shows are `rowFrom`/`rowTo` (`fnc_screenToCell`, `fnc_hoverGeometry`, the drag's geometry, clamp and footprint, `fnc_groupMode`,
+  `fnc_swapPlan`, `fnc_drawCells`). **Every tile of the compartment stays on the grid**, in the same order, whatever page shows - the room, the queue, the
+  drag's indices and the selection need them - but only the shown page's have controls: the others are bare (`offPage` true, `controls` []), skipped by
+  `fnc_findTile` and `fnc_selectionTiles`/`fnc_selectSection`/`fnc_select` (selecting works on the shown page), and drawn by `fnc_createTile` when their page
+  comes (`fnc_drawTiles`; the same HashMap, put back where it stood in the grid's list). The pager is `fnc_drawPageBar` (the wizard's look: "Page 2 / 5",
+  two ghost arrows; `fnc_pageCounts` says how many tiles and matches each page holds) and the cue over the page's edge - `PAGE_FADE_STEPS` strips and a chip "+37
+  items on other pages", clickable - is part of it (the grid's `pageControls`, drawn after the tiles so they lie over them, drawn again by every turn). `fnc_turnPage [grid, step]` ->
+  `fnc_setPage [grid, page, bySearch]` (state, `GVAR(pagesMoved)` for the search) -> `fnc_showPage [display, grid, page]`, which draws only this box: the page left
+  gives up its cell squares, tile controls and panel, the window moves, the panel (`fnc_drawPagePanel`), the new tiles, `fnc_drawCells` and the bar come, then
+  `fnc_drawPending` (the queue's circles are found again), the selection, the search's fading and the hover are redone as after `fnc_redrawTiles`. `fnc_redrawTiles`
+  accepts a paged compartment as long as the page height is the one the box was made for and redraws the page it stands on (the window may move with what lies
+  there: then the box is drawn from its panel on); the bar is drawn again. The wheel is not used (the column needs it). A dragged item held over a bar arrow
+  (`GVAR(pageAreas)`, the drag's geometry "pageBoxes") for `PAGE_HOVER_TIME` 0.7 s turns the page, again every 0.7 s while it stays, before the frame's early exits;
+  `fnc_setPage` drops what the drag knew of the grids ("geometry", "hold", "spot", "frame", "cells|n", "swap|...").
 - **Kit windows** (`fnc_drawWindows`, `fnc_drawWindow [display, section, theme, fresh]`): a kit or pouch is a floating glass
   window - a title row (picture, name, Take all and Sort, "12 / 60 mass", a cross, all on the row's middle line; the buttons and
   the cross are a section caption's - 0.62 UNIT high, labels 0.46 UNIT and centred, `fnc_buttonWidth` / `fnc_sortChip` widths -,
@@ -1548,8 +1586,8 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   (`fnc_selectSection`). A press on an empty cell is only a click that clears the selection (`einv_gui_emptyPress`, `[Ctrl held, mouse]`); dragging
   from it does nothing - there is no frame to drag out. Refs
   are `[holder, key, compartment, col, row]` (`einv_gui_selection`), found again on every build by `fnc_selectionTiles`; one side
-  at a time (`own` or `loot`); searched tiles only. **Double click** - or the quick move key, F by default (CBA keybind `einv_gui_quickMove`, `fnc_isQuickKey`, read by `fnc_onKeyDown` since CBA's keys do not run in a dialog; both do `fnc_quickAction`) - moves a tile over (`fnc_quickMove`: from own gear into the
-  loot column's containers in order, else the ground; from loot into uniform, vest, backpack), opens a kit or nested container, or
+  at a time (`own` or `loot`); searched tiles only. **Double click** - or the quick move key, F by default (CBA keybind `einv_gui_quickMove`, `fnc_isQuickKey`, read by `fnc_onKeyDown` since CBA's keys do not run in a dialog; both do `fnc_quickAction`; held, the key repeats and each repeat is a press: the first press of a hold (`GVAR(quickHeldKey)`, cleared by the display's KeyUp) does all a double click does, the repeats only queue - a tile that waits or is on its way costs nothing, and what opens (a nested container, a kit) or puts on is the first press's) - moves a tile over (`fnc_quickMove`: from own gear into the
+  loot column's containers in order, else the ground; from loot into uniform, vest, backpack; the room is asked of `fnc_roomFor`, see below), opens a kit or nested container, or
   moves a whole selection (`fnc_quickMoveGroup`); Ctrl+click on a slot takes off (`fnc_quickUnequip`); the **drop key** (CBA
   keybind `einv_gui_drop`, G by default, read like the quick move key by `fnc_isDropKey`, modifiers respected; the footer shows it,
   `fnc_dropKeyName`, and leaves the hint out while it is unbound; no other key drops, Delete included; the hotbar's strip clear and
@@ -1662,7 +1700,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   (`einv_gui_weightBar`, `fnc_previewWeight`, `fnc_clearWeightPreview`) in the colour of the tier it lands in, and the hint says
   "+2.4 kg: you will be Overloaded (46.9 kg)" (`fnc_weightText`) - a forecast, never a refusal.
 
-### Searching, sounds, the looting pose
+### Searching, sounds, moving stops looting
 
 - **Searching** (`fnc_isSearched`, `fnc_markHidden`, `fnc_animateSearch`, `fnc_showSearch`, `fnc_revealTile`, `fnc_learn`): loot
   of the kinds the settings name (bodies, persons, containers, ground; never the player's own gear, an object with
@@ -1673,7 +1711,11 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   you put in you know. The queue entry is `[container, class, row, col, cells, block]`, revealed one item at a time with a ring
   and a circling magnifier; a found tile is drawn anew in place, a build only when the section's first find brings Take all. A
   frame of searching costs the same however much is still hidden: the head's ring picture changes only when its step does, the
-  glass is one control moved, the sound has its own clock.
+  glass is one control moved, the sound has its own clock. A hidden tile of a page not shown has no controls: `fnc_findTile` does not find it, `fnc_revealTile`
+  only takes its "?" from the data. **The search field** (`fnc_drawFilter`, `fnc_applyFilter [jump]`) fades the tiles that do not match; it looks at every page of a
+  paged box (`fnc_pageCounts` reads all the grid's tiles): typed in or emptied (`jump` true) it turns each paged box to its first page with a match when the page it shows has none
+  (`fnc_setPage` with `bySearch`, remembered in `GVAR(pagesMoved)`; emptied, those pages go back, but not one the player turned since), and draws every bar again - the arrows'
+  marks count the matches before and after the page, the chip counts the matches on other pages.
 - **Sounds** (`fnc_playSound [action, class, container, world, ui]`, public): by family from the config `CfgEinvSounds`
   (`gui/CfgEinvSounds.hpp`; its header explains the layers): `Default`, 17 item families and 4 container families (crate, vehicle,
   body, ground), Arma's own files only; the family is the item's config `einv_sound`, else `fnc_soundFamily`. Actions: `lift`,
@@ -1688,19 +1730,14 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   click of a refused opening in `fnc_onInventoryOpened`, the Arsenal's blocked sound in `einv_arsenal_fnc_showBlocked`). `fnc_playSound` asks before the
   looter's copy; the world's copy (`fnc_sendNoise`) is not the looter's to mute. The variable `einv_gui_searchMuted` of the speaker that muted the
   rustle alone is read once as the start value.
-- **Looting pose** (`einv_gui_animation`): Arma's own inventory states `Ainv<Perc|Pknl|Ppne>Mstp...` (`fnc_poseState`) played with
-  `playMoveNow` on the local unit by `fnc_poseStart` (guarded by `fnc_canPose`), watched by `fnc_poseCheck`, ended by
-  `fnc_poseEnd` only while the soldier is still in an `Ainv` state, so nothing ACE started is fought. He kneels at bodies, at
-  piles holding something unsearched and at crates lower than `LOW_TARGET` 0.6 m. **Moving stops looting**
-  (`einv_gui_moveToStop`): a movement key closes the window while it was opened on something or a search runs (not keys with Ctrl
-  or Alt).
-  The weapon comes out of the pose as it went in: `fnc_open` keeps `weaponLowered` (`einv_gui_openLowered`), `fnc_poseEnd` plays the
-  raised plain state of the stance unless it was lowered (`fnc_restState [unit, stance, raised = true]`, ACE's way in
-  `ace_common_fnc_fixLoweredRifleAnimation`), and `fnc_raiseWeapon` looks again every `POSE_RAISE_STEP` until he stands still out of
-  the pose. A magazine into the weapon in the hands (`fnc_playReload`) plays its `reloadAction` with `playActionNow`
-  (`fnc_reloadGesture`: player, local, on foot, `currentWeapon`, not while ACE reloads or holds him; any animation setting); in the
-  pose he first steps out with the weapon raised, the action plays once he is out, and `einv_gui_reloadHold` keeps the pose away for
-  `RELOAD_HOLD` 3 s (the return is not counted as a re-entry).
+- **Moving stops looting** (`einv_gui_moveToStop`): a movement key closes the window while it was opened on something or a search runs
+  (not keys with Ctrl or Alt; `fnc_onKeyDown`), and `fnc_checkTaken` (every `CHECK_INTERVAL` from `fnc_onFrame`) closes it with the
+  reason `"taken"` when the soldier was taken away from what he looted - into a vehicle, handcuffed or surrendering by ACE, dragging or carrying, or
+  moved more than `TAKEN_LEASH` 1.5 m from where the window opened (seated, `einv_storage_fnc_inReach` of the vehicle and what he opened).
+  There is no looting pose: the soldier keeps whatever stance and animation he has (the looting animation of 0.4.x, `einv_gui_animation`, with its
+  `fnc_poseStart`, `fnc_poseCheck`, `fnc_poseEnd`, `fnc_gesture`, `fnc_raiseWeapon` and the rest, was taken out before 0.5.0 was released; a settings box
+  that still names `gui_animation` reads clean, `einv_main_retiredSettings`). A magazine into the weapon in the hands (`fnc_playReload`) plays its
+  `reloadAction` with `playActionNow` (`fnc_reloadGesture`: player, local, on foot, `currentWeapon`, not while ACE reloads or holds him).
 
 ### People, the CBA menu and other mods in the window
 
@@ -2505,6 +2542,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_storage_nearbyRange` | SLIDER 1 to 5 | global | 3 | m, how far crates and piles count as nearby |
 | `einv_storage_useUniform`, `useVest`, `useBackpack` | LIST | global | `all` | "Use items from the uniform / vest / backpack": `all` Everything, `list` Only whitelisted (items with `use=` for it), `none` Nothing, `strict` Strict (hidden) - Only whitelisted, and the blocked items are kept out of the cargo in the unit's hidden holder; what the padlocks, the hotbar, the window's use rows and the reload key honour (section 3, Use from containers and Strict mode) |
 | `einv_gui_cellScale` | SLIDER 0.8 to 1.3 | client | 1.1 | tile scale: the cell size, capped where the columns no longer fit; next opening |
+| `einv_gui_pageRows` | SLIDER 0 to 40 | client | 10 | rows per page of a tall compartment of what is looted (section 4, "Tall compartments"); 0 or 40 no pages, at least 4 |
 | `einv_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
 | `einv_gui_tileNames` | CHECKBOX | client | off | the item's short name in the top corner of every tile (`fnc_createTile`, a name that does not fit set a fifth smaller before it is cut; the setup wizard's preview always has it); the name at the mouse stays; ACE Arsenal's panel follows |
 | `einv_gui_cameraDefault` | LIST | client | `soldier` | the camera as the window opens: `soldier` (third person), `off` (first person) |
@@ -2515,7 +2553,6 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_gui_soundVolume` | SLIDER 0 to 2 | client | 1 | their volume |
 | `einv_gui_muteMoves`, `muteMagazines`, `muteContainers`, `muteSearch`, `muteOther` | CHECKBOX | client | on | "Mute button: ...": which kinds of sound the speaker in the window's header silences (`fnc_soundMuted`) |
 | `einv_gui_soundsWorld` | CHECKBOX | global | on | players nearby hear someone loot |
-| `einv_gui_animation` | LIST | global | Off | Off, While looting, Always: the looting pose |
 | `einv_gui_moveToStop` | CHECKBOX | client | on | a movement key closes the window while looting |
 | `einv_gui_searchTime` | SLIDER 0 to 3 | global | 0.4 | seconds per cell searched; 0 shows everything |
 | `einv_gui_handDrop` | SLIDER 0 to 3 | global | 0.3 | seconds the hands are busy dropping one item (hands' queue, section 4); 0 drops at once, no circle |
@@ -2629,7 +2666,7 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
   Same as, Review, and later the wildcard search, the tree view with its `class=X+` edits, the weight and name fields and Export /
   Import at the editors); the window details (the menu's right-click fall-through, the weight card without ticks, count pills, the
   n/stack badge); the backpack drop with its safety nets; `hasSpace` with partial stacks.
-- **Features older than that but newer than the 0.2.3 test**: the sound families and the looting pose, "moving stops looting", the
+- **Features older than that but newer than the 0.2.3 test**: the sound families, "moving stops looting", the
   magazine fill bar and the repack, the weight tiers with their effects and the comparison card, the window's lock gates, ACE
   cargo, TFAR and ACRE2 radios, the vanilla Virtual Arsenal handling.
 - **Three gate tests that were never run**: whether variables on nested objects reach other machines (G1; both ways are kept), the

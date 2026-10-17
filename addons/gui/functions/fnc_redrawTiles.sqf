@@ -69,6 +69,7 @@ private _loadSize = UNIT * 0.46;
 {
     private _section = _x;
     private _holder = _section getOrDefault ["container", objNull];
+    private _pagedNow = [];
     private _info = _infos param [_infos findIf {(_x getOrDefault ["holder", objNull]) isEqualTo _holder}, createHashMap];
 
     if (isNull _holder || {count _info == 0}) exitWith {
@@ -123,7 +124,7 @@ private _loadSize = UNIT * 0.46;
         // The compartments drawn are the ones there are, as the column shows them (fnc_viewBlocks: a tall
         // one down to a little below its last row in use - one that would show more or fewer rows now, or
         // fold another number of them away, is built anew), and so is the number of overflow tiles.
-        ([_layout, _holder] call FUNC(viewBlocks)) params ["_blocks", "", "_foldable"];
+        ([_layout, _holder, (_section getOrDefault ["side", ""]) isEqualTo "loot"] call FUNC(viewBlocks)) params ["_blocks", "", "_foldable", "", ["_paging", []]];
 
         if (_foldable isNotEqualTo (_info getOrDefault ["foldable", false])) exitWith {
             _ok = false;
@@ -144,9 +145,24 @@ private _loadSize = UNIT * 0.46;
         if (count _plain != count (_blocks select {(_x select 0) * (_x select 1) > 0})) exitWith {
             _ok = false;
         };
+
+        // The pages (fnc_pageRanges): a compartment that was paged still is and the other way round, and the tallest page
+        // is as tall as the box was made for - the bar and everything below it lie where they were drawn. The pages
+        // themselves may have moved with what lies there; the box is drawn to the page it stands on (below).
+        _pagedNow = _paging;
+
+        if (_plain findIf {
+            private _now = _paging param [_x get "block", []];
+            private _was = _x getOrDefault ["pageRanges", []];
+
+            (_now isEqualTo []) != (_was isEqualTo [])
+            || {_now isNotEqualTo [] && {selectMax ((_now select 1) apply {(_x select 1) - (_x select 0)}) != (_x getOrDefault ["pageHeight", 0])}}
+        } >= 0) exitWith {
+            _ok = false;
+        };
     };
 
-    _jobs pushBack [_section, _holder, _info, _entries, _layout, _holderGrids, _load];
+    _jobs pushBack [_section, _holder, _info, _entries, _layout, _holderGrids, _load, _pagedNow];
 } forEach _sections;
 
 if (!_ok) exitWith {false};
@@ -159,7 +175,7 @@ private _keptCount = 0;
 private _madeCount = 0;
 
 {
-    _x params ["_section", "_holder", "_info", "_entries", "_layout", "_holderGrids", "_load"];
+    _x params ["_section", "_holder", "_info", "_entries", "_layout", "_holderGrids", "_load", ["_pagedNow", []]];
 
     // The weight on the caption line.
     private _label = _info get "load";
@@ -174,6 +190,41 @@ private _madeCount = 0;
     // Search knowledge is a count per class on the container, so what was revealed stays so; what is
     // still hidden is queued again from the new arrangement.
     GVAR(searchQueue) = GVAR(searchQueue) select {(_x select 0) isNotEqualTo _holder};
+
+    // A paged compartment's page may have moved with what lies there (a page is cut at a tile, fnc_pageRanges): where
+    // the rows that show changed, the box is drawn anew from its panel - none of its tiles lies where it did.
+    {
+        private _pagedGrid = _x;
+        private _paging = _pagedNow param [_pagedGrid getOrDefault ["block", -1], []];
+
+        if (_paging isEqualTo [] || {_pagedGrid getOrDefault ["overflow", false]}) then {continue};
+
+        _pagedGrid set ["pageRanges", _paging select 1];
+        _pagedGrid set ["page", _paging select 0];
+
+        private _window = (_paging select 1) select (_paging select 0);
+
+        if (_window isEqualTo [_pagedGrid get "rowFrom", _pagedGrid get "rowTo"]) then {continue};
+
+        {
+            {ctrlDelete _x} forEach (_x getOrDefault ["controls", []]);
+        } forEach (_pagedGrid get "tiles");
+
+        {ctrlDelete _x} forEach (_pagedGrid get "cells");
+        _pagedGrid set ["cells", (_pagedGrid get "cells") apply {controlNull}];
+        _pagedGrid set ["tiles", []];
+
+        {ctrlDelete _x} forEach (_pagedGrid getOrDefault ["panel", []]);
+
+        [_pagedGrid, _window select 0, _window select 1] call FUNC(setWindow);
+
+        (_pagedGrid get "rel") params ["_pageLeft", "_pageTop"];
+
+        _pagedGrid set ["panel", [
+            _display, _pagedGrid get "parent", [_pageLeft, _pageTop], _pagedGrid get "cols", _window select 0, _window select 1,
+            _pagedGrid getOrDefault ["holes", []], _theme
+        ] call FUNC(drawPagePanel)];
+    } forEach _holderGrids;
 
     // The tiles each grid had: what did not change is kept as it is (fnc_drawTiles), the rest goes below.
     private _before = _holderGrids apply {_x get "tiles"};
@@ -205,6 +256,11 @@ private _madeCount = 0;
 
         // The cells' squares: shown where a tile went, hidden where one came, made where none was yet.
         [_display, _x] call FUNC(drawCells);
+
+        // A paged compartment's bar and cue: what lies on the pages not shown may have changed.
+        if ((_x getOrDefault ["pageRanges", []]) isNotEqualTo []) then {
+            [_display, _x] call FUNC(drawPageBar);
+        };
     } forEach _holderGrids;
 
     // Places and cargo disagree: noted for the authority, as a build notes it (fnc_drawCompartments).

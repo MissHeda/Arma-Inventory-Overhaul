@@ -12,12 +12,17 @@
  * queue of N entries costs N lookups, not N scans of every tile. Pass one cache for all the entries of one
  * pass (a HashMap, filled here) to share the index; the window must not change between the calls that share it.
  *
+ * The common case costs nothing: the entry carries "hint", the tiles the caller queued it for (the very HashMaps of the
+ * window, fnc_queueMoves). While their controls are still there (a tile drawn anew has its old controls deleted, a kept
+ * one is the same HashMap) they are the answer, and no grid is looked at - which is what keeps the quick move key
+ * cheap when it repeats over a long queue and a big container. The grid in such an answer is an empty HashMap.
+ *
  * Arguments:
  * 0: The queue entry <HASHMAP>
  * 1: Cache shared by several calls, empty at first (default: a new one) <HASHMAP>
  *
  * Return Value:
- * [[grid, tile], ...] - the grids' own HashMaps, not copies <ARRAY>
+ * [[grid, tile], ...] - the grids' own HashMaps, not copies (an empty one for a tile found by its hint) <ARRAY>
  *
  * Example:
  * [GVAR(handQueue) select 0] call einv_gui_fnc_queueTiles;
@@ -26,6 +31,12 @@
  */
 
 params [["_entry", createHashMap, [createHashMap]], ["_cache", createHashMap, [createHashMap]]];
+
+private _hint = _entry getOrDefault ["hint", []];
+
+if (_hint isNotEqualTo [] && {_hint findIf {isNull (_x getOrDefault ["background", controlNull])} < 0}) exitWith {
+    _hint apply {[createHashMap, _x]}
+};
 
 private _found = [];
 

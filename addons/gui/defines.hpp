@@ -210,6 +210,23 @@
 #define COLLAPSE_MIN_ROWS 4
 #define COLLAPSE_HIDE_MIN 4
 
+// A tall compartment of what is looted shows PAGE_ROWS (the client setting einv_gui_pageRows) rows at a time with a bar
+// under it to turn the pages (fnc_pageRanges, fnc_drawPageBar). At least PAGE_MIN_ROWS rows to a page; the setting 0
+// or MAX_ROWS (or more) turns the pages off. A dragged item held over an arrow of the bar turns the page after
+// PAGE_HOVER_TIME seconds, and again every PAGE_HOVER_TIME while it stays. The bar is PAGE_BAR_H of a UNIT tall,
+// PAGE_BAR_GAP of one below the compartment's panel; the fade over the page's last row (the cue that more lies on
+// other pages) is PAGE_FADE_STEPS strips over PAGE_FADE_ROWS of a cell.
+#define PAGE_MIN_ROWS 4
+#define PAGE_HOVER_TIME 0.7
+#define PAGE_BAR_H 0.62
+#define PAGE_BAR_GAP 0.12
+#define PAGE_FADE_STEPS 6
+#define PAGE_FADE_ROWS 0.7
+
+// The room a paged compartment keeps under its cells for the bar, for a cell CELLW wide: the panel's pad, the gap and the
+// bar (fnc_drawSection reserves it in the flow, fnc_drawPageBar draws in it).
+#define PAGE_RESERVE(CELLW) (COMPARTMENT_PAD_PX(CELLW) * pixelH + UNIT * PAGE_BAR_GAP + UNIT * PAGE_BAR_H)
+
 // ---------------------------------------------------------------------------
 // Weight: what lifting something previews on the weight card, and the comparison card at the mouse
 // (fnc_previewWeight, fnc_drawCompare)
@@ -253,27 +270,10 @@
 #define RELOAD_GAIN 0.4
 #define SURFACE_CACHE 2
 
-// The looting pose (fnc_poseStart, fnc_poseCheck, fnc_poseEnd). A crate whose top is less than LOW_TARGET metres
-// above the player's feet is looted kneeling. Moved more than POSE_LEASH metres from where the window opened, the
-// player has left the loot. A pose not reached within POSE_REACH_TIME seconds is someone else's turn; after a
-// weapon change it comes back POSE_REENTRIES times at most. Closed by a key tap that moved nothing, the soldier
-// stands up after POSE_MOVE_GRACE seconds. Movement keys count only MOVE_GRACE seconds after the window opened.
-#define LOW_TARGET 0.6
-#define POSE_LEASH 1.5
-#define POSE_REACH_TIME 2.5
-#define POSE_REENTRIES 3
-#define POSE_MOVE_GRACE 0.6
+// A soldier moved more than TAKEN_LEASH metres from where the window opened has left the loot (fnc_checkTaken).
+// Movement keys count only MOVE_GRACE seconds after the window opened.
+#define TAKEN_LEASH 1.5
 #define MOVE_GRACE 0.5
-
-// The weapon after the pose (fnc_poseEnd, fnc_raiseWeapon): one he held raised when the window opened and finds
-// lowered once out of the pose is raised again - looked at every POSE_RAISE_STEP seconds, POSE_RAISE_TRIES times
-// at most, while he is still bent over his gear or a reload runs. A reload in the window (fnc_reloadGesture)
-// steps out of the pose and keeps it away for RELOAD_HOLD seconds, the length of a rifle's reload gesture; the
-// gesture waits RELOAD_STEP_OUT seconds at most for him to be out of the pose.
-#define POSE_RAISE_STEP 0.25
-#define POSE_RAISE_TRIES 20
-#define RELOAD_HOLD 3
-#define RELOAD_STEP_OUT 1.5
 #define MOVE_ACTIONS ["MoveForward", "MoveBack", "TurnLeft", "TurnRight", "MoveLeft", "MoveRight", "MoveFastForward", "MoveSlowForward", "EvasiveLeft", "EvasiveRight"]
 
 // The keys the engine keeps while the inventory window is open: those of the actions in this list - talking (chat,

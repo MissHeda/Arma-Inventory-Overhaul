@@ -51,9 +51,34 @@ private _entries = if (_grid getOrDefault ["overflow", false]) then {
     }
 };
 
+// A compartment cut into pages (fnc_pageRanges) draws only the tiles of the rows that show: the others are on the grid
+// all the same - the room, the selection and the hands' queue know them - but bare, "offPage", with no control at all.
+// A page turned (fnc_showPage) draws them when they come to show.
+private _rowFrom = _grid getOrDefault ["rowFrom", 0];
+private _rowTo = _grid getOrDefault ["rowTo", _grid getOrDefault ["rows", 1e6]];
+private _paged = _rowFrom > 0 || {_rowTo < (_grid getOrDefault ["rows", 0])};
+
+private _fnc_shows = {
+    params ["_entry"];
+
+    !_paged || {(_entry getOrDefault ["row", 0]) >= _rowFrom && {(_entry getOrDefault ["row", 0]) < _rowTo}}
+};
+
+private _fnc_bare = {
+    params ["_entry"];
+
+    _entry set ["offPage", true];
+    _entry set ["controls", []];
+    (_grid get "tiles") pushBack _entry;
+};
+
 if (_before isEqualTo []) exitWith {
     {
-        [_display, _grid, _x, _theme] call FUNC(createTile);
+        if ([_x] call _fnc_shows) then {
+            [_display, _grid, _x, _theme] call FUNC(createTile);
+        } else {
+            [_x] call _fnc_bare;
+        };
     } forEach _entries;
 
     []
@@ -77,6 +102,8 @@ private _fnc_look = {
 private _byLook = createHashMap;
 
 {
+    if (_x getOrDefault ["offPage", false]) then {continue};
+
     private _look = [_x] call _fnc_look;
     private _list = _byLook getOrDefault [_look, []];
 
@@ -94,6 +121,12 @@ private _tiles = _grid get "tiles";
 
 {
     private _entry = _x;
+
+    if !([_entry] call _fnc_shows) then {
+        [_entry] call _fnc_bare;
+        continue;
+    };
+
     private _list = _byLook getOrDefault [[_entry] call _fnc_look, []];
     private _index = if (_list isEqualTo []) then {-1} else {_list deleteAt 0};
     private _old = _before param [_index, createHashMap];

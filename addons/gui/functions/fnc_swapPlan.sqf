@@ -95,7 +95,7 @@ if (_sameHolder && {!_sameGrid} && {_toBlock == _fromBlock}) exitWith {_none};
 private _holesHeld = ([_entry getOrDefault ["class", ""], _rot] call EFUNC(items,footprintAs)) select 2;
 private _cols = _target get "cols";
 
-if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {_row + _h > (_target get "rows")}) exitWith {_none};
+if (_col < 0 || {_row < (_target getOrDefault ["rowFrom", 0])} || {_col + _w > _cols} || {_row + _h > (_target getOrDefault ["rowTo", _target get "rows"])}) exitWith {_none};
 if ([_target, _col, _row, _w, _h, _holesHeld] call FUNC(hitsHole)) exitWith {_none};
 
 private _lifted = [-1, _tileIndex] select _sameGrid;

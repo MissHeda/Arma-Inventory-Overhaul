@@ -18,6 +18,18 @@
     0
 ] call CBA_fnc_addSetting;
 
+// Each player's own eyes: a tall crate or vehicle of what is looted shows this many rows at a time, with a bar that turns
+// the pages (fnc_pageRows, fnc_viewBlocks). 0, or MAX_ROWS (the tallest a container gets), shows the whole container as
+// before. Read whenever a container is drawn.
+[
+    QGVAR(pageRows),
+    "SLIDER",
+    [LLSTRING(Setting_PageRows), LLSTRING(Setting_PageRows_Desc)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
+    [0, MAX_ROWS, 10, 0],
+    0
+] call CBA_fnc_addSetting;
+
 // Each player's own eyes.
 [
     QGVAR(compareTooltip),
@@ -136,16 +148,6 @@
     "CHECKBOX",
     [LLSTRING(Setting_SoundsWorld), LLSTRING(Setting_SoundsWorld_Desc)],
     true
-] call EFUNC(main,addSetting);
-
-// ----- Animation -----
-
-// For everyone alike: whether others can see who loots is part of a mission's game.
-[
-    QGVAR(animation),
-    "LIST",
-    [LLSTRING(Setting_Animation), LLSTRING(Setting_Animation_Desc)],
-    [[0, 1, 2], [LLSTRING(Setting_Animation_Off), LLSTRING(Setting_Animation_Looting), LLSTRING(Setting_Animation_Always)], 0]
 ] call EFUNC(main,addSetting);
 
 // ----- Searching -----

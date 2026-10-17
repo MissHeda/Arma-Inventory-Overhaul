@@ -14,9 +14,8 @@
  * GVAR(personMode)): they walk off by themselves, so fnc_onFrame watches them.
  *
  * What it was opened on - a crate, vehicle, body, person or pile, not the player's own gear - is noted
- * (GVAR(openedOn)): the soldier takes the looting pose (fnc_poseStart), the container opens with a sound,
- * and a movement key closes the window on foot (fnc_onKeyDown). The stance, vehicle and place he had are kept for
- * the end (fnc_poseEnd, fnc_poseCheck).
+ * (GVAR(openedOn)): the container opens with a sound, and a movement key closes the window on foot
+ * (fnc_onKeyDown). The vehicle and place he had are kept to tell when he was taken away (fnc_checkTaken).
  *
  * One line in the RPT per window that opens ("open: <class> kind <family> rows x cols <grid> ..."): what it
  * was opened on and beside it, the grid each has, and whether the loot column shows it - shown, locked and
@@ -232,11 +231,11 @@ if (!isNil "bettInv_stackMove") then {
     bettInv_stackMove = 1;
 };
 
-// What the window was opened on - the soldier looks into it, kneels at it, hears it open (fnc_poseStart): the
-// first of the container and the second that is somebody else's loot. Not the unit, not its own uniform,
+// What the window was opened on - the soldier hears it open: the first of the container and the second that is
+// somebody else's loot. Not the unit, not its own uniform,
 // vest or backpack, and not the empty pile the engine makes at the feet for its ground panel - opening
 // one's own gear is no looting. Not for a window that attaches with hooks (fnc_attach is all the Arsenal
-// calls), which has no pose and no sound.
+// calls), which has no sound.
 private _own = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
 
 GVAR(openedOn) = objNull;
@@ -250,11 +249,6 @@ GVAR(openedOn) = objNull;
     };
 } forEach [_container, _secondary];
 
-GVAR(openStance) = stance _unit;
-
-// How he held his weapon: the pose gives it back that way when the window closes (fnc_poseEnd).
-GVAR(openLowered) = weaponLowered _unit;
-GVAR(reloadHold) = 0;
 GVAR(openParent) = objectParent _unit;
 GVAR(openPos) = getPosASL _unit;
 GVAR(closeReason) = "";
@@ -279,11 +273,13 @@ _display displayAddEventHandler ["KeyUp", {
 
     GVAR(moveHeld) = GVAR(moveHeld) - [GVAR(moveKeys) getOrDefault [_key, ""]];
 
+    // The quick move key let go: the next press is the first of a hold again (fnc_onKeyDown).
+    if (_key == GVAR(quickHeldKey)) then {
+        GVAR(quickHeldKey) = -1;
+    };
+
     false
 }];
-
-GVAR(poseTried) = false;
-[_unit, GVAR(openedOn)] call FUNC(poseStart);
 
 if (!isNull GVAR(openedOn) && {objectParent _unit isNotEqualTo GVAR(openedOn)}) then {
     ["open", "", GVAR(openedOn)] call FUNC(playSound);

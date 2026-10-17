@@ -43,12 +43,16 @@
  * 7: Holes - the indices row * cols + col of the cells it does not have <ARRAY> (default: [])
  * 8: Where its columns and rows start from its corner, [colX, rowY] as fnc_flowCompartments gives a
  *    canvas's compartment; [] for the plain pitch <ARRAY> (default: [])
+ * 9: The rows that show, [from, to), when the compartment is cut into pages (fnc_pageRanges): the grid then stands
+ *    with row "from" at its corner; [] for all of them <ARRAY> (default: [])
  *
  * Return Value:
  * The grid <HASHMAP>
  *   "parent"  - the group the grid lies in, controlNull for the display <CONTROL>
  *   "rel"     - its top left corner in the parent, on a pixel <ARRAY>
  *   "cols", "rows" <NUMBER>
+ *   "rowFrom", "rowTo" - the rows that show, [from, to): 0 and "rows" unless the compartment is paged; cells outside get
+ *               no control, no tile is drawn there and no point is found there <NUMBER>
  *   "cellW", "cellH" - one cell, as screen width and height <NUMBER>
  *   "colX", "rowY" - where each column and row starts from the corner <ARRAY>
  *   "colAt", "rowAt" - per stretch of one cell from the corner, the last column (row) that starts in it
@@ -68,7 +72,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_position", "_rows", "_theme", ["_section", ""], ["_cols", STORAGE_COLS], ["_holes", []], ["_offsets", [], [[]]]];
+params ["_display", "_parent", "_position", "_rows", "_theme", ["_section", ""], ["_cols", STORAGE_COLS], ["_holes", []], ["_offsets", [], [[]]], ["_window", [], [[]]]];
 _position params ["_relX", "_relY"];
 _offsets params [["_colX", [], [[]]], ["_rowY", [], [[]]]];
 
@@ -88,6 +92,22 @@ if (count _rowY != _rows) then {
 
     for "_row" from 0 to (_rows - 1) do {
         _rowY pushBack (_row * _cellH);
+    };
+};
+
+// A page of a tall compartment (fnc_pageRanges): the grid is the whole compartment, but only the rows [from, to) show,
+// from the corner down - the rows before them lie above it, the rows after them below the page, where nothing is drawn
+// and nothing is found (fnc_screenToCell). Where each row starts says so, and so does everything drawn on the grid.
+private _rowFrom = 0;
+private _rowTo = _rows;
+
+if (_window isNotEqualTo []) then {
+    _rowFrom = (_window select 0) max 0;
+    _rowTo = (_window select 1) min _rows;
+    _rowY = [];
+
+    for "_row" from 0 to (_rows - 1) do {
+        _rowY pushBack ((_row - _rowFrom) * _cellH);
     };
 };
 
@@ -139,6 +159,8 @@ private _grid = createHashMapFromArray [
     ["rel", [_left, _top]],
     ["cols", _cols],
     ["rows", _rows],
+    ["rowFrom", _rowFrom],
+    ["rowTo", _rowTo],
     ["cellW", _cellW],
     ["cellH", _cellH],
     ["colX", _colX],

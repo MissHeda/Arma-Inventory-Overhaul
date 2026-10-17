@@ -38,9 +38,8 @@
  * searching, no answers finished - but the checks whether the window should still be open and whether
  * what it shows is what the containers hold. Another window over this one stops the repack.
  *
- * At each check, after those whether the window should stay open, the looting pose is looked after: a
- * soldier taken away from the loot closes the window, the pose comes back after a weapon change
- * (fnc_poseCheck).
+ * At each check, after those whether the window should stay open, a soldier taken away from the loot
+ * closes the window (fnc_checkTaken).
  *
  * The hands' queue (fnc_queueMoves) runs every frame while it holds something (fnc_animateQueue), not while another
  * window lies over this one.
@@ -540,9 +539,8 @@ if (_why isNotEqualTo "") exitWith {
     [_why] call FUNC(closeDisplay);
 };
 
-// The looting pose: the soldier taken away from the loot closes the window; a pose that is not reached yet,
-// or lost to a weapon change, is looked after (fnc_poseCheck).
-if ([_display] call FUNC(poseCheck)) exitWith {};
+// The soldier taken away from the loot closes the window (fnc_checkTaken).
+if ([_display] call FUNC(checkTaken)) exitWith {};
 
 // Not while a tile is held: a rebuild would pull it from under the mouse.
 if (_now < GVAR(nextSignature) || {GVAR(press) isNotEqualTo []}) exitWith {};

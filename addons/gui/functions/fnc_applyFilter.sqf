@@ -8,25 +8,86 @@
  * tiles of a source grid (fnc_createGrid) are never faded, and a window that attached is told afterwards
  * (the "filter" hook).
  *
+ * A tall compartment cut into pages (fnc_pageRanges) is searched on every page, not only the one shown: the
+ * tiles of the other pages are on the grid too (fnc_pageCounts). Asked to jump (the field was typed in or emptied),
+ * each such box turns to the first page with a match when the page it stands on has none (it stays where it is while
+ * it still shows one, so refining a word does not move it) - the pages it moved are kept (GVAR(pagesMoved)) and
+ * given back when the field is emptied, but for one the player turned himself since. Its bar shows how many matches
+ * lie before and after the page (fnc_drawPageBar). The tiles that match are the ones not faded, as ever.
+ *
  * A section folded away to its caption (fnc_drawSection) shows no tile to fade, so with text in the field
  * its caption tab is tinted in the soft accent colour when something searched in it matches - the player
  * knows which crate to unfold.
  *
  * Arguments:
- * None
+ * 0: Turn the paged boxes to what the search found, or back when it is empty - the field changed <BOOL> (default: false)
  *
  * Return Value:
  * None
  *
  * Example:
- * call einv_gui_fnc_applyFilter;
+ * [] call einv_gui_fnc_applyFilter;
+ * [true] call einv_gui_fnc_applyFilter;
  *
  * Public: No
  */
 
 disableSerialization;
 
+params [["_jump", false, [false]]];
+
 private _filter = toLower GVAR(filter);
+private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+// ----- Paged boxes: found on any page -----
+if (_jump && {!isNull _display}) then {
+    if (_filter isEqualTo "") then {
+        // Emptied: the pages the search moved go back.
+        private _moved = +GVAR(pagesMoved);
+
+        GVAR(pagesMoved) = [];
+
+        {
+            _x params ["_holder", "_block", "_back"];
+
+            private _grid = (uiNamespace getVariable [QGVAR(grids), []]) param [
+                (uiNamespace getVariable [QGVAR(grids), []]) findIf {
+                    (_x getOrDefault ["holder", objNull]) isEqualTo _holder && {(_x getOrDefault ["block", -1]) == _block} && {(_x getOrDefault ["pageRanges", []]) isNotEqualTo []}
+                }, createHashMap
+            ];
+
+            if (count _grid > 0) then {
+                [_grid, _back] call FUNC(setPage);
+            } else {
+                [_holder, _block, _back] call FUNC(pageOf);
+            };
+        } forEach _moved;
+
+        // The marks on the arrows go.
+        {
+            if ((_x getOrDefault ["pageRanges", []]) isNotEqualTo []) then {
+                [_display, _x] call FUNC(drawPageBar);
+            };
+        } forEach (uiNamespace getVariable [QGVAR(grids), []]);
+    } else {
+        {
+            private _grid = _x;
+
+            if ((_grid getOrDefault ["pageRanges", []]) isEqualTo []) then {continue};
+
+            ([_grid] call FUNC(pageCounts)) params ["", "_matches"];
+
+            private _page = _grid getOrDefault ["page", 0];
+            private _first = _matches findIf {_x > 0};
+
+            if ((_matches select _page) == 0 && {_first >= 0}) then {
+                [_grid, _first, true] call FUNC(setPage);
+            } else {
+                [_display, _grid] call FUNC(drawPageBar);
+            };
+        } forEach (uiNamespace getVariable [QGVAR(grids), []]);
+    };
+};
 
 {
     // A place things come from (a source grid, as the Arsenal panel makes of ACE's list) holds no container: the search leaves it alone.

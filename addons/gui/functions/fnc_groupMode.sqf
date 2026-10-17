@@ -169,7 +169,9 @@ if (_keepOk) then {
     private _baseCol = (_cell select 0) - _grabCol - (_grabbed get "col");
     private _baseRow = (_cell select 1) - _grabRow - (_grabbed get "row");
     private _cols = _target get "cols";
-    private _rows = _target get "rows";
+    // Of a paged compartment only the rows that show: the arrangement lands on the page, never past it.
+    private _rows = _target getOrDefault ["rowTo", _target get "rows"];
+    private _rowsFrom = _target getOrDefault ["rowFrom", 0];
     private _block = _target getOrDefault ["block", 0];
 
     // The cells a move under way goes to count as taken, as for a single tile (fnc_updateDrag).
@@ -199,7 +201,7 @@ if (_keepOk) then {
         private _mask = [_col, _row, _w, _h, _tile getOrDefault ["holes", []]];
 
         // Inside the compartment, and none of its cells on a shaped compartment's holes.
-        if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {_row + _h > _rows} || {[_target, _col, _row, _w, _h, _mask select 4] call FUNC(hitsHole)}) exitWith {
+        if (_col < 0 || {_row < _rowsFrom} || {_col + _w > _cols} || {_row + _h > _rows} || {[_target, _col, _row, _w, _h, _mask select 4] call FUNC(hitsHole)}) exitWith {
             _keepOk = false;
         };
 

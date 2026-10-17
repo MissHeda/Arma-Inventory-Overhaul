@@ -37,7 +37,7 @@ if (GVAR(handQueue) isEqualTo []) exitWith {
 };
 
 if (GVAR(queueDirty)) then {
-    [_display] call FUNC(drawQueue);
+    [_display, GVAR(queueFrom)] call FUNC(drawQueue);
 };
 
 if (GVAR(handStarted) >= 0 && {_gap > QUEUE_PAUSE}) then {

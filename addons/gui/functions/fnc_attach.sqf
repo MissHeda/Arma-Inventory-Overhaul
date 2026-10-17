@@ -120,6 +120,10 @@ GVAR(drift) = [];
 GVAR(handQueue) = [];
 GVAR(handStarted) = -1;
 GVAR(queueDirty) = false;
+GVAR(queueFrom) = 0;
+GVAR(handWaiting) = createHashMap;
+GVAR(roomCache) = [];
+GVAR(quickHeldKey) = -1;
 
 // The selection is view state of one window, and no press on an empty cell waits.
 GVAR(selection) = [];

@@ -17,9 +17,10 @@
  *
  * Cost: one call for all the moves of a Take all or a group drag, and no drawing in it - the entries are only
  * added and fnc_drawQueue is asked for (GVAR(queueDirty), done by fnc_animateQueue in the next frame, or by any
- * drawPending before), so the circles of N entries are made once, not N times. What waits already is
- * kept by cell, and the tiles are found through an index of the grids shared by the call (fnc_queueTiles), so a
- * move costs a few lookups, not a scan of every tile and of everything that waits.
+ * drawPending before, from GVAR(queueFrom) on), so the circles of N entries are made once, not N times. Whether a tile
+ * waits is one look in the queue's index by cell (fnc_queueIndex, fnc_queueWaits) and the tile is the HashMap the caller
+ * named (the entry's "hint", fnc_queueTiles) - a move costs a few lookups however long the queue is and however many tiles
+ * the container has, which is what the quick move key held down (one call per repeat) needs.
  *
  * Arguments:
  * 0: Moves, as fnc_sendMoves takes them <ARRAY>
@@ -42,45 +43,11 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
 if (isNull _display || {!(call FUNC(isInventoryMode))}) exitWith {[_moves, 0]};
 
-// What waits already: a second move of the same tile or worn item is not asked for. The sources are kept by their
-// cell - [holder, key, block] under "column_row" - so a move asks only what lies on its own cell.
-private _waiting = createHashMap;
-
-private _fnc_wait = {
-    params ["_source"];
-
-    _source params ["_holder", "_key", "_block", "_col", "_row"];
-
-    private _at = format ["%1_%2", _col, _row];
-    private _there = _waiting getOrDefault [_at, []];
-
-    if (_there isEqualTo []) then {
-        _waiting set [_at, _there];
-    };
-
-    _there pushBack [_holder, _key, _block];
-};
-
-private _fnc_waits = {
-    params ["_source"];
-
-    _source params ["_holder", "_key", "_block", "_col", "_row"];
-
-    (_waiting getOrDefault [format ["%1_%2", _col, _row], []]) findIf {
-        (_x select 0) isEqualTo _holder && {(_x select 1) isEqualTo _key} && {(_x select 2) isEqualTo _block}
-    } >= 0
-};
-
-{
-    {
-        [_x] call _fnc_wait;
-    } forEach (_x getOrDefault ["sources", []]);
-} forEach GVAR(handQueue);
-
-// One index of the window's tiles for all the moves of the call.
+// What waits already is looked up in the queue's index (fnc_queueIndex): a second move of the same tile or worn item
+// is not asked for, and the ask costs the same however long the queue is. A worn item is told by its slot, which the
+// few entries of that kind are searched for.
 private _cache = createHashMap;
-
-private _slotsWaiting = GVAR(handQueue) apply {_x getOrDefault ["slot", []]};
+private _slotsAdded = [];
 
 private _instant = [];
 private _held = [];
@@ -99,6 +66,7 @@ private _held = [];
     // again when the window is drawn anew - and the worn item a take off or swap lifts from its slot.
     private _sources = [];
     private _slot = [];
+    private _hint = [];
     private _kind = _move getOrDefault ["kind", "move"];
 
     {
@@ -113,6 +81,7 @@ private _held = [];
         };
 
         _sources pushBack [_holder, _key, _tile getOrDefault ["block", 0], _tile getOrDefault ["col", -1], _tile getOrDefault ["row", -1]];
+        _hint pushBack _tile;
     } forEach (switch (_kind) do {
         case "move";
         case "equip": {[[_move getOrDefault ["from", objNull], _move getOrDefault ["entry", createHashMap]]]};
@@ -130,8 +99,11 @@ private _held = [];
     };
 
     // Nothing of it on the window - a kit unpacked from the menu with its window closed, a slot not shown: no circle
-    // to run, so no wait either.
-    private _shown = ([createHashMapFromArray [["sources", _sources], ["slot", _slot]], _cache] call FUNC(queueTiles)) isNotEqualTo []
+    // to run, so no wait either. The tile the caller names is the one on the window while its controls are there
+    // (fnc_queueTiles); only otherwise is the window searched.
+    private _found = [createHashMapFromArray [["sources", _sources], ["slot", _slot], ["hint", _hint]], _cache] call FUNC(queueTiles);
+
+    private _shown = _found isNotEqualTo []
         || {_slot isNotEqualTo [] && {(uiNamespace getVariable [QGVAR(slots), []]) findIf {
             (_x param [5, ""]) isEqualTo (_slot select 1) && {(_x param [6, objNull]) isEqualTo (_slot select 0)} && {(_x param [7, -1]) < 0}
         } >= 0}};
@@ -143,18 +115,14 @@ private _held = [];
 
     // Already waiting: left out, not sent a second time.
     if (
-        (_slot isNotEqualTo [] && {_slot in _slotsWaiting})
-        || {_sources findIf {[_x] call _fnc_waits} >= 0}
+        (_slot isNotEqualTo [] && {_slot in _slotsAdded || {([_slot select 0, _slot select 1] call FUNC(queuedSlot)) > 0}})
+        || {_sources findIf {[_x] call FUNC(queueWaits)} >= 0}
     ) then {
         continue;
     };
 
-    {
-        [_x] call _fnc_wait;
-    } forEach _sources;
-
     if (_slot isNotEqualTo []) then {
-        _slotsWaiting pushBack _slot;
+        _slotsAdded pushBack _slot;
     };
 
     GVAR(handId) = GVAR(handId) + 1;
@@ -162,10 +130,15 @@ private _held = [];
     private _own = +_options;
     _own set ["now", true];
 
-    _held pushBack createHashMapFromArray [
+    private _entry = createHashMapFromArray [
         ["id", GVAR(handId)], ["move", _move], ["options", _own], ["hand", _hand], ["time", _seconds],
-        ["sources", _sources], ["slot", _slot], ["fx", []], ["arc", controlNull], ["step", 1]
+        ["sources", _sources], ["slot", _slot], ["hint", _hint], ["fx", []], ["arc", controlNull], ["step", 1]
     ];
+
+    _held pushBack _entry;
+
+    // At once, so the same tile twice in one call is left out as well.
+    [[_entry], true] call FUNC(queueIndex);
 } forEach _moves;
 
 if (_held isEqualTo []) exitWith {[_instant, 0]};
@@ -178,6 +151,9 @@ for "_i" from 0 to (count _held - 2) do {
 if (GVAR(handQueue) isEqualTo []) then {
     GVAR(handStarted) = -1;
 };
+
+// The circles of the entries before these stay as they are: only the new ones need a pass (fnc_drawQueue).
+GVAR(queueFrom) = [count GVAR(handQueue), GVAR(queueFrom) min count GVAR(handQueue)] select GVAR(queueDirty);
 
 GVAR(handQueue) append _held;
 

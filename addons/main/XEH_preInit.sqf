@@ -13,10 +13,12 @@ ADDON = false;
 //   serverKeys     - key (the name without the prefix, lowercase) -> name
 //   serverOrder    - the names in the order they were registered
 //   settingsApplied - the text box's text has been put into effect at least once, with the scripts
+//   retiredSettings - keys of settings the mod no longer has; a box that still names one reads clean (fnc_parseSettings)
 GVAR(serverSettings) = createHashMap;
 GVAR(serverKeys) = createHashMap;
 GVAR(serverOrder) = [];
 GVAR(settingsApplied) = false;
+GVAR(retiredSettings) = ["gui_animation"];
 
 #include "initSettings.inc.sqf"
 

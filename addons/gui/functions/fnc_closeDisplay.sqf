@@ -6,9 +6,8 @@
  * through here, so the RPT names it (fnc_onUnload: "window closed: <reason>"), and a window that closes
  * with no reason given was closed by something else: another mod's closeDialog or closeDisplay.
  *
- * Two reasons are keys the looting pose reads (fnc_poseEnd): "move" (a movement key - the soldier walks
- * off out of the pose) and "taken" (taken away from the loot - no closing sound, no end move). Any other
- * is only told.
+ * Two reasons are read by key: "move" (a movement key - the soldier walks off) and "taken" (taken away from
+ * the loot, fnc_checkTaken - no closing sound). Any other is only told.
  *
  * Arguments:
  * 0: Why <STRING>

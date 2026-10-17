@@ -39,11 +39,6 @@ private _pending = [];
     _pending append (_y param [0, []]);
 } forEach GVAR(inFlight);
 
-// And those waiting for the hands (fnc_queueMoves).
-{
-    _pending append (_x getOrDefault ["sources", []]);
-} forEach GVAR(handQueue);
-
 private _items = [];
 private _unit = GVAR(unit);
 
@@ -57,6 +52,11 @@ private _unit = GVAR(unit);
         && {_pendingBlock == (_entry getOrDefault ["block", 0])} && {_pendingCol == (_entry getOrDefault ["col", -1])}
         && {_pendingRow == (_entry getOrDefault ["row", -1])}
     } >= 0) then {continue};
+
+    // And those waiting for the hands (fnc_queueMoves), found in the queue's index, not by a pass over the queue.
+    if ([[
+        _holder, _entry getOrDefault ["key", ""], _entry getOrDefault ["block", 0], _entry getOrDefault ["col", -1], _entry getOrDefault ["row", -1]
+    ]] call FUNC(queueWaits)) then {continue};
 
     _entry set ["holder", _holder];
     _entry set ["root", _unit];

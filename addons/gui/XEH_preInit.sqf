@@ -51,6 +51,8 @@ uiNamespace setVariable [QGVAR(zones), []];
 //   grids    - each a HashMap (fnc_createGrid)
 //   foldAreas - where a drag may let go to be laid down in a folded container's hidden rows: HashMaps "rel", "parent",
 //              "size", "container" (fnc_drawSection, fnc_updateDrag)
+//   pageAreas - the arrows of the page bars (fnc_drawPageBar): HashMaps "rel", "parent", "size", "grid", "step" - a dragged
+//              item held over one turns the page (fnc_updateDrag)
 //   slots    - hover areas of the dedicated slots, [[x, y, w, h] on the screen, class, caption] and,
 //              optionally, its place in a scrolling group and its weapon array (see fnc_drawSlot)
 //   hover    - what the mouse is on: ["tile", grid index, tile index], ["slot", slot index] or []
@@ -61,6 +63,7 @@ uiNamespace setVariable [QGVAR(zones), []];
 uiNamespace setVariable [QGVAR(created), []];
 uiNamespace setVariable [QGVAR(grids), []];
 uiNamespace setVariable [QGVAR(foldAreas), []];
+uiNamespace setVariable [QGVAR(pageAreas), []];
 uiNamespace setVariable [QGVAR(slots), []];
 GVAR(hover) = [];
 GVAR(lastMouse) = [];
@@ -178,12 +181,20 @@ GVAR(searchLast) = 0;
 // that fills), and what fnc_drawQueue keeps to tell whether the circle is still good: "tiles" ([[grid, tile], ...] it
 // marked), "marks" (those tiles' surfaces), "slotAt", "class" and "position". Only the first runs; handStarted is when it
 // began (-1: not yet), handLast the last frame of the queue, handId counts the entries made. queueDirty: entries were
-// queued or cancelled, so the circles are brought up to date in the next frame (fnc_animateQueue), once.
+// queued or cancelled, so the circles are brought up to date in the next frame (fnc_animateQueue), once - queueFrom is
+// the first place in the queue that needs it (entries added at the end leave the ones before them alone).
+// handWaiting is the queue's sources by cell, "col_row" -> [[holder, key, block], ...] (fnc_queueIndex): asking whether a
+// tile waits is one look, however long the queue is. "hint" on an entry is the tile it was queued for (fnc_queueTiles).
+// roomCache is the room each target container has for the quick move key (fnc_roomFor), one entry per container.
 GVAR(handQueue) = [];
 GVAR(handStarted) = -1;
 GVAR(handLast) = 0;
 GVAR(handId) = 0;
 GVAR(queueDirty) = false;
+GVAR(queueFrom) = 0;
+GVAR(handWaiting) = createHashMap;
+GVAR(roomCache) = [];
+GVAR(quickHeldKey) = -1;
 
 // The sounds: each item class's family, each family's actions as read from CfgEinvSounds, when each sound last
 // played and which variant, the files found for config paths, the weapons' reload sounds, the ground under the
@@ -198,21 +209,11 @@ GVAR(noiseNext) = 0;
 GVAR(noiseSearchNext) = 0;
 GVAR(reloadSoundId) = -1;
 
-// The looting pose: what the window was opened on, the stance, vehicle and place the soldier had then, the pose
-// itself ([unit, stance at opening, pose state, started, token, reached, re-entries] or []), a counter that tells
-// one window's pose from the next, whether the pose was tried at all in this window, why the window closed
-// ("move", "taken" or ""), and where the camera frames the soldier (fnc_poseStart, fnc_poseCheck, fnc_poseEnd).
-// Whether his weapon was lowered when the window opened, given back so as it closes (fnc_poseEnd,
-// fnc_raiseWeapon), and until when a reload in the window keeps the pose away (fnc_reloadGesture).
+// What the window was opened on, the vehicle and place the soldier had then (fnc_checkTaken), why the window
+// closed ("move", "taken" or ""), and where the camera frames the soldier.
 GVAR(openedOn) = objNull;
-GVAR(openStance) = "";
-GVAR(openLowered) = false;
-GVAR(reloadHold) = 0;
 GVAR(openParent) = objNull;
 GVAR(openPos) = [];
-GVAR(pose) = [];
-GVAR(poseToken) = 0;
-GVAR(poseTried) = false;
 GVAR(closeReason) = "";
 GVAR(cameraRect) = [];
 
@@ -267,6 +268,14 @@ GVAR(collapsed) = [];
 // Tall compartments whose empty rows the player opened (fnc_viewBlocks, fnc_toggleRows), by holder, for
 // the whole mission.
 GVAR(expanded) = [];
+
+// The page each tall compartment of what is looted is turned to, [[holder, compartment, page], ...], for the whole
+// mission (fnc_pageOf, fnc_viewBlocks), and the pages a search moved, [[holder, compartment, page it was on], ...],
+// given back when the search is emptied (fnc_applyFilter). pageHover is what a dragged item is held over: [which
+// arrow, since when] (fnc_updateDrag).
+GVAR(pages) = [];
+GVAR(pagesMoved) = [];
+GVAR(pageHover) = [];
 
 // The window's sounds, muted with the speaker in the header (fnc_toggleMute); which kinds it silences is the
 // player's setting (fnc_soundMuted). Each player's own, kept in the profile - the speaker used to mute the

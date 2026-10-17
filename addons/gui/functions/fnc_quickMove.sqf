@@ -22,7 +22,8 @@
  * column, einv_locks), the ground is no place for it either: the hint says "Locked".
  *
  * Free cells decide: the first container with a free spot for all of it takes it, whatever it weighs. A
- * backpack that has nowhere but backpacks to go says that.
+ * backpack that has nowhere but backpacks to go says that. The room is asked of fnc_roomFor, not laid out
+ * anew for every press, and the move is told it was checked (applyMove's option "roomChecked").
  *
  * Arguments:
  * 0: Grid index <NUMBER>
@@ -69,9 +70,15 @@ private _fnc_pick = {
     private _noBackpack = false;
 
     {
-        if (_x isEqualTo _from || {!([_x, _tile] call EFUNC(storage,hasSpace))}) then {continue};
+        if (_x isEqualTo _from) then {continue};
 
-        if ([_x, _tile] call EFUNC(storage,backpackIntoBackpack)) then {
+        // The room is asked of fnc_roomFor, which keeps what it worked out while the container stays as it is and
+        // counts the room it gives away: a held key asks this at every repeat. A backpack for a backpack takes none.
+        private _backpack = [_x, _tile] call EFUNC(storage,backpackIntoBackpack);
+
+        if (!([_x, _tile, !_backpack] call FUNC(roomFor))) then {continue};
+
+        if (_backpack) then {
             _noBackpack = true;
         } else {
             _whole = _x;
@@ -91,7 +98,7 @@ if !(_from in _own) exitWith {
         false
     };
 
-    [_from, _target, _tile, -1, []] call FUNC(applyMove)
+    [_from, _target, _tile, -1, [], createHashMapFromArray [["roomChecked", true]]] call FUNC(applyMove)
 };
 
 // From the player's own gear: the loot containers in the order the column shows them, then the open
@@ -169,7 +176,7 @@ _loot = _loot select {
 ([_loot] call _fnc_pick) params ["_target", "_packWhy"];
 
 if (!isNull _target) exitWith {
-    [_from, _target, _tile, -1, []] call FUNC(applyMove)
+    [_from, _target, _tile, -1, [], createHashMapFromArray [["roomChecked", true]]] call FUNC(applyMove)
 };
 
 private _kitIndex = -1;

@@ -77,6 +77,12 @@ private _placed = _layout getOrDefault ["entries", []];
 private _blocks = _layout getOrDefault ["blocks", []];
 private _overflow = _layout getOrDefault ["overflow", []];
 
+// A compartment cut into pages (fnc_viewBlocks): [page, [[from, to], ...]] per compartment, [] for one that is not. Its grid
+// is the whole compartment with only the rows of its page showing (fnc_createGrid), its panel the page's, and under it the
+// bar that turns the page (fnc_drawPageBar).
+private _paging = _layout getOrDefault ["paging", []];
+private _pagePanels = createHashMap;
+
 // Loot not searched yet shows as "?" (fnc_markHidden).
 [_container, _placed] call FUNC(markHidden);
 
@@ -170,7 +176,7 @@ private _fnc_panel = {
 };
 
 private _fnc_compartment = {
-    params ["_index", "_cols", "_rows", "_place", "_isOverflow", "_overflowIndex", ["_holes", []], ["_pos", []]];
+    params ["_index", "_cols", "_rows", "_place", "_isOverflow", "_overflowIndex", ["_holes", []], ["_pos", []], ["_paged", []]];
     _place params ["_dx", "_dy", ["_colX", []], ["_rowY", []]];
 
     private _x0 = _gridX + _dx;
@@ -185,7 +191,20 @@ private _fnc_compartment = {
         ] call FUNC(uiPanel);
     };
 
-    private _grid = [_display, _parent, [_x0, _y0], _rows, _theme, _id, _cols, _holes, [_colX, _rowY]] call FUNC(createGrid);
+    private _pageWindow = [];
+
+    if (_paged isNotEqualTo []) then {
+        _pageWindow = (_paged select 1) select (_paged select 0);
+    };
+
+    private _grid = [_display, _parent, [_x0, _y0], _rows, _theme, _id, _cols, _holes, [_colX, _rowY], _pageWindow] call FUNC(createGrid);
+
+    if (_paged isNotEqualTo []) then {
+        _grid set ["pageRanges", _paged select 1];
+        _grid set ["page", _paged select 0];
+        _grid set ["pageHeight", selectMax ((_paged select 1) apply {(_x select 1) - (_x select 0)})];
+        _grid set ["panel", _pagePanels getOrDefault [_index, []]];
+    };
 
     // What the grid shows, for moving items in and out of it (fnc_onMouseButton, fnc_endDrag): a
     // virtual section - a body's worn gear - has no container to take from; nothing can be put into
@@ -209,6 +228,10 @@ private _fnc_compartment = {
 
     // The cells' squares after the tiles: only where no tile lies (fnc_drawCells).
     [_display, _grid] call FUNC(drawCells);
+
+    if (_paged isNotEqualTo []) then {
+        [_display, _grid] call FUNC(drawPageBar);
+    };
 };
 
 // Every compartment's panel first, behind every cell.
@@ -220,6 +243,16 @@ private _fnc_compartment = {
     if (_place isEqualTo [] || {_cols <= 0} || {_rows <= 0}) then {continue};
 
     _place params ["_dx", "_dy", ["_colX", []], ["_rowY", []]];
+
+    // A page: its own panel, of the rows that show.
+    private _pageOf = _paging param [_forEachIndex, []];
+
+    if (_pageOf isNotEqualTo []) then {
+        private _pageWindow = (_pageOf select 1) select (_pageOf select 0);
+
+        _pagePanels set [_forEachIndex, [_display, _parent, [_gridX + _dx, _bodyTop + _dy], _cols, _pageWindow select 0, _pageWindow select 1, _holes, _theme] call FUNC(drawPagePanel)];
+        continue;
+    };
 
     if (count _colX != _cols) then {
         _colX = [_cols, _cellW] call _fnc_plain;
@@ -237,7 +270,7 @@ private _fnc_compartment = {
 
     if ((_places param [_forEachIndex, []]) isEqualTo []) then {continue};
 
-    [_forEachIndex, _cols, _rows, _places select _forEachIndex, false, -1, _holes, _pos] call _fnc_compartment;
+    [_forEachIndex, _cols, _rows, _places select _forEachIndex, false, -1, _holes, _pos, _paging param [_forEachIndex, []]] call _fnc_compartment;
 } forEach _blocks;
 
 {

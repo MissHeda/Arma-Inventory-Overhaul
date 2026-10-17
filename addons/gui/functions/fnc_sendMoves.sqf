@@ -617,6 +617,7 @@ private _records = [];
 private _feels = [];
 private _sources = [];
 private _targets = [];
+private _lifted = [];
 private _rest = [];
 private _refused = "";
 
@@ -698,6 +699,7 @@ if (_moves isEqualTo []) exitWith {
             };
 
             _sources pushBack [_manyHolder, _manyKey, _manyEntry getOrDefault ["block", 0], _manyEntry getOrDefault ["col", -1], _manyEntry getOrDefault ["row", -1]];
+            _lifted pushBack _manyEntry;
 
             _targets pushBack [
                 _manyHolder, _manyCell param [2, 0], _manyCell select 0, _manyCell select 1,
@@ -750,6 +752,7 @@ if (_moves isEqualTo []) exitWith {
             };
 
             _sources pushBack [_recordFrom, _recordKey, _recordEntry getOrDefault ["block", 0], _recordEntry getOrDefault ["col", -1], _recordEntry getOrDefault ["row", -1]];
+            _lifted pushBack _recordEntry;
             _targets pushBack [
                 _recordTo, _recordCell param [2, 0], _recordCell select 0, _recordCell select 1,
                 _recordCell param [3, _recordEntry getOrDefault ["w", 1]], _recordCell param [4, _recordEntry getOrDefault ["h", 1]]
@@ -823,6 +826,7 @@ if (_moves isEqualTo []) exitWith {
         };
 
         _sources pushBack [_from, _key, _entry getOrDefault ["block", 0], _entry getOrDefault ["col", -1], _entry getOrDefault ["row", -1]];
+        _lifted pushBack _entry;
     };
 
     if (_kind in ["move", "unequip"] && {_cell isNotEqualTo []} && {_landTo isNotEqualTo "ground"}) then {
@@ -858,6 +862,20 @@ if (_id isEqualTo "") exitWith {
 // player the answer is here already - fnc_onFrame finishes it, and this entry with it, the next frame.
 if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) then {
     GVAR(inFlight) set [_id, [_sources, _targets, diag_tickTime, _feels]];
+
+    // The tiles it takes from are on their way from this moment, not from the next build: faded and flagged as
+    // fnc_drawPending does, so the same tile, asked for again before the answer (the quick move key repeats while it is
+    // held), is not sent a second time.
+    {
+        if (!(_x getOrDefault ["pending", false]) && {count (_x getOrDefault ["controls", []]) > 0}) then {
+            _x set ["pending", true];
+
+            {
+                _x ctrlSetFade DRAG_SOURCE_FADE;
+                _x ctrlCommit 0;
+            } forEach (_x getOrDefault ["controls", []]);
+        };
+    } forEach _lifted;
 };
 
 // Some went, some were left out: why those were.

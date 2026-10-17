@@ -42,6 +42,20 @@ private _state = [];
 _state resize (_cols * _rows);
 _state = _state apply {0};
 
+// A paged compartment (fnc_pageRanges) has squares only on the rows that show; the others are none, as a hole is.
+private _rowFrom = _grid getOrDefault ["rowFrom", 0];
+private _rowTo = _grid getOrDefault ["rowTo", _rows];
+
+if (_rowFrom > 0 || {_rowTo < _rows}) then {
+    for "_index" from 0 to (_rowFrom * _cols - 1) do {
+        _state set [_index, 2];
+    };
+
+    for "_index" from (_rowTo * _cols) to (_cols * _rows - 1) do {
+        _state set [_index, 2];
+    };
+};
+
 {
     if (_x >= 0 && {_x < count _state}) then {
         _state set [_x, 2];
@@ -68,7 +82,7 @@ _state = _state apply {0};
     // Cut at the grid's edge, its holes no longer match its cells: the box is drawn then, and covered.
     private _holes = [[], _x getOrDefault ["holes", []]] select (_w == _fullW);
 
-    for "_r" from _row to ((_row + _h - 1) min (_rows - 1)) do {
+    for "_r" from (_row max _rowFrom) to ((_row + _h - 1) min (_rowTo - 1)) do {
         for "_c" from _col to ((_col + _w - 1) min (_cols - 1)) do {
             private _index = _r * _cols + _c;
 

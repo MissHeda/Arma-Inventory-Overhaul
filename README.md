@@ -236,11 +236,15 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   a container, turning an item and splitting a stack stay instant, and so does ACE Arsenal's panel. The times are server settings on the wizard's
   General page, under "Looting and searching" (`einv_gui_handDrop` 0.3 s, `einv_gui_handMove` 0.4 s, `einv_gui_handEquip` 1 s; 0 is no wait and no circle for that
   kind, as before 0.5.0).
+- **Big containers in pages:** a crate or vehicle taller than "Rows per page of a container" (`einv_gui_pageRows`, in "Enhanced Inventory - Client",
+  General, 10 rows by default, 0 or 40 for no pages) shows that many rows at a time. The bar under it turns the pages, a fade over the page's last row
+  with a chip such as "+37 items on other pages" says there is more, and an item dragged over an arrow of the bar turns the page after a moment so it can be let go
+  on another page. Quick move, Take all and placing use the whole container; the pages are only the view, and only the page shown has controls on the
+  screen. The search field finds an item on any page (the box turns to its first page with a match, the arrows show how many matches lie before and after).
+  Your own gear is never paged.
 - **Sounds and looting:** every kind of gear sounds like what it is - weapons, magazines, vests, helmets, medical
   items, radios -, using Arma's own sound files only; players within earshot hear someone loot (`einv_gui_soundsWorld`,
-  a server setting). While the window looks into something (a body, a crate, a pile) the soldier lowers his weapon and
-  looks into his gear, kneeling at bodies and low things, so others see who loots (`einv_gui_animation`, a server
-  setting: off, while looting, always); a movement key stops looting and closes the window (each player's setting).
+  a server setting). A movement key stops looting and closes the window (each player's setting).
   The speaker in the window's header mutes them for you; which kinds it silences (item moves, magazines, containers, searching, the rest) is five
   checkboxes in "Enhanced Inventory - Client", all on by default.
   Add your own sounds as classes of `CfgEinvSounds` (see `addons/gui/CfgEinvSounds.hpp`), or give an item the

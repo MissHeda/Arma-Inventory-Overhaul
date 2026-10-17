@@ -36,8 +36,24 @@ if (isNull _display) exitWith {false};
 
 private _found = _item call FUNC(findTile);
 
-// Not on the window any more (folded away meanwhile): nothing to draw, the next item comes up.
+// Not on the window any more (folded away meanwhile): nothing to draw, the next item comes up. A tile on a page of a tall
+// compartment that is not turned to has no controls: it only stops being a "?", for when its page comes.
 if (_found isEqualTo []) exitWith {
+    _item params ["_itemContainer", "_itemKey", "_itemRow", "_itemCol", "", ["_itemBlock", 0]];
+
+    {
+        if ((_x getOrDefault ["container", objNull]) isEqualTo _itemContainer) then {
+            {
+                if (
+                    (_x getOrDefault ["offPage", false]) && {(_x getOrDefault ["row", -1]) == _itemRow} && {(_x getOrDefault ["col", -1]) == _itemCol}
+                    && {(_x getOrDefault ["block", 0]) == _itemBlock} && {toLowerANSI (_x getOrDefault ["class", ""]) isEqualTo _itemKey}
+                ) then {
+                    _x deleteAt "hidden";
+                };
+            } forEach (_x getOrDefault ["tiles", []]);
+        };
+    } forEach (uiNamespace getVariable [QGVAR(grids), []]);
+
     GVAR(searchQueue) = GVAR(searchQueue) select {_x isNotEqualTo _item};
     [_display] call FUNC(showSearch);
     true

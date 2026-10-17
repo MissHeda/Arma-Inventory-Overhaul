@@ -21,14 +21,18 @@
  * Arguments:
  * 0: Layout, see einv_storage_fnc_getLayout <HASHMAP>
  * 1: Holder its places are kept on - the container, or a key <OBJECT or STRING>
+ * 2: Cut tall compartments into pages (einv_gui_pageRows) - false for a section that is never paged (default: true) <BOOL>
  *
  * Return Value:
- * [blocks, hidden, foldable, cells] <ARRAY>
+ * [blocks, hidden, foldable, cells, paging] <ARRAY>
  *   blocks   - [cols, rows, holes, pos] per compartment as the column shows it - a shaped one's
  *              holes in the rows folded away go with them
  *   hidden   - how many rows are folded away, all compartments together <NUMBER>
  *   foldable - rows are folded away now, or would be without the player having opened them <BOOL>
  *   cells    - how many cells those rows hold, holes not counted <NUMBER>
+ *   paging   - per compartment, [page, [[from, to], ...]] when it is cut into pages (einv_gui_pageRows, fnc_pageRanges:
+ *              its blocks entry then holds all the rows the pages cover, and it neither folds nor counts in hidden,
+ *              foldable and cells), [] when it is not <ARRAY>
  *
  * Example:
  * ([_layout, _crate] call einv_gui_fnc_viewBlocks) params ["_blocks", "_hidden", "_foldable", "_cells"];
@@ -36,7 +40,7 @@
  * Public: No
  */
 
-params [["_layout", createHashMap, [createHashMap]], ["_holder", objNull, [objNull, ""]]];
+params [["_layout", createHashMap, [createHashMap]], ["_holder", objNull, [objNull, ""]], ["_pages", true, [true]]];
 
 private _blocks = _layout getOrDefault ["blocks", []];
 private _entries = _layout getOrDefault ["entries", []];
@@ -71,13 +75,34 @@ private _cells = 0;
 private _foldable = false;
 
 private _shown = [];
+private _paging = [];
+private _perPage = [0, call FUNC(pageRows)] select _pages;
 
 {
     _x params ["_cols", "_rows", ["_holes", []], ["_pos", []]];
 
     private _want = ((_used select _forEachIndex) + COLLAPSE_SPARE_ROWS) max COLLAPSE_MIN_ROWS;
+    private _folds = !(_rows - _want < COLLAPSE_HIDE_MIN || {_pos isNotEqualTo []});
 
-    if (_rows - _want < COLLAPSE_HIDE_MIN || {_pos isNotEqualTo []}) then {
+    // The rows the compartment shows if the player has not opened them: down to a little below its last row in use, or
+    // all of them where that would hide too few.
+    private _domain = [_rows, _want] select _folds;
+
+    // Taller than a page: cut into pages over exactly those rows. The pages replace the fold - there is no line to open
+    // the empty rows below, the pages end with the spare rows after the last in use - and the player's opening of the rows
+    // does not apply (fnc_toggleRows is a line's only).
+    if (_perPage > 0 && {_pos isEqualTo []} && {_domain > _perPage}) then {
+        private _ranges = [_entries, _forEachIndex, _domain, _perPage] call FUNC(pageRanges);
+        private _page = (([_holder, _forEachIndex] call FUNC(pageOf)) min (count _ranges - 1)) max 0;
+
+        _shown pushBack [_cols, _domain, _holes select {_x < _domain * _cols}, _pos];
+        _paging pushBack [_page, _ranges];
+        continue;
+    };
+
+    _paging pushBack [];
+
+    if (!_folds) then {
         _shown pushBack [_cols, _rows, _holes, _pos];
     } else {
         _foldable = true;
@@ -96,4 +121,4 @@ private _shown = [];
     };
 } forEach _blocks;
 
-[_shown, _hidden, _foldable, _cells]
+[_shown, _hidden, _foldable, _cells, _paging]
