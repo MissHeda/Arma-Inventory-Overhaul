@@ -1105,7 +1105,8 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   **A redraw keeps what did not change** (`fnc_drawTiles [display, grid, layout, theme, before]` -> the old tiles not kept): an
   old tile that looks exactly as a new entry would (class, `hidden`, `strict`, compartment, cell, `w`, `h`, `rotated`, `holes`, count, rounds,
   capacity, attachments, `picture`, `icon`, overflow) is that tile again - the same HashMap (the hands' queue holds it), its
-  controls untouched, the new entry's keys merged in and the ones it lost dropped, its light reset and, when it was `pending` and
+  controls untouched, the new entry's keys merged in and the ones it lost dropped, its light reset (only a tile the hover lit - the tile's `lit` - is
+  touched; no control of another kept tile gets a command) and, when it was `pending` and
   is not `queued`, faded in; everything else is made by `fnc_createTile` and the old controls left over are deleted. Tiles go on
   the grid in the layout's order either way. One item taken from a pile of ninety makes one tile less instead of ninety again, and
   the queue's circles on the tiles that stayed stay (`fnc_drawQueue` finds their surfaces unchanged).
@@ -1143,7 +1144,11 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   transaction, the next chunk when the answer came; kinds `move`, `equip`, `unequip`, `swap`, `sort`, `placeMany`, `exchange`; a kit
   through its holder type's ops). Moved tiles stay faded and cannot be lifted, their target cells outlined (`einv_gui_inFlight`,
   `fnc_drawPending`) until the answer and the new places arrived (`einv_gui_answers`, finished by `fnc_afterAction`, at the latest
-  `ANSWER_WAIT` 3 s after the answer; given up after `PENDING_TIMEOUT` 15 s); each sounds when finished. On
+  `ANSWER_WAIT` 3 s after the answer; given up after `PENDING_TIMEOUT` 15 s); each sounds when finished. The flash on the tile where an item landed
+  (`fnc_flashTile`, also the search's reveal) is deleted once it has faded (uiNamespace `einv_gui_flashes`, `[control, when it has faded]`): one made for every finished
+  move of a long Take all used to stay on the window, invisible, until the next build. What a finished move touches: its source and target tiles (made or removed), the head's
+  circle and the few that cross a limit of the queue's look (`QUEUE_NUMBER_MAX`, `QUEUE_DISC_MAX`), the flash, the bars of paged boxes only where what they say changed - no
+  other tile gets a command and no box moves unless its rows' shape changed. On
   `einv_items_rulesChanged` an open window is built again once a held tile is let go.
 - **The hands' queue** (`fnc_queueMoves`, `fnc_queueTime`, `fnc_queueTiles`, `fnc_queuedSlot`, `fnc_drawQueue`, `fnc_animateQueue`,
   `fnc_runQueue`, `fnc_cancelQueued`; state `GVAR(handQueue)`, `handStarted`, `handLast`, `handId` in `XEH_preInit.sqf`). What takes the hands is not
@@ -1172,11 +1177,15 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   old circle, so those entries get new circles; a slot entry compares the slot's record, `slotAt`). Only what changed is touched: an
   entry that moved in the queue gets its number written in place (`ctrlSetText` on the last control), a new or invalidated one is made
   - a dark disc, the faint full ring, and for the first entry the ring that fills (`SEARCH_RING` pictures, the accent colour), for the
-  others their place as a number - on the tile's group (so they scroll and clip with it) or on the slot, flags the tiles `pending` (faded as a move in
+  next `QUEUE_NUMBER_MAX` 4 less one their place as a number (the rest have no number: every finished move shifts every place by one,
+  and a number on each of hundreds of tiles counting down once a second looked like lag; a finished move now changes the head's ring, the
+  few numbers, the one entry that crosses `QUEUE_NUMBER_MAX` and the one that crosses `QUEUE_DISC_MAX`, and nothing else - the circle's
+  `class` includes whether it is numbered) - on the tile's group (so they scroll and clip with it) or on the slot, flags the tiles `pending` (faded as a move in
   flight, so nothing can lift or act on them; `fnc_startDrag` also looks in the queue) and `queued` with the entry's id (`fnc_refresh`'s
   settle leaves tiles that are `queued` alone, so a queue is not faded in and out at each answer); every entry
   whose tile or slot the window shows is marked, but only the first `QUEUE_DISC_MAX` 30 get the dark disc - the later ones keep the
-  faint ring (a little stronger) and their number, two controls instead of three. `fnc_onFrame` calls `fnc_animateQueue` each frame while the queue holds something and the
+  faint ring (a little stronger). An entry whose tile lies on a page of a paged box that is not shown is flagged on that tile (`queued`) and has no circle: the box's bar
+  counts it (`fnc_updatePageBars`, called at the end of `fnc_drawQueue`). `fnc_onFrame` calls `fnc_animateQueue` each frame while the queue holds something and the
   window is not covered (the time it stood still does not count, as for the search): that one place changes the first ring's picture when its
   step changes and calls `fnc_runQueue` when the time is up - no control is made per frame, and the work of a frame does not grow with the
   length of the queue (the head entry only). What waits is also kept in an index by cell, `GVAR(handWaiting)` (`fnc_queueIndex` adds and takes out, `fnc_queueWaits [source]` asks): `fnc_queueMoves`, Take all and Put all in ask it instead of passing the queue. A left press on a queued tile or slot
@@ -1250,8 +1259,9 @@ The Arsenal panel has no theme of its own: it is drawn in Glass as it is, with i
 ### The UI kit
 
 `fnc_uiPanel`, `fnc_uiLabel`, `fnc_uiIcon`, `fnc_uiPicture`, `fnc_uiFrame`, `fnc_uiBar`, `fnc_uiRing`, `fnc_uiShape`,
-`fnc_uiHatch`, `fnc_uiKeyHint` and `fnc_uiButton [display, parent, rect, id, text, icon, theme, code, disabled, textSize, centred]`
-(left click runs `code` with `[1, id]`, right click `[-1, id]`) take a `parent` (`controlNull` for the display, a group for relative coordinates), snap to
+`fnc_uiHatch`, `fnc_uiKeyHint` and `fnc_uiButton [display, parent, rect, id, text, icon, theme, code, disabled, textSize, centred, hitPad]`
+(left click runs `code` with `[1, id]`, right click `[-1, id]`; `hitPad` - `[x, y]` or `[left, top, right, bottom]`, default none - makes the hit area larger than
+the surface: the section captions, the kit windows' buttons and the header's use it, see "Hit areas" under Section) take a `parent` (`controlNull` for the display, a group for relative coordinates), snap to
 pixels and register top-level controls in `einv_gui_created`.
 A **centred** button (`centred` true: the section buttons, the kit windows' buttons, the red Arsenal screen's OK) leaves the centring to the
 engine: its label is a centred `EINV_LabelCenter` as wide as the room between the paddings (`BUTTON_PAD` 0.3 of the height each
@@ -1354,7 +1364,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   a nested group would eat the wheel.
 - **Section** (`fnc_drawSection`): a caption tab (folds it, `fnc_toggleSection`; the contents' weight on the right,
   `fnc_loadText`, only told), a box with the container's picture and short name, and the grid. Beside the tab, as high as it and in the
-  caption's size (0.46 UNIT, the tab 0.62), centred buttons: "Take all" (loot) or "Put all in" (own) (`fnc_takeAll`, `fnc_putAll`,
+  caption's size (0.46 UNIT, the tab and the buttons `CAPTION_LINE` 0.8 UNIT high), centred buttons: "Take all" (loot) or "Put all in" (own) (`fnc_takeAll`, `fnc_putAll`,
   `fnc_putAllTarget`: from the contents, not from what is drawn; what is not searched stays) and "Sort: Name" with
   `icon_sort_desc_ca` (`fnc_sortHolder [holder, root, step]` - the storage's op "sort"; the only way to sort, the context menu has no
   row for it; on every container section of the inventory the player may change, also an empty one, never on a section that only
@@ -1371,7 +1381,13 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   (a container the unit lacks: a hatched box that is its slot when it has an `owner`), `worn` + `unit` (a body's compact doll,
   `fnc_drawEquipmentDoll`), `locked` (a padlock and one muted line, nothing of what it holds; `lockTip` adds an open padlock). Own
   sections start open, crates found around start folded; `einv_gui_collapsed` holds the containers the player turned the other
-  way.
+  way. **Hit areas** (loot fast, Mia, 0.5.1): the caption line is `CAPTION_LINE` 0.8 UNIT high and what is clicked on it - the tab and chevron
+  (`fnc_toggleSection`), the buttons (`fnc_uiButton`'s `hitPad`), a nested container's cross, the fold line - is a hit area larger than
+  it is drawn: `CAPTION_HIT_UP` 0.3 UNIT over the line (the gap between sections is 0.5), `CAPTION_HIT_DOWN` 0.2 under it (0.25 lie between the
+  line and the box) and half the 0.3 gap to the next button either side, so about a cell high; the fold line reaches 0.1 up (the grid is
+  just above it) and 0.2 down. The kit window's buttons and cross reach over the title row (`_hitV`, `_hitH`; their `buttons` record is the hit
+  area, so a press there still neither raises nor moves the window) and the header's four buttons 0.2 UNIT up and down and into the gaps
+  (`HEADER_HIT_PAD`; they are 1.6 UNIT squares already). Nothing reaches over a grid's cells.
 - **Compartments.** `fnc_flowCompartments [layout, cell]` -> `[places, height, width]`, drawn by `fnc_drawCompartments [display,
   parent, [left, top], section, layout, places, theme, window]`. Flowed compartments (`pos` `[]`) lie side by side as far as
   `STORAGE_COLS` cells reach, then on the next line, `COMPARTMENT_GAP` (0.22 cell, pixel-rounded) between blocks. A compartment
@@ -1449,19 +1465,28 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `fnc_swapPlan`, `fnc_drawCells`). **Every tile of the compartment stays on the grid**, in the same order, whatever page shows - the room, the queue, the
   drag's indices and the selection need them - but only the shown page's have controls: the others are bare (`offPage` true, `controls` []), skipped by
   `fnc_findTile` and `fnc_selectionTiles`/`fnc_selectSection`/`fnc_select` (selecting works on the shown page), and drawn by `fnc_createTile` when their page
-  comes (`fnc_drawTiles`; the same HashMap, put back where it stood in the grid's list). The pager is `fnc_drawPageBar` (the wizard's look: "Page 2 / 5",
-  two ghost arrows; `fnc_pageCounts` says how many tiles and matches each page holds) and the cue over the page's edge - `PAGE_FADE_STEPS` strips and a chip "+37
-  items on other pages", clickable - is part of it (the grid's `pageControls`, drawn after the tiles so they lie over them, drawn again by every turn). `fnc_turnPage [grid, step]` ->
+  comes (`fnc_drawTiles`; the same HashMap, put back where it stood in the grid's list). The pager is `fnc_drawPageBar`: a bar `PAGE_BAR_H` 1.15 UNIT tall under
+  the box, **nothing lies over the tiles** (the fade strips and the chip over the page's edge of 0.5.0 are gone: they covered the first or last row's tiles).
+  Its left half is one button that turns back, its right half one that turns on (`fnc_uiButton` with no surface until the mouse is on it; an arrow at each end of the bar,
+  the search's mark at the arrow's corner), and the middle says in one line where it stands and what lies elsewhere: "Page 2 / 5 | +180 items on other pages | 12 queued" -
+  `fnc_pageCounts` says how many tiles and matches each page holds; while the search field holds something the matches on other pages replace the items, and the
+  queued count is the tiles of the box that are `offPage` and `queued` (the hands' queue marks them in `fnc_drawQueue` though they have no controls: an entry whose tile is
+  not drawn has no circle). The grid's `pageControls` are drawn again only when what the bar says changed (`pageSig`: build, page, page count, text, the marks); `fnc_updatePageBars`,
+  called at the end of `fnc_drawQueue`, has every paged box's bar compared after a queue changed or a move finished. A dragged item turns the page over the outer `PAGE_ZONE` 0.35 of
+  the bar on each side (`pageAreas`); the middle 0.3 is a `foldAreas` place where a drop is laid down in the container's first free spot. `fnc_turnPage [grid, step]` ->
   `fnc_setPage [grid, page, bySearch]` (state, `GVAR(pagesMoved)` for the search) -> `fnc_showPage [display, grid, page]`, which draws only this box: the page left
-  gives up its cell squares, tile controls and panel, the window moves, the panel (`fnc_drawPagePanel`), the new tiles, `fnc_drawCells` and the bar come, then
-  `fnc_drawPending` (the queue's circles are found again), the selection, the search's fading and the hover are redone as after `fnc_redrawTiles`. `fnc_redrawTiles`
+  gives up its cell squares, **every control its tiles ever made** (the grid's `tileControls`, which `fnc_createTile` appends to and `fnc_drawTiles` prunes: a control a tile
+  no longer names - a faded copy the search's fade had touched - is cleared all the same; after every redraw `fnc_drawTiles` compares the list with the controls the grid's tiles hold, deletes
+  any stray and writes `A paged box held N controls that belong to no tile - deleted` to the RPT, which says that something drew a tile twice; `fnc_createTile` also deletes the controls an entry still holds before it draws
+  it again) and its panel, the window moves, the panel (`fnc_drawPagePanel`), the new tiles, `fnc_drawCells` and the bar come, then
+  `fnc_drawPending` (the queue's circles are found again: those of tiles that are not drawn are deleted and not made), the selection, the search's fading and the hover are redone as after `fnc_redrawTiles`. `fnc_redrawTiles`
   accepts a paged compartment as long as the page height is the one the box was made for and redraws the page it stands on (the window may move with what lies
-  there: then the box is drawn from its panel on); the bar is drawn again. The wheel is not used (the column needs it). A dragged item held over a bar arrow
+  there: then the box is drawn from its panel on, every tile made anew and every control the old ones made deleted, `tileControls` included); the bar is drawn again when what it says changed. The wheel is not used (the column needs it). A dragged item held over the bar's outer zones
   (`GVAR(pageAreas)`, the drag's geometry "pageBoxes") for `PAGE_HOVER_TIME` 0.7 s turns the page, again every 0.7 s while it stays, before the frame's early exits;
   `fnc_setPage` drops what the drag knew of the grids ("geometry", "hold", "spot", "frame", "cells|n", "swap|...").
 - **Kit windows** (`fnc_drawWindows`, `fnc_drawWindow [display, section, theme, fresh]`): a kit or pouch is a floating glass
   window - a title row (picture, name, Take all and Sort, "12 / 60 mass", a cross, all on the row's middle line; the buttons and
-  the cross are a section caption's - 0.62 UNIT high, labels 0.46 UNIT and centred, `fnc_buttonWidth` / `fnc_sortChip` widths -,
+  the cross are a section caption's - `CAPTION_LINE` 0.8 UNIT high, labels 0.46 UNIT and centred, `fnc_buttonWidth` / `fnc_sortChip` widths -,
   right-aligned before the fill text with one gap each; the name keeps its width up to 4 UNIT, else Sort gets compact - `fnc_sortChip` argument 3: 1 the icon and "Sort", 2 the
   icon alone, the order in the tooltip (`fnc_sortText`'s third answer, `fnc_sortButtons [controls, compact]`) -, then goes, then Take all; a
   press on a button neither raises nor moves the window, record key `buttons`) and a scroll body with the kit's grid (`window` =
@@ -1715,7 +1740,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   only takes its "?" from the data. **The search field** (`fnc_drawFilter`, `fnc_applyFilter [jump]`) fades the tiles that do not match; it looks at every page of a
   paged box (`fnc_pageCounts` reads all the grid's tiles): typed in or emptied (`jump` true) it turns each paged box to its first page with a match when the page it shows has none
   (`fnc_setPage` with `bySearch`, remembered in `GVAR(pagesMoved)`; emptied, those pages go back, but not one the player turned since), and draws every bar again - the arrows'
-  marks count the matches before and after the page, the chip counts the matches on other pages.
+  marks count the matches before and after the page, the bar's text counts the matches on other pages.
 - **Sounds** (`fnc_playSound [action, class, container, world, ui]`, public): by family from the config `CfgEinvSounds`
   (`gui/CfgEinvSounds.hpp`; its header explains the layers): `Default`, 17 item families and 4 container families (crate, vehicle,
   body, ground), Arma's own files only; the family is the item's config `einv_sound`, else `fnc_soundFamily`. Actions: `lift`,

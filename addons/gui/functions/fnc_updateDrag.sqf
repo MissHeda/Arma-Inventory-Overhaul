@@ -389,7 +389,7 @@ if (_scrolled || {_geometry isEqualTo []}) then {
         [_x get "container", _shown]
     };
 
-    // The arrows of the page bars (GVAR(pageAreas), fnc_drawPageBar), as [grid, step, [x, y, w, h] where they show] - [] for
+    // The outer parts of the page bars (GVAR(pageAreas), fnc_drawPageBar), as [grid, step, [x, y, w, h] where they show] - [] for
     // one scrolled out of sight: an item held over one turns the page (below).
     private _pageBoxes = (uiNamespace getVariable [QGVAR(pageAreas), []]) apply {
         private _parent = _x getOrDefault ["parent", controlNull];
@@ -420,7 +420,7 @@ if (_scrolled || {_geometry isEqualTo []}) then {
 
 _geometry params ["_slotRects", "_gridBoxes", ["_foldBoxes", []], ["_pageBoxes", []]];
 
-// Held over an arrow of a page bar (and nothing lying over it): the page turns after PAGE_HOVER_TIME, and again every
+// Held over the outer part of a page bar (and nothing lying over it): the page turns after PAGE_HOVER_TIME, and again every
 // PAGE_HOVER_TIME while the item stays - so it can be let go on a page that is not shown. Before the frame's early exits:
 // a mouse standing still on the arrow is what turns it. The turn drops what the drag knew of the grids; the next frame
 // works it out anew.

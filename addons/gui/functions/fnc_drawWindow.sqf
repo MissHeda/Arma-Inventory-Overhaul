@@ -77,8 +77,9 @@ private _padX = SQUARE(_padY);
 private _titleH = UNIT * 1.1;
 
 // The buttons and the cross of the title row are a section caption's (fnc_drawSection): a caption line high,
-// their labels in its size, a gap apart.
-private _chipH = UNIT * 0.62;
+// their labels in its size, a gap apart; their hit areas reach up and down over the title row's room and half a gap
+// to either side (fnc_uiButton, argument 11).
+private _chipH = UNIT * CAPTION_LINE;
 private _chipSize = UNIT * 0.46;
 private _gap = SQUARE(UNIT * 0.3);
 private _closeW = SQUARE(_chipH);
@@ -160,6 +161,8 @@ private _fnc_events = {
 // by TEXT_MID of its font height, as the buttons' labels do (fnc_uiButton). [top, height] in the window.
 private _rowMid = _padY + _titleH / 2;
 private _chipTop = _rowMid - _chipH / 2;
+private _hitV = (_titleH - _chipH) / 2 + _padY * 0.5;
+private _hitH = SQUARE(UNIT * 0.14);
 
 private _fnc_mid = {
     params ["_size"];
@@ -292,7 +295,7 @@ if (_buttons isNotEqualTo []) then {
                     [_what] call EFUNC(compat_efak,unpackAll);
                 };
             },
-            _busy, _chipSize, true
+            _busy, _chipSize, true, [_hitH, _hitV]
         ] call FUNC(uiButton);
 
         // What it does, when the mouse rests on it, as on a section's caption line. Sort says what its next
@@ -304,7 +307,8 @@ if (_buttons isNotEqualTo []) then {
             (_button select -1) ctrlSetTooltip LLSTRING(Section_TakeAll_Tooltip);
         };
 
-        _buttonRects pushBack _rect;
+        // Where a press is a button's (no raising, no moving the window): its hit area.
+        _buttonRects pushBack [_buttonX - _hitH, _chipTop - _hitV, _buttonW + _hitH * 2, _chipH + _hitV * 2];
         _buttonX = _buttonX + _buttonW + _gap;
     } forEach _buttons;
 };
@@ -328,7 +332,7 @@ private _cross = [_display, _group, [_closeX, _chipTop, _closeW, _chipH], _key, 
     if (GVAR(dragging)) exitWith {};
 
     [_key] call FUNC(closeWindow);
-}] call FUNC(uiButton);
+}, false, -1, false, [_hitH, _hitV]] call FUNC(uiButton);
 
 (_cross select -1) ctrlSetTooltip LLSTRING(Section_Close);
 

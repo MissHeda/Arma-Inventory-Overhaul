@@ -242,6 +242,7 @@ PREP(pageCounts);
 PREP(setWindow);
 PREP(drawPagePanel);
 PREP(drawPageBar);
+PREP(updatePageBars);
 PREP(showPage);
 PREP(setPage);
 PREP(turnPage);

@@ -4,8 +4,8 @@
  * Author: Miss Heda
  * How many tiles lie on each page of a paged compartment, and - while the search field holds something - how many of
  * them match it (fnc_matchesFilter, a tile not searched yet never does). Read from the grid's tiles, all of which it
- * keeps whatever page is turned to (fnc_drawTiles), so the pager can say what lies on the pages not shown: the chip over
- * the page's edge, and the marks on the bar's arrows (fnc_drawPageBar). One name is matched once per class.
+ * keeps whatever page is turned to (fnc_drawTiles), so the pager can say what lies on the pages not shown: the bar's text
+ * and the marks on its arrows (fnc_drawPageBar). One name is matched once per class.
  *
  * Arguments:
  * 0: The grid of a paged compartment (fnc_createGrid) <HASHMAP>

@@ -32,6 +32,9 @@
  * 8: Disabled <BOOL> (default: false)
  * 9: Text height - the label's size, -1 for a share of the button's height <NUMBER> (default: -1)
  * 10: Centred - the label and an icon beside it laid out as described above <BOOL> (default: false)
+ * 11: How far the hit area reaches beyond the surface, [x, y] either side or [left, top, right, bottom], in the
+ *     position's own units: a small button is hard to hit, and the room around it is empty. The surface and the
+ *     label stay as drawn; the hit area is the only thing that grows <ARRAY> (default: [])
  *
  * Return Value:
  * The controls, the hit area last <ARRAY>
@@ -44,7 +47,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_rect", "_id", "_text", "_icon", "_theme", "_code", ["_disabled", false], ["_textSize", -1], ["_centred", false]];
+params ["_display", "_parent", "_rect", "_id", "_text", "_icon", "_theme", "_code", ["_disabled", false], ["_textSize", -1], ["_centred", false], ["_hitPad", []]];
 _rect params ["_left", "_top", "_width", "_height"];
 
 private _normal = _theme getOrDefault ["button", [1, 1, 1, 0.06]];
@@ -133,7 +136,16 @@ if (_centred) then {
     };
 };
 
-private _hit = [_display, "EINV_Hitbox", _parent, _rect] call FUNC(uiCreate);
+// The hit area, wider than the surface where the caller asks for it.
+_hitPad params [["_padLeft", 0], ["_padTop", 0], ["_padRight", -1], ["_padBottom", -1]];
+
+if (_padRight < 0) then {_padRight = _padLeft};
+if (_padBottom < 0) then {_padBottom = _padTop};
+
+private _hit = [
+    _display, "EINV_Hitbox", _parent,
+    [_left - _padLeft, _top - _padTop, _width + _padLeft + _padRight, _height + _padTop + _padBottom]
+] call FUNC(uiCreate);
 
 // Nothing more to do for a disabled one - it only keeps clicks off what lies under it.
 if (_disabled) exitWith {

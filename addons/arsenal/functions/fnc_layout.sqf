@@ -196,7 +196,7 @@ private _fnc_draw = {
     if ((_section getOrDefault ["id", ""]) isEqualTo "staging") then {
         (call EFUNC(gui,getCell)) params ["", "_cellH"];
 
-        private _free = ((ctrlPosition _group) select 3) - _top - UNIT * (0.62 + 0.25) - pixelH * 2;
+        private _free = ((ctrlPosition _group) select 3) - _top - UNIT * (CAPTION_LINE + 0.25) - pixelH * 2;
 
         [_section get "container", floor (_free / _cellH)] call FUNC(growStaging);
     };

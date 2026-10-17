@@ -83,9 +83,13 @@ private _fnc_tooltip = {
 
 private _square = SQUARE(HEAD_H);
 
+// The hit area of each button reaches over half the gap to its neighbour and a little above and under it
+// (fnc_uiButton, argument 11): the square is drawn as it was.
+private _hitPad = [SQUARE(UNIT * 0.14), UNIT * HEADER_HIT_PAD];
+
 private _close = [_display, controlNull, [_square] call _fnc_place, "close", "", UI_TEX(icon_close_ca), _theme, {
     ["the close button"] call FUNC(closeDisplay);
-}] call FUNC(uiButton);
+}, false, -1, false, _hitPad] call FUNC(uiButton);
 [_close, LLSTRING(Close)] call _fnc_tooltip;
 
 // The camera switch, white like the other icons of the header. Its state shows in the icon's strength: the
@@ -104,14 +108,14 @@ if !(call FUNC(cameraForced)) then {
 
     private _camera = [_display, controlNull, [_square] call _fnc_place, "camera", "", UI_TEX(icon_camera_ca), _cameraTheme, {
         call FUNC(toggleCamera);
-    }] call FUNC(uiButton);
+    }, false, -1, false, _hitPad] call FUNC(uiButton);
     [_camera, LLSTRING(Camera_Tooltip)] call _fnc_tooltip;
 };
 
 // The speaker: the window's sounds, on or muted (fnc_toggleMute) - which kinds it silences is the player's setting.
 private _sound = [
     _display, controlNull, [_square] call _fnc_place, "mute", "",
-    [UI_TEX(icon_sound_on_ca), UI_TEX(icon_sound_off_ca)] select GVAR(muted), _theme, {call FUNC(toggleMute)}
+    [UI_TEX(icon_sound_on_ca), UI_TEX(icon_sound_off_ca)] select GVAR(muted), _theme, {call FUNC(toggleMute)}, false, -1, false, _hitPad
 ] call FUNC(uiButton);
 [_sound, [LLSTRING(Mute_Mute), LLSTRING(Mute_Unmute)] select GVAR(muted)] call _fnc_tooltip;
 
@@ -128,7 +132,7 @@ if (!isNil QEFUNC(setup,openFromGame) && {call (missionNamespace getVariable [QE
 
     private _setup = [_display, controlNull, [_square] call _fnc_place, "setup", "", UI_TEX(icon_setup_ca), _theme, {
         [0, ""] call EFUNC(setup,openFromGame);
-    }] call FUNC(uiButton);
+    }, false, -1, false, _hitPad] call FUNC(uiButton);
     [_setup, [LELSTRING(setup,OpenWizard_ReadOnly), LELSTRING(setup,OpenWizard)] select _canSave] call _fnc_tooltip;
 };
 

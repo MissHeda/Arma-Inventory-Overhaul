@@ -14,7 +14,8 @@
  * taken from a pile of ninety then makes no ninety tiles again but none, and the circles of the hands'
  * queue on the tiles that stayed stay with them (fnc_drawQueue). A kept tile is made as fresh as a new one:
  * the light of the mouse off it, and faded in again when it was under way and does not wait in the
- * hands' queue (fnc_drawPending fades again what is still under way, as after any redraw). The tiles go on
+ * hands' queue (fnc_drawPending fades again what is still under way, as after any redraw); a tile the mouse had lit
+ * gets its colour back, no other one is touched (nothing is set on a tile that did not change). The tiles go on
  * the grid in the layout's order either way, so a tile's number in the grid is what a fresh draw gives.
  * The squares of the cells are the caller's (fnc_drawCells), after this.
  *
@@ -37,6 +38,11 @@
 disableSerialization;
 
 params ["_display", "_grid", "_layout", "_theme", ["_before", [], [[]]]];
+
+// A paged compartment's list of the controls its tiles made (fnc_createTile) drops the ones that are gone.
+if ((_grid getOrDefault ["pageRanges", []]) isNotEqualTo []) then {
+    _grid set ["tileControls", (_grid getOrDefault ["tileControls", []]) select {!isNull _x}];
+};
 
 private _entries = if (_grid getOrDefault ["overflow", false]) then {
     // One overflow grid per entry, in the order the layout lists them.
@@ -115,7 +121,7 @@ private _byLook = createHashMap;
 } forEach _before;
 
 // What a tile is drawn as and what marks it on the window: kept from the old tile.
-private _drawn = ["controls", "background", "backgrounds", "rect", "color", "mark", "bar", "barRect", "amount", "amountShort", "pending", "queued"];
+private _drawn = ["controls", "background", "backgrounds", "rect", "color", "mark", "bar", "barRect", "amount", "amountShort", "pending", "queued", "lit"];
 private _kept = createHashMap;
 private _tiles = _grid get "tiles";
 
@@ -145,13 +151,18 @@ private _tiles = _grid get "tiles";
 
     _old merge [_entry, true];
 
-    // As fresh as a new tile: unlit, and no longer faded for a move that was answered meanwhile.
-    private _color = _old getOrDefault ["color", []];
+    // As fresh as a new tile: unlit (only one the mouse lit has to be touched), and no longer faded for a move that
+    // was answered meanwhile.
+    if (_old getOrDefault ["lit", false]) then {
+        private _color = _old getOrDefault ["color", []];
 
-    if (_color isNotEqualTo []) then {
-        {
-            _x ctrlSetBackgroundColor _color;
-        } forEach (_old getOrDefault ["backgrounds", []]);
+        _old set ["lit", false];
+
+        if (_color isNotEqualTo []) then {
+            {
+                _x ctrlSetBackgroundColor _color;
+            } forEach (_old getOrDefault ["backgrounds", []]);
+        };
     };
 
     if (_old getOrDefault ["pending", false] && {(_old getOrDefault ["queued", 0]) == 0}) then {
@@ -174,5 +185,30 @@ private _left = [];
         _left pushBack _x;
     };
 } forEach _before;
+
+// A paged compartment checks that nothing but its tiles' controls is on its list: a control that belongs to no tile - one
+// that was left behind by something that drew a tile twice - would show faintly under or over the page for good (it
+// is no tile's, so nothing fades, lights or deletes it). Those are deleted, and the RPT says so. The controls of the
+// tiles not kept are still there, for the caller to delete.
+if ((_grid getOrDefault ["pageRanges", []]) isNotEqualTo []) then {
+    private _known = [];
+
+    {
+        _known append (_x getOrDefault ["controls", []]);
+    } forEach ((_grid get "tiles") + _left);
+
+    _known = _known select {!isNull _x};
+
+    private _made = (_grid getOrDefault ["tileControls", []]) select {!isNull _x};
+
+    if (count _made > count _known) then {
+        private _strays = _made select {!(_x in _known)};
+
+        {ctrlDelete _x} forEach _strays;
+        _grid set ["tileControls", _made select {!isNull _x}];
+
+        INFO_1("A paged box held %1 controls that belong to no tile - deleted",count _strays);
+    };
+};
 
 _left

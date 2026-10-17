@@ -4,10 +4,11 @@
  * Author: Miss Heda
  * Shows the hands' queue (fnc_queueMoves): every action waiting gets a circle on the tile it takes from - or
  * on the slot of the worn item it takes off -, made as the search's ring is (fnc_showSearch, the same ring
- * pictures) over a dark disc. Past QUEUE_DISC_MAX entries the disc is left out (two controls instead of
- * three, so a Take all on a big crate stays cheap), the faint ring and the number still show. The first,
- * the one the hands are busy with, has the ring that fills (fnc_animateQueue turns its picture on); the others
- * wait with a faint ring and their place in the queue as a number. The tiles are flagged "pending", so they
+ * pictures) over a dark disc. Past QUEUE_DISC_MAX entries the disc is left out (one control fewer, so a Take all
+ * on a big crate stays cheap), the faint ring still shows. The first, the one the hands are busy with, has the
+ * ring that fills (fnc_animateQueue turns its picture on); the others wait with a faint ring, and the next
+ * QUEUE_NUMBER_MAX - 1 after the first say their place in the queue as a number - the rest have the ring alone,
+ * so a move that finishes changes a few circles and not a number on every tile that waits. The tiles are flagged "pending", so they
  * cannot be lifted or acted on, and "queued" with the entry's id, so a click on one cancels it
  * (fnc_onMouseButton, fnc_cancelQueued); they fade as a move in flight does.
  *
@@ -17,7 +18,7 @@
  * A circle is made anew for an entry that has none yet, whose tile was drawn again (a build, a redraw of its
  * section, a kit window drawn anew - the new controls lie over the old circle), whose slot was drawn anew, or
  * that became the first or crossed QUEUE_DISC_MAX (the first has a ring instead of a number, the disc is
- * left out past the limit). The tiles are found through one index shared by the whole call (fnc_queueTiles),
+ * left out past the limit, the number past QUEUE_NUMBER_MAX). The tiles are found through one index shared by the whole call (fnc_queueTiles),
  * and only for the entries that need a circle. The call clears GVAR(queueDirty).
  *
  * Called by fnc_drawPending, which every build and every redraw of tiles ends with, after a kit window is drawn,
@@ -56,7 +57,10 @@ if (isNull _display) exitWith {
     } forEach GVAR(handQueue);
 };
 
-if (GVAR(handQueue) isEqualTo []) exitWith {};
+// The bars of paged boxes count what waits on the pages not shown (fnc_updatePageBars): the same when nothing queued.
+if (GVAR(handQueue) isEqualTo []) exitWith {
+    [_display] call FUNC(updatePageBars);
+};
 
 private _theme = GVAR(theme);
 private _accent = _theme getOrDefault ["accent", [1, 1, 1, 1]];
@@ -104,9 +108,10 @@ private _fnc_onSurfaces = {
 for "_position" from (_from max 0) to (count GVAR(handQueue) - 1) do {
     private _entry = GVAR(handQueue) select _position;
 
-    // What the circle is made of: the first has the ring that fills, the others a number; the disc is left out
-    // past QUEUE_DISC_MAX.
-    private _class = ([0, 2] select (_position == 0)) + parseNumber (_position < QUEUE_DISC_MAX);
+    // What the circle is made of: the first has the ring that fills, the next few a number, the rest the faint ring
+    // alone; the disc is left out past QUEUE_DISC_MAX.
+    private _numbered = _position > 0 && {_position < QUEUE_NUMBER_MAX};
+    private _class = ([0, 2] select (_position == 0)) + parseNumber (_position < QUEUE_DISC_MAX) + ([0, 4] select _numbered);
 
     private _fx = _entry getOrDefault ["fx", []];
     private _held = _entry getOrDefault ["tiles", []];
@@ -136,9 +141,13 @@ for "_position" from (_from max 0) to (count GVAR(handQueue) - 1) do {
             };
         } forEach _held;
 
-        // Only its place moved: the number is written in place (it is the last control).
+        // Only its place moved: a number is written in place (it is the last control), a circle without one has
+        // nothing to change.
         if (_position != (_entry getOrDefault ["position", -1])) then {
-            (_fx select (count _fx - 1)) ctrlSetText str (_position + 1);
+            if (_numbered) then {
+                (_fx select (count _fx - 1)) ctrlSetText str (_position + 1);
+            };
+
             _entry set ["position", _position];
         };
 
@@ -223,7 +232,8 @@ for "_position" from (_from max 0) to (count GVAR(handQueue) - 1) do {
     private _discSize = _size * QUEUE_DISC_SIZE;
     private _made = [];
 
-    // The disc (not past QUEUE_DISC_MAX), the whole ring faint, then what says where it is in the queue.
+    // The disc (not past QUEUE_DISC_MAX), the whole ring faint, then what says where it is in the queue (the ring that
+    // fills for the first, a number for the next few, nothing for the rest).
     if (_position < QUEUE_DISC_MAX) then {
         _made pushBack ([
             _display, _parent,
@@ -251,14 +261,19 @@ for "_position" from (_from max 0) to (count GVAR(handQueue) - 1) do {
         _entry set ["step", _step];
         _made pushBack _arc;
     } else {
-        private _fontHeight = _size * pixelH * 0.46;
+        if (_numbered) then {
+            private _fontHeight = _size * pixelH * 0.46;
 
-        _made pushBack ([
-            _display, _parent,
-            [_centerX - _size * pixelW / 2, _centerY - _fontHeight * 0.62, _size * pixelW, _fontHeight * 1.3],
-            str (_position + 1), _fontHeight, _text, _font, 2
-        ] call FUNC(uiLabel));
+            _made pushBack ([
+                _display, _parent,
+                [_centerX - _size * pixelW / 2, _centerY - _fontHeight * 0.62, _size * pixelW, _fontHeight * 1.3],
+                str (_position + 1), _fontHeight, _text, _font, 2
+            ] call FUNC(uiLabel));
+        };
     };
 
     _entry set ["fx", _made];
 };
+
+// What waits on the pages not shown is counted on the bars (an entry has no circle while its tile is not drawn).
+[_display] call FUNC(updatePageBars);

@@ -2,8 +2,8 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Turns a paged compartment one page on or back: an arrow of its bar, the chip over its edge, a dragged item held over an
- * arrow. Stops at the first and the last page.
+ * Turns a paged compartment one page on or back: a half of its bar, a dragged item held over its outer
+ * parts. Stops at the first and the last page.
  *
  * Arguments:
  * 0: The grid of a paged compartment <HASHMAP>

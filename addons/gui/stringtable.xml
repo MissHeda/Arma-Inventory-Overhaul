@@ -337,9 +337,6 @@
         <Key ID="STR_einv_gui_Option_Unconscious">
             <English>Only the unconscious</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Chip_Tooltip">
-            <English>More lies on other pages - click to turn</English>
-        </Key>
         <Key ID="STR_einv_gui_Page_Hits">
             <English>%1 matches on other pages</English>
         </Key>
@@ -360,6 +357,9 @@
         </Key>
         <Key ID="STR_einv_gui_Page_Prev">
             <English>Previous page</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Queued">
+            <English>%1 queued</English>
         </Key>
         <Key ID="STR_einv_gui_QuickMove">
             <English>Quick move</English>

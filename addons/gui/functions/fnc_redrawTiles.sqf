@@ -210,6 +210,10 @@ private _madeCount = 0;
             {ctrlDelete _x} forEach (_x getOrDefault ["controls", []]);
         } forEach (_pagedGrid get "tiles");
 
+        // And every other control the compartment's tiles made (fnc_createTile, "tileControls").
+        {ctrlDelete _x} forEach (_pagedGrid getOrDefault ["tileControls", []]);
+        _pagedGrid set ["tileControls", []];
+
         {ctrlDelete _x} forEach (_pagedGrid get "cells");
         _pagedGrid set ["cells", (_pagedGrid get "cells") apply {controlNull}];
         _pagedGrid set ["tiles", []];
@@ -257,7 +261,7 @@ private _madeCount = 0;
         // The cells' squares: shown where a tile went, hidden where one came, made where none was yet.
         [_display, _x] call FUNC(drawCells);
 
-        // A paged compartment's bar and cue: what lies on the pages not shown may have changed.
+        // A paged compartment's bar: what lies on the pages not shown may have changed (it is left alone when it says the same).
         if ((_x getOrDefault ["pageRanges", []]) isNotEqualTo []) then {
             [_display, _x] call FUNC(drawPageBar);
         };

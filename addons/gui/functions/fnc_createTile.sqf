@@ -73,6 +73,10 @@ disableSerialization;
 
 params ["_display", "_grid", "_entry", "_theme"];
 
+// An entry that still holds the controls of an earlier drawing would lose them here and leave them on the window for
+// good, under the new ones: they go first.
+{ctrlDelete _x} forEach (_entry getOrDefault ["controls", []]);
+
 private _parent = _grid get "parent";
 private _cellW = _grid get "cellW";
 private _cellH = _grid get "cellH";
@@ -462,6 +466,16 @@ if (_border isNotEqualTo []) then {
 };
 
 _entry set ["controls", _controls];
+
+// A paged compartment keeps a list of every control its tiles made (fnc_showPage clears the window with it, whatever
+// the tiles say they hold).
+if ((_grid getOrDefault ["pageRanges", []]) isNotEqualTo []) then {
+    private _made = _grid getOrDefault ["tileControls", []];
+
+    _grid set ["tileControls", _made];
+    _made append _controls;
+};
+
 _entry set ["background", _background];
 _entry set ["backgrounds", _backgrounds];
 _entry set ["rect", [_left, _top, _width, _height]];

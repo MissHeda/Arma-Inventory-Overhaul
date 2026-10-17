@@ -38,6 +38,9 @@ _color set [3, _alpha];
 
 // Over every surface of the tile: a shaped one has one per run of its cells (fnc_createTile), and its
 // holes do not flash.
+private _flashes = uiNamespace getVariable [QGVAR(flashes), []];
+private _faded = diag_tickTime + _duration;
+
 {
     private _flash = [_display, "EINV_PanelRect", ctrlParentControlsGroup _x, ctrlPosition _x] call FUNC(uiCreate);
     _flash ctrlSetBackgroundColor _color;
@@ -45,6 +48,27 @@ _color set [3, _alpha];
     _flash ctrlCommit 0;
     _flash ctrlSetFade 1;
     _flash ctrlCommit _duration;
+    _flashes pushBack [_flash, _faded];
 } forEach (_tile getOrDefault ["backgrounds", [_background]]);
+
+uiNamespace setVariable [QGVAR(flashes), _flashes];
+
+// Faded out, a flash is deleted: one for every move that finished would pile up on the window for as long as it stays
+// open. [control, when it has faded out] in uiNamespace, the controls of flashes still fading stay.
+[{
+    private _left = [];
+
+    {
+        _x params ["_flash", "_end"];
+
+        if (diag_tickTime >= _end) then {
+            ctrlDelete _flash;
+        } else {
+            _left pushBack _x;
+        };
+    } forEach (uiNamespace getVariable [QGVAR(flashes), []]);
+
+    uiNamespace setVariable [QGVAR(flashes), _left];
+}, [], _duration + 0.1] call FUNC(delay);
 
 _tile

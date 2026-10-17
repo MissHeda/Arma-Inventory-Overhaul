@@ -233,9 +233,13 @@ private _caption = switch (_id) do {
     default {_section getOrDefault ["title", ""]};
 };
 
-private _lineH = UNIT * 0.62;
+// The caption line (CAPTION_LINE) is a button row: tall enough to hit, and every hit area reaches over the empty room
+// above and under it (CAPTION_HIT_UP, CAPTION_HIT_DOWN) and half a gap to either side.
+private _lineH = UNIT * CAPTION_LINE;
 private _lineSize = UNIT * 0.46;
 private _tabPad = SQUARE(_lineH * 0.5);
+private _hitUp = UNIT * CAPTION_HIT_UP;
+private _hitDown = UNIT * CAPTION_HIT_DOWN;
 
 private _load = "";
 
@@ -409,7 +413,9 @@ if (_chevronW > 0) then {
         [UI_TEX(icon_chevron_down_ca), UI_TEX(icon_chevron_right_ca)] select _collapsed, _colorText2
     ] call FUNC(uiIcon);
 
-    private _toggle = [_display, "EINV_Hitbox", _parent, [_blockX, _top, _tabW max _chevronW, _lineH]] call FUNC(uiCreate);
+    private _toggle = [
+        _display, "EINV_Hitbox", _parent, [_blockX, _top - _hitUp, (_tabW max _chevronW) + SQUARE(UNIT * 0.14), _lineH + _hitUp + _hitDown]
+    ] call FUNC(uiCreate);
     _toggle ctrlSetTooltip LLSTRING(Section_Toggle);
     _toggle setVariable [QGVAR(key), _sectionContainer];
     _toggle ctrlAddEventHandler ["ButtonClick", {
@@ -449,7 +455,7 @@ private _buttonX = _blockX + _tabW + _buttonGap;
 
     private _button = [
         _display, _parent, [_buttonX, _top, _buttonW, _lineH], format ["%1|%2|%3", _kind, _infoIndex, GVAR(buildCount)],
-        _label, _icon, _theme, _fnc_click, _busy, _buttonSize, true
+        _label, _icon, _theme, _fnc_click, _busy, _buttonSize, true, [SQUARE(UNIT * 0.14), _hitUp, SQUARE(UNIT * 0.14), _hitDown]
     ] call FUNC(uiButton);
 
     // What it does, when the mouse rests on it. Sort says what its next click sorts by (fnc_sortText) and is
@@ -512,7 +518,9 @@ if (_nested) then {
 
     [_display, _parent, [_closeX + (_closeW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH], UI_TEX(icon_close_ca), _colorText2] call FUNC(uiIcon);
 
-    private _close = [_display, "EINV_Hitbox", _parent, [_closeX, _top, _closeW, _lineH]] call FUNC(uiCreate);
+    private _close = [
+        _display, "EINV_Hitbox", _parent, [_closeX - SQUARE(UNIT * 0.14), _top - _hitUp, _closeW + SQUARE(UNIT * 0.14), _lineH + _hitUp + _hitDown]
+    ] call FUNC(uiCreate);
     _close ctrlSetTooltip LLSTRING(Section_Close);
     _close setVariable [QGVAR(key), _sectionContainer];
     _close ctrlAddEventHandler ["ButtonClick", {
@@ -697,8 +705,8 @@ private _used = (_bodyTop - _top) + (_boxH max _blocksH);
 // The empty rows folded away: one line under the grid that says how many and opens them - or, opened,
 // folds them away again (fnc_toggleRows).
 // ---------------------------------------------------------------------------
-// A drop on the box of a paged container, or on the name of its bar, is laid down in its first free spot, whatever page
-// it is on (fnc_updateDrag, GVAR(foldAreas)) - the arrows turn the page instead.
+// A drop on the box of a paged container, or on the middle of its bar, is laid down in its first free spot, whatever page
+// it is on (fnc_updateDrag, GVAR(foldAreas)) - the outer parts of the bar turn the page instead (PAGE_ZONE).
 if (_anyPaged && {!isNull _sectionContainer}) then {
     private _areas = uiNamespace getVariable [QGVAR(foldAreas), []];
 
@@ -718,10 +726,11 @@ if (_anyPaged && {!isNull _sectionContainer}) then {
         private _pageTall = selectMax ((_x select 1) apply {(_x select 1) - (_x select 0)});
         private _barTop = _bodyTop + (_place select 1) + _pageTall * _cellH + COMPARTMENT_PAD_PX(_cellW) * pixelH + UNIT * PAGE_BAR_GAP;
         private _barH = UNIT * PAGE_BAR_H;
-        private _labelW = _pagedCols * _cellW - SQUARE(_barH) * 2 - SQUARE(UNIT * 0.4);
+        private _barW = _pagedCols * _cellW - pixelW;
 
         _areas pushBack createHashMapFromArray [
-            ["rel", [_gridX + (_place select 0), _barTop]], ["parent", _parent], ["size", [_labelW max 0, _barH]], ["container", _sectionContainer]
+            ["rel", [_gridX + (_place select 0) + _barW * PAGE_ZONE, _barTop]], ["parent", _parent],
+            ["size", [_barW * (1 - 2 * PAGE_ZONE), _barH]], ["container", _sectionContainer]
         ];
     } forEach _paging;
 
@@ -754,7 +763,9 @@ if (_rowsFoldable) then {
         [[_rowsText, _theme] call FUNC(caption), _textW, _font, _lineSize] call FUNC(fitText), _lineSize, _colorText2, _font, 0
     ] call FUNC(uiLabel);
 
-    private _rowsToggle = [_display, "EINV_Hitbox", _parent, [_gridX, _rowsTop, _rowsW, _lineH]] call FUNC(uiCreate);
+    private _rowsToggle = [
+        _display, "EINV_Hitbox", _parent, [_gridX, _rowsTop - UNIT * 0.1, _rowsW, _lineH + UNIT * 0.1 + _hitDown]
+    ] call FUNC(uiCreate);
     _rowsToggle ctrlSetTooltip LLSTRING(Rows_Tooltip);
     _rowsToggle setVariable [QGVAR(key), _sectionContainer];
     _rowsToggle ctrlAddEventHandler ["ButtonClick", {

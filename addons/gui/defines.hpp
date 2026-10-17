@@ -134,13 +134,17 @@
 // The hands' queue (fnc_queueMoves, fnc_drawQueue, fnc_animateQueue): each action waiting for the hands has a circle on its
 // tile, drawn like the search's ring (the same SEARCH_RING pictures). It is QUEUE_RING_SIZE of the tile's shorter side, never
 // more than QUEUE_RING_MAX pixels; the dark disc behind it QUEUE_DISC_SIZE of the ring. Only the first QUEUE_DISC_MAX actions
-// get the disc (a Take all on a big crate would make hundreds of controls): every later one is marked by the faint ring and its
-// number alone, so every tile that waits shows it. Longer than QUEUE_PAUSE between two frames of the
-// queue, and it was paused (another window over this one): the time it stood still does not count.
+// get the disc (a Take all on a big crate would make hundreds of controls): every later one is marked by the faint ring
+// alone, so every tile that waits shows it. Only the first QUEUE_NUMBER_MAX actions (the one the hands are busy
+// with and the next ones) say their place as a number: every move that finishes shifts every place by one, and a number
+// on each of hundreds of tiles counting down once a second looked like the window lagging. Longer than QUEUE_PAUSE
+// between two frames of the queue, and it was paused (another window over this one): the time it stood still does not
+// count.
 #define QUEUE_RING_SIZE 0.62
 #define QUEUE_RING_MAX 56
 #define QUEUE_DISC_SIZE 0.86
 #define QUEUE_DISC_MAX 30
+#define QUEUE_NUMBER_MAX 4
 #define QUEUE_PAUSE 0.25
 
 // Tiles that do not match the search field fade this far, this quickly (fnc_applyFilter).
@@ -195,6 +199,15 @@
 #define BUTTON_ICON 0.56
 #define BUTTON_GAP 0.22
 
+// The caption line of a section and the title row's buttons of a kit window (fnc_drawSection, fnc_drawWindow) are
+// CAPTION_LINE of a UNIT high; their hit areas reach further than they are drawn (fnc_uiButton, argument 11): CAPTION_HIT_UP
+// above and CAPTION_HIT_DOWN under the line (the gap between two sections is 0.5 UNIT, the one under the caption 0.25),
+// and half the gap to the next button either side. HEADER_HIT_PAD is the same for the header's buttons.
+#define CAPTION_LINE 0.8
+#define CAPTION_HIT_UP 0.3
+#define CAPTION_HIT_DOWN 0.2
+#define HEADER_HIT_PAD 0.2
+
 // How far the mouse has to move with the button held before a press on a tile becomes a drag, and how
 // faint the tile it was lifted from stays while it is dragged.
 #define DRAG_THRESHOLD 0.008
@@ -214,14 +227,15 @@
 // under it to turn the pages (fnc_pageRanges, fnc_drawPageBar). At least PAGE_MIN_ROWS rows to a page; the setting 0
 // or MAX_ROWS (or more) turns the pages off. A dragged item held over an arrow of the bar turns the page after
 // PAGE_HOVER_TIME seconds, and again every PAGE_HOVER_TIME while it stays. The bar is PAGE_BAR_H of a UNIT tall,
-// PAGE_BAR_GAP of one below the compartment's panel; the fade over the page's last row (the cue that more lies on
-// other pages) is PAGE_FADE_STEPS strips over PAGE_FADE_ROWS of a cell.
+// PAGE_BAR_GAP of one below the compartment's panel; its left half turns back and its right half on (the whole half is
+// the button), and the count of what lies on other pages is in the bar's own text - nothing lies over the tiles. A dragged
+// item turns the page over the outer PAGE_ZONE of the bar's width on each side; the middle stays the place where a drop
+// is laid down in the first free spot.
 #define PAGE_MIN_ROWS 4
 #define PAGE_HOVER_TIME 0.7
-#define PAGE_BAR_H 0.62
+#define PAGE_BAR_H 1.15
 #define PAGE_BAR_GAP 0.12
-#define PAGE_FADE_STEPS 6
-#define PAGE_FADE_ROWS 0.7
+#define PAGE_ZONE 0.35
 
 // The room a paged compartment keeps under its cells for the bar, for a cell CELLW wide: the panel's pad, the gap and the
 // bar (fnc_drawSection reserves it in the flow, fnc_drawPageBar draws in it).

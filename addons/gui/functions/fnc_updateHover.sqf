@@ -347,7 +347,10 @@ private _fnc_light = {
         _color set [3, ((_color select 3) + HOVER_ALPHA) min 1];
     };
 
-    // A shaped tile has a surface per run of its cells (fnc_createTile): all of them light up.
+    // A shaped tile has a surface per run of its cells (fnc_createTile): all of them light up. Noted on the tile, so
+    // a redraw (fnc_drawTiles) puts the colour back on the tiles that were lit and touches no other.
+    _tile set ["lit", _on];
+
     {
         _x ctrlSetBackgroundColor _color;
     } forEach (_tile getOrDefault ["backgrounds", [_background]]);
