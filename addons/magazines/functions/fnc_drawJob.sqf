@@ -81,7 +81,7 @@ private _missing = false;
                     if (
                         toLowerANSI (_x getOrDefault ["class", ""]) isEqualTo _key
                         && {(_x getOrDefault ["ammo", -1]) == _rounds}
-                        && {!(_x getOrDefault ["hidden", false])}
+                        && {!(_x getOrDefault ["hidden", false])} && {!(_x getOrDefault ["strict", false])}
                         && {_count > 1 || {!([_gridIndex, _tileIndex] in _taken)}}
                         && {!_exact || {(_x get "col") == _col && {(_x get "row") == _row} && {(_x getOrDefault ["block", 0]) == _block}}}
                     ) exitWith {

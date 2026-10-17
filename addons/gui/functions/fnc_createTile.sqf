@@ -49,6 +49,7 @@
  *   "holes" (optional) - the cells of its box a shaped item does not take, as it lies
  *   "count", "ammo", "capacity" (optional) - how many, a magazine's rounds and how many it holds
  *   "hidden" (optional) - not searched yet <BOOL>
+ *   "strict" (optional) - kept in the unit's hidden holder (Strict mode): a crossed eye on the tile <BOOL>
  *   "icon" (optional) - [scale, across, down] to draw the picture by instead of the item's own; "picture"
  *   (optional) - the texture to draw instead of the item's own (the wizard's preview of a picture being
  *   picked); "preview" (optional) - drawn outside the inventory window (the setup wizard), so nothing
@@ -271,7 +272,9 @@ if (_hidden) then {
         };
     };
 
-    if (_entry getOrDefault ["hidden", false] && {!(_entry getOrDefault ["preview", false])}) then {
+    // Kept in the unit's hidden holder (Strict mode, "strict"), which is not the same as not searched yet
+    // ("hidden", the "?" tile): the eye is for the first, and a tile of the second never gets here.
+    if (_entry getOrDefault ["strict", false] && {!(_entry getOrDefault ["preview", false])}) then {
         _controls pushBack ([
             _display, _parent, [_markX, _top + _padY * 0.5, SQUARE(_markSize), _markSize], UI_TEX(icon_eye_off_ca), _markColor
         ] call FUNC(uiIcon));

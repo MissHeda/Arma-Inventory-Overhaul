@@ -2,7 +2,8 @@
 /*
  * Author: Miss Heda
  * Puts an "Inventory setup" button on CBA's Addon Options, in the free place of its bottom row between
- * Load and Import, and shows it only while this mod's page is the one open. It opens the setup wizard
+ * Load and Import, and shows it only while this mod's server page ("Enhanced Inventory - Server", where
+ * the rules are; the client page has nothing for the wizard) is the one open. It opens the setup wizard
  * over the menu, in menu mode: what the wizard applies arrives in the menu as a change still to be
  * confirmed - our row turns yellow - and CBA's own OK saves it, or Cancel throws it away, like any other
  * change made there. Shown only to who may see the wizard at all (fnc_canOpen), asked whenever the button
@@ -78,11 +79,11 @@ _button ctrlAddEventHandler ["ButtonClick", {
 
 // The page of a category is its name in lower case after CBA localized it - read from the setting
 // itself, so a category that is ever turned into a stringtable entry still matches in every language.
-private _category = CBA_SETTINGS_EINV;
+private _category = CBA_SETTINGS_EINV_SERVER;
 private _defaults = missionNamespace getVariable "cba_settings_default";
 
 if (!isNil "_defaults") then {
-    _category = (_defaults getVariable [QEGVAR(items,rules), []]) param [4, CBA_SETTINGS_EINV];
+    _category = (_defaults getVariable [QEGVAR(items,rules), []]) param [4, CBA_SETTINGS_EINV_SERVER];
 };
 
 _display setVariable [QGVAR(cbaButton), _button];

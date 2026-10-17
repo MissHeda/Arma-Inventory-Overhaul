@@ -11,6 +11,11 @@
  * key, the mouse button is ACE's own picture on a cap of its own (ACE's interaction addon ships mouse_left,
  * mouse_right and mouse_scroll); with no such picture the cap says it in words ("Right click").
  *
+ * The spacing is one rule for every hint, so a row of them reads evenly: all caps are the same height
+ * (whole pixels, so none is a pixel off its neighbour) and a mouse cap is as large as a one-letter key cap;
+ * caps of one key and the cap and its words are one gap apart; the next hint begins a larger gap after the
+ * words, which are measured as they are (the label's own box has room to spare, the advance has not).
+ *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Controls group to create it in, or controlNull for the display <CONTROL>
@@ -35,6 +40,12 @@ disableSerialization;
 params ["_display", "_parent", "_position", "_key", "_text", "_theme", ["_height", UNIT * 0.9], ["_measure", false]];
 _position params ["_left", "_top"];
 
+// Whole pixels: every cap of every hint is then the same height and sits on the same line.
+private _originY = [safezoneY, 0] select !isNull _parent;
+
+_height = ((round (_height / pixelH)) max 1) * pixelH;
+_top = _originY + round ((_top - _originY) / pixelH) * pixelH;
+
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
 private _keyBg = _theme getOrDefault ["keyBg", [1, 1, 1, 0.15]];
@@ -44,7 +55,11 @@ private _round = _theme getOrDefault ["keyRound", false];
 private _keySize = _height * 0.56;
 private _textSize = _height * 0.62;
 private _circleW = SQUARE(_height);
-private _capGap = SQUARE(_height * 0.18);
+
+// One gap between caps of one key and between the cap and its words; a larger one before the next hint.
+private _gap = SQUARE(_height * 0.3);
+private _capGap = _gap;
+private _entryGap = SQUARE(_height * 0.9);
 
 // The caps the key is made of: [text, "", 1] for a key cap, ["", picture, how many] for a mouse button. A key with
 // no token is one cap, as ever.
@@ -82,7 +97,9 @@ if ((_key find "@") < 0) then {
     } forEach (_key splitString "+");
 };
 
-private _iconSide = _height * 0.78;
+// A mouse picture as large as the letter of a key cap: the cap is the same square, the picture is not
+// to make it look bigger than the keys beside it.
+private _iconSide = (round (_height * 0.66 / pixelH)) * pixelH;
 
 // Each cap's width: a key cap as wide as its name, at least a circle; a mouse button's a circle, two of
 // them a little wider than two pictures.
@@ -102,13 +119,16 @@ private _badgeW = _capGap * (count _caps - 1);
     _badgeW = _badgeW + _x;
 } forEach _widths;
 
-private _taken = _badgeW + SQUARE(_height * 0.9);
-private _gap = SQUARE(_height * 0.3);
+private _taken = _badgeW + _entryGap;
 private _textW = 0;
 
 if (_text isNotEqualTo "") then {
-    _textW = (_text getTextWidth [_font, _textSize]) * TEXT_SLACK;
-    _taken = _taken + _gap + _textW;
+    // The advance is the words as they are, the label has the slack: the gap after them is the same
+    // whatever the words.
+    private _textExact = _text getTextWidth [_font, _textSize];
+
+    _textW = _textExact * TEXT_SLACK;
+    _taken = _taken + _gap + _textExact;
 };
 
 if (_measure) exitWith {_taken};
@@ -135,7 +155,7 @@ private _capX = _left;
         private _iconX = _capX + (_capW - _iconW * _times) / 2;
 
         for "_i" from 0 to (_times - 1) do {
-            [_display, _parent, [_iconX + _iconW * _i, _top + (_height - _iconSide) / 2, _iconW, _iconSide], _capPicture, _keyText] call FUNC(uiIcon);
+            [_display, _parent, [_iconX + _iconW * _i, _top + (round ((_height - _iconSide) / 2 / pixelH)) * pixelH, _iconW, _iconSide], _capPicture, _keyText] call FUNC(uiIcon);
         };
     };
 

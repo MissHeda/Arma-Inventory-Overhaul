@@ -437,7 +437,7 @@ private _source = if (_isKey && {_entries isEqualTo []}) then {
         if !(_x get "overflow") then {
             private _record = [_x get "key", _x get "col", _x get "row", _x get "w", _x get "h", _x get "block", parseNumber (_x get "rotated")];
 
-            if (!_isKey && {((_infos select _forEachIndex) getOrDefault ["stack", 1]) > 1} && {!(_x getOrDefault ["hidden", false])}) then {
+            if (!_isKey && {((_infos select _forEachIndex) getOrDefault ["stack", 1]) > 1} && {!(_x getOrDefault ["strict", false])}) then {
                 _record pushBack (_x getOrDefault ["count", 1]);
             };
 

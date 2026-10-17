@@ -93,7 +93,7 @@ if (_new) then {
 
         if (
             !_isKey && {_count isEqualType 0} && {_count >= 1} && {(_entry getOrDefault ["attachments", []]) isEqualTo []}
-            && {!(_entry getOrDefault ["hidden", false])}
+            && {!(_entry getOrDefault ["strict", false])}
             && {isNull (_entry getOrDefault ["container", objNull])}
             && {(([_class] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) > 1}
         ) then {

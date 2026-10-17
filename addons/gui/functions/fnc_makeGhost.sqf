@@ -108,11 +108,21 @@ uiNamespace setVariable [QGVAR(dragTurned), _turned];
 
 // How many of the stack go - only for a stack; for a group always, how many tiles are dragged.
 if ((_entry getOrDefault ["count", 1]) > 1 || {GVAR(dragGroup) isNotEqualTo []}) then {
-    private _counter = [
-        _display, controlNull, [0, 0, SQUARE(UNIT * 1.6), UNIT * 0.75], "", UNIT * 0.55,
-        GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]], GVAR(theme) getOrDefault ["fontBold", "PuristaSemibold"], 2
-    ] call FUNC(uiLabel);
+    // A rounded chip like the footer's key caps: a group, so the mouse moves one control, holding the chip's
+    // panel (round corners cannot be a label's background) and the label the text goes to (QGVAR(label)).
+    private _counterW = SQUARE(UNIT * 1.6);
+    private _counterH = UNIT * 0.75;
+    private _theme = GVAR(theme);
+    private _radius = [(_theme getOrDefault ["radius", 0]) min (_counterH * 0.3), _counterH / 2] select (_theme getOrDefault ["keyRound", false]);
 
-    _counter ctrlSetBackgroundColor [0.05, 0.05, 0.05, 0.95];
+    private _counter = [_display, "EINV_Group", controlNull, [0, 0, _counterW, _counterH]] call FUNC(uiCreate);
+
+    [_display, _counter, [0, 0, _counterW, _counterH], [0.05, 0.05, 0.05, 0.95], _radius] call FUNC(uiPanel);
+
+    _counter setVariable [QGVAR(label), [
+        _display, _counter, [0, 0, _counterW, _counterH], "", UNIT * 0.55,
+        _theme getOrDefault ["accent", [1, 1, 1, 1]], _theme getOrDefault ["fontBold", "PuristaSemibold"], 2
+    ] call FUNC(uiLabel)];
+
     uiNamespace setVariable [QGVAR(dragCounter), _counter];
 };

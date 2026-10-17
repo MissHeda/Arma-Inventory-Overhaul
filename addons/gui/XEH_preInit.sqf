@@ -268,12 +268,13 @@ GVAR(collapsed) = [];
 // the whole mission.
 GVAR(expanded) = [];
 
-// The rustle while searching, muted with the speaker in the header (fnc_toggleSearchSound). Each
-// player's own, kept in the profile.
-GVAR(searchMuted) = profileNamespace getVariable [QGVAR(searchMuted), false];
+// The window's sounds, muted with the speaker in the header (fnc_toggleMute); which kinds it silences is the
+// player's setting (fnc_soundMuted). Each player's own, kept in the profile - the speaker used to mute the
+// search rustle alone and kept that in einv_gui_searchMuted, which a player's choice is taken from.
+GVAR(muted) = profileNamespace getVariable [QGVAR(muted), profileNamespace getVariable [QGVAR(searchMuted), false]];
 
-if !(GVAR(searchMuted) isEqualType true) then {
-    GVAR(searchMuted) = false;
+if !(GVAR(muted) isEqualType true) then {
+    GVAR(muted) = false;
 };
 
 // The order the Sort buttons lay a container out by (fnc_sortHolder, one of SORT_MODES): the one the last
@@ -374,10 +375,13 @@ GVAR(aceInventoryAction) = isClass (configFile >> "CfgPatches" >> "ace_medical_s
 GVAR(actionAgent) = objNull;
 
 // The live camera on the player's soldier and its light at night (fnc_cameraStart), and whom and which
-// rectangle it frames, [unit, rect] - a build keeps a camera that frames the same (fnc_build).
+// rectangle it frames, [unit, rect] - a build keeps a camera that frames the same (fnc_build), and
+// fnc_cameraStart moves one that frames the same soldier from another rectangle. cameraView is
+// [unit, view] the player had before the camera, which fnc_cameraStop switches back to.
 GVAR(camera) = objNull;
 GVAR(cameraLight) = objNull;
 GVAR(cameraFor) = [];
+GVAR(cameraView) = [];
 
 // What the containers held when the window was last drawn, in the five parts fnc_getSignature gives:
 // the unit's own gear, the list of sections shown, per loot and per storage section what it holds and

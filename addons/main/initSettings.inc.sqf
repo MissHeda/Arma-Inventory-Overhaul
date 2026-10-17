@@ -12,7 +12,7 @@
     QGVAR(settings),
     "EDITBOX",
     [LLSTRING(Setting_Settings), LLSTRING(Setting_Settings_Desc)],
-    [CBA_SETTINGS_EINV, LELSTRING(items,SubCategory_Grids)],
+    [CBA_SETTINGS_EINV_SERVER, LELSTRING(items,SubCategory_Grids)],
     ["", false, FUNC(sanitizeSettings)],
     1,
     {[_this] call FUNC(applySettings)}

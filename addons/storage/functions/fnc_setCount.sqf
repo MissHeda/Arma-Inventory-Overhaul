@@ -30,7 +30,7 @@ if (isNull _holder) exitWith {false};
 
 // A tile of the hidden holder (Strict mode) is cut plainly and its record never carries a count: one given
 // to it would be read as a stack of the cargo's pile of the same key (fnc_getContents).
-if (_entry getOrDefault ["hidden", false]) exitWith {false};
+if (_entry getOrDefault ["strict", false]) exitWith {false};
 
 private _key = _entry getOrDefault ["key", ""];
 

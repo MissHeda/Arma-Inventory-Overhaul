@@ -5,7 +5,7 @@
  * "Use items from ..." on Strict (fnc_hiddenLists). The holder keeps, per container, what the setting keeps
  * out of the cargo: items of the limited kinds (USE_ITEM_KINDS) that are not whitelisted for it
  * (fnc_useState "blocked"). The window shows them as the container's own tiles all the same
- * (fnc_getContents merges them, marked "hidden"), so nothing visibly moves here. Per container, in order:
+ * (fnc_getContents merges them, marked "strict"), so nothing visibly moves here. Per container, in order:
  *
  *   1. Out of the holder - what no longer belongs there. The holder's list of a kind whose container is not
  *      Strict any more, or while the holder is not in force (fnc_hiddenActive: the unit died, became an AI,
@@ -152,7 +152,7 @@ private _fnc_save = {
     // -----------------------------------------------------------------------
     if (_strict) then {
         private _entries = ([_container] call FUNC(getContents)) select {
-            !(_x getOrDefault ["hidden", false]) && {([_x get "class", _kind] call FUNC(useState)) isEqualTo "blocked"}
+            !(_x getOrDefault ["strict", false]) && {([_x get "class", _kind] call FUNC(useState)) isEqualTo "blocked"}
         };
 
         {

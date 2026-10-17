@@ -139,7 +139,7 @@ private _same = [];
 
 if (_stackable) then {
     _same = _tiles select {
-        (_x getOrDefault ["count", 1]) > 0 && {!(_x getOrDefault ["overflow", false])} && {!(_x getOrDefault ["hidden", false])}
+        (_x getOrDefault ["count", 1]) > 0 && {!(_x getOrDefault ["overflow", false])} && {!(_x getOrDefault ["strict", false])}
         && {(_x getOrDefault ["key", ""]) isEqualTo _key}
     };
 };
@@ -290,7 +290,7 @@ if (_rest isEqualTo [] && {_type in ["weapon", "magazine"] || {_type isEqualTo "
             ["capacity", _info getOrDefault ["capacity", 0]],
             ["attachments", _probe get "attachments"],
             ["container", objNull],
-            ["hidden", [_to, _class] call FUNC(hiddenRoute)],
+            ["strict", [_to, _class] call FUNC(hiddenRoute)],
             ["block", _spot param [2, -1]],
             ["col", _spot param [0, 0]],
             ["row", _spot param [1, 0]],

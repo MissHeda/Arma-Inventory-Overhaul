@@ -62,7 +62,7 @@ if (_count > _have) exitWith {["Gone", [], []]};
 if (
     _count < 1 || {_count >= _have}
     || {(([_class] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) <= 1}
-    || {_entry getOrDefault ["hidden", false]} || {_entry getOrDefault ["overflow", false]}
+    || {_entry getOrDefault ["strict", false]} || {_entry getOrDefault ["overflow", false]}
     || {(_entry getOrDefault ["attachments", []]) isNotEqualTo []} || {!isNull (_entry getOrDefault ["container", objNull])}
 ) exitWith {["Failed", [], []]};
 
@@ -97,7 +97,7 @@ private _footprint = ([_class, _spot select 5] call EFUNC(items,footprintAs));
     ["capacity", _entry getOrDefault ["capacity", 0]],
     ["attachments", []],
     ["container", objNull],
-    ["hidden", false],
+    ["strict", false],
     ["block", _spot select 2],
     ["col", _spot select 0],
     ["row", _spot select 1],

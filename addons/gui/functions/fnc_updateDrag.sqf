@@ -642,7 +642,7 @@ GVAR(dragRoom) set ["hold", _newHold];
 // The count beside the ghost: as many of a stack as go, or how many tiles - a group's grid says below how many
 // of them fit.
 if (!isNull _counter) then {
-    _counter ctrlSetText ([format ["%1 / %2", GVAR(dragCount), _stack], format ["×%1", count _dragGroup]] select (_dragGroup isNotEqualTo []));
+    (_counter getVariable [QGVAR(label), _counter]) ctrlSetText ([format ["%1 / %2", GVAR(dragCount), _stack], format ["×%1", count _dragGroup]] select (_dragGroup isNotEqualTo []));
 };
 
 // A group's extra footprints and pictures are shown only where they mean something, below.
@@ -1240,7 +1240,7 @@ call {
         };
 
         if (!isNull _counter) then {
-            _counter ctrlSetText ([format ["×%1", _total], format ["%1 / %2", _fitting, _total]] select (_mode isEqualTo "pack"));
+            (_counter getVariable [QGVAR(label), _counter]) ctrlSetText ([format ["×%1", _total], format ["%1 / %2", _fitting, _total]] select (_mode isEqualTo "pack"));
         };
     };
 

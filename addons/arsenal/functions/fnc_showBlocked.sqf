@@ -27,4 +27,6 @@ if (isNull _parent) exitWith {};
 
 _parent createDisplay "EINV_ArsenalBlocked";
 
-playSound "addItemFailed";
+if !(["warn"] call EFUNC(gui,soundMuted)) then {
+    playSound "addItemFailed";
+};

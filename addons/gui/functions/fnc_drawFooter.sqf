@@ -7,10 +7,14 @@
  * fnc_updateHover), the version on the right. All of it on a strip of the window's glass, the width of
  * the content. The key hints name G to drop, the selection on Ctrl+click and the menu on the right mouse button - in the order Esc, quick move
  * (its key, F by default, or the double click while it has none), drop, hotbar, select, menu; the mouse buttons are ACE's pictures,
- * not words (fnc_uiKeyHint). The hotbar adds
- * its own keys at the end (einv_hotbar_fnc_footerHint - only when that addon is loaded, and only in the
+ * not words (fnc_uiKeyHint). The hotbar's entry has its place between drop and select
+ * (einv_hotbar_fnc_footerHint - only when that addon is loaded, and only in the
  * inventory). A window that attached names its own keys (the "footerKeys"
  * hook, [[key, text], ...]).
+ *
+ * The hints are evenly spaced (fnc_uiKeyHint), and what does not fit the bar is left out: the hint line in
+ * the middle gives way first (it hides when the room between the hints and the version is too small), then
+ * the hints from the last backwards, Esc staying.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -80,10 +84,35 @@ if (_ownKeys isEqualType [] && {_ownKeys isNotEqualTo []}) then {
     _keys = _ownKeys;
 };
 
+// What fits: the width of each hint is measured first, the version on the right and a little room before it kept.
+private _versionW = SQUARE(UNIT * 4);
+private _room = _width - _versionW - SQUARE(UNIT * 0.5);
+
+_keys = _keys select {(_x select 0) isNotEqualTo ""};
+
+private _used = 0;
+private _fits = 0;
+
 {
     _x params ["_key", "_text"];
 
-    if (_key isEqualTo "") then {continue};
+    private _measured = [_display, controlNull, [0, 0], _key, _text, _theme, _keyH, true] call FUNC(uiKeyHint);
+
+    if (isNil "_measured") then {
+        _measured = 0;
+    };
+
+    _used = _used + _measured;
+
+    if (_used > _room && {_fits > 0}) exitWith {};
+
+    _fits = _fits + 1;
+} forEach _keys;
+
+_keys = _keys select [0, _fits];
+
+{
+    _x params ["_key", "_text"];
 
     private _taken = [_display, controlNull, [_keyX, FOOT_Y + (FOOT_H - _keyH) / 2], _key, _text, _theme, _keyH] call FUNC(uiKeyHint);
 
@@ -95,8 +124,6 @@ if (_ownKeys isEqualType [] && {_ownKeys isNotEqualTo []}) then {
 } forEach _keys;
 
 // ----- Version -----
-
-private _versionW = SQUARE(UNIT * 4);
 
 [
     _display,
@@ -116,5 +143,12 @@ private _versionW = SQUARE(UNIT * 4);
 // line above the footer's middle, where their words are centred.
 private _side = ((_keyX - _left) max _versionW) + SQUARE(UNIT * 0.5);
 private _hintSize = UNIT * 0.558;
+private _hintW = _width - _side * 2;
+private _hintCtrl = [_display, "EINV_FooterHint", controlNull, [_left + _side, FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
 
-uiNamespace setVariable [QGVAR(hint), [_display, "EINV_FooterHint", controlNull, [_left + _side, FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH, _width - _side * 2, _hintSize * 1.4]] call FUNC(uiCreate)];
+// Too narrow for words: the line is hidden rather than wrapped over the key hints.
+if (_hintW < SQUARE(UNIT * 6)) then {
+    _hintCtrl ctrlShow false;
+};
+
+uiNamespace setVariable [QGVAR(hint), _hintCtrl];

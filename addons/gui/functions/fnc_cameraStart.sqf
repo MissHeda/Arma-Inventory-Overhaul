@@ -9,6 +9,12 @@
  * Only on foot - in a vehicle there is no room in front of the soldier, and the window keeps the
  * player's own view. fnc_cameraStop gives the view back; fnc_onUnload makes sure it always does.
  *
+ * A camera that already frames this soldier is moved and re-aimed, never ended and made anew: ending
+ * it throws the player out of third person (cameraEffect "terminate" falls back to the first-person
+ * view), which a camera restart on every change of the free middle - a pile appearing on the ground
+ * after a drop opens the loot column - did again and again. The view the player had before the first
+ * camera is kept for fnc_cameraStop (GVAR(cameraView)).
+ *
  * Arguments:
  * 0: Unit <OBJECT>
  * 1: Where the soldier should stand, [x, y, w, h] on the screen <ARRAY>
@@ -24,9 +30,17 @@
 
 params ["_unit", "_rect"];
 
-call FUNC(cameraStop);
+// The camera of this soldier stays; anything else is ended first.
+private _again = !isNull GVAR(camera) && {(GVAR(cameraFor) param [0, objNull]) isEqualTo _unit};
 
-if (isNull _unit || {!isNull objectParent _unit} || {count _rect != 4}) exitWith {false};
+if (!_again) then {
+    call FUNC(cameraStop);
+};
+
+if (isNull _unit || {!isNull objectParent _unit} || {count _rect != 4}) exitWith {
+    call FUNC(cameraStop);
+    false
+};
 
 _rect params ["_rectX", "_rectY", "_rectW", "_rectH"];
 
@@ -57,9 +71,20 @@ private _metresPerPixel = 2 * _distance * CAMERA_FOV * CAMERA_FOV_SCALE / (safez
 private _side = ((_rectX + _rectW / 2) - (safezoneX + safezoneW / 2)) / pixelW * _metresPerPixel;
 private _rise = ((_rectY + _rectH / 2) - (safezoneY + safezoneH / 2)) / pixelH * _metresPerPixel;
 
-private _camera = "camera" camCreate (_unit modelToWorldVisual [_chestX, _chestY + _distance, _chestZ]);
-_camera cameraEffect ["internal", "back"];
-showCinemaBorder false;
+private _camera = GVAR(camera);
+
+if (_again) then {
+    _camera camSetPos (_unit modelToWorldVisual [_chestX, _chestY + _distance, _chestZ]);
+} else {
+    // The view the player has now, for fnc_cameraStop: the camera takes the screen, and ending it must
+    // give the player's third person (or first, or gunner) view back.
+    GVAR(cameraView) = [_unit, [cameraView, ""] select (cameraOn isNotEqualTo vehicle _unit)];
+
+    _camera = "camera" camCreate (_unit modelToWorldVisual [_chestX, _chestY + _distance, _chestZ]);
+    _camera cameraEffect ["internal", "back"];
+    showCinemaBorder false;
+};
+
 _camera camSetTarget (_unit modelToWorldVisual [_chestX + _side, _chestY, _chestZ + _rise]);
 _camera camSetFov CAMERA_FOV;
 _camera camCommit 0;
@@ -70,9 +95,14 @@ GVAR(camera) = _camera;
 GVAR(cameraFor) = [_unit, _rect];
 
 // A light point shines all around, so "aimed at the soldier" means: between the camera and the
-// soldier, a little above the chest. Local - nobody else sees it.
+// soldier, a little above the chest. Local - nobody else sees it. A light that exists is moved.
 if (sunOrMoon < CAMERA_LIGHT_SUN) then {
-    private _light = "#lightpoint" createVehicleLocal [0, 0, 0];
+    private _light = GVAR(cameraLight);
+
+    if (isNull _light) then {
+        _light = "#lightpoint" createVehicleLocal [0, 0, 0];
+    };
+
     _light setPosASL (_unit modelToWorldVisualWorld [_chestX, _chestY + _distance * 0.6, _chestZ + 0.4]);
     _light setLightBrightness CAMERA_LIGHT_BRIGHTNESS;
     _light setLightColor [1, 0.95, 0.88];

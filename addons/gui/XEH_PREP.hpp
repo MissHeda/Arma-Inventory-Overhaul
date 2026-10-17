@@ -142,7 +142,8 @@ PREP(closeInspect);
 PREP(toggleSection);
 PREP(toggleRows);
 PREP(closeNested);
-PREP(toggleSearchSound);
+PREP(toggleMute);
+PREP(soundMuted);
 
 // The feel: every kind of gear sounds like itself, others hear the looting, and the soldier looks into his gear
 PREP(soundFamily);

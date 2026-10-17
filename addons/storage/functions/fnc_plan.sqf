@@ -127,7 +127,7 @@ private _fnc_state = {
                 private _tileStack = (([_x getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) max 1;
                 private _tileCount = _x getOrDefault ["count", 1];
 
-                if (_tileStack > 1 && {_tileCount < _tileStack} && {!(_x getOrDefault ["hidden", false])}) then {
+                if (_tileStack > 1 && {_tileCount < _tileStack} && {!(_x getOrDefault ["strict", false])}) then {
                     private _tileKey = _x getOrDefault ["key", ""];
                     private _rooms = (_state select 7) getOrDefault [_tileKey, []];
 

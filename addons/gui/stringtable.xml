@@ -313,6 +313,12 @@
         <Key ID="STR_einv_gui_Menu_Settings">
             <English>Settings for %1</English>
         </Key>
+        <Key ID="STR_einv_gui_Mute_Mute">
+            <English>Mute the inventory sounds</English>
+        </Key>
+        <Key ID="STR_einv_gui_Mute_Unmute">
+            <English>Play the inventory sounds again</English>
+        </Key>
         <Key ID="STR_einv_gui_Notify_Searched">
             <English>%1 is going through your gear</English>
         </Key>
@@ -342,12 +348,6 @@
         </Key>
         <Key ID="STR_einv_gui_Rows_Tooltip">
             <English>The rest of the room - click to show it or to fold it away again</English>
-        </Key>
-        <Key ID="STR_einv_gui_SearchSound_Mute">
-            <English>Mute the search sound</English>
-        </Key>
-        <Key ID="STR_einv_gui_SearchSound_Unmute">
-            <English>Play the search sound again</English>
         </Key>
         <Key ID="STR_einv_gui_Section_Close">
             <English>Close</English>
@@ -456,6 +456,36 @@
         </Key>
         <Key ID="STR_einv_gui_Setting_MoveToStop_Desc">
             <English>A movement key pressed while looting or\nsearching closes the window: the search\nstops and the soldier walks off. What\nwas found stays found; the item being\nsearched starts again next time.\n\nOff: movement keys do nothing in the\nwindow.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MuteContainers">
+            <English>Mute button: containers</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MuteContainers_Desc">
+            <English>The speaker in the window's header also\nsilences containers, kits and pouches\nbeing opened and closed.\n\nOff: these keep playing while the\nspeaker is muted.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MuteMagazines">
+            <English>Mute button: magazines</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MuteMagazines_Desc">
+            <English>The speaker in the window's header also\nsilences magazines being loaded,\nunloaded, reloaded and repacked.\n\nOff: these keep playing while the\nspeaker is muted.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MuteMoves">
+            <English>Mute button: item moves</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MuteMoves_Desc">
+            <English>The speaker in the window's header also\nsilences items being picked up, moved,\ndropped, put on, taken off, attached\nand turned.\n\nOff: these keep playing while the\nspeaker is muted.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MuteOther">
+            <English>Mute button: other sounds</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MuteOther_Desc">
+            <English>The speaker in the window's header also\nsilences the rest: inspecting an item\nand the click or warning when\nsomething is refused.\n\nOff: these keep playing while the\nspeaker is muted.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MuteSearch">
+            <English>Mute button: searching</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_MuteSearch_Desc">
+            <English>The speaker in the window's header also\nsilences the rustle while loot is\nsearched and the sound of an item\nfound.\n\nOff: these keep playing while the\nspeaker is muted.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonItems">
             <English>Take and put items</English>

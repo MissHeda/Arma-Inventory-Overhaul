@@ -79,10 +79,11 @@ if (_progress >= 1) exitWith {
 };
 
 // Rummaging: a short sound now and then, of what is searched - cloth on a body, things shifting in a crate, a
-// hand on the ground. The speaker in the header mutes it for the looter only: the others still hear him.
+// hand on the ground. The speaker in the header mutes it for the looter only (fnc_playSound): the others still
+// hear him.
 if (_now >= GVAR(searchSoundAt)) then {
     GVAR(searchSoundAt) = _now + SEARCH_SOUND_GAP + random SEARCH_SOUND_GAP;
-    ["search", "", _head select 0, true, !GVAR(searchMuted)] call FUNC(playSound);
+    ["search", "", _head select 0, true] call FUNC(playSound);
 };
 
 private _fx = uiNamespace getVariable [QGVAR(searchFx), []];

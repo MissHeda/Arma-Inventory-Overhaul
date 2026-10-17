@@ -96,8 +96,8 @@ their load. A text that names a preset of an older version (`base=realism`, `wei
   (`force force einv_main_settings = "einv1, weight_enabled=0";`); the wizard's Export gives that line. A mission whose `cba_settings.sqf` has lines for the old settings
   (`einv_gui_searchTime = 0.6;`), or that saved them in Eden's addon options, keeps working as long as the text box is empty: those values are taken as if the text said them (the server's own
   profile and `cba_settings.sqf` are not read - set them in the wizard again). What players set for themselves (tile scale, tile names, sounds, keys, the
-  hotbar's look) stays in CBA's menu, per player. The old tables (`einv_items_sizeTable`, `stackTable`, `einv_storage_containerTable`) and the rules text stay
-  CBA text boxes of their own.
+  hotbar's look) stays in CBA's menu, per player, in the category "Enhanced Inventory - Client". The box itself, the old tables (`einv_items_sizeTable`, `stackTable`, `einv_storage_containerTable`) and the rules text stay
+  CBA text boxes of their own, in the category "Enhanced Inventory - Server" (the setting names do not carry the category, so a `cba_settings.sqf` is the same under either).
 
 - **Your own classes and kits:** `class=X+` covers X and every class built on it, from any mod -
   `class=My_Medic_Kit+ > size=2x2 stack=1 weight=1.5 name=Medic_kit`. A later rule beats an earlier one.
@@ -241,6 +241,8 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   a server setting). While the window looks into something (a body, a crate, a pile) the soldier lowers his weapon and
   looks into his gear, kneeling at bodies and low things, so others see who loots (`einv_gui_animation`, a server
   setting: off, while looting, always); a movement key stops looting and closes the window (each player's setting).
+  The speaker in the window's header mutes them for you; which kinds it silences (item moves, magazines, containers, searching, the rest) is five
+  checkboxes in "Enhanced Inventory - Client", all on by default.
   Add your own sounds as classes of `CfgEinvSounds` (see `addons/gui/CfgEinvSounds.hpp`), or give an item the
   family of another with `einv_sound = "vest";` in its config.
 

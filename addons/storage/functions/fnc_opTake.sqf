@@ -58,7 +58,7 @@ private _fnc_taken = {
     } else {
         // Of a stack that lies apart from others of its class, this tile gives the items: its record's
         // count goes down, so the one the player took from is the one that shrinks (fnc_setCount).
-        if (!(_entry getOrDefault ["hidden", false]) && {(_entry getOrDefault ["attachments", []]) isEqualTo []}) then {
+        if (!(_entry getOrDefault ["strict", false]) && {(_entry getOrDefault ["attachments", []]) isEqualTo []}) then {
             [_from, _entry, _have - _n] call FUNC(setCount);
         };
 

@@ -116,7 +116,7 @@ private _refused = [];
     };
 } forEach [_container, _secondary];
 
-if (_refused isNotEqualTo []) then {
+if (_refused isNotEqualTo [] && {!(["warn"] call FUNC(soundMuted))}) then {
     playSound "ACE_Sound_Click";
 };
 

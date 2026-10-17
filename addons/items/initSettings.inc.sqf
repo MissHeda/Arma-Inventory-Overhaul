@@ -43,7 +43,7 @@
     QGVAR(rules),
     "EDITBOX",
     [LLSTRING(Setting_Rules), LLSTRING(Setting_Rules_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Grids)],
+    [CBA_SETTINGS_EINV_SERVER, LLSTRING(SubCategory_Grids)],
     [DEFAULT_RULES, false, FUNC(sanitizeText)],
     1,
     {[] call FUNC(loadRules)}
@@ -55,7 +55,7 @@
     QGVAR(sizeTable),
     "EDITBOX",
     [LLSTRING(Setting_SizeTable), LLSTRING(Setting_SizeTable_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Grids)],
+    [CBA_SETTINGS_EINV_SERVER, LLSTRING(SubCategory_Grids)],
     ["", false, FUNC(sanitizeText)],
     1,
     {[] call FUNC(loadRules)}
@@ -65,7 +65,7 @@
     QGVAR(stackTable),
     "EDITBOX",
     [LLSTRING(Setting_StackTable), LLSTRING(Setting_StackTable_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Grids)],
+    [CBA_SETTINGS_EINV_SERVER, LLSTRING(SubCategory_Grids)],
     ["", false, FUNC(sanitizeText)],
     1,
     {[] call FUNC(loadRules)}

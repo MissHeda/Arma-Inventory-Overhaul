@@ -13,6 +13,8 @@
  * and a blast's deafness apply, times the volume setting (einv_gui_soundVolume) and only with the sounds
  * setting on. Others near the looter hear the louder ones, quieter, where his hands are (einv_gui_soundsWorld,
  * fnc_sendNoise). The same sound twice within a moment plays once; of several variants never the one before.
+ * The speaker in the header (fnc_toggleMute) silences it for the looter when the player's settings say it
+ * covers that kind (fnc_soundMuted); the others near him still hear it.
  *
  * Actions: "lift" (an item picked up), "move" (put into a container), "drop" (onto the ground), "equip",
  * "unequip", "attach", "detach", "loadMag", "loadMagHandgun", "loadMagLauncher", "loadMagUgl", "unloadMag",
@@ -94,7 +96,7 @@ if (_layers isEqualTo []) then {
 
 if (_layers isEqualTo []) exitWith {};
 
-if (_ui && {missionNamespace getVariable [QGVAR(sounds), true]}) then {
+if (_ui && {missionNamespace getVariable [QGVAR(sounds), true]} && {!([_action] call FUNC(soundMuted))}) then {
     private _scale = missionNamespace getVariable [QGVAR(soundVolume), 1];
 
     {

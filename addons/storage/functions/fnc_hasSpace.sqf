@@ -64,7 +64,7 @@ if (_stack > 1) then {
         private _had = _x getOrDefault ["count", 1];
 
         if (
-            _had < _stack && {!(_x getOrDefault ["hidden", false])} && {toLowerANSI (_x getOrDefault ["class", ""]) isEqualTo _lower}
+            _had < _stack && {!(_x getOrDefault ["strict", false])} && {toLowerANSI (_x getOrDefault ["class", ""]) isEqualTo _lower}
             && {([_x] call FUNC(entryKey)) isEqualTo _key}
         ) then {
             _left = _left - (_stack - _had);

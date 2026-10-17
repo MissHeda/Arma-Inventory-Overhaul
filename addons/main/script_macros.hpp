@@ -17,8 +17,13 @@
 #define ACEFUNC(module,function)    TRIPLES(DOUBLES(ACE_PREFIX,module),fnc,function)
 #define QACEFUNC(module,function)   QUOTE(ACEFUNC(module,function))
 
-// Category every setting and keybind of the mod lives under, shared by all addons.
+// Category every keybind of the mod lives under (CBA's Controls menu), shared by all addons. The settings are in two
+// categories of CBA's Addon Options: what each player sets for himself (scope 0), and what the server or the mission
+// decides - the settings box einv_main_settings, the rules and the older tables (scope 1). A setting's name
+// does not carry its category, so cba_settings.sqf lines and saved values are the same under either.
 #define CBA_SETTINGS_EINV "Enhanced Inventory"
+#define CBA_SETTINGS_EINV_CLIENT "Enhanced Inventory - Client"
+#define CBA_SETTINGS_EINV_SERVER "Enhanced Inventory - Server"
 
 // ---------------------------------------------------------------------------
 // Shared between addons

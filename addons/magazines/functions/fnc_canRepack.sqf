@@ -37,9 +37,11 @@ private _class = _sourceTile getOrDefault ["class", ""];
 
 if (_class isEqualTo "" || {toLowerANSI _class isNotEqualTo toLowerANSI (_targetTile getOrDefault ["class", ""])}) exitWith {[false, ""]};
 
-// A tile not searched yet, or one a move is under way for.
+// A tile not searched yet, one kept in the hidden holder (Strict mode - not magazines of the cargo), or one a
+// move is under way for.
 if (
     _sourceTile getOrDefault ["hidden", false] || {_targetTile getOrDefault ["hidden", false]}
+    || {_sourceTile getOrDefault ["strict", false]} || {_targetTile getOrDefault ["strict", false]}
     || {_sourceTile getOrDefault ["pending", false]} || {_targetTile getOrDefault ["pending", false]}
 ) exitWith {[false, ""]};
 

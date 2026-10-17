@@ -64,10 +64,10 @@ if (_count < 1) then {
     _count = _entry getOrDefault ["count", 1];
 };
 
-// A tile of the unit's hidden holder (Strict mode, fnc_getContents "hidden"): out of the holder, not out of
+// A tile of the unit's hidden holder (Strict mode, fnc_getContents "strict"): out of the holder, not out of
 // the cargo - the holder is this mod's own list, so what the payload says is exactly what left it
 // (fnc_hiddenTake). Noted in the journal like any other.
-if (_entry getOrDefault ["hidden", false]) exitWith {
+if (_entry getOrDefault ["strict", false]) exitWith {
     private _payload = [_container, _class, _count, _entry getOrDefault ["ammo", 0]] call FUNC(hiddenTake);
 
     if (_payload isEqualTo []) exitWith {

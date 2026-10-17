@@ -52,7 +52,7 @@
     QGVAR(notify),
     "CHECKBOX",
     [LLSTRING(Setting_Notify), LLSTRING(Setting_Notify_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Weight)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Weight)],
     true,
     0
 ] call CBA_fnc_addSetting;

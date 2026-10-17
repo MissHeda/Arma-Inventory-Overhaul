@@ -34,7 +34,7 @@
     QGVAR(containerTable),
     "EDITBOX",
     [LLSTRING(Setting_ContainerTable), LLSTRING(Setting_ContainerTable_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Containers)],
+    [CBA_SETTINGS_EINV_SERVER, LLSTRING(SubCategory_Containers)],
     ["", false, EFUNC(items,sanitizeText)],
     1,
     {[] call EFUNC(items,loadRules)}

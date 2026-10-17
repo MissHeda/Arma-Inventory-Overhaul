@@ -458,6 +458,7 @@ size - along the places' records when they carry counts (two stacks of one class
 | `attachments` | ARRAY, a weapon's `weaponsItemsCargo` entry, `[]` otherwise |
 | `container` | OBJECT, a uniform, vest or backpack lying here: its own container object from `everyContainer`; objNull otherwise |
 | `key` | STRING, the key of its place record (`fnc_entryKey`) |
+| `strict` | BOOL, it lies in the unit's hidden holder, not in the cargo (Strict mode, below). Not the window's `hidden`, "not searched yet" (`fnc_markHidden`), which only the window sets |
 
 **Stacks apart** (`fnc_getContents`, `fnc_stackCounts`). A pile of one key (`fnc_entryKey`) is cut along the places' records of that
 key: the n-th record is the n-th tile and holds as many as its eighth element (the count) says, so 5 and 1 of a class that stacks
@@ -908,16 +909,16 @@ which is exactly what Strict asks for - and the kinds that are ever limited are 
 and nested containers are never limited and never in it.
 
 **Merged view.** `fnc_getContents` of a unit's uniform, vest or backpack (`fnc_getOwner` tells the unit and the kind) appends the
-holder's list of that kind after the cargo's entries, stacked like cargo (`_fnc_addStacked`), each entry marked `hidden`. The keys
+holder's list of that kind after the cargo's entries, stacked like cargo (`_fnc_addStacked`), each entry marked `strict`. The keys
 are the keys their cargo twins would have, so the places need no change when a tile goes into or comes out of the holder, the layout
 (`fnc_getLayout`), the room checks (`fnc_hasSpace`, `fnc_plan`), the mass of a section (`fnc_getMass`), `fnc_findEntry`, the Arsenal
 panel (through `fnc_getContents` and `fnc_countAll` + `fnc_hiddenCounts`), `fnc_countClass` and `fnc_addNew`, the EFAK kit finder
 (`einv_compat_efak_fnc_locate`, `fnc_getSections` + `fnc_hiddenClasses`) all see one container, and every machine the same one.
-The window draws a hidden tile with a crossed eye (`icon_eye_off_ca`) after the padlock (`fnc_createTile`) and the footer says
+The window draws a `strict` tile with a crossed eye (`icon_eye_off_ca`) after the padlock (`fnc_createTile`; it was keyed `hidden` until 0.4.7, the window's "not searched yet", so the eye was never reached and a Strict tile showed as "?") and the footer says
 "Hidden: kept out of the backpack, so nothing else can use it" (`fnc_updateHover`); `fnc_getSignature` watches the holders of the
 people shown, so a move into or out of one redraws.
 
-**Moves.** Two primitives route the physical item. `fnc_removeEntry` of an entry marked `hidden` takes it out of the holder
+**Moves.** Two primitives route the physical item. `fnc_removeEntry` of an entry marked `strict` takes it out of the holder
 (`fnc_hiddenTake`: the owner's list of that kind, the entry of that class and rounds, at most as many as are there; written public
 at once; noted "out" in the journal like any take). `fnc_addPayload [container, payload, raw]` asks `fnc_hiddenRoute [container,
 class]` first - a unit's container, its setting Strict, the holder in force for the unit (`fnc_hiddenActive`: alive, `isPlayer`, not
@@ -1102,7 +1103,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   (`fnc_redrawPart`). Called once a second by `fnc_onFrame` (`SIGNATURE_INTERVAL`) and by `fnc_afterAction` after every answer -
   a move no longer builds the window. Tiles still flagged `pending` whose request was answered fade back in (`fnc_drawPending`).
   **A redraw keeps what did not change** (`fnc_drawTiles [display, grid, layout, theme, before]` -> the old tiles not kept): an
-  old tile that looks exactly as a new entry would (class, `hidden`, compartment, cell, `w`, `h`, `rotated`, `holes`, count, rounds,
+  old tile that looks exactly as a new entry would (class, `hidden`, `strict`, compartment, cell, `w`, `h`, `rotated`, `holes`, count, rounds,
   capacity, attachments, `picture`, `icon`, overflow) is that tile again - the same HashMap (the hands' queue holds it), its
   controls untouched, the new entry's keys merged in and the ones it lost dropped, its light reset and, when it was `pending` and
   is not `queued`, faded in; everything else is made by `fnc_createTile` and the old controls left over are deleted. Tiles go on
@@ -1112,8 +1113,12 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   outer `EINV_Group` made by the build where the piece belongs (so it keeps its z-order) holding an inner group the piece is drawn
   in; a redraw deletes the inner group, leaves its `slots` / `infoAreas` entries as dead stubs (numbers stay valid), and draws into a
   new one. The weight card (`fnc_drawWeightCard`, split out of `fnc_drawEquipmentCards`) and the hotbar strip are parts.
-- **The camera is kept** across builds while `einv_gui_cameraFor` (`[unit, rect]`, set by `fnc_cameraStart`) is unchanged; only the
-  pose being reached (`fnc_poseCheck`), another rect, the camera switch or a vehicle start or stop it. `einv_gui_debugTiming` (client,
+- **The camera is kept** across builds while `einv_gui_cameraFor` (`[unit, rect]`, set by `fnc_cameraStart`) is unchanged; another rect
+  (a pile appearing after a drop opens the loot column and moves the free middle), the pose being reached (`fnc_poseCheck`) only move
+  and re-aim the camera that is there (`camSetPos`, `camSetTarget`; the light follows) - ending it ("terminate") leaves the player in first person, which
+  made a drop throw him out of third person before 0.4.7 - and only the camera switch, another soldier or a vehicle end it
+  (`fnc_cameraStop`). The view the player had when the camera began (`cameraView`, kept with his unit in `einv_gui_cameraView`) is
+  switched back to whenever the camera ends: window closed, camera off, a vehicle. `einv_gui_debugTiming` (client,
   default off) writes `timing: build 12.3 ms (N controls on the display, N of them shown: PanelRect N, ...)` (the controls by class,
   the eight most) with `timing: build parts (ms) - sweep 2.1, contents 1.0, columns 30.2, footer and camera 0.8, kit windows and
   top layer 0.3, under way and selection 0.2, signature 0.9`, `timing: redraw 2.1 ms (N loot and N storage sections, N tiles kept,
@@ -1476,7 +1481,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 - **What a frame of a drag costs.** `fnc_updateDrag` works out only what changed. Every frame it reads the middle button and holds
   or edge-scrolls the columns (each column's box is worked out at its first frame, element 3 of its `dragScroll` entry), then
   compares the mouse and what is held (`dragCount`, `dragRot`, `count inFlight`) with the last frame (`dragRoom` "frame"); nothing
-  changed, it stops there. Mouse moved: the ghost, the counter and a kept group's pictures follow it. What lies under the mouse is
+  changed, it stops there. Mouse moved: the ghost, the counter (a rounded chip - a group of `fnc_uiPanel` and a label, `einv_gui_dragCounter`, its label in the group's variable `einv_gui_label`) and a kept group's pictures follow it. What lies under the mouse is
   read from `dragRoom` "geometry" - every slot's `fnc_slotRect` and every target grid's visible box, origin and visible cells,
   worked out at the first frame and again only after a column scrolled - and gives the "spot": the slots whose box holds the mouse,
   the grid and cell (`fnc_screenToCell`'s rule, a cell before a hole), the equipment column, or off the grids the storage column, a
@@ -1602,14 +1607,18 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   from there (`einv_storage_fnc_useState` is "blocked") wears a small padlock (`icon_lock_ca`) in its top left corner, beside the
   window's own badge if it has one (`fnc_createTile`; never in the wizard's preview), and its footer hint says "Cannot be used from
   the backpack", or - on a limited container where the item is whitelisted - "Whitelisted: can be used from the backpack"
-  (`fnc_updateHover`). A tile the Strict setting keeps in the unit's hidden holder (the entry's `hidden`, section 3, Strict mode)
+  (`fnc_updateHover`). A tile the Strict setting keeps in the unit's hidden holder (the entry's `strict`, section 3, Strict mode)
   wears a crossed eye (`icon_eye_off_ca`) after the padlock, and the hint says "Hidden: kept out of the backpack, so nothing else
   can use it"; nothing else about it looks different. The context menu leaves out what would use it: the hotbar's bind row (it refuses, section 7), Open radio and Use
   as active radio, and CBA rows that use the item up (`fnc_cbaOptions`: the `consume` flag on `UNIFORM_CONTAINER`,
   `VEST_CONTAINER`, `BACKPACK_CONTAINER`). Moving, equipping, loading into a weapon and dropping are never limited.
 - **The footer's key hints** (`fnc_drawFooter`, `fnc_uiKeyHint`): Esc Close, the quick move (the player's key, F by default - `fnc_quickKeyName` -,
   or the double click while it has none), the drop key (the player's, `fnc_dropKeyName`; no hint while unbound), the hotbar's range, Ctrl+click Select and the right mouse button Options, in that
-  order; contextual hints (R rotate, the drag's keys) come in the hint line, not here. A mouse button in a key hint is ACE's own
+  order. The spacing is one rule (`fnc_uiKeyHint`): every cap is the same height in whole pixels and a mouse cap is a one-letter cap's square
+  with a smaller picture; the caps of one key and the cap and its words are `0.3` of the cap's height apart, the next hint `0.9`
+  after the words, which are measured as they are (the label has the slack, `TEXT_SLACK`, the advance does not). `fnc_drawFooter` measures the hints first (`fnc_uiKeyHint`
+  with `only measure`), leaves out from the last backwards what does not fit before the version, Esc staying, and hides the hint line
+  (`einv_gui_hint`) when less than `UNIT * 6` is left between the hints and the version; contextual hints (R rotate, the drag's keys) come in the hint line, not here. A mouse button in a key hint is ACE's own
   picture, not words: a key string may carry the tokens `@left`, `@right`, `@scroll` and `@double` (two left clicks), alone or after
   modifiers joined by `+` (`"Ctrl+@left"`: a key cap `Ctrl`, then a cap with the mouse picture). The pictures are
   `\z\ace\addons\interaction\UI\mouse_left_ca.paa`, `mouse_right_ca.paa` and `mouse_scroll_ca.paa` (`MOUSE_ICON_PATH`; ACE has no
@@ -1671,7 +1680,14 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `move`, `drop`, `equip`, `unequip`, `attach`, `detach`, `loadMag...`, `unloadMag`, `rotate`, `open`, `close`, `search`,
   `uncover`, `inspect`, `giveBack`. The looter hears them on the UI channel (`einv_gui_soundVolume`, `einv_gui_sounds`); others
   within the action's range hear a quieter copy (`einv_gui_soundsWorld`: `fnc_sendNoise` -> the target event `einv_gui_noise`,
-  `fnc_onNoise`; never from the Arsenal).
+  `fnc_onNoise`; never from the Arsenal). **The speaker in the header** (`fnc_toggleMute`, `einv_gui_muted`, kept in the profile)
+  mutes them for the looter: `fnc_soundMuted [action]` says whether it silences that action, by five client settings (the
+  checkboxes of "Mute button silences", all on): `einv_gui_muteMoves` (lift, move, drop, equip, unequip, attach, detach, rotate, giveBack),
+  `muteMagazines` (the `loadMag...` actions, `unloadMag`, the reload's own sound in `fnc_playReload` as "reload", the repack's finished sound in
+  `einv_magazines_fnc_onFrame` as "repack"), `muteContainers` (open, close), `muteSearch` (search, uncover) and `muteOther` (inspect, and "warn": the
+  click of a refused opening in `fnc_onInventoryOpened`, the Arsenal's blocked sound in `einv_arsenal_fnc_showBlocked`). `fnc_playSound` asks before the
+  looter's copy; the world's copy (`fnc_sendNoise`) is not the looter's to mute. The variable `einv_gui_searchMuted` of the speaker that muted the
+  rustle alone is read once as the start value.
 - **Looting pose** (`einv_gui_animation`): Arma's own inventory states `Ainv<Perc|Pknl|Ppne>Mstp...` (`fnc_poseState`) played with
   `playMoveNow` on the local unit by `fnc_poseStart` (guarded by `fnc_canPose`), watched by `fnc_poseCheck`, ended by
   `fnc_poseEnd` only while the soldier is still in an `Ainv` state, so nothing ACE started is fought. He kneels at bodies, at
@@ -1907,7 +1923,7 @@ over the main menu and in Eden.
 
 | Where | Mode | How |
 |---|---|---|
-| CBA's Addon Options, a button in the bottom row (between Load and Import) while this mod's page is open | menu | `fnc_initCbaMenu` (`Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions`); missing CBA controls mean no button and nothing else breaks |
+| CBA's Addon Options, a button in the bottom row (between Load and Import) while this mod's Server page (the category of `einv_items_rules`) is open | menu | `fnc_initCbaMenu` (`Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions`); missing CBA controls mean no button and nothing else breaks |
 | ESC > Options > Inventory setup | direct | `CBA_fnc_addPauseMenuOption` with the display `einv_setup_RscWizard` (idd 9620) |
 | Eden: Tools menu | direct | `Display3DEN.hpp`, over display 313; saves into the scenario |
 | the inventory's cog (`einv_gui_fnc_drawHeader`) | direct | `fnc_openFromGame`; the tooltip says read-only when `fnc_canEdit` says so; the inventory comes back on close (`einv_setup_reopenInventory`), as a person window when it was one |
@@ -2446,7 +2462,11 @@ its capacity there.
 
 ## 8. Settings
 
-Every CBA setting of the mod (`initSettings.inc.sqf` of each addon), all under the category "Enhanced Inventory". Scope **client** is
+Every CBA setting of the mod (`initSettings.inc.sqf` of each addon) is in one of two categories of CBA's Addon Options:
+`CBA_SETTINGS_EINV_CLIENT` "Enhanced Inventory - Client" for what each player sets for himself (scope 0) and `CBA_SETTINGS_EINV_SERVER`
+"Enhanced Inventory - Server" for the settings box, the rules and the older tables (scope 1). The keybinds stay under `CBA_SETTINGS_EINV`
+"Enhanced Inventory" (CBA's Controls, `CBA_fnc_getKeybind` asks for it). A setting's name does not carry its category, so a `cba_settings.sqf` and
+saved values are the same under either; `fnc_initCbaMenu` takes its page from the category of `einv_items_rules` (the Server page). Scope **client** is
 `0` (each player's own value), **global** is `1` (the same for everyone; the server or mission decides). Descriptions in the
 stringtables are wrapped as BRIEFING asks.
 
@@ -2493,6 +2513,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_gui_magazineText` | CHECKBOX | client | on | the rounds ("17/30") on magazine tiles; off leaves the bar alone |
 | `einv_gui_sounds` | CHECKBOX | client | on | the inventory's sounds |
 | `einv_gui_soundVolume` | SLIDER 0 to 2 | client | 1 | their volume |
+| `einv_gui_muteMoves`, `muteMagazines`, `muteContainers`, `muteSearch`, `muteOther` | CHECKBOX | client | on | "Mute button: ...": which kinds of sound the speaker in the window's header silences (`fnc_soundMuted`) |
 | `einv_gui_soundsWorld` | CHECKBOX | global | on | players nearby hear someone loot |
 | `einv_gui_animation` | LIST | global | Off | Off, While looting, Always: the looting pose |
 | `einv_gui_moveToStop` | CHECKBOX | client | on | a movement key closes the window while looting |
@@ -2523,7 +2544,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_locks_zeusOpens` | CHECKBOX | global | on | Zeus may open locked containers |
 
 CBA keybinds: `einv_hotbar_slot1` to `slot7` (4 to 0), `einv_hotbar_show`, `einv_gui_quickMove` (F, the quick move in the inventory window), `einv_gui_drop` (G, the drop in the inventory window). Kept in the player's
-profile: `einv_gui_searchMuted`, `einv_hotbar_slots` (`einv_gui_cameraOn` no longer since 0.4.7: `einv_gui_cameraDefault`).
+profile: `einv_gui_muted` (the speaker; `einv_gui_searchMuted` before 0.4.7), `einv_hotbar_slots` (`einv_gui_cameraOn` no longer since 0.4.7: `einv_gui_cameraDefault`).
 
 **What missions and other mods may set** (all optional): on an object `einv_grid` (a grid text, public), `einv_noSearch`,
 `einv_nearby = false`, `einv_noAccess` (a person); in a mission `einv_arsenal_biPassThrough`; in an item's config `einv_size`,

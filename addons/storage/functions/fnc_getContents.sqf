@@ -23,7 +23,7 @@
  *
  * A unit's uniform, vest or backpack under a Strict setting (fnc_opStrict) has a second source: the unit's
  * hidden holder (einv_storage_hidden, fnc_hiddenLists) keeps what the setting keeps out of the cargo. Its
- * things come after the cargo's, as tiles like any other, marked "hidden" - so the window, the layout, the
+ * things come after the cargo's, as tiles like any other, marked "strict" - so the window, the layout, the
  * room checks, the weight and the Arsenal panel see one container, and every machine the same one (the
  * holder is public). Taking such a tile out takes it out of the holder (fnc_removeEntry).
  *
@@ -39,7 +39,7 @@
  *   "attachments" - a weapon's weaponsItemsCargo entry, [] for anything else <ARRAY>
  *   "container"   - a uniform, vest or backpack's own container object, objNull for anything else <OBJECT>
  *   "key"         - the key of its record (fnc_entryKey) <STRING>
- *   "hidden"      - it lies in the unit's hidden holder, not in the cargo (Strict mode) <BOOL>
+ *   "strict"      - it lies in the unit's hidden holder, not in the cargo (Strict mode) <BOOL>
  *
  * Example:
  * [backpackContainer player] call einv_storage_fnc_getContents;
@@ -106,7 +106,7 @@ private _fnc_add = {
         ["capacity", ([_class] call EFUNC(items,getInfo)) get "capacity"],
         ["attachments", _attachments],
         ["container", _object],
-        ["hidden", _hiddenMark]
+        ["strict", _hiddenMark]
     ];
 
     _entry set ["key", [_entry, _nested] call FUNC(entryKey)];
@@ -242,7 +242,7 @@ private _itemTotals = createHashMap;
 
 // ---------------------------------------------------------------------------
 // The hidden holder (Strict mode): what a setting keeps out of one of a unit's three containers lies on the
-// unit (fnc_hiddenLists), and shows as the container's own tiles - after the cargo's, marked "hidden".
+// unit (fnc_hiddenLists), and shows as the container's own tiles - after the cargo's, marked "strict".
 // Magazines by their rounds, grenades and items stacked like the cargo's.
 // ---------------------------------------------------------------------------
 ([_container] call FUNC(getOwner)) params ["_owner", "_kindName"];

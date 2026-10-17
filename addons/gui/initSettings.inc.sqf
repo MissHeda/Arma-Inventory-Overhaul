@@ -13,7 +13,7 @@
     QGVAR(cellScale),
     "SLIDER",
     [LLSTRING(Setting_CellScale), LLSTRING(Setting_CellScale_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
     [CELL_SCALE_MIN, CELL_SCALE_MAX, 1.1, 1],
     0
 ] call CBA_fnc_addSetting;
@@ -23,7 +23,7 @@
     QGVAR(compareTooltip),
     "CHECKBOX",
     [LLSTRING(Setting_CompareTooltip), LLSTRING(Setting_CompareTooltip_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
     true,
     0
 ] call CBA_fnc_addSetting;
@@ -34,7 +34,7 @@
     QGVAR(tileNames),
     "CHECKBOX",
     [LLSTRING(Setting_TileNames), LLSTRING(Setting_TileNames_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
     false,
     0
 ] call CBA_fnc_addSetting;
@@ -45,7 +45,7 @@
     QGVAR(cameraDefault),
     "LIST",
     [LLSTRING(Setting_CameraDefault), LLSTRING(Setting_CameraDefault_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
     [["soldier", "off"], [LLSTRING(Setting_CameraDefault_Soldier), LLSTRING(Setting_CameraDefault_Off)], 0],
     0
 ] call CBA_fnc_addSetting;
@@ -56,7 +56,7 @@
     QGVAR(debugTiming),
     "CHECKBOX",
     [LLSTRING(Setting_DebugTiming), LLSTRING(Setting_DebugTiming_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
     false,
     0
 ] call CBA_fnc_addSetting;
@@ -68,7 +68,7 @@
     QGVAR(soundVolume),
     "SLIDER",
     [LLSTRING(Setting_SoundVolume), LLSTRING(Setting_SoundVolume_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Sounds)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
     [0, 2, 1, 0, true],
     0
 ] call CBA_fnc_addSetting;
@@ -77,7 +77,55 @@
     QGVAR(sounds),
     "CHECKBOX",
     [LLSTRING(Setting_Sounds), LLSTRING(Setting_Sounds_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Sounds)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
+    true,
+    0
+] call CBA_fnc_addSetting;
+
+// Each player's own ears: what the speaker in the window's header silences (fnc_soundMuted). All of it by default,
+// so the speaker means what it says; a player who wants the rustle gone but the clicks kept unticks the rest. Read
+// at every sound, so a change reaches the next one.
+[
+    QGVAR(muteMoves),
+    "CHECKBOX",
+    [LLSTRING(Setting_MuteMoves), LLSTRING(Setting_MuteMoves_Desc)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
+    true,
+    0
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(muteMagazines),
+    "CHECKBOX",
+    [LLSTRING(Setting_MuteMagazines), LLSTRING(Setting_MuteMagazines_Desc)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
+    true,
+    0
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(muteContainers),
+    "CHECKBOX",
+    [LLSTRING(Setting_MuteContainers), LLSTRING(Setting_MuteContainers_Desc)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
+    true,
+    0
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(muteSearch),
+    "CHECKBOX",
+    [LLSTRING(Setting_MuteSearch), LLSTRING(Setting_MuteSearch_Desc)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
+    true,
+    0
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(muteOther),
+    "CHECKBOX",
+    [LLSTRING(Setting_MuteOther), LLSTRING(Setting_MuteOther_Desc)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
     true,
     0
 ] call CBA_fnc_addSetting;
@@ -144,7 +192,7 @@
     QGVAR(moveToStop),
     "CHECKBOX",
     [LLSTRING(Setting_MoveToStop), LLSTRING(Setting_MoveToStop_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Searching)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Searching)],
     true,
     0
 ] call CBA_fnc_addSetting;
@@ -216,7 +264,7 @@
     QGVAR(showNearby),
     "CHECKBOX",
     [LLSTRING(Setting_ShowNearby), LLSTRING(Setting_ShowNearby_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Nearby)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Nearby)],
     true,
     0
 ] call CBA_fnc_addSetting;
@@ -228,7 +276,7 @@
     QGVAR(magazineFillBar),
     "CHECKBOX",
     [LLSTRING(Setting_MagazineFillBar), LLSTRING(Setting_MagazineFillBar_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Magazines)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Magazines)],
     true,
     0
 ] call CBA_fnc_addSetting;
@@ -238,7 +286,7 @@
     QGVAR(magazineText),
     "CHECKBOX",
     [LLSTRING(Setting_MagazineText), LLSTRING(Setting_MagazineText_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Magazines)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Magazines)],
     true,
     0
 ] call CBA_fnc_addSetting;

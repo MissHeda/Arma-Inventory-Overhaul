@@ -108,12 +108,12 @@ if !(call FUNC(cameraForced)) then {
     [_camera, LLSTRING(Camera_Tooltip)] call _fnc_tooltip;
 };
 
-// The speaker: the rustle while searching, on or muted (fnc_toggleSearchSound).
+// The speaker: the window's sounds, on or muted (fnc_toggleMute) - which kinds it silences is the player's setting.
 private _sound = [
-    _display, controlNull, [_square] call _fnc_place, "searchSound", "",
-    [UI_TEX(icon_sound_on_ca), UI_TEX(icon_sound_off_ca)] select GVAR(searchMuted), _theme, {call FUNC(toggleSearchSound)}
+    _display, controlNull, [_square] call _fnc_place, "mute", "",
+    [UI_TEX(icon_sound_on_ca), UI_TEX(icon_sound_off_ca)] select GVAR(muted), _theme, {call FUNC(toggleMute)}
 ] call FUNC(uiButton);
-[_sound, [LLSTRING(SearchSound_Mute), LLSTRING(SearchSound_Unmute)] select GVAR(searchMuted)] call _fnc_tooltip;
+[_sound, [LLSTRING(Mute_Mute), LLSTRING(Mute_Unmute)] select GVAR(muted)] call _fnc_tooltip;
 
 // The search field (fnc_drawFilter).
 [_display, [SQUARE(UNIT * 11)] call _fnc_place, _theme] call FUNC(drawFilter);

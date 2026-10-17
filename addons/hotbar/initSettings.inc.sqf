@@ -11,7 +11,7 @@
     QGVAR(hudTime),
     "SLIDER",
     [LLSTRING(Setting_HudTime), LLSTRING(Setting_HudTime_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory)],
     [1, 15, 4, 0],
     0
 ] call CBA_fnc_addSetting;
@@ -29,7 +29,7 @@
     QGVAR(leaderKeys),
     "CHECKBOX",
     [LLSTRING(Setting_LeaderKeys), LLSTRING(Setting_LeaderKeys_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory)],
     true,
     0
 ] call CBA_fnc_addSetting;
@@ -38,7 +38,7 @@
     QGVAR(hudMode),
     "LIST",
     [LLSTRING(Setting_HudMode), LLSTRING(Setting_HudMode_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory)],
     [[0, 1, 2], [LLSTRING(HudMode_Never), LLSTRING(HudMode_InUse), LLSTRING(HudMode_Always)], 1],
     0
 ] call CBA_fnc_addSetting;

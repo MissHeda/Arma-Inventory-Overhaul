@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Takes out of the hidden holder what a hidden tile of a unit's container stands for (fnc_removeEntry for an
- * entry marked "hidden"): the owner and kind of the container (fnc_getOwner), the holder's list of that kind,
+ * entry marked "strict"): the owner and kind of the container (fnc_getOwner), the holder's list of that kind,
  * the entry of that class with those rounds (an item: by class alone, fnc_hiddenAmmo), at most as many as
  * are there - and hands the payload on. The holder is written back public at once (fnc_hiddenWrite).
  *

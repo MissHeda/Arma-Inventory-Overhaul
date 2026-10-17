@@ -64,7 +64,7 @@ private _fnc_look = {
     params ["_tile"];
 
     str [
-        _tile getOrDefault ["class", ""], _tile getOrDefault ["hidden", false], _tile getOrDefault ["block", 0],
+        _tile getOrDefault ["class", ""], _tile getOrDefault ["hidden", false], _tile getOrDefault ["strict", false], _tile getOrDefault ["block", 0],
         _tile getOrDefault ["col", 0], _tile getOrDefault ["row", 0], _tile getOrDefault ["w", -1], _tile getOrDefault ["h", -1],
         _tile getOrDefault ["rotated", false], _tile getOrDefault ["holes", []], _tile getOrDefault ["count", 1],
         _tile getOrDefault ["ammo", 0], _tile getOrDefault ["capacity", -1], _tile getOrDefault ["attachments", []],
