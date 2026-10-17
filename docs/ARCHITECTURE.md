@@ -583,7 +583,7 @@ elements) reads as turned when its `w` is not the upright one, and `fnc_getLayou
 shaped item always come from its class at use time (`einv_items_fnc_footprintAs [class, rot]`), so only `rot` is stored and
 synced.
 
-**Rotation convention.** Turned is a quarter clockwise, as the picture turns (`ctrlSetAngle 90`): the cell `(c, r)` of an upright
+**Rotation convention.** Turned is a quarter clockwise (the picture is not turned, see "Grids and tiles"): the cell `(c, r)` of an upright
 mask `cols` wide and `rows` high lies at `(rows - 1 - r, c)` of the turned one (`fnc_turnMask`). Two ways round only, never upside
 down.
 
@@ -1387,18 +1387,16 @@ label started where the *measured* text would be centred, and `getTextWidth` is 
 the middle. `fnc_buttonWidth [text, icon, height, size, theme]` gives the width that fits such a button (paddings, icon, gap and the
 text with `TEXT_SLACK`).
 `fnc_safePicture [path]` -> path or "": a file path (`\` or `/`) ending .paa/.jpg/.png, or none when its .paa exists, that
-`fileExists` finds - asked once per path (uiNamespace `einv_gui_pictures`); `#(...)` passes. `fnc_uiPicture` / `fnc_uiPictureTurned`
-draw nothing for ""; the wizard's index and editors, the Arsenal header and ACE cargo's cards ask it too (`picture = "picturething"`).
-`fnc_uiItemPicture [display, parent, box, texture, icon, colour, turned, aspect, clip, events]` -> the control is how the **item's
+`fileExists` finds - asked once per path (uiNamespace `einv_gui_pictures`); `#(...)` passes. `fnc_uiPicture`
+draws nothing for ""; the wizard's index and editors, the Arsenal header and ACE cargo's cards ask it too (`picture = "picturething"`).
+`fnc_uiItemPicture [display, parent, box, texture, icon, colour, clip, events, share]` -> the control is how the **item's
 own picture** is drawn wherever it is (tiles, slots, the equipment cards, the inspect card, the dragged ghost; see "Grids and
-tiles"): the picture of `fnc_uiPicture` / `fnc_uiPictureTurned` made `icon` (`getInfo "icon"`, `[scale, across, down]`) larger or
+tiles"): the picture of `fnc_uiPicture` made `icon` (`getInfo "icon"`, `[scale, across, down]`) larger or
 smaller about the box's middle and moved by the offsets, which are a share of the `clip` rectangle's (the tile's, the slot's)
 width and height. The plain icon (`ICON_PLAIN`) is the one control it was. Otherwise the image is measured by the texture's own
 shape (`getTextureInfo`), not by the control it is fitted into: where it stays inside `clip` (half a pixel of give) it is still one
 control, where it would reach out it is made inside an `EINV_Group` of exactly `clip`, which cuts it - the group is what comes
-back, the picture is `getVariable "einv_gui_inner"`. `fnc_uiPictureRounded [display, parent, rect, texture, radius, film, backdrop, icon, events]` draws the same for the editor's picture of a crate or vehicle on its grey (which not every mod's pictures share - ACE's is lighter than BI's, and a script cannot read a picture's pixels - so the backdrop's colour is laid over the edges of the image in `FADE_STEPS` strips of falling strength, clipped to the round box, and no rectangle shows); `fnc_uiPictureCut [display, parent, box, texture, icon, clip, radius, events]` draws a picture by `icon=` cut at a round box: one that reaches out of the box is three groups as `fnc_uiPanel` has three rectangles (the middle and the two sides between the corners), each holding the whole picture, so the box's round corners show the backdrop instead of the group's square ones; `fnc_uiBoxPicture [display, parent, rect, theme, own, preview, icon, radius, events]` is what fills such a box: the rules' picture `own` (`picture=`, on the slot surface with a little air) else the editor's `preview`, both by the class's `icon=` and cut at the box; `[]` when there is neither (the caller shows its icon). `fnc_uiPictureTurned` takes a `scale` (the square's side times it) and a
-`shift` of the square's middle for it; a turned picture's offsets turn with it (what moves across moves down, what moves down
-moves left). A group over a tile reports the buttons and the wheel as the display does (`events`, true except in the wizard's
+back, the picture is `getVariable "einv_gui_inner"`. `fnc_uiPictureRounded [display, parent, rect, texture, radius, film, backdrop, icon, events]` draws the same for the editor's picture of a crate or vehicle on its grey (which not every mod's pictures share - ACE's is lighter than BI's, and a script cannot read a picture's pixels - so the backdrop's colour is laid over the edges of the image in `FADE_STEPS` strips of falling strength, clipped to the round box, and no rectangle shows); `fnc_uiPictureCut [display, parent, box, texture, icon, clip, radius, events]` draws a picture by `icon=` cut at a round box: one that reaches out of the box is three groups as `fnc_uiPanel` has three rectangles (the middle and the two sides between the corners), each holding the whole picture, so the box's round corners show the backdrop instead of the group's square ones; `fnc_uiBoxPicture [display, parent, rect, theme, own, preview, icon, radius, events]` is what fills such a box: the rules' picture `own` (`picture=`, on the slot surface with a little air) else the editor's `preview`, both by the class's `icon=` and cut at the box; `[]` when there is neither (the caller shows its icon). A group over a tile reports the buttons and the wheel as the display does (`events`, true except in the wizard's
 preview) and hands the wheel to the scrolling group it lies in, `fnc_passWheel` (`WHEEL_STEP` 3 `UNIT`): a group nested in a
 column takes the wheel from it (`fnc_createGrid`), and its picture, larger than it, would make it scrollable - its scroll is put
 back to the top at every turn, and again for `UNSCROLL_FRAMES` frames from `fnc_onFrame` (`fnc_unscroll`): the engine scrolls the group after
@@ -1580,12 +1578,13 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   compartment's panel. `fnc_createTile [display, grid, entry,
   theme]` draws the surface in the category's colour over the entry's cells only (a shaped tile: runs of cells with one-pixel
   bridges; `"backgrounds"` and `"rect"` kept for hover, flash, reveal and the repack film), the picture, the short name, a
-  stack's count and a magazine's fill. A **turned picture** (`rotated`; the dragged ghost held turned, also a row dragged from
-  ACE's list; `fnc_uiPictureTurned`) is an `EINV_Picture` made **in the picture's own shape** (`fnc_turnedSize`: W:H from `getTextureInfo`, else the item's cell ratio), in whole pixels, centred on the box,
-  turned `ctrlSetAngle [90, 0.5, 0.5]` - a quarter clockwise round its middle. The control keeps a picture's shape (`ST_KEEP_ASPECT_RATIO`) only at rest; turned it fills its whole rectangle, so a wide texture in a square came out squashed (0.4.7 to 0.5.16: rifles and other four-cell rectangles; a 0.4.6 layout in the swapped shape had come out squashed and out of its box). So there is nothing to fit once it turns: the control is W px wide and H px high in the picture's proportion and shows H wide and W high turned. The long edge is the most the turned picture may have to fit the box: `min(boxH, boxW * W/H)` px for a wide picture (`min(boxW, boxH * H/W)` for a tall one) times the item's zoom, so
-  a 2:1 rifle on a 1x4 box is a 2-cell by 1-cell control showing 1 wide and 2 high. The control stands out of the box only where the turned picture does not (its bounding box is within the old square's). The hover outline and every hit test are unaffected: the controls are not interactive and the tile's rectangle is the hit area. The
-  group ghosts of a drag keep their angle when moved (`fnc_updateDrag`; a ghost whose picture is cut by a group turns the picture
-  in it). The hotbar and the inspect card draw upright only.
+  stack's count and a magazine's fill. A **turned tile** (`rotated`; the dragged ghost held turned, also a row dragged from
+  ACE's list) draws its picture **upright**, in the one plain `EINV_Picture` of any other tile, fitted with its shape kept
+  (`ST_KEEP_ASPECT_RATIO`) into the turned footprint (the swapped `w` and `h` as the box). Nothing is rotated: `ctrlSetAngle` on a
+  picture came out squashed or out of the tile for pictures that are not square (0.4.7 to 0.5.17 tried a square control and one in
+  the picture's own proportion), so a wide texture is simply small in a tall footprint and item pictures should be square. The
+  footprint itself (R, the swapped size, placement, records) is unchanged, and the ghost is drawn exactly as its tile. The
+  hotbar and the inspect card draw upright as ever.
   **The picture is drawn by the item's `icon`** (`icon=`, `getInfo "icon"`, `fnc_uiItemPicture`): `fnc_createTile` (clip: the
   tile's rectangle, its box for a shaped item; an entry may carry its own `"icon"`, and `"preview"` for the wizard's tile),
   `fnc_makeGhost` (one-item ghost and the group ghosts; clip: the footprint's rectangle), `fnc_drawSlot` (clip: the slot, the
@@ -2500,7 +2499,7 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
 - **Item editor** (`fnc_drawItemEditor`): width and height steppers (1 to 8), the stack (1 to 999; not for weapons, uniforms,
   vests, backpacks), the weight in kg and the name (two text fields; empty is config's own, and config's weight is the
   placeholder), the **Picture row** (see below), an 8x8 canvas where a click makes a place one of the item's cells, the tile preview, and a warning while the
-  cells are not one piece (Apply off). Beside the preview, the **zoom block** (`fnc_drawIconBlock`, "Zoom and place", shared with the Containers step): a zoom stepper (25 to 400 %, shown as
+  cells are not one piece (Apply off). The button row (this editor and the Containers one, `fnc_drawCellEditor`): Discard and Back to the default (the Containers one also "Same as another class") from the left, Apply at the right end - the width of the footer's Save (`fnc_footerButtonW`, the formula of `fnc_drawFrame`'s Back, Next and Save), ending at the editor's right edge so it lies above Save; a button on the left that would reach under it shows its icon alone. Beside the preview, the **zoom block** (`fnc_drawIconBlock`, "Zoom and place", shared with the Containers step): a zoom stepper (25 to 400 %, shown as
   "Zoom 140 %") with chips for 50, 100, 150 and 200 %, two shift steppers, "Across" and "Down" (-100 to 100 % of the tile), and
   Reset (back to 100 % and nothing shifted; enabled while it is not). The working copy holds them as `iconPercent`
   (`[zoom, across, down]` in whole per cent; `ICON_PERCENT_PLAIN` is `[100, 0, 0]`). Each stepper (`fnc_uiStepper`; range

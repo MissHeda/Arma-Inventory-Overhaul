@@ -249,7 +249,7 @@ private _next = [-1, GVAR(step) + 1] select (GVAR(step) + 1 < count _steps);
 private _fnc_buttonW = {
     params ["_text"];
 
-    (SQUARE(UNIT * 4.5)) max (SQUARE(_rowH * 1.4) + (_text getTextWidth [_font, _rowH * 0.5]) * TEXT_SLACK)
+    [_text, _font] call FUNC(footerButtonW)
 };
 
 private _right = _width - _padX;

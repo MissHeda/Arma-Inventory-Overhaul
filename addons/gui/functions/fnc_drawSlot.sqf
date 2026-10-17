@@ -207,7 +207,7 @@ if (_areaH > 0) then {
         _controls pushBack ([
             _display, _parent, [_left + _padX, _areaTop, _width - _padX * 2, _areaH], _info getOrDefault ["picture", ""],
             _info getOrDefault ["icon", ICON_PLAIN], [[1, 1, 1, 1], [1, 1, 1, 0.35]] select (_options getOrDefault ["faded", false]),
-            false, 1, [_left, _top, _width, _height]
+            [_left, _top, _width, _height]
         ] call FUNC(uiItemPicture));
 
         private _weapon = _options getOrDefault ["weapon", []];

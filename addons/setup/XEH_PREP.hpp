@@ -54,6 +54,7 @@ PREP(describeRule);
 
 // The window and its steps
 PREP(drawFrame);
+PREP(footerButtonW);
 PREP(showStep);
 PREP(drawGeneral);
 PREP(drawChanges);

@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * A shape turned a quarter clockwise, as an item lies turned (R while dragging, or the layout turning it
- * to make it fit) - the same way the window turns its picture (ctrlSetAngle 90). The cell in column c,
+ * to make it fit) - the convention of the storage. The cell in column c,
  * row r of the upright shape, cols wide and rows high, lies in column rows - 1 - r, row c of the turned
  * one, which is rows wide and cols high: the top left corner goes to the top right.
  *

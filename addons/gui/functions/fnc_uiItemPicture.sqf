@@ -3,21 +3,18 @@
 /*
  * Author: Miss Heda
  * An item's picture the way its rules ask for it (icon= / einv_icon, "icon" of einv_items_fnc_getInfo, see
- * einv_items_fnc_parseIcon): fitted into its box as fnc_uiPicture fits it - fnc_uiPictureTurned for a tile that
- * lies turned -, then drawn [scale] times as large about the box's middle and moved by the offsets, which are
- * a share of the tile's width and height. Every tile, slot, card and the dragged ghost draw an item's picture
- * through here.
+ * einv_items_fnc_parseIcon): fitted into its box as fnc_uiPicture fits it, then drawn [scale] times as large
+ * about the box's middle and moved by the offsets, which are a share of the tile's width and height. Every
+ * tile, slot, card and the dragged ghost draw an item's picture through here. The picture is always upright:
+ * a tile that lies turned (R) is given its turned footprint as the box, and the picture is fitted into that
+ * as it is, not turned along.
  *
  * The plain picture (scale 1, nothing moved) is the one control it always was. A picture that is larger or
  * moved never goes out of the rectangle it belongs to: where its image stays inside that rectangle it is
  * still one control; where it would reach out, it is made inside a controls group of exactly that rectangle,
  * which clips it. The image is measured by the texture's own shape (getTextureInfo), not by the control it is
  * fitted into, so a wide picture in a tall box that stays inside gets no group. The group is the control that
- * comes back, with the picture in it as (_group getVariable QGVAR(inner)) - a turned ghost is turned again on
- * it every frame (fnc_updateDrag).
- *
- * Turned, a quarter clockwise like the tile, the offsets turn with the picture: what the upright picture
- * moves across the tile (right) the turned one moves down it, and what it moves down it moves left.
+ * comes back, with the picture in it as (_group getVariable QGVAR(inner)).
  *
  * A group over a tile takes the mouse from the column that holds the tile, so it reports the buttons and the
  * wheel as the display does, like every group of the window (fnc_build, fnc_drawPart), and hands the wheel
@@ -32,13 +29,11 @@
  * 3: Texture - the item's picture <STRING>
  * 4: The icon, [scale, across, down] (the item's "icon") <ARRAY> (default: [1, 0, 0])
  * 5: Colour it is multiplied with <ARRAY> (default: [1, 1, 1, 1])
- * 6: The tile lies turned a quarter <BOOL> (default: false)
- * 7: Width to height of the picture, turned, when the texture does not say <NUMBER> (default: 1)
- * 8: The rectangle it must stay in, [x, y, w, h], in the same space as the box - the tile's, the slot's;
+ * 6: The rectangle it must stay in, [x, y, w, h], in the same space as the box - the tile's, the slot's;
  *    the box itself when left out <ARRAY> (default: [])
- * 9: Report the mouse as the display does - not in the setup wizard, which has no inventory window; a group
+ * 7: Report the mouse as the display does - not in the setup wizard, which has no inventory window; a group
  *    made without it only keeps the picture in it from being scrolled by the wheel <BOOL> (default: true)
- * 10: The size the offsets are a share of, [w, h]; the rectangle's own when left out. A box drawn in pieces
+ * 8: The size the offsets are a share of, [w, h]; the rectangle's own when left out. A box drawn in pieces
  *    (fnc_uiPictureCut) gives every piece the whole box's size, so every piece moves the picture by the same
  *    amount <ARRAY> (default: [])
  *
@@ -46,7 +41,7 @@
  * The picture, or the group that clips it <CONTROL>
  *
  * Example:
- * [_display, _group, [0, 0, 0.1, 0.05], _picture, [1.4, 0.1, -0.05], [1, 1, 1, 1], false, 1, [0, 0, 0.1, 0.05]] call einv_gui_fnc_uiItemPicture;
+ * [_display, _group, [0, 0, 0.1, 0.05], _picture, [1.4, 0.1, -0.05], [1, 1, 1, 1], [0, 0, 0.1, 0.05]] call einv_gui_fnc_uiItemPicture;
  *
  * Public: No
  */
@@ -54,8 +49,8 @@
 disableSerialization;
 
 params [
-    "_display", "_parent", "_box", "_texture", ["_icon", ICON_PLAIN, [[]]], ["_color", [1, 1, 1, 1]], ["_turned", false],
-    ["_aspect", 1], ["_clip", []], ["_events", true], ["_share", []]
+    "_display", "_parent", "_box", "_texture", ["_icon", ICON_PLAIN, [[]]], ["_color", [1, 1, 1, 1]],
+    ["_clip", []], ["_events", true], ["_share", []]
 ];
 
 _icon params [["_scale", 1], ["_across", 0], ["_down", 0]];
@@ -69,11 +64,7 @@ if (!_plain && {([_texture] call FUNC(safePicture)) isEqualTo ""}) then {
 };
 
 if (_plain) exitWith {
-    if (_turned) then {
-        [_display, _parent, _box, _texture, _color, _aspect] call FUNC(uiPictureTurned)
-    } else {
-        [_display, _parent, _box, _texture, _color] call FUNC(uiPicture)
-    }
+    [_display, _parent, _box, _texture, _color] call FUNC(uiPicture)
 };
 
 _box params ["_boxX", "_boxY", "_boxW", "_boxH"];
@@ -98,52 +89,34 @@ if (_info isEqualType [] && {(_info param [0, 0]) > 0} && {(_info param [1, 0]) 
     _ratio = (_info select 0) / (_info select 1);
 };
 
-// How far the picture moves on the screen. Turned a quarter clockwise, what went across now goes down and
-// what went down now goes left.
+// How far the picture moves on the screen.
 private _shiftX = _across * _shareW;
 private _shiftY = _down * _shareH;
-
-if (_turned) then {
-    _shiftX = -_down * _shareW;
-    _shiftY = _across * _shareH;
-};
 
 private _centerX = _boxX + _boxW / 2 + _shiftX;
 private _centerY = _boxY + _boxH / 2 + _shiftY;
 
-// The control it is made as (upright) and the image in it, which is all that has to stay inside.
-private _rect = [];
-private _imageW = 0;
-private _imageH = 0;
+// The control it is made as and the image in it, which is all that has to stay inside.
+private _width = _boxW * _scale;
+private _height = _boxH * _scale;
 
-if (_turned) then {
-    // The control fnc_uiPictureTurned makes, in the picture's own shape, before the turn; turned, the picture
-    // shows as wide as the control is high and as high as it is wide.
-    ([_texture, _aspect, [_boxW / pixelW, _boxH / pixelH], _scale] call FUNC(turnedSize)) params ["_ctrlW", "_ctrlH"];
+// On whole pixels, so a picture drawn in pieces lands on the same pixels in every piece.
+private _rect = [
+    round ((_centerX - _width / 2) / pixelW) * pixelW, round ((_centerY - _height / 2) / pixelH) * pixelH,
+    ((round (_width / pixelW)) max 1) * pixelW, ((round (_height / pixelH)) max 1) * pixelH
+];
+_width = _rect select 2;
+_height = _rect select 3;
 
-    _imageW = _ctrlH * pixelW;
-    _imageH = _ctrlW * pixelH;
-} else {
-    private _width = _boxW * _scale;
-    private _height = _boxH * _scale;
+private _imageW = _width;
+private _imageH = _height;
 
-    // On whole pixels, so a picture drawn in pieces lands on the same pixels in every piece.
-    _rect = [
-        round ((_centerX - _width / 2) / pixelW) * pixelW, round ((_centerY - _height / 2) / pixelH) * pixelH,
-        ((round (_width / pixelW)) max 1) * pixelW, ((round (_height / pixelH)) max 1) * pixelH
-    ];
-    _width = _rect select 2;
-    _height = _rect select 3;
-    _imageW = _width;
-    _imageH = _height;
-
-    // Kept in its shape, the image fills the control along the side it is longer on.
-    if (_ratio > 0) then {
-        if ((_width / pixelW) / (_height / pixelH) > _ratio) then {
-            _imageW = (_height / pixelH) * _ratio * pixelW;
-        } else {
-            _imageH = (_width / pixelW) / _ratio * pixelH;
-        };
+// Kept in its shape, the image fills the control along the side it is longer on.
+if (_ratio > 0) then {
+    if ((_width / pixelW) / (_height / pixelH) > _ratio) then {
+        _imageW = (_height / pixelH) * _ratio * pixelW;
+    } else {
+        _imageH = (_width / pixelW) / _ratio * pixelH;
     };
 };
 
@@ -170,15 +143,9 @@ if (!_inside) then {
     _originY = _position select 1;
 };
 
-private _picture = if (_turned) then {
-    [
-        _display, _target, [_boxX - _originX, _boxY - _originY, _boxW, _boxH], _texture, _color, _aspect, _scale, [_shiftX, _shiftY]
-    ] call FUNC(uiPictureTurned)
-} else {
-    [
-        _display, _target, [(_rect select 0) - _originX, (_rect select 1) - _originY, _rect select 2, _rect select 3], _texture, _color
-    ] call FUNC(uiPicture)
-};
+private _picture = [
+    _display, _target, [(_rect select 0) - _originX, (_rect select 1) - _originY, _rect select 2, _rect select 3], _texture, _color
+] call FUNC(uiPicture);
 
 if (_inside) exitWith {_picture};
 

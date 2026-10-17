@@ -130,12 +130,6 @@ class EINV_Picture: EINV_Icon {
     colorText[] = C_WHITE;
 };
 
-// A picture stretched over its whole box (ST_PICTURE). A turned picture no longer uses it: since 0.4.7 it
-// is an EINV_Picture made in the picture's own shape and turned (fnc_uiPictureTurned).
-class EINV_PictureStretch: EINV_Icon {
-    style = 48;
-};
-
 // ---------------------------------------------------------------------------
 // A button with no look of its own: it only catches the mouse, over a surface, icon and label drawn by
 // the controls under it. Hover and clicks are added at run time (fnc_uiButton), so every look can

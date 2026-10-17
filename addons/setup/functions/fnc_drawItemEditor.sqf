@@ -636,12 +636,14 @@ if (_dirty) then {
 
 [_display, _box, [_sideX, _sideY, _sideW], LLSTRING(Items_CanvasHelp), TEXT_SMALL, _muted, _font] call FUNC(uiText);
 
-// ----- Apply, Discard, Back to the default -----
+// ----- Discard, Back to the default; Apply at the right end -----
 
+// Apply is as wide as the footer's Save and ends where the editor does, so it lies above Save.
+private _applyW = (ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font)) max ([[LLSTRING(Save), LLSTRING(Apply)] select (GVAR(mode) isEqualTo "menu"), _font] call FUNC(footerButtonW));
+private _applyX = _innerX + _innerW - _applyW;
 private _buttonX = _innerX;
-private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
 
-[_display, _box, [_buttonX, _buttonsY, _applyW, _buttonH], LLSTRING(Items_Apply), UI_TEX(icon_check_ca), _theme, {
+[_display, _box, [_applyX, _buttonsY, _applyW, _buttonH], LLSTRING(Items_Apply), UI_TEX(icon_check_ca), _theme, {
     params ["_class", "_canvas", "_startShape", "_startStack", "_forced", "_startWeight", "_startWeightText", "_startName", "_tree", "_below", "_startIcon", "_ownIcon", "_startPicture", "_ownPicture", "_startUse", "_startGroups", "_defaultGroups"];
 
     private _lc = toLowerANSI _class;
@@ -769,8 +771,6 @@ private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
     [_class, _set, _remove, _tree] call FUNC(upsertRule);
 }, [_class, _canvas, _startShape, _startStack, _forced, _startWeight, _startWeightText, _startName, _tree, _below, _startIcon, _ownIcon, _startPicture, _ownPicture, _startUse, _startGroups, _default getOrDefault ["groups", ["misc"]]], _onePiece && {_dirty}, "accent", [LLSTRING(Items_ApplyTip), LLSTRING(Items_ApplyTipTree)] select _tree] call FUNC(uiAction);
 
-_buttonX = _buttonX + _applyW + _gap;
-
 if (_dirty) then {
     private _buttonW = ACTION_W(LLSTRING(Cont_Discard),_buttonH,false,_font);
 
@@ -794,9 +794,16 @@ if (_tree) then {
 };
 
 if (_hasOwn) then {
-    private _buttonW = ACTION_W(LLSTRING(Groups_Reset),_buttonH,true,_font);
+    private _resetText = LLSTRING(Groups_Reset);
+    private _buttonW = ACTION_W(_resetText,_buttonH,true,_font);
 
-    [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], LLSTRING(Groups_Reset), UI_TEX(icon_reset_ca), _theme, {
+    // On a narrow screen only its icon, which the tooltip explains, so it never reaches under Apply.
+    if (_buttonX + _buttonW > _applyX - _gap) then {
+        _resetText = "";
+        _buttonW = ACTION_W(_resetText,_buttonH,true,_font);
+    };
+
+    [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], _resetText, UI_TEX(icon_reset_ca), _theme, {
         params ["_class", "_ownFields", "_tree", "_below"];
 
         GVAR(itemWork) deleteAt (toLowerANSI _class);

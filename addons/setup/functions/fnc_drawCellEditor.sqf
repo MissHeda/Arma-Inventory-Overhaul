@@ -717,15 +717,20 @@ if (_dirty || _pictureDirty) then {
     [_display, _box, [_innerX, _totalsY, _innerW, _totalsH], LLSTRING(Cont_Unapplied), TEXT_SMALL, _warn, _font, 1] call EFUNC(gui,uiLabel);
 };
 
-// ----- Apply, Discard, Back to the default; Same as another class -----
+// ----- Discard, Back to the default, Same as another class; Apply at the right end -----
 
 private _gap = SQUARE(UNIT * 0.3);
 private _buttonX = _innerX;
+// Where the buttons on the left must end: before Apply when there is one.
+private _limitX = _innerX + _innerW;
 
 if (_editable || _pictureDirty) then {
-    private _buttonW = ACTION_W(LLSTRING(Cont_Apply),_buttonH,true,_font);
+    // As wide as the footer's Save and ending where the editor does, so it lies above Save.
+    private _buttonW = (ACTION_W(LLSTRING(Cont_Apply),_buttonH,true,_font)) max ([[LLSTRING(Save), LLSTRING(Apply)] select (GVAR(mode) isEqualTo "menu"), _font] call FUNC(footerButtonW));
 
-    [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], LLSTRING(Cont_Apply), UI_TEX(icon_check_ca), _theme, {
+    _limitX = _innerX + _innerW - _buttonW - _gap;
+
+    [_display, _box, [_innerX + _innerW - _buttonW, _buttonsY, _buttonW, _buttonH], LLSTRING(Cont_Apply), UI_TEX(icon_check_ca), _theme, {
         params ["_class", "_tree", "_below", "_gridDirty", "_startIcon", "_startPicture", "_ownIcon", "_ownPicture"];
 
         private _lc = toLowerANSI _class;
@@ -820,8 +825,6 @@ if (_editable || _pictureDirty) then {
         [_class, _set, _remove, _tree] call FUNC(upsertRule);
     // Greyed while nothing is painted: Apply would only refuse (Hint_NoCells), and the tooltip says what it is for.
     }, [_class, _tree, _below, _dirty, _startIcon, _startPicture, _ownIcon, _ownPicture], (_dirty && {_blocks isNotEqualTo []}) || _pictureDirty, "accent", [LLSTRING(Cont_ApplyTip), LLSTRING(Cont_ApplyTipTree)] select _tree] call FUNC(uiAction);
-
-    _buttonX = _buttonX + _buttonW + _gap;
 };
 
 if (_dirty || _pictureDirty) then {
@@ -850,9 +853,16 @@ if (_tree) then {
 };
 
 if (_hasOwn) then {
-    private _buttonW = ACTION_W(LLSTRING(Groups_Reset),_buttonH,true,_font);
+    private _resetText = LLSTRING(Groups_Reset);
+    private _buttonW = ACTION_W(_resetText,_buttonH,true,_font);
 
-    [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], LLSTRING(Groups_Reset), UI_TEX(icon_reset_ca), _theme, {
+    // On a narrow screen only its icon, which the tooltip explains, so it never reaches under Apply.
+    if (_buttonX + _buttonW > _limitX) then {
+        _resetText = "";
+        _buttonW = ACTION_W(_resetText,_buttonH,true,_font);
+    };
+
+    [_display, _box, [_buttonX, _buttonsY, _buttonW, _buttonH], _resetText, UI_TEX(icon_reset_ca), _theme, {
         params ["_class", "_tree", "_below", "_ownFields"];
 
         GVAR(cellWork) deleteAt (toLowerANSI _class);
@@ -868,17 +878,22 @@ if (_hasOwn) then {
 // Same as another class: a popover picks it (fnc_drawSameAs). For one class: a tree has no single class to
 // follow or copy for.
 if (!_tree) then {
-    // The long label where it fits, else the short one.
+    // The long label where it fits, else the short one, else only its icon (the tooltip says what it is).
     private _sameText = LLSTRING(Cont_SameAs);
     private _sameW = ACTION_W(_sameText,_buttonH,true,_font);
 
-    if (_sameW > _innerX + _innerW - _buttonX) then {
+    if (_buttonX + _sameW > _limitX) then {
         _sameText = LLSTRING(Cont_SameAsShort);
         _sameW = ACTION_W(_sameText,_buttonH,true,_font);
     };
 
+    if (_buttonX + _sameW > _limitX) then {
+        _sameText = "";
+        _sameW = ACTION_W(_sameText,_buttonH,true,_font);
+    };
+
     private _same = [
-        _display, _box, [_innerX + _innerW - _sameW, _buttonsY, _sameW, _buttonH], _sameText, UI_TEX(icon_swap_ca), _theme, {}, [], true, "", LLSTRING(Cont_SameAsTip)
+        _display, _box, [_buttonX, _buttonsY, _sameW, _buttonH], _sameText, UI_TEX(icon_swap_ca), _theme, {}, [], true, "", LLSTRING(Cont_SameAsTip)
     ] call FUNC(uiAction);
     private _sameHit = _same select (count _same - 1);
 

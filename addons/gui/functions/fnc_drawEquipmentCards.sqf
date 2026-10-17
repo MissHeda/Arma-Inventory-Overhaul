@@ -183,7 +183,7 @@ private _fnc_weaponCard = {
         // As the rules draw it (icon=): larger, smaller or moved, and cut to the card where it would reach out.
         [
             _display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _info getOrDefault ["picture", ""],
-            _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], false, 1, _cardRect
+            _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _cardRect
         ] call FUNC(uiItemPicture);
 
         // What is on the weapon shows on its picture, the way Arma's own inventory draws it.

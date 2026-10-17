@@ -36,7 +36,7 @@ params [
     "_display", "_parent", "_box", "_texture", ["_icon", ICON_PLAIN, [[]]], "_clip", ["_radius", 0], ["_events", true, [true]]
 ];
 
-private _first = [_display, _parent, _box, _texture, _icon, [1, 1, 1, 1], false, 1, _clip, _events, [_clip select 2, _clip select 3]] call FUNC(uiItemPicture);
+private _first = [_display, _parent, _box, _texture, _icon, [1, 1, 1, 1], _clip, _events, [_clip select 2, _clip select 3]] call FUNC(uiItemPicture);
 
 // Nothing to cut: one control that stays inside the box.
 if !(_first getVariable [QGVAR(clip), false]) exitWith {[_first]};
@@ -68,7 +68,7 @@ private _controls = [];
     // The sides of a pill have no height left between their corners.
     if (_pieceW <= 0 || {_pieceH <= 0}) then {continue};
 
-    _controls pushBack ([_display, _parent, _box, _texture, _icon, [1, 1, 1, 1], false, 1, _x, _events, [_clip select 2, _clip select 3]] call FUNC(uiItemPicture));
+    _controls pushBack ([_display, _parent, _box, _texture, _icon, [1, 1, 1, 1], _x, _events, [_clip select 2, _clip select 3]] call FUNC(uiItemPicture));
 } forEach [
     [_x0 + _cap, _y0, _x1 - _x0 - 2 * _cap, _y1 - _y0],
     [_x0, _y0 + _rise, _cap, _y1 - _y0 - 2 * _rise],

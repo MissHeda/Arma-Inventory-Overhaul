@@ -19,9 +19,9 @@
  * while the player has them on (einv_gui_magazineText).
  *
  * The picture is fitted into the tile with its own shape kept. On a tile that lies turned ("rotated",
- * fnc_getLayout) it turns along, a quarter clockwise round the box's middle and fitted into the turned box
- * (fnc_uiPictureTurned); what is on a weapon shows only upright. An item whose rules say so (icon=, the
- * "icon" of einv_items_fnc_getInfo) has it drawn larger, smaller or moved - turned along with the tile - and
+ * fnc_getLayout) it is not turned along: it is drawn upright, fitted into the turned footprint like on any
+ * other tile (a wide picture is best made square); what is on a weapon shows only on an upright tile. An item whose rules say so (icon=, the
+ * "icon" of einv_items_fnc_getInfo) has it drawn larger, smaller or moved and
  * never out of the tile: a picture that would reach out is cut at the tile's edge by a controls group of
  * the tile's size (fnc_uiItemPicture), the one control the picture is then.
  *
@@ -196,21 +196,19 @@ if (_hidden) then {
         _controls append ([_display, _parent, _x, _stripe] call FUNC(uiHatch));
     } forEach _hatched;
 } else {
-    private _turned = _entry getOrDefault ["rotated", false];
-
     // The picture as its rules draw it (icon=): larger, smaller or moved, and cut to the tile where it would
     // reach out - one control as long as it does not. An entry may carry an icon of its own (the setup
     // wizard's preview shows the one being edited, "preview": it has no inventory window to report to).
     _controls pushBack ([
         _display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _entry getOrDefault ["picture", _info getOrDefault ["picture", ""]],
-        _entry getOrDefault ["icon", _info getOrDefault ["icon", ICON_PLAIN]], [1, 1, 1, 1], _turned, _sizeW / (_sizeH max 1),
+        _entry getOrDefault ["icon", _info getOrDefault ["icon", ICON_PLAIN]], [1, 1, 1, 1],
         [_left, _top, _width, _height], !(_entry getOrDefault ["preview", false])
     ] call FUNC(uiItemPicture));
 
     // A weapon shows what is on it (fnc_drawAttachments).
     private _attachments = _entry getOrDefault ["attachments", []];
 
-    if (_attachments isNotEqualTo [] && {!_turned}) then {
+    if (_attachments isNotEqualTo [] && {!(_entry getOrDefault ["rotated", false])}) then {
         _controls append ([_display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _attachments] call FUNC(drawAttachments));
     };
 

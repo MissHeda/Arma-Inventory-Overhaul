@@ -271,12 +271,6 @@ if (([_boxX] call FUNC(isFinite)) && {[_boxY] call FUNC(isFinite)} && {[_offsetX
 GVAR(dragRoom) set ["boxX", _boxX];
 GVAR(dragRoom) set ["boxY", _boxY];
 
-if (uiNamespace getVariable [QGVAR(dragTurned), false]) then {
-    // A ghost whose picture reaches out of its footprint is a group with the picture in it (fnc_uiItemPicture):
-    // the picture is what turns.
-    (_ghost getVariable [QGVAR(inner), _ghost]) ctrlSetAngle [90, 0.5, 0.5];
-};
-
 private _counter = uiNamespace getVariable [QGVAR(dragCounter), controlNull];
 
 if (!isNull _counter) then {
@@ -290,15 +284,10 @@ if (!isNull _counter) then {
 // grid below, and following the mouse while they show ("ghosts" in the drag's record).
 private _fnc_moveGhosts = {
     {
-        _x params ["_ghostControl", "_offsetCellsX", "_offsetCellsY", "_pictureX", "_pictureY", ["_ghostTurned", false]];
+        _x params ["_ghostControl", "_offsetCellsX", "_offsetCellsY", "_pictureX", "_pictureY"];
 
         _ghostControl ctrlSetPosition [_boxX + _offsetCellsX + _pictureX, _boxY + _offsetCellsY + _pictureY];
         _ghostControl ctrlCommit 0;
-
-        // A tile that lies turned keeps its turned picture where it moved, as the held one does above.
-        if (_ghostTurned) then {
-            (_ghostControl getVariable [QGVAR(inner), _ghostControl]) ctrlSetAngle [90, 0.5, 0.5];
-        };
 
         _ghostControl ctrlShow true;
     } forEach (uiNamespace getVariable [QGVAR(dragGhosts), []]);

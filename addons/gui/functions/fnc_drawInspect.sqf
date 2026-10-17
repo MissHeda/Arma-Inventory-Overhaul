@@ -242,7 +242,7 @@ private _pictureInner = [_padX * 2, _cursor + _padY * 0.5, _innerW - _padX * 2, 
 
 // As the rules draw it (icon=): larger, smaller or moved, and cut to the lighter box where it would reach out.
 [
-    _display, _group, _pictureInner, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], false, 1,
+    _display, _group, _pictureInner, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1],
     [_padX, _cursor, _innerW, _pictureH]
 ] call FUNC(uiItemPicture);
 

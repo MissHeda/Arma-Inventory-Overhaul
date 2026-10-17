@@ -78,11 +78,9 @@ uiNamespace setVariable [QGVAR(tipShown), controlNull];
 private _size = ((_record select 0) select [2, 2]) apply {_x max (UNIT * 1.5)};
 private _info = [_class] call EFUNC(items,getInfo);
 private _rect = [0, 0, _size select 0, _size select 1];
-private _footprint = _info getOrDefault ["size", [1, 1]];
 
 private _ghost = [
-    _display, controlNull, _rect, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.85], false,
-    (_footprint select 0) / ((_footprint select 1) max 1), _rect
+    _display, controlNull, _rect, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.85], _rect
 ] call FUNC(uiItemPicture);
 
 (ctrlPosition _ghost) params ["_ghostX", "_ghostY"];

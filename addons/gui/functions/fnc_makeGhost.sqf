@@ -65,13 +65,11 @@ if (
         private _tileW = _tile getOrDefault ["w", _tileSizeW];
         private _tileH = _tile getOrDefault ["h", _tileSizeH];
         private _tileRect = [0, 0, _tileW * _cellW, _tileH * _cellH];
-        private _tileTurned = _tile getOrDefault ["rotated", _tileW != _tileSizeW && {_tileSizeW != _tileSizeH}];
         private _picture = _tileInfo getOrDefault ["picture", ""];
 
         // As its tile draws it (icon=): a picture that reaches out of its footprint is cut to it by a group.
         private _ghost = [
-            _display, controlNull, _tileRect, _picture, _tileInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.8], _tileTurned,
-            _tileSizeW / (_tileSizeH max 1), _tileRect
+            _display, controlNull, _tileRect, _picture, _tileInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.8], _tileRect
         ] call FUNC(uiItemPicture);
 
         (ctrlPosition _ghost) params ["_ghostX", "_ghostY"];
@@ -79,24 +77,21 @@ if (
         _ghost ctrlShow false;
         _ghosts pushBack [
             _ghost, ((_tile getOrDefault ["col", 0]) - (_grabbedTile getOrDefault ["col", 0])) * _cellW,
-            ((_tile getOrDefault ["row", 0]) - (_grabbedTile getOrDefault ["row", 0])) * _cellH, _ghostX, _ghostY, _tileTurned
+            ((_tile getOrDefault ["row", 0]) - (_grabbedTile getOrDefault ["row", 0])) * _cellH, _ghostX, _ghostY
         ];
     } forEach GVAR(dragGroup);
 
     uiNamespace setVariable [QGVAR(dragGhosts), _ghosts];
 };
 GVAR(dragSize) params ["_w", "_h"];
-(_info getOrDefault ["size", [1, 1]]) params ["_sizeW", "_sizeH"];
 
 private _rect = [0, 0, _w * _cellW, _h * _cellH];
-private _turned = GVAR(dragRot) == 1;
 private _picture = _info getOrDefault ["picture", ""];
 
 // As its tile draws it (icon=): a picture that reaches out of its footprint is cut to it by a group, which is
-// the ghost then and has the picture in it (fnc_uiItemPicture) - the turn of a turned one goes on that.
+// the ghost then and has the picture in it (fnc_uiItemPicture). Held turned, it is fitted into the turned box, upright.
 private _ghost = [
-    _display, controlNull, _rect, _picture, _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.8], _turned,
-    _sizeW / (_sizeH max 1), _rect
+    _display, controlNull, _rect, _picture, _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.8], _rect
 ] call FUNC(uiItemPicture);
 
 // Where the picture lies in the box it is moved by.
@@ -104,7 +99,6 @@ private _ghost = [
 
 uiNamespace setVariable [QGVAR(dragGhost), _ghost];
 uiNamespace setVariable [QGVAR(dragGhostOffset), [_ghostX, _ghostY]];
-uiNamespace setVariable [QGVAR(dragTurned), _turned];
 
 // How many of the stack go - only for a stack; for a group always, how many tiles are dragged.
 if ((_entry getOrDefault ["count", 1]) > 1 || {GVAR(dragGroup) isNotEqualTo []}) then {
