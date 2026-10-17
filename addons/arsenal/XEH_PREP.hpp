@@ -9,6 +9,7 @@ PREP(isOver);
 PREP(hooks);
 PREP(layout);
 PREP(footer);
+PREP(toggleCollapse);
 PREP(onFrame);
 PREP(hoverConfirm);
 PREP(onMouse);

@@ -49,6 +49,15 @@ GVAR(stagingCount) = 0;
 GVAR(folded) = createHashMap;
 GVAR(foldKeys) = [];
 
+// The whole panel folded to its title bar (the button at the right end of the title row, fnc_toggleCollapse):
+// kept for the session and, per player, in the profile; where the column was scrolled to when it folded,
+// [container class, pixels], to put it back (fnc_layout); the list row's class a drag out of ACE's list began
+// with and since when it is held over the folded panel's title bar, to unfold it (fnc_listDrag, fnc_onFrame).
+GVAR(collapsed) = [profileNamespace getVariable [QGVAR(collapsed), false]] param [0, false, [false]];
+GVAR(collapsedScroll) = ["", 0];
+GVAR(listDragClass) = "";
+GVAR(unfoldSince) = -1;
+
 // A left press on a row of ACE's list that may yet become a drag of its item, [where, shift, frame, row]
 // or [] (fnc_onListPress, fnc_onFrame); the row the list picked last, [row, frame] or [] (fnc_listDrag); a move
 // into or out of the staging space waited for, to tell ACE, [container, class, count before, until] or []

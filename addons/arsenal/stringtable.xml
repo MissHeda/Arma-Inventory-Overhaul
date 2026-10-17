@@ -13,6 +13,12 @@
         <Key ID="STR_einv_arsenal_Blocked_Title">
             <English>The Virtual Arsenal is not allowed here</English>
         </Key>
+        <Key ID="STR_einv_arsenal_Collapse_Fold">
+            <English>Fold the panel to its title bar</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Collapse_Unfold">
+            <English>Unfold the panel</English>
+        </Key>
         <Key ID="STR_einv_arsenal_Confirm_Keep">
             <English>Keep editing</English>
         </Key>
@@ -39,6 +45,9 @@
         </Key>
         <Key ID="STR_einv_arsenal_Hint_ListCancel">
             <English>Let go over a free spot of a grid to put it in</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_ListUnfold">
+            <English>Hold it over the title bar to unfold the panel</English>
         </Key>
         <Key ID="STR_einv_arsenal_Hint_NotAllowed">
             <English>ACE does not allow this item here</English>

@@ -62,6 +62,8 @@ GVAR(scrollHold) = [];
 GVAR(ctrlHeld) = false;
 GVAR(picturePass) = GVAR(picturePass) + 1;
 GVAR(stagingCount) = 0;
+GVAR(listDragClass) = "";
+GVAR(unfoldSince) = -1;
 
 {
     if (!isNull _x) then {

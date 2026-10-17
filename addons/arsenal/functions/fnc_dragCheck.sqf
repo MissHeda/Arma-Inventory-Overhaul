@@ -33,6 +33,16 @@ params [["_target", [], [[]]], ["_entry", createHashMap, [createHashMap]], ["_gr
 private _kind = _target param [0, ""];
 
 if ((_grid getOrDefault ["source", ""]) isEqualTo "aceList") exitWith {
+    // The panel folded to its title row has no grid to put it in: held over the row it unfolds (fnc_onFrame).
+    if (GVAR(collapsed)) exitWith {
+        if (GVAR(dragZone) isNotEqualTo "unfold") then {
+            GVAR(dragZone) = "unfold";
+            [LLSTRING(Hint_ListUnfold), "muted"] call EFUNC(gui,showHint);
+        };
+
+        []
+    };
+
     if (_kind isEqualTo "grid") exitWith {
         private _intoKit = [_target, _entry] call FUNC(listToKit);
 

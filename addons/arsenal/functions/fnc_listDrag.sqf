@@ -116,4 +116,9 @@ if (!isNull _sink) then {
 
 [_display] call EFUNC(gui,startDrag);
 
+// Which row it is, to lift it again should the folded panel unfold under it (fnc_onFrame).
+if (EGVAR(gui,dragging)) then {
+    GVAR(listDragClass) = _class;
+};
+
 EGVAR(gui,dragging)

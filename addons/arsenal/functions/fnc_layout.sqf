@@ -26,6 +26,12 @@
  * in it (fnc_growStaging). ACE's list is registered as a zone of the engine: whatever is let go outside
  * the panel is shown going there, out of the container (fnc_dragCheck).
  *
+ * The button at the right end of the title row folds the whole panel (GVAR(collapsed), fnc_toggleCollapse):
+ * folded, the panel is its title row alone - the glass, the picture, the name and the button, nothing of the
+ * column, the staging space and the hint line is made, and the panel's rectangle (GVAR(panelRect), the
+ * engine's panels) is that row, so ACE's controls and its 3D view behind the rest answer the mouse as without
+ * the panel. Unfolded, the column is scrolled to where it stood when it was folded.
+ *
  * The focus sink (GVAR(focusSink) in uiNamespace) is made here the first time: a control of no size in the
  * screen's corner that fnc_onFrame gives the focus to, so that ACE's list loses it.
  *
@@ -96,11 +102,16 @@ private _fnc_fold = {
 GVAR(foldKeys) = [];
 [_section, toLowerANSI (_section getOrDefault ["class", ""])] call _fnc_fold;
 
+// The whole panel folded to its title row (the button in it).
+private _collapsed = GVAR(collapsed);
+
 // The title row names and pictures the container: no box with its picture beside the grid.
 _section set ["box", false];
 
 private _sections = [_section];
-private _holder = [] call FUNC(staging);
+
+// Folded, no staging space is looked at: the crate is made when the panel unfolds.
+private _holder = if (_collapsed) then {objNull} else {[] call FUNC(staging)};
 
 if (!isNull _holder) then {
     private _staging = createHashMapFromArray [
@@ -136,6 +147,12 @@ private _titleH = TITLE_H;
 private _bandH = SNAP_H(_padY + _titleH);
 private _bodyTop = _top + _bandH;
 
+// Folded, the panel ends under the title row, with the padding the block has round its content.
+if (_collapsed) then {
+    _height = SNAP_H(_padY * 2 + _titleH);
+    _rect = [_left, _top, _width, _height];
+};
+
 // The hint line, the block's last band: a line as high as the footer's key hints, a second while the
 // staging space holds something - for the note that it goes with the window (the "hint" hook) -, and room
 // above and below, in ACE's grid as its text is. The column reaches down to it.
@@ -144,7 +161,7 @@ private _hintH = SNAP_H(HINT_LINE_H * _lines + HINT_PAD * 2);
 private _hintTop = _top + _height - _hintH;
 private _columnH = _hintTop - _bodyTop;
 
-if (_columnH < UNIT * 4) exitWith {[]};
+if (!_collapsed && {_columnH < UNIT * 4}) exitWith {[]};
 
 // The block: the inventory's glass with its corner radius.
 [
@@ -167,7 +184,10 @@ if (_picture isNotEqualTo "") then {
 private _headFont = _theme getOrDefault ["fontBold", "PuristaSemibold"];
 private _headSize = TITLE_SIZE;
 private _headTop = _titleTop + _titleH / 2 - TEXT_MID * _headSize;
-private _headW = _left + _width - _padX - _textX;
+
+// The fold button is a square as high as the row at its right end; the name ends a gap before it.
+private _buttonW = SQUARE(_titleH);
+private _headW = _left + _width - _padX - _textX - _buttonW - SQUARE(_titleH * 0.3);
 private _title = [[_section getOrDefault ["title", ""], _theme] call EFUNC(gui,caption), _headW, _headFont, _headSize] call EFUNC(gui,fitText);
 
 [
@@ -175,10 +195,54 @@ private _title = [[_section getOrDefault ["title", ""], _theme] call EFUNC(gui,c
     _theme getOrDefault ["text", [1, 1, 1, 1]], _headFont, 0
 ] call EFUNC(gui,uiLabel);
 
+// The fold button, drawn as the header's buttons are (einv_gui_fnc_drawHeader): the dark surface one step lighter,
+// lighter again under the mouse, a round shape as high as the row. The chevron is the sections': down while the
+// panel is open, to the right once it is folded. The hit area is the button and 2 px (einv_gui_fnc_uiButton).
+([_theme, false] call EFUNC(gui,headerStyle)) params ["_buttonFill", "_buttonHover", "_buttonInk"];
+
+private _buttonTheme = createHashMap;
+_buttonTheme merge _theme;
+_buttonTheme set ["button", _buttonFill];
+_buttonTheme set ["buttonHover", _buttonHover];
+_buttonTheme set ["buttonText", _buttonInk];
+
+private _button = [
+    _display, controlNull, [_left + _width - _padX - _buttonW, _titleTop, _buttonW, _titleH], "collapse", "",
+    [UI_TEX(icon_chevron_down_ca), UI_TEX(icon_chevron_right_ca)] select _collapsed, _buttonTheme,
+    {[] call FUNC(toggleCollapse)}
+] call EFUNC(gui,uiButton);
+
+(_button select -1) ctrlSetTooltip ([LLSTRING(Collapse_Fold), LLSTRING(Collapse_Unfold)] select _collapsed);
+
+// Folded, the title row is all there is: the panel is that row, the hint line and the zone of ACE's list are
+// gone, and where the column was scrolled to is kept for the unfolding.
+if (_collapsed) exitWith {
+    private _pixels = (uiNamespace getVariable [QEGVAR(gui,keepPixels), createHashMap]) getOrDefault ["storage", -1];
+
+    if (_pixels >= 0) then {
+        GVAR(collapsedScroll) = [_section getOrDefault ["class", ""], _pixels];
+    };
+
+    GVAR(panelRect) = _rect;
+    EGVAR(gui,panels) pushBack _rect;
+
+    []
+};
+
 // A hairline under the title row, as the columns of the inventory have under theirs.
 [
     _display, controlNull, [_left + _padX, _titleTop + _titleH + _padY * 0.4, _width - _padX * 2, pixelH], _theme getOrDefault ["line", []]
 ] call EFUNC(gui,uiPanel);
+
+// Unfolded again: the column is scrolled to where it stood when the panel was folded, for the same container class
+// (the engine hands the pixels on to the column it draws, einv_gui_fnc_drawColumn, fnc_build).
+GVAR(collapsedScroll) params ["_scrollClass", "_scrollPixels"];
+
+if (_scrollClass isEqualTo (_section getOrDefault ["class", ""]) && {_scrollPixels > 0}) then {
+    (uiNamespace getVariable [QEGVAR(gui,keepPixels), createHashMap]) set ["storage", _scrollPixels];
+};
+
+GVAR(collapsedScroll) = ["", 0];
 
 // The column over the block: the same theme, without a background of its own.
 private _columnTheme = +_theme;

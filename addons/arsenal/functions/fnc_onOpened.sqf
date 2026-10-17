@@ -67,6 +67,9 @@ GVAR(scrollHold) = [];
 GVAR(ctrlHeld) = false;
 GVAR(pictureCache) = createHashMap;
 GVAR(stagingCount) = 0;
+GVAR(collapsedScroll) = ["", 0];
+GVAR(listDragClass) = "";
+GVAR(unfoldSince) = -1;
 
 _display displayAddEventHandler ["KeyDown", {_this call FUNC(onKey)}];
 _display displayAddEventHandler ["KeyUp", {(_this + [false]) call FUNC(onKey)}];

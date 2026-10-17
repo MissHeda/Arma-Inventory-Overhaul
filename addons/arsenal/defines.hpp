@@ -83,6 +83,10 @@
 // a quick grab end before it counted; more than a hand's tremor on a click.
 #define LIST_DRAG_PX 5
 
+// How long an item dragged out of ACE's list is held over the title bar of the folded panel before the panel
+// unfolds under it, in seconds (fnc_onFrame).
+#define UNFOLD_HOVER 0.6
+
 // How long a move into or out of the staging space is waited for before ACE's list is no longer told,
 // in seconds (fnc_onFrame).
 #define WATCH_TIME 3

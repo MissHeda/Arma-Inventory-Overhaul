@@ -100,6 +100,50 @@ if (_holding) then {
     };
 };
 
+// ----- An item out of ACE's list, held over the folded panel's title row: the panel unfolds under it -----
+// The drag is the engine's own (fnc_listDrag), over no grid while the panel is folded, with the hint saying to
+// hold it there (fnc_dragCheck). After UNFOLD_HOVER seconds on the row the panel is built unfolded - which ends the
+// drag, as every build does - and the row is lifted again at once, the button still held.
+if (GVAR(listDragClass) isNotEqualTo "" && {!EGVAR(gui,dragging)}) then {
+    GVAR(listDragClass) = "";
+};
+
+if (GVAR(collapsed) && {GVAR(listDragClass) isNotEqualTo ""}) then {
+    if !([_mouse] call FUNC(isOver)) exitWith {
+        GVAR(unfoldSince) = -1;
+    };
+
+    if (GVAR(unfoldSince) < 0) exitWith {
+        GVAR(unfoldSince) = _now;
+    };
+
+    if (_now - GVAR(unfoldSince) < UNFOLD_HOVER) exitWith {};
+
+    private _class = GVAR(listDragClass);
+
+    GVAR(listDragClass) = "";
+
+    if !([0, true, true] call FUNC(toggleCollapse)) exitWith {};
+
+    private _list = _display displayCtrl ARSENAL_IDC_LIST;
+
+    if (isNull _list || {inputMouse 0 == 0}) exitWith {};
+
+    private _row = -1;
+
+    for "_i" from 0 to ((lnbSize _list) select 0) - 1 do {
+        if ((_list lnbData [_i, 0]) isEqualTo _class) exitWith {
+            _row = _i;
+        };
+    };
+
+    if (_row >= 0) then {
+        [_display, _mouse, false, _row, -1] call FUNC(listDrag);
+    };
+} else {
+    GVAR(unfoldSince) = -1;
+};
+
 // ----- The focus, away from ACE's list while the panel is used - not from a field (2) or a sort bar (4) -----
 private _focus = focusedCtrl _display;
 private _sink = uiNamespace getVariable [QGVAR(focusSink), controlNull];
