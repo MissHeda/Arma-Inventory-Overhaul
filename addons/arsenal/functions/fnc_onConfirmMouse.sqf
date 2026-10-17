@@ -7,6 +7,9 @@
  * here: a left press on "Keep editing" or "Remove and close" is noted, and the same button let go on the same
  * answer gives it (fnc_closeConfirm, fnc_answerConfirm) a frame later - the card's controls are deleted by
  * it, and not inside the event of the display they are on. A press that is let go elsewhere answers nothing.
+ * A left press on the card's top strip (the title) that is on no answer starts moving the card
+ * (einv_gui_fnc_dragHandle, "begin"): its controls are moved one by one, the answers' hit areas too - they
+ * are found by their live positions here and in fnc_hoverConfirm - and the dimming stays.
  * Every press and release is taken (true) while the question is up: ACE's note of the press, which would pan
  * or turn its camera, is emptied. With no question up it does nothing and takes nothing.
  *
@@ -28,7 +31,7 @@
 
 disableSerialization;
 
-params [["_down", true, [true]], "", ["_button", 0, [0]], ["_mouseX", 0, [0]], ["_mouseY", 0, [0]]];
+params [["_down", true, [true]], ["_display", displayNull, [displayNull]], ["_button", 0, [0]], ["_mouseX", 0, [0]], ["_mouseY", 0, [0]]];
 
 if (isNull (uiNamespace getVariable [QGVAR(confirm), controlNull])) exitWith {false};
 
@@ -51,6 +54,21 @@ private _hit = (uiNamespace getVariable [QGVAR(confirmButtons), []]) findIf {
 
 if (_down) exitWith {
     GVAR(confirmPress) = _hit;
+
+    // On no answer, on the strip over the title: the card is picked up.
+    (uiNamespace getVariable [QGVAR(confirmBar), [controlNull, 0]]) params ["_film", "_inset"];
+
+    if (_hit < 0 && {!isNull _film} && {!isNull _display}) then {
+        (ctrlPosition _film) params ["_barX", "_barY", "_barW", "_barH"];
+
+        if (_mouseX >= _barX - _inset && {_mouseX < _barX + _barW + _inset} && {_mouseY >= _barY - _inset} && {_mouseY < _barY + _barH}) then {
+            ["begin", [
+                _display, uiNamespace getVariable [QGVAR(confirmMoved), []],
+                [_barX - _inset, _barY - _inset, _barW + _inset * 2, _barH + _inset], [_mouseX, _mouseY], "", _film
+            ]] call EFUNC(gui,dragHandle);
+        };
+    };
+
     true
 };
 

@@ -9,8 +9,10 @@
  * keeps the mouse from ACE's controls under it - a plain rectangle, not a button (that played its click sound
  * for every press); the clicks on the answers are taken by the display's handler (fnc_onConfirmMouse), the
  * wheel is absorbed (fnc_onOpened); keys are held by fnc_onAceKey. All of it is made straight on the
- * display, in no controls group - a group moved the card with the wheel. While the window is open
- * those tiles stay what they are, red and shown apart. With nothing to remove, or a unit that is not local
+ * display, in no controls group - a group moved the card with the wheel. The card can be dragged by its
+ * title strip (einv_gui_fnc_dragHandle, begun by fnc_onConfirmMouse on the press): all its controls are moved
+ * one by one, the dimming staying; they are kept in a list for that and the strip's film. While the window
+ * is open those tiles stay what they are, red and shown apart. With nothing to remove, or a unit that is not local
  * here, the window closes at once, as it always did.
  *
  * Arguments:
@@ -135,6 +137,15 @@ uiNamespace setVariable [QGVAR(confirm), _dim select 0];
 [_display, controlNull, [_cardX, _cardY, _cardW, _cardH], _theme getOrDefault ["panel", [0.05, 0.05, 0.05, 0.92]], _radius] call EFUNC(gui,uiPanel);
 [_display, controlNull, [_cardX, _cardY, _cardW, _cardH], _loss, _radius] call EFUNC(gui,uiRing);
 
+// The strip to move the card by - the top, down to under the title - with a light film that shows the mouse is on
+// it (fnc_hoverConfirm); under the title, over the card.
+private _inset = _radius max (UNIT * 0.15);
+private _film = [
+    _display, "EINV_PanelRect", controlNull, [_cardX + _inset, _cardY + _inset, _cardW - _inset * 2, UNIT * 2.6 - _inset]
+] call EFUNC(gui,uiCreate);
+
+_film ctrlSetBackgroundColor [1, 1, 1, 0];
+
 private _y = _cardY + UNIT * 1;
 private _titleSize = UNIT * 1.0;
 
@@ -183,6 +194,10 @@ private _created = uiNamespace getVariable [QEGVAR(gui,created), []];
 } forEach _mine;
 
 uiNamespace setVariable [QGVAR(confirmControls), _mine];
+
+// What the card is moved by: everything but the dimming, which covers the window and stays.
+uiNamespace setVariable [QGVAR(confirmMoved), _mine - _dim];
+uiNamespace setVariable [QGVAR(confirmBar), [_film, _inset]];
 
 // The keys are held by fnc_onAceKey; the focus leaves ACE's lists and fields for the control of no size that
 // covers nothing (fnc_layout). Not for a control of the card: the engine draws the focused control over every

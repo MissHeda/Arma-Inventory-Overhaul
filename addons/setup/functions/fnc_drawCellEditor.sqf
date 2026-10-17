@@ -814,7 +814,7 @@ if (!_tree) then {
                 uiNamespace setVariable [QGVAR(sameAsArgs), [_display, _inner, _theme]];
 
                 ["all"] call FUNC(drawSameAs);
-            }
+            }, [], [], "sameAs"
         ] call FUNC(popover);
     }, [_sameHit, _class]]];
 };

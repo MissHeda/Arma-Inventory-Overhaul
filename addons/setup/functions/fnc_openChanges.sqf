@@ -6,6 +6,8 @@
  * saves (fnc_drawChanges "saved"): the server settings, the cell size, the kinds of container and the rules, each
  * in words and marked new, changed or removed, with a cross that takes that one change back, and a click that opens
  * it where it is set. A box below what opened it - the header's "4 changes" -, so the page the player is on stays.
+ * It has no title bar of its own: the strip over its caption is the handle to move it by
+ * (einv_gui_fnc_dragHandle), made last so it lies over what the list drew there.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -24,10 +26,23 @@ disableSerialization;
 
 params ["_display", ["_anchor", [], [[]]]];
 
-[_display, _anchor, [SQUARE(UNIT * 30), UNIT * 17], "", {
+private _inner = [_display, _anchor, [SQUARE(UNIT * 30), UNIT * 17], "", {
     params ["_display", "_inner", "_theme"];
 
     (ctrlPosition _inner) params ["", "", "_width", "_height"];
 
     [_display, _inner, [0, 0, _width, _height], _theme, "saved"] call FUNC(drawChanges);
 }] call FUNC(popover);
+
+// The card is the content group's parent; its bar is the strip down to under the caption.
+private _card = ctrlParentControlsGroup _inner;
+
+if (!isNull _card) then {
+    (ctrlPosition _card) params ["", "", "_cardW"];
+    (ctrlPosition _inner) params ["", "_innerY"];
+
+    private _barH = _innerY + CARD_PAD_Y + CARD_CAPTION_H;
+    private _inset = (GVAR(theme) getOrDefault ["radius", 0]) max (UNIT * 0.15);
+
+    [_display, _card, [0, 0, _cardW, _barH], "changes", [_inset, _inset, _cardW - _inset * 2, _barH - _inset]] call EFUNC(gui,dragHandle);
+};

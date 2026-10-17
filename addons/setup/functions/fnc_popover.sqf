@@ -7,6 +7,12 @@
  * a question that has to be answered. A click anywhere beside it closes it (a hit area over the whole
  * screen, under the card), as does Escape. Only one at a time: opening one closes the last.
  *
+ * A card with a title is a window to move: the title bar, up to the cross, is the handle of
+ * einv_gui_fnc_dragHandle - press on it and the card follows the mouse, the dimming and the hit area stay
+ * where they are. With a kind, the place it is let go at is kept for the next card of that kind this
+ * session. A card without a title (a dropdown's list, a question) is not moved by this; the caller can
+ * make a handle of its own on the returned group's card (the card is the content group's parent).
+ *
  * Everything of it is made in the wizard's top layer (fnc_topLayer), made after the pane, and the focus
  * goes into it: the engine draws the control that holds the focus over all others, and a pane that kept
  * it - a click on a dropdown in it gives it the focus - lay over a popover made on the display (Mia,
@@ -22,6 +28,7 @@
  * 5: Arguments <ANY> (default: [])
  * 6: For the middle of the screen: the point to centre the card on, [x, y] - the wizard's middle, say; the
  *    screen's own middle when left out <ARRAY> (default: [])
+ * 7: Kind of window, to keep where it was moved to; "" to forget it <STRING> (default: "")
  *
  * Return Value:
  * The content group <CONTROL>
@@ -34,7 +41,7 @@
 
 disableSerialization;
 
-params ["_display", ["_anchor", [], [[]]], ["_size", [0.3, 0.2], [[]]], ["_title", "", [""]], ["_draw", {}, [{}]], ["_arguments", []], ["_centre", [], [[]]]];
+params ["_display", ["_anchor", [], [[]]], ["_size", [0.3, 0.2], [[]]], ["_title", "", [""]], ["_draw", {}, [{}]], ["_arguments", []], ["_centre", [], [[]]], ["_kind", "", [""]]];
 _size params ["_width", "_height"];
 
 call FUNC(closePopover);
@@ -91,7 +98,14 @@ if (_anchor isEqualTo []) then {
 // Under the card, over everything else: a click beside the card closes it, and nothing behind it is hit
 // through it. A moment later - it is this control's own click.
 private _catcher = [_display, "EINV_Hitbox", _layer, [0, 0, safezoneW, safezoneH]] call EFUNC(gui,uiCreate);
-_catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closePopover)}] call FUNC(defer)}];
+_catcher ctrlAddEventHandler ["ButtonClick", {
+    [{
+        // The release that ended a drag of the card is not a click beside it.
+        if !(["busy"] call EFUNC(gui,dragHandle)) then {
+            call FUNC(closePopover);
+        };
+    }] call FUNC(defer);
+}];
 _catcher ctrlAddEventHandler ["MouseButtonUp", {
     params ["", "_button"];
 
@@ -121,6 +135,16 @@ if (_title isNotEqualTo "") then {
         [_title, _titleW, _fontBold, TEXT_HEAD] call EFUNC(gui,fitText), TEXT_HEAD,
         _theme getOrDefault ["text", [1, 1, 1, 1]], _fontBold, 0
     ] call EFUNC(gui,uiLabel);
+
+    // The bar to move the card by: from the card's edge to the cross, and down to the content. Made before the
+    // cross, which lies over it and stays a button of its own.
+    private _barW = _cardWidth - _padX - _closeW - UNIT * 0.2;
+    private _barH = _padY + _titleH;
+    private _inset = _radius max (UNIT * 0.15);
+
+    [
+        _display, _card, [0, 0, _barW, _barH], _kind, [_inset, _inset, _barW - _inset, _barH - _inset * 2]
+    ] call EFUNC(gui,dragHandle);
 
     [
         _display, _card, [_cardWidth - _padX - _closeW, _padY + (_titleH * 0.8 - _closeH) / 2, _closeW, _closeH],

@@ -129,4 +129,4 @@ params ["_display", ["_anchor", [], [[]]]];
 
     [_display, _inner, [0, _buttonY, _buttonW, _buttonH], LLSTRING(Import_Add), "", _theme, _fnc_take, [true]] call FUNC(uiAction);
     [_display, _inner, [_width - _buttonW, _buttonY, _buttonW, _buttonH], LLSTRING(Import_Replace), "", _theme, _fnc_take, [false], true, "accent"] call FUNC(uiAction);
-}] call FUNC(popover);
+}, [], [], "import"] call FUNC(popover);

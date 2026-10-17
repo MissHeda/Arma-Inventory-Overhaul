@@ -255,6 +255,7 @@ PREP(openWindow);
 PREP(closeWindow);
 PREP(raiseWindow);
 PREP(placeWindow);
+PREP(dragHandle);
 PREP(topAt);
 PREP(hoverGeometry);
 PREP(hoverOutline);

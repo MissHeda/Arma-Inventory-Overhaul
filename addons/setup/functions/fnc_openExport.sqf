@@ -101,4 +101,4 @@ uiNamespace setVariable [QGVAR(exportAnchor), _anchor];
             [LLSTRING(Text_Copied), "gain"] call FUNC(setHint);
         }, [], true, "accent"] call FUNC(uiAction);
     };
-}] call FUNC(popover);
+}, [], [], "export"] call FUNC(popover);

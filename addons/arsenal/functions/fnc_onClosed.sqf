@@ -37,8 +37,14 @@ if (GVAR(attached)) then {
 };
 
 uiNamespace setVariable [QGVAR(display), displayNull];
+
+// A drag of the question's card ends with the window.
+["end"] call EFUNC(gui,dragHandle);
+
 uiNamespace setVariable [QGVAR(confirm), controlNull];
 uiNamespace setVariable [QGVAR(confirmControls), []];
+uiNamespace setVariable [QGVAR(confirmMoved), []];
+uiNamespace setVariable [QGVAR(confirmBar), [controlNull, 0]];
 uiNamespace setVariable [QGVAR(confirmButtons), []];
 GVAR(confirmPress) = -1;
 

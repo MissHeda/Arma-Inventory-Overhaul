@@ -774,6 +774,7 @@ carries `holder`, `root`, `parent`, `nearby`, `folded` (crates found around star
 puts a section with a `parent` right below its parent's. `fnc_getNearby [unit, range, max]` (public): every pile that holds
 something and every crate within `einv_storage_nearbyRange`, same floor and in sight (`fnc_isNear`), nearest first, at most
 `NEARBY_MAX`; not vehicles, bodies, persons, hidden, carried, loaded or locked objects, nor `einv_nearby = false` on the object.
+Whether a pile holds something is asked of the engine's cargo lists, not of `fnc_getContents` (the window asks every second).
 
 ### Loadouts
 
@@ -1093,13 +1094,20 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
 - **Drawing only what changed** (`fnc_refresh [display]` -> `""` / `"redraw"` / `"build"`): the signature is
   `fnc_getSignature` -> `[own, list, loot, storage, card]` - `own` the unit's loadout less what its uniform, vest and backpack
   carry; `list` sections shown (also the worn containers as objects, and whether each opened container still lies where it was
-  opened); `loot` / `storage` per section of the loot / own storage column `[number, str [cargo all the way down, places
-  revision]]`; `card` ACE's `vLoad` on the unit and its three containers and the weight limits' key. `own` or `list` changed, or a
+  opened); `loot` / `storage` per section of the loot / own storage column `[number, [cargo all the way down, places
+  revision]]` (the engine's lists themselves, compared as arrays - no `str` of a full crate every second); `card` ACE's `vLoad` on the unit and its three containers and the weight limits' key. `own` or `list` changed, or a
   section came or went: `fnc_build`. Else `fnc_redrawTiles [lootNumbers, ownNumbers]` draws the changed sections' tiles (own
   sections only in the inventory; false before touching anything when compartments, overflow, the button, the folded-rows line or
   the caption's weight label no longer fit) and, when `storage` or `card` changed, the **parts** are drawn again
   (`fnc_redrawPart`). Called once a second by `fnc_onFrame` (`SIGNATURE_INTERVAL`) and by `fnc_afterAction` after every answer -
   a move no longer builds the window. Tiles still flagged `pending` whose request was answered fade back in (`fnc_drawPending`).
+  **A redraw keeps what did not change** (`fnc_drawTiles [display, grid, layout, theme, before]` -> the old tiles not kept): an
+  old tile that looks exactly as a new entry would (class, `hidden`, compartment, cell, `w`, `h`, `rotated`, `holes`, count, rounds,
+  capacity, attachments, `picture`, `icon`, overflow) is that tile again - the same HashMap (the hands' queue holds it), its
+  controls untouched, the new entry's keys merged in and the ones it lost dropped, its light reset and, when it was `pending` and
+  is not `queued`, faded in; everything else is made by `fnc_createTile` and the old controls left over are deleted. Tiles go on
+  the grid in the layout's order either way. One item taken from a pile of ninety makes one tile less instead of ninety again, and
+  the queue's circles on the tiles that stayed stay (`fnc_drawQueue` finds their surfaces unchanged).
 - **Parts** (`fnc_drawPart [display, key, parent, rect, code, args]`, uiNamespace `einv_gui_parts`, emptied by each build): an
   outer `EINV_Group` made by the build where the piece belongs (so it keeps its z-order) holding an inner group the piece is drawn
   in; a redraw deletes the inner group, leaves its `slots` / `infoAreas` entries as dead stubs (numbers stay valid), and draws into a
@@ -1107,12 +1115,21 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
 - **The camera is kept** across builds while `einv_gui_cameraFor` (`[unit, rect]`, set by `fnc_cameraStart`) is unchanged; only the
   pose being reached (`fnc_poseCheck`), another rect, the camera switch or a vehicle start or stop it. `einv_gui_debugTiming` (client,
   default off) writes `timing: build 12.3 ms (N controls on the display, N of them shown: PanelRect N, ...)` (the controls by class,
-  the eight most), `timing: redraw 2.1 ms (...)`, `timing: drag ...` and, every 1500 frames, when a drag starts and when the window
-  closes, `timing: frames idle 0.06 ms avg 0.45 max (n 800, 1 over 1 ms) / hover held ... / hover same ... / hover new ... / drag ...`
-  to the RPT. The frames line is the script's share of a frame (`fnc_frame` times `fnc_onFrame`, `fnc_logFrame` keeps the tally; the
-  driver takes it only when the setting was on as the window opened): "hover held" is a mouse moving inside the cell it was in,
-  "same" one that found what it had found, "new" one that found something else. The rest of a frame is the engine drawing the
-  display's controls (and the camera's view): idle script cost against the frame time says which of the two a low FPS is.
+  the eight most) with `timing: build parts (ms) - sweep 2.1, contents 1.0, columns 30.2, footer and camera 0.8, kit windows and
+  top layer 0.3, under way and selection 0.2, signature 0.9`, `timing: redraw 2.1 ms (N loot and N storage sections, N tiles kept,
+  N made in N ms, signature N ms)`, `timing: search found an item - N ms (its tile drawn anew in place | the window built anew, ...)`,
+  `timing: drag ...` and, every 1500 frames, when a drag starts and when the window closes, `timing: frames idle 0.06 ms avg 0.45
+  max (n 800, 1 over 1 ms) / hover held ... / hover same ... / hover new ... / drag ...` followed by `timing: frame parts - whole
+  frame 4.02 ms avg 9.80 max (249 fps) / start ... / hover ... / search ... / queue ... / answers ... / check ... / contents ... - N
+  controls on the display, N shown; N tiles, N cell squares (N shown)` to the RPT. The frames line is the script's share of a frame
+  (`fnc_frame` times `fnc_onFrame`, `fnc_logFrame` keeps the tally; the driver takes it only when the setting was on as the window
+  opened): "hover held" is a mouse moving inside the cell it was in, "same" one that found what it had found, "new" one that found
+  something else. The parts line splits it: `fnc_onFrame` says where each part begins (`NOTE_PHASE` in `defines.hpp`,
+  `fnc_notePhase`; an `isNil` each while the setting is off) - start, queue, lift, drag, hover, search, warm, answers, check,
+  contents (the once-a-second signature with its redraws and builds) - each with its average per frame and the most one stretch
+  took, and "whole frame" is the time from one frame to the next (`einv_gui_frameLast`), the game's FPS. The rest of a frame is the
+  engine drawing the display's controls (and the camera's view): idle script cost against the whole frame says which of the two a
+  low FPS is, and the control counts say how much the engine has to draw.
 - **`fnc_onFrame`** each frame: hover, the drag, the focus rule, kit windows moving, the search animation; every
   `CHECK_INTERVAL` 0.25 s the "stay open" checks; once a second `fnc_refresh` with the **signature** ("Drawing only what changed"
   above). Nothing is built while a tile or frame is held. A window covered by another display (`fnc_isCovered`) keeps still and
@@ -1362,9 +1379,13 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 - **Grids and tiles.** `fnc_createGrid [display, parent, [relX, relY], rows, theme, section id, cols, holes, [colX, rowY]]` -> a
   HashMap: `parent`, `rel`, `cols`, `rows`, `cellW`, `cellH`, `colX`, `rowY` (where each column and row starts from `rel`; the
   plain pitch unless a canvas's seams), `colAt`, `rowAt` (per stretch of one cell, the last column or row starting in it or
-  before), `cells` (a **hole** has no control: `controlNull`), `holes`,
+  before), `cells` (a **hole** has no control: `controlNull`; nor has a cell whose square is not made yet), `cellColor`, `holes`,
   `tiles`, `section`, and from `fnc_drawCompartments` `container`, `virtual`, `kit`, `layoutKey`, `unit`, `block`,
-  `pos`, `overflow`, `window`, `holder`, `root`, `side` (a source grid adds `source`). `fnc_createTile [display, grid, entry,
+  `pos`, `overflow`, `window`, `holder`, `root`, `side` (a source grid adds `source`). **The cells' squares** are made by
+  `fnc_drawCells [display, grid]` once the tiles lie on the grid (`fnc_drawCompartments`, `fnc_redrawTiles`), and only where no tile
+  lies: a cell under a tile never gets a control (a full pile of ninety tiles makes no ninety squares only to hide them); a redraw
+  shows, hides or makes them as tiles went and came. Made after the tiles of their group, they still lie over nothing but their
+  compartment's panel. `fnc_createTile [display, grid, entry,
   theme]` draws the surface in the category's colour over the entry's cells only (a shaped tile: runs of cells with one-pixel
   bridges; `"backgrounds"` and `"rect"` kept for hover, flash, reveal and the repack film), the picture, the short name, a
   stack's count and a magazine's fill. A **turned picture** (`rotated`; the dragged ghost held turned, also a row dragged from
@@ -1382,7 +1403,8 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   panel's tiles and the kit windows' are `fnc_createTile`'s. **The boxes of crates and vehicles** (`fnc_drawSection`, the loaded-cargo cards of `compat_ace_cargo`) ask `getInfo` for the object's class: `pictureOverride` shown when `picture` is it (the file is there), else `editorPreview`, drawn by `icon` (`fnc_uiBoxPicture`); a uniform, vest or backpack box is `fnc_drawSlot`, which already drew by `picture` and `icon`; a kit window's title picture is `fnc_uiItemPicture` too. `fnc_createTile`'s entry may carry its own `"picture"` (the wizard's preview of one being picked). The small title pictures (the Arsenal panel, the
   context menu) and the wizard's lists draw the plain picture. A weapon's attachment icons stay where they were.
   `fnc_tileAt` and `fnc_hitsHole` miss holes. A class whose `stack` is over 1 shows **"count/stack"** ("3/10", "1/10" too) on a
-  small flat box in the `raised` colour at the bottom right; one that does not stack shows nothing; a magazine's rounds then
+  small flat box in the `raised` colour at the bottom right - one label with the box as its own background
+  (`fnc_drawCountBackdrop` with "only measure", argument 11; a hotbar slot's count the same) -; one that does not stack shows nothing; a magazine's rounds then
   move to the bottom left. Counts over a picture stand on a dark pill (`fnc_drawCountBackdrop`, sized for the widest text the
   label can become, since a repack writes rounds live). The fill bar (`einv_gui_magazineFillBar`) shows on magazines that are
   not full; the rounds as words only while `einv_gui_magazineText` is on (tiles only - a weapon's magazine slot keeps them;
@@ -1635,10 +1657,14 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 
 - **Searching** (`fnc_isSearched`, `fnc_markHidden`, `fnc_animateSearch`, `fnc_showSearch`, `fnc_revealTile`, `fnc_learn`): loot
   of the kinds the settings name (bodies, persons, containers, ground; never the player's own gear, an object with
-  `einv_noSearch`, an ACE arsenal box) shows as "?" tiles until searched, `einv_gui_searchTime` seconds per cell. What a player
+  `einv_noSearch`, an ACE arsenal box) shows as "?" tiles until searched, `einv_gui_searchTime` seconds per cell (a plain "?" tile is
+  one label whose background is its surface, `mark` and `background` at once, plus its outline; the search takes its text away and
+  `fnc_showSearch` gives it back to the tile that stops being the head). What a player
   knows is counted per container and class (local), in the arrangement's order, so everyone reveals the same top-left ones; what
   you put in you know. The queue entry is `[container, class, row, col, cells, block]`, revealed one item at a time with a ring
-  and a circling magnifier; a found tile is drawn anew in place, a build only when the section's first find brings Take all.
+  and a circling magnifier; a found tile is drawn anew in place, a build only when the section's first find brings Take all. A
+  frame of searching costs the same however much is still hidden: the head's ring picture changes only when its step does, the
+  glass is one control moved, the sound has its own clock.
 - **Sounds** (`fnc_playSound [action, class, container, world, ui]`, public): by family from the config `CfgEinvSounds`
   (`gui/CfgEinvSounds.hpp`; its header explains the layers): `Default`, 17 item families and 4 container families (crate, vehicle,
   body, ground), Arma's own files only; the family is the item's config `einv_sound`, else `fnc_soundFamily`. Actions: `lift`,
@@ -1788,7 +1814,13 @@ they are **taken out**, not left in or moved on, and the player is asked first.
   and a full-screen `EINV_Hitbox` under the card take the mouse from ACE's controls): "N items do not fit your gear and will be
   removed: <names x count>" (six names at most, then "+K"), **Keep editing** and **Remove and close** (loss colour). While it
   is up `fnc_isOver` says nowhere, `fnc_onKey` does nothing and `fnc_onAceKey` holds every key: Escape is Keep editing
-  (`fnc_closeConfirm`), the rest is swallowed.
+  (`fnc_closeConfirm`), the rest is swallowed. **Moving the card:** its controls lie straight on ACE's display and do not hear
+  the mouse themselves, so a left press from `fnc_onConfirmMouse` on no answer and inside the title strip (the live position of
+  the film in uiNamespace `einv_arsenal_confirmBar`) starts `["begin", ...] call einv_gui_fnc_dragHandle` with the list in
+  `einv_arsenal_confirmMoved` (all the card's controls except the dimming). The helper moves them one by one with the display's
+  own `MouseMoving` / `MouseHolding` / `MouseButtonUp`; the answers' hit tests read their live positions, so they follow;
+  `fnc_hoverConfirm` lights the film on hover when no drag is running. The red screen (`fnc_onBlockedLoad`) has its card as a group
+  inside the full-screen one and a plain `attach` handle over its sign and title.
 - **Remove and close** (`fnc_answerConfirm`): `fnc_dropOverflow` - per container the first overflow entry through
   `einv_storage_fnc_removeEntry`, the layout read again after each, `fnc_tellAce` with the class counts before and after, the
   `giveBack` sound once -, an RPT INFO line, then `closeDisplay` with the code the player asked for.
@@ -1918,6 +1950,8 @@ control over all others, and the pane holds the focus after a redraw (its sink) 
 it. A popover therefore takes the focus into the layer (a button of no size on its card) before its content is drawn, its
 full-screen hit area closes it on a click beside the card and lets nothing through, and the keys wait while one is open
 (`fnc_onKeyDown`, `fnc_onKeyUp`); `fnc_closePopover` hides the layer and gives the focus back to the sink. A popover with an anchor opens below it (above when there is no room), at the anchor's place on the screen as `fnc_screenRect` works it out: the groups around the control add their corner and take off how far each is scrolled (`ctrlScrollValues` times the content's height less the group's; a step that draws a scrolling page says its height in the group's `contentH`, else it is the lowest bottom edge of the group's controls). A step drawn again keeps where its groups were scrolled (`scrollId` on the group): `fnc_showStep` saves them and `fnc_restoreScroll` sets them again until they hold, a page that came out longer or shorter at the same distance from its top. A popover without an anchor sits in the middle of the screen, or - with its seventh argument - centred on a point (`fnc_confirm` centres on the wizard's middle). **`fnc_confirm`** is a card with its question centred (a bold title above it when it has one) and its answers right-aligned along the bottom with one gap, as wide as the answers need; the answer that does nothing is first on the left, Escape and a click beside the card are that answer. Closing with unsaved changes (`fnc_close`) asks "You have unsaved changes.": **Keep editing**, **Close without saving** (style `danger`) and - only when the wizard may save (`!readOnly`) - **Save and close**, which calls `fnc_save` and closes the display once the draft is no longer dirty (a conflict question or a refusal leaves it open).
+
+**Moving a popup window** (`einv_gui_fnc_dragHandle`, gui addon, shared by setup and arsenal). A titled popover is a window: `fnc_popover` makes the title bar (from the card's edge to the cross, down to the content) a drag handle - a transparent `EINV_Hitbox` in the card group, made after the title and before the cross, with a faint film under it that lights on hover (`MouseEnter` / `MouseExit`). A left press on it ("begin") adds `MouseMoving`, `MouseHolding` and `MouseButtonUp` to the display and nothing else runs until then; each move sets the **card group** with `ctrlSetPosition` + `ctrlCommit 0` (a group carries all it holds), the release removes the three handlers. The dimming and the full-screen catcher are siblings of the card in the layer and stay put. The move is the mouse's distance since the press, rounded to whole pixels and clamped so the whole handle stays in the safe zone. The state is uiNamespace `einv_gui_drag` (empty when idle); `["busy"] call einv_gui_fnc_dragHandle` is true while dragging and for 0.3 s after, which the catcher's `ButtonClick` asks so the release that ends a drag never counts as a click beside the card. The popover's eighth argument is a *kind* (`picker`, `export`, `exportClasses`, `exportChoice`, `import`, `importChoice`, `classImport`, `sameAs`; `changes` for the changes list): where a window of that kind was let go is kept in uiNamespace `einv_gui_places` for the session and the next one is put there (brought back inside the screen by the same clamp). Untitled cards make a handle of their own through the same function on the card (`ctrlParentControlsGroup` of the content group): `fnc_confirm` over its words and padding (not the answers; no kind, a question opens in the middle each time), `fnc_openChanges` over its caption strip. Dropdown lists are anchored menus and are not moved.
 
 ### State and the draft
 

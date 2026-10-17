@@ -9,6 +9,8 @@
  * colour unless it says otherwise. The card is as wide as the answers need, at least as wide as the question
  * reads well, so the row fills it and the padding is the same on both sides. Any other answer than the one
  * that does nothing (first on the left) can be added; Escape, or a click beside the card, is that first one.
+ * The card has no title bar: it is moved by its words and the padding round them (einv_gui_fnc_dragHandle),
+ * the answers staying buttons.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -89,6 +91,17 @@ ctrlDelete _probe;
     private _words = [_display, "EINV_StructuredText", _inner, [0, 0, _width, _textH]] call EFUNC(gui,uiCreate);
 
     _words ctrlSetStructuredText parseText _markup;
+
+    // The card is the content group's parent. The handle lies over the words and the padding round them,
+    // down to short of the answers, made after the words so it is over them.
+    private _card = ctrlParentControlsGroup _inner;
+
+    if (!isNull _card) then {
+        (ctrlPosition _card) params ["", "", "_cardW"];
+        (ctrlPosition _inner) params ["", "_innerY"];
+
+        [_display, _card, [0, 0, _cardW, _innerY + _textH + UNIT * 0.2]] call EFUNC(gui,dragHandle);
+    };
 
     // From the right edge: the answer that does it last in the list, first from the right.
     private _right = _width;

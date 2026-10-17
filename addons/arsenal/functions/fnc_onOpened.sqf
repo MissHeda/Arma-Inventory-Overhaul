@@ -43,6 +43,8 @@ if (!GVAR(ready) || {isNull _display} || {ctrlIDD _display != ARSENAL_IDD}) exit
 uiNamespace setVariable [QGVAR(display), _display];
 uiNamespace setVariable [QGVAR(confirm), controlNull];
 uiNamespace setVariable [QGVAR(confirmControls), []];
+uiNamespace setVariable [QGVAR(confirmMoved), []];
+uiNamespace setVariable [QGVAR(confirmBar), [controlNull, 0]];
 uiNamespace setVariable [QGVAR(confirmButtons), []];
 GVAR(confirmPress) = -1;
 

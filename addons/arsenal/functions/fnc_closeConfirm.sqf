@@ -21,8 +21,13 @@ disableSerialization;
 private _parts = uiNamespace getVariable [QGVAR(confirmControls), []];
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
+// A drag of the card ends with it.
+["end"] call EFUNC(gui,dragHandle);
+
 uiNamespace setVariable [QGVAR(confirm), controlNull];
 uiNamespace setVariable [QGVAR(confirmControls), []];
+uiNamespace setVariable [QGVAR(confirmMoved), []];
+uiNamespace setVariable [QGVAR(confirmBar), [controlNull, 0]];
 uiNamespace setVariable [QGVAR(confirmButtons), []];
 GVAR(confirmPress) = -1;
 

@@ -70,6 +70,8 @@ GVAR(pictureCache) = createHashMap;
 uiNamespace setVariable [QGVAR(confirm), controlNull];
 uiNamespace setVariable [QGVAR(confirmCode), 1];
 uiNamespace setVariable [QGVAR(confirmControls), []];
+uiNamespace setVariable [QGVAR(confirmMoved), []];
+uiNamespace setVariable [QGVAR(confirmBar), [controlNull, 0]];
 uiNamespace setVariable [QGVAR(confirmButtons), []];
 
 // The answer a press began on (fnc_onConfirmMouse): 0 Keep editing, 1 Remove and close, -1 none.

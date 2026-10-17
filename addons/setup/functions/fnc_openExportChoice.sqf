@@ -56,4 +56,4 @@ params ["_display", ["_anchor", [], [[]]], ["_mode", "items", [""]], ["_class", 
         [LLSTRING(ExportChoice_Config), LLSTRING(ExportChoice_ConfigHelp), "accent", "config"],
         [LLSTRING(ExportChoice_Layout), [LLSTRING(ExportChoice_LayoutHelp), LLSTRING(ExportChoice_LayoutHelpTree)] select _tree, "", "layout"]
     ];
-}, [_mode, _class, _tree]] call FUNC(popover);
+}, [_mode, _class, _tree], [], "exportChoice"] call FUNC(popover);

@@ -65,4 +65,4 @@ GVAR(picker) = createHashMapFromArray [
     uiNamespace setVariable [QGVAR(pickerArgs), [_display, _inner, _theme]];
 
     ["all"] call FUNC(drawPicturePicker);
-}] call FUNC(popover);
+}, [], [], "picker"] call FUNC(popover);

@@ -69,4 +69,4 @@ params ["_display", ["_anchor", [], [[]]], ["_class", "", [""]], ["_tree", false
 
         [GVAR(classImportText), _class, _tree, ""] call FUNC(applyClassImport);
     }, [_class, _tree], true, "accent"] call FUNC(uiAction);
-}, [_class, _tree]] call FUNC(popover);
+}, [_class, _tree], [], "classImport"] call FUNC(popover);

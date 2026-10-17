@@ -77,4 +77,4 @@ _info params [["_first", "", [""]], ["_named", 1, [0]]];
     [_display, _inner, [_width - _cancelW, _height - _buttonH, _cancelW, _buttonH], LLSTRING(Cancel), "", _theme, {
         call FUNC(closePopover);
     }, [], true, "ghost"] call FUNC(uiAction);
-}, [_text, _class, _tree, _known, _first, _named]] call FUNC(popover);
+}, [_text, _class, _tree, _known, _first, _named], [], "importChoice"] call FUNC(popover);

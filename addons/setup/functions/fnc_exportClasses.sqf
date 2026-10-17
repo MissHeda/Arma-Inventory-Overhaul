@@ -180,7 +180,7 @@ if (isServer || {!isMultiplayer}) exitWith {
         [_display, _inner, [_width - _closeW, _height - _buttonH, _closeW, _buttonH], LLSTRING(Close), "", _theme, {
             call FUNC(closePopover);
         }, [], true, "accent"] call FUNC(uiAction);
-    }, [_text]
+    }, [_text], [], "exportClasses"
 ] call FUNC(popover);
 
 _text
