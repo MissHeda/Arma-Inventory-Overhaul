@@ -313,12 +313,6 @@
         <Key ID="STR_einv_gui_Menu_Settings">
             <English>Settings for %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Mute_Mute">
-            <English>Mute the inventory sounds</English>
-        </Key>
-        <Key ID="STR_einv_gui_Mute_Unmute">
-            <English>Play the inventory sounds again</English>
-        </Key>
         <Key ID="STR_einv_gui_Notify_Searched">
             <English>%1 is going through your gear</English>
         </Key>
@@ -492,36 +486,6 @@ build.</English>
         <Key ID="STR_einv_gui_Setting_MoveToStop_Desc">
             <English>A movement key pressed while looting or\nsearching closes the window: the search\nstops and the soldier walks off. What\nwas found stays found; the item being\nsearched starts again next time.\n\nOff: movement keys do nothing in the\nwindow.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_MuteContainers">
-            <English>Mute button: containers</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_MuteContainers_Desc">
-            <English>The speaker in the window's header also\nsilences containers, kits and pouches\nbeing opened and closed.\n\nOff: these keep playing while the\nspeaker is muted.</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_MuteMagazines">
-            <English>Mute button: magazines</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_MuteMagazines_Desc">
-            <English>The speaker in the window's header also\nsilences magazines being loaded,\nunloaded, reloaded and repacked.\n\nOff: these keep playing while the\nspeaker is muted.</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_MuteMoves">
-            <English>Mute button: item moves</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_MuteMoves_Desc">
-            <English>The speaker in the window's header also\nsilences items being picked up, moved,\ndropped, put on, taken off, attached\nand turned.\n\nOff: these keep playing while the\nspeaker is muted.</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_MuteOther">
-            <English>Mute button: other sounds</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_MuteOther_Desc">
-            <English>The speaker in the window's header also\nsilences the rest: inspecting an item\nand the click or warning when\nsomething is refused.\n\nOff: these keep playing while the\nspeaker is muted.</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_MuteSearch">
-            <English>Mute button: searching</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_MuteSearch_Desc">
-            <English>The speaker in the window's header also\nsilences the rustle while loot is\nsearched and the sound of an item\nfound.\n\nOff: these keep playing while the\nspeaker is muted.</English>
-        </Key>
         <Key ID="STR_einv_gui_Setting_PageRows">
             <English>Rows per page of a container</English>
         </Key>
@@ -600,23 +564,11 @@ loot, not for your own gear.</English>
         <Key ID="STR_einv_gui_Setting_ShowNearby_Desc">
             <English>Shows every pile on the ground and\nevery crate within reach as a box of\nits own in the loot column, nearest\nfirst. Crates you did not open start\nfolded - click their name to open\nthem.\n\nOff: only what you opened shows, as\nin the vanilla inventory.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SoundVolume">
-            <English>Volume</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_SoundVolume_Desc">
-            <English>How loud the inventory's sounds are for\nyou. The game's effects volume applies\non top, and so do earplugs and a blast's\ndeafness.</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_Sounds">
-            <English>Sounds</English>
-        </Key>
         <Key ID="STR_einv_gui_Setting_SoundsWorld">
             <English>Others hear looting</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SoundsWorld_Desc">
             <English>Players nearby hear someone loot: the\nrustle of a search, a rifle taken off a\nbody, a backpack dropped, a reload. Up\nto 10 to 20 metres, quieter than the\nlooter hears it.\n\nOff: only the looter hears anything.</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_Sounds_Desc">
-            <English>Every kind of gear sounds like what it\nis: weapons, magazines, vests, medical\nitems, helmets, radios and more - picked\nup, put down, put on, attached, loaded,\nand containers opened and searched.\n\nOff: you hear none of them. Others near\nyou may still hear you loot.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_TileNames">
             <English>Item names on tiles</English>
@@ -714,6 +666,36 @@ loot, not for your own gear.</English>
         <Key ID="STR_einv_gui_Sort_Weight_Next">
             <English>Next click: sorts everything in here by weight, heaviest first</English>
         </Key>
+        <Key ID="STR_einv_gui_Sound_Containers">
+            <English>Opening containers</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sound_Magazines">
+            <English>Magazines</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sound_Master">
+            <English>Master volume</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sound_Moves">
+            <English>Moving items</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sound_MuteAll">
+            <English>Mute all</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sound_Other">
+            <English>Other</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sound_Search">
+            <English>Searching</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sound_Title">
+            <English>Sounds</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sound_Tooltip">
+            <English>Sound volumes (right click: mute or unmute all)</English>
+        </Key>
+        <Key ID="STR_einv_gui_Sound_UnmuteAll">
+            <English>Unmute all</English>
+        </Key>
         <Key ID="STR_einv_gui_Stat_Weight">
             <English>Weight</English>
         </Key>
@@ -731,9 +713,6 @@ loot, not for your own gear.</English>
         </Key>
         <Key ID="STR_einv_gui_SubCategory_Searching">
             <English>Searching</English>
-        </Key>
-        <Key ID="STR_einv_gui_SubCategory_Sounds">
-            <English>Sounds</English>
         </Key>
         <Key ID="STR_einv_gui_Tarkov_Backpack">
             <English>Backpack</English>

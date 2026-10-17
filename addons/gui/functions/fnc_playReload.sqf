@@ -61,8 +61,10 @@ if (GVAR(reloadSoundId) >= 0) then {
     stopSound GVAR(reloadSoundId);
 };
 
-if (missionNamespace getVariable [QGVAR(sounds), true] && {!(["reload"] call FUNC(soundMuted))}) then {
-    GVAR(reloadSoundId) = [_layer, missionNamespace getVariable [QGVAR(soundVolume), 1]] call FUNC(playLayer);
+private _scale = ["reload"] call FUNC(soundGain);
+
+if (_scale > 0) then {
+    GVAR(reloadSoundId) = [_layer, _scale] call FUNC(playLayer);
 };
 
 [[_layer], _range min 25, NOISE_GAP, false] call FUNC(sendNoise);

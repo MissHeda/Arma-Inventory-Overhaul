@@ -34,6 +34,13 @@ private _created = uiNamespace getVariable [QGVAR(created), []];
 if (isNull _display) exitWith {false};
 if (!_force && {(_created param [(count _created - 1) max 0, controlNull]) isEqualTo _layer}) exitWith {false};
 
+// The sound dropdown under the speaker (fnc_openSoundMenu) is made again from the volumes as they are.
+if ((GVAR(menuFor) param [0, ""]) isEqualTo "sound") exitWith {
+    [_display] call FUNC(openSoundMenu);
+
+    true
+};
+
 GVAR(menuState) params ["_choices", "_at"];
 
 [_display, _choices, _at] call FUNC(openMenu);

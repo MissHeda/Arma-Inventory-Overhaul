@@ -1219,6 +1219,13 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
 `UNIT = safezoneH / 40` (a row, about 27 px at 1080p). Everything see-through meets on whole pixels (`SQUARE`, `UNSQUARE`,
 `SNAP_*`). Header `HEAD_Y = safezoneY + UNIT * 0.6`, `HEAD_H = UNIT * 1.6`; content from `CONTENT_Y = safezoneY + UNIT * 3` to
 `CONTENT_B = safezoneY + safezoneH - UNIT * 2.6`; footer `FOOT_Y`, `FOOT_H = UNIT * 1.4`; `MARGIN_X = SQUARE(UNIT * 1.2)`.
+
+**The header's buttons** (`fnc_drawHeader`, right to left: Close, camera, speaker, the search field, the cog) are 1.6 UNIT squares with a 0.3 UNIT gap, each on a piece of the
+window's glass with a lit surface of its own from `fnc_headerStyle [theme, on]` -> `[surface, surface under the mouse, ink]` (the theme's `buttonHover` colour at
+a stronger alpha, 2.4 times that under the mouse; the accent at 0.42 and 0.62 for a button that is on, with the `text` ink). The search field's frame has the plain
+surface under the field's own film. The speaker's controls and its rectangle are kept in uiNamespace `einv_gui_soundButton` and `einv_gui_soundAnchor`
+(the dropdown opens under and right-aligned to it); `fnc_updateSoundButton` recolours it in place (accent while the dropdown is open, muted icon, dimmed, while nothing is audible).
+
 **`fnc_getCell`** -> `[cellW, cellH]`, whole pixels, the same across and down: `round(((UNIT * 1.45) min UNSQUARE(safezoneW / 52))
 / pixelH)`. Every grid uses it. 52 cells across is what two columns of `STORAGE_COLS` 10 cells with their boxes (13 cells each),
 the equipment column and the middle take at 16:9 - 37 px at 1920x1080, which leaves the middle 5 UNIT for the soldier while
@@ -1237,7 +1244,7 @@ cells fit within a third of the screen and left of ACE's list; its grids, kit wi
 list so a look could be added. `fnc_theme` adds `equipmentPanel` (a pane under the equipment cards), `titleIcons` and `onAccent`.
 **The camera** on the soldier in the middle (`einv_gui_cameraOn`) starts as `einv_gui_cameraDefault` says at every opening
 (`fnc_open`: `"soldier"` the third-person camera, `"off"` none - the world as seen from his eyes, darker dim); the header's
-button (`fnc_toggleCamera`; white like the header's other icons, at 45 % strength while the camera is off; not drawn at all and
+button (`fnc_toggleCamera`; the accent surface while the camera is on, the plain one with the icon at 45 % strength while it is off; not drawn at all and
 a no-op where a server or mission forces the setting - `fnc_cameraForced`, a CBA priority of 1 or more on `server` or `mission`)
 turns it for that window only, a step aside (`fnc_stepAside`, `einv_gui_cameraNext`) brings it back
 as it was. It is no longer kept in the profile.
@@ -1753,16 +1760,28 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   (`gui/CfgEinvSounds.hpp`; its header explains the layers): `Default`, 17 item families and 4 container families (crate, vehicle,
   body, ground), Arma's own files only; the family is the item's config `einv_sound`, else `fnc_soundFamily`. Actions: `lift`,
   `move`, `drop`, `equip`, `unequip`, `attach`, `detach`, `loadMag...`, `unloadMag`, `rotate`, `open`, `close`, `search`,
-  `uncover`, `inspect`, `giveBack`. The looter hears them on the UI channel (`einv_gui_soundVolume`, `einv_gui_sounds`); others
-  within the action's range hear a quieter copy (`einv_gui_soundsWorld`: `fnc_sendNoise` -> the target event `einv_gui_noise`,
-  `fnc_onNoise`; never from the Arsenal). **The speaker in the header** (`fnc_toggleMute`, `einv_gui_muted`, kept in the profile)
-  mutes them for the looter: `fnc_soundMuted [action]` says whether it silences that action, by five client settings (the
-  checkboxes of "Mute button silences", all on): `einv_gui_muteMoves` (lift, move, drop, equip, unequip, attach, detach, rotate, giveBack),
-  `muteMagazines` (the `loadMag...` actions, `unloadMag`, the reload's own sound in `fnc_playReload` as "reload", the repack's finished sound in
-  `einv_magazines_fnc_onFrame` as "repack"), `muteContainers` (open, close), `muteSearch` (search, uncover) and `muteOther` (inspect, and "warn": the
-  click of a refused opening in `fnc_onInventoryOpened`, the Arsenal's blocked sound in `einv_arsenal_fnc_showBlocked`). `fnc_playSound` asks before the
-  looter's copy; the world's copy (`fnc_sendNoise`) is not the looter's to mute. The variable `einv_gui_searchMuted` of the speaker that muted the
-  rustle alone is read once as the start value.
+  `uncover`, `inspect`, `giveBack`. The looter hears them on the UI channel at the volume of their kind times the master volume
+  (`fnc_soundGain [action]`); others within the action's range hear a quieter copy (`einv_gui_soundsWorld`: `fnc_sendNoise` -> the target
+  event `einv_gui_noise`, `fnc_onNoise`; never from the Arsenal) which the volumes below do not scale: they are only the looter's ears.
+  **The speaker in the header** opens the **sound dropdown** (`fnc_openSoundMenu`; there are no client CBA settings for sound). The kinds
+  (`fnc_soundGroup [action]` -> one of `einv_gui_soundGroups`): `moves` (lift, move, drop, equip, unequip, attach, detach, rotate, giveBack and any other
+  action), `magazines` (the `loadMag...` actions, `unloadMag`, the reload's own sound in `fnc_playReload` as "reload", the repack's finished sound as "repack"),
+  `containers` (open, close), `search` (search, uncover) and `other` (inspect, and "warn": the click of a refused opening in `fnc_onInventoryOpened`, the Arsenal's
+  blocked sound in `einv_arsenal_fnc_showBlocked`). State: `einv_gui_soundLevels` (per kind `[volume 0..1, volume to come back to]`; a kind at 0 is off),
+  `einv_gui_soundMaster` (0..1), written to the profile as `einv_gui_soundMix` = `[master, levels]` by `fnc_soundSettle` when the dropdown closes (and by
+  `fnc_onUnload`; never per frame) - `einv_gui_soundDirty` says there is something to write. `fnc_soundSet [mode, argument]` is the one place that changes them ("volume"
+  `[index, v]`, "toggle" index - off sets the volume to 0 and keeps the old one, on brings it back -, "master" v, "all": mute everything or, when nothing is audible,
+  bring it all back; also the speaker's right click) and then updates the open dropdown (`fnc_updateSoundMenu`, in place) and the speaker (`fnc_updateSoundButton`).
+  `fnc_soundMuted [action]` is `fnc_soundGain <= 0` (action "" asks about everything: what the speaker shows). `fnc_playSound` and `fnc_playReload` scale their layers
+  with `fnc_soundGain`; the three sounds played by the game's `playSound` (the refused opening's click, the blocked arsenal, a repack's finished sound) go through
+  `fnc_playClass [CfgSounds class, action]` (public), which reads the class's file, volume and pitch and plays it as a layer at the scaled volume (`playSound`
+  itself if the file cannot be found and the kind is not silenced). The dropdown is the context menu's machinery: a layer in `einv_gui_menu`, `einv_gui_menuRect`,
+  `einv_gui_menuFor = ["sound", -1]` and `einv_gui_menuState = ["sound"]`, so Escape, a click or right press beside it, `fnc_build` and the
+  `fnc_raiseMenu` of `fnc_onFrame`/`fnc_redrawTiles` (which makes it again from the current volumes) treat it as a menu, and `fnc_closeMenu` calls `fnc_soundSettle`
+  when it closes it. A click on the speaker while it is open lands on the layer's hit area and closes it. Sliders are a track, a fill and a knob with a hit area; a left press
+  starts `fnc_soundSlide ["begin", ...]`, which adds `MouseMoving`, `MouseHolding` and `MouseButtonUp` to the display for the drag (the way `fnc_dragHandle` does) and plays
+  a sample of the kind when the button is let go. The profile variables `einv_gui_muted` (and `einv_gui_searchMuted` before it) are read once, only when no `einv_gui_soundMix`
+  is saved: a muted speaker then starts with every kind off.
 - **Moving stops looting** (`einv_gui_moveToStop`): a movement key closes the window while it was opened on something or a search runs
   (not keys with Ctrl or Alt; `fnc_onKeyDown`), and `fnc_checkTaken` (every `CHECK_INTERVAL` from `fnc_onFrame`) closes it with the
   reason `"taken"` when the soldier was taken away from what he looted - into a vehicle, handcuffed or surrendering by ACE, dragging or carrying, or
@@ -2583,9 +2602,6 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_gui_showNearby` | CHECKBOX | client | on | nearby piles and crates as boxes in the loot column |
 | `einv_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |
 | `einv_gui_magazineText` | CHECKBOX | client | on | the rounds ("17/30") on magazine tiles; off leaves the bar alone |
-| `einv_gui_sounds` | CHECKBOX | client | on | the inventory's sounds |
-| `einv_gui_soundVolume` | SLIDER 0 to 2 | client | 1 | their volume |
-| `einv_gui_muteMoves`, `muteMagazines`, `muteContainers`, `muteSearch`, `muteOther` | CHECKBOX | client | on | "Mute button: ...": which kinds of sound the speaker in the window's header silences (`fnc_soundMuted`) |
 | `einv_gui_soundsWorld` | CHECKBOX | global | on | players nearby hear someone loot |
 | `einv_gui_moveToStop` | CHECKBOX | client | on | a movement key closes the window while looting |
 | `einv_gui_searchTime` | SLIDER 0 to 3 | global | 0.4 | seconds per cell searched; 0 shows everything |
@@ -2615,7 +2631,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_locks_zeusOpens` | CHECKBOX | global | on | Zeus may open locked containers |
 
 CBA keybinds: `einv_hotbar_slot1` to `slot7` (4 to 0), `einv_hotbar_show`, `einv_gui_quickMove` (F, the quick move in the inventory window), `einv_gui_drop` (G, the drop in the inventory window). Kept in the player's
-profile: `einv_gui_muted` (the speaker; `einv_gui_searchMuted` before 0.5.0), `einv_hotbar_slots` (`einv_gui_cameraOn` no longer since 0.5.0: `einv_gui_cameraDefault`).
+profile: `einv_gui_soundMix` (the sound dropdown's volumes; the speaker's `einv_gui_muted`, `einv_gui_searchMuted` before it, are read once), `einv_hotbar_slots` (`einv_gui_cameraOn` no longer since 0.5.0: `einv_gui_cameraDefault`).
 
 **What missions and other mods may set** (all optional): on an object `einv_grid` (a grid text, public), `einv_noSearch`,
 `einv_nearby = false`, `einv_noAccess` (a person); in a mission `einv_arsenal_biPassThrough`; in an item's config `einv_size`,

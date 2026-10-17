@@ -145,8 +145,19 @@ PREP(closeInspect);
 PREP(toggleSection);
 PREP(toggleRows);
 PREP(closeNested);
-PREP(toggleMute);
+
+// The sound dropdown under the speaker in the header: volumes per kind of sound and a master volume
 PREP(soundMuted);
+PREP(soundGroup);
+PREP(soundGain);
+PREP(soundSet);
+PREP(soundSettle);
+PREP(soundSlide);
+PREP(playClass);
+PREP(openSoundMenu);
+PREP(updateSoundMenu);
+PREP(updateSoundButton);
+PREP(headerStyle);
 
 // The feel: every kind of gear sounds like itself, others hear the looting, and the soldier looks into his gear
 PREP(soundFamily);

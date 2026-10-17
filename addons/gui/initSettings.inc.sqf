@@ -87,72 +87,8 @@
 
 // ----- Sounds -----
 
-// Each player's own ears.
-[
-    QGVAR(soundVolume),
-    "SLIDER",
-    [LLSTRING(Setting_SoundVolume), LLSTRING(Setting_SoundVolume_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
-    [0, 2, 1, 0, true],
-    0
-] call CBA_fnc_addSetting;
-
-[
-    QGVAR(sounds),
-    "CHECKBOX",
-    [LLSTRING(Setting_Sounds), LLSTRING(Setting_Sounds_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
-    true,
-    0
-] call CBA_fnc_addSetting;
-
-// Each player's own ears: what the speaker in the window's header silences (fnc_soundMuted). All of it by default,
-// so the speaker means what it says; a player who wants the rustle gone but the clicks kept unticks the rest. Read
-// at every sound, so a change reaches the next one.
-[
-    QGVAR(muteMoves),
-    "CHECKBOX",
-    [LLSTRING(Setting_MuteMoves), LLSTRING(Setting_MuteMoves_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
-    true,
-    0
-] call CBA_fnc_addSetting;
-
-[
-    QGVAR(muteMagazines),
-    "CHECKBOX",
-    [LLSTRING(Setting_MuteMagazines), LLSTRING(Setting_MuteMagazines_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
-    true,
-    0
-] call CBA_fnc_addSetting;
-
-[
-    QGVAR(muteContainers),
-    "CHECKBOX",
-    [LLSTRING(Setting_MuteContainers), LLSTRING(Setting_MuteContainers_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
-    true,
-    0
-] call CBA_fnc_addSetting;
-
-[
-    QGVAR(muteSearch),
-    "CHECKBOX",
-    [LLSTRING(Setting_MuteSearch), LLSTRING(Setting_MuteSearch_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
-    true,
-    0
-] call CBA_fnc_addSetting;
-
-[
-    QGVAR(muteOther),
-    "CHECKBOX",
-    [LLSTRING(Setting_MuteOther), LLSTRING(Setting_MuteOther_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Sounds)],
-    true,
-    0
-] call CBA_fnc_addSetting;
+// A player's own sound volumes are no settings here: they are set in the window, in the dropdown under the speaker
+// in the header (fnc_openSoundMenu), and kept in the profile.
 
 // For everyone alike: whether looting can be heard is part of a mission's game.
 [

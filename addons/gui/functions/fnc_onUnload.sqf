@@ -50,6 +50,9 @@ _reason = (createHashMapFromArray [
 
 INFO_1("window closed: %1",_reason);
 
+// The volumes set in the sound dropdown are kept, should the window close with it open.
+[] call FUNC(soundSettle);
+
 // A repack in progress ends with the window: what was moved so far is written (einv_magazines).
 if (!isNil QEFUNC(magazines,stop)) then {
     ["Closed"] call EFUNC(magazines,stop);

@@ -95,7 +95,7 @@ their load. A text that names a preset of an older version (`base=realism`, `wei
   `einv_weight_heavyAt` or reads `einv_gui_searchBodies` knows nothing of it. A `cba_settings.sqf` sets it with one line
   (`force force einv_main_settings = "einv1, weight_enabled=0";`); the wizard's Export gives that line. A mission whose `cba_settings.sqf` has lines for the old settings
   (`einv_gui_searchTime = 0.6;`), or that saved them in Eden's addon options, keeps working as long as the text box is empty: those values are taken as if the text said them (the server's own
-  profile and `cba_settings.sqf` are not read - set them in the wizard again). What players set for themselves (tile scale, tile names, sounds, keys, the
+  profile and `cba_settings.sqf` are not read - set them in the wizard again). What players set for themselves (tile scale, tile names, keys, the
   hotbar's look) stays in CBA's menu, per player, in the category "Enhanced Inventory - Client". The box itself, the old tables (`einv_items_sizeTable`, `stackTable`, `einv_storage_containerTable`) and the rules text stay
   CBA text boxes of their own, in the category "Enhanced Inventory - Server" (the setting names do not carry the category, so a `cba_settings.sqf` is the same under either).
 
@@ -249,8 +249,8 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
 - **Sounds and looting:** every kind of gear sounds like what it is - weapons, magazines, vests, helmets, medical
   items, radios -, using Arma's own sound files only; players within earshot hear someone loot (`einv_gui_soundsWorld`,
   a server setting). A movement key stops looting and closes the window (each player's setting).
-  The speaker in the window's header mutes them for you; which kinds it silences (item moves, magazines, containers, searching, the rest) is five
-  checkboxes in "Enhanced Inventory - Client", all on by default.
+  The speaker in the window's header opens a dropdown with a switch and a volume slider for each kind of sound you hear (moving items, magazines,
+  opening containers, searching, other) and a master volume; they are no CBA settings but each player's own, kept in the profile. A right click on the speaker mutes everything or brings it back.
   Add your own sounds as classes of `CfgEinvSounds` (see `addons/gui/CfgEinvSounds.hpp`), or give an item the
   family of another with `einv_sound = "vest";` in its config.
 

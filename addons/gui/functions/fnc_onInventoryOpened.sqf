@@ -116,8 +116,8 @@ private _refused = [];
     };
 } forEach [_container, _secondary];
 
-if (_refused isNotEqualTo [] && {!(["warn"] call FUNC(soundMuted))}) then {
-    playSound "ACE_Sound_Click";
+if (_refused isNotEqualTo []) then {
+    ["ACE_Sound_Click", "warn"] call FUNC(playClass);
 };
 
 // A window the guard opened on a guess - a vanilla inventory came up before the engine asked this handler, and

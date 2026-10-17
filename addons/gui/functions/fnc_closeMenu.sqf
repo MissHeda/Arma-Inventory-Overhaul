@@ -59,4 +59,12 @@ if (_hadFocus) then {
 
 uiNamespace setVariable [QGVAR(menuFocusBack), controlNull];
 
+// The sound dropdown under the speaker is a menu of this kind (fnc_openSoundMenu): what was set in it is written
+// to the profile, and the speaker is drawn for the state it is in.
+if (_controls isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) isEqualTo "sound"}) then {
+    GVAR(menuFor) = [];
+
+    [] call FUNC(soundSettle);
+};
+
 _controls isNotEqualTo []

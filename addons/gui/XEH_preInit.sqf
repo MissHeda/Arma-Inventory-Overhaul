@@ -277,13 +277,34 @@ GVAR(pages) = [];
 GVAR(pagesMoved) = [];
 GVAR(pageHover) = [];
 
-// The window's sounds, muted with the speaker in the header (fnc_toggleMute); which kinds it silences is the
-// player's setting (fnc_soundMuted). Each player's own, kept in the profile - the speaker used to mute the
-// search rustle alone and kept that in einv_gui_searchMuted, which a player's choice is taken from.
-GVAR(muted) = profileNamespace getVariable [QGVAR(muted), profileNamespace getVariable [QGVAR(searchMuted), false]];
+// The window's sounds, set in the dropdown under the speaker in the header (fnc_openSoundMenu): one volume per kind
+// of sound (GVAR(soundGroups), fnc_soundGroup), 0 to 1, and a master volume over all of them. Each level is
+// [volume, the volume to come back to when its switch is turned on again]; a kind at volume 0 is off. Each player's
+// own, kept in the profile when the dropdown closes (fnc_soundSettle). The speaker used to mute with one flag,
+// einv_gui_muted (einv_gui_searchMuted before that): a player who had it set starts with every kind off.
+GVAR(soundGroups) = ["moves", "magazines", "containers", "search", "other"];
+GVAR(soundMaster) = 1;
+GVAR(soundLevels) = GVAR(soundGroups) apply {[1, 1]};
+GVAR(soundDirty) = false;
 
-if !(GVAR(muted) isEqualType true) then {
-    GVAR(muted) = false;
+private _savedMix = profileNamespace getVariable [QGVAR(soundMix), []];
+
+if (
+    _savedMix isEqualType [] && {count _savedMix == 2} && {(_savedMix select 0) isEqualType 0}
+    && {(_savedMix select 1) isEqualType []} && {count (_savedMix select 1) == count GVAR(soundGroups)}
+) then {
+    GVAR(soundMaster) = ((_savedMix select 0) max 0) min 1;
+    GVAR(soundLevels) = (_savedMix select 1) apply {
+        _x params [["_volume", 1, [0]], ["_last", 1, [0]]];
+
+        [(_volume max 0) min 1, (_last max 0) min 1]
+    };
+} else {
+    private _wasMuted = profileNamespace getVariable [QGVAR(muted), profileNamespace getVariable [QGVAR(searchMuted), false]];
+
+    if (_wasMuted isEqualTo true) then {
+        GVAR(soundLevels) = GVAR(soundGroups) apply {[0, 1]};
+    };
 };
 
 // The order the Sort buttons lay a container out by (fnc_sortHolder, one of SORT_MODES): the one the last

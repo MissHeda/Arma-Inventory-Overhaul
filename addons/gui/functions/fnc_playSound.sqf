@@ -10,11 +10,11 @@
  * (fnc_soundFamily). Without a class the family is the container's (fnc_containerFamily).
  *
  * The looter hears it on the interface, through the effects bus, so the game's effects volume, earplugs
- * and a blast's deafness apply, times the volume setting (einv_gui_soundVolume) and only with the sounds
- * setting on. Others near the looter hear the louder ones, quieter, where his hands are (einv_gui_soundsWorld,
- * fnc_sendNoise). The same sound twice within a moment plays once; of several variants never the one before.
- * The speaker in the header (fnc_toggleMute) silences it for the looter when the player's settings say it
- * covers that kind (fnc_soundMuted); the others near him still hear it.
+ * and a blast's deafness apply, times the volume of its kind and the master volume the player set in the
+ * dropdown under the speaker in the header (fnc_soundGain, fnc_openSoundMenu); at 0 he hears nothing. Others
+ * near the looter hear the louder ones, quieter, where his hands are (einv_gui_soundsWorld, fnc_sendNoise) -
+ * the dropdown does not touch that. The same sound twice within a moment plays once; of several variants
+ * never the one before.
  *
  * Actions: "lift" (an item picked up), "move" (put into a container), "drop" (onto the ground), "equip",
  * "unequip", "attach", "detach", "loadMag", "loadMagHandgun", "loadMagLauncher", "loadMagUgl", "unloadMag",
@@ -96,9 +96,9 @@ if (_layers isEqualTo []) then {
 
 if (_layers isEqualTo []) exitWith {};
 
-if (_ui && {missionNamespace getVariable [QGVAR(sounds), true]} && {!([_action] call FUNC(soundMuted))}) then {
-    private _scale = missionNamespace getVariable [QGVAR(soundVolume), 1];
+private _scale = if (_ui) then {[_action] call FUNC(soundGain)} else {0};
 
+if (_scale > 0) then {
     {
         [_x, _scale] call FUNC(playLayer);
     } forEach _layers;

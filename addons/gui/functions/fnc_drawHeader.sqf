@@ -3,9 +3,12 @@
 /*
  * Author: Miss Heda
  * Draws the header along the top of the window, the same in every look but in its colours: the title
- * on the left; on the right the cog of the setup wizard, the search field, the speaker for the search
- * rustle, the camera switch (white like the rest, dimmed while off; left out where the setting is forced -
- * fnc_cameraForced) and Close, each on a piece of the window's glass. A line under it, the width of the content.
+ * on the left; on the right the cog of the setup wizard, the search field, the speaker (it opens the dropdown
+ * of the sound volumes, fnc_openSoundMenu; a right click mutes everything or brings it back), the camera
+ * switch (left out where the setting is forced - fnc_cameraForced) and Close, each on a piece of the
+ * window's glass. The buttons and the search field's frame have a lit surface of their own (fnc_headerStyle),
+ * lighter under the mouse; a button that is on - the camera, the speaker while its dropdown is open - has the
+ * accent, an icon that is off is dimmed. A line under it, the width of the content.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -72,12 +75,33 @@ private _fnc_place = {
     _rect
 };
 
+// The theme a header button is drawn with: the lit surface of fnc_headerStyle in place of the theme's button
+// colours, which are made for the columns. Dimmed: the icon at less than half its strength.
+private _fnc_buttonTheme = {
+    params [["_on", false], ["_dim", false]];
+
+    ([_theme, _on] call FUNC(headerStyle)) params ["_fill", "_hover", "_ink"];
+
+    if (_dim) then {
+        _ink = +_ink;
+        _ink set [3, (_ink param [3, 1]) * 0.45];
+    };
+
+    private _buttonTheme = createHashMap;
+    _buttonTheme merge _theme;
+    _buttonTheme set ["button", _fill];
+    _buttonTheme set ["buttonHover", _hover];
+    _buttonTheme set ["buttonText", _ink];
+
+    _buttonTheme
+};
+
 // The hit area is the last of a button's controls (fnc_uiButton). Tooltips are plain text.
 private _fnc_tooltip = {
     params ["_controls", "_text"];
 
     if (_controls isNotEqualTo []) then {
-        (_controls select (count _controls - 1)) ctrlSetTooltip _text;
+        (_controls select -1) ctrlSetTooltip _text;
     };
 };
 
@@ -87,40 +111,51 @@ private _square = SQUARE(HEAD_H);
 // (fnc_uiButton, argument 11): the square is drawn as it was.
 private _hitPad = [SQUARE(UNIT * 0.14), UNIT * HEADER_HIT_PAD];
 
-private _close = [_display, controlNull, [_square] call _fnc_place, "close", "", UI_TEX(icon_close_ca), _theme, {
+private _close = [_display, controlNull, [_square] call _fnc_place, "close", "", UI_TEX(icon_close_ca), [] call _fnc_buttonTheme, {
     ["the close button"] call FUNC(closeDisplay);
 }, false, -1, false, _hitPad] call FUNC(uiButton);
 [_close, LLSTRING(Close)] call _fnc_tooltip;
 
-// The camera switch, white like the other icons of the header. Its state shows in the icon's strength: the
-// button's ink, dimmed while the camera is off. Not drawn at all where a server or a mission forces the
-// setting (fnc_cameraForced): the player has no choice to make then.
+// The camera switch. Its state shows in the button: the accent surface while the camera is on, the plain one with
+// a dimmed icon while it is off. Not drawn at all where a server or a mission forces the setting
+// (fnc_cameraForced): the player has no choice to make then.
 if !(call FUNC(cameraForced)) then {
-    private _cameraTheme = createHashMap;
-    _cameraTheme merge _theme;
-
-    if (!GVAR(cameraOn)) then {
-        private _ink = +(_theme getOrDefault ["buttonText", [0.88, 0.88, 0.88, 1]]);
-
-        _ink set [3, (_ink param [3, 1]) * 0.45];
-        _cameraTheme set ["buttonText", _ink];
-    };
-
-    private _camera = [_display, controlNull, [_square] call _fnc_place, "camera", "", UI_TEX(icon_camera_ca), _cameraTheme, {
-        call FUNC(toggleCamera);
-    }, false, -1, false, _hitPad] call FUNC(uiButton);
+    private _camera = [
+        _display, controlNull, [_square] call _fnc_place, "camera", "", UI_TEX(icon_camera_ca),
+        [GVAR(cameraOn), !GVAR(cameraOn)] call _fnc_buttonTheme, {call FUNC(toggleCamera)}, false, -1, false, _hitPad
+    ] call FUNC(uiButton);
     [_camera, LLSTRING(Camera_Tooltip)] call _fnc_tooltip;
 };
 
-// The speaker: the window's sounds, on or muted (fnc_toggleMute) - which kinds it silences is the player's setting.
-private _sound = [
-    _display, controlNull, [_square] call _fnc_place, "mute", "",
-    [UI_TEX(icon_sound_on_ca), UI_TEX(icon_sound_off_ca)] select GVAR(muted), _theme, {call FUNC(toggleMute)}, false, -1, false, _hitPad
-] call FUNC(uiButton);
-[_sound, [LLSTRING(Mute_Mute), LLSTRING(Mute_Unmute)] select GVAR(muted)] call _fnc_tooltip;
+// The speaker: a click opens the dropdown of the sound volumes under it (fnc_openSoundMenu), a right click
+// mutes everything or brings it all back (fnc_soundSet). It shows the muted speaker, dimmed, while nothing
+// is audible, and the accent while its dropdown is open (fnc_updateSoundButton, which keeps it up to date
+// without a rebuild - the controls and the place under which the dropdown opens are kept for it).
+private _silent = [""] call FUNC(soundMuted);
+private _soundRect = [_square] call _fnc_place;
 
-// The search field (fnc_drawFilter).
-[_display, [SQUARE(UNIT * 11)] call _fnc_place, _theme] call FUNC(drawFilter);
+private _sound = [
+    _display, controlNull, _soundRect, "sound", "", [UI_TEX(icon_sound_on_ca), UI_TEX(icon_sound_off_ca)] select _silent,
+    [false, _silent] call _fnc_buttonTheme, {
+        if ((_this select 0) < 0) then {
+            ["all"] call FUNC(soundSet);
+        } else {
+            [uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openSoundMenu);
+        };
+    }, false, -1, false, _hitPad
+] call FUNC(uiButton);
+[_sound, LLSTRING(Sound_Tooltip)] call _fnc_tooltip;
+
+uiNamespace setVariable [QGVAR(soundButton), _sound];
+uiNamespace setVariable [QGVAR(soundAnchor), _soundRect];
+
+// The search field (fnc_drawFilter), in a frame of its own surface: the field draws its film over it.
+private _searchRect = [SQUARE(UNIT * 11)] call _fnc_place;
+
+([_theme, false] call FUNC(headerStyle)) params ["_searchFill"];
+
+[_display, controlNull, _searchRect, _searchFill, (_theme getOrDefault ["radius", 0]) min (HEAD_H / 2)] call FUNC(uiPanel);
+[_display, _searchRect, _theme] call FUNC(drawFilter);
 
 // The cog: the setup wizard (einv_setup) - how big items are, how many share a tile, how containers are
 // split, the same for everyone. Drawn only for whoever may open it (einv_setup_fnc_canOpen: who runs the
@@ -130,7 +165,7 @@ if (!isNil QEFUNC(setup,openFromGame) && {call (missionNamespace getVariable [QE
     private _target = ["direct"] call (missionNamespace getVariable [QEFUNC(setup,canEdit), {createHashMap}]);
     private _canSave = !isNil "_target" && {_target isEqualType createHashMap} && {_target getOrDefault ["canSave", false]};
 
-    private _setup = [_display, controlNull, [_square] call _fnc_place, "setup", "", UI_TEX(icon_setup_ca), _theme, {
+    private _setup = [_display, controlNull, [_square] call _fnc_place, "setup", "", UI_TEX(icon_setup_ca), [] call _fnc_buttonTheme, {
         [0, ""] call EFUNC(setup,openFromGame);
     }, false, -1, false, _hitPad] call FUNC(uiButton);
     [_setup, [LELSTRING(setup,OpenWizard_ReadOnly), LELSTRING(setup,OpenWizard)] select _canSave] call _fnc_tooltip;

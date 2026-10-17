@@ -69,9 +69,7 @@ while {_done < count _events && {((_events select _done) select 0) <= _elapsed}}
 _job set ["done", _done];
 
 if (_sound isNotEqualTo "") then {
-    if !(["repack"] call EFUNC(gui,soundMuted)) then {
-        playSound _sound;
-    };
+    [_sound, "repack"] call EFUNC(gui,playClass);
 
     [] call FUNC(showProgress);
 };
