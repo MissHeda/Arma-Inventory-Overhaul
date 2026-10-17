@@ -89,7 +89,7 @@ private _cardChanged = _storageChanged isNotEqualTo [] || {_card isNotEqualTo (_
 
 // Tiles of moves that were answered meanwhile are no longer under way: faded back in, and what is still
 // under way marked again (fnc_drawPending) - only when there were such tiles, which is after a move. A tile that
-// waits in the hands' queue is not one of them: it stays marked and faded (fnc_drawQueue keeps its circle), so a
+// waits in the hands' queue is not one of them: it stays marked and faded (fnc_drawQueue keeps its mark), so a
 // long queue is not faded in and out again at each answer.
 private _fnc_settle = {
     private _found = false;
@@ -114,7 +114,7 @@ private _fnc_settle = {
 private _fnc_pending = {
     call FUNC(drawPending);
 
-    if (GVAR(filter) isNotEqualTo "") then {
+    if (GVAR(filter) isNotEqualTo "" || {GVAR(groupFilters) isNotEqualTo []}) then {
         [] call FUNC(applyFilter);
     };
 };

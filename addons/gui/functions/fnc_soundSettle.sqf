@@ -24,7 +24,9 @@
 if (GVAR(soundDirty)) then {
     GVAR(soundDirty) = false;
 
-    profileNamespace setVariable [QGVAR(soundMix), [GVAR(soundMaster), +GVAR(soundLevels)]];
+    // The first number was the master volume of the earlier dropdown, which is gone: always 1 now, so the saved
+    // format stays [number, levels] and an older version reads it.
+    profileNamespace setVariable [QGVAR(soundMix), [1, +GVAR(soundLevels)]];
     saveProfileNamespace;
 };
 

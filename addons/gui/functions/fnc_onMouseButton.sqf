@@ -39,7 +39,7 @@
  * grid (fnc_createGrid, "source") is pressed like one in a container. A Shift double click counts as a
  * double click there.
  *
- * An action waiting for the hands (fnc_queueMoves) has its circle on its tile or slot: a left press there
+ * An action waiting for the hands (fnc_queueMoves) is marked on its tile or slot: a left press there
  * cancels it (fnc_cancelQueued) and starts no drag or click.
  *
  * While a repack of magazines runs (einv_magazines - only when that addon is loaded) the hands are busy: a

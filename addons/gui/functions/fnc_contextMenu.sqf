@@ -24,7 +24,7 @@
  * On a tile of a selection of several nothing but deselect (fnc_clearSelection): what can be done with
  * all of them is a double click, a drag and Delete (fnc_quickMoveGroup).
  *
- * An action waiting for the hands (fnc_queueMoves) - a tile with its circle on it, or a slot whose item is to come
+ * An action waiting for the hands (fnc_queueMoves) - a tinted tile, or a slot whose item is to come
  * off - has Cancel in its menu, after Inspect (and the container rows of a tile).
  *
  * Drop goes to the ground at the feet, or into the vehicle's cargo while seated. A tile a move is under

@@ -945,6 +945,34 @@ def gloss(tex_w, tex_h, width, height, radius, screen_h):
     return im.resize((tex_w, tex_h), Image.LANCZOS)
 
 
+def slot_cat_all(p):
+    # "All": four tiles of a grid, the way the loot strip's first button says "no filter".
+    for x0, y0 in ((0.14, 0.14), (0.54, 0.14), (0.14, 0.54), (0.54, 0.54)):
+        p.rect(x0, y0, x0 + 0.32, y0 + 0.32, r=0.06)
+
+
+def slot_cat_medical(p):
+    # A thick cross.
+    p.rect(0.38, 0.12, 0.62, 0.88, r=0.05)
+    p.rect(0.12, 0.38, 0.88, 0.62, r=0.05)
+
+
+def slot_cat_food(p):
+    # A fork and a knife side by side: the fork's tines are cut into its head.
+    p.rect(0.13, 0.1, 0.43, 0.42, r=0.04)
+    p.rect(0.2, 0.4, 0.36, 0.9, r=0.05)
+    for x in (0.2, 0.28, 0.36):
+        p.line([(x, 0.06), (x, 0.3)], 0.03, erase=True)
+    p.poly([(0.58, 0.08), (0.8, 0.24), (0.8, 0.54), (0.58, 0.54)])
+    p.rect(0.6, 0.5, 0.78, 0.9, r=0.05)
+
+
+def slot_cat_misc(p):
+    # Three dots: "everything else".
+    for x in (0.2, 0.5, 0.8):
+        p.ellipse(x, 0.5, 0.11)
+
+
 def build_images():
     """Every texture by its file name, as Pillow images."""
     images = {"search_ring_%02d_ca" % k: search_ring(k) for k in range(1, SEARCH_FRAMES + 1)}
@@ -1029,6 +1057,12 @@ def build_images():
         "slot_handgun_ca": slot_icon(slot_handgun),
         "slot_rifle_ca": slot_icon(slot_rifle, 256, 128),
         "slot_launcher_ca": slot_icon(slot_launcher, 256, 128),
+        # The strip of categories at the side of a loot box (fnc_drawGroupStrip); the weapon, magazine, vest and radio
+        # pictures above stand for weapons, ammunition, gear and tools.
+        "slot_cat_all_ca": slot_icon(slot_cat_all),
+        "slot_cat_medical_ca": slot_icon(slot_cat_medical),
+        "slot_cat_food_ca": slot_icon(slot_cat_food),
+        "slot_cat_misc_ca": slot_icon(slot_cat_misc),
         # The window's glass, for its shape on a wide screen: INV_W x INV_VISIBLE_H in rows of
         # INV_H / 37, where INV_W is 33 cells of 1.5 rows (addons/gui/defines.hpp).
         "gloss_inventory_ca": gloss(1024, 1024, 33 * 1.5, 36, 0.6, 36 * 0.95 * 1080 / 37),
@@ -1037,11 +1071,26 @@ def build_images():
 
 
 def main():
-    tool = sys.argv[1] if len(sys.argv) > 1 else IMAGE_TO_PAA
+    # Usage: generate_ui_textures.py [path to ImageToPAA] [--only name,name] - with --only just those textures are
+    # made again, so a new picture does not rewrite every other file (a texture is a binary: each would show as changed).
+    args = sys.argv[1:]
+    only = None
+
+    if "--only" in args:
+        at = args.index("--only")
+        only = set(args[at + 1].split(","))
+        del args[at:at + 2]
+
+    tool = args[0] if args else IMAGE_TO_PAA
     if not os.path.isfile(tool):
         raise SystemExit("ImageToPAA not found: %s" % tool)
 
     images = build_images()
+    if only is not None:
+        missing = only - set(images)
+        if missing:
+            raise SystemExit("Unknown textures: %s" % ", ".join(sorted(missing)))
+        images = {name: im for name, im in images.items() if name in only}
     os.makedirs(OUT, exist_ok=True)
     tmp = tempfile.mkdtemp()
     for name, im in images.items():

@@ -228,14 +228,19 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   the same crate, vehicle or pile. Servers with their own way to refill magazines (GreenMag) switch "Repack
   magazines" (`einv_magazines_repack`) off; the fill bar on magazines that are not full is each player's own
   setting.
-- **Hands:** dropping an item, moving it to a different container (a drag, the quick move, Take all, Put all in) and putting on or taking off
-  gear take a moment, as in Wardogs: each such action waits its turn in the window with a circle on its tile (or on the slot) - the first one's
-  ring fills, the others wait with a faint ring and their place - and when a circle is full the action happens, exactly as it always did. Press G on
-  five items and five circles run one after another. A click on a circle (or Cancel in the right click menu) takes that action out of the queue;
-  closing the window cancels what still waits, and nothing is lost or half done, since nothing happens before its circle is full. Rearranging within
-  a container, turning an item and splitting a stack stay instant, and so does ACE Arsenal's panel. The times are server settings on the wizard's
-  General page, under "Looting and searching" (`einv_gui_handDrop` 0.3 s, `einv_gui_handMove` 0.4 s, `einv_gui_handEquip` 1 s; 0 is no wait and no circle for that
-  kind, as before 0.5.0).
+- **Hands:** the quick move (F, double click), Take all, Put all in and dropping with the drop key or the menu take a moment, as in Wardogs: the
+  items go one after another, and the caption line of the box they come from (the bar with Take all and Sort) says how far it is - a ring that goes
+  round, "Grabbing items 3 / 12" - with a red cross that cancels what still waits. The waiting tiles are tinted and faded, nothing sits on them. When an
+  item's turn comes it happens exactly as it always did. A click on a waiting tile (or Cancel in the right click menu) takes that one out of the queue;
+  closing the window cancels what still waits, and nothing is lost or half done, since nothing happens before its turn. **A drag never waits**, nor does
+  rearranging within a container, turning an item, splitting a stack, or ACE Arsenal's panel. Putting on and taking off a uniform, vest, backpack or
+  helmet is instant too, unless the server wants it to wait. The times and what waits are server settings on the wizard's General page, under "Looting and
+  searching" (`einv_gui_handDrop` 0.3 s, `einv_gui_handMove` 0.4 s, `einv_gui_handEquip` 1 s - 0 is no wait; the switches `einv_gui_waitMove` and
+  `einv_gui_waitDrop` on, `einv_gui_waitWorn` and `einv_gui_waitEquip` off).
+- **Searching:** loot you have not searched shows as diagonally striped tiles in the size of what lies there; they turn into items one by one. The
+  caption line of the box says "Searching 0:07" with a ring that goes round and a cross that stops the search of that box (the button then reads
+  "Search" and goes on again). A strip of icons at the side of a loot box - all, weapons, ammunition, gear, medical, food and drink, tools, other - shows
+  only that kind of item in the box (the rest fades, like with the search field; a paged box turns to its first page with a match).
 - **Big containers in pages:** a crate or vehicle taller than "Rows per page of a container" (`einv_gui_pageRows`, in "Enhanced Inventory - Client",
   General, 10 rows by default, 0 or 40 for no pages) shows that many rows at a time. The bar under it turns the pages, a fade over the page's last row
   with a chip such as "+37 items on other pages" says there is more, and an item dragged over an arrow of the bar turns the page after a moment so it can be let go

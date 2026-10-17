@@ -3,8 +3,9 @@
 /*
  * Author: Miss Heda
  * Draws the speaker in the header (fnc_drawHeader) for the state it is in, in place, without building the
- * window again: the muted speaker while every sound is off (fnc_soundMuted with ""), dimmed; the accent
- * surface while the dropdown under it is open (fnc_openSoundMenu), the plain one otherwise. Asked whenever the
+ * window again: the muted speaker while every sound is off (fnc_soundMuted with ""), dimmed; an accent icon and
+ * the thin accent line under the button while the dropdown under it is open (fnc_openSoundMenu), the plain
+ * button otherwise. Asked whenever the
  * volumes change and the dropdown opens or closes (fnc_soundSettle). The mouse's light on the surface
  * (fnc_uiButton) is kept up to date as well.
  *
@@ -30,6 +31,9 @@ private _open = (uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [] && {
 private _muted = [""] call FUNC(soundMuted);
 
 ([GVAR(theme), _open] call FUNC(headerStyle)) params ["_fill", "_hover", "_ink"];
+
+// The accent line under the button shows while the dropdown is open.
+{_x ctrlShow _open} forEach (uiNamespace getVariable [QGVAR(soundLine), []]);
 
 // Muted: the icon's strength drops, as the camera's does when it is off.
 if (_muted && {!_open}) then {

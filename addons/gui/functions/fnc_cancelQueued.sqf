@@ -2,29 +2,35 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Takes an action out of the hands' queue (fnc_queueMoves): a click on its tile or slot, or "Cancel" in the
- * menu. Nothing had been sent or changed - the move only waited - so there is nothing to undo: the tile
- * is free again and the others are numbered again (their circles stay, only the numbers are written anew,
- * once in the next frame however many were taken out - fnc_animateQueue). If it was the one the hands were
- * busy with, the next one starts from nothing.
+ * Takes an action out of the hands' queue (fnc_queueMoves): a click on its tile or slot, "Cancel" in the
+ * menu, or the stop button in the caption line of its box (which cancels all of the box's). Nothing had been sent
+ * or changed - the move only waited - so there is nothing to undo: the tile is free again and its colour is back. If it
+ * was the one the hands were busy with, the next one starts from nothing. The box's count (fnc_boxStep) goes down by
+ * as many as left.
  *
  * Arguments:
  * 0: The queue entry's id, 0 for every entry <NUMBER> (default: 0)
+ * 1: Only the entries of this box - with the id 0 - objNull for every box <OBJECT> (default: objNull)
  *
  * Return Value:
  * How many were taken out <NUMBER>
  *
  * Example:
  * [3] call einv_gui_fnc_cancelQueued;
+ * [0, _crate] call einv_gui_fnc_cancelQueued;
  *
  * Public: No
  */
 
 disableSerialization;
 
-params [["_id", 0, [0]]];
+params [["_id", 0, [0]], ["_box", objNull, [objNull]]];
 
-private _gone = GVAR(handQueue) select {_id == 0 || {(_x get "id") == _id}};
+private _all = _id == 0 && {isNull _box};
+
+private _gone = GVAR(handQueue) select {
+    if (_id != 0) then {(_x get "id") == _id} else {isNull _box || {(_x getOrDefault ["box", objNull]) isEqualTo _box}}
+};
 
 if (_gone isEqualTo []) exitWith {0};
 
@@ -34,12 +40,19 @@ if (_gone findIf {(_x get "id") == _headId} >= 0) then {
     GVAR(handStarted) = -1;
 };
 
-GVAR(handQueue) = GVAR(handQueue) select {_id != 0 && {(_x get "id") != _id}};
+private _goneIds = _gone apply {_x get "id"};
 
-if (_id == 0) then {
+GVAR(handQueue) = GVAR(handQueue) select {!((_x get "id") in _goneIds)};
+
+if (_all) then {
     GVAR(handWaiting) = createHashMap;
+    GVAR(handBoxes) = [];
 } else {
     [_gone, false] call FUNC(queueIndex);
+
+    {
+        [_x, false] call FUNC(boxStep);
+    } forEach _gone;
 };
 
 // What the cancelled moves had room reserved for is free again (fnc_roomFor).
@@ -58,17 +71,11 @@ GVAR(roomCache) = [];
     {
         _x params ["", "_tile"];
 
-        _tile set ["pending", false];
-        _tile deleteAt "queued";
-
-        {
-            _x ctrlSetFade 0;
-            _x ctrlCommit 0;
-        } forEach (_tile getOrDefault ["controls", []]);
+        [_tile] call FUNC(unmarkQueued);
     } forEach _tiles;
 } forEach _gone;
 
-// The others are numbered again, in the next frame.
+// The others are marked again where they need it, in the next frame.
 GVAR(queueFrom) = 0;
 GVAR(queueDirty) = true;
 

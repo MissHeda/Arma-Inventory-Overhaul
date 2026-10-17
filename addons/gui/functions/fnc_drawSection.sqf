@@ -129,11 +129,22 @@ private _colorLine = _theme getOrDefault ["line", [1, 1, 1, 0.07]];
 private _gridW = STORAGE_COLS * _cellW;
 private _gapX = SQUARE(UNIT * 0.35);
 private _wantsBox = _section getOrDefault ["box", true];
-private _boxCells = (floor (((_width - _gridW - _gapX) / _cellW) * 2) / 2) min 3;
+
+// The strip of categories at the side of what is looted (fnc_drawGroupStrip): between the box and the grid, a slim column
+// and a gap. It takes its room from the box - which gives way in half cells - and from nothing else, so the grid keeps
+// its width; where the column has not even that to spare there is no strip. Only for a container with a grid of its own in
+// the loot column (the player's own containers are small, a kit's grid and the Arsenal's panel are no loot).
+private _stripW = SQUARE(UNIT * 0.8);
+private _stripOn = !_placeholder && {_wantsBox} && {(_section getOrDefault ["side", _parent getVariable [QGVAR(column), ""]]) isEqualTo "loot"}
+    && {!isNull (_section getOrDefault ["container", objNull])} && {!(_section getOrDefault ["virtual", "entries" in _section])}
+    && {!(_section getOrDefault ["locked", false])} && {_id in ["ground", "container", "uniform", "vest", "backpack"]}
+    && {call FUNC(isInventoryMode)} && {(_width - _gridW - _gapX) >= (_stripW + _gapX)};
+private _stripExtra = [0, _stripW + _gapX] select _stripOn;
+private _boxCells = (floor (((_width - _gridW - _gapX - _stripExtra) / _cellW) * 2) / 2) min 3;
 private _hasBox = _wantsBox && {_boxCells >= 1.5};
 private _boxW = [0, _boxCells * _cellW] select _hasBox;
 private _boxH = [0, _boxCells * _cellH] select _hasBox;
-private _blockW = _gridW + ([0, _boxW + _gapX] select _hasBox);
+private _blockW = _gridW + ([0, _boxW + _gapX] select _hasBox) + _stripExtra;
 // One pixel in from the left for the panel's block: drawCompartments outlines a pixel outside its cells,
 // which the scroll group would clip at 0.
 private _blockX = [pixelW, ((_width - _blockW) / 2) max 0] select _wantsBox;
@@ -215,11 +226,13 @@ if (!_placeholder) then {
 // where less than one and a half cells are left. Folding rows (fnc_viewBlocks) changes no width.
 if ((_layout getOrDefault ["blocks", []]) findIf {(_x param [3, []]) isNotEqualTo []} >= 0) then {
     _gridW = (STORAGE_COLS * _cellW) max (([_layout] call FUNC(flowCompartments)) select 2);
-    _boxCells = (floor (((_width - _gridW - _gapX) / _cellW) * 2) / 2) min 3;
+    _stripOn = _stripOn && {(_width - _gridW - _gapX) >= (_stripW + _gapX)};
+    _stripExtra = [0, _stripW + _gapX] select _stripOn;
+    _boxCells = (floor (((_width - _gridW - _gapX - _stripExtra) / _cellW) * 2) / 2) min 3;
     _hasBox = _wantsBox && {_boxCells >= 1.5};
     _boxW = [0, _boxCells * _cellW] select _hasBox;
     _boxH = [0, _boxCells * _cellH] select _hasBox;
-    _blockW = _gridW + ([0, _boxW + _gapX] select _hasBox);
+    _blockW = _gridW + ([0, _boxW + _gapX] select _hasBox) + _stripExtra;
     _blockX = [pixelW, ((_width - _blockW) / 2) max 0] select _wantsBox;
 };
 
@@ -233,13 +246,18 @@ private _caption = switch (_id) do {
     default {_section getOrDefault ["title", ""]};
 };
 
-// The caption line (CAPTION_LINE) is a button row: tall enough to hit, and every hit area reaches over the empty room
-// above and under it (CAPTION_HIT_UP, CAPTION_HIT_DOWN) and half a gap to either side.
+// The caption line (CAPTION_LINE) is a button row: the tab, the buttons and the cross are on it, each hit area its own
+// drawing and two pixels.
 private _lineH = UNIT * CAPTION_LINE;
 private _lineSize = UNIT * 0.46;
 private _tabPad = SQUARE(_lineH * 0.5);
-private _hitUp = UNIT * CAPTION_HIT_UP;
-private _hitDown = UNIT * CAPTION_HIT_DOWN;
+
+// The buttons on the line (Take all, Put all in, Sort and the activity chip) are a little lower than the line and stand in
+// the middle of it, a clear gap above the line under it and above the container's top edge; their hit area is the button
+// and two pixels each way.
+private _buttonH = UNIT * 0.6;
+private _buttonTop = _top + (_lineH - _buttonH) / 2;
+private _hitPx = [pixelW * 2, pixelH * 2, pixelW * 2, pixelH * 2];
 
 private _load = "";
 
@@ -317,24 +335,24 @@ if (
 };
 
 // What it is meant to be - the tab may give the buttons up for lack of room below. The caption line is
-// _lineH high, and so is every button on it: the tab, the buttons and the cross are one row, the labels in
-// the tab's own size. A button is [id, label, icon, width]; they stand in this order beside the tab, and for
+// _buttonH high and in the middle of the line (the tab and the cross are _lineH high): the labels are a little smaller
+// than the tab's. A button is [id, label, icon, width]; they stand in this order beside the tab, and for
 // lack of room the last one goes first.
 private _buttonIntent = _buttonKind;
-private _buttonSize = _lineSize;
+private _buttonSize = UNIT * 0.42;
 private _buttonGap = SQUARE(UNIT * 0.3);
 private _buttons = [];
 
 if (_buttonKind isNotEqualTo "") then {
     private _label = [LLSTRING(Section_TakeAll), LLSTRING(Section_PutAll)] select (_buttonKind isEqualTo "put");
 
-    _buttons pushBack [_buttonKind, _label, "", [_label, "", _lineH, _buttonSize, _theme] call FUNC(buttonWidth)];
+    _buttons pushBack [_buttonKind, _label, "", [_label, "", _buttonH, _buttonSize, _theme] call FUNC(buttonWidth)];
 };
 
 if (_sortable) then {
     // "Sort: Name", the order the player sorts by now; as wide as the widest of its labels, so a click that
     // steps to the next order changes the words in place and nothing on the line moves (fnc_sortChip).
-    ([_lineH, _buttonSize, _theme] call FUNC(sortChip)) params ["_sortLabel", "_sortIcon", "_sortW"];
+    ([_buttonH, _buttonSize, _theme] call FUNC(sortChip)) params ["_sortLabel", "_sortIcon", "_sortW"];
 
     _buttons pushBack ["sort", _sortLabel, _sortIcon, _sortW];
 };
@@ -414,7 +432,7 @@ if (_chevronW > 0) then {
     ] call FUNC(uiIcon);
 
     private _toggle = [
-        _display, "EINV_Hitbox", _parent, [_blockX, _top - _hitUp, (_tabW max _chevronW) + SQUARE(UNIT * 0.14), _lineH + _hitUp + _hitDown]
+        _display, "EINV_Hitbox", _parent, [_blockX - pixelW * 2, _top - pixelH * 2, (_tabW max _chevronW) + pixelW * 4, _lineH + pixelH * 4]
     ] call FUNC(uiCreate);
     _toggle ctrlSetTooltip LLSTRING(Section_Toggle);
     _toggle setVariable [QGVAR(key), _sectionContainer];
@@ -454,8 +472,8 @@ private _buttonX = _blockX + _tabW + _buttonGap;
     _x params ["_kind", "_label", "_icon", "_buttonW"];
 
     private _button = [
-        _display, _parent, [_buttonX, _top, _buttonW, _lineH], format ["%1|%2|%3", _kind, _infoIndex, GVAR(buildCount)],
-        _label, _icon, _theme, _fnc_click, _busy, _buttonSize, true, [SQUARE(UNIT * 0.14), _hitUp, SQUARE(UNIT * 0.14), _hitDown]
+        _display, _parent, [_buttonX, _buttonTop, _buttonW, _buttonH], format ["%1|%2|%3", _kind, _infoIndex, GVAR(buildCount)],
+        _label, _icon, _theme, _fnc_click, _busy, _buttonSize, true, _hitPx
     ] call FUNC(uiButton);
 
     // What it does, when the mouse rests on it. Sort says what its next click sorts by (fnc_sortText) and is
@@ -480,6 +498,23 @@ private _buttonX = _blockX + _tabW + _buttonGap;
 
     _buttonX = _buttonX + _buttonW + _buttonGap;
 } forEach _buttons;
+
+// Where the activity chip goes (fnc_updateStatus): right of the buttons, as high as they are and in the middle of the line, up to
+// the weight - and over the weight where that is too little room for the ring, a few words and the button.
+if (_foldable && {!_placeholder} && {call FUNC(isInventoryMode)}) then {
+    private _chipLeft = _buttonX max (_blockX + _tabW + _buttonGap);
+    private _chipRight = _blockX + _blockW - _closeW - _lockW - _buttonGap;
+    private _beside = _blockX + _blockW - _closeW - _loadW - _lockW - _buttonGap - _chipLeft;
+    private _wanted = SQUARE(_buttonH) * 2 + ((format [LLSTRING(Status_Search), "0:00"]) getTextWidth [_fontBold, _buttonSize]) * TEXT_SLACK;
+    private _room = [_chipRight - _chipLeft, _beside] select (_beside >= _wanted);
+
+    if (_room >= _wanted * 0.85) then {
+        _info set ["statusParent", _parent];
+        _info set ["statusRect", [_chipLeft, _buttonTop, _room, _buttonH]];
+        _info set ["statusSize", _buttonSize];
+        _info set ["statusCover", _beside < _wanted];
+    };
+};
 
 // The weight of what it holds, right-aligned on the caption line.
 if (_load isNotEqualTo "") then {
@@ -519,7 +554,7 @@ if (_nested) then {
     [_display, _parent, [_closeX + (_closeW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH], UI_TEX(icon_close_ca), _colorText2] call FUNC(uiIcon);
 
     private _close = [
-        _display, "EINV_Hitbox", _parent, [_closeX - SQUARE(UNIT * 0.14), _top - _hitUp, _closeW + SQUARE(UNIT * 0.14), _lineH + _hitUp + _hitDown]
+        _display, "EINV_Hitbox", _parent, [_closeX - pixelW * 2, _top - pixelH * 2, _closeW + pixelW * 4, _lineH + pixelH * 4]
     ] call FUNC(uiCreate);
     _close ctrlSetTooltip LLSTRING(Section_Close);
     _close setVariable [QGVAR(key), _sectionContainer];
@@ -593,7 +628,7 @@ if (_anyPaged) then {
 
 ([_flowLayout] call FUNC(flowCompartments)) params ["_places", "_blocksH"];
 
-private _gridX = _blockX + ([0, _boxW + _gapX] select _hasBox);
+private _gridX = _blockX + ([0, _boxW + _gapX] select _hasBox) + _stripExtra;
 
 // ---------------------------------------------------------------------------
 // The box
@@ -701,6 +736,18 @@ if (_hasBox) then {
 
 private _used = (_bodyTop - _top) + (_boxH max _blocksH);
 
+// The strip of categories between the box and the grid: as high as the box or the grid, and never so small that its
+// pictures get smaller than STRIP_ICON_MIN of a UNIT (the section grows then).
+if (_stripOn) then {
+    private _pitch = (((_boxH max _blocksH) / 8) max (UNIT * STRIP_ICON_MIN)) min (UNIT * STRIP_ICON);
+
+    [
+        _display, _parent, [_gridX - _stripExtra, _bodyTop, _stripW, _pitch * 8], _sectionContainer, _info, _theme
+    ] call FUNC(drawGroupStrip);
+
+    _used = _used max ((_bodyTop - _top) + _pitch * 8);
+};
+
 // ---------------------------------------------------------------------------
 // The empty rows folded away: one line under the grid that says how many and opens them - or, opened,
 // folds them away again (fnc_toggleRows).
@@ -764,7 +811,7 @@ if (_rowsFoldable) then {
     ] call FUNC(uiLabel);
 
     private _rowsToggle = [
-        _display, "EINV_Hitbox", _parent, [_gridX, _rowsTop - UNIT * 0.1, _rowsW, _lineH + UNIT * 0.1 + _hitDown]
+        _display, "EINV_Hitbox", _parent, [_gridX - pixelW * 2, _rowsTop - pixelH * 2, _rowsW + pixelW * 4, _lineH + pixelH * 4]
     ] call FUNC(uiCreate);
     _rowsToggle ctrlSetTooltip LLSTRING(Rows_Tooltip);
     _rowsToggle setVariable [QGVAR(key), _sectionContainer];

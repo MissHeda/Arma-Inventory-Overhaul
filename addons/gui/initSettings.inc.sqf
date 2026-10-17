@@ -147,11 +147,11 @@
     0
 ] call CBA_fnc_addSetting;
 
-// ----- Item-moving queue (the wizard shows these three under "Looting and searching") -----
+// ----- Item-moving queue (the wizard shows these under "Looting and searching") -----
 
-// For everyone alike: how long the hands are busy is part of a mission's pace. In seconds, 0 is no wait at all (no
-// circle, as before). Each action waits its turn in the window's queue (fnc_queueMoves, fnc_animateQueue). Read when the
-// action is queued, so a change reaches what is queued afterwards.
+// For everyone alike: how long the hands are busy is part of a mission's pace. In seconds, 0 is no wait at all. What waits is
+// told by the switches below; each action that waits takes its turn in the window's queue (fnc_queueMoves, fnc_animateQueue).
+// Read when the action is queued, so a change reaches what is queued afterwards.
 [
     QGVAR(handDrop),
     "SLIDER",
@@ -171,6 +171,37 @@
     "SLIDER",
     [LLSTRING(Setting_HandEquip), LLSTRING(Setting_HandEquip_Desc)],
     [0, 5, 1, 2]
+] call EFUNC(main,addSetting);
+
+// What waits for the hands at all (fnc_queueTime). A drag out of the window never does, whatever these say. The things
+// worn on the body - uniform, vest, backpack, headgear - are put on and taken off at once unless told otherwise; they
+// are the ones a player does in a hurry.
+[
+    QGVAR(waitMove),
+    "CHECKBOX",
+    [LLSTRING(Setting_WaitMove), LLSTRING(Setting_WaitMove_Desc)],
+    true
+] call EFUNC(main,addSetting);
+
+[
+    QGVAR(waitDrop),
+    "CHECKBOX",
+    [LLSTRING(Setting_WaitDrop), LLSTRING(Setting_WaitDrop_Desc)],
+    true
+] call EFUNC(main,addSetting);
+
+[
+    QGVAR(waitWorn),
+    "CHECKBOX",
+    [LLSTRING(Setting_WaitWorn), LLSTRING(Setting_WaitWorn_Desc)],
+    false
+] call EFUNC(main,addSetting);
+
+[
+    QGVAR(waitEquip),
+    "CHECKBOX",
+    [LLSTRING(Setting_WaitEquip), LLSTRING(Setting_WaitEquip_Desc)],
+    false
 ] call EFUNC(main,addSetting);
 
 // ----- Living persons -----

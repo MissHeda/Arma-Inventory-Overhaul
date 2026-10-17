@@ -5,13 +5,13 @@
  * Shows another page of a paged compartment (fnc_pageRanges) without building the window: only this box is drawn
  * again - its panel, the tiles of the rows that show now, the squares of the free cells and the bar. Only the page shown
  * has controls: every control the compartment's tiles ever made (the grid's "tileControls", whatever a tile says it holds)
- * and every cell square goes before the new page is drawn, and the circles of the hands' queue are made again for the tiles
+ * and every cell square goes before the new page is drawn, and the marks of the hands' queue are made again for the tiles
  * that show (fnc_drawPending), so nothing of another page stays under or over this one. The tiles of the page left behind
  * give up their controls and stay on the grid bare ("offPage"), so a tile's
  * number in the grid never changes: a drag under way, a press, the selection and the hands' queue still point at the
  * tile they pointed at. Everything else on the window stays - the scroll of the columns, the other boxes, the open kit
  * windows. What lay over the tiles that went comes back as after a redraw of tiles (fnc_redrawTiles): the moves under
- * way and the queue's circles, the selection, the search field's fading; the hover is looked at again and an open menu closed.
+ * way and the queue's marks, the selection, the search field's fading; the hover is looked at again and an open menu closed.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -51,7 +51,7 @@ if ((_window select 0) == (_grid get "rowFrom") && {(_window select 1) == (_grid
 // What the page left shows goes: the squares of the cells (and the pieces that round them), the tiles' controls, the panel.
 [_grid] call FUNC(clearCells);
 
-private _gone = ["controls", "background", "backgrounds", "corners", "rect", "color", "mark", "bar", "barRect", "amount", "amountShort"];
+private _gone = ["controls", "background", "backgrounds", "corners", "rect", "color", "bar", "barRect", "amount", "amountShort"];
 
 {
     private _tile = _x;
@@ -117,7 +117,7 @@ if (_undrawn isNotEqualTo []) then {
 call FUNC(drawPending);
 [] call FUNC(drawSelection);
 
-if (GVAR(filter) isNotEqualTo "") then {
+if (GVAR(filter) isNotEqualTo "" || {GVAR(groupFilters) isNotEqualTo []}) then {
     [] call FUNC(applyFilter);
 };
 

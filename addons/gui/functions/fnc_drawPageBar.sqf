@@ -10,12 +10,13 @@
  * while their tile is not drawn, so they are counted here), and, while the search field holds something, the matches on
  * other pages instead of the items (fnc_pageCounts) - a search is found on any page. An arrow whose side of the pages has
  * matches wears a small mark with their number.
- * The arrows are the only things that light: each is a round button of its own, its surface fading in under the mouse and
- * out again (a pair of fades, not a jump), though its hit area is the whole half of the bar and a little more above and
- * below, so it is easy to hit. An arrow with no page behind it is dimmed and does nothing.
- * On the last page - not the first - with free rows under its tiles, those rows carry a note (Mia, 0.5.4): "Last page - the
- * earlier pages hold 256 items" and a button "First page", so a box opened there is not taken for an empty one. The note lies
- * on the free cells only, never over a tile; with one free row the words and the button share it, with more they are stacked.
+ * The arrows are round buttons of their own, a good deal bigger than the line of words, its surface fading in under the mouse and
+ * out again (a pair of fades, not a jump). The hit area of each is the button and 2 pixels on every side (the rule of fnc_uiButton),
+ * not the half of the bar, so the bar between is free. An arrow with no page behind it is dimmed and does nothing.
+ * On the last page - not the first - the bar says so itself (Mia, 0.5.5): "Last page  ·  174 items on earlier pages", with the arrow
+ * back lit and tinted with the accent. The words are a button too, as soon as there is a page before: a click on them jumps to the
+ * first page (they light under the mouse). Nothing lies on the grid's free cells any more: the note and its "First page" button of 0.5.4,
+ * which stood behind the tiles' background, are gone.
  * The bar is drawn again whenever the page turns, the search or the queue changes what it says or the free rows change; one
  * that would look as it does (the grid's "pageSig") is left alone, so a redraw of the tiles does not flicker it (the controls are
  * the grid's "pageControls"). The outer PAGE_ZONE of the bar on each side is registered once per build in uiNamespace
@@ -73,33 +74,30 @@ private _others = (_counts call _fnc_sum) - (_counts select _page);
 private _elsewhere = (_matches call _fnc_sum) - (_matches select _page);
 private _queued = 0;
 
-// The rows under the last tile of the rows that show: free, whatever page it is.
-private _rowFrom = _grid getOrDefault ["rowFrom", 0];
-private _rowTo = _grid getOrDefault ["rowTo", _grid get "rows"];
-private _freeFrom = _rowFrom;
-
 {
-    if (_x getOrDefault ["offPage", false]) then {
-        if ((_x getOrDefault ["queued", 0]) != 0) then {
-            _queued = _queued + 1;
-        };
-    } else {
-        _freeFrom = _freeFrom max ((_x getOrDefault ["row", 0]) + (_x getOrDefault ["h", 1]));
+    if ((_x getOrDefault ["offPage", false]) && {(_x getOrDefault ["queued", 0]) != 0}) then {
+        _queued = _queued + 1;
     };
 } forEach (_grid getOrDefault ["tiles", []]);
 
-_freeFrom = _freeFrom min _rowTo;
-
-// The last page, not the first, with room left under its tiles: it says so there.
-private _note = _page > 0 && {_page == _pages - 1} && {_rowTo - _freeFrom >= 1} && {_freeFrom < (_grid get "rows")};
+// The last page, not the first: the bar says so, and how much lies before it.
+private _last = _page > 0 && {_page == _pages - 1};
 
 private _parts = [format [LLSTRING(Page_Label), _page + 1, _pages]];
+
+if (_last) then {
+    _parts = [LLSTRING(Page_Last_None)];
+};
 
 if (_searching && {_elsewhere > 0}) then {
     _parts pushBack format [[LLSTRING(Page_Hits), LLSTRING(Page_Hits_One)] select (_elsewhere == 1), _elsewhere];
 } else {
     if (_others > 0) then {
-        _parts pushBack format [[LLSTRING(Page_Other), LLSTRING(Page_Other_One)] select (_others == 1), _others];
+        if (_last) then {
+            _parts pushBack format [[LLSTRING(Page_Earlier), LLSTRING(Page_Earlier_One)] select (_others == 1), _others];
+        } else {
+            _parts pushBack format [[LLSTRING(Page_Other), LLSTRING(Page_Other_One)] select (_others == 1), _others];
+        };
     };
 };
 
@@ -110,7 +108,7 @@ if (_queued > 0) then {
 private _text = _parts joinString "  ·  ";
 
 // Nothing it says changed since it was drawn, and the controls are all there: left as it is.
-private _signature = [GVAR(buildCount), _page, _pages, _text, _before, _after, [-1, _freeFrom] select _note, _others];
+private _signature = [GVAR(buildCount), _page, _pages, _text, _before, _after, _others];
 private _drawn = _grid getOrDefault ["pageControls", []];
 
 if (_drawn isNotEqualTo [] && {(_grid getOrDefault ["pageSig", []]) isEqualTo _signature} && {_drawn findIf {isNull _x} < 0}) exitWith {};
@@ -135,13 +133,12 @@ private _controls = [];
 private _barH = UNIT * PAGE_BAR_H;
 private _barW = _cols * _cellW - pixelW;
 private _barTop = _top + (_grid getOrDefault ["pageHeight", 1]) * _cellH + COMPARTMENT_PAD_PX(_cellW) * pixelH + UNIT * PAGE_BAR_GAP;
-private _halfW = _barW / 2;
 private _size = UNIT * 0.46;
 
-// The arrows are round buttons inside the bar, a little in from its ends.
-private _inset = _barH * 0.12;
+// The arrows are round buttons inside the bar, a little in from its ends: nearly the bar's height and wider than they are high.
+private _inset = _barH * 0.07;
 private _buttonH = _barH - _inset * 2;
-private _buttonW = SQUARE(_buttonH);
+private _buttonW = SQUARE(_buttonH * 1.5);
 private _buttonRadius = (_theme getOrDefault ["radius", 0]) min (_buttonH * 0.35);
 
 // ----- The bar -----
@@ -152,11 +149,15 @@ _controls append ([
 
 // The words, in the middle of the bar between the two buttons.
 private _labelW = _barW - (_buttonW + SQUARE(_inset)) * 2 - SQUARE(_barH * 0.3);
+private _labelRect = [_left + (_barW - _labelW) / 2, _barTop + _barH / 2 - TEXT_MID * _size, _labelW, TEXT_MID * _size * 2];
 
-_controls pushBack ([
-    _display, _parent, [_left + (_barW - _labelW) / 2, _barTop + _barH / 2 - TEXT_MID * _size, _labelW, TEXT_MID * _size * 2],
-    [_text, _labelW, _font, _size] call FUNC(fitText), _size, _text2, _font, 2
-] call FUNC(uiLabel));
+private _labelInk = [_text2, _theme getOrDefault ["text", [1, 1, 1, 1]]] select _last;
+
+private _labelCtrl = [
+    _display, _parent, _labelRect, [_text, _labelW, _font, _size] call FUNC(fitText), _size, _labelInk, _font, 2
+] call FUNC(uiLabel);
+
+_controls pushBack _labelCtrl;
 
 // A click finds this grid again in this build; it runs a frame later (the page redraws its own bar).
 private _fnc_click = {
@@ -175,7 +176,7 @@ private _fnc_click = {
     [_target, parseNumber _step] call FUNC(turnPage);
 };
 
-// "First page" in the note on the last page: the same, to the first page.
+// A click on the words: the same, to the first page.
 private _fnc_first = {
     params ["_direction", "_buttonId"];
 
@@ -195,23 +196,32 @@ private _fnc_first = {
 private _gridIndex = (uiNamespace getVariable [QGVAR(grids), []]) find _grid;
 private _areas = uiNamespace getVariable [QGVAR(pageAreas), []];
 private _register = !(_grid getOrDefault ["pageAreasMade", false]);
-private _iconH = _buttonH * 0.55;
-private _hitUp = UNIT * 0.1;
-private _hitDown = UNIT * 0.1;
+private _iconH = _buttonH * 0.6;
+
+// The hit area of an arrow: its button and two pixels on every side (the rule of fnc_uiButton).
+private _hitX = pixelW * 2;
+private _hitY = pixelH * 2;
 private _buttonColor = _theme getOrDefault ["button", [1, 1, 1, 0.07]];
 private _hoverColor = _theme getOrDefault ["buttonHover", [1, 1, 1, 0.16]];
 private _hits = [];
 
-// Each arrow: [step, where its half starts, where its button stands, whether it can turn, the tooltip, the search's mark, where the
-// drag's zone starts].
+// Each arrow: [step, where its button stands, whether it can turn, the tooltip, the search's mark, where the drag's zone starts].
 {
-    _x params ["_step", "_halfX", "_buttonX", "_enabled", "_tip", "_mark", "_zoneX"];
+    _x params ["_step", "_buttonX", "_enabled", "_tip", "_mark", "_zoneX"];
 
     private _buttonRect = [_buttonX, _barTop + _inset, _buttonW, _buttonH];
-    private _ink = +([_muted, _text2] select _enabled);
 
-    // A surface of its own, dimmer when there is no page that way; lit by a second one that fades in under the mouse.
+    // On the last page the arrow back is the way out: lit, with the accent on its icon.
+    private _emphasis = _last && {_step < 0};
+    private _ink = +([[_muted, _text2] select _enabled, _accent] select _emphasis);
+
+    // A surface of its own, dimmer when there is no page that way, brighter for the emphasised arrow; lit by a second one that fades
+    // in under the mouse.
     private _surface = +_buttonColor;
+
+    if (_emphasis) then {
+        _surface = +_hoverColor;
+    };
 
     if (!_enabled) then {
         _ink set [3, (_ink param [3, 1]) * 0.4];
@@ -250,7 +260,7 @@ private _hits = [];
         ] call FUNC(uiLabel));
     };
 
-    _hits pushBack [_step, _halfX, _enabled, _tip, _light];
+    _hits pushBack [_step, _buttonRect, _enabled, _tip, _light];
 
     if (_register) then {
         _areas pushBack createHashMapFromArray [
@@ -258,65 +268,20 @@ private _hits = [];
         ];
     };
 } forEach [
-    [-1, _left, _left + SQUARE(_inset), _page > 0, LLSTRING(Page_Prev), _before, _left],
-    [1, _left + _halfW, _left + _barW - SQUARE(_inset) - _buttonW, _page < _pages - 1, LLSTRING(Page_Next), _after, _left + _barW * (1 - PAGE_ZONE)]
+    [-1, _left + SQUARE(_inset), _page > 0, LLSTRING(Page_Prev), _before, _left],
+    [1, _left + _barW - SQUARE(_inset) - _buttonW, _page < _pages - 1, LLSTRING(Page_Next), _after, _left + _barW * (1 - PAGE_ZONE)]
 ];
 
-// ----- The note on the last page -----
-if (_note) then {
-    private _freeRows = _rowTo - _freeFrom;
-    private _noteLeft = _left;
-    private _noteWidth = _barW;
-    private _noteTop = _top + ((_grid get "rowY") select _freeFrom);
-    private _noteHeight = (_freeRows min 2) * _cellH - pixelH;
-
-    private _noteText = if (_others <= 0) then {
-        LLSTRING(Page_Last_None)
-    } else {
-        format [[LLSTRING(Page_Last), LLSTRING(Page_Last_One)] select (_others == 1), _others]
-    };
-
-    private _noteSize = UNIT * 0.5;
-    private _lineH = TEXT_MID * _noteSize * 2;
-    private _firstH = UNIT * 1;
-    private _firstW = [LLSTRING(Page_First), "", _firstH, UNIT * 0.46, _theme] call FUNC(buttonWidth);
-    private _padNote = SQUARE(UNIT * 0.5);
-
-    // One free row: the words on the left, the button on the right. More: the words, and the button under them, in the middle.
-    private _textRect = [];
-    private _buttonRectFirst = [];
-
-    if (_freeRows < 2) then {
-        _buttonRectFirst = [_noteLeft + _noteWidth - _padNote - _firstW, _noteTop + (_noteHeight - _firstH) / 2, _firstW, _firstH];
-        _textRect = [_noteLeft + _padNote, _noteTop + _noteHeight / 2 - _lineH / 2, _noteWidth - _padNote * 3 - _firstW, _lineH];
-    } else {
-        private _gap = UNIT * 0.25;
-        private _block = _lineH + _gap + _firstH;
-        private _blockTop = _noteTop + (_noteHeight - _block) / 2;
-
-        _textRect = [_noteLeft + _padNote, _blockTop, _noteWidth - _padNote * 2, _lineH];
-        _buttonRectFirst = [_noteLeft + (_noteWidth - _firstW) / 2, _blockTop + _lineH + _gap, _firstW, _firstH];
-    };
-
-    _controls pushBack ([
-        _display, _parent, _textRect, [_noteText, _textRect select 2, _font, _noteSize] call FUNC(fitText), _noteSize, _text2, _font,
-        [2, 0] select (_freeRows < 2)
-    ] call FUNC(uiLabel));
-
-    _controls append ([
-        _display, _parent, _buttonRectFirst, format ["pagefirst|%1|%2", _gridIndex, GVAR(buildCount)], LLSTRING(Page_First), "", _theme,
-        _fnc_first, false, UNIT * 0.46, true, [SQUARE(UNIT * 0.1), UNIT * 0.1]
-    ] call FUNC(uiButton));
-};
-
 // ----- The hit areas -----
-// The two halves last, so nothing lies over them. Under the mouse the light of the arrow's button fades in and out again; the
-// whole half is the hit area, a little taller than the bar, though only the button shows the light.
+// Last, so nothing lies over them. Under the mouse the light of the arrow's button fades in and out again. The hit area of an arrow is
+// its button and two pixels around it; the words get one as soon as there is a page before (a click on them goes to the first).
 {
-    _x params ["_step", "_halfX", "_enabled", "_tip", "_light"];
+    _x params ["_step", "_buttonRect", "_enabled", "_tip", "_light"];
+
+    _buttonRect params ["_hitLeft", "_hitTop", "_hitW", "_hitH"];
 
     private _hit = [
-        _display, "EINV_Hitbox", _parent, [_halfX, _barTop - _hitUp, _halfW, _barH + _hitUp + _hitDown]
+        _display, "EINV_Hitbox", _parent, [_hitLeft - _hitX, _hitTop - _hitY, _hitW + _hitX * 2, _hitH + _hitY * 2]
     ] call FUNC(uiCreate);
 
     _controls pushBack _hit;
@@ -354,6 +319,36 @@ if (_note) then {
         [_ctrl getVariable [QGVAR(code), {}], [1, _ctrl getVariable [QGVAR(id), ""]]] call FUNC(later);
     }];
 } forEach _hits;
+
+if (_page > 0) then {
+    private _words = [_display, "EINV_Hitbox", _parent, [_labelRect select 0, _barTop, _labelW, _barH]] call FUNC(uiCreate);
+
+    _controls pushBack _words;
+
+    _words setVariable [QGVAR(id), format ["pagefirst|%1|%2", _gridIndex, GVAR(buildCount)]];
+    _words setVariable [QGVAR(code), _fnc_first];
+    _words setVariable [QGVAR(label), _labelCtrl];
+    _words setVariable [QGVAR(ink), _labelInk];
+    _words ctrlSetTooltip LLSTRING(Page_First);
+
+    _words ctrlAddEventHandler ["MouseEnter", {
+        params ["_ctrl"];
+
+        (_ctrl getVariable [QGVAR(label), controlNull]) ctrlSetTextColor (GVAR(theme) getOrDefault ["text", [1, 1, 1, 1]]);
+    }];
+
+    _words ctrlAddEventHandler ["MouseExit", {
+        params ["_ctrl"];
+
+        (_ctrl getVariable [QGVAR(label), controlNull]) ctrlSetTextColor (_ctrl getVariable [QGVAR(ink), [1, 1, 1, 1]]);
+    }];
+
+    _words ctrlAddEventHandler ["ButtonClick", {
+        params ["_ctrl"];
+
+        [_ctrl getVariable [QGVAR(code), {}], [1, _ctrl getVariable [QGVAR(id), ""]]] call FUNC(later);
+    }];
+};
 
 if (_register) then {
     uiNamespace setVariable [QGVAR(pageAreas), _areas];

@@ -3,7 +3,8 @@
 /*
  * Author: Miss Heda
  * How many tiles lie on each page of a paged compartment, and - while the search field holds something - how many of
- * them match it (fnc_matchesFilter, a tile not searched yet never does). Read from the grid's tiles, all of which it
+ * them match it (fnc_matchesFilter, a tile not searched yet never does) and the category chosen at the box's side
+ * (fnc_boxGroup, fnc_matchesGroup). Read from the grid's tiles, all of which it
  * keeps whatever page is turned to (fnc_drawTiles), so the pager can say what lies on the pages not shown: the bar's text
  * and the marks on its arrows (fnc_drawPageBar). One name is matched once per class.
  *
@@ -24,7 +25,8 @@ params [["_grid", createHashMap, [createHashMap]]];
 private _ranges = _grid getOrDefault ["pageRanges", []];
 private _tiles = _ranges apply {0};
 private _matches = _ranges apply {0};
-private _search = GVAR(filter) isNotEqualTo "";
+private _group = [_grid getOrDefault ["holder", _grid getOrDefault ["container", objNull]]] call FUNC(boxGroup);
+private _search = GVAR(filter) isNotEqualTo "" || {_group isNotEqualTo ""};
 private _byClass = createHashMap;
 
 {
@@ -40,7 +42,7 @@ private _byClass = createHashMap;
         private _match = _byClass getOrDefault [_class, 2];
 
         if (_match isEqualTo 2) then {
-            _match = [_class] call FUNC(matchesFilter);
+            _match = ([_class] call FUNC(matchesFilter)) && {[_class, _group] call FUNC(matchesGroup)};
             _byClass set [_class, _match];
         };
 

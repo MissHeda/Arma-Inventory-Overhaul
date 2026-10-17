@@ -350,6 +350,11 @@ private _fnc_light = {
 
     if (isNull _background || {_color isEqualTo []}) exitWith {};
 
+    // A tile that waits in the hands' queue keeps its tint when the light goes (fnc_queueColor).
+    if ((_tile getOrDefault ["queued", 0]) > 0) then {
+        _color = [_color] call FUNC(queueColor);
+    };
+
     if (_on) then {
         _color = +_color;
         _color set [3, ((_color select 3) + HOVER_ALPHA) min 1];

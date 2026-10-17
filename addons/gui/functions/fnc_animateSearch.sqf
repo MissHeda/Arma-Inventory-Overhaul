@@ -3,11 +3,14 @@
 /*
  * Author: Miss Heda
  * Searching, every frame: the item at the head of the queue (fnc_markHidden) is searched for its time -
- * longer for bigger ones - while its ring fills and the glass goes round on its tile (fnc_showSearch),
- * and a rummaging sound plays now and then. Once its time is up it is known (fnc_learn), its tile is
- * drawn anew in place without its "?" (fnc_revealTile, fnc_revealFx), and the next one is searched. The
+ * longer for bigger ones - and a rummaging sound plays now and then. Once its time is up it is known (fnc_learn), its tile is
+ * drawn anew in place without its hatching (fnc_revealTile, fnc_revealFx), and the next one is searched. The
  * window is only built again when the section's caption line has to change with it (its first item
  * found brings Take all) - a build per item made a big crate or vehicle flicker while it was searched.
+ *
+ * What is searched is told only in the caption line of its box (fnc_updateStatus: a ring that goes round, the time that
+ * is left, a button that stops it) - the tile has no ring or glass of its own. A box whose search the player stopped
+ * (GVAR(searchPaused)) is passed over: the head is the first item of a box that is not stopped.
  *
  * The rummaging is the sound of what is searched - cloth on a body, things shifting in a crate, a hand on the
  * ground (fnc_playSound "search" for the container) -, heard by players near the looter as well; the speaker
@@ -42,7 +45,15 @@ if (GVAR(searchStarted) >= 0 && {_gap > SEARCH_PAUSE}) then {
 
 if (GVAR(searchQueue) isEqualTo []) exitWith {};
 
-private _head = GVAR(searchQueue) select 0;
+private _headIndex = GVAR(searchQueue) findIf {!((_x select 0) in GVAR(searchPaused))};
+
+// Every box that is left was stopped: nothing runs.
+if (_headIndex < 0) exitWith {
+    GVAR(searchStarted) = -1;
+    GVAR(searchHead) = [];
+};
+
+private _head = GVAR(searchQueue) select _headIndex;
 
 if (_head isNotEqualTo GVAR(searchHead) || {GVAR(searchStarted) < 0}) then {
     GVAR(searchHead) = _head;
@@ -85,29 +96,3 @@ if (_now >= GVAR(searchSoundAt)) then {
     GVAR(searchSoundAt) = _now + SEARCH_SOUND_GAP + random SEARCH_SOUND_GAP;
     ["search", "", _head select 0, true] call FUNC(playSound);
 };
-
-private _fx = uiNamespace getVariable [QGVAR(searchFx), []];
-_fx params [["_arc", controlNull], ["_glass", controlNull], ["_center", [0, 0]], ["_size", 0], ["_frame", 1]];
-
-if (isNull _arc) exitWith {};
-
-// The ring: as far round as the time has run.
-private _step = ((ceil (_progress * SEARCH_FRAMES)) max 1) min SEARCH_FRAMES;
-
-if (_step != _frame) then {
-    _arc ctrlSetText SEARCH_RING(_step);
-    _fx set [4, _step];
-};
-
-// The glass: round and round in a small circle.
-_center params ["_centerX", "_centerY"];
-
-private _angle = (_now * SEARCH_GLASS_SPEED) mod 360;
-private _glassSize = _size * SEARCH_GLASS_SIZE;
-private _orbit = _size * SEARCH_GLASS_ORBIT;
-
-_glass ctrlSetPosition [
-    _centerX + (_orbit * cos _angle - _glassSize / 2) * pixelW,
-    _centerY + (_orbit * sin _angle - _glassSize / 2) * pixelH
-];
-_glass ctrlCommit 0;

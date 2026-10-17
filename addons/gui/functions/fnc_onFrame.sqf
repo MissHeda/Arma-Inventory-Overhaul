@@ -42,7 +42,8 @@
  * closes the window (fnc_checkTaken).
  *
  * The hands' queue (fnc_queueMoves) runs every frame while it holds something (fnc_animateQueue), not while another
- * window lies over this one.
+ * window lies over this one; the activity chips of the boxes' caption lines move with it and with the search
+ * (fnc_animateStatus).
  *
  * The sound of each answer is played as it is finished (fnc_afterAction, fnc_feelAnswer).
  *
@@ -237,7 +238,7 @@ if (_covered) exitWith {
     };
 };
 
-// The hands' queue: the first action's ring fills, and it is sent when the time is up (fnc_animateQueue). Not under
+// The hands' queue: the first action is sent when its time is up (fnc_animateQueue). Not under
 // another window, and the time it stood still does not count.
 if (GVAR(handQueue) isNotEqualTo []) then {
     NOTE_PHASE("queue");
@@ -455,7 +456,7 @@ if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
     _tip ctrlCommit 0;
 };
 
-// Searching, every frame: the ring fills and the glass goes round, and the item shows once its time is
+// Searching, every frame: the item shows once its time is
 // up (fnc_animateSearch). Not while something is held: a rebuild would pull it from under the mouse.
 NOTE_PHASE("search");
 
@@ -478,6 +479,12 @@ if (GVAR(press) isEqualTo []) then {
         NOTE_PHASE("warm");
         [_display] call FUNC(warmTargets);
     };
+};
+
+// The chips in the boxes' caption lines: the ring goes round, the count and the time are written when they changed
+// (fnc_animateStatus).
+if (GVAR(statusLive)) then {
+    [_display, _now] call FUNC(animateStatus);
 };
 
 // The hover above may have lit a slot with a ring made on the display: the menu goes over it in this frame.

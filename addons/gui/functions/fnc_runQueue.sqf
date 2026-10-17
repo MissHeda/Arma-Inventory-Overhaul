@@ -6,9 +6,8 @@
  * as a move of the window always is (fnc_sendMoves, with the option "now" so it is not queued again) - the
  * transaction, the authority, the answer and its hint are exactly those of a move that was never queued. When
  * nothing is sent (the move is refused here: the item is gone, nowhere to put it, a lock set meanwhile, and the
- * hint says why) its tile is free again, and the next entry starts either way. fnc_drawPending outlines the
- * move now in flight and brings the circles up to date (fnc_drawQueue): the others keep theirs and only their
- * numbers change, the next one gets the ring that fills.
+ * hint says why) its tile is free again, and the next entry starts either way. Its box's count goes up by one
+ * (fnc_boxStep). fnc_drawPending outlines the move now in flight and brings the marks up to date (fnc_drawQueue).
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -31,6 +30,7 @@ if (GVAR(handQueue) isEqualTo []) exitWith {false};
 private _head = GVAR(handQueue) deleteAt 0;
 
 [[_head], false] call FUNC(queueIndex);
+[_head, true] call FUNC(boxStep);
 
 // The tiles fnc_drawQueue marked for it (found anew only when it has not been drawn yet).
 private _tiles = _head getOrDefault ["tiles", []];
@@ -41,12 +41,13 @@ if (_tiles isEqualTo []) then {
 
 GVAR(handStarted) = -1;
 
+// On its way now: no longer a waiting tile (its own colour back), but faded as any move in flight.
 {
     _x params ["", "_tile"];
-    _tile deleteAt "queued";
+
+    [_tile, true] call FUNC(unmarkQueued);
 } forEach _tiles;
 
-// Gone with the circle: the ring has run its course.
 {ctrlDelete _x} forEach (_head getOrDefault ["fx", []]);
 
 private _sent = [[_head get "move"], _head get "options"] call FUNC(sendMoves);
@@ -56,12 +57,7 @@ if (!_sent) then {
     {
         _x params ["", "_tile"];
 
-        _tile set ["pending", false];
-
-        {
-            _x ctrlSetFade 0;
-            _x ctrlCommit 0;
-        } forEach (_tile getOrDefault ["controls", []]);
+        [_tile] call FUNC(unmarkQueued);
     } forEach _tiles;
 };
 

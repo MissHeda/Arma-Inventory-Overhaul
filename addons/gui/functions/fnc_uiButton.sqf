@@ -32,9 +32,11 @@
  * 8: Disabled <BOOL> (default: false)
  * 9: Text height - the label's size, -1 for a share of the button's height <NUMBER> (default: -1)
  * 10: Centred - the label and an icon beside it laid out as described above <BOOL> (default: false)
- * 11: How far the hit area reaches beyond the surface, [x, y] either side or [left, top, right, bottom], in the
- *     position's own units: a small button is hard to hit, and the room around it is empty. The surface and the
- *     label stay as drawn; the hit area is the only thing that grows <ARRAY> (default: [])
+ * 11: How far the hit area would reach beyond the surface, [x, y] either side or [left, top, right, bottom]. Kept
+ *     so that the old callers work, but the rule is the same for every button now: the hit area is the drawn
+ *     button and 2 pixels on each side, so that one who just misses the button still hits it -
+ *     and no more, so a button does not take the clicks of what lies beside it. A larger request is cut to that;
+ *     a smaller one is raised to it <ARRAY> (default: [])
  *
  * Return Value:
  * The controls, the hit area last <ARRAY>
@@ -136,11 +138,12 @@ if (_centred) then {
     };
 };
 
-// The hit area, wider than the surface where the caller asks for it.
-_hitPad params [["_padLeft", 0], ["_padTop", 0], ["_padRight", -1], ["_padBottom", -1]];
-
-if (_padRight < 0) then {_padRight = _padLeft};
-if (_padBottom < 0) then {_padBottom = _padTop};
+// The hit area: the surface and two pixels on every side, whatever the caller asked for (argument 11 is capped to
+// that - the section captions and the kit windows used to ask for a whole cell).
+private _padLeft = pixelW * 2;
+private _padRight = _padLeft;
+private _padTop = pixelH * 2;
+private _padBottom = _padTop;
 
 private _hit = [
     _display, "EINV_Hitbox", _parent,

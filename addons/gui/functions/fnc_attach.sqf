@@ -86,6 +86,11 @@ if (!isNil QEFUNC(compat_efak,onWindowOpen)) then {
 GVAR(filter) = "";
 GVAR(filterFocus) = false;
 
+// Nothing is chosen at the side of a box, no box has its search stopped, and no caption line holds a chip yet.
+GVAR(groupFilters) = [];
+GVAR(searchPaused) = [];
+GVAR(statusLive) = false;
+
 // The inspect card went with the window it was opened in, however that closed - only where it stood is
 // kept for the next one (GVAR(inspectPos)).
 GVAR(inspect) = [];
@@ -122,6 +127,7 @@ GVAR(handStarted) = -1;
 GVAR(queueDirty) = false;
 GVAR(queueFrom) = 0;
 GVAR(handWaiting) = createHashMap;
+GVAR(handBoxes) = [];
 GVAR(roomCache) = [];
 GVAR(quickHeldKey) = -1;
 

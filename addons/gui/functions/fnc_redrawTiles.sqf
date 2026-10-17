@@ -18,8 +18,8 @@
  * Only where it is certain to look right: the compartments (and the rows of an open grid, the number of
  * overflow tiles) must be the ones drawn, the Take all or Put all in button must stay what it is, the
  * ground pile must still hold something, and the new weight must fit the caption's label - or there must
- * be none when there was none; the caption then changes in place. The glass and ring of the item
- * being searched go and come back with the queue (fnc_showSearch), wherever it lies.
+ * be none when there was none; the caption then changes in place. The chips of the caption lines
+ * (what a box is searching or moving, fnc_updateStatus) are made true again after it.
  * Anything else - a pile that vanished, a rule changed - answers false before a single control is
  * touched, and the caller builds the window anew.
  *
@@ -300,13 +300,11 @@ GVAR(searchQueue) = [GVAR(searchQueue), [], {
     (_containers find (_x select 0)) * 1e7 + ((_x param [5, 0]) + 1) * 100000 + (_x select 2) * 100 + (_x select 3)
 }, "ASCEND"] call BIS_fnc_sortBy;
 
-[_display] call FUNC(showSearch);
-
 // What lay over the tiles that went: the moves under way, the selection, the search field's fading.
 call FUNC(drawPending);
 [] call FUNC(drawSelection);
 
-if (GVAR(filter) isNotEqualTo "") then {
+if (GVAR(filter) isNotEqualTo "" || {GVAR(groupFilters) isNotEqualTo []}) then {
     [] call FUNC(applyFilter);
 };
 

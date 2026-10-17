@@ -44,6 +44,8 @@
  * fits moves, the rest stays and the hint says how many), one after the other into a kit, or onto the
  * ground (fnc_quickMoveGroup).
  *
+ * Nothing a drag sends waits for the hands (GVAR(instantFrame), fnc_queueTime).
+ *
  * Every move is a transaction now (fnc_sendMoves): nothing shows in its new place before it got there.
  * A tile that went on its way stays faded where it lay and cannot be lifted again, the cells it goes to
  * are outlined (fnc_drawPending); where it landed lights up once the answer is finished (fnc_onFrame,
@@ -137,7 +139,7 @@ uiNamespace setVariable [QGVAR(hoverHold), []];
     } forEach ((_lifted param [_x select 1, createHashMap]) getOrDefault ["controls", []]);
 } forEach _group;
 
-if (GVAR(filter) isNotEqualTo "") then {
+if (GVAR(filter) isNotEqualTo "" || {GVAR(groupFilters) isNotEqualTo []}) then {
     [] call FUNC(applyFilter);
 };
 
@@ -176,6 +178,10 @@ if (_kind isEqualTo "hotbar") exitWith {
         [_targetIndex, _entry get "class", [], true] call EFUNC(hotbar,bind);
     };
 };
+
+// What a drag sends goes out at once, never into the hands' queue (fnc_queueTime asks this frame number): dropping is
+// instant, only the quick move, Take all and the keys wait.
+GVAR(instantFrame) = diag_frameNo;
 
 // Whether it was asked for (fnc_sendMoves) - a refusal before that says why itself.
 private _sent = call {

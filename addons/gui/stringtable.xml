@@ -79,6 +79,30 @@
         <Key ID="STR_einv_gui_Ground_With">
             <English>Ground - %1</English>
         </Key>
+        <Key ID="STR_einv_gui_Group_All">
+            <English>All</English>
+        </Key>
+        <Key ID="STR_einv_gui_Group_Ammo">
+            <English>Ammunition</English>
+        </Key>
+        <Key ID="STR_einv_gui_Group_Food">
+            <English>Food and drink</English>
+        </Key>
+        <Key ID="STR_einv_gui_Group_Gear">
+            <English>Gear and clothing</English>
+        </Key>
+        <Key ID="STR_einv_gui_Group_Medical">
+            <English>Medical</English>
+        </Key>
+        <Key ID="STR_einv_gui_Group_Misc">
+            <English>Other</English>
+        </Key>
+        <Key ID="STR_einv_gui_Group_Tool">
+            <English>Tools and electronics</English>
+        </Key>
+        <Key ID="STR_einv_gui_Group_Weapon">
+            <English>Weapons</English>
+        </Key>
         <Key ID="STR_einv_gui_Hint_All">
             <English>Middle click: all</English>
         </Key>
@@ -331,6 +355,12 @@
         <Key ID="STR_einv_gui_Option_Unconscious">
             <English>Only the unconscious</English>
         </Key>
+        <Key ID="STR_einv_gui_Page_Earlier">
+            <English>%1 items on earlier pages</English>
+        </Key>
+        <Key ID="STR_einv_gui_Page_Earlier_One">
+            <English>%1 item on an earlier page</English>
+        </Key>
         <Key ID="STR_einv_gui_Page_First">
             <English>First page</English>
         </Key>
@@ -343,14 +373,8 @@
         <Key ID="STR_einv_gui_Page_Label">
             <English>Page %1 / %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Last">
-            <English>Last page - the earlier pages hold %1 items</English>
-        </Key>
         <Key ID="STR_einv_gui_Page_Last_None">
             <English>Last page</English>
-        </Key>
-        <Key ID="STR_einv_gui_Page_Last_One">
-            <English>Last page - the earlier pages hold %1 item</English>
         </Key>
         <Key ID="STR_einv_gui_Page_Next">
             <English>Next page</English>
@@ -440,19 +464,42 @@
             <English>Time to drop an item</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandDrop_Desc">
-            <English>Seconds the hands are busy dropping one\nitem onto the ground (the drop key, a drag\nout of the window, Drop in the menu).\nEvery item waits its turn with a circle\non its tile: one runs at a time, the\nnext starts when it is done, and a click\non a circle cancels it. Closing the\nwindow cancels what still waits.\n\n0 drops at once, with no circle.</English>
+            <English>Seconds the hands are busy dropping one
+item onto the ground (the drop key and
+Drop in the menu). One runs at a time,
+the next starts when it is done; the
+box it comes from counts them. Closing
+the window cancels what still waits.
+
+0 drops at once, with no wait.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandEquip">
             <English>Time to put on or take off</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandEquip_Desc">
-            <English>Seconds the hands are busy putting one\nitem on or taking it off: a drag onto a\nslot, a double click on the ground,\nEquip in the menu, Ctrl+click on a slot.\nThe circle lies on the tile or the slot;\na click on it cancels the action.\nClosing the window cancels what still\nwaits.\n\n0 does it at once, with no circle.</English>
+            <English>Seconds the hands are busy putting one
+item on or taking it off, for what the
+switches below let wait (a drag never
+does): a double click on the ground,
+Equip in the menu, Ctrl+click on a slot.
+Closing the window cancels what still
+waits.
+
+0 does it at once, with no wait.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandMove">
             <English>Time to move to another container</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandMove_Desc">
-            <English>Seconds the hands are busy moving one\nitem to a different container or holder:\na drag between containers, the quick\nmove, Take all and Put all in - one\ncircle per item, one after another. A\nclick on a circle cancels it.\nRearranging within a container, turning\nand splitting a stack take no time.\n\n0 moves at once, with no circle.</English>
+            <English>Seconds the hands are busy moving one
+item to a different container: the quick
+move, Take all and Put all in, one item
+after another, counted in the caption
+line of the box. A drag never waits.
+Rearranging within a container, turning
+and splitting a stack take no time.
+
+0 moves at once, with no wait.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_LootSide">
             <English>Where other storage opens</English>
@@ -588,6 +635,54 @@ loot, not for your own gear.</English>
         <Key ID="STR_einv_gui_Setting_TileNames_Desc">
             <English>The item's short name in the top\nright corner of every tile. Off, the\ntiles show the picture alone - the\nname still shows at the mouse.\n\nThe Arsenal's panel follows it.</English>
         </Key>
+        <Key ID="STR_einv_gui_Setting_WaitDrop">
+            <English>Dropping waits</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_WaitDrop_Desc">
+            <English>Whether the drop key and Drop in the
+menu take the hands' time (time to drop
+an item), one item after another. A drag
+out of the window never waits.
+
+Off drops at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_WaitEquip">
+            <English>Equipping other items waits</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_WaitEquip_Desc">
+            <English>Whether putting on and taking off
+anything else - goggles, night vision,
+binoculars, a map and the like, the parts
+of a weapon - takes the hands' time (time
+to put on or take off). A drag never
+waits.
+
+Off does it at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_WaitMove">
+            <English>Quick move and Take all wait</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_WaitMove_Desc">
+            <English>Whether the quick move key, a double
+click, Take all and Put all in take the
+hands' time (time to move to another
+container). The caption line of the box
+says how far it is and has a stop
+button. A drag never waits.
+
+Off moves them at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_WaitWorn">
+            <English>Uniform, vest, backpack and helmet wait</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_WaitWorn_Desc">
+            <English>Whether putting on and taking off a
+uniform, vest, backpack or headgear takes
+the hands' time (time to put on or take
+off). A drag never waits.
+
+Off does it at once.</English>
+        </Key>
         <Key ID="STR_einv_gui_Slot_Backpack">
             <English>Backpack</English>
         </Key>
@@ -684,14 +779,8 @@ loot, not for your own gear.</English>
         <Key ID="STR_einv_gui_Sound_Magazines">
             <English>Magazines</English>
         </Key>
-        <Key ID="STR_einv_gui_Sound_Master">
-            <English>Master volume</English>
-        </Key>
         <Key ID="STR_einv_gui_Sound_Moves">
             <English>Moving items</English>
-        </Key>
-        <Key ID="STR_einv_gui_Sound_MuteAll">
-            <English>Mute all</English>
         </Key>
         <Key ID="STR_einv_gui_Sound_Other">
             <English>Other</English>
@@ -705,11 +794,41 @@ loot, not for your own gear.</English>
         <Key ID="STR_einv_gui_Sound_Tooltip">
             <English>Sound volumes (right click: mute or unmute all)</English>
         </Key>
-        <Key ID="STR_einv_gui_Sound_UnmuteAll">
-            <English>Unmute all</English>
-        </Key>
         <Key ID="STR_einv_gui_Stat_Weight">
             <English>Weight</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_Drop">
+            <English>Dropping items %1 / %2</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_Gear">
+            <English>Changing gear %1 / %2</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_Grab">
+            <English>Grabbing items %1 / %2</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_Move">
+            <English>Moving items %1 / %2</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_Put">
+            <English>Putting items away %1 / %2</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_Resume">
+            <English>Search</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_ResumeSearch">
+            <English>Search this box again</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_Search">
+            <English>Searching %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_StopHands">
+            <English>Cancel what still waits</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_StopSearch">
+            <English>Stop searching this box</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_Stopped">
+            <English>Stopped %1</English>
         </Key>
         <Key ID="STR_einv_gui_Storage_Empty">
             <English>No uniform, vest or backpack</English>

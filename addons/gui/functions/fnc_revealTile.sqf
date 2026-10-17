@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * An item was just found (fnc_animateSearch): its tile is drawn anew where it lies, without its "?", and
+ * An item was just found (fnc_animateSearch): its tile is drawn anew where it lies, without its hatching, and
  * the search moves on to the next item - without building the window again. A build for every item
  * found made a crate or vehicle full of loot flicker while it was searched (Mia, 0.2.3): every control
  * was made anew, the columns stood at the top for a frame until their scroll came back, and the camera
@@ -37,7 +37,7 @@ if (isNull _display) exitWith {false};
 private _found = _item call FUNC(findTile);
 
 // Not on the window any more (folded away meanwhile): nothing to draw, the next item comes up. A tile on a page of a tall
-// compartment that is not turned to has no controls: it only stops being a "?", for when its page comes.
+// compartment that is not turned to has no controls: it only stops being hatched, for when its page comes.
 if (_found isEqualTo []) exitWith {
     _item params ["_itemContainer", "_itemKey", "_itemRow", "_itemCol", "", ["_itemBlock", 0]];
 
@@ -55,7 +55,7 @@ if (_found isEqualTo []) exitWith {
     } forEach (uiNamespace getVariable [QGVAR(grids), []]);
 
     GVAR(searchQueue) = GVAR(searchQueue) select {_x isNotEqualTo _item};
-    [_display] call FUNC(showSearch);
+    [_display] call FUNC(updateStatus);
     true
 };
 
@@ -76,16 +76,12 @@ private _tileIndex = _tiles find _tile;
 
 if (_gridIndex < 0 || {_tileIndex < 0}) exitWith {false};
 
-// The glass and ring of the search lie on the tile: they go first (fnc_showSearch makes the next ones).
-{ctrlDelete _x} forEach ((uiNamespace getVariable [QGVAR(searchFx), []]) param [5, []]);
-uiNamespace setVariable [QGVAR(searchFx), []];
-
-// The "?" tile goes, the found item's tile comes in its place - at the same index of the grid's tiles.
+// The hatched tile goes, the found item's tile comes in its place - at the same index of the grid's tiles.
 {ctrlDelete _x} forEach (_tile getOrDefault ["controls", []]);
 
 {
     _tile deleteAt _x;
-} forEach ["hidden", "mark", "controls", "background", "backgrounds", "rect", "color"];
+} forEach ["hidden", "controls", "background", "backgrounds", "rect", "color"];
 
 [_display, _grid, _tile, GVAR(theme)] call FUNC(createTile);
 
@@ -100,10 +96,10 @@ if (GVAR(hover) isEqualTo ["tile", _gridIndex, _tileIndex]) then {
     GVAR(lastMouse) = [];
 };
 
-if (GVAR(filter) isNotEqualTo "") then {
+if (GVAR(filter) isNotEqualTo "" || {GVAR(groupFilters) isNotEqualTo []}) then {
     [] call FUNC(applyFilter);
 };
 
-[_display] call FUNC(showSearch);
+[_display] call FUNC(updateStatus);
 
 true

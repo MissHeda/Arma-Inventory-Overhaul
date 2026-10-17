@@ -12,7 +12,7 @@
  * 0: "begin" <STRING>
  * 1: Array of:
  *    0: Display <DISPLAY>
- *    1: Which volume: an index of einv_gui_soundGroups, -1 for the master volume <NUMBER>
+ *    1: Which volume: an index of einv_gui_soundGroups <NUMBER>
  *    2: The slider's left end on the screen <NUMBER>
  *    3: Its width <NUMBER>
  *    4: The mouse's x <NUMBER>
@@ -44,11 +44,7 @@ private _fnc_set = {
     if (_place < 0.02) then {_place = 0};
     if (_place > 0.98) then {_place = 1};
 
-    if (_index < 0) then {
-        ["master", _place] call FUNC(soundSet);
-    } else {
-        ["volume", [_index, _place]] call FUNC(soundSet);
-    };
+    ["volume", [_index, _place]] call FUNC(soundSet);
 };
 
 if (_what isEqualTo "move") exitWith {

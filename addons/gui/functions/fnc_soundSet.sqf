@@ -6,18 +6,17 @@
  * (fnc_soundSettle) - or here, at once, when it is not open (a right click on the speaker).
  *
  * A kind of sound at volume 0 is off. Its switch turns it off by setting the volume to 0 and remembering what it
- * was; turned on again it comes back to that volume. Dragging a volume up from 0 turns the kind on. The master
- * volume is over all of them.
+ * was; turned on again it comes back to that volume. Dragging a volume up from 0 turns the kind on. There is no
+ * master volume over them: each kind's volume is the whole of it.
  *
  * Modes:
  *   "volume" - the kind (an index of einv_gui_soundGroups) is set to the volume, 0 to 1
  *   "toggle" - the kind's switch: off sets the volume to 0, on brings it back
- *   "master" - the master volume is set, 0 to 1
  *   "all"    - mutes every kind, or when everything is silent already, brings them all back
  *
  * Arguments:
  * 0: Mode <STRING>
- * 1: Argument - "volume": [index, volume]; "toggle": the index; "master": the volume <ANY>
+ * 1: Argument - "volume": [index, volume]; "toggle": the index <ANY>
  *
  * Return Value:
  * None
@@ -62,12 +61,6 @@ switch (_mode) do {
         };
     };
 
-    case "master": {
-        if !(_argument isEqualType 0) exitWith {};
-
-        GVAR(soundMaster) = (round (((_argument max 0) min 1) * 100)) / 100;
-    };
-
     case "all": {
         private _audible = !([""] call FUNC(soundMuted));
 
@@ -82,10 +75,6 @@ switch (_mode) do {
                 _x set [0, [1, _x select 1] select ((_x select 1) > 0)];
             };
         } forEach _levels;
-
-        if (!_audible && {GVAR(soundMaster) <= 0}) then {
-            GVAR(soundMaster) = 1;
-        };
     };
 };
 

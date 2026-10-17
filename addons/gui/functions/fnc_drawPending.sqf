@@ -8,7 +8,7 @@
  * its new place before it got there.
  *
  * The hands' queue (fnc_queueMoves) is drawn here too (fnc_drawQueue): the tiles of the actions waiting are
- * flagged and faded the same way and the circles made, whether or not a move is in flight.
+ * flagged and faded the same way and the marks made, whether or not a move is in flight.
  *
  * A tile is found by its holder - a grid's "holder", else its container or, for a kit's grid, its
  * layout key - its key and its cell; one that moved meanwhile simply is not marked. Safe to call again
@@ -35,7 +35,7 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
 if (isNull _display) exitWith {};
 
-// The actions waiting for the hands (fnc_queueMoves) have their circles and fading tiles drawn here as well: this
+// The actions waiting for the hands (fnc_queueMoves) have their marks drawn here as well: this
 // is what every build and every redraw of tiles ends with.
 if (count GVAR(inFlight) == 0) exitWith {
     [_display] call FUNC(drawQueue);

@@ -24,6 +24,7 @@ GVAR(steps) = [
 GVAR(topics) = [
     ["looting", [
         "einv_gui_searchTime", "einv_storage_nearbyRange", "einv_gui_handDrop", "einv_gui_handMove", "einv_gui_handEquip",
+        "einv_gui_waitMove", "einv_gui_waitDrop", "einv_gui_waitWorn", "einv_gui_waitEquip",
         "einv_gui_searchBodies", "einv_gui_searchPersons",
         "einv_gui_searchContainers", "einv_gui_searchGround", "einv_gui_soundsWorld"
     ]],

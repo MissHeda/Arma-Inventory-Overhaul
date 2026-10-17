@@ -40,7 +40,7 @@ uiNamespace setVariable [QGVAR(tooltip), [_display] call FUNC(makeTooltip)];
 call FUNC(drawInspect);
 
 // What the search field leaves out fades (fnc_applyFilter).
-if (GVAR(filter) isNotEqualTo "") then {
+if (GVAR(filter) isNotEqualTo "" || {GVAR(groupFilters) isNotEqualTo []}) then {
     [] call FUNC(applyFilter);
 };
 

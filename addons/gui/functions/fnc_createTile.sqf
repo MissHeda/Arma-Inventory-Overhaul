@@ -59,8 +59,7 @@
  * Return Value:
  * None - the entry gets "controls", "background" and "color", "backgrounds" (every surface: a shaped
  * one has several, "background" is the first, and a corner that follows its panel's round corner adds pieces, fnc_uiSurface),
- * "rect" (its box) and "corners" (the corners of its panel it touches, fnc_cornerRadii; [] for none and for a shaped tile) - and
- * "mark", the "?" of a hidden one;
+ * "rect" (its box) and "corners" (the corners of its panel it touches, fnc_cornerRadii; [] for none and for a shaped tile);
  * a magazine's "bar" (its fill bar's controls) and "barRect", and "amount" (the label of its rounds) with
  * "amountShort" (written without the capacity), which a repack in progress draws over
  * (einv_magazines_fnc_drawJob) - and joins the grid's "tiles"
@@ -150,26 +149,11 @@ private _color = if (_hidden) then {
     (_theme getOrDefault ["tileBg", []]) param [_info getOrDefault ["category", 0], [1, 1, 1, 0.075]]
 };
 
-// A plain "?" tile is one label that is its surface as well (its background is the tile's colour, over the same
-// rectangle): one control fewer per item not searched yet. Not under a hatch, which lies between the two.
-private _markSurface = _hidden && {!_shaped} && {!(_theme getOrDefault ["hatch", false])} && {_corners isEqualTo []};
-
 private _backgrounds = if (_shaped) then {
     [
-        _display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _color, "surface", 0, [_grid, _col, _row],
-        !(_theme getOrDefault ["hatch", false])
+        _display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _color, "surface", 0, [_grid, _col, _row], !_hidden
     ] call FUNC(uiShape)
 } else {
-    if (_markSurface) exitWith {
-        private _ctrl = [
-            _display, _parent, [_left, _top, _width, _height], "?", _cellH * 0.55,
-            _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _fontBold, 2
-        ] call FUNC(uiLabel);
-
-        _ctrl ctrlSetBackgroundColor _color;
-        [_ctrl]
-    };
-
     // The corners it touches round (a plain rectangle where it touches none).
     [_display, _parent, [_left, _top, _width, _height], _color, _corners] call FUNC(uiSurface)
 };
@@ -178,48 +162,39 @@ private _background = _backgrounds select 0;
 _controls append _backgrounds;
 
 if (_hidden) then {
-    if (_theme getOrDefault ["hatch", false]) then {
-        // A shaped one hatched run by run - the bridges between its rows are too thin for it.
-        private _hatched = if (_shaped) then {
-            (_backgrounds apply {ctrlPosition _x}) select {(_x select 3) > pixelH * 2}
-        } else {
-            [[_left, _top, _width, _height]]
-        };
+    // Diagonal stripes over the whole footprint, a little stronger than the empty slots' (fnc_uiHatch: pieces of about a
+    // cell, so a wide tile keeps the angle). A shaped one is hatched run by run - the bridges between its rows are too thin
+    // for it. A tile at a round corner of its panel is hatched a little in from that corner (a third of its radius on the
+    // two sides that meet there): a square piece of stripes would stick out over the round edge.
+    private _stripe = +(_theme getOrDefault ["line", [1, 1, 1, 0.07]]);
 
-        {
-            _controls append ([_display, _parent, _x, _theme getOrDefault ["line", [1, 1, 1, 0.07]]] call FUNC(uiHatch));
-        } forEach _hatched;
-    };
+    _stripe set [3, ((_stripe select 3) * 1.8) min 0.2];
 
-    // Its outline, a little lighter than the lines between the cells: a step above an empty cell alone,
-    // tiles of different sizes side by side read as one field with "?"s strewn over it (Mia, 0.2.3 - a
-    // vehicle being searched). A look with tile borders draws its own below.
-    if ((_theme getOrDefault ["tileBorder", []]) isEqualTo []) then {
-        private _edge = +(_theme getOrDefault ["line", [1, 1, 1, 0.09]]);
-        _edge set [3, ((_edge select 3) * 1.8) min 1];
-
-        if (_shaped) then {
-            _controls append ([_display, _parent, [_left, _top], _cellW, _cellH, [_w, _h, _holes], _edge, "frame", 0, [_grid, _col, _row]] call FUNC(uiShape));
-        } else {
-            _controls append ([_display, _parent, [_left, _top, _width, _height], _edge, _corners, 1] call FUNC(uiOutline));
-        };
-    };
-
-    // The "?" - it gives way to the glass while the item is searched (fnc_showSearch takes its text away). The
-    // surface itself where it is that label already.
-    private _mark = if (_markSurface) then {
-        _background
+    private _hatched = if (_shaped) then {
+        (_backgrounds apply {ctrlPosition _x}) select {(_x select 3) > pixelH * 2}
     } else {
-        private _label = [
-            _display, _parent, [_left, _top, _width, _height], "?", _cellH * 0.55,
-            _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _fontBold, 2
-        ] call FUNC(uiLabel);
+        private _box = [_left, _top, _width, _height];
 
-        _controls pushBack _label;
-        _label
+        if (_corners isNotEqualTo []) then {
+            _corners params ["_radius", "_mask"];
+            _mask params ["_topLeft", "_topRight", "_bottomLeft", "_bottomRight"];
+
+            private _inX = ceil (_radius * 0.3) * pixelW;
+            private _inY = ceil (_radius * 0.3) * pixelH;
+            private _x0 = _left + ([0, _inX] select (_topLeft || {_bottomLeft}));
+            private _y0 = _top + ([0, _inY] select (_topLeft || {_topRight}));
+            private _x1 = _left + _width - ([0, _inX] select (_topRight || {_bottomRight}));
+            private _y1 = _top + _height - ([0, _inY] select (_bottomLeft || {_bottomRight}));
+
+            _box = [_x0, _y0, (_x1 - _x0) max pixelW, (_y1 - _y0) max pixelH];
+        };
+
+        [_box]
     };
 
-    _entry set ["mark", _mark];
+    {
+        _controls append ([_display, _parent, _x, _stripe] call FUNC(uiHatch));
+    } forEach _hatched;
 } else {
     private _turned = _entry getOrDefault ["rotated", false];
 
@@ -333,6 +308,27 @@ if (_hidden) then {
     private _amountFont = [_fontBold, _font] select (_style isEqualTo "text");
     private _countBottom = _bottom - _padY * 0.3;
 
+    // A tile at a round corner of its panel (fnc_cornerRadii) keeps what lies in its bottom corners in from that corner:
+    // a box's square corner would stick out over the arc. A corner point inside the arc is at least 0.3 of the radius in
+    // from both edges, so the box ends there, less what its own padding gives already. Only with nothing under the box
+    // (the ammo bar lifts it).
+    private _roundBL = false;
+    private _roundBR = false;
+    private _cornerX = 0;
+    private _cornerY = 0;
+
+    if (_corners isNotEqualTo [] && {_bottom == _top + _height}) then {
+        _corners params ["_cornerRadius", "_cornerMask"];
+
+        _roundBL = _cornerMask select 2;
+        _roundBR = _cornerMask select 3;
+        _cornerX = ((ceil (_cornerRadius * 0.3)) * pixelW - _padX) max 0;
+        _cornerY = ((ceil (_cornerRadius * 0.3)) * pixelH - _padY * 0.3) max 0;
+    };
+
+    private _stackX = [0, _cornerX] select _roundBR;
+    private _stackY = [0, _cornerY] select _roundBR;
+
     // What stacks says how many lie here of how many one tile takes, "3/10", on a small flat box in the
     // bottom right corner - Arma's way, as Wardogs and Hotzone show it: one sees at once that it stacks,
     // also with one alone. What does not stack has nothing in that corner. The same box as a hotbar slot's
@@ -347,7 +343,7 @@ if (_hidden) then {
         // Only measured: the label lies on exactly the box and draws it as its own background - one control
         // for the box and its words instead of two, on every stack of the window.
         ([
-            _display, _parent, _stackText, _fontBold, _textH, _left + _width - _padX, _countBottom, _innerW, _theme, true, false, true
+            _display, _parent, _stackText, _fontBold, _textH, _left + _width - _padX - _stackX, _countBottom - _stackY, _innerW, _theme, true, false, true
         ] call FUNC(drawCountBackdrop)) params ["_boxControls", "_boxRect", ["_boxColor", []]];
 
         _controls append _boxControls;
@@ -382,6 +378,10 @@ if (_hidden) then {
 
     private _amount = format ["%1/%2", _ammo, _capacity];
     private _leftSide = _stackW > 0;
+
+    // The same for the rounds' box, in the corner it stands in.
+    private _roundX = [[0, _cornerX] select _roundBR, [0, _cornerX] select _roundBL] select _leftSide;
+    private _roundY = [[0, _cornerY] select _roundBR, [0, _cornerY] select _roundBL] select _leftSide;
     private _room = [_innerW, (_innerW - _stackW - _padX) max (_innerW * 0.25)] select _leftSide;
 
     // Rounds that do not fit with the capacity show on their own.
@@ -398,8 +398,8 @@ if (_hidden) then {
     switch (_style) do {
         case "pill": {
             private _pillW = (_amountW + SQUARE(_boxH * 0.5)) max SQUARE(_boxH);
-            private _pillX = [_left + _width - _padX - _pillW, _left + _padX] select _leftSide;
-            private _pill = [_pillX, _bottom - _padY * 0.5 - _boxH, _pillW, _boxH];
+            private _pillX = [_left + _width - _padX - _pillW - _roundX, _left + _padX + _roundX] select _leftSide;
+            private _pill = [_pillX, _bottom - _padY * 0.5 - _boxH - _roundY, _pillW, _boxH];
 
             // A square look keeps its count box square, as it keeps everything else.
             private _pillRadius = [0, _boxH / 2] select ((_theme getOrDefault ["radius", 0]) > 0);
@@ -417,7 +417,7 @@ if (_hidden) then {
         case "badge": {
             // Flush with the tile's corner, or sitting on the ammo bar - the left one already.
             private _badgeW = _amountW + SQUARE(_boxH * 0.4);
-            private _badge = [_left, ([_bottom - _boxH, _bottom - _padY * 0.5 - _boxH] select (_bottom < _top + _height)), _badgeW, _boxH];
+            private _badge = [_left + _roundX, ([_bottom - _boxH, _bottom - _padY * 0.5 - _boxH] select (_bottom < _top + _height)) - _roundY, _badgeW, _boxH];
 
             _controls append ([_display, _parent, _badge, _theme getOrDefault ["tileCountBg", [0.84, 0.54, 0.1, 1]], 0] call FUNC(uiPanel));
 
@@ -441,8 +441,8 @@ if (_hidden) then {
             };
 
             private _backdrop = [
-                _display, _parent, _widest, _amountFont, _textH, [_left + _width - _padX, _left + _padX] select _leftSide,
-                _countBottom, _room, _theme, false, _leftSide
+                _display, _parent, _widest, _amountFont, _textH, [_left + _width - _padX - _roundX, _left + _padX + _roundX] select _leftSide,
+                _countBottom - _roundY, _room, _theme, false, _leftSide
             ] call FUNC(drawCountBackdrop);
 
             _backdrop params ["_backdropControls", "_backdropRect"];

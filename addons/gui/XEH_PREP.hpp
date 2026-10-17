@@ -113,12 +113,25 @@ PREP(markHidden);
 PREP(learn);
 PREP(findTile);
 PREP(boxTile);
-PREP(showSearch);
+PREP(updateStatus);
+PREP(animateStatus);
+PREP(stopStatus);
 PREP(revealTile);
 PREP(animateSearch);
 PREP(revealFx);
 
-// The hands' queue: drops, moves between containers and putting on or off wait their turn, one circle each
+// The categories at the side of a loot box
+PREP(itemGroup);
+PREP(boxGroup);
+PREP(setGroup);
+PREP(matchesGroup);
+PREP(drawGroupStrip);
+PREP(paintGroupStrip);
+
+// The hands' queue: what is not dragged waits its turn - quick moves, Take all and Put all in, drops, as far as the settings say; its tiles are tinted and the box's caption line counts
+PREP(queueColor);
+PREP(boxStep);
+PREP(unmarkQueued);
 PREP(queueTime);
 PREP(queueMoves);
 PREP(queueTiles);

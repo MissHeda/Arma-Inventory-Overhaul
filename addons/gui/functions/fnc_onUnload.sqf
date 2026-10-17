@@ -100,6 +100,8 @@ GVAR(handStarted) = -1;
 GVAR(queueDirty) = false;
 GVAR(queueFrom) = 0;
 GVAR(handWaiting) = createHashMap;
+GVAR(handBoxes) = [];
+GVAR(statusLive) = false;
 GVAR(roomCache) = [];
 GVAR(quickHeldKey) = -1;
 

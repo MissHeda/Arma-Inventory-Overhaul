@@ -93,7 +93,7 @@ _new set ["grids", +_old];
 
 [_display] call FUNC(drawTopLayer);
 
-// The circles of the hands' queue (fnc_queueMoves) on its tiles, which are new controls.
+// The marks of the hands' queue (fnc_queueMoves) on its tiles, which are new controls.
 if (GVAR(handQueue) isNotEqualTo []) then {
     [_display] call FUNC(drawQueue);
 };

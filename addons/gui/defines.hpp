@@ -115,37 +115,35 @@
 #define FADE_STEPS 4
 #define FADE_SHARE 0.05
 
-// Searching, as Tarkov shows it (fnc_showSearch, fnc_animateSearch, fnc_revealFx). The ring that fills
-// comes in SEARCH_FRAMES steps (search_ring_01_ca to _32_ca, drawn by tools/generate_ui_textures.py),
-// as big as SEARCH_RING_SIZE of the tile's shorter side. The glass in it is SEARCH_GLASS_SIZE of the
-// ring and goes round a circle of SEARCH_GLASS_ORBIT of it, SEARCH_GLASS_SPEED degrees a second. A
-// rustle every SEARCH_SOUND_GAP seconds, plus up to as much again.
+// Searching (fnc_updateStatus, fnc_animateSearch, fnc_revealFx): what is not searched yet shows as hatched tiles, and the
+// search itself only in the caption line of its box. The ring pictures (search_ring_01_ca to _32_ca, drawn by
+// tools/generate_ui_textures.py) are the spinner there - STATUS_ARC is the step that is its arc - and the repack's
+// progress ring (einv_magazines), as big as SEARCH_RING_SIZE of the tile's shorter side. A rustle every
+// SEARCH_SOUND_GAP seconds, plus up to as much again.
 #define SEARCH_FRAMES 32
 #define SEARCH_RING(N) format ["%1\search_ring_%2_ca.paa", QPATHTOF(ui), [str (N), "0" + str (N)] select ((N) < 10)]
 #define SEARCH_RING_SIZE 0.72
-#define SEARCH_GLASS_SIZE 0.5
-#define SEARCH_GLASS_ORBIT 0.12
-#define SEARCH_GLASS_SPEED 300
 #define SEARCH_SOUND_GAP 0.3
 
 // Longer than this between two frames of searching, and the search was paused (something held).
 #define SEARCH_PAUSE 0.25
 
-// The hands' queue (fnc_queueMoves, fnc_drawQueue, fnc_animateQueue): each action waiting for the hands has a circle on its
-// tile, drawn like the search's ring (the same SEARCH_RING pictures). It is QUEUE_RING_SIZE of the tile's shorter side, never
-// more than QUEUE_RING_MAX pixels; the dark disc behind it QUEUE_DISC_SIZE of the ring. Only the first QUEUE_DISC_MAX actions
-// get the disc (a Take all on a big crate would make hundreds of controls): every later one is marked by the faint ring
-// alone, so every tile that waits shows it. Only the first QUEUE_NUMBER_MAX actions (the one the hands are busy
-// with and the next ones) say their place as a number: every move that finishes shifts every place by one, and a number
-// on each of hundreds of tiles counting down once a second looked like the window lagging. Longer than QUEUE_PAUSE
-// between two frames of the queue, and it was paused (another window over this one): the time it stood still does not
-// count.
-#define QUEUE_RING_SIZE 0.62
-#define QUEUE_RING_MAX 56
-#define QUEUE_DISC_SIZE 0.86
-#define QUEUE_DISC_MAX 30
-#define QUEUE_NUMBER_MAX 4
+// The caption line's activity chip (fnc_updateStatus, fnc_animateStatus): a ring that goes round STATUS_SPIN_SPEED degrees
+// a second, what the box is doing and a button to stop it. Its parts are STATUS_ICON of the line's height tall.
+#define STATUS_ARC 8
+#define STATUS_SPIN_SPEED 300
+#define STATUS_ICON 0.62
+
+// The hands' queue (fnc_queueMoves, fnc_drawQueue, fnc_animateQueue): an action that waits for the hands marks its tile (the
+// surface in a tint of the accent colour, the picture faded - fnc_queueColor) and counts in the activity chip of the box it
+// takes from. Longer than QUEUE_PAUSE between two frames of the queue, and it was paused (another window over this one):
+// the time it stood still does not count.
 #define QUEUE_PAUSE 0.25
+
+// The strip of categories at the side of a loot box (fnc_drawGroupStrip): its icons are STRIP_ICON of a UNIT tall at the
+// most and at least STRIP_ICON_MIN, which the strip's room is divided by.
+#define STRIP_ICON 0.9
+#define STRIP_ICON_MIN 0.62
 
 // Tiles that do not match the search field fade this far, this quickly (fnc_applyFilter).
 #define FILTER_FADE 0.82
@@ -200,13 +198,9 @@
 #define BUTTON_GAP 0.22
 
 // The caption line of a section and the title row's buttons of a kit window (fnc_drawSection, fnc_drawWindow) are
-// CAPTION_LINE of a UNIT high; their hit areas reach further than they are drawn (fnc_uiButton, argument 11): CAPTION_HIT_UP
-// above and CAPTION_HIT_DOWN under the line (the gap between two sections is 0.5 UNIT, the one under the caption 0.25),
-// and half the gap to the next button either side. HEADER_HIT_PAD is the same for the header's buttons.
+// CAPTION_LINE of a UNIT high. A section's buttons are lower than that and stand in the middle of the line, and their hit area
+// is what is drawn and two pixels (fnc_uiButton cuts it to that whatever is asked for).
 #define CAPTION_LINE 0.8
-#define CAPTION_HIT_UP 0.3
-#define CAPTION_HIT_DOWN 0.2
-#define HEADER_HIT_PAD 0.2
 
 // How far the mouse has to move with the button held before a press on a tile becomes a drag, and how
 // faint the tile it was lifted from stays while it is dragged.

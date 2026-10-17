@@ -3,16 +3,19 @@
 /*
  * Author: Miss Heda
  * Fades every tile whose item does not match the search field (GVAR(filter), fnc_drawFilter) - by its
- * name or short name as the window shows them (fnc_matchesFilter) - and brings back every tile that does.
- * Items not searched yet match nothing: what they are is not known. An empty field shows everything. The
+ * name or short name as the window shows them (fnc_matchesFilter) - and brings back every tile that does. A loot box
+ * that has a category chosen at its side (GVAR(groupFilters), fnc_setGroup) fades what is not of that category as well:
+ * its tiles have to match the field and the category both.
+ * Items not searched yet match nothing: what they are is not known. An empty field and no category shows everything. The
  * tiles of a source grid (fnc_createGrid) are never faded, and a window that attached is told afterwards
  * (the "filter" hook).
  *
  * A tall compartment cut into pages (fnc_pageRanges) is searched on every page, not only the one shown: the
- * tiles of the other pages are on the grid too (fnc_pageCounts). Asked to jump (the field was typed in or emptied),
- * each such box turns to the first page with a match when the page it stands on has none (it stays where it is while
- * it still shows one, so refining a word does not move it) - the pages it moved are kept (GVAR(pagesMoved)) and
- * given back when the field is emptied, but for one the player turned himself since. Its bar shows how many matches
+ * tiles of the other pages are on the grid too (fnc_pageCounts). Asked to jump (the field was typed in or emptied, a
+ * category chosen), each such box turns to the first page with a match when the page it stands on has none (it stays
+ * where it is while it still shows one, so refining a word does not move it) - the pages it moved are kept
+ * (GVAR(pagesMoved)) and given back when the field is emptied and no category is chosen, but for one the player turned
+ * himself since. Its bar shows how many matches
  * lie before and after the page (fnc_drawPageBar). The tiles that match are the ones not faded, as ever.
  *
  * A section folded away to its caption (fnc_drawSection) shows no tile to fade, so with text in the field
@@ -41,7 +44,7 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
 // ----- Paged boxes: found on any page -----
 if (_jump && {!isNull _display}) then {
-    if (_filter isEqualTo "") then {
+    if (_filter isEqualTo "" && {GVAR(groupFilters) isEqualTo []}) then {
         // Emptied: the pages the search moved go back.
         private _moved = +GVAR(pagesMoved);
 
@@ -93,10 +96,15 @@ if (_jump && {!isNull _display}) then {
     // A place things come from (a source grid, as the Arsenal panel makes of ACE's list) holds no container: the search leaves it alone.
     if ((_x getOrDefault ["source", ""]) isNotEqualTo "") then {continue};
 
+    // The category chosen at the side of this box, if any.
+    private _group = [_x getOrDefault ["holder", _x getOrDefault ["container", objNull]]] call FUNC(boxGroup);
+    private _off = _filter isEqualTo "" && {_group isEqualTo ""};
+
     {
         private _tile = _x;
-        private _match = _filter isEqualTo "" || {
+        private _match = _off || {
             !(_tile getOrDefault ["hidden", false]) && {[_tile getOrDefault ["class", ""]] call FUNC(matchesFilter)}
+            && {[_tile getOrDefault ["class", ""], _group] call FUNC(matchesGroup)}
         };
 
         private _fade = [FILTER_FADE, 0] select _match;
@@ -119,7 +127,9 @@ if (_jump && {!isNull _display}) then {
     private _tab = _info getOrDefault ["tab", []];
     private _tint = false;
 
-    if (_filter isNotEqualTo "" && {!isNull _holder}) then {
+    private _foldedGroup = [_holder] call FUNC(boxGroup);
+
+    if ((_filter isNotEqualTo "" || {_foldedGroup isNotEqualTo ""}) && {!isNull _holder}) then {
         // What is searched in there, in the order it lies - the rest is not known to match anything.
         private _placed = ([_holder, [_holder] call EFUNC(storage,getContents)] call EFUNC(storage,getLayout)) get "entries";
 
@@ -127,6 +137,7 @@ if (_jump && {!isNull _display}) then {
 
         _tint = _placed findIf {
             !(_x getOrDefault ["hidden", false]) && {[_x getOrDefault ["class", ""]] call FUNC(matchesFilter)}
+            && {[_x getOrDefault ["class", ""], _foldedGroup] call FUNC(matchesGroup)}
         } >= 0;
     };
 

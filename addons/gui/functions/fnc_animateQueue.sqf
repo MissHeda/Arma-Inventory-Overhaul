@@ -3,14 +3,13 @@
 /*
  * Author: Miss Heda
  * The hands' queue, every frame while it holds something (fnc_onFrame): the first entry is the one the hands
- * are busy with. Its ring fills as its time runs - the same pictures as the search's ring, changed only when
- * the step changes, for all the circles of the queue in this one place - and once the time is up it is sent
- * (fnc_runQueue) and the next one begins. The time the window stood still under another window does not
- * count, as the search's does not.
+ * are busy with. Once its time is up it is sent (fnc_runQueue) and the next one begins. The time the window stood
+ * still under another window does not count, as the search's does not. Nothing is drawn per frame: what the box's
+ * caption line says changes when an entry finishes (fnc_animateStatus reads it).
  *
- * Also where the circles are brought up to date after a change of the queue (GVAR(queueDirty), set when
+ * Also where the marks are brought up to date after a change of the queue (GVAR(queueDirty), set when
  * entries were queued or cancelled): fnc_drawQueue runs here, once, however many entries changed in the frame.
- * Without that, a frame is a handful of reads and at most one ctrlSetText - the same for any length of queue.
+ * Without that, a frame is a handful of reads - the same for any length of queue.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -49,19 +48,7 @@ if (GVAR(handStarted) < 0) then {
 };
 
 private _head = GVAR(handQueue) select 0;
-private _progress = ((_now - GVAR(handStarted)) / ((_head get "time") max 0.05)) min 1;
 
-if (_progress >= 1) exitWith {
+if ((_now - GVAR(handStarted)) >= ((_head get "time") max 0.05)) then {
     [_display] call FUNC(runQueue);
-};
-
-private _arc = _head getOrDefault ["arc", controlNull];
-
-if (isNull _arc) exitWith {};
-
-private _step = ((ceil (_progress * SEARCH_FRAMES)) max 1) min SEARCH_FRAMES;
-
-if (_step != (_head get "step")) then {
-    _arc ctrlSetText SEARCH_RING(_step);
-    _head set ["step", _step];
 };

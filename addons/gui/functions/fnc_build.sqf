@@ -438,8 +438,7 @@ GVAR(searchQueue) = [GVAR(searchQueue), [], {
     (_containers find (_x select 0)) * 1e7 + ((_x param [5, 0]) + 1) * 100000 + (_x select 2) * 100 + (_x select 3)
 }, "ASCEND"] call BIS_fnc_sortBy;
 
-// The first of it is being searched: the glass and the ring on its tile.
-[_display] call FUNC(showSearch);
+// What is being searched is told in the caption line of its box (fnc_updateStatus, from fnc_drawPending below).
 
 // The scrolling columns take the clicks over them, so they report the mouse buttons as the display does.
 // A group kept from the last build (IDC_KEEP) has them already - it must not collect more. A guest only

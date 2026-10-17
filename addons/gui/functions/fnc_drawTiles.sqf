@@ -8,10 +8,10 @@
  * building the window again (fnc_redrawTiles).
  *
  * A redraw hands in the tiles the grid had (argument 4): a tile that would look exactly as one of them -
- * the same item on the same cells, turned the same, the same count, rounds, attachments and "?" - is that
+ * the same item on the same cells, turned the same, the same count, rounds, attachments and hatching - is that
  * old tile again, its controls left as they are, with what the new entry says about it taken over (the new
  * entry's keys replace the old ones, those it no longer has go, the controls and marks stay). One item
- * taken from a pile of ninety then makes no ninety tiles again but none, and the circles of the hands'
+ * taken from a pile of ninety then makes no ninety tiles again but none, and the marks of the hands'
  * queue on the tiles that stayed stay with them (fnc_drawQueue). A kept tile is made as fresh as a new one:
  * the light of the mouse off it, and faded in again when it was under way and does not wait in the
  * hands' queue (fnc_drawPending fades again what is still under way, as after any redraw); a tile the mouse had lit
@@ -121,7 +121,7 @@ private _byLook = createHashMap;
 } forEach _before;
 
 // What a tile is drawn as and what marks it on the window: kept from the old tile.
-private _drawn = ["controls", "background", "backgrounds", "corners", "rect", "color", "mark", "bar", "barRect", "amount", "amountShort", "pending", "queued", "lit"];
+private _drawn = ["controls", "background", "backgrounds", "corners", "rect", "color", "bar", "barRect", "amount", "amountShort", "pending", "queued", "lit"];
 private _kept = createHashMap;
 private _tiles = _grid get "tiles";
 
@@ -159,6 +159,11 @@ private _tiles = _grid get "tiles";
         _old set ["lit", false];
 
         if (_color isNotEqualTo []) then {
+            // A tile that waits in the hands' queue has its tint (fnc_queueColor), not the plain colour.
+            if ((_old getOrDefault ["queued", 0]) > 0) then {
+                _color = [_color] call FUNC(queueColor);
+            };
+
             [_old getOrDefault ["backgrounds", []], _color] call FUNC(paintSurface);
         };
     };

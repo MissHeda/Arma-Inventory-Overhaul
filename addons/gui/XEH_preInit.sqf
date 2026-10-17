@@ -174,18 +174,26 @@ GVAR(searchHead) = [];
 GVAR(searchSoundAt) = 0;
 GVAR(searchLast) = 0;
 
+// The boxes whose search the player stopped (the button in the caption line, fnc_stopStatus): their containers. Nothing of
+// them is searched until the button says "Search" again; the window's own state, empty for every window.
+GVAR(searchPaused) = [];
+
 // The hands' queue (fnc_queueMoves): the actions waiting for the hands, in order, each a HashMap - "id", "move" (the
 // move fnc_sendMoves was given), "options", "hand" ("drop", "move" or "equip"), "time" (seconds), "sources" (the tiles it
-// takes from, as the moves in flight name them), "slot" ([unit, slot] of a worn item it takes off), "fx" (the circle's
-// controls, made by fnc_drawQueue and kept until the tile or slot they lie on is drawn anew), "arc" and "step" (the ring
-// that fills), and what fnc_drawQueue keeps to tell whether the circle is still good: "tiles" ([[grid, tile], ...] it
-// marked), "marks" (those tiles' surfaces), "slotAt", "class" and "position". Only the first runs; handStarted is when it
-// began (-1: not yet), handLast the last frame of the queue, handId counts the entries made. queueDirty: entries were
-// queued or cancelled, so the circles are brought up to date in the next frame (fnc_animateQueue), once - queueFrom is
-// the first place in the queue that needs it (entries added at the end leave the ones before them alone).
-// handWaiting is the queue's sources by cell, "col_row" -> [[holder, key, block], ...] (fnc_queueIndex): asking whether a
-// tile waits is one look, however long the queue is. "hint" on an entry is the tile it was queued for (fnc_queueTiles).
-// roomCache is the room each target container has for the quick move key (fnc_roomFor), one entry per container.
+// takes from, as the moves in flight name them), "slot" ([unit, slot] of a worn item it takes off), "box" (the container
+// whose caption line says it, objNull for none), "fx" (the one control that marks a worn item's slot, made by fnc_drawQueue)
+// and what fnc_drawQueue keeps to tell whether its marks are still good: "tiles" ([[grid, tile], ...] it marked), "marks"
+// (those tiles' surfaces) and "slotAt". Only the first runs; handStarted is when it began (-1: not yet), handLast the last
+// frame of the queue, handId counts the entries made. queueDirty: entries were queued or cancelled, so the marks are brought
+// up to date in the next frame (fnc_animateQueue), once - queueFrom is the first place in the queue that needs it (entries
+// added at the end leave the ones before them alone). handWaiting is the queue's sources by cell, "col_row" ->
+// [[holder, key, block], ...] (fnc_queueIndex): asking whether a tile waits is one look, however long the queue is. "hint" on an
+// entry is the tile it was queued for (fnc_queueTiles). roomCache is the room each target container has for the quick move
+// key (fnc_roomFor), one entry per container.
+// handBoxes is what the caption lines say: one HashMap per box that has something waiting - "holder", "verb" ("grab", "put", "drop"
+// or "move"), "total" and "done" of the entries of this run (fnc_queueMoves adds, fnc_runQueue and fnc_cancelQueued count). A
+// box is dropped from it once nothing of it waits. instantFrame is the frame a drag let go in: what the drag sends goes at once
+// (fnc_endDrag, fnc_queueTime).
 GVAR(handQueue) = [];
 GVAR(handStarted) = -1;
 GVAR(handLast) = 0;
@@ -193,6 +201,8 @@ GVAR(handId) = 0;
 GVAR(queueDirty) = false;
 GVAR(queueFrom) = 0;
 GVAR(handWaiting) = createHashMap;
+GVAR(handBoxes) = [];
+GVAR(instantFrame) = -1;
 GVAR(roomCache) = [];
 GVAR(quickHeldKey) = -1;
 
@@ -232,6 +242,15 @@ GVAR(opened) = [];
 // (fnc_drawFilter, fnc_applyFilter).
 GVAR(filter) = "";
 GVAR(filterFocus) = false;
+
+// The category chosen at the side of a loot box (fnc_drawGroupStrip, fnc_setGroup): [[container, group], ...], one pair per
+// box that has one - "weapon", "ammo", "gear", "medical", "food", "tool" or "misc"; a box with none shows everything. It fades
+// the tiles of its box that are not of the category as the search field does (fnc_applyFilter).
+GVAR(groupFilters) = [];
+// Whether the caption lines hold a chip that moves every frame (fnc_updateStatus, fnc_animateStatus), and the last whole
+// second of the search's time it said.
+GVAR(statusLive) = false;
+GVAR(statusSecond) = -1;
 
 // Where the mouse was when the name beside it was last placed (fnc_onFrame).
 GVAR(tooltipAt) = [];
@@ -278,12 +297,11 @@ GVAR(pagesMoved) = [];
 GVAR(pageHover) = [];
 
 // The window's sounds, set in the dropdown under the speaker in the header (fnc_openSoundMenu): one volume per kind
-// of sound (GVAR(soundGroups), fnc_soundGroup), 0 to 1, and a master volume over all of them. Each level is
+// of sound (GVAR(soundGroups), fnc_soundGroup), 0 to 1. Each level is
 // [volume, the volume to come back to when its switch is turned on again]; a kind at volume 0 is off. Each player's
 // own, kept in the profile when the dropdown closes (fnc_soundSettle). The speaker used to mute with one flag,
 // einv_gui_muted (einv_gui_searchMuted before that): a player who had it set starts with every kind off.
 GVAR(soundGroups) = ["moves", "magazines", "containers", "search", "other"];
-GVAR(soundMaster) = 1;
 GVAR(soundLevels) = GVAR(soundGroups) apply {[1, 1]};
 GVAR(soundDirty) = false;
 
@@ -293,11 +311,14 @@ if (
     _savedMix isEqualType [] && {count _savedMix == 2} && {(_savedMix select 0) isEqualType 0}
     && {(_savedMix select 1) isEqualType []} && {count (_savedMix select 1) == count GVAR(soundGroups)}
 ) then {
-    GVAR(soundMaster) = ((_savedMix select 0) max 0) min 1;
+    // The first number was a master volume (the dropdown has none now): worked into the levels, so a player who had
+    // set one still hears what he set. At 0 it silences the kinds but leaves what they come back to.
+    private _master = ((_savedMix select 0) max 0) min 1;
+
     GVAR(soundLevels) = (_savedMix select 1) apply {
         _x params [["_volume", 1, [0]], ["_last", 1, [0]]];
 
-        [(_volume max 0) min 1, (_last max 0) min 1]
+        [((_volume max 0) min 1) * _master, ((_last max 0) min 1) * ([_master, 1] select (_master <= 0))]
     };
 } else {
     private _wasMuted = profileNamespace getVariable [QGVAR(muted), profileNamespace getVariable [QGVAR(searchMuted), false]];
