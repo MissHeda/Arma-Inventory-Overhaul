@@ -78,8 +78,8 @@ private _blocks = _layout getOrDefault ["blocks", []];
 private _overflow = _layout getOrDefault ["overflow", []];
 
 // A compartment cut into pages (fnc_viewBlocks): [page, [[from, to], ...]] per compartment, [] for one that is not. Its grid
-// is the whole compartment with only the rows of its page showing (fnc_createGrid), its panel the page's, and under it the
-// bar that turns the page (fnc_drawPageBar).
+// is the whole compartment with only the rows of its page showing (fnc_createGrid), its panel the page's down to the tallest
+// page's last row, and under it - as the bottom part of the same panel - the bar that turns the page (fnc_drawPageBar).
 private _paging = _layout getOrDefault ["paging", []];
 private _pagePanels = createHashMap;
 
@@ -280,7 +280,7 @@ private _fnc_compartment = {
     if (_pageOf isNotEqualTo []) then {
         private _pageWindow = (_pageOf select 1) select (_pageOf select 0);
 
-        _pagePanels set [_forEachIndex, [_display, _parent, [_gridX + _dx, _bodyTop + _dy], _cols, _pageWindow select 0, _pageWindow select 1, _holes, _theme] call FUNC(drawPagePanel)];
+        _pagePanels set [_forEachIndex, [_display, _parent, [_gridX + _dx, _bodyTop + _dy], _cols, _pageWindow select 0, _pageWindow select 1, _holes, _theme, selectMax ((_pageOf select 1) apply {(_x select 1) - (_x select 0)})] call FUNC(drawPagePanel)];
         continue;
     };
 

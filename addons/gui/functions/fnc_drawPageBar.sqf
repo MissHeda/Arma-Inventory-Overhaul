@@ -3,7 +3,9 @@
 /*
  * Author: Miss Heda
  * The pager of a paged compartment (fnc_pageRanges): a bar under its cells, PAGE_BAR_H of a UNIT tall, and nothing else - no
- * cue, no fade and no chip lies over the tiles. One control: a soft track with a round arrow button at each end and, between
+ * cue, no fade and no chip lies over the tiles. The bar is the bottom part of the compartment's panel (Mia, 0.5.10): the panel of the
+ * cells (fnc_drawPagePanel) ends where the bar starts, with no gap, and the bar's darker track, as wide as the panel, has the
+ * panel's round bottom corners. It is a soft track with a round arrow button at each end and, between
  * them, one line that says where it stands and what lies elsewhere:
  *   "Page 2 / 5  ·  +180 items on other pages  ·  12 queued"
  * - the items on the pages not shown, the entries of the hands' queue waiting on tiles of those pages (they have no circle
@@ -160,7 +162,10 @@ private _controls = [];
 
 private _barH = UNIT * PAGE_BAR_H;
 private _barW = _cols * _cellW - pixelW;
-private _barTop = _top + (_grid getOrDefault ["pageHeight", 1]) * _cellH + COMPARTMENT_PAD_PX(_cellW) * pixelH + UNIT * PAGE_BAR_GAP;
+private _pageTall = _grid getOrDefault ["pageHeight", 1];
+private _barTop = PAGE_BAR_TOP(_top,_pageTall,_cellW,_cellH);
+private _pad = COMPARTMENT_PAD_PX(_cellW);
+private _padW = _pad * pixelW;
 private _size = UNIT * 0.46;
 
 // The arrows are round buttons inside the bar, a little in from its ends: nearly the bar's height and wider than they are high.
@@ -170,10 +175,14 @@ private _buttonW = SQUARE(_buttonH * 1.5);
 private _buttonRadius = (_theme getOrDefault ["radius", 0]) min (_buttonH * 0.35);
 
 // ----- The bar -----
+// The bottom part of the compartment's panel (fnc_drawPagePanel ends where this starts): as wide as the panel, square on top and
+// round at the bottom corners, which are the panel's.
+private _panelRadius = (_theme getOrDefault ["radius", 0]) min (_pad * 3 * pixelH);
+
 _controls append ([
-    _display, _parent, [_left, _barTop, _barW, _barH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]],
-    (_theme getOrDefault ["radius", 0]) min (_barH * 0.35)
-] call FUNC(uiPanel));
+    _display, _parent, [_left - _padW, _barTop, _barW + _padW * 2, _barH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]],
+    [_panelRadius / pixelH, [false, false, true, true]]
+] call FUNC(uiSurface));
 
 // The words, in the middle of the bar between the two buttons.
 private _labelW = _barW - (_buttonW + SQUARE(_inset)) * 2 - SQUARE(_barH * 0.3);

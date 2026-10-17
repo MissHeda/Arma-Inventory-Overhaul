@@ -225,7 +225,7 @@ private _madeCount = 0;
 
         _pagedGrid set ["panel", [
             _display, _pagedGrid get "parent", [_pageLeft, _pageTop], _pagedGrid get "cols", _window select 0, _window select 1,
-            _pagedGrid getOrDefault ["holes", []], _theme
+            _pagedGrid getOrDefault ["holes", []], _theme, _pagedGrid getOrDefault ["pageHeight", 0]
         ] call FUNC(drawPagePanel)];
     } forEach _holderGrids;
 

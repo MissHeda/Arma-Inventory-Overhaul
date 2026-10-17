@@ -101,6 +101,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 - A count badge or the rounds' box of a tile at a round corner of its panel keeps in from that corner, so its square corner no longer pokes out over the round edge; an unsearched tile there is striped a little in from the corner for the same reason.
 - The caption line's chips are all round now (Mia, 0.5.7): the tab with the container's name and the fold arrow is a pill as high as Take all and Sort and with their text size, and so are the chip of the hands' queue and of the search (its stop button is a round one inside it), the fold line of a tall box ("+32 empty rows"), the tab of a locked box and the tab of ACE cargo's cards; the sharp-edged tab was the one chip that was not.
 - The search field in the header is exactly as light as the buttons beside it: it lay on a second film (a frame of its own and the field's), now it has the one the buttons have.
+- The page bar of a big container is part of its box (Mia, 0.5.10): the compartment's rounded panel now runs down to include the bar, with no gap between the grid and the bar (the bar floated as a strip of its own). The bar is a darker footer inside the panel, as wide as it, and the panel's bottom corners are the bar's; the cells' bottom corners are square, only the top corners of the grid are round. A last page with fewer rows keeps the panel as tall as the others, so the bar never leaves it. A box without pages is unchanged.
 
 ### Removed
 

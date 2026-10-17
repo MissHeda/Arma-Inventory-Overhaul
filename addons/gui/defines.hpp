@@ -229,20 +229,23 @@
 // A tall compartment of what is looted shows PAGE_ROWS (the client setting einv_gui_pageRows) rows at a time with a bar
 // under it to turn the pages (fnc_pageRanges, fnc_drawPageBar). At least PAGE_MIN_ROWS rows to a page; the setting 0
 // or MAX_ROWS (or more) turns the pages off. A dragged item held over an arrow of the bar turns the page after
-// PAGE_HOVER_TIME seconds, and again every PAGE_HOVER_TIME while it stays. The bar is PAGE_BAR_H of a UNIT tall,
-// PAGE_BAR_GAP of one below the compartment's panel; its left half turns back and its right half on (the whole half is
+// PAGE_HOVER_TIME seconds, and again every PAGE_HOVER_TIME while it stays. The bar is PAGE_BAR_H of a UNIT tall and is the
+// bottom part of the compartment's panel: it starts where the panel's pad under the cells ends, with no gap, and the panel's
+// bottom corners are its corners; its left half turns back and its right half on (the whole half is
 // the button), and the count of what lies on other pages is in the bar's own text - nothing lies over the tiles. A dragged
 // item turns the page over the outer PAGE_ZONE of the bar's width on each side; the middle stays the place where a drop
 // is laid down in the first free spot.
 #define PAGE_MIN_ROWS 4
 #define PAGE_HOVER_TIME 0.7
 #define PAGE_BAR_H 1.15
-#define PAGE_BAR_GAP 0.12
 #define PAGE_ZONE 0.35
 
-// The room a paged compartment keeps under its cells for the bar, for a cell CELLW wide: the panel's pad, the gap and the
-// bar (fnc_drawSection reserves it in the flow, fnc_drawPageBar draws in it).
-#define PAGE_RESERVE(CELLW) (COMPARTMENT_PAD_PX(CELLW) * pixelH + UNIT * PAGE_BAR_GAP + UNIT * PAGE_BAR_H)
+// The room a paged compartment keeps under its panel's pad for the bar, which is part of the panel (fnc_drawSection reserves it in
+// the flow, fnc_drawPageBar draws in it). Where the bar starts, for a compartment whose cells start at TOP and which is ROWS
+// rows tall on its tallest page: PAGE_BAR_TOP - the last cell's far edge and the pad under it, exactly where the panel of the
+// cells ends (fnc_drawPagePanel).
+#define PAGE_RESERVE(CELLW) (UNIT * PAGE_BAR_H)
+#define PAGE_BAR_TOP(TOP,ROWS,CELLW,CELLH) ((TOP) + (ROWS) * (CELLH) - pixelH + COMPARTMENT_PAD_PX(CELLW) * pixelH)
 
 // ---------------------------------------------------------------------------
 // Weight: what lifting something previews on the weight card, and the comparison card at the mouse

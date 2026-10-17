@@ -5,7 +5,7 @@
  * outline or a drag footprint that reaches the panel's corner has to follow its round corner (fnc_uiSurface,
  * fnc_uiOutline) - only that one corner, two for a box as wide or as high as the compartment. The panel runs from the first
  * cell's corner to the last cell's far edge, so the box is compared with those four places (a pixel apart counts as the
- * same). A paged compartment (fnc_setWindow) has the corners of the rows that show; a grid with no round corners (square
+ * same). A paged compartment (fnc_setWindow) has the top corners of the rows that show, and no bottom ones: its panel goes on into the page bar, which has the round bottom corners; a grid with no round corners (square
  * look, shaped panel, overflow, a preview, "corner" 0, fnc_gridCorner) answers at once.
  *
  * Arguments:
@@ -57,6 +57,12 @@ private _atTop = abs (_y - _panelTop) < _slackY;
 private _atBottom = abs (_y + _h - _panelBottom) < _slackY;
 
 private _mask = [_atLeft && _atTop, _atRight && _atTop, _atLeft && _atBottom, _atRight && _atBottom];
+
+// A paged compartment's panel ends in the page bar (fnc_drawPageBar), which has the round bottom corners: the cells' bottom corners are square.
+if ((_grid getOrDefault ["pageRanges", []]) isNotEqualTo []) then {
+    _mask set [2, false];
+    _mask set [3, false];
+};
 
 if !(true in _mask) exitWith {[]};
 

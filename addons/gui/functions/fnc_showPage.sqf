@@ -78,7 +78,7 @@ _grid set ["tileControls", []];
 
 (_grid get "rel") params ["_left", "_top"];
 
-_grid set ["panel", [_display, _parent, [_left, _top], _grid get "cols", _window select 0, _window select 1, _grid getOrDefault ["holes", []], GVAR(theme)] call FUNC(drawPagePanel)];
+_grid set ["panel", [_display, _parent, [_left, _top], _grid get "cols", _window select 0, _window select 1, _grid getOrDefault ["holes", []], GVAR(theme), _grid getOrDefault ["pageHeight", 0]] call FUNC(drawPagePanel)];
 
 // The tiles of the page that shows now: drawn where they lie, in the place they have on the grid already. Each is the very
 // HashMap the grid holds (taken by its number, never from a copy of the list - the controls and the box it gets are the grid's

@@ -785,7 +785,7 @@ if (_anyPaged && {!isNull _sectionContainer}) then {
         (_viewBlocks select _forEachIndex) params ["_pagedCols"];
 
         private _pageTall = selectMax ((_x select 1) apply {(_x select 1) - (_x select 0)});
-        private _barTop = _bodyTop + (_place select 1) + _pageTall * _cellH + COMPARTMENT_PAD_PX(_cellW) * pixelH + UNIT * PAGE_BAR_GAP;
+        private _barTop = PAGE_BAR_TOP(_bodyTop + (_place select 1),_pageTall,_cellW,_cellH);
         private _barH = UNIT * PAGE_BAR_H;
         private _barW = _pagedCols * _cellW - pixelW;
 

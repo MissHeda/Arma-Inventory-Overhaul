@@ -8,7 +8,7 @@
  * so an item at the corner follows the same arc a pad nearer). 0 where the panel has no round corner: a square look
  * (theme radius 0), a compartment whose rows that show hold a hole (its panel is a shape of rectangles, fnc_uiShape),
  * and a corner too small to see. A page of a paged compartment (fnc_setWindow) is asked again - the holes of its rows
- * decide - and the overflow grid is told to have none by the caller.
+ * decide; only its top corners are round (fnc_cornerRadii), the page bar has the bottom ones - and the overflow grid is told to have none by the caller.
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid ("panelR" and "pad" in pixels, "holes", "cols", "rowFrom", "rowTo" read) <HASHMAP>
