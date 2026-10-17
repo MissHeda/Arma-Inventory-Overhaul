@@ -102,14 +102,16 @@ GVAR(defaultCache) = createHashMap;
 // The Items and Containers steps: per step ("items", "containers") the list's [search text, chip, own
 // rules only, page] (fnc_drawClassList), and which typing is the last (fnc_drawResults waits for it); the
 // edits not applied yet, by lowercase class - a canvas each (fnc_canvasFromBlocks; fnc_drawCellEditor,
-// and fnc_drawItemEditor with the stack); how the Containers step draws - 0 Paint, 1 Blocks - and the
-// colour it paints with (0 none, else 1 to PAINT_COUNT), both kept for the whole session; what the "Same
+// and fnc_drawItemEditor with the stack); the compartment picked on the Paint way, by lowercase class - the places it had (cellPick,
+// fnc_canvasPick); how the Containers step draws - 0 Paint, 1 Blocks - and the
+// colour it paints with (0 none, else 1 to PAINT_COUNT; -1 picks a compartment by a click), both kept for the whole session; what the "Same
 // as another class" popover shows (fnc_drawSameAs); the picture edits of the Containers step not applied yet, by
 // lowercase class (boxWork: "iconPercent", "pictureText"), and what the picture picker shows (picker); and the own rules by class, worked out once per draft
 // text (fnc_ownClassRules). The class index itself is in uiNamespace (fnc_buildIndex).
 GVAR(listState) = createHashMap;
 GVAR(searchToken) = 0;
 GVAR(cellWork) = createHashMap;
+GVAR(cellPick) = createHashMap;
 GVAR(itemWork) = createHashMap;
 GVAR(cellMode) = 0;
 GVAR(cellBrush) = 1;

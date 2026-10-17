@@ -21,8 +21,21 @@
  * exactly where the inventory would flow them (fnc_canvasFromBlocks, only the places): they are the
  * Blocks way's compartments, drawn and written the same.
  *
+ * A painted canvas also carries the attributes of its compartments (the Paint way of the Containers step): "attrs",
+ * [[places, accepts, single], ...] - the places a compartment with a category lock or a single slot had when it was last
+ * looked at. Each is given to the compartment that has most of those places now (fnc_canvasMatch), so an attribute follows its
+ * compartment through repainting: a split one keeps it on the larger part, a merge takes the first's, one whose places are
+ * all painted away is gone. A compartment with attributes comes back as fnc_parseGrid gives it, [cols, rows, holes, pos,
+ * accepts, single] ([cols, rows, holes, [], accepts, single] where the pos is dropped), one without as before.
+ *
+ * Asked to sync, it also writes into the canvas what it found: "attrs" with the places as they are now, "parts" (per
+ * compartment its places, ascending) and "label" (per place its compartment, -1 for none), which the editor
+ * (fnc_canvasPick, fnc_drawCellAttrs) reads. Every change of a canvas does that, so the next one maps from the
+ * compartments as they were.
+ *
  * Arguments:
  * 0: Canvas, see fnc_canvasFromBlocks <HASHMAP>
+ * 1: Sync: write "attrs", "parts" and "label" into the canvas <BOOL> (default: false)
  *
  * Return Value:
  * Compartments [[cols, rows, holes, pos], ...], holes the indices row * cols + col, ascending, [] for a
@@ -35,7 +48,7 @@
  * Public: No
  */
 
-params [["_canvas", createHashMap, [createHashMap]]];
+params [["_canvas", createHashMap, [createHashMap]], ["_sync", false, [false]]];
 
 private _cols = _canvas getOrDefault ["cols", 1];
 private _rows = _canvas getOrDefault ["rows", 0];
@@ -50,6 +63,7 @@ private _values = if ("paint" in _canvas) then {
 // Per place the compartment it belongs to, -1 for none yet.
 private _label = _values apply {-1};
 private _blocks = [];
+private _parts = [];
 
 {
     if (_x == 0 || {(_label select _forEachIndex) >= 0}) then {continue};
@@ -84,6 +98,9 @@ private _blocks = [];
         ];
     };
 
+    _members sort true;
+    _parts pushBack _members;
+
     // The box around them; what of it is not theirs is a hole.
     private _minCol = _cols;
     private _maxCol = -1;
@@ -115,9 +132,51 @@ private _blocks = [];
     _blocks pushBack [_w, _h, _holes, [_minCol, _minRow]];
 } forEach _values;
 
+// The attributes of a painted canvas: each entry goes to the compartment that has most of its places, none to two.
+private _attrOf = _blocks apply {[]};
+
+if ("paint" in _canvas) then {
+    private _taken = [];
+    private _kept = [];
+
+    {
+        _x params ["_places", "_accepts", "_single"];
+
+        private _index = [_label, count _blocks, _places, _taken] call FUNC(canvasMatch);
+
+        if (_index >= 0) then {
+            _taken pushBack _index;
+            _attrOf set [_index, [_accepts, _single]];
+            _kept pushBack [_parts select _index, _accepts, _single];
+        };
+    } forEach (_canvas getOrDefault ["attrs", []]);
+
+    if (_sync) then {
+        _canvas set ["attrs", _kept];
+        _canvas set ["parts", _parts];
+        _canvas set ["label", _label];
+    };
+};
+
+// A block with its attributes after the pos, as fnc_parseGrid has it.
+private _fnc_attach = {
+    params ["_list"];
+
+    {
+        private _attrs = _attrOf select _forEachIndex;
+
+        if (_attrs isNotEqualTo []) then {
+            _list set [_forEachIndex, (_x select [0, 4]) + _attrs];
+        };
+    } forEach _list;
+
+    _list
+};
+
 if (count _blocks == 1) exitWith {
     (_blocks select 0) set [3, []];
-    _blocks
+
+    [_blocks] call _fnc_attach
 };
 
 // From the corner of the box around them all: where the canvas starts drawing is no part of it.
@@ -138,8 +197,8 @@ if ("paint" in _canvas) then {
     private _flowed = [_blocks apply {[_x select 0, _x select 1, _x select 2]}, 1, CANVAS_ROWS_LOADED, _cols, false, true] call FUNC(canvasFromBlocks);
 
     if (_flowed isEqualTo (_blocks apply {_x select 3})) then {
-        _blocks = _blocks apply {[_x select 0, _x select 1, _x select 2]};
+        _blocks = _blocks apply {[_x select 0, _x select 1, _x select 2, []]};
     };
 };
 
-_blocks
+[_blocks] call _fnc_attach

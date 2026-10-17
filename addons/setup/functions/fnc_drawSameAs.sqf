@@ -111,7 +111,9 @@ if (_part isEqualTo "all") then {
                 private _lc = toLowerANSI _target;
                 private _own = ((call FUNC(ownClassRules)) select 0) getOrDefault [_lc, createHashMap];
                 private _work = if (GVAR(cellMode) == 1) then {
-                    createHashMapFromArray [["blocks", _blocks apply {[_x select 0, _x select 1, _x select 2]}], ["picked", 0]]
+                    createHashMapFromArray [
+                        ["blocks", _blocks apply {[[_x select 0, _x select 1, _x select 2], _x param [4, []], _x param [5, false]] call FUNC(cellBlock)}], ["picked", 0]
+                    ]
                 } else {
                     [_blocks, 1, CANVAS_ROWS_LOADED, STORAGE_COLS, true] call FUNC(canvasFromBlocks)
                 };
@@ -119,6 +121,7 @@ if (_part isEqualTo "all") then {
                 // Copied cells are the class's own: Apply takes a like= away with them.
                 _work set ["unlink", "like" in _own];
                 GVAR(cellWork) set [_lc, _work];
+                GVAR(cellPick) deleteAt _lc;
 
                 call FUNC(closePopover);
 

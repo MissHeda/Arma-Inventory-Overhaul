@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The rows under the tools of the Blocks way (fnc_drawCellBlocks): what the picked compartment takes.
+ * The rows under the tools of the Blocks way (fnc_drawCellBlocks) and of the Paint way (fnc_drawCellEditor): what the picked compartment takes.
  *   - "Accepts": a chip for All and one for each category (weapon, ammo, grenade, gear, medical, food, tool, misc and the ones the draft
  *     defines). With All on, the
  *     compartment takes anything, as every compartment does until it is locked; one or more categories on, only items in one of
@@ -12,6 +12,12 @@
  *   - "One item, any size": a chip for the single slot. The compartment then holds one item of its categories whatever the item's
  *     size, and the item takes the whole compartment - a 1x1 grenade loop takes a 2x2 grenade and draws it scaled into the slot.
  * The changes go into the working copy of the class (GVAR(cellWork)), made on the first one, and the editor is drawn again.
+ *
+ * On the Paint way (uiNamespace QGVAR(paintCanvas) holds the painted canvas, which the editor sets each time it is drawn; empty on the
+ * Blocks way) a row of its own comes first: "Compartment 2 / 5", a stepper through the compartments of the canvas in reading order
+ * (GVAR(cellPick) keeps the picked one as its places), and the chip "Select on canvas", which makes a click on the canvas pick the
+ * compartment it hits instead of painting (GVAR(cellBrush) -1). The attributes are kept in the canvas (fnc_canvasBlocks, "attrs"),
+ * tied to the places of the compartment, so they follow it through repainting.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -51,6 +57,29 @@ private _fnc_change = {
     params ["_class", "_shown", "_picked", "_accepts", "_single"];
 
     private _lc = toLowerANSI _class;
+    private _canvas = uiNamespace getVariable [QGVAR(paintCanvas), createHashMap];
+
+    // The Paint way: the lock belongs to the places of the compartment picked, kept in the canvas.
+    if (count _canvas > 0) exitWith {
+        private _places = (_canvas getOrDefault ["parts", []]) param [_picked, []];
+
+        if (_places isEqualTo []) exitWith {};
+
+        if !(_lc in GVAR(cellWork)) then {
+            GVAR(cellWork) set [_lc, _canvas];
+        };
+
+        private _attrs = (_canvas getOrDefault ["attrs", []]) select {(_x select 0) isNotEqualTo _places};
+
+        if (_accepts isNotEqualTo [] || {_single}) then {
+            _attrs pushBack [+_places, _accepts, _single];
+        };
+
+        _canvas set ["attrs", _attrs];
+
+        [] call FUNC(drawCellEditor);
+    };
+
     private _work = GVAR(cellWork) getOrDefault [_lc, createHashMap];
 
     if (count _work == 0) then {
@@ -69,10 +98,45 @@ private _fnc_change = {
     [] call FUNC(drawCellEditor);
 };
 
-[_display, _parent, [_left, _top, _labelW, _rowH], LLSTRING(Cont_Accepts), TEXT_SMALL, _colorText2, _fontBold, 0] call EFUNC(gui,uiLabel);
+// The Paint way: which compartment, by number or by a click on the canvas.
+private _rowsTop = _top;
+private _paint = count (uiNamespace getVariable [QGVAR(paintCanvas), createHashMap]) > 0;
+
+if (_paint) then {
+    private _pickW = SQUARE(UNIT * 9);
+
+    [
+        _display, _parent, [_left, _rowsTop + (_rowH - _chipH) / 2, _pickW, _chipH], _picked + 1, [1, count _shown, 1], _theme, {
+            params ["_value", "_arguments"];
+            _arguments params ["_class"];
+
+            private _canvas = uiNamespace getVariable [QGVAR(paintCanvas), createHashMap];
+            private _places = (_canvas getOrDefault ["parts", []]) param [_value - 1, []];
+
+            GVAR(cellPick) set [toLowerANSI _class, +_places];
+
+            [] call FUNC(drawCellEditor);
+        }, [_class], format [LLSTRING(Cont_Picked), "%1", count _shown], true, LLSTRING(Cont_PaintStepTip)
+    ] call FUNC(uiStepper);
+
+    private _selectText = LLSTRING(Cont_PaintSelect);
+    private _selectW = SQUARE(_chipH * 0.9) + (_selectText getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK;
+
+    [_display, _parent, [_left + _pickW + _gap, _rowsTop + (_rowH - _chipH) / 2, _selectW, _chipH], _selectText, GVAR(cellBrush) < 0, _theme, {
+        params ["_state"];
+
+        GVAR(cellBrush) = [1, -1] select _state;
+
+        [] call FUNC(drawCellEditor);
+    }] call FUNC(uiChip);
+
+    _rowsTop = _rowsTop + _rowH;
+};
+
+[_display, _parent, [_left, _rowsTop, _labelW, _rowH], LLSTRING(Cont_Accepts), TEXT_SMALL, _colorText2, _fontBold, 0] call EFUNC(gui,uiLabel);
 
 private _chipX = _left + _labelW;
-private _lineY = _top;
+private _lineY = _rowsTop;
 
 // All, then the categories.
 {

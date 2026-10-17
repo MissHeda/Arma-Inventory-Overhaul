@@ -78,7 +78,8 @@ _ast set ["rules", _rules];
 } forEach (keys GVAR(itemWork));
 
 {
-    private _blocks = (GVAR(cellWork) get _x) getOrDefault ["blocks", []];
+    private _work = GVAR(cellWork) get _x;
+    private _blocks = _work getOrDefault ["blocks", []];
 
     {
         private _accepts = _x param [4, []];
@@ -87,6 +88,22 @@ _ast set ["rules", _rules];
             _blocks set [_forEachIndex, [_x, _accepts - [_id]] call FUNC(cellBlock)];
         };
     } forEach _blocks;
+
+    // A painted working copy keeps them with the places of its compartments (fnc_canvasBlocks).
+    private _attrs = _work getOrDefault ["attrs", []];
+
+    {
+        _x params ["_places", "_accepts", "_single"];
+
+        if (_id in _accepts) then {
+            _attrs set [_forEachIndex, [_places, [_accepts - [_id]] call EFUNC(items,orderGroups), _single]];
+        };
+    } forEach _attrs;
+
+    // One that was only that category and no single slot takes anything again, and has nothing left to keep.
+    if ("attrs" in _work) then {
+        _work set ["attrs", _attrs select {(_x select 1) isNotEqualTo [] || {_x select 2}}];
+    };
 } forEach (keys GVAR(cellWork));
 
 [_ast] call FUNC(commit);

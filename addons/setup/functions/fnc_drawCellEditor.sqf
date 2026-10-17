@@ -19,10 +19,14 @@
  *       (fnc_drawCellBlocks): each its own small drawing, a click making a cell a hole; the one picked
  *       gets its width and height; Add and Remove. Apply writes them one after the other (+).
  *       Under the tools of the picked compartment its attributes (fnc_drawCellAttrs): the categories it accepts and "One item, any size"
- *       (a single slot); Apply writes them after the compartment's colon, grid=1x2:ammo+1x1:grenade|one+4x2. Paint keeps neither: a
- *       container that has any shows a note there, and Apply in Paint writes the cells without them.
- *     Switching turns a working copy into the other way: painted compartments become blocks in reading
- *     order, blocks are laid out as the inventory flows them and coloured (fnc_canvasFromBlocks).
+ *       (a single slot); Apply writes them after the compartment's colon, grid=1x2:ammo+1x1:grenade|one+4x2.
+ *       Paint has the same rows for each compartment it paints, with a stepper "Compartment 2 / 5" and the chip "Select on canvas"
+ *       (a click on the drawing picks the compartment instead of painting) above them; the picked one is framed in white on the
+ *       drawing (GVAR(cellPick) keeps it as its places). The attributes are kept in the canvas, tied to the places of the
+ *       compartment (fnc_canvasBlocks), so repainting hands them on to the compartment that has most of those places; Apply
+ *       writes the canvas letters with them, grid=aab/aab:a=ammo:b=grenade|one.
+ *     Switching turns a working copy into the other way, attributes and the picked compartment with it: painted compartments become
+ *     blocks in reading order, blocks are laid out as the inventory flows them and coloured (fnc_canvasFromBlocks).
  *   - Beside it how the inventory will show them (fnc_drawPreview), and under it the total of cells and
  *     compartments against the limits (fnc_cellChanged).
  *   - Under that preview the container's picture, as in the Items step: the Picture row (fnc_drawPictureRow, with
@@ -94,6 +98,8 @@ if (isNull _display || {isNull _parent}) exitWith {};
 uiNamespace setVariable [QGVAR(editorArgs), _args];
 uiNamespace setVariable [QGVAR(cellTotals), controlNull];
 uiNamespace setVariable [QGVAR(previewArgs), []];
+// The Paint way sets the painted canvas for the rows of its compartments (fnc_drawCellAttrs); the Blocks way has none.
+uiNamespace setVariable [QGVAR(paintCanvas), createHashMap];
 
 // Where the drawing was scrolled: drawn again for the same class, it stays there.
 private _oldCanvas = uiNamespace getVariable [QGVAR(cellCanvas), controlNull];
@@ -184,11 +190,21 @@ if (_hasWork && {("blocks" in _work) isNotEqualTo _blocksMode}) then {
     private _unlink = _work getOrDefault ["unlink", false];
 
     if (_blocksMode) then {
+        // The compartments in reading order, with what they accept; the picked one stays the picked one.
+        private _fromPaint = [_work, true] call FUNC(canvasBlocks);
+        private _pickedNow = ([_work, GVAR(cellPick) getOrDefault [_lc, []]] call FUNC(canvasPick)) select 0;
+
         _work = createHashMapFromArray [
-            ["blocks", ([_work] call FUNC(canvasBlocks)) apply {[_x select 0, _x select 1, _x select 2]}], ["picked", 0]
+            ["blocks", _fromPaint apply {[[_x select 0, _x select 1, _x select 2], _x param [4, []], _x param [5, false]] call FUNC(cellBlock)}],
+            ["picked", _pickedNow max 0]
         ];
     } else {
+        private _wasPicked = _work getOrDefault ["picked", 0];
+
         _work = [_work get "blocks", 1, CANVAS_ROWS_LOADED, STORAGE_COLS, true] call FUNC(canvasFromBlocks);
+
+        [_work, true] call FUNC(canvasBlocks);
+        GVAR(cellPick) set [_lc, +((_work getOrDefault ["parts", []]) param [_wasPicked, []])];
     };
 
     _work set ["unlink", _unlink];
@@ -201,6 +217,7 @@ private _shown = [];
 private _picked = 0;
 private _blocks = [];
 private _start = [];
+private _pickedPlaces = [];
 
 if (_blocksMode) then {
     _start = _resolved apply {[[_x select 0, _x select 1, _x param [2, []]], _x param [4, []], _x param [5, false]] call FUNC(cellBlock)};
@@ -212,7 +229,23 @@ if (_blocksMode) then {
 
     _start = [_loaded] call FUNC(canvasBlocks);
     _canvas = [_loaded, _work] select _hasWork;
-    _blocks = [_canvas] call FUNC(canvasBlocks);
+
+    // The compartments as painted now, the attributes handed on to the ones that are left, and the compartment picked: the one
+    // that has most of the places it had (fnc_canvasPick), so the pick and the lock follow it through repainting.
+    _blocks = [_canvas, true] call FUNC(canvasBlocks);
+    _shown = _blocks;
+
+    ([_canvas, GVAR(cellPick) getOrDefault [_lc, []]] call FUNC(canvasPick)) params ["_pickIndex", "_pickPlaces"];
+
+    _picked = _pickIndex max 0;
+    _pickedPlaces = _pickPlaces;
+    GVAR(cellPick) set [_lc, +_pickPlaces];
+    uiNamespace setVariable [QGVAR(paintCanvas), _canvas];
+
+    // What the rows of the picked compartment show: when a change leaves it as it is, the editor is not drawn again.
+    private _pickedBlock = _blocks param [_picked, []];
+
+    uiNamespace setVariable [QGVAR(paintSig), [count _blocks, _picked, _pickedBlock param [4, []], _pickedBlock param [5, false]]];
 };
 
 // Both ways give the preview (fnc_drawPreview, through fnc_cellChanged) the same kind of thing. While
@@ -373,11 +406,6 @@ if (_editable && {_blocksMode} && {_resolved findIf {(_x select 3) isNotEqualTo 
     _notes pushBack [LLSTRING(Cont_BlocksFlowNote), _muted];
 };
 
-// Painting keeps no categories and no single slots: they are set on the Blocks way (fnc_drawCellAttrs).
-if (_editable && {!_blocksMode} && {_resolved findIf {count _x > 4} >= 0}) then {
-    _notes pushBack [LLSTRING(Cont_PaintAttrsNote), _loss];
-};
-
 if ((_src select [0, 7]) isEqualTo "legacy:") then {
     _notes pushBack [LLSTRING(Cont_LegacyNote), _loss];
 };
@@ -437,8 +465,9 @@ private _areaY = _cursorY;
 if (_editable) then {
     _areaY = _cursorY + _toolH + UNIT * 0.25;
 
-    // Blocks: what the picked compartment takes - its categories and whether it is a single slot.
-    if (_blocksMode && {_shown isNotEqualTo []}) then {
+    // What the picked compartment takes - its categories and whether it is a single slot - on both ways; painted, with the row that
+    // picks the compartment.
+    if (_shown isNotEqualTo []) then {
         _areaY = _areaY + ([_display, _box, [_innerX, _areaY, _innerW], _theme, _class, _shown, _picked] call FUNC(drawCellAttrs)) + UNIT * 0.2;
     };
 
@@ -550,11 +579,33 @@ if (_blocksMode) then {
         ["editable", _editable],
         ["scrollId", "cellCanvas"],
         ["arguments", [_class]],
+        ["picked", +_pickedPlaces],
+        ["onPick", {
+            params ["_place", "_arguments"];
+            _arguments params ["_class"];
+
+            // The select brush: the click picks the compartment the place is in (fnc_canvasBlocks keeps "label" and "parts" up to date).
+            private _canvas = uiNamespace getVariable [QGVAR(paintCanvas), createHashMap];
+            private _id = (_canvas getOrDefault ["label", []]) param [_place, -1];
+
+            if (_id < 0) exitWith {};
+
+            GVAR(cellPick) set [toLowerANSI _class, +((_canvas get "parts") select _id)];
+
+            [] call FUNC(drawCellEditor);
+        }],
         ["onChange", {
             params ["_canvas", "_arguments"];
             _arguments params ["_class"];
 
             private _lc = toLowerANSI _class;
+
+            // The compartments as they are now: the attributes and the pick go to the ones that have most of their places.
+            private _blocks = [_canvas, true] call FUNC(canvasBlocks);
+
+            ([_canvas, GVAR(cellPick) getOrDefault [_lc, []]] call FUNC(canvasPick)) params ["_index", "_places"];
+
+            GVAR(cellPick) set [_lc, +_places];
 
             // The first change: the working copy, and the editor drawn again to say so.
             if !(_lc in GVAR(cellWork)) exitWith {
@@ -563,7 +614,22 @@ if (_blocksMode) then {
                 [] call FUNC(drawCellEditor);
             };
 
-            [[_canvas] call FUNC(canvasBlocks)] call FUNC(cellChanged);
+            // A compartment more or less, another one picked, or the picked one taking something else (it grew into a locked one):
+            // the rows above the drawing are drawn again.
+            private _block = _blocks param [_index max 0, []];
+
+            if ([count _blocks, _index max 0, _block param [4, []], _block param [5, false]] isNotEqualTo (uiNamespace getVariable [QGVAR(paintSig), []])) exitWith {
+                [] call FUNC(drawCellEditor);
+            };
+
+            // Otherwise only the frame of the picked compartment follows what was painted, and the total and the preview.
+            private _group = uiNamespace getVariable [QGVAR(cellCanvas), controlNull];
+
+            if (!isNull _group) then {
+                [_group, _places] call (_group getVariable [QGVAR(canvasPickSet), {}]);
+            };
+
+            [_blocks] call FUNC(cellChanged);
         }]
     ]] call FUNC(uiCanvas);
 };

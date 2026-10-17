@@ -111,6 +111,8 @@ PREP(classBlocks);
 PREP(drawPreview);
 PREP(canvasFromBlocks);
 PREP(canvasBlocks);
+PREP(canvasMatch);
+PREP(canvasPick);
 PREP(canvasBox);
 PREP(answerText);
 PREP(kitRoom);

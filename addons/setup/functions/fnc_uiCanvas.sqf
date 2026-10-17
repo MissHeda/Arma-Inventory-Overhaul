@@ -41,6 +41,9 @@
  *    "onChange"  - called after a click changed it, with [canvas, arguments] <CODE> (default: {})
  *    "arguments" - for that <ANY> (default: [])
  *    "scrollId"  - its scroll position kept under this name when the step is drawn again <STRING> (default: "")
+ *    "picked"    - painted: the places of the compartment that is picked, framed in white and a pixel thicker than the others <ARRAY of NUMBER> (default: [])
+ *    "onPick"    - painted: called with [place, arguments] for a click on a place while the brush is "select" (GVAR(cellBrush) -1), which
+ *                  paints nothing then <CODE> (default: {})
  *
  * Return Value:
  * Its group <CONTROL>
@@ -174,9 +177,11 @@ private _fnc_frame = {
         private _top = _row * _cellH;
         private _w = _cellW - pixelW;
         private _h = _cellH - pixelH;
-        private _lineW = pixelW * 2;
-        private _lineH = pixelH * 2;
-        private _color = PAINT_COLORS select (_value - 1);
+        // The picked compartment is framed in white and a pixel thicker.
+        private _isPicked = _index in (_group getVariable [QGVAR(canvasPicked), []]);
+        private _lineW = pixelW * ([2, 3] select _isPicked);
+        private _lineH = pixelH * ([2, 3] select _isPicked);
+        private _color = [PAINT_COLORS select (_value - 1), [1, 1, 1, 1]] select _isPicked;
         private _display = ctrlParent _group;
 
         {
@@ -197,6 +202,24 @@ private _fnc_frame = {
 };
 
 _group setVariable [QGVAR(canvasFrame), _fnc_frame];
+
+// The picked compartment's places can be changed without drawing the canvas again: its frames, and those it leaves, are made anew.
+_group setVariable [QGVAR(canvasPicked), +(_options getOrDefault ["picked", []])];
+_group setVariable [QGVAR(canvasPickSet), {
+    params ["_group", "_places"];
+
+    private _old = _group getVariable [QGVAR(canvasPicked), []];
+
+    if (_old isEqualTo _places) exitWith {};
+
+    _group setVariable [QGVAR(canvasPicked), +_places];
+
+    private _fnc_frame = _group getVariable [QGVAR(canvasFrame), {}];
+
+    {
+        [_group, _x] call _fnc_frame;
+    } forEach (_old + (_places - _old));
+}];
 
 if (_palette) then {
     _group setVariable [QGVAR(canvasLayer), [_display, "EINV_Group", _group, [0, 0, _cols * _cellW, _rows * _cellH]] call EFUNC(gui,uiCreate)];
@@ -235,6 +258,11 @@ private _set = {
     private _list = _canvas getOrDefault [["cells", "paint"] select _palette, []];
 
     if (_index >= count _list) exitWith {};
+
+    // The "select" brush paints nothing: the click picks the compartment the place is in.
+    if (_palette && {GVAR(cellBrush) < 0}) exitWith {
+        [_index, _options getOrDefault ["arguments", []]] call (_options getOrDefault ["onPick", {}]);
+    };
 
     private _old = _list select _index;
     private _new = [_value > 0, _value] select _palette;
@@ -365,6 +393,9 @@ _group setVariable [QGVAR(canvasTarget), _fnc_target];
         // A stroke stays on its canvas, known by its scroll id: the first place may have drawn the editor
         // again (the working copy made), and the canvas under the mouse is a new control then.
         if (isNull _group || {(_group getVariable [QGVAR(scrollId), ""]) isNotEqualTo _scrollId}) exitWith {};
+
+        // Picking a compartment takes a click, not a stroke.
+        if (GVAR(cellBrush) < 0 && {(_group getVariable [QGVAR(canvasOptions), createHashMap]) getOrDefault ["palette", false]}) exitWith {};
 
         [_group getVariable [QGVAR(canvasSet), {}], [_group, _index, _hit, _value]] call FUNC(defer);
     }];

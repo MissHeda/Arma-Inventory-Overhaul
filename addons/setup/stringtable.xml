@@ -403,11 +403,14 @@
         <Key ID="STR_einv_setup_Cont_NotContainer">
             <English>%1 holds nothing - there are no cells to draw.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_PaintAttrsNote">
-            <English>This container has compartments that take only some categories or hold one item of any size. Painting does not keep them - set them on the Blocks way; Apply here writes the cells without them.</English>
-        </Key>
         <Key ID="STR_einv_setup_Cont_PaintHelp">
-            <English>Pick a colour, then click or drag over cells. Touching cells of one colour are one compartment; empty places are left out.</English>
+            <English>Pick a colour, then click or drag over cells. Touching cells of one colour are one compartment; empty places are left out. The rows above pick a compartment (the white frame) and set what it accepts.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_PaintSelect">
+            <English>Select on canvas</English>
+        </Key>
+        <Key ID="STR_einv_setup_Cont_PaintStepTip">
+            <English>Go through the compartments of the drawing, in reading order.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_PatternNote">
             <English>These cells come from its load or a pattern. A change here replaces that with exactly these cells.</English>
@@ -1386,6 +1389,9 @@
         </Key>
         <Key ID="STR_einv_setup_Value_GridCells">
             <English>%1 cells</English>
+        </Key>
+        <Key ID="STR_einv_setup_Value_GridLocks">
+            <English>(takes only: %1)</English>
         </Key>
         <Key ID="STR_einv_setup_Value_GridPattern">
             <English>cells laid out as %1</English>

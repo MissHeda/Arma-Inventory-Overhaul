@@ -75,6 +75,7 @@ GVAR(banner) = false;
 GVAR(hint) = ["", "text2"];
 GVAR(listState) = createHashMap;
 GVAR(cellWork) = createHashMap;
+GVAR(cellPick) = createHashMap;
 GVAR(itemWork) = createHashMap;
 GVAR(sameAs) = createHashMap;
 GVAR(boxWork) = createHashMap;

@@ -2533,9 +2533,32 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   compartment as `[cols, rows, holes]` while it takes anything and is no slot, `[cols, rows, holes, [], accepts, single]` once it
   does (`fnc_cellBlock` is the one form, so copies compare equal and go to the preview and to `formatGrid` as they are); Apply writes
   `grid=...:ammo+...`. Each compartment shows what it takes under its cells. The preview and the inventory draw a locked empty
-  compartment with its category's picture. The **Paint way keeps neither**: painted compartments are found again from colours, and
-  nothing ties an attribute to one of them, so a container that has any shows a note in Paint, and Apply there writes the cells without
-  them; switching Blocks to Paint drops them.
+  compartment with its category's picture.
+- **Accepts and single slots in the Paint way** (the same `fnc_drawCellAttrs`, `fnc_canvasBlocks`, `fnc_canvasMatch`,
+  `fnc_canvasPick`): each compartment the painter produces has the same two rows. Above them a row picks the compartment: a stepper
+  "Compartment 2 / 5" through the compartments in reading order and the chip "Select on canvas" (`einv_setup_cellBrush` -1: a click on
+  the drawing picks the compartment it hits and paints nothing, no stroke). The picked one is framed in white and a pixel thicker on
+  the drawing (`fnc_uiCanvas` options `picked` and `onPick`; `canvasPickSet` on the group changes the frame without drawing the
+  canvas again). The canvas (`fnc_canvasFromBlocks` painted) carries `attrs`, `[[places, accepts, single], ...]` for the
+  compartments that have any, the places being the indices of the compartment's cells at the time. `fnc_canvasBlocks` hands each
+  entry to the compartment that now has most of those places (`fnc_canvasMatch`: first on a tie, a compartment taken only once, a next
+  best for the second of two that grew together) - so a split compartment keeps its attributes on the larger part, a merge takes
+  the first's and a compartment painted away loses them - and returns the blocks as `parseGrid` gives them, `[cols, rows, holes, pos,
+  accepts, single]` (`[cols, rows, holes, [], accepts, single]` where it drops the pos of compartments that lie as the flow would put
+  them; a plain one `[cols, rows, holes, []]`). Asked to sync (second argument) it also writes `attrs` with the places as they are now,
+  `parts` (per compartment its places, ascending) and `label` (per place its compartment) into the canvas; the editor syncs each time
+  it is drawn and on every paint change, so the next change maps from the compartments as they were. The picked compartment is kept the
+  same way, as its places (`GVAR(cellPick)`, lowercase class -> places; `fnc_canvasPick` finds the compartment that has most of them,
+  the first when none is left), so it stays picked while compartments before it appear or go. A paint change that leaves the number of
+  compartments, the picked one and what it accepts as they were only updates the frame, the total and the preview; any other redraws the
+  editor (the stepper's range and the chips). A chip click writes `attrs` of the working copy (made on the first change) and redraws.
+  Apply writes the canvas letters with them, `grid=aab/aab:a=ammo:b=grenade|one`, or - where the compartments lie as the flow would put
+  them - `2x2:ammo+1x2:grenade|one`, exactly the text `parseGrid` reads. Switching Paint and Blocks carries attributes and the picked
+  compartment over (blocks as `fnc_cellBlock`, canvas through `canvasFromBlocks` and `canvasBlocks`), "Copy cells of X" keeps X's
+  attributes in either way, deleting a category takes it out of `attrs` as well as of the blocks, and the "Back to the default" button
+  also appears for a change of attributes alone. The preview draws the first category's picture, large and faint, in the middle of a
+  compartment that accepts only some (a single slot a little stronger), as the inventory does for an empty one (`fnc_drawPreview`), and
+  the change lists word them after the compartments, "(takes only: Ammo; Grenade · one item)" (`fnc_describeRule`).
 - **Same as another class** (`fnc_drawSameAs`): a popover on the button (`fnc_popover`): a search over the index's containers
   minus itself, 8 to a page. A pick offers **Follow X** (writes `like=X` and removes the own `grid`, which would win over it) and
   **Copy cells of X** (X's `fnc_classBlocks` into a working copy in the current mode, `unlink` set when the class has `like=`, so

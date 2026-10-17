@@ -28,7 +28,8 @@
  * 1: Controls group to create it in <CONTROL>
  * 2: Position [x, y, w, h], relative to the group <ARRAY>
  * 3: Theme <HASHMAP>
- * 4: Compartments [[cols, rows, holes, pos], ...] - for an item its shape alone, [] for none <ARRAY>
+ * 4: Compartments [[cols, rows, holes, pos, accepts, single], ...] - the last two where a compartment takes only some categories or is a single
+ *    slot (its category's picture is drawn faintly in its middle); for an item its shape alone, [] for none <ARRAY>
  * 5: For an item [picture, category, class, icon]; [] for a container <ARRAY> (default: [])
  *    With a class, the tile is drawn for it, by the icon and the picture given ([scale, across, down], the
  *    one being edited, not the draft's); without, its shape and picture only
@@ -213,11 +214,11 @@ private _drawn = [];
         ] call EFUNC(gui,uiShape);
     };
 
-    _drawn pushBack [_x0, _y0, _w, _h, _holes, _colX, _rowY];
+    _drawn pushBack [_x0, _y0, _w, _h, _holes, _colX, _rowY, _x param [4, []], _x param [5, false]];
 } forEach _blocks;
 
 {
-    _x params ["_x0", "_y0", "_w", "_h", "_holes", "_colX", "_rowY"];
+    _x params ["_x0", "_y0", "_w", "_h", "_holes", "_colX", "_rowY", "_accepts", "_single"];
 
     for "_row" from 0 to (_h - 1) do {
         for "_col" from 0 to (_w - 1) do {
@@ -225,5 +226,24 @@ private _drawn = [];
 
             [_display, _group, [_x0 + (_colX select _col), _y0 + (_rowY select _row), _cellW - pixelW, _cellH - pixelH], _cellColor] call EFUNC(gui,uiPanel);
         };
+    };
+
+    // A compartment that takes only some categories shows the first one's picture, large and faint in its middle, as the empty
+    // one does in the inventory (einv_gui_fnc_drawBadge); a single slot a little stronger.
+    private _texture = "";
+
+    if (_accepts isNotEqualTo []) then {
+        _texture = [_accepts select 0, GVAR(draftRules)] call EFUNC(gui,groupTexture);
+    };
+
+    if (_texture isNotEqualTo "") then {
+        private _boxW = (_colX select (_w - 1)) + _cellW - pixelW;
+        private _boxH = (_rowY select (_h - 1)) + _cellH - pixelH;
+        private _sidePx = ((_boxW / pixelW) min (_boxH / pixelH)) * 0.6;
+        private _side = [_sidePx * pixelW, _sidePx * pixelH];
+
+        [
+            _display, _group, [_x0 + (_boxW - (_side select 0)) / 2, _y0 + (_boxH - (_side select 1)) / 2, _side select 0, _side select 1], _texture, [1, 1, 1, [0.12, 0.2] select _single]
+        ] call EFUNC(gui,uiPicture);
     };
 } forEach _drawn;

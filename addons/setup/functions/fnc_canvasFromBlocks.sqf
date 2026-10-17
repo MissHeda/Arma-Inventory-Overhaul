@@ -34,6 +34,9 @@
  *   "rows"  - its rows <NUMBER>
  *   "cells" - not painted: per place (index row * cols + col) whether it is a cell <ARRAY of BOOL>
  *   "paint" - painted: per place its colour, 0 for none, else 1 to PAINT_COUNT <ARRAY of NUMBER>
+ *   "attrs" - painted: [[places, accepts, single], ...] for each compartment that accepts only some categories or is a single
+ *             slot (a fifth and sixth element of its block, fnc_parseGrid), the places being the indices of its cells
+ *             on the canvas; fnc_canvasBlocks hands them to the compartments again whatever is painted over them <ARRAY>
  *
  * Example:
  * private _canvas = [[[4, 2, [5, 6]], [2, 3, []]], 1, CANVAS_ROWS_LOADED, STORAGE_COLS, true] call einv_setup_fnc_canvasFromBlocks;
@@ -196,6 +199,29 @@ private _colors = _blocks apply {0};
     _colors set [_forEachIndex, _color];
 } forEach _blocks;
 
+// A compartment with a category lock or a single slot keeps it with the places it was given.
+private _attrs = [];
+
+{
+    private _accepts = _x param [4, []];
+    private _single = _x param [5, false];
+
+    if (_accepts isEqualTo [] && {!_single}) then {continue};
+
+    private _block = _forEachIndex;
+    private _places = [];
+
+    {
+        if (_x == _block) then {
+            _places pushBack _forEachIndex;
+        };
+    } forEach _owners;
+
+    if (_places isNotEqualTo []) then {
+        _attrs pushBack [_places, +_accepts, _single];
+    };
+} forEach _blocks;
+
 createHashMapFromArray [
-    ["cols", _cols], ["rows", _rows], ["paint", _owners apply {if (_x < 0) then {0} else {_colors select _x}}]
+    ["cols", _cols], ["rows", _rows], ["paint", _owners apply {if (_x < 0) then {0} else {_colors select _x}}], ["attrs", _attrs]
 ]

@@ -203,7 +203,24 @@ private _fnc_grid = {
                 };
             } forEach _blocks;
 
-            format [LLSTRING(Value_GridBlocks), _parts joinString " + "]
+            // What a compartment takes, said after them: the categories it accepts and a single slot ("locked: Ammo; Grenade · one item").
+            private _locks = [];
+
+            {
+                private _words = ((_x param [4, []]) apply {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name")}) joinString "/";
+
+                if (_x param [5, false]) then {
+                    _words = [_words + " · " + LLSTRING(Cont_SingleShort), LLSTRING(Cont_SingleShort)] select (_words isEqualTo "");
+                };
+
+                if (_words isNotEqualTo "") then {
+                    _locks pushBack _words;
+                };
+            } forEach _blocks;
+
+            private _said = format [LLSTRING(Value_GridBlocks), _parts joinString " + "];
+
+            [_said, format ["%1 %2", _said, format [LLSTRING(Value_GridLocks), _locks joinString "; "]]] select (_locks isNotEqualTo [])
         };
         default {
             // A pattern by name, perhaps with its number of cells: rig, rig:16.
