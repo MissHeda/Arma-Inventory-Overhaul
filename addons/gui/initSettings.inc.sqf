@@ -149,7 +149,7 @@
     0
 ] call CBA_fnc_addSetting;
 
-// ----- Hands -----
+// ----- Item-moving queue (the wizard shows these three under "Looting and searching") -----
 
 // For everyone alike: how long the hands are busy is part of a mission's pace. In seconds, 0 is no wait at all (no
 // circle, as before). Each action waits its turn in the window's queue (fnc_queueMoves, fnc_animateQueue). Read when the

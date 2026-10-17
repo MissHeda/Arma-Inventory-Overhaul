@@ -36,9 +36,11 @@
  * account; slots through the areas they registered in (uiNamespace getVariable [QGVAR(slots), []]). A slot that also registered where
  * it lies in its group - a fourth element, the HashMap with "rel" and "parent" fnc_gridOrigin takes -
  * is found where its scrolled group shows it now, and only on the part that shows (fnc_slotRect). A
- * tile gets brighter and, as a slot does, an outline in the accent colour that follows the round corners
- * of a rectangle (fnc_uiRing) or the cells of a shaped tile (fnc_uiShape); there is one outline at a time,
- * for the tile or the slot under the mouse, made in the group the tile or slot lies in so it scrolls and
+ * tile gets brighter and, as a slot does, an outline in the accent colour - the square frame of the Ctrl
+ * selection, two pixels thick (fnc_hoverOutline) - or the cells of a shaped tile (fnc_uiShape); a free
+ * cell of a grid that holds things (hover ["cell", grid, column, row]) gets the same frame around that
+ * one cell, and no hint but the idle one; there is one outline at a time,
+ * for the tile, slot or cell under the mouse, made in the group it lies in so it scrolls and
  * clips with it, and deleted when the mouse leaves (a drag takes the tile's outline away,
  * fnc_startDrag; the footprint shows then). The name at the mouse always lies over that outline: one made
  * on the display itself comes after the name, so the name is made again over it (fnc_raiseTooltip).
@@ -114,13 +116,21 @@ if (_mouse isNotEqualTo [] && {_layer isNotEqualTo "inspect"}) then {
     };
 
     if (_gridIndex >= 0) exitWith {
-        private _tileIndex = [_grids select _gridIndex, _cell] call FUNC(tileAt);
+        private _grid = _grids select _gridIndex;
+        private _tileIndex = [_grid, _cell] call FUNC(tileAt);
 
+        // A free cell of a grid that holds things is found too, to get its outline; a grid that only shows
+        // (a list, the overflow row) has no free cell to point at.
         if (_tileIndex >= 0) then {
             _found = ["tile", _gridIndex, _tileIndex];
+        } else {
+            if (!(_grid getOrDefault ["virtual", true]) && {!(_grid getOrDefault ["overflow", false])}) then {
+                _found = ["cell", _gridIndex, _cell select 0, _cell select 1];
+            };
+        };
 
+        if (_found isNotEqualTo []) then {
             // The cell it lies on, the part of it that shows, unless an earlier grid of the layer reaches into it.
-            private _grid = _grids select _gridIndex;
 
             (_gridBoxes select _gridIndex) params ["", "", "_visible", "_originX", "_originY"];
             _cell params ["_col", "_row"];
@@ -217,21 +227,23 @@ private _fnc_tile = {
 // the mouse included, which is then made again over it (fnc_raiseTooltip).
 private _ringMade = false;
 
-// A tile in its own colour, or a little brighter; the slot frame around a slot, or hidden.
+// A tile in its own colour, or a little brighter; the outline around a tile, a slot or a free cell, or hidden.
 private _fnc_light = {
     params ["_hover", "_on"];
 
-    // Only tiles and slots light up.
-    if !((_hover param [0, ""]) in ["tile", "slot"]) exitWith {};
+    // Only tiles, slots and free cells light up.
+    if !((_hover param [0, ""]) in ["tile", "slot", "cell"]) exitWith {};
 
-    // A slot: an outline in the accent colour that follows its round corners (fnc_uiRing) - made in its
-    // column's group where it has one, so it scrolls and clips with the slot. It stays while the mouse is
-    // on that slot and goes with it.
+    // The outline goes with the hover, whichever it was.
+    if (!_on) then {
+        {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(hoverRing), []]);
+        uiNamespace setVariable [QGVAR(hoverRing), []];
+    };
+
+    // A slot: the outline of the Ctrl selection (fnc_hoverOutline) - made in its column's group where it has
+    // one, so it scrolls and clips with the slot. It stays while the mouse is on that slot and goes with it.
     if ((_hover select 0) isEqualTo "slot") exitWith {
-        if (!_on) exitWith {
-            {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(hoverRing), []]);
-            uiNamespace setVariable [QGVAR(hoverRing), []];
-        };
+        if (!_on) exitWith {};
 
         if ((uiNamespace getVariable [QGVAR(hoverRing), []]) isNotEqualTo []) exitWith {};
 
@@ -249,11 +261,7 @@ private _fnc_light = {
             _rect = (_anchor get "rel") + [_slotRect select 2, _slotRect select 3];
         };
 
-        private _radius = (GVAR(theme) getOrDefault ["radius", 0]) min ((_rect select 3) / 4);
-
-        uiNamespace setVariable [QGVAR(hoverRing), [
-            _display, _parent, _rect, GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]], _radius
-        ] call FUNC(uiRing)];
+        uiNamespace setVariable [QGVAR(hoverRing), [_display, _parent, _rect] call FUNC(hoverOutline)];
 
         // In a group it lies under the name anyway: the group was made before it.
         if (isNull _parent) then {
@@ -261,49 +269,64 @@ private _fnc_light = {
         };
     };
 
+    // A free cell: the same outline around that one cell, in the group of its grid so it scrolls with it.
+    if ((_hover select 0) isEqualTo "cell") exitWith {
+        if (!_on) exitWith {};
+
+        if ((uiNamespace getVariable [QGVAR(hoverRing), []]) isNotEqualTo []) exitWith {};
+
+        _hover params ["", "_cellGridIndex", "_cellCol", "_cellRow"];
+
+        private _cellGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_cellGridIndex, createHashMap];
+
+        if (count _cellGrid == 0) exitWith {};
+
+        private _cellParent = _cellGrid getOrDefault ["parent", controlNull];
+        private _cellRect = [_cellGrid, _cellGrid get "rel", _cellCol, _cellRow] call FUNC(spanRect);
+
+        uiNamespace setVariable [QGVAR(hoverRing), [_display, _cellParent, _cellRect] call FUNC(hoverOutline)];
+
+        if (isNull _cellParent) then {
+            _ringMade = true;
+        };
+    };
+
     private _tile = _hover call _fnc_tile;
 
     // A tile: the same outline around its footprint, wide and high as it lies (turned too), in the group of
-    // its column so it scrolls with the tile. It goes with the hover.
-    if (!_on) then {
-        {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(hoverRing), []]);
-        uiNamespace setVariable [QGVAR(hoverRing), []];
-    } else {
-        if ((uiNamespace getVariable [QGVAR(hoverRing), []]) isEqualTo []) then {
-            private _tileGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_hover select 1, createHashMap];
-            private _box = _tile getOrDefault ["rect", []];
+    // its column so it scrolls with the tile.
+    if (_on && {(uiNamespace getVariable [QGVAR(hoverRing), []]) isEqualTo []}) then {
+        private _tileGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_hover select 1, createHashMap];
+        private _box = _tile getOrDefault ["rect", []];
 
-            if (_box isNotEqualTo [] && {count _tileGrid > 0}) then {
-                private _tileParent = _tileGrid getOrDefault ["parent", controlNull];
-                private _tileHoles = _tile getOrDefault ["holes", []];
+        if (_box isNotEqualTo [] && {count _tileGrid > 0}) then {
+            private _tileParent = _tileGrid getOrDefault ["parent", controlNull];
+            private _tileHoles = _tile getOrDefault ["holes", []];
+            private _outline = [];
+
+            // A shaped tile on its own cells, as its border is drawn (fnc_createTile), two pixels thick.
+            if (
+                _tileHoles isNotEqualTo [] && {((_tile getOrDefault ["col", 0]) + (_tile getOrDefault ["w", 1])) <= (_tileGrid getOrDefault ["cols", 0])}
+            ) then {
+                private _footprint = [_tile getOrDefault ["w", 1], _tile getOrDefault ["h", 1], _tileHoles];
+                private _onGrid = [_tileGrid, _tile getOrDefault ["col", 0], _tile getOrDefault ["row", 0]];
                 private _accent = GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]];
-                private _outline = [];
 
-                // A shaped tile on its own cells, as its border is drawn (fnc_createTile), two pixels thick.
-                if (
-                    _tileHoles isNotEqualTo [] && {((_tile getOrDefault ["col", 0]) + (_tile getOrDefault ["w", 1])) <= (_tileGrid getOrDefault ["cols", 0])}
-                ) then {
-                    private _footprint = [_tile getOrDefault ["w", 1], _tile getOrDefault ["h", 1], _tileHoles];
-                    private _onGrid = [_tileGrid, _tile getOrDefault ["col", 0], _tile getOrDefault ["row", 0]];
+                {
+                    _outline append ([
+                        _display, _tileParent, [_box select 0, _box select 1], _tileGrid get "cellW", _tileGrid get "cellH",
+                        _footprint, _accent, "frame", _x, _onGrid
+                    ] call FUNC(uiShape));
+                } forEach [0, 1];
+            } else {
+                _outline = [_display, _tileParent, _box] call FUNC(hoverOutline);
+            };
 
-                    {
-                        _outline append ([
-                            _display, _tileParent, [_box select 0, _box select 1], _tileGrid get "cellW", _tileGrid get "cellH",
-                            _footprint, _accent, "frame", _x, _onGrid
-                        ] call FUNC(uiShape));
-                    } forEach [0, 1];
-                } else {
-                    private _radius = (GVAR(theme) getOrDefault ["radius", 0]) min ((_tileGrid get "cellH") / 4);
+            uiNamespace setVariable [QGVAR(hoverRing), _outline];
 
-                    _outline = [_display, _tileParent, _box, _accent, _radius] call FUNC(uiRing);
-                };
-
-                uiNamespace setVariable [QGVAR(hoverRing), _outline];
-
-                // In a group it lies under the name anyway: the group was made before it.
-                if (isNull _tileParent) then {
-                    _ringMade = true;
-                };
+            // In a group it lies under the name anyway: the group was made before it.
+            if (isNull _tileParent) then {
+                _ringMade = true;
             };
         };
     };
@@ -330,7 +353,7 @@ if (!_force && {_found isEqualTo GVAR(hover)}) exitWith {
     // A slot that did not change still moves when its column scrolls under a mouse that stands still - and
     // gets its ring again when a part was drawn anew under it (fnc_redrawPart), over the name at the mouse.
     // A tile gets its outline back after a drag that left it where it was (fnc_endDrag).
-    if ((_found param [0, ""]) in ["slot", "tile"]) then {
+    if ((_found param [0, ""]) in ["slot", "tile", "cell"]) then {
         [_found, true] call _fnc_light;
 
         if (_ringMade) then {

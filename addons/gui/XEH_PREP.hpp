@@ -257,6 +257,7 @@ PREP(raiseWindow);
 PREP(placeWindow);
 PREP(topAt);
 PREP(hoverGeometry);
+PREP(hoverOutline);
 PREP(frame);
 PREP(logFrame);
 PREP(tileRect);

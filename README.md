@@ -234,7 +234,7 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   five items and five circles run one after another. A click on a circle (or Cancel in the right click menu) takes that action out of the queue;
   closing the window cancels what still waits, and nothing is lost or half done, since nothing happens before its circle is full. Rearranging within
   a container, turning an item and splitting a stack stay instant, and so does ACE Arsenal's panel. The times are server settings on the wizard's
-  General page, under "Hands" (`einv_gui_handDrop` 0.3 s, `einv_gui_handMove` 0.4 s, `einv_gui_handEquip` 1 s; 0 is no wait and no circle for that
+  General page, under "Looting and searching" (`einv_gui_handDrop` 0.3 s, `einv_gui_handMove` 0.4 s, `einv_gui_handEquip` 1 s; 0 is no wait and no circle for that
   kind, as before 0.4.7).
 - **Sounds and looting:** every kind of gear sounds like what it is - weapons, magazines, vests, helmets, medical
   items, radios -, using Arma's own sound files only; players within earshot hear someone loot (`einv_gui_soundsWorld`,

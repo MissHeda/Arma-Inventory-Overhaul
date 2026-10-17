@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Creates an outline with round corners - the frame around the slot or card under the mouse: four
+ * Creates an outline with round corners - a round card's border (the hover outline is square, fnc_hoverOutline): four
  * edges and four quarter rings (ring_*_ca), laid out as fnc_uiPanel lays out a round panel, so the
  * outline follows the corners of what it surrounds. The edges are as thick as the rings are drawn
  * (RING_SHARE of the corner). Square corners get a plain one pixel frame.

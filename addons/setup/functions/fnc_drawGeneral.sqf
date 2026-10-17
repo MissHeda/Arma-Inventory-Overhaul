@@ -53,9 +53,23 @@ private _loss = _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];
 
 // ----- The page: one column that scrolls, and a throwaway group to measure texts in -----
 
-private _page = [_display, "EINV_ScrollGroup", _group, [0, 0, _width, _height]] call EFUNC(gui,uiCreate);
+// Drawn again in the same step (fnc_showStep keeps the content group), the scroll group stays: the controls on it are
+// drawn first and the old ones deleted at the end, so the group is never empty and keeps its place (a new one would start at
+// the top).
+private _page = _group getVariable [QGVAR(page), controlNull];
+private _oldControls = [];
 
-_page setVariable [QGVAR(scrollId), "general"];
+if (isNull _page) then {
+    _page = [_display, "EINV_ScrollGroup", _group, [0, 0, _width, _height]] call EFUNC(gui,uiCreate);
+
+    _group setVariable [QGVAR(page), _page];
+    _page setVariable [QGVAR(scrollId), "general"];
+} else {
+    _page ctrlSetPosition [0, 0, _width, _height];
+    _page ctrlCommit 0;
+
+    _oldControls = (allControls _page) select {ctrlParentControlsGroup _x isEqualTo _page};
+};
 
 private _pageW = _width - SCROLL_W - pixelW * 2;
 private _probe = [_display, "EINV_Group", _group, [0, 0, _pageW, UNIT * 10]] call EFUNC(gui,uiCreate);
@@ -614,3 +628,9 @@ _cursorY = _cursorY + UNIT * 11 + UNIT * 0.6;
 _page setVariable [QGVAR(contentH), _cursorY + pixelH];
 
 ctrlDelete _probe;
+
+// The page as it was goes now that the new one stands on it: the scroll group never lay empty, so it kept its place
+// (fnc_showStep). Text areas that were on it are gone with it.
+{ctrlDelete _x} forEach _oldControls;
+
+uiNamespace setVariable [QGVAR(editAreas), (uiNamespace getVariable [QGVAR(editAreas), []]) select {!isNull _x}];

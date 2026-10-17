@@ -1422,16 +1422,20 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   the box of its cell (or slot) that no earlier grid or slot reaches into is kept as `einv_gui_hoverHold` with the hover it belongs
   to: a mouse moving inside it, with the same geometry and layer, ends the call after the stamp check - no lookup, no hint, no
   name or card made again. Only a changed target does work: the light, the name at the mouse or the comparison card (a control
-  made then, never per frame), the hint's text. Free cells and "nothing" are never held (a redraw resets the hover to `[]`, and
+  made then, never per frame), the hint's text. A free cell is held like a tile ("nothing" never is: a redraw resets the hover to `[]`, and
   a held `[]` would not notice a tile that came there).
-- **The hover outline.** A tile under the mouse gets, besides the lighter surface, the outline a slot has: the accent colour, rounded as
-  `fnc_uiRing` rounds a slot's (radius at most a quarter of a cell's height, so square corners on a plain look), around its box (`rect`,
-  w x h cells as it lies, a turned one too), or on its own cells (`fnc_uiShape` "frame", two pixels) when it is shaped. There is one
-  outline at a time, `einv_gui_hoverRing`, the slot's and the tile's: `fnc_updateHover`'s light makes it in the column's group when the
-  hover changes (so it scrolls and clips with the tile, and lies under the name at the mouse; a grid on the display itself asks
-  `fnc_raiseTooltip`) and deletes it when the hover leaves - nothing per tile, nothing per frame. `fnc_startDrag` deletes a lifted
-  tile's outline (the footprint shows instead), `fnc_endDrag` clears `hoverHold` so the next frame gives the tile under the mouse its
-  outline again; `fnc_redrawTiles` and `fnc_build` delete it with the groups it lay in. A tile waiting in the hands' queue shows it too.
+- **The hover outline.** What the mouse is on gets, besides the lighter surface of a tile, the frame of the Ctrl selection
+  (`fnc_hoverOutline`: the accent colour, square, two pixels thick like `fnc_drawSelection`'s, no fill, snapped to whole pixels): a
+  tile around its box (`rect`, w x h cells as it lies, a turned one too) or, shaped, on its own cells (`fnc_uiShape` "frame", two
+  pixels); a slot - weapon, attachment, worn, hotbar - around its box; a free cell of a grid that holds things (not a virtual or
+  overflow grid) around that one cell (`fnc_spanRect`), found as the hover `["cell", grid, column, row]` when `fnc_tileAt` finds no
+  tile - such a hover has no name and the idle hint, and nothing else reads it (the clicks and keys look at `"tile"` and `"slot"`
+  only). There is one outline at a time, `einv_gui_hoverRing`, the slot's, tile's or cell's: `fnc_updateHover`'s light makes it in
+  the column's group when the hover changes (so it scrolls and clips with it, and lies under the name at the mouse; a grid on the
+  display itself asks `fnc_raiseTooltip`) and deletes it when the hover leaves - nothing per tile, nothing per frame. `fnc_startDrag`
+  deletes a lifted tile's outline (the footprint shows instead), `fnc_endDrag` clears `hoverHold` so the next frame gives what is
+  under the mouse its outline again; `fnc_redrawTiles` and `fnc_build` delete it with the groups it lay in. A tile waiting in the
+  hands' queue shows it too. The round rings (`fnc_uiRing`) stay for cards and popovers.
 - **What a frame of a drag costs.** `fnc_updateDrag` works out only what changed. Every frame it reads the middle button and holds
   or edge-scrolls the columns (each column's box is worked out at its first frame, element 3 of its `dragScroll` entry), then
   compares the mouse and what is held (`dragCount`, `dragRot`, `count inFlight`) with the last frame (`dragRoom` "frame"); nothing
@@ -1916,6 +1920,15 @@ window (`step`, `focus`, `selection`, `theme`) and what steps keep between redra
 undo step (`fnc_commitSetup`). `fnc_setDraft [text]` parses, writes out again, compiles with a fresh cache and raises the local event
 `einv_setup_draftChanged [draftText]`. A change that writes out the same text is no change.
 
+Every change ends in `fnc_showStep`, which draws the step again. A scroll group made anew starts at the top and only knows its height a
+frame later, so the lists keep their place by `scrollId`: read before the redraw and put back by `fnc_restoreScroll` a few hundredths
+of a second later, until it holds (a few frames show the top meanwhile). The General page is the one exception: drawn again in the same
+step, `fnc_showStep` keeps the content group and `fnc_drawGeneral` keeps the page's scroll group in it (the group's variable `page`),
+draws the new controls first and deletes the old ones last, so the group is never new, never empty, and the page does not move. A click on
+a stepper (`fnc_uiStepper` defers its code, `fnc_setSetting`, `fnc_commitSettings`) or a pick in a dropdown (`fnc_closePopover`, then the
+same) takes that path. The Items and Containers editors draw only their own card again (`fnc_drawItemEditor`, `fnc_drawCellEditor`), not
+a scrolling page.
+
 **Saving** (`fnc_save`) writes each of the two settings that changed (or that the source lacks, or whose force switch turned) - `einv_items_rules`
 and `einv_main_settings` - with `CBA_settings_fnc_set` into the same source and priority; in menu mode it imports both lines into CBA's menu.
 `fnc_canEdit` is locked when a `cba_settings.sqf` sets either, `fnc_getActive`, `fnc_targetValue` and `fnc_sourceEmpty` take the setting as an
@@ -1937,7 +1950,7 @@ argument, and a change of either (`einv_items_rulesChanged`, `einv_main_settings
     words with the numbers of the moment (the cell, `UNIFORM_COLS`, `UNIFORM_ROWS_MIN`/`MAX`, `VEST_POUCHES_MAX`, a vest of load 120, a backpack of 280, a crate
     of 1000): containers, uniforms, vests, backpacks, vehicles and crates, items, stacking, and that a rule of the class beats it all. The sizes of items and
     the stack numbers in the words are those of the default preset - keep them together.
-  - **Server settings** by topic (`GVAR(topics)`: looting, hands, living persons, containers, weight, hotbar/repacking/locks, vanilla arsenal; a registered setting that
+  - **Server settings** by topic (`GVAR(topics)`: looting and searching with the hands' queue times, living persons, containers, weight, hotbar/repacking/locks, vanilla arsenal; a registered setting that
     no topic names goes under Other, one whose addon is not loaded is not shown): two to a line, a text box a line to itself. A control by the registry's type
     (`einv_main_serverSettings`): CHECKBOX `fnc_uiToggle`, SLIDER `fnc_uiStepper` (a step of 1, or 0.5 or 0.05 for a short range with decimals; the value
     rounded to the setting's decimals), LIST `fnc_uiDropdown`, EDITBOX `fnc_uiField` (a text box applied on Return or when it loses the cursor, not per key).
