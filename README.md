@@ -195,8 +195,7 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   Nothing is locked by default. An item never lands in a compartment that refuses it - dragging, quick move, Take all, the arsenals
   and scripts that add to the cargo all follow it; what the compartments refuse is put in another compartment or counts as no room.
   Over a refusing compartment the drag footprint is red with "Only magazines here". A locked compartment always shows what it takes -
-  a small badge with the pictures of its categories (and a "1" for a single slot) at its top left cell, also while something lies in it, and a faint
-  picture of its category on its free cells - and hovering it says so in the footer. A single slot draws the item scaled into it and gives it its
+  a faint picture of its category, large in the middle of an empty compartment and small on each free cell when something lies in it - and hovering it says so in the footer. A single slot draws the item scaled into it and gives it its
   own size back when you take it out. The wizard's Containers editor sets both per compartment on the Blocks way.
   The eight categories are not all there is: the wizard's General page has a Categories card where you rename them, give them another picture
   (any of this mod's icons or any item's picture), and add categories of your own. They are statements of the rules text, so they are saved on
@@ -266,6 +265,10 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   caption line of the box says "Searching 0:07" with a ring that goes round and a cross that stops the search of that box (the button then reads
   "Search" and goes on again). A strip of icons at the side of a loot box - all, weapons, ammunition, gear, medical, food and drink, tools, other - shows
   only that kind of item in the box (the rest fades, like with the search field; a paged box turns to its first page with a match).
+  Searching can be left out for a single crate, vehicle or body: in Eden by the attribute *Skip searching* (category Enhanced Inventory), in Zeus Enhanced
+  by the right-click choices *Searching: turn off* / *Searching: turn on*, in a script by `[_crate, false] call einv_gui_fnc_setSearchable;` (`true` gives it back to the
+  settings; the mark is public, so a player who joins later has it). The server setting *Search Zeus-placed crates and vehicles* (on by default) leaves out
+  everything a game master places when switched off.
 - **Big containers in pages:** a crate or vehicle taller than "Rows per page of a container" (`einv_gui_pageRows`, in "Enhanced Inventory - Client",
   General, 10 rows by default, 0 or 40 for no pages) shows that many rows at a time. The bar under it turns the pages, a fade over the page's last row
   with a chip such as "+37 items on other pages" says there is more, and an item dragged over an arrow of the bar turns the page after a moment so it can be let go

@@ -130,6 +130,15 @@
     true
 ] call EFUNC(main,addSetting);
 
+// Zeus fills a crate with what the players are meant to find, and a search on top of that is often not wanted: off leaves
+// the crates and vehicles the game master places out of the search. One object can be turned back on from Zeus (compat_zen).
+[
+    QGVAR(searchZeus),
+    "CHECKBOX",
+    [LLSTRING(Setting_SearchZeus), LLSTRING(Setting_SearchZeus_Desc)],
+    true
+] call EFUNC(main,addSetting);
+
 [
     QGVAR(searchGround),
     "CHECKBOX",

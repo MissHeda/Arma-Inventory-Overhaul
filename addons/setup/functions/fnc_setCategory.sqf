@@ -26,7 +26,12 @@ if (_id isEqualTo "") exitWith {};
 private _ast = [GVAR(draftText)] call EFUNC(items,parseRules);
 private _categories = +(_ast getOrDefault ["categories", []]);
 private _at = _categories findIf {(_x select 0) isEqualTo _id};
-private _entry = [[_id, "", ""], +(_categories select _at)] select (_at >= 0);
+// Not a select on both: the second would throw for a category that is not there yet.
+private _entry = [_id, "", ""];
+
+if (_at >= 0) then {
+    _entry = +(_categories select _at);
+};
 
 if ("name" in _fields) then {
     _entry set [1, (trim (_fields get "name")) select [0, CAT_NAME_MAX]];

@@ -13,6 +13,12 @@
         <Key ID="STR_einv_compat_zen_Action_Lock">
             <English>Inventory lock</English>
         </Key>
+        <Key ID="STR_einv_compat_zen_Action_SearchOff">
+            <English>Searching: turn off</English>
+        </Key>
+        <Key ID="STR_einv_compat_zen_Action_SearchOn">
+            <English>Searching: turn on</English>
+        </Key>
         <Key ID="STR_einv_compat_zen_Action_Side">
             <English>%1 only</English>
         </Key>
@@ -45,6 +51,12 @@
         </Key>
         <Key ID="STR_einv_compat_zen_Feedback_Open">
             <English>Not locked any more</English>
+        </Key>
+        <Key ID="STR_einv_compat_zen_Feedback_SearchOff">
+            <English>Not searched: the loot shows at once</English>
+        </Key>
+        <Key ID="STR_einv_compat_zen_Feedback_SearchOn">
+            <English>Searched as the server's settings say</English>
         </Key>
         <Key ID="STR_einv_compat_zen_Module_Lock">
             <English>Lock inventory</English>

@@ -199,7 +199,7 @@ private _fnc_compartment = {
     };
 
     // A compartment that takes only some categories, and a single slot (one tile whatever its size, einv_storage_fnc_blockMode),
-    // says so with a badge and a faint picture on its free cells: made over the tiles, after them (fnc_drawBadge, from fnc_drawCells).
+    // says so with a faint picture on its free cells: made over the tiles, after them (fnc_drawBadge, from fnc_drawCells).
 
     private _grid = [_display, _parent, [_x0, _y0], _rows, _theme, _id, _cols, _holes, [_colX, _rowY], _pageWindow] call FUNC(createGrid);
 

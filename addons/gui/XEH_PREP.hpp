@@ -116,6 +116,9 @@ PREP(cbaRun);
 
 // Searching loot
 PREP(isSearched);
+PREP(setSearchable);
+PREP(onZeusPlaced);
+PREP(hookCurators);
 PREP(markHidden);
 PREP(learn);
 PREP(findTile);

@@ -158,9 +158,8 @@
 // group of them (fnc_stripEntries, fnc_stripMore).
 #define STRIP_SLOTS 9
 
-// What a compartment that takes only some categories shows (fnc_drawBadge): at most this many category pictures in the badge
-// at its top left corner, and the faint pictures on its free cells while at most this many cells are free.
-#define BADGE_ICONS_MAX 3
+// What a compartment that takes only some categories shows (fnc_drawBadge): the faint pictures on its free cells while at most
+// this many cells are free.
 #define WATERMARK_CELLS_MAX 12
 
 // Tiles that do not match the search field fade this far, this quickly (fnc_applyFilter).

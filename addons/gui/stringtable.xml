@@ -67,6 +67,12 @@
         <Key ID="STR_einv_gui_Drop">
             <English>Drop</English>
         </Key>
+        <Key ID="STR_einv_gui_Eden_NoSearch">
+            <English>Skip searching</English>
+        </Key>
+        <Key ID="STR_einv_gui_Eden_NoSearch_Tooltip">
+            <English>What this object holds shows at once, without being searched first. Overrides the search settings of the server.</English>
+        </Key>
         <Key ID="STR_einv_gui_Equip">
             <English>Equip</English>
         </Key>
@@ -642,7 +648,7 @@ loot, not for your own gear.</English>
             <English>Search crates and vehicles</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchContainers_Desc">
-            <English>What a crate or a vehicle holds shows\nas &quot;?&quot; until it has been searched.\n\nMission makers can leave out a single\nobject (an arsenal box, base supply):\n_box setVariable [&quot;einv_noSearch&quot;, true, true];</English>
+            <English>What a crate or a vehicle holds shows\nas &quot;?&quot; until it has been searched.\n\nOne object can be left out: in Eden with\nits &quot;Skip searching&quot; box, from Zeus with\nthe right click menu, in a script with\n[_box, false] call\neinv_gui_fnc_setSearchable;</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchGround">
             <English>Search the ground</English>
@@ -661,6 +667,12 @@ loot, not for your own gear.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTime_Desc">
             <English>Seconds it takes to search one grid\ncell of loot. A 2x2 item takes four\ntimes as long.\n\n0 shows everything at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchZeus">
+            <English>Search Zeus-placed crates and vehicles</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchZeus_Desc">
+            <English>Crates and vehicles a game master\nplaces with Zeus are searched like\nany other.\n\nOff: what Zeus places shows its loot at\nonce. Needs &quot;Search crates and vehicles&quot;\non. One object can be switched in Zeus\nEnhanced (right click, Searching).</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_ShowNearby">
             <English>Show everything nearby</English>

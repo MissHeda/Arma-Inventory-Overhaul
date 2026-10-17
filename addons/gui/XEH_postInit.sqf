@@ -12,6 +12,10 @@
     };
 }, true] call CBA_fnc_addClassEventHandler;
 
+// A crate or a vehicle the game master places is left out of the search when the server says so (fnc_onZeusPlaced). The
+// curator modules are looked for every few seconds on every machine: a game master can be assigned at any time.
+[{call FUNC(hookCurators)}, 5] call CBA_fnc_addPerFrameHandler;
+
 if (!hasInterface) exitWith {};
 
 #include "initKeybinds.inc.sqf"
