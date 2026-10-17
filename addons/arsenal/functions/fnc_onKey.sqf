@@ -4,8 +4,9 @@
  * Author: Miss Heda
  * A key pressed on ACE Arsenal's display, beside ACE's own handler, which runs as always: Escape closes,
  * the arrows add and take out, typing goes into ACE's search fields. The engine gets only two keys: R
- * while it drags something (a quarter turn), and Delete while the mouse is over the panel (the tile there
- * is taken out - the engine's Delete ends in the "ground" hook, fnc_remove). Nothing while a field of
+ * while it drags something (a quarter turn), and the drop key (the player's, G by default -
+ * einv_gui_fnc_isDropKey) while the mouse is over the panel (the tile there is taken out - the engine's drop
+ * ends in the "ground" hook, fnc_remove). Nothing while a field of
  * ACE's has the cursor.
  *
  * Whether Ctrl is held is noted with every key, pressed or let go (also by the display's KeyUp handler,
@@ -56,7 +57,10 @@ private _dragging = EGVAR(gui,dragging);
 
 if (
     (_key == DIK_R && {_dragging})
-    || {_key == DIK_DELETE && {!_dragging} && {[getMousePosition] call FUNC(isOver)}}
+    || {
+        !_dragging && {[getMousePosition] call FUNC(isOver)}
+        && {[_key, [_shift, _ctrl, _alt]] call EFUNC(gui,isDropKey)}
+    }
 ) exitWith {
     _this call EFUNC(gui,onKeyDown)
 };

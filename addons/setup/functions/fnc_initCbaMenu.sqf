@@ -10,7 +10,7 @@
  *
  * Runs when the menu loads (Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions), after CBA's
  * own handler, which made the controls looked for here. Their ids are CBA's internals, not a promise:
- * should any of them be missing or moved, the button is simply not made, and ESC > Options, the keybind,
+ * should any of them be missing or moved, the button is simply not made, and ESC > Options,
  * Eden's Tools menu and the inventory's cog still open the wizard.
  *
  * Arguments:

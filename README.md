@@ -12,7 +12,7 @@ all") or puts everything of yours into the box beside it ("Put all in").
 
 - **Grid panel in ACE Arsenal:** pick the uniform, vest or backpack tab and its grid opens beside ACE's list.
   What you add lands in the first free cell, drag tiles to sort them (R turns, stacks merge, a badge shows
-  n/stack), drag them out of the panel - or right click, or Delete - to take them out. With no free cells ACE's
+  n/stack), drag them out of the panel - or right click, or the drop key (G by default) - to take them out. With no free cells ACE's
   add is taken back and the message says how much room to make. Drag a row out of ACE's list onto a free spot of
   the grid to put it in there (the wheel sets how many, Ctrl+wheel over a tile adds or takes out one). Under the
   grid a staging space holds things while you rearrange a full container - it grows as you fill it -; whatever

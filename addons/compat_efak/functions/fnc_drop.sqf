@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * A move into, out of or between kits, for the window - a drag let go (einv_gui_fnc_endDrag), Ctrl+click
- * (einv_gui_fnc_quickMove, fnc_takeOut), Delete and Drop (einv_gui_fnc_dropToGround). As many of a
+ * (einv_gui_fnc_quickMove, fnc_takeOut), the drop key and Drop (einv_gui_fnc_dropToGround). As many of a
  * stack as the drag counted, all of them or none.
  *
  * Checked here against what this machine sees, so a refusal says why at once and nothing is sent: what

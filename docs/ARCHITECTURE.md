@@ -1131,7 +1131,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   next entry goes on). The funnel is `fnc_sendMoves` itself: unless the option `"now"` is set it hands its moves to `fnc_queueMoves` first, which
   answers `[moves to send now, how many were queued]`; the rest goes on in the same call, and the call answers true when it queued something. Every
   caller gets it without a change: the drag (`fnc_endDrag` -> `fnc_applyMove`, `fnc_dropToGround`, `fnc_doEquip`, `fnc_doUnequip`, `fnc_doSwap`,
-  `fnc_applySwap`), the quick move and double click, G / Delete and Drop, Take all / Put all in and group drags (`fnc_sendPlan`, one entry per
+  `fnc_applySwap`), the quick move and double click, the drop key and Drop, Take all / Put all in and group drags (`fnc_sendPlan`, one entry per
   move), the kits' ops (`einv_compat_efak`). `fnc_queueTime [move]` -> `[kind, seconds]` says what a move costs: `drop` (to `"ground"`,
   `"vehicle"` or a pile - `einv_gui_handDrop`), `move` (to a different holder, and an `exchange` - `einv_gui_handMove`), `equip` (`equip`,
   `unequip`, `swap` - `einv_gui_handEquip`); `""` and no wait for a move within one holder, `placeMany`, `sort`. A kind set to 0 seconds is never
@@ -1265,7 +1265,7 @@ inventory-only feature asks it: nearby boxes, selecting, the band, group drags, 
 | `wheel` | `[scroll, mouse]` | BOOL, true = taken - only while nothing is dragged, once per turn | `fnc_onMouseZ` |
 | `mouseDown`, `mouseUp` | `[button, mouse, shift, ctrl, alt]` | BOOL, true = taken - before the right click | `fnc_onMouseButton` |
 | `click` | `[kind "single" / "double", target, shift, ctrl, alt]` | BOOL, true = handled - a click that did not become a drag | `fnc_onMouseButton` |
-| `key` | `[display, key, shift, ctrl, alt]` | BOOL, true = handled - after the hotbar and selection keys, before the drop keys (G, Delete) and the Gear key | `fnc_onKeyDown` |
+| `key` | `[display, key, shift, ctrl, alt]` | BOOL, true = handled - after the hotbar and selection keys, before the drop key and the Gear key | `fnc_onKeyDown` |
 | `submit` | `[edit]` | nothing - Return in a field | `fnc_onKeyDown` |
 | `dragCheck` | `[dragTarget, entry, sourceGrid, slotSource]` | the target as it is to stand, `[]` for none, nil to leave it - last of everything | `fnc_updateDrag` |
 | `drop` | `[kind, sourceIndex, tileIndex, slotSource, entry, count, targetIndex, col, row, w, h, targetSlot, place, rot]` (**14**) | BOOL, true = handled - after the `!fits` exit | `fnc_endDrag` |
@@ -1523,9 +1523,11 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   are `[holder, key, compartment, col, row]` (`einv_gui_selection`), found again on every build by `fnc_selectionTiles`; one side
   at a time (`own` or `loot`); searched tiles only. **Double click** - or the quick move key, F by default (CBA keybind `einv_gui_quickMove`, `fnc_isQuickKey`, read by `fnc_onKeyDown` since CBA's keys do not run in a dialog; both do `fnc_quickAction`) - moves a tile over (`fnc_quickMove`: from own gear into the
   loot column's containers in order, else the ground; from loot into uniform, vest, backpack), opens a kit or nested container, or
-  moves a whole selection (`fnc_quickMoveGroup`); Ctrl+click on a slot takes off (`fnc_quickUnequip`); **G** (the footer's
-  drop key, in the inventory only; Delete does the same everywhere) and "Drop" put the selection on the ground - with
-  nothing selected, G drops the tile under the mouse, or the item of the worn slot there (`fnc_doUnequip` to the ground).
+  moves a whole selection (`fnc_quickMoveGroup`); Ctrl+click on a slot takes off (`fnc_quickUnequip`); the **drop key** (CBA
+  keybind `einv_gui_drop`, G by default, read like the quick move key by `fnc_isDropKey`, modifiers respected; the footer shows it,
+  `fnc_dropKeyName`, and leaves the hint out while it is unbound; no other key drops, Delete included; the hotbar's strip clear and
+  the Arsenal's panel use the same key) and "Drop" put the selection on the ground - with
+  nothing selected, the key drops the tile under the mouse, or the item of the worn slot there (`fnc_doUnequip` to the ground).
   Alt+click has no meaning of its own any more (it was the quick equip: putting on is a drag onto a slot, a double click on the
   ground and the menu's Equip). **Shift+click** on a stack (two or more) splits it - half onto the nearest free cell as a stack
   of its own (`fnc_splitStack`, an `applyMove` from = to with `separate`) - but only while `einv_storage_stackSplits` is true;
@@ -1584,7 +1586,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   as active radio, and CBA rows that use the item up (`fnc_cbaOptions`: the `consume` flag on `UNIFORM_CONTAINER`,
   `VEST_CONTAINER`, `BACKPACK_CONTAINER`). Moving, equipping, loading into a weapon and dropping are never limited.
 - **The footer's key hints** (`fnc_drawFooter`, `fnc_uiKeyHint`): Esc Close, the quick move (the player's key, F by default - `fnc_quickKeyName` -,
-  or the double click while it has none), G Drop, the hotbar's range, Ctrl+click Select and the right mouse button Options, in that
+  or the double click while it has none), the drop key (the player's, `fnc_dropKeyName`; no hint while unbound), the hotbar's range, Ctrl+click Select and the right mouse button Options, in that
   order; contextual hints (R rotate, the drag's keys) come in the hint line, not here. A mouse button in a key hint is ACE's own
   picture, not words: a key string may carry the tokens `@left`, `@right`, `@scroll` and `@double` (two left clicks), alone or after
   modifiers joined by `+` (`"Ctrl+@left"`: a key cap `Ctrl`, then a cap with the mouse picture). The pictures are
@@ -1719,7 +1721,7 @@ The hook table (`einv_arsenal_fnc_hooks`, section 4) sets `guest`, `header` (non
 closes), `frame`, `mouseDown` / `mouseUp` (`fnc_onMouse`: outside the panel taken, so the engine ignores it), `click`
 (`fnc_onClick`: double, Ctrl and Alt clicks swallowed - no equip or quick move past ACE), `wheel`, `dragCheck`, `drop`, `ground`
 (-> `fnc_remove`), `fold`, `menu` (Remove, Remove all of this kind) and `hint`. `fnc_onKey` hands the engine only R while dragging
-and Delete over the panel, never while a field has the cursor. A drop outside the panel never goes to the ground: it takes the
+and the drop key (`fnc_isDropKey`) over the panel, never while a field has the cursor. A drop outside the panel never goes to the ground: it takes the
 item out.
 
 ### The panel
@@ -1831,7 +1833,7 @@ they are **taken out**, not left in or moved on, and the player is asked first.
   per class) - and likewise for a tile that joins a stack of its own class there.
 - **Wheel and remove.** During a list drag the engine's wheel sets the count on the ghost. Else `fnc_onWheel`: plain is the
   column's scroll; **Ctrl** over a tile adds one of its class (`fnc_addTo`, if in `ace_arsenal_virtualItemsFlat`) or takes one out
-  (`fnc_remove`). A drop outside the panel, Delete, the menu or Ctrl+wheel down remove (`fnc_remove`: the record first when the
+  (`fnc_remove`). A drop outside the panel, the drop key, the menu or Ctrl+wheel down remove (`fnc_remove`: the record first when the
   whole tile goes, then `removeEntry` with the dragged count; `fnc_removeKind`), with sound `giveBack` and `fnc_tellAce`.
 - **Frame-later pass** (`fnc_settle`, once a frame however often asked): fallback follow-up, snapshot, `fnc_syncAce` (row counts,
   load bar, `ace_arsenal_currentItems`, `ace_arsenal_fnc_updateRightPanel`), **`fnc_ungrey`** (rows are greyed or lit by whether a stack has room or a spot of the item's shape is free, as an add would find it, one grid look per shape, in turns of UNGREY_BUDGET; also the "+" of the picked row, and the
@@ -1876,12 +1878,11 @@ over the main menu and in Eden.
 | CBA's Addon Options, a button in the bottom row (between Load and Import) while this mod's page is open | menu | `fnc_initCbaMenu` (`Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions`); missing CBA controls mean no button and nothing else breaks |
 | ESC > Options > Inventory setup | direct | `CBA_fnc_addPauseMenuOption` with the display `einv_setup_RscWizard` (idd 9620) |
 | Eden: Tools menu | direct | `Display3DEN.hpp`, over display 313; saves into the scenario |
-| keybind `einv_setup_openWizard` (unbound) | direct | `fnc_openFromGame [step, class]`; a running mission only |
 | the inventory's cog (`einv_gui_fnc_drawHeader`) | direct | `fnc_openFromGame`; the tooltip says read-only when `fnc_canEdit` says so; the inventory comes back on close (`einv_setup_reopenInventory`), as a person window when it was one |
 
 - `fnc_open [parent = displayNull, mode = "direct", step = 0, class = ""]` (public) -> display; one wizard at a time, an open
-  inventory closes first. The wizard edits `einv_items_rules`, has one keybind, `einv_setup_openWizard`, and no setting of its
-  own. `fnc_canOpen []` (public) -> BOOL is the one gate every way in passes: `fnc_openFromGame` (keybind, the inventory's cog; asked
+  inventory closes first. The wizard edits `einv_items_rules`, has no keybind and no setting of its
+  own. `fnc_canOpen []` (public) -> BOOL is the one gate every way in passes: `fnc_openFromGame` (the inventory's cog; asked
   before the inventory closes, so a refusal keeps it open and says nothing), `fnc_open` (a mission's own call), `fnc_initCbaMenu` (the
   button on CBA's Addon Options, asked at every sync) and `fnc_onLoad` (ESC > Options, where the engine makes the display itself:
   closed again through `fnc_defer`, silently). It is `is3DEN || isServer || !isMultiplayer || serverCommandAvailable "#kick"`: the
@@ -2250,7 +2251,7 @@ equips or shows targets for real slots touches it.
 - **Keys** (`fnc_onKey`, a frame later `fnc_use`): left to Arma and ACE when the slot is empty, while a command menu is open, in
   Zeus or a feature camera, and - `einv_hotbar_leaderKeys` - while the player leads AI; a second press within `USE_LOCK` 0.4 s is
   ignored. CBA keybinds do not run in a dialog, so the window asks `fnc_onWindowKey` itself: over a tile or an own slot a slot's
-  key binds the item, over a hotbar slot it swaps the two, G (the window's drop key) or Delete empties it. A filled slot of the
+  key binds the item, over a hotbar slot it swaps the two, the drop key (`fnc_isDropKey`) empties it. A filled slot of the
   window's row can also be dragged: onto another slot it swaps, anywhere else it is removed (gui `fnc_startStripDrag`). `fnc_checkKeys` names, once per profile, every other
   keybind on the same keys. `fnc_bind [index, class, from, checked]`, `fnc_unbind`, `fnc_use` are public.
 - **The bar on the screen** (`RscTitles >> einv_hotbar_RscHud`, `CfgUIGrids` entry `einv_hotbar_grid`, movable in Arma's layout
@@ -2487,7 +2488,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_weight_notify` | CHECKBOX | client | on | a message when the tier changes with the inventory closed |
 | `einv_locks_zeusOpens` | CHECKBOX | global | on | Zeus may open locked containers |
 
-CBA keybinds: `einv_hotbar_slot1` to `slot7` (4 to 0), `einv_hotbar_show`, `einv_gui_quickMove` (F, the quick move in the inventory window), `einv_setup_openWizard` (unbound). Kept in the player's
+CBA keybinds: `einv_hotbar_slot1` to `slot7` (4 to 0), `einv_hotbar_show`, `einv_gui_quickMove` (F, the quick move in the inventory window), `einv_gui_drop` (G, the drop in the inventory window). Kept in the player's
 profile: `einv_gui_searchMuted`, `einv_hotbar_slots` (`einv_gui_cameraOn` no longer since 0.4.7: `einv_gui_cameraDefault`).
 
 **What missions and other mods may set** (all optional): on an object `einv_grid` (a grid text, public), `einv_noSearch`,

@@ -49,6 +49,9 @@ private _keyX = _left;
 // The quick move is the player's key (fnc_quickKeyName), the double click while it has none.
 private _quickKey = call FUNC(quickKeyName);
 
+// The drop is the player's key too (fnc_dropKeyName); with none set there is no hint, the menu's Drop row is left.
+private _dropKey = call FUNC(dropKeyName);
+
 // Their order: Esc, the quick move, drop, the hotbar's range, select, the menu. Selecting is the inventory's only:
 // where another window attaches (the Arsenal) Ctrl+click still moves a tile over (fnc_onMouseButton).
 private _inventory = call FUNC(isInventoryMode);
@@ -57,7 +60,7 @@ private _keys = if (_inventory) then {
     [
         [LLSTRING(Key_Escape), LLSTRING(Close)],
         [[_quickKey, "@double"] select (_quickKey isEqualTo ""), LLSTRING(QuickMove)],
-        [LLSTRING(Key_Drop), LLSTRING(Drop)],
+        [_dropKey, LLSTRING(Drop)],
         (if (!isNil QEFUNC(hotbar,footerHint)) then {call EFUNC(hotbar,footerHint)} else {["", ""]}),
         ["Ctrl+@left", LLSTRING(Select)],
         ["@right", LLSTRING(Menu)]
@@ -66,7 +69,7 @@ private _keys = if (_inventory) then {
     [
         [LLSTRING(Key_Escape), LLSTRING(Close)],
         ["Ctrl+@left", LLSTRING(QuickMove)],
-        [LLSTRING(Key_Drop), LLSTRING(Drop)],
+        [_dropKey, LLSTRING(Drop)],
         ["@right", LLSTRING(Menu)]
     ]
 };

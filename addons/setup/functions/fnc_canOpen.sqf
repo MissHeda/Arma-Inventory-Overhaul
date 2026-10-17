@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Whether this player may see the setup wizard at all - the one gate every way into it passes: the
- * keybind and the inventory's cog (fnc_openFromGame, before the inventory closes for it), a mission's own
+ * inventory's cog (fnc_openFromGame, before the inventory closes for it), a mission's own
  * call (fnc_open), CBA's Addon Options button (fnc_initCbaMenu) and ESC > Options, where the engine makes
  * the display itself and only its onLoad can still say no (fnc_onLoad). Saving is a question of its own
  * (fnc_canEdit); this one is whether the wizard exists for the player.

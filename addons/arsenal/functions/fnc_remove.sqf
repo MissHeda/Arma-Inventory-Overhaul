@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Takes a tile of the panel out of the open uniform, vest or backpack - let go outside the panel, Delete
+ * Takes a tile of the panel out of the open uniform, vest or backpack - let go outside the panel, the drop key
  * over it, or "Remove" in its menu - and ACE's list follows. A whole tile's record goes first (left in, the
  * tiles after it would take the record before theirs), then exactly the count asked for leaves through the
  * storage (einv_storage_fnc_removeEntry: a magazine by its rounds, a weapon with its parts, a container with

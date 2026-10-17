@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Opens the setup wizard from a running mission - the keybind and the cog in the inventory's header. The
+ * Opens the setup wizard from a running mission - the cog in the inventory's header. The
  * inventory window closes first: the two never share the screen. The wizard opens a frame later over the
  * game's own screen, in direct mode, so what it saves goes straight into CBA's settings. A player
  * who may not open it (fnc_canOpen) gets a hint and keeps the inventory.

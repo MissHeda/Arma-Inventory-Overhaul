@@ -772,9 +772,6 @@
         <Key ID="STR_einv_setup_Key_Undo">
             <English>Ctrl+Z</English>
         </Key>
-        <Key ID="STR_einv_setup_Keybind_Open">
-            <English>Open inventory setup</English>
-        </Key>
         <Key ID="STR_einv_setup_Kind_Auto_backpack">
             <English>one big block, by load</English>
         </Key>

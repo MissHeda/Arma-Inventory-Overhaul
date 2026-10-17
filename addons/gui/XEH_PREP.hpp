@@ -276,6 +276,8 @@ PREP(compatCollect);
 PREP(stepAside);
 PREP(isQuickKey);
 PREP(quickKeyName);
+PREP(isDropKey);
+PREP(dropKeyName);
 PREP(quickAction);
 PREP(takeFocus);
 PREP(isFinite);

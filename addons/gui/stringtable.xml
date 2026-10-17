@@ -182,7 +182,7 @@
             <English>R: rotate</English>
         </Key>
         <Key ID="STR_einv_gui_Hint_Selected">
-            <English>%1 selected - drag them together, double click to move them over, G drops them</English>
+            <English>%1 selected - drag them together, double click to move them over, the drop key drops them</English>
         </Key>
         <Key ID="STR_einv_gui_Hint_StripMove">
             <English>Let go to move it to this hotbar slot</English>
@@ -253,9 +253,6 @@
         <Key ID="STR_einv_gui_Key_DoubleClick">
             <English>Double click</English>
         </Key>
-        <Key ID="STR_einv_gui_Key_Drop">
-            <English>G</English>
-        </Key>
         <Key ID="STR_einv_gui_Key_Escape">
             <English>Esc</English>
         </Key>
@@ -267,6 +264,12 @@
         </Key>
         <Key ID="STR_einv_gui_Key_Scroll">
             <English>Scroll</English>
+        </Key>
+        <Key ID="STR_einv_gui_Keybind_Drop">
+            <English>Drop (inventory window)</English>
+        </Key>
+        <Key ID="STR_einv_gui_Keybind_Drop_Tooltip">
+            <English>Drops the item under the mouse onto\nthe ground, or the whole selection.\nOver a worn slot it takes the item\noff and drops it.\n\nOn a hotbar slot it empties the slot;\non ACE Arsenal's panel it takes the\nitem out.</English>
         </Key>
         <Key ID="STR_einv_gui_Keybind_QuickMove">
             <English>Quick move (inventory window)</English>
@@ -422,7 +425,7 @@
             <English>Time to drop an item</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandDrop_Desc">
-            <English>Seconds the hands are busy dropping one\nitem onto the ground (G, Delete, a drag\nout of the window, Drop in the menu).\nEvery item waits its turn with a circle\non its tile: one runs at a time, the\nnext starts when it is done, and a click\non a circle cancels it. Closing the\nwindow cancels what still waits.\n\n0 drops at once, with no circle.</English>
+            <English>Seconds the hands are busy dropping one\nitem onto the ground (the drop key, a drag\nout of the window, Drop in the menu).\nEvery item waits its turn with a circle\non its tile: one runs at a time, the\nnext starts when it is done, and a click\non a circle cancels it. Closing the\nwindow cancels what still waits.\n\n0 drops at once, with no circle.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandEquip">
             <English>Time to put on or take off</English>

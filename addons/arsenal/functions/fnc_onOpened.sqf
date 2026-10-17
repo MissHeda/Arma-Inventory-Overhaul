@@ -9,7 +9,7 @@
  * engine on ACE's display, on top of ACE's own controls, and goes with it.
  *
  * ACE's keys stay ACE's: the display gets one more key handler (fnc_onKey) that hands the engine R while
- * something is dragged and Delete over the panel, nothing else, and notes Ctrl - pressed there and let go
+ * something is dragged and the drop key over the panel, nothing else, and notes Ctrl - pressed there and let go
  * in a KeyUp handler - for Ctrl and the wheel (fnc_onWheel). A new row picked in ACE's list has its
  * list and "+" looked at again by the grid a frame later (fnc_ungrey), after ACE's own look by weight -
  * ACE greys every row anew at each pick -, and a press on the list is noted, as it may become a drag of
