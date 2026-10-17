@@ -13,6 +13,9 @@
  *     about a class: a class with a rule of its own, or a mod that sets its grid, keeps it.
  *   - How room is worked out: the load per cell (the header's cell=) and, in plain words with the numbers as they
  *     are now, how weight turns into cells for each kind of container, how big an item is and what stacks.
+ *   - Categories (fnc_drawCategories): the eight built-in categories - names and pictures can be changed - and the ones the setup
+ *     defines itself, which items are put in, compartments accept and the strip at the side of a loot box lists. Add, rename,
+ *     pick a picture, delete; the statements category=... of the rules text.
  *   - The server settings, by topic (GVAR(topics)): everything of this mod that is the same for everyone, each a control of
  *     its own kind - a switch, a stepper, a drop-down, a text box - with a small reset button while it is off its
  *     default. They are registered by their addons (einv_main_fnc_addSetting) and saved in one CBA text box,
@@ -440,6 +443,10 @@ private _paragraphY = _contentY + _rowH + UNIT * 0.35 - UNIT * 0.1;
 } forEach _paragraphs;
 
 _cursorY = _cursorY + _roomH + _gapY;
+
+// ----- Categories: the names and pictures of the categories, and the setup's own -----
+
+_cursorY = _cursorY + ([_display, _page, [_padX, _cursorY, _innerW], _theme, _probe] call FUNC(drawCategories)) + _gapY;
 
 // ----- The server settings, by topic -----
 

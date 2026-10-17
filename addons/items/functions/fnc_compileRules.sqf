@@ -42,6 +42,9 @@
  *   "base"        - the preset it builds on in the end, "none" for none <STRING>
  *   "chain"       - the presets read, the base first <ARRAY>
  *   "cell"        - config mass per grid cell <NUMBER>
+ *   "categoryIds" - every category there is: the eight built-in ones (ITEM_GROUPS), then the text's own in the order it
+ *                   defines them (fnc_categories) <ARRAY of STRING>
+ *   "categoryDefs" - id -> [name, picture] the text gives it, "" for what it does not set (fnc_categoryInfo) <HASHMAP>
  *   "groups"      - group key -> its definitions, each a list of compiled conditions; the key of the
  *                   definition in effect is the group's name, replaced ones are "name#layer" <HASHMAP>
  *   "groupKeys"   - name -> key of the definition in effect <HASHMAP>
@@ -74,6 +77,18 @@ private _warnings = [];
 private _ast = [_text] call FUNC(parseRules);
 
 _warnings append (_ast get "warnings");
+
+// ----- The categories -----
+// The eight built-in ones, then those the text defines (category=...). Only the text defines any: a preset has no say in them.
+private _categoryIds = ITEM_GROUPS;
+private _categoryDefs = createHashMap;
+
+{
+    _x params ["_categoryId", "_categoryName", "_categoryPicture"];
+
+    _categoryDefs set [_categoryId, [_categoryName, _categoryPicture]];
+    _categoryIds pushBackUnique _categoryId;
+} forEach (_ast getOrDefault ["categories", []]);
 
 // ----- The preset chain -----
 
@@ -671,6 +686,31 @@ if (_legacy) then {
     };
 };
 
+// ----- Categories nobody defined -----
+// An item or a compartment of the text that names a category the text does not define: left out where it is used
+// (fnc_getInfo, fnc_cleanGrid), said here once.
+private _undefined = [];
+
+{
+    private _values = _x select 1;
+    private _used = +(_values getOrDefault ["cats", []]);
+    private _gridSpec = _values getOrDefault ["grid", []];
+
+    if ((_gridSpec param [0, ""]) isEqualTo "blocks") then {
+        {
+            _used append (_x param [4, []]);
+        } forEach (_gridSpec select 1);
+    };
+
+    {
+        _undefined pushBackUnique _x;
+    } forEach (_used select {!(_x in _categoryIds)});
+} forEach _own;
+
+{
+    _warnings pushBack format ["There is no category '%1' - the items and compartments that name it ignore it. Add category=%1 > name=... to define it.", _x];
+} forEach _undefined;
+
 // ----- By kind -----
 
 private _byKind = createHashMap;
@@ -719,6 +759,8 @@ createHashMapFromArray [
     ["base", ["none", _base] select (_chain isNotEqualTo [])],
     ["chain", _chain],
     ["cell", _cell],
+    ["categoryIds", _categoryIds],
+    ["categoryDefs", _categoryDefs],
     ["groups", _groups],
     ["groupKeys", _groupKeys],
     ["groupSource", _groupSource],

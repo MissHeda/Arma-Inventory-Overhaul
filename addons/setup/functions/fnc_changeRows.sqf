@@ -27,7 +27,7 @@
  *
  * Return Value:
  * Rows, [[kind, status, label, words, picture, before, class, statement, undo], ...] <ARRAY>
- *   kind      - "preset", "cell", "override", "setting", "group" or "rule"
+ *   kind      - "preset", "cell", "override", "setting", "category", "group" or "rule"
  *   status    - "new", "changed" or "removed"
  *   label     - what it is about: "Preset", the class by its display name, or the whole sentence
  *   words     - the change in words (fnc_describeRule), "" when the label says it all
@@ -54,6 +54,8 @@ if (_against isEqualTo "default") then {
     private _general = [RULES_DEFAULT] call EFUNC(items,parseRules);
 
     _general set ["cell", GVAR(draft) getOrDefault ["cell", -1]];
+    // The categories are the General step's own, as the cell size is.
+    _general set ["categories", +(GVAR(draft) getOrDefault ["categories", []])];
     _general set ["rules", (GVAR(draft) getOrDefault ["rules", []]) select {
         private _rule = _x;
 
@@ -173,24 +175,44 @@ if (_against isEqualTo "saved") then {
 
 // ----- The statements -----
 
-// Each by what it is for - a group by its name, a rule by its conditions, the second of the same counted
-// apart - with [key, is a group, statement, index in its own list, as written, index in these entries].
+// Each by what it is for - a category by its id, a group by its name, a rule by its conditions, the second of the same counted
+// apart - with [key, type (0 rule, 1 group, 2 category), statement, index in its own list, as written, index in these entries].
+// The text writes them in this order: the categories, the groups, the rules.
 private _fnc_entries = {
     params ["_ast", "_statements"];
 
+    private _categories = _ast getOrDefault ["categories", []];
     private _groups = _ast getOrDefault ["groups", []];
+    private _categoryCount = count _categories;
     private _groupCount = count _groups;
     private _seen = createHashMap;
     private _entries = [];
 
     {
-        private _isGroup = _forEachIndex < _groupCount;
-        private _subject = if (_isGroup) then {"@" + (_x select 0)} else {str (_x select 0)};
+        private _type = 0;
+
+        if (_forEachIndex < _categoryCount) then {
+            _type = 2;
+        } else {
+            if (_forEachIndex < _categoryCount + _groupCount) then {
+                _type = 1;
+            };
+        };
+
+        private _subject = switch (_type) do {
+            case 2: {"category=" + (_x select 0)};
+            case 1: {"@" + (_x select 0)};
+            default {str (_x select 0)};
+        };
         private _nth = _seen getOrDefault [_subject, 0];
 
         _seen set [_subject, _nth + 1];
-        _entries pushBack [format ["%1#%2", _subject, _nth], _isGroup, _x, [_forEachIndex - _groupCount, _forEachIndex] select _isGroup, _statements param [_forEachIndex, ""], count _entries];
-    } forEach (_groups + (_ast getOrDefault ["rules", []]));
+        _entries pushBack [
+            format ["%1#%2", _subject, _nth], _type, _x,
+            _forEachIndex - ([_categoryCount + _groupCount, _categoryCount, 0] select _type),
+            _statements param [_forEachIndex, ""], count _entries
+        ];
+    } forEach (_categories + _groups + (_ast getOrDefault ["rules", []]));
 
     _entries
 };
@@ -206,9 +228,10 @@ private _refByKey = createHashMap;
 // In words: a rule for exactly one class (class=X, not X+) by that class's picture and display name and
 // what it sets; anything else as the whole sentence. [label, words, picture, class]
 private _fnc_words = {
-    params ["_isGroup", "_statement", "_ast"];
+    params ["_type", "_statement", "_ast"];
 
-    if (_isGroup) exitWith {[[_statement, _ast, true] call FUNC(describeRule), "", "", ""]};
+    if (_type == 2) exitWith {[[_statement, _ast, false, false, true] call FUNC(describeRule), "", "", ""]};
+    if (_type == 1) exitWith {[[_statement, _ast, true] call FUNC(describeRule), "", "", ""]};
 
     private _conds = _statement param [0, []];
     private _class = "";
@@ -236,7 +259,7 @@ private _fnc_words = {
 // there that the draft still has, else first. The draft index to be taken out first (a changed statement,
 // put back after) shifts those behind it by one.
 private _fnc_placeOf = {
-    params ["_refIndex", "_isGroup", ["_taken", -1]];
+    params ["_refIndex", "_type", ["_taken", -1]];
 
     private _at = 0;
 
@@ -244,7 +267,7 @@ private _fnc_placeOf = {
         private _previous = _refEntries select _i;
         private _kept = _draftByKey get (_previous select 0);
 
-        if ((_previous select 1) isEqualTo _isGroup && {!isNil "_kept"}) exitWith {
+        if ((_previous select 1) isEqualTo _type && {!isNil "_kept"}) exitWith {
             private _keptAt = _kept select 3;
 
             if (_taken >= 0 && {_keptAt > _taken}) then {
@@ -258,14 +281,14 @@ private _fnc_placeOf = {
     _at
 };
 
-// Takes one statement's change back: [what, is a group, index, statement, place] - "delete" a new one,
+// Takes one statement's change back: [what, type, index, statement, place] - "delete" a new one,
 // "set" a changed one to what it was (taken out at the index and put in at the place, which is where the
 // other setup has it: the edit moved it to the end, and with it out of order the list would still differ
 // from the other when every change was undone), "insert" a removed one at the index.
 private _undoStatement = {
-    params ["_what", "_isGroup", "_index", "_statement", ["_at", 0]];
+    params ["_what", "_type", "_index", "_statement", ["_at", 0]];
 
-    private _key = ["rules", "groups"] select _isGroup;
+    private _key = ["rules", "groups", "categories"] select _type;
     private _ast = [GVAR(draftText)] call EFUNC(items,parseRules);
     private _list = _ast getOrDefault [_key, []];
 
@@ -284,12 +307,12 @@ private _undoStatement = {
 };
 
 private _fnc_row = {
-    params ["_status", "_isGroup", "_statement", "_ast", "_before", "_undo"];
+    params ["_status", "_type", "_statement", "_ast", "_before", "_undo"];
 
-    private _row = [["rule", "group"] select _isGroup, _status, "", "", "", "", "", _statement, [_undoStatement, _undo]];
+    private _row = [["rule", "group", "category"] select _type, _status, "", "", "", "", "", _statement, [_undoStatement, _undo]];
 
     if (_describe) then {
-        ([_isGroup, _statement, _ast] call _fnc_words) params ["_label", "_words", "_picture", "_class"];
+        ([_type, _statement, _ast] call _fnc_words) params ["_label", "_words", "_picture", "_class"];
 
         _row set [2, _label];
         _row set [3, _words];
@@ -297,7 +320,7 @@ private _fnc_row = {
         _row set [6, _class];
 
         if (_before isNotEqualTo []) then {
-            ([_isGroup, _before, _refAst] call _fnc_words) params ["_beforeLabel", "_beforeWords"];
+            ([_type, _before, _refAst] call _fnc_words) params ["_beforeLabel", "_beforeWords"];
 
             _row set [5, [_beforeLabel, _beforeWords] select (_beforeWords isNotEqualTo "")];
         };
@@ -307,26 +330,26 @@ private _fnc_row = {
 };
 
 {
-    _x params ["_key", "_isGroup", "_statement", "_index", "_written"];
+    _x params ["_key", "_type", "_statement", "_index", "_written"];
 
     private _other = _refByKey get _key;
 
     if (isNil "_other") then {
-        _rows pushBack (["new", _isGroup, _statement, _draft, [], ["delete", _isGroup, _index, []]] call _fnc_row);
+        _rows pushBack (["new", _type, _statement, _draft, [], ["delete", _type, _index, []]] call _fnc_row);
     } else {
         if ((_other select 4) isNotEqualTo _written) then {
-            _rows pushBack (["changed", _isGroup, _statement, _draft, _other select 2, ["set", _isGroup, _index, _other select 2, [_other select 5, _isGroup, _index] call _fnc_placeOf]] call _fnc_row);
+            _rows pushBack (["changed", _type, _statement, _draft, _other select 2, ["set", _type, _index, _other select 2, [_other select 5, _type, _index] call _fnc_placeOf]] call _fnc_row);
         };
     };
 } forEach _draftEntries;
 
 {
-    _x params ["_key", "_isGroup", "_statement"];
+    _x params ["_key", "_type", "_statement"];
 
     if !(_key in _draftByKey) then {
-        private _at = [_forEachIndex, _isGroup] call _fnc_placeOf;
+        private _at = [_forEachIndex, _type] call _fnc_placeOf;
 
-        _rows pushBack (["removed", _isGroup, _statement, _refAst, [], ["insert", _isGroup, _at, _statement]] call _fnc_row);
+        _rows pushBack (["removed", _type, _statement, _refAst, [], ["insert", _type, _at, _statement]] call _fnc_row);
     };
 } forEach _refEntries;
 

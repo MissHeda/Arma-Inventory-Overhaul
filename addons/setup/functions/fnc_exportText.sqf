@@ -148,6 +148,7 @@ switch (_variant) do {
             ["version", 1],
             ["base", "none"],
             ["cell", GVAR(draftRules) getOrDefault ["cell", -1]],
+            ["categories", +(GVAR(draft) getOrDefault ["categories", []])],
             ["groups", _groups],
             ["rules", _rules],
             ["warnings", []]

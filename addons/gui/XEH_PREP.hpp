@@ -135,6 +135,9 @@ PREP(setGroup);
 PREP(matchesGroup);
 PREP(drawGroupStrip);
 PREP(paintGroupStrip);
+PREP(stripEntries);
+PREP(stripMore);
+PREP(drawBadge);
 
 // The hands' queue: what is not dragged waits its turn - quick moves, Take all and Put all in, drops, as far as the settings say; its tiles are tinted and the box's caption line counts
 PREP(queueColor);

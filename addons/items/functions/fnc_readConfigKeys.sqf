@@ -307,7 +307,7 @@ if (_use isNotEqualTo "") then {
 };
 
 // ----- cat -----
-// Read by the rules' own reader (fnc_parseGroups). The canonical value is the list in the order of ITEM_GROUPS.
+// Read by the rules' own reader (fnc_parseGroups). The canonical value is the list in the order of fnc_orderGroups.
 
 private _cat = _found getOrDefault [QGVARMAIN(cat), ""];
 

@@ -2,12 +2,12 @@
 /*
  * Author: Miss Heda
  * Writes the value of cats= (a rule) or einv_cat (an item's config) from the categories, the way
- * fnc_parseGroups reads it back: the words in the order of ITEM_GROUPS joined with "+" (a comma would end a
+ * fnc_parseGroups reads it back: the words in the order of fnc_orderGroups joined with "+" (a comma would end a
  * statement of a rules text) or with the separator given - config uses a comma. A grid's "accepts" is
  * written with a bar (fnc_formatGrid). No category at all is "".
  *
  * Arguments:
- * 0: The categories, any of ITEM_GROUPS <ARRAY of STRING>
+ * 0: The categories, built-in (ITEM_GROUPS) or the setup's own <ARRAY of STRING>
  * 1: What joins the words: "+" for a rules text, "," for config <STRING> (default: "+")
  *
  * Return Value:
@@ -22,4 +22,4 @@
 
 params [["_groups", [], [[]]], ["_separator", "+", [""]]];
 
-(ITEM_GROUPS select {_x in _groups}) joinString _separator
+([_groups] call FUNC(orderGroups)) joinString _separator

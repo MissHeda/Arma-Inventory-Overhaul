@@ -114,7 +114,7 @@ switch (_mode) do {
         private _fnc_attrs = {
             params ["_block"];
 
-            private _words = ITEM_GROUPS select {_x in (_block param [4, []])};
+            private _words = [_block param [4, []]] call FUNC(orderGroups);
 
             if (_block param [5, false]) then {
                 _words pushBack "one";

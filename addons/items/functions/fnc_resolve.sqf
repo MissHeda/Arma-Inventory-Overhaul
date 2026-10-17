@@ -61,7 +61,7 @@
  *   "use"       - the containers it may be used from where a setting limits what can be used there (use=,
  *                 fnc_parseUse), in the order uniform, vest, backpack; [] when none says <ARRAY of STRING>
  *   "cats"      - the categories the rules or the config put it in (cats=, einv_cat, fnc_parseGroups), in the
- *                 order of ITEM_GROUPS; [] when none says: the built-in mapping then (fnc_defaultGroup) <ARRAY of STRING>
+ *                 order of fnc_orderGroups; [] when none says: the built-in mapping then (fnc_defaultGroup) <ARRAY of STRING>
  *   "src"       - field -> where it came from: "own:<i>" (i-th rule of the text),
  *                 "legacy:<setting>:<i>", "mod:<config key>", "preset:<preset>:<i>", "all:<i>" (the
  *                 i-th rule of the text, one with "all"), "builtin", "forced" <HASHMAP>

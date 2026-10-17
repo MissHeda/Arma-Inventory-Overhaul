@@ -137,6 +137,11 @@ if (_objectGrid isEqualType "" && {_objectGrid isNotEqualTo ""}) then {
     };
 };
 
+// A category the setup does not define accepts nothing for good: left out of the compartments that name it.
+if (_spec isNotEqualTo []) then {
+    _spec = [_spec] call EFUNC(items,cleanGrid);
+};
+
 // The rules for the class - a class that is no container to them (a mod's odd cargo object) gets its
 // grid by load.
 if (_spec isEqualTo []) then {

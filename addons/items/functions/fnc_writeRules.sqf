@@ -1,12 +1,14 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Writes a rules text from its parts (fnc_parseRules), always the same way: the header, then the
- * groups, then the rules, each in their order, joined with ", ". A rule's conditions come before a
+ * Writes a rules text from its parts (fnc_parseRules), always the same way: the header, then the categories of the
+ * setup's own, the groups, then the rules, each in their order, joined with ", ". A category is written
+ * "category=bandit > name=Bandit_loot picture=/a3/ui_f/data/gui/cfg/hints/gear_ca.paa" - its name and picture only where it has
+ * them, "category=bandit" for one with neither. A rule's conditions come before a
  * " > ", its values in the order like, size, stack, grid, weight, name, icon, picture, use, cats. Reading what this wrote and
  * writing it again gives the same text, so two setups that mean the same can be compared as texts.
  *
- * Groups go before the rules: a group means the same wherever it is defined, so that changes nothing.
+ * Categories and groups go before the rules: they mean the same wherever they are defined, so that changes nothing.
  * Never a ";" - see fnc_sanitizeText.
  *
  * Arguments:
@@ -72,6 +74,22 @@ if (_header) then {
 
     _parts pushBack _line;
 };
+
+{
+    _x params ["_id", ["_name", ""], ["_picture", ""]];
+
+    private _values = [];
+
+    if (_name isNotEqualTo "") then {
+        _values pushBack ("name=" + ([_name] call FUNC(encodeName)));
+    };
+
+    if (_picture isNotEqualTo "") then {
+        _values pushBack ("picture=" + ([_picture, true] call FUNC(encodeName)));
+    };
+
+    _parts pushBack (["category=" + _id, format ["category=%1 > %2", _id, _values joinString " "]] select (_values isNotEqualTo []));
+} forEach (_ast getOrDefault ["categories", []]);
 
 {
     _x params ["_id", "_conds"];

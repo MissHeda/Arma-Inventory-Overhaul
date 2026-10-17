@@ -16,7 +16,7 @@
  * 1: Code run when a picture is taken, called with [path, arguments] <CODE>
  * 2: Arguments <ANY> (default: [])
  * 3: The picture in use, the one set else config's <STRING> (default: the one set, "" for none)
- * 4: The class it is for, "" for none <STRING> (default: "")
+ * 4: The class it is for, "" for none; "#category" for the picture of a category - the picker then has the chip of this mod's own icons <STRING> (default: "")
  *
  * Return Value:
  * None
@@ -36,9 +36,15 @@ if (_inUse isEqualTo "") then {
     _inUse = _current;
 };
 
-// The chip of the class's kind, from the class index; "all" where it does not list the class.
+// The chip of the class's kind, from the class index; "all" where it does not list the class. For a category (the class "#category")
+// the chip of this mod's own icons: it needs no catalog, and the picture in use is ringed without it.
+private _forCategory = _class isEqualTo "#category";
 private _row = ((uiNamespace getVariable [QGVAR(index), createHashMap]) getOrDefault ["byClass", createHashMap]) getOrDefault [toLowerANSI _class, []];
 private _chip = ["all", [_row param [ROW_KIND, ""]] call FUNC(pictureCategory)] select (_row isNotEqualTo []);
+
+if (_forCategory) then {
+    _chip = "icons";
+};
 
 // A crate or a vehicle with no picture of its own is drawn by the picture the editor has of it (editorPreview),
 // not by the config picture the Picture row names - so that is the one in use, and the one ringed.
@@ -50,12 +56,14 @@ if (_current isEqualTo "" && {_chip isEqualTo "vehicles"}) then {
     };
 };
 
-// text - the search; chip - "items", "gear", "vehicles" or "all"; page; picked - the thumbnail clicked, at the
+// text - the search; chip - "icons" (a picker for a category: this mod's own icons), "items", "gear", "vehicles" or "all"; icons - the
+// picker is for a category and has the chip of icons; page; picked - the thumbnail clicked, at the
 // start the picture in use; reveal - turn to the page of the picture picked as soon as the catalog is read; custom -
 // the path field; source - which of the two counts, "list" or "custom"; last - the last click, [path, time], for
 // the double click; customOk - the path field holds a file the game has
 GVAR(picker) = createHashMapFromArray [
-    ["text", ""], ["chip", _chip], ["page", 0], ["picked", _inUse], ["reveal", _inUse isNotEqualTo ""], ["custom", _current], ["source", "list"],
+    ["text", ""], ["chip", _chip], ["page", 0], ["picked", _inUse], ["reveal", _inUse isNotEqualTo "" && {!_forCategory}], ["custom", _current], ["source", "list"],
+    ["icons", _forCategory],
     ["last", ["", 0]], ["customOk", false], ["code", _code], ["arguments", _arguments]
 ];
 

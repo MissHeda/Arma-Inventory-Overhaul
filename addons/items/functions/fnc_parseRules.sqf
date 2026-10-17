@@ -14,6 +14,16 @@
  *                                         cell. Without one, the text reads as einv1 base=default.
  *                                         A renamed preset's old id reads as the new one
  *                                         (PRESET_ALIASES: base=tarkov, realism and weight are base=default).
+ *   category=bandit > name=Bandit_loot picture=/a3/ui_f/data/gui/cfg/hints/gear_ca.paa
+ *                                         a category of the setup's own, on top of the eight built-in ones (weapon,
+ *                                         ammo, grenade, gear, medical, food, tool, misc): an id of a-z 0-9 _ at most
+ *                                         CAT_ID_MAX long, its name (written as name= of a rule, at most CAT_NAME_MAX
+ *                                         characters) and the picture it is drawn with, both optional. Items are put in
+ *                                         it by cats=, compartments accept it by grid=2x2:bandit, the strip at the side of
+ *                                         a loot box lists it. The same id says it again: what the later one sets counts.
+ *                                         For a built-in id it gives the category another name or picture (it stays
+ *                                         there). At most MAX_CUSTOM_CATEGORIES; an id that reads as a built-in word
+ *                                         (fnc_builtinGroup: "tools", "magazine") is refused.
  *   @rifle_mags: kind=magazine mass<=20   a group: a name for a selection, used as @rifle_mags. A name
  *                                         defined twice means either. An own group replaces the
  *                                         preset's group of the same name; @name inside it means the
@@ -65,7 +75,8 @@
  *                            used there (fnc_parseUse): any of uniform, vest, backpack joined with +, all, or
  *                            none for no container - a comma would end the statement
  *   cats=medical+misc        the categories the item is in instead of the built-in one (fnc_parseGroups): any of
- *                            weapon, ammo, grenade, gear, medical, food, tool, misc joined with +. The strip at the
+ *                            weapon, ammo, grenade, gear, medical, food, tool, misc - or a category the text defines -
+ *                            joined with +. The strip at the
  *                            side of a loot box and a compartment that accepts only some categories (grid=,
  *                            fnc_parseGrid) read them. Not "cat=": that is the condition on the tile's colour
  *   picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa   the texture it shows instead of its config's
@@ -92,6 +103,7 @@
  *   "base"     - the preset it builds on: "default", "none" or a CfgEinvRulesets class, lowercase
  *                <STRING>
  *   "cell"     - config mass per grid cell, -1 when the header sets none <NUMBER>
+ *   "categories" - [[id, name, picture], ...] in text order, ids lowercase; name and picture "" where the text sets none <ARRAY>
  *   "groups"   - [[id, conditions], ...] in text order, ids lowercase <ARRAY>
  *   "rules"    - [[conditions, values], ...] in text order <ARRAY>
  *   "warnings" - what was left out or cut down, and why <ARRAY of STRING>
@@ -103,7 +115,7 @@
  * fnc_formatGrid writes it), "weight" (kg <NUMBER>), "name" (the name as it shows), "icon" ([scale,
  * across, down] <ARRAY>, see fnc_parseIcon), "picture" (the texture path with backslashes <STRING>), "use" (the containers it may be used from, in the
  * order uniform, vest, backpack <ARRAY of STRING>, [] for none - see fnc_parseUse), "cats" (the categories, in the
- * order of ITEM_GROUPS <ARRAY of STRING> - see fnc_parseGroups).
+ * order of fnc_orderGroups <ARRAY of STRING> - see fnc_parseGroups).
  *
  * Example:
  * ["einv1 base=default, kind=grenade > stack=3"] call einv_items_fnc_parseRules;
@@ -115,6 +127,7 @@ params [["_text", "", [""]]];
 
 private _warnings = [];
 private _groups = [];
+private _categories = [];
 private _rules = [];
 private _version = 1;
 private _base = "default";
@@ -124,6 +137,7 @@ private _ast = createHashMapFromArray [
     ["version", _version],
     ["base", _base],
     ["cell", _cell],
+    ["categories", _categories],
     ["groups", _groups],
     ["rules", _rules],
     ["warnings", _warnings]
@@ -736,6 +750,99 @@ private _fnc_groupDef = {
     _groups pushBack [_id, _conds];
 };
 
+// "category=bandit > name=Bandit_loot picture=/a3/...": a category of the setup's own, or another name and picture for a built-in
+// one. A second statement of the same id adds to the first, what it sets counting over what it said before.
+private _fnc_categoryDef = {
+    params ["_tokens", "_short"];
+
+    private _notes = [];
+    private _id = toLowerANSI ((_tokens select 0) select [9]);
+    private _name = "";
+    private _picture = "";
+    private _error = "";
+
+    if !([_id] call _fnc_isId) then {
+        _error = format ["'%1' is no category name - letters, digits and _ only", _id];
+    } else {
+        if (count _id > CAT_ID_MAX) then {
+            _error = format ["a category's name is at most %1 characters", CAT_ID_MAX];
+        } else {
+            // A word that cats= would read as one of the eight cannot be the id of another category.
+            private _builtin = [_id] call FUNC(builtinGroup);
+
+            if (_builtin isNotEqualTo "" && {_builtin isNotEqualTo _id}) then {
+                _error = format ["'%1' reads as the category %2 - choose another name", _id, _builtin];
+            };
+
+            if (_id in CAT_ID_RESERVED) then {
+                _error = format ["'%1' means something else where a category stands - choose another name", _id];
+            };
+        };
+    };
+
+    if (_error isEqualTo "") then {
+        {
+            if (_x isEqualTo ">") then {continue};
+
+            if !([_x] call _fnc_isValue) then {
+                _notes pushBack format ["'%1' is neither name= nor picture= - left out", _x];
+                continue;
+            };
+
+            private _key = toLowerANSI (_x select [0, _x find "="]);
+
+            if !(_key in ["name", "picture"]) then {
+                _notes pushBack format ["category= takes name= and picture= only - %1= is left out", _key];
+                continue;
+            };
+
+            private _result = [_x] call _fnc_value;
+
+            if (_result isEqualTo []) then {continue};
+
+            if (_key isEqualTo "name") then {
+                _name = _result select 1;
+
+                if (count _name > CAT_NAME_MAX) then {
+                    _notes pushBack format ["a category's name is at most %1 characters - cut down", CAT_NAME_MAX];
+                    _name = _name select [0, CAT_NAME_MAX];
+                };
+            } else {
+                _picture = _result select 1;
+            };
+        } forEach (_tokens select [1]);
+
+        private _at = _categories findIf {(_x select 0) isEqualTo _id};
+        private _own = ({!((_x select 0) in ITEM_GROUPS)} count _categories);
+
+        if (_id in ITEM_GROUPS && {_name isEqualTo ""} && {_picture isEqualTo ""}) then {
+            _error = "a built-in category needs a name= or a picture= to change";
+        } else {
+            if (_at < 0 && {!(_id in ITEM_GROUPS)} && {_own >= MAX_CUSTOM_CATEGORIES}) then {
+                _error = format ["at most %1 categories of your own", MAX_CUSTOM_CATEGORIES];
+            };
+        };
+
+        if (_error isEqualTo "") then {
+            if (_at < 0) then {
+                _categories pushBack [_id, _name, _picture];
+            } else {
+                private _had = _categories select _at;
+
+                _categories set [_at, [_id, [_had select 1, _name] select (_name isNotEqualTo ""), [_had select 2, _picture] select (_picture isNotEqualTo "")]];
+            };
+        };
+    };
+
+    {
+        _warnings pushBack format ["'%1': %2.", _short, _x];
+    } forEach _notes;
+
+    if (_error isNotEqualTo "") then {
+        _warnings pushBack format ["'%1': %2 - left out.", _short, _error];
+    };
+};
+
 private _fnc_rule = {
     params ["_tokens", "_short"];
 
@@ -869,6 +976,11 @@ private _count = 0;
             _warnings pushBack format ["'%1': the header (einv1 ...) is only read as the first statement - left out.", _short];
         };
 
+        continue;
+    };
+
+    if ((_first select [0, 9]) isEqualTo "category=") then {
+        [_tokens, _short] call _fnc_categoryDef;
         continue;
     };
 

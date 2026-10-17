@@ -11,7 +11,7 @@
  * 0: Item class <STRING>
  *
  * Return Value:
- * "weapon", "ammo", "grenade", "gear", "medical", "food", "tool" or "misc" <STRING>
+ * the id of a category: "weapon", "ammo", "grenade", "gear", "medical", "food", "tool", "misc" or one the setup defines <STRING>
  *
  * Example:
  * ["arifle_MX_F"] call einv_gui_fnc_itemGroup;

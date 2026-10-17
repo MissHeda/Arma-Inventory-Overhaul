@@ -31,6 +31,7 @@
  * 2: It is a group <BOOL> (default: false)
  * 3: Only what a rule sets, without whom it is for - for a list that names the class itself, by its
  *    picture and display name (fnc_changeRows) <BOOL> (default: false)
+ * 4: It is a category, [id, name, picture] as under "categories": "Category bandit: name Bandit loot, picture ..." <BOOL> (default: false)
  *
  * Return Value:
  * Sentence <STRING>
@@ -41,7 +42,7 @@
  * Public: No
  */
 
-params [["_rule", [], [[]]], ["_ast", createHashMap, [createHashMap]], ["_isGroup", false, [false]], ["_valuesOnly", false, [false]]];
+params [["_rule", [], [[]]], ["_ast", createHashMap, [createHashMap]], ["_isGroup", false, [false]], ["_valuesOnly", false, [false]], ["_isCategory", false, [false]]];
 
 // The word between alternatives, spaced here rather than in the stringtable, where spaces at the ends of
 // a text are easily lost.
@@ -303,10 +304,30 @@ private _fnc_values = {
 
     if ("cats" in _values) then {
         // The categories it is in instead of the built-in one (cats=).
-        _parts pushBack format [LLSTRING(Value_Cats), ((_values get "cats") apply {localize format ["STR_einv_setup_Cat_%1", _x]}) joinString ", "];
+        _parts pushBack format [LLSTRING(Value_Cats), ((_values get "cats") apply {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name")}) joinString ", "];
     };
 
     _parts joinString ", "
+};
+
+// A category: its id, and what the text gives it.
+if (_isCategory) exitWith {
+    _rule params [["_id", "", [""]], ["_name", "", [""]], ["_picture", "", [""]]];
+
+    private _categoryValues = createHashMap;
+
+    if (_name isNotEqualTo "") then {
+        _categoryValues set ["name", _name];
+    };
+
+    if (_picture isNotEqualTo "") then {
+        _categoryValues set ["picture", _picture];
+    };
+
+    private _subject = format [LLSTRING(Desc_Category), _id];
+    private _words = [_categoryValues] call _fnc_values;
+
+    [_subject, format [LLSTRING(Desc_Rule), _subject, _words]] select (_words isNotEqualTo "")
 };
 
 if (_isGroup) exitWith {

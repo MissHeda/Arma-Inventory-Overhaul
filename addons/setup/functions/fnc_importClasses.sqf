@@ -132,6 +132,7 @@ if (_from isEqualTo "") then {
     // Only rules that are nothing but class=X (or X+), no group, no header and no setting around them.
     private _plain = _rules isNotEqualTo []
         && {(_ast getOrDefault ["groups", []]) isEqualTo []}
+        && {(_ast getOrDefault ["categories", []]) isEqualTo []}
         && {(toLower (_pasted select [0, 4])) isNotEqualTo "einv"}
         && {(toLower _pasted) find RULES_SETTING < 0}
         && {_rules findIf {

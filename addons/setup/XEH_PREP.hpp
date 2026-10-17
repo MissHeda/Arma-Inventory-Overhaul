@@ -91,9 +91,17 @@ PREP(pictureKey);
 PREP(openPicturePicker);
 PREP(drawPicturePicker);
 PREP(pickPicture);
+PREP(iconEntries);
 PREP(drawPictureRow);
 PREP(drawUseRow);
 PREP(drawCatRow);
+// The General step's Categories card: the setup's own categories, their names and pictures
+PREP(drawCategories);
+PREP(setCategory);
+PREP(renameCategory);
+PREP(addCategory);
+PREP(deleteCategory);
+PREP(newCategoryId);
 PREP(drawCellAttrs);
 PREP(cellBlock);
 PREP(drawIconBlock);

@@ -22,7 +22,7 @@
  *     containers the item is whitelisted for (use=, einv_use) - it may be used from them even where the settings
  *     "Use items from ..." (einv_storage) close them - and a line of what those settings limit now. The working
  *     copy keeps the list as "useList"; Apply writes use=uniform+backpack (use=none for an emptied one).
- *   - Under it a Category row (fnc_drawCatRow): a chip each for the eight categories (ITEM_GROUPS), on for the ones the item is in
+ *   - Under it a Category row (fnc_drawCatRow): a chip each for the categories (the eight of ITEM_GROUPS and the draft's own), on for the ones the item is in
  *     (cats=, einv_cat, else the built-in one), at least one on; a reset button back to the built-in one. The working copy keeps
  *     the list as "catsList"; Apply writes cats=medical+misc, and takes the class's own cats away when it is the built-in one again.
  *   - Under them the canvas (fnc_uiCanvas), SHAPE_MAX cells each way, always shown: a click makes a place
@@ -148,7 +148,7 @@ private _ownPicture = "picture" in _own || {_tree && {"picture" in (_treeRules g
 // The containers it may be used from where a setting closes them (use=, einv_use): any of uniform, vest, backpack.
 private _startUse = _info getOrDefault ["use", []];
 
-// The categories it is in now (cats=, einv_cat, else the built-in one): any of ITEM_GROUPS.
+// The categories it is in now (cats=, einv_cat, else the built-in one): any category of the draft.
 private _startGroups = _info getOrDefault ["groups", ["misc"]];
 private _canvas = GVAR(itemWork) getOrDefault [_lc, createHashMap];
 

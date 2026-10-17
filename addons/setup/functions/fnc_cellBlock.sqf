@@ -8,7 +8,7 @@
  *
  * Arguments:
  * 0: The compartment, [cols, rows, holes] and anything after <ARRAY>
- * 1: The categories it accepts, any of ITEM_GROUPS, [] for all <ARRAY of STRING> (default: its own, else [])
+ * 1: The categories it accepts, built-in or the draft's own, [] for all <ARRAY of STRING> (default: its own, else [])
  * 2: Whether it is a single slot <BOOL> (default: its own, else false)
  *
  * Return Value:
@@ -34,4 +34,4 @@ private _plain = [_block select 0, _block select 1, +(_block param [2, []])];
 
 if (_accepts isEqualTo [] && {!_single}) exitWith {_plain};
 
-_plain + [[], ITEM_GROUPS select {_x in _accepts}, _single]
+_plain + [[], [_accepts] call EFUNC(items,orderGroups), _single]

@@ -68,7 +68,7 @@
  *   "use"               - the containers it may be used from where a setting limits what can be used there,
  *                         any of "uniform", "vest", "backpack" in that order, [] for none <ARRAY of STRING>
  *   "cats"              - the categories the rules or the config put it in (cats=, einv_cat), [] when none does <ARRAY of STRING>
- *   "groups"            - the categories it is in: "cats" when it has some, else the built-in one (fnc_defaultGroup) - of ITEM_GROUPS:
+ *   "groups"            - the categories it is in: "cats" when it has some, else the built-in one (fnc_defaultGroup) - of ITEM_GROUPS and the setup's own:
  *                         weapon, ammo, grenade, gear, medical, food, tool, misc. Never empty. The strip of a loot box, the compartments
  *                         that accept only some categories and the wizard read this <ARRAY of STRING>
  *   "pictureOverride"   - the rules' picture path, "" when none - also when the file is missing <STRING>
@@ -116,12 +116,16 @@ _info set ["footprintTurned", [_w, _h, _holes] call FUNC(turnMask)];
 _info set ["cells", _w * _h - count _holes];
 _info set ["shape", [_w, _h, _holes] call FUNC(formatMask)];
 _info set ["stack", _resolved get "stack"];
-_info set ["grid", _resolved get "grid"];
+
+// The categories there are: an item or a compartment that names one the setup does not define ignores it.
+private _categoryIds = _compiled getOrDefault ["categoryIds", ITEM_GROUPS];
+
+_info set ["grid", [_resolved get "grid", _categoryIds] call FUNC(cleanGrid)];
 _info set ["icon", _resolved get "icon"];
 _info set ["use", _resolved get "use"];
 
 // The categories: the rules' and the config's, else the built-in one.
-private _cats = _resolved get "cats";
+private _cats = (_resolved get "cats") select {_x in _categoryIds};
 
 _info set ["cats", _cats];
 _info set ["groups", [[[_facts] call FUNC(defaultGroup)], _cats] select (_cats isNotEqualTo [])];

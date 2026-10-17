@@ -194,9 +194,16 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   ```
   Nothing is locked by default. An item never lands in a compartment that refuses it - dragging, quick move, Take all, the arsenals
   and scripts that add to the cargo all follow it; what the compartments refuse is put in another compartment or counts as no room.
-  Over a refusing compartment the drag footprint is red with "Only magazines here", an empty locked compartment shows a faint picture of
-  its category, and a single slot draws the item scaled into it and gives it its own size back when you take it out. The wizard's
-  Containers editor sets both per compartment on the Blocks way.
+  Over a refusing compartment the drag footprint is red with "Only magazines here". A locked compartment always shows what it takes -
+  a small badge with the pictures of its categories (and a "1" for a single slot) at its top left cell, also while something lies in it, and a faint
+  picture of its category on its free cells - and hovering it says so in the footer. A single slot draws the item scaled into it and gives it its
+  own size back when you take it out. The wizard's Containers editor sets both per compartment on the Blocks way.
+  The eight categories are not all there is: the wizard's General page has a Categories card where you rename them, give them another picture
+  (any of this mod's icons or any item's picture), and add categories of your own. They are statements of the rules text, so they are saved on
+  the server and export and import with it: `category=bandit > name=Bandit_loot picture=/a3/ui_f/data/gui/cfg/hints/gear_ca.paa` (an id of
+  letters, digits and `_`, at most 16 of your own), and then `cats=bandit`, `einv_cat = "bandit";` and `grid=2x2:bandit` use it like the others.
+  The strip at the side of a loot box, the Items step's Category chips and the Containers step's Accepts chips list them too. Deleting one in the
+  wizard takes it out of every item and compartment that names it.
 - **Use from containers:** three server settings on the wizard's General page, under "Containers and use", "Use items from the uniform / vest /
   backpack" (`einv_storage_useUniform`, `useVest`, `useBackpack`), each Everything (the game's way, the default),
   Only whitelisted or Nothing. What lies in a limited container - magazines, grenades, medicine, food, kits, radios - is

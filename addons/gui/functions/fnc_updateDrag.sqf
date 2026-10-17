@@ -1477,7 +1477,7 @@ call {
 
         if (_groups findIf {_x in _targetAccepts} < 0) then {
             _reason = "WrongKind";
-            _hintParts = [[format [LLSTRING(Hint_Only), (_targetAccepts apply {localize format ["STR_einv_gui_Only_%1", _x]}) joinString ", "], "loss"]];
+            _hintParts = [[format [LLSTRING(Hint_Only), (_targetAccepts apply {(([_x] call EFUNC(items,categoryInfo)) get "only")}) joinString ", "], "loss"]];
         };
     };
 

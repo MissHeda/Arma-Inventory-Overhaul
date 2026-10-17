@@ -157,3 +157,8 @@ private _fnc_pieces = {
         };
     };
 } forEach _state;
+
+// A compartment that takes only some categories, or is a single slot, says so over its tiles (fnc_drawBadge).
+if ((_grid getOrDefault ["accepts", []]) isNotEqualTo [] || {_grid getOrDefault ["single", false]}) then {
+    [_display, _grid, _state] call FUNC(drawBadge);
+};

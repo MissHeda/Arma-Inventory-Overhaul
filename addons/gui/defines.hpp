@@ -154,6 +154,15 @@
 #define STRIP_ICON 1.1
 #define STRIP_ICON_MIN 0.75
 
+// How many fields the strip has: All and the categories. With more categories than that the last field turns to the next
+// group of them (fnc_stripEntries, fnc_stripMore).
+#define STRIP_SLOTS 9
+
+// What a compartment that takes only some categories shows (fnc_drawBadge): at most this many category pictures in the badge
+// at its top left corner, and the faint pictures on its free cells while at most this many cells are free.
+#define BADGE_ICONS_MAX 3
+#define WATERMARK_CELLS_MAX 12
+
 // Tiles that do not match the search field fade this far, this quickly (fnc_applyFilter).
 #define FILTER_FADE 0.82
 #define FILTER_TIME 0.12

@@ -39,10 +39,14 @@ private _quiet = +(_theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]);
 
 _quiet set [3, 0.62];
 
+// A category on another group of the strip lights the field that turns to it.
+private _ids = (_info get "strip") apply {_x select 0};
+
 {
     _x params ["_id", "_field", "_picture"];
 
-    private _on = _id isEqualTo _chosen;
+    // A field a short last group leaves over has no id: nothing to light.
+    private _on = _id isNotEqualTo "" && {_id isEqualTo _chosen || {_id isEqualTo "more" && {!(_chosen in _ids)}}};
 
     _picture ctrlSetTextColor ([_quiet, _white] select _on);
 

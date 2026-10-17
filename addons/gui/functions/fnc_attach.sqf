@@ -88,6 +88,7 @@ GVAR(filterFocus) = false;
 
 // Nothing is chosen at the side of a box, no box has its search stopped, and no caption line holds a chip yet.
 GVAR(groupFilters) = [];
+GVAR(stripPages) = [];
 GVAR(coalesced) = createHashMap;
 GVAR(pageWanted) = createHashMap;
 GVAR(searchPaused) = [];

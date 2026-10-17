@@ -97,6 +97,57 @@
         <Key ID="STR_einv_setup_Cat_weapon">
             <English>Weapon</English>
         </Key>
+        <Key ID="STR_einv_setup_Categories_Add">
+            <English>Add</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_AddPlaceholder">
+            <English>New category, like Bandit loot</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_AddTip">
+            <English>Add a category of your own with this name</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_BuiltIn">
+            <English>Built in</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_Delete">
+            <English>Delete this category</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_DeleteConfirm">
+            <English>Delete the category %1? It is taken out of every item and compartment that names it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_DeleteYes">
+            <English>Delete</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_Help">
+            <English>Items are sorted into categories: the strip at the side of a loot box lists them, a compartment can take only some of them (Containers step) and an item is put in them at the Items step. The eight built-in ones can be renamed and given another picture; add your own below. Deleting one takes it out of every item and compartment that names it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_Max">
+            <English>At most %1 categories of your own</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_NamePlaceholder">
+            <English>Name</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_NameTip">
+            <English>The name the strip, the hints and the wizard show. Return keeps it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_NeedName">
+            <English>A category needs a name</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_Picture">
+            <English>Picture...</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_PictureTip">
+            <English>Pick the picture this category is drawn with: one of this mod's icons or the picture of any item.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_ResetBuiltIn">
+            <English>Back to the name and picture this mod ships</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_ResetPicture">
+            <English>Back to the default picture</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_Title">
+            <English>Categories</English>
+        </Key>
         <Key ID="STR_einv_setup_Cell_Default">
             <English>the default</English>
         </Key>
@@ -429,6 +480,9 @@
         </Key>
         <Key ID="STR_einv_setup_Desc_AllWhere">
             <English>Everything else, %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Desc_Category">
+            <English>Category %1</English>
         </Key>
         <Key ID="STR_einv_setup_Desc_Every">
             <English>Every item</English>
@@ -984,6 +1038,9 @@
         </Key>
         <Key ID="STR_einv_setup_Pic_CatGear">
             <English>Uniforms &amp; gear</English>
+        </Key>
+        <Key ID="STR_einv_setup_Pic_CatIcons">
+            <English>Category icons</English>
         </Key>
         <Key ID="STR_einv_setup_Pic_CatItems">
             <English>Item icons</English>

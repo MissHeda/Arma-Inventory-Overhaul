@@ -42,6 +42,17 @@
 // (einv_items_fnc_parseGroups). An array literal - used in code only, never inside a macro's arguments.
 #define ITEM_GROUPS ["weapon", "ammo", "grenade", "gear", "medical", "food", "tool", "misc"]
 
+// Categories of the server's own, on top of the eight above (a statement "category=bandit > name=Bandit_loot picture=PATH" of the
+// rules text, einv_items_fnc_parseRules): an id of a-z 0-9 _ at most CAT_ID_MAX long, a name of at most CAT_NAME_MAX characters, at
+// most MAX_CUSTOM_CATEGORIES of them. The built-in eight cannot be taken away, only given another name or picture.
+#define CAT_ID_MAX 24
+// The same as a regular expression, for a word to be tested whole (keep the two together).
+#define CAT_ID_PATTERN "^[a-z0-9_]{1,24}$"
+#define CAT_NAME_MAX 30
+// Words that mean something else where a category's id stands (the attributes of a compartment, the strip's fields): no id.
+#define CAT_ID_RESERVED ["one", "single", "all", "more", "none"]
+#define MAX_CUSTOM_CATEGORIES 16
+
 // Every storage grid is this many cells wide, whatever the style. Where an item lies is stored per
 // container (einv_storage_fnc_getLayout); a grid of another width would have to lay everything out
 // anew each time the style changes. Ten since 0.4.0: a backpack drawn on the wizard's canvas - a

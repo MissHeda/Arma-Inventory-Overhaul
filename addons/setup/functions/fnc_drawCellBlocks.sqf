@@ -280,7 +280,7 @@ private _toggle = {
     };
 
     // What it takes, under the cells: its categories and a single slot, nothing for a compartment that takes anything.
-    private _attrs = ((_x param [4, []]) apply {localize format ["STR_einv_setup_Cat_%1", _x]}) joinString "/";
+    private _attrs = ((_x param [4, []]) apply {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name")}) joinString "/";
 
     if (_x param [5, false]) then {
         _attrs = [_attrs + " · " + LLSTRING(Cont_SingleShort), LLSTRING(Cont_SingleShort)] select (_attrs isEqualTo "");

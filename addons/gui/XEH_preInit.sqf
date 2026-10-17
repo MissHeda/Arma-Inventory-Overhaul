@@ -244,9 +244,11 @@ GVAR(filter) = "";
 GVAR(filterFocus) = false;
 
 // The category chosen at the side of a loot box (fnc_drawGroupStrip, fnc_setGroup): [[container, group], ...], one pair per
-// box that has one - "weapon", "ammo", "gear", "medical", "food", "tool" or "misc"; a box with none shows everything. It fades
+// box that has one - the id of a category, one of ITEM_GROUPS or one the setup defines; a box with none shows everything. It fades
 // the tiles of its box that are not of the category as the search field does (fnc_applyFilter).
 GVAR(groupFilters) = [];
+// Which group of categories the strip of a box shows when there are more than its fields hold (fnc_stripMore): [[container, page], ...].
+GVAR(stripPages) = [];
 // Whether the caption lines hold a chip that moves every frame (fnc_updateStatus, fnc_animateStatus), and the last whole
 // second of the search's time it said.
 GVAR(statusLive) = false;

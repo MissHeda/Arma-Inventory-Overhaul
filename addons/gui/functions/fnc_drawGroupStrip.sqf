@@ -3,10 +3,11 @@
 /*
  * Author: Miss Heda
  * The strip of categories at the side of a loot box, as Tarkov has it left of its loot grid: one slim column of white
- * pictures - All, weapons, ammunition, grenades and explosives, gear and clothing, medical, food and drink, tools and electronics, other (the
- * groups of fnc_itemGroup). A click chooses a category (fnc_setGroup): only that kind of item shows in the box, the
- * rest is hidden (fnc_applyFilter), and a paged box turns to its first page with a match; a click on it again, or
- * on All, shows everything. The chosen one is a lighter field with a white picture - no accent colour (Mia, 0.5.7);
+ * pictures - All, weapons, ammunition, grenades and explosives, gear and clothing, medical, food and drink, tools and electronics, other
+ * and the categories the setup defines itself (fnc_stripEntries). A click chooses a category (fnc_setGroup): only that kind of item
+ * shows in the box, the rest is hidden (fnc_applyFilter), and a paged box turns to its first page with a match; a click on it again, or
+ * on All, shows everything. With more categories than the strip has fields (STRIP_SLOTS) its last field is "more" and turns to the next
+ * group of them (fnc_stripMore). The chosen one is a lighter field with a white picture - no accent colour (Mia, 0.5.7);
  * the mouse resting on one lights it a little and shows its name (the tooltip).
  *
  * The strip is one rounded bar (the colour of the caption chips) and its fields lie exactly on it: each field is as wide
@@ -14,7 +15,7 @@
  * corners (fnc_uiSurface), so a chosen field ends where the bar ends and nothing shows round it.
  *
  * Three controls (sets) per picture - the field, the picture, the hit box -, kept in the section's info ("strip", [id, field,
- * picture]) for fnc_paintGroupStrip. Not for the player's own containers (they are small and the player knows what is in
+ * picture, hit]) for fnc_paintGroupStrip and fnc_stripMore. Not for the player's own containers (they are small and the player knows what is in
  * them), a section with no grid of its own, or a column too narrow to spare the room (fnc_drawSection).
  *
  * Arguments:
@@ -39,19 +40,16 @@ disableSerialization;
 params ["_display", "_parent", "_rect", "_holder", "_info", "_theme"];
 _rect params ["_left", "_top", "_width", "_height"];
 
-private _groups = [
-    ["all", UI_TEX(slot_cat_all_ca), LLSTRING(Group_All)],
-    ["weapon", UI_TEX(slot_rifle_ca), LLSTRING(Group_Weapon)],
-    ["ammo", UI_TEX(slot_magazine_ca), LLSTRING(Group_Ammo)],
-    ["grenade", UI_TEX(slot_grenade_ca), LLSTRING(Group_Grenade)],
-    ["gear", UI_TEX(slot_vest_ca), LLSTRING(Group_Gear)],
-    ["medical", UI_TEX(slot_cat_medical_ca), LLSTRING(Group_Medical)],
-    ["food", UI_TEX(slot_cat_food_ca), LLSTRING(Group_Food)],
-    ["tool", UI_TEX(slot_radio_ca), LLSTRING(Group_Tool)],
-    ["misc", UI_TEX(slot_cat_misc_ca), LLSTRING(Group_Misc)]
-];
+private _pageAt = GVAR(stripPages) findIf {(_x select 0) isEqualTo _holder};
+private _page = 0;
 
-private _count = count _groups;
+if (_pageAt >= 0) then {
+    _page = (GVAR(stripPages) select _pageAt) select 1;
+};
+
+([_page] call FUNC(stripEntries)) params ["_groups"];
+
+private _count = STRIP_SLOTS min (count _groups);
 private _pitch = _height / _count;
 private _size = (_pitch * 0.78) min (UNSQUARE(_width) * 0.78);
 private _strip = [];
@@ -110,10 +108,19 @@ private _cornerPx = floor (_radius / pixelH);
         [(_this select 0) getVariable [QGVAR(key), objNull]] call FUNC(paintGroupStrip);
     }];
     _hit ctrlAddEventHandler ["ButtonClick", {
-        [{_this call FUNC(setGroup)}, [(_this select 0) getVariable [QGVAR(key), objNull], (_this select 0) getVariable [QGVAR(kind), "all"]]] call FUNC(later);
+        [{
+            params ["_holder", "_kind"];
+
+            // The last field turns to the next group of categories; the others choose one.
+            if (_kind isEqualTo "more") then {
+                [_holder] call FUNC(stripMore);
+            } else {
+                [_holder, _kind] call FUNC(setGroup);
+            };
+        }, [(_this select 0) getVariable [QGVAR(key), objNull], (_this select 0) getVariable [QGVAR(kind), "all"]]] call FUNC(later);
     }];
 
-    _strip pushBack [_id, _field, _picture];
+    _strip pushBack [_id, _field, _picture, _hit];
 } forEach _groups;
 
 _info set ["strip", _strip];

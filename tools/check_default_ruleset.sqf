@@ -22,7 +22,8 @@
  * marked "caps" come from the limits on what a mod's einv_grids[] may ask for (24 compartments, 400 cells). Also
  * checked: a text that names a preset that is gone (base=tarkov, realism, weight) builds on the default, and
  * canvases (grid=aaa/aba/aaa) read and write the same, as does everything else (all > ..., "all" written first
- * wherever it was typed).
+ * wherever it was typed), and categories of the setup's own (category=bandit > name=... picture=...) are registered, merged
+ * and refused as the rules say.
  */
 
 private _compiled = ["einv1 base=default", false] call einv_items_fnc_compileRules;
@@ -323,7 +324,8 @@ private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stac
     "einv1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4",
     "class=My_Kit > icon=1.4, class=My_Bandage+ > icon=1.4@0.1:-0.05 stack=3, kind=grenade > icon=0.5@-0.2:0.2, class=My_Plain > icon=1",
     "class=My_Kit > icon=1.4@0.1,-0.05, stack=3",
-    "class=My_Kit > icon=1.4 picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa, class=My_Mag > picture=/my_mod/ui/kit%201_ca.paa"
+    "class=My_Kit > icon=1.4 picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa, class=My_Mag > picture=/my_mod/ui/kit%201_ca.paa",
+    "category=bandit > name=Bandit_loot picture=/a3/ui_f/data/gui/cfg/hints/gear_ca.paa, category=weapon > name=Arms, category=zeta, class=My_Pack > cats=zeta+bandit+medical grid=2x2:bandit|medical+1x1:zeta:one"
 ] +((getArray (configFile >> "CfgEinvRulesets" >> "default" >> "rules")) apply {"einv1 base=none, " + _x});
 
 {
@@ -370,6 +372,28 @@ private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stac
     ["picture=my_mod/ui/kit%201_ca.paa", "my_mod\ui\kit 1_ca.paa"],
     ["picture=my_mod/ui/nofile", ""]
 ];
+
+// Categories of the setup's own: the eight come first, then the text's in the order it defines them, a statement of the same id
+// adds to the first, a word cats= would read as a built-in one (tools) and a built-in id with nothing to change are left out, and a
+// category named but never defined is a warning.
+private _categoryText = "category=bandit > name=Bandit_loot, category=tools > name=X, category=medical, category=weapon > name=Arms, category=bandit > picture=/my_mod/ui/bandit_ca.paa, class=My_Item > cats=bandit+ghost";
+private _categoryRules = [_categoryText, false] call einv_items_fnc_compileRules;
+private _wantIds = ["weapon", "ammo", "grenade", "gear", "medical", "food", "tool", "misc", "bandit"];
+private _banditDef = (_categoryRules get "categoryDefs") getOrDefault ["bandit", []];
+private _weaponDef = (_categoryRules get "categoryDefs") getOrDefault ["weapon", []];
+
+if ((_categoryRules get "categoryIds") isNotEqualTo _wantIds) then {
+    ["roundTrip", format ["CATEGORIES ids %1, wanted %2", _categoryRules get "categoryIds", _wantIds]] call _fnc_count;
+};
+
+if (_banditDef isNotEqualTo ["Bandit loot", "\my_mod\ui\bandit_ca.paa"] || {_weaponDef isNotEqualTo ["Arms", ""]}) then {
+    ["roundTrip", format ["CATEGORIES bandit %1, weapon %2", _banditDef, _weaponDef]] call _fnc_count;
+};
+
+// tools and medical are left out, ghost is named but not defined: three warnings.
+if (count ((_categoryRules get "warnings") select {(_x find "tools") >= 0 || {(_x find "category=medical") >= 0} || {(_x find "ghost") >= 0}}) != 3) then {
+    ["roundTrip", format ["CATEGORIES warnings %1", _categoryRules get "warnings"]] call _fnc_count;
+};
 
 // A text that names a preset that is gone still loads, on the default.
 {

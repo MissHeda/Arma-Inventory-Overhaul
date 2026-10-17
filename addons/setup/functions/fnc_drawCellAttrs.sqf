@@ -3,7 +3,8 @@
 /*
  * Author: Miss Heda
  * The rows under the tools of the Blocks way (fnc_drawCellBlocks): what the picked compartment takes.
- *   - "Accepts": a chip for All and one for each category (weapon, ammo, grenade, gear, medical, food, tool, misc). With All on, the
+ *   - "Accepts": a chip for All and one for each category (weapon, ammo, grenade, gear, medical, food, tool, misc and the ones the draft
+ *     defines). With All on, the
  *     compartment takes anything, as every compartment does until it is locked; one or more categories on, only items in one of
  *     them go in - a vest's front pouches for magazines, its back for grenades. A click on All takes the lock away, a click on a
  *     category adds it or takes it out; the last one taken out is All again. An item is in the categories of the Category row of
@@ -76,7 +77,7 @@ private _lineY = _top;
 // All, then the categories.
 {
     private _group = _x;
-    private _text = [localize format ["STR_einv_setup_Cat_%1", _group], LLSTRING(Cont_AcceptsAll)] select (_group isEqualTo "");
+    private _text = [(([_group, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name"), LLSTRING(Cont_AcceptsAll)] select (_group isEqualTo "");
     private _chipW = SQUARE(_chipH * 0.9) + (_text getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK;
 
     if (_chipX + _chipW > _left + _width && {_chipX > _left + _labelW}) then {
@@ -96,11 +97,11 @@ private _lineY = _top;
             ([_accepts - [_group], _accepts + [_group]] select _state)
         };
 
-        [_class, _shown, _picked, ITEM_GROUPS select {_x in _list}, _single] call _change;
+        [_class, _shown, _picked, [_list] call EFUNC(items,orderGroups), _single] call _change;
     }, [_group, _class, _shown, _picked, _accepts, _single, _fnc_change]] call FUNC(uiChip);
 
     _chipX = _chipX + _chipW + _gap;
-} forEach ([""] + ITEM_GROUPS);
+} forEach ([""] + ([GVAR(draftRules)] call EFUNC(items,categories)));
 
 _lineY = _lineY + _rowH;
 

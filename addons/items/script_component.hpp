@@ -31,6 +31,10 @@
 #define KINDS_AS_ITEM ["kit"]
 #define KINDS_SINGLE ["rifle", "handgun", "launcher", "binocular", "uniform", "vest", "backpack"]
 
+// The words that stand for one of the eight categories of ITEM_GROUPS, [word, category]: read as that category in cats=,
+// einv_cat and the attributes of a grid, and never usable as the id of a category of the server's own (fnc_builtinGroup).
+#define GROUP_ALIASES [["magazine", "ammo"], ["mag", "ammo"], ["ammunition", "ammo"], ["throwable", "grenade"], ["explosive", "grenade"], ["clothing", "gear"], ["armour", "gear"], ["armor", "gear"], ["medic", "medical"], ["drink", "food"], ["gadget", "tool"], ["other", "misc"]]
+
 // The tile categories by their names in the rules (cat=), in the order of the CATEGORY_* numbers.
 #define CATEGORY_NAMES ["misc", "gear", "weapon", "ammo", "medical"]
 

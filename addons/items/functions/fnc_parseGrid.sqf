@@ -24,7 +24,7 @@
  *                   compartments of a second one flow on their own, with a message.
  *   1x2:ammo+1x1:grenade:one+6x4
  *                 - attributes after a compartment's colon. A list of categories (weapon, ammo, grenade, gear,
- *                   medical, food, tool, misc - ITEM_GROUPS, joined with |) means the compartment accepts only
+ *                   medical, food, tool, misc - ITEM_GROUPS - or a category the setup defines, joined with |) means the compartment accepts only
  *                   items in one of them: "2x2:ammo|grenade" takes magazines and grenades and nothing else; no
  *                   list takes everything. The word "one" makes it a single slot: it holds one tile whatever
  *                   its size, and the item takes the whole slot ("1x1:grenade:one", the vest's grenade loop).
@@ -164,7 +164,8 @@ if (_colon >= 0 && {!(_name in GRID_PATTERNS)}) then {
 };
 
 // The attributes of one piece: letter ("" for a piece without a canvas) -> [accepts, single]. A category is one of
-// ITEM_GROUPS, "one" says one item of any size; "a=" in front names the compartment of a canvas.
+// ITEM_GROUPS or the id of a category of the setup's own (fnc_parseGroups), "one" says one item of any size; "a=" in front names
+// the compartment of a canvas.
 private _fnc_attrs = {
     params ["_pieceTails"];
 
@@ -206,7 +207,7 @@ private _fnc_attrs = {
 
         private _had = _map getOrDefault [_letter, [[], false]];
 
-        _map set [_letter, [ITEM_GROUPS select {_x in (_had select 0) || {_x in _groups}}, (_had select 1) || _single]];
+        _map set [_letter, [[(_had select 0) + _groups] call FUNC(orderGroups), (_had select 1) || _single]];
     } forEach _pieceTails;
 
     _map
@@ -339,7 +340,7 @@ private _spec = switch (true) do {
                 if (count _parts <= 1) then {
                     private _own = _attrs getOrDefault [_letters param [0, ""], [[], false]];
                     private _merged = [
-                        ITEM_GROUPS select {_x in (_plain select 0) || {_x in (_own select 0)}},
+                        [(_plain select 0) + (_own select 0)] call FUNC(orderGroups),
                         (_plain select 1) || {_own select 1}
                     ];
 

@@ -64,6 +64,6 @@ private _word = toLowerANSI ((_first splitString " ") param [0, ""]);
 private _digits = toArray (_word select [4]);
 private _header = (_word select [0, 4]) isEqualTo "einv" && {_digits isNotEqualTo []} && {(_digits findIf {_x < 48 || {_x > 57}}) < 0};
 
-if ((_ast getOrDefault ["groups", []]) isEqualTo [] && {(_ast getOrDefault ["rules", []]) isEqualTo []} && {!_header}) exitWith {createHashMap};
+if ((_ast getOrDefault ["categories", []]) isEqualTo [] && {(_ast getOrDefault ["groups", []]) isEqualTo []} && {(_ast getOrDefault ["rules", []]) isEqualTo []} && {!_header}) exitWith {createHashMap};
 
 _ast

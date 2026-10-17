@@ -586,7 +586,40 @@ private _fnc_idle = {
     };
 };
 
+// What a compartment that takes only some categories says: "Only medical items here", and for a single slot that it holds one
+// item whatever its size. [[text, colour key], ...], [] for a compartment like any other.
+private _fnc_locked = {
+    params ["_grid"];
+
+    private _accepts = _grid getOrDefault ["accepts", []];
+    private _parts = [];
+
+    if (_accepts isNotEqualTo []) then {
+        _parts pushBack [
+            format [LLSTRING(Hint_Only), (_accepts apply {(([_x] call EFUNC(items,categoryInfo)) get "only")}) joinString ", "], "accent"
+        ];
+    };
+
+    if (_grid getOrDefault ["single", false]) then {
+        _parts pushBack [LLSTRING(Hint_SingleSlot), "text2"];
+    };
+
+    _parts
+};
+
 switch (_shown param [0, ""]) do {
+    case "cell": {
+        private _cellGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_shown select 1, createHashMap];
+        private _lockedParts = [_cellGrid] call _fnc_locked;
+
+        if (_lockedParts isEqualTo []) exitWith {
+            call _fnc_idle;
+        };
+
+        {
+            _x call _fnc_add;
+        } forEach _lockedParts;
+    };
     case "tile": {
         private _tile = _shown call _fnc_tile;
 
@@ -663,6 +696,13 @@ switch (_shown param [0, ""]) do {
                 };
             };
         };
+
+        // A compartment that takes only some categories, or is a single slot: said on whatever lies in it, as on its free cells.
+        private _lockedGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_shown select 1, createHashMap];
+
+        {
+            _x call _fnc_add;
+        } forEach ([_lockedGrid] call _fnc_locked);
 
         // On the ground a double click puts on what can be worn, and Ctrl+click opens a uniform, vest or
         // backpack (fnc_onMouseButton): said here, where it differs from the footer's keys.

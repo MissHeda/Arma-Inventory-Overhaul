@@ -4,7 +4,9 @@
  * Author: Miss Heda
  * The content of the picture picker (fnc_openPicturePicker), in the style of the "Same as another class"
  * popover (fnc_drawSameAs):
- *   - Chips under the search: "Item icons", "Uniforms & gear", "Vehicles & boxes" and "All" - which group of the
+ *   - Chips under the search: "Item icons", "Uniforms & gear", "Vehicles & boxes" and "All" - and, in the picker of a category
+ *     (the General step's Categories card), first "Category icons": the icons of this mod's own (the slot pictures and symbols
+ *     of its ui folder, GVAR(iconList)), which need no catalog - which group of the
  *     catalog is looked through (a picture's categories come from the classes that own it, fnc_pictureCategory). The
  *     picker opens on the chip of the class being edited, and on the page of the picture it has in use, ringed.
  *   - A search field over the picture catalog (fnc_pictureCatalog: every picture of every class the wizard
@@ -116,6 +118,14 @@ if (_part isEqualTo "chips") exitWith {
 
     uiNamespace setVariable [QGVAR(pickerChips), _row];
 
+    private _chipList = [
+        ["items", LLSTRING(Pic_CatItems)], ["gear", LLSTRING(Pic_CatGear)], ["vehicles", LLSTRING(Pic_CatVehicles)], ["all", LLSTRING(Pic_CatAll)]
+    ];
+
+    if (GVAR(picker) getOrDefault ["icons", false]) then {
+        _chipList = [["icons", LLSTRING(Pic_CatIcons)]] + _chipList;
+    };
+
     {
         _x params ["_id", "_text"];
 
@@ -133,9 +143,7 @@ if (_part isEqualTo "chips") exitWith {
         }, _id] call FUNC(uiChip);
 
         _chipX = _chipX + _chipW + SQUARE(UNIT * 0.3);
-    } forEach [
-        ["items", LLSTRING(Pic_CatItems)], ["gear", LLSTRING(Pic_CatGear)], ["vehicles", LLSTRING(Pic_CatVehicles)], ["all", LLSTRING(Pic_CatAll)]
-    ];
+    } forEach _chipList;
 };
 
 // ----- Everything: the search, the path field, the buttons -----
@@ -252,8 +260,10 @@ private _list = [_display, "EINV_Group", _box, [0, _gridY, _width, _listH]] call
 
 uiNamespace setVariable [QGVAR(pickerList), _list];
 
-// Still reading: say how far, and look again a moment later.
-if !(call FUNC(pictureCatalog)) exitWith {
+// Still reading: say how far, and look again a moment later. This mod's own icons are no part of the catalog and wait for nothing.
+private _chip = GVAR(picker) getOrDefault ["chip", "all"];
+
+if (_chip isNotEqualTo "icons" && {!(call FUNC(pictureCatalog))}) exitWith {
     private _index = uiNamespace getVariable [QGVAR(index), createHashMap];
     private _catalog = uiNamespace getVariable [QGVAR(pictures), createHashMap];
     private _text = if (_index getOrDefault ["done", false]) then {
@@ -276,12 +286,15 @@ if !(call FUNC(pictureCatalog)) exitWith {
 // ----- What is found, a page of thumbnails -----
 
 private _typed = GVAR(picker) getOrDefault ["text", ""];
-private _chip = GVAR(picker) getOrDefault ["chip", "all"];
 private _found = GVAR(picker) getOrDefault ["found", []];
 
 // What the catalog has of a chip's group that the text finds.
 private _fnc_find = {
     params ["_typed", "_chip"];
+
+    if (_chip isEqualTo "icons") exitWith {
+        [_typed] call FUNC(iconEntries)
+    };
 
     private _all = (uiNamespace getVariable QGVAR(pictures)) get "list";
 
@@ -427,7 +440,13 @@ if (!isNull _summary) then {
     private _text = "";
 
     if (_current isNotEqualTo "" && {(GVAR(picker) getOrDefault ["source", "list"]) isEqualTo "list"}) then {
-        private _entry = ((uiNamespace getVariable QGVAR(pictures)) get "byPath") getOrDefault [[_current] call FUNC(pictureKey), []];
+        private _currentKey = [_current] call FUNC(pictureKey);
+        private _entry = ((uiNamespace getVariable [QGVAR(pictures), createHashMap]) getOrDefault ["byPath", createHashMap]) getOrDefault [_currentKey, []];
+
+        // Not a class's picture: one of this mod's own icons.
+        if (_entry isEqualTo []) then {
+            _entry = (([""] call FUNC(iconEntries)) select {(_x select 9) isEqualTo _currentKey}) param [0, []];
+        };
 
         _text = [format ["%1 · %2", _entry param [3, ""], _current], _summaryW, _font, TEXT_SMALL] call EFUNC(gui,fitText);
     };

@@ -3,7 +3,8 @@
 /*
  * Author: Miss Heda
  * The row "Category" of the Items step: which categories the item is in - a chip each for weapon, ammo, grenade, gear,
- * medical, food, tool and misc (ITEM_GROUPS), more than one on when it is in several (cats=, einv_cat). The strip at the
+ * medical, food, tool and misc (ITEM_GROUPS) and the ones the draft defines (General step), more than one on when it is in several
+ * (cats=, einv_cat). The strip at the
  * side of a loot box shows an item under each of them, and a compartment that accepts only some categories (the Containers
  * step) takes it when it is in one of them. Like the Use from row, the chips are always clickable and nothing is written
  * here: the code gets the new list and puts it into the editor's working copy; Apply writes cats=. At least one stays on.
@@ -15,7 +16,7 @@
  * 2: Position [x, y, w], relative to the group <ARRAY>
  * 3: Theme <HASHMAP>
  * 4: Width of the label at the left <NUMBER>
- * 5: The categories the working copy has, any of ITEM_GROUPS <ARRAY of STRING>
+ * 5: The categories the working copy has, any category of the draft <ARRAY of STRING>
  * 6: Code, called with [new list, arguments] when a chip is clicked <CODE>
  * 7: Arguments <ANY> (default: [])
  *
@@ -50,7 +51,7 @@ private _lineY = _top;
 
 {
     private _group = _x;
-    private _text = localize format ["STR_einv_setup_Cat_%1", _group];
+    private _text = ([_group, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name";
     private _chipW = SQUARE(_chipH * 0.9) + (_text getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK;
 
     // A chip that would reach past the row starts the next line, under the first chip.
@@ -63,7 +64,7 @@ private _lineY = _top;
         params ["_on", "_arguments"];
         _arguments params ["_group", "_work", "_code", "_codeArguments"];
 
-        // In the order of the strip, whatever order they were clicked in; the last one on cannot be switched off.
+        // In the order they are stored in, whatever order they were clicked in; the last one on cannot be switched off.
         private _list = ([_work - [_group], _work + [_group]] select _on);
 
         if (_list isEqualTo []) exitWith {
@@ -71,10 +72,10 @@ private _lineY = _top;
             [_work, _codeArguments] call _code;
         };
 
-        [ITEM_GROUPS select {_x in _list}, _codeArguments] call _code;
+        [[_list] call EFUNC(items,orderGroups), _codeArguments] call _code;
     }, [_group, _work, _code, _arguments]] call FUNC(uiChip);
 
     _chipX = _chipX + _chipW + _gap;
-} forEach ITEM_GROUPS;
+} forEach ([GVAR(draftRules)] call EFUNC(items,categories));
 
 _lineY - _top + _rowH

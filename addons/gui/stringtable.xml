@@ -100,6 +100,9 @@
         <Key ID="STR_einv_gui_Group_Misc">
             <English>Other</English>
         </Key>
+        <Key ID="STR_einv_gui_Group_More">
+            <English>More categories (%1 of %2)</English>
+        </Key>
         <Key ID="STR_einv_gui_Group_Tool">
             <English>Tools and electronics</English>
         </Key>
@@ -216,6 +219,9 @@
         </Key>
         <Key ID="STR_einv_gui_Hint_Selected">
             <English>%1 selected - drag them together, double click to move them over, the drop key drops them</English>
+        </Key>
+        <Key ID="STR_einv_gui_Hint_SingleSlot">
+            <English>holds one item, whatever its size</English>
         </Key>
         <Key ID="STR_einv_gui_Hint_StripMove">
             <English>Let go to move it to this hotbar slot</English>
