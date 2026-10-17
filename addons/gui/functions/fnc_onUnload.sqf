@@ -96,6 +96,7 @@ GVAR(dragTarget) = [];
 // (fnc_queueMoves). A move that already went out finishes on its own.
 GVAR(handQueue) = [];
 GVAR(handStarted) = -1;
+GVAR(queueDirty) = false;
 
 GVAR(person) = objNull;
 GVAR(personMode) = "";

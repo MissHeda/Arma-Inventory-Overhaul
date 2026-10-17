@@ -174,12 +174,16 @@ GVAR(searchLast) = 0;
 // The hands' queue (fnc_queueMoves): the actions waiting for the hands, in order, each a HashMap - "id", "move" (the
 // move fnc_sendMoves was given), "options", "hand" ("drop", "move" or "equip"), "time" (seconds), "sources" (the tiles it
 // takes from, as the moves in flight name them), "slot" ([unit, slot] of a worn item it takes off), "fx" (the circle's
-// controls, made by fnc_drawQueue), "arc" and "step" (the ring that fills). Only the first runs; handStarted is when it
-// began (-1: not yet), handLast the last frame of the queue, handId counts the entries made.
+// controls, made by fnc_drawQueue and kept until the tile or slot they lie on is drawn anew), "arc" and "step" (the ring
+// that fills), and what fnc_drawQueue keeps to tell whether the circle is still good: "tiles" ([[grid, tile], ...] it
+// marked), "marks" (those tiles' surfaces), "slotAt", "class" and "position". Only the first runs; handStarted is when it
+// began (-1: not yet), handLast the last frame of the queue, handId counts the entries made. queueDirty: entries were
+// queued or cancelled, so the circles are brought up to date in the next frame (fnc_animateQueue), once.
 GVAR(handQueue) = [];
 GVAR(handStarted) = -1;
 GVAR(handLast) = 0;
 GVAR(handId) = 0;
+GVAR(queueDirty) = false;
 
 // The sounds: each item class's family, each family's actions as read from CfgEinvSounds, when each sound last
 // played and which variant, the files found for config paths, the weapons' reload sounds, the ground under the

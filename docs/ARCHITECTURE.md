@@ -1140,17 +1140,29 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   window closed), and one whose tile or worn item already waits (dropped, no second entry). An entry is a HashMap: `id`, `move`, `options`
   (a copy with `now`; `label` only on the last entry of a call), `hand`, `time`, `sources` (`[holder, key, block, col, row]` as the moves in
   flight name them), `slot` (`[unit, slot]` of a worn item a take off or swap lifts), `fx`, `arc`, `step`. `fnc_queueTiles [entry]` finds the
-  tiles by those sources as `fnc_drawPending` finds a move in flight's. `fnc_drawQueue` is called at the end of `fnc_drawPending` (every build,
-  every redraw of tiles, every settle) and after a kit window is drawn on its own: it deletes the last circles and makes them again - a
-  dark disc, the faint full ring, and for the first entry the ring that fills (`SEARCH_RING` pictures, the accent colour), for the others their
-  place as a number - on the tile's group (so they scroll and clip with it) or on the slot, flags the tiles `pending` (faded as a move in
-  flight, so nothing can lift or act on them; `fnc_startDrag` also looks in the queue) and `queued` with the entry's id; every entry
+  tiles by those sources as `fnc_drawPending` finds a move in flight's, through an index of each grid's tiles by cell that the caller
+  can share between the entries of a pass (`cache` argument; nothing scans every tile per entry). `fnc_drawQueue` is called at the end
+  of `fnc_drawPending` (every build, every redraw of tiles, every settle), after a kit window is drawn on its own and, once a frame at
+  most, by `fnc_animateQueue` when `GVAR(queueDirty)` says entries were queued or cancelled. It **keeps the circles**: an entry's
+  controls (`fx`) stay as long as they are all there, its place class is the same (first / others, under or past `QUEUE_DISC_MAX`) and
+  its tiles still have the surfaces the circle was made over (`marks`; a redraw of a section makes new controls that would lie over the
+  old circle, so those entries get new circles; a slot entry compares the slot's record, `slotAt`). Only what changed is touched: an
+  entry that moved in the queue gets its number written in place (`ctrlSetText` on the last control), a new or invalidated one is made
+  - a dark disc, the faint full ring, and for the first entry the ring that fills (`SEARCH_RING` pictures, the accent colour), for the
+  others their place as a number - on the tile's group (so they scroll and clip with it) or on the slot, flags the tiles `pending` (faded as a move in
+  flight, so nothing can lift or act on them; `fnc_startDrag` also looks in the queue) and `queued` with the entry's id (`fnc_refresh`'s
+  settle leaves tiles that are `queued` alone, so a queue is not faded in and out at each answer); every entry
   whose tile or slot the window shows is marked, but only the first `QUEUE_DISC_MAX` 30 get the dark disc - the later ones keep the
   faint ring (a little stronger) and their number, two controls instead of three. `fnc_onFrame` calls `fnc_animateQueue` each frame while the queue holds something and the
   window is not covered (the time it stood still does not count, as for the search): that one place changes the first ring's picture when its
-  step changes and calls `fnc_runQueue` when the time is up - no control is made per frame. A left press on a queued tile or slot
+  step changes and calls `fnc_runQueue` when the time is up - no control is made per frame, and the work of a frame does not grow with the
+  length of the queue (the head entry only). A left press on a queued tile or slot
   (`fnc_onMouseButton`) or "Cancel" in its menu (`fnc_contextMenu`) calls `fnc_cancelQueued [id]` (0: all): the entry leaves, the tile is
-  free, the others are numbered again. The queue is dropped by `fnc_attach` and `fnc_onUnload`: closing the window (Escape, the Gear key,
+  free, the others are numbered again (in the next frame, once, through `queueDirty`). `fnc_queueMoves` adds the entries of a call without
+  drawing (the circles of a Take all of N come once, in the next frame, or with the next `fnc_drawPending`); what waits is kept by cell
+  and the tiles are found through one shared index, so a call is N lookups. What a finished entry costs: `fnc_runQueue` -> `fnc_sendMoves`
+  -> answer -> `fnc_refresh` redraws only the touched sections (`fnc_redrawTiles`; a build only when sections came or went or the unit's
+  gear changed, as for any move), and `fnc_drawQueue` renews the circles only of the entries on those redrawn tiles. The queue is dropped by `fnc_attach` and `fnc_onUnload`: closing the window (Escape, the Gear key,
   a movement key, ...) cancels everything that still waits, which only waited - a move already sent finishes on its own. Take all / Put all in
   skip tiles that wait (`handQueue` sources next to `inFlight`'s). Walking does not cancel (only `einv_gui_moveToStop` closes the window
   while looting, as ever); with the looting animation on, the soldier simply stays in the pose while the window is open. The target cells
@@ -1424,10 +1436,13 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   name or card made again. Only a changed target does work: the light, the name at the mouse or the comparison card (a control
   made then, never per frame), the hint's text. A free cell is held like a tile ("nothing" never is: a redraw resets the hover to `[]`, and
   a held `[]` would not notice a tile that came there).
-- **The hover outline.** What the mouse is on gets, besides the lighter surface of a tile, the frame of the Ctrl selection
-  (`fnc_hoverOutline`: the accent colour, square, two pixels thick like `fnc_drawSelection`'s, no fill, snapped to whole pixels): a
-  tile around its box (`rect`, w x h cells as it lies, a turned one too) or, shaped, on its own cells (`fnc_uiShape` "frame", two
-  pixels); a slot - weapon, attachment, worn, hotbar - around its box; a free cell of a grid that holds things (not a virtual or
+- **The hover outline.** What the mouse is on gets, besides the lighter surface of a tile, an outline in the accent colour. An item
+  tile or a free cell of a grid has the frame of the Ctrl selection (`fnc_hoverOutline`: square, two pixels thick like
+  `fnc_drawSelection`'s, no fill, snapped to whole pixels): a tile around its box (`rect`, w x h cells as it lies, a turned one too)
+  or, shaped, on its own cells (`fnc_uiShape` "frame", two pixels). A slot - weapon, attachment, worn gear, the small gear slots,
+  hotbar - keeps the **round ring** (`fnc_uiRing`, radius = the theme's `radius` at most a quarter of the slot's height, the same
+  as the slot's own panel in `fnc_drawSlot`), so the ring follows the slot's corners; only the grids' tiles and cells are square.
+  A free cell of a grid that holds things (not a virtual or
   overflow grid) around that one cell (`fnc_spanRect`), found as the hover `["cell", grid, column, row]` when `fnc_tileAt` finds no
   tile - such a hover has no name and the idle hint, and nothing else reads it (the clicks and keys look at `"tile"` and `"slot"`
   only). There is one outline at a time, `einv_gui_hoverRing`, the slot's, tile's or cell's: `fnc_updateHover`'s light makes it in
@@ -1435,7 +1450,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   display itself asks `fnc_raiseTooltip`) and deletes it when the hover leaves - nothing per tile, nothing per frame. `fnc_startDrag`
   deletes a lifted tile's outline (the footprint shows instead), `fnc_endDrag` clears `hoverHold` so the next frame gives what is
   under the mouse its outline again; `fnc_redrawTiles` and `fnc_build` delete it with the groups it lay in. A tile waiting in the
-  hands' queue shows it too. The round rings (`fnc_uiRing`) stay for cards and popovers.
+  hands' queue shows it too. The round rings (`fnc_uiRing`) are the slots' outline and the border of cards and popovers.
 - **What a frame of a drag costs.** `fnc_updateDrag` works out only what changed. Every frame it reads the middle button and holds
   or edge-scrolls the columns (each column's box is worked out at its first frame, element 3 of its `dragScroll` entry), then
   compares the mouse and what is held (`dragCount`, `dragRot`, `count inFlight`) with the last frame (`dragRoom` "frame"); nothing

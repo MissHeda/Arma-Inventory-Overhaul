@@ -119,6 +119,7 @@ GVAR(drift) = [];
 // The hands' queue went with it: nothing was sent, so nothing is lost (fnc_queueMoves).
 GVAR(handQueue) = [];
 GVAR(handStarted) = -1;
+GVAR(queueDirty) = false;
 
 // The selection is view state of one window, and no press on an empty cell waits.
 GVAR(selection) = [];

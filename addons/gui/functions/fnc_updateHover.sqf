@@ -36,9 +36,10 @@
  * account; slots through the areas they registered in (uiNamespace getVariable [QGVAR(slots), []]). A slot that also registered where
  * it lies in its group - a fourth element, the HashMap with "rel" and "parent" fnc_gridOrigin takes -
  * is found where its scrolled group shows it now, and only on the part that shows (fnc_slotRect). A
- * tile gets brighter and, as a slot does, an outline in the accent colour - the square frame of the Ctrl
- * selection, two pixels thick (fnc_hoverOutline) - or the cells of a shaped tile (fnc_uiShape); a free
- * cell of a grid that holds things (hover ["cell", grid, column, row]) gets the same frame around that
+ * tile gets brighter and, as a slot does, an outline in the accent colour: a tile gets the square frame
+ * of the Ctrl selection, two pixels thick (fnc_hoverOutline) - or the cells of a shaped tile (fnc_uiShape) -
+ * a slot (weapon, attachment, worn gear, hotbar) a ring with its own round corners (fnc_uiRing); a free
+ * cell of a grid that holds things (hover ["cell", grid, column, row]) gets the square frame around that
  * one cell, and no hint but the idle one; there is one outline at a time,
  * for the tile, slot or cell under the mouse, made in the group it lies in so it scrolls and
  * clips with it, and deleted when the mouse leaves (a drag takes the tile's outline away,
@@ -240,7 +241,7 @@ private _fnc_light = {
         uiNamespace setVariable [QGVAR(hoverRing), []];
     };
 
-    // A slot: the outline of the Ctrl selection (fnc_hoverOutline) - made in its column's group where it has
+    // A slot: a ring with the slot's round corners (fnc_uiRing) - made in its column's group where it has
     // one, so it scrolls and clips with the slot. It stays while the mouse is on that slot and goes with it.
     if ((_hover select 0) isEqualTo "slot") exitWith {
         if (!_on) exitWith {};
@@ -261,7 +262,12 @@ private _fnc_light = {
             _rect = (_anchor get "rel") + [_slotRect select 2, _slotRect select 3];
         };
 
-        uiNamespace setVariable [QGVAR(hoverRing), [_display, _parent, _rect] call FUNC(hoverOutline)];
+        // The ring follows the round corners of the slot's own panel (fnc_drawSlot's radius).
+        private _radius = (GVAR(theme) getOrDefault ["radius", 0]) min ((_rect select 3) / 4);
+
+        uiNamespace setVariable [QGVAR(hoverRing), [
+            _display, _parent, _rect, GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]], _radius
+        ] call FUNC(uiRing)];
 
         // In a group it lies under the name anyway: the group was made before it.
         if (isNull _parent) then {

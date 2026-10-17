@@ -15,6 +15,12 @@
  * The label an option brings (the hint after a Take all) goes with the last entry of the call, the one whose
  * answer ends it.
  *
+ * Cost: one call for all the moves of a Take all or a group drag, and no drawing in it - the entries are only
+ * added and fnc_drawQueue is asked for (GVAR(queueDirty), done by fnc_animateQueue in the next frame, or by any
+ * drawPending before), so the circles of N entries are made once, not N times. What waits already is
+ * kept by cell, and the tiles are found through an index of the grids shared by the call (fnc_queueTiles), so a
+ * move costs a few lookups, not a scan of every tile and of everything that waits.
+ *
  * Arguments:
  * 0: Moves, as fnc_sendMoves takes them <ARRAY>
  * 1: Options of fnc_sendMoves <HASHMAP>
@@ -36,12 +42,43 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
 if (isNull _display || {!(call FUNC(isInventoryMode))}) exitWith {[_moves, 0]};
 
-// What waits already: a second move of the same tile or worn item is not asked for.
-private _waiting = [];
+// What waits already: a second move of the same tile or worn item is not asked for. The sources are kept by their
+// cell - [holder, key, block] under "column_row" - so a move asks only what lies on its own cell.
+private _waiting = createHashMap;
+
+private _fnc_wait = {
+    params ["_source"];
+
+    _source params ["_holder", "_key", "_block", "_col", "_row"];
+
+    private _at = format ["%1_%2", _col, _row];
+    private _there = _waiting getOrDefault [_at, []];
+
+    if (_there isEqualTo []) then {
+        _waiting set [_at, _there];
+    };
+
+    _there pushBack [_holder, _key, _block];
+};
+
+private _fnc_waits = {
+    params ["_source"];
+
+    _source params ["_holder", "_key", "_block", "_col", "_row"];
+
+    (_waiting getOrDefault [format ["%1_%2", _col, _row], []]) findIf {
+        (_x select 0) isEqualTo _holder && {(_x select 1) isEqualTo _key} && {(_x select 2) isEqualTo _block}
+    } >= 0
+};
 
 {
-    _waiting append (_x getOrDefault ["sources", []]);
+    {
+        [_x] call _fnc_wait;
+    } forEach (_x getOrDefault ["sources", []]);
 } forEach GVAR(handQueue);
+
+// One index of the window's tiles for all the moves of the call.
+private _cache = createHashMap;
 
 private _slotsWaiting = GVAR(handQueue) apply {_x getOrDefault ["slot", []]};
 
@@ -94,7 +131,7 @@ private _held = [];
 
     // Nothing of it on the window - a kit unpacked from the menu with its window closed, a slot not shown: no circle
     // to run, so no wait either.
-    private _shown = ([createHashMapFromArray [["sources", _sources], ["slot", _slot]]] call FUNC(queueTiles)) isNotEqualTo []
+    private _shown = ([createHashMapFromArray [["sources", _sources], ["slot", _slot]], _cache] call FUNC(queueTiles)) isNotEqualTo []
         || {_slot isNotEqualTo [] && {(uiNamespace getVariable [QGVAR(slots), []]) findIf {
             (_x param [5, ""]) isEqualTo (_slot select 1) && {(_x param [6, objNull]) isEqualTo (_slot select 0)} && {(_x param [7, -1]) < 0}
         } >= 0}};
@@ -107,12 +144,14 @@ private _held = [];
     // Already waiting: left out, not sent a second time.
     if (
         (_slot isNotEqualTo [] && {_slot in _slotsWaiting})
-        || {_sources findIf {_x in _waiting} >= 0}
+        || {_sources findIf {[_x] call _fnc_waits} >= 0}
     ) then {
         continue;
     };
 
-    _waiting append _sources;
+    {
+        [_x] call _fnc_wait;
+    } forEach _sources;
 
     if (_slot isNotEqualTo []) then {
         _slotsWaiting pushBack _slot;
@@ -142,7 +181,8 @@ if (GVAR(handQueue) isEqualTo []) then {
 
 GVAR(handQueue) append _held;
 
-// The tiles fade and the circles come at once; the next frame starts the clock.
-call FUNC(drawPending);
+// The tiles fade and the circles come once, in the next frame (fnc_animateQueue), which also starts the clock; a
+// caller that draws at once (fnc_drawPending) does it for the whole queue.
+GVAR(queueDirty) = true;
 
 [_instant, count _held]

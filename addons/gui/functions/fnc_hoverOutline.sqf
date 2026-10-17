@@ -2,10 +2,10 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The outline of whatever the mouse is on - a tile, a slot or a free cell: the frame of a selected tile
+ * The outline of an item tile or a free cell of a grid under the mouse: the frame of a selected tile
  * (fnc_drawSelection) without its fill. Square corners, two pixels thick (a frame and another inside it), in
- * the accent colour, snapped to whole pixels. The one place that draws it, so a tile, a slot, a hotbar slot
- * and a free cell all look the same as the Ctrl selection.
+ * the accent colour, snapped to whole pixels. The one place that draws it, so a tile and a free cell look
+ * the same as the Ctrl selection. Slots (weapon, worn gear, hotbar) get the round fnc_uiRing instead.
  *
  * Arguments:
  * 0: Display <DISPLAY>

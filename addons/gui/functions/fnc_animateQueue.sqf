@@ -8,6 +8,10 @@
  * (fnc_runQueue) and the next one begins. The time the window stood still under another window does not
  * count, as the search's does not.
  *
+ * Also where the circles are brought up to date after a change of the queue (GVAR(queueDirty), set when
+ * entries were queued or cancelled): fnc_drawQueue runs here, once, however many entries changed in the frame.
+ * Without that, a frame is a handful of reads and at most one ctrlSetText - the same for any length of queue.
+ *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Now, diag_tickTime <NUMBER>
@@ -30,6 +34,10 @@ GVAR(handLast) = _now;
 
 if (GVAR(handQueue) isEqualTo []) exitWith {
     GVAR(handStarted) = -1;
+};
+
+if (GVAR(queueDirty)) then {
+    [_display] call FUNC(drawQueue);
 };
 
 if (GVAR(handStarted) >= 0 && {_gap > QUEUE_PAUSE}) then {

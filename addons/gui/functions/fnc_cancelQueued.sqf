@@ -4,8 +4,9 @@
  * Author: Miss Heda
  * Takes an action out of the hands' queue (fnc_queueMoves): a click on its tile or slot, or "Cancel" in the
  * menu. Nothing had been sent or changed - the move only waited - so there is nothing to undo: the tile
- * is free again and the circles of the others are drawn anew with their new places. If it was the one the
- * hands were busy with, the next one starts from nothing.
+ * is free again and the others are numbered again (their circles stay, only the numbers are written anew,
+ * once in the next frame however many were taken out - fnc_animateQueue). If it was the one the hands were
+ * busy with, the next one starts from nothing.
  *
  * Arguments:
  * 0: The queue entry's id, 0 for every entry <NUMBER> (default: 0)
@@ -38,6 +39,13 @@ GVAR(handQueue) = GVAR(handQueue) select {_id != 0 && {(_x get "id") != _id}};
 {
     {ctrlDelete _x} forEach (_x getOrDefault ["fx", []]);
 
+    // The tiles fnc_drawQueue marked for it (found anew only when it has not been drawn yet).
+    private _tiles = _x getOrDefault ["tiles", []];
+
+    if (_tiles isEqualTo []) then {
+        _tiles = [_x] call FUNC(queueTiles);
+    };
+
     {
         _x params ["", "_tile"];
 
@@ -48,9 +56,10 @@ GVAR(handQueue) = GVAR(handQueue) select {_id != 0 && {(_x get "id") != _id}};
             _x ctrlSetFade 0;
             _x ctrlCommit 0;
         } forEach (_tile getOrDefault ["controls", []]);
-    } forEach ([_x] call FUNC(queueTiles));
+    } forEach _tiles;
 } forEach _gone;
 
-call FUNC(drawPending);
+// The others are numbered again, in the next frame.
+GVAR(queueDirty) = true;
 
 count _gone

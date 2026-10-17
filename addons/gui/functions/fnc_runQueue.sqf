@@ -6,8 +6,9 @@
  * as a move of the window always is (fnc_sendMoves, with the option "now" so it is not queued again) - the
  * transaction, the authority, the answer and its hint are exactly those of a move that was never queued. When
  * nothing is sent (the move is refused here: the item is gone, nowhere to put it, a lock set meanwhile, and the
- * hint says why) its tile is free again, and the next entry starts either way. The tiles and circles are drawn
- * anew (fnc_drawPending): the one that went is a move in flight now, the next one has the ring that fills.
+ * hint says why) its tile is free again, and the next entry starts either way. fnc_drawPending outlines the
+ * move now in flight and brings the circles up to date (fnc_drawQueue): the others keep theirs and only their
+ * numbers change, the next one gets the ring that fills.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -28,7 +29,13 @@ params ["_display"];
 if (GVAR(handQueue) isEqualTo []) exitWith {false};
 
 private _head = GVAR(handQueue) deleteAt 0;
-private _tiles = [_head] call FUNC(queueTiles);
+
+// The tiles fnc_drawQueue marked for it (found anew only when it has not been drawn yet).
+private _tiles = _head getOrDefault ["tiles", []];
+
+if (_tiles isEqualTo []) then {
+    _tiles = [_head] call FUNC(queueTiles);
+};
 
 GVAR(handStarted) = -1;
 

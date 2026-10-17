@@ -87,13 +87,15 @@ private _storageChanged = [_storage, _before select 3] call _fnc_changed;
 private _cardChanged = _storageChanged isNotEqualTo [] || {_card isNotEqualTo (_before select 4)};
 
 // Tiles of moves that were answered meanwhile are no longer under way: faded back in, and what is still
-// under way marked again (fnc_drawPending) - only when there were such tiles, which is after a move.
+// under way marked again (fnc_drawPending) - only when there were such tiles, which is after a move. A tile that
+// waits in the hands' queue is not one of them: it stays marked and faded (fnc_drawQueue keeps its circle), so a
+// long queue is not faded in and out again at each answer.
 private _fnc_settle = {
     private _found = false;
 
     {
         {
-            if (_x getOrDefault ["pending", false]) then {
+            if (_x getOrDefault ["pending", false] && {(_x getOrDefault ["queued", 0]) == 0}) then {
                 _x set ["pending", false];
                 _found = true;
 
