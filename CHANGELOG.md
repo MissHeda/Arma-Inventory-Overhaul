@@ -115,6 +115,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- Setup wizard, Items: Apply was lit whenever the drawn shape was one piece, even with nothing changed. It is now grey until the working copy differs from what the item is.
 - The script error "Error max: Type String, expected Number" in `fnc_animateStatus` while grabbing or searching (Mia, 0.5.7): `max` binds tighter than `find`, so the verb of the hands' queue was asked for its maximum before it was looked up. Parenthesised; no other file has the pattern.
 - Pages and filters: turning a page of a box with a search or a category on lit every tile up for a moment (the page's new tiles were made at full strength and faded to the dimmed state over a tenth of a second). A tile made new takes its state at once now.
 - The sound dropdown's sliders only gave 0 and 100 % (Mia, 0.5.7): the slider read the mouse from the arguments of the control's press and the display's move, which were not in the space of the track's place, so every place was off the track. The mouse is read with `getMousePosition`, as everything else does, and the volume goes in steps of 5 % along the track (the knob's middle runs from one end of the track to the other).

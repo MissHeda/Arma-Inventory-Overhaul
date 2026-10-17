@@ -767,7 +767,7 @@ private _applyW = ACTION_W(LLSTRING(Items_Apply),_buttonH,true,_font);
         [format [LLSTRING(Hint_SizeApplied), _class], format [LLSTRING(Hint_TreeApplied), _class, _below]] select _tree, "text2"
     ] call FUNC(setHint);
     [_class, _set, _remove, _tree] call FUNC(upsertRule);
-}, [_class, _canvas, _startShape, _startStack, _forced, _startWeight, _startWeightText, _startName, _tree, _below, _startIcon, _ownIcon, _startPicture, _ownPicture, _startUse, _startGroups, _default getOrDefault ["groups", ["misc"]]], _onePiece, "accent", [LLSTRING(Items_ApplyTip), LLSTRING(Items_ApplyTipTree)] select _tree] call FUNC(uiAction);
+}, [_class, _canvas, _startShape, _startStack, _forced, _startWeight, _startWeightText, _startName, _tree, _below, _startIcon, _ownIcon, _startPicture, _ownPicture, _startUse, _startGroups, _default getOrDefault ["groups", ["misc"]]], _onePiece && {_dirty}, "accent", [LLSTRING(Items_ApplyTip), LLSTRING(Items_ApplyTipTree)] select _tree] call FUNC(uiAction);
 
 _buttonX = _buttonX + _applyW + _gap;
 
