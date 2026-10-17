@@ -73,6 +73,7 @@ if (count _best < 7) exitWith {
     [false, LLSTRING(Reason_NotNow)]
 };
 
-_unit action ["LoadMagazine", _unit, _unit, _best select 6, _best select 5, _weapon, _muzzle];
+// Loaded as every reload of the mod is: the game's action, or by hand into an empty weapon.
+if !([_unit, _weapon, _muzzle, _best] call EFUNC(storage,loadMagazine)) exitWith {[false, LLSTRING(Reason_NotNow)]};
 
 [true, format [LLSTRING(Message_Reload), [_class] call EFUNC(gui,itemName), _best select 1]]

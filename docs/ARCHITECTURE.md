@@ -33,7 +33,7 @@ no setting to bring it back and no fallback to it (section 4, Opening).
   local; the server is the hub between machines (section 3).
 
 CBA_A3 and ACE3 are hard requirements. Everything else (Enhanced First Aid Kits and Enhanced Utility Pouches, ACE cargo, ACE
-vehicle lock, ACE magazine repack, TFAR, ACRE2, Zeus Enhanced) is optional: its addon is skipped when the mod is missing
+vehicle lock, ACE magazine repack, TFAR, ACRE2, Zeus Enhanced, ACE Interaction Menu Expansion) is optional: its addon is skipped when the mod is missing
 (`skipWhenMissingDependencies`), and the window calls another mod's functions only behind `isNil` guards.
 
 ### Toolchain and conventions
@@ -77,6 +77,7 @@ The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
 | `compat_ace_vehiclelock` | ACE's vehicle lock as one more lock of ours. |
 | `compat_ace_interaction` | ACE interaction "Inventory" on people, the action menu's entry as an ACE action. |
 | `compat_zen` | Zeus Enhanced: the "Inventory lock" menu and module. |
+| `compat_aime` | ACE Interaction Menu Expansion (AIME): its "Change Ammo Type" and inventory actions under this mod's rules. |
 | `compat_tfar` | TFAR radios: channel and frequency at the mouse, "Open radio", "Use as active radio", long-range settings kept through moves. |
 | `compat_acre` | the same for ACRE2, and the dummy radio ACRE2 keeps in the radio slot fixed. |
 
@@ -900,8 +901,8 @@ limited.
   loads and takes it from any container; a mod cannot change that, and `Reloaded` cannot be cancelled. So the handler stands in
   front of the key - the game's "Reload" action keys, plain, on foot, with a rifle, pistol or launcher in the hands - and only acts
   when a magazine that the weapon takes lies in a blocked container (`magazinesAmmoFull` less `useCarried`): none lies in a usable
-  one, the key does nothing and a line names the containers to take one out of; some do, the handler loads the fullest of them with
-  the game's own `LoadMagazine` action (as the hotbar does) and swallows the key. Where nothing is blocked, or nothing limited, the
+  one, the key does nothing and a line names the containers to take one out of; some do, the handler loads the fullest of them
+  (`fnc_reloadPick`, then `fnc_loadMagazine` below: the game's `LoadMagazine` action, or by hand into an empty weapon) and swallows the key. Where nothing is blocked, or nothing limited, the
   key is the game's. A full magazine in the weapon is left to the game. A vehicle's gun is not caught.
 - **A reload by the scroll menu, a gamepad button or a script** (`fnc_onReloaded`, the CAManBase event `Reloaded` from postInit):
   the engine has loaded a magazine by then and `Reloaded` cannot be cancelled, so it is undone afterwards, and only when it is sure.
@@ -920,10 +921,24 @@ limited.
   it is when the container will not take it) - and a magazine nowhere is put back into the weapon with `addWeaponItem`. Then the old
   magazine (`Reloaded`'s last argument, when it has rounds) is taken out of whichever container holds one with those rounds and put
   into the weapon, and given back to the container when that does not hold. A line says "Cannot reload from the backpack."; if a
-  magazine that may be used is left (`fnc_reloadPick`, the fullest), `UNDO_RELOAD_WAIT` later it is loaded with the `LoadMagazine`
-  action. Never done twice (`GVAR(undoBusy)`), and not when the magazine's origin is unknown. Untested in the game: the exact shape
+  magazine that may be used is left (`fnc_reloadPick`, the fullest), `UNDO_RELOAD_WAIT` later it is loaded with `fnc_loadMagazine`. Never done twice (`GVAR(undoBusy)`), and not when the magazine's origin is unknown. Untested in the game: the exact shape
   of the `Reloaded` arguments and whether `removePrimaryWeaponItem` returns the magazine to the cargo are checked by counting, not
   assumed.
+- **Loading a chosen magazine** (`einv_storage_fnc_loadMagazine [unit, weapon, muzzle, entry]`, public): the one way every reload of
+  this mod ends - the key's guard, the undo of a refused reload, the hotbar, `compat_aime`'s menu. `entry` is a row of
+  `magazinesAmmoFull` (seven items). A muzzle that holds a magazine gets the game's `LoadMagazine` action with its animation. An
+  **empty** muzzle - no magazine in the weapon - is loaded by hand: the magazine is taken out of the container it lies in
+  (`addMagazineAmmoCargo [class, -1, rounds]`, counted before and after), put in with `fnc_weaponPart` (below), the window's reload
+  gesture and sound play (`einv_gui_fnc_playReload`, when loaded), `fnc_queueMigrate` and `fnc_useTrack` follow; a magazine that did
+  not go in is put back and only then the action is tried. Why: the reload key's guard used to load its pick with the action alone,
+  which is not reliable for a weapon with no magazine in it (Mia, 0.5.13: R does nothing with an empty weapon, whatever lies where,
+  and a popup says the backpack's magazines do not work). Found by reading, not by running the game: untested in Arma. `fnc_reloadPick` chooses: the fullest usable
+  magazine the muzzle takes, ties by uniform, vest, backpack. `fnc_weaponPart` puts a magazine on a weapon (the window's drag onto a
+  weapon or a magazine slot, the menu's "Load into", the direct load above) with `addWeaponItem` and looks at `weaponsItems` after
+  each try: `[weapon, [class, rounds, muzzle], true]`, then without the muzzle (first muzzle only), then the plain class with the
+  rounds set by `setAmmo`; a form that was needed is told in the RPT (INFO), none working a WARNING. Handgun, launcher and a second
+  muzzle (a grenade launcher, slot `mag2`) go through the same code by their slot id; a second muzzle is one in `muzzles[]` that
+  is neither `this` nor the first.
 - **The throw key and ACE's advanced throwing.** The engine takes the throwable of the selected class from the unit's magazines -
   the order of its containers is believed to be uniform, vest, backpack (the order of the unit's loadout; not verified, and not
   relied on) - and nothing a mod runs can say from which. What is done instead keeps a closed throwable from being the choice:
@@ -2736,7 +2751,7 @@ phase, as `einv_storage_fnc_addNew` does (`einv_storage_fnc_makePayload`, `fnc_p
 Aid Kits' own kit window and its kits tab in ACE's window still count the capacity: a kit with a grid of its own may hold more than
 its capacity there.
 
-### compat_ace_cargo, compat_tfar, compat_acre, compat_zen, compat_ace_vehiclelock, compat_ace_interaction
+### compat_ace_cargo, compat_tfar, compat_acre, compat_zen, compat_ace_vehiclelock, compat_ace_interaction, compat_aime
 
 - **compat_ace_cargo.** `fnc_getSections [lootSections]` adds, right under every container section with things loaded
   (`ace_cargo_loaded`), a section `id "cargo"` with `vehicle`, `parent`, `items` and `drawer` (the name of `fnc_drawSection`),
@@ -2761,6 +2776,37 @@ its capacity there.
   `ace_vehiclelock_LockVehicleInventory` on, the player on foot, a Car, Tank or Helicopter, `locked` 2 or 3, and no key by
   `ace_vehiclelock_fnc_hasKeyForVehicle`. ACE blocks only the vanilla display 602, which this window never opens - without the
   provider ACE's lock would be bypassed.
+- **compat_aime.** ACE Interaction Menu Expansion (AIME, Workshop 1376867375, author upsilon). Its CfgPatches `UPSL_aime_change_ammo`
+  and `UPSL_aime_inventory` are required, so the addon is skipped without them. AIME adds these actions that touch the inventory (read
+  from its pbos); what is done with each:
+  - *Self action "Change Ammo Type"* (`UPSL_aime_change_ammo_ammo_class`, CAManBase, `ACE_SelfActions`). Its children are built by a
+    `CfgFunctions` function, final and unchangeable, that lists `magazines _player` (every container, the backpack too) and loads with
+    `addWeaponItem [weapon, [mag, 0]]` + `reload` (the engine picks any magazine of the class) - a bypass of the use limits.
+    **Replaced**: postInit waits until AIME has put its action into `ace_interact_menu_inheritedActionsMan`, takes it out
+    (`removeActionFromClass` with inheritance: out of every class built so far and kept out of every later one) and adds one of the
+    same name, label, icon and place (`fnc_ammoCondition`, `fnc_ammoMenus`, `fnc_ammoLoad`). AIME's setting "Enable ammo switch
+    menu" is still read. The list is the magazines `einv_storage_fnc_useCarried` leaves that the muzzle takes and that are not
+    loaded, grouped by class (the class in the weapon is left out, as AIME leaves it out); with only closed containers' magazines
+    left, one entry says where to take one out of. A click loads the fullest usable magazine of the class (ties: uniform, vest,
+    backpack) with `einv_storage_fnc_loadMagazine`. AIME's `Reloaded` handler (it gives the old magazine back with `addMagazine`)
+    never has a flag to act on, since its own loader no longer runs.
+  - *Self action "Change Ammo Type" of a vehicle gunner* (`..._vehicle_ammo_class`, LandVehicle): the vehicle's turret magazines, not
+    the unit's inventory. Left alone.
+  - *"Inventory" on a vehicle* (`UPSL_aime_inventory_open_action`; Car, Tank, Helicopter, Plane, Ship_F), *"Open backpack"* on a
+    living person (`..._backpack_action_3d` and `..._backpack_action`), *"Inventory" on a body* (`..._open_action` on CAManBase),
+    *"Open"* on a pile's backpack (`..._holder_open_action`): all end in the engine's `action ["Gear" | "OpenBag", ...]`, which
+    section 4 ("Opening") answers with this window and its checks (locks, `einv_noAccess`, `fnc_personInReach`, the search), so they
+    cannot bypass anything. What the config patch changes is when they show: the vehicle entry only where
+    `einv_gui_fnc_canOpenVehicle` holds (`fnc_vehicleCondition`) and not at all beside `compat_ace_interaction`'s own "Inventory"; the
+    living person's backpack entries only where `fnc_canOpenPerson` and `fnc_personInReach` hold (`fnc_personCondition`). The body's
+    entry is as it was (bodies are open to everyone).
+  - *Ground pile action* (`UPSL_aime_inventory_holder_action`, WeaponHolder and WeaponHolderSimulated): one click picks up the only
+    item lying there (`TakeWeapon`, `addMagazine` + `clearMagazineCargoGlobal`, `PutBag` / `AddBag`) with no search. Its statement is
+    patched to `fnc_holderRun`: while `einv_gui_searchTime` is above 0, `einv_gui_searchGround` is on and the pile has no
+    `einv_noSearch`, the click opens the window on the pile (`action ["Gear", pile]`); otherwise AIME's own pick-up runs.
+  - *Static weapon assemble / disassemble* (`..._assemble_action`, `..._disassemble_action`, the `WeaponAssembled` handler that clears
+    a base backpack) work on the engine's backpack of a static weapon, which has no cargo: left alone. AIME's UAV terminal, group,
+    vehicle seat and vehicle control actions do not touch the inventory.
 - **compat_ace_interaction.** Needs `ace_interact_menu` (skipped without it). In postInit, on machines with a screen: ACE
   interaction "Inventory" with the inventory icon, under `ACE_MainActions` of `CAManBase` (type 0, with inheritance, so agents and
   respawned units too). Condition `fnc_canOpen [target, player]`: not the player, `einv_gui_fnc_canOpenPerson` not "" (the

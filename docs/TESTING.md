@@ -157,5 +157,16 @@ A client can see them and cannot change them.
       back (`einv_grid` as the rules write it).
 - [ ] Weight tiers: no sprint from Overloaded, walking from Critical, ACE fatigue follows.
 - [ ] Zeus Enhanced: Inventory lock in the right-click menu and the module.
+- [ ] Reload with an empty weapon (take the magazine out of the rifle first): R with a magazine only in the vest loads it; with
+      the backpack on "Nothing" and magazines in vest and backpack loads the vest's, never the backpack's; with magazines only in
+      the backpack the popup says to take one out and nothing loads; the RPT shows no `did not go into` line. The same with a
+      pistol, a launcher and the grenade launcher's second muzzle (switch to GL, R). Drag a magazine from the vest onto the empty
+      rifle, onto its magazine slot, and use "Load into" in the menu: it loads; read the RPT for `only without a muzzle name` /
+      `only as a plain magazine`.
+- [ ] AIME (Workshop 1376867375): self interaction > Change Ammo Type lists only the magazines the settings allow (backpack on
+      Nothing: its magazines are not listed, and with nothing else a "take one out first" entry), loads the fullest of the class,
+      also into an empty weapon; Inventory on a vehicle shows once (not twice with ACE interaction), not for a locked one or one
+      out of reach; Open backpack on a living person only where "Living persons" allows; the click on a ground pile with a single
+      item opens the window (diagonal stripes) while ground searching is on, and picks it up at once with searching off.
 - [ ] Performance: a big mod pack, a crate with 300 items, the window opens in under a second.
 - [ ] The RPT after every test: no `Error`, read every `einv` line.

@@ -51,7 +51,44 @@ if (_kind in ["magazine", "grenade"]) exitWith {
         _ammo = getNumber (configFile >> "CfgMagazines" >> _class >> "count");
     };
 
+    // Where the muzzle's magazine stands in weaponsItems: the first muzzle's at 4, the second's at 5.
+    private _slot = [4, 5] select _second;
+
+    // Whether the muzzle holds a magazine of the class now. Asked after every try: an empty weapon does not
+    // always take the first form the command knows, and a load that did not happen must not be taken for one.
+    private _fnc_loaded = {
+        private _item = (weaponsItems _unit) select {(_x select 0) == _weapon};
+
+        if (_item isEqualTo []) exitWith {false};
+
+        private _mag = (_item select 0) param [_slot, []];
+
+        _mag isEqualType [] && {count _mag >= 2} && {(_mag select 0) == _class}
+    };
+
+    // The muzzle by its name first, as the arsenal gives it; then without it for the weapon's own muzzle;
+    // then the magazine of the class as it comes and its rounds set afterwards.
     _unit addWeaponItem [_weapon, [_class, _ammo, _muzzle], true];
+
+    if (call _fnc_loaded) exitWith {};
+
+    if (!_second) then {
+        _unit addWeaponItem [_weapon, [_class, _ammo], true];
+    };
+
+    if (call _fnc_loaded) exitWith {
+        INFO_2("%1 went into %2 only without a muzzle name.",_class,_weapon);
+    };
+
+    _unit addWeaponItem [_weapon, _class, true];
+
+    if (call _fnc_loaded) then {
+        _unit setAmmo [_muzzle, _ammo];
+
+        INFO_2("%1 went into %2 only as a plain magazine, its rounds set after.",_class,_weapon);
+    } else {
+        WARNING_3("%1 did not go into %2 (muzzle %3) by any form of addWeaponItem.",_class,_weapon,_muzzle);
+    };
 };
 
 switch (_base) do {

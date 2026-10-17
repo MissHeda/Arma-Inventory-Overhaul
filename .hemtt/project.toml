@@ -36,6 +36,7 @@ workshop = [
     "3809430149", # Enhanced First Aid Kits
     "894678801",  # Task Force Arrowhead Radio (BETA), for the radio compat
     "843577117", #RHS
+    "1376867375", # ACE Interaction Menu Expansion (AIME), for the compat_aime addon
 ]
 
 # A test scene for the inventory (.hemtt/missions/EINV_Test.VR): a soldier with full gear, a crate, an

@@ -150,6 +150,7 @@ PREP(useHint);
 PREP(useTrack);
 PREP(onReloaded);
 PREP(reloadPick);
+PREP(loadMagazine);
 PREP(reloadUndo);
 PREP(throwState);
 PREP(throwSelect);

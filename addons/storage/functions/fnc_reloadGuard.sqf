@@ -8,8 +8,8 @@
  *
  *   - none of the magazines the weapon takes lies where it can be used: the key does nothing, and a line
  *     says from where to take one out
- *   - some do: the key loads the fullest of those with the game's own reload action (the one the hotbar
- *     uses), so the magazine never comes from a blocked container
+ *   - some do: the key loads the fullest of those (fnc_loadMagazine: the game's own reload action, or by
+ *     hand into an empty weapon), so the magazine never comes from a blocked container
  *   - no magazine that would do lies in a blocked container, or nothing is limited, or the weapon is full:
  *     the key is left to the game, untouched
  *
@@ -96,18 +96,16 @@ if (_usable isEqualTo []) exitWith {
     true
 };
 
-// The fullest one that may be used. The game's reload action wants the magazine by its id and its creator,
-// which the list carries behind the rounds (seven entries) - without them the game is left to do it.
-private _best = _usable select 0;
+// The fullest one that may be used (fnc_reloadPick), loaded the way every reload of this mod is
+// (fnc_loadMagazine): with the game's action when the weapon holds a magazine, put in by hand when its
+// muzzle is empty - the action alone did nothing there, so an empty weapon stayed empty although magazines
+// that may be used lay in the vest.
+private _best = [_unit, _weapon, _muzzle] call FUNC(reloadPick);
 
-{
-    if ((_x select 1) > (_best select 1)) then {
-        _best = _x;
-    };
-} forEach _usable;
+if (_best isEqualTo []) exitWith {false};
 
-if (count _best < 7 || {missionNamespace getVariable ["ace_common_isReloading", false]}) exitWith {count _best >= 7};
+if (missionNamespace getVariable ["ace_common_isReloading", false]) exitWith {true};
 
-_unit action ["LoadMagazine", _unit, _unit, _best select 6, _best select 5, _weapon, _muzzle];
+if !([_unit, _weapon, _muzzle, _best] call FUNC(loadMagazine)) exitWith {false};
 
 true

@@ -4,8 +4,8 @@
  * Takes back a reload the game did from a container the "Use items from ..." settings close to the item
  * (fnc_onReloaded): the magazine that was loaded goes out of the weapon and back into the container it came
  * from, and the magazine the weapon had before goes back into the weapon. Then a line says so - and when a
- * magazine that may be used lies elsewhere, the fullest of those is loaded with the game's own reload
- * action, as the reload key's guard does.
+ * magazine that may be used lies elsewhere, the fullest of those is loaded the way the reload key's guard
+ * loads one (fnc_loadMagazine).
  *
  * Every step is looked at before the next one: the loaded magazine must still be the one in the weapon;
  * the cargo is counted before and after, so a magazine is never lost and never doubled - one that cannot
@@ -214,13 +214,14 @@ if (_pick isEqualTo []) then {
 
         if (!alive _unit || {missionNamespace getVariable ["ace_common_isReloading", false]}) exitWith {};
 
-        // Looked at again: the unit may have done something meanwhile. The reload action wants the
-        // magazine by its id and its creator, which the entry carries behind the rounds.
+        // Looked at again: the unit may have done something meanwhile. Loaded as every reload is
+        // (fnc_loadMagazine): by hand into an empty muzzle, which the undo has just made of it when the
+        // weapon had no magazine before.
         private _best = [_unit, _weapon, _muzzle] call FUNC(reloadPick);
 
         if (_best isEqualTo [] || {currentWeapon _unit isNotEqualTo _weapon}) exitWith {};
 
-        _unit action ["LoadMagazine", _unit, _unit, _best select 6, _best select 5, _weapon, _muzzle];
+        [_unit, _weapon, _muzzle, _best] call FUNC(loadMagazine);
     }, [_unit, _weapon, _muzzle], UNDO_RELOAD_WAIT] call CBA_fnc_waitAndExecute;
 };
 

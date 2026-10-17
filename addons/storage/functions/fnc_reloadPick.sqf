@@ -2,8 +2,8 @@
 /*
  * Author: Miss Heda
  * The magazine a reload may use: the fullest one the weapon's muzzle takes that is not loaded and does not lie
- * in a container the "Use items from ..." settings close to it (fnc_useCarried). [] when there is none, or the
- * weapon is full already.
+ * in a container the "Use items from ..." settings close to it (fnc_useCarried); of equal rounds the one from the uniform, then the vest, then the backpack. [] when there is
+ * none, or the weapon is full already.
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -33,11 +33,16 @@ private _loadedClass = currentMagazine _unit;
 
 if (_loadedClass isNotEqualTo "" && {(_unit ammo _muzzle) >= getNumber (configFile >> "CfgMagazines" >> _loadedClass >> "count")}) exitWith {[]};
 
+// The fullest one; of equal rounds the one from the container that comes first: uniform, vest, backpack.
 private _best = _usable select 0;
+private _bestAt = USE_KINDS find (toLowerANSI format ["%1", _best select 4]);
 
 {
-    if ((_x select 1) > (_best select 1)) then {
+    private _at = USE_KINDS find (toLowerANSI format ["%1", _x select 4]);
+
+    if ((_x select 1) > (_best select 1) || {(_x select 1) == (_best select 1) && {_at >= 0} && {_bestAt < 0 || {_at < _bestAt}}}) then {
         _best = _x;
+        _bestAt = _at;
     };
 } forEach _usable;
 

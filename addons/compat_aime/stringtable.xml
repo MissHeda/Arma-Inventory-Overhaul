@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="einv">
+    <Package name="compat_aime">
+        <Key ID="STR_einv_compat_aime_Action_ChangeAmmo">
+            <English>Change Ammo Type</English>
+        </Key>
+        <Key ID="STR_einv_compat_aime_Menu_Blocked">
+            <English>Magazines are in a closed container - take one out first</English>
+        </Key>
+        <Key ID="STR_einv_compat_aime_Menu_Left">
+            <English>%1 (%2 left)</English>
+        </Key>
+    </Package>
+</Project>
