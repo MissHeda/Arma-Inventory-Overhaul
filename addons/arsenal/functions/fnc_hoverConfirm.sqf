@@ -6,7 +6,7 @@
  * those did not reach them, so every frame (fnc_onFrame) the mouse is looked for on them here: the colours
  * are the button's own, set only when the state changed. The card's controls lie straight on the display, so
  * their positions are the screen's. The film over the title strip, by which the card is moved (fnc_onConfirmMouse),
- * lights up the same way, and is left to the drag while the card is held.
+ * is never lit: it only takes the press.
  *
  * Arguments:
  * 0: Mouse [x, y] <ARRAY>
@@ -47,16 +47,3 @@ _mouse params ["_mouseX", "_mouseY"];
         };
     };
 } forEach (uiNamespace getVariable [QGVAR(confirmButtons), []]);
-
-(uiNamespace getVariable [QGVAR(confirmBar), [controlNull, 0]]) params ["_film", "_inset"];
-
-if (!isNull _film && {(uiNamespace getVariable [QEGVAR(gui,drag), []]) isEqualTo []}) then {
-    (ctrlPosition _film) params ["_barX", "_barY", "_barW", "_barH"];
-
-    private _over = _mouseX >= _barX - _inset && {_mouseX < _barX + _barW + _inset} && {_mouseY >= _barY - _inset} && {_mouseY < _barY + _barH};
-
-    if (_over isNotEqualTo (_film getVariable [QGVAR(lit), false])) then {
-        _film setVariable [QGVAR(lit), _over];
-        _film ctrlSetBackgroundColor ([[1, 1, 1, 0], [1, 1, 1, 0.06]] select _over);
-    };
-};

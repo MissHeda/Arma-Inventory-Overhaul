@@ -27,10 +27,14 @@
  * the panel is shown going there, out of the container (fnc_dragCheck).
  *
  * The button at the right end of the title row folds the whole panel (GVAR(collapsed), fnc_toggleCollapse):
- * folded, the panel is its title row alone - the glass, the picture, the name and the button, nothing of the
- * column, the staging space and the hint line is made, and the panel's rectangle (GVAR(panelRect), the
- * engine's panels) is that row, so ACE's controls and its 3D view behind the rest answer the mouse as without
- * the panel. Unfolded, the column is scrolled to where it stood when it was folded.
+ * folded, the panel is a small square button with the inventory's picture at the panel's right edge and nothing
+ * else - no column, staging space or hint line is made, and the panel's rectangle (GVAR(panelRect), the
+ * engine's panels) is that square, so ACE's controls and its 3D view behind the rest answer the mouse as without
+ * the panel. A click on it unfolds the panel. Unfolded, the column is scrolled to where it stood when it was folded.
+ *
+ * The other worn containers are sections of the column too, folded to their captions at first (key "other_" +
+ * class in GVAR(folded) once opened), between the open container and the staging space, so that things can be
+ * dragged between all three; the staging space is the same one in every tab.
  *
  * The focus sink (GVAR(focusSink) in uiNamespace) is made here the first time: a control of no size in the
  * screen's corner that fnc_onFrame gives the focus to, so that ACE's list loses it.
@@ -90,12 +94,14 @@ if (isNull _sink) then {
 // Folded is what a section starts as, turned round by the inventory's clicks on its caption
 // (einv_gui_collapsed). Here the panel's own folds count (the "fold" hook): started against that list, a
 // section is folded exactly when its key - the container's class, or "staging" - is in GVAR(folded).
+// The other worn containers start folded (a closed section is open once its key is in the list).
 private _fnc_fold = {
-    params ["_section", "_key"];
+    params ["_section", "_key", ["_closed", false]];
 
     private _object = _section get "container";
+    private _folded = (_key in GVAR(folded)) isNotEqualTo _closed;
 
-    _section set ["folded", (_key in GVAR(folded)) isNotEqualTo (_object in EGVAR(gui,collapsed))];
+    _section set ["folded", _folded isNotEqualTo (_object in EGVAR(gui,collapsed))];
     GVAR(foldKeys) pushBack [_object, _key];
 };
 
@@ -109,6 +115,21 @@ private _collapsed = GVAR(collapsed);
 _section set ["box", false];
 
 private _sections = [_section];
+
+// The other worn containers beside it, folded to their captions and unfolded by a click on them, so that things
+// can be dragged between all three; the staging space below is the same one in every tab.
+if (!_collapsed) then {
+    {
+        private _other = _x;
+        private _otherContainer = _other getOrDefault ["container", objNull];
+
+        if (!isNull _otherContainer && {_otherContainer isNotEqualTo _container}) then {
+            _other set ["box", false];
+            [_other, "other_" + toLowerANSI (_other getOrDefault ["class", ""]), true] call _fnc_fold;
+            _sections pushBack _other;
+        };
+    } forEach (_context getOrDefault ["ownSections", []]);
+};
 
 // Folded, no staging space is looked at: the crate is made when the panel unfolds.
 private _holder = if (_collapsed) then {objNull} else {[] call FUNC(staging)};
@@ -147,10 +168,44 @@ private _titleH = TITLE_H;
 private _bandH = SNAP_H(_padY + _titleH);
 private _bodyTop = _top + _bandH;
 
-// Folded, the panel ends under the title row, with the padding the block has round its content.
-if (_collapsed) then {
-    _height = SNAP_H(_padY * 2 + _titleH);
-    _rect = [_left, _top, _width, _height];
+// Folded, the panel is a small square button with the inventory's picture at the panel's right edge, by ACE's
+// list: the glass with the padding the block has round its content. A click on it unfolds the panel.
+if (_collapsed) exitWith {
+    private _side = SNAP_H(_padY * 2 + _titleH);
+    private _squareW = SQUARE(_side);
+
+    _rect = [SNAP_X(_left + _width - _squareW), _top, SNAP_W(_squareW), _side];
+
+    [
+        _display, controlNull, _rect, _theme getOrDefault ["panel", []], _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
+    ] call EFUNC(gui,uiPanel);
+
+    ([_theme, false] call EFUNC(gui,headerStyle)) params ["_fill", "_hover", "_ink"];
+
+    private _unfoldTheme = createHashMap;
+    _unfoldTheme merge _theme;
+    _unfoldTheme set ["button", _fill];
+    _unfoldTheme set ["buttonHover", _hover];
+    _unfoldTheme set ["buttonText", _ink];
+
+    private _unfold = [
+        _display, controlNull, [(_rect select 0) + _padX, (_rect select 1) + _padY, SQUARE(_titleH), _titleH], "collapse", "",
+        UI_TEX(icon_inventory_ca), _unfoldTheme, {[] call FUNC(toggleCollapse)}
+    ] call EFUNC(gui,uiButton);
+
+    (_unfold select -1) ctrlSetTooltip LLSTRING(Collapse_Unfold);
+
+    // Where the column was scrolled to is kept for the unfolding.
+    private _pixels = (uiNamespace getVariable [QEGVAR(gui,keepPixels), createHashMap]) getOrDefault ["storage", -1];
+
+    if (_pixels >= 0) then {
+        GVAR(collapsedScroll) = [_section getOrDefault ["class", ""], _pixels];
+    };
+
+    GVAR(panelRect) = _rect;
+    EGVAR(gui,panels) pushBack _rect;
+
+    []
 };
 
 // The hint line, the block's last band: a line as high as the footer's key hints, a second while the
@@ -161,7 +216,7 @@ private _hintH = SNAP_H(HINT_LINE_H * _lines + HINT_PAD * 2);
 private _hintTop = _top + _height - _hintH;
 private _columnH = _hintTop - _bodyTop;
 
-if (!_collapsed && {_columnH < UNIT * 4}) exitWith {[]};
+if (_columnH < UNIT * 4) exitWith {[]};
 
 // The block: the inventory's glass with its corner radius.
 [
@@ -208,26 +263,11 @@ _buttonTheme set ["buttonText", _buttonInk];
 
 private _button = [
     _display, controlNull, [_left + _width - _padX - _buttonW, _titleTop, _buttonW, _titleH], "collapse", "",
-    [UI_TEX(icon_chevron_down_ca), UI_TEX(icon_chevron_right_ca)] select _collapsed, _buttonTheme,
+    UI_TEX(icon_chevron_down_ca), _buttonTheme,
     {[] call FUNC(toggleCollapse)}
 ] call EFUNC(gui,uiButton);
 
-(_button select -1) ctrlSetTooltip ([LLSTRING(Collapse_Fold), LLSTRING(Collapse_Unfold)] select _collapsed);
-
-// Folded, the title row is all there is: the panel is that row, the hint line and the zone of ACE's list are
-// gone, and where the column was scrolled to is kept for the unfolding.
-if (_collapsed) exitWith {
-    private _pixels = (uiNamespace getVariable [QEGVAR(gui,keepPixels), createHashMap]) getOrDefault ["storage", -1];
-
-    if (_pixels >= 0) then {
-        GVAR(collapsedScroll) = [_section getOrDefault ["class", ""], _pixels];
-    };
-
-    GVAR(panelRect) = _rect;
-    EGVAR(gui,panels) pushBack _rect;
-
-    []
-};
+(_button select -1) ctrlSetTooltip LLSTRING(Collapse_Fold);
 
 // A hairline under the title row, as the columns of the inventory have under theirs.
 [

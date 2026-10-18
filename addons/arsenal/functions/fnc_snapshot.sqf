@@ -21,6 +21,8 @@
  * Public: No
  */
 
+[] call FUNC(keepPlaces);
+
 (call FUNC(selected)) params ["", "_container"];
 
 if (isNull _container) exitWith {

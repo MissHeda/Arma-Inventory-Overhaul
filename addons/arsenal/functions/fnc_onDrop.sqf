@@ -95,14 +95,14 @@ if ((_from getOrDefault ["source", ""]) isEqualTo "aceList") exitWith {
     true
 };
 
-// Between the soldier's container and the staging space: ACE is told once it landed.
-if (_kind isEqualTo "grid" && {!isNull GVAR(staging)}) exitWith {
+// Between the open container and the staging space or another worn container: ACE is told once it landed.
+if (_kind isEqualTo "grid") exitWith {
     private _to = (_grids param [_targetIndex, createHashMap]) getOrDefault ["container", objNull];
     private _source = _from getOrDefault ["container", objNull];
 
     (call FUNC(selected)) params ["", "_open"];
 
-    if (_source isNotEqualTo _to && {GVAR(staging) in [_source, _to]} && {_open in [_source, _to]}) then {
+    if (_source isNotEqualTo _to && {_open in [_source, _to]}) then {
         private _classes = [_entry getOrDefault ["class", ""]];
 
         // Two tiles swapping places between the container and staging change two classes there.

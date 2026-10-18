@@ -14,7 +14,7 @@
             <English>The Virtual Arsenal is not allowed here</English>
         </Key>
         <Key ID="STR_einv_arsenal_Collapse_Fold">
-            <English>Fold the panel to its title bar</English>
+            <English>Fold the panel to a small button</English>
         </Key>
         <Key ID="STR_einv_arsenal_Collapse_Unfold">
             <English>Unfold the panel</English>
@@ -54,6 +54,9 @@
         </Key>
         <Key ID="STR_einv_arsenal_Hint_NotInArsenal">
             <English>This arsenal does not have it</English>
+        </Key>
+        <Key ID="STR_einv_arsenal_Hint_Staged">
+            <English>%1 did not fit and went to the staging space</English>
         </Key>
         <Key ID="STR_einv_arsenal_Hint_Wheel">
             <English>Ctrl+wheel on an item: one more or less</English>

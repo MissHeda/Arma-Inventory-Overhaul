@@ -32,7 +32,7 @@ private _class = _entry getOrDefault ["class", ""];
     [LLSTRING(Menu_Remove), [[_gridIndex, _tileIndex], -1, _class], {_this call FUNC(remove)}],
     [
         format [LLSTRING(Menu_RemoveAll), [_class] call EFUNC(gui,itemName)],
-        [_class, [objNull, GVAR(staging)] select ((_grid get "container") isEqualTo GVAR(staging))],
+        [_class, [_grid get "container", objNull] select ((_grid get "container") isEqualTo ((call FUNC(selected)) select 1))],
         {_this call FUNC(removeKind)}
     ]
 ]

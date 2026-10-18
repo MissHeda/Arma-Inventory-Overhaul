@@ -38,9 +38,12 @@ private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNul
 
 (call FUNC(selected)) params ["_id", "_open"];
 
+// The open container, the other worn ones the panel shows and the staging space take an add.
+private _worn = [uniformContainer _center, vestContainer _center, backpackContainer _center];
+
 if (
     isNull _to || {_class isEqualTo ""} || {_count < 1} || {isNull _center} || {!local _center}
-    || {_to isNotEqualTo _open && {_to isNotEqualTo GVAR(staging)}}
+    || {!(_to in _worn) && {_to isNotEqualTo GVAR(staging)}}
 ) exitWith {"Failed"};
 
 private _intoSoldier = _to isEqualTo _open;

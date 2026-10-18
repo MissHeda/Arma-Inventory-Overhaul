@@ -28,6 +28,9 @@ params [["_display", displayNull, [displayNull]], ["_panel", -1, [0]]];
 
 if (!GVAR(attached)) exitWith {};
 
+// A container picked in ACE's list made all three new: the old arrangement goes back before anything reads them.
+[] call FUNC(keepPlaces);
+
 GVAR(itemsSeen) = true;
 
 (call FUNC(selected)) params ["_id", "", "_open"];

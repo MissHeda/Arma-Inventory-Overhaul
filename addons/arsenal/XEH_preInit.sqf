@@ -30,6 +30,11 @@ GVAR(dragZone) = "";
 // (fnc_snapshot).
 GVAR(snapshot) = [objNull, createHashMap];
 
+// Where things lay in the uniform, vest and backpack at the last look, [[container, lowercase class, records],
+// ...], and when to look again (fnc_keepPlaces): ACE makes all three new when one is picked.
+GVAR(kept) = [];
+GVAR(keptAt) = 0;
+
 // Following ACE's events: ace_arsenal_itemsChanged came since the last ace_arsenal_cargoChanged (an ACE
 // that has it); a cargoChanged waits for its pass a frame later; that pass is asked for already
 // (fnc_settle); the panel is to be built again once nothing of it is held (fnc_onFrame).

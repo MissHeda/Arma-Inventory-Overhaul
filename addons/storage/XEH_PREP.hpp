@@ -152,6 +152,7 @@ PREP(onReloaded);
 PREP(reloadPick);
 PREP(loadMagazine);
 PREP(reloadUndo);
+PREP(reloadTidy);
 PREP(reloadBusy);
 PREP(noteHandLoad);
 PREP(throwState);

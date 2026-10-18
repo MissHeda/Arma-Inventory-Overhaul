@@ -3,13 +3,14 @@
  * Author: Miss Heda
  * What lies on no cell of a unit's uniform, vest or backpack - the entries the inventory window would show
  * apart, in red (fnc_checkOverflow says only which container has some). Laid out the way the window would,
- * without keeping that layout.
+ * without keeping that layout - and everything that lies in the staging space (fnc_staging), which goes when
+ * the window closes (the question of fnc_confirmClose names both).
  *
  * Arguments:
  * 0: Unit <OBJECT>
  *
  * Return Value:
- * One [container, entry] per entry with no room, an entry as fnc_getContents makes it <ARRAY>
+ * One [container, entry] per entry with no room or in the staging space, an entry as fnc_getContents makes it <ARRAY>
  *
  * Example:
  * [player] call einv_arsenal_fnc_findOverflow;
@@ -30,5 +31,14 @@ private _found = [];
         _found pushBack [_container, _x];
     } forEach (_layout getOrDefault ["overflow", []]);
 } forEach ([_unit] call EFUNC(storage,getSections));
+
+// What lies in the staging space is gone with the window as well.
+private _staging = GVAR(staging);
+
+if (!isNull _staging) then {
+    {
+        _found pushBack [_staging, _x];
+    } forEach ([_staging] call EFUNC(storage,getContents));
+};
 
 _found

@@ -36,6 +36,8 @@ PREP(removeKind);
 
 // Following ACE's adds and removals: what the container held, what had no room, ACE's list kept right
 PREP(countAll);
+PREP(keepPlaces);
+PREP(stageOverflow);
 PREP(snapshot);
 PREP(onCargoChanged);
 PREP(onItemsChanged);

@@ -137,8 +137,8 @@ uiNamespace setVariable [QGVAR(confirm), _dim select 0];
 [_display, controlNull, [_cardX, _cardY, _cardW, _cardH], _theme getOrDefault ["panel", [0.05, 0.05, 0.05, 0.92]], _radius] call EFUNC(gui,uiPanel);
 [_display, controlNull, [_cardX, _cardY, _cardW, _cardH], _loss, _radius] call EFUNC(gui,uiRing);
 
-// The strip to move the card by - the top, down to under the title - with a light film that shows the mouse is on
-// it (fnc_hoverConfirm); under the title, over the card.
+// The strip to move the card by - the top, down to under the title - with a clear film that only takes the press
+// (fnc_onConfirmMouse), never lit on hover; under the title, over the card.
 private _inset = _radius max (UNIT * 0.15);
 private _film = [
     _display, "EINV_PanelRect", controlNull, [_cardX + _inset, _cardY + _inset, _cardW - _inset * 2, UNIT * 2.6 - _inset]

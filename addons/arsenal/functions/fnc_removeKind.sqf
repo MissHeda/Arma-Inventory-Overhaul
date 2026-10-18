@@ -24,7 +24,8 @@ params [["_class", "", [""]], ["_from", objNull, [objNull]]];
 
 (call FUNC(selected)) params ["", "_container"];
 
-private _staged = !isNull _from && {_from isEqualTo GVAR(staging)};
+// Apart from ACE's list: the staging space or another worn container.
+private _staged = !isNull _from && {_from isNotEqualTo _container};
 
 if (_staged) then {
     _container = _from;

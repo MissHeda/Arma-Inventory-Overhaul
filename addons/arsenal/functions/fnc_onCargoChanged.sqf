@@ -34,6 +34,8 @@ params [["_display", displayNull, [displayNull]], ["_item", "", [""]], ["_addOrR
 
 if (!GVAR(attached)) exitWith {};
 
+[] call FUNC(keepPlaces);
+
 GVAR(itemsSeen) = false;
 GVAR(cargoPending) = true;
 [] call FUNC(settle);

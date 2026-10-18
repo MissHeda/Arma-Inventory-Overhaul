@@ -82,8 +82,8 @@ if (_candidates isEqualTo []) exitWith {false};
 
 private _usable = (([_unit, [[], [], _all]] call FUNC(useCarried)) select 2) select {[_x] call _fnc_fit};
 
-// Nothing that would do lies in a blocked container, and the weapon has a magazine: the game's own reload.
-if (count _usable == count _candidates && {!_empty}) exitWith {false};
+// With limits active the magazine is always the one fnc_reloadPick chooses below, never the game's own pick,
+// which would take it from a blocked container although a usable one lies elsewhere.
 
 // A full magazine in the weapon: the game does nothing, and so does this.
 if (!_empty && {(_unit ammo _muzzle) >= getNumber (configFile >> "CfgMagazines" >> _loadedClass >> "count")}) exitWith {false};

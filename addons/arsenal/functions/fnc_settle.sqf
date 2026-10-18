@@ -4,6 +4,7 @@
  * After ACE's events, once a frame: ACE's list is put right for what the open container holds (counts,
  * load bar, ACE's own record of it - fnc_syncAce), the rows are greyed or lit by whether the grid has a
  * spot for their item (fnc_ungrey), the rows get the pictures the rules give their items (fnc_pictures), what
+ * has no cell goes to the staging space (fnc_stageOverflow), what
  * the container holds is noted for the next add (fnc_snapshot), and
  * the panel is built again for whatever tab is open now - unless something of it is held, then once it is
  * let go (fnc_onFrame).
@@ -48,6 +49,10 @@ if (GVAR(cargoPending) && {!GVAR(itemsSeen)}) then {
 };
 
 GVAR(cargoPending) = false;
+
+// What found no cell, after another container was picked or on opening, goes to the staging space. Before the
+// snapshot, which notes what the open container holds for the next add.
+[missionNamespace getVariable [QACEGVAR(arsenal,center), objNull]] call FUNC(stageOverflow);
 
 [] call FUNC(snapshot);
 [_display] call FUNC(syncAce);

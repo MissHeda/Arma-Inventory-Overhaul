@@ -91,6 +91,10 @@
 // in seconds (fnc_onFrame).
 #define WATCH_TIME 3
 
+// How often the places of the soldier's three containers are noted again while ACE's window is open, in
+// seconds (fnc_keepPlaces).
+#define KEPT_REFRESH 0.2
+
 // The Ctrl keys, for Ctrl and the wheel over a tile (fnc_onKey, fnc_onWheel).
 #define DIK_LCONTROL 29
 #define DIK_RCONTROL 157

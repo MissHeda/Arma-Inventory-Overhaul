@@ -71,8 +71,26 @@ private _fnc_loaded = {
     }
 };
 
-// A muzzle that holds a magazine: the game swaps them, with its animation.
-if ((call _fnc_loaded) isNotEqualTo []) exitWith {call _fnc_action};
+// A muzzle that holds a magazine: the game swaps them, with its animation. The one it puts away may land in
+// a container the settings close, so a moment later fnc_reloadTidy takes it to the container the new one
+// came from.
+private _old = call _fnc_loaded;
+
+if (_old isNotEqualTo []) exitWith {
+    private _containers = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
+    private _counts = _containers apply {
+        private _box = _x;
+
+        if (isNull _box) then {0} else {{(_x select 0) == (_old select 0) && {(_x select 1) == (_old select 1)}} count (magazinesAmmoCargo _box)}
+    };
+    private _done = call _fnc_action;
+
+    if (_done && {missionNamespace getVariable [QGVAR(useActive), false]}) then {
+        [FUNC(reloadTidy), [_unit, _old, format ["%1", _entry param [4, ""]], _counts], UNDO_RELOAD_WAIT] call CBA_fnc_waitAndExecute;
+    };
+
+    _done
+};
 
 // An empty muzzle. The container the magazine lies in: the location the game gave, else the one container
 // that holds a magazine of this class and these rounds.

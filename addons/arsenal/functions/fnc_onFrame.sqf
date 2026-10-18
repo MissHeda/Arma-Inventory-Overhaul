@@ -56,6 +56,9 @@ disableSerialization;
 
 params [["_display", displayNull, [displayNull]], ["_mouse", getMousePosition, [[]]], ["_now", diag_tickTime, [0]]];
 
+// ----- The arrangement of the three containers, put back after ACE made them new -----
+[] call FUNC(keepPlaces);
+
 // ----- The answers of the question fnc_confirmClose asks, lit up under the mouse -----
 if !(isNull (uiNamespace getVariable [QGVAR(confirm), controlNull])) then {
     [_mouse] call FUNC(hoverConfirm);

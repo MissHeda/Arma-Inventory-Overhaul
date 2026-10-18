@@ -42,10 +42,12 @@ private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNul
 
 (call FUNC(selected)) params ["", "_open"];
 
-private _staged = !isNull _container && {_container isEqualTo GVAR(staging)};
+// Apart from ACE's list: the staging space or another worn container, whose removal ACE is not told of.
+private _worn = [uniformContainer _center, vestContainer _center, backpackContainer _center];
+private _staged = !isNull _container && {_container isNotEqualTo _open};
 
 if (
-    count _entry == 0 || {isNull _container} || {_container isNotEqualTo _open && {!_staged}} || {!local _center}
+    count _entry == 0 || {isNull _container} || {_staged && {_container isNotEqualTo GVAR(staging)} && {!(_container in _worn)}} || {!local _center}
     || {_entry getOrDefault ["pending", false]}
 ) exitWith {false};
 
