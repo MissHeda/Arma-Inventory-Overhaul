@@ -11,8 +11,8 @@
  *       - some do: the key loads the fullest of those (fnc_loadMagazine: the game's own reload action, or by
  *         hand into an empty weapon), so the magazine never comes from a blocked container
  *   - the weapon's muzzle holds no magazine at all (a magazine dragged out of its slot in the window, a
- *     script, a loadout): the key loads the fullest magazine that may be used by hand
- *     (fnc_loadMagazine), whatever the settings - after unloading by drag and drop the game's own key was seen
+ *     script, a loadout) while a limit is active: the key loads the fullest magazine that may be used by hand
+ *     (fnc_loadMagazine) - after unloading by drag and drop the game's own key was seen
  *     doing nothing for such a weapon. If nothing could be loaded the key is the game's.
  *
  * No magazine that would do lies in a blocked container, or nothing is limited, or the weapon is full: the key
@@ -62,8 +62,8 @@ private _empty = _loadedClass isEqualTo "";
 // weapon's state says how far the magazine's reload has got), and the game's own key is left alone.
 if (_empty && {([] call FUNC(reloadBusy)) || {((weaponState _unit) param [6, 0]) > 0}}) exitWith {false};
 
-// Without limits and with a magazine in the weapon the key is the game's.
-if (!(missionNamespace getVariable [QGVAR(useActive), false]) && {!_empty}) exitWith {false};
+// Without limits the key is the game's, whatever the weapon holds: reloading is vanilla then, untouched.
+if !(missionNamespace getVariable [QGVAR(useActive), false]) exitWith {false};
 
 private _muzzle = currentMuzzle _unit;
 private _compatible = (compatibleMagazines [_weapon, _muzzle]) apply {toLowerANSI _x};

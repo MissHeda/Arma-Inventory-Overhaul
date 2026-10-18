@@ -221,6 +221,11 @@ if (_pick isEqualTo []) then {
 
         if (_best isEqualTo [] || {currentWeapon _unit isNotEqualTo _weapon}) exitWith {};
 
+        // Only into a muzzle the undo left empty, by hand: a weapon that has its old magazine back is not
+        // reloaded again from here (the game's reload would play its animation again and could take the
+        // blocked magazine once more - a loop). The next press of the key does it (fnc_reloadGuard).
+        if (currentMagazine _unit isNotEqualTo "") exitWith {};
+
         [_unit, _weapon, _muzzle, _best] call FUNC(loadMagazine);
     }, [_unit, _weapon, _muzzle], UNDO_RELOAD_WAIT] call CBA_fnc_waitAndExecute;
 };

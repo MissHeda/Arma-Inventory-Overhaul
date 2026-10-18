@@ -177,6 +177,10 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 - Dragging: the script error "Not a Number, expected Number" in `fnc_updateDrag` (the dragged picture's position). The picture is positioned from the mouse and its size alone now, a position that is not a finite number is never handed to the control, and the RPT says once per drag what it was made of should it happen again.
 - Dragging: the dragged picture and the green or red footprint lay under the column, the backpack's box and other panels. A control with the focus is drawn over every other, and the one that took the press kept it while the button was held; while something is held the focus now goes back to the window's sink every frame (`fnc_takeFocus`).
 - Setup wizard, Categories: adding a category threw "Error 0 elements provided, 0 expected" in `fnc_setCategory` (Mia, 0.5.12): `[a, b] select cond` evaluates both branches, so the entry of a category that was not there yet was asked for at index -1. It is an if now.
+- Swapping a uniform, vest or backpack no longer moves anything in the other containers: for a minute after a worn container changed, the surplus pass (`fnc_requestMigrate`) leaves the unit alone, so only the changed container gets a fresh layout and the others keep their cells.
+- Reloading is plain vanilla again while every use limit is on "Everything": `fnc_reloadGuard` no longer takes the key for an empty weapon then. With limits active, the undo's follow-up reload only loads by hand into a muzzle the undo left empty, so it can no longer repeat the game's reload animation in a loop.
+- ACE Arsenal, "Gear does not fit" card: it follows the mouse 1:1 now; `fnc_dragHandle` reads the mouse position with `getMousePosition` instead of the event's numbers, which ran on another scale there.
+- Setup wizard, Containers: the slot restriction (Accepts chips, single slot) of a compartment shows again after Apply; `fnc_classBlocks` dropped the attributes of the applied grid.
 
 ## 0.4.0 - unreleased
 

@@ -109,7 +109,9 @@ if (_this isEqualType [] && {(_this select 0) isEqualTo "move"}) exitWith {
         ["end"] call FUNC(dragHandle);
     };
 
-    (_this select 1) params ["", ["_mouseX", 0, [0]], ["_mouseY", 0, [0]]];
+    // The mouse where the game reads it now, in the units the controls are placed in: the numbers an event of
+    // another display reports (ACE Arsenal's) were seen on another scale, and the card ran ahead of the mouse.
+    getMousePosition params ["_mouseX", "_mouseY"];
 
     private _delta = [_mouseX - (_start select 0), _mouseY - (_start select 1), _handle] call _fnc_clamp;
 
@@ -217,7 +219,7 @@ if (_this isEqualType [] && {(_this select 0) isEqualTo "begin"}) exitWith {
     };
 
     uiNamespace setVariable [QGVAR(drag), [
-        _display, _moved, _moved apply {ctrlPosition _x}, _handleRect, _mouse, [0, 0], _kind, _film, _ids, focusedCtrl _display
+        _display, _moved, _moved apply {ctrlPosition _x}, _handleRect, getMousePosition, [0, 0], _kind, _film, _ids, focusedCtrl _display
     ]];
 };
 

@@ -40,6 +40,20 @@ params [["_unit", objNull, [objNull]], ["_requester", objNull, [objNull]], ["_tr
 
 if (is3DEN || {isNull _unit} || {!(_unit isKindOf "CAManBase")}) exitWith {false};
 
+// A worn container changed since the last look (a swap in the window, a script, an arsenal): the other
+// containers are left exactly as they are for a while - nothing moves between them because one was swapped.
+// Only the changed container has a fresh layout; what it cannot hold stays shown as overflow until then.
+private _worn = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
+private _seen = _unit getVariable [QGVAR(wornSeen), []];
+
+if (_seen isNotEqualTo [] && {_seen isNotEqualTo _worn}) then {
+    _unit setVariable [QGVAR(swapAt), diag_tickTime];
+};
+
+_unit setVariable [QGVAR(wornSeen), _worn];
+
+private _held = diag_tickTime - (_unit getVariable [QGVAR(swapAt), -1e9]) < 60;
+
 private _ops = [];
 
 // Strict mode first: the hidden holder and the containers disagree with the settings (fnc_hiddenDue,
@@ -49,7 +63,7 @@ if ([_unit] call FUNC(hiddenDue)) then {
 };
 
 // Then the surplus - not under an open arsenal, not with the switch off.
-if (!ARSENAL_OPEN && {missionNamespace getVariable [QGVAR(migrate), true]}) then {
+if (!_held && {!ARSENAL_OPEN} && {missionNamespace getVariable [QGVAR(migrate), true]}) then {
     // Uniform, vest, backpack - those the unit has. getSections also marks each with its unit, which the
     // compartments depend on (fnc_getOwner).
     private _containers = ([_unit] call FUNC(getSections)) apply {_x get "container"};
