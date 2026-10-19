@@ -66,7 +66,7 @@ createHashMapFromArray [
     // object in the inventory's list: ACE makes a new uniform, vest or backpack for every one picked
     // (fnc_layout keeps which class each section shows)
     ["fold", {
-        params [["_container", objNull, [objNull]]];
+        params [["_container", objNull, [objNull, ""]]];
 
         private _index = GVAR(foldKeys) findIf {(_x select 0) isEqualTo _container};
 

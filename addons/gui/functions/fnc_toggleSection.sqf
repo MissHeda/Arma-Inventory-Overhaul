@@ -11,7 +11,7 @@
  * then the list is left alone and the window is only drawn again.
  *
  * Arguments:
- * 0: The section's container <OBJECT>
+ * 0: The section's container, or its "foldKey" - a string - where it has none <OBJECT or STRING>
  *
  * Return Value:
  * None
@@ -24,9 +24,9 @@
 
 disableSerialization;
 
-params [["_container", objNull, [objNull]]];
+params [["_container", objNull, [objNull, ""]]];
 
-if (isNull _container) exitWith {};
+if (_container isEqualTo objNull || {_container isEqualTo ""}) exitWith {};
 
 // The window that attached keeps its own folds: the inventory's, kept for the mission, stay as they were.
 if ((["fold", [_container], false] call FUNC(hook)) isNotEqualTo true) then {
@@ -39,7 +39,7 @@ if ((["fold", [_container], false] call FUNC(hook)) isNotEqualTo true) then {
     };
 
     // Containers that are gone go with them.
-    GVAR(collapsed) = GVAR(collapsed) select {_x isEqualType objNull && {!isNull _x}};
+    GVAR(collapsed) = GVAR(collapsed) select {_x isEqualType "" || {_x isEqualType objNull && {!isNull _x}}};
 };
 
 // The state is changed; the window is built once for a run of clicks (fnc_buildSoon).

@@ -38,6 +38,28 @@ private _entry = (_grid getOrDefault ["tiles", []]) param [_tileIndex, createHas
 private _container = _grid getOrDefault ["container", objNull];
 private _class = _entry getOrDefault ["class", ""];
 
+// A tile of a kit's grid (fnc_kitSections): one more of its class goes into the kit, one out of it.
+private _kit = _grid getOrDefault ["kit", ""];
+
+if (_kit isNotEqualTo "" && {_class isNotEqualTo ""} && {!(_entry getOrDefault ["pending", false])}) exitWith {
+    if (_scroll < 0) then {
+        [[_gridIndex, _tileIndex], 1, _class] call FUNC(remove);
+    } else {
+        if (!isNil QEFUNC(compat_efak,packNew)) then {
+            ([_kit, _class, 1, [], _grid getOrDefault ["root", objNull]] call EFUNC(compat_efak,packNew)) params ["_added", "_why"];
+
+            if (_added < 1) then {
+                [[_why, "Failed"] select (_why isEqualTo "")] call EFUNC(gui,flashHint);
+            } else {
+                ["move", _class, objNull, false] call EFUNC(gui,playSound);
+                [] call FUNC(settle);
+            };
+        };
+    };
+
+    true
+};
+
 if (_class isEqualTo "" || {isNull _container} || {_entry getOrDefault ["pending", false]}) exitWith {false};
 
 // Where the column stands now, kept while the wheel's own step goes by.

@@ -42,6 +42,31 @@ private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNul
 
 (call FUNC(selected)) params ["", "_open"];
 
+// A tile of a kit's grid in the panel (fnc_kitSections): taken out of the kit (einv_compat_efak_fnc_discard).
+private _kit = _grid getOrDefault ["kit", ""];
+
+if (_kit isNotEqualTo "") exitWith {
+    private _kitClass = _entry getOrDefault ["class", ""];
+
+    if (
+        isNil QEFUNC(compat_efak,discard) || {count _entry == 0} || {_kitClass isEqualTo ""} || {_entry getOrDefault ["pending", false]}
+        || {_expected isNotEqualTo "" && {_kitClass != _expected}}
+    ) then {
+        false
+    } else {
+        ([_kit, _entry, _count, _grid getOrDefault ["root", objNull]] call EFUNC(compat_efak,discard)) params ["_taken", "_why"];
+
+        if (_taken < 1) then {
+            [[_why, "Failed"] select (_why isEqualTo "")] call EFUNC(gui,flashHint);
+            false
+        } else {
+            ["giveBack", _kitClass, objNull, false] call EFUNC(gui,playSound);
+            [] call FUNC(settle);
+            true
+        }
+    }
+};
+
 // Apart from ACE's list: the staging space or another worn container, whose removal ACE is not told of.
 private _worn = [uniformContainer _center, vestContainer _center, backpackContainer _center];
 private _staged = !isNull _container && {_container isNotEqualTo _open};

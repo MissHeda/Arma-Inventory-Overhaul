@@ -186,6 +186,8 @@
 // A kit's window fades in over this many seconds when it opens (fnc_drawWindow), its title lit up in the
 // accent colour as a landed tile is.
 #define WINDOW_FADE 0.15
+// Rows of cells a kit window shows at most; a taller grid scrolls inside it.
+#define WINDOW_VIEW_ROWS 10
 
 // How thick a round outline is, as a share of its corner (fnc_uiRing) - as tools/generate_ui_textures.py
 // draws the ring corners.

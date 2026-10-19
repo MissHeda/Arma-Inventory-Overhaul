@@ -17,6 +17,9 @@ PREP(fillState);
 // Kits in windows of their own inside the inventory
 PREP(onWindowOpen);
 PREP(getSections);
+PREP(kitSection);
+PREP(discard);
+PREP(arsenalSections);
 PREP(getEntries);
 PREP(toggle);
 PREP(open);

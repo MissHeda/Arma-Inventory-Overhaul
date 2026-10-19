@@ -29,6 +29,8 @@ PREP(onListPress);
 PREP(listDrag);
 PREP(addTo);
 PREP(listToKit);
+PREP(kitSections);
+PREP(focusedKit);
 
 // Taking things out of the open container or the staging space
 PREP(remove);

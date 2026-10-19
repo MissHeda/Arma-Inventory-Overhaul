@@ -53,6 +53,7 @@ GVAR(stagingCount) = 0;
 // hook).
 GVAR(folded) = createHashMap;
 GVAR(foldKeys) = [];
+GVAR(focusKit) = "";
 
 // The whole panel folded to its title bar (the button at the right end of the title row, fnc_toggleCollapse):
 // kept for the session and, per player, in the profile; where the column was scrolled to when it folded,

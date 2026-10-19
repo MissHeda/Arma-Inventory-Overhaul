@@ -1681,7 +1681,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   right-aligned before the fill text with one gap each; the name keeps its width up to 4 UNIT, else Sort gets compact - `fnc_sortChip` argument 3: 1 the icon and "Sort", 2 the
   icon alone, the order in the tooltip (`fnc_sortText`'s third answer, `fnc_sortButtons [controls, compact]`) -, then goes, then Take all; a
   press on a button neither raises nor moves the window, record key `buttons`) and a scroll body with the kit's grid (`window` =
-  its key). Open windows are `einv_gui_windowOrder` (bottom first), placed by `fnc_placeWindow` beside the tile they were opened from, moved by a
+  its key; the body is at most `WINDOW_VIEW_ROWS` 10 rows of cells high, a taller grid or several compartments scroll inside it with the engine's own scroll bar, `fnc_gridOrigin` counting the offset). Open windows are `einv_gui_windowOrder` (bottom first), placed by `fnc_placeWindow` beside the tile they were opened from, moved by a
   press on the title, raised by any press (`fnc_raiseWindow`: that window alone is made again, last), opened by `fnc_openWindow
   [key, anchor]`, closed by the cross, Escape on the topmost, or `fnc_closeWindow [key]`. **Hit testing** is by layer (`fnc_topAt
   [point]` -> `"inspect"`, a window key or `""`): menu, inspect card, windows (top first), columns; hover, drag targets, press,
@@ -2190,7 +2190,7 @@ they are **taken out**, not left in or moved on, and the player is asked first.
   (`efak_core_fnc_canPackInto` with the Arsenal, always in Eden), that mod's rules, and the kit's room by `fnc_roomMode`: its
   capacity, or the free cells of its own grid and never the capacity then; green when some fit (the hint says how many), red with
   the reason when none. `fnc_onDrop` packs them with `einv_compat_efak_fnc_packNew` and runs `fnc_settle`. EFAK's own kits tab of
-  ACE's window is left as it is. The target's 11th element is the cell under the mouse (the item is held by its middle, so the footprint's corner is no longer the cell
+  ACE's window is left as it is. **Kit sections:** `fnc_kitSections [display, holders]` adds, between the worn containers and the staging space, one section per kit class that lies in them (`einv_compat_efak_fnc_arsenalSections` -> `fnc_kitSection`, the section a kit window is drawn from too; `foldKey` a string, so `fnc_drawSection` and `fnc_toggleSection` fold by it where there is no container; kept in `GVAR(folded)` as `kit_<class>`, or `kitfocus_<class>` for the type picked in ACE's list, `fnc_focusedKit`, which starts open). Its grid is a kit holder like a window's: container to kit and back go through the engine's kit ops, `fnc_listToKit` gives a list drag over it the kit's verdict (`canPackNew`) and `fnc_onDrop` packs it (`packNew`, the cell when free), `fnc_remove` and Ctrl+wheel take out through `einv_compat_efak_fnc_discard` (`takeFromKit` outside a phase, local root, Arsenal setting). ACE's rows are not greyed by the kit's room: its "+" adds to the container. The target's 11th element is the cell under the mouse (the item is held by its middle, so the footprint's corner is no longer the cell
   minus a fixed grab): `fnc_listToKit` takes the cell from it. The drop (`fnc_onDrop`) calls `fnc_addTo [container, class, count, [col, row, block,
   w, h]]`: `normalize`, then `addItemToUniform` / `Vest` / `Backpack` for the open container, `addNew` for staging and for what
   the engine refused, the cell as a new record (`setPlace`); then `syncAce` and `tellAce`.

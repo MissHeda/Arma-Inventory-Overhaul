@@ -103,6 +103,14 @@ if (_hasHolder) then {
         if (_openedIndex >= 0) then {
             _liesIn = (GVAR(opened) select _openedIndex) param [2, objNull];
         };
+    } else {
+        // A kit's grid: the container its tile lies in leads to its root (the Arsenal's panel, whose staging space
+        // is no root the kit finder would think of).
+        private _parent = _section getOrDefault ["parent", objNull];
+
+        if (_parent isEqualType objNull) then {
+            _liesIn = _parent;
+        };
     };
 
     _root = [_holder, _liesIn] call EFUNC(storage,rootOf);

@@ -82,7 +82,33 @@ if ((_from getOrDefault ["source", ""]) isEqualTo "aceList") exitWith {
         [] call FUNC(settle);
     };
 
-    if (_kind isEqualTo "grid") then {
+    // The grid of a kit unfolded in the panel (fnc_kitSections): packed into the kit, on the cell it was let go
+    // on when that is free, else where the kit's layout puts it.
+    private _kitGrid = _kind isEqualTo "grid" && {((_grids param [_targetIndex, createHashMap]) getOrDefault ["kit", ""]) isNotEqualTo ""};
+
+    if (_kitGrid) then {
+        private _target = _grids select _targetIndex;
+        private _amount = [_count, _entry getOrDefault ["count", 1]] select (_count < 1);
+        private _class = _entry getOrDefault ["class", ""];
+
+        ([
+            _target get "kit", _class, _amount, [_col, _row, _target getOrDefault ["block", 0], _w, _h, _rot], _target getOrDefault ["root", objNull]
+        ] call EFUNC(compat_efak,packNew)) params ["_added", "_why"];
+
+        if (_added < 1) then {
+            [_why] call EFUNC(gui,flashHint);
+        } else {
+            ["move", _class, objNull, false] call EFUNC(gui,playSound);
+
+            if (_why isNotEqualTo "") then {
+                [_why, "accent"] call EFUNC(gui,showHint);
+            };
+
+            [] call FUNC(settle);
+        };
+    };
+
+    if (_kind isEqualTo "grid" && {!_kitGrid}) then {
         private _target = _grids param [_targetIndex, createHashMap];
         private _amount = [_count, _entry getOrDefault ["count", 1]] select (_count < 1);
 

@@ -23,9 +23,9 @@
  * (fnc_onMouseButton, "buttons").
  *
  * One controls group of a fixed size, its content fitting it exactly - a group scrolls once its content
- * reaches past it. The grid lies in a scrolling group of its own, the body, which scrolls only for a
- * kit taller than the screen allows: at most the content band high, so the window never covers the
- * header or the footer. It is moved by its title (fnc_onMouseButton, fnc_onFrame) - no button for it: a
+ * reaches past it. The grid lies in a scrolling group of its own, the body, which scrolls for a
+ * kit taller than WINDOW_VIEW_ROWS rows of cells (10, the columns' STORAGE_COLS wide): the window shows at
+ * most that, and never more than the content band, so it covers neither the header nor the footer. It is moved by its title (fnc_onMouseButton, fnc_onFrame) - no button for it: a
  * focused control would draw over everything.
  *
  * Where it was put is kept (GVAR(windowPos)); opened just now it is placed beside the tile it was opened
@@ -69,7 +69,7 @@ private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
 private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _radius = _theme getOrDefault ["radius", 0];
 
-(call FUNC(getCell)) params ["_cellW"];
+(call FUNC(getCell)) params ["_cellW", "_cellH"];
 
 // The columns' paddings, so a window reads as one of them.
 private _padY = UNIT * 0.4;
@@ -110,7 +110,9 @@ if (_notice isEqualTo "") then {
 private _innerW = _blockW + pixelW;
 private _width = _padX * 2 + _innerW;
 
-private _bodyH = _contentH min (CONTENT_H - _padY * 3 - _titleH);
+// At most WINDOW_VIEW_ROWS rows of cells in view (and never taller than the content band allows): a kit with
+// more, or several compartments one under the other, scrolls inside the window instead of covering the screen.
+private _bodyH = _contentH min (CONTENT_H - _padY * 3 - _titleH) min (WINDOW_VIEW_ROWS * _cellH + pixelH * 2);
 private _height = _padY * 3 + _titleH + _bodyH;
 
 // ----- Where -----

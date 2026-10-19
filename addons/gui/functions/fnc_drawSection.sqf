@@ -72,6 +72,7 @@
  *   "layoutKey" - where its layout is kept (einv_storage_fnc_getLayout)
  *   "side"      - "own" or "loot" (the column it is in, when left out)
  *   "folded"    - starts folded
+ *   "foldKey"   - a string the tab folds it by where it has no container (the Arsenal's kit sections)
  *   "root"      - whose locality decides who may change it
  *   "tabIcon"   - a small picture before the caption's text, in its colour (the Arsenal's staging crate)
  *   "box"       - false: no box with the container's picture, the grid at the section's left edge (the
@@ -276,9 +277,13 @@ if (!_placeholder) then {
 // go by the section's container - a section with none folds and closes not at all. Folded is what the
 // section starts as, changed by the player's own clicks (GVAR(collapsed)).
 private _sectionContainer = _section getOrDefault ["container", objNull];
-private _foldable = !isNull _sectionContainer;
-private _collapsed = _foldable && {(_section getOrDefault ["folded", false]) isNotEqualTo (_sectionContainer in GVAR(collapsed))};
-private _nested = _foldable && {GVAR(opened) findIf {(_x select 1) isEqualTo _sectionContainer} >= 0};
+
+// What a click on the tab folds by: the container, else the section's own "foldKey" (a string: the Arsenal's
+// kit sections, whose grid has no container).
+private _foldKey = _section getOrDefault ["foldKey", _sectionContainer];
+private _foldable = !isNull _sectionContainer || {_foldKey isEqualType "" && {_foldKey isNotEqualTo ""}};
+private _collapsed = _foldable && {(_section getOrDefault ["folded", false]) isNotEqualTo (_foldKey in GVAR(collapsed))};
+private _nested = !isNull _sectionContainer && {GVAR(opened) findIf {(_x select 1) isEqualTo _sectionContainer} >= 0};
 private _chevronW = [0, SQUARE(_buttonH * 0.95)] select _foldable;
 private _closeW = [0, SQUARE(_lineH)] select _nested;
 
@@ -305,7 +310,7 @@ private _sortable = false;
 private _busy = false;
 
 if (
-    !_placeholder && {_foldable} && {_id in ["ground", "container", "uniform", "vest", "backpack"]}
+    !_placeholder && {!isNull _sectionContainer} && {_id in ["ground", "container", "uniform", "vest", "backpack"]}
     && {_side in ["own", "loot"]} && {call FUNC(isInventoryMode)}
     && {([_sectionContainer, "items"] call FUNC(checkTouch)) isEqualTo ""}
 ) then {
@@ -430,7 +435,8 @@ private _info = createHashMapFromArray [
 
 private _infoIndex = -1;
 
-if (_foldable && {!_placeholder}) then {
+// Only a section with a container is one the status chips, filters and moves look up by it.
+if (!isNull _sectionContainer && {!_placeholder}) then {
     _infoIndex = (uiNamespace getVariable [QGVAR(sectionInfo), []]) pushBack _info;
 };
 
@@ -447,7 +453,7 @@ if (_chevronW > 0) then {
         _display, "EINV_Hitbox", _parent, [_blockX - pixelW * 2, _buttonTop - pixelH * 2, (_tabW max _chevronW) + pixelW * 4, _buttonH + pixelH * 4]
     ] call FUNC(uiCreate);
     _toggle ctrlSetTooltip LLSTRING(Section_Toggle);
-    _toggle setVariable [QGVAR(key), _sectionContainer];
+    _toggle setVariable [QGVAR(key), _foldKey];
     _toggle ctrlAddEventHandler ["ButtonClick", {
         [{_this call FUNC(toggleSection)}, [(_this select 0) getVariable [QGVAR(key), objNull]]] call FUNC(later);
     }];
@@ -552,7 +558,7 @@ if (_lockTip isNotEqualTo "") then {
 };
 
 // The hint over the caption line says what the contents weigh (fnc_infoHint).
-if (_foldable && {!_placeholder}) then {
+if (!isNull _sectionContainer && {!_placeholder}) then {
     private _captionAnchor = createHashMapFromArray [["rel", [_blockX, _top]], ["parent", _parent]];
     ([_captionAnchor] call FUNC(gridOrigin)) params ["_captionX", "_captionY"];
 

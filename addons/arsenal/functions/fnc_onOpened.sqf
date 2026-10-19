@@ -95,6 +95,11 @@ if (!isNull _list) then {
     _list ctrlAddEventHandler ["LBSelChanged", {
         GVAR(listSel) = [_this select 1, diag_frameNo];
 
+        // Another kit type picked: its kits open in the panel, those of the one left fold (fnc_kitSections).
+        if (!isNil QEFUNC(compat_efak,arsenalSections) && {([ctrlParent (_this select 0)] call FUNC(focusedKit)) isNotEqualTo GVAR(focusKit)}) then {
+            [] call EFUNC(gui,requestRebuild);
+        };
+
         [{_this call FUNC(ungrey)}, [ctrlParent (_this select 0)]] call EFUNC(gui,later);
     }];
 

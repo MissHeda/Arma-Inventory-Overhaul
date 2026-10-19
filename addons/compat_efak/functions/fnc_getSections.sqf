@@ -140,20 +140,8 @@ for "_pass" from 1 to KIT_MAX_DEPTH do {
 GVAR(opened) = GVAR(opened) select {toLowerANSI _x in _resolved};
 GVAR(holders) = _resolved;
 
-private _synced = missionNamespace getVariable [QEFAKGVAR(core,contentsSynced), true];
-
-// Why no kit may change yet, shown in place of the grid, so nothing can be dropped there
-// (fnc_notReady).
-private _wait = call FUNC(notReady);
-
 GVAR(opened) apply {
     private _kit = _x;
-    private _key = "kit:" + toLowerANSI _kit;
-    private _title = [_kit] call FUNC(getName);
-
-    if (_title isEqualTo "") then {
-        _title = ([_kit] call EFUNC(items,getInfo)) getOrDefault ["name", _kit];
-    };
 
     // Where it lies, and up to the container the outermost kit lies in - whose root runs its ops.
     (_resolved getOrDefault [toLowerANSI _kit, [objNull, ""]]) params ["_container", "_parentKit"];
@@ -170,24 +158,5 @@ GVAR(opened) apply {
         _outer = _nextParent;
     };
 
-    // How full: that mod's mass against its capacity, or the cells of a grid of its own.
-    ([_kit] call FUNC(fillState)) params ["_load", "_over"];
-
-    createHashMapFromArray [
-        ["id", "kit"],
-        ["title", _title],
-        ["class", _kit],
-        ["container", objNull],
-        ["entries", if (_synced) then {[_kit] call FUNC(getEntries)} else {[]}],
-        ["virtual", false],
-        ["kit", _kit],
-        ["key", _key],
-        ["layoutKey", _key],
-        ["holder", _key],
-        ["root", if (isNull _top) then {objNull} else {[_top] call EFUNC(storage,rootOf)}],
-        ["parent", if (_parentKit isEqualTo "") then {_container} else {"kit:" + toLowerANSI _parentKit}],
-        ["load", _load],
-        ["loadOver", _over],
-        ["notice", _wait]
-    ]
+    [_kit, _container, _parentKit, _top] call FUNC(kitSection)
 }
