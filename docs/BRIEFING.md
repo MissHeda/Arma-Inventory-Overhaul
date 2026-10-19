@@ -30,7 +30,7 @@ inventory (RscDisplayInventory, IDD 602) with a Tarkov-style grid inventory, in 
 of the kit window of my mod Enhanced First Aid Kits (EFAK). I attached EFAK's GUI files - treat
 them as the design system.
 
-Name: Enhanced Inventory, prefix einv. Repo: C:\Users\Heda\GitHub Repos\Arma-Inventory-Redesign.
+Name: Arma Inventory Overhaul, prefix einv. Repo: C:\Users\Heda\GitHub Repos\Arma-Inventory-Redesign.
 Phase 1 is built - read the repo before changing anything.
 
 ## What this is - and what it is not

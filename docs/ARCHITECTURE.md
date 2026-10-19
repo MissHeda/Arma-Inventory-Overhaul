@@ -1,4 +1,4 @@
-# Enhanced Inventory - architecture
+# Arma Inventory Overhaul - architecture
 
 This is the contract every file of the mod is written against, as the mod is on this branch (the 0.4 line). Function names,
 arguments, HashMap keys and settings named here are binding: several people (and agents) write different files at the same time
@@ -11,7 +11,7 @@ plan; the plan behind the rules engine and the wizard is `docs/design/design_syn
 
 ### What the mod is
 
-Enhanced Inventory replaces the vanilla inventory (`RscDisplayInventory`) with a window of its own, built at run time from
+Arma Inventory Overhaul replaces the vanilla inventory (`RscDisplayInventory`) with a window of its own, built at run time from
 controls: nothing is patched into the vanilla display, and the vanilla inventory never opens while the mod is loaded - there is
 no setting to bring it back and no fallback to it (section 4, Opening).
 
@@ -2854,9 +2854,9 @@ its capacity there.
 ## 8. Settings
 
 Every CBA setting of the mod (`initSettings.inc.sqf` of each addon) is in one of two categories of CBA's Addon Options:
-`CBA_SETTINGS_EINV_CLIENT` "Enhanced Inventory - Client" for what each player sets for himself (scope 0) and `CBA_SETTINGS_EINV_SERVER`
-"Enhanced Inventory - Server" for the settings box, the rules and the older tables (scope 1). The keybinds stay under `CBA_SETTINGS_EINV`
-"Enhanced Inventory" (CBA's Controls, `CBA_fnc_getKeybind` asks for it). A setting's name does not carry its category, so a `cba_settings.sqf` and
+`CBA_SETTINGS_EINV_CLIENT` "Arma Inventory Overhaul - Client" for what each player sets for himself (scope 0) and `CBA_SETTINGS_EINV_SERVER`
+"Arma Inventory Overhaul - Server" for the settings box, the rules and the older tables (scope 1). The keybinds stay under `CBA_SETTINGS_EINV`
+"Arma Inventory Overhaul" (CBA's Controls, `CBA_fnc_getKeybind` asks for it). A setting's name does not carry its category, so a `cba_settings.sqf` and
 saved values are the same under either; `fnc_initCbaMenu` takes its page from the category of `einv_items_rules` (the Server page). Scope **client** is
 `0` (each player's own value), **global** is `1` (the same for everyone; the server or mission decides). Descriptions in the
 stringtables are wrapped as BRIEFING asks.

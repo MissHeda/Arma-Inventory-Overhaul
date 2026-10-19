@@ -4,7 +4,7 @@
  * Opens a kit of Enhanced First Aid Kits or a pouch of Enhanced Utility Pouches. The slot stands for the
  * kit it was bound with, or - when that one is gone - any kit of the same type that is carried.
  *
- * With Enhanced Inventory's kit support loaded, the window opens on the unit's own gear with the kit
+ * With Arma Inventory Overhaul's kit support loaded, the window opens on the unit's own gear with the kit
  * opened as a window inside it, where its contents can be taken out and put in by drag and drop.
  * Otherwise - the support is not loaded, or the window could not open - Enhanced First Aid Kits' own
  * window opens.

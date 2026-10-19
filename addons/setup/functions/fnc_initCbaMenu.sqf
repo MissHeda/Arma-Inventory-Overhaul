@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Puts an "Inventory setup" button on CBA's Addon Options, in the free place of its bottom row between
- * Load and Import, and shows it only while this mod's server page ("Enhanced Inventory - Server", where
+ * Load and Import, and shows it only while this mod's server page ("Arma Inventory Overhaul - Server", where
  * the rules are; the client page has nothing for the wizard) is the one open. It opens the setup wizard
  * over the menu, in menu mode: what the wizard applies arrives in the menu as a change still to be
  * confirmed - our row turns yellow - and CBA's own OK saves it, or Cancel throws it away, like any other

@@ -93,7 +93,7 @@ if (isServer) then {
         params [["_client", -1, [0]], ["_version", "", [""]]];
 
         if (_version isNotEqualTo QUOTE(VERSION_STR)) then {
-            WARNING_3("Machine %1 runs Enhanced Inventory %2, this server %3 - it moves nothing through the server.",_client,_version,QUOTE(VERSION_STR));
+            WARNING_3("Machine %1 runs Arma Inventory Overhaul %2, this server %3 - it moves nothing through the server.",_client,_version,QUOTE(VERSION_STR));
         };
 
         [QGVAR(welcome), [QUOTE(VERSION_STR)], _client] call CBA_fnc_ownerEvent;
@@ -181,7 +181,7 @@ if (!isServer) then {
         GVAR(serverVersion) = _version;
 
         if (_version isNotEqualTo QUOTE(VERSION_STR)) then {
-            WARNING_2("The server runs Enhanced Inventory %1, this machine %2 - nothing is moved through the server.",_version,QUOTE(VERSION_STR));
+            WARNING_2("The server runs Arma Inventory Overhaul %1, this machine %2 - nothing is moved through the server.",_version,QUOTE(VERSION_STR));
         };
     }] call CBA_fnc_addEventHandler;
 

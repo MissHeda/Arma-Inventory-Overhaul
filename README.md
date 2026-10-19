@@ -1,4 +1,4 @@
-# Enhanced Inventory
+# AIO - Arma Inventory Overhaul
 
 An Arma 3 inventory built from scratch, in the look of Enhanced First Aid Kits' kit window. It replaces
 the vanilla inventory with a grid: items are tiles of their own size that you drag, stack and split, and
@@ -99,8 +99,8 @@ their load. A text that names a preset of an older version (`base=realism`, `wei
   (`force force einv_main_settings = "einv1, weight_enabled=0";`); the wizard's Export gives that line. A mission whose `cba_settings.sqf` has lines for the old settings
   (`einv_gui_searchTime = 0.6;`), or that saved them in Eden's addon options, keeps working as long as the text box is empty: those values are taken as if the text said them (the server's own
   profile and `cba_settings.sqf` are not read - set them in the wizard again). What players set for themselves (tile scale, tile names, keys, the
-  hotbar's look) stays in CBA's menu, per player, in the category "Enhanced Inventory - Client". The box itself, the old tables (`einv_items_sizeTable`, `stackTable`, `einv_storage_containerTable`) and the rules text stay
-  CBA text boxes of their own, in the category "Enhanced Inventory - Server" (the setting names do not carry the category, so a `cba_settings.sqf` is the same under either).
+  hotbar's look) stays in CBA's menu, per player, in the category "Arma Inventory Overhaul - Client". The box itself, the old tables (`einv_items_sizeTable`, `stackTable`, `einv_storage_containerTable`) and the rules text stay
+  CBA text boxes of their own, in the category "Arma Inventory Overhaul - Server" (the setting names do not carry the category, so a `cba_settings.sqf` is the same under either).
 
 - **Your own classes and kits:** `class=X+` covers X and every class built on it, from any mod -
   `class=My_Medic_Kit+ > size=2x2 stack=1 weight=1.5 name=Medic_kit`. A later rule beats an earlier one.
@@ -162,7 +162,7 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   and bodies show when they are opened. `_object setVariable ["einv_nearby", false, true];` keeps an object
   out of that list, `lockInventory` as well. Each player can switch it off ("Show everything nearby").
 - **Locks:** lock a crate or a vehicle to one side, one group or the admins: the Eden attribute *Inventory
-  locked to* (category Enhanced Inventory), Zeus Enhanced's right-click *Inventory lock* and module, or
+  locked to* (category Arma Inventory Overhaul), Zeus Enhanced's right-click *Inventory lock* and module, or
   `[_crate, "side", west] call einv_locks_fnc_setLock;` (`"group"` with a group or a group's callsign,
   `"admins"`, `""` opens it again). Logged-in admins always open it, Zeus too unless the server switches
   that off (*Zeus opens locked containers*); in single player nobody is an admin. Players who may not open it
@@ -224,7 +224,7 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   throw, a grenade of a type that also lies in an open container (the game may take the copy from the closed one), a vehicle's
   guns, and scripts.
   *Strict (hidden)*, the fourth option, is the full enforcement: the blocked items are kept out of the container altogether, in a
-  hidden holder on the unit (no object - a variable), so nothing but Enhanced Inventory can reach them. They still show as the
+  hidden holder on the unit (no object - a variable), so nothing but Arma Inventory Overhaul can reach them. They still show as the
   container's tiles with a small crossed eye, move, drop, go onto the ground and into crates, weigh (through ACE's virtual load)
   and keep their places; whitelisted items stay in the container and work as usual; on death everything goes into the body, on
   taking the backpack off into the backpack, while an arsenal is open into the containers. It can break mods or scripts that
@@ -233,7 +233,7 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   on respawn or with Zeus. Use it only if you need it; the setting's text says the same.
 - **Multiplayer:** where things lie syncs by itself - every player sees the same arrangement, also of
   containers your scripts fill. Every change runs where the container is local and the server carries what
-  moves between machines, so the server has to run the same version of Enhanced Inventory. Scripts can move
+  moves between machines, so the server has to run the same version of Arma Inventory Overhaul. Scripts can move
   items with `einv_storage_fnc_moveEntry`, `einv_storage_fnc_equip` and `einv_storage_fnc_unequip`;
   `[cursorObject] call einv_storage_fnc_dumpPlaces` writes where things lie to the RPT. The engine's own commands (`addItem`,
   `addMagazine`, `addWeapon`, loadouts, ACE) ignore the grid: what a unit's uniform, vest or backpack then holds
@@ -272,11 +272,11 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   caption line of the box says "Searching 0:07" with a ring that goes round and a cross that stops the search of that box (the button then reads
   "Search" and goes on again). A strip of icons at the side of a loot box - all, weapons, ammunition, gear, medical, food and drink, tools, other - shows
   only that kind of item in the box (the rest fades, like with the search field; a paged box turns to its first page with a match).
-  Searching can be left out for a single crate, vehicle or body: in Eden by the attribute *Skip searching* (category Enhanced Inventory), in Zeus Enhanced
+  Searching can be left out for a single crate, vehicle or body: in Eden by the attribute *Skip searching* (category Arma Inventory Overhaul), in Zeus Enhanced
   by the right-click choices *Searching: turn off* / *Searching: turn on*, in a script by `[_crate, false] call einv_gui_fnc_setSearchable;` (`true` gives it back to the
   settings; the mark is public, so a player who joins later has it). The server setting *Search Zeus-placed crates and vehicles* (on by default) leaves out
   everything a game master places when switched off.
-- **Big containers in pages:** a crate or vehicle taller than "Rows per page of a container" (`einv_gui_pageRows`, in "Enhanced Inventory - Client",
+- **Big containers in pages:** a crate or vehicle taller than "Rows per page of a container" (`einv_gui_pageRows`, in "Arma Inventory Overhaul - Client",
   General, 10 rows by default, 0 or 40 for no pages) shows that many rows at a time. The bar under it turns the pages, a fade over the page's last row
   with a chip such as "+37 items on other pages" says there is more, and an item dragged over an arrow of the bar turns the page after a moment so it can be let go
   on another page. Quick move, Take all and placing use the whole container; the pages are only the view, and only the page shown has controls on the
@@ -284,7 +284,7 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   Your own gear is never paged.
 - **Where other storage opens:** your own storage column stays at the right edge of the window, and the column of what you loot (the ground, a crate,
   a vehicle, a body, what lies nearby) opens left of it, between your equipment and your storage. "Where other storage opens"
-  (`einv_gui_lootSide`, in "Enhanced Inventory - Client", General) can put it at the right edge instead, with your storage moving in as it did in earlier
+  (`einv_gui_lootSide`, in "Arma Inventory Overhaul - Client", General) can put it at the right edge instead, with your storage moving in as it did in earlier
   versions. The soldier in the middle moves with the free space without leaving third person.
 - **Sounds and looting:** every kind of gear sounds like what it is - weapons, magazines, vests, helmets, medical
   items, radios -, using Arma's own sound files only; players within earshot hear someone loot (`einv_gui_soundsWorld`,
@@ -297,6 +297,6 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
 ## The vanilla inventory
 
 Gone while this mod is loaded. The Gear key, ACE's "Inventory" and "Open backpack", crates, vehicles and
-bodies all open Enhanced Inventory, and there is no setting to bring the vanilla one back. Should another
+bodies all open Arma Inventory Overhaul, and there is no setting to bring the vanilla one back. Should another
 mod or a script open it anyway (Better Inventory, `createDisplay "RscDisplayInventory"`), it is closed again
 at once; should the window ever fail to open, nothing opens and the RPT says why.

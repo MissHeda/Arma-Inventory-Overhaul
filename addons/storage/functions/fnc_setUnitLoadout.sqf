@@ -13,7 +13,7 @@
  * getUnitLoadout gives, or [loadout, rearm] as setUnitLoadout takes it; a config class name is set as it
  * is, with nothing to top up.
  *
- * ACE Arsenal and CBA_fnc_setLoadout need nothing of this: Enhanced Inventory tops up their loadouts by
+ * ACE Arsenal and CBA_fnc_setLoadout need nothing of this: Arma Inventory Overhaul tops up their loadouts by
  * itself (event CBA_loadoutSet).
  *
  * Arguments:

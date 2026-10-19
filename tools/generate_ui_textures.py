@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draws the textures of Enhanced Inventory's window and converts them to PAA.
+"""Draws the textures of Arma Inventory Overhaul's window and converts them to PAA.
 
 Started as a copy of Enhanced First Aid Kits' generator, so both mods share one look: the same
 corners, icons, switches and scroll thumb, plus the icons and the glass this window needs.

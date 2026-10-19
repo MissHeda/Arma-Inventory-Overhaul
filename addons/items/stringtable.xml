@@ -149,10 +149,10 @@
             <English>Grids</English>
         </Key>
         <Key ID="STR_einv_items_Warning_HashMismatch">
-            <English>Enhanced Inventory: this machine reads the inventory rules differently from the server - use the server's version of the mod.</English>
+            <English>Arma Inventory Overhaul: this machine reads the inventory rules differently from the server - use the server's version of the mod.</English>
         </Key>
         <Key ID="STR_einv_items_Warning_VersionMismatch">
-            <English>Enhanced Inventory %1 here, %2 on the server - item sizes and grids may not match.</English>
+            <English>Arma Inventory Overhaul %1 here, %2 on the server - item sizes and grids may not match.</English>
         </Key>
     </Package>
 </Project>

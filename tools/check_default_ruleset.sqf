@@ -416,7 +416,7 @@ private _summary = format [
     _report pushBack ("WARNING " + _x);
 } forEach (_compiled get "warnings");
 
-diag_log text "----- Enhanced Inventory: default ruleset check -----";
+diag_log text "----- Arma Inventory Overhaul: default ruleset check -----";
 
 {
     diag_log text _x;

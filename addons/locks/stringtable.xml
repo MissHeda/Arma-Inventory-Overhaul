@@ -11,7 +11,7 @@
             <English>With &quot;One group&quot;: the callsign of that group, as its Callsign attribute shows it (e.g. Alpha 1-1). Give it a callsign no other group has.</English>
         </Key>
         <Key ID="STR_einv_locks_Eden_Category">
-            <English>Enhanced Inventory</English>
+            <English>Arma Inventory Overhaul</English>
         </Key>
         <Key ID="STR_einv_locks_Eden_Everyone">
             <English>Everyone (not locked)</English>

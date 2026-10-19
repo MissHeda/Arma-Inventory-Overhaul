@@ -21,9 +21,9 @@
 // categories of CBA's Addon Options: what each player sets for himself (scope 0), and what the server or the mission
 // decides - the settings box einv_main_settings, the rules and the older tables (scope 1). A setting's name
 // does not carry its category, so cba_settings.sqf lines and saved values are the same under either.
-#define CBA_SETTINGS_EINV "Enhanced Inventory"
-#define CBA_SETTINGS_EINV_CLIENT "Enhanced Inventory - Client"
-#define CBA_SETTINGS_EINV_SERVER "Enhanced Inventory - Server"
+#define CBA_SETTINGS_EINV "Arma Inventory Overhaul"
+#define CBA_SETTINGS_EINV_CLIENT "Arma Inventory Overhaul - Client"
+#define CBA_SETTINGS_EINV_SERVER "Arma Inventory Overhaul - Server"
 
 // ---------------------------------------------------------------------------
 // Shared between addons
