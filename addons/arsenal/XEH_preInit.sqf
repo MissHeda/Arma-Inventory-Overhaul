@@ -72,6 +72,10 @@ GVAR(listPress) = [];
 GVAR(listSel) = [];
 GVAR(watch) = [];
 GVAR(scrollHold) = [];
+
+// Where the column stood last and for which set of containers (fnc_layout, fnc_onFrame): kept across every rebuild.
+GVAR(scrollKey) = "";
+GVAR(scrollPixels) = 0;
 GVAR(ctrlHeld) = false;
 
 // The rules' pictures on ACE's lists (fnc_pictures): the pass that is going, and the picture of each class

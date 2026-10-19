@@ -178,6 +178,15 @@ if (
     };
 };
 
+// ----- Where the column stands, for the next rebuild (fnc_layout) - not while a restore is still pending -----
+if ((uiNamespace getVariable [QEGVAR(gui,scrollRestore), []]) isEqualTo []) then {
+    {
+        if (!isNull _x && {ctrlType _x == 15} && {(_x getVariable [QEGVAR(gui,column), ""]) isEqualTo "storage"}) then {
+            GVAR(scrollPixels) = [_x] call EFUNC(gui,scrollPixels);
+        };
+    } forEach (uiNamespace getVariable [QEGVAR(gui,created), []]);
+};
+
 // ----- The column held where it stood against the wheel's own step -----
 if (GVAR(scrollHold) isNotEqualTo []) then {
     GVAR(scrollHold) params ["_pixels", "_until"];

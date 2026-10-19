@@ -117,18 +117,30 @@ _section set ["box", false];
 private _sections = [_section];
 
 // The other worn containers beside it, folded to their captions and unfolded by a click on them, so that things
-// can be dragged between all three; the staging space below is the same one in every tab.
+// can be dragged between all three; the staging space below is the same one in every tab. The order is always
+// uniform, vest, backpack: the open tab only decides which of them is unfolded.
 if (!_collapsed) then {
+    private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+    private _order = [uniformContainer _center, vestContainer _center, backpackContainer _center];
+    private _all = [];
+
     {
         private _other = _x;
         private _otherContainer = _other getOrDefault ["container", objNull];
 
-        if (!isNull _otherContainer && {_otherContainer isNotEqualTo _container}) then {
+        if (!isNull _otherContainer) then {
             _other set ["box", false];
-            [_other, "other_" + toLowerANSI (_other getOrDefault ["class", ""]), true] call _fnc_fold;
-            _sections pushBack _other;
+
+            if (_otherContainer isNotEqualTo _container) then {
+                [_other, "other_" + toLowerANSI (_other getOrDefault ["class", ""]), true] call _fnc_fold;
+            };
+
+            _all pushBack [_order find _otherContainer, _other];
         };
     } forEach (_context getOrDefault ["ownSections", []]);
+
+    _all sort true;
+    _sections = _all apply {_x select 1};
 };
 
 // Folded, no staging space is looked at: the crate is made when the panel unfolds.
@@ -372,7 +384,45 @@ private _fnc_draw = {
     _used
 };
 
-[_display, [_left, _bodyTop, _width, _columnH], _sections, _columnTheme, "", "", _fnc_draw, "storage"] call EFUNC(gui,drawColumn);
+// The scroll position is kept across every rebuild (einv_gui_fnc_build deleted the old group already, it kept the
+// pixels): only another set of shown containers starts at the top. Set at once and a frame later, as a new group
+// does not know its height before.
+private _setKey = (_sections apply {_x getOrDefault ["class", ""]}) joinString "|";
+private _keepMap = uiNamespace getVariable [QEGVAR(gui,keepPixels), createHashMap];
+private _pixels = (_keepMap getOrDefault ["storage", 0]) max 0;
+
+if (_pixels <= 0 && {GVAR(scrollKey) isEqualTo _setKey}) then {
+    _pixels = GVAR(scrollPixels);
+};
+
+if (GVAR(scrollKey) isNotEqualTo _setKey) then {
+    _pixels = 0;
+};
+
+GVAR(scrollKey) = _setKey;
+_keepMap set ["storage", _pixels];
+
+private _group = [_display, [_left, _bodyTop, _width, _columnH], _sections, _columnTheme, "", "", _fnc_draw, "storage"] call EFUNC(gui,drawColumn);
+
+if (_pixels > 0 && {!isNull _group}) then {
+    private _range = (_group getVariable [QEGVAR(gui,contentH), 0]) - ((ctrlPosition _group) select 3);
+
+    if (_range > 0) then {
+        _group ctrlSetScrollValues [(_pixels / _range) min 1, -1];
+    };
+
+    [{
+        params ["_group", "_pixels"];
+
+        if (isNull _group) exitWith {};
+
+        private _range = (_group getVariable [QEGVAR(gui,contentH), 0]) - ((ctrlPosition _group) select 3);
+
+        if (_range > 0) then {
+            _group ctrlSetScrollValues [(_pixels / _range) min 1, -1];
+        };
+    }, [_group, _pixels]] call CBA_fnc_execNextFrame;
+};
 
 GVAR(panelRect) = _rect;
 // The hint line's band (fnc_footer).
