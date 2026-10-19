@@ -87,6 +87,10 @@ private _readList = {
         && {(_wanted select 0) isNotEqualTo ""}
         && {(toLowerANSI (_wanted select 0)) isEqualTo (toLowerANSI _wornClass)}
     ) then {
+        // Only a container the engine filled up can have lost anything to its load: one with room left got
+        // all it was given, and a difference there is a renamed item (an EFAK kit or a radio gets a new
+        // instance class when it is made again), which must not be added a second time.
+        private _full = (maxLoad _container) <= 0 || {(loadAbs _container) >= 0.9 * (maxLoad _container)};
         private _have = [(_now param [_index, [], [[]]]) param [1, [], [[]]]] call _readList;
         private _need = [_wanted param [1, [], [[]]]] call _readList;
 
@@ -97,7 +101,17 @@ private _readList = {
 
             private _missing = _count - ((_have getOrDefault [_key, [_kind, _what, 0]]) select 2);
 
-            if (_missing > 0) then {
+            // A kit is never topped up: its instance class changes whenever it is made again, so the loadout's
+            // name is missing although the kit is there.
+            private _class = _what;
+
+            if (_what isEqualType []) then {
+                _class = _what param [0, ""];
+            };
+
+            private _isKit = (([_class] call (missionNamespace getVariable ["einv_items_fnc_kitOf", {[]}])) isNotEqualTo []);
+
+            if (_missing > 0 && {_full} && {!_isKit}) then {
                 switch (_kind) do {
                     case 2: {
                         if (isClass (configFile >> "CfgWeapons" >> (_what select 0))) then {
