@@ -49,5 +49,8 @@ if (_object getVariable ["einv_noSearch", false] || {_container getVariable ["ei
 switch (true) do {
     case (_object isKindOf "CAManBase"): {[GVAR(searchBodies), GVAR(searchPersons)] select (alive _object)};
     case ([_container] call EFUNC(storage,isGroundHolder)): {GVAR(searchGround)};
+    // A backpack lying about as an object of its own - thrown down, set by a mission - is no crate and no pile: it is
+    // searched when either is, or it would be a way round the search ("Open" on a bag that was thrown on the ground).
+    case (_container isKindOf "Bag_Base"): {GVAR(searchGround) || {GVAR(searchContainers)}};
     default {GVAR(searchContainers)};
 }

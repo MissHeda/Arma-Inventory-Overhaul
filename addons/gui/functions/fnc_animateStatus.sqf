@@ -120,7 +120,7 @@ private _fnc_fit = {
         private _seconds = ceil (_left max 0);
         private _rest = _seconds mod 60;
         private _clock = format ["%1:%2", floor (_seconds / 60), ["", "0"] select (_rest < 10)] + str _rest;
-        private _words = format [[LLSTRING(Status_Search), LLSTRING(Status_Stopped)] select (_status get "stopped"), _clock];
+        private _words = format [[LLSTRING(Status_Search), [LLSTRING(Status_Stopped), LLSTRING(Status_Idle)] select (_status getOrDefault ["idle", false])] select (_status get "stopped"), _clock];
 
         _words = [_words, _clock, _status] call _fnc_fit;
 

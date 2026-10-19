@@ -92,6 +92,9 @@ GVAR(stripPages) = [];
 GVAR(coalesced) = createHashMap;
 GVAR(pageWanted) = createHashMap;
 GVAR(searchPaused) = [];
+GVAR(searchIdle) = [];
+GVAR(searchSeen) = [];
+GVAR(searchResume) = [];
 GVAR(statusLive) = false;
 
 // The inspect card went with the window it was opened in, however that closed - only where it stood is

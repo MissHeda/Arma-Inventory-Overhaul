@@ -178,6 +178,13 @@ GVAR(searchLast) = 0;
 // them is searched until the button says "Search" again; the window's own state, empty for every window.
 GVAR(searchPaused) = [];
 
+// With "Search starts on click" (einv_gui_searchOnClick): the boxes that wait for the click, the boxes the window has met
+// (so a rebuild does not make a searched or stopped box wait again), and the boxes a click on another one interrupted,
+// the latest last (fnc_stopStatus); they go on once the clicked box is done (fnc_animateSearch). The window's own state.
+GVAR(searchIdle) = [];
+GVAR(searchSeen) = [];
+GVAR(searchResume) = [];
+
 // The hands' queue (fnc_queueMoves): the actions waiting for the hands, in order, each a HashMap - "id", "move" (the
 // move fnc_sendMoves was given), "options", "hand" ("drop", "move" or "equip"), "time" (seconds), "sources" (the tiles it
 // takes from, as the moves in flight name them), "slot" ([unit, slot] of a worn item it takes off), "box" (the container

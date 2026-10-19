@@ -146,6 +146,14 @@
     false
 ] call EFUNC(main,addSetting);
 
+// Searching starts on a click on the box's Search button, as in Tarkov; off starts every box by itself, as before.
+[
+    QGVAR(searchOnClick),
+    "CHECKBOX",
+    [LLSTRING(Setting_SearchOnClick), LLSTRING(Setting_SearchOnClick_Desc)],
+    true
+] call EFUNC(main,addSetting);
+
 // Each player's own: some open the window and keep walking keys under their fingers.
 [
     QGVAR(moveToStop),

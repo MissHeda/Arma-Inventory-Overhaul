@@ -138,7 +138,7 @@ if (_ctrl || _alt) then {
 
 if (
     GVAR(moveToStop) && {!_ctrl} && {!_alt}
-    && {!isNull GVAR(openedOn) || {GVAR(searchQueue) isNotEqualTo []}}
+    && {!isNull GVAR(openedOn) || {GVAR(searchQueue) findIf {!((_x select 0) in GVAR(searchIdle))} >= 0}}
     && {isNull objectParent GVAR(unit)}
     && {call FUNC(isInventoryMode)}
     && {diag_tickTime - GVAR(openedAt) > MOVE_GRACE}

@@ -59,6 +59,13 @@ _order sort true;
         _entry set ["hidden", true];
 
         if (_queue) then {
+            // A box the window meets for the first time waits for the click on its Search button (fnc_stopStatus).
+            if (GVAR(searchOnClick) && {!(_container in GVAR(searchSeen))}) then {
+                GVAR(searchSeen) pushBack _container;
+                GVAR(searchIdle) pushBack _container;
+                GVAR(searchPaused) pushBackUnique _container;
+            };
+
             GVAR(searchQueue) pushBack [
                 _container, _key, _entry getOrDefault ["row", 0], _entry getOrDefault ["col", 0],
                 (_entry getOrDefault ["w", 1]) * (_entry getOrDefault ["h", 1]), _entry getOrDefault ["block", 0]

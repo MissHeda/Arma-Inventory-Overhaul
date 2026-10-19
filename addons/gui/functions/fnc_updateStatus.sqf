@@ -51,6 +51,7 @@ private _live = false;
     private _holder = _info getOrDefault ["holder", objNull];
     private _kind = "";
     private _stopped = false;
+    private _idle = false;
 
     if (!isNull _holder) then {
         if (GVAR(handBoxes) findIf {(_x get "holder") isEqualTo _holder} >= 0) then {
@@ -59,13 +60,14 @@ private _live = false;
             if (GVAR(searchQueue) findIf {(_x select 0) isEqualTo _holder} >= 0) then {
                 _kind = "search";
                 _stopped = _holder in GVAR(searchPaused);
+                _idle = _stopped && {_holder in GVAR(searchIdle)};
             };
         };
     };
 
     private _status = _info getOrDefault ["status", createHashMap];
     private _made = _status getOrDefault ["controls", []];
-    private _signature = [_kind, _stopped];
+    private _signature = [_kind, _stopped, _idle];
 
     // What it says is what is true, and the controls are all there: left as it is.
     if (_kind isNotEqualTo "" && {(_status getOrDefault ["signature", []]) isEqualTo _signature} && {_made findIf {isNull _x} < 0}) then {
@@ -116,7 +118,7 @@ private _live = false;
             };
         } forEach [LLSTRING(Status_Grab), LLSTRING(Status_Put), LLSTRING(Status_Drop), LLSTRING(Status_Move), LLSTRING(Status_Gear)];
     } else {
-        _sample = format [[LLSTRING(Status_Search), LLSTRING(Status_Stopped)] select _stopped, "99:59"];
+        _sample = format [[LLSTRING(Status_Search), [LLSTRING(Status_Stopped), LLSTRING(Status_Idle)] select _idle] select _stopped, "99:59"];
     };
 
     private _gap = SQUARE(_height * 0.2);
@@ -197,7 +199,7 @@ private _live = false;
     _hit setVariable [QGVAR(surface), _surface];
     _hit ctrlSetTooltip ([
         LLSTRING(Status_StopHands),
-        [LLSTRING(Status_StopSearch), LLSTRING(Status_ResumeSearch)] select _stopped
+        [LLSTRING(Status_StopSearch), [LLSTRING(Status_ResumeSearch), LLSTRING(Status_StartSearch)] select _idle] select _stopped
     ] select (_kind isEqualTo "search"));
     _hit ctrlAddEventHandler ["MouseEnter", {
         {
@@ -226,7 +228,7 @@ private _live = false;
 
     _info set ["status", createHashMapFromArray [
         ["controls", _controls], ["signature", _signature], ["kind", _kind], ["arc", _arc], ["label", _label],
-        ["text", ""], ["stopped", _stopped], ["labelW", _labelW], ["font", _font], ["size", _size]
+        ["text", ""], ["stopped", _stopped], ["idle", _idle], ["labelW", _labelW], ["font", _font], ["size", _size]
     ]];
 } forEach (uiNamespace getVariable [QGVAR(sectionInfo), []]);
 

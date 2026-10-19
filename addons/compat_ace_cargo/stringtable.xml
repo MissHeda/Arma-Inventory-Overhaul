@@ -34,6 +34,9 @@
         <Key ID="STR_einv_compat_ace_cargo_Tip_TooFar">
             <English>Too far from the vehicle</English>
         </Key>
+        <Key ID="STR_einv_compat_ace_cargo_Tip_Unsearched">
+            <English>Search the vehicle first</English>
+        </Key>
         <Key ID="STR_einv_compat_ace_cargo_Tip_VehicleLocked">
             <English>The vehicle is locked</English>
         </Key>

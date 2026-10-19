@@ -656,6 +656,12 @@ loot, not for your own gear.</English>
         <Key ID="STR_einv_gui_Setting_SearchGround_Desc">
             <English>Loose items on the ground show as &quot;?&quot;\nuntil they have been searched.</English>
         </Key>
+        <Key ID="STR_einv_gui_Setting_SearchOnClick">
+            <English>Search starts on click</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchOnClick_Desc">
+            <English>A box is searched once its Search button\nis clicked, one box at a time.\n\nOff: every box starts searching by itself.</English>
+        </Key>
         <Key ID="STR_einv_gui_Setting_SearchPersons">
             <English>Search living persons</English>
         </Key>
@@ -863,6 +869,9 @@ Off does it at once.</English>
         <Key ID="STR_einv_gui_Status_Grab">
             <English>Grabbing items %1 / %2</English>
         </Key>
+        <Key ID="STR_einv_gui_Status_Idle">
+            <English>Unsearched %1</English>
+        </Key>
         <Key ID="STR_einv_gui_Status_Move">
             <English>Moving items %1 / %2</English>
         </Key>
@@ -877,6 +886,9 @@ Off does it at once.</English>
         </Key>
         <Key ID="STR_einv_gui_Status_Search">
             <English>Searching %1</English>
+        </Key>
+        <Key ID="STR_einv_gui_Status_StartSearch">
+            <English>Search this box</English>
         </Key>
         <Key ID="STR_einv_gui_Status_StopHands">
             <English>Cancel what still waits</English>

@@ -26,7 +26,7 @@ GVAR(topics) = [
         "einv_gui_searchTime", "einv_storage_nearbyRange", "einv_gui_handDrop", "einv_gui_handMove", "einv_gui_handEquip",
         "einv_gui_waitMove", "einv_gui_waitDrop", "einv_gui_waitWorn", "einv_gui_waitEquip",
         "einv_gui_searchBodies", "einv_gui_searchPersons",
-        "einv_gui_searchContainers", "einv_gui_searchZeus", "einv_gui_searchGround", "einv_gui_soundsWorld"
+        "einv_gui_searchContainers", "einv_gui_searchZeus", "einv_gui_searchGround", "einv_gui_searchOnClick", "einv_gui_soundsWorld"
     ]],
     ["persons", ["einv_gui_personNotify", "einv_gui_personOpen", "einv_gui_personItems", "einv_gui_personWorn"]],
     ["containers", ["einv_storage_migrate", "einv_storage_useUniform", "einv_storage_useVest", "einv_storage_useBackpack"]],

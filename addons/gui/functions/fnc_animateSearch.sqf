@@ -43,6 +43,26 @@ if (GVAR(searchStarted) >= 0 && {_gap > SEARCH_PAUSE}) then {
     GVAR(searchStarted) = GVAR(searchStarted) + _gap;
 };
 
+// The clicked box is done: the one it interrupted goes on (fnc_stopStatus).
+if (GVAR(searchResume) isNotEqualTo [] && {GVAR(searchQueue) findIf {!((_x select 0) in GVAR(searchPaused))} < 0}) then {
+    private _next = objNull;
+
+    while {GVAR(searchResume) isNotEqualTo [] && {isNull _next}} do {
+        private _candidate = GVAR(searchResume) deleteAt (count GVAR(searchResume) - 1);
+
+        if (GVAR(searchQueue) findIf {(_x select 0) isEqualTo _candidate} >= 0) then {
+            _next = _candidate;
+        };
+    };
+
+    if (!isNull _next) then {
+        GVAR(searchPaused) = GVAR(searchPaused) - [_next];
+        GVAR(searchStarted) = -1;
+        GVAR(searchHead) = [];
+        [_display] call FUNC(updateStatus);
+    };
+};
+
 if (GVAR(searchQueue) isEqualTo []) exitWith {};
 
 private _headIndex = GVAR(searchQueue) findIf {!((_x select 0) in GVAR(searchPaused))};
