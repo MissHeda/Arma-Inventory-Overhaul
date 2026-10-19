@@ -35,6 +35,10 @@ GVAR(snapshot) = [objNull, createHashMap];
 GVAR(kept) = [];
 GVAR(keptAt) = 0;
 
+// The last frame of the quiet time after a loadout was set on ACE's unit: until then nothing is moved out of
+// the containers (fnc_stageOverflow) and no old places are written onto them (fnc_keepPlaces).
+GVAR(loadoutFrame) = -1;
+
 // Following ACE's events: ace_arsenal_itemsChanged came since the last ace_arsenal_cargoChanged (an ACE
 // that has it); a cargoChanged waits for its pass a frame later; that pass is asked for already
 // (fnc_settle); the panel is to be built again once nothing of it is held (fnc_onFrame).
@@ -130,6 +134,22 @@ if (hasInterface) then {
 
     [QACEGVAR(arsenal,displayClosed), {
         call FUNC(onClosed);
+    }] call CBA_fnc_addEventHandler;
+
+    // A loadout set on ACE's unit (loaded in the arsenal, imported): its containers are new objects with other
+    // contents. The places noted before are stale for them and dropped, and nothing is moved out for a few
+    // frames, while the storage addon adds what the engine left out (fnc_topUpLoadout) and writes the places
+    // the loadout carries.
+    ["CBA_loadoutSet", {
+        params [["_unit", objNull, [objNull]]];
+
+        if (GVAR(attached) && {_unit isEqualTo (missionNamespace getVariable [QACEGVAR(arsenal,center), objNull])}) then {
+            GVAR(kept) = [];
+            GVAR(keptAt) = 0;
+            GVAR(loadoutFrame) = diag_frameNo + LOADOUT_QUIET_FRAMES;
+
+            [] call FUNC(settle);
+        };
     }] call CBA_fnc_addEventHandler;
 
     // A tab of the left bar filled (also after ACE's refresh, a loadout imported or loaded), the list of

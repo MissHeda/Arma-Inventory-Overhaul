@@ -95,6 +95,9 @@
 // seconds (fnc_keepPlaces).
 #define KEPT_REFRESH 0.2
 
+// Frames after a loadout was set in which nothing is moved out of the soldier's containers (fnc_stageOverflow).
+#define LOADOUT_QUIET_FRAMES 4
+
 // The Ctrl keys, for Ctrl and the wheel over a tile (fnc_onKey, fnc_onWheel).
 #define DIK_LCONTROL 29
 #define DIK_RCONTROL 157

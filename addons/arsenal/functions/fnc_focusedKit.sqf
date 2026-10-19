@@ -2,9 +2,9 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The kit type that is in focus in ACE's list: the row picked there is a kit of Enhanced First Aid Kits
- * (a prototype or one of its instances). The panel unfolds the kits of that type by themselves
- * (fnc_kitSections), so the one being added or looked at is open to be filled.
+ * The kit type that is in focus in ACE's LEFT list: the row picked there is a kit of Enhanced First Aid Kits
+ * (a prototype or one of its instances). The panel then shows that type's kit grid in place of the container
+ * (fnc_layout, fnc_kitSections); with no such row picked it shows no kit at all.
  *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
@@ -22,15 +22,15 @@ disableSerialization;
 
 params [["_display", displayNull, [displayNull]]];
 
-private _list = _display displayCtrl ARSENAL_IDC_LIST;
+private _list = _display displayCtrl ARSENAL_IDC_LEFT_LIST;
 
 if (isNull _list) exitWith {""};
 
-private _row = lnbCurSelRow _list;
+private _row = lbCurSel _list;
 
-if (_row < 0 || {_row >= (lnbSize _list) select 0}) exitWith {""};
+if (_row < 0 || {_row >= lbSize _list}) exitWith {""};
 
-private _class = _list lnbData [_row, 0];
+private _class = _list lbData _row;
 
 if (_class isEqualTo "" || {(([_class] call EFUNC(items,kitOf)) isEqualTo [])}) exitWith {""};
 

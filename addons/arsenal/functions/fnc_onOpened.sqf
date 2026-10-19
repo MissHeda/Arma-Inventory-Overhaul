@@ -56,6 +56,7 @@ GVAR(removeZone) = -1;
 GVAR(snapshot) = [objNull, createHashMap];
 GVAR(kept) = [];
 GVAR(keptAt) = 0;
+GVAR(loadoutFrame) = -1;
 GVAR(itemsSeen) = false;
 GVAR(cargoPending) = false;
 GVAR(dirty) = false;
@@ -87,6 +88,18 @@ _display displayAddEventHandler ["MouseZChanged", {!isNull (uiNamespace getVaria
 // The Close button and Escape ask first when something does not fit (fnc_confirmClose).
 [_display] call FUNC(interceptClose);
 
+// Another kit picked in ACE's left list (or none): the panel shows its grid in place of the container, or the
+// container again (fnc_layout, fnc_focusedKit).
+private _left = _display displayCtrl ARSENAL_IDC_LEFT_LIST;
+
+if (!isNull _left) then {
+    _left ctrlAddEventHandler ["LBSelChanged", {
+        if (!isNil QEFUNC(compat_efak,arsenalSections) && {([ctrlParent (_this select 0)] call FUNC(focusedKit)) isNotEqualTo GVAR(focusKit)}) then {
+            [] call EFUNC(gui,requestRebuild);
+        };
+    }];
+};
+
 private _list = _display displayCtrl ARSENAL_IDC_LIST;
 
 if (!isNull _list) then {
@@ -94,11 +107,6 @@ if (!isNull _list) then {
     // when it was picked since the press (fnc_listDrag).
     _list ctrlAddEventHandler ["LBSelChanged", {
         GVAR(listSel) = [_this select 1, diag_frameNo];
-
-        // Another kit type picked: its kits open in the panel, those of the one left fold (fnc_kitSections).
-        if (!isNil QEFUNC(compat_efak,arsenalSections) && {([ctrlParent (_this select 0)] call FUNC(focusedKit)) isNotEqualTo GVAR(focusKit)}) then {
-            [] call EFUNC(gui,requestRebuild);
-        };
 
         [{_this call FUNC(ungrey)}, [ctrlParent (_this select 0)]] call EFUNC(gui,later);
     }];

@@ -2,12 +2,10 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The kits that lie in the panel's containers as sections of the column (fnc_layout), each with the grid
- * the kit has (einv_compat_efak_fnc_arsenalSections): filled there as a container is. Folded to their
- * captions at first and unfolded by a click on the tab - except the kits of the type in focus in ACE's
- * list (fnc_focusedKit), which start open. The state is kept in GVAR(folded) while ACE's window is open,
- * under "kit_" + the lowercase class, or "kitfocus_" + that for a kit in focus (so a kit opened by hand
- * does not turn into a folded one when the picked row changes); the "fold" hook finds it in GVAR(foldKeys).
+ * The kits of the type in focus in ACE's left list (fnc_focusedKit) that lie in the panel's containers, each as a
+ * section with its grid (einv_compat_efak_fnc_arsenalSections): filled there as a container is. Other kits get
+ * no section. Open by default; a fold by hand is kept in GVAR(folded) while ACE's window is open, under
+ * "kitfocus_" + the lowercase class (the "fold" hook finds it in GVAR(foldKeys)).
  *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
@@ -26,18 +24,18 @@ params [["_display", displayNull, [displayNull]], ["_holders", [], [[]]]];
 
 if (isNil QEFUNC(compat_efak,arsenalSections)) exitWith {[]};
 
-private _focus = [_display] call FUNC(focusedKit);
+private _focus = GVAR(focusKit);
 
-GVAR(focusKit) = _focus;
+if (_focus isEqualTo "") exitWith {[]};
 
-([_holders] call EFUNC(compat_efak,arsenalSections)) apply {
+(([_holders] call EFUNC(compat_efak,arsenalSections)) select {
+    ((([(_x get "kit")] call EFUNC(items,kitOf)) param [0, ""]) isEqualTo _focus)
+}) apply {
     private _section = _x;
-    private _kit = _section get "kit";
-    private _focused = _focus isNotEqualTo "" && {((([_kit] call EFUNC(items,kitOf)) param [0, ""]) isEqualTo _focus)};
-    private _key = (["kit_", "kitfocus_"] select _focused) + toLowerANSI _kit;
+    private _key = "kitfocus_" + toLowerANSI (_section get "kit");
 
     _section set ["foldKey", _key];
-    _section set ["folded", (_key in GVAR(folded)) isNotEqualTo !_focused];
+    _section set ["folded", _key in GVAR(folded)];
     _section set ["box", false];
     _section set ["side", "own"];
 

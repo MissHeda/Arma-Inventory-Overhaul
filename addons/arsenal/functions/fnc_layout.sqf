@@ -36,9 +36,10 @@
  * class in GVAR(folded) once opened), between the open container and the staging space, so that things can be
  * dragged between all three; the staging space is the same one in every tab.
  *
- * Under them come the kits of Enhanced First Aid Kits that lie in any of them or in the staging space, each as a
- * section with its grid (fnc_kitSections): things are dragged out of ACE's list into it, out of it, and to and from
- * the containers. Folded at first; the kits of the type picked in ACE's list start open.
+ * With a kit of Enhanced First Aid Kits picked in ACE's left list (fnc_focusedKit), in any tab, the panel shows
+ * that kit's grid instead of the containers - one section per kit of that type that lies in a worn container or
+ * the staging space (fnc_kitSections) - and the staging space below: things are dragged out of ACE's list into
+ * it, out of it, and to and from the staging space. No kit is shown otherwise.
  *
  * The focus sink (GVAR(focusSink) in uiNamespace) is made here the first time: a control of no size in the
  * screen's corner that fnc_onFrame gives the focus to, so that ACE's list loses it.
@@ -68,13 +69,36 @@ GVAR(stagingCount) = 0;
 
 (call FUNC(selected)) params ["_id", "_container"];
 
-if (_id isEqualTo "" || {!GVAR(shown)}) exitWith {[]};
+if (!GVAR(shown)) exitWith {[]};
+
+// The whole panel folded to its title row (the button in it).
+private _collapsed = GVAR(collapsed);
+
+// A kit picked in ACE's left list: its grid (with the staging space) is shown in place of the container, in
+// any tab (fnc_focusedKit, fnc_kitSections). With no kit picked no kit is shown.
+GVAR(focusKit) = ["", [_display] call FUNC(focusedKit)] select (!isNil QEFUNC(compat_efak,arsenalSections));
+
+// Folded, no staging space is looked at: the crate is made when the panel unfolds.
+private _holder = if (_collapsed) then {objNull} else {[] call FUNC(staging)};
+private _kitSections = [];
+
+if (GVAR(focusKit) isNotEqualTo "") then {
+    private _worn = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+
+    _kitSections = [_display, [uniformContainer _worn, vestContainer _worn, backpackContainer _worn, _holder]] call FUNC(kitSections);
+};
+
+private _kitMode = _kitSections isNotEqualTo [];
+
+if (_kitMode) then {
+    _container = objNull;
+};
 
 private _index = (_context getOrDefault ["ownSections", []]) findIf {(_x getOrDefault ["container", objNull]) isEqualTo _container};
 
-if (_index < 0) exitWith {[]};
+if (!_kitMode && {_id isEqualTo "" || {_index < 0}}) exitWith {[]};
 
-private _section = (_context get "ownSections") select _index;
+private _section = if (_kitMode) then {_kitSections select 0} else {(_context get "ownSections") select _index};
 private _rect = [_display, _container] call FUNC(panelRect);
 
 if (_rect isEqualTo []) exitWith {[]};
@@ -110,20 +134,25 @@ private _fnc_fold = {
 };
 
 GVAR(foldKeys) = [];
-[_section, toLowerANSI (_section getOrDefault ["class", ""])] call _fnc_fold;
 
-// The whole panel folded to its title row (the button in it).
-private _collapsed = GVAR(collapsed);
+if (!_kitMode) then {
+    [_section, toLowerANSI (_section getOrDefault ["class", ""])] call _fnc_fold;
+};
 
 // The title row names and pictures the container: no box with its picture beside the grid.
 _section set ["box", false];
 
 private _sections = [_section];
 
+// A kit's grids, one per kit of the type: all of them in place of the containers.
+if (_kitMode) then {
+    _sections = +_kitSections;
+};
+
 // The other worn containers beside it, folded to their captions and unfolded by a click on them, so that things
 // can be dragged between all three; the staging space below is the same one in every tab. The order is always
 // uniform, vest, backpack: the open tab only decides which of them is unfolded.
-if (!_collapsed) then {
+if (!_collapsed && {!_kitMode}) then {
     private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
     private _order = [uniformContainer _center, vestContainer _center, backpackContainer _center];
     private _all = [];
@@ -147,9 +176,6 @@ if (!_collapsed) then {
     _sections = _all apply {_x select 1};
 };
 
-// Folded, no staging space is looked at: the crate is made when the panel unfolds.
-private _holder = if (_collapsed) then {objNull} else {[] call FUNC(staging)};
-
 if (!isNull _holder) then {
     private _staging = createHashMapFromArray [
         ["id", "staging"],
@@ -172,18 +198,6 @@ if (!isNull _holder) then {
     {
         GVAR(stagingCount) = GVAR(stagingCount) + _y;
     } forEach ([_holder] call FUNC(countAll));
-};
-
-// The kits that lie in the containers below the containers, each with its grid (fnc_kitSections): filled
-// there as a container is. Before the staging space, which reaches down to the hint line.
-if (!_collapsed) then {
-    private _kitSections = [_display, _sections apply {_x getOrDefault ["container", objNull]}] call FUNC(kitSections);
-
-    if (_kitSections isNotEqualTo []) then {
-        private _last = [count _sections, count _sections - 1] select (!isNull _holder);
-
-        _sections = (_sections select [0, _last]) + _kitSections + (_sections select [_last]);
-    };
 };
 
 // The padding of the block, as the inventory's columns have it (einv_gui_fnc_drawColumn): the title row
