@@ -16,7 +16,8 @@
  * What came over the network or from a profile is not trusted: only well-formed records are kept. A
  * loadout without the key, or of another version, changes nothing - its things lie where the layout puts
  * them first. Any loadout, with the key or without, also notes its unit for the surplus check
- * (fnc_queueMigrate): what it holds beyond the grid moves on to the next container with room.
+ * (fnc_queueMigrate): what it holds beyond the grid moves on to the next container with room. What the engine
+ * left out of the loadout because of a container's maximumLoad is added back (fnc_topUpLoadout).
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -53,6 +54,19 @@ if (!is3DEN) then {
     } else {
         [QGVAR(migrateUnit), [_unit], _unit] call CBA_fnc_targetEvent;
     };
+};
+
+// The engine stops filling a container at its maximumLoad, which this mod's grid does not: whatever the loadout
+// meant to hold beyond that is added now (fnc_topUpLoadout), before the places below are written so they find
+// it. Where the unit is local; otherwise its machine does it, a frame later when the containers have arrived.
+if (local _unit) then {
+    [_unit, _loadout] call FUNC(topUpLoadout);
+
+    [{
+        [_this select 0, _this select 1] call FUNC(topUpLoadout);
+    }, [_unit, _loadout]] call FUNC(nextFrame);
+} else {
+    [QGVAR(topUpLoadout), [_unit, _loadout], _unit] call CBA_fnc_targetEvent;
 };
 
 private _layout = _extended getOrDefault ["einv_layout", []];

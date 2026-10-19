@@ -240,6 +240,10 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   beyond its cells moves on to the next container with free cells (uniform, vest, backpack) a moment later, on the
   machine the unit is local on; what fits nowhere stays shown as overflow. The server setting
   `einv_storage_migrate` switches that off.
+- **Loadouts beyond the config load:** a container may hold more than its config `maximumLoad`, but the engine's `setUnitLoadout` stops
+  filling a container there. Loadouts set through CBA (`CBA_fnc_setLoadout`, ACE Arsenal's Load) are topped up by the mod on their own. In a
+  mission use `[unit, loadout] call einv_storage_fnc_setUnitLoadout` instead of `setUnitLoadout` (any machine; it runs where the unit is local,
+  adds only what the engine left out, and what then lies beyond the grid moves on as above).
 - **Arsenal:** ACE Arsenal is the arsenal - `ace_arsenal_fnc_initBox` and `ace_arsenal_fnc_openBox`, its boxes,
   loadouts and Zeus arsenal work as always; the grid panel hooks into its window (also in the Eden editor), and
   free cells are the only limit on what goes in. The vanilla Virtual Arsenal is a server setting,

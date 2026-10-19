@@ -169,29 +169,50 @@ private _bandH = SNAP_H(_padY + _titleH);
 private _bodyTop = _top + _bandH;
 
 // Folded, the panel is a small square button with the inventory's picture at the panel's right edge, by ACE's
-// list: the glass with the padding the block has round its content. A click on it unfolds the panel.
+// list. It is one surface, the panel's colour, with no second square (the header buttons' film) inside it and
+// no frame: lighter under the mouse like the other header buttons. A click on it unfolds the panel.
 if (_collapsed) exitWith {
     private _side = SNAP_H(_padY * 2 + _titleH);
     private _squareW = SQUARE(_side);
 
     _rect = [SNAP_X(_left + _width - _squareW), _top, SNAP_W(_squareW), _side];
 
-    [
-        _display, controlNull, _rect, _theme getOrDefault ["panel", []], _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
-    ] call EFUNC(gui,uiPanel);
-
     ([_theme, false] call EFUNC(gui,headerStyle)) params ["_fill", "_hover", "_ink"];
+
+    private _surface = +(_theme getOrDefault ["panel", _fill]);
+    private _surfaceHover = +_hover;
+
+    if (count _surface >= 4) then {
+        _surfaceHover = [
+            (_surface select 0) + (1 - (_surface select 0)) * 0.14,
+            (_surface select 1) + (1 - (_surface select 1)) * 0.14,
+            (_surface select 2) + (1 - (_surface select 2)) * 0.14,
+            _surface select 3
+        ];
+    } else {
+        _surface = _fill;
+    };
 
     private _unfoldTheme = createHashMap;
     _unfoldTheme merge _theme;
-    _unfoldTheme set ["button", _fill];
-    _unfoldTheme set ["buttonHover", _hover];
+    _unfoldTheme set ["button", _surface];
+    _unfoldTheme set ["buttonHover", _surfaceHover];
     _unfoldTheme set ["buttonText", _ink];
 
     private _unfold = [
-        _display, controlNull, [(_rect select 0) + _padX, (_rect select 1) + _padY, SQUARE(_titleH), _titleH], "collapse", "",
+        _display, controlNull, _rect, "collapse", "",
         UI_TEX(icon_inventory_ca), _unfoldTheme, {[] call FUNC(toggleCollapse)}
     ] call EFUNC(gui,uiButton);
+
+    // The button takes no keyboard focus: a focused button draws the engine's frame round itself.
+    (_unfold select -1) ctrlAddEventHandler ["SetFocus", {
+        params ["_ctrl"];
+        private _list = (ctrlParent _ctrl) displayCtrl ARSENAL_IDC_LIST;
+
+        if (!isNull _list) then {
+            ctrlSetFocus _list;
+        };
+    }];
 
     (_unfold select -1) ctrlSetTooltip LLSTRING(Collapse_Unfold);
 

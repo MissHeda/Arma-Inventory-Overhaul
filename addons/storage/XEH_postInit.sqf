@@ -13,6 +13,16 @@
 // Places of a loadout set on another machine, written here where the unit is local.
 [QGVAR(loadoutPlaces), {_this call FUNC(onLoadoutPlaces)}] call CBA_fnc_addEventHandler;
 
+// What a loadout set on another machine left out of the unit's containers (fnc_onLoadoutSet), added here.
+[QGVAR(topUpLoadout), {
+    params ["_unit", "_loadout"];
+
+    [{_this call FUNC(topUpLoadout)}, [_unit, _loadout]] call FUNC(nextFrame);
+}] call CBA_fnc_addEventHandler;
+
+// A loadout set for a unit that lives on another machine (einv_storage_fnc_setUnitLoadout), set where it is local.
+[QGVAR(setUnitLoadout), {_this call FUNC(setUnitLoadout)}] call CBA_fnc_addEventHandler;
+
 // Queued phases, held phases and re-sends.
 [{call FUNC(tick)}, 0] call CBA_fnc_addPerFrameHandler;
 

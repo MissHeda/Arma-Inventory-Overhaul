@@ -118,6 +118,8 @@ PREP(addNew);
 PREP(countClass);
 PREP(onLoadoutGet);
 PREP(onLoadoutSet);
+PREP(topUpLoadout);
+PREP(setUnitLoadout);
 
 // Surplus: what a unit's uniform, vest or backpack holds beyond its grid, moved on to the next container
 // with room - asked for when its cargo changed, carried out by the unit's authority (op "migrate")

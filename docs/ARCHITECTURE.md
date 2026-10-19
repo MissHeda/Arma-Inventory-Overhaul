@@ -847,6 +847,17 @@ machine (`einv_storage_loadoutPlaces`, `fnc_onLoadoutPlaces`). Only well-formed 
 match drops out at the next layout, and a loadout without the key leaves everything to the first fit. Both handlers are registered
 in preInit on every machine, Eden too.
 
+**The container load.** The engine's `setUnitLoadout` stops filling a uniform, vest or backpack at its config `maximumLoad`, which the grid does not
+respect, so a saved loadout would come back short. `fnc_onLoadoutSet` therefore calls `fnc_topUpLoadout [unit, loadout]` (where the unit is local at
+once and a frame later, else it sends `einv_storage_topUpLoadout` to the unit's machine) before the places are written: for the uniform, vest and
+backpack the loadout names (a different worn class is skipped) the intended items are compared with `getUnitLoadout` as a map - an item by class,
+a magazine by class and rounds, a weapon by class and attachments without its loaded magazines, a backpack by class - and only the positive
+difference is added to the container object with `addItemCargoGlobal`, `addMagazineAmmoCargo`, `addWeaponWithAttachmentsCargoGlobal` or
+`addBackpackCargoGlobal` (classes the game lacks are left out as the engine left them), so a second pass adds nothing. The layout and
+`fnc_queueMigrate` do the rest. Every path through `CBA_fnc_setLoadout` is covered, ACE Arsenal's Load and the loadouts screen included; a plain
+`setUnitLoadout` raises no event, so scripts that need this call the public **`einv_storage_fnc_setUnitLoadout [unit, loadout]`** (`setUnitLoadout`
+plus the top-up and the migrate note, on any machine: a unit that is not local gets a `einv_storage_setUnitLoadout` CBA event).
+
 ### The backpack take-off path
 
 The drop of any worn slot (menu Drop, a drag to the ground): `einv_gui_fnc_doUnequip` -> `fnc_sendMoves` (`unequip` to `"ground"`:
@@ -2045,6 +2056,11 @@ Registered in preInit, so Eden has them too.
 | `ace_arsenal_cargoChanged` | `fnc_onCargoChanged`: what of an add the engine refused by `maximumLoad` is put in with `einv_storage_fnc_addNew` while there is a free spot; flags the frame-later pass |
 | `ace_arsenal_itemsChanged` | `fnc_onItemsChanged`: for the open container's tab `fnc_reconcile` at once, before ACE greys its list |
 | `leftPanelFilled`, `rightPanelFilled`, `loadoutImported`, `onLoadoutLoad`, `showToggle` | `fnc_settle` a frame later |
+
+A loadout loaded in ACE Arsenal reaches the unit through `CBA_loadoutSet`, where the storage addon adds what the engine left out of a container for its
+`maximumLoad` (`fnc_topUpLoadout`, the storage section "Loadouts"); the panel then shows it at the `onLoadoutLoad` settle. The folded panel is one button
+(`fnc_layout`): the panel's colour as its surface, lighter under the mouse, no inner square or frame, and a `SetFocus` handler that hands the focus
+to ACE's list so the engine draws no focus frame.
 
 The hook table (`einv_arsenal_fnc_hooks`, section 4) sets `guest`, `header` (none), `layout`
 (`fnc_layout`), `footer` (`fnc_footer`: the hint line), `camera` (none: ACE's), `keepOpen` (true: ACE decides when it
