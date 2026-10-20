@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Shows the selected tiles: a faint accent fill and a frame two pixels thick on each, made in the tile's
+ * Shows the selected tiles: a frame (no fill - a tinted item was hard on the eyes) two pixels thick on each, made in the tile's
  * own controls group so they scroll and clip with it. The ones made before go first, so it can be called
  * again after every change of the selection - and at the end of a build and of a redraw of tiles
  * (fnc_build, fnc_redrawTiles), which made the tiles anew.
@@ -36,8 +36,6 @@ if (_tiles isEqualTo []) exitWith {};
 
 private _grids = uiNamespace getVariable [QGVAR(grids), []];
 private _accent = GVAR(theme) getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
-private _fill = +_accent;
-_fill set [3, SELECT_FILL_ALPHA];
 
 private _frames = [];
 
@@ -68,7 +66,6 @@ private _frames = [];
         private _origin = [_rect select 0, _rect select 1];
         private _on = [_grid, _tile get "col", _tile get "row"];
 
-        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _fill, "surface", 0, _on, true] call FUNC(uiShape));
         _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame", 0, _on] call FUNC(uiShape));
         _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame", 1, _on] call FUNC(uiShape));
         continue;
@@ -77,7 +74,6 @@ private _frames = [];
     // At a corner of its compartment's panel the fill and the frame are round there (fnc_cornerRadii).
     private _corners = [_grid, _rect] call FUNC(cornerRadii);
 
-    _frames append ([_display, _parent, _rect, _fill, _corners] call FUNC(uiSurface));
 
     // Two pixels thick: the frame, and another inside it.
     _frames append ([_display, _parent, _rect, _accent, _corners, 2] call FUNC(uiOutline));

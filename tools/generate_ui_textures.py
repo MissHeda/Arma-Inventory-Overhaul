@@ -827,6 +827,29 @@ def toggle(on, w=128, h=64):
     return finish(im, w, h)
 
 
+def toggle_track(w=128, h=64):
+    """The on state's track alone, white, so the game tints it with the player's accent."""
+    im = canvas(w, h)
+    d = ImageDraw.Draw(im)
+    W, H = w * SS, h * SS
+    pad = H * 0.08
+    d.rounded_rectangle([pad, pad, W - pad, H - pad], radius=(H - 2 * pad) / 2, fill=WHITE)
+    return whiten(finish(im, w, h))
+
+
+def toggle_knob(w=128, h=64):
+    """The on state's knob alone, white, at the right end - drawn over the tinted track."""
+    im = canvas(w, h)
+    d = ImageDraw.Draw(im)
+    W, H = w * SS, h * SS
+    pad = H * 0.08
+    r = (H - 2 * pad) / 2 - H * 0.1
+    cy = H / 2
+    cx = W - pad - (H - 2 * pad) / 2
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=WHITE)
+    return whiten(finish(im, w, h))
+
+
 def scroll_thumb(w=32, h=256):
     """A scroll bar's thumb: a slim bar with round ends in the middle of the bar's width. The game
     stretches it to the thumb's length, so its ends are drawn a little flat to come out round."""
@@ -1032,6 +1055,8 @@ def build_images():
         "icon_unload_ca": stroke_icon(icon_unload),
         "toggle_on_ca": toggle(True),
         "toggle_off_ca": toggle(False),
+        "toggle_track_ca": toggle_track(),
+        "toggle_knob_ca": toggle_knob(),
         "scroll_thumb_ca": scroll_thumb(),
         "circle_ca": circle(),
         "hatch_ca": hatch(),

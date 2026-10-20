@@ -654,9 +654,6 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
         <Key ID="STR_einv_gui_Setting_SearchTime">
             <English>Search time per cell</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTime_Desc">
-            <English>Seconds it takes to search one grid cell of loot; a 2x2 item takes four times as long.\n0 shows everything at once. Each kind of box below can take longer or shorter.</English>
-        </Key>
         <Key ID="STR_einv_gui_Setting_SearchTimeBackpack">
             <English>Search time: backpacks</English>
         </Key>
@@ -698,6 +695,9 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTimeVest_Desc">
             <English>Times the search time per cell for a vest, worn or lying anywhere: 1 the same, 2 twice as long.\n0 shows a vest's contents at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTime_Desc">
+            <English>Seconds it takes to search one grid cell of loot; a 2x2 item takes four times as long.\n0 shows everything at once. Each kind of box below can take longer or shorter.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchZeus">
             <English>Search Zeus-placed crates and vehicles</English>

@@ -23,18 +23,4 @@ disableSerialization;
 
 params ["_display", "_item"];
 
-private _tile = [_display, _item, REVEAL_FLASH_ALPHA, REVEAL_FLASH] call FUNC(flashTile);
-private _background = _tile getOrDefault ["background", controlNull];
-
-if (isNull _background || {_tile getOrDefault ["hidden", false]}) exitWith {};
-
-private _backgrounds = _tile getOrDefault ["backgrounds", [_background]];
-
-{
-    if !(_x in _backgrounds) then {
-        _x ctrlSetFade 1;
-        _x ctrlCommit 0;
-        _x ctrlSetFade 0;
-        _x ctrlCommit REVEAL_FADE;
-    };
-} forEach (_tile getOrDefault ["controls", []]);
+// A found item simply appears: no flash and no fade (both were tiring to watch). The tile is built shown already.

@@ -139,6 +139,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- Wizard switches were orange whatever the player's colour (the texture had it baked in): they are now a white track tinted with the accent and a white knob. Selected items are no longer filled with the accent (frame only), found items appear without a fade, and the base search time is shorter by default (0.25 s).
 - No more coloured pulse on tiles: clicking, landing a move and finding an item while searching only show the outline or fade the item in.
 - The inventory did not open: the profile accent colour's brightness check passed the colour itself instead of wrapping it, so a script error stopped the window.
 - Reload with "Use items from the backpack" on Nothing or Only whitelisted took its magazine from the closed backpack (issue #13; the cause issue #2 kept reporting): the list of what may be used (`einv_storage_fnc_useCarried`) dropped the first magazine of that class and those rounds, not the one that lies in the closed container, so with 30-round magazines in the vest and in the backpack the vest's was dropped and R, the hotbar and AIME's menu loaded the backpack's - Strict hides the closed ones, so it never showed there. It drops the entry whose location is the closed container now. The reload and throw hints always name a container, and the main display's key handler answers a Boolean whatever a guard returned. A script error reported with these settings was not found by reading the code and needs its text from the RPT.

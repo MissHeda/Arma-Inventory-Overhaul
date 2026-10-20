@@ -105,7 +105,7 @@
     QGVAR(searchTime),
     "SLIDER",
     [LLSTRING(Setting_SearchTime), LLSTRING(Setting_SearchTime_Desc)],
-    [0, 3, 0.4, 2]
+    [0, 3, 0.25, 2]
 ] call EFUNC(main,addSetting);
 
 // How long each kind of box takes, as a factor of the time per cell above (fnc_searchTime): 1 is that time, 2 twice as long,
