@@ -12,6 +12,19 @@
 // attaches to this one may keep a control in such an id rather than make it again each time.
 #define IDC_KEEP      9603
 
+// The accent colour (fnc_accentColour, issue 14): the player's own active element colour from the profile (Options > Game >
+// Colors), which every theme takes as its accent. One too dark for the near-black panes is brightened until its luminance
+// (gamma 2.2) reaches ACCENT_MIN_LUMA - about 3.3 : 1 against a pane of 0.05, which Arma's own red (0.8, 0, 0) just keeps; the
+// profile with none gives ACCENT_FALLBACK, the orange the mod always had. The shades: "soft" is the accent as a film of
+// ACCENT_SOFT_ALPHA, "hover" is the accent lighter by ACCENT_HOVER_MIX towards white, and "on" is the text on a fill of it,
+// ACCENT_INK_DARK or ACCENT_INK_LIGHT by what contrasts more.
+#define ACCENT_FALLBACK [0.84, 0.54, 0.1, 1]
+#define ACCENT_MIN_LUMA 0.12
+#define ACCENT_SOFT_ALPHA 0.2
+#define ACCENT_HOVER_MIX 0.25
+#define ACCENT_INK_DARK [0.05, 0.05, 0.05, 1]
+#define ACCENT_INK_LIGHT [1, 1, 1, 1]
+
 // The vanilla inventory (RscDisplayInventory), which this mod keeps closed (fnc_guardVanilla).
 #define IDD_VANILLA_INVENTORY 602
 

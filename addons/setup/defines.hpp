@@ -68,11 +68,12 @@
 // share of it.
 #define STRUCTURED_SIZE (UNIT * 0.7)
 
-// Colours the theme has no key for: Enhanced First Aid Kits' menus and their edge, the accent under the
-// mouse, and what is greyed out.
+// Colours the theme has no key for: Enhanced First Aid Kits' menus and their edge, and what is greyed out.
 #define MENU_BG [0.06, 0.06, 0.06, 0.98]
 #define MENU_EDGE [1, 1, 1, 0.14]
-#define ACCENT_HOVER [1, 0.733, 0.29, 1]
+// The accent under the mouse: the theme's accentHover, a lighter shade of the player's own accent colour
+// (einv_gui_fnc_accentColour, issue 14). Read from the _theme of the function that uses it.
+#define ACCENT_HOVER (_theme getOrDefault ["accentHover", _theme getOrDefault ["accent", ACCENT_FALLBACK]])
 #define DISABLED_FILL [1, 1, 1, 0.035]
 #define DISABLED_INK [1, 1, 1, 0.3]
 

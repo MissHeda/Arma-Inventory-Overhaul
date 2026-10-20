@@ -5,14 +5,14 @@
  * The window's theme (fnc_layoutGlass), in the feel of Arma's and ACE's own menus. Every column is a
  * near-black, mostly opaque pane with round corners, and what lies on it - cards, slots - is a faint
  * light film, so every layer is a small step brighter. Text is white with grey for the second line, the
- * accent is Arma's warning orange, and the font is Purista as in vanilla and ACE. Tiles are dark greys
- * tinted by what they are, with their short name and a magazine's ammo bar; captions sit over the
- * slots, in normal case.
+ * accent is the player's own active element colour from Arma's Options > Game > Colors (fnc_accentColour; orange
+ * without one), and the font is Purista as in vanilla and ACE. Tiles are dark greys tinted by what they are,
+ * with their short name and a magazine's ammo bar; captions sit over the slots, in normal case.
  *
  * What is looted is told apart from what the player carries (issue 7) (issue 7, blue look reverted in issue 11) only by the header text; the loot keys stay empty, so it keeps the plain pane -
  * here: the loot column's pane is tinted towards it and ringed in it, its title has an accent strip and icon in it,
  * and the caption tabs and hairlines of its sections are a film of it - still the same near-black glass, only
- * cooler; the player's own column keeps the plain pane and the orange accent.
+ * cooler; the player's own column keeps the plain pane and the accent.
  *
  * The palette is written out here rather than taken from fnc_themeBase as it is, so Glass stays Enhanced
  * First Aid Kits' look whatever the base theme turns into. "equipmentPanel", "titleIcons" and
@@ -31,6 +31,10 @@
  */
 
 private _theme = call FUNC(themeBase);
+
+// The accent is the player's own active element colour (fnc_accentColour), read once for the theme; its shades are
+// worked out from it. Every key gets a copy of its own.
+private _accent = call FUNC(accentColour);
 
 private _tileBg = [];
 _tileBg set [CATEGORY_MISC, [0.15, 0.15, 0.15, 0.92]];
@@ -62,7 +66,7 @@ _theme merge [createHashMapFromArray [
     ["slotCaption", "above"],
     ["slotCaptionBg", [1, 1, 1, 0.06]],
     ["slotIcon", [1, 1, 1, 0.45]],
-    ["slotAccent", [0.84, 0.54, 0.1, 1]],
+    ["slotAccent", +_accent],
     ["hatch", false],
     ["cell", [1, 1, 1, 0.05]],
     ["tileBg", _tileBg],
@@ -76,14 +80,15 @@ _theme merge [createHashMapFromArray [
     ["text", [1, 1, 1, 1]],
     ["text2", [0.78, 0.78, 0.78, 1]],
     ["muted", [0.56, 0.56, 0.56, 1]],
-    ["accent", [0.84, 0.54, 0.1, 1]],
-    ["accentSoft", [0.84, 0.54, 0.1, 0.2]],
+    ["accent", +_accent],
+    ["accentSoft", ["soft", _accent] call FUNC(accentColour)],
+    ["accentHover", ["hover", _accent] call FUNC(accentColour)],
     ["line", [1, 1, 1, 0.08]],
     ["warn", [0.93, 0.75, 0.2, 1]],
     ["tooltipBg", [0.03, 0.03, 0.03, 0.96]],
     ["inspectBg", [0.06, 0.06, 0.06, 0.98]],
     ["barTrack", [1, 1, 1, 0.1]],
-    ["barFill", [0.84, 0.54, 0.1, 1]],
+    ["barFill", +_accent],
     ["button", [1, 1, 1, 0.07]],
     ["buttonHover", [1, 1, 1, 0.16]],
     ["buttonText", [0.88, 0.88, 0.88, 1]],
@@ -92,7 +97,7 @@ _theme merge [createHashMapFromArray [
     ["keyRound", false],
     ["equipmentPanel", true],
     ["titleIcons", true],
-    ["onAccent", [0.05, 0.05, 0.05, 1]]
+    ["onAccent", ["on", _accent] call FUNC(accentColour)]
 ], true];
 
 _theme

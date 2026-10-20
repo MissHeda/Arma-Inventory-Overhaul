@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * The colour of a load on the weight card (fnc_drawEquipmentCards): the bar's fill, the tier's words and
- * the preview of a pick-up (fnc_previewWeight). Light is the quiet text2, Heavy the accent, Overloaded and
+ * the preview of a pick-up (fnc_previewWeight). Light is the quiet text2, Heavy the warn colour, Overloaded and
  * Critical the loss colour - all from the theme. Inside a tier the colour is plain; over the last 6 % of
  * the bar before a tier's limit it blends into that tier's, so the fill does not jump where a limit is
  * crossed and the player sees it coming without any mark on the bar.
@@ -26,7 +26,7 @@ params [["_unit", objNull, [objNull]], ["_load", 0, [0]], ["_theme", GVAR(theme)
 
 private _colors = [
     _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]],
-    _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]],
+    _theme getOrDefault ["warn", [0.93, 0.75, 0.2, 1]],
     _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]],
     _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
 ];

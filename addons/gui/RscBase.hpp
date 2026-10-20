@@ -96,7 +96,9 @@ class EINV_Edit: RscEdit {
     sizeEx = QUOTE(UNIT * 0.7);
     colorText[] = C_TOOLTIP_TEXT;
     colorBackground[] = C_CLEAR;
-    colorSelection[] = {0.84, 0.54, 0.1, 0.35};
+    // The accent (issue 14): the engine evaluates strings in a colour as script when the control is made, so the
+    // selection follows the profile's active element colour as ACE's does; orange without one.
+    colorSelection[] = {"(profileNamespace getVariable ['GUI_BCG_RGB_R',0.84])", "(profileNamespace getVariable ['GUI_BCG_RGB_G',0.54])", "(profileNamespace getVariable ['GUI_BCG_RGB_B',0.1])", 0.35};
     colorDisabled[] = {1, 1, 1, 0.3};
     autocomplete = "";
     maxChars = 40;

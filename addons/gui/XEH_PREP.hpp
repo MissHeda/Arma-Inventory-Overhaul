@@ -207,6 +207,7 @@ PREP(reloadGesture);
 
 // Styles and the camera
 PREP(themeBase);
+PREP(accentColour);
 PREP(toggleCamera);
 PREP(cameraForced);
 PREP(cameraStart);
