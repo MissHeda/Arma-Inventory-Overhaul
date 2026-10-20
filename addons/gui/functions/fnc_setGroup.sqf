@@ -23,9 +23,9 @@
 
 disableSerialization;
 
-params [["_holder", objNull, [objNull]], ["_group", "all", [""]]];
+params [["_holder", objNull, [objNull, ""]], ["_group", "all", [""]]];
 
-if (isNull _holder) exitWith {};
+if (_holder isEqualTo objNull || {_holder isEqualTo ""}) exitWith {};
 
 private _old = [_holder] call FUNC(boxGroup);
 // The category chosen again, or "All", is no category.

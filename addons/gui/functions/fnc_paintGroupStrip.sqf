@@ -19,7 +19,7 @@
 
 disableSerialization;
 
-params [["_holder", objNull, [objNull]]];
+params [["_holder", objNull, [objNull, ""]]];
 
 private _infos = uiNamespace getVariable [QGVAR(sectionInfo), []];
 private _info = _infos param [_infos findIf {(_x getOrDefault ["holder", objNull]) isEqualTo _holder && {"strip" in _x}}, createHashMap];

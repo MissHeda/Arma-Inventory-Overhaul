@@ -16,9 +16,10 @@
  * Public: No
  */
 
-params [["_holder", objNull, [objNull]]];
+// A holder is an object, or a string for the holders that are none (a kit's holder id, the arsenal's staging).
+params [["_holder", objNull, [objNull, ""]]];
 
-if (GVAR(groupFilters) isEqualTo [] || {isNull _holder}) exitWith {""};
+if (GVAR(groupFilters) isEqualTo [] || {_holder isEqualTo objNull} || {_holder isEqualTo ""}) exitWith {""};
 
 private _index = GVAR(groupFilters) findIf {(_x select 0) isEqualTo _holder};
 
