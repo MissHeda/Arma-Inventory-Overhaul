@@ -4,7 +4,9 @@
  * What a unit carries without what lies in a container it cannot use from: the lists the hotbar counts
  * from (items, magazines, magazinesAmmoFull) with one entry less for every item that lies in a blocked
  * container (fnc_useState). An item that lies in two containers, one of them free, stays once for each
- * that is free. The loaded magazines and everything the unit wears stay as they are.
+ * that is free: the entry of magazinesAmmoFull that goes is the one whose location is the blocked container, so the
+ * same magazine in an open container stays as the one that may be used. The loaded magazines and everything the
+ * unit wears stay as they are.
  *
  * While no setting limits anything the lists come back as they were, at no cost.
  *
@@ -61,7 +63,18 @@ _ammoFull = +_ammoFull;
                 _magazines deleteAt _at;
             };
 
-            private _entry = _ammoFull findIf {(_x select 0) == _class && {(_x select 1) == _rounds} && {!(_x select 2)}};
+            // The entry that lies in this container, by the location the game gives: the same magazine (class and
+            // rounds) lies in an open container as well, and the first of them in the list is not the closed one's -
+            // the closed container's entry would stay as the one that may be used, and a reload would take it from there.
+            private _entry = _ammoFull findIf {
+                (_x select 0) == _class && {(_x select 1) == _rounds} && {!(_x select 2)}
+                && {(toLowerANSI format ["%1", _x param [4, ""]]) isEqualTo _kind}
+            };
+
+            // No location that says so: the first of that class and these rounds.
+            if (_entry < 0) then {
+                _entry = _ammoFull findIf {(_x select 0) == _class && {(_x select 1) == _rounds} && {!(_x select 2)}};
+            };
 
             if (_entry >= 0) then {
                 _ammoFull deleteAt _entry;

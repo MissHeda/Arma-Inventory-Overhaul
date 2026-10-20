@@ -113,6 +113,10 @@ if (hasInterface) then {
             private _reload = _this call FUNC(reloadGuard);
             private _throw = _this call FUNC(throwGuard);
 
+            // A Boolean from each, whatever happened inside: no answer is the key being the game's.
+            if (isNil "_reload" || {!(_reload isEqualType true)}) then {_reload = false};
+            if (isNil "_throw" || {!(_throw isEqualType true)}) then {_throw = false};
+
             _reload || _throw
         }];
     }] call CBA_fnc_waitUntilAndExecute;

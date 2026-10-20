@@ -91,6 +91,11 @@ private _where = [];
     } forEach ([_unit, _class] call FUNC(useBlockedIn));
 } forEach _blocked;
 
+// Not found where they lie: every container a setting limits.
+if (_where isEqualTo []) then {
+    _where = USE_KINDS select {([_x] call FUNC(useMode)) isNotEqualTo USE_ALL};
+};
+
 [format [localize "STR_einv_storage_Hint_NoThrow", [USE_KINDS select {_x in _where}] call FUNC(useKindName)]] call FUNC(useHint);
 
 // ACE's key is not held back here; the status effect does it.
