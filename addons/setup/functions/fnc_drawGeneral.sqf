@@ -20,8 +20,9 @@
  *     its own kind - a switch, a stepper, a drop-down, a text box - with a small reset button while it is off its
  *     default. They are registered by their addons (einv_main_fnc_addSetting) and saved in one CBA text box,
  *     einv_main_settings (fnc_setSetting, fnc_commitSettings). What a player sets for themselves stays in CBA's menu.
- *   - What you changed: what the classes change on top of all that (fnc_drawChanges "default") - when all uniforms are 10x10
- *     by their kind and one is 5x5, that one - each in words, to open at its class or take back.
+ *   - What you changed: everything above that is off the default, and what the classes change on top of it
+ *     (fnc_drawChanges "default") - the cell size, a server setting, the size of a kind of container, a category, a class
+ *     that is 5x5 -, each in words, to open at its class or take back.
  * Every change goes into the draft; Save in the footer stores it, and the header's count of changes opens the list
  * of what Save would store.
  *
@@ -621,7 +622,7 @@ private _fnc_setting = {
     _cursorY = _cursorY + _topicH + _gapY;
 } forEach _topics;
 
-// ----- What you changed: the classes' own rules, against what is set above -----
+// ----- What you changed: everything off the default, this page's settings and the classes' own rules -----
 
 [_display, _page, [_padX, _cursorY, _innerW, UNIT * 11], _theme, "default"] call FUNC(drawChanges);
 

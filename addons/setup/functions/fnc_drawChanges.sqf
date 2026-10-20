@@ -4,9 +4,9 @@
  * Author: Miss Heda
  * A card listing what the draft changes, each change one line in words (fnc_changeRows) - the same list
  * wherever it is shown, so a player learns to read it once:
- *   - "default", the General step's "What you changed": what the classes change on top of what that step sets -
- *     every own rule that is not the General step's own, each in words. When all uniforms are 10x10 by their kind
- *     and one is 5x5, that one is the only line.
+ *   - "default", the General step's "What you changed": everything that differs from the default setup - the
+ *     cell size, each server setting off its default, each kind of container given a size, the categories and
+ *     the classes' own rules, each in words.
  *   - "saved", the box the header's "4 changes" opens: against what is saved, each line marked new, changed or
  *     removed - the settings, the cell size, the kinds of container and the rules alike -, which is what Save
  *     would store.
@@ -14,8 +14,9 @@
  * tile" -, anything else its sentence. A click on a line opens it where it is set (fnc_ruleStep): a rule for one
  * class, or for it and everything built on it, at the step that lists its kind - Containers for a uniform,
  * vest, backpack, crate, vehicle or kit that has grid= or like= in the rule, Items for the rest -, with the
- * class picked; anything else - a setting, the cell size, a kind of container, a rule for several classes, a class
- * this game does not have - at General. The cross takes that one change back.
+ * class picked; anything else - a setting, the cell size, a kind of container, a category, a rule for several
+ * classes, a class this game does not have - at General (from the General step itself there is nothing to open,
+ * and a click does nothing). The cross takes that one change back.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -100,7 +101,12 @@ private _open = {
         GVAR(listState) set [_stepId, [_class, "all", false, 0]];
     };
 
-    [GVAR(steps) findIf {(_x select 0) isEqualTo _stepId}] call FUNC(showStep);
+    private _index = GVAR(steps) findIf {(_x select 0) isEqualTo _stepId};
+
+    // Already on the page it belongs to, with no class to pick: there is nothing to open.
+    if (_class isEqualTo "" && {_index == GVAR(step)}) exitWith {};
+
+    [_index] call FUNC(showStep);
 };
 
 (ctrlPosition _list) params ["", "", "_listW"];

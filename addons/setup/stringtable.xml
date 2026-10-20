@@ -194,16 +194,16 @@
             <English>Take this change back</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_Count">
-            <English>%1 classes differ from what the settings above give them</English>
+            <English>%1 changes from the default setup</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_CountOne">
-            <English>1 class differs from what the settings above give it</English>
+            <English>1 change from the default setup</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_Help">
             <English>Click one to open it. The cross takes that change back.</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_None">
-            <English>Nothing of its own yet: the settings above decide for every class.</English>
+            <English>Nothing changed yet: this is the default setup.</English>
         </Key>
         <Key ID="STR_einv_setup_Changes_Title">
             <English>What you changed</English>

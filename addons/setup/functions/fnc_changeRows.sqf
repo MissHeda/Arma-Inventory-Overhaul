@@ -3,16 +3,16 @@
 /*
  * Author: Miss Heda
  * What the draft changes against another setup, one row per change, the way CBA lists what differs from
- * the default - for what is not saved yet and for what the classes change on top of the General step's
- * settings (both drawn by fnc_drawChanges), and for the header's count (fnc_countChanges):
+ * the default - for what is not saved yet and for what differs from the default setup (both drawn by
+ * fnc_drawChanges), and for the header's count (fnc_countChanges):
  *   - "saved": against GVAR(clean) and GVAR(cleanSettings), the setup in effect where the wizard saves - as it
  *     was when the wizard opened, was saved or reloaded. On a machine that may not save, the one in use. The
  *     switch to force it over the mission's own setup is a change as well.
- *   - "default": against the default setup that has what the General step sets - the cell size and the size of
- *     each kind of container (the rules "all kind=uniform > grid=5x5") - as the draft has it. Those are the
- *     defaults the classes are measured against: when all uniforms are 10x10 by their kind and one is 5x5, only
- *     that one is a change. The server settings are not part of it.
- * The preset (only a text can still change it), the cell size, each server setting, then every group and rule. A statement is matched with the one the other
+ *   - "default": against the default setup, with no rules of its own, no cell size and every server setting at its
+ *     default - the General step's "What you changed". What that step sets is in it like anything else: the cell
+ *     size, each server setting off its default, each kind of container with a size (the rules "all kind=uniform >
+ *     grid=5x5"), the categories - and the classes' own rules, which are listed next to them.
+ * The preset (only a text can still change it), the cell size, each server setting, then every category, group and rule. A statement is matched with the one the other
  * setup has for the same conditions - a group by its name -, so a class given another size is one row,
  * "changed", rather than one rule taken away and another added. Those the draft lost come last.
  *
@@ -46,24 +46,8 @@
 params [["_against", "saved", [""]], ["_describe", true, [true]]];
 
 // The other setup, read once per text: the header and both lists ask on every redraw. Written out by the
-// engine as the draft is, so their statements compare as text. Against the default it is the default with
-// what the General step sets kept as the draft has it.
-private _refText = GVAR(clean);
-
-if (_against isEqualTo "default") then {
-    private _general = [RULES_DEFAULT] call EFUNC(items,parseRules);
-
-    _general set ["cell", GVAR(draft) getOrDefault ["cell", -1]];
-    // The categories are the General step's own, as the cell size is.
-    _general set ["categories", +(GVAR(draft) getOrDefault ["categories", []])];
-    _general set ["rules", (GVAR(draft) getOrDefault ["rules", []]) select {
-        private _rule = _x;
-
-        (GENERAL_KINDS findIf {([[_rule], [_x]] call FUNC(allRule)) == 0}) >= 0
-    }];
-
-    _refText = [_general] call EFUNC(items,writeRules);
-};
+// engine as the draft is, so their statements compare as text. The default has nothing of its own in the text.
+private _refText = [GVAR(clean), RULES_DEFAULT] select (_against isEqualTo "default");
 
 private _refs = missionNamespace getVariable [QGVAR(changeRefs), createHashMap];
 private _ref = _refs get _refText;
@@ -142,36 +126,39 @@ if (_against isEqualTo "saved" && {GVAR(override) isNotEqualTo GVAR(cleanOverrid
 // ----- The server settings -----
 
 // Each one that is not at the same value in the other setup: set where it was at its default, taken back to it,
-// or changed. Only what is saved is compared - the default has no settings of its own to be measured against.
-if (_against isEqualTo "saved") then {
-    private _registry = missionNamespace getVariable [QEGVAR(main,serverSettings), createHashMap];
-    private _refValues = ([GVAR(cleanSettings)] call EFUNC(main,parseSettings)) select 0;
+// or changed. The default has none set, so against it each one off its default is a row, "new".
+private _registry = missionNamespace getVariable [QEGVAR(main,serverSettings), createHashMap];
+private _refValues = ([[GVAR(cleanSettings), ""] select (_against isEqualTo "default")] call EFUNC(main,parseSettings)) select 0;
 
-    {
-        private _name = _x;
-        private _now = GVAR(draftSettings) get _name;
-        private _was = _refValues get _name;
+{
+    private _name = _x;
+    private _now = GVAR(draftSettings) get _name;
+    private _was = _refValues get _name;
 
-        if (isNil "_now" && {isNil "_was"}) then {continue};
-        if (!isNil "_now" && {!isNil "_was"} && {_now isEqualTo _was}) then {continue};
+    if (isNil "_now" && {isNil "_was"}) then {continue};
+    if (!isNil "_now" && {!isNil "_was"} && {_now isEqualTo _was}) then {continue};
 
-        private _entry = _registry get _name;
-        private _words = "";
+    private _entry = _registry get _name;
+    private _words = "";
 
-        if (_describe) then {
-            _words = format [LLSTRING(Change_From), [_name, _was] call FUNC(settingText), [_name, _now] call FUNC(settingText)];
-        };
+    if (_describe) then {
+        _words = format [LLSTRING(Change_From), [_name, _was] call FUNC(settingText), [_name, _now] call FUNC(settingText)];
+    };
 
-        _rows pushBack [
-            "setting", ["changed", "new", "removed"] select ([[0, 2] select (isNil "_now"), 1] select (isNil "_was")),
-            _entry get "label", _words, "", "", "", [], [{
-                params ["_name", "_value"];
+    // Nothing for the default: the value is left out of the arguments rather than named while it holds nothing.
+    private _undoArguments = [_name];
 
-                [_name, _value] call FUNC(setSetting);
-            }, [_name, _was]]
-        ];
-    } forEach (missionNamespace getVariable [QEGVAR(main,serverOrder), []]);
-};
+    if (!isNil "_was") then {
+        _undoArguments pushBack _was;
+    };
+
+    _rows pushBack [
+        "setting", ["changed", "new", "removed"] select ([[0, 2] select (isNil "_now"), 1] select (isNil "_was")),
+        _entry get "label", _words, "", "", "", [], [{
+            _this call FUNC(setSetting);
+        }, _undoArguments]
+    ];
+} forEach (missionNamespace getVariable [QEGVAR(main,serverOrder), []]);
 
 // ----- The statements -----
 
