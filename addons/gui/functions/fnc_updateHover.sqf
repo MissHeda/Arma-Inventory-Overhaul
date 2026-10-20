@@ -824,4 +824,7 @@ switch (_shown param [0, ""]) do {
     };
 };
 
-(uiNamespace getVariable [QGVAR(hint), controlNull]) ctrlSetStructuredText (composeText _parts setAttributes ["align", "center"]);
+// In the footer's text scale where it keeps one (fnc_drawFooter).
+private _hintCtrl = uiNamespace getVariable [QGVAR(hint), controlNull];
+
+_hintCtrl ctrlSetStructuredText (composeText _parts setAttributes ["align", "center", "size", str (_hintCtrl getVariable [QGVAR(textScale), 1])]);

@@ -5,8 +5,9 @@
  * Caps the open window's cell (fnc_getCell) for the rest of its life. A window with less room than the
  * inventory - ACE Arsenal's panel beside ACE's list (einv_arsenal_fnc_panelRect) - asks for at most so many
  * pixels, so its grid of STORAGE_COLS cells still fits there with a large tile scale (einv_gui_cellScale).
- * Every grid, tile and ghost of that window then takes the capped cell; the next window works it out
- * afresh. Said once in the RPT when it caps.
+ * Every grid, tile and ghost of that window then takes the capped cell, and its words the text scale of
+ * that cell (fnc_textScale, which goes by the cell kept here); the next window works it out afresh. Said
+ * once in the RPT when it caps.
  *
  * Arguments:
  * 0: The most pixels a cell may have across and down <NUMBER>

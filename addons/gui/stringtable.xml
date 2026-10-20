@@ -31,11 +31,14 @@
         <Key ID="STR_einv_gui_Column_Loot">
             <English>Loot</English>
         </Key>
+        <Key ID="STR_einv_gui_Column_LootOf">
+            <English>Loot - %1</English>
+        </Key>
         <Key ID="STR_einv_gui_Column_Nearby">
             <English>Nearby</English>
         </Key>
         <Key ID="STR_einv_gui_Column_Storage">
-            <English>Storage</English>
+            <English>Your gear</English>
         </Key>
         <Key ID="STR_einv_gui_Compare_Armor">
             <English>Armor (%1)</English>
@@ -457,6 +460,9 @@
         <Key ID="STR_einv_gui_Section_Close">
             <English>Close</English>
         </Key>
+        <Key ID="STR_einv_gui_Section_OwnedBy">
+            <English>%1 - %2</English>
+        </Key>
         <Key ID="STR_einv_gui_Section_PutAll">
             <English>Put all in</English>
         </Key>
@@ -497,7 +503,7 @@
             <English>Tile scale</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CellScale_Desc">
-            <English>How large the cells and the pictures on\nthem are - above 1 if items are hard to\nmake out. The default, 1.1, lets a name\non a one-cell tile show more of its\nletters. Takes effect the next time the\ninventory opens. Where the columns would\nno longer fit across the screen, the\nlargest scale that fits is used.</English>
+            <English>How large the cells, the pictures on\nthem and the window's text are - above 1\nif items are hard to make out. The\ndefault, 1.1, lets a name on a one-cell\ntile show more of its letters. Takes\neffect the next time the inventory\nopens. Where the columns would no longer\nfit across the screen, the largest scale\nthat fits is used.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CompareTooltip">
             <English>Compare gear at the mouse</English>

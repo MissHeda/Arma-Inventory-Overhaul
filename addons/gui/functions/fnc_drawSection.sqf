@@ -15,6 +15,12 @@
  * (fnc_infoHint) - nothing more: weight limits no container, its free cells do, so there is no bar, no
  * warning colour and no "full" mark. The hairline under the caption is all the line has.
  *
+ * The words and the rows that hold them - the caption line, its tab and buttons, the weight, the box's name, the
+ * fold line - are measured in TEXT_UNIT, so they grow with the tile scale as the cells do (fnc_textScale). In the
+ * loot column a uniform, vest or backpack says whose it is ("Backpack - Miller", fnc_ownerName), and the tab, the
+ * fold line and the hairline take the theme's loot colours (lootTab, lootLine) where it has them: what is someone
+ * else's never reads as the player's own (issue 7).
+ *
  * Its caption tab folds the section away (fnc_toggleSection); a uniform, vest or backpack opened from
  * inside a container gets a cross to close it (fnc_closeNested) - both by the section's container. The
  * box of a unit's uniform, vest or backpack is that unit's slot - right click and drag work on it; the
@@ -127,6 +133,10 @@ private _colorLine = _theme getOrDefault ["line", [1, 1, 1, 0.07]];
 // ---------------------------------------------------------------------------
 (call FUNC(getCell)) params ["_cellW", "_cellH"];
 
+// Every word on the section and every row that holds words grow with the tiles (TEXT_UNIT, fnc_textScale): the caption
+// line, its chips and buttons, the weight, the box's name, the fold line.
+private _textUnit = TEXT_UNIT;
+
 private _gridW = STORAGE_COLS * _cellW;
 private _gapX = SQUARE(UNIT * 0.35);
 private _wantsBox = _section getOrDefault ["box", true];
@@ -160,8 +170,8 @@ if (_id isEqualTo "worn" && {!isNull _body}) exitWith {
 // Locked to this player (einv_locks_fnc_decorate): the caption with a padlock where the chevron would
 // be, why in one muted line - and nothing of what is inside: no box, no grid, no load, no button.
 if (_section getOrDefault ["locked", false]) exitWith {
-    private _lineH = UNIT * 0.62;
-    private _lineSize = UNIT * 0.46;
+    private _lineH = _textUnit * 0.62;
+    private _lineSize = _textUnit * 0.46;
     private _tabPad = SQUARE(_lineH * 0.5);
     private _lockW = SQUARE(_lineH);
     private _notice = _section getOrDefault ["notice", ""];
@@ -187,11 +197,11 @@ if (_section getOrDefault ["locked", false]) exitWith {
     [_display, _parent, [_blockX, _top + _lineH, _blockW, pixelH], _colorLine] call FUNC(uiPanel);
 
     [
-        _display, _parent, [_blockX, _top + _lineH + UNIT * 0.25, _blockW, UNIT * 0.62],
+        _display, _parent, [_blockX, _top + _lineH + UNIT * 0.25, _blockW, _textUnit * 0.62],
         [_notice, _blockW, _font, _lineSize] call FUNC(fitText), _lineSize, _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 0
     ] call FUNC(uiLabel);
 
-    _lineH + UNIT * 0.25 + UNIT * 0.7
+    _lineH + UNIT * 0.25 + _textUnit * 0.7
 };
 
 // ---------------------------------------------------------------------------
@@ -250,18 +260,31 @@ private _caption = switch (_id) do {
     default {_section getOrDefault ["title", ""]};
 };
 
+// What someone else wears says whose it is (issue 7: a body's "Backpack" read as the player's own): "Backpack -
+// Miller" in the loot column, the player's own stay "Backpack".
+private _loot = _side isEqualTo "loot";
+
+if (_loot && {_id in ["uniform", "vest", "backpack"]}) then {
+    private _wearer = ([_section getOrDefault ["container", objNull]] call EFUNC(storage,getOwner)) select 0;
+    private _wearerName = [_wearer] call FUNC(ownerName);
+
+    if (_wearerName isNotEqualTo "") then {
+        _caption = format [LLSTRING(Section_OwnedBy), _caption, _wearerName];
+    };
+};
+
 // The caption line (CAPTION_LINE) is a button row: the tab, the buttons and the cross are on it, each hit area its own
 // drawing and two pixels.
-private _lineH = UNIT * CAPTION_LINE;
-private _lineSize = UNIT * 0.46;
+private _lineH = _textUnit * CAPTION_LINE;
+private _lineSize = _textUnit * 0.46;
 
 // The buttons on the line (Take all, Put all in, Sort and the activity chip) are a little lower than the line and stand in
 // the middle of it, a clear gap above the line under it and above the container's top edge; their hit area is the button
 // and two pixels each way. The caption's own tab is one of them (Mia, 0.5.7): the same height, the same text size and the same
 // round ends - a pill with the fold arrow in its left end - and so is every other chip of the line.
-private _buttonH = UNIT * 0.6;
+private _buttonH = _textUnit * 0.6;
 private _buttonTop = _top + (_lineH - _buttonH) / 2;
-private _buttonSize = UNIT * 0.42;
+private _buttonSize = _textUnit * TEXT_REF;
 private _chipRadius = (_theme getOrDefault ["radius", 0]) min (_buttonH / 2);
 private _tabPad = SQUARE(_buttonH * 0.9);
 private _hitPx = [pixelW * 2, pixelH * 2, pixelW * 2, pixelH * 2];
@@ -350,7 +373,7 @@ if (
 // than the tab's. A button is [id, label, icon, width]; they stand in this order beside the tab, and for
 // lack of room the last one goes first.
 private _buttonIntent = _buttonKind;
-private _buttonGap = SQUARE(UNIT * 0.3);
+private _buttonGap = SQUARE(_textUnit * 0.3);
 private _buttons = [];
 
 if (_buttonKind isNotEqualTo "") then {
@@ -378,7 +401,7 @@ private _fnc_buttonsW = {
     _sum
 };
 
-private _loadW = [0, (_load getTextWidth [_font, _lineSize]) * TEXT_SLACK + SQUARE(UNIT * 0.3)] select (_load isNotEqualTo "");
+private _loadW = [0, (_load getTextWidth [_font, _lineSize]) * TEXT_SLACK + SQUARE(_textUnit * 0.3)] select (_load isNotEqualTo "");
 
 // How many characters of a shortened text are left of it.
 private _fnc_chars = {
@@ -403,6 +426,22 @@ while {_buttons isNotEqualTo [] && {([_shown] call _fnc_chars) < (3 min count _c
 
 private _tabW = (((_shown getTextWidth [_fontBold, _buttonSize]) * TEXT_SLACK) + _tabPad + _chevronW + _tabIconW) min _tabRoom;
 private _tabColor = _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]];
+
+// What is looted has a tab and a hairline of its own colour where the theme gives one (lootTab, lootLine), so a caption in
+// the loot column never reads as one of the player's own; [] keeps the plain ones.
+if (_loot) then {
+    private _lootTab = _theme getOrDefault ["lootTab", []];
+    private _lootLine = _theme getOrDefault ["lootLine", []];
+
+    if (_lootTab isNotEqualTo []) then {
+        _tabColor = _lootTab;
+    };
+
+    if (_lootLine isNotEqualTo []) then {
+        _colorLine = _lootLine;
+    };
+};
+
 private _tab = [];
 
 if (_shown isNotEqualTo "") then {
@@ -816,7 +855,7 @@ if (_rowsFoldable) then {
     private _rowsW = (STORAGE_COLS * _cellW) min (_blockX + _blockW - _gridX);
 
     [
-        _display, _parent, [_gridX, _rowsTop, _rowsW, _lineH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]],
+        _display, _parent, [_gridX, _rowsTop, _rowsW, _lineH], _tabColor,
         (_theme getOrDefault ["radius", 0]) min (_lineH / 2)
     ] call FUNC(uiPanel);
 

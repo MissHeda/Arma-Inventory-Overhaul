@@ -251,6 +251,8 @@ PREP(uiKeyHint);
 PREP(uiHatch);
 PREP(caption);
 PREP(fitText);
+PREP(textScale);
+PREP(ownerName);
 
 // Grids and tiles
 PREP(getCell);

@@ -166,7 +166,9 @@ private _pageTall = _grid getOrDefault ["pageHeight", 1];
 private _barTop = PAGE_BAR_TOP(_top,_pageTall,_cellW,_cellH);
 private _pad = COMPARTMENT_PAD_PX(_cellW);
 private _padW = _pad * pixelW;
-private _size = UNIT * 0.46;
+// Its words grow with the tile scale as the caption line's do (TEXT_UNIT, fnc_textScale); the bar keeps its height,
+// which has room for them at the largest.
+private _size = TEXT_UNIT * 0.46;
 
 // The arrows are round buttons inside the bar, a little in from its ends: nearly the bar's height and wider than they are high.
 private _inset = _barH * 0.07;

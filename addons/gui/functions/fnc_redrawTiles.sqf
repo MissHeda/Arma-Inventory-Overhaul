@@ -64,7 +64,7 @@ private _ok = true;
 
 // The caption's weight, as fnc_drawSection writes it.
 private _loadFont = _theme getOrDefault ["font", "PuristaMedium"];
-private _loadSize = UNIT * 0.46;
+private _loadSize = TEXT_UNIT * 0.46;
 
 {
     private _section = _x;

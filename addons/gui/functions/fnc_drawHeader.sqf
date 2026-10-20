@@ -10,7 +10,8 @@
  * (fnc_headerStyle), one step lighter again under the mouse. A button that is on - the camera, the speaker while
  * its dropdown is open - shows it by an accent-tinted icon and a thin accent line under it, not by a fill; an
  * icon that is off is dimmed. All of them are squares of the header's height with the same gap. A line under the
- * header, the width of the content.
+ * header, the width of the content. The title's words grow with the tile scale (TEXT_UNIT, fnc_textScale); the
+ * buttons are icons on the header's fixed height and stay as they are.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -41,9 +42,9 @@ private _iconH = UNIT * 1.1;
 [
     _display,
     controlNull,
-    [_left + SQUARE(_iconH * 1.4), HEAD_Y, SQUARE(UNIT * 10), HEAD_H],
+    [_left + SQUARE(_iconH * 1.4), HEAD_Y, SQUARE(TEXT_UNIT * 10), HEAD_H],
     [LLSTRING(Title), _theme] call FUNC(caption),
-    UNIT * 0.95,
+    TEXT_UNIT * 0.95,
     _theme get "text",
     _theme get "fontBold",
     0

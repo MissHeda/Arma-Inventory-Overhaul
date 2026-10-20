@@ -17,9 +17,10 @@
  * as fnc_buttonWidth and fnc_sortChip make them - Sort names the order it sorts by, "Sort: Name", and
  * changes in place with it (fnc_sortButtons). They stand together on the right, before the fill text and
  * the cross, one gap between each of them and before the name. The name keeps its room first - all of it,
- * or SQUARE(UNIT * 4) of a long one: a window too narrow for that makes Sort compact - the icon and "Sort",
+ * or SQUARE(TEXT_UNIT * 4) of a long one: a window too narrow for that makes Sort compact - the icon and "Sort",
  * then the icon alone, the order in its tooltip -, then leaves it out, then Take all, and only then is the
- * name cut. A press on a button is the button's: it neither raises nor moves the window
+ * name cut. The title row, its buttons and its words are measured in TEXT_UNIT, so they grow with the tile scale
+ * as the cells do (fnc_textScale). A press on a button is the button's: it neither raises nor moves the window
  * (fnc_onMouseButton, "buttons").
  *
  * One controls group of a fixed size, its content fitting it exactly - a group scrolls once its content
@@ -74,14 +75,17 @@ private _radius = _theme getOrDefault ["radius", 0];
 // The columns' paddings, so a window reads as one of them.
 private _padY = UNIT * 0.4;
 private _padX = SQUARE(_padY);
-private _titleH = UNIT * 1.1;
+
+// The title row and what is on it grow with the tile scale as the columns' words do (TEXT_UNIT, fnc_textScale).
+private _textUnit = TEXT_UNIT;
+private _titleH = _textUnit * 1.1;
 
 // The buttons and the cross of the title row are a section caption's (fnc_drawSection): a caption line high,
 // their labels in its size, a gap apart; their hit areas reach up and down over the title row's room and half a gap
 // to either side (fnc_uiButton, argument 11).
-private _chipH = UNIT * CAPTION_LINE;
-private _chipSize = UNIT * 0.46;
-private _gap = SQUARE(UNIT * 0.3);
+private _chipH = _textUnit * CAPTION_LINE;
+private _chipSize = _textUnit * 0.46;
+private _gap = SQUARE(_textUnit * 0.3);
 private _closeW = SQUARE(_chipH);
 
 // ----- What the body holds -----
@@ -89,7 +93,7 @@ private _closeW = SQUARE(_chipH);
 private _notice = _section getOrDefault ["notice", ""];
 private _layout = createHashMap;
 private _places = [];
-private _contentH = UNIT * 0.7;
+private _contentH = _textUnit * 0.7;
 
 // The grid's block: STORAGE_COLS cells, or wider where a canvas's seams open it (fnc_flowCompartments).
 private _blockW = STORAGE_COLS * _cellW;
@@ -164,7 +168,7 @@ private _fnc_events = {
 private _rowMid = _padY + _titleH / 2;
 private _chipTop = _rowMid - _chipH / 2;
 private _hitV = (_titleH - _chipH) / 2 + _padY * 0.5;
-private _hitH = SQUARE(UNIT * 0.14);
+private _hitH = SQUARE(_textUnit * 0.14);
 
 private _fnc_mid = {
     params ["_size"];
@@ -244,12 +248,12 @@ private _fnc_buttonsW = {
     _sum
 };
 
-// The name keeps its room first - all of it, or SQUARE(UNIT * 4) of a long one. Too narrow for that, Sort gets
+// The name keeps its room first - all of it, or SQUARE(TEXT_UNIT * 4) of a long one. Too narrow for that, Sort gets
 // compact - the icon and "Sort", then the icon alone, the order in its tooltip (fnc_sortChip) -, then it goes,
 // then Take all, and only then is the name cut.
 private _name = [_section getOrDefault ["title", ""], _theme] call FUNC(caption);
-private _nameSize = UNIT * 0.66;
-private _nameLeast = ((_name getTextWidth [_fontBold, _nameSize]) * TEXT_SLACK) min SQUARE(UNIT * 4);
+private _nameSize = _textUnit * 0.66;
+private _nameLeast = ((_name getTextWidth [_fontBold, _nameSize]) * TEXT_SLACK) min SQUARE(_textUnit * 4);
 
 while {_buttons isNotEqualTo [] && {_buttonsEnd - (call _fnc_buttonsW) - _textX < _nameLeast}} do {
     (_buttons select -1) params ["_lastId", "", "", "", "_lastCompact"];
@@ -356,8 +360,8 @@ private _first = count _grids;
 if (_notice isNotEqualTo "") then {
     // Nothing to show yet: a line that says why, and no grid that could take anything.
     [
-        _display, _body, [pixelW, 0, _innerW, UNIT * 0.7],
-        [_notice, _innerW, _font, UNIT * 0.5] call FUNC(fitText), UNIT * 0.5, _muted, _font, 0
+        _display, _body, [pixelW, 0, _innerW, _textUnit * 0.7],
+        [_notice, _innerW, _font, _textUnit * 0.5] call FUNC(fitText), _textUnit * 0.5, _muted, _font, 0
     ] call FUNC(uiLabel);
 } else {
     [_display, _body, [pixelW, pixelH], _section, _layout, _places, _theme, _key] call FUNC(drawCompartments);

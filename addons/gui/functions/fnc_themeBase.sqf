@@ -9,7 +9,9 @@
  *   _theme merge [createHashMapFromArray [["id", "glass"], ...], true];
  *
  * A fresh HashMap each call, with arrays of its own, so a look can change it freely. What each key
- * means is in docs/ARCHITECTURE.md (Themes); colours are RGBA, [] where a key allows "none". fnc_build
+ * means is in docs/ARCHITECTURE.md (Themes); colours are RGBA, [] where a key allows "none". The loot keys
+ * (lootPanel, lootBorder, lootAccent, lootTab, lootLine) are [] here: a look that sets none draws the loot column as
+ * the player's own (fnc_drawColumn, fnc_drawSection). fnc_build
  * sets the id from GVAR(styles), and the name too where a look leaves it empty.
  *
  * Arguments:
@@ -42,6 +44,11 @@ createHashMapFromArray [
     ["dimCamera", [0, 0, 0, 0.25]],
     ["panel", [0.05, 0.05, 0.05, 0.92]],
     ["panelBorder", []],
+    ["lootPanel", []],
+    ["lootBorder", []],
+    ["lootAccent", []],
+    ["lootTab", []],
+    ["lootLine", []],
     ["card", [1, 1, 1, 0.045]],
     ["slot", [1, 1, 1, 0.07]],
     ["slotEmpty", [1, 1, 1, 0.04]],

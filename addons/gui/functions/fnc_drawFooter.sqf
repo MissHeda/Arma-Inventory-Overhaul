@@ -12,6 +12,10 @@
  * inventory). A window that attached names its own keys (the "footerKeys"
  * hook, [[key, text], ...]).
  *
+ * Everything on it is measured in TEXT_UNIT and grows with the tile scale (fnc_textScale); the hint's words, whose
+ * size the control's config fixes, are scaled by its writers (fnc_updateHover, fnc_dragHint, fnc_flashHint: the
+ * "size" attribute, by the scale kept on the control - none on another window's hint line).
+ *
  * The hints are evenly spaced (fnc_uiKeyHint), and what does not fit the bar is left out: the hint line in
  * the middle gives way first (it hides when the room between the hints and the version is too small), then
  * the hints from the last backwards, Esc staying.
@@ -33,7 +37,10 @@ disableSerialization;
 
 params ["_display", "_theme"];
 
-private _keyH = UNIT * 0.9;
+// The key caps, their words, the version and the hint grow with the tile scale as every word on the window does
+// (TEXT_UNIT, fnc_textScale) - at the largest still well inside the footer's FOOT_H.
+private _textUnit = TEXT_UNIT;
+private _keyH = _textUnit * 0.9;
 
 // The footer lies on the world, not on a pane: grey words straight on it vanish over a bright sky or a
 // white wall, whatever their grey. The window's glass under it keeps them readable over anything, and
@@ -85,7 +92,7 @@ if (_ownKeys isEqualType [] && {_ownKeys isNotEqualTo []}) then {
 };
 
 // What fits: the width of each hint is measured first, the version on the right and a little room before it kept.
-private _versionW = SQUARE(UNIT * 4);
+private _versionW = SQUARE(_textUnit * 4);
 private _room = _width - _versionW - SQUARE(UNIT * 0.5);
 
 _keys = _keys select {(_x select 0) isNotEqualTo ""};
@@ -130,7 +137,7 @@ _keys = _keys select [0, _fits];
     controlNull,
     [_left + _width - _versionW, FOOT_Y, _versionW, FOOT_H],
     format ["v%1", getText (configFile >> "CfgPatches" >> "einv_main" >> "versionStr")],
-    UNIT * 0.62,
+    _textUnit * 0.62,
     _theme get "muted",
     _theme get "font",
     1
@@ -142,7 +149,7 @@ _keys = _keys select [0, _fits];
 // hints' size, on their line: structured text starts at the top of its box, so the box starts half a
 // line above the footer's middle, where their words are centred.
 private _side = ((_keyX - _left) max _versionW) + SQUARE(UNIT * 0.5);
-private _hintSize = UNIT * 0.558;
+private _hintSize = _textUnit * 0.558;
 private _hintW = _width - _side * 2;
 private _hintCtrl = [_display, "EINV_FooterHint", controlNull, [_left + _side, FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
 
@@ -150,5 +157,9 @@ private _hintCtrl = [_display, "EINV_FooterHint", controlNull, [_left + _side, F
 if (_hintW < SQUARE(UNIT * 6)) then {
     _hintCtrl ctrlShow false;
 };
+
+// Its words are scaled by whoever writes them (the "size" attribute): the control's own size is its config's. Only this
+// hint carries the scale - a window that brings a hint line of its own (the Arsenal panel) keeps its words as they are.
+_hintCtrl setVariable [QGVAR(textScale), TEXT_SCALE];
 
 uiNamespace setVariable [QGVAR(hint), _hintCtrl];

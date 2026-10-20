@@ -7,8 +7,9 @@
  *   | equipment |        free        | loot | storage |
  *
  * On the left what the unit wears, as cards (fnc_drawEquipmentCards). On the right its uniform, vest
- * and backpack stacked in one scrolling column, and while it loots a second column for that, titled with
- * what is looted ("Nearby" when it only shows what lies around) - the middle gets narrower for it. By
+ * and backpack stacked in one scrolling column titled "Your gear", and while it loots a second column for
+ * that, titled with what is looted ("Loot - Miller", "Loot - Nearby" when it only shows what lies around) and
+ * drawn in the theme's loot look (fnc_drawColumn) - the middle gets narrower for it. By
  * default the loot column opens left of the storage column, which stays where it is; the client setting
  * einv_gui_lootSide can have it open at the right edge instead, with the storage column moving in
  * (| storage | loot |). The middle stays free: the camera shows the soldier there, and an open kit's window
@@ -152,7 +153,7 @@ private _ownSections = _context getOrDefault ["storageSections", _context getOrD
 // Without a uniform, vest or backpack the column would stand there empty, as if something had failed.
 if (_ownSections isEqualTo []) then {
     private _font = _theme getOrDefault ["font", "PuristaMedium"];
-    private _size = UNIT * 0.6;
+    private _size = TEXT_UNIT * 0.6;
     private _textW = _columnW - _padX * 4;
 
     [
@@ -189,9 +190,9 @@ if (_looting) then {
         _icon = UI_TEX(icon_ground_ca);
     };
 
-    if (_title isEqualTo "") then {
-        _title = LLSTRING(Column_Loot);
-    };
+    // "Loot - Miller", "Loot - Nearby": the column says that it is someone else's before it says whose (issue 7), as the
+    // player's own says "Your gear"; drawColumn gives it the theme's loot look by its id.
+    _title = if (_title isEqualTo "") then {LLSTRING(Column_Loot)} else {format [LLSTRING(Column_LootOf), _title]};
 
     [
         _display, [_lootX, CONTENT_Y, _rightW, CONTENT_H], _lootSections, _theme, _title, ["", _icon] select _titleIcons,

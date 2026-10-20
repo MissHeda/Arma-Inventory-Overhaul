@@ -83,4 +83,4 @@ private _hex = "#" + ((_color select [0, 3]) apply {
     ("0123456789ABCDEF" select [floor (_value / 16), 1]) + ("0123456789ABCDEF" select [_value mod 16, 1])
 } joinString "");
 
-_hint ctrlSetStructuredText (text _text setAttributes ["color", _hex]);
+_hint ctrlSetStructuredText (text _text setAttributes ["color", _hex, "size", str (_hint getVariable [QGVAR(textScale), 1])]);

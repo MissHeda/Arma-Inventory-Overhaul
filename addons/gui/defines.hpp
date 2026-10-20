@@ -389,6 +389,24 @@
 #define CELL_SCALE_MIN 0.8
 #define CELL_SCALE_MAX 1.3
 
+// The cell at tile scale 1, in whole pixels (fnc_getCell): 1.45 rows where the screen is wide enough, else as many
+// pixels as leave 52 cells across.
+#define CELL_BASE_PX (round (((UNIT * 1.45) min UNSQUARE(safezoneW / 52)) / pixelH))
+
+// The text scale (fnc_textScale): the window's words grow with its tiles. It is the cell the window really has over the
+// cell at tile scale 1 - after every cap, fnc_getCell's and the Arsenal panel's (fnc_capCell) - never below
+// TEXT_SCALE_MIN, so a small tile scale keeps the words as they were, and never above TEXT_SCALE_MAX. And never so small
+// that the caption's words (TEXT_REF of a UNIT, the section chips' size) come out under TEXT_MIN_PX pixels: a low
+// resolution gets larger words rather than unreadable ones. TEXT_UNIT is a UNIT grown by it - what every text size and
+// every row that holds words (caption lines, buttons, title rows, key caps) is measured in, so a button stays as high
+// as its words need and fnc_buttonWidth measures the words in the size they are drawn in.
+#define TEXT_SCALE_MIN 1
+#define TEXT_SCALE_MAX CELL_SCALE_MAX
+#define TEXT_REF 0.42
+#define TEXT_MIN_PX 12
+#define TEXT_SCALE (call einv_gui_fnc_textScale)
+#define TEXT_UNIT (UNIT * TEXT_SCALE)
+
 // The room between two compartments of a container, a share of a cell rounded to whole pixels: between
 // blocks that flow side by side or one under another (fnc_flowCompartments).
 #define COMPARTMENT_GAP 0.22

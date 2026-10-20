@@ -17,6 +17,7 @@
  * and CELL_FIT_LEFT UNITs of the equipment column still fit across - the largest that fits, said once in the
  * RPT, never less than the cell at scale 1 (a 4:3 screen keeps the layout it had). ACE Arsenal's panel, which
  * has less room, caps it further for its window (fnc_capCell).
+ * The window's words grow with the cell this gives (fnc_textScale, TEXT_UNIT).
  *
  * Worked out at the first ask after a window attached (fnc_attach) and kept until it closes
  * (uiNamespace einv_gui_cell): a changed setting takes effect at the next opening, and nothing drawn
@@ -38,7 +39,7 @@ private _kept = uiNamespace getVariable [QGVAR(cell), []];
 
 if (_kept isNotEqualTo []) exitWith {+_kept};
 
-private _base = round (((UNIT * 1.45) min UNSQUARE(safezoneW / 52)) / pixelH);
+private _base = CELL_BASE_PX;
 
 // Read from the mission namespace: grids are drawn in Eden as well, where CBA runs no settings.
 private _scale = missionNamespace getVariable [QGVAR(cellScale), 1];

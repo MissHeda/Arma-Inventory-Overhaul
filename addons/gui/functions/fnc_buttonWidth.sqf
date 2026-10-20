@@ -5,7 +5,9 @@
  * The width a button needs for what it holds, laid out the centred way (fnc_uiButton with "centred"): the
  * room at either side, the icon and the gap after it where there is one, and the label with TEXT_SLACK
  * over its measured width - the engine draws wider than getTextWidth says, and the label is centred in
- * that room, so it stands in the middle of the button whatever it really measures.
+ * that room, so it stands in the middle of the button whatever it really measures. The callers pass the height and
+ * text size they draw with - on the window both grow with the tile scale (TEXT_UNIT, fnc_textScale) - so a larger
+ * label gets a wider button.
  *
  * Arguments:
  * 0: Label, "" for none <STRING>

@@ -23,7 +23,7 @@
  * 3: Key, e.g. "ESC", or with a mouse button, e.g. "Ctrl+@left" <STRING>
  * 4: What it does, "" for nothing <STRING>
  * 5: Theme <HASHMAP>
- * 6: Height <NUMBER> (default: UNIT * 0.9)
+ * 6: Height <NUMBER> (default: TEXT_UNIT * 0.9 - it grows with the tile scale, fnc_textScale)
  * 7: Only measure: nothing is created <BOOL> (default: false)
  *
  * Return Value:
@@ -37,7 +37,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_position", "_key", "_text", "_theme", ["_height", UNIT * 0.9], ["_measure", false]];
+params ["_display", "_parent", "_position", "_key", "_text", "_theme", ["_height", TEXT_UNIT * 0.9], ["_measure", false]];
 _position params ["_left", "_top"];
 
 // Whole pixels: every cap of every hint is then the same height and sits on the same line.

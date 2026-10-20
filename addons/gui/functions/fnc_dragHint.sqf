@@ -57,4 +57,4 @@ private _texts = [];
     ]);
 } forEach _parts;
 
-_hint ctrlSetStructuredText (composeText _texts setAttributes ["align", "center"]);
+_hint ctrlSetStructuredText (composeText _texts setAttributes ["align", "center", "size", str (_hint getVariable [QGVAR(textScale), 1])]);

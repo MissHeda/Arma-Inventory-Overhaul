@@ -13,6 +13,12 @@
  * side at a time, fnc_select). Where the storage column lies is kept as GVAR(storageRect): a uniform, vest
  * or backpack let go on it goes on (fnc_updateDrag).
  *
+ * The loot column is told apart from the player's own at a glance (issue 7), in the theme's loot colours where it
+ * has them (fnc_theme; [] in fnc_themeBase leaves a column plain): a pane of its own tint (lootPanel), a thin ring
+ * round it (lootBorder) and an accent strip under its title with the title's icon in the same colour (lootAccent),
+ * where the player's own column keeps the plain pane and hairline. The title row is TEXT_UNIT high and its words
+ * grow with the tile scale (fnc_textScale).
+ *
  * The group reaches into the panel's right padding: its scroll bar runs there, beside the sections
  * rather than over them.
  *
@@ -84,32 +90,57 @@ private _padY = UNIT * 0.4;
 private _padX = SQUARE(_padY);
 private _innerTop = _top + _padY;
 
+// The loot column's own look, where the theme has one: each key left [] keeps the plain one.
+private _loot = _id isEqualTo "loot";
+private _panelColor = _theme getOrDefault ["panel", []];
+private _ringColor = [];
+private _accentColor = [];
+
+if (_loot) then {
+    private _lootPanel = _theme getOrDefault ["lootPanel", []];
+
+    if (_lootPanel isNotEqualTo []) then {
+        _panelColor = _lootPanel;
+    };
+
+    _ringColor = _theme getOrDefault ["lootBorder", []];
+    _accentColor = _theme getOrDefault ["lootAccent", []];
+};
+
 if (!_reuse) then {
     [
-        _display, controlNull, _rect, _theme getOrDefault ["panel", []],
+        _display, controlNull, _rect, _panelColor,
         _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
     ] call FUNC(uiPanel);
+
+    if (_ringColor isNotEqualTo []) then {
+        [_display, controlNull, _rect, _ringColor, _theme getOrDefault ["radius", 0]] call FUNC(uiRing);
+    };
 };
 
 if (_title isNotEqualTo "") then {
-    private _titleH = UNIT * 1.1;
+    private _titleH = TEXT_UNIT * 1.1;
     private _textX = _left + _padX;
 
     if (!_reuse) then {
         if (_icon isNotEqualTo "") then {
-            [_display, controlNull, [_textX, _innerTop + _titleH * 0.15, SQUARE(_titleH * 0.7), _titleH * 0.7], _icon, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] call FUNC(uiIcon);
+            [
+                _display, controlNull, [_textX, _innerTop + _titleH * 0.15, SQUARE(_titleH * 0.7), _titleH * 0.7], _icon,
+                [_accentColor, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] select (_accentColor isEqualTo [])
+            ] call FUNC(uiIcon);
         };
 
-        private _size = UNIT * 0.66;
+        private _size = _titleH * 0.6;
         private _font = _theme getOrDefault ["fontBold", "PuristaSemibold"];
         private _iconW = [0, SQUARE(_titleH * 0.7) + SQUARE(_titleH * 0.3)] select (_icon isNotEqualTo "");
         private _text = [[_title, _theme] call FUNC(caption), _left + _width - _padX - _textX - _iconW, _font, _size] call FUNC(fitText);
 
         [_display, controlNull, [_textX + _iconW, _innerTop, _left + _width - _padX - _textX - _iconW, _titleH], _text, _size, _theme getOrDefault ["text", [1, 1, 1, 1]], _font, 0] call FUNC(uiLabel);
 
-        // A hairline under the title, like the header's.
-        private _line = [_display, "EINV_PanelRect", controlNull, [_left + _padX, _innerTop + _titleH + _padY * 0.4, _width - _padX * 2, pixelH]] call FUNC(uiCreate);
-        _line ctrlSetBackgroundColor (_theme getOrDefault ["line", [1, 1, 1, 0.07]]);
+        // A hairline under the title, like the header's - the loot column's is its accent strip, two pixels in its colour.
+        private _lineH = [pixelH * 2, pixelH] select (_accentColor isEqualTo []);
+        private _line = [_display, "EINV_PanelRect", controlNull, [_left + _padX, _innerTop + _titleH + _padY * 0.4, _width - _padX * 2, _lineH]] call FUNC(uiCreate);
+        _line ctrlSetBackgroundColor ([_accentColor, _theme getOrDefault ["line", [1, 1, 1, 0.07]]] select (_accentColor isEqualTo []));
     };
 
     _innerTop = _innerTop + _titleH + _padY;
