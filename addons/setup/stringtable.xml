@@ -119,7 +119,7 @@
             <English>Delete</English>
         </Key>
         <Key ID="STR_einv_setup_Categories_Help">
-            <English>Items are sorted into categories: the strip at the side of a loot box lists them, a compartment can take only some of them (Containers step) and an item is put in them at the Items step. The eight built-in ones can be renamed and given another picture; add your own below. Deleting one takes it out of every item and compartment that names it.</English>
+            <English>Categories sort items for the loot box strip and for what a compartment accepts. The eight built-in ones can be renamed or given another picture; deleting one removes it everywhere.</English>
         </Key>
         <Key ID="STR_einv_setup_Categories_Max">
             <English>At most %1 categories of your own</English>
@@ -245,7 +245,7 @@
             <English>Imported config lines for %1 classes (%3 warnings); %2 classes this game does not have were left out. Save puts them to use.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_Help">
-            <English>Paste config lines, a layout (Export, Layout only) or rules here with Ctrl+V. A layout, and the values of a class this game does not have, go to the class selected in the editor. They go into the draft; Undo takes them back.</English>
+            <English>Paste config lines, a layout or rules with Ctrl+V. A layout goes to the class selected in the editor. They go into the draft; Undo takes them back.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_Layout">
             <English>Applied the layout to %1 (%2 warnings). Save puts it to use.</English>
@@ -317,7 +317,7 @@
             <English>Your changes are on top of the new setup - look it over and save again.</English>
         </Key>
         <Key ID="STR_einv_setup_Conflict_Text">
-            <English>Someone else saved the setup while you were working on it. Put your changes on top of theirs, or overwrite what they saved?</English>
+            <English>Someone else saved the setup meanwhile. Put your changes on top of theirs, or overwrite them?</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Accepts">
             <English>Accepts</English>
@@ -338,7 +338,7 @@
             <English>Keep these cells and this picture for this class. Save puts them to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_ApplyTipTree">
-            <English>Keep these cells for this class and every class built on it, as one rule. A class with a rule of its own further down keeps it. Save puts them to use.</English>
+            <English>Keep these cells for this class and every class built on it, as one rule; a class with a rule of its own keeps it.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Blocks">
             <English>%1 compartments · %2 cells</English>
@@ -347,7 +347,7 @@
             <English>Blocks puts compartments side by side: Apply here loses where they were painted.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_BlocksHelp">
-            <English>Click a compartment's name to pick it, and a cell to make it a hole. The inventory puts compartments side by side.</English>
+            <English>Click a compartment's name to pick it, a cell to make it a hole. Compartments sit side by side.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_CanvasRows">
             <English>%1 rows</English>
@@ -371,16 +371,16 @@
             <English>Paint every empty place in the brush colour.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Help">
-            <English>Pick a uniform, vest, backpack, crate or kit on the left and draw its cells on the right. Apply keeps the change; Save puts it to use. The search takes wildcards (B_Bergen*, *Carryall*); the Tree button shows a class among its relatives, to change them all at once.</English>
+            <English>Pick a container on the left and draw its cells on the right. Apply keeps the change, Save puts it to use. The search takes wildcards (B_Bergen*).</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_KitCellsNote">
-            <English>Its own cells are all its room - Enhanced First Aid Kits' capacity no longer counts. Back to the default returns it to the capacity.</English>
+            <English>Its own cells are all its room; the kit's capacity no longer counts. Back to the default restores it.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_KitNote">
-            <English>Enhanced First Aid Kits decides by its capacity now, and the kit window grows as needed. These cells are only a start: once Apply gives the kit cells of its own, they are all its room and the capacity no longer counts - in the inventory and in the ACE Arsenal. Back to the default returns it to the capacity.</English>
+            <English>Without cells of its own, the kit follows Enhanced First Aid Kits' capacity. Once Apply gives it cells, they are all its room. Back to the default returns it to the capacity.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_LegacyNote">
-            <English>An old table setting decides this class and wins over every rule. Remove the class there for these cells to count.</English>
+            <English>An old table setting still decides this class. Remove the class there for these cells to count.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_LikeRest">
             <English>Its own cells. Everything else is the same as %1.</English>
@@ -404,7 +404,7 @@
             <English>%1 holds nothing - there are no cells to draw.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_PaintHelp">
-            <English>Pick a colour, then click or drag over cells. Touching cells of one colour are one compartment; empty places are left out. The rows above pick a compartment (the white frame) and set what it accepts.</English>
+            <English>Pick a colour, then click or drag over cells; touching cells of one colour are one compartment. The rows above pick a compartment and set what it accepts.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_PaintSelect">
             <English>Select on canvas</English>
@@ -434,7 +434,7 @@
             <English>Remove its own cells, the link to another class and its picture settings. The default decides again.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_ResetTipTree">
-            <English>Remove the cells of this class and of its tree, and the link to another class. The default decides again; a class with a rule of its own keeps it.</English>
+            <English>Remove the cells and the class link of this class and its tree. The default decides again.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Rows">
             <English>%1 down</English>
@@ -470,7 +470,7 @@
             <English>Not applied yet. Apply keeps it.</English>
         </Key>
         <Key ID="STR_einv_setup_Containers_Help">
-            <English>How many cells each kind of container gets. Auto works it out from the container's load, as explained below; Fixed gives every container of that kind the same size. A class with a rule of its own, and what a mod says about its own classes, always wins.</English>
+            <English>Cells per kind of container: Auto from the container's load (explained below), Fixed the same for all. A class rule or a mod's own setting always wins.</English>
         </Key>
         <Key ID="STR_einv_setup_Containers_Title">
             <English>Containers</English>
@@ -518,7 +518,7 @@
             <English>You have unsaved changes.</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Backpacks">
-            <English>One big block, as near square as %1 columns allow: a load of 280 makes %2 cells, %3 across and %4 down.</English>
+            <English>One near-square block, up to %1 columns: a load of 280 makes %2 cells, %3 across and %4 down.</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Backpacks_Label">
             <English>Backpacks</English>
@@ -530,37 +530,37 @@
             <English>Vehicles, crates</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Containers">
-            <English>A container's room is its load - what its config says it can carry - divided by the load per cell and rounded up. What you wear gets a fifth more than that: a vest that carries 120 gets %3 cells, a backpack that carries 280 gets %4. One cell is %1 units of load (%2 kg) now.</English>
+            <English>Cells = the container's load divided by the load per cell (%1 units, %2 kg), rounded up; worn gear gets a fifth more. A vest carrying 120 gets %3 cells, a backpack carrying 280 gets %4.</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Containers_Label">
             <English>Containers</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Items">
-            <English>How big an item is depends on what it is, not on what it weighs: rifles from 4×2 to 7×2, the heavier the longer; handguns 2×1; launchers 6×2; magazines 1×1 when light, 1×2, and 2×2 when heavy; grenades, optics and small things 1×1; helmets 2×2; backpacks, vests and uniforms by their kind.</English>
+            <English>An item's size follows what it is, not its weight: rifles 4×2 to 7×2, handguns 2×1, launchers 6×2, magazines 1×1 to 2×2, grenades, optics and small things 1×1, helmets 2×2.</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Items_Label">
             <English>Items</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Rules">
-            <English>A rule of your own for a class, set under Items and Containers, beats all of this - and so does what a mod says about its own classes.</English>
+            <English>Your own rules for a class (Items and Containers steps) and mods' own settings win over all of this.</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Rules_Label">
             <English>Your rules</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Stacks">
-            <English>Nothing stacks: every magazine, grenade and item takes a tile of its own - but for a short list of consumables. Bandages, injectors and small infusions go ten to a tile (sutures and cable ties twenty), rations, splints, bigger infusions and first aid kits five, the biggest infusions and blood bags two. They stack only where the mod that adds them is loaded.</English>
+            <English>Only consumables stack: bandages, injectors, small infusions 10 per tile (sutures, cable ties 20); rations, splints, bigger infusions, first aid kits 5; biggest infusions, blood bags 2.</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Stacks_Label">
             <English>Stacking</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Uniforms">
-            <English>One block %1 cells wide and from %2 to %3 rows high, as its load asks: a plain uniform is 6×2, one that carries more is a row or two taller.</English>
+            <English>One block %1 cells wide, %2 to %3 rows high by load: a plain uniform is 6×2.</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Uniforms_Label">
             <English>Uniforms</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Vests">
-            <English>Magazine pouches, as a real rig has them: a tall one of 1×2 cells, then a square one of 2×2, and so on - as many as the load asks for, at most %1.</English>
+            <English>Magazine pouches like a real rig: a tall 1×2, then a square 2×2 and so on, as many as the load needs, at most %1.</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Vests_Label">
             <English>Vests</English>
@@ -578,10 +578,10 @@
             <English>Layout only (to share)</English>
         </Key>
         <Key ID="STR_einv_setup_ExportChoice_LayoutHelp">
-            <English>Just the values, no class name: one short text anyone can paste into Import at their own class, whichever mod it is from.</English>
+            <English>Just the values, no class name: a short text to paste into Import at any class, from any mod.</English>
         </Key>
         <Key ID="STR_einv_setup_ExportChoice_LayoutHelpTree">
-            <English>Just the values of the picked class, no class name: one short text anyone can paste into Import at their own class, whichever mod it is from.</English>
+            <English>Just the values of the picked class, no class name: paste them into Import at any class.</English>
         </Key>
         <Key ID="STR_einv_setup_ExportChoice_Title">
             <English>Export as</English>
@@ -734,7 +734,7 @@
             <English>Imported %1 rules, %2 settings and %3 warnings.</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Help">
-            <English>Paste a shared setup here with Ctrl+V: rules, or lines from a cba_settings.sqf or CBA's Export. The rules and the server settings in them are both read; the rest of the mods' settings are left alone.</English>
+            <English>Paste a shared setup here with Ctrl+V: rules, or lines from a cba_settings.sqf or CBA's Export. Rules and server settings in it are both read.</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Nothing">
             <English>Nothing to import: no rules or settings found.</English>
@@ -761,7 +761,7 @@
             <English>Keep this size, stack, weight, name and picture zoom for this class. Save puts it to use.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_ApplyTipTree">
-            <English>Keep this for the class and every class built on it, as one rule. A class with a rule of its own further down keeps it. Save puts it to use.</English>
+            <English>Keep this for the class and every class built on it, as one rule; a class with a rule of its own keeps it.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_CanvasHelp">
             <English>Click the cells it takes: an L, a T, any shape in one piece. Across and down make a rectangle.</English>
@@ -776,7 +776,7 @@
             <English>Weapons, uniforms, vests and backpacks never share a tile.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Help">
-            <English>Pick an item on the left, draw its cells and set how many share a tile. Apply keeps the change; Save puts it to use. The search takes wildcards (B_Bergen*, *Carryall*); the Tree button shows a class among its relatives, to change them all at once.</English>
+            <English>Pick an item on the left, draw its cells and set how many share a tile. Apply keeps the change, Save puts it to use. The search takes wildcards (B_Bergen*).</English>
         </Key>
         <Key ID="STR_einv_setup_Items_NameField">
             <English>Name</English>
@@ -803,13 +803,13 @@
             <English>Pick an item on the left to see and set its size.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PickTip">
-            <English>Choose another picture for this item from the pictures of the game's items, or type the path of any texture.</English>
+            <English>Choose another picture from the game's items, or type a texture path.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureAcross">
             <English>Across %1 %2</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureConfigTip">
-            <English>The picture from the item's own config. Click to select the path, Ctrl+C copies it; Pick... chooses another.</English>
+            <English>The picture from the item's config. Click to select its path, Ctrl+C copies it.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureDown">
             <English>Down %1 %2</English>
@@ -824,7 +824,7 @@
             <English>no picture</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureOwnTip">
-            <English>The picture set for this item. Click to select the path, Ctrl+C copies it; Pick... chooses another.</English>
+            <English>The picture set for this item. Click to select its path, Ctrl+C copies it.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_PictureReset">
             <English>Reset</English>
@@ -1112,7 +1112,7 @@
             <English>This is the default already.</English>
         </Key>
         <Key ID="STR_einv_setup_Reset_Confirm">
-            <English>Back to the default - no rules of your own, every server setting at its default? Undo takes it back until you close the wizard.</English>
+            <English>Reset to the default: no rules of your own, every server setting default? Undo works until you close the wizard.</English>
         </Key>
         <Key ID="STR_einv_setup_Reset_Done">
             <English>Back to the default - save to use it.</English>
@@ -1211,13 +1211,13 @@
             <English>Nothing to save: it is in use already.</English>
         </Key>
         <Key ID="STR_einv_setup_Scope_KitNote">
-            <English>Applies to %1 and every one of them carried in the game - the %2 kits Enhanced First Aid Kits makes of it - in one rule, class=%3+.</English>
+            <English>Applies to %1 and all its kits in the game (%2 from Enhanced First Aid Kits) as one rule, class=%3+.</English>
         </Key>
         <Key ID="STR_einv_setup_Scope_OnlyThis">
             <English>Only this class</English>
         </Key>
         <Key ID="STR_einv_setup_Scope_TreeNote">
-            <English>Applies to %1 and the %2 classes built on it - one rule, class=%3+. A class with a rule of its own further down keeps it.</English>
+            <English>Applies to %1 and the %2 classes built on it as one rule, class=%3+. A class with its own rule keeps it.</English>
         </Key>
         <Key ID="STR_einv_setup_Source_client">
             <English>Client</English>
@@ -1268,7 +1268,7 @@
             <English>Full</English>
         </Key>
         <Key ID="STR_einv_setup_Text_FullNote">
-            <English>The whole default written out, so later versions cannot change it. Its rules also win over sizes a mod sets itself.</English>
+            <English>The whole default written out, so later versions cannot change it; its rules also beat a mod's own sizes.</English>
         </Key>
         <Key ID="STR_einv_setup_Text_Own">
             <English>Own</English>
@@ -1466,7 +1466,7 @@
             <English>Tree</English>
         </Key>
         <Key ID="STR_einv_setup_View_TreeTip">
-            <English>Open the tree at the picked class: it stands among its relatives there, so a wrong pick is one click from the right one.</English>
+            <English>Open the tree at the picked class to see its relatives.</English>
         </Key>
         <Key ID="STR_einv_setup_Warning_TooLong">
             <English>The text is %1 characters long: more than 16,000 cannot be saved.</English>

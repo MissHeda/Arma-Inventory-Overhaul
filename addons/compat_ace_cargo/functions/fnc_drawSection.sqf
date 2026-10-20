@@ -8,6 +8,8 @@
  * inventory, which then shows as a section of its own, and Unload.
  *
  * Laid out beside the blocks of the sections above it: the same cell, the same width, the same left edge.
+ * Its texts and the rows that hold them (caption line, names, details, buttons) grow with the tile scale as
+ * the sections' do (TEXT_UNIT, einv_gui_fnc_textScale), and its tab and hairline take the theme's loot colours.
  * The cards hold no grid - nothing to hover, drag onto or right-click. A button that may not act now is
  * drawn muted and says why in its tooltip and in the hint when pressed (fnc_rowState). While a thing
  * unloads (fnc_startUnload) its Unload button is a bar of the time ACE takes, and a click on it stops it.
@@ -64,8 +66,10 @@ private _blockX = ((_width - _blockW) / 2) max 0;
 // ---------------------------------------------------------------------------
 // Caption line: the tab on the left, space used and in all on the right, a hairline under both.
 // ---------------------------------------------------------------------------
-private _lineH = UNIT * 0.62;
-private _lineSize = UNIT * 0.46;
+// The caption line and every text of the cards grow with the tile scale (TEXT_UNIT), as einv_gui_fnc_drawSection's do.
+private _textUnit = TEXT_UNIT;
+private _lineH = _textUnit * 0.62;
+private _lineSize = _textUnit * 0.46;
 private _tabPad = SQUARE(_lineH * 0.5);
 
 private _used = 0;
@@ -75,16 +79,28 @@ private _used = 0;
 } forEach _items;
 
 private _space = format ["%1 / %2", _used, _used + (_holder call ACEFUNC(cargo,getCargoSpaceLeft))];
-private _spaceW = (_space getTextWidth [_font, _lineSize]) * TEXT_SLACK + SQUARE(UNIT * 0.3);
+private _spaceW = (_space getTextWidth [_font, _lineSize]) * TEXT_SLACK + SQUARE(_textUnit * 0.3);
 
 private _caption = [_section getOrDefault ["title", ""], _theme] call EFUNC(gui,caption);
 private _tabRoom = _blockW - _spaceW;
 private _shown = [_caption, _tabRoom - _tabPad, _fontBold, _lineSize] call EFUNC(gui,fitText);
 private _tabW = (((_shown getTextWidth [_fontBold, _lineSize]) * TEXT_SLACK) + _tabPad) min _tabRoom;
 
+// What is looted has its tab and hairline in the theme's loot colours where it has them (lootTab, lootLine; issue 7), as
+// the sections above: the cargo is always the loot column's.
+private _tabColor = _theme getOrDefault ["lootTab", []];
+
+if (_tabColor isEqualTo []) then {
+    _tabColor = _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]];
+};
+
+if ((_theme getOrDefault ["lootLine", []]) isNotEqualTo []) then {
+    _colorLine = _theme get "lootLine";
+};
+
 if (_shown isNotEqualTo "") then {
     [
-        _display, _parent, [_blockX, _top, _tabW, _lineH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]],
+        _display, _parent, [_blockX, _top, _tabW, _lineH], _tabColor,
         (_theme getOrDefault ["radius", 0]) min (_lineH / 2)
     ] call EFUNC(gui,uiPanel);
     [_display, _parent, [_blockX, _top, _tabW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2] call EFUNC(gui,uiLabel);
@@ -104,7 +120,7 @@ private _cardH = _cellH * 2;
 private _cardGap = UNIT * 0.2;
 private _cardsTop = _top + _lineH + UNIT * 0.25;
 private _radius = (_theme getOrDefault ["radius", 0]) min (_cardH / 4);
-private _buttonH = UNIT * 0.9;
+private _buttonH = _textUnit * 0.9;
 private _buttonGap = SQUARE(UNIT * 0.25);
 private _pad = SQUARE(_cardH * 0.1);
 
@@ -219,10 +235,10 @@ private _fnc_button = {
     private _textW = _blockX + _blockW - _pad - _textX;
 
     // Its name as ACE has it, the custom name too - in the loss colour when ACE cannot unload it at all.
-    private _name = [[_item, true] call ACEFUNC(cargo,getNameItem), _textW, _font, UNIT * 0.5] call EFUNC(gui,fitText);
+    private _name = [[_item, true] call ACEFUNC(cargo,getNameItem), _textW, _font, _textUnit * 0.5] call EFUNC(gui,fitText);
 
     [
-        _display, _parent, [_textX, _cardTop + _cardH * 0.1, _textW, UNIT * 0.7], _name, UNIT * 0.5,
+        _display, _parent, [_textX, _cardTop + _cardH * 0.1, _textW, _textUnit * 0.7], _name, _textUnit * 0.5,
         [_colorText, _colorLoss] select (_size < 0), _font, 0
     ] call EFUNC(gui,uiLabel);
 
@@ -242,7 +258,7 @@ private _fnc_button = {
 
     [
         _display, _parent, [_textX, _buttonTop, (_openX - _buttonGap - _textX) max 0, _buttonH],
-        [_details, (_openX - _buttonGap - _textX) max 0, _font, UNIT * 0.42] call EFUNC(gui,fitText), UNIT * 0.42, _colorText2, _font, 0
+        [_details, (_openX - _buttonGap - _textX) max 0, _font, _textUnit * 0.42] call EFUNC(gui,fitText), _textUnit * 0.42, _colorText2, _font, 0
     ] call EFUNC(gui,uiLabel);
 
     // Open or Close - Close is always possible.

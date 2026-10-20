@@ -113,43 +113,43 @@
             <English>Default</English>
         </Key>
         <Key ID="STR_einv_items_Ruleset_Default_Desc">
-            <English>Realistic sizes: long rifles, magazines a tile or two, backpacks with big tiles. Nothing stacks but bandages, injectors, infusions, rations and first aid kits; containers get the room their load gives.</English>
+            <English>Realistic sizes. Only bandages, injectors, infusions, rations and first aid kits stack. Container size follows the load.</English>
         </Key>
         <Key ID="STR_einv_items_Setting_MassPerCell">
             <English>Load per cell</English>
         </Key>
         <Key ID="STR_einv_items_Setting_MassPerCell_Desc">
-            <English>How much load one grid cell stands for,\nin the same mass units as the inventory.\n\nEvery container gets its maximum load\ndivided by this as cells. At 5, a\nbackpack that holds 280 gets 56 cells:\nseven rows of eight.\n\nLower values make bigger grids. Items\nkeep their size either way.\n\ncell= in the rules text beats this. The\nsetup wizard's General page sets that.</English>
+            <English>Load one grid cell stands for; a container gets its maximum load divided by this.\nLower = bigger grids (5: a backpack holding 280 gets 56 cells). cell= in the rules wins.</English>
         </Key>
         <Key ID="STR_einv_items_Setting_Rules">
             <English>Inventory rules</English>
         </Key>
         <Key ID="STR_einv_items_Setting_Rules_Desc">
-            <English>How big items are, how many share a\ntile and how containers are split into\ncompartments - one text for everyone.\n\nRules are separated by commas: what a\nrule is for, then what it sets. Later\nrules beat earlier ones:\nkind=grenade &gt; stack=3,\nclass=ACE_fieldDressing+ &gt; stack=20,\n@vest &gt; grid=rig\n\nweight=1.5 and name=Field_kit give an\nitem a weight in kg and a name.\n\ngrid=xxx/x-x draws a compartment cell\nby cell, - is a hole. like=CLASS takes\nsize, stack, grid and rule weight from\nanother class.\n\nall kind=uniform &gt; grid=5x5 gives every\nuniform that has no rule of its own that\nsize - the setup wizard's General page\nwrites such rules.\n\nThe first part, einv1 base=default\ncell=5, names the default the rules build\non and the load per cell. The setup\nwizard writes all of this for you.\n\nWhat cannot be read is left out and\nnamed in the RPT. Empty is the default.</English>
+            <English>Item sizes, stacks and compartments, one text for everyone. Empty uses the defaults.\nRules are separated by commas, later ones win. The setup wizard writes them for you.\nExample: kind=grenade &gt; stack=3, class=ACE_fieldDressing+ &gt; stack=20, @vest &gt; grid=rig</English>
         </Key>
         <Key ID="STR_einv_items_Setting_SizeTable">
             <English>Grid sizes by class</English>
         </Key>
         <Key ID="STR_einv_items_Setting_SizeTable_Desc">
-            <English>How many cells an item takes, across\nand down, for the classes listed here.\nBeats the rules text, the item's own\nmod and the default rules.\n\nFormat: class:WxH, separated by commas.\n1x2 is one cell across, two down:\nrhs_mag_30Rnd_556x45_M855A1_Stanag:1x2,\nrhsusf_100Rnd_762x51:1x3\n\nA class also covers every class that\ninherits from it; the nearest one listed\nwins. At most 8 across and 40 down.\n\nThe rules text does the same and more:\nclass=rhsusf_100Rnd_762x51+ &gt; size=1x3\n\nEntries that do not read are left out\nand named in the RPT.</English>
+            <English>Item sizes by class as class:WxH (across x down), comma-separated. Beats the rules text.\nExample: rhsusf_100Rnd_762x51:1x3. A class also covers its child classes. Max 8 x 40.</English>
         </Key>
         <Key ID="STR_einv_items_Setting_StackSmall">
             <English>Small items per tile</English>
         </Key>
         <Key ID="STR_einv_items_Setting_StackSmall_Desc">
-            <English>How many small items share one tile:\nthe group @item_small in the rules,\neverything of a weight up to 10 that is\nnot a magazine or a weapon.\n\nNothing stacks by default but a list of\nconsumables (bandages, injectors,\ninfusions, rations). Moved off 10, this\nstacks every small item that many to a\ntile - unless a rule, the stack table or\nthe item's own mod says otherwise.\n\nCounts only when moved off 10.</English>
+            <English>How many small items (weight up to 10, no magazines or weapons) share a tile.\nCounts only when moved off 10; rules, the stack table and the item's mod still win.</English>
         </Key>
         <Key ID="STR_einv_items_Setting_StackTable">
             <English>Stack sizes by class</English>
         </Key>
         <Key ID="STR_einv_items_Setting_StackTable_Desc">
-            <English>How many of an item share one tile, for\nthe classes listed here. Beats the rules\ntext, the item's own mod and the\ndefault rules.\n\nFormat: class:N, separated by commas:\nACE_fieldDressing:20, ACE_morphine:5\n\nA class also covers every class that\ninherits from it; the nearest one listed\nwins. ACE_ItemCore:10 stacks every ACE\nitem by ten, 1 stops an item stacking.\n\nUniforms, vests, backpacks and weapons\nnever stack, whatever is listed here.\n\nEntries that do not read are left out\nand named in the RPT.</English>
+            <English>Items per tile by class as class:N, comma-separated: ACE_fieldDressing:20, ACE_morphine:5\nA class also covers its child classes; 1 stops stacking. Beats the rules text.</English>
         </Key>
         <Key ID="STR_einv_items_SubCategory_Grids">
             <English>Grids</English>
         </Key>
         <Key ID="STR_einv_items_Warning_HashMismatch">
-            <English>Arma Inventory Overhaul: this machine reads the inventory rules differently from the server - use the server's version of the mod.</English>
+            <English>Arma Inventory Overhaul: the inventory rules here differ from the server's - use the server's mod version.</English>
         </Key>
         <Key ID="STR_einv_items_Warning_VersionMismatch">
             <English>Arma Inventory Overhaul %1 here, %2 on the server - item sizes and grids may not match.</English>

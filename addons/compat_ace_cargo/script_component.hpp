@@ -9,6 +9,10 @@
 #define SQUARE(H) ((H) * pixelW / pixelH)
 #define TEXT_SLACK 1.3
 
+// The window's words grow with its tiles (einv_gui_fnc_textScale, TEXT_UNIT in gui/defines.hpp): the cards' texts and
+// the rows that hold them are measured in it, as the sections above them are.
+#define TEXT_UNIT (UNIT * (call einv_gui_fnc_textScale))
+
 // ACE's own number: how close the player has to be to a vehicle to unload it (MAX_LOAD_DISTANCE in
 // ace_cargo's script_component.hpp, ACE 3.21.2).
 #define MAX_LOAD_DISTANCE 5

@@ -167,25 +167,25 @@
             <English>Hotbar</English>
         </Key>
         <Key ID="STR_einv_hotbar_Setting_Enabled_Desc">
-            <English>Items on the keys 4 to 0: grenades,\nbandages, medicine, magazines, food\nand kits, each used with its key.\n\nOff, the keys are Arma's and ACE's\nagain and the hotbar is gone.</English>
+            <English>Items on the keys 4 to 0: grenades, bandages, medicine, magazines, food and kits.\nOff: the keys are Arma's and ACE's again.</English>
         </Key>
         <Key ID="STR_einv_hotbar_Setting_HudMode">
             <English>Hotbar on screen</English>
         </Key>
         <Key ID="STR_einv_hotbar_Setting_HudMode_Desc">
-            <English>Never: only in the inventory.\nWhile in use: after a key, while an\nitem is used or a grenade is in hand.\nAlways: whenever the game shows its HUD.</English>
+            <English>Never: inventory only. While in use: after a key press or with a grenade in hand.\nAlways: whenever the game shows its HUD.</English>
         </Key>
         <Key ID="STR_einv_hotbar_Setting_HudTime">
             <English>Hotbar shown for</English>
         </Key>
         <Key ID="STR_einv_hotbar_Setting_HudTime_Desc">
-            <English>Seconds the hotbar stays on screen after\none of its keys, when it shows only\nwhile in use.</English>
+            <English>Seconds the hotbar stays visible after a key press, in the mode "While in use".</English>
         </Key>
         <Key ID="STR_einv_hotbar_Setting_LeaderKeys">
             <English>Command menu first when leading</English>
         </Key>
         <Key ID="STR_einv_hotbar_Setting_LeaderKeys_Desc">
-            <English>While you lead AI soldiers, the\nhotbar's keys open Arma's command\nmenu as they always did.\n\nOff, the hotbar keeps its keys.</English>
+            <English>While you lead AI soldiers, the hotbar keys open Arma's command menu.\nOff: the hotbar keeps its keys.</English>
         </Key>
         <Key ID="STR_einv_hotbar_Shared_CommandMenu">
             <English>Command menu</English>

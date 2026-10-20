@@ -8,7 +8,7 @@
             <English>Group callsign</English>
         </Key>
         <Key ID="STR_einv_locks_Eden_Callsign_Tooltip">
-            <English>With &quot;One group&quot;: the callsign of that group, as its Callsign attribute shows it (e.g. Alpha 1-1). Give it a callsign no other group has.</English>
+            <English>With "One group": that group's callsign (e.g. Alpha 1-1); no other group may share it.</English>
         </Key>
         <Key ID="STR_einv_locks_Eden_Category">
             <English>Arma Inventory Overhaul</English>
@@ -38,7 +38,7 @@
             <English>Zeus opens locked containers</English>
         </Key>
         <Key ID="STR_einv_locks_Setting_ZeusOpens_Desc">
-            <English>Game masters (Zeus) open every locked\ncrate and vehicle, as logged-in admins\nalways do.\n\nOff: Zeus is kept out like any player\nof another side or group.</English>
+            <English>Game masters (Zeus) open every locked crate and vehicle, as logged-in admins do.\nOff: Zeus is kept out like any other player.</English>
         </Key>
         <Key ID="STR_einv_locks_Side_Civilian">
             <English>Civilian</English>

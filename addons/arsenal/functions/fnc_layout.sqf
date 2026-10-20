@@ -395,7 +395,8 @@ private _fnc_draw = {
     if ((_section getOrDefault ["id", ""]) isEqualTo "staging") then {
         (call EFUNC(gui,getCell)) params ["", "_cellH"];
 
-        private _free = ((ctrlPosition _group) select 3) - _top - UNIT * (CAPTION_LINE + 0.25) - pixelH * 2;
+        // The caption line grows with the tile scale (TEXT_UNIT, einv_gui_fnc_textScale), the gap under it does not.
+        private _free = ((ctrlPosition _group) select 3) - _top - TEXT_UNIT * CAPTION_LINE - UNIT * 0.25 - pixelH * 2;
 
         [_section get "container", floor (_free / _cellH)] call FUNC(growStaging);
     };
@@ -425,14 +426,14 @@ private _fnc_draw = {
 
         private _load = _info getOrDefault ["load", controlNull];
         private _end = if (isNull _load) then {_width} else {(ctrlPosition _load) select 0};
-        private _gapX = SQUARE(UNIT * 0.3);
+        private _gapX = SQUARE(TEXT_UNIT * 0.3);
         private _textX = _tabRight + _gapX;
         private _textW = _end - _gapX - _textX;
         private _font = _theme getOrDefault ["font", "PuristaMedium"];
 
         // The tab is a pill as high as the section buttons now, its words set in the middle of its height (einv_gui_fnc_drawSection):
         // the subtitle is set the same way, in the same size, so that the one line of capitals runs on.
-        private _size = UNIT * 0.42;
+        private _size = TEXT_UNIT * TEXT_REF;
 
         if (_textW < SQUARE(UNIT * 1.5)) exitWith {};
 
