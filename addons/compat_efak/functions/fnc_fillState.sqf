@@ -41,6 +41,7 @@ if (([_kit] call FUNC(roomMode)) isEqualTo "cells") exitWith {
     [format [LLSTRING(FillCells), _used, _total], (_layout getOrDefault ["overflow", []]) isNotEqualTo []]
 };
 
+// The kit's class, as fnc_canPack passes it too (an assumption about that mod's API, see there).
 private _used = [_kit] call EFAKFUNC(core,getUsedCapacity);
 private _capacity = [_kit] call EFAKFUNC(core,getCapacity);
 

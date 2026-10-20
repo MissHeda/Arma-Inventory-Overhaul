@@ -28,8 +28,10 @@ private _focus = GVAR(focusKit);
 
 if (_focus isEqualTo "") exitWith {[]};
 
+// The type as config spells it (efak_IFAK) against the lowercase focus: compared in lowercase, or a kit type with a
+// capital letter in its class never got its sections.
 (([_holders] call EFUNC(compat_efak,arsenalSections)) select {
-    ((([(_x get "kit")] call EFUNC(items,kitOf)) param [0, ""]) isEqualTo _focus)
+    (toLowerANSI ((([(_x get "kit")] call EFUNC(items,kitOf)) param [0, ""]))) isEqualTo _focus
 }) apply {
     private _section = _x;
     private _key = "kitfocus_" + toLowerANSI (_section get "kit");

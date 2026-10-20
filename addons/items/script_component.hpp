@@ -25,11 +25,14 @@
 // is its room.
 #define KINDS_CONTAINER ["uniform", "vest", "backpack", "crate", "vehicle", "kit"]
 
-// Kinds that are an item to kind= as well: a kit is sized and stacked as the item it is - kind=item and the
-// presets' item groups reach it as they always did - and has a grid as a kit (kind=kit reaches only kits).
+// Kinds that are an item to kind= as well: a kit is sized as the item it is - kind=item and the presets' item
+// groups reach it as they always did - and has a grid as a kit (kind=kit reaches only kits).
 // fnc_matches tests a condition that way, and fnc_compileRules sorts the rules that way.
 #define KINDS_AS_ITEM ["kit"]
-#define KINDS_SINGLE ["rifle", "handgun", "launcher", "binocular", "uniform", "vest", "backpack"]
+// Alone on a tile whatever a rule says (stack forced to 1): a weapon carries its attachments, a uniform, vest,
+// backpack or kit (Enhanced First Aid Kits) holds things of its own - two kits of one class on a tile would
+// share one tile's moves and contents (issue #19).
+#define KINDS_SINGLE ["rifle", "handgun", "launcher", "binocular", "uniform", "vest", "backpack", "kit"]
 
 // The words that stand for one of the eight categories of ITEM_GROUPS, [word, category]: read as that category in cats=,
 // einv_cat and the attributes of a grid, and never usable as the id of a category of the server's own (fnc_builtinGroup).

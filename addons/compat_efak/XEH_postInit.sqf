@@ -14,11 +14,15 @@ if (!hasInterface) exitWith {};
 // medic using a bandage, the mod's own kit window - shows within a frame. That mod registers its
 // handlers in preInit, so its tables are up to date before these run. The inspect card shows a kit's
 // weight and contents too, and is drawn anew only with the window: a kit inspected but not open - in a
-// crate, inside another kit - would keep what it held.
+// crate, inside another kit - would keep what it held. A kit's grid in ACE Arsenal's panel (GVAR(arsenalHolders)) is
+// no open kit, and that mod's own kits tab fills it beside the panel: it is looked at the same way.
 [QEFAKGVAR(core,contentsChanged), {
     params [["_class", "", [""]]];
 
-    if ((GVAR(opened) findIf {_x == _class}) >= 0 || {(EGVAR(gui,inspect) param [0, ""]) == _class}) then {
+    if (
+        (GVAR(opened) findIf {_x == _class}) >= 0 || {(EGVAR(gui,inspect) param [0, ""]) == _class}
+        || {toLowerANSI _class in GVAR(arsenalHolders)}
+    ) then {
         call FUNC(requestRebuild);
     };
 }] call CBA_fnc_addEventHandler;

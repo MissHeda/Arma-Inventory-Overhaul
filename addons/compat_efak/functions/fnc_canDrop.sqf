@@ -15,7 +15,8 @@
  *   backpack with contents    - no: their contents would be lost, the kit keeps only the class
  *   an empty magazine         - no: the kit would hand it back full (fnc_changeKit)
  *   packing switched off     - only what came out of this kit since the window was opened
- *                               (fnc_repackable), as that mod's kit window allows
+ *                               (fnc_repackable), as that mod's kit window allows; in ACE Arsenal's
+ *                               window the kit type's Arsenal setting instead (ArsenalReadOnly)
  *   the kit                   - what it takes and has room for (fnc_canPack): that mod's
  *                               capacity, or the free cells of a grid a rule or its config gives
  *                               it (fnc_roomMode)
@@ -96,6 +97,17 @@ if (([_class] call EFAKFUNC(core,getMagazineSize)) > 1 && {(_entry getOrDefault 
 private _wait = call FUNC(notReady);
 
 if (_wait isNotEqualTo "") exitWith {[false, _wait]};
+
+// In ACE Arsenal's window (the one window attached with hooks) the kit type's Arsenal setting decides, as for a
+// row of ACE's list (fnc_canPackNew) and a tile taken out there (fnc_discard) - not the packing-off rule of that
+// mod's kit window in the field, which turned the staging space away from a kit ACE's list could fill.
+if !([] call EFUNC(gui,isInventoryMode)) exitWith {
+    if (!isNil QEFAKFUNC(core,canPackInto) && {!([_kit, true] call EFAKFUNC(core,canPackInto))}) exitWith {
+        [false, LLSTRING(ArsenalReadOnly)]
+    };
+
+    [_kit, _class, _n, _entry getOrDefault ["ammo", -1]] call FUNC(canPack)
+};
 
 // What it held when the window first touched it, for the packing-off rule.
 [_kit] call FUNC(snapshot);

@@ -6,7 +6,7 @@
  *
  *   Without a root - the window's side: where the kit windows were last drawn found it
  *   (GVAR(holders)) or the ACE Arsenal's panel shows it as a section (GVAR(arsenalHolders)), else among
- *   the contents of an open kit. A kit's tile in a container the window
+ *   the contents of an open kit or of such a section. A kit's tile in a container the window
  *   shows comes with its holder from the caller instead (fnc_drop).
  *   With a root - the side that runs a kit op (einv_storage_fnc_execute): the real cargo under that
  *   root, nothing the window remembers - the uniform, vest and backpack of a unit (or the object
@@ -128,13 +128,15 @@ private _fnc_holder = {
 
     if (_known isNotEqualTo []) exitWith {_known};
 
-    private _index = GVAR(opened) findIf {
+    // Packed in an open kit - or in a kit of the Arsenal's panel, where none is open.
+    private _shown = GVAR(opened) + keys GVAR(arsenalHolders);
+    private _index = _shown findIf {
         (([_x] call EFAKFUNC(core,getContents)) findIf {(_x select 0) == _class}) >= 0
     };
 
     if (_index < 0) exitWith {[objNull, ""]};
 
-    [objNull, GVAR(opened) select _index]
+    [objNull, _shown select _index]
 };
 
 if (_holder isEqualTo []) then {

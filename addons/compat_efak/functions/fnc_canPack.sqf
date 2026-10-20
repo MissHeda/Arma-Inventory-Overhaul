@@ -64,7 +64,10 @@ if (([_kit] call FUNC(roomMode)) isEqualTo "cells") exitWith {
 };
 
 private _mass = [_class] call EFAKFUNC(core,getItemMass);
-private _free = ([_kit] call EFAKFUNC(core,getCapacity)) - ([_contents] call EFAKFUNC(core,getUsedCapacity));
+// getUsedCapacity takes the kit's class, as getCapacity does: the shape every other caller has used since the first
+// version (the window title, the hint and the inspect card, now fnc_fillState) and that the game showed right. Assumed,
+// EFAK's source is not at hand; this was the one call that passed the contents (issue #19).
+private _free = ([_kit] call EFAKFUNC(core,getCapacity)) - ([_kit] call EFAKFUNC(core,getUsedCapacity));
 
 if (_mass > 0 && {(floor ((_free + KIT_MASS_EPSILON) / _mass)) < _count}) exitWith {
     [false, localize "STR_efak_core_Error_NotEnoughSpace"]

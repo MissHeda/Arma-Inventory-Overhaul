@@ -72,7 +72,13 @@ if (!_ok) exitWith {[_why, [], false]};
 
 // The kit as it lies before: is the cell asked for free, and how many tiles of its kind there are.
 private _kitKey = "kit:" + toLowerANSI _kit;
-private _key = [_payload] call EFUNC(storage,payloadKey);
+
+// The key its tiles have in the kit (fnc_getEntries): an empty uniform, vest or backpack lies there as its class
+// alone - the payload's key would carry the id of a container the kit does not keep, match no tile, and the
+// cell asked for would be lost.
+private _key = [createHashMapFromArray [
+    ["class", _class], ["ammo", _rounds param [0, 0]], ["capacity", ([_class] call EFUNC(items,getInfo)) getOrDefault ["capacity", 0]]
+]] call EFUNC(storage,entryKey);
 private _view = [_kit, true] call FUNC(getEntries);
 private _before = {(_x getOrDefault ["key", ""]) isEqualTo _key} count _view;
 private _spot = [];

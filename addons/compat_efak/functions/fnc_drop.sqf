@@ -124,6 +124,11 @@ if (_fromKit isNotEqualTo "") then {
     _wait = switch (true) do {
         case (isNull _fromWhere || {isNull _fromRoot}): {"Failed"};
         case (!([_fromWhere] call FUNC(mayReach))): {LLSTRING(NotYours)};
+        // In ACE Arsenal's window the kit type's Arsenal setting decides, as for Remove there (fnc_discard).
+        case (
+            !([] call EFUNC(gui,isInventoryMode)) && {!isNil QEFAKFUNC(core,canPackInto)}
+            && {!([_fromKit, true] call EFAKFUNC(core,canPackInto))}
+        ): {LLSTRING(ArsenalReadOnly)};
         default {[_fromWhere, "items"] call EFUNC(gui,checkTouch)};
     };
 };

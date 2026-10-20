@@ -38,8 +38,10 @@ params [["_kit", "", [""]], ["_class", "", [""]], ["_delta", 0, [0]], ["_rounds"
 
 if (_kit isEqualTo "" || {_class isEqualTo ""} || {_delta == 0}) exitWith {false};
 
-private _contents = [_kit] call EFAKFUNC(core,getContents);
-private _charges = [_kit] call EFAKFUNC(core,getCharges);
+// Copies: what that mod hands out may be its own table, which must change only through setContents - changed in
+// place first, the write would find nothing new to send.
+private _contents = +([_kit] call EFAKFUNC(core,getContents));
+private _charges = +([_kit] call EFAKFUNC(core,getCharges));
 private _size = [_class] call EFAKFUNC(core,getMagazineSize);
 
 if (_delta > 0) exitWith {
