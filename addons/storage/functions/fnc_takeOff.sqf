@@ -11,6 +11,10 @@
  * still worn after removeBackpack is looked at again a frame later: gone by then, it goes back on from
  * its snapshot rather than being lost.
  *
+ * A uniform, vest or backpack taken off a body or a living person who is not the player here (an AI, a
+ * captive) takes its search state along (GVAR(searchState), one of GVAR(carryVariables)): it is searched as
+ * that body or person is wherever it lands, and whoever searched it on them keeps it searched (issue 17).
+ *
  * Arguments:
  * 0: Unit <OBJECT>
  * 1: Slot id <STRING>
@@ -62,7 +66,29 @@ private _payload = switch (true) do {
         // taken again should the item be put on again, fnc_opStrict).
         [_unit, _base] call FUNC(hiddenReturn);
 
-        private _snapshot = [_entry get "container", _class] call FUNC(snapshot);
+        // Its search state goes with it (GVAR(searchState), carried by the snapshot to the object the engine makes of
+        // it where it lands): off a body or a living person who is no player here - an AI, a captive -, it stays to be
+        // searched as they are, wherever it lies now (einv_gui_fnc_isSearched); a player's own gear is his and carries
+        // no source. The id the players' knowledge of it is kept under stays the same, or is made now.
+        private _worn = _entry get "container";
+        private _state = _worn getVariable [QGVAR(searchState), []];
+        private _source = switch (true) do {
+            case (_unit getVariable [QGVARMAIN(noSearch), false] || {_worn getVariable [QGVARMAIN(noSearch), false]}): {""};
+            case (!alive _unit): {"body"};
+            case (_unit in [player, missionNamespace getVariable ["ACE_player", player]]): {""};
+            default {"person"};
+        };
+        private _id = _state param [0, "", [""]];
+
+        if (_id isEqualTo "" && {_source isNotEqualTo ""}) then {
+            _id = format ["%1:%2:%3", clientOwner, round (diag_tickTime * 1000), round random 1e6];
+        };
+
+        if (_id isNotEqualTo "") then {
+            _worn setVariable [QGVAR(searchState), [_id, _source]];
+        };
+
+        private _snapshot = [_worn, _class] call FUNC(snapshot);
 
         // removeBackpack, not removeBackpackGlobal: the global command takes the backpack off only a frame
         // later, so the check below still saw it worn, handed nothing on - and then the engine took it

@@ -460,6 +460,9 @@
         <Key ID="STR_einv_gui_Seal_Click">
             <English>Click to search</English>
         </Key>
+        <Key ID="STR_einv_gui_Seal_Refused">
+            <English>Search it first</English>
+        </Key>
         <Key ID="STR_einv_gui_Seal_Searching">
             <English>Searching...</English>
         </Key>
@@ -622,37 +625,79 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
             <English>Search bodies</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchBodies_Desc">
-            <English>What a body carries shows as "?" until it has been searched.</English>
+            <English>What a body carries stays a sealed "Unsearched" box until it has been searched - also once dropped.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchContainers">
             <English>Search crates and vehicles</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchContainers_Desc">
-            <English>What a crate or a vehicle holds shows as "?" until it has been searched.\nSingle objects can be skipped: Eden "Skip searching", Zeus right click, or [_box, false] call einv_gui_fnc_setSearchable;</English>
+            <English>What a crate or a vehicle holds stays a sealed "Unsearched" box until it has been searched.\nSingle objects can be skipped: Eden "Skip searching", Zeus right click, or [_box, false] call einv_gui_fnc_setSearchable;</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchGround">
             <English>Search the ground</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchGround_Desc">
-            <English>Loose items on the ground show as "?" until they have been searched.</English>
+            <English>A pile on the ground stays a sealed "Unsearched" box until it has been searched.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchOnClick">
             <English>Search starts on click</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchOnClick_Desc">
-            <English>A box is searched once its Search button is clicked, one box at a time.\nOff: every box starts searching by itself.</English>
+            <English>A box is searched once its Search button is clicked; several boxes can search at the same time.\nOff: every box starts searching by itself.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchPersons">
             <English>Search living persons</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchPersons_Desc">
-            <English>What a living person carries shows as "?" until searched, awake, unconscious or captive.\nBodies follow "Search bodies".</English>
+            <English>What a living person carries stays sealed until searched, awake, unconscious or captive.\nBodies follow "Search bodies".</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTime">
             <English>Search time per cell</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTime_Desc">
-            <English>Seconds it takes to search one grid cell of loot; a 2x2 item takes four times as long.\n0 shows everything at once.</English>
+            <English>Seconds it takes to search one grid cell of loot; a 2x2 item takes four times as long.\n0 shows everything at once. Each kind of box below can take longer or shorter.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeBackpack">
+            <English>Search time: backpacks</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeBackpack_Desc">
+            <English>Times the search time per cell for a backpack, worn or lying anywhere: 1 the same, 2 twice as long.\n0 shows a backpack's contents at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeBody">
+            <English>Search time: bodies</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeBody_Desc">
+            <English>Times the time of a body's uniform, vest and backpack on top of their own factor, also once dropped.\n1 the same, 2 twice as long, 0 shows what a body carries at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeCrate">
+            <English>Search time: crates</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeCrate_Desc">
+            <English>Times the search time per cell for a crate or box: 1 the same, 2 twice as long.\n0 shows a crate's contents at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeGround">
+            <English>Search time: ground</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeGround_Desc">
+            <English>Times the search time per cell for a pile on the ground (needs "Search the ground"): 1 the same.\n0 shows the ground at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeUniform">
+            <English>Search time: uniforms</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeUniform_Desc">
+            <English>Times the search time per cell for a uniform's pockets, worn or lying anywhere: 1 the same, 2 twice as long.\n0 shows a uniform's contents at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeVehicle">
+            <English>Search time: vehicles</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeVehicle_Desc">
+            <English>Times the search time per cell for a vehicle's cargo, also while you sit in it: 1 the same, 2 twice as long.\n0 shows a vehicle's cargo at once.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeVest">
+            <English>Search time: vests</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_SearchTimeVest_Desc">
+            <English>Times the search time per cell for a vest, worn or lying anywhere: 1 the same, 2 twice as long.\n0 shows a vest's contents at once.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchZeus">
             <English>Search Zeus-placed crates and vehicles</English>

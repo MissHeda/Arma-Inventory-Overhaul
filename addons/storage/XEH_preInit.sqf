@@ -33,7 +33,12 @@ GVAR(guards) = [];
 // window takes things out and puts them in anew, which makes a new object (a TFAR long-range radio keeps
 // its frequencies in "radio_settings"). Compat addons add names here in their preInit
 // (einv_compat_tfar); fnc_snapshot reads them, fnc_restore sets them.
-GVAR(carryVariables) = [];
+//
+// The first is the container's search state (issue 17), [id, source], public: the id every player's knowledge
+// of it is kept under (einv_gui_fnc_searchRecord, which gives it one the first time anything is known of it),
+// and where it came from - "body" or "person" when it was taken off one (fnc_takeOff), "" when not. A body's
+// backpack dropped on the ground is searched as the body is, and whoever searched it keeps it searched.
+GVAR(carryVariables) = [QGVAR(searchState)];
 
 // Holders that are no object, by the part of their key before ":" - "kit" from einv_compat_efak:
 // HashMap "entries" CODE [holder] -> entries, "root" CODE [holder, hint] -> root (fnc_rootOf hands on

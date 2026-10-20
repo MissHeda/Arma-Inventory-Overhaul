@@ -150,8 +150,8 @@ uiNamespace setVariable [QGVAR(parts), createHashMap];
 // carries the build it was drawn in, so its click a frame later never lands on another build's section.
 GVAR(buildCount) = 0;
 
-// Loot still to be searched, [container, class, row, col, cells] in the order it is revealed, and when
-// the item being searched now was started (fnc_markHidden, fnc_onFrame).
+// Loot still to be searched, [container, class, row, col, cells, compartment] in the order it is revealed, box after box,
+// each box's seal (class "") before its items (fnc_markHidden, fnc_onFrame).
 GVAR(searchQueue) = [];
 
 // Where the window's panels are, [x, y, w, h] on the screen: a dragged item let go outside all of them
@@ -167,23 +167,34 @@ GVAR(equipmentRect) = [];
 // let go there is refused (fnc_updateDrag).
 GVAR(storageRect) = [];
 
+// The boxes searched now, side by side (fnc_animateSearch): one run per box that has something queued and is not stopped,
+// [container, the entry being searched as it stood in the queue, when it was started, how long it takes]. searchDirty: the
+// queue or the stopped boxes changed, so the runs are matched with them again in the next frame; searchSynced is the queue
+// they were matched with (a build or a find puts a new one in its place). searchStarted is -1 while no box searches, else
+// the frame of the last step (fnc_onFrame asks it). When the next rustle plays, and the last frame of searching.
+GVAR(searchRuns) = [];
+GVAR(searchDirty) = false;
+GVAR(searchSynced) = [];
 GVAR(searchStarted) = -1;
-
-// The item being searched as it stood in the queue, and when the next rustle plays (fnc_animateSearch).
-GVAR(searchHead) = [];
 GVAR(searchSoundAt) = 0;
 GVAR(searchLast) = 0;
+
+// What this player knows of the containers that move about (fnc_searchRecord): the id a uniform, vest or backpack carries
+// (einv_storage_searchState) -> [["known", class -> count], ["unsealed", true]]. Kept for the whole mission and never
+// broadcast, so a body's backpack this player searched stays searched on the ground, in a crate or on another body.
+GVAR(searchMemory) = createHashMap;
+
+// The sealed block a drag is held over (fnc_animateStatus): its seal info while it shows "Search it first".
+GVAR(sealDragOver) = createHashMap;
 
 // The boxes whose search the player stopped (the button in the caption line, fnc_stopStatus): their containers. Nothing of
 // them is searched until the button says "Search" again; the window's own state, empty for every window.
 GVAR(searchPaused) = [];
 
-// With "Search starts on click" (einv_gui_searchOnClick): the boxes that wait for the click, the boxes the window has met
-// (so a rebuild does not make a searched or stopped box wait again), and the boxes a click on another one interrupted,
-// the latest last (fnc_stopStatus); they go on once the clicked box is done (fnc_animateSearch). The window's own state.
+// With "Search starts on click" (einv_gui_searchOnClick): the boxes that wait for the click, and the boxes the window has met
+// (so a rebuild does not make a searched or stopped box wait again). The window's own state.
 GVAR(searchIdle) = [];
 GVAR(searchSeen) = [];
-GVAR(searchResume) = [];
 
 // The hands' queue (fnc_queueMoves): the actions waiting for the hands, in order, each a HashMap - "id", "move" (the
 // move fnc_sendMoves was given), "options", "hand" ("drop", "move" or "equip"), "time" (seconds), "sources" (the tiles it

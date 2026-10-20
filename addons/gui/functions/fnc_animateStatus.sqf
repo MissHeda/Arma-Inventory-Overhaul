@@ -4,11 +4,15 @@
  * Author: Miss Heda
  * The caption lines' activity chips, every frame while one stands (fnc_onFrame, GVAR(statusLive)): the ring goes round
  * (one ctrlSetAngle on one control per chip) and the words are written in place when they changed - the hands' count
- * when an item of the queue finished, the search's time once a second. Nothing is made here. A chip whose box has
- * nothing left to do (the queue's last item was sent, the last item found) asks fnc_updateStatus, which deletes it.
+ * when an item of the queue finished, the search's time once a second (fnc_statusWords). Nothing is made here. A chip
+ * whose box has nothing left to do (the queue's last item was sent, the last item found), or whose words took another
+ * shape than it was made for (fnc_updateStatus sizes it to them), asks fnc_updateStatus, which makes it true again.
  *
- * The search's time is what is left of the box's items: their cells at the time per cell, less what the item being
- * searched has run.
+ * The search's time is what is left of the box's items: their cells at the box's time per cell, less what its run has done.
+ *
+ * A sealed block (fnc_drawSection) takes nothing: a tile dragged over it finds no grid there, so the drag would just do
+ * nothing. While a drag is held over one, the block says why - a film in the loss colour over it and "Search it first"
+ * in its line - and let go there, the footer's hint says it too (fnc_flashHint). The drag itself is left alone.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -35,19 +39,7 @@ private _tick = _second != GVAR(statusSecond);
 GVAR(statusSecond) = _second;
 
 private _resync = false;
-
-// The words as they are when they fit the room of the chip's label, else the short ones, else cut.
-private _fnc_fit = {
-    params ["_long", "_short", "_status"];
-
-    private _room = _status get "labelW";
-    private _font = _status get "font";
-    private _size = _status get "size";
-
-    if (((_long getTextWidth [_font, _size]) * TEXT_SLACK) <= _room) exitWith {_long};
-
-    [_short, _room, _font, _size] call FUNC(fitText)
-};
+private _infos = uiNamespace getVariable [QGVAR(sectionInfo), []];
 
 {
     // A sealed block's ring (fnc_drawSection), shown while its box is searched (fnc_updateStatus).
@@ -61,7 +53,6 @@ private _fnc_fit = {
 
     if (count _status == 0) then {continue};
 
-    private _holder = _x getOrDefault ["holder", objNull];
     private _kind = _status get "kind";
     private _text = _status get "text";
 
@@ -72,79 +63,84 @@ private _fnc_fit = {
         _arc ctrlSetAngle [(_now * STATUS_SPIN_SPEED) mod 360, 0.5, 0.5];
     };
 
-    if (_kind isEqualTo "hands") then {
-        private _record = GVAR(handBoxes) findIf {(_x get "holder") isEqualTo _holder};
+    // The search's time changes once a second; the hands' count whenever an item of the queue finished.
+    if (_kind isEqualTo "search" && {!_tick}) then {continue};
 
-        if (_record < 0) then {
-            _resync = true;
-            continue;
+    private _words = [
+        _x getOrDefault ["holder", objNull], _kind, _status get "stopped", _status getOrDefault ["idle", false],
+        _status getOrDefault ["sealed", false], _now, _status get "room", _status get "font", _status get "size"
+    ] call FUNC(statusWords);
+
+    if (_words isEqualTo _text) then {continue};
+
+    // Nothing left, or words of another width: the chip is made again to them.
+    if (_words isEqualTo "" || {(_words regexReplace ["[0-9]", "0"]) isNotEqualTo (_status get "shape")}) then {
+        _resync = true;
+        continue;
+    };
+
+    (_status get "label") ctrlSetText _words;
+    _status set ["text", _words];
+} forEach _infos;
+
+// A drag held over a sealed block: the block it is over, found by where the block lies on the screen now (its column
+// scrolls) and only where its column shows it.
+private _over = createHashMap;
+
+if (GVAR(dragging)) then {
+    getMousePosition params ["_mouseX", "_mouseY"];
+
+    {
+        private _seal = _x getOrDefault ["seal", createHashMap];
+
+        if (count _seal == 0) then {continue};
+
+        ([_seal get "frame"] call FUNC(gridOrigin)) params ["_frameX", "_frameY"];
+        (_seal get "frameSize") params ["_frameW", "_frameH"];
+
+        if (_mouseX < _frameX || {_mouseX >= _frameX + _frameW} || {_mouseY < _frameY} || {_mouseY >= _frameY + _frameH}) then {continue};
+
+        ([_seal get "anchor"] call FUNC(gridOrigin)) params ["_blockX", "_blockY"];
+        (_seal get "blockSize") params ["_blockW", "_blockH"];
+
+        if (_mouseX >= _blockX && {_mouseX < _blockX + _blockW} && {_mouseY >= _blockY} && {_mouseY < _blockY + _blockH}) exitWith {
+            _over = _seal;
         };
+    } forEach _infos;
+};
 
-        _record = GVAR(handBoxes) select _record;
+if ((count _over > 0 || {count GVAR(sealDragOver) > 0}) && {!(_over isEqualRef GVAR(sealDragOver))}) then {
+    private _before = GVAR(sealDragOver);
+    private _theme = GVAR(theme);
 
-        private _total = _record get "total";
+    // The block it left has its own words and colour back. Let go over it, the footer says why nothing happened - not
+    // when a build ended the drag, which made the block anew.
+    if (count _before > 0) then {
+        {_x ctrlShow false} forEach (_before getOrDefault ["film", []]);
 
-        // Parenthesised: max binds tighter than find, so without the brackets it was asked of the verb (a string) itself.
-        private _verb = (["grab", "put", "drop", "move", "gear"] find (_record get "verb")) max 0;
-        private _words = format [
-            [
-                LLSTRING(Status_Grab), LLSTRING(Status_Put), LLSTRING(Status_Drop), LLSTRING(Status_Move), LLSTRING(Status_Gear)
-            ] select _verb,
-            ((_record get "done") + 1) min _total, _total
-        ];
+        private _line = _before getOrDefault ["line", controlNull];
 
-        // Too long for the room the line gave it: the count alone.
-        _words = [_words, format ["%1 / %2", ((_record get "done") + 1) min _total, _total], _status] call _fnc_fit;
+        if (!isNull _line) then {
+            _line ctrlSetText (_before getOrDefault ["words", ""]);
+            _line ctrlSetTextColor (_theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]]);
 
-        if (_words isNotEqualTo _text) then {
-            (_status get "label") ctrlSetText _words;
-            _status set ["text", _words];
-        };
-    } else {
-        // Once a second is as often as a time that counts seconds changes.
-        if (!_tick && {_text isNotEqualTo ""}) then {continue};
-
-        private _left = 0;
-        private _items = 0;
-
-        {
-            if ((_x select 0) isEqualTo _holder) then {
-                _left = _left + GVAR(searchTime) * (_x select 4);
-                _items = _items + 1;
+            if (!GVAR(dragging)) then {
+                [LLSTRING(Seal_Refused)] call FUNC(flashHint);
             };
-        } forEach GVAR(searchQueue);
-
-        if (_items == 0) then {
-            _resync = true;
-            continue;
-        };
-
-        // What the item being searched has run already.
-        if (!(_status get "stopped") && {GVAR(searchStarted) >= 0} && {(GVAR(searchHead) param [0, objNull]) isEqualTo _holder}) then {
-            _left = _left - ((_now - GVAR(searchStarted)) min (GVAR(searchTime) * (GVAR(searchHead) param [4, 1])));
-        };
-
-        private _seconds = ceil (_left max 0);
-        private _rest = _seconds mod 60;
-        private _clock = format ["%1:%2", floor (_seconds / 60), ["", "0"] select (_rest < 10)] + str _rest;
-
-        // A sealed box says no time: it would tell how much the container holds (fnc_isSealed).
-        private _sealedBox = _x getOrDefault ["sealed", false];
-
-        if (_sealedBox) then {
-            _clock = "";
-        };
-
-        private _words = trim format [[LLSTRING(Status_Search), [LLSTRING(Status_Stopped), LLSTRING(Status_Idle)] select (_status getOrDefault ["idle", false])] select (_status get "stopped"), _clock];
-
-        _words = [_words, [_clock, _words] select _sealedBox, _status] call _fnc_fit;
-
-        if (_words isNotEqualTo _text) then {
-            (_status get "label") ctrlSetText _words;
-            _status set ["text", _words];
         };
     };
-} forEach (uiNamespace getVariable [QGVAR(sectionInfo), []]);
+
+    if (count _over > 0) then {
+        {_x ctrlShow true} forEach (_over getOrDefault ["film", []]);
+
+        private _line = _over get "line";
+
+        _line ctrlSetText ([LLSTRING(Seal_Refused), _over get "width", _theme getOrDefault ["font", "PuristaMedium"], _over get "size"] call FUNC(fitText));
+        _line ctrlSetTextColor (_theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]);
+    };
+
+    GVAR(sealDragOver) = _over;
+};
 
 // Something ended: the chips are made true again (one pass, and the next frame finds nothing to ask).
 if (_resync) then {

@@ -18,9 +18,9 @@
  *             what it holds and where it lies]: its cargo - and that of every uniform, vest and backpack
  *             lying in it, all the way down - and the revision of its places, kept as the engine's lists
  *             themselves: comparing them is cheaper than writing a full crate out as text every second.
- *             Only some of these changed: only those sections are drawn again (fnc_redrawTiles). A sealed body's or
- *             person's container (fnc_isSealed) is [number, "sealed"] until it is searched: nothing in it is shown,
- *             so nothing in it is compared, and its unsealing changes the part.
+ *             Only some of these changed: only those sections are drawn again (fnc_redrawTiles). A sealed box
+ *             (fnc_isSealed: a body's, a crate, a vehicle, a pile not opened yet) is [number, "sealed"] until its seal
+ *             is searched: nothing in it is shown, so nothing in it is compared, and its opening changes the part.
  *   storage - the same per section of the unit's own storage column (GVAR(context) "ownSections"). Only
  *             some changed: those sections are drawn again, and with them the weight card and the hotbar,
  *             which count what the unit carries (fnc_redrawPart). A window that attached may name holders of
@@ -169,8 +169,10 @@ private _loot = [];
     private _container = _x getOrDefault ["container", objNull];
 
     if (!isNull _container) then {
-        // A sealed container (fnc_isSealed) shows nothing of what it holds: its part is the same while it stays sealed,
-        // and changes - to its cargo - the moment it is unsealed, which builds the window with its grid.
+        // A sealed box (fnc_isSealed) shows nothing of what it holds: its part is the same while it stays sealed, and
+        // changes - to its cargo - the moment it is opened, which builds the window with its grid. A uniform, vest or
+        // backpack that came off a body a moment ago gets its search state a little after it lands (the server sets it
+        // with what it held): the part turns to "sealed" then, and the window is built with the block.
         if ([_container] call FUNC(isSealed)) then {
             _loot pushBack [_forEachIndex, "sealed"];
         } else {

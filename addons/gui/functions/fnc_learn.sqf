@@ -3,7 +3,8 @@
  * Author: Miss Heda
  * Changes how many items of a class this player knows in a searched container (fnc_markHidden):
  * searching one, putting one in (+1), taking one out (-1). Local - every player searches for
- * themselves.
+ * themselves - and kept where fnc_searchRecord keeps it: on a crate, a vehicle or a pile, and for a
+ * uniform, vest or backpack by the id it carries, so it goes with it when it is moved.
  *
  * Arguments:
  * 0: Container <OBJECT>
@@ -23,8 +24,9 @@ params ["_container", "_class", "_delta"];
 
 if !([_container] call FUNC(isSearched)) exitWith {};
 
-private _known = _container getVariable [QGVAR(known), createHashMap];
+private _record = [_container, true] call FUNC(searchRecord);
+private _known = _record getOrDefault ["known", createHashMap];
 private _key = toLowerANSI _class;
 
 _known set [_key, ((_known getOrDefault [_key, 0]) + _delta) max 0];
-_container setVariable [QGVAR(known), _known];
+_record set ["known", _known];

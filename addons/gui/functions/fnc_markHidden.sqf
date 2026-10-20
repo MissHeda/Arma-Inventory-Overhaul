@@ -2,11 +2,11 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Marks the loot this player has not searched yet as hidden ("?" tiles, fnc_createTile) and queues it
+ * Marks the loot this player has not searched yet as hidden (hatched tiles, fnc_createTile) and queues it
  * for searching as [container, class, row, col, cells, compartment] - fnc_animateSearch reveals it,
- * one item after another, compartment after compartment, top left first.
+ * one item after another, compartment after compartment, top left first, each box with its own clock.
  *
- * What a player knows is counted per container and class, on the container but not broadcast - every
+ * What a player knows is counted per container and class (fnc_searchRecord "known"), not broadcast - every
  * player searches for themselves: the n-th entry of a class is known while n is below the count.
  * Searching raises the count, and so does putting something in (fnc_afterAction) - what you put in you
  * know; taking something out lowers it again.
@@ -15,6 +15,9 @@
  * engine lists the cargo: every machine lays the same places out the same way, so the ones a player has
  * revealed are the same top-left ones in everyone's view of that container.
  *
+ * A sealed box (fnc_isSealed) queues its seal alone, [container, "", 0, 0, SEAL_CELLS, SEAL_BLOCK]: nothing of what it
+ * holds is shown or timed until the seal is done and the window is built with its real grid, which queues the items.
+ *
  * Never for the player's own uniform, vest and backpack, nor where the settings or the mission
  * (einv_noSearch on the object) say not to.
  *
@@ -22,8 +25,7 @@
  * 0: Container <OBJECT>
  * 1: Entries, as fnc_getLayout placed them <ARRAY>
  * 2: Queue the hidden ones for searching - off to only learn which are hidden <BOOL> (default: true)
- * 3: Sealed (fnc_isSealed): with the queue, one more entry after the items - the seal, [container, "", 0, 0, SEAL_CELLS,
- *    SEAL_BLOCK] - whose end unseals the container (fnc_animateSearch); also for a container that holds nothing <BOOL>
+ * 3: Sealed (fnc_isSealed): with the queue, the seal instead of the items - also for a container that holds nothing <BOOL>
  *    (default: false)
  *
  * Return Value:
@@ -46,9 +48,12 @@ private _fnc_wait = {
         GVAR(searchIdle) pushBack _container;
         GVAR(searchPaused) pushBackUnique _container;
     };
+
+    // The boxes that search are matched with the queue again in the next frame (fnc_animateSearch).
+    GVAR(searchDirty) = true;
 };
 
-private _known = _container getVariable [QGVAR(known), createHashMap];
+private _known = ([_container] call FUNC(searchRecord)) getOrDefault ["known", createHashMap];
 private _seen = createHashMap;
 
 // [compartment, row, column, index]: sorted by where it lies, then back to the entry by its index.
@@ -70,7 +75,7 @@ _order sort true;
     if (_index >= (_known getOrDefault [_key, 0])) then {
         _entry set ["hidden", true];
 
-        if (_queue) then {
+        if (_queue && {!_seal}) then {
             call _fnc_wait;
 
             GVAR(searchQueue) pushBack [
@@ -81,7 +86,7 @@ _order sort true;
     };
 } forEach _order;
 
-// The seal comes last: the container shows what it holds only when everything in it was searched.
+// Sealed: the seal is all that is queued - the container shows what it holds only once it is open.
 if (_queue && {_seal}) then {
     call _fnc_wait;
 

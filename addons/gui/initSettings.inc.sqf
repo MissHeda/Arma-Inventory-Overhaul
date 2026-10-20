@@ -108,6 +108,58 @@
     [0, 3, 0.4, 2]
 ] call EFUNC(main,addSetting);
 
+// How long each kind of box takes, as a factor of the time per cell above (fnc_searchTime): 1 is that time, 2 twice as long,
+// 0 shows that kind at once. A uniform's, vest's or backpack's own factor counts wherever it is - worn, on the ground, in a
+// crate -, and what a body wears takes the body's factor on top of it. Read when an item comes up to be searched.
+[
+    QGVAR(searchTimeUniform),
+    "SLIDER",
+    [LLSTRING(Setting_SearchTimeUniform), LLSTRING(Setting_SearchTimeUniform_Desc)],
+    [0, 5, 1, 2]
+] call EFUNC(main,addSetting);
+
+[
+    QGVAR(searchTimeVest),
+    "SLIDER",
+    [LLSTRING(Setting_SearchTimeVest), LLSTRING(Setting_SearchTimeVest_Desc)],
+    [0, 5, 1, 2]
+] call EFUNC(main,addSetting);
+
+[
+    QGVAR(searchTimeBackpack),
+    "SLIDER",
+    [LLSTRING(Setting_SearchTimeBackpack), LLSTRING(Setting_SearchTimeBackpack_Desc)],
+    [0, 5, 1, 2]
+] call EFUNC(main,addSetting);
+
+[
+    QGVAR(searchTimeCrate),
+    "SLIDER",
+    [LLSTRING(Setting_SearchTimeCrate), LLSTRING(Setting_SearchTimeCrate_Desc)],
+    [0, 5, 1, 2]
+] call EFUNC(main,addSetting);
+
+[
+    QGVAR(searchTimeVehicle),
+    "SLIDER",
+    [LLSTRING(Setting_SearchTimeVehicle), LLSTRING(Setting_SearchTimeVehicle_Desc)],
+    [0, 5, 1, 2]
+] call EFUNC(main,addSetting);
+
+[
+    QGVAR(searchTimeGround),
+    "SLIDER",
+    [LLSTRING(Setting_SearchTimeGround), LLSTRING(Setting_SearchTimeGround_Desc)],
+    [0, 5, 1, 2]
+] call EFUNC(main,addSetting);
+
+[
+    QGVAR(searchTimeBody),
+    "SLIDER",
+    [LLSTRING(Setting_SearchTimeBody), LLSTRING(Setting_SearchTimeBody_Desc)],
+    [0, 5, 1, 2]
+] call EFUNC(main,addSetting);
+
 [
     QGVAR(searchBodies),
     "CHECKBOX",

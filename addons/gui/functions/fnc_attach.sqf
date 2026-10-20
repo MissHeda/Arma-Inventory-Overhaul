@@ -73,9 +73,11 @@ GVAR(hooks) = _hooks;
 
 GVAR(openedAt) = diag_tickTime;
 
-// The item being searched starts again from now - the window was closed meanwhile.
+// The items being searched start again from now - the window was closed meanwhile.
 GVAR(searchStarted) = -1;
-GVAR(searchHead) = [];
+GVAR(searchRuns) = [];
+GVAR(searchDirty) = true;
+GVAR(sealDragOver) = createHashMap;
 GVAR(opened) = [];
 
 // The kits opened in the last window close with it (einv_compat_efak - only when that addon is loaded).
@@ -94,7 +96,6 @@ GVAR(pageWanted) = createHashMap;
 GVAR(searchPaused) = [];
 GVAR(searchIdle) = [];
 GVAR(searchSeen) = [];
-GVAR(searchResume) = [];
 GVAR(statusLive) = false;
 
 // The inspect card went with the window it was opened in, however that closed - only where it stood is

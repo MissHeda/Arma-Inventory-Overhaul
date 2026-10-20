@@ -21,12 +21,15 @@
  * fold line and the hairline take the theme's loot colours (lootTab, lootLine) where it has them: what is someone
  * else's never reads as the player's own (issue 7).
  *
- * A body's or a living person's uniform, vest or backpack this player has not searched yet is sealed (fnc_isSealed,
- * issue 6, as in Tarkov): beside its box one block of SEAL_ROWS cells by STORAGE_COLS, hatched, "UNSEARCHED", with a ring
- * and a line that say what its search does (fnc_updateStatus) - no grid, no tiles, no weight, no Take all or Sort, no
- * load hint, no strip, whatever it really holds and however big it is. Its items and a last entry, the seal, are queued
- * as any box's (fnc_markHidden); the caption line's chip searches, stops and resumes it, and with "Search starts on
- * click" a click on the block starts it. When the seal is done the window is built with the real grid.
+ * A box of the loot column this player has to search and has not opened yet is sealed (fnc_isSealed, issues 6 and 16, as
+ * in Tarkov): a body's or a living person's uniform, vest or backpack, a crate, a vehicle's cargo, a pile, a bag lying
+ * about, one opened from inside a container, and a body's that was dropped unsearched. Beside its box one block of
+ * SEAL_ROWS cells by STORAGE_COLS, hatched, "UNSEARCHED", with a ring and a line that say what its search does
+ * (fnc_updateStatus) - no grid, no tiles, no weight, no Take all or Sort, no load hint, no strip, whatever it really holds
+ * and however big it is. Its seal alone is queued (fnc_markHidden); the caption line's chip searches, stops and resumes
+ * it, and with "Search starts on click" a click on the block starts it. When the seal is done - about two seconds - the
+ * window is built with the real grid, every item a hatched footprint, and the items are found one by one. The block
+ * takes nothing: a drag held over it is refused there with "Search it first" (fnc_animateStatus).
  *
  * Its caption tab folds the section away (fnc_toggleSection); a uniform, vest or backpack opened from
  * inside a container gets a cross to close it (fnc_closeNested) - both by the section's container. The
@@ -152,11 +155,12 @@ private _wantsBox = _section getOrDefault ["box", true];
 // and a gap. It takes its room from the box - which gives way in half cells - and from nothing else, so the grid keeps
 // its width; where the column has not even that to spare there is no strip. Only for a container with a grid of its own in
 // the loot column (the player's own containers are small, a kit's grid and the Arsenal's panel are no loot).
-// A body's or a living person's uniform, vest or backpack this player has not searched yet (fnc_isSealed, issue 6): one
-// block of a fixed size where the grid would be, and nothing of the container's real size or contents anywhere - no
-// strip, no weight, no buttons, no hint of its load.
+// A box of the loot column this player has to search and has not opened yet (fnc_isSealed, issues 6 and 16): one block of
+// a fixed size where the grid would be, and nothing of the container's real size or contents anywhere - no strip, no
+// weight, no buttons, no hint of its load. Not a section that brings what it shows along (the Arsenal's, a kit's).
 private _sealed = !_placeholder && {(_section getOrDefault ["side", _parent getVariable [QGVAR(column), ""]]) isEqualTo "loot"}
-    && {_id in ["uniform", "vest", "backpack"]} && {!(_section getOrDefault ["locked", false])} && {call FUNC(isInventoryMode)}
+    && {_id in ["uniform", "vest", "backpack", "container", "ground"]} && {!(_section getOrDefault ["locked", false])}
+    && {!("entries" in _section)} && {call FUNC(isInventoryMode)}
     && {[_section getOrDefault ["container", objNull]] call FUNC(isSealed)};
 
 private _stripW = SQUARE(UNIT * 1);
@@ -272,6 +276,11 @@ private _caption = switch (_id) do {
     case "uniform": {LLSTRING(Tarkov_Pockets)};
     case "backpack": {LLSTRING(Tarkov_Backpack)};
     default {_section getOrDefault ["title", ""]};
+};
+
+// A sealed pile is "Ground" alone: "Ground - Rifle" would name what lies in it.
+if (_sealed && {_id isEqualTo "ground"}) then {
+    _caption = LELSTRING(storage,Ground);
 };
 
 // What someone else wears says whose it is (issue 7: a body's "Backpack" read as the player's own): "Backpack -
@@ -852,7 +861,24 @@ if (_sealed) then {
         _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2
     ] call FUNC(uiLabel);
 
-    _info set ["seal", createHashMapFromArray [["arc", _arc], ["line", _sealLine], ["width", _sealW], ["size", _lineSmall], ["state", ""]]];
+    // A drag held over the block is refused there (fnc_animateStatus): a film in the loss colour, hidden until then, and
+    // where the block and its column lie, to find it on the screen as the column scrolls.
+    private _loss = +(_theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]);
+
+    _loss set [3, 0.18];
+
+    private _film = [_display, _parent, [_gridX, _bodyTop, _sealW, _sealH], _loss, _sealRadius] call FUNC(uiPanel);
+
+    {_x ctrlShow false} forEach _film;
+
+    (ctrlPosition _parent) params ["_frameX", "_frameY", "_frameW", "_frameH"];
+
+    _info set ["seal", createHashMapFromArray [
+        ["arc", _arc], ["line", _sealLine], ["width", _sealW], ["size", _lineSmall], ["state", ""], ["words", ""], ["film", _film],
+        ["anchor", createHashMapFromArray [["rel", [_gridX, _bodyTop]], ["parent", _parent]]], ["blockSize", [_sealW, _sealH]],
+        ["frame", createHashMapFromArray [["rel", [_frameX, _frameY]], ["parent", ctrlParentControlsGroup _parent]]],
+        ["frameSize", [_frameW, _frameH]]
+    ]];
 
     // With "Search starts on click" a click on the block starts or resumes its search, as the chip's Search button does;
     // it never stops it (the chip's cross does).
@@ -872,8 +898,8 @@ if (_sealed) then {
         }];
     };
 
-    // Its items and then the seal are queued as any box's (fnc_markHidden), and wait for the click with "Search starts on
-    // click"; the seal's end builds the window with the real grid (fnc_animateSearch).
+    // Its seal is queued alone (fnc_markHidden) and waits for the click with "Search starts on click"; the seal's end
+    // builds the window with the real grid, whose items are queued then (fnc_animateSearch).
     [_sectionContainer, _layout getOrDefault ["entries", []], true, true] call FUNC(markHidden);
 } else {
     [_display, _parent, [_gridX, _bodyTop], _section, _drawLayout, _places, _theme] call FUNC(drawCompartments);
