@@ -3,8 +3,9 @@
  * Checks that the shipped default ruleset (CfgEinvRulesets >> default, the one preset there is) gives every
  * item the size and stack, and every container the compartments, it is meant to: the sizes of "expected" below
  * (rifles from 4x2 to 7x2, backpack tiles 4x4, 5x5 and 5x6, the rest as they always were), nothing stacking
- * but the classes of the @stack_* groups with the number of their group, and containers laid out from 120 % of
- * their load - a uniform one block 6 wide and 2 to 5 rows high, a vest pouches of 1x2 and 2x2, a backpack one
+ * but the classes of the @stack_* groups with the number of their group and the medical items of the rules that follow
+ * them (class=..., ACE, ACM, ACME, EFAK; checked against those rules compiled alone), and containers laid out from
+ * 120 % of their load - a uniform one block 6 wide and 2 to 5 rows high, a vest pouches of 1x2 and 2x2, a backpack one
  * near-square block, crates and vehicles as wide as the columns - with nothing set in the older tables and both
  * sliders on their defaults. Also checks that the default's groups are a partition (an item in two of them
  * would let a rule for one reach into the other; only medical and the stack groups overlap on purpose), that
@@ -27,6 +28,15 @@
  */
 
 private _compiled = ["einv1 base=default", false] call einv_items_fnc_compileRules;
+
+// The medical items of ACE, ACM, ACME and Enhanced First Aid Kits (issue #9): the default's rules that name a class
+// (they follow the @stack_* groups) give them sizes and stacks of their own, not the old ones below. Compiled alone,
+// they say what such a class has to come out as; every other class is still checked against the old answers.
+private _medicalRules = (getArray (configFile >> "CfgEinvRulesets" >> "default" >> "rules")) select {
+    (_x select [0, 6]) in ["class=", "class~"]
+};
+private _medical = ["einv1 base=none, " + (_medicalRules joinString ", "), false] call einv_items_fnc_compileRules;
+private _medicalCache = createHashMap;
 private _cache = createHashMap;
 private _cell = _compiled get "cell";
 private _report = [];
@@ -258,8 +268,17 @@ private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stac
 
     _counts set ["classes", (_counts get "classes") + 1];
 
+    // The medical list's answer, where one of its rules reaches the class.
+    private _medicalInfo = [_class, _medical, _medicalCache] call einv_items_fnc_getInfo;
+    private _medicalSize = (((_medicalInfo get "src") get "footprint") select [0, 4]) isEqualTo "own:";
+    private _medicalStack = (((_medicalInfo get "src") get "stack") select [0, 4]) isEqualTo "own:";
+
     // Size
     private _oldSize = [_config, _kind, _mass, _facts get "maxLoad", _facts get "rounds"] call _fnc_oldSize;
+
+    if (_medicalSize) then {
+        _oldSize = _medicalInfo get "size";
+    };
 
     if ((_info get "size") isNotEqualTo _oldSize) then {
         ["size", format ["SIZE %1 (%2, mass %3): expected %4, now %5 from %6", _class, _kind, _mass, _oldSize, _info get "size", (_info get "src") get "footprint"]] call _fnc_count;
@@ -267,6 +286,10 @@ private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stac
 
     // Stack
     private _oldStack = [_config, _kind, _oldSize, _facts] call _fnc_oldStack;
+
+    if (_medicalStack) then {
+        _oldStack = _medicalInfo get "stack";
+    };
 
     if ((_info get "stack") != _oldStack) then {
         ["stack", format ["STACK %1 (%2, mass %3, size %4): expected %5, now %6 from %7", _class, _kind, _mass, _oldSize, _oldStack, _info get "stack", (_info get "src") get "stack"]] call _fnc_count;

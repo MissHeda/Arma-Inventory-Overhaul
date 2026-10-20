@@ -21,7 +21,8 @@
 // name is free: the config finds a class whatever its case, and the ids are read lowercased.
 class CfgEinvRulesets {
     // The default, the one preset: the sizes a rig and a rifle really take, and nothing stacks but what
-    // the owner picked by hand (the last groups, @stack_*). A rifle is a column longer than it was before presets went, a
+    // is listed by class (the last groups, @stack_*, and the rules after them for the medical items of
+    // ACE, ACM, ACME and Enhanced First Aid Kits, with their own sizes). A rifle is a column longer than it was before presets went, a
     // backpack's tile as large as its room. No rule here sets a container's grid: a uniform, vest or
     // backpack with no rule, mod or setting of its own gets what the built-in answer makes of its load
     // (einv_storage_fnc_blocksFor), so the kind settings of the setup wizard's General page - the text's
@@ -34,7 +35,7 @@ class CfgEinvRulesets {
     class Default {
         name = CSTRING(Ruleset_Default);
         description = CSTRING(Ruleset_Default_Desc);
-        revision = 3;
+        revision = 4;
         base = "";
         cell = -1;
         rules[] = {
@@ -108,21 +109,48 @@ class CfgEinvRulesets {
             "@backpack_medium > size=5x5",
             "@backpack_large > size=5x6",
 
-            // What may share a tile: consumables that are used up one at a time (bandages, injectors,
-            // infusions, rations, a first aid kit), by what they weigh - the small ones twenty or ten
-            // to a tile, the heavy ones five or two. Keyed by class, so a class of a mod that is not
-            // loaded matches nothing and costs nothing; a name with a plus is that class and every
-            // class built on it, where they are all of the same sort. Chalk, anything that is a magazine
-            // to the game, and what keeps a state of its own (a canteen, a fresh blood bag) never stack.
-            // A rule of the text with a class of these wins, as it does over any rule here.
-            "@stack_20: class=ACE_suture|ACE_CableTie|ACE_EarPlugs",
-            "@stack_10: class=ACE_fieldDressing|ACE_packingBandage|ACE_elasticBandage|ACE_quikclot|ACE_tourniquet|ACE_morphine|ACE_epinephrine|ACE_adenosine|ACE_painkillers_Item|ACE_plasmaIV_250|ACE_salineIV_250|ACE_bloodIV_250|ACE_IR_Strobe_Item|ACM_PressureBandage|ACM_ElasticWrap|ACM_SAMSplint|ACM_IV_16g+|ACM_Syringe_10+|ACM_Vial_Epinephrine+|ACM_BloodBag_O_250+",
-            "@stack_5: class=ACE_splint|ACE_plasmaIV_500|ACE_salineIV_500|ACE_bloodIV_500|ACE_Sunflower_Seeds|ACE_MRE_LambCurry+|ACE_Can_Spirit+|ACM_EmergencyTraumaDressing|ACM_ChestSeal|ACM_BloodBag_O_500+|FirstAidKit",
-            "@stack_2: class=ACE_plasmaIV|ACE_salineIV|ACE_bloodIV|ACM_BloodBag_O_1000+",
+            // What may share a tile besides the medical list below: consumables used up one at a time (cable
+            // ties, ear plugs, rations, a first aid kit), by what they weigh - the small ones twenty or ten to a tile,
+            // the heavy ones five or two. Keyed by class, so a class of a mod that is not loaded matches nothing and
+            // costs nothing; a name with a plus is that class and every class built on it, where they are all of the
+            // same sort. Chalk and what keeps a state of its own (a canteen) never stack. A rule
+            // of the text with a class of these wins, as it does over any rule here.
+            "@stack_20: class=ACE_CableTie|ACE_EarPlugs",
+            "@stack_10: class=ACE_adenosine|ACE_painkillers_Item|ACE_bloodIV_250|ACE_IR_Strobe_Item",
+            "@stack_5: class=ACE_splint|ACE_bloodIV_500|ACE_Sunflower_Seeds|ACE_MRE_LambCurry+|ACE_Can_Spirit+|FirstAidKit",
+            "@stack_2: class=ACE_bloodIV",
             "@stack_20 > stack=20",
             "@stack_10 > stack=10",
             "@stack_5 > stack=5",
-            "@stack_2 > stack=2"
+            "@stack_2 > stack=2",
+
+            // The medical items of ACE, ACM, ACME and Enhanced First Aid Kits (issue #9): the stack and the size of
+            // each, last so they win over the groups above, field by field. One rule per size and stack; a name with a
+            // plus is the class and every class built on it ("all types"). A stack above 1 on a class the game treats
+            // as a magazine (ACM_Paracetamol, ACM_AmmoniaInhalant, ACM_Inhaler_Penthrox, ACM_Syringe_10 and its types,
+            // ACM_OxygenTank_425) is all it takes to let it share a tile: only magazines with the same rounds meet.
+            // Every vial (ACM_Vial_*, ACME_Vial_*, ACME_MannitolVial) by a part of its class name, so a vial added
+            // later is covered too: three to a tile.
+            "class~ACM_Vial_|ACME_Vial_|ACME_MannitolVial > size=1x1 stack=3",
+            // One to a tile, 1x1: single-use devices, bags and tools. A name with a plus is that class and every class built on
+            // it (all types of a blood bag, plasma, saline and PlasmaLyte bag).
+            "class=ACM_AmmoniaInhalant|ACM_BloodBag+|ACM_EMMA|ACME_ETTube|ACM_EsmololBag|ACM_IO_EZ|ACM_IO_FAST|ACM_FieldBloodTransfusionKit_250|ACM_FieldBloodTransfusionKit_500|ACME_HTSBag|ACME_Laryngoscope|ACME_BloodWarmer|ACME_MagnesiumBag|ACME_MannitolBag|ACM_HPMK|ACM_NRBMask|ACM_Inhaler_Penthrox|ACE_plasmaIV+|ACME_PlasmaLyteBag+|ACM_PocketBVM|ACM_PressureCuff|ACE_salineIV+|ACM_Stethoscope|ACM_Thermometer|ACE_suture|ACM_ThoracostomyKit|ACME_VentBattery > size=1x1 stack=1",
+            // Two to a tile, 1x1: dressings, injectors, sprays and kits used up one at a time; body bags, all types.
+            "class=ACM_Paracetamol|ACM_Autoinjector_ATNA|ACE_fieldDressing|ACE_elasticBandage|ACE_packingBandage|ACE_quikclot|ACE_bodyBag+|ACM_ChestTubeKit|ACM_CombatGauze|ACM_CricKit|ACM_ElasticWrap|ACM_EmergencyTraumaDressing|ACE_epinephrine|ACME_Spray_Esketamine|ACME_HTSBullet|ACM_Autoinjector_Midazolam|ACE_morphine|ACM_Spray_Naloxone|ACME_NARSPEAR|ACM_NCDKit|ACM_PressureBandage|ACME_PressureInfuser|ACM_PulseOximeter|ACM_SAMSplint|ACE_tourniquet|ACME_XStat > size=1x1 stack=2",
+            // Three to a tile, 1x1: cannulas, seals, airways, flushes and prepared syringes (all types).
+            "class=ACM_IV_14g+|ACM_IV_16g+|ACM_IV_18g+|ACM_IV_20g+|ACM_ChestSeal|ACM_SuctionBag|ACM_IGel|ACME_NARBOA|ACM_NPA|ACM_OPA|ACM_SalineFlush_10|ACM_Syringe_10+ > size=1x1 stack=3",
+            // Five to a tile, 1x1: lozenges and IV lines.
+            "class=ACM_Lozenge_Fentanyl|ACME_IVLine|ACME_YTubing > size=1x1 stack=5",
+            // One to a tile, 2x1; the individual first aid kit (Enhanced First Aid Kits) with every instance class built on it.
+            "class=ACM_BVM|ACME_AAJT_S|efak_IFAK+ > size=2x1 stack=1",
+            // One to a tile, 1x2: the oxygen tank.
+            "class=ACM_OxygenTank_425 > size=1x2 stack=1",
+            // One to a tile, 2x2; the kit of Enhanced First Aid Kits with its instances (efak_AFAK_1 and on) via the plus.
+            "class=ACM_AED|ACME_BloodCooler_CSWB1U|ACE_surgicalKit|ACME_Ventilator|efak_AFAK+ > size=2x2 stack=1",
+            // One to a tile, 3x2; before 3x3, so that a kit built on one of these two takes the larger size.
+            "class=ACM_ACCUVAC|ACME_BloodCooler_CSWB2U|efak_MFAK+ > size=3x2 stack=1",
+            // One to a tile, 3x3.
+            "class=ACME_BloodCooler_CSWB4U|efak_MFAKPlus+ > size=3x3 stack=1"
         };
 
         // Examples only where the class surely lands in that group; the others stay "" until they
