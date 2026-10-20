@@ -36,7 +36,7 @@ _tileBg set [CATEGORY_MEDICAL, [0.12, 0.21, 0.14, 0.92]];
 
 // The accent is the player's own active element colour (fnc_accentColour), with the shades the look needs worked out
 // from it: every key below that is an accent is a copy of its own.
-private _accent = call FUNC(accentColour);
+private _accent = [] call FUNC(accentColour);
 
 createHashMapFromArray [
     ["id", ""],

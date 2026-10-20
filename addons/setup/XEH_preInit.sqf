@@ -23,7 +23,9 @@ GVAR(steps) = [
 // before text boxes within a topic - but for the master switch of the weight tiers, first of its topic.
 GVAR(topics) = [
     ["looting", [
-        "einv_gui_searchTime", "einv_storage_nearbyRange", "einv_gui_handDrop", "einv_gui_handMove", "einv_gui_handEquip",
+        "einv_gui_searchTime", "einv_gui_searchTimeUniform", "einv_gui_searchTimeVest", "einv_gui_searchTimeBackpack",
+        "einv_gui_searchTimeCrate", "einv_gui_searchTimeVehicle", "einv_gui_searchTimeGround", "einv_gui_searchTimeBody",
+        "einv_storage_nearbyRange", "einv_gui_handDrop", "einv_gui_handMove", "einv_gui_handEquip",
         "einv_gui_waitMove", "einv_gui_waitDrop", "einv_gui_waitWorn", "einv_gui_waitEquip",
         "einv_gui_searchBodies", "einv_gui_searchPersons",
         "einv_gui_searchContainers", "einv_gui_searchZeus", "einv_gui_searchGround", "einv_gui_searchOnClick", "einv_gui_soundsWorld"

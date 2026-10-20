@@ -34,7 +34,7 @@ private _theme = call FUNC(themeBase);
 
 // The accent is the player's own active element colour (fnc_accentColour), read once for the theme; its shades are
 // worked out from it. Every key gets a copy of its own.
-private _accent = call FUNC(accentColour);
+private _accent = [] call FUNC(accentColour);
 
 private _tileBg = [];
 _tileBg set [CATEGORY_MISC, [0.15, 0.15, 0.15, 0.92]];

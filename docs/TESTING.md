@@ -49,7 +49,7 @@ A client can see them and cannot change them.
 - [ ] Weight bar: colour by tier, the texts (next limit, effect), the preview on pick-up, no ticks.
 - [ ] Right-click on another tile while a menu is open opens the new menu; right-click on empty space closes.
 - [ ] Count badges `n/stack` only for stackable classes; magazine rounds bottom left; hotbar slots alike.
-- [ ] Searching a crate: tiles reveal one by one, the ring follows a tile on a painted compartment's cells.
+- [ ] Searching a crate: the UNSEARCHED block opens after about 2 s, then the hatched tiles reveal one by one, also on a painted compartment's cells.
 - [ ] Holes in grids: no hover on a hole, the footprint turns red over one, a drop beside a hole.
 - [ ] L-shaped items: tile border, R turns around the grabbed cell, a small item fits into the L's corner.
 - [ ] Grids 10 wide: cell 37 px at 1080p, the storage column scrolls, the camera stays visible while looting.
@@ -79,10 +79,30 @@ A client can see them and cannot change them.
       backpack), no tiles, no weight in the caption, no Take all or Sort, no strip, a chip that says no time; the hint over the
       block and the caption says nothing of the load; Put all in from your gear does not go into them. With "Search starts on
       click" on: the chip says Unsearched, a click on Search or on the block starts it (the block's ring turns, "Searching..."),
-      clicking another box first pauses this one and it goes on afterwards, the cross stops it ("Stopped"). When done the real
-      grid appears with every item visible; closing and opening the body keeps it searched; a second player still sees it
-      sealed. An empty backpack is searched in a moment and shows its empty grid. With the setting off the blocks search one
-      after another by themselves. A living person (search persons on) the same; crates and the ground keep hatched tiles.
+      the cross stops it ("Stopped"). After about 2 s the block turns into the real grid with every item a hatched footprint,
+      then the items are found one by one; closing and opening the body keeps what was found; a second player still sees it
+      sealed. An empty backpack opens after the 2 s and shows its empty grid. With the setting off every block starts by itself.
+      A living person (search persons on) the same.
+- [ ] Tarkov reveal everywhere (issue #16): a crate, a vehicle opened from outside and the vehicle you sit in (searching on),
+      a pile with "Search the ground" on, a bag lying about and a backpack opened from inside a crate each start as the
+      UNSEARCHED block; Search opens it after about 2 s into the grid with hatched footprints, then the tiles reveal one by
+      one. A pile you dropped an item onto (nothing else in it) is open to you at once.
+- [ ] Parallel searches (issue #16): open an AI's body, click Search on the uniform, then at once on the vest: both rings turn
+      and both chips count down, neither waits for the other; the cross stops only its own box, Search resumes it. Set
+      "Search time: vests" to 3 on the General page: the vest takes three times as long as the uniform; "Search time:
+      bodies" at 2 doubles both; a factor at 0 shows that kind at once. Frame time stays flat with five boxes searching.
+- [ ] Search chip width (issue #16): the chip reads "[ring] Unsearched [Search]" (sealed) or "[ring] Searching 0:07 [x]" with
+      one even gap between the parts and no empty space before the button; it keeps its place while the seconds tick and is
+      remade when the time goes from 1:00 to 0:59.
+- [ ] A drag over a sealed block (issue #16): drag a bandage from the ground onto a body's unsearched backpack block: the block
+      tints red and reads "Search it first", letting go there moves nothing and the footer says "Search it first".
+- [ ] Search bypass (issue #17): kill an AI with a full backpack, do not search it, drag the backpack onto the ground and right
+      click > Open it: it is an UNSEARCHED block, and so is it in a crate you drag it into. Search it there to the end, then
+      drag it back onto the body's backpack slot: on him it is open to you with every item found, while a second player
+      (multiplayer, body local to the server and to a headless client) still sees it sealed until he searches it. Search a second body's vest on the body,
+      then drop it: on the ground it is open to you at once with every item found. Drop your own backpack: no block for anyone
+      while "Search the ground" is off.
+- [ ] Items onto a body (issue #18): kill a soldier and open him with a pile on the ground beside you (drop a helmet, a vest, a rifle and a bandage there). Search his vest and backpack to the end, then drag the bandage from the Ground section onto the vest's grid and from your own gear onto the backpack's: both go in (multiplayer too, with the body local to the server, to a headless client and to a player); a sealed block takes nothing. Drag the helmet onto the doll's "Headwear" slot: green, it goes on, his old helmet lies on the cell the new one came from; the same for the vest and backpack (the old one comes with what it holds); the rifle on any doll slot is red "That does not go there", a helmet on his vest slot too; an item out of an open kit is red. A living person's doll takes nothing, whatever the settings say.
 - [ ] Loot and own apart (issue #7): open a body - the loot column reads "Loot - <name>" with a blue strip under its title, a
       cooler pane ringed in blue and blue-tinted caption tabs; the body's uniform, vest and backpack read "Pockets - <name>",
       "Tactical rig - <name>", "Backpack - <name>", yours "Pockets", "Tactical rig", "Backpack" in the plain "Your gear" column with the
@@ -95,6 +115,17 @@ A client can see them and cannot change them.
       the same places; Sort on an empty container and a kit still works.
 - [ ] Kits (EFAK) open and pack by drag; the kit window's title row: Take all and Sort as tall as the cross, the fill text and
       the name centred in the row's height beside them; radios (TFAR / ACRE2) hint, menu, Open radio; ACE cargo cards, Unload.
+- [ ] Kits (issue #19): an IFAK with contents in capacity mode - its window's title says "n / 35 mass" with n > 0, and a full IFAK
+      refuses one more bandage ("Not enough space"); in the debug console `[["efak_IFAK_1"] call efak_core_fnc_getUsedCapacity,
+      [["efak_IFAK_1"] call efak_core_fnc_getContents] call efak_core_fnc_getUsedCapacity]` - the first (the class, which
+      `fnc_canPack` and `fnc_fillState` now both pass) is the used mass with no RPT error; if only the second is, switch both.
+- [ ] Kits (issue #19), two players: B opens an IFAK lying in a crate, A packs a bandage into it and takes one out - B's kit window
+      follows within a second; EFAK's own window used on A's own IFAK the same for A's open kit window.
+- [ ] Kits (issue #19): `inheritsFrom (configFile >> "CfgWeapons" >> "efak_IFAK_1")` is `efak_IFAK` (rules `class=efak_IFAK+` reach
+      the instances); a rule giving IFAKs `stack=3` leaves two IFAKs two tiles with no count badge, the wizard offers no Stack for a kit.
+- [ ] Kits (issue #19): the CBRN bag (Enhanced Utility Pouches) takes an empty uniform let go on a free cell, on that cell; arrange
+      an IFAK, save and load the loadout in ACE Arsenal - the kit comes back with its contents (its arrangement inside may start
+      fresh under its new instance class); a full backpack with an IFAK as the last thing saved and loaded - the IFAK is there.
 - [ ] Magazine repack by drop, Repack all, the fill bar.
 - [ ] Surplus moves on: `player addItemToUniform` of more than the uniform's grid holds (a loop of 30 bandages, with the window
       shut and open): within a second the rest lies in the vest, then the backpack, none of it as overflow while a cell is
@@ -125,6 +156,11 @@ A client can see them and cannot change them.
       `einv_compat_efak_fnc_roomMode` says "cells"): pick the IFAK in the left list, drag a row of ACE's right list onto a free cell
       and onto a taken one, drag from staging into the kit and a kit tile out to staging, move a tile inside the kit and turn it (R),
       drop one outside the panel, Delete, right-click Remove, Ctrl+wheel; a kit lying in the staging space and one in the vest.
+- [ ] Kit grid (issue #19): picking an IFAK, an AFAK and a pouch of Enhanced Utility Pouches in the left list each shows that kit's
+      grid; with the IFAK's field packing off and Arsenal packing on, staging -> kit and kit -> staging work like ACE's list; with
+      Arsenal packing off both are red "This kit cannot be filled in the arsenal" and moving inside the kit still works; filling
+      the kit with EFAK's own kits tab redraws the grid at once; "+" an IFAK from ACE's list and pick it - its grid takes items
+      within a second (the prototype made ready); a kit packed in a kit there takes a drop on its tile.
 - [ ] Sections fold and stay folded per class; the title row: the container's picture, its name beside it in the title size of
       the inventory's columns and centred on the picture, a hairline under it; picture, tabs and grids on one left edge, the
       weights on one right edge, the same room round everything; the staging subtitle on the caption's baseline.
@@ -139,6 +175,10 @@ A client can see them and cannot change them.
 
 - [ ] Opens from ESC > Options, the cog in the inventory, Eden's Tools menu; every button works in Eden.
 - [ ] Start: switch Default / Realism / Weight, "Keep my own rules", What you changed (remove, jump), Advanced.
+- [ ] General, What you changed (issue #15): turn a server setting off its default, set Backpacks to Fixed 8x6, change the cell size, add a
+      category, give one class a rule on Items - each is a row ("Search on click: on » off", "Every backpack: compartments 8×6") and the
+      header says "N changes from the default setup"; the cross takes one back and the control above follows; the header chip's list
+      (marked new / changed) and Save cover the same; Reset to default empties the list.
 - [ ] Items: search, kind chips, "Only classes with own rules" lists no containers, steppers, drawing an L,
       Apply / Discard / Back to the preset, the preview.
 - [ ] Containers: search, chips, load-0 backpacks listed, Paint (colours, drag-painting, the preview with gaps),

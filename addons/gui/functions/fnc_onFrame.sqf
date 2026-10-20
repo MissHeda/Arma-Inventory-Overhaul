@@ -423,6 +423,11 @@ if (GVAR(stripDrag) isNotEqualTo []) exitWith {
 if (GVAR(dragging)) exitWith {
     GVAR(lastMouse) = _mouse;
     [_display, _mouse] call FUNC(updateDrag);
+
+    // A sealed block under the drag says why it takes nothing (the chips below are not reached while it is held).
+    if (GVAR(statusLive)) then {
+        [_display, _now, true] call FUNC(animateStatus);
+    };
 };
 
 // A press on an empty cell is a click and nothing more: let go outside the window, where no event reaches,

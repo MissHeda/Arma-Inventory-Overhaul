@@ -12,11 +12,13 @@
  *
  * A sealed block (fnc_drawSection) takes nothing: a tile dragged over it finds no grid there, so the drag would just do
  * nothing. While a drag is held over one, the block says why - a film in the loss colour over it and "Search it first"
- * in its line - and let go there, the footer's hint says it too (fnc_flashHint). The drag itself is left alone.
+ * in its line - and let go there, the footer's hint says it too (fnc_flashHint). The drag itself is left alone. A drag
+ * ends the frame before the chips are looked at (fnc_onFrame), so it asks for this part alone.
  *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Now, diag_tickTime <NUMBER>
+ * 2: Only the sealed block under a drag, not the chips <BOOL> (default: false)
  *
  * Return Value:
  * None
@@ -29,14 +31,16 @@
 
 disableSerialization;
 
-params ["_display", "_now"];
+params ["_display", "_now", ["_dragOnly", false, [false]]];
 
 if (!GVAR(statusLive)) exitWith {};
 
 private _second = floor _now;
 private _tick = _second != GVAR(statusSecond);
 
-GVAR(statusSecond) = _second;
+if (!_dragOnly) then {
+    GVAR(statusSecond) = _second;
+};
 
 private _resync = false;
 private _infos = uiNamespace getVariable [QGVAR(sectionInfo), []];
@@ -81,7 +85,7 @@ private _infos = uiNamespace getVariable [QGVAR(sectionInfo), []];
 
     (_status get "label") ctrlSetText _words;
     _status set ["text", _words];
-} forEach _infos;
+} forEach ([_infos, []] select _dragOnly);
 
 // A drag held over a sealed block: the block it is over, found by where the block lies on the screen now (its column
 // scrolls) and only where its column shows it.

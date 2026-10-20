@@ -881,6 +881,12 @@ an object of its own and no item cargo, which the scripted holder avoids (see Gr
 holder the engine keeps it in until the end of the frame is never taken for a pile. `fnc_opPutGround` writes one RPT line per
 backpack, "Backpack CLASS goes onto pile NETID".
 
+**The search goes with it** (issue #17). Before the snapshot `fnc_takeOff` writes the container's search state, `GVAR(searchState)`
+`[id, source]` - "body" off a dead man, "person" off a living one who is not the player where the unit is local, "" otherwise -, which
+`GVAR(carryVariables)` carries: `fnc_restore` sets it, public, on the object the engine makes where it lands (ground, crate, another
+body, the player). No step of the drop path does anything else for it (`fnc_opPutGround`, `fnc_getGroundHolder` and `fnc_addPayload`
+are unchanged); a payload restored loose, when `fnc_addPayload` cannot tell which new object arrived, loses it. See "Searching" in section 4.
+
 ### Use from containers (`fnc_useState`, `fnc_useCarried`, `fnc_reloadGuard`)
 
 Three global CBA settings, topic "Use from containers" (`addons/storage/initSettings.inc.sqf`): `einv_storage_useUniform`,
@@ -1398,7 +1404,7 @@ sizes; what lies on a tile goes by the cell already.
 
 `fnc_themeBase` returns a HashMap with every key; a look copies it and overrides. There is one look, **Glass** (`fnc_theme`, id
 `"main"`, in the feel of Arma's and ACE's menus and Enhanced First Aid Kits); `einv_gui_styles` holds that one entry, kept as a
-list so a look could be added. `fnc_theme` adds `equipmentPanel` (a pane under the equipment cards), `titleIcons` and `onAccent`.
+list so a look could be added. `fnc_theme` adds `equipmentPanel` (a pane under the equipment cards), `titleIcons` and `onAccent`. The accent keys (`accent`, `accentSoft`, `accentHover`, `slotAccent`, `barFill`) are the player's own active element colour from Arma's Options > Game > Colors (profile `GUI_BCG_RGB_*`), read by `fnc_accentColour` whenever a theme is built (the window, the wizard, the Arsenal panel), brightened when too dark for the near-black panes, with the translucent and hover shades and the ink on it (`onAccent`, dark or white by contrast) derived from that one base and the old orange as the fallback without a profile value (issue #14).
 **The camera** on the soldier in the middle (`einv_gui_cameraOn`) starts as `einv_gui_cameraDefault` says at every opening
 (`fnc_open`: `"soldier"` the third-person camera, `"off"` none - the world as seen from his eyes, darker dim); the header's
 button (`fnc_toggleCamera`; an accent icon and line while the camera is on, the plain surface with the icon at 45 % strength while it is off; not drawn at all and
@@ -1416,7 +1422,7 @@ as it was. It is no longer kept in the profile.
 | `slot`, `slotEmpty`, `slotBorder`, `slotCaption` (`"none"`, `"above"`, `"tab"`, `"inside"`), `slotCaptionBg`, `slotIcon`, `slotAccent`, `hatch` | slots |
 | `cell`, `tileBg` (five colours by `CATEGORY_*`), `tileBorder`, `tileName`, `tileCount` (`"text"`, `"pill"`, `"badge"`), `tileCountBg`, `tileCountColor`, `tileAmmoBar` | grid cells and tiles |
 | `raised` | the small flat box of a stack's "3/10" and a hotbar slot's count |
-| `text`, `text2`, `muted`, `accent`, `accentSoft`, `line`, `gain`, `loss`, `warn`, `info` | colours |
+| `text`, `text2`, `muted`, `accent`, `accentSoft`, `accentHover`, `line`, `gain`, `loss`, `warn`, `info` | colours |
 | `barTrack`, `barFill`, `button`, `buttonHover`, `buttonText`, `keyBg`, `keyText`, `keyRound` | bars, buttons, key hints in the footer |
 
 The Arsenal panel has no theme of its own: it is drawn in Glass as it is, with its radius, panel colour, fonts and text colours.
@@ -1576,11 +1582,14 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `statusRect`, `statusSize` and `statusCover` into the section's info (`sectionInfo`) and draws nothing. `fnc_updateStatus` (the end of every `fnc_drawQueue`, so of
   every build, redraw and settle, and `fnc_revealTile`, `fnc_stopStatus`, `fnc_animateStatus` asking) makes, keeps and deletes the chips: for each info it works out
   what the box does - `hands` (a record in `GVAR(handBoxes)`, which comes first) or `search` (entries of `GVAR(searchQueue)` for its container; stopped when it is in
-  `GVAR(searchPaused)`) - and leaves a chip alone whose `signature` ([kind, stopped]) and controls are still right. A chip is a pill (the theme's radius, at most half its height, like the buttons beside it) in the tab's colour, a ring
+  `GVAR(searchPaused)`) - and leaves a chip alone whose `signature` ([kind, stopped, idle, the words' shape]) and controls are still right. A chip is a pill (the theme's radius, at most half its height, like the buttons beside it) in the tab's colour, a ring
   (`search_ring_32` as the track, `search_ring_08` over it as the arc, `STATUS_ARC`), a label and a button: a red round button (a circle with the cross; the word "Search" on an accent pill for a stopped box) set in from the chip's edge on three sides by 0.12 of its
   height, so the chip's round end shows round it; one hit box, that button and two pixels, that lights it under the mouse and runs `fnc_stopStatus` a frame later (hands: `fnc_cancelQueued
-  [0, box]`; search: stop or resume). The words are sized for their longest (the count at its largest, "99:59") so the chip does not move; where even that does not fit
-  the label says the count or the time alone. `fnc_onFrame` calls `fnc_animateStatus` while `GVAR(statusLive)` (the caption lines hold a chip): one `ctrlSetAngle` on each
+  [0, box]`; search: stop or resume). The chip is as wide as what it says (issue #16): ring, one gap, the words (`fnc_statusWords`) in a label as wide as they measure
+  (`getTextWidth` times `TEXT_SLACK`, the words centred in it so the slack lies evenly on both sides), one gap, the button - no fixed width. It is
+  made for the words' shape (every digit a 0), so the seconds tick in place and only a new shape (another state, a time that loses a digit)
+  has `fnc_animateStatus` ask `fnc_updateStatus` to make it anew; where the long words do not fit the room the label says the count or the
+  time alone. `fnc_onFrame` calls `fnc_animateStatus` while `GVAR(statusLive)` (the caption lines hold a chip): one `ctrlSetAngle` on each
   ring (`STATUS_SPIN_SPEED` degrees a second) and a `ctrlSetText` only when the words changed - the hands' count when an entry finished, the search's time once a second;
   a chip whose box has nothing left asks `fnc_updateStatus`, which deletes it and shows the weight again. **The strip** (`fnc_drawGroupStrip`) is one rounded bar (`slotCaptionBg`, the theme's radius at most half its width, `SQUARE(UNIT)` wide) holding a column of
   white pictures between a loot box's picture and its grid - All (`slot_cat_all_ca`), then every category there is (`fnc_stripEntries`: `einv_items_fnc_categories`, each with `fnc_groupTexture` and the `label` of `fnc_categoryInfo`): weapons (`slot_rifle_ca`), ammunition (`slot_magazine_ca`), grenades (`slot_grenade_ca`), gear (`slot_vest_ca`), medical
@@ -1828,7 +1837,12 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   over free cells are fine; cells a move under way goes to count as taken), another container must be able to carry it
   (`fnc_checkTouch`; `fnc_backpackIntoBackpack` is the one kind rule), and a uniform, vest or backpack never goes into itself
   (`fnc_liesIn`). On an own slot it fits when `slotAccepts` says so, and its footprint (green or red) is round like the slot - all four corners with the radius of the slot's own panel and ring (the theme's `radius`, at most a quarter of the slot's height; `_fnc_slotCorners` in `fnc_updateDrag` hands `_fnc_show` the radius in pixels and a third element true, which also rounds it for a shaped item) on weapon, attachment, worn-gear, small-gear and hotbar slots, drawn by the same six pieces as a grid footprint at a panel's corner (`dragCorners`, made at the lift); the equipment column as a whole stays a plain faint rectangle; worn gear over the same slot of another unit is exchanged
-  (`fnc_canSwap`, `fnc_doSwap`); outside every panel it goes on the ground. `fnc_endDrag` hands the result to `fnc_sendMoves` (or
+  (`fnc_canSwap`, `fnc_doSwap`); **a tile from a container (the ground, a crate, the player's gear) let go on a slot of a dead body's paper doll is put on
+  the body** (issue #18): `["slot", i, 0, 0, fits, why, slot, true, body]`, `fnc_canPutOn [class, body, slot]` (only `SWAP_SLOTS` - never a weapon -, what the slot
+  takes, `fnc_checkTouch [body, "worn"]`; red "NoFit" otherwise, also out of a kit), `fnc_endDrag` -> `fnc_doEquip` with the body as its fifth argument -> an `equip`
+  move of `fnc_sendMoves` with `unit` the body, the old item back on the tile's cell; a living person's slots are no target for a tile, and a body's uniform, vest and
+  backpack accept a drop as any container once searched (a sealed one is a block without a grid, so there is nothing to let go on); outside every panel it goes on
+  the ground. `fnc_endDrag` hands the result to `fnc_sendMoves` (or
   the `drop` hook).
 - **Tile onto tile: a swap** (`fnc_swapPlan`, `fnc_applySwap`). Where a grid drop is refused as `"NoRoom"` for taken cells - and only
   there: the whole of a stack held, nothing from a slot or a group, no kit's grid or ACE's list; a
@@ -1965,7 +1979,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   it back. The **search field** (`fnc_drawFilter`, `fnc_applyFilter`) dims non-matching tiles; a category chosen at a loot box's side hides them (see "Section bars").
 - **The weight card** reads `einv_weight_fnc_getLoad` (ACE's total, the rules' weights and EFAK's kits included), the limits and
   the tier. The bar has no tick marks or zone strip; it fills by load over the Critical limit. The fill, the tier's words and the
-  preview take **`fnc_weightColor [unit, load, theme]`**: `text2` in Light, `accent` in Heavy, `loss` in Overloaded and Critical,
+  preview take **`fnc_weightColor [unit, load, theme]`**: `text2` in Light, `warn` in Heavy, `loss` in Overloaded and Critical,
   blending into the next tier's colour over the last 6 % of the bar before its limit. The right text is the tier and its effect
   ("Heavy · jogging tires you", `einv_weight_fnc_tierText`); the left the load and where the next tier starts ("12.4 kg · Heavy at
   26.7 kg", `Load_Next`; nothing at Critical); on a narrow column the next limit goes first, then the effect. Lifting something
@@ -1975,21 +1989,71 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 
 ### Searching, sounds, moving stops looting
 
-- **Searching** (`fnc_isSearched`, `fnc_markHidden`, `fnc_animateSearch`, `fnc_updateStatus`, `fnc_stopStatus`, `fnc_revealTile`, `fnc_learn`): loot
-  of the kinds the settings name (bodies, persons, containers, ground; never the player's own gear, an object with
-  `einv_noSearch` - see "Leaving an object out" below -, an ACE arsenal box) shows as **diagonally striped tiles** until searched, `einv_gui_searchTime` seconds per cell. An unsearched tile is a
-  surface a step above an empty cell with `hatch_ca` stripes over its whole footprint (`fnc_createTile`, `fnc_uiHatch`: pieces of about a cell, so a wide tile keeps
-  the stripes' angle; a shaped one run by run; a tile at a round corner of its panel is hatched a third of the corner's radius in from that corner, a square piece
-  would stick out over the arc) - no "?", no outline, no ring and no glass on the tile: two controls for a one-cell tile, as the "?" tile had. What a player
-  knows is counted per container and class (local), in the arrangement's order, so everyone reveals the same top-left ones; what
-  you put in you know. The queue entry is `[container, class, row, col, cells, block]`, revealed one item at a time, the first of the first box that is not
-  stopped; a found tile is drawn anew in place (its stripes go, the flash comes), a build only when the section's first find brings Take all. A frame of searching
-  costs the same however much is still hidden: a clock, the sound's own clock, and the chip. **The search is told in the box's caption line only**
-  ("Section bars: the activity chip", under "Layout"): a ring that goes round, "Searching 0:07" - the time that is left of the box's items, their cells times
-  `einv_gui_searchTime`, less what the item being searched has run, written once a second (`fnc_animateStatus`) - and a red cross. The cross stops the search
-  of that box (`fnc_stopStatus`: its container is in `GVAR(searchPaused)`, which `fnc_animateSearch` passes over; the window's own state, empty for every window);
-  a stopped box says "Stopped 0:07" with a still ring and a button "Search" that takes the container out of the list again. A hidden tile of a page not shown has
-  no controls: `fnc_findTile` does not find it, `fnc_revealTile` only takes its hatching from the data. **The search field** (`fnc_drawFilter`,
+- **Searching** (issues #6, #16, #17; `fnc_isSearched`, `fnc_isSealed`, `fnc_searchKind`, `fnc_searchTime`, `fnc_searchRecord`, `fnc_markHidden`,
+  `fnc_animateSearch`, `fnc_updateStatus`, `fnc_statusWords`, `fnc_animateStatus`, `fnc_stopStatus`, `fnc_revealTile`, `fnc_learn`). **What is
+  searched:** loot of the kinds the settings name (`fnc_isSearched`: bodies, living persons, crates and vehicles - the cargo of the one the player
+  sits in too -, the ground, a bag lying about; never the player's own gear or anything lying in it, an object with `einv_noSearch` - see
+  "Leaving an object out" below -, an ACE arsenal box), a uniform, vest or backpack opened from inside a container as that container is, and
+  one that carries a search state of its own (below) as the body or person it came off is. A kind whose time is 0 is not searched at all.
+  **How long:** `fnc_searchTime [container]` is seconds per cell, `einv_gui_searchTime` times the factor of the box's kind (`fnc_searchKind`:
+  uniform, vest, backpack by the slot it is worn in or by its class wherever it lies - Bag_Base, a Supply container told apart by the item
+  class it lies as -, ground, vehicle (`AllVehicles`), crate; settings `einv_gui_searchTimeUniform`, `Vest`, `Backpack`, `Crate`, `Vehicle`,
+  `Ground`, all 1 by default) and for what a body carries also `einv_gui_searchTimeBody`. An item takes its cells' time; the seal
+  `SEAL_CELLS` 5 cells, two seconds at the default 0.4.
+  **The Tarkov model:** a box of the loot column this player has to search and has not opened yet is **sealed** (`fnc_isSealed`; drawn by
+  `fnc_drawSection` for the ids uniform, vest, backpack, container - crates, vehicles, bags, nested ones - and ground, not for a section that
+  brings its entries along): beside its box one block of `STORAGE_COLS` x `SEAL_ROWS` 3 cells whatever the container is, on the caption's
+  surface (`lootTab`) with the unsearched hatching, a ring, "UNSEARCHED" and a line of what its search does. No compartments, tiles, weight,
+  Take all, Sort, category strip, load hint (`infoAreas`), no canvas widening, and `fnc_putAllTarget` leaves it out - nothing tells its size or
+  contents. `fnc_markHidden [container, entries, true, true]` queues **the seal alone**, `[container, "", 0, 0, SEAL_CELLS, SEAL_BLOCK]` (block
+  -1, so `fnc_build`'s sort puts it first; also for an empty container), with the "Search starts on click" waiting
+  (`searchSeen`/`searchIdle`/`searchPaused`). When the seal's time is up `fnc_animateSearch` marks the box open (`unsealed` in its record),
+  plays the container's "open" and builds the window: the real grid, every item a **hatched footprint** in its place and size (an unsearched
+  tile is a surface a step above an empty cell with `hatch_ca` stripes over its whole footprint, `fnc_createTile`, `fnc_uiHatch`: pieces of
+  about a cell, a shaped one run by run, a third of a round corner's radius in from that corner; no "?", no outline, no ring, no glass), which
+  `fnc_drawCompartments` -> `fnc_markHidden` queues, `[container, class, row, col, cells, block]` in the arrangement's order. They are then
+  found one by one: `fnc_learn`, the "uncover" sound, the tile drawn anew in place (`fnc_revealTile`, `fnc_revealFx` - its stripes go, the
+  flash comes), a build only when the section's first find brings Take all. A box every entry of which this player knows already (he put it
+  all there, a pile he dropped onto) is open to him at once and stays so (`fnc_isSealed` writes `unsealed`). A hidden tile of a page not shown
+  has no controls: `fnc_findTile` does not find it, `fnc_revealTile` only takes its hatching from the data.
+  **Several boxes at once:** every box with something queued that is not stopped searches, each with its own clock. `GVAR(searchRuns)` holds
+  one run per box, `[container, entry, started, duration]`, the entry being the box's first in the queue. `fnc_animateSearch` (from
+  `fnc_onFrame` while nothing is held) matches the runs with the queue only when it changed - `GVAR(searchDirty)` (set by `fnc_markHidden`
+  and `fnc_stopStatus`) or a queue that is not the one it matched (`isEqualRef GVAR(searchSynced)`: a build, a find) -, keeping the clock
+  of a run whose entry is still the box's first; every other frame it only compares each run's clock. The finds of one frame are handled
+  together and build the window once. A pause (something held, a gap over `SEARCH_PAUSE`) moves every run's start on. One rummage clock
+  (`GVAR(searchSoundAt)`) plays the "search" sound of one of the running boxes. `GVAR(searchStarted)` is -1 while no box searches, which
+  is what `fnc_onFrame` asks. `fnc_attach` empties the runs: an item starts again from nothing in a new window. The one-at-a-time order
+  of 0.5.28 (the box clicked first, `searchResume`) is gone.
+  **The caption line only** ("Section bars: the activity chip", under "Layout") tells the search: a ring that goes round, "Searching 0:07"
+  - what is left of the box's queued entries at its time per cell, less what its run has done (`fnc_statusWords`) - and a red cross. The
+  cross stops the box (`fnc_stopStatus`: its container into `GVAR(searchPaused)`, which has no run; the window's own state); a stopped box
+  says "Stopped 0:07" with a still ring and a button "Search" that takes it out again, one waiting for its first click "Unsearched 0:07".
+  A sealed box's chip says no time ("Searching", "Stopped", "Unsearched"): the time would tell how much it holds. With search-on-click a hit
+  box over the block starts or resumes it too (never stops). While sealed `fnc_updateStatus` writes the block's line from the section
+  info's `seal` (`Seal_Click` idle, `Seal_Searching` while it runs - its ring shown and turned by `fnc_animateStatus` -, `Seal_Stopped` /
+  `Seal_StoppedClick`, `Seal_Waiting`). **The block takes nothing:** a drag finds no grid on it, so `fnc_animateStatus` (every frame while a
+  block stands - `fnc_updateStatus` keeps `statusLive` on for it) finds the block under the mouse while `GVAR(dragging)` (its `anchor` and
+  its column's `frame` on the screen, `fnc_gridOrigin`), shows its `film` in the loss colour and writes `Seal_Refused` "Search it first" in
+  its line (`GVAR(sealDragOver)`), and when the drag ends there `fnc_flashHint` says it in the footer; the drag engine is not asked.
+  **Cheap redraws:** `fnc_getSignature` gives a sealed loot section `[number, "sealed"]` instead of its cargo, so a sealed container never
+  redraws for what changes in it and its opening changes the part; `fnc_redrawTiles` answers false for a sealed info (`sealed` in
+  `sectionInfo`), so that change builds.
+  **What a player knows** (`fnc_searchRecord [container, create]`, a HashMap `known` class -> count of entries, `unsealed`): local, never
+  broadcast - every player searches for himself; the n-th entry of a class is known while n is below the count, counted in the
+  arrangement's order so everyone reveals the same top-left ones; what you put in you know (`fnc_afterAction` -> `fnc_learn` +1, -1 for
+  what is taken out). A crate, a vehicle or a pile keeps it on the object (`einv_gui_searchRecord`). A uniform, vest or backpack is made
+  anew by the engine on every move, so its record is in `GVAR(searchMemory)` under the id of its **search state**: the public
+  `einv_storage_searchState` `[id, source]`, one of `einv_storage_carryVariables`, so `einv_storage_fnc_snapshot` / `fnc_restore` carry
+  it to every new object. The first time anything is known of one without an id, `fnc_searchRecord` makes one and broadcasts it; a
+  machine whose own id lost a race keeps its record under `einv_gui_searchKey` and merges it into the one that stands.
+  **The search travels** (issue #17): `einv_storage_fnc_takeOff` writes the source onto a uniform, vest or backpack before its snapshot -
+  "body" off a dead man, "person" off a living one who is not the player there (an AI, a captive), "" off a player himself or with
+  `einv_noSearch` - and keeps or makes the id. Lying on the ground, in a crate, opened from either, it is searched as that body or person
+  is (`fnc_isSearched`; not while it lies in the player's own gear), sealed until searched, with the body's factor on its time; searching
+  it there or on the body is the same search, and whoever searched it keeps it searched. Before the server's restore sets the state on the
+  new object a client may see it for a moment as the pile it lies in is searched; the state arriving changes the signature and builds.
+- **The search field** (`fnc_drawFilter`,
   `fnc_applyFilter [jump]`) dims the tiles that do not match; it looks at every page of a
   paged box (`fnc_pageCounts` reads all the grid's tiles): typed in or emptied (`jump` true) it turns each paged box to its first page with a match when the page it shows has none
   (`fnc_setPage` with `bySearch`, remembered in `GVAR(pagesMoved)`; those pages go back box by box once nothing filters the box, but not one the player turned since), and draws every bar again - the arrows'
@@ -2002,26 +2066,6 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   other pages, as for a word. Whether a box is filtered is per box (the field is every box's, a category the one box's): when a box is filtered no more - the field empty and its
   own category cleared - `fnc_applyFilter [true]` gives it back the page the jump moved it from (`GVAR(pagesMoved)`), also while another box still has a category chosen; the entries
   of boxes that are still filtered stay.
-- **Sealed containers of bodies and persons** (issue #6, `fnc_isSealed`): a body's or living person's uniform, vest or backpack
-  (`einv_storage_fnc_getOwner` a `CAManBase` that is not the player) that `fnc_isSearched` says must be searched and this player has
-  not unsealed (`einv_gui_unsealed` on the container, local, never broadcast) is drawn **sealed** by `fnc_drawSection`: beside its box
-  one block of `STORAGE_COLS` x `SEAL_ROWS` 3 cells whatever the container is, on the caption's surface (`lootTab`) with the
-  unsearched hatching, a ring, "UNSEARCHED" and a line of what its search does. No compartments, tiles, weight, Take all, Sort,
-  category strip, load hint (`infoAreas`), no canvas widening, and `fnc_putAllTarget` leaves it out - nothing tells its size or
-  contents. **The state flows through the queue as any box's:** `fnc_drawSection` calls `fnc_markHidden [container, entries, true,
-  true]`, which queues the hidden items and after them **the seal**, `[container, "", 0, 0, SEAL_CELLS, SEAL_BLOCK]` (1 cell of search
-  time, block 98 so `fnc_build`'s sort puts it last; also for an empty container), with the same "Search starts on click" waiting
-  (`searchSeen`/`searchIdle`/`searchPaused`). The caption chip starts, stops and resumes it (`fnc_stopStatus`, the clicked box first);
-  with search-on-click a hit box over the block starts or resumes it too (never stops). `fnc_animateSearch` finds the items as ever -
-  `fnc_learn`, the "uncover" sound - but `fnc_revealTile` finds no tile and only takes them out of the queue; when the seal's time is up
-  it sets `unsealed`, plays the container's "open" and builds the window, which draws the real grid with everything known. While
-  sealed `fnc_updateStatus` writes the block's line from the section info's `seal` (`Seal_Click` idle, `Seal_Searching` while it is the
-  box being searched - its ring shown and turned by `fnc_animateStatus` -, `Seal_Stopped` / `Seal_StoppedClick`, `Seal_Waiting`) and
-  `fnc_animateStatus` leaves the time out of the chip (`Status_Search` with no clock): the time left would tell how much it holds.
-  **Cheap redraws:** `fnc_getSignature` gives a sealed loot section `[number, "sealed"]` instead of its cargo, so a sealed container
-  never redraws for what changes in it and its unsealing changes the part; `fnc_redrawTiles` answers false for a sealed info (`sealed`
-  in `sectionInfo`), so that change builds. Crates, vehicles, the ground, a bag lying about and containers opened from inside one
-  keep the hatched tiles.
 - **Leaving an object out of the search** (0.5.12). The one mark is the object variable `einv_noSearch` (`QGVARMAIN(noSearch)`, a BOOL, default false), read by `fnc_isSearched` for the container and for the body or person that owns it, so it holds for a crate, a vehicle, a body, a living person and the things they wear; every other question (`fnc_markHidden`, `fnc_learn`, `fnc_openNested`, the cargo chain of compat_ace_cargo) goes through `fnc_isSearched`. It is an override in one direction: it can switch the search off, never force it on where the settings say off. Ways to set it: (a) **Eden**: the attribute `einv_gui_edenNoSearch` (`gui/Cfg3DEN.hpp`, Checkbox "Skip searching", on every object with inventory cargo, in the locks addon's category `EINV_Attributes`, which gui loads after); its expression sets the variable locally on every machine when the mission starts (not in the editor), which needs no broadcast and covers a joiner. (b) **`einv_gui_fnc_setSearchable [object, searchable]`** (public): `false` marks the object, `true` gives it back to the settings; `setVariable` with the broadcast flag, so it works from any machine and for JIP. (c) **Zeus**: the server setting `einv_gui_searchZeus` (CHECKBOX, default on, in the "looting" topic after `searchContainers`) - with it off `fnc_onZeusPlaced` marks every non-person object with `maxLoad > 0` that a curator places. The handler is on the "CuratorObjectPlaced" event of every curator module, put there by `fnc_hookCurators`, which a 5 s per-frame handler in `XEH_postInit` calls on every machine (a game master can be assigned at any time and the event fires where the module is local, which differs by setup); the variable is public and the same from every machine, so a double run is harmless. compat_zen adds the right-click choices "Searching: turn off" and "Searching: turn on" (`fnc_setSearch`, `fnc_canSetSearch`; each is shown while some target would change, targets are `fnc_targets`: crates and vehicles, no persons), which call `fnc_setSearchable` and show the curator feedback line.
 - **Sounds** (`fnc_playSound [action, class, container, world, ui]`, public): by family from the config `CfgEinvSounds`
   (`gui/CfgEinvSounds.hpp`; its header explains the layers): `Default`, 17 item families and 4 container families (crate, vehicle,
@@ -2398,7 +2442,7 @@ argument, and a change of either (`einv_items_rulesChanged`, `einv_main_settings
     grid=WxH` of the draft (`fnc_kindRule`, `fnc_upsertKinds`); Auto takes `grid` out of it. The engine asks these rules after everything about a class
     (`fnc_resolve`, layer `all`), so a class rule, a table, a mod's `einv_grid` and the preset win over them. The last numbers stepped to are kept per kind
     (`kindEdit`) for when Fixed is switched on again.
-  - **Categories** (`fnc_drawCategories`, the card after "How room is worked out"): one row per category there is in the draft (`einv_items_fnc_categories` of `GVAR(draftRules)`, the eight built-in ones first): its picture as the window draws it (`einv_gui_fnc_groupTexture` of the draft), a name field (`fnc_uiField`, applied on Return or when the cursor leaves it: `fnc_renameCategory` - a name of its own category cannot be empty, a built-in one given its shipped name or none is the shipped one), "Built in" or the id, **Picture...** (`fnc_openPicturePicker` with the class `#category`: the picker opens on its extra chip **Category icons**, the slot pictures and symbols of this mod's own `ui` folder, `fnc_iconEntries`, which needs no catalog and is ringed without it; the other chips are the item pictures as before), a reset button (a built-in category back to its shipped name and picture - its statement goes -, one of the setup's own back to the star) and, for the setup's own, a cross that asks (`fnc_confirm`, "danger") and runs `fnc_deleteCategory`. The last row is Add: a field and a button (`fnc_addCategory`; the id is made from the name by `fnc_newCategoryId` - lowercase letters and digits, the rest `_`, `CAT_ID_MAX`, a number on the end where it is taken or reads as a built-in word; Return in the field adds too; refused with a hint without a name and at `MAX_CUSTOM_CATEGORIES`). Every edit is the statement `category=ID > name=... picture=...` of the draft (`fnc_setCategory`, one `fnc_commit`, so undo, Save, Export, Import, the change lists and the server's hash see it as any rules text; Import of a text with `category=` statements joins them, the later statement of an id counting, and Export "full" keeps them). **Delete** (`fnc_deleteCategory`) takes the statement out and the id out of every rule's `cats=` (a rule left with nothing to set goes) and of every `grid=` it accepts (`fnc_cleanGrid` on the parsed grid, written again), and out of the editors' unapplied work (`itemWork` `catsList`, `cellWork` accepts) - in one undo step, so nothing is left that lists a category that is gone. The Items step's Category chips (`fnc_drawCatRow`) and the Containers step's Accepts chips (`fnc_drawCellAttrs`) list the draft's categories by `categoryInfo` `name`, in the order they were defined, and store in the order of `fnc_orderGroups`. The changes list has a row kind `category` (new / changed / removed, "Category bandit: name Bandit loot", `fnc_describeRule` with its fifth argument) which `fnc_countChanges` counts under the General step; `fnc_changeRows` keeps the categories as the General step's own when it measures against the default.
+  - **Categories** (`fnc_drawCategories`, the card after "How room is worked out"): one row per category there is in the draft (`einv_items_fnc_categories` of `GVAR(draftRules)`, the eight built-in ones first): its picture as the window draws it (`einv_gui_fnc_groupTexture` of the draft), a name field (`fnc_uiField`, applied on Return or when the cursor leaves it: `fnc_renameCategory` - a name of its own category cannot be empty, a built-in one given its shipped name or none is the shipped one), "Built in" or the id, **Picture...** (`fnc_openPicturePicker` with the class `#category`: the picker opens on its extra chip **Category icons**, the slot pictures and symbols of this mod's own `ui` folder, `fnc_iconEntries`, which needs no catalog and is ringed without it; the other chips are the item pictures as before), a reset button (a built-in category back to its shipped name and picture - its statement goes -, one of the setup's own back to the star) and, for the setup's own, a cross that asks (`fnc_confirm`, "danger") and runs `fnc_deleteCategory`. The last row is Add: a field and a button (`fnc_addCategory`; the id is made from the name by `fnc_newCategoryId` - lowercase letters and digits, the rest `_`, `CAT_ID_MAX`, a number on the end where it is taken or reads as a built-in word; Return in the field adds too; refused with a hint without a name and at `MAX_CUSTOM_CATEGORIES`). Every edit is the statement `category=ID > name=... picture=...` of the draft (`fnc_setCategory`, one `fnc_commit`, so undo, Save, Export, Import, the change lists and the server's hash see it as any rules text; Import of a text with `category=` statements joins them, the later statement of an id counting, and Export "full" keeps them). **Delete** (`fnc_deleteCategory`) takes the statement out and the id out of every rule's `cats=` (a rule left with nothing to set goes) and of every `grid=` it accepts (`fnc_cleanGrid` on the parsed grid, written again), and out of the editors' unapplied work (`itemWork` `catsList`, `cellWork` accepts) - in one undo step, so nothing is left that lists a category that is gone. The Items step's Category chips (`fnc_drawCatRow`) and the Containers step's Accepts chips (`fnc_drawCellAttrs`) list the draft's categories by `categoryInfo` `name`, in the order they were defined, and store in the order of `fnc_orderGroups`. The changes list has a row kind `category` (new / changed / removed, "Category bandit: name Bandit loot", `fnc_describeRule` with its fifth argument) which `fnc_countChanges` counts under the General step and the General step's "What you changed" lists too.
   - **How room is worked out**: the load per cell - the header's `cell=` (`fnc_commit`), 1 to 50, with "1 cell = X kg", its source and a reset - and, in
     words with the numbers of the moment (the cell, `UNIFORM_COLS`, `UNIFORM_ROWS_MIN`/`MAX`, `VEST_POUCHES_MAX`, a vest of load 120, a backpack of 280, a crate
     of 1000): containers, uniforms, vests, backpacks, vehicles and crates, items, stacking, and that a rule of the class beats it all. The sizes of items and
@@ -2409,9 +2453,11 @@ argument, and a change of either (`einv_items_rulesChanged`, `einv_main_settings
     rounded to the setting's decimals), LIST `fnc_uiDropdown`, EDITBOX `fnc_uiField` (a text box applied on Return or when it loses the cursor, not per key).
     The label's tooltip is the setting's description, the label is in the accent and a reset button (`fnc_uiReset`) shows while the value is off its default
     (the setting is in `draftSettings`). Settings with `hidden` (`einv_items_massPerCell`, `einv_items_stackSmall`) have none.
-  - **What you changed** (`fnc_drawChanges "default"`): the rules that are not the General step's own - `fnc_changeRows "default"` compares the draft with the
-    default that keeps the draft's `cell=` and its `all kind=...` rules - so when all uniforms are 10x10 by their kind and one is 5x5, that one is the only
-    row.
+  - **What you changed** (`fnc_drawChanges "default"`): everything the draft sets that is not the default - `fnc_changeRows "default"` compares the draft with
+    `einv1 base=default` and no server setting set: the cell size, each server setting off its default ("Search on click: on » off"), each kind of container with a size
+    (`all kind=backpack > grid=8x6`, worded "Every backpack: compartments 8×6"), the categories, and the rules of single classes, so when all uniforms are 10x10 by their kind
+    and one is 5x5, both are rows. It is the "saved" list's rows with another reference and no new / changed / removed tags. A click on a row of the General step's own
+    does nothing (the page is open already); a class opens at its step; the cross takes that one change back.
 - The header chip ("Server · forced · 4 changes", `fnc_drawFrame`) is a button: it opens `fnc_openChanges`, the list of what Save would store
   (`fnc_drawChanges "saved"`) over whatever step is open. The footer has Back, Next and Save (Apply in menu mode); a dot on a step pill means changes
   in it (`fnc_countChanges` -> `[count, step ids]`, a rule goes to its step by `fnc_ruleStep`).
@@ -2442,9 +2488,10 @@ argument, and a change of either (`einv_items_rulesChanged`, `einv_main_settings
   removes the field from the class's rule at once (`fnc_upsertRule`, an undo step) and drops what the editor held for it unapplied.
 - **`fnc_changeRows [against = "saved" | "default", describe = true]`** is the one diff behind both lists and the header count: rows `[kind, status, label,
   words, picture, before, class, statement, undo]` (kind `rule`, `group`, `category`, `setting`, `preset`, `cell`, `override`) for the preset (only a text can change it now), the cell size, the override switch (saved only), every server
-  setting (saved only: kind `setting`, words "before » after" by `fnc_settingText`, the cross sets it back), then every group and rule matched by what it is for
+  setting (kind `setting`, words "before » after" by `fnc_settingText`, the cross sets it back; against the default each one set is "new"), then every group and rule matched by what it is for
   (a group by name, a rule by its conditions), so a class given another size is one "changed" row. Against `"saved"` the reference is `clean` and
-  `cleanSettings`; against `"default"` it is the default with the draft's own `cell=` and `all kind=...` rules, i.e. what the General step sets. A single-class
+  `cleanSettings`; against `"default"` it is `einv1 base=default` (`RULES_DEFAULT`) and no settings, so what the General step sets (cell size, settings,
+  kind sizes, categories) is listed with the rest. A single-class
   rule shows the class's picture and display name plus `fnc_describeRule [.. , valuesOnly = true]`; `all kind=uniform > grid=5x5` is worded "Every uniform:
   compartments 5×5". `undo` is `[code, args]` and ends in `fnc_commit` (or `fnc_setSetting`), so undo/redo keep working; a removed statement goes back after
   the one it followed, since a later rule wins. Reference setups are parsed once per text (`changeRefs`). `fnc_countChanges` counts these rows
@@ -2852,7 +2899,9 @@ kit type's Arsenal setting `efak_core_fnc_canPackInto [kit, true]`, `fnc_canPack
 with the kit under it (`fnc_holderVerify`), so the one writer of the kit is this machine - written where it is called, outside any
 phase, as `einv_storage_fnc_addNew` does (`einv_storage_fnc_makePayload`, `fnc_putIntoKit`, `fnc_requestRebuild`).
 `fnc_arsenalSections` notes where each kit it returns lies in `GVAR(arsenalHolders)` (lowercase class -> `[container, ""]`, made anew
-at every call; the panel calls it with `[]` outside kit mode, `fnc_onWindowOpen` empties it). No kit window is open in ACE's window,
+at every call; the panel calls it with `[]` outside kit mode, `fnc_onWindowOpen` empties it). In ACE's window (`einv_gui_fnc_isInventoryMode`
+false) `fnc_canDrop` and `fnc_drop` ask the type's Arsenal setting for every move into or out of a kit, not the field's packing-off
+rule; `efak_core_contentsChanged` for such a kit rebuilds the panel, and `fnc_locate` finds a kit packed in one of them. No kit window is open in ACE's window,
 so `GVAR(holders)` stays empty there (`fnc_getSections`), and the engine's moves between a kit's grid and the staging space or a
 container (`fnc_drop` -> `fnc_locate`, `fnc_canDrop`, `einv_storage_fnc_rootOf` -> `fnc_holderRoot`) found the kit nowhere and
 were refused with "Failed" in either room mode (issue #4); `fnc_locate` and `fnc_canDrop` fall back to it, and `fnc_signature`
@@ -2979,6 +3028,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_gui_soundsWorld` | CHECKBOX | global | on | players nearby hear someone loot |
 | `einv_gui_moveToStop` | CHECKBOX | client | on | a movement key closes the window while looting |
 | `einv_gui_searchTime` | SLIDER 0 to 3 | global | 0.4 | seconds per cell searched; 0 shows everything |
+| `einv_gui_searchTimeUniform`, `Vest`, `Backpack`, `Crate`, `Vehicle`, `Ground`, `Body` | SLIDER 0 to 5 | global | 1 | factor of the time per cell for that kind of box (`fnc_searchTime`); a body's on top of its uniform's, vest's or backpack's; 0 shows that kind at once |
 | `einv_gui_handDrop` | SLIDER 0 to 3 | global | 0.3 | seconds the hands are busy dropping one item (hands' queue, section 4); 0 drops at once |
 | `einv_gui_handMove` | SLIDER 0 to 3 | global | 0.4 | seconds to move one item to a different container or holder (the quick move, Take all, Put all in; never a drag); 0 at once |
 | `einv_gui_handEquip` | SLIDER 0 to 5 | global | 1 | seconds to put one item on or take it off (a drag never waits); 0 at once |
