@@ -55,7 +55,7 @@ if (count _rgb < 3) then {
     };
 
     for "_i" from 1 to 40 do {
-        if ((_rgb call _fnc_luma) >= ACCENT_MIN_LUMA) exitWith {};
+        if (([_rgb] call _fnc_luma) >= ACCENT_MIN_LUMA) exitWith {};
 
         private _top = selectMax _rgb;
 
@@ -72,8 +72,8 @@ switch (_shade) do {
     case "hover": {(_rgb apply {_x + (1 - _x) * ACCENT_HOVER_MIX}) + [1]};
     case "on": {
         // Contrast as (lighter + 0.05) / (darker + 0.05)
-        private _fill = (_rgb call _fnc_luma) + 0.05;
-        private _dark = (ACCENT_INK_DARK call _fnc_luma) + 0.05;
+        private _fill = ([_rgb] call _fnc_luma) + 0.05;
+        private _dark = ([ACCENT_INK_DARK] call _fnc_luma) + 0.05;
 
         [ACCENT_INK_LIGHT, ACCENT_INK_DARK] select (_fill / _dark >= 1.05 / _fill)
     };
