@@ -9,7 +9,7 @@
  * tinted by what they are, with their short name and a magazine's ammo bar; captions sit over the
  * slots, in normal case.
  *
- * What is looted is told apart from what the player carries (issue 7) by a steel blue that is no other colour's
+ * What is looted is told apart from what the player carries (issue 7) (issue 7, blue look reverted in issue 11) only by the header text; the loot keys stay empty, so it keeps the plain pane -
  * here: the loot column's pane is tinted towards it and ringed in it, its title has an accent strip and icon in it,
  * and the caption tabs and hairlines of its sections are a film of it - still the same near-black glass, only
  * cooler; the player's own column keeps the plain pane and the orange accent.
@@ -50,11 +50,11 @@ _theme merge [createHashMapFromArray [
     ["dimCamera", [0, 0, 0, 0.25]],
     ["panel", [0.05, 0.05, 0.05, 0.92]],
     ["panelBorder", []],
-    ["lootPanel", [0.035, 0.05, 0.07, 0.92]],
-    ["lootBorder", [0.45, 0.62, 0.82, 0.32]],
-    ["lootAccent", [0.45, 0.62, 0.82, 1]],
-    ["lootTab", [0.45, 0.62, 0.82, 0.14]],
-    ["lootLine", [0.45, 0.62, 0.82, 0.22]],
+    ["lootPanel", []],
+    ["lootBorder", []],
+    ["lootAccent", []],
+    ["lootTab", []],
+    ["lootLine", []],
     ["card", [1, 1, 1, 0.045]],
     ["slot", [1, 1, 1, 0.07]],
     ["slotEmpty", [1, 1, 1, 0.04]],
