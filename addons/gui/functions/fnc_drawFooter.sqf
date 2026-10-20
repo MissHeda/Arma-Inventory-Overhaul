@@ -148,10 +148,12 @@ _keys = _keys select [0, _fits];
 // Centred on the screen, with as much room on both sides as the wider of the two ends takes. In the key
 // hints' size, on their line: structured text starts at the top of its box, so the box starts half a
 // line above the footer's middle, where their words are centred.
-private _side = ((_keyX - _left) max _versionW) + SQUARE(UNIT * 0.5);
+// It takes all the room between the last key hint and the version, not a centred share of it - a box as wide
+// as the bar minus twice the wider side cut long item lines short (issue 12).
+private _hintX = _keyX + SQUARE(UNIT * 0.5);
 private _hintSize = _textUnit * 0.558;
-private _hintW = _width - _side * 2;
-private _hintCtrl = [_display, "EINV_FooterHint", controlNull, [_left + _side, FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
+private _hintW = (_left + _width - _versionW - SQUARE(UNIT * 0.5)) - _hintX;
+private _hintCtrl = [_display, "EINV_FooterHint", controlNull, [_hintX, FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
 
 // Too narrow for words: the line is hidden rather than wrapped over the key hints.
 if (_hintW < SQUARE(UNIT * 6)) then {
