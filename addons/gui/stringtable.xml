@@ -74,7 +74,7 @@
             <English>Skip searching</English>
         </Key>
         <Key ID="STR_einv_gui_Eden_NoSearch_Tooltip">
-            <English>What this object holds shows at once, without being searched first. Overrides the search settings of the server.</English>
+            <English>Shows what this object holds at once, without a search. Overrides the server's search settings.</English>
         </Key>
         <Key ID="STR_einv_gui_Equip">
             <English>Equip</English>
@@ -320,13 +320,13 @@
             <English>Drop (inventory window)</English>
         </Key>
         <Key ID="STR_einv_gui_Keybind_Drop_Tooltip">
-            <English>Drops the item under the mouse onto\nthe ground, or the whole selection.\nOver a worn slot it takes the item\noff and drops it.\n\nOn a hotbar slot it empties the slot;\non ACE Arsenal's panel it takes the\nitem out.</English>
+            <English>Drops the item under the mouse or the whole selection onto the ground.\nOver a worn slot it takes the item off; on a hotbar slot or ACE Arsenal's panel it empties/takes it out.</English>
         </Key>
         <Key ID="STR_einv_gui_Keybind_QuickMove">
             <English>Quick move (inventory window)</English>
         </Key>
         <Key ID="STR_einv_gui_Keybind_QuickMove_Tooltip">
-            <English>Moves the item under the mouse over,\nas a double click does - into the\nloot, or into your gear. Several\nselected items move together.\n\nOpens a uniform, vest or backpack\nlying in a container.</English>
+            <English>Moves the item under the mouse over, as a double click does; selected items move together.\nOpens a uniform, vest or backpack lying in a container.</English>
         </Key>
         <Key ID="STR_einv_gui_Load_Next">
             <English>· %1 at %2 kg</English>
@@ -509,7 +509,7 @@
             <English>Camera when opening</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CameraDefault_Desc">
-            <English>What the middle of the inventory shows\nwhen it opens: your soldier from the\nfront, as the arsenal does, or nothing -\nthe world as seen from his eyes. The\ncamera button in the header still turns\nit on or off while it is open.</English>
+            <English>What the middle of the inventory shows on opening: your soldier (third person) or nothing (first person).\nThe header's camera button still switches it while open.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CameraDefault_Off">
             <English>Off (first person)</English>
@@ -521,80 +521,47 @@
             <English>Tile scale</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CellScale_Desc">
-            <English>How large the cells, the pictures on\nthem and the window's text are - above 1\nif items are hard to make out. The\ndefault, 1.1, lets a name on a one-cell\ntile show more of its letters. Takes\neffect the next time the inventory\nopens. Where the columns would no longer\nfit across the screen, the largest scale\nthat fits is used.</English>
+            <English>Size of cells, pictures and window text; above 1 if items are hard to make out (default 1.1).\nTakes effect when the inventory next opens; the largest scale that fits the screen is used.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CompareTooltip">
             <English>Compare gear at the mouse</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CompareTooltip_Desc">
-            <English>A vest, uniform, helmet or backpack at\nthe mouse shows how it differs from\nthe one you wear: armor, room and\nweight. Green is better, red worse.</English>
+            <English>A vest, uniform, helmet or backpack at the mouse shows how it differs from the one you wear.\nGreen is better, red worse.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_DebugTiming">
             <English>Log window timings (debug)</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_DebugTiming_Desc">
-            <English>Writes to the RPT how long each build\nand redraw took and how many controls\nthe display holds, what the window's\nframes cost in script (idle, mouse over\ntiles, dragging) and in which part, the\nwhole frame time (FPS), what each item\nfound by searching cost, and for each\ndrag its lift and frames - for reports\nof stutters and low FPS. Read as the\nwindow opens. Off in play.</English>
+            <English>Writes build, redraw and frame timings and search and drag costs to the RPT, for FPS reports.\nOff in play.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandDrop">
             <English>Time to drop an item</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandDrop_Desc">
-            <English>Seconds the hands are busy dropping one
-item onto the ground (the drop key and
-Drop in the menu). One runs at a time,
-the next starts when it is done; the
-box it comes from counts them. Closing
-the window cancels what still waits.
-
-0 drops at once, with no wait.</English>
+            <English>Seconds the hands are busy dropping one item (drop key, Drop in the menu), one after another.
+0 drops at once.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandEquip">
             <English>Time to put on or take off</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandEquip_Desc">
-            <English>Seconds the hands are busy putting one
-item on or taking it off, for what the
-switches below let wait (a drag never
-does): a double click on the ground,
-Equip in the menu, Ctrl+click on a slot.
-Closing the window cancels what still
-waits.
-
-0 does it at once, with no wait.</English>
+            <English>Seconds the hands are busy putting one item on or taking it off, for what the switches below let wait.
+0 does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandMove">
             <English>Time to move to another container</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandMove_Desc">
-            <English>Seconds the hands are busy moving one
-item to a different container: the quick
-move, Take all and Put all in, one item
-after another, counted in the caption
-line of the box. A drag never waits.
-Rearranging within a container, turning
-and splitting a stack take no time.
-
-0 moves at once, with no wait.</English>
+            <English>Seconds the hands are busy moving one item to another container (quick move, Take all, Put all in).
+0 moves at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_LootSide">
             <English>Where other storage opens</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_LootSide_Desc">
-            <English>Where the column of what you loot (a
-crate, a vehicle, a body, the ground or
-what lies nearby) opens.
-
-Left of my storage: your own storage
-column never moves, and the new column
-opens beside it, in the middle of the
-window.
-
-Right of my storage: the new column takes
-the right edge and your storage moves
-aside for it, as in earlier versions.
-
-An open window changes at its next
-build.</English>
+            <English>Where the column of what you loot opens. Left of my storage: beside it, in the middle of the window.
+Right of my storage: at the right edge, and your storage moves aside.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_LootSide_Left">
             <English>Left of my storage - my storage stays put</English>
@@ -606,169 +573,138 @@ build.</English>
             <English>Fill bar on magazines</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MagazineFillBar_Desc">
-            <English>A thin bar along the bottom of every\nmagazine that is not full: how many\nrounds are left, at a glance - on its\ntile and on a weapon's magazine slot.\n\nThe rounds as words have a switch of\ntheir own (Rounds on magazines).</English>
+            <English>A thin bar along the bottom of every magazine that is not full, on its tile and on a weapon's magazine slot.\nThe rounds as words have their own switch.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MagazineText">
             <English>Rounds on magazines</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MagazineText_Desc">
-            <English>The rounds left in a magazine as words\n("17/30") in a corner of its tile. Off,\nthe fill bar alone tells how full one\nis - and a full one shows neither.\n\nA weapon's magazine slot keeps them.</English>
+            <English>The rounds left in a magazine as words ("17/30") in a corner of its tile; a weapon's slot keeps them.\nOff: the fill bar alone shows how full it is.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MoveToStop">
             <English>Moving stops looting</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MoveToStop_Desc">
-            <English>A movement key pressed while looting or\nsearching closes the window: the search\nstops and the soldier walks off. What\nwas found stays found; the item being\nsearched starts again next time.\n\nOff: movement keys do nothing in the\nwindow.</English>
+            <English>A movement key pressed while looting or searching closes the window and stops the search.\nOff: movement keys do nothing in the window.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PageRows">
             <English>Rows per page of a container</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PageRows_Desc">
-            <English>How many rows of a tall crate or vehicle
-are shown at a time. Taller than that, it
-gets pages: a bar under it turns them,
-and a fade on the page's edge with a
-chip such as +37 items on other pages
-says there is more. The search finds
-items on any page, and an item held over
-an arrow of the bar turns the page.
-
-A page is at least 4 rows. 0 or 40 shows
-the whole container, with its empty rows
-folded as before. Only for what you
-loot, not for your own gear.</English>
+            <English>Rows of a tall crate or vehicle shown at a time; taller ones get pages (4 to 39, 10 by default).
+0 or 40 shows the whole container. Only for what you loot, not your own gear.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonItems">
             <English>Take and put items</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonItems_Desc">
-            <English>Who may take items out of a living\nperson's uniform, vest and backpack,\nand put items in. Vanilla lets anyone\ntake from a backpack.\n\nNobody: the gear can only be looked at.</English>
+            <English>Who may take items out of a living person's uniform, vest and backpack, and put items in.\nNobody: the gear can only be looked at.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonNotify">
             <English>Tell the searched player</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonNotify_Desc">
-            <English>A player whose gear is opened reads\nwho is going through it. With a\nbackpack on, everyone near hears ACE's\nzipper and the player feels a tug.\n\nSwitched off, only ACE's own backpack\ninteraction still zips.</English>
+            <English>A player whose gear is opened is told who goes through it; with a backpack on, nearby players hear ACE's zipper.\nOff: only ACE's own backpack interaction still zips.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonOpen">
             <English>Open the whole person</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonOpen_Desc">
-            <English>Whose uniform, vest and backpack open\nwith &quot;Inventory&quot; while they are alive.\nAnyone else opens only by the backpack,\nas in vanilla - but from any side.\n\nCaptives are surrendered or handcuffed\n(ACE). The unconscious always open\nwhole, as with ACE's &quot;Inventory&quot;.\n\nMission makers can close one person\nto everyone:\n_unit setVariable [&quot;einv_noAccess&quot;, true, true];</English>
+            <English>Whose uniform, vest and backpack open with "Inventory" while alive; others open only by the backpack.\nCaptives are surrendered or handcuffed (ACE); the unconscious always open whole.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonWorn">
             <English>Take off worn gear</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonWorn_Desc">
-            <English>Who may take off what a living person\nwears - weapons, helmet, uniform, vest,\nbackpack and the rest - by dragging,\nCtrl+click or the context menu.\n\nCaptives are surrendered or handcuffed\n(ACE). Bodies can always be stripped.</English>
+            <English>Who may take off what a living person wears (weapons, helmet, uniform, vest, backpack and the rest).\nCaptives are surrendered or handcuffed (ACE). Bodies can always be stripped.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchBodies">
             <English>Search bodies</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchBodies_Desc">
-            <English>What a body carries shows as &quot;?&quot;\nuntil it has been searched.</English>
+            <English>What a body carries shows as "?" until it has been searched.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchContainers">
             <English>Search crates and vehicles</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchContainers_Desc">
-            <English>What a crate or a vehicle holds shows\nas &quot;?&quot; until it has been searched.\n\nOne object can be left out: in Eden with\nits &quot;Skip searching&quot; box, from Zeus with\nthe right click menu, in a script with\n[_box, false] call\neinv_gui_fnc_setSearchable;</English>
+            <English>What a crate or a vehicle holds shows as "?" until it has been searched.\nSingle objects can be skipped: Eden "Skip searching", Zeus right click, or [_box, false] call einv_gui_fnc_setSearchable;</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchGround">
             <English>Search the ground</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchGround_Desc">
-            <English>Loose items on the ground show as &quot;?&quot;\nuntil they have been searched.</English>
+            <English>Loose items on the ground show as "?" until they have been searched.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchOnClick">
             <English>Search starts on click</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchOnClick_Desc">
-            <English>A box is searched once its Search button\nis clicked, one box at a time.\n\nOff: every box starts searching by itself.</English>
+            <English>A box is searched once its Search button is clicked, one box at a time.\nOff: every box starts searching by itself.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchPersons">
             <English>Search living persons</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchPersons_Desc">
-            <English>What a living person carries shows as\n&quot;?&quot; until it has been searched - awake,\nunconscious or captive alike.\n\nBodies follow &quot;Search bodies&quot;.</English>
+            <English>What a living person carries shows as "?" until searched, awake, unconscious or captive.\nBodies follow "Search bodies".</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTime">
             <English>Search time per cell</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTime_Desc">
-            <English>Seconds it takes to search one grid\ncell of loot. A 2x2 item takes four\ntimes as long.\n\n0 shows everything at once.</English>
+            <English>Seconds it takes to search one grid cell of loot; a 2x2 item takes four times as long.\n0 shows everything at once.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchZeus">
             <English>Search Zeus-placed crates and vehicles</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchZeus_Desc">
-            <English>Crates and vehicles a game master\nplaces with Zeus are searched like\nany other.\n\nOff: what Zeus places shows its loot at\nonce. Needs &quot;Search crates and vehicles&quot;\non. One object can be switched in Zeus\nEnhanced (right click, Searching).</English>
+            <English>Crates and vehicles placed with Zeus are searched like any other.\nOff: they show their loot at once. Needs "Search crates and vehicles" on.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_ShowNearby">
             <English>Show everything nearby</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_ShowNearby_Desc">
-            <English>Shows every pile on the ground and\nevery crate within reach as a box of\nits own in the loot column, nearest\nfirst. Crates you did not open start\nfolded - click their name to open\nthem.\n\nOff: only what you opened shows, as\nin the vanilla inventory.</English>
+            <English>Shows every pile on the ground and crate within reach as a box in the loot column, nearest first.\nOff: only what you opened shows, as in the vanilla inventory.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SoundsWorld">
             <English>Others hear looting</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SoundsWorld_Desc">
-            <English>Players nearby hear someone loot: the\nrustle of a search, a rifle taken off a\nbody, a backpack dropped, a reload. Up\nto 10 to 20 metres, quieter than the\nlooter hears it.\n\nOff: only the looter hears anything.</English>
+            <English>Players nearby hear someone loot (searching, a rifle taken, a backpack dropped, a reload), up to 10 to 20 m.\nOff: only the looter hears anything.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_TileNames">
             <English>Item names on tiles</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_TileNames_Desc">
-            <English>The item's short name in the top\nright corner of every tile. Off, the\ntiles show the picture alone - the\nname still shows at the mouse.\n\nThe Arsenal's panel follows it.</English>
+            <English>The item's short name in the top right corner of every tile; the Arsenal's panel follows.\nOff: the picture alone, the name still shows at the mouse.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitDrop">
             <English>Dropping waits</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitDrop_Desc">
-            <English>Whether the drop key and Drop in the
-menu take the hands' time (time to drop
-an item), one item after another. A drag
-out of the window never waits.
-
-Off drops at once.</English>
+            <English>Whether the drop key and Drop in the menu take the hands' time (time to drop an item).
+Off drops at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitEquip">
             <English>Equipping other items waits</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitEquip_Desc">
-            <English>Whether putting on and taking off
-anything else - goggles, night vision,
-binoculars, a map and the like, the parts
-of a weapon - takes the hands' time (time
-to put on or take off). A drag never
-waits.
-
-Off does it at once.</English>
+            <English>Whether putting on and taking off other items (goggles, night vision, binoculars, weapon parts) takes the hands' time.
+Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitMove">
             <English>Quick move and Take all wait</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitMove_Desc">
-            <English>Whether the quick move key, a double
-click, Take all and Put all in take the
-hands' time (time to move to another
-container). The caption line of the box
-says how far it is and has a stop
-button. A drag never waits.
-
-Off moves them at once.</English>
+            <English>Whether the quick move, a double click, Take all and Put all in take the hands' time.
+Off moves them at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitWorn">
             <English>Uniform, vest, backpack and helmet wait</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitWorn_Desc">
-            <English>Whether putting on and taking off a
-uniform, vest, backpack or headgear takes
-the hands' time (time to put on or take
-off). A drag never waits.
-
-Off does it at once.</English>
+            <English>Whether putting on and taking off a uniform, vest, backpack or headgear takes the hands' time.
+Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Slot_Backpack">
             <English>Backpack</English>
