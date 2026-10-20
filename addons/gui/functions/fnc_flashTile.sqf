@@ -22,63 +22,14 @@
 
 disableSerialization;
 
-params ["_display", "_item", ["_alpha", 0.3], ["_duration", 0.45]];
+params ["_display", "_item"];
 
 private _found = _item call FUNC(findTile);
 
 if (_found isEqualTo []) exitWith {createHashMap};
 
 private _tile = _found select 1;
-private _background = _tile getOrDefault ["background", controlNull];
 
-if (isNull _background) exitWith {_tile};
-
-private _color = +(GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]]);
-_color set [3, _alpha];
-
-// Over every surface of the tile: a shaped one has one per run of its cells (fnc_createTile), and its
-// holes do not flash; a tile at the corner of its compartment's panel has the pieces of a round corner too.
-private _flashes = uiNamespace getVariable [QGVAR(flashes), []];
-private _faded = diag_tickTime + _duration;
-
-{
-    private _flash = controlNull;
-
-    // A round corner of the surface (fnc_uiSurface) flashes as a round corner, the rest as rectangles.
-    if (ctrlClassName _x isEqualTo "EINV_PanelCorner") then {
-        _flash = [_display, "EINV_PanelCorner", ctrlParentControlsGroup _x, ctrlPosition _x] call FUNC(uiCreate);
-        _flash ctrlSetText ctrlText _x;
-        _flash ctrlSetTextColor _color;
-    } else {
-        _flash = [_display, "EINV_PanelRect", ctrlParentControlsGroup _x, ctrlPosition _x] call FUNC(uiCreate);
-        _flash ctrlSetBackgroundColor _color;
-    };
-
-    _flash ctrlSetFade 0;
-    _flash ctrlCommit 0;
-    _flash ctrlSetFade 1;
-    _flash ctrlCommit _duration;
-    _flashes pushBack [_flash, _faded];
-} forEach (_tile getOrDefault ["backgrounds", [_background]]);
-
-uiNamespace setVariable [QGVAR(flashes), _flashes];
-
-// Faded out, a flash is deleted: one for every move that finished would pile up on the window for as long as it stays
-// open. [control, when it has faded out] in uiNamespace, the controls of flashes still fading stay.
-[{
-    private _left = [];
-
-    {
-        _x params ["_flash", "_end"];
-
-        if (diag_tickTime >= _end) then {
-            ctrlDelete _flash;
-        } else {
-            _left pushBack _x;
-        };
-    } forEach (uiNamespace getVariable [QGVAR(flashes), []]);
-
-    uiNamespace setVariable [QGVAR(flashes), _left];
-}, [], _duration + 0.1] call FUNC(delay);
-
+// No flash is drawn any more: a coloured pulse on a click, a landing or a found item was tiring to look at.
+// The tile is only looked up and handed back, for the callers that fade its content in (fnc_revealFx).
 _tile
