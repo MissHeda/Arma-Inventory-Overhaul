@@ -8,8 +8,9 @@
  * also let go anywhere over the equipment column (the slot that takes it, fnc_updateDrag) or, a uniform,
  * vest or backpack, on the storage column off its grids; a slot's item
  * comes off onto the cells (fnc_doUnequip), or onto another unit's same slot, which gives back what it
- * wore there (fnc_doSwap). Outside every panel it goes on the ground;
- * anywhere else it goes back, saying why when it did not fit (fnc_flashHint). First of all
+ * wore there (fnc_doSwap); a tile let go on a dead body's slot is put on the body (fnc_doEquip, fnc_canPutOn).
+ * Outside every panel it goes on the ground; anywhere else it goes back, saying why when it did not fit
+ * (fnc_flashHint). First of all
  * what lifting it previewed about weight is put back (fnc_clearWeightPreview).
  *
  * Into, out of and between kits of Enhanced First Aid Kits - the grids of their windows and their tiles -
@@ -313,7 +314,8 @@ private _sent = call {
             ([_slotSource, _targetUnit, _targetSlot] call FUNC(doSwap)) isEqualTo true
         };
 
-        ([_targetSlot, _fromBox, _entry, _fromKit] call FUNC(doEquip)) isEqualTo true
+        // Onto a dead body's slot (the target names the body): put on that unit (fnc_canPutOn).
+        ([_targetSlot, _fromBox, _entry, _fromKit, _targetUnit] call FUNC(doEquip)) isEqualTo true
     };
 
     private _target = _grids param [_targetIndex, createHashMap];

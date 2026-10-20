@@ -9,7 +9,10 @@
  * goes on that part (einv_storage_fnc_partFor). Anywhere else over the equipment column it goes into
  * the slot that takes it (einv_storage_fnc_slotFor). Worn gear dragged from a slot onto the same slot of
  * another unit - the player's onto a body's, a body's onto the player's or anywhere over the player's
- * equipment column - is exchanged (fnc_canSwap); the target then names that unit as its 9th element. A
+ * equipment column - is exchanged (fnc_canSwap); the target then names that unit as its 9th element. A tile
+ * from a container (the ground, a crate, the player's gear) let go on a slot of a dead body's paper doll is put
+ * on the body (fnc_canPutOn, fnc_doEquip), the target naming the body the same way; a living person's slots are
+ * no target for a tile. A
  * uniform, vest or backpack let go on the storage column off its grids (GVAR(storageRect)) goes into that
  * slot as on the slot itself, the footprint faint over the column; wearing none of the three, the column
  * shows only its placeholder and anything else is red there, "NoFit". On a grid: the cells it would cover - the grabbed cell
@@ -1085,6 +1088,44 @@ call {
         [_slotRects select _slotIndex, _why isEqualTo "", DRAG_FOOTPRINT_ALPHA, "", [_slotRects select _slotIndex] call _fnc_slotCorners] call _fnc_show;
     };
 
+    // ----- A tile onto a dead body's slot: put on it (fnc_canPutOn, fnc_doEquip) -----
+    // The body's paper doll in the loot column has slots of its own. Gear from the ground, a crate or the player's
+    // own containers that the slot takes goes on the body, what it wore there comes back onto the cell the tile lay
+    // on, as on the player's own slot; a weapon, a kit's item and anything the slot does not take is red. A living
+    // person has no such target (their gear is only taken off as the settings say), and a group is never put on.
+    if (_slotSource isEqualTo [] && {_onTop isEqualTo ""} && {_dragGroup isEqualTo []} && {[] call FUNC(isInventoryMode)}) then {
+        private _hit = _slotHits findIf {
+            private _record = _slots select _x;
+            private _bodyOf = _record param [6, objNull];
+
+            (_record param [5, ""]) isNotEqualTo "" && {(_record param [7, -1]) < 0}
+            && {!isNull _bodyOf} && {_bodyOf isNotEqualTo GVAR(unit)} && {_bodyOf isKindOf "CAManBase"} && {!alive _bodyOf}
+        };
+
+        if (_hit < 0) exitWith {};
+
+        private _slotIndex = _slotHits select _hit;
+        private _record = _slots select _slotIndex;
+        private _toUnit = _record select 6;
+        private _toSlot = _record select 5;
+        private _key = format ["putOn|%1", _slotIndex];
+        private _why = GVAR(dragRoom) get _key;
+
+        if (isNil "_why") then {
+            _why = [_entry getOrDefault ["class", ""], _toUnit, _toSlot] call FUNC(canPutOn);
+
+            // Out of an open kit: the kit has no way to put its item on another unit (fnc_doEquip).
+            if (_why isEqualTo "" && {((_grids param [_sourceIndex, createHashMap]) getOrDefault ["kit", ""]) isNotEqualTo ""}) then {
+                _why = "NoFit";
+            };
+
+            GVAR(dragRoom) set [_key, _why];
+        };
+
+        GVAR(dragTarget) = ["slot", _slotIndex, 0, 0, _why isEqualTo "", _why, _toSlot, true, _toUnit];
+        [_slotRects select _slotIndex, _why isEqualTo "", DRAG_FOOTPRINT_ALPHA, "", [_slotRects select _slotIndex] call _fnc_slotCorners] call _fnc_show;
+    };
+
     if ((GVAR(dragTarget) param [0, ""]) isEqualTo "slot") then {
         // Still on that slot, and nothing over it there: nothing more to look for. A target that stands for
         // the whole equipment column has no slot of its own there (-1) and is looked for anew below.
@@ -1305,7 +1346,7 @@ call {
 
         private _gain = GVAR(theme) getOrDefault ["gain", [0.298, 0.765, 0.541, 1]];
         private _loss = GVAR(theme) getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];
-        private _partly = GVAR(theme) getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
+        private _partly = GVAR(theme) getOrDefault ["warn", [0.84, 0.54, 0.1, 1]];
 
         private _fnc_paint = {
             params ["_control", "_rect", "_color"];

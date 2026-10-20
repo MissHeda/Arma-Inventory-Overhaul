@@ -105,6 +105,7 @@ PREP(flashHint);
 PREP(doEquip);
 PREP(doUnequip);
 PREP(canSwap);
+PREP(canPutOn);
 PREP(doSwap);
 PREP(itemName);
 
@@ -117,6 +118,10 @@ PREP(cbaRun);
 // Searching loot
 PREP(isSearched);
 PREP(isSealed);
+PREP(searchKind);
+PREP(searchTime);
+PREP(searchRecord);
+PREP(statusWords);
 PREP(setSearchable);
 PREP(onZeusPlaced);
 PREP(hookCurators);

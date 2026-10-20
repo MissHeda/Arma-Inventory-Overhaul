@@ -147,7 +147,8 @@
 #define SEARCH_RING_SIZE 0.72
 #define SEARCH_SOUND_GAP 0.3
 
-// Longer than this between two frames of searching, and the search was paused (something held).
+// Longer than this between two frames of searching, and the search was paused (something held): every box that searches
+// takes up again where it stood.
 #define SEARCH_PAUSE 0.25
 
 // The caption line's activity chip (fnc_updateStatus, fnc_animateStatus): a ring that goes round STATUS_SPIN_SPEED degrees
@@ -156,14 +157,15 @@
 #define STATUS_SPIN_SPEED 300
 #define STATUS_ICON 0.62
 
-// A body's or a living person's uniform, vest or backpack not searched yet is a sealed block (fnc_isSealed, fnc_drawSection):
-// SEAL_ROWS cells high and STORAGE_COLS wide whatever the container really is, hatched, with nothing of what it holds. Its
-// search ends with one more entry of the queue (fnc_markHidden): SEAL_CELLS cells of search time - also for an empty one -,
-// in compartment SEAL_BLOCK, so it sorts after every item of the container (fnc_build) and its class "" tells it apart
-// (fnc_animateSearch unseals the container when it is done).
+// A box this player has to search and has not opened yet is a sealed block (fnc_isSealed, fnc_drawSection): SEAL_ROWS cells
+// high and STORAGE_COLS wide whatever the container really is, hatched, with nothing of what it holds. Its search starts with
+// one entry of the queue of its own (fnc_markHidden), the seal: SEAL_CELLS cells of the box's search time - about two seconds
+// at the default time per cell, also for an empty one -, in compartment SEAL_BLOCK, so it sorts before every item of the
+// container (fnc_build) and its class "" tells it apart. When it is done the box opens (fnc_animateSearch): its real grid
+// with every item a hatched footprint, which are then found one by one.
 #define SEAL_ROWS 3
-#define SEAL_CELLS 1
-#define SEAL_BLOCK 98
+#define SEAL_CELLS 5
+#define SEAL_BLOCK -1
 
 // The hands' queue (fnc_queueMoves, fnc_drawQueue, fnc_animateQueue): an action that waits for the hands marks its tile (the
 // surface in a tint of the accent colour, the picture faded - fnc_queueColor) and counts in the activity chip of the box it
