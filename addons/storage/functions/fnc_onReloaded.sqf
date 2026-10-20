@@ -1,12 +1,21 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The player's unit reloaded - by the scroll menu's entry, a gamepad button, a script or anything else the
- * reload key's guard (fnc_reloadGuard) does not stand in front of. The game has loaded a magazine; if that
- * one came out of a container the "Use items from ..." settings close to it (noted beforehand,
- * fnc_useTrack) and is not whitelisted for it, the reload is undone a frame later (fnc_reloadUndo).
- * Everything else is left alone: a magazine from a container that allows it, one whose origin is not
- * known, a reload of another unit, from a vehicle's gun, or of a weapon the unit does not carry.
+ * A unit reloaded. Two cases, while a "Use items from ..." setting limits something:
+ *
+ *   - the reload this mod asked for (fnc_loadMagazine wrote GVAR(reloadToken) before the game's action): the
+ *     token is spent by the first event of that unit, whatever it shows - so nothing here can run twice for
+ *     one reload. When the magazine now loaded is the one asked for, the reload stands, and a frame later the
+ *     magazine the game put away is moved once out of a container the settings close (fnc_reloadTidy). When
+ *     it is another one (the game did a reload of its own), an RPT line says so and the case below decides.
+ *   - any other reload - the scroll menu's entry, a gamepad button, a script, the game's own reload when a
+ *     magazine ran dry: if the loaded magazine came out of a container the settings close to it (noted
+ *     beforehand, fnc_useTrack) and is not whitelisted for it, the reload is undone a frame later
+ *     (fnc_reloadUndo), which never starts a reload of the game's again.
+ *
+ * Left alone: a magazine from a container that allows it, one whose origin is not known, one the window put
+ * in by hand (fnc_noteHandLoad), a reload of another unit, from a vehicle's gun, or of a weapon the unit does
+ * not carry. Without limits nothing is looked at.
  *
  * A handler of the "Reloaded" event of CAManBase (XEH_postInit); it runs where the unit is local.
  *
@@ -33,6 +42,19 @@ params [
     ["_new", [], [[]]],
     ["_old", [], [[]]]
 ];
+
+// The reload this mod asked for: spent by the first event of its unit, one that ran out by any.
+private _token = GVAR(reloadToken);
+
+if (_token isNotEqualTo []) then {
+    if (diag_tickTime > (_token select 8) || {_unit isEqualTo (_token select 0)}) then {
+        GVAR(reloadToken) = [];
+    };
+
+    if (diag_tickTime > (_token select 8) || {_unit isNotEqualTo (_token select 0)}) then {
+        _token = [];
+    };
+};
 
 if (!(missionNamespace getVariable [QGVAR(useActive), false]) || {diag_tickTime < GVAR(undoUntil)}) exitWith {false};
 
@@ -65,14 +87,36 @@ if (
 
 // The magazine that is in the weapon now. The event does not say which one it was by id, so the loaded
 // magazine of this class and these rounds is looked for; more than one (the same magazine in two weapons)
-// is not told apart, and the game's reload stands.
+// is not told apart.
 private _loaded = (magazinesAmmoFull _unit) select {
     count _x >= 7 && {_x select 2} && {(_x select 0) == _class} && {(_x select 1) == _rounds}
 };
 
-if (count _loaded != 1) exitWith {false};
+private _id = if (count _loaded == 1) then {format ["%1:%2", (_loaded select 0) select 6, (_loaded select 0) select 5]} else {""};
 
-private _kind = GVAR(useIds) getOrDefault [format ["%1:%2", (_loaded select 0) select 6, (_loaded select 0) select 5], ""];
+// The reload asked for: the magazine by its id, or - when it cannot be told apart - by class and rounds.
+if (_token isNotEqualTo []) then {
+    _token params ["", "_tokenWeapon", "_tokenId", "_tokenClass", "_tokenRounds", "_tokenOld", "_tokenKind", "_tokenCounts"];
+
+    private _asked = (toLowerANSI _weapon) isEqualTo _tokenWeapon && {
+        [_id isEqualTo _tokenId, _class == _tokenClass && {_rounds == _tokenRounds}] select (_id isEqualTo "")
+    };
+
+    if (_asked) then {
+        // A frame later: the game is still putting the old magazine away.
+        [FUNC(reloadTidy), [_unit, _tokenOld, _tokenKind, _tokenCounts]] call CBA_fnc_execNextFrame;
+    } else {
+        INFO_3("The reload action asked for %1 (%2) but the game loaded %3.",_tokenClass,_tokenId,_class);
+
+        _token = [];
+    };
+};
+
+if (_token isNotEqualTo []) exitWith {false};
+
+if (_id isEqualTo "") exitWith {false};
+
+private _kind = GVAR(useIds) getOrDefault [_id, ""];
 
 if (_kind isEqualTo "" || {([_class, _kind] call FUNC(useState)) isNotEqualTo "blocked"}) exitWith {false};
 

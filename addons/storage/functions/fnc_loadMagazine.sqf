@@ -6,8 +6,12 @@
  * magazine). The caller chooses the magazine among those the "Use items from ..." settings leave open; this
  * only loads it:
  *
- *   - the muzzle holds a magazine: the game's own reload action with its animation, which swaps the two
- *     (the old magazine goes back into the unit's gear)
+ *   - the muzzle holds a magazine: the game's own reload action for exactly this magazine (by its id and
+ *     creator), with its animation, which swaps the two (the old magazine goes back into the unit's gear).
+ *     Before the action a one-shot note is written, GVAR(reloadToken): the first "Reloaded" event of the unit
+ *     spends it (fnc_onReloaded) - when it shows this magazine loaded, the reload is not taken back, and the
+ *     old magazine is moved once out of a container the settings close (fnc_reloadTidy). The note runs out
+ *     after RELOAD_TOKEN_MAX seconds and is cleared when a magazine is taken out of a weapon (fnc_takeOff).
  *   - the muzzle is EMPTY: the magazine is taken out of the container it lies in (counted before and after)
  *     and put into the muzzle with addWeaponItem (fnc_weaponPart, which tries three forms of the command and
  *     looks at the weapon after each), the weapon's reload gesture and sound play as the window plays them,
@@ -44,8 +48,30 @@ private _which = [primaryWeapon _unit, handgunWeapon _unit, secondaryWeapon _uni
 if (isNull _unit || {!alive _unit} || {_which < 0} || {_class isEqualTo ""} || {_rounds <= 0}) exitWith {false};
 
 // The reload action wants the magazine by its id and its creator, which the entry carries behind the rounds.
+// The token first, should the event come at once: [unit, weapon, "creator:id", class, rounds, the magazine the
+// weapon had [class, rounds] or [], the container the new one lies in, how many magazines like the old one
+// each container held before [uniform, vest, backpack], until when it stands].
 private _fnc_action = {
+    params [["_old", [], [[]]]];
+
     if (count _entry < 7) exitWith {false};
+
+    private _id = format ["%1:%2", _entry select 6, _entry select 5];
+    private _kind = toLowerANSI format ["%1", _entry select 4];
+
+    if !(_kind in USE_KINDS) then {
+        _kind = GVAR(useIds) getOrDefault [_id, ""];
+    };
+
+    private _counts = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit] apply {
+        private _box = _x;
+
+        if (isNull _box || {_old isEqualTo []}) then {0} else {
+            {(_x select 0) == (_old select 0) && {(_x select 1) == (_old select 1)}} count (magazinesAmmoCargo _box)
+        }
+    };
+
+    GVAR(reloadToken) = [_unit, toLowerANSI _weapon, _id, _class, _rounds, _old, _kind, _counts, diag_tickTime + RELOAD_TOKEN_MAX];
 
     _unit action ["LoadMagazine", vehicle _unit, _unit, _entry select 6, _entry select 5, _weapon, _muzzle];
 
@@ -72,25 +98,10 @@ private _fnc_loaded = {
 };
 
 // A muzzle that holds a magazine: the game swaps them, with its animation. The one it puts away may land in
-// a container the settings close, so a moment later fnc_reloadTidy takes it to the container the new one
-// came from.
+// a container the settings close; the token lets fnc_onReloaded move it once, when the reload is done.
 private _old = call _fnc_loaded;
 
-if (_old isNotEqualTo []) exitWith {
-    private _containers = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
-    private _counts = _containers apply {
-        private _box = _x;
-
-        if (isNull _box) then {0} else {{(_x select 0) == (_old select 0) && {(_x select 1) == (_old select 1)}} count (magazinesAmmoCargo _box)}
-    };
-    private _done = call _fnc_action;
-
-    if (_done && {missionNamespace getVariable [QGVAR(useActive), false]}) then {
-        [FUNC(reloadTidy), [_unit, _old, format ["%1", _entry param [4, ""]], _counts], UNDO_RELOAD_WAIT] call CBA_fnc_waitAndExecute;
-    };
-
-    _done
-};
+if (_old isNotEqualTo []) exitWith {[_old] call _fnc_action};
 
 // An empty muzzle. The container the magazine lies in: the location the game gave, else the one container
 // that holds a magazine of this class and these rounds.
@@ -110,7 +121,7 @@ if (_at < 0 || {([_containers select _at] call _fnc_count) < 1}) then {
     _at = _containers findIf {([_x] call _fnc_count) > 0};
 };
 
-if (_at < 0) exitWith {call _fnc_action};
+if (_at < 0) exitWith {[[]] call _fnc_action};
 
 private _box = _containers select _at;
 private _before = [_box] call _fnc_count;
@@ -118,7 +129,7 @@ private _before = [_box] call _fnc_count;
 _box addMagazineAmmoCargo [_class, -1, _rounds];
 
 // The container did not let it go: nothing has changed, the game's own reload is left to try.
-if (([_box] call _fnc_count) >= _before) exitWith {call _fnc_action};
+if (([_box] call _fnc_count) >= _before) exitWith {[[]] call _fnc_action};
 
 [_unit, ["primary", "handgun", "launcher"] select _which, true, _class, _rounds, _second] call FUNC(weaponPart);
 
@@ -126,7 +137,7 @@ if ((call _fnc_loaded) isEqualTo []) exitWith {
     // It did not go in: back where it lay.
     _box addMagazineAmmoCargo [_class, 1, _rounds];
 
-    call _fnc_action
+    [[]] call _fnc_action
 };
 
 // The window's reload gesture and sound (einv_gui, when it is loaded), then the notes that follow any change

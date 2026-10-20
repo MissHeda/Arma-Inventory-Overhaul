@@ -101,16 +101,24 @@ if (isServer) then {
 };
 
 if (hasInterface) then {
-    // The reload key in front of the engine's, once the main display exists: a magazine in a container the
-    // "Use items from ..." settings close is not loaded, the fullest of the others is (fnc_reloadGuard).
-    // The throw key in front of the engine's too: with nothing to throw but closed containers' grenades it
-    // does nothing and says where to take one out (fnc_throwGuard).
+    // The reload key in front of the engine's, once the main display exists: with a "Use items from ..."
+    // limit active the key is this mod's, and the fullest magazine that may be used is loaded
+    // (fnc_reloadGuard). The throw key in front of the engine's too: with nothing to throw but closed
+    // containers' grenades it does nothing and says where to take one out (fnc_throwGuard). One handler for
+    // both, whose answer is either's: with two, the engine was seen going by one handler's false although
+    // the other swallowed the key - the reload guard's true was lost, and the game reloaded by its own pick
+    // as well. Both always run, each for its own key.
     [{!isNull findDisplay 46}, {
-        (findDisplay 46) displayAddEventHandler ["KeyDown", {_this call FUNC(reloadGuard)}];
-        (findDisplay 46) displayAddEventHandler ["KeyDown", {_this call FUNC(throwGuard)}];
+        (findDisplay 46) displayAddEventHandler ["KeyDown", {
+            private _reload = _this call FUNC(reloadGuard);
+            private _throw = _this call FUNC(throwGuard);
+
+            _reload || _throw
+        }];
     }] call CBA_fnc_waitUntilAndExecute;
 
-    // What the keys cannot catch. A reload by the scroll menu, a gamepad button or a script is the game's:
+    // The reload this mod asked for spends its token here, once (fnc_onReloaded tidies the magazine put away).
+    // What the keys cannot catch: a reload by the scroll menu, a gamepad button or a script is the game's;
     // a magazine it took from a closed container is taken back after the event (fnc_onReloaded, which needs
     // to know where the magazines lay: fnc_useTrack, once a second and after every move). The throwing is
     // kept to the unit's open containers by ACE's blockThrow effect and the selection (fnc_throwTick).

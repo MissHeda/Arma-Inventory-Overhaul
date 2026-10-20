@@ -3,9 +3,9 @@
  * Author: Miss Heda
  * Takes back a reload the game did from a container the "Use items from ..." settings close to the item
  * (fnc_onReloaded): the magazine that was loaded goes out of the weapon and back into the container it came
- * from, and the magazine the weapon had before goes back into the weapon. Then a line says so - and when a
- * magazine that may be used lies elsewhere, the fullest of those is loaded the way the reload key's guard
- * loads one (fnc_loadMagazine).
+ * from, and the magazine the weapon had before goes back into the weapon. Then a line says so - and when the
+ * muzzle is left empty and a magazine that may be used lies elsewhere, the fullest of those is put in by hand
+ * (fnc_loadMagazine). An undo never starts a reload of the game's.
  *
  * Every step is looked at before the next one: the loaded magazine must still be the one in the weapon;
  * the cargo is counted before and after, so a magazine is never lost and never doubled - one that cannot
@@ -160,8 +160,10 @@ if ((_after call _total) > (_before call _total)) then {
     };
 };
 
-// Nowhere to put it: it goes back into the weapon, as the game had it.
+// Nowhere to put it: it goes back into the weapon, as the game had it. Noted as a hand load: should the command
+// raise "Reloaded", fnc_onReloaded leaves it alone instead of undoing the undo.
 if (!_safe) exitWith {
+    [_unit, _weapon, _class] call FUNC(noteHandLoad);
     _unit addWeaponItem [_weapon, [_class, _rounds, _muzzle], true];
 
     if ((call _fnc_loaded) isEqualTo []) then {
@@ -184,6 +186,8 @@ if (_oldClass isNotEqualTo "" && {_oldRounds > 0}) then {
         _holder addMagazineAmmoCargo [_oldClass, -1, _oldRounds];
 
         if (([_holder, _oldClass, _oldRounds] call _fnc_count) < (_oldCounts select ([_boxAt, 0, 1, 2] select _at))) then {
+            // A hand load, as above: the old magazine may itself have come from a closed container once.
+            [_unit, _weapon, _oldClass] call FUNC(noteHandLoad);
             _unit addWeaponItem [_weapon, [_oldClass, _oldRounds, _muzzle], true];
 
             if ((call _fnc_loaded) isNotEqualTo [_oldClass, _oldRounds]) then {
@@ -222,8 +226,8 @@ if (_pick isEqualTo []) then {
         if (_best isEqualTo [] || {currentWeapon _unit isNotEqualTo _weapon}) exitWith {};
 
         // Only into a muzzle the undo left empty, by hand: a weapon that has its old magazine back is not
-        // reloaded again from here (the game's reload would play its animation again and could take the
-        // blocked magazine once more - a loop). The next press of the key does it (fnc_reloadGuard).
+        // reloaded again from here - an undo never starts a reload of the game's, so it cannot loop. The
+        // next press of the key does it (fnc_reloadGuard).
         if (currentMagazine _unit isNotEqualTo "") exitWith {};
 
         [_unit, _weapon, _muzzle, _best] call FUNC(loadMagazine);

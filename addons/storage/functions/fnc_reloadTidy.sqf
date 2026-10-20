@@ -5,7 +5,8 @@
  * magazine the game put away may have landed in a container the settings close. It is moved to the container
  * the new magazine came from - where a cell was freed - when that has room for it. Nothing is moved when it
  * landed in a usable container, when the source is gone or full, or when the game did not change the counts.
- * Once per reload; nothing repeats.
+ * Called once per reload, a frame after the "Reloaded" event that spent the reload's token (fnc_onReloaded);
+ * it starts no reload and raises no event of its own, so nothing repeats.
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -26,7 +27,7 @@ params [["_unit", objNull, [objNull]], ["_old", [], [[]]], ["_kind", "", [""]], 
 
 _old params [["_class", "", [""]], ["_rounds", 0, [0]]];
 
-if (isNull _unit || {!alive _unit} || {_class isEqualTo ""} || {count _before < 3} || {!(missionNamespace getVariable [QGVAR(useActive), false])}) exitWith {false};
+if (isNull _unit || {!alive _unit} || {_class isEqualTo ""} || {_rounds <= 0} || {count _before < 3} || {!(missionNamespace getVariable [QGVAR(useActive), false])}) exitWith {false};
 
 private _containers = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
 private _toAt = USE_KINDS find (toLowerANSI _kind);
@@ -46,7 +47,7 @@ private _fnc_count = {
 };
 
 // The container the old magazine was put into: one that holds more of it than before.
-private _at = _containers findIf {(([_x] call _fnc_count) > (_before select (_containers find _x))) && {!isNull _x}};
+private _at = [0, 1, 2] findIf {!isNull (_containers select _x) && {([_containers select _x] call _fnc_count) > (_before select _x)}};
 
 if (_at < 0) exitWith {false};
 

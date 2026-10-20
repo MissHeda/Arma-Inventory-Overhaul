@@ -132,11 +132,14 @@ GVAR(strictActive) = false;
 // a reload the game did can be told to have come from a closed container (fnc_onReloaded); whether such a
 // reload is being taken back right now (fnc_reloadUndo) - until when, a time and not a flag, so one that a
 // script error left behind runs out -; a magazine the window loaded by hand, [unit, weapon, class, until]
-// (fnc_noteHandLoad); when ACE's "is reloading" was first seen (fnc_reloadBusy); and the throw block
-// (fnc_throwTick): whether ACE's blockThrow is set by us and for which unit.
+// (fnc_noteHandLoad); the one reload this mod asked the game for, spent by its first "Reloaded" event
+// (fnc_loadMagazine writes it, fnc_onReloaded spends it, it runs out); when ACE's "is reloading" was first
+// seen (fnc_reloadBusy); and the throw block (fnc_throwTick): whether ACE's blockThrow is set by us and for
+// which unit.
 GVAR(useIds) = createHashMap;
 GVAR(undoUntil) = 0;
 GVAR(handLoad) = [];
+GVAR(reloadToken) = [];
 GVAR(reloadBusySince) = 0;
 GVAR(throwBlocked) = false;
 GVAR(throwUnit) = objNull;

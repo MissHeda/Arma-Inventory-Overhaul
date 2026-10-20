@@ -44,8 +44,10 @@ private _payload = switch (true) do {
         [_unit, _base, false, _class] call FUNC(weaponPart);
 
         // The muzzle is empty again: nothing is expected of it any more, the reload key may act at once (a
-        // note of an earlier load, the key's repeat gap) and the notes of where the magazines lie are renewed.
+        // note of an earlier load, the token of a reload asked for, the key's repeat gap) and the notes of
+        // where the magazines lie are renewed.
         [objNull] call FUNC(noteHandLoad);
+        GVAR(reloadToken) = [];
         GVAR(reloadAt) = 0;
         [_unit] call FUNC(useTrack);
         ["magazine", _class, [_entry get "ammo"]]

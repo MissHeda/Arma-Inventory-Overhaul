@@ -1,13 +1,14 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Whether a reload is under way that a new one has to wait for - ACE's "is reloading" flag
- * (ace_common_isReloading) - but not for ever. The flag is set when a reload starts and cleared when the
- * game says it is done; a reload that did nothing (a weapon with no magazine, a magazine the engine refused)
- * says nothing, and the flag could stay set. The reload key's guard, the hotbar and AIME's menu all wait on
- * it, so a flag left behind made every later reload do nothing - after taking a magazine out of a weapon by
- * dragging it out, say. So it is believed for RELOAD_BUSY_MAX seconds from the first time it was seen set; a
- * flag that outlived that is ignored until it has been seen cleared once.
+ * Whether a reload is under way that a new one has to wait for: the player's weapon is in the middle of a
+ * magazine reload (weaponState entry 6 above 0 - the engine's own answer, also for a reload this mod started
+ * by the game's action), or ACE's "is reloading" flag (ace_common_isReloading) is set - but not for ever. ACE
+ * sets the flag in its KeyDown handler whenever the reload key is pressed and clears it after the animation's
+ * time; a flag left behind made every later reload do nothing (after taking a magazine out of a weapon by
+ * dragging it out, say). So it is believed for RELOAD_BUSY_MAX seconds from the first time it was seen set; a
+ * flag that outlived that is ignored until it has been seen cleared once. The hotbar, AIME's menu and the
+ * reload undo's follow-up wait on it. The reload key's guard does not: ACE sets the flag for that very press.
  *
  * Arguments:
  * None
@@ -20,6 +21,10 @@
  *
  * Public: Yes
  */
+
+private _unit = missionNamespace getVariable ["ACE_player", player];
+
+if (!isNull _unit && {((weaponState _unit) param [6, 0]) > 0}) exitWith {true};
 
 if !(missionNamespace getVariable ["ace_common_isReloading", false]) exitWith {
     GVAR(reloadBusySince) = 0;

@@ -83,13 +83,17 @@
 // The reload key is looked at at most this often, in seconds (fnc_reloadGuard): a key held down repeats.
 #define RELOAD_GUARD_GAP 0.6
 
+// How long the token of a reload this mod asked the game for (fnc_loadMagazine) waits for its "Reloaded" event
+// (fnc_onReloaded), in seconds - longer than any reload animation; one the game never answered runs out.
+#define RELOAD_TOKEN_MAX 12
+
 // The magazine a scroll-menu or gamepad reload took from a closed container is taken back a frame after the
 // event (fnc_reloadUndo); a magazine that may be used is then loaded this many seconds later, once the
 // weapon is back as it was.
 #define UNDO_RELOAD_WAIT 0.4
 
 // How long a flag of a reload under way is believed, in seconds, before it counts as left behind: ACE's "is reloading"
-// (fnc_reloadBusy), whose end never comes when a reload did nothing, and the undo of a reload (fnc_reloadUndo),
+// (fnc_reloadBusy), whose end may never come, and the undo of a reload (fnc_reloadUndo),
 // whose steps normally take a frame or two. Nothing waits on either for ever.
 #define RELOAD_BUSY_MAX 5
 #define UNDO_BUSY_MAX 3
