@@ -68,6 +68,26 @@ A client can see them and cannot change them.
       crate, the ground and a kit window, and is greyed while a move out of that container is under way;
       none on a body's worn gear, on a living person's gear that the settings keep look-only, nor in the Arsenal; a narrow window
       drops Sort first, then Take all, before the tab is cut under three letters.
+- [ ] Text follows the tile size (issue #10): at 1920x1080 set "Tile scale" (`einv_gui_cellScale`) to 1.3 and open the window -
+      section captions and chips (Backpack, Tactical rig, Take all, Put all in, Sort, the weight, the search chip), the column
+      titles, the box's name, "+N empty rows", the page bar's words, a kit window's title row, the footer's key hints, hint and
+      version and the window title are about a fifth larger than at the default 1.1 (a third over 1.0), nothing overlaps or is cut, Take all and Sort are as wide
+      as their labels; at 0.8 the words are as at 1.0; at 1280x720 (or a small UI size) the captions stay readable (12 px); in ACE
+      Arsenal's panel the words follow the panel's own capped tiles and the panel still fits.
+- [ ] Sealed body containers (issue #6): kill a soldier with a full backpack and loot him - his uniform, vest and backpack
+      each show one hatched block of 3 rows marked UNSEARCHED beside their box (the same size for a small pouch and a big
+      backpack), no tiles, no weight in the caption, no Take all or Sort, no strip, a chip that says no time; the hint over the
+      block and the caption says nothing of the load; Put all in from your gear does not go into them. With "Search starts on
+      click" on: the chip says Unsearched, a click on Search or on the block starts it (the block's ring turns, "Searching..."),
+      clicking another box first pauses this one and it goes on afterwards, the cross stops it ("Stopped"). When done the real
+      grid appears with every item visible; closing and opening the body keeps it searched; a second player still sees it
+      sealed. An empty backpack is searched in a moment and shows its empty grid. With the setting off the blocks search one
+      after another by themselves. A living person (search persons on) the same; crates and the ground keep hatched tiles.
+- [ ] Loot and own apart (issue #7): open a body - the loot column reads "Loot - <name>" with a blue strip under its title, a
+      cooler pane ringed in blue and blue-tinted caption tabs; the body's uniform, vest and backpack read "Pockets - <name>",
+      "Tactical rig - <name>", "Backpack - <name>", yours "Pockets", "Tactical rig", "Backpack" in the plain "Your gear" column with the
+      orange accent; a crate reads "Loot - <crate>", the ground "Loot - Ground", what lies around "Loot - Nearby"; the same with
+      "Where other storage opens" (`einv_gui_lootSide`) on either choice; ACE Arsenal's panel looks as before.
 - [ ] Sort cycles: the button reads "Sort: Size" (or the last order used) and a click sorts by the next one - Name (A to Z), Weight
       (heaviest first), Size (largest first), Type (weapons, ammo, gear, medical, the rest) - with every Sort button of the window
       (all sections, an open kit's window) changing its words at once and the caption line not moving; the tooltip names what the next
@@ -98,6 +118,13 @@ A client can see them and cannot change them.
 - [ ] Drag a row of the list onto a cell; a plain click stays ACE's; wheel sets the count while dragging;
       Ctrl+wheel over a tile adds or removes one; plain wheel scrolls.
 - [ ] Staging grows with its contents, scrolls, the footer warns, deleted on close.
+- [ ] Tab switch folds anew (issue #3): open the vest and backpack sections by hand in the uniform tab, switch to the vest tab -
+      only the vest's section is open, uniform and backpack folded, staging as it was, order uniform, vest, backpack, staging,
+      scroll kept; the same for the backpack tab and for picking a kit (IFAK) in ACE's left list (its sections open, they fold by hand).
+- [ ] Kit grid (issue #4), once in the default (capacity) and once with a rule giving the kit cells (`class=efak_IFAK+ > grid=4x3`,
+      `einv_compat_efak_fnc_roomMode` says "cells"): pick the IFAK in the left list, drag a row of ACE's right list onto a free cell
+      and onto a taken one, drag from staging into the kit and a kit tile out to staging, move a tile inside the kit and turn it (R),
+      drop one outside the panel, Delete, right-click Remove, Ctrl+wheel; a kit lying in the staging space and one in the vest.
 - [ ] Sections fold and stay folded per class; the title row: the container's picture, its name beside it in the title size of
       the inventory's columns and centred on the picture, a hairline under it; picture, tabs and grids on one left edge, the
       weights on one right edge, the same room round everything; the staging subtitle on the caption's baseline.
@@ -155,6 +182,7 @@ A client can see them and cannot change them.
 - [ ] `copyToClipboard ([["B_Carryall_blk", true]] apply {_x call einv_items_fnc_configEntry} joinString endl)` after changing a
       class in the wizard gives its lines; `[text] call einv_items_fnc_parseConfigEntry` on them gives the class and the values
       back (`einv_grid` as the rules write it).
+- [ ] Medical defaults (issue #9, ACE + ACM + ACME + EFAK loaded): in a box, `ACE_fieldDressing` stacks 2, `ACM_Vial_Morphine` and `ACME_MannitolVial` 3 on 1x1, `ACM_Paracetamol`, `ACM_Syringe_10` types and `ACM_OxygenTank_425` (1x2) obey their rule although they are magazines, `ACM_BloodBag_*` and `ACE_plasmaIV_*` do not stack, `efak_IFAK_1` is 2x1 and `efak_MFAKPlus_1` 3x3; the check script reports no size or stack differences.
 - [ ] Weight tiers: no sprint from Overloaded, walking from Critical, ACE fatigue follows.
 - [ ] Zeus Enhanced: Inventory lock in the right-click menu and the module.
 - [ ] Reload with an empty weapon (take the magazine out of the rifle first): R with a magazine only in the vest loads it; with
@@ -163,6 +191,13 @@ A client can see them and cannot change them.
       pistol, a launcher and the grenade launcher's second muzzle (switch to GL, R). Drag a magazine from the vest onto the empty
       rifle, onto its magazine slot, and use "Load into" in the menu: it loads; read the RPT for `only without a muzzle name` /
       `only as a plain magazine`.
+- [ ] Reload with use limits (issue #2): backpack on "Nothing", a partly used magazine in the rifle, allowed magazines in the vest
+      and a full one in the backpack. R once: one animation, the vest's fullest magazine goes in, the old one goes where the game
+      puts it (moved to the vest if it landed in the backpack), no hint, no second animation; hold R: still one reload. Fire the
+      weapon empty and R: the vest's again. Drag the magazine out of the rifle in the window, close it, R: loads at once from the
+      vest. Only backpack magazines left: R loads nothing and the popup says to take one out. With every limit on "Everything"
+      R is the game's own (it may take the backpack's). The RPT shows no `asked for ... but the game loaded` and no `could not be
+      loaded` line.
 - [ ] AIME (Workshop 1376867375): self interaction > Change Ammo Type lists only the magazines the settings allow (backpack on
       Nothing: its magazines are not listed, and with nothing else a "take one out first" entry), loads the fullest of the class,
       also into an empty weapon; Inventory on a vehicle shows once (not twice with ACE interaction), not for a locked one or one

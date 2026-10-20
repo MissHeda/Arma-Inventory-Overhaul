@@ -310,13 +310,13 @@ installed), `base`, `cell` (-1 to leave it to its base or the slider), `rules[]`
 element, no commas) and `class Groups` (labels and examples of the groups). The group ids are what own rules refer to and a preset's id
 is what a text names in `base=`: never rename one. Other mods may add presets as classes there; the wizard offers no choice among them.
 
-- **`default`** (revision 3) is the one preset this mod ships, and it is realism: rifles 4x2 to 7x2 by mass, handguns 2x1,
+- **`default`** (revision 4) is the one preset this mod ships, and it is realism: rifles 4x2 to 7x2 by mass, handguns 2x1,
   launchers 6x2, magazines 1x1, 1x2 or 2x2 by mass, belts 2x2, rockets 1x3 and 2x3, grenades 1x1, optics, muzzles and small items 1x1 up
   to 3x2 by mass, belts 2x2, helmets 2x2, uniforms 2x2, vests 3x3, backpacks 4x4, 5x5 and 5x6 by load (up to 160, up to 280, above) - and
   **nothing stacks** but the groups `@stack_20`, `@stack_10`, `@stack_5` and `@stack_2`: consumables of ACE, ACM and the vanilla first aid kit,
   by class (`class=ACE_fieldDressing|ACM_IV_16g+|...`). The rules are keyed by class, so a mod that is not loaded matches nothing; a name with a
   plus is that class and everything built on it, used where all of them are of the same sort. A rule of the text for a class wins over them like
-  over any preset rule. It sets **no grid**: a uniform, vest or backpack gets the built-in answer (`grid=120%`, `einv_storage_fnc_blocksFor`),
+  over any preset rule. The medical list of issue #9 (ACE, ACM, ACME and Enhanced First Aid Kits: one `class=` rule per size and stack, vials by `class~`) sits after the `@stack_*` groups and wins over them. It sets **no grid**: a uniform, vest or backpack gets the built-in answer (`grid=120%`, `einv_storage_fnc_blocksFor`),
   a crate or vehicle `auto`, so the text's rules with `all` - the General step's kind sizes - decide for every container no class rule, table or mod
   answers. The groups are a partition (an item is in at most one, `medical` and the `stack_*` groups excepted, which are only handles), so a rule for
   one never reaches into another. Kits of Enhanced First Aid Kits are items to `kind=` as well, so the item groups size them; none of
@@ -908,20 +908,34 @@ limited.
   `fnc_useCarried [unit, [items, magazines, magazinesAmmoFull]]` leaves, which takes one entry out for every item lying in a
   blocked container; a key pressed with everything blocked says "Cannot be used from the backpack - take it out first",
   `fnc_useBlockedIn`); and the engine's reload key.
-- **The reload key** (`fnc_reloadGuard`, a KeyDown handler on the main display from postInit): the engine decides which magazine it
-  loads and takes it from any container; a mod cannot change that, and `Reloaded` cannot be cancelled. So the handler stands in
-  front of the key - the game's "Reload" action keys, plain, on foot, with a rifle, pistol or launcher in the hands - and only acts
-  when a magazine that the weapon takes lies in a blocked container (`magazinesAmmoFull` less `useCarried`): none lies in a usable
-  one, the key does nothing and a line names the containers to take one out of; some do, the handler loads the fullest of them
-  (`fnc_reloadPick`, then `fnc_loadMagazine` below: the game's `LoadMagazine` action, or by hand into an empty weapon) and swallows the key. Where nothing is blocked, or nothing limited, the
-  key is the game's. A full magazine in the weapon is left to the game. A vehicle's gun is not caught.
-  **An empty muzzle is the guard's whatever the settings say**: when `currentMagazine` is "" - the weapon was emptied by dragging its magazine out of the window, by a script or a loadout - the guard loads the fullest usable magazine by hand (`fnc_reloadPick`, `fnc_loadMagazine`), also with all three settings on Everything (`useCarried` then returns everything); the game's own key was seen doing nothing for a weapon emptied that way. Not while a reload is under way (`fnc_reloadBusy`, or `weaponState` entry 6, the magazine's reload phase, above 0 - a reload takes the magazine out of the muzzle for a while, and that muzzle is not "empty"). A pick that is not loaded gives the key back to the game and clears the repeat gap (`GVAR(reloadAt)`).
-- **Nothing waits for ever**. ACE's `ace_common_isReloading` is read through `einv_storage_fnc_reloadBusy` (the reload key's guard, the hotbar's magazine and throwable keys, AIME's menu, the undo's delayed load): believed for `RELOAD_BUSY_MAX` 5 s from the first time it was seen set, then ignored until it was seen cleared once (a reload that did nothing never says it is done, and the flag stayed set - every later reload was swallowed). The undo's busy mark is a time, `GVAR(undoUntil)` (`UNDO_BUSY_MAX` 3 s), not a flag, so a script error in the middle of `fnc_reloadUndo` cannot disable `fnc_onReloaded` for good. A magazine taken out of a muzzle (`fnc_takeOff`, slots `mag` and `mag2`) clears the hand-load note, the repeat gap and renews the notes of where the magazines lie (`fnc_useTrack`).
+- **The reload key** (`fnc_reloadGuard`, called by the one KeyDown handler on the main display from postInit, which also calls
+  `fnc_throwGuard` and swallows the key when either says so - two handlers were one too many: the engine went by the throw guard's
+  `false` for R although the reload guard returned `true`, and reloaded by its own pick as well, issue #2). The engine decides which
+  magazine it loads and takes it from any container; a mod cannot change that, and `Reloaded` cannot be cancelled. So **with any
+  limit active the key is the mod's alone** - the game's "Reload" action keys, plain, on foot, with a rifle, pistol or launcher in
+  the hands, and at least one magazine the muzzle takes (none: the key is the game's, which has nothing to load either). A key held
+  down (`RELOAD_GUARD_GAP` 0.6 s, `GVAR(reloadAt)`) or a reload under way (`weaponState` entry 6, the magazine reload phase, above 0)
+  is swallowed; a full magazine in the weapon does nothing, as in the game; otherwise the fullest usable magazine (`fnc_reloadPick`)
+  is loaded with `fnc_loadMagazine` (below: the game's `LoadMagazine` action for that one magazine, or by hand into an empty muzzle).
+  With only blocked magazines a line names the containers to take one out of. A load that fails swallows the press too (an RPT
+  WARNING) and clears the repeat gap - the engine's own reload is never let in while a limit is active. ACE's `isReloading` is
+  **not** asked here: ACE sets it in its own KeyDown handler for this very press, and the guard took its own press for a reload
+  under way and swallowed it without loading. With every setting on Everything the guard answers `false` at once: reloading is the
+  game's, untouched. A vehicle's gun is not caught.
+- **One reload, one token** (`GVAR(reloadToken)`). `fnc_loadMagazine` writes `[unit, weapon, "creator:id", class, rounds, old
+  magazine, source container, counts of the old magazine per container, until]` right before the `LoadMagazine` action. The
+  first `Reloaded` event of that unit spends it (`fnc_onReloaded`), whatever it shows, so nothing runs twice for one reload: when
+  the loaded magazine is the one asked for (by id, or by class and rounds when the id cannot be told), the reload stands and a frame
+  later `fnc_reloadTidy` moves the magazine the game put away out of a container that is blocked for it into the container the new
+  one came from, when that has room - once. When the game loaded another one, an RPT INFO says so and the undo below decides. The
+  token runs out after `RELOAD_TOKEN_MAX` 12 s and is cleared when a magazine is taken out of a weapon (`fnc_takeOff`).
+- **Nothing waits for ever**. `einv_storage_fnc_reloadBusy` (the hotbar's magazine and throwable keys, AIME's menu, the undo's
+  delayed load) is the player's weapon reload phase (`weaponState` entry 6) or ACE's `ace_common_isReloading`, the flag believed
+  for `RELOAD_BUSY_MAX` 5 s from the first time it was seen set, then ignored until it was seen cleared once. The undo's busy mark
+  is a time, `GVAR(undoUntil)` (`UNDO_BUSY_MAX` 3 s), not a flag, so a script error in the middle of `fnc_reloadUndo` cannot disable
+  `fnc_onReloaded` for good. A magazine taken out of a muzzle (`fnc_takeOff`, slots `mag` and `mag2`) clears the hand-load note,
+  the reload token and the repeat gap and renews the notes of where the magazines lie (`fnc_useTrack`).
 - **Loading by hand is free of the limits**. The settings are about using items in the field (R, hotbar, ACE actions), not about handling the gear in the window: a magazine dragged from any container (also a blocked backpack, and a Strict one's hidden entries, which `fnc_removeEntry` takes out of the holder) onto a weapon or its magazine slot, or loaded with the menu's "Load into", goes in. `fnc_weaponPart` notes every magazine it puts on (`fnc_noteHandLoad`: `GVAR(handLoad)` = `[unit, weapon, class, until]`, `HAND_LOAD_WINDOW` 1.5 s), and `fnc_onReloaded` leaves a loaded magazine of that weapon and class alone while the note stands (one event answers it and clears it) - should `addWeaponItem` raise `Reloaded`, the undo would take back a load the player chose. The setting texts say so.
-- **Limits active: the key always loads the chosen magazine.** `fnc_reloadGuard` no longer leaves the game's own reload to itself when the
-  weapon holds a magazine and nothing usable lies blocked: with limits active it always loads what `fnc_reloadPick` chose (the engine's
-  `LoadMagazine` action, `fnc_loadMagazine`), and `fnc_reloadTidy` (`UNDO_RELOAD_WAIT` later, once) moves the magazine the game put away to the
-  container the new one came from when it landed in a blocked container and that one has room.
 - **A reload by the scroll menu, a gamepad button or a script** (`fnc_onReloaded`, the CAManBase event `Reloaded` from postInit):
   the engine has loaded a magazine by then and `Reloaded` cannot be cancelled, so it is undone afterwards, and only when it is sure.
   `fnc_useTrack` keeps `GVAR(useIds)`, "creator:id" -> "uniform" | "vest" | "backpack" for every magazine of the player that
@@ -939,12 +953,13 @@ limited.
   it is when the container will not take it) - and a magazine nowhere is put back into the weapon with `addWeaponItem`. Then the old
   magazine (`Reloaded`'s last argument, when it has rounds) is taken out of whichever container holds one with those rounds and put
   into the weapon, and given back to the container when that does not hold. A line says "Cannot reload from the backpack."; if a
-  magazine that may be used is left (`fnc_reloadPick`, the fullest), `UNDO_RELOAD_WAIT` later it is loaded with `fnc_loadMagazine`. Never done twice (`GVAR(undoUntil)`, a time that runs out), and not when the magazine's origin is unknown. Untested in the game: the exact shape
+  magazine that may be used is left (`fnc_reloadPick`, the fullest) and the undo left the muzzle empty, `UNDO_RELOAD_WAIT` later it is put in by hand with `fnc_loadMagazine` - an undo never starts a reload of the game's, so it cannot loop. Its own `addWeaponItem` restores are noted as hand loads (`fnc_noteHandLoad`), so a `Reloaded` they raise is not undone in turn. Never done twice (`GVAR(undoUntil)`, a time that runs out), and not when the magazine's origin is unknown. Untested in the game: the exact shape
   of the `Reloaded` arguments and whether `removePrimaryWeaponItem` returns the magazine to the cargo are checked by counting, not
   assumed.
 - **Loading a chosen magazine** (`einv_storage_fnc_loadMagazine [unit, weapon, muzzle, entry]`, public): the one way every reload of
   this mod ends - the key's guard, the undo of a refused reload, the hotbar, `compat_aime`'s menu. `entry` is a row of
-  `magazinesAmmoFull` (seven items). A muzzle that holds a magazine gets the game's `LoadMagazine` action with its animation. An
+  `magazinesAmmoFull` (seven items). A muzzle that holds a magazine gets the game's `LoadMagazine` action with its animation,
+  after the reload token above is written. An
   **empty** muzzle - no magazine in the weapon - is loaded by hand: the magazine is taken out of the container it lies in
   (`addMagazineAmmoCargo [class, -1, rounds]`, counted before and after), put in with `fnc_weaponPart` (below), the window's reload
   gesture and sound play (`einv_gui_fnc_playReload`, when loaded), `fnc_queueMigrate` and `fnc_useTrack` follow; a magazine that did
@@ -1360,6 +1375,25 @@ once in the RPT. The cell is worked out at the first ask after `fnc_attach` and 
 for itself with **`fnc_capCell [pixels, where]`**: ACE Arsenal's panel (`einv_arsenal_fnc_panelRect`) so its `STORAGE_COLS`
 cells fit within a third of the screen and left of ACE's list; its grids, kit windows and ghosts follow.
 
+**The text scale** (`fnc_textScale`, issue #10): the window's words grow with its tiles. The factor is the cell the window really
+has (`fnc_getCell`, after `fnc_capCell` where a window caps it) over the cell at tile scale 1 (`CELL_BASE_PX`, the same base
+`fnc_getCell` starts from), at least `TEXT_SCALE_MIN` 1 (a tile scale under 1 leaves the words as they were), at most
+`TEXT_SCALE_MAX` (= `CELL_SCALE_MAX` 1.3), and at least what brings a caption's words (`TEXT_REF` 0.42 UNIT) to `TEXT_MIN_PX` 12
+pixels - 1080p at tile scale 1 gets 1.06, a lower resolution more (up to the cap). It is kept in uiNamespace `einv_gui_textScale`
+with the cell and UNIT it was worked out for, so it changes only when they do. **`TEXT_UNIT`** = `UNIT * TEXT_SCALE` is what the
+words and the rows that hold them are measured in: the section's caption line (`CAPTION_LINE` TEXT_UNITs), its tab, buttons
+(0.6, labels `TEXT_REF`), weight (0.46), box name and fold line (`fnc_drawSection`, and the weight's measure in `fnc_redrawTiles`),
+the activity chip's place and size (handed to `fnc_updateStatus` in `statusRect` / `statusSize`), the column title row (1.1, words
+0.66; `fnc_drawColumn`), the empty storage line (`fnc_layoutGlass`), the page bar's words (the bar keeps `PAGE_BAR_H`), a kit
+window's title row, its buttons and name (`fnc_drawWindow`), the footer's key caps (0.9, `fnc_uiKeyHint`'s default too), version and
+hint box (`fnc_drawFooter`; the hint's words, fixed by `EINV_FooterHint`, take the factor as the structured text's `size`, kept on
+the footer's own hint control as `einv_gui_textScale` - another window's hint line carries none and stays as it is) and the window
+title (`fnc_drawHeader`; its buttons keep the header's height), ACE cargo's cards (`compat_ace_cargo`'s `fnc_drawSection`, its own
+`TEXT_UNIT`; their tab and hairline take the loot colours) and the Arsenal panel's staging subtitle and its prediction of the caption
+line (`einv_arsenal_fnc_layout`: `TEXT_UNIT * CAPTION_LINE + UNIT * 0.25`). `fnc_buttonWidth` and `fnc_sortChip` measure with the sizes they are
+handed, so the buttons widen with their labels. The equipment column, the menus, the inspect and comparison cards keep their
+sizes; what lies on a tile goes by the cell already.
+
 ### Themes
 
 `fnc_themeBase` returns a HashMap with every key; a look copies it and overrides. There is one look, **Glass** (`fnc_theme`, id
@@ -1377,6 +1411,7 @@ as it was. It is no longer kept in the profile.
 | `id`, `name`, `font`, `fontBold`, `upper` | style id and name; `PuristaMedium`, `PuristaSemibold`; captions in capitals (`fnc_caption`) |
 | `radius` | panel corner radius as a height (0 = square; Glass `UNIT * 0.45`) |
 | `dim`, `dimCamera`, `panel`, `panelBorder` | the screen's dim colour without and with the camera; column background (`[]` for none), 1 px frame |
+| `lootPanel`, `lootBorder`, `lootAccent`, `lootTab`, `lootLine` | the loot column's look (issue #7; `[]` in `fnc_themeBase`: as the own column): its pane, a ring round it (`fnc_uiRing`), the 2 px strip under its title and its title icon (`fnc_drawColumn`), its sections' caption tab, fold line and hairline (`fnc_drawSection`; the activity chip takes the tab's colour). Glass: a steel blue, `[0.45, 0.62, 0.82]`, the pane `[0.035, 0.05, 0.07, 0.92]` |
 | `inspectBg`, `tooltipBg`, `card` | the inspect card and kit windows; the comparison card and mouse tooltip; section header and card |
 | `slot`, `slotEmpty`, `slotBorder`, `slotCaption` (`"none"`, `"above"`, `"tab"`, `"inside"`), `slotCaptionBg`, `slotIcon`, `slotAccent`, `hatch` | slots |
 | `cell`, `tileBg` (five colours by `CATEGORY_*`), `tileBorder`, `tileName`, `tileCount` (`"text"`, `"pill"`, `"badge"`), `tileCountBg`, `tileCountColor`, `tileAmmoBar` | grid cells and tiles |
@@ -1496,7 +1531,13 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   the slot that takes it (`slotFor`); the gear row is drawn first, so a backpack let go anywhere there lights its slot, worn or
   not.
 - **Columns** (`fnc_drawColumn [display, rect, sections, theme, title, icon, drawer, id]`): a panel, a title row, a scroll group
-  with one section per container; the column's `id` (`"storage"`, `"loot"`) is how `fnc_build` keeps its scroll
+  with one section per container. **Loot and own apart** (issue #7): the own column is titled "Your gear" (`Column_Storage`), the loot
+  column "Loot - <what>" (`Column_LootOf`: the body's or person's name, the crate, "Ground", "Nearby"; `fnc_layoutGlass`), and the
+  column with id `"loot"` takes the theme's loot look - `lootPanel` pane, a `lootBorder` ring, a 2 px `lootAccent` strip under the title
+  and the title icon in it - in either order of `einv_gui_lootSide`, since it goes by the id, not the side of the screen. In the loot
+  column a uniform, vest or backpack's caption names its wearer, "Backpack - Miller" (`Section_OwnedBy`, `einv_storage_fnc_getOwner`,
+  `fnc_ownerName`: ACE's name, else the unit's displayName), and its tab, fold line and hairline take `lootTab` / `lootLine`. ACE
+  Arsenal's panel draws a `"storage"` column with `"own"` sections and is untouched; the column's `id` (`"storage"`, `"loot"`) is how `fnc_build` keeps its scroll
   (`fnc_scrollPixels`, restored a frame later through `einv_gui_scrollRestore`). Cells are controls created directly in the group:
   a nested group would eat the wheel. **A column scrolled down keeps its group:** `fnc_build` notes each column group with a scroll (its id, `scrollPixels`) and hands it over in
   uiNamespace `keepColumns` (id -> [group, panel and title controls, [rect, title, icon]], what `fnc_drawColumn` stores on the group as `columnParts`/`columnKey`), spares those controls in its
@@ -1961,6 +2002,26 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   other pages, as for a word. Whether a box is filtered is per box (the field is every box's, a category the one box's): when a box is filtered no more - the field empty and its
   own category cleared - `fnc_applyFilter [true]` gives it back the page the jump moved it from (`GVAR(pagesMoved)`), also while another box still has a category chosen; the entries
   of boxes that are still filtered stay.
+- **Sealed containers of bodies and persons** (issue #6, `fnc_isSealed`): a body's or living person's uniform, vest or backpack
+  (`einv_storage_fnc_getOwner` a `CAManBase` that is not the player) that `fnc_isSearched` says must be searched and this player has
+  not unsealed (`einv_gui_unsealed` on the container, local, never broadcast) is drawn **sealed** by `fnc_drawSection`: beside its box
+  one block of `STORAGE_COLS` x `SEAL_ROWS` 3 cells whatever the container is, on the caption's surface (`lootTab`) with the
+  unsearched hatching, a ring, "UNSEARCHED" and a line of what its search does. No compartments, tiles, weight, Take all, Sort,
+  category strip, load hint (`infoAreas`), no canvas widening, and `fnc_putAllTarget` leaves it out - nothing tells its size or
+  contents. **The state flows through the queue as any box's:** `fnc_drawSection` calls `fnc_markHidden [container, entries, true,
+  true]`, which queues the hidden items and after them **the seal**, `[container, "", 0, 0, SEAL_CELLS, SEAL_BLOCK]` (1 cell of search
+  time, block 98 so `fnc_build`'s sort puts it last; also for an empty container), with the same "Search starts on click" waiting
+  (`searchSeen`/`searchIdle`/`searchPaused`). The caption chip starts, stops and resumes it (`fnc_stopStatus`, the clicked box first);
+  with search-on-click a hit box over the block starts or resumes it too (never stops). `fnc_animateSearch` finds the items as ever -
+  `fnc_learn`, the "uncover" sound - but `fnc_revealTile` finds no tile and only takes them out of the queue; when the seal's time is up
+  it sets `unsealed`, plays the container's "open" and builds the window, which draws the real grid with everything known. While
+  sealed `fnc_updateStatus` writes the block's line from the section info's `seal` (`Seal_Click` idle, `Seal_Searching` while it is the
+  box being searched - its ring shown and turned by `fnc_animateStatus` -, `Seal_Stopped` / `Seal_StoppedClick`, `Seal_Waiting`) and
+  `fnc_animateStatus` leaves the time out of the chip (`Status_Search` with no clock): the time left would tell how much it holds.
+  **Cheap redraws:** `fnc_getSignature` gives a sealed loot section `[number, "sealed"]` instead of its cargo, so a sealed container
+  never redraws for what changes in it and its unsealing changes the part; `fnc_redrawTiles` answers false for a sealed info (`sealed`
+  in `sectionInfo`), so that change builds. Crates, vehicles, the ground, a bag lying about and containers opened from inside one
+  keep the hatched tiles.
 - **Leaving an object out of the search** (0.5.12). The one mark is the object variable `einv_noSearch` (`QGVARMAIN(noSearch)`, a BOOL, default false), read by `fnc_isSearched` for the container and for the body or person that owns it, so it holds for a crate, a vehicle, a body, a living person and the things they wear; every other question (`fnc_markHidden`, `fnc_learn`, `fnc_openNested`, the cargo chain of compat_ace_cargo) goes through `fnc_isSearched`. It is an override in one direction: it can switch the search off, never force it on where the settings say off. Ways to set it: (a) **Eden**: the attribute `einv_gui_edenNoSearch` (`gui/Cfg3DEN.hpp`, Checkbox "Skip searching", on every object with inventory cargo, in the locks addon's category `EINV_Attributes`, which gui loads after); its expression sets the variable locally on every machine when the mission starts (not in the editor), which needs no broadcast and covers a joiner. (b) **`einv_gui_fnc_setSearchable [object, searchable]`** (public): `false` marks the object, `true` gives it back to the settings; `setVariable` with the broadcast flag, so it works from any machine and for JIP. (c) **Zeus**: the server setting `einv_gui_searchZeus` (CHECKBOX, default on, in the "looting" topic after `searchContainers`) - with it off `fnc_onZeusPlaced` marks every non-person object with `maxLoad > 0` that a curator places. The handler is on the "CuratorObjectPlaced" event of every curator module, put there by `fnc_hookCurators`, which a 5 s per-frame handler in `XEH_postInit` calls on every machine (a game master can be assigned at any time and the event fires where the module is local, which differs by setup); the variable is public and the same from every machine, so a double run is harmless. compat_zen adds the right-click choices "Searching: turn off" and "Searching: turn on" (`fnc_setSearch`, `fnc_canSetSearch`; each is shown while some target would change, targets are `fnc_targets`: crates and vehicles, no persons), which call `fnc_setSearchable` and show the curator feedback line.
 - **Sounds** (`fnc_playSound [action, class, container, world, ui]`, public): by family from the config `CfgEinvSounds`
   (`gui/CfgEinvSounds.hpp`; its header explains the layers): `Default`, 17 item families and 4 container families (crate, vehicle,
@@ -2098,6 +2159,11 @@ item out.
   `"staging"` - in `einv_arsenal_folded` while ACE's window is open: ACE makes a new uniform, vest or backpack for every one
   picked, so folding per object would be lost. `fnc_layout` notes `foldKeys` `[[container, key], ...]` and sets each section's
   `folded` to `key in folded` XOR `container in einv_gui_collapsed`, so the inventory's own list is never touched.
+  **A tab switch folds anew** (issue #3): `fnc_layout` keeps the tab the folds were last set for in `GVAR(foldTab)` - ACE's
+  tab id (`fnc_selected`, "" for a tab without the panel) or `"kit:" + class` while a kit's sections show -; when it changes,
+  `GVAR(folded)` is emptied but for `"staging"`, so the picked container (or the kit's sections) is open, the other worn containers
+  folded, the staging space as it was. Order and scroll are untouched. `foldKeys` is emptied before `fnc_kitSections` notes the
+  kit sections' keys, so the `fold` hook finds them (a kit section did not fold by hand before).
 - **Other worn containers.** `fnc_layout` adds the soldier's other two containers as sections between the open one and the staging space,
   folded to their captions (key `"other_" + class` in `einv_arsenal_folded`; present = unfolded), so items can be dragged between all three;
   the staging space is one shared area in every tab. `fnc_addTo`, `fnc_remove`, `fnc_removeKind` and the drop's watch accept them like the staging
@@ -2784,7 +2850,13 @@ masses against its capacity, and an open grid that grows. Everything that decide
 kit type's Arsenal setting `efak_core_fnc_canPackInto [kit, true]`, `fnc_canPack`; as many as fit by halving) and `fnc_packNew
 [kit, class, count, cell, root]` -> `[added, why, landed]`: only for a root whose phases run here (`einv_storage_fnc_isLocalRoot`)
 with the kit under it (`fnc_holderVerify`), so the one writer of the kit is this machine - written where it is called, outside any
-phase, as `einv_storage_fnc_addNew` does (`einv_storage_fnc_makePayload`, `fnc_putIntoKit`, `fnc_requestRebuild`). Enhanced First
+phase, as `einv_storage_fnc_addNew` does (`einv_storage_fnc_makePayload`, `fnc_putIntoKit`, `fnc_requestRebuild`).
+`fnc_arsenalSections` notes where each kit it returns lies in `GVAR(arsenalHolders)` (lowercase class -> `[container, ""]`, made anew
+at every call; the panel calls it with `[]` outside kit mode, `fnc_onWindowOpen` empties it). No kit window is open in ACE's window,
+so `GVAR(holders)` stays empty there (`fnc_getSections`), and the engine's moves between a kit's grid and the staging space or a
+container (`fnc_drop` -> `fnc_locate`, `fnc_canDrop`, `einv_storage_fnc_rootOf` -> `fnc_holderRoot`) found the kit nowhere and
+were refused with "Failed" in either room mode (issue #4); `fnc_locate` and `fnc_canDrop` fall back to it, and `fnc_signature`
+counts those kits' places as an open kit's. Enhanced First
 Aid Kits' own kit window and its kits tab in ACE's window still count the capacity: a kit with a grid of its own may hold more than
 its capacity there.
 
