@@ -67,5 +67,10 @@ if (_current isEqualType [] && {count _current > _itemsIndex}) then {
 };
 
 if (!isNil QACEFUNC(arsenal,updateRightPanel)) then {
+    private _begin = diag_tickTime;
+
     [_list, _container, _items isNotEqualTo []] call ACEFUNC(arsenal,updateRightPanel);
+
+    // ACE's own look at every row (its weight check), which no budget of ours can cut: told apart in the log.
+    ["syncAce/ACE's updateRightPanel (ACE's own code)", _begin, format ["%1 rows", (lnbSize _list) select 0]] call FUNC(noteOpen);
 };

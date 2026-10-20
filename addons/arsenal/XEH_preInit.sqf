@@ -88,6 +88,9 @@ GVAR(ctrlHeld) = false;
 // The rules' pictures on ACE's lists (fnc_pictures): the pass that is going, and the picture of each class
 // asked about, "" for none.
 GVAR(picturePass) = 0;
+GVAR(pictureStat) = [0, 0, 0, 0];
+GVAR(ungreyStat) = [0, 0, 0];
+GVAR(openedAt) = diag_tickTime;
 GVAR(pictureCache) = createHashMap;
 
 // The question asked when ACE's window is about to close with things that do not fit (fnc_confirmClose):
@@ -108,6 +111,7 @@ GVAR(missingSaid) = [];
 // The pass that greys and lights ACE's rows by the grid (fnc_ungrey): a newer one takes over from one that is
 // still going; and the alpha ACE gave the rows it greyed, as last seen, to grey the rows it left lit alike.
 GVAR(ungreyPass) = 0;
+GVAR(ungreyQueued) = false;
 GVAR(greyAlpha) = 0.25;
 
 // ----- The vanilla Virtual Arsenal -----

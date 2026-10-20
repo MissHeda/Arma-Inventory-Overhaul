@@ -41,6 +41,7 @@ if (_pass < 0) then {
     GVAR(picturePass) = GVAR(picturePass) + 1;
     _pass = GVAR(picturePass);
     _jobs = [];
+    GVAR(pictureStat) = [diag_tickTime, 0, 0, 0];
 
     {
         _x params ["_idc", "_isNbox"];
@@ -55,8 +56,11 @@ if (_pass < 0) then {
 
 if (_pass != GVAR(picturePass)) exitWith {};
 
-private _until = diag_tickTime + PICTURE_BUDGET;
+private _sliceBegin = diag_tickTime;
+private _until = _sliceBegin + PICTURE_BUDGET;
 private _more = [];
+private _rowsDone = 0;
+private _fresh = 0;
 
 {
     _x params ["_list", "_isNbox", "_row"];
@@ -72,6 +76,8 @@ private _more = [];
 
             // Asked once per class while the window is open: the rules cannot change under it.
             if (isNil "_picture") then {
+                _fresh = _fresh + 1;
+
                 private _info = [_class] call EFUNC(items,getInfo);
                 private _ruled = _info getOrDefault ["pictureOverride", ""];
 
@@ -94,6 +100,7 @@ private _more = [];
         };
 
         _row = _row + 1;
+        _rowsDone = _rowsDone + 1;
     };
 
     if (_row < _size) then {
@@ -101,7 +108,16 @@ private _more = [];
     };
 } forEach _jobs;
 
+// For the tester's numbers (einv_gui_debugTiming): what the whole pass spent, over all its frames, and how many
+// classes it had to work out the rules' info of for the first time (the cost of a first look).
+GVAR(pictureStat) params ["_passBegin", "_slices", "_spent", "_made"];
+GVAR(pictureStat) = [_passBegin, _slices + 1, _spent + (diag_tickTime - _sliceBegin), _made + _fresh];
+
 // Not done within the budget: the rest a frame later.
 if (_more isNotEqualTo []) then {
     [{_this call FUNC(pictures)}, [_display, _more, _pass]] call EFUNC(gui,later);
+} else {
+    GVAR(pictureStat) params ["_passBegin", "_slices", "_spent", "_made"];
+
+    ["pictures pass", diag_tickTime - _spent, format ["%1 classes first looked at, %2 frames, %3 ms in all, %4 ms from start to end", _made, _slices, (_spent * 1000) toFixed 1, ((diag_tickTime - _passBegin) * 1000) toFixed 0], true] call FUNC(noteOpen);
 };

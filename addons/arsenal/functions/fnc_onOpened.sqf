@@ -48,6 +48,8 @@ uiNamespace setVariable [QGVAR(confirmBar), [controlNull, 0]];
 uiNamespace setVariable [QGVAR(confirmButtons), []];
 GVAR(confirmPress) = -1;
 
+GVAR(openedAt) = diag_tickTime;
+GVAR(ungreyQueued) = false;
 GVAR(attached) = false;
 GVAR(shown) = true;
 GVAR(panelRect) = [];
@@ -109,7 +111,16 @@ if (!isNull _list) then {
     _list ctrlAddEventHandler ["LBSelChanged", {
         GVAR(listSel) = [_this select 1, diag_frameNo];
 
-        [{_this call FUNC(ungrey)}, [ctrlParent (_this select 0)]] call EFUNC(gui,later);
+        // One look a frame however many picks ACE's events make in it: each would start a pass of its own,
+        // and every pass runs its turn of UNGREY_BUDGET before a newer one takes over.
+        if (!GVAR(ungreyQueued)) then {
+            GVAR(ungreyQueued) = true;
+
+            [{
+                GVAR(ungreyQueued) = false;
+                _this call FUNC(ungrey);
+            }, [ctrlParent (_this select 0)]] call EFUNC(gui,later);
+        };
     }];
 
     // A press there may become a drag of its row's item into the panel (fnc_onListPress, fnc_listDrag).
@@ -141,13 +152,21 @@ private _fnc_attach = {
 
     if (isNull _center) exitWith {};
 
-    if !([_display, _center, objNull, objNull, call FUNC(hooks), "draw3d"] call EFUNC(gui,attach)) exitWith {
+    private _begin = diag_tickTime;
+    private _attached = [_display, _center, objNull, objNull, call FUNC(hooks), "draw3d"] call EFUNC(gui,attach);
+
+    ["gui attach (first build of the panel)", _begin, "", true] call FUNC(noteOpen);
+
+    if !(_attached) exitWith {
         WARNING("The inventory's engine did not attach to ACE Arsenal - it opens without the grid panel.");
     };
 
     GVAR(attached) = true;
 
+    _begin = diag_tickTime;
     [] call FUNC(snapshot);
+    ["first snapshot", _begin] call FUNC(noteOpen);
+
     [] call FUNC(settle);
 };
 

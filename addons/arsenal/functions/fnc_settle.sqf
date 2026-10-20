@@ -52,12 +52,27 @@ GVAR(cargoPending) = false;
 
 // What found no cell, after another container was picked or on opening, goes to the staging space. Before the
 // snapshot, which notes what the open container holds for the next add.
-[missionNamespace getVariable [QACEGVAR(arsenal,center), objNull]] call FUNC(stageOverflow);
+private _begin = diag_tickTime;
+private _first = _begin;
 
+[missionNamespace getVariable [QACEGVAR(arsenal,center), objNull]] call FUNC(stageOverflow);
+["settle/stageOverflow", _begin] call FUNC(noteOpen);
+
+_begin = diag_tickTime;
 [] call FUNC(snapshot);
+["settle/snapshot", _begin] call FUNC(noteOpen);
+
+_begin = diag_tickTime;
 [_display] call FUNC(syncAce);
+["settle/syncAce", _begin] call FUNC(noteOpen);
+
+_begin = diag_tickTime;
 [_display] call FUNC(ungrey);
+["settle/ungrey (first turn)", _begin] call FUNC(noteOpen);
+
+_begin = diag_tickTime;
 [_display] call FUNC(pictures);
+["settle/pictures (first turn)", _begin] call FUNC(noteOpen);
 
 // The engine's unit is ACE's: in the Eden editor a copy ACE made after its display opened.
 private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
@@ -72,4 +87,7 @@ if (EGVAR(gui,dragging) || {EGVAR(gui,press) isNotEqualTo []}) exitWith {
     GVAR(dirty) = true;
 };
 
+_begin = diag_tickTime;
 [_display] call EFUNC(gui,build);
+["settle/build", _begin] call FUNC(noteOpen);
+["settle (whole)", _first] call FUNC(noteOpen);

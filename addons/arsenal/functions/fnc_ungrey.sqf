@@ -67,6 +67,7 @@ if (isNull _list || {isNull _plus}) exitWith {
 if (_pass < 0) then {
     GVAR(ungreyPass) = GVAR(ungreyPass) + 1;
     _pass = GVAR(ungreyPass);
+    GVAR(ungreyStat) = [diag_tickTime, 0, 0];
 };
 
 // Whether one more of a class would be taken: asked as fnc_addNew asks it, with a magazine full. What
@@ -121,7 +122,8 @@ if (_from == 0) then {
 
 private _size = (lnbSize _list) select 0;
 private _row = _from;
-private _until = diag_tickTime + UNGREY_BUDGET;
+private _sliceBegin = diag_tickTime;
+private _until = _sliceBegin + UNGREY_BUDGET;
 
 while {_row < _size && {diag_tickTime < _until}} do {
     if ((_list lnbValue [_row, 2]) != 1) then {
@@ -152,7 +154,15 @@ while {_row < _size && {diag_tickTime < _until}} do {
     _row = _row + 1;
 };
 
+// For the tester's numbers (einv_gui_debugTiming): what the whole pass spent, over all its frames.
+GVAR(ungreyStat) params ["_passBegin", "_slices", "_spent"];
+GVAR(ungreyStat) = [_passBegin, _slices + 1, _spent + (diag_tickTime - _sliceBegin)];
+
 // Not done within the budget: the rest a frame later.
 if (_row < _size) then {
     [{_this call FUNC(ungrey)}, [_display, _row, _pass, _asked]] call EFUNC(gui,later);
+} else {
+    GVAR(ungreyStat) params ["_passBegin", "_slices", "_spent"];
+
+    ["ungrey pass", diag_tickTime - _spent, format ["%1 rows, %2 shapes or classes asked of the grid, %3 frames, %4 ms in all, %5 ms from start to end", _size, count _asked, _slices, (_spent * 1000) toFixed 1, ((diag_tickTime - _passBegin) * 1000) toFixed 0], true] call FUNC(noteOpen);
 };
