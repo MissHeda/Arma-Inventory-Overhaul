@@ -20,6 +20,10 @@
  * chip that already says what is true is left alone - the words and the ring are moved every frame in place
  * (fnc_animateStatus).
  *
+ * A sealed box (fnc_isSealed, issue 6) also has its block's line written here - "Click to search", "Searching ...",
+ * "Stopped", "Waiting to be searched" - and its ring shown while it is the box being searched; its chip says what the
+ * search does without the time, which would tell how much the container holds (fnc_animateStatus).
+ *
  * Arguments:
  * 0: Display <DISPLAY>
  *
@@ -41,12 +45,17 @@ if (isNull _display) exitWith {};
 private _theme = GVAR(theme);
 private _live = false;
 
+// The box being searched now: the first of the queue that is not stopped (fnc_animateSearch).
+private _searching = (GVAR(searchQueue) param [GVAR(searchQueue) findIf {!((_x select 0) in GVAR(searchPaused))}, []]) param [0, objNull];
+
 {
     private _info = _x;
     private _parent = _info getOrDefault ["statusParent", controlNull];
+    private _seal = _info getOrDefault ["seal", createHashMap];
 
-    // A section with no chip: no room in its line, or a box that has no such line.
-    if (isNull _parent) then {continue};
+    // A section with no chip: no room in its line, or a box that has no such line - unless it is sealed, whose block
+    // says what its search does whether there is a chip or not.
+    if (isNull _parent && {count _seal == 0}) then {continue};
 
     private _holder = _info getOrDefault ["holder", objNull];
     private _kind = "";
@@ -64,6 +73,38 @@ private _live = false;
             };
         };
     };
+
+    // The sealed block (fnc_drawSection): its line says what the search does, its ring goes round while it runs.
+    if (count _seal > 0) then {
+        private _state = switch (true) do {
+            case (_kind isNotEqualTo "search"): {"wait"};
+            case (_idle): {"idle"};
+            case (_stopped): {"stopped"};
+            case (_searching isEqualTo _holder): {"running"};
+            default {"wait"};
+        };
+
+        if (_state isNotEqualTo (_seal get "state")) then {
+            _seal set ["state", _state];
+
+            private _words = switch (_state) do {
+                case "idle": {LLSTRING(Seal_Click)};
+                case "stopped": {[LLSTRING(Seal_Stopped), LLSTRING(Seal_StoppedClick)] select GVAR(searchOnClick)};
+                case "running": {LLSTRING(Seal_Searching)};
+                default {LLSTRING(Seal_Waiting)};
+            };
+            private _line = _seal get "line";
+
+            _line ctrlSetText ([_words, _seal get "width", _theme getOrDefault ["font", "PuristaMedium"], _seal get "size"] call FUNC(fitText));
+            (_seal get "arc") ctrlShow (_state isEqualTo "running");
+        };
+
+        if (_state isEqualTo "running") then {
+            _live = true;
+        };
+    };
+
+    if (isNull _parent) then {continue};
 
     private _status = _info getOrDefault ["status", createHashMap];
     private _made = _status getOrDefault ["controls", []];

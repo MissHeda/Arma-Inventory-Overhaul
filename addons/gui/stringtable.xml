@@ -457,6 +457,24 @@
         <Key ID="STR_einv_gui_Rows_Tooltip">
             <English>The rest of the room - click to show it or to fold it away again</English>
         </Key>
+        <Key ID="STR_einv_gui_Seal_Click">
+            <English>Click to search</English>
+        </Key>
+        <Key ID="STR_einv_gui_Seal_Searching">
+            <English>Searching...</English>
+        </Key>
+        <Key ID="STR_einv_gui_Seal_Stopped">
+            <English>Stopped</English>
+        </Key>
+        <Key ID="STR_einv_gui_Seal_StoppedClick">
+            <English>Stopped - click to go on</English>
+        </Key>
+        <Key ID="STR_einv_gui_Seal_Unsearched">
+            <English>Unsearched</English>
+        </Key>
+        <Key ID="STR_einv_gui_Seal_Waiting">
+            <English>Waiting to be searched</English>
+        </Key>
         <Key ID="STR_einv_gui_Section_Close">
             <English>Close</English>
         </Key>

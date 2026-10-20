@@ -18,7 +18,9 @@
  *             what it holds and where it lies]: its cargo - and that of every uniform, vest and backpack
  *             lying in it, all the way down - and the revision of its places, kept as the engine's lists
  *             themselves: comparing them is cheaper than writing a full crate out as text every second.
- *             Only some of these changed: only those sections are drawn again (fnc_redrawTiles).
+ *             Only some of these changed: only those sections are drawn again (fnc_redrawTiles). A sealed body's or
+ *             person's container (fnc_isSealed) is [number, "sealed"] until it is searched: nothing in it is shown,
+ *             so nothing in it is compared, and its unsealing changes the part.
  *   storage - the same per section of the unit's own storage column (GVAR(context) "ownSections"). Only
  *             some changed: those sections are drawn again, and with them the weight card and the hotbar,
  *             which count what the unit carries (fnc_redrawPart). A window that attached may name holders of
@@ -167,7 +169,13 @@ private _loot = [];
     private _container = _x getOrDefault ["container", objNull];
 
     if (!isNull _container) then {
-        _loot pushBack [_forEachIndex, [[_container] call _fnc_cargo, [_container] call _fnc_revision]];
+        // A sealed container (fnc_isSealed) shows nothing of what it holds: its part is the same while it stays sealed,
+        // and changes - to its cargo - the moment it is unsealed, which builds the window with its grid.
+        if ([_container] call FUNC(isSealed)) then {
+            _loot pushBack [_forEachIndex, "sealed"];
+        } else {
+            _loot pushBack [_forEachIndex, [[_container] call _fnc_cargo, [_container] call _fnc_revision]];
+        };
     };
 } forEach (GVAR(context) getOrDefault ["lootSections", []]);
 

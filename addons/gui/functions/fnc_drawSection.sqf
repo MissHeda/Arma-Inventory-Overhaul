@@ -21,6 +21,13 @@
  * fold line and the hairline take the theme's loot colours (lootTab, lootLine) where it has them: what is someone
  * else's never reads as the player's own (issue 7).
  *
+ * A body's or a living person's uniform, vest or backpack this player has not searched yet is sealed (fnc_isSealed,
+ * issue 6, as in Tarkov): beside its box one block of SEAL_ROWS cells by STORAGE_COLS, hatched, "UNSEARCHED", with a ring
+ * and a line that say what its search does (fnc_updateStatus) - no grid, no tiles, no weight, no Take all or Sort, no
+ * load hint, no strip, whatever it really holds and however big it is. Its items and a last entry, the seal, are queued
+ * as any box's (fnc_markHidden); the caption line's chip searches, stops and resumes it, and with "Search starts on
+ * click" a click on the block starts it. When the seal is done the window is built with the real grid.
+ *
  * Its caption tab folds the section away (fnc_toggleSection); a uniform, vest or backpack opened from
  * inside a container gets a cross to close it (fnc_closeNested) - both by the section's container. The
  * box of a unit's uniform, vest or backpack is that unit's slot - right click and drag work on it; the
@@ -145,8 +152,15 @@ private _wantsBox = _section getOrDefault ["box", true];
 // and a gap. It takes its room from the box - which gives way in half cells - and from nothing else, so the grid keeps
 // its width; where the column has not even that to spare there is no strip. Only for a container with a grid of its own in
 // the loot column (the player's own containers are small, a kit's grid and the Arsenal's panel are no loot).
+// A body's or a living person's uniform, vest or backpack this player has not searched yet (fnc_isSealed, issue 6): one
+// block of a fixed size where the grid would be, and nothing of the container's real size or contents anywhere - no
+// strip, no weight, no buttons, no hint of its load.
+private _sealed = !_placeholder && {(_section getOrDefault ["side", _parent getVariable [QGVAR(column), ""]]) isEqualTo "loot"}
+    && {_id in ["uniform", "vest", "backpack"]} && {!(_section getOrDefault ["locked", false])} && {call FUNC(isInventoryMode)}
+    && {[_section getOrDefault ["container", objNull]] call FUNC(isSealed)};
+
 private _stripW = SQUARE(UNIT * 1);
-private _stripOn = !_placeholder && {_wantsBox} && {(_section getOrDefault ["side", _parent getVariable [QGVAR(column), ""]]) isEqualTo "loot"}
+private _stripOn = !_placeholder && {!_sealed} && {_wantsBox} && {(_section getOrDefault ["side", _parent getVariable [QGVAR(column), ""]]) isEqualTo "loot"}
     && {!isNull (_section getOrDefault ["container", objNull])} && {!(_section getOrDefault ["virtual", "entries" in _section])}
     && {!(_section getOrDefault ["locked", false])} && {_id in ["ground", "container", "uniform", "vest", "backpack"]}
     && {call FUNC(isInventoryMode)} && {(_width - _gridW - _gapX) >= (_stripW + _gapX)};
@@ -238,7 +252,7 @@ if (!_placeholder) then {
 // A canvas (compartments with a pos) is wider than STORAGE_COLS cells where seams open it between two of
 // them (fnc_flowCompartments): the grid takes that room and the box gives way - smaller, or none at all
 // where less than one and a half cells are left. Folding rows (fnc_viewBlocks) changes no width.
-if ((_layout getOrDefault ["blocks", []]) findIf {(_x param [3, []]) isNotEqualTo []} >= 0) then {
+if (!_sealed && {(_layout getOrDefault ["blocks", []]) findIf {(_x param [3, []]) isNotEqualTo []} >= 0}) then {
     _gridW = (STORAGE_COLS * _cellW) max (([_layout] call FUNC(flowCompartments)) select 2);
     _stripOn = _stripOn && {(_width - _gridW - _gapX) >= (_stripW + _gapX)};
     _stripExtra = [0, _stripW + _gapX] select _stripOn;
@@ -291,7 +305,7 @@ private _hitPx = [pixelW * 2, pixelH * 2, pixelW * 2, pixelH * 2];
 
 private _load = "";
 
-if (!_placeholder) then {
+if (!_placeholder && {!_sealed}) then {
     _load = [_entries] call FUNC(loadText);
 };
 
@@ -333,7 +347,7 @@ private _sortable = false;
 private _busy = false;
 
 if (
-    !_placeholder && {!isNull _sectionContainer} && {_id in ["ground", "container", "uniform", "vest", "backpack"]}
+    !_placeholder && {!_sealed} && {!isNull _sectionContainer} && {_id in ["ground", "container", "uniform", "vest", "backpack"]}
     && {_side in ["own", "loot"]} && {call FUNC(isInventoryMode)}
     && {([_sectionContainer, "items"] call FUNC(checkTouch)) isEqualTo ""}
 ) then {
@@ -469,7 +483,7 @@ if (_shown isNotEqualTo "") then {
 private _info = createHashMapFromArray [
     ["holder", _sectionContainer], ["id", _id], ["side", _side], ["folded", _collapsed], ["tab", _tab],
     ["tabColor", _tabColor], ["load", controlNull], ["button", _buttonIntent], ["eligible", _buttonEligible],
-    ["caption", _caption], ["busy", _busy]
+    ["caption", _caption], ["busy", _busy], ["sealed", _sealed]
 ];
 
 private _infoIndex = -1;
@@ -597,7 +611,7 @@ if (_lockTip isNotEqualTo "") then {
 };
 
 // The hint over the caption line says what the contents weigh (fnc_infoHint).
-if (!isNull _sectionContainer && {!_placeholder}) then {
+if (!isNull _sectionContainer && {!_placeholder} && {!_sealed}) then {
     private _captionAnchor = createHashMapFromArray [["rel", [_blockX, _top]], ["parent", _parent]];
     ([_captionAnchor] call FUNC(gridOrigin)) params ["_captionX", "_captionY"];
 
@@ -634,7 +648,7 @@ private _bodyTop = _top + _lineH + UNIT * 0.25;
 // use and a little more; the empty rows below fold into a line under the grid (fnc_viewBlocks). The view
 // only: the layout and the places stay the whole container's. The unit's own storage shows all of its
 // rows, where the player arranges what he carries.
-private _view = if (isNull _sectionContainer || {_placeholder} || {_side isNotEqualTo "loot"}) then {
+private _view = if (isNull _sectionContainer || {_placeholder} || {_sealed} || {_side isNotEqualTo "loot"}) then {
     [[], 0, false, 0, []]
 } else {
     [_layout, _sectionContainer] call FUNC(viewBlocks)
@@ -686,6 +700,12 @@ if (_anyPaged) then {
 };
 
 ([_flowLayout] call FUNC(flowCompartments)) params ["_places", "_blocksH"];
+
+// Sealed: no compartment is drawn, the block is as high as SEAL_ROWS cells whatever the container holds.
+if (_sealed) then {
+    _places = [];
+    _blocksH = SEAL_ROWS * _cellH;
+};
 
 private _gridX = _blockX + ([0, _boxW + _gapX] select _hasBox) + _stripExtra;
 
@@ -791,7 +811,73 @@ if (_hasBox) then {
 // ---------------------------------------------------------------------------
 // The compartments and their tiles
 // ---------------------------------------------------------------------------
-[_display, _parent, [_gridX, _bodyTop], _section, _drawLayout, _places, _theme] call FUNC(drawCompartments);
+if (_sealed) then {
+    // The block: as wide as a grid of STORAGE_COLS cells and SEAL_ROWS high, on the caption's surface (the loot tint where the
+    // theme has one, issue 7) with the hatching of what is not searched, a third of its corner in from the round edge.
+    // "UNSEARCHED" in the middle, a ring over it that goes round while this box is searched, and one line under it that says
+    // what the search does - written by fnc_updateStatus (the "seal" of the section's info), the ring turned by
+    // fnc_animateStatus.
+    private _sealW = STORAGE_COLS * _cellW - pixelW;
+    private _sealH = SEAL_ROWS * _cellH - pixelH;
+    private _sealRadius = (_theme getOrDefault ["radius", 0]) min (_sealH / 4);
+    private _inset = _sealRadius * 0.3;
+    private _stripe = +_colorLine;
+
+    _stripe set [3, ((_stripe select 3) * 1.8) min 0.2];
+
+    [_display, _parent, [_gridX, _bodyTop, _sealW, _sealH], _tabColor, _sealRadius] call FUNC(uiPanel);
+    [_display, _parent, [_gridX + SQUARE(_inset), _bodyTop + _inset, _sealW - SQUARE(_inset) * 2, _sealH - _inset * 2], _stripe] call FUNC(uiHatch);
+
+    private _ringH = _textUnit * 0.95;
+    private _wordSize = _textUnit * 0.62;
+    private _lineSmall = _textUnit * TEXT_REF;
+    private _stackH = _ringH + _textUnit * 0.15 + _wordSize * 1.2 + _lineSmall * 1.3;
+    private _stackTop = _bodyTop + (((_sealH - _stackH) / 2) max 0);
+    private _ringRect = [_gridX + (_sealW - SQUARE(_ringH)) / 2, _stackTop, SQUARE(_ringH), _ringH];
+
+    [_display, _parent, _ringRect, SEARCH_RING(SEARCH_FRAMES), _theme getOrDefault ["searchTrack", [1, 1, 1, 0.12]]] call FUNC(uiIcon);
+
+    private _arc = [_display, _parent, _ringRect, SEARCH_RING(STATUS_ARC), _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]] call FUNC(uiIcon);
+    _arc ctrlShow false;
+
+    private _wordTop = _stackTop + _ringH + _textUnit * 0.15;
+
+    [
+        _display, _parent, [_gridX, _wordTop, _sealW, _wordSize * 1.2],
+        [toUpper LLSTRING(Seal_Unsearched), _sealW, _fontBold, _wordSize] call FUNC(fitText), _wordSize, _colorText2, _fontBold, 2
+    ] call FUNC(uiLabel);
+
+    private _sealLine = [
+        _display, _parent, [_gridX, _wordTop + _wordSize * 1.2, _sealW, _lineSmall * 1.3], "", _lineSmall,
+        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2
+    ] call FUNC(uiLabel);
+
+    _info set ["seal", createHashMapFromArray [["arc", _arc], ["line", _sealLine], ["width", _sealW], ["size", _lineSmall], ["state", ""]]];
+
+    // With "Search starts on click" a click on the block starts or resumes its search, as the chip's Search button does;
+    // it never stops it (the chip's cross does).
+    if (GVAR(searchOnClick)) then {
+        private _sealHit = [_display, "EINV_Hitbox", _parent, [_gridX, _bodyTop, _sealW, _sealH]] call FUNC(uiCreate);
+
+        _sealHit ctrlSetTooltip LLSTRING(Status_StartSearch);
+        _sealHit setVariable [QGVAR(key), _sectionContainer];
+        _sealHit ctrlAddEventHandler ["ButtonClick", {
+            [{
+                params ["_holder"];
+
+                if (_holder in GVAR(searchPaused)) then {
+                    [_holder, "search"] call FUNC(stopStatus);
+                };
+            }, [(_this select 0) getVariable [QGVAR(key), objNull]]] call FUNC(later);
+        }];
+    };
+
+    // Its items and then the seal are queued as any box's (fnc_markHidden), and wait for the click with "Search starts on
+    // click"; the seal's end builds the window with the real grid (fnc_animateSearch).
+    [_sectionContainer, _layout getOrDefault ["entries", []], true, true] call FUNC(markHidden);
+} else {
+    [_display, _parent, [_gridX, _bodyTop], _section, _drawLayout, _places, _theme] call FUNC(drawCompartments);
+};
 
 private _used = (_bodyTop - _top) + (_boxH max _blocksH);
 

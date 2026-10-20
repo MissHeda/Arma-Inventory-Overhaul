@@ -143,6 +143,15 @@
 #define STATUS_SPIN_SPEED 300
 #define STATUS_ICON 0.62
 
+// A body's or a living person's uniform, vest or backpack not searched yet is a sealed block (fnc_isSealed, fnc_drawSection):
+// SEAL_ROWS cells high and STORAGE_COLS wide whatever the container really is, hatched, with nothing of what it holds. Its
+// search ends with one more entry of the queue (fnc_markHidden): SEAL_CELLS cells of search time - also for an empty one -,
+// in compartment SEAL_BLOCK, so it sorts after every item of the container (fnc_build) and its class "" tells it apart
+// (fnc_animateSearch unseals the container when it is done).
+#define SEAL_ROWS 3
+#define SEAL_CELLS 1
+#define SEAL_BLOCK 98
+
 // The hands' queue (fnc_queueMoves, fnc_drawQueue, fnc_animateQueue): an action that waits for the hands marks its tile (the
 // surface in a tint of the accent colour, the picture faded - fnc_queueColor) and counts in the activity chip of the box it
 // takes from. Longer than QUEUE_PAUSE between two frames of the queue, and it was paused (another window over this one):

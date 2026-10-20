@@ -22,6 +22,9 @@
  * 0: Container <OBJECT>
  * 1: Entries, as fnc_getLayout placed them <ARRAY>
  * 2: Queue the hidden ones for searching - off to only learn which are hidden <BOOL> (default: true)
+ * 3: Sealed (fnc_isSealed): with the queue, one more entry after the items - the seal, [container, "", 0, 0, SEAL_CELLS,
+ *    SEAL_BLOCK] - whose end unseals the container (fnc_animateSearch); also for a container that holds nothing <BOOL>
+ *    (default: false)
  *
  * Return Value:
  * None
@@ -32,9 +35,18 @@
  * Public: No
  */
 
-params ["_container", "_entries", ["_queue", true, [true]]];
+params ["_container", "_entries", ["_queue", true, [true]], ["_seal", false, [true]]];
 
 if !([_container] call FUNC(isSearched)) exitWith {};
+
+// A box the window meets for the first time waits for the click on its Search button (fnc_stopStatus).
+private _fnc_wait = {
+    if (GVAR(searchOnClick) && {!(_container in GVAR(searchSeen))}) then {
+        GVAR(searchSeen) pushBack _container;
+        GVAR(searchIdle) pushBack _container;
+        GVAR(searchPaused) pushBackUnique _container;
+    };
+};
 
 private _known = _container getVariable [QGVAR(known), createHashMap];
 private _seen = createHashMap;
@@ -59,12 +71,7 @@ _order sort true;
         _entry set ["hidden", true];
 
         if (_queue) then {
-            // A box the window meets for the first time waits for the click on its Search button (fnc_stopStatus).
-            if (GVAR(searchOnClick) && {!(_container in GVAR(searchSeen))}) then {
-                GVAR(searchSeen) pushBack _container;
-                GVAR(searchIdle) pushBack _container;
-                GVAR(searchPaused) pushBackUnique _container;
-            };
+            call _fnc_wait;
 
             GVAR(searchQueue) pushBack [
                 _container, _key, _entry getOrDefault ["row", 0], _entry getOrDefault ["col", 0],
@@ -73,3 +80,10 @@ _order sort true;
         };
     };
 } forEach _order;
+
+// The seal comes last: the container shows what it holds only when everything in it was searched.
+if (_queue && {_seal}) then {
+    call _fnc_wait;
+
+    GVAR(searchQueue) pushBack [_container, "", 0, 0, SEAL_CELLS, SEAL_BLOCK];
+};

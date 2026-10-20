@@ -50,6 +50,13 @@ private _fnc_fit = {
 };
 
 {
+    // A sealed block's ring (fnc_drawSection), shown while its box is searched (fnc_updateStatus).
+    private _sealArc = (_x getOrDefault ["seal", createHashMap]) getOrDefault ["arc", controlNull];
+
+    if (!isNull _sealArc && {ctrlShown _sealArc}) then {
+        _sealArc ctrlSetAngle [(_now * STATUS_SPIN_SPEED) mod 360, 0.5, 0.5];
+    };
+
     private _status = _x getOrDefault ["status", createHashMap];
 
     if (count _status == 0) then {continue};
@@ -120,9 +127,17 @@ private _fnc_fit = {
         private _seconds = ceil (_left max 0);
         private _rest = _seconds mod 60;
         private _clock = format ["%1:%2", floor (_seconds / 60), ["", "0"] select (_rest < 10)] + str _rest;
-        private _words = format [[LLSTRING(Status_Search), [LLSTRING(Status_Stopped), LLSTRING(Status_Idle)] select (_status getOrDefault ["idle", false])] select (_status get "stopped"), _clock];
 
-        _words = [_words, _clock, _status] call _fnc_fit;
+        // A sealed box says no time: it would tell how much the container holds (fnc_isSealed).
+        private _sealedBox = _x getOrDefault ["sealed", false];
+
+        if (_sealedBox) then {
+            _clock = "";
+        };
+
+        private _words = trim format [[LLSTRING(Status_Search), [LLSTRING(Status_Stopped), LLSTRING(Status_Idle)] select (_status getOrDefault ["idle", false])] select (_status get "stopped"), _clock];
+
+        _words = [_words, [_clock, _words] select _sealedBox, _status] call _fnc_fit;
 
         if (_words isNotEqualTo _text) then {
             (_status get "label") ctrlSetText _words;

@@ -18,6 +18,10 @@
  *
  * Every item gets its own time from when it comes up - after a close and open of the window, too.
  *
+ * A sealed container (a body's or person's uniform, vest or backpack, fnc_isSealed) has no tiles: its items are found as
+ * any (known, the "uncover" sound) with nothing drawn, and the seal that comes after them (class "") unseals it - the
+ * container's "open" sound, and the window built with its real grid.
+ *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Now, diag_tickTime <NUMBER>
@@ -82,6 +86,20 @@ if (_head isNotEqualTo GVAR(searchHead) || {GVAR(searchStarted) < 0}) then {
 
 private _duration = (GVAR(searchTime) * (_head select 4)) max 0.05;
 private _progress = ((_now - GVAR(searchStarted)) / _duration) min 1;
+
+// The seal of a body's or person's container (fnc_markHidden, fnc_isSealed), after all its items: done, the container
+// is searched - this player knows it from now on - and the window is built with its real grid and what lies in it.
+if (_progress >= 1 && {(_head select 1) isEqualTo ""}) exitWith {
+    private _sealed = _head select 0;
+
+    _sealed setVariable [QGVAR(unsealed), true];
+    GVAR(searchQueue) = GVAR(searchQueue) select {_x isNotEqualTo _head};
+    GVAR(searchStarted) = -1;
+    GVAR(searchHead) = [];
+
+    ["open", "", _sealed, false] call FUNC(playSound);
+    [_display] call FUNC(build);
+};
 
 if (_progress >= 1) exitWith {
     // What was found makes its own sound, quietly, for the looter alone.

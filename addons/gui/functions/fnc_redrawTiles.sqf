@@ -72,7 +72,8 @@ private _loadSize = TEXT_UNIT * 0.46;
     private _pagedNow = [];
     private _info = _infos param [_infos findIf {(_x getOrDefault ["holder", objNull]) isEqualTo _holder}, createHashMap];
 
-    if (isNull _holder || {count _info == 0}) exitWith {
+    // A sealed section (fnc_isSealed) has no tiles to draw again: its unsealing, or anything else, builds the window.
+    if (isNull _holder || {count _info == 0} || {_info getOrDefault ["sealed", false]}) exitWith {
         _ok = false;
     };
 
