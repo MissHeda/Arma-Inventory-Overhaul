@@ -54,9 +54,11 @@ GVAR(stagingCount) = 0;
 
 // The panel's folded sections while ACE's window is open, container class (or "staging") -> true, and
 // which class each section of the last build showed, [[container, class], ...] (fnc_layout, the "fold"
-// hook).
+// hook); the tab - or "kit:" and the kit picked - the folds were last set anew for, as a switch folds the panel
+// anew (fnc_layout).
 GVAR(folded) = createHashMap;
 GVAR(foldKeys) = [];
+GVAR(foldTab) = "";
 GVAR(focusKit) = "";
 
 // The whole panel folded to its title bar (the button at the right end of the title row, fnc_toggleCollapse):

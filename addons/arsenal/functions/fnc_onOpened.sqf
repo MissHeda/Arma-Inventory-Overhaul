@@ -63,6 +63,7 @@ GVAR(dirty) = false;
 GVAR(dragZone) = "";
 GVAR(folded) = createHashMap;
 GVAR(foldKeys) = [];
+GVAR(foldTab) = "";
 GVAR(listPress) = [];
 GVAR(listSel) = [];
 GVAR(watch) = [];

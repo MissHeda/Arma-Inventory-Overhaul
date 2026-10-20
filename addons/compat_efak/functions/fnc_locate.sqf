@@ -5,7 +5,8 @@
  * kit packed in kits lies in after all. Two ways to look:
  *
  *   Without a root - the window's side: where the kit windows were last drawn found it
- *   (GVAR(holders)), else among the contents of an open kit. A kit's tile in a container the window
+ *   (GVAR(holders)) or the ACE Arsenal's panel shows it as a section (GVAR(arsenalHolders)), else among
+ *   the contents of an open kit. A kit's tile in a container the window
  *   shows comes with its holder from the caller instead (fnc_drop).
  *   With a root - the side that runs a kit op (einv_storage_fnc_execute): the real cargo under that
  *   root, nothing the window remembers - the uniform, vest and backpack of a unit (or the object
@@ -119,6 +120,11 @@ private _fnc_holder = {
     params ["_class"];
 
     private _known = GVAR(holders) getOrDefault [toLowerANSI _class, []];
+
+    // A kit section of the ACE Arsenal's panel, where no kit window is open (fnc_arsenalSections).
+    if (_known isEqualTo []) then {
+        _known = GVAR(arsenalHolders) getOrDefault [toLowerANSI _class, []];
+    };
 
     if (_known isNotEqualTo []) exitWith {_known};
 

@@ -41,6 +41,9 @@
  * the staging space (fnc_kitSections) - and the staging space below: things are dragged out of ACE's list into
  * it, out of it, and to and from the staging space. No kit is shown otherwise.
  *
+ * Switching ACE's tab (or the kit picked) folds the panel anew: the section of what was picked open, every other
+ * container's folded, the staging space as it was (GVAR(foldTab)).
+ *
  * The focus sink (GVAR(focusSink) in uiNamespace) is made here the first time: a control of no size in the
  * screen's corner that fnc_onFrame gives the focus to, so that ACE's list loses it.
  *
@@ -82,13 +85,44 @@ GVAR(focusKit) = ["", [_display] call FUNC(focusedKit)] select (!isNil QEFUNC(co
 private _holder = if (_collapsed) then {objNull} else {[] call FUNC(staging)};
 private _kitSections = [];
 
+// Which class or key each section of this build folds by (the "fold" hook): emptied before the kit sections note
+// theirs (fnc_kitSections), so a kit's section folds by hand too.
+GVAR(foldKeys) = [];
+
 if (GVAR(focusKit) isNotEqualTo "") then {
     private _worn = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
 
     _kitSections = [_display, [uniformContainer _worn, vestContainer _worn, backpackContainer _worn, _holder]] call FUNC(kitSections);
+} else {
+    // No kit section: where the last ones lay is forgotten (einv_compat_efak_fnc_arsenalSections).
+    if (!isNil QEFUNC(compat_efak,arsenalSections)) then {
+        [[]] call EFUNC(compat_efak,arsenalSections);
+    };
 };
 
 private _kitMode = _kitSections isNotEqualTo [];
+
+// Another tab of ACE's left bar - uniform, vest, backpack, any other -, or a kit picked in its left list: the
+// panel is folded anew. The section of what was picked is open (the open container, or the kit's), every other
+// container's section folded to its caption, the staging space as it was; folds by hand hold until the next
+// switch. The order of the sections and the column's scroll stay as they are.
+private _tab = [_id, "kit:" + GVAR(focusKit)] select _kitMode;
+
+if (_tab isNotEqualTo GVAR(foldTab)) then {
+    GVAR(foldTab) = _tab;
+
+    private _stagingFolded = "staging" in GVAR(folded);
+
+    GVAR(folded) = createHashMap;
+
+    if (_stagingFolded) then {
+        GVAR(folded) set ["staging", true];
+    };
+
+    {
+        _x set ["folded", false];
+    } forEach _kitSections;
+};
 
 if (_kitMode) then {
     _container = objNull;
@@ -132,8 +166,6 @@ private _fnc_fold = {
     _section set ["folded", _folded isNotEqualTo (_object in EGVAR(gui,collapsed))];
     GVAR(foldKeys) pushBack [_object, _key];
 };
-
-GVAR(foldKeys) = [];
 
 if (!_kitMode) then {
     [_section, toLowerANSI (_section getOrDefault ["class", ""])] call _fnc_fold;

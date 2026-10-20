@@ -8,6 +8,10 @@
  * Strict mode's hidden holder keeps for it (einv_storage_fnc_hiddenClasses). A kit that lies in another kit
  * is not unfolded. Nothing without Enhanced First Aid Kits' registry knowing the class (fnc_isKit).
  *
+ * Where each kit lies is kept in GVAR(arsenalHolders), anew at every call (an empty list empties it): no kit
+ * window is open in ACE's window, so GVAR(holders) knows none of them, and a move between a kit's grid and the
+ * staging space or a container (fnc_drop) found the kit nowhere and was refused - in either measure of its room.
+ *
  * Arguments:
  * 0: The containers to look in - uniform, vest, backpack, the staging space <ARRAY of OBJECTs>
  *
@@ -37,9 +41,12 @@ private _sections = [];
 
         if (_lower in _seen || {!([_x] call FUNC(isKit))}) then {continue};
 
-        _seen set [_lower, true];
+        // Where it lies, as GVAR(holders) notes it for a kit window: [container, kit it is packed in].
+        _seen set [_lower, [_container, ""]];
         _sections pushBack ([_x, _container, "", _container] call FUNC(kitSection));
     } forEach _classes;
 } forEach _holders;
+
+GVAR(arsenalHolders) = _seen;
 
 _sections

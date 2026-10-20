@@ -27,7 +27,8 @@
  * 2: Entry - a tile's, or a slot's (einv_storage_fnc_getSlot) <HASHMAP>
  * 3: How many of a stack, -1 for all of it <NUMBER> (default: -1)
  * 4: The slot it comes from, [unit, slot id] - [] for a tile <ARRAY> (default: [])
- * 5: Where the kit lies, [container, kit] - [] for where it was found as an open kit (GVAR(holders))
+ * 5: Where the kit lies, [container, kit] - [] for where it was found as an open kit (GVAR(holders)) or
+ *    a kit section of the ACE Arsenal's panel (GVAR(arsenalHolders))
  *    <ARRAY> (default: [])
  *
  * Return Value:
@@ -59,7 +60,7 @@ if (_fromKit isNotEqualTo "" && {_fromKit == _kit}) exitWith {
 };
 
 if (_holder isEqualTo []) then {
-    _holder = GVAR(holders) getOrDefault [toLowerANSI _kit, [objNull, ""]];
+    _holder = GVAR(holders) getOrDefault [toLowerANSI _kit, GVAR(arsenalHolders) getOrDefault [toLowerANSI _kit, [objNull, ""]]];
 };
 
 if !([_holder param [0, objNull]] call FUNC(mayReach)) exitWith {[false, LLSTRING(NotYours)]};

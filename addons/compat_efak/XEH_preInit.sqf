@@ -12,6 +12,11 @@ GVAR(opened) = [];
 // kit it is packed in] (fnc_getSections). A kit found nowhere any more is closed there.
 GVAR(holders) = createHashMap;
 
+// Where each kit the ACE Arsenal's panel shows as a section lies, lowercase class -> [container, ""]
+// (fnc_arsenalSections, made anew at each of its builds): no kit window is open there, so GVAR(holders) stays
+// empty, and the moves into and out of such a kit (fnc_drop, fnc_canDrop, fnc_locate) find it here.
+GVAR(arsenalHolders) = createHashMap;
+
 // Each kit as it was when this window first touched it, lowercase class -> [contents, opened
 // magazines]: with packing switched off, only what came out since may go back in (fnc_repackable) -
 // Enhanced First Aid Kits' own rule for its kit window.
