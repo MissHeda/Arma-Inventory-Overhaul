@@ -20,7 +20,7 @@
  * Width, in screen units <NUMBER>
  *
  * Example:
- * ["Take all", "", 0.017, 0.0125, _theme] call einv_gui_fnc_buttonWidth;
+ * ["Sort", "", 0.017, 0.0125, _theme] call einv_gui_fnc_buttonWidth;
  *
  * Public: No
  */

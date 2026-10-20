@@ -411,23 +411,34 @@ _order sort true;
 
 private _overflow = [];
 
-// The first free spot for that size and those holes, compartment after compartment, row by row.
+// The first free spot for that size and those holes in the compartments of one tier (fnc_blockOrder), compartment after
+// compartment, row by row. Cells are only ever taken from here on, so a cell that was not free for a shape never is again:
+// every search remembers per shape and compartment where it found its spot, and the next one for that shape starts there
+// instead of at the top - a crate of hundreds of tiles is laid out in one pass over its cells, not once per tile.
+private _resume = createHashMap;    // shape -> per compartment the first cell (row * cols + col) still worth a look
+
 private _fnc_find = {
-    params ["_w", "_h", ["_holes", []], ["_entryIndex", -1]];
+    params ["_w", "_h", "_holes", "_entryIndex", "_order"];
 
     private _spot = [];
+    private _shape = format ["%1x%2", _w, _h] + (["", str _holes] select (_holes isNotEqualTo []));
+    private _from = _resume get _shape;
+
+    if (isNil "_from") then {
+        _from = _blocks apply {0};
+        _resume set [_shape, _from];
+    };
+
+    private _plain = _holes isEqualTo [];
 
     {
-        _x params ["_cols", "_rows"];
-        private _block = _forEachIndex;
+        private _block = _x;
 
-        // A compartment that refuses the entry is passed over; a single slot is one spot, whole, when it is empty.
+        (_blocks select _block) params ["_cols", "_rows"];
+
+        // A single slot is one spot, whole, when it is empty (a compartment that refuses the entry is not in the order).
         if (_special && {_entryIndex >= 0}) then {
-            private _mode = [_entryIndex, _block] call _fnc_modeOf;
-
-            if (_mode < 0) then {continue};
-
-            if (_mode == 1) then {
+            if (([_entryIndex, _block] call _fnc_modeOf) == 1) then {
                 if ([_block] call _fnc_slotFree) then {
                     _spot = [_block, 0, 0, true];
 
@@ -438,21 +449,65 @@ private _fnc_find = {
             };
         };
 
-        // The open grid: past its last row everything is free, so looking one row further always ends.
-        private _lastRow = if (_open) then {count (_taken select _block)} else {_rows - _h};
+        if (_cols < _w) then {continue};
 
-        for "_row" from 0 to _lastRow do {
-            for "_col" from 0 to (_cols - _w) do {
-                if ([_block, _col, _row, _w, _h, _holes] call _fnc_isFree) exitWith {_spot = [_block, _col, _row]};
+        private _grid = _taken select _block;
+
+        // The open grid: past its last row everything is free, so looking one row further always ends.
+        private _lastRow = if (_open) then {count _grid} else {_rows - _h};
+        private _start = _from select _block;
+
+        for "_row" from (floor (_start / _cols)) to _lastRow do {
+            private _line = _grid param [_row, []];
+
+            for "_col" from ((_start - _row * _cols) max 0) to (_cols - _w) do {
+                // A taken first cell rules out any box that has one there (a hole of a shape may lie on it).
+                if (_plain && {_line isNotEqualTo []} && {_line select _col}) then {continue};
+
+                if ([_grid, _col, _row, _w, _h, _holes] call FUNC(cellsFree)) exitWith {
+                    _spot = [_block, _col, _row];
+                    _from set [_block, _row * _cols + _col];
+                };
             };
 
             if (_spot isNotEqualTo []) exitWith {};
         };
 
         if (_spot isNotEqualTo []) exitWith {};
-    } forEach _blocks;
+
+        _from set [_block, (_lastRow + 1) * _cols];
+    } forEach _order;
 
     _spot
+};
+
+// The compartments to look through for an entry, in tiers: the compartments whose category lock includes one of its
+// categories, then the unrestricted ones (fnc_blockOrder). Each tier is tried upright, then turned, before the next.
+private _tierCache = createHashMap;
+private _plainTiers = [[]];
+
+{
+    (_plainTiers select 0) pushBack _forEachIndex;
+} forEach _blocks;
+
+private _fnc_tiers = {
+    params ["_index"];
+
+    if (!_special) exitWith {_plainTiers};
+
+    private _groups = _groupsOf select _index;
+    private _key = str _groups;
+    private _tiers = _tierCache get _key;
+
+    if (isNil "_tiers") then {
+        private _order = [_blocks, _groups] call FUNC(blockOrder);
+        private _locked = _order select {count (_blocks select _x) > 4 && {((_blocks select _x) select 4) isNotEqualTo []}};
+
+        _tiers = [_locked, _order - _locked] select {_x isNotEqualTo []};
+        _tierCache set [_key, _tiers];
+    };
+
+    _tiers
 };
 
 {
@@ -462,23 +517,30 @@ private _fnc_find = {
     private _h = _entry get "h";
     private _holes = [_index, 0] call _fnc_holes;
     private _turnedHoles = [_index, 1] call _fnc_holes;
-    private _spot = [_w, _h, _holes, _index] call _fnc_find;
+    private _canTurn = _w != _h || {_holes isNotEqualTo _turnedHoles};
+    private _spot = [];
 
-    // Fits nowhere upright: turned a quarter, as a player would - a shape turns with it, and one in a
-    // square box is tried turned too when that takes other cells.
-    if (_spot isEqualTo [] && {_w != _h || {_holes isNotEqualTo _turnedHoles}}) then {
-        _spot = [_h, _w, _turnedHoles, _index] call _fnc_find;
+    // Upright, else turned a quarter as a player would - a shape turns with it, and one in a square box is tried turned
+    // too when that takes other cells -, in the preferred compartments first.
+    {
+        _spot = [_w, _h, _holes, _index, _x] call _fnc_find;
 
-        if (_spot isNotEqualTo []) then {
-            _entry set ["w", _h];
-            _entry set ["h", _w];
-            _entry set ["rotated", true];
-            _entry set ["holes", _turnedHoles];
-            _w = _entry get "w";
-            _h = _entry get "h";
-            _holes = _turnedHoles;
+        if (_spot isEqualTo [] && {_canTurn}) then {
+            _spot = [_h, _w, _turnedHoles, _index, _x] call _fnc_find;
+
+            if (_spot isNotEqualTo []) then {
+                _entry set ["w", _h];
+                _entry set ["h", _w];
+                _entry set ["rotated", true];
+                _entry set ["holes", _turnedHoles];
+                _w = _entry get "w";
+                _h = _entry get "h";
+                _holes = _turnedHoles;
+            };
         };
-    };
+
+        if (_spot isNotEqualTo []) exitWith {};
+    } forEach ([_index] call _fnc_tiers);
 
     if (_spot isEqualTo []) then {
         _entry set ["overflow", true];

@@ -59,7 +59,7 @@ private _fnc_build = {
     "build"
 };
 
-// A section's Take all or Put all in drawn held back while a move from it was under way (fnc_drawSection)
+// A section's Sort drawn held back while a move from it was under way (fnc_drawSection)
 // is given back by a build once no move is left: a redraw leaves the caption line as it is.
 if (
     count _before != count _signature || {_own isNotEqualTo (_before select 0)} || {_list isNotEqualTo (_before select 1)}

@@ -176,7 +176,7 @@ private _taken = if (_down) then {
 if (_taken isEqualTo true) exitWith {true};
 
 // Pressed on a kit window: on its cross, the cross closes it (fnc_drawWindow) and nothing happens here,
-// nor on its Take all and Sort, whose own clicks they are (a raise would draw them anew under the mouse and
+// nor on its Sort, whose own clicks they are (a raise would draw them anew under the mouse and
 // the click would be lost), nor on its body's scroll bar. Anywhere else it comes to the top first - a right
 // click's menu then opens over it, a tile pressed there is the raised window's -, and a left press on its
 // title holds it to move it.

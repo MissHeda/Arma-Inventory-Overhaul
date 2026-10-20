@@ -79,7 +79,7 @@ PREP(onAnswer);
 PREP(drawPending);
 PREP(requestNormalize);
 
-// Selecting several: click, Ctrl, Shift and a frame, moved together, Take all, Put all in and Sort
+// Selecting several: click, Ctrl, Shift and a frame, moved together and Sort
 PREP(select);
 PREP(selectSection);
 PREP(clearSelection);
@@ -87,9 +87,6 @@ PREP(selectionTiles);
 PREP(drawSelection);
 PREP(groupMode);
 PREP(quickMoveGroup);
-PREP(takeAll);
-PREP(putAll);
-PREP(putAllTarget);
 PREP(sortHolder);
 PREP(sortText);
 PREP(sortChip);
@@ -148,7 +145,7 @@ PREP(stripEntries);
 PREP(stripMore);
 PREP(drawBadge);
 
-// The hands' queue: what is not dragged waits its turn - quick moves, Take all and Put all in, drops, as far as the settings say; its tiles are tinted and the box's caption line counts
+// The hands' queue: what is not dragged waits its turn - quick moves, group moves, drops, as far as the settings say; its tiles are tinted and the box's caption line counts
 PREP(queueColor);
 PREP(boxStep);
 PREP(unmarkQueued);

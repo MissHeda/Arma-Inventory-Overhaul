@@ -10,7 +10,7 @@
  *
  * The menu is a layer of its own: one controls group over the screen, made last, with the focus taken into
  * it (a button of a pixel on its card, as the setup wizard's popovers do). The engine draws the focused
- * control over every other, and a column whose button kept the focus after its click (Sort, Take all) drew
+ * control over every other, and a column whose button kept the focus after its click (Sort) drew
  * its tiles over the menu - "the menu hides behind items, sometimes". The layer is the display's last
  * control as well: should anything be made on the display while it is open (fnc_redrawTiles, a slot's
  * hover ring), fnc_raiseMenu makes it again on top - the same choices at the same place, the row under the

@@ -12,7 +12,7 @@
  * stacks with magazines of the same rounds) - the layout never merges into a tile; two tiles of a class
  * that are both partly filled (fnc_getContents, the places' counts) are two tiles, each with its room - and
  * only what is left over needs free spots, one per stack's worth. That is what a put without a cell does
- * (fnc_opPut), so the answer holds for Quick move, Take all and the plan.
+ * (fnc_opPut), so the answer holds for Quick move and the plan.
  *
  * Arguments:
  * 0: Container, or the key of a grid with no object <OBJECT or STRING>

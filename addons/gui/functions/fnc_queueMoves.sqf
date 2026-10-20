@@ -14,10 +14,10 @@
  * does), when the window is not the inventory (ACE Arsenal's panel stays instant) or is not open, or when nothing of
  * the move is on the window (no tile to mark). A move of a tile or worn item that already waits is left out.
  *
- * The label an option brings (the hint after a Take all) goes with the last entry of the call, the one whose
+ * The label an option brings (the hint after a group move) goes with the last entry of the call, the one whose
  * answer ends it.
  *
- * Cost: one call for all the moves of a Take all or a group drag, and no drawing in it - the entries are only
+ * Cost: one call for all the moves of a group move, and no drawing in it - the entries are only
  * added and fnc_drawQueue is asked for (GVAR(queueDirty), done by fnc_animateQueue in the next frame, or by any
  * drawPending before, from GVAR(queueFrom) on), so the marks of N entries are made once, not N times. Whether a tile
  * waits is one look in the queue's index by cell (fnc_queueIndex, fnc_queueWaits) and the tile is the HashMap the caller

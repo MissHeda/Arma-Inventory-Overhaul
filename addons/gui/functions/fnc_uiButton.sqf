@@ -8,7 +8,7 @@
  * button that steps through choices goes forward and back, and one code serves several buttons that
  * tell themselves apart by their id (each kit window's cross, fnc_drawWindow).
  *
- * A disabled button is drawn in muted colours, does not light up and does nothing when clicked - Take all
+ * A disabled button is drawn in muted colours, does not light up and does nothing when clicked - Sort
  * while its own moves are under way (fnc_drawSection). The code always runs a frame later
  * (fnc_later): a button may rebuild the window, which deletes this very control.
  *

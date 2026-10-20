@@ -25,7 +25,7 @@
  * in Tarkov): a body's or a living person's uniform, vest or backpack, a crate, a vehicle's cargo, a pile, a bag lying
  * about, one opened from inside a container, and a body's that was dropped unsearched. Beside its box one block of
  * SEAL_ROWS cells by STORAGE_COLS, hatched, "UNSEARCHED", with a ring and a line that say what its search does
- * (fnc_updateStatus) - no grid, no tiles, no weight, no Take all or Sort, no load hint, no strip, whatever it really holds
+ * (fnc_updateStatus) - no grid, no tiles, no weight, no Sort, no load hint, no strip, whatever it really holds
  * and however big it is. Its seal alone is queued (fnc_markHidden); the caption line's chip searches, stops and resumes
  * it, and with "Search starts on click" a click on the block starts it. When the seal is done - about two seconds - the
  * window is built with the real grid, every item a hatched footprint, and the items are found one by one. The block
@@ -41,19 +41,14 @@
  * clicks on the tab are kept in GVAR(collapsed) as a change from that, so folding it again goes back to
  * the start. Folded, it keeps its caption line, weight and button.
  *
- * Beside the tab buttons act on the whole section, as high as the tab and in the caption's own size:
- * one moves everything over in one go (fnc_takeAll, fnc_putAll) - "Take all" in what is looted, "Put all in"
- * in the unit's own uniform, vest and backpack and in containers opened from them, while the loot column has
- * somewhere to put things -, "Sort: Name" lays out its grid anew by the order the player has chosen and each
- * click steps to the next one - name, weight, size, type (fnc_sortHolder, fnc_sortChip: the label changes
- * in place on every Sort button, which is as wide as the widest label, fnc_sortButtons). The only way to
- * sort: the context menu has no row for it.
- * Only the inventory has them (fnc_isInventoryMode). Take all and Put all in come only where at least one
- * searched tile lies, Sort on every container the player may change - a section that holds no grid of its
- * own, a body's gear, has none; both are drawn disabled while a move of this section is under way. Their
- * labels are centred by the engine in the width fnc_buttonWidth gives (fnc_uiButton, "centred"). The tab
- * gives up room to them down to three characters; below that the last button is left out, then the one
- * before it.
+ * Beside the tab a button acts on the whole section, as high as the tab and in the caption's own size:
+ * "Sort: Name" lays out its grid anew by the order the player has chosen and each click steps to the next
+ * one - name, weight, size, type (fnc_sortHolder, fnc_sortChip: the label changes in place on every Sort
+ * button, which is as wide as the widest label, fnc_sortButtons). The only way to sort: the context menu has
+ * no row for it. Only the inventory has it (fnc_isInventoryMode), on every container the player may change -
+ * a section that holds no grid of its own, a body's gear, has none; it is drawn disabled while a move of this
+ * section is under way. Its label is centred by the engine in the width fnc_buttonWidth gives (fnc_uiButton,
+ * "centred"). The tab gives up room to it down to three characters; below that the button is left out.
  *
  * A tall compartment in the loot column - a crate's or a vehicle's, up to MAX_ROWS rows - shows its rows
  * down to the last one in use and two more (fnc_viewBlocks); the empty rows below fold into one line under the grid,
@@ -301,7 +296,7 @@ if (_loot && {_id in ["uniform", "vest", "backpack"]}) then {
 private _lineH = _textUnit * CAPTION_LINE;
 private _lineSize = _textUnit * 0.46;
 
-// The buttons on the line (Take all, Put all in, Sort and the activity chip) are a little lower than the line and stand in
+// The buttons on the line (Sort and the activity chip) are a little lower than the line and stand in
 // the middle of it, a clear gap above the line under it and above the container's top edge; their hit area is the button
 // and two pixels each way. The caption's own tab is one of them (Mia, 0.5.7): the same height, the same text size and the same
 // round ends - a pill with the fold arrow in its left end - and so is every other chip of the line.
@@ -344,14 +339,8 @@ private _lockTip = _section getOrDefault ["lockTip", ""];
 private _lockW = [0, SQUARE(_lineH)] select (_lockTip isNotEqualTo "");
 
 // ---------------------------------------------------------------------------
-// The buttons beside the tab: Take all out of what is looted, Put all in out of what the unit carries - a
-// container opened from the unit's own storage counts as carried - and Sort for a container the player may
-// change. Take all and Put all in where at least one searched tile is there to move, and, for Put all in,
-// somewhere in the loot column to put it; Sort on every grid of its own that the player may change, so also
-// on an empty one.
+// The button beside the tab: Sort, for a container the player may change - on every grid of its own, so also on an empty one.
 // ---------------------------------------------------------------------------
-private _buttonKind = "";
-private _buttonEligible = "";
 private _sortable = false;
 private _busy = false;
 
@@ -360,25 +349,6 @@ if (
     && {_side in ["own", "loot"]} && {call FUNC(isInventoryMode)}
     && {([_sectionContainer, "items"] call FUNC(checkTouch)) isEqualTo ""}
 ) then {
-    private _carried = _side isEqualTo "own" || {(_section getOrDefault ["root", objNull]) isEqualTo GVAR(unit)};
-    private _placed = _layout getOrDefault ["entries", []];
-
-    // What the button would be here, and whether any searched tile is there to move: what was not
-    // searched yet does not count; searching it later brings the button.
-    if (_carried) then {
-        if ((call FUNC(putAllTarget)) isNotEqualTo []) then {
-            _buttonEligible = "put";
-        };
-    } else {
-        _buttonEligible = "take";
-    };
-
-    [_sectionContainer, _placed, false] call FUNC(markHidden);
-
-    if (_placed findIf {!(_x getOrDefault ["hidden", false])} >= 0) then {
-        _buttonKind = _buttonEligible;
-    };
-
     // A section that only shows what it is given has no grid of its own to sort.
     _sortable = !(_section getOrDefault ["virtual", "entries" in _section]);
 
@@ -391,19 +361,12 @@ if (
     } forEach GVAR(inFlight);
 };
 
-// What it is meant to be - the tab may give the buttons up for lack of room below. The caption line is
+// What it is meant to be - the tab may give the button up for lack of room below. The caption line is
 // _buttonH high and in the middle of the line (the tab and the cross are _lineH high): the labels are a little smaller
 // than the tab's. A button is [id, label, icon, width]; they stand in this order beside the tab, and for
 // lack of room the last one goes first.
-private _buttonIntent = _buttonKind;
 private _buttonGap = SQUARE(_textUnit * 0.3);
 private _buttons = [];
-
-if (_buttonKind isNotEqualTo "") then {
-    private _label = [LLSTRING(Section_TakeAll), LLSTRING(Section_PutAll)] select (_buttonKind isEqualTo "put");
-
-    _buttons pushBack [_buttonKind, _label, "", [_label, "", _buttonH, _buttonSize, _theme] call FUNC(buttonWidth)];
-};
 
 if (_sortable) then {
     // "Sort: Name", the order the player sorts by now; as wide as the widest of its labels, so a click that
@@ -491,7 +454,7 @@ if (_shown isNotEqualTo "") then {
 // whether its button was drawn held back for a move under way (fnc_refresh builds once none is left).
 private _info = createHashMapFromArray [
     ["holder", _sectionContainer], ["id", _id], ["side", _side], ["folded", _collapsed], ["tab", _tab],
-    ["tabColor", _tabColor], ["load", controlNull], ["button", _buttonIntent], ["eligible", _buttonEligible],
+    ["tabColor", _tabColor], ["load", controlNull],
     ["caption", _caption], ["busy", _busy], ["sealed", _sealed]
 ];
 
@@ -540,10 +503,7 @@ private _fnc_click = {
     if (isNull _holder) exitWith {};
 
     switch (_kind) do {
-        // Take all and Put all in plan a whole container; clicked fast they plan it once per rest (fnc_coalesce) - what already
-        // waits for the hands is skipped in any case. Sort steps its order at each click and sends one request (fnc_sortHolder).
-        case "take": {["take|" + str _holder, {[_this select 0] call FUNC(takeAll)}, [_holder], COALESCE_REQUEST] call FUNC(coalesce)};
-        case "put": {["put|" + str _holder, {[_this select 0] call FUNC(putAll)}, [_holder], COALESCE_REQUEST] call FUNC(coalesce)};
+        // Sort steps its order at each click and sends one request (fnc_sortHolder).
         case "sort": {[_holder, objNull, true] call FUNC(sortHolder)};
     };
 };
@@ -558,25 +518,10 @@ private _buttonX = _blockX + _tabW + _buttonGap;
         _label, _icon, _theme, _fnc_click, _busy, _buttonSize, true, _hitPx
     ] call FUNC(uiButton);
 
-    // What it does, when the mouse rests on it. Sort says what its next click sorts by (fnc_sortText) and is
-    // kept up to date as the order changes (fnc_sortButtons).
-    private _tooltip = switch (_kind) do {
-        case "sort": {([GVAR(sortMode)] call FUNC(sortText)) select 1};
-        case "put": {
-            private _targetHolder = ((call FUNC(putAllTarget)) param [0, []]) param [0, objNull];
-            private _lootSections = GVAR(context) getOrDefault ["lootSections", []];
-            private _targetSection = _lootSections param [_lootSections findIf {(_x getOrDefault ["container", objNull]) isEqualTo _targetHolder}, createHashMap];
-
-            format [LLSTRING(Section_PutAll_Tooltip), _targetSection getOrDefault ["title", [_targetHolder] call FUNC(containerName)]]
-        };
-        default {LLSTRING(Section_TakeAll_Tooltip)};
-    };
-
-    (_button select -1) ctrlSetTooltip _tooltip;
-
-    if (_kind isEqualTo "sort") then {
-        [_button] call FUNC(sortButtons);
-    };
+    // What it does, when the mouse rests on it: what its next click sorts by (fnc_sortText), kept up to date as the
+    // order changes (fnc_sortButtons).
+    (_button select -1) ctrlSetTooltip (([GVAR(sortMode)] call FUNC(sortText)) select 1);
+    [_button] call FUNC(sortButtons);
 
     _buttonX = _buttonX + _buttonW + _buttonGap;
 } forEach _buttons;

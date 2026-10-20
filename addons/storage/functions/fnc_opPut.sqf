@@ -14,7 +14,7 @@
  * opens new tiles (a full stack each, then the remainder), or, with "separate", is a tile of its own at the
  * cell asked for (cut into full tiles when it is more than a stack): it joins nothing. With "merge into"
  * the tile at that cell, when it is of the payload's key and has room, is filled first, then as without. Quick
- * move, Take all, Sort, the plan and settlement never ask for either and so keep filling partial stacks.
+ * move, Sort, the plan and settlement never ask for either and so keep filling partial stacks.
  * Only the tiles that open need a free spot; a payload that fits into the room of the tiles it joins needs
  * none. The counts live in the places' records (fnc_setCount, fnc_setPlace), changed here in step with the
  * cargo, so the stack that was chosen gains the items.

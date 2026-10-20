@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Plays the sound of an answer that is finished (fnc_afterAction): of the first item that really moved,
- * and only one per answer - a group dragged, Take all and a whole crate sound like their first item, each
+ * and only one per answer - a group dragged and a whole crate sound like their first item, each
  * chunk of BATCH_MAX moves once. Nothing when all of it was refused (the hint says why) or nothing was
  * asked for a sound.
  *

@@ -1,8 +1,8 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Sends what einv_storage_fnc_plan worked out for several tiles moved together - Take all, Put all in, a
- * group quick move, a group dragged over a container (fnc_takeAll, fnc_putAll, fnc_quickMoveGroup,
+ * Sends what einv_storage_fnc_plan worked out for several tiles moved together - a
+ * group quick move, a group dragged over a container (fnc_quickMoveGroup,
  * fnc_endDrag) - as moves (fnc_sendMoves): every tile to the cell planned for it, the ones that stay in
  * their own holder laid down at once (kind "placeMany"), so two of them never wait for each other's cells.
  *

@@ -8,7 +8,7 @@
  * unequip, swap with another unit). The times are the server settings einv_gui_handDrop, handMove and
  * handEquip, in seconds; 0 is no wait at all.
  *
- * Whether the kind waits at all is the server's second word, four switches: the quick move, Take all and Put all in
+ * Whether the kind waits at all is the server's second word, four switches: the quick move and group moves
  * (einv_gui_waitMove, on by default), dropping (waitDrop, on), putting on and taking off a uniform, vest, backpack or
  * headgear (waitWorn, off) and equipping anything else (waitEquip, off). A drag out of the window never waits: what
  * fnc_endDrag sends in the frame it was let go in (GVAR(instantFrame)) goes at once, whatever the switches say.

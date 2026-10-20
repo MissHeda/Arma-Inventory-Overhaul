@@ -68,10 +68,12 @@ private _fnc_isLifted = {
 // ---------------------------------------------------------------------------
 // A target as the planning sees it, made when the first item asks for it:
 //   ["ground"]  or  ["none"] for a holder that is neither the ground nor a container
-//   ["grid", holder, root, blocks, open, taken, isBackpack, rooms]
+//   ["grid", holder, root, blocks, open, taken, isBackpack, rooms, resume, tiers]
 // taken is per compartment a list of rows of booleans, true where something lies or a shaped compartment
 // has a hole; rows past the end are free. rooms is, per key of a stackable class, how much room each of
-// its tiles that is not full has left, in the order of the tiles - what a put fills first.
+// its tiles that is not full has left, in the order of the tiles - what a put fills first. resume remembers per shape and
+// compartment where the last search found its spot (cells are only ever taken, so the next one starts there), tiers the
+// compartments to look through for an item's categories (fnc_blockOrder).
 // ---------------------------------------------------------------------------
 private _states = _targets apply {[]};
 
@@ -114,11 +116,13 @@ private _fnc_state = {
         private _open = ([_holder] call FUNC(getBlocks)) isEqualTo [];
 
         // A shaped compartment's holes are taken from the start (fnc_seedTaken).
-        _state = ["grid", _holder, _root, _blocks, _open, [_blocks] call FUNC(seedTaken), getNumber (configOf _holder >> "isBackpack") == 1, createHashMap];
+        _state = ["grid", _holder, _root, _blocks, _open, [_blocks] call FUNC(seedTaken), getNumber (configOf _holder >> "isBackpack") == 1, createHashMap, createHashMap, createHashMap];
 
-        // What lies there, less what is lifted away: its cells are taken.
+        // What lies there, less what is lifted away: its cells are taken. Most targets have nothing lifted from them.
+        private _liftedHere = _lifted findIf {(_x getOrDefault ["holder", objNull]) isEqualTo _holder} >= 0;
+
         {
-            if ([_x, _holder] call _fnc_isLifted) then {continue};
+            if (_liftedHere && {[_x, _holder] call _fnc_isLifted}) then {continue};
 
             if (!(_x getOrDefault ["overflow", false]) && {(_x getOrDefault ["block", -1]) >= 0}) then {
                 [_state, _x get "block", _x get "col", _x get "row", _x get "w", _x get "h", _x getOrDefault ["holes", []]] call _fnc_mark;
@@ -143,8 +147,6 @@ private _fnc_state = {
     _state
 };
 
-// The first free spot for a size and its holes, the given compartment first: [compartment, col, row],
-// [] for none.
 // Whether a single slot has nothing in it yet (fnc_slotOf).
 private _fnc_slotFree = {
     params ["_state", "_block"];
@@ -154,52 +156,57 @@ private _fnc_slotFree = {
     [(_state select 5) select _block, _col, _row, _w, _h, _holes] call FUNC(cellsFree)
 };
 
+// The first free spot for a size and its holes, in the compartments given (in that order): [compartment, col, row], [] for none.
 private _fnc_find = {
-    params ["_state", "_w", "_h", "_first", ["_holes", []], ["_groups", []]];
+    params ["_state", "_w", "_h", "_holes", "_order", "_groups"];
 
     private _spot = [];
     private _blocks = _state select 3;
-    private _blockOrder = [];
+    private _open = _state select 4;
+    private _shape = format ["%1x%2", _w, _h] + (["", str _holes] select (_holes isNotEqualTo []));
+    private _from = (_state select 8) get _shape;
 
-    if (_first >= 0 && {_first < count _blocks}) then {
-        _blockOrder pushBack _first;
+    if (isNil "_from") then {
+        _from = _blocks apply {0};
+        (_state select 8) set [_shape, _from];
     };
 
-    for "_i" from 0 to (count _blocks - 1) do {
-        if (_i != _first) then {
-            _blockOrder pushBack _i;
-        };
-    };
+    private _plain = _holes isEqualTo [];
 
     {
         private _block = _x;
 
         (_blocks select _block) params ["_cols", "_rows"];
 
-        // A compartment that refuses the item is passed over (fnc_blockMode); a single slot is one spot, whole, when it is empty.
-        if (count (_blocks select _block) > 4 && {_groups isNotEqualTo []}) then {
-            private _mode = [_blocks select _block, _groups] call FUNC(blockMode);
+        // A compartment that refuses the item is not in the order (fnc_blockOrder); a single slot is one spot, whole, when it is empty.
+        if (count (_blocks select _block) > 4 && {([_blocks select _block, _groups] call FUNC(blockMode)) == 1}) then {
+            if ([_state, _block] call _fnc_slotFree) then {
+                _spot = [_block, 0, 0, true];
 
-            if (_mode < 0) then {continue};
-
-            if (_mode == 1) then {
-                if ([_state, _block] call _fnc_slotFree) then {
-                    _spot = [_block, 0, 0, true];
-
-                    break;
-                };
-
-                continue;
+                break;
             };
+
+            continue;
         };
 
-        // The open grid has no end: looking one row past the last one taken always finds room.
-        private _lastRow = if (_state select 4) then {count ((_state select 5) select _block)} else {_rows - _h};
+        if (_cols < _w) then {continue};
 
-        for "_row" from 0 to _lastRow do {
-            for "_col" from 0 to (_cols - _w) do {
-                if ([_state, _block, _col, _row, _w, _h, _holes] call _fnc_isFree) exitWith {
+        private _grid = (_state select 5) select _block;
+
+        // The open grid has no end: looking one row past the last one taken always finds room.
+        private _lastRow = if (_open) then {count _grid} else {_rows - _h};
+        private _start = _from select _block;
+
+        for "_row" from (floor (_start / _cols)) to _lastRow do {
+            private _line = _grid param [_row, []];
+
+            for "_col" from ((_start - _row * _cols) max 0) to (_cols - _w) do {
+                // A taken first cell rules out any box that has one there (a hole of a shape may lie on it).
+                if (_plain && {_line isNotEqualTo []} && {_line select _col}) then {continue};
+
+                if ([_grid, _col, _row, _w, _h, _holes] call FUNC(cellsFree)) exitWith {
                     _spot = [_block, _col, _row];
+                    _from set [_block, _row * _cols + _col];
                 };
             };
 
@@ -207,9 +214,32 @@ private _fnc_find = {
         };
 
         if (_spot isNotEqualTo []) exitWith {};
-    } forEach _blockOrder;
+
+        _from set [_block, (_lastRow + 1) * _cols];
+    } forEach _order;
 
     _spot
+};
+
+// The compartments to look through for an item, in tiers: the one asked for first (the options' "start") and those whose
+// category lock includes one of its categories, then the unrestricted ones (fnc_blockOrder). Each tier is tried upright, then
+// turned, before the next.
+private _fnc_tiers = {
+    params ["_state", "_first", "_groups"];
+
+    private _key = str [_first, _groups];
+    private _tiers = (_state select 9) get _key;
+
+    if (isNil "_tiers") then {
+        private _blocks = _state select 3;
+        private _order = [_blocks, _groups, _first] call FUNC(blockOrder);
+        private _locked = _order select {_x == _first || {count (_blocks select _x) > 4 && {((_blocks select _x) select 4) isNotEqualTo []}}};
+
+        _tiers = [_locked, _order - _locked] select {_x isNotEqualTo []};
+        (_state select 9) set [_key, _tiers];
+    };
+
+    _tiers
 };
 
 // ---------------------------------------------------------------------------
@@ -319,14 +349,20 @@ private _left = [];
 
         private _firstBlock = if (_start isNotEqualTo [] && {(_start select 0) isEqualTo _holder}) then {_start param [1, -1]} else {-1};
         private _turned = false;
-        private _spot = [_state, _w, _h, _firstBlock, _holes, _groups] call _fnc_find;
+        private _spot = [];
 
-        // Fits nowhere upright: turned a quarter, as a player would - a shape turns with it, and one in a
-        // square box is tried turned too when that takes other cells.
-        if (_spot isEqualTo [] && {_w != _h || {_holes isNotEqualTo _turnedHoles}}) then {
-            _spot = [_state, _h, _w, _firstBlock, _turnedHoles, _groups] call _fnc_find;
-            _turned = _spot isNotEqualTo [];
-        };
+        {
+            _spot = [_state, _w, _h, _holes, _x, _groups] call _fnc_find;
+
+            // Fits nowhere upright: turned a quarter, as a player would - a shape turns with it, and one in a
+            // square box is tried turned too when that takes other cells.
+            if (_spot isEqualTo [] && {_w != _h || {_holes isNotEqualTo _turnedHoles}}) then {
+                _spot = [_state, _h, _w, _turnedHoles, _x, _groups] call _fnc_find;
+                _turned = _spot isNotEqualTo [];
+            };
+
+            if (_spot isNotEqualTo []) exitWith {};
+        } forEach ([_state, _firstBlock, _groups] call _fnc_tiers);
 
         if (_spot isEqualTo []) then {continue};
 

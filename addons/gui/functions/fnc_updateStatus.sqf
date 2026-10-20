@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The activity chip in the caption line of a box (the bar where Take all and Sort stand): what the box is busy with, in one
+ * The activity chip in the caption line of a box (the bar where Sort stands): what the box is busy with, in one
  * small place and nothing else. A ring that goes round, the words and a button that stops it:
  *
  *   hands - the box has actions waiting in the hands' queue (GVAR(handBoxes)): "Grabbing items 3 / 12", "Putting items

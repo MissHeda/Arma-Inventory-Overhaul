@@ -12,9 +12,6 @@
  * the rest of the column, its scroll, the open kit windows and the hover stay too. The tile keeps its
  * place in its grid's list of tiles - a press or a hover that points at it still finds it.
  *
- * Only where that is all that changes: the first item found in a section brings its Take all button, and
- * that line is drawn by the section - then it answers false and the caller builds the window.
- *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: The item, as it stood at the head of the search queue (fnc_markHidden), already learnt <ARRAY>
@@ -60,14 +57,6 @@ if (_found isEqualTo []) exitWith {
 };
 
 _found params ["_grid", "_tile"];
-
-// The first searched tile of a section brings its Take all or Put all in button: the caption line is the
-// section's to draw.
-private _holder = _grid getOrDefault ["holder", objNull];
-private _infos = uiNamespace getVariable [QGVAR(sectionInfo), []];
-private _info = _infos param [_infos findIf {(_x getOrDefault ["holder", objNull]) isEqualTo _holder}, createHashMap];
-
-if ((_info getOrDefault ["button", ""]) isEqualTo "" && {(_info getOrDefault ["eligible", ""]) isNotEqualTo ""}) exitWith {false};
 
 private _grids = uiNamespace getVariable [QGVAR(grids), []];
 private _gridIndex = _grids find _grid;

@@ -13,7 +13,7 @@
  * player (fnc_searchRecord "unsealed"), its "open" sound plays and the window is built with its real grid, every item a
  * hatched footprint, which are then queued and found one by one. An item found is known (fnc_learn), makes its own quiet
  * sound ("uncover"), and its tile is drawn anew in place without its hatching (fnc_revealTile, fnc_revealFx); the window
- * is only built again when the section's caption line has to change with it (its first item found brings Take all) - a
+ * is only built again when something other than the tile has to change with it - a
  * build per item made a big crate or vehicle flicker while it was searched. Several finds of one frame build it once.
  *
  * What is searched is told only in the caption line of its box (fnc_updateStatus: a ring that goes round, the time that
@@ -143,7 +143,7 @@ if (_done isNotEqualTo []) then {
     // For the tester's numbers (einv_gui_debugTiming): what finding it cost - a stutter while searching is this.
     if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
         private _revealTook = ((diag_tickTime - _revealFrom) * 1000) toFixed 1;
-        private _revealHow = ["its tile drawn anew in place", "the window built anew, as a box opened or a section's first find brings Take all"] select _build;
+        private _revealHow = ["its tile drawn anew in place", "the window built anew, as a box opened"] select _build;
         private _revealCount = count _done;
 
         INFO_3("timing: search found %1 item(s) - %2 ms (%3)",_revealCount,_revealTook,_revealHow);

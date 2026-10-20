@@ -561,8 +561,11 @@ In order:
 2. **kin** - every record still unused, in order, goes to the first unplaced entry of the same kind (`fnc_layoutKey`) whose size
    matches either way round, when free: a repacked magazine, a radio that got its instance class, a kit made ready keep their
    place.
-3. **first fit** - the rest, in the `order` asked for - largest first (then category, kind, key, index) when none is: compartment
-   after compartment, row by row, upright, else turned. A square rectangle never turns; a shape in a square box turns when turned
+3. **first fit** - the rest, in the `order` asked for - largest first (then category, kind, key, index) when none is: the compartments
+   whose category lock (`accepts`, below) includes one of the item's categories first, then the unrestricted ones (`fnc_blockOrder`; a
+   compartment that refuses the item is left out), each in its own order, row by row, upright, else turned - a locked compartment is
+   tried turned too before an unrestricted one is looked at. The search remembers per shape and compartment where its last spot lay
+   (cells are only ever taken during the pass), so a crate of hundreds of tiles is laid out in about one pass over its cells. A square rectangle never turns; a shape in a square box turns when turned
    it takes other cells. Only a Sort asks for another order (`fnc_opSort`), one of `SORT_MODES` (main's `script_macros.hpp`):
    `"size"` as above, `"name"` by the item's name (`getInfo "name"`, lowercase), `"weight"` heaviest first by what the tile weighs
    (`fnc_getMass`: attachments and a container's contents count) then by name, `"type"` weapons, ammo, gear, medical, the rest (the
@@ -615,8 +618,9 @@ never lands in a compartment that refuses it, on any machine:
   (which only add to the cargo and let the layout place) follow without a line of their own.
 - **Ops that name a spot**: `findSpots` (op put, move, split) passes refusing compartments over - a cell asked for in one is not free,
   the item goes to the first fit or, for a split, the nearest spot, and `elsewhere` says so; `opPlaceMany` (op place, swap, the plan's
-  moves in the same holder) answers `"WrongKind"` for a cell in a refusing compartment; `fnc_plan` (quick move, Take all, Put all,
+  moves in the same holder) answers `"WrongKind"` for a cell in a refusing compartment; `fnc_plan` (quick move,
   the migration) skips them per target. `hasSpace` and `findSpots` agree because both go through the layout.
+  **Placement priority.** Wherever a first fit looks for a spot - the layout, `findSpots` (op put, move, split without an origin) and `fnc_plan` (quick move, take, loadout top-up, migration; its `"start"` compartment still comes first) - the compartments whose `accepts` includes one of the item's categories are looked through before the unrestricted ones (`fnc_blockOrder [blocks, groups, first]` gives the order; a tier is tried upright, then turned, before the next), so magazines fill magazine slots first. A cell asked for, a record and a nearest-spot search (a drop with an origin) are not reordered.
 - **Single slots.** A single slot holds one tile - a stack counts as one - and the tile takes the whole compartment: `fnc_slotOf [block]`
   -> `[0, 0, cols, rows, holes]`. The layout writes the entry with that box, `rotated` false and `"single"` true, and its record is
   `[key, 0, 0, cols, rows, block, 0]` (a record in a slot is kept for any entry the slot accepts, its own size aside); the slot is
@@ -639,7 +643,7 @@ in a single slot, but its categories are not asked there: the next layout puts a
   one is laid out like a container, what it holds read through its holder type's `"entries"`. A stackable entry **first fills the
   partly filled tiles of its own key** (a magazine only stacks with the same rounds; two partial tiles of a class are two tiles,
   each with its own room) - the layout never merges into a tile - and only what is left needs free spots, one per stack's worth.
-  That is exactly what a put without a cell does (`fnc_opPut`), so the answer holds for Quick move, Take all and the plan.
+  That is exactly what a put without a cell does (`fnc_opPut`), so the answer holds for Quick move and the plan.
 - `fnc_hasRoom [container, entry]`: `fnc_hasSpace` plus the one kind rule left, `fnc_backpackIntoBackpack` (reason
   `"NoBackpack"`). The cargo commands add whatever they are given, so a window, mission or mod asks this before it puts anything
   in. `fnc_moveEntry` and `fnc_unequip` ask when they get no cell; the machine that runs the op asks again and decides.
@@ -679,7 +683,7 @@ putting in with the cargo commands.
   so every stackable tile has a record with its count. `take` of part of a stack lowers its tile's count (`fnc_setCount`), of a whole
   tile removes the record. `put` of a payload of a class that stacks (items, magazines of one number of rounds, not into the hidden
   holder, not a uniform, vest or backpack): **without options it joins** the tiles of its key that have room, in their order,
-  and what is left opens new tiles (this is what Quick move, Take all, Sort, the plan and settlement do); with **`separate`**
+  and what is left opens new tiles (this is what Quick move, Sort, the plan and settlement do); with **`separate`**
   (6th argument) it joins nothing and lies at the cell as a tile of its own (a count above one stack is cut into full tiles, the
   others go to the first fit); with **`merge into`** (7th, `[col, row, compartment]` of a tile of the same key) that tile is
   filled first, then as without. Only the tiles that open need a free spot (`fnc_findSpots`: the cell asked for, else the first fit,
@@ -921,7 +925,7 @@ limited.
   limit active the key is the mod's alone** - the game's "Reload" action keys, plain, on foot, with a rifle, pistol or launcher in
   the hands, and at least one magazine the muzzle takes (none: the key is the game's, which has nothing to load either). A key held
   down (`RELOAD_GUARD_GAP` 0.6 s, `GVAR(reloadAt)`) or a reload under way (`weaponState` entry 6, the magazine reload phase, above 0)
-  is swallowed; a full magazine in the weapon does nothing, as in the game; otherwise the fullest usable magazine (`fnc_reloadPick`)
+  is swallowed; otherwise the fullest usable magazine (`fnc_reloadPick` with its swap argument true, so a full magazine in the weapon is swapped for another one as in the game, the full one going back as any ejected magazine does)
   is loaded with `fnc_loadMagazine` (below: the game's `LoadMagazine` action for that one magazine, or by hand into an empty muzzle).
   With only blocked magazines a line names the containers to take one out of. A load that fails swallows the press too (an RPT
   WARNING) and clears the repeat gap - the engine's own reload is never let in while a limit is active. ACE's `isReloading` is
@@ -1212,7 +1216,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   `windowOrder`, `GVAR(filter)`, `GVAR(pageWanted)`) and asks the gate for the **work**. Throttle, the default: the first request of a quiet moment runs at once (so a single click is
   as fast as before and runs where it did - the callers that rebuild still come through `fnc_later`); a request while the key rests only marks it due, **with the latest code and
   arguments** (latest wins), and `fnc_onFrame` runs it through `fnc_coalesceTick` when the rest is over - one run per key however many clicks came, nothing queued per click.
-  After a run the key rests for `gap` (`COALESCE_GAP` 0.1 s; `COALESCE_REQUEST` 0.3 s for Sort, Take all / Put all in and the kit's unpack, which plan a container or reach the authority) or
+  After a run the key rests for `gap` (`COALESCE_GAP` 0.1 s; `COALESCE_REQUEST` 0.3 s for Sort and the kit's unpack, which plan a container or reach the authority) or
   `COALESCE_REST` 1.5 times the time the run took, whichever is longer, so a slow build is left alone longer (about two thirds of the time stays for the frames). Debounce: nothing runs until
   `gap` after the last request (`COALESCE_TYPING` 0.15 s, the search field). Idle keys are forgotten by the tick. A window covered by another one runs nothing (the tick comes after the
   covered exit of `fnc_onFrame`). Keys in use: `"build"` (`fnc_buildSoon`: `fnc_toggleSection`, `fnc_toggleRows`, `fnc_toggleCamera`, `fnc_openNested`, `fnc_closeNested`, ACE cargo's
@@ -1278,7 +1282,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   `fnc_drawPending`) until the answer and the new places arrived (`einv_gui_answers`, finished by `fnc_afterAction`, at the latest
   `ANSWER_WAIT` 3 s after the answer; given up after `PENDING_TIMEOUT` 15 s); each sounds when finished. The flash on the tile where an item landed
   (`fnc_flashTile`, also the search's reveal) is deleted once it has faded (uiNamespace `einv_gui_flashes`, `[control, when it has faded]`): one made for every finished
-  move of a long Take all used to stay on the window, invisible, until the next build. What a finished move touches: its source and target tiles (made or removed), the marks of the entries on them, the chip's count (written in place), the flash, the bars of paged boxes only where what they say changed - no
+  move of a long group move used to stay on the window, invisible, until the next build. What a finished move touches: its source and target tiles (made or removed), the marks of the entries on them, the chip's count (written in place), the flash, the bars of paged boxes only where what they say changed - no
   other tile gets a command and no box moves unless its rows' shape changed. On
   `einv_items_rulesChanged` an open window is built again once a held tile is let go.
 - **The hands' queue** (`fnc_queueMoves`, `fnc_queueTime`, `fnc_queueTiles`, `fnc_queuedSlot`, `fnc_drawQueue`, `fnc_animateQueue`,
@@ -1288,14 +1292,14 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   the transaction, the authority, the guards, the answer and the hint are exactly those of a move that was never queued - nothing is reserved, changed or
   checked early; a refusal, Gone or NoRoom shows its hint and the next entry goes on). The funnel is `fnc_sendMoves` itself: unless the option `"now"` is
   set it hands its moves to `fnc_queueMoves` first, which answers `[moves to send now, how many were queued]`; the rest goes on in the same call, and the
-  call answers true when it queued something. Every caller gets it without a change: the quick move and double click, the drop key and Drop, Take all /
-  Put all in (`fnc_sendPlan`, one entry per move), the menu's Equip, the kits' ops (`einv_compat_efak`).
+  call answers true when it queued something. Every caller gets it without a change: the quick move and double click, the drop key and Drop, the group moves
+  (`fnc_sendPlan`, one entry per move), the menu's Equip, the kits' ops (`einv_compat_efak`).
   **What waits is decided by `fnc_queueTime [move]`** -> `[kind, seconds]` (`""` and 0 for no wait). A **drag never waits**: `fnc_endDrag` sets
   `GVAR(instantFrame)` to `diag_frameNo` before it sends and `fnc_queueTime` answers `""` for the rest of that frame, so `fnc_applyMove`,
   `fnc_dropToGround`, `fnc_doEquip`, `fnc_doUnequip`, `fnc_doSwap`, `fnc_applySwap` and a group's `fnc_sendPlan` go out at once from a drag (a frame number
   instead of a flag: nothing to reset should a script error end `fnc_endDrag` early). Otherwise by the kind of move and four server switches: `drop` (to
   `"ground"`, `"vehicle"` or a pile - `einv_gui_handDrop` seconds, `einv_gui_waitDrop`, on), `move` (to a different holder, and an `exchange` -
-  `einv_gui_handMove`, `einv_gui_waitMove`, on: the quick move, Take all, Put all in and the menu's moves), `equip` (`equip`, `unequip`, `swap` -
+  `einv_gui_handMove`, `einv_gui_waitMove`, on: the quick move and the menu's moves), `equip` (`equip`, `unequip`, `swap` -
   `einv_gui_handEquip`; by the slot: `uniform`, `vest`, `backpack` and `headgear` follow `einv_gui_waitWorn`, off, every other slot `einv_gui_waitEquip`, off);
   `""` and no wait for a move within one holder, `placeMany`, `sort`. A kind with 0 seconds or its switch off is never queued. Not queued either: any window
   that is not the inventory (ACE Arsenal's panel does not use `fnc_sendMoves` anyway), a move with nothing of it on the window (no tile found by
@@ -1329,15 +1333,15 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   **Running it.** `fnc_onFrame` calls `fnc_animateQueue` each frame while the queue holds something and the window is not covered (the time it stood still does
   not count, as for the search): it calls `fnc_runQueue` when the head's time is up and nothing else - no control is made or touched per frame, and the work of a
   frame does not grow with the length of the queue. What waits is also kept in an index by cell, `GVAR(handWaiting)` (`fnc_queueIndex` adds and takes out,
-  `fnc_queueWaits [source]` asks): `fnc_queueMoves`, Take all and Put all in ask it instead of passing the queue. **Cancelling:** a left press on a queued tile or
+  `fnc_queueWaits [source]` asks): `fnc_queueMoves` and the group moves ask it instead of passing the queue. **Cancelling:** a left press on a queued tile or
   slot (`fnc_onMouseButton`) or "Cancel" in its menu (`fnc_contextMenu`) calls `fnc_cancelQueued [id]`; the cross in the box's chip calls
   `fnc_cancelQueued [0, box]` (every entry of that box; `[0]` is all): the entries leave, their tiles are free and their own colour is back, the others are marked
-  again in the next frame, once (`queueDirty`). `fnc_queueMoves` adds the entries of a call without drawing (the marks of a Take all of N come once, in the next
+  again in the next frame, once (`queueDirty`). `fnc_queueMoves` adds the entries of a call without drawing (the marks of a group move of N come once, in the next
   frame, or with the next `fnc_drawPending`) and the tiles are found through one shared index, so a call is N lookups. What a finished entry costs: `fnc_runQueue`
   -> `fnc_sendMoves` -> answer -> `fnc_refresh` redraws only the touched sections (`fnc_redrawTiles`; a build only when sections came or went or the unit's gear
   changed, as for any move), and `fnc_drawQueue` marks only the entries on those redrawn tiles. The queue is dropped by `fnc_attach` and `fnc_onUnload`: closing
-  the window (Escape, the Gear key, a movement key, ...) cancels everything that still waits, which only waited - a move already sent finishes on its own. Take
-  all / Put all in skip tiles that wait (`handQueue` sources next to `inFlight`'s). Walking does not cancel (only `einv_gui_moveToStop` closes the window while
+  the window (Escape, the Gear key, a movement key, ...) cancels everything that still waits, which only waited - a move already sent finishes on its own. Group
+  moves skip tiles that wait (`handQueue` sources next to `inFlight`'s). Walking does not cancel (only `einv_gui_moveToStop` closes the window while
   looting, as ever). The target cells of a queued move are not reserved or outlined: something else put there meanwhile makes it land elsewhere ("Put elsewhere")
   or bounce, as for any move whose cell was taken. Times do not depend on weight.
 - **The quick move key held down** (`fnc_onKeyDown`, `fnc_quickAction` argument 3, `fnc_quickMove`, `fnc_roomFor`). What a repeat costs, and what it does not: it never reaches
@@ -1463,7 +1467,7 @@ the handler ran, so a reset in the handler alone left it one step down each turn
 The rule that keeps the inventory safe: **with an empty hook table every function of the gui addon behaves as the plain
 inventory.** A hook may only be asked through `einv_gui_fnc_hook [name, args, default]`: absent gives the default; a flag gives
 its value; code is called with `args` and its answer used unless nil. `fnc_isInventoryMode` is true with no hooks, and every
-inventory-only feature asks it: nearby boxes, selecting, the band, group drags, Take all / Put all in, the hotbar, repacking.
+inventory-only feature asks it: nearby boxes, selecting, the band, group drags, the hotbar, repacking.
 
 | Hook | Arguments | Answer | Asked in |
 |---|---|---|---|
@@ -1554,8 +1558,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `fnc_loadText`, only told), a box with the container's picture and short name, and the grid. **The tab is one of the line's chips** (Mia, 0.5.7: its edges were sharp): a pill as high as the buttons (0.6 UNIT, in the middle of the
   `CAPTION_LINE` 0.8 UNIT line with a gap above the container's top edge), the theme's radius at most half its height, the same 0.42 UNIT of text set the way a centred button
   sets it (`TEXT_MID`), the fold arrow in its left end; its hit area the drawn pill and two pixels; what the search tints on a folded box is its pieces, painted as a
-  surface (`fnc_paintSurface`). The fold line of a tall box (`Rows_Show`), the tab of a locked box and the tab of ACE cargo's cards are round too. Beside the tab, the buttons, centred: "Take all" (loot) or "Put all in" (own) (`fnc_takeAll`, `fnc_putAll`,
-  `fnc_putAllTarget`: from the contents, not from what is drawn; what is not searched stays) and "Sort: Name" with
+  surface (`fnc_paintSurface`). The fold line of a tall box (`Rows_Show`), the tab of a locked box and the tab of ACE cargo's cards are round too. Beside the tab, the button, centred: "Sort: Name" with
   `icon_sort_desc_ca` (`fnc_sortHolder [holder, root, step]` - the storage's op "sort"; the only way to sort, the context menu has no
   row for it; on every container section of the inventory the player may change, also an empty one, never on a section that only
   shows - `virtual`). **The Sort button cycles:** its label names the order the player sorts by now - Name, Weight, Size or Type
@@ -1726,10 +1729,10 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   (`GVAR(pageAreas)`, the drag's geometry "pageBoxes") for `PAGE_HOVER_TIME` 0.7 s turns the page, again every 0.7 s while it stays, before the frame's early exits;
   `fnc_setPage` drops what the drag knew of the grids ("geometry", "hold", "spot", "frame", "cells|n", "swap|...").
 - **Kit windows** (`fnc_drawWindows`, `fnc_drawWindow [display, section, theme, fresh]`): a kit or pouch is a floating glass
-  window - a title row (picture, name, Take all and Sort, "12 / 60 mass", a cross, all on the row's middle line; the buttons and
-  the cross are a section caption's - `CAPTION_LINE` 0.8 UNIT high, labels 0.46 UNIT and centred, `fnc_buttonWidth` / `fnc_sortChip` widths -,
+  window - a title row (picture, name, Sort, "12 / 60 mass", a cross, all on the row's middle line; the buttons and
+  the cross are a section caption's - `CAPTION_LINE` 0.8 UNIT high, labels 0.46 UNIT and centred, `fnc_sortChip` widths -,
   right-aligned before the fill text with one gap each; the name keeps its width up to 4 UNIT, else Sort gets compact - `fnc_sortChip` argument 3: 1 the icon and "Sort", 2 the
-  icon alone, the order in the tooltip (`fnc_sortText`'s third answer, `fnc_sortButtons [controls, compact]`) -, then goes, then Take all; a
+  icon alone, the order in the tooltip (`fnc_sortText`'s third answer, `fnc_sortButtons [controls, compact]`) -, then goes; a
   press on a button neither raises nor moves the window, record key `buttons`) and a scroll body with the kit's grid (`window` =
   its key; the body is at most `WINDOW_VIEW_ROWS` 10 rows of cells high, a taller grid or several compartments scroll inside it with the engine's own scroll bar, `fnc_gridOrigin` counting the offset). Open windows are `einv_gui_windowOrder` (bottom first), placed by `fnc_placeWindow` beside the tile they were opened from, moved by a
   press on the title, raised by any press (`fnc_raiseWindow`: that window alone is made again, last), opened by `fnc_openWindow
@@ -1761,7 +1764,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `fnc_applyFilter`) is no tile to the drag: its cells are not "taken" and not under the mouse for a swap or a merge (`"cells|n"` keeps them
   as a third list); a footprint on them goes to the first free spot of the box from elsewhere - `place` false, the footprint is the
   compartment at half strength, the hint "Goes to the first free spot of this box - not onto a hidden item" - and is refused within one
-  box. Take all in a box with a category or the search field active plans only the tiles that match (`fnc_takeAll`).
+  box.
 - **What a lift costs.** It makes few controls and reads little: the green highlight of each slot that takes the item (some fifteen
   controls with round corners) is made once per build by `fnc_glowSlot` into uiNamespace `einv_gui_glowCache`, ahead of time by
   `fnc_warmTargets` (one of the player's own slots per idle frame from `fnc_onFrame`, `glowNext` remembers how far), and a drag only
@@ -1890,7 +1893,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   colour and "Add to the stack of ...", `fnc_endDrag` sends it through `fnc_applyMove` with the option `"mergeInto"`
   `[col, row, compartment]` of that stack): as many join as fit (all, or what the wheel left), the rest stays where it lay; within
   one container it is a take and a put with `merge into` in one phase, across containers the `move` or `put` gets it as its
-  seventh argument. A merge needs no free spot. Quick move, Take all, Sort and the group packs never ask for either option and so
+  seventh argument. A merge needs no free spot. Quick move, Sort and the group packs never ask for either option and so
   keep filling partial stacks.
 
 ### Menus, hints, the weight card
@@ -1917,7 +1920,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   menu in the same go (on empty space nothing opens); a press on the menu and every left press are the menu's.
   **The menu's layer.** The menu is one full-screen `EINV_Group` (uiNamespace `einv_gui_menu` = `[layer]`) made last, with the
   mouse handlers the columns get, and it takes the focus into a one-pixel button on its card, as the wizard's popovers do: the
-  engine draws the focused control over all others, and a column whose Sort or Take all button kept the focus after its click
+  engine draws the focused control over all others, and a column whose Sort button kept the focus after its click
   drew its tiles over the menu. `fnc_closeMenu` hides the layer and leaves its deletion to the next frame
   (`einv_gui_windowTrash`: a right press beside the card closes it from the layer's own event) and gives the focus back to a
   field that had it, else to the search field's sink. Anything registered on the display after the menu (its layer no longer the
@@ -2004,7 +2007,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   `fnc_drawSection` for the ids uniform, vest, backpack, container - crates, vehicles, bags, nested ones - and ground, not for a section that
   brings its entries along): beside its box one block of `STORAGE_COLS` x `SEAL_ROWS` 3 cells whatever the container is, on the caption's
   surface (`lootTab`) with the unsearched hatching, a ring, "UNSEARCHED" and a line of what its search does. No compartments, tiles, weight,
-  Take all, Sort, category strip, load hint (`infoAreas`), no canvas widening, and `fnc_putAllTarget` leaves it out - nothing tells its size or
+  Sort, category strip, load hint (`infoAreas`), no canvas widening - nothing tells its size or
   contents. `fnc_markHidden [container, entries, true, true]` queues **the seal alone**, `[container, "", 0, 0, SEAL_CELLS, SEAL_BLOCK]` (block
   -1, so `fnc_build`'s sort puts it first; also for an empty container), with the "Search starts on click" waiting
   (`searchSeen`/`searchIdle`/`searchPaused`). When the seal's time is up `fnc_animateSearch` marks the box open (`unsealed` in its record),
@@ -2013,7 +2016,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   about a cell, a shaped one run by run, a third of a round corner's radius in from that corner; no "?", no outline, no ring, no glass), which
   `fnc_drawCompartments` -> `fnc_markHidden` queues, `[container, class, row, col, cells, block]` in the arrangement's order. They are then
   found one by one: `fnc_learn`, the "uncover" sound, the tile drawn anew in place (`fnc_revealTile`, `fnc_revealFx` - its stripes go, the
-  flash comes), a build only when the section's first find brings Take all. A box every entry of which this player knows already (he put it
+  flash comes). A box every entry of which this player knows already (he put it
   all there, a pile he dropped onto) is open to him at once and stays so (`fnc_isSealed` writes `unsealed`). A hidden tile of a page not shown
   has no controls: `fnc_findTile` does not find it, `fnc_revealTile` only takes its hatching from the data.
   **Several boxes at once:** every box with something queued that is not stopped searches, each with its own clock. `GVAR(searchRuns)` holds
@@ -2187,7 +2190,7 @@ item out.
   padding below it, as `fnc_drawColumn` draws it. **Sections** in `einv_gui_fnc_drawColumn`
   (id `"storage"`): the open container, then staging; both with `"box"` false, so `einv_gui_fnc_drawSection` draws no picture
   box and the grid starts at the left edge (the inventory keeps its boxes). The caption lines are the inventory's - chevron, tab, load
-  right-aligned, the staging space's subtitle in the same 0.46 UNIT; no Take all, Put all in or Sort there (the inventory only). The column
+  right-aligned, the staging space's subtitle in the same 0.46 UNIT; no Sort there (the inventory only). The column
   reaches down to the **hint line**, the block's last band: no box of its own, a hairline over it, `EINV_ArsenalHint` at `HINT_SIZE`,
   a line `HINT_LINE_H` high with `HINT_PAD` above and below - one line, two while staging holds something (the note, in the
   accent colour, from the `hint` hook; the idle text is cut to one line, Ctrl+wheel only where it fits beside). ACE's list is
@@ -3030,9 +3033,9 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_gui_searchTime` | SLIDER 0 to 3 | global | 0.4 | seconds per cell searched; 0 shows everything |
 | `einv_gui_searchTimeUniform`, `Vest`, `Backpack`, `Crate`, `Vehicle`, `Ground`, `Body` | SLIDER 0 to 5 | global | 1 | factor of the time per cell for that kind of box (`fnc_searchTime`); a body's on top of its uniform's, vest's or backpack's; 0 shows that kind at once |
 | `einv_gui_handDrop` | SLIDER 0 to 3 | global | 0.3 | seconds the hands are busy dropping one item (hands' queue, section 4); 0 drops at once |
-| `einv_gui_handMove` | SLIDER 0 to 3 | global | 0.4 | seconds to move one item to a different container or holder (the quick move, Take all, Put all in; never a drag); 0 at once |
+| `einv_gui_handMove` | SLIDER 0 to 3 | global | 0.4 | seconds to move one item to a different container or holder (the quick move; never a drag); 0 at once |
 | `einv_gui_handEquip` | SLIDER 0 to 5 | global | 1 | seconds to put one item on or take it off (a drag never waits); 0 at once |
-| `einv_gui_waitMove` | CHECKBOX | global | on | the quick move, Take all, Put all in and the menu's moves take the hands' time; off: at once |
+| `einv_gui_waitMove` | CHECKBOX | global | on | the quick move and the menu's moves take the hands' time; off: at once |
 | `einv_gui_waitDrop` | CHECKBOX | global | on | the drop key and Drop in the menu take the hands' time; off: at once |
 | `einv_gui_waitWorn` | CHECKBOX | global | off | putting on and taking off a uniform, vest, backpack or headgear takes the hands' time; off: at once |
 | `einv_gui_waitEquip` | CHECKBOX | global | off | equipping anything else (goggles, night vision, a map, weapon parts) takes the hands' time; off: at once |
@@ -3164,7 +3167,7 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
   `merge into`, the op `split`, the merge drop, the plan filling partial stacks, and the Arsenal's lowering of a tile's count were
   written and read through, not run. To try: 5 of 10 of a class on a cell, drop 1 on another cell of the same container (two
   tiles), in another container (two tiles), onto the stack of five (merge); Shift+click; Quick move of the single into a
-  container that holds a partial stack; Take all; close and reopen; another player or a script adding the same class
+  container that holds a partial stack; close and reopen; another player or a script adding the same class
   (reconciled, nothing lost); a save from before the counts.
 - **Searching left out for one object** (0.5.12): the Eden attribute "Skip searching", the "CuratorObjectPlaced" hook (on which machines it fires), the compat_zen choices and `fnc_setSearchable` were written and read through, not run. To try: place a crate in Eden with the box ticked and loot it (no stripes); in Zeus place a crate with *Search Zeus-placed crates and vehicles* off (no stripes), right-click it, *Searching: turn on* (stripes again for a player who opens it fresh), then *Searching: turn off*; call `[_crate, false] call einv_gui_fnc_setSearchable;` from the debug console and join as a second player.
 - **Categories of the setup's own and the locked compartments' faint pictures** (0.5.0): the `category=` statements and their registry, the Categories card of the General step (add, rename, picture, delete with its clean-up), the picker's Category icons chip, the strip with more than eight categories (the "more" field), the watermark on the free cells (also on a paged box and in a kit; the corner badge was taken out in 0.5.12), and the footer hint on a locked compartment were written and read through, not run. To try: a vest with a 2x2 `:medical` compartment holding a pulse oximeter (the cells carry the faint picture, no badge in the corner, hovering says "Only medical items here"); add a category, give it a picture, put an item in it (Items step) and a compartment (Containers step, Blocks), loot a crate holding it (the strip lists it; add 9 and click "more"); delete the category (the chips, the item and the compartment lose it, one undo brings it back); export and import the setup on a client.

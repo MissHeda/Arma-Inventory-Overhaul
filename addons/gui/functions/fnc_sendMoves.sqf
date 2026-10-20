@@ -35,7 +35,7 @@
  * circle is full (fnc_runQueue). What needs no hands - a rearrangement within one holder, sorting - goes at
  * once, and the function says it was asked for when it queued something.
  *
- * Several tiles of one holder laid down at once (a group dragged within a compartment, or Take all
+ * Several tiles of one holder laid down at once (a group dragged within a compartment, or a group move
  * with the target already holding some of them) are one move of the kind "placeMany": op placeMany lifts
  * them all and puts them down together, so two never wait for each other's cells. It counts for as many
  * moves as it has tiles, but is never cut in two.

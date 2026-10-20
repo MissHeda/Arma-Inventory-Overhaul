@@ -8,8 +8,8 @@
  *
  *   - a reload under way (the weapon's magazine reload phase, weaponState entry 6) or a key held down (one
  *     answer per RELOAD_GUARD_GAP): swallowed, nothing new starts
- *   - a full magazine in the weapon: swallowed, nothing happens - as in the game
- *   - the fullest magazine the weapon's muzzle takes that may be used (fnc_reloadPick): loaded with
+ *   - the fullest magazine the weapon's muzzle takes that may be used (fnc_reloadPick) - also while the weapon holds a full
+ *     magazine, which is swapped as in the game, the full one going back into a container like any ejected one: loaded with
  *     fnc_loadMagazine - the game's own reload action for that one magazine when the muzzle holds one (one
  *     animation; fnc_onReloaded tidies the magazine the game put away, once), by hand into an empty muzzle
  *   - none that may be used, but some in containers that are closed to them: nothing loads, and a line says
@@ -68,14 +68,9 @@ if ((magazinesAmmoFull _unit) findIf {!(_x select 2) && {(_x select 1) > 0} && {
 // A key held down repeats, and a reload under way (the hotbar's, AIME's, the last press's) runs its course.
 if (diag_tickTime < (missionNamespace getVariable [QGVAR(reloadAt), 0]) || {((weaponState _unit) param [6, 0]) > 0}) exitWith {true};
 
-// A full magazine in the weapon: nothing to do, as in the game.
-private _loadedClass = currentMagazine _unit;
-
-if (_loadedClass isNotEqualTo "" && {(_unit ammo _muzzle) >= getNumber (configFile >> "CfgMagazines" >> _loadedClass >> "count")}) exitWith {true};
-
 GVAR(reloadAt) = diag_tickTime + RELOAD_GUARD_GAP;
 
-private _best = [_unit, _weapon, _muzzle] call FUNC(reloadPick);
+private _best = [_unit, _weapon, _muzzle, true] call FUNC(reloadPick);
 
 if (_best isEqualTo []) exitWith {
     // Only magazines that may not be used: from where to take one out.

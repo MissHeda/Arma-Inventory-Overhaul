@@ -5,7 +5,7 @@
  * is local here and, a frame later, still holds no item, weapon, magazine or backpack. The engine deletes
  * an ordinary pile it takes for empty - and a pile holding only a backpack, an object of its own and no
  * item cargo, counts as empty to it, backpack and all (0.4.0) -, which is why the piles are scripted ones
- * now; the engine leaves those alone, so whoever emptied one has to remove it, or every Take all and every
+ * now; the engine leaves those alone, so whoever emptied one has to remove it, or every group move and every
  * bounced put-down would leave an empty object lying there for good.
  *
  * Called by fnc_execute for each pile a phase touched and by fnc_opPutGround for the piles a bounced

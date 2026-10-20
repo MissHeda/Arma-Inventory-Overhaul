@@ -4,9 +4,7 @@
  * Author: Miss Heda
  * Draws an open kit's window - a kit of Enhanced First Aid Kits or a pouch of Enhanced Utility Pouches
  * (einv_compat_efak): a card of the inspect card's glass floating over the columns, as Tarkov opens a
- * container in a window of its own. On top the kit's picture and name, a "Take all" button that moves
- * everything into the player's own gear (einv_compat_efak_fnc_unpackAll - the inventory only, while the
- * kit has something in it), a "Sort" button that lays its grid out anew (fnc_sortHolder - the inventory
+ * container in a window of its own. On top the kit's picture and name, a "Sort" button that lays its grid out anew (fnc_sortHolder - the inventory
  * only, where the player may change the kit), how full it is - "12 / 60 mass" in that mod's measure, in
  * the loss colour when over - and a cross that closes it; under a hairline the kit's grid with our tiles,
  * or the line that says why nothing can go in yet (still loading, say).
@@ -14,11 +12,11 @@
  * The title row is one middle line: the picture, the name, the buttons, the fill text and the cross are
  * all centred in the row's height. The buttons and the cross are those of a section's caption line
  * (fnc_drawSection): as high as it, their labels in its size and centred (fnc_uiButton, "centred"), as wide
- * as fnc_buttonWidth and fnc_sortChip make them - Sort names the order it sorts by, "Sort: Name", and
+ * as fnc_sortChip makes them - Sort names the order it sorts by, "Sort: Name", and
  * changes in place with it (fnc_sortButtons). They stand together on the right, before the fill text and
  * the cross, one gap between each of them and before the name. The name keeps its room first - all of it,
  * or SQUARE(TEXT_UNIT * 4) of a long one: a window too narrow for that makes Sort compact - the icon and "Sort",
- * then the icon alone, the order in its tooltip -, then leaves it out, then Take all, and only then is the
+ * then the icon alone, the order in its tooltip -, then leaves it out, and only then is the
  * name cut. The title row, its buttons and its words are measured in TEXT_UNIT, so they grow with the tile scale
  * as the cells do (fnc_textScale). A press on a button is the button's: it neither raises nor moves the window
  * (fnc_onMouseButton, "buttons").
@@ -50,7 +48,7 @@
  *   "rect"          - [x, y, w, h] on the screen
  *   "title"         - [x, y, w, h] in the window: the strip that moves it
  *   "close"         - [x, y, w, h] in the window: the cross's column of the title row
- *   "buttons"       - [[x, y, w, h], ...] in the window: Take all and Sort, where they are drawn
+ *   "buttons"       - [[x, y, w, h], ...] in the window: Sort, where it is drawn
  *   "section"       - what it was drawn from, to draw it again (fnc_raiseWindow)
  *   "grids"         - the indices of its grids in the list of grids
  *
@@ -160,7 +158,7 @@ private _fnc_events = {
 [_display, _group, [0, 0, _groupW, _groupH], _theme getOrDefault ["inspectBg", [0.06, 0.06, 0.06, 0.98]], _radius] call FUNC(uiPanel);
 [_display, _group, [0, 0, _groupW, _groupH], [1, 1, 1, 0.12], _radius] call FUNC(uiRing);
 
-// ----- The title row: picture, name, Take all and Sort, how full, the cross -----
+// ----- The title row: picture, name, Sort, how full, the cross -----
 
 // One middle line, the row's: the picture, the buttons and the cross are centred on it, the name and the fill
 // text as well - a label draws its text from its top edge down, so a text in the row's middle starts above it
@@ -212,23 +210,15 @@ if (_load isNotEqualTo "") then {
     [_display, _group, [_closeX - _gap - _loadW, _loadTop, _loadW, _loadH], _load, _chipSize, _loadColor, _font, 1] call FUNC(uiLabel);
 };
 
-// The buttons, right-aligned before how full it is. Take all: everything in the kit into the player's own gear
-// (einv_compat_efak_fnc_unpackAll), as on a section of the loot column (fnc_drawSection). Sort: the kit's grid
-// laid out anew by the order the player has chosen, each click stepping to the next one (fnc_sortHolder,
-// fnc_sortChip), where the player may change the kit (einv_compat_efak_fnc_checkTouch). Both only in the
-// inventory and while the kit shows its grid, and drawn disabled while a move out of this kit is under way.
-// A button is [id, label, icon, width, compact]; for lack of room Sort gets compact first, then the last one
-// goes.
+// The button, right-aligned before how full it is. Sort: the kit's grid laid out anew by the order the player has
+// chosen, each click stepping to the next one (fnc_sortHolder, fnc_sortChip), where the player may change the kit
+// (einv_compat_efak_fnc_checkTouch). Only in the inventory and while the kit shows its grid, and drawn disabled
+// while a move out of this kit is under way. A button is [id, label, icon, width, compact]; for lack of room Sort
+// gets compact first, then it goes.
 private _kitClass = _section getOrDefault ["kit", ""];
 private _buttons = [];
 
 if (_kitClass isNotEqualTo "" && {_notice isEqualTo ""} && {call FUNC(isInventoryMode)}) then {
-    if ((_section getOrDefault ["entries", []]) isNotEqualTo [] && {!isNil QEFUNC(compat_efak,unpackAll)}) then {
-        private _label = LLSTRING(Section_TakeAll);
-
-        _buttons pushBack [format ["take|%1", _kitClass], _label, "", [_label, "", _chipH, _chipSize, _theme] call FUNC(buttonWidth), 0];
-    };
-
     if (isNil QEFUNC(compat_efak,checkTouch) || {([_kitClass] call EFUNC(compat_efak,checkTouch)) isEqualTo ""}) then {
         // "Sort: Name", the order the player sorts by now, in a button as wide as the widest label (fnc_sortChip).
         ([_chipH, _chipSize, _theme] call FUNC(sortChip)) params ["_sortLabel", "_sortIcon", "_sortW"];
@@ -250,7 +240,7 @@ private _fnc_buttonsW = {
 
 // The name keeps its room first - all of it, or SQUARE(TEXT_UNIT * 4) of a long one. Too narrow for that, Sort gets
 // compact - the icon and "Sort", then the icon alone, the order in its tooltip (fnc_sortChip) -, then it goes,
-// then Take all, and only then is the name cut.
+// and only then is the name cut.
 private _name = [_section getOrDefault ["title", ""], _theme] call FUNC(caption);
 private _nameSize = _textUnit * 0.66;
 private _nameLeast = ((_name getTextWidth [_fontBold, _nameSize]) * TEXT_SLACK) min SQUARE(_textUnit * 4);
@@ -293,26 +283,14 @@ if (_buttons isNotEqualTo []) then {
 
                 if (_direction != 1) exitWith {};
 
-                (_buttonId splitString "|") params ["_kind", "_what"];
-
-                if (_kind isEqualTo "sort") then {
-                    [_what, objNull, true] call FUNC(sortHolder);
-                } else {
-                    // Once per rest for a run of clicks (fnc_coalesce).
-                    ["unpack|" + _what, {[_this select 0] call EFUNC(compat_efak,unpackAll)}, [_what], COALESCE_REQUEST] call FUNC(coalesce);
-                };
+                [(_buttonId splitString "|") param [1, ""], objNull, true] call FUNC(sortHolder);
             },
             _busy, _chipSize, true, [_hitH, _hitV]
         ] call FUNC(uiButton);
 
-        // What it does, when the mouse rests on it, as on a section's caption line. Sort says what its next
-        // click sorts by - a compact one which order it sorts by as well - and changes with the order
-        // (fnc_sortButtons).
-        if ((_buttonId select [0, 5]) isEqualTo "sort|") then {
-            [_button, _compact] call FUNC(sortButtons);
-        } else {
-            (_button select -1) ctrlSetTooltip LLSTRING(Section_TakeAll_Tooltip);
-        };
+        // What it does, when the mouse rests on it, as on a section's caption line: what its next click sorts by - a
+        // compact one which order it sorts by as well - changing with the order (fnc_sortButtons).
+        [_button, _compact] call FUNC(sortButtons);
 
         // Where a press is a button's (no raising, no moving the window): its hit area.
         _buttonRects pushBack [_buttonX - _hitH, _chipTop - _hitV, _buttonW + _hitH * 2, _chipH + _hitV * 2];

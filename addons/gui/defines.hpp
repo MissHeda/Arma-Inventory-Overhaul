@@ -73,7 +73,7 @@
 // What a click may ask for when it is clicked fast (fnc_coalesce): the least time between two runs of the same heavy
 // action, in seconds - and the share of its own duration it is left alone for after a run, so a slow build is
 // run less often than a quick one. A search typed in waits COALESCE_TYPING after the last key; a request to the
-// authority or a plan of a whole container (Sort, Take all, Put all in) rests COALESCE_REQUEST.
+// authority or a plan of a whole container (Sort) rests COALESCE_REQUEST.
 #define COALESCE_GAP 0.1
 #define COALESCE_REST 1.5
 #define COALESCE_TYPING 0.15

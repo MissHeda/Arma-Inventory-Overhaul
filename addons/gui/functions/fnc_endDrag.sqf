@@ -181,7 +181,7 @@ if (_kind isEqualTo "hotbar") exitWith {
 };
 
 // What a drag sends goes out at once, never into the hands' queue (fnc_queueTime asks this frame number): dropping is
-// instant, only the quick move, Take all and the keys wait.
+// instant, only the quick move and the keys wait.
 GVAR(instantFrame) = diag_frameNo;
 
 // Whether it was asked for (fnc_sendMoves) - a refusal before that says why itself.

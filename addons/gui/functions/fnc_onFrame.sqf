@@ -262,7 +262,7 @@ if (GVAR(menuState) isNotEqualTo []) then {
 // A click into a column gives it the focus, and the engine draws the focused control over every other -
 // the context menu, the inspect card, the dragged ghost and the name at the mouse would end up under
 // it. The focus goes straight back to the search field's sink (fnc_drawFilter), unless the field is
-// being typed in. So does a button of the window's own in a group - a section's Sort or Take all, a kit
+// being typed in. So does a button of the window's own in a group - a section's Sort, a kit
 // window's cross - once its click came: it kept the focus, and its column drew its tiles over the
 // context menu and the name at the mouse until the next build (a tester's report on 0.4.6). A window
 // with buttons of its own in groups (the "focusAll" flag) has every control but a field sent back. Both

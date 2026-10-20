@@ -16,8 +16,7 @@
  * section drawn anew. A section folded away has no tiles: only its weight text changes.
  *
  * Only where it is certain to look right: the compartments (and the rows of an open grid, the number of
- * overflow tiles) must be the ones drawn, the Take all or Put all in button must stay what it is, the
- * ground pile must still hold something, and the new weight must fit the caption's label - or there must
+ * overflow tiles) must be the ones drawn, the ground pile must still hold something, and the new weight must fit the caption's label - or there must
  * be none when there was none; the caption then changes in place. The chips of the caption lines
  * (what a box is searching or moving, fnc_updateStatus) are made true again after it.
  * Anything else - a pile that vanished, a rule changed - answers false before a single control is
@@ -104,14 +103,7 @@ private _loadSize = TEXT_UNIT * 0.46;
     private _layout = [_section getOrDefault ["layoutKey", _holder], _entries] call EFUNC(storage,getLayout);
     private _placed = _layout get "entries";
 
-    // Searched tiles decide whether the button is there: it must stay as it is.
     [_holder, _placed, false] call FUNC(markHidden);
-
-    private _revealed = _placed findIf {!(_x getOrDefault ["hidden", false])} >= 0;
-
-    if ((_info get "button") isNotEqualTo (["", _info get "eligible"] select _revealed)) exitWith {
-        _ok = false;
-    };
 
     private _holderGrids = [];
 

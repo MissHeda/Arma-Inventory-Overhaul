@@ -484,23 +484,11 @@
         <Key ID="STR_einv_gui_Section_OwnedBy">
             <English>%1 - %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Section_PutAll">
-            <English>Put all in</English>
-        </Key>
-        <Key ID="STR_einv_gui_Section_PutAll_Tooltip">
-            <English>Moves everything in here into %1</English>
-        </Key>
         <Key ID="STR_einv_gui_Section_Sort">
             <English>Sort</English>
         </Key>
         <Key ID="STR_einv_gui_Section_SortBy">
             <English>Sort: %1</English>
-        </Key>
-        <Key ID="STR_einv_gui_Section_TakeAll">
-            <English>Take all</English>
-        </Key>
-        <Key ID="STR_einv_gui_Section_TakeAll_Tooltip">
-            <English>Moves everything searched in here into your uniform, vest and backpack</English>
         </Key>
         <Key ID="STR_einv_gui_Section_Toggle">
             <English>Fold away or open</English>
@@ -556,7 +544,7 @@
             <English>Time to move to another container</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandMove_Desc">
-            <English>Seconds the hands are busy moving one item to another container (quick move, Take all, Put all in).
+            <English>Seconds the hands are busy moving one item to another container (quick move, group moves).
 0 moves at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_LootSide">
@@ -738,10 +726,10 @@ Off drops at once; a drag never waits.</English>
 Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitMove">
-            <English>Quick move and Take all wait</English>
+            <English>Quick move waits</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitMove_Desc">
-            <English>Whether the quick move, a double click, Take all and Put all in take the hands' time.
+            <English>Whether the quick move, a double click and a group quick move take the hands' time.
 Off moves them at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitWorn">

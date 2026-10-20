@@ -8,7 +8,7 @@
  * COLLAPSE_SPARE_ROWS more to put things into, at least COLLAPSE_MIN_ROWS; the empty rows below fold
  * into one line under the grid that says how many there are and opens them (fnc_drawSection,
  * fnc_toggleRows). Nothing of the room is hidden that way: the line names it, the weight beside the caption
- * still counts the whole container, and moves that find a place by themselves (Take all, a quick move, a
+ * still counts the whole container, and moves that find a place by themselves (a quick move, a
  * group packed in) use every row - the column grows with what lands there.
  *
  * Only for what the view shows: the arrangement, the places and every machine's layout stay the
