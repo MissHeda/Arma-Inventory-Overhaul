@@ -18,6 +18,9 @@
  *
  * Extra: [the pile it went onto, the second pile when it took a rest].
  *
+ * Event "einv_storage_groundPut" (local, on this machine) when it landed: [requester, payload, piles]. The
+ * engine's "Put" event never comes for a drop through the storage.
+ *
  * Arguments:
  * 0: Args, [payload or ref] <ARRAY>
  * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
@@ -109,5 +112,8 @@ if (_rest isNotEqualTo []) exitWith {
 };
 
 ["in", _payload] call FUNC(journalNote);
+
+// For addons that answer a drop on the ground the way the engine's "Put" event would have (compat_mavic).
+[QGVAR(groundPut), [_requester, _payload, _piles]] call CBA_fnc_localEvent;
 
 ["", [], _piles]

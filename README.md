@@ -42,7 +42,8 @@ and frequency of a radio show at the mouse, on the hint line and on the inspect 
 frequencies while you move it around). Works with ACE vehicle lock and Zeus Enhanced. Works with ACE Interaction
 Menu Expansion (AIME): its *Change Ammo Type* offers and loads only magazines that "Use items from ..." allows, its
 inventory entries show only where the window opens, and its one-click pick-up from the ground opens the window while
-the ground has to be searched.
+the ground has to be searched. Works with Mavic 3 - Improved: a Mavic item dropped through the window (drag to the
+ground, the drop key, Drop in the menu) is deployed as a drone, as that mod does for the engine's inventory.
 
 ## Building
 
