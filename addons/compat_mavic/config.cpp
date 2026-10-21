@@ -11,6 +11,7 @@ class CfgPatches {
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {
             "cba_main",
+            "ace_interact_menu",
             "einv_main",
             "einv_storage",
             "Mavic_Core"
