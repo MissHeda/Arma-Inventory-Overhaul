@@ -445,6 +445,51 @@
         <Key ID="STR_einv_gui_Page_Queued">
             <English>%1 queued</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Accent">
+            <English>Accent</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Accent_Tip">
+            <English>Highlights, switches, bars and the icons that are on.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Default">
+            <English>Default</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Hue">
+            <English>Hue</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_MatchAccent">
+            <English>Match accent</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Panels">
+            <English>Panels</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_ResetAll">
+            <English>Reset all</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Secondary">
+            <English>Secondary</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Secondary_Tip">
+            <English>Tints the cards, slots, caption tabs, buttons, what lights under the mouse and picked rows.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Title">
+            <English>Colours</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Tooltip">
+            <English>Colours and transparency</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Transparency">
+            <English>Transparency</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Transparency_Tip">
+            <English>How see-through the window's panels are.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_UseArma">
+            <English>Use my Arma colour</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Vividness">
+            <English>Vividness</English>
+        </Key>
         <Key ID="STR_einv_gui_QuickMove">
             <English>Quick move</English>
         </Key>
@@ -608,6 +653,12 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonWorn_Desc">
             <English>Who may take off what a living person wears (weapons, helmet, uniform, vest, backpack and the rest).\nCaptives are surrendered or handcuffed (ACE). Bodies can always be stripped.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PlayerColours">
+            <English>Players may pick their colours</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PlayerColours_Desc">
+            <English>The header gets a palette button: accent, secondary colour, transparency.\nOff: everyone sees their Arma colour and the standard look.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchBodies">
             <English>Search bodies</English>

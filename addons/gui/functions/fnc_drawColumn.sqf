@@ -25,7 +25,9 @@
  * A column that was scrolled down and is drawn again in the same place with the same title (fnc_build: a section folded or
  * unfolded, a move) keeps its panel, its title and its scroll group - fnc_build hands them over in uiNamespace keepColumns
  * by the column's id: the sections are drawn into the group first and the controls that were in it go afterwards, in the same
- * call, as the setup wizard's General page does (fnc_showStep). A group made anew starts at the top and learns its height a
+ * call, as the setup wizard's General page does (fnc_showStep). Kept too when only the panel's colour and the hairline's changed (the
+ * palette's transparency and secondary colour, fnc_palette): they are painted in place, so a slider dragged with a column scrolled
+ * does not send it to the top for a frame at every build. A group made anew starts at the top and learns its height a
  * frame later, so the column showed its top for a moment before fnc_onFrame put it back (Mia, 0.5.3: the list jumped up
  * when a section was folded). The scroll is put back all the same, now and a frame later, in screen height from the top.
  *
@@ -65,31 +67,6 @@ if (_id isEqualTo "storage") then {
     GVAR(storageRect) = _rect;
 };
 
-// What fnc_build kept of this column from its last drawing, when it was scrolled: [group, panel and title controls, [rect, title,
-// icon]]. The same place and words: all of it stays as it is, only the sections in the group are drawn again.
-private _keepList = uiNamespace getVariable [QGVAR(keepColumns), createHashMap];
-private _kept = _keepList getOrDefault [_id, []];
-private _key = [_rect, _title, _icon];
-
-_keepList deleteAt _id;
-
-private _reuse = _id isNotEqualTo "" && {_kept isNotEqualTo []} && {!isNull (_kept select 0)} && {(_kept select 2) isEqualTo _key}
-    && {(_kept select 1) findIf {isNull _x} < 0};
-
-// One that cannot be kept (it moved, it is named otherwise) goes now.
-if (!_reuse && {_kept isNotEqualTo []}) then {
-    ctrlDelete (_kept select 0);
-
-    {ctrlDelete _x} forEach (_kept select 1);
-};
-
-private _created = uiNamespace getVariable [QGVAR(created), []];
-private _madeFrom = count _created;
-
-private _padY = UNIT * 0.4;
-private _padX = SQUARE(_padY);
-private _innerTop = _top + _padY;
-
 // The loot column's own look, where the theme has one: each key left [] keeps the plain one.
 private _loot = _id isEqualTo "loot";
 private _panelColor = _theme getOrDefault ["panel", []];
@@ -107,11 +84,65 @@ if (_loot) then {
     _accentColor = _theme getOrDefault ["lootAccent", []];
 };
 
+// The hairline under the title: the loot column's accent strip, else the theme's line.
+private _lineColor = [_accentColor, _theme getOrDefault ["line", [1, 1, 1, 0.07]]] select (_accentColor isEqualTo []);
+
+// What a kept column can take on in place and what it cannot. The palette (fnc_palette) changes colours while the window is open, with a
+// column scrolled: the panel's colour and the hairline's are painted over the kept controls (below), so the column stays where it is;
+// a change of anything in the first list draws the column anew.
+private _look = [
+    _ringColor, _accentColor, _theme getOrDefault ["text", []], _theme getOrDefault ["text2", []], _theme getOrDefault ["radius", 0],
+    _theme getOrDefault ["panelBorder", []], _panelColor isEqualTo []
+];
+private _paintLook = [_panelColor, _lineColor];
+
+// What fnc_build kept of this column from its last drawing, when it was scrolled: [group, panel and title controls, [rect, title,
+// icon]]. The same place, words and look: all of it stays as it is, only the sections in the group are drawn again.
+private _keepList = uiNamespace getVariable [QGVAR(keepColumns), createHashMap];
+private _kept = _keepList getOrDefault [_id, []];
+private _key = [_rect, _title, _icon];
+
+_keepList deleteAt _id;
+
+private _reuse = _id isNotEqualTo "" && {_kept isNotEqualTo []} && {!isNull (_kept select 0)} && {(_kept select 2) isEqualTo _key}
+    && {(_kept select 1) findIf {isNull _x} < 0} && {((_kept select 0) getVariable [QGVAR(columnLook), []]) isEqualTo _look};
+
+// One that cannot be kept (it moved, it is named otherwise) goes now.
+if (!_reuse && {_kept isNotEqualTo []}) then {
+    ctrlDelete (_kept select 0);
+
+    {ctrlDelete _x} forEach (_kept select 1);
+};
+
+private _created = uiNamespace getVariable [QGVAR(created), []];
+private _madeFrom = count _created;
+
+private _padY = UNIT * 0.4;
+private _padX = SQUARE(_padY);
+private _innerTop = _top + _padY;
+
+// The pieces of the panel and the hairline, which a kept column is painted over with (the group keeps them).
+private _paint = [[], controlNull];
+
+if (_reuse) then {
+    _paint = (_kept select 0) getVariable [QGVAR(columnPaint), [[], controlNull]];
+
+    if (((_kept select 0) getVariable [QGVAR(columnPaintLook), []]) isNotEqualTo _paintLook) then {
+        if (_panelColor isNotEqualTo []) then {
+            [_paint select 0, _panelColor] call FUNC(paintSurface);
+        };
+
+        (_paint select 1) ctrlSetBackgroundColor _lineColor;
+    };
+};
+
 if (!_reuse) then {
-    [
+    private _panelParts = [
         _display, controlNull, _rect, _panelColor,
         _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
     ] call FUNC(uiPanel);
+
+    _paint set [0, _panelParts select {ctrlClassName _x in ["EINV_PanelRect", "EINV_PanelCorner"]}];
 
     if (_ringColor isNotEqualTo []) then {
         [_display, controlNull, _rect, _ringColor, _theme getOrDefault ["radius", 0]] call FUNC(uiRing);
@@ -140,7 +171,8 @@ if (_title isNotEqualTo "") then {
         // A hairline under the title, like the header's - the loot column's is its accent strip, two pixels in its colour.
         private _lineH = [pixelH * 2, pixelH] select (_accentColor isEqualTo []);
         private _line = [_display, "EINV_PanelRect", controlNull, [_left + _padX, _innerTop + _titleH + _padY * 0.4, _width - _padX * 2, _lineH]] call FUNC(uiCreate);
-        _line ctrlSetBackgroundColor ([_accentColor, _theme getOrDefault ["line", [1, 1, 1, 0.07]]] select (_accentColor isEqualTo []));
+        _line ctrlSetBackgroundColor _lineColor;
+        _paint set [1, _line];
     };
 
     _innerTop = _innerTop + _titleH + _padY;
@@ -181,6 +213,9 @@ if (_reuse) then {
 _group setVariable [QGVAR(column), _id];
 _group setVariable [QGVAR(columnParts), _parts];
 _group setVariable [QGVAR(columnKey), _key];
+_group setVariable [QGVAR(columnLook), _look];
+_group setVariable [QGVAR(columnPaintLook), _paintLook];
+_group setVariable [QGVAR(columnPaint), _paint];
 
 // As wide as the padding leaves - narrower only where the scroll bar would not fit beside it.
 private _contentW = (_width - _padX * 2) min (_groupW - SCROLL_W - pixelW * 2);

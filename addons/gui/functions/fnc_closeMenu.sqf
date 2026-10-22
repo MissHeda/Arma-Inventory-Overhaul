@@ -1,7 +1,8 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Closes the context menu (fnc_openMenu), if one is open. Its layer goes with everything in it, and the
+ * Closes the context menu (fnc_openMenu), the sound dropdown (fnc_openSoundMenu) or the palette popover
+ * (fnc_openPaletteMenu), if one is open. Its layer goes with everything in it, and the
  * focus it took goes back to what had it before - or the search field's sink when that is gone - so a field
  * being typed in has the keys again.
  *
@@ -65,6 +66,16 @@ if (_controls isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) isEqualTo "sound
     GVAR(menuFor) = [];
 
     [] call FUNC(soundSettle);
+};
+
+// So is the palette popover (fnc_openPaletteMenu): what was chosen is written to the profile. Not when it is only made
+// again - over a build or on top of a redraw (einv_gui_menuRemake) - where it stays open and a slider held goes on.
+if (_controls isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) isEqualTo "palette"}) then {
+    GVAR(menuFor) = [];
+
+    if (!GVAR(menuRemake)) then {
+        [] call FUNC(paletteSettle);
+    };
 };
 
 _controls isNotEqualTo []

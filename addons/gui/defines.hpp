@@ -25,6 +25,16 @@
 #define ACCENT_INK_DARK [0.05, 0.05, 0.05, 1]
 #define ACCENT_INK_LIGHT [1, 1, 1, 1]
 
+// The palette (fnc_palette, fnc_openPaletteMenu): what a player may set about the window's colours. The panels' alpha the themes
+// start with is PANEL_ALPHA; a player may make them see-through down to PALETTE_ALPHA_MIN. A colour is picked by its hue and its
+// vividness (how far from white it is), the sliders moving in PALETTE_HUE_STEPS and PALETTE_VIVID_STEPS steps; the transparency
+// in steps of PALETTE_ALPHA_STEP.
+#define PANEL_ALPHA 0.92
+#define PALETTE_ALPHA_MIN 0.5
+#define PALETTE_ALPHA_STEP 0.01
+#define PALETTE_HUE_STEPS 72
+#define PALETTE_VIVID_STEPS 50
+
 // The vanilla inventory (RscDisplayInventory), which this mod keeps closed (fnc_guardVanilla).
 #define IDD_VANILLA_INVENTORY 602
 

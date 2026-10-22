@@ -7,7 +7,8 @@
  * is the menus' see-through and is not read - every shade here sets its own). The themes ask for it when they are
  * built (fnc_theme, fnc_themeBase), so the window, the setup wizard, the Arsenal panel and every chip, button, ring
  * and highlight in them follow the colour the player chose; the profile is looked at once per theme and costs
- * three lookups.
+ * three lookups. A colour the player picked in the palette (the header's palette button, fnc_palette) takes the
+ * profile's place - and is made readable like it - unless the server switched the palette off.
  *
  * The colour is made readable first: on the near-black panes a very dark red or blue would sink, so one whose
  * luminance is below ACCENT_MIN_LUMA is brightened - scaled up with its hue while a channel has room, then mixed
@@ -47,13 +48,21 @@ private _fnc_luma = {
 };
 
 if (count _rgb < 3) then {
-    // A channel the profile does not hold reads as -1, which no colour has
-    _rgb = ["R", "G", "B"] apply {profileNamespace getVariable [format ["GUI_BCG_RGB_%1", _x], -1]};
+    // The player's own pick in the palette (fnc_palette: [hue, vividness], or [] for none) comes before the profile's colour.
+    private _pick = (([] call FUNC(palette)) select 0);
 
-    if (!(_rgb isEqualTypeAll 0) || {_rgb findIf {!(_x >= 0 && {_x <= 1})} >= 0}) then {
-        _rgb = ACCENT_FALLBACK select [0, 3];
+    if (_pick isNotEqualTo []) then {
+        _rgb = ["rgb", [_pick select 0, _pick select 1, 1]] call FUNC(hsv);
+    } else {
+        // A channel the profile does not hold reads as -1, which no colour has
+        _rgb = ["R", "G", "B"] apply {profileNamespace getVariable [format ["GUI_BCG_RGB_%1", _x], -1]};
+
+        if (!(_rgb isEqualTypeAll 0) || {_rgb findIf {!(_x >= 0 && {_x <= 1})} >= 0}) then {
+            _rgb = ACCENT_FALLBACK select [0, 3];
+        };
     };
 
+    // Brightened as the profile's colour is: a pure blue would sink into the near-black panes as well.
     for "_i" from 1 to 40 do {
         if (([_rgb] call _fnc_luma) >= ACCENT_MIN_LUMA) exitWith {};
 

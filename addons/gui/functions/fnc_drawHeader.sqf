@@ -4,11 +4,12 @@
  * Author: Miss Heda
  * Draws the header along the top of the window, the same in every look but in its colours: the title
  * on the left; on the right the cog of the setup wizard, the search field (on the buttons' own surface), the speaker (it opens the dropdown
- * of the sound volumes, fnc_openSoundMenu; a right click mutes everything or brings it back), the camera
+ * of the sound volumes, fnc_openSoundMenu; a right click mutes everything or brings it back), the palette (it opens the popover
+ * of the colours, fnc_openPaletteMenu; left out where the server does not let players pick them - fnc_paletteAllowed), the camera
  * switch (left out where the setting is forced - fnc_cameraForced) and Close, each on a piece of the
  * window's glass. The buttons and the search field's frame are dark, the column panels' colour one step lighter
- * (fnc_headerStyle), one step lighter again under the mouse. A button that is on - the camera, the speaker while
- * its dropdown is open - shows it by an accent-tinted icon and a thin accent line under it, not by a fill; an
+ * (fnc_headerStyle), one step lighter again under the mouse. A button that is on - the camera, the speaker and the palette
+ * while their dropdown is open - shows it by an accent-tinted icon and a thin accent line under it, not by a fill; an
  * icon that is off is dimmed. All of them are squares of the header's height with the same gap. A line under the
  * header, the width of the content. The title's words grow with the tile scale (TEXT_UNIT, fnc_textScale); the
  * buttons are icons on the header's fixed height and stay as they are.
@@ -148,6 +149,32 @@ if !(call FUNC(cameraForced)) then {
         [GVAR(cameraOn), !GVAR(cameraOn)] call _fnc_buttonTheme, {[] call FUNC(toggleCamera)}
     ] call FUNC(uiButton);
     [_camera, LLSTRING(Camera_Tooltip)] call _fnc_tooltip;
+};
+
+// The palette: a click opens the popover of the colours under it (fnc_openPaletteMenu), where the player picks the accent, the
+// secondary colour and the transparency and sees them at once. Not drawn where the server does not let players pick their colours
+// (fnc_paletteAllowed). Like the speaker it shows an accent icon and line while its popover is open (fnc_updatePaletteButton, which
+// keeps it up to date without a rebuild - the controls are kept for it).
+uiNamespace setVariable [QGVAR(paletteButton), []];
+uiNamespace setVariable [QGVAR(paletteLine), []];
+
+if ([] call FUNC(paletteAllowed)) then {
+    private _paletteRect = [_square] call _fnc_place;
+    private _paletteLine = [_paletteRect, false] call _fnc_underline;
+
+    private _palette = [
+        _display, controlNull, _paletteRect, "palette", "", UI_TEX(icon_palette_ca), [false] call _fnc_buttonTheme, {
+            // A left click only.
+            if ((_this select 0) < 0) exitWith {};
+
+            // Once per rest for a run of clicks (fnc_coalesce).
+            ["palettemenu", {[uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openPaletteMenu)}, [], COALESCE_GAP] call FUNC(coalesce);
+        }
+    ] call FUNC(uiButton);
+    [_palette, LLSTRING(Palette_Tooltip)] call _fnc_tooltip;
+
+    uiNamespace setVariable [QGVAR(paletteButton), _palette];
+    uiNamespace setVariable [QGVAR(paletteLine), _paletteLine];
 };
 
 // The speaker: a click opens the dropdown of the sound volumes under it (fnc_openSoundMenu), a right click

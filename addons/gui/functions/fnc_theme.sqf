@@ -18,6 +18,12 @@
  * First Aid Kits' look whatever the base theme turns into. "equipmentPanel", "titleIcons" and
  * "onAccent" are the layout's own keys (fnc_layoutGlass, fnc_drawEquipmentCards).
  *
+ * The player's palette (fnc_palette, the header's palette button) is worked in last: the accent through fnc_accentColour,
+ * the secondary colour - the tint of every faint film of the panes (cards, slots, caption tabs, cells, buttons and what lights
+ * under the mouse, the hairlines and bar tracks) and of the soft accent (accentSoft: queued tiles, picked rows, banners), a
+ * white film being the tint of vividness 0 - and the panels' alpha. With no choice (or where the server switched the
+ * palette off) the theme is what it has always been.
+ *
  * Arguments:
  * None
  *
@@ -36,6 +42,15 @@ private _theme = call FUNC(themeBase);
 // worked out from it. Every key gets a copy of its own.
 private _accent = [] call FUNC(accentColour);
 
+// The player's secondary colour and panel transparency (fnc_palette), unset where the player chose nothing.
+([] call FUNC(palette)) params ["", "_secondaryPick", "_alphaPick"];
+
+private _tint = [];
+
+if (_secondaryPick isNotEqualTo []) then {
+    _tint = ["rgb", [_secondaryPick select 0, _secondaryPick select 1, 1]] call FUNC(hsv);
+};
+
 private _tileBg = [];
 _tileBg set [CATEGORY_MISC, [0.15, 0.15, 0.15, 0.92]];
 _tileBg set [CATEGORY_GEAR, [0.18, 0.18, 0.18, 0.92]];
@@ -52,7 +67,7 @@ _theme merge [createHashMapFromArray [
     ["radius", UNIT * 0.45],
     ["dim", [0, 0, 0, 0.5]],
     ["dimCamera", [0, 0, 0, 0.25]],
-    ["panel", [0.05, 0.05, 0.05, 0.92]],
+    ["panel", [0.05, 0.05, 0.05, PANEL_ALPHA]],
     ["panelBorder", []],
     ["lootPanel", []],
     ["lootBorder", []],
@@ -81,7 +96,7 @@ _theme merge [createHashMapFromArray [
     ["text2", [0.78, 0.78, 0.78, 1]],
     ["muted", [0.56, 0.56, 0.56, 1]],
     ["accent", +_accent],
-    ["accentSoft", ["soft", _accent] call FUNC(accentColour)],
+    ["accentSoft", ["soft", [_accent, _tint] select (_tint isNotEqualTo [])] call FUNC(accentColour)],
     ["accentHover", ["hover", _accent] call FUNC(accentColour)],
     ["line", [1, 1, 1, 0.08]],
     ["warn", [0.93, 0.75, 0.2, 1]],
@@ -99,5 +114,20 @@ _theme merge [createHashMapFromArray [
     ["titleIcons", true],
     ["onAccent", ["on", _accent] call FUNC(accentColour)]
 ], true];
+
+// The secondary colour tints the films: each keeps its own strength, only its colour changes (vividness 0 is the white they had).
+if (_tint isNotEqualTo []) then {
+    {
+        _theme set [_x, _tint + [(_theme get _x) select 3]];
+    } forEach ["card", "slot", "slotEmpty", "slotCaptionBg", "cell", "line", "button", "buttonHover", "barTrack", "keyBg"];
+};
+
+// The panels' alpha: the player's own, within what the palette offers.
+if (_alphaPick >= 0) then {
+    private _panel = +(_theme get "panel");
+
+    _panel set [3, (_alphaPick max PALETTE_ALPHA_MIN) min 1];
+    _theme set ["panel", _panel];
+};
 
 _theme

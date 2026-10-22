@@ -24,6 +24,7 @@
  * under way are shown (fnc_drawPending) and the tiles selected (fnc_drawSelection), which survive every
  * build by what they stand for.
  * A repack of magazines in progress is drawn on the tiles last (einv_magazines_fnc_drawJob).
+ * The palette popover (fnc_openPaletteMenu), if it was open, is made again after everything else.
  *
  * The layout is looked up by name, so a look that is missing or broken leaves a window with only its
  * header and footer - still one that can be closed - rather than no window at all.
@@ -87,7 +88,14 @@ GVAR(searchQueue) = [];
 GVAR(panels) = [];
 GVAR(equipmentRect) = [];
 GVAR(storageRect) = [];
-call FUNC(closeMenu);
+
+// The palette popover stays open across a build - what it sets is this build's colours - and is made again at its end. It is
+// closed here without being written to the profile (einv_gui_menuRemake, fnc_closeMenu).
+private _paletteOpen = !isNull ((uiNamespace getVariable [QGVAR(menu), []]) param [0, controlNull]) && {(GVAR(menuFor) param [0, ""]) isEqualTo "palette"};
+
+GVAR(menuRemake) = _paletteOpen;
+[] call FUNC(closeMenu);
+GVAR(menuRemake) = false;
 
 // The style, by its id - an unknown one falls back to the first.
 private _index = (GVAR(styles) findIf {(_x select 0) isEqualTo GVAR(style)}) max 0;
@@ -522,6 +530,11 @@ if (!isNil QEFUNC(magazines,drawJob)) then {
 
 // The window that attached has the last word: its own controls, counts and marks on what was just built.
 ["afterBuild", [_display]] call FUNC(hook);
+
+// The palette popover, over everything just built; a slider held in it stays held (fnc_paletteSlide).
+if (_paletteOpen) then {
+    [_display] call FUNC(openPaletteMenu);
+};
 
 // For the tester's numbers (einv_gui_debugTiming).
 if (_timed) then {

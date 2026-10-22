@@ -516,6 +516,38 @@ GVAR(style) = "main";
 GVAR(cameraOn) = true;
 GVAR(cameraNext) = nil;
 
+// The player's colours, picked in the popover under the header's palette button (fnc_openPaletteMenu): [accent, secondary, alpha]
+// (fnc_palette) - the accent and the secondary colour each [hue, vividness] (0 to 1) or [] for none, the panels' alpha PALETTE_ALPHA_MIN
+// to 1 or -1 for none. Each player's own, kept in the profile as einv_gui_palette when the popover closes (fnc_paletteSettle); whether
+// the themes use it is the server's to say (einv_gui_playerColours, fnc_paletteAllowed). Anything in the profile that is not that
+// shape is no choice. einv_gui_paletteDirty says there is something to write, and einv_gui_menuRemake that the menu being closed
+// is only made again (fnc_closeMenu).
+GVAR(palette) = [[], [], -1];
+GVAR(paletteDirty) = false;
+GVAR(menuRemake) = false;
+
+private _savedPalette = profileNamespace getVariable [QGVAR(palette), []];
+
+if (_savedPalette isEqualType [] && {count _savedPalette == 3}) then {
+    _savedPalette params ["_savedAccent", "_savedSecondary", "_savedAlpha"];
+
+    private _fnc_colour = {
+        params ["_pick"];
+
+        if (_pick isEqualType [] && {count _pick == 2} && {_pick isEqualTypeAll 0} && {_pick findIf {!(_x >= 0 && {_x <= 1})} < 0}) then {
+            +_pick
+        } else {
+            []
+        }
+    };
+
+    GVAR(palette) = [
+        [_savedAccent] call _fnc_colour,
+        [_savedSecondary] call _fnc_colour,
+        if (_savedAlpha isEqualType 0 && {_savedAlpha >= PALETTE_ALPHA_MIN} && {_savedAlpha <= 1}) then {_savedAlpha} else {-1}
+    ];
+};
+
 #include "initSettings.inc.sqf"
 
 ADDON = true;

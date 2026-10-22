@@ -207,9 +207,23 @@ PREP(feelAnswer);
 PREP(checkTaken);
 PREP(reloadGesture);
 
-// Styles and the camera
+// Styles
 PREP(themeBase);
 PREP(accentColour);
+
+// The palette behind the header's palette button: the player's accent, secondary colour and panel transparency
+PREP(palette);
+PREP(paletteAllowed);
+PREP(paletteInfo);
+PREP(paletteSet);
+PREP(paletteSettle);
+PREP(paletteSlide);
+PREP(hsv);
+PREP(openPaletteMenu);
+PREP(updatePaletteMenu);
+PREP(updatePaletteButton);
+
+// The camera
 PREP(toggleCamera);
 PREP(cameraForced);
 PREP(cameraStart);

@@ -41,6 +41,13 @@ if ((GVAR(menuFor) param [0, ""]) isEqualTo "sound") exitWith {
     true
 };
 
+// The palette popover (fnc_openPaletteMenu) likewise, with the choices as they are.
+if ((GVAR(menuFor) param [0, ""]) isEqualTo "palette") exitWith {
+    [_display] call FUNC(openPaletteMenu);
+
+    true
+};
+
 GVAR(menuState) params ["_choices", "_at"];
 
 [_display, _choices, _at] call FUNC(openMenu);

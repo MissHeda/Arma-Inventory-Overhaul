@@ -267,6 +267,18 @@ def icon_style(d, s, w):
     line(d, [(s * 0.16, s * 0.69), (s * 0.5, s * 0.87), (s * 0.84, s * 0.69)], w)
 
 
+def icon_palette(d, s, w):
+    # A painter's palette: a round board with a bite out of its lower right and four dabs of paint. The colour
+    # button in the header, next to the speaker.
+    cx, cy, r = s * 0.5, s * 0.5, s * 0.36
+    body = arc_points(cx, cy, r, 78, 392, 72)
+    bite = [(s * 0.80, s * 0.66), (s * 0.70, s * 0.64), (s * 0.65, s * 0.70), (s * 0.64, s * 0.78)]
+    line(d, body + bite + [body[0]], w)
+    dab = w * 0.62
+    for x, y in ((0.3, 0.46), (0.43, 0.3), (0.6, 0.3), (0.72, 0.44)):
+        d.ellipse([s * x - dab, s * y - dab, s * x + dab, s * y + dab], fill=WHITE)
+
+
 def icon_weight(d, s, w):
     # A kettlebell: a round body with a flat foot, and its handle.
     r = s * 0.23
@@ -868,6 +880,30 @@ def circle(size=128):
     return whiten(finish(im, size, size))
 
 
+def hue_strip(w=256, h=16):
+    """Every hue from red round to red, left to right, fully lit: the track of a hue slider (fnc_openPaletteMenu).
+    Drawn in colour - the game stretches it over the track and does not tint it."""
+    import colorsys
+    im = Image.new("RGBA", (w, h))
+    px = im.load()
+    for x in range(w):
+        r, g, b = colorsys.hsv_to_rgb(x / (w - 1), 1.0, 1.0)
+        for y in range(h):
+            px[x, y] = (round(r * 255), round(g * 255), round(b * 255), 255)
+    return im
+
+
+def fade_strip(w=256, h=16):
+    """White that fades out from left to right. Laid over a panel of a pure hue and stretched over it, it makes the
+    track of a vividness slider: white at the left, the full colour at the right (fnc_openPaletteMenu)."""
+    im = Image.new("RGBA", (w, h))
+    px = im.load()
+    for x in range(w):
+        for y in range(h):
+            px[x, y] = (255, 255, 255, round(255 * (1 - x / (w - 1))))
+    return im
+
+
 def hatch(size=256, stripes=8, duty=0.32):
     """Diagonal stripes, bottom left to top right, for Tarkov's empty slots and hidden tiles. A
     whole number of stripes fits across, so the texture tiles without a seam."""
@@ -1028,6 +1064,7 @@ def build_images():
         "icon_sound_on_ca": stroke_icon(icon_sound_on),
         "icon_sound_off_ca": stroke_icon(icon_sound_off),
         "icon_style_ca": stroke_icon(icon_style),
+        "icon_palette_ca": stroke_icon(icon_palette),
         "icon_weight_ca": stroke_icon(icon_weight),
         # The setup wizard: its cog in the inventory's header and in Eden's Tools menu, and its controls.
         "icon_setup_ca": stroke_icon(icon_setup),
@@ -1059,6 +1096,8 @@ def build_images():
         "toggle_knob_ca": toggle_knob(),
         "scroll_thumb_ca": scroll_thumb(),
         "circle_ca": circle(),
+        "hue_strip_ca": hue_strip(),
+        "fade_strip_ca": fade_strip(),
         "hatch_ca": hatch(),
         "silhouette_ca": soldier(),
         "slot_headgear_ca": slot_icon(slot_headgear),

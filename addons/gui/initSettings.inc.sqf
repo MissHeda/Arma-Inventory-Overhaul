@@ -340,3 +340,21 @@
     true,
     0
 ] call CBA_fnc_addSetting;
+
+// ----- Look -----
+
+// For everyone alike: a server or a mission may want one look for all. A player's own colours (accent, secondary colour, panel
+// transparency) are picked in the window, in the popover under the palette button in the header (fnc_openPaletteMenu), and kept
+// in the profile. Off: no palette button, and what players saved is ignored (fnc_paletteAllowed, fnc_palette) - everyone gets the
+// Arma colour of their own profile and the themes' own films and panels. A window that is open is built again for it.
+[
+    QGVAR(playerColours),
+    "CHECKBOX",
+    [LLSTRING(Setting_PlayerColours), LLSTRING(Setting_PlayerColours_Desc)],
+    true,
+    {
+        if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) then {
+            [] call FUNC(buildSoon);
+        };
+    }
+] call EFUNC(main,addSetting);
