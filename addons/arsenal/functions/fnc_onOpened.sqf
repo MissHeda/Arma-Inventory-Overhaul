@@ -13,7 +13,10 @@
  * in a KeyUp handler - for Ctrl and the wheel (fnc_onWheel). A new row picked in ACE's list has its
  * list and "+" looked at again by the grid a frame later (fnc_ungrey), after ACE's own look by weight -
  * ACE greys every row anew at each pick -, and a press on the list is noted, as it may become a drag of
- * the row's item into the panel (fnc_onListPress).
+ * the row's item into the panel (fnc_onListPress). The same for the list of Enhanced First Aid Kits' kits tab,
+ * which lies over ACE's at the same place while that tab is open (einv_compat_efak_fnc_arsenalControls): its items
+ * are dragged into the kit's grid, and its rows greyed by the kit's cells (fnc_ungreyKit). Each list notes which
+ * "-" and "+" lie over its row picked, as a press there is theirs.
  *
  * ACE's Close button and Escape are taken over (fnc_interceptClose): the window closes as ever, but asks
  * first when something does not fit the grid of the uniform, vest or backpack, and takes it out on the
@@ -77,7 +80,13 @@ GVAR(pictureCache) = createHashMap;
 GVAR(stagingCount) = 0;
 GVAR(collapsedScroll) = ["", 0];
 GVAR(listDragClass) = "";
+GVAR(listDragIdc) = ARSENAL_IDC_LIST;
 GVAR(unfoldSince) = -1;
+GVAR(focusSeen) = [false, "", false];
+GVAR(focusBuilt) = [false, "", false];
+GVAR(focusKit) = "";
+GVAR(kitVerdicts) = [[], createHashMap];
+GVAR(kitUngreyAt) = 0;
 
 _display displayAddEventHandler ["KeyDown", {_this call FUNC(onKey)}];
 _display displayAddEventHandler ["KeyUp", {(_this + [false]) call FUNC(onKey)}];
@@ -91,25 +100,26 @@ _display displayAddEventHandler ["MouseZChanged", {!isNull (uiNamespace getVaria
 // The Close button and Escape ask first when something does not fit (fnc_confirmClose).
 [_display] call FUNC(interceptClose);
 
-// Another kit picked in ACE's left list (or none): the panel shows its grid in place of the container, or the
-// container again (fnc_layout, fnc_focusedKit).
-private _left = _display displayCtrl ARSENAL_IDC_LEFT_LIST;
+// ACE's list, and the kits tab's list where Enhanced First Aid Kits is loaded, each with the "-" and "+" over its row.
+private _lists = [[_display displayCtrl ARSENAL_IDC_LIST, [ARSENAL_IDC_MINUS, ARSENAL_IDC_PLUS]]];
 
-if (!isNull _left) then {
-    _left ctrlAddEventHandler ["LBSelChanged", {
-        if (!isNil QEFUNC(compat_efak,arsenalSections) && {([ctrlParent (_this select 0)] call FUNC(focusedKit)) isNotEqualTo GVAR(focusKit)}) then {
-            [] call EFUNC(gui,requestRebuild);
-        };
-    }];
+if (!isNil QEFUNC(compat_efak,arsenalControls)) then {
+    ([_display] call EFUNC(compat_efak,arsenalControls)) params ["_kitList", "", "_kitArrows"];
+
+    _lists pushBack [_kitList, _kitArrows];
 };
 
-private _list = _display displayCtrl ARSENAL_IDC_LIST;
+{
+    _x params ["_list", "_arrows"];
 
-if (!isNull _list) then {
-    // The row picked and when: a drag from the list whose press found no row takes the row picked, only
-    // when it was picked since the press (fnc_listDrag).
+    if (isNull _list) then {continue};
+
+    _list setVariable [QGVAR(arrows), _arrows];
+
+    // The row picked, when and in which list: a drag from the list whose press found no row takes the row picked,
+    // only when it was picked since the press (fnc_listDrag).
     _list ctrlAddEventHandler ["LBSelChanged", {
-        GVAR(listSel) = [_this select 1, diag_frameNo];
+        GVAR(listSel) = [_this select 1, diag_frameNo, ctrlIDC (_this select 0)];
 
         // One look a frame however many picks ACE's events make in it: each would start a pass of its own,
         // and every pass runs its turn of UNGREY_BUDGET before a newer one takes over.
@@ -129,7 +139,7 @@ if (!isNull _list) then {
 
         [_list, _button, _shift] call FUNC(onListPress);
     }];
-};
+} forEach _lists;
 
 // The engine a frame later, once ACE's own start is done; once more if another of its windows is still
 // closing.

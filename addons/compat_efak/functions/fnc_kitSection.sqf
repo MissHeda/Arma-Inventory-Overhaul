@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * One kit as a section of the window's kind (see fnc_getSections): the kit's picture and name, how full
  * it is, and what it holds - for a kit window (fnc_getSections) and for a kit unfolded in the ACE Arsenal's
- * panel (einv_arsenal_fnc_layout, fnc_arsenalSections).
+ * panel (einv_arsenal_fnc_layout, fnc_arsenalKit).
  *
  * Arguments:
  * 0: Kit class <STRING>

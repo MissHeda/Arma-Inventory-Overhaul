@@ -65,6 +65,11 @@ if (_after == _before) exitWith {
 
 ["giveBack", _class, objNull, false] call EFUNC(gui,playSound);
 
+// Kits taken away for good: their instances back to that mod's pool (einv_compat_efak_fnc_arsenalFree).
+if (!isNil QEFUNC(compat_efak,arsenalFree)) then {
+    [[_class], [uniformContainer _center, vestContainer _center, backpackContainer _center, GVAR(staging)]] call EFUNC(compat_efak,arsenalFree);
+};
+
 if (_staged) exitWith {
     [] call FUNC(settle);
     true

@@ -7,11 +7,17 @@
  * container, shown as ACE's list lit in the loss colour, and the hint line says so once as the drag gets
  * there (fnc_onDrop does it).
  *
- * An item dragged out of ACE's list (fnc_listDrag) goes in only on a grid of the panel - the open
- * container's or the staging space's, where the engine's verdict stands as well -, or over a kit's tile
- * there into that kit, as that kit says (fnc_listToKit: Enhanced First Aid Kits' rules and the kit's
- * room - its capacity, or the cells of a grid a rule or its config gives it). Anywhere else there is no
- * target: let go there, nothing happens, which the hint line says once.
+ * An item dragged out of ACE's list or the list of Enhanced First Aid Kits' kits tab (fnc_listDrag) goes in only
+ * on a grid of the panel - a container's or the staging space's, where the engine's verdict stands as well -,
+ * on the kit's grid in the kits tab or over a kit's tile there into that kit, as that kit says (fnc_listToKit:
+ * whether it may be filled in the arsenal, Enhanced First Aid Kits' rules and the kit's room - its capacity, or the
+ * cells of a grid a rule or its config gives it). Anywhere else there is no target: let go there, nothing happens,
+ * which the hint line says once.
+ *
+ * A tile of the kit's grid that leaves the kit - onto another grid or kit, or out of the panel to be taken away -
+ * goes only where the kit lets things out in the arsenal (einv_compat_efak_fnc_arsenalEditable: the kit type's
+ * Arsenal setting, a kit that follows the default contents): red at once, with why. Within its own grid it only
+ * changes its place, which is always allowed.
  *
  * Arguments:
  * 0: The engine's target <ARRAY>
@@ -60,9 +66,37 @@ if ((_grid getOrDefault ["source", ""]) isEqualTo "aceList") exitWith {
     []
 };
 
+// Out of the kit's grid: only where the kit lets things out. Its own grid - a place within the kit - is not leaving.
+private _fromKit = _grid getOrDefault ["kit", ""];
+private _locked = "";
+
+if (_fromKit isNotEqualTo "" && {!isNil QEFUNC(compat_efak,arsenalEditable)}) then {
+    private _toKit = ((uiNamespace getVariable [QEGVAR(gui,grids), []]) param [_target param [1, -1], createHashMap]) getOrDefault ["kit", ""];
+
+    if (_kind in ["ground", "zone", "kitTile"] || {_kind isEqualTo "grid" && {_toKit isNotEqualTo _fromKit}}) then {
+        _locked = [_fromKit, false] call EFUNC(compat_efak,arsenalEditable);
+    };
+};
+
 if (!(_kind in ["ground", "zone"]) || {GVAR(removeZone) < 0}) exitWith {
     GVAR(dragZone) = "";
-    nil
+
+    if (_locked isEqualTo "" || {(_target param [4, false]) isEqualTo false}) exitWith {nil};
+
+    private _answer = +_target;
+
+    _answer set [4, false];
+    _answer set [5, _locked];
+    _answer
+};
+
+if (_locked isNotEqualTo "") exitWith {
+    if (GVAR(dragZone) isNotEqualTo "locked") then {
+        GVAR(dragZone) = "locked";
+        [_locked] call EFUNC(gui,flashHint);
+    };
+
+    ["zone", GVAR(removeZone), 0, 0, false, _locked, "loss"]
 };
 
 if (GVAR(dragZone) isNotEqualTo "remove") then {

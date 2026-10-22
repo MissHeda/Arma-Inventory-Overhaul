@@ -7,13 +7,14 @@
  * capacity says, it no longer limits anything. Over: fuller than its capacity, or tiles that found no
  * cell (a grid given to a kit that was full already - they show apart and are never lost). For the
  * title of its window (fnc_getSections), the hint (fnc_hintParts) and the inspect card
- * (fnc_inspectRows).
+ * (fnc_inspectRows). The numbers themselves too, for the title of a kit's section in ACE Arsenal's
+ * panel, "Kit: IFAK (8/12)" (fnc_arsenalKit): the mass rounded as the text has it.
  *
  * Arguments:
  * 0: Kit class <STRING>
  *
  * Return Value:
- * [text, over] <ARRAY>
+ * [text, over, used, room] <ARRAY>
  *
  * Example:
  * (["efak_IFAK_7"] call einv_compat_efak_fnc_fillState) params ["_text", "_over"];
@@ -38,11 +39,14 @@ if (([_kit] call FUNC(roomMode)) isEqualTo "cells") exitWith {
         _total = _total + (_x select 0) * (_x select 1) - count (_x param [2, []]);
     } forEach (_layout getOrDefault ["blocks", []]);
 
-    [format [LLSTRING(FillCells), _used, _total], (_layout getOrDefault ["overflow", []]) isNotEqualTo []]
+    [format [LLSTRING(FillCells), _used, _total], (_layout getOrDefault ["overflow", []]) isNotEqualTo [], _used, _total]
 };
 
-// The kit's class, as fnc_canPack passes it too (an assumption about that mod's API, see there).
+// The kit's class, as fnc_canPack passes it too (that mod reads a class or a contents list alike).
 private _used = [_kit] call EFAKFUNC(core,getUsedCapacity);
 private _capacity = [_kit] call EFAKFUNC(core,getCapacity);
 
-[format ["%1 / %2 %3", round _used, round _capacity, localize "STR_efak_gui_MassUnit"], _used > _capacity + KIT_MASS_EPSILON]
+[
+    format ["%1 / %2 %3", round _used, round _capacity, localize "STR_efak_gui_MassUnit"], _used > _capacity + KIT_MASS_EPSILON,
+    round _used, round _capacity
+]

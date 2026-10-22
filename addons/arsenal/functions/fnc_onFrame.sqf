@@ -7,7 +7,15 @@
  * for a pan or a turn over the middle: ACE notes every press on its display, also those on the panel, and
  * moves its camera while the button is down. So its note is emptied every frame meanwhile.
  *
- * A press on ACE's list that the mouse moves away from with the button held, further than LIST_DRAG_PX
+ * Enhanced First Aid Kits' kits tab says nothing to ACE or anyone when it opens, closes or another kit is picked in
+ * it: what it shows is read every frame (fnc_focusedKit - two variables and the pick of its list) and set against
+ * what the last build showed (GVAR(focusSeen), fnc_layout). Opened or closed, the whole frame-later pass follows
+ * (fnc_settle), as after ACE's own events; another kit picked, the panel is built through the engine's gate
+ * (einv_gui_fnc_buildSoon), so a run of picks with the arrow keys is one build more, not one a pick. While the tab
+ * is open its rows are greyed again by the kit's cells every KIT_UNGREY_EVERY seconds (fnc_ungreyKit): that mod
+ * writes its own greying whenever it fills or counts its list.
+ *
+ * A press on ACE's list (or the kits tab's) that the mouse moves away from with the button held, further than LIST_DRAG_PX
  * pixels in any direction, becomes a drag of the pressed row's item (fnc_onListPress, fnc_listDrag): the
  * list scrolls by the wheel and its bar, not by dragging its rows, so a move up or down is a drag as well.
  * Its threshold is in pixels and smaller than the engine's own (DRAG_THRESHOLD, in screen units: 6 px at
@@ -26,8 +34,9 @@
  * over the panel - the first press on a tile, a caption's click and the wheel went to it instead of the
  * panel. A click into the list takes the focus back for the list's own keys.
  *
- * And once the mouse has left the panel with nothing held, the focus goes back to ACE's list (IDC 15) -
- * if it was the sink's: ACE's arrow keys move the list's selection only while the list has the focus, and
+ * And once the mouse has left the panel with nothing held, the focus goes back to the list in ACE's right column
+ * (fnc_rightList: ACE's, IDC 15, or the kits tab's while that is open) - if it was the sink's: the arrow keys move
+ * the list's selection only while the list has the focus, and
  * without this the player would have to click the list first after every visit to the panel. Not before
  * the name at the mouse and the menu are gone: the list focused would lie over them where they reach
  * over it, which is exactly why the sink has the focus meanwhile.
@@ -59,6 +68,32 @@ params [["_display", displayNull, [displayNull]], ["_mouse", getMousePosition, [
 // ----- The arrangement of the three containers, put back after ACE made them new -----
 [] call FUNC(keepPlaces);
 
+// ----- Enhanced First Aid Kits' kits tab: opened, closed, another kit picked -----
+private _focus = [_display] call FUNC(focusedKit);
+
+if (_focus isNotEqualTo GVAR(focusSeen)) then {
+    private _was = GVAR(focusSeen);
+
+    GVAR(focusSeen) = _focus;
+    GVAR(kitUngreyAt) = 0;
+
+    if ((_was param [0, false]) isNotEqualTo (_focus select 0)) exitWith {
+        [] call FUNC(settle);
+    };
+
+    if (EGVAR(gui,dragging) || {EGVAR(gui,press) isNotEqualTo []}) exitWith {
+        GVAR(dirty) = true;
+    };
+
+    [] call EFUNC(gui,buildSoon);
+};
+
+if ((_focus select 0) && {_now >= GVAR(kitUngreyAt)}) then {
+    GVAR(kitUngreyAt) = _now + KIT_UNGREY_EVERY;
+
+    [_display] call FUNC(ungreyKit);
+};
+
 // ----- The answers of the question fnc_confirmClose asks, lit up under the mouse -----
 if !(isNull (uiNamespace getVariable [QGVAR(confirm), controlNull])) then {
     [_mouse] call FUNC(hoverConfirm);
@@ -66,7 +101,7 @@ if !(isNull (uiNamespace getVariable [QGVAR(confirm), controlNull])) then {
 
 // ----- A press on ACE's list that the mouse moves away from -----
 if (GVAR(listPress) isNotEqualTo []) then {
-    GVAR(listPress) params ["_pressed", "_shift", ["_frame", -1], ["_row", -1]];
+    GVAR(listPress) params ["_pressed", "_shift", ["_frame", -1], ["_row", -1], ["_idc", ARSENAL_IDC_LIST]];
 
     // Let go, the note goes - but not in the frame of the press nor the next: the press event may come
     // before the button reads as held, and the press was forgotten before it could become a drag (a second
@@ -81,7 +116,7 @@ if (GVAR(listPress) isNotEqualTo []) then {
 
     if (_moveX * _moveX + _moveY * _moveY > LIST_DRAG_PX * LIST_DRAG_PX) then {
         GVAR(listPress) = [];
-        [_display, _pressed, _shift, _row, _frame] call FUNC(listDrag);
+        [_display, _pressed, _shift, _row, _frame, _idc] call FUNC(listDrag);
     };
 };
 
@@ -128,7 +163,7 @@ if (GVAR(collapsed) && {GVAR(listDragClass) isNotEqualTo ""}) then {
 
     if !([0, true, true] call FUNC(toggleCollapse)) exitWith {};
 
-    private _list = _display displayCtrl ARSENAL_IDC_LIST;
+    private _list = _display displayCtrl GVAR(listDragIdc);
 
     if (isNull _list || {inputMouse 0 == 0}) exitWith {};
 
@@ -141,7 +176,7 @@ if (GVAR(collapsed) && {GVAR(listDragClass) isNotEqualTo ""}) then {
     };
 
     if (_row >= 0) then {
-        [_display, _mouse, false, _row, -1] call FUNC(listDrag);
+        [_display, _mouse, false, _row, -1, ctrlIDC _list] call FUNC(listDrag);
     };
 } else {
     GVAR(unfoldSince) = -1;
@@ -171,7 +206,7 @@ if (
     && {!([_mouse] call FUNC(isOver))}
     && {isNull _tip || {!ctrlShown _tip}} && {(uiNamespace getVariable [QEGVAR(gui,menu), []]) isEqualTo []}
 ) then {
-    private _list = _display displayCtrl ARSENAL_IDC_LIST;
+    private _list = [_display] call FUNC(rightList);
 
     if (!isNull _list && {ctrlShown _list} && {ctrlEnabled _list}) then {
         ctrlSetFocus _list;
@@ -214,7 +249,7 @@ if (GVAR(watch) isNotEqualTo []) then {
 
     (call FUNC(selected)) params ["", "_open"];
 
-    if (_open isNotEqualTo _watched || {_now > _until}) exitWith {
+    if (isNull _open || {_open isNotEqualTo _watched} || {_now > _until}) exitWith {
         GVAR(watch) = [];
     };
 

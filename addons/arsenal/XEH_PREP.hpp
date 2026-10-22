@@ -29,8 +29,13 @@ PREP(onListPress);
 PREP(listDrag);
 PREP(addTo);
 PREP(listToKit);
-PREP(kitSections);
+
+// Enhanced First Aid Kits' kits tab: whether it is open and the kit picked, its list in ACE's right column, the
+// note where the kit has no grid, and that list's rows greyed by the kit's cells
 PREP(focusedKit);
+PREP(rightList);
+PREP(drawNote);
+PREP(ungreyKit);
 
 // Taking things out of the open container or the staging space
 PREP(remove);

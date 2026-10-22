@@ -43,6 +43,9 @@
         <Key ID="STR_einv_arsenal_Hint_IntoKit">
             <English>Let go to pack it into %1</English>
         </Key>
+        <Key ID="STR_einv_arsenal_Hint_KitRowNotAllowed">
+            <English>This kit does not take it here - its row's tooltip says why</English>
+        </Key>
         <Key ID="STR_einv_arsenal_Hint_ListCancel">
             <English>Let go over a free spot of a grid to put it in</English>
         </Key>

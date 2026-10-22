@@ -2,14 +2,16 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * A mouse button pressed on ACE's list (IDC 15) - the list's own handler, as the display's may not hear a
- * press on one of ACE's controls. A left press on its rows is noted - where, in which frame and on which
- * row -, and nothing else: the click and the row it picks are ACE's. Should the mouse then move further
+ * A mouse button pressed on ACE's list (IDC 15), or on the list of Enhanced First Aid Kits' kits tab that lies
+ * over it while that tab is open (fnc_onOpened) - the list's own handler, as the display's may not hear a
+ * press on one of ACE's controls. A left press on its rows is noted - where, in which frame, on which
+ * row and in which list -, and nothing else: the click and the row it picks are the list's. Should the mouse then move further
  * than LIST_DRAG_PX pixels, in any direction, with the button held, the frame hook makes a drag of that
  * row's item (fnc_onFrame, fnc_listDrag); let go first, the note goes. The list scrolls with the wheel and
  * its scroll bar, never by dragging its rows, so a held button that moves is a drag, up and down too. Not on
- * the scroll bar along its right edge, not on ACE's "-" and "+" over the right end of the row picked (IDC
- * 101 and 102: the player aimed at those), and only while there is a panel beside it to drag to.
+ * the scroll bar along its right edge, not on the "-" and "+" over the right end of the row picked (ACE's IDC
+ * 101 and 102, the kits tab's own - each list names its pair: the player aimed at those), and only while there is
+ * a panel beside it to drag to.
  *
  * The row is worked out here, from where the press is, and not read from the list: this handler runs
  * before the list moves its selection to the row pressed, so lnbCurSelRow still names the row picked
@@ -32,7 +34,7 @@
  * takes the row the list picked since the press, if it picked one.
  *
  * Arguments:
- * 0: ACE's list <CONTROL>
+ * 0: ACE's list, or the kits tab's <CONTROL>
  * 1: Button, 0 left, 1 right <NUMBER>
  * 2: Shift - a drag starts with a whole stack <BOOL> (default: false)
  *
@@ -64,11 +66,11 @@ if (
     || {_mouseY < _listY} || {_mouseY >= _listY + _listH}
 ) exitWith {};
 
-// ACE's "-" and "+" lie over the right end of the row picked while a container's tab is open - shown and
-// not faded out. A press there is theirs, even with the "+" disabled for an item the box does not have.
+// The list's "-" and "+" lie over the right end of the row picked - shown and not faded out. A press there is
+// theirs, even with the "+" disabled for an item the box does not have.
 private _display = ctrlParent _list;
 
-private _onArrow = [ARSENAL_IDC_MINUS, ARSENAL_IDC_PLUS] findIf {
+private _onArrow = (_list getVariable [QGVAR(arrows), [ARSENAL_IDC_MINUS, ARSENAL_IDC_PLUS]]) findIf {
     private _arrow = _display displayCtrl _x;
 
     !isNull _arrow && {ctrlShown _arrow} && {ctrlFade _arrow < 1} && {
@@ -81,12 +83,13 @@ private _onArrow = [ARSENAL_IDC_MINUS, ARSENAL_IDC_PLUS] findIf {
 if (_onArrow) exitWith {};
 
 // The height of the list's rows, found once by its IDC in ACE's display config: its rowHeight or - ACE
-// leaves it at RscListNBox's 0, rows as high as their text - its sizeEx, 7 of ACE's grid units. Both may
-// be expressions, which getNumber does not work out; failing all, ACE's 7 units as ACE_ROW_SIZE has them.
+// leaves it at RscListNBox's 0, rows as high as their text - its sizeEx, 7 of ACE's grid units (the kits tab's
+// list is a child of ACE's, the same). Both may be expressions, which getNumber does not work out; failing all,
+// ACE's 7 units as ACE_ROW_SIZE has them.
 private _rowH = _list getVariable [QGVAR(rowHeight), -1];
 
 if (_rowH <= 0) then {
-    private _config = (format ["getNumber (_x >> 'idc') == %1", ARSENAL_IDC_LIST] configClasses (configFile >> "ace_arsenal_display" >> "controls")) param [0, configNull];
+    private _config = (format ["getNumber (_x >> 'idc') == %1", ctrlIDC _list] configClasses (configFile >> "ace_arsenal_display" >> "controls")) param [0, configNull];
 
     private _fnc_read = {
         if (isText _this) exitWith {[call compile getText _this] param [0, 0, [0]]};
@@ -114,4 +117,4 @@ if (_row >= _rows) then {
     _row = -1;
 };
 
-GVAR(listPress) = [_mouse, _shift, diag_frameNo, _row];
+GVAR(listPress) = [_mouse, _shift, diag_frameNo, _row, ctrlIDC _list];

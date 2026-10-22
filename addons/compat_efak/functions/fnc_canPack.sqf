@@ -64,9 +64,8 @@ if (([_kit] call FUNC(roomMode)) isEqualTo "cells") exitWith {
 };
 
 private _mass = [_class] call EFAKFUNC(core,getItemMass);
-// getUsedCapacity takes the kit's class, as getCapacity does: the shape every other caller has used since the first
-// version (the window title, the hint and the inspect card, now fnc_fillState) and that the game showed right. Assumed,
-// EFAK's source is not at hand; this was the one call that passed the contents (issue #19).
+// getUsedCapacity takes the kit's class (or a contents list, which reads the same - efak 1.1.2 checked), as getCapacity
+// does: the shape every other caller uses (the window title, the hint and the inspect card, fnc_fillState).
 private _free = ([_kit] call EFAKFUNC(core,getCapacity)) - ([_kit] call EFAKFUNC(core,getUsedCapacity));
 
 if (_mass > 0 && {(floor ((_free + KIT_MASS_EPSILON) / _mass)) < _count}) exitWith {

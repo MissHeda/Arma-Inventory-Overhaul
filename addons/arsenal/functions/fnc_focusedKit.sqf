@@ -2,36 +2,29 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The kit type that is in focus in ACE's LEFT list: the row picked there is a kit of Enhanced First Aid Kits
- * (a prototype or one of its instances). The panel then shows that type's kit grid in place of the container
- * (fnc_layout, fnc_kitSections); with no such row picked it shows no kit at all.
+ * Whether Enhanced First Aid Kits' kits tab is open in ACE Arsenal - the kits' button in ACE's left bar, under the
+ * backpack's -, and the kit picked in its list (einv_compat_efak_fnc_arsenalFocus). That tab lies over ACE's panels
+ * while ACE's own tab stays the one it was, so no container is open in ACE's sense then (fnc_selected), and the panel
+ * shows the soldier's uniform, vest and backpack folded, the picked kit's grid unfolded and the staging space
+ * (fnc_layout). Read every frame (fnc_onFrame): the tab tells nobody when it opens, closes or another kit is picked.
+ * Never open without the compat addon (Enhanced First Aid Kits not loaded).
  *
  * Arguments:
- * 0: ACE Arsenal's display <DISPLAY>
+ * 0: ACE Arsenal's display <DISPLAY> (default: the open one)
  *
  * Return Value:
- * The lowercase prototype of the kit type, "" when the picked row is no kit <STRING>
+ * [the tab is open <BOOL>, class of the row picked, "" for none <STRING>, a row of kits being made ready <BOOL>] <ARRAY>
  *
  * Example:
- * [_display] call einv_arsenal_fnc_focusedKit;
+ * ([_display] call einv_arsenal_fnc_focusedKit) params ["_open", "_picked", "_preparing"];
  *
  * Public: No
  */
 
 disableSerialization;
 
-params [["_display", displayNull, [displayNull]]];
+params [["_display", uiNamespace getVariable [QGVAR(display), displayNull], [displayNull]]];
 
-private _list = _display displayCtrl ARSENAL_IDC_LEFT_LIST;
+if (isNull _display || {isNil QEFUNC(compat_efak,arsenalFocus)}) exitWith {[false, "", false]};
 
-if (isNull _list) exitWith {""};
-
-private _row = lbCurSel _list;
-
-if (_row < 0 || {_row >= lbSize _list}) exitWith {""};
-
-private _class = _list lbData _row;
-
-if (_class isEqualTo "" || {(([_class] call EFUNC(items,kitOf)) isEqualTo [])}) exitWith {""};
-
-toLowerANSI (([_class] call EFUNC(items,kitOf)) param [0, ""])
+[_display] call EFUNC(compat_efak,arsenalFocus)

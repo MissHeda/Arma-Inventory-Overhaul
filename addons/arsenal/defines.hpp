@@ -77,6 +77,16 @@
 // How long a frame's turn of asking the grid about ACE's rows may take, in seconds (fnc_ungrey).
 #define UNGREY_BUDGET 0.003
 
+// How often the rows of Enhanced First Aid Kits' kits tab are greyed again by the kit's cells, in seconds
+// (fnc_onFrame, fnc_ungreyKit): that mod writes its own greying whenever it fills or counts its list. And the alpha
+// of a greyed row there, that mod's own (efak_arsenal_fnc_updateContents).
+#define KIT_UNGREY_EVERY 0.25
+#define KIT_GREY_ALPHA 0.25
+
+// What the kit's section of the panel folds by in GVAR(folded) while the kits tab is open (fnc_layout, the "fold"
+// hook): one key whichever kit it shows - a string, as a kit's grid has no container to fold by.
+#define KIT_FOLD_KEY "arsenalKit"
+
 // How far the mouse moves with the button held, in any direction and in the screen's pixels, before a
 // press on ACE's list becomes a drag of its row (fnc_onFrame). Less than the engine's DRAG_THRESHOLD,
 // which is in screen units - 6 px at 1080p and the normal interface size, 9 px at the largest - and let

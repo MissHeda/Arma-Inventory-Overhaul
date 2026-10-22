@@ -15,6 +15,9 @@
  *
  * Items the box does not offer (ACE's unique ones, lnbValue 1) and backpacks are left to ACE.
  *
+ * While Enhanced First Aid Kits' kits tab lies over ACE's panels (fnc_focusedKit) its own list is the one shown:
+ * a new pass greys that by the kit's cells instead (fnc_ungreyKit), and a pass of ACE's list still going ends.
+ *
  * Run after ACE's own look: a frame after its events (fnc_settle) and a frame after a row is picked
  * (fnc_onOpened). ACE looks again at every pick (ace_arsenal_fnc_onSelChangedRightListnBox) and greys the
  * whole list by weight anew, so the rows are put right after a pick too, not only the "+". One look at the
@@ -49,6 +52,12 @@ params [
 if (!GVAR(attached) || {isNull _display}) exitWith {};
 
 if (_pass >= 0 && {_pass != GVAR(ungreyPass)}) exitWith {};
+
+if ((([_display] call FUNC(focusedKit)) select 0)) exitWith {
+    if (_pass < 0) then {
+        [_display] call FUNC(ungreyKit);
+    };
+};
 
 (call FUNC(selected)) params ["", "_container"];
 

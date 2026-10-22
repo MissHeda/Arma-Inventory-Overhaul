@@ -1,8 +1,10 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Packs new items straight into a kit, in the ACE Arsenal: dragged out of ACE's list onto the kit's
- * tile in the panel (einv_arsenal_fnc_onDrop). As many as the kit takes (fnc_canPackNew: the kit type's
+ * Packs new items straight into a kit, in the ACE Arsenal: dragged out of ACE's list or the kits tab's list onto
+ * the kit's grid or tile in the panel (einv_arsenal_fnc_onDrop), Ctrl and the wheel up over its tile
+ * (einv_arsenal_fnc_onWheel). What the kits tab still has staged is written first (fnc_arsenalFlush), so the kit
+ * is asked as that tab shows it. As many as the kit takes (fnc_canPackNew: the kit type's
  * Arsenal setting, that mod's rules, and its room - its capacity, or the free cells of a grid a rule or
  * its config gives it, fnc_roomMode), made from nothing (einv_storage_fnc_makePayload) and written into
  * the kit (fnc_putIntoKit, which asks the kit once more and ends in that mod's setContents); the tile's
@@ -37,6 +39,8 @@ if (
     _kit isEqualTo "" || {_class isEqualTo ""} || {_count < 1} || {isNull _root}
     || {!([_root] call EFUNC(storage,isLocalRoot))} || {!(["kit:" + toLowerANSI _kit, _root] call FUNC(holderVerify))}
 ) exitWith {[0, "Failed", []]};
+
+[] call FUNC(arsenalFlush);
 
 ([_kit, _class, _count] call FUNC(canPackNew)) params ["_n", "_why"];
 

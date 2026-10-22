@@ -121,7 +121,7 @@ private _fnc_holder = {
 
     private _known = GVAR(holders) getOrDefault [toLowerANSI _class, []];
 
-    // A kit section of the ACE Arsenal's panel, where no kit window is open (fnc_arsenalSections).
+    // The kit section of the ACE Arsenal's panel, where no kit window is open (fnc_arsenalKit).
     if (_known isEqualTo []) then {
         _known = GVAR(arsenalHolders) getOrDefault [toLowerANSI _class, []];
     };

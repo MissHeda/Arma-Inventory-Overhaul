@@ -11,11 +11,11 @@
  * ACE's list, it is taken out of the container or the staging space: as much of the stack as was dragged
  * (fnc_remove).
  *
- * An item dragged out of ACE's list (fnc_listDrag) is always this hook's to end: on a grid of the panel it
- * is put in, on the cell it was let go on and turned as it was, as many as the wheel left (fnc_addTo); on
- * a kit's tile there (fnc_listToKit) it is packed into that kit, as many as the kit takes
- * (einv_compat_efak_fnc_packNew: its rules, and its room - its capacity, or the cells of a grid a rule or
- * its config gives it); anywhere else it was nothing.
+ * An item dragged out of ACE's list or the kits tab's (fnc_listDrag) is always this hook's to end: on a grid of
+ * the panel it is put in, on the cell it was let go on and turned as it was, as many as the wheel left
+ * (fnc_addTo); on the kit's grid in the kits tab, or on a kit's tile (fnc_listToKit), it is packed into that kit,
+ * on that cell where it is free, as many as the kit takes (einv_compat_efak_fnc_packNew: its rules, and its room -
+ * its capacity, or the cells of a grid a rule or its config gives it); anywhere else it was nothing.
  *
  * Arguments:
  * 0: Kind of target <STRING>
@@ -82,8 +82,8 @@ if ((_from getOrDefault ["source", ""]) isEqualTo "aceList") exitWith {
         [] call FUNC(settle);
     };
 
-    // The grid of a kit unfolded in the panel (fnc_kitSections): packed into the kit, on the cell it was let go
-    // on when that is free, else where the kit's layout puts it.
+    // The kit's grid in the kits tab (fnc_layout): packed into the kit, on the cell it was let go on when that is
+    // free, else where the kit's layout puts it.
     private _kitGrid = _kind isEqualTo "grid" && {((_grids param [_targetIndex, createHashMap]) getOrDefault ["kit", ""]) isNotEqualTo ""};
 
     if (_kitGrid) then {
@@ -128,7 +128,8 @@ if (_kind isEqualTo "grid") exitWith {
 
     (call FUNC(selected)) params ["", "_open"];
 
-    if (_source isNotEqualTo _to && {_open in [_source, _to]}) then {
+    // Only with a container's tab open: in the kits tab (fnc_selected) ACE's list takes nothing to hear of.
+    if (!isNull _open && {_source isNotEqualTo _to} && {_open in [_source, _to]}) then {
         private _classes = [_entry getOrDefault ["class", ""]];
 
         // Two tiles swapping places between the container and staging change two classes there.

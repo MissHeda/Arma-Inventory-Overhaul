@@ -52,6 +52,11 @@ if (isNull _unit || {!local _unit}) exitWith {_gone};
     };
 } forEach ([_unit] call EFUNC(storage,getSections));
 
+// Kits taken away for good: their instances back to that mod's pool (einv_compat_efak_fnc_arsenalFree).
+if (count _gone > 0 && {!isNil QEFUNC(compat_efak,arsenalFree)}) then {
+    [keys _gone, [uniformContainer _unit, vestContainer _unit, backpackContainer _unit, GVAR(staging)]] call EFUNC(compat_efak,arsenalFree);
+};
+
 // One sound for all of it, the one of giving back.
 if (count _gone > 0) then {
     ["giveBack", (keys _gone) select 0, objNull, false] call EFUNC(gui,playSound);

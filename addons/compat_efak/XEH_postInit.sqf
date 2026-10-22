@@ -27,6 +27,16 @@ if (!hasInterface) exitWith {};
     };
 }] call CBA_fnc_addEventHandler;
 
+// A kit ticked or unticked to follow the default contents in that mod's kits tab of ACE Arsenal: the panel's kit
+// may or may not change now (fnc_arsenalEditable), and its grid says so at once.
+[QEFAKGVAR(core,followDefaultsChanged), {
+    params [["_class", "", [""]]];
+
+    if (toLowerANSI _class in GVAR(arsenalHolders)) then {
+        call FUNC(requestRebuild);
+    };
+}] call CBA_fnc_addEventHandler;
+
 // A kit's name shows on its tile wherever it lies.
 [QEFAKGVAR(core,labelChanged), {
     call FUNC(requestRebuild);

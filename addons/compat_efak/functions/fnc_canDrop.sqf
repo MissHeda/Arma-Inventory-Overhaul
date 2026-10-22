@@ -16,7 +16,8 @@
  *   an empty magazine         - no: the kit would hand it back full (fnc_changeKit)
  *   packing switched off     - only what came out of this kit since the window was opened
  *                               (fnc_repackable), as that mod's kit window allows; in ACE Arsenal's
- *                               window the kit type's Arsenal setting instead (ArsenalReadOnly)
+ *                               window instead whether the kit may be filled there and, out of
+ *                               another kit, whether that one lets things out (fnc_arsenalEditable)
  *   the kit                   - what it takes and has room for (fnc_canPack): that mod's
  *                               capacity, or the free cells of a grid a rule or its config gives
  *                               it (fnc_roomMode)
@@ -98,13 +99,18 @@ private _wait = call FUNC(notReady);
 
 if (_wait isNotEqualTo "") exitWith {[false, _wait]};
 
-// In ACE Arsenal's window (the one window attached with hooks) the kit type's Arsenal setting decides, as for a
-// row of ACE's list (fnc_canPackNew) and a tile taken out there (fnc_discard) - not the packing-off rule of that
-// mod's kit window in the field, which turned the staging space away from a kit ACE's list could fill.
+// In ACE Arsenal's window (the one window attached with hooks) the kits tab's rules decide, as for a row of a list
+// (fnc_canPackNew) and a tile taken out there (fnc_discard) - not the packing-off rule of that mod's kit window in the
+// field, which turned the staging space away from a kit ACE's list could fill: the kit takes things in there, and the
+// kit it comes out of, if any, lets them out (fnc_arsenalEditable).
 if !([] call EFUNC(gui,isInventoryMode)) exitWith {
-    if (!isNil QEFAKFUNC(core,canPackInto) && {!([_kit, true] call EFAKFUNC(core,canPackInto))}) exitWith {
-        [false, LLSTRING(ArsenalReadOnly)]
+    private _locked = [_kit, true] call FUNC(arsenalEditable);
+
+    if (_locked isEqualTo "" && {_fromKit isNotEqualTo ""}) then {
+        _locked = [_fromKit, false] call FUNC(arsenalEditable);
     };
+
+    if (_locked isNotEqualTo "") exitWith {[false, _locked]};
 
     [_kit, _class, _n, _entry getOrDefault ["ammo", -1]] call FUNC(canPack)
 };

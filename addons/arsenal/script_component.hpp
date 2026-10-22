@@ -26,6 +26,9 @@
 // The sort bar over the right list (IDC_sortRightTab), whose top the panel starts at.
 #define ARSENAL_IDC_SORT 17
 
+// The soldier's weight beside ACE's menu bar (IDC_totalWeightText), which ACE writes only when its own panels change.
+#define ARSENAL_IDC_WEIGHT 801
+
 // The left panel's buttons for uniform, vest and backpack (IDC_buttonUniform, IDC_buttonVest,
 // IDC_buttonBackpack) - what ace_arsenal_currentLeftPanel holds while one of them is open.
 #define ARSENAL_IDC_UNIFORM 2010

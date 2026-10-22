@@ -10,7 +10,12 @@
  * which keeps its counts, load bar and greyed rows right.
  *
  * A tile of the staging space (fnc_staging) goes the same way and is gone; ACE is not told, as nothing of
- * the soldier's changed - only the panel is built again.
+ * the soldier's changed - only the panel is built again. Nor is it told in Enhanced First Aid Kits' kits tab, where no
+ * container's tab is open (fnc_selected). A kit of that mod taken out gives its instance back to that mod's pool,
+ * as ACE's own "-" does (einv_compat_efak_fnc_arsenalFree).
+ *
+ * A tile of the kit's grid (the kits tab, fnc_layout) is taken out of the kit and away
+ * (einv_compat_efak_fnc_discard: the kit must let things out in the arsenal).
  *
  * Only on ACE's own unit where it is local, as ACE's own buttons work; never for a tile still on its way
  * somewhere.
@@ -42,7 +47,7 @@ private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNul
 
 (call FUNC(selected)) params ["", "_open"];
 
-// A tile of a kit's grid in the panel (fnc_kitSections): taken out of the kit (einv_compat_efak_fnc_discard).
+// A tile of the kit's grid in the panel (the kits tab): taken out of the kit (einv_compat_efak_fnc_discard).
 private _kit = _grid getOrDefault ["kit", ""];
 
 if (_kit isNotEqualTo "") exitWith {
@@ -101,6 +106,11 @@ if (!_whole) then {
 };
 
 ["giveBack", _class, objNull, false] call EFUNC(gui,playSound);
+
+// A kit taken away for good: its instance back to that mod's pool, unless one of its class still lies here.
+if (!isNil QEFUNC(compat_efak,arsenalFree)) then {
+    [[_class], _worn + [GVAR(staging)]] call EFUNC(compat_efak,arsenalFree);
+};
 
 if (_staged) exitWith {
     [] call FUNC(settle);

@@ -3,7 +3,8 @@
  * Author: Miss Heda
  * The right click on the panel (the "menu" hook): on a tile, "Remove" takes that tile out of the container
  * (fnc_remove) and "Remove all" every one of its kind there (fnc_removeKind) - in the staging space every
- * one lying in that. On a tile of a kit's grid (fnc_kitSections) only "Remove", out of the kit (fnc_remove).
+ * one lying in that. On a tile of the kit's grid in Enhanced First Aid Kits' kits tab (fnc_layout) only "Remove",
+ * out of the kit and away (fnc_remove).
  * Nothing on free cells or on a tile still on its way somewhere.
  *
  * Arguments:

@@ -5,7 +5,9 @@
  * unit is still known): the engine lets go of it (einv_gui_fnc_onUnload - the next window, the inventory,
  * has no hooks again), the panel's state is forgotten, and a helper that carried a vanilla box's items
  * (fnc_openBI) is deleted a frame later, once ACE is done with it. So is the staging space (fnc_staging)
- * with whatever still lies in it: it was for this fitting only, as its caption and the hint line said.
+ * with whatever still lies in it: it was for this fitting only, as its caption and the hint line said. A kit of
+ * Enhanced First Aid Kits lying there gives its instance back to that mod's pool first
+ * (einv_compat_efak_fnc_arsenalFree).
  *
  * If the soldier walks off with more in a uniform, vest or backpack than its grid has room for - a loadout
  * brought it, say - and the window closed some way fnc_confirmClose could not ask first (a script closed
@@ -64,6 +66,26 @@ GVAR(picturePass) = GVAR(picturePass) + 1;
 GVAR(stagingCount) = 0;
 GVAR(listDragClass) = "";
 GVAR(unfoldSince) = -1;
+GVAR(focusSeen) = [false, "", false];
+GVAR(focusBuilt) = [false, "", false];
+GVAR(focusKit) = "";
+GVAR(kitVerdicts) = [[], createHashMap];
+
+// Where the kit of Enhanced First Aid Kits' kits tab lay is forgotten (einv_compat_efak_fnc_arsenalKit).
+if (!isNil QEFUNC(compat_efak,arsenalKit)) then {
+    [] call EFUNC(compat_efak,arsenalKit);
+};
+
+// Kits of Enhanced First Aid Kits that lie in the staging space go with it: their instances back to that mod's pool,
+// unless one of the class lies on the soldier (einv_compat_efak_fnc_arsenalFree).
+private _soldier = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+
+if (!isNull GVAR(staging) && {!isNull _soldier} && {!isNil QEFUNC(compat_efak,arsenalFree)}) then {
+    [
+        ((getItemCargo GVAR(staging)) param [0, []]) + ([GVAR(staging)] call EFUNC(storage,hiddenClasses)),
+        [uniformContainer _soldier, vestContainer _soldier, backpackContainer _soldier]
+    ] call EFUNC(compat_efak,arsenalFree);
+};
 
 {
     if (!isNull _x) then {

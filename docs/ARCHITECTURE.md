@@ -2252,10 +2252,10 @@ item out.
   picked, so folding per object would be lost. `fnc_layout` notes `foldKeys` `[[container, key], ...]` and sets each section's
   `folded` to `key in folded` XOR `container in einv_gui_collapsed`, so the inventory's own list is never touched.
   **A tab switch folds anew** (issue #3): `fnc_layout` keeps the tab the folds were last set for in `GVAR(foldTab)` - ACE's
-  tab id (`fnc_selected`, "" for a tab without the panel) or `"kit:" + class` while a kit's sections show -; when it changes,
-  `GVAR(folded)` is emptied but for `"staging"`, so the picked container (or the kit's sections) is open, the other worn containers
-  folded, the staging space as it was. Order and scroll are untouched. `foldKeys` is emptied before `fnc_kitSections` notes the
-  kit sections' keys, so the `fold` hook finds them (a kit section did not fold by hand before).
+  tab id (`fnc_selected`, "" for a tab without the panel) or `"kits"` while Enhanced First Aid Kits' kits tab is open -; when it
+  changes, `GVAR(folded)` is emptied but for `"staging"`, so the picked container (or the kit's section) is open, the other worn
+  containers folded, the staging space as it was. Order and scroll are untouched. Another kit picked in the kits tab is no switch:
+  only the kit's section opens again (its key `KIT_FOLD_KEY` leaves `GVAR(folded)`), see "Enhanced First Aid Kits' kits tab".
 - **Other worn containers.** `fnc_layout` adds the soldier's other two containers as sections between the open one and the staging space,
   folded to their captions (key `"other_" + class` in `einv_arsenal_folded`; present = unfolded), so items can be dragged between all three;
   the staging space is one shared area in every tab. `fnc_addTo`, `fnc_remove`, `fnc_removeKind` and the drop's watch accept them like the staging
@@ -2344,11 +2344,12 @@ they are **taken out**, not left in or moved on, and the player is asked first.
   `einv_gui_press` and `einv_gui_fnc_startDrag`. `fnc_dragCheck`: only a
   grid of the panel is a target (else `[]`) - or, with compat_efak loaded, a **kit's tile** there (`fnc_listToKit`: the cell under the
   mouse, the footprint's corner plus `einv_gui_press`'s grab, lies on a tile `einv_compat_efak_fnc_isKit` knows): the target becomes
-  `["kitTile", grid, tile, 0, fits, why]` by `einv_compat_efak_fnc_canPackNew [kit, class, count]` - the kit type's Arsenal setting
-  (`efak_core_fnc_canPackInto` with the Arsenal, always in Eden), that mod's rules, and the kit's room by `fnc_roomMode`: its
+  `["kitTile", grid, tile, 0, fits, why]` by `einv_compat_efak_fnc_canPackNew [kit, class, count]` - whether the kit may be filled in
+  the arsenal (`einv_compat_efak_fnc_arsenalEditable`), that mod's rules, and the kit's room by `fnc_roomMode`: its
   capacity, or the free cells of its own grid and never the capacity then; green when some fit (the hint says how many), red with
-  the reason when none. `fnc_onDrop` packs them with `einv_compat_efak_fnc_packNew` and runs `fnc_settle`. EFAK's own kits tab of
-  ACE's window is left as it is. **Kit sections:** `fnc_focusedKit` reads the row picked in ACE's LEFT list (IDC 13); when it is a kit, in any tab, `fnc_layout` shows that kit's grid in place of the containers - `fnc_kitSections [display, holders]`, one section per kit of that type in the worn containers or staging space (`einv_compat_efak_fnc_arsenalSections` -> `fnc_kitSection`, the section a kit window is drawn from too; `foldKey` a string, so `fnc_drawSection` and `fnc_toggleSection` fold by it where there is no container; kept in `GVAR(folded)` as `kitfocus_<class>`, open at first) - plus the staging space; a pick that changes it rebuilds (`LBSelChanged` of the left list). No kit is a section of the container tabs. Its grid is a kit holder like a window's: container to kit and back go through the engine's kit ops, `fnc_listToKit` gives a list drag over it the kit's verdict (`canPackNew`) and `fnc_onDrop` packs it (`packNew`, the cell when free), `fnc_remove` and Ctrl+wheel take out through `einv_compat_efak_fnc_discard` (`takeFromKit` outside a phase, local root, Arsenal setting). ACE's rows are not greyed by the kit's room: its "+" adds to the container. The target's 11th element is the cell under the mouse (the item is held by its middle, so the footprint's corner is no longer the cell
+  the reason when none. `fnc_onDrop` packs them with `einv_compat_efak_fnc_packNew` and runs `fnc_settle`. The kits tab's list is
+  dragged from the same way, and a kit's own grid shows only in that tab (next section). The target's 11th element is the cell under
+  the mouse (the item is held by its middle, so the footprint's corner is no longer the cell
   minus a fixed grab): `fnc_listToKit` takes the cell from it. The drop (`fnc_onDrop`) calls `fnc_addTo [container, class, count, [col, row, block,
   w, h]]`: `normalize`, then `addItemToUniform` / `Vest` / `Backpack` for the open container, `addNew` for staging and for what
   the engine refused, the cell as a new record (`setPlace`); then `syncAce` and `tellAce`.
@@ -2375,6 +2376,78 @@ they are **taken out**, not left in or moved on, and the player is asked first.
   `fnc_layout`) while the mouse is over the panel with no button held or a drag is on, unless a field (type 2) or the sort bar
   (type 4) has it, and **gives it back to ACE's list (IDC 15) once the mouse has left the panel with nothing held**, so ACE's
   arrow keys work. It is not ACE's 3D area (IDC 0) that gets the focus: it covers the screen, and focused it lay over the panel.
+
+### Enhanced First Aid Kits' kits tab
+
+That mod's arsenal addon (`efak_arsenal`, read from its 1.1.2 PBOs) puts a kits button into ACE's left bar under the backpack's,
+shown while the soldier carries a kit (always in Eden; greyed for a unit not the player's own). Its tab lies over ACE's panels
+**without telling ACE**: `ace_arsenal_currentLeftPanel` stays the tab that was open, ACE's left list (IDC 13), right list (IDC 15),
+sort bar (17) and "Remove all" (40) are hidden, and no ACE event is raised (ACE's next `leftPanelFilled` closes it). It shows two
+lists of its own: the kits carried (IDC 88503, one row per kit, `lbData` the instance class, `efak_IFAK_7`; `lbValue` 0 a kit,
+1 kits still being made ready - data the prototype -, 2 a notice) and, at the place of ACE's right list, what the picked kit may
+hold (IDC 88510, a child of ACE's `rightTabContentListnBox`: `lnbData [row, 0]` the class, `lnbValue [row, 2]` 1 for a row that
+cannot be added, `lnbText [row, 2]` the count; its own "-"/"+" 88508/88509, its sort bar 88522 where ACE's is). Its "+" and "-"
+go by the capacity and are **staged**, written a second after the last click (`efak_arsenal_fnc_queueFlush` -> `fnc_flush` ->
+`efak_core_fnc_setContents`); a change made elsewhere comes back through `efak_core_contentsChanged`, merged with what it staged
+(`efak_arsenal_fnc_onContentsChanged`), which redraws its counts and greying. What the tab may change is the kit type's Arsenal
+setting (`efak_core_fnc_getArsenalEditing`: nothing, remove only, everything - everything in Eden) and the "Use CBA default" box
+(`efak_core_followDefaults`: the kit is locked). In ACE's container lists kits are their prototypes; that mod counts the instances
+for them and gives an instance taken out with ACE's "-" back to its pool. Kits keep their contents through loadouts by that mod's
+own CBA loadout handling; nothing of that is repeated here (the storage's top-up never tops up kits).
+
+- **The signal.** compat_efak reads the tab: `einv_compat_efak_fnc_arsenalFocus [display]` -> `[open, picked class, being made
+  ready]` (`efak_arsenal_active`, the row picked in 88503, else `efak_arsenal_selected`), and names its controls
+  (`fnc_arsenalControls` -> `[list 88510, sort bar 88522, [88508, 88509]]`); the panel asks through `fnc_focusedKit` (never open
+  without compat_efak). The frame hook sets it against `GVAR(focusSeen)` every frame: opened or closed -> `fnc_settle`, as after
+  ACE's own events; another kit picked -> `einv_gui_fnc_buildSoon`, one build for a run of picks with the arrow keys (something
+  held: `GVAR(dirty)`). While the tab is open `fnc_selected` names no container - ACE's list takes nothing -, so `fnc_tellAce` and
+  the drop's watch stay silent, `fnc_addTo` uses `addNew` for every worn container, and `fnc_syncAce` keeps only
+  `ace_arsenal_currentItems` of the three containers right (things move between them and the kit) and the weight text (IDC 801,
+  three frames later, as that mod's flush does): ACE's `updateRightPanel` would show its "Remove all" over the tab.
+- **The layout** (`fnc_layout`). Uniform, vest and backpack folded to their captions (`"other_" + class`), in that order, then the
+  kit's section unfolded, then the staging space. `einv_compat_efak_fnc_arsenalKit [picked, preparing, holders]` finds the kit: the
+  row's very instance where it lies in a worn container or the staging space (cargo or `einv_storage_fnc_hiddenClasses`), else the
+  first instance of its type lying there that is no prototype (the tab's list follows a moved or re-instanced kit only at its next
+  look); notes it alone in `einv_compat_efak_arsenalHolders`, and returns `fnc_kitSection` titled `"Kit: <name> (<used>/<room>)"`
+  (`fnc_getName`, else `efak_core_fnc_getKitName`; `fnc_fillState`'s numbers, mass against capacity or cells) with `panelTitle`
+  for the title row, which pictures the kit. With no grid to show it returns a note (`note`, drawn by `fnc_drawNote` as a caption
+  and one muted line): "Take the kit first" (none in the gear or the staging space, a notice row), "being made ready" (a preparing
+  row), "Loading" (`fnc_notReady`). The section folds by `KIT_FOLD_KEY` and opens again at every new pick; `GVAR(foldTab)` is
+  `"kits"`, so opening the tab folds the panel anew but a pick does not; its `scrollClass` "kit" keeps the column's scroll across
+  picks (`GVAR(scrollKey)`). `fnc_panelRect` takes the widest of the holders shown and the tab's sort bar for its top.
+- **Into and out of the kit.** The tab's list gets the handlers ACE's has (`fnc_onOpened`: each list keeps its arrows in
+  `einv_arsenal_arrows`, its row height comes from its config by IDC, `GVAR(listPress)` and `GVAR(listSel)` carry the IDC); a press
+  becomes a drag (`fnc_listDrag [display, where, shift, row, frame, idc]`), a row with `lnbValue` 1 flashes "This kit does not take
+  it here". Over the kit's grid `fnc_listToKit` puts the kit's verdict on the engine's grid target (`canPackNew`, red footprint and
+  the reason when none fits) and `fnc_onDrop` packs it (`packNew`, on the cell when it is free, else where the layout puts it).
+  Between the kit and the worn containers or the staging space it is the engine's kit ops (`einv_compat_efak_fnc_drop`, the kit
+  found through `arsenalHolders`). `fnc_dragCheck` turns a tile red that would leave a kit which lets nothing out
+  (`fnc_arsenalEditable [kit, false]`; a place within its own grid always goes). Out onto the list, Ctrl+wheel down and the menu's
+  Remove take it out and away (`fnc_remove` -> `einv_compat_efak_fnc_discard`); Ctrl+wheel up packs one more (`packNew`, only what
+  the arsenal has, as ACE's "+").
+- **The rules** (`einv_compat_efak_fnc_arsenalEditable [kit, adding]`, as the tab's): contents not here yet (`fnc_notReady`); the
+  Arsenal setting "nothing" refuses, "remove only" lets things out but not in; a kit following the default contents is locked
+  ("untick Use CBA default"). That mod's words where they are localized (`isLocalized`), else ours. Asked by `canPackNew`,
+  `discard`, `canDrop` (the target in, a kit source out) and `drop` (the source out) in ACE's window.
+- **That tab's staged edits first** (`einv_compat_efak_fnc_arsenalFlush`): `packNew`, `discard` and `drop` in ACE's window call
+  `efak_arsenal_fnc_flush` while the tab is up, so the kit is checked and written as the tab shows it and nothing it staged is
+  replayed onto the panel's change. The tab's counts then follow by its own `contentsChanged` handler.
+- **Greying the tab's rows** (`fnc_ungreyKit`): only while the kit's room is its cells (`roomMode` "cells"); with the capacity the
+  tab's own greying is the kit's room and stays. Per class `canPackNew [kit, class, 1]`, kept in `GVAR(kitVerdicts)` while
+  `einv_compat_efak_fnc_arsenalState` (contents, places' revision, rules revision, defaults lock, editing, synced) is the same;
+  rows with `lnbValue` 0 get alpha 1 or `KIT_GREY_ALPHA`, only where it differs; the picked row's "+" is only ever turned off.
+  The tab writes its greying at every fill, so the frame hook runs it every `KIT_UNGREY_EVERY` 0.25 s and a pick a frame later,
+  once the build shows the tab's pick (`GVAR(focusBuilt)`), in turns of `UNGREY_BUDGET`.
+- **Instances back to the pool** (`einv_compat_efak_fnc_arsenalFree [classes, holders]`): a kit taken away in the panel
+  (`fnc_remove`, `fnc_removeKind`, `fnc_dropOverflow`, `fnc_discard`, and what lies in the staging space when the window closes,
+  `fnc_onClosed`) gives its instance back (`efak_core_fnc_freeInstance`, its packed kits with it) unless one of the class still lies
+  in the holders - as that mod does for ACE's "-".
+- **Closing.** That mod writes what its tab staged on its own `displayClosed`. The close card (`fnc_findOverflow`) looks only at
+  the worn containers and the staging space: a kit's tiles without a cell stay in the kit and are never named; a kit lying in the
+  staging space is, as everything there. `arsenalHolders` is emptied.
+- **Limits.** The tab's "+" and its load bar still go by the capacity: with a grid of its own a kit may get more there than its
+  cells hold (the rest shows apart in the grid, never lost). A kit moved out of the gear (into the staging space) leaves the tab's
+  list at its next look, and the panel follows the tab's pick.
 
 ### The vanilla Virtual Arsenal
 
@@ -2941,21 +3014,23 @@ masses against its capacity, and an open grid that grows. Everything that decide
 - `fnc_capacity [kit]` (public) -> that mod's capacity (its CBA setting over config), the registry's where its functions are not
   there, -1 for no kit - the setup wizard's "capacity 35 (EFAK)".
 
-**ACE Arsenal** (section 5): `fnc_canPackNew [kit, class, count]` -> `[how many it takes, why not all]` (`fnc_notReady`, the
-kit type's Arsenal setting `efak_core_fnc_canPackInto [kit, true]`, `fnc_canPack`; as many as fit by halving) and `fnc_packNew
-[kit, class, count, cell, root]` -> `[added, why, landed]`: only for a root whose phases run here (`einv_storage_fnc_isLocalRoot`)
-with the kit under it (`fnc_holderVerify`), so the one writer of the kit is this machine - written where it is called, outside any
-phase, as `einv_storage_fnc_addNew` does (`einv_storage_fnc_makePayload`, `fnc_putIntoKit`, `fnc_requestRebuild`).
-`fnc_arsenalSections` notes where each kit it returns lies in `GVAR(arsenalHolders)` (lowercase class -> `[container, ""]`, made anew
-at every call; the panel calls it with `[]` outside kit mode, `fnc_onWindowOpen` empties it). In ACE's window (`einv_gui_fnc_isInventoryMode`
-false) `fnc_canDrop` and `fnc_drop` ask the type's Arsenal setting for every move into or out of a kit, not the field's packing-off
-rule; `efak_core_contentsChanged` for such a kit rebuilds the panel, and `fnc_locate` finds a kit packed in one of them. No kit window is open in ACE's window,
-so `GVAR(holders)` stays empty there (`fnc_getSections`), and the engine's moves between a kit's grid and the staging space or a
-container (`fnc_drop` -> `fnc_locate`, `fnc_canDrop`, `einv_storage_fnc_rootOf` -> `fnc_holderRoot`) found the kit nowhere and
-were refused with "Failed" in either room mode (issue #4); `fnc_locate` and `fnc_canDrop` fall back to it, and `fnc_signature`
-counts those kits' places as an open kit's. Enhanced First
-Aid Kits' own kit window and its kits tab in ACE's window still count the capacity: a kit with a grid of its own may hold more than
-its capacity there.
+**ACE Arsenal** (section 5, "Enhanced First Aid Kits' kits tab"): the panel shows the kit picked in that mod's kits tab with its
+grid. Read from the tab: `fnc_arsenalFocus`, `fnc_arsenalControls`. The kit's section: `fnc_arsenalKit [picked, preparing,
+holders]` (the row's instance, else the first of its type, in the worn containers or the staging space; a note where there is no
+grid), which keeps where the kit lies in `GVAR(arsenalHolders)` (lowercase class -> `[container, ""]`, the one kit, anew at every
+build; `fnc_onWindowOpen` and no holders empty it) - no kit window is open in ACE's window, so `GVAR(holders)` stays empty there and
+`fnc_locate`, `fnc_canDrop` and `fnc_signature` fall back to it (the moves between a kit's grid and a container or the staging space
+were refused with "Failed" before, issue #4). Changes there: `fnc_canPackNew [kit, class, count]` -> `[how many it takes, why not
+all]` (`fnc_arsenalEditable`, `fnc_canPack`; as many as fit by halving), `fnc_packNew [kit, class, count, cell, root]` -> `[added,
+why, landed]` and `fnc_discard [kit, tile, count, root]` -> `[taken, why]`: only for a root whose phases run here
+(`einv_storage_fnc_isLocalRoot`) with the kit under it (`fnc_holderVerify`), so the one writer of the kit is this machine -
+written where they are called, outside any phase, as `einv_storage_fnc_addNew` does (`einv_storage_fnc_makePayload`,
+`fnc_putIntoKit`, `fnc_takeFromKit`, `fnc_requestRebuild`), after what the tab staged (`fnc_arsenalFlush`). In ACE's window
+(`einv_gui_fnc_isInventoryMode` false) `fnc_canDrop` and `fnc_drop` ask `fnc_arsenalEditable` - the target lets things in, a kit
+source lets them out - not the field's packing-off rule. `fnc_arsenalState` is what a kit's answers depend on, `fnc_arsenalFree`
+gives the instances of kits taken away back to that mod's pool. `efak_core_contentsChanged` and `followDefaultsChanged` for that
+kit rebuild the panel. Enhanced First Aid Kits' own kit window and its kits tab's "+" still count the capacity: a kit with a grid of
+its own may hold more than its capacity there, or get more than its cells by that "+".
 
 ### compat_ace_cargo, compat_tfar, compat_acre, compat_zen, compat_ace_vehiclelock, compat_ace_interaction, compat_aime
 
@@ -3246,5 +3321,17 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
   opens). `[player, "ACE_fieldDressing", 8] call einv_storage_fnc_addToUnit` with room for 5 returns 5; a magazine with rounds; a unit of
   another machine (the number is the local estimate, the add follows); a Take from a scripted pile through the scroll menu leaves no
   empty pile.
+- **The kit of Enhanced First Aid Kits' kits tab in ACE Arsenal's panel** (0.5.0, issues #4 and #19): `fnc_arsenalFocus` and the
+  frame hook's look at the tab, `fnc_arsenalKit`, `fnc_drawNote`, the drag out of the tab's list (IDC 88510), `fnc_ungreyKit`,
+  `fnc_arsenalEditable`, `fnc_arsenalFlush` and `fnc_arsenalFree` were written against that mod's 1.1.2 source and read through,
+  not run. To try (ACE + EFAK, two IFAKs in the backpack, `class=efak_IFAK+ > grid=4x3` for the cells): the kits button under
+  the backpack - the panel shows Uniform, Vest, Backpack folded, "Kit: IFAK (n/12)" open, Staging; the other IFAK in the tab's
+  list - the section changes, the scroll stays; drag a bandage from the tab's list onto a free cell (lands there), onto a full
+  kit (red, "No room"); a tile out onto the list (gone, the tab's count drops), Ctrl+wheel up and down over a tile, right click >
+  Remove; a tile to the vest and back, to the staging space and back; rows grey where no cell is left, the "+" off; the type's
+  Arsenal setting on Remove only (in refused, out allowed) and Nothing; tick "Use CBA default" (locked); "+" in the tab, then a
+  drag within a second (nothing doubled); the IFAK itself into the staging space and back; no kit carried ("Take the kit first");
+  a loadout loaded with kits; close with a kit in the staging space (named on the card, its instance freed); the same without a
+  grid rule (capacity: the tab's own greying, "(12/35)").
 - **Multiplayer on a dedicated server**: the hub, the handshake and the nested copies are designed for it; `HISTORY.md` records no
   dedicated-server run.

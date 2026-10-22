@@ -31,9 +31,11 @@ The plan is in [docs/BRIEFING.md](docs/BRIEFING.md), the design in [docs/ARCHITE
 
 Works with [Enhanced First Aid Kits](https://steamcommunity.com/workshop/filedetails/?id=3809430149) and
 Enhanced Utility Pouches: kits and pouches open in windows of their own inside the inventory, things are
-packed and unpacked by drag and drop. Options other mods add to CBA's item context menu (field rations, ...)
-show in the window's right-click menu; ACE's "Repack Magazines" gives way to the window's own repack while
-that is switched on.
+packed and unpacked by drag and drop. In ACE Arsenal, that mod's kits button (under the backpack) adds the picked
+kit's grid to the panel - "Kit: IFAK (8/12)" under your folded uniform, vest and backpack - filled by dragging from
+its list, emptied by dragging back, and shared with your containers and the staging space. Options other mods add
+to CBA's item context menu (field rations, ...) show in the window's right-click menu; ACE's "Repack Magazines"
+gives way to the window's own repack while that is switched on.
 
 Works with ACE cargo: what is loaded into a vehicle (or a crate) shows in its inventory as a "Cargo" box, with
 a card for each thing, Open for a crate and Unload with ACE's own time. Works with TFAR and ACRE2: the channel
@@ -122,9 +124,11 @@ their load. A text that names a preset of an older version (`base=realism`, `wei
   capacity no longer counts, in the inventory, in kit windows ("8 / 12 cells") and in ACE Arsenal:
   `class=efak_IFAK+ > grid=4x3` (the `+` matters - the kits players carry are numbered copies of the type, `efak_IFAK_7`),
   `kind=kit > grid=12` for every kit, or `einv_grid = "4x3";` on the kit's class in a mod. The wizard's Containers step has a
-  Kits chip and writes the `+` rule for you; "Back to the default" returns a kit to the capacity. That mod's own kit window and its
-  kits tab in ACE Arsenal still go by the capacity. In ACE Arsenal an item dragged from ACE's list onto a kit's tile in the panel
-  is packed into that kit, where the kit type's Arsenal setting allows filling it.
+  Kits chip and writes the `+` rule for you; "Back to the default" returns a kit to the capacity. That mod's own kit window and the
+  "+" of its kits tab in ACE Arsenal still go by the capacity. In ACE Arsenal the kits tab shows the picked kit's grid in the panel
+  (drag from the tab's list into it, out of it to remove, to and from your containers and the staging space), and an item dragged
+  from ACE's list onto a kit's tile in the panel is packed into that kit - where the kit type's Arsenal setting allows it ("Remove
+  only" lets things out, not in) and the kit does not follow "Use CBA default".
 - **One crate, vehicle or a unit's uniform, vest or backpack:** give the object its own grid, which wins
   over every rule - `_crate setVariable ["einv_grid", "6x4+2x3", true];` (also `"24"`, `"rig:16"`, `"auto"`).
 - **Mods:** add a preset of your own as a class of `CfgEinvRulesets` (see `addons/items/CfgEinvRulesets.hpp`; a text names it with

@@ -2,12 +2,14 @@
 /*
  * Author: Miss Heda
  * Takes things out of a kit and away, in the ACE Arsenal: a tile of the kit's grid in the panel dragged out
- * onto ACE's list, Ctrl+wheel down over it (einv_arsenal_fnc_remove). The counterpart of fnc_packNew: the kit
- * type's Arsenal setting must allow a change (efak_core_fnc_canPackInto with the Arsenal), the kit must lie
- * under a root whose phases run on this machine (einv_storage_fnc_isLocalRoot, fnc_holderVerify), and the
- * tile is taken out as a window's take-out does (fnc_takeFromKit: all or nothing, the tile's record leaving
- * the kit's places), outside any phase, so the one writer of the kit is this machine. The window is built
- * again (fnc_requestRebuild). An emptied kit stays where it is.
+ * onto ACE's list, Ctrl+wheel down over it, Remove in its menu (einv_arsenal_fnc_remove). The counterpart of
+ * fnc_packNew: the kit must let things out there (fnc_arsenalEditable: the kit type's Arsenal setting allows
+ * taking out - "Remove only" does -, the kit does not follow the default contents), it must lie under a root
+ * whose phases run on this machine (einv_storage_fnc_isLocalRoot, fnc_holderVerify), what the kits tab still has
+ * staged is written first (fnc_arsenalFlush), and the tile is taken out as a window's take-out does
+ * (fnc_takeFromKit: all or nothing, the tile's record leaving the kit's places), outside any phase, so the one
+ * writer of the kit is this machine. A kit taken out of it gives its instance back (fnc_arsenalFree). The window is
+ * built again (fnc_requestRebuild). An emptied kit stays where it is.
  *
  * Arguments:
  * 0: Kit class <STRING>
@@ -31,17 +33,18 @@ if (
     || {!([_root] call EFUNC(storage,isLocalRoot))} || {!(["kit:" + toLowerANSI _kit, _root] call FUNC(holderVerify))}
 ) exitWith {[0, "Failed"]};
 
-private _wait = [] call FUNC(notReady);
+private _locked = [_kit, false] call FUNC(arsenalEditable);
 
-if (_wait isNotEqualTo "") exitWith {[0, _wait]};
+if (_locked isNotEqualTo "") exitWith {[0, _locked]};
 
-if (!isNil QEFAKFUNC(core,canPackInto) && {!([_kit, true] call EFAKFUNC(core,canPackInto))}) exitWith {
-    [0, LLSTRING(ArsenalReadOnly)]
-};
+[] call FUNC(arsenalFlush);
 
 ([_kit, _entry, _count] call FUNC(takeFromKit)) params ["_status"];
 
 if (_status isNotEqualTo "") exitWith {[0, _status]};
+
+// A kit packed in it is gone with the rest: its instance goes back to that mod's pool.
+[[_entry getOrDefault ["class", ""]]] call FUNC(arsenalFree);
 
 [] call FUNC(requestRebuild);
 

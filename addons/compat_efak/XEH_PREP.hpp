@@ -18,8 +18,6 @@ PREP(fillState);
 PREP(onWindowOpen);
 PREP(getSections);
 PREP(kitSection);
-PREP(discard);
-PREP(arsenalSections);
 PREP(getEntries);
 PREP(toggle);
 PREP(open);
@@ -29,6 +27,18 @@ PREP(mayReach);
 PREP(menuChoices);
 PREP(signature);
 PREP(requestRebuild);
+
+// The kit in ACE Arsenal's panel while Enhanced First Aid Kits' kits tab is open: what that tab shows and its
+// controls, the kit's section, what its answers depend on, whether it may change there, that tab's staged edits
+// written first, taking things out and away, and the instances of kits taken away given back
+PREP(arsenalFocus);
+PREP(arsenalControls);
+PREP(arsenalKit);
+PREP(arsenalState);
+PREP(arsenalEditable);
+PREP(arsenalFlush);
+PREP(discard);
+PREP(arsenalFree);
 
 // Moving into and out of kits
 PREP(canDrop);

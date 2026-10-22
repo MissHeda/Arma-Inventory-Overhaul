@@ -36,13 +36,19 @@
  * class in GVAR(folded) once opened), between the open container and the staging space, so that things can be
  * dragged between all three; the staging space is the same one in every tab.
  *
- * With a kit of Enhanced First Aid Kits picked in ACE's left list (fnc_focusedKit), in any tab, the panel shows
- * that kit's grid instead of the containers - one section per kit of that type that lies in a worn container or
- * the staging space (fnc_kitSections) - and the staging space below: things are dragged out of ACE's list into
- * it, out of it, and to and from the staging space. No kit is shown otherwise.
+ * Enhanced First Aid Kits' kits tab - its button in ACE's left bar, under the backpack's - lies over ACE's panels
+ * (fnc_focusedKit). While it is open the panel shows the uniform, vest and backpack folded to their captions, in
+ * that order, then the kit picked in the tab's list, unfolded - "Kit: <name> (<used>/<room>)", the kit carried
+ * (einv_compat_efak_fnc_arsenalKit) -, then the staging space; the title row names and pictures the kit. Things are
+ * dragged out of the tab's list into the kit's grid (fnc_listDrag, fnc_listToKit), out of it onto the list to take
+ * them away, and between the kit, the containers and the staging space - the kit's grid is a kit holder of the
+ * storage, its moves the engine's kit ops (einv_compat_efak_fnc_drop). Another kit picked there shows that one in
+ * the same place, its section open again, the containers' folds and the column's scroll kept. Where the kit has no
+ * grid to show - it lies in none of the soldier's containers nor the staging space, it is still being made ready -,
+ * a note stands in its place (fnc_drawNote). No kit is shown in any other tab.
  *
- * Switching ACE's tab (or the kit picked) folds the panel anew: the section of what was picked open, every other
- * container's folded, the staging space as it was (GVAR(foldTab)).
+ * Switching ACE's tab, or opening the kits tab, folds the panel anew: the section of what was picked open, every
+ * other container's folded, the staging space as it was (GVAR(foldTab)).
  *
  * The focus sink (GVAR(focusSink) in uiNamespace) is made here the first time: a control of no size in the
  * screen's corner that fnc_onFrame gives the focus to, so that ACE's list loses it.
@@ -77,36 +83,44 @@ if (!GVAR(shown)) exitWith {[]};
 // The whole panel folded to its title row (the button in it).
 private _collapsed = GVAR(collapsed);
 
-// A kit picked in ACE's left list: its grid (with the staging space) is shown in place of the container, in
-// any tab (fnc_focusedKit, fnc_kitSections). With no kit picked no kit is shown.
-GVAR(focusKit) = ["", [_display] call FUNC(focusedKit)] select (!isNil QEFUNC(compat_efak,arsenalSections));
+// Enhanced First Aid Kits' kits tab over ACE's panels, and the kit picked in its list (fnc_focusedKit) - noted as
+// this build shows it, for the frame hook to see the next pick (fnc_onFrame).
+private _focus = [_display] call FUNC(focusedKit);
+
+_focus params ["_kitTab", "_picked", "_preparing"];
+
+GVAR(focusSeen) = _focus;
+GVAR(focusBuilt) = _focus;
 
 // Folded, no staging space is looked at: the crate is made when the panel unfolds.
 private _holder = if (_collapsed) then {objNull} else {[] call FUNC(staging)};
-private _kitSections = [];
+private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _worn = [uniformContainer _center, vestContainer _center, backpackContainer _center];
 
-// Which class or key each section of this build folds by (the "fold" hook): emptied before the kit sections note
-// theirs (fnc_kitSections), so a kit's section folds by hand too.
+// Which class or key each section of this build folds by (the "fold" hook).
 GVAR(foldKeys) = [];
 
-if (GVAR(focusKit) isNotEqualTo "") then {
-    private _worn = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+// The kits tab: the kit's section - its grid, or a note in its place - and where the kit lies, for the moves into and
+// out of it (einv_compat_efak_fnc_arsenalKit). Any other tab: where a kit lay is forgotten.
+private _kitSection = createHashMap;
 
-    _kitSections = [_display, [uniformContainer _worn, vestContainer _worn, backpackContainer _worn, _holder]] call FUNC(kitSections);
+if (_kitTab) then {
+    // Folded, a kit may still lie in a staging space made before.
+    _kitSection = [_picked, _preparing, _worn + [[_holder, GVAR(staging)] select _collapsed]] call EFUNC(compat_efak,arsenalKit);
 } else {
-    // No kit section: where the last ones lay is forgotten (einv_compat_efak_fnc_arsenalSections).
-    if (!isNil QEFUNC(compat_efak,arsenalSections)) then {
-        [[]] call EFUNC(compat_efak,arsenalSections);
+    if (!isNil QEFUNC(compat_efak,arsenalKit)) then {
+        [] call EFUNC(compat_efak,arsenalKit);
     };
 };
 
-private _kitMode = _kitSections isNotEqualTo [];
+private _kit = _kitSection getOrDefault ["kit", ""];
 
-// Another tab of ACE's left bar - uniform, vest, backpack, any other -, or a kit picked in its left list: the
-// panel is folded anew. The section of what was picked is open (the open container, or the kit's), every other
-// container's section folded to its caption, the staging space as it was; folds by hand hold until the next
-// switch. The order of the sections and the column's scroll stay as they are.
-private _tab = [_id, "kit:" + GVAR(focusKit)] select _kitMode;
+// Another tab of ACE's left bar - uniform, vest, backpack, any other -, or the kits tab opened: the panel is folded
+// anew. The section of what was picked is open (the open container, or the kit's), every other container's section
+// folded to its caption, the staging space as it was; folds by hand hold until the next switch. The order of the
+// sections and the column's scroll stay as they are. Another kit picked in the kits tab opens the kit's section
+// again and leaves the rest as it is.
+private _tab = [_id, "kits"] select _kitTab;
 
 if (_tab isNotEqualTo GVAR(foldTab)) then {
     GVAR(foldTab) = _tab;
@@ -118,22 +132,29 @@ if (_tab isNotEqualTo GVAR(foldTab)) then {
     if (_stagingFolded) then {
         GVAR(folded) set ["staging", true];
     };
-
-    {
-        _x set ["folded", false];
-    } forEach _kitSections;
 };
 
-if (_kitMode) then {
-    _container = objNull;
+if (_kitTab && {_kit isNotEqualTo GVAR(focusKit)}) then {
+    GVAR(folded) deleteAt KIT_FOLD_KEY;
 };
+
+// The kit shown, for the greying of the kits tab's rows by its cells (fnc_ungreyKit).
+GVAR(focusKit) = _kit;
 
 private _index = (_context getOrDefault ["ownSections", []]) findIf {(_x getOrDefault ["container", objNull]) isEqualTo _container};
 
-if (!_kitMode && {_id isEqualTo "" || {_index < 0}}) exitWith {[]};
+if (!_kitTab && {_id isEqualTo "" || {_index < 0}}) exitWith {[]};
 
-private _section = if (_kitMode) then {_kitSections select 0} else {(_context get "ownSections") select _index};
-private _rect = [_display, _container] call FUNC(panelRect);
+private _section = if (_kitTab) then {_kitSection} else {(_context get "ownSections") select _index};
+
+// As wide as what is shown needs: the open container, or the kit's grid and the soldier's containers.
+private _shownHolders = +_worn;
+
+if (_kit isNotEqualTo "") then {
+    _shownHolders pushBack ("kit:" + toLowerANSI _kit);
+};
+
+private _rect = [_display, [_container, _shownHolders] select _kitTab] call FUNC(panelRect);
 
 if (_rect isEqualTo []) exitWith {[]};
 
@@ -167,26 +188,37 @@ private _fnc_fold = {
     GVAR(foldKeys) pushBack [_object, _key];
 };
 
-if (!_kitMode) then {
+// The title row names and pictures the container - or the kit: no box with its picture beside the grid.
+_section set ["box", false];
+
+if (_kitTab) then {
+    _section set ["side", "own"];
+
+    // The kit's section keeps its scroll through another kit picked: one name for it in the set of what is shown.
+    _section set ["scrollClass", "kit"];
+
+    // No grid to show: a note in its place (fnc_drawNote). A grid: folded by its caption like a container's, under
+    // one key whichever kit it shows.
+    if ((_section getOrDefault ["note", ""]) isNotEqualTo "") then {
+        _section set ["drawer", QFUNC(drawNote)];
+    } else {
+        _section set ["foldKey", KIT_FOLD_KEY];
+        _section set ["folded", KIT_FOLD_KEY in GVAR(folded)];
+
+        GVAR(foldKeys) pushBack [KIT_FOLD_KEY, KIT_FOLD_KEY];
+    };
+} else {
     [_section, toLowerANSI (_section getOrDefault ["class", ""])] call _fnc_fold;
 };
 
-// The title row names and pictures the container: no box with its picture beside the grid.
-_section set ["box", false];
-
 private _sections = [_section];
-
-// A kit's grids, one per kit of the type: all of them in place of the containers.
-if (_kitMode) then {
-    _sections = +_kitSections;
-};
 
 // The other worn containers beside it, folded to their captions and unfolded by a click on them, so that things
 // can be dragged between all three; the staging space below is the same one in every tab. The order is always
-// uniform, vest, backpack: the open tab only decides which of them is unfolded.
-if (!_collapsed && {!_kitMode}) then {
-    private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
-    private _order = [uniformContainer _center, vestContainer _center, backpackContainer _center];
+// uniform, vest, backpack: the open tab only decides which of them is unfolded - none in the kits tab, whose kit
+// follows the backpack.
+if (!_collapsed) then {
+    private _order = _worn;
     private _all = [];
 
     {
@@ -206,6 +238,10 @@ if (!_collapsed && {!_kitMode}) then {
 
     _all sort true;
     _sections = _all apply {_x select 1};
+
+    if (_kitTab) then {
+        _sections pushBack _section;
+    };
 };
 
 if (!isNull _holder) then {
@@ -294,7 +330,7 @@ if (_collapsed) exitWith {
     private _pixels = (uiNamespace getVariable [QEGVAR(gui,keepPixels), createHashMap]) getOrDefault ["storage", -1];
 
     if (_pixels >= 0) then {
-        GVAR(collapsedScroll) = [_section getOrDefault ["class", ""], _pixels];
+        GVAR(collapsedScroll) = [_section getOrDefault ["scrollClass", _section getOrDefault ["class", ""]], _pixels];
     };
 
     GVAR(panelRect) = _rect;
@@ -323,7 +359,10 @@ if (_columnH < UNIT * 4) exitWith {[]};
 // centred in the row's height (TEXT_MID: a label draws its text from its top edge down).
 private _titleTop = _top + _padY;
 private _textX = _left + _padX;
-private _picture = [([_section getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]] call EFUNC(gui,safePicture);
+private _pictureClass = _section getOrDefault ["class", ""];
+private _picture = if (_pictureClass isEqualTo "") then {""} else {
+    [([_pictureClass] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]] call EFUNC(gui,safePicture)
+};
 
 if (_picture isNotEqualTo "") then {
     [_display, controlNull, [_textX, _titleTop, SQUARE(_titleH), _titleH], _picture] call EFUNC(gui,uiPicture);
@@ -338,7 +377,9 @@ private _headTop = _titleTop + _titleH / 2 - TEXT_MID * _headSize;
 // The fold button is a square as high as the row at its right end; the name ends a gap before it.
 private _buttonW = SQUARE(_titleH);
 private _headW = _left + _width - _padX - _textX - _buttonW - SQUARE(_titleH * 0.3);
-private _title = [[_section getOrDefault ["title", ""], _theme] call EFUNC(gui,caption), _headW, _headFont, _headSize] call EFUNC(gui,fitText);
+private _title = [
+    [_section getOrDefault ["panelTitle", _section getOrDefault ["title", ""]], _theme] call EFUNC(gui,caption), _headW, _headFont, _headSize
+] call EFUNC(gui,fitText);
 
 [
     _display, controlNull, [_textX, _headTop, _headW, _titleTop + _titleH - _headTop], _title, _headSize,
@@ -373,7 +414,7 @@ private _button = [
 // (the engine hands the pixels on to the column it draws, einv_gui_fnc_drawColumn, fnc_build).
 GVAR(collapsedScroll) params ["_scrollClass", "_scrollPixels"];
 
-if (_scrollClass isEqualTo (_section getOrDefault ["class", ""]) && {_scrollPixels > 0}) then {
+if (_scrollClass isEqualTo (_section getOrDefault ["scrollClass", _section getOrDefault ["class", ""]]) && {_scrollPixels > 0}) then {
     (uiNamespace getVariable [QEGVAR(gui,keepPixels), createHashMap]) set ["storage", _scrollPixels];
 };
 
@@ -448,9 +489,9 @@ private _fnc_draw = {
 };
 
 // The scroll position is kept across every rebuild (einv_gui_fnc_build deleted the old group already, it kept the
-// pixels): only another set of shown containers starts at the top. Set at once and a frame later, as a new group
-// does not know its height before.
-private _setKey = (_sections apply {_x getOrDefault ["class", ""]}) joinString "|";
+// pixels): only another set of shown containers starts at the top - another kit picked in the kits tab is the same
+// set ("scrollClass"). Set at once and a frame later, as a new group does not know its height before.
+private _setKey = (_sections apply {_x getOrDefault ["scrollClass", _x getOrDefault ["class", ""]]}) joinString "|";
 private _keepMap = uiNamespace getVariable [QEGVAR(gui,keepPixels), createHashMap];
 private _pixels = (_keepMap getOrDefault ["storage", 0]) max 0;
 

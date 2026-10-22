@@ -8,6 +8,14 @@
  * the weight text and its greying of rows. The rows ACE greys by weight are lit again afterwards where the
  * grid has room (fnc_ungrey).
  *
+ * While Enhanced First Aid Kits' kits tab lies over ACE's panels (fnc_focusedKit) ACE's list is hidden under it, and
+ * the list shown counts what the picked kit holds by itself - that mod's own, from the kit's contents that every
+ * change writes (efak_core_contentsChanged). What ACE keeps of the soldier is kept right all the same: its record of
+ * the uniform's, vest's and backpack's items (ace_arsenal_currentItems) - things move between them and the kit - and
+ * the weight beside its menu bar, three frames later: a kit's own weight reaches the soldier's load a frame after its
+ * contents change, which that mod's tab waits for as well (efak_arsenal_fnc_flush). ACE's updateRightPanel is not
+ * asked then: it would show its "Remove all" over that tab.
+ *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
  *
@@ -24,10 +32,46 @@ disableSerialization;
 
 params [["_display", displayNull, [displayNull]]];
 
+private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+
+if ((([_display] call FUNC(focusedKit)) select 0)) exitWith {
+    if (isNull _center) exitWith {};
+
+    private _current = missionNamespace getVariable [QACEGVAR(arsenal,currentItems), []];
+
+    if (_current isEqualType [] && {count _current > ARSENAL_ITEMS_BACKPACK}) then {
+        private _loadout = getUnitLoadout _center;
+
+        {
+            _x params ["_itemsIndex", "_loadoutIndex"];
+
+            _current set [_itemsIndex, (_loadout select _loadoutIndex) param [1, []]];
+        } forEach [
+            [ARSENAL_ITEMS_UNIFORM, LOADOUT_UNIFORM], [ARSENAL_ITEMS_VEST, LOADOUT_VEST], [ARSENAL_ITEMS_BACKPACK, LOADOUT_BACKPACK]
+        ];
+    };
+
+    if (isNil QACEFUNC(common,getWeight)) exitWith {};
+
+    // Three frames on: the next frame's script, twice more.
+    [{
+        [{
+            [{
+                params ["_display", "_center"];
+
+                if (isNull _display || {isNull _center}) exitWith {};
+
+                (_display displayCtrl ARSENAL_IDC_WEIGHT) ctrlSetText format [
+                    "%1 (%2)", _center call ACEFUNC(common,getWeight), [_center, 1] call ACEFUNC(common,getWeight)
+                ];
+            }, _this] call EFUNC(gui,later);
+        }, _this] call EFUNC(gui,later);
+    }, [_display, _center]] call EFUNC(gui,later);
+};
+
 (call FUNC(selected)) params ["_id", "_container", "", "_itemsIndex", "_loadoutIndex"];
 
 private _list = _display displayCtrl ARSENAL_IDC_LIST;
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
 
 if (isNull _container || {isNull _list}) exitWith {};
 

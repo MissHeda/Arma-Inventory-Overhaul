@@ -1,11 +1,11 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * How many new items of a class a kit takes in the ACE Arsenal - dragged out of ACE's list onto the
- * kit's tile in the panel (einv_arsenal_fnc_dragCheck, fnc_packNew). In this order:
- *   its contents have not reached this machine yet (fnc_notReady)
- *   the kit type's Arsenal setting in Enhanced First Aid Kits - only a type that may be changed
- *   entirely there takes new things (efak_core_fnc_canPackInto with the Arsenal; Eden always)
+ * How many new items of a class a kit takes in the ACE Arsenal - dragged out of ACE's list or the kits tab's
+ * list onto the kit's grid or tile in the panel, Ctrl and the wheel over its tile (einv_arsenal_fnc_listToKit,
+ * fnc_packNew), and the greying of the kits tab's rows (einv_arsenal_fnc_ungreyKit). In this order:
+ *   whether the kit may be filled there (fnc_arsenalEditable): its contents have reached this machine, the kit
+ *   type's Arsenal setting lets things in (Eden always), the kit does not follow the default contents
  *   the kit (fnc_canPack): that mod's rules for it - kits in kits, its list, its types, medical only,
  *   its defaults -, and its room in the measure it is counted in (fnc_roomMode): that mod's capacity,
  *   or the free cells of a grid a rule or its config gives the kit, whatever the capacity says
@@ -29,13 +29,9 @@ params [["_kit", "", [""]], ["_class", "", [""]], ["_count", 1, [0]]];
 
 if (_kit isEqualTo "" || {_class isEqualTo ""} || {_count < 1} || {!([_kit] call FUNC(isKit))}) exitWith {[0, "Failed"]};
 
-private _wait = [] call FUNC(notReady);
+private _locked = [_kit, true] call FUNC(arsenalEditable);
 
-if (_wait isNotEqualTo "") exitWith {[0, _wait]};
-
-if (!isNil QEFAKFUNC(core,canPackInto) && {!([_kit, true] call EFAKFUNC(core,canPackInto))}) exitWith {
-    [0, LLSTRING(ArsenalReadOnly)]
-};
+if (_locked isNotEqualTo "") exitWith {[0, _locked]};
 
 ([_kit, _class, _count] call FUNC(canPack)) params ["_ok", "_why"];
 

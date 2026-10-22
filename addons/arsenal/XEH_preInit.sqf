@@ -54,12 +54,22 @@ GVAR(stagingCount) = 0;
 
 // The panel's folded sections while ACE's window is open, container class (or "staging") -> true, and
 // which class each section of the last build showed, [[container, class], ...] (fnc_layout, the "fold"
-// hook); the tab - or "kit:" and the kit picked - the folds were last set anew for, as a switch folds the panel
-// anew (fnc_layout).
+// hook); the tab - or "kits" for Enhanced First Aid Kits' kits tab - the folds were last set anew for, as a
+// switch folds the panel anew (fnc_layout).
 GVAR(folded) = createHashMap;
 GVAR(foldKeys) = [];
 GVAR(foldTab) = "";
+
+// Enhanced First Aid Kits' kits tab as last seen, [open, class of the row picked, being made ready] - by the frame
+// hook, which sets the tab's state against it, or a build (fnc_onFrame, fnc_layout) -, and as the last build showed
+// it (fnc_ungreyKit waits for that); the kit whose grid the panel shows there, "" for none; that kit's answers to
+// one more of each class, [the kit's state, lowercase class -> 1 or 0] (fnc_ungreyKit); when the tab's rows are
+// greyed again next (diag_tickTime).
+GVAR(focusSeen) = [false, "", false];
+GVAR(focusBuilt) = [false, "", false];
 GVAR(focusKit) = "";
+GVAR(kitVerdicts) = [[], createHashMap];
+GVAR(kitUngreyAt) = 0;
 
 // The whole panel folded to its title bar (the button at the right end of the title row, fnc_toggleCollapse):
 // kept for the session and, per player, in the profile; where the column was scrolled to when it folded,
@@ -68,10 +78,12 @@ GVAR(focusKit) = "";
 GVAR(collapsed) = [profileNamespace getVariable [QGVAR(collapsed), false]] param [0, false, [false]];
 GVAR(collapsedScroll) = ["", 0];
 GVAR(listDragClass) = "";
+GVAR(listDragIdc) = ARSENAL_IDC_LIST;
 GVAR(unfoldSince) = -1;
 
-// A left press on a row of ACE's list that may yet become a drag of its item, [where, shift, frame, row]
-// or [] (fnc_onListPress, fnc_onFrame); the row the list picked last, [row, frame] or [] (fnc_listDrag); a move
+// A left press on a row of ACE's list (or the kits tab's) that may yet become a drag of its item, [where, shift,
+// frame, row, the list's IDC] or [] (fnc_onListPress, fnc_onFrame); the row a list picked last, [row, frame, the
+// list's IDC] or [] (fnc_listDrag); a move
 // into or out of the staging space waited for, to tell ACE, [container, class, count before, until] or []
 // (fnc_onDrop); where the column stood when Ctrl and the wheel changed a tile, [pixels, until frame] or []
 // (fnc_onWheel); Ctrl held (fnc_onKey).

@@ -1,16 +1,17 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * An item dragged out of ACE's list over a kit's tile in the panel (the "dragCheck" hook, fnc_dragCheck):
- * it goes into that kit, wherever the kit lies - the open container or the staging space. The cell under
+ * An item dragged out of ACE's list - or the list of Enhanced First Aid Kits' kits tab - over a kit's tile in the
+ * panel (the "dragCheck" hook, fnc_dragCheck): it goes into that kit, wherever the kit lies - a container or the
+ * staging space. The cell under
  * the mouse decides, as in the inventory: the footprint's corner plus where the item was taken by
- * (einv_gui_press), or the cell the engine names. The kit answers (einv_compat_efak_fnc_canPackNew): the kit type's Arsenal setting in
- * Enhanced First Aid Kits, that mod's rules for it, and its room in the measure it is counted in
+ * (einv_gui_press), or the cell the engine names. The kit answers (einv_compat_efak_fnc_canPackNew): whether it may be
+ * filled in the arsenal (the kit type's Arsenal setting, a kit that follows the default contents), that mod's rules
+ * for it, and its room in the measure it is counted in
  * (einv_compat_efak_fnc_roomMode) - that mod's capacity, or the free cells of a grid a rule or its config
  * gives the kit, never the capacity then. Green when some of them fit - the hint says how many -, red
- * with the reason when none does. The same over a cell of the grid of a kit unfolded in the panel
- * (fnc_kitSections): the engine's grid target stands, with the kit's verdict. EFAK's own kits tab of ACE's
- * window stays as it is.
+ * with the reason when none does. The same over a cell of the kit's grid in the kits tab (fnc_layout): the
+ * engine's grid target stands, with the kit's verdict.
  *
  * Arguments:
  * 0: The engine's target, a grid's ["grid", index, col, row, ...] <ARRAY>
@@ -34,7 +35,7 @@ private _grid = (uiNamespace getVariable [QEGVAR(gui,grids), []]) param [_target
 
 if (count _grid == 0 || {(_grid getOrDefault ["source", ""]) isNotEqualTo ""}) exitWith {[]};
 
-// A kit's own grid in the panel (fnc_kitSections): the item is let go on a cell of it, the kit's first free
+// The kit's own grid in the kits tab (fnc_layout): the item is let go on a cell of it, the kit's first free
 // spot taking it when that cell is not free.
 private _gridKit = _grid getOrDefault ["kit", ""];
 private _tileIndex = -1;

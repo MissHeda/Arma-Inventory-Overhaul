@@ -31,6 +31,10 @@ if (isNull _display || {_before == _after}) exitWith {};
 
 (call FUNC(selected)) params ["", "", "_panel"];
 
+// No container's tab open - Enhanced First Aid Kits' kits tab over ACE's panels: ACE's list takes nothing to hear
+// of (fnc_syncAce keeps ACE's record of the containers right then).
+if (_panel < 0) exitWith {};
+
 if (isNil QACEFUNC(arsenal,fireItemsChangedEvent)) exitWith {
     [_display] call FUNC(reconcile);
     [] call FUNC(settle);

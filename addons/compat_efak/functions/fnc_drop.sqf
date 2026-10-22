@@ -124,16 +124,21 @@ if (_fromKit isNotEqualTo "") then {
     _wait = switch (true) do {
         case (isNull _fromWhere || {isNull _fromRoot}): {"Failed"};
         case (!([_fromWhere] call FUNC(mayReach))): {LLSTRING(NotYours)};
-        // In ACE Arsenal's window the kit type's Arsenal setting decides, as for Remove there (fnc_discard).
-        case (
-            !([] call EFUNC(gui,isInventoryMode)) && {!isNil QEFAKFUNC(core,canPackInto)}
-            && {!([_fromKit, true] call EFAKFUNC(core,canPackInto))}
-        ): {LLSTRING(ArsenalReadOnly)};
+        // In ACE Arsenal's window the kits tab's rules decide whether it lets things out, as for Remove there
+        // (fnc_discard): "Remove only" does, a kit that follows the default contents does not (fnc_arsenalEditable).
+        case (!([] call EFUNC(gui,isInventoryMode))): {[_fromKit, false] call FUNC(arsenalEditable)};
         default {[_fromWhere, "items"] call EFUNC(gui,checkTouch)};
     };
 };
 
 if (_wait isNotEqualTo "") exitWith {[_wait] call _fnc_refuse};
+
+// In ACE Arsenal's window what Enhanced First Aid Kits' kits tab still has staged is written before a kit changes
+// (fnc_arsenalFlush): the move is checked against the kit as that tab shows it, and nothing of the tab is replayed
+// onto it afterwards.
+if (!([] call EFUNC(gui,isInventoryMode)) && {_fromKit isNotEqualTo "" || {_toKit isNotEqualTo ""}}) then {
+    [] call FUNC(arsenalFlush);
+};
 
 // ----- Into a kit -----
 if (_toKit isNotEqualTo "") exitWith {
