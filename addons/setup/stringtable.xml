@@ -649,6 +649,9 @@
         <Key ID="STR_einv_setup_Filter_Weapons">
             <English>Weapons</English>
         </Key>
+        <Key ID="STR_einv_setup_General_CbaNote">
+            <English>These are the same settings as in CBA's Addon Options &gt; %1, and both stay in sync. Either place works; this page is the recommended one.</English>
+        </Key>
         <Key ID="STR_einv_setup_General_Title">
             <English>General</English>
         </Key>
@@ -1088,10 +1091,10 @@
             <English>client values never count for this setting - switch to the Server or Mission tab.</English>
         </Key>
         <Key ID="STR_einv_setup_Reason_LockedMission">
-            <English>the mission's cba_settings.sqf sets it - a change here would be lost on the next restart.</English>
+            <English>the mission's cba_settings.sqf sets the rules - a change here would be lost on the next restart.</English>
         </Key>
         <Key ID="STR_einv_setup_Reason_LockedServer">
-            <English>the server's cba_settings.sqf sets it - a change here would be lost on the next restart.</English>
+            <English>the server's cba_settings.sqf sets the rules - a change here would be lost on the next restart.</English>
         </Key>
         <Key ID="STR_einv_setup_Reason_NoAdmin">
             <English>only the server or a logged-in admin can change it.</English>
@@ -1219,6 +1222,12 @@
         <Key ID="STR_einv_setup_Scope_TreeNote">
             <English>Applies to %1 and the %2 classes built on it as one rule, class=%3+. A class with its own rule keeps it.</English>
         </Key>
+        <Key ID="STR_einv_setup_Setting_LockedMission">
+            <English>Set by the mission's cba_settings.sqf - change it there.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Setting_LockedServer">
+            <English>Set by the server's cba_settings.sqf - change it there.</English>
+        </Key>
         <Key ID="STR_einv_setup_Source_client">
             <English>Client</English>
         </Key>
@@ -1250,7 +1259,7 @@
             <English>Vests</English>
         </Key>
         <Key ID="STR_einv_setup_Text_Cba">
-            <English>CBA line</English>
+            <English>CBA lines</English>
         </Key>
         <Key ID="STR_einv_setup_Text_CbaNote">
             <English>For a cba_settings.sqf, or CBA's own Import.</English>
@@ -1296,6 +1305,9 @@
         </Key>
         <Key ID="STR_einv_setup_Topic_extras">
             <English>Hotbar, repacking and locks</English>
+        </Key>
+        <Key ID="STR_einv_setup_Topic_look">
+            <English>Look</English>
         </Key>
         <Key ID="STR_einv_setup_Topic_looting">
             <English>Looting and searching</English>

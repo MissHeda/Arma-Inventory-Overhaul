@@ -1,30 +1,29 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The text the wizard starts from - what is in use where it saves - for one of its two settings, the rules or
- * the server settings:
+ * The rules text the wizard starts from - what is in use where it saves:
  *   - menu mode: what CBA's menu shows for the source picked there, a change not yet confirmed in the menu
  *     first (CBA keeps those in its temporary values until OK).
  *   - direct mode: the value of the source the wizard saves to, when that source has one of its own; the
  *     value in effect otherwise - what a player sees in the game, and what a mission maker starts from in
  *     Eden while the scenario has none yet.
+ * The server settings are fnc_activeSettings'.
  *
  * Arguments:
- * 0: The setting, RULES_SETTING or SETTINGS_SETTING <STRING> (default: the rules)
+ * 0: The setting <STRING> (default: the rules, RULES_SETTING)
  *
  * Return Value:
  * Text <STRING>
  *
  * Example:
  * call einv_setup_fnc_getActive;
- * [SETTINGS_SETTING] call einv_setup_fnc_getActive;
  *
  * Public: No
  */
 
 params [["_setting", RULES_SETTING, [""]]];
 
-private _default = [RULES_DEFAULT, ""] select (_setting isEqualTo SETTINGS_SETTING);
+private _default = RULES_DEFAULT;
 
 if (isNil "cba_settings_fnc_get") exitWith {
     private _value = missionNamespace getVariable [_setting, _default];

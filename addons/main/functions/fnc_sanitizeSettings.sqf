@@ -1,15 +1,15 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Cleans the text of the server settings as it is typed - CBA runs this on every key press in the text box's
- * row. CBA's own export, its import and every cba_settings.sqf split their lines at ";" without minding
+ * Cleans a text of server settings that came from outside - the line of the settings box of the test builds
+ * (einv_main_settings) pasted into the setup wizard's Import (einv_setup_fnc_importSettings). CBA's own export,
+ * its import and every cba_settings.sqf split their lines at ";" without minding
  * quotes, so one ";" in a value would break all of them: semicolons and line breaks become commas, which part
  * the statements just as well, and quotes, "#" and backslashes go - a cba_settings.sqf is run through the
- * preprocessor, where they mean something else. The text is the setup wizard's to write
- * (fnc_writeSettings); this only keeps a hand-typed one from doing harm.
+ * preprocessor, where they mean something else.
  *
  * Arguments:
- * The text itself, not in an array - CBA calls it that way <STRING>
+ * The text itself, not in an array - the way CBA called it while it was the box's sanitizer <STRING>
  *
  * Return Value:
  * The cleaned text <STRING>

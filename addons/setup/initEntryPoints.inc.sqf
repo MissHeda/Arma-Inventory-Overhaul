@@ -8,6 +8,8 @@
 
 // ESC > Options > Inventory setup. The engine makes the wizard over the pause menu itself; the wizard
 // then opens in direct mode at its first step (its onLoad), the way every entry outside CBA's menu does.
-// CBA's entries carry no condition, so it is there for everyone: for a player who may not open it
-// (fnc_canOpen), the wizard's onLoad closes it again with a hint (fnc_canOpen).
+// CBA's entries carry no condition, so the entry is in CBA's list for everyone, and taken off the pause menu
+// again as it opens for a player who may not see the wizard (fnc_canOpen, asked every time: fnc_initPauseMenu,
+// Extended_DisplayLoad_EventHandlers in CfgEventHandlers.hpp). Should that ever miss, the wizard's onLoad
+// still closes it again without a word.
 [[LLSTRING(OpenWizard), LLSTRING(OpenWizard_Tooltip)], QGVAR(RscWizard)] call CBA_fnc_addPauseMenuOption;

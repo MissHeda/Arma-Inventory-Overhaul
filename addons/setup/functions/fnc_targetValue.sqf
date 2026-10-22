@@ -11,7 +11,7 @@
  * may not save, the text in use.
  *
  * Arguments:
- * 0: The setting, RULES_SETTING or SETTINGS_SETTING <STRING> (default: the rules)
+ * 0: The setting <STRING> (default: the rules, RULES_SETTING)
  *
  * Return Value:
  * [value, priority] <ARRAY>

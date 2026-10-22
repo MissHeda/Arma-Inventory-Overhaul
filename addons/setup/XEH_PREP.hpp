@@ -13,10 +13,12 @@ PREP(restoreScroll);
 PREP(runDeferred);
 
 // Who may open it at all and save where, what is in use, and the draft being edited: the rules and the server
-// settings, two settings that are one setup
+// settings, one setup
 PREP(canOpen);
 PREP(canEdit);
 PREP(getActive);
+PREP(activeSettings);
+PREP(onSettingChanged);
 PREP(targetValue);
 PREP(targetValues);
 PREP(setDraft);

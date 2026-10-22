@@ -6,7 +6,8 @@
  * Ctrl+V - a paste box, as CBA's own Import is one: it works for every player, where a script reading the
  * clipboard would not -, then take it instead of the own setup, or add its statements to the own ones
  * (fnc_importText). The lines of a cba_settings.sqf or CBA's Export may carry the server settings as well
- * (einv_main_settings, fnc_importSettings): added, the settings the text names are set and the others stay;
+ * (one line each, or the settings box of the test builds - fnc_importSettings): added, the settings the text names
+ * are set and the others stay;
  * instead of the own setup, the ones it does not name go back to their defaults. Either way it only changes the
  * draft, rules and settings in one undo step: Save is still to come, and Undo takes it back.
  *
@@ -56,8 +57,10 @@ params ["_display", ["_anchor", [], [[]]]];
         };
 
         private _ast = [GVAR(importText)] call FUNC(importText);
-        private _settingsText = [GVAR(importText)] call FUNC(importSettings);
-        private _hasSettings = _settingsText isNotEqualTo "";
+
+        ([GVAR(importText)] call FUNC(importSettings)) params ["_named", "_settingWarnings"];
+
+        private _hasSettings = count _named > 0;
 
         if (count _ast == 0 && {!_hasSettings}) exitWith {
             [LLSTRING(Import_Nothing), "loss"] call FUNC(setHint);
@@ -102,8 +105,6 @@ params ["_display", ["_anchor", [], [[]]]];
         private _count = 0;
 
         if (_hasSettings) then {
-            ([_settingsText] call EFUNC(main,parseSettings)) params ["_named", "_settingWarnings"];
-
             _warnings = _warnings + _settingWarnings;
             _count = count _named;
             _values = [createHashMap, +GVAR(draftSettings)] select _add;

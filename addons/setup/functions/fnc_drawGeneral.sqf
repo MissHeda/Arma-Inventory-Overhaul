@@ -4,9 +4,9 @@
  * Author: Miss Heda
  * Step 1, General: what holds for everything, top to bottom in one page that scrolls.
  *   - The title, where Save goes (or why it may not, in red), the switch to force it over the mission's own setup
- *     where that is allowed, and the buttons for the setup as a whole: Import, Export (the setup as text,
- *     fnc_openExport) and Reset to default. Under them, only when there are
- *     any, what the rules engine left out of the text it read.
+ *     where that is allowed, a line that says these are the very settings of CBA's Addon Options as well, and the
+ *     buttons for the setup as a whole: Import, Export (the setup as text, fnc_openExport) and Reset to default.
+ *     Under them, only when there are any, what the rules engine left out of the text it read.
  *   - Containers: for each kind - uniforms, vests, backpacks, vehicles, crates - Auto, the size its load gives
  *     (see below), or Fixed, every container of that kind the same size across x down. The rule all kind=uniform >
  *     grid=5x5 of the text (fnc_kindRule, fnc_upsertKinds), which the engine asks after every rule, mod and table
@@ -16,10 +16,12 @@
  *   - Categories (fnc_drawCategories): the eight built-in categories - names and pictures can be changed - and the ones the setup
  *     defines itself, which items are put in, compartments accept and the strip at the side of a loot box lists. Add, rename,
  *     pick a picture, delete; the statements category=... of the rules text.
- *   - The server settings, by topic (GVAR(topics)): everything of this mod that is the same for everyone, each a control of
- *     its own kind - a switch, a stepper, a drop-down, a text box - with a small reset button while it is off its
- *     default. They are registered by their addons (einv_main_fnc_addSetting) and saved in one CBA text box,
- *     einv_main_settings (fnc_setSetting, fnc_commitSettings). What a player sets for themselves stays in CBA's menu.
+ *   - The server settings, by topic (einv_main_topics): everything of this mod that is the same for everyone, each a
+ *     control of its own kind - a switch, a stepper, a drop-down, a text box - with a small reset button while it is
+ *     off its default. They are registered by their addons (einv_main_fnc_addSetting), each a CBA setting of its own
+ *     as well, and show the values in effect; Save writes each one changed through CBA (fnc_setSetting,
+ *     fnc_commitSettings, fnc_save). One the source's cba_settings.sqf sets is greyed, with why in its tooltip.
+ *     What a player sets for themselves stays in CBA's menu.
  *   - What you changed: everything above that is off the default, and what the classes change on top of it
  *     (fnc_drawChanges "default") - the cell size, a server setting, the size of a kind of container, a category, a class
  *     that is 5x5 -, each in words, to open at its class or take back.
@@ -197,6 +199,11 @@ if (GVAR(readOnly)) then {
         _cursorY = _cursorY + UNIT * 1.05 + UNIT * 0.1;
     };
 };
+
+// The same settings are rows of CBA's Addon Options: say so, and which place is the better one.
+_cursorY = _cursorY + ([
+    _display, _page, [_padX, _cursorY, _innerW], format [LLSTRING(General_CbaNote), CBA_SETTINGS_EINV_SERVER], TEXT_SMALL, _muted, _font
+] call FUNC(uiText)) + UNIT * 0.1;
 
 _cursorY = _cursorY + _gapY;
 
@@ -461,7 +468,7 @@ private _topics = [];
 private _named = [];
 
 {
-    _x params ["_id", "_names"];
+    _x params ["_id", "", "_names"];
 
     private _inTopic = _names select {_x in _shown};
 
@@ -470,7 +477,7 @@ private _named = [];
     if (_inTopic isNotEqualTo []) then {
         _topics pushBack [_id, _inTopic];
     };
-} forEach GVAR(topics);
+} forEach (missionNamespace getVariable [QEGVAR(main,topics), []]);
 
 private _others = _shown select {!(_x in _named)};
 
@@ -481,6 +488,11 @@ if (_others isNotEqualTo []) then {
 private _columnGap = SQUARE(UNIT * 1.2);
 private _columnW = (_cardW - _columnGap) / 2;
 
+// A setting the source's cba_settings.sqf sets is greyed: a change here would be lost at the next restart, and Save
+// leaves it out (fnc_canEdit).
+private _lockedSettings = _target getOrDefault ["lockedSettings", []];
+private _lockedWhy = [LLSTRING(Setting_LockedServer), LLSTRING(Setting_LockedMission)] select ((_target getOrDefault ["source", ""]) isEqualTo "mission");
+
 // One setting's row: its label (the tooltip is its description), its control by its kind, and its reset button
 // while it is off its default - all in the room of _w, a column or a whole line.
 private _fnc_setting = {
@@ -490,15 +502,20 @@ private _fnc_setting = {
     private _type = _entry get "type";
     private _default = _entry get "default";
     private _isOff = _name in GVAR(draftSettings);
+    private _locked = _name in _lockedSettings;
     private _value = GVAR(draftSettings) getOrDefault [_name, _default];
     private _tip = _entry get "tip";
     private _labelW = _w * 0.46;
     private _controlX = _left + _labelW + _gap;
     private _controlW = _w - _labelW - _gap - _rowH - _gap;
 
+    if (_locked) then {
+        _tip = _lockedWhy + toString [10, 10] + _tip;
+    };
+
     private _label = [
         _display, _page, [_left, _y, _labelW, _rowH], [_entry get "label", _labelW, _font, TEXT_BODY] call EFUNC(gui,fitText), TEXT_BODY,
-        [_colorText2, _accent] select _isOff, _font, 0
+        [[_colorText2, _accent] select _isOff, _muted] select _locked, _font, 0
     ] call EFUNC(gui,uiLabel);
 
     _label ctrlSetTooltip ((_entry get "label") + toString [10, 10] + _tip);
@@ -509,7 +526,7 @@ private _fnc_setting = {
                 params ["_on", "_name"];
 
                 [_name, _on] call FUNC(setSetting);
-            }, _name, true, ""] call FUNC(uiToggle);
+            }, _name, !_locked, ""] call FUNC(uiToggle);
 
             (_controls select (count _controls - 1)) ctrlSetTooltip _tip;
         };
@@ -536,7 +553,7 @@ private _fnc_setting = {
                     private _factor = 10 ^ _decimals;
 
                     [_name, (round (_new * _factor)) / _factor] call FUNC(setSetting);
-                }, [_name, _decimals], "%1", true, _tip
+                }, [_name, _decimals], "%1", !_locked, _tip
             ] call FUNC(uiStepper);
         };
         case "LIST": {
@@ -551,18 +568,25 @@ private _fnc_setting = {
                 params ["_new", "_name"];
 
                 [_name, _new] call FUNC(setSetting);
-            }, _name] call FUNC(uiDropdown);
+            }, _name, !_locked] call FUNC(uiDropdown);
         };
         default {
-            [_display, _page, [_controlX, _y, _controlW, _rowH], _value, "", _theme, {
-                params ["_new", "_name"];
+            // A text field has no greyed look: a locked one shows its text instead.
+            if (_locked) then {
+                private _valueLabel = [_display, _page, [_controlX, _y, _controlW, _rowH], [_value, _controlW, _font, TEXT_BODY] call EFUNC(gui,fitText), TEXT_BODY, _muted, _font, 0] call EFUNC(gui,uiLabel);
 
-                [_name, _new] call FUNC(setSetting);
-            }, _name, _tip] call FUNC(uiField);
+                _valueLabel ctrlSetTooltip _tip;
+            } else {
+                [_display, _page, [_controlX, _y, _controlW, _rowH], _value, "", _theme, {
+                    params ["_new", "_name"];
+
+                    [_name, _new] call FUNC(setSetting);
+                }, _name, _tip] call FUNC(uiField);
+            };
         };
     };
 
-    if (_isOff) then {
+    if (_isOff && {!_locked}) then {
         [_display, _page, [_left + _w - _rowH, _y, _rowH, _rowH], _theme, {
             params ["_name"];
 

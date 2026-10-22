@@ -1,10 +1,11 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Writes server settings as the text einv_main_settings holds (fnc_parseSettings reads it): the header einv1,
+ * Writes server settings as the setup wizard's short text of them (fnc_parseSettings reads it): the header einv1,
  * then every setting that is not at its default as key=value, in the order they were registered, one canonical
  * way - so two setups that mean the same compare as texts. Nothing at its default is written, and no setting
- * at all gives an empty text: the CBA setting stays what it is until someone changes something.
+ * at all gives an empty text. The settings themselves are CBA settings of their own; this text is the wizard's
+ * draft and nothing CBA stores.
  *
  * Arguments:
  * 0: The settings, setting's name -> value <HASHMAP>

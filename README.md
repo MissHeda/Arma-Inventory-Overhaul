@@ -67,7 +67,8 @@ Tools).
 
 How big items are, how many share a tile and how containers are split up is one text of rules, the
 CBA setting "Inventory rules" (`einv_items_rules`), the same for everyone. The setup wizard writes it for you
-(ESC > Options > Inventory setup, Eden's Tools menu, the cog in the inventory - shown only to the server, the host, single player and logged-in admins, other players never see it).
+(ESC > Options > Inventory setup, the "Inventory setup" button on CBA's Addon Options, Eden's Tools menu, the cog in the inventory - shown only to the server, the host,
+single player and logged-in admins, other players never see it: the pause menu leaves the entry out and CBA's menu hides the button).
 Its three pages:
 
 - **General** is what holds for everything. *Containers:* for uniforms, vests, backpacks, vehicles and crates, Auto - the size
@@ -97,16 +98,19 @@ the mod that adds them (ACE, ACM) is loaded. In crates, vehicles and piles on th
 their load. A text that names a preset of an older version (`base=realism`, `weight`, `tarkov`) reads as the default. Grids are ten cells wide.
 
 - **Server settings:** every setting of this mod that is the same for everyone - searching, the hands' times, living persons, weight, the hotbar, repacking,
-  locks, the vanilla arsenal, the stack multiplier of crates - is a control of the wizard's General page and no row of CBA's menu. They are saved in one CBA text box, `einv_main_settings`
-  (a server's or a mission's, forced or not, like the rules), as `einv1, gui_searchTime=0.6, weight_enabled=0`: the setting's name without `einv_`, a value
-  (`1` or `0` for a switch, a number, the value of a choice, free text with a `%` and four hex digits for what is not a letter, a digit, `-` or `.`), only what is off its
-  default. On every machine the text is read into the variables the mod has always read, under the same names, with the same scripts, so a script that sets
-  `einv_weight_heavyAt` or reads `einv_gui_searchBodies` knows nothing of it. A `cba_settings.sqf` sets it with one line
-  (`force force einv_main_settings = "einv1, weight_enabled=0";`); the wizard's Export gives that line. A mission whose `cba_settings.sqf` has lines for the old settings
-  (`einv_gui_searchTime = 0.6;`), or that saved them in Eden's addon options, keeps working as long as the text box is empty: those values are taken as if the text said them (the server's own
-  profile and `cba_settings.sqf` are not read - set them in the wizard again). What players set for themselves (tile scale, tile names, keys, the
-  hotbar's look) stays in CBA's menu, per player, in the category "Arma Inventory Overhaul - Client". The box itself, the old tables (`einv_items_sizeTable`, `stackTable`, `einv_storage_containerTable`) and the rules text stay
-  CBA text boxes of their own, in the category "Arma Inventory Overhaul - Server" (the setting names do not carry the category, so a `cba_settings.sqf` is the same under either).
+  locks, the vanilla arsenal, the stack multiplier of crates, whether players may pick their colours - is in two places at once, which are one and the same:
+  a control of the wizard's General page, and a row of CBA's Addon Options, category "Arma Inventory Overhaul - Server", by topic. Change it in either and the
+  other shows it - the wizard follows a change made in CBA's menu even while it is open, and what the wizard saves is what CBA's Server tab (in Eden its Mission
+  tab) shows. We recommend the wizard; CBA's menu is 1:1 the same, and its first row says so. Each is a plain CBA setting under its own name
+  (`einv_gui_searchTime`, `einv_weight_enabled`, ...), saved by the server, the mission or a `cba_settings.sqf`, forced or not, like the rules - so a
+  `cba_settings.sqf` line `force einv_gui_searchTime = 0.6;` works, and the wizard's Export gives those lines. A setting set in the server's or the mission's
+  `cba_settings.sqf` is greyed in the wizard: change it in that file. Saving in the wizard writes only what you changed, so a value the mission sets is never
+  copied into the server's profile. The test builds 0.4.27 to 0.5.42 kept these settings in one text box, `einv_main_settings`; whatever is still saved
+  there - in the server's profile or file, a mission or a scenario - is moved into the settings of their own by itself (the server's profile once and for
+  good, a scenario as you open the wizard or CBA's menu in Eden; save the scenario then). What players set for themselves (tile scale, tile names, keys, the
+  hotbar's look) stays in CBA's menu, per player, in the category "Arma Inventory Overhaul - Client". The old tables (`einv_items_sizeTable`, `stackTable`,
+  `einv_storage_containerTable`) and the rules text are CBA text boxes of the Server category too (the setting names do not carry the category, so a
+  `cba_settings.sqf` is the same under either).
 
 - **Your own classes and kits:** `class=X+` covers X and every class built on it, from any mod -
   `class=My_Medic_Kit+ > size=2x2 stack=1 weight=1.5 name=Medic_kit`. A later rule beats an earlier one.

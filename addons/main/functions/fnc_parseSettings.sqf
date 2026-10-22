@@ -1,7 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Reads the text of the server settings (einv_main_settings) - the way the rules text is read: statements
+ * Reads a text of server settings - the setup wizard's own short form of them (its draft, undo steps and
+ * changes compare as such texts), and what the settings box of the test builds, einv_main_settings, held
+ * (fnc_migrateSettings) - the way the rules text is read: statements
  * separated by commas, a line break counts as a comma, one setting each as key=value, the key being the
  * setting's name without "einv_" (gui_searchTime=0.6, weight_enabled=0, arsenal_biMessage=Closed%0020today). A
  * first statement of "einv" and a number is the header and carries nothing yet. Only what the text says is in the

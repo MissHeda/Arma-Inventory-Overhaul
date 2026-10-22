@@ -11,11 +11,11 @@
  *     config (einv_gridSize and the like) where the preset's did not. The older table settings
  *     (einv_items_sizeTable and the like) are settings of their own and not part of either text.
  *   - "cba": the lines for a cba_settings.sqf, or CBA's Import box: force einv_items_rules = "...";
- *     and, when any server setting is off its default, force einv_main_settings = "..."; - forced over the
- *     mission when the wizard would save it so.
+ *     and one line for each server setting off its default (force einv_gui_searchTime = 0.6;) - forced over
+ *     the mission when the wizard would save it so. The same lines CBA's own Export writes for them.
  * "own" and "full" one statement per line, with a comma at its end - the line breaks are read as commas
- * again - so a long setup stays readable. "cba" one line for each of the two settings, as CBA's files want
- * them. The server settings are no part of "own" and "full": they are no rules.
+ * again - so a long setup stays readable. "cba" one line for each setting, as CBA's files want them. The
+ * server settings are no part of "own" and "full": they are no rules.
  *
  * Arguments:
  * 0: "own", "full" or "cba" <STRING> (default: "own")
@@ -40,9 +40,15 @@ switch (_variant) do {
         private _prefix = ["force ", "force force "] select _forced;
         private _lines = [format ["%1%2 = %3;", _prefix, RULES_SETTING, str GVAR(draftText)]];
 
-        if (GVAR(draftSettingsText) isNotEqualTo "") then {
-            _lines pushBack format ["%1%2 = %3;", _prefix, SETTINGS_SETTING, str GVAR(draftSettingsText)];
-        };
+        // Each server setting off its default, in the order they were registered - true and false, a number, a
+        // quoted text, as CBA writes them.
+        {
+            private _value = GVAR(draftSettings) get _x;
+
+            if (!isNil "_value") then {
+                _lines pushBack format ["%1%2 = %3;", _prefix, _x, str _value];
+            };
+        } forEach (missionNamespace getVariable [QEGVAR(main,serverOrder), []]);
 
         _lines joinString toString [10]
     };

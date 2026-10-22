@@ -3,9 +3,9 @@
  * Author: Miss Heda
  * Reads the rules of a shared setup pasted into the wizard: a bare rules text, or lines out of a cba_settings.sqf or
  * CBA's Export - then only the einv_items_rules line counts (read with CBA's own reader,
- * cba_settings_fnc_parse), the rest of the mods' settings are left alone; the server settings' own line is read by
- * fnc_importSettings. Its priority ("force") is not
- * taken over: where and how this machine saves is the wizard's own choice.
+ * cba_settings_fnc_parse), the rest of the mods' settings are left alone; the server settings' lines are read by
+ * fnc_importSettings, and lines with server settings but no rules have no rules text at all. Its priority
+ * ("force") is not taken over: where and how this machine saves is the wizard's own choice.
  *
  * The text is cleaned the way the setting's own box cleans it (fnc_sanitize) before the rules engine
  * reads it; what the engine cannot read it leaves out and names in the tree's warnings. A text without a
@@ -44,6 +44,11 @@ if ((toLower _rules) find RULES_SETTING >= 0) then {
     };
 
     _rules = _found;
+} else {
+    // Lines of a cba_settings.sqf with server settings and no rules: nothing here is a rule.
+    if (count (([_rules] call FUNC(importSettings)) select 0) > 0) then {
+        _rules = "";
+    };
 };
 
 _rules = trim ([_rules] call FUNC(sanitize));

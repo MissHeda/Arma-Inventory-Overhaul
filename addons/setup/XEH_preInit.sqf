@@ -16,26 +16,8 @@ GVAR(steps) = [
     ["containers", LSTRING(Step_Containers), QFUNC(drawContainers)]
 ];
 
-// The server settings the General step shows, by topic: [topic id (its name is Topic_<id> in the stringtable),
-// [setting's name, ...] in the order they are shown]. A setting is registered by its own addon
-// (einv_main_fnc_addSetting) - one whose addon is not loaded is left out here, one that is registered but named
-// nowhere in this list goes under "Other" after them. Numbers come before switches, switches before lists, lists
-// before text boxes within a topic - but for the master switch of the weight tiers, first of its topic.
-GVAR(topics) = [
-    ["looting", [
-        "einv_gui_searchTime", "einv_gui_searchTimeUniform", "einv_gui_searchTimeVest", "einv_gui_searchTimeBackpack",
-        "einv_gui_searchTimeCrate", "einv_gui_searchTimeVehicle", "einv_gui_searchTimeGround", "einv_gui_searchTimeBody",
-        "einv_storage_nearbyRange", "einv_storage_stackMultiplier", "einv_gui_handDrop", "einv_gui_handMove", "einv_gui_handEquip",
-        "einv_gui_waitMove", "einv_gui_waitDrop", "einv_gui_waitWorn", "einv_gui_waitEquip",
-        "einv_gui_searchBodies", "einv_gui_searchPersons",
-        "einv_gui_searchContainers", "einv_gui_searchZeus", "einv_gui_searchGround", "einv_gui_searchOnClick", "einv_gui_soundsWorld"
-    ]],
-    ["persons", ["einv_gui_personNotify", "einv_gui_personOpen", "einv_gui_personItems", "einv_gui_personWorn"]],
-    ["containers", ["einv_storage_migrate", "einv_storage_useUniform", "einv_storage_useVest", "einv_storage_useBackpack"]],
-    ["weight", ["einv_weight_enabled", "einv_weight_heavyAt", "einv_weight_overloadedAt", "einv_weight_criticalAt", "einv_weight_effects"]],
-    ["extras", ["einv_hotbar_enabled", "einv_magazines_repack", "einv_locks_zeusOpens"]],
-    ["arsenal", ["einv_arsenal_biArsenal", "einv_arsenal_biMessage"]]
-];
+// The server settings the General step shows, and the topics they are under, are main's: einv_main_serverSettings
+// and einv_main_topics, which CBA's menu uses for its sub-categories as well.
 
 // How the open wizard was opened and where it may save (fnc_onLoad, fnc_canEdit):
 //   mode      - "menu" from CBA's Addon Options, "direct" from everywhere else
@@ -50,16 +32,18 @@ GVAR(cleanOverride) = false;
 // The setup being edited - two texts, the rules and the server settings. Nothing of it reaches the game before
 // Save:
 //   origin        - the rules text in use when the wizard opened; originSource what the source it saves to
-//                   held then for each of the two settings, name -> [value, priority] - someone else saving
-//                   meanwhile changes that (fnc_save)
+//                   held then for the rules, name -> [value, priority] - someone else saving meanwhile
+//                   changes that (fnc_save)
 //   draft         - the text as the rules engine reads it (einv_items_fnc_parseRules), draftText the
 //                   same written out again, draftRules compiled, draftCache item answers under it
 //   parseWarnings - what the engine left out of the text the draft came from
 //   clean         - the draft as it was last saved or loaded; anything else is a change
-//   originSettings, draftSettings, draftSettingsText, cleanSettings - the same for the
-//                   server settings: draftSettings holds what the text names, setting's name -> value
-//                   (einv_main_fnc_parseSettings), draftSettingsText the text written out again
-//   sourceEmpty   - the source it saves to holds no setup of its own yet, while clean is not the
+//   draftSettings, draftSettingsText, cleanSettings - the same for the server settings, as one short text of the
+//                   ones off their defaults (fnc_activeSettings): draftSettings holds what the text names, setting's
+//                   name -> value (einv_main_fnc_parseSettings), draftSettingsText the text written out again. Clean
+//                   follows every change made elsewhere at once, setting by setting (fnc_onSettingChanged); Save
+//                   writes each setting whose draft differs from it
+//   sourceEmpty   - the source it saves to holds no rules of its own yet, while clean is not the
 //                   default: Save stays possible without a change (fnc_sourceEmpty)
 //   undo, redo    - earlier and undone setups, [rules text, settings text], the latest last
 GVAR(origin) = "";
@@ -70,7 +54,6 @@ GVAR(draftRules) = createHashMap;
 GVAR(draftCache) = createHashMap;
 GVAR(parseWarnings) = [];
 GVAR(clean) = "";
-GVAR(originSettings) = "";
 GVAR(draftSettings) = createHashMap;
 GVAR(draftSettingsText) = "";
 GVAR(cleanSettings) = "";
@@ -137,16 +120,47 @@ GVAR(reopenInventory) = [];
 if (hasInterface) then {
     #include "initEntryPoints.inc.sqf"
 
-    // The setup changed - saved here, by an admin, by a mission script: an open wizard takes it in. Its
-    // own redraw deletes controls, so it runs a moment later rather than inside the event. The rules and the
-    // server settings are two settings, each one's change an event of its own.
-    {
-        [_x, {
-            if (isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {};
+    // The rules changed - saved here, by an admin, by a mission script: an open wizard takes them in. Its
+    // own redraw deletes controls, so it runs a moment later rather than inside the event.
+    [QEGVAR(items,rulesChanged), {
+        if (isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {};
 
-            [FUNC(onRulesChanged)] call FUNC(defer);
-        }] call CBA_fnc_addEventHandler;
-    } forEach [QEGVAR(items,rulesChanged), QEGVAR(main,settingsChanged)];
+        [FUNC(onRulesChanged)] call FUNC(defer);
+    }] call CBA_fnc_addEventHandler;
+
+    // A server setting changed - in CBA's menu, by the wizard's own Save, by an admin elsewhere, by a mission
+    // script: the open wizard's row follows it (fnc_onSettingChanged). The names wait in settingsQueue, so a
+    // dozen confirmed at once in CBA's menu are one redraw. CBA raises CBA_SettingChanged once its settings
+    // are ready; before that - in Eden, which never gets that far - only its own refresh event, after which
+    // CBA has set the variable.
+    GVAR(settingsQueue) = [];
+
+    private _fnc_queue = {
+        params ["_setting"];
+
+        if (isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {};
+        if !(_setting in (missionNamespace getVariable [QEGVAR(main,serverSettings), createHashMap])) exitWith {};
+
+        if (GVAR(settingsQueue) isEqualTo []) then {
+            [FUNC(onSettingChanged)] call FUNC(defer);
+        };
+
+        GVAR(settingsQueue) pushBackUnique _setting;
+    };
+
+    ["CBA_SettingChanged", {
+        params [["_setting", "", [""]]];
+
+        [_setting] call (_thisArgs select 0);
+    }, [_fnc_queue]] call CBA_fnc_addEventHandlerArgs;
+
+    ["cba_settings_refreshSetting", {
+        params [["_setting", "", [""]]];
+
+        if (!isNil "cba_settings_ready") exitWith {};
+
+        [_setting] call (_thisArgs select 0);
+    }, [_fnc_queue]] call CBA_fnc_addEventHandlerArgs;
 };
 
 ADDON = true;

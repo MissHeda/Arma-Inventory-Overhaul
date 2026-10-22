@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * Opens the box that shows the setup as text, to copy and share: the own rules (short, and follows the default as the
  * mod improves it), the whole of them written out (so later versions cannot change it), or the lines for a
- * cba_settings.sqf or CBA's Import - the rules and, where any is off its default, the server settings
+ * cba_settings.sqf or CBA's Import - the rules and one line for each server setting off its default
  * (fnc_exportText). One of the three is shown at a time, read only; the Copy button puts it on the clipboard where the
  * game lets a script do that (the server, single player, Eden), else the text is there to select (Ctrl+A) and copy
  * (Ctrl+C) by hand. What the box showed last - the line for a cba_settings.sqf the first time - stays picked.

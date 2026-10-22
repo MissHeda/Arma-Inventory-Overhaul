@@ -2,25 +2,27 @@
 /*
  * Author: Miss Heda
  * Registers a setting that is the same for everyone - what a server or a mission decides, not what a player
- * sets for themselves. It takes the place of CBA_fnc_addSetting with its isGlobal at 1, and is called with
- * the same arguments but the category and the scope: the setting's variable (einv_gui_searchTime) exists
- * at once, set to what the text holds for it or else the default, and every other part of the mod reads it
- * exactly as before. What changes is where the value comes from: not a row of CBA's menu of its own but the
- * text of one setting for them all (einv_main_settings), which the setup wizard's General page writes and
- * fnc_applySettings reads - it sets the variable, runs the setting's script and raises CBA's setting-changed
- * event, as CBA did for a row of its own.
- *
- * The wizard draws a control for it by its type: a switch, a stepper, a drop-down, a text field.
+ * sets for themselves - in two places at once, which share one value:
+ *   - CBA: a setting of its own (CBA_fnc_addSetting with isGlobal 1), a row in CBA's Addon Options, category
+ *     "Arma Inventory Overhaul - Server", sub-category its topic's (GVAR(topics)). CBA reads its value from the
+ *     server, the mission and a cba_settings.sqf, sets the variable (einv_gui_searchTime) at once, runs the
+ *     script once the settings are ready and again on every change, on every machine, and raises its
+ *     setting-changed event - exactly as for any other CBA setting, so nothing that reads it knows the difference.
+ *   - The setup wizard's General page: a control by its type - a switch, a stepper, a drop-down, a text field.
+ *     The wizard shows the value in effect and saves a change through CBA (CBA_settings_fnc_set), into the
+ *     same place CBA's own Server or Mission tab writes to.
+ * Called with the arguments of CBA_fnc_addSetting less the category and the scope.
  *
  * Arguments:
  * 0: Setting's name, the variable it sets <STRING>
  * 1: "CHECKBOX", "SLIDER", "LIST" or "EDITBOX" <STRING>
  * 2: Title and tooltip, [title, tooltip] - the tooltip's lines are wrapped with \n as CBA's descriptions are <ARRAY>
  * 3: What CBA_fnc_addSetting takes for that type: CHECKBOX the default; SLIDER [min, max, default, trailing
- *    decimals]; LIST [values, labels, index of the default]; EDITBOX the default text <ANY>
+ *    decimals]; LIST [values, labels, index of the default]; EDITBOX the default text, or [default, isPassword,
+ *    sanitizer] <ANY>
  * 4: Code to run when it changes, with the new value as _this - and once when the settings are first read,
  *    as CBA does <CODE> (default: {})
- * 5: Hidden: no control in the wizard - the value can still be written into the text by hand <BOOL> (default: false)
+ * 5: Hidden: no control in the wizard - it is still a row of CBA's menu <BOOL> (default: false)
  *
  * Return Value:
  * Registered <BOOL>
@@ -59,13 +61,23 @@ if (_title isEqualType "") then {
     _label = _title;
 };
 
+// The topic it is shown under, in the wizard and as CBA's sub-category: the one that names it, else "Other".
+private _topicIndex = GVAR(topics) findIf {_name in (_x select 2)};
+private _topic = ["other", ELSTRING(setup,Topic_other), []];
+
+if (_topicIndex >= 0) then {
+    _topic = GVAR(topics) select _topicIndex;
+};
+
 private _entry = createHashMapFromArray [
     ["name", _name],
     ["type", _type],
     ["label", [_label] call _fnc_text],
     ["tip", [_tip] call _fnc_text],
     ["script", _script],
-    ["hidden", _hidden]
+    ["hidden", _hidden],
+    ["topic", _topic select 0],
+    ["subCategory", [_topic select 1] call _fnc_text]
 ];
 
 private _default = switch (_type) do {
@@ -101,7 +113,7 @@ if (_type isEqualTo "EDITBOX" && {_valueInfo isEqualType []}) then {
 
 _entry set ["default", _default];
 
-// The key in the text: the name without the mod's prefix, "einv_".
+// The key in the wizard's text: the name without the mod's prefix, "einv_".
 private _key = toLowerANSI (_name select [5]);
 
 _entry set ["key", _key];
@@ -114,11 +126,14 @@ GVAR(serverSettings) set [_name, _entry];
 GVAR(serverKeys) set [_key, _name];
 GVAR(serverOrder) pushBack _name;
 
-// What the mod reads from now on: what the text holds already - CBA has read it from the server, the mission and the
-// profile by the time any addon registers its settings - else the default. As CBA does for a row of its own, the
-// value is there at once and the script runs only once the settings are ready (fnc_applySettings).
-private _value = ([missionNamespace getVariable [QGVAR(settings), ""], [_name]] call FUNC(readSettings)) get _name;
+// The CBA setting itself: global, the same for everyone, the server or the mission decides.
+[
+    _name, _type, [_entry get "label", _entry get "tip"], [CBA_SETTINGS_EINV_SERVER, _entry get "subCategory"], _valueInfo, 1, _script
+] call CBA_fnc_addSetting;
 
-missionNamespace setVariable [_name, [_value, _default] select (isNil "_value")];
+// CBA has set the variable by now. Should its settings not be loaded yet, the default stands in until they are.
+if (isNil _name) then {
+    missionNamespace setVariable [_name, _default];
+};
 
 true

@@ -62,7 +62,7 @@ The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
 
 | Addon | Does |
 |---|---|
-| `main` | version, macros and the shared defines of `script_macros.hpp`; the registry of the server settings and the one CBA text that holds them (section 8). |
+| `main` | version, macros and the shared defines of `script_macros.hpp`; the registry of the server settings - each a CBA setting and a control of the wizard's General page -, their topics, and the one-time move out of the settings box of the test builds (section 8). |
 | `items` | what an item is (`einv_items_fnc_getInfo`) and the rules engine behind it: text, presets, compile, resolve. |
 | `storage` | what a container holds and where it lies; what a unit wears; the transactions, hub, places sync and loadouts that change anything. |
 | `gui` | the window: engine, Glass theme, layout, tiles, drag, menus, searching, sounds, people, CBA item menu, kit windows. |
@@ -2467,18 +2467,19 @@ makes a box never searched and gives it "Open Arsenal" (`fnc_canOpen`, `fnc_open
 
 ## 6. Setup wizard (setup)
 
-The wizard edits one thing, the text of `einv_items_rules`, through the rules engine's own functions (`parseRules`, `writeRules`,
-`compileRules`, `getInfo [class, draft, cache]`), and draws with the inventory's UI kit and theme (`einv_gui_fnc_ui*`,
+The wizard edits the text of `einv_items_rules`, through the rules engine's own functions (`parseRules`, `writeRules`,
+`compileRules`, `getInfo [class, draft, cache]`), and the server settings - the very CBA settings of CBA's Addon Options, page
+"Arma Inventory Overhaul - Server" (section 8) -, and draws with the inventory's UI kit and theme (`einv_gui_fnc_ui*`,
 `einv_gui_fnc_theme`). Nothing reaches the game before Save. Its functions are PREPed in preStart as well as preInit
-(`XEH_PREP_entry.hpp`: `fnc_initCbaMenu`, `fnc_openFromGame`), so CBA's menu and the wizard's display find them in `uiNamespace`
-over the main menu and in Eden.
+(`XEH_PREP_entry.hpp`: `fnc_initCbaMenu`, `fnc_initPauseMenu`, `fnc_openFromGame`), so CBA's menu, the pause menu and the wizard's
+display find them in `uiNamespace` over the main menu and in Eden.
 
 ### Entry points
 
 | Where | Mode | How |
 |---|---|---|
-| CBA's Addon Options, a button in the bottom row (between Load and Import) while this mod's Server page (the category of `einv_items_rules`) is open | menu | `fnc_initCbaMenu` (`Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions`); missing CBA controls mean no button and nothing else breaks |
-| ESC > Options > Inventory setup | direct | `CBA_fnc_addPauseMenuOption` with the display `einv_setup_RscWizard` (idd 9620) |
+| CBA's Addon Options, a button in the bottom row (between Load and Import) while this mod's Server page (the category of `einv_items_rules`) is open, for whoever passes `fnc_canOpen` | menu | `fnc_initCbaMenu` (`Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions`); missing CBA controls mean no button and nothing else breaks. CBA has no condition for a control of its own: the button is made hidden and shown while `fnc_canOpen` holds, asked at every sync (mouse move, key, list pick), so a login while the menu is open shows it. In Eden it first runs `einv_main_fnc_migrateSettings` |
+| ESC > Options > Inventory setup, for whoever passes `fnc_canOpen` | direct | `CBA_fnc_addPauseMenuOption` with the display `einv_setup_RscWizard` (idd 9620); CBA's entries take no condition, so `fnc_initPauseMenu` (`Extended_DisplayLoad_EventHandlers >> RscDisplayInterrupt`, `RscDisplayMPInterrupt`, after CBA's own handler) deletes the button again as the pause menu opens for anyone else and moves the buttons above it down a row (CBA's buttons on the display, `cba_ui_MenuButtons`: the game's four, then one per entry of CBA's list `cba_ui_MenuButtons` in missionNamespace). Asked at every opening of the pause menu |
 | Eden: Tools menu | direct | `Display3DEN.hpp`, over display 313; saves into the scenario |
 | the inventory's cog (`einv_gui_fnc_drawHeader`) | direct | `fnc_openFromGame`; the tooltip says read-only when `fnc_canEdit` says so; the inventory comes back on close (`einv_setup_reopenInventory`), as a person window when it was one |
 
@@ -2490,17 +2491,25 @@ over the main menu and in Eden.
   closed again through `fnc_defer`, silently). It is `is3DEN || isServer || !isMultiplayer || serverCommandAvailable "#kick"`: the
   editor, the server itself, the host, single player, a logged-in or voted admin. Nobody else sees the wizard: the cog in the
   inventory header (`einv_gui_fnc_drawHeader`) is not drawn, asked at every draw, so a login shows at once (the game has no event for
-  it). CBA's pause-menu entries take no condition, so ESC > Options still lists it for everyone; it closes again at once.
+  it); ESC > Options leaves the entry out (`fnc_initPauseMenu`, asked as the pause menu opens) and CBA's Addon Options hide the
+  button (`fnc_initCbaMenu`). Should the pause menu's entry slip through all the same, the wizard closes again at once.
   Saving is a question of its own (`fnc_canEdit`); the read-only mode stays in the code for the CBA whitelist case.
   `fnc_canEdit [mode]` (public) -> HashMap `canSave`, `source` (`"server"`, `"mission"`, `""`),
-  `override` (may force over the mission, priority 2, multiplayer server only), `locked` (set in a `cba_settings.sqf`), `reason`,
-  `priority`, `missionWins`: direct mode saves to the mission in Eden, else to the server - as the server itself (single player
-  too), a logged-in admin or CBA's whitelist; everyone else is read-only. Menu mode: the source picked in CBA's menu.
-- `fnc_save [overwrite]`: direct mode `CBA_settings_fnc_set` into the source (the mission forced at priority 1, the server at 2
-  when the switch says so); menu mode `cba_settings_fnc_import` into CBA's menu as a pending change, and the wizard closes - CBA's
-  OK keeps it. Someone else saved meanwhile: replay my edits on top (`fnc_replay`), overwrite, or cancel.
-  `einv_items_rulesChanged` while the wizard is open -> `fnc_onRulesChanged` (deferred): no own changes - show the new setup; own
-  changes - keep them and show a banner (Reload / keep mine).
+  `override` (may force over the mission, priority 2, multiplayer server only), `locked` (the rules set in that source's
+  `cba_settings.sqf` - the whole wizard read-only), `lockedSettings` (the server settings that file sets: greyed rows, left out of
+  Save), `reason`, `priority` (the rules'), `missionWins` (the mission sets the rules or any server setting at priority 1 or more):
+  direct mode saves to the mission in Eden, else to the server - as the server itself (single player too, the player's profile, as
+  CBA's Server tab), a logged-in admin or CBA's whitelist; everyone else is read-only. Menu mode: the source picked in CBA's menu.
+- `fnc_save [overwrite]`: every CBA setting on its own - the rules when they changed (or the source lacks them, or the force switch
+  turned), each server setting whose draft differs from `cleanSettings` (with the switch turned also each the source holds), never
+  one of `lockedSettings`. Direct mode `CBA_settings_fnc_set [name, value, priority, source, true]` (the mission forced at priority 1,
+  the server at 2 when the switch says so) - the place CBA's own Server / Mission tab writes to, stored in the server's profile or the
+  scenario; menu mode the value and priority into CBA's temporary values of the menu's source (`cba_settings_<source>Temp`, what
+  `cba_settings_fnc_import` does with a line - without the line, since a free text may hold a `;`), `cba_settings_fnc_gui_refresh`,
+  and the wizard closes - CBA's OK keeps it. Someone else saved the rules meanwhile: replay my edits on top (`fnc_replay`), overwrite,
+  or cancel. `einv_items_rulesChanged` while the wizard is open -> `fnc_onRulesChanged` (deferred): rules not edited here - take the
+  new ones (the server settings of the draft stay); edited - keep them and show a banner (Reload / keep mine). A server setting
+  changed elsewhere -> `fnc_onSettingChanged` (below).
 
 ### Eden: everything is deferred
 
@@ -2530,9 +2539,11 @@ full-screen hit area closes it on a click beside the card and lets nothing throu
 "Settings for <name>" row finds `items` and `containers` there, and `fnc_openFromGame [step, class]` takes the step's place in the list
 (0 General, 1 Items, 2 Containers). Group rules (`@group > ...`) have no step of their own: they are text, written and read through Export
 and Import. missionNamespace holds the mode, `target` (canEdit's answer), `readOnly`, the draft - two texts, the rules and the server settings:
-`origin`, `originSource` (name -> [value, priority] of the source for each of the two settings), `draft` (AST), `draftText` (canonical),
-`draftRules` (compiled), `draftCache`, `parseWarnings`, `clean`, and for the settings `originSettings`, `draftSettings` (what the text names,
-setting's name -> value), `draftSettingsText`, `cleanSettings`; `sourceEmpty`, `undo`, `redo` (entries `[rules text, settings text]`) -, the
+`origin`, `originSource` (name -> [value, priority] of the source for the rules), `draft` (AST), `draftText` (canonical),
+`draftRules` (compiled), `draftCache`, `parseWarnings`, `clean`, and for the settings `draftSettings` (what the text names,
+setting's name -> value), `draftSettingsText`, `cleanSettings` (the wizard's short text of the server settings, `einv_main_fnc_writeSettings`:
+only what is off its default, `einv1, gui_searchTime=0.6`; nothing CBA stores); `sourceEmpty` (rules only), `settingsQueue`, `undo`, `redo`
+(entries `[rules text, settings text]`) -, the
 window (`step`, `focus`, `selection`, `theme`) and what steps keep between redraws (`listState`, `treeState`, `editScope`, `cellWork`,
 `itemWork`, `cellMode`, `cellBrush`, `sameAs`, `kindEdit`, `exportMode`, ...); controls stay in uiNamespace. **Every edit of the rules ends in
 `fnc_commit [ast, redraw = true]`** (an undo step, `fnc_setDraft`, redraw); **every edit of a server setting in `fnc_setSetting [name, value]`**
@@ -2549,18 +2560,30 @@ a stepper (`fnc_uiStepper` defers its code, `fnc_setSetting`, `fnc_commitSetting
 same) takes that path. The Items and Containers editors draw only their own card again (`fnc_drawItemEditor`, `fnc_drawCellEditor`), not
 a scrolling page.
 
-**Saving** (`fnc_save`) writes each of the two settings that changed (or that the source lacks, or whose force switch turned) - `einv_items_rules`
-and `einv_main_settings` - with `CBA_settings_fnc_set` into the same source and priority; in menu mode it imports both lines into CBA's menu.
-`fnc_canEdit` is locked when a `cba_settings.sqf` sets either, `fnc_getActive`, `fnc_targetValue` and `fnc_sourceEmpty` take the setting as an
-argument, and a change of either (`einv_items_rulesChanged`, `einv_main_settingsChanged`) while the wizard is open is `fnc_onRulesChanged`'s.
+**Where the draft starts and how it follows.** The rules from `fnc_getActive` (the source's own value, else the one in effect; in menu mode
+the menu's), the server settings from `fnc_activeSettings`: in direct mode the values in effect - the variables CBA set, which its menu shows
+too -, in menu mode what the menu shows for its source (pending value, else the source's, else the default). `clean` / `cleanSettings` are
+what Save compares with. **Two-way sync with CBA:** a server setting changed while the wizard is open - in CBA's menu, by the wizard's own
+Save, by an admin elsewhere, by a script - raises `CBA_SettingChanged` (before CBA's settings are ready, as in Eden, only
+`cba_settings_refreshSetting`, after which CBA has set the variable); `XEH_preInit` queues the name in `settingsQueue` (a dozen confirmed
+at once are one redraw) and defers `fnc_onSettingChanged`, which puts the value in effect (rounded as the text holds it) into
+`cleanSettings` and, where the player has not changed that setting here, into the draft, then draws the step. A setting changed here as
+well keeps the change made here; Save writes it. Not in menu mode, where nothing outside the menu changes what it holds. **Saving**
+(`fnc_save`) writes the rules and each changed server setting with `CBA_settings_fnc_set` into the same source and priority (in menu mode
+into CBA's pending values), then takes what it wrote into `cleanSettings`; a locked one the draft changed anyway (an import, Reset) goes
+back. A conflict is asked only for the rules (`fnc_targetValue`, `fnc_targetValues`, `fnc_replay`): the settings follow at once.
+`fnc_canEdit` is locked when a `cba_settings.sqf` sets the rules, and greys each server setting it sets (`lockedSettings`).
 
 ### Steps
 
-- **General** (`fnc_drawGeneral`): one page that scrolls. Its top row has the title and Import (`fnc_openImport`), Export (`fnc_openExport`: a box with
-  the own rules, the whole setup written out or the lines for a `cba_settings.sqf` - the rules and, off their defaults, `einv_main_settings` -, read only,
+- **General** (`fnc_drawGeneral`): one page that scrolls. Its top row has the title and Import (`fnc_openImport`: rules, and server settings from
+  the lines of a `cba_settings.sqf` or CBA's Export - one line per setting, or the old box line `einv_main_settings`, `fnc_importSettings` -; lines with
+  settings and no rules have no rules text, `fnc_importText`), Export (`fnc_openExport`: a box with the own rules, the whole setup written out or the
+  lines for a `cba_settings.sqf` - the rules and one line per server setting off its default, `force einv_gui_searchTime = 0.6;` -, read only,
   with Copy where `copyToClipboard` works) and Reset to default (`fnc_resetAll`, after `fnc_confirm`); under it where Save goes,
-  or why it may not (in red), and the switch to force it over the mission where `canEdit` allows it. Only when there are any: what the engine left out of
-  the text it read. Then:
+  or why it may not (in red), the switch to force it over the mission where `canEdit` allows it, and a muted line (`General_CbaNote`) that these
+  are the same settings as CBA's Addon Options > "Arma Inventory Overhaul - Server", both in sync, this page the recommended one. Only when there
+  are any: what the engine left out of the text it read. Then:
   - **Containers**: a row for each of `GENERAL_KINDS` (uniform, vest, backpack, vehicle, crate): Auto | Fixed, two steppers (across 1 to `STORAGE_COLS`,
     down 1 to `MAX_ROWS`) greyed while Auto, a reset button while there is a rule, and a few words of what Auto gives. Each is the rule `all kind=K >
     grid=WxH` of the draft (`fnc_kindRule`, `fnc_upsertKinds`); Auto takes `grid` out of it. The engine asks these rules after everything about a class
@@ -2571,12 +2594,14 @@ argument, and a change of either (`einv_items_rulesChanged`, `einv_main_settings
     words with the numbers of the moment (the cell, `UNIFORM_COLS`, `UNIFORM_ROWS_MIN`/`MAX`, `VEST_POUCHES_MAX`, a vest of load 120, a backpack of 280, a crate
     of 1000): containers, uniforms, vests, backpacks, vehicles and crates, items, stacking, and that a rule of the class beats it all. The sizes of items and
     the stack numbers in the words are those of the default preset - keep them together.
-  - **Server settings** by topic (`GVAR(topics)`: looting and searching with the hands' queue times, living persons, containers, weight, hotbar/repacking/locks, vanilla arsenal; a registered setting that
-    no topic names goes under Other, one whose addon is not loaded is not shown): two to a line, a text box a line to itself. A control by the registry's type
+  - **Server settings** by topic (`einv_main_topics`: looting and searching with the hands' queue times, living persons, containers, weight, hotbar/repacking/locks, vanilla arsenal, look; a registered setting that
+    no topic names goes under Other, one whose addon is not loaded is not shown): two to a line, a text box a line to itself. One that the source's
+    `cba_settings.sqf` sets (`lockedSettings`) is greyed - its control disabled, a text box shown as text, no reset button - with why in its tooltip. A control by the registry's type
     (`einv_main_serverSettings`): CHECKBOX `fnc_uiToggle`, SLIDER `fnc_uiStepper` (a step of 1, or 0.5 or 0.05 for a short range with decimals; the value
     rounded to the setting's decimals), LIST `fnc_uiDropdown`, EDITBOX `fnc_uiField` (a text box applied on Return or when it loses the cursor, not per key).
     The label's tooltip is the setting's description, the label is in the accent and a reset button (`fnc_uiReset`) shows while the value is off its default
-    (the setting is in `draftSettings`). Settings with `hidden` (`einv_items_massPerCell`, `einv_items_stackSmall`) have none.
+    (the setting is in `draftSettings`). Settings with `hidden` (`einv_items_massPerCell`, `einv_items_stackSmall`) have none; they are rows of CBA's
+    menu only (sub-category Grids).
   - **What you changed** (`fnc_drawChanges "default"`): everything the draft sets that is not the default - `fnc_changeRows "default"` compares the draft with
     `einv1 base=default` and no server setting set: the cell size, each server setting off its default ("Search on click: on » off"), each kind of container with a size
     (`all kind=backpack > grid=8x6`, worded "Every backpack: compartments 8×6"), the categories, and the rules of single classes, so when all uniforms are 10x10 by their kind
@@ -3114,41 +3139,54 @@ its own may hold more than its capacity there, or get more than its cells by tha
 
 Every CBA setting of the mod (`initSettings.inc.sqf` of each addon) is in one of two categories of CBA's Addon Options:
 `CBA_SETTINGS_EINV_CLIENT` "Arma Inventory Overhaul - Client" for what each player sets for himself (scope 0) and `CBA_SETTINGS_EINV_SERVER`
-"Arma Inventory Overhaul - Server" for the settings box, the rules and the older tables (scope 1). The keybinds stay under `CBA_SETTINGS_EINV`
+"Arma Inventory Overhaul - Server" for every server setting, the rules and the older tables (scope 1). The keybinds stay under `CBA_SETTINGS_EINV`
 "Arma Inventory Overhaul" (CBA's Controls, `CBA_fnc_getKeybind` asks for it). A setting's name does not carry its category, so a `cba_settings.sqf` and
 saved values are the same under either; `fnc_initCbaMenu` takes its page from the category of `einv_items_rules` (the Server page). Scope **client** is
 `0` (each player's own value), **global** is `1` (the same for everyone; the server or mission decides). Descriptions in the
 stringtables are wrapped as BRIEFING asks.
 
-**Server settings** - the ones of scope 1 - are no rows of CBA's menu. Each addon registers its own with
-`einv_main_fnc_addSetting [name, type, [label, description], valueInfo, script = {}, hidden = false]` (the arguments of `CBA_fnc_addSetting`
-less the category and the scope, in `initSettings.inc.sqf`): `einv_main_serverSettings` (name -> definition: `type`, `label`, `tip`, `default`, `min`,
-`max`, `decimals`, `values`, `labels`, `script`, `hidden`, `key`), `einv_main_serverKeys` (key -> name), `einv_main_serverOrder`. The variable exists at
-once, set to what the box below holds for it by then (CBA has read the box before any addon registers), else the default - as CBA
-sets a row's variable at once and runs its script only later. Their values are the text of **one CBA EDITBOX, `einv_main_settings`** (scope 1, default "", title "Server settings - set in
-the setup wizard, do not edit", sanitized by `einv_main_fnc_sanitizeSettings`): `einv1, gui_searchTime=0.6, weight_enabled=0` - the header, then
-`key=value` for each setting that is off its default, in registration order, the key the name without `einv_`. A switch is `1` or `0` (also `on`, `off`,
-`true`, `false`), a slider a number cut to its range and rounded to its decimals, a list the value of one of its choices, a text box free text with
-`%` and four hex digits for every character that is not a letter, a digit, `-` or `.` (`fnc_encodeText`, `fnc_decodeText`). `fnc_parseSettings [text]` ->
-`[values, warnings]` (public; a typo is left out with a warning, never the rest), `fnc_writeSettings [values]` -> the canonical text ("" for none; public),
-`fnc_parseValue [entry, text]`. **`fnc_applySettings`** is the box's change script, run by CBA on every machine when the settings are first read and
-whenever the text changes: it sets every registered variable (the default where the text says nothing), then runs each changed setting's script
-with the value (every one the first time, as CBA does) and raises CBA's `CBA_SettingChanged [name, value]` (which the hotbar listens to) and the local
-event `einv_main_settingsChanged [text]` (an open wizard takes it in). Before CBA's settings are ready (`cba_settings_ready`; never in Eden)
-it only sets the variables - no script, no `CBA_SettingChanged`, and the first call once they are ready still runs every script: `XEH_preInit`
-calls it on CBA's `cba_settings_refreshSetting` for the box then, so a save in Eden reaches the variables too. The variables, their names, their kinds
-of value and their scripts are those of the rows they replace, so no reader changed. What the text says, and the old names below, is read by
-`fnc_readSettings [text, names = []]`. While the box is empty and a mission has values for the old names - lines of its own `cba_settings.sqf`
-(CBA's `cba_settings_missionConfig`), else saved in Eden (the mission attribute `cba_settings_hash`) - those values are taken as if the text said them;
-the server's profile and file are not read. A scope-2 box (a setting nobody may override) would be a second EDITBOX; no setting needs one.
+**Server settings** - the ones of scope 1 - are CBA settings of their own and, at the same time, controls of the setup wizard's General page
+(section 6). Both edit the very same CBA value, so they never disagree: what is set in CBA's menu shows in the wizard, what the wizard saves
+shows in CBA's menu. Each addon registers its own with `einv_main_fnc_addSetting [name, type, [label, description], valueInfo, script = {},
+hidden = false]` (the arguments of `CBA_fnc_addSetting` less the category and the scope, in `initSettings.inc.sqf`), which calls
+`CBA_fnc_addSetting [name, type, [label, description], [CBA_SETTINGS_EINV_SERVER, sub-category], valueInfo, 1, script]` and keeps what the wizard
+needs: `einv_main_serverSettings` (name -> definition: `type`, `label`, `tip`, `default`, `min`, `max`, `decimals`, `values`, `labels`, `script`,
+`hidden`, `key`, `topic`, `subCategory`), `einv_main_serverKeys` (key -> name; the key is the name without `einv_`), `einv_main_serverOrder`.
+From there on it is a CBA setting like any other: CBA reads it from the server (profile, `userconfig\cba_settings.sqf`), the mission
+(`cba_settings.sqf`, Eden's attributes) and the client, sets the variable at once, runs the script when its settings are ready and on every change,
+on every machine, and raises `CBA_SettingChanged [name, value]` (the hotbar and an open wizard listen to it). Old `cba_settings.sqf` lines for
+these names (`force einv_gui_searchTime = 0.6;`) work as they always did. `hidden` only means no control in the wizard; the row in CBA's menu
+is there all the same.
 
-The setup wizard's General page draws a control for each registered setting that is not `hidden` (section 6). What stays in CBA's menu: the rules
-(`einv_items_rules`) with the three older tables, the box above, and every setting of scope 0.
+**Topics** (`einv_main_topics`, main's `XEH_preInit`): `[id, CBA sub-category (a stringtable key), [names]]` - `looting`, `persons`, `containers`
+(CBA's "Containers", shared with `einv_storage_containerTable`), `weight`, `extras`, `arsenal`, `look`, and `grids` for the hidden ones (beside the
+rules). The wizard shows a topic as `Topic_<id>` of its stringtable, its settings in the order listed; CBA sorts its sub-categories by name and a
+sub-category's settings by registration order. A registered setting named in no topic is "Other" in both.
+
+**The first row of the Server page** is `einv_main_settingsInfo` (LIST with the one choice "ESC > Options > Inventory setup", global, no
+sub-category so CBA puts it first, read by nothing): "Also in the setup wizard (recommended)", its description that both stay in sync.
+
+**The wizard's text of the settings.** The wizard holds its draft of them as one short text (`einv1, gui_searchTime=0.6, weight_enabled=0` -
+the header, then `key=value` for each setting off its default, in registration order). A switch is `1` or `0` (also `on`, `off`, `true`,
+`false`), a slider a number cut to its range and rounded to its decimals, a list the value of one of its choices, a text box free text with `%`
+and four hex digits for every character that is not a letter, a digit, `-` or `.` (`fnc_encodeText`, `fnc_decodeText`). `fnc_parseSettings
+[text]` -> `[values, warnings]` (public; a typo is left out with a warning, never the rest; a key of `einv_main_retiredSettings` reads clean),
+`fnc_writeSettings [values]` -> the canonical text ("" for none; public), `fnc_parseValue [entry, text]`. Nothing of this text is stored by CBA.
+
+**The settings box of the test builds.** 0.4.27 to 0.5.42 kept every server setting in one CBA EDITBOX, `einv_main_settings` (that text). It
+is no setting any more; what CBA still keeps for it is moved into the settings of their own by `fnc_migrateSettings`, on every machine at
+CBA's `CBA_beforeSettingsInitialized` (before the scripts run): each value it names is set through `CBA_settings_fnc_set` into the source it
+was saved in, at the priority it had there, where that source still has the setting at its default. The server's profile (server and single
+player): set and stored, then the box is taken out of the profile hash - once. The server's own `cba_settings.sqf`: set for the session, a
+warning in the RPT. The mission's `cba_settings.sqf`, else its Eden attributes: set for the session on every machine. In Eden (no postInit)
+it runs as the wizard (`fnc_onLoad`) or CBA's menu (`fnc_initCbaMenu`) opens: the scenario's attributes are set and stored, and the box taken
+out of them (kept once the scenario is saved). The wizard's Import still reads a pasted box line (`einv_setup_fnc_importSettings`,
+`fnc_sanitizeSettings`).
 
 | `einv_items_rules` | EDITBOX | global | `einv1 base=default` | the setup (section 2); runs `fnc_loadRules` |
 | `einv_items_massPerCell` | SLIDER 2 to 20 | global (hidden) | 5 | fallback mass per cell, when a text has no `cell=` - the General page sets `cell=` |
-| `einv_items_stackSmall` | SLIDER 1 to 50 | global (hidden) | 10 | `@item_small`'s stack, only when moved off 10 - by hand in `einv_main_settings` |
-| `einv_main_settings` | EDITBOX | global | "" | the server settings as one text (above); runs `einv_main_fnc_applySettings` |
+| `einv_items_stackSmall` | SLIDER 1 to 50 | global (hidden) | 10 | `@item_small`'s stack, only when moved off 10 - in CBA's menu (Grids) |
+| `einv_main_settingsInfo` | LIST, one choice | global | 0 | the Server page's first row: "Also in the setup wizard (recommended)", both stay in sync; read by nothing |
 | `einv_items_sizeTable`, `einv_items_stackTable` | EDITBOX | global | "" | older tables, `class:WxH` / `class:N`; win over the text |
 | `einv_storage_migrate` | CHECKBOX | global | on | move a unit's surplus (overflow) on to its next container with room (section 3, Surplus) |
 | `einv_storage_containerTable` | EDITBOX | global | "" | `class:N` or `class:WxH+WxH`; wins over the text |
@@ -3165,7 +3203,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |
 | `einv_gui_magazineText` | CHECKBOX | client | on | the rounds ("17/30") on magazine tiles; off leaves the bar alone |
 | `einv_gui_soundsWorld` | CHECKBOX | global | on | players nearby hear someone loot |
-| `einv_gui_playerColours` | CHECKBOX | global | on | players may pick their colours with the palette button in the header (`fnc_paletteAllowed`); off hides the button and ignores what players saved (topic Look; the wizard lists it under Other until `GVAR(topics)` in `einv_setup` names it) |
+| `einv_gui_playerColours` | CHECKBOX | global | on | players may pick their colours with the palette button in the header (`fnc_paletteAllowed`); off hides the button and ignores what players saved (topic Look, `einv_main_topics`) |
 | `einv_gui_moveToStop` | CHECKBOX | client | on | a movement key closes the window while looting |
 | `einv_gui_searchTime` | SLIDER 0 to 3 | global | 0.4 | seconds per cell searched; 0 shows everything |
 | `einv_gui_searchTimeUniform`, `Vest`, `Backpack`, `Crate`, `Vehicle`, `Ground`, `Body` | SLIDER 0 to 5 | global | 1 | factor of the time per cell for that kind of box (`fnc_searchTime`); a body's on top of its uniform's, vest's or backpack's; 0 shows that kind at once |
@@ -3337,5 +3375,14 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
   drag within a second (nothing doubled); the IFAK itself into the staging space and back; no kit carried ("Take the kit first");
   a loadout loaded with kits; close with a kit in the staging space (named on the card, its instance freed); the same without a
   grid rule (capacity: the tab's own greying, "(12/35)").
+- **Server settings as CBA settings of their own, linked with the wizard; the admin-only entries** (0.5.0): `einv_main_fnc_addSetting`
+  calling `CBA_fnc_addSetting`, `fnc_migrateSettings`, `einv_setup_fnc_activeSettings`, `fnc_onSettingChanged`, the per-setting
+  `fnc_save`, `fnc_initPauseMenu` and the greyed rows were written against CBA 3.19's source and read through, not run. To try: the
+  wizard (SP) shows a value set in CBA's Server tab; change one in the wizard, Save, CBA's Server tab shows it; with the wizard open,
+  change another in CBA's menu (the row follows; one changed in the wizard first keeps the wizard's); Eden: Save writes the Mission
+  tab, the scenario keeps it after saving; a dedicated server as a logged-in admin (Save reaches every client, a joiner too) and as
+  a plain player (no "Inventory setup" under ESC > Options, no button on CBA's Server page; log in, reopen - both there); menu mode
+  (button on CBA's page, Apply, rows yellow, OK keeps); a profile with the old `einv_main_settings` (values moved once, the box gone
+  from the profile); a mission `cba_settings.sqf` with `force einv_gui_searchTime = 1;` (the row greyed when saving to the mission).
 - **Multiplayer on a dedicated server**: the hub, the handshake and the nested copies are designed for it; `HISTORY.md` records no
   dedicated-server run.

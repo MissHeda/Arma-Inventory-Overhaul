@@ -52,6 +52,12 @@ if !(call FUNC(canOpen)) exitWith {
     [{(uiNamespace getVariable [QGVAR(display), displayNull]) closeDisplay 2}] call FUNC(defer);
 };
 
+// In Eden, what the scenario still keeps in the settings box of the test builds goes into the server settings of
+// their own first, so the draft starts from it (einv_main_fnc_migrateSettings).
+if (is3DEN) then {
+    [] call (missionNamespace getVariable [QEFUNC(main,migrateSettings), {}]);
+};
+
 GVAR(mode) = _mode;
 GVAR(theme) = call EFUNC(gui,theme);
 GVAR(target) = [_mode] call FUNC(canEdit);
@@ -84,18 +90,18 @@ GVAR(treeState) = createHashMap;
 GVAR(editScope) = createHashMap;
 GVAR(classImportText) = "";
 
-// The draft starts as what is in use there (fnc_getActive): the rules and the server settings. What the source
-// it saves to holds right now is kept beside it: should that change before Save, someone else saved in
-// between (fnc_save).
+// The draft starts as what is in use there: the rules (fnc_getActive) and the server settings (fnc_activeSettings).
+// What the source it saves to holds right now for the rules is kept beside it: should that change before Save,
+// someone else saved in between (fnc_save). A server setting changed elsewhere is followed at once
+// (fnc_onSettingChanged).
 private _active = [] call FUNC(getActive);
 
 GVAR(origin) = _active;
 GVAR(originSource) = [] call FUNC(targetValues);
+GVAR(settingsQueue) = [];
 
 [_active] call FUNC(setDraft);
-[[SETTINGS_SETTING] call FUNC(getActive)] call FUNC(setSettingsDraft);
-
-GVAR(originSettings) = GVAR(draftSettingsText);
+[[] call FUNC(activeSettings)] call FUNC(setSettingsDraft);
 
 // Taken from the setup in effect, it may not be stored where the wizard saves: Save is offered all the
 // same (fnc_sourceEmpty).
