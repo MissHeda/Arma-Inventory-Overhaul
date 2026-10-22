@@ -13,6 +13,8 @@
  * 1: How many <NUMBER> (default: 1)
  * 2: A magazine's rounds, -1 for full <NUMBER> (default: -1)
  * 3: A weapon's attachments, as fnc_getContents gives them <ARRAY> (default: [])
+ * 4: The container it lies in, for how many may share a tile there (a crate stacks higher than a vest,
+ *    einv_storage_fnc_stackFor) <OBJECT> (default: objNull)
  *
  * Return Value:
  * None
@@ -23,13 +25,13 @@
  * Public: No
  */
 
-params [["_class", "", [""]], ["_count", 1, [0]], ["_ammo", -1, [0]], ["_attachments", [], [[]]]];
+params [["_class", "", [""]], ["_count", 1, [0]], ["_ammo", -1, [0]], ["_attachments", [], [[]]], ["_holder", objNull, [objNull]]];
 
 if (_class isEqualTo "") exitWith {};
 
 call FUNC(closeMenu);
 
-GVAR(inspect) = [_class, _count, _ammo, _attachments];
+GVAR(inspect) = [_class, _count, _ammo, _attachments, _holder];
 
 call FUNC(drawInspect);
 

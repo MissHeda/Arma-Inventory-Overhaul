@@ -331,7 +331,7 @@ if (_hidden) then {
     // bottom right corner - Arma's way, as Wardogs and Hotzone show it: one sees at once that it stacks,
     // also with one alone. What does not stack has nothing in that corner. The same box as a hotbar slot's
     // count (fnc_drawSlot, fnc_drawCountBackdrop).
-    private _stack = _info getOrDefault ["stack", 1];
+    private _stack = [_grid getOrDefault ["container", objNull], _entry get "class", _info getOrDefault ["stack", 1]] call EFUNC(storage,stackFor);
     private _stackW = 0;
 
     if (_stack > 1) then {

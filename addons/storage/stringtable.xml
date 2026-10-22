@@ -55,6 +55,12 @@
         <Key ID="STR_einv_storage_Setting_NearbyRange_Desc">
             <English>Distance in metres within which piles and crates show in the loot column and can be changed.\nOnly what the player can see counts; vehicles and bodies show when opened.</English>
         </Key>
+        <Key ID="STR_einv_storage_Setting_StackMultiplier">
+            <English>Stack multiplier for crates and vehicles</English>
+        </Key>
+        <Key ID="STR_einv_storage_Setting_StackMultiplier_Desc">
+            <English>Stacks in crates, vehicles and ground\npiles grow this many times. 1 = off.</English>
+        </Key>
         <Key ID="STR_einv_storage_Setting_UseBackpack">
             <English>Use items from the backpack</English>
         </Key>

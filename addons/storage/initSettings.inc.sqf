@@ -15,6 +15,16 @@
     [1, 5, 3, 1]
 ] call EFUNC(main,addSetting);
 
+// The same for everyone, like the layout it changes: the machine that owns a crate or a pile cuts its tiles, the
+// others read them, and all of them have to agree on how big a tile can be. In a crate, a vehicle or a pile on
+// the ground a class that stacks stacks this many times higher (fnc_stackFor); what is worn is not touched. 1 is off.
+[
+    QGVAR(stackMultiplier),
+    "SLIDER",
+    [LLSTRING(Setting_StackMultiplier), LLSTRING(Setting_StackMultiplier_Desc)],
+    [1, 10, 5, 0]
+] call EFUNC(main,addSetting);
+
 // ----- Containers -----
 
 // The same for everyone: the machine that owns a unit moves its surplus, the server's AI included

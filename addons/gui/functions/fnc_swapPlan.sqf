@@ -148,7 +148,7 @@ private _merge = false;
 private _mergeCount = 0;
 
 if (_sameClass) then {
-    private _stackSize = (([_classA] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) max 1;
+    private _stackSize = [_to, _classA] call EFUNC(storage,stackFor);
     private _roomB = _stackSize - (_tileB getOrDefault ["count", 1]);
     private _keyA = _entry getOrDefault ["key", ""];
 

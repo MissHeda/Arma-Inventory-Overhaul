@@ -548,7 +548,7 @@
             <English>Your rules</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Stacks">
-            <English>Only consumables stack: bandages, injectors, small infusions 10 per tile (sutures, cable ties 20); rations, splints, bigger infusions, first aid kits 5; biggest infusions, blood bags 2.</English>
+            <English>Only consumables stack: bandages, vials, cannulas, seals, syringes 5 per tile; injectors, sprays, tourniquets 4; lozenges, IV lines 10 (cable ties, ear plugs 20); rations, splints, first aid kits 5; blood bags, IV bags and devices 1. In crates, vehicles and piles on the ground the stack multiplier (Looting and searching) makes every stack larger.</English>
         </Key>
         <Key ID="STR_einv_setup_Explain_Stacks_Label">
             <English>Stacking</English>

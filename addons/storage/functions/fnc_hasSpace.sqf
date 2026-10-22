@@ -38,7 +38,7 @@ if (([_container] call FUNC(getBlocks)) isEqualTo []) exitWith {true};
 
 private _class = _entry getOrDefault ["class", ""];
 private _count = (_entry getOrDefault ["count", 1]) max 1;
-private _stack = (([_class] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) max 1;
+private _stack = [_container, _class] call FUNC(stackFor);
 private _contents = if (_isKey) then {
     private _type = GVAR(holderTypes) getOrDefault [(_container splitString ":") param [0, ""], createHashMap];
     private _code = _type get "entries";

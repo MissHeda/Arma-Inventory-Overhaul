@@ -35,7 +35,7 @@ class CfgEinvRulesets {
     class Default {
         name = CSTRING(Ruleset_Default);
         description = CSTRING(Ruleset_Default_Desc);
-        revision = 4;
+        revision = 5;
         base = "";
         cell = -1;
         rules[] = {
@@ -124,23 +124,24 @@ class CfgEinvRulesets {
             "@stack_5 > stack=5",
             "@stack_2 > stack=2",
 
-            // The medical items of ACE, ACM, ACME and Enhanced First Aid Kits (issue #9): the stack and the size of
-            // each, last so they win over the groups above, field by field. One rule per size and stack; a name with a
-            // plus is the class and every class built on it ("all types"). A stack above 1 on a class the game treats
-            // as a magazine (ACM_Paracetamol, ACM_AmmoniaInhalant, ACM_Inhaler_Penthrox, ACM_Syringe_10 and its types,
-            // ACM_OxygenTank_425) is all it takes to let it share a tile: only magazines with the same rounds meet.
+            // The medical items of ACE, ACM, ACME and Enhanced First Aid Kits (issue #9, stacks raised for play in issue #21): the
+            // stack and the size of each, last so they win over the groups above, field by field. One rule per size and stack; a
+            // name with a plus is the class and every class built on it ("all types"). A stack above 1 on a class the game
+            // treats as a magazine (ACM_Paracetamol, ACM_AmmoniaInhalant, ACM_Inhaler_Penthrox, ACM_Syringe_10 and its types,
+            // ACM_OxygenTank_425) is all it takes to let it share a tile: only magazines with the same rounds meet. The stacks
+            // are for worn containers; a crate, a vehicle or a pile on the ground multiplies them (einv_storage_stackMultiplier).
             // Every vial (ACM_Vial_*, ACME_Vial_*, ACME_MannitolVial) by a part of its class name, so a vial added
-            // later is covered too: three to a tile.
-            "class~ACM_Vial_|ACME_Vial_|ACME_MannitolVial > size=1x1 stack=3",
+            // later is covered too: five to a tile.
+            "class~ACM_Vial_|ACME_Vial_|ACME_MannitolVial > size=1x1 stack=5",
             // One to a tile, 1x1: single-use devices, bags and tools. A name with a plus is that class and every class built on
-            // it (all types of a blood bag, plasma, saline and PlasmaLyte bag).
-            "class=ACM_AmmoniaInhalant|ACM_BloodBag+|ACM_EMMA|ACME_ETTube|ACM_EsmololBag|ACM_IO_EZ|ACM_IO_FAST|ACM_FieldBloodTransfusionKit_250|ACM_FieldBloodTransfusionKit_500|ACME_HTSBag|ACME_Laryngoscope|ACME_BloodWarmer|ACME_MagnesiumBag|ACME_MannitolBag|ACM_HPMK|ACM_NRBMask|ACM_Inhaler_Penthrox|ACE_plasmaIV+|ACME_PlasmaLyteBag+|ACM_PocketBVM|ACM_PressureCuff|ACE_salineIV+|ACM_Stethoscope|ACM_Thermometer|ACE_suture|ACM_ThoracostomyKit|ACME_VentBattery > size=1x1 stack=1",
-            // Two to a tile, 1x1: dressings, injectors, sprays and kits used up one at a time; body bags, all types.
-            "class=ACM_Paracetamol|ACM_Autoinjector_ATNA|ACE_fieldDressing|ACE_elasticBandage|ACE_packingBandage|ACE_quikclot|ACE_bodyBag+|ACM_ChestTubeKit|ACM_CombatGauze|ACM_CricKit|ACM_ElasticWrap|ACM_EmergencyTraumaDressing|ACE_epinephrine|ACME_Spray_Esketamine|ACME_HTSBullet|ACM_Autoinjector_Midazolam|ACE_morphine|ACM_Spray_Naloxone|ACME_NARSPEAR|ACM_NCDKit|ACM_PressureBandage|ACME_PressureInfuser|ACM_PulseOximeter|ACM_SAMSplint|ACE_tourniquet|ACME_XStat > size=1x1 stack=2",
-            // Three to a tile, 1x1: cannulas, seals, airways, flushes and prepared syringes (all types).
-            "class=ACM_IV_14g+|ACM_IV_16g+|ACM_IV_18g+|ACM_IV_20g+|ACM_ChestSeal|ACM_SuctionBag|ACM_IGel|ACME_NARBOA|ACM_NPA|ACM_OPA|ACM_SalineFlush_10|ACM_Syringe_10+ > size=1x1 stack=3",
-            // Five to a tile, 1x1: lozenges and IV lines.
-            "class=ACM_Lozenge_Fentanyl|ACME_IVLine|ACME_YTubing > size=1x1 stack=5",
+            // it (all types of a blood bag, plasma, saline and PlasmaLyte bag). Bulky things stay at one.
+            "class=ACM_AmmoniaInhalant|ACM_BloodBag+|ACM_EMMA|ACME_ETTube|ACM_EsmololBag|ACM_FieldBloodTransfusionKit_250|ACM_FieldBloodTransfusionKit_500|ACME_HTSBag|ACME_Laryngoscope|ACME_BloodWarmer|ACME_MagnesiumBag|ACME_MannitolBag|ACM_HPMK|ACM_NRBMask|ACM_Inhaler_Penthrox|ACE_plasmaIV+|ACME_PlasmaLyteBag+|ACM_PocketBVM|ACM_PressureCuff|ACE_salineIV+|ACM_Stethoscope|ACM_Thermometer|ACE_suture|ACM_ThoracostomyKit|ACME_VentBattery > size=1x1 stack=1",
+            // Four to a tile, 1x1: injectors, sprays, splints, tourniquets and kits used up one at a time; body bags, all types.
+            "class=ACM_Paracetamol|ACM_Autoinjector_ATNA|ACE_bodyBag+|ACM_ChestTubeKit|ACM_CricKit|ACE_epinephrine|ACME_Spray_Esketamine|ACME_HTSBullet|ACM_Autoinjector_Midazolam|ACE_morphine|ACM_Spray_Naloxone|ACME_NARSPEAR|ACM_NCDKit|ACME_PressureInfuser|ACM_PulseOximeter|ACM_SAMSplint|ACE_tourniquet|ACME_XStat > size=1x1 stack=4",
+            // Five to a tile, 1x1: dressings and wraps, IV cannulas and IO devices, seals, airways, flushes and prepared syringes (all types).
+            "class=ACE_fieldDressing|ACE_elasticBandage|ACE_packingBandage|ACE_quikclot|ACM_PressureBandage|ACM_ElasticWrap|ACM_CombatGauze|ACM_EmergencyTraumaDressing|ACM_IV_14g+|ACM_IV_16g+|ACM_IV_18g+|ACM_IV_20g+|ACM_IO_EZ|ACM_IO_FAST|ACM_ChestSeal|ACM_SuctionBag|ACM_IGel|ACME_NARBOA|ACM_NPA|ACM_OPA|ACM_SalineFlush_10|ACM_Syringe_10+ > size=1x1 stack=5",
+            // Ten to a tile, 1x1: lozenges, IV lines and Y tubing.
+            "class=ACM_Lozenge_Fentanyl|ACME_IVLine|ACME_YTubing > size=1x1 stack=10",
             // One to a tile, 2x1; the individual first aid kit (Enhanced First Aid Kits) with every instance class built on it.
             "class=ACM_BVM|ACME_AAJT_S|efak_IFAK+ > size=2x1 stack=1",
             // One to a tile, 1x2: the oxygen tank.

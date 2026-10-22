@@ -42,7 +42,8 @@ and frequency of a radio show at the mouse, on the hint line and on the inspect 
 frequencies while you move it around). Works with ACE vehicle lock and Zeus Enhanced. Works with ACE Interaction
 Menu Expansion (AIME): its *Change Ammo Type* offers and loads only magazines that "Use items from ..." allows, its
 inventory entries show only where the window opens, and its one-click pick-up from the ground opens the window while
-the ground has to be searched. Works with Mavic 3 - Improved: a Mavic item dropped through the window (drag to the
+the ground has to be searched, else puts a magazine (or a weapon you cannot wield at once) into the first container with
+free cells instead of the engine's add. Works with Mavic 3 - Improved: a Mavic item dropped through the window (drag to the
 ground, the drop key, Drop in the menu) is deployed as a drone, as that mod does for the engine's inventory, and a deployed drone has an ACE interaction
 "Pack up drone" that checks the grid for room.
 
@@ -86,14 +87,15 @@ Its three pages:
   A small reset button beside a field takes it back to what the class would be without a rule of its own.
 
 It is plain text all the same. There is one preset, the default, which is realism: rifles from 4x2 to 7x2, magazines a tile or two,
-backpacks with big tiles, and **nothing stacks** but a short list of consumables - bandages, injectors and small infusions
-ten to a tile, rations, splints, bigger infusions and first aid kits five, blood bags and the biggest infusions two - and only where
-the mod that adds them (ACE, ACM) is loaded. What is worn gets a fifth more room than its load gives (a uniform is one block 6 wide and
+backpacks with big tiles, and **nothing stacks** but a short list of consumables - vials, bandages, cannulas and syringes five to a tile,
+injectors and tourniquets four, lozenges and IV lines ten, rations, splints and first aid kits five, bulky bags and devices one or two - and only where
+the mod that adds them (ACE, ACM) is loaded. In crates, vehicles and piles on the ground every stack is five times larger (server setting
+"Stack multiplier for crates and vehicles", 1 turns it off); what you wear keeps the plain stacks. What is worn gets a fifth more room than its load gives (a uniform is one block 6 wide and
 2 to 5 rows high, a vest is magazine pouches of 1x2 and 2x2, a backpack one near-square block); vehicles and crates get as many cells as
 their load. A text that names a preset of an older version (`base=realism`, `weight`, `tarkov`) reads as the default. Grids are ten cells wide.
 
 - **Server settings:** every setting of this mod that is the same for everyone - searching, the hands' times, living persons, weight, the hotbar, repacking,
-  locks, the vanilla arsenal - is a control of the wizard's General page and no row of CBA's menu. They are saved in one CBA text box, `einv_main_settings`
+  locks, the vanilla arsenal, the stack multiplier of crates - is a control of the wizard's General page and no row of CBA's menu. They are saved in one CBA text box, `einv_main_settings`
   (a server's or a mission's, forced or not, like the rules), as `einv1, gui_searchTime=0.6, weight_enabled=0`: the setting's name without `einv_`, a value
   (`1` or `0` for a switch, a number, the value of a choice, free text with a `%` and four hex digits for what is not a letter, a digit, `-` or `.`), only what is off its
   default. On every machine the text is read into the variables the mod has always read, under the same names, with the same scripts, so a script that sets
@@ -242,6 +244,15 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   beyond its cells moves on to the next container with free cells (uniform, vest, backpack) a moment later, on the
   machine the unit is local on; what fits nowhere stays shown as overflow. The server setting
   `einv_storage_migrate` switches that off.
+- **Adding things from a script or another mod:** `[unit, "class", count, rounds] call einv_storage_fnc_addToUnit` (any machine; the
+  last argument is optional and only for magazines, -1 or left out for full ones) puts new things into the unit's uniform, vest
+  and backpack - the first with free cells, one with a slot for the item's category first - and returns how many it placed,
+  `0` when the grid has no room. The engine's `addItem`, `addMagazine`, `addWeapon` and `addBackpack` stop at a container's config
+  `maximumLoad`, which the grid ignores, and `addMagazine` loads an empty weapon instead of the pockets; a script that checks
+  `canAdd` and then adds (or takes the thing out of a pile first) can lose the item. `addToUnit` ignores the config load, never
+  loads a weapon and never drops anything on the ground: what has no room is simply not added, so compare the number returned
+  with the number asked for. For a unit on another machine it runs where the unit is local and the number returned is what this
+  machine's picture of the unit says will fit.
 - **Loadouts beyond the config load:** a container may hold more than its config `maximumLoad`, but the engine's `setUnitLoadout` stops
   filling a container there. Loadouts set through CBA (`CBA_fnc_setLoadout`, ACE Arsenal's Load) are topped up by the mod on their own. In a
   mission use `[unit, loadout] call einv_storage_fnc_setUnitLoadout` instead of `setUnitLoadout` (any machine; it runs where the unit is local,

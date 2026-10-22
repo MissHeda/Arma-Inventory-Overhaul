@@ -310,13 +310,13 @@ installed), `base`, `cell` (-1 to leave it to its base or the slider), `rules[]`
 element, no commas) and `class Groups` (labels and examples of the groups). The group ids are what own rules refer to and a preset's id
 is what a text names in `base=`: never rename one. Other mods may add presets as classes there; the wizard offers no choice among them.
 
-- **`default`** (revision 4) is the one preset this mod ships, and it is realism: rifles 4x2 to 7x2 by mass, handguns 2x1,
+- **`default`** (revision 5) is the one preset this mod ships, and it is realism: rifles 4x2 to 7x2 by mass, handguns 2x1,
   launchers 6x2, magazines 1x1, 1x2 or 2x2 by mass, belts 2x2, rockets 1x3 and 2x3, grenades 1x1, optics, muzzles and small items 1x1 up
   to 3x2 by mass, belts 2x2, helmets 2x2, uniforms 2x2, vests 3x3, backpacks 4x4, 5x5 and 5x6 by load (up to 160, up to 280, above) - and
   **nothing stacks** but the groups `@stack_20`, `@stack_10`, `@stack_5` and `@stack_2`: consumables of ACE, ACM and the vanilla first aid kit,
   by class (`class=ACE_fieldDressing|ACM_IV_16g+|...`). The rules are keyed by class, so a mod that is not loaded matches nothing; a name with a
   plus is that class and everything built on it, used where all of them are of the same sort. A rule of the text for a class wins over them like
-  over any preset rule. The medical list of issue #9 (ACE, ACM, ACME and Enhanced First Aid Kits: one `class=` rule per size and stack, vials by `class~`) sits after the `@stack_*` groups and wins over them. It sets **no grid**: a uniform, vest or backpack gets the built-in answer (`grid=120%`, `einv_storage_fnc_blocksFor`),
+  over any preset rule. The medical list of issue #9 (ACE, ACM, ACME and Enhanced First Aid Kits: one `class=` rule per size and stack, vials by `class~`) sits after the `@stack_*` groups and wins over them. Its stacks are the ones for play of issue #21 (revision 5), for worn containers: vials, dressings and wraps (field, elastic, packing, quikclot, pressure bandage, elastic wrap, combat gauze, emergency trauma dressing), cannulas, IO devices, chest seals, airways, flushes and syringes five to a tile, injectors, sprays, tourniquets and kits four, lozenges, IV lines and Y tubing ten; blood bags, IV bags and devices stay at one. A crate, a vehicle or a pile multiplies them (`fnc_stackFor`, section 3). It sets **no grid**: a uniform, vest or backpack gets the built-in answer (`grid=120%`, `einv_storage_fnc_blocksFor`),
   a crate or vehicle `auto`, so the text's rules with `all` - the General step's kind sizes - decide for every container no class rule, table or mod
   answers. The groups are a partition (an item is in at most one, `medical` and the `stack_*` groups excepted, which are only handles), so a rule for
   one never reaches into another. Kits of Enhanced First Aid Kits are items to `kind=` as well, so the item groups size them; none of
@@ -495,6 +495,20 @@ tops up the last tile that has room with what is still left, then opens new tile
 without a count (an older save, a loadout) stand for "as many as the cargo gives": with none at all that is the old cut - full
 stacks first, then the remainder. A tile of the hidden holder (Strict mode) and anything that does not stack have no counts.
 
+**How big a tile can be** (`fnc_stackFor [holder, class, own stack (optional)]`). The one place a stack size is read for a place where
+tiles lie: `getInfo "stack"` in a uniform, vest, backpack or kit, and that times the server setting `einv_storage_stackMultiplier` (1 to 10,
+default 5, 1 is off; Looting and searching on the wizard's General page), rounded up, in a crate, a vehicle or a pile on the ground - a
+holder that is no `ContainerSupply` (a uniform's or vest's container), no `Bag_Base` (a backpack) and no `CAManBase`, worked out once per
+type in `GVAR(stackRoomy)`. A class that does not stack (stack 1: rifles, magazines, kits, bulky things) stays 1 everywhere, so the
+multiplier makes stacks larger and never makes a class stack. A uniform, vest or backpack lying in a crate counts as worn: what it holds
+goes by the plain stack, so the same pile is the same tiles once it is put on. `fnc_getContents` (the cut into tiles, and `fnc_stackCounts`
+with it), `fnc_hasSpace`, `fnc_plan`, `fnc_opPut`, `fnc_setPlace` (a record's count is cut to it), the tile's "3/10" badge, the inspect card's
+"Stackable" row and the merge drop (`fnc_swapPlan`) all read it from here; a test whether a class stacks at all (`stack` over 1) does not need it.
+The setting is forced like every server setting, so the machine that owns a holder and the ones that only read its places cut the same
+tiles. A record whose count is above the stack - the setting went down, or places came with a pile out of a crate - is cut to the stack by
+`fnc_stackCounts` and the rest is surplus, which tops up the last tile with room and then opens tiles of full stacks and a remainder;
+every step places at least one item, so it ends, and `fnc_getLayout` writes the cut places back once.
+
 `fnc_getLayout` adds `block`, `col`, `row`, `w`, `h` (as it lies), `holes`, `rotated` and `overflow`. Every nested container gets
 two local marks as it is read: `einv_storage_itemClass` (its compartments go by the item, since its container object is only a
 Supply class) and `einv_storage_parent` (what it lies in, for `fnc_rootOf`). `fnc_entryToArray` / `fnc_entryFromArray` carry an
@@ -642,7 +656,8 @@ in a single slot, but its categories are not asked there: the next layout puts a
   places everyone shares; nothing is kept. The ground and a kit without a grid of its own always have room (they grow); a kit with
   one is laid out like a container, what it holds read through its holder type's `"entries"`. A stackable entry **first fills the
   partly filled tiles of its own key** (a magazine only stacks with the same rounds; two partial tiles of a class are two tiles,
-  each with its own room) - the layout never merges into a tile - and only what is left needs free spots, one per stack's worth.
+  each with its own room) - the layout never merges into a tile - and only what is left needs free spots, one per stack's worth
+  of the container's own stack (`fnc_stackFor`: 15 vials from a crate need three spots in a vest, a stack of 5).
   That is exactly what a put without a cell does (`fnc_opPut`), so the answer holds for Quick move and the plan.
 - `fnc_hasRoom [container, entry]`: `fnc_hasSpace` plus the one kind rule left, `fnc_backpackIntoBackpack` (reason
   `"NoBackpack"`). The cargo commands add whatever they are given, so a window, mission or mod asks this before it puts anything
@@ -652,7 +667,9 @@ in a single slot, but its categories are not asked there: the next layout puts a
   planned. Options `"start"` ([holder, compartment] tried first) and `"lifted"` (items treated as gone from where they lie).
   `"ground"` as a target always has room and takes no cell. Nothing is asked of any machine but this one. An item never goes into
   a target that is the container it is or lies in it (`fnc_liesIn`). **A stackable tile first fills the stacks of its key in a
-  target that are not full** (what its put does) and only the rest takes a spot, one tile's worth; one that fits into the stacks
+  target that are not full** (what its put does) and only the rest takes a spot, one tile's worth of the target's own stack
+  (`fnc_stackFor`) - a count above it takes one spot per stack's worth (a pile of 15 from a crate meets a stack of 5 in a vest: three
+  spots, all of them or the target is passed over and its cells are given back); one that fits into the stacks
   that are there is assigned with the cell `[]`, and what is planned into a target counts for the items after it. A tile planned
   into the holder it lies in joins nothing (op `placeMany` lays it down) and always takes a spot.
 
@@ -674,9 +691,25 @@ putting in with the cargo commands.
   on**, and `fnc_restore` only refills a container `fnc_clearCargo` really emptied: that is what keeps an item from being copied
   or lost. Of several identical uniforms, vests or backpacks the engine picks which leaves; `fnc_removeSameClass` takes all of the
   class out, hands the wanted one on by uid and puts the others back, verified.
-- `fnc_makePayload [class, count, rounds]` and `fnc_addNew [container, class, count, cell]` -> `""` / `"NoRoom"` / `"NoBackpack"`
-  / `"Failed"` make what did not exist (the Arsenal's adds), a free spot when no cell is given; `fnc_countClass [container,
-  class]` counts by class. `addNew` and everything else adds by the cargo commands, never by `canAdd`.
+- `fnc_makePayload [class, count, rounds]` and `fnc_addNew [container, class, count, cell, rounds]` -> `""` / `"NoRoom"` / `"NoBackpack"`
+  / `"Failed"` make what did not exist (the Arsenal's adds), a free spot when no cell is given, magazines full unless `rounds` (-1 =
+  full) says otherwise; `fnc_countClass [container, class]` counts by class. `addNew` and everything else adds by the cargo
+  commands, never by `canAdd`.
+- **`einv_storage_fnc_addToUnit [unit, class, count, rounds]`** (public) -> how many were put in: the way for a mission or another mod
+  to add new things to a person without the engine's `addItem` / `addMagazine` / `addWeapon` / `addBackpack`, which refuse at a
+  container's config `maximumLoad` (the grid does not care about it) and load a magazine straight into an empty compatible weapon -
+  a script that took the thing from somewhere first (a ground pile, another unit) loses it when the engine says no. The things go
+  into the unit's worn containers with the cargo commands: `fnc_unitTargets [unit, class]` orders the uniform, vest and backpack
+  the unit has (those with a compartment that is a slot for the class's categories - `grid=2x2:ammo` - first, then the rest, each in
+  the order uniform, vest, backpack), `fnc_addFit [unit, class, count, rounds]` works out per container how many its grid takes
+  (`fnc_hasRoom`: the stacks of the key first, a backpack never into a backpack; found by halving, a few layouts however many are
+  asked for) and `fnc_addNew` adds that many, counted before and after (`fnc_countClass`). What no container has room for is not
+  added - never into a weapon, never onto the ground - and is the difference between the count asked for and the number returned.
+  The unit may be on another machine: the call is a CBA targeted event (`einv_storage_addToUnit`, hops counted up to 3 in case the
+  unit changes hands in flight), the add runs where the unit is local, and the caller's number is this machine's `fnc_addFit`
+  answer, exact while the unit's cargo and places are as this machine reads them. A local add queues the unit (`fnc_queueMigrate`)
+  in case the layout the add used differed from the cells. The class must exist in CfgWeapons, CfgMagazines, CfgVehicles or
+  CfgGlasses (else a WARNING and 0). Not run in the game.
 - **Stacks apart** (`fnc_opPut`, `fnc_opTake`, `fnc_opMove`, `fnc_opSplit`, `fnc_setCount`, `fnc_findSpots`). The records are
   changed in step with the cargo, in the phase's buffer, so the stack the player chose is the one that gains or gives items. The
   first view of a container in a phase (`fnc_findEntry`) puts the picture's records into the buffer before any op changes the cargo,
@@ -684,8 +717,8 @@ putting in with the cargo commands.
   tile removes the record. `put` of a payload of a class that stacks (items, magazines of one number of rounds, not into the hidden
   holder, not a uniform, vest or backpack): **without options it joins** the tiles of its key that have room, in their order,
   and what is left opens new tiles (this is what Quick move, Sort, the plan and settlement do); with **`separate`**
-  (6th argument) it joins nothing and lies at the cell as a tile of its own (a count above one stack is cut into full tiles, the
-  others go to the first fit); with **`merge into`** (7th, `[col, row, compartment]` of a tile of the same key) that tile is
+  (6th argument) it joins nothing and lies at the cell as a tile of its own (a count above one stack of the holder - `fnc_stackFor` -
+  is cut into full tiles, the others go to the first fit); with **`merge into`** (7th, `[col, row, compartment]` of a tile of the same key) that tile is
   filled first, then as without. Only the tiles that open need a free spot (`fnc_findSpots`: the cell asked for, else the first fit,
   upright then turned); a payload that fits into the room of the tiles it joins needs none, so the check of `move` asks for what
   really moves. Extra of a put: `[landed cell (the joined tile's cell for a pure join), elsewhere]`. `move` passes both on to its
@@ -818,6 +851,18 @@ overflow, shown apart as before. Never dropped, never copied.
   the hub sends again is answered from the journal and never runs twice); every move is verified by counting, and a tile that did not
   land goes back to where it was taken from. A change of owner between request and run is `"Moved"` or runs on the new owner, which
   plans again from what it finds. The server setting `einv_storage_migrate` (default on) switches the whole thing off.
+- **Adds of the engine that a script made after a check.** A script that asks `canAdd` and then `addMagazine`, or takes an item out
+  of a pile and adds it, depends on the engine's load limit, which the grid does not follow: an add the engine refuses is lost
+  where nothing can see it (no event, no return value). What this mod can see is only what it does itself: `einv_storage_fnc_addToUnit`
+  (above) is the replacement for such scripts, AIME's one-click pick-up goes through the grid instead (`fnc_moveEntry`, section 7, compat_aime), and the engine's
+  own `Take` from one of our scripted piles that empties it deletes the pile (`GroundWeaponHolder_Scripted`, never deleted by the
+  engine - the `Take` handler in postInit asks `fnc_pruneScriptedPile`, on the pile's machine through `einv_storage_prunePile`). A
+  vanilla `TakeMagazine` / `TakeItem` / `TakeWeapon` action that the engine refuses leaves the item in the pile and raises no
+  event; nothing of ours reacts to it. A magazine an engine add puts into an empty compatible muzzle (a spent launcher) is the
+  engine's loading, not an add into the cargo; the reload machinery leaves it alone - `fnc_onReloaded` acts only on a loaded magazine
+  noted beforehand as lying in a blocked container (`fnc_useTrack`) or on the token of a reload this mod asked for, and a magazine
+  that was never in a container has neither; `fnc_reloadTidy` runs only with a token, `fnc_noteHandLoad` and `fnc_weaponPart` only
+  from the window's own loads.
 
 ### Equipment (`fnc_getEquipment`, slots, putting on and off)
 
@@ -1116,7 +1161,7 @@ the game, like the rest of Use from containers.
 Public: `einv_storage_fnc_useState`, `fnc_useKind`, `fnc_useMode`, `fnc_useCarried`, `fnc_useBlockedIn`, `fnc_useKindName`, `fnc_loadMagazine`, `fnc_reloadBusy`,
 `fnc_hiddenCounts`, `fnc_hiddenClasses`,
 `einv_storage_fnc_request`, `fnc_moveEntry`, `fnc_equip`, `fnc_unequip`, `fnc_getEquipment`, `fnc_getNearby`,
-`fnc_readPlaces`, `fnc_rootOf`, `fnc_dumpPlaces`, `fnc_addNew`. Other addons extend the storage only through tables they fill in
+`fnc_readPlaces`, `fnc_rootOf`, `fnc_dumpPlaces`, `fnc_addNew`, `fnc_addToUnit`. Other addons extend the storage only through tables they fill in
 preInit: `einv_storage_ops` (op name -> function name), `einv_storage_guards`, `einv_storage_carryVariables` and
 `einv_storage_holderTypes` (a holder that is no object, by the part of its key before `:`; `kit` from compat_efak: `entries`,
 `blocks` (its compartments, `[]` for an open grid; left out, open), `root`, `verify`, and the names of its ops for `take`, `put`,
@@ -1969,8 +2014,8 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   took, since an answer of true on every click would keep the window's own buttons from their clicks.
 - **Hints:** `fnc_updateHover` names what the mouse is on in the footer; `fnc_showHint [text, colourKey]`; `fnc_flashHint [reason,
   details]` (a reason key such as `"NoRoom"`, `"LookOnly"`, `"Locked"`, `"NoBackpack"`, any other text as it is, `""` nothing);
-  `fnc_dragHint`; `fnc_infoHint [kind, args]` for the weight card and each caption. The **inspect card** (`fnc_inspect`,
-  `fnc_drawInspect`) and the **comparison card** (`fnc_compareRows`, `fnc_drawCompare`, `einv_gui_compareTooltip`: over a vest,
+  `fnc_dragHint`; `fnc_infoHint [kind, args]` for the weight card and each caption. The **inspect card** (`fnc_inspect` with the
+  container the tile lies in as its fifth argument, for the "Stackable" row's `fnc_stackFor`; `fnc_drawInspect`) and the **comparison card** (`fnc_compareRows`, `fnc_drawCompare`, `einv_gui_compareTooltip`: over a vest,
   uniform, helmet or backpack that is not the soldier's own, "vs. <worn item>" with Armor, Covers, Space, Weight) float over the
   columns. **The name at the mouse lies over every highlight.** It is one label (`fnc_makeTooltip`, made by `fnc_drawTopLayer` after
   each build, uiNamespace `einv_gui_tooltip`), and the engine draws what is made later over what is made before, so a ring made on
@@ -2962,9 +3007,21 @@ its capacity there.
     living person's backpack entries only where `fnc_canOpenPerson` and `fnc_personInReach` hold (`fnc_personCondition`). The body's
     entry is as it was (bodies are open to everyone).
   - *Ground pile action* (`UPSL_aime_inventory_holder_action`, WeaponHolder and WeaponHolderSimulated): one click picks up the only
-    item lying there (`TakeWeapon`, `addMagazine` + `clearMagazineCargoGlobal`, `PutBag` / `AddBag`) with no search. Its statement is
-    patched to `fnc_holderRun`: while `einv_gui_searchTime` is above 0, `einv_gui_searchGround` is on and the pile has no
-    `einv_noSearch`, the click opens the window on the pile (`action ["Gear", pile]`); otherwise AIME's own pick-up runs.
+    weapon, magazine or backpack lying there (items are not counted; `UPSL_aime_inventory_fnc_can_pickup`) with no search -
+    `TakeWeapon`, `canAdd` then `addMagazine` + `clearMagazineCargoGlobal` (cleared whatever the add did), `PutBag` / `AddBag` - and
+    opens the window with more. Its statement is patched to `fnc_holderRun`: while `einv_gui_searchTime` is above 0,
+    `einv_gui_searchGround` is on and the pile has no `einv_noSearch`, the click opens the window on the pile (`action ["Gear",
+    pile]`); otherwise `fnc_holderPick` (issue 20: an RHS RPG round picked up with a launcher carried was "loaded into the RPG" or gone
+    - the engine's add stops at a container's config load, which the grid does not follow, loads an empty weapon, and AIME cleared the
+    pile after it whatever happened). `fnc_holderPick` handles a lone **magazine** and a lone **weapon that does not fit an empty slot of
+    the soldier** (`fnc_slotFor`, `fnc_getSlot`): the entry of the pile (`fnc_getContents`, first) is moved to the first of
+    `fnc_unitTargets` that `fnc_hasRoom` says has a spot for it, by `fnc_moveEntry` (take at the pile's root, put at the unit's: the same
+    transaction as a quick move out of a pile, the hub in multiplayer, settlement back to the pile when the put bounces), after the
+    same "PutDown" movement AIME played. No container with room: nothing is touched and the hint "No container has room for that"
+    (`STR_einv_gui_Hint_NowhereToGo`, through `einv_storage_fnc_useHint`, since no window is open) shows; a refusal of the
+    transaction shows the matching gui hint. Left to AIME's own function (`fnc_holderPick` answers false): a backpack (AIME takes the
+    worn one off and puts this on - a wearing), a weapon for a free slot (the game's `TakeWeapon` wields it), and a pile with more than
+    one such thing (the Gear action, the window).
   - *Static weapon assemble / disassemble* (`..._assemble_action`, `..._disassemble_action`, the `WeaponAssembled` handler that clears
     a base backpack) work on the engine's backpack of a static weapon, which has no cargo: left alone. AIME's UAV terminal, group,
     vehicle seat and vehicle control actions do not touch the inventory.
@@ -3018,6 +3075,7 @@ The setup wizard's General page draws a control for each registered setting that
 | `einv_storage_migrate` | CHECKBOX | global | on | move a unit's surplus (overflow) on to its next container with room (section 3, Surplus) |
 | `einv_storage_containerTable` | EDITBOX | global | "" | `class:N` or `class:WxH+WxH`; wins over the text |
 | `einv_storage_nearbyRange` | SLIDER 1 to 5 | global | 3 | m, how far crates and piles count as nearby |
+| `einv_storage_stackMultiplier` | SLIDER 1 to 10 | global | 5 | "Stack multiplier for crates and vehicles": what stacks stacks this many times higher in a crate, a vehicle or a pile on the ground, not in what is worn (section 3, `fnc_stackFor`); 1 is off |
 | `einv_storage_useUniform`, `useVest`, `useBackpack` | LIST | global | `all` | "Use items from the uniform / vest / backpack": `all` Everything, `list` Only whitelisted (items with `use=` for it), `none` Nothing, `strict` Strict (hidden) - Only whitelisted, and the blocked items are kept out of the cargo in the unit's hidden holder; what the padlocks, the hotbar, the window's use rows and the reload key honour (section 3, Use from containers and Strict mode) |
 | `einv_gui_cellScale` | SLIDER 0.8 to 1.3 | client | 1.1 | tile scale: the cell size, capped where the columns no longer fit; next opening |
 | `einv_gui_pageRows` | SLIDER 0 to 40 | client | 10 | rows per page of a tall compartment of what is looted (section 4, "Tall compartments"); 0 or 40 no pages, at least 4 |
@@ -3169,7 +3227,24 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
   tiles), in another container (two tiles), onto the stack of five (merge); Shift+click; Quick move of the single into a
   container that holds a partial stack; close and reopen; another player or a script adding the same class
   (reconciled, nothing lost); a save from before the counts.
+- **Stack multiplier and the raised medical stacks** (0.5.0, issue #21): `fnc_stackFor` and its readers were written and read through, not
+  run. To try (ACE + ACM): a crate with 100 `ACM_Vial_Morphine` shows tiles of 25 ("25/25"), the same in a vest tiles of 5; take 15 out of
+  a tile and drop them on an empty cell of a vest (three tiles of 5), Quick move the tile (three tiles, or nothing moves when the vest has
+  fewer than three free cells), drag 3 onto a tile of 2 in the vest (merge to 5); put 30 into the vest back into the crate; the setting at
+  1 (crate tiles of 5 again, the places with counts of 25 cut and the surplus opened as tiles, no loop), at 10; a client of a
+  dedicated server sees the same tiles as the host; the Arsenal's panel and a worn vest never multiply.
 - **Searching left out for one object** (0.5.12): the Eden attribute "Skip searching", the "CuratorObjectPlaced" hook (on which machines it fires), the compat_zen choices and `fnc_setSearchable` were written and read through, not run. To try: place a crate in Eden with the box ticked and loot it (no stripes); in Zeus place a crate with *Search Zeus-placed crates and vehicles* off (no stripes), right-click it, *Searching: turn on* (stripes again for a player who opens it fresh), then *Searching: turn off*; call `[_crate, false] call einv_gui_fnc_setSearchable;` from the debug console and join as a second player.
 - **Categories of the setup's own and the locked compartments' faint pictures** (0.5.0): the `category=` statements and their registry, the Categories card of the General step (add, rename, picture, delete with its clean-up), the picker's Category icons chip, the strip with more than eight categories (the "more" field), the watermark on the free cells (also on a paged box and in a kit; the corner badge was taken out in 0.5.12), and the footer hint on a locked compartment were written and read through, not run. To try: a vest with a 2x2 `:medical` compartment holding a pulse oximeter (the cells carry the faint picture, no badge in the corner, hovering says "Only medical items here"); add a category, give it a picture, put an item in it (Items step) and a compartment (Containers step, Blocks), loot a crate holding it (the strip lists it; add 9 and click "more"); delete the category (the chips, the item and the compartment lose it, one undo brings it back); export and import the setup on a client.
+- **AIME's pick-up through the grid and `einv_storage_fnc_addToUnit`** (0.5.0, issue #20): `fnc_holderPick`, `fnc_addToUnit`, `fnc_addFit`,
+  `fnc_unitTargets`, the rounds argument of `fnc_addNew` and the `Take` handler that deletes an emptied scripted pile were written and read
+  through, not run; the engine behaviours they work around (a spent launcher loading an added magazine, `addMagazine` refusing at the
+  config load after `canAdd`) are read from the command descriptions, not seen. To try (ACE + AIME + RHS AFRF, "Searching" off for the
+  ground): a pile with one `rhs_rpg7_PG7VL_mag`, a loaded RPG-7 on the back, the ACE menu on the pile -> the round is in the first
+  container with free cells, the launcher unchanged, the pile gone; the same with the RPG-7 spent (the round is in the pockets, not in
+  the launcher); every container full -> the hint "No container has room for that", the round stays; a lone rifle with a rifle already
+  carried (goes into a container), with the slot free (wielded, AIME's action); a backpack (AIME's); two magazines on the pile (the window
+  opens). `[player, "ACE_fieldDressing", 8] call einv_storage_fnc_addToUnit` with room for 5 returns 5; a magazine with rounds; a unit of
+  another machine (the number is the local estimate, the add follows); a Take from a scripted pile through the scroll menu leaves no
+  empty pile.
 - **Multiplayer on a dedicated server**: the hub, the handshake and the nested copies are designed for it; `HISTORY.md` records no
   dedicated-server run.

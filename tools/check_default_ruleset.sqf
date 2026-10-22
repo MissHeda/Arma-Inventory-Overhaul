@@ -4,7 +4,9 @@
  * item the size and stack, and every container the compartments, it is meant to: the sizes of "expected" below
  * (rifles from 4x2 to 7x2, backpack tiles 4x4, 5x5 and 5x6, the rest as they always were), nothing stacking
  * but the classes of the @stack_* groups with the number of their group and the medical items of the rules that follow
- * them (class=..., ACE, ACM, ACME, EFAK; checked against those rules compiled alone), and containers laid out from
+ * them (class=..., ACE, ACM, ACME, EFAK; checked against those rules compiled alone, and a few of them by the stack
+ * the play settings of issue #21 give: dressings, vials, cannulas and syringes 5, tourniquets and injectors 4, lozenges and
+ * IV lines 10, bags and devices 1; einv_storage_fnc_stackFor multiplies those in a crate), and containers laid out from
  * 120 % of their load - a uniform one block 6 wide and 2 to 5 rows high, a vest pouches of 1x2 and 2x2, a backpack one
  * near-square block, crates and vehicles as wide as the columns - with nothing set in the older tables and both
  * sliders on their defaults. Also checks that the default's groups are a partition (an item in two of them
@@ -325,6 +327,62 @@ private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stac
         ["overlap", format ["OVERLAP %1 (%2, mass %3, rounds %4) is in %5", _class, _kind, _mass, _facts get "rounds", _in]] call _fnc_count;
     };
 } forEach _classes;
+
+// ----- The stacks for play (issue #21) -----
+
+// A few classes of each stack the medical list gives, named here and not derived from its rules (the loop above can only
+// compare the rules with themselves). A class of a mod that is not loaded is skipped.
+{
+    _x params ["_stackWanted", "_stackNames"];
+
+    {
+        if (isClass (configFile >> "CfgWeapons" >> _x) || {isClass (configFile >> "CfgMagazines" >> _x)}) then {
+            private _got = ([_x, _compiled, _cache] call einv_items_fnc_getInfo) get "stack";
+
+            if (_got != _stackWanted) then {
+                ["stack", format ["STACK %1: the stacks for play say %2, now %3", _x, _stackWanted, _got]] call _fnc_count;
+            };
+        };
+    } forEach _stackNames;
+} forEach [
+    [1, ["ACM_Stethoscope", "ACE_suture", "ACM_PocketBVM", "ACM_BloodBag_O_NEG"]],
+    [4, ["ACE_tourniquet", "ACE_morphine", "ACE_epinephrine", "ACM_SAMSplint"]],
+    [5, [
+        "ACE_fieldDressing", "ACE_elasticBandage", "ACE_packingBandage", "ACE_quikclot", "ACM_PressureBandage", "ACM_ElasticWrap",
+        "ACM_CombatGauze", "ACM_EmergencyTraumaDressing", "ACM_ChestSeal", "ACM_IV_16g", "ACM_IO_EZ", "ACM_Syringe_10",
+        "ACM_Vial_Morphine", "ACME_MannitolVial"
+    ]],
+    [10, ["ACM_Lozenge_Fentanyl", "ACME_IVLine", "ACME_YTubing"]]
+];
+
+// einv_storage_fnc_stackFor: a crate multiplies a class that stacks (FirstAidKit stacks 5 in the default), a worn container,
+// a kit and a class that does not stack (a rifle, a magazine) are not multiplied, and 1 turns it off. The setting is put
+// back afterwards.
+private _stackSaved = missionNamespace getVariable ["einv_storage_stackMultiplier", 1];
+private _crate = createVehicle ["Box_NATO_Ammo_F", [0, 0, 0], [], 0, "CAN_COLLIDE"];
+private _worn = [vestContainer player, backpackContainer player, uniformContainer player] select {!isNull _x};
+
+{
+    _x params ["_multiplier", "_holder", "_class", "_wantedStack"];
+
+    missionNamespace setVariable ["einv_storage_stackMultiplier", _multiplier];
+
+    private _gotStack = [_holder, _class] call einv_storage_fnc_stackFor;
+
+    if (_gotStack != _wantedStack) then {
+        ["stack", format ["STACKFOR x%1 %2 in %3: expected %4, now %5", _multiplier, _class, str _holder, _wantedStack, _gotStack]] call _fnc_count;
+    };
+} forEach ([
+    [5, _crate, "FirstAidKit", 25],
+    [1, _crate, "FirstAidKit", 5],
+    [5, _crate, "arifle_MX_F", 1],
+    [5, _crate, "30Rnd_65x39_caseless_mag", 1],
+    [5, "kit:efak_ifak_1", "FirstAidKit", 5],
+    [5, objNull, "FirstAidKit", 5]
+] + (_worn apply {[5, _x, "FirstAidKit", 5]}));
+
+missionNamespace setVariable ["einv_storage_stackMultiplier", _stackSaved];
+deleteVehicle _crate;
 
 // ----- Texts read and written again stay the same -----
 

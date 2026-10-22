@@ -168,7 +168,7 @@ switch (GVAR(hover) param [0, ""]) do {
 
         _choices pushBack [
             LLSTRING(Menu_Inspect),
-            [_class, _tile getOrDefault ["count", 1], _tile getOrDefault ["ammo", -1], _tile getOrDefault ["attachments", []]],
+            [_class, _tile getOrDefault ["count", 1], _tile getOrDefault ["ammo", -1], _tile getOrDefault ["attachments", []], _from],
             {_this call FUNC(inspect)}
         ];
 

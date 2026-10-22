@@ -7,7 +7,8 @@
  * Weapons and backpacks are each a tile of their own - every one may carry different attachments or
  * contents. So is every magazine, as each has its own rounds; only the ones that stack (grenades and
  * the like, einv_items_fnc_getInfo's "stack") share a tile, and only with the same rounds. Items are
- * counted together by class and split into tiles at their stack size - along the places' records of the
+ * counted together by class and split into tiles at their stack size in this container (fnc_stackFor: larger
+ * in a crate, a vehicle or a pile than in what is worn) - along the places' records of the
  * key when they carry counts: the n-th record of a key is the n-th tile of that key and holds as many as
  * its count says, so a stack of five and a stack of one of a class that stacks to ten are two tiles
  * (fnc_stackCounts reconciles them with what the cargo really holds, so nothing is lost or doubled when
@@ -125,7 +126,7 @@ private _fnc_addStacked = {
     params ["_class", "_count", "_ammo"];
 
     private _info = [_class] call EFUNC(items,getInfo);
-    private _stack = (_info get "stack") max 1;
+    private _stack = [_container, _class, _info get "stack"] call FUNC(stackFor);
     private _counts = [];
 
     // Only a pile of a class that stacks can lie in several tiles, and only one with no container object

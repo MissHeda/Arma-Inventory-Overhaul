@@ -12,7 +12,8 @@
  * joins the other stacks as the cargo's total says, fnc_getContents) beside any stack of the class that
  * lies elsewhere. With no cell they join the last stack that has room, then open new ones.
  *
- * A uniform, vest or backpack comes empty, a magazine full, a weapon without attachments (fnc_makePayload).
+ * A uniform, vest or backpack comes empty, a magazine full unless its rounds are given, a weapon without
+ * attachments (fnc_makePayload).
  * Runs where the container is local, as the cargo commands do - the player's own gear, a unit being
  * dressed in the editor.
  *
@@ -22,6 +23,7 @@
  * 2: How many <NUMBER> (default: 1)
  * 3: Cell [col, row, compartment, width, height] - the size as it lies there, turned or not - or [] for
  *    wherever the layout finds a spot <ARRAY> (default: [])
+ * 4: Rounds in each magazine, -1 for full ones; not read for anything but a magazine <NUMBER> (default: -1)
  *
  * Return Value:
  * "" it is there; "NoBackpack" a backpack for a backpack; "NoRoom" no free spot on the grid; "Failed" not
@@ -33,7 +35,7 @@
  * Public: Yes
  */
 
-params [["_container", objNull, [objNull]], ["_class", "", [""]], ["_count", 1, [0]], ["_cell", [], [[]]]];
+params [["_container", objNull, [objNull]], ["_class", "", [""]], ["_count", 1, [0]], ["_cell", [], [[]]], ["_rounds", -1, [0]]];
 
 if (isNull _container || {_class isEqualTo ""}) exitWith {"Failed"};
 
@@ -42,9 +44,10 @@ _count = _count max 1;
 private _info = [_class] call EFUNC(items,getInfo);
 private _capacity = _info getOrDefault ["capacity", 0];
 
-// What it will be, as a tile of the container would see it: a magazine full.
+// What it will be, as a tile of the container would see it: a magazine full, or with the rounds asked for.
+private _ammo = [_capacity, (_rounds min _capacity) max 0] select (_rounds >= 0 && {_capacity > 0});
 private _probe = createHashMapFromArray [
-    ["class", _class], ["count", _count], ["ammo", _capacity], ["capacity", _capacity],
+    ["class", _class], ["count", _count], ["ammo", _ammo], ["capacity", _capacity],
     ["attachments", []], ["container", objNull]
 ];
 
@@ -57,12 +60,12 @@ private _payloads = if ((_info getOrDefault ["kind", ""]) in ["rifle", "handgun"
     private _each = [];
 
     for "_i" from 1 to _count do {
-        _each pushBack ([_class, 1] call FUNC(makePayload));
+        _each pushBack ([_class, 1, _rounds] call FUNC(makePayload));
     };
 
     _each
 } else {
-    [[_class, _count] call FUNC(makePayload)]
+    [[_class, _count, _rounds] call FUNC(makePayload)]
 };
 
 private _before = [_container, _class] call FUNC(countClass);

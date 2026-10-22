@@ -97,7 +97,7 @@ if (_new) then {
             && {isNull (_entry getOrDefault ["container", objNull])}
             && {(([_class] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) > 1}
         ) then {
-            _record pushBack (floor (_count min ((([_class] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) max 1)));
+            _record pushBack (floor (_count min ([_holder, _class] call FUNC(stackFor))));
         };
 
         _records pushBack _record;

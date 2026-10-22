@@ -121,7 +121,7 @@ if (!_force && {[_to, _probe] call FUNC(backpackIntoBackpack)}) exitWith {
 // else is one tile.
 // ---------------------------------------------------------------------------
 private _info = [_class] call EFUNC(items,getInfo);
-private _stack = (_info getOrDefault ["stack", 1]) max 1;
+private _stack = [_to, _class, (_info getOrDefault ["stack", 1]) max 1] call FUNC(stackFor);
 
 private _stackable = _stack > 1
     && {_count > 0}

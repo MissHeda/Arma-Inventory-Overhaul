@@ -38,7 +38,7 @@ uiNamespace setVariable [QGVAR(inspectRect), []];
 
 if (isNull _display || {GVAR(inspect) isEqualTo []}) exitWith {};
 
-GVAR(inspect) params ["_class", "_count", "_ammo", "_attachments"];
+GVAR(inspect) params ["_class", "_count", "_ammo", "_attachments", ["_holder", objNull, [objNull]]];
 
 private _info = [_class] call EFUNC(items,getInfo);
 private _theme = GVAR(theme);
@@ -90,7 +90,7 @@ if (_count > 1) then {
     _rows pushBack [LLSTRING(Inspect_Count), format ["×%1", _count]];
 };
 
-private _stack = _info getOrDefault ["stack", 1];
+private _stack = [_holder, _class, _info getOrDefault ["stack", 1]] call EFUNC(storage,stackFor);
 
 _rows pushBack [LLSTRING(Inspect_Stackable), [LLSTRING(Inspect_No), format [LLSTRING(Inspect_YesUpTo), _stack]] select (_stack > 1)];
 

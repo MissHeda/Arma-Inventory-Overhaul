@@ -9,6 +9,7 @@ PREP(getMass);
 PREP(getLayout);
 PREP(entryKey);
 PREP(stackCounts);
+PREP(stackFor);
 PREP(setCount);
 PREP(setRecords);
 PREP(findSpots);
@@ -120,6 +121,12 @@ PREP(onLoadoutGet);
 PREP(onLoadoutSet);
 PREP(topUpLoadout);
 PREP(setUnitLoadout);
+
+// Adding new things to a unit through the grid (fnc_addToUnit, for missions and other mods): the worn containers
+// in the order to try them, and how many of a class each has room for
+PREP(addToUnit);
+PREP(addFit);
+PREP(unitTargets);
 
 // Surplus: what a unit's uniform, vest or backpack holds beyond its grid, moved on to the next container
 // with room - asked for when its cargo changed, carried out by the unit's authority (op "migrate")

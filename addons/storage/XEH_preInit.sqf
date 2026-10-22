@@ -52,6 +52,10 @@ GVAR(holderTypes) = createHashMap;
 // Same kind of item, class -> canonical key (fnc_layoutKey).
 GVAR(layoutKeys) = createHashMap;
 
+// Whether a holder of this class is one nobody wears (a crate, a vehicle, a pile on the ground), type -> BOOL: the places the
+// stack multiplier reaches (fnc_stackFor).
+GVAR(stackRoomy) = createHashMap;
+
 // What a weapon takes in one slot, "weapon|mag", "weapon|mag2" or "weapon|items" (lower case) -> a HashMap of the
 // lower case class names it takes (fnc_slotAccepts). Read from config once per weapon: config does not change
 // during a mission, and asking the engine for the compatible magazines of every slot at every lift is not cheap.

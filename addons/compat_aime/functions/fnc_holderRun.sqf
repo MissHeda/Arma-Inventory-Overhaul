@@ -7,9 +7,13 @@
  * what this mod asks of everything on the ground: the search. So while the ground has to be searched (the
  * search time above 0, the setting for the ground on, the pile not left out with einv_noSearch) the click
  * opens the window on the pile instead - the engine's Gear action, answered by the window, where the item
- * is searched before it is seen and then taken like any other. With searching off for the ground AIME's
- * pick-up runs as it always did: what it adds the engine's way is laid on the grid by the usual look
- * (fnc_queueMigrate), and what has no room goes back to the ground.
+ * is searched before it is seen and then taken like any other.
+ *
+ * With searching off for the ground the pick-up is this mod's own (fnc_holderPick): the thing is taken from
+ * the pile and put into the first container of the soldier with free cells, as a quick move does, instead of
+ * AIME's addMagazine, which the engine refuses at a container's config load and loads into an empty weapon.
+ * What that leaves to AIME - a backpack, a weapon that fits an empty slot, a pile with more than one thing -
+ * runs as AIME made it.
  *
  * ACE runs it when the action is chosen.
  *
@@ -33,7 +37,14 @@ private _searched = (missionNamespace getVariable [QEGVAR(gui,searchTime), 0]) >
     && {missionNamespace getVariable [QEGVAR(gui,searchGround), false]}
     && {!(_target getVariable [QGVARMAIN(noSearch), false])};
 
-if (_searched || {isNil "UPSL_aime_inventory_fnc_holder_run"}) exitWith {
+if (_searched) exitWith {
+    _player action ["Gear", _target];
+};
+
+// This mod's pick-up, for what it covers.
+if ([_target, _player] call FUNC(holderPick)) exitWith {};
+
+if (isNil "UPSL_aime_inventory_fnc_holder_run") exitWith {
     _player action ["Gear", _target];
 };
 

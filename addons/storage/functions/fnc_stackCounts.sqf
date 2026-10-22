@@ -16,9 +16,15 @@
  * Records without a count (a save from before stacks could be apart, a loadout) stand for "as many as the
  * cargo gives": with no count at all that is today's cut - full stacks first, then the remainder.
  *
+ * The stack is the holder's (fnc_stackFor), so a record can carry more than a tile there may hold - the
+ * stack multiplier of crates and vehicles went down, or a loadout's places came from a crate. Such a count is
+ * cut to the stack like any other; the items it loses are part of the total that is still unplaced, and
+ * they top up the last tile with room or open new tiles of full stacks and a remainder. Each step puts a
+ * positive number of items somewhere, so it always ends.
+ *
  * Arguments:
  * 0: Total in the cargo for this key <NUMBER>
- * 1: Largest stack <NUMBER>
+ * 1: Largest stack in this holder (fnc_stackFor) <NUMBER>
  * 2: The count of each record of the key in order, -1 for a record without one <ARRAY of NUMBERs>
  *
  * Return Value:

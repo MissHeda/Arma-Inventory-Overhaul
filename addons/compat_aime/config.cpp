@@ -105,9 +105,11 @@ class CfgVehicles {
         };
     };
 
-    // The ground pile's action: one click picks up the only item lying there - without the search, and past
-    // the cells. With searching on for the ground the click opens the window on the pile instead, where the
-    // item is searched first (fnc_holderRun); else AIME's pick-up runs as it did.
+    // The ground pile's action: one click picks up the only item lying there - without the search, and with
+    // the engine's addMagazine, which stops at a container's config load. With searching on for the ground the
+    // click opens the window on the pile instead, where the item is searched first (fnc_holderRun); else a
+    // magazine, or a weapon that does not fit an empty slot, goes through this mod's grid like a quick move
+    // out of a pile (fnc_holderPick), and AIME's own pick-up runs for the rest.
     class ReammoBox;
     class WeaponHolder: ReammoBox {
         class ACE_Actions {

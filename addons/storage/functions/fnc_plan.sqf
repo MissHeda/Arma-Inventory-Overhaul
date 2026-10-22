@@ -20,6 +20,8 @@
  * stacks that are there is assigned with the cell [] (the put joins them). The tiles planned into a target
  * count for the ones after, so a class that is moved in pieces fills the partial stacks first. A tile that
  * stays in the holder it lies in joins nothing there (it is laid down, not put) and always takes a spot.
+ * The stack is the target's own (fnc_stackFor): a tile of 15 from a crate meets a stack of 5 in a vest, so it
+ * takes three spots there - all three or the target is passed over, as the put would bounce it.
  *
  * Arguments:
  * 0: Items, entries as the window's tiles are - "class", "count", "key", "block", "col", "row", and
@@ -127,8 +129,8 @@ private _fnc_state = {
             if (!(_x getOrDefault ["overflow", false]) && {(_x getOrDefault ["block", -1]) >= 0}) then {
                 [_state, _x get "block", _x get "col", _x get "row", _x get "w", _x get "h", _x getOrDefault ["holes", []]] call _fnc_mark;
 
-                // A stack that is not full: what a put onto this holder fills first.
-                private _tileStack = (([_x getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) max 1;
+                // A stack that is not full: what a put onto this holder fills first (the holder's stack, fnc_stackFor).
+                private _tileStack = [_holder, _x getOrDefault ["class", ""]] call FUNC(stackFor);
                 private _tileCount = _x getOrDefault ["count", 1];
 
                 if (_tileStack > 1 && {_tileCount < _tileStack} && {!(_x getOrDefault ["strict", false])}) then {
@@ -242,6 +244,74 @@ private _fnc_tiers = {
     _tiers
 };
 
+// The cells taken for a tile given back: what _fnc_mark took, the way back (a tile that found no company in a target
+// that has room for only some of the tiles its count opens).
+private _fnc_unmark = {
+    params ["_state", "_block", "_col", "_row", "_w", "_h", ["_holes", []]];
+
+    private _grid = (_state select 5) select _block;
+    private _cols = ((_state select 3) select _block) select 0;
+
+    for "_r" from (_row max 0) to (_row + _h - 1) do {
+        private _line = _grid param [_r, []];
+        private _base = (_r - _row) * _w - _col;
+
+        for "_c" from (_col max 0) to ((_col + _w - 1) min (_cols - 1)) do {
+            if (_line isNotEqualTo [] && {!((_base + _c) in _holes)}) then {
+                _line set [_c, false];
+            };
+        };
+    };
+};
+
+// The first free spot for one tile of a size - upright, then turned a quarter - in a target, its cells taken:
+// [the cell, what to give back] - the cell [col, row, compartment], with [.., width, height, 1] when it lies turned -,
+// [] for none.
+private _fnc_claim = {
+    params ["_state", "_firstBlock", "_w", "_h", "_holes", "_turnedHoles", "_groups"];
+
+    private _turned = false;
+    private _spot = [];
+
+    {
+        _spot = [_state, _w, _h, _holes, _x, _groups] call _fnc_find;
+
+        // Fits nowhere upright: turned a quarter, as a player would - a shape turns with it, and one in a
+        // square box is tried turned too when that takes other cells.
+        if (_spot isEqualTo [] && {_w != _h || {_holes isNotEqualTo _turnedHoles}}) then {
+            _spot = [_state, _h, _w, _turnedHoles, _x, _groups] call _fnc_find;
+            _turned = _spot isNotEqualTo [];
+        };
+
+        if (_spot isNotEqualTo []) exitWith {};
+    } forEach ([_state, _firstBlock, _groups] call _fnc_tiers);
+
+    if (_spot isEqualTo []) exitWith {[]};
+
+    _spot params ["_block", "_col", "_row", ["_slot", false]];
+
+    private _cellW = [_w, _h] select _turned;
+    private _cellH = [_h, _w] select _turned;
+    private _cellHoles = [_holes, _turnedHoles] select _turned;
+
+    // A single slot takes it whole, upright (fnc_slotOf); the cell is the slot's, the size is not asked.
+    if (_slot) then {
+        ([(_state select 3) select _block] call FUNC(slotOf)) params ["", "", "_slotW", "_slotH", "_slotHoles"];
+
+        _cellW = _slotW;
+        _cellH = _slotH;
+        _cellHoles = _slotHoles;
+        _turned = false;
+    };
+
+    [_state, _block, _col, _row, _cellW, _cellH, _cellHoles] call _fnc_mark;
+
+    [
+        [[_col, _row, _block], [_col, _row, _block, _cellW, _cellH, 1]] select _turned,
+        [_state, _block, _col, _row, _cellW, _cellH, _cellHoles]
+    ]
+};
+
 // ---------------------------------------------------------------------------
 // The items, largest first (then category, class, and the order they came in - so the same items always
 // plan the same way).
@@ -274,7 +344,7 @@ private _left = [];
     private _turnedHoles = (_info getOrDefault ["footprintTurned", [_h, _w, []]]) param [2, []];
     private _isBackpack = (_info getOrDefault ["kind", ""]) isEqualTo "backpack";
     private _groups = _info getOrDefault ["groups", ["misc"]];
-    private _stackSize = (_info getOrDefault ["stack", 1]) max 1;
+    private _baseStack = (_info getOrDefault ["stack", 1]) max 1;
     private _inside = _item getOrDefault ["container", objNull];
     private _done = false;
 
@@ -291,6 +361,9 @@ private _left = [];
         };
 
         _state params ["", "_holder", "_root", "", "", "", "_holderIsBackpack", "_rooms"];
+
+        // How many share a tile there: larger in a crate, a vehicle or a pile than in what is worn (fnc_stackFor).
+        private _stackSize = [_holder, _class, _baseStack] call FUNC(stackFor);
 
         // Not into itself, nor into anything lying in it.
         if (!isNull _inside && {_holder isEqualTo _inside || {[_holder, _inside] call FUNC(liesIn)}}) then {continue};
@@ -347,45 +420,43 @@ private _left = [];
             _done = true;
         };
 
-        private _firstBlock = if (_start isNotEqualTo [] && {(_start select 0) isEqualTo _holder}) then {_start param [1, -1]} else {-1};
-        private _turned = false;
-        private _spot = [];
+        // A count above this holder's stack (a pile that lay in a crate, moved into a vest) opens one tile per stack's
+        // worth, as its put cuts it: a spot for each. The last tile holds what is left of the count.
+        private _tiles = 1;
 
-        {
-            _spot = [_state, _w, _h, _holes, _x, _groups] call _fnc_find;
-
-            // Fits nowhere upright: turned a quarter, as a player would - a shape turns with it, and one in a
-            // square box is tried turned too when that takes other cells.
-            if (_spot isEqualTo [] && {_w != _h || {_holes isNotEqualTo _turnedHoles}}) then {
-                _spot = [_state, _h, _w, _turnedHoles, _x, _groups] call _fnc_find;
-                _turned = _spot isNotEqualTo [];
-            };
-
-            if (_spot isNotEqualTo []) exitWith {};
-        } forEach ([_state, _firstBlock, _groups] call _fnc_tiers);
-
-        if (_spot isEqualTo []) then {continue};
-
-        _spot params ["_block", "_col", "_row", ["_slot", false]];
-
-        private _cellW = [_w, _h] select _turned;
-        private _cellH = [_h, _w] select _turned;
-        private _cellHoles = [_holes, _turnedHoles] select _turned;
-
-        // A single slot takes it whole, upright (fnc_slotOf); the cell is the slot's, the size is not asked.
-        if (_slot) then {
-            ([(_state select 3) select _block] call FUNC(slotOf)) params ["", "", "_slotW", "_slotH", "_slotHoles"];
-
-            _cellW = _slotW;
-            _cellH = _slotH;
-            _cellHoles = _slotHoles;
-            _turned = false;
+        if (_stackSize > 1 && {isNull _inside}) then {
+            _tiles = (ceil (_remaining / _stackSize)) max 1;
+            _remaining = _remaining - (_tiles - 1) * _stackSize;
         };
 
-        [_state, _block, _col, _row, _cellW, _cellH, _cellHoles] call _fnc_mark;
+        private _firstBlock = if (_start isNotEqualTo [] && {(_start select 0) isEqualTo _holder}) then {_start param [1, -1]} else {-1};
+        private _cells = [];
+        private _marked = [];
+
+        for "_n" from 1 to _tiles do {
+            private _claim = [_state, _firstBlock, _w, _h, _holes, _turnedHoles, _groups] call _fnc_claim;
+
+            if (_claim isEqualTo []) exitWith {};
+
+            _cells pushBack (_claim select 0);
+            _marked pushBack (_claim select 1);
+        };
+
+        // Not every tile has a spot here: what was taken for the others is free again, and the next target is tried.
+        if (count _cells < _tiles) then {
+            {
+                _x call _fnc_unmark;
+            } forEach _marked;
+
+            // The searches started behind cells that are free again.
+            _state set [8, createHashMap];
+
+            continue;
+        };
+
         call _fnc_fill;
 
-        _assigned pushBack [_item, _holder, _root, [[_col, _row, _block], [_col, _row, _block, _cellW, _cellH, 1]] select _turned];
+        _assigned pushBack [_item, _holder, _root, _cells select 0];
         _done = true;
     } forEach _targets;
 

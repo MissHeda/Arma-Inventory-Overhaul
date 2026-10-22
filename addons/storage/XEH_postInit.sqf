@@ -23,6 +23,14 @@
 // A loadout set for a unit that lives on another machine (einv_storage_fnc_setUnitLoadout), set where it is local.
 [QGVAR(setUnitLoadout), {_this call FUNC(setUnitLoadout)}] call CBA_fnc_addEventHandler;
 
+// New things for a unit that lives on another machine than the one that asked (einv_storage_fnc_addToUnit),
+// added here where the unit is local; the call comes back to the function, which passes it on again should the
+// unit have moved on meanwhile.
+[QGVAR(addToUnit), {_this call FUNC(addToUnit)}] call CBA_fnc_addEventHandler;
+
+// A pile of ours that the engine's own Take emptied (fnc_pruneScriptedPile), asked of the machine it is local on.
+[QGVAR(prunePile), {_this call FUNC(pruneScriptedPile)}] call CBA_fnc_addEventHandler;
+
 // Queued phases, held phases and re-sends.
 [{call FUNC(tick)}, 0] call CBA_fnc_addPerFrameHandler;
 
@@ -49,6 +57,22 @@
         };
     }] call CBA_fnc_addClassEventHandler;
 } forEach ["Take", "Put", "InventoryClosed"];
+
+// The engine's own Take from one of our ground piles (the scroll menu's Take, a script's action TakeMagazine or
+// TakeWeapon) leaves a GroundWeaponHolder_Scripted behind when it was the last thing there; the engine never deletes
+// that kind, so it is deleted here, the way a pile emptied by a transaction is. An action that failed leaves the
+// pile as it was and raises no event; one that left something in the pile finds it not empty and deletes nothing.
+["CAManBase", "Take", {
+    params ["", ["_container", objNull, [objNull]]];
+
+    if (isNull _container || {typeOf _container != "GroundWeaponHolder_Scripted"}) exitWith {};
+
+    if (local _container) then {
+        [_container] call FUNC(pruneScriptedPile);
+    } else {
+        [QGVAR(prunePile), [_container], _container] call CBA_fnc_targetEvent;
+    };
+}] call CBA_fnc_addClassEventHandler;
 
 // Strict mode. What a setting on Strict keeps out of a unit's uniform, vest or backpack lives in a hidden
 // holder on the unit (op "strict", fnc_opStrict), asked for by the same look as the surplus
