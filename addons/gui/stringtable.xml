@@ -451,17 +451,35 @@
         <Key ID="STR_einv_gui_Palette_Accent_Tip">
             <English>Highlights, switches, bars and the icons that are on.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Blue">
+            <English>B</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Channel_Tip">
+            <English>0 to 255. Press Return to apply.</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Default">
             <English>Default</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Hue">
-            <English>Hue</English>
+        <Key ID="STR_einv_gui_Palette_Green">
+            <English>G</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Hex">
+            <English>Hex</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Hex_Tip">
+            <English>A colour code such as #FF8800 or #F80. Press Return to apply.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_MatchAccent">
             <English>Match accent</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Panels">
             <English>Panels</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Panels_Tip">
+            <English>The window's background: the panels behind the columns, the header and the footer. Kept dark enough for the text to stay readable.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Red">
+            <English>R</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_ResetAll">
             <English>Reset all</English>
@@ -486,9 +504,6 @@
         </Key>
         <Key ID="STR_einv_gui_Palette_UseArma">
             <English>Use my Arma colour</English>
-        </Key>
-        <Key ID="STR_einv_gui_Palette_Vividness">
-            <English>Vividness</English>
         </Key>
         <Key ID="STR_einv_gui_QuickMove">
             <English>Quick move</English>
@@ -658,7 +673,7 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
             <English>Players may pick their colours</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PlayerColours_Desc">
-            <English>The header gets a palette button: accent, secondary colour, transparency.\nOff: everyone sees their Arma colour and the standard look.</English>
+            <English>The header gets a palette button: accent, secondary colour, panel colour, transparency.\nOff: everyone sees their Arma colour and the standard look.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchBodies">
             <English>Search bodies</English>

@@ -315,10 +315,12 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   Add your own sounds as classes of `CfgEinvSounds` (see `addons/gui/CfgEinvSounds.hpp`), or give an item the
   family of another with `einv_sound = "vest";` in its config.
 - **Colours:** the palette button in the window's header, right of the speaker, opens a popover where you pick the accent colour, a secondary
-  colour and how see-through the panels are, and the window follows as you move the sliders. A colour is a hue and a vividness; each choice has a
-  button that takes it away ("Use my Arma colour", "Match accent", "Default"), and "Reset all" takes them all. Until you change it, the accent is the
-  colour you set in Arma's Options > Game > Colors. The secondary colour tints the cards, slots, caption tabs, buttons, what lights under the mouse
-  and picked rows. Your choices are kept in your profile (`einv_gui_palette`); the setup wizard and the ACE Arsenal panel use them the next time they
+  colour, the colour of the panels and how see-through the panels are (up to 75 %), and the window follows as you drag. Each colour is a row; click
+  it to open its picker - a colour square, a strip of hues and fields for red, green, blue and a hex code you can type or paste (press Return) - and
+  click it again to fold it. Each choice has a button that takes it away ("Use my Arma colour", "Match accent", "Default"), and "Reset all" takes
+  them all. Until you change it, the accent is the colour you set in Arma's Options > Game > Colors. The secondary colour tints the cards, slots,
+  caption tabs, buttons, what lights under the mouse and picked rows. The panels' colour is kept dark so that the text stays readable: a lighter
+  colour comes back as the lightest the panels have. Your choices are kept in your profile (`einv_gui_palette`); the setup wizard and the ACE Arsenal panel use them the next time they
   open. A server can switch the palette off with "Players may pick their colours" (`einv_gui_playerColours`, on the wizard's General page): there is
   no button then, and everyone sees the Arma colour of their profile and the standard look.
 

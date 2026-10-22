@@ -20,20 +20,31 @@
 // ACCENT_INK_DARK or ACCENT_INK_LIGHT by what contrasts more.
 #define ACCENT_FALLBACK [0.84, 0.54, 0.1, 1]
 #define ACCENT_MIN_LUMA 0.12
+#define ACCENT_MIN_CONTRAST 3.3
 #define ACCENT_SOFT_ALPHA 0.2
 #define ACCENT_HOVER_MIX 0.25
 #define ACCENT_INK_DARK [0.05, 0.05, 0.05, 1]
 #define ACCENT_INK_LIGHT [1, 1, 1, 1]
 
 // The palette (fnc_palette, fnc_openPaletteMenu): what a player may set about the window's colours. The panels' alpha the themes
-// start with is PANEL_ALPHA; a player may make them see-through down to PALETTE_ALPHA_MIN. A colour is picked by its hue and its
-// vividness (how far from white it is), the sliders moving in PALETTE_HUE_STEPS and PALETTE_VIVID_STEPS steps; the transparency
-// in steps of PALETTE_ALPHA_STEP.
+// start with is PANEL_ALPHA; a player may make them see-through down to PALETTE_ALPHA_MIN (75 % see-through). A colour is picked as
+// hue, saturation and value (a square of saturation across and value down, a strip of hues beside it, R G B and hex fields): the
+// mouse moves in PALETTE_HUE_STEPS steps along the strip and PALETTE_SV_STEPS along each side of the square, the transparency in
+// steps of PALETTE_ALPHA_STEP; typed values are kept as they are.
+// The panels' colour stays dark so that the light text on them stays readable (fnc_panelColour): its value is at most
+// PALETTE_PANEL_VALUE_MAX (a luminance of 0.07 at the very most, 8 : 1 against white), PANEL_COLOR is what it is without a choice.
+// The greys of the second and the muted text are lifted when a lighter panel would take them below PALETTE_CONTRAST_TEXT2 and
+// PALETTE_CONTRAST_MUTED to 1 (fnc_theme), and the accent is lifted until it keeps ACCENT_MIN_CONTRAST against the panel it sits on
+// (fnc_accentColour).
 #define PANEL_ALPHA 0.92
-#define PALETTE_ALPHA_MIN 0.5
+#define PANEL_COLOR [0.05, 0.05, 0.05]
+#define PALETTE_ALPHA_MIN 0.25
 #define PALETTE_ALPHA_STEP 0.01
-#define PALETTE_HUE_STEPS 72
-#define PALETTE_VIVID_STEPS 50
+#define PALETTE_HUE_STEPS 360
+#define PALETTE_SV_STEPS 100
+#define PALETTE_PANEL_VALUE_MAX 0.3
+#define PALETTE_CONTRAST_TEXT2 4.5
+#define PALETTE_CONTRAST_MUTED 3
 
 // The vanilla inventory (RscDisplayInventory), which this mod keeps closed (fnc_guardVanilla).
 #define IDD_VANILLA_INVENTORY 602

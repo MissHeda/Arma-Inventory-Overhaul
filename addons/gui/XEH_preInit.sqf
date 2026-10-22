@@ -516,35 +516,38 @@ GVAR(style) = "main";
 GVAR(cameraOn) = true;
 GVAR(cameraNext) = nil;
 
-// The player's colours, picked in the popover under the header's palette button (fnc_openPaletteMenu): [accent, secondary, alpha]
-// (fnc_palette) - the accent and the secondary colour each [hue, vividness] (0 to 1) or [] for none, the panels' alpha PALETTE_ALPHA_MIN
-// to 1 or -1 for none. Each player's own, kept in the profile as einv_gui_palette when the popover closes (fnc_paletteSettle); whether
-// the themes use it is the server's to say (einv_gui_playerColours, fnc_paletteAllowed). Anything in the profile that is not that
-// shape is no choice. einv_gui_paletteDirty says there is something to write, and einv_gui_menuRemake that the menu being closed
-// is only made again (fnc_closeMenu).
-GVAR(palette) = [[], [], -1];
+// The player's colours, picked in the popover under the header's palette button (fnc_openPaletteMenu): [accent, secondary, alpha,
+// panel] (fnc_palette) - the accent, the secondary colour and the panels' colour each [hue, saturation, value] (0 to 1) or [] for
+// none, the panels' alpha PALETTE_ALPHA_MIN to 1 or -1 for none. Each player's own, kept in the profile as einv_gui_palette when the
+// popover closes (fnc_paletteSettle); whether the themes use it is the server's to say (einv_gui_playerColours, fnc_paletteAllowed).
+// Anything in the profile that is not that shape is no choice; what the first version of the palette saved - three entries, a
+// colour as [hue, vividness] - still reads (value 1), an alpha beyond the range is cut to it, and the panels' value is cut at
+// PALETTE_PANEL_VALUE_MAX as fnc_paletteSet cuts it. einv_gui_paletteDirty says there is something to write, and einv_gui_menuRemake
+// that the menu being closed is only made again (fnc_closeMenu).
+GVAR(palette) = [[], [], -1, []];
 GVAR(paletteDirty) = false;
 GVAR(menuRemake) = false;
 
 private _savedPalette = profileNamespace getVariable [QGVAR(palette), []];
 
-if (_savedPalette isEqualType [] && {count _savedPalette == 3}) then {
-    _savedPalette params ["_savedAccent", "_savedSecondary", "_savedAlpha"];
+if (_savedPalette isEqualType [] && {count _savedPalette in [3, 4]}) then {
+    _savedPalette params ["_savedAccent", "_savedSecondary", "_savedAlpha", ["_savedPanel", []]];
 
     private _fnc_colour = {
-        params ["_pick"];
+        params ["_pick", "_valueMax"];
 
-        if (_pick isEqualType [] && {count _pick == 2} && {_pick isEqualTypeAll 0} && {_pick findIf {!(_x >= 0 && {_x <= 1})} < 0}) then {
-            +_pick
+        if (_pick isEqualType [] && {count _pick in [2, 3]} && {_pick isEqualTypeAll 0} && {_pick findIf {!(_x >= 0 && {_x <= 1})} < 0}) then {
+            [_pick select 0, _pick select 1, ((_pick param [2, 1]) min _valueMax)]
         } else {
             []
         }
     };
 
     GVAR(palette) = [
-        [_savedAccent] call _fnc_colour,
-        [_savedSecondary] call _fnc_colour,
-        if (_savedAlpha isEqualType 0 && {_savedAlpha >= PALETTE_ALPHA_MIN} && {_savedAlpha <= 1}) then {_savedAlpha} else {-1}
+        [_savedAccent, 1] call _fnc_colour,
+        [_savedSecondary, 1] call _fnc_colour,
+        if (_savedAlpha isEqualType 0 && {_savedAlpha >= 0} && {_savedAlpha <= 1}) then {_savedAlpha max PALETTE_ALPHA_MIN} else {-1},
+        [_savedPanel, PALETTE_PANEL_VALUE_MAX] call _fnc_colour
     ];
 };
 

@@ -21,8 +21,10 @@
  * The player's palette (fnc_palette, the header's palette button) is worked in last: the accent through fnc_accentColour,
  * the secondary colour - the tint of every faint film of the panes (cards, slots, caption tabs, cells, buttons and what lights
  * under the mouse, the hairlines and bar tracks) and of the soft accent (accentSoft: queued tiles, picked rows, banners), a
- * white film being the tint of vividness 0 - and the panels' alpha. With no choice (or where the server switched the
- * palette off) the theme is what it has always been.
+ * white film being the tint of saturation 0 and value 1 - the panels' colour (fnc_panelColour: kept dark, value 0.3 at most) and
+ * the panels' alpha. A panel colour the player chose also lifts the greys of "text2" and "muted" where they would fall below
+ * PALETTE_CONTRAST_TEXT2 and PALETTE_CONTRAST_MUTED to 1 against it (white text keeps 8 : 1 at the darkest the palette allows
+ * and needs nothing). With no choice (or where the server switched the palette off) the theme is what it has always been.
  *
  * Arguments:
  * None
@@ -42,13 +44,13 @@ private _theme = call FUNC(themeBase);
 // worked out from it. Every key gets a copy of its own.
 private _accent = [] call FUNC(accentColour);
 
-// The player's secondary colour and panel transparency (fnc_palette), unset where the player chose nothing.
-([] call FUNC(palette)) params ["", "_secondaryPick", "_alphaPick"];
+// The player's secondary colour, panel colour and panel transparency (fnc_palette), unset where the player chose nothing.
+([] call FUNC(palette)) params ["", "_secondaryPick", "_alphaPick", "_panelPick"];
 
 private _tint = [];
 
 if (_secondaryPick isNotEqualTo []) then {
-    _tint = ["rgb", [_secondaryPick select 0, _secondaryPick select 1, 1]] call FUNC(hsv);
+    _tint = ["rgb", _secondaryPick] call FUNC(hsv);
 };
 
 private _tileBg = [];
@@ -122,11 +124,40 @@ if (_tint isNotEqualTo []) then {
     } forEach ["card", "slot", "slotEmpty", "slotCaptionBg", "cell", "line", "button", "buttonHover", "barTrack", "keyBg"];
 };
 
-// The panels' alpha: the player's own, within what the palette offers.
-if (_alphaPick >= 0) then {
+// The panels' colour and alpha: the player's own, within what the palette offers - the colour kept dark (fnc_panelColour).
+if (_panelPick isNotEqualTo [] || {_alphaPick >= 0}) then {
     private _panel = +(_theme get "panel");
 
-    _panel set [3, (_alphaPick max PALETTE_ALPHA_MIN) min 1];
+    if (_panelPick isNotEqualTo []) then {
+        private _panelRgb = [] call FUNC(panelColour);
+
+        _panel set [0, _panelRgb select 0];
+        _panel set [1, _panelRgb select 1];
+        _panel set [2, _panelRgb select 2];
+
+        // The light greys keep their contrast with the lighter panel: a neutral grey g has the luminance g ^ 2.2, and the contrast is
+        // (luminance + 0.05) / (panel + 0.05), so the grey that just keeps a contrast c is (c * (panel + 0.05) - 0.05) ^ (1 / 2.2).
+        private _panelLuma = 0.2126 * ((_panelRgb select 0) ^ 2.2) + 0.7152 * ((_panelRgb select 1) ^ 2.2) + 0.0722 * ((_panelRgb select 2) ^ 2.2);
+
+        {
+            _x params ["_key", "_contrast"];
+
+            private _ink = +(_theme get _key);
+            private _grey = (((_contrast * (_panelLuma + 0.05) - 0.05) max 0) ^ (1 / 2.2)) min 1;
+
+            if (_grey > (_ink select 0)) then {
+                _ink set [0, _grey];
+                _ink set [1, _grey];
+                _ink set [2, _grey];
+                _theme set [_key, _ink];
+            };
+        } forEach [["text2", PALETTE_CONTRAST_TEXT2], ["muted", PALETTE_CONTRAST_MUTED]];
+    };
+
+    if (_alphaPick >= 0) then {
+        _panel set [3, (_alphaPick max PALETTE_ALPHA_MIN) min 1];
+    };
+
     _theme set ["panel", _panel];
 };
 

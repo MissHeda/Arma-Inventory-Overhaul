@@ -880,27 +880,55 @@ def circle(size=128):
     return whiten(finish(im, size, size))
 
 
-def hue_strip(w=256, h=16):
-    """Every hue from red round to red, left to right, fully lit: the track of a hue slider (fnc_openPaletteMenu).
-    Drawn in colour - the game stretches it over the track and does not tint it."""
+def cursor_ring(size=128):
+    """The cursor of the palette picker's colour square and hue strip (fnc_openPaletteMenu): a white ring with a dark rim inside and out,
+    so it reads on every colour from white to black, and the colour under it shows through the hole. Drawn in colour - the game
+    does not tint it."""
+    im = canvas(size, size)
+    d = ImageDraw.Draw(im)
+    s = size * SS
+    mid = s / 2
+    rim = (0, 0, 0, 200)
+    # Outside in: dark rim, the white band, dark rim, the hole. Each ellipse replaces what lies under it.
+    for r, fill in ((0.50, rim), (0.44, WHITE), (0.34, rim), (0.28, CLEAR)):
+        d.ellipse([mid - r * s, mid - r * s, mid + r * s - 1, mid + r * s - 1], fill=fill)
+    return finish(im, size, size)
+
+
+def hue_vstrip(w=16, h=256):
+    """Every hue from red round to red, top to bottom, fully lit: the strip beside the colour square of the palette's
+    picker (fnc_openPaletteMenu). The last row is one step short of red again, as the picker's hue goes from 0 to
+    359/360 so the end of the strip is not a jump. Drawn in colour - the game stretches it over the strip and does not tint it."""
     import colorsys
     im = Image.new("RGBA", (w, h))
     px = im.load()
-    for x in range(w):
-        r, g, b = colorsys.hsv_to_rgb(x / (w - 1), 1.0, 1.0)
-        for y in range(h):
+    for y in range(h):
+        r, g, b = colorsys.hsv_to_rgb(y / h, 1.0, 1.0)
+        for x in range(w):
             px[x, y] = (round(r * 255), round(g * 255), round(b * 255), 255)
     return im
 
 
 def fade_strip(w=256, h=16):
     """White that fades out from left to right. Laid over a panel of a pure hue and stretched over it, it makes the
-    track of a vividness slider: white at the left, the full colour at the right (fnc_openPaletteMenu)."""
+    saturation across the palette picker's colour square: white at the left, the full colour at the right
+    (fnc_openPaletteMenu); the shade strip below does the value."""
     im = Image.new("RGBA", (w, h))
     px = im.load()
     for x in range(w):
         for y in range(h):
             px[x, y] = (255, 255, 255, round(255 * (1 - x / (w - 1))))
+    return im
+
+
+def shade_strip(w=16, h=256):
+    """Black that fades in from top to bottom: nothing at the top, solid at the bottom. Laid over the white fade above, it makes the
+    value down the palette picker's colour square: the colour at the top, black at the bottom (fnc_openPaletteMenu)."""
+    im = Image.new("RGBA", (w, h))
+    px = im.load()
+    for y in range(h):
+        for x in range(w):
+            px[x, y] = (0, 0, 0, round(255 * y / (h - 1)))
     return im
 
 
@@ -1096,8 +1124,10 @@ def build_images():
         "toggle_knob_ca": toggle_knob(),
         "scroll_thumb_ca": scroll_thumb(),
         "circle_ca": circle(),
-        "hue_strip_ca": hue_strip(),
+        "cursor_ring_ca": cursor_ring(),
+        "hue_vstrip_ca": hue_vstrip(),
         "fade_strip_ca": fade_strip(),
+        "shade_strip_ca": shade_strip(),
         "hatch_ca": hatch(),
         "silhouette_ca": soldier(),
         "slot_headgear_ca": slot_icon(slot_headgear),

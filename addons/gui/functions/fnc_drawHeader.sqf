@@ -152,7 +152,7 @@ if !(call FUNC(cameraForced)) then {
 };
 
 // The palette: a click opens the popover of the colours under it (fnc_openPaletteMenu), where the player picks the accent, the
-// secondary colour and the transparency and sees them at once. Not drawn where the server does not let players pick their colours
+// secondary colour, the panels' colour and the transparency and sees them at once. Not drawn where the server does not let players pick their colours
 // (fnc_paletteAllowed). Like the speaker it shows an accent icon and line while its popover is open (fnc_updatePaletteButton, which
 // keeps it up to date without a rebuild - the controls are kept for it).
 uiNamespace setVariable [QGVAR(paletteButton), []];

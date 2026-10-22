@@ -12,8 +12,10 @@
  *
  * The colour is made readable first: on the near-black panes a very dark red or blue would sink, so one whose
  * luminance is below ACCENT_MIN_LUMA is brightened - scaled up with its hue while a channel has room, then mixed
- * towards white - until it reaches it. A profile with no colour, or a value that is no number between 0 and 1, gives
- * ACCENT_FALLBACK, the orange the mod always had.
+ * towards white - until it reaches it. On a panel the player made lighter (the palette's panel colour, fnc_panelColour) the
+ * bar is higher: the luminance must give ACCENT_MIN_CONTRAST against that panel, (accent + 0.05) / (panel + 0.05), and never
+ * less than ACCENT_MIN_LUMA (the near-black panel of 0.05 is the 0.12 as it always was). A profile with no colour, or a value
+ * that is no number between 0 and 1, gives ACCENT_FALLBACK, the orange the mod always had.
  *
  * The other shades are worked out from the accent, not read again: pass it as the second argument.
  *   ""      the accent, alpha 1
@@ -48,11 +50,13 @@ private _fnc_luma = {
 };
 
 if (count _rgb < 3) then {
-    // The player's own pick in the palette (fnc_palette: [hue, vividness], or [] for none) comes before the profile's colour.
+    // The player's own pick in the palette (fnc_palette: [hue, saturation, value], or [] for none) comes before the profile's colour.
     private _pick = (([] call FUNC(palette)) select 0);
 
     if (_pick isNotEqualTo []) then {
-        _rgb = ["rgb", [_pick select 0, _pick select 1, 1]] call FUNC(hsv);
+        _pick params ["_hue", "_saturation", ["_value", 1]];
+
+        _rgb = ["rgb", [_hue, _saturation, _value]] call FUNC(hsv);
     } else {
         // A channel the profile does not hold reads as -1, which no colour has
         _rgb = ["R", "G", "B"] apply {profileNamespace getVariable [format ["GUI_BCG_RGB_%1", _x], -1]};
@@ -62,9 +66,13 @@ if (count _rgb < 3) then {
         };
     };
 
-    // Brightened as the profile's colour is: a pure blue would sink into the near-black panes as well.
+    // Brightened as the profile's colour is: a pure blue would sink into the near-black panes as well. Against a lighter panel of the
+    // player's the bar rises with it.
+    private _panelLuma = [[] call FUNC(panelColour)] call _fnc_luma;
+    private _minLuma = ACCENT_MIN_LUMA max (ACCENT_MIN_CONTRAST * (_panelLuma + 0.05) - 0.05);
+
     for "_i" from 1 to 40 do {
-        if (([_rgb] call _fnc_luma) >= ACCENT_MIN_LUMA) exitWith {};
+        if (([_rgb] call _fnc_luma) >= _minLuma) exitWith {};
 
         private _top = selectMax _rgb;
 

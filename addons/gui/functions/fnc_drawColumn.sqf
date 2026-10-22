@@ -26,7 +26,7 @@
  * unfolded, a move) keeps its panel, its title and its scroll group - fnc_build hands them over in uiNamespace keepColumns
  * by the column's id: the sections are drawn into the group first and the controls that were in it go afterwards, in the same
  * call, as the setup wizard's General page does (fnc_showStep). Kept too when only the panel's colour and the hairline's changed (the
- * palette's transparency and secondary colour, fnc_palette): they are painted in place, so a slider dragged with a column scrolled
+ * palette's panel colour, transparency and secondary colour, fnc_palette): they are painted in place, so a picker dragged with a column scrolled
  * does not send it to the top for a frame at every build. A group made anew starts at the top and learns its height a
  * frame later, so the column showed its top for a moment before fnc_onFrame put it back (Mia, 0.5.3: the list jumped up
  * when a section was folded). The scroll is put back all the same, now and a frame later, in screen height from the top.
