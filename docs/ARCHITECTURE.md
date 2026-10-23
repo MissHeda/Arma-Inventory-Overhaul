@@ -589,7 +589,7 @@ In order:
 
 An entry no compartment has room for (a script or another mod added it) is `overflow`: shown apart, never lost. On a unit's
 uniform, vest or backpack the surplus is moved on to the unit's next container with free cells (section "Surplus" below); what
-fits nowhere stays overflow.
+fits nowhere stays overflow - except for the player's own unit, whose overflow the sweep puts on the ground (same section).
 
 **Place records** are `[key, col, row, w, h, block, rot]` and, for a tile of a class that stacks in a container, `[..., count]`:
 `w` and `h` as it lies, `rot` 0 upright or 1 turned a quarter clockwise, always written with `rot`, `count` the items the tile holds
@@ -825,7 +825,8 @@ writes revision, records, nested tags and this machine's drawn view to the RPT a
 The engine's own commands (`addItem`, `addMagazine`, `addWeapon`, loadouts, ACE, the arsenals, scripts) know nothing of our cells and
 fill a uniform, vest or backpack until its mass is reached. Cells are the only room, so what the layout has no room for
 (`overflow`) is passed on: **uniform -> vest -> backpack**, to the first later container with free cells. What fits nowhere stays
-overflow, shown apart as before. Never dropped, never copied.
+overflow, shown apart as before - except for the player's own unit, whose overflow is put on the ground (the overflow sweep, below).
+Never copied, never lost.
 
 - **Op `migrate [unit]`** (`fnc_opMigrate`; root: the unit, holders: its three containers, so they are verified and written once at
   the end of the phase). For the uniform, then the vest: `fnc_plan` puts the overflow (largest first) into the containers after it
@@ -850,7 +851,53 @@ overflow, shown apart as before. Never dropped, never copied.
 - **Locality, no loss, no copy.** Only the unit's authority changes its containers, one phase at a time per root, journaled (a phase
   the hub sends again is answered from the journal and never runs twice); every move is verified by counting, and a tile that did not
   land goes back to where it was taken from. A change of owner between request and run is `"Moved"` or runs on the new owner, which
-  plans again from what it finds. The server setting `einv_storage_migrate` (default on) switches the whole thing off.
+  plans again from what it finds. The server setting `einv_storage_migrate` (default on; "Move overfull items on", its text "Overfull
+  items go to another container, else to the ground.") switches the whole thing off, the overflow sweep below included.
+- **Overflow sweep** (`fnc_queueSweep`, `fnc_sweepTick`, `fnc_requestSweep`, `fnc_sweepBusy`; `fnc_wornHeld` and `fnc_migratePasses` are
+  shared with the pass above). The player's own unit only - never an AI, a body, a looted person, a crate or a vehicle, whose overflow
+  stays as above. An add that the engine took (its config load allows it) and the grid has no cell for - ACE's pick-up, another mod's
+  action doing `player addItem` / `addItemToUniform` - and that no later container could take stayed a lone red tile outside the grid
+  for ever. Now it goes to another worn container with room, else onto the ground next to the player, with the hint "No room for
+  <name> - put on the ground" (`fnc_useHint`, the line `STR_einv_storage_Hint_NoRoomGround`) and one RPT INFO line.
+  - *Triggers* all end in `fnc_queueSweep [wait, floor, fresh]`, which sets one due time (the earliest stays: a burst is one sweep;
+    `GVAR(sweepNotBefore)` is the floor a loadout or a new unit sets, `GVAR(sweepQuiet)` the one a failed pass sets) and costs a few
+    assignments. `fnc_sweepTick`, a `SWEEP_TICK` 0.25 s per-frame handler on a machine with an interface (postInit, not in Eden), runs
+    `fnc_requestSweep` once the time is due. The triggers: CBA's polled `loadout` event (`SWEEP_DELAY` 0.5 s later); the engine's `Take`
+    and `InventoryClosed` on the player; a loadout set (`fnc_onLoadoutSet`, and `einv_storage_migrateUnit` where the unit is local):
+    not before `SWEEP_LOADOUT_DELAY` 1.5 s, after `fnc_topUpLoadout` (at once and a frame later) and the places are in; the `unit`
+    player event (the start, JIP, a respawn, a team switch): not before `SWEEP_INIT_DELAY` 4 s, so a loadout with more than fits is
+    tidied once it is in - the first sweep of a new unit and of a loadout set ignores the hold below; the open window that shows an
+    overflow tile of the player's gear (`einv_gui_fnc_requestNormalize`, each signature check); and the watch.
+  - *The watch* (the net under the events): every `SWEEP_WATCH` 1 s `fnc_sweepTick` compares a signature of five numbers - `loadAbs` of
+    the uniform, vest and backpack and the counts of `items` and `magazines` of the unit - with the last one, and queues a sweep on a
+    change. It builds no loadout array: about a tenth of a millisecond a second for a full kit, two comparisons between the checks and
+    with nothing due. The first signature of a unit is only noted.
+  - *The pass* (`fnc_requestSweep`, one look): the overflow of the three containers (not Strict mode's hidden tiles) from
+    `fnc_getLayout`, then the first of two that applies. (1) Some of it has a free cell in another worn container: op `migrate [unit, true]`
+    ("wide": `fnc_migratePasses` gives the passes - on first, uniform to vest to backpack, then back, the backpack's and the vest's
+    leftovers to the containers before them -, `fnc_plan` picks the cell, a compartment with a slot for the category first), a silent
+    request on the unit as root that runs at once on the player's machine; the look is repeated `SWEEP_AGAIN` 0.5 s later, and after three
+    asks in a row that moved nothing the rest goes on. (2) The rest goes onto the ground, but only after the same overflow with the same
+    revisions of the three containers' places was seen on two looks `SWEEP_AGAIN` apart (a layout read while places are still arriving -
+    a joining player, a loadout - or a move is half done can show a tile without a cell that has one; within `SWEEP_TRUST` 4 s of a pass
+    that put something down the next one goes at once): one transaction, phase 0 at the unit a `take` of
+    each tile (at most `SWEEP_MAX` 6 a pass, the rest on the next one), phase 1 on the server a `putGround` per tile with the take's
+    payload as its input - the same two phases as a drag out of the window (section "The backpack take-off path"), so the pile at the
+    feet is found or made by the server, a tile that could not be put down settles back where it came from (`fnc_settle`) and nothing is
+    lost or copied. The answer teaches the pile to the dropper (`einv_gui_fnc_learn`, only when the window addon is there), so the Ground
+    section shows it at once and the item is not "unsearched" to him, says the hint and the RPT line, and looks again when tiles were left.
+    A pass that put nothing down holds the next one back `SWEEP_FAIL` 5 s times the failures in a row, at most `SWEEP_FAIL_MAX` 60 s.
+  - *When it waits*: with the setting off it never runs. While `fnc_sweepBusy` - an arsenal is open (`ARSENAL_OPEN`), ACE Arsenal's
+    `LOADOUT_QUIET_FRAMES` after a loadout set (`einv_arsenal_loadoutFrame`), a magazine repack, and with the window open a tile pressed or
+    dragged (`einv_gui_press`, `dragging`, `stripDrag`), a move of the window in flight (`inFlight`, `answers`) or in the hands' queue
+    (`handQueue`) - it looks again `SWEEP_BUSY` 1 s later (the window's variables are not read while it is closed). For
+    `SWAP_HOLD` 60 s after a worn container was swapped (`fnc_wornHeld`, the hold `fnc_requestMigrate` has had since 0.5.19, now one function
+    for both) it looks again when the hold ends. Seated (a drop would go into the vehicle's cargo and may bounce), with nothing under the
+    feet (`fnc_groundPos`) or before the server answered the greeting (`fnc_hubReady`) the wide migrate runs and the ground waits
+    `SWEEP_BLOCKED` 5 s at a time. After ACE Arsenal closes `einv_arsenal_fnc_onClosed` takes out what does not fit (section 5) first; the
+    sweep sees what is left.
+  - *Multiplayer*: nothing new is asked of the network. The migrate is a request on the player's own unit, the take runs on the player's
+    machine and the ground put is the existing op `putGround` on the server through the hub, like every drop.
 - **Adds of the engine that a script made after a check.** A script that asks `canAdd` and then `addMagazine`, or takes an item out
   of a pile and adds it, depends on the engine's load limit, which the grid does not follow: an add the engine refuses is lost
   where nothing can see it (no event, no return value). What this mod can see is only what it does itself: `einv_storage_fnc_addToUnit`
@@ -903,7 +950,8 @@ backpack the loadout names (a different worn class is skipped) the intended item
 a magazine by class and rounds, a weapon by class and attachments without its loaded magazines, a backpack by class - and only the positive
 difference is added to the container object with `addItemCargoGlobal`, `addMagazineAmmoCargo`, `addWeaponWithAttachmentsCargoGlobal` or
 `addBackpackCargoGlobal` (classes the game lacks are left out as the engine left them), so a second pass adds nothing. The layout and
-`fnc_queueMigrate` do the rest. Every path through `CBA_fnc_setLoadout` is covered, ACE Arsenal's Load and the loadouts screen included; a plain
+`fnc_queueMigrate` do the rest; for the player's own unit the overflow sweep (section "Surplus") then puts what fits nowhere on the ground,
+`SWEEP_LOADOUT_DELAY` 1.5 s after the set, after the top-up and the places. Every path through `CBA_fnc_setLoadout` is covered, ACE Arsenal's Load and the loadouts screen included; a plain
 `setUnitLoadout` raises no event, so scripts that need this call the public **`einv_storage_fnc_setUnitLoadout [unit, loadout]`** (`setUnitLoadout`
 plus the top-up and the migrate note, on any machine: a unit that is not local gets a `einv_storage_setUnitLoadout` CBA event).
 
@@ -3188,7 +3236,7 @@ out of them (kept once the scenario is saved). The wizard's Import still reads a
 | `einv_items_stackSmall` | SLIDER 1 to 50 | global (hidden) | 10 | `@item_small`'s stack, only when moved off 10 - in CBA's menu (Grids) |
 | `einv_main_settingsInfo` | LIST, one choice | global | 0 | the Server page's first row: "Also in the setup wizard (recommended)", both stay in sync; read by nothing |
 | `einv_items_sizeTable`, `einv_items_stackTable` | EDITBOX | global | "" | older tables, `class:WxH` / `class:N`; win over the text |
-| `einv_storage_migrate` | CHECKBOX | global | on | move a unit's surplus (overflow) on to its next container with room (section 3, Surplus) |
+| `einv_storage_migrate` | CHECKBOX | global | on | "Move overfull items on": move a unit's surplus (overflow) on to its next container with room, and put the player's own on the ground when nothing has room (section 3, Surplus); off: nothing moves |
 | `einv_storage_containerTable` | EDITBOX | global | "" | `class:N` or `class:WxH+WxH`; wins over the text |
 | `einv_storage_nearbyRange` | SLIDER 1 to 5 | global | 3 | m, how far crates and piles count as nearby |
 | `einv_storage_stackMultiplier` | SLIDER 1 to 10 | global | 5 | "Stack multiplier for crates and vehicles": what stacks stacks this many times higher in a crate, a vehicle or a pile on the ground, not in what is worn (section 3, `fnc_stackFor`); 1 is off |
@@ -3285,7 +3333,10 @@ guard or carried variable in the storage's tables (section 3).
 - **Surplus.** Nothing raises an event for a script's `addItem`: a unit's cargo is found changed through CBA's polled `loadout`
   event (the player), the engine's `Take` / `Put` / `InventoryClosed`, a loadout set, and a window showing the overflow - an AI
   whose gear a script filled and nobody looks at keeps its surplus until one of those happens. Up to 0.3 s plus a tick pass
-  before the surplus moves. A stack that would only fit by joining a partly filled pile of the same class (no free cell) is not
+  before the surplus moves. The player's own overflow is put on the ground about a second after the add (the sweep, section 3): not
+  while seated or with nothing under the feet, not within a minute of swapping a worn container, not while the player drags, an arsenal
+  is open or a move is under way - it stays a red tile until then. An item that a mod puts back by script each time (a pick-up action
+  that repeats) is put on the ground each time; a pile that cannot take it holds the sweep back for up to a minute. A stack that would only fit by joining a partly filled pile of the same class (no free cell) is not
   moved: the plan needs a free cell per tile. Mid-move changes by other players in the same network moment can make a planned
   cell taken; the op then takes the first fit or leaves the tile where it is.
 - **Kits.** Another living player's kits do not open or move. EFAK itself writes kits on whichever machine acts (its medical use,

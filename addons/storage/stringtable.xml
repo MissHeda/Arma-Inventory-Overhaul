@@ -10,6 +10,9 @@
         <Key ID="STR_einv_storage_Hint_NoReloadFrom">
             <English>Cannot reload from the %1.</English>
         </Key>
+        <Key ID="STR_einv_storage_Hint_NoRoomGround">
+            <English>No room for %1 - put on the ground</English>
+        </Key>
         <Key ID="STR_einv_storage_Hint_NoThrow">
             <English>Cannot throw: the grenades are in the %1. Take one out first.</English>
         </Key>
@@ -47,7 +50,7 @@
             <English>Move overfull items on</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_Migrate_Desc">
-            <English>Items beyond a container's cells (scripts, addItem) move on: uniform, then vest, then backpack.\nWhat fits nowhere stays, shown in red. Off: everything stays where the engine put it.</English>
+            <English>Overfull items go to another container,\nelse to the ground.</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_NearbyRange">
             <English>Reach</English>

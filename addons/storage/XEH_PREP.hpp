@@ -133,6 +133,15 @@ PREP(unitTargets);
 PREP(requestMigrate);
 PREP(queueMigrate);
 PREP(tickMigrate);
+PREP(wornHeld);
+PREP(migratePasses);
+
+// The player's overflow sweep: what the grid has no room for and no other worn container takes goes onto the
+// ground next to the player (the setting einv_storage_migrate switches it off with the rest of the surplus pass)
+PREP(queueSweep);
+PREP(sweepTick);
+PREP(sweepBusy);
+PREP(requestSweep);
 
 // Compartments
 PREP(blocksFor);

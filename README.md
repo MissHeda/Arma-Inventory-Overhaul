@@ -250,8 +250,9 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   `[cursorObject] call einv_storage_fnc_dumpPlaces` writes where things lie to the RPT. The engine's own commands (`addItem`,
   `addMagazine`, `addWeapon`, loadouts, ACE) ignore the grid: what a unit's uniform, vest or backpack then holds
   beyond its cells moves on to the next container with free cells (uniform, vest, backpack) a moment later, on the
-  machine the unit is local on; what fits nowhere stays shown as overflow. The server setting
-  `einv_storage_migrate` switches that off.
+  machine the unit is local on; what fits nowhere is, for the player's own unit, put on the ground next to him with the hint "No room
+  for <name> - put on the ground" (an AI, a body or a crate keeps it as overflow, shown apart). The server setting
+  `einv_storage_migrate` ("Move overfull items on": overfull items go to another container, else to the ground) switches that off.
 - **Adding things from a script or another mod:** `[unit, "class", count, rounds] call einv_storage_fnc_addToUnit` (any machine; the
   last argument is optional and only for magazines, -1 or left out for full ones) puts new things into the unit's uniform, vest
   and backpack - the first with free cells, one with a slot for the item's category first - and returns how many it placed,

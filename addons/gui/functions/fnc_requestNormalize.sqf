@@ -6,7 +6,9 @@
  *
  * Surplus: a person (the player's own unit, a body, someone looted) whose uniform, vest or backpack shows an
  * overflow tile is asked to pass what it can on to its next container with room
- * (einv_storage_fnc_requestMigrate, op "migrate"), once per DRIFT_REPEAT seconds per person.
+ * (einv_storage_fnc_requestMigrate, op "migrate"), once per DRIFT_REPEAT seconds per person. The player's own
+ * unit is also noted for the overflow sweep (einv_storage_fnc_queueSweep), which puts what fits no worn container
+ * onto the ground.
  *
  * Drift: a holder whose places and cargo have disagreed for DRIFT_WAIT seconds (GVAR(drift)) and was not
  * reported in the last DRIFT_REPEAT seconds gets a silent transaction of one op, "normalize", with this
@@ -67,6 +69,12 @@ private _persons = [];
 {
     private _person = _x;
     private _worn = [uniformContainer _person, vestContainer _person, backpackContainer _person];
+
+    // The player's own overflow tile is swept as well (einv_storage_fnc_requestSweep): to another worn container
+    // with room, else onto the ground. A call that only notes a due time, so every check may make it.
+    if (_person isEqualTo player) then {
+        [] call EFUNC(storage,queueSweep);
+    };
 
     if (_now - (_person getVariable [QGVAR(migratedAt), -1e9]) < DRIFT_REPEAT) then {continue};
     if (_busy findIf {_x in _worn} >= 0) then {continue};

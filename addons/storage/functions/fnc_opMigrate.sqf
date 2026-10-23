@@ -2,11 +2,11 @@
 /*
  * Author: Miss Heda
  * Op "migrate": what a unit's uniform, vest or backpack holds beyond its grid moves on to the next of the
- * unit's containers that has free cells for it - uniform to vest to backpack, never the other way round. The
- * surplus is what the layout has no room for (fnc_getLayout, "overflow"): the engine's own commands
- * (addItem, addMagazine, addWeapon, a loadout, a script, ACE) know nothing of our cells and fill a container
- * as long as its mass allows. What fits nowhere stays where it is and is shown as overflow, as before.
- * Nothing is dropped and nothing is copied.
+ * unit's containers that has free cells for it - uniform to vest to backpack, never the other way round
+ * (unless "wide" is asked for, below). The surplus is what the layout has no room for (fnc_getLayout,
+ * "overflow"): the engine's own commands (addItem, addMagazine, addWeapon, a loadout, a script, ACE) know
+ * nothing of our cells and fill a container as long as its mass allows. What fits nowhere stays where it is
+ * and is shown as overflow, as before. This op drops nothing and copies nothing.
  *
  * Every move is op "move" (fnc_opMove) with the cell fnc_plan found for it, largest first: a spot is checked
  * before anything leaves, out and in are verified by counting, and what did not arrive goes back into the
@@ -22,10 +22,14 @@
  * arsenal is open (ARSENAL_OPEN) - the arsenals give back what does not fit themselves - or when the
  * setting einv_storage_migrate is switched off.
  *
+ * "wide" is the player's overflow sweep (fnc_requestSweep): after the passes on, what still lies on no cell
+ * is offered to the containers before its own as well (fnc_migratePasses), since a free cell anywhere is
+ * better than the ground.
+ *
  * Extra: [how many tiles moved].
  *
  * Arguments:
- * 0: Args, [unit] <ARRAY>
+ * 0: Args, [unit, wide (default: false)] <ARRAY>
  * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
@@ -44,7 +48,7 @@
 
 params [["_args", [], [[]]], ["_context", createHashMap, [createHashMap]]];
 
-_args params [["_unit", objNull, [objNull]]];
+_args params [["_unit", objNull, [objNull]], ["_wide", false, [false]]];
 
 if (isNull _unit || {!(_unit isKindOf "CAManBase")}) exitWith {["Moved", [], []]};
 
@@ -65,8 +69,10 @@ _moveContext set ["batch", createHashMap];
 private _moved = 0;
 private _produced = [];
 
-for "_i" from 0 to (count _containers - 2) do {
-    private _from = _containers select _i;
+{
+    _x params ["_fromIndex", "_toIndices"];
+
+    private _from = _containers select _fromIndex;
 
     // Laid out from the places as the moves so far left them.
     GVAR(cache) deleteAt (netId _from);
@@ -75,8 +81,8 @@ for "_i" from 0 to (count _containers - 2) do {
 
     if (_over isEqualTo []) then {continue};
 
-    // Only on - the order of the unit's containers is the order of preference.
-    private _targets = (_containers select [_i + 1]) apply {[_x, _unit]};
+    // The order of the unit's containers is the order of preference.
+    private _targets = _toIndices apply {[_containers select _x, _unit]};
 
     ([_over, _targets] call FUNC(plan)) params [["_assigned", [], [[]]]];
 
@@ -108,7 +114,7 @@ for "_i" from 0 to (count _containers - 2) do {
             };
         } forEach _strays;
     } forEach _assigned;
-};
+} forEach ([count _containers, _wide] call FUNC(migratePasses));
 
 if (_produced isNotEqualTo []) exitWith {["Bounced", _produced, [_moved]]};
 

@@ -73,6 +73,24 @@ GVAR(compatSets) = createHashMap;
 // fnc_tickMigrate). Filled by the triggers in XEH_postInit, fnc_onLoadoutSet and the arsenal addon.
 GVAR(migrateDue) = [];
 
+// The player's overflow sweep (fnc_queueSweep, fnc_sweepTick, fnc_requestSweep): when it is due (-1 for not at all);
+// the time before which nothing is swept (a loadout was set, the unit is new); the time before which a pass that put
+// nothing down is not tried again; how many of those in a row; how many migrations in a row the look asked for;
+// until when a pass under way is waited for; whether the unit is new (its first sweep ignores the hold after a swapped
+// container); the last signature of the unit's load and counts (the watch) and when it is next compared; the overflow
+// seen by the last look that was about to put it on the ground, and until when the state is trusted without a second look.
+GVAR(sweepDue) = -1;
+GVAR(sweepNotBefore) = 0;
+GVAR(sweepQuiet) = 0;
+GVAR(sweepFails) = 0;
+GVAR(sweepMigrates) = 0;
+GVAR(sweepRunning) = 0;
+GVAR(sweepFresh) = false;
+GVAR(sweepSignature) = [];
+GVAR(sweepWatchAt) = 0;
+GVAR(sweepSeen) = "";
+GVAR(sweepTrusted) = 0;
+
 // While a phase's ops run here: the places they changed, [[holder, records], ...] - written once at the
 // end - and what the ops read of each holder, holder netId or kit key -> HashMap (fnc_execute).
 GVAR(executing) = false;

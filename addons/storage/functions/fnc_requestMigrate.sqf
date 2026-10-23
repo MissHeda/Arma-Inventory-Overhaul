@@ -43,16 +43,7 @@ if (is3DEN || {isNull _unit} || {!(_unit isKindOf "CAManBase")}) exitWith {false
 // A worn container changed since the last look (a swap in the window, a script, an arsenal): the other
 // containers are left exactly as they are for a while - nothing moves between them because one was swapped.
 // Only the changed container has a fresh layout; what it cannot hold stays shown as overflow until then.
-private _worn = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
-private _seen = _unit getVariable [QGVAR(wornSeen), []];
-
-if (_seen isNotEqualTo [] && {_seen isNotEqualTo _worn}) then {
-    _unit setVariable [QGVAR(swapAt), diag_tickTime];
-};
-
-_unit setVariable [QGVAR(wornSeen), _worn];
-
-private _held = diag_tickTime - (_unit getVariable [QGVAR(swapAt), -1e9]) < 60;
+private _held = ([_unit] call FUNC(wornHeld)) > 0;
 
 private _ops = [];
 

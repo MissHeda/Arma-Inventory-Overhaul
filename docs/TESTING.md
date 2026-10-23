@@ -134,6 +134,19 @@ A client can see them and cannot change them.
       open: nothing moves, an add with no free cell is taken back; after the close the surplus moves on first and the notice
       names only what fits nowhere. The setting "Move overfull items on" off: nothing moves. The RPT: no `Error`, no item lost
       or doubled (count before and after).
+- [ ] Overflow sweep (the player's own gear): with every container full, `player addItem "Laptop"` (or ACE's pick-up of a laptop from the
+      ground, window shut): within about two seconds the laptop lies on the ground at your feet, the hint "No room for <name> - put on
+      the ground" shows, one RPT INFO line, and opening the window shows the Ground section with the laptop at once (not hatched,
+      no search). With a free cell in another container (the item landed in the backpack, the uniform has room) it moves there
+      instead, from the backpack to the uniform too. Window open: the red tile goes the same way. A loop of 30 bandages into a full
+      unit: six tiles at a time, all on the ground after a few passes. Nothing is swept: while ACE Arsenal is open (after the close
+      the arsenal's own card decides, then the sweep sees what is left); during a drag; with moves in the hands' queue; within a
+      minute after a worn container was swapped (it goes when the minute is over); seated in a vehicle or swimming (it goes when you
+      stand on the ground); an AI, a body, a crate or a vehicle keeps its overflow. A respawn or JIP with a loadout beyond the grid
+      is tidied about four seconds after the unit arrived; a loadout set by `CBA_fnc_setLoadout` 1.5 s after it, after the top-up.
+      The setting "Move overfull items on" off: nothing moves and nothing is dropped. Multiplayer (listen server and dedicated):
+      the same, the pile is the server's, other players see it. The RPT: no `Error`, no item lost or doubled; the frame time with
+      the profiler or diag_captureFrame shows no cost from the watch (about a tenth of a millisecond a second).
 - [ ] Sounds, a movement key closes the window.
 - [ ] Colour palette by element: the palette (header, right of the speaker) has eight rows - Accent, Secondary, Panels, Transparency,
       Cells, Tiles, Text, Lines - and the card fits under the header with the picker open. Panels a strong blue and Transparency 75 %:

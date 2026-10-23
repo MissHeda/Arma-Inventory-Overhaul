@@ -17,7 +17,9 @@
  * loadout without the key, or of another version, changes nothing - its things lie where the layout puts
  * them first. Any loadout, with the key or without, also notes its unit for the surplus check
  * (fnc_queueMigrate): what it holds beyond the grid moves on to the next container with room. What the engine
- * left out of the loadout because of a container's maximumLoad is added back (fnc_topUpLoadout).
+ * left out of the loadout because of a container's maximumLoad is added back (fnc_topUpLoadout). The player's
+ * own overflow is swept afterwards (fnc_requestSweep, SWEEP_LOADOUT_DELAY later): what fits no container goes
+ * onto the ground.
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -65,6 +67,12 @@ if (local _unit) then {
     [{
         [_this select 0, _this select 1] call FUNC(topUpLoadout);
     }, [_unit, _loadout]] call FUNC(nextFrame);
+
+    // The player's overflow is swept only after the top-up above, its second pass a frame later and the places
+    // below are in: nothing is put on the ground that the loadout meant to hold (fnc_requestSweep).
+    if (hasInterface && {_unit isEqualTo player}) then {
+        [SWEEP_LOADOUT_DELAY, true, true] call FUNC(queueSweep);
+    };
 } else {
     [QGVAR(topUpLoadout), [_unit, _loadout], _unit] call CBA_fnc_targetEvent;
 };

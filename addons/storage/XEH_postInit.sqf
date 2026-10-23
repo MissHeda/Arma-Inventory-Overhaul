@@ -97,6 +97,11 @@
     params [["_unit", objNull, [objNull]]];
 
     [_unit, 1] call FUNC(queueMigrate);
+
+    // The player's own sweep waits for the loadout's top-up and places as well.
+    if (hasInterface && {_unit isEqualTo player}) then {
+        [SWEEP_LOADOUT_DELAY, true, true] call FUNC(queueSweep);
+    };
 }] call CBA_fnc_addEventHandler;
 
 if (isServer) then {
@@ -185,10 +190,14 @@ if (hasInterface) then {
         };
 
         [_unit] call FUNC(queueMigrate);
+
+        // What nothing has room for goes onto the ground a moment later (fnc_requestSweep).
+        [] call FUNC(queueSweep);
     }] call CBA_fnc_addPlayerEventHandler;
 
     // The unit the player is now - the start, a respawn, a team switch, a Zeus remote control - may come
-    // with more than its grid holds.
+    // with more than its grid holds. Its overflow is swept a few seconds after it arrived, once the loadout
+    // the mission or the respawn gave it is in and topped up (fnc_onLoadoutSet), and the watch starts afresh.
     ["unit", {
         private _unit = _this param [0, objNull];
 
@@ -197,7 +206,35 @@ if (hasInterface) then {
         };
 
         [_unit] call FUNC(queueMigrate);
+
+        GVAR(sweepSignature) = [];
+        GVAR(sweepFails) = 0;
+        GVAR(sweepMigrates) = 0;
+        GVAR(sweepQuiet) = 0;
+        GVAR(sweepRunning) = 0;
+        GVAR(sweepSeen) = "";
+        GVAR(sweepTrusted) = 0;
+
+        [SWEEP_INIT_DELAY, true, true] call FUNC(queueSweep);
     }, true] call CBA_fnc_addPlayerEventHandler;
+
+    // The player's overflow sweep (fnc_requestSweep): an item that came into the uniform, vest or backpack beyond
+    // the grid and fits no other worn container goes onto the ground. Nothing raises an event for a script's
+    // addItem (ACE's pick-up, another mod's action), so the triggers are CBA's polled loadout event above, the
+    // engine's own Take and InventoryClosed here, a loadout set (fnc_onLoadoutSet), the unit event above, the
+    // open window that shows an overflow tile (einv_gui_fnc_requestNormalize) and this tick, which also compares
+    // a cheap signature of the load once a second: the net under all of them (fnc_sweepTick).
+    [{[] call FUNC(sweepTick)}, SWEEP_TICK] call CBA_fnc_addPerFrameHandler;
+
+    {
+        ["CAManBase", _x, {
+            params [["_unit", objNull, [objNull]]];
+
+            if (_unit isEqualTo player) then {
+                [] call FUNC(queueSweep);
+            };
+        }] call CBA_fnc_addClassEventHandler;
+    } forEach ["Take", "InventoryClosed"];
 
     // A changed rule set may have shrunk a grid under what it holds. Raised on every machine once it has
     // the new rules.

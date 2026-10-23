@@ -62,6 +62,34 @@
 #define MIGRATE_TRIES 3
 #define MIGRATE_WAIT 1
 
+// How long after a worn container was swapped for another the unit's surplus is left alone, in seconds
+// (fnc_wornHeld): only the changed container gets a fresh layout, the others keep their cells.
+#define SWAP_HOLD 60
+
+// The player's overflow sweep (fnc_queueSweep, fnc_sweepTick, fnc_requestSweep): what the grid has no room for and
+// no other worn container takes goes onto the ground. SWEEP_TICK is how often the due time is looked at, SWEEP_WATCH how
+// often the cheap loadout signature is compared (the net under the events), SWEEP_DELAY how long after a change the
+// sweep runs, SWEEP_LOADOUT_DELAY and SWEEP_INIT_DELAY the earliest it runs after a loadout was set and after the
+// player got a unit (the top-up and the places come first), SWEEP_BUSY when it looks again after the player was busy,
+// SWEEP_BLOCKED when it looks again while nothing can be put down (seated, nothing under the feet, the server not
+// ready), SWEEP_AGAIN when it looks again after a pass that changed something, SWEEP_MAX how many tiles one pass
+// puts down, SWEEP_TIMEOUT how long one pass is waited for, SWEEP_TRUST how long after a pass that put something
+// down the next one needs no second look. A pass that put nothing down waits SWEEP_FAIL seconds times the number of
+// failures in a row, at most SWEEP_FAIL_MAX.
+#define SWEEP_TICK 0.25
+#define SWEEP_WATCH 1
+#define SWEEP_DELAY 0.5
+#define SWEEP_LOADOUT_DELAY 1.5
+#define SWEEP_INIT_DELAY 4
+#define SWEEP_BUSY 1
+#define SWEEP_BLOCKED 5
+#define SWEEP_AGAIN 0.5
+#define SWEEP_MAX 6
+#define SWEEP_TIMEOUT 12
+#define SWEEP_TRUST 4
+#define SWEEP_FAIL 5
+#define SWEEP_FAIL_MAX 60
+
 // ACE Arsenal's display (1127001, ARSENAL_IDD of the arsenal addon) or the vanilla arsenal's is open. Both
 // do their own adding and taking back on the unit's cargo and read it as they go, so nothing is moved under
 // them (fnc_requestMigrate, fnc_opMigrate); the arsenal addon asks again once they are closed.
