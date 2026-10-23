@@ -23,7 +23,7 @@
  * 1: Array of:
  *    0: Display <DISPLAY>
  *    1: Which picker, "alpha", "hue" or "square" <STRING>
- *    2: Which colour, 0 accent, 1 secondary, 2 panels (not read for "alpha") <NUMBER>
+ *    2: Which colour, 0 accent, 1 secondary, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines (not read for "alpha") <NUMBER>
  *    3: The picker's place on the screen [left, top, width, height] <ARRAY>
  *
  * Arguments (move, up, end):

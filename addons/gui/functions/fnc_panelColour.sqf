@@ -10,9 +10,10 @@
  * value (the V of hue, saturation and value) is cut at PALETTE_PANEL_VALUE_MAX, so the panel's luminance (gamma 2.2) is 0.07 at the
  * very most - white text keeps 8.7 : 1 against it, the light grey of the second line 5.2 : 1. The popover cuts a pick the same way
  * when it is made (fnc_paletteSet) and so does the profile's loading (XEH_preInit); this is the last of three, for a value that came
- * from anywhere else. What stays readable beyond that is worked out from this colour: the second and the muted text are lifted
- * where a lighter panel would take them below their contrast (fnc_theme), and the accent is brightened to keep its own against the
- * panel (fnc_accentColour).
+ * from anywhere else. What stays readable beyond that is worked out from this colour: the text and its dimmer shades are lifted
+ * where a lighter panel (or lighter cells or tiles) would take them below their contrast (fnc_theme), and the accent is brightened
+ * to keep its own against the panel (fnc_accentColour). Only the panels follow this colour: the cells, slot boxes and tiles on them
+ * keep their own (fnc_theme).
  *
  * Arguments:
  * None

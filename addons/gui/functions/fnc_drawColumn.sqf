@@ -25,9 +25,9 @@
  * A column that was scrolled down and is drawn again in the same place with the same title (fnc_build: a section folded or
  * unfolded, a move) keeps its panel, its title and its scroll group - fnc_build hands them over in uiNamespace keepColumns
  * by the column's id: the sections are drawn into the group first and the controls that were in it go afterwards, in the same
- * call, as the setup wizard's General page does (fnc_showStep). Kept too when only the panel's colour and the hairline's changed (the
- * palette's panel colour, transparency and secondary colour, fnc_palette): they are painted in place, so a picker dragged with a column scrolled
- * does not send it to the top for a frame at every build. A group made anew starts at the top and learns its height a
+ * call, as the setup wizard's General page does (fnc_showStep). Kept too when only the panel's colour, the hairline's and the title's
+ * text and icon colours changed (the palette's panels, transparency, lines and text, fnc_palette): they are painted in place, so a
+ * picker dragged with a column scrolled does not send it to the top for a frame at every build. A group made anew starts at the top and learns its height a
  * frame later, so the column showed its top for a moment before fnc_onFrame put it back (Mia, 0.5.3: the list jumped up
  * when a section was folded). The scroll is put back all the same, now and a frame later, in screen height from the top.
  *
@@ -84,17 +84,19 @@ if (_loot) then {
     _accentColor = _theme getOrDefault ["lootAccent", []];
 };
 
-// The hairline under the title: the loot column's accent strip, else the theme's line.
+// The hairline under the title: the loot column's accent strip, else the theme's line. The title's words, and its icon: in the loot
+// column's accent, else the second line's grey.
 private _lineColor = [_accentColor, _theme getOrDefault ["line", [1, 1, 1, 0.07]]] select (_accentColor isEqualTo []);
+private _titleColor = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _iconColor = [_accentColor, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] select (_accentColor isEqualTo []);
 
 // What a kept column can take on in place and what it cannot. The palette (fnc_palette) changes colours while the window is open, with a
-// column scrolled: the panel's colour and the hairline's are painted over the kept controls (below), so the column stays where it is;
-// a change of anything in the first list draws the column anew.
+// column scrolled: the panel's colour, the hairline's and the title's words and icon are painted over the kept controls (below), so the
+// column stays where it is; a change of anything in the first list draws the column anew.
 private _look = [
-    _ringColor, _accentColor, _theme getOrDefault ["text", []], _theme getOrDefault ["text2", []], _theme getOrDefault ["radius", 0],
-    _theme getOrDefault ["panelBorder", []], _panelColor isEqualTo []
+    _ringColor, _accentColor, _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []], _panelColor isEqualTo []
 ];
-private _paintLook = [_panelColor, _lineColor];
+private _paintLook = [_panelColor, _lineColor, _titleColor, _iconColor];
 
 // What fnc_build kept of this column from its last drawing, when it was scrolled: [group, panel and title controls, [rect, title,
 // icon]]. The same place, words and look: all of it stays as it is, only the sections in the group are drawn again.
@@ -121,18 +123,21 @@ private _padY = UNIT * 0.4;
 private _padX = SQUARE(_padY);
 private _innerTop = _top + _padY;
 
-// The pieces of the panel and the hairline, which a kept column is painted over with (the group keeps them).
-private _paint = [[], controlNull];
+// The pieces of the panel, the hairline, the title's words and its icon, which a kept column is painted over with (the group keeps
+// them; a part the column has not is controlNull).
+private _paint = [[], controlNull, controlNull, controlNull];
 
 if (_reuse) then {
-    _paint = (_kept select 0) getVariable [QGVAR(columnPaint), [[], controlNull]];
+    _paint = (_kept select 0) getVariable [QGVAR(columnPaint), _paint];
 
     if (((_kept select 0) getVariable [QGVAR(columnPaintLook), []]) isNotEqualTo _paintLook) then {
         if (_panelColor isNotEqualTo []) then {
-            [_paint select 0, _panelColor] call FUNC(paintSurface);
+            [_paint param [0, []], _panelColor] call FUNC(paintSurface);
         };
 
-        (_paint select 1) ctrlSetBackgroundColor _lineColor;
+        (_paint param [1, controlNull]) ctrlSetBackgroundColor _lineColor;
+        (_paint param [2, controlNull]) ctrlSetTextColor _titleColor;
+        (_paint param [3, controlNull]) ctrlSetTextColor _iconColor;
     };
 };
 
@@ -155,10 +160,9 @@ if (_title isNotEqualTo "") then {
 
     if (!_reuse) then {
         if (_icon isNotEqualTo "") then {
-            [
-                _display, controlNull, [_textX, _innerTop + _titleH * 0.15, SQUARE(_titleH * 0.7), _titleH * 0.7], _icon,
-                [_accentColor, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] select (_accentColor isEqualTo [])
-            ] call FUNC(uiIcon);
+            _paint set [3, [
+                _display, controlNull, [_textX, _innerTop + _titleH * 0.15, SQUARE(_titleH * 0.7), _titleH * 0.7], _icon, _iconColor
+            ] call FUNC(uiIcon)];
         };
 
         private _size = _titleH * 0.6;
@@ -166,7 +170,9 @@ if (_title isNotEqualTo "") then {
         private _iconW = [0, SQUARE(_titleH * 0.7) + SQUARE(_titleH * 0.3)] select (_icon isNotEqualTo "");
         private _text = [[_title, _theme] call FUNC(caption), _left + _width - _padX - _textX - _iconW, _font, _size] call FUNC(fitText);
 
-        [_display, controlNull, [_textX + _iconW, _innerTop, _left + _width - _padX - _textX - _iconW, _titleH], _text, _size, _theme getOrDefault ["text", [1, 1, 1, 1]], _font, 0] call FUNC(uiLabel);
+        _paint set [2, [
+            _display, controlNull, [_textX + _iconW, _innerTop, _left + _width - _padX - _textX - _iconW, _titleH], _text, _size, _titleColor, _font, 0
+        ] call FUNC(uiLabel)];
 
         // A hairline under the title, like the header's - the loot column's is its accent strip, two pixels in its colour.
         private _lineH = [pixelH * 2, pixelH] select (_accentColor isEqualTo []);

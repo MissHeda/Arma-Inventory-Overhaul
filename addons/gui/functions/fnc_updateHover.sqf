@@ -360,9 +360,16 @@ private _fnc_light = {
         _color = [_color] call FUNC(queueColor);
     };
 
+    // Lit: a film's alpha goes up by HOVER_ALPHA; a solid surface (the palette's cells and tiles, fnc_theme), where more alpha would
+    // change nothing, goes as far towards white instead - what a white film of that strength over it would show.
     if (_on) then {
         _color = +_color;
-        _color set [3, ((_color select 3) + HOVER_ALPHA) min 1];
+
+        if ((_color param [3, 1]) >= 1) then {
+            _color = ((_color select [0, 3]) apply {_x + (1 - _x) * HOVER_ALPHA}) + [1];
+        } else {
+            _color set [3, ((_color select 3) + HOVER_ALPHA) min 1];
+        };
     };
 
     // A shaped tile has a surface per run of its cells (fnc_createTile): all of them light up. Noted on the tile, so

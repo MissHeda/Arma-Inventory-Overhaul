@@ -135,6 +135,17 @@ A client can see them and cannot change them.
       names only what fits nowhere. The setting "Move overfull items on" off: nothing moves. The RPT: no `Error`, no item lost
       or doubled (count before and after).
 - [ ] Sounds, a movement key closes the window.
+- [ ] Colour palette by element: the palette (header, right of the speaker) has eight rows - Accent, Secondary, Panels, Transparency,
+      Cells, Tiles, Text, Lines - and the card fits under the header with the picker open. Panels a strong blue and Transparency 75 %:
+      the columns, header and footer turn blue and see-through, while the empty cells, slot boxes and tiles look
+      exactly as before (no blue, not see-through); the inspect card and a kit window take the blue. Cells red: the empty cells and
+      slot boxes turn dark red, the tiles do not; Tiles green: every tile takes it, a rifle still a little bluer, a magazine warmer.
+      Hover a tile and an unsearched (hatched) one: both still light up. Text pure blue: captions and names light blue, the second
+      line and muted words dimmer shades of it; Lines red tints the hairlines and the stripes of an unsearched item. Drag each picker
+      with the storage column scrolled down: live, and the column stays where it is. "Default" on each row and "Reset all" bring the
+      look back exactly; the choices survive closing the window and a restart; a profile saved with 0.5.46 (four entries) loads with
+      the new rows unset. The wizard's paint canvas still lights the cell under the mouse with Cells set. "Players may pick their
+      colours" off: no button, the standard look.
 - [ ] Pages: a crate with more than 10 rows of loot shows a bar; arrows turn the page; a dragged item held over an arrow turns it; the search finds an item on another page; holding F over a crate stays smooth.
 - [ ] Hotbar 4 to 0: bind by drag, use, the HUD strip.
 - [ ] No vanilla inventory: the Gear key, ACE's "Inventory" on an unconscious soldier, ACE's "Open backpack", a crate and a

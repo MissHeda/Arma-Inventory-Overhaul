@@ -141,10 +141,15 @@ private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
 private _controls = [];
 
 private _color = if (_hidden) then {
-    // Nothing about an unsearched item shows, not even its category: a step above an empty cell.
+    // Nothing about an unsearched item shows, not even its category: a step above an empty cell - a little more of the cell's film,
+    // or, for a solid cell (the palette's, fnc_theme), its colour a little towards white, which is what that film would add.
     private _cell = +(_theme getOrDefault ["cell", [1, 1, 1, 0.045]]);
 
-    if (_cell isEqualTo []) then {[1, 1, 1, 0.06]} else {_cell set [3, (_cell select 3) + 0.03]; _cell}
+    switch (true) do {
+        case (_cell isEqualTo []): {[1, 1, 1, 0.06]};
+        case ((_cell param [3, 1]) >= 1): {((_cell select [0, 3]) apply {_x + (1 - _x) * 0.03}) + [1]};
+        default {_cell set [3, (_cell select 3) + 0.03]; _cell};
+    }
 } else {
     (_theme getOrDefault ["tileBg", []]) param [_info getOrDefault ["category", 0], [1, 1, 1, 0.075]]
 };

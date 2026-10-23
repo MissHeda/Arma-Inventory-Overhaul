@@ -33,9 +33,10 @@
 // steps of PALETTE_ALPHA_STEP; typed values are kept as they are.
 // The panels' colour stays dark so that the light text on them stays readable (fnc_panelColour): its value is at most
 // PALETTE_PANEL_VALUE_MAX (a luminance of 0.07 at the very most, 8 : 1 against white), PANEL_COLOR is what it is without a choice.
-// The greys of the second and the muted text are lifted when a lighter panel would take them below PALETTE_CONTRAST_TEXT2 and
-// PALETTE_CONTRAST_MUTED to 1 (fnc_theme), and the accent is lifted until it keeps ACCENT_MIN_CONTRAST against the panel it sits on
-// (fnc_accentColour).
+// The cells and the tiles are surfaces under text as well and are cut at the same value. The text, its dimmer shades and the inks
+// beside it are lifted where they would fall below PALETTE_CONTRAST_TEXT, PALETTE_CONTRAST_TEXT2 (the second line) and
+// PALETTE_CONTRAST_MUTED to 1 against the lightest of the panels, the cells and the tiles (fnc_theme), and the accent is lifted
+// until it keeps ACCENT_MIN_CONTRAST against the panel it sits on (fnc_accentColour).
 #define PANEL_ALPHA 0.92
 #define PANEL_COLOR [0.05, 0.05, 0.05]
 #define PALETTE_ALPHA_MIN 0.25
@@ -43,8 +44,19 @@
 #define PALETTE_HUE_STEPS 360
 #define PALETTE_SV_STEPS 100
 #define PALETTE_PANEL_VALUE_MAX 0.3
+#define PALETTE_CONTRAST_TEXT 4.5
 #define PALETTE_CONTRAST_TEXT2 4.5
 #define PALETTE_CONTRAST_MUTED 3
+
+// The palette's colours by number - 0 accent, 1 secondary, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines (fnc_paletteSet,
+// fnc_paletteSlide, fnc_openPaletteMenu): PALETTE_COLOURS of them, each one's id (what its button takes away, fnc_paletteSet
+// "reset"), where it lies in einv_gui_palette (the transparency, at 2, is no colour) and how light it may be - the surfaces under
+// the text (panels, cells, tiles) at most PALETTE_PANEL_VALUE_MAX. PALETTE_UNSET is the palette with nothing chosen.
+#define PALETTE_COLOURS 7
+#define PALETTE_IDS ["accent", "secondary", "panel", "cells", "tiles", "text", "lines"]
+#define PALETTE_SLOTS [0, 1, 3, 4, 5, 6, 7]
+#define PALETTE_VALUE_MAX [1, 1, PALETTE_PANEL_VALUE_MAX, PALETTE_PANEL_VALUE_MAX, PALETTE_PANEL_VALUE_MAX, 1, 1]
+#define PALETTE_UNSET [[], [], -1, [], [], [], [], []]
 
 // The vanilla inventory (RscDisplayInventory), which this mod keeps closed (fnc_guardVanilla).
 #define IDD_VANILLA_INVENTORY 602

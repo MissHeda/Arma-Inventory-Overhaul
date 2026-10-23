@@ -211,7 +211,8 @@ PREP(reloadGesture);
 PREP(themeBase);
 PREP(accentColour);
 
-// The palette behind the header's palette button: the player's accent, secondary colour, panel colour and panel transparency
+// The palette behind the header's palette button: the player's accent, secondary colour, panels and their transparency, cells,
+// tiles, text and lines
 PREP(palette);
 PREP(paletteAllowed);
 PREP(panelColour);

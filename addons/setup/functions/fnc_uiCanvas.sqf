@@ -93,7 +93,12 @@ if (_palette) then {
 
     private _cellHover = +_cell;
 
-    _cellHover set [3, (_cell select 3) + 0.12];
+    // A solid cell (the palette's, einv_gui_fnc_theme) lights towards white instead: more alpha would change nothing.
+    if ((_cell select 3) >= 1) then {
+        _cellHover = ((_cell select [0, 3]) apply {_x + (1 - _x) * 0.12}) + [1];
+    } else {
+        _cellHover set [3, (_cell select 3) + 0.12];
+    };
 
     // The tint over the cell, both over the panel, as one layer of the same result.
     private _fnc_over = {

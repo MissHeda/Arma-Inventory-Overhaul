@@ -454,6 +454,12 @@
         <Key ID="STR_einv_gui_Palette_Blue">
             <English>B</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Cells">
+            <English>Cells</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Cells_Tip">
+            <English>The empty grid cells and the slot boxes. Kept dark enough for what lies on them to stay readable.</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Channel_Tip">
             <English>0 to 255. Press Return to apply.</English>
         </Key>
@@ -469,6 +475,12 @@
         <Key ID="STR_einv_gui_Palette_Hex_Tip">
             <English>A colour code such as #FF8800 or #F80. Press Return to apply.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Lines">
+            <English>Lines</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Lines_Tip">
+            <English>The tint of the hairlines, borders and the stripes of unsearched items.</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_MatchAccent">
             <English>Match accent</English>
         </Key>
@@ -476,7 +488,7 @@
             <English>Panels</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Panels_Tip">
-            <English>The window's background: the panels behind the columns, the header and the footer. Kept dark enough for the text to stay readable.</English>
+            <English>The window's background: the panels behind the columns, the header and the footer, and the inspect card and kit windows. The cells and tiles keep their own colours. Kept dark enough for the text to stay readable.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Red">
             <English>R</English>
@@ -488,7 +500,19 @@
             <English>Secondary</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Secondary_Tip">
-            <English>Tints the cards, slots, caption tabs, buttons, what lights under the mouse and picked rows.</English>
+            <English>Tints the caption tabs, chips, buttons, what lights under the mouse, bar tracks and picked rows.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Text">
+            <English>Text</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Text_Tip">
+            <English>Captions, names and labels, with their dimmer shades. Lightened where it would be hard to read.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Tiles">
+            <English>Tiles</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Tiles_Tip">
+            <English>The background of the item tiles. Weapons, ammunition, gear and medical keep a hint of their own tint.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Title">
             <English>Colours</English>
@@ -500,7 +524,7 @@
             <English>Transparency</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Transparency_Tip">
-            <English>How see-through the window's panels are.</English>
+            <English>How see-through the window's panels are. The cells and tiles stay solid.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_UseArma">
             <English>Use my Arma colour</English>

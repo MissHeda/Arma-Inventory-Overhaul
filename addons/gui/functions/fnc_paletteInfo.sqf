@@ -2,29 +2,33 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * What the palette popover shows (fnc_openPaletteMenu, fnc_updatePaletteMenu, fnc_paletteSet): for the accent, the secondary
- * colour, the panels' colour and the panels' alpha, the values the pickers stand at and the colour to preview - the player's choice
- * where there is one, else what the window wears without it. Without a choice the accent is the Arma profile's colour
- * (fnc_accentColour, brightened for the dark panes), the secondary colour follows the accent, the panels' colour is PANEL_COLOR and
- * the alpha is PANEL_ALPHA. A colour is shown as hue, saturation and value (fnc_hsv): for a colour without a choice they are worked
- * out from the colour the window wears, so the first move of a picker starts from it.
+ * What the palette popover shows (fnc_openPaletteMenu, fnc_updatePaletteMenu, fnc_paletteSet): for each of its colours - 0 accent,
+ * 1 secondary, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines - and for the panels' alpha, the values the pickers stand at and the
+ * colour to preview: the player's choice where there is one, else what the window wears without it. Without a choice the accent is
+ * the Arma profile's colour (fnc_accentColour, brightened for the dark panes), the secondary colour follows the accent, the panels'
+ * colour is PANEL_COLOR, the cells and the tiles are the colour they are seen in (a cell's film over the card over the panel, the
+ * misc tile's over the card), the text is its white and the lines are the white their films are tinted with; the alpha is
+ * PANEL_ALPHA. A colour is shown as hue, saturation and value (fnc_hsv): for a colour without a choice they are worked out from the
+ * colour the window wears, so the first move of a picker starts from it and changes only what it moves.
  *
  * Reads the player's own choices (einv_gui_palette), not what fnc_palette hands the themes: the popover only exists where
- * the server allows the palette.
+ * the server allows the palette. What the window wears is read from its theme (einv_gui_theme), the one of its last build: a choice
+ * just taken away shows its plain colour once the build that follows has made the popover again.
  *
  * Arguments:
  * None
  *
  * Return Value:
  * Keys <HASHMAP>:
- *   hsv      [hue, saturation, value] of the accent, the secondary colour and the panels' colour, in that order (the panels'
- *            value cut at PALETTE_PANEL_VALUE_MAX): where the cursors stand
- *   rgb      the same three as [r, g, b] 0 to 1: what the fields show
- *   swatch   [r, g, b] of what the swatches show: the accent as the window wears it (brightened where it would sink), the secondary
- *            colour and the panels' colour as picked
+ *   hsv      [hue, saturation, value] of each colour, by its number (the value of the panels, the cells and the tiles cut at
+ *            PALETTE_PANEL_VALUE_MAX): where the cursors stand
+ *   rgb      the same as [r, g, b] 0 to 1: what the fields show
+ *   swatch   [r, g, b] of what each swatch shows: the accent and the text as the window wears them (brightened where they would
+ *            sink), the others as picked
  *   alpha    the panels' alpha shown
- *   set      [accent, secondary, panels, alpha], each true where the player chose it (what "Use my Arma colour" and the like take away)
- *   any      any of the four is chosen
+ *   set      each colour by its number and then the alpha, true where the player chose it (what "Use my Arma colour", "Default"
+ *            and the like take away)
+ *   any      any of them is chosen
  *
  * Example:
  * private _info = [] call einv_gui_fnc_paletteInfo;
@@ -32,36 +36,75 @@
  * Public: No
  */
 
-GVAR(palette) params [["_accentPick", [], [[]]], ["_secondaryPick", [], [[]]], ["_alphaPick", -1, [0]], ["_panelPick", [], [[]]]];
+GVAR(palette) params [
+    ["_accentPick", [], [[]]], ["_secondaryPick", [], [[]]], ["_alphaPick", -1, [0]], ["_panelPick", [], [[]]],
+    ["_cellsPick", [], [[]]], ["_tilesPick", [], [[]]], ["_textPick", [], [[]]], ["_linesPick", [], [[]]]
+];
+
+private _theme = missionNamespace getVariable [QGVAR(theme), createHashMap];
+
+// A colour as it is seen where it lies, as [r, g, b]: a film mixed with what is under it by its alpha, a solid one as it is.
+private _fnc_seen = {
+    params ["_color", "_under"];
+
+    if (count _color < 3) exitWith {+_under};
+
+    private _alpha = _color param [3, 1];
+
+    [0, 1, 2] apply {(_color select _x) * _alpha + (_under select _x) * (1 - _alpha)}
+};
 
 private _accentWorn = (["", []] call FUNC(accentColour)) select [0, 3];
+private _textWorn = (_theme getOrDefault ["text", [1, 1, 1, 1]]) select [0, 3];
 
-private _accentHsv = if (_accentPick isEqualTo []) then {
-    ["hsv", _accentWorn] call FUNC(hsv)
-} else {
-    +_accentPick
+// What the cells and the tiles lie on: the card's film over the panel.
+private _panelSeen = (_theme getOrDefault ["panel", []]) select [0, 3];
+
+if (count _panelSeen < 3) then {
+    _panelSeen = +PANEL_COLOR;
 };
 
-private _secondaryHsv = if (_secondaryPick isEqualTo []) then {+_accentHsv} else {+_secondaryPick};
+private _cardSeen = [_theme getOrDefault ["card", []], _panelSeen] call _fnc_seen;
 
-private _panelHsv = if (_panelPick isEqualTo []) then {
-    ["hsv", PANEL_COLOR] call FUNC(hsv)
-} else {
-    +_panelPick
-};
+// What each colour is without a choice, by its number (the secondary colour follows the accent, below).
+private _plain = [
+    _accentWorn,
+    _accentWorn,
+    +PANEL_COLOR,
+    [_theme getOrDefault ["cell", []], _cardSeen] call _fnc_seen,
+    [(_theme getOrDefault ["tileBg", []]) param [CATEGORY_MISC, []], _cardSeen] call _fnc_seen,
+    _textWorn,
+    (_theme getOrDefault ["line", [1, 1, 1, 1]]) select [0, 3]
+];
 
-_panelHsv set [2, (_panelHsv select 2) min PALETTE_PANEL_VALUE_MAX];
+private _picks = [_accentPick, _secondaryPick, _panelPick, _cellsPick, _tilesPick, _textPick, _linesPick];
+private _hsv = [];
 
-private _hsv = [_accentHsv, _secondaryHsv, _panelHsv];
+{
+    private _which = _forEachIndex;
+    private _at = switch (true) do {
+        case (_x isNotEqualTo []): {+_x};
+        case (_which == 1): {+(_hsv select 0)};
+        default {["hsv", _plain select _which] call FUNC(hsv)};
+    };
+
+    _at set [2, (_at select 2) min (PALETTE_VALUE_MAX select _which)];
+    _hsv pushBack _at;
+} forEach _picks;
+
 private _rgb = _hsv apply {["rgb", _x] call FUNC(hsv)};
+private _swatch = +_rgb;
 
-private _set = [_accentPick isNotEqualTo [], _secondaryPick isNotEqualTo [], _panelPick isNotEqualTo [], _alphaPick >= 0];
+_swatch set [0, _accentWorn];
+_swatch set [5, _textWorn];
+
+private _set = (_picks apply {_x isNotEqualTo []}) + [_alphaPick >= 0];
 
 createHashMapFromArray [
     ["hsv", _hsv],
     ["rgb", _rgb],
-    ["swatch", [_accentWorn, _rgb select 1, _rgb select 2]],
-    ["alpha", [PANEL_ALPHA, _alphaPick] select (_set select 3)],
+    ["swatch", _swatch],
+    ["alpha", [PANEL_ALPHA, _alphaPick] select (_alphaPick >= 0)],
     ["set", _set],
     ["any", true in _set]
 ]

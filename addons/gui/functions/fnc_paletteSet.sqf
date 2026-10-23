@@ -10,12 +10,14 @@
  *
  * A colour is a hue, a saturation and a value (fnc_hsv): the colour square gives the saturation (across) and the value (down),
  * the strip beside it the hue, the fields the red, green and blue 0 to 255 or the hex code. The picker of one that is still
- * the profile's or the accent's own starts from what the window wears now (fnc_paletteInfo), so the first move changes only
- * that. Nothing happens when the value is what the player had chosen already. The panels' colour is cut dark where it is
- * chosen: its value is at most PALETTE_PANEL_VALUE_MAX (the square shows only that much of the value, fnc_openPaletteMenu), so
- * a typed colour that is lighter comes back as the lightest the panels have, and the fields show it.
+ * the profile's, the accent's or the theme's own starts from what the window wears now (fnc_paletteInfo), so the first move changes
+ * only that. Nothing happens when the value is what the player had chosen already. The surfaces under the text - the panels, the
+ * cells and the tiles - are cut dark where they are chosen: their value is at most PALETTE_PANEL_VALUE_MAX (PALETTE_VALUE_MAX; the
+ * square shows only that much of the value, fnc_openPaletteMenu), so a typed colour that is lighter comes back as the lightest they
+ * have, and the fields show it.
  *
- * Colours are numbered 0 accent, 1 secondary colour, 2 panels.
+ * Colours are numbered 0 accent, 1 secondary colour, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines (PALETTE_IDS); each lies in
+ * einv_gui_palette where PALETTE_SLOTS says (the transparency, at 2, is no colour).
  *
  * Modes:
  *   "alpha"  - the place 0 to 1 along the slider: 0 is opaque, 1 as see-through as PALETTE_ALPHA_MIN allows
@@ -25,8 +27,8 @@
  *   "field"  - [colour, field, text]: what was typed in a field - 0 red, 1 green, 2 blue (0 to 255) or 3 the hex code (3 or 6
  *              digits, # first or not); a text that is none of these is put back, and a colour with no hue (grey) or no
  *              saturation (black) keeps the picker's hue and saturation
- *   "reset"  - "accent" (back to the Arma profile's colour), "secondary" (follows the accent again), "panel" (the themes' own),
- *              "alpha" (the themes' own) or "all"
+ *   "reset"  - "accent" (back to the Arma profile's colour), "secondary" (follows the accent again), "panel", "cells", "tiles",
+ *              "text", "lines", "alpha" (each the theme's own) or "all"
  *
  * Arguments:
  * 0: Mode <STRING>
@@ -43,26 +45,22 @@
 
 params [["_mode", "", [""]], ["_argument", 0]];
 
-// The array is changed in place: it is the one fnc_palette hands a copy of. [accent, secondary, alpha, panel].
+// The array is changed in place: it is the one fnc_palette hands a copy of. [accent, secondary, alpha, panel, cells, tiles, text,
+// lines].
 private _palette = GVAR(palette);
 private _changed = false;
 
-// Where each colour (0 accent, 1 secondary, 2 panels) lies in the palette.
-private _slots = [0, 1, 3];
-
 private _info = [] call FUNC(paletteInfo);
 
-// Puts a colour's hue, saturation and value into the palette: rounded, the panels' value cut. False where it is the choice already.
+// Puts a colour's hue, saturation and value into the palette: rounded, the value cut where the colour is a surface under the text.
+// False where it is the choice already.
 private _fnc_pick = {
     params ["_which", "_hsv"];
 
     _hsv = _hsv apply {(((round (_x * 100000)) / 100000) max 0) min 1};
+    _hsv set [2, (_hsv select 2) min (PALETTE_VALUE_MAX select _which)];
 
-    if (_which == 2) then {
-        _hsv set [2, (_hsv select 2) min PALETTE_PANEL_VALUE_MAX];
-    };
-
-    private _slot = _slots select _which;
+    private _slot = PALETTE_SLOTS select _which;
 
     if (((_info get "set") select _which) && {(_palette select _slot) isEqualTo _hsv}) exitWith {false};
 
@@ -88,7 +86,7 @@ switch (_mode) do {
     case "hue": {
         _argument params [["_which", -1, [0]], ["_place", 0, [0]]];
 
-        if (_which < 0 || {_which > 2}) exitWith {};
+        if (_which < 0 || {_which >= PALETTE_COLOURS}) exitWith {};
 
         // The strip's end is one step short of red again, so that the bottom is not a jump back to the top.
         private _step = (round (((_place max 0) min 1) * PALETTE_HUE_STEPS)) min (PALETTE_HUE_STEPS - 1);
@@ -101,9 +99,9 @@ switch (_mode) do {
     case "square": {
         _argument params [["_which", -1, [0]], ["_across", 0, [0]], ["_down", 0, [0]]];
 
-        if (_which < 0 || {_which > 2}) exitWith {};
+        if (_which < 0 || {_which >= PALETTE_COLOURS}) exitWith {};
 
-        private _valueMax = [1, 1, PALETTE_PANEL_VALUE_MAX] select _which;
+        private _valueMax = PALETTE_VALUE_MAX select _which;
         private _saturation = (round (((_across max 0) min 1) * PALETTE_SV_STEPS)) / PALETTE_SV_STEPS;
         private _value = (round ((1 - ((_down max 0) min 1)) * PALETTE_SV_STEPS)) / PALETTE_SV_STEPS * _valueMax;
         private _hsv = +((_info get "hsv") select _which);
@@ -116,7 +114,7 @@ switch (_mode) do {
     case "field": {
         _argument params [["_which", -1, [0]], ["_field", 0, [0]], ["_text", "", [""]]];
 
-        if (_which < 0 || {_which > 2}) exitWith {};
+        if (_which < 0 || {_which >= PALETTE_COLOURS}) exitWith {};
 
         // What the fields say now: only a different value is a choice (a click into a field and out again is none).
         private _shown = ((_info get "rgb") select _which) apply {round (_x * 255)};
@@ -171,7 +169,7 @@ switch (_mode) do {
 
         _changed = [_which, _hsv] call _fnc_pick;
 
-        // A typed colour the panels cut comes back changed, and one cut to the choice already made changes nothing: either way the
+        // A typed colour a surface cuts comes back changed, and one cut to the choice already made changes nothing: either way the
         // fields show what is.
         if (!_changed) then {
             [] call FUNC(updatePaletteMenu);
@@ -181,18 +179,21 @@ switch (_mode) do {
     case "reset": {
         private _was = +_palette;
 
-        switch (_argument) do {
-            case "accent": {_palette set [0, []]};
-            case "secondary": {_palette set [1, []]};
-            case "alpha": {_palette set [2, -1]};
-            case "panel": {_palette set [3, []]};
-            case "all": {
-                _palette set [0, []];
-                _palette set [1, []];
-                _palette set [2, -1];
-                _palette set [3, []];
+        // Where each choice lies in the palette, by the id of the button that takes it away: the colours' and the transparency's.
+        private _slotOf = createHashMapFromArray [["alpha", 2]];
+
+        {
+            _slotOf set [_x, PALETTE_SLOTS select _forEachIndex];
+        } forEach PALETTE_IDS;
+
+        private _cleared = if (_argument isEqualTo "all") then {values _slotOf} else {[_slotOf getOrDefault [_argument, -1]]};
+
+        // Unset is [] for a colour and -1 for the transparency.
+        {
+            if (_x >= 0) then {
+                _palette set [_x, [[], -1] select (_x == 2)];
             };
-        };
+        } forEach _cleared;
 
         _changed = _was isNotEqualTo _palette;
     };
