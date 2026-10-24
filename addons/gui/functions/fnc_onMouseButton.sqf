@@ -273,7 +273,10 @@ if (_down) exitWith {
             private _grid = (uiNamespace getVariable [QGVAR(grids), []]) select _gridIndex;
             private _tile = (_grid get "tiles") select _tileIndex;
 
-            if (_tile getOrDefault ["hidden", false]) exitWith {};
+            // Not searched yet: searched next in its box (fnc_searchFirst).
+            if (_tile getOrDefault ["hidden", false]) exitWith {
+                [_grid, _tile] call FUNC(searchFirst);
+            };
 
             // An action waiting for the hands (fnc_queueMoves): a click on its tile cancels it.
             if ((_tile getOrDefault ["queued", 0]) > 0) exitWith {

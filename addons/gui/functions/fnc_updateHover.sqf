@@ -633,6 +633,7 @@ switch (_shown param [0, ""]) do {
         if (_tile getOrDefault ["hidden", false]) exitWith {
             [LLSTRING(Hint_Hidden), "text2"] call _fnc_add;
             [[_tile getOrDefault ["w", 1], _tile getOrDefault ["h", 1]] call _fnc_size, "muted"] call _fnc_add;
+            [LLSTRING(Hint_SearchFirst), "accent"] call _fnc_add;
         };
 
         private _class = _tile getOrDefault ["class", ""];

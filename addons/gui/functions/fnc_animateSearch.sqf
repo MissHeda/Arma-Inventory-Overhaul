@@ -120,6 +120,13 @@ if (_done isNotEqualTo []) then {
         ["uncover", _class, _container, false] call FUNC(playSound);
         [_container, _class, 1] call FUNC(learn);
 
+        // The item clicked to be searched first (fnc_searchFirst) is found: the box goes on from the top left.
+        private _record = [_container] call FUNC(searchRecord);
+
+        if ((_record getOrDefault ["first", []]) isEqualTo [_class, _head select 2, _head select 3, _head param [5, 0]]) then {
+            _record deleteAt "first";
+        };
+
         // Drawn anew in place - unless the window is built anyway, which draws it found.
         if (_build || {!([_display, _head] call FUNC(revealTile))}) then {
             _build = true;

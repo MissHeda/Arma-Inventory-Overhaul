@@ -281,17 +281,7 @@ private _madeCount = 0;
 } forEach _jobs;
 
 // What is still to be searched, one container after the other, each from the top left (fnc_build).
-private _containers = [];
-
-{
-    if !((_x select 0) in _containers) then {
-        _containers pushBack (_x select 0);
-    };
-} forEach GVAR(searchQueue);
-
-GVAR(searchQueue) = [GVAR(searchQueue), [], {
-    (_containers find (_x select 0)) * 1e7 + ((_x param [5, 0]) + 1) * 100000 + (_x select 2) * 100 + (_x select 3)
-}, "ASCEND"] call BIS_fnc_sortBy;
+call FUNC(sortSearch);
 
 // What lay over the tiles that went: the moves under way, the selection, the search field's fading.
 call FUNC(drawPending);

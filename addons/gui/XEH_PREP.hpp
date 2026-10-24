@@ -117,6 +117,8 @@ PREP(isSearched);
 PREP(isSealed);
 PREP(searchKind);
 PREP(searchTime);
+PREP(sortSearch);
+PREP(searchFirst);
 PREP(searchRecord);
 PREP(statusWords);
 PREP(setSearchable);

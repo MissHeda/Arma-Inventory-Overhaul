@@ -226,6 +226,9 @@
         <Key ID="STR_einv_gui_Hint_Rotate">
             <English>R: rotate</English>
         </Key>
+        <Key ID="STR_einv_gui_Hint_SearchFirst">
+            <English>Click: search this first</English>
+        </Key>
         <Key ID="STR_einv_gui_Hint_Selected">
             <English>%1 selected - drag them together, double click to move them over, the drop key drops them</English>
         </Key>

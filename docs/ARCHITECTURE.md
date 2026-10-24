@@ -2137,7 +2137,12 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   **Cheap redraws:** `fnc_getSignature` gives a sealed loot section `[number, "sealed"]` instead of its cargo, so a sealed container never
   redraws for what changes in it and its opening changes the part; `fnc_redrawTiles` answers false for a sealed info (`sealed` in
   `sectionInfo`), so that change builds.
-  **What a player knows** (`fnc_searchRecord [container, create]`, a HashMap `known` class -> count of entries, `unsealed`): local, never
+  **Search this first:** a left click on a hidden tile (`fnc_onMouseButton` -> `fnc_searchFirst [grid, tile]`) stores
+  `[class, row, col, block]` as the record's `first`, takes the box out of `searchPaused`/`searchIdle` and sorts the queue again
+  (`fnc_sortSearch`, the one sort `fnc_build` and `fnc_redrawTiles` use: per container its seal, then `first`, then compartment, row,
+  column). The box's run switches to that entry in the next frame; the entry it was at starts again from nothing later.
+  `fnc_animateSearch` deletes `first` when that item is found. The hover card of a hidden tile says "Click: search this first".
+  **What a player knows** (`fnc_searchRecord [container, create]`, a HashMap `known` class -> count of entries, `unsealed`, `first`): local, never
   broadcast - every player searches for himself; the n-th entry of a class is known while n is below the count, counted in the
   arrangement's order so everyone reveals the same top-left ones; what you put in you know (`fnc_afterAction` -> `fnc_learn` +1, -1 for
   what is taken out). A crate, a vehicle or a pile keeps it on the object (`einv_gui_searchRecord`). A uniform, vest or backpack is made

@@ -437,17 +437,7 @@ if ("footer" in GVAR(hooks)) then {
 };
 
 // What is still to be searched, one container after the other, each from the top left.
-private _containers = [];
-
-{
-    if !((_x select 0) in _containers) then {
-        _containers pushBack (_x select 0);
-    };
-} forEach GVAR(searchQueue);
-
-GVAR(searchQueue) = [GVAR(searchQueue), [], {
-    (_containers find (_x select 0)) * 1e7 + ((_x param [5, 0]) + 1) * 100000 + (_x select 2) * 100 + (_x select 3)
-}, "ASCEND"] call BIS_fnc_sortBy;
+call FUNC(sortSearch);
 
 // What is being searched is told in the caption line of its box (fnc_updateStatus, from fnc_drawPending below).
 
