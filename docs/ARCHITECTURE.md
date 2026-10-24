@@ -2142,6 +2142,10 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   (`fnc_sortSearch`, the one sort `fnc_build` and `fnc_redrawTiles` use: per container its seal, then `first`, then compartment, row,
   column). The box's run switches to that entry in the next frame; the entry it was at starts again from nothing later.
   `fnc_animateSearch` deletes `first` when that item is found. The hover card of a hidden tile says "Click: search this first".
+  **The item being searched** (`fnc_searchMarks`, every frame from `fnc_animateSearch`): per run whose entry is an item, an accent
+  outline round its tile and a bar at its foot whose fill is `(now - started) / duration` of the bar's width. `GVAR(searchMarks)`
+  holds `[entry, tile's first control, outline+track controls, fill, full width]`; a mark is made again when its tile's first
+  control is gone (tile redrawn, window built) and deleted when no run is at its entry; `fnc_attach` deletes them all.
   **What a player knows** (`fnc_searchRecord [container, create]`, a HashMap `known` class -> count of entries, `unsealed`, `first`): local, never
   broadcast - every player searches for himself; the n-th entry of a class is known while n is below the count, counted in the
   arrangement's order so everyone reveals the same top-left ones; what you put in you know (`fnc_afterAction` -> `fnc_learn` +1, -1 for

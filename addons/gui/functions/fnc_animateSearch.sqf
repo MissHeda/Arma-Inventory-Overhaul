@@ -90,6 +90,10 @@ if (GVAR(searchDirty) || {!(GVAR(searchQueue) isEqualRef GVAR(searchSynced))}) t
 
 if (GVAR(searchRuns) isEqualTo []) exitWith {
     GVAR(searchStarted) = -1;
+
+    if (GVAR(searchMarks) isNotEqualTo []) then {
+        [_display, _now] call FUNC(searchMarks);
+    };
 };
 
 GVAR(searchStarted) = _now;
@@ -156,6 +160,9 @@ if (_done isNotEqualTo []) then {
         INFO_3("timing: search found %1 item(s) - %2 ms (%3)",_revealCount,_revealTook,_revealHow);
     };
 };
+
+// The item each box is at: an outline and a bar that fills on its tile (fnc_searchMarks).
+[_display, _now] call FUNC(searchMarks);
 
 // Rummaging: a short sound now and then, of what is searched - cloth on a body, things shifting in a crate, a
 // hand on the ground. The speaker in the header mutes it for the looter only (fnc_playSound): the others still

@@ -1,4 +1,5 @@
 #include "..\script_component.hpp"
+#include "..\defines.hpp"
 /*
  * Author: Miss Heda
  * A click on a hidden item: it is searched next in its box, before everything that lies ahead of it - the item
@@ -41,8 +42,12 @@ GVAR(searchIdle) = GVAR(searchIdle) - [_container];
 
 call FUNC(sortSearch);
 
-// The box's run takes the new first entry in the next frame (fnc_animateSearch).
+// The box's run takes the new first entry in the next frame (fnc_animateSearch), whose tile then shows it is searched
+// (fnc_searchMarks); the rummage is heard at once.
 GVAR(searchDirty) = true;
+GVAR(searchSoundAt) = diag_tickTime + SEARCH_SOUND_GAP;
+
+["search", "", _container, true] call FUNC(playSound);
 
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 

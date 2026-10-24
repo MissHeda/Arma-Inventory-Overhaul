@@ -3,9 +3,9 @@
 /*
  * Author: Miss Heda
  * Shows what the palette is set to in the popover under the palette button (fnc_openPaletteMenu), in place: the open picker's
- * cursors, the pure hue under its colour square and its fields (red, green, blue and hex), the transparency slider's knob, fill and
- * value, every row's swatch, and the buttons that take a choice away, which show only while there is one. The rows are found by
- * their ids (PALETTE_IDS, and "alpha" for the transparency). Asked whenever a value changes (fnc_paletteSet), so a picker follows
+ * cursors, the pure hue under its colour square and its fields (red, green, blue and hex), the knob, fill and value of each of the two
+ * transparency sliders (the panels' and the item tiles'), every row's swatch, and the buttons that take a choice away, which show only
+ * while there is one. The rows are found by their ids (PALETTE_IDS, and "alpha" and "tileAlpha" for the transparencies). Asked whenever a value changes (fnc_paletteSet), so a picker follows
  * the mouse without the popover being made again, and by the popover itself when it is made. Nothing happens while it is not open.
  *
  * Arguments:
@@ -30,6 +30,7 @@ private _info = [] call FUNC(paletteInfo);
 private _hsvs = _info get "hsv";
 private _rgbs = _info get "rgb";
 private _alpha = _info get "alpha";
+private _tileAlpha = _info get "tileAlpha";
 
 // ----- The open picker, bound to one colour -----
 private _tab = _rows getOrDefault ["tab", -1];
@@ -74,31 +75,37 @@ if (count _picker > 0 && {_tab >= 0} && {_tab < PALETTE_COLOURS}) then {
     _hexField ctrlSetText _hex;
 };
 
-// ----- The transparency slider -----
-(_rows getOrDefault ["alpha", []]) params [["_thumbs", []], ["_geo", []], ["_valueText", controlNull], ["_fill", controlNull]];
+// ----- The transparency sliders -----
+private _sliders = _rows getOrDefault ["sliders", createHashMap];
 
-if (_thumbs isNotEqualTo []) then {
-    _geo params ["_trackLeft", "_trackTop", "_trackWidth", "_trackHeight", "_thumbW", "_thumbH", "_thumbTop"];
+{
+    _x params ["_id", "_shown"];
 
-    // How far along its track the knob stands, 0 to 1 (an alpha of 1 is 0).
-    private _place = (((1 - _alpha) / (1 - PALETTE_ALPHA_MIN)) max 0) min 1;
-    private _thumbX = _trackLeft + _trackWidth * _place - _thumbW / 2;
+    (_sliders getOrDefault [_id, []]) params [["_thumbs", []], ["_geo", []], ["_valueText", controlNull], ["_fill", controlNull]];
 
-    // The knob is two circles: the dark ring a little larger than the white one.
-    (_thumbs select 0) ctrlSetPosition [_thumbX - pixelW * 2, _thumbTop - pixelH * 2, _thumbW + pixelW * 4, _thumbH + pixelH * 4];
-    (_thumbs select 0) ctrlCommit 0;
-    (_thumbs select 1) ctrlSetPosition [_thumbX, _thumbTop, _thumbW, _thumbH];
-    (_thumbs select 1) ctrlCommit 0;
+    if (_thumbs isNotEqualTo []) then {
+        _geo params ["_trackLeft", "_trackTop", "_trackWidth", "_trackHeight", "_thumbW", "_thumbH", "_thumbTop"];
 
-    _valueText ctrlSetText (str round ((1 - _alpha) * 100) + " %");
+        // How far along its track the knob stands, 0 to 1 (an alpha of 1 is 0, an alpha of PALETTE_ALPHA_MIN - fully see-through - 1).
+        private _place = (((1 - _shown) / (1 - PALETTE_ALPHA_MIN)) max 0) min 1;
+        private _thumbX = _trackLeft + _trackWidth * _place - _thumbW / 2;
 
-    // The fill of the track.
-    _fill ctrlSetPosition [_trackLeft, _trackTop, _trackWidth * _place, _trackHeight];
-    _fill ctrlCommit 0;
-    _fill ctrlShow (_place > 0);
-};
+        // The knob is two circles: the dark ring a little larger than the white one.
+        (_thumbs select 0) ctrlSetPosition [_thumbX - pixelW * 2, _thumbTop - pixelH * 2, _thumbW + pixelW * 4, _thumbH + pixelH * 4];
+        (_thumbs select 0) ctrlCommit 0;
+        (_thumbs select 1) ctrlSetPosition [_thumbX, _thumbTop, _thumbW, _thumbH];
+        (_thumbs select 1) ctrlCommit 0;
 
-// ----- The swatches: each colour as it is set or worn, and the panels as they are with the alpha over a grey -----
+        _valueText ctrlSetText (str round ((1 - _shown) * 100) + " %");
+
+        // The fill of the track.
+        _fill ctrlSetPosition [_trackLeft, _trackTop, _trackWidth * _place, _trackHeight];
+        _fill ctrlCommit 0;
+        _fill ctrlShow (_place > 0);
+    };
+} forEach [["alpha", _alpha], ["tileAlpha", _tileAlpha]];
+
+// ----- The swatches: each colour as it is set or worn, and the panels and the tiles as they are with their alpha over a grey -----
 private _swatches = _rows getOrDefault ["swatches", createHashMap];
 private _worn = _info get "swatch";
 
@@ -107,8 +114,10 @@ private _worn = _info get "swatch";
 } forEach PALETTE_IDS;
 
 [_swatches getOrDefault ["alpha", []], (_worn select 2) + [_alpha]] call FUNC(paintSurface);
+[_swatches getOrDefault ["tileAlpha", []], (_worn select 4) + [_tileAlpha]] call FUNC(paintSurface);
 
-// What can be taken away shows its button: the colours by their number, then the transparency ("set" is in that order).
+// What can be taken away shows its button: the colours by their number, then the panels' and the tiles' transparency ("set" is in
+// that order).
 private _chosen = _info get "set";
 private _chips = _rows getOrDefault ["chips", createHashMap];
 
@@ -116,6 +125,6 @@ private _chips = _rows getOrDefault ["chips", createHashMap];
     private _on = _chosen select _forEachIndex;
 
     {_x ctrlShow _on} forEach (_chips getOrDefault [_x, []]);
-} forEach (PALETTE_IDS + ["alpha"]);
+} forEach (PALETTE_IDS + ["alpha", "tileAlpha"]);
 
 {_x ctrlShow (_info get "any")} forEach (_rows getOrDefault ["resetAll", []]);

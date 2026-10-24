@@ -173,6 +173,8 @@ GVAR(storageRect) = [];
 // they were matched with (a build or a find puts a new one in its place). searchStarted is -1 while no box searches, else
 // the frame of the last step (fnc_onFrame asks it). When the next rustle plays, and the last frame of searching.
 GVAR(searchRuns) = [];
+// The marks on the tiles being searched (fnc_searchMarks).
+GVAR(searchMarks) = [];
 GVAR(searchDirty) = false;
 GVAR(searchSynced) = [];
 GVAR(searchStarted) = -1;
@@ -517,14 +519,16 @@ GVAR(cameraOn) = true;
 GVAR(cameraNext) = nil;
 
 // The player's colours, picked in the popover under the header's palette button (fnc_openPaletteMenu): [accent, secondary, alpha,
-// panel, cells, tiles, text, lines] (fnc_palette) - each colour [hue, saturation, value] (0 to 1) or [] for none, the panels' alpha
-// PALETTE_ALPHA_MIN to 1 or -1 for none. Each player's own, kept in the profile as einv_gui_palette when the popover closes
-// (fnc_paletteSettle); whether the themes use it is the server's to say (einv_gui_playerColours, fnc_paletteAllowed).
+// panel, cells, tiles, text, lines, tile alpha] (fnc_palette) - each colour [hue, saturation, value] (0 to 1) or [] for none, the
+// panels' alpha and the tiles' alpha PALETTE_ALPHA_MIN to 1 or -1 for none. Each player's own, kept in the profile as
+// einv_gui_palette when the popover closes (fnc_paletteSettle); whether the themes use it is the server's to say
+// (einv_gui_playerColours, fnc_paletteAllowed).
 // Anything in the profile that is not that shape is no choice; what the first version of the palette saved - three entries, a
 // colour as [hue, vividness] - still reads (value 1), and so does a palette of four entries from before the cells, tiles, text and
-// lines rows (those unset). An alpha beyond the range is cut to it, and the value of the panels, the cells and the tiles is cut at
-// PALETTE_PANEL_VALUE_MAX as fnc_paletteSet cuts it. einv_gui_paletteDirty says there is something to write, and einv_gui_menuRemake
-// that the menu being closed is only made again (fnc_closeMenu).
+// lines rows (those unset) and a palette of eight entries from before the tiles' own transparency (that one unset). An alpha beyond
+// the range is cut to it, and the value of the panels, the cells and the tiles is cut at PALETTE_PANEL_VALUE_MAX as fnc_paletteSet
+// cuts it. einv_gui_paletteDirty says there is something to write, and einv_gui_menuRemake that the menu being closed is only
+// made again (fnc_closeMenu).
 GVAR(palette) = PALETTE_UNSET;
 GVAR(paletteDirty) = false;
 GVAR(menuRemake) = false;
@@ -534,7 +538,7 @@ private _savedPalette = profileNamespace getVariable [QGVAR(palette), []];
 if (_savedPalette isEqualType [] && {count _savedPalette >= 3} && {count _savedPalette <= count PALETTE_UNSET}) then {
     _savedPalette params [
         "_savedAccent", "_savedSecondary", "_savedAlpha", ["_savedPanel", []],
-        ["_savedCells", []], ["_savedTiles", []], ["_savedText", []], ["_savedLines", []]
+        ["_savedCells", []], ["_savedTiles", []], ["_savedText", []], ["_savedLines", []], ["_savedTileAlpha", -1]
     ];
 
     private _fnc_colour = {
@@ -555,7 +559,8 @@ if (_savedPalette isEqualType [] && {count _savedPalette >= 3} && {count _savedP
         [_savedCells, PALETTE_PANEL_VALUE_MAX] call _fnc_colour,
         [_savedTiles, PALETTE_PANEL_VALUE_MAX] call _fnc_colour,
         [_savedText, 1] call _fnc_colour,
-        [_savedLines, 1] call _fnc_colour
+        [_savedLines, 1] call _fnc_colour,
+        if (_savedTileAlpha isEqualType 0 && {_savedTileAlpha >= 0} && {_savedTileAlpha <= 1}) then {_savedTileAlpha max PALETTE_ALPHA_MIN} else {-1}
     ];
 };
 

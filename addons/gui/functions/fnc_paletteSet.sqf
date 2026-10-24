@@ -17,10 +17,11 @@
  * have, and the fields show it.
  *
  * Colours are numbered 0 accent, 1 secondary colour, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines (PALETTE_IDS); each lies in
- * einv_gui_palette where PALETTE_SLOTS says (the transparency, at 2, is no colour).
+ * einv_gui_palette where PALETTE_SLOTS says (the panels' transparency, at 2, and the tiles', at 8, are no colours).
  *
  * Modes:
- *   "alpha"  - the place 0 to 1 along the slider: 0 is opaque, 1 as see-through as PALETTE_ALPHA_MIN allows
+ *   "alpha"  - the place 0 to 1 along the panels' slider: 0 is opaque, 1 as see-through as PALETTE_ALPHA_MIN allows (all the way)
+ *   "tileAlpha" - the same for the item tiles' slider (the entry at 8)
  *   "hue"    - [colour, place]: the place 0 to 1 down the strip
  *   "square" - [colour, across, down]: 0 to 1 each from the square's top left: saturation from 0 to 1 across, value from its
  *              top (the colour's brightest) to 0 at the bottom
@@ -28,7 +29,7 @@
  *              digits, # first or not); a text that is none of these is put back, and a colour with no hue (grey) or no
  *              saturation (black) keeps the picker's hue and saturation
  *   "reset"  - "accent" (back to the Arma profile's colour), "secondary" (follows the accent again), "panel", "cells", "tiles",
- *              "text", "lines", "alpha" (each the theme's own) or "all"
+ *              "text", "lines", "alpha", "tileAlpha" (each the theme's own) or "all"
  *
  * Arguments:
  * 0: Mode <STRING>
@@ -46,7 +47,7 @@
 params [["_mode", "", [""]], ["_argument", 0]];
 
 // The array is changed in place: it is the one fnc_palette hands a copy of. [accent, secondary, alpha, panel, cells, tiles, text,
-// lines].
+// lines, tile alpha].
 private _palette = GVAR(palette);
 private _changed = false;
 
@@ -80,6 +81,19 @@ switch (_mode) do {
         if ((_palette select 2) isEqualTo _alpha) exitWith {};
 
         _palette set [2, _alpha];
+        _changed = true;
+    };
+
+    // The item tiles' slider: the same steps, kept at 8.
+    case "tileAlpha": {
+        private _place = (_argument max 0) min 1;
+        private _alpha = 1 - (round (_place * (1 - PALETTE_ALPHA_MIN) / PALETTE_ALPHA_STEP)) * PALETTE_ALPHA_STEP;
+
+        _alpha = (round (_alpha * 100)) / 100;
+
+        if ((_palette select 8) isEqualTo _alpha) exitWith {};
+
+        _palette set [8, _alpha];
         _changed = true;
     };
 
@@ -179,8 +193,8 @@ switch (_mode) do {
     case "reset": {
         private _was = +_palette;
 
-        // Where each choice lies in the palette, by the id of the button that takes it away: the colours' and the transparency's.
-        private _slotOf = createHashMapFromArray [["alpha", 2]];
+        // Where each choice lies in the palette, by the id of the button that takes it away: the colours' and the transparencies'.
+        private _slotOf = createHashMapFromArray [["alpha", 2], ["tileAlpha", 8]];
 
         {
             _slotOf set [_x, PALETTE_SLOTS select _forEachIndex];
@@ -188,10 +202,10 @@ switch (_mode) do {
 
         private _cleared = if (_argument isEqualTo "all") then {values _slotOf} else {[_slotOf getOrDefault [_argument, -1]]};
 
-        // Unset is [] for a colour and -1 for the transparency.
+        // Unset is [] for a colour and -1 for a transparency (2 and 8).
         {
             if (_x >= 0) then {
-                _palette set [_x, [[], -1] select (_x == 2)];
+                _palette set [_x, [[], -1] select (_x in [2, 8])];
             };
         } forEach _cleared;
 

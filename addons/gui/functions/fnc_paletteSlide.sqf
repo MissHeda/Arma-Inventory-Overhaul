@@ -3,14 +3,15 @@
 /*
  * Author: Miss Heda
  * Drags a picker of the palette popover (fnc_openPaletteMenu), as fnc_soundSlide drags a volume: the colour square, the hue strip
- * beside it or the transparency slider. A press on one ("begin") sets the value where the mouse is and, for as long as the button
+ * beside it or one of the two transparency sliders (the panels' and the item tiles'). A press on one ("begin") sets the value where the mouse is and, for as long as the button
  * is held, the display's MouseMoving and MouseHolding follow the mouse - along the whole screen, not only over the picker - until
  * the release (MouseButtonUp) takes the three handlers off again. Nothing runs while no picker is held. The place of the mouse in
  * the picker's rectangle, 0 at its left or top edge to 1 at its right or bottom edge and kept inside, goes to fnc_paletteSet,
  * which rounds it to the picker's steps and does nothing when the value is the same. The mouse is read with getMousePosition at
  * the press and at every move, in the space the picker's place is given in.
  *
- *   "alpha"   the transparency slider: the place across (fnc_paletteSet "alpha")
+ *   "alpha"   the panels' transparency slider: the place across (fnc_paletteSet "alpha")
+ *   "tileAlpha"  the item tiles' transparency slider: the place across (fnc_paletteSet "tileAlpha")
  *   "hue"     the strip: the place down (fnc_paletteSet "hue")
  *   "square"  the colour square: the place across and down (fnc_paletteSet "square")
  *
@@ -22,8 +23,8 @@
  * 0: "begin" <STRING>
  * 1: Array of:
  *    0: Display <DISPLAY>
- *    1: Which picker, "alpha", "hue" or "square" <STRING>
- *    2: Which colour, 0 accent, 1 secondary, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines (not read for "alpha") <NUMBER>
+ *    1: Which picker, "alpha", "tileAlpha", "hue" or "square" <STRING>
+ *    2: Which colour, 0 accent, 1 secondary, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines (not read for the sliders) <NUMBER>
  *    3: The picker's place on the screen [left, top, width, height] <ARRAY>
  *
  * Arguments (move, up, end):
@@ -56,6 +57,7 @@ private _fnc_set = {
 
     switch (_kind) do {
         case "alpha": {["alpha", _across] call FUNC(paletteSet)};
+        case "tileAlpha": {["tileAlpha", _across] call FUNC(paletteSet)};
         case "hue": {["hue", [_which, _down]] call FUNC(paletteSet)};
         case "square": {["square", [_which, _across, _down]] call FUNC(paletteSet)};
     };

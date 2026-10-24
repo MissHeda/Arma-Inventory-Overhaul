@@ -511,6 +511,12 @@
         <Key ID="STR_einv_gui_Palette_Text_Tip">
             <English>Captions, names and labels, with their dimmer shades. Lightened where it would be hard to read.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_TileTransparency">
+            <English>Tile transparency</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_TileTransparency_Tip">
+            <English>How see-through the item tiles are. Their tint stays.</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Tiles">
             <English>Tiles</English>
         </Key>
@@ -527,7 +533,7 @@
             <English>Transparency</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Transparency_Tip">
-            <English>How see-through the window's panels are. The cells and tiles stay solid.</English>
+            <English>How see-through the window's panels are, up to fully. The cells and tiles stay solid.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_UseArma">
             <English>Use my Arma colour</English>

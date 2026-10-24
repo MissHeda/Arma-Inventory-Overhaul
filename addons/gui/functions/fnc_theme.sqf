@@ -32,12 +32,14 @@
  *   Panels        panel (its colour), card, tooltipBg,       panel is the colour (fnc_panelColour, kept dark); tooltipBg and inspectBg
  *                 inspectBg                                  are it shifted as far as they lie from the plain panel; card stays a
  *                                                            white film, a step above whatever the panel is
- *   Transparency  panel (its alpha)                          the panels' alpha, nothing else
+ *   Transparency  panel (its alpha)                          the panels' alpha, 1 down to 0 (fully see-through), nothing else
  *   Cells         cell, slot, slotEmpty                      solid: cell is the colour, the slots it shifted as far as they lie from
  *                                                            the plain cell (kept dark)
  *   Tiles         tileBg (all five), raised, tileCountBg     solid: the misc tile is the colour, the other four and the count boxes it
  *                                                            shifted as far as they lie from the plain misc tile (kept dark), so a
  *                                                            weapon keeps its blue hint
+ *   Tile          tileBg (its alpha)                         the tiles' alpha, 1 down to 0 (fully see-through), on all five tiles
+ *   transparency                                             alike; their hints and the count boxes keep their colours and strengths
  *   Text          text, text2, muted, buttonText, keyText,   the colour times the grey each has against the white text (text2 0.78,
  *                 tileCountColor, slotIcon                   muted 0.56, ...): its dimmer shades
  *   Lines         line, panelBorder, slotBorder, tileBorder  the tint of these films as for Secondary; the hatch stripes are drawn
@@ -51,7 +53,9 @@
  * The cells, the slot boxes and the tiles used to be faint films over the panel (a cell is white at 5 %), so they showed the panel
  * through them and took on its colour and its transparency as well. Now, as soon as the panels' colour or transparency is chosen,
  * they are drawn solid in the very colour they have on the plain panel (a film over what lies under it, worked out once below), and
- * a colour chosen for them is solid too: the panels move alone. Without any of these choices they stay the films they were.
+ * a colour chosen for them is solid too: the panels move alone. Without any of these choices they stay the films they were. The
+ * tiles alone can be made see-through on top of that (the tile transparency): they are solid in their colour at the alpha chosen,
+ * so the card and the panel show through them, and 0 % is the solid tile as it is without the choice.
  *
  * Readability: the panels, the cells and the tiles are kept dark (value PALETTE_PANEL_VALUE_MAX at most), and the text keys are
  * lifted - their hue kept, made brighter, then towards white - where they would fall below PALETTE_CONTRAST_TEXT,
@@ -80,7 +84,8 @@ private _accent = [] call FUNC(accentColour);
 // existed reads that row as unset (XEH_preInit), and so do the defaults here.
 ([] call FUNC(palette)) params [
     "", ["_secondaryPick", [], [[]]], ["_alphaPick", -1, [0]], ["_panelPick", [], [[]]],
-    ["_cellsPick", [], [[]]], ["_tilesPick", [], [[]]], ["_textPick", [], [[]]], ["_linesPick", [], [[]]]
+    ["_cellsPick", [], [[]]], ["_tilesPick", [], [[]]], ["_textPick", [], [[]]], ["_linesPick", [], [[]]],
+    ["_tileAlphaPick", -1, [0]]
 ];
 
 private _tint = [];
@@ -272,12 +277,16 @@ if (_cellsPick isNotEqualTo []) then {
     };
 };
 
-// ----- Tiles: the item tiles' backgrounds, solid, and the boxes of their counts -----
+// ----- Tiles: the item tiles' backgrounds, solid (or see-through by the tile transparency), and the boxes of their counts -----
+
+// The alpha of every tile: 1 (solid) unless the player made the tiles see-through. The item-kind hints are in the colours, not the
+// alpha, so a weapon's blue and a medical item's green stay with every alpha.
+private _tileAlpha = [1, (_tileAlphaPick max PALETTE_ALPHA_MIN) min 1] select (_tileAlphaPick >= 0);
 
 if (_tilesPick isNotEqualTo []) then {
     private _tileRgb = [_tilesPick, PALETTE_PANEL_VALUE_MAX] call _fnc_pickRgb;
 
-    _theme set ["tileBg", _plainTiles apply {([_tileRgb, _plainTile, _x] call _fnc_shift) + [1]}];
+    _theme set ["tileBg", _plainTiles apply {([_tileRgb, _plainTile, _x] call _fnc_shift) + [_tileAlpha]}];
 
     // The count boxes lie on the tile: they keep their own strength.
     {
@@ -288,8 +297,8 @@ if (_tilesPick isNotEqualTo []) then {
         };
     } forEach ["raised", "tileCountBg"];
 } else {
-    if (_panelsMoved) then {
-        _theme set ["tileBg", _plainTiles apply {_x + [1]}];
+    if (_panelsMoved || {_tileAlphaPick >= 0}) then {
+        _theme set ["tileBg", _plainTiles apply {_x + [_tileAlpha]}];
     };
 };
 

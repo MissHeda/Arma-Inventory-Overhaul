@@ -119,6 +119,7 @@ PREP(searchKind);
 PREP(searchTime);
 PREP(sortSearch);
 PREP(searchFirst);
+PREP(searchMarks);
 PREP(searchRecord);
 PREP(statusWords);
 PREP(setSearchable);

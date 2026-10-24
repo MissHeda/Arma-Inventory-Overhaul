@@ -76,6 +76,13 @@ GVAR(openedAt) = diag_tickTime;
 // The items being searched start again from now - the window was closed meanwhile.
 GVAR(searchStarted) = -1;
 GVAR(searchRuns) = [];
+
+{
+    {ctrlDelete _x} forEach (_x select 2);
+    ctrlDelete (_x select 3);
+} forEach GVAR(searchMarks);
+
+GVAR(searchMarks) = [];
 GVAR(searchDirty) = true;
 GVAR(sealDragOver) = createHashMap;
 GVAR(opened) = [];

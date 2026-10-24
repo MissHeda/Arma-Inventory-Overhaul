@@ -27,10 +27,11 @@
 #define ACCENT_INK_LIGHT [1, 1, 1, 1]
 
 // The palette (fnc_palette, fnc_openPaletteMenu): what a player may set about the window's colours. The panels' alpha the themes
-// start with is PANEL_ALPHA; a player may make them see-through down to PALETTE_ALPHA_MIN (75 % see-through). A colour is picked as
-// hue, saturation and value (a square of saturation across and value down, a strip of hues beside it, R G B and hex fields): the
-// mouse moves in PALETTE_HUE_STEPS steps along the strip and PALETTE_SV_STEPS along each side of the square, the transparency in
-// steps of PALETTE_ALPHA_STEP; typed values are kept as they are.
+// start with is PANEL_ALPHA; a player may make them see-through down to PALETTE_ALPHA_MIN (0: fully see-through, 100 %), and the
+// item tiles' alpha the same way (the "Tile transparency" slider, the palette's ninth entry). A colour is picked as hue,
+// saturation and value (a square of saturation across and value down, a strip of hues beside it, R G B and hex fields): the
+// mouse moves in PALETTE_HUE_STEPS steps along the strip and PALETTE_SV_STEPS along each side of the square, the transparencies
+// in steps of PALETTE_ALPHA_STEP; typed values are kept as they are.
 // The panels' colour stays dark so that the light text on them stays readable (fnc_panelColour): its value is at most
 // PALETTE_PANEL_VALUE_MAX (a luminance of 0.07 at the very most, 8 : 1 against white), PANEL_COLOR is what it is without a choice.
 // The cells and the tiles are surfaces under text as well and are cut at the same value. The text, its dimmer shades and the inks
@@ -39,7 +40,7 @@
 // until it keeps ACCENT_MIN_CONTRAST against the panel it sits on (fnc_accentColour).
 #define PANEL_ALPHA 0.92
 #define PANEL_COLOR [0.05, 0.05, 0.05]
-#define PALETTE_ALPHA_MIN 0.25
+#define PALETTE_ALPHA_MIN 0
 #define PALETTE_ALPHA_STEP 0.01
 #define PALETTE_HUE_STEPS 360
 #define PALETTE_SV_STEPS 100
@@ -50,13 +51,13 @@
 
 // The palette's colours by number - 0 accent, 1 secondary, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines (fnc_paletteSet,
 // fnc_paletteSlide, fnc_openPaletteMenu): PALETTE_COLOURS of them, each one's id (what its button takes away, fnc_paletteSet
-// "reset"), where it lies in einv_gui_palette (the transparency, at 2, is no colour) and how light it may be - the surfaces under
+// "reset"), where it lies in einv_gui_palette (the transparencies, at 2 and 8, are no colour) and how light it may be - the surfaces under
 // the text (panels, cells, tiles) at most PALETTE_PANEL_VALUE_MAX. PALETTE_UNSET is the palette with nothing chosen.
 #define PALETTE_COLOURS 7
 #define PALETTE_IDS ["accent", "secondary", "panel", "cells", "tiles", "text", "lines"]
 #define PALETTE_SLOTS [0, 1, 3, 4, 5, 6, 7]
 #define PALETTE_VALUE_MAX [1, 1, PALETTE_PANEL_VALUE_MAX, PALETTE_PANEL_VALUE_MAX, PALETTE_PANEL_VALUE_MAX, 1, 1]
-#define PALETTE_UNSET [[], [], -1, [], [], [], [], []]
+#define PALETTE_UNSET [[], [], -1, [], [], [], [], [], -1]
 
 // The vanilla inventory (RscDisplayInventory), which this mod keeps closed (fnc_guardVanilla).
 #define IDD_VANILLA_INVENTORY 602
