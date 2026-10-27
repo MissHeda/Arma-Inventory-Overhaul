@@ -29,6 +29,13 @@
 // Switched off with the rest of the surplus pass: no watch, nothing due.
 if !(missionNamespace getVariable [QGVAR(migrate), true]) exitWith {
     GVAR(sweepDue) = -1;
+
+    // Once in the RPT (issue #23): an overflow tile then stays red, by design.
+    if (GVAR(sweepTrace) isNotEqualTo "off") then {
+        GVAR(sweepTrace) = "off";
+
+        INFO("Overflow sweep: off (setting einv_storage_migrate).");
+    };
 };
 
 private _now = diag_tickTime;

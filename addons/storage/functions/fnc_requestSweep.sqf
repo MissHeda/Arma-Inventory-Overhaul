@@ -111,8 +111,15 @@ GVAR(sweepFresh) = false;
 private _containers = ([_unit] call FUNC(getSections)) apply {_x get "container"};
 
 // What lies on no cell of each (a tile in Strict mode's hidden holder is none of this).
+private _strictOver = [];
 private _over = _containers apply {
     private _all = ([_x, [_x] call FUNC(getContents)] call FUNC(getLayout)) getOrDefault ["overflow", []];
+
+    {
+        if (_x getOrDefault ["strict", false]) then {
+            _strictOver pushBack (_x getOrDefault ["class", ""]);
+        };
+    } forEach _all;
 
     _all select {!(_x getOrDefault ["strict", false])}
 };
@@ -122,7 +129,10 @@ if (_over findIf {_x isNotEqualTo []} < 0) exitWith {
     GVAR(sweepMigrates) = 0;
     GVAR(sweepOverSeen) = "";
     GVAR(sweepSeen) = "";
-    GVAR(sweepTrace) = "";
+
+    // Nothing on no cell as the sweep sees it - while the window may show a red tile (issue #23); Strict mode's
+    // hidden tiles on no cell are not the sweep's and are named.
+    [format ["sees no overflow (%1 worn containers, Strict tiles on no cell %2)", count _containers, _strictOver]] call _fnc_trace;
 
     false
 };
