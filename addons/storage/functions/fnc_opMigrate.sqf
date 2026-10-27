@@ -96,6 +96,11 @@ private _produced = [];
 
         if (_status isEqualTo "") then {
             _moved = _moved + 1;
+        } else {
+            // A cell was planned and the move still failed (issue #23): why, in the RPT.
+            private _class = _item getOrDefault ["class", ""];
+
+            INFO_4("Migrate: %1 from %2 to %3 not moved (%4).",_class,typeOf _from,typeOf _to,_status);
         };
 
         // A move that went wrong hands on what it took out and could not land anywhere: back into the

@@ -47,6 +47,20 @@
 private _unit = player;
 private _now = diag_tickTime;
 
+// One RPT line per new verdict on the player's overflow (issue #23): why a tile on no cell stays where it is. Only
+// written when the verdict or the overflow changed, so a tile that waits a minute leaves one line, not hundreds.
+private _fnc_trace = {
+    params ["_verdict", ["_classes", []]];
+
+    private _line = format ["%1 %2", _verdict, _classes];
+
+    if (_line isNotEqualTo GVAR(sweepTrace)) then {
+        GVAR(sweepTrace) = _line;
+
+        INFO_1("Overflow sweep: %1",_line);
+    };
+};
+
 if (is3DEN || {!hasInterface} || {isNull _unit} || {!alive _unit} || {!(_unit isKindOf "CAManBase")}) exitWith {false};
 
 // Off: nothing is swept, as before.
@@ -54,6 +68,8 @@ if !(missionNamespace getVariable [QGVAR(migrate), true]) exitWith {false};
 
 // A loadout was just set, a unit just arrived: its top-up and its places come first.
 if (_now < GVAR(sweepNotBefore)) exitWith {
+    ["waits for a loadout's top-up"] call _fnc_trace;
+
     [GVAR(sweepNotBefore) - _now] call FUNC(queueSweep);
 
     false
@@ -61,6 +77,8 @@ if (_now < GVAR(sweepNotBefore)) exitWith {
 
 // A pass is still under way (its answer clears this).
 if (GVAR(sweepRunning) > _now) exitWith {
+    ["waits for the last pass"] call _fnc_trace;
+
     [SWEEP_BUSY] call FUNC(queueSweep);
 
     false
@@ -68,6 +86,8 @@ if (GVAR(sweepRunning) > _now) exitWith {
 
 // In the middle of something.
 if ([] call FUNC(sweepBusy)) exitWith {
+    [format ["busy (arsenal %1, window %2)", ARSENAL_OPEN, !isNull (uiNamespace getVariable [QEGVAR(gui,display), displayNull])]] call _fnc_trace;
+
     [SWEEP_BUSY] call FUNC(queueSweep);
 
     false
@@ -77,6 +97,8 @@ if ([] call FUNC(sweepBusy)) exitWith {
 private _held = [_unit] call FUNC(wornHeld);
 
 if (_held > 0 && {!GVAR(sweepFresh)}) exitWith {
+    [format ["held %1 s after a swapped container", round _held]] call _fnc_trace;
+
     [_held + SWEEP_DELAY] call FUNC(queueSweep);
 
     false
@@ -100,6 +122,7 @@ if (_over findIf {_x isNotEqualTo []} < 0) exitWith {
     GVAR(sweepMigrates) = 0;
     GVAR(sweepOverSeen) = "";
     GVAR(sweepSeen) = "";
+    GVAR(sweepTrace) = "";
 
     false
 };
@@ -132,8 +155,12 @@ private _movable = false;
     };
 } forEach ([count _containers, true] call FUNC(migratePasses));
 
+private _classes = _over apply {_x apply {_x getOrDefault ["class", ""]}};
+
 if (_movable && {GVAR(sweepMigrates) < 3}) exitWith {
     GVAR(sweepMigrates) = GVAR(sweepMigrates) + 1;
+
+    [format ["move %1 into another worn container", GVAR(sweepMigrates)], _classes] call _fnc_trace;
 
     [[[_unit, [["migrate", [_unit, true]]]]], {}, [], true, _unit] call FUNC(request);
 
@@ -147,6 +174,8 @@ if (_movable && {GVAR(sweepMigrates) < 3}) exitWith {
 // A pass that put nothing down a moment ago holds back the next one (only this step: moves into a free cell
 // above are never held by it).
 if (_now < GVAR(sweepQuiet)) exitWith {
+    [format ["ground held %1 s, a free cell %2", round (GVAR(sweepQuiet) - _now), _movable], _classes] call _fnc_trace;
+
     [GVAR(sweepQuiet) - _now] call FUNC(queueSweep);
 
     false
@@ -155,6 +184,8 @@ if (_now < GVAR(sweepQuiet)) exitWith {
 // Seated, a drop would go into the vehicle's cargo; with nothing under the feet it would hang in the air; a
 // client whose server has not answered its greeting has nowhere to hand the tile to (fnc_hubReady).
 if (!isNull objectParent _unit || {([_unit] call FUNC(groundPos)) isEqualTo []} || {!([] call FUNC(hubReady))}) exitWith {
+    [format ["ground blocked (seated %1, hub %2)", !isNull objectParent _unit, [] call FUNC(hubReady)], _classes] call _fnc_trace;
+
     GVAR(sweepQuiet) = _now + SWEEP_BLOCKED;
 
     [SWEEP_BLOCKED] call FUNC(queueSweep);
@@ -180,6 +211,8 @@ if (_now >= GVAR(sweepTrusted) && {_print isNotEqualTo GVAR(sweepSeen)}) exitWit
 };
 
 GVAR(sweepSeen) = "";
+
+[format ["onto the ground, a free cell %1", _movable], _classes] call _fnc_trace;
 
 // A few tiles at a time, the unit's own order: uniform, vest, backpack.
 private _takes = [];
@@ -224,6 +257,10 @@ private _id = [[[_unit, _takes], [objNull, _puts]], {
     } forEach _results;
 
     if (_landed isEqualTo []) then {
+        private _statuses = _results apply {_x param [0, ""]};
+
+        INFO_1("Overflow sweep: nothing lay on the ground %1",_statuses);
+
         // Nothing lay down (the server would not, the unit moved on): the next try waits, longer each time.
         GVAR(sweepFails) = GVAR(sweepFails) + 1;
         GVAR(sweepQuiet) = diag_tickTime + ((SWEEP_FAIL * GVAR(sweepFails)) min SWEEP_FAIL_MAX);
