@@ -68,8 +68,10 @@ private _radius = _theme getOrDefault ["radius", 0];
 private _flat = _radius <= 0;
 
 // Captions over the slots take a line of their own above them - room the rows below have to leave.
-private _lineH = UNIT * 0.62;
-private _lineSize = UNIT * 0.46;
+// The words, and the rows and cards that hold them, grow with the tiles (TEXT_UNIT, fnc_textScale), as fnc_drawSlot's.
+private _textUnit = TEXT_UNIT;
+private _lineH = _textUnit * 0.62;
+private _lineSize = _textUnit * 0.46;
 private _capH = [0, _lineH] select ((_theme getOrDefault ["slotCaption", "none"]) isEqualTo "above");
 
 // The same theme with no captions on the slots, for the attachments and the small slots.
@@ -84,8 +86,8 @@ private _gapH = UNIT * 0.25;
 private _gapW = SQUARE(_gapH);
 private _groupGap = UNIT * 0.5;
 private _rowGap = UNIT * 0.4;
-private _statH = UNIT * 2.2;
-private _labelH = UNIT * 0.8;
+private _statH = _textUnit * 2.2;
+private _labelH = _textUnit * 0.8;
 private _gearGap = UNIT * 0.3;
 
 // Square slots: eight small ones across a row, four big gear cards across another. The gear cards take what
@@ -124,7 +126,7 @@ private _fnc_weaponCard = {
     private _empty = _class isEqualTo "";
     private _info = if (_empty) then {createHashMap} else {[_class] call EFUNC(items,getInfo)};
     private _cardRadius = _radius min (_cardH / 4);
-    private _padY = UNIT * 0.22;
+    private _padY = _textUnit * 0.22;
     private _padX = SQUARE(_padY);
 
     [_display, _parent, _cardRect, _theme getOrDefault [["slot", "slotEmpty"] select _empty, [1, 1, 1, 0.035]], _cardRadius] call FUNC(uiPanel);
@@ -139,7 +141,7 @@ private _fnc_weaponCard = {
     private _innerTop = _cardY + _padY;
 
     if (_flat) then {
-        private _stripW = SQUARE(UNIT * 1.05);
+        private _stripW = SQUARE(_textUnit * 1.05);
 
         [_display, _parent, [_cardX, _cardY, _stripW, _cardH], [_colorStrip, _colorAccent] select _inHand] call FUNC(uiPanel);
         [
@@ -177,7 +179,7 @@ private _fnc_weaponCard = {
         [_display, _parent, [_contentX, _cardY + (_cardH - _iconH) / 2, _contentW, _iconH], _icon, _theme getOrDefault ["slotIcon", [1, 1, 1, 0.15]]] call FUNC(uiIcon);
     } else {
         private _nameTop = _cardY + _cardH - _padY * 0.5 - _lineH;
-        private _nameSize = UNIT * 0.5;
+        private _nameSize = _textUnit * 0.5;
         private _name = [[_info getOrDefault ["name", _class], _theme] call FUNC(caption), _contentW, _font, _nameSize] call FUNC(fitText);
 
         // As the rules draw it (icon=): larger, smaller or moved, and cut to the card where it would reach out.
@@ -271,7 +273,7 @@ private _fnc_weaponRow = {
 private _fnc_label = {
     params ["_labelTop", "_text"];
 
-    [_display, _parent, [_left, _labelTop, _width, _labelH], [_text, _theme] call FUNC(caption), UNIT * 0.55, _colorText2, _font, 0] call FUNC(uiLabel);
+    [_display, _parent, [_left, _labelTop, _width, _labelH], [_text, _theme] call FUNC(caption), _textUnit * 0.55, _colorText2, _font, 0] call FUNC(uiLabel);
 };
 
 // ---------------------------------------------------------------------------

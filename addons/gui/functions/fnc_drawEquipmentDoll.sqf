@@ -56,8 +56,10 @@ private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
 private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
 
 // The caption tab as fnc_drawSlot draws it, to know how much of the slot's top it takes.
-private _lineH = UNIT * 0.62;
-private _lineSize = UNIT * 0.46;
+// Grown with the tiles as fnc_drawSlot's (TEXT_UNIT, fnc_textScale).
+private _textUnit = TEXT_UNIT;
+private _lineH = _textUnit * 0.62;
+private _lineSize = _textUnit * 0.46;
 
 // ---------------------------------------------------------------------------
 // Sizes, in whole pixels: the slots are see-through, so their edges and gaps should not shift by a
@@ -199,7 +201,7 @@ private _slots = [
     if (_empty || {!_isWeapon} || {_key isEqualTo "binocular"}) then {continue};
 
     private _info = [_class] call EFUNC(items,getInfo);
-    private _padY = (_slotH * 0.08) min (UNIT * 0.25);
+    private _padY = (_slotH * 0.08) min (_textUnit * 0.25);
     private _padX = SQUARE(_padY);
     private _nameX = _slotX + _padX + ([0, _tabW] select _tab);
     private _room = _slotX + _slotW - _padX - _nameX;
@@ -218,7 +220,7 @@ private _slots = [
 
         // A single rocket or grenade is no count worth showing.
         if (_capacity > 1) then {
-            private _size = UNIT * ([0.8, 0.62] select _compact);
+            private _size = _textUnit * ([0.8, 0.62] select _compact);
             private _boxH = _size * 1.15;
 
             [

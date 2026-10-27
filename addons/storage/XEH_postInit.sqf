@@ -210,6 +210,7 @@ if (hasInterface) then {
         GVAR(sweepSignature) = [];
         GVAR(sweepFails) = 0;
         GVAR(sweepMigrates) = 0;
+        GVAR(sweepOverSeen) = "";
         GVAR(sweepQuiet) = 0;
         GVAR(sweepRunning) = 0;
         GVAR(sweepSeen) = "";

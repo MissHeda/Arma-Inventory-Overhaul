@@ -197,3 +197,4 @@ PREP(hiddenReturn);
 PREP(hiddenDue);
 PREP(hiddenSweep);
 PREP(opStrict);
+PREP(fitRecords);

@@ -66,11 +66,13 @@ if (_choices isEqualTo []) exitWith {};
 
 private _theme = GVAR(theme);
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
-private _size = UNIT * 0.66;
-private _rowH = UNIT * 1.15;
-private _padY = UNIT * 0.2;
-private _padX = SQUARE(UNIT * 0.45);
-private _width = SQUARE(UNIT * 6);
+// Its rows and words grow with the tiles (TEXT_UNIT, fnc_textScale).
+private _textUnit = TEXT_UNIT;
+private _size = _textUnit * 0.66;
+private _rowH = _textUnit * 1.15;
+private _padY = _textUnit * 0.2;
+private _padX = SQUARE(_textUnit * 0.45);
+private _width = SQUARE(_textUnit * 6);
 private _iconH = _rowH * 0.6;
 
 private _fnc_options = {
@@ -81,7 +83,7 @@ private _fnc_options = {
 
 // Room for a picture before every row's text once one row has one, so the texts stay in line.
 private _hasIcons = _choices findIf {((_x call _fnc_options) getOrDefault ["icon", ""]) isNotEqualTo ""} >= 0;
-private _textX = [0, SQUARE(_iconH) + SQUARE(UNIT * 0.3)] select _hasIcons;
+private _textX = [0, SQUARE(_iconH) + SQUARE(_textUnit * 0.3)] select _hasIcons;
 
 {
     _width = _width max (((_x select 0) getTextWidth [_font, _size]) * TEXT_SLACK + _padX * 2 + _textX);

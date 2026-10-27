@@ -5,9 +5,9 @@
  * An item's picture the way its rules ask for it (icon= / einv_icon, "icon" of einv_items_fnc_getInfo, see
  * einv_items_fnc_parseIcon): fitted into its box as fnc_uiPicture fits it, then drawn [scale] times as large
  * about the box's middle and moved by the offsets, which are a share of the tile's width and height. Every
- * tile, slot, card and the dragged ghost draw an item's picture through here. The picture is always upright:
- * a tile that lies turned (R) is given its turned footprint as the box, and the picture is fitted into that
- * as it is, not turned along.
+ * tile, slot, card and the dragged ghost draw an item's picture through here. The picture is upright: a tile
+ * that lies turned (R) is given its turned footprint as the box and gets this as its fallback, with the turned
+ * picture laid over it (fnc_turnPicture); a ghost held turned is fnc_uiPictureTurned's instead.
  *
  * The plain picture (scale 1, nothing moved) is the one control it always was. A picture that is larger or
  * moved never goes out of the rectangle it belongs to: where its image stays inside that rectangle it is

@@ -9,7 +9,7 @@
  *
  * The share is the cell the window really has (fnc_getCell, and fnc_capCell where a window caps it for itself - ACE
  * Arsenal's panel) over the cell at tile scale 1 (CELL_BASE_PX), so whatever caps the tiles caps the words with them.
- * It is never below TEXT_SCALE_MIN - a tile scale under 1 leaves the words as they were - nor above TEXT_SCALE_MAX, and
+ * It is never below TEXT_SCALE_MIN (the tile scale's own floor: the words shrink with the tiles too) nor above TEXT_SCALE_MAX, and
  * never so small that a caption's words (TEXT_REF of a UNIT) are under TEXT_MIN_PX pixels high: on a low resolution
  * the words are the floor's size whatever the tiles are.
  *

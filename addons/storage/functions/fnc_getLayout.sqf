@@ -168,6 +168,20 @@ private _fnc_modeOf = {
     [_blocks select _block, _groupsOf select _index] call FUNC(blockMode)
 };
 
+// Whether a record's box lies inside a compartment that exists. A record outside them - a grid that shrank, a
+// container of another class, a stale record of something long gone - is never used, not even for a single slot,
+// which otherwise takes its tile whole whatever cell the record names (for a slot only its first cell is asked: the
+// size a slot's record carries is the slot's, or an item's own in an older one).
+private _fnc_inBlock = {
+    params ["_block", "_col", "_row", "_w", "_h"];
+
+    if (_block < 0 || {_block >= count _blocks}) exitWith {false};
+
+    (_blocks select _block) params ["_cols", "_rows"];
+
+    _col >= 0 && {_row >= 0} && {_w >= 1} && {_h >= 1} && {_col + _w <= _cols} && {_row + _h <= _rows}
+};
+
 // Whether a single slot has nothing in it yet.
 private _fnc_slotFree = {
     params ["_block"];
@@ -274,7 +288,7 @@ private _seen = createHashMap;
 
             // A compartment that refuses it keeps no record of it; a single slot takes it whole, the record's size aside.
             if (_mode == 1) then {
-                if ([_block] call _fnc_slotFree) then {
+                if ([_block, _col, _row, 1, 1] call _fnc_inBlock && {[_block] call _fnc_slotFree}) then {
                     [_index, _block, 0, 0, 0, 0, 0, true] call _fnc_put;
                     _placed set [_index, true];
                     _used set [_forEachIndex, true];
@@ -341,7 +355,7 @@ if (count _kinOf > 0) then {
 
                     !(_placed select _candidate) && {_mode >= 0} && {
                         if (_slot) then {
-                            [_block] call _fnc_slotFree
+                            [_block, _col, _row, 1, 1] call _fnc_inBlock && {[_block] call _fnc_slotFree}
                         } else {
                             [_entries select _candidate, _w, _h, _rot] call _fnc_sizeFits
                             && {[_block, _col, _row, _w, _h, [_candidate, _rot] call _fnc_holes] call _fnc_isFree}

@@ -71,10 +71,12 @@ private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
 private _colorMuted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _radius = (_theme getOrDefault ["radius", 0]) min (_height / 4);
 
-private _padY = (_height * 0.08) min (UNIT * 0.25);
+// Every word on the slot and the rows that hold them grow with the tiles (TEXT_UNIT, fnc_textScale).
+private _textUnit = TEXT_UNIT;
+private _padY = (_height * 0.08) min (_textUnit * 0.25);
 private _padX = SQUARE(_padY);
-private _lineH = UNIT * 0.62;
-private _lineSize = UNIT * 0.46;
+private _lineH = _textUnit * 0.62;
+private _lineSize = _textUnit * 0.46;
 
 private _controls = [
     _display, _parent, _rect, _theme getOrDefault [["slot", "slotEmpty"] select _empty, [1, 1, 1, 0.035]],
@@ -225,7 +227,7 @@ if (!_empty) then {
 
     if (_badge isEqualType "" && {_badge isNotEqualTo ""}) then {
         _controls pushBack ([
-            _display, _parent, [_left + _padX * 0.5, _top + _padY * 0.5, SQUARE(UNIT * 0.42), UNIT * 0.42], _badge, _colorText2
+            _display, _parent, [_left + _padX * 0.5, _top + _padY * 0.5, SQUARE(_textUnit * 0.42), _textUnit * 0.42], _badge, _colorText2
         ] call FUNC(uiIcon));
     };
 };

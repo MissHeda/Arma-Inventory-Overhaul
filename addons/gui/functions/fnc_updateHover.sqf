@@ -487,13 +487,14 @@ if (!isNull _tooltip) then {
     } else {
         if (_name isNotEqualTo "") then {
             private _font = GVAR(theme) getOrDefault ["font", "PuristaMedium"];
-            private _width = (_name getTextWidth [_font, UNIT * 0.58]) * TEXT_SLACK + SQUARE(UNIT * 0.8);
+            private _textUnit = TEXT_UNIT;
+            private _width = (_name getTextWidth [_font, _textUnit * 0.58]) * TEXT_SLACK + SQUARE(_textUnit * 0.8);
 
             _tooltip ctrlSetText _name;
-            _tooltip ctrlSetPosition [-10, -10, _width, UNIT * 0.85];
+            _tooltip ctrlSetPosition [-10, -10, _width, _textUnit * 0.85];
             _tooltip ctrlCommit 0;
             _tooltip setVariable [QGVAR(width), _width];
-            _tooltip setVariable [QGVAR(height), UNIT * 0.85];
+            _tooltip setVariable [QGVAR(height), _textUnit * 0.85];
         };
 
         _tooltip ctrlShow (_name isNotEqualTo "");

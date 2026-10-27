@@ -73,11 +73,13 @@ for "_i" from _tier + 1 to TIER_CRITICAL do {
     };
 };
 
+// Its words and the rows that hold them grow with the tiles (TEXT_UNIT, fnc_textScale).
+private _textUnit = TEXT_UNIT;
 private _cursor = _top;
-private _statPadY = UNIT * 0.22;
-private _statPadX = SQUARE(UNIT * 0.3);
-private _stripH = UNIT * 0.68;
-private _statBarH = (2 max round (UNIT * 0.2 / pixelH)) * pixelH;
+private _statPadY = _textUnit * 0.22;
+private _statPadX = SQUARE(_textUnit * 0.3);
+private _stripH = _textUnit * 0.68;
+private _statBarH = (2 max round (_textUnit * 0.2 / pixelH)) * pixelH;
 private _statBarY = _cursor + _statH - _statPadY - _statBarH;
 private _statBarW = _width - _statPadX * 2;
 
@@ -91,16 +93,16 @@ if (_flat) then {
 
 [
     _display, _parent, [_left + _statPadX, _cursor, _statBarW, _stripH], [LLSTRING(Stat_Weight), _theme] call FUNC(caption),
-    UNIT * 0.42, _colorText2, _font, 0
+    _textUnit * 0.42, _colorText2, _font, 0
 ] call FUNC(uiLabel);
 
 private _valueY = _cursor + _stripH;
 private _valueH = _statBarY - _valueY;
-private _wordSize = UNIT * 0.46;
+private _wordSize = _textUnit * 0.46;
 
 // The load, and after it where the next tier starts, in kilograms.
 private _valueText = format ["%1 kg", (_mass * MASS_TO_KG) toFixed 1];
-private _valueSize = UNIT * 0.66;
+private _valueSize = _textUnit * 0.66;
 private _valueW = (_valueText getTextWidth [_fontBold, _valueSize]) * TEXT_SLACK;
 private _nextText = "";
 
@@ -119,15 +121,15 @@ private _fnc_width = {
     (_text getTextWidth [_textFont, _textSize]) * TEXT_SLACK
 };
 
-private _nextGap = SQUARE(UNIT * 0.2);
+private _nextGap = SQUARE(_textUnit * 0.2);
 private _nextW = 0;
 
 if (_nextText isNotEqualTo "") then {
-    _nextW = ([_nextText, _font, UNIT * 0.46] call _fnc_width) + _nextGap;
+    _nextW = ([_nextText, _font, _textUnit * 0.46] call _fnc_width) + _nextGap;
 };
 
 private _wordFull = [_word, format [LLSTRING(Tier_Effect), _word, _effect]] select (_effect isNotEqualTo "");
-private _room = _statBarW - _valueW - SQUARE(UNIT * 0.4);
+private _room = _statBarW - _valueW - SQUARE(_textUnit * 0.4);
 private _fullW = [[_wordFull, _theme] call FUNC(caption), _fontBold, _wordSize] call _fnc_width;
 
 if (_nextText isNotEqualTo "" && {_nextW + _fullW > _room}) then {
@@ -148,7 +150,7 @@ private _wordW = [_wordText, _fontBold, _wordSize] call _fnc_width;
 if (_nextText isNotEqualTo "") then {
     [
         _display, _parent, [_left + _statPadX + _valueW + _nextGap, _valueY, _nextW, _valueH],
-        _nextText, UNIT * 0.46, _colorMuted, _font, 0
+        _nextText, _textUnit * 0.46, _colorMuted, _font, 0
     ] call FUNC(uiLabel);
 };
 

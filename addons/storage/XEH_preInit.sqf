@@ -91,6 +91,10 @@ GVAR(sweepWatchAt) = 0;
 GVAR(sweepSeen) = "";
 GVAR(sweepTrusted) = 0;
 
+// The overflow, by class and count, that the asks to move it into another worn container (GVAR(sweepMigrates))
+// were counted for: they start again from 0 when it changed (fnc_requestSweep).
+GVAR(sweepOverSeen) = "";
+
 // While a phase's ops run here: the places they changed, [[holder, records], ...] - written once at the
 // end - and what the ops read of each holder, holder netId or kit key -> HashMap (fnc_execute).
 GVAR(executing) = false;

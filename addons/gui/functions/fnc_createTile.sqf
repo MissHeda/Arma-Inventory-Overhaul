@@ -19,8 +19,9 @@
  * while the player has them on (einv_gui_magazineText).
  *
  * The picture is fitted into the tile with its own shape kept. On a tile that lies turned ("rotated",
- * fnc_getLayout) it is not turned along: it is drawn upright, fitted into the turned footprint like on any
- * other tile (a wide picture is best made square); what is on a weapon shows only on an upright tile. An item whose rules say so (icon=, the
+ * fnc_getLayout) it turns along, a quarter clockwise (issue #24): the upright picture is drawn as the
+ * fallback and a turned one is laid over it on the display (fnc_turnPicture, fnc_syncTurned), shown wherever
+ * the tile shows whole; what is on a weapon shows only on an upright tile. An item whose rules say so (icon=, the
  * "icon" of einv_items_fnc_getInfo) has it drawn larger, smaller or moved and
  * never out of the tile: a picture that would reach out is cut at the tile's edge by a controls group of
  * the tile's size (fnc_uiItemPicture), the one control the picture is then.
@@ -204,11 +205,21 @@ if (_hidden) then {
     // The picture as its rules draw it (icon=): larger, smaller or moved, and cut to the tile where it would
     // reach out - one control as long as it does not. An entry may carry an icon of its own (the setup
     // wizard's preview shows the one being edited, "preview": it has no inventory window to report to).
-    _controls pushBack ([
-        _display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _entry getOrDefault ["picture", _info getOrDefault ["picture", ""]],
-        _entry getOrDefault ["icon", _info getOrDefault ["icon", ICON_PLAIN]], [1, 1, 1, 1],
-        [_left, _top, _width, _height], !(_entry getOrDefault ["preview", false])
-    ] call FUNC(uiItemPicture));
+    private _pictureBox = [_left + _padX, _top + _padY, _innerW, _height - _padY * 2];
+    private _texture = _entry getOrDefault ["picture", _info getOrDefault ["picture", ""]];
+    private _icon = _entry getOrDefault ["icon", _info getOrDefault ["icon", ICON_PLAIN]];
+    private _preview = _entry getOrDefault ["preview", false];
+    private _picture = [
+        _display, _parent, _pictureBox, _texture, _icon, [1, 1, 1, 1], [_left, _top, _width, _height], !_preview
+    ] call FUNC(uiItemPicture);
+
+    _controls pushBack _picture;
+
+    // A tile that lies turned turns its picture along (issue #24): a turned one laid over this upright one, which
+    // stays as the fallback (fnc_turnPicture, fnc_syncTurned). Not in the wizard's preview.
+    if (_entry getOrDefault ["rotated", false] && {!_preview}) then {
+        [_display, _grid, _pictureBox, _texture, _icon, [_left, _top, _width, _height], _picture] call FUNC(turnPicture);
+    };
 
     // A weapon shows what is on it (fnc_drawAttachments).
     private _attachments = _entry getOrDefault ["attachments", []];
@@ -241,7 +252,7 @@ if (_hidden) then {
 
     if (_badge isEqualType "" && {_badge isNotEqualTo ""}) then {
         _controls pushBack ([
-            _display, _parent, [_left + _padX * 0.5, _top + _padY * 0.5, SQUARE(UNIT * 0.42), UNIT * 0.42], _badge,
+            _display, _parent, [_left + _padX * 0.5, _top + _padY * 0.5, SQUARE(TEXT_UNIT * 0.42), TEXT_UNIT * 0.42], _badge,
             _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]
         ] call FUNC(uiIcon));
     };
@@ -250,8 +261,8 @@ if (_hidden) then {
     // cannot be used from here (einv_storage_fnc_useState) - only the player's own gear is ever used from, and
     // only while a setting limits something (one variable read) -, and the crossed eye of one that Strict mode
     // keeps out of the container, in the unit's hidden holder (the entry's "hidden", einv_storage_fnc_opStrict).
-    private _markSize = UNIT * 0.4;
-    private _markX = _left + _padX * 0.5 + ([0, SQUARE(UNIT * 0.42) + _padX * 0.5] select (_badge isEqualType "" && {_badge isNotEqualTo ""}));
+    private _markSize = TEXT_UNIT * 0.4;
+    private _markX = _left + _padX * 0.5 + ([0, SQUARE(TEXT_UNIT * 0.42) + _padX * 0.5] select (_badge isEqualType "" && {_badge isNotEqualTo ""}));
     private _markColor = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
 
     if (

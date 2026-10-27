@@ -453,12 +453,12 @@
 
 // The text scale (fnc_textScale): the window's words grow with its tiles. It is the cell the window really has over the
 // cell at tile scale 1 - after every cap, fnc_getCell's and the Arsenal panel's (fnc_capCell) - never below
-// TEXT_SCALE_MIN, so a small tile scale keeps the words as they were, and never above TEXT_SCALE_MAX. And never so small
+// TEXT_SCALE_MIN (the tile scale's own floor, so the words follow the tiles both ways), and never above TEXT_SCALE_MAX. And never so small
 // that the caption's words (TEXT_REF of a UNIT, the section chips' size) come out under TEXT_MIN_PX pixels: a low
 // resolution gets larger words rather than unreadable ones. TEXT_UNIT is a UNIT grown by it - what every text size and
 // every row that holds words (caption lines, buttons, title rows, key caps) is measured in, so a button stays as high
 // as its words need and fnc_buttonWidth measures the words in the size they are drawn in.
-#define TEXT_SCALE_MIN 1
+#define TEXT_SCALE_MIN CELL_SCALE_MIN
 #define TEXT_SCALE_MAX CELL_SCALE_MAX
 #define TEXT_REF 0.42
 #define TEXT_MIN_PX 12

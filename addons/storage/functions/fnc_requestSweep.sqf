@@ -10,8 +10,8 @@
  * Only the player's own unit: never an AI, a body, a crate or a vehicle - their overflow stays as it is. Not at
  * all with the setting einv_storage_migrate off, and never while the player is in the middle of moving something:
  * an arsenal is open, a tile is dragged or waits in the hands' queue, a move of the window is under way
- * (fnc_sweepBusy), or a worn container was swapped a minute ago (fnc_wornHeld; a new unit's first sweep ignores
- * that). It looks again a moment later instead (fnc_queueSweep), and after the time a loadout needs for its top-up
+ * (fnc_sweepBusy), or a worn container was swapped a minute ago (fnc_wornHeld: only some of them, and only until
+ * something new comes in; a new unit's first sweep ignores that). It looks again a moment later instead (fnc_queueSweep), and after the time a loadout needs for its top-up
  * and its places (fnc_onLoadoutSet).
  *
  * One look per due time: the overflow of the unit's containers (fnc_getLayout), and then, in this order,
@@ -29,7 +29,8 @@
  * not with nothing under the feet (swimming, falling): looked at again SWEEP_BLOCKED seconds later. Nothing goes onto the
  * ground before the same overflow was seen twice running, SWEEP_AGAIN apart (a layout read while places are still
  * arriving can show a tile without a cell that has one). A pass that put nothing down holds the next one back
- * (SWEEP_FAIL seconds, longer each time), so a pile that cannot take it is not tried every second.
+ * (SWEEP_FAIL seconds, longer each time), so a pile that cannot take it is not tried every second - that hold is the
+ * ground's only, a move into a free cell of another worn container still runs at once.
  *
  * Arguments:
  * None
@@ -97,9 +98,20 @@ private _over = _containers apply {
 if (_over findIf {_x isNotEqualTo []} < 0) exitWith {
     GVAR(sweepFails) = 0;
     GVAR(sweepMigrates) = 0;
+    GVAR(sweepOverSeen) = "";
     GVAR(sweepSeen) = "";
 
     false
+};
+
+// What lies on no cell, by class and count: the asks to move it count up while it stays the same, and start again
+// when it changed (something new came in, something left). The count is not reset when the look goes on to the
+// ground, so a move that keeps finding a cell it then cannot take is not asked for again and again for ever.
+private _overPrint = str (_over apply {_x apply {[_x getOrDefault ["class", ""], _x getOrDefault ["count", 1]]}});
+
+if (_overPrint isNotEqualTo GVAR(sweepOverSeen)) then {
+    GVAR(sweepOverSeen) = _overPrint;
+    GVAR(sweepMigrates) = 0;
 };
 
 // ----- 1. Another worn container with a free cell -----
@@ -130,9 +142,15 @@ if (_movable && {GVAR(sweepMigrates) < 3}) exitWith {
     true
 };
 
-GVAR(sweepMigrates) = 0;
-
 // ----- 2. The ground -----
+
+// A pass that put nothing down a moment ago holds back the next one (only this step: moves into a free cell
+// above are never held by it).
+if (_now < GVAR(sweepQuiet)) exitWith {
+    [GVAR(sweepQuiet) - _now] call FUNC(queueSweep);
+
+    false
+};
 
 // Seated, a drop would go into the vehicle's cargo; with nothing under the feet it would hang in the air; a
 // client whose server has not answered its greeting has nowhere to hand the tile to (fnc_hubReady).

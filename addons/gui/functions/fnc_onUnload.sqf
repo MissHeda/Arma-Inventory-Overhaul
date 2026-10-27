@@ -135,6 +135,7 @@ uiNamespace setVariable [QGVAR(hoverHold), []];
 uiNamespace setVariable [QGVAR(inspectGroup), controlNull];
 uiNamespace setVariable [QGVAR(inspectRect), []];
 uiNamespace setVariable [QGVAR(windows), []];
+uiNamespace setVariable [QGVAR(turnedPictures), []];
 uiNamespace setVariable [QGVAR(windowTrash), []];
 uiNamespace setVariable [QGVAR(scrollRestore), []];
 uiNamespace setVariable [QGVAR(keepColumns), createHashMap];

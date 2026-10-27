@@ -144,6 +144,9 @@ if (_restore isNotEqualTo []) then {
     uiNamespace setVariable [QGVAR(scrollRestore), _later];
 };
 
+// The turned pictures of turned tiles lie on the display: they follow their tiles' scroll and windows (fnc_syncTurned).
+[] call FUNC(syncTurned);
+
 private _mouse = getMousePosition;
 private _now = diag_tickTime;
 private _check = _now >= GVAR(nextCheck);

@@ -36,18 +36,20 @@ private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
 private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
 private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 
-private _padX = SQUARE(UNIT * 0.2);
-private _padY = UNIT * 0.25;
-private _nameSize = UNIT * 0.58;
-private _smallSize = UNIT * 0.5;
-private _nameH = UNIT * 0.8;
-private _versusH = UNIT * 0.62;
+// The card and its words grow with the tiles (TEXT_UNIT, fnc_textScale).
+private _textUnit = TEXT_UNIT;
+private _padX = SQUARE(_textUnit * 0.2);
+private _padY = _textUnit * 0.25;
+private _nameSize = _textUnit * 0.58;
+private _smallSize = _textUnit * 0.5;
+private _nameH = _textUnit * 0.8;
+private _versusH = _textUnit * 0.62;
 
 private _name = _compare getOrDefault ["name", ""];
 private _rows = _compare getOrDefault ["rows", []];
 
 // As wide as the standard card, or the name when that is longer.
-private _width = COMPARE_W max (((_name getTextWidth [_fontBold, _nameSize]) * TEXT_SLACK) + _padX * 2);
+private _width = (COMPARE_W * TEXT_SCALE) max (((_name getTextWidth [_fontBold, _nameSize]) * TEXT_SLACK) + _padX * 2);
 private _valueX = _padX + COMPARE_LABEL_W;
 private _diffX = _width - _padX - COMPARE_DIFF_W;
 private _valueW = (_diffX - _valueX) max COMPARE_VALUE_W;

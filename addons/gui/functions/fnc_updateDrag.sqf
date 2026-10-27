@@ -257,6 +257,11 @@ private _ghost = uiNamespace getVariable [QGVAR(dragGhost), controlNull];
 if (([_boxX] call FUNC(isFinite)) && {[_boxY] call FUNC(isFinite)} && {[_offsetX] call FUNC(isFinite)} && {[_offsetY] call FUNC(isFinite)}) then {
     _ghost ctrlSetPosition [_boxX + _offsetX, _boxY + _offsetY];
     _ghost ctrlCommit 0;
+
+    // A picture held turned (fnc_uiPictureTurned) is turned again after the commit.
+    if ((_ghost getVariable [QGVAR(angle), 0]) != 0) then {
+        _ghost ctrlSetAngle [_ghost getVariable [QGVAR(angle), 0], 0.5, 0.5, true];
+    };
 } else {
     if (!("nanNoted" in GVAR(dragRoom))) then {
         GVAR(dragRoom) set ["nanNoted", true];
@@ -291,6 +296,10 @@ private _fnc_moveGhosts = {
 
         _ghostControl ctrlSetPosition [_boxX + _offsetCellsX + _pictureX, _boxY + _offsetCellsY + _pictureY];
         _ghostControl ctrlCommit 0;
+
+        if ((_ghostControl getVariable [QGVAR(angle), 0]) != 0) then {
+            _ghostControl ctrlSetAngle [_ghostControl getVariable [QGVAR(angle), 0], 0.5, 0.5, true];
+        };
 
         _ghostControl ctrlShow true;
     } forEach (uiNamespace getVariable [QGVAR(dragGhosts), []]);

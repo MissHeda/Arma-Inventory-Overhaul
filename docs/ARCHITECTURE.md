@@ -637,7 +637,8 @@ never lands in a compartment that refuses it, on any machine:
   **Placement priority.** Wherever a first fit looks for a spot - the layout, `findSpots` (op put, move, split without an origin) and `fnc_plan` (quick move, take, loadout top-up, migration; its `"start"` compartment still comes first) - the compartments whose `accepts` includes one of the item's categories are looked through before the unrestricted ones (`fnc_blockOrder [blocks, groups, first]` gives the order; a tier is tried upright, then turned, before the next), so magazines fill magazine slots first. A cell asked for, a record and a nearest-spot search (a drop with an origin) are not reordered.
 - **Single slots.** A single slot holds one tile - a stack counts as one - and the tile takes the whole compartment: `fnc_slotOf [block]`
   -> `[0, 0, cols, rows, holes]`. The layout writes the entry with that box, `rotated` false and `"single"` true, and its record is
-  `[key, 0, 0, cols, rows, block, 0]` (a record in a slot is kept for any entry the slot accepts, its own size aside); the slot is
+  `[key, 0, 0, cols, rows, block, 0]` (a record in a slot is kept for any entry the slot accepts, its own size aside - but only when its
+  first cell lies inside the slot: since 0.5.51 a record outside every compartment is never used, not even for a slot); the slot is
   free only while none of its cells is taken, so the ordinary cell logic keeps a second item out. `findSpots` returns a seventh
   element, the spot's holes, and a single slot as `[0, 0, block, cols, rows, 0, holes]`; `opPlaceMany` replaces any cell asked for in a
   slot by the slot's. An item lifted out lies at its own size again: the window reads `"single"` of the entry (`fnc_startDrag`) and
@@ -877,7 +878,9 @@ Never copied, never lost.
     ("wide": `fnc_migratePasses` gives the passes - on first, uniform to vest to backpack, then back, the backpack's and the vest's
     leftovers to the containers before them -, `fnc_plan` picks the cell, a compartment with a slot for the category first), a silent
     request on the unit as root that runs at once on the player's machine; the look is repeated `SWEEP_AGAIN` 0.5 s later, and after three
-    asks in a row that moved nothing the rest goes on. (2) The rest goes onto the ground, but only after the same overflow with the same
+    asks in a row that moved nothing the rest goes on. The asks are counted per overflow (`GVAR(sweepOverSeen)`, its classes and
+    counts): they start again from 0 only when it changed, not when the look went on to the ground - before 0.5.51 they did, so a
+    tile whose move kept failing was asked for three more times on every look and never reached the ground (issue #23). (2) The rest goes onto the ground, but only after the same overflow with the same
     revisions of the three containers' places was seen on two looks `SWEEP_AGAIN` apart (a layout read while places are still arriving -
     a joining player, a loadout - or a move is half done can show a tile without a cell that has one; within `SWEEP_TRUST` 4 s of a pass
     that put something down the next one goes at once): one transaction, phase 0 at the unit a `take` of
@@ -887,12 +890,20 @@ Never copied, never lost.
     lost or copied. The answer teaches the pile to the dropper (`einv_gui_fnc_learn`, only when the window addon is there), so the Ground
     section shows it at once and the item is not "unsearched" to him, says the hint and the RPT line, and looks again when tiles were left.
     A pass that put nothing down holds the next one back `SWEEP_FAIL` 5 s times the failures in a row, at most `SWEEP_FAIL_MAX` 60 s.
+    That hold (`GVAR(sweepQuiet)`, also set while seated) is the ground step's only: `fnc_requestSweep` looks at it just before the
+    ground and `fnc_queueSweep` no longer delays the due time by it, so a move into a free cell of another worn container still runs
+    within a second.
   - *When it waits*: with the setting off it never runs. While `fnc_sweepBusy` - an arsenal is open (`ARSENAL_OPEN`), ACE Arsenal's
     `LOADOUT_QUIET_FRAMES` after a loadout set (`einv_arsenal_loadoutFrame`), a magazine repack, and with the window open a tile pressed or
     dragged (`einv_gui_press`, `dragging`, `stripDrag`), a move of the window in flight (`inFlight`, `answers`) or in the hands' queue
     (`handQueue`) - it looks again `SWEEP_BUSY` 1 s later (the window's variables are not read while it is closed). For
     `SWAP_HOLD` 60 s after a worn container was swapped (`fnc_wornHeld`, the hold `fnc_requestMigrate` has had since 0.5.19, now one function
-    for both) it looks again when the hold ends. Seated (a drop would go into the vehicle's cargo and may bounce), with nothing under the
+    for both) it looks again when the hold ends. The hold starts only for a swap of some containers while another worn one stayed the
+    same object; when every container the unit wears is new (a loadout, ACE Arsenal's `setUnitLoadout` on any pick, a respawn) none
+    starts. It ends early once the unit carries more items or magazines than at the swap (`GVAR(swapCounts)` on the unit): something
+    new came in that was never part of the swap - ACE's unload (`ace_common_fnc_unloadUnitWeapon` -> `CBA_fnc_addMagazine` ->
+    `addMagazine`), ACE's detach (`addItem`), a pick-up. Before 0.5.51 every loadout and every ACE Arsenal session armed the hold, so an
+    unloaded magazine or a detached strobe stayed red for a minute (issue #23). Seated (a drop would go into the vehicle's cargo and may bounce), with nothing under the
     feet (`fnc_groundPos`) or before the server answered the greeting (`fnc_hubReady`) the wide migrate runs and the ground waits
     `SWEEP_BLOCKED` 5 s at a time. After ACE Arsenal closes `einv_arsenal_fnc_onClosed` takes out what does not fit (section 5) first; the
     sweep sees what is left.
@@ -1497,6 +1508,15 @@ title (`fnc_drawHeader`; its buttons keep the header's height), ACE cargo's card
 line (`einv_arsenal_fnc_layout`: `TEXT_UNIT * CAPTION_LINE + UNIT * 0.25`). `fnc_buttonWidth` and `fnc_sortChip` measure with the sizes they are
 handed, so the buttons widen with their labels. The equipment column, the menus, the inspect and comparison cards keep their
 sizes; what lies on a tile goes by the cell already.
+**Since issue #24 (0.5.50) everything follows it:** `TEXT_SCALE_MIN` is `CELL_SCALE_MIN`, so the words shrink with the tiles
+too (still never under `TEXT_MIN_PX`), and the equipment column (`fnc_drawEquipmentCards`: caption lines, the weapon cards' padding,
+number strip and names, the Equipment and hotbar labels, the weight card's row), `fnc_drawSlot` (caption line and size, count box,
+number, badge - so the hotbar's slots of `einv_hotbar_fnc_drawStrip` too), `fnc_drawWeightCard` (all of it), `fnc_drawEquipmentDoll`,
+the tile marks of `fnc_createTile` (window badge, padlock, crossed eye), `fnc_drawInspect` (the whole card, its description's
+structured `size`), `fnc_drawCompare` (the card, `COMPARE_W` times the scale), the name at the mouse (`fnc_makeTooltip`,
+`fnc_updateHover`), the context menu (`fnc_openMenu`) and the drag counter (`fnc_makeGhost`) measure in `TEXT_UNIT`. Left fixed:
+the palette and sound popovers of the header, the search field (it goes by the header's height) and the config `sizeEx` /
+`size` of `RscBase.hpp`, which every label overrides (`fnc_uiLabel` sets the font height; structured text takes `size`).
 
 ### Themes
 
@@ -1748,6 +1768,27 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   the picture's own proportion), so a wide texture is simply small in a tall footprint and item pictures should be square. The
   footprint itself (R, the swapped size, placement, records) is unchanged, and the ghost is drawn exactly as its tile. The
   hotbar and the inspect card draw upright as ever.
+  **Since issue #24 (0.5.50) a turned tile's picture is turned along**, which supersedes the above. `fnc_uiPictureTurned
+  [display, parent, box, texture, colour, icon, clip, share]` makes an `EINV_PictureTurned` (ST_PICTURE 48 without
+  ST_KEEP_ASPECT_RATIO - the keep-aspect fit is worked out on the turned box and was what squashed 0.5.17's) in the texture's
+  own shape (`getTextureInfo`), in whole pixels, fitted so that turned (shown `h` wide and `w` high) it fills the turned box
+  along its longer side, times icon= scale, capped to the clip rectangle, its offsets turned (right -> down, down -> left) and
+  its middle held inside; then `ctrlSetAngle [90, 0.5, 0.5, true]` (the point is a share of the control: its middle) and the
+  angle kept in `einv_gui_angle` so a mover turns it again after each commit (`fnc_updateDrag` for the ghost and the group
+  ghosts). A turned control inside a controls group that is moved or scrolled is drawn in the wrong place, so a **turned
+  tile** (`fnc_createTile`, not the wizard's preview, only on the inventory's display) keeps its upright `fnc_uiItemPicture`
+  as the fallback and `fnc_turnPicture` lays a turned one over it **on the display** (disabled, so the mouse and wheel pass
+  to what is under it), recorded in uiNamespace `einv_gui_turnedPictures` as `[turned, fallback, its picture, its colour,
+  grid parent, middle in the parent's space, state]`. `fnc_syncTurned` (every frame from `fnc_onFrame`, before anything can
+  exit, and once at creation) walks each tile's groups from the top as `fnc_gridOrigin` counts (a pending scroll included)
+  for where its space lies and what the groups show; the turned picture shows only where the fallback is shown with every
+  group, lies wholly inside what they show (half a pixel of give) and under no kit window later in `einv_gui_windows` than the
+  tile's own, inspect card, comparison card or name at the mouse - then it takes the fallback's fade and the fallback's
+  picture goes alpha 0; otherwise it hides and the fallback shows upright. A record whose fallback is gone is dropped and
+  its turned picture deleted (a build's sweep of `einv_gui_created` deletes them anyway). The dragged ghost held turned
+  (`GVAR(dragRot)` 1) and a group ghost of a tile lying turned are `fnc_uiPictureTurned` directly (on the display already).
+  With `einv_gui_debugTiming` on, `fnc_uiPictureTurned` writes one RPT line per texture and box size: texture info, box px,
+  control px before the turn, its position, `ctrlAngle` and whether it was made on the display or in a group.
   **The picture is drawn by the item's `icon`** (`icon=`, `getInfo "icon"`, `fnc_uiItemPicture`): `fnc_createTile` (clip: the
   tile's rectangle, its box for a shaped item; an entry may carry its own `"icon"`, and `"preview"` for the wizard's tile),
   `fnc_makeGhost` (one-item ghost and the group ghosts; clip: the footprint's rectangle), `fnc_drawSlot` (clip: the slot, the
@@ -2377,9 +2418,15 @@ they are **taken out**, not left in or moved on, and the player is asked first.
 
 - **Picking another container** (`fnc_keepPlaces`). ACE goes through `setUnitLoadout`, which makes all three containers new objects with first-fit
   places. `GVAR(kept)` holds `[container, class, records]` per slot (re-read every `KEPT_REFRESH` 0.2 s while the object is the same); when a slot
-  holds a new object of the same class its records are written back with `einv_storage_fnc_writePlaces` (records that no longer match drop out at
-  the next layout). Called from the frame hook, `fnc_snapshot`, `fnc_onItemsChanged` and `fnc_onCargoChanged`, before anything normalizes the new
-  containers. The slot whose class changed is laid out fresh (first fit). A loadout set on ACE's unit (`CBA_loadoutSet`) empties `GVAR(kept)` (the old records are stale for the new contents) and sets `GVAR(loadoutFrame)`, `LOADOUT_QUIET_FRAMES` 4 frames in which `fnc_stageOverflow` moves nothing and asks for `fnc_settle` again.
+  holds a new object - of any class, ACE carries the contents over to the one picked - the records that still fit its grid are written back
+  with `einv_storage_fnc_writePlaces` (records that no longer match the contents drop out at the next layout). Called from the frame hook,
+  `fnc_snapshot`, `fnc_onItemsChanged` and `fnc_onCargoChanged`, before anything normalizes the new containers. Which records fit says
+  `einv_storage_fnc_fitRecords [container, records]`: the compartment exists, the box lies inside it, none of its cells is a hole of the
+  compartment (a shaped item asked with its own holes, `einv_items_fnc_footprintAs`) and it takes no cell an earlier kept record took; a
+  single slot keeps a record whose first cell lies in it while it is empty. So a container of the exact same grid keeps everything, and in
+  another one only what has no room where it lay gets a first fit (before 0.5.51 only the same class kept its records, issue #22). The
+  owner is set on the new object first (`einv_storage_owner`), its compartments depend on it. Changing the insignia does not make new
+  containers (ACE 3.21 calls only `BIS_fnc_setUnitInsignia`); re-picking the uniform, which re-applies it, goes through the path above. A loadout set on ACE's unit (`CBA_loadoutSet`) empties `GVAR(kept)` (the old records are stale for the new contents) and sets `GVAR(loadoutFrame)`, `LOADOUT_QUIET_FRAMES` 4 frames in which `fnc_stageOverflow` moves nothing and asks for `fnc_settle` again.
 - **Overflow to staging** (`fnc_stageOverflow`, in `fnc_settle` before the snapshot): entries with no cell are moved first to another worn container with a free spot (uniform, vest, backpack order), and only what fits none to the staging
   space (`einv_storage_fnc_moveEntry`, `fnc_growStaging` first), ACE told for the open container; what the staging space cannot take stays red.
   `fnc_findOverflow` also lists everything in the staging space, so the close card names it.

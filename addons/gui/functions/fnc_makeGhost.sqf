@@ -4,7 +4,9 @@
  * Author: Miss Heda
  * Makes the picture that follows the mouse while an item is dragged, in the shape it is held in
  * (GVAR(dragSize)) - turned a quarter when it was turned (fnc_rotateDrag) - and the count under its
- * bottom right corner while a stack is held. Made again on every turn; fnc_updateDrag moves them.
+ * bottom right corner while a stack is held. Made again on every turn; fnc_updateDrag moves them. Held turned
+ * (GVAR(dragRot) 1), its picture is turned along (fnc_uiPictureTurned, on the display, where a turned control
+ * lies where it is put); so is the picture of a group's tile that lies turned.
  *
  * Tiles dragged together (GVAR(dragGroup)) have the grabbed tile's picture and a counter of their own
  * ("×6", or how many fit once there is a container under the mouse). When they keep their arrangement
@@ -67,10 +69,13 @@ if (
         private _tileRect = [0, 0, _tileW * _cellW, _tileH * _cellH];
         private _picture = _tileInfo getOrDefault ["picture", ""];
 
-        // As its tile draws it (icon=): a picture that reaches out of its footprint is cut to it by a group.
-        private _ghost = [
-            _display, controlNull, _tileRect, _picture, _tileInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.8], _tileRect
-        ] call FUNC(uiItemPicture);
+        // As its tile draws it (icon=): a picture that reaches out of its footprint is cut to it by a group; a turned
+        // tile's turned along.
+        private _ghost = if (_tile getOrDefault ["rotated", false]) then {
+            [_display, controlNull, _tileRect, _picture, [1, 1, 1, 0.8], _tileInfo getOrDefault ["icon", ICON_PLAIN], _tileRect] call FUNC(uiPictureTurned)
+        } else {
+            [_display, controlNull, _tileRect, _picture, _tileInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.8], _tileRect] call FUNC(uiItemPicture)
+        };
 
         (ctrlPosition _ghost) params ["_ghostX", "_ghostY"];
 
@@ -89,10 +94,12 @@ private _rect = [0, 0, _w * _cellW, _h * _cellH];
 private _picture = _info getOrDefault ["picture", ""];
 
 // As its tile draws it (icon=): a picture that reaches out of its footprint is cut to it by a group, which is
-// the ghost then and has the picture in it (fnc_uiItemPicture). Held turned, it is fitted into the turned box, upright.
-private _ghost = [
-    _display, controlNull, _rect, _picture, _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.8], _rect
-] call FUNC(uiItemPicture);
+// the ghost then and has the picture in it (fnc_uiItemPicture). Held turned, the picture is turned along (issue #24).
+private _ghost = if (GVAR(dragRot) == 1) then {
+    [_display, controlNull, _rect, _picture, [1, 1, 1, 0.8], _info getOrDefault ["icon", ICON_PLAIN], _rect] call FUNC(uiPictureTurned)
+} else {
+    [_display, controlNull, _rect, _picture, _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 0.8], _rect] call FUNC(uiItemPicture)
+};
 
 // Where the picture lies in the box it is moved by.
 (ctrlPosition _ghost) params ["_ghostX", "_ghostY"];
@@ -104,8 +111,10 @@ uiNamespace setVariable [QGVAR(dragGhostOffset), [_ghostX, _ghostY]];
 if ((_entry getOrDefault ["count", 1]) > 1 || {GVAR(dragGroup) isNotEqualTo []}) then {
     // A rounded chip like the footer's key caps: a group, so the mouse moves one control, holding the chip's
     // panel (round corners cannot be a label's background) and the label the text goes to (QGVAR(label)).
-    private _counterW = SQUARE(UNIT * 1.6);
-    private _counterH = UNIT * 0.75;
+    // Grown with the tiles as every word of the window (TEXT_UNIT, fnc_textScale).
+    private _textUnit = TEXT_UNIT;
+    private _counterW = SQUARE(_textUnit * 1.6);
+    private _counterH = _textUnit * 0.75;
     private _theme = GVAR(theme);
     private _radius = [(_theme getOrDefault ["radius", 0]) min (_counterH * 0.3), _counterH / 2] select (_theme getOrDefault ["keyRound", false]);
 
@@ -114,7 +123,7 @@ if ((_entry getOrDefault ["count", 1]) > 1 || {GVAR(dragGroup) isNotEqualTo []})
     [_display, _counter, [0, 0, _counterW, _counterH], [0.05, 0.05, 0.05, 0.95], _radius] call FUNC(uiPanel);
 
     _counter setVariable [QGVAR(label), [
-        _display, _counter, [0, 0, _counterW, _counterH], "", UNIT * 0.55,
+        _display, _counter, [0, 0, _counterW, _counterH], "", _textUnit * 0.55,
         _theme getOrDefault ["accent", [1, 1, 1, 1]], _theme getOrDefault ["fontBold", "PuristaSemibold"], 2
     ] call FUNC(uiLabel)];
 

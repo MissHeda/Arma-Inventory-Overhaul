@@ -132,6 +132,14 @@ class EINV_Picture: EINV_Icon {
     colorText[] = C_WHITE;
 };
 
+// An item's picture turned a quarter (issue #24, fnc_uiPictureTurned): a plain ST_PICTURE that stretches its texture
+// over the control. Keeping the shape (ST_KEEP_ASPECT_RATIO) is worked out on the turned box and squashed the picture;
+// the control is made in the texture's own shape instead, so the stretch changes nothing.
+class EINV_PictureTurned: EINV_Icon {
+    style = 48;
+    colorText[] = C_WHITE;
+};
+
 // ---------------------------------------------------------------------------
 // A button with no look of its own: it only catches the mouse, over a surface, icon and label drawn by
 // the controls under it. Hover and clicks are added at run time (fnc_uiButton), so every look can

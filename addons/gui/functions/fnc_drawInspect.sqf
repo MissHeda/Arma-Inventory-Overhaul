@@ -150,28 +150,30 @@ _rows pushBack [LLSTRING(Inspect_Class), _info getOrDefault ["class", _class]];
 
 // ----- Measures -----
 
-private _width = SQUARE(UNIT * 17);
-private _padY = UNIT * 0.7;
+// The card and its words grow with the tiles (TEXT_UNIT, fnc_textScale).
+private _textUnit = TEXT_UNIT;
+private _width = SQUARE(_textUnit * 17);
+private _padY = _textUnit * 0.7;
 private _padX = SQUARE(_padY);
 private _innerW = _width - _padX * 2;
-private _titleH = UNIT * 1.1;
-private _pictureH = UNIT * 6.5;
-private _rowH = UNIT * 0.8;
-private _gap = UNIT * 0.45;
+private _titleH = _textUnit * 1.1;
+private _pictureH = _textUnit * 6.5;
+private _rowH = _textUnit * 0.8;
+private _gap = _textUnit * 0.45;
 private _closeH = _titleH;
 private _closeW = SQUARE(_closeH);
 
 // The description, measured in a box of the card's width before anything is placed.
 private _description = _info getOrDefault ["description", ""];
 private _descText = parseText format [
-    "<t font='%1' color='%2' size='0.95'>%3</t>", _font, [_colorText2] call _fnc_hex, _description
+    "<t font='%1' color='%2' size='%4'>%3</t>", _font, [_colorText2] call _fnc_hex, _description, (0.95 * TEXT_SCALE) toFixed 3
 ];
 private _descH = 0;
 
 if (_description isNotEqualTo "") then {
     private _probe = [_display, "EINV_StructuredText", controlNull, [0, 0, _innerW, UNIT]] call FUNC(uiCreate);
     _probe ctrlSetStructuredText _descText;
-    _descH = (ctrlTextHeight _probe) min (UNIT * 6);
+    _descH = (ctrlTextHeight _probe) min (_textUnit * 6);
     ctrlDelete _probe;
 };
 
@@ -180,7 +182,7 @@ private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap
     + count _rows * _rowH;
 
 // Where it was put, or the middle of the screen - always whole on it.
-GVAR(inspectPos) params [["_left", safezoneX + (safezoneW - _width) / 2], ["_top", safezoneY + (((safezoneH - _height) / 2) max (UNIT * 2))]];
+GVAR(inspectPos) params [["_left", safezoneX + (safezoneW - _width) / 2], ["_top", safezoneY + (((safezoneH - _height) / 2) max (_textUnit * 2))]];
 
 _left = (_left max safezoneX) min (safezoneX + safezoneW - _width);
 _top = (_top max safezoneY) min ((safezoneY + safezoneH - _height) max safezoneY);
@@ -208,12 +210,12 @@ _categoryColor set [3, 1];
 
 [_display, _group, [_padX, _cursor + _titleH * 0.15, pixelW * 3, _titleH * 0.7], _categoryColor] call FUNC(uiPanel);
 
-private _titleW = _innerW - SQUARE(UNIT * 0.35) - _closeW;
+private _titleW = _innerW - SQUARE(_textUnit * 0.35) - _closeW;
 
 [
-    _display, _group, [_padX + SQUARE(UNIT * 0.35), _cursor, _titleW, _titleH],
-    [[_class] call FUNC(itemName), _titleW, _fontBold, UNIT * 0.8] call FUNC(fitText),
-    UNIT * 0.8, _colorText, _fontBold, 0
+    _display, _group, [_padX + SQUARE(_textUnit * 0.35), _cursor, _titleW, _titleH],
+    [[_class] call FUNC(itemName), _titleW, _fontBold, _textUnit * 0.8] call FUNC(fitText),
+    _textUnit * 0.8, _colorText, _fontBold, 0
 ] call FUNC(uiLabel);
 
 private _grip = [_display, "EINV_Hitbox", _group, [0, 0, _width - _padX - _closeW, _cursor + _titleH]] call FUNC(uiCreate);
@@ -264,12 +266,12 @@ if (_descH > 0) then {
 
     private _rowTop = _cursor + _forEachIndex * _rowH;
 
-    [_display, _group, [_padX, _rowTop, _innerW * 0.4, _rowH], _label, UNIT * 0.58, _muted, _font, 0] call FUNC(uiLabel);
+    [_display, _group, [_padX, _rowTop, _innerW * 0.4, _rowH], _label, _textUnit * 0.58, _muted, _font, 0] call FUNC(uiLabel);
 
     // A number is how full something is: a bar over the first half of the value's room, its text after it.
     if (_value isEqualType 0) then {
         private _barW = _innerW * 0.3;
-        private _barH = (2 max round (UNIT * 0.1 / pixelH)) * pixelH;
+        private _barH = (2 max round (_textUnit * 0.1 / pixelH)) * pixelH;
 
         [
             _display, _group, [_padX + _innerW * 0.4, _rowTop + (_rowH - _barH) / 2, _barW, _barH], _value,
@@ -277,13 +279,13 @@ if (_descH > 0) then {
         ] call FUNC(uiBar);
 
         [
-            _display, _group, [_padX + _innerW * 0.4 + _barW + SQUARE(UNIT * 0.3), _rowTop, _innerW * 0.3 - SQUARE(UNIT * 0.3), _rowH],
-            [_valueText, _innerW * 0.3 - SQUARE(UNIT * 0.3), _font, UNIT * 0.58] call FUNC(fitText), UNIT * 0.58, _colorText, _font, 1
+            _display, _group, [_padX + _innerW * 0.4 + _barW + SQUARE(_textUnit * 0.3), _rowTop, _innerW * 0.3 - SQUARE(_textUnit * 0.3), _rowH],
+            [_valueText, _innerW * 0.3 - SQUARE(_textUnit * 0.3), _font, _textUnit * 0.58] call FUNC(fitText), _textUnit * 0.58, _colorText, _font, 1
         ] call FUNC(uiLabel);
     } else {
         [
             _display, _group, [_padX + _innerW * 0.4, _rowTop, _innerW * 0.6, _rowH],
-            [_value, _innerW * 0.6, _font, UNIT * 0.58] call FUNC(fitText), UNIT * 0.58, _colorText, _font, 1
+            [_value, _innerW * 0.6, _font, _textUnit * 0.58] call FUNC(fitText), _textUnit * 0.58, _colorText, _font, 1
         ] call FUNC(uiLabel);
     };
 } forEach _rows;

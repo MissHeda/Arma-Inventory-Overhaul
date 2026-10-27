@@ -26,7 +26,7 @@ params ["_display"];
 private _theme = GVAR(theme);
 
 private _tooltip = [
-    _display, controlNull, [0, 0, 0, UNIT * 0.85], "", UNIT * 0.58,
+    _display, controlNull, [0, 0, 0, TEXT_UNIT * 0.85], "", TEXT_UNIT * 0.58,
     _theme getOrDefault ["text", [1, 1, 1, 1]], _theme getOrDefault ["font", "PuristaMedium"], 2
 ] call FUNC(uiLabel);
 
