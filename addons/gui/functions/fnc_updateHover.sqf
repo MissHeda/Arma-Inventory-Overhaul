@@ -388,7 +388,7 @@ if (!_force && {_found isEqualTo GVAR(hover)}) exitWith {
     if ((_found param [0, ""]) in ["slot", "tile", "cell"]) then {
         [_found, true] call _fnc_light;
 
-        if (_ringMade) then {
+        if (_ringMade || {(uiNamespace getVariable [QGVAR(turnedPictures), []]) isNotEqualTo []}) then {
             [] call FUNC(raiseTooltip);
         };
     };
@@ -503,8 +503,9 @@ if (!isNull _tooltip) then {
 
     GVAR(tooltipAt) = [];
 
-    // The ring made above lies over the name just set: the name is made again over it.
-    if (_ringMade) then {
+    // The ring made above, or a turned picture (fnc_turnPicture, made on the display), lies over the name just set:
+    // the name is made again over it.
+    if (_ringMade || {(uiNamespace getVariable [QGVAR(turnedPictures), []]) isNotEqualTo []}) then {
         [] call FUNC(raiseTooltip);
     };
 };

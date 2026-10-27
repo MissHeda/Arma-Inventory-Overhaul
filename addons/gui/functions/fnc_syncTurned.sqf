@@ -10,8 +10,10 @@
  *
  * It shows only where its fallback (the upright picture the tile was drawn with) would: shown with every group
  * it lies in, wholly inside what they show (half a pixel of give), and with nothing over it that is drawn over the
- * tile - a kit window above the tile's own (later in GVAR(windows), the order the engine draws them in), the
- * inspect card, the comparison card or the name at the mouse. Then it takes the fallback's fade, and the
+ * tile - a kit window above the tile's own (later in GVAR(windows), the order the engine draws them in) or the
+ * inspect card. The name at the mouse and the comparison card are no cover: they are made again over the turned
+ * pictures (fnc_raiseTooltip), so a hovered tile keeps its turned picture (before 0.5.53 it flipped upright under
+ * the mouse). Then it takes the fallback's fade, and the
  * fallback goes see-through (its colour's alpha 0) - otherwise it is hidden and the fallback shows as it was. A
  * record whose turned picture or fallback is gone is dropped, its turned picture deleted.
  *
@@ -41,13 +43,6 @@ if (_records isEqualTo []) exitWith {};
 
 // What lies over the tiles, as [x0, y0, x1, y1].
 private _covers = [];
-
-{
-    if (!isNull _x && {ctrlShown _x}) then {
-        (ctrlPosition _x) params ["_coverX", "_coverY", "_coverW", "_coverH"];
-        _covers pushBack [_coverX, _coverY, _coverX + _coverW, _coverY + _coverH];
-    };
-} forEach [uiNamespace getVariable [QGVAR(compare), controlNull], uiNamespace getVariable [QGVAR(tooltip), controlNull]];
 
 private _inspect = uiNamespace getVariable [QGVAR(inspectGroup), controlNull];
 
