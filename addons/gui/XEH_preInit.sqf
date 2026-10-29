@@ -512,7 +512,7 @@ GVAR(style) = "main";
 // the range is cut to it, and the value of the panels, the cells and the tiles is cut at PALETTE_PANEL_VALUE_MAX as fnc_paletteSet
 // cuts it. einv_gui_paletteDirty says there is something to write, and einv_gui_menuRemake that the menu being closed is only
 // made again (fnc_closeMenu).
-GVAR(palette) = PALETTE_UNSET;
+GVAR(palette) = +PALETTE_DEFAULT;
 GVAR(paletteDirty) = false;
 GVAR(menuRemake) = false;
 

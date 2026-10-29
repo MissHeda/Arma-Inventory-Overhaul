@@ -34,7 +34,7 @@
  */
 
 if !([] call FUNC(paletteAllowed)) exitWith {
-    PALETTE_UNSET
+    +PALETTE_DEFAULT
 };
 
 +GVAR(palette)

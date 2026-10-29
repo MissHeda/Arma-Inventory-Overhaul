@@ -449,8 +449,8 @@ private _y = _headTop + _titleH + _gapY;
     _fontBold, 0
 ] call FUNC(uiLabel);
 
-// Nothing chosen is the window as it ships: Classic, whichever way it came to be.
-private _styleName = [LLSTRING(Style_Classic), LLSTRING(Style_Custom)] select (_info get "any");
+// The window as it ships (PALETTE_DEFAULT) is Classic, whichever way it came to be.
+private _styleName = [LLSTRING(Style_Custom), LLSTRING(Style_Classic)] select (GVAR(palette) isEqualTo PALETTE_DEFAULT);
 
 {
     if ((_x select 0) isEqualTo (_info get "style")) exitWith {_styleName = _x select 1};
@@ -488,7 +488,7 @@ if (_stylesOpen) then {
     {
         _x params ["_styleId", "_name", "_values"];
 
-        private _current = _styleId isEqualTo (_info get "style") || {_styleId isEqualTo "classic" && {!(_info get "any")}};
+        private _current = _styleId isEqualTo (_info get "style") || {_styleId isEqualTo "classic" && {GVAR(palette) isEqualTo PALETTE_DEFAULT}};
         private _rowTop = _y;
 
         // Its colours as a strip of three: the accent, the panels, and the gradient (or the secondary colour).

@@ -259,10 +259,10 @@ switch (_mode) do {
             {
                 // A copy of a colour; a style's name is a plain string, which has none to make.
                 _palette set [_forEachIndex, if (_x isEqualType []) then {+_x} else {_x}];
-            } forEach PALETTE_UNSET;
+            } forEach PALETTE_DEFAULT;
         } else {
             {
-                private _unset = PALETTE_UNSET select _x;
+                private _unset = PALETTE_DEFAULT select _x;
 
                 _palette set [_x, if (_unset isEqualType []) then {+_unset} else {_unset}];
             } forEach (_rowSlots getOrDefault [_argument, []]);

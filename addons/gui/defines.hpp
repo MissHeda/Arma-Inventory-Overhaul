@@ -61,6 +61,9 @@
 // lines, tiles' alpha, cells' alpha, the titles' gradient end, the style picked last ("" when changed by hand since), the titles'
 // colour, the panels' gradient end, the secondary films' alpha, the lines' alpha]. A row's gradient is on while its end is set.
 #define PALETTE_UNSET [[], [], -1, [], [], [], [], [], -1, -1, [], "", [], [], -1, -1, -1]
+// The window as it ships: nothing chosen but the titles' gradient, from the accent into white (the Classic style). What a new
+// player starts with, what Reset takes things back to, and all there is where players may not pick their colours.
+#define PALETTE_DEFAULT [[], [], -1, [], [], [], [], [], -1, -1, [0, 0, 1], "", [], [], -1, -1, -1]
 // Where each transparency lies in the palette, by its slider's id.
 #define PALETTE_ALPHAS [["alpha", 2], ["cellAlpha", 9], ["tileAlpha", 8], ["secondaryAlpha", 14], ["linesAlpha", 15]]
 

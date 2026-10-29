@@ -143,4 +143,5 @@ private _chips = _rows getOrDefault ["chips", createHashMap];
     ["text", [5]], ["lines", [6, 14]]
 ];
 
-{_x ctrlShow (_info get "any")} forEach (_rows getOrDefault ["resetAll", []]);
+// Reset all only where there is something to take back to the window as it ships.
+{_x ctrlShow (GVAR(palette) isNotEqualTo PALETTE_DEFAULT)} forEach (_rows getOrDefault ["resetAll", []]);
