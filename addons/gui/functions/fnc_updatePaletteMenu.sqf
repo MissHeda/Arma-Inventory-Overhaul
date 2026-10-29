@@ -31,6 +31,7 @@ private _hsvs = _info get "hsv";
 private _rgbs = _info get "rgb";
 private _alpha = _info get "alpha";
 private _tileAlpha = _info get "tileAlpha";
+private _cellAlpha = _info get "cellAlpha";
 
 // ----- The open picker, bound to one colour -----
 private _tab = _rows getOrDefault ["tab", -1];
@@ -103,28 +104,35 @@ private _sliders = _rows getOrDefault ["sliders", createHashMap];
         _fill ctrlCommit 0;
         _fill ctrlShow (_place > 0);
     };
-} forEach [["alpha", _alpha], ["tileAlpha", _tileAlpha]];
+} forEach [["alpha", _alpha], ["cellAlpha", _cellAlpha], ["tileAlpha", _tileAlpha]];
 
-// ----- The swatches: each colour as it is set or worn, and the panels and the tiles as they are with their alpha over a grey -----
+// ----- The swatches: each colour as it is set or worn; the panels, the cells and the tiles with their alpha over a grey -----
 private _swatches = _rows getOrDefault ["swatches", createHashMap];
 private _worn = _info get "swatch";
 
 {
-    [_swatches getOrDefault [_x, []], (_worn select _forEachIndex) + [1]] call FUNC(paintSurface);
-} forEach PALETTE_IDS;
+    _x params ["_id", "_which", "_shownAlpha"];
 
-[_swatches getOrDefault ["alpha", []], (_worn select 2) + [_alpha]] call FUNC(paintSurface);
-[_swatches getOrDefault ["tileAlpha", []], (_worn select 4) + [_tileAlpha]] call FUNC(paintSurface);
+    [_swatches getOrDefault [_id, []], (_worn select _which) + [_shownAlpha]] call FUNC(paintSurface);
+} forEach [
+    ["accent", 0, 1], ["gradient", 7, [0.25, 1] select (_info get "gradient")], ["secondary", 1, 1], ["panel", 2, _alpha],
+    ["cells", 3, _cellAlpha], ["items", 4, _tileAlpha], ["text", 5, 1], ["lines", 6, 1]
+];
 
-// What can be taken away shows its button: the colours by their number, then the panels' and the tiles' transparency ("set" is in
-// that order).
+// What can be taken away shows its button, by row: what each row's button takes back ("set" holds the colours by their number,
+// then the panels', the tiles' and the cells' transparency).
 private _chosen = _info get "set";
 private _chips = _rows getOrDefault ["chips", createHashMap];
 
 {
-    private _on = _chosen select _forEachIndex;
+    _x params ["_id", "_places"];
 
-    {_x ctrlShow _on} forEach (_chips getOrDefault [_x, []]);
-} forEach (PALETTE_IDS + ["alpha", "tileAlpha"]);
+    private _on = (_places findIf {_chosen select _x}) >= 0;
+
+    {_x ctrlShow _on} forEach (_chips getOrDefault [_id, []]);
+} forEach [
+    ["accent", [0]], ["gradient", [7]], ["secondary", [1]], ["panel", [2, 8]], ["cells", [3, 10]], ["items", [9]], ["text", [5]],
+    ["lines", [6]]
+];
 
 {_x ctrlShow (_info get "any")} forEach (_rows getOrDefault ["resetAll", []]);

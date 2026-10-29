@@ -461,16 +461,22 @@
             <English>B</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Cells">
-            <English>Cells</English>
+            <English>Empty cells</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Cells_Tip">
-            <English>The empty grid cells and the slot boxes. Kept dark enough for what lies on them to stay readable.</English>
+            <English>The empty grid cells and the slot boxes, and how see-through they are. Kept dark enough for what lies on them to stay readable.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Channel_Tip">
             <English>0 to 255. Press Return to apply.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Default">
             <English>Default</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Gradient">
+            <English>Text gradient</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Gradient_Tip">
+            <English>Accent texts run from the accent colour into this one, left to right.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Green">
             <English>G</English>
@@ -485,16 +491,19 @@
             <English>Lines</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Lines_Tip">
-            <English>The tint of the hairlines, borders and the stripes of unsearched items.</English>
+            <English>The hairlines, and a frame round the panels, the slot boxes and the item tiles.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_MatchAccent">
             <English>Match accent</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Off">
+            <English>Off</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Panels">
             <English>Panels</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Panels_Tip">
-            <English>The window's background: the panels behind the columns, the header and the footer, and the inspect card and kit windows. The cells and tiles keep their own colours. Kept dark enough for the text to stay readable.</English>
+            <English>The window's background: the panels behind the columns, the header and the footer, and the inspect card and kit windows - and how see-through they are. Kept dark enough for the text to stay readable.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Red">
             <English>R</English>
@@ -508,23 +517,26 @@
         <Key ID="STR_einv_gui_Palette_Secondary_Tip">
             <English>Tints the caption tabs, chips, buttons, what lights under the mouse, bar tracks and picked rows.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Style">
+            <English>Style</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Style_Tip">
+            <English>Ready-made looks to start from. Changing a row afterwards makes it Custom.</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Text">
             <English>Text</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Text_Tip">
             <English>Captions, names and labels, with their dimmer shades. Lightened where it would be hard to read.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_TileTransparency">
-            <English>Tile transparency</English>
-        </Key>
-        <Key ID="STR_einv_gui_Palette_TileTransparency_Tip">
-            <English>How see-through the item tiles are. Their tint stays.</English>
-        </Key>
         <Key ID="STR_einv_gui_Palette_Tiles">
-            <English>Tiles</English>
+            <English>Item tiles</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_TilesNote">
+            <English>Item colours are set per category in the setup (Categories).</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Tiles_Tip">
-            <English>The background of the item tiles. Weapons, ammunition, gear and medical keep a hint of their own tint.</English>
+            <English>How see-through the item tiles are. Their colours come from the setup, per category.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Title">
             <English>Colours</English>
@@ -534,9 +546,6 @@
         </Key>
         <Key ID="STR_einv_gui_Palette_Transparency">
             <English>Transparency</English>
-        </Key>
-        <Key ID="STR_einv_gui_Palette_Transparency_Tip">
-            <English>How see-through the window's panels are, up to fully. The cells and tiles stay solid.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_UseArma">
             <English>Use my Arma colour</English>
@@ -984,6 +993,27 @@ Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Storage_Empty">
             <English>No uniform, vest or backpack</English>
+        </Key>
+        <Key ID="STR_einv_gui_Style_Classic">
+            <English>Classic</English>
+        </Key>
+        <Key ID="STR_einv_gui_Style_Custom">
+            <English>Custom</English>
+        </Key>
+        <Key ID="STR_einv_gui_Style_Modern">
+            <English>Modern</English>
+        </Key>
+        <Key ID="STR_einv_gui_Style_ModernGradient">
+            <English>Modern gradient</English>
+        </Key>
+        <Key ID="STR_einv_gui_Style_Neon">
+            <English>Neon</English>
+        </Key>
+        <Key ID="STR_einv_gui_Style_Night">
+            <English>Night (OLED)</English>
+        </Key>
+        <Key ID="STR_einv_gui_Style_Tactical">
+            <English>Tactical</English>
         </Key>
         <Key ID="STR_einv_gui_SubCategory_General">
             <English>General</English>

@@ -41,7 +41,7 @@
 GVAR(palette) params [
     ["_accentPick", [], [[]]], ["_secondaryPick", [], [[]]], ["_alphaPick", -1, [0]], ["_panelPick", [], [[]]],
     ["_cellsPick", [], [[]]], ["_tilesPick", [], [[]]], ["_textPick", [], [[]]], ["_linesPick", [], [[]]],
-    ["_tileAlphaPick", -1, [0]]
+    ["_tileAlphaPick", -1, [0]], ["_cellAlphaPick", -1, [0]], ["_gradientPick", [], [[]]], ["_style", "", [""]]
 ];
 
 private _theme = missionNamespace getVariable [QGVAR(theme), createHashMap];
@@ -85,10 +85,11 @@ private _plain = [
     [_theme getOrDefault ["cell", []], _cardSeen] call _fnc_seen,
     [_tileWorn, _cardSeen] call _fnc_seen,
     _textWorn,
-    (_theme getOrDefault ["line", [1, 1, 1, 1]]) select [0, 3]
+    (_theme getOrDefault ["line", [1, 1, 1, 1]]) select [0, 3],
+    _accentWorn
 ];
 
-private _picks = [_accentPick, _secondaryPick, _panelPick, _cellsPick, _tilesPick, _textPick, _linesPick];
+private _picks = [_accentPick, _secondaryPick, _panelPick, _cellsPick, [], _textPick, _linesPick, _gradientPick];
 private _hsv = [];
 
 {
@@ -96,6 +97,8 @@ private _hsv = [];
     private _at = switch (true) do {
         case (_x isNotEqualTo []): {+_x};
         case (_which == 1): {+(_hsv select 0)};
+        // The gradient starts as the accent turned a sixth round, so the first move of its picker already shows two colours.
+        case (_which == 7): {private _turned = +(_hsv select 0); _turned set [0, ((_turned select 0) + 1 / 6) mod 1]; _turned};
         default {["hsv", _plain select _which] call FUNC(hsv)};
     };
 
@@ -109,7 +112,8 @@ private _swatch = +_rgb;
 _swatch set [0, _accentWorn];
 _swatch set [5, _textWorn];
 
-private _set = (_picks apply {_x isNotEqualTo []}) + [_alphaPick >= 0, _tileAlphaPick >= 0];
+// What is chosen: the colours by their number, then the panels', the tiles' and the cells' transparency.
+private _set = (_picks apply {_x isNotEqualTo []}) + [_alphaPick >= 0, _tileAlphaPick >= 0, _cellAlphaPick >= 0];
 
 createHashMapFromArray [
     ["hsv", _hsv],
@@ -117,6 +121,9 @@ createHashMapFromArray [
     ["swatch", _swatch],
     ["alpha", [PANEL_ALPHA, _alphaPick] select (_alphaPick >= 0)],
     ["tileAlpha", [1, _tileAlphaPick] select (_tileAlphaPick >= 0)],
+    ["cellAlpha", [1, _cellAlphaPick] select (_cellAlphaPick >= 0)],
+    ["gradient", _gradientPick isNotEqualTo []],
+    ["style", _style],
     ["set", _set],
     ["any", true in _set]
 ]

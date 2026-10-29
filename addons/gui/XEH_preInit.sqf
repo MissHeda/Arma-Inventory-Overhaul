@@ -521,7 +521,8 @@ private _savedPalette = profileNamespace getVariable [QGVAR(palette), []];
 if (_savedPalette isEqualType [] && {count _savedPalette >= 3} && {count _savedPalette <= count PALETTE_UNSET}) then {
     _savedPalette params [
         "_savedAccent", "_savedSecondary", "_savedAlpha", ["_savedPanel", []],
-        ["_savedCells", []], ["_savedTiles", []], ["_savedText", []], ["_savedLines", []], ["_savedTileAlpha", -1]
+        ["_savedCells", []], ["_savedTiles", []], ["_savedText", []], ["_savedLines", []], ["_savedTileAlpha", -1],
+        ["_savedCellAlpha", -1], ["_savedGradient", []], ["_savedStyle", ""]
     ];
 
     private _fnc_colour = {
@@ -543,7 +544,10 @@ if (_savedPalette isEqualType [] && {count _savedPalette >= 3} && {count _savedP
         [_savedTiles, PALETTE_PANEL_VALUE_MAX] call _fnc_colour,
         [_savedText, 1] call _fnc_colour,
         [_savedLines, 1] call _fnc_colour,
-        if (_savedTileAlpha isEqualType 0 && {_savedTileAlpha >= 0} && {_savedTileAlpha <= 1}) then {_savedTileAlpha max PALETTE_ALPHA_MIN} else {-1}
+        if (_savedTileAlpha isEqualType 0 && {_savedTileAlpha >= 0} && {_savedTileAlpha <= 1}) then {_savedTileAlpha max PALETTE_ALPHA_MIN} else {-1},
+        if (_savedCellAlpha isEqualType 0 && {_savedCellAlpha >= 0} && {_savedCellAlpha <= 1}) then {_savedCellAlpha max PALETTE_ALPHA_MIN} else {-1},
+        [_savedGradient, 1] call _fnc_colour,
+        ["", _savedStyle] select (_savedStyle isEqualType "")
     ];
 };
 

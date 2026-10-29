@@ -56,8 +56,9 @@ private _fnc_set = {
     private _down = (((_mouseY - _top) / (_height max pixelH)) max 0) min 1;
 
     switch (_kind) do {
-        case "alpha": {["alpha", _across] call FUNC(paletteSet)};
-        case "tileAlpha": {["tileAlpha", _across] call FUNC(paletteSet)};
+        case "alpha";
+        case "cellAlpha";
+        case "tileAlpha": {[_kind, _across] call FUNC(paletteSet)};
         case "hue": {["hue", [_which, _down]] call FUNC(paletteSet)};
         case "square": {["square", [_which, _across, _down]] call FUNC(paletteSet)};
     };

@@ -53,11 +53,15 @@
 // fnc_paletteSlide, fnc_openPaletteMenu): PALETTE_COLOURS of them, each one's id (what its button takes away, fnc_paletteSet
 // "reset"), where it lies in einv_gui_palette (the transparencies, at 2 and 8, are no colour) and how light it may be - the surfaces under
 // the text (panels, cells, tiles) at most PALETTE_PANEL_VALUE_MAX. PALETTE_UNSET is the palette with nothing chosen.
-#define PALETTE_COLOURS 7
-#define PALETTE_IDS ["accent", "secondary", "panel", "cells", "tiles", "text", "lines"]
-#define PALETTE_SLOTS [0, 1, 3, 4, 5, 6, 7]
-#define PALETTE_VALUE_MAX [1, 1, PALETTE_PANEL_VALUE_MAX, PALETTE_PANEL_VALUE_MAX, PALETTE_PANEL_VALUE_MAX, 1, 1]
-#define PALETTE_UNSET [[], [], -1, [], [], [], [], [], -1]
+#define PALETTE_COLOURS 8
+#define PALETTE_IDS ["accent", "secondary", "panel", "cells", "tiles", "text", "lines", "gradient"]
+#define PALETTE_SLOTS [0, 1, 3, 4, 5, 6, 7, 10]
+#define PALETTE_VALUE_MAX [1, 1, PALETTE_PANEL_VALUE_MAX, PALETTE_PANEL_VALUE_MAX, PALETTE_PANEL_VALUE_MAX, 1, 1, 1]
+// [accent, secondary, panels' alpha, panels, cells, tiles (no longer offered: the setup colours the tiles by category), text,
+// lines, tiles' alpha, cells' alpha, the gradient's end colour, the style picked last ("" when changed by hand since)].
+#define PALETTE_UNSET [[], [], -1, [], [], [], [], [], -1, -1, [], ""]
+// Where each transparency lies in the palette, by its slider's id.
+#define PALETTE_ALPHAS [["alpha", 2], ["cellAlpha", 9], ["tileAlpha", 8]]
 
 // The vanilla inventory (RscDisplayInventory), which this mod keeps closed (fnc_guardVanilla).
 #define IDD_VANILLA_INVENTORY 602

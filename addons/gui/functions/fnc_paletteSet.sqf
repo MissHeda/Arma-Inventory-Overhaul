@@ -46,8 +46,7 @@
 
 params [["_mode", "", [""]], ["_argument", 0]];
 
-// The array is changed in place: it is the one fnc_palette hands a copy of. [accent, secondary, alpha, panel, cells, tiles, text,
-// lines, tile alpha].
+// The array is changed in place: it is the one fnc_palette hands a copy of (PALETTE_UNSET says what lies where).
 private _palette = GVAR(palette);
 private _changed = false;
 
@@ -70,31 +69,51 @@ private _fnc_pick = {
     true
 };
 
+// Grown from an older save: every place there is now.
+while {count _palette < count PALETTE_UNSET} do {
+    _palette pushBack (PALETTE_UNSET select (count _palette));
+};
+
+// The places the rows' "Default" buttons take back, by row id: a row with a slider takes its transparency with its colour.
+private _rowSlots = createHashMapFromArray [
+    ["accent", [0]], ["secondary", [1]], ["panel", [3, 2]], ["cells", [4, 9]], ["items", [8]], ["text", [6]], ["lines", [7]],
+    ["gradient", [10]]
+];
+
 switch (_mode) do {
-    case "alpha": {
+    // A transparency's slider: the panels', the cells' or the tiles'.
+    case "alpha";
+    case "cellAlpha";
+    case "tileAlpha": {
+        private _slot = (createHashMapFromArray PALETTE_ALPHAS) get _mode;
         private _place = (_argument max 0) min 1;
         private _alpha = 1 - (round (_place * (1 - PALETTE_ALPHA_MIN) / PALETTE_ALPHA_STEP)) * PALETTE_ALPHA_STEP;
 
         // Two decimals: the sum above leaves dust.
         _alpha = (round (_alpha * 100)) / 100;
 
-        if ((_palette select 2) isEqualTo _alpha) exitWith {};
+        if ((_palette select _slot) isEqualTo _alpha) exitWith {};
 
-        _palette set [2, _alpha];
+        _palette set [_slot, _alpha];
         _changed = true;
     };
 
-    // The item tiles' slider: the same steps, kept at 8.
-    case "tileAlpha": {
-        private _place = (_argument max 0) min 1;
-        private _alpha = 1 - (round (_place * (1 - PALETTE_ALPHA_MIN) / PALETTE_ALPHA_STEP)) * PALETTE_ALPHA_STEP;
+    // A style of the dropdown (fnc_paletteStyles): every place as the style says, and its id kept.
+    case "style": {
+        private _style = ([] call FUNC(paletteStyles)) select {(_x select 0) isEqualTo _argument};
 
-        _alpha = (round (_alpha * 100)) / 100;
+        if (_style isEqualTo []) exitWith {};
 
-        if ((_palette select 8) isEqualTo _alpha) exitWith {};
+        private _was = +_palette;
+        private _values = +((_style select 0) select 2);
 
-        _palette set [8, _alpha];
-        _changed = true;
+        _values set [11, _argument];
+
+        {
+            _palette set [_forEachIndex, _x];
+        } forEach _values;
+
+        _changed = _was isNotEqualTo _palette;
     };
 
     case "hue": {
@@ -193,24 +212,24 @@ switch (_mode) do {
     case "reset": {
         private _was = +_palette;
 
-        // Where each choice lies in the palette, by the id of the button that takes it away: the colours' and the transparencies'.
-        private _slotOf = createHashMapFromArray [["alpha", 2], ["tileAlpha", 8]];
-
-        {
-            _slotOf set [_x, PALETTE_SLOTS select _forEachIndex];
-        } forEach PALETTE_IDS;
-
-        private _cleared = if (_argument isEqualTo "all") then {values _slotOf} else {[_slotOf getOrDefault [_argument, -1]]};
-
-        // Unset is [] for a colour and -1 for a transparency (2 and 8).
-        {
-            if (_x >= 0) then {
-                _palette set [_x, [[], -1] select (_x in [2, 8])];
-            };
-        } forEach _cleared;
+        // Everything, or the places of one row.
+        if (_argument isEqualTo "all") then {
+            {
+                _palette set [_forEachIndex, +_x];
+            } forEach PALETTE_UNSET;
+        } else {
+            {
+                _palette set [_x, +(PALETTE_UNSET select _x)];
+            } forEach (_rowSlots getOrDefault [_argument, []]);
+        };
 
         _changed = _was isNotEqualTo _palette;
     };
+};
+
+// Changed by hand: no longer the style picked last (the dropdown says "Custom").
+if (_changed && {_mode isNotEqualTo "style"} && {!(_mode isEqualTo "reset" && {_argument isEqualTo "all"})}) then {
+    _palette set [11, ""];
 };
 
 if (!_changed) exitWith {};

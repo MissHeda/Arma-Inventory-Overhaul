@@ -3,38 +3,31 @@
 /*
  * Author: Miss Heda
  * Opens the palette popover under the palette button in the header: a small card where the player picks the window's colours
- * and transparency, live, element by element. A row for each - its name (a tooltip says what it sets), a swatch of what is set and a
- * small button that takes the choice away - and one shared picker, open under the row it is bound to: a click on a colour's row,
- * its swatch or its arrow binds the picker to that colour and moves it under that row, a click on the row it is open under folds
- * it. Which theme key follows which row is the table at the top of fnc_theme:
+ * and transparency, live. Top to bottom:
+ *   Style         a dropdown of ready-made looks (fnc_paletteStyles: Classic, Modern, Modern gradient, Tactical, Night, Neon); it
+ *                 says "Custom" once a row was changed by hand. Its list opens under it, a swatch strip of each style beside its name.
  *   Accent        "Use my Arma colour" goes back to the colour of Options > Game > Colors
+ *   Text gradient the colour the accent's texts run into, left to right, as Discord's gradient names (fnc_uiLabel); "Off" ends it
  *   Secondary     "Match accent" goes back to the themes' own films (caption tabs, buttons, bar tracks, picked rows)
- *   Panels        the window's background; "Default" goes back to the near-black, and the colour is kept dark so the text stays
- *                 readable (PALETTE_PANEL_VALUE_MAX, fnc_panelColour)
- *   Transparency  how see-through the panels are, 0 % up to 100 % (PALETTE_ALPHA_MIN), with its slider under the row
- *   Cells         the empty grid cells and the slot boxes, kept dark as the panels are
- *   Tiles         the item tiles' background, kept dark as the panels are
- *   Tile          how see-through the item tiles are, 0 % up to 100 %, with its slider under the row (the one after Tiles; the
- *   transparency  tiles' hints stay)
+ *   Panels        the window's background, kept dark so the text stays readable, with its transparency
+ *   Empty cells   the empty grid cells and the slot boxes, kept dark, with their transparency
+ *   Item tiles    their transparency only: their colours are the setup's, by category (Categories card, fnc_tileColour)
  *   Text          captions, names and labels with their dimmer shades
- *   Lines         the tint of the hairlines and borders
- * Every row but Accent and Secondary goes back with "Default", and "Reset all" in the title row takes every choice away. The
- * buttons show only while there is a choice to take away. The rows are a little lower than a header's (and the picker a little
- * smaller), so the card stays at most about 19 UNIT tall with the picker open and both sliders in - under half the screen, the whole
- * of it on the screen under the header at any size - and needs neither a scroll nor a second column.
+ *   Lines         the hairlines and a frame round the panels, the slot boxes and the tiles
+ * Every row is folded to one line - name, swatch, its button back to the default - and opens on a click: its picker and its slider
+ * under it, one row open at a time. Folding it (a click on the open row) hides all of it, the slider too. "Reset all" in the title
+ * row takes every choice away. The buttons show only while there is a choice to take away.
  *
- * The picker is the kind that painting programs and Advanced Developer Tools' colour window have: a colour square (the saturation
- * across, from white to the full colour, and the value down, from the colour to black; a pure-hue rectangle with a white fade and a
- * black fade over it, fnc_paletteSet "square"), a strip of hues beside it, and fields for red, green and blue (0 to 255) and the
- * hex code, which take what is typed (read when the cursor leaves the field - Return does that - because every change builds the
- * window again). A round cursor marks the colour in the square and on the strip. Where nothing is chosen the picker stands at the
- * colour the window wears now (fnc_paletteInfo). Every move goes to fnc_paletteSet (fnc_paletteSlide drags the pickers), which
- * updates this card in place (fnc_updatePaletteMenu) and builds the window again for the colour. The panels' picker shows only the
- * values up to PALETTE_PANEL_VALUE_MAX, and so do the cells' and the tiles': a black film over the square, so what it shows is what
- * is chosen.
+ * The picker is the kind that painting programs have: a colour square (the saturation across, the value down; a pure-hue rectangle
+ * with a white fade and a black fade over it, fnc_paletteSet "square"), a strip of hues beside it, and fields for red, green and
+ * blue (0 to 255) and the hex code, which take what is typed (read when the cursor leaves the field - Return does that). A round
+ * cursor marks the colour in the square and on the strip. Where nothing is chosen the picker stands at the colour the window wears
+ * now (fnc_paletteInfo). Every move goes to fnc_paletteSet (fnc_paletteSlide drags the pickers and the sliders), which updates this
+ * card in place (fnc_updatePaletteMenu) and builds the window again. The squares of the panels and the cells show only the values
+ * up to PALETTE_PANEL_VALUE_MAX: a black film over them, so what they show is what is chosen.
  *
- * Which colour the picker is bound to is kept in uiNamespace einv_gui_paletteTab (its number, 0 accent to 6 lines as PALETTE_IDS,
- * -1 none).
+ * Which row is open is kept in uiNamespace einv_gui_paletteOpen (its id, "" none), and its colour's number in einv_gui_paletteTab
+ * (-1 for none, fnc_closeMenu keeps a field being typed in by it); whether the style list is open in einv_gui_paletteStylesOpen.
  *
  * The card is the sound dropdown's (fnc_openSoundMenu) in look and machinery: darker than the panels, a one-pixel border, a
  * soft shadow, neutral greys and white words whatever the palette sets - the swatches and the picker are the only colour -,
@@ -107,27 +100,36 @@ private _text = [1, 1, 1, 1];
 private _text2 = [0.78, 0.78, 0.78, 1];
 private _muted = [0.56, 0.56, 0.56, 1];
 
-// Which colour the picker is bound to: its number (PALETTE_IDS), -1 none.
-private _tab = uiNamespace getVariable [QGVAR(paletteTab), 0];
+// The rows, top to bottom: id (what its button takes away, fnc_paletteSet "reset"), the colour's number (PALETTE_IDS; -1 for a row
+// with no colour of its own), name, what it sets (the name's tooltip), the button's words, its sliders [[kind, words], ...]
+// (fnc_paletteSlide, fnc_paletteSet) and a note under them ("" for none).
+private _rowDefs = [
+    ["accent", 0, LLSTRING(Palette_Accent), LLSTRING(Palette_Accent_Tip), LLSTRING(Palette_UseArma), [], ""],
+    ["gradient", 7, LLSTRING(Palette_Gradient), LLSTRING(Palette_Gradient_Tip), LLSTRING(Palette_Off), [], ""],
+    ["secondary", 1, LLSTRING(Palette_Secondary), LLSTRING(Palette_Secondary_Tip), LLSTRING(Palette_MatchAccent), [], ""],
+    ["panel", 2, LLSTRING(Palette_Panels), LLSTRING(Palette_Panels_Tip), LLSTRING(Palette_Default), [["alpha", LLSTRING(Palette_Transparency)]], ""],
+    ["cells", 3, LLSTRING(Palette_Cells), LLSTRING(Palette_Cells_Tip), LLSTRING(Palette_Default), [["cellAlpha", LLSTRING(Palette_Transparency)]], ""],
+    ["items", -1, LLSTRING(Palette_Tiles), LLSTRING(Palette_Tiles_Tip), LLSTRING(Palette_Default), [["tileAlpha", LLSTRING(Palette_Transparency)]], LLSTRING(Palette_TilesNote)],
+    ["text", 5, LLSTRING(Palette_Text), LLSTRING(Palette_Text_Tip), LLSTRING(Palette_Default), [], ""],
+    ["lines", 6, LLSTRING(Palette_Lines), LLSTRING(Palette_Lines_Tip), LLSTRING(Palette_Default), [], ""]
+];
 
-if (!(_tab isEqualType 0) || {_tab < -1} || {_tab >= PALETTE_COLOURS}) then {
-    _tab = 0;
+// Which row is open ("" none), and so which colour the picker is bound to.
+private _open = uiNamespace getVariable [QGVAR(paletteOpen), ""];
+
+if (!(_open isEqualType "") || {(_rowDefs findIf {(_x select 0) isEqualTo _open}) < 0}) then {
+    _open = "";
 };
 
-// The rows, top to bottom: id (what its button takes away, fnc_paletteSet "reset"; for a transparency also the kind of its slider,
-// fnc_paletteSlide), the colour's number (PALETTE_IDS; -1 for a transparency, which has a slider instead of the picker), name, what
-// it sets (the name's tooltip), the button's words and, for a transparency, the word before its slider.
-private _rowDefs = [
-    ["accent", 0, LLSTRING(Palette_Accent), LLSTRING(Palette_Accent_Tip), LLSTRING(Palette_UseArma)],
-    ["secondary", 1, LLSTRING(Palette_Secondary), LLSTRING(Palette_Secondary_Tip), LLSTRING(Palette_MatchAccent)],
-    ["panel", 2, LLSTRING(Palette_Panels), LLSTRING(Palette_Panels_Tip), LLSTRING(Palette_Default)],
-    ["alpha", -1, LLSTRING(Palette_Transparency), LLSTRING(Palette_Transparency_Tip), LLSTRING(Palette_Default), LLSTRING(Palette_Panels)],
-    ["cells", 3, LLSTRING(Palette_Cells), LLSTRING(Palette_Cells_Tip), LLSTRING(Palette_Default)],
-    ["tiles", 4, LLSTRING(Palette_Tiles), LLSTRING(Palette_Tiles_Tip), LLSTRING(Palette_Default)],
-    ["tileAlpha", -1, LLSTRING(Palette_TileTransparency), LLSTRING(Palette_TileTransparency_Tip), LLSTRING(Palette_Default), LLSTRING(Palette_Tiles)],
-    ["text", 5, LLSTRING(Palette_Text), LLSTRING(Palette_Text_Tip), LLSTRING(Palette_Default)],
-    ["lines", 6, LLSTRING(Palette_Lines), LLSTRING(Palette_Lines_Tip), LLSTRING(Palette_Default)]
-];
+private _openDef = _rowDefs param [_rowDefs findIf {(_x select 0) isEqualTo _open}, []];
+private _tab = _openDef param [1, -1];
+
+uiNamespace setVariable [QGVAR(paletteTab), _tab];
+
+// The style list, open under the Style row or not, and the styles.
+private _stylesOpen = uiNamespace getVariable [QGVAR(paletteStylesOpen), false];
+private _styles = [] call FUNC(paletteStyles);
+private _info = [] call FUNC(paletteInfo);
 
 // The fields of a picker: the words by it, and the tip.
 private _fieldDefs = [
@@ -163,14 +165,24 @@ private _fieldSize = _fieldH * 0.48;
 private _fieldPadX = SQUARE(UNIT * 0.3);
 private _fieldLabelW = SQUARE(UNIT * 1.4);
 
-// The rows, a slider under each transparency's row, and the picker under the row it is bound to.
-private _height = _padY * 2 + _titleH + (count _rowDefs) * (_gapY + _headH) + (count (_rowDefs select {(_x select 1) < 0})) * _rowH;
+// The title, the Style row (and its list), every row folded, and what the open row shows: its picker, its sliders, its note.
+private _height = _padY * 2 + _titleH + (_gapY + _headH) + (count _rowDefs) * (_gapY + _headH);
 
-if (_tab >= 0) then {
-    _height = _height + _pickPad * 2 + _pickH;
+if (_stylesOpen) then {
+    _height = _height + _pickPad * 2 + (count _styles) * _rowH;
 };
 
-// Left to right in a colour's row: padding, arrow, name, swatch, then the button at the right edge.
+if (_openDef isNotEqualTo []) then {
+    _openDef params ["", "_openWhich", "", "", "", "_openSliders", "_openNote"];
+
+    if (_openWhich >= 0) then {
+        _height = _height + _pickPad * 2 + _pickH;
+    };
+
+    _height = _height + (count _openSliders) * _rowH + ([0, _rowH] select (_openNote isNotEqualTo "")) + ([0, _pickPad] select (_openWhich < 0));
+};
+
+// Left to right in a row: padding, arrow, name, swatch, then the button at the right edge.
 private _arrowH = UNIT * 0.5;
 private _arrowW = SQUARE(_arrowH);
 private _nameX = _padX + _arrowW + SQUARE(UNIT * 0.3);
@@ -181,7 +193,7 @@ private _swatchX = _nameX + _nameW;
 private _chipH = UNIT * 0.8;
 private _chipSize = UNIT * 0.44;
 
-// Left to right in a transparency slider's row: padding, name, gap, slider, gap, value, padding.
+// Left to right in a slider's row: padding, name, gap, slider, gap, value, padding.
 private _labelW = SQUARE(UNIT * 3.2);
 private _sliderX = _padX + _labelW + _gapX;
 private _valueW = SQUARE(UNIT * 1.6);
@@ -402,132 +414,243 @@ private _fnc_picker = {
     ]
 };
 
-// ----- The rows, the picker under the one it is bound to, the transparency's slider under its own -----
+// ----- Style: the dropdown, and its list under it while open -----
 
-// The swatches and the take-away buttons by row id (and a transparency's swatch, the surface over a grey, by "alpha" and "tileAlpha"),
-// and the sliders' parts by their row id.
+private _y = _headTop + _titleH + _gapY;
+
+[
+    _display, _layer, [_cardX + _nameX, _y, _nameW, _headH], [LLSTRING(Palette_Style), _nameW, _fontBold, _size] call FUNC(fitText), _size, _text,
+    _fontBold, 0
+] call FUNC(uiLabel);
+
+// Nothing chosen is the window as it ships: Classic, whichever way it came to be.
+private _styleName = [LLSTRING(Style_Classic), LLSTRING(Style_Custom)] select (_info get "any");
+
+{
+    if ((_x select 0) isEqualTo (_info get "style")) exitWith {_styleName = _x select 1};
+} forEach _styles;
+
+private _dropX = _cardX + _swatchX;
+private _dropW = _cardX + _width - _padX - _dropX;
+
+private _drop = [
+    _display, _layer, [_dropX, _y + (_headH - _chipH) / 2, _dropW, _chipH], "style", _styleName,
+    [UI_TEX(icon_chevron_down_ca), UI_TEX(icon_chevron_right_ca)] select !_stylesOpen, _buttonTheme, {
+        params ["_button"];
+
+        if (_button < 0) exitWith {};
+
+        [{
+            private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+            if (isNull _display) exitWith {};
+
+            uiNamespace setVariable [QGVAR(paletteStylesOpen), !(uiNamespace getVariable [QGVAR(paletteStylesOpen), false])];
+
+            [_display] call FUNC(openPaletteMenu);
+        }] call FUNC(later);
+    }, false, _chipSize
+] call FUNC(uiButton);
+
+(_drop param [count _drop - 1, controlNull]) ctrlSetTooltip LLSTRING(Palette_Style_Tip);
+
+_y = _y + _headH;
+
+if (_stylesOpen) then {
+    _y = _y + _pickPad;
+
+    {
+        _x params ["_styleId", "_name", "_values"];
+
+        private _current = _styleId isEqualTo (_info get "style") || {_styleId isEqualTo "classic" && {!(_info get "any")}};
+        private _rowTop = _y;
+
+        // Its colours as a strip of three: the accent, the panels, and the gradient (or the secondary colour).
+        private _fnc_rgb = {
+            params ["_pick", "_fallback"];
+
+            if (count _pick >= 3) then {(["rgb", _pick] call FUNC(hsv)) + [1]} else {_fallback}
+        };
+
+        private _accentRgb = [_values select 0, ((["", []] call FUNC(accentColour)) select [0, 3]) + [1]] call _fnc_rgb;
+        private _strip = [
+            _accentRgb,
+            [_values select 3, PANEL_COLOR + [1]] call _fnc_rgb,
+            [_values select 10, [_values select 1, _accentRgb] call _fnc_rgb] call _fnc_rgb
+        ];
+        private _dotW = SQUARE(_rowH * 0.5);
+
+        {
+            [
+                _display, _layer, [_cardX + _nameX + _forEachIndex * (_dotW + pixelW * 2), _rowTop + _rowH * 0.25, _dotW, _rowH * 0.5], _x, UNIT * 0.1
+            ] call FUNC(uiPanel);
+        } forEach _strip;
+
+        private _textX = _cardX + _nameX + 3 * (_dotW + pixelW * 2) + SQUARE(UNIT * 0.3);
+
+        [_display, _layer, [_textX, _rowTop, _cardX + _width - _padX - _textX, _rowH], _name, _small, [_text2, _text] select _current, _font, 0] call FUNC(uiLabel);
+
+        if (_current) then {
+            [
+                _display, _layer, [_cardX + _width - _padX - SQUARE(_rowH * 0.6), _rowTop + _rowH * 0.2, SQUARE(_rowH * 0.6), _rowH * 0.6],
+                UI_TEX(icon_check_ca), _text
+            ] call FUNC(uiIcon);
+        };
+
+        private _hit = [_display, "EINV_Hitbox", _layer, [_cardX + _padX, _rowTop, _width - _padX * 2, _rowH]] call FUNC(uiCreate);
+
+        _hit setVariable [QGVAR(id), _styleId];
+        _hit ctrlAddEventHandler ["ButtonClick", {
+            params ["_ctrl"];
+
+            [{
+                params ["_styleId"];
+
+                private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+                if (isNull _display) exitWith {};
+
+                uiNamespace setVariable [QGVAR(paletteStylesOpen), false];
+
+                ["style", _styleId] call FUNC(paletteSet);
+
+                // The same style again changes nothing and builds nothing: the list still closes.
+                [_display] call FUNC(openPaletteMenu);
+            }, [_ctrl getVariable [QGVAR(id), ""]]] call FUNC(later);
+        }];
+
+        _y = _y + _rowH;
+    } forEach _styles;
+
+    _y = _y + _pickPad;
+};
+
+// ----- The rows, the open one with its picker, its sliders and its note under it -----
+
+// The swatches and the take-away buttons by row id, and the sliders' parts by their kind.
 private _swatches = createHashMap;
 private _chips = createHashMap;
 private _picker = createHashMap;
 private _sliders = createHashMap;
-private _y = _headTop + _titleH;
 
 {
-    _x params ["_id", "_which", "_name", "_tip", "_words", ["_sliderLabel", ""]];
+    _x params ["_id", "_which", "_name", "_tip", "_words", "_rowSliders", "_note"];
+
+    private _isOpen = _id isEqualTo _open;
 
     _y = _y + _gapY;
 
-    if (_forEachIndex > 0) then {
-        [_display, _layer, [_cardX + _padX, _y - _gapY / 2, _width - _padX * 2, pixelH], [1, 1, 1, 0.05]] call FUNC(uiPanel);
-    };
+    [_display, _layer, [_cardX + _padX, _y - _gapY / 2, _width - _padX * 2, pixelH], [1, 1, 1, 0.05]] call FUNC(uiPanel);
+
+    // The arrow: down while the row is open, to the right while it is folded.
+    [
+        _display, _layer, [_cardX + _padX, _y + (_headH - _arrowH) / 2, _arrowW, _arrowH],
+        [UI_TEX(icon_chevron_right_ca), UI_TEX(icon_chevron_down_ca)] select _isOpen, _text2
+    ] call FUNC(uiIcon);
 
     [
         _display, _layer, [_cardX + _nameX, _y, _nameW, _headH], [_name, _nameW, _fontBold, _size] call FUNC(fitText), _size, _text,
         _fontBold, 0
     ] call FUNC(uiLabel);
 
+    // The swatch; what can be see-through lies over a grey, so that what shows through is seen.
     private _swatchRect = [_y] call _fnc_swatch;
 
+    if (_rowSliders isNotEqualTo []) then {
+        [_display, _layer, _swatchRect, [0.55, 0.55, 0.55, 1], UNIT * 0.2] call FUNC(uiPanel);
+    };
+
+    _swatches set [_id, [_display, _layer, _swatchRect, [0, 0, 0, 1], UNIT * 0.2] call FUNC(uiPanel)];
     _chips set [_id, [_id, _words, _y, _headH] call _fnc_chip];
 
-    if (_which >= 0) then {
-        private _open = _which == _tab;
+    // A click on the arrow, the name or the swatch opens the row (the one open before folds), or folds it where it is open.
+    private _nameHit = [_display, "EINV_Hitbox", _layer, [_cardX + _padX, _y, _swatchX + _swatchW + SQUARE(UNIT * 0.3) - _padX, _headH]] call FUNC(uiCreate);
 
-        // The arrow: down while the picker is open under this row, to the right while it is not.
-        [
-            _display, _layer, [_cardX + _padX, _y + (_headH - _arrowH) / 2, _arrowW, _arrowH],
-            [UI_TEX(icon_chevron_right_ca), UI_TEX(icon_chevron_down_ca)] select _open, _text2
-        ] call FUNC(uiIcon);
+    _nameHit ctrlSetTooltip _tip;
+    _nameHit setVariable [QGVAR(id), _id];
+    _nameHit ctrlAddEventHandler ["ButtonClick", {
+        params ["_ctrl"];
 
-        _swatches set [_id, [_display, _layer, _swatchRect, [0, 0, 0, 1], UNIT * 0.2] call FUNC(uiPanel)];
+        // The popover is made again, which deletes this very control: a frame later.
+        [{
+            params ["_id"];
 
-        // A click on the arrow, the name or the swatch binds the picker to this colour (it moves here from the row it was under), or
-        // folds it where it is open already.
-        private _nameHit = [_display, "EINV_Hitbox", _layer, [_cardX + _padX, _y, _swatchX + _swatchW + SQUARE(UNIT * 0.3) - _padX, _headH]] call FUNC(uiCreate);
+            private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
-        _nameHit ctrlSetTooltip _tip;
-        _nameHit setVariable [QGVAR(colour), _which];
-        _nameHit ctrlAddEventHandler ["ButtonClick", {
-            params ["_ctrl"];
+            if (isNull _display) exitWith {};
 
-            // The popover is made again, which deletes this very control: a frame later.
-            [{
-                params ["_which"];
+            uiNamespace setVariable [QGVAR(paletteOpen), [_id, ""] select (_id isEqualTo (uiNamespace getVariable [QGVAR(paletteOpen), ""]))];
 
-                private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+            [_display] call FUNC(openPaletteMenu);
+        }, [_ctrl getVariable [QGVAR(id), ""]]] call FUNC(later);
+    }];
 
-                if (isNull _display) exitWith {};
+    _y = _y + _headH;
 
-                uiNamespace setVariable [QGVAR(paletteTab), [_which, -1] select (_which == (uiNamespace getVariable [QGVAR(paletteTab), 0]))];
-
-                [_display] call FUNC(openPaletteMenu);
-            }, [_ctrl getVariable [QGVAR(colour), 0]]] call FUNC(later);
-        }];
-
-        _y = _y + _headH;
-
-        if (_open) then {
+    if (_isOpen) then {
+        if (_which >= 0) then {
             _picker = [_which, _y + _pickPad] call _fnc_picker;
             _y = _y + _pickPad * 2 + _pickH;
+        } else {
+            _y = _y + _pickPad;
         };
-    } else {
-        // A transparency: the surface's colour over a grey so that what shows through is seen, and its slider under the row.
-        private _alphaNameHit = [_display, "EINV_Hitbox", _layer, [_cardX + _nameX, _y, _nameW, _headH]] call FUNC(uiCreate);
 
-        _alphaNameHit ctrlSetTooltip _tip;
+        // Its sliders: a name, a track with its fill, a knob and its value, and the hit area that drags it.
+        {
+            _x params ["_kind", "_sliderLabel"];
 
-        [_display, _layer, _swatchRect, [0.55, 0.55, 0.55, 1], UNIT * 0.2] call FUNC(uiPanel);
-        _swatches set [_id, [_display, _layer, _swatchRect, [0, 0, 0, 1], UNIT * 0.2] call FUNC(uiPanel)];
+            private _trackY = _y + (_rowH - _trackH) / 2;
+            private _trackRect = [_cardX + _trackX, _trackY, _trackW, _trackH];
 
-        _y = _y + _headH;
+            [
+                _display, _layer, [_cardX + _padX, _y, _labelW, _rowH], [_sliderLabel, _labelW, _font, _small] call FUNC(fitText),
+                _small, _text2, _font, 0
+            ] call FUNC(uiLabel);
 
-        // The slider: its name, a track with its fill, a knob and its value, and the hit area that drags it.
-        private _trackY = _y + (_rowH - _trackH) / 2;
-        private _trackRect = [_cardX + _trackX, _trackY, _trackW, _trackH];
+            [_display, _layer, _trackRect, [1, 1, 1, 0.12], _trackH / 2] call FUNC(uiPanel);
 
-        [
-            _display, _layer, [_cardX + _padX, _y, _labelW, _rowH], [_sliderLabel, _labelW, _font, _small] call FUNC(fitText),
-            _small, _text2, _font, 0
-        ] call FUNC(uiLabel);
+            private _fill = [_display, "EINV_PanelRect", _layer, _trackRect] call FUNC(uiCreate);
 
-        [_display, _layer, _trackRect, [1, 1, 1, 0.12], _trackH / 2] call FUNC(uiPanel);
+            _fill ctrlSetBackgroundColor [0.72, 0.72, 0.72, 1];
 
-        private _fill = [_display, "EINV_PanelRect", _layer, _trackRect] call FUNC(uiCreate);
+            // The knob is white on a dark ring: white alone would vanish at the white end of the track.
+            private _thumbTop = _y + (_rowH - _thumbH) / 2;
+            private _ring = [
+                _display, _layer, [_cardX + _trackX - _thumbW / 2 - pixelW * 2, _thumbTop - pixelH * 2, _thumbW + pixelW * 4, _thumbH + pixelH * 4],
+                UI_TEX(circle_ca), [0.04, 0.04, 0.04, 0.9]
+            ] call FUNC(uiIcon);
+            private _thumb = [
+                _display, _layer, [_cardX + _trackX - _thumbW / 2, _thumbTop, _thumbW, _thumbH], UI_TEX(circle_ca), _text
+            ] call FUNC(uiIcon);
 
-        _fill ctrlSetBackgroundColor [0.72, 0.72, 0.72, 1];
+            private _value = [
+                _display, _layer, [_cardX + _width - _padX - _valueW, _y, _valueW, _rowH], "", _small * 0.9, _text2, _font, 1
+            ] call FUNC(uiLabel);
 
-        // The knob is white on a dark ring: white alone would vanish at the white end of the track.
-        private _thumbTop = _y + (_rowH - _thumbH) / 2;
-        private _ring = [
-            _display, _layer, [_cardX + _trackX - _thumbW / 2 - pixelW * 2, _thumbTop - pixelH * 2, _thumbW + pixelW * 4, _thumbH + pixelH * 4],
-            UI_TEX(circle_ca), [0.04, 0.04, 0.04, 0.9]
-        ] call FUNC(uiIcon);
-        private _thumb = [
-            _display, _layer, [_cardX + _trackX - _thumbW / 2, _thumbTop, _thumbW, _thumbH], UI_TEX(circle_ca), _text
-        ] call FUNC(uiIcon);
+            // The hit area is the slider's whole room, a knob's width beyond the track at each end: a press near an end is that end.
+            // The track's place on the screen goes with it, for the mouse's place along it (fnc_paletteSlide).
+            private _hit = [_display, "EINV_Hitbox", _layer, [_cardX + _sliderX, _y, _sliderW, _rowH]] call FUNC(uiCreate);
 
-        private _value = [
-            _display, _layer, [_cardX + _width - _padX - _valueW, _y, _valueW, _rowH], "", _small * 0.9, _text2, _font, 1
-        ] call FUNC(uiLabel);
+            _hit setVariable [QGVAR(picker), [_kind, 0, [safezoneX + _cardX + _trackX, safezoneY + _trackY, _trackW, _trackH]]];
 
-        // The hit area is the slider's whole room, a knob's width beyond the track at each end: a press near an end is that end. The
-        // track's place on the screen goes with it, for the mouse's place along it (fnc_paletteSlide).
-        private _hit = [_display, "EINV_Hitbox", _layer, [_cardX + _sliderX, _y, _sliderW, _rowH]] call FUNC(uiCreate);
+            _hit ctrlAddEventHandler ["MouseButtonDown", {
+                params ["_ctrl", "_button"];
 
-        _hit setVariable [QGVAR(picker), [_id, 0, [safezoneX + _cardX + _trackX, safezoneY + _trackY, _trackW, _trackH]]];
+                if (_button != 0) exitWith {};
 
-        _hit ctrlAddEventHandler ["MouseButtonDown", {
-            params ["_ctrl", "_button"];
+                (_ctrl getVariable [QGVAR(picker), []]) params ["_kind", "_which", "_screen"];
 
-            if (_button != 0) exitWith {};
+                ["begin", [ctrlParent _ctrl, _kind, _which, _screen]] call FUNC(paletteSlide);
+            }];
 
-            (_ctrl getVariable [QGVAR(picker), []]) params ["_kind", "_which", "_screen"];
+            _sliders set [_kind, [[_ring, _thumb], [_cardX + _trackX, _trackY, _trackW, _trackH, _thumbW, _thumbH, _thumbTop], _value, _fill]];
+            _y = _y + _rowH;
+        } forEach _rowSliders;
 
-            ["begin", [ctrlParent _ctrl, _kind, _which, _screen]] call FUNC(paletteSlide);
-        }];
-
-        _sliders set [_id, [[_ring, _thumb], [_cardX + _trackX, _trackY, _trackW, _trackH, _thumbW, _thumbH, _thumbTop], _value, _fill]];
-        _y = _y + _rowH;
+        if (_note isNotEqualTo "") then {
+            [_display, _layer, [_cardX + _padX, _y, _width - _padX * 2, _rowH], _note, _small * 0.9, _muted, _font, 0] call FUNC(uiLabel);
+            _y = _y + _rowH;
+        };
     };
 } forEach _rowDefs;
 
@@ -541,8 +664,8 @@ uiNamespace setVariable [QGVAR(menuFocusBack), _back];
 uiNamespace setVariable [QGVAR(menuRect), [_left, _top, _width, _height]];
 
 // What lies in it, to show the values in place (fnc_updatePaletteMenu): the open picker's controls and places, its fields, the
-// transparency sliders' knobs, places, values and fills by row id ("alpha", "tileAlpha"), the swatches and the buttons by row id (the
-// colours by PALETTE_IDS, the transparencies by "alpha" and "tileAlpha"), and Reset all.
+// open row's sliders' knobs, places, values and fills by their kind ("alpha", "cellAlpha", "tileAlpha"), the swatches and the
+// buttons by row id, and Reset all.
 uiNamespace setVariable [QGVAR(paletteRows), createHashMapFromArray [
     ["tab", _tab],
     ["picker", _picker],

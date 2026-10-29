@@ -35,15 +35,19 @@
  *   Transparency  panel (its alpha)                          the panels' alpha, 1 down to 0 (fully see-through), nothing else
  *   Cells         cell, slot, slotEmpty                      solid: cell is the colour, the slots it shifted as far as they lie from
  *                                                            the plain cell (kept dark)
- *   Tiles         tileBg (all five), raised, tileCountBg     solid: the misc tile is the colour, the other four and the count boxes it
- *                                                            shifted as far as they lie from the plain misc tile (kept dark), so a
- *                                                            weapon keeps its blue hint
+ *   Cell          cell, slot, slotEmpty (their alpha)        the empty cells' and slot boxes' alpha, 1 down to 0 (fully see-through)
+ *   transparency
  *   Tile          tileBg (its alpha)                         the tiles' alpha, 1 down to 0 (fully see-through), on all five tiles
- *   transparency                                             alike; their hints and the count boxes keep their colours and strengths
+ *   transparency                                             alike; their hints and the count boxes keep their colours and strengths.
+ *                                                            The tiles' colours are no longer the palette's: the setup gives them
+ *                                                            by category (category=... color=, fnc_tileColour)
+ *   Gradient      accentGradient                             the colour the accent's texts run into, left to right, as Discord's
+ *                                                            gradient names do (fnc_uiLabel); [] for plain accent text
  *   Text          text, text2, muted, buttonText, keyText,   the colour times the grey each has against the white text (text2 0.78,
  *                 tileCountColor, slotIcon                   muted 0.56, ...): its dimmer shades
- *   Lines         line, panelBorder, slotBorder, tileBorder  the tint of these films as for Secondary; the hatch stripes are drawn
- *                                                            from line; a border that is [] stays none
+ *   Lines         line, panelBorder, slotBorder, tileBorder  the colour, at strengths that are seen (a hairline at the plain 8 % of a
+ *                                                            colour was not): the hairlines, and a frame round the panels, the slot
+ *                                                            boxes and the tiles; the hatch stripes are drawn from line
  *   Fixed         dim, lootPanel, lootBorder,                never: the screen's dim is the world behind the window, the loot keys
  *                 lootAccent, lootTab, lootLine, gain,       and the status colours mean something
  *                 loss, warn, info
@@ -85,7 +89,7 @@ private _accent = [] call FUNC(accentColour);
 ([] call FUNC(palette)) params [
     "", ["_secondaryPick", [], [[]]], ["_alphaPick", -1, [0]], ["_panelPick", [], [[]]],
     ["_cellsPick", [], [[]]], ["_tilesPick", [], [[]]], ["_textPick", [], [[]]], ["_linesPick", [], [[]]],
-    ["_tileAlphaPick", -1, [0]]
+    ["_tileAlphaPick", -1, [0]], ["_cellAlphaPick", -1, [0]], ["_gradientPick", [], [[]]]
 ];
 
 private _tint = [];
@@ -225,9 +229,18 @@ if (_tint isNotEqualTo []) then {
     [["slotCaptionBg", "button", "buttonHover", "barTrack", "keyBg"], _tint] call _fnc_tintFilms;
 };
 
+// Lines: the hairlines and a frame round the panels, the slot boxes and the tiles, each at a strength that is seen.
 if (_linesPick isNotEqualTo []) then {
-    [["line", "panelBorder", "slotBorder", "tileBorder"], [_linesPick, 1] call _fnc_pickRgb] call _fnc_tintFilms;
+    private _lineRgb = [_linesPick, 1] call _fnc_pickRgb;
+
+    _theme set ["line", _lineRgb + [0.3]];
+    _theme set ["panelBorder", _lineRgb + [0.5]];
+    _theme set ["slotBorder", _lineRgb + [0.3]];
+    _theme set ["tileBorder", _lineRgb + [0.22]];
 };
+
+// The gradient of the accent's texts (fnc_uiLabel).
+_theme set ["accentGradient", [[], ([_gradientPick, 1] call _fnc_pickRgb) + [1]] select (_gradientPick isNotEqualTo [])];
 
 // ----- Panels and Transparency -----
 
@@ -260,19 +273,21 @@ if (_panelsMoved) then {
     _theme set ["panel", _panelRgb + [_panelAlpha]];
 };
 
-// ----- Cells: the empty grid cells and the slot boxes, solid -----
+// ----- Cells: the empty grid cells and the slot boxes, solid (or see-through by the cell transparency) -----
+
+private _cellAlpha = [1, (_cellAlphaPick max PALETTE_ALPHA_MIN) min 1] select (_cellAlphaPick >= 0);
 
 if (_cellsPick isNotEqualTo []) then {
     private _cellRgb = [_cellsPick, PALETTE_PANEL_VALUE_MAX] call _fnc_pickRgb;
 
-    _theme set ["cell", _cellRgb + [1]];
-    _theme set ["slot", ([_cellRgb, _plainCell, _plainSlot] call _fnc_shift) + [1]];
-    _theme set ["slotEmpty", ([_cellRgb, _plainCell, _plainSlotEmpty] call _fnc_shift) + [1]];
+    _theme set ["cell", _cellRgb + [_cellAlpha]];
+    _theme set ["slot", ([_cellRgb, _plainCell, _plainSlot] call _fnc_shift) + [_cellAlpha]];
+    _theme set ["slotEmpty", ([_cellRgb, _plainCell, _plainSlotEmpty] call _fnc_shift) + [_cellAlpha]];
 } else {
-    if (_panelsMoved) then {
-        _theme set ["cell", _plainCell + [1]];
-        _theme set ["slot", _plainSlot + [1]];
-        _theme set ["slotEmpty", _plainSlotEmpty + [1]];
+    if (_panelsMoved || {_cellAlphaPick >= 0}) then {
+        _theme set ["cell", _plainCell + [_cellAlpha]];
+        _theme set ["slot", _plainSlot + [_cellAlpha]];
+        _theme set ["slotEmpty", _plainSlotEmpty + [_cellAlpha]];
     };
 };
 
@@ -282,23 +297,9 @@ if (_cellsPick isNotEqualTo []) then {
 // alpha, so a weapon's blue and a medical item's green stay with every alpha.
 private _tileAlpha = [1, (_tileAlphaPick max PALETTE_ALPHA_MIN) min 1] select (_tileAlphaPick >= 0);
 
-if (_tilesPick isNotEqualTo []) then {
-    private _tileRgb = [_tilesPick, PALETTE_PANEL_VALUE_MAX] call _fnc_pickRgb;
-
-    _theme set ["tileBg", _plainTiles apply {([_tileRgb, _plainTile, _x] call _fnc_shift) + [_tileAlpha]}];
-
-    // The count boxes lie on the tile: they keep their own strength.
-    {
-        private _box = _theme getOrDefault [_x, []];
-
-        if (count _box >= 3) then {
-            _theme set [_x, ([_tileRgb, _plainTile, _box] call _fnc_shift) + [_box param [3, 1]]];
-        };
-    } forEach ["raised", "tileCountBg"];
-} else {
-    if (_panelsMoved || {_tileAlphaPick >= 0}) then {
-        _theme set ["tileBg", _plainTiles apply {_x + [_tileAlpha]}];
-    };
+// The tiles' colours are the setup's (by category, fnc_tileColour) - a Tiles colour of an older palette is left alone.
+if (_panelsMoved || {_tileAlphaPick >= 0}) then {
+    _theme set ["tileBg", _plainTiles apply {_x + [_tileAlpha]}];
 };
 
 // ----- Text: the colour and its dimmer shades -----
