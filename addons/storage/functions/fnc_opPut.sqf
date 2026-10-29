@@ -118,7 +118,8 @@ if (!_force && {[_to, _probe] call FUNC(backpackIntoBackpack)}) exitWith {
 // ---------------------------------------------------------------------------
 // Does it stack? Items and magazines of a class that stacks, all with the same rounds, and not into the
 // hidden holder of Strict mode: those lie in tiles of a count, which the places' records keep. Anything
-// else is one tile.
+// else is one tile. A grenade - one round and light, a small charge too - has no capacity: its rounds tell
+// nothing apart, it lies as an item does (fnc_getContents, fnc_payloadKey).
 // ---------------------------------------------------------------------------
 private _info = [_class] call EFUNC(items,getInfo);
 private _stack = [_to, _class, (_info getOrDefault ["stack", 1]) max 1] call FUNC(stackFor);
@@ -128,7 +129,7 @@ private _stackable = _stack > 1
     && {!((_info getOrDefault ["kind", ""]) in ["uniform", "vest", "backpack"])}
     && {
         (_type isEqualTo "item" && {(_payload param [3, []]) isEqualTo []})
-        || {_type isEqualTo "magazine" && {(_info getOrDefault ["capacity", 0]) > 0} && {count (_rounds arrayIntersect _rounds) == 1}}
+        || {_type isEqualTo "magazine" && {(_info getOrDefault ["capacity", 0]) == 0 || {count (_rounds arrayIntersect _rounds) == 1}}}
     }
     && {!([_to, _class] call FUNC(hiddenRoute))};
 
