@@ -160,6 +160,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- The hint line in the footer (the item under the mouse, what a drag does, refusals) is centred between the key hints and the version instead of starting on the left.
 - ACE Arsenal: opening it logs where the time goes ("Log window timings (debug)": `timing: arsenal open - ...` lines for the panel's first build, each part of the first settle, ACE's own list look and the totals of the greying and picture passes), and the greying of ACE's rows no longer starts one pass per pick when ACE picks several rows in a frame.
 - Opening a category on a box whose holder is no object (a kit, the arsenal's staging) threw a script error in the category filter.
 - Wizard switches were orange whatever the player's colour (the texture had it baked in): they are now a white track tinted with the accent and a white knob. Selected items are no longer filled with the accent (frame only), found items appear without a fade, and the base search time is shorter by default (0.25 s).

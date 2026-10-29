@@ -109,8 +109,13 @@ class EINV_Edit: RscEdit {
 
 // The hint in the footer: the size of the key hints' words beside it (fnc_uiKeyHint, a 0.9 UNIT key at
 // 0.62 of its height), so the line reads as one.
+// Centred in the room between the key hints and the version: an "align" set on composed text by script did not
+// reach the line (it stayed on the left), the control's own attributes do - for every hint written into it.
 class EINV_FooterHint: EINV_StructuredText {
     size = QUOTE(UNIT * 0.558);
+    class Attributes: Attributes {
+        align = "center";
+    };
 };
 
 // ---------------------------------------------------------------------------
