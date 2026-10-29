@@ -110,7 +110,7 @@ switch (_mode) do {
         private _values = +PALETTE_UNSET;
 
         {
-            _values set [_forEachIndex, [_x, +_x] select (_x isEqualType [])];
+            _values set [_forEachIndex, if (_x isEqualType []) then {+_x} else {_x}];
         } forEach ((_style select 0) select 2);
 
         _values set [11, _argument];
@@ -248,13 +248,13 @@ switch (_mode) do {
         if (_argument isEqualTo "all") then {
             {
                 // A copy of a colour; a style's name is a plain string, which has none to make.
-                _palette set [_forEachIndex, [_x, +_x] select (_x isEqualType [])];
+                _palette set [_forEachIndex, if (_x isEqualType []) then {+_x} else {_x}];
             } forEach PALETTE_UNSET;
         } else {
             {
                 private _unset = PALETTE_UNSET select _x;
 
-                _palette set [_x, [_unset, +_unset] select (_unset isEqualType [])];
+                _palette set [_x, if (_unset isEqualType []) then {+_unset} else {_unset}];
             } forEach (_rowSlots getOrDefault [_argument, []]);
         };
 
