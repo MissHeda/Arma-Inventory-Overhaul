@@ -133,7 +133,7 @@ private _fnc_weaponCard = {
 
     if (_capH > 0 && {_caption isNotEqualTo ""}) then {
         private _shown = [[_caption, _theme] call FUNC(caption), _cardW, _font, _lineSize] call FUNC(fitText);
-        [_display, _parent, [_cardX, _cardY - _lineH, _cardW, _lineH], _shown, _lineSize, _colorText2, _font, 0, true] call FUNC(uiLabel);
+        [_display, _parent, [_cardX, _cardY - _lineH, _cardW, _lineH], _shown, _lineSize, _colorText2, _font, 0, "caption"] call FUNC(uiLabel);
     };
 
     // Where the picture and the name may go - right of the strip, under the key cap.
@@ -190,7 +190,7 @@ private _fnc_weaponCard = {
 
         // What is on the weapon shows on its picture, the way Arma's own inventory draws it.
         [_display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _weapon] call FUNC(drawAttachments);
-        [_display, _parent, [_contentX, _nameTop, _contentW, _lineH], _name, _nameSize, _colorText, _font, 0, "name"] call FUNC(uiLabel);
+        [_display, _parent, [_contentX, _nameTop, _contentW, _lineH], _name, _nameSize, _colorText, _font, 0, "weapon"] call FUNC(uiLabel);
     };
 
     // The weapon in hand is framed in the accent colour, over everything else on the card.
@@ -273,7 +273,7 @@ private _fnc_weaponRow = {
 private _fnc_label = {
     params ["_labelTop", "_text"];
 
-    [_display, _parent, [_left, _labelTop, _width, _labelH], [_text, _theme] call FUNC(caption), _textUnit * 0.55, _colorText2, _font, 0, true] call FUNC(uiLabel);
+    [_display, _parent, [_left, _labelTop, _width, _labelH], [_text, _theme] call FUNC(caption), _textUnit * 0.55, _colorText2, _font, 0, "section"] call FUNC(uiLabel);
 };
 
 // ---------------------------------------------------------------------------

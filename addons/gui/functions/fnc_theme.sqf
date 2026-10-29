@@ -95,7 +95,7 @@ private _accent = [] call FUNC(accentColour);
     "", ["_secondaryPick", [], [[]]], ["_alphaPick", -1, [0]], ["_panelPick", [], [[]]],
     ["_cellsPick", [], [[]]], ["_tilesPick", [], [[]]], ["_textPick", [], [[]]], ["_linesPick", [], [[]]],
     ["_tileAlphaPick", -1, [0]], ["_cellAlphaPick", -1, [0]], ["_gradientPick", [], [[]]], "",
-    ["_titlePick", [], [[]]], ["_panelEndPick", [], [[]]], ["_secondaryAlphaPick", -1, [0]], ["_linesAlphaPick", -1, [0]],
+    ["_titlePick", [], [[]]], ["_panelEndPick", [], [[]]], ["_secondaryAlphaPick", -1, [0]], ["_linesAlphaPick", -1, [0]], "",
     ["_reachPick", -1, [0]]
 ];
 
@@ -270,8 +270,7 @@ if (_linesPick isNotEqualTo []) then {
 _theme set ["titleColor", [[], ([_titlePick, 1] call _fnc_pickRgb) + [1]] select (_titlePick isNotEqualTo [])];
 _theme set ["titleGradient", [[], ([_gradientPick, 1] call _fnc_pickRgb) + [1]] select (_gradientPick isNotEqualTo [])];
 
-// Where the titles' gradient shows (fnc_uiLabel, GRADIENT_*): titles, headings, item names, counts, values, buttons, menus,
-// tooltips and notes - a sum of their numbers. Unset, the titles, the headings and the mouse's.
+// Where the titles' gradient shows (fnc_uiLabel, GRADIENT_*): a sum of the parts' numbers. Unset, the titles, the headings and the mouse's.
 _theme set ["gradientParts", [GRADIENT_PARTS_DEFAULT, _reachPick] select (_reachPick >= 0)];
 
 // ----- Panels and Transparency -----

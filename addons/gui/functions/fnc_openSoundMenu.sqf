@@ -107,6 +107,9 @@ private _cardY = _top - safezoneY;
 
 private _layer = [_display, "EINV_Group", controlNull, [safezoneX, safezoneY, safezoneW, safezoneH]] call FUNC(uiCreate);
 
+// Settings, not the inventory: no word in it takes the gradient (fnc_uiLabel).
+_layer setVariable [QGVAR(plain), true];
+
 // A group keeps the mouse's buttons from the display's own handlers: it reports them as the columns do (fnc_build)
 // and so does the hit area over the screen in it (fnc_openMenu).
 _layer setVariable [QGVAR(hooked), true];

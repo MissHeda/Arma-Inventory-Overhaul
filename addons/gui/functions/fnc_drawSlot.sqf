@@ -119,7 +119,7 @@ if (_caption isNotEqualTo "") then {
     switch (_theme getOrDefault ["slotCaption", "inside"]) do {
         case "above": {
             private _shown = [_caption, _width, _font, _lineSize] call FUNC(fitText);
-            _controls pushBack ([_display, _parent, [_left, _top - _lineH, _width, _lineH], _shown, _lineSize, _colorText2, _font, 0, true] call FUNC(uiLabel));
+            _controls pushBack ([_display, _parent, [_left, _top - _lineH, _width, _lineH], _shown, _lineSize, _colorText2, _font, 0, "caption"] call FUNC(uiLabel));
         };
         case "tab": {
             private _room = _width - _numberW;
@@ -130,14 +130,14 @@ if (_caption isNotEqualTo "") then {
             // Round like the slot's corner it lies in - as round as a tab this low can be - or its square
             // corner would stick out past the slot's.
             _controls append ([_display, _parent, _tab, _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]], _radius min (_lineH / 2)] call FUNC(uiPanel));
-            _controls pushBack ([_display, _parent, _tab, _shown, _lineSize, _colorText2, _fontBold, 2, true] call FUNC(uiLabel));
+            _controls pushBack ([_display, _parent, _tab, _shown, _lineSize, _colorText2, _fontBold, 2, "caption"] call FUNC(uiLabel));
             _areaTop = _top + _lineH + _padY * 0.5;
         };
         case "inside": {
             private _room = _width - _padX * 2 - _numberW;
             private _shown = [_caption, _room, _font, _lineSize] call FUNC(fitText);
 
-            _controls pushBack ([_display, _parent, [_left + _padX * 1.5, _top + _padY * 0.5, _room, _lineH], _shown, _lineSize, _colorMuted, _font, 0, "heading"] call FUNC(uiLabel));
+            _controls pushBack ([_display, _parent, [_left + _padX * 1.5, _top + _padY * 0.5, _room, _lineH], _shown, _lineSize, _colorMuted, _font, 0, "caption"] call FUNC(uiLabel));
             _areaTop = _top + _lineH;
         };
         default {};
@@ -176,7 +176,7 @@ if (_ammo isNotEqualTo [] || _showName) then {
 
         private _text = format ["%1/%2", _rounds, _capacity];
         _ammoW = (_text getTextWidth [_font, _lineSize]) * TEXT_SLACK;
-        _controls pushBack ([_display, _parent, [_left + _padX, _lineTop, _width - _padX * 2, _lineH], _text, _lineSize, _colorText, _font, 1, "count"] call FUNC(uiLabel));
+        _controls pushBack ([_display, _parent, [_left + _padX, _lineTop, _width - _padX * 2, _lineH], _text, _lineSize, _colorText, _font, 1, "ammo"] call FUNC(uiLabel));
     };
 
     if (_showName) then {
@@ -255,7 +255,7 @@ if (_countText isNotEqualTo "") then {
     private _countRect = [_backdropRect, [_left + _padX, _top + _height - _padY * 0.5 - _lineH, _width - _padX * 2, _lineH]] select (_backdropRect isEqualTo []);
 
     private _countLabel = [
-        _display, _parent, _countRect, _countText, _lineSize, _countColor, _fontBold, [2, 1] select (_backdropRect isEqualTo []), "count"
+        _display, _parent, _countRect, _countText, _lineSize, _countColor, _fontBold, [2, 1] select (_backdropRect isEqualTo []), "stack"
     ] call FUNC(uiLabel);
 
     if (_backdropControls isEqualTo [] && {_backdropColor isNotEqualTo []}) then {

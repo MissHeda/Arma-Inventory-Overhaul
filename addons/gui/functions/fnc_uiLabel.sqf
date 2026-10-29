@@ -9,10 +9,11 @@
  * gradient on runs from it (or the accent) into the gradient's colour, letter by letter from left to right, as Discord's gradient
  * names do (fnc_gradientText). That line is structured text, set once: a later ctrlSetText does not reach it.
  * Where the gradient shows is the player's (the theme's "gradientParts", fnc_theme, GRADIENT_*): argument 8 says what the line is -
- * "title", "heading" (or true), "name", "count", "value", "button", "menu", "hover", "hint" (or false, the default), "key" (a mark on
- * a badge of its own, never) or "never" (a line written to later). Anything but titles and headings only on the inventory's own
- * window, never in the wizard. Never a line of one or two letters (a key, a number on a badge) and never ink on a lit surface (the
- * theme's "onAccent", or dark ink): the gradient starts in the accent, and on the accent it would vanish.
+ * "window", "title" (a column's), "section" (or true), "caption", "tab", "name", "weapon", "stack", "ammo", "key", "weight",
+ * "value", "hover", "hint" (or false, the default), "button", "keyhint", "menu" or "never" (a line written to later). Window, titles,
+ * sections, captions and tabs show it in the wizard too, the rest only on the inventory's own window and never in a layer marked
+ * plain (the colour and sound panels). Where it cannot run - a count, one letter, ink on a lit surface - the line takes one colour
+ * of it (see below).
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -44,32 +45,24 @@ private _gradient = _theme getOrDefault ["titleGradient", []];
 // What the line is: a word for it, or the older numbers and the title flag.
 private _part = switch (true) do {
     case (_title isEqualType ""): {_title};
-    case (_title isEqualType true): {["hint", "heading"] select _title};
-    default {["never", "title", "heading", "hint"] select (((_title + 1) max 0) min 3)};
+    case (_title isEqualType true): {["hint", "section"] select _title};
+    default {["never", "title", "section", "hint"] select (((_title + 1) max 0) min 3)};
 };
 
-// Titles and headings take the titles' colour; the gradient shows where the player switched it on (GRADIENT_*). Anything but a
-// title or heading only on the inventory's own window, never in the wizard.
-_title = _part in ["title", "heading"];
+// The window's titles, sections, captions and tabs take the titles' colour, and show the gradient in the setup wizard too.
+// Everything else only on the inventory's own window, and never in a layer that asks for plain words (the colour and sound
+// panels, QGVAR(plain)): their buttons and rows are settings, not the inventory.
+_title = _part in ["window", "title", "section", "heading", "caption", "tab"];
 
 private _bit = (createHashMapFromArray [
-    ["title", GRADIENT_TITLES], ["heading", GRADIENT_HEADINGS], ["name", GRADIENT_NAMES], ["count", GRADIENT_COUNTS],
-    ["value", GRADIENT_VALUES], ["button", GRADIENT_BUTTONS], ["menu", GRADIENT_MENUS], ["hover", GRADIENT_HOVER],
-    ["hint", GRADIENT_HINTS], ["text", GRADIENT_HINTS]
+    ["window", GRADIENT_WINDOW], ["title", GRADIENT_COLUMNS], ["section", GRADIENT_SECTIONS], ["heading", GRADIENT_CAPTIONS],
+    ["caption", GRADIENT_CAPTIONS], ["tab", GRADIENT_TABS], ["name", GRADIENT_NAMES], ["weapon", GRADIENT_WEAPONS],
+    ["stack", GRADIENT_STACKS], ["ammo", GRADIENT_AMMO], ["count", GRADIENT_AMMO], ["key", GRADIENT_KEYS],
+    ["weight", GRADIENT_WEIGHT], ["value", GRADIENT_VALUES], ["hover", GRADIENT_HOVER], ["hint", GRADIENT_NOTES],
+    ["text", GRADIENT_NOTES], ["button", GRADIENT_BUTTONS], ["keyhint", GRADIENT_KEYHINTS], ["menu", GRADIENT_MENUS]
 ]) getOrDefault [_part, 0];
 
-// Ink on a lit surface - a key's badge, a lit button - is the theme's "onAccent" or dark: the gradient, starting in the accent,
-// would sink into it. One or two letters do not run either.
-if (_bit > 0 && {_color isNotEqualTo []}) then {
-    private _onAccent = (_theme getOrDefault ["onAccent", []]) select [0, 3];
-    private _light = (_color select 0) * 0.2126 + (_color select 1) * 0.7152 + (_color select 2) * 0.0722;
-
-    if ((_color select [0, 3]) isEqualTo _onAccent || {_light < 0.35}) then {
-        _bit = 0;
-    };
-};
-
-if (_text isEqualType "" && {count _text < 3}) then {
+if (!isNull _parent && {_parent getVariable [QGVAR(plain), false]}) then {
     _bit = 0;
 };
 
@@ -92,11 +85,29 @@ if (count _start < 3) then {
     _start = _theme getOrDefault ["accent", [1, 1, 1, 1]];
 };
 
-// A count in its little box ("5/5", "30/30") is too short for a gradient and too tight for structured text: it takes the
-// gradient's start colour as a plain label.
-if (_graded && {_part isEqualTo "count"}) then {
-    _graded = false;
-    _color = (_start select [0, 3]) + [[1, _color param [3, 1]] select (count _color >= 4)];
+// Where the gradient cannot run, the line takes one colour of it as a plain label: a count in its little box ("5/5", "30/30") is
+// too tight for structured text, and one letter has nothing to run along - they take the start. Ink on a lit surface (a key's
+// badge, a lit button: the theme's "onAccent", or dark ink) takes the end: the start is the accent, and it would sink into it.
+if (_graded) then {
+    private _solid = [];
+
+    if (_color isNotEqualTo []) then {
+        private _onAccent = (_theme getOrDefault ["onAccent", []]) select [0, 3];
+        private _light = (_color select 0) * 0.2126 + (_color select 1) * 0.7152 + (_color select 2) * 0.0722;
+
+        if ((_color select [0, 3]) isEqualTo _onAccent || {_light < 0.35}) then {
+            _solid = _gradient select [0, 3];
+        };
+    };
+
+    if (_solid isEqualTo [] && {_part in ["stack", "ammo", "count"] || {_text isEqualType "" && {count _text < 2}}}) then {
+        _solid = _start select [0, 3];
+    };
+
+    if (_solid isNotEqualTo []) then {
+        _graded = false;
+        _color = _solid + [[1, _color param [3, 1]] select (count _color >= 4)];
+    };
 };
 
 if (_graded && {_text isEqualType ""} && {_text isNotEqualTo ""}) exitWith {

@@ -116,10 +116,20 @@ _catcher ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMous
 _catcher ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton); false}];
 _catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closeMenu)}] call FUNC(later)}];
 
+// Round as the window's panels are: the border is the card's size in the border's colour, the card one pixel in from it (a panel's
+// own border is square only).
+private _radius = (_theme getOrDefault ["radius", 0]) * 0.7;
+
+[_display, _layer, [_cardX, _cardY, _width, _height], [1, 1, 1, 0.14], _radius] call FUNC(uiPanel);
 [
-    _display, _layer, [_cardX, _cardY, _width, _height],
-    _theme getOrDefault ["inspectBg", [0.06, 0.06, 0.06, 0.98]], _theme getOrDefault ["radius", 0], [1, 1, 1, 0.14]
+    _display, _layer, [_cardX + pixelW, _cardY + pixelH, _width - pixelW * 2, _height - pixelH * 2],
+    _theme getOrDefault ["inspectBg", [0.06, 0.06, 0.06, 0.98]], (_radius - pixelH) max 0
 ] call FUNC(uiPanel);
+
+// The row under the mouse lights in the secondary colour's film, round and in from the card's edge as the slots' are.
+private _hover = _theme getOrDefault ["buttonHover", [1, 1, 1, 0.16]];
+private _rowInset = _padX * 0.3;
+private _rowRadius = (_radius * 0.6) min (_rowH / 2);
 
 {
     _x params ["_text", "_arguments", "_code"];
@@ -135,14 +145,14 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closeMenu)}] call FUNC
         ] call FUNC(uiPanel);
     };
 
-    private _surface = [_display, "EINV_PanelRect", _layer, [_cardX + _padX * 0.3, _rowTop, _width - _padX * 0.6, _rowH]] call FUNC(uiCreate);
+    private _surface = [_display, _layer, [_cardX + _rowInset, _rowTop, _width - _rowInset * 2, _rowH], [0, 0, 0, 0], _rowRadius] call FUNC(uiPanel);
 
     // The row under the mouse is lit from the start: a menu made again on top (fnc_raiseMenu) hears of no
     // mouse entering until it moves.
     private _lit = _enabled && {(_mouse select 0) >= _left} && {(_mouse select 0) < _left + _width}
         && {(_mouse select 1) >= _rowTop + safezoneY} && {(_mouse select 1) < _rowTop + safezoneY + _rowH};
 
-    _surface ctrlSetBackgroundColor ([[0, 0, 0, 0], [1, 1, 1, 0.1]] select _lit);
+    [_surface, [[0, 0, 0, 0], _hover] select _lit] call FUNC(paintSurface);
 
     private _icon = _options getOrDefault ["icon", ""];
 
@@ -174,10 +184,10 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closeMenu)}] call FUNC
     };
 
     if (_enabled) then {
-        _hit setVariable [QGVAR(surface), _surface];
+        _hit setVariable [QGVAR(surface), [_surface, _hover]];
         _hit setVariable [QGVAR(choice), [_arguments, _code]];
-        _hit ctrlAddEventHandler ["MouseEnter", {((_this select 0) getVariable [QGVAR(surface), controlNull]) ctrlSetBackgroundColor [1, 1, 1, 0.1]}];
-        _hit ctrlAddEventHandler ["MouseExit", {((_this select 0) getVariable [QGVAR(surface), controlNull]) ctrlSetBackgroundColor [0, 0, 0, 0]}];
+        _hit ctrlAddEventHandler ["MouseEnter", {((_this select 0) getVariable [QGVAR(surface), [[], []]]) call FUNC(paintSurface)}];
+        _hit ctrlAddEventHandler ["MouseExit", {[((_this select 0) getVariable [QGVAR(surface), [[]]]) select 0, [0, 0, 0, 0]] call FUNC(paintSurface)}];
         _hit ctrlAddEventHandler ["ButtonClick", {
             private _choice = (_this select 0) getVariable [QGVAR(choice), [[], {}]];
 

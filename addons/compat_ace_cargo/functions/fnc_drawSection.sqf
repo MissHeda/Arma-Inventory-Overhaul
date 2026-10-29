@@ -103,7 +103,7 @@ if (_shown isNotEqualTo "") then {
         _display, _parent, [_blockX, _top, _tabW, _lineH], _tabColor,
         (_theme getOrDefault ["radius", 0]) min (_lineH / 2)
     ] call EFUNC(gui,uiPanel);
-    [_display, _parent, [_blockX, _top, _tabW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2, "heading"] call EFUNC(gui,uiLabel);
+    [_display, _parent, [_blockX, _top, _tabW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2, "tab"] call EFUNC(gui,uiLabel);
 };
 
 [_display, _parent, [_blockX + _blockW - _spaceW, _top, _spaceW, _lineH], _space, _lineSize, _colorText2, _font, 1, "value"] call EFUNC(gui,uiLabel);

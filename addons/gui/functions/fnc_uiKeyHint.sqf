@@ -149,7 +149,7 @@ private _capX = _left;
     };
 
     if (_capPicture isEqualTo "") then {
-        [_display, _parent, [_capX, _top, _capW, _height], _capText, _keySize, _keyText, _fontBold, 2, "key"] call FUNC(uiLabel);
+        [_display, _parent, [_capX, _top, _capW, _height], _capText, _keySize, _keyText, _fontBold, 2, "keyhint"] call FUNC(uiLabel);
     } else {
         private _iconW = SQUARE(_iconSide);
         private _iconX = _capX + (_capW - _iconW * _times) / 2;
@@ -163,7 +163,7 @@ private _capX = _left;
 } forEach _caps;
 
 if (_text isNotEqualTo "") then {
-    [_display, _parent, [_left + _badgeW + _gap, _top, _textW, _height], _text, _textSize, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _font, 0, "button"] call FUNC(uiLabel);
+    [_display, _parent, [_left + _badgeW + _gap, _top, _textW, _height], _text, _textSize, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _font, 0, "keyhint"] call FUNC(uiLabel);
 };
 
 _taken

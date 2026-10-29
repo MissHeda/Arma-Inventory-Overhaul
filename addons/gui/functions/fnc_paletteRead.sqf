@@ -30,7 +30,7 @@ _savedPalette params [
     "_savedAccent", "_savedSecondary", "_savedAlpha", ["_savedPanel", []],
     ["_savedCells", []], ["_savedTiles", []], ["_savedText", []], ["_savedLines", []], ["_savedTileAlpha", -1],
     ["_savedCellAlpha", -1], ["_savedGradient", []], ["_savedStyle", ""], ["_savedTitle", []], ["_savedPanelEnd", []],
-    ["_savedSecondaryAlpha", -1], ["_savedLinesAlpha", -1], ["_savedReach", -1]
+    ["_savedSecondaryAlpha", -1], ["_savedLinesAlpha", -1], "", ["_savedReach", -1]
 ];
 
 private _fnc_alpha = {
@@ -66,6 +66,7 @@ _read = [
     [_savedPanelEnd, PALETTE_PANEL_VALUE_MAX] call _fnc_colour,
     [_savedSecondaryAlpha] call _fnc_alpha,
     [_savedLinesAlpha] call _fnc_alpha,
+    -1,
     if (_savedReach isEqualType 0 && {_savedReach >= 0} && {_savedReach <= GRADIENT_PARTS_ALL} && {_savedReach == floor _savedReach}) then {_savedReach} else {-1}
 ];
 

@@ -496,6 +496,18 @@
         <Key ID="STR_einv_gui_Palette_Green">
             <English>G</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Group_Controls">
+            <English>Controls</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Group_Info">
+            <English>Info</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Group_Items">
+            <English>Items</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Group_Window">
+            <English>Window</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Hex">
             <English>Hex</English>
         </Key>
@@ -532,29 +544,29 @@
         <Key ID="STR_einv_gui_Palette_Panels_Tip">
             <English>The window's background: the panels behind the columns, the header and the footer, and the inspect card and kit windows - and how see-through they are. Kept dark enough for the text to stay readable.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Ammo">
+            <English>Ammo counts</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Ammo_Tip">
+            <English>Rounds like 30/30 on magazines and weapons.</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Part_Buttons">
             <English>Buttons</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Buttons_Tip">
-            <English>The words on buttons and tabs and beside the key hints in the bar at the bottom. The keys themselves keep their colour.</English>
+            <English>The window's buttons: Take all, Sort, the tabs' chips. Never those of the colour and sound panels.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Counts">
-            <English>Counts</English>
+        <Key ID="STR_einv_gui_Palette_Part_Captions">
+            <English>Slot captions</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Counts_Tip">
-            <English>Stack and ammo counts like 5/5 and 30/30 - in the gradient's start colour, they are too short to run.</English>
+        <Key ID="STR_einv_gui_Palette_Part_Captions_Tip">
+            <English>Primary, Headgear, Uniform and the other captions over or in the slots.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Headings">
-            <English>Headings</English>
+        <Key ID="STR_einv_gui_Palette_Part_Columns">
+            <English>Column titles</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Headings_Tip">
-            <English>Equipment, Gear, Hotbar, the captions of the slots and the names of the boxes' tabs.</English>
-        </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Hints">
-            <English>Notes</English>
-        </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Hints_Tip">
-            <English>The quiet lines: notes, the search field's placeholder, labels on the cards and the version.</English>
+        <Key ID="STR_einv_gui_Palette_Part_Columns_Tip">
+            <English>Your gear, Loot and the names of the boxes at the top of a column.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Hover">
             <English>Tooltips</English>
@@ -562,32 +574,77 @@
         <Key ID="STR_einv_gui_Palette_Part_Hover_Tip">
             <English>The name of what you point at, the comparison card and the tips of the buttons.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Part_KeyHints">
+            <English>Key hints</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_KeyHints_Tip">
+            <English>The keys and words in the bar at the bottom: Esc Close, F Quick move.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Keys">
+            <English>Keys</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Keys_Tip">
+            <English>The weapons' 1, 2, 3, the hotbar's 4 to 0 and the page marks.</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Part_Menus">
-            <English>Menus</English>
+            <English>Right-click menu</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Menus_Tip">
-            <English>The right-click menu and the colour and sound panels.</English>
+            <English>The rows of the menu a right click opens.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Names">
-            <English>Names</English>
+            <English>Item names</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Names_Tip">
-            <English>The names of items on their tiles, in the slots and in the vehicle's cargo.</English>
+            <English>The names on the tiles, on the inspect card and in a vehicle's cargo.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Titles">
-            <English>Titles</English>
+        <Key ID="STR_einv_gui_Palette_Part_Notes">
+            <English>Notes</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Titles_Tip">
-            <English>The window's title and the titles of the columns.</English>
+        <Key ID="STR_einv_gui_Palette_Part_Notes_Tip">
+            <English>The quiet lines: notes, the search field's placeholder, labels on the cards and the version.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Sections">
+            <English>Sections</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Sections_Tip">
+            <English>Equipment, Gear and Hotbar.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Stacks">
+            <English>Stack counts</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Stacks_Tip">
+            <English>How many lie in a stack, and a hotbar slot's count.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Tabs">
+            <English>Box tabs</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Tabs_Tip">
+            <English>The tabs of the boxes: Uniform, Vest, Backpack, a vehicle's cargo.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Values">
             <English>Values</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Values_Tip">
-            <English>Weights, loads, free space and the values on the inspect and comparison cards.</English>
+            <English>Loads, free space and the values on the inspect and comparison cards.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Reach">
-            <English>Shows on</English>
+        <Key ID="STR_einv_gui_Palette_Part_Weapons">
+            <English>Weapon names</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Weapons_Tip">
+            <English>The weapons' names on their cards: MX, P99.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Weight">
+            <English>Weight</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Weight_Tip">
+            <English>The weight card: the kilograms, Light or Heavy and the next step.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Window">
+            <English>Window title</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Window_Tip">
+            <English>The word Inventory at the top left.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Red">
             <English>R</English>

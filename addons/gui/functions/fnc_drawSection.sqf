@@ -201,7 +201,7 @@ if (_section getOrDefault ["locked", false]) exitWith {
         _display, _parent, [_blockX + (_lockW - SQUARE(_iconH)) / 2 + SQUARE(_lineH * 0.15), _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
         UI_TEX(icon_lock_ca), _colorText2
     ] call FUNC(uiIcon);
-    [_display, _parent, [_blockX + _lockW, _top, _tabW - _lockW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2, "heading"] call FUNC(uiLabel);
+    [_display, _parent, [_blockX + _lockW, _top, _tabW - _lockW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2, "tab"] call FUNC(uiLabel);
 
     // Why, when the mouse rests on the tab.
     private _tip = [_display, "EINV_Hitbox", _parent, [_blockX, _top, _tabW, _lineH]] call FUNC(uiCreate);
@@ -437,7 +437,7 @@ if (_shown isNotEqualTo "") then {
     [
         _display, _parent,
         [_blockX + _chevronW + _tabIconW, _buttonTop + _buttonH / 2 - TEXT_MID * _buttonSize, _tabW - _chevronW - _tabIconW, TEXT_MID * _buttonSize * 2],
-        _shown, _buttonSize, _colorText2, _fontBold, 2, "button"
+        _shown, _buttonSize, _colorText2, _fontBold, 2, "tab"
     ] call FUNC(uiLabel);
 
     if (_tabIconW > 0) then {

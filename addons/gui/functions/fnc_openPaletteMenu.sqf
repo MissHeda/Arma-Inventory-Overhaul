@@ -202,9 +202,13 @@ if (_openDef isNotEqualTo []) then {
     if (_openGradient >= 0) then {
         _height = _height + _rowH + _gapY;
 
-        // The titles' gradient on: where it shows, under it - three chips a row.
+        // The titles' gradient on: where it shows, under it - a group of checkboxes three to a row, a little gap between groups.
         if ((_openDef select 0) isEqualTo "titles" && {[_openGradient] call _fnc_gradientOn}) then {
-            _height = _height + _rowH * ceil ((count GRADIENT_PART_LIST) / 3) + _gapY;
+            {
+                _height = _height + _rowH * ceil ((count (_x select 1)) / 3);
+            } forEach GRADIENT_PART_GROUPS;
+
+            _height = _height + _gapY + _gapY * 0.5 * (count GRADIENT_PART_GROUPS - 1);
         };
     };
 
@@ -248,6 +252,9 @@ private _cardY = _top - safezoneY;
 // ----- The layer, the hit area beside the card, the card -----
 
 private _layer = [_display, "EINV_Group", controlNull, [safezoneX, safezoneY, safezoneW, safezoneH]] call FUNC(uiCreate);
+
+// Settings, not the inventory: no word in it takes the gradient (fnc_uiLabel).
+_layer setVariable [QGVAR(plain), true];
 
 // A group keeps the mouse's buttons from the display's own handlers: it reports them as the columns do (fnc_build)
 // and so does the hit area over the screen in it (fnc_openMenu).
@@ -781,12 +788,11 @@ private _sliders = createHashMap;
 
             _y = _y + _rowH;
 
-            // Where the titles' gradient shows: a checkbox for each part, three to a row, as CBA's settings have them - a square
-            // outline, ticked while the part is on (GRADIENT_*, fnc_uiLabel). The box and its words take the click.
+            // Where the titles' gradient shows: a checkbox for each part as CBA's settings have them - a square outline, ticked
+            // while the part is on (GRADIENT_*, fnc_uiLabel) - in groups, the group's name in the label column, three to a row. The
+            // box and its words take the click.
             if (_gradientOn && {_id isEqualTo "titles"}) then {
                 _y = _y + _gapY;
-
-                [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], LLSTRING(Palette_Reach), _small, _text2, _font, 0, "menu"] call FUNC(uiLabel);
 
                 private _parts = GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT];
                 private _partsX = _cardX + _sliderX;
@@ -797,50 +803,60 @@ private _sliders = createHashMap;
                 private _edgeH = pixelH * 2;
 
                 {
-                    _x params ["_bit", "_words", "_partTip"];
+                    _x params ["_groupWords", "_groupParts"];
 
-                    private _cellX = _partsX + (_forEachIndex mod 3) * (_partW + _gapX / 2);
-                    private _cellY = _y + floor (_forEachIndex / 3) * _rowH;
-                    private _checkY = _cellY + (_rowH - _checkH) / 2;
-                    private _on = ((floor (_parts / _bit)) mod 2) == 1;
-
-                    [_display, _layer, [_cellX, _checkY, _checkW, _checkH], [_muted, _text] select _on, 0] call FUNC(uiPanel);
-                    [_display, _layer, [_cellX + _edgeW, _checkY + _edgeH, _checkW - _edgeW * 2, _checkH - _edgeH * 2], [0.08, 0.08, 0.08, 1], 0] call FUNC(uiPanel);
-
-                    if (_on) then {
-                        private _inset = _checkH * 0.16;
-
-                        [
-                            _display, _layer, [_cellX + SQUARE(_inset), _checkY + _inset, _checkW - SQUARE(_inset) * 2, _checkH - _inset * 2],
-                            UI_TEX(icon_check_ca), _text
-                        ] call FUNC(uiIcon);
+                    if (_forEachIndex > 0) then {
+                        _y = _y + _gapY * 0.5;
                     };
 
-                    private _wordsX = _cellX + _checkW + SQUARE(UNIT * 0.15);
-                    private _wordsW = _cellX + _partW - _wordsX;
+                    [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], _groupWords, _small, _text2, _font, 0] call FUNC(uiLabel);
 
-                    [
-                        _display, _layer, [_wordsX, _cellY, _wordsW, _rowH], [_words, _wordsW, _font, _small * 0.9] call FUNC(fitText),
-                        _small * 0.9, [_muted, _text] select _on, _font, 0, "never"
-                    ] call FUNC(uiLabel);
+                    {
+                        _x params ["_bit", "_words", "_partTip"];
 
-                    private _partHit = [_display, "EINV_Hitbox", _layer, [_cellX, _cellY, _partW, _rowH]] call FUNC(uiCreate);
+                        private _cellX = _partsX + (_forEachIndex mod 3) * (_partW + _gapX / 2);
+                        private _cellY = _y + floor (_forEachIndex / 3) * _rowH;
+                        private _checkY = _cellY + (_rowH - _checkH) / 2;
+                        private _on = ((floor (_parts / _bit)) mod 2) == 1;
 
-                    [_partHit, _partTip] call FUNC(setTooltip);
-                    _partHit setVariable [QGVAR(id), _bit];
-                    _partHit ctrlAddEventHandler ["ButtonClick", {
-                        params ["_ctrl"];
+                        [_display, _layer, [_cellX, _checkY, _checkW, _checkH], [_muted, _text] select _on, 0] call FUNC(uiPanel);
+                        [_display, _layer, [_cellX + _edgeW, _checkY + _edgeH, _checkW - _edgeW * 2, _checkH - _edgeH * 2], [0.08, 0.08, 0.08, 1], 0] call FUNC(uiPanel);
 
-                        // The popover is made again, which deletes this very control: a frame later.
-                        [{
-                            params ["_bit"];
+                        if (_on) then {
+                            private _inset = _checkH * 0.16;
 
-                            ["gradientPart", _bit] call FUNC(paletteSet);
-                        }, [_ctrl getVariable [QGVAR(id), 0]]] call FUNC(later);
-                    }];
-                } forEach GRADIENT_PART_LIST;
+                            [
+                                _display, _layer, [_cellX + SQUARE(_inset), _checkY + _inset, _checkW - SQUARE(_inset) * 2, _checkH - _inset * 2],
+                                UI_TEX(icon_check_ca), _text
+                            ] call FUNC(uiIcon);
+                        };
 
-                _y = _y + _rowH * ceil ((count GRADIENT_PART_LIST) / 3);
+                        private _wordsX = _cellX + _checkW + SQUARE(UNIT * 0.15);
+                        private _wordsW = _cellX + _partW - _wordsX;
+
+                        [
+                            _display, _layer, [_wordsX, _cellY, _wordsW, _rowH], [_words, _wordsW, _font, _small * 0.9] call FUNC(fitText),
+                            _small * 0.9, [_muted, _text] select _on, _font, 0
+                        ] call FUNC(uiLabel);
+
+                        private _partHit = [_display, "EINV_Hitbox", _layer, [_cellX, _cellY, _partW, _rowH]] call FUNC(uiCreate);
+
+                        [_partHit, _partTip] call FUNC(setTooltip);
+                        _partHit setVariable [QGVAR(id), _bit];
+                        _partHit ctrlAddEventHandler ["ButtonClick", {
+                            params ["_ctrl"];
+
+                            // The popover is made again, which deletes this very control: a frame later.
+                            [{
+                                params ["_bit"];
+
+                                ["gradientPart", _bit] call FUNC(paletteSet);
+                            }, [_ctrl getVariable [QGVAR(id), 0]]] call FUNC(later);
+                        }];
+                    } forEach _groupParts;
+
+                    _y = _y + _rowH * ceil ((count _groupParts) / 3);
+                } forEach GRADIENT_PART_GROUPS;
             };
         };
 

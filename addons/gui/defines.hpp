@@ -60,24 +60,33 @@
 // [accent, secondary, panels' alpha, panels, cells, tiles (no longer offered: the setup colours the tiles by category), text,
 // lines, tiles' alpha, cells' alpha, the titles' gradient end, the style picked last ("" when changed by hand since), the titles'
 // colour, the panels' gradient end, the secondary films' alpha, the lines' alpha]. A row's gradient is on while its end is set.
-#define PALETTE_UNSET [[], [], -1, [], [], [], [], [], -1, -1, [], "", [], [], -1, -1, -1]
+#define PALETTE_UNSET [[], [], -1, [], [], [], [], [], -1, -1, [], "", [], [], -1, -1, -1, -1]
 // The window as it ships: nothing chosen but the titles' gradient, from the accent into white (the Classic style). What a new
 // player starts with, what Reset takes things back to, and all there is where players may not pick their colours.
-// Where the titles' gradient shows (palette slot 16, fnc_uiLabel): a sum of these. Unset, GRADIENT_PARTS_DEFAULT.
-#define GRADIENT_TITLES 1
-#define GRADIENT_HEADINGS 2
-#define GRADIENT_NAMES 4
-#define GRADIENT_COUNTS 8
-#define GRADIENT_BUTTONS 16
-#define GRADIENT_VALUES 32
-#define GRADIENT_HOVER 64
-#define GRADIENT_MENUS 128
-#define GRADIENT_HINTS 256
-#define GRADIENT_PARTS_DEFAULT 67
-#define GRADIENT_PARTS_ALL 511
-// The colour popover's checkboxes for them, three to a row, in order: [part, words, tip].
-#define GRADIENT_PART_LIST [[GRADIENT_TITLES, LLSTRING(Palette_Part_Titles), LLSTRING(Palette_Part_Titles_Tip)], [GRADIENT_HEADINGS, LLSTRING(Palette_Part_Headings), LLSTRING(Palette_Part_Headings_Tip)], [GRADIENT_NAMES, LLSTRING(Palette_Part_Names), LLSTRING(Palette_Part_Names_Tip)], [GRADIENT_COUNTS, LLSTRING(Palette_Part_Counts), LLSTRING(Palette_Part_Counts_Tip)], [GRADIENT_VALUES, LLSTRING(Palette_Part_Values), LLSTRING(Palette_Part_Values_Tip)], [GRADIENT_BUTTONS, LLSTRING(Palette_Part_Buttons), LLSTRING(Palette_Part_Buttons_Tip)], [GRADIENT_MENUS, LLSTRING(Palette_Part_Menus), LLSTRING(Palette_Part_Menus_Tip)], [GRADIENT_HOVER, LLSTRING(Palette_Part_Hover), LLSTRING(Palette_Part_Hover_Tip)], [GRADIENT_HINTS, LLSTRING(Palette_Part_Hints), LLSTRING(Palette_Part_Hints_Tip)]]
-#define PALETTE_DEFAULT [[], [], -1, [], [], [], [], [], -1, -1, [0, 0, 1], "", [], [], -1, -1, -1]
+// Where the titles' gradient shows (palette slot 17, fnc_uiLabel): a sum of these. Unset, GRADIENT_PARTS_DEFAULT. Slot 16 held
+// an older, coarser set and is no longer read.
+#define GRADIENT_WINDOW 1
+#define GRADIENT_COLUMNS 2
+#define GRADIENT_SECTIONS 4
+#define GRADIENT_CAPTIONS 8
+#define GRADIENT_TABS 16
+#define GRADIENT_NAMES 32
+#define GRADIENT_WEAPONS 64
+#define GRADIENT_STACKS 128
+#define GRADIENT_AMMO 256
+#define GRADIENT_KEYS 512
+#define GRADIENT_WEIGHT 1024
+#define GRADIENT_VALUES 2048
+#define GRADIENT_HOVER 4096
+#define GRADIENT_NOTES 8192
+#define GRADIENT_BUTTONS 16384
+#define GRADIENT_KEYHINTS 32768
+#define GRADIENT_MENUS 65536
+#define GRADIENT_PARTS_DEFAULT 4127
+#define GRADIENT_PARTS_ALL 131071
+// The colour popover's checkboxes for them, in groups of a row or two, three to a row: [group's words, [[part, words, tip], ...]].
+#define GRADIENT_PART_GROUPS [[LLSTRING(Palette_Group_Window), [[GRADIENT_WINDOW, LLSTRING(Palette_Part_Window), LLSTRING(Palette_Part_Window_Tip)], [GRADIENT_COLUMNS, LLSTRING(Palette_Part_Columns), LLSTRING(Palette_Part_Columns_Tip)], [GRADIENT_SECTIONS, LLSTRING(Palette_Part_Sections), LLSTRING(Palette_Part_Sections_Tip)], [GRADIENT_CAPTIONS, LLSTRING(Palette_Part_Captions), LLSTRING(Palette_Part_Captions_Tip)], [GRADIENT_TABS, LLSTRING(Palette_Part_Tabs), LLSTRING(Palette_Part_Tabs_Tip)]]], [LLSTRING(Palette_Group_Items), [[GRADIENT_NAMES, LLSTRING(Palette_Part_Names), LLSTRING(Palette_Part_Names_Tip)], [GRADIENT_WEAPONS, LLSTRING(Palette_Part_Weapons), LLSTRING(Palette_Part_Weapons_Tip)], [GRADIENT_STACKS, LLSTRING(Palette_Part_Stacks), LLSTRING(Palette_Part_Stacks_Tip)], [GRADIENT_AMMO, LLSTRING(Palette_Part_Ammo), LLSTRING(Palette_Part_Ammo_Tip)], [GRADIENT_KEYS, LLSTRING(Palette_Part_Keys), LLSTRING(Palette_Part_Keys_Tip)]]], [LLSTRING(Palette_Group_Info), [[GRADIENT_WEIGHT, LLSTRING(Palette_Part_Weight), LLSTRING(Palette_Part_Weight_Tip)], [GRADIENT_VALUES, LLSTRING(Palette_Part_Values), LLSTRING(Palette_Part_Values_Tip)], [GRADIENT_HOVER, LLSTRING(Palette_Part_Hover), LLSTRING(Palette_Part_Hover_Tip)], [GRADIENT_NOTES, LLSTRING(Palette_Part_Notes), LLSTRING(Palette_Part_Notes_Tip)]]], [LLSTRING(Palette_Group_Controls), [[GRADIENT_BUTTONS, LLSTRING(Palette_Part_Buttons), LLSTRING(Palette_Part_Buttons_Tip)], [GRADIENT_KEYHINTS, LLSTRING(Palette_Part_KeyHints), LLSTRING(Palette_Part_KeyHints_Tip)], [GRADIENT_MENUS, LLSTRING(Palette_Part_Menus), LLSTRING(Palette_Part_Menus_Tip)]]]]
+#define PALETTE_DEFAULT [[], [], -1, [], [], [], [], [], -1, -1, [0, 0, 1], "", [], [], -1, -1, -1, -1]
 // Where each transparency lies in the palette, by its slider's id.
 #define PALETTE_ALPHAS [["alpha", 2], ["cellAlpha", 9], ["tileAlpha", 8], ["secondaryAlpha", 14], ["linesAlpha", 15]]
 

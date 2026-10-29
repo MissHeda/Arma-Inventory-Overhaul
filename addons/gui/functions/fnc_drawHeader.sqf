@@ -50,7 +50,7 @@ private _iconH = UNIT * 1.1;
     _theme get "text",
     _theme get "fontBold",
     0,
-    0
+    "window"
 ] call FUNC(uiLabel);
 
 // ----- Buttons, from the right edge inwards -----
