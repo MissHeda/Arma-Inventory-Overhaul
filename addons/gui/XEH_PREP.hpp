@@ -218,6 +218,9 @@ PREP(accentColour);
 // tiles, text and lines
 PREP(palette);
 PREP(paletteAllowed);
+PREP(paletteForced);
+PREP(paletteImport);
+PREP(paletteRead);
 PREP(panelColour);
 PREP(paletteInfo);
 PREP(paletteSet);

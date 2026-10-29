@@ -145,6 +145,9 @@ uiNamespace setVariable [QGVAR(paletteTab), _tab];
 
 // The style list, open under the Style row or not, and the styles.
 private _stylesOpen = uiNamespace getVariable [QGVAR(paletteStylesOpen), false];
+
+// The Import or Export line under the title, or neither ("").
+private _io = uiNamespace getVariable [QGVAR(paletteIO), ""];
 private _styles = [] call FUNC(paletteStyles);
 
 // The fields of a picker: the words by it, and the tip.
@@ -183,6 +186,10 @@ private _fieldLabelW = SQUARE(UNIT * 1.4);
 
 // The title, the Style row (and its list), every row folded, and what the open row shows: its picker, its sliders, its note.
 private _height = _padY * 2 + _titleH + (_gapY + _headH) + (count _rowDefs) * (_gapY + _headH);
+
+if (_io isNotEqualTo "") then {
+    _height = _height + _gapY + _rowH;
+};
 
 if (_stylesOpen) then {
     _height = _height + _pickPad * 2 + (count _styles) * _rowH;
@@ -297,6 +304,52 @@ private _headTop = _cardY + _padY;
 [_display, _layer, [_cardX + _padX, _headTop, _width - _padX * 2, _titleH], LLSTRING(Palette_Title), _size, _text2, _fontBold, 0] call FUNC(uiLabel);
 
 private _resetAll = ["all", LLSTRING(Palette_ResetAll), _headTop, _titleH] call _fnc_chip;
+
+// Import and Export, left of Reset all: each opens its line under the title (a click on the open one closes it).
+private _ioRight = _cardX + _width - _padX - ([LLSTRING(Palette_ResetAll), "", _chipH, _chipSize, _buttonTheme] call FUNC(buttonWidth)) - _gapX;
+
+{
+    _x params ["_ioId", "_ioWords", "_ioTip"];
+
+    private _ioW = [_ioWords, "", _chipH, _chipSize, _buttonTheme] call FUNC(buttonWidth);
+    private _ioRect = [_ioRight - _ioW, _headTop + (_titleH - _chipH) / 2, _ioW, _chipH];
+
+    if (_io isEqualTo _ioId) then {
+        [_display, _layer, _ioRect, ((GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]]) select [0, 3]) + [0.45], _chipH / 2] call FUNC(uiPanel);
+    };
+
+    private _ioButton = [
+        _display, _layer, _ioRect, _ioId, _ioWords, "", _buttonTheme, {
+            params ["_button", "_ioId"];
+
+            if (_button < 0) exitWith {};
+
+            [{
+                params ["_ioId"];
+
+                private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+                if (isNull _display) exitWith {};
+
+                uiNamespace setVariable [QGVAR(paletteIO), [_ioId, ""] select (_ioId isEqualTo (uiNamespace getVariable [QGVAR(paletteIO), ""]))];
+
+                // Exported: on the clipboard as well, where the game allows it.
+                if (_ioId isEqualTo "export") then {
+                    copyToClipboard str GVAR(palette);
+                };
+
+                [_display] call FUNC(openPaletteMenu);
+            }, [_ioId]] call FUNC(later);
+        }, false, _chipSize, true
+    ] call FUNC(uiButton);
+
+    [(_ioButton param [count _ioButton - 1, controlNull]), _ioTip] call FUNC(setTooltip);
+
+    _ioRight = _ioRight - _ioW - _gapX;
+} forEach [
+    ["export", LLSTRING(Palette_Export), LLSTRING(Palette_Export_Tip)],
+    ["import", LLSTRING(Palette_Import), LLSTRING(Palette_Import_Tip)]
+];
 
 [_display, _layer, [_cardX + _padX, _headTop + _titleH - pixelH, _width - _padX * 2, pixelH], _line] call FUNC(uiPanel);
 
@@ -443,6 +496,64 @@ private _fnc_picker = {
 // ----- Style: the dropdown, and its list under it while open -----
 
 private _y = _headTop + _titleH + _gapY;
+
+// ----- Import or Export: the colours as text in a field, and its button -----
+
+if (_io isNotEqualTo "") then {
+    private _buttonWords = [LLSTRING(Palette_Apply), LLSTRING(Palette_Done)] select (_io isEqualTo "export");
+    private _ioButtonW = [_buttonWords, "", _chipH, _chipSize, _buttonTheme] call FUNC(buttonWidth);
+    private _fieldRect = [_cardX + _padX, _y, _width - _padX * 2 - _ioButtonW - _gapX, _rowH];
+
+    [_display, _layer, _fieldRect, [1, 1, 1, 0.08], UNIT * 0.25] call FUNC(uiPanel);
+
+    private _ioEdit = [
+        _display, "EINV_Edit", _layer,
+        [(_fieldRect select 0) + SQUARE(UNIT * 0.3), _y + (_rowH - _small * 1.4) / 2, (_fieldRect select 2) - SQUARE(UNIT * 0.6), _small * 1.4]
+    ] call FUNC(uiCreate);
+
+    _ioEdit ctrlSetFont _font;
+    _ioEdit ctrlSetFontHeight _small;
+    _ioEdit ctrlSetTextColor _text;
+    _ioEdit ctrlSetText (["", str GVAR(palette)] select (_io isEqualTo "export"));
+
+    uiNamespace setVariable [QGVAR(paletteIOEdit), _ioEdit];
+
+    [
+        _display, _layer, [_cardX + _width - _padX - _ioButtonW, _y + (_rowH - _chipH) / 2, _ioButtonW, _chipH], _io, _buttonWords, "",
+        _buttonTheme, {
+            params ["_button", "_ioId"];
+
+            if (_button < 0) exitWith {};
+
+            private _typed = ctrlText (uiNamespace getVariable [QGVAR(paletteIOEdit), controlNull]);
+
+            [{
+                params ["_ioId", "_typed"];
+
+                private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+                if (isNull _display) exitWith {};
+
+                // Apply: the pasted colours are taken; text that holds none says so and the line stays.
+                if (_ioId isEqualTo "import" && {!([_typed] call FUNC(paletteImport))}) exitWith {
+                    ["ImportBad"] call FUNC(flashHint);
+                };
+
+                uiNamespace setVariable [QGVAR(paletteIO), ""];
+
+                [_display] call FUNC(openPaletteMenu);
+            }, [_ioId, _typed]] call FUNC(later);
+        }, false, _chipSize, true
+    ] call FUNC(uiButton);
+
+    // Export: the text is selected, so Ctrl+C copies it where the clipboard was not reached.
+    if (_io isEqualTo "export") then {
+        ctrlSetFocus _ioEdit;
+        _ioEdit ctrlSetTextSelection [0, count ctrlText _ioEdit];
+    };
+
+    _y = _y + _rowH + _gapY;
+};
 
 [
     _display, _layer, [_cardX + _nameX, _y, _nameW, _headH], [LLSTRING(Palette_Style), _nameW, _fontBold, _size] call FUNC(fitText), _size, _text,

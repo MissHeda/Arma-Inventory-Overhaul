@@ -74,6 +74,29 @@
     0
 ] call CBA_fnc_addSetting;
 
+// Each player's colours as text - the colour popover's own, written here whenever it closes (fnc_paletteSettle), so they can
+// be copied or pasted in Configure Addons. Pasted here, they are taken (fnc_paletteImport). A server or mission that forces it
+// gives everyone these colours, and the palette button goes (fnc_paletteForced, fnc_palette).
+[
+    QGVAR(paletteText),
+    "EDITBOX",
+    [LLSTRING(Setting_PaletteText), LLSTRING(Setting_PaletteText_Desc)],
+    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
+    "",
+    0,
+    {
+        params ["_text"];
+
+        if ([] call FUNC(paletteForced)) exitWith {
+            if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) then {
+                [] call FUNC(buildSoon);
+            };
+        };
+
+        [_text] call FUNC(paletteImport);
+    }
+] call CBA_fnc_addSetting;
+
 // ----- Sounds -----
 
 // A player's own sound volumes are no settings here: they are set in the window, in the dropdown under the speaker

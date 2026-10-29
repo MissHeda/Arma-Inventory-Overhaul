@@ -17,4 +17,4 @@
  * Public: No
  */
 
-(missionNamespace getVariable [QGVAR(playerColours), true]) isNotEqualTo false
+(missionNamespace getVariable [QGVAR(playerColours), true]) isNotEqualTo false && {!([] call FUNC(paletteForced))}

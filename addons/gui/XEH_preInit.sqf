@@ -516,51 +516,11 @@ GVAR(palette) = +PALETTE_DEFAULT;
 GVAR(paletteDirty) = false;
 GVAR(menuRemake) = false;
 
-private _savedPalette = profileNamespace getVariable [QGVAR(palette), []];
+// What the profile holds, read as fnc_paletteRead reads any palette: nothing usable keeps the window as it ships.
+private _savedPalette = [profileNamespace getVariable [QGVAR(palette), []]] call FUNC(paletteRead);
 
-if (_savedPalette isEqualType [] && {count _savedPalette >= 3} && {count _savedPalette <= count PALETTE_UNSET}) then {
-    _savedPalette params [
-        "_savedAccent", "_savedSecondary", "_savedAlpha", ["_savedPanel", []],
-        ["_savedCells", []], ["_savedTiles", []], ["_savedText", []], ["_savedLines", []], ["_savedTileAlpha", -1],
-        ["_savedCellAlpha", -1], ["_savedGradient", []], ["_savedStyle", ""], ["_savedTitle", []], ["_savedPanelEnd", []],
-        ["_savedSecondaryAlpha", -1], ["_savedLinesAlpha", -1], ["_savedReach", -1]
-    ];
-
-    private _fnc_alpha = {
-        params ["_saved"];
-
-        if (_saved isEqualType 0 && {_saved >= 0} && {_saved <= 1}) then {_saved max PALETTE_ALPHA_MIN} else {-1}
-    };
-
-    private _fnc_colour = {
-        params ["_pick", "_valueMax"];
-
-        if (_pick isEqualType [] && {count _pick in [2, 3]} && {_pick isEqualTypeAll 0} && {_pick findIf {!(_x >= 0 && {_x <= 1})} < 0}) then {
-            [_pick select 0, _pick select 1, ((_pick param [2, 1]) min _valueMax)]
-        } else {
-            []
-        }
-    };
-
-    GVAR(palette) = [
-        [_savedAccent, 1] call _fnc_colour,
-        [_savedSecondary, 1] call _fnc_colour,
-        if (_savedAlpha isEqualType 0 && {_savedAlpha >= 0} && {_savedAlpha <= 1}) then {_savedAlpha max PALETTE_ALPHA_MIN} else {-1},
-        [_savedPanel, PALETTE_PANEL_VALUE_MAX] call _fnc_colour,
-        [_savedCells, PALETTE_PANEL_VALUE_MAX] call _fnc_colour,
-        [_savedTiles, PALETTE_PANEL_VALUE_MAX] call _fnc_colour,
-        [_savedText, 1] call _fnc_colour,
-        [_savedLines, 1] call _fnc_colour,
-        if (_savedTileAlpha isEqualType 0 && {_savedTileAlpha >= 0} && {_savedTileAlpha <= 1}) then {_savedTileAlpha max PALETTE_ALPHA_MIN} else {-1},
-        if (_savedCellAlpha isEqualType 0 && {_savedCellAlpha >= 0} && {_savedCellAlpha <= 1}) then {_savedCellAlpha max PALETTE_ALPHA_MIN} else {-1},
-        [_savedGradient, 1] call _fnc_colour,
-        ["", _savedStyle] select (_savedStyle isEqualType ""),
-        [_savedTitle, 1] call _fnc_colour,
-        [_savedPanelEnd, PALETTE_PANEL_VALUE_MAX] call _fnc_colour,
-        [_savedSecondaryAlpha] call _fnc_alpha,
-        [_savedLinesAlpha] call _fnc_alpha,
-        if (_savedReach isEqualType 0 && {_savedReach >= 0} && {_savedReach <= GRADIENT_PARTS_ALL} && {_savedReach == floor _savedReach}) then {_savedReach} else {-1}
-    ];
+if (_savedPalette isNotEqualTo []) then {
+    GVAR(palette) = _savedPalette;
 };
 
 #include "initSettings.inc.sqf"

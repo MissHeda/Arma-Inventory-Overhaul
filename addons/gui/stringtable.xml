@@ -457,6 +457,9 @@
         <Key ID="STR_einv_gui_Palette_Accent_Tip">
             <English>Highlights, switches, bars and the icons that are on.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Apply">
+            <English>Apply</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Blue">
             <English>B</English>
         </Key>
@@ -472,8 +475,17 @@
         <Key ID="STR_einv_gui_Palette_Default">
             <English>Default</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Done">
+            <English>Done</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_End">
             <English>End</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Export">
+            <English>Export</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Export_Tip">
+            <English>Your colours as text, copied to the clipboard - paste them anywhere to share your look.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Gradient">
             <English>Gradient</English>
@@ -489,6 +501,15 @@
         </Key>
         <Key ID="STR_einv_gui_Palette_Hex_Tip">
             <English>A colour code such as #FF8800 or #F80. Press Return to apply.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Import">
+            <English>Import</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_ImportBad">
+            <English>That text holds no colours</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Import_Tip">
+            <English>Paste colours someone exported (Ctrl+V) and press Apply.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Lines">
             <English>Lines</English>
@@ -737,6 +758,12 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
         <Key ID="STR_einv_gui_Setting_PageRows_Desc">
             <English>Rows of a tall crate or vehicle shown at a time; taller ones get pages (4 to 39, 10 by default).
 0 or 40 shows the whole container. Only for what you loot, not your own gear.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PaletteText">
+            <English>Colours (text)</English>
+        </Key>
+        <Key ID="STR_einv_gui_Setting_PaletteText_Desc">
+            <English>Your colours from the colour panel as text.\nCopy it to share your look, or paste\nsomeone else's to wear theirs.\n\nA server or mission that forces it\ngives everyone these colours, and the\ncolour button goes.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonItems">
             <English>Take and put items</English>

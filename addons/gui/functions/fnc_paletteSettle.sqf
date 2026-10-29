@@ -24,11 +24,20 @@
 
 uiNamespace setVariable [QGVAR(paletteTyping), []];
 
+// The Import or Export line closes with the popover.
+uiNamespace setVariable [QGVAR(paletteIO), ""];
+
 if (GVAR(paletteDirty)) then {
     GVAR(paletteDirty) = false;
 
     profileNamespace setVariable [QGVAR(palette), +GVAR(palette)];
     saveProfileNamespace;
+
+    // The CBA setting shows the same colours as text (Configure Addons, client), so they can be copied from there or set
+    // there - unless a server or mission forces it.
+    if (!isNil "CBA_settings_fnc_set" && {!([] call FUNC(paletteForced))}) then {
+        [QGVAR(paletteText), str GVAR(palette), 0, "client"] call CBA_settings_fnc_set;
+    };
 };
 
 uiNamespace setVariable [QGVAR(paletteRows), createHashMap];

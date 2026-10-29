@@ -33,6 +33,13 @@
  * Public: No
  */
 
+// The colours a server or mission forces (einv_gui_paletteText): everyone wears those.
+if ([] call FUNC(paletteForced)) exitWith {
+    private _forced = [parseSimpleArray (missionNamespace getVariable [QGVAR(paletteText), ""])] call FUNC(paletteRead);
+
+    [_forced, +PALETTE_DEFAULT] select (_forced isEqualTo [])
+};
+
 if !([] call FUNC(paletteAllowed)) exitWith {
     +PALETTE_DEFAULT
 };
