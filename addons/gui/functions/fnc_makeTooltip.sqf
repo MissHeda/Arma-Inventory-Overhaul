@@ -25,6 +25,17 @@ params ["_display"];
 
 private _theme = GVAR(theme);
 
+// With the titles' gradient on, structured text: its letters take the gradient (fnc_setTipText).
+if ((_theme getOrDefault ["titleGradient", []]) isNotEqualTo []) exitWith {
+    private _tip = [_display, "EINV_StructuredText", controlNull, [0, 0, 0, TEXT_UNIT * 0.85]] call FUNC(uiCreate);
+
+    _tip setVariable [QGVAR(gradient), true];
+    _tip ctrlSetBackgroundColor (_theme getOrDefault ["tooltipBg", [0.03, 0.03, 0.03, 0.96]]);
+    _tip ctrlShow false;
+
+    _tip
+};
+
 private _tooltip = [
     _display, controlNull, [0, 0, 0, TEXT_UNIT * 0.85], "", TEXT_UNIT * 0.58,
     _theme getOrDefault ["text", [1, 1, 1, 1]], _theme getOrDefault ["font", "PuristaMedium"], 2

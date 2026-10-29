@@ -75,7 +75,7 @@ private _group = [_display, "EINV_Group", controlNull, [-10, -10, _width + pixel
 
 private _cursor = _padY;
 
-[_display, _group, [_padX, _cursor, _width - _padX * 2, _nameH], _name, _nameSize, _colorText, _fontBold, 0] call FUNC(uiLabel);
+[_display, _group, [_padX, _cursor, _width - _padX * 2, _nameH], _name, _nameSize, _colorText, _fontBold, 0, true] call FUNC(uiLabel);
 _cursor = _cursor + _nameH;
 
 [_display, _group, [_padX, _cursor, _width - _padX * 2, _versusH], _compare getOrDefault ["versus", ""], _smallSize, _muted, _font, 0] call FUNC(uiLabel);

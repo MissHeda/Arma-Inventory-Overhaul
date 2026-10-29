@@ -522,8 +522,15 @@ if (_savedPalette isEqualType [] && {count _savedPalette >= 3} && {count _savedP
     _savedPalette params [
         "_savedAccent", "_savedSecondary", "_savedAlpha", ["_savedPanel", []],
         ["_savedCells", []], ["_savedTiles", []], ["_savedText", []], ["_savedLines", []], ["_savedTileAlpha", -1],
-        ["_savedCellAlpha", -1], ["_savedGradient", []], ["_savedStyle", ""]
+        ["_savedCellAlpha", -1], ["_savedGradient", []], ["_savedStyle", ""], ["_savedTitle", []], ["_savedPanelEnd", []],
+        ["_savedSecondaryAlpha", -1], ["_savedLinesAlpha", -1]
     ];
+
+    private _fnc_alpha = {
+        params ["_saved"];
+
+        if (_saved isEqualType 0 && {_saved >= 0} && {_saved <= 1}) then {_saved max PALETTE_ALPHA_MIN} else {-1}
+    };
 
     private _fnc_colour = {
         params ["_pick", "_valueMax"];
@@ -547,7 +554,11 @@ if (_savedPalette isEqualType [] && {count _savedPalette >= 3} && {count _savedP
         if (_savedTileAlpha isEqualType 0 && {_savedTileAlpha >= 0} && {_savedTileAlpha <= 1}) then {_savedTileAlpha max PALETTE_ALPHA_MIN} else {-1},
         if (_savedCellAlpha isEqualType 0 && {_savedCellAlpha >= 0} && {_savedCellAlpha <= 1}) then {_savedCellAlpha max PALETTE_ALPHA_MIN} else {-1},
         [_savedGradient, 1] call _fnc_colour,
-        ["", _savedStyle] select (_savedStyle isEqualType "")
+        ["", _savedStyle] select (_savedStyle isEqualType ""),
+        [_savedTitle, 1] call _fnc_colour,
+        [_savedPanelEnd, PALETTE_PANEL_VALUE_MAX] call _fnc_colour,
+        [_savedSecondaryAlpha] call _fnc_alpha,
+        [_savedLinesAlpha] call _fnc_alpha
     ];
 };
 

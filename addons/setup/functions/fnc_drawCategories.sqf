@@ -72,7 +72,7 @@ private _pictureW = (ACTION_W(_pictureLabel,_rowH,true,_font)) max SQUARE(UNIT *
 private _idW = SQUARE(UNIT * 6.5);
 private _squareW = SQUARE(_rowH);
 private _checkW = SQUARE(_rowH * 1.7);
-private _colourW = SQUARE(UNIT * 4.6);
+private _colourW = SQUARE(UNIT * 6.4);
 private _nameW = _cardW - _checkW - _squareW - _idW - _colourW - _pictureW - _squareW * 2 - _gap * 7;
 
 // The tiles' colour as a swatch: the setup's colour, else the look's own of the category's tiles (a plain grey for one of the
@@ -130,7 +130,7 @@ private _builtinTile = createHashMapFromArray [
         _display, _page, [_rowX + pixelW, _rowY + _rowH * 0.15 + pixelH, _swatchW - pixelW * 2, _rowH * 0.7 - pixelH * 2], _swatch, _radius
     ] call EFUNC(gui,uiPanel);
 
-    [_display, _page, [_rowX + _swatchW + _gap, _rowY, _colourW - _swatchW - _gap, _rowH], _info get "colorSet", LLSTRING(Categories_ColourPlaceholder), _theme, {
+    [_display, _page, [_rowX + _swatchW + _gap, _rowY, _colourW - _swatchW - _gap, _rowH], _info get "colorSet", LLSTRING(Categories_ColourShort), _theme, {
         params ["_text", "_id"];
 
         if !([[_id], _text] call FUNC(setCategoryColours)) then {

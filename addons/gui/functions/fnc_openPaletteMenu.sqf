@@ -7,15 +7,19 @@
  *   Style         a dropdown of ready-made looks (fnc_paletteStyles: Classic, Modern, Modern gradient, Tactical, Night, Neon); it
  *                 says "Custom" once a row was changed by hand. Its list opens under it, a swatch strip of each style beside its name.
  *   Accent        "Use my Arma colour" goes back to the colour of Options > Game > Colors
- *   Text gradient the colour the accent's texts run into, left to right, as Discord's gradient names (fnc_uiLabel); "Off" ends it
- *   Secondary     "Match accent" goes back to the themes' own films (caption tabs, buttons, bar tracks, picked rows)
- *   Panels        the window's background, kept dark so the text stays readable, with its transparency
+ *   Titles        the colour of the titles (the window's, the columns', the headings, the name at the mouse, the cards' names), with
+ *                 a gradient as Discord's gradient names: two colours, left to right (fnc_uiLabel, fnc_gradientText)
+ *   Secondary     "Match accent" goes back to the themes' own films (caption tabs, buttons, bar tracks, picked rows); its transparency
+ *   Panels        the window's background, kept dark so the text stays readable, with its transparency and a gradient
+ *                 (fnc_panelGradient)
  *   Empty cells   the empty grid cells and the slot boxes, kept dark, with their transparency
  *   Item tiles    their transparency only: their colours are the setup's, by category (Categories card, fnc_tileColour)
  *   Text          captions, names and labels with their dimmer shades
- *   Lines         the hairlines and a frame round the panels, the slot boxes and the tiles
+ *   Lines         the hairlines and a frame round the panels, the slot boxes and the tiles, with their transparency
  * Every row is folded to one line - name, swatch, its button back to the default - and opens on a click: its picker and its slider
- * under it, one row open at a time. Folding it (a click on the open row) hides all of it, the slider too. "Reset all" in the title
+ * under it, one row open at a time. Folding it (a click on the open row) hides all of it, the slider too. A row that can run as a
+ * gradient (Titles, Panels) shows a Gradient switch when open, and with it on two colour boxes, Start and End: a click on one binds
+ * the picker to it (uiNamespace einv_gui_paletteEnd). Its folded swatch shows both halves. "Reset all" in the title
  * row takes every choice away. The buttons show only while there is a choice to take away.
  *
  * The picker is the kind that painting programs have: a colour square (the saturation across, the value down; a pure-hue rectangle
@@ -102,16 +106,17 @@ private _muted = [0.56, 0.56, 0.56, 1];
 
 // The rows, top to bottom: id (what its button takes away, fnc_paletteSet "reset"), the colour's number (PALETTE_IDS; -1 for a row
 // with no colour of its own), name, what it sets (the name's tooltip), the button's words, its sliders [[kind, words], ...]
-// (fnc_paletteSlide, fnc_paletteSet) and a note under them ("" for none).
+// (fnc_paletteSlide, fnc_paletteSet), a note under them ("" for none) and the colour its gradient runs into (-1 for none).
+private _transparency = LLSTRING(Palette_Transparency);
 private _rowDefs = [
-    ["accent", 0, LLSTRING(Palette_Accent), LLSTRING(Palette_Accent_Tip), LLSTRING(Palette_UseArma), [], ""],
-    ["gradient", 7, LLSTRING(Palette_Gradient), LLSTRING(Palette_Gradient_Tip), LLSTRING(Palette_Off), [], ""],
-    ["secondary", 1, LLSTRING(Palette_Secondary), LLSTRING(Palette_Secondary_Tip), LLSTRING(Palette_MatchAccent), [], ""],
-    ["panel", 2, LLSTRING(Palette_Panels), LLSTRING(Palette_Panels_Tip), LLSTRING(Palette_Default), [["alpha", LLSTRING(Palette_Transparency)]], ""],
-    ["cells", 3, LLSTRING(Palette_Cells), LLSTRING(Palette_Cells_Tip), LLSTRING(Palette_Default), [["cellAlpha", LLSTRING(Palette_Transparency)]], ""],
-    ["items", -1, LLSTRING(Palette_Tiles), LLSTRING(Palette_Tiles_Tip), LLSTRING(Palette_Default), [["tileAlpha", LLSTRING(Palette_Transparency)]], LLSTRING(Palette_TilesNote)],
-    ["text", 5, LLSTRING(Palette_Text), LLSTRING(Palette_Text_Tip), LLSTRING(Palette_Default), [], ""],
-    ["lines", 6, LLSTRING(Palette_Lines), LLSTRING(Palette_Lines_Tip), LLSTRING(Palette_Default), [], ""]
+    ["accent", 0, LLSTRING(Palette_Accent), LLSTRING(Palette_Accent_Tip), LLSTRING(Palette_UseArma), [], "", -1],
+    ["titles", 8, LLSTRING(Palette_Titles), LLSTRING(Palette_Titles_Tip), LLSTRING(Palette_Default), [], "", 7],
+    ["secondary", 1, LLSTRING(Palette_Secondary), LLSTRING(Palette_Secondary_Tip), LLSTRING(Palette_MatchAccent), [["secondaryAlpha", _transparency]], "", -1],
+    ["panel", 2, LLSTRING(Palette_Panels), LLSTRING(Palette_Panels_Tip), LLSTRING(Palette_Default), [["alpha", _transparency]], "", 9],
+    ["cells", 3, LLSTRING(Palette_Cells), LLSTRING(Palette_Cells_Tip), LLSTRING(Palette_Default), [["cellAlpha", _transparency]], "", -1],
+    ["items", -1, LLSTRING(Palette_Tiles), LLSTRING(Palette_Tiles_Tip), LLSTRING(Palette_Default), [["tileAlpha", _transparency]], LLSTRING(Palette_TilesNote), -1],
+    ["text", 5, LLSTRING(Palette_Text), LLSTRING(Palette_Text_Tip), LLSTRING(Palette_Default), [], "", -1],
+    ["lines", 6, LLSTRING(Palette_Lines), LLSTRING(Palette_Lines_Tip), LLSTRING(Palette_Default), [["linesAlpha", _transparency]], "", -1]
 ];
 
 // Which row is open ("" none), and so which colour the picker is bound to.
@@ -122,14 +127,25 @@ if (!(_open isEqualType "") || {(_rowDefs findIf {(_x select 0) isEqualTo _open}
 };
 
 private _openDef = _rowDefs param [_rowDefs findIf {(_x select 0) isEqualTo _open}, []];
-private _tab = _openDef param [1, -1];
+private _info = [] call FUNC(paletteInfo);
+
+// A row's gradient is on while its end colour is chosen.
+private _fnc_gradientOn = {
+    params ["_end"];
+
+    _end >= 0 && {(_info get "set") select _end}
+};
+
+// The picker is bound to the open row's colour - or, with its gradient on and End picked, to the end's.
+private _openEnd = _openDef param [7, -1];
+private _pickEnd = ([_openEnd] call _fnc_gradientOn) && {uiNamespace getVariable [QGVAR(paletteEnd), false]};
+private _tab = [_openDef param [1, -1], _openEnd] select _pickEnd;
 
 uiNamespace setVariable [QGVAR(paletteTab), _tab];
 
 // The style list, open under the Style row or not, and the styles.
 private _stylesOpen = uiNamespace getVariable [QGVAR(paletteStylesOpen), false];
 private _styles = [] call FUNC(paletteStyles);
-private _info = [] call FUNC(paletteInfo);
 
 // The fields of a picker: the words by it, and the tip.
 private _fieldDefs = [
@@ -173,7 +189,12 @@ if (_stylesOpen) then {
 };
 
 if (_openDef isNotEqualTo []) then {
-    _openDef params ["", "_openWhich", "", "", "", "_openSliders", "_openNote"];
+    _openDef params ["", "_openWhich", "", "", "", "_openSliders", "_openNote", "_openGradient"];
+
+    // The Gradient line: its switch, and Start and End.
+    if (_openGradient >= 0) then {
+        _height = _height + _rowH + _gapY;
+    };
 
     if (_openWhich >= 0) then {
         _height = _height + _pickPad * 2 + _pickH;
@@ -534,9 +555,10 @@ private _picker = createHashMap;
 private _sliders = createHashMap;
 
 {
-    _x params ["_id", "_which", "_name", "_tip", "_words", "_rowSliders", "_note"];
+    _x params ["_id", "_which", "_name", "_tip", "_words", "_rowSliders", "_note", "_end"];
 
     private _isOpen = _id isEqualTo _open;
+    private _gradientOn = [_end] call _fnc_gradientOn;
 
     _y = _y + _gapY;
 
@@ -560,7 +582,16 @@ private _sliders = createHashMap;
         [_display, _layer, _swatchRect, [0.55, 0.55, 0.55, 1], UNIT * 0.2] call FUNC(uiPanel);
     };
 
-    _swatches set [_id, [_display, _layer, _swatchRect, [0, 0, 0, 1], UNIT * 0.2] call FUNC(uiPanel)];
+    // With its gradient on, the swatch is both colours: the start's half and the end's.
+    if (_gradientOn) then {
+        _swatchRect params ["_swatchLeft", "_swatchTop", "_swatchWidth", "_swatchHeight"];
+
+        _swatches set [_id, [_display, _layer, [_swatchLeft, _swatchTop, _swatchWidth / 2, _swatchHeight], [0, 0, 0, 1], 0] call FUNC(uiPanel)];
+        _swatches set [_id + "End", [_display, _layer, [_swatchLeft + _swatchWidth / 2, _swatchTop, _swatchWidth / 2, _swatchHeight], [0, 0, 0, 1], 0] call FUNC(uiPanel)];
+    } else {
+        _swatches set [_id, [_display, _layer, _swatchRect, [0, 0, 0, 1], UNIT * 0.2] call FUNC(uiPanel)];
+    };
+
     _chips set [_id, [_id, _words, _y, _headH] call _fnc_chip];
 
     // A click on the arrow, the name or the swatch opens the row (the one open before folds), or folds it where it is open.
@@ -580,6 +611,7 @@ private _sliders = createHashMap;
             if (isNull _display) exitWith {};
 
             uiNamespace setVariable [QGVAR(paletteOpen), [_id, ""] select (_id isEqualTo (uiNamespace getVariable [QGVAR(paletteOpen), ""]))];
+            uiNamespace setVariable [QGVAR(paletteEnd), false];
 
             [_display] call FUNC(openPaletteMenu);
         }, [_ctrl getVariable [QGVAR(id), ""]]] call FUNC(later);
@@ -588,8 +620,75 @@ private _sliders = createHashMap;
     _y = _y + _headH;
 
     if (_isOpen) then {
+        // The Gradient line: the switch, and with it on the two colours, the one the picker is bound to outlined.
+        if (_end >= 0) then {
+            _y = _y + _gapY;
+
+            [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], LLSTRING(Palette_Gradient), _small, _text2, _font, 0] call FUNC(uiLabel);
+
+            private _switchW = SQUARE(UNIT * 2.2);
+
+            private _switch = [
+                _display, _layer, [_cardX + _sliderX, _y + (_rowH - _chipH) / 2, _switchW, _chipH], _id,
+                [LLSTRING(Palette_Off), LLSTRING(Palette_On)] select _gradientOn, "", _buttonTheme, {
+                    params ["_button", "_id"];
+
+                    if (_button < 0) exitWith {};
+
+                    uiNamespace setVariable [QGVAR(paletteEnd), false];
+
+                    ["gradient", _id] call FUNC(paletteSet);
+                }, false, _chipSize, true
+            ] call FUNC(uiButton);
+
+            (_switch param [count _switch - 1, controlNull]) ctrlSetTooltip LLSTRING(Palette_Gradient_Tip);
+
+            if (_gradientOn) then {
+                private _boxW = SQUARE(UNIT * 2.6);
+                private _boxX = _cardX + _sliderX + _switchW + _gapX;
+
+                {
+                    _x params ["_boxId", "_words", "_isEnd"];
+
+                    private _boxRect = [_boxX, _y + _rowH * 0.1, _boxW, _rowH * 0.8];
+                    private _picked = _isEnd isEqualTo _pickEnd;
+
+                    [_display, _layer, _boxRect, [[1, 1, 1, 0.22], _text] select _picked, UNIT * 0.2] call FUNC(uiPanel);
+                    _swatches set [_boxId, [
+                        _display, _layer, [(_boxRect select 0) + pixelW * 2, (_boxRect select 1) + pixelH * 2, (_boxRect select 2) - pixelW * 4, (_boxRect select 3) - pixelH * 4],
+                        [0, 0, 0, 1], UNIT * 0.15
+                    ] call FUNC(uiPanel)];
+
+                    [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0] call FUNC(uiLabel);
+
+                    private _boxHit = [_display, "EINV_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(UNIT * 1.7), _rowH]] call FUNC(uiCreate);
+
+                    _boxHit setVariable [QGVAR(id), _isEnd];
+                    _boxHit ctrlAddEventHandler ["ButtonClick", {
+                        params ["_ctrl"];
+
+                        [{
+                            params ["_isEnd"];
+
+                            private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+                            if (isNull _display) exitWith {};
+
+                            uiNamespace setVariable [QGVAR(paletteEnd), _isEnd];
+
+                            [_display] call FUNC(openPaletteMenu);
+                        }, [_ctrl getVariable [QGVAR(id), false]]] call FUNC(later);
+                    }];
+
+                    _boxX = _boxX + _boxW + SQUARE(UNIT * 1.9);
+                } forEach [["gradStart", LLSTRING(Palette_Start), false], ["gradEnd", LLSTRING(Palette_End), true]];
+            };
+
+            _y = _y + _rowH;
+        };
+
         if (_which >= 0) then {
-            _picker = [_which, _y + _pickPad] call _fnc_picker;
+            _picker = [[_which, _end] select (_pickEnd && {_end >= 0}), _y + _pickPad] call _fnc_picker;
             _y = _y + _pickPad * 2 + _pickH;
         } else {
             _y = _y + _pickPad;

@@ -115,6 +115,9 @@
         <Key ID="STR_einv_setup_Categories_ColourPlaceholder">
             <English>Default colour</English>
         </Key>
+        <Key ID="STR_einv_setup_Categories_ColourShort">
+            <English>Default</English>
+        </Key>
         <Key ID="STR_einv_setup_Categories_ColourTip">
             <English>The colour of this category's item tiles, six hex digits like C83232. Empty: the default colour.
 An item in several categories takes the first one's that has a colour.</English>

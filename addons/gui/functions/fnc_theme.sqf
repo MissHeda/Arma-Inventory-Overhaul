@@ -41,8 +41,13 @@
  *   transparency                                             alike; their hints and the count boxes keep their colours and strengths.
  *                                                            The tiles' colours are no longer the palette's: the setup gives them
  *                                                            by category (category=... color=, fnc_tileColour)
- *   Gradient      accentGradient                             the colour the accent's texts run into, left to right, as Discord's
- *                                                            gradient names do (fnc_uiLabel); [] for plain accent text
+ *   Titles        titleColor, titleGradient                  the titles' colour ([] for the text's) and, with the gradient on, the
+ *                                                            colour they run into, left to right, as Discord's gradient names do
+ *                                                            (fnc_uiLabel's titles: the window's, the columns', the headings,
+ *                                                            the name at the mouse and the cards' names)
+ *   Panels'       panelGradient                              with the panels' gradient on, the colour their left side runs from
+ *   gradient                                                 into the panels' colour (fnc_panelGradient)
+ *   Secondary and lines: their alpha                         the films' and the lines' own strength times the slider's
  *   Text          text, text2, muted, buttonText, keyText,   the colour times the grey each has against the white text (text2 0.78,
  *                 tileCountColor, slotIcon                   muted 0.56, ...): its dimmer shades
  *   Lines         line, panelBorder, slotBorder, tileBorder  the colour, at strengths that are seen (a hairline at the plain 8 % of a
@@ -89,7 +94,8 @@ private _accent = [] call FUNC(accentColour);
 ([] call FUNC(palette)) params [
     "", ["_secondaryPick", [], [[]]], ["_alphaPick", -1, [0]], ["_panelPick", [], [[]]],
     ["_cellsPick", [], [[]]], ["_tilesPick", [], [[]]], ["_textPick", [], [[]]], ["_linesPick", [], [[]]],
-    ["_tileAlphaPick", -1, [0]], ["_cellAlphaPick", -1, [0]], ["_gradientPick", [], [[]]]
+    ["_tileAlphaPick", -1, [0]], ["_cellAlphaPick", -1, [0]], ["_gradientPick", [], [[]]], "",
+    ["_titlePick", [], [[]]], ["_panelEndPick", [], [[]]], ["_secondaryAlphaPick", -1, [0]], ["_linesAlphaPick", -1, [0]]
 ];
 
 private _tint = [];
@@ -239,8 +245,29 @@ if (_linesPick isNotEqualTo []) then {
     _theme set ["tileBorder", _lineRgb + [0.22]];
 };
 
-// The gradient of the accent's texts (fnc_uiLabel).
-_theme set ["accentGradient", [[], ([_gradientPick, 1] call _fnc_pickRgb) + [1]] select (_gradientPick isNotEqualTo [])];
+// How strong the secondary films and the lines are: their own strength times the slider's.
+{
+    _x params ["_pickAlpha", "_keys"];
+
+    if (_pickAlpha >= 0) then {
+        {
+            private _film = _theme getOrDefault [_x, []];
+
+            if (count _film >= 4) then {
+                _film = +_film;
+                _film set [3, (_film select 3) * ((_pickAlpha max 0) min 1)];
+                _theme set [_x, _film];
+            };
+        } forEach _keys;
+    };
+} forEach [
+    [_secondaryAlphaPick, ["slotCaptionBg", "button", "buttonHover", "barTrack", "keyBg"]],
+    [_linesAlphaPick, ["line", "panelBorder", "slotBorder", "tileBorder"]]
+];
+
+// The titles: their own colour, and the colour they run into (fnc_uiLabel).
+_theme set ["titleColor", [[], ([_titlePick, 1] call _fnc_pickRgb) + [1]] select (_titlePick isNotEqualTo [])];
+_theme set ["titleGradient", [[], ([_gradientPick, 1] call _fnc_pickRgb) + [1]] select (_gradientPick isNotEqualTo [])];
 
 // ----- Panels and Transparency -----
 
@@ -272,6 +299,9 @@ if (_panelsMoved) then {
 
     _theme set ["panel", _panelRgb + [_panelAlpha]];
 };
+
+// The panels' gradient: the colour their left side runs from, at the panels' alpha (fnc_panelGradient).
+_theme set ["panelGradient", [[], ([_panelEndPick, PALETTE_PANEL_VALUE_MAX] call _fnc_pickRgb) + [(_theme getOrDefault ["panel", []]) param [3, PANEL_ALPHA]]] select (_panelEndPick isNotEqualTo [])];
 
 // ----- Cells: the empty grid cells and the slot boxes, solid (or see-through by the cell transparency) -----
 

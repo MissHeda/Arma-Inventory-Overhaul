@@ -73,12 +73,6 @@
         [0.33, 0.25, 0.09], [], [], [0.33, 0.5, 0.45], -1, 1, [], ""
     ]],
 
-    // True black, no glass: for dark rooms and OLED screens.
-    ["night", LLSTRING(Style_Night), [
-        [0.58, 0.3, 0.9], [0, 0, 0.55], 1, [0, 0, 0],
-        [0, 0, 0.07], [], [0, 0, 0.88], [0, 0, 0.3], -1, 1, [], ""
-    ]],
-
     // Dark blue glass.
     ["modern", LLSTRING(Style_Modern), [
         [0.6, 0.7, 1], [0.6, 0.3, 0.9], 0.9, [0.63, 0.45, 0.08],

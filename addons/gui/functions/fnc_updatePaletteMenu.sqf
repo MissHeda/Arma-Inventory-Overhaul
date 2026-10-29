@@ -32,6 +32,8 @@ private _rgbs = _info get "rgb";
 private _alpha = _info get "alpha";
 private _tileAlpha = _info get "tileAlpha";
 private _cellAlpha = _info get "cellAlpha";
+private _secondaryAlpha = _info get "secondaryAlpha";
+private _linesAlpha = _info get "linesAlpha";
 
 // ----- The open picker, bound to one colour -----
 private _tab = _rows getOrDefault ["tab", -1];
@@ -104,23 +106,29 @@ private _sliders = _rows getOrDefault ["sliders", createHashMap];
         _fill ctrlCommit 0;
         _fill ctrlShow (_place > 0);
     };
-} forEach [["alpha", _alpha], ["cellAlpha", _cellAlpha], ["tileAlpha", _tileAlpha]];
+} forEach [
+    ["alpha", _alpha], ["cellAlpha", _cellAlpha], ["tileAlpha", _tileAlpha], ["secondaryAlpha", _secondaryAlpha], ["linesAlpha", _linesAlpha]
+];
 
 // ----- The swatches: each colour as it is set or worn; the panels, the cells and the tiles with their alpha over a grey -----
 private _swatches = _rows getOrDefault ["swatches", createHashMap];
 private _worn = _info get "swatch";
+
+// The open row's Start and End boxes: the colours of the row the picker belongs to.
+private _openPair = (createHashMapFromArray [["titles", [8, 7]], ["panel", [2, 9]]]) getOrDefault [uiNamespace getVariable [QGVAR(paletteOpen), ""], [8, 7]];
 
 {
     _x params ["_id", "_which", "_shownAlpha"];
 
     [_swatches getOrDefault [_id, []], (_worn select _which) + [_shownAlpha]] call FUNC(paintSurface);
 } forEach [
-    ["accent", 0, 1], ["gradient", 7, [0.25, 1] select (_info get "gradient")], ["secondary", 1, 1], ["panel", 2, _alpha],
-    ["cells", 3, _cellAlpha], ["items", 4, _tileAlpha], ["text", 5, 1], ["lines", 6, 1]
+    ["accent", 0, 1], ["titles", 8, 1], ["titlesEnd", 7, 1], ["secondary", 1, _secondaryAlpha], ["panel", 2, _alpha],
+    ["panelEnd", 9, _alpha], ["cells", 3, _cellAlpha], ["items", 4, _tileAlpha], ["text", 5, 1], ["lines", 6, _linesAlpha],
+    ["gradStart", _openPair select 0, 1], ["gradEnd", _openPair select 1, 1]
 ];
 
 // What can be taken away shows its button, by row: what each row's button takes back ("set" holds the colours by their number,
-// then the panels', the tiles' and the cells' transparency).
+// 0 to 9, then the transparencies of the panels, the tiles, the cells, the secondary films and the lines, 10 to 14).
 private _chosen = _info get "set";
 private _chips = _rows getOrDefault ["chips", createHashMap];
 
@@ -131,8 +139,8 @@ private _chips = _rows getOrDefault ["chips", createHashMap];
 
     {_x ctrlShow _on} forEach (_chips getOrDefault [_id, []]);
 } forEach [
-    ["accent", [0]], ["gradient", [7]], ["secondary", [1]], ["panel", [2, 8]], ["cells", [3, 10]], ["items", [9]], ["text", [5]],
-    ["lines", [6]]
+    ["accent", [0]], ["titles", [8, 7]], ["secondary", [1, 13]], ["panel", [2, 9, 10]], ["cells", [3, 12]], ["items", [11]],
+    ["text", [5]], ["lines", [6, 14]]
 ];
 
 {_x ctrlShow (_info get "any")} forEach (_rows getOrDefault ["resetAll", []]);

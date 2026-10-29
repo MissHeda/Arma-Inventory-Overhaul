@@ -133,6 +133,8 @@ private _cardsRect = if (_theme getOrDefault ["equipmentPanel", true]) then {
         _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
     ] call FUNC(uiPanel);
 
+    [_display, controlNull, [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
+
     [CONTENT_X + _padX, CONTENT_Y + _padY, _leftW - _padX * 2, CONTENT_H - _padY * 2]
 } else {
     [CONTENT_X, CONTENT_Y + _padY, _leftW, CONTENT_H - _padY * 2]

@@ -41,7 +41,8 @@
 GVAR(palette) params [
     ["_accentPick", [], [[]]], ["_secondaryPick", [], [[]]], ["_alphaPick", -1, [0]], ["_panelPick", [], [[]]],
     ["_cellsPick", [], [[]]], ["_tilesPick", [], [[]]], ["_textPick", [], [[]]], ["_linesPick", [], [[]]],
-    ["_tileAlphaPick", -1, [0]], ["_cellAlphaPick", -1, [0]], ["_gradientPick", [], [[]]], ["_style", "", [""]]
+    ["_tileAlphaPick", -1, [0]], ["_cellAlphaPick", -1, [0]], ["_gradientPick", [], [[]]], ["_style", "", [""]],
+    ["_titlePick", [], [[]]], ["_panelEndPick", [], [[]]], ["_secondaryAlphaPick", -1, [0]], ["_linesAlphaPick", -1, [0]]
 ];
 
 private _theme = missionNamespace getVariable [QGVAR(theme), createHashMap];
@@ -86,10 +87,12 @@ private _plain = [
     [_tileWorn, _cardSeen] call _fnc_seen,
     _textWorn,
     (_theme getOrDefault ["line", [1, 1, 1, 1]]) select [0, 3],
-    _accentWorn
+    _accentWorn,
+    _textWorn,
+    +PANEL_COLOR
 ];
 
-private _picks = [_accentPick, _secondaryPick, _panelPick, _cellsPick, [], _textPick, _linesPick, _gradientPick];
+private _picks = [_accentPick, _secondaryPick, _panelPick, _cellsPick, [], _textPick, _linesPick, _gradientPick, _titlePick, _panelEndPick];
 private _hsv = [];
 
 {
@@ -99,6 +102,8 @@ private _hsv = [];
         case (_which == 1): {+(_hsv select 0)};
         // The gradient starts as the accent turned a sixth round, so the first move of its picker already shows two colours.
         case (_which == 7): {private _turned = +(_hsv select 0); _turned set [0, ((_turned select 0) + 1 / 6) mod 1]; _turned};
+        // The panels' gradient starts as the panels turned a sixth round, as dark as they are.
+        case (_which == 9): {private _turned = +(_hsv select 2); _turned set [0, ((_turned select 0) + 1 / 6) mod 1]; _turned set [1, (_turned select 1) max 0.5]; _turned};
         default {["hsv", _plain select _which] call FUNC(hsv)};
     };
 
@@ -112,8 +117,11 @@ private _swatch = +_rgb;
 _swatch set [0, _accentWorn];
 _swatch set [5, _textWorn];
 
-// What is chosen: the colours by their number, then the panels', the tiles' and the cells' transparency.
-private _set = (_picks apply {_x isNotEqualTo []}) + [_alphaPick >= 0, _tileAlphaPick >= 0, _cellAlphaPick >= 0];
+// What is chosen: the colours by their number (0 to 9), then the transparencies of the panels, the tiles, the cells, the secondary
+// films and the lines (10 to 14).
+private _set = (_picks apply {_x isNotEqualTo []}) + [
+    _alphaPick >= 0, _tileAlphaPick >= 0, _cellAlphaPick >= 0, _secondaryAlphaPick >= 0, _linesAlphaPick >= 0
+];
 
 createHashMapFromArray [
     ["hsv", _hsv],
@@ -122,7 +130,10 @@ createHashMapFromArray [
     ["alpha", [PANEL_ALPHA, _alphaPick] select (_alphaPick >= 0)],
     ["tileAlpha", [1, _tileAlphaPick] select (_tileAlphaPick >= 0)],
     ["cellAlpha", [1, _cellAlphaPick] select (_cellAlphaPick >= 0)],
+    ["secondaryAlpha", [1, _secondaryAlphaPick] select (_secondaryAlphaPick >= 0)],
+    ["linesAlpha", [1, _linesAlphaPick] select (_linesAlphaPick >= 0)],
     ["gradient", _gradientPick isNotEqualTo []],
+    ["panelGradient", _panelEndPick isNotEqualTo []],
     ["style", _style],
     ["set", _set],
     ["any", true in _set]

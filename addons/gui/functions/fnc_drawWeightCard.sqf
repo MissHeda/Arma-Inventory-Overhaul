@@ -93,7 +93,7 @@ if (_flat) then {
 
 [
     _display, _parent, [_left + _statPadX, _cursor, _statBarW, _stripH], [LLSTRING(Stat_Weight), _theme] call FUNC(caption),
-    _textUnit * 0.42, _colorText2, _font, 0
+    _textUnit * 0.42, _colorText2, _font, 0, true
 ] call FUNC(uiLabel);
 
 private _valueY = _cursor + _stripH;

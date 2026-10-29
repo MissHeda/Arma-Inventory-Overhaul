@@ -472,11 +472,14 @@
         <Key ID="STR_einv_gui_Palette_Default">
             <English>Default</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_End">
+            <English>End</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Gradient">
-            <English>Text gradient</English>
+            <English>Gradient</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Gradient_Tip">
-            <English>Titles run from the accent colour into this one, left to right.</English>
+            <English>Runs from the Start colour into the End colour, left to right. Click a box to pick its colour.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Green">
             <English>G</English>
@@ -499,6 +502,9 @@
         <Key ID="STR_einv_gui_Palette_Off">
             <English>Off</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_On">
+            <English>On</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Panels">
             <English>Panels</English>
         </Key>
@@ -516,6 +522,9 @@
         </Key>
         <Key ID="STR_einv_gui_Palette_Secondary_Tip">
             <English>Tints the caption tabs, chips, buttons, what lights under the mouse, bar tracks and picked rows.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Start">
+            <English>Start</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Style">
             <English>Style</English>
@@ -540,6 +549,12 @@
         </Key>
         <Key ID="STR_einv_gui_Palette_Title">
             <English>Colours</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Titles">
+            <English>Titles</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Titles_Tip">
+            <English>The window's title, the column titles, the headings, the name at the mouse and the cards' names. Can run as a gradient.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Tooltip">
             <English>Colours and transparency</English>
@@ -1020,9 +1035,6 @@ Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Style_ModernGradient">
             <English>Modern gradient</English>
-        </Key>
-        <Key ID="STR_einv_gui_Style_Night">
-            <English>Night (OLED)</English>
         </Key>
         <Key ID="STR_einv_gui_Style_Stealth">
             <English>Night vision</English>

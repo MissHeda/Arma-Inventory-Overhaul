@@ -119,7 +119,7 @@ if (_caption isNotEqualTo "") then {
     switch (_theme getOrDefault ["slotCaption", "inside"]) do {
         case "above": {
             private _shown = [_caption, _width, _font, _lineSize] call FUNC(fitText);
-            _controls pushBack ([_display, _parent, [_left, _top - _lineH, _width, _lineH], _shown, _lineSize, _colorText2, _font, 0] call FUNC(uiLabel));
+            _controls pushBack ([_display, _parent, [_left, _top - _lineH, _width, _lineH], _shown, _lineSize, _colorText2, _font, 0, true] call FUNC(uiLabel));
         };
         case "tab": {
             private _room = _width - _numberW;
@@ -130,7 +130,7 @@ if (_caption isNotEqualTo "") then {
             // Round like the slot's corner it lies in - as round as a tab this low can be - or its square
             // corner would stick out past the slot's.
             _controls append ([_display, _parent, _tab, _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]], _radius min (_lineH / 2)] call FUNC(uiPanel));
-            _controls pushBack ([_display, _parent, _tab, _shown, _lineSize, _colorText2, _fontBold, 2] call FUNC(uiLabel));
+            _controls pushBack ([_display, _parent, _tab, _shown, _lineSize, _colorText2, _fontBold, 2, true] call FUNC(uiLabel));
             _areaTop = _top + _lineH + _padY * 0.5;
         };
         case "inside": {

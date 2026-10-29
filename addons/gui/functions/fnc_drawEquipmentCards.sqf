@@ -133,7 +133,7 @@ private _fnc_weaponCard = {
 
     if (_capH > 0 && {_caption isNotEqualTo ""}) then {
         private _shown = [[_caption, _theme] call FUNC(caption), _cardW, _font, _lineSize] call FUNC(fitText);
-        [_display, _parent, [_cardX, _cardY - _lineH, _cardW, _lineH], _shown, _lineSize, _colorText2, _font, 0] call FUNC(uiLabel);
+        [_display, _parent, [_cardX, _cardY - _lineH, _cardW, _lineH], _shown, _lineSize, _colorText2, _font, 0, true] call FUNC(uiLabel);
     };
 
     // Where the picture and the name may go - right of the strip, under the key cap.

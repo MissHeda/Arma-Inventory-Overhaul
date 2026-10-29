@@ -58,7 +58,9 @@ private _fnc_set = {
     switch (_kind) do {
         case "alpha";
         case "cellAlpha";
-        case "tileAlpha": {[_kind, _across] call FUNC(paletteSet)};
+        case "tileAlpha";
+        case "secondaryAlpha";
+        case "linesAlpha": {[_kind, _across] call FUNC(paletteSet)};
         case "hue": {["hue", [_which, _down]] call FUNC(paletteSet)};
         case "square": {["square", [_which, _across, _down]] call FUNC(paletteSet)};
     };

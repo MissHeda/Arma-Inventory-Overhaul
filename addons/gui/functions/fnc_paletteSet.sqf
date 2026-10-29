@@ -76,15 +76,17 @@ while {count _palette < count PALETTE_UNSET} do {
 
 // The places the rows' "Default" buttons take back, by row id: a row with a slider takes its transparency with its colour.
 private _rowSlots = createHashMapFromArray [
-    ["accent", [0]], ["secondary", [1]], ["panel", [3, 2]], ["cells", [4, 9]], ["items", [8]], ["text", [6]], ["lines", [7]],
-    ["gradient", [10]]
+    ["accent", [0]], ["titles", [12, 10]], ["secondary", [1, 14]], ["panel", [3, 2, 13]], ["cells", [4, 9]], ["items", [8]],
+    ["text", [6]], ["lines", [7, 15]]
 ];
 
 switch (_mode) do {
     // A transparency's slider: the panels', the cells' or the tiles'.
     case "alpha";
     case "cellAlpha";
-    case "tileAlpha": {
+    case "tileAlpha";
+    case "secondaryAlpha";
+    case "linesAlpha": {
         private _slot = (createHashMapFromArray PALETTE_ALPHAS) get _mode;
         private _place = (_argument max 0) min 1;
         private _alpha = 1 - (round (_place * (1 - PALETTE_ALPHA_MIN) / PALETTE_ALPHA_STEP)) * PALETTE_ALPHA_STEP;
@@ -105,7 +107,11 @@ switch (_mode) do {
         if (_style isEqualTo []) exitWith {};
 
         private _was = +_palette;
-        private _values = +((_style select 0) select 2);
+        private _values = +PALETTE_UNSET;
+
+        {
+            _values set [_forEachIndex, +_x];
+        } forEach ((_style select 0) select 2);
 
         _values set [11, _argument];
 
@@ -207,6 +213,32 @@ switch (_mode) do {
         if (!_changed) then {
             [] call FUNC(updatePaletteMenu);
         };
+    };
+
+    // A row's gradient on or off: on, its end starts as its colour turned a sixth round (and the titles start at the accent when
+    // they have no colour of their own yet); off, the end goes.
+    case "gradient": {
+        private _pair = (createHashMapFromArray [["titles", [8, 7]], ["panel", [2, 9]]]) getOrDefault [_argument, []];
+
+        if (_pair isEqualTo []) exitWith {};
+
+        _pair params ["_start", "_end"];
+
+        private _endSlot = PALETTE_SLOTS select _end;
+
+        if ((_palette select _endSlot) isNotEqualTo []) then {
+            _palette set [_endSlot, []];
+        } else {
+            private _hsvs = _info get "hsv";
+
+            if (_argument isEqualTo "titles" && {(_palette select 12) isEqualTo []}) then {
+                _palette set [12, +(_hsvs select 0)];
+            };
+
+            _palette set [_endSlot, +(_hsvs select _end)];
+        };
+
+        _changed = true;
     };
 
     case "reset": {

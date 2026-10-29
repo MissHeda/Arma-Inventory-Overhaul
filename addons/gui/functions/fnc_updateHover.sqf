@@ -490,7 +490,7 @@ if (!isNull _tooltip) then {
             private _textUnit = TEXT_UNIT;
             private _width = (_name getTextWidth [_font, _textUnit * 0.58]) * TEXT_SLACK + SQUARE(_textUnit * 0.8);
 
-            _tooltip ctrlSetText _name;
+            [_tooltip, _name] call FUNC(setTipText);
             _tooltip ctrlSetPosition [-10, -10, _width, _textUnit * 0.85];
             _tooltip ctrlCommit 0;
             _tooltip setVariable [QGVAR(width), _width];

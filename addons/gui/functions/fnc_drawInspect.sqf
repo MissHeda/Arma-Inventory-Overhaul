@@ -215,7 +215,7 @@ private _titleW = _innerW - SQUARE(_textUnit * 0.35) - _closeW;
 [
     _display, _group, [_padX + SQUARE(_textUnit * 0.35), _cursor, _titleW, _titleH],
     [[_class] call FUNC(itemName), _titleW, _fontBold, _textUnit * 0.8] call FUNC(fitText),
-    _textUnit * 0.8, _colorText, _fontBold, 0
+    _textUnit * 0.8, _colorText, _fontBold, 0, true
 ] call FUNC(uiLabel);
 
 private _grip = [_display, "EINV_Hitbox", _group, [0, 0, _width - _padX - _closeW, _cursor + _titleH]] call FUNC(uiCreate);

@@ -96,7 +96,8 @@ private _iconColor = [_accentColor, _theme getOrDefault ["text2", [0.78, 0.78, 0
 // The title in the palette's gradient is set once (fnc_uiLabel): the gradient and the accent belong to what cannot be painted over.
 private _look = [
     _ringColor, _accentColor, _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []], _panelColor isEqualTo [],
-    _theme getOrDefault ["accentGradient", []], [[], _theme getOrDefault ["accent", []]] select ((_theme getOrDefault ["accentGradient", []]) isNotEqualTo [])
+    _theme getOrDefault ["titleGradient", []], _theme getOrDefault ["titleColor", []], _theme getOrDefault ["panelGradient", []],
+    [[], _theme getOrDefault ["accent", []]] select ((_theme getOrDefault ["titleGradient", []]) isNotEqualTo [])
 ];
 private _paintLook = [_panelColor, _lineColor, _titleColor, _iconColor];
 
@@ -150,6 +151,10 @@ if (!_reuse) then {
     ] call FUNC(uiPanel);
 
     _paint set [0, _panelParts select {ctrlClassName _x in ["EINV_PanelRect", "EINV_PanelCorner"]}];
+
+    if (_panelColor isNotEqualTo []) then {
+        [_display, controlNull, _rect, _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
+    };
 
     if (_ringColor isNotEqualTo []) then {
         [_display, controlNull, _rect, _ringColor, _theme getOrDefault ["radius", 0]] call FUNC(uiRing);

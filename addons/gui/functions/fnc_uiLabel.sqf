@@ -5,9 +5,9 @@
  * Creates a line of text. Font, size and colour are set here rather than in the class, because the
  * style decides them.
  *
- * A title (argument 8) runs from the accent into the palette's gradient colour, letter by letter from left to right, where the
- * player chose one (the theme's "accentGradient", fnc_theme) - as Discord's gradient names do; so does any text in the accent's
- * colour. That line is structured text, one colour per letter, set once: a later ctrlSetText does not reach it.
+ * A title (argument 8) takes the palette's titles colour where the player chose one (the theme's "titleColor"), and with the titles'
+ * gradient on runs from it (or the accent) into the gradient's colour, letter by letter from left to right, as Discord's gradient
+ * names do (fnc_gradientText). That line is structured text, set once: a later ctrlSetText does not reach it.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -34,45 +34,32 @@ disableSerialization;
 params ["_display", "_parent", "_rect", "_text", "_size", ["_color", []], ["_font", ""], ["_align", 0], ["_title", false]];
 
 private _theme = missionNamespace getVariable [QGVAR(theme), createHashMap];
-private _gradient = _theme getOrDefault ["accentGradient", []];
-private _accent = _theme getOrDefault ["accent", []];
+private _gradient = _theme getOrDefault ["titleGradient", []];
 
-if (
-    count _gradient >= 3 && {count _accent >= 3} && {_text isEqualType ""} && {_text isNotEqualTo ""}
-    && {_title || {count _color >= 3 && {(_color select [0, 3]) isEqualTo (_accent select [0, 3])}}}
-) exitWith {
-    // From the accent, at the strength the label would have.
-    _color = (_accent select [0, 3]) + [[1, _color param [3, 1]] select (count _color >= 4)];
+if (_title) then {
+    private _own = _theme getOrDefault ["titleColor", []];
+
+    if (count _own >= 3) then {
+        _color = (_own select [0, 3]) + [[1, _color param [3, 1]] select (count _color >= 4)];
+    };
+};
+
+if (_title && {count _gradient >= 3} && {_text isEqualType ""} && {_text isNotEqualTo ""}) exitWith {
+    // From the titles' colour, else the accent, at the strength the label would have.
+    private _start = _theme getOrDefault ["titleColor", []];
+
+    if (count _start < 3) then {
+        _start = _theme getOrDefault ["accent", [1, 1, 1, 1]];
+    };
+
+    _color = (_start select [0, 3]) + [[1, _color param [3, 1]] select (count _color >= 4)];
 
     // Structured text is drawn from the top of its control: the line is set where a label would centre it.
     _rect params ["_left", "_top", "_width", "_height"];
 
     private _ctrl = [_display, "EINV_StructuredText", _parent, [_left, _top + (_height - _size * 1.15) / 2, _width, _size * 1.3]] call FUNC(uiCreate);
-    private _codes = toArray _text;
-    private _last = (count _codes - 1) max 1;
-    private _digits = "0123456789ABCDEF";
-    private _alpha = _color param [3, 1];
-    private _letters = [];
 
-    {
-        private _at = _forEachIndex / _last;
-        private _bytes = [0, 1, 2] apply {round (((_color select _x) + ((_gradient select _x) - (_color select _x)) * _at) * 255)};
-        private _hex = (_bytes + [round (_alpha * 255)]) apply {(_digits select [floor (_x / 16), 1]) + (_digits select [_x mod 16, 1])};
-        private _letter = switch (_x) do {
-            case 38: {"&amp;"};
-            case 60: {"&lt;"};
-            case 62: {"&gt;"};
-            default {toString [_x]};
-        };
-
-        _letters pushBack format ["<t color='#%1%2%3%4'>%5</t>", _hex select 3, _hex select 0, _hex select 1, _hex select 2, _letter];
-    } forEach _codes;
-
-    _ctrl ctrlSetStructuredText parseText format [
-        "<t font='%1' size='%2' align='%3'>%4</t>",
-        [_font, "PuristaMedium"] select (_font isEqualTo ""), _size / (UNIT * 0.7), ["left", "right", "center"] select ((_align max 0) min 2),
-        _letters joinString ""
-    ];
+    _ctrl ctrlSetStructuredText ([_text, _font, _size, _align, _color, _gradient] call FUNC(gradientText));
 
     _ctrl
 };
