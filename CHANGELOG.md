@@ -164,6 +164,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- The tips of the colour, sound and right-click menus' buttons show over the menu again instead of behind it.
 - With the gradient on, words no longer sit a little higher than they do without it; the structured text is placed where a label centres its line.
 - With the gradient on, keys and numbers on badges (the hotbar's keys, the weapon cards' 1/2/3, the footer's key caps, page marks) no longer vanish: they keep their own colour, as does any line of one or two letters and any dark ink or ink on the accent, where the gradient's accent start sank into the badge.
 - Words in the gradient were cut at the end ("Clos", "Hotba"): their line gets a little more room, as a letter of its own in each colour runs wider. Long tips break onto several lines and show over the colour panel instead of under it.

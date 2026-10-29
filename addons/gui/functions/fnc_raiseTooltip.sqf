@@ -11,8 +11,8 @@
  * the frame of the backpack's slot over the very name of the backpack (a tester's screenshot, 0.4.7).
  *
  * Asked after such an outline was made (fnc_updateHover, fnc_drawSelection). It acts only when the name
- * or the card shows, no context menu is open (the menu is the topmost layer and hides the name) and
- * nothing is dragged, and only when something made after it is still there. The name keeps its text, place
+ * or the card shows and nothing is dragged - with a menu or the colour popover open too, where the tip of
+ * its buttons shows (an item's name does not), or it lay behind the popover, and only when something made after it is still there. The name keeps its text, place
  * and size; the card is drawn again from the rows it was made from (fnc_drawCompare). Controls in a group -
  * the tiles' hover, selection and flash - lie under it anyway: their group was made before it.
  *
@@ -34,7 +34,9 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 private _tip = uiNamespace getVariable [QGVAR(tipShown), controlNull];
 
 if (isNull _display || {isNull _tip} || {!ctrlShown _tip}) exitWith {false};
-if ((uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [] || {GVAR(dragging)}) exitWith {false};
+// With a menu or the colour popover open no item's name shows (fnc_updateHover): what shows is the tip of one of its buttons, and
+// it has to go over the popover too.
+if (GVAR(dragging)) exitWith {false};
 
 private _created = uiNamespace getVariable [QGVAR(created), []];
 private _at = _created find _tip;
