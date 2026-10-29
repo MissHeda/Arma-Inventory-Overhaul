@@ -110,7 +110,7 @@ if (_centred) then {
 
         _controls pushBack ([
             _display, _parent, [_labelX, _labelTop, _labelW, TEXT_MID * _size * 2],
-            [_caption, _labelW, _font, _size] call FUNC(fitText), _size, _ink, _font, 2
+            [_caption, _labelW, _font, _size] call FUNC(fitText), _size, _ink, _font, 2, "button"
         ] call FUNC(uiLabel));
     };
 } else {
@@ -134,7 +134,7 @@ if (_centred) then {
         // spills to the right, never off the left.
         private _labelX = _start + _iconW + _gap;
 
-        _controls pushBack ([_display, _parent, [_labelX, _top, _left + _width - _labelX, _height], _shown, _size, _ink, _font, 0] call FUNC(uiLabel));
+        _controls pushBack ([_display, _parent, [_labelX, _top, _left + _width - _labelX, _height], _shown, _size, _ink, _font, 0, "button"] call FUNC(uiLabel));
     };
 };
 

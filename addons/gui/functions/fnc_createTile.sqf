@@ -243,7 +243,7 @@ if (_hidden) then {
 
         _controls pushBack ([
             _display, _parent, [_left + _padX, _top + _padY * 0.4, _innerW, _nameH * 1.15], _short, _nameH,
-            _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _font, 1
+            _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _font, 1, "name"
         ] call FUNC(uiLabel));
     };
 
@@ -374,7 +374,7 @@ if (_hidden) then {
         };
 
         private _stackLabel = [
-            _display, _parent, _boxRect, _stackText, _textH, _stackColor, _fontBold, [2, 1] select _noBox
+            _display, _parent, _boxRect, _stackText, _textH, _stackColor, _fontBold, [2, 1] select _noBox, "count"
         ] call FUNC(uiLabel);
 
         if (_boxControls isEqualTo [] && {_boxColor isNotEqualTo []}) then {
@@ -422,7 +422,7 @@ if (_hidden) then {
 
             private _label = [
                 _display, _parent, _pill, _amount, _textH,
-                _theme getOrDefault ["tileCountColor", [1, 1, 1, 1]], _amountFont, 2
+                _theme getOrDefault ["tileCountColor", [1, 1, 1, 1]], _amountFont, 2, "count"
             ] call FUNC(uiLabel);
 
             _controls pushBack _label;
@@ -437,7 +437,7 @@ if (_hidden) then {
 
             private _label = [
                 _display, _parent, _badge, _amount, _textH,
-                _theme getOrDefault ["tileCountColor", [0.05, 0.05, 0.05, 1]], _amountFont, 2
+                _theme getOrDefault ["tileCountColor", [0.05, 0.05, 0.05, 1]], _amountFont, 2, "count"
             ] call FUNC(uiLabel);
 
             _controls pushBack _label;
@@ -466,12 +466,12 @@ if (_hidden) then {
             private _label = if (_backdropRect isEqualTo []) then {
                 [
                     _display, _parent, [_left + _padX, _countBottom - _textH * 1.15, _innerW, _textH * 1.15], _amount, _textH,
-                    _theme getOrDefault ["text", [1, 1, 1, 1]], _amountFont, parseNumber !_leftSide
+                    _theme getOrDefault ["text", [1, 1, 1, 1]], _amountFont, parseNumber !_leftSide, "count"
                 ] call FUNC(uiLabel)
             } else {
                 [
                     _display, _parent, _backdropRect, _amount, _textH,
-                    _theme getOrDefault ["tileCountColor", [1, 1, 1, 1]], _amountFont, 2
+                    _theme getOrDefault ["tileCountColor", [1, 1, 1, 1]], _amountFont, 2, "count"
                 ] call FUNC(uiLabel)
             };
 

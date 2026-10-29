@@ -195,9 +195,9 @@ if (_openDef isNotEqualTo []) then {
     if (_openGradient >= 0) then {
         _height = _height + _rowH + _gapY;
 
-        // The titles' gradient on: the Reach line under it.
+        // The titles' gradient on: where it shows, under it - three chips a row.
         if ((_openDef select 0) isEqualTo "titles" && {[_openGradient] call _fnc_gradientOn}) then {
-            _height = _height + _rowH + _gapY;
+            _height = _height + _rowH * ceil ((count GRADIENT_PART_LIST) / 3) + _gapY;
         };
     };
 
@@ -491,28 +491,7 @@ if (_stylesOpen) then {
         private _current = _styleId isEqualTo (_info get "style") || {_styleId isEqualTo "classic" && {GVAR(palette) isEqualTo PALETTE_DEFAULT}};
         private _rowTop = _y;
 
-        // Its colours as a strip of three: the accent, the panels, and the gradient (or the secondary colour).
-        private _fnc_rgb = {
-            params ["_pick", "_fallback"];
-
-            if (count _pick >= 3) then {(["rgb", _pick] call FUNC(hsv)) + [1]} else {_fallback}
-        };
-
-        private _accentRgb = [_values select 0, ((["", []] call FUNC(accentColour)) select [0, 3]) + [1]] call _fnc_rgb;
-        private _strip = [
-            _accentRgb,
-            [_values select 3, PANEL_COLOR + [1]] call _fnc_rgb,
-            [_values select 10, [_values select 1, _accentRgb] call _fnc_rgb] call _fnc_rgb
-        ];
-        private _dotW = SQUARE(_rowH * 0.5);
-
-        {
-            [
-                _display, _layer, [_cardX + _nameX + _forEachIndex * (_dotW + pixelW * 2), _rowTop + _rowH * 0.25, _dotW, _rowH * 0.5], _x, UNIT * 0.1
-            ] call FUNC(uiPanel);
-        } forEach _strip;
-
-        private _textX = _cardX + _nameX + 3 * (_dotW + pixelW * 2) + SQUARE(UNIT * 0.3);
+        private _textX = _cardX + _nameX;
 
         [_display, _layer, [_textX, _rowTop, _cardX + _width - _padX - _textX, _rowH], _name, _small, [_text2, _text] select _current, _font, 0] call FUNC(uiLabel);
 
@@ -691,47 +670,42 @@ private _sliders = createHashMap;
 
             _y = _y + _rowH;
 
-            // How far the titles' gradient reaches: the titles only, the headings too, or every word (fnc_uiLabel).
+            // Where the titles' gradient shows: a chip for each part, lit while it is on (GRADIENT_*, fnc_uiLabel).
             if (_gradientOn && {_id isEqualTo "titles"}) then {
                 _y = _y + _gapY;
 
                 [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], LLSTRING(Palette_Reach), _small, _text2, _font, 0] call FUNC(uiLabel);
 
-                private _reach = GVAR(theme) getOrDefault ["gradientReach", 1];
-                private _reachX = _cardX + _sliderX;
-                private _reachW = (_cardX + _width - _padX - _reachX - _gapX * 2) / 3;
+                private _parts = GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT];
+                private _partsX = _cardX + _sliderX;
+                private _partW = (_cardX + _width - _padX - _partsX - _gapX * 2) / 3;
 
                 {
-                    _x params ["_value", "_words", "_reachTip"];
+                    _x params ["_bit", "_words", "_partTip"];
 
-                    // The one in use lies on the accent.
-                    if (_value isEqualTo _reach) then {
+                    private _partRect = [_partsX + (_forEachIndex mod 3) * (_partW + _gapX), _y + floor (_forEachIndex / 3) * _rowH + (_rowH - _chipH) / 2, _partW, _chipH];
+
+                    // One that is on lies on the accent.
+                    if (((floor (_parts / _bit)) mod 2) == 1) then {
                         [
-                            _display, _layer, [_reachX, _y + (_rowH - _chipH) / 2, _reachW, _chipH],
-                            ((GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]]) select [0, 3]) + [0.45], _chipH / 2
+                            _display, _layer, _partRect, ((GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]]) select [0, 3]) + [0.45], _chipH / 2
                         ] call FUNC(uiPanel);
                     };
 
-                    private _reachButton = [
-                        _display, _layer, [_reachX, _y + (_rowH - _chipH) / 2, _reachW, _chipH], _value, _words, "", _buttonTheme, {
-                            params ["_button", "_value"];
+                    private _partButton = [
+                        _display, _layer, _partRect, _bit, _words, "", _buttonTheme, {
+                            params ["_button", "_bit"];
 
                             if (_button < 0) exitWith {};
 
-                            ["gradientReach", _value] call FUNC(paletteSet);
+                            ["gradientPart", _bit] call FUNC(paletteSet);
                         }, false, _chipSize, true
                     ] call FUNC(uiButton);
 
-                    [(_reachButton param [count _reachButton - 1, controlNull]), _reachTip] call FUNC(setTooltip);
+                    [(_partButton param [count _partButton - 1, controlNull]), _partTip] call FUNC(setTooltip);
+                } forEach GRADIENT_PART_LIST;
 
-                    _reachX = _reachX + _reachW + _gapX;
-                } forEach [
-                    [0, LLSTRING(Palette_Reach_Titles), LLSTRING(Palette_Reach_Titles_Tip)],
-                    [1, LLSTRING(Palette_Reach_Headings), LLSTRING(Palette_Reach_Headings_Tip)],
-                    [2, LLSTRING(Palette_Reach_All), LLSTRING(Palette_Reach_All_Tip)]
-                ];
-
-                _y = _y + _rowH;
+                _y = _y + _rowH * ceil ((count GRADIENT_PART_LIST) / 3);
             };
         };
 

@@ -84,3 +84,4 @@ private _hex = "#" + ((_color select [0, 3]) apply {
 } joinString "");
 
 _hint ctrlSetStructuredText (text _text setAttributes ["color", _hex, "size", str (_hint getVariable [QGVAR(textScale), 1])]);
+[_hint] call FUNC(fitHint);

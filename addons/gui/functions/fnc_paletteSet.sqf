@@ -244,9 +244,17 @@ switch (_mode) do {
         _changed = true;
     };
 
-    case "gradientReach": {
-        if (_argument isEqualType 0 && {_argument in [0, 1, 2]} && {(_palette param [16, -1]) isNotEqualTo _argument}) then {
-            _palette set [16, _argument];
+    // One part of where the gradient shows (GRADIENT_*) switched on or off.
+    case "gradientPart": {
+        if (_argument isEqualType 0 && {_argument in [1, 2, 4, 8, 16, 32, 64]}) then {
+            private _parts = _palette param [16, -1];
+
+            if (_parts < 0) then {
+                _parts = GRADIENT_PARTS_DEFAULT;
+            };
+
+            _parts = [_parts + _argument, _parts - _argument] select (((floor (_parts / _argument)) mod 2) == 1);
+            _palette set [16, _parts];
             _changed = true;
         };
     };

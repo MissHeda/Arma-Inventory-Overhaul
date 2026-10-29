@@ -137,7 +137,7 @@ if (_caption isNotEqualTo "") then {
             private _room = _width - _padX * 2 - _numberW;
             private _shown = [_caption, _room, _font, _lineSize] call FUNC(fitText);
 
-            _controls pushBack ([_display, _parent, [_left + _padX * 1.5, _top + _padY * 0.5, _room, _lineH], _shown, _lineSize, _colorMuted, _font, 0] call FUNC(uiLabel));
+            _controls pushBack ([_display, _parent, [_left + _padX * 1.5, _top + _padY * 0.5, _room, _lineH], _shown, _lineSize, _colorMuted, _font, 0, "heading"] call FUNC(uiLabel));
             _areaTop = _top + _lineH;
         };
         default {};
@@ -176,14 +176,14 @@ if (_ammo isNotEqualTo [] || _showName) then {
 
         private _text = format ["%1/%2", _rounds, _capacity];
         _ammoW = (_text getTextWidth [_font, _lineSize]) * TEXT_SLACK;
-        _controls pushBack ([_display, _parent, [_left + _padX, _lineTop, _width - _padX * 2, _lineH], _text, _lineSize, _colorText, _font, 1] call FUNC(uiLabel));
+        _controls pushBack ([_display, _parent, [_left + _padX, _lineTop, _width - _padX * 2, _lineH], _text, _lineSize, _colorText, _font, 1, "count"] call FUNC(uiLabel));
     };
 
     if (_showName) then {
         private _room = _width - _padX * 3 - _ammoW;
         private _name = [_info getOrDefault ["name", _class], _room, _font, _lineSize] call FUNC(fitText);
 
-        _controls pushBack ([_display, _parent, [_left + _padX * 1.5, _lineTop, _room, _lineH], _name, _lineSize, _colorText2, _font, 0] call FUNC(uiLabel));
+        _controls pushBack ([_display, _parent, [_left + _padX * 1.5, _lineTop, _room, _lineH], _name, _lineSize, _colorText2, _font, 0, "name"] call FUNC(uiLabel));
     };
 
     _areaBottom = _lineTop;
@@ -255,7 +255,7 @@ if (_countText isNotEqualTo "") then {
     private _countRect = [_backdropRect, [_left + _padX, _top + _height - _padY * 0.5 - _lineH, _width - _padX * 2, _lineH]] select (_backdropRect isEqualTo []);
 
     private _countLabel = [
-        _display, _parent, _countRect, _countText, _lineSize, _countColor, _fontBold, [2, 1] select (_backdropRect isEqualTo [])
+        _display, _parent, _countRect, _countText, _lineSize, _countColor, _fontBold, [2, 1] select (_backdropRect isEqualTo []), "count"
     ] call FUNC(uiLabel);
 
     if (_backdropControls isEqualTo [] && {_backdropColor isNotEqualTo []}) then {

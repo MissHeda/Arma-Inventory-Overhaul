@@ -48,18 +48,29 @@ private _parts = [
     (_theme getOrDefault ["radius", 0]) * 0.5
 ] call FUNC(uiPanel);
 
-if (_tooltip getVariable [QGVAR(gradient), false]) then {
-    private _from = _theme getOrDefault ["titleColor", []];
+private _lines = round ((_height - TEXT_UNIT * 0.85) / (TEXT_UNIT * 0.62)) + 1;
 
-    if (count _from < 3) then {
-        _from = _theme getOrDefault ["accent", [1, 1, 1, 1]];
+if (_tooltip getVariable [QGVAR(gradient), false] || {_lines > 1}) then {
+    // In the gradient, or one colour (from and to the same) where only structured text breaks the lines.
+    private _plainColor = (_theme getOrDefault ["text", [1, 1, 1, 1]]) select [0, 3];
+    private _from = _plainColor;
+    private _to = _plainColor;
+
+    if (_tooltip getVariable [QGVAR(gradient), false]) then {
+        _from = (_theme getOrDefault ["titleColor", []]) select [0, 3];
+
+        if (count _from < 3) then {
+            _from = (_theme getOrDefault ["accent", [1, 1, 1, 1]]) select [0, 3];
+        };
+
+        _to = _theme getOrDefault ["titleGradient", [1, 1, 1]];
     };
 
-    private _words = [_display, "EINV_StructuredText", _tooltip, [0, (_height - _size) / 2 - pixelH, _width, _size * 1.4]] call FUNC(uiCreate);
+    private _textH = _size * 1.1 * _lines;
+    private _pad = SQUARE(TEXT_UNIT * 0.3);
+    private _words = [_display, "EINV_StructuredText", _tooltip, [_pad, (_height - _textH) / 2 - pixelH, _width - _pad * 2, _textH + _size * 0.4]] call FUNC(uiCreate);
 
-    _words ctrlSetStructuredText ([
-        _text, _font, _size, 2, (_from select [0, 3]) + [1], _theme getOrDefault ["titleGradient", [1, 1, 1]]
-    ] call FUNC(gradientText));
+    _words ctrlSetStructuredText ([_text, _font, _size, 2, _from + [1], _to] call FUNC(gradientText));
 
     _parts pushBack _words;
 } else {

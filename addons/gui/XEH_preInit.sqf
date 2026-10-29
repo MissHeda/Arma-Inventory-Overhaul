@@ -559,7 +559,7 @@ if (_savedPalette isEqualType [] && {count _savedPalette >= 3} && {count _savedP
         [_savedPanelEnd, PALETTE_PANEL_VALUE_MAX] call _fnc_colour,
         [_savedSecondaryAlpha] call _fnc_alpha,
         [_savedLinesAlpha] call _fnc_alpha,
-        if (_savedReach isEqualType 0 && {_savedReach in [0, 1, 2]}) then {_savedReach} else {-1}
+        if (_savedReach isEqualType 0 && {_savedReach >= 0} && {_savedReach <= GRADIENT_PARTS_ALL} && {_savedReach == floor _savedReach}) then {_savedReach} else {-1}
     ];
 };
 

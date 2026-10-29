@@ -38,7 +38,8 @@ private _gap = SQUARE(UNIT * 0.3);
 
 private _iconH = UNIT * 1.1;
 
-[_display, controlNull, [_left, HEAD_Y + (HEAD_H - _iconH) / 2, SQUARE(_iconH), _iconH], UI_TEX(icon_inventory_ca), _theme get "accent"] call FUNC(uiIcon);
+// The window's icon stays white whatever the palette: it is the mark of the window, not a title.
+[_display, controlNull, [_left, HEAD_Y + (HEAD_H - _iconH) / 2, SQUARE(_iconH), _iconH], UI_TEX(icon_inventory_ca), [1, 1, 1, 1]] call FUNC(uiIcon);
 
 [
     _display,

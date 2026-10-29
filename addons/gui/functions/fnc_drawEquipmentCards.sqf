@@ -190,7 +190,7 @@ private _fnc_weaponCard = {
 
         // What is on the weapon shows on its picture, the way Arma's own inventory draws it.
         [_display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _weapon] call FUNC(drawAttachments);
-        [_display, _parent, [_contentX, _nameTop, _contentW, _lineH], _name, _nameSize, _colorText, _font, 0] call FUNC(uiLabel);
+        [_display, _parent, [_contentX, _nameTop, _contentW, _lineH], _name, _nameSize, _colorText, _font, 0, "name"] call FUNC(uiLabel);
     };
 
     // The weapon in hand is framed in the accent colour, over everything else on the card.

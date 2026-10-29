@@ -506,9 +506,16 @@ if (!isNull _tooltip) then {
             private _textUnit = TEXT_UNIT;
             private _width = (_name getTextWidth [_font, _textUnit * 0.58]) * TEXT_SLACK + SQUARE(_textUnit * 0.8);
 
-            _tooltip ctrlSetPosition [-10, -10, _width, _textUnit * 0.85];
+            // A long tip breaks into lines rather than running across the screen.
+            private _maxW = SQUARE(_textUnit * 15);
+            private _lines = ceil (_width / _maxW);
+            private _height = _textUnit * 0.85 + (_lines - 1) * _textUnit * 0.62;
+
+            _width = _width min _maxW;
+
+            _tooltip ctrlSetPosition [-10, -10, _width, _height];
             _tooltip ctrlCommit 0;
-            [_tooltip, _name, _width, _textUnit * 0.85] call FUNC(setTipText);
+            [_tooltip, _name, _width, _height] call FUNC(setTipText);
         };
 
         _tooltip ctrlShow (_name isNotEqualTo "");
@@ -519,7 +526,8 @@ if (!isNull _tooltip) then {
 
     // The ring made above, or a turned picture (fnc_turnPicture, made on the display), lies over the name just set:
     // the name is made again over it.
-    if (_ringMade || {(uiNamespace getVariable [QGVAR(turnedPictures), []]) isNotEqualTo []}) then {
+    // A tip of the colour popover or a menu lies under them unless made again over them.
+    if (_ringMade || {_ownTip isNotEqualTo ""} || {(uiNamespace getVariable [QGVAR(turnedPictures), []]) isNotEqualTo []}) then {
         [] call FUNC(raiseTooltip);
     };
 };
@@ -852,3 +860,4 @@ switch (_shown param [0, ""]) do {
 private _hintCtrl = uiNamespace getVariable [QGVAR(hint), controlNull];
 
 _hintCtrl ctrlSetStructuredText (composeText _parts setAttributes ["align", "center", "size", str (_hintCtrl getVariable [QGVAR(textScale), 1])]);
+[_hintCtrl] call FUNC(fitHint);

@@ -27,7 +27,9 @@ params ["_display"];
 private _tip = [_display, "EINV_Group", controlNull, [-10, -10, 0, TEXT_UNIT * 0.85]] call FUNC(uiCreate);
 
 // With the titles' gradient on, its words are structured text: their letters take the gradient (fnc_setTipText).
-_tip setVariable [QGVAR(gradient), (GVAR(theme) getOrDefault ["titleGradient", []]) isNotEqualTo []];
+_tip setVariable [QGVAR(gradient), (GVAR(theme) getOrDefault ["titleGradient", []]) isNotEqualTo [] && {
+    ((floor ((GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]) / GRADIENT_HOVER)) mod 2) == 1
+}];
 _tip setVariable [QGVAR(tipParts), []];
 _tip ctrlShow false;
 

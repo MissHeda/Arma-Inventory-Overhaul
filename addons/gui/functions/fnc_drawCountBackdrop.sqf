@@ -61,9 +61,8 @@ private _pad = _height * ([0.5, 0.35] select _flat);
 private _width = (((_text getTextWidth [_font, _size]) * TEXT_SLACK + SQUARE(_pad)) max SQUARE(_height)) min _maxW;
 private _rect = [[_right - _width, _right] select _fromLeft, _bottom - _height, _width, _height];
 
-// Round ends only on a pill where the theme has round corners; a square look keeps its count box square,
-// and the flat box is square in every look.
-private _radius = [0, _height / 2] select (!_flat && {(_theme getOrDefault ["radius", 0]) > 0});
+// Where the theme has round corners: the box is a pill, the flat box gets softly rounded corners. A square look keeps both square.
+private _radius = if ((_theme getOrDefault ["radius", 0]) > 0) then {[_height / 2, _height * 0.3] select _flat} else {0};
 
 // A square box measured only: the label made on the same rectangle is snapped to the same pixels
 // (fnc_uiCreate, as fnc_uiPanel snaps it) and draws the colour behind its text itself.

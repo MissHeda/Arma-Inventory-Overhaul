@@ -160,6 +160,17 @@ if (_hintW < SQUARE(UNIT * 6)) then {
     _hintCtrl ctrlShow false;
 };
 
+// Centred on the screen: a box as wide on both sides of the middle as the nearer end allows. A line too long for it
+// (it would break onto a second line) takes the whole room instead, so long item lines are never cut (issue 12) -
+// fnc_fitHint, after each write.
+private _middle = safezoneX + safezoneW / 2;
+private _halfW = ((_middle - _hintX) min (_hintX + _hintW - _middle)) max 0;
+private _hintY = FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH;
+
+_hintCtrl setVariable [QGVAR(hintCentred), [_middle - _halfW, _hintY, _halfW * 2, _hintSize * 1.4]];
+_hintCtrl setVariable [QGVAR(hintWide), [_hintX, _hintY, _hintW max pixelW, _hintSize * 1.4]];
+_hintCtrl setVariable [QGVAR(hintLine), _hintSize];
+
 // Its words are scaled by whoever writes them (the "size" attribute): the control's own size is its config's. Only this
 // hint carries the scale - a window that brings a hint line of its own (the Arsenal panel) keeps its words as they are.
 _hintCtrl setVariable [QGVAR(textScale), TEXT_SCALE];
