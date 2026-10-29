@@ -140,7 +140,8 @@ _keys = _keys select [0, _fits];
     _textUnit * 0.62,
     _theme get "muted",
     _theme get "font",
-    1
+    1,
+    "hint"
 ] call FUNC(uiLabel);
 
 // ----- The hint -----

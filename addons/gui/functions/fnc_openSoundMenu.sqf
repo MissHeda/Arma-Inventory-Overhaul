@@ -130,7 +130,7 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closeMenu)}] call FUNC
 
 private _headTop = _cardY + _padY;
 
-[_display, _layer, [_cardX + _padX, _headTop, _width - _padX * 2, _headH], LLSTRING(Sound_Title), _size, _text2, _fontBold, 0] call FUNC(uiLabel);
+[_display, _layer, [_cardX + _padX, _headTop, _width - _padX * 2, _headH], LLSTRING(Sound_Title), _size, _text2, _fontBold, 0, "menu"] call FUNC(uiLabel);
 
 [_display, _layer, [_cardX + _padX, _headTop + _headH - pixelH, _width - _padX * 2, pixelH], _line] call FUNC(uiPanel);
 
@@ -148,7 +148,7 @@ private _fnc_slider = {
     private _thumb = [_display, _layer, [_cardX + _trackX - _thumbW / 2, _thumbTop, _thumbW, _thumbH], UI_TEX(circle_ca), _text] call FUNC(uiIcon);
 
     private _percent = [
-        _display, _layer, [_cardX + _width - _padX - _percentW, _rowTop, _percentW, _rowHeight], "", _size * 0.9, _text2, _font, 1
+        _display, _layer, [_cardX + _width - _padX - _percentW, _rowTop, _percentW, _rowHeight], "", _size * 0.9, _text2, _font, 1, "menu"
     ] call FUNC(uiLabel);
 
     // The hit area is the slider's whole room, a knob's width beyond the track at each end: a press near an end is that end. The
@@ -196,7 +196,7 @@ private _rows = [];
     ] call FUNC(uiIcon);
 
     private _label = [
-        _display, _layer, [_cardX + _labelX, _rowTop, _labelW, _rowH], [_names select _forEachIndex, _labelW, _font, _size] call FUNC(fitText), _size, _text, _font, 0
+        _display, _layer, [_cardX + _labelX, _rowTop, _labelW, _rowH], [_names select _forEachIndex, _labelW, _font, _size] call FUNC(fitText), _size, _text, _font, 0, "never"
     ] call FUNC(uiLabel);
 
     ([_forEachIndex, _rowTop, _rowH] call _fnc_slider) params ["_fill", "_thumb", "_percent", "_geo"];

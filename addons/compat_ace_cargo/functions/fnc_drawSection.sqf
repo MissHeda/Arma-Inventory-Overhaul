@@ -103,10 +103,10 @@ if (_shown isNotEqualTo "") then {
         _display, _parent, [_blockX, _top, _tabW, _lineH], _tabColor,
         (_theme getOrDefault ["radius", 0]) min (_lineH / 2)
     ] call EFUNC(gui,uiPanel);
-    [_display, _parent, [_blockX, _top, _tabW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2] call EFUNC(gui,uiLabel);
+    [_display, _parent, [_blockX, _top, _tabW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2, "heading"] call EFUNC(gui,uiLabel);
 };
 
-[_display, _parent, [_blockX + _blockW - _spaceW, _top, _spaceW, _lineH], _space, _lineSize, _colorText2, _font, 1] call EFUNC(gui,uiLabel);
+[_display, _parent, [_blockX + _blockW - _spaceW, _top, _spaceW, _lineH], _space, _lineSize, _colorText2, _font, 1, "value"] call EFUNC(gui,uiLabel);
 
 private _spaceTip = [_display, "EINV_Hitbox", _parent, [_blockX + _blockW - _spaceW, _top, _spaceW, _lineH]] call EFUNC(gui,uiCreate);
 [_spaceTip, LLSTRING(Tip_Space)] call EFUNC(gui,setTooltip);
@@ -239,7 +239,7 @@ private _fnc_button = {
 
     [
         _display, _parent, [_textX, _cardTop + _cardH * 0.1, _textW, _textUnit * 0.7], _name, _textUnit * 0.5,
-        [_colorText, _colorLoss] select (_size < 0), _font, 0
+        [_colorText, _colorLoss] select (_size < 0), _font, 0, "name"
     ] call EFUNC(gui,uiLabel);
 
     // Size and damage, on the line of the buttons.
@@ -258,7 +258,7 @@ private _fnc_button = {
 
     [
         _display, _parent, [_textX, _buttonTop, (_openX - _buttonGap - _textX) max 0, _buttonH],
-        [_details, (_openX - _buttonGap - _textX) max 0, _font, _textUnit * 0.42] call EFUNC(gui,fitText), _textUnit * 0.42, _colorText2, _font, 0
+        [_details, (_openX - _buttonGap - _textX) max 0, _font, _textUnit * 0.42] call EFUNC(gui,fitText), _textUnit * 0.42, _colorText2, _font, 0, "hint"
     ] call EFUNC(gui,uiLabel);
 
     // Open or Close - Close is always possible.
@@ -284,7 +284,7 @@ private _fnc_button = {
 
         private _label = [
             _display, _parent, _unloadRect, format [LLSTRING(Unloading), ceil (_duration - (CBA_missionTime - _start))],
-            _lineSize, _theme getOrDefault ["buttonText", _colorText], _font, 2
+            _lineSize, _theme getOrDefault ["buttonText", _colorText], _font, 2, "never"
         ] call EFUNC(gui,uiLabel);
 
         private _stop = [_display, "EINV_Hitbox", _parent, _unloadRect] call EFUNC(gui,uiCreate);

@@ -266,7 +266,7 @@ if (_descH > 0) then {
 
     private _rowTop = _cursor + _forEachIndex * _rowH;
 
-    [_display, _group, [_padX, _rowTop, _innerW * 0.4, _rowH], _label, _textUnit * 0.58, _muted, _font, 0] call FUNC(uiLabel);
+    [_display, _group, [_padX, _rowTop, _innerW * 0.4, _rowH], _label, _textUnit * 0.58, _muted, _font, 0, "hint"] call FUNC(uiLabel);
 
     // A number is how full something is: a bar over the first half of the value's room, its text after it.
     if (_value isEqualType 0) then {
@@ -280,12 +280,12 @@ if (_descH > 0) then {
 
         [
             _display, _group, [_padX + _innerW * 0.4 + _barW + SQUARE(_textUnit * 0.3), _rowTop, _innerW * 0.3 - SQUARE(_textUnit * 0.3), _rowH],
-            [_valueText, _innerW * 0.3 - SQUARE(_textUnit * 0.3), _font, _textUnit * 0.58] call FUNC(fitText), _textUnit * 0.58, _colorText, _font, 1
+            [_valueText, _innerW * 0.3 - SQUARE(_textUnit * 0.3), _font, _textUnit * 0.58] call FUNC(fitText), _textUnit * 0.58, _colorText, _font, 1, "value"
         ] call FUNC(uiLabel);
     } else {
         [
             _display, _group, [_padX + _innerW * 0.4, _rowTop, _innerW * 0.6, _rowH],
-            [_value, _innerW * 0.6, _font, _textUnit * 0.58] call FUNC(fitText), _textUnit * 0.58, _colorText, _font, 1
+            [_value, _innerW * 0.6, _font, _textUnit * 0.58] call FUNC(fitText), _textUnit * 0.58, _colorText, _font, 1, "value"
         ] call FUNC(uiLabel);
     };
 } forEach _rows;

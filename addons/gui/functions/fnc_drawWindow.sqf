@@ -207,7 +207,7 @@ private _buttonsEnd = _closeX - _gap - ([0, _loadW + _gap] select (_loadW > 0));
 if (_load isNotEqualTo "") then {
     (_chipSize call _fnc_mid) params ["_loadTop", "_loadH"];
 
-    [_display, _group, [_closeX - _gap - _loadW, _loadTop, _loadW, _loadH], _load, _chipSize, _loadColor, _font, 1] call FUNC(uiLabel);
+    [_display, _group, [_closeX - _gap - _loadW, _loadTop, _loadW, _loadH], _load, _chipSize, _loadColor, _font, 1, "value"] call FUNC(uiLabel);
 };
 
 // The button, right-aligned before how full it is. Sort: the kit's grid laid out anew by the order the player has
@@ -304,7 +304,7 @@ private _nameW = (_buttonsEnd - (call _fnc_buttonsW) - _textX) max 0;
 [
     _display, _group, [_textX, _nameTop, _nameW, _nameH],
     [_name, _nameW, _fontBold, _nameSize] call FUNC(fitText),
-    _nameSize, _theme getOrDefault ["text", [1, 1, 1, 1]], _fontBold, 0
+    _nameSize, _theme getOrDefault ["text", [1, 1, 1, 1]], _fontBold, 0, "title"
 ] call FUNC(uiLabel);
 
 // The cross: its click closes the window, which takes the cross along (fnc_closeWindow). Not while
@@ -339,7 +339,7 @@ if (_notice isNotEqualTo "") then {
     // Nothing to show yet: a line that says why, and no grid that could take anything.
     [
         _display, _body, [pixelW, 0, _innerW, _textUnit * 0.7],
-        [_notice, _innerW, _font, _textUnit * 0.5] call FUNC(fitText), _textUnit * 0.5, _muted, _font, 0
+        [_notice, _innerW, _font, _textUnit * 0.5] call FUNC(fitText), _textUnit * 0.5, _muted, _font, 0, "hint"
     ] call FUNC(uiLabel);
 } else {
     [_display, _body, [pixelW, pixelH], _section, _layout, _places, _theme, _key] call FUNC(drawCompartments);

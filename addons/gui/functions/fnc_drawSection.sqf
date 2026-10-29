@@ -201,7 +201,7 @@ if (_section getOrDefault ["locked", false]) exitWith {
         _display, _parent, [_blockX + (_lockW - SQUARE(_iconH)) / 2 + SQUARE(_lineH * 0.15), _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
         UI_TEX(icon_lock_ca), _colorText2
     ] call FUNC(uiIcon);
-    [_display, _parent, [_blockX + _lockW, _top, _tabW - _lockW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2] call FUNC(uiLabel);
+    [_display, _parent, [_blockX + _lockW, _top, _tabW - _lockW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2, "heading"] call FUNC(uiLabel);
 
     // Why, when the mouse rests on the tab.
     private _tip = [_display, "EINV_Hitbox", _parent, [_blockX, _top, _tabW, _lineH]] call FUNC(uiCreate);
@@ -211,7 +211,7 @@ if (_section getOrDefault ["locked", false]) exitWith {
 
     [
         _display, _parent, [_blockX, _top + _lineH + UNIT * 0.25, _blockW, _textUnit * 0.62],
-        [_notice, _blockW, _font, _lineSize] call FUNC(fitText), _lineSize, _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 0
+        [_notice, _blockW, _font, _lineSize] call FUNC(fitText), _lineSize, _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 0, "hint"
     ] call FUNC(uiLabel);
 
     _lineH + UNIT * 0.25 + _textUnit * 0.7
@@ -437,7 +437,7 @@ if (_shown isNotEqualTo "") then {
     [
         _display, _parent,
         [_blockX + _chevronW + _tabIconW, _buttonTop + _buttonH / 2 - TEXT_MID * _buttonSize, _tabW - _chevronW - _tabIconW, TEXT_MID * _buttonSize * 2],
-        _shown, _buttonSize, _colorText2, _fontBold, 2
+        _shown, _buttonSize, _colorText2, _fontBold, 2, "button"
     ] call FUNC(uiLabel);
 
     if (_tabIconW > 0) then {
@@ -759,7 +759,7 @@ if (_hasBox) then {
     private _padX = SQUARE(_padY);
     private _name = [[_class, true] call FUNC(itemName), _boxW - _padX * 2, _font, _lineSize] call FUNC(fitText);
 
-    [_display, _parent, [_blockX + _padX, _bodyTop + _padY * 0.5, _boxW - _padX * 2, _lineH], _name, _lineSize, _colorText2, _font, 1] call FUNC(uiLabel);
+    [_display, _parent, [_blockX + _padX, _bodyTop + _padY * 0.5, _boxW - _padX * 2, _lineH], _name, _lineSize, _colorText2, _font, 1, "name"] call FUNC(uiLabel);
 };
 
 // ---------------------------------------------------------------------------
@@ -798,7 +798,7 @@ if (_sealed) then {
 
     [
         _display, _parent, [_gridX, _wordTop, _sealW, _wordSize * 1.2],
-        [toUpper LLSTRING(Seal_Unsearched), _sealW, _fontBold, _wordSize] call FUNC(fitText), _wordSize, _colorText2, _fontBold, 2
+        [toUpper LLSTRING(Seal_Unsearched), _sealW, _fontBold, _wordSize] call FUNC(fitText), _wordSize, _colorText2, _fontBold, 2, "hint"
     ] call FUNC(uiLabel);
 
     private _sealLine = [
@@ -926,7 +926,7 @@ if (_rowsFoldable) then {
 
     [
         _display, _parent, [_textX, _rowsTop, _textW, _lineH],
-        [[_rowsText, _theme] call FUNC(caption), _textW, _font, _lineSize] call FUNC(fitText), _lineSize, _colorText2, _font, 0
+        [[_rowsText, _theme] call FUNC(caption), _textW, _font, _lineSize] call FUNC(fitText), _lineSize, _colorText2, _font, 0, "hint"
     ] call FUNC(uiLabel);
 
     private _rowsToggle = [

@@ -103,11 +103,11 @@ if (_number isNotEqualTo "") then {
         private _badge = [_left + _width - _padX - SQUARE(_lineH), _top + _padY, SQUARE(_lineH), _lineH];
 
         _controls pushBack ([_display, _parent, _badge, UI_TEX(circle_ca), _theme getOrDefault ["keyBg", [1, 1, 1, 0.15]]] call FUNC(uiIcon));
-        _controls pushBack ([_display, _parent, _badge, _number, _lineH * 0.62, _theme getOrDefault ["keyText", _colorText], _fontBold, 2] call FUNC(uiLabel));
+        _controls pushBack ([_display, _parent, _badge, _number, _lineH * 0.62, _theme getOrDefault ["keyText", _colorText], _fontBold, 2, "key"] call FUNC(uiLabel));
         _numberW = SQUARE(_lineH) + _padX;
     } else {
         _numberW = (_number getTextWidth [_fontBold, _lineSize]) * TEXT_SLACK + _padX;
-        _controls pushBack ([_display, _parent, [_left + _width - _padX - _numberW, _top + _padY * 0.5, _numberW, _lineH], _number, _lineSize, _colorMuted, _fontBold, 1] call FUNC(uiLabel));
+        _controls pushBack ([_display, _parent, [_left + _width - _padX - _numberW, _top + _padY * 0.5, _numberW, _lineH], _number, _lineSize, _colorMuted, _fontBold, 1, "key"] call FUNC(uiLabel));
     };
 };
 

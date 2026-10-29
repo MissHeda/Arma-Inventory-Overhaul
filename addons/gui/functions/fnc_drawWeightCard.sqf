@@ -144,13 +144,13 @@ if (_fullW > _room - _nextW) then {
 private _wordText = [_wordFull, _theme] call FUNC(caption);
 private _wordW = [_wordText, _fontBold, _wordSize] call _fnc_width;
 
-[_display, _parent, [_left + _statPadX + _statBarW - _wordW, _valueY, _wordW, _valueH], _wordText, _wordSize, _fill, _fontBold, 1] call FUNC(uiLabel);
-[_display, _parent, [_left + _statPadX, _valueY, _statBarW - _wordW, _valueH], _valueText, _valueSize, _colorText, _fontBold, 0] call FUNC(uiLabel);
+[_display, _parent, [_left + _statPadX + _statBarW - _wordW, _valueY, _wordW, _valueH], _wordText, _wordSize, _fill, _fontBold, 1, "value"] call FUNC(uiLabel);
+[_display, _parent, [_left + _statPadX, _valueY, _statBarW - _wordW, _valueH], _valueText, _valueSize, _colorText, _fontBold, 0, "value"] call FUNC(uiLabel);
 
 if (_nextText isNotEqualTo "") then {
     [
         _display, _parent, [_left + _statPadX + _valueW + _nextGap, _valueY, _nextW, _valueH],
-        _nextText, _textUnit * 0.46, _colorMuted, _font, 0
+        _nextText, _textUnit * 0.46, _colorMuted, _font, 0, "hint"
     ] call FUNC(uiLabel);
 };
 

@@ -69,12 +69,14 @@
 #define GRADIENT_NAMES 4
 #define GRADIENT_COUNTS 8
 #define GRADIENT_BUTTONS 16
-#define GRADIENT_TEXT 32
+#define GRADIENT_VALUES 32
 #define GRADIENT_HOVER 64
+#define GRADIENT_MENUS 128
+#define GRADIENT_HINTS 256
 #define GRADIENT_PARTS_DEFAULT 67
-#define GRADIENT_PARTS_ALL 127
-// The colour popover's chips for them, in order: [part, words, tip].
-#define GRADIENT_PART_LIST [[GRADIENT_TITLES, LLSTRING(Palette_Part_Titles), LLSTRING(Palette_Part_Titles_Tip)], [GRADIENT_HEADINGS, LLSTRING(Palette_Part_Headings), LLSTRING(Palette_Part_Headings_Tip)], [GRADIENT_NAMES, LLSTRING(Palette_Part_Names), LLSTRING(Palette_Part_Names_Tip)], [GRADIENT_COUNTS, LLSTRING(Palette_Part_Counts), LLSTRING(Palette_Part_Counts_Tip)], [GRADIENT_BUTTONS, LLSTRING(Palette_Part_Buttons), LLSTRING(Palette_Part_Buttons_Tip)], [GRADIENT_TEXT, LLSTRING(Palette_Part_Text), LLSTRING(Palette_Part_Text_Tip)], [GRADIENT_HOVER, LLSTRING(Palette_Part_Hover), LLSTRING(Palette_Part_Hover_Tip)]]
+#define GRADIENT_PARTS_ALL 511
+// The colour popover's checkboxes for them, three to a row, in order: [part, words, tip].
+#define GRADIENT_PART_LIST [[GRADIENT_TITLES, LLSTRING(Palette_Part_Titles), LLSTRING(Palette_Part_Titles_Tip)], [GRADIENT_HEADINGS, LLSTRING(Palette_Part_Headings), LLSTRING(Palette_Part_Headings_Tip)], [GRADIENT_NAMES, LLSTRING(Palette_Part_Names), LLSTRING(Palette_Part_Names_Tip)], [GRADIENT_COUNTS, LLSTRING(Palette_Part_Counts), LLSTRING(Palette_Part_Counts_Tip)], [GRADIENT_VALUES, LLSTRING(Palette_Part_Values), LLSTRING(Palette_Part_Values_Tip)], [GRADIENT_BUTTONS, LLSTRING(Palette_Part_Buttons), LLSTRING(Palette_Part_Buttons_Tip)], [GRADIENT_MENUS, LLSTRING(Palette_Part_Menus), LLSTRING(Palette_Part_Menus_Tip)], [GRADIENT_HOVER, LLSTRING(Palette_Part_Hover), LLSTRING(Palette_Part_Hover_Tip)], [GRADIENT_HINTS, LLSTRING(Palette_Part_Hints), LLSTRING(Palette_Part_Hints_Tip)]]
 #define PALETTE_DEFAULT [[], [], -1, [], [], [], [], [], -1, -1, [0, 0, 1], "", [], [], -1, -1, -1]
 // Where each transparency lies in the palette, by its slider's id.
 #define PALETTE_ALPHAS [["alpha", 2], ["cellAlpha", 9], ["tileAlpha", 8], ["secondaryAlpha", 14], ["linesAlpha", 15]]

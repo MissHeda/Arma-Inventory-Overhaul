@@ -146,7 +146,7 @@ private _fnc_weaponCard = {
         [_display, _parent, [_cardX, _cardY, _stripW, _cardH], [_colorStrip, _colorAccent] select _inHand] call FUNC(uiPanel);
         [
             _display, _parent, [_cardX, _cardY + _padY * 0.5, _stripW, _lineH], format ["[%1]", _number], _lineSize,
-            [_colorMuted, _colorOnAccent] select _inHand, _fontBold, 2
+            [_colorMuted, _colorOnAccent] select _inHand, _fontBold, 2, "key"
         ] call FUNC(uiLabel);
 
         _innerX = _cardX + _stripW;
@@ -157,7 +157,7 @@ private _fnc_weaponCard = {
         [_display, _parent, _key, [_theme getOrDefault ["keyBg", [1, 1, 1, 0.1]], _colorAccent] select _inHand, _lineH * 0.3] call FUNC(uiPanel);
         [
             _display, _parent, _key, _number, _lineSize * 0.9,
-            [_theme getOrDefault ["keyText", _colorText], _colorOnAccent] select _inHand, _fontBold, 2
+            [_theme getOrDefault ["keyText", _colorText], _colorOnAccent] select _inHand, _fontBold, 2, "key"
         ] call FUNC(uiLabel);
 
         _innerTop = _cardY + _padY * 1.5 + _lineH;

@@ -68,14 +68,14 @@ if (_tooltip getVariable [QGVAR(gradient), false] || {_lines > 1}) then {
 
     private _textH = _size * 1.1 * _lines;
     private _pad = SQUARE(TEXT_UNIT * 0.3);
-    private _words = [_display, "EINV_StructuredText", _tooltip, [_pad, (_height - _textH) / 2 - pixelH, _width - _pad * 2, _textH + _size * 0.4]] call FUNC(uiCreate);
+    private _words = [_display, "EINV_StructuredText", _tooltip, [_pad, (_height - _textH) / 2 + _size * 0.05, _width - _pad * 2, _textH + _size * 0.4]] call FUNC(uiCreate);
 
     _words ctrlSetStructuredText ([_text, _font, _size, 2, _from + [1], _to] call FUNC(gradientText));
 
     _parts pushBack _words;
 } else {
     _parts pushBack ([
-        _display, _tooltip, [0, 0, _width, _height], _text, _size, _theme getOrDefault ["text", [1, 1, 1, 1]], _font, 2
+        _display, _tooltip, [0, 0, _width, _height], _text, _size, _theme getOrDefault ["text", [1, 1, 1, 1]], _font, 2, "never"
     ] call FUNC(uiLabel));
 };
 

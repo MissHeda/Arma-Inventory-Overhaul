@@ -209,7 +209,7 @@ private _slots = [
     if (_room > SQUARE(UNIT * 1.2)) then {
         private _name = [_info getOrDefault ["short", _class], _room, _font, _lineSize] call FUNC(fitText);
 
-        [_display, _parent, [_nameX, _slotY, _room, _lineH], _name, _lineSize, _colorText2, _font, 1] call FUNC(uiLabel);
+        [_display, _parent, [_nameX, _slotY, _room, _lineH], _name, _lineSize, _colorText2, _font, 1, "name"] call FUNC(uiLabel);
     };
 
     private _magazine = _value param [4, []];
@@ -225,7 +225,7 @@ private _slots = [
 
             [
                 _display, _parent, [_slotX + _padX, _slotY + _slotH - _padY * 0.5 - _boxH, _slotW - _padX * 2, _boxH],
-                format ["%1/%2", _rounds, _capacity], _size, _colorText, _fontBold, 1
+                format ["%1/%2", _rounds, _capacity], _size, _colorText, _fontBold, 1, "count"
             ] call FUNC(uiLabel);
         };
     };

@@ -536,7 +536,7 @@
             <English>Buttons</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Buttons_Tip">
-            <English>The words on buttons and chips and the key hints in the bar at the bottom.</English>
+            <English>The words on buttons and tabs and beside the key hints in the bar at the bottom. The keys themselves keep their colour.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Counts">
             <English>Counts</English>
@@ -548,31 +548,43 @@
             <English>Headings</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Headings_Tip">
-            <English>Equipment, Gear, Hotbar and the captions of the slots and boxes.</English>
+            <English>Equipment, Gear, Hotbar, the captions of the slots and the names of the boxes' tabs.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Hints">
+            <English>Notes</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Hints_Tip">
+            <English>The quiet lines: notes, the search field's placeholder, labels on the cards and the version.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Hover">
-            <English>Mouse</English>
+            <English>Tooltips</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Hover_Tip">
             <English>The name of what you point at, the comparison card and the tips of the buttons.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Menus">
+            <English>Menus</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Menus_Tip">
+            <English>The right-click menu and the colour and sound panels.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Names">
             <English>Names</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Names_Tip">
-            <English>The names of items on their tiles and in the slots.</English>
-        </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Text">
-            <English>Other text</English>
-        </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Text_Tip">
-            <English>Every other word of the inventory: weights, the hint line, notes.</English>
+            <English>The names of items on their tiles, in the slots and in the vehicle's cargo.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Titles">
             <English>Titles</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Titles_Tip">
             <English>The window's title and the titles of the columns.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Values">
+            <English>Values</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Values_Tip">
+            <English>Weights, loads, free space and the values on the inspect and comparison cards.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Reach">
             <English>Shows on</English>

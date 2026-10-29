@@ -193,7 +193,7 @@ private _labelRect = [_left + (_barW - _labelW) / 2, _barTop + _barH / 2 - TEXT_
 private _labelInk = [_text2, _theme getOrDefault ["text", [1, 1, 1, 1]]] select _last;
 
 private _labelCtrl = [
-    _display, _parent, _labelRect, [_text, _labelW, _font, _size] call FUNC(fitText), _size, _labelInk, _font, 2
+    _display, _parent, _labelRect, [_text, _labelW, _font, _size] call FUNC(fitText), _size, _labelInk, _font, 2, "never"
 ] call FUNC(uiLabel);
 
 _controls pushBack _labelCtrl;
@@ -296,7 +296,7 @@ private _hits = [];
 
         _controls append ([_display, _parent, _markRect, _accent, _markH / 2] call FUNC(uiPanel));
         _controls pushBack ([
-            _display, _parent, _markRect, str _mark, _markH * 0.62, _theme getOrDefault ["onAccent", [0.05, 0.05, 0.05, 1]], _fontBold, 2
+            _display, _parent, _markRect, str _mark, _markH * 0.62, _theme getOrDefault ["onAccent", [0.05, 0.05, 0.05, 1]], _fontBold, 2, "key"
         ] call FUNC(uiLabel));
     };
 

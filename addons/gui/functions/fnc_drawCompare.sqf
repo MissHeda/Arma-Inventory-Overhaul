@@ -78,7 +78,7 @@ private _cursor = _padY;
 [_display, _group, [_padX, _cursor, _width - _padX * 2, _nameH], _name, _nameSize, _colorText, _fontBold, 0, "hover"] call FUNC(uiLabel);
 _cursor = _cursor + _nameH;
 
-[_display, _group, [_padX, _cursor, _width - _padX * 2, _versusH], _compare getOrDefault ["versus", ""], _smallSize, _muted, _font, 0] call FUNC(uiLabel);
+[_display, _group, [_padX, _cursor, _width - _padX * 2, _versusH], _compare getOrDefault ["versus", ""], _smallSize, _muted, _font, 0, "hint"] call FUNC(uiLabel);
 _cursor = _cursor + _versusH;
 
 {
@@ -86,7 +86,7 @@ _cursor = _cursor + _versusH;
 
     private _rowH = _heights select _forEachIndex;
 
-    [_display, _group, [_padX, _cursor, COMPARE_LABEL_W, _rowH], _label, _smallSize, _muted, _font, 0] call FUNC(uiLabel);
+    [_display, _group, [_padX, _cursor, COMPARE_LABEL_W, _rowH], _label, _smallSize, _muted, _font, 0, "hint"] call FUNC(uiLabel);
 
     if (_structured) then {
         // Structured text sizes itself against its control's own: the card's rows are 0.5 where the class says 0.7.
@@ -94,13 +94,13 @@ _cursor = _cursor + _versusH;
 
         _text ctrlSetStructuredText (_value setAttributes ["size", str (_smallSize / (UNIT * 0.7)), "font", _font]);
     } else {
-        [_display, _group, [_valueX, _cursor, _valueW, _rowH], _value, _smallSize, _colorText, _font, 0] call FUNC(uiLabel);
+        [_display, _group, [_valueX, _cursor, _valueW, _rowH], _value, _smallSize, _colorText, _font, 0, "value"] call FUNC(uiLabel);
     };
 
     if (_diff isNotEqualTo "") then {
         [
             _display, _group, [_diffX, _cursor, COMPARE_DIFF_W, _rowH], _diff, _smallSize,
-            _theme getOrDefault [_diffKey, _muted], _fontBold, 1
+            _theme getOrDefault [_diffKey, _muted], _fontBold, 1, "value"
         ] call FUNC(uiLabel);
     };
 

@@ -246,7 +246,7 @@ switch (_mode) do {
 
     // One part of where the gradient shows (GRADIENT_*) switched on or off.
     case "gradientPart": {
-        if (_argument isEqualType 0 && {_argument in [1, 2, 4, 8, 16, 32, 64]}) then {
+        if (_argument isEqualType 0 && {_argument in [1, 2, 4, 8, 16, 32, 64, 128, 256]}) then {
             private _parts = _palette param [16, -1];
 
             if (_parts < 0) then {

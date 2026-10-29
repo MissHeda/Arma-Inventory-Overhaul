@@ -301,7 +301,7 @@ private _fnc_chip = {
 
 private _headTop = _cardY + _padY;
 
-[_display, _layer, [_cardX + _padX, _headTop, _width - _padX * 2, _titleH], LLSTRING(Palette_Title), _size, _text2, _fontBold, 0] call FUNC(uiLabel);
+[_display, _layer, [_cardX + _padX, _headTop, _width - _padX * 2, _titleH], LLSTRING(Palette_Title), _size, _text2, _fontBold, 0, "menu"] call FUNC(uiLabel);
 
 private _resetAll = ["all", LLSTRING(Palette_ResetAll), _headTop, _titleH] call _fnc_chip;
 
@@ -447,7 +447,7 @@ private _fnc_picker = {
         private _rowTop = _pickTop + _index * _fieldPitch;
 
         [_display, _layer, [_fieldsX, _rowTop, _fieldsW, _fieldH], [1, 1, 1, 0.08], UNIT * 0.25] call FUNC(uiPanel);
-        [_display, _layer, [_fieldsX + _fieldPadX, _rowTop, _fieldLabelW, _fieldH], _label, _fieldSize, _muted, _font, 0] call FUNC(uiLabel);
+        [_display, _layer, [_fieldsX + _fieldPadX, _rowTop, _fieldLabelW, _fieldH], _label, _fieldSize, _muted, _font, 0, "menu"] call FUNC(uiLabel);
 
         private _hit = [_display, "EINV_Hitbox", _layer, [_fieldsX, _rowTop, _fieldsW, _fieldH]] call FUNC(uiCreate);
         private _editX = _fieldsX + _fieldPadX + _fieldLabelW;
@@ -557,7 +557,7 @@ if (_io isNotEqualTo "") then {
 
 [
     _display, _layer, [_cardX + _nameX, _y, _nameW, _headH], [LLSTRING(Palette_Style), _nameW, _fontBold, _size] call FUNC(fitText), _size, _text,
-    _fontBold, 0
+    _fontBold, 0, "menu"
 ] call FUNC(uiLabel);
 
 // The window as it ships (PALETTE_DEFAULT) is Classic, whichever way it came to be.
@@ -604,7 +604,7 @@ if (_stylesOpen) then {
 
         private _textX = _cardX + _nameX;
 
-        [_display, _layer, [_textX, _rowTop, _cardX + _width - _padX - _textX, _rowH], _name, _small, [_text2, _text] select _current, _font, 0] call FUNC(uiLabel);
+        [_display, _layer, [_textX, _rowTop, _cardX + _width - _padX - _textX, _rowH], _name, _small, [_text2, _text] select _current, _font, 0, "menu"] call FUNC(uiLabel);
 
         if (_current) then {
             [
@@ -667,7 +667,7 @@ private _sliders = createHashMap;
 
     [
         _display, _layer, [_cardX + _nameX, _y, _nameW, _headH], [_name, _nameW, _fontBold, _size] call FUNC(fitText), _size, _text,
-        _fontBold, 0
+        _fontBold, 0, "menu"
     ] call FUNC(uiLabel);
 
     // The swatch; what can be see-through lies over a grey, so that what shows through is seen.
@@ -719,7 +719,7 @@ private _sliders = createHashMap;
         if (_end >= 0) then {
             _y = _y + _gapY;
 
-            [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], LLSTRING(Palette_Gradient), _small, _text2, _font, 0] call FUNC(uiLabel);
+            [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], LLSTRING(Palette_Gradient), _small, _text2, _font, 0, "menu"] call FUNC(uiLabel);
 
             private _switchW = SQUARE(UNIT * 2.2);
 
@@ -754,7 +754,7 @@ private _sliders = createHashMap;
                         [0, 0, 0, 1], UNIT * 0.15
                     ] call FUNC(uiPanel)];
 
-                    [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0] call FUNC(uiLabel);
+                    [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0, "menu"] call FUNC(uiLabel);
 
                     private _boxHit = [_display, "EINV_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(UNIT * 1.7), _rowH]] call FUNC(uiCreate);
 
@@ -781,39 +781,63 @@ private _sliders = createHashMap;
 
             _y = _y + _rowH;
 
-            // Where the titles' gradient shows: a chip for each part, lit while it is on (GRADIENT_*, fnc_uiLabel).
+            // Where the titles' gradient shows: a checkbox for each part, three to a row, as CBA's settings have them - a square
+            // outline, ticked while the part is on (GRADIENT_*, fnc_uiLabel). The box and its words take the click.
             if (_gradientOn && {_id isEqualTo "titles"}) then {
                 _y = _y + _gapY;
 
-                [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], LLSTRING(Palette_Reach), _small, _text2, _font, 0] call FUNC(uiLabel);
+                [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], LLSTRING(Palette_Reach), _small, _text2, _font, 0, "menu"] call FUNC(uiLabel);
 
                 private _parts = GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT];
                 private _partsX = _cardX + _sliderX;
-                private _partW = (_cardX + _width - _padX - _partsX - _gapX * 2) / 3;
+                private _partW = (_cardX + _width - _padX - _partsX - _gapX) / 3;
+                private _checkH = _rowH * 0.62;
+                private _checkW = SQUARE(_checkH);
+                private _edgeW = pixelW * 2;
+                private _edgeH = pixelH * 2;
 
                 {
                     _x params ["_bit", "_words", "_partTip"];
 
-                    private _partRect = [_partsX + (_forEachIndex mod 3) * (_partW + _gapX), _y + floor (_forEachIndex / 3) * _rowH + (_rowH - _chipH) / 2, _partW, _chipH];
+                    private _cellX = _partsX + (_forEachIndex mod 3) * (_partW + _gapX / 2);
+                    private _cellY = _y + floor (_forEachIndex / 3) * _rowH;
+                    private _checkY = _cellY + (_rowH - _checkH) / 2;
+                    private _on = ((floor (_parts / _bit)) mod 2) == 1;
 
-                    // One that is on lies on the accent.
-                    if (((floor (_parts / _bit)) mod 2) == 1) then {
+                    [_display, _layer, [_cellX, _checkY, _checkW, _checkH], [_muted, _text] select _on, 0] call FUNC(uiPanel);
+                    [_display, _layer, [_cellX + _edgeW, _checkY + _edgeH, _checkW - _edgeW * 2, _checkH - _edgeH * 2], [0.08, 0.08, 0.08, 1], 0] call FUNC(uiPanel);
+
+                    if (_on) then {
+                        private _inset = _checkH * 0.16;
+
                         [
-                            _display, _layer, _partRect, ((GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]]) select [0, 3]) + [0.45], _chipH / 2
-                        ] call FUNC(uiPanel);
+                            _display, _layer, [_cellX + SQUARE(_inset), _checkY + _inset, _checkW - SQUARE(_inset) * 2, _checkH - _inset * 2],
+                            UI_TEX(icon_check_ca), _text
+                        ] call FUNC(uiIcon);
                     };
 
-                    private _partButton = [
-                        _display, _layer, _partRect, _bit, _words, "", _buttonTheme, {
-                            params ["_button", "_bit"];
+                    private _wordsX = _cellX + _checkW + SQUARE(UNIT * 0.15);
+                    private _wordsW = _cellX + _partW - _wordsX;
 
-                            if (_button < 0) exitWith {};
+                    [
+                        _display, _layer, [_wordsX, _cellY, _wordsW, _rowH], [_words, _wordsW, _font, _small * 0.9] call FUNC(fitText),
+                        _small * 0.9, [_muted, _text] select _on, _font, 0, "never"
+                    ] call FUNC(uiLabel);
+
+                    private _partHit = [_display, "EINV_Hitbox", _layer, [_cellX, _cellY, _partW, _rowH]] call FUNC(uiCreate);
+
+                    [_partHit, _partTip] call FUNC(setTooltip);
+                    _partHit setVariable [QGVAR(id), _bit];
+                    _partHit ctrlAddEventHandler ["ButtonClick", {
+                        params ["_ctrl"];
+
+                        // The popover is made again, which deletes this very control: a frame later.
+                        [{
+                            params ["_bit"];
 
                             ["gradientPart", _bit] call FUNC(paletteSet);
-                        }, false, _chipSize, true
-                    ] call FUNC(uiButton);
-
-                    [(_partButton param [count _partButton - 1, controlNull]), _partTip] call FUNC(setTooltip);
+                        }, [_ctrl getVariable [QGVAR(id), 0]]] call FUNC(later);
+                    }];
                 } forEach GRADIENT_PART_LIST;
 
                 _y = _y + _rowH * ceil ((count GRADIENT_PART_LIST) / 3);
@@ -836,7 +860,7 @@ private _sliders = createHashMap;
 
             [
                 _display, _layer, [_cardX + _padX, _y, _labelW, _rowH], [_sliderLabel, _labelW, _font, _small] call FUNC(fitText),
-                _small, _text2, _font, 0
+                _small, _text2, _font, 0, "menu"
             ] call FUNC(uiLabel);
 
             [_display, _layer, _trackRect, [1, 1, 1, 0.12], _trackH / 2] call FUNC(uiPanel);
@@ -856,7 +880,7 @@ private _sliders = createHashMap;
             ] call FUNC(uiIcon);
 
             private _value = [
-                _display, _layer, [_cardX + _width - _padX - _valueW, _y, _valueW, _rowH], "", _small * 0.9, _text2, _font, 1
+                _display, _layer, [_cardX + _width - _padX - _valueW, _y, _valueW, _rowH], "", _small * 0.9, _text2, _font, 1, "menu"
             ] call FUNC(uiLabel);
 
             // The hit area is the slider's whole room, a knob's width beyond the track at each end: a press near an end is that end.
@@ -880,7 +904,7 @@ private _sliders = createHashMap;
         } forEach _rowSliders;
 
         if (_note isNotEqualTo "") then {
-            [_display, _layer, [_cardX + _padX, _y, _width - _padX * 2, _rowH], _note, _small * 0.9, _muted, _font, 0] call FUNC(uiLabel);
+            [_display, _layer, [_cardX + _padX, _y, _width - _padX * 2, _rowH], _note, _small * 0.9, _muted, _font, 0, "menu"] call FUNC(uiLabel);
             _y = _y + _rowH;
         };
     };

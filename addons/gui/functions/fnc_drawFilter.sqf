@@ -50,7 +50,7 @@ private _textX = _left + _padX + SQUARE(_iconH) + SQUARE(_height * 0.2);
 private _textW = _left + _width - _padX - _textX;
 private _size = _height * 0.48;
 
-private _placeholder = [_display, controlNull, [_textX, _top, _textW, _height], _placeholderText, _size, _muted, _font, 0] call FUNC(uiLabel);
+private _placeholder = [_display, controlNull, [_textX, _top, _textW, _height], _placeholderText, _size, _muted, _font, 0, "hint"] call FUNC(uiLabel);
 _placeholder ctrlShow (GVAR(filter) isEqualTo "");
 
 // A click anywhere on the box puts the cursor in the field.

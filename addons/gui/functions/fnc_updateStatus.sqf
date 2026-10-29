@@ -223,7 +223,7 @@ private _now = diag_tickTime;
 
     if (_stopped) then {
         _controls pushBack ([
-            _display, _parent, [_buttonX, _textTop, _drawnW, _size * 1.4], _resume, _size, [1, 1, 1, 1], _font, 2
+            _display, _parent, [_buttonX, _textTop, _drawnW, _size * 1.4], _resume, _size, [1, 1, 1, 1], _font, 2, "button"
         ] call FUNC(uiLabel));
     } else {
         private _crossH = _height * 0.5;

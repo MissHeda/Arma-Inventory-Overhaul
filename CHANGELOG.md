@@ -88,6 +88,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Changed
 
+- Colour panel, "Shows on": the gradient's parts are checkboxes as in CBA's settings (a square that is ticked) instead of chips, and there are nine of them instead of a catch-all "Other text": Titles, Headings, Names, Counts, Values (weights, loads, free space, the inspect and comparison values), Buttons, Menus (right-click menu, colour and sound panels), Tooltips (was "Mouse") and Notes (notes, the search placeholder, card labels, the version). A saved "Other text" now means Values.
 - Colour panel: Titles is a row of its own (the window's title, column titles, headings, slot captions, the name at the mouse and the cards' names). Titles and Panels have a Gradient switch: on, two boxes Start and End, a click on one binds the picker to it; the panels then run from the End colour on the left into their own. Secondary and Lines got transparency sliders. The Night (OLED) style is gone.
 - Setup, Categories: the colour field is wide enough for its text again.
 - Colour panel styles are now all dark: Classic, Arma 3, Apex, Contact, Tanks, Jets, Laws of War, Tactical, Night vision, Night (OLED), Modern and Modern gradient. The text gradient now shows: it runs over the titles (the window's title, the column titles, Equipment / Gear / Hotbar) - before, it only reached text in the accent colour, which the window hardly has.
@@ -163,6 +164,8 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- With the gradient on, words no longer sit a little higher than they do without it; the structured text is placed where a label centres its line.
+- With the gradient on, keys and numbers on badges (the hotbar's keys, the weapon cards' 1/2/3, the footer's key caps, page marks) no longer vanish: they keep their own colour, as does any line of one or two letters and any dark ink or ink on the accent, where the gradient's accent start sank into the badge.
 - Words in the gradient were cut at the end ("Clos", "Hotba"): their line gets a little more room, as a letter of its own in each colour runs wider. Long tips break onto several lines and show over the colour panel instead of under it.
 - The footer's hint line sits in the middle of the screen; only a line too long for that takes the whole room.
 - Count boxes on tiles have round corners in a look with round corners; the window's icon at the top left stays white; the style list shows names only.

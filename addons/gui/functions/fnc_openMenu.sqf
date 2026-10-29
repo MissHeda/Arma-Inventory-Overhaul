@@ -163,7 +163,7 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closeMenu)}] call FUNC
         _color = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
     };
 
-    [_display, _layer, [_cardX + _padX + _textX, _rowTop, _width - _padX * 2 - _textX, _rowH], _text, _size, _color, _font, 0] call FUNC(uiLabel);
+    [_display, _layer, [_cardX + _padX + _textX, _rowTop, _width - _padX * 2 - _textX, _rowH], _text, _size, _color, _font, 0, "menu"] call FUNC(uiLabel);
 
     // A greyed-out row takes the click, so it closes nothing and runs nothing.
     private _hit = [_display, "EINV_Hitbox", _layer, [_cardX, _rowTop, _width, _rowH]] call FUNC(uiCreate);

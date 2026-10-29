@@ -160,7 +160,7 @@ if (_ownSections isEqualTo []) then {
     [
         _display, controlNull, [_storageX + _padX * 2, CONTENT_Y + UNIT * 2.4, _textW, UNIT],
         [LLSTRING(Storage_Empty), _textW, _font, _size] call FUNC(fitText), _size,
-        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2
+        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2, "hint"
     ] call FUNC(uiLabel);
 };
 
