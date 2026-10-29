@@ -22,9 +22,7 @@
  * why, or no section at all. With fnc_onInventoryOpened's "asked:" line before it, a container that does
  * not open says where it stopped.
  *
- * Nothing the last window waited for carries over (fnc_attach). The camera on the soldier starts as the
- * player's setting says (einv_gui_cameraDefault); the header's button turns it for this window only - or
- * across a step aside for another mod's dialog (fnc_stepAside), which opens the same window again.
+ * Nothing the last window waited for carries over (fnc_attach).
  *
  * Never over the vanilla inventory: a dialog is made as the child of the one on top, and a child closes
  * with its parent. Another mod can have the engine open RscDisplayInventory beside this mod's handler
@@ -126,15 +124,6 @@ if (_wait) exitWith {
     [{_this call FUNC(open)}, [_unit, _container, _secondary, _waited + 1, _guess]] call CBA_fnc_execNextFrame;
     true
 };
-
-// The camera as the player set it (einv_gui_cameraDefault), unless a step aside brings the window back as it was.
-GVAR(cameraOn) = if (isNil QGVAR(cameraNext)) then {
-    (missionNamespace getVariable [QGVAR(cameraDefault), "soldier"]) isEqualTo "soldier"
-} else {
-    GVAR(cameraNext)
-};
-
-GVAR(cameraNext) = nil;
 
 if !(createDialog "EINV_InventoryDialog") exitWith {
     ERROR("Could not create the inventory dialog.");

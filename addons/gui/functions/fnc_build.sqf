@@ -3,14 +3,11 @@
 /*
  * Author: Miss Heda
  * Builds everything on the window in the chosen look: clears what was there, reads what the unit wears
- * and carries and what it loots, draws the header, the look's layout and the footer, and turns the
- * camera on where the layout left room for the soldier. Runs again whenever the look, the camera
- * switch, a section's fold or the sections shown change; a change of what some sections hold only draws
- * those again (fnc_refresh).
+ * and carries and what it loots, and draws the header, the look's layout and the footer. Runs again
+ * whenever the look, a section's fold or the sections shown change; a change of what some sections hold
+ * only draws those again (fnc_refresh).
  *
- * The camera on the soldier is kept while it frames the same unit in the same free middle: a new camera
- * is a new view for the engine, and starting one on every build showed as a small stutter on every move
- * and every fold (a tester, 0.4.7). With einv_gui_debugTiming on, the RPT gets how long the build took.
+ * With einv_gui_debugTiming on, the RPT gets how long the build took.
  *
  * Last come what floats over the columns - the open kits' windows where they were, then the name at the
  * mouse and the inspect card (fnc_drawWindows, fnc_drawTopLayer): controls made later draw over earlier
@@ -29,10 +26,9 @@
  * The layout is looked up by name, so a look that is missing or broken leaves a window with only its
  * header and footer - still one that can be closed - rather than no window at all.
  *
- * A window that attached with hooks (fnc_attach) is asked at six places: the theme and the context may
+ * A window that attached with hooks (fnc_attach) is asked at five places: the theme and the context may
  * be changed ("theme", "context"), the header, the layout and the footer can be its own ("header",
- * "layout" - the layout answers where the soldier stands -, "footer"), its camera is told that rect
- * ("camera", and then this addon's own camera stays off), and "afterBuild" comes last of all. A top-level
+ * "layout" - the layout answers where its free middle is -, "footer"), and "afterBuild" comes last of all. A top-level
  * control with the id IDC_KEEP survives the sweep, with everything in it; on a display of another mod
  * (the "guest" flag) only what this addon registered is swept. Without hooks the build is exactly the
  * inventory's.
@@ -63,10 +59,6 @@ private _start = diag_tickTime;
 // For the tester's numbers (einv_gui_debugTiming): when each part of the build ended.
 private _timed = missionNamespace getVariable [QGVAR(debugTiming), false];
 private _marks = [];
-
-// The soldier's live camera is this addon's own, unless the window brings one (the "camera" hook). It is
-// not stopped here: a camera that still frames the same is kept (below).
-private _ownCamera = !("camera" in GVAR(hooks));
 
 // A rebuild ends any drag: the tiles it pointed at are about to go. The drag's
 // timing line (einv_gui_debugTiming) is written first (fnc_logDrag).
@@ -370,12 +362,11 @@ private _context = createHashMapFromArray [
     ["equipment", [_unit] call EFUNC(storage,getEquipment)],
     ["ownSections", _ownSections],
     ["lootSections", _lootSections],
-    ["looting", _lootSections isNotEqualTo []],
-    ["cameraOn", GVAR(cameraOn) && {isNull objectParent _unit}]
+    ["looting", _lootSections isNotEqualTo []]
 ];
 
 // ... and what it shows (the Arsenal's storage column also holds the containers opened inside the
-// soldier's, and its camera is its own).
+// soldier's).
 ["context", [_context]] call FUNC(hook);
 
 GVAR(theme) = _theme;
@@ -465,27 +456,7 @@ call FUNC(sortSearch);
     };
 } forEach (uiNamespace getVariable [QGVAR(created), []]);
 
-// Where the soldier stands in the free middle.
-GVAR(cameraRect) = _rect;
-
-if (_ownCamera) then {
-    if ((_context get "cameraOn") && {_rect isNotEqualTo []}) then {
-        if (isNull GVAR(camera) || {GVAR(cameraFor) isNotEqualTo [_unit, _rect]}) then {
-            [_unit, _rect] call FUNC(cameraStart);
-        };
-    } else {
-        call FUNC(cameraStop);
-    };
-
-    if (!isNull GVAR(camera)) then {
-        _dim ctrlSetBackgroundColor (_theme getOrDefault ["dimCamera", [0, 0, 0, 0.1]]);
-    };
-} else {
-    // The window's own camera is told where the soldier stands (the free middle of the layout).
-    ["camera", [_rect]] call FUNC(hook);
-};
-
-if (_timed) then {_marks pushBack ["footer and camera", diag_tickTime]};
+if (_timed) then {_marks pushBack ["footer", diag_tickTime]};
 
 // The open kits' windows where they were, then the name at the mouse and the inspect card over them -
 // with the search field's fading and the hover (fnc_drawTopLayer).

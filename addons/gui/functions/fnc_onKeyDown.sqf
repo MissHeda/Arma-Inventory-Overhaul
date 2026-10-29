@@ -76,8 +76,8 @@ if (
     && {[GVAR(windowOrder) select -1] call FUNC(closeWindow)}
 ) exitWith {true};
 
-// R turns what is being dragged a quarter round - not several tiles dragged together.
-if (_key == DIK_R && {GVAR(dragging)}) exitWith {
+// The rotate key (R by default) turns what is being dragged a quarter round - not several tiles dragged together.
+if (GVAR(dragging) && {[_key, [_shift, _ctrl, _alt]] call FUNC(isRotateKey)}) exitWith {
     if (GVAR(dragGroup) isEqualTo []) then {
         [_display] call FUNC(rotateDrag);
     };

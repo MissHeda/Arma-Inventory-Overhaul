@@ -44,7 +44,7 @@
  *                 tileCountColor, slotIcon                   muted 0.56, ...): its dimmer shades
  *   Lines         line, panelBorder, slotBorder, tileBorder  the tint of these films as for Secondary; the hatch stripes are drawn
  *                                                            from line; a border that is [] stays none
- *   Fixed         dim, dimCamera, lootPanel, lootBorder,     never: the screen's dim is the world behind the window, the loot keys
+ *   Fixed         dim, lootPanel, lootBorder,                never: the screen's dim is the world behind the window, the loot keys
  *                 lootAccent, lootTab, lootLine, gain,       and the status colours mean something
  *                 loss, warn, info
  *
@@ -109,7 +109,6 @@ _theme merge [createHashMapFromArray [
     ["upper", false],
     ["radius", UNIT * 0.45],
     ["dim", [0, 0, 0, 0.5]],
-    ["dimCamera", [0, 0, 0, 0.25]],
     ["panel", [0.05, 0.05, 0.05, PANEL_ALPHA]],
     ["panelBorder", []],
     ["lootPanel", []],

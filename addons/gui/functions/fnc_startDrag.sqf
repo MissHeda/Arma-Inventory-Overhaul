@@ -402,7 +402,8 @@ uiNamespace setVariable [QGVAR(dragScroll), _scroll];
 private _hint = uiNamespace getVariable [QGVAR(hint), controlNull];
 
 if (!isNull _hint) then {
-    private _parts = [LLSTRING(Hint_Rotate)];
+    private _rotateKey = call FUNC(rotateKeyName);
+    private _parts = [[], [format [LLSTRING(Hint_Rotate), _rotateKey]]] select (_rotateKey isNotEqualTo "");
 
     if (_stack > 1) then {
         _parts append [LLSTRING(Hint_Amount), LLSTRING(Hint_All)];

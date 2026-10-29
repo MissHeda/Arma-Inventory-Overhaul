@@ -240,12 +240,11 @@ GVAR(noiseSearchNext) = 0;
 GVAR(reloadSoundId) = -1;
 
 // What the window was opened on, the vehicle and place the soldier had then (fnc_checkTaken), why the window
-// closed ("move", "taken" or ""), and where the camera frames the soldier.
+// closed ("move", "taken" or "").
 GVAR(openedOn) = objNull;
 GVAR(openParent) = objNull;
 GVAR(openPos) = [];
 GVAR(closeReason) = "";
-GVAR(cameraRect) = [];
 
 // Moving stops looting: DIK code -> movement action, and the actions held already when the window opened
 // (fnc_open, fnc_onKeyDown).
@@ -453,15 +452,6 @@ GVAR(aceInventoryAction) = isClass (configFile >> "CfgPatches" >> "ace_medical_s
 // (fnc_agentActionCondition, fnc_addAgentAction).
 GVAR(actionAgent) = objNull;
 
-// The live camera on the player's soldier and its light at night (fnc_cameraStart), and whom and which
-// rectangle it frames, [unit, rect] - a build keeps a camera that frames the same (fnc_build), and
-// fnc_cameraStart moves one that frames the same soldier from another rectangle. cameraView is
-// [unit, view] the player had before the camera, which fnc_cameraStop switches back to.
-GVAR(camera) = objNull;
-GVAR(cameraLight) = objNull;
-GVAR(cameraFor) = [];
-GVAR(cameraView) = [];
-
 // What the containers held when the window was last drawn, in the five parts fnc_getSignature gives:
 // the unit's own gear, the list of sections shown, per loot and per storage section what it holds and
 // where it lies, and what else the weight card shows. fnc_refresh compares them part by part: an own or
@@ -510,13 +500,6 @@ GVAR(styles) = [
     ["main", LSTRING(Title), QFUNC(theme), QFUNC(layoutGlass)]
 ];
 GVAR(style) = "main";
-
-// The camera on the soldier in the window's middle: on or off for the window open now - set from the
-// player's setting at every opening (einv_gui_cameraDefault, fnc_open), turned by the header's button
-// (fnc_toggleCamera); and what a step aside for another mod's dialog brings back (fnc_stepAside) - nil
-// otherwise. No longer kept in the profile: the setting is the default now (0.4.7).
-GVAR(cameraOn) = true;
-GVAR(cameraNext) = nil;
 
 // The player's colours, picked in the popover under the header's palette button (fnc_openPaletteMenu): [accent, secondary, alpha,
 // panel, cells, tiles, text, lines, tile alpha] (fnc_palette) - each colour [hue, saturation, value] (0 to 1) or [] for none, the

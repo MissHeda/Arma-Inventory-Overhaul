@@ -5,10 +5,10 @@
  * Draws the header along the top of the window, the same in every look but in its colours: the title
  * on the left; on the right the cog of the setup wizard, the search field (on the buttons' own surface), the speaker (it opens the dropdown
  * of the sound volumes, fnc_openSoundMenu; a right click mutes everything or brings it back), the palette (it opens the popover
- * of the colours, fnc_openPaletteMenu; left out where the server does not let players pick them - fnc_paletteAllowed), the camera
- * switch (left out where the setting is forced - fnc_cameraForced) and Close, each on a piece of the
+ * of the colours, fnc_openPaletteMenu; left out where the server does not let players pick them - fnc_paletteAllowed)
+ * and Close, each on a piece of the
  * window's glass. The buttons and the search field's frame are dark, the column panels' colour one step lighter
- * (fnc_headerStyle), one step lighter again under the mouse. A button that is on - the camera, the speaker and the palette
+ * (fnc_headerStyle), one step lighter again under the mouse. A button that is on - the speaker and the palette
  * while their dropdown is open - shows it by an accent-tinted icon and a thin accent line under it, not by a fill; an
  * icon that is off is dimmed. All of them are squares of the header's height with the same gap. A line under the
  * header, the width of the content. The title's words grow with the tile scale (TEXT_UNIT, fnc_textScale); the
@@ -133,23 +133,6 @@ private _close = [_display, controlNull, _closeRect, "close", "", UI_TEX(icon_cl
     ["the close button"] call FUNC(closeDisplay);
 }] call FUNC(uiButton);
 [_close, LLSTRING(Close)] call _fnc_tooltip;
-
-// The camera switch. Its state shows in the button: an accent icon and line while the camera is on, a dimmed icon
-// while it is off. Not drawn at all where a server or a mission forces the setting
-// (fnc_cameraForced): the player has no choice to make then.
-if !(call FUNC(cameraForced)) then {
-    private _cameraRect = [_square] call _fnc_place;
-
-    if (GVAR(cameraOn)) then {
-        [_cameraRect, true] call _fnc_underline;
-    };
-
-    private _camera = [
-        _display, controlNull, _cameraRect, "camera", "", UI_TEX(icon_camera_ca),
-        [GVAR(cameraOn), !GVAR(cameraOn)] call _fnc_buttonTheme, {[] call FUNC(toggleCamera)}
-    ] call FUNC(uiButton);
-    [_camera, LLSTRING(Camera_Tooltip)] call _fnc_tooltip;
-};
 
 // The palette: a click opens the popover of the colours under it (fnc_openPaletteMenu), where the player picks the accent, the
 // secondary colour, the panels' colour and the transparency and sees them at once. Not drawn where the server does not let players pick their colours

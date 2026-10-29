@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * The window closed - however it closed: Escape, the Gear key, the close button, fnc_onFrame because the
  * unit can no longer use it, or another script. Every one of them ends here, so this is where the frame
- * is stopped (fnc_stopFrame) and the camera is given back to the player.
+ * is stopped (fnc_stopFrame).
  *
  * And where the RPT is told why, one line "window closed: <reason>": the reason the window's own path gave
  * (fnc_closeDisplay - a movement key, Escape, the Gear key, the close button, a rule of fnc_onFrame, the
@@ -87,8 +87,6 @@ GVAR(openPos) = [];
 GVAR(moveHeld) = [];
 
 call FUNC(stopFrame);
-
-call FUNC(cameraStop);
 
 call EFUNC(storage,flushPlaces);
 

@@ -51,17 +51,6 @@
     0
 ] call CBA_fnc_addSetting;
 
-// Each player's own taste: the soldier from the front, as ACE Arsenal shows him, or the world as seen from
-// his eyes. Read as the window opens (fnc_open); the header's button still turns it for that window.
-[
-    QGVAR(cameraDefault),
-    "LIST",
-    [LLSTRING(Setting_CameraDefault), LLSTRING(Setting_CameraDefault_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
-    [["soldier", "off"], [LLSTRING(Setting_CameraDefault_Soldier), LLSTRING(Setting_CameraDefault_Off)], 0],
-    0
-] call CBA_fnc_addSetting;
-
 // Each player's own taste: where the loot column opens - left of their storage column, which then never moves
 // (default), or at the right edge with the storage column moving in, as it did before. Read at every build
 // (fnc_layoutGlass), so an open window follows at its next one.

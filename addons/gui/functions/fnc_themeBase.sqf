@@ -46,7 +46,6 @@ createHashMapFromArray [
     ["upper", false],
     ["radius", 0],
     ["dim", [0, 0, 0, 0.5]],
-    ["dimCamera", [0, 0, 0, 0.25]],
     ["panel", [0.05, 0.05, 0.05, 0.92]],
     ["panelBorder", []],
     ["lootPanel", []],
@@ -92,6 +91,5 @@ createHashMapFromArray [
     ["buttonText", [0.88, 0.88, 0.88, 1]],
     ["keyBg", [1, 1, 1, 0.14]],
     ["keyText", [1, 1, 1, 1]],
-    ["keyRound", false],
-    ["cameraDefault", true]
+    ["keyRound", false]
 ]

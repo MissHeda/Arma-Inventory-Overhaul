@@ -56,7 +56,7 @@ if (!isNull _focused && {ctrlType _focused == 2}) exitWith {false};
 private _dragging = EGVAR(gui,dragging);
 
 if (
-    (_key == DIK_R && {_dragging})
+    (_dragging && {[_key, [_shift, _ctrl, _alt]] call EFUNC(gui,isRotateKey)})
     || {
         !_dragging && {[getMousePosition] call FUNC(isOver)}
         && {[_key, [_shift, _ctrl, _alt]] call EFUNC(gui,isDropKey)}

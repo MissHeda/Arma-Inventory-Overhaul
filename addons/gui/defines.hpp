@@ -394,7 +394,7 @@
 // Screen geometry, relative to the safezone so it scales with the UI size. The window takes the whole
 // screen; the looks share its frame and lay out the content between header and footer themselves:
 //
-//    0.6 -  2.2   header: title, camera, Close                           (in UNITs from the top)
+//    0.6 -  2.2   header: title, buttons, Close                          (in UNITs from the top)
 //    3.0 - 37.4   content: whatever the look draws
 //   38.0 - 39.4   footer: key hints, the hint, the version
 // ---------------------------------------------------------------------------
@@ -485,26 +485,3 @@
 #define COMPARTMENT_PAD 0.06
 #define COMPARTMENT_PAD_PX(CELLW) ((round ((CELLW) * COMPARTMENT_PAD / pixelW)) max 1)
 
-// ---------------------------------------------------------------------------
-// The live camera on the player's soldier (fnc_cameraStart). Starting values - tuned in the game.
-// ---------------------------------------------------------------------------
-
-// How far in front of the soldier it stands, in metres, and how close a wall may pull it in.
-#define CAMERA_DISTANCE     2.5
-#define CAMERA_MIN_DISTANCE 0.9
-
-// How far it stays off a wall it was pulled in front of, in metres.
-#define CAMERA_WALL_GAP 0.25
-
-// Its zoom (camSetFov). The soldier is placed on the screen as if this were the tangent of half the
-// view's height; should the soldier land off the middle of the look's free space, CAMERA_FOV_SCALE
-// corrects that assumption without changing the zoom.
-#define CAMERA_FOV       0.7
-#define CAMERA_FOV_SCALE 1
-
-// The chest's height in the soldier's model when its bones cannot be read, in metres.
-#define CAMERA_CHEST_Z 1.3
-
-// The light it brings along at night: weak, so the soldier is seen but the night stays night.
-#define CAMERA_LIGHT_BRIGHTNESS 0.2
-#define CAMERA_LIGHT_SUN        0.5

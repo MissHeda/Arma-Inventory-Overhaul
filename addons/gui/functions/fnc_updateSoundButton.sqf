@@ -35,7 +35,7 @@ private _muted = [""] call FUNC(soundMuted);
 // The accent line under the button shows while the dropdown is open.
 {_x ctrlShow _open} forEach (uiNamespace getVariable [QGVAR(soundLine), []]);
 
-// Muted: the icon's strength drops, as the camera's does when it is off.
+// Muted: the icon's strength drops, as any button's does when it is off.
 if (_muted && {!_open}) then {
     _ink = +_ink;
     _ink set [3, (_ink param [3, 1]) * 0.45];

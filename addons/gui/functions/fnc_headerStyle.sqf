@@ -4,7 +4,7 @@
  * The colours of a button in the header (fnc_drawHeader): the dark of the inventory's panels. The window's glass
  * lies under every button and the theme's button film goes over it, so a button is the panel colour one step
  * lighter, as the buttons in the columns are; under the mouse it is one step lighter again. Nothing is filled with
- * the accent: a button that is on (the camera, the speaker while its dropdown is open) keeps the same surface and
+ * the accent: a button that is on (the speaker or the palette while its dropdown is open) keeps the same surface and
  * shows it by its icon, tinted with the accent (and a thin accent line under it, fnc_drawHeader). The search
  * field's frame uses the plain one.
  *

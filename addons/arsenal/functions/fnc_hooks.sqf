@@ -42,8 +42,7 @@ createHashMapFromArray [
     ["layout", {_this call FUNC(layout)}],
     ["footer", {_this call FUNC(footer)}],
 
-    // ACE's camera, and ACE decides when its window closes
-    ["camera", {}],
+    // ACE decides when its window closes
     ["keepOpen", true],
     ["frame", {_this call FUNC(onFrame)}],
 

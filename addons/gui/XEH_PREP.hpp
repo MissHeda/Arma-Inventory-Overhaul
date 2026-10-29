@@ -228,12 +228,6 @@ PREP(openPaletteMenu);
 PREP(updatePaletteMenu);
 PREP(updatePaletteButton);
 
-// The camera
-PREP(toggleCamera);
-PREP(cameraForced);
-PREP(cameraStart);
-PREP(cameraStop);
-
 // Weight: what lifting something previews on the weight card, the words for what a pick-up makes of the
 // soldier, and the comparison of a vest, uniform, helmet or backpack with the one worn
 PREP(previewWeight);
@@ -360,6 +354,8 @@ PREP(isQuickKey);
 PREP(quickKeyName);
 PREP(isDropKey);
 PREP(dropKeyName);
+PREP(isRotateKey);
+PREP(rotateKeyName);
 PREP(quickAction);
 PREP(takeFocus);
 PREP(isFinite);

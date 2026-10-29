@@ -77,7 +77,7 @@
 // which cannot hold a display.
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
-// Gone without its unload handler having run - the frame must not outlive it, nor the camera
+// Gone without its unload handler having run - the frame must not outlive it
 // (fnc_stopFrame ends whichever driver called this). The inventory's own dialog always runs its unload
 // handler: one that did not was taken away with no event at all, and is ended here as any other close, so
 // the RPT says so and nothing of it is left open. A display the window is a guest on ends it from its own
@@ -88,7 +88,6 @@ if (isNull _display) exitWith {
         [displayNull, -1] call FUNC(onUnload);
     } else {
         call FUNC(stopFrame);
-        call FUNC(cameraStop);
     };
 };
 

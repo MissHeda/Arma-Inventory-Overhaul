@@ -12,7 +12,7 @@
  * drawn in the theme's loot look (fnc_drawColumn) - the middle gets narrower for it. By
  * default the loot column opens left of the storage column, which stays where it is; the client setting
  * einv_gui_lootSide can have it open at the right edge instead, with the storage column moving in
- * (| storage | loot |). The middle stays free: the camera shows the soldier there, and an open kit's window
+ * (| storage | loot |). The middle stays free: an open kit's window
  * opens there (fnc_placeWindow). Kits never bring the loot column in: they float over the columns in
  * windows of their own (fnc_drawWindows).
  *
@@ -36,8 +36,7 @@
  * 2: Context, see fnc_build <HASHMAP>
  *
  * Return Value:
- * Where the soldier stands when the camera is on, [x, y, w, h] on the screen - [] when the middle is
- * too narrow for it <ARRAY>
+ * The free middle, [x, y, w, h] on the screen - [] when it is too narrow <ARRAY>
  *
  * Example:
  * [_display, _theme, _context] call einv_gui_fnc_layoutGlass;
@@ -200,7 +199,7 @@ if (_looting) then {
     ] call FUNC(drawColumn);
 };
 
-// ----- The middle, for the camera -----
+// ----- The free middle -----
 
 private _middleX = CONTENT_X + _leftW + _gap;
 private _middleW = _right - _middleX;

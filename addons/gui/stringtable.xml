@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project name="einv">
     <Package name="gui">
-        <Key ID="STR_einv_gui_Camera_Tooltip">
-            <English>Show your soldier in the middle, or not</English>
-        </Key>
         <Key ID="STR_einv_gui_Category_Ammo">
             <English>Ammunition</English>
         </Key>
@@ -224,7 +221,7 @@
             <English>%1 went back - no room any more</English>
         </Key>
         <Key ID="STR_einv_gui_Hint_Rotate">
-            <English>R: rotate</English>
+            <English>%1: rotate</English>
         </Key>
         <Key ID="STR_einv_gui_Hint_SearchFirst">
             <English>Click: search this first</English>
@@ -330,6 +327,12 @@
         </Key>
         <Key ID="STR_einv_gui_Keybind_QuickMove_Tooltip">
             <English>Moves the item under the mouse over, as a double click does; selected items move together.\nOpens a uniform, vest or backpack lying in a container.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Keybind_Rotate">
+            <English>Rotate (inventory window)</English>
+        </Key>
+        <Key ID="STR_einv_gui_Keybind_Rotate_Tooltip">
+            <English>Turns the item you are dragging a quarter round.</English>
         </Key>
         <Key ID="STR_einv_gui_Load_Next">
             <English>· %1 at %2 kg</English>
@@ -588,18 +591,6 @@
         </Key>
         <Key ID="STR_einv_gui_Select">
             <English>Select</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_CameraDefault">
-            <English>Camera when opening</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_CameraDefault_Desc">
-            <English>What the middle of the inventory shows on opening: your soldier (third person) or nothing (first person).\nThe header's camera button still switches it while open.</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_CameraDefault_Off">
-            <English>Off (first person)</English>
-        </Key>
-        <Key ID="STR_einv_gui_Setting_CameraDefault_Soldier">
-            <English>Soldier (third person)</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CellScale">
             <English>Tile scale</English>

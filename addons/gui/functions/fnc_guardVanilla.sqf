@@ -180,7 +180,6 @@ if (_under) then {
 
     if (_again) then {
         GVAR(reopenedAt) = diag_tickTime;
-        GVAR(cameraNext) = GVAR(cameraOn);
 
         [{
             params ["_unit", "_container", "_secondary"];

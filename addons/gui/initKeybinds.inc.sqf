@@ -23,3 +23,13 @@
     {},
     [DIK_G, [false, false, false]]
 ] call CBA_fnc_addKeybind;
+
+// Rotate: what is being dragged turns a quarter round (one tile, not several dragged together).
+[
+    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    QGVAR(rotate),
+    [LLSTRING(Keybind_Rotate), LLSTRING(Keybind_Rotate_Tooltip)],
+    {false},
+    {},
+    [DIK_R, [false, false, false]]
+] call CBA_fnc_addKeybind;

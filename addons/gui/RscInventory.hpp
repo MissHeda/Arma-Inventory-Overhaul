@@ -10,8 +10,7 @@ class EINV_InventoryDialog {
     onKeyDown = QUOTE(_this call FUNC(onKeyDown));
 
     class ControlsBackground {
-        // The world behind, dimmed, so the window has the attention. The style recolours it - lighter
-        // while the camera shows the soldier.
+        // The world behind, dimmed, so the window has the attention. The style recolours it.
         class Dim: EINV_PanelRect {
             idc = IDC_DIM;
             x = QUOTE(safezoneX);

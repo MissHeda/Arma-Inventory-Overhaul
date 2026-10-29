@@ -4,8 +4,7 @@
  * Author: Miss Heda
  * Opens a kit's window on top of the others (einv_compat_efak_fnc_open, once the kit may open): beside
  * the tile it was opened from, fading in. Open already, it only comes to the top where it is. Only the
- * windows are drawn again (fnc_drawWindows): nothing in the columns appears, goes, moves or scrolls,
- * and the camera keeps its aim.
+ * windows are drawn again (fnc_drawWindows): nothing in the columns appears, goes, moves or scrolls.
  *
  * Its key is all this window knows of the kit - what to draw comes from einv_compat_efak, which has to
  * know the kit as open already. With no inventory open only the order is noted.
