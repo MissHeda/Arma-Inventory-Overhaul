@@ -76,7 +76,7 @@ if (_header) then {
 };
 
 {
-    _x params ["_id", ["_name", ""], ["_picture", ""]];
+    _x params ["_id", ["_name", ""], ["_picture", ""], ["_color", ""]];
 
     private _values = [];
 
@@ -86,6 +86,10 @@ if (_header) then {
 
     if (_picture isNotEqualTo "") then {
         _values pushBack ("picture=" + ([_picture, true] call FUNC(encodeName)));
+    };
+
+    if (_color isNotEqualTo "") then {
+        _values pushBack ("color=" + _color);
     };
 
     _parts pushBack (["category=" + _id, format ["category=%1 > %2", _id, _values joinString " "]] select (_values isNotEqualTo []));

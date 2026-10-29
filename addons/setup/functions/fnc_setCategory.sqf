@@ -27,7 +27,7 @@ private _ast = [GVAR(draftText)] call EFUNC(items,parseRules);
 private _categories = +(_ast getOrDefault ["categories", []]);
 private _at = _categories findIf {(_x select 0) isEqualTo _id};
 // Not a select on both: the second would throw for a category that is not there yet.
-private _entry = [_id, "", ""];
+private _entry = [_id, "", "", ""];
 
 if (_at >= 0) then {
     _entry = +(_categories select _at);
@@ -41,7 +41,7 @@ if ("picture" in _fields) then {
     _entry set [2, _fields get "picture"];
 };
 
-if (_id in ITEM_GROUPS && {(_entry select 1) isEqualTo ""} && {(_entry select 2) isEqualTo ""}) then {
+if (_id in ITEM_GROUPS && {(_entry select 1) isEqualTo ""} && {(_entry select 2) isEqualTo ""} && {(_entry param [3, ""]) isEqualTo ""}) then {
     // Back to what this mod ships.
     if (_at >= 0) then {
         _categories deleteAt _at;

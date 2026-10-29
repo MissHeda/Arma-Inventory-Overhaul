@@ -84,9 +84,9 @@ private _categoryIds = ITEM_GROUPS;
 private _categoryDefs = createHashMap;
 
 {
-    _x params ["_categoryId", "_categoryName", "_categoryPicture"];
+    _x params ["_categoryId", "_categoryName", "_categoryPicture", ["_categoryColor", ""]];
 
-    _categoryDefs set [_categoryId, [_categoryName, _categoryPicture]];
+    _categoryDefs set [_categoryId, [_categoryName, _categoryPicture, _categoryColor]];
     _categoryIds pushBackUnique _categoryId;
 } forEach (_ast getOrDefault ["categories", []]);
 

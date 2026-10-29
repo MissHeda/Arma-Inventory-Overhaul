@@ -71,6 +71,8 @@
  *   "groups"            - the categories it is in: "cats" when it has some, else the built-in one (fnc_defaultGroup) - of ITEM_GROUPS and the setup's own:
  *                         weapon, ammo, grenade, gear, medical, food, tool, misc. Never empty. The strip of a loot box, the compartments
  *                         that accept only some categories and the wizard read this <ARRAY of STRING>
+ *   "tileColor"         - the colour the setup gives its tiles (color= of the first of its "groups" that has one),
+ *                         [r, g, b] 0 to 1, [] for the look's own colour of its category <ARRAY>
  *   "pictureOverride"   - the rules' picture path, "" when none - also when the file is missing <STRING>
  *   "configPicture"     - config's picture <STRING>
  *   and from fnc_getFacts: "lc", "root", "rounds", "lineage", "addon", "mod"
@@ -129,6 +131,18 @@ private _cats = (_resolved get "cats") select {_x in _categoryIds};
 
 _info set ["cats", _cats];
 _info set ["groups", [[[_facts] call FUNC(defaultGroup)], _cats] select (_cats isNotEqualTo [])];
+
+// The tiles' colour: the first of its categories that the setup gives one (category=... color=).
+private _tileColor = [];
+private _categoryDefs = _compiled getOrDefault ["categoryDefs", createHashMap];
+
+{
+    if (((_categoryDefs getOrDefault [_x, []]) param [2, ""]) isNotEqualTo "") exitWith {
+        _tileColor = ([_x, _compiled] call FUNC(categoryInfo)) get "color";
+    };
+} forEach (_info get "groups");
+
+_info set ["tileColor", _tileColor];
 _info set ["src", _resolved get "src"];
 
 // What config says stays readable next to what the rules make of it.

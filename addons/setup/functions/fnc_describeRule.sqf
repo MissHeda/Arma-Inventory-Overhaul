@@ -329,7 +329,7 @@ private _fnc_values = {
 
 // A category: its id, and what the text gives it.
 if (_isCategory) exitWith {
-    _rule params [["_id", "", [""]], ["_name", "", [""]], ["_picture", "", [""]]];
+    _rule params [["_id", "", [""]], ["_name", "", [""]], ["_picture", "", [""]], ["_color", "", [""]]];
 
     private _categoryValues = createHashMap;
 
@@ -343,6 +343,10 @@ if (_isCategory) exitWith {
 
     private _subject = format [LLSTRING(Desc_Category), _id];
     private _words = [_categoryValues] call _fnc_values;
+
+    if (_color isNotEqualTo "") then {
+        _words = ([_words, format [LLSTRING(Desc_CategoryColour), toUpper _color]] select {_x isNotEqualTo ""}) joinString ", ";
+    };
 
     [_subject, format [LLSTRING(Desc_Rule), _subject, _words]] select (_words isNotEqualTo "")
 };

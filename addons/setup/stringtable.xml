@@ -106,8 +106,18 @@
         <Key ID="STR_einv_setup_Categories_AddTip">
             <English>Add a category of your own with this name</English>
         </Key>
+        <Key ID="STR_einv_setup_Categories_BadColour">
+            <English>That is no colour - six hex digits like C83232 or #C83232, empty for the default.</English>
+        </Key>
         <Key ID="STR_einv_setup_Categories_BuiltIn">
             <English>Built in</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_ColourPlaceholder">
+            <English>Default colour</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_ColourTip">
+            <English>The colour of this category's item tiles, six hex digits like C83232. Empty: the default colour.
+An item in several categories takes the first one's that has a colour.</English>
         </Key>
         <Key ID="STR_einv_setup_Categories_Delete">
             <English>Delete this category</English>
@@ -119,7 +129,16 @@
             <English>Delete</English>
         </Key>
         <Key ID="STR_einv_setup_Categories_Help">
-            <English>Categories sort items for the loot box strip and for what a compartment accepts. The eight built-in ones can be renamed or given another picture; deleting one removes it everywhere.</English>
+            <English>Categories sort items for the loot box strip and for what a compartment accepts. The eight built-in ones can be renamed or given another picture; deleting one removes it everywhere. Each category can give its items' tiles a colour: type it in the row, or select several rows and colour them at once.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_MassApply">
+            <English>Colour selected</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_MassApplyTip">
+            <English>Gives every selected category the colour typed beside it.</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_MassClear">
+            <English>Clear colour</English>
         </Key>
         <Key ID="STR_einv_setup_Categories_Max">
             <English>At most %1 categories of your own</English>
@@ -144,6 +163,15 @@
         </Key>
         <Key ID="STR_einv_setup_Categories_ResetPicture">
             <English>Back to the default picture</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_SelectAll">
+            <English>All</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_SelectNone">
+            <English>None</English>
+        </Key>
+        <Key ID="STR_einv_setup_Categories_Selected">
+            <English>%1 selected</English>
         </Key>
         <Key ID="STR_einv_setup_Categories_Title">
             <English>Categories</English>
@@ -486,6 +514,9 @@
         </Key>
         <Key ID="STR_einv_setup_Desc_Category">
             <English>Category %1</English>
+        </Key>
+        <Key ID="STR_einv_setup_Desc_CategoryColour">
+            <English>tile colour #%1</English>
         </Key>
         <Key ID="STR_einv_setup_Desc_Every">
             <English>Every item</English>

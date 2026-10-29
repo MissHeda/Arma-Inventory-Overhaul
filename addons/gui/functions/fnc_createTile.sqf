@@ -152,7 +152,7 @@ private _color = if (_hidden) then {
         default {_cell set [3, (_cell select 3) + 0.03]; _cell};
     }
 } else {
-    (_theme getOrDefault ["tileBg", []]) param [_info getOrDefault ["category", 0], [1, 1, 1, 0.075]]
+    [_theme, _info] call FUNC(tileColour)
 };
 
 private _backgrounds = if (_shaped) then {

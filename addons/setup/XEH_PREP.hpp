@@ -100,6 +100,7 @@ PREP(drawUseRow);
 PREP(drawCatRow);
 // The General step's Categories card: the setup's own categories, their names and pictures
 PREP(drawCategories);
+PREP(setCategoryColours);
 PREP(setCategory);
 PREP(renameCategory);
 PREP(addCategory);

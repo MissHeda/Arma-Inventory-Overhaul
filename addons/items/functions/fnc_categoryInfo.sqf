@@ -20,6 +20,8 @@
  *   "picture"  - the setup's picture of it, "" for none or when the game lacks the file <STRING>
  *   "nameSet"  - the setup's own name, "" for none <STRING>
  *   "pictureSet" - the setup's own picture path, "" for none, whether the game has the file or not <STRING>
+ *   "color"    - the colour of its items' tiles (color=), [r, g, b] 0 to 1, [] for none <ARRAY>
+ *   "colorSet" - the setup's own color= as written, six hex digits, "" for none <STRING>
  *
  * Example:
  * ["medical"] call einv_items_fnc_categoryInfo;
@@ -36,9 +38,21 @@ if (count _compiled == 0) then {
 _id = toLowerANSI _id;
 
 private _builtin = _id in ITEM_GROUPS;
-private _definition = (_compiled getOrDefault ["categoryDefs", createHashMap]) getOrDefault [_id, ["", ""]];
+private _definition = (_compiled getOrDefault ["categoryDefs", createHashMap]) getOrDefault [_id, ["", "", ""]];
 
-_definition params [["_ownName", "", [""]], ["_ownPicture", "", [""]]];
+_definition params [["_ownName", "", [""]], ["_ownPicture", "", [""]], ["_ownColor", "", [""]]];
+
+// The tiles' colour, [r, g, b] 0 to 1 from the six hex digits of color=, [] for none.
+private _color = [];
+
+if (count _ownColor == 6) then {
+    private _digits = "0123456789abcdef";
+    private _nibbles = (toLowerANSI _ownColor splitString "") apply {_digits find _x};
+
+    if (_nibbles findIf {_x < 0} < 0) then {
+        _color = [0, 2, 4] apply {((_nibbles select _x) * 16 + (_nibbles select (_x + 1))) / 255};
+    };
+};
 
 private _titled = (toUpper (_id select [0, 1])) + (_id select [1]);
 private _name = _ownName;
@@ -81,5 +95,7 @@ createHashMapFromArray [
     ["only", _only],
     ["picture", _picture],
     ["nameSet", _ownName],
-    ["pictureSet", _ownPicture]
+    ["pictureSet", _ownPicture],
+    ["color", _color],
+    ["colorSet", _ownColor]
 ]

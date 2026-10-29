@@ -354,6 +354,7 @@ PREP(isQuickKey);
 PREP(quickKeyName);
 PREP(isDropKey);
 PREP(dropKeyName);
+PREP(tileColour);
 PREP(isRotateKey);
 PREP(rotateKeyName);
 PREP(quickAction);

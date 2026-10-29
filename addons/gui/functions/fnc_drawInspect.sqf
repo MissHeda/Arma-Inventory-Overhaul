@@ -205,7 +205,7 @@ _group ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseBu
 private _cursor = _padY;
 
 // The title, in its category's colour as a little bar beside it. Held, it moves the card.
-private _categoryColor = +((_theme getOrDefault ["tileBg", []]) param [_info getOrDefault ["category", 0], [1, 1, 1, 0.1]]);
+private _categoryColor = [_theme, _info, [1, 1, 1, 0.1]] call FUNC(tileColour);
 _categoryColor set [3, 1];
 
 [_display, _group, [_padX, _cursor + _titleH * 0.15, pixelW * 3, _titleH * 0.7], _categoryColor] call FUNC(uiPanel);

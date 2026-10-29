@@ -21,8 +21,9 @@
  *                                         characters) and the picture it is drawn with, both optional. Items are put in
  *                                         it by cats=, compartments accept it by grid=2x2:bandit, the strip at the side of
  *                                         a loot box lists it. The same id says it again: what the later one sets counts.
- *                                         For a built-in id it gives the category another name or picture (it stays
- *                                         there). At most MAX_CUSTOM_CATEGORIES; an id that reads as a built-in word
+ *                                         For a built-in id it gives the category another name, picture or colour (it
+ *                                         stays there). color=RRGGBB (six hex digits, no #) is the colour of the tiles
+ *                                         of its items (the first of an item's categories that has one). At most MAX_CUSTOM_CATEGORIES; an id that reads as a built-in word
  *                                         (fnc_builtinGroup: "tools", "magazine") is refused.
  *   @rifle_mags: kind=magazine mass<=20   a group: a name for a selection, used as @rifle_mags. A name
  *                                         defined twice means either. An own group replaces the
@@ -759,6 +760,7 @@ private _fnc_categoryDef = {
     private _id = toLowerANSI ((_tokens select 0) select [9]);
     private _name = "";
     private _picture = "";
+    private _color = "";
     private _error = "";
 
     if !([_id] call _fnc_isId) then {
@@ -784,6 +786,19 @@ private _fnc_categoryDef = {
         {
             if (_x isEqualTo ">") then {continue};
 
+            // The tiles' colour: six hex digits.
+            if ((toLowerANSI (_x select [0, 6])) isEqualTo "color=") then {
+                private _hex = toLowerANSI (_x select [6]);
+
+                if (count _hex == 6 && {((_hex splitString "") findIf {!(_x in ("0123456789abcdef" splitString ""))}) < 0}) then {
+                    _color = _hex;
+                } else {
+                    _notes pushBack format ["color=%1 is no colour - six hex digits like color=c83232 - left out", _hex];
+                };
+
+                continue;
+            };
+
             if !([_x] call _fnc_isValue) then {
                 _notes pushBack format ["'%1' is neither name= nor picture= - left out", _x];
                 continue;
@@ -792,7 +807,7 @@ private _fnc_categoryDef = {
             private _key = toLowerANSI (_x select [0, _x find "="]);
 
             if !(_key in ["name", "picture"]) then {
-                _notes pushBack format ["category= takes name= and picture= only - %1= is left out", _key];
+                _notes pushBack format ["category= takes name=, picture= and color= only - %1= is left out", _key];
                 continue;
             };
 
@@ -815,8 +830,8 @@ private _fnc_categoryDef = {
         private _at = _categories findIf {(_x select 0) isEqualTo _id};
         private _own = ({!((_x select 0) in ITEM_GROUPS)} count _categories);
 
-        if (_id in ITEM_GROUPS && {_name isEqualTo ""} && {_picture isEqualTo ""}) then {
-            _error = "a built-in category needs a name= or a picture= to change";
+        if (_id in ITEM_GROUPS && {_name isEqualTo ""} && {_picture isEqualTo ""} && {_color isEqualTo ""}) then {
+            _error = "a built-in category needs a name=, picture= or color= to change";
         } else {
             if (_at < 0 && {!(_id in ITEM_GROUPS)} && {_own >= MAX_CUSTOM_CATEGORIES}) then {
                 _error = format ["at most %1 categories of your own", MAX_CUSTOM_CATEGORIES];
@@ -825,11 +840,14 @@ private _fnc_categoryDef = {
 
         if (_error isEqualTo "") then {
             if (_at < 0) then {
-                _categories pushBack [_id, _name, _picture];
+                _categories pushBack [_id, _name, _picture, _color];
             } else {
                 private _had = _categories select _at;
 
-                _categories set [_at, [_id, [_had select 1, _name] select (_name isNotEqualTo ""), [_had select 2, _picture] select (_picture isNotEqualTo "")]];
+                _categories set [_at, [
+                    _id, [_had select 1, _name] select (_name isNotEqualTo ""), [_had select 2, _picture] select (_picture isNotEqualTo ""),
+                    [_had param [3, ""], _color] select (_color isNotEqualTo "")
+                ]];
             };
         };
     };
