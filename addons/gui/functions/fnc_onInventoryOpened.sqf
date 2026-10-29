@@ -70,6 +70,17 @@ if (_unit isNotEqualTo ACE_player) exitWith {
     INFO_1("refused: %1 is not the player's unit (ACE_player) - nothing opens.",typeOf _unit);
 };
 
+// A holder hanging on a soldier is his, never loot: the weapon on the back of WebKnight's or KJW's Two Primary
+// Weapons lies in one (taken out here, it would be there twice - that mod still has it). The nearby list and the
+// ground leave those out as well (einv_storage_fnc_getNearby).
+{
+    if (!isNull _x && {(attachedTo _x) isKindOf "CAManBase"}) then {
+        INFO_2("left out: %1 hangs on %2 - a carried weapon, not loot.",typeOf _x,typeOf attachedTo _x);
+
+        if (_forEachIndex == 0) then {_container = objNull} else {_secondary = objNull};
+    };
+} forEach [_container, _secondary];
+
 // What the engine named to loot, the first of it: not the soldier's own, not the empty pile the engine makes at
 // the feet for its ground panel.
 private _own = [_unit, uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
