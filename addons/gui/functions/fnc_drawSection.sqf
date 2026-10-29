@@ -205,7 +205,7 @@ if (_section getOrDefault ["locked", false]) exitWith {
 
     // Why, when the mouse rests on the tab.
     private _tip = [_display, "EINV_Hitbox", _parent, [_blockX, _top, _tabW, _lineH]] call FUNC(uiCreate);
-    _tip ctrlSetTooltip _notice;
+    [_tip, _notice] call FUNC(setTooltip);
 
     [_display, _parent, [_blockX, _top + _lineH, _blockW, pixelH], _colorLine] call FUNC(uiPanel);
 
@@ -477,7 +477,7 @@ if (_chevronW > 0) then {
     private _toggle = [
         _display, "EINV_Hitbox", _parent, [_blockX - pixelW * 2, _buttonTop - pixelH * 2, (_tabW max _chevronW) + pixelW * 4, _buttonH + pixelH * 4]
     ] call FUNC(uiCreate);
-    _toggle ctrlSetTooltip LLSTRING(Section_Toggle);
+    [_toggle, LLSTRING(Section_Toggle)] call FUNC(setTooltip);
     _toggle setVariable [QGVAR(key), _foldKey];
     _toggle ctrlAddEventHandler ["ButtonClick", {
         [{_this call FUNC(toggleSection)}, [(_this select 0) getVariable [QGVAR(key), objNull]]] call FUNC(later);
@@ -520,7 +520,7 @@ private _buttonX = _blockX + _tabW + _buttonGap;
 
     // What it does, when the mouse rests on it: what its next click sorts by (fnc_sortText), kept up to date as the
     // order changes (fnc_sortButtons).
-    (_button select -1) ctrlSetTooltip (([GVAR(sortMode)] call FUNC(sortText)) select 1);
+    [(_button select -1), (([GVAR(sortMode)] call FUNC(sortText)) select 1)] call FUNC(setTooltip);
     [_button] call FUNC(sortButtons);
 
     _buttonX = _buttonX + _buttonW + _buttonGap;
@@ -547,7 +547,7 @@ if (_foldable && {!_placeholder} && {call FUNC(isInventoryMode)}) then {
 if (_load isNotEqualTo "") then {
     private _labelRect = [_blockX + _blockW - _closeW - _loadW, _top, _loadW, _lineH];
 
-    _info set ["load", [_display, _parent, _labelRect, _load, _lineSize, _colorText2, _font, 1] call FUNC(uiLabel)];
+    _info set ["load", [_display, _parent, _labelRect, _load, _lineSize, _colorText2, _font, 1, -1] call FUNC(uiLabel)];
 };
 
 // The open padlock, left of the weight.
@@ -561,7 +561,7 @@ if (_lockTip isNotEqualTo "") then {
     ] call FUNC(uiIcon);
 
     private _lockHit = [_display, "EINV_Hitbox", _parent, [_lockX, _top, _lockW, _lineH]] call FUNC(uiCreate);
-    _lockHit ctrlSetTooltip _lockTip;
+    [_lockHit, _lockTip] call FUNC(setTooltip);
 };
 
 // The hint over the caption line says what the contents weigh (fnc_infoHint).
@@ -583,7 +583,7 @@ if (_nested) then {
     private _close = [
         _display, "EINV_Hitbox", _parent, [_closeX - pixelW * 2, _top - pixelH * 2, _closeW + pixelW * 4, _lineH + pixelH * 4]
     ] call FUNC(uiCreate);
-    _close ctrlSetTooltip LLSTRING(Section_Close);
+    [_close, LLSTRING(Section_Close)] call FUNC(setTooltip);
     _close setVariable [QGVAR(key), _sectionContainer];
     _close ctrlAddEventHandler ["ButtonClick", {
         [{_this call FUNC(closeNested)}, [(_this select 0) getVariable [QGVAR(key), objNull]]] call FUNC(later);
@@ -830,7 +830,7 @@ if (_sealed) then {
     if (GVAR(searchOnClick)) then {
         private _sealHit = [_display, "EINV_Hitbox", _parent, [_gridX, _bodyTop, _sealW, _sealH]] call FUNC(uiCreate);
 
-        _sealHit ctrlSetTooltip LLSTRING(Status_StartSearch);
+        [_sealHit, LLSTRING(Status_StartSearch)] call FUNC(setTooltip);
         _sealHit setVariable [QGVAR(key), _sectionContainer];
         _sealHit ctrlAddEventHandler ["ButtonClick", {
             [{
@@ -932,7 +932,7 @@ if (_rowsFoldable) then {
     private _rowsToggle = [
         _display, "EINV_Hitbox", _parent, [_gridX - pixelW * 2, _rowsTop - pixelH * 2, _rowsW + pixelW * 4, _lineH + pixelH * 4]
     ] call FUNC(uiCreate);
-    _rowsToggle ctrlSetTooltip LLSTRING(Rows_Tooltip);
+    [_rowsToggle, LLSTRING(Rows_Tooltip)] call FUNC(setTooltip);
     _rowsToggle setVariable [QGVAR(key), _sectionContainer];
     _rowsToggle ctrlAddEventHandler ["ButtonClick", {
         [{_this call FUNC(toggleRows)}, [(_this select 0) getVariable [QGVAR(key), objNull]]] call FUNC(later);

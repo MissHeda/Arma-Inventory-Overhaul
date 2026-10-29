@@ -201,7 +201,7 @@ private _now = diag_tickTime;
     private _textTop = _top + _height / 2 - _size * TEXT_MID;
 
     private _label = [
-        _display, _parent, [_left + _padLeft + SQUARE(_ringH) + _gap, _textTop, _labelW, _size * 1.4], _words, _size, _text2, _font, 2
+        _display, _parent, [_left + _padLeft + SQUARE(_ringH) + _gap, _textTop, _labelW, _size * 1.4], _words, _size, _text2, _font, 2, -1
     ] call FUNC(uiLabel);
 
     _controls pushBack _label;
@@ -242,10 +242,10 @@ private _now = diag_tickTime;
     _hit setVariable [QGVAR(key), _holder];
     _hit setVariable [QGVAR(kind), _kind];
     _hit setVariable [QGVAR(surface), _surface];
-    _hit ctrlSetTooltip ([
+    [_hit, [
         LLSTRING(Status_StopHands),
         [LLSTRING(Status_StopSearch), [LLSTRING(Status_ResumeSearch), LLSTRING(Status_StartSearch)] select _idle] select _stopped
-    ] select (_kind isEqualTo "search"));
+    ] select (_kind isEqualTo "search")] call FUNC(setTooltip);
     _hit ctrlAddEventHandler ["MouseEnter", {
         {
             _x ctrlSetFade 0.3;

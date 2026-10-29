@@ -332,7 +332,7 @@ private _hits = [];
     _hit setVariable [QGVAR(code), _fnc_click];
     _hit setVariable [QGVAR(light), _light];
 
-    _hit ctrlSetTooltip _tip;
+    [_hit, _tip] call FUNC(setTooltip);
 
     _hit ctrlAddEventHandler ["MouseEnter", {
         params ["_ctrl"];
@@ -369,7 +369,7 @@ if (_hasPrev) then {
     _words setVariable [QGVAR(code), _fnc_first];
     _words setVariable [QGVAR(label), _labelCtrl];
     _words setVariable [QGVAR(ink), _labelInk];
-    _words ctrlSetTooltip LLSTRING(Page_First);
+    [_words, LLSTRING(Page_First)] call FUNC(setTooltip);
 
     _words ctrlAddEventHandler ["MouseEnter", {
         params ["_ctrl"];

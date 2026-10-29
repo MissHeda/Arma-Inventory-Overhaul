@@ -8,6 +8,8 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Added
 
+- Gradient reach in the colour panel (Titles row, under Gradient): Titles (the window's and the columns' titles), Headings (also Equipment, Gear, the slots' and boxes' captions and the name at the mouse, as before) or All text (every word of the inventory). Every style now brings a gradient of its own, Classic included; the Gradient switch still turns it off.
+- Tips of the window's buttons and fields (fold a box, sort, close, the colour panel, ...) show on the same round glass as the name at the mouse instead of Arma's square tooltip box.
 - Tile colours per category in the setup (General step, Categories card): each category can give its items' tiles a colour (`category=medical > color=C83232` in the rules text, saved and exported with them). A switch on each row selects it for the mass edit below the list, which colours all selected categories at once or clears them. An item in several categories takes the first one's colour.
 - Works with Better Inventory (`compat_betterinventory`): its inventory handler no longer starts a script at every opening that waits for the vanilla inventory this window replaces (they piled up for the whole mission).
 - Works with WebKnight's Two Primary Weapons (`compat_wbk_twoprimary`): when a move in the window leaves your hands empty, the weapon on your back comes into them, as that mod does in the vanilla inventory. The weapon on the back of WebKnight's or KJW's Two Primary (and Secondary) Weapons never opens as loot, so it cannot be taken out twice; other things hanging on a soldier (BackpackOnChest's pack) open as their mod asks.

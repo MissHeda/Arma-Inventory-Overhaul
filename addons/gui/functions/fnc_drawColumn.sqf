@@ -178,7 +178,7 @@ if (_title isNotEqualTo "") then {
         private _text = [[_title, _theme] call FUNC(caption), _left + _width - _padX - _textX - _iconW, _font, _size] call FUNC(fitText);
 
         _paint set [2, [
-            _display, controlNull, [_textX + _iconW, _innerTop, _left + _width - _padX - _textX - _iconW, _titleH], _text, _size, _titleColor, _font, 0, true
+            _display, controlNull, [_textX + _iconW, _innerTop, _left + _width - _padX - _textX - _iconW, _titleH], _text, _size, _titleColor, _font, 0, 0
         ] call FUNC(uiLabel)];
 
         // A hairline under the title, like the header's - the loot column's is its accent strip, two pixels in its colour.

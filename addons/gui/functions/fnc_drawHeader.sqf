@@ -49,7 +49,7 @@ private _iconH = UNIT * 1.1;
     _theme get "text",
     _theme get "fontBold",
     0,
-    true
+    0
 ] call FUNC(uiLabel);
 
 // ----- Buttons, from the right edge inwards -----
@@ -106,7 +106,7 @@ private _fnc_tooltip = {
     params ["_controls", "_text"];
 
     if (_controls isNotEqualTo []) then {
-        (_controls select -1) ctrlSetTooltip _text;
+        [(_controls select -1), _text] call FUNC(setTooltip);
     };
 };
 

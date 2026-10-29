@@ -57,7 +57,7 @@ GVAR(stripPages) pushBack [_holder, _page];
     if (_on) then {
         _picture ctrlSetText (_entry select 1);
         _hit setVariable [QGVAR(kind), _entry select 0];
-        _hit ctrlSetTooltip (_entry select 2);
+        [_hit, (_entry select 2)] call FUNC(setTooltip);
     };
 } forEach (_info get "strip");
 

@@ -109,7 +109,7 @@ if (_shown isNotEqualTo "") then {
 [_display, _parent, [_blockX + _blockW - _spaceW, _top, _spaceW, _lineH], _space, _lineSize, _colorText2, _font, 1] call EFUNC(gui,uiLabel);
 
 private _spaceTip = [_display, "EINV_Hitbox", _parent, [_blockX + _blockW - _spaceW, _top, _spaceW, _lineH]] call EFUNC(gui,uiCreate);
-_spaceTip ctrlSetTooltip LLSTRING(Tip_Space);
+[_spaceTip, LLSTRING(Tip_Space)] call EFUNC(gui,setTooltip);
 
 [_display, _parent, [_blockX, _top + _lineH, _blockW, pixelH], _colorLine] call EFUNC(gui,uiPanel);
 
@@ -183,7 +183,7 @@ private _fnc_button = {
     };
 
     if (_tip isNotEqualTo "") then {
-        (_controls select -1) ctrlSetTooltip _tip;
+        [(_controls select -1), _tip] call EFUNC(gui,setTooltip);
     };
 
     _controls
@@ -288,7 +288,7 @@ private _fnc_button = {
         ] call EFUNC(gui,uiLabel);
 
         private _stop = [_display, "EINV_Hitbox", _parent, _unloadRect] call EFUNC(gui,uiCreate);
-        _stop ctrlSetTooltip LLSTRING(Tip_Stop);
+        [_stop, LLSTRING(Tip_Stop)] call EFUNC(gui,setTooltip);
         _stop ctrlAddEventHandler ["ButtonClick", {
             [{["", true] call FUNC(stopUnload)}, []] call EFUNC(gui,later);
         }];

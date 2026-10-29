@@ -170,7 +170,7 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closeMenu)}] call FUNC
     private _tooltip = _options getOrDefault ["tooltip", ""];
 
     if (_tooltip isEqualType "" && {_tooltip isNotEqualTo ""}) then {
-        _hit ctrlSetTooltip _tooltip;
+        [_hit, _tooltip] call FUNC(setTooltip);
     };
 
     if (_enabled) then {

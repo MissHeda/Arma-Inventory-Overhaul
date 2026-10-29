@@ -319,7 +319,7 @@ private _cross = [_display, _group, [_closeX, _chipTop, _closeW, _chipH], _key, 
     [_key] call FUNC(closeWindow);
 }, false, -1, false, [_hitH, _hitV]] call FUNC(uiButton);
 
-(_cross select -1) ctrlSetTooltip LLSTRING(Section_Close);
+[(_cross select -1), LLSTRING(Section_Close)] call FUNC(setTooltip);
 
 // A hairline under the title, as under a column's.
 private _line = [_display, "EINV_PanelRect", _group, [_padX, _padY + _titleH + _padY * 0.4, _innerW, pixelH]] call FUNC(uiCreate);

@@ -88,7 +88,7 @@ private _cornerPx = floor (_radius / pixelH);
     _hit setVariable [QGVAR(kind), _id];
     _hit setVariable [QGVAR(picture), _picture];
     _hit setVariable [QGVAR(field), _field];
-    _hit ctrlSetTooltip _name;
+    [_hit, _name] call FUNC(setTooltip);
 
     // Under the mouse: a little lighter, the chosen one stays as it is.
     _hit ctrlAddEventHandler ["MouseEnter", {

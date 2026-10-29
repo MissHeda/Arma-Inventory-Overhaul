@@ -320,6 +320,7 @@ PREP(drawWindow);
 PREP(clearWindows);
 PREP(drawTopLayer);
 PREP(makeTooltip);
+PREP(setTooltip);
 PREP(raiseTooltip);
 PREP(startStripDrag);
 PREP(updateStripDrag);

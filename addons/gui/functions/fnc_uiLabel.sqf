@@ -8,6 +8,9 @@
  * A title (argument 8) takes the palette's titles colour where the player chose one (the theme's "titleColor"), and with the titles'
  * gradient on runs from it (or the accent) into the gradient's colour, letter by letter from left to right, as Discord's gradient
  * names do (fnc_gradientText). That line is structured text, set once: a later ctrlSetText does not reach it.
+ * How far the gradient reaches is the player's (the theme's "gradientReach", fnc_theme): argument 8 says what the line is - 0 a
+ * title of the window or a column, 1 (or true) a heading, 2 (or false, the default) any other word, -1 never (a line written to
+ * later). Every word only on the inventory's own window, never in the wizard.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -18,7 +21,7 @@
  * 5: Colour, [] for the class's own <ARRAY>
  * 6: Font, "" for the class's own <STRING>
  * 7: Alignment - 0 left, 1 right, 2 centre <NUMBER> (default: 0)
- * 8: A title: drawn in the palette's gradient where it has one <BOOL> (default: false)
+ * 8: What the line is, for the gradient: 0 title, 1 or true heading, 2 or false other text, -1 never <NUMBER, BOOL> (default: false)
  *
  * Return Value:
  * The label <CONTROL>
@@ -35,6 +38,15 @@ params ["_display", "_parent", "_rect", "_text", "_size", ["_color", []], ["_fon
 
 private _theme = missionNamespace getVariable [QGVAR(theme), createHashMap];
 private _gradient = _theme getOrDefault ["titleGradient", []];
+private _level = if (_title isEqualType true) then {[2, 1] select _title} else {_title};
+private _reach = _theme getOrDefault ["gradientReach", 1];
+
+// Titles and headings take the titles' colour; the gradient goes as far as the player lets it.
+_title = _level in [0, 1];
+
+private _graded = _level >= 0 && {_level <= _reach} && {
+    _level < 2 || {_display isEqualTo (uiNamespace getVariable [QGVAR(display), displayNull])}
+};
 
 if (_title) then {
     private _own = _theme getOrDefault ["titleColor", []];
@@ -44,7 +56,7 @@ if (_title) then {
     };
 };
 
-if (_title && {count _gradient >= 3} && {_text isEqualType ""} && {_text isNotEqualTo ""}) exitWith {
+if (_graded && {count _gradient >= 3} && {_text isEqualType ""} && {_text isNotEqualTo ""}) exitWith {
     // From the titles' colour, else the accent, at the strength the label would have.
     private _start = _theme getOrDefault ["titleColor", []];
 

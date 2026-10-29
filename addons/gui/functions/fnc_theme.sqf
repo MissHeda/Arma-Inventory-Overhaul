@@ -95,7 +95,8 @@ private _accent = [] call FUNC(accentColour);
     "", ["_secondaryPick", [], [[]]], ["_alphaPick", -1, [0]], ["_panelPick", [], [[]]],
     ["_cellsPick", [], [[]]], ["_tilesPick", [], [[]]], ["_textPick", [], [[]]], ["_linesPick", [], [[]]],
     ["_tileAlphaPick", -1, [0]], ["_cellAlphaPick", -1, [0]], ["_gradientPick", [], [[]]], "",
-    ["_titlePick", [], [[]]], ["_panelEndPick", [], [[]]], ["_secondaryAlphaPick", -1, [0]], ["_linesAlphaPick", -1, [0]]
+    ["_titlePick", [], [[]]], ["_panelEndPick", [], [[]]], ["_secondaryAlphaPick", -1, [0]], ["_linesAlphaPick", -1, [0]],
+    ["_reachPick", -1, [0]]
 ];
 
 private _tint = [];
@@ -268,6 +269,10 @@ if (_linesPick isNotEqualTo []) then {
 // The titles: their own colour, and the colour they run into (fnc_uiLabel).
 _theme set ["titleColor", [[], ([_titlePick, 1] call _fnc_pickRgb) + [1]] select (_titlePick isNotEqualTo [])];
 _theme set ["titleGradient", [[], ([_gradientPick, 1] call _fnc_pickRgb) + [1]] select (_gradientPick isNotEqualTo [])];
+
+// How far the titles' gradient reaches (fnc_uiLabel): 0 the window's and the columns' titles, 1 the headings too (Equipment,
+// Primary, the slots' and sections' captions, the name at the mouse), 2 every word of the window. Unset, the headings.
+_theme set ["gradientReach", [1, _reachPick] select (_reachPick in [0, 1, 2])];
 
 // ----- Panels and Transparency -----
 

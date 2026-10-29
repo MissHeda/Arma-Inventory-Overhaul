@@ -60,7 +60,7 @@
 // [accent, secondary, panels' alpha, panels, cells, tiles (no longer offered: the setup colours the tiles by category), text,
 // lines, tiles' alpha, cells' alpha, the titles' gradient end, the style picked last ("" when changed by hand since), the titles'
 // colour, the panels' gradient end, the secondary films' alpha, the lines' alpha]. A row's gradient is on while its end is set.
-#define PALETTE_UNSET [[], [], -1, [], [], [], [], [], -1, -1, [], "", [], [], -1, -1]
+#define PALETTE_UNSET [[], [], -1, [], [], [], [], [], -1, -1, [], "", [], [], -1, -1, -1]
 // Where each transparency lies in the palette, by its slider's id.
 #define PALETTE_ALPHAS [["alpha", 2], ["cellAlpha", 9], ["tileAlpha", 8], ["secondaryAlpha", 14], ["linesAlpha", 15]]
 

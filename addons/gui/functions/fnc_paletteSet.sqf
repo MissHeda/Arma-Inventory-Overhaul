@@ -115,6 +115,9 @@ switch (_mode) do {
 
         _values set [11, _argument];
 
+        // How far the gradient reaches is no part of a style: it stays as the player set it.
+        _values set [16, _palette param [16, -1]];
+
         {
             _palette set [_forEachIndex, _x];
         } forEach _values;
@@ -239,6 +242,13 @@ switch (_mode) do {
         };
 
         _changed = true;
+    };
+
+    case "gradientReach": {
+        if (_argument isEqualType 0 && {_argument in [0, 1, 2]} && {(_palette param [16, -1]) isNotEqualTo _argument}) then {
+            _palette set [16, _argument];
+            _changed = true;
+        };
     };
 
     case "reset": {

@@ -194,6 +194,11 @@ if (_openDef isNotEqualTo []) then {
     // The Gradient line: its switch, and Start and End.
     if (_openGradient >= 0) then {
         _height = _height + _rowH + _gapY;
+
+        // The titles' gradient on: the Reach line under it.
+        if ((_openDef select 0) isEqualTo "titles" && {[_openGradient] call _fnc_gradientOn}) then {
+            _height = _height + _rowH + _gapY;
+        };
     };
 
     if (_openWhich >= 0) then {
@@ -400,7 +405,7 @@ private _fnc_picker = {
         _edit ctrlSetFont _font;
         _edit ctrlSetFontHeight _fieldSize;
         _edit ctrlSetTextColor _text;
-        _edit ctrlSetTooltip _tip;
+        [_edit, _tip] call FUNC(setTooltip);
         _edit setVariable [QGVAR(field), [_which, _index]];
 
         _hit setVariable [QGVAR(edit), _edit];
@@ -473,7 +478,7 @@ private _drop = [
     }, false, _chipSize
 ] call FUNC(uiButton);
 
-(_drop param [count _drop - 1, controlNull]) ctrlSetTooltip LLSTRING(Palette_Style_Tip);
+[(_drop param [count _drop - 1, controlNull]), LLSTRING(Palette_Style_Tip)] call FUNC(setTooltip);
 
 _y = _y + _headH;
 
@@ -597,7 +602,7 @@ private _sliders = createHashMap;
     // A click on the arrow, the name or the swatch opens the row (the one open before folds), or folds it where it is open.
     private _nameHit = [_display, "EINV_Hitbox", _layer, [_cardX + _padX, _y, _swatchX + _swatchW + SQUARE(UNIT * 0.3) - _padX, _headH]] call FUNC(uiCreate);
 
-    _nameHit ctrlSetTooltip _tip;
+    [_nameHit, _tip] call FUNC(setTooltip);
     _nameHit setVariable [QGVAR(id), _id];
     _nameHit ctrlAddEventHandler ["ButtonClick", {
         params ["_ctrl"];
@@ -641,7 +646,7 @@ private _sliders = createHashMap;
                 }, false, _chipSize, true
             ] call FUNC(uiButton);
 
-            (_switch param [count _switch - 1, controlNull]) ctrlSetTooltip LLSTRING(Palette_Gradient_Tip);
+            [(_switch param [count _switch - 1, controlNull]), LLSTRING(Palette_Gradient_Tip)] call FUNC(setTooltip);
 
             if (_gradientOn) then {
                 private _boxW = SQUARE(UNIT * 2.6);
@@ -685,6 +690,49 @@ private _sliders = createHashMap;
             };
 
             _y = _y + _rowH;
+
+            // How far the titles' gradient reaches: the titles only, the headings too, or every word (fnc_uiLabel).
+            if (_gradientOn && {_id isEqualTo "titles"}) then {
+                _y = _y + _gapY;
+
+                [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], LLSTRING(Palette_Reach), _small, _text2, _font, 0] call FUNC(uiLabel);
+
+                private _reach = GVAR(theme) getOrDefault ["gradientReach", 1];
+                private _reachX = _cardX + _sliderX;
+                private _reachW = (_cardX + _width - _padX - _reachX - _gapX * 2) / 3;
+
+                {
+                    _x params ["_value", "_words", "_reachTip"];
+
+                    // The one in use lies on the accent.
+                    if (_value isEqualTo _reach) then {
+                        [
+                            _display, _layer, [_reachX, _y + (_rowH - _chipH) / 2, _reachW, _chipH],
+                            ((GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]]) select [0, 3]) + [0.45], _chipH / 2
+                        ] call FUNC(uiPanel);
+                    };
+
+                    private _reachButton = [
+                        _display, _layer, [_reachX, _y + (_rowH - _chipH) / 2, _reachW, _chipH], _value, _words, "", _buttonTheme, {
+                            params ["_button", "_value"];
+
+                            if (_button < 0) exitWith {};
+
+                            ["gradientReach", _value] call FUNC(paletteSet);
+                        }, false, _chipSize, true
+                    ] call FUNC(uiButton);
+
+                    [(_reachButton param [count _reachButton - 1, controlNull]), _reachTip] call FUNC(setTooltip);
+
+                    _reachX = _reachX + _reachW + _gapX;
+                } forEach [
+                    [0, LLSTRING(Palette_Reach_Titles), LLSTRING(Palette_Reach_Titles_Tip)],
+                    [1, LLSTRING(Palette_Reach_Headings), LLSTRING(Palette_Reach_Headings_Tip)],
+                    [2, LLSTRING(Palette_Reach_All), LLSTRING(Palette_Reach_All_Tip)]
+                ];
+
+                _y = _y + _rowH;
+            };
         };
 
         if (_which >= 0) then {

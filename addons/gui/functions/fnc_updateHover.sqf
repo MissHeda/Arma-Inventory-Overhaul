@@ -444,6 +444,17 @@ if (!isNull _tooltip) then {
 
     private _name = if (_class isEqualTo "") then {""} else {[_class] call FUNC(itemName)};
 
+    // Over a button or field of the window with a tip of its own (fnc_setTooltip): that tip, on the same glass.
+    private _ownTip = "";
+
+    if (_class isEqualTo "" && {!GVAR(dragging)} && {GVAR(stripDrag) isEqualTo []}) then {
+        private _tipCtrl = uiNamespace getVariable [QGVAR(hoverTip), controlNull];
+
+        if (!isNull _tipCtrl && {ctrlShown _tipCtrl} && {ctrlEnabled _tipCtrl}) then {
+            _ownTip = _tipCtrl getVariable [QGVAR(tip), ""];
+        };
+    };
+
     // A radio: its channel and frequency after the name (einv_compat_tfar, einv_compat_acre).
     if (_name isNotEqualTo "") then {
         private _radioHolder = objNull;
@@ -467,6 +478,11 @@ if (!isNull _tooltip) then {
         if (_extra isNotEqualTo []) then {
             _name = ([_name] + _extra) joinString "  ·  ";
         };
+    };
+
+    // No item there: the control's own tip, on one line.
+    if (_name isEqualTo "" && {_ownTip isNotEqualTo ""}) then {
+        _name = (_ownTip splitString toString [10]) joinString " ";
     };
 
     // The card of the last hover goes in any case: what it showed is not what the mouse is on now.

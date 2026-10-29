@@ -219,7 +219,7 @@ private _titleW = _innerW - SQUARE(_textUnit * 0.35) - _closeW;
 ] call FUNC(uiLabel);
 
 private _grip = [_display, "EINV_Hitbox", _group, [0, 0, _width - _padX - _closeW, _cursor + _titleH]] call FUNC(uiCreate);
-_grip ctrlSetTooltip LLSTRING(Inspect_Move);
+[_grip, LLSTRING(Inspect_Move)] call FUNC(setTooltip);
 _grip ctrlAddEventHandler ["MouseButtonDown", {
     params ["_ctrl", "_button"];
 

@@ -56,9 +56,9 @@ private _caption = [_label, GVAR(theme)] call FUNC(caption);
     _x params ["_labelControl", "_hit", ["_isCompact", 0]];
 
     if (_isCompact > 0) then {
-        _hit ctrlSetTooltip _compactTip;
+        [_hit, _compactTip] call FUNC(setTooltip);
     } else {
         _labelControl ctrlSetText _caption;
-        _hit ctrlSetTooltip _tip;
+        [_hit, _tip] call FUNC(setTooltip);
     };
 } forEach _buttons;

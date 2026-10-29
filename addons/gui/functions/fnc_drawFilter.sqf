@@ -62,7 +62,7 @@ _edit ctrlSetFont _font;
 _edit ctrlSetFontHeight _size;
 _edit ctrlSetTextColor (_theme getOrDefault ["text", [1, 1, 1, 1]]);
 _edit ctrlSetText GVAR(filter);
-_edit ctrlSetTooltip LLSTRING(Filter_Tooltip);
+[_edit, LLSTRING(Filter_Tooltip)] call FUNC(setTooltip);
 _edit setVariable [QGVAR(placeholder), _placeholder];
 
 _edit ctrlAddEventHandler ["EditChanged", {

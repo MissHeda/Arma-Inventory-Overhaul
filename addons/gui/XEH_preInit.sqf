@@ -523,7 +523,7 @@ if (_savedPalette isEqualType [] && {count _savedPalette >= 3} && {count _savedP
         "_savedAccent", "_savedSecondary", "_savedAlpha", ["_savedPanel", []],
         ["_savedCells", []], ["_savedTiles", []], ["_savedText", []], ["_savedLines", []], ["_savedTileAlpha", -1],
         ["_savedCellAlpha", -1], ["_savedGradient", []], ["_savedStyle", ""], ["_savedTitle", []], ["_savedPanelEnd", []],
-        ["_savedSecondaryAlpha", -1], ["_savedLinesAlpha", -1]
+        ["_savedSecondaryAlpha", -1], ["_savedLinesAlpha", -1], ["_savedReach", -1]
     ];
 
     private _fnc_alpha = {
@@ -558,7 +558,8 @@ if (_savedPalette isEqualType [] && {count _savedPalette >= 3} && {count _savedP
         [_savedTitle, 1] call _fnc_colour,
         [_savedPanelEnd, PALETTE_PANEL_VALUE_MAX] call _fnc_colour,
         [_savedSecondaryAlpha] call _fnc_alpha,
-        [_savedLinesAlpha] call _fnc_alpha
+        [_savedLinesAlpha] call _fnc_alpha,
+        if (_savedReach isEqualType 0 && {_savedReach in [0, 1, 2]}) then {_savedReach} else {-1}
     ];
 };
 

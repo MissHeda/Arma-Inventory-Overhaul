@@ -511,6 +511,27 @@
         <Key ID="STR_einv_gui_Palette_Panels_Tip">
             <English>The window's background: the panels behind the columns, the header and the footer, and the inspect card and kit windows - and how see-through they are. Kept dark enough for the text to stay readable.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Reach">
+            <English>Reach</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Reach_All">
+            <English>All text</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Reach_All_Tip">
+            <English>Every word of the inventory runs in the gradient: titles, headings, names, buttons and the key hints.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Reach_Headings">
+            <English>Headings</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Reach_Headings_Tip">
+            <English>The titles and the headings: Equipment, Gear, the slots' and boxes' captions and the name at the mouse.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Reach_Titles">
+            <English>Titles</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Reach_Titles_Tip">
+            <English>Only the window's title and the titles of the columns.</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Red">
             <English>R</English>
         </Key>
