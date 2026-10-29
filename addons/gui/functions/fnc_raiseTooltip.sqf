@@ -46,7 +46,7 @@ private _position = ctrlPosition _tip;
 private _made = true;
 
 if (_tip isEqualTo (uiNamespace getVariable [QGVAR(tooltip), controlNull])) then {
-    private _text = _tip getVariable [QGVAR(tipText), ctrlText _tip];
+    private _text = _tip getVariable [QGVAR(tipText), ""];
     private _width = _tip getVariable [QGVAR(width), 0];
     private _height = _tip getVariable [QGVAR(height), UNIT * 0.85];
 
@@ -55,11 +55,9 @@ if (_tip isEqualTo (uiNamespace getVariable [QGVAR(tooltip), controlNull])) then
 
     private _new = [_display] call FUNC(makeTooltip);
 
-    [_new, _text] call FUNC(setTipText);
     _new ctrlSetPosition _position;
     _new ctrlCommit 0;
-    _new setVariable [QGVAR(width), _width];
-    _new setVariable [QGVAR(height), _height];
+    [_new, _text, _width, _height] call FUNC(setTipText);
     _new ctrlShow true;
 
     uiNamespace setVariable [QGVAR(tooltip), _new];

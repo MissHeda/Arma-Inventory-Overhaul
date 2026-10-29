@@ -160,6 +160,8 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- The name at the mouse has round corners like the comparison card, and its words sit in the middle of the box (with the titles' gradient on they sat too high).
+- Reset all in the colour panel threw a script error (a style's name in the palette is text, which it tried to copy as a colour).
 - The hint line in the footer (the item under the mouse, what a drag does, refusals) is centred between the key hints and the version instead of starting on the left.
 - ACE Arsenal: opening it logs where the time goes ("Log window timings (debug)": `timing: arsenal open - ...` lines for the panel's first build, each part of the first settle, ACE's own list look and the totals of the greying and picture passes), and the greying of ACE's rows no longer starts one pass per pick when ACE picks several rows in a frame.
 - Opening a category on a box whose holder is no object (a kit, the arsenal's staging) threw a script error in the category filter.
