@@ -5,9 +5,9 @@
  * Creates a line of text. Font, size and colour are set here rather than in the class, because the
  * style decides them.
  *
- * A text in the accent's colour runs into the palette's gradient colour, letter by letter from left to right, where the player
- * chose one (the theme's "accentGradient", fnc_theme) - as Discord's gradient names do. That line is structured text, one colour
- * per letter, set once: a later ctrlSetText does not reach it.
+ * A title (argument 8) runs from the accent into the palette's gradient colour, letter by letter from left to right, where the
+ * player chose one (the theme's "accentGradient", fnc_theme) - as Discord's gradient names do; so does any text in the accent's
+ * colour. That line is structured text, one colour per letter, set once: a later ctrlSetText does not reach it.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -18,6 +18,7 @@
  * 5: Colour, [] for the class's own <ARRAY>
  * 6: Font, "" for the class's own <STRING>
  * 7: Alignment - 0 left, 1 right, 2 centre <NUMBER> (default: 0)
+ * 8: A title: drawn in the palette's gradient where it has one <BOOL> (default: false)
  *
  * Return Value:
  * The label <CONTROL>
@@ -30,15 +31,19 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_rect", "_text", "_size", ["_color", []], ["_font", ""], ["_align", 0]];
+params ["_display", "_parent", "_rect", "_text", "_size", ["_color", []], ["_font", ""], ["_align", 0], ["_title", false]];
 
 private _theme = missionNamespace getVariable [QGVAR(theme), createHashMap];
 private _gradient = _theme getOrDefault ["accentGradient", []];
+private _accent = _theme getOrDefault ["accent", []];
 
 if (
-    count _gradient >= 3 && {_text isEqualType ""} && {_text isNotEqualTo ""} && {count _color >= 3}
-    && {(_color select [0, 3]) isEqualTo ((_theme getOrDefault ["accent", []]) select [0, 3])}
+    count _gradient >= 3 && {count _accent >= 3} && {_text isEqualType ""} && {_text isNotEqualTo ""}
+    && {_title || {count _color >= 3 && {(_color select [0, 3]) isEqualTo (_accent select [0, 3])}}}
 ) exitWith {
+    // From the accent, at the strength the label would have.
+    _color = (_accent select [0, 3]) + [[1, _color param [3, 1]] select (count _color >= 4)];
+
     // Structured text is drawn from the top of its control: the line is set where a label would centre it.
     _rect params ["_left", "_top", "_width", "_height"];
 

@@ -273,7 +273,7 @@ private _fnc_weaponRow = {
 private _fnc_label = {
     params ["_labelTop", "_text"];
 
-    [_display, _parent, [_left, _labelTop, _width, _labelH], [_text, _theme] call FUNC(caption), _textUnit * 0.55, _colorText2, _font, 0] call FUNC(uiLabel);
+    [_display, _parent, [_left, _labelTop, _width, _labelH], [_text, _theme] call FUNC(caption), _textUnit * 0.55, _colorText2, _font, 0, true] call FUNC(uiLabel);
 };
 
 // ---------------------------------------------------------------------------

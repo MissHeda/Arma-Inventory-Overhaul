@@ -93,8 +93,10 @@ private _iconColor = [_accentColor, _theme getOrDefault ["text2", [0.78, 0.78, 0
 // What a kept column can take on in place and what it cannot. The palette (fnc_palette) changes colours while the window is open, with a
 // column scrolled: the panel's colour, the hairline's and the title's words and icon are painted over the kept controls (below), so the
 // column stays where it is; a change of anything in the first list draws the column anew.
+// The title in the palette's gradient is set once (fnc_uiLabel): the gradient and the accent belong to what cannot be painted over.
 private _look = [
-    _ringColor, _accentColor, _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []], _panelColor isEqualTo []
+    _ringColor, _accentColor, _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []], _panelColor isEqualTo [],
+    _theme getOrDefault ["accentGradient", []], [[], _theme getOrDefault ["accent", []]] select ((_theme getOrDefault ["accentGradient", []]) isNotEqualTo [])
 ];
 private _paintLook = [_panelColor, _lineColor, _titleColor, _iconColor];
 
@@ -171,7 +173,7 @@ if (_title isNotEqualTo "") then {
         private _text = [[_title, _theme] call FUNC(caption), _left + _width - _padX - _textX - _iconW, _font, _size] call FUNC(fitText);
 
         _paint set [2, [
-            _display, controlNull, [_textX + _iconW, _innerTop, _left + _width - _padX - _textX - _iconW, _titleH], _text, _size, _titleColor, _font, 0
+            _display, controlNull, [_textX + _iconW, _innerTop, _left + _width - _padX - _textX - _iconW, _titleH], _text, _size, _titleColor, _font, 0, true
         ] call FUNC(uiLabel)];
 
         // A hairline under the title, like the header's - the loot column's is its accent strip, two pixels in its colour.

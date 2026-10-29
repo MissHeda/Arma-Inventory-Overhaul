@@ -25,22 +25,52 @@
     // The window as it ships.
     ["classic", LLSTRING(Style_Classic), PALETTE_UNSET],
 
-    // Cool blue glass: lighter, more see-through panels, blue lines.
-    ["modern", LLSTRING(Style_Modern), [
-        [0.6, 0.72, 1], [0.6, 0.35, 1], 0.86, [0.62, 0.45, 0.13],
-        [0.62, 0.35, 0.17], [], [], [0.6, 0.45, 1], -1, 0.9, [], ""
+    // Arma 3's own menus: near-black glass, white text, an amber highlight.
+    ["arma", LLSTRING(Style_Arma), [
+        [0.11, 0.85, 0.95], [0, 0, 0.75], 0.9, [0, 0, 0.07],
+        [0, 0, 0.13], [], [], [0, 0, 0.4], -1, 1, [], ""
     ]],
 
-    // The same, its accent texts running from blue into violet.
-    ["modernGradient", LLSTRING(Style_ModernGradient), [
-        [0.6, 0.72, 1], [0.7, 0.35, 1], 0.86, [0.66, 0.45, 0.13],
-        [0.66, 0.35, 0.17], [], [], [0.7, 0.45, 1], -1, 0.9, [0.79, 0.62, 1], ""
+    // Apex: Tanoa's jungle, a deep teal with a jade highlight.
+    ["apex", LLSTRING(Style_Apex), [
+        [0.45, 0.7, 0.85], [0.42, 0.35, 0.75], 0.92, [0.47, 0.55, 0.07],
+        [0.47, 0.4, 0.12], [], [], [0.45, 0.45, 0.6], -1, 1, [], ""
     ]],
 
-    // Olive and sand, as gear and maps are.
+    // Contact: Livonia's cold forest, blue-grey with an icy highlight.
+    ["contact", LLSTRING(Style_Contact), [
+        [0.55, 0.4, 1], [0.58, 0.15, 0.8], 0.92, [0.6, 0.3, 0.07],
+        [0.6, 0.22, 0.12], [], [], [0.56, 0.3, 0.65], -1, 1, [], ""
+    ]],
+
+    // Tanks: desert dust and steel.
+    ["tanks", LLSTRING(Style_Tanks), [
+        [0.09, 0.6, 0.85], [0.08, 0.25, 0.75], 0.93, [0.08, 0.35, 0.07],
+        [0.08, 0.25, 0.12], [], [], [0.08, 0.35, 0.6], -1, 1, [], ""
+    ]],
+
+    // Jets: a cockpit at night, steel blue with an amber read-out.
+    ["jets", LLSTRING(Style_Jets), [
+        [0.13, 0.8, 1], [0.6, 0.25, 0.8], 0.92, [0.6, 0.35, 0.06],
+        [0.6, 0.25, 0.11], [], [], [0.6, 0.35, 0.55], -1, 1, [], ""
+    ]],
+
+    // Laws of War: charcoal, and red as the only colour.
+    ["lawsOfWar", LLSTRING(Style_LawsOfWar), [
+        [0, 0.78, 0.88], [0, 0, 0.7], 0.95, [0, 0, 0.06],
+        [0, 0, 0.11], [], [], [0, 0.4, 0.55], -1, 1, [], ""
+    ]],
+
+    // Olive and sand, as gear and maps are - dark.
     ["tactical", LLSTRING(Style_Tactical), [
-        [0.11, 0.55, 0.88], [0.17, 0.3, 0.75], 0.94, [0.19, 0.4, 0.12],
-        [0.18, 0.3, 0.17], [], [0.14, 0.12, 1], [0.15, 0.35, 0.75], -1, -1, [], ""
+        [0.12, 0.5, 0.85], [0.18, 0.3, 0.7], 0.94, [0.19, 0.4, 0.07],
+        [0.19, 0.3, 0.12], [], [0.14, 0.12, 1], [0.16, 0.35, 0.55], -1, 1, [], ""
+    ]],
+
+    // Night vision: black, its green the only light.
+    ["stealth", LLSTRING(Style_Stealth), [
+        [0.33, 0.75, 0.85], [0.33, 0.35, 0.6], 0.96, [0.33, 0.3, 0.04],
+        [0.33, 0.25, 0.09], [], [], [0.33, 0.5, 0.45], -1, 1, [], ""
     ]],
 
     // True black, no glass: for dark rooms and OLED screens.
@@ -49,9 +79,15 @@
         [0, 0, 0.07], [], [0, 0, 0.88], [0, 0, 0.3], -1, 1, [], ""
     ]],
 
-    // Pink into cyan on a deep violet.
-    ["neon", LLSTRING(Style_Neon), [
-        [0.9, 0.75, 1], [0.5, 0.75, 1], 0.9, [0.76, 0.6, 0.1],
-        [0.76, 0.5, 0.14], [], [], [0.5, 0.75, 1], -1, 0.92, [0.5, 0.85, 1], ""
+    // Dark blue glass.
+    ["modern", LLSTRING(Style_Modern), [
+        [0.6, 0.7, 1], [0.6, 0.3, 0.9], 0.9, [0.63, 0.45, 0.08],
+        [0.63, 0.35, 0.13], [], [], [0.6, 0.45, 0.65], -1, 1, [], ""
+    ]],
+
+    // The same, its titles running from blue into violet.
+    ["modernGradient", LLSTRING(Style_ModernGradient), [
+        [0.6, 0.7, 1], [0.7, 0.3, 0.9], 0.9, [0.67, 0.45, 0.08],
+        [0.67, 0.35, 0.13], [], [], [0.7, 0.45, 0.65], -1, 1, [0.8, 0.6, 1], ""
     ]]
 ]
