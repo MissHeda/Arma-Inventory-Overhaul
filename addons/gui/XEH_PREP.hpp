@@ -246,6 +246,7 @@ PREP(drawCompare);
 // UI kit
 PREP(uiCreate);
 PREP(uiPanel);
+PREP(uiSplitSwatch);
 PREP(uiLabel);
 PREP(uiIcon);
 PREP(uiPicture);

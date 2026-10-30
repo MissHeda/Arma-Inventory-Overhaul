@@ -452,6 +452,14 @@ if (_check || {_mouse isNotEqualTo GVAR(lastMouse)}) then {
 private _tip = uiNamespace getVariable [QGVAR(tipShown), controlNull];
 private _tipUp = !isNull _tip && {ctrlShown _tip};
 
+// A menu or the colour popover made again (a click in it, a tick) lies over a tip that was showing, with the mouse standing still:
+// the tip is made again over it (fnc_raiseTooltip does nothing while it is the last made).
+if (_tipUp && {GVAR(menuState) isNotEqualTo []} && {[] call FUNC(raiseTooltip)}) then {
+    _tip = uiNamespace getVariable [QGVAR(tipShown), controlNull];
+    _tipUp = !isNull _tip && {ctrlShown _tip};
+    GVAR(tooltipAt) = [];
+};
+
 if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
     GVAR(tooltipAt) = _mouse;
     _mouse params ["_mouseX", "_mouseY"];

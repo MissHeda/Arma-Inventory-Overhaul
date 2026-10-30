@@ -712,10 +712,10 @@ private _sliders = createHashMap;
 
     // With its gradient on, the swatch is both colours: the start's half and the end's.
     if (_gradientOn) then {
-        _swatchRect params ["_swatchLeft", "_swatchTop", "_swatchWidth", "_swatchHeight"];
+        ([_display, _layer, _swatchRect, UNIT * 0.2] call FUNC(uiSplitSwatch)) params ["_startCtrls", "_endCtrls"];
 
-        _swatches set [_id, [_display, _layer, [_swatchLeft, _swatchTop, _swatchWidth / 2, _swatchHeight], [0, 0, 0, 1], 0] call FUNC(uiPanel)];
-        _swatches set [_id + "End", [_display, _layer, [_swatchLeft + _swatchWidth / 2, _swatchTop, _swatchWidth / 2, _swatchHeight], [0, 0, 0, 1], 0] call FUNC(uiPanel)];
+        _swatches set [_id, _startCtrls];
+        _swatches set [_id + "End", _endCtrls];
     } else {
         _swatches set [_id, [_display, _layer, _swatchRect, [0, 0, 0, 1], UNIT * 0.2] call FUNC(uiPanel)];
     };
@@ -784,7 +784,7 @@ private _sliders = createHashMap;
                     [_display, _layer, _boxRect, [[1, 1, 1, 0.22], _text] select _picked, UNIT * 0.2] call FUNC(uiPanel);
                     _swatches set [_boxId, [
                         _display, _layer, [(_boxRect select 0) + pixelW * 2, (_boxRect select 1) + pixelH * 2, (_boxRect select 2) - pixelW * 4, (_boxRect select 3) - pixelH * 4],
-                        [0, 0, 0, 1], UNIT * 0.15
+                        [0, 0, 0, 1], UNIT * 0.2
                     ] call FUNC(uiPanel)];
 
                     [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0, "menu"] call FUNC(uiLabel);
@@ -867,15 +867,14 @@ private _sliders = createHashMap;
                     private _pillW = SQUARE(_checkH * 1.6);
                     private _pillRect = [_cellX + _checkW + SQUARE(UNIT * 0.15), _checkY, _pillW, _checkH];
 
-                    [_display, _layer, _pillRect, [[1, 1, 1, 0.22], _text] select (_partIndex == _partPick), 0] call FUNC(uiPanel);
-                    _swatches set [format ["part%1", _partIndex], [
-                        _display, _layer, [(_pillRect select 0) + _edgeW, (_pillRect select 1) + _edgeH, _pillW / 2 - _edgeW, _checkH - _edgeH * 2],
-                        [0, 0, 0, 1], 0
-                    ] call FUNC(uiPanel)];
-                    _swatches set [format ["part%1End", _partIndex], [
-                        _display, _layer, [(_pillRect select 0) + _pillW / 2, (_pillRect select 1) + _edgeH, _pillW / 2 - _edgeW, _checkH - _edgeH * 2],
-                        [0, 0, 0, 1], 0
-                    ] call FUNC(uiPanel)];
+                    [_display, _layer, _pillRect, [[1, 1, 1, 0.22], _text] select (_partIndex == _partPick), UNIT * 0.2] call FUNC(uiPanel);
+
+                    ([
+                        _display, _layer, [(_pillRect select 0) + _edgeW, (_pillRect select 1) + _edgeH, _pillW - _edgeW * 2, _checkH - _edgeH * 2], UNIT * 0.15
+                    ] call FUNC(uiSplitSwatch)) params ["_partStartCtrls", "_partEndCtrls"];
+
+                    _swatches set [format ["part%1", _partIndex], _partStartCtrls];
+                    _swatches set [format ["part%1End", _partIndex], _partEndCtrls];
 
                     // Each half picks its own colour for the picker: the left the start, the right the end. The half that is
                     // picked already, clicked again, lets the part go.
@@ -993,8 +992,14 @@ private _sliders = createHashMap;
 
                 [(_partSwitch param [count _partSwitch - 1, controlNull]), LLSTRING(Palette_PartGradient_Tip)] call FUNC(setTooltip);
 
-                private _boxW = SQUARE(UNIT * 2.6);
+                // Main shows only where the part has a colour of its own. Start and End share what is left of the line with it:
+                // the boxes give way, so Main never lies over End or its word.
+                private _ownSet = _info get "ownSet";
+                private _mainShown = (_ownSet select (_partPick * 2)) || {_ownSet select (_partPick * 2 + 1)};
+                private _mainW = SQUARE(UNIT * 1.8);
                 private _boxX = _cardX + _sliderX + _switchW + _gapX;
+                private _boxRoom = (_cardX + _width - _padX - ([0, _mainW + _gapX] select _mainShown)) - _boxX;
+                private _boxW = (SQUARE(UNIT * 2.6) min ((_boxRoom - SQUARE(UNIT * 1.9) * 2) / 2)) max SQUARE(UNIT * 1);
 
                 {
                     _x params ["_boxId", "_words", "_isEnd"];
@@ -1007,7 +1012,7 @@ private _sliders = createHashMap;
                     [_display, _layer, _boxRect, [[1, 1, 1, 0.22], _text] select _picked, UNIT * 0.2] call FUNC(uiPanel);
                     _swatches set [_boxId, [
                         _display, _layer, [(_boxRect select 0) + pixelW * 2, (_boxRect select 1) + pixelH * 2, (_boxRect select 2) - pixelW * 4, (_boxRect select 3) - pixelH * 4],
-                        [0, 0, 0, 1], UNIT * 0.15
+                        [0, 0, 0, 1], UNIT * 0.2
                     ] call FUNC(uiPanel)];
 
                     [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0] call FUNC(uiLabel);
@@ -1036,10 +1041,7 @@ private _sliders = createHashMap;
                 } forEach [["partStart", [LLSTRING(Palette_PartColour), LLSTRING(Palette_Start)] select _partOn, false], ["partEnd", LLSTRING(Palette_End), true]];
 
                 // Main: only where the part has a colour of its own.
-                private _ownSet = _info get "ownSet";
-
-                if ((_ownSet select (_partPick * 2)) || {_ownSet select (_partPick * 2 + 1)}) then {
-                    private _mainW = SQUARE(UNIT * 1.8);
+                if (_mainShown) then {
                     private _main = [
                         _display, _layer, [_cardX + _width - _padX - _mainW, _y + (_rowH - _chipH) / 2, _mainW, _chipH], str _partPick,
                         LLSTRING(Palette_PartMain), "", _buttonTheme, {
