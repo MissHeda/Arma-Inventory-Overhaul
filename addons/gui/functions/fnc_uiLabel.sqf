@@ -57,7 +57,7 @@ _title = _part in ["window", "title", "section", "heading", "caption", "tab"];
 private _bit = (createHashMapFromArray [
     ["window", GRADIENT_WINDOW], ["title", GRADIENT_COLUMNS], ["section", GRADIENT_SECTIONS], ["heading", GRADIENT_CAPTIONS],
     ["caption", GRADIENT_CAPTIONS], ["tab", GRADIENT_TABS], ["name", GRADIENT_NAMES], ["weapon", GRADIENT_WEAPONS],
-    ["stack", GRADIENT_STACKS], ["ammo", GRADIENT_AMMO], ["count", GRADIENT_AMMO], ["key", GRADIENT_KEYS],
+    ["stack", GRADIENT_STACKS], ["ammo", GRADIENT_AMMO], ["count", GRADIENT_AMMO], ["weaponammo", GRADIENT_WEAPONAMMO], ["key", GRADIENT_KEYS],
     ["weight", GRADIENT_WEIGHT], ["value", GRADIENT_VALUES], ["hover", GRADIENT_HOVER], ["hint", GRADIENT_NOTES],
     ["text", GRADIENT_NOTES], ["button", GRADIENT_BUTTONS], ["keyhint", GRADIENT_KEYHINTS], ["menu", GRADIENT_MENUS]
 ]) getOrDefault [_part, 0];
@@ -66,8 +66,22 @@ if (!isNull _parent && {_parent getVariable [QGVAR(plain), false]}) then {
     _bit = 0;
 };
 
+private _ownStart = [];
 private _graded = _bit > 0 && {count _gradient >= 3} && {((floor ((_theme getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]) / _bit)) mod 2) == 1} && {
     _title || {_part isEqualTo "hover"} || {_display isEqualTo (uiNamespace getVariable [QGVAR(display), displayNull])}
+};
+
+// The part's own gradient where the player set one (the theme's "gradientOwn", by the part's place): its start, its end, or both.
+if (_graded) then {
+    private _ownPair = (_theme getOrDefault ["gradientOwn", []]) param [round (log _bit / log 2), [[], []]];
+
+    if ((_ownPair select 1) isNotEqualTo []) then {
+        _gradient = (_ownPair select 1) select [0, 3];
+    };
+
+    if ((_ownPair select 0) isNotEqualTo []) then {
+        _ownStart = _ownPair select 0;
+    };
 };
 
 if (_title) then {
@@ -85,6 +99,10 @@ if (count _start < 3) then {
     _start = _theme getOrDefault ["accent", [1, 1, 1, 1]];
 };
 
+if (_ownStart isNotEqualTo []) then {
+    _start = _ownStart;
+};
+
 // Where the gradient cannot run, the line takes one colour of it as a plain label: a count in its little box ("5/5", "30/30") is
 // too tight for structured text, and one letter has nothing to run along - they take the start. Ink on a lit surface (a key's
 // badge, a lit button: the theme's "onAccent", or dark ink) takes the end: the start is the accent, and it would sink into it.
@@ -100,7 +118,7 @@ if (_graded) then {
         };
     };
 
-    if (_solid isEqualTo [] && {_part in ["stack", "ammo", "count"] || {_text isEqualType "" && {count _text < 2}}}) then {
+    if (_solid isEqualTo [] && {_part in ["stack", "ammo", "count", "weaponammo"] || {_text isEqualType "" && {count _text < 2}}}) then {
         _solid = _start select [0, 3];
     };
 
@@ -124,6 +142,10 @@ if (_graded && {_text isEqualType ""} && {_text isNotEqualTo ""}) exitWith {
     private _ctrl = [_display, "EINV_StructuredText", _parent, [_boxLeft, _top + (_height - _size) / 2, _width + _extra, _size * 1.3]] call FUNC(uiCreate);
 
     _ctrl ctrlSetStructuredText ([_text, _font, _size, _align, _color, _gradient] call FUNC(gradientText));
+
+    // Structured text takes the mouse and the focus, where a label does neither: over a button or a fold tab it kept their
+    // tips from showing until a click, and focused, its column was drawn over the name at the mouse. Off, it is words only.
+    _ctrl ctrlEnable false;
 
     _ctrl
 };

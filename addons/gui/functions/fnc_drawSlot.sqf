@@ -176,7 +176,7 @@ if (_ammo isNotEqualTo [] || _showName) then {
 
         private _text = format ["%1/%2", _rounds, _capacity];
         _ammoW = (_text getTextWidth [_font, _lineSize]) * TEXT_SLACK;
-        _controls pushBack ([_display, _parent, [_left + _padX, _lineTop, _width - _padX * 2, _lineH], _text, _lineSize, _colorText, _font, 1, "ammo"] call FUNC(uiLabel));
+        _controls pushBack ([_display, _parent, [_left + _padX, _lineTop, _width - _padX * 2, _lineH], _text, _lineSize, _colorText, _font, 1, "weaponammo"] call FUNC(uiLabel));
     };
 
     if (_showName) then {

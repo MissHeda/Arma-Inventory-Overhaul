@@ -39,13 +39,13 @@ private _linesAlpha = _info get "linesAlpha";
 private _tab = _rows getOrDefault ["tab", -1];
 private _picker = _rows getOrDefault ["picker", createHashMap];
 
-if (count _picker > 0 && {_tab >= 0} && {_tab < PALETTE_COLOURS}) then {
+if (count _picker > 0 && {_tab >= 0} && {_tab < PALETTE_COLOURS + GRADIENT_PART_COLOURS}) then {
     (_hsvs select _tab) params ["_hue", "_saturation", "_value"];
 
     // The square: the pure hue under the white and black fades; a surface's square shows only the values up to its cut.
     (_picker getOrDefault ["base", controlNull]) ctrlSetBackgroundColor ((["rgb", [_hue, 1, 1]] call FUNC(hsv)) + [1]);
 
-    private _valueMax = PALETTE_VALUE_MAX select _tab;
+    private _valueMax = PALETTE_VALUE_MAX param [_tab, 1];
 
     // The cursors: a ring each (cursor_ring_ca, its dark rim drawn in it), centred on the colour.
     (_picker getOrDefault ["squareGeo", []]) params ["_left", "_top", "_width", "_height", "_knobW", "_knobH"];
@@ -126,6 +126,19 @@ private _openPair = (createHashMapFromArray [["titles", [8, 7]], ["panel", [2, 9
     ["panelEnd", 9, _alpha], ["cells", 3, _cellAlpha], ["items", 4, _tileAlpha], ["text", 5, 1], ["lines", 6, _linesAlpha],
     ["gradStart", _openPair select 0, 1], ["gradEnd", _openPair select 1, 1]
 ];
+
+// The parts' pills in the titles' checkboxes, and the Start and End of the part picked for colours of its own (fnc_openPaletteMenu).
+for "_part" from 0 to (GRADIENT_PART_COUNT - 1) do {
+    [_swatches getOrDefault [format ["part%1", _part], []], (_worn select (PALETTE_COLOURS + _part * 2)) + [1]] call FUNC(paintSurface);
+    [_swatches getOrDefault [format ["part%1End", _part], []], (_worn select (PALETTE_COLOURS + _part * 2 + 1)) + [1]] call FUNC(paintSurface);
+};
+
+private _partPick = uiNamespace getVariable [QGVAR(palettePart), -1];
+
+if (_partPick isEqualType 0 && {_partPick >= 0} && {_partPick < GRADIENT_PART_COUNT}) then {
+    [_swatches getOrDefault ["partStart", []], (_worn select (PALETTE_COLOURS + _partPick * 2)) + [1]] call FUNC(paintSurface);
+    [_swatches getOrDefault ["partEnd", []], (_worn select (PALETTE_COLOURS + _partPick * 2 + 1)) + [1]] call FUNC(paintSurface);
+};
 
 // What can be taken away shows its button, by row: what each row's button takes back ("set" holds the colours by their number,
 // 0 to 9, then the transparencies of the panels, the tiles, the cells, the secondary films and the lines, 10 to 14).

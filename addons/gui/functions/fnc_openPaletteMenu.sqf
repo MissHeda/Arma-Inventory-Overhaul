@@ -141,6 +141,18 @@ private _openEnd = _openDef param [7, -1];
 private _pickEnd = ([_openEnd] call _fnc_gradientOn) && {uiNamespace getVariable [QGVAR(paletteEnd), false]};
 private _tab = [_openDef param [1, -1], _openEnd] select _pickEnd;
 
+// A part of the titles' gradient picked for colours of its own (its pill in the checkboxes): the picker is bound to its start or end
+// (PALETTE_COLOURS + part * 2, + 1 for the end), and the main Start and End are not outlined.
+private _partPick = uiNamespace getVariable [QGVAR(palettePart), -1];
+
+if !(_open isEqualTo "titles" && {[_openEnd] call _fnc_gradientOn} && {_partPick isEqualType 0} && {_partPick >= 0} && {_partPick < GRADIENT_PART_COUNT}) then {
+    _partPick = -1;
+};
+
+if (_partPick >= 0) then {
+    _tab = PALETTE_COLOURS + _partPick * 2 + ([0, 1] select (uiNamespace getVariable [QGVAR(paletteEnd), false]));
+};
+
 uiNamespace setVariable [QGVAR(paletteTab), _tab];
 
 // The style list, open under the Style row or not, and the styles.
@@ -209,6 +221,11 @@ if (_openDef isNotEqualTo []) then {
             } forEach GRADIENT_PART_GROUPS;
 
             _height = _height + _gapY + _gapY * 0.5 * (count GRADIENT_PART_GROUPS - 1);
+
+            // The line of the part picked for colours of its own.
+            if (_partPick >= 0) then {
+                _height = _height + _gapY + _rowH;
+            };
         };
     };
 
@@ -402,7 +419,7 @@ private _fnc_picker = {
 
     // The square of a surface under the text (the panels, the cells, the tiles) shows only the dark values it may have: a black film
     // over all of it, so that what it shows is what is chosen.
-    private _valueMax = PALETTE_VALUE_MAX select _which;
+    private _valueMax = PALETTE_VALUE_MAX param [_which, 1];
 
     if (_valueMax < 1) then {
         [_display, _layer, _squareRect, [0, 0, 0, 1 - _valueMax]] call FUNC(uiPanel);
@@ -754,7 +771,7 @@ private _sliders = createHashMap;
                     _x params ["_boxId", "_words", "_isEnd"];
 
                     private _boxRect = [_boxX, _y + _rowH * 0.1, _boxW, _rowH * 0.8];
-                    private _picked = _isEnd isEqualTo _pickEnd;
+                    private _picked = _partPick < 0 && {_isEnd isEqualTo _pickEnd};
 
                     [_display, _layer, _boxRect, [[1, 1, 1, 0.22], _text] select _picked, UNIT * 0.2] call FUNC(uiPanel);
                     _swatches set [_boxId, [
@@ -778,6 +795,7 @@ private _sliders = createHashMap;
                             if (isNull _display) exitWith {};
 
                             uiNamespace setVariable [QGVAR(paletteEnd), _isEnd];
+                            uiNamespace setVariable [QGVAR(palettePart), -1];
 
                             [_display] call FUNC(openPaletteMenu);
                         }, [_ctrl getVariable [QGVAR(id), false]]] call FUNC(later);
@@ -832,15 +850,52 @@ private _sliders = createHashMap;
                             ] call FUNC(uiIcon);
                         };
 
+                        // Its own gradient: a small pill of its start and end at the cell's right end, outlined while it is the
+                        // part the picker is bound to. A click on it picks the part (the line under the groups).
+                        private _partIndex = round (log _bit / log 2);
+                        private _pillW = SQUARE(_checkH * 1.6);
+                        private _pillRect = [_cellX + _partW - _pillW, _checkY, _pillW, _checkH];
+
+                        [_display, _layer, _pillRect, [[1, 1, 1, 0.22], _text] select (_partIndex == _partPick), 0] call FUNC(uiPanel);
+                        _swatches set [format ["part%1", _partIndex], [
+                            _display, _layer, [(_pillRect select 0) + _edgeW, (_pillRect select 1) + _edgeH, _pillW / 2 - _edgeW, _checkH - _edgeH * 2],
+                            [0, 0, 0, 1], 0
+                        ] call FUNC(uiPanel)];
+                        _swatches set [format ["part%1End", _partIndex], [
+                            _display, _layer, [(_pillRect select 0) + _pillW / 2, (_pillRect select 1) + _edgeH, _pillW / 2 - _edgeW, _checkH - _edgeH * 2],
+                            [0, 0, 0, 1], 0
+                        ] call FUNC(uiPanel)];
+
+                        private _pillHit = [_display, "EINV_Hitbox", _layer, _pillRect] call FUNC(uiCreate);
+
+                        [_pillHit, LLSTRING(Palette_PartPick)] call FUNC(setTooltip);
+                        _pillHit setVariable [QGVAR(id), _partIndex];
+                        _pillHit ctrlAddEventHandler ["ButtonClick", {
+                            params ["_ctrl"];
+
+                            [{
+                                params ["_partIndex"];
+
+                                private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+                                if (isNull _display) exitWith {};
+
+                                uiNamespace setVariable [QGVAR(palettePart), [_partIndex, -1] select (_partIndex == (uiNamespace getVariable [QGVAR(palettePart), -1]))];
+                                uiNamespace setVariable [QGVAR(paletteEnd), false];
+
+                                [_display] call FUNC(openPaletteMenu);
+                            }, [_ctrl getVariable [QGVAR(id), -1]]] call FUNC(later);
+                        }];
+
                         private _wordsX = _cellX + _checkW + SQUARE(UNIT * 0.15);
-                        private _wordsW = _cellX + _partW - _wordsX;
+                        private _wordsW = (_pillRect select 0) - _wordsX - SQUARE(UNIT * 0.1);
 
                         [
                             _display, _layer, [_wordsX, _cellY, _wordsW, _rowH], [_words, _wordsW, _font, _small * 0.9] call FUNC(fitText),
                             _small * 0.9, [_muted, _text] select _on, _font, 0
                         ] call FUNC(uiLabel);
 
-                        private _partHit = [_display, "EINV_Hitbox", _layer, [_cellX, _cellY, _partW, _rowH]] call FUNC(uiCreate);
+                        private _partHit = [_display, "EINV_Hitbox", _layer, [_cellX, _cellY, _partW - _pillW, _rowH]] call FUNC(uiCreate);
 
                         [_partHit, _partTip] call FUNC(setTooltip);
                         _partHit setVariable [QGVAR(id), _bit];
@@ -858,6 +913,89 @@ private _sliders = createHashMap;
 
                     _y = _y + _rowH * ceil ((count _groupParts) / 3);
                 } forEach GRADIENT_PART_GROUPS;
+
+                // The part picked for colours of its own: its name, its Start and End (the one the picker is bound to outlined) and
+                // Main, which takes them back to the main gradient's.
+                if (_partPick >= 0) then {
+                    _y = _y + _gapY;
+
+                    private _partWords = "";
+
+                    {
+                        {
+                            if (round (log (_x select 0) / log 2) == _partPick) exitWith {
+                                _partWords = _x select 1;
+                            };
+                        } forEach (_x select 1);
+                    } forEach GRADIENT_PART_GROUPS;
+
+                    [
+                        _display, _layer, [_cardX + _padX, _y, _labelW, _rowH], [_partWords, _labelW, _font, _small] call FUNC(fitText),
+                        _small, _text, _font, 0
+                    ] call FUNC(uiLabel);
+
+                    private _ownEnd = uiNamespace getVariable [QGVAR(paletteEnd), false];
+                    private _boxW = SQUARE(UNIT * 2.6);
+                    private _boxX = _cardX + _sliderX;
+
+                    {
+                        _x params ["_boxId", "_words", "_isEnd"];
+
+                        private _boxRect = [_boxX, _y + _rowH * 0.1, _boxW, _rowH * 0.8];
+                        private _picked = _isEnd isEqualTo _ownEnd;
+
+                        [_display, _layer, _boxRect, [[1, 1, 1, 0.22], _text] select _picked, UNIT * 0.2] call FUNC(uiPanel);
+                        _swatches set [_boxId, [
+                            _display, _layer, [(_boxRect select 0) + pixelW * 2, (_boxRect select 1) + pixelH * 2, (_boxRect select 2) - pixelW * 4, (_boxRect select 3) - pixelH * 4],
+                            [0, 0, 0, 1], UNIT * 0.15
+                        ] call FUNC(uiPanel)];
+
+                        [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0] call FUNC(uiLabel);
+
+                        private _boxHit = [_display, "EINV_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(UNIT * 1.7), _rowH]] call FUNC(uiCreate);
+
+                        [_boxHit, LLSTRING(Palette_PartColours_Tip)] call FUNC(setTooltip);
+                        _boxHit setVariable [QGVAR(id), _isEnd];
+                        _boxHit ctrlAddEventHandler ["ButtonClick", {
+                            params ["_ctrl"];
+
+                            [{
+                                params ["_isEnd"];
+
+                                private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+                                if (isNull _display) exitWith {};
+
+                                uiNamespace setVariable [QGVAR(paletteEnd), _isEnd];
+
+                                [_display] call FUNC(openPaletteMenu);
+                            }, [_ctrl getVariable [QGVAR(id), false]]] call FUNC(later);
+                        }];
+
+                        _boxX = _boxX + _boxW + SQUARE(UNIT * 1.9);
+                    } forEach [["partStart", LLSTRING(Palette_Start), false], ["partEnd", LLSTRING(Palette_End), true]];
+
+                    // Main: only where the part has a colour of its own.
+                    private _ownSet = _info get "ownSet";
+
+                    if ((_ownSet select (_partPick * 2)) || {_ownSet select (_partPick * 2 + 1)}) then {
+                        private _mainW = SQUARE(UNIT * 1.8);
+                        private _main = [
+                            _display, _layer, [_cardX + _width - _padX - _mainW, _y + (_rowH - _chipH) / 2, _mainW, _chipH], str _partPick,
+                            LLSTRING(Palette_PartMain), "", _buttonTheme, {
+                                params ["_button", "_partId"];
+
+                                if (_button < 0) exitWith {};
+
+                                ["partColours", parseNumber _partId] call FUNC(paletteSet);
+                            }, false, _chipSize, true
+                        ] call FUNC(uiButton);
+
+                        [(_main param [count _main - 1, controlNull]), LLSTRING(Palette_PartMain_Tip)] call FUNC(setTooltip);
+                    };
+
+                    _y = _y + _rowH;
+                };
             };
         };
 

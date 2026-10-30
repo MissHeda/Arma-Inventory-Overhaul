@@ -225,7 +225,7 @@ private _slots = [
 
             [
                 _display, _parent, [_slotX + _padX, _slotY + _slotH - _padY * 0.5 - _boxH, _slotW - _padX * 2, _boxH],
-                format ["%1/%2", _rounds, _capacity], _size, _colorText, _fontBold, 1, "ammo"
+                format ["%1/%2", _rounds, _capacity], _size, _colorText, _fontBold, 1, "weaponammo"
             ] call FUNC(uiLabel);
         };
     };

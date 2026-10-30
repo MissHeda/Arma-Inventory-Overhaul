@@ -64,6 +64,17 @@ if (_tooltip getVariable [QGVAR(gradient), false] || {_lines > 1}) then {
         };
 
         _to = _theme getOrDefault ["titleGradient", [1, 1, 1]];
+
+        // The tooltips' own gradient, where the player set one.
+        private _ownPair = (_theme getOrDefault ["gradientOwn", []]) param [round (log GRADIENT_HOVER / log 2), [[], []]];
+
+        if ((_ownPair select 0) isNotEqualTo []) then {
+            _from = (_ownPair select 0) select [0, 3];
+        };
+
+        if ((_ownPair select 1) isNotEqualTo []) then {
+            _to = _ownPair select 1;
+        };
     };
 
     private _textH = _size * 1.1 * _lines;
@@ -71,6 +82,7 @@ if (_tooltip getVariable [QGVAR(gradient), false] || {_lines > 1}) then {
     private _words = [_display, "EINV_StructuredText", _tooltip, [_pad, (_height - _textH) / 2 + _size * 0.05, _width - _pad * 2, _textH + _size * 0.4]] call FUNC(uiCreate);
 
     _words ctrlSetStructuredText ([_text, _font, _size, 2, _from + [1], _to] call FUNC(gradientText));
+    _words ctrlEnable false;
 
     _parts pushBack _words;
 } else {

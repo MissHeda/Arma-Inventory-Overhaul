@@ -103,7 +103,7 @@ private _look = [
     _ringColor, _accentColor, _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []], _panelColor isEqualTo [],
     _theme getOrDefault ["titleGradient", []], _theme getOrDefault ["titleColor", []], _theme getOrDefault ["panelGradient", []],
     [[], _theme getOrDefault ["accent", []]] select ((_theme getOrDefault ["titleGradient", []]) isNotEqualTo []),
-    _theme getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]
+    _theme getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT], _theme getOrDefault ["gradientOwn", []]
 ];
 private _paintLook = [_panelColor, _lineColor, _titleColor, _iconColor];
 

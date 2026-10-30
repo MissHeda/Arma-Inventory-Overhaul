@@ -42,7 +42,7 @@ GVAR(palette) params [
     ["_accentPick", [], [[]]], ["_secondaryPick", [], [[]]], ["_alphaPick", -1, [0]], ["_panelPick", [], [[]]],
     ["_cellsPick", [], [[]]], ["_tilesPick", [], [[]]], ["_textPick", [], [[]]], ["_linesPick", [], [[]]],
     ["_tileAlphaPick", -1, [0]], ["_cellAlphaPick", -1, [0]], ["_gradientPick", [], [[]]], ["_style", "", [""]],
-    ["_titlePick", [], [[]]], ["_panelEndPick", [], [[]]], ["_secondaryAlphaPick", -1, [0]], ["_linesAlphaPick", -1, [0]]
+    ["_titlePick", [], [[]]], ["_panelEndPick", [], [[]]], ["_secondaryAlphaPick", -1, [0]], ["_linesAlphaPick", -1, [0]], "", "", ["_ownPick", [], [[]]]
 ];
 
 private _theme = missionNamespace getVariable [QGVAR(theme), createHashMap];
@@ -111,6 +111,22 @@ private _hsv = [];
     _hsv pushBack _at;
 } forEach _picks;
 
+// The parts' own colours after the ten (GRADIENT_PART_COLOURS): a part's start, then its end. Unset, the main gradient's - its start
+// the titles' colour, else the accent; its end the gradient's end.
+private _ownSet = [];
+private _mainStart = [_hsv select 0, _hsv select 8] select (_titlePick isNotEqualTo []);
+
+for "_part" from 0 to (GRADIENT_PART_COUNT - 1) do {
+    private _own = _ownPick param [_ownPick findIf {(_x select 0) == _part}, [_part, [], []]];
+
+    {
+        private _pick = _own select (_x + 1);
+
+        _hsv pushBack ([+_pick, +([_mainStart, _hsv select 7] select _x)] select (_pick isEqualTo []));
+        _ownSet pushBack (_pick isNotEqualTo []);
+    } forEach [0, 1];
+};
+
 private _rgb = _hsv apply {["rgb", _x] call FUNC(hsv)};
 private _swatch = +_rgb;
 
@@ -136,5 +152,6 @@ createHashMapFromArray [
     ["panelGradient", _panelEndPick isNotEqualTo []],
     ["style", _style],
     ["set", _set],
+    ["ownSet", _ownSet],
     ["any", true in _set]
 ]

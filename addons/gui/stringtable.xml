@@ -544,11 +544,23 @@
         <Key ID="STR_einv_gui_Palette_Panels_Tip">
             <English>The window's background: the panels behind the columns, the header and the footer, and the inspect card and kit windows - and how see-through they are. Kept dark enough for the text to stay readable.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_PartColours_Tip">
+            <English>The colours this part's gradient runs between. Unset, it takes the main gradient's start and end.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_PartMain">
+            <English>Main</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_PartMain_Tip">
+            <English>Back to the main gradient's colours for this part.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_PartPick">
+            <English>Its own gradient: click to set this part's colours below</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Part_Ammo">
             <English>Ammo counts</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Ammo_Tip">
-            <English>Rounds like 30/30 on magazines and weapons.</English>
+            <English>Rounds like 30/30 on the magazines' tiles.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Buttons">
             <English>Buttons</English>
@@ -627,6 +639,12 @@
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Values_Tip">
             <English>Loads, free space and the values on the inspect and comparison cards.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_WeaponAmmo">
+            <English>Weapon ammo</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_WeaponAmmo_Tip">
+            <English>The rounds on the weapons' cards and in their magazine slots: 30/30, 17/17.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Weapons">
             <English>Weapon names</English>

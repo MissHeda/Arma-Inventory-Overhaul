@@ -88,6 +88,8 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Changed
 
+- Colour panel, Titles: every part of "Shows on" can run in colours of its own. A small pill at each checkbox shows the part's start and end; a click on it opens a line under the checkboxes with the part's name, its own Start and End (the picker bound to the one outlined) and Main, which takes the part back to the main gradient's colours. Unset, a part follows the main gradient. Saved with the palette, exported and imported with it. New part "Weapon ammo" (the rounds on the weapons' cards and in their magazine slots), apart from the magazines' counts on the tiles.
+- Styles: some say where the gradient shows and give parts colours of their own where it suits the look - Apex's jade weapon ammo and keys, Jets' amber read-outs (weight and rounds), Laws of War's red keys, Night vision's green rounds and weight, Modern gradient's cyan weapon names and violet rounds, Tactical's sand weapon names. The others keep where the gradient shows as you set it; picking any style takes the own colours away.
 - An item let go on the loot column off its grids goes into the column's first container, laid down in its first free spot as on a folded box, or onto the ground where the column shows the ground (or nothing). The column lights at half strength while it is held there.
 - Colour panel: the list of styles starts at the popover's left edge, without an indent of its own.
 - The right-click menu is round like the window's panels, and the row under the mouse is a round film in the secondary colour, in from the card's edge as the slots' are.
@@ -167,6 +169,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- With the gradient on, the tips of the fold tab and Sort show when the mouse rests on them again, over the column: the gradient's words took the mouse and, clicked, the focus, which drew their column over the tip. They are words only now.
 - TFAR: a right click on a radio in the backpack offers "Open radio" again even where "Use items from the backpack" is off (that setting is about using things up). The vanilla radio in the radio slot, or a radio TFAR has not made the player's own yet, gets "Open radio" too: TFAR is asked to swap it now and the radio it gives is opened.
 - In ACE Arsenal's panel the tips of its buttons (the fold arrow of Staging, ...) show when the mouse rests on them, not only after a click: there the window finds the button under the mouse by its place, as the engine reports the mouse entering it unreliably on another mod's display.
 - The tips of the colour, sound and right-click menus' buttons show over the menu again instead of behind it.

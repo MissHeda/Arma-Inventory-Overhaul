@@ -30,7 +30,7 @@ _savedPalette params [
     "_savedAccent", "_savedSecondary", "_savedAlpha", ["_savedPanel", []],
     ["_savedCells", []], ["_savedTiles", []], ["_savedText", []], ["_savedLines", []], ["_savedTileAlpha", -1],
     ["_savedCellAlpha", -1], ["_savedGradient", []], ["_savedStyle", ""], ["_savedTitle", []], ["_savedPanelEnd", []],
-    ["_savedSecondaryAlpha", -1], ["_savedLinesAlpha", -1], "", ["_savedReach", -1]
+    ["_savedSecondaryAlpha", -1], ["_savedLinesAlpha", -1], "", ["_savedReach", -1], ["_savedOwn", []]
 ];
 
 private _fnc_alpha = {
@@ -67,7 +67,28 @@ _read = [
     [_savedSecondaryAlpha] call _fnc_alpha,
     [_savedLinesAlpha] call _fnc_alpha,
     -1,
-    if (_savedReach isEqualType 0 && {_savedReach >= 0} && {_savedReach <= GRADIENT_PARTS_ALL} && {_savedReach == floor _savedReach}) then {_savedReach} else {-1}
+    if (_savedReach isEqualType 0 && {_savedReach >= 0} && {_savedReach <= GRADIENT_PARTS_ALL} && {_savedReach == floor _savedReach}) then {_savedReach} else {-1},
+    // The parts' own colours: [part, start, end] each, a part once, its colours [] or valid, one with neither left out.
+    if (_savedOwn isEqualType []) then {
+        private _parts = [];
+        private _own = [];
+
+        {
+            if (
+                _x isEqualType [] && {count _x == 3} && {(_x select 0) isEqualType 0} && {(_x select 0) >= 0}
+                && {(_x select 0) < GRADIENT_PART_COUNT} && {(_x select 0) == floor (_x select 0)} && {!((_x select 0) in _parts)}
+            ) then {
+                private _entry = [_x select 0, [_x select 1, 1] call _fnc_colour, [_x select 2, 1] call _fnc_colour];
+
+                if ((_entry select 1) isNotEqualTo [] || {(_entry select 2) isNotEqualTo []}) then {
+                    _parts pushBack (_x select 0);
+                    _own pushBack _entry;
+                };
+            };
+        } forEach _savedOwn;
+
+        _own
+    } else {[]}
 ];
 
 _read

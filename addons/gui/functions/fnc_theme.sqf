@@ -96,7 +96,7 @@ private _accent = [] call FUNC(accentColour);
     ["_cellsPick", [], [[]]], ["_tilesPick", [], [[]]], ["_textPick", [], [[]]], ["_linesPick", [], [[]]],
     ["_tileAlphaPick", -1, [0]], ["_cellAlphaPick", -1, [0]], ["_gradientPick", [], [[]]], "",
     ["_titlePick", [], [[]]], ["_panelEndPick", [], [[]]], ["_secondaryAlphaPick", -1, [0]], ["_linesAlphaPick", -1, [0]], "",
-    ["_reachPick", -1, [0]]
+    ["_reachPick", -1, [0]], ["_ownPick", [], [[]]]
 ];
 
 private _tint = [];
@@ -272,6 +272,17 @@ _theme set ["titleGradient", [[], ([_gradientPick, 1] call _fnc_pickRgb) + [1]] 
 
 // Where the titles' gradient shows (fnc_uiLabel, GRADIENT_*): a sum of the parts' numbers. Unset, the titles, the headings and the mouse's.
 _theme set ["gradientParts", [GRADIENT_PARTS_DEFAULT, _reachPick] select (_reachPick >= 0)];
+
+// The parts' own gradients (fnc_uiLabel): by the part's place, [start, end] as colours, [] each for the main gradient's.
+private _gradientOwn = [];
+
+for "_part" from 0 to (GRADIENT_PART_COUNT - 1) do {
+    private _own = _ownPick param [_ownPick findIf {(_x select 0) == _part}, [_part, [], []]];
+
+    _gradientOwn pushBack ([_own select 1, _own select 2] apply {[[], ([_x, 1] call _fnc_pickRgb) + [1]] select (_x isNotEqualTo [])});
+};
+
+_theme set ["gradientOwn", _gradientOwn];
 
 // ----- Panels and Transparency -----
 

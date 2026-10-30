@@ -28,6 +28,7 @@
  *   "field"  - [colour, field, text]: what was typed in a field - 0 red, 1 green, 2 blue (0 to 255) or 3 the hex code (3 or 6
  *              digits, # first or not); a text that is none of these is put back, and a colour with no hue (grey) or no
  *              saturation (black) keeps the picker's hue and saturation
+ *   "partColours" - a part (0 to GRADIENT_PART_COUNT - 1): its own gradient colours taken back
  *   "reset"  - "accent" (back to the Arma profile's colour), "secondary" (follows the accent again), "panel", "cells", "tiles",
  *              "text", "lines", "alpha", "tileAlpha" (each the theme's own) or "all"
  *
@@ -58,7 +59,27 @@ private _fnc_pick = {
     params ["_which", "_hsv"];
 
     _hsv = _hsv apply {(((round (_x * 100000)) / 100000) max 0) min 1};
-    _hsv set [2, (_hsv select 2) min (PALETTE_VALUE_MAX select _which)];
+    _hsv set [2, (_hsv select 2) min (PALETTE_VALUE_MAX param [_which, 1])];
+
+    // A part's own start or end (GRADIENT_PART_COLOURS): into its entry of slot 18, made where there is none.
+    if (_which >= PALETTE_COLOURS) exitWith {
+        private _part = floor ((_which - PALETTE_COLOURS) / 2);
+        private _end = (_which - PALETTE_COLOURS) mod 2;
+        private _own = _palette select 18;
+        private _at = _own findIf {(_x select 0) == _part};
+
+        if (_at < 0) then {
+            _at = _own pushBack [_part, [], []];
+        };
+
+        private _entry = _own select _at;
+
+        if (((_info get "ownSet") select (_which - PALETTE_COLOURS)) && {(_entry select (_end + 1)) isEqualTo _hsv}) exitWith {false};
+
+        _entry set [_end + 1, _hsv];
+
+        true
+    };
 
     private _slot = PALETTE_SLOTS select _which;
 
@@ -76,7 +97,7 @@ while {count _palette < count PALETTE_UNSET} do {
 
 // The places the rows' "Default" buttons take back, by row id: a row with a slider takes its transparency with its colour.
 private _rowSlots = createHashMapFromArray [
-    ["accent", [0]], ["titles", [12, 10]], ["secondary", [1, 14]], ["panel", [3, 2, 13]], ["cells", [4, 9]], ["items", [8]],
+    ["accent", [0]], ["titles", [12, 10, 18]], ["secondary", [1, 14]], ["panel", [3, 2, 13]], ["cells", [4, 9]], ["items", [8]],
     ["text", [6]], ["lines", [7, 15]]
 ];
 
@@ -115,8 +136,12 @@ switch (_mode) do {
 
         _values set [11, _argument];
 
-        // How far the gradient reaches is no part of a style: it stays as the player set it.
-        _values set [17, _palette param [17, -1]];
+        // Where the gradient shows and the parts' own colours: as the style says where it says (a style of 19 places), else
+        // where it shows stays as the player set it and the own colours go - they were picked for another look.
+        if (count ((_style select 0) select 2) < 19) then {
+            _values set [17, _palette param [17, -1]];
+            _values set [18, []];
+        };
 
         {
             _palette set [_forEachIndex, _x];
@@ -128,7 +153,7 @@ switch (_mode) do {
     case "hue": {
         _argument params [["_which", -1, [0]], ["_place", 0, [0]]];
 
-        if (_which < 0 || {_which >= PALETTE_COLOURS}) exitWith {};
+        if (_which < 0 || {_which >= PALETTE_COLOURS + GRADIENT_PART_COLOURS}) exitWith {};
 
         // The strip's end is one step short of red again, so that the bottom is not a jump back to the top.
         private _step = (round (((_place max 0) min 1) * PALETTE_HUE_STEPS)) min (PALETTE_HUE_STEPS - 1);
@@ -141,9 +166,9 @@ switch (_mode) do {
     case "square": {
         _argument params [["_which", -1, [0]], ["_across", 0, [0]], ["_down", 0, [0]]];
 
-        if (_which < 0 || {_which >= PALETTE_COLOURS}) exitWith {};
+        if (_which < 0 || {_which >= PALETTE_COLOURS + GRADIENT_PART_COLOURS}) exitWith {};
 
-        private _valueMax = PALETTE_VALUE_MAX select _which;
+        private _valueMax = PALETTE_VALUE_MAX param [_which, 1];
         private _saturation = (round (((_across max 0) min 1) * PALETTE_SV_STEPS)) / PALETTE_SV_STEPS;
         private _value = (round ((1 - ((_down max 0) min 1)) * PALETTE_SV_STEPS)) / PALETTE_SV_STEPS * _valueMax;
         private _hsv = +((_info get "hsv") select _which);
@@ -156,7 +181,7 @@ switch (_mode) do {
     case "field": {
         _argument params [["_which", -1, [0]], ["_field", 0, [0]], ["_text", "", [""]]];
 
-        if (_which < 0 || {_which >= PALETTE_COLOURS}) exitWith {};
+        if (_which < 0 || {_which >= PALETTE_COLOURS + GRADIENT_PART_COLOURS}) exitWith {};
 
         // What the fields say now: only a different value is a choice (a click into a field and out again is none).
         private _shown = ((_info get "rgb") select _which) apply {round (_x * 255)};
@@ -246,7 +271,7 @@ switch (_mode) do {
 
     // One part of where the gradient shows (GRADIENT_*) switched on or off.
     case "gradientPart": {
-        if (_argument isEqualType 0 && {_argument in ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] apply {2 ^ _x})}) then {
+        if (_argument isEqualType 0 && {_argument in ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17] apply {2 ^ _x})}) then {
             private _parts = _palette param [17, -1];
 
             if (_parts < 0) then {
@@ -257,6 +282,17 @@ switch (_mode) do {
             _palette set [17, _parts];
             _changed = true;
         };
+    };
+
+    // A part's own colours taken back: it runs in the main gradient's again.
+    case "partColours": {
+        private _own = _palette select 18;
+        private _at = _own findIf {(_x select 0) == _argument};
+
+        if (_at < 0) exitWith {};
+
+        _own deleteAt _at;
+        _changed = true;
     };
 
     case "reset": {
