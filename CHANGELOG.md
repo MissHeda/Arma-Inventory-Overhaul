@@ -89,7 +89,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Changed
 
-- Arma 3 is the default style now (AIO's red style is gone). Gradients are kept to Apex and Modern gradient (its titles only); the other styles run plain.
+- Classic is the default style now (AIO's red style is gone): your Arma colour, its titles, headings, the name at the mouse and the weight bar running into white. Most styles bring a light gradient of their own - Arma 3, Contact, Tanks, Jets, Tactical and Stealth on their titles and a part or two that suits them, Apex as before; Laws of War and Modern run plain.
 - Help texts shortened (issue #8): the 42 longest CBA setting descriptions and wizard helps are one or two short lines now.
 - The loot column's title icon is in the accent, so it is told apart from your own storage at a glance (issue #7).
 - New default look "AIO (default)": a red accent and the deep red films behind Open, Unload and the Unsearched box; new players start with it and Reset all goes back to it. Classic stays as the old look with your own Arma colour. The colour panel's Text row has a new group Surfaces: Bars (weight bar, ammo bars), Buttons and chips, and Header lines can run in the gradient too.
@@ -179,6 +179,9 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- Import in the colour panel no longer throws a script error: the field took only 40 characters, which cut every palette off. Text that is no palette just says so.
+- Export has a Copy button beside Done.
+- The tip at the mouse stays on top after a click that drew a section again (Sort, a page) - it went behind the column.
 - The colour and sound buttons in the header keep their gradient (Buttons and chips) when their popover opens or closes or the volumes change - they turned flat.
 - ACE cargo cards: Open and Unload have their icon and words centred.
 - The page bar's arrows have a light film of their own (they were the secondary colour on a bar of the secondary colour - red on red) and the bar runs in the gradient with Buttons and chips.

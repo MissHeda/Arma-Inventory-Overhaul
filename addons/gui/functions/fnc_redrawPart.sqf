@@ -99,4 +99,7 @@ _rect params ["_left", "_top", "_width", "_height"];
 
 ([_display, _inner, [_left - _outerX, _top - _outerY, _width, _height]] + _args) call _code;
 
+// The name at the mouse is made again over the new drawing (fnc_raiseTooltip): its group went over it.
+uiNamespace setVariable [QGVAR(tipStale), true];
+
 true

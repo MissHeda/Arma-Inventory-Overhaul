@@ -306,6 +306,10 @@ if (!isNull _focus) then {
         }
     ) then {
         ctrlSetFocus _sink;
+
+        // The focused control was drawn over the name at the mouse meanwhile; it is made again on top (fnc_raiseTooltip).
+        uiNamespace setVariable [QGVAR(tipStale), true];
+        [] call FUNC(raiseTooltip);
     };
 };
 

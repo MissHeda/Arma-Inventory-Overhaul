@@ -567,12 +567,15 @@ private _y = _headTop + _titleH + _gapY;
 if (_io isNotEqualTo "") then {
     private _buttonWords = [LLSTRING(Palette_Apply), LLSTRING(Palette_Done)] select (_io isEqualTo "export");
     private _ioButtonW = [_buttonWords, "", _chipH, _chipSize, _buttonTheme] call FUNC(buttonWidth);
-    private _fieldRect = [_cardX + _padX, _y, _width - _padX * 2 - _ioButtonW - _gapX, _rowH];
+
+    // Export has Copy beside Done: the text on the clipboard with one click, where selecting it in the field is fiddly.
+    private _copyW = [0, [LLSTRING(Palette_Copy), "", _chipH, _chipSize, _buttonTheme] call FUNC(buttonWidth)] select (_io isEqualTo "export");
+    private _fieldRect = [_cardX + _padX, _y, _width - _padX * 2 - _ioButtonW - _gapX - ([0, _copyW + _gapX] select (_copyW > 0)), _rowH];
 
     [_display, _layer, _fieldRect, [1, 1, 1, 0.08], UNIT * 0.25] call FUNC(uiPanel);
 
     private _ioEdit = [
-        _display, "EINV_Edit", _layer,
+        _display, "EINV_EditLong", _layer,
         [(_fieldRect select 0) + SQUARE(UNIT * 0.3), _y + (_rowH - _small * 1.4) / 2, (_fieldRect select 2) - SQUARE(UNIT * 0.6), _small * 1.4]
     ] call FUNC(uiCreate);
 
@@ -611,6 +614,18 @@ if (_io isNotEqualTo "") then {
         }, false, _chipSize, true
     ] call FUNC(uiButton);
 
+    if (_copyW > 0) then {
+        [
+            _display, _layer, [_cardX + _width - _padX - _ioButtonW - _gapX - _copyW, _y + (_rowH - _chipH) / 2, _copyW, _chipH], "copy",
+            LLSTRING(Palette_Copy), "", _buttonTheme, {
+                if ((_this select 0) < 0) exitWith {};
+
+                copyToClipboard ctrlText (uiNamespace getVariable [QGVAR(paletteIOEdit), controlNull]);
+                ["Copied"] call FUNC(flashHint);
+            }, false, _chipSize, true
+        ] call FUNC(uiButton);
+    };
+
     // Export: the text is selected, so Ctrl+C copies it where the clipboard was not reached.
     if (_io isEqualTo "export") then {
         ctrlSetFocus _ioEdit;
@@ -625,8 +640,8 @@ if (_io isNotEqualTo "") then {
     _fontBold, 0, "menu"
 ] call FUNC(uiLabel);
 
-// The window as it ships (PALETTE_DEFAULT) is the AIO style, whichever way it came to be.
-private _styleName = [LLSTRING(Style_Custom), LLSTRING(Style_Arma)] select (GVAR(palette) isEqualTo PALETTE_DEFAULT);
+// The window as it ships (PALETTE_DEFAULT) is the Classic style, whichever way it came to be.
+private _styleName = [LLSTRING(Style_Custom), LLSTRING(Style_Classic)] select (GVAR(palette) isEqualTo PALETTE_DEFAULT);
 
 {
     if ((_x select 0) isEqualTo (_info get "style")) exitWith {_styleName = _x select 1};
@@ -669,7 +684,7 @@ if (_stylesOpen) then {
     {
         _x params ["_styleId", "_name", "_values"];
 
-        private _current = _styleId isEqualTo (_info get "style") || {_styleId isEqualTo "arma" && {GVAR(palette) isEqualTo PALETTE_DEFAULT}};
+        private _current = _styleId isEqualTo (_info get "style") || {_styleId isEqualTo "classic" && {GVAR(palette) isEqualTo PALETTE_DEFAULT}};
         private _rowTop = _y;
 
         // Flush with the popover's left edge (its title, the rows' arrows): no indent of its own.

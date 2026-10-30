@@ -24,11 +24,15 @@
  */
 
 [
-    // The window as it ships (PALETTE_DEFAULT): Arma 3's own menus - near-black glass, white text, an amber highlight.
-    ["arma", LLSTRING(Style_Arma), PALETTE_DEFAULT],
+    // The window as it ships (PALETTE_DEFAULT): the player's own Arma colour on the plain films, the titles, the headings, the name at
+    // the mouse and the weight bar running from it into white.
+    ["classic", LLSTRING(Style_Classic), PALETTE_DEFAULT],
 
-    // The player's own Arma colour on the plain films.
-    ["classic", LLSTRING(Style_Classic), [[], [], -1, [], [], [], [], [], -1, -1, [], ""]],
+    // Arma 3's own menus - near-black glass, white text, an amber highlight; the titles and the weight bar into a pale amber.
+    ["arma", LLSTRING(Style_Arma), [
+        [0.11, 0.85, 0.95], [0, 0, 0.75], 0.9, [0, 0, 0.07], [0, 0, 0.13], [], [], [0, 0, 0.4], -1, 1, [0.12, 0.3, 1], "",
+        [], [], -1, -1, -1, 262151, []
+    ]],
 
     // Apex: Tanoa's jungle, a deep teal with a jade highlight - its titles and a few parts running into a lighter jade.
     ["apex", LLSTRING(Style_Apex), [
@@ -37,22 +41,25 @@
         [], [], -1, -1, -1, 135775, [[17, [0.42, 0.6, 0.9], [0.3, 0.15, 1]], [9, [0.45, 0.7, 0.85], [0.3, 0.3, 1]]]
     ]],
 
-    // Contact: Livonia's cold forest, blue-grey with an icy highlight.
+    // Contact: Livonia's cold forest, blue-grey with an icy highlight; the titles and the name at the mouse frosting over.
     ["contact", LLSTRING(Style_Contact), [
         [0.55, 0.4, 1], [0.58, 0.15, 0.8], 0.92, [0.6, 0.3, 0.07],
-        [0.6, 0.22, 0.12], [], [], [0.56, 0.3, 0.65], -1, 1, [], ""
+        [0.6, 0.22, 0.12], [], [], [0.56, 0.3, 0.65], -1, 1, [0.52, 0.12, 1], "",
+        [], [], -1, -1, -1, 4103, []
     ]],
 
-    // Tanks: desert dust and steel.
+    // Tanks: desert dust and steel; the titles and the weight bar bleaching into sand.
     ["tanks", LLSTRING(Style_Tanks), [
         [0.09, 0.6, 0.85], [0.08, 0.25, 0.75], 0.93, [0.08, 0.35, 0.07],
-        [0.08, 0.25, 0.12], [], [], [0.08, 0.35, 0.6], -1, 1, [], ""
+        [0.08, 0.25, 0.12], [], [], [0.08, 0.35, 0.6], -1, 1, [0.11, 0.25, 1], "",
+        [], [], -1, -1, -1, 262151, []
     ]],
 
-    // Jets: a cockpit at night, steel blue with an amber read-out.
+    // Jets: a cockpit at night, steel blue with an amber read-out; the titles, the bars and the header lines from amber into steel.
     ["jets", LLSTRING(Style_Jets), [
         [0.13, 0.8, 1], [0.6, 0.25, 0.8], 0.92, [0.6, 0.35, 0.06],
-        [0.6, 0.25, 0.11], [], [], [0.6, 0.35, 0.55], -1, 1, [], ""
+        [0.6, 0.25, 0.11], [], [], [0.6, 0.35, 0.55], -1, 1, [0.58, 0.45, 1], "",
+        [], [], -1, -1, -1, 1310727, []
     ]],
 
     // Laws of War: charcoal, and red as the only colour.
@@ -61,16 +68,18 @@
         [0, 0, 0.11], [], [], [0, 0.4, 0.55], -1, 1, [], ""
     ]],
 
-    // Olive and sand, as gear and maps are - dark.
+    // Olive and sand, as gear and maps are - dark; the titles into sand.
     ["tactical", LLSTRING(Style_Tactical), [
         [0.12, 0.5, 0.85], [0.18, 0.3, 0.7], 0.94, [0.19, 0.4, 0.07],
-        [0.19, 0.3, 0.12], [], [0.14, 0.12, 1], [0.16, 0.35, 0.55], -1, 1, [], ""
+        [0.19, 0.3, 0.12], [], [0.14, 0.12, 1], [0.16, 0.35, 0.55], -1, 1, [0.14, 0.25, 0.95], "",
+        [], [], -1, -1, -1, 7, []
     ]],
 
-    // Night vision: black, its green the only light.
+    // Night vision: black, its green the only light; the titles and the name at the mouse glowing brighter.
     ["stealth", LLSTRING(Style_Stealth), [
         [0.33, 0.75, 0.85], [0.33, 0.35, 0.6], 0.96, [0.33, 0.3, 0.04],
-        [0.33, 0.25, 0.09], [], [], [0.33, 0.5, 0.45], -1, 1, [], ""
+        [0.33, 0.25, 0.09], [], [], [0.33, 0.5, 0.45], -1, 1, [0.33, 0.3, 1], "",
+        [], [], -1, -1, -1, 4103, []
     ]],
 
     // Dark blue glass.

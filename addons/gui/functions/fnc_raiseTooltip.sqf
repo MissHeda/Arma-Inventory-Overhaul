@@ -41,8 +41,12 @@ if (GVAR(dragging)) exitWith {false};
 private _created = uiNamespace getVariable [QGVAR(created), []];
 private _at = _created find _tip;
 
-// Not the last live control made on the display: something went over it.
-if (_at < 0 || {(_created select [_at + 1]) findIf {!isNull _x} < 0}) exitWith {false};
+// Not the last live control made on the display: something went over it. Or a part was drawn again in its group after a click
+// (fnc_redrawPart, fnc_onFrame's focus): the group then lies over the name though the list does not say so (QGVAR(tipStale)).
+if (_at < 0) exitWith {false};
+if (!(uiNamespace getVariable [QGVAR(tipStale), false]) && {(_created select [_at + 1]) findIf {!isNull _x} < 0}) exitWith {false};
+
+uiNamespace setVariable [QGVAR(tipStale), false];
 
 private _position = ctrlPosition _tip;
 private _made = true;

@@ -44,6 +44,7 @@ if (isNull _hint) exitWith {};
 private _text = switch (_reason) do {
     case "NoBackpack": {LLSTRING(Hint_NoBackpack)};
     case "ImportBad": {LLSTRING(Palette_ImportBad)};
+    case "Copied": {LLSTRING(Palette_Copied)};
     case "Locked": {LELSTRING(locks,Hint_Locked)};
     case "NoRoom": {LLSTRING(Hint_NoRoom)};
     case "WrongKind": {LLSTRING(Hint_WrongKind)};

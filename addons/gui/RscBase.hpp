@@ -107,6 +107,11 @@ class EINV_Edit: RscEdit {
     tooltipColorShade[] = C_TOOLTIP_SHADE;
 };
 
+// A field for a whole palette as text (the colour popover's Import and Export): 40 characters cut it off mid-array.
+class EINV_EditLong: EINV_Edit {
+    maxChars = 20000;
+};
+
 // The hint in the footer: the size of the key hints' words beside it (fnc_uiKeyHint, a 0.9 UNIT key at
 // 0.62 of its height), so the line reads as one.
 // Left, right after the key hints and a thin line that parts it from them: an "align" set on composed text by script does
