@@ -45,7 +45,7 @@ switch ([_class] call FUNC(radioType)) do {
     case 2: {
         if (!_own) exitWith {};
 
-        _choices pushBack [LLSTRING(Menu_Open), [], {[] call FUNC(openPrototype)}];
+        _choices pushBack [LLSTRING(Menu_Open), [_class], {_this call FUNC(openPrototype)}];
     };
 
     // The long-range radio on the player's own back.

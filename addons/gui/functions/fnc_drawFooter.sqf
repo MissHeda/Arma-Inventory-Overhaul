@@ -146,12 +146,11 @@ _keys = _keys select [0, _fits];
 
 // ----- The hint -----
 
-// Centred on the screen, with as much room on both sides as the wider of the two ends takes. In the key
-// hints' size, on their line: structured text starts at the top of its box, so the box starts half a
-// line above the footer's middle, where their words are centred.
-// It takes all the room between the last key hint and the version, not a centred share of it - a box as wide
-// as the bar minus twice the wider side cut long item lines short (issue 12).
-private _hintX = _keyX + SQUARE(UNIT * 0.5);
+// Right after the key hints, parted from them by a thin upright line, left-aligned, in their size and on their line:
+// structured text starts at the top of its box, so the box starts half a line above the footer's middle, where their
+// words are centred. It takes all the room up to the version, so long item lines are never cut (issue 12).
+private _hintGap = SQUARE(UNIT * 0.45);
+private _hintX = _keyX + _hintGap * 2;
 private _hintSize = _textUnit * 0.558;
 private _hintW = (_left + _width - _versionW - SQUARE(UNIT * 0.5)) - _hintX;
 private _hintCtrl = [_display, "EINV_FooterHint", controlNull, [_hintX, FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
@@ -159,16 +158,18 @@ private _hintCtrl = [_display, "EINV_FooterHint", controlNull, [_hintX, FOOT_Y +
 // Too narrow for words: the line is hidden rather than wrapped over the key hints.
 if (_hintW < SQUARE(UNIT * 6)) then {
     _hintCtrl ctrlShow false;
+} else {
+    // The line between the key hints and the hint, half the bar high.
+    [
+        _display, controlNull, [_keyX + _hintGap, FOOT_Y + FOOT_H * 0.25, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * 0.5],
+        _theme getOrDefault ["line", [1, 1, 1, 0.14]]
+    ] call FUNC(uiPanel);
 };
 
-// Centred on the screen: a box as wide on both sides of the middle as the nearer end allows. A line too long for it
-// (it would break onto a second line) takes the whole room instead, so long item lines are never cut (issue 12) -
-// fnc_fitHint, after each write.
-private _middle = safezoneX + safezoneW / 2;
-private _halfW = ((_middle - _hintX) min (_hintX + _hintW - _middle)) max 0;
+// One place for every line, short or long (fnc_fitHint puts it back after each write).
 private _hintY = FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH;
 
-_hintCtrl setVariable [QGVAR(hintCentred), [_middle - _halfW, _hintY, _halfW * 2, _hintSize * 1.4]];
+_hintCtrl setVariable [QGVAR(hintCentred), [_hintX, _hintY, _hintW max pixelW, _hintSize * 1.4]];
 _hintCtrl setVariable [QGVAR(hintWide), [_hintX, _hintY, _hintW max pixelW, _hintSize * 1.4]];
 _hintCtrl setVariable [QGVAR(hintLine), _hintSize];
 

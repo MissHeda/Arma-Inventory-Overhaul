@@ -379,7 +379,47 @@ private _fnc_light = {
     [_tile getOrDefault ["backgrounds", [_background]], _color] call FUNC(paintSurface);
 };
 
-if (!_force && {_found isEqualTo GVAR(hover)}) exitWith {
+    // The button with a tip of its own under the mouse (fnc_setTooltip) - found before the hover is compared with the last one: over the
+// columns' empty room the hover stays "nothing" while the mouse goes onto such a button, and its tip would never be asked for.
+private _tipNow = uiNamespace getVariable [QGVAR(hoverTip), controlNull];
+
+    // No entering reported - the engine misses it on some buttons in the columns' groups (a section's fold tab and Sort),
+    // and as a guest on another mod's display (ACE Arsenal) on most: the last made control with a tip under the mouse, where
+    // it shows, over the columns (no kit window or inspect card there) and with no menu open.
+    if (
+        isNull _tipNow && {_mouse isNotEqualTo []}
+        && {_layer isEqualTo "" || {(["guest", [], false] call FUNC(hook)) isEqualTo true}}
+        && {(uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []}
+    ) then {
+        private _tipped = uiNamespace getVariable [QGVAR(tipCtrls), []];
+
+        for "_i" from (count _tipped - 1) to 0 step -1 do {
+            private _candidate = _tipped select _i;
+
+            if (!isNull _candidate && {ctrlShown _candidate}) then {
+                private _size = ctrlPosition _candidate;
+                private _at = if (isNull ctrlParentControlsGroup _candidate) then {_size} else {
+                    [[
+                        [0, 0, _size select 2, _size select 3], "", "",
+                        createHashMapFromArray [["rel", [_size select 0, _size select 1]], ["parent", ctrlParentControlsGroup _candidate]]
+                    ]] call FUNC(slotRect)
+                };
+
+                if (_at isNotEqualTo [] && {
+                    (_mouse select 0) >= (_at select 0) && {(_mouse select 0) < (_at select 0) + (_at select 2)}
+                    && {(_mouse select 1) >= (_at select 1)} && {(_mouse select 1) < (_at select 1) + (_at select 3)}
+                }) exitWith {
+                    _tipNow = _candidate;
+                };
+            };
+        };
+    };
+
+private _tipChanged = _tipNow isNotEqualTo (uiNamespace getVariable [QGVAR(hoverTipSeen), controlNull]);
+
+uiNamespace setVariable [QGVAR(hoverTipSeen), _tipNow];
+
+if (!_force && {!_tipChanged} && {_found isEqualTo GVAR(hover)}) exitWith {
     GVAR(hoverNote) = "same";
 
     // A slot that did not change still moves when its column scrolls under a mouse that stands still - and
@@ -448,39 +488,7 @@ if (!isNull _tooltip) then {
     private _ownTip = "";
 
     if (_class isEqualTo "" && {!GVAR(dragging)} && {GVAR(stripDrag) isEqualTo []}) then {
-        private _tipCtrl = uiNamespace getVariable [QGVAR(hoverTip), controlNull];
-
-        // No entering reported - the engine misses it on some buttons in the columns' groups (a section's fold tab and Sort),
-        // and as a guest on another mod's display (ACE Arsenal) on most: the last made control with a tip under the mouse, where
-        // it shows, over the columns (no kit window or inspect card there) and with no menu open.
-        if (
-            isNull _tipCtrl && {_mouse isNotEqualTo []}
-            && {_layer isEqualTo "" || {(["guest", [], false] call FUNC(hook)) isEqualTo true}}
-            && {(uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []}
-        ) then {
-            private _tipped = uiNamespace getVariable [QGVAR(tipCtrls), []];
-
-            for "_i" from (count _tipped - 1) to 0 step -1 do {
-                private _candidate = _tipped select _i;
-
-                if (!isNull _candidate && {ctrlShown _candidate}) then {
-                    private _size = ctrlPosition _candidate;
-                    private _at = if (isNull ctrlParentControlsGroup _candidate) then {_size} else {
-                        [[
-                            [0, 0, _size select 2, _size select 3], "", "",
-                            createHashMapFromArray [["rel", [_size select 0, _size select 1]], ["parent", ctrlParentControlsGroup _candidate]]
-                        ]] call FUNC(slotRect)
-                    };
-
-                    if (_at isNotEqualTo [] && {
-                        (_mouse select 0) >= (_at select 0) && {(_mouse select 0) < (_at select 0) + (_at select 2)}
-                        && {(_mouse select 1) >= (_at select 1)} && {(_mouse select 1) < (_at select 1) + (_at select 3)}
-                    }) exitWith {
-                        _tipCtrl = _candidate;
-                    };
-                };
-            };
-        };
+        private _tipCtrl = _tipNow;
 
         if (!isNull _tipCtrl && {ctrlShown _tipCtrl} && {ctrlEnabled _tipCtrl}) then {
             _ownTip = _tipCtrl getVariable [QGVAR(tip), ""];
@@ -891,5 +899,5 @@ switch (_shown param [0, ""]) do {
 // In the footer's text scale where it keeps one (fnc_drawFooter).
 private _hintCtrl = uiNamespace getVariable [QGVAR(hint), controlNull];
 
-_hintCtrl ctrlSetStructuredText (composeText _parts setAttributes ["align", "center", "size", str (_hintCtrl getVariable [QGVAR(textScale), 1])]);
+_hintCtrl ctrlSetStructuredText (composeText _parts setAttributes ["align", "left", "size", str (_hintCtrl getVariable [QGVAR(textScale), 1])]);
 [_hintCtrl] call FUNC(fitHint);

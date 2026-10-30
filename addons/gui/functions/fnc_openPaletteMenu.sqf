@@ -214,10 +214,10 @@ if (_openDef isNotEqualTo []) then {
     if (_openGradient >= 0) then {
         _height = _height + _rowH + _gapY;
 
-        // The titles' gradient on: where it shows, under it - a group of checkboxes three to a row, a little gap between groups.
+        // The titles' gradient on: where it shows, under it - a group of checkboxes two to a row, a little gap between groups.
         if ((_openDef select 0) isEqualTo "titles" && {[_openGradient] call _fnc_gradientOn}) then {
             {
-                _height = _height + _rowH * ceil ((count (_x select 1)) / 3);
+                _height = _height + _rowH * ceil ((count (_x select 1)) / 2);
             } forEach GRADIENT_PART_GROUPS;
 
             _height = _height + _gapY + _gapY * 0.5 * (count GRADIENT_PART_GROUPS - 1);
@@ -808,14 +808,14 @@ private _sliders = createHashMap;
             _y = _y + _rowH;
 
             // Where the titles' gradient shows: a checkbox for each part as CBA's settings have them - a square outline, ticked
-            // while the part is on (GRADIENT_*, fnc_uiLabel) - in groups, the group's name in the label column, three to a row. The
+            // while the part is on (GRADIENT_*, fnc_uiLabel) - in groups, the group's name in the label column, two to a row. The
             // box and its words take the click.
             if (_gradientOn && {_id isEqualTo "titles"}) then {
                 _y = _y + _gapY;
 
                 private _parts = GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT];
                 private _partsX = _cardX + _sliderX;
-                private _partW = (_cardX + _width - _padX - _partsX - _gapX) / 3;
+                private _partW = (_cardX + _width - _padX - _partsX - _gapX / 2) / 2;
                 private _checkH = _rowH * 0.62;
                 private _checkW = SQUARE(_checkH);
                 private _edgeW = pixelW * 2;
@@ -833,8 +833,8 @@ private _sliders = createHashMap;
                     {
                         _x params ["_bit", "_words", "_partTip"];
 
-                        private _cellX = _partsX + (_forEachIndex mod 3) * (_partW + _gapX / 2);
-                        private _cellY = _y + floor (_forEachIndex / 3) * _rowH;
+                        private _cellX = _partsX + (_forEachIndex mod 2) * (_partW + _gapX / 2);
+                        private _cellY = _y + floor (_forEachIndex / 2) * _rowH;
                         private _checkY = _cellY + (_rowH - _checkH) / 2;
                         private _on = ((floor (_parts / _bit)) mod 2) == 1;
 
@@ -850,11 +850,11 @@ private _sliders = createHashMap;
                             ] call FUNC(uiIcon);
                         };
 
-                        // Its own gradient: a small pill of its start and end at the cell's right end, outlined while it is the
+                        // Its own gradient: a small pill of its start and end right beside the checkbox, outlined while it is the
                         // part the picker is bound to. A click on it picks the part (the line under the groups).
                         private _partIndex = round (log _bit / log 2);
                         private _pillW = SQUARE(_checkH * 1.6);
-                        private _pillRect = [_cellX + _partW - _pillW, _checkY, _pillW, _checkH];
+                        private _pillRect = [_cellX + _checkW + SQUARE(UNIT * 0.15), _checkY, _pillW, _checkH];
 
                         [_display, _layer, _pillRect, [[1, 1, 1, 0.22], _text] select (_partIndex == _partPick), 0] call FUNC(uiPanel);
                         _swatches set [format ["part%1", _partIndex], [
@@ -887,31 +887,37 @@ private _sliders = createHashMap;
                             }, [_ctrl getVariable [QGVAR(id), -1]]] call FUNC(later);
                         }];
 
-                        private _wordsX = _cellX + _checkW + SQUARE(UNIT * 0.15);
-                        private _wordsW = (_pillRect select 0) - _wordsX - SQUARE(UNIT * 0.1);
+                        private _wordsX = (_pillRect select 0) + _pillW + SQUARE(UNIT * 0.15);
+                        private _wordsW = _cellX + _partW - _wordsX;
 
                         [
                             _display, _layer, [_wordsX, _cellY, _wordsW, _rowH], [_words, _wordsW, _font, _small * 0.9] call FUNC(fitText),
                             _small * 0.9, [_muted, _text] select _on, _font, 0
                         ] call FUNC(uiLabel);
 
-                        private _partHit = [_display, "EINV_Hitbox", _layer, [_cellX, _cellY, _partW - _pillW, _rowH]] call FUNC(uiCreate);
+                        // The checkbox and the words take the click - two hit areas either side of the pill, which has its own.
+                        {
+                            private _partHit = [_display, "EINV_Hitbox", _layer, _x] call FUNC(uiCreate);
 
-                        [_partHit, _partTip] call FUNC(setTooltip);
-                        _partHit setVariable [QGVAR(id), _bit];
-                        _partHit ctrlAddEventHandler ["ButtonClick", {
-                            params ["_ctrl"];
+                            [_partHit, _partTip] call FUNC(setTooltip);
+                            _partHit setVariable [QGVAR(id), _bit];
+                            _partHit ctrlAddEventHandler ["ButtonClick", {
+                                params ["_ctrl"];
 
-                            // The popover is made again, which deletes this very control: a frame later.
-                            [{
-                                params ["_bit"];
+                                // The popover is made again, which deletes this very control: a frame later.
+                                [{
+                                    params ["_bit"];
 
-                                ["gradientPart", _bit] call FUNC(paletteSet);
-                            }, [_ctrl getVariable [QGVAR(id), 0]]] call FUNC(later);
-                        }];
+                                    ["gradientPart", _bit] call FUNC(paletteSet);
+                                }, [_ctrl getVariable [QGVAR(id), 0]]] call FUNC(later);
+                            }];
+                        } forEach [
+                            [_cellX, _cellY, (_pillRect select 0) - _cellX, _rowH],
+                            [(_pillRect select 0) + _pillW, _cellY, _cellX + _partW - (_pillRect select 0) - _pillW, _rowH]
+                        ];
                     } forEach _groupParts;
 
-                    _y = _y + _rowH * ceil ((count _groupParts) / 3);
+                    _y = _y + _rowH * ceil ((count _groupParts) / 2);
                 } forEach GRADIENT_PART_GROUPS;
 
                 // The part picked for colours of its own: its name, its Start and End (the one the picker is bound to outlined) and
