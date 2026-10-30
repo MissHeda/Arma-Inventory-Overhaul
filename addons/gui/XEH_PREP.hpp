@@ -325,6 +325,7 @@ PREP(clearWindows);
 PREP(drawTopLayer);
 PREP(makeTooltip);
 PREP(setTooltip);
+PREP(setMenuHint);
 PREP(fitHint);
 PREP(raiseTooltip);
 PREP(startStripDrag);

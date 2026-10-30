@@ -109,14 +109,20 @@ private _muted = [0.56, 0.56, 0.56, 1];
 // (fnc_paletteSlide, fnc_paletteSet), a note under them ("" for none) and the colour its gradient runs into (-1 for none).
 private _transparency = LLSTRING(Palette_Transparency);
 private _rowDefs = [
-    ["accent", 0, LLSTRING(Palette_Accent), LLSTRING(Palette_Accent_Tip), LLSTRING(Palette_UseArma), [], "", -1],
     ["titles", 8, LLSTRING(Palette_Titles), LLSTRING(Palette_Titles_Tip), LLSTRING(Palette_Default), [], "", 7],
+    ["text", 5, LLSTRING(Palette_Text), LLSTRING(Palette_Text_Tip), LLSTRING(Palette_Default), [], "", -1],
+    ["accent", 0, LLSTRING(Palette_Accent), LLSTRING(Palette_Accent_Tip), LLSTRING(Palette_UseArma), [], "", -1],
     ["secondary", 1, LLSTRING(Palette_Secondary), LLSTRING(Palette_Secondary_Tip), LLSTRING(Palette_MatchAccent), [["secondaryAlpha", _transparency]], "", -1],
     ["panel", 2, LLSTRING(Palette_Panels), LLSTRING(Palette_Panels_Tip), LLSTRING(Palette_Default), [["alpha", _transparency]], "", 9],
     ["cells", 3, LLSTRING(Palette_Cells), LLSTRING(Palette_Cells_Tip), LLSTRING(Palette_Default), [["cellAlpha", _transparency]], "", -1],
     ["items", -1, LLSTRING(Palette_Tiles), LLSTRING(Palette_Tiles_Tip), LLSTRING(Palette_Default), [["tileAlpha", _transparency]], LLSTRING(Palette_TilesNote), -1],
-    ["text", 5, LLSTRING(Palette_Text), LLSTRING(Palette_Text_Tip), LLSTRING(Palette_Default), [], "", -1],
     ["lines", 6, LLSTRING(Palette_Lines), LLSTRING(Palette_Lines_Tip), LLSTRING(Palette_Default), [["linesAlpha", _transparency]], "", -1]
+];
+
+// The rows come in three sections, each with a heading over its first row: the words and their gradient first - what the
+// palette shows off -, then the colours that tint the controls, then the surfaces under everything.
+private _sectionHeads = createHashMapFromArray [
+    ["titles", LLSTRING(Palette_Section_Text)], ["accent", LLSTRING(Palette_Section_Colours)], ["panel", LLSTRING(Palette_Section_Surfaces)]
 ];
 
 // Which row is open ("" none), and so which colour the picker is bound to.
@@ -181,6 +187,7 @@ private _titleH = UNIT * 1.1;
 private _headH = UNIT * 0.95;
 private _rowH = UNIT * 0.8;
 private _gapY = UNIT * 0.1;
+private _sectionH = UNIT * 0.72;
 private _padX = SQUARE(UNIT * 0.6);
 private _padY = UNIT * 0.35;
 private _gapX = SQUARE(UNIT * 0.45);
@@ -200,7 +207,11 @@ private _fieldPadX = SQUARE(UNIT * 0.3);
 private _fieldLabelW = SQUARE(UNIT * 1.4);
 
 // The title, the Style row (and its list), every row folded, and what the open row shows: its picker, its sliders, its note.
-private _height = _padY * 2 + _titleH + (_gapY + _headH) + (count _rowDefs) * (_gapY + _headH);
+private _height = _padY * 2 + _titleH + (_gapY + _headH) + (count _rowDefs) * (_gapY + _headH) + (count _sectionHeads) * (_gapY + _sectionH);
+
+// The hint line at the bottom: the tip of what the mouse is on, inside the panel (a tip floating over it would lie under the
+// panel, which is drawn over everything while it holds the focus).
+_height = _height + _gapY + _rowH * 1.6;
 
 if (_io isNotEqualTo "") then {
     _height = _height + _gapY + _rowH;
@@ -685,6 +696,17 @@ private _sliders = createHashMap;
 {
     _x params ["_id", "_which", "_name", "_tip", "_words", "_rowSliders", "_note", "_end"];
 
+    // A section begins: its heading, in the accent of the card's own white, over a hairline.
+    private _sectionHead = _sectionHeads getOrDefault [_id, ""];
+
+    if (_sectionHead isNotEqualTo "") then {
+        _y = _y + _gapY;
+
+        [_display, _layer, [_cardX + _padX, _y, _width - _padX * 2, _sectionH], toUpperANSI _sectionHead, _small, _muted, _fontBold, 0, "never"] call FUNC(uiLabel);
+
+        _y = _y + _sectionH;
+    };
+
     private _isOpen = _id isEqualTo _open;
     private _gradientOn = [_end] call _fnc_gradientOn;
 
@@ -1127,10 +1149,29 @@ private _sliders = createHashMap;
     };
 } forEach _rowDefs;
 
+// ----- The hint line: what the control under the mouse does (fnc_updateHover writes it) -----
+
+private _hintTop = _cardY + _height - _padY - _rowH * 1.6;
+
+[_display, _layer, [_cardX + _padX, _hintTop - _gapY / 2, _width - _padX * 2, pixelH], [1, 1, 1, 0.05]] call FUNC(uiPanel);
+
+private _hintLine = [_display, "EINV_StructuredText", _layer, [_cardX + _padX, _hintTop, _width - _padX * 2, _rowH * 1.6]] call FUNC(uiCreate);
+
+_hintLine ctrlEnable false;
+_hintLine setVariable [QGVAR(hintSize), _small * 0.9];
+uiNamespace setVariable [QGVAR(menuHint), _hintLine];
+
+// The panel made again after a click: the tip shown before stays.
+[_hintLine, uiNamespace getVariable [QGVAR(menuHintText), ""]] call FUNC(setMenuHint);
+
 // The focus into the layer, so it is drawn over everything: a button no one sees, one pixel in the card's
 // padding. Return and Space press nothing on it (fnc_openMenu).
 private _focus = [_display, "EINV_Hitbox", _layer, [_cardX + _padX / 2, _cardY + _padY / 2, pixelW, pixelH]] call FUNC(uiCreate);
 ctrlSetFocus _focus;
+
+// Kept, so the frame can give the focus back should it leave the layer (fnc_onFrame): without it the layer sinks under the columns,
+// which then take the clicks meant for the panel.
+uiNamespace setVariable [QGVAR(menuFocus), [_layer, _focus]];
 
 uiNamespace setVariable [QGVAR(menu), [_layer]];
 uiNamespace setVariable [QGVAR(menuFocusBack), _back];

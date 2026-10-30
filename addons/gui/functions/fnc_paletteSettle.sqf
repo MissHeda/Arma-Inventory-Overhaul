@@ -24,8 +24,9 @@
 
 uiNamespace setVariable [QGVAR(paletteTyping), []];
 
-// The Import or Export line closes with the popover.
+// The Import or Export line closes with the popover, and its hint line forgets the last tip.
 uiNamespace setVariable [QGVAR(paletteIO), ""];
+uiNamespace setVariable [QGVAR(menuHintText), ""];
 
 if (GVAR(paletteDirty)) then {
     GVAR(paletteDirty) = false;

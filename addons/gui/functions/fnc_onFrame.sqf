@@ -452,12 +452,24 @@ if (_check || {_mouse isNotEqualTo GVAR(lastMouse)}) then {
 private _tip = uiNamespace getVariable [QGVAR(tipShown), controlNull];
 private _tipUp = !isNull _tip && {ctrlShown _tip};
 
-// A menu or the colour popover made again (a click in it, a tick) lies over a tip that was showing, with the mouse standing still:
-// the tip is made again over it (fnc_raiseTooltip does nothing while it is the last made).
-if (_tipUp && {GVAR(menuState) isNotEqualTo []} && {[] call FUNC(raiseTooltip)}) then {
-    _tip = uiNamespace getVariable [QGVAR(tipShown), controlNull];
-    _tipUp = !isNull _tip && {ctrlShown _tip};
-    GVAR(tooltipAt) = [];
+// An open menu or the colour popover is drawn over everything only while a control in it holds the focus (fnc_openMenu,
+// fnc_openPaletteMenu). Should the focus go elsewhere - a deleted control's, a click that reached the window under it -, the layer
+// sinks under the columns and they take every click meant for it: the focus goes back to the layer.
+(uiNamespace getVariable [QGVAR(menuFocus), []]) params [["_menuLayer", controlNull], ["_menuFocus", controlNull]];
+
+if (GVAR(menuState) isNotEqualTo [] && {!isNull _menuLayer} && {!isNull _menuFocus}) then {
+    private _focused = focusedCtrl _display;
+    private _inLayer = false;
+
+    while {!isNull _focused} do {
+        if (_focused isEqualTo _menuLayer) exitWith {_inLayer = true};
+
+        _focused = ctrlParentControlsGroup _focused;
+    };
+
+    if (!_inLayer) then {
+        ctrlSetFocus _menuFocus;
+    };
 };
 
 if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {

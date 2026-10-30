@@ -57,6 +57,8 @@ private _trash = uiNamespace getVariable [QGVAR(windowTrash), []];
 uiNamespace setVariable [QGVAR(windowTrash), _trash];
 uiNamespace setVariable [QGVAR(menu), []];
 uiNamespace setVariable [QGVAR(menuRect), []];
+uiNamespace setVariable [QGVAR(menuFocus), []];
+uiNamespace setVariable [QGVAR(menuHint), controlNull];
 GVAR(menuState) = [];
 
 if (_hadFocus) then {

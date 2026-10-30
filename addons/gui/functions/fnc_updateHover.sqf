@@ -520,6 +520,28 @@ if (!isNull _tooltip) then {
         };
     };
 
+    // A tip of a control in the colour popover goes onto the popover's own hint line, never floating over it: the popover holds the
+    // focus and is drawn over everything, a floating tip included. The line keeps the last tip until another is pointed at.
+    private _menuHint = uiNamespace getVariable [QGVAR(menuHint), controlNull];
+
+    if (!isNull _menuHint && {_ownTip isNotEqualTo ""}) then {
+        private _menuLayer = (uiNamespace getVariable [QGVAR(menuFocus), []]) param [0, controlNull];
+        private _inMenu = false;
+        private _up = _tipNow;
+
+        while {!isNull _up} do {
+            if (_up isEqualTo _menuLayer) exitWith {_inMenu = true};
+
+            _up = ctrlParentControlsGroup _up;
+        };
+
+        if (_inMenu) then {
+            uiNamespace setVariable [QGVAR(menuHintText), _ownTip];
+            [_menuHint, _ownTip] call FUNC(setMenuHint);
+            _ownTip = "";
+        };
+    };
+
     // No item there: the control's own tip, on one line.
     if (_name isEqualTo "" && {_ownTip isNotEqualTo ""}) then {
         _name = (_ownTip splitString toString [10]) joinString " ";

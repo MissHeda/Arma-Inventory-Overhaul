@@ -682,6 +682,15 @@
         <Key ID="STR_einv_gui_Palette_Secondary_Tip">
             <English>Tints the caption tabs, chips, buttons, what lights under the mouse, bar tracks and picked rows.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Section_Colours">
+            <English>Colours</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Section_Surfaces">
+            <English>Surfaces</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Section_Text">
+            <English>Text and gradient</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Start">
             <English>Start</English>
         </Key>
