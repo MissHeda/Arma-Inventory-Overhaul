@@ -179,6 +179,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- The colour and sound buttons in the header keep their gradient (Buttons and chips) when their popover opens or closes or the volumes change - they turned flat.
 - ACE cargo cards: Open and Unload have their icon and words centred.
 - The page bar's arrows have a light film of their own (they were the secondary colour on a bar of the secondary colour - red on red) and the bar runs in the gradient with Buttons and chips.
 - The name at the mouse is made again over whatever a click drew after it (a page turned, a crate opened) - it lay behind them.
