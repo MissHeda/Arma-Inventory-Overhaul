@@ -180,7 +180,7 @@ private _fnc_button = {
                 [_state get "unloadTip"] call EFUNC(gui,flashHint);
             };
         },
-        false, _lineSize
+        false, _lineSize, true
     ] call EFUNC(gui,uiButton);
 
     if (!_enabled) then {

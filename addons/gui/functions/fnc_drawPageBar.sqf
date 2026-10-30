@@ -181,10 +181,14 @@ private _buttonRadius = (_theme getOrDefault ["radius", 0]) min (_buttonH * 0.35
 // round at the bottom corners, which are the panel's.
 private _panelRadius = (_theme getOrDefault ["radius", 0]) min (_pad * 3 * pixelH);
 
-_controls append ([
-    _display, _parent, [_left - _padW, _barTop, _barW + _padW * 2, _barH], _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]],
-    [_panelRadius / pixelH, [false, false, true, true]]
-] call FUNC(uiSurface));
+private _barRect = [_left - _padW, _barTop, _barW + _padW * 2, _barH];
+private _barColor = _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]];
+private _barSurface = [_display, _parent, _barRect, _barColor, [_panelRadius / pixelH, [false, false, true, true]]] call FUNC(uiSurface);
+
+_controls append _barSurface;
+
+// In the gradient where the colour panel runs the buttons and chips in it (GRADIENT_CHIPS), as the caption chips above.
+_controls append ([_display, _parent, _barRect, GRADIENT_CHIPS, +_barSurface, _barColor param [3, 1], _panelRadius] call FUNC(gradientSurface));
 
 // The words, in the middle of the bar between the two buttons.
 private _labelW = _barW - (_buttonW + SQUARE(_inset)) * 2 - SQUARE(_barH * 0.3);
@@ -241,8 +245,10 @@ private _iconH = _buttonH * 0.6;
 // The hit area of an arrow: its button and two pixels on every side (the rule of fnc_uiButton).
 private _hitX = pixelW * 2;
 private _hitY = pixelH * 2;
-private _buttonColor = _theme getOrDefault ["button", [1, 1, 1, 0.07]];
-private _hoverColor = _theme getOrDefault ["buttonHover", [1, 1, 1, 0.16]];
+// A light film of their own, not the theme's buttons: those take the secondary colour, as the bar does, and a red button on a red
+// bar did not show.
+private _buttonColor = [1, 1, 1, 0.1];
+private _hoverColor = [1, 1, 1, 0.2];
 private _hits = [];
 
 // Each arrow: [step, where its button stands, whether it can turn, the tooltip, the search's mark, where the drag's zone starts].

@@ -593,10 +593,10 @@ if (!isNull _tooltip) then {
 
     // The ring made above, or a turned picture (fnc_turnPicture, made on the display), lies over the name just set:
     // the name is made again over it.
-    // A tip of the colour popover or a menu lies under them unless made again over them.
-    if (_ringMade || {_ownTip isNotEqualTo ""} || {(uiNamespace getVariable [QGVAR(turnedPictures), []]) isNotEqualTo []}) then {
-        [] call FUNC(raiseTooltip);
-    };
+    // A tip of the colour popover or a menu lies under them unless made again over them - and so does the name after a click
+    // that drew controls again (a page turned, a crate opened): it was made before them. fnc_raiseTooltip does nothing where the
+    // name is the last control made.
+    [] call FUNC(raiseTooltip);
 };
 
 // A hotbar slot's binding being dragged writes its own hint (fnc_updateStripDrag).

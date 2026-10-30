@@ -24,20 +24,13 @@
  */
 
 [
-    // The window as it ships (PALETTE_DEFAULT): a red accent, deep red films behind the buttons and on the Unsearched box, the
-    // titles running from the accent into white.
-    ["aio", LLSTRING(Style_Aio), PALETTE_DEFAULT],
+    // The window as it ships (PALETTE_DEFAULT): Arma 3's own menus - near-black glass, white text, an amber highlight.
+    ["arma", LLSTRING(Style_Arma), PALETTE_DEFAULT],
 
-    // The look before AIO's red: the player's own Arma colour, plain films, the titles running from the accent into white.
-    ["classic", LLSTRING(Style_Classic), [[], [], -1, [], [], [], [], [], -1, -1, [0, 0, 1], ""]],
+    // The player's own Arma colour on the plain films.
+    ["classic", LLSTRING(Style_Classic), [[], [], -1, [], [], [], [], [], -1, -1, [], ""]],
 
-    // Arma 3's own menus: near-black glass, white text, an amber highlight.
-    ["arma", LLSTRING(Style_Arma), [
-        [0.11, 0.85, 0.95], [0, 0, 0.75], 0.9, [0, 0, 0.07],
-        [0, 0, 0.13], [], [], [0, 0, 0.4], -1, 1, [0.11, 0.25, 1], ""
-    ]],
-
-    // Apex: Tanoa's jungle, a deep teal with a jade highlight.
+    // Apex: Tanoa's jungle, a deep teal with a jade highlight - its titles and a few parts running into a lighter jade.
     ["apex", LLSTRING(Style_Apex), [
         [0.45, 0.7, 0.85], [0.42, 0.35, 0.75], 0.92, [0.47, 0.55, 0.07],
         [0.47, 0.4, 0.12], [], [], [0.45, 0.45, 0.6], -1, 1, [0.3, 0.6, 0.95], "",
@@ -47,41 +40,37 @@
     // Contact: Livonia's cold forest, blue-grey with an icy highlight.
     ["contact", LLSTRING(Style_Contact), [
         [0.55, 0.4, 1], [0.58, 0.15, 0.8], 0.92, [0.6, 0.3, 0.07],
-        [0.6, 0.22, 0.12], [], [], [0.56, 0.3, 0.65], -1, 1, [0.7, 0.25, 1], ""
+        [0.6, 0.22, 0.12], [], [], [0.56, 0.3, 0.65], -1, 1, [], ""
     ]],
 
     // Tanks: desert dust and steel.
     ["tanks", LLSTRING(Style_Tanks), [
         [0.09, 0.6, 0.85], [0.08, 0.25, 0.75], 0.93, [0.08, 0.35, 0.07],
-        [0.08, 0.25, 0.12], [], [], [0.08, 0.35, 0.6], -1, 1, [0.06, 0.7, 0.95], ""
+        [0.08, 0.25, 0.12], [], [], [0.08, 0.35, 0.6], -1, 1, [], ""
     ]],
 
     // Jets: a cockpit at night, steel blue with an amber read-out.
     ["jets", LLSTRING(Style_Jets), [
         [0.13, 0.8, 1], [0.6, 0.25, 0.8], 0.92, [0.6, 0.35, 0.06],
-        [0.6, 0.25, 0.11], [], [], [0.6, 0.35, 0.55], -1, 1, [0.55, 0.5, 1], "",
-        [], [], -1, -1, -1, 136479, [[10, [0.13, 0.85, 1], [0.16, 0.4, 1]], [8, [0.13, 0.85, 1], [0.1, 0.6, 1]], [17, [0.13, 0.85, 1], [0.1, 0.6, 1]]]
+        [0.6, 0.25, 0.11], [], [], [0.6, 0.35, 0.55], -1, 1, [], ""
     ]],
 
     // Laws of War: charcoal, and red as the only colour.
     ["lawsOfWar", LLSTRING(Style_LawsOfWar), [
         [0, 0.78, 0.88], [0, 0, 0.7], 0.95, [0, 0, 0.06],
-        [0, 0, 0.11], [], [], [0, 0.4, 0.55], -1, 1, [0.95, 0.45, 1], "",
-        [], [], -1, -1, -1, 4639, [[9, [0, 0.8, 1], [0.05, 0.5, 1]]]
+        [0, 0, 0.11], [], [], [0, 0.4, 0.55], -1, 1, [], ""
     ]],
 
     // Olive and sand, as gear and maps are - dark.
     ["tactical", LLSTRING(Style_Tactical), [
         [0.12, 0.5, 0.85], [0.18, 0.3, 0.7], 0.94, [0.19, 0.4, 0.07],
-        [0.19, 0.3, 0.12], [], [0.14, 0.12, 1], [0.16, 0.35, 0.55], -1, 1, [0.12, 0.35, 1], "",
-        [], [], -1, -1, -1, 4191, [[6, [0.12, 0.4, 1], [0.2, 0.35, 0.85]]]
+        [0.19, 0.3, 0.12], [], [0.14, 0.12, 1], [0.16, 0.35, 0.55], -1, 1, [], ""
     ]],
 
     // Night vision: black, its green the only light.
     ["stealth", LLSTRING(Style_Stealth), [
         [0.33, 0.75, 0.85], [0.33, 0.35, 0.6], 0.96, [0.33, 0.3, 0.04],
-        [0.33, 0.25, 0.09], [], [], [0.33, 0.5, 0.45], -1, 1, [0.45, 0.6, 1], "",
-        [], [], -1, -1, -1, 136479, [[8, [0.33, 0.8, 0.9], [0.25, 0.4, 1]], [10, [0.33, 0.8, 0.9], [0.25, 0.4, 1]], [17, [0.33, 0.8, 0.9], [0.25, 0.4, 1]]]
+        [0.33, 0.25, 0.09], [], [], [0.33, 0.5, 0.45], -1, 1, [], ""
     ]],
 
     // Dark blue glass.
@@ -90,10 +79,9 @@
         [0.63, 0.35, 0.13], [], [], [0.6, 0.45, 0.65], -1, 1, [], ""
     ]],
 
-    // The same, its titles running from blue into violet.
+    // The same, its titles running from blue into violet - the titles only.
     ["modernGradient", LLSTRING(Style_ModernGradient), [
         [0.6, 0.7, 1], [0.7, 0.3, 0.9], 0.9, [0.67, 0.45, 0.08],
-        [0.67, 0.35, 0.13], [], [], [0.7, 0.45, 0.65], -1, 1, [0.8, 0.6, 1], "",
-        [], [], -1, -1, -1, 135263, [[6, [0.55, 0.7, 1], [0.5, 0.4, 1]], [17, [0.75, 0.5, 1], [0.85, 0.4, 1]]]
+        [0.67, 0.35, 0.13], [], [], [0.7, 0.45, 0.65], -1, 1, [0.8, 0.6, 1], ""
     ]]
 ]

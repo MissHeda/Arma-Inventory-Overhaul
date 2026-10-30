@@ -1203,14 +1203,11 @@ Off does it at once; a drag never waits.</English>
         <Key ID="STR_einv_gui_Storage_Empty">
             <English>No uniform, vest or backpack</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_Aio">
-            <English>AIO (default)</English>
-        </Key>
         <Key ID="STR_einv_gui_Style_Apex">
             <English>Apex</English>
         </Key>
         <Key ID="STR_einv_gui_Style_Arma">
-            <English>Arma 3</English>
+            <English>Arma 3 (default)</English>
         </Key>
         <Key ID="STR_einv_gui_Style_Classic">
             <English>Classic</English>

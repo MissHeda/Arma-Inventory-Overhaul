@@ -299,7 +299,7 @@ private _trackW = _sliderW - _thumbW;
 
 // The right edge of the window - the header's, where the Close button ends - and a small gap under the header's line, kept on the screen.
 private _left = ((CONTENT_X + CONTENT_W - _width) min (safezoneX + safezoneW - _width)) max safezoneX;
-private _top = ((HEAD_Y + HEAD_H + UNIT * 0.5) max (safezoneY + UNIT * 2.6 + pixelH * 3)) min (safezoneY + safezoneH - _height);
+private _top = (((HEAD_Y + HEAD_H + UNIT * 0.5) max (safezoneY + UNIT * 2.6 + pixelH * 3)) min (safezoneY + safezoneH - _height)) max safezoneY;
 private _cardX = _left - safezoneX;
 private _cardY = _top - safezoneY;
 
@@ -626,7 +626,7 @@ if (_io isNotEqualTo "") then {
 ] call FUNC(uiLabel);
 
 // The window as it ships (PALETTE_DEFAULT) is the AIO style, whichever way it came to be.
-private _styleName = [LLSTRING(Style_Custom), LLSTRING(Style_Aio)] select (GVAR(palette) isEqualTo PALETTE_DEFAULT);
+private _styleName = [LLSTRING(Style_Custom), LLSTRING(Style_Arma)] select (GVAR(palette) isEqualTo PALETTE_DEFAULT);
 
 {
     if ((_x select 0) isEqualTo (_info get "style")) exitWith {_styleName = _x select 1};
@@ -649,6 +649,11 @@ private _drop = [
 
             uiNamespace setVariable [QGVAR(paletteStylesOpen), !(uiNamespace getVariable [QGVAR(paletteStylesOpen), false])];
 
+            // One thing open at a time: the style list and an open row together ran the card off the top of the screen.
+            if (uiNamespace getVariable [QGVAR(paletteStylesOpen), false]) then {
+                uiNamespace setVariable [QGVAR(paletteOpen), ""];
+            };
+
             [_display] call FUNC(openPaletteMenu);
         }] call FUNC(later);
     }, false, _chipSize
@@ -664,7 +669,7 @@ if (_stylesOpen) then {
     {
         _x params ["_styleId", "_name", "_values"];
 
-        private _current = _styleId isEqualTo (_info get "style") || {_styleId isEqualTo "aio" && {GVAR(palette) isEqualTo PALETTE_DEFAULT}};
+        private _current = _styleId isEqualTo (_info get "style") || {_styleId isEqualTo "arma" && {GVAR(palette) isEqualTo PALETTE_DEFAULT}};
         private _rowTop = _y;
 
         // Flush with the popover's left edge (its title, the rows' arrows): no indent of its own.
@@ -783,6 +788,7 @@ private _sliders = createHashMap;
             if (isNull _display) exitWith {};
 
             uiNamespace setVariable [QGVAR(paletteOpen), [_id, ""] select (_id isEqualTo (uiNamespace getVariable [QGVAR(paletteOpen), ""]))];
+            uiNamespace setVariable [QGVAR(paletteStylesOpen), false];
             uiNamespace setVariable [QGVAR(paletteEnd), false];
 
             [_display] call FUNC(openPaletteMenu);
