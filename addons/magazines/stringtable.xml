@@ -32,7 +32,7 @@
             <English>Repack magazines</English>
         </Key>
         <Key ID="STR_einv_magazines_Setting_Repack_Desc">
-            <English>Drop a partly filled magazine onto another of the same kind to repack them with ACE's Magazine Repack.\nOff: no repacking in the window; ACE's own Repack Magazines shows in the menu instead.</English>
+            <English>Drop a magazine onto another of its kind to repack them.\nOff: use ACE's Repack Magazines.</English>
         </Key>
     </Package>
 </Project>

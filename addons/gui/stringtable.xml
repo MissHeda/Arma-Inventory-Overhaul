@@ -545,7 +545,7 @@
             <English>Panels</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Panels_Tip">
-            <English>The window's background: the panels behind the columns, the header and the footer, and the inspect card and kit windows - and how see-through they are. Kept dark enough for the text to stay readable.</English>
+            <English>The window's background and how see-through it is. Kept dark so text stays readable.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_PartColour">
             <English>Colour</English>
@@ -809,7 +809,7 @@
             <English>Tile scale</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CellScale_Desc">
-            <English>Size of cells, pictures and window text; above 1 if items are hard to make out (default 1.1).\nTakes effect when the inventory next opens; the largest scale that fits the screen is used.</English>
+            <English>Size of cells, pictures and text (default 1.1).\nApplies on the next opening.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_CompareTooltip">
             <English>Compare gear at the mouse</English>
@@ -834,8 +834,7 @@
             <English>Time to put on or take off</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandEquip_Desc">
-            <English>Seconds the hands are busy putting one item on or taking it off, for what the switches below let wait.
-0 does it at once; a drag never waits.</English>
+            <English>Seconds the hands need to put an item on or take it off.\n0 is instant; dragging never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_HandMove">
             <English>Time to move to another container</English>
@@ -848,8 +847,7 @@
             <English>Where other storage opens</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_LootSide_Desc">
-            <English>Where the column of what you loot opens. Left of my storage: beside it, in the middle of the window.
-Right of my storage: at the right edge, and your storage moves aside.</English>
+            <English>Where the loot column opens: beside your storage,\nor at the right edge with your storage moving aside.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_LootSide_Left">
             <English>Left of my storage - my storage stays put</English>
@@ -861,13 +859,13 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
             <English>Fill bar on magazines</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MagazineFillBar_Desc">
-            <English>A thin bar along the bottom of every magazine that is not full, on its tile and on a weapon's magazine slot.\nThe rounds as words have their own switch.</English>
+            <English>A thin fill bar on magazines that are not full.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MagazineText">
             <English>Rounds on magazines</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MagazineText_Desc">
-            <English>The rounds left in a magazine as words ("17/30") in a corner of its tile; a weapon's slot keeps them.\nOff: the fill bar alone shows how full it is.</English>
+            <English>Rounds left as text ("17/30") on magazine tiles.\nOff: the fill bar alone.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_MoveToStop">
             <English>Moving stops looting</English>
@@ -879,14 +877,13 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
             <English>Rows per page of a container</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PageRows_Desc">
-            <English>Rows of a tall crate or vehicle shown at a time; taller ones get pages (4 to 39, 10 by default).
-0 or 40 shows the whole container. Only for what you loot, not your own gear.</English>
+            <English>Rows shown at a time for tall crates and vehicles (default 10).\n0 or 40 shows everything. Loot only.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PaletteText">
             <English>Colours (text)</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PaletteText_Desc">
-            <English>Your colours from the colour panel as text.\nCopy it to share your look, or paste\nsomeone else's to wear theirs.\n\nA server or mission that forces it\ngives everyone these colours, and the\ncolour button goes.</English>
+            <English>Your colours as text. Copy to share,\npaste to wear someone else's.\nForced by the server: everyone gets them.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonItems">
             <English>Take and put items</English>
@@ -898,25 +895,25 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
             <English>Tell the searched player</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonNotify_Desc">
-            <English>A player whose gear is opened is told who goes through it; with a backpack on, nearby players hear ACE's zipper.\nOff: only ACE's own backpack interaction still zips.</English>
+            <English>Tell a player who goes through their gear;\nnearby players hear ACE's zipper.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonOpen">
             <English>Open the whole person</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonOpen_Desc">
-            <English>Whose uniform, vest and backpack open with "Inventory" while alive; others open only by the backpack.\nCaptives are surrendered or handcuffed (ACE); the unconscious always open whole.</English>
+            <English>Whose gear opens fully while alive; others only by the backpack.\nUnconscious players always open fully.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonWorn">
             <English>Take off worn gear</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PersonWorn_Desc">
-            <English>Who may take off what a living person wears (weapons, helmet, uniform, vest, backpack and the rest).\nCaptives are surrendered or handcuffed (ACE). Bodies can always be stripped.</English>
+            <English>Who may take off what a living person wears.\nBodies can always be stripped.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PlayerColours">
             <English>Players may pick their colours</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_PlayerColours_Desc">
-            <English>The header gets a palette button: accent, secondary colour, panel colour, transparency.\nOff: everyone sees their Arma colour and the standard look.</English>
+            <English>Players get the colour panel in the header.\nOff: everyone sees the default look.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchBodies">
             <English>Search bodies</English>
@@ -928,7 +925,7 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
             <English>Search crates and vehicles</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchContainers_Desc">
-            <English>What a crate or a vehicle holds stays a sealed "Unsearched" box until it has been searched.\nSingle objects can be skipped: Eden "Skip searching", Zeus right click, or [_box, false] call einv_gui_fnc_setSearchable;</English>
+            <English>Crates and vehicles stay "Unsearched" until searched.\nSkip one in Eden or with Zeus.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchGround">
             <English>Search the ground</English>
@@ -961,7 +958,7 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
             <English>Search time: bodies</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTimeBody_Desc">
-            <English>Times the time of a body's uniform, vest and backpack on top of their own factor, also once dropped.\n1 the same, 2 twice as long, 0 shows what a body carries at once.</English>
+            <English>Search time factor for bodies (1 normal, 2 double, 0 instant).</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTimeCrate">
             <English>Search time: crates</English>
@@ -979,13 +976,13 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
             <English>Search time: uniforms</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTimeUniform_Desc">
-            <English>Times the search time per cell for a uniform's pockets, worn or lying anywhere: 1 the same, 2 twice as long.\n0 shows a uniform's contents at once.</English>
+            <English>Search time factor for uniforms (1 normal, 2 double, 0 instant).</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTimeVehicle">
             <English>Search time: vehicles</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTimeVehicle_Desc">
-            <English>Times the search time per cell for a vehicle's cargo, also while you sit in it: 1 the same, 2 twice as long.\n0 shows a vehicle's cargo at once.</English>
+            <English>Search time factor for vehicles (1 normal, 2 double, 0 instant).</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTimeVest">
             <English>Search time: vests</English>
@@ -994,7 +991,7 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
             <English>Times the search time per cell for a vest, worn or lying anywhere: 1 the same, 2 twice as long.\n0 shows a vest's contents at once.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchTime_Desc">
-            <English>Seconds it takes to search one grid cell of loot; a 2x2 item takes four times as long.\n0 shows everything at once. Each kind of box below can take longer or shorter.</English>
+            <English>Seconds to search one cell of loot; bigger items take longer.\n0 shows everything at once.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SearchZeus">
             <English>Search Zeus-placed crates and vehicles</English>
@@ -1006,19 +1003,19 @@ Right of my storage: at the right edge, and your storage moves aside.</English>
             <English>Show everything nearby</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_ShowNearby_Desc">
-            <English>Shows every pile on the ground and crate within reach as a box in the loot column, nearest first.\nOff: only what you opened shows, as in the vanilla inventory.</English>
+            <English>Show piles and crates within reach in the loot column.\nOff: only what you opened.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SoundsWorld">
             <English>Others hear looting</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_SoundsWorld_Desc">
-            <English>Players nearby hear someone loot (searching, a rifle taken, a backpack dropped, a reload), up to 10 to 20 m.\nOff: only the looter hears anything.</English>
+            <English>Players nearby hear looting (10 to 20 m).\nOff: only the looter hears it.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_TileNames">
             <English>Item names on tiles</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_TileNames_Desc">
-            <English>The item's short name in the top right corner of every tile; the Arsenal's panel follows.\nOff: the picture alone, the name still shows at the mouse.</English>
+            <English>Short item names on tiles.\nOff: picture only, the name shows on hover.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitDrop">
             <English>Dropping waits</English>
@@ -1031,8 +1028,7 @@ Off drops at once; a drag never waits.</English>
             <English>Equipping other items waits</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitEquip_Desc">
-            <English>Whether putting on and taking off other items (goggles, night vision, binoculars, weapon parts) takes the hands' time.
-Off does it at once; a drag never waits.</English>
+            <English>Goggles, NVGs, binoculars and weapon parts take the hands' time too.\nOff: instant.</English>
         </Key>
         <Key ID="STR_einv_gui_Setting_WaitMove">
             <English>Quick move waits</English>

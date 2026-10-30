@@ -24,22 +24,19 @@ At least 1 kg above Overloaded.</English>
             <English>Overload slows soldiers</English>
         </Key>
         <Key ID="STR_einv_weight_Setting_Effects_Desc">
-            <English>Overloaded: no sprinting, tiring faster up to 1.5x toward Critical. Critical: walking only.
-Off: the bar still shows the tiers, nothing happens to the soldier.</English>
+            <English>Overloaded: no sprinting, tire faster. Critical: walk only.\nOff: the bar only shows it.</English>
         </Key>
         <Key ID="STR_einv_weight_Setting_Enabled">
             <English>Weight tiers</English>
         </Key>
         <Key ID="STR_einv_weight_Setting_Enabled_Desc">
-            <English>Heavy, Overloaded and Critical tiers: bar colours, effects and messages.
-Off: only the kilograms show, nothing slows soldiers down, other weight settings do nothing.</English>
+            <English>Weight tiers with colours, effects and messages.\nOff: only the kilograms show.</English>
         </Key>
         <Key ID="STR_einv_weight_Setting_HeavyAt">
             <English>Heavy from (kg)</English>
         </Key>
         <Key ID="STR_einv_weight_Setting_HeavyAt_Desc">
-            <English>Where the bar turns yellow. 0 follows ACE Advanced Fatigue (where jogging starts to tire).
-Any other value is a fixed weight, never later than Overloaded.</English>
+            <English>Weight where the bar turns yellow.\n0 follows ACE Advanced Fatigue.</English>
         </Key>
         <Key ID="STR_einv_weight_Setting_Notify">
             <English>Tell me when my load changes tier</English>

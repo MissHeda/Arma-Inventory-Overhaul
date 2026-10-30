@@ -132,7 +132,7 @@ An item in several categories takes the first one's that has a colour.</English>
             <English>Delete</English>
         </Key>
         <Key ID="STR_einv_setup_Categories_Help">
-            <English>Categories sort items for the loot box strip and for what a compartment accepts. The eight built-in ones can be renamed or given another picture; deleting one removes it everywhere. Each category can give its items' tiles a colour: type it in the row, or select several rows and colour them at once.</English>
+            <English>Categories sort items for the loot strip and compartments. Rename, pick a picture or a tile colour; select rows to colour several at once.</English>
         </Key>
         <Key ID="STR_einv_setup_Categories_MassApply">
             <English>Colour selected</English>
@@ -276,7 +276,7 @@ An item in several categories takes the first one's that has a colour.</English>
             <English>Imported config lines for %1 classes (%3 warnings); %2 classes this game does not have were left out. Save puts them to use.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_Help">
-            <English>Paste config lines, a layout or rules with Ctrl+V. A layout goes to the class selected in the editor. They go into the draft; Undo takes them back.</English>
+            <English>Paste config lines, a layout or rules with Ctrl+V. Undo takes them back.</English>
         </Key>
         <Key ID="STR_einv_setup_ClassImport_Layout">
             <English>Applied the layout to %1 (%2 warnings). Save puts it to use.</English>
@@ -402,7 +402,7 @@ An item in several categories takes the first one's that has a colour.</English>
             <English>Paint every empty place in the brush colour.</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_Help">
-            <English>Pick a container on the left and draw its cells on the right. Apply keeps the change, Save puts it to use. The search takes wildcards (B_Bergen*).</English>
+            <English>Pick a container, draw its cells. Apply keeps it, Save uses it. Search takes wildcards (B_Bergen*).</English>
         </Key>
         <Key ID="STR_einv_setup_Cont_KitCellsNote">
             <English>Its own cells are all its room; the kit's capacity no longer counts. Back to the default restores it.</English>
@@ -501,7 +501,7 @@ An item in several categories takes the first one's that has a colour.</English>
             <English>Not applied yet. Apply keeps it.</English>
         </Key>
         <Key ID="STR_einv_setup_Containers_Help">
-            <English>Cells per kind of container: Auto from the container's load (explained below), Fixed the same for all. A class rule or a mod's own setting always wins.</English>
+            <English>Cells per container kind: Auto from its load, or Fixed. Class rules always win.</English>
         </Key>
         <Key ID="STR_einv_setup_Containers_Title">
             <English>Containers</English>
@@ -771,7 +771,7 @@ An item in several categories takes the first one's that has a colour.</English>
             <English>Imported %1 rules, %2 settings and %3 warnings.</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Help">
-            <English>Paste a shared setup here with Ctrl+V: rules, or lines from a cba_settings.sqf or CBA's Export. Rules and server settings in it are both read.</English>
+            <English>Paste a shared setup with Ctrl+V: rules or cba_settings lines.</English>
         </Key>
         <Key ID="STR_einv_setup_Import_Nothing">
             <English>Nothing to import: no rules or settings found.</English>
@@ -813,7 +813,7 @@ An item in several categories takes the first one's that has a colour.</English>
             <English>Weapons, uniforms, vests and backpacks never share a tile.</English>
         </Key>
         <Key ID="STR_einv_setup_Items_Help">
-            <English>Pick an item on the left, draw its cells and set how many share a tile. Apply keeps the change, Save puts it to use. The search takes wildcards (B_Bergen*).</English>
+            <English>Pick an item, draw its cells, set its stack. Apply keeps it, Save uses it. Search takes wildcards (B_Bergen*).</English>
         </Key>
         <Key ID="STR_einv_setup_Items_NameField">
             <English>Name</English>

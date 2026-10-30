@@ -44,7 +44,7 @@
             <English>Container sizes</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_ContainerTable_Desc">
-            <English>Cells per container class as class:size, comma-separated. Beats the rules text and the config.\nSize: a cell count or WxH compartments joined with +. Example: B_Carryall_cbr:6x4+2x3, V_PlateCarrier1_rgr:20</English>
+            <English>Cells per container as class:size, comma-separated.\nExample: B_Carryall_cbr:6x4+2x3</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_Migrate">
             <English>Move overfull items on</English>
@@ -56,7 +56,7 @@
             <English>Reach</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_NearbyRange_Desc">
-            <English>Distance in metres within which piles and crates show in the loot column and can be changed.\nOnly what the player can see counts; vehicles and bodies show when opened.</English>
+            <English>Metres within which piles and crates show in the loot column.</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_StackMultiplier">
             <English>Stack multiplier for crates and vehicles</English>
@@ -68,19 +68,19 @@
             <English>Use items from the backpack</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_UseBackpack_Desc">
-            <English>Items usable from the backpack: Everything, Only whitelisted (set in the wizard) or Nothing.\nStrict also hides blocked items from other mods - it can break them, use only if needed.</English>
+            <English>What can be used from the backpack.\nStrict also hides it from other mods - use only if needed.</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_UseUniform">
             <English>Use items from the uniform</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_UseUniform_Desc">
-            <English>Items usable from the uniform: Everything, Only whitelisted (set in the wizard) or Nothing.\nStrict also hides blocked items from other mods - it can break them, use only if needed.</English>
+            <English>What can be used from the uniform.\nStrict also hides it from other mods - use only if needed.</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_UseVest">
             <English>Use items from the vest</English>
         </Key>
         <Key ID="STR_einv_storage_Setting_UseVest_Desc">
-            <English>Items usable from the vest: Everything, Only whitelisted (set in the wizard) or Nothing.\nStrict also hides blocked items from other mods - it can break them, use only if needed.</English>
+            <English>What can be used from the vest.\nStrict also hides it from other mods - use only if needed.</English>
         </Key>
         <Key ID="STR_einv_storage_SubCategory_Containers">
             <English>Containers</English>

@@ -92,7 +92,7 @@
             <English>Not allowed</English>
         </Key>
         <Key ID="STR_einv_arsenal_Setting_BIArsenal_Desc">
-            <English>What opening the vanilla Virtual Arsenal (box, script) does; Zeus is never stopped.\nOpen ACE Arsenal: with grids. Not allowed: red screen. Leave it alone: vanilla, no grids.</English>
+            <English>What the vanilla Virtual Arsenal does: open ACE Arsenal with grids,\nblock it, or leave it vanilla. Zeus is never stopped.</English>
         </Key>
         <Key ID="STR_einv_arsenal_Setting_BIArsenal_Vanilla">
             <English>Leave it alone</English>

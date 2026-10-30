@@ -119,31 +119,31 @@
             <English>Load per cell</English>
         </Key>
         <Key ID="STR_einv_items_Setting_MassPerCell_Desc">
-            <English>Load one grid cell stands for; a container gets its maximum load divided by this.\nLower = bigger grids (5: a backpack holding 280 gets 56 cells). cell= in the rules wins.</English>
+            <English>Load per grid cell. Lower means bigger grids.\ncell= in the rules wins.</English>
         </Key>
         <Key ID="STR_einv_items_Setting_Rules">
             <English>Inventory rules</English>
         </Key>
         <Key ID="STR_einv_items_Setting_Rules_Desc">
-            <English>Item sizes, stacks and compartments, one text for everyone. Empty uses the defaults.\nRules are separated by commas, later ones win. The setup wizard writes them for you.\nExample: kind=grenade &gt; stack=3, class=ACE_fieldDressing+ &gt; stack=20, @vest &gt; grid=rig</English>
+            <English>Item sizes, stacks and compartments. Empty uses the defaults.\nThe setup wizard writes this for you.</English>
         </Key>
         <Key ID="STR_einv_items_Setting_SizeTable">
             <English>Grid sizes by class</English>
         </Key>
         <Key ID="STR_einv_items_Setting_SizeTable_Desc">
-            <English>Item sizes by class as class:WxH (across x down), comma-separated. Beats the rules text.\nExample: rhsusf_100Rnd_762x51:1x3. A class also covers its child classes. Max 8 x 40.</English>
+            <English>Item sizes as class:WxH, comma-separated.\nExample: rhsusf_100Rnd_762x51:1x3</English>
         </Key>
         <Key ID="STR_einv_items_Setting_StackSmall">
             <English>Small items per tile</English>
         </Key>
         <Key ID="STR_einv_items_Setting_StackSmall_Desc">
-            <English>How many small items (weight up to 10, no magazines or weapons) share a tile.\nCounts only when moved off 10; rules, the stack table and the item's mod still win.</English>
+            <English>How many small items share a tile (default 10).</English>
         </Key>
         <Key ID="STR_einv_items_Setting_StackTable">
             <English>Stack sizes by class</English>
         </Key>
         <Key ID="STR_einv_items_Setting_StackTable_Desc">
-            <English>Items per tile by class as class:N, comma-separated: ACE_fieldDressing:20, ACE_morphine:5\nA class also covers its child classes; 1 stops stacking. Beats the rules text.</English>
+            <English>Items per tile as class:N, comma-separated.\nExample: ACE_fieldDressing:20</English>
         </Key>
         <Key ID="STR_einv_items_SubCategory_Grids">
             <English>Grids</English>
