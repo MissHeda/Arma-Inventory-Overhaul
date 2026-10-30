@@ -767,20 +767,21 @@ if (_hasBox) then {
 // ---------------------------------------------------------------------------
 if (_sealed) then {
     // The block: as wide as a grid of STORAGE_COLS cells and SEAL_ROWS high, on the caption's surface (the loot tint where the
-    // theme has one, issue 7) with the hatching of what is not searched, a third of its corner in from the round edge.
+    // theme has one, issue 7) with the hatching of what is not searched. The hatching is square: it keeps a corner's width in from
+    // the left and right edges and runs the full height, so it starts and ends where the round corners meet the straight top and
+    // bottom - a third of the corner in from every edge left its square corners standing in the round ones.
     // "UNSEARCHED" in the middle, a ring over it that goes round while this box is searched, and one line under it that says
     // what the search does - written by fnc_updateStatus (the "seal" of the section's info), the ring turned by
     // fnc_animateStatus.
     private _sealW = STORAGE_COLS * _cellW - pixelW;
     private _sealH = SEAL_ROWS * _cellH - pixelH;
     private _sealRadius = (_theme getOrDefault ["radius", 0]) min (_sealH / 4);
-    private _inset = _sealRadius * 0.3;
     private _stripe = +_colorLine;
 
     _stripe set [3, ((_stripe select 3) * 1.8) min 0.2];
 
     [_display, _parent, [_gridX, _bodyTop, _sealW, _sealH], _tabColor, _sealRadius] call FUNC(uiPanel);
-    [_display, _parent, [_gridX + SQUARE(_inset), _bodyTop + _inset, _sealW - SQUARE(_inset) * 2, _sealH - _inset * 2], _stripe] call FUNC(uiHatch);
+    [_display, _parent, [_gridX + SQUARE(_sealRadius), _bodyTop, _sealW - SQUARE(_sealRadius) * 2, _sealH], _stripe] call FUNC(uiHatch);
 
     private _ringH = _textUnit * 0.95;
     private _wordSize = _textUnit * 0.62;

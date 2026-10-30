@@ -174,6 +174,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- The "Unsearched" box's hatching no longer shows square corners inside its round ones: it keeps a corner's width in from the left and right edges and runs the full height.
 - The name at the mouse sits centred under the pointer, a fixed gap below it, and is pushed in from a screen edge instead of jumping to the pointer's other side - near the right edge it flipped from right to left and back as names of other widths came along.
 - Colour panel: the hint line at the bottom is as tall as its longest tip wraps to - two lines cut the Titles row's tip off mid-sentence.
 - Colour panel: with a dark titles colour (a deep violet, say) the titles ran in their End colour alone instead of the gradient - dark ink was taken for a key's badge on the accent. Only keys and buttons count as that now. The titles' Start box shows the accent while the titles have no colour of their own and the gradient is on, as the gradient really starts there.
