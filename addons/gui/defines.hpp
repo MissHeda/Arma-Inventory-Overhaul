@@ -163,6 +163,7 @@
 // How long the window stays closed before the code it stepped aside for runs (fnc_stepAside): TFAR's own
 // radio menu waits as long before it opens a radio, so its dialog finds none open.
 #define STEP_ASIDE_DELAY 0.2
+#define STEP_ASIDE_WAIT 2
 
 // Moves under way (fnc_sendMoves). Nothing is shown before it happened, so without an answer after
 // PENDING_TIMEOUT seconds the window stops waiting and shows what is there ("Still waiting for an

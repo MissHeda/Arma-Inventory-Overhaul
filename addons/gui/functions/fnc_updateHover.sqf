@@ -450,10 +450,12 @@ if (!isNull _tooltip) then {
     if (_class isEqualTo "" && {!GVAR(dragging)} && {GVAR(stripDrag) isEqualTo []}) then {
         private _tipCtrl = uiNamespace getVariable [QGVAR(hoverTip), controlNull];
 
-        // As a guest (ACE Arsenal) no entering may have been reported: the last made control with a tip under the mouse,
-        // where it shows and nothing is open over it.
+        // No entering reported - the engine misses it on some buttons in the columns' groups (a section's fold tab and Sort),
+        // and as a guest on another mod's display (ACE Arsenal) on most: the last made control with a tip under the mouse, where
+        // it shows, over the columns (no kit window or inspect card there) and with no menu open.
         if (
-            isNull _tipCtrl && {_mouse isNotEqualTo []} && {(["guest", [], false] call FUNC(hook)) isEqualTo true}
+            isNull _tipCtrl && {_mouse isNotEqualTo []}
+            && {_layer isEqualTo "" || {(["guest", [], false] call FUNC(hook)) isEqualTo true}}
             && {(uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []}
         ) then {
             private _tipped = uiNamespace getVariable [QGVAR(tipCtrls), []];

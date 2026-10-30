@@ -105,7 +105,7 @@ if (_ownStart isNotEqualTo []) then {
 
 // Where the gradient cannot run, the line takes one colour of it as a plain label: a count in its little box ("5/5", "30/30") is
 // too tight for structured text, and one letter has nothing to run along - they take the start. Ink on a lit surface (a key's
-// badge, a lit button: the theme's "onAccent", or dark ink) takes the end: the start is the accent, and it would sink into it.
+// badge, a lit button: the theme's "onAccent", or dark ink) takes the end or the start, whichever reads on the accent, else its ink.
 if (_graded) then {
     private _solid = [];
 
@@ -113,8 +113,23 @@ if (_graded) then {
         private _onAccent = (_theme getOrDefault ["onAccent", []]) select [0, 3];
         private _light = (_color select 0) * 0.2126 + (_color select 1) * 0.7152 + (_color select 2) * 0.0722;
 
+        // On the lit surface the end or the start, whichever stands out from the accent (3 : 1 at least, the end first); where
+        // neither does, the ink the theme worked out for it, with no gradient at all - a key that cannot be read is no key.
         if ((_color select [0, 3]) isEqualTo _onAccent || {_light < 0.35}) then {
-            _solid = _gradient select [0, 3];
+            private _fnc_luma = {
+                params ["_rgb"];
+
+                (((_rgb select 0) max 0) ^ 2.2) * 0.2126 + (((_rgb select 1) max 0) ^ 2.2) * 0.7152 + (((_rgb select 2) max 0) ^ 2.2) * 0.0722
+            };
+
+            private _under = [(_theme getOrDefault ["accent", [1, 1, 1, 1]]) select [0, 3]] call _fnc_luma;
+            private _readable = [_gradient select [0, 3], _start select [0, 3]] select {
+                private _luma = [_x] call _fnc_luma;
+
+                ((_luma max _under) + 0.05) / ((_luma min _under) + 0.05) >= 3
+            };
+
+            _solid = _readable param [0, _color select [0, 3]];
         };
     };
 

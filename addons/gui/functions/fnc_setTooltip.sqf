@@ -35,8 +35,9 @@ if (_ctrl getVariable [QGVAR(tipHooked), false]) exitWith {};
 
 _ctrl setVariable [QGVAR(tipHooked), true];
 
-// Kept for the look by place: as a guest on another mod's display (ACE Arsenal) the engine reports the mouse entering a
-// control unreliably - the tip showed only after a click - so the hover looks for it under the mouse there (fnc_updateHover).
+// Kept for the look by place: the engine reports the mouse entering some controls unreliably - in the columns' groups, and as a
+// guest on another mod's display (ACE Arsenal) - the tip showed only after a click, so the hover looks for it under the mouse
+// (fnc_updateHover).
 private _tipped = uiNamespace getVariable [QGVAR(tipCtrls), []];
 _tipped = _tipped select {!isNull _x};
 _tipped pushBack _ctrl;

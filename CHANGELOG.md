@@ -169,6 +169,9 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- The key of the weapon in hand (its 1 on the accent) stays readable with the gradient on: it takes the gradient's end or start, whichever stands out from the accent at 3 : 1, else its own ink.
+- Tips of buttons the engine reports no mouse entering for - a section's fold tab and Sort among them - show anyway: the window looks for the button under the mouse by its place, over the columns, as in ACE Arsenal.
+- TFAR's "Open radio" waits until no dialog is open any more (up to 2 s) before it asks TFAR, which opens nothing while one is; where TFAR still refuses, the RPT says why.
 - With the gradient on, the tips of the fold tab and Sort show when the mouse rests on them again, over the column: the gradient's words took the mouse and, clicked, the focus, which drew their column over the tip. They are words only now.
 - TFAR: a right click on a radio in the backpack offers "Open radio" again even where "Use items from the backpack" is off (that setting is about using things up). The vanilla radio in the radio slot, or a radio TFAR has not made the player's own yet, gets "Open radio" too: TFAR is asked to swap it now and the radio it gives is opened.
 - In ACE Arsenal's panel the tips of its buttons (the fold arrow of Staging, ...) show when the mouse rests on them, not only after a click: there the window finds the button under the mouse by its place, as the engine reports the mouse entering it unreliably on another mod's display.
