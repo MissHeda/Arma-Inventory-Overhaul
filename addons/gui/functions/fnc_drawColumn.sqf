@@ -90,10 +90,11 @@ if (_loot) then {
 };
 
 // The hairline under the title: the theme's line in every column (an accent strip under the loot column's title looked out of
-// place). The title's words, and its icon: in the loot column's accent, else the second line's grey.
+// place). The title's words, and its icon in the second line's grey in every column - the loot column's in its accent stood out
+// against the white of the others.
 private _lineColor = _theme getOrDefault ["line", [1, 1, 1, 0.07]];
 private _titleColor = _theme getOrDefault ["text", [1, 1, 1, 1]];
-private _iconColor = [_accentColor, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] select (_accentColor isEqualTo []);
+private _iconColor = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
 
 // What a kept column can take on in place and what it cannot. The palette (fnc_palette) changes colours while the window is open, with a
 // column scrolled: the panel's colour, the hairline's and the title's words and icon are painted over the kept controls (below), so the
