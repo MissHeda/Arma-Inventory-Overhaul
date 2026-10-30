@@ -532,7 +532,24 @@ if (GVAR(menuState) isNotEqualTo []) then {
 
 // The name at the mouse - a button's tip too - over whatever a click drew since or gave the focus (a column refreshed after Sort,
 // a part drawn again): every frame, as the menu. It does nothing while it is the last control made and nothing marked it stale.
-[] call FUNC(raiseTooltip);
+// While a mouse button is held the engine draws the group pressed on over everything, whatever was made after it - the name went
+// behind the tile it belongs to. It hides for the press, as a tooltip does, and comes back fresh on the release.
+private _tipShown = uiNamespace getVariable [QGVAR(tipShown), controlNull];
+
+if (inputMouse 0 != 0 || {inputMouse 1 != 0}) then {
+    if (!isNull _tipShown && {ctrlShown _tipShown}) then {
+        _tipShown ctrlShow false;
+        GVAR(tipHeld) = true;
+    };
+} else {
+    if (GVAR(tipHeld)) then {
+        GVAR(tipHeld) = false;
+        GVAR(lastMouse) = getMousePosition;
+        [_display, GVAR(lastMouse), true] call FUNC(updateHover);
+    };
+
+    [] call FUNC(raiseTooltip);
+};
 
 // ----- Answers to the window's moves -----
 // Each finishes once this machine reads every revision of the places it names - a holder gone

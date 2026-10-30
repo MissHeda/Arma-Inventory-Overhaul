@@ -181,7 +181,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 - Import in the colour panel no longer throws a script error: the field took only 40 characters, which cut every palette off. Text that is no palette just says so.
 - Export has a Copy button beside Done.
-- The tip at the mouse stays on top after a click (Sort, a page, a click into a column) - it went behind the list. It is checked every frame now, as the context menu is.
+- The tip at the mouse stays on top after a click (Sort, a page, a click into a column) - it went behind the list. It is checked every frame now, as the context menu is, and hides while a mouse button is held (the engine draws the pressed tile's group over everything then) - back on the release.
 - The colour and sound buttons in the header keep their gradient (Buttons and chips) when their popover opens or closes or the volumes change - they turned flat.
 - ACE cargo cards: Open and Unload have their icon and words centred.
 - The page bar's arrows have a light film of their own (they were the secondary colour on a bar of the secondary colour - red on red) and the bar runs in the gradient with Buttons and chips.

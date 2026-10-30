@@ -121,6 +121,7 @@ uiNamespace setVariable [QGVAR(selectionFrames), []];
 // A press on an empty cell of a column (fnc_onMouseButton): [Ctrl held, mouse] or [] for none. Let go in place it
 // is a click that clears the selection; dragged away it does nothing.
 GVAR(emptyPress) = [];
+GVAR(tipHeld) = false;
 
 // The tiles dragged together while several are selected, [grid index, tile index] each, or [] for a single
 // item (fnc_startDrag, fnc_updateDrag). The footprints and the pictures at the mouse are controls, so they
