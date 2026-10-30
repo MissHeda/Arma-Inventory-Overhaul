@@ -61,7 +61,7 @@ private _entries = if (_grid getOrDefault ["overflow", false]) then {
 // all the same - the room, the selection and the hands' queue know them - but bare, "offPage", with no control at all.
 // A page turned (fnc_showPage) draws them when they come to show.
 private _rowFrom = _grid getOrDefault ["rowFrom", 0];
-private _rowTo = _grid getOrDefault ["rowTo", _grid getOrDefault ["rows", 1e6]];
+private _rowTo = _grid getOrDefault ["tileTo", _grid getOrDefault ["rowTo", _grid getOrDefault ["rows", 1e6]]];
 private _paged = _rowFrom > 0 || {_rowTo < (_grid getOrDefault ["rows", 0])};
 
 private _fnc_shows = {

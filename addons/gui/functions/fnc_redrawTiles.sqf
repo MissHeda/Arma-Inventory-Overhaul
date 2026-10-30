@@ -149,7 +149,7 @@ private _loadSize = TEXT_UNIT * 0.46;
             private _was = _x getOrDefault ["pageRanges", []];
 
             (_now isEqualTo []) != (_was isEqualTo [])
-            || {_now isNotEqualTo [] && {selectMax ((_now select 1) apply {(_x select 1) - (_x select 0)}) != (_x getOrDefault ["pageHeight", 0])}}
+            || {_now isNotEqualTo [] && {selectMax ((_now select 1) apply {(_x param [2, _x select 1]) - (_x select 0)}) != (_x getOrDefault ["pageHeight", 0])}}
         } >= 0) exitWith {
             _ok = false;
         };
@@ -196,8 +196,11 @@ private _madeCount = 0;
         _pagedGrid set ["page", _paging select 0];
 
         private _window = (_paging select 1) select (_paging select 0);
+        private _shownTo = _window param [2, _window select 1];
 
-        if (_window isEqualTo [_pagedGrid get "rowFrom", _pagedGrid get "rowTo"]) then {continue};
+        _pagedGrid set ["tileTo", _window select 1];
+
+        if ([_window select 0, _shownTo] isEqualTo [_pagedGrid get "rowFrom", _pagedGrid get "rowTo"]) then {continue};
 
         {
             {ctrlDelete _x} forEach (_x getOrDefault ["controls", []]);
@@ -212,12 +215,12 @@ private _madeCount = 0;
 
         {ctrlDelete _x} forEach (_pagedGrid getOrDefault ["panel", []]);
 
-        [_pagedGrid, _window select 0, _window select 1] call FUNC(setWindow);
+        [_pagedGrid, _window select 0, _shownTo] call FUNC(setWindow);
 
         (_pagedGrid get "rel") params ["_pageLeft", "_pageTop"];
 
         _pagedGrid set ["panel", [
-            _display, _pagedGrid get "parent", [_pageLeft, _pageTop], _pagedGrid get "cols", _window select 0, _window select 1,
+            _display, _pagedGrid get "parent", [_pageLeft, _pageTop], _pagedGrid get "cols", _window select 0, _shownTo,
             _pagedGrid getOrDefault ["holes", []], _theme, _pagedGrid getOrDefault ["pageHeight", 0]
         ] call FUNC(drawPagePanel)];
     } forEach _holderGrids;

@@ -178,6 +178,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- Paged boxes no longer grow a page to the end of the container when every row is reached over by a tile (a full crate of staggered magazines): the page is cut where the fewest tiles reach over and shows the rows its last tiles reach down to. Every page is as tall as the tallest, so one page of 24 rows left a big empty area on all the others.
 - The ACE cargo list's "Cargo" caption is a pill on its line like the sections' tabs above it (it was a lower box at the line's top).
 - Magazine bars on tiles, slots and the inspect card have round ends again. Gradient buttons show no step at their round ends (the middle runs as two fades over nothing, each end in its own colour) and keep their gradient under the mouse.
 - Gradient surfaces (bars, buttons and chips, header lines) are filled to their round ends: the left end takes the start colour, the right end the end colour - the left end showed the end colour (white with the default gradient).

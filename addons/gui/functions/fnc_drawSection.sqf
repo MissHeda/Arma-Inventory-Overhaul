@@ -645,7 +645,7 @@ if (_anyPaged) then {
             _x params ["_cols", "", "_holes", "_pos"];
 
             _flowBlocks pushBack [
-                _cols, selectMax ((_pageOf select 1) apply {(_x select 1) - (_x select 0)}) + PAGE_RESERVE(_cellW) / _cellH, _holes, _pos
+                _cols, selectMax ((_pageOf select 1) apply {(_x param [2, _x select 1]) - (_x select 0)}) + PAGE_RESERVE(_cellW) / _cellH, _holes, _pos
             ];
         };
     } forEach _viewBlocks;
@@ -887,7 +887,7 @@ if (_anyPaged && {!isNull _sectionContainer}) then {
 
         (_viewBlocks select _forEachIndex) params ["_pagedCols"];
 
-        private _pageTall = selectMax ((_x select 1) apply {(_x select 1) - (_x select 0)});
+        private _pageTall = selectMax ((_x select 1) apply {(_x param [2, _x select 1]) - (_x select 0)});
         private _barTop = PAGE_BAR_TOP(_bodyTop + (_place select 1),_pageTall,_cellW,_cellH);
         private _barH = UNIT * PAGE_BAR_H;
         private _barW = _pagedCols * _cellW - pixelW;

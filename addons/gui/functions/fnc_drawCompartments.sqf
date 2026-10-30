@@ -214,7 +214,7 @@ private _fnc_compartment = {
     if (_paged isNotEqualTo []) then {
         _grid set ["pageRanges", _paged select 1];
         _grid set ["page", _paged select 0];
-        _grid set ["pageHeight", selectMax ((_paged select 1) apply {(_x select 1) - (_x select 0)})];
+        _grid set ["pageHeight", selectMax ((_paged select 1) apply {(_x param [2, _x select 1]) - (_x select 0)})];
         _grid set ["panel", _pagePanels getOrDefault [_index, []]];
     };
 
@@ -269,7 +269,7 @@ private _fnc_compartment = {
     if (_pageOf isNotEqualTo []) then {
         private _pageWindow = (_pageOf select 1) select (_pageOf select 0);
 
-        _pagePanels set [_forEachIndex, [_display, _parent, [_gridX + _dx, _bodyTop + _dy], _cols, _pageWindow select 0, _pageWindow select 1, _holes, _theme, selectMax ((_pageOf select 1) apply {(_x select 1) - (_x select 0)})] call FUNC(drawPagePanel)];
+        _pagePanels set [_forEachIndex, [_display, _parent, [_gridX + _dx, _bodyTop + _dy], _cols, _pageWindow select 0, _pageWindow param [2, _pageWindow select 1], _holes, _theme, selectMax ((_pageOf select 1) apply {(_x param [2, _x select 1]) - (_x select 0)})] call FUNC(drawPagePanel)];
         continue;
     };
 

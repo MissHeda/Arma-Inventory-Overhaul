@@ -105,7 +105,7 @@ private _rowTo = _rows;
 
 if (_window isNotEqualTo []) then {
     _rowFrom = (_window select 0) max 0;
-    _rowTo = (_window select 1) min _rows;
+    _rowTo = (_window param [2, _window select 1]) min _rows;
     _rowY = [];
 
     for "_row" from 0 to (_rows - 1) do {
@@ -163,6 +163,9 @@ private _grid = createHashMapFromArray [
     ["rows", _rows],
     ["rowFrom", _rowFrom],
     ["rowTo", _rowTo],
+    // The rows a tile has to start on to be this page's (fnc_pageRanges): the page may show rows below them, where its last
+    // tiles reach down.
+    ["tileTo", [_rowTo, (_window param [1, _rowTo]) min _rows] select (_window isNotEqualTo [])],
     ["cellW", _cellW],
     ["cellH", _cellH],
     ["colX", _colX],

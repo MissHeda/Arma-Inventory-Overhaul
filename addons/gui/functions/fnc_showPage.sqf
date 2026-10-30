@@ -44,7 +44,11 @@ private _parent = _grid get "parent";
 _grid set ["page", _page];
 
 // The rows are the same: the bar alone changes (a search may have moved the marks).
-if ((_window select 0) == (_grid get "rowFrom") && {(_window select 1) == (_grid get "rowTo")}) exitWith {
+private _shownTo = _window param [2, _window select 1];
+
+_grid set ["tileTo", _window select 1];
+
+if ((_window select 0) == (_grid get "rowFrom") && {_shownTo == (_grid get "rowTo")}) exitWith {
     [_display, _grid] call FUNC(drawPageBar);
 };
 
@@ -74,11 +78,11 @@ _grid set ["tileControls", []];
 
 {ctrlDelete _x} forEach (_grid getOrDefault ["panel", []]);
 
-[_grid, _window select 0, _window select 1] call FUNC(setWindow);
+[_grid, _window select 0, _shownTo] call FUNC(setWindow);
 
 (_grid get "rel") params ["_left", "_top"];
 
-_grid set ["panel", [_display, _parent, [_left, _top], _grid get "cols", _window select 0, _window select 1, _grid getOrDefault ["holes", []], GVAR(theme), _grid getOrDefault ["pageHeight", 0]] call FUNC(drawPagePanel)];
+_grid set ["panel", [_display, _parent, [_left, _top], _grid get "cols", _window select 0, _shownTo, _grid getOrDefault ["holes", []], GVAR(theme), _grid getOrDefault ["pageHeight", 0]] call FUNC(drawPagePanel)];
 
 // The tiles of the page that shows now: drawn where they lie, in the place they have on the grid already. Each is the very
 // HashMap the grid holds (taken by its number, never from a copy of the list - the controls and the box it gets are the grid's
