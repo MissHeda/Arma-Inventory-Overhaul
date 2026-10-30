@@ -177,6 +177,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- Magazine bars on tiles, slots and the inspect card have round ends again. Gradient buttons show no step at their round ends (the middle runs as two fades over nothing, each end in its own colour) and keep their gradient under the mouse.
 - Gradient surfaces (bars, buttons and chips, header lines) are filled to their round ends: the left end takes the start colour, the right end the end colour - the left end showed the end colour (white with the default gradient).
 - A script error "Undefined variable _default" (fnc_hook) when the window was built from a scheduled script - a hook asked without a default gave back a variable that was not there.
 - The "Unsearched" box's hatching no longer shows square corners inside its round ones: it keeps a corner's width in from the left and right edges and runs the full height.

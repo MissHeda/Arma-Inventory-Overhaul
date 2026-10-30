@@ -79,11 +79,15 @@ private _rects = _controls select {ctrlClassName _x isEqualTo "EINV_PanelRect"};
 private _corners = _controls select {ctrlClassName _x isEqualTo "EINV_PanelCorner"};
 
 // Its surface in the gradient where the colour panel switched the buttons and chips on (GRADIENT_CHIPS): a visible surface only.
-if ((_normal param [3, 0]) > 0) then {
-    private _fade = [_display, _parent, _rect, GRADIENT_CHIPS, _controls, _normal param [3, 1], (_theme getOrDefault ["radius", 0]) min (_height / 2)] call FUNC(gradientSurface);
+private _graded = [];
 
-    if (!isNull _fade) then {
-        _controls pushBack _fade;
+if ((_normal param [3, 0]) > 0) then {
+    private _surface = +_controls;
+    private _fades = [_display, _parent, _rect, GRADIENT_CHIPS, _surface, _normal param [3, 1], (_theme getOrDefault ["radius", 0]) min (_height / 2)] call FUNC(gradientSurface);
+
+    if (_fades isNotEqualTo []) then {
+        _graded = _surface + _fades;
+        _controls append _fades;
     };
 };
 
@@ -169,10 +173,26 @@ _hit setVariable [QGVAR(id), _id];
 _hit setVariable [QGVAR(code), _code];
 _hit setVariable [QGVAR(surface), [_rects, _corners, _normal, _hover]];
 
+// In a gradient (fnc_gradientSurface) every piece keeps its own colour: the light under the mouse makes each as much stronger as
+// the hover film is than the plain one, and leaving gives each its own back.
+_hit setVariable [QGVAR(graded), [_graded, ((_hover param [3, 1]) / ((_normal param [3, 1]) max 0.001)) max 1]];
+
 // The surface lights up under the mouse. Its rectangles take the colour as their background, its
 // round corners - pictures - as their text colour.
 _hit ctrlAddEventHandler ["MouseEnter", {
     params ["_ctrl"];
+
+    (_ctrl getVariable [QGVAR(graded), [[], 1]]) params ["_graded", "_gain"];
+
+    if (_graded isNotEqualTo []) exitWith {
+        {
+            private _paint = +(_x getVariable [QGVAR(paint), [0, 0, 0, 0]]);
+
+            _paint set [3, ((_paint select 3) * _gain) min 1];
+            [[_x], _paint] call FUNC(paintSurface);
+        } forEach _graded;
+    };
+
     (_ctrl getVariable [QGVAR(surface), [[], [], [], []]]) params ["_rects", "_corners", "", "_color"];
 
     {_x ctrlSetBackgroundColor _color} forEach _rects;
@@ -181,6 +201,15 @@ _hit ctrlAddEventHandler ["MouseEnter", {
 
 _hit ctrlAddEventHandler ["MouseExit", {
     params ["_ctrl"];
+
+    (_ctrl getVariable [QGVAR(graded), [[], 1]]) params ["_graded"];
+
+    if (_graded isNotEqualTo []) exitWith {
+        {
+            [[_x], _x getVariable [QGVAR(paint), [0, 0, 0, 0]]] call FUNC(paintSurface);
+        } forEach _graded;
+    };
+
     (_ctrl getVariable [QGVAR(surface), [[], [], [], []]]) params ["_rects", "_corners", "_color"];
 
     {_x ctrlSetBackgroundColor _color} forEach _rects;

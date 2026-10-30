@@ -168,7 +168,7 @@ if (_ammo isNotEqualTo [] || _showName) then {
 
             _controls append ([
                 _display, _parent, [_left + _padX, _barY, _width - _padX * 2, _barH], _rounds / _capacity,
-                _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]], _theme getOrDefault ["barFill", [0.84, 0.54, 0.1, 1]], 0, GRADIENT_BARS
+                _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]], _theme getOrDefault ["barFill", [0.84, 0.54, 0.1, 1]], _barH / 2, GRADIENT_BARS
             ] call FUNC(uiBar));
 
             _lineTop = _barY - _lineH;

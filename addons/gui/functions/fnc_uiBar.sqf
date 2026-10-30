@@ -41,11 +41,7 @@ if (_fraction > 0) then {
     _controls append _fillParts;
 
     // The fill in the gradient where the colour panel switched the bars on (argument 7, GRADIENT_BARS).
-    private _fade = [_display, _parent, [_left, _top, _length, _height], _gradient, _fillParts, _fill param [3, 1], _radius] call FUNC(gradientSurface);
-
-    if (!isNull _fade) then {
-        _controls pushBack _fade;
-    };
+    _controls append ([_display, _parent, [_left, _top, _length, _height], _gradient, _fillParts, _fill param [3, 1], _radius] call FUNC(gradientSurface));
 };
 
 _controls
