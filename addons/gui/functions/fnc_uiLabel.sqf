@@ -79,22 +79,19 @@ if (_inScope && {((floor ((_theme getOrDefault ["gradientParts", GRADIENT_PARTS_
     };
 };
 
-private _graded = _bit > 0 && {count _gradient >= 3} && {((floor ((_theme getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]) / _bit)) mod 2) == 1} && {
-    _title || {_part isEqualTo "hover"} || {_display isEqualTo (uiNamespace getVariable [QGVAR(display), displayNull])}
-};
-
 // The part's own gradient where the player set one (the theme's "gradientOwn", by the part's place): its start, its end, or both.
-if (_graded) then {
-    private _ownPair = (_theme getOrDefault ["gradientOwn", []]) param [round (log _bit / log 2), [[], []]];
+// With an end of its own it runs even with the Titles row's gradient off.
+private _ownPair = if (_bit > 0) then {(_theme getOrDefault ["gradientOwn", []]) param [round (log _bit / log 2), [[], []]]} else {[[], []]};
 
-    if ((_ownPair select 1) isNotEqualTo []) then {
-        _gradient = (_ownPair select 1) select [0, 3];
-    };
-
-    if ((_ownPair select 0) isNotEqualTo []) then {
-        _ownStart = _ownPair select 0;
-    };
+if ((_ownPair select 1) isNotEqualTo []) then {
+    _gradient = (_ownPair select 1) select [0, 3];
 };
+
+if ((_ownPair select 0) isNotEqualTo []) then {
+    _ownStart = _ownPair select 0;
+};
+
+private _graded = _inScope && {count _gradient >= 3} && {((floor ((_theme getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]) / _bit)) mod 2) == 1};
 
 if (_title) then {
     private _own = _theme getOrDefault ["titleColor", []];

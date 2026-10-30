@@ -32,7 +32,23 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 private _created = uiNamespace getVariable [QGVAR(created), []];
 
 if (isNull _display) exitWith {false};
-if (!_force && {(_created param [(count _created - 1) max 0, controlNull]) isEqualTo _layer}) exitWith {false};
+// The name at the mouse and the tips of the menu's own buttons lie over it on purpose (fnc_raiseTooltip): made after it, they are
+// no reason to make it again - that made both again every frame, and a click pressed on one control was let go on its successor.
+private _tips = [
+    uiNamespace getVariable [QGVAR(tooltip), controlNull], uiNamespace getVariable [QGVAR(tipShown), controlNull],
+    uiNamespace getVariable [QGVAR(compare), controlNull]
+];
+private _last = controlNull;
+
+for "_i" from (count _created - 1) to 0 step -1 do {
+    private _ctrl = _created select _i;
+
+    if (!isNull _ctrl && {!(_ctrl in _tips)}) exitWith {
+        _last = _ctrl;
+    };
+};
+
+if (!_force && {_last isEqualTo _layer}) exitWith {false};
 
 // The sound dropdown under the speaker (fnc_openSoundMenu) is made again from the volumes as they are.
 if ((GVAR(menuFor) param [0, ""]) isEqualTo "sound") exitWith {

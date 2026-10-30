@@ -97,8 +97,8 @@ while {count _palette < count PALETTE_UNSET} do {
 
 // The places the rows' "Default" buttons take back, by row id: a row with a slider takes its transparency with its colour.
 private _rowSlots = createHashMapFromArray [
-    ["accent", [0]], ["titles", [12, 10, 18]], ["secondary", [1, 14]], ["panel", [3, 2, 13]], ["cells", [4, 9]], ["items", [8]],
-    ["text", [6]], ["lines", [7, 15]]
+    ["accent", [0]], ["titles", [12, 10]], ["secondary", [1, 14]], ["panel", [3, 2, 13]], ["cells", [4, 9]], ["items", [8]],
+    ["text", [6, 17, 18]], ["lines", [7, 15]]
 ];
 
 switch (_mode) do {

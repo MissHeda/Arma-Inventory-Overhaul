@@ -141,11 +141,11 @@ private _openEnd = _openDef param [7, -1];
 private _pickEnd = ([_openEnd] call _fnc_gradientOn) && {uiNamespace getVariable [QGVAR(paletteEnd), false]};
 private _tab = [_openDef param [1, -1], _openEnd] select _pickEnd;
 
-// A part of the titles' gradient picked for colours of its own (its pill in the checkboxes): the picker is bound to its start or end
+// A part of the gradient picked for colours of its own (its pill in the Text row's checkboxes): the picker is bound to its start or end
 // (PALETTE_COLOURS + part * 2, + 1 for the end), and the main Start and End are not outlined.
 private _partPick = uiNamespace getVariable [QGVAR(palettePart), -1];
 
-if !(_open isEqualTo "titles" && {[_openEnd] call _fnc_gradientOn} && {_partPick isEqualType 0} && {_partPick >= 0} && {_partPick < GRADIENT_PART_COUNT}) then {
+if !(_open isEqualTo "text" && {_partPick isEqualType 0} && {_partPick >= 0} && {_partPick < GRADIENT_PART_COUNT}) then {
     _partPick = -1;
 };
 
@@ -217,18 +217,19 @@ if (_openDef isNotEqualTo []) then {
     if (_openGradient >= 0) then {
         _height = _height + _rowH + _gapY;
 
-        // The titles' gradient on: where it shows, under it - a group of checkboxes two to a row, a little gap between groups.
-        if ((_openDef select 0) isEqualTo "titles" && {[_openGradient] call _fnc_gradientOn}) then {
-            {
-                _height = _height + _rowH * ceil ((count (_x select 1)) / 2);
-            } forEach GRADIENT_PART_GROUPS;
+    };
 
-            _height = _height + _gapY + _gapY * 0.5 * (count GRADIENT_PART_GROUPS - 1);
+    // The Text row: where the gradient shows - a group of checkboxes two to a row, a little gap between groups.
+    if ((_openDef select 0) isEqualTo "text") then {
+        {
+            _height = _height + _rowH * ceil ((count (_x select 1)) / 2);
+        } forEach GRADIENT_PART_GROUPS;
 
-            // The line of the part picked for colours of its own.
-            if (_partPick >= 0) then {
-                _height = _height + _gapY + _rowH;
-            };
+        _height = _height + _gapY + _gapY * 0.5 * (count GRADIENT_PART_GROUPS - 1);
+
+        // The line of the part picked for colours of its own.
+        if (_partPick >= 0) then {
+            _height = _height + _gapY + _rowH;
         };
     };
 
@@ -293,6 +294,10 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{[] call FUNC(closeMenu)}] call F
 [
     _display, _layer, [_cardX + pixelW, _cardY + pixelH, _width - pixelW * 2, _height - pixelH * 2], _cardColor, (_radius - pixelH) max 0
 ] call FUNC(uiPanel);
+
+// A click on the card between its controls is no click beside it: this takes it, and does nothing (the catcher above closes the
+// popover only for a click beside the card).
+[_display, "EINV_Hitbox", _layer, [_cardX, _cardY, _width, _height]] call FUNC(uiCreate);
 
 // What the small buttons are drawn with: neutral films, the light ink of the card.
 private _buttonTheme = createHashMapFromArray [
@@ -810,251 +815,252 @@ private _sliders = createHashMap;
 
             _y = _y + _rowH;
 
-            // Where the titles' gradient shows: a checkbox for each part as CBA's settings have them - a square outline, ticked
-            // while the part is on (GRADIENT_*, fnc_uiLabel) - in groups, the group's name in the label column, two to a row. The
-            // box and its words take the click.
-            if (_gradientOn && {_id isEqualTo "titles"}) then {
-                _y = _y + _gapY;
+        };
 
-                private _parts = GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT];
-                private _partsX = _cardX + _sliderX;
-                private _partW = (_cardX + _width - _padX - _partsX - _gapX / 2) / 2;
-                private _checkH = _rowH * 0.62;
-                private _checkW = SQUARE(_checkH);
-                private _edgeW = pixelW * 2;
-                private _edgeH = pixelH * 2;
+        // The Text row: where the gradient shows - a checkbox for each part as CBA's settings have them, a square outline ticked
+        // while the part is on (GRADIENT_*, fnc_uiLabel) - in groups, the group's name in the label column, two to a row. The box
+        // and its words take the click. A part runs in its own colours where it has them, else in the Titles row's gradient.
+        if (_id isEqualTo "text") then {
+            _y = _y + _gapY;
+
+            private _parts = GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT];
+            private _partsX = _cardX + _sliderX;
+            private _partW = (_cardX + _width - _padX - _partsX - _gapX / 2) / 2;
+            private _checkH = _rowH * 0.62;
+            private _checkW = SQUARE(_checkH);
+            private _edgeW = pixelW * 2;
+            private _edgeH = pixelH * 2;
+
+            {
+                _x params ["_groupWords", "_groupParts"];
+
+                if (_forEachIndex > 0) then {
+                    _y = _y + _gapY * 0.5;
+                };
+
+                [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], _groupWords, _small, _text2, _font, 0] call FUNC(uiLabel);
 
                 {
-                    _x params ["_groupWords", "_groupParts"];
+                    _x params ["_bit", "_words", "_partTip"];
 
-                    if (_forEachIndex > 0) then {
-                        _y = _y + _gapY * 0.5;
-                    };
+                    private _cellX = _partsX + (_forEachIndex mod 2) * (_partW + _gapX / 2);
+                    private _cellY = _y + floor (_forEachIndex / 2) * _rowH;
+                    private _checkY = _cellY + (_rowH - _checkH) / 2;
+                    private _on = ((floor (_parts / _bit)) mod 2) == 1;
 
-                    [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], _groupWords, _small, _text2, _font, 0] call FUNC(uiLabel);
+                    [_display, _layer, [_cellX, _checkY, _checkW, _checkH], [_muted, _text] select _on, 0] call FUNC(uiPanel);
+                    [_display, _layer, [_cellX + _edgeW, _checkY + _edgeH, _checkW - _edgeW * 2, _checkH - _edgeH * 2], [0.08, 0.08, 0.08, 1], 0] call FUNC(uiPanel);
 
+                    // The tick is always there, shown while the part is on: a click flips it at once, before the window is built
+                    // again for the change.
+                    private _inset = _checkH * 0.16;
+                    private _tick = [
+                        _display, _layer, [_cellX + SQUARE(_inset), _checkY + _inset, _checkW - SQUARE(_inset) * 2, _checkH - _inset * 2],
+                        UI_TEX(icon_check_ca), _text
+                    ] call FUNC(uiIcon);
+
+                    _tick ctrlShow _on;
+
+                    // Its own gradient: a small pill of its start and end right beside the checkbox, outlined while it is the
+                    // part the picker is bound to. A click on it picks the part (the line under the groups).
+                    private _partIndex = round (log _bit / log 2);
+                    private _pillW = SQUARE(_checkH * 1.6);
+                    private _pillRect = [_cellX + _checkW + SQUARE(UNIT * 0.15), _checkY, _pillW, _checkH];
+
+                    [_display, _layer, _pillRect, [[1, 1, 1, 0.22], _text] select (_partIndex == _partPick), 0] call FUNC(uiPanel);
+                    _swatches set [format ["part%1", _partIndex], [
+                        _display, _layer, [(_pillRect select 0) + _edgeW, (_pillRect select 1) + _edgeH, _pillW / 2 - _edgeW, _checkH - _edgeH * 2],
+                        [0, 0, 0, 1], 0
+                    ] call FUNC(uiPanel)];
+                    _swatches set [format ["part%1End", _partIndex], [
+                        _display, _layer, [(_pillRect select 0) + _pillW / 2, (_pillRect select 1) + _edgeH, _pillW / 2 - _edgeW, _checkH - _edgeH * 2],
+                        [0, 0, 0, 1], 0
+                    ] call FUNC(uiPanel)];
+
+                    // Each half picks its own colour for the picker: the left the start, the right the end. The half that is
+                    // picked already, clicked again, lets the part go.
                     {
-                        _x params ["_bit", "_words", "_partTip"];
+                        _x params ["_halfRect", "_isEnd"];
 
-                        private _cellX = _partsX + (_forEachIndex mod 2) * (_partW + _gapX / 2);
-                        private _cellY = _y + floor (_forEachIndex / 2) * _rowH;
-                        private _checkY = _cellY + (_rowH - _checkH) / 2;
-                        private _on = ((floor (_parts / _bit)) mod 2) == 1;
+                        private _pillHit = [_display, "EINV_Hitbox", _layer, _halfRect] call FUNC(uiCreate);
 
-                        [_display, _layer, [_cellX, _checkY, _checkW, _checkH], [_muted, _text] select _on, 0] call FUNC(uiPanel);
-                        [_display, _layer, [_cellX + _edgeW, _checkY + _edgeH, _checkW - _edgeW * 2, _checkH - _edgeH * 2], [0.08, 0.08, 0.08, 1], 0] call FUNC(uiPanel);
-
-                        // The tick is always there, shown while the part is on: a click flips it at once, before the window is built
-                        // again for the change.
-                        private _inset = _checkH * 0.16;
-                        private _tick = [
-                            _display, _layer, [_cellX + SQUARE(_inset), _checkY + _inset, _checkW - SQUARE(_inset) * 2, _checkH - _inset * 2],
-                            UI_TEX(icon_check_ca), _text
-                        ] call FUNC(uiIcon);
-
-                        _tick ctrlShow _on;
-
-                        // Its own gradient: a small pill of its start and end right beside the checkbox, outlined while it is the
-                        // part the picker is bound to. A click on it picks the part (the line under the groups).
-                        private _partIndex = round (log _bit / log 2);
-                        private _pillW = SQUARE(_checkH * 1.6);
-                        private _pillRect = [_cellX + _checkW + SQUARE(UNIT * 0.15), _checkY, _pillW, _checkH];
-
-                        [_display, _layer, _pillRect, [[1, 1, 1, 0.22], _text] select (_partIndex == _partPick), 0] call FUNC(uiPanel);
-                        _swatches set [format ["part%1", _partIndex], [
-                            _display, _layer, [(_pillRect select 0) + _edgeW, (_pillRect select 1) + _edgeH, _pillW / 2 - _edgeW, _checkH - _edgeH * 2],
-                            [0, 0, 0, 1], 0
-                        ] call FUNC(uiPanel)];
-                        _swatches set [format ["part%1End", _partIndex], [
-                            _display, _layer, [(_pillRect select 0) + _pillW / 2, (_pillRect select 1) + _edgeH, _pillW / 2 - _edgeW, _checkH - _edgeH * 2],
-                            [0, 0, 0, 1], 0
-                        ] call FUNC(uiPanel)];
-
-                        // Each half picks its own colour for the picker: the left the start, the right the end. The half that is
-                        // picked already, clicked again, lets the part go.
-                        {
-                            _x params ["_halfRect", "_isEnd"];
-
-                            private _pillHit = [_display, "EINV_Hitbox", _layer, _halfRect] call FUNC(uiCreate);
-
-                            [_pillHit, LLSTRING(Palette_PartPick)] call FUNC(setTooltip);
-                            _pillHit setVariable [QGVAR(id), [_partIndex, _isEnd]];
-                            _pillHit ctrlAddEventHandler ["ButtonClick", {
-                                params ["_ctrl"];
-
-                                [{
-                                    params ["_partIndex", "_isEnd"];
-
-                                    private _display = uiNamespace getVariable [QGVAR(display), displayNull];
-
-                                    if (isNull _display) exitWith {};
-
-                                    private _again = _partIndex == (uiNamespace getVariable [QGVAR(palettePart), -1])
-                                        && {_isEnd isEqualTo (uiNamespace getVariable [QGVAR(paletteEnd), false])};
-
-                                    uiNamespace setVariable [QGVAR(palettePart), [_partIndex, -1] select _again];
-                                    uiNamespace setVariable [QGVAR(paletteEnd), _isEnd];
-
-                                    [_display] call FUNC(openPaletteMenu);
-                                }, _ctrl getVariable [QGVAR(id), [-1, false]]] call FUNC(later);
-                            }];
-                        } forEach [
-                            [[_pillRect select 0, _cellY, _pillW / 2, _rowH], false],
-                            [[(_pillRect select 0) + _pillW / 2, _cellY, _pillW / 2, _rowH], true]
-                        ];
-
-                        private _wordsX = (_pillRect select 0) + _pillW + SQUARE(UNIT * 0.15);
-                        private _wordsW = _cellX + _partW - _wordsX;
-
-                        private _wordsLabel = [
-                            _display, _layer, [_wordsX, _cellY, _wordsW, _rowH], [_words, _wordsW, _font, _small * 0.9] call FUNC(fitText),
-                            _small * 0.9, [_muted, _text] select _on, _font, 0
-                        ] call FUNC(uiLabel);
-
-                        // The checkbox and the words take the click - two hit areas either side of the pill, which has its own.
-                        {
-                            private _partHit = [_display, "EINV_Hitbox", _layer, _x] call FUNC(uiCreate);
-
-                            [_partHit, _partTip] call FUNC(setTooltip);
-                            _partHit setVariable [QGVAR(id), _bit];
-                            _partHit setVariable [QGVAR(tick), [_tick, _wordsLabel]];
-                            _partHit ctrlAddEventHandler ["ButtonClick", {
-                                params ["_ctrl"];
-
-                                // Seen at once: the tick and the words flip now, the window follows when it is built again.
-                                (_ctrl getVariable [QGVAR(tick), []]) params [["_tick", controlNull], ["_wordsLabel", controlNull]];
-
-                                private _now = !ctrlShown _tick;
-
-                                _tick ctrlShow _now;
-                                _wordsLabel ctrlSetTextColor ([[0.56, 0.56, 0.56, 1], [1, 1, 1, 1]] select _now);
-
-                                // The popover is made again, which deletes this very control: a frame later.
-                                [{
-                                    params ["_bit"];
-
-                                    ["gradientPart", _bit] call FUNC(paletteSet);
-                                }, [_ctrl getVariable [QGVAR(id), 0]]] call FUNC(later);
-                            }];
-                        } forEach [
-                            [_cellX, _cellY, (_pillRect select 0) - _cellX, _rowH],
-                            [(_pillRect select 0) + _pillW, _cellY, _cellX + _partW - (_pillRect select 0) - _pillW, _rowH]
-                        ];
-                    } forEach _groupParts;
-
-                    _y = _y + _rowH * ceil ((count _groupParts) / 2);
-                } forEach GRADIENT_PART_GROUPS;
-
-                // The part picked for colours of its own: its name, its Start and End (the one the picker is bound to outlined) and
-                // Main, which takes them back to the main gradient's.
-                if (_partPick >= 0) then {
-                    _y = _y + _gapY;
-
-                    private _partWords = "";
-
-                    {
-                        {
-                            if (round (log (_x select 0) / log 2) == _partPick) exitWith {
-                                _partWords = _x select 1;
-                            };
-                        } forEach (_x select 1);
-                    } forEach GRADIENT_PART_GROUPS;
-
-                    [
-                        _display, _layer, [_cardX + _padX, _y, _labelW, _rowH], [_partWords, _labelW, _font, _small] call FUNC(fitText),
-                        _small, _text, _font, 0
-                    ] call FUNC(uiLabel);
-
-                    // Whether this part runs in a gradient at all - the same as its checkbox. Off, it takes its own colour (Start) as
-                    // one plain colour where one is set, and End is not offered.
-                    private _partBit = 2 ^ _partPick;
-                    private _partOn = ((floor ((GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]) / _partBit)) mod 2) == 1;
-                    private _ownEnd = _partOn && {uiNamespace getVariable [QGVAR(paletteEnd), false]};
-                    private _switchW = SQUARE(UNIT * 2.2);
-                    private _partSwitch = [
-                        _display, _layer, [_cardX + _sliderX, _y + (_rowH - _chipH) / 2, _switchW, _chipH], str _partBit,
-                        [LLSTRING(Palette_Off), LLSTRING(Palette_On)] select _partOn, "", _buttonTheme, {
-                            params ["_button", "_bitId"];
-
-                            if (_button < 0) exitWith {};
-
-                            uiNamespace setVariable [QGVAR(paletteEnd), false];
-
-                            ["gradientPart", parseNumber _bitId] call FUNC(paletteSet);
-                        }, false, _chipSize, true
-                    ] call FUNC(uiButton);
-
-                    [(_partSwitch param [count _partSwitch - 1, controlNull]), LLSTRING(Palette_PartGradient_Tip)] call FUNC(setTooltip);
-
-                    private _boxW = SQUARE(UNIT * 2.6);
-                    private _boxX = _cardX + _sliderX + _switchW + _gapX;
-
-                    {
-                        _x params ["_boxId", "_words", "_isEnd"];
-
-                        if (_isEnd && {!_partOn}) then {continue};
-
-                        private _boxRect = [_boxX, _y + _rowH * 0.1, _boxW, _rowH * 0.8];
-                        private _picked = _isEnd isEqualTo _ownEnd;
-
-                        [_display, _layer, _boxRect, [[1, 1, 1, 0.22], _text] select _picked, UNIT * 0.2] call FUNC(uiPanel);
-                        _swatches set [_boxId, [
-                            _display, _layer, [(_boxRect select 0) + pixelW * 2, (_boxRect select 1) + pixelH * 2, (_boxRect select 2) - pixelW * 4, (_boxRect select 3) - pixelH * 4],
-                            [0, 0, 0, 1], UNIT * 0.15
-                        ] call FUNC(uiPanel)];
-
-                        [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0] call FUNC(uiLabel);
-
-                        private _boxHit = [_display, "EINV_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(UNIT * 1.7), _rowH]] call FUNC(uiCreate);
-
-                        [_boxHit, LLSTRING(Palette_PartColours_Tip)] call FUNC(setTooltip);
-                        _boxHit setVariable [QGVAR(id), _isEnd];
-                        _boxHit ctrlAddEventHandler ["ButtonClick", {
+                        [_pillHit, LLSTRING(Palette_PartPick)] call FUNC(setTooltip);
+                        _pillHit setVariable [QGVAR(id), [_partIndex, _isEnd]];
+                        _pillHit ctrlAddEventHandler ["ButtonClick", {
                             params ["_ctrl"];
 
                             [{
-                                params ["_isEnd"];
+                                params ["_partIndex", "_isEnd"];
 
                                 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
                                 if (isNull _display) exitWith {};
 
+                                private _again = _partIndex == (uiNamespace getVariable [QGVAR(palettePart), -1])
+                                    && {_isEnd isEqualTo (uiNamespace getVariable [QGVAR(paletteEnd), false])};
+
+                                uiNamespace setVariable [QGVAR(palettePart), [_partIndex, -1] select _again];
                                 uiNamespace setVariable [QGVAR(paletteEnd), _isEnd];
 
                                 [_display] call FUNC(openPaletteMenu);
-                            }, [_ctrl getVariable [QGVAR(id), false]]] call FUNC(later);
+                            }, _ctrl getVariable [QGVAR(id), [-1, false]]] call FUNC(later);
                         }];
+                    } forEach [
+                        [[_pillRect select 0, _cellY, _pillW / 2, _rowH], false],
+                        [[(_pillRect select 0) + _pillW / 2, _cellY, _pillW / 2, _rowH], true]
+                    ];
 
-                        _boxX = _boxX + _boxW + SQUARE(UNIT * 1.9);
-                    } forEach [["partStart", [LLSTRING(Palette_PartColour), LLSTRING(Palette_Start)] select _partOn, false], ["partEnd", LLSTRING(Palette_End), true]];
+                    private _wordsX = (_pillRect select 0) + _pillW + SQUARE(UNIT * 0.15);
+                    private _wordsW = _cellX + _partW - _wordsX;
 
-                    // Main: only where the part has a colour of its own.
-                    private _ownSet = _info get "ownSet";
+                    private _wordsLabel = [
+                        _display, _layer, [_wordsX, _cellY, _wordsW, _rowH], [_words, _wordsW, _font, _small * 0.9] call FUNC(fitText),
+                        _small * 0.9, [_muted, _text] select _on, _font, 0
+                    ] call FUNC(uiLabel);
 
-                    if ((_ownSet select (_partPick * 2)) || {_ownSet select (_partPick * 2 + 1)}) then {
-                        private _mainW = SQUARE(UNIT * 1.8);
-                        private _main = [
-                            _display, _layer, [_cardX + _width - _padX - _mainW, _y + (_rowH - _chipH) / 2, _mainW, _chipH], str _partPick,
-                            LLSTRING(Palette_PartMain), "", _buttonTheme, {
-                                params ["_button", "_partId"];
+                    // The checkbox and the words take the click - two hit areas either side of the pill, which has its own.
+                    {
+                        private _partHit = [_display, "EINV_Hitbox", _layer, _x] call FUNC(uiCreate);
 
-                                if (_button < 0) exitWith {};
+                        [_partHit, _partTip] call FUNC(setTooltip);
+                        _partHit setVariable [QGVAR(id), _bit];
+                        _partHit setVariable [QGVAR(tick), [_tick, _wordsLabel]];
+                        _partHit ctrlAddEventHandler ["ButtonClick", {
+                            params ["_ctrl"];
 
-                                ["partColours", parseNumber _partId] call FUNC(paletteSet);
-                            }, false, _chipSize, true
-                        ] call FUNC(uiButton);
+                            // Seen at once: the tick and the words flip now, the window follows when it is built again.
+                            (_ctrl getVariable [QGVAR(tick), []]) params [["_tick", controlNull], ["_wordsLabel", controlNull]];
 
-                        [(_main param [count _main - 1, controlNull]), LLSTRING(Palette_PartMain_Tip)] call FUNC(setTooltip);
-                    };
+                            private _now = !ctrlShown _tick;
 
-                    _y = _y + _rowH;
+                            _tick ctrlShow _now;
+                            _wordsLabel ctrlSetTextColor ([[0.56, 0.56, 0.56, 1], [1, 1, 1, 1]] select _now);
+
+                            // The popover is made again, which deletes this very control: a frame later.
+                            [{
+                                params ["_bit"];
+
+                                ["gradientPart", _bit] call FUNC(paletteSet);
+                            }, [_ctrl getVariable [QGVAR(id), 0]]] call FUNC(later);
+                        }];
+                    } forEach [
+                        [_cellX, _cellY, (_pillRect select 0) - _cellX, _rowH],
+                        [(_pillRect select 0) + _pillW, _cellY, _cellX + _partW - (_pillRect select 0) - _pillW, _rowH]
+                    ];
+                } forEach _groupParts;
+
+                _y = _y + _rowH * ceil ((count _groupParts) / 2);
+            } forEach GRADIENT_PART_GROUPS;
+
+            // The part picked for colours of its own: its name, its Start and End (the one the picker is bound to outlined) and
+            // Main, which takes them back to the main gradient's.
+            if (_partPick >= 0) then {
+                _y = _y + _gapY;
+
+                private _partWords = "";
+
+                {
+                    {
+                        if (round (log (_x select 0) / log 2) == _partPick) exitWith {
+                            _partWords = _x select 1;
+                        };
+                    } forEach (_x select 1);
+                } forEach GRADIENT_PART_GROUPS;
+
+                [
+                    _display, _layer, [_cardX + _padX, _y, _labelW, _rowH], [_partWords, _labelW, _font, _small] call FUNC(fitText),
+                    _small, _text, _font, 0
+                ] call FUNC(uiLabel);
+
+                // Whether this part runs in a gradient at all - the same as its checkbox. Off, it takes its own colour (Start) as
+                // one plain colour where one is set, and End is not offered.
+                private _partBit = 2 ^ _partPick;
+                private _partOn = ((floor ((GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]) / _partBit)) mod 2) == 1;
+                private _ownEnd = _partOn && {uiNamespace getVariable [QGVAR(paletteEnd), false]};
+                private _switchW = SQUARE(UNIT * 2.2);
+                private _partSwitch = [
+                    _display, _layer, [_cardX + _sliderX, _y + (_rowH - _chipH) / 2, _switchW, _chipH], str _partBit,
+                    [LLSTRING(Palette_Off), LLSTRING(Palette_On)] select _partOn, "", _buttonTheme, {
+                        params ["_button", "_bitId"];
+
+                        if (_button < 0) exitWith {};
+
+                        uiNamespace setVariable [QGVAR(paletteEnd), false];
+
+                        ["gradientPart", parseNumber _bitId] call FUNC(paletteSet);
+                    }, false, _chipSize, true
+                ] call FUNC(uiButton);
+
+                [(_partSwitch param [count _partSwitch - 1, controlNull]), LLSTRING(Palette_PartGradient_Tip)] call FUNC(setTooltip);
+
+                private _boxW = SQUARE(UNIT * 2.6);
+                private _boxX = _cardX + _sliderX + _switchW + _gapX;
+
+                {
+                    _x params ["_boxId", "_words", "_isEnd"];
+
+                    if (_isEnd && {!_partOn}) then {continue};
+
+                    private _boxRect = [_boxX, _y + _rowH * 0.1, _boxW, _rowH * 0.8];
+                    private _picked = _isEnd isEqualTo _ownEnd;
+
+                    [_display, _layer, _boxRect, [[1, 1, 1, 0.22], _text] select _picked, UNIT * 0.2] call FUNC(uiPanel);
+                    _swatches set [_boxId, [
+                        _display, _layer, [(_boxRect select 0) + pixelW * 2, (_boxRect select 1) + pixelH * 2, (_boxRect select 2) - pixelW * 4, (_boxRect select 3) - pixelH * 4],
+                        [0, 0, 0, 1], UNIT * 0.15
+                    ] call FUNC(uiPanel)];
+
+                    [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0] call FUNC(uiLabel);
+
+                    private _boxHit = [_display, "EINV_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(UNIT * 1.7), _rowH]] call FUNC(uiCreate);
+
+                    [_boxHit, LLSTRING(Palette_PartColours_Tip)] call FUNC(setTooltip);
+                    _boxHit setVariable [QGVAR(id), _isEnd];
+                    _boxHit ctrlAddEventHandler ["ButtonClick", {
+                        params ["_ctrl"];
+
+                        [{
+                            params ["_isEnd"];
+
+                            private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+                            if (isNull _display) exitWith {};
+
+                            uiNamespace setVariable [QGVAR(paletteEnd), _isEnd];
+
+                            [_display] call FUNC(openPaletteMenu);
+                        }, [_ctrl getVariable [QGVAR(id), false]]] call FUNC(later);
+                    }];
+
+                    _boxX = _boxX + _boxW + SQUARE(UNIT * 1.9);
+                } forEach [["partStart", [LLSTRING(Palette_PartColour), LLSTRING(Palette_Start)] select _partOn, false], ["partEnd", LLSTRING(Palette_End), true]];
+
+                // Main: only where the part has a colour of its own.
+                private _ownSet = _info get "ownSet";
+
+                if ((_ownSet select (_partPick * 2)) || {_ownSet select (_partPick * 2 + 1)}) then {
+                    private _mainW = SQUARE(UNIT * 1.8);
+                    private _main = [
+                        _display, _layer, [_cardX + _width - _padX - _mainW, _y + (_rowH - _chipH) / 2, _mainW, _chipH], str _partPick,
+                        LLSTRING(Palette_PartMain), "", _buttonTheme, {
+                            params ["_button", "_partId"];
+
+                            if (_button < 0) exitWith {};
+
+                            ["partColours", parseNumber _partId] call FUNC(paletteSet);
+                        }, false, _chipSize, true
+                    ] call FUNC(uiButton);
+
+                    [(_main param [count _main - 1, controlNull]), LLSTRING(Palette_PartMain_Tip)] call FUNC(setTooltip);
                 };
+
+                _y = _y + _rowH;
             };
         };
 
         if (_which >= 0) then {
-            // The titles' picker edits the part picked for colours of its own, where one is (_tab, above).
-            _picker = [[[_which, _end] select (_pickEnd && {_end >= 0}), _tab] select (_id isEqualTo "titles" && {_partPick >= 0}), _y + _pickPad] call _fnc_picker;
+            // The Text row's picker edits the part picked for colours of its own, where one is (_tab, above).
+            _picker = [[[_which, _end] select (_pickEnd && {_end >= 0}), _tab] select (_id isEqualTo "text" && {_partPick >= 0}), _y + _pickPad] call _fnc_picker;
             _y = _y + _pickPad * 2 + _pickH;
         } else {
             _y = _y + _pickPad;

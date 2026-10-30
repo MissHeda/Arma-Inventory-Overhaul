@@ -88,6 +88,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Changed
 
+- Colour panel: where the gradient shows (the checkboxes, each part's own colours and gradient switch) moved from the Titles row to the Text row, and shows whether the Titles row's gradient is on or not. A part with an end colour of its own runs even with it off; one without takes the Titles row's start and end. The Text row's Default takes the parts and their colours back too.
 - Colour panel, a part's own colours: each half of its pill picks its start or its end straight away. The line under the checkboxes has a Gradient On/Off switch of the part's own (the same as its checkbox): off, the part shows in one colour of its own (Colour) instead of running, where one is set.
 - The gradient's checkboxes flip their tick at the click, before the window is built again for it.
 - Colour panel, "Shows on": two parts to a row instead of three, so their names show whole; each part's colour pill sits right beside its checkbox.
@@ -173,6 +174,8 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- The colour panel's buttons and checkboxes were hard to hit and a click could land on the wrong one: each tip shown over the panel made the panel be made again, which raised the tip again, every frame - a click pressed on one control was let go on its successor. Tips no longer count as lying over a menu.
+- A click on the colour panel between its controls no longer closes it; only a click beside the panel does.
 - A part's own Start and End were set on the main gradient instead: the picker stayed bound to the Titles row's colour.
 - TFAR: a radio TFAR has not set up opens at once, as the prototype it is, not after three seconds.
 - The tips of Sort and the fold tab (and of any button over the columns' empty room) show when the mouse rests on them: the hover gave up early where what lay under the mouse - nothing - had not changed, before it asked for a button's tip.
