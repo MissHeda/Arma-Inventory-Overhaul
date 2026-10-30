@@ -24,8 +24,8 @@
  */
 
 [
-    // The window as it ships (PALETTE_DEFAULT): the player's own Arma colour on the plain films, the titles, the headings, the name at
-    // the mouse and the weight bar running from it into white.
+    // The window as it ships (PALETTE_DEFAULT): the player's own Arma colour on the plain films, the titles, the headings and the
+    // weight bar running from it into white - the name at the mouse plain.
     ["classic", LLSTRING(Style_Classic), PALETTE_DEFAULT],
 
     // Arma 3's own menus - near-black glass, white text, an amber highlight; the titles and the weight bar into a pale amber.

@@ -530,6 +530,10 @@ if (GVAR(menuState) isNotEqualTo []) then {
     [] call FUNC(raiseMenu);
 };
 
+// The name at the mouse - a button's tip too - over whatever a click drew since or gave the focus (a column refreshed after Sort,
+// a part drawn again): every frame, as the menu. It does nothing while it is the last control made and nothing marked it stale.
+[] call FUNC(raiseTooltip);
+
 // ----- Answers to the window's moves -----
 // Each finishes once this machine reads every revision of the places it names - a holder gone
 // meanwhile, the last item taken from a pile the engine then deleted, counts as read - or ANSWER_WAIT
