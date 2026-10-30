@@ -89,9 +89,9 @@ if (_loot) then {
     _accentColor = _theme getOrDefault ["lootAccent", []];
 };
 
-// The hairline under the title: the loot column's accent strip, else the theme's line. The title's words, and its icon: in the loot
-// column's accent, else the second line's grey.
-private _lineColor = [_accentColor, _theme getOrDefault ["line", [1, 1, 1, 0.07]]] select (_accentColor isEqualTo []);
+// The hairline under the title: the theme's line in every column (an accent strip under the loot column's title looked out of
+// place). The title's words, and its icon: in the loot column's accent, else the second line's grey.
+private _lineColor = _theme getOrDefault ["line", [1, 1, 1, 0.07]];
 private _titleColor = _theme getOrDefault ["text", [1, 1, 1, 1]];
 private _iconColor = [_accentColor, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] select (_accentColor isEqualTo []);
 
@@ -188,7 +188,7 @@ if (_title isNotEqualTo "") then {
         ] call FUNC(uiLabel)];
 
         // A hairline under the title, like the header's - the loot column's is its accent strip, two pixels in its colour.
-        private _lineH = [pixelH * 2, pixelH] select (_accentColor isEqualTo []);
+        private _lineH = pixelH;
         private _line = [_display, "EINV_PanelRect", controlNull, [_left + _padX, _innerTop + _titleH + _padY * 0.4, _width - _padX * 2, _lineH]] call FUNC(uiCreate);
         _line ctrlSetBackgroundColor _lineColor;
         _paint set [1, _line];

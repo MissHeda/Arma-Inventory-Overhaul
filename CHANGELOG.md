@@ -89,7 +89,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 ### Changed
 
 - Help texts shortened (issue #8): the 42 longest CBA setting descriptions and wizard helps are one or two short lines now.
-- The loot column has an accent strip under its title and its icon in the accent, so it is told apart from your own storage at a glance (issue #7).
+- The loot column's title icon is in the accent, so it is told apart from your own storage at a glance (issue #7).
 - New default look "AIO (default)": a red accent and the deep red films behind Open, Unload and the Unsearched box; new players start with it and Reset all goes back to it. Classic stays as the old look with your own Arma colour. The colour panel's Text row has a new group Surfaces: Bars (weight bar, ammo bars), Buttons and chips, and Header lines can run in the gradient too.
 - Colour panel: where the gradient shows (the checkboxes, each part's own colours and gradient switch) moved from the Titles row to the Text row, and shows whether the Titles row's gradient is on or not. A part with an end colour of its own runs even with it off; one without takes the Titles row's start and end. The Text row's Default takes the parts and their colours back too.
 - Colour panel, a part's own colours: each half of its pill picks its start or its end straight away. The line under the checkboxes has a Gradient On/Off switch of the part's own (the same as its checkbox): off, the part shows in one colour of its own (Colour) instead of running, where one is set.
@@ -177,6 +177,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- Gradient surfaces (bars, buttons and chips, header lines) are filled to their round ends: the left end takes the start colour, the right end the end colour - the left end showed the end colour (white with the default gradient).
 - A script error "Undefined variable _default" (fnc_hook) when the window was built from a scheduled script - a hook asked without a default gave back a variable that was not there.
 - The "Unsearched" box's hatching no longer shows square corners inside its round ones: it keeps a corner's width in from the left and right edges and runs the full height.
 - The name at the mouse sits centred under the pointer, a fixed gap below it, and is pushed in from a screen edge instead of jumping to the pointer's other side - near the right edge it flipped from right to left and back as names of other widths came along.

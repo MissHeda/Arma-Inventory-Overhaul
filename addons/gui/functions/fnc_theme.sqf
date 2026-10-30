@@ -9,7 +9,7 @@
  * without one), and the font is Purista as in vanilla and ACE. Tiles are dark greys tinted by what they are,
  * with their short name and a magazine's ammo bar; captions sit over the slots, in normal case.
  *
- * What is looted is told apart from what the player carries (issue 7; the blue look was reverted in issue 11) by the header text and an accent strip under the loot column's title, its icon in the accent (lootAccent); the other loot keys stay empty, so it keeps the plain pane -
+ * What is looted is told apart from what the player carries (issue 7; the blue look was reverted in issue 11) by the header text and the loot column's title icon in the accent (lootAccent); the other loot keys stay empty, so it keeps the plain pane -
  * here: the loot column's pane is tinted towards it and ringed in it, its title has an accent strip and icon in it,
  * and the caption tabs and hairlines of its sections are a film of it - still the same near-black glass, only
  * cooler; the player's own column keeps the plain pane and the accent.
@@ -124,7 +124,7 @@ _theme merge [createHashMapFromArray [
     ["panelBorder", []],
     ["lootPanel", []],
     ["lootBorder", []],
-    // Issue 7: the loot column's title gets an accent strip under it and its icon in the accent - still the same dark pane.
+    // Issue 7: the loot column's title icon in the accent - still the same dark pane, no strip.
     ["lootAccent", +_accent],
     ["lootTab", []],
     ["lootLine", []],

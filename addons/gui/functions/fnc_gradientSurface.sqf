@@ -3,12 +3,12 @@
 /*
  * Author: Miss Heda
  * Runs a surface - a bar's fill, a button, a header button's line - from the gradient's start into its end, left to right, where
- * the colour panel switched that part on (the Text row's parts, GRADIENT_BARS, GRADIENT_CHIPS, GRADIENT_LINES): the surface
- * takes the end colour, and a fade in the start colour lies over it, strong at the left and gone at the right. Its colours are the
- * part's own where it has them, else the main gradient's (the Titles row: its colour, else the accent, into its end), as for the
- * texts (fnc_uiLabel). The fade keeps a corner's width in from the left and right edges, where a round surface has straight top
- * and bottom edges, so no square corner shows. Only on the inventory's window, never in a layer that asks for plain controls
- * (the colour and sound panels, QGVAR(plain)).
+ * the colour panel switched that part on (the Text row's parts, GRADIENT_BARS, GRADIENT_CHIPS, GRADIENT_LINES). A round surface
+ * (fnc_uiPanel) is a middle piece between two round ends: the left end takes the start colour, the right end the end colour, and
+ * the middle piece runs between them - the end colour under a fade in the start colour, strong at its left and gone at its right.
+ * So the surface is filled to its round corners, start to end, and no square corner shows. Its colours are the part's own where it
+ * has them, else the main gradient's (the Titles row: its colour, else the accent, into its end), as for the texts (fnc_uiLabel).
+ * Only on the inventory's window, never in a layer that asks for plain controls (the colour and sound panels, QGVAR(plain)).
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -59,11 +59,19 @@ if (count _start < 3) then {
     _start = (_theme getOrDefault ["accent", [1, 1, 1, 1]]) select [0, 3];
 };
 
-[_surface, _end + [_alpha]] call FUNC(paintSurface);
-
 _rect params ["_left", "_top", "_width", "_height"];
 
-private _inset = SQUARE(_radius min (_height / 2));
+// The round ends as fnc_uiPanel cuts them: whole pixels, at most half the surface.
+private _inset = (floor ((_radius min (_height / 2)) / pixelH) min floor (_width / pixelW / 2)) * pixelW;
+
+// Each piece by where its middle lies: the left end the start, the right end and the middle piece the end.
+{
+    (ctrlPosition _x) params ["_pieceX", "", "_pieceW"];
+
+    private _middle = _pieceX + _pieceW / 2;
+
+    [[_x], ([_end, _start] select (_inset > 0 && {_middle < _left + _inset})) + [_alpha]] call FUNC(paintSurface);
+} forEach _surface;
 
 if (_width - _inset * 2 < pixelW) exitWith {controlNull};
 
