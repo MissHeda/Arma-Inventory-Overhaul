@@ -174,6 +174,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- Colour panel: the hint line at the bottom is as tall as its longest tip wraps to - two lines cut the Titles row's tip off mid-sentence.
 - Colour panel: with a dark titles colour (a deep violet, say) the titles ran in their End colour alone instead of the gradient - dark ink was taken for a key's badge on the accent. Only keys and buttons count as that now. The titles' Start box shows the accent while the titles have no colour of their own and the gradient is on, as the gradient really starts there.
 - Colour panel: after one click nothing in it could be clicked any more. The panel lies over the window only while a control in it holds the keyboard focus; once the focus went elsewhere it sank under the columns, which took the clicks. The frame now gives the focus back to the panel while it is open. The same focus is why a tip floating over the panel always lay under it: the tips of the panel's controls now show on a hint line at the bottom of the panel, and stay there after a click.
 - Colour panel rows in three sections with headings: Text and gradient (Titles, Text with the gradient parts) first, then Colours (Accent, Secondary), then Surfaces (Panels, Empty cells, Item tiles, Lines).

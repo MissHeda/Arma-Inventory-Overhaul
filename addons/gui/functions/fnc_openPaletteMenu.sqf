@@ -210,8 +210,30 @@ private _fieldLabelW = SQUARE(UNIT * 1.4);
 private _height = _padY * 2 + _titleH + (_gapY + _headH) + (count _rowDefs) * (_gapY + _headH) + (count _sectionHeads) * (_gapY + _sectionH);
 
 // The hint line at the bottom: the tip of what the mouse is on, inside the panel (a tip floating over it would lie under the
-// panel, which is drawn over everything while it holds the focus).
-_height = _height + _gapY + _rowH * 1.6;
+// panel, which is drawn over everything while it holds the focus). As many lines as the longest tip the panel has wraps to -
+// two cut the Titles row's tip off in the middle of a sentence.
+private _hintSize = _small * 0.9;
+private _hintW = _width - _padX * 2;
+private _hintLines = 2;
+
+{
+    private _words = _x;
+    private _lines = 0;
+
+    {
+        _lines = _lines + ((ceil (((_x getTextWidth [_font, _hintSize]) * TEXT_SLACK) / (_hintW max pixelW))) max 1);
+    } forEach (_words splitString toString [10]);
+
+    _hintLines = _hintLines max _lines;
+} forEach ((_rowDefs apply {_x select 3}) + [
+    LLSTRING(Palette_Style_Tip), LLSTRING(Palette_Gradient_Tip), LLSTRING(Palette_PartGradient_Tip), LLSTRING(Palette_PartColours_Tip),
+    LLSTRING(Palette_PartMain_Tip), LLSTRING(Palette_PartPick), LLSTRING(Palette_Export_Tip), LLSTRING(Palette_Import_Tip),
+    LLSTRING(Palette_Channel_Tip), LLSTRING(Palette_Hex_Tip)
+]);
+
+private _hintH = _hintSize * 1.3 * (_hintLines min 5) + _hintSize * 0.4;
+
+_height = _height + _gapY + _hintH;
 
 if (_io isNotEqualTo "") then {
     _height = _height + _gapY + _rowH;
@@ -1151,14 +1173,14 @@ private _sliders = createHashMap;
 
 // ----- The hint line: what the control under the mouse does (fnc_updateHover writes it) -----
 
-private _hintTop = _cardY + _height - _padY - _rowH * 1.6;
+private _hintTop = _cardY + _height - _padY - _hintH;
 
 [_display, _layer, [_cardX + _padX, _hintTop - _gapY / 2, _width - _padX * 2, pixelH], [1, 1, 1, 0.05]] call FUNC(uiPanel);
 
-private _hintLine = [_display, "EINV_StructuredText", _layer, [_cardX + _padX, _hintTop, _width - _padX * 2, _rowH * 1.6]] call FUNC(uiCreate);
+private _hintLine = [_display, "EINV_StructuredText", _layer, [_cardX + _padX, _hintTop, _hintW, _hintH]] call FUNC(uiCreate);
 
 _hintLine ctrlEnable false;
-_hintLine setVariable [QGVAR(hintSize), _small * 0.9];
+_hintLine setVariable [QGVAR(hintSize), _hintSize];
 uiNamespace setVariable [QGVAR(menuHint), _hintLine];
 
 // The panel made again after a click: the tip shown before stays.
