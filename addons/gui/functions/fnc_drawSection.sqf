@@ -767,9 +767,9 @@ if (_hasBox) then {
 // ---------------------------------------------------------------------------
 if (_sealed) then {
     // The block: as wide as a grid of STORAGE_COLS cells and SEAL_ROWS high, on the caption's surface (the loot tint where the
-    // theme has one, issue 7) with the hatching of what is not searched. The hatching is square: it keeps a corner's width in from
-    // the left and right edges and runs the full height, so it starts and ends where the round corners meet the straight top and
-    // bottom - a third of the corner in from every edge left its square corners standing in the round ones.
+    // theme has one, issue 7) with the hatching of what is not searched. The hatching fills the block to its edges and leaves out
+    // only the corner squares (fnc_uiHatch's boxes: the middle band edge to edge, the top and bottom bands between the corners) -
+    // square stripes in the round corners stood out, and a corner's width kept free at both sides framed the stripes.
     // "UNSEARCHED" in the middle, a ring over it that goes round while this box is searched, and one line under it that says
     // what the search does - written by fnc_updateStatus (the "seal" of the section's info), the ring turned by
     // fnc_animateStatus.
@@ -781,7 +781,13 @@ if (_sealed) then {
     _stripe set [3, ((_stripe select 3) * 1.8) min 0.2];
 
     [_display, _parent, [_gridX, _bodyTop, _sealW, _sealH], _tabColor, _sealRadius] call FUNC(uiPanel);
-    [_display, _parent, [_gridX + SQUARE(_sealRadius), _bodyTop, _sealW - SQUARE(_sealRadius) * 2, _sealH], _stripe] call FUNC(uiHatch);
+    private _cornerW = SQUARE(_sealRadius);
+
+    [_display, _parent, [_gridX, _bodyTop, _sealW, _sealH], _stripe, [
+        [_gridX, _bodyTop + _sealRadius, _sealW, _sealH - _sealRadius * 2],
+        [_gridX + _cornerW, _bodyTop, _sealW - _cornerW * 2, _sealRadius],
+        [_gridX + _cornerW, _bodyTop + _sealH - _sealRadius, _sealW - _cornerW * 2, _sealRadius]
+    ]] call FUNC(uiHatch);
 
     private _ringH = _textUnit * 0.95;
     private _wordSize = _textUnit * 0.62;
