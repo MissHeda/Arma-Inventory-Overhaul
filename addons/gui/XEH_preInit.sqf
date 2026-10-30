@@ -166,6 +166,7 @@ GVAR(equipmentRect) = [];
 // vest or backpack let go on it off its grids is put on; while the unit wears none of them, anything else
 // let go there is refused (fnc_updateDrag).
 GVAR(storageRect) = [];
+GVAR(lootRect) = [];
 
 // The boxes searched now, side by side (fnc_animateSearch): one run per box that has something queued and is not stopped,
 // [container, the entry being searched as it stood in the queue, when it was started, how long it takes]. searchDirty: the

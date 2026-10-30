@@ -450,6 +450,36 @@ if (!isNull _tooltip) then {
     if (_class isEqualTo "" && {!GVAR(dragging)} && {GVAR(stripDrag) isEqualTo []}) then {
         private _tipCtrl = uiNamespace getVariable [QGVAR(hoverTip), controlNull];
 
+        // As a guest (ACE Arsenal) no entering may have been reported: the last made control with a tip under the mouse,
+        // where it shows and nothing is open over it.
+        if (
+            isNull _tipCtrl && {_mouse isNotEqualTo []} && {(["guest", [], false] call FUNC(hook)) isEqualTo true}
+            && {(uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []}
+        ) then {
+            private _tipped = uiNamespace getVariable [QGVAR(tipCtrls), []];
+
+            for "_i" from (count _tipped - 1) to 0 step -1 do {
+                private _candidate = _tipped select _i;
+
+                if (!isNull _candidate && {ctrlShown _candidate}) then {
+                    private _size = ctrlPosition _candidate;
+                    private _at = if (isNull ctrlParentControlsGroup _candidate) then {_size} else {
+                        [[
+                            [0, 0, _size select 2, _size select 3], "", "",
+                            createHashMapFromArray [["rel", [_size select 0, _size select 1]], ["parent", ctrlParentControlsGroup _candidate]]
+                        ]] call FUNC(slotRect)
+                    };
+
+                    if (_at isNotEqualTo [] && {
+                        (_mouse select 0) >= (_at select 0) && {(_mouse select 0) < (_at select 0) + (_at select 2)}
+                        && {(_mouse select 1) >= (_at select 1)} && {(_mouse select 1) < (_at select 1) + (_at select 3)}
+                    }) exitWith {
+                        _tipCtrl = _candidate;
+                    };
+                };
+            };
+        };
+
         if (!isNull _tipCtrl && {ctrlShown _tipCtrl} && {ctrlEnabled _tipCtrl}) then {
             _ownTip = _tipCtrl getVariable [QGVAR(tip), ""];
         };

@@ -80,6 +80,7 @@ GVAR(searchQueue) = [];
 GVAR(panels) = [];
 GVAR(equipmentRect) = [];
 GVAR(storageRect) = [];
+GVAR(lootRect) = [];
 
 // The palette popover stays open across a build - what it sets is this build's colours - and is made again at its end. It is
 // closed here without being written to the profile (einv_gui_menuRemake, fnc_closeMenu).

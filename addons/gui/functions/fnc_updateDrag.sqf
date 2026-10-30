@@ -606,6 +606,7 @@ private _inArea = _onTop isEqualTo "" && {_dragGroup isEqualTo []} && {[] call F
 // Off every grid only: the storage column (GVAR(storageRect)), a zone a window that attached drew
 // (uiNamespace zones), or outside every panel.
 private _inStorage = false;
+private _inLoot = false;
 private _hitZone = -1;
 private _outside = false;
 
@@ -615,6 +616,12 @@ if (_hitGrid < 0) then {
             GVAR(storageRect) params [["_areaX", 0], ["_areaY", 0], ["_areaW", 0], ["_areaH", 0]];
             _mouseX >= _areaX && {_mouseX < _areaX + _areaW} && {_mouseY >= _areaY} && {_mouseY < _areaY + _areaH}
         };
+
+    // The loot column off its grids, for a single item from elsewhere (below).
+    _inLoot = _onTop isEqualTo "" && {_dragGroup isEqualTo []} && {
+        GVAR(lootRect) params [["_areaX", 0], ["_areaY", 0], ["_areaW", 0], ["_areaH", 0]];
+        _mouseX >= _areaX && {_mouseX < _areaX + _areaW} && {_mouseY >= _areaY} && {_mouseY < _areaY + _areaH}
+    };
 
     _hitZone = (uiNamespace getVariable [QGVAR(zones), []]) findIf {
         (_x select 0) params [["_zoneX", 0], ["_zoneY", 0], ["_zoneW", 0], ["_zoneH", 0]];
@@ -644,7 +651,7 @@ if (_hitGrid >= 0 && {_dragGroup isEqualTo []} && {(_w mod 2) == 0 || {(_h mod 2
     _halves = [_acrossX >= 0.5, _acrossY >= 0.5];
 };
 
-private _spot = [_onTop, _slotHits, _hitGrid, _hitCell, _inArea, _inStorage, _hitZone, _outside, _foldHit, _halves];
+private _spot = [_onTop, _slotHits, _hitGrid, _hitCell, _inArea, _inStorage, _hitZone, _outside, _foldHit, _halves, _inLoot];
 
 if (!_changed && {_spot isEqualTo (GVAR(dragRoom) getOrDefault ["spot", []])}) exitWith {
     if (_timed) then {call _fnc_noteTime};
@@ -1215,6 +1222,27 @@ call {
         };
     };
 
+    // On the loot column off its grids, from outside that column: into its first container, laid down in its first free spot
+    // as on a folded one - or, where that is the ground (or it shows none), onto the ground.
+    private _lootGround = false;
+
+    if (_targetIndex < 0 && {_inLoot} && {
+        _slotSource isNotEqualTo [] || {((_grids select _sourceIndex) getOrDefault ["side", ""]) isNotEqualTo "loot"}
+    }) then {
+        private _lootIndex = _grids findIf {
+            (_x getOrDefault ["side", ""]) isEqualTo "loot" && {!(_x getOrDefault ["virtual", true])} && {!(_x getOrDefault ["overflow", false])}
+            && {(_x getOrDefault ["window", ""]) isEqualTo ""} && {!isNull (_x getOrDefault ["container", objNull])}
+        };
+
+        if (_lootIndex < 0 || {[(_grids select _lootIndex) get "container"] call EFUNC(storage,isGroundHolder)}) then {
+            _lootGround = true;
+        } else {
+            _targetIndex = _lootIndex;
+            _viaFold = true;
+            _cell = [0, 0];
+        };
+    };
+
     if (_targetIndex < 0) exitWith {
         _footprint ctrlShow false;
 
@@ -1297,7 +1325,12 @@ call {
             GVAR(dragRoom) set ["fromGround", _fromGround];
         };
 
-        GVAR(dragTarget) = [[], ["ground", -1, 0, 0, true, ""]] select (_outside && {!_fromGround});
+        GVAR(dragTarget) = [[], ["ground", -1, 0, 0, true, ""]] select ((_outside || _lootGround) && {!_fromGround});
+
+        // The loot column that stands for the ground: its whole room lights at half strength.
+        if (_lootGround && {!_fromGround}) then {
+            [GVAR(lootRect), true, DRAG_FOOTPRINT_ALPHA / 2] call _fnc_show;
+        };
     };
 
     private _target = _grids select _targetIndex;

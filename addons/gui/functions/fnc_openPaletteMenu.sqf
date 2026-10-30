@@ -609,7 +609,8 @@ if (_stylesOpen) then {
         private _current = _styleId isEqualTo (_info get "style") || {_styleId isEqualTo "classic" && {GVAR(palette) isEqualTo PALETTE_DEFAULT}};
         private _rowTop = _y;
 
-        private _textX = _cardX + _nameX;
+        // Flush with the popover's left edge (its title, the rows' arrows): no indent of its own.
+        private _textX = _cardX + _padX;
 
         [_display, _layer, [_textX, _rowTop, _cardX + _width - _padX - _textX, _rowH], _name, _small, [_text2, _text] select _current, _font, 0, "menu"] call FUNC(uiLabel);
 

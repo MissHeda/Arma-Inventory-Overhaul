@@ -67,6 +67,11 @@ if (_id isEqualTo "storage") then {
     GVAR(storageRect) = _rect;
 };
 
+// So is the loot column off its grids: what is let go there goes into its first container, or onto the ground (fnc_updateDrag).
+if (_id isEqualTo "loot") then {
+    GVAR(lootRect) = _rect;
+};
+
 // The loot column's own look, where the theme has one: each key left [] keeps the plain one.
 private _loot = _id isEqualTo "loot";
 private _panelColor = _theme getOrDefault ["panel", []];

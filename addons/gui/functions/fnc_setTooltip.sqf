@@ -34,6 +34,13 @@ _ctrl setVariable [QGVAR(tip), _tip];
 if (_ctrl getVariable [QGVAR(tipHooked), false]) exitWith {};
 
 _ctrl setVariable [QGVAR(tipHooked), true];
+
+// Kept for the look by place: as a guest on another mod's display (ACE Arsenal) the engine reports the mouse entering a
+// control unreliably - the tip showed only after a click - so the hover looks for it under the mouse there (fnc_updateHover).
+private _tipped = uiNamespace getVariable [QGVAR(tipCtrls), []];
+_tipped = _tipped select {!isNull _x};
+_tipped pushBack _ctrl;
+uiNamespace setVariable [QGVAR(tipCtrls), _tipped];
 _ctrl ctrlAddEventHandler ["MouseEnter", {
     params ["_ctrl"];
 
