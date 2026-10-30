@@ -544,8 +544,14 @@
         <Key ID="STR_einv_gui_Palette_Panels_Tip">
             <English>The window's background: the panels behind the columns, the header and the footer, and the inspect card and kit windows - and how see-through they are. Kept dark enough for the text to stay readable.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_PartColour">
+            <English>Colour</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_PartColours_Tip">
             <English>The colours this part's gradient runs between. Unset, it takes the main gradient's start and end.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_PartGradient_Tip">
+            <English>Whether this part runs in a gradient - the same as its checkbox. Off, it shows in its own colour, where you set one, or as before.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_PartMain">
             <English>Main</English>
@@ -554,7 +560,7 @@
             <English>Back to the main gradient's colours for this part.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_PartPick">
-            <English>Its own gradient: click to set this part's colours below</English>
+            <English>This part's own colours: the left half its start, the right its end. Click to set it below</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Ammo">
             <English>Ammo counts</English>

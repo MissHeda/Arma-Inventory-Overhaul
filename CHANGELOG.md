@@ -88,6 +88,8 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Changed
 
+- Colour panel, a part's own colours: each half of its pill picks its start or its end straight away. The line under the checkboxes has a Gradient On/Off switch of the part's own (the same as its checkbox): off, the part shows in one colour of its own (Colour) instead of running, where one is set.
+- The gradient's checkboxes flip their tick at the click, before the window is built again for it.
 - Colour panel, "Shows on": two parts to a row instead of three, so their names show whole; each part's colour pill sits right beside its checkbox.
 - The hint in the footer starts right after the key hints, parted from them by a thin upright line, left-aligned, instead of in the middle of the screen.
 - Colour panel, Titles: every part of "Shows on" can run in colours of its own. A small pill at each checkbox shows the part's start and end; a click on it opens a line under the checkboxes with the part's name, its own Start and End (the picker bound to the one outlined) and Main, which takes the part back to the main gradient's colours. Unset, a part follows the main gradient. Saved with the palette, exported and imported with it. New part "Weapon ammo" (the rounds on the weapons' cards and in their magazine slots), apart from the magazines' counts on the tiles.
@@ -171,6 +173,8 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- A part's own Start and End were set on the main gradient instead: the picker stayed bound to the Titles row's colour.
+- TFAR: a radio TFAR has not set up opens at once, as the prototype it is, not after three seconds.
 - The tips of Sort and the fold tab (and of any button over the columns' empty room) show when the mouse rests on them: the hover gave up early where what lay under the mouse - nothing - had not changed, before it asked for a button's tip.
 - TFAR: "Open radio" on a radio TFAR has not set up opens it all the same after three seconds, as the prototype it is - TFAR's beta server never answers the radio request with newer CBA, so its radios stayed prototypes. The vanilla radio, which has no dialog of its own, says it is not ready and the RPT why.
 - The key of the weapon in hand (its 1 on the accent) stays readable with the gradient on: it takes the gradient's end or start, whichever stands out from the accent at 3 : 1, else its own ink.

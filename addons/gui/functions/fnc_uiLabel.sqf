@@ -67,6 +67,18 @@ if (!isNull _parent && {_parent getVariable [QGVAR(plain), false]}) then {
 };
 
 private _ownStart = [];
+private _inScope = _bit > 0 && {_title || {_part isEqualTo "hover"} || {_display isEqualTo (uiNamespace getVariable [QGVAR(display), displayNull])}};
+
+// A part with no gradient but a colour of its own (its Start, set in the colour panel): that colour, plain.
+if (_inScope && {((floor ((_theme getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]) / _bit)) mod 2) == 0}) then {
+    private _ownPlain = ((_theme getOrDefault ["gradientOwn", []]) param [round (log _bit / log 2), [[], []]]) select 0;
+
+    if (_ownPlain isNotEqualTo []) then {
+        _color = (_ownPlain select [0, 3]) + [[1, _color param [3, 1]] select (count _color >= 4)];
+        _title = false;
+    };
+};
+
 private _graded = _bit > 0 && {count _gradient >= 3} && {((floor ((_theme getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]) / _bit)) mod 2) == 1} && {
     _title || {_part isEqualTo "hover"} || {_display isEqualTo (uiNamespace getVariable [QGVAR(display), displayNull])}
 };

@@ -149,8 +149,11 @@ if !(_open isEqualTo "titles" && {[_openEnd] call _fnc_gradientOn} && {_partPick
     _partPick = -1;
 };
 
+// A part with no gradient has no end: its one colour is its start.
 if (_partPick >= 0) then {
-    _tab = PALETTE_COLOURS + _partPick * 2 + ([0, 1] select (uiNamespace getVariable [QGVAR(paletteEnd), false]));
+    private _partRuns = ((floor ((GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]) / (2 ^ _partPick))) mod 2) == 1;
+
+    _tab = PALETTE_COLOURS + _partPick * 2 + parseNumber (_partRuns && {uiNamespace getVariable [QGVAR(paletteEnd), false]});
 };
 
 uiNamespace setVariable [QGVAR(paletteTab), _tab];
@@ -841,14 +844,15 @@ private _sliders = createHashMap;
                         [_display, _layer, [_cellX, _checkY, _checkW, _checkH], [_muted, _text] select _on, 0] call FUNC(uiPanel);
                         [_display, _layer, [_cellX + _edgeW, _checkY + _edgeH, _checkW - _edgeW * 2, _checkH - _edgeH * 2], [0.08, 0.08, 0.08, 1], 0] call FUNC(uiPanel);
 
-                        if (_on) then {
-                            private _inset = _checkH * 0.16;
+                        // The tick is always there, shown while the part is on: a click flips it at once, before the window is built
+                        // again for the change.
+                        private _inset = _checkH * 0.16;
+                        private _tick = [
+                            _display, _layer, [_cellX + SQUARE(_inset), _checkY + _inset, _checkW - SQUARE(_inset) * 2, _checkH - _inset * 2],
+                            UI_TEX(icon_check_ca), _text
+                        ] call FUNC(uiIcon);
 
-                            [
-                                _display, _layer, [_cellX + SQUARE(_inset), _checkY + _inset, _checkW - SQUARE(_inset) * 2, _checkH - _inset * 2],
-                                UI_TEX(icon_check_ca), _text
-                            ] call FUNC(uiIcon);
-                        };
+                        _tick ctrlShow _on;
 
                         // Its own gradient: a small pill of its start and end right beside the checkbox, outlined while it is the
                         // part the picker is bound to. A click on it picks the part (the line under the groups).
@@ -866,31 +870,43 @@ private _sliders = createHashMap;
                             [0, 0, 0, 1], 0
                         ] call FUNC(uiPanel)];
 
-                        private _pillHit = [_display, "EINV_Hitbox", _layer, _pillRect] call FUNC(uiCreate);
+                        // Each half picks its own colour for the picker: the left the start, the right the end. The half that is
+                        // picked already, clicked again, lets the part go.
+                        {
+                            _x params ["_halfRect", "_isEnd"];
 
-                        [_pillHit, LLSTRING(Palette_PartPick)] call FUNC(setTooltip);
-                        _pillHit setVariable [QGVAR(id), _partIndex];
-                        _pillHit ctrlAddEventHandler ["ButtonClick", {
-                            params ["_ctrl"];
+                            private _pillHit = [_display, "EINV_Hitbox", _layer, _halfRect] call FUNC(uiCreate);
 
-                            [{
-                                params ["_partIndex"];
+                            [_pillHit, LLSTRING(Palette_PartPick)] call FUNC(setTooltip);
+                            _pillHit setVariable [QGVAR(id), [_partIndex, _isEnd]];
+                            _pillHit ctrlAddEventHandler ["ButtonClick", {
+                                params ["_ctrl"];
 
-                                private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+                                [{
+                                    params ["_partIndex", "_isEnd"];
 
-                                if (isNull _display) exitWith {};
+                                    private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
-                                uiNamespace setVariable [QGVAR(palettePart), [_partIndex, -1] select (_partIndex == (uiNamespace getVariable [QGVAR(palettePart), -1]))];
-                                uiNamespace setVariable [QGVAR(paletteEnd), false];
+                                    if (isNull _display) exitWith {};
 
-                                [_display] call FUNC(openPaletteMenu);
-                            }, [_ctrl getVariable [QGVAR(id), -1]]] call FUNC(later);
-                        }];
+                                    private _again = _partIndex == (uiNamespace getVariable [QGVAR(palettePart), -1])
+                                        && {_isEnd isEqualTo (uiNamespace getVariable [QGVAR(paletteEnd), false])};
+
+                                    uiNamespace setVariable [QGVAR(palettePart), [_partIndex, -1] select _again];
+                                    uiNamespace setVariable [QGVAR(paletteEnd), _isEnd];
+
+                                    [_display] call FUNC(openPaletteMenu);
+                                }, _ctrl getVariable [QGVAR(id), [-1, false]]] call FUNC(later);
+                            }];
+                        } forEach [
+                            [[_pillRect select 0, _cellY, _pillW / 2, _rowH], false],
+                            [[(_pillRect select 0) + _pillW / 2, _cellY, _pillW / 2, _rowH], true]
+                        ];
 
                         private _wordsX = (_pillRect select 0) + _pillW + SQUARE(UNIT * 0.15);
                         private _wordsW = _cellX + _partW - _wordsX;
 
-                        [
+                        private _wordsLabel = [
                             _display, _layer, [_wordsX, _cellY, _wordsW, _rowH], [_words, _wordsW, _font, _small * 0.9] call FUNC(fitText),
                             _small * 0.9, [_muted, _text] select _on, _font, 0
                         ] call FUNC(uiLabel);
@@ -901,8 +917,17 @@ private _sliders = createHashMap;
 
                             [_partHit, _partTip] call FUNC(setTooltip);
                             _partHit setVariable [QGVAR(id), _bit];
+                            _partHit setVariable [QGVAR(tick), [_tick, _wordsLabel]];
                             _partHit ctrlAddEventHandler ["ButtonClick", {
                                 params ["_ctrl"];
+
+                                // Seen at once: the tick and the words flip now, the window follows when it is built again.
+                                (_ctrl getVariable [QGVAR(tick), []]) params [["_tick", controlNull], ["_wordsLabel", controlNull]];
+
+                                private _now = !ctrlShown _tick;
+
+                                _tick ctrlShow _now;
+                                _wordsLabel ctrlSetTextColor ([[0.56, 0.56, 0.56, 1], [1, 1, 1, 1]] select _now);
 
                                 // The popover is made again, which deletes this very control: a frame later.
                                 [{
@@ -940,12 +965,34 @@ private _sliders = createHashMap;
                         _small, _text, _font, 0
                     ] call FUNC(uiLabel);
 
-                    private _ownEnd = uiNamespace getVariable [QGVAR(paletteEnd), false];
+                    // Whether this part runs in a gradient at all - the same as its checkbox. Off, it takes its own colour (Start) as
+                    // one plain colour where one is set, and End is not offered.
+                    private _partBit = 2 ^ _partPick;
+                    private _partOn = ((floor ((GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]) / _partBit)) mod 2) == 1;
+                    private _ownEnd = _partOn && {uiNamespace getVariable [QGVAR(paletteEnd), false]};
+                    private _switchW = SQUARE(UNIT * 2.2);
+                    private _partSwitch = [
+                        _display, _layer, [_cardX + _sliderX, _y + (_rowH - _chipH) / 2, _switchW, _chipH], str _partBit,
+                        [LLSTRING(Palette_Off), LLSTRING(Palette_On)] select _partOn, "", _buttonTheme, {
+                            params ["_button", "_bitId"];
+
+                            if (_button < 0) exitWith {};
+
+                            uiNamespace setVariable [QGVAR(paletteEnd), false];
+
+                            ["gradientPart", parseNumber _bitId] call FUNC(paletteSet);
+                        }, false, _chipSize, true
+                    ] call FUNC(uiButton);
+
+                    [(_partSwitch param [count _partSwitch - 1, controlNull]), LLSTRING(Palette_PartGradient_Tip)] call FUNC(setTooltip);
+
                     private _boxW = SQUARE(UNIT * 2.6);
-                    private _boxX = _cardX + _sliderX;
+                    private _boxX = _cardX + _sliderX + _switchW + _gapX;
 
                     {
                         _x params ["_boxId", "_words", "_isEnd"];
+
+                        if (_isEnd && {!_partOn}) then {continue};
 
                         private _boxRect = [_boxX, _y + _rowH * 0.1, _boxW, _rowH * 0.8];
                         private _picked = _isEnd isEqualTo _ownEnd;
@@ -979,7 +1026,7 @@ private _sliders = createHashMap;
                         }];
 
                         _boxX = _boxX + _boxW + SQUARE(UNIT * 1.9);
-                    } forEach [["partStart", LLSTRING(Palette_Start), false], ["partEnd", LLSTRING(Palette_End), true]];
+                    } forEach [["partStart", [LLSTRING(Palette_PartColour), LLSTRING(Palette_Start)] select _partOn, false], ["partEnd", LLSTRING(Palette_End), true]];
 
                     // Main: only where the part has a colour of its own.
                     private _ownSet = _info get "ownSet";
@@ -1006,7 +1053,8 @@ private _sliders = createHashMap;
         };
 
         if (_which >= 0) then {
-            _picker = [[_which, _end] select (_pickEnd && {_end >= 0}), _y + _pickPad] call _fnc_picker;
+            // The titles' picker edits the part picked for colours of its own, where one is (_tab, above).
+            _picker = [[[_which, _end] select (_pickEnd && {_end >= 0}), _tab] select (_id isEqualTo "titles" && {_partPick >= 0}), _y + _pickPad] call _fnc_picker;
             _y = _y + _pickPad * 2 + _pickH;
         } else {
             _y = _y + _pickPad;
