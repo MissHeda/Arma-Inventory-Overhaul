@@ -2,7 +2,7 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## 0.5.0 - unreleased
+## 0.6.0 - beta
 
 - The mod is now called AIO - Arma Inventory Overhaul (was Enhanced Inventory). Class names, the einv prefix and all setting names stay, so missions and saved settings keep working.
 

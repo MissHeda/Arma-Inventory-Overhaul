@@ -19,9 +19,10 @@ all") or puts everything of yours into the box beside it ("Put all in").
   is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is
   blocked, by server setting.
 
-**Status:** 0.4.0, in testing: drag and drop between containers and equipment slots, searching loot and
-server-checked moves in multiplayer are built, and this version adds the grid panel in ACE Arsenal, shaped
-grids and items, a setup wizard where you paint the compartments, and cells as the only room (no weight limit).
+**Status:** 0.6.0, public beta: drag and drop between containers and equipment slots, searching loot,
+server-checked moves in multiplayer, the grid panel in ACE Arsenal, shaped grids and items, the hotbar, the
+setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
+Bugs and wishes go to Discord or the GitHub issues.
 The plan is in [docs/BRIEFING.md](docs/BRIEFING.md), the design in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Requirements
