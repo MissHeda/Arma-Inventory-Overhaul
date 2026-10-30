@@ -25,17 +25,21 @@
 
 params [["_name", "", [""]], ["_args", [], [[]]], "_default"];
 
-if !(_name in GVAR(hooks)) exitWith {_default};
+// What a hook that is not there, or answers nothing, gives back: the default, or nothing where the caller named none (read with
+// isNil - a missing argument is no variable at all, and naming it was a script error in a scheduled caller).
+private _fnc_default = {if (isNil "_default") then {nil} else {_default}};
+
+if !(_name in GVAR(hooks)) exitWith {call _fnc_default};
 
 private _hook = GVAR(hooks) get _name;
 
-if (isNil "_hook") exitWith {_default};
+if (isNil "_hook") exitWith {call _fnc_default};
 
 // A flag: not code, so nothing to call - its value is the answer.
 if !(_hook isEqualType {}) exitWith {_hook};
 
 private _result = _args call _hook;
 
-if (isNil "_result") exitWith {_default};
+if (isNil "_result") exitWith {call _fnc_default};
 
 _result

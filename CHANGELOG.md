@@ -175,6 +175,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- A script error "Undefined variable _default" (fnc_hook) when the window was built from a scheduled script - a hook asked without a default gave back a variable that was not there.
 - The "Unsearched" box's hatching no longer shows square corners inside its round ones: it keeps a corner's width in from the left and right edges and runs the full height.
 - The name at the mouse sits centred under the pointer, a fixed gap below it, and is pushed in from a screen edge instead of jumping to the pointer's other side - near the right edge it flipped from right to left and back as names of other widths came along.
 - Colour panel: the hint line at the bottom is as tall as its longest tip wraps to - two lines cut the Titles row's tip off mid-sentence.
