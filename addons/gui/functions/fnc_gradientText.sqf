@@ -13,6 +13,7 @@
  * 3: Alignment - 0 left, 1 right, 2 centre <NUMBER>
  * 4: The first letter's colour [r, g, b, a] <ARRAY>
  * 5: The last letter's colour [r, g, b] <ARRAY>
+ * 6: Keep it on one line: its spaces are ones the line never breaks at (a name, a title) <BOOL> (default: false)
  *
  * Return Value:
  * Structured text, for EINV_StructuredText <TEXT>
@@ -23,7 +24,7 @@
  * Public: No
  */
 
-params [["_text", "", [""]], ["_font", "", [""]], ["_size", 0.03, [0]], ["_align", 0, [0]], ["_from", [1, 1, 1, 1], [[]]], ["_to", [1, 1, 1], [[]]]];
+params [["_text", "", [""]], ["_font", "", [""]], ["_size", 0.03, [0]], ["_align", 0, [0]], ["_from", [1, 1, 1, 1], [[]]], ["_to", [1, 1, 1], [[]]], ["_keepLine", false, [false]]];
 
 private _codes = toArray _text;
 private _last = (count _codes - 1) max 1;
@@ -39,6 +40,9 @@ private _letters = [];
         case 38: {"&amp;"};
         case 60: {"&lt;"};
         case 62: {"&gt;"};
+        // A space the line may not break at: structured text breaks a line between any two of these letters' tags as soon as
+        // the words run a hair wider than their box, and the rest of a one-line box is cut ("MX" showed as "M").
+        case 32: {[" ", toString [160]] select _keepLine};
         default {toString [_x]};
     };
 

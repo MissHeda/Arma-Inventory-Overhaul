@@ -546,6 +546,11 @@ if (!isNull _tooltip) then {
             private _textUnit = TEXT_UNIT;
             private _width = (_name getTextWidth [_font, _textUnit * 0.58]) * TEXT_SLACK + SQUARE(_textUnit * 0.8);
 
+            // In the gradient each letter is a tag of its own and the line runs wider than measured: the glass gets that room.
+            if (_tooltip getVariable [QGVAR(gradient), false]) then {
+                _width = _width + (_name getTextWidth [_font, _textUnit * 0.58]) * 0.2;
+            };
+
             // A long tip breaks into lines rather than running across the screen.
             private _maxW = SQUARE(_textUnit * 15);
             private _lines = ceil (_width / _maxW);

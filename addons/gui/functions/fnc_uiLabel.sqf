@@ -165,7 +165,7 @@ if (_graded && {_text isEqualType ""} && {_text isNotEqualTo ""}) exitWith {
     private _boxLeft = [_left, _left - _extra, _left - _extra / 2] select ((_align max 0) min 2);
     private _ctrl = [_display, "EINV_StructuredText", _parent, [_boxLeft, _top + (_height - _size) / 2, _width + _extra, _size * 1.3]] call FUNC(uiCreate);
 
-    _ctrl ctrlSetStructuredText ([_text, _font, _size, _align, _color, _gradient] call FUNC(gradientText));
+    _ctrl ctrlSetStructuredText ([_text, _font, _size, _align, _color, _gradient, true] call FUNC(gradientText));
 
     // Structured text takes the mouse and the focus, where a label does neither: over a button or a fold tab it kept their
     // tips from showing until a click, and focused, its column was drawn over the name at the mouse. Off, it is words only.

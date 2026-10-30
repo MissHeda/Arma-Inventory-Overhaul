@@ -174,6 +174,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- The name at the mouse in the gradient showed only its first letters ("M" for the MX): a letter of its own in each colour runs wider than the name was measured, and the line broke. The glass gets that room, and one-line names and titles in the gradient never break.
 - Colour panel: a tip that was showing stays over the panel when the panel is drawn again (a click, a tick) with the mouse standing still; the two-colour swatches of a gradient (the row's and each part's) have round corners like the others, and the Start and End boxes are rounder; on a part's colour line Main no longer lies over End - Start and End give it room.
 - The colour panel's buttons and checkboxes were hard to hit and a click could land on the wrong one: each tip shown over the panel made the panel be made again, which raised the tip again, every frame - a click pressed on one control was let go on its successor. Tips no longer count as lying over a menu.
 - A click on the colour panel between its controls no longer closes it; only a click beside the panel does.
