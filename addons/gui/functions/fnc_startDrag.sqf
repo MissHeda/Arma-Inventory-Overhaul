@@ -409,6 +409,11 @@ if (!isNull _hint) then {
         _parts append [LLSTRING(Hint_Amount), LLSTRING(Hint_All)];
     };
 
+    // A box with pages on the window: Page Up / Page Down carry the item to another page (fnc_onKeyDown).
+    if ((uiNamespace getVariable [QGVAR(grids), []]) findIf {count (_x getOrDefault ["pageRanges", []]) > 1} >= 0) then {
+        _parts pushBack LLSTRING(Hint_Pages);
+    };
+
     // Several tiles: no turning, whole stacks.
     if (_group isNotEqualTo []) then {
         _parts = [LLSTRING(Hint_GroupDrag)];

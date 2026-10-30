@@ -120,6 +120,30 @@ if (_editing) exitWith {
     };
 };
 
+// Page Up / Page Down turn the page of a paged box (a tall crate or vehicle, fnc_pageRanges): the box the dragged item is over, else
+// the box under the mouse - so an item can be carried from one page to another without holding it over the page bar's arrow.
+if (_key in [DIK_PRIOR, DIK_NEXT]) exitWith {
+    private _gridIndex = if (GVAR(dragging)) then {
+        [-1, GVAR(dragTarget) param [1, -1]] select ((GVAR(dragTarget) param [0, ""]) isEqualTo "grid")
+    } else {
+        [-1, GVAR(hover) param [1, -1]] select ((GVAR(hover) param [0, ""]) in ["tile", "cell"])
+    };
+    private _grid = (uiNamespace getVariable [QGVAR(grids), []]) param [_gridIndex, createHashMap];
+
+    if (count (_grid getOrDefault ["pageRanges", []]) < 2) exitWith {false};
+
+    private _step = [1, -1] select (_key == DIK_PRIOR);
+
+    // A drag turns at once, as its hold over the bar does; a click's turn goes through the coalesced one.
+    if (GVAR(dragging)) then {
+        [_grid, _step] call FUNC(turnPage);
+    } else {
+        [_grid, _step] call FUNC(pageSoon);
+    };
+
+    true
+};
+
 // Moving while looting or searching: the soldier stops and walks off (einv_gui_moveToStop). A key that was
 // held already when the window opened counts once it was let go and pressed again (KeyUp in fnc_open), and
 // nothing counts in the first moment, while the press that opened the window may still be repeating. A

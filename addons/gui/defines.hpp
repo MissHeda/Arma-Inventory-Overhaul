@@ -137,6 +137,8 @@
 #define DEFAULT_QUICK_KEY 33
 #define DIK_R      19
 #define DIK_DELETE 211
+#define DIK_PRIOR  201
+#define DIK_NEXT   209
 
 // The Gear key (I) closes the window again - but not the press that opened it, still held down or
 // repeating, which arrives within this many seconds.

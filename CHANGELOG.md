@@ -8,6 +8,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Added
 
+- Page Up / Page Down turn the page of a tall crate or vehicle: the box a dragged item is over, else the box under the mouse - an item can be carried to another page of the same box. The drag hint says so where a box has pages.
 - Import and Export in the colour panel (beside Reset all): Export puts your colours as text on the clipboard and in a field to copy, Import takes text pasted into the field. The same text is a client setting, Colours (text) (`einv_gui_paletteText`, Configure Addons - Client, General): it follows the colour panel, and text pasted there is taken. A server or mission that forces it gives everyone those colours and hides the colour button.
 - Where the titles' gradient shows, part by part, in the colour panel (Titles row, "Shows on"): Titles, Headings, Names, Counts, Buttons (and the key hints), Other text and Mouse (the name and tips at the mouse). By default the titles, the headings and the mouse's. Counts take the gradient's start colour - too short to run. Every style now brings a gradient of its own, Classic included, and the window ships with it: titles run from the accent into white for a new player, after Reset all and where the server does not let players pick colours. The Gradient switch still turns it off.
 - Tips of the window's buttons and fields (fold a box, sort, close, the colour panel, ...) show on the same round glass as the name at the mouse instead of Arma's square tooltip box.

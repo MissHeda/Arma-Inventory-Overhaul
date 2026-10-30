@@ -211,6 +211,9 @@
         <Key ID="STR_einv_gui_Hint_Overflow">
             <English>Too wide for this grid</English>
         </Key>
+        <Key ID="STR_einv_gui_Hint_Pages">
+            <English>PgUp/PgDn: page</English>
+        </Key>
         <Key ID="STR_einv_gui_Hint_PlacedElsewhere">
             <English>Put elsewhere - that place was just taken</English>
         </Key>
