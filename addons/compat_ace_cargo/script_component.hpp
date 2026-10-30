@@ -8,6 +8,11 @@
 #define UNIT (safezoneH / 40)
 #define SQUARE(H) ((H) * pixelW / pixelH)
 #define TEXT_SLACK 1.3
+// The caption line and its pill tab (fnc_drawSection there): the line's height and the tab's text size in TEXT_UNITs, and
+// where a line of capitals sits in its box.
+#define CAPTION_LINE 0.8
+#define TEXT_REF 0.42
+#define TEXT_MID 0.66
 
 // The window's words grow with its tiles (einv_gui_fnc_textScale, TEXT_UNIT in gui/defines.hpp): the cards' texts and
 // the rows that hold them are measured in it, as the sections above them are.

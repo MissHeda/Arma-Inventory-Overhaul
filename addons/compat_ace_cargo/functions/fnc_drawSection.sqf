@@ -68,9 +68,15 @@ private _blockX = ((_width - _blockW) / 2) max 0;
 // ---------------------------------------------------------------------------
 // The caption line and every text of the cards grow with the tile scale (TEXT_UNIT), as einv_gui_fnc_drawSection's do.
 private _textUnit = TEXT_UNIT;
-private _lineH = _textUnit * 0.62;
+private _lineH = _textUnit * CAPTION_LINE;
 private _lineSize = _textUnit * 0.46;
-private _tabPad = SQUARE(_lineH * 0.5);
+
+// The tab is a pill on the line as the sections' tabs above are (einv_gui_fnc_drawSection): lower than the line and in its middle,
+// the same height, text size and round ends.
+private _buttonH = _textUnit * 0.6;
+private _buttonTop = _top + (_lineH - _buttonH) / 2;
+private _buttonSize = _textUnit * TEXT_REF;
+private _tabPad = SQUARE(_buttonH * 0.9);
 
 private _used = 0;
 
@@ -83,8 +89,8 @@ private _spaceW = (_space getTextWidth [_font, _lineSize]) * TEXT_SLACK + SQUARE
 
 private _caption = [_section getOrDefault ["title", ""], _theme] call EFUNC(gui,caption);
 private _tabRoom = _blockW - _spaceW;
-private _shown = [_caption, _tabRoom - _tabPad, _fontBold, _lineSize] call EFUNC(gui,fitText);
-private _tabW = (((_shown getTextWidth [_fontBold, _lineSize]) * TEXT_SLACK) + _tabPad) min _tabRoom;
+private _shown = [_caption, _tabRoom - _tabPad, _fontBold, _buttonSize] call EFUNC(gui,fitText);
+private _tabW = (((_shown getTextWidth [_fontBold, _buttonSize]) * TEXT_SLACK) + _tabPad) min _tabRoom;
 
 // What is looted has its tab and hairline in the theme's loot colours where it has them (lootTab, lootLine; issue 7), as
 // the sections above: the cargo is always the loot column's.
@@ -100,10 +106,13 @@ if ((_theme getOrDefault ["lootLine", []]) isNotEqualTo []) then {
 
 if (_shown isNotEqualTo "") then {
     [
-        _display, _parent, [_blockX, _top, _tabW, _lineH], _tabColor,
-        (_theme getOrDefault ["radius", 0]) min (_lineH / 2)
+        _display, _parent, [_blockX, _buttonTop, _tabW, _buttonH], _tabColor,
+        (_theme getOrDefault ["radius", 0]) min (_buttonH / 2)
     ] call EFUNC(gui,uiPanel);
-    [_display, _parent, [_blockX, _top, _tabW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2, "tab"] call EFUNC(gui,uiLabel);
+    [
+        _display, _parent, [_blockX, _buttonTop + _buttonH / 2 - TEXT_MID * _buttonSize, _tabW, TEXT_MID * _buttonSize * 2],
+        _shown, _buttonSize, _colorText2, _fontBold, 2, "tab"
+    ] call EFUNC(gui,uiLabel);
 };
 
 [_display, _parent, [_blockX + _blockW - _spaceW, _top, _spaceW, _lineH], _space, _lineSize, _colorText2, _font, 1, "value"] call EFUNC(gui,uiLabel);
