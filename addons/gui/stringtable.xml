@@ -505,6 +505,9 @@
         <Key ID="STR_einv_gui_Palette_Group_Items">
             <English>Items</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Group_Surfaces">
+            <English>Surfaces</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Group_Window">
             <English>Window</English>
         </Key>
@@ -568,6 +571,12 @@
         <Key ID="STR_einv_gui_Palette_Part_Ammo_Tip">
             <English>Rounds like 30/30 on the magazines' tiles.</English>
         </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Bars">
+            <English>Bars</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Bars_Tip">
+            <English>The weight bar, the ammo bars on magazines and the bars on the cards.</English>
+        </Key>
         <Key ID="STR_einv_gui_Palette_Part_Buttons">
             <English>Buttons</English>
         </Key>
@@ -579,6 +588,12 @@
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Captions_Tip">
             <English>Primary, Headgear, Uniform and the other captions over or in the slots.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Chips">
+            <English>Buttons and chips</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Chips_Tip">
+            <English>The surfaces of buttons and chips: Open, Unload, Sort, the caption chips.</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Columns">
             <English>Column titles</English>
@@ -603,6 +618,12 @@
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Keys_Tip">
             <English>The weapons' 1, 2, 3, the hotbar's 4 to 0 and the page marks.</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Lines">
+            <English>Header lines</English>
+        </Key>
+        <Key ID="STR_einv_gui_Palette_Part_Lines_Tip">
+            <English>The line under a header button that is on (the palette, the speaker).</English>
         </Key>
         <Key ID="STR_einv_gui_Palette_Part_Menus">
             <English>Right-click menu</English>
@@ -1182,6 +1203,9 @@ Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_einv_gui_Storage_Empty">
             <English>No uniform, vest or backpack</English>
+        </Key>
+        <Key ID="STR_einv_gui_Style_Aio">
+            <English>AIO (default)</English>
         </Key>
         <Key ID="STR_einv_gui_Style_Apex">
             <English>Apex</English>

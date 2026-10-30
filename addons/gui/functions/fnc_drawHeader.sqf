@@ -124,6 +124,16 @@ private _fnc_underline = {
         _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]
     ] call FUNC(uiPanel);
 
+    // In the gradient where the colour panel switched the lines on (GRADIENT_LINES).
+    private _fade = [
+        _display, controlNull, [(_rect select 0) + SQUARE(_inset), (_rect select 1) + (_rect select 3) - pixelH * 4, (_rect select 2) - SQUARE(_inset) * 2, pixelH * 2],
+        GRADIENT_LINES, _line, 1
+    ] call FUNC(gradientSurface);
+
+    if (!isNull _fade) then {
+        _line pushBack _fade;
+    };
+
     {_x ctrlShow _shown} forEach _line;
 
     _line

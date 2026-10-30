@@ -625,8 +625,8 @@ if (_io isNotEqualTo "") then {
     _fontBold, 0, "menu"
 ] call FUNC(uiLabel);
 
-// The window as it ships (PALETTE_DEFAULT) is Classic, whichever way it came to be.
-private _styleName = [LLSTRING(Style_Custom), LLSTRING(Style_Classic)] select (GVAR(palette) isEqualTo PALETTE_DEFAULT);
+// The window as it ships (PALETTE_DEFAULT) is the AIO style, whichever way it came to be.
+private _styleName = [LLSTRING(Style_Custom), LLSTRING(Style_Aio)] select (GVAR(palette) isEqualTo PALETTE_DEFAULT);
 
 {
     if ((_x select 0) isEqualTo (_info get "style")) exitWith {_styleName = _x select 1};
@@ -664,7 +664,7 @@ if (_stylesOpen) then {
     {
         _x params ["_styleId", "_name", "_values"];
 
-        private _current = _styleId isEqualTo (_info get "style") || {_styleId isEqualTo "classic" && {GVAR(palette) isEqualTo PALETTE_DEFAULT}};
+        private _current = _styleId isEqualTo (_info get "style") || {_styleId isEqualTo "aio" && {GVAR(palette) isEqualTo PALETTE_DEFAULT}};
         private _rowTop = _y;
 
         // Flush with the popover's left edge (its title, the rows' arrows): no indent of its own.

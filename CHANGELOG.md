@@ -88,6 +88,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Changed
 
+- New default look "AIO (default)": a red accent and the deep red films behind Open, Unload and the Unsearched box; new players start with it and Reset all goes back to it. Classic stays as the old look with your own Arma colour. The colour panel's Text row has a new group Surfaces: Bars (weight bar, ammo bars), Buttons and chips, and Header lines can run in the gradient too.
 - Colour panel: where the gradient shows (the checkboxes, each part's own colours and gradient switch) moved from the Titles row to the Text row, and shows whether the Titles row's gradient is on or not. A part with an end colour of its own runs even with it off; one without takes the Titles row's start and end. The Text row's Default takes the parts and their colours back too.
 - Colour panel, a part's own colours: each half of its pill picks its start or its end straight away. The line under the checkboxes has a Gradient On/Off switch of the part's own (the same as its checkbox): off, the part shows in one colour of its own (Colour) instead of running, where one is set.
 - The gradient's checkboxes flip their tick at the click, before the window is built again for it.

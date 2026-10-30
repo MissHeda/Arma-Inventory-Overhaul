@@ -24,7 +24,11 @@
  */
 
 [
-    // The window as it ships, its titles running from the accent into white.
+    // The window as it ships (PALETTE_DEFAULT): a red accent, deep red films behind the buttons and on the Unsearched box, the
+    // titles running from the accent into white.
+    ["aio", LLSTRING(Style_Aio), PALETTE_DEFAULT],
+
+    // The look before AIO's red: the player's own Arma colour, plain films, the titles running from the accent into white.
     ["classic", LLSTRING(Style_Classic), [[], [], -1, [], [], [], [], [], -1, -1, [0, 0, 1], ""]],
 
     // Arma 3's own menus: near-black glass, white text, an amber highlight.

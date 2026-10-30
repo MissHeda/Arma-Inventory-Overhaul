@@ -275,7 +275,7 @@ if (_descH > 0) then {
 
         [
             _display, _group, [_padX + _innerW * 0.4, _rowTop + (_rowH - _barH) / 2, _barW, _barH], _value,
-            _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]], _theme getOrDefault ["barFill", [0.84, 0.54, 0.1, 1]], 0
+            _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]], _theme getOrDefault ["barFill", [0.84, 0.54, 0.1, 1]], 0, GRADIENT_BARS
         ] call FUNC(uiBar);
 
         [

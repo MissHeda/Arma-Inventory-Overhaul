@@ -364,6 +364,7 @@ PREP(dropKeyName);
 PREP(tileColour);
 PREP(paletteStyles);
 PREP(gradientText);
+PREP(gradientSurface);
 PREP(setTipText);
 PREP(panelGradient);
 PREP(isRotateKey);

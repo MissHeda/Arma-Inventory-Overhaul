@@ -306,7 +306,7 @@ if (_hidden) then {
         private _barRect = [_left + _padX, _barY, _innerW, _barH];
         private _bar = [
             _display, _parent, _barRect, _ammo / _capacity,
-            _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]], _theme getOrDefault ["barFill", [0.84, 0.54, 0.1, 1]], 0
+            _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]], _theme getOrDefault ["barFill", [0.84, 0.54, 0.1, 1]], 0, GRADIENT_BARS
         ] call FUNC(uiBar);
 
         _controls append _bar;

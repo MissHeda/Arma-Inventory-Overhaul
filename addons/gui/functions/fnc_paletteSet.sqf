@@ -271,7 +271,7 @@ switch (_mode) do {
 
     // One part of where the gradient shows (GRADIENT_*) switched on or off.
     case "gradientPart": {
-        if (_argument isEqualType 0 && {_argument in ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17] apply {2 ^ _x})}) then {
+        if (_argument isEqualType 0 && {_argument in ((call {private _places = []; for "_p" from 0 to (GRADIENT_PART_COUNT - 1) do {_places pushBack _p}; _places}) apply {2 ^ _x})}) then {
             private _parts = _palette param [17, -1];
 
             if (_parts < 0) then {

@@ -78,6 +78,15 @@ private _controls = [_display, _parent, _rect, _normal, (_theme getOrDefault ["r
 private _rects = _controls select {ctrlClassName _x isEqualTo "EINV_PanelRect"};
 private _corners = _controls select {ctrlClassName _x isEqualTo "EINV_PanelCorner"};
 
+// Its surface in the gradient where the colour panel switched the buttons and chips on (GRADIENT_CHIPS): a visible surface only.
+if ((_normal param [3, 0]) > 0) then {
+    private _fade = [_display, _parent, _rect, GRADIENT_CHIPS, _controls, _normal param [3, 1], (_theme getOrDefault ["radius", 0]) min (_height / 2)] call FUNC(gradientSurface);
+
+    if (!isNull _fade) then {
+        _controls pushBack _fade;
+    };
+};
+
 private _caption = [_text, _theme] call FUNC(caption);
 private _hasIcon = _icon isNotEqualTo "";
 private _size = [_height * 0.48, _textSize] select (_textSize > 0);

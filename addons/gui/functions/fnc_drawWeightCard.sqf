@@ -166,11 +166,11 @@ if (_flat) then {
     for "_i" from 0 to (_segments - 1) do {
         [
             _display, _parent, [_left + _statPadX + _i * (_segmentW + _segmentGap), _statBarY, _segmentW, _statBarH],
-            ((_share * _segments - _i) max 0) min 1, _barTrack, _fill, 0
+            ((_share * _segments - _i) max 0) min 1, _barTrack, _fill, 0, GRADIENT_BARS
         ] call FUNC(uiBar);
     };
 } else {
-    [_display, _parent, _barRect, (_mass / _end) min 1, _barTrack, _fill, _statBarH / 2] call FUNC(uiBar);
+    [_display, _parent, _barRect, (_mass / _end) min 1, _barTrack, _fill, _statBarH / 2, GRADIENT_BARS] call FUNC(uiBar);
 };
 
 if (_flat) then {
