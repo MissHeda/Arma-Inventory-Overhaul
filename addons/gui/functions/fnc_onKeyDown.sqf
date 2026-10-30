@@ -128,7 +128,15 @@ if (_key in [DIK_PRIOR, DIK_NEXT]) exitWith {
     } else {
         [-1, GVAR(hover) param [1, -1]] select ((GVAR(hover) param [0, ""]) in ["tile", "cell"])
     };
-    private _grid = (uiNamespace getVariable [QGVAR(grids), []]) param [_gridIndex, createHashMap];
+    private _grids = uiNamespace getVariable [QGVAR(grids), []];
+    private _grid = _grids param [_gridIndex, createHashMap];
+
+    // Not over a box with pages (its page bar, an empty part of it, another compartment): the one box with pages on the window.
+    if (count (_grid getOrDefault ["pageRanges", []]) < 2) then {
+        private _paged = _grids select {count (_x getOrDefault ["pageRanges", []]) > 1};
+
+        _grid = [createHashMap, _paged select 0] select (count _paged == 1);
+    };
 
     if (count (_grid getOrDefault ["pageRanges", []]) < 2) exitWith {false};
 
