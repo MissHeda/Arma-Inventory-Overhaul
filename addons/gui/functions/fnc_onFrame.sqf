@@ -447,8 +447,9 @@ if (_check || {_mouse isNotEqualTo GVAR(lastMouse)}) then {
     [_display, _mouse] call FUNC(updateHover);
 };
 
-// The name at the mouse, or the comparison card in its place, stays beside the pointer - on its left near the
-// screen's right edge, above it near the bottom. Whichever shows (fnc_updateHover) says how wide and high it is.
+// The name at the mouse, or the comparison card in its place, stays centred under the pointer - pushed in from a screen edge
+// rather than thrown to the pointer's other side, which made it jump from right to left and back as names of other widths came
+// along; above the pointer only where it would run off the bottom. Whichever shows (fnc_updateHover) says how wide and high it is.
 private _tip = uiNamespace getVariable [QGVAR(tipShown), controlNull];
 private _tipUp = !isNull _tip && {ctrlShown _tip};
 
@@ -478,13 +479,12 @@ if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
 
     private _width = _tip getVariable [QGVAR(width), 0];
     private _height = _tip getVariable [QGVAR(height), UNIT];
-    private _blockW = _width;
-    private _blockH = _height;
-    private _tipX = _mouseX + TOOLTIP_DX;
+    private _tipX = ((_mouseX - _width / 2) min (safezoneX + safezoneW - TOOLTIP_MARGIN - _width)) max (safezoneX + TOOLTIP_MARGIN);
     private _tipY = _mouseY + TOOLTIP_DY;
 
-    if (_tipX + _blockW > safezoneX + safezoneW) then {_tipX = _mouseX - TOOLTIP_DX - _blockW};
-    if (_tipY + _blockH > safezoneY + safezoneH) then {_tipY = (_mouseY - TOOLTIP_DY - _blockH) max safezoneY};
+    if (_tipY + _height > safezoneY + safezoneH - TOOLTIP_MARGIN) then {
+        _tipY = (_mouseY - UNIT * 0.3 - _height) max safezoneY;
+    };
 
     _tip ctrlSetPosition [_tipX, _tipY];
     _tip ctrlCommit 0;

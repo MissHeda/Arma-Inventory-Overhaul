@@ -265,9 +265,10 @@
 // The slots that take a dragged item: their fill, under a green outline (fnc_showTargets).
 #define TARGET_FILL_ALPHA 0.1
 
-// The name at the mouse (fnc_updateHover, fnc_onFrame): this far right of and below the pointer.
-#define TOOLTIP_DX SQUARE(UNIT * 0.7)
-#define TOOLTIP_DY (UNIT * 0.8)
+// The name at the mouse (fnc_updateHover, fnc_onFrame): centred under the pointer, this far below its tip (clear of the arrow),
+// kept this far from the screen's edges.
+#define TOOLTIP_DY (UNIT * 1.1)
+#define TOOLTIP_MARGIN SQUARE(UNIT * 0.3)
 
 // Where a dragged item landed lights up, this strong, for this long (fnc_flashTile).
 #define LAND_FLASH_ALPHA 0.28
