@@ -269,9 +269,9 @@ switch (GVAR(hover) param [0, ""]) do {
             ];
         };
 
-        // A radio the player carries: open it, use it (einv_compat_tfar, einv_compat_acre). Not one in a kit, and
-        // not one that cannot be used from the container it lies in (the settings "Use items from ...").
-        if (_kit isEqualTo "" && {([_class, [_from] call EFUNC(storage,useKind)] call EFUNC(storage,useState)) isNotEqualTo "blocked"}) then {
+        // A radio the player carries: open it, use it (einv_compat_tfar, einv_compat_acre). Not one in a kit. The settings
+        // "Use items from ..." are about using things up: a radio in the backpack is opened as TFAR and ACRE2 open it.
+        if (_kit isEqualTo "") then {
             private _carried = _from in [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
 
             _choices append ([

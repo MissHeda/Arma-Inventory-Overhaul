@@ -167,6 +167,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- TFAR: a right click on a radio in the backpack offers "Open radio" again even where "Use items from the backpack" is off (that setting is about using things up). The vanilla radio in the radio slot, or a radio TFAR has not made the player's own yet, gets "Open radio" too: TFAR is asked to swap it now and the radio it gives is opened.
 - In ACE Arsenal's panel the tips of its buttons (the fold arrow of Staging, ...) show when the mouse rests on them, not only after a click: there the window finds the button under the mouse by its place, as the engine reports the mouse entering it unreliably on another mod's display.
 - The tips of the colour, sound and right-click menus' buttons show over the menu again instead of behind it.
 - With the gradient on, words no longer sit a little higher than they do without it; the structured text is placed where a label centres its line.

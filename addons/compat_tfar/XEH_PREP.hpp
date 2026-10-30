@@ -8,4 +8,5 @@ PREP(inspectRows);
 // Using it
 PREP(menuChoices);
 PREP(open);
+PREP(openPrototype);
 PREP(makeActive);
