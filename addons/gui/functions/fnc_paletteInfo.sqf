@@ -88,7 +88,8 @@ private _plain = [
     _textWorn,
     (_theme getOrDefault ["line", [1, 1, 1, 1]]) select [0, 3],
     _accentWorn,
-    _textWorn,
+    // The titles with no colour of their own: with the gradient on it starts at the accent (fnc_uiLabel), so its Start box shows that.
+    [_textWorn, _accentWorn] select (_gradientPick isNotEqualTo []),
     +PANEL_COLOR
 ];
 

@@ -42,6 +42,9 @@ params ["_display", "_parent", "_rect", "_text", "_size", ["_color", []], ["_fon
 private _theme = missionNamespace getVariable [QGVAR(theme), createHashMap];
 private _gradient = _theme getOrDefault ["titleGradient", []];
 
+// The colour the caller asked for, before the palette's own colours replace it: what tells ink on a lit surface (below).
+private _asked = +_color;
+
 // What the line is: a word for it, or the older numbers and the title flag.
 private _part = switch (true) do {
     case (_title isEqualType ""): {_title};
@@ -120,11 +123,13 @@ if (_graded) then {
 
     if (_color isNotEqualTo []) then {
         private _onAccent = (_theme getOrDefault ["onAccent", []]) select [0, 3];
-        private _light = (_color select 0) * 0.2126 + (_color select 1) * 0.7152 + (_color select 2) * 0.0722;
+        private _light = if (count _asked >= 3) then {(_asked select 0) * 0.2126 + (_asked select 1) * 0.7152 + (_asked select 2) * 0.0722} else {1};
 
         // On the lit surface the end or the start, whichever stands out from the accent (3 : 1 at least, the end first); where
-        // neither does, the ink the theme worked out for it, with no gradient at all - a key that cannot be read is no key.
-        if ((_color select [0, 3]) isEqualTo _onAccent || {_light < 0.35}) then {
+        // neither does, the ink the theme worked out for it, with no gradient at all - a key that cannot be read is no key. Told
+        // by the colour the caller asked for, and dark ink only on a key or a button: a dark colour the player gave the titles
+        // (a deep violet) is no ink on the accent, and ran in its end colour alone.
+        if ((_asked select [0, 3]) isEqualTo _onAccent || {_light < 0.35 && {_part in ["key", "button", "keyhint"]}}) then {
             private _fnc_luma = {
                 params ["_rgb"];
 
