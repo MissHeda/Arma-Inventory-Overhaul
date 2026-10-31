@@ -171,8 +171,7 @@ private _giveY = pixelH / 2;
             _overlay ctrlSetFade _fade;
             _overlay ctrlCommit 0;
 
-            // A commit may reset what the control draws; the turn goes on again.
-            _overlay ctrlSetAngle [_overlay getVariable [QGVAR(angle), 90], 0.5, 0.5, true];
+            // The picture is turned in its texture (fnc_turnedTexture), the control is not: nothing to turn again.
         };
 
         if (!ctrlShown _overlay) then {

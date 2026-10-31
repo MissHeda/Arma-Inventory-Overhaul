@@ -142,12 +142,21 @@ class AIO_Picture: AIO_Icon {
     colorText[] = C_WHITE;
 };
 
-// An item's picture turned a quarter (issue #24, fnc_uiPictureTurned): a plain ST_PICTURE that stretches its texture
-// over the control. Keeping the shape (ST_KEEP_ASPECT_RATIO) is worked out on the turned box and squashed the picture;
-// the control is made in the texture's own shape instead, so the stretch changes nothing.
+// An item's picture turned a quarter (issues #24, #28, fnc_uiPictureTurned): a plain ST_PICTURE that stretches its
+// texture over the control - the turned texture of fnc_turnedTexture, square, on a control square in pixels.
 class AIO_PictureTurned: AIO_Icon {
     style = 48;
     colorText[] = C_WHITE;
+};
+
+// The display a turned picture is drawn by, into a texture of its own (fnc_turnedTexture): nothing in it but what
+// that function puts there - RscDisplayEmpty brings a vignette along.
+class AIO_TurnTexture {
+    idd = -1;
+    movingEnable = 0;
+    enableSimulation = 1;
+    class controlsBackground {};
+    class controls {};
 };
 
 // ---------------------------------------------------------------------------

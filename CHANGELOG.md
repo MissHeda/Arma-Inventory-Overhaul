@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.7 - beta
+
+### Fixed
+
+- A weapon or other item turned with R no longer looks squeezed: its picture showed short and fat in the tile and on the dragged ghost. Arma turns a control in its UI units, which are not square to the screen's pixels, and cuts the picture to the control's rectangle before the turn - no size or order of the control's own got around that (measured in game). The picture is now turned inside a texture of its own (ui-to-texture, `aio_gui_fnc_turnedTexture`): square, with the picture in its own shape, and shown on a plain square control, so it comes out exactly as the item lies. Two small textures per turned picture, made once per game session (issue #28).
+
 ## 0.6.6 - beta
 
 ### Fixed

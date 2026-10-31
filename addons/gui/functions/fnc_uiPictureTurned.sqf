@@ -5,21 +5,19 @@
  * An item's picture turned a quarter clockwise (issue #24), the way the footprint of a tile turned with R
  * lies: the turned tiles' pictures (fnc_turnPicture) and the dragged ghost held turned (fnc_makeGhost).
  *
- * How the engine turns a picture: ctrlSetAngle works on a plain static picture (ST_PICTURE) and turns what
- * it draws about a point given as a share of the control itself - [0.5, 0.5] is its middle. Two things broke
- * the earlier tries (0.4.7 to 0.5.17) and are left out here:
- * - The picture kept its shape (ST_KEEP_ASPECT_RATIO). That fit is worked out on the box as it is turned, so a
- *   picture that is not square came out squashed. AIO_PictureTurned stretches its texture over the control
- *   instead, and the control is made in the texture's own shape (getTextureInfo), in whole pixels, so the
- *   stretch is no stretch at all and the turn only swaps width and height on the screen.
- * - A turned control inside a scrolled or moved controls group is drawn in the wrong place. The caller makes it
- *   on the display (fnc_turnPicture keeps it over its tile; the ghost is on the display anyway).
+ * Nothing on the screen is turned: ctrlSetAngle turns in the screen's UI units, which are not square, and cuts
+ * what it draws to the control's rectangle before the turn, so a rifle came out short and fat (issue #28, and
+ * every try from 0.4.7 to 0.6.5). The picture is turned inside a texture of its own instead (fnc_turnedTexture):
+ * square, the turned picture in its own shape in the middle, transparent round it. AIO_PictureTurned stretches
+ * that texture over a control that is square in pixels, as long as the turned picture is, so the picture shows
+ * exactly as turned. The control is still made on the display by the callers (fnc_turnPicture keeps it over its
+ * tile; the ghost is on the display anyway).
  *
  * The control is fitted so that, turned, it fills the box along its longer side: shown, it is as wide as the
  * control is high and as high as it is wide. An item's icon= scale makes it larger or smaller, never larger
  * than the rectangle it must stay in; its offsets turn with it (what the upright picture moves right the
  * turned one moves down, what it moves down the turned one moves left), and its middle is held inside that
- * rectangle. The control keeps its turn in QGVAR(angle), so whoever moves it turns it again after the commit.
+ * rectangle. QGVAR(angle) is 0: the control itself is not turned, whoever moves it has nothing to turn again.
  *
  * With "Log window timings (debug)" on, the RPT gets one line per texture and box size: what the texture says
  * of its shape, the box, the control before the turn and where it lies, and what ctrlAngle reads back.
@@ -95,14 +93,16 @@ private _centerY = _boxY + _boxH / 2 + _across * _shareH;
 _centerX = (_centerX max (_clipX + _shownW / 2)) min (_clipX + _clipW - _shownW / 2);
 _centerY = (_centerY max (_clipY + _shownH / 2)) min (_clipY + _clipH - _shownH / 2);
 
+// Square, as long as the turned picture: the turned texture holds the picture in its own shape in the middle.
+private _side = _ctrlW max _ctrlH;
+
 private _ctrl = [_display, "AIO_PictureTurned", _parent, [
-    _centerX - _ctrlW * pixelW / 2, _centerY - _ctrlH * pixelH / 2, _ctrlW * pixelW, _ctrlH * pixelH
+    _centerX - _side * pixelW / 2, _centerY - _side * pixelH / 2, _side * pixelW, _side * pixelH
 ]] call FUNC(uiCreate);
 
-_ctrl ctrlSetText ([_texture] call FUNC(safePicture));
+_ctrl ctrlSetText ([_display, [_texture] call FUNC(safePicture)] call FUNC(turnedTexture));
 _ctrl ctrlSetTextColor _color;
-_ctrl ctrlSetAngle [90, 0.5, 0.5, true];
-_ctrl setVariable [QGVAR(angle), 90];
+_ctrl setVariable [QGVAR(angle), 0];
 _ctrl setVariable [QGVAR(shown), [_shownW, _shownH]];
 
 if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {

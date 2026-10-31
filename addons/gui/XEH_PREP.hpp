@@ -263,6 +263,7 @@ PREP(cornerRadii);
 PREP(clearCells);
 PREP(uiItemPicture);
 PREP(uiPictureTurned);
+PREP(turnedTexture);
 PREP(turnPicture);
 PREP(syncTurned);
 PREP(uiPictureCut);
