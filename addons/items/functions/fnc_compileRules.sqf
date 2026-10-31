@@ -645,7 +645,8 @@ if (_legacy) then {
         {
             _x params ["", "_class", "_value"];
 
-            private _conds = [[false, "class", "=", [_class + "+"]]];
+            // X* (every class whose name starts with X) as it is, a class with everything built on it.
+            private _conds = [[false, "class", "=", [[_class + "+", _class] select ((_class select [count _class - 1]) isEqualTo "*")]]];
 
             // The value as the rules text would write it, for the text, and as compiled.
             private _written = switch (_type) do {

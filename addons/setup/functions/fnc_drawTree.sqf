@@ -275,6 +275,7 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
 
         GVAR(selection) set [_mode, _class];
         GVAR(editScope) set [_mode, "tree"];
+        GVAR(groupEdit) deleteAt _mode;
 
         [GVAR(step)] call FUNC(showStep);
     }, [_mode, _class], true, _class] call FUNC(uiHit);

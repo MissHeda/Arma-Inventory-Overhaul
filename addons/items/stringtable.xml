@@ -125,13 +125,38 @@
             <English>Inventory rules</English>
         </Key>
         <Key ID="STR_aio_items_Setting_Rules_Desc">
-            <English>Item sizes, stacks and compartments. Empty uses the defaults.\nThe setup wizard writes this for you.</English>
+            <English>Item sizes, stacks and compartments.
+Empty uses the defaults. The setup
+wizard (ESC &gt; Options &gt; Inventory
+setup) writes this for you.
+
+A rule: which classes &gt; what they get.
+Rules are split by commas, later
+rules win.
+
+Which classes:
+class=B_Carryall_khk - that class
+class=B_Carryall_Base+ - that class
+and every class built on it
+class=USP_AssaultBackpack* - every
+class whose name starts like that
+class~Carryall - every class with
+that text in its name
+addon=rhsusf_c_weapons - one addon
+kind=backpack - every backpack
+
+Example:
+class=USP_AssaultBackpack* &gt; grid=6x5</English>
         </Key>
         <Key ID="STR_aio_items_Setting_SizeTable">
             <English>Grid sizes by class</English>
         </Key>
         <Key ID="STR_aio_items_Setting_SizeTable_Desc">
-            <English>Item sizes as class:WxH, comma-separated.\nExample: rhsusf_100Rnd_762x51:1x3</English>
+            <English>Item sizes as class:WxH, comma-separated.
+A class covers the classes built on it,
+Class* every class starting like that.
+Example: rhsusf_100Rnd_762x51:1x3,
+ACE_quikclot*:1x1</English>
         </Key>
         <Key ID="STR_aio_items_Setting_StackSmall">
             <English>Small items per tile</English>
@@ -143,7 +168,11 @@
             <English>Stack sizes by class</English>
         </Key>
         <Key ID="STR_aio_items_Setting_StackTable_Desc">
-            <English>Items per tile as class:N, comma-separated.\nExample: ACE_fieldDressing:20</English>
+            <English>Items per tile as class:N, comma-separated.
+A class covers the classes built on it,
+Class* every class starting like that.
+Example: ACE_fieldDressing:20,
+ACE_quikclot*:10</English>
         </Key>
         <Key ID="STR_aio_items_SubCategory_Grids">
             <English>Grids</English>

@@ -91,8 +91,11 @@ private _fnc_test = {
 
                 _data findIf {_lc find _x >= 0} >= 0
             } else {
-                (_data select 0) getOrDefault [_facts get "lc", false]
+                private _lc = _facts get "lc";
+
+                (_data select 0) getOrDefault [_lc, false]
                 || {(_facts get "lineage") findIf {_x in (_data select 1)} >= 0}
+                || {(_data param [2, []]) findIf {(_lc select [0, count _x]) isEqualTo _x} >= 0}
             };
         };
         case "addon": {

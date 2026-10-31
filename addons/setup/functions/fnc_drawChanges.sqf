@@ -160,8 +160,9 @@ private _cursor = 0;
         [_display, _list, [_tagX, _cursor, _tagW, _rowH], _tag select 1, TEXT_SMALL, _theme getOrDefault [_tag select 2, _muted], _font, 1] call EFUNC(gui,uiLabel);
     };
 
-    // The line opens it; the cross on top of it takes the change back.
-    [_display, _list, _rowRect, _surface, _rowFill, _rowHover, _open, [_kind, _statement], true, _tooltip] call FUNC(uiHit);
+    // The line opens it; the cross at its end takes the change back. The line's hit area stops short of the cross:
+    // laid under it, it took the cross's clicks and opened the class instead (issue #29).
+    [_display, _list, [0, _cursor, _rowW - _removeW - SQUARE(UNIT * 0.2), _rowH], _surface, _rowFill, _rowHover, _open, [_kind, _statement], true, _tooltip] call FUNC(uiHit);
 
     [
         _display, _list, [_rowW - _removeW - SQUARE(UNIT * 0.1), _cursor + (_rowH - _removeH) / 2, _removeW, _removeH], "", UI_TEX(icon_close_ca), _theme, {

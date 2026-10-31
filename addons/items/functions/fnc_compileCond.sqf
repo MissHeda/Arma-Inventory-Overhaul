@@ -78,18 +78,19 @@ switch (_key) do {
         } else {
             private _exact = [];
             private _lineage = [];
+            private _prefixes = [];
 
             {
                 private _name = toLowerANSI _x;
 
-                if ((_name select [count _name - 1]) isEqualTo "+") then {
-                    _lineage pushBack (_name select [0, count _name - 1]);
-                } else {
-                    _exact pushBack _name;
+                switch (_name select [count _name - 1]) do {
+                    case "+": {_lineage pushBack (_name select [0, count _name - 1])};
+                    case "*": {_prefixes pushBack (_name select [0, count _name - 1])};
+                    default {_exact pushBack _name};
                 };
             } forEach _values;
 
-            ["", [_negated, "class", "=", [[_exact] call _fnc_set, [_lineage] call _fnc_set], 3]]
+            ["", [_negated, "class", "=", [[_exact] call _fnc_set, [_lineage] call _fnc_set, _prefixes], 3]]
         };
     };
     case "addon": {

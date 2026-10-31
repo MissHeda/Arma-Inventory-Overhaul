@@ -710,6 +710,18 @@ An item in several categories takes the first one's that has a colour.</English>
         <Key ID="STR_aio_setup_Hint_Copied">
             <English>The cells of %1 are copied to %2. Apply keeps them.</English>
         </Key>
+        <Key ID="STR_aio_setup_Hint_GroupApplied">
+            <English>Applied to all %1 classes found. Save puts it to use.</English>
+        </Key>
+        <Key ID="STR_aio_setup_Hint_GroupOff">
+            <English>Editing the picked class alone again.</English>
+        </Key>
+        <Key ID="STR_aio_setup_Hint_GroupOn">
+            <English>Editing all %1 classes found: what you apply goes to every one of them.</English>
+        </Key>
+        <Key ID="STR_aio_setup_Hint_GroupOnRule">
+            <English>Editing every class starting with %1 - as one rule, classes added later included.</English>
+        </Key>
         <Key ID="STR_aio_setup_Hint_Linked">
             <English>%1 now has the same cells as %2. Save puts it to use.</English>
         </Key>
@@ -882,7 +894,7 @@ An item in several categories takes the first one's that has a colour.</English>
             <English>Remove its own size, stack, weight, name, picture and picture zoom. The default decides again.</English>
         </Key>
         <Key ID="STR_aio_setup_Items_Search">
-            <English>Search name or class (* ?)</English>
+            <English>Search name or class, e.g. USP_Assault*</English>
         </Key>
         <Key ID="STR_aio_setup_Items_Title">
             <English>Items: how big each one is</English>
@@ -973,6 +985,24 @@ An item in several categories takes the first one's that has a colour.</English>
         </Key>
         <Key ID="STR_aio_setup_Kinds_vest">
             <English>Vests</English>
+        </Key>
+        <Key ID="STR_aio_setup_List_AllMods">
+            <English>All mods</English>
+        </Key>
+        <Key ID="STR_aio_setup_List_EditAll">
+            <English>Edit all %1</English>
+        </Key>
+        <Key ID="STR_aio_setup_List_EditAllTip">
+            <English>Search (USP_AssaultBackpack*) or pick a mod first.
+Then whatever you apply on the right goes to every class found.
+A search like Name* becomes one rule that also covers classes added later.</English>
+        </Key>
+        <Key ID="STR_aio_setup_List_EditingAll">
+            <English>Editing all %1 - stop</English>
+        </Key>
+        <Key ID="STR_aio_setup_List_EditingAllTip">
+            <English>What you apply goes to every class found.
+Click to edit the picked class alone again.</English>
         </Key>
         <Key ID="STR_aio_setup_List_None">
             <English>Nothing found</English>

@@ -158,7 +158,10 @@ private _applied = 0;
 {
     _x params [["_class", "", [""]], ["_set", createHashMap, [createHashMap]], ["_remove", [], [[]]], ["_tree", false, [false]]];
 
-    if (_class isEqualTo "" || {(toArray _class) findIf {!(_x in _allowed)} >= 0}) then {
+    // A class name, or the start of one with a * (class=X*, every class whose name starts with X).
+    private _name = [_class, _class select [0, count _class - 1]] select ((_class select [count _class - 1]) isEqualTo "*");
+
+    if (_name isEqualTo "" || {(toArray _name) findIf {!(_x in _allowed)} >= 0}) then {
         [format [LLSTRING(Hint_BadClass), _class], "loss"] call FUNC(setHint);
     } else {
         _rules = [_rules, _class, _set, _remove, _tree] call _fnc_apply;

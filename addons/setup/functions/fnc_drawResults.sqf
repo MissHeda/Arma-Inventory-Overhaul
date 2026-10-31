@@ -78,7 +78,7 @@ uiNamespace setVariable [QGVAR(indexLabel), controlNull];
 
 private _containers = _mode isEqualTo "containers";
 
-(GVAR(listState) getOrDefault [_mode, ["", "all", false, 0]]) params ["_text", "_chip", "_ownOnly", "_page"];
+(GVAR(listState) getOrDefault [_mode, ["", "all", false, 0]]) params ["_text", "_chip", "_ownOnly", "_page", ["_modPick", ""]];
 private _named = ([] call FUNC(ownClassRules)) select 1;
 
 private _filter = [_text] call FUNC(searchFilter);
@@ -107,6 +107,24 @@ private _matches = ((uiNamespace getVariable QGVAR(index)) get "rows") select {
     }}
 };
 
+// The mods of what is found, for the filter; then only the one picked (issue #32).
+private _modNames = [];
+
+{
+    _modNames pushBackUnique (_x select ROW_MOD);
+} forEach _matches;
+
+_modNames sort true;
+
+if (_modPick isNotEqualTo "" && {!(_modPick in _modNames)}) then {
+    _modPick = "";
+    (GVAR(listState) getOrDefault [_mode, []]) set [4, ""];
+};
+
+if (_modPick isNotEqualTo "") then {
+    _matches = _matches select {(_x select ROW_MOD) isEqualTo _modPick};
+};
+
 private _total = count _matches;
 private _pages = (ceil (_total / LIST_PAGE)) max 1;
 
@@ -132,7 +150,79 @@ private _footY = _height - _footH;
 
 // ----- The cards -----
 
-private _list = [_display, "AIO_ScrollGroup", _box, [0, 0, _width, _footY - UNIT * 0.2]] call EFUNC(gui,uiCreate);
+// ----- The mod filter and the edit of everything found -----
+// A search or a mod picked, and more than one class found: "Edit all" makes the editor beside the list write for every
+// one of them in one step (fnc_upsertRule). A search that is a plain start of a name with a * (USP_AssaultBackpack*)
+// is written as one rule, class=USP_AssaultBackpack*, which also takes classes a mod adds later; anything else as one
+// rule per class. GVAR(groupEdit) holds it per step: [selector, classes], the selector "" for one rule per class.
+
+private _barH = UNIT * 1;
+private _barGap = SQUARE(UNIT * 0.25);
+private _group = GVAR(groupEdit) getOrDefault [_mode, []];
+private _classes = _matches apply {_x select 1};
+
+// What was edited all at once is no longer what is found: the edit is for the picked class alone again.
+if (_group isNotEqualTo [] && {(_group select 1) isNotEqualTo _classes}) then {
+    GVAR(groupEdit) deleteAt _mode;
+    _group = [];
+};
+
+private _groupOn = _group isNotEqualTo [];
+private _canGroup = _total > 1 && {_needle isNotEqualTo "" || {_modPick isNotEqualTo ""}};
+private _selector = "";
+
+// One rule: a text of letters, digits and _ ending in a single *, and no mod picked.
+if (_modPick isEqualTo "" && {count _text > 3}) then {
+    private _stem = trim _text;
+    _stem = _stem select [0, count _stem - 1];
+
+    if (((trim _text) select [count (trim _text) - 1]) isEqualTo "*" && {count _stem >= 3} && {(toArray _stem) findIf {!(_x in (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"))} < 0}) then {
+        _selector = _stem + "*";
+    };
+};
+
+private _groupW = _width * 0.42;
+private _modOptions = [[LLSTRING(List_AllMods), ""]] + (_modNames apply {[_x, _x]});
+
+[_display, _box, [0, 0, _width - _groupW - _barGap, _barH], _modOptions, _modPick, _theme, {
+    params ["_new", "_mode"];
+
+    private _state = GVAR(listState) get _mode;
+
+    _state set [4, _new];
+    _state set [3, 0];
+
+    [] call FUNC(drawResults);
+}, _mode, count _modNames > 1] call FUNC(uiDropdown);
+
+[
+    _display, _box, [_width - _groupW, 0, _groupW, _barH],
+    format [[LLSTRING(List_EditAll), LLSTRING(List_EditingAll)] select _groupOn, _total], "", _theme, {
+        params ["_mode", "_on", "_selector", "_classes"];
+
+        if (_on) then {
+            GVAR(groupEdit) deleteAt _mode;
+            [LLSTRING(Hint_GroupOff), "text2"] call FUNC(setHint);
+        } else {
+            GVAR(groupEdit) set [_mode, [_selector, _classes]];
+
+            // The first one found shows in the editor; what is applied goes to all of them.
+            if !((toLowerANSI (GVAR(selection) getOrDefault [_mode, ""])) in (_classes apply {toLowerANSI _x})) then {
+                GVAR(selection) set [_mode, _classes select 0];
+            };
+
+            GVAR(editScope) set [_mode, "class"];
+
+            [[format [LLSTRING(Hint_GroupOn), count _classes], format [LLSTRING(Hint_GroupOnRule), _selector]] select (_selector isNotEqualTo ""), "accent"] call FUNC(setHint);
+        };
+
+        [GVAR(step)] call FUNC(showStep);
+    }, [_mode, _groupOn, _selector, _classes], _canGroup || _groupOn, ["", "accent"] select _groupOn,
+    [LLSTRING(List_EditAllTip), LLSTRING(List_EditingAllTip)] select _groupOn
+] call FUNC(uiAction);
+
+private _listTop = _barH + UNIT * 0.25;
+private _list = [_display, "AIO_ScrollGroup", _box, [0, _listTop, _width, _footY - UNIT * 0.2 - _listTop]] call EFUNC(gui,uiCreate);
 
 _list setVariable [QGVAR(scrollId), "list_" + _mode];
 
@@ -146,12 +236,17 @@ private _textW = _rowW - _textX - SQUARE(UNIT * 0.2);
 private _picked = toLowerANSI (GVAR(selection) getOrDefault [_mode, ""]);
 private _fill = [1, 1, 1, 0.035];
 private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]];
+private _groupSet = createHashMap;
+
+{
+    _groupSet set [toLowerANSI _x, true];
+} forEach (_group param [1, []]);
 
 {
     _x params ["_lc", "_class", "", "_name", "_kind", "_family", "_picture", "_mod"];
 
     private _cardY = _forEachIndex * (_cardH + _gap);
-    private _isPicked = _lc isEqualTo _picked;
+    private _isPicked = _lc isEqualTo _picked || {_lc in _groupSet};
     private _cardFill = [_fill, _fillPicked] select _isPicked;
     private _surface = [_display, _list, [0, _cardY, _rowW, _cardH], _cardFill, _radius] call EFUNC(gui,uiPanel);
 
@@ -191,6 +286,7 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
         // Picked here, an edit is for this class alone; the tree view picks a class with everything built on it.
         GVAR(selection) set [_mode, _class];
         GVAR(editScope) set [_mode, "class"];
+        GVAR(groupEdit) deleteAt _mode;
 
         [GVAR(step)] call FUNC(showStep);
     }, [_mode, _class], true, _class] call FUNC(uiHit);

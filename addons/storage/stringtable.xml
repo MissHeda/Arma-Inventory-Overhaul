@@ -44,7 +44,12 @@
             <English>Container sizes</English>
         </Key>
         <Key ID="STR_aio_storage_Setting_ContainerTable_Desc">
-            <English>Cells per container as class:size, comma-separated.\nExample: B_Carryall_cbr:6x4+2x3</English>
+            <English>Cells per container as class:size,
+comma-separated. A class covers the
+classes built on it, Class* every class
+starting like that.
+Example: B_Carryall_cbr:6x4+2x3,
+USP_AssaultBackpack*:6x5</English>
         </Key>
         <Key ID="STR_aio_storage_Setting_Migrate">
             <English>Move overfull items on</English>

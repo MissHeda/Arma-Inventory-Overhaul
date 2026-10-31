@@ -88,6 +88,7 @@ GVAR(boxWork) = createHashMap;
 GVAR(picker) = createHashMap;
 GVAR(treeState) = createHashMap;
 GVAR(editScope) = createHashMap;
+GVAR(groupEdit) = createHashMap;
 GVAR(classImportText) = "";
 
 // The draft starts as what is in use there: the rules (fnc_getActive) and the server settings (fnc_activeSettings).

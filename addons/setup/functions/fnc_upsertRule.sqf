@@ -5,6 +5,9 @@
  * class=X > ... - or, for a tree, as the one rule class=X+ > ... that covers the class and every class built
  * on it. All of it is fnc_upsertRules, with the one class; see there for what happens to the rules already
  * written and where the new one goes.
+ * While "Edit all" is on for the step the class is picked in (fnc_drawResults, GVAR(groupEdit)), the edit is for
+ * everything the list found: one rule class=X* when the search was the start of a name with a *, else one rule
+ * per class - all in one undo step.
  *
  * Ends in fnc_commit: an undo step, and the step drawn again.
  *
@@ -27,4 +30,21 @@
 
 params [["_class", "", [""]], ["_set", createHashMap, [createHashMap]], ["_remove", [], [[]]], ["_tree", false, [false]]];
 
-[[[_class, _set, _remove, _tree]]] call FUNC(upsertRules)
+private _entries = [[_class, _set, _remove, _tree]];
+private _lc = toLowerANSI _class;
+
+{
+    _y params ["_selector", "_classes"];
+
+    if ((toLowerANSI (GVAR(selection) getOrDefault [_x, ""])) isEqualTo _lc) exitWith {
+        _entries = if (_selector isNotEqualTo "") then {
+            [[_selector, _set, _remove, false]]
+        } else {
+            _classes apply {[_x, _set, _remove, false]}
+        };
+
+        [format [LLSTRING(Hint_GroupApplied), count _classes], "text2"] call FUNC(setHint);
+    };
+} forEach (missionNamespace getVariable [QGVAR(groupEdit), createHashMap]);
+
+[_entries] call FUNC(upsertRules)

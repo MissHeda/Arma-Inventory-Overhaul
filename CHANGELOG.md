@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.4 - beta
+
+### Added
+
+- Wildcards for class names: `class=USP_AssaultBackpack*` is every class whose name starts so - all colours of a backpack in one rule, and the classes a mod adds later too (3 letters at least before the `*`). The old tables (grid sizes, stacks, cells per container) take `Class*:...` as well, and the tips of those CBA settings and of the rules text now explain every way to name classes, with examples (issue #31).
+- Setup wizard, Items and Containers: a mod filter over the list ("All mods" or one mod) and "Edit all N": with a search or a mod picked, what you apply on the right goes to every class found, in one undo step. A search like `USP_AssaultBackpack*` is written as the one rule `class=USP_AssaultBackpack*`, anything else as a rule per class. The classes it goes to are lit in the list (issue #32).
+
+### Fixed
+
+- Setup wizard, General page: the cross at the end of a line of "What you changed" takes that change back again - the line under it took the click and opened the class instead (issue #29).
+
 ## 0.6.3 - beta
 
 ### Fixed

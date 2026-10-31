@@ -48,6 +48,7 @@
  *   cat=medical                    its tile's category: misc, gear, weapon, ammo, medical
  *   class=X  class=X+  class~abc   that class; X and every class built on it; a class name holding
  *                                  the text (MIN_SEARCH letters at least)
+ *   class=X*                       every class whose name starts with X (MIN_SEARCH letters at least)
  *   addon=x  addon~abc             the CfgPatches class that brought it in
  *   well=X                         a magazine of that magazine well
  *   for=X                          a magazine the weapon X loads
@@ -157,7 +158,7 @@ if (count _text > TEXT_WARN) then {
 // ----- What may stand where -----
 
 private _allowed = createHashMap;
-{_allowed set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _+./%:|@!<>=~-");
+{_allowed set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _+*./%:|@!<>=~-");
 _allowed set [9, true];
 
 private _idChars = createHashMap;
@@ -525,19 +526,20 @@ private _fnc_checkValues = {
                     _error = format ["'%1': class~ looks for a part of a class name, %2 letters at least", _token, MIN_SEARCH];
                 };
             } else {
-                // X, or X+ for X and every class built on it.
+                // X, X+ for X and every class built on it, or X* for every class whose name starts with X.
                 private _bad = _values findIf {
                     private _name = _x;
+                    private _last = _name select [count _name - 1];
 
-                    if ((_name select [count _name - 1]) isEqualTo "+") then {
+                    if (_last in ["+", "*"]) then {
                         _name = _name select [0, count _name - 1];
                     };
 
-                    !([_name] call _fnc_isClass)
+                    !([_name] call _fnc_isClass) || {_last isEqualTo "*" && {count _name < MIN_SEARCH}}
                 };
 
                 if (_bad >= 0) then {
-                    _error = format ["'%1': '%2' is no class name", _token, _values select _bad];
+                    _error = format ["'%1': '%2' is no class name - X* needs %3 letters at least before the *", _token, _values select _bad, MIN_SEARCH];
                 };
             };
         };
