@@ -187,10 +187,12 @@ private _giveY = pixelH / 2;
         };
 
         private _source = _overlay getVariable [QGVAR(turnedSource), ""];
+        private _attachments = _overlay getVariable [QGVAR(turnedAttachments), []];
+        private _checkKey = _source + "|" + str _attachments;
 
-        if (_check && {_source isNotEqualTo ""} && {!(_source in _checked)}) then {
-            _checked set [_source, true];
-            [ctrlParent _overlay, _source, false] call FUNC(turnedTexture);
+        if (_check && {_source isNotEqualTo ""} && {!(_checkKey in _checked)}) then {
+            _checked set [_checkKey, true];
+            [ctrlParent _overlay, _source, false, _attachments] call FUNC(turnedTexture);
         };
 
         if (_state isNotEqualTo true) then {

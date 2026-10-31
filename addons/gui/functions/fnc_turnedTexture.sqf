@@ -28,6 +28,8 @@
  * 1: The picture's texture <STRING>
  * 2: For a control that shows it for the first time - drawn again even when nothing was empty; false only fills
  *    what is empty (fnc_syncTurned's check) <BOOL> (default: true)
+ * 3: A weapon's attachments as fnc_getContents gives them, drawn onto the picture before it is turned, so they turn along
+ *    (fnc_drawAttachments); a texture of its own per weapon and attachments <ARRAY> (default: [])
  *
  * Return Value:
  * The turned texture, for ctrlSetText <STRING>
@@ -42,10 +44,14 @@
 
 disableSerialization;
 
-params [["_display", displayNull, [displayNull]], ["_texture", "", [""]], ["_fresh", true, [true]]];
+params [["_display", displayNull, [displayNull]], ["_texture", "", [""]], ["_fresh", true, [true]], ["_attachments", [], [[]]]];
 
 private _known = uiNamespace getVariable [QGVAR(turnedTextures), createHashMap];
 private _key = toLowerANSI _texture;
+
+if (_attachments isNotEqualTo []) then {
+    _key = _key + "|" + str _attachments;
+};
 private _index = _known getOrDefault [_key, -1];
 
 if (_index < 0) then {
@@ -80,26 +86,42 @@ if (!isNull _display) then {
 
     !isNull (findDisplay _inner) && {!isNull (findDisplay _outer)}
 }, {
-    params ["_inner", "_outer", "_innerTexture", "_texture", "_fresh"];
+    params ["_inner", "_outer", "_innerTexture", "_texture", "_fresh", "_key", "_attachments"];
 
     private _innerDisplay = findDisplay _inner;
     private _outerDisplay = findDisplay _outer;
     private _filled = false;
 
-    if ((_innerDisplay getVariable [QGVAR(turnedOf), ""]) isNotEqualTo _texture) then {
+    if ((_innerDisplay getVariable [QGVAR(turnedOf), ""]) isNotEqualTo _key) then {
         {ctrlDelete _x} forEach allControls _innerDisplay;
 
+        private _safe = [_texture] call FUNC(safePicture);
         private _picture = _innerDisplay ctrlCreate ["AIO_Picture", -1];
         _picture ctrlSetPosition [0, 0, 1, 1];
-        _picture ctrlSetText ([_texture] call FUNC(safePicture));
+        _picture ctrlSetText _safe;
         _picture ctrlCommit 0;
 
-        _innerDisplay setVariable [QGVAR(turnedOf), _texture];
+        // What is on a weapon, onto the area its picture takes in the square (fitted in its own shape, in the middle).
+        if (_attachments isNotEqualTo []) then {
+            private _size = getTextureInfo _safe;
+            private _aspect = 2;
+
+            if (_size isEqualType [] && {(_size param [0, 0]) > 0} && {(_size param [1, 0]) > 0}) then {
+                _aspect = (_size select 0) / (_size select 1);
+            };
+
+            private _areaW = [_aspect, 1] select (_aspect >= 1);
+            private _areaH = [1, 1 / _aspect] select (_aspect >= 1);
+
+            [_innerDisplay, controlNull, [(1 - _areaW) / 2, (1 - _areaH) / 2, _areaW, _areaH], _attachments, true] call FUNC(drawAttachments);
+        };
+
+        _innerDisplay setVariable [QGVAR(turnedOf), _key];
         displayUpdate _innerDisplay;
         _filled = true;
     };
 
-    if ((_outerDisplay getVariable [QGVAR(turnedOf), ""]) isNotEqualTo _texture) then {
+    if ((_outerDisplay getVariable [QGVAR(turnedOf), ""]) isNotEqualTo _key) then {
         {ctrlDelete _x} forEach allControls _outerDisplay;
 
         private _picture = _outerDisplay ctrlCreate ["AIO_PictureTurned", -1];
@@ -108,7 +130,7 @@ if (!isNull _display) then {
         _picture ctrlCommit 0;
         _picture ctrlSetAngle [90, 0.5, 0.5, true];
 
-        _outerDisplay setVariable [QGVAR(turnedOf), _texture];
+        _outerDisplay setVariable [QGVAR(turnedOf), _key];
         _filled = true;
     };
 
@@ -140,6 +162,6 @@ if (!isNull _display) then {
     [_retake, _outerDisplay, 2] call CBA_fnc_execAfterNFrames;
     [_retake, _outerDisplay, 0.1] call CBA_fnc_waitAndExecute;
     [_retake, _outerDisplay, 0.6] call CBA_fnc_waitAndExecute;
-}, [_inner, _outer, _innerTexture, _texture, _fresh], 5] call CBA_fnc_waitUntilAndExecute;
+}, [_inner, _outer, _innerTexture, _texture, _fresh, _key, _attachments], 5] call CBA_fnc_waitUntilAndExecute;
 
 format ["#(argb,%1,%1,1)ui(AIO_TurnTexture,%2)", TURN_RES, _outer]

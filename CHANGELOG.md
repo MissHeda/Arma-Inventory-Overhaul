@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.23 - beta
+
+### Fixed
+
+- A weapon lying turned showed none of its attachments (a suppressor, an optic): they are drawn onto its picture before it is turned now, so they turn along.
+
 ## 0.6.22 - beta
 
 ### Fixed

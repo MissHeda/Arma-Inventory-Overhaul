@@ -31,6 +31,7 @@
  * 5: The icon, [scale, across, down] (the item's "icon") <ARRAY> (default: [1, 0, 0])
  * 6: The rectangle it must stay in, [x, y, w, h]; the box when left out <ARRAY> (default: [])
  * 7: The size the offsets are a share of, [w, h]; the rectangle's own when left out <ARRAY> (default: [])
+ * 8: A weapon's attachments, drawn onto it and turned along (fnc_turnedTexture) <ARRAY> (default: [])
  *
  * Return Value:
  * The picture <CONTROL>
@@ -44,7 +45,8 @@
 disableSerialization;
 
 params [
-    "_display", "_parent", "_box", "_texture", ["_color", [1, 1, 1, 1]], ["_icon", ICON_PLAIN, [[]]], ["_clip", []], ["_share", []]
+    "_display", "_parent", "_box", "_texture", ["_color", [1, 1, 1, 1]], ["_icon", ICON_PLAIN, [[]]], ["_clip", []], ["_share", []],
+    ["_attachments", [], [[]]]
 ];
 
 _box params ["_boxX", "_boxY", "_boxW", "_boxH"];
@@ -102,8 +104,9 @@ private _ctrl = [_display, "AIO_PictureTurned", _parent, [
 
 private _source = [_texture] call FUNC(safePicture);
 
-_ctrl ctrlSetText ([_display, _source] call FUNC(turnedTexture));
+_ctrl ctrlSetText ([_display, _source, true, _attachments] call FUNC(turnedTexture));
 _ctrl setVariable [QGVAR(turnedSource), _source];
+_ctrl setVariable [QGVAR(turnedAttachments), _attachments];
 // A control that shows the turned texture for the first time is drawn white until the engine has drawn the texture for it
 // (a frame or two, fnc_turnedTexture): it comes in see-through and gets its colour once that is done - no white flash when
 // a dragged weapon is turned with R.

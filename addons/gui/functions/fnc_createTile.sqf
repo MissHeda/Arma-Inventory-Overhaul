@@ -225,10 +225,10 @@ if (_hidden) then {
     // A tile that lies turned turns its picture along (issue #24): a turned one laid over this upright one, which
     // stays as the fallback (fnc_turnPicture, fnc_syncTurned). Not in the wizard's preview.
     if (_entry getOrDefault ["rotated", false] && {!_preview}) then {
-        [_display, _grid, _pictureBox, _texture, _icon, [_left, _top, _width, _height], _picture] call FUNC(turnPicture);
+        [_display, _grid, _pictureBox, _texture, _icon, [_left, _top, _width, _height], _picture, _entry getOrDefault ["attachments", []]] call FUNC(turnPicture);
     };
 
-    // A weapon shows what is on it (fnc_drawAttachments).
+    // A weapon shows what is on it (fnc_drawAttachments) - a turned one on its turned picture (fnc_turnedTexture).
     private _attachments = _entry getOrDefault ["attachments", []];
 
     if (_attachments isNotEqualTo [] && {!(_entry getOrDefault ["rotated", false])}) then {

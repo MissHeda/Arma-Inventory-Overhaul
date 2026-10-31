@@ -20,6 +20,8 @@
  * 1: Controls group, or controlNull <CONTROL>
  * 2: The weapon picture's rectangle [x, y, w, h] <ARRAY>
  * 3: The weapon [class, muzzle, rail, optic, [magazine, rounds] or [], [magazine, rounds] or [], bipod] <ARRAY>
+ * 4: The rectangle is the picture's area exactly, not fitted at 2:1 by the screen's pixels - the square texture of a turned
+ *    picture, whose units are its own pixels (fnc_turnedTexture) <BOOL> (default: false)
  *
  * Return Value:
  * The controls <ARRAY>
@@ -32,7 +34,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_rect", "_weapon"];
+params ["_display", "_parent", "_rect", "_weapon", ["_exact", false, [false]]];
 _rect params ["_left", "_top", "_width", "_height"];
 _weapon params [["_class", ""], ["_muzzle", ""], ["_rail", ""], ["_optic", ""], ["_magazine", []], ["_magazine2", []], ["_bipod", ""]];
 
@@ -50,6 +52,13 @@ private _x0 = _left + (_pxW - _imageW) / 2 * pixelW;
 private _y0 = _top + (_pxH - _imageH) / 2 * pixelH;
 private _w = _imageW * pixelW;
 private _h = _imageH * pixelH;
+
+if (_exact) then {
+    _x0 = _left;
+    _y0 = _top;
+    _w = _width;
+    _h = _height;
+};
 
 private _slots = ("isClass _x" configClasses _slotsConfig) select {getText (_x >> "iconPicture") isNotEqualTo ""};
 
@@ -99,7 +108,17 @@ private _fnc_takes = {
         default {_iconX = _iconX - _iconW / 2; _iconY = _iconY - _iconH / 2};
     };
 
-    _controls pushBack ([_display, _parent, [_iconX, _iconY, _iconW, _iconH], getText (_slot >> "iconPicture")] call FUNC(uiPicture));
+    // In a turned picture's texture, as it is: no rounding to the screen's pixels, and not one of the window's controls that a
+    // build sweeps (fnc_uiCreate).
+    if (_exact) then {
+        private _icon = _display ctrlCreate ["AIO_Picture", -1];
+        _icon ctrlSetPosition [_iconX, _iconY, _iconW, _iconH];
+        _icon ctrlSetText ([getText (_slot >> "iconPicture")] call FUNC(safePicture));
+        _icon ctrlCommit 0;
+        _controls pushBack _icon;
+    } else {
+        _controls pushBack ([_display, _parent, [_iconX, _iconY, _iconW, _iconH], getText (_slot >> "iconPicture")] call FUNC(uiPicture));
+    };
 } forEach [
     [_muzzle, "MuzzleSlot"],
     [_rail, "PointerSlot"],
