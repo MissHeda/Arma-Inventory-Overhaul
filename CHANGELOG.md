@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.6 - beta
+
+### Fixed
+
+- Setup wizard, Categories: giving a built-in category (Medical, Ammo, ...) its first colour raised a script error - the row it changes was read before anyone asked whether there was one. The colour is now set without it and shows on the tiles as soon as the setup is saved (issue #30).
+
 ## 0.6.5 - beta
 
 ### Fixed

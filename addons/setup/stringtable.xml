@@ -720,7 +720,7 @@ An item in several categories takes the first one's that has a colour.</English>
             <English>Editing all %1 classes found: what you apply goes to every one of them.</English>
         </Key>
         <Key ID="STR_aio_setup_Hint_GroupOnRule">
-            <English>Editing every class starting with %1 - as one rule, classes added later included.</English>
+            <English>Editing every class whose name starts with %1 - as one rule, classes added later included.</English>
         </Key>
         <Key ID="STR_aio_setup_Hint_Linked">
             <English>%1 now has the same cells as %2. Save puts it to use.</English>

@@ -213,7 +213,7 @@ private _modOptions = [[LLSTRING(List_AllMods), ""]] + (_modNames apply {[_x, _x
 
             GVAR(editScope) set [_mode, "class"];
 
-            [[format [LLSTRING(Hint_GroupOn), count _classes], format [LLSTRING(Hint_GroupOnRule), _selector]] select (_selector isNotEqualTo ""), "accent"] call FUNC(setHint);
+            [[format [LLSTRING(Hint_GroupOn), count _classes], format [LLSTRING(Hint_GroupOnRule), _selector select [0, count _selector - 1]]] select (_selector isNotEqualTo ""), "accent"] call FUNC(setHint);
         };
 
         [GVAR(step)] call FUNC(showStep);

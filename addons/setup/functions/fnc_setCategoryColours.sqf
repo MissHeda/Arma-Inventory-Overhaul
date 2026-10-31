@@ -38,7 +38,9 @@ private _categories = +(_ast getOrDefault ["categories", []]);
 {
     private _id = _x;
     private _at = _categories findIf {(_x select 0) isEqualTo _id};
-    private _entry = [[_id, "", "", ""], +(_categories select _at)] select (_at >= 0);
+    // Not "[new, +(_categories select _at)] select (_at >= 0)": both sides are worked out first, and select -1 is a
+    // script error for a category the text does not define yet - every built-in one before its first change (issue #30).
+    private _entry = if (_at >= 0) then {+(_categories select _at)} else {[_id, "", "", ""]};
 
     _entry set [3, _hex];
 
