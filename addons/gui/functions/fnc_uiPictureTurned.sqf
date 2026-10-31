@@ -104,7 +104,19 @@ private _source = [_texture] call FUNC(safePicture);
 
 _ctrl ctrlSetText ([_display, _source] call FUNC(turnedTexture));
 _ctrl setVariable [QGVAR(turnedSource), _source];
-_ctrl ctrlSetTextColor _color;
+// A control that shows the turned texture for the first time is drawn white until the engine has drawn the texture for it
+// (a frame or two, fnc_turnedTexture): it comes in see-through and gets its colour once that is done - no white flash when
+// a dragged weapon is turned with R.
+_ctrl ctrlSetTextColor ((_color select [0, 3]) + [0]);
+
+[{
+    params ["_ctrl", "_color"];
+
+    if (!isNull _ctrl) then {
+        _ctrl ctrlSetTextColor _color;
+    };
+}, [_ctrl, _color], 3] call CBA_fnc_execAfterNFrames;
+
 _ctrl setVariable [QGVAR(angle), 0];
 _ctrl setVariable [QGVAR(shown), [_shownW, _shownH]];
 
