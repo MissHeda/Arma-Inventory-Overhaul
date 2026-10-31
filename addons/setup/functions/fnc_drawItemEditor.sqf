@@ -176,7 +176,7 @@ private _workIcon = _canvas getOrDefault ["iconPercent", _startIcon];
 private _workPicture = _canvas getOrDefault ["pictureText", _startPicture];
 private _workUse = _canvas getOrDefault ["useList", _startUse];
 private _workCats = _canvas getOrDefault ["catsList", _startGroups];
-// The colour of a tile in several categories (tint=): one of them, split, or "" for the first.
+// The colour of a tile in several categories (tint=): one of them, none, or "" for the first that has a colour.
 if !("tintStart" in _canvas) then {
     _canvas set ["tintStart", _info getOrDefault ["tint", ""]];
 };
@@ -549,13 +549,15 @@ _cursorY = _cursorY + ([
 
 // ----- Its tile's colour (tint=) -----
 // A chip for each category it is in - the tile takes that one's colour (category=... color=, the Categories card) - and
-// No colour, for the look's plain tile. The one in effect is lit: tint= where it names one of them, else the first.
+// No colour, for the look's plain tile. The one in effect is lit: tint= where it names one of them, else the first of them
+// that has a colour, else No colour - as the tile takes it (aio_items_fnc_getInfo).
 if (_workCats isNotEqualTo []) then {
     private _chipH = UNIT * 0.95;
+    private _firstColoured = (_workCats select {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "color") isNotEqualTo []}) param [0, "none"];
     private _shownTint = switch (true) do {
         case (_workTint isEqualTo "none"): {"none"};
         case (_workTint in _workCats): {_workTint};
-        default {_workCats select 0};
+        default {_firstColoured};
     };
 
     [_display, _box, [_innerX, _cursorY, _labelW, _rowH], LLSTRING(Tint_Label), TEXT_SMALL, _colorText2, _fontBold, 0] call EFUNC(gui,uiLabel);
@@ -577,12 +579,12 @@ if (_workCats isNotEqualTo []) then {
             params ["", "_arguments"];
             _arguments params ["_class", "_canvas", "_value", "_first"];
 
-            // The first is what the tile takes without tint=: picked, it needs none.
+            // The first with a colour is what the tile takes without tint=: picked, it needs none.
             _canvas set ["tintPick", ["", _value] select (_value isNotEqualTo _first || {(_canvas getOrDefault ["tintStart", ""]) isNotEqualTo ""})];
             GVAR(itemWork) set [toLowerANSI _class, _canvas];
 
             [] call FUNC(drawItemEditor);
-        }, [_class, _canvas, _value, _workCats select 0]] call FUNC(uiChip);
+        }, [_class, _canvas, _value, _firstColoured]] call FUNC(uiChip);
 
         _chipX = _chipX + _chipW + _gap;
     } forEach ((_workCats apply {[_x, ([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name"]}) + [["none", LLSTRING(Tint_None)]]);

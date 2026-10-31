@@ -137,16 +137,20 @@ if ((_resolved get "cats") isEqualTo ["none"]) then {
     _info set ["groups", []];
 };
 
-// The tiles' colour: of its categories that the setup gives one (category=... color=), the one tint= names, else the first;
-// tint=none keeps the look's plain tile.
+// The tiles' colour: the category tint= names, when it is one of its categories - with no colour of its own (category=...
+// color=) that is the look's plain tile; else the first of its categories that has a colour. tint=none keeps the plain tile.
+// The setup's Colour row lights the same one (aio_setup_fnc_drawItemEditor).
 private _categoryDefs = _compiled getOrDefault ["categoryDefs", createHashMap];
 private _coloured = (_info get "groups") select {((_categoryDefs getOrDefault [_x, []]) param [2, ""]) isNotEqualTo ""};
 private _tint = _resolved getOrDefault ["tint", ""];
+private _pick = switch (true) do {
+    case (_tint isEqualTo "none"): {""};
+    case (_tint in (_info get "groups")): {_tint};
+    default {_coloured param [0, ""]};
+};
 private _tileColor = [];
 
-if (_coloured isNotEqualTo [] && {_tint isNotEqualTo "none"}) then {
-    private _pick = [_coloured select 0, _tint] select (_tint in _coloured);
-
+if (_pick isNotEqualTo "") then {
     _tileColor = ([_pick, _compiled] call FUNC(categoryInfo)) get "color";
 };
 

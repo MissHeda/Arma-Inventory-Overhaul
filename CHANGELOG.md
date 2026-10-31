@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.14 - beta
+
+### Fixed
+
+- An item in several categories took the wrong tile colour: picking a category without a colour of its own in the Colour row still showed another category's colour, and the row could light a different category than the tile used.
+
 ## 0.6.13 - beta
 
 ### Added
