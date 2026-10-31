@@ -768,7 +768,7 @@ if (_hasBox) then {
 if (_sealed) then {
     // The block: as wide as a grid of STORAGE_COLS cells and SEAL_ROWS high, on the caption's surface (the loot tint where the
     // theme has one, issue 7) with the hatching of what is not searched. The hatching fills the block to its edges and leaves out
-    // only the corner squares (fnc_uiHatch's boxes: the middle band edge to edge, the top and bottom bands between the corners) -
+    // the round corners (fnc_uiHatch's boxes, cut along the curve pixel line by pixel line) -
     // square stripes in the round corners stood out, and a corner's width kept free at both sides framed the stripes.
     // "UNSEARCHED" in the middle, a ring over it that goes round while this box is searched, and one line under it that says
     // what the search does - written by fnc_updateStatus (the "seal" of the section's info), the ring turned by
@@ -781,13 +781,20 @@ if (_sealed) then {
     _stripe set [3, ((_stripe select 3) * 1.8) min 0.2];
 
     [_display, _parent, [_gridX, _bodyTop, _sealW, _sealH], _tabColor, _sealRadius] call FUNC(uiPanel);
-    private _cornerW = SQUARE(_sealRadius);
+    // The bands: the middle edge to edge, and above and below it one line of pixels each, as wide as the round corners leave it -
+    // so the stripes follow the curve rather than leaving a square cut out of each corner.
+    private _radiusPx = round (_sealRadius / pixelH);
+    private _clips = [[_gridX, _bodyTop + _radiusPx * pixelH, _sealW, _sealH - _radiusPx * pixelH * 2]];
 
-    [_display, _parent, [_gridX, _bodyTop, _sealW, _sealH], _stripe, [
-        [_gridX, _bodyTop + _sealRadius, _sealW, _sealH - _sealRadius * 2],
-        [_gridX + _cornerW, _bodyTop, _sealW - _cornerW * 2, _sealRadius],
-        [_gridX + _cornerW, _bodyTop + _sealH - _sealRadius, _sealW - _cornerW * 2, _sealRadius]
-    ]] call FUNC(uiHatch);
+    for "_row" from 0 to (_radiusPx - 1) do {
+        private _dy = _radiusPx - _row - 0.5;
+        private _inset = (_radiusPx - sqrt ((_radiusPx ^ 2 - _dy ^ 2) max 0)) * pixelW;
+
+        _clips pushBack [_gridX + _inset, _bodyTop + _row * pixelH, _sealW - _inset * 2, pixelH];
+        _clips pushBack [_gridX + _inset, _bodyTop + _sealH - (_row + 1) * pixelH, _sealW - _inset * 2, pixelH];
+    };
+
+    [_display, _parent, [_gridX, _bodyTop, _sealW, _sealH], _stripe, _clips] call FUNC(uiHatch);
 
     private _ringH = _textUnit * 0.95;
     private _wordSize = _textUnit * 0.62;

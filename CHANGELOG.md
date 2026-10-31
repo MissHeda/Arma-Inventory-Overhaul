@@ -91,7 +91,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 - Classic is the default style now (AIO's red style is gone): your Arma colour, its titles, headings and the weight bar running into white; the name and tips at the mouse stay plain. Most styles bring a light gradient of their own - Arma 3, Contact, Tanks, Jets, Tactical and Stealth on their titles and a part or two that suits them, Apex as before; Laws of War and Modern run plain.
 - Help texts shortened (issue #8): the 42 longest CBA setting descriptions and wizard helps are one or two short lines now.
-- The hatching of an unsearched box fills its block to the edges - it kept a corner's width free on both sides; only the round corners stay clear.
+- The hatching of an unsearched box fills its block to the edges and follows the round corners - it kept a corner's width free on both sides.
 - The loot column's title icon has the same colour as the other columns' icons (it was in the accent, red beside white).
 - New default look "AIO (default)": a red accent and the deep red films behind Open, Unload and the Unsearched box; new players start with it and Reset all goes back to it. Classic stays as the old look with your own Arma colour. The colour panel's Text row has a new group Surfaces: Bars (weight bar, ammo bars), Buttons and chips, and Header lines can run in the gradient too.
 - Colour panel: where the gradient shows (the checkboxes, each part's own colours and gradient switch) moved from the Titles row to the Text row, and shows whether the Titles row's gradient is on or not. A part with an end colour of its own runs even with it off; one without takes the Titles row's start and end. The Text row's Default takes the parts and their colours back too.
