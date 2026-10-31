@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.9 - beta
+
+### Changed
+
+- Setup wizard: the custom override shows as you type the start of a class name - `B_Assault` offers `B_Assault*` as well, no `*` needed (it shows when classes start so).
+
 ## 0.6.8 - beta
 
 ### Changed

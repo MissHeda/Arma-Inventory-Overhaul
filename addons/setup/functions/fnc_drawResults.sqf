@@ -172,7 +172,7 @@ private _list = [_display, "AIO_ScrollGroup", _box, [0, _listTop, _width, _footY
 _list setVariable [QGVAR(scrollId), "list_" + _mode];
 
 // ----- Overrides: one rule for every class whose name starts the same (class=X*) -----
-// A search that is the start of a name and a * (B_Assault*) offers an entry of its own above the classes: "Custom override".
+// A search that can start a class name (B_Assault, or B_Assault*) offers an entry of its own above the classes: "Custom override".
 // Picked - after a question the first time -, the editor beside the list shows the first class found and what it applies
 // is written as the one rule class=B_Assault* (fnc_upsertRule), which takes every class of that name, those a mod adds
 // later too. Overrides the draft has already show as such entries as well: all of them with nothing typed, else those the
@@ -182,13 +182,15 @@ private _group = GVAR(groupEdit) getOrDefault [_mode, []];
 private _letters = toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
 private _typed = "";
 
-if (count (trim _text) > 3) then {
-    private _whole = trim _text;
-    private _stem = _whole select [0, count _whole - 1];
+// The text typed, a * at its end or not (B_Assault and B_Assault* both offer B_Assault*): letters, digits and _ only.
+private _whole = trim _text;
 
-    if ((_whole select [count _whole - 1]) isEqualTo "*" && {count _stem >= 3} && {(toArray _stem) findIf {!(_x in _letters)} < 0}) then {
-        _typed = _stem;
-    };
+if ((_whole select [count _whole - 1]) isEqualTo "*") then {
+    _whole = _whole select [0, count _whole - 1];
+};
+
+if (count _whole >= 3 && {(toArray _whole) findIf {!(_x in _letters)} < 0}) then {
+    _typed = _whole;
 };
 
 // The overrides the draft has, by their stem as written.
