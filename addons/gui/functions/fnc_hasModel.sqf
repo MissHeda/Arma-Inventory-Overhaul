@@ -1,11 +1,12 @@
 #include "..\script_component.hpp"
+#include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Whether an item has a model of its own worth a look in 3D. KPBLM Item Preview shows the config's model (model=, else
- * modelSpecial=, read where the class lives - CfgWeapons, CfgMagazines, CfgVehicles, CfgGlasses); many items have none of
- * their own and inherit the engine's placeholder, the box of a magazine, from ItemCore or CA_Magazine - the showcase would
- * show that box (the medical items of ACM, for one). Those and items with no model at all are left out (PLACEHOLDER_MODELS).
- * Known per class for the session.
+ * Whether an item has a model of its own worth a look in 3D (the inspect card's 3D view, fnc_inspect3D): the config's model
+ * (model=, else modelSpecial=, read where the class lives - CfgWeapons, CfgMagazines, CfgVehicles, CfgGlasses). Many items
+ * have none of their own and inherit the engine's stand-in, the box of a magazine, from ItemCore or CA_Magazine - the medical
+ * items of ACM, for one. Those and items with no model at all are left out (PLACEHOLDER_MODELS). Known per class for the
+ * session.
  *
  * Arguments:
  * 0: Item class <STRING>
@@ -14,7 +15,7 @@
  * Has a model of its own <BOOL>
  *
  * Example:
- * ["arifle_MX_F"] call aio_compat_itempreview_fnc_hasModel;
+ * ["arifle_MX_F"] call aio_gui_fnc_hasModel;
  *
  * Public: No
  */
@@ -22,10 +23,6 @@
 params [["_class", "", [""]]];
 
 if (_class isEqualTo "") exitWith {false};
-
-if (isNil QGVAR(hasModel)) then {
-    GVAR(hasModel) = createHashMap;
-};
 
 private _key = toLowerANSI _class;
 private _known = GVAR(hasModel) get _key;

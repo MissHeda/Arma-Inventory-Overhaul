@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.17 - beta
+
+### Added
+
+- 3D view on the inspect card: a 2D/3D switch in the corner of its picture shows the item turning in a lit scene of its own, right in the card - drag to turn it round, the wheel to zoom, a double click to reset. A weapon shows with its attachments. Only for items with a model of their own (not for those with only the stand-in ammo box, such as most ACM medical items), and only with Picture-in-Picture on in the video options, which renders it. The choice is kept. Built on the showcase of KPBLM Item Preview, with its author's permission; that mod is no longer needed, and "View in 3D" left the context menu.
+
 ## 0.6.16 - beta
 
 ### Fixed

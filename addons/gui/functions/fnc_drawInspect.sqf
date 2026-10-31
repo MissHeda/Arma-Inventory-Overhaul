@@ -3,7 +3,8 @@
 /*
  * Author: Miss Heda
  * Draws the inspect card (GVAR(inspect), fnc_inspect): a glass window with the item's picture - what is
- * on a weapon drawn onto it -, its name in its category's colour, its description and its figures:
+ * on a weapon drawn onto it, or for an item with a model of its own the item in 3D (fnc_inspect3D), as the
+ * 2D/3D switch in the picture's corner says -, its name in its category's colour, its description and its figures:
  * weight, size, count, rounds, whether it stacks, its category, the mod it comes from
  * and its class name. A kit of Enhanced First Aid Kits also how full it is and what is in it
  * (aio_compat_efak), a radio its channel, frequency and state (aio_compat_tfar, aio_compat_acre -
@@ -36,7 +37,9 @@ ctrlDelete (uiNamespace getVariable [QGVAR(inspectGroup), controlNull]);
 uiNamespace setVariable [QGVAR(inspectGroup), controlNull];
 uiNamespace setVariable [QGVAR(inspectRect), []];
 
-if (isNull _display || {GVAR(inspect) isEqualTo []}) exitWith {};
+if (isNull _display || {GVAR(inspect) isEqualTo []}) exitWith {
+    ["stop"] call FUNC(inspect3D);
+};
 
 GVAR(inspect) params ["_class", "_count", "_ammo", "_attachments", ["_holder", objNull, [objNull]]];
 
@@ -242,14 +245,97 @@ _cursor = _cursor + _titleH + _gap;
 
 private _pictureInner = [_padX * 2, _cursor + _padY * 0.5, _innerW - _padX * 2, _pictureH - _padY];
 
-// As the rules draw it (icon=): larger, smaller or moved, and cut to the lighter box where it would reach out.
-[
-    _display, _group, _pictureInner, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1],
-    [_padX, _cursor, _innerW, _pictureH]
-] call FUNC(uiItemPicture);
+// The item in 3D instead, for one with a model of its own (fnc_hasModel) and with 3D picked in the box's corner: its scene's
+// camera films into a texture shown over the box (fnc_inspect3D). Picture-in-Picture renders it - off in the video options,
+// there is no 3D. Held and dragged the item turns (fnc_onFrame), the wheel zooms, a double click puts it back.
+private _can3D = [_class] call FUNC(hasModel);
+private _show3D = _can3D && {isPiPEnabled} && {GVAR(inspectView) isEqualTo "3d"};
 
-if (_attachments isNotEqualTo []) then {
-    [_display, _group, _pictureInner, _attachments] call FUNC(drawAttachments);
+if (_show3D) then {
+    ["start", [_class, _attachments]] call FUNC(inspect3D);
+
+    private _viewRect = [_padX + pixelW, _cursor + pixelH, _innerW - pixelW * 2, _pictureH - pixelH * 2];
+    _viewRect params ["", "", "_viewW", "_viewH"];
+
+    private _view = [_display, "AIO_PictureTurned", _group, _viewRect] call FUNC(uiCreate);
+    _view ctrlSetText format ["#(argb,1024,512,1)r2t(%1,%2)", INSPECT_3D_TARGET, ((_viewW / pixelW) / (_viewH / pixelH)) toFixed 3];
+
+    private _hit = [_display, "AIO_Hitbox", _group, _viewRect] call FUNC(uiCreate);
+    [_hit, LLSTRING(Inspect_3DTip)] call FUNC(setTooltip);
+
+    _hit ctrlAddEventHandler ["MouseButtonDown", {
+        params ["", "_button"];
+
+        if (_button == 0) then {
+            GVAR(inspect3DTurn) = getMousePosition;
+        };
+    }];
+    _hit ctrlAddEventHandler ["MouseButtonDblClick", {
+        params ["", "_button"];
+
+        if (_button == 0) then {
+            ["reset"] call FUNC(inspect3D);
+        };
+    }];
+    // The display reports the same turn of the wheel: one per frame counts.
+    _hit ctrlAddEventHandler ["MouseZChanged", {
+        params ["", "_scroll"];
+
+        if (GVAR(lastWheel3D) isEqualTo diag_frameNo) exitWith {true};
+
+        GVAR(lastWheel3D) = diag_frameNo;
+        ["zoom", [_scroll]] call FUNC(inspect3D);
+        true
+    }];
+} else {
+    ["stop"] call FUNC(inspect3D);
+
+    // As the rules draw it (icon=): larger, smaller or moved, and cut to the lighter box where it would reach out.
+    [
+        _display, _group, _pictureInner, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1],
+        [_padX, _cursor, _innerW, _pictureH]
+    ] call FUNC(uiItemPicture);
+
+    if (_attachments isNotEqualTo []) then {
+        [_display, _group, _pictureInner, _attachments] call FUNC(drawAttachments);
+    };
+};
+
+// 2D or 3D, in the box's corner, for an item with a model of its own. The one shown is lit; 3D is greyed out without
+// Picture-in-Picture. The choice is kept for the next items and games.
+if (_can3D) then {
+    private _toggleH = _textUnit * 0.85;
+    private _toggleW = SQUARE(_toggleH * 1.4);
+    private _toggleY = _cursor + _textUnit * 0.3;
+    private _accent = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
+    private _shown = ["2d", "3d"] select _show3D;
+
+    {
+        _x params ["_view", "_label", "_index"];
+
+        private _active = _view isEqualTo _shown;
+        private _buttonTheme = +_theme;
+
+        _buttonTheme set ["button", [[0, 0, 0, 0.45], _accent + [1]] select _active];
+        _buttonTheme set ["buttonHover", [[0, 0, 0, 0.65], _accent + [1]] select _active];
+        _buttonTheme set ["buttonText", [_colorText, _theme getOrDefault ["onAccent", [0, 0, 0, 1]]] select _active];
+
+        private _left = _padX + _innerW - SQUARE(_textUnit * 0.3) - _toggleW * (2 - _index);
+        private _button = [
+            _display, _group, [_left, _toggleY, _toggleW, _toggleH], "inspectView" + _view, _label, "", _buttonTheme, {
+                params ["", "_id"];
+
+                GVAR(inspectView) = ["2d", "3d"] select (_id isEqualTo "inspectView3d");
+                profileNamespace setVariable [QGVAR(inspectView), GVAR(inspectView)];
+
+                call FUNC(drawInspect);
+            }, _view isEqualTo "3d" && {!isPiPEnabled}, -1, true
+        ] call FUNC(uiButton);
+
+        if (_view isEqualTo "3d" && {!isPiPEnabled}) then {
+            [_button select -1, LLSTRING(Inspect_3DNoPiP)] call FUNC(setTooltip);
+        };
+    } forEach [["2d", LLSTRING(Inspect_2D), 0], ["3d", LLSTRING(Inspect_3D), 1]];
 };
 
 _cursor = _cursor + _pictureH + _gap;

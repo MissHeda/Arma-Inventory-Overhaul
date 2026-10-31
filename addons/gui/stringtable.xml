@@ -265,6 +265,18 @@
         <Key ID="STR_aio_gui_Hint_WrongKind">
             <English>This compartment takes other things</English>
         </Key>
+        <Key ID="STR_aio_gui_Inspect_2D">
+            <English>2D</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_3D">
+            <English>3D</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_3DNoPiP">
+            <English>3D needs Picture-in-Picture - turn it on in the video options</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_3DTip">
+            <English>Drag to turn, wheel to zoom, double click to reset</English>
+        </Key>
         <Key ID="STR_aio_gui_Inspect_Attached">
             <English>Attached</English>
         </Key>

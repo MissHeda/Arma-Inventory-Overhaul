@@ -390,6 +390,21 @@ if (GVAR(inspectMove) isNotEqualTo []) then {
     };
 };
 
+// The inspect card's 3D view turns the item while it is held (fnc_drawInspect, fnc_inspect3D).
+if (GVAR(inspect3DTurn) isNotEqualTo []) then {
+    if (inputMouse 0 == 0) then {
+        GVAR(inspect3DTurn) = [];
+    } else {
+        GVAR(inspect3DTurn) params ["_fromX", "_fromY"];
+        _mouse params ["_toX", "_toY"];
+
+        if (_toX != _fromX || {_toY != _fromY}) then {
+            ["turn", [_toX - _fromX, _toY - _fromY]] call FUNC(inspect3D);
+            GVAR(inspect3DTurn) = [_toX, _toY];
+        };
+    };
+};
+
 // A kit window follows the mouse the same way while its title is held (fnc_onMouseButton) - whole on the
 // screen's sides and between header and footer, its corner on a pixel so every see-through edge stays
 // sharp. Looked up by its key every frame: a build meanwhile makes it anew.

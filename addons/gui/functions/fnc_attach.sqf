@@ -109,6 +109,7 @@ GVAR(statusLive) = false;
 // kept for the next one (GVAR(inspectPos)).
 GVAR(inspect) = [];
 GVAR(inspectMove) = [];
+["stop"] call FUNC(inspect3D);
 GVAR(covered) = false;
 
 // The kit windows went with it too, and where they stood with them: opened again, a kit comes up

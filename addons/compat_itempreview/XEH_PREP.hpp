@@ -1,2 +1,0 @@
-PREP(hasModel);
-PREP(open);

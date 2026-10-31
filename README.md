@@ -19,7 +19,7 @@ all") or puts everything of yours into the box beside it ("Put all in").
   is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is
   blocked, by server setting.
 
-**Status:** 0.6.16, public beta: drag and drop between containers and equipment slots, searching loot,
+**Status:** 0.6.17, public beta: drag and drop between containers and equipment slots, searching loot,
 server-checked moves in multiplayer, the grid panel in ACE Arsenal, shaped grids and items, the hotbar, the
 setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
 Bugs and wishes go to Discord or the GitHub issues.
@@ -51,7 +51,7 @@ free cells instead of the engine's add. Works with Mavic 3 - Improved: a Mavic i
 ground, the drop key, Drop in the menu) is deployed as a drone, as that mod does for the engine's inventory, and a deployed drone has an ACE interaction
 "Pack up drone" that checks the grid for room. Works with WebKnight's and KJW's Two Primary Weapons: the weapon on the back never shows as loot, and with
 WebKnight's it comes into your hands when a move in the window empties them. With Better Inventory loaded, its handler for the vanilla inventory stays
-quiet. Works with KPBLM Item Preview: "View in 3D" in the context menu shows an item with a model of its own on its 3D showcase.
+quiet.
 
 ## Building
 
@@ -341,3 +341,8 @@ Gone while this mod is loaded. The Gear key, ACE's "Inventory" and "Open backpac
 bodies all open Arma Inventory Overhaul, and there is no setting to bring the vanilla one back. Should another
 mod or a script open it anyway (Better Inventory, `createDisplay "RscDisplayInventory"`), it is closed again
 at once; should the window ever fail to open, nothing opens and the RPT says why.
+
+## Credits
+
+The inspect card's 3D view is built on the showcase scene of [KPBLM Item Preview](https://steamcommunity.com/sharedfiles/filedetails/?id=3822903400)
+by KPBLM, included with its author's permission.

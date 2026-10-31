@@ -530,3 +530,17 @@
 #define COMPARTMENT_PAD 0.06
 #define COMPARTMENT_PAD_PX(CELLW) ((round ((CELLW) * COMPARTMENT_PAD / pixelW)) max 1)
 
+
+// The inspect card's 3D view (fnc_inspect3D): the render target its camera films into, shown in the card's picture box as
+// #(argb,1024,512,1)r2t(INSPECT_3D_TARGET,aspect); the camera's field of view; where the scene stands, far off any map, high
+// above the sea (its dark sphere would show in the sky of anyone near); the size every item is framed by at most, in metres -
+// the boxes of many mods' models are blown up by their hit geometry - and the distance per metre of it.
+#define INSPECT_3D_TARGET "aio_inspect3d"
+#define INSPECT_3D_FOV 0.35
+#define INSPECT_3D_PLACE [-2048, -2048]
+#define INSPECT_3D_FRAME 1.2
+#define INSPECT_3D_DISTANCE 2
+
+// The engine's stand-in models an item without one of its own inherits (ItemCore, CA_Magazine and the dummies), in lowercase,
+// without the leading backslash and the extension (fnc_hasModel): such an item has nothing to show in 3D.
+#define PLACEHOLDER_MODELS ["a3\weapons_f\ammo\mag_univ", "a3\weapons_f\dummyweapon", "a3\weapons_f\dummyweapon_single", "a3\weapons_f\empty", "a3\data_f\cl_basic", "a3\weapons_f\dummyitem", "a3\weapons_f\dummyitemhorizontal"]

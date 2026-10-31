@@ -174,6 +174,8 @@ PREP(glowSlot);
 PREP(warmTargets);
 PREP(inspect);
 PREP(drawInspect);
+PREP(inspect3D);
+PREP(hasModel);
 PREP(closeInspect);
 PREP(toggleSection);
 PREP(toggleRows);
