@@ -2,6 +2,7 @@
 PREP(getContents);
 PREP(getMaxLoad);
 PREP(isGroundHolder);
+PREP(isForeignHolder);
 PREP(getOwner);
 PREP(getMass);
 

@@ -19,7 +19,7 @@ all") or puts everything of yours into the box beside it ("Put all in").
   is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is
   blocked, by server setting.
 
-**Status:** 0.6.4, public beta: drag and drop between containers and equipment slots, searching loot,
+**Status:** 0.6.5, public beta: drag and drop between containers and equipment slots, searching loot,
 server-checked moves in multiplayer, the grid panel in ACE Arsenal, shaped grids and items, the hotbar, the
 setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
 Bugs and wishes go to Discord or the GitHub issues.
@@ -42,7 +42,8 @@ Works with ACE cargo: what is loaded into a vehicle (or a crate) shows in its in
 a card for each thing, Open for a crate and Unload with ACE's own time. Works with TFAR and ACRE2: the channel
 and frequency of a radio show at the mouse, on the hint line and on the inspect card, and a radio of yours has
 "Open radio" and "Use as active radio" in its right-click menu (TFAR's long-range backpack keeps its
-frequencies while you move it around). Works with ACE vehicle lock and Zeus Enhanced. Works with ACE Interaction
+frequencies while you move it around). Works with ACE vehicle lock and Zeus Enhanced. Works with Helmet on Ass - Helmet Slinging: a slung helmet
+or facewear is never taken for loot. Works with ACE Interaction
 Menu Expansion (AIME): its *Change Ammo Type* offers and loads only magazines that "Use items from ..." allows, its
 inventory entries show only where the window opens, and its one-click pick-up from the ground opens the window while
 the ground has to be searched, else puts a magazine (or a weapon you cannot wield at once) into the first container with

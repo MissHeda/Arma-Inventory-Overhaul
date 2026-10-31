@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.5 - beta
+
+### Fixed
+
+- Helmet on Ass - Helmet Slinging (Workshop 3487820370): a slung helmet or facewear no longer shows as loot. That mod hangs it on you with a ground holder of its own (`hoa_groundholder`, `hoa_groundholder_facewear`), which the vicinity box took for a pile on the ground - and an item dropped beside you could go into it. Such holders are now left out of the nearby list, never joined by a drop and not opened from the engine's inventory action (`aio_storage_fnc_isForeignHolder`, issue #36).
+
 ## 0.6.4 - beta
 
 ### Added

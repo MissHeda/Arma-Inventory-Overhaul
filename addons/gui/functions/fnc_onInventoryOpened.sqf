@@ -86,6 +86,15 @@ if (_unit isNotEqualTo ACE_player) exitWith {
     };
 } forEach [_container, _secondary];
 
+// Another mod's holder that is no loot - Helmet on Ass's slung helmet (aio_storage_fnc_isForeignHolder): left out.
+{
+    if ([_x] call EFUNC(storage,isForeignHolder)) then {
+        INFO_1("left out: %1 is another mod's holder, not loot.",typeOf _x);
+
+        if (_forEachIndex == 0) then {_container = objNull} else {_secondary = objNull};
+    };
+} forEach [_container, _secondary];
+
 // What the engine named to loot, the first of it: not the soldier's own, not the empty pile the engine makes at
 // the feet for its ground panel.
 private _own = [_unit, uniformContainer _unit, vestContainer _unit, backpackContainer _unit];

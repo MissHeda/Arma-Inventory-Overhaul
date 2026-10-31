@@ -72,6 +72,7 @@ if (!_fresh) then {
     _pile = ((nearestObjects [ASLToAGL _point, ["GroundWeaponHolder"], GROUND_RANGE, true]) select {
         local _x
         && {!isObjectHidden _x}
+        && {!([_x] call FUNC(isForeignHolder))}
         && {isNull attachedTo _x}
         && {!_ownOnly || {typeOf _x == "GroundWeaponHolder_Scripted"}}
         && {(everyBackpack _x) findIf {_x getVariable [QGVAR(takenOff), false]} < 0}

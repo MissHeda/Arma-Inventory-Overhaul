@@ -6,7 +6,8 @@
  * sight from the eyes - nothing through walls or floors (fnc_isNear). Nearest first, at most `max`.
  *
  * Not vehicles and bodies - they show when they are opened, a convoy would flood the column with big grids
- * and dolls -, nor living persons (their own action opens them). Not what a mission marks with the public
+ * and dolls -, nor living persons (their own action opens them), nor another mod's holder that is no loot
+ * (Helmet on Ass's slung helmet, fnc_isForeignHolder). Not what a mission marks with the public
  * variable aio_nearby = false, what is locked (lockInventory), hidden, carried (ACE) or loaded somewhere.
  * An empty crate shows - it is a place to put things -, an empty pile does not: the engine deletes it.
  *
@@ -39,6 +40,7 @@ private _feet = getPosASL _unit;
 // second is not a ReammoBox_F.
 private _found = (nearestObjects [_unit, ["WeaponHolder", "WeaponHolderSimulated", "ReammoBox_F"], _range + 1, true]) select {
     !(_x isKindOf "ContainerSupply")
+    && {!([_x] call FUNC(isForeignHolder))}
     && {alive _x}
     && {!isObjectHidden _x}
     && {isNull attachedTo _x}

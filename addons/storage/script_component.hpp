@@ -6,6 +6,9 @@
 // How far from a unit a pile on the ground still counts as at its feet (fnc_getGroundHolder).
 #define GROUND_RANGE 2
 
+// Holders other mods use for something else than loot (fnc_isForeignHolder): Helmet on Ass's slung helmet and facewear.
+#define FOREIGN_HOLDERS ["hoa_groundholder", "hoa_groundholder_facewear"]
+
 // How long after writing places the authority looks whether an older write overtook its own, in seconds
 // (fnc_writePlaces, the heal). Used as an array literal in code only - never handed to a macro, whose
 // arguments must not hold commas.
