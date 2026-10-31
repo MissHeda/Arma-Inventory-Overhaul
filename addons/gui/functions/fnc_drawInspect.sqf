@@ -290,16 +290,13 @@ if (_show3D) then {
     {
         private _hit = [_display, "AIO_Hitbox", _group, _x] call FUNC(uiCreate);
 
-        // The left button turns, the middle one moves the camera (fnc_onFrame).
+        // The left button turns. The middle one moves the camera: the engine reports no event of it to a control, so the frame
+        // asks the button itself, over these areas (QGVAR(inspect3DHits), fnc_onFrame).
         _hit ctrlAddEventHandler ["MouseButtonDown", {
             params ["", "_button"];
 
             if (_button == 0) then {
                 GVAR(inspect3DTurn) = getMousePosition;
-            };
-
-            if (_button == 2) then {
-                GVAR(inspect3DPan) = getMousePosition;
             };
         }];
         _hit ctrlAddEventHandler ["MouseButtonDblClick", {
@@ -320,7 +317,11 @@ if (_show3D) then {
             true
         }];
     } forEach _hitRects;
+
+    uiNamespace setVariable [QGVAR(inspect3DHits), _hitRects];
 } else {
+    uiNamespace setVariable [QGVAR(inspect3DHits), []];
+
     ["stop"] call FUNC(inspect3D);
 
     // As the rules draw it (icon=): larger, smaller or moved, and cut to the lighter box where it would reach out.

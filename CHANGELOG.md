@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.26 - beta
+
+### Fixed
+
+- Inspect card 3D view: holding the middle mouse button did not move the camera - the engine reports that button to no control, so the frame now asks for it itself while the mouse is over the view.
+
 ## 0.6.25 - beta
 
 ### Changed

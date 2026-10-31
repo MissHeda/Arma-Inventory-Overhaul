@@ -405,7 +405,24 @@ if (GVAR(inspect3DTurn) isNotEqualTo []) then {
     };
 };
 
-// ... and moves the camera while the middle button holds it.
+// ... and moves the camera while the middle button holds it - pressed over the view (fnc_drawInspect's areas, in the card's
+// space), as the engine reports the middle button to no control.
+private _middle = inputMouse 2 != 0;
+
+if (_middle && {!GVAR(middleWas)} && {GVAR(inspect3DPan) isEqualTo []} && {count GVAR(scene3D) > 0}) then {
+    (ctrlPosition (uiNamespace getVariable [QGVAR(inspectGroup), controlNull])) params [["_cardX", 0], ["_cardY", 0]];
+    _mouse params ["_atX", "_atY"];
+
+    if ((uiNamespace getVariable [QGVAR(inspect3DHits), []]) findIf {
+        _x params ["_hitX", "_hitY", "_hitW", "_hitH"];
+        _atX >= _cardX + _hitX && {_atX < _cardX + _hitX + _hitW} && {_atY >= _cardY + _hitY} && {_atY < _cardY + _hitY + _hitH}
+    } >= 0) then {
+        GVAR(inspect3DPan) = +_mouse;
+    };
+};
+
+GVAR(middleWas) = _middle;
+
 if (GVAR(inspect3DPan) isNotEqualTo []) then {
     if (inputMouse 2 == 0) then {
         GVAR(inspect3DPan) = [];
