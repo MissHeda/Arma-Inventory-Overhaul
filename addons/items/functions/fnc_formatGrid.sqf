@@ -110,14 +110,15 @@ switch (_mode) do {
         private _parts = [];
         private _written = false;
 
-        // The attributes of a block, after a colon: its categories joined with |, and "one" for a single slot.
+        // The attributes of a block, after a colon: its categories joined with |, and "one" for a single slot - "grow" for one
+        // that takes the size of the item in it.
         private _fnc_attrs = {
             params ["_block"];
 
             private _words = [_block param [4, []]] call FUNC(orderGroups);
 
             if (_block param [5, false]) then {
-                _words pushBack "one";
+                _words pushBack (["one", "grow"] select (_block param [6, false]));
             };
 
             _words joinString "|"

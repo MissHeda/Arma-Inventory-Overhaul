@@ -100,7 +100,7 @@ private _loadSize = TEXT_UNIT * 0.46;
 
     if (!_ok) exitWith {};
 
-    private _layout = [_section getOrDefault ["layoutKey", _holder], _entries] call EFUNC(storage,getLayout);
+    private _layout = [[_section getOrDefault ["layoutKey", _holder], _entries] call EFUNC(storage,getLayout)] call FUNC(growSlots);
     private _placed = _layout get "entries";
 
     [_holder, _placed, false] call FUNC(markHidden);

@@ -97,7 +97,7 @@ private _contentH = _textUnit * 0.7;
 private _blockW = STORAGE_COLS * _cellW;
 
 if (_notice isEqualTo "") then {
-    _layout = [_section getOrDefault ["layoutKey", ""], _section getOrDefault ["entries", []]] call EFUNC(storage,getLayout);
+    _layout = [[_section getOrDefault ["layoutKey", ""], _section getOrDefault ["entries", []]] call EFUNC(storage,getLayout)] call FUNC(growSlots);
 
     ([_layout] call FUNC(flowCompartments)) params ["_flowed", "_flowH", "_flowW"];
 

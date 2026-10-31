@@ -59,6 +59,11 @@ _known apply {
 
     if (count _x > 4) then {
         _block append [+(_x param [4, []]), _x param [5, false]];
+
+        // A single slot that grows with its item (grid=1x1:grow, aio_gui_fnc_growSlots).
+        if (_x param [6, false]) then {
+            _block pushBack true;
+        };
     };
 
     _block

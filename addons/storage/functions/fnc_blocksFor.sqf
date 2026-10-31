@@ -69,13 +69,18 @@ _spec params [["_mode", "auto", [""]]];
 // Compartments given exactly - a copy, the spec is shared. The older table and aio_grids[] give
 // rectangles as [cols, rows]: everyone reads four, and whoever only wants three still finds them first. A
 // compartment that accepts only some categories or is a single slot (grid=1x1:grenade:one) has two more, its
-// accepts and single: they are carried on as they are, and only on those.
+// accepts and single, and a single slot that grows a seventh, true: they are carried on as they are, and only on those.
 if (_mode isEqualTo "blocks") exitWith {
     (_spec select 1) apply {
         private _block = [_x select 0, _x select 1, +(_x param [2, []]), +(_x param [3, []])];
 
         if (count _x > 4) then {
             _block append [+(_x param [4, []]), _x param [5, false]];
+
+            // A single slot that takes the size of the item in it (grid=1x1:grow, aio_gui_fnc_growSlots).
+            if (_x param [6, false]) then {
+                _block pushBack true;
+            };
         };
 
         _block

@@ -19,7 +19,7 @@ all") or puts everything of yours into the box beside it ("Put all in").
   is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is
   blocked, by server setting.
 
-**Status:** 0.6.18, public beta: drag and drop between containers and equipment slots, searching loot,
+**Status:** 0.6.19, public beta: drag and drop between containers and equipment slots, searching loot,
 server-checked moves in multiplayer, the grid panel in ACE Arsenal, shaped grids and items, the hotbar, the
 setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
 Bugs and wishes go to Discord or the GitHub issues.
@@ -217,7 +217,8 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   and scripts that add to the cargo all follow it; what the compartments refuse is put in another compartment or counts as no room.
   Over a refusing compartment the drag footprint is red with "Only magazines here". A locked compartment always shows what it takes -
   a faint picture of its category, large in the middle of an empty compartment and small on each free cell when something lies in it - and hovering it says so in the footer. A single slot draws the item scaled into it and gives it its
-  own size back when you take it out. The wizard's Containers editor sets both per compartment on the Blocks way.
+  own size back when you take it out; one written `grow` instead of `one` (`1x1:grow`, "Grows with the item" in the wizard) takes
+  the size of the item in it - a 1x1 slot holding a 3x3 item is 3x3 - and the compartments after it move aside. The wizard's Containers editor sets both per compartment on the Blocks way.
   The eight categories are not all there is: the wizard's General page has a Categories card where you rename them, give them another picture
   (any of this mod's icons or any item's picture), and add categories of your own. They are statements of the rules text, so they are saved on
   the server and export and import with it: `category=bandit > name=Bandit_loot picture=/a3/ui_f/data/gui/cfg/hints/gear_ca.paa` (an id of

@@ -11,6 +11,8 @@
  *     the Items step (cats=), else its built-in one.
  *   - "One item, any size": a chip for the single slot. The compartment then holds one item of its categories whatever the item's
  *     size, and the item takes the whole compartment - a 1x1 grenade loop takes a 2x2 grenade and draws it scaled into the slot.
+ *     With it on, "Grows with the item": the slot takes the size of the item in it instead - a 1x1 slot with a 3x3 item is 3x3,
+ *     and the compartments after it move aside (grid=1x1:grow, aio_gui_fnc_growSlots; issue #42).
  * The changes go into the working copy of the class (GVAR(cellWork)), made on the first one, and the editor is drawn again.
  *
  * On the Paint way (uiNamespace QGVAR(paintCanvas) holds the painted canvas, which the editor sets each time it is drawn; empty on the
@@ -51,10 +53,11 @@ private _labelW = SQUARE(UNIT * 5.6);
 private _block = _shown param [_picked, [1, 1, []]];
 private _accepts = _block param [4, []];
 private _single = _block param [5, false];
+private _grow = _block param [6, false];
 
 // The working copy of the class, made from what is shown the first time something changes.
 private _fnc_change = {
-    params ["_class", "_shown", "_picked", "_accepts", "_single"];
+    params ["_class", "_shown", "_picked", "_accepts", "_single", ["_grow", false]];
 
     private _lc = toLowerANSI _class;
     private _canvas = uiNamespace getVariable [QGVAR(paintCanvas), createHashMap];
@@ -72,7 +75,7 @@ private _fnc_change = {
         private _attrs = (_canvas getOrDefault ["attrs", []]) select {(_x select 0) isNotEqualTo _places};
 
         if (_accepts isNotEqualTo [] || {_single}) then {
-            _attrs pushBack [+_places, _accepts, _single];
+            _attrs pushBack [+_places, _accepts, _single, _single && _grow];
         };
 
         _canvas set ["attrs", _attrs];
@@ -90,7 +93,7 @@ private _fnc_change = {
     private _blocks = _work get "blocks";
 
     if (_picked < count _blocks) then {
-        _blocks set [_picked, [_blocks select _picked, _accepts, _single] call FUNC(cellBlock)];
+        _blocks set [_picked, [_blocks select _picked, _accepts, _single, _grow] call FUNC(cellBlock)];
     };
 
     _work set ["picked", _picked];
@@ -153,7 +156,7 @@ private _lineY = _rowsTop;
 
     [_display, _parent, [_chipX, _lineY + (_rowH - _chipH) / 2, _chipW, _chipH], _text, _on, _theme, {
         params ["_state", "_arguments"];
-        _arguments params ["_group", "_class", "_shown", "_picked", "_accepts", "_single", "_change"];
+        _arguments params ["_group", "_class", "_shown", "_picked", "_accepts", "_single", "_grow", "_change"];
 
         private _list = if (_group isEqualTo "") then {
             []
@@ -161,8 +164,8 @@ private _lineY = _rowsTop;
             ([_accepts - [_group], _accepts + [_group]] select _state)
         };
 
-        [_class, _shown, _picked, [_list] call EFUNC(items,orderGroups), _single] call _change;
-    }, [_group, _class, _shown, _picked, _accepts, _single, _fnc_change]] call FUNC(uiChip);
+        [_class, _shown, _picked, [_list] call EFUNC(items,orderGroups), _single, _grow] call _change;
+    }, [_group, _class, _shown, _picked, _accepts, _single, _grow, _fnc_change]] call FUNC(uiChip);
 
     _chipX = _chipX + _chipW + _gap;
 } forEach ([""] + ([GVAR(draftRules)] call EFUNC(items,categories)));
@@ -177,10 +180,10 @@ private _singleW = SQUARE(_chipH * 0.9) + (_singleText getTextWidth [_fontBold, 
 
 [_display, _parent, [_left + _labelW, _lineY + (_rowH - _chipH) / 2, _singleW, _chipH], _singleText, _single, _theme, {
     params ["_state", "_arguments"];
-    _arguments params ["_class", "_shown", "_picked", "_accepts", "_change"];
+    _arguments params ["_class", "_shown", "_picked", "_accepts", "_grow", "_change"];
 
-    [_class, _shown, _picked, _accepts, _state] call _change;
-}, [_class, _shown, _picked, _accepts, _fnc_change]] call FUNC(uiChip);
+    [_class, _shown, _picked, _accepts, _state, _grow] call _change;
+}, [_class, _shown, _picked, _accepts, _grow, _fnc_change]] call FUNC(uiChip);
 
 // Its explanation beside the chip.
 [
@@ -189,6 +192,26 @@ private _singleW = SQUARE(_chipH * 0.9) + (_singleText getTextWidth [_fontBold, 
 ] call EFUNC(gui,uiLabel);
 
 _lineY = _lineY + _rowH;
+
+// A single slot: whether it grows to the item in it, or draws every item at the slot's size.
+if (_single) then {
+    private _growText = LLSTRING(Cont_GrowChip);
+    private _growW = SQUARE(_chipH * 0.9) + (_growText getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK;
+
+    [_display, _parent, [_left + _labelW, _lineY + (_rowH - _chipH) / 2, _growW, _chipH], _growText, _grow, _theme, {
+        params ["_state", "_arguments"];
+        _arguments params ["_class", "_shown", "_picked", "_accepts", "_change"];
+
+        [_class, _shown, _picked, _accepts, true, _state] call _change;
+    }, [_class, _shown, _picked, _accepts, _fnc_change]] call FUNC(uiChip);
+
+    [
+        _display, _parent, [_left + _labelW + _growW + _gap * 2, _lineY, _width - _labelW - _growW - _gap * 2, _rowH],
+        LLSTRING(Cont_GrowExplain), TEXT_SMALL, _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _theme getOrDefault ["font", "PuristaMedium"], 0
+    ] call EFUNC(gui,uiLabel);
+
+    _lineY = _lineY + _rowH;
+};
 
 // ----- The picture its empty cells show (show= of the class, for all its compartments; aio_gui_fnc_drawBadge) -----
 // A chip for each category it takes, Small for a small picture of each in its corner, and No picture. The one in effect is lit:

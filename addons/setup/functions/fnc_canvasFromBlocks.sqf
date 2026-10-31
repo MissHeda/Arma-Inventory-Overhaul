@@ -205,6 +205,7 @@ private _attrs = [];
 {
     private _accepts = _x param [4, []];
     private _single = _x param [5, false];
+    private _grow = _x param [6, false];
 
     if (_accepts isEqualTo [] && {!_single}) then {continue};
 
@@ -218,7 +219,7 @@ private _attrs = [];
     } forEach _owners;
 
     if (_places isNotEqualTo []) then {
-        _attrs pushBack [_places, +_accepts, _single];
+        _attrs pushBack [_places, +_accepts, _single, _grow];
     };
 } forEach _blocks;
 

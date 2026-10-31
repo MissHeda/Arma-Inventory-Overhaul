@@ -210,7 +210,8 @@ private _fnc_grid = {
                 private _words = ((_x param [4, []]) apply {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name")}) joinString "/";
 
                 if (_x param [5, false]) then {
-                    _words = [_words + " · " + LLSTRING(Cont_SingleShort), LLSTRING(Cont_SingleShort)] select (_words isEqualTo "");
+                    private _short = [LLSTRING(Cont_SingleShort), LLSTRING(Cont_GrowShort)] select (_x param [6, false]);
+                    _words = [_words + " · " + _short, _short] select (_words isEqualTo "");
                 };
 
                 if (_words isNotEqualTo "") then {

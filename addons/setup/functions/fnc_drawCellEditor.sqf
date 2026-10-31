@@ -195,7 +195,7 @@ if (_hasWork && {("blocks" in _work) isNotEqualTo _blocksMode}) then {
         private _pickedNow = ([_work, GVAR(cellPick) getOrDefault [_lc, []]] call FUNC(canvasPick)) select 0;
 
         _work = createHashMapFromArray [
-            ["blocks", _fromPaint apply {[[_x select 0, _x select 1, _x select 2], _x param [4, []], _x param [5, false]] call FUNC(cellBlock)}],
+            ["blocks", _fromPaint apply {[[_x select 0, _x select 1, _x select 2], _x param [4, []], _x param [5, false], _x param [6, false]] call FUNC(cellBlock)}],
             ["picked", _pickedNow max 0]
         ];
     } else {
@@ -220,7 +220,7 @@ private _start = [];
 private _pickedPlaces = [];
 
 if (_blocksMode) then {
-    _start = _resolved apply {[[_x select 0, _x select 1, _x param [2, []]], _x param [4, []], _x param [5, false]] call FUNC(cellBlock)};
+    _start = _resolved apply {[[_x select 0, _x select 1, _x param [2, []]], _x param [4, []], _x param [5, false], _x param [6, false]] call FUNC(cellBlock)};
     _shown = [_start, _work getOrDefault ["blocks", []]] select _hasWork;
     _picked = (_work getOrDefault ["picked", 0]) min ((count _shown - 1) max 0);
     _blocks = _shown select {(_x select 0) * (_x select 1) > count (_x select 2)};
@@ -245,7 +245,7 @@ if (_blocksMode) then {
     // What the rows of the picked compartment show: when a change leaves it as it is, the editor is not drawn again.
     private _pickedBlock = _blocks param [_picked, []];
 
-    uiNamespace setVariable [QGVAR(paintSig), [count _blocks, _picked, _pickedBlock param [4, []], _pickedBlock param [5, false]]];
+    uiNamespace setVariable [QGVAR(paintSig), [count _blocks, _picked, _pickedBlock param [4, []], _pickedBlock param [5, false], _pickedBlock param [6, false]]];
 };
 
 // Both ways give the preview (fnc_drawPreview, through fnc_cellChanged) the same kind of thing. While
@@ -357,7 +357,7 @@ private _now = if (_kitRoom isEqualTo "capacity") then {
 
 // Back to the default, beside the line: the compartments, whatever way they were drawn, as three numbers each.
 private _fnc_shapes = {
-    ((_this select {(_x select 1) > 0}) apply {[_x select 0, _x select 1, _x param [2, []], _x param [4, []], _x param [5, false]]})
+    ((_this select {(_x select 1) > 0}) apply {[_x select 0, _x select 1, _x param [2, []], _x param [4, []], _x param [5, false], _x param [6, false]]})
 };
 private _resetSize = UNIT * 1.1;
 private _canResetGrid = _kitRoom isEqualTo "" && {("like" in _own) || {(_blocks call _fnc_shapes) isNotEqualTo (_defaultBlocks call _fnc_shapes)}};
@@ -618,7 +618,7 @@ if (_blocksMode) then {
             // the rows above the drawing are drawn again.
             private _block = _blocks param [_index max 0, []];
 
-            if ([count _blocks, _index max 0, _block param [4, []], _block param [5, false]] isNotEqualTo (uiNamespace getVariable [QGVAR(paintSig), []])) exitWith {
+            if ([count _blocks, _index max 0, _block param [4, []], _block param [5, false], _block param [6, false]] isNotEqualTo (uiNamespace getVariable [QGVAR(paintSig), []])) exitWith {
                 [] call FUNC(drawCellEditor);
             };
 

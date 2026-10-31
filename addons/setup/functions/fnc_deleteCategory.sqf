@@ -93,10 +93,10 @@ _ast set ["rules", _rules];
     private _attrs = _work getOrDefault ["attrs", []];
 
     {
-        _x params ["_places", "_accepts", "_single"];
+        _x params ["_places", "_accepts", "_single", ["_grow", false]];
 
         if (_id in _accepts) then {
-            _attrs set [_forEachIndex, [_places, [_accepts - [_id]] call EFUNC(items,orderGroups), _single]];
+            _attrs set [_forEachIndex, [_places, [_accepts - [_id]] call EFUNC(items,orderGroups), _single, _grow]];
         };
     } forEach _attrs;
 

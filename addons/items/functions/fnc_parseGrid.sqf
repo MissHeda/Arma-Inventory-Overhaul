@@ -27,7 +27,10 @@
  *                   medical, food, tool, misc - ITEM_GROUPS - or a category the setup defines, joined with |) means the compartment accepts only
  *                   items in one of them: "2x2:ammo|grenade" takes magazines and grenades and nothing else; no
  *                   list takes everything. The word "one" makes it a single slot: it holds one tile whatever
- *                   its size, and the item takes the whole slot ("1x1:grenade:one", the vest's grenade loop).
+ *                   its size, and the item takes the whole slot ("1x1:grenade:one", the vest's grenade loop). The word
+ *                   "grow" makes it a single slot that takes the size of the item in it instead: "1x1:grow" is a cell
+ *                   while empty and 3x3 with a 3x3 item in it - the window moves the compartments after it aside
+ *                   (aio_gui_fnc_growSlots).
  *                   On a canvas each letter has its own, "aab/aab:a=ammo:b=grenade|one". A compartment without
  *                   attributes is written as it always was, so no older text changes. A rig:16 pattern, a
  *                   number of cells or a share cannot carry any: they say nothing about single compartments.
@@ -61,7 +64,8 @@
  *              the cells a shape does not have, ascending, [] for a full rectangle; pos [x, y] the
  *              compartment's top left cell on its canvas, [] for one that flows; and for a compartment with
  *              attributes two more: accepts, the categories it takes ([] for all of them), and single, true
- *              for a slot of one item of any size (fnc_blocksFor, aio_storage_fnc_blockMode). A compartment
+ *              for a slot of one item of any size (fnc_blocksFor, aio_storage_fnc_blockMode), and a seventh, true,
+ *              for a single slot that grows (only where it does). A compartment
  *              without attributes has the four only; [] when the text cannot be read <ARRAY>
  *   messages - what was cut down, or why it cannot be read <ARRAY of STRING>
  *
@@ -163,9 +167,9 @@ if (_colon >= 0 && {!(_name in GRID_PATTERNS)}) then {
     };
 };
 
-// The attributes of one piece: letter ("" for a piece without a canvas) -> [accepts, single]. A category is one of
-// ITEM_GROUPS or the id of a category of the setup's own (fnc_parseGroups), "one" says one item of any size; "a=" in front names
-// the compartment of a canvas.
+// The attributes of one piece: letter ("" for a piece without a canvas) -> [accepts, single, grow]. A category is one of
+// ITEM_GROUPS or the id of a category of the setup's own (fnc_parseGroups), "one" says one item of any size, "grow" a single slot
+// that takes the size of the item in it (and is one); "a=" in front names the compartment of a canvas.
 private _fnc_attrs = {
     params ["_pieceTails"];
 
@@ -181,13 +185,14 @@ private _fnc_attrs = {
         };
 
         private _single = false;
+        private _grow = false;
         private _words = [];
 
         {
-            if (_x in ["one", "single"]) then {
-                _single = true;
-            } else {
-                _words pushBack _x;
+            switch (true) do {
+                case (_x in ["one", "single"]): {_single = true};
+                case (_x isEqualTo "grow"): {_single = true; _grow = true};
+                default {_words pushBack _x};
             };
         } forEach (_token splitString "|");
 
@@ -205,9 +210,9 @@ private _fnc_attrs = {
             continue;
         };
 
-        private _had = _map getOrDefault [_letter, [[], false]];
+        private _had = _map getOrDefault [_letter, [[], false, false]];
 
-        _map set [_letter, [[(_had select 0) + _groups] call FUNC(orderGroups), (_had select 1) || _single]];
+        _map set [_letter, [[(_had select 0) + _groups] call FUNC(orderGroups), (_had select 1) || _single, (_had param [2, false]) || _grow]];
     } forEach _pieceTails;
 
     _map
@@ -302,16 +307,16 @@ private _spec = switch (true) do {
             private _blocks = [];
             private _canvases = 0;
 
-            // The attributes of a block, [accepts, single], appended to it only when it has some: a grid without
-            // them is exactly what it always was.
+            // The attributes of a block, [accepts, single] and grow as a seventh only where it grows, appended to it only when it
+            // has some: a grid without them is exactly what it always was.
             private _fnc_extra = {
                 params ["_block", "_attr"];
 
-                _attr params [["_accepts", []], ["_single", false]];
+                _attr params [["_accepts", []], ["_single", false], ["_grow", false]];
 
                 if (_accepts isEqualTo [] && {!_single}) exitWith {_block};
 
-                _block + [_accepts, _single]
+                _block + [_accepts, _single] + ([[], [true]] select _grow)
             };
 
             {
@@ -363,7 +368,7 @@ private _spec = switch (true) do {
                     };
 
                     _blocks append (_lettered apply {
-                        [[_x select 0, _x select 1, _x select 2, []], [_x param [4, []], _x param [5, false]]] call _fnc_extra
+                        [[_x select 0, _x select 1, _x select 2, []], [_x param [4, []], _x param [5, false], _x param [6, false]]] call _fnc_extra
                     });
                 } else {
                     _blocks append _lettered;
@@ -376,7 +381,7 @@ private _spec = switch (true) do {
                 _messages pushBack format ["grid=%1: a compartment is at most %2 across and %3 down - cut down", _value, STORAGE_COLS, MAX_ROWS];
                 _blocks = _blocks apply {
                     if ((_x select 0) > STORAGE_COLS || {(_x select 1) > MAX_ROWS}) then {
-                        [(_x call _fnc_cut) + [[]], [_x param [4, []], _x param [5, false]]] call _fnc_extra
+                        [(_x call _fnc_cut) + [[]], [_x param [4, []], _x param [5, false], _x param [6, false]]] call _fnc_extra
                     } else {
                         _x
                     }

@@ -283,7 +283,8 @@ private _toggle = {
     private _attrs = ((_x param [4, []]) apply {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name")}) joinString "/";
 
     if (_x param [5, false]) then {
-        _attrs = [_attrs + " · " + LLSTRING(Cont_SingleShort), LLSTRING(Cont_SingleShort)] select (_attrs isEqualTo "");
+        private _short = [LLSTRING(Cont_SingleShort), LLSTRING(Cont_GrowShort)] select (_x param [6, false]);
+        _attrs = [_attrs + " · " + _short, _short] select (_attrs isEqualTo "");
     };
 
     if (_attrs isNotEqualTo "") then {

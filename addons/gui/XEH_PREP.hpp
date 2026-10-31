@@ -174,6 +174,7 @@ PREP(glowSlot);
 PREP(warmTargets);
 PREP(inspect);
 PREP(drawInspect);
+PREP(growSlots);
 PREP(inspect3D);
 PREP(hasModel);
 PREP(closeInspect);

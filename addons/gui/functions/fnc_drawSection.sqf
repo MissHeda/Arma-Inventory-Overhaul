@@ -246,6 +246,9 @@ if (!_placeholder) then {
     };
 
     _layout = [_section getOrDefault ["layoutKey", _container], _entries] call EFUNC(storage,getLayout);
+
+    // Single slots that grow are as large as the item in them, the others make room (fnc_growSlots).
+    _layout = [_layout] call FUNC(growSlots);
 };
 
 // A canvas (compartments with a pos) is wider than STORAGE_COLS cells where seams open it between two of

@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.19 - beta
+
+### Added
+
+- Single slots that grow with their item (issue #42): in the setup wizard's Containers step, a single slot ("One item, any size") has a second switch, "Grows with the item". Such a slot takes the size of the item in it instead of drawing it scaled into the slot - a 1x1 slot holding a 3x3 item becomes 3x3 - and is its drawn size again while empty. The compartments after it move aside: flowed ones by the flow, on a painted canvas everything right of the slot moves right and everything below it moves down by what it grew. In the rules text it is the word `grow` instead of `one` (`grid=1x1:grow`). Only the view changes: the places and the multiplayer checks keep the slot as drawn.
+
 ## 0.6.18 - beta
 
 ### Added

@@ -34,6 +34,8 @@ if (!isNil QEFUNC(storage,blocksFor)) then {
     ] call EFUNC(storage,blocksFor);
 };
 
-_blocks = (_blocks select {(_x select 1) > 0}) apply {[_x select 0, _x select 1, +(_x param [2, []]), +(_x param [3, []]), +(_x param [4, []]), _x param [5, false]]};
+_blocks = (_blocks select {(_x select 1) > 0}) apply {
+    [_x select 0, _x select 1, +(_x param [2, []]), +(_x param [3, []]), +(_x param [4, []]), _x param [5, false]] + ([[], [true]] select (_x param [6, false]))
+};
 
 [_info, _blocks]

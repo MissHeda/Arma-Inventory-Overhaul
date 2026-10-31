@@ -140,14 +140,14 @@ if ("paint" in _canvas) then {
     private _kept = [];
 
     {
-        _x params ["_places", "_accepts", "_single"];
+        _x params ["_places", "_accepts", "_single", ["_grow", false]];
 
         private _index = [_label, count _blocks, _places, _taken] call FUNC(canvasMatch);
 
         if (_index >= 0) then {
             _taken pushBack _index;
-            _attrOf set [_index, [_accepts, _single]];
-            _kept pushBack [_parts select _index, _accepts, _single];
+            _attrOf set [_index, [_accepts, _single] + ([[], [true]] select (_single && _grow))];
+            _kept pushBack [_parts select _index, _accepts, _single, _grow];
         };
     } forEach (_canvas getOrDefault ["attrs", []]);
 

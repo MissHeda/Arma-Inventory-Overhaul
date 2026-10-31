@@ -112,7 +112,7 @@ if (_part isEqualTo "all") then {
                 private _own = ((call FUNC(ownClassRules)) select 0) getOrDefault [_lc, createHashMap];
                 private _work = if (GVAR(cellMode) == 1) then {
                     createHashMapFromArray [
-                        ["blocks", _blocks apply {[[_x select 0, _x select 1, _x select 2], _x param [4, []], _x param [5, false]] call FUNC(cellBlock)}], ["picked", 0]
+                        ["blocks", _blocks apply {[[_x select 0, _x select 1, _x select 2], _x param [4, []], _x param [5, false], _x param [6, false]] call FUNC(cellBlock)}], ["picked", 0]
                     ]
                 } else {
                     [_blocks, 1, CANVAS_ROWS_LOADED, STORAGE_COLS, true] call FUNC(canvasFromBlocks)
