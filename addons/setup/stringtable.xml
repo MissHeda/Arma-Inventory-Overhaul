@@ -422,7 +422,7 @@
             <English>%1 holds nothing - there are no cells to draw.</English>
         </Key>
         <Key ID="STR_aio_setup_Cont_PaintHelp">
-            <English>Pick a colour, then click or drag over cells; touching cells of one colour are one compartment. The rows above pick a compartment and set what it accepts.</English>
+            <English>Pick a colour, then click or drag over cells; touching cells of one colour are one compartment. A right click on a cell picks its compartment; the rows above set what it accepts.</English>
         </Key>
         <Key ID="STR_aio_setup_Cont_PaintSelect">
             <English>Select on canvas</English>
@@ -474,6 +474,9 @@
         </Key>
         <Key ID="STR_aio_setup_Cont_SingleChip">
             <English>One item, any size</English>
+        </Key>
+        <Key ID="STR_aio_setup_Cont_SingleExplain">
+            <English>Holds exactly one item, whatever its size - the item fills the whole compartment (a grenade loop, a radio pouch).</English>
         </Key>
         <Key ID="STR_aio_setup_Cont_SingleShort">
             <English>one item</English>
@@ -1285,16 +1288,13 @@ What you apply on the right goes to all of them.</English>
             <English>Set by the server's cba_settings.sqf - change it there.</English>
         </Key>
         <Key ID="STR_aio_setup_Show_All">
-            <English>Picture: small, all of them in the corner</English>
+            <English>Small, all in the corner</English>
         </Key>
-        <Key ID="STR_aio_setup_Show_First">
-            <English>Picture: the first</English>
+        <Key ID="STR_aio_setup_Show_Label">
+            <English>Picture</English>
         </Key>
         <Key ID="STR_aio_setup_Show_None">
-            <English>Picture: none</English>
-        </Key>
-        <Key ID="STR_aio_setup_Show_Of">
-            <English>Picture: %1</English>
+            <English>No picture</English>
         </Key>
         <Key ID="STR_aio_setup_Source_client">
             <English>Client</English>
@@ -1353,14 +1353,11 @@ What you apply on the right goes to all of them.</English>
         <Key ID="STR_aio_setup_Text_OwnRead">
             <English>One rule per line. The settings are in the lines for a cba_settings.sqf.</English>
         </Key>
-        <Key ID="STR_aio_setup_Tint_First">
-            <English>Colour: the first</English>
+        <Key ID="STR_aio_setup_Tint_Label">
+            <English>Colour</English>
         </Key>
-        <Key ID="STR_aio_setup_Tint_Of">
-            <English>Colour: %1</English>
-        </Key>
-        <Key ID="STR_aio_setup_Tint_Split">
-            <English>Colour: split, a stripe each</English>
+        <Key ID="STR_aio_setup_Tint_None">
+            <English>No colour</English>
         </Key>
         <Key ID="STR_aio_setup_Title">
             <English>Inventory setup</English>

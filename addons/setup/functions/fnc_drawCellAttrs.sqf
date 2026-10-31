@@ -182,26 +182,55 @@ private _singleW = SQUARE(_chipH * 0.9) + (_singleText getTextWidth [_fontBold, 
     [_class, _shown, _picked, _accepts, _state] call _change;
 }, [_class, _shown, _picked, _accepts, _fnc_change]] call FUNC(uiChip);
 
-// Taking several categories: which picture its empty cells show (show= of the class, for all its compartments; aio_gui_fnc_drawBadge) -
-// one of them, a small picture of each in the corner, or none. Written at once, an undo step of its own.
-if (count _accepts > 1) then {
-    private _show = ([_class, GVAR(draftRules)] call EFUNC(items,getInfo)) getOrDefault ["show", ""];
-    private _options = [[LLSTRING(Show_First), ""]]
-        + (_accepts apply {[format [LLSTRING(Show_Of), ([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name"], _x]})
-        + [[LLSTRING(Show_All), "all"], [LLSTRING(Show_None), "none"]];
-    private _showW = SQUARE(UNIT * 9);
-
-    [_display, _parent, [_left + _labelW + _singleW + _gap * 3, _lineY, _showW, _rowH], _options, _show, _theme, {
-        params ["_value", "_class"];
-
-        if (_value isEqualTo "") then {
-            [_class, createHashMap, ["show"]] call FUNC(upsertRule);
-        } else {
-            [_class, createHashMapFromArray [["show", _value]]] call FUNC(upsertRule);
-        };
-    }, _class, true, LLSTRING(Show_First)] call FUNC(uiDropdown);
-};
+// Its explanation beside the chip.
+[
+    _display, _parent, [_left + _labelW + _singleW + _gap * 2, _lineY, _width - _labelW - _singleW - _gap * 2, _rowH],
+    LLSTRING(Cont_SingleExplain), TEXT_SMALL, _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _theme getOrDefault ["font", "PuristaMedium"], 0
+] call EFUNC(gui,uiLabel);
 
 _lineY = _lineY + _rowH;
+
+// ----- The picture its empty cells show (show= of the class, for all its compartments; aio_gui_fnc_drawBadge) -----
+// A chip for each category it takes, Small for a small picture of each in its corner, and No picture. The one in effect is lit:
+// show= where it names one of them, else the first. Written at once, an undo step of its own.
+if (_accepts isNotEqualTo []) then {
+    private _show = ([_class, GVAR(draftRules)] call EFUNC(items,getInfo)) getOrDefault ["show", ""];
+    private _showLit = switch (true) do {
+        case (_show in ["all", "none"]): {_show};
+        case (_show in _accepts): {_show};
+        default {_accepts select 0};
+    };
+
+    [_display, _parent, [_left, _lineY, _labelW, _rowH], LLSTRING(Show_Label), TEXT_SMALL, _colorText2, _fontBold, 0] call EFUNC(gui,uiLabel);
+
+    private _pickX = _left + _labelW;
+    private _pickY = _lineY;
+
+    {
+        _x params ["_value", "_text"];
+
+        private _pickW = SQUARE(_chipH * 0.9) + (_text getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK;
+
+        if (_pickX + _pickW > _left + _width && {_pickX > _left + _labelW}) then {
+            _pickX = _left + _labelW;
+            _pickY = _pickY + _rowH;
+        };
+
+        [_display, _parent, [_pickX, _pickY + (_rowH - _chipH) / 2, _pickW, _chipH], _text, _value isEqualTo _showLit, _theme, {
+            params ["", "_arguments"];
+            _arguments params ["_class", "_value", "_first"];
+
+            if (_value isEqualTo _first) then {
+                [_class, createHashMap, ["show"]] call FUNC(upsertRule);
+            } else {
+                [_class, createHashMapFromArray [["show", _value]]] call FUNC(upsertRule);
+            };
+        }, [_class, _value, _accepts select 0]] call FUNC(uiChip);
+
+        _pickX = _pickX + _pickW + _gap;
+    } forEach ((_accepts apply {[_x, ([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name"]}) + [["all", LLSTRING(Show_All)], ["none", LLSTRING(Show_None)]]);
+
+    _lineY = _pickY + _rowH;
+};
 
 _lineY - _top

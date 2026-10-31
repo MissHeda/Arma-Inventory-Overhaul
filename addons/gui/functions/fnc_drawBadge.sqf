@@ -70,7 +70,8 @@ private _free = [];
 if (_shown == 0) exitWith {};
 
 // ----- Small pictures of all of them in the corner (show=all) -----
-if (_show isEqualTo "all" && {count _textures > 1}) exitWith {
+// With one category too: show=all is the small pictures in the corner on every compartment that takes only some, an item on it or not.
+if (_show isEqualTo "all" && {_textures isNotEqualTo []}) exitWith {
     private _side = ((_cellW / pixelW) min (_cellH / pixelH)) * 0.42;
     private _pad = _side * 0.18;
 

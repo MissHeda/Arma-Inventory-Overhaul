@@ -19,7 +19,7 @@ all") or puts everything of yours into the box beside it ("Put all in").
   is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is
   blocked, by server setting.
 
-**Status:** 0.6.11, public beta: drag and drop between containers and equipment slots, searching loot,
+**Status:** 0.6.12, public beta: drag and drop between containers and equipment slots, searching loot,
 server-checked moves in multiplayer, the grid panel in ACE Arsenal, shaped grids and items, the hotbar, the
 setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
 Bugs and wishes go to Discord or the GitHub issues.
@@ -125,7 +125,7 @@ their load. A text that names a preset of an older version (`base=realism`, `wei
   either side of the main compartment, `grid=aaa/aba/aaa` a ring with a cell of its own inside. A backpack
   whose config holds nothing (a cosmetic one, some radio packs) has no cells until a rule gives it some:
   `class=My_Radio_Pack > grid=4x3`.
-  `cats=medical+tool` puts an item in several categories, `cats=none` in none; `tint=tool` (or `tint=split`) says which colour its tile
+  `cats=medical+tool` puts an item in several categories, `cats=none` in none; `tint=tool` (or `tint=none`) says which colour its tile
   takes then, `show=all` (or a category, or `none`) what the empty cells of a container's compartments with several categories show.
   `class=My_Vest > like=V_PlateCarrier1_rgr` gives a class another one's size, stack, grid and rule weight,
   and follows it when that changes; `like=X grid=6x4` changes one.

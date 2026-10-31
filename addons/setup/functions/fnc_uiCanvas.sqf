@@ -364,6 +364,23 @@ _group setVariable [QGVAR(canvasTarget), _fnc_target];
     _hit ctrlAddEventHandler ["MouseButtonDown", {
         params ["_hit", "_button"];
 
+        // A right click on a painted canvas picks the compartment the place is in, whatever the brush (issue #38).
+        if (_button == 1) exitWith {
+            (_hit getVariable [QGVAR(canvasPlace), []]) params [["_group", controlNull], ["_index", -1]];
+
+            if (isNull _group) exitWith {};
+
+            private _options = _group getVariable [QGVAR(canvasOptions), createHashMap];
+
+            if (_options getOrDefault ["palette", false]) then {
+                [{
+                    params ["_index", "_options"];
+
+                    [_index, _options getOrDefault ["arguments", []]] call (_options getOrDefault ["onPick", {}]);
+                }, [_index, _options]] call FUNC(defer);
+            };
+        };
+
         if (_button != 0) exitWith {};
 
         (_hit getVariable [QGVAR(canvasPlace), []]) params [["_group", controlNull], ["_index", -1]];

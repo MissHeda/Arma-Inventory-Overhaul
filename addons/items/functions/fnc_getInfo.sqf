@@ -138,25 +138,19 @@ if ((_resolved get "cats") isEqualTo ["none"]) then {
 };
 
 // The tiles' colour: of its categories that the setup gives one (category=... color=), the one tint= names, else the first;
-// tint=split gives every one of them a stripe of the tile ("tileColors", fnc_createTile).
+// tint=none keeps the look's plain tile.
 private _categoryDefs = _compiled getOrDefault ["categoryDefs", createHashMap];
 private _coloured = (_info get "groups") select {((_categoryDefs getOrDefault [_x, []]) param [2, ""]) isNotEqualTo ""};
 private _tint = _resolved getOrDefault ["tint", ""];
 private _tileColor = [];
-private _tileColors = [];
 
-if (_coloured isNotEqualTo []) then {
+if (_coloured isNotEqualTo [] && {_tint isNotEqualTo "none"}) then {
     private _pick = [_coloured select 0, _tint] select (_tint in _coloured);
 
     _tileColor = ([_pick, _compiled] call FUNC(categoryInfo)) get "color";
-
-    if (_tint isEqualTo "split" && {count _coloured > 1}) then {
-        _tileColors = _coloured apply {([_x, _compiled] call FUNC(categoryInfo)) get "color"};
-    };
 };
 
 _info set ["tileColor", _tileColor];
-_info set ["tileColors", _tileColors];
 _info set ["tint", _tint];
 _info set ["show", _resolved getOrDefault ["show", ""]];
 _info set ["src", _resolved get "src"];

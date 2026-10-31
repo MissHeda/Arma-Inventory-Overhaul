@@ -535,25 +535,8 @@ if (_workCats isNotEqualTo (_default getOrDefault ["groups", ["misc"]])) then {
     ] call FUNC(uiReset);
 };
 
-// In several categories: which one's colour the tile takes, or a stripe of each (tint=).
-private _tintW = [0, SQUARE(UNIT * 7)] select (count _workCats > 1);
-
-if (_tintW > 0) then {
-    private _tintOptions = [[LLSTRING(Tint_First), ""]] + (_workCats apply {[format [LLSTRING(Tint_Of), ([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name"], _x]}) + [[LLSTRING(Tint_Split), "split"]];
-
-    [_display, _box, [_innerX + _innerW - _rowH - _tintW - _gap, _cursorY, _tintW, _rowH], _tintOptions, [_workTint, ""] select !(_workTint in (_workCats + ["split"])), _theme, {
-        params ["_value", "_arguments"];
-        _arguments params ["_class", "_canvas"];
-
-        _canvas set ["tintPick", _value];
-        GVAR(itemWork) set [toLowerANSI _class, _canvas];
-
-        [] call FUNC(drawItemEditor);
-    }, [_class, _canvas]] call FUNC(uiDropdown);
-};
-
 _cursorY = _cursorY + ([
-    _display, _box, [_innerX, _cursorY, _innerW - _rowH - ([0, _tintW + _gap * 2] select (_tintW > 0))], _theme, _labelW, _workCats, {
+    _display, _box, [_innerX, _cursorY, _innerW - _rowH], _theme, _labelW, _workCats, {
         params ["_list", "_arguments"];
         _arguments params ["_class", "_canvas"];
 
@@ -563,6 +546,49 @@ _cursorY = _cursorY + ([
         [] call FUNC(drawItemEditor);
     }, [_class, _canvas]
 ] call FUNC(drawCatRow)) + UNIT * 0.3;
+
+// ----- Its tile's colour (tint=) -----
+// A chip for each category it is in - the tile takes that one's colour (category=... color=, the Categories card) - and
+// No colour, for the look's plain tile. The one in effect is lit: tint= where it names one of them, else the first.
+if (_workCats isNotEqualTo []) then {
+    private _chipH = UNIT * 0.95;
+    private _shownTint = switch (true) do {
+        case (_workTint isEqualTo "none"): {"none"};
+        case (_workTint in _workCats): {_workTint};
+        default {_workCats select 0};
+    };
+
+    [_display, _box, [_innerX, _cursorY, _labelW, _rowH], LLSTRING(Tint_Label), TEXT_SMALL, _colorText2, _fontBold, 0] call EFUNC(gui,uiLabel);
+
+    private _chipX = _innerX + _labelW;
+    private _lineY = _cursorY;
+
+    {
+        _x params ["_value", "_text"];
+
+        private _chipW = SQUARE(_chipH * 0.9) + (_text getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK;
+
+        if (_chipX + _chipW > _innerX + _innerW && {_chipX > _innerX + _labelW}) then {
+            _chipX = _innerX + _labelW;
+            _lineY = _lineY + _rowH;
+        };
+
+        [_display, _box, [_chipX, _lineY + (_rowH - _chipH) / 2, _chipW, _chipH], _text, _value isEqualTo _shownTint, _theme, {
+            params ["", "_arguments"];
+            _arguments params ["_class", "_canvas", "_value", "_first"];
+
+            // The first is what the tile takes without tint=: picked, it needs none.
+            _canvas set ["tintPick", ["", _value] select (_value isNotEqualTo _first || {(_canvas getOrDefault ["tintStart", ""]) isNotEqualTo ""})];
+            GVAR(itemWork) set [toLowerANSI _class, _canvas];
+
+            [] call FUNC(drawItemEditor);
+        }, [_class, _canvas, _value, _workCats select 0]] call FUNC(uiChip);
+
+        _chipX = _chipX + _chipW + _gap;
+    } forEach ((_workCats apply {[_x, ([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name"]}) + [["none", LLSTRING(Tint_None)]]);
+
+    _cursorY = _lineY + _rowH + UNIT * 0.3;
+};
 
 // ----- The canvas, and beside it how it looks -----
 

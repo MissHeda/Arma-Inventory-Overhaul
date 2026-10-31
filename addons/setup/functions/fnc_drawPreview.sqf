@@ -220,6 +220,12 @@ private _drawn = [];
     _drawn pushBack [_x0, _y0, _w, _h, _holes, _colX, _rowY, _x param [4, []], _x param [5, false]];
 } forEach _blocks;
 
+// The picture the class's compartments show (show=, the Containers step's Picture row; aio_gui_fnc_drawBadge).
+private _previewClass = GVAR(selection) getOrDefault ["containers", ""];
+private _previewShow = if (_previewClass isEqualTo "") then {""} else {
+    ([_previewClass, GVAR(draftRules)] call EFUNC(items,getInfo)) getOrDefault ["show", ""]
+};
+
 {
     _x params ["_x0", "_y0", "_w", "_h", "_holes", "_colX", "_rowY", "_accepts", "_single"];
 
@@ -235,8 +241,23 @@ private _drawn = [];
     // one does in the inventory (aio_gui_fnc_drawBadge); a single slot a little stronger.
     private _texture = "";
 
-    if (_accepts isNotEqualTo []) then {
-        _texture = [_accepts select 0, GVAR(draftRules)] call EFUNC(gui,groupTexture);
+    if (_accepts isNotEqualTo [] && {_previewShow isNotEqualTo "none"}) then {
+        _texture = [[_accepts select 0, _previewShow] select (_previewShow in _accepts), GVAR(draftRules)] call EFUNC(gui,groupTexture);
+    };
+
+    // Small pictures of all of them in the corner instead.
+    if (_previewShow isEqualTo "all") then {
+        private _side = ((_cellW / pixelW) min (_cellH / pixelH)) * 0.42;
+        private _pad = _side * 0.18;
+
+        {
+            [
+                _display, _group, [_x0 + (_pad + _forEachIndex * (_side + _pad)) * pixelW, _y0 + _pad * pixelH, _side * pixelW, _side * pixelH],
+                [_x, GVAR(draftRules)] call EFUNC(gui,groupTexture), [1, 1, 1, 0.4]
+            ] call EFUNC(gui,uiPicture);
+        } forEach _accepts;
+
+        _texture = "";
     };
 
     if (_texture isNotEqualTo "") then {

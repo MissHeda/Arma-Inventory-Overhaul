@@ -441,15 +441,15 @@ private _fnc_use = {
     ["use", _kinds]
 };
 
-// tint=: the colour of a tile in several categories - one of them (its id), or split for a stripe of each (fnc_getInfo).
+// tint=: the colour of a tile in several categories - one of them (its id), or none for the look's plain tile (fnc_getInfo).
 private _fnc_tint = {
     params ["_raw"];
 
     private _word = toLowerANSI (trim _raw);
 
-    if (_word isEqualTo "split" || {_word regexMatch CAT_ID_PATTERN}) exitWith {["tint", _word]};
+    if (_word regexMatch CAT_ID_PATTERN) exitWith {["tint", _word]};
 
-    _notes pushBack format ["tint=%1: a category's id or split - left out", _raw];
+    _notes pushBack format ["tint=%1: a category's id or none - left out", _raw];
 
     []
 };

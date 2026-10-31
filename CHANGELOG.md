@@ -2,12 +2,18 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.12 - beta
+
+### Changed
+
+- Setup wizard, Containers: a right click on a cell of the painted canvas picks its compartment, whatever colour is the brush; the single slot ("One item, any size") says what it does beside its chip (issue #38).
+
 ## 0.6.11 - beta
 
 ### Added
 
-- An item in several categories can say which colour its tile takes: `tint=tool` takes that category's colour, `tint=split` a stripe of each of their colours, without it the first. The setup wizard's Items step shows the choice beside the Category row as soon as two are ticked (issue #37).
-- A container's compartments that take several categories can say which picture their empty cells show: `show=food` that category's, `show=all` a small picture of each in the compartment's top left corner (the corner icons are back as an option), `show=none` none, without it the first. In the wizard's Containers step beside "One item, any size" (issue #37).
+- An item in several categories can say which colour its tile takes: `tint=tool` takes that category's colour, `tint=none` the look's plain tile, without it the first. The setup wizard's Items step has a Colour row under Category: a chip for each category ticked and No colour, the one in effect lit (issues #37, #38).
+- A container's compartments that take only some categories can say which picture they show: `show=food` that category's, `show=all` a small picture of each in the compartment's top left corner, on top of the items too (the corner icons are back as an option), `show=none` none, without it the first. The wizard's Containers step has a Picture row under the compartment's attributes - a chip for each category it takes, Small, all in the corner, and No picture -, and its preview follows it (issues #37, #38).
 - An item can be in no category at all: untick every category in the Items step (`cats=none`). A compartment that takes only some categories does not take it; its tile keeps the look's plain colour.
 
 ### Changed
