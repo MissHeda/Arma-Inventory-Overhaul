@@ -9,13 +9,25 @@
 // The arsenal's display (IDD_ace_arsenal).
 #define ARSENAL_IDD 1127001
 
-// The list of the right panel (IDC_rightTabContentListnBox) and the load bar under it
-// (IDC_loadIndicatorBar).
+// The list of the right panel (IDC_rightTabContentListnBox), its "-" and "+" arrows (IDC_arrowMinus,
+// IDC_arrowPlus) and the load bar under it (IDC_loadIndicatorBar).
+#define ARSENAL_IDC_LEFT_LIST 13
+#define ARSENAL_IDC_RIGHT_LIST 14
 #define ARSENAL_IDC_LIST 15
+#define ARSENAL_IDC_MINUS 101
+#define ARSENAL_IDC_PLUS 102
 #define ARSENAL_IDC_LOAD 701
 
-// The "Remove all" button that empties the open uniform, vest or backpack (IDC_buttonRemoveAll).
-#define ARSENAL_IDC_REMOVE_ALL 40
+// The "Close" button of ACE's menu bar (IDC_menuBarClose), whose click closes the display with exit code 1,
+// and ACE's loadouts display (IDD_loadouts_display), which takes Escape for itself while it is open.
+#define ARSENAL_IDC_CLOSE 1001
+#define ARSENAL_IDD_LOADOUTS 1127002
+
+// The sort bar over the right list (IDC_sortRightTab), whose top the panel starts at.
+#define ARSENAL_IDC_SORT 17
+
+// The soldier's weight beside ACE's menu bar (IDC_totalWeightText), which ACE writes only when its own panels change.
+#define ARSENAL_IDC_WEIGHT 801
 
 // The left panel's buttons for uniform, vest and backpack (IDC_buttonUniform, IDC_buttonVest,
 // IDC_buttonBackpack) - what ace_arsenal_currentLeftPanel holds while one of them is open.

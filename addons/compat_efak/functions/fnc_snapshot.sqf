@@ -29,4 +29,5 @@ if (
     || {_key in (missionNamespace getVariable [QEFAKGVAR(core,needsConversion), createHashMap])}
 ) exitWith {};
 
-GVAR(kitStart) set [_key, [[_kit] call EFAKFUNC(core,getContents), [_kit] call EFAKFUNC(core,getCharges)]];
+// Copies: a note that shares that mod's own table would change with the kit and let nothing back in.
+GVAR(kitStart) set [_key, [+([_kit] call EFAKFUNC(core,getContents)), +([_kit] call EFAKFUNC(core,getCharges))]];

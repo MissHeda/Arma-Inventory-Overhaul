@@ -36,7 +36,7 @@ private _titleW = _width - CARD_PAD_X * 2;
 [
     _display, _parent, [_left + CARD_PAD_X, _top + CARD_PAD_Y, _titleW, CARD_CAPTION_H],
     [[_title, _theme] call EFUNC(gui,caption), _titleW, _fontBold, UNIT * 0.72] call EFUNC(gui,fitText), UNIT * 0.72,
-    _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]], _fontBold, 0
+    _theme getOrDefault ["text", [1, 1, 1, 1]], _fontBold, 0
 ] call EFUNC(gui,uiLabel);
 
 _top + CARD_PAD_Y + CARD_CAPTION_H + UNIT * 0.15

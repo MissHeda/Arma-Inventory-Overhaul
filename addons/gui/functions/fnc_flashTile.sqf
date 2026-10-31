@@ -22,25 +22,14 @@
 
 disableSerialization;
 
-params ["_display", "_item", ["_alpha", 0.3], ["_duration", 0.45]];
+params ["_display", "_item"];
 
 private _found = _item call FUNC(findTile);
 
 if (_found isEqualTo []) exitWith {createHashMap};
 
 private _tile = _found select 1;
-private _background = _tile getOrDefault ["background", controlNull];
 
-if (isNull _background) exitWith {_tile};
-
-private _color = +(GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]]);
-_color set [3, _alpha];
-
-private _flash = [_display, "EINV_PanelRect", ctrlParentControlsGroup _background, ctrlPosition _background] call FUNC(uiCreate);
-_flash ctrlSetBackgroundColor _color;
-_flash ctrlSetFade 0;
-_flash ctrlCommit 0;
-_flash ctrlSetFade 1;
-_flash ctrlCommit _duration;
-
+// No flash is drawn any more: a coloured pulse on a click, a landing or a found item was tiring to look at.
+// The tile is only looked up and handed back, for the callers that fade its content in (fnc_revealFx).
 _tile

@@ -45,8 +45,5 @@ EGVAR(gui,opened) pushBack [typeOf _item, _item, _holder];
 
 ["open", "", _item] call EFUNC(gui,playSound);
 
-private _display = uiNamespace getVariable [QEGVAR(gui,display), displayNull];
-
-if (!isNull _display) then {
-    [_display] call EFUNC(gui,build);
-};
+// The window is built once for a run of clicks (einv_gui_fnc_buildSoon).
+[] call EFUNC(gui,buildSoon);

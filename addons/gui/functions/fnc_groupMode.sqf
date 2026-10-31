@@ -6,7 +6,7 @@
  *   "keep" - they keep their arrangement: all come from one compartment, and every tile's cell - the
  *            hovered cell less the grabbed tile's offset, plus its own offset from the grabbed tile - lies
  *            inside the hovered compartment on cells that are free or lifted by this drag; into another
- *            holder there is also room by mass for all of them together
+ *            holder none of them may be a backpack for a backpack
  *   "pack" - otherwise, over a grid: they are packed into the hovered container, largest first, the
  *            hovered compartment first, those that fit moving and the rest staying (einv_storage_fnc_plan)
  *   "kit"  - over an open kit's window or a kit's tile: the kit takes each one or not (einv_compat_efak)
@@ -14,7 +14,7 @@
  *            player may not put into: nothing moves, the reason says why
  *
  * Asked again for every cell the mouse comes to; the answer is kept for the drag in GVAR(dragRoom) under
- * "group|<grid index>|<col>|<row>", as are the room by mass and the answers of the kits.
+ * "group|<grid index>|<col>|<row>", as are the answers of the kits.
  *
  * Arguments:
  * 0: Index of the hovered grid <NUMBER>
@@ -164,12 +164,20 @@ private _grabbed = ((_grids param [_sourceIndex, createHashMap]) getOrDefault ["
 private _keepCells = [];
 private _keepOk = count _sources == 1 && {count _grabbed > 0};
 
+// A compartment that takes only some categories or is a single slot (einv_storage_fnc_blockMode) is not a place to keep an arrangement in:
+// the tiles are packed by the plan, which asks every compartment what it takes.
+if (_keepOk && {(_target getOrDefault ["accepts", []]) isNotEqualTo [] || {_target getOrDefault ["single", false]}}) then {
+    _keepOk = false;
+};
+
 if (_keepOk) then {
     // Where the grabbed tile would lie, and every other tile at its offset from it.
     private _baseCol = (_cell select 0) - _grabCol - (_grabbed get "col");
     private _baseRow = (_cell select 1) - _grabRow - (_grabbed get "row");
     private _cols = _target get "cols";
-    private _rows = _target get "rows";
+    // Of a paged compartment only the rows that show: the arrangement lands on the page, never past it.
+    private _rows = _target getOrDefault ["rowTo", _target get "rows"];
+    private _rowsFrom = _target getOrDefault ["rowFrom", 0];
     private _block = _target getOrDefault ["block", 0];
 
     // The cells a move under way goes to count as taken, as for a single tile (fnc_updateDrag).
@@ -195,8 +203,11 @@ if (_keepOk) then {
         private _w = _tile get "w";
         private _h = _tile get "h";
 
-        // Inside the compartment.
-        if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {_row + _h > _rows}) exitWith {
+        // A shaped item (size=xx/x-) takes only its own cells, as it lies (einv_storage_fnc_overlaps).
+        private _mask = [_col, _row, _w, _h, _tile getOrDefault ["holes", []]];
+
+        // Inside the compartment, and none of its cells on a shaped compartment's holes.
+        if (_col < 0 || {_row < _rowsFrom} || {_col + _w > _cols} || {_row + _h > _rows} || {[_target, _col, _row, _w, _h, _mask select 4] call FUNC(hitsHole)}) exitWith {
             _keepOk = false;
         };
 
@@ -209,19 +220,14 @@ if (_keepOk) then {
 
             if (
                 (_group findIf {_x isEqualTo [_targetIndex, _otherIndex]}) < 0
-                && {(_other get "col") < _col + _w} && {_col < (_other get "col") + (_other get "w")}
-                && {(_other get "row") < _row + _h} && {_row < (_other get "row") + (_other get "h")}
+                && {[_mask, [_other get "col", _other get "row", _other get "w", _other get "h", _other getOrDefault ["holes", []]]] call EFUNC(storage,overlaps)}
             ) exitWith {
                 _clash = true;
             };
         } forEach (_target getOrDefault ["tiles", []]);
 
         if (!_clash) then {
-            _clash = _busy findIf {
-                _x params ["_busyCol", "_busyRow", "_busyW", "_busyH"];
-
-                _busyCol < _col + _w && {_col < _busyCol + _busyW} && {_busyRow < _row + _h} && {_row < _busyRow + _busyH}
-            } >= 0;
+            _clash = _busy findIf {[_mask, _x] call EFUNC(storage,overlaps)} >= 0;
         };
 
         if (_clash) exitWith {
@@ -231,34 +237,11 @@ if (_keepOk) then {
         _keepCells pushBack [(_group select _forEachIndex) select 0, (_group select _forEachIndex) select 1, _col, _row];
     } forEach _tiles;
 
-    // Into another holder there has to be room for all of them by mass, and for each of them on its own
-    // (a backpack never goes into a backpack).
+    // Into another holder none of them may be a backpack for a backpack; the cells were checked above.
     private _sourceHolder = (_grids param [_sources select 0, createHashMap]) getOrDefault ["holder", objNull];
 
     if (_keepOk && {_holder isNotEqualTo _sourceHolder}) then {
-        private _massKey = format ["groupMass|%1", _targetIndex];
-        private _room = GVAR(dragRoom) get _massKey;
-
-        if (isNil "_room") then {
-            _room = !isNull _to && {(_tiles findIf {!([_to, _x select 1, -1] call EFUNC(storage,hasRoom))}) < 0};
-
-            if (_room && {!EGVAR(storage,gridOnly)}) then {
-                private _maxLoad = [_to] call EFUNC(storage,getMaxLoad);
-
-                if (_maxLoad >= 0) then {
-                    private _held = [[_to] call EFUNC(storage,getContents)] call EFUNC(storage,getMass);
-                    private _need = [_tiles apply {_x select 1}] call EFUNC(storage,getMass);
-
-                    _room = _held + _need <= _maxLoad + 0.001;
-                };
-            };
-
-            GVAR(dragRoom) set [_massKey, _room];
-        };
-
-        if (!_room) then {
-            _keepOk = false;
-        };
+        _keepOk = !isNull _to && {(_tiles findIf {[_to, _x select 1] call EFUNC(storage,backpackIntoBackpack)}) < 0};
     };
 };
 

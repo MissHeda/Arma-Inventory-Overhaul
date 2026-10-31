@@ -2,130 +2,67 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * A key in the window (the "key" hook), after the inventory's own: Escape closes (in the Eden editor it
- * cancels; in ACE's showcase mission Arsenal.VR it asks first, fnc_leaveVR), Backspace hides and shows the
- * panels, the night vision key goes through normal, night vision and thermal, Ctrl+F finds, Ctrl+C copies a
- * class or a loadout, Ctrl+V imports one, Delete gives back what the mouse is on, the arrow keys add and
- * give back one. The Gear key does nothing here. While the panels are hidden every key but Escape,
- * Backspace and the night vision key does nothing.
+ * A key pressed on ACE Arsenal's display, beside ACE's own handler, which runs as always: Escape closes,
+ * the arrows add and take out, typing goes into ACE's search fields. The engine gets only two keys: R
+ * while it drags something (a quarter turn), and the drop key (the player's, G by default -
+ * einv_gui_fnc_isDropKey) while the mouse is over the panel (the tile there is taken out - the engine's drop
+ * ends in the "ground" hook, fnc_remove). Nothing while a field of
+ * ACE's has the cursor.
  *
- * Ctrl+C copies the class of what the mouse is on - a card, a tile, a slot - and only when there is
- * nothing there the soldier's loadout (with Shift the list of default loadouts); Ctrl+V takes a loadout
- * (with Shift in the Eden editor a list of defaults). Typing in a field never gets here: the field has the
- * keys (einv_gui_fnc_onKeyDown).
+ * Whether Ctrl is held is noted with every key, pressed or let go (also by the display's KeyUp handler,
+ * fnc_onOpened), and with every mouse button (fnc_onMouse): the wheel's event does not say it, and Ctrl
+ * with the wheel over a tile adds or takes out one (fnc_onWheel), by the latest note. A Ctrl let go while
+ * the display had no focus is so corrected by the next key or click.
  *
  * Arguments:
- * 0: Display <DISPLAY>
- * 1: DIK code <NUMBER>
- * 2: Shift held <BOOL>
- * 3: Ctrl held <BOOL>
- * 4: Alt held <BOOL>
+ * 0: ACE Arsenal's display <DISPLAY>
+ * 1: Key (DIK code) <NUMBER>
+ * 2: Shift <BOOL>
+ * 3: Ctrl <BOOL>
+ * 4: Alt <BOOL>
+ * 5: Pressed (true) or let go (false) <BOOL> (default: true)
  *
  * Return Value:
  * Handled <BOOL>
  *
  * Example:
- * [_display, 14, false, false, false] call einv_arsenal_fnc_onKey;
+ * [_display, 211, false, false, false] call einv_arsenal_fnc_onKey;
  *
  * Public: No
  */
 
-#define DIK_BACKSPACE 14
-#define DIK_F 33
-#define DIK_C 46
-#define DIK_V 47
-#define DIK_LEFT 203
-#define DIK_RIGHT 205
+disableSerialization;
 
-params ["_display", "_key", ["_shift", false], ["_ctrl", false], ["_alt", false]];
+params [
+    ["_display", displayNull, [displayNull]], ["_key", 0, [0]], ["_shift", false, [false]], ["_ctrl", false, [false]],
+    ["_alt", false, [false]], ["_down", true, [true]]
+];
 
-// ACE's own flag, read by the windows of other mods that look at it.
-ACEGVAR(arsenal,shiftState) = _shift;
+private _isCtrl = _key in [DIK_LCONTROL, DIK_RCONTROL];
 
-// What reached here is not the menu's, the card's or a field's: Escape closes - or, in Arsenal.VR, asks.
-if (_key == DIK_ESCAPE) exitWith {
-    if !([] call FUNC(leaveVR)) then {
-        [2] call FUNC(close);
-    };
+GVAR(ctrlHeld) = [_ctrl && {!_isCtrl}, _ctrl || {_isCtrl}] select _down;
 
-    true
-};
+if (!_down) exitWith {false};
 
-// The Gear key opens and closes the inventory; this is not it.
-if (_key in actionKeys "Gear") exitWith {true};
+// The question of fnc_confirmClose holds the keys (fnc_onAceKey).
+if !(isNull (uiNamespace getVariable [QGVAR(confirm), controlNull])) exitWith {false};
 
-// Backspace: the panels go, and come back (the field has Backspace for itself while it is typed in).
-if (_key == DIK_BACKSPACE) exitWith {
-    call FUNC(toggleHidden);
+if (!GVAR(attached) || {(uiNamespace getVariable [QEGVAR(gui,display), displayNull]) isNotEqualTo _display}) exitWith {false};
 
-    true
-};
+private _focused = focusedCtrl _display;
 
-// The game's night vision key: normal, night vision, thermal. Also while the panels are away - that is
-// when the soldier is looked at.
-if (_key in actionKeys "nightvision") exitWith {
-    [] call FUNC(cycleVision);
+if (!isNull _focused && {ctrlType _focused == 2}) exitWith {false};
 
-    true
-};
+private _dragging = EGVAR(gui,dragging);
 
-// Nothing can be pointed at while the panels are away, so no other key has anything to act on.
-if (GVAR(hidden)) exitWith {true};
-
-// Ctrl+F: into the search field.
-if (_ctrl && {_key == DIK_F}) exitWith {
-    ctrlSetFocus (uiNamespace getVariable [QEGVAR(gui,filterEdit), controlNull]);
-
-    true
-};
-
-// Ctrl+C: the class under the mouse, else the loadout.
-if (_ctrl && {_key == DIK_C}) exitWith {
-    if !(call FUNC(copyClass)) then {
-        [_shift] call FUNC(loadoutExport);
-    };
-
-    true
-};
-
-// Ctrl+V: a loadout from the clipboard.
-if (_ctrl && {_key == DIK_V}) exitWith {
-    [_shift && {is3DEN}] call FUNC(loadoutImport);
-
-    true
-};
-
-// Delete: what the mouse is on goes back.
-if (_key == DIK_DELETE) exitWith {
-    if (!EGVAR(gui,dragging)) then {
-        EGVAR(gui,hover) params [["_kind", ""], ["_index", -1], ["_tile", -1]];
-
-        switch (_kind) do {
-            case "tile": {
-                [[_index, _tile]] call FUNC(giveBack);
-            };
-            case "slot": {
-                // A slot is [rect, class, caption, anchor, weapon, slot, unit, hotbar].
-                ((uiNamespace getVariable [QEGVAR(gui,slots), []]) param [_index, []]) params ["", ["_class", ""], "", "", "", ["_slot", ""], ["_unit", objNull]];
-
-                if (_class isNotEqualTo "" && {_slot isNotEqualTo ""} && {!isNull _unit}) then {
-                    [[_unit, _slot]] call FUNC(giveBack);
-                };
-            };
-            default {};
-        };
-    };
-
-    true
-};
-
-// The arrows: one more of that class, or one less (Shift: five).
-if (_key == DIK_RIGHT || {_key == DIK_LEFT}) exitWith {
-    if (!EGVAR(gui,dragging)) then {
-        [[-1, 1] select (_key == DIK_RIGHT), _shift] call FUNC(stepCount);
-    };
-
-    true
+if (
+    (_dragging && {[_key, [_shift, _ctrl, _alt]] call EFUNC(gui,isRotateKey)})
+    || {
+        !_dragging && {[getMousePosition] call FUNC(isOver)}
+        && {[_key, [_shift, _ctrl, _alt]] call EFUNC(gui,isDropKey)}
+    }
+) exitWith {
+    _this call EFUNC(gui,onKeyDown)
 };
 
 false

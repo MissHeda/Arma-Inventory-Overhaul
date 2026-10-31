@@ -62,7 +62,6 @@ private _result = [];
         ["title", localize "STR_ACE_Cargo_openMenu"],
         ["class", ""],
         ["container", objNull],
-        ["maxLoad", -1],
         ["vehicle", _holder],
         ["parent", _holder],
         ["side", "loot"],

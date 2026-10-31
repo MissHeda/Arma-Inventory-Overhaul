@@ -5,38 +5,50 @@
  * pockets and pouches of their own sizes. An item has to fit into one of them, so what a container
  * takes depends on its shape, not only on its weight - a rig of magazine pouches takes magazines, not
  * a helmet. Works on the class alone, so the setup wizard can show a container nobody carries;
- * fnc_getBlocks finds what to ask for a real one.
+ * fnc_getBlocks finds what to ask for a real one. What a container gets is worked out from the load
+ * alone, never from its name: two containers with the same load look the same.
  *
  * The grid spec (einv_items_fnc_parseGrid, as the rules or einv_grid give it):
  *   ["auto"]                 - maximum load / mass per cell cells, laid out by the kind's pattern
  *   ["cells", N]             - N cells, the same way
  *   ["percent", P]           - P % of what the load gives
  *   ["pattern", name, N]     - a pattern by name; N cells, or from the load when N is -1
- *   ["blocks", [[c, r], ..]] - the compartments exactly
+ *   ["blocks", [[c, r, holes, pos, accepts, single], ..]] - the compartments exactly; holes and pos may be left out
+ *                            for none; accepts (categories, [] for all) and single (a slot of one item of any size) too
  *
- * The patterns, and which a kind takes when none is named - which one is the class's own (a sum over
- * its name), so every model always looks the same and two of the same size can still differ:
- *   uniform  - pockets [1x2] or pockets_mixed [1x1, 1x2], at most six from the load
- *   vest     - rig [1x2], mixed [1x2, 1x2, 1x1, 1x1], plate [2x2, 1x2, 1x2] or long [1x3, 1x2, 1x1],
- *              at most sixteen from the load
+ * The patterns, and which a kind takes when none is named:
+ *   uniform  - block: one compartment UNIFORM_COLS wide, as many rows as the load asks for, UNIFORM_ROWS_MIN to
+ *              UNIFORM_ROWS_MAX of them - 6x2 for a plain uniform, a row or two more for one that carries more
+ *   vest     - pouches: [1x2, 2x2] one after the other, magazine pouches as a real rig has them, as many as the
+ *              load asks for, at most VEST_POUCHES_MAX
  *   backpack - single: one big compartment, as near square as STORAGE_COLS columns allow
+ *   kit      - single as well: a kit or pouch of Enhanced First Aid Kits is a bag of one space
  *   anything else (crates, vehicles) - wide: one compartment STORAGE_COLS wide
+ * Named by a rule they are also pockets [1x2] or pockets_mixed [1x1, 1x2], at most six from the load, and for a
+ * vest rig [1x2], mixed [1x2, 1x2, 1x1, 1x1], plate [2x2, 1x2, 1x2] or long [1x3, 1x2, 1x1], at most sixteen.
  *
- * A number that was given (N cells, einv_slots) is met exactly: as many pockets or pouches as it
- * takes, and the last pouch or the last, unfilled row cut down to what is left. One from the load is
- * only a rough measure, so there the limits hold and the last pouch or row may be bigger than needed.
+ * A number that was given (N cells, einv_grid = "24", einv_slots) is met exactly: as many pockets or
+ * pouches as it takes, and the last pouch or the last, unfilled row cut down to what is left. One from
+ * the load is only a rough measure, so there the limits hold and the last pouch or row may be bigger
+ * than needed.
  * Either way at most MAX_CELLS cells and MAX_BLOCKS compartments: a given number that MAX_BLOCKS
  * pouches cannot cover gets MAX_BLOCKS - 2 of them and what is left as rows STORAGE_COLS wide.
  *
  * Arguments:
  * 0: Class - the uniform's or vest's item class, the backpack's, crate's or vehicle's own <STRING>
- * 1: Kind: "uniform", "vest", "backpack", or anything else for one wide compartment <STRING>
+ * 1: Kind: "uniform", "vest", "backpack", "kit", or anything else for one wide compartment <STRING>
  * 2: Maximum load <NUMBER>
  * 3: Grid spec <ARRAY> (default: ["auto"])
  * 4: Config mass per cell <NUMBER> (default: the rules in effect)
  *
  * Return Value:
- * Compartments [[cols, rows], ...]; [[STORAGE_COLS, 0]] when there are no cells <ARRAY>
+ * Compartments [[cols, rows, holes, pos], ...] - holes the indices row * cols + col of the cells a
+ * shaped compartment does not have (einv_items_fnc_parseGrid), [] for a full rectangle, which every
+ * pattern gives; pos [x, y] the cell its top left corner lies on, on the canvas it was drawn on (grid=
+ * aab/acc), [] for one the window flows - every pattern's. In the order the place records count them:
+ * the canvas's in reading order of each one's first cell. Every compartment keeps cells of its own,
+ * numbered from its own top left corner, wherever it is drawn. [[STORAGE_COLS, 0, [], []]] when there
+ * are no cells <ARRAY>
  *
  * Example:
  * ["V_PlateCarrier1_rgr", "vest", 80, ["pattern", "rig", 20]] call einv_storage_fnc_blocksFor;
@@ -54,18 +66,29 @@ params [
 
 _spec params [["_mode", "auto", [""]]];
 
-// Compartments given exactly - a copy, the spec is shared.
-if (_mode isEqualTo "blocks") exitWith {+(_spec select 1)};
+// Compartments given exactly - a copy, the spec is shared. The older table and einv_grids[] give
+// rectangles as [cols, rows]: everyone reads four, and whoever only wants three still finds them first. A
+// compartment that accepts only some categories or is a single slot (grid=1x1:grenade:one) has two more, its
+// accepts and single: they are carried on as they are, and only on those.
+if (_mode isEqualTo "blocks") exitWith {
+    (_spec select 1) apply {
+        private _block = [_x select 0, _x select 1, +(_x param [2, []]), +(_x param [3, []])];
+
+        if (count _x > 4) then {
+            _block append [+(_x param [4, []]), _x param [5, false]];
+        };
+
+        _block
+    }
+};
 
 if (_cell <= 0) then {
     _cell = (call EFUNC(items,currentRules)) getOrDefault ["cell", 5];
 };
 
-private _hash = 0;
-{_hash = _hash + _x} forEach toArray toLowerANSI _class;
-
 // The patterns: pouches, how many at most from the load, and how they are laid out.
 private _patterns = createHashMapFromArray [
+    ["pouches", [[[1, 2], [2, 2]], VEST_POUCHES_MAX]],
     ["pockets", [[[1, 2]], 6]],
     ["pockets_mixed", [[[1, 1], [1, 2]], 6]],
     ["rig", [[[1, 2]], 16]],
@@ -75,9 +98,10 @@ private _patterns = createHashMapFromArray [
 ];
 
 private _pattern = switch (_kind) do {
-    case "uniform": {["pockets", "pockets_mixed"] select (_hash mod 2)};
-    case "vest": {["rig", "mixed", "plate", "long"] select (_hash mod 4)};
-    case "backpack": {"single"};
+    case "uniform": {"block"};
+    case "vest": {"pouches"};
+    case "backpack";
+    case "kit": {"single"};
     default {"wide"};
 };
 
@@ -104,7 +128,7 @@ switch (_mode) do {
     };
 };
 
-if (_cells <= 0) exitWith {[[STORAGE_COLS, 0]]};
+if (_cells <= 0) exitWith {[[STORAGE_COLS, 0, [], []]]};
 
 // Never more than MAX_CELLS cells, whatever the kind - a typo or a huge load would otherwise build a
 // control for each of thousands of cells.
@@ -168,9 +192,20 @@ private _fnc_fill = {
     _blocks
 };
 
-switch (_pattern) do {
+// A pattern's compartments are full rectangles that flow: no holes, no place of their own.
+(switch (_pattern) do {
     case "single": {
         [(ceil sqrt _cells) min STORAGE_COLS, _cells] call _fnc_rows
+    };
+    // A uniform: UNIFORM_COLS wide, and from the load as many rows as it asks for - at least two, at most five.
+    // A number that was given is met exactly instead, row after row.
+    case "block": {
+        if (_given) then {
+            // Never more than MAX_ROWS rows: six columns reach that long before MAX_CELLS.
+            [UNIFORM_COLS min STORAGE_COLS, _cells min ((UNIFORM_COLS min STORAGE_COLS) * MAX_ROWS)] call _fnc_rows
+        } else {
+            [[UNIFORM_COLS min STORAGE_COLS, ((ceil (_cells / UNIFORM_COLS)) max UNIFORM_ROWS_MIN) min UNIFORM_ROWS_MAX]]
+        }
     };
     case "wide": {
         [STORAGE_COLS, _cells] call _fnc_rows
@@ -180,4 +215,4 @@ switch (_pattern) do {
 
         [_pouches, _limit] call _fnc_fill
     };
-}
+}) apply {[_x select 0, _x select 1, [], []]}

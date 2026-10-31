@@ -21,23 +21,36 @@
  * in flight; the answer plays the first that went (fnc_afterAction, fnc_feelAnswer).
  *
  * Each transaction is recorded in flight (GVAR(inFlight)): its tiles fade and cannot be lifted, its
- * target cells are outlined (fnc_drawPending) until the answer and the places it names arrived; the
- * record also keeps, for each move, what a refusal for weight needs to say how much is missing - where
- * it was going, the tile and how many ([to, entry as an array, count], [] for the kinds that carry no
- * weight question). Left out with a hint: a move into itself ("IntoItself"), a drop onto the ground on
+ * target cells are outlined (fnc_drawPending) until the answer and the places it names arrived. Left out
+ * with a hint: a move into itself ("IntoItself"), a drop onto the ground on
  * foot with nothing under the feet ("NoGround"), anything that needs the server's hub before it answered
  * ("NotReady"), a holder whose root is not known ("Moved"), and a move into or out of a container that is
  * locked to the player ("Locked", einv_locks_fnc_canReach): the lock may have been set after the window
  * was built, or by a script; every op asks the lock again where it runs.
  *
- * Several tiles of one holder laid down at once (a group dragged within a compartment, or Take all
+ * The hands (fnc_queueMoves): a drop, a move to a different container or holder and putting on or taking
+ * off do not go out at once while the window is the inventory and the server's setting for that kind
+ * (einv_gui_handDrop, handMove, handEquip - seconds) is more than 0: each such move waits in the window's
+ * queue with a circle on its tile, and goes out through this function again, with the option "now", when the
+ * circle is full (fnc_runQueue). What needs no hands - a rearrangement within one holder, sorting - goes at
+ * once, and the function says it was asked for when it queued something.
+ *
+ * Several tiles of one holder laid down at once (a group dragged within a compartment, or a group move
  * with the target already holding some of them) are one move of the kind "placeMany": op placeMany lifts
  * them all and puts them down together, so two never wait for each other's cells. It counts for as many
  * moves as it has tiles, but is never cut in two.
  *
+ * Two tiles that swap places between two containers (a tile let go on another one, fnc_swapPlan) are one
+ * move of the kind "exchange": take the first, take the second, put the first at the cell the second lay
+ * on, put the second at the cell the first lay on - four steps in the phases of their roots, so each
+ * root runs its own and nothing is put before it was taken. It has two records (one per tile), counts for
+ * two moves and is never cut in two; within one container a swap is a "placeMany" of the two. A step
+ * that does not go leaves its payload to settlement (back where it came from), so nothing is lost or
+ * doubled.
+ *
  * Arguments:
  * 0: Moves, each a HashMap <ARRAY>
- *    "kind"     - "move" (default), "equip", "unequip", "swap", "sort" or "placeMany"
+ *    "kind"     - "move" (default), "equip", "unequip", "swap", "sort", "placeMany" or "exchange"
  *    "from"     - holder it lies in: a container, or a key like "kit:..." (einv_storage_holderTypes);
  *                 for "sort" the holder to sort
  *    "fromRoot" - its root, objNull to look it up (einv_storage_fnc_rootOf)
@@ -49,16 +62,31 @@
  *    "toRoot"   - its root, objNull to look it up
  *    "cell"     - [col, row, compartment] - with [.., width, height] when it lies turned - or [] for the
  *                 first fit (move, unequip)
+ *    "separate" - what lands on the cell lies there as a stack of its own and joins no other stack of its
+ *                 class in the holder (move; default false). Within one holder, part of a stack moved
+ *                 with it is split off onto the cell - or, with no cell, onto the nearest free one: op
+ *                 "split" [holder, payload, count, cell]. The ops take it as their sixth argument
+ *                 (einv_storage_fnc_opPut, fnc_opMove); the window sends it only while
+ *                 einv_storage_stackSplits is true
+ *    "mergeInto" - [col, row, compartment] of a stack of the same key in "to": what lands joins that stack
+ *                 first (move; default none). Within one holder, take and put in one phase; the ops take it
+ *                 as their seventh argument, after "separate"
  *    "unit", "slot" - whose slot and which (equip: the player's, unequip: anybody's, swap: where it
  *                 comes off)
  *    "toUnit", "toSlot" - for "swap": the unit it goes onto and the slot there; what that unit wore
  *                 there comes back onto "unit" (fnc_doSwap)
  *    "tiles"    - for "placeMany": [[entry, cell], ...] in the holder "from"; a cell is [col, row,
  *                 compartment] or, turned, [col, row, compartment, width, height]
+ *    "otherEntry", "otherCell" - for "exchange": the tile that lies in "to" and the cell in "from" it
+ *                 goes to; "cell" is the cell "entry" goes to in "to" (both [col, row, compartment,
+ *                 width, height, rot])
  *    "kit"      - the kit class an equip comes out of, for where its old item may go (default "")
+ *    "order"    - for "sort": one of SORT_MODES, what the holder is laid out by (default "size", largest first)
  * 1: Options <HASHMAP> (default: empty)
  *    "flash" - light up where the moves landed once they did <BOOL> (default: true)
  *    "label" - a text the hint shows once everything went as asked <STRING> (default: "")
+ *    "now"   - send at once, whatever the hands' settings say: the queue's own sending, and the chunks that follow
+ *              <BOOL> (default: false)
  *
  * Return Value:
  * Something was sent <BOOL>
@@ -70,6 +98,29 @@
  */
 
 params [["_moves", [], [[]]], ["_options", createHashMap, [createHashMap]]];
+
+if (_moves isEqualTo []) exitWith {false};
+
+// The hands' queue: what takes them waits there, what does not goes on at once, with the option "now" so that the
+// chunks of it that follow (fnc_onAnswer) are not looked at again.
+private _queued = 0;
+
+if !(_options getOrDefault ["now", false]) then {
+    ([_moves, _options] call FUNC(queueMoves)) params ["_instant", "_count"];
+
+    _queued = _count;
+    _moves = _instant;
+    _options = +_options;
+    _options set ["now", true];
+};
+
+if (_queued > 0) exitWith {
+    if (_moves isNotEqualTo []) then {
+        [_moves, _options] call FUNC(sendMoves);
+    };
+
+    true
+};
 
 if (_moves isEqualTo []) exitWith {false};
 
@@ -170,6 +221,9 @@ private _fnc_moveSteps = {
     private _entry = _move getOrDefault ["entry", createHashMap];
     private _count = _move getOrDefault ["count", -1];
     private _cell = _move getOrDefault ["cell", []];
+    private _separate = _move getOrDefault ["separate", false];
+    private _mergeInto = _move getOrDefault ["mergeInto", []];
+    private _landing = _separate || {_mergeInto isNotEqualTo []};
 
     if (_from isEqualType objNull && {isNull _from}) exitWith {["Failed", []]};
     if (_to isEqualType objNull && {isNull _to}) exitWith {["Failed", []]};
@@ -203,8 +257,26 @@ private _fnc_moveSteps = {
         ], "ground"]
     };
 
-    // Within one holder: only somewhere else, and only a whole tile - a container holds a class as one.
+    // Within one holder: only somewhere else, and only a whole tile - a container holds a class as one -
+    // unless it keeps separate stacks: then part of a stack is split off (op "split", the cell [] for the
+    // nearest free one), and what is dragged onto a stack of its class joins that very stack (take and put
+    // with "merge into", in one phase).
     if (_from isEqualTo _to) exitWith {
+        if (_mergeInto isNotEqualTo [] && {_from isEqualType objNull}) exitWith {
+            ["", [
+                [_fromRoot, _take, [_from, _array, _count], "take"],
+                [_fromRoot, "put", [_to, ["#step", 0, 0], [], false, false, false, _mergeInto], "land"]
+            ], _to]
+        };
+
+        if (_separate && {_count > 0} && {_count < (_entry getOrDefault ["count", 1])}) exitWith {
+            private _split = [_from, "split"] call _fnc_opName;
+
+            if (_split isEqualTo "") exitWith {["", []]};
+
+            ["", [[_fromRoot, _split, [_from, _array, _count, _cell], "land"]], _to]
+        };
+
         if (_cell isEqualTo [] || {_count > 0 && {_count < (_entry getOrDefault ["count", 1])}}) exitWith {["", []]};
 
         private _place = [_from, "place"] call _fnc_opName;
@@ -229,7 +301,7 @@ private _fnc_moveSteps = {
     // that type's own, anything else as a take and a put in the same phase.
     if (_fromRoot isEqualTo _toRoot) exitWith {
         if (_from isEqualType objNull && {_to isEqualType objNull}) exitWith {
-            ["", [[_fromRoot, "move", [_from, _to, _array, _count, _cell], "land"]], _to]
+            ["", [[_fromRoot, "move", [_from, _to, _array, _count, _cell] + ([[], [_separate, _mergeInto]] select _landing), "land"]], _to]
         };
 
         private _between = [_from, "move"] call _fnc_opName;
@@ -240,14 +312,14 @@ private _fnc_moveSteps = {
 
         ["", [
             [_fromRoot, _take, [_from, _array, _count], "take"],
-            [_toRoot, _put, [_to, ["#step", 0, 0], _cell], "land"]
+            [_toRoot, _put, [_to, ["#step", 0, 0], _cell] + ([[], [false, false, _separate, _mergeInto]] select _landing), "land"]
         ], _to]
     };
 
     // Between two roots: out at the source's authority, in at the target's - each checked against its own.
     ["", [
         [_fromRoot, _take, [_from, _array, _count], "take"],
-        [_toRoot, _put, [_to, ["#step", 0, 0], _cell], "land"]
+        [_toRoot, _put, [_to, ["#step", 0, 0], _cell] + ([[], [false, false, _separate, _mergeInto]] select _landing), "land"]
     ], _to]
 };
 
@@ -376,7 +448,8 @@ private _fnc_unequipSteps = {
 
 // Worn gear from one unit's slot onto another's: off the first, on the other - which hands back what it
 // wore there -, that onto the first. Only takeOff and putOn, each where its unit is local; nothing that
-// does not go on is lost: it came off a slot, so settlement puts it into the vehicle or onto the ground.
+// does not go on is lost: it came off a slot, so settlement puts it back on there while that is empty,
+// else into the vehicle or onto the ground.
 private _fnc_swapSteps = {
     params ["_move"];
 
@@ -406,6 +479,43 @@ private _fnc_swapSteps = {
     ["", _steps, _toUnit, _old getOrDefault ["class", ""], [objNull, _fromUnit] select (count _old > 0)]
 };
 
+// Two tiles of two containers that swap places: out of both, then each into the other's holder at the other's
+// cell. The takes come first, so the cells the puts want are free by then. Returns [why not or "", steps].
+private _fnc_exchangeSteps = {
+    params ["_move"];
+
+    private _from = _move getOrDefault ["from", objNull];
+    private _to = _move getOrDefault ["to", objNull];
+    private _entry = _move getOrDefault ["entry", createHashMap];
+    private _other = _move getOrDefault ["otherEntry", createHashMap];
+
+    if (
+        !(_from isEqualType objNull) || {!(_to isEqualType objNull)} || {isNull _from} || {isNull _to} || {_from isEqualTo _to}
+        || {count _entry == 0} || {count _other == 0}
+    ) exitWith {["Failed", []]};
+
+    // A uniform, vest or backpack never goes into itself or into anything lying in it - either of the two.
+    private _insideEntry = _entry getOrDefault ["container", objNull];
+    private _insideOther = _other getOrDefault ["container", objNull];
+
+    if (
+        (!isNull _insideEntry && {_to isEqualTo _insideEntry || {[_to, _insideEntry] call EFUNC(storage,liesIn)}})
+        || {!isNull _insideOther && {_from isEqualTo _insideOther || {[_from, _insideOther] call EFUNC(storage,liesIn)}}}
+    ) exitWith {["IntoItself", []]};
+
+    private _fromRoot = [_from, _move getOrDefault ["fromRoot", objNull]] call _fnc_rootOf;
+    private _toRoot = [_to, _move getOrDefault ["toRoot", objNull]] call _fnc_rootOf;
+
+    if (isNull _fromRoot || {isNull _toRoot}) exitWith {["Moved", []]};
+
+    ["", [
+        [_fromRoot, "take", [_from, [_entry] call EFUNC(storage,entryToArray), -1], "take"],
+        [_toRoot, "take", [_to, [_other] call EFUNC(storage,entryToArray), -1], "takeOther"],
+        [_toRoot, "put", [_to, ["#step", 0, 0], _move getOrDefault ["cell", []]], "land"],
+        [_fromRoot, "put", [_from, ["#step", 1, 0], _move getOrDefault ["otherCell", []]], "landOther"]
+    ]]
+};
+
 private _fnc_sortSteps = {
     params ["_move"];
 
@@ -417,7 +527,8 @@ private _fnc_sortSteps = {
 
     if (isNull _root) exitWith {["Moved", []]};
 
-    ["", [[_root, "sort", [_holder], "land"]], _holder]
+    // The order the player chose goes with the op: it is laid out where the root is local.
+    ["", [[_root, "sort", [_holder, _move getOrDefault ["order", SORT_DEFAULT]], "land"]], _holder]
 };
 
 // Several tiles of one holder laid down at once: one step.
@@ -506,7 +617,7 @@ private _records = [];
 private _feels = [];
 private _sources = [];
 private _targets = [];
-private _details = [];
+private _lifted = [];
 private _rest = [];
 private _refused = "";
 
@@ -539,6 +650,10 @@ if (_moves isEqualTo []) exitWith {
     // A chunk at a time: the rest goes when this one is answered (fnc_onAnswer). A group laid down at
     // once is never cut in two - alone in a chunk it may be longer.
     private _weight = [1, count (_move getOrDefault ["tiles", []])] select (_kind isEqualTo "placeMany");
+
+    if (_kind isEqualTo "exchange") then {
+        _weight = 2;
+    };
 
     if (_records isNotEqualTo [] && {count _records + _weight > BATCH_MAX}) then {
         _rest pushBack _move;
@@ -578,21 +693,74 @@ if (_moves isEqualTo []) exitWith {
                 ["oldClass", ""], ["oldTo", objNull], ["roles", _manyRoles]
             ];
 
-            // Laid down where it lies: no question of weight.
-            _details pushBack [];
-
             // Rearranged in its holder: it sounds like a move.
             if (count _feels < 3) then {
                 _feels pushBack ["move", _manyClass, [_manyHolder, objNull] select (_manyHolder isEqualType ""), "", objNull];
             };
 
             _sources pushBack [_manyHolder, _manyKey, _manyEntry getOrDefault ["block", 0], _manyEntry getOrDefault ["col", -1], _manyEntry getOrDefault ["row", -1]];
+            _lifted pushBack _manyEntry;
 
             _targets pushBack [
                 _manyHolder, _manyCell param [2, 0], _manyCell select 0, _manyCell select 1,
                 _manyCell param [3, _manyEntry getOrDefault ["w", 1]], _manyCell param [4, _manyEntry getOrDefault ["h", 1]]
             ];
         } forEach (_move getOrDefault ["tiles", []]);
+
+        continue;
+    };
+
+    // ----- Two tiles swap places between two containers: two records, four steps -----
+    if (_kind isEqualTo "exchange") then {
+        ([_move] call _fnc_exchangeSteps) params [["_swapReason", "Failed"], ["_swapSteps", []]];
+
+        if (_swapReason isEqualTo "" && {!_ready} && {_swapSteps findIf {!([_x select 0] call EFUNC(storage,isLocalRoot))} >= 0}) then {
+            _swapReason = "NotReady";
+        };
+
+        if (_swapReason isNotEqualTo "") then {
+            if (_refused isEqualTo "") then {
+                _refused = _swapReason;
+            };
+
+            continue;
+        };
+
+        private _swapRoles = ([_swapSteps] call _fnc_addSteps) select 1;
+        private _swapFrom = _move get "from";
+        private _swapTo = _move get "to";
+
+        // One record per tile, each with the steps that are its own: what the answer reads (fnc_afterAction).
+        {
+            _x params ["_recordFrom", "_recordTo", "_recordEntry", "_recordCell", "_takeRole", "_landRole"];
+
+            _records pushBack createHashMapFromArray [
+                ["kind", "move"], ["from", _recordFrom], ["to", _recordTo], ["class", _recordEntry getOrDefault ["class", ""]],
+                ["cell", _recordCell], ["oldClass", ""], ["oldTo", objNull],
+                ["roles", createHashMapFromArray [["take", _swapRoles get _takeRole], ["land", _swapRoles get _landRole]]]
+            ];
+
+            // How it will sound: like any move (a pile on the ground drops).
+            if (count _feels < 3) then {
+                _feels pushBack ([createHashMapFromArray [["kind", "move"], ["entry", _recordEntry], ["to", _recordTo]]] call FUNC(feelFor));
+            };
+
+            private _recordKey = _recordEntry getOrDefault ["key", ""];
+
+            if (_recordKey isEqualTo "") then {
+                _recordKey = [_recordEntry] call EFUNC(storage,entryKey);
+            };
+
+            _sources pushBack [_recordFrom, _recordKey, _recordEntry getOrDefault ["block", 0], _recordEntry getOrDefault ["col", -1], _recordEntry getOrDefault ["row", -1]];
+            _lifted pushBack _recordEntry;
+            _targets pushBack [
+                _recordTo, _recordCell param [2, 0], _recordCell select 0, _recordCell select 1,
+                _recordCell param [3, _recordEntry getOrDefault ["w", 1]], _recordCell param [4, _recordEntry getOrDefault ["h", 1]]
+            ];
+        } forEach [
+            [_swapFrom, _swapTo, _move get "entry", _move get "cell", "take", "land"],
+            [_swapTo, _swapFrom, _move get "otherEntry", _move get "otherCell", "takeOther", "landOther"]
+        ];
 
         continue;
     };
@@ -643,23 +811,6 @@ if (_moves isEqualTo []) exitWith {
         ["oldClass", _oldClass], ["oldTo", _oldTo], ["roles", _roles]
     ];
 
-    // What a refusal for weight says how much is missing with: where it was going, the tile, how many.
-    // Only into a container - the ground and a kit take no weight question here.
-    private _detail = [];
-
-    if (_landTo isEqualType objNull && {!isNull _landTo}) then {
-        switch (_kind) do {
-            case "move": {
-                _detail = [_landTo, [_entry] call EFUNC(storage,entryToArray), _move getOrDefault ["count", -1]];
-            };
-            case "unequip": {
-                _detail = [_landTo, [[_from, _move getOrDefault ["slot", ""]] call EFUNC(storage,getSlot)] call EFUNC(storage,entryToArray), 1];
-            };
-        };
-    };
-
-    _details pushBack _detail;
-
     // How it will sound once it happened (fnc_feelFor); an answer plays the first one that went, and the first
     // three are all it can come to.
     if (count _feels < 3) then {
@@ -675,6 +826,7 @@ if (_moves isEqualTo []) exitWith {
         };
 
         _sources pushBack [_from, _key, _entry getOrDefault ["block", 0], _entry getOrDefault ["col", -1], _entry getOrDefault ["row", -1]];
+        _lifted pushBack _entry;
     };
 
     if (_kind in ["move", "unequip"] && {_cell isNotEqualTo []} && {_landTo isNotEqualTo "ground"}) then {
@@ -709,7 +861,21 @@ if (_id isEqualTo "") exitWith {
 // Only while the window shows it: a chain that goes on after the window closed fades nothing. In single
 // player the answer is here already - fnc_onFrame finishes it, and this entry with it, the next frame.
 if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) then {
-    GVAR(inFlight) set [_id, [_sources, _targets, diag_tickTime, _feels, _details]];
+    GVAR(inFlight) set [_id, [_sources, _targets, diag_tickTime, _feels]];
+
+    // The tiles it takes from are on their way from this moment, not from the next build: faded and flagged as
+    // fnc_drawPending does, so the same tile, asked for again before the answer (the quick move key repeats while it is
+    // held), is not sent a second time.
+    {
+        if (!(_x getOrDefault ["pending", false]) && {count (_x getOrDefault ["controls", []]) > 0}) then {
+            _x set ["pending", true];
+
+            {
+                _x ctrlSetFade DRAG_SOURCE_FADE;
+                _x ctrlCommit 0;
+            } forEach (_x getOrDefault ["controls", []]);
+        };
+    } forEach _lifted;
 };
 
 // Some went, some were left out: why those were.

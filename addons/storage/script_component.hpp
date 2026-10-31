@@ -50,11 +50,93 @@
 // How often the server looks at held phases and re-sends, in seconds (fnc_tick, fnc_hubTick).
 #define HUB_TICK 0.25
 
+// Surplus migration (fnc_queueMigrate, fnc_tickMigrate, fnc_requestMigrate, fnc_opMigrate). A unit whose cargo
+// changed is looked at MIGRATE_DELAY seconds later, so a script adding twenty items over a few frames is one
+// look; the waiting units are looked at every MIGRATE_TICK seconds, MIGRATE_PER_TICK of them at most. A request
+// that was not carried out (the server not ready, the unit changed hands) is asked again after MIGRATE_RETRY
+// seconds, at most MIGRATE_TRIES times; under an arsenal the unit waits MIGRATE_WAIT seconds at a time.
+#define MIGRATE_DELAY 0.3
+#define MIGRATE_TICK 0.25
+#define MIGRATE_PER_TICK 3
+#define MIGRATE_RETRY 3
+#define MIGRATE_TRIES 3
+#define MIGRATE_WAIT 1
+
+// How long after a worn container was swapped for another the unit's surplus is left alone, in seconds
+// (fnc_wornHeld): only the changed container gets a fresh layout, the others keep their cells.
+#define SWAP_HOLD 60
+
+// The player's overflow sweep (fnc_queueSweep, fnc_sweepTick, fnc_requestSweep): what the grid has no room for and
+// no other worn container takes goes onto the ground. SWEEP_TICK is how often the due time is looked at, SWEEP_WATCH how
+// often the cheap loadout signature is compared (the net under the events), SWEEP_DELAY how long after a change the
+// sweep runs, SWEEP_LOADOUT_DELAY and SWEEP_INIT_DELAY the earliest it runs after a loadout was set and after the
+// player got a unit (the top-up and the places come first), SWEEP_BUSY when it looks again after the player was busy,
+// SWEEP_BLOCKED when it looks again while nothing can be put down (seated, nothing under the feet, the server not
+// ready), SWEEP_AGAIN when it looks again after a pass that changed something, SWEEP_MAX how many tiles one pass
+// puts down, SWEEP_TIMEOUT how long one pass is waited for, SWEEP_TRUST how long after a pass that put something
+// down the next one needs no second look. A pass that put nothing down waits SWEEP_FAIL seconds times the number of
+// failures in a row, at most SWEEP_FAIL_MAX.
+#define SWEEP_TICK 0.25
+#define SWEEP_WATCH 1
+#define SWEEP_DELAY 0.5
+#define SWEEP_LOADOUT_DELAY 1.5
+#define SWEEP_INIT_DELAY 4
+#define SWEEP_BUSY 1
+#define SWEEP_BLOCKED 5
+#define SWEEP_AGAIN 0.5
+#define SWEEP_MAX 6
+#define SWEEP_TIMEOUT 12
+#define SWEEP_TRUST 4
+#define SWEEP_FAIL 5
+#define SWEEP_FAIL_MAX 60
+
+// ACE Arsenal's display (1127001, ARSENAL_IDD of the arsenal addon) or the vanilla arsenal's is open. Both
+// do their own adding and taking back on the unit's cargo and read it as they go, so nothing is moved under
+// them (fnc_requestMigrate, fnc_opMigrate); the arsenal addon asks again once they are closed.
+#define ARSENAL_OPEN (!isNull (findDisplay 1127001) || {!isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull])})
+
 // MAX_ROWS, MAX_BLOCKS and MAX_CELLS live in main's script_macros.hpp: the items addon reads the
 // rules that size containers and has to keep to the same limits.
 
-// When a container counts as full by weight (fnc_getLoadState): "full" below the larger of FULL_FREE_MASS
-// (config mass, about 0.23 kg) and FULL_SHARE of its load left. NEAR_FULL, from where it is "near", is in
-// main's script_macros.hpp: the window reads it for the sections that bring their own fill.
-#define FULL_FREE_MASS 5
-#define FULL_SHARE 0.02
+// ---------------------------------------------------------------------------
+// Use from containers (the settings einv_storage_useUniform, useVest and useBackpack)
+// ---------------------------------------------------------------------------
+
+// The kinds of item (einv_items_fnc_getInfo "kind") that are used from where they lie: magazines to reload,
+// grenades to throw, medicine, food and tools (item), kits and radios. A rifle, an attachment or a piece of
+// clothing is worn or fitted, not used from a container, so the settings never touch them. An array literal -
+// used in code only, never inside a macro's arguments.
+#define USE_ITEM_KINDS ["magazine", "grenade", "item", "kit", "radio"]
+
+// The reload key is looked at at most this often, in seconds (fnc_reloadGuard): a key held down repeats.
+#define RELOAD_GUARD_GAP 0.6
+
+// How long the token of a reload this mod asked the game for (fnc_loadMagazine) waits for its "Reloaded" event
+// (fnc_onReloaded), in seconds - longer than any reload animation; one the game never answered runs out.
+#define RELOAD_TOKEN_MAX 12
+
+// The magazine a scroll-menu or gamepad reload took from a closed container is taken back a frame after the
+// event (fnc_reloadUndo); a magazine that may be used is then loaded this many seconds later, once the
+// weapon is back as it was.
+#define UNDO_RELOAD_WAIT 0.4
+
+// How long a flag of a reload under way is believed, in seconds, before it counts as left behind: ACE's "is reloading"
+// (fnc_reloadBusy), whose end may never come, and the undo of a reload (fnc_reloadUndo),
+// whose steps normally take a frame or two. Nothing waits on either for ever.
+#define RELOAD_BUSY_MAX 5
+#define UNDO_BUSY_MAX 3
+
+// A magazine the window put into a weapon by hand (drag onto the weapon, "Load into", fnc_weaponPart) is a chosen
+// one: for this many seconds the reload undo (fnc_onReloaded) leaves a loaded magazine of that class alone, whatever
+// the "Use items from ..." settings say about the container it lay in.
+#define HAND_LOAD_WINDOW 1.5
+
+// How often the throwing is looked at (fnc_throwTick), and the notes of where the magazines lie are taken
+// again (fnc_useTrack), in seconds.
+#define THROW_TICK 0.25
+#define TRACK_TICK 1
+
+// Strict mode: how often every unit local here that carries a hidden holder is noted for a look at it
+// (fnc_hiddenSweep -> op "strict", fnc_opStrict), in seconds - the net under the events: a player who left,
+// a Zeus who let go, a setting switched away from Strict, a body whose death this machine did not see.
+#define STRICT_SWEEP 3

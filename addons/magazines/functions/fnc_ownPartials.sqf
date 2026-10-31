@@ -44,7 +44,7 @@ private _found = [];
 
             if (
                 toLowerANSI (_x getOrDefault ["class", ""]) isEqualTo _key && {_ammo > 0} && {_ammo < _capacity}
-                && {!(_x getOrDefault ["hidden", false])} && {!(_x getOrDefault ["pending", false])}
+                && {!(_x getOrDefault ["hidden", false])} && {!(_x getOrDefault ["strict", false])} && {!(_x getOrDefault ["pending", false])}
             ) then {
                 private _part = [
                     _grid get "container",

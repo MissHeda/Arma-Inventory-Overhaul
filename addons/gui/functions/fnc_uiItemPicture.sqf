@@ -1,0 +1,176 @@
+#include "..\script_component.hpp"
+#include "..\defines.hpp"
+/*
+ * Author: Miss Heda
+ * An item's picture the way its rules ask for it (icon= / einv_icon, "icon" of einv_items_fnc_getInfo, see
+ * einv_items_fnc_parseIcon): fitted into its box as fnc_uiPicture fits it, then drawn [scale] times as large
+ * about the box's middle and moved by the offsets, which are a share of the tile's width and height. Every
+ * tile, slot, card and the dragged ghost draw an item's picture through here. The picture is upright: a tile
+ * that lies turned (R) is given its turned footprint as the box and gets this as its fallback, with the turned
+ * picture laid over it (fnc_turnPicture); a ghost held turned is fnc_uiPictureTurned's instead.
+ *
+ * The plain picture (scale 1, nothing moved) is the one control it always was. A picture that is larger or
+ * moved never goes out of the rectangle it belongs to: where its image stays inside that rectangle it is
+ * still one control; where it would reach out, it is made inside a controls group of exactly that rectangle,
+ * which clips it. The image is measured by the texture's own shape (getTextureInfo), not by the control it is
+ * fitted into, so a wide picture in a tall box that stays inside gets no group. The group is the control that
+ * comes back, with the picture in it as (_group getVariable QGVAR(inner)).
+ *
+ * A group over a tile takes the mouse from the column that holds the tile, so it reports the buttons and the
+ * wheel as the display does, like every group of the window (fnc_build, fnc_drawPart), and hands the wheel
+ * on to its column (fnc_onMouseZ, fnc_passWheel). It scrolls by nothing of its own: a picture larger than it
+ * would make it scrollable, and the engine scrolls such a group by the wheel after the event's handlers ran -
+ * so the group is put back to the top at the start of the frame as well, for a few frames (fnc_unscroll).
+ *
+ * Arguments:
+ * 0: Display <DISPLAY>
+ * 1: Controls group to create it in, or controlNull for the display <CONTROL>
+ * 2: The box the picture is fitted into, [x, y, w, h], in that group or on the screen <ARRAY>
+ * 3: Texture - the item's picture <STRING>
+ * 4: The icon, [scale, across, down] (the item's "icon") <ARRAY> (default: [1, 0, 0])
+ * 5: Colour it is multiplied with <ARRAY> (default: [1, 1, 1, 1])
+ * 6: The rectangle it must stay in, [x, y, w, h], in the same space as the box - the tile's, the slot's;
+ *    the box itself when left out <ARRAY> (default: [])
+ * 7: Report the mouse as the display does - not in the setup wizard, which has no inventory window; a group
+ *    made without it only keeps the picture in it from being scrolled by the wheel <BOOL> (default: true)
+ * 8: The size the offsets are a share of, [w, h]; the rectangle's own when left out. A box drawn in pieces
+ *    (fnc_uiPictureCut) gives every piece the whole box's size, so every piece moves the picture by the same
+ *    amount <ARRAY> (default: [])
+ *
+ * Return Value:
+ * The picture, or the group that clips it <CONTROL>
+ *
+ * Example:
+ * [_display, _group, [0, 0, 0.1, 0.05], _picture, [1.4, 0.1, -0.05], [1, 1, 1, 1], [0, 0, 0.1, 0.05]] call einv_gui_fnc_uiItemPicture;
+ *
+ * Public: No
+ */
+
+disableSerialization;
+
+params [
+    "_display", "_parent", "_box", "_texture", ["_icon", ICON_PLAIN, [[]]], ["_color", [1, 1, 1, 1]],
+    ["_clip", []], ["_events", true], ["_share", []]
+];
+
+_icon params [["_scale", 1], ["_across", 0], ["_down", 0]];
+
+// The picture as it is fitted: one control, nothing to cut. Also for a placeholder or a file that is not there
+// (fnc_safePicture): nothing is drawn, so there is nothing to cut.
+private _plain = _scale == 1 && {_across == 0} && {_down == 0};
+
+if (!_plain && {([_texture] call FUNC(safePicture)) isEqualTo ""}) then {
+    _plain = true;
+};
+
+if (_plain) exitWith {
+    [_display, _parent, _box, _texture, _color] call FUNC(uiPicture)
+};
+
+_box params ["_boxX", "_boxY", "_boxW", "_boxH"];
+
+if (_clip isEqualTo []) then {
+    _clip = +_box;
+};
+
+_clip params ["_clipX", "_clipY", "_clipW", "_clipH"];
+
+if (_share isEqualTo []) then {
+    _share = [_clipW, _clipH];
+};
+
+_share params ["_shareW", "_shareH"];
+
+// The picture's own shape, width to height: where its image really ends inside the control it is fitted into.
+private _info = getTextureInfo _texture;
+private _ratio = 0;
+
+if (_info isEqualType [] && {(_info param [0, 0]) > 0} && {(_info param [1, 0]) > 0}) then {
+    _ratio = (_info select 0) / (_info select 1);
+};
+
+// How far the picture moves on the screen.
+private _shiftX = _across * _shareW;
+private _shiftY = _down * _shareH;
+
+private _centerX = _boxX + _boxW / 2 + _shiftX;
+private _centerY = _boxY + _boxH / 2 + _shiftY;
+
+// The control it is made as and the image in it, which is all that has to stay inside.
+private _width = _boxW * _scale;
+private _height = _boxH * _scale;
+
+// On whole pixels, so a picture drawn in pieces lands on the same pixels in every piece.
+private _rect = [
+    round ((_centerX - _width / 2) / pixelW) * pixelW, round ((_centerY - _height / 2) / pixelH) * pixelH,
+    ((round (_width / pixelW)) max 1) * pixelW, ((round (_height / pixelH)) max 1) * pixelH
+];
+_width = _rect select 2;
+_height = _rect select 3;
+
+private _imageW = _width;
+private _imageH = _height;
+
+// Kept in its shape, the image fills the control along the side it is longer on.
+if (_ratio > 0) then {
+    if ((_width / pixelW) / (_height / pixelH) > _ratio) then {
+        _imageW = (_height / pixelH) * _ratio * pixelW;
+    } else {
+        _imageH = (_width / pixelW) / _ratio * pixelH;
+    };
+};
+
+// Half a pixel of give: the edges of a tile are on pixels, the picture's maths is not.
+private _inside = _centerX - _imageW / 2 >= _clipX - pixelW / 2
+    && {_centerX + _imageW / 2 <= _clipX + _clipW + pixelW / 2}
+    && {_centerY - _imageH / 2 >= _clipY - pixelH / 2}
+    && {_centerY + _imageH / 2 <= _clipY + _clipH + pixelH / 2};
+
+// Where it is made: where it was asked for when it stays inside, else in a group of the rectangle.
+private _target = _parent;
+private _group = controlNull;
+private _originX = 0;
+private _originY = 0;
+
+if (!_inside) then {
+    _group = [_display, "EINV_Group", _parent, _clip] call FUNC(uiCreate);
+    _target = _group;
+
+    // The group's corner sits on a pixel, a little off where it was asked for; its picture counts from it.
+    private _position = ctrlPosition _group;
+
+    _originX = _position select 0;
+    _originY = _position select 1;
+};
+
+private _picture = [
+    _display, _target, [(_rect select 0) - _originX, (_rect select 1) - _originY, _rect select 2, _rect select 3], _texture, _color
+] call FUNC(uiPicture);
+
+if (_inside) exitWith {_picture};
+
+_group setVariable [QGVAR(inner), _picture];
+_group setVariable [QGVAR(clip), true];
+
+if (_events) then {
+    // Hooked here, so the build's sweep leaves it alone (it hooks every group it finds that is not).
+    _group setVariable [QGVAR(hooked), true];
+    _group ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton)}];
+    _group ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton)}];
+    _group ctrlAddEventHandler ["MouseZChanged", {[_this] call FUNC(onMouseZ)}];
+} else {
+    // No window to hand the wheel to: at least the picture stays where it is put.
+    _group ctrlAddEventHandler ["MouseZChanged", {[_this select 0] call FUNC(unscroll)}];
+};
+
+// A turn over the picture itself reaches the group it lies in as a turn over its content: the group never
+// stays scrolled either way (fnc_unscroll).
+_picture ctrlAddEventHandler ["MouseZChanged", {
+    private _group = ctrlParentControlsGroup (_this select 0);
+
+    if (!isNull _group && {_group getVariable [QGVAR(clip), false]}) then {
+        [_group] call FUNC(unscroll);
+    };
+}];
+
+_group

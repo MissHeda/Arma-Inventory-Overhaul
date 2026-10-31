@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Whether a unit may open a container and move things in and out of it - what every gate asks: the
- * window, the vanilla inventory's gate, the client's check before a move and the guard on every op.
+ * window, the engine's inventory gate, the client's check before a move and the guard on every op.
  *
  * The lock that counts is the container's own, or that of the locked object it lies in or is attached to
  * (fnc_lockHolder), or - for a uniform, vest or backpack opened from inside a container - of the root the

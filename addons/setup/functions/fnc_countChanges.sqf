@@ -1,15 +1,18 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * How many changes the draft holds against what was last saved or loaded: each statement added or taken
- * away (a changed one counts as both), the header - preset and cell size - and the switch to force it
- * over the mission. For the header's "4 changes" and the dots on the steps.
+ * How many changes the draft holds against what was last saved or loaded - the rows of the change list
+ * (fnc_changeRows "saved"), so the header's "4 changes" and that list always agree: the cell size, the switch to
+ * force it over the mission, each server setting, and each group or rule added, changed or taken away. And
+ * which steps they belong to, for the dots on the steps: General for the settings, the cell size, the kinds of
+ * container and any rule that is not for one class, Items and Containers for the rules of one class
+ * (fnc_ruleStep).
  *
  * Arguments:
  * None
  *
  * Return Value:
- * [all changes, header changed, statements changed] <ARRAY>
+ * [all changes, the ids of the steps that hold some] <ARRAY>
  *
  * Example:
  * (call einv_setup_fnc_countChanges) select 0;
@@ -17,11 +20,17 @@
  * Public: No
  */
 
-([GVAR(clean)] call FUNC(statements)) params ["_cleanHead", "_cleanStatements"];
-([GVAR(draftText)] call FUNC(statements)) params ["_draftHead", "_draftStatements"];
+private _rows = ["saved", false] call FUNC(changeRows);
+private _steps = [];
 
-private _statements = count (_draftStatements - _cleanStatements) + count (_cleanStatements - _draftStatements);
-private _head = _draftHead isNotEqualTo _cleanHead;
-private _count = _statements + ([0, 1] select _head) + ([0, 1] select (GVAR(override) isNotEqualTo GVAR(cleanOverride)));
+{
+    _x params ["_kind", "", "", "", "", "", "", "_statement"];
 
-[_count, _head, _statements > 0]
+    if (_kind isEqualTo "rule") then {
+        _steps pushBackUnique (([_statement] call FUNC(ruleStep)) select 0);
+    } else {
+        _steps pushBackUnique "general";
+    };
+} forEach _rows;
+
+[count _rows, _steps]

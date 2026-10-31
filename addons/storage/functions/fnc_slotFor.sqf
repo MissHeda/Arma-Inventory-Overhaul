@@ -26,8 +26,15 @@ if (_kind isEqualTo "rifle") exitWith {"primary"};
 
 private _slot = "";
 
+// Read once for the three weapons, and only for an item that may go on a part of one.
+private _equipment = createHashMap;
+
+if (_kind in ["muzzle", "optic", "rail", "bipod", "magazine", "grenade"]) then {
+    _equipment = [_unit] call FUNC(getEquipment);
+};
+
 {
-    _slot = [_unit, _x, _class] call FUNC(partFor);
+    _slot = [_unit, _x, _class, _equipment] call FUNC(partFor);
 
     if (_slot isNotEqualTo "") exitWith {};
 } forEach ["primary", "handgun", "launcher"];

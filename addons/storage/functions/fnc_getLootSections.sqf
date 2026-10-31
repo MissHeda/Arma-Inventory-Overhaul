@@ -130,7 +130,6 @@ private _fnc_addWorn = {
         ["title", _title],
         ["class", ""],
         ["container", objNull],
-        ["maxLoad", -1],
         ["entries", _entries],
         ["unit", _body]
     ];
@@ -169,8 +168,7 @@ private _fnc_add = {
             ["id", "ground"],
             ["title", LLSTRING(Ground)],
             ["class", ""],
-            ["container", _object],
-            ["maxLoad", -1]
+            ["container", _object]
         ];
 
         [_section, _object, objNull, _isNearby] call _fnc_belong;
@@ -182,8 +180,7 @@ private _fnc_add = {
         ["id", "container"],
         ["title", getText (configOf _object >> "displayName")],
         ["class", ""],
-        ["container", _object],
-        ["maxLoad", [_object] call FUNC(getMaxLoad)]
+        ["container", _object]
     ];
 
     [_section, _object, objNull, _isNearby] call _fnc_belong;
@@ -207,8 +204,7 @@ if (_secondary isNotEqualTo _container) then {
         ["id", "container"],
         ["title", ([_class] call EFUNC(items,getInfo)) getOrDefault ["name", _class]],
         ["class", _class],
-        ["container", _object],
-        ["maxLoad", [_object] call FUNC(getMaxLoad)]
+        ["container", _object]
     ];
 
     [_section, _object, _parent] call _fnc_belong;

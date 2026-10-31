@@ -15,8 +15,12 @@
  *   backpack with contents    - no: their contents would be lost, the kit keeps only the class
  *   an empty magazine         - no: the kit would hand it back full (fnc_changeKit)
  *   packing switched off     - only what came out of this kit since the window was opened
- *                               (fnc_repackable), as that mod's kit window allows
- *   the kit                   - what it takes and has room for (fnc_canPack)
+ *                               (fnc_repackable), as that mod's kit window allows; in ACE Arsenal's
+ *                               window instead whether the kit may be filled there and, out of
+ *                               another kit, whether that one lets things out (fnc_arsenalEditable)
+ *   the kit                   - what it takes and has room for (fnc_canPack): that mod's
+ *                               capacity, or the free cells of a grid a rule or its config gives
+ *                               it (fnc_roomMode)
  * Its reasons are that mod's words wherever it has them.
  *
  * Arguments:
@@ -25,7 +29,8 @@
  * 2: Entry - a tile's, or a slot's (einv_storage_fnc_getSlot) <HASHMAP>
  * 3: How many of a stack, -1 for all of it <NUMBER> (default: -1)
  * 4: The slot it comes from, [unit, slot id] - [] for a tile <ARRAY> (default: [])
- * 5: Where the kit lies, [container, kit] - [] for where it was found as an open kit (GVAR(holders))
+ * 5: Where the kit lies, [container, kit] - [] for where it was found as an open kit (GVAR(holders)) or
+ *    a kit section of the ACE Arsenal's panel (GVAR(arsenalHolders))
  *    <ARRAY> (default: [])
  *
  * Return Value:
@@ -57,7 +62,7 @@ if (_fromKit isNotEqualTo "" && {_fromKit == _kit}) exitWith {
 };
 
 if (_holder isEqualTo []) then {
-    _holder = GVAR(holders) getOrDefault [toLowerANSI _kit, [objNull, ""]];
+    _holder = GVAR(holders) getOrDefault [toLowerANSI _kit, GVAR(arsenalHolders) getOrDefault [toLowerANSI _kit, [objNull, ""]]];
 };
 
 if !([_holder param [0, objNull]] call FUNC(mayReach)) exitWith {[false, LLSTRING(NotYours)]};
@@ -94,6 +99,22 @@ private _wait = call FUNC(notReady);
 
 if (_wait isNotEqualTo "") exitWith {[false, _wait]};
 
+// In ACE Arsenal's window (the one window attached with hooks) the kits tab's rules decide, as for a row of a list
+// (fnc_canPackNew) and a tile taken out there (fnc_discard) - not the packing-off rule of that mod's kit window in the
+// field, which turned the staging space away from a kit ACE's list could fill: the kit takes things in there, and the
+// kit it comes out of, if any, lets them out (fnc_arsenalEditable).
+if !([] call EFUNC(gui,isInventoryMode)) exitWith {
+    private _locked = [_kit, true] call FUNC(arsenalEditable);
+
+    if (_locked isEqualTo "" && {_fromKit isNotEqualTo ""}) then {
+        _locked = [_fromKit, false] call FUNC(arsenalEditable);
+    };
+
+    if (_locked isNotEqualTo "") exitWith {[false, _locked]};
+
+    [_kit, _class, _n, _entry getOrDefault ["ammo", -1]] call FUNC(canPack)
+};
+
 // What it held when the window first touched it, for the packing-off rule.
 [_kit] call FUNC(snapshot);
 
@@ -101,4 +122,4 @@ if (!([_kit] call EFAKFUNC(core,canPackInto)) && {_n > ([_kit, _class, _entry ge
     [false, localize "STR_efak_core_Error_PackingDisabled"]
 };
 
-[_kit, _class, _n] call FUNC(canPack)
+[_kit, _class, _n, _entry getOrDefault ["ammo", -1]] call FUNC(canPack)

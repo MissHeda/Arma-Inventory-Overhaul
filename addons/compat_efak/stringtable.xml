@@ -1,11 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project name="einv">
     <Package name="compat_efak">
+        <Key ID="STR_einv_compat_efak_ArsenalKit">
+            <English>Kit</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_ArsenalKitName">
+            <English>Kit: %1</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_ArsenalKitTitle">
+            <English>Kit: %1 (%2/%3)</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_ArsenalLocked">
+            <English>Locked: untick "Use CBA default" to change this kit</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_ArsenalReadOnly">
+            <English>This kit cannot be filled in the arsenal</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_ArsenalRemoveOnly">
+            <English>Items can only be taken out of this kit in the arsenal</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_ArsenalTakeKit">
+            <English>Take the kit first</English>
+        </Key>
         <Key ID="STR_einv_compat_efak_EmptyFirst">
             <English>Empty it first</English>
         </Key>
         <Key ID="STR_einv_compat_efak_EmptyMagazine">
             <English>An empty magazine stays out of the kit</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_FillCells">
+            <English>%1 / %2 cells</English>
         </Key>
         <Key ID="STR_einv_compat_efak_Inspect_Contents">
             <English>Contents</English>
@@ -36,6 +60,9 @@
         </Key>
         <Key ID="STR_einv_compat_efak_RestStays">
             <English>Not everything fit - the rest stays in the kit</English>
+        </Key>
+        <Key ID="STR_einv_compat_efak_SomeFit">
+            <English>Only %1 of %2 fit into the kit</English>
         </Key>
     </Package>
 </Project>

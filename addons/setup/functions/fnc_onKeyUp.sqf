@@ -27,6 +27,9 @@ params ["_display", "_key", ["_shift", false], ["_ctrl", false], ["_alt", false]
 
 if (ctrlType (focusedCtrl _display) == CTRL_TYPE_EDIT) exitWith {false};
 
+// An open popover is answered first (fnc_onKeyDown).
+if ((uiNamespace getVariable [QGVAR(popover), []]) isNotEqualTo []) exitWith {false};
+
 private _handled = [_key, _shift, _ctrl, _alt, true] call GVAR(stepKey);
 
 !isNil "_handled" && {_handled isEqualType true} && {_handled}

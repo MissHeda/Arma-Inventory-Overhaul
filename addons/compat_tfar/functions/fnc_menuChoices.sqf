@@ -4,7 +4,9 @@
  * The right-click choices of a radio: "Open radio" (TFAR's own dialog for it) and "Use as active radio" -
  * only for the player's own radios, which are the ones TFAR lets them handle: the radio slot, the
  * uniform, vest and backpack, and the long-range radio of the backpack they wear. A radio lying in a crate
- * or on someone else gets nothing; neither does a prototype (nobody carries it yet).
+ * or on someone else gets nothing. A prototype of the player's own - the vanilla radio in the radio slot, a radio TFAR has
+ * not swapped for one of theirs yet - gets "Open radio" too: TFAR is asked to swap it now, and the radio it gives is opened
+ * (fnc_openPrototype).
  *
  * Arguments:
  * 0: Class <STRING>
@@ -37,6 +39,13 @@ switch ([_class] call FUNC(radioType)) do {
         if (!_inSlot && {isNil "_active" || {_class != _active}}) then {
             _choices pushBack [LLSTRING(Menu_MakeActive), [_class], {_this call FUNC(makeActive)}];
         };
+    };
+
+    // A prototype of the player's own: made a radio of theirs first.
+    case 2: {
+        if (!_own) exitWith {};
+
+        _choices pushBack [LLSTRING(Menu_Open), [_class], {_this call FUNC(openPrototype)}];
     };
 
     // The long-range radio on the player's own back.

@@ -1,84 +1,57 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Packs new items into a kit straight from the Enhanced Arsenal's catalog: nothing is taken from anywhere,
- * the kit's contents are written (einv_compat_efak_fnc_putIntoKit, which ends in that mod's setContents) and
- * the item gets a tile in the kit's window, on the cell asked for when that is free, else where the kit's
- * layout puts it. Only while the kit's arsenal setting is everything (fnc_arsenalEditing), and only what
- * that mod would let into the kit by hand: its item rules, the default contents limit, the room left
- * (fnc_canPack). As many as fit go in when not all do.
+ * Packs new items straight into a kit, in the ACE Arsenal: dragged out of ACE's list or the kits tab's list onto
+ * the kit's grid or tile in the panel (einv_arsenal_fnc_onDrop), Ctrl and the wheel up over its tile
+ * (einv_arsenal_fnc_onWheel). What the kits tab still has staged is written first (fnc_arsenalFlush), so the kit
+ * is asked as that tab shows it. As many as the kit takes (fnc_canPackNew: the kit type's
+ * Arsenal setting, that mod's rules, and its room - its capacity, or the free cells of a grid a rule or
+ * its config gives it, fnc_roomMode), made from nothing (einv_storage_fnc_makePayload) and written into
+ * the kit (fnc_putIntoKit, which asks the kit once more and ends in that mod's setContents); the tile's
+ * record goes on the cell asked for when that is free, else where the kit's layout puts it.
  *
- * Written where it is called: the kit has to lie under the root named - the Arsenal's unit, whose gear is
- * local to the player, as einv_storage_fnc_addNew's containers are. A kit nobody has carried yet (a
- * prototype, in the Eden editor or on a Zeus unit) holds nothing of its own yet and says so.
+ * One writer per kit: it writes where it is called, outside any phase, and only for a root whose
+ * transactions run on this machine (einv_storage_fnc_isLocalRoot) with the kit really under it
+ * (fnc_holderVerify) - the soldier's own gear in the Arsenal, or its staging space -, as
+ * einv_storage_fnc_addNew does for a container. The window is built again (fnc_requestRebuild).
  *
  * Arguments:
- * 0: Kit class, an instance <STRING>
+ * 0: Kit class <STRING>
  * 1: Item class <STRING>
  * 2: How many <NUMBER> (default: 1)
- * 3: Cell [col, row, compartment, width, height], [] for the first place there is <ARRAY> (default: [])
- * 4: The unit whose gear the kit lies in, objNull to take it for granted <OBJECT> (default: objNull)
+ * 3: Cell [col, row, compartment, w, h, rot] in the kit's grid, [] for where its layout puts it
+ *    <ARRAY> (default: [])
+ * 4: Root of what the kit lies in <OBJECT> (default: objNull)
  *
  * Return Value:
- * [how many went in, why not - "" when they did, "ReadOnly" for a kit the arsenal may not fill, else a word
- *  for einv_gui_fnc_flashHint or a text -, the cell it landed on or []] <ARRAY>
+ * [how many went in, why not all - "" when all did, a reason or words otherwise, the cell it landed on
+ *  [col, row, compartment, w, h, rot] - [] when unknown] <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7", "ACE_morphine", 2, [], player] call einv_compat_efak_fnc_packNew;
+ * ["efak_IFAK_7", "ACE_fieldDressing", 5, [], player] call einv_compat_efak_fnc_packNew;
  *
  * Public: No
  */
 
-params [
-    ["_kit", "", [""]], ["_class", "", [""]], ["_count", 1, [0]], ["_cell", [], [[]]], ["_root", objNull, [objNull]]
-];
+params [["_kit", "", [""]], ["_class", "", [""]], ["_count", 1, [0]], ["_cell", [], [[]]], ["_root", objNull, [objNull]]];
 
-if (_kit isEqualTo "" || {_class isEqualTo ""} || {_count < 1}) exitWith {[0, "Failed", []]};
+if (
+    _kit isEqualTo "" || {_class isEqualTo ""} || {_count < 1} || {isNull _root}
+    || {!([_root] call EFUNC(storage,isLocalRoot))} || {!(["kit:" + toLowerANSI _kit, _root] call FUNC(holderVerify))}
+) exitWith {[0, "Failed", []]};
 
-if (([_kit] call FUNC(arsenalEditing)) < 2) exitWith {[0, "ReadOnly", []]};
+[] call FUNC(arsenalFlush);
 
-// Whether the kit takes this many more.
-private _fnc_takes = {
-    params ["_n"];
+([_kit, _class, _count] call FUNC(canPackNew)) params ["_n", "_why"];
 
-    ([_kit, _class, _n] call FUNC(canPack)) select 0
-};
+if (_n < 1) exitWith {[0, [_why, "Failed"] select (_why isEqualTo ""), []]};
 
-if !([1] call _fnc_takes) exitWith {
-    ([_kit, _class, 1] call FUNC(canPack)) params ["", "_why"];
+private _payload = [_class, _n] call EFUNC(storage,makePayload);
 
-    [0, [_why, "Failed"] select (_why isEqualTo ""), []]
-};
+([_kit, _payload, _cell] call FUNC(putIntoKit)) params ["_refused", "_landed"];
 
-// Not all of them: as many as there is room and allowance for (the answer only ever turns from yes to no).
-private _n = _count;
-
-if !([_n] call _fnc_takes) then {
-    private _low = 1;
-    private _high = _n;
-
-    while {_high - _low > 1} do {
-        private _mid = floor ((_low + _high) / 2);
-
-        if ([_mid] call _fnc_takes) then {
-            _low = _mid;
-        } else {
-            _high = _mid;
-        };
-    };
-
-    _n = _low;
-};
-
-// The kit lies under the unit's gear, or the contents are another's. Written here only for a unit of
-// this machine: its gear's transactions run here too (einv_storage_fnc_isLocalRoot) - one writer.
-if (!isNull _root && {!local _root}) exitWith {[0, "Failed", []]};
-if (!isNull _root && {!([("kit:" + toLowerANSI _kit), _root] call FUNC(holderVerify))}) exitWith {[0, "Gone", []]};
-
-([_kit, [_class, _n] call EFUNC(storage,makePayload), _cell] call FUNC(putIntoKit)) params ["_why", "_landed"];
-
-if (_why isNotEqualTo "") exitWith {[0, _why, []]};
+if (_refused isNotEqualTo "") exitWith {[0, _refused, []]};
 
 [] call FUNC(requestRebuild);
 
-[_n, "", _landed]
+[_n, ["", format [LLSTRING(SomeFit), _n, _count]] select (_n < _count), _landed]

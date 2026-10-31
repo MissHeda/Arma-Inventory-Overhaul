@@ -130,4 +130,21 @@ private _load = 0;
     _load = _load + (_mass - (_info getOrDefault ["configMass", _mass])) * _y;
 } forEach _carried;
 
+// Strict mode's hidden holder (einv_storage_fnc_opStrict): what it keeps out of the uniform, vest and
+// backpack is in no cargo the engine weighs, so its whole mass - the rules' - is added, not only the
+// override's difference. [[uniform, vest, backpack] lists of [class, count, rounds], containers].
+private _hidden = _unit getVariable [QEGVAR(storage,hidden), []];
+
+if (_hidden isEqualTypeArray [[], []]) then {
+    {
+        {
+            if (_x isEqualTypeArray ["", 0, 0]) then {
+                _x params ["_class", "_count"];
+
+                _load = _load + (([_class] call EFUNC(items,getInfo)) getOrDefault ["mass", 0]) * _count;
+            };
+        } forEach _x;
+    } forEach (_hidden select 0);
+};
+
 _load

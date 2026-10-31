@@ -1,8 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The presets a setup can start from (CfgEinvRulesets): this mod's own - Default, Tarkov-like,
- * Weight-like - and any that another mod adds, in config order.
+ * The presets there are (CfgEinvRulesets): this mod's one, Default, and any that another mod adds, in config
+ * order. The wizard offers no choice among them any more - a text names its preset by base=, which is the
+ * default unless another mod's preset was named by hand -; this is what names them.
  *
  * Arguments:
  * None

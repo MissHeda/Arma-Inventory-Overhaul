@@ -4,11 +4,15 @@
  * Author: Miss Heda
  * Moves an item for the window: checked here first, so the hint says at once what this machine can
  * already tell - a living person's gear the player may not change or is out of reach of
- * (fnc_checkTouch), another living player's kit (einv_compat_efak_fnc_checkTile), no room for its load
- * (einv_storage_fnc_roomByWeight: too heavy says for which container and by how much, a backpack into a
- * backpack says so), no free spot when only the grid counts and nobody said where - then sent as
- * a transaction (fnc_sendMoves). Every change happens where the holder's root is local, checked there
- * again; places, search knowledge and the window follow the answer (fnc_afterAction).
+ * (fnc_checkTouch), another living player's kit (einv_compat_efak_fnc_checkTile), a backpack into a
+ * backpack (einv_storage_fnc_backpackIntoBackpack), no free spot when nobody said where - then sent as
+ * a transaction (fnc_sendMoves). With the option "separate" (and only where the storage keeps separate
+ * stacks, einv_storage_stackSplits) what goes to a cell lies there as a stack of its own and does not join
+ * a stack of its class elsewhere in the container; part of a stack moved within its container is split off
+ * onto the cell (einv_storage_fnc_opSplit). With "mergeInto" - the [col, row, compartment] of a stack of
+ * the same class - what goes joins that very stack (einv_storage_fnc_opPut); it needs no free spot, the
+ * count being what fits. Every change happens where the holder's root is local, checked there again;
+ * places, search knowledge and the window follow the answer (fnc_afterAction).
  *
  * Within one container it is a rearrangement onto the cell; the ground ("ground") is the surface under
  * the feet, or the vehicle's cargo while seated. A ground pile the window does not show, or none at
@@ -21,7 +25,9 @@
  * 3: How many of a stack, -1 for all of it <NUMBER> (default: -1)
  * 4: Cell [col, row, compartment] - with [.., width, height] when it lies turned there - or [] to let
  *    the layout find one <ARRAY> (default: [])
- * 5: Options (fnc_sendMoves) <HASHMAP> (default: empty)
+ * 5: Options (fnc_sendMoves) <HASHMAP> (default: empty); "separate" <BOOL> as above (default: false);
+ *    "mergeInto" <ARRAY> as above (default: []); "roomChecked" <BOOL> - the caller asked for room already
+ *    (fnc_roomFor), so it is not laid out again here (default: false)
  *
  * Return Value:
  * Asked for <BOOL>
@@ -49,7 +55,6 @@ if (_to isEqualType objNull && {isNull _to}) exitWith {false};
 
 private _class = _entry getOrDefault ["class", ""];
 private _why = "";
-private _details = [];
 
 // A living person's gear only as the settings say and while in reach - also rearranged, which everyone
 // looking at them sees. Their machine asks again (fnc_personGuard).
@@ -65,31 +70,28 @@ if (_why isEqualTo "" && {_from isEqualType objNull} && {_to isNotEqualTo _from}
     _why = [_class, _from] call EFUNC(compat_efak,checkTile);
 };
 
-// Room for its load, and with only the grid counting (einv_storage_gridOnly) a free spot when nobody
-// said where. The authority asks both again against what it holds then.
+// A backpack never goes into a backpack, and with nobody saying where it needs a free spot. The authority
+// asks both again against what it holds then.
 if (_why isEqualTo "" && {_to isEqualType objNull} && {_to isNotEqualTo _from}) then {
-    private _room = [_to, _entry, _count] call EFUNC(storage,roomByWeight);
-
-    if !(_room get "fits") exitWith {
-        _why = _room get "reason";
-
-        // Which container and by how much (fnc_flashHint -> fnc_weightText).
-        if (_why isEqualTo "TooHeavy") then {
-            _details = [_to, _entry, _count];
-        };
+    if ([_to, _entry] call EFUNC(storage,backpackIntoBackpack)) exitWith {
+        _why = "NoBackpack";
     };
 
-    if (EGVAR(storage,gridOnly) && {_cell isEqualTo []} && {!([_to, _entry] call EFUNC(storage,hasSpace))}) then {
+    if (
+        _cell isEqualTo [] && {(_options getOrDefault ["mergeInto", []]) isEqualTo []} && {!(_options getOrDefault ["roomChecked", false])}
+        && {!([_to, _entry] call EFUNC(storage,hasSpace))}
+    ) then {
         _why = "NoRoom";
     };
 };
 
 if (_why isNotEqualTo "") exitWith {
-    [_why, _details] call FUNC(flashHint);
+    [_why] call FUNC(flashHint);
 
     false
 };
 
 [[createHashMapFromArray [
-    ["kind", "move"], ["from", _from], ["to", _to], ["entry", _entry], ["count", _count], ["cell", _cell]
+    ["kind", "move"], ["from", _from], ["to", _to], ["entry", _entry], ["count", _count], ["cell", _cell],
+    ["separate", _options getOrDefault ["separate", false]], ["mergeInto", _options getOrDefault ["mergeInto", []]]
 ]], _options] call FUNC(sendMoves)

@@ -2,23 +2,25 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Draws the Tarkov look's paper doll: what a unit wears, as slots in rows, each with its caption on a
+ * Draws a paper doll: what a unit wears, as slots in rows, each with its caption on a
  * tab - and behind them, faintly, a soldier standing.
  *
  *   EARPIECE  | HEADWEAR   | FACE COVER
  *   UNIFORM   | BODY ARMOR | BACKPACK
  *   ON SLING               | HOLSTER
  *   ON BACK                | BINOCULAR
- *   EYEWEAR | MAP | GPS | COMPASS | WATCH
+ *   NIGHT VISION | MAP | GPS | COMPASS | WATCH
  *
  * Uniform, body armor and backpack - the three that hold things - stand together, in the order their
- * sections follow under a body's doll; the eyewear (night vision) is one of the small slots (Mia, 0.2.3:
- * a body had no backpack slot to take one off or put one on).
+ * sections follow under a body's doll; the night vision is one of the small slots (Mia, 0.2.3:
+ * a body had no backpack slot to take one off or put one on). It is captioned "Night vision" as on the
+ * player's own gear row and in ACE's arsenal - "Eyewear" read as the goggles' slot (a tester, 0.4.7).
  *
  * A weapon's slot is wide, about 2.3 squares; the three slots of each upper row spread out over the
- * same width, so the doll's edges line up. The player's doll fills the gear panel with square slots,
- * as big as the room allows. A body's doll is compact: low, wide slots in the loot column, as wide as
- * the containers under it, and no soldier behind them.
+ * same width, so the doll's edges line up. A full-size doll fills its room with square slots, as big as
+ * the room allows. A body's doll is compact: low, wide slots in the loot column, as wide as the
+ * containers under it, and no soldier behind them. Only the compact one is drawn today (fnc_drawSection):
+ * the player's own gear is drawn as cards (fnc_drawEquipmentCards).
  *
  * Weapons show their short name in the top right corner and their magazine's rounds in big digits in
  * the bottom right. Their attachments are not slots of their own here, as in Tarkov - the hint names
@@ -50,12 +52,14 @@ _rect params ["_left", "_top", "_width", ["_height", -1]];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _colorText2 = _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
 
 // The caption tab as fnc_drawSlot draws it, to know how much of the slot's top it takes.
-private _lineH = UNIT * 0.62;
-private _lineSize = UNIT * 0.46;
+// Grown with the tiles as fnc_drawSlot's (TEXT_UNIT, fnc_textScale).
+private _textUnit = TEXT_UNIT;
+private _lineH = _textUnit * 0.62;
+private _lineSize = _textUnit * 0.46;
 
 // ---------------------------------------------------------------------------
 // Sizes, in whole pixels: the slots are see-through, so their edges and gaps should not shift by a
@@ -159,7 +163,7 @@ private _slots = [
     ["handgun", LLSTRING(Tarkov_Holster), GEAR_ICON(ui_gear_hgun_gs), [_sideX, [2] call _fnc_rowY, _colW, _rowH]],
     ["launcher", LLSTRING(Tarkov_OnBack), GEAR_ICON(ui_gear_secondary_gs), [_x0, [3] call _fnc_rowY, _wideW, _rowH]],
     ["binocular", LLSTRING(Tarkov_Binocular), GEAR_ICON(ui_gear_binocular_gs), [_sideX, [3] call _fnc_rowY, _colW, _rowH]],
-    ["nvg", LLSTRING(Tarkov_Eyewear), GEAR_ICON(ui_gear_nvg_gs), [[0, 5, _smallW] call _fnc_spreadX, _smallY, _smallW, _smallH]],
+    ["nvg", LLSTRING(Slot_NVG), GEAR_ICON(ui_gear_nvg_gs), [[0, 5, _smallW] call _fnc_spreadX, _smallY, _smallW, _smallH]],
     ["map", LLSTRING(Tarkov_Map), GEAR_ICON(ui_gear_map_gs), [[1, 5, _smallW] call _fnc_spreadX, _smallY, _smallW, _smallH]],
     ["gps", LLSTRING(Tarkov_Gps), GEAR_ICON(ui_gear_gps_gs), [[2, 5, _smallW] call _fnc_spreadX, _smallY, _smallW, _smallH]],
     ["compass", LLSTRING(Tarkov_Compass), GEAR_ICON(ui_gear_compass_gs), [[3, 5, _smallW] call _fnc_spreadX, _smallY, _smallW, _smallH]],
@@ -197,7 +201,7 @@ private _slots = [
     if (_empty || {!_isWeapon} || {_key isEqualTo "binocular"}) then {continue};
 
     private _info = [_class] call EFUNC(items,getInfo);
-    private _padY = (_slotH * 0.08) min (UNIT * 0.25);
+    private _padY = (_slotH * 0.08) min (_textUnit * 0.25);
     private _padX = SQUARE(_padY);
     private _nameX = _slotX + _padX + ([0, _tabW] select _tab);
     private _room = _slotX + _slotW - _padX - _nameX;
@@ -205,7 +209,7 @@ private _slots = [
     if (_room > SQUARE(UNIT * 1.2)) then {
         private _name = [_info getOrDefault ["short", _class], _room, _font, _lineSize] call FUNC(fitText);
 
-        [_display, _parent, [_nameX, _slotY, _room, _lineH], _name, _lineSize, _colorText2, _font, 1] call FUNC(uiLabel);
+        [_display, _parent, [_nameX, _slotY, _room, _lineH], _name, _lineSize, _colorText2, _font, 1, "weapon"] call FUNC(uiLabel);
     };
 
     private _magazine = _value param [4, []];
@@ -216,12 +220,12 @@ private _slots = [
 
         // A single rocket or grenade is no count worth showing.
         if (_capacity > 1) then {
-            private _size = UNIT * ([0.8, 0.62] select _compact);
+            private _size = _textUnit * ([0.8, 0.62] select _compact);
             private _boxH = _size * 1.15;
 
             [
                 _display, _parent, [_slotX + _padX, _slotY + _slotH - _padY * 0.5 - _boxH, _slotW - _padX * 2, _boxH],
-                format ["%1/%2", _rounds, _capacity], _size, _colorText, _fontBold, 1
+                format ["%1/%2", _rounds, _capacity], _size, _colorText, _fontBold, 1, "weaponammo"
             ] call FUNC(uiLabel);
         };
     };

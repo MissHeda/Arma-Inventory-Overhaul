@@ -3,8 +3,8 @@
 /*
  * Author: Miss Heda
  * The vanilla arsenal opened though nothing here let it (arsenalOpened): a display created directly, or
- * BIS_fnc_arsenal's entry lost to another mod. Its display is closed a frame later and this addon blocks or
- * opens its own, unless the vanilla one is meant to stay.
+ * BIS_fnc_arsenal's entry lost to another mod. Its display is closed a frame later and this addon blocks it
+ * or opens ACE Arsenal with the same items, unless the vanilla one is meant to stay.
  *
  * The vanilla one stays when the setting says so, in the editor, in BI's showcase, in Warlords, for a
  * mission that opted out or hooks the arsenal itself (the same rules as fnc_handleBIOpen), and when
@@ -38,7 +38,7 @@
         _mode isEqualTo "vanilla" || {GVAR(biLetThrough)} || {!GVAR(ready)} || {_passThrough isEqualTo true}
         || {missionName isEqualTo "Arsenal" && {!isNil "arsenal_fnc_opened"}}
         || {!isNil "BIS_WL_arsenalEnabled"}
-        || {_mode isEqualTo "enhanced" && {isNil "_passThrough"} && {call FUNC(biMissionHooks)}}
+        || {_mode isEqualTo "ace" && {isNil "_passThrough"} && {call FUNC(biMissionHooks)}}
     ) exitWith {};
 
     // What the vanilla arsenal was opened for, before it forgets.
@@ -65,13 +65,7 @@
 
         ([_cargo, _full, _center] call FUNC(biItems)) params ["_all", "_classes"];
 
-        private _box = [_cargo, _center] select isNull _cargo;
-
-        if (_all) then {
-            [_box, _center, true, nil, displayNull, "bi"] call FUNC(openWindow);
-        } else {
-            [_box, _center, false, _classes, displayNull, "bi"] call FUNC(openWindow);
-        };
+        [[_cargo, _center] select isNull _cargo, _center, _all, _classes] call FUNC(openBI);
     }, [_center, _cargo, _full, _mode]] call EFUNC(gui,later);
 }] call BIS_fnc_addScriptedEventHandler;
 

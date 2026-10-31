@@ -28,7 +28,7 @@
 
 params [["_unit", objNull, [objNull]], ["_class", "", [""]], ["_index", 0, [0]]];
 
-if (missionNamespace getVariable ["ace_common_isReloading", false]) exitWith {[false, LLSTRING(Reason_Busy)]};
+if ([] call EFUNC(storage,reloadBusy)) exitWith {[false, LLSTRING(Reason_Busy)]};
 
 private _name = [_class] call EFUNC(gui,itemName);
 private _advanced = !isNil "ace_advanced_throwing_fnc_prepare" && {missionNamespace getVariable ["ace_advanced_throwing_enabled", false]};

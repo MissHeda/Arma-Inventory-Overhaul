@@ -32,9 +32,8 @@ private _fnc_greet = {
     if (GVAR(serverVersion) isNotEqualTo "") exitWith {};
 
     [QGVAR(hello), [call FUNC(machineId), QUOTE(VERSION_STR)]] call CBA_fnc_serverEvent;
-    GVAR(greeted) = diag_tickTime;
 
-    // A minute of 5 s tries: the server most likely runs no Enhanced Inventory at all.
+    // A minute of 5 s tries: the server most likely runs no Arma Inventory Overhaul at all.
     if (_tries == 12) then {
         WARNING("The server has not answered for a minute - moves through the server stay off until it does.");
     };

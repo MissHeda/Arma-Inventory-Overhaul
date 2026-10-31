@@ -55,6 +55,7 @@ switch (_op) do {
     };
     case "place";
     case "placeMany";
+    case "split";
     case "sort";
     case "normalize";
     case "take";

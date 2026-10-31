@@ -86,7 +86,7 @@ if (_oldClass isNotEqualTo "") then {
     } else {
         // Not into the uniform, vest or backpack that comes off itself.
         private _targets = ([_kit] call FUNC(ownTargets)) select {_x isNotEqualTo _inside};
-        private _index = _targets findIf {[_x, _old] call EFUNC(storage,hasRoom) && {[_x, _old] call EFUNC(storage,hasSpace)}};
+        private _index = _targets findIf {[_x, _old] call EFUNC(storage,hasRoom)};
 
         if (_index >= 0) then {
             _move set ["to", _targets select _index];

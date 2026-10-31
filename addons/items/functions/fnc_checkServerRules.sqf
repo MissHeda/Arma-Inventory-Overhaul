@@ -32,7 +32,7 @@ if (_version isNotEqualTo QUOTE(VERSION_STR)) exitWith {
     if (!GVAR(versionWarned)) then {
         GVAR(versionWarned) = true;
 
-        WARNING_2("Enhanced Inventory %1 here, %2 on the server - item sizes and grids may not match.",QUOTE(VERSION_STR),_version);
+        WARNING_2("Arma Inventory Overhaul %1 here, %2 on the server - item sizes and grids may not match.",QUOTE(VERSION_STR),_version);
 
         if (hasInterface) then {
             systemChat format [LLSTRING(Warning_VersionMismatch), QUOTE(VERSION_STR), _version];

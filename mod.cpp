@@ -1,8 +1,8 @@
-name = "Enhanced Inventory";
+name = "AIO - Arma Inventory Overhaul";
 author = "Miss Heda";
-tooltip = "Enhanced Inventory";
-tooltipOwned = "Enhanced Inventory";
-overview = "Enhanced Inventory by Miss Heda - a grid inventory built from scratch: items as tiles of their own size, drag, turn and stack them, search the loot before you see it.";
+tooltip = "Arma Inventory Overhaul";
+tooltipOwned = "Arma Inventory Overhaul";
+overview = "Arma Inventory Overhaul by Miss Heda - a grid inventory built from scratch, also inside ACE Arsenal: items as tiles of their own shape and size, drag, turn and stack them, search the loot before you see it.";
 actionName = "Support Discord";
 action = "https://discord.gg/Jud6gyzFYx";
 hideName = 0;

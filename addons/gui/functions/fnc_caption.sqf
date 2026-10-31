@@ -1,8 +1,8 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * A caption the way the style writes it: in capitals for the looks that shout their labels (Tarkov),
- * as it is for the others.
+ * A caption the way the style writes it: in capitals for a look that shouts its labels (the theme's
+ * "upper"), as it is for the others.
  *
  * Arguments:
  * 0: Text <STRING>

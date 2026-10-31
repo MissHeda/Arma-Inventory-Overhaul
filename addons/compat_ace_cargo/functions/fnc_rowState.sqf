@@ -35,6 +35,10 @@ switch (true) do {
     case (_isString): {
         _openTip = LLSTRING(Tip_Packed);
     };
+    // What a vehicle carries is no tile to uncover: the loot of the vehicle is searched first (einv_gui).
+    case (!isNull (uiNamespace getVariable [QEGVAR(gui,display), displayNull]) && {[_holder] call EFUNC(gui,isSearched)} && {EGVAR(gui,searchQueue) findIf {(_x select 0) isEqualTo _holder} >= 0}): {
+        _openTip = LLSTRING(Tip_Unsearched);
+    };
     case (!alive _item || {maxLoad _item <= 0} || {getNumber (configOf _item >> "disableInventory") == 1}): {
         _openTip = LLSTRING(Tip_NoInventory);
     };

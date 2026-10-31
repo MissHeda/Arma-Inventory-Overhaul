@@ -5,12 +5,13 @@
  * The mouse button let go of a dragged item. Where the footprint was green it is asked for: a tile
  * moves to its cells (fnc_applyMove) - as many of a stack as the wheel left, the way round it was held
  * - or is put on in a slot (fnc_doEquip), a magazine dropped on a weapon loaded, an attachment put on,
- * also let go anywhere over the equipment column (the slot that takes it, fnc_updateDrag); a slot's item
+ * also let go anywhere over the equipment column (the slot that takes it, fnc_updateDrag) or, a uniform,
+ * vest or backpack, on the storage column off its grids; a slot's item
  * comes off onto the cells (fnc_doUnequip), or onto another unit's same slot, which gives back what it
- * wore there (fnc_doSwap). Outside every panel it goes on the ground;
- * anywhere else it goes back, saying why when it did not fit - a container too heavy for it with the kilograms
- * (the target's container, the entry and the count go along: fnc_flashHint, fnc_weightText). First of all
- * what lifting it marked about weight is put back (fnc_clearWeightMarks).
+ * wore there (fnc_doSwap); a tile let go on a dead body's slot is put on the body (fnc_doEquip, fnc_canPutOn).
+ * Outside every panel it goes on the ground; anywhere else it goes back, saying why when it did not fit
+ * (fnc_flashHint). First of all
+ * what lifting it previewed about weight is put back (fnc_clearWeightPreview).
  *
  * Into, out of and between kits of Enhanced First Aid Kits - the grids of their windows and their tiles -
  * it goes through that addon (einv_compat_efak_fnc_drop, when loaded): two kits' grids both have no
@@ -19,6 +20,17 @@
  *
  * Onto a slot of the hotbar (einv_hotbar - only when that addon is loaded) nothing moves: the item's class
  * is put on that key.
+ *
+ * Where the storage keeps separate stacks (einv_storage_stackSplits), what is let go on a free cell lies
+ * there as a stack of its own: it does not join a stack of its class elsewhere in the container, and part
+ * of a stack let go in the container it lies in is split off onto the cell (fnc_applyMove, "separate").
+ * What is let go onto a stack of its own class that has room joins that very stack, as many as fit (the
+ * target's plan says merge, fnc_swapPlan; "mergeInto"), the rest stays where it lay. Quick move and Take
+ * all still fill partial stacks.
+ *
+ * Onto a tile that lies there, where the footprint showed a swap (the target's 10th element, fnc_swapPlan):
+ * the two tiles change places in one transaction (fnc_applySwap) - the dragged one onto the cell it was let
+ * go on, the other onto the cell the dragged one came from.
  *
  * Onto a partly filled magazine of its kind (einv_magazines - only when that addon is loaded) nothing moves
  * either: the two are repacked in the window (einv_magazines_fnc_startPair), which says in the hint why not
@@ -33,10 +45,16 @@
  * fits moves, the rest stays and the hint says how many), one after the other into a kit, or onto the
  * ground (fnc_quickMoveGroup).
  *
+ * Nothing a drag sends waits for the hands (GVAR(instantFrame), fnc_queueTime).
+ *
  * Every move is a transaction now (fnc_sendMoves): nothing shows in its new place before it got there.
  * A tile that went on its way stays faded where it lay and cannot be lifted again, the cells it goes to
  * are outlined (fnc_drawPending); where it landed lights up once the answer is finished (fnc_onFrame,
  * fnc_afterAction).
+ *
+ * With einv_gui_debugTiming on, the RPT gets one line for the drag before anything else: "timing: drag 0.04 ms
+ * avg, 1.20 ms max over 140 frames (start 2.1 ms; slowest frame: ...)" - the lift, and what its frames cost
+ * (fnc_logDrag, fnc_startDrag, fnc_updateDrag).
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -54,24 +72,37 @@ disableSerialization;
 
 params ["_display"];
 
+// For the tester's numbers (einv_gui_debugTiming): the line of this drag (fnc_logDrag - a build and the window
+// closing write it too, as they end a drag without this).
+call FUNC(logDrag);
+
 // What lifting it showed about weight goes first.
-[] call FUNC(clearWeightMarks);
+[] call FUNC(clearWeightPreview);
 
 ctrlDelete (uiNamespace getVariable [QGVAR(dragGhost), controlNull]);
 ctrlDelete (uiNamespace getVariable [QGVAR(dragFootprint), controlNull]);
 ctrlDelete (uiNamespace getVariable [QGVAR(dragCounter), controlNull]);
+ctrlDelete (uiNamespace getVariable [QGVAR(dragSwapFootprint), controlNull]);
+uiNamespace setVariable [QGVAR(dragSwapFootprint), controlNull];
 uiNamespace setVariable [QGVAR(dragGhost), controlNull];
 uiNamespace setVariable [QGVAR(dragFootprint), controlNull];
 uiNamespace setVariable [QGVAR(dragCounter), controlNull];
 uiNamespace setVariable [QGVAR(dragScroll), []];
 
-{ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(dragGlow), []]);
+// The lit slots' highlights are kept for the next drag (fnc_glowSlot): only hidden.
+{
+    if (!isNull _x) then {_x ctrlShow false};
+} forEach (uiNamespace getVariable [QGVAR(dragGlow), []]);
 uiNamespace setVariable [QGVAR(dragGlow), []];
 
 // The footprints and pictures of a group, and which tiles it was.
 {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(dragFootprints), []]);
 {ctrlDelete (_x select 0)} forEach (uiNamespace getVariable [QGVAR(dragGhosts), []]);
+{ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(dragShapes), []]);
+{ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(dragCorners), []]);
 uiNamespace setVariable [QGVAR(dragFootprints), []];
+uiNamespace setVariable [QGVAR(dragShapes), []];
+uiNamespace setVariable [QGVAR(dragCorners), []];
 uiNamespace setVariable [QGVAR(dragGhosts), []];
 
 private _group = GVAR(dragGroup);
@@ -81,12 +112,19 @@ private _entry = uiNamespace getVariable [QGVAR(dragEntry), createHashMap];
 uiNamespace setVariable [QGVAR(dragEntry), createHashMap];
 
 GVAR(press) params ["_sourceIndex", "_tileIndex", "", "", "", "_slotSource"];
-GVAR(dragTarget) params [["_kind", ""], ["_targetIndex", -1], ["_col", 0], ["_row", 0], ["_fits", false], ["_reason", ""], ["_targetSlot", ""], ["_place", true], ["_targetUnit", objNull]];
+GVAR(dragTarget) params [["_kind", ""], ["_targetIndex", -1], ["_col", 0], ["_row", 0], ["_fits", false], ["_reason", ""], ["_targetSlot", ""], ["_place", true], ["_targetUnit", objNull], ["_swap", []]];
 GVAR(dragSize) params ["_w", "_h"];
+
+// Which way round it is held (fnc_rotateDrag): 1 turned a quarter clockwise - a shaped item in a square
+// box says so by this alone.
+private _rot = GVAR(dragRot);
 
 GVAR(press) = [];
 GVAR(dragging) = false;
 GVAR(dragTarget) = [];
+
+// Where the mouse is on is looked at in full again, so the hovered tile gets its outline back.
+uiNamespace setVariable [QGVAR(hoverHold), []];
 
 {
     _x ctrlSetFade 0;
@@ -102,8 +140,8 @@ GVAR(dragTarget) = [];
     } forEach ((_lifted param [_x select 1, createHashMap]) getOrDefault ["controls", []]);
 } forEach _group;
 
-if (GVAR(filter) isNotEqualTo "") then {
-    call FUNC(applyFilter);
+if (GVAR(filter) isNotEqualTo "" || {GVAR(groupFilters) isNotEqualTo []}) then {
+    [] call FUNC(applyFilter);
 };
 
 // The hint goes back to what the mouse is on - a reason why not, below, writes over it.
@@ -116,14 +154,7 @@ private _stack = _entry getOrDefault ["count", 1];
 private _count = [-1, GVAR(dragCount)] select (GVAR(dragCount) < _stack);
 
 if (!_fits) exitWith {
-    // Too heavy for a container: it is named, with the numbers.
-    private _refusedBox = if (_kind isEqualTo "grid") then {((uiNamespace getVariable [QGVAR(grids), []]) param [_targetIndex, createHashMap]) getOrDefault ["container", objNull]} else {objNull};
-
-    if (_reason isEqualTo "TooHeavy" && {!isNull _refusedBox} && {_group isEqualTo []}) then {
-        [_reason, [_refusedBox, _entry, _count]] call FUNC(flashHint);
-    } else {
-        [_reason] call FUNC(flashHint);
-    };
+    [_reason] call FUNC(flashHint);
 };
 
 private _grids = uiNamespace getVariable [QGVAR(grids), []];
@@ -134,9 +165,9 @@ private _fromBox = _fromGrid getOrDefault ["container", objNull];
 private _fromKit = _fromGrid getOrDefault ["kit", ""];
 
 // A window that attached has the first word on where it was let go (the "drop" hook): true, it has done it
-// all. What comes from a source grid (the Arsenal's catalog) is always its to end, whatever it answers -
+// all. What comes from a source grid (ACE's list in the Arsenal panel) is always its to end, whatever it answers -
 // there is no container behind that tile to move from -, and a zone is nothing but its own.
-private _handled = ["drop", [_kind, _sourceIndex, _tileIndex, _slotSource, _entry, _count, _targetIndex, _col, _row, _w, _h, _targetSlot, _place], false] call FUNC(hook);
+private _handled = ["drop", [_kind, _sourceIndex, _tileIndex, _slotSource, _entry, _count, _targetIndex, _col, _row, _w, _h, _targetSlot, _place, _rot, _swap], false] call FUNC(hook);
 
 if (
     _handled isEqualTo true || {(_fromGrid getOrDefault ["source", ""]) isNotEqualTo ""} || {_kind isEqualTo "zone"}
@@ -148,6 +179,10 @@ if (_kind isEqualTo "hotbar") exitWith {
         [_targetIndex, _entry get "class", [], true] call EFUNC(hotbar,bind);
     };
 };
+
+// What a drag sends goes out at once, never into the hands' queue (fnc_queueTime asks this frame number): dropping is
+// instant, only the quick move and the keys wait.
+GVAR(instantFrame) = diag_frameNo;
 
 // Whether it was asked for (fnc_sendMoves) - a refusal before that says why itself.
 private _sent = call {
@@ -192,7 +227,9 @@ private _sent = call {
                     _tile set ["holder", _from getOrDefault ["holder", objNull]];
                     _tile set ["root", _from getOrDefault ["root", objNull]];
 
-                    _assigned pushBack [_tile, _holder, _root, [_cellCol, _cellRow, _block, _tile get "w", _tile get "h"]];
+                    _assigned pushBack [_tile, _holder, _root, [
+                        _cellCol, _cellRow, _block, _tile get "w", _tile get "h", parseNumber (_tile getOrDefault ["rotated", false])
+                    ]];
                 } forEach _data;
 
                 _moving && {[_assigned, _total] call FUNC(sendPlan)}
@@ -277,7 +314,8 @@ private _sent = call {
             ([_slotSource, _targetUnit, _targetSlot] call FUNC(doSwap)) isEqualTo true
         };
 
-        ([_targetSlot, _fromBox, _entry, _fromKit] call FUNC(doEquip)) isEqualTo true
+        // Onto a dead body's slot (the target names the body): put on that unit (fnc_canPutOn).
+        ([_targetSlot, _fromBox, _entry, _fromKit, _targetUnit] call FUNC(doEquip)) isEqualTo true
     };
 
     private _target = _grids param [_targetIndex, createHashMap];
@@ -287,14 +325,42 @@ private _sent = call {
     private _to = _target getOrDefault ["container", objNull];
     private _toKit = _target getOrDefault ["kit", ""];
 
+    // Onto a tile that lies there, as the footprint showed: the two swap places (fnc_swapPlan).
+    if (_swap isNotEqualTo [] && {_slotSource isEqualTo []}) exitWith {
+        _swap params ["_indexOther", "_cellEntry", "_cellOther", ["_merge", false], ["_mergeCount", 0]];
+
+        private _other = (_target getOrDefault ["tiles", []]) param [_indexOther, createHashMap];
+
+        // Onto a stack of its own class: as many as fit join it, the rest stays where it lay.
+        if (_merge) exitWith {
+            private _mergeAll = _mergeCount >= _stack || {_mergeCount < 1};
+
+            ([_fromBox, _to, _entry, [_mergeCount, -1] select _mergeAll, [], createHashMapFromArray [
+                ["mergeInto", [_other get "col", _other get "row", _other getOrDefault ["block", _target getOrDefault ["block", 0]]]]
+            ]] call FUNC(applyMove)) isEqualTo true
+        };
+
+        ([_fromGrid, _target, _entry, _other, _cellEntry, _cellOther] call FUNC(applySwap)) isEqualTo true
+    };
+
+    // A single slot takes the tile whole, whatever its own size and turn: its cell is the slot's (the authority decides the same,
+    // einv_storage_fnc_opPlaceMany, fnc_findSpots).
+    if (_target getOrDefault ["single", false]) then {
+        _col = 0;
+        _row = 0;
+        _w = _target get "cols";
+        _h = _target get "rows";
+        _rot = 0;
+    };
+
     // The cell, with the size it lies in there - turned or not. On a taken cell of a kit's grid none:
     // its layout finds one.
-    private _cell = [[], [_col, _row, _target getOrDefault ["block", 0], _w, _h]] select _place;
+    private _cell = [[], [_col, _row, _target getOrDefault ["block", 0], _w, _h, _rot]] select _place;
 
     // Dropped where it lies already, the same way round.
     if (
         _slotSource isEqualTo [] && {_targetIndex == _sourceIndex} && {_col == (_entry get "col")} && {_row == (_entry get "row")}
-        && {_w == (_entry get "w")} && {_h == (_entry get "h")}
+        && {_w == (_entry get "w")} && {_h == (_entry get "h")} && {_rot == (parseNumber (_entry getOrDefault ["rotated", false]))}
     ) exitWith {false};
 
     // Into, out of or between kits (einv_compat_efak) - before the slot's item and before containers are
@@ -312,12 +378,16 @@ private _sent = call {
         ([_unit, _slot, _to, _cell] call FUNC(doUnequip)) isEqualTo true
     };
 
-    // Part of a stack into the container it lies in changes nothing: a container holds a class as one.
-    if (_count > 0 && {_fromBox isEqualTo _to}) exitWith {false};
+    // On a cell of its own it lies as a stack of its own, where the storage keeps them apart.
+    private _separate = _place && {missionNamespace getVariable [QEGVAR(storage,stackSplits), false]};
 
-    ([_fromBox, _to, _entry, _count, _cell] call FUNC(applyMove)) isEqualTo true
+    // Part of a stack into the container it lies in changes nothing where a container holds a class as one.
+    if (_count > 0 && {_fromBox isEqualTo _to} && {!_separate}) exitWith {false};
+
+    ([_fromBox, _to, _entry, _count, _cell, createHashMapFromArray [["separate", _separate]]] call FUNC(applyMove)) isEqualTo true
 };
 
+// A refusal before it went out flashed its own reason.
 if (!_sent) exitWith {};
 
 // On its way: it stays where it lay, faded, and cannot be lifted again until the answer came; the cells

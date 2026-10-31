@@ -92,7 +92,6 @@ if (_now >= GVAR(nextCount)) then {
 
     if (_signature isNotEqualTo GVAR(hudSignature)) then {
         GVAR(hudSignature) = _signature;
-        GVAR(counts) = _counts;
 
         [_counts] call FUNC(hudDraw);
     };

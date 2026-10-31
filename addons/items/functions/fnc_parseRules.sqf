@@ -12,12 +12,33 @@
  *   einv1 base=default cell=5             the header, read only as the first statement: the preset to
  *                                         build on (base=none for none) and the config mass per grid
  *                                         cell. Without one, the text reads as einv1 base=default.
+ *                                         A renamed preset's old id reads as the new one
+ *                                         (PRESET_ALIASES: base=tarkov, realism and weight are base=default).
+ *   category=bandit > name=Bandit_loot picture=/a3/ui_f/data/gui/cfg/hints/gear_ca.paa
+ *                                         a category of the setup's own, on top of the eight built-in ones (weapon,
+ *                                         ammo, grenade, gear, medical, food, tool, misc): an id of a-z 0-9 _ at most
+ *                                         CAT_ID_MAX long, its name (written as name= of a rule, at most CAT_NAME_MAX
+ *                                         characters) and the picture it is drawn with, both optional. Items are put in
+ *                                         it by cats=, compartments accept it by grid=2x2:bandit, the strip at the side of
+ *                                         a loot box lists it. The same id says it again: what the later one sets counts.
+ *                                         For a built-in id it gives the category another name, picture or colour (it
+ *                                         stays there). color=RRGGBB (six hex digits, no #) is the colour of the tiles
+ *                                         of its items (the first of an item's categories that has one). At most MAX_CUSTOM_CATEGORIES; an id that reads as a built-in word
+ *                                         (fnc_builtinGroup: "tools", "magazine") is refused.
  *   @rifle_mags: kind=magazine mass<=20   a group: a name for a selection, used as @rifle_mags. A name
  *                                         defined twice means either. An own group replaces the
  *                                         preset's group of the same name; @name inside it means the
  *                                         preset's group, to add to it.
  *   kind=grenade > stack=3                a rule: conditions, then what it sets. No condition means
  *                                         every item; the ">" only makes it easier to read.
+ *   all > size=1x1 stack=10               everything else: a rule for what nothing else answers. It
+ *                                         is asked last of all rules - after the preset, before the
+ *                                         built-in answer (fnc_resolve) -, so it fills only the gaps
+ *                                         where no rule of the text, table, mod or preset gives one;
+ *                                         a preset's rules without conditions (its own everything
+ *                                         else) give way to it. Further conditions narrow it, all
+ *                                         kind=vest|uniform > grid=6x4. Only in a rule, never with
+ *                                         "!", written first.
  *
  * Conditions must all hold; "|" means either, a "!" in front means not:
  *   kind=rifle|handgun             what an item is (fnc_getFacts): rifle, handgun, launcher, binocular,
@@ -35,14 +56,38 @@
  *   @group                         a member of that group
  *
  * What a rule sets:
- *   size=2x3 (or shape=2x3)  the cells it takes, across and down; size=mass: as many as it weighs
+ *   like=V_PlateCarrier1_rgr everything the rules make of that class but its name - size, stack, grid
+ *                            and weight, asked when an item is looked at (fnc_resolve), so a later
+ *                            change to that class follows. The rule's other values go on top.
+ *   size=2x3 (or shape=2x3)  the cells it takes, across and down; size=mass: as many as it weighs;
+ *                            size=xx/x- drawn as a grid's compartment is (fnc_parseMask): rows by /,
+ *                            x a cell, - a hole - an L of 3 cells. At most SHAPE_MAX each way
  *   stack=10                 how many share a tile, 1 to MAX_STACK
- *   grid=...                 a container's compartments, see fnc_parseGrid
+ *   grid=...                 a container's compartments, see fnc_parseGrid - also a canvas,
+ *                            grid=aaa/aba/aaa, its compartments where they were drawn
  *   weight=1.25              its weight in kg instead of its config's
  *   name=Field_kit           the name it shows, written as fnc_encodeName does
+ *   icon=1.4  icon=1.4@0.1:-0.05  its picture drawn 1.4 times as large in its tile, and moved a tenth of the
+ *                            tile across and a twentieth up (fnc_parseIcon): 0.25 to 4, the offsets -1 to 1.
+ *                            The comma of config's "1.4@0.1,-0.05" would end the statement here: typed in a
+ *                            text, it is read as the colon - a number on its own right after such an icon
+ *                            is its second offset
+ *   use=backpack+vest        the containers the item may be used from even where a setting limits what can be
+ *                            used there (fnc_parseUse): any of uniform, vest, backpack joined with +, all, or
+ *                            none for no container - a comma would end the statement
+ *   cats=medical+misc        the categories the item is in instead of the built-in one (fnc_parseGroups): any of
+ *                            weapon, ammo, grenade, gear, medical, food, tool, misc - or a category the text defines -
+ *                            joined with +. The strip at the
+ *                            side of a loot box and a compartment that accepts only some categories (grid=,
+ *                            fnc_parseGrid) read them. Not "cat=": that is the condition on the tile's colour
+ *   picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa   the texture it shows instead of its config's
+ *                            picture (fnc_parsePicture): a path, slashes either way, a space as %20 and any
+ *                            other special character as %XX (fnc_encodeName with the path switch). A file
+ *                            that is not there falls back to the config picture (fnc_getInfo)
  *
- * Shapes other than rectangles (L3, 10/11, a turn like @1) are kept for a later version: such a
- * value is left out with a warning, the rest of its rule stays.
+ * A shape is read to its smallest form and written back the shortest way (fnc_formatMask): xx/xx is
+ * 2x2. Named shapes and turns (L3, 10/11, @1) are not read: such a value is left out with a warning,
+ * the rest of its rule stays.
  *
  * Left out, with a warning: a statement holding a character other than letters, digits, space and
  * _ + . / % : | @ ! < > = ~ - (a semicolon, quotes, the hash or a backslash would break CBA's
@@ -59,13 +104,19 @@
  *   "base"     - the preset it builds on: "default", "none" or a CfgEinvRulesets class, lowercase
  *                <STRING>
  *   "cell"     - config mass per grid cell, -1 when the header sets none <NUMBER>
+ *   "categories" - [[id, name, picture], ...] in text order, ids lowercase; name and picture "" where the text sets none <ARRAY>
  *   "groups"   - [[id, conditions], ...] in text order, ids lowercase <ARRAY>
  *   "rules"    - [[conditions, values], ...] in text order <ARRAY>
  *   "warnings" - what was left out or cut down, and why <ARRAY of STRING>
  * A condition is [negated, key, op, values], the values the texts between the "|", class names as
- * written; a group in a condition is key "@", op "=" and the group ids. A rule's values are a HashMap:
- * "footprint" ("WxH" or "mass"), "stack" <NUMBER>, "grid" (as fnc_formatGrid writes it), "weight"
- * (kg <NUMBER>), "name" (the name as it shows).
+ * written; a group in a condition is key "@", op "=" and the group ids; "all" is [false, "all", "", []],
+ * always the rule's first. A rule's values are a HashMap:
+ * "like" (a class name as written), "footprint" ("WxH", a shape like "xx/x-" or "mass"), "stack"
+ * <NUMBER>, "grid" (as
+ * fnc_formatGrid writes it), "weight" (kg <NUMBER>), "name" (the name as it shows), "icon" ([scale,
+ * across, down] <ARRAY>, see fnc_parseIcon), "picture" (the texture path with backslashes <STRING>), "use" (the containers it may be used from, in the
+ * order uniform, vest, backpack <ARRAY of STRING>, [] for none - see fnc_parseUse), "cats" (the categories, in the
+ * order of fnc_orderGroups <ARRAY of STRING> - see fnc_parseGroups).
  *
  * Example:
  * ["einv1 base=default, kind=grenade > stack=3"] call einv_items_fnc_parseRules;
@@ -77,6 +128,7 @@ params [["_text", "", [""]]];
 
 private _warnings = [];
 private _groups = [];
+private _categories = [];
 private _rules = [];
 private _version = 1;
 private _base = "default";
@@ -86,6 +138,7 @@ private _ast = createHashMapFromArray [
     ["version", _version],
     ["base", _base],
     ["cell", _cell],
+    ["categories", _categories],
     ["groups", _groups],
     ["rules", _rules],
     ["warnings", _warnings]
@@ -117,7 +170,7 @@ private _classChars = createHashMap;
 private _shapeChars = createHashMap;
 {_shapeChars set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/@");
 
-private _valueKeys = ["size", "shape", "stack", "grid", "weight", "name"];
+private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon", "picture", "use", "cats"];
 
 private _numberOps = ["=", "<", "<=", ">", ">="];
 private _keyOps = createHashMapFromArray [
@@ -170,6 +223,17 @@ private _fnc_isNumber = {
     && {({_x == 46} count _codes) <= 1}
 };
 
+// Digits with one dot at most, a minus or a plus in front allowed: -0.05, 0.1.
+private _fnc_isSigned = {
+    params ["_digits"];
+
+    if ((_digits select [0, 1]) in ["-", "+"]) then {
+        _digits = _digits select [1];
+    };
+
+    [_digits] call _fnc_isNumber
+};
+
 private _fnc_isValue = {
     params ["_token"];
 
@@ -189,6 +253,34 @@ private _fnc_footprint = {
 
     if (_lower isEqualTo "mass") exitWith {["footprint", "mass"]};
 
+    // Drawn, with no digit in it: a shape, read the way a grid's compartment is.
+    private _codes = toArray _lower;
+
+    if (_codes isNotEqualTo [] && {_codes findIf {!(_x in [120, 45, 47])} < 0}) exitWith {
+        private _shape = [_lower] call FUNC(parseMask);
+
+        if ((_shape select 0) < 0) exitWith {
+            _notes pushBack format ["size=%1: %2 - this part is left out", _raw, _shape select 2];
+            []
+        };
+
+        // Larger than the wizard's board: its top left part, read again (fnc_parseMask cuts it).
+        if ((_shape select 0) > SHAPE_MAX || {(_shape select 1) > SHAPE_MAX}) then {
+            _shape = [_lower, SHAPE_MAX, SHAPE_MAX] call FUNC(parseMask);
+
+            if ((_shape select 0) > 0) then {
+                _notes pushBack format ["size=%1: a shape is at most %2 cells each way - cut to %3", _raw, SHAPE_MAX, _shape call FUNC(formatMask)];
+            };
+        };
+
+        if ((_shape select 0) < 1) exitWith {
+            _notes pushBack format ["size=%1: a shape is at most %2 cells each way, and its top left part has no cell - this part is left out", _raw, SHAPE_MAX];
+            []
+        };
+
+        ["footprint", _shape call FUNC(formatMask)]
+    };
+
     private _cross = _lower find "x";
     private _w = -1;
     private _h = -1;
@@ -203,12 +295,12 @@ private _fnc_footprint = {
         };
     };
 
-    // No WxH: a shape's name, a mask or a turn are for a later version, anything else is no size.
+    // No WxH and no shape: a shape's name or a turn are not read, anything else is no size.
     if (_w < 0) exitWith {
         if ((toArray _raw) findIf {!(_x in _shapeChars)} < 0) then {
-            _notes pushBack format ["size=%1: shapes come in a later version, only rectangles like 2x3 for now - this part is left out", _raw];
+            _notes pushBack format ["size=%1: named shapes and turns are not read - draw it like xx/x- or write 2x3 - this part is left out", _raw];
         } else {
-            _notes pushBack format ["size=%1 is no size like 2x3 or mass - this part is left out", _raw];
+            _notes pushBack format ["size=%1 is no size like 2x3, xx/x- or mass - this part is left out", _raw];
         };
         []
     };
@@ -225,6 +317,19 @@ private _fnc_footprint = {
     };
 
     ["footprint", format ["%1x%2", _w, _h]]
+};
+
+// A class name as a condition's class= has it: letters, digits and _ only. Whether config knows it is
+// asked when an item is looked at - a mod that is not loaded is no mistake in the text.
+private _fnc_like = {
+    params ["_raw"];
+
+    if !([_raw] call _fnc_isClass) exitWith {
+        _notes pushBack format ["like=%1 is no class name - letters, digits and _ only - this part is left out", _raw];
+        []
+    };
+
+    ["like", _raw]
 };
 
 private _fnc_stack = {
@@ -299,6 +404,54 @@ private _fnc_name = {
     ["name", _name]
 };
 
+private _fnc_icon = {
+    params ["_raw"];
+
+    ([_raw] call FUNC(parseIcon)) params ["_icon", "_messages"];
+
+    _notes append _messages;
+
+    if (_icon isEqualTo []) exitWith {[]};
+
+    ["icon", _icon]
+};
+
+private _fnc_picture = {
+    params ["_raw"];
+
+    ([_raw] call FUNC(parsePicture)) params ["_path", "_messages"];
+
+    _notes append _messages;
+
+    if (_path isEqualTo "") exitWith {[]};
+
+    ["picture", _path]
+};
+
+private _fnc_use = {
+    params ["_raw"];
+
+    ([_raw] call FUNC(parseUse)) params ["_kinds", "_messages", "_readable"];
+
+    _notes append _messages;
+
+    if (!_readable) exitWith {[]};
+
+    ["use", _kinds]
+};
+
+private _fnc_cats = {
+    params ["_raw"];
+
+    ([_raw] call FUNC(parseGroups)) params ["_groups", "_messages", "_readable"];
+
+    _notes append _messages;
+
+    if (!_readable) exitWith {[]};
+
+    ["cats", _groups]
+};
+
 private _fnc_value = {
     params ["_token"];
 
@@ -306,12 +459,17 @@ private _fnc_value = {
     private _raw = _token select [_equals + 1];
 
     switch (toLowerANSI (_token select [0, _equals])) do {
+        case "like": {[_raw] call _fnc_like};
         case "size";
         case "shape": {[_raw] call _fnc_footprint};
         case "stack": {[_raw] call _fnc_stack};
         case "grid": {[_raw] call _fnc_grid};
         case "weight": {[_raw] call _fnc_weight};
         case "name": {[_raw] call _fnc_name};
+        case "icon": {[_raw] call _fnc_icon};
+        case "picture": {[_raw] call _fnc_picture};
+        case "use": {[_raw] call _fnc_use};
+        case "cats": {[_raw] call _fnc_cats};
         default {[]};
     }
 };
@@ -461,6 +619,14 @@ private _fnc_cond = {
 
     if ((_token select [0, 1]) isEqualTo "@") exitWith {[_token, _negated] call _fnc_groupCond};
 
+    // "all" is no test of the item but the rule's place: asked after every other (fnc_compileRules).
+    // Not "all" would be a rule for nothing.
+    if (toLowerANSI _token isEqualTo "all") exitWith {
+        if (_negated) exitWith {["'!all' would match nothing - 'all' means everything no other rule answers", []]};
+
+        ["", [false, "all", "", []]]
+    };
+
     [_token, _negated] call _fnc_keyCond
 };
 
@@ -489,6 +655,20 @@ private _fnc_header = {
             case "base": {
                 if ([_value] call _fnc_isId) then {
                     _base = _value;
+
+                    // A preset renamed since the text was written: built on the new one, said once in
+                    // the RPT - the wizard writes the new id the next time it saves.
+                    // Not when a preset of that name exists: a third party's own is not shadowed by the alias.
+                    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _value && {!isClass (configFile >> "CfgEinvRulesets" >> _value)}};
+
+                    if (_alias >= 0) then {
+                        _base = (PRESET_ALIASES select _alias) select 1;
+
+                        if !(missionNamespace getVariable [QGVAR(aliasWarned), false]) then {
+                            missionNamespace setVariable [QGVAR(aliasWarned), true];
+                            INFO_2("Rules: base=%1 is now base=%2 - read as that.",_value,_base);
+                        };
+                    };
                 } else {
                     _warnings pushBack format ["Header: '%1' is no preset name - built on default.", _x];
                 };
@@ -552,6 +732,11 @@ private _fnc_groupDef = {
             _error = _condError;
         };
 
+        // A group is a selection; "everything else" is a rule's place, not one.
+        if ((_cond select 1) isEqualTo "all") exitWith {
+            _error = "'all' only stands in a rule, as in all > size=1x1";
+        };
+
         _conds pushBack _cond;
     } forEach _rest;
 
@@ -564,6 +749,116 @@ private _fnc_groupDef = {
     };
 
     _groups pushBack [_id, _conds];
+};
+
+// "category=bandit > name=Bandit_loot picture=/a3/...": a category of the setup's own, or another name and picture for a built-in
+// one. A second statement of the same id adds to the first, what it sets counting over what it said before.
+private _fnc_categoryDef = {
+    params ["_tokens", "_short"];
+
+    private _notes = [];
+    private _id = toLowerANSI ((_tokens select 0) select [9]);
+    private _name = "";
+    private _picture = "";
+    private _color = "";
+    private _error = "";
+
+    if !([_id] call _fnc_isId) then {
+        _error = format ["'%1' is no category name - letters, digits and _ only", _id];
+    } else {
+        if (count _id > CAT_ID_MAX) then {
+            _error = format ["a category's name is at most %1 characters", CAT_ID_MAX];
+        } else {
+            // A word that cats= would read as one of the eight cannot be the id of another category.
+            private _builtin = [_id] call FUNC(builtinGroup);
+
+            if (_builtin isNotEqualTo "" && {_builtin isNotEqualTo _id}) then {
+                _error = format ["'%1' reads as the category %2 - choose another name", _id, _builtin];
+            };
+
+            if (_id in CAT_ID_RESERVED) then {
+                _error = format ["'%1' means something else where a category stands - choose another name", _id];
+            };
+        };
+    };
+
+    if (_error isEqualTo "") then {
+        {
+            if (_x isEqualTo ">") then {continue};
+
+            // The tiles' colour: six hex digits.
+            if ((toLowerANSI (_x select [0, 6])) isEqualTo "color=") then {
+                private _hex = toLowerANSI (_x select [6]);
+
+                if (count _hex == 6 && {((_hex splitString "") findIf {!(_x in ("0123456789abcdef" splitString ""))}) < 0}) then {
+                    _color = _hex;
+                } else {
+                    _notes pushBack format ["color=%1 is no colour - six hex digits like color=c83232 - left out", _hex];
+                };
+
+                continue;
+            };
+
+            if !([_x] call _fnc_isValue) then {
+                _notes pushBack format ["'%1' is neither name= nor picture= - left out", _x];
+                continue;
+            };
+
+            private _key = toLowerANSI (_x select [0, _x find "="]);
+
+            if !(_key in ["name", "picture"]) then {
+                _notes pushBack format ["category= takes name=, picture= and color= only - %1= is left out", _key];
+                continue;
+            };
+
+            private _result = [_x] call _fnc_value;
+
+            if (_result isEqualTo []) then {continue};
+
+            if (_key isEqualTo "name") then {
+                _name = _result select 1;
+
+                if (count _name > CAT_NAME_MAX) then {
+                    _notes pushBack format ["a category's name is at most %1 characters - cut down", CAT_NAME_MAX];
+                    _name = _name select [0, CAT_NAME_MAX];
+                };
+            } else {
+                _picture = _result select 1;
+            };
+        } forEach (_tokens select [1]);
+
+        private _at = _categories findIf {(_x select 0) isEqualTo _id};
+        private _own = ({!((_x select 0) in ITEM_GROUPS)} count _categories);
+
+        if (_id in ITEM_GROUPS && {_name isEqualTo ""} && {_picture isEqualTo ""} && {_color isEqualTo ""}) then {
+            _error = "a built-in category needs a name=, picture= or color= to change";
+        } else {
+            if (_at < 0 && {!(_id in ITEM_GROUPS)} && {_own >= MAX_CUSTOM_CATEGORIES}) then {
+                _error = format ["at most %1 categories of your own", MAX_CUSTOM_CATEGORIES];
+            };
+        };
+
+        if (_error isEqualTo "") then {
+            if (_at < 0) then {
+                _categories pushBack [_id, _name, _picture, _color];
+            } else {
+                private _had = _categories select _at;
+
+                _categories set [_at, [
+                    _id, [_had select 1, _name] select (_name isNotEqualTo ""), [_had select 2, _picture] select (_picture isNotEqualTo ""),
+                    [_had param [3, ""], _color] select (_color isNotEqualTo "")
+                ]];
+            };
+        };
+    };
+
+    {
+        _warnings pushBack format ["'%1': %2.", _short, _x];
+    } forEach _notes;
+
+    if (_error isNotEqualTo "") then {
+        _warnings pushBack format ["'%1': %2 - left out.", _short, _error];
+    };
 };
 
 private _fnc_rule = {
@@ -604,7 +899,14 @@ private _fnc_rule = {
                     ([_x] call _fnc_cond) params ["_condError", "_cond"];
 
                     if (_condError isEqualTo "") then {
-                        _conds pushBack _cond;
+                        // "all" first, and once: the writer puts it there, so a text reads back the same.
+                        if ((_cond select 1) isEqualTo "all") then {
+                            if (_conds findIf {(_x select 1) isEqualTo "all"} < 0) then {
+                                _conds = [_cond] + _conds;
+                            };
+                        } else {
+                            _conds pushBack _cond;
+                        };
                     } else {
                         _error = _condError;
                     };
@@ -634,13 +936,39 @@ private _fnc_rule = {
 
 // ----- The text -----
 
+// The pieces between the commas. An icon's offsets are the one thing with a comma inside: icon=1.4@0.1,-0.05
+// as config writes it. A number on its own right after an icon with one offset so far cannot be a statement
+// of its own, so it is that icon's second offset - joined with the colon the writer uses.
+private _pieces = [];
+
+{
+    private _piece = trim _x;
+
+    // Nothing between two commas, or after the last one, is no mistake.
+    if (_piece isEqualTo "") then {continue};
+
+    if (_pieces isNotEqualTo [] && {[_piece] call _fnc_isSigned}) then {
+        private _lastAt = count _pieces - 1;
+        private _last = _pieces select _lastAt;
+        private _words = _last splitString (toString [32, 9]);
+
+        reverse _words;
+
+        private _tail = toLowerANSI (_words select 0);
+
+        if ((_tail select [0, 5]) isEqualTo "icon=" && {_tail find "@" > 0} && {_tail find ":" < 0}) then {
+            _pieces set [_lastAt, _last + ":" + _piece];
+            continue;
+        };
+    };
+
+    _pieces pushBack _piece;
+} forEach (_text splitString (toString [44, 10, 13]));
+
 private _count = 0;
 
 {
-    private _statement = trim _x;
-
-    // Nothing between two commas, or after the last one, is no mistake.
-    if (_statement isEqualTo "") then {continue};
+    private _statement = _x;
 
     _count = _count + 1;
 
@@ -669,13 +997,18 @@ private _count = 0;
         continue;
     };
 
+    if ((_first select [0, 9]) isEqualTo "category=") then {
+        [_tokens, _short] call _fnc_categoryDef;
+        continue;
+    };
+
     if ((_first select [0, 1]) isEqualTo "@" && {_first find ":" >= 0}) then {
         [_tokens, _short] call _fnc_groupDef;
         continue;
     };
 
     [_tokens, _short] call _fnc_rule;
-} forEach (_text splitString (toString [44, 10, 13]));
+} forEach _pieces;
 
 _ast set ["version", _version];
 _ast set ["base", _base];

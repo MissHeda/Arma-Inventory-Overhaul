@@ -7,6 +7,9 @@
  * dragged, and each cell it goes to gets a thin outline in the theme's accentSoft. Nothing is shown in
  * its new place before it got there.
  *
+ * The hands' queue (fnc_queueMoves) is drawn here too (fnc_drawQueue): the tiles of the actions waiting are
+ * flagged and faded the same way and the marks made, whether or not a move is in flight.
+ *
  * A tile is found by its holder - a grid's "holder", else its container or, for a kit's grid, its
  * layout key - its key and its cell; one that moved meanwhile simply is not marked. Safe to call again
  * without a build: the outlines of the last call go first.
@@ -30,7 +33,13 @@ uiNamespace setVariable [QGVAR(pendingFrames), []];
 
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
-if (isNull _display || {count GVAR(inFlight) == 0}) exitWith {};
+if (isNull _display) exitWith {};
+
+// The actions waiting for the hands (fnc_queueMoves) have their marks drawn here as well: this
+// is what every build and every redraw of tiles ends with.
+if (count GVAR(inFlight) == 0) exitWith {
+    [_display] call FUNC(drawQueue);
+};
 
 // Only grids items can lie on - not a body's worn gear, not the overflow - each with its holder.
 private _grids = (uiNamespace getVariable [QGVAR(grids), []]) select {
@@ -90,18 +99,21 @@ private _frames = [];
 
             if ((_holders select _forEachIndex) isNotEqualTo _holder || {(_grid getOrDefault ["block", 0]) != _block}) then {continue};
 
-            (_grid getOrDefault ["rel", [0, 0]]) params ["_left", "_top"];
+            // The cells of another page of a paged box are not on the window: no outline lies over what is there.
+            if (_row + _h <= (_grid getOrDefault ["rowFrom", 0]) || {_row >= (_grid getOrDefault ["rowTo", 1e6])}) then {continue};
 
-            private _cellW = _grid getOrDefault ["cellW", 0];
-            private _cellH = _grid getOrDefault ["cellH", 0];
+            // As a tile ends a pixel before the next cell, so does its outline, where the grid's columns and rows
+            // lie (fnc_spanRect); round at the corner of the compartment's panel it touches (fnc_uiOutline).
+            private _outlineRect = [_grid, _grid getOrDefault ["rel", [0, 0]], _col, _row, _w, _h] call FUNC(spanRect);
 
-            // As a tile ends a pixel before the next cell, so does its outline.
-            _frames pushBack ([
-                _display, _grid getOrDefault ["parent", controlNull],
-                [_left + _col * _cellW, _top + _row * _cellH, _w * _cellW - pixelW, _h * _cellH - pixelH], _color
-            ] call FUNC(uiFrame));
+            _frames append ([
+                _display, _grid getOrDefault ["parent", controlNull], _outlineRect, _color,
+                [_grid, _outlineRect] call FUNC(cornerRadii), 1
+            ] call FUNC(uiOutline));
         } forEach _grids;
     } forEach _targets;
 } forEach GVAR(inFlight);
 
 uiNamespace setVariable [QGVAR(pendingFrames), _frames];
+
+[_display] call FUNC(drawQueue);

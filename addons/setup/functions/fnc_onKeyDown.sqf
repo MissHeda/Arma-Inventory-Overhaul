@@ -5,7 +5,7 @@
  * Display key down. Escape closes an open popover first, then the wizard - asking first when there are
  * changes (fnc_close). Ctrl+Z undoes, Ctrl+Y does again - Z and Y as printed on the keyboard, whatever
  * its layout. In a text field the keys are the field's; anything else goes to the open step
- * (GVAR(stepKey)).
+ * (GVAR(stepKey)) - not while a popover is open: it is answered first.
  *
  * Keys the wizard does not use are kept from the game: opened over the game's own screen, the soldier
  * must not walk off while the player types a rule.
@@ -39,6 +39,12 @@ if (_key == DIK_ESCAPE) exitWith {
 };
 
 if (ctrlType (focusedCtrl _display) == CTRL_TYPE_EDIT) exitWith {false};
+
+// An open popover is answered first: the step's keys and undo wait. Ctrl+F would put the cursor into the
+// pane, and the pane holding the focus is drawn over the popover (fnc_topLayer).
+if ((uiNamespace getVariable [QGVAR(popover), []]) isNotEqualTo []) exitWith {
+    !(_key in [DIK_RETURN, DIK_NUMPADENTER, DIK_SPACE])
+};
 
 // Undo and redo go by the letter on the key, not by where the key sits: on a German keyboard Z and Y have
 // swapped places, and the footer says Ctrl+Z and Ctrl+Y. The game names a key as the keyboard's layout

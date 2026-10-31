@@ -3,7 +3,8 @@
 /*
  * Author: Miss Heda
  * Draws a dedicated slot - a weapon, a piece of gear, an attachment or a loaded magazine: its surface,
- * its caption where the style puts it, and the item's picture - or, while the slot is empty, the
+ * its caption where the style puts it, and the item's picture - drawn as its rules say (icon=,
+ * fnc_uiItemPicture) and never out of the slot - or, while the slot is empty, the
  * silhouette of what belongs there, hatched in Tarkov's look. Registers the slot in (uiNamespace getVariable [QGVAR(slots), []]), so
  * the mouse finds it (fnc_onFrame).
  *
@@ -36,6 +37,9 @@
  *   "hotbar"  - the number of the hotbar's slot this is (einv_hotbar), -1 for a slot of the gear: kept
  *               as the eighth element of the slot's record, which tells the mouse handling that it takes
  *               a class and holds no item <NUMBER>
+ *   "container" - the box of a uniform, vest or backpack opened from inside a container (fnc_openNested):
+ *               its container object, kept as the ninth element of the record, so the box is lifted and
+ *               hinted as its tile there (fnc_boxTile) <OBJECT>
  * 5: Theme <HASHMAP>
  *
  * Return Value:
@@ -62,15 +66,17 @@ private _captionText = _options getOrDefault ["caption", ""];
 private _caption = [_captionText, _theme] call FUNC(caption);
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _colorText2 = _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]];
-private _colorMuted = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
+private _colorMuted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _radius = (_theme getOrDefault ["radius", 0]) min (_height / 4);
 
-private _padY = (_height * 0.08) min (UNIT * 0.25);
+// Every word on the slot and the rows that hold them grow with the tiles (TEXT_UNIT, fnc_textScale).
+private _textUnit = TEXT_UNIT;
+private _padY = (_height * 0.08) min (_textUnit * 0.25);
 private _padX = SQUARE(_padY);
-private _lineH = UNIT * 0.62;
-private _lineSize = UNIT * 0.46;
+private _lineH = _textUnit * 0.62;
+private _lineSize = _textUnit * 0.46;
 
 private _controls = [
     _display, _parent, _rect, _theme getOrDefault [["slot", "slotEmpty"] select _empty, [1, 1, 1, 0.035]],
@@ -97,11 +103,11 @@ if (_number isNotEqualTo "") then {
         private _badge = [_left + _width - _padX - SQUARE(_lineH), _top + _padY, SQUARE(_lineH), _lineH];
 
         _controls pushBack ([_display, _parent, _badge, UI_TEX(circle_ca), _theme getOrDefault ["keyBg", [1, 1, 1, 0.15]]] call FUNC(uiIcon));
-        _controls pushBack ([_display, _parent, _badge, _number, _lineH * 0.62, _theme getOrDefault ["keyText", _colorText], _fontBold, 2] call FUNC(uiLabel));
+        _controls pushBack ([_display, _parent, _badge, _number, _lineH * 0.62, _theme getOrDefault ["keyText", _colorText], _fontBold, 2, "key"] call FUNC(uiLabel));
         _numberW = SQUARE(_lineH) + _padX;
     } else {
         _numberW = (_number getTextWidth [_fontBold, _lineSize]) * TEXT_SLACK + _padX;
-        _controls pushBack ([_display, _parent, [_left + _width - _padX - _numberW, _top + _padY * 0.5, _numberW, _lineH], _number, _lineSize, _colorMuted, _fontBold, 1] call FUNC(uiLabel));
+        _controls pushBack ([_display, _parent, [_left + _width - _padX - _numberW, _top + _padY * 0.5, _numberW, _lineH], _number, _lineSize, _colorMuted, _fontBold, 1, "key"] call FUNC(uiLabel));
     };
 };
 
@@ -113,7 +119,7 @@ if (_caption isNotEqualTo "") then {
     switch (_theme getOrDefault ["slotCaption", "inside"]) do {
         case "above": {
             private _shown = [_caption, _width, _font, _lineSize] call FUNC(fitText);
-            _controls pushBack ([_display, _parent, [_left, _top - _lineH, _width, _lineH], _shown, _lineSize, _colorText2, _font, 0] call FUNC(uiLabel));
+            _controls pushBack ([_display, _parent, [_left, _top - _lineH, _width, _lineH], _shown, _lineSize, _colorText2, _font, 0, "caption"] call FUNC(uiLabel));
         };
         case "tab": {
             private _room = _width - _numberW;
@@ -124,14 +130,14 @@ if (_caption isNotEqualTo "") then {
             // Round like the slot's corner it lies in - as round as a tab this low can be - or its square
             // corner would stick out past the slot's.
             _controls append ([_display, _parent, _tab, _theme getOrDefault ["slotCaptionBg", [0, 0, 0, 0.5]], _radius min (_lineH / 2)] call FUNC(uiPanel));
-            _controls pushBack ([_display, _parent, _tab, _shown, _lineSize, _colorText2, _fontBold, 2] call FUNC(uiLabel));
+            _controls pushBack ([_display, _parent, _tab, _shown, _lineSize, _colorText2, _fontBold, 2, "caption"] call FUNC(uiLabel));
             _areaTop = _top + _lineH + _padY * 0.5;
         };
         case "inside": {
             private _room = _width - _padX * 2 - _numberW;
             private _shown = [_caption, _room, _font, _lineSize] call FUNC(fitText);
 
-            _controls pushBack ([_display, _parent, [_left + _padX * 1.5, _top + _padY * 0.5, _room, _lineH], _shown, _lineSize, _colorMuted, _font, 0] call FUNC(uiLabel));
+            _controls pushBack ([_display, _parent, [_left + _padX * 1.5, _top + _padY * 0.5, _room, _lineH], _shown, _lineSize, _colorMuted, _font, 0, "caption"] call FUNC(uiLabel));
             _areaTop = _top + _lineH;
         };
         default {};
@@ -162,7 +168,7 @@ if (_ammo isNotEqualTo [] || _showName) then {
 
             _controls append ([
                 _display, _parent, [_left + _padX, _barY, _width - _padX * 2, _barH], _rounds / _capacity,
-                _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]], _theme getOrDefault ["barFill", [0.84, 0.54, 0.1, 1]], 0
+                _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]], _theme getOrDefault ["barFill", [0.84, 0.54, 0.1, 1]], _barH / 2, GRADIENT_BARS
             ] call FUNC(uiBar));
 
             _lineTop = _barY - _lineH;
@@ -170,14 +176,14 @@ if (_ammo isNotEqualTo [] || _showName) then {
 
         private _text = format ["%1/%2", _rounds, _capacity];
         _ammoW = (_text getTextWidth [_font, _lineSize]) * TEXT_SLACK;
-        _controls pushBack ([_display, _parent, [_left + _padX, _lineTop, _width - _padX * 2, _lineH], _text, _lineSize, _colorText, _font, 1] call FUNC(uiLabel));
+        _controls pushBack ([_display, _parent, [_left + _padX, _lineTop, _width - _padX * 2, _lineH], _text, _lineSize, _colorText, _font, 1, "weaponammo"] call FUNC(uiLabel));
     };
 
     if (_showName) then {
         private _room = _width - _padX * 3 - _ammoW;
         private _name = [_info getOrDefault ["name", _class], _room, _font, _lineSize] call FUNC(fitText);
 
-        _controls pushBack ([_display, _parent, [_left + _padX * 1.5, _lineTop, _room, _lineH], _name, _lineSize, _colorText2, _font, 0] call FUNC(uiLabel));
+        _controls pushBack ([_display, _parent, [_left + _padX * 1.5, _lineTop, _room, _lineH], _name, _lineSize, _colorText2, _font, 0, "name"] call FUNC(uiLabel));
     };
 
     _areaBottom = _lineTop;
@@ -199,10 +205,12 @@ if (_areaH > 0) then {
             _theme getOrDefault ["slotIcon", [1, 1, 1, 0.15]]
         ] call FUNC(uiIcon));
     } else {
+        // As the rules draw it (icon=): larger, smaller or moved, and cut to the slot where it would reach out.
         _controls pushBack ([
             _display, _parent, [_left + _padX, _areaTop, _width - _padX * 2, _areaH], _info getOrDefault ["picture", ""],
-            [[1, 1, 1, 1], [1, 1, 1, 0.35]] select (_options getOrDefault ["faded", false])
-        ] call FUNC(uiPicture));
+            _info getOrDefault ["icon", ICON_PLAIN], [[1, 1, 1, 1], [1, 1, 1, 0.35]] select (_options getOrDefault ["faded", false]),
+            [_left, _top, _width, _height]
+        ] call FUNC(uiItemPicture));
 
         private _weapon = _options getOrDefault ["weapon", []];
 
@@ -219,21 +227,42 @@ if (!_empty) then {
 
     if (_badge isEqualType "" && {_badge isNotEqualTo ""}) then {
         _controls pushBack ([
-            _display, _parent, [_left + _padX * 0.5, _top + _padY * 0.5, SQUARE(UNIT * 0.42), UNIT * 0.42], _badge, _colorText2
+            _display, _parent, [_left + _padX * 0.5, _top + _padY * 0.5, SQUARE(_textUnit * 0.42), _textUnit * 0.42], _badge, _colorText2
         ] call FUNC(uiIcon));
     };
 };
 
-// A number in the bottom right corner, over the picture: how many there are, red at none.
+// A number in the bottom right corner, over the picture: how many there are, red at none. On the same small
+// flat box as a stack's count on a tile (fnc_drawCountBackdrop), so a hotbar slot and a tile read alike -
+// and the picture under it may be white.
 private _countText = _options getOrDefault ["count", ""];
 
 if (_countText isNotEqualTo "") then {
-    private _countColor = [_colorText, _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]] select (_countText isEqualTo "0");
+    private _countColor = [
+        _theme getOrDefault ["tileCountColor", _colorText], _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]]
+    ] select (_countText isEqualTo "0");
 
-    _controls pushBack ([
-        _display, _parent, [_left + _padX, _top + _height - _padY * 0.5 - _lineH, _width - _padX * 2, _lineH], _countText,
-        _lineSize, _countColor, _fontBold, 1
-    ] call FUNC(uiLabel));
+    // Only measured: the label lies on exactly the box and draws it as its own background (one control).
+    private _backdrop = [
+        _display, _parent, _countText, _fontBold, _lineSize, _left + _width - _padX, _top + _height - _padY * 0.5, _width - _padX * 2, _theme, true,
+        false, true
+    ] call FUNC(drawCountBackdrop);
+
+    _backdrop params ["_backdropControls", "_backdropRect", ["_backdropColor", []]];
+
+    _controls append _backdropControls;
+
+    private _countRect = [_backdropRect, [_left + _padX, _top + _height - _padY * 0.5 - _lineH, _width - _padX * 2, _lineH]] select (_backdropRect isEqualTo []);
+
+    private _countLabel = [
+        _display, _parent, _countRect, _countText, _lineSize, _countColor, _fontBold, [2, 1] select (_backdropRect isEqualTo []), "stack"
+    ] call FUNC(uiLabel);
+
+    if (_backdropControls isEqualTo [] && {_backdropColor isNotEqualTo []}) then {
+        _countLabel ctrlSetBackgroundColor _backdropColor;
+    };
+
+    _controls pushBack _countLabel;
 };
 
 // The hover area is kept in screen coordinates; a slot in a group counts from the group's corner, and
@@ -248,6 +277,6 @@ if (!isNull _parent) then {
     _origin = [_anchor] call FUNC(gridOrigin);
 };
 
-(uiNamespace getVariable [QGVAR(slots), []]) pushBack [[_origin select 0, _origin select 1, _width, _height], _class, _captionText, _anchor, _options getOrDefault ["weapon", []], _options getOrDefault ["slot", ""], _options getOrDefault ["unit", objNull], _options getOrDefault ["hotbar", -1]];
+(uiNamespace getVariable [QGVAR(slots), []]) pushBack [[_origin select 0, _origin select 1, _width, _height], _class, _captionText, _anchor, _options getOrDefault ["weapon", []], _options getOrDefault ["slot", ""], _options getOrDefault ["unit", objNull], _options getOrDefault ["hotbar", -1], _options getOrDefault ["container", objNull]];
 
 _controls

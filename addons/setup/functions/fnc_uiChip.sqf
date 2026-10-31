@@ -36,7 +36,7 @@ _rect params ["_left", "_top", "_width", "_height"];
 
 private _fill = [_theme getOrDefault ["button", [1, 1, 1, 0.08]], _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]] select _active;
 private _hover = [_theme getOrDefault ["buttonHover", [1, 1, 1, 0.12]], ACCENT_HOVER] select _active;
-private _ink = [_theme getOrDefault ["text2", [0.698, 0.734, 0.784, 1]], _theme getOrDefault ["onAccent", [0.086, 0.094, 0.114, 1]]] select _active;
+private _ink = [_theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _theme getOrDefault ["onAccent", [0.05, 0.05, 0.05, 1]]] select _active;
 
 if (!_enabled) then {
     _fill = DISABLED_FILL;

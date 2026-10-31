@@ -1,8 +1,8 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Whether the draft holds something not saved yet: another text, or the switch to force it over the
- * mission's own setup turned.
+ * Whether the draft holds something not saved yet: another rules text, other server settings, or the
+ * switch to force it over the mission's own setup turned.
  *
  * Arguments:
  * None
@@ -16,4 +16,4 @@
  * Public: No
  */
 
-(GVAR(draftText) isNotEqualTo GVAR(clean)) || {GVAR(override) isNotEqualTo GVAR(cleanOverride)}
+(GVAR(draftText) isNotEqualTo GVAR(clean)) || {GVAR(draftSettingsText) isNotEqualTo GVAR(cleanSettings)} || {GVAR(override) isNotEqualTo GVAR(cleanOverride)}

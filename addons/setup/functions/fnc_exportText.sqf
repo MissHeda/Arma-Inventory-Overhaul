@@ -10,10 +10,12 @@
  *     One thing does change: the preset's rules become own rules, which win over sizes a mod sets in its
  *     config (einv_gridSize and the like) where the preset's did not. The older table settings
  *     (einv_items_sizeTable and the like) are settings of their own and not part of either text.
- *   - "cba": a line for a cba_settings.sqf, or CBA's Import box: force einv_items_rules = "...";
- *     forced over the mission when the wizard would save it so.
+ *   - "cba": the lines for a cba_settings.sqf, or CBA's Import box: force einv_items_rules = "...";
+ *     and one line for each server setting off its default (force einv_gui_searchTime = 0.6;) - forced over
+ *     the mission when the wizard would save it so. The same lines CBA's own Export writes for them.
  * "own" and "full" one statement per line, with a comma at its end - the line breaks are read as commas
- * again - so a long setup stays readable. "cba" in one line, as CBA's files want it.
+ * again - so a long setup stays readable. "cba" one line for each setting, as CBA's files want them. The
+ * server settings are no part of "own" and "full": they are no rules.
  *
  * Arguments:
  * 0: "own", "full" or "cba" <STRING> (default: "own")
@@ -35,7 +37,20 @@ switch (_variant) do {
     case "cba": {
         private _forced = (GVAR(target) getOrDefault ["source", ""]) isEqualTo "server" && {GVAR(override)} && {GVAR(target) getOrDefault ["override", false]};
 
-        format ["%1%2 = %3;", ["force ", "force force "] select _forced, RULES_SETTING, str GVAR(draftText)]
+        private _prefix = ["force ", "force force "] select _forced;
+        private _lines = [format ["%1%2 = %3;", _prefix, RULES_SETTING, str GVAR(draftText)]];
+
+        // Each server setting off its default, in the order they were registered - true and false, a number, a
+        // quoted text, as CBA writes them.
+        {
+            private _value = GVAR(draftSettings) get _x;
+
+            if (!isNil "_value") then {
+                _lines pushBack format ["%1%2 = %3;", _prefix, _x, str _value];
+            };
+        } forEach (missionNamespace getVariable [QEGVAR(main,serverOrder), []]);
+
+        _lines joinString toString [10]
     };
     case "full": {
         // The layers, as the rules engine stacks them (einv_items_fnc_compileRules): the presets it builds
@@ -139,6 +154,7 @@ switch (_variant) do {
             ["version", 1],
             ["base", "none"],
             ["cell", GVAR(draftRules) getOrDefault ["cell", -1]],
+            ["categories", +(GVAR(draft) getOrDefault ["categories", []])],
             ["groups", _groups],
             ["rules", _rules],
             ["warnings", []]

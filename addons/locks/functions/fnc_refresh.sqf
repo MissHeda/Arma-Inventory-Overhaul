@@ -8,8 +8,7 @@
  *
  * Only ever undoes the lock this machine set itself (einv_locks_engineMine): a lock the mission set is
  * never lifted here, and never taken over. When the answer changes, the window's signature changes with
- * it (einv_locks_stamp), and the vanilla inventory - the window switched off - on what just became
- * locked closes at once if the player stands near it.
+ * it (einv_locks_stamp).
  *
  * Arguments:
  * 0: Locked object, or one that was locked a moment ago <OBJECT>
@@ -47,9 +46,4 @@ if (_allowed) then {
 if (_allowed isNotEqualTo (_object getVariable [QGVAR(allowedHere), true])) then {
     _object setVariable [QGVAR(allowedHere), _allowed];
     GVAR(stamp) = GVAR(stamp) + 1;
-
-    // The vanilla inventory (this window switched off) on what just became locked goes at once.
-    if (!_allowed && {!isNull findDisplay 602} && {_player distance _object < VANILLA_CLOSE_DISTANCE}) then {
-        (findDisplay 602) closeDisplay 2;
-    };
 };

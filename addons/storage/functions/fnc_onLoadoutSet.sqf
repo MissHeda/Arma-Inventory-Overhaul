@@ -15,7 +15,11 @@
  *
  * What came over the network or from a profile is not trusted: only well-formed records are kept. A
  * loadout without the key, or of another version, changes nothing - its things lie where the layout puts
- * them first.
+ * them first. Any loadout, with the key or without, also notes its unit for the surplus check
+ * (fnc_queueMigrate): what it holds beyond the grid moves on to the next container with room. What the engine
+ * left out of the loadout because of a container's maximumLoad is added back (fnc_topUpLoadout). The player's
+ * own overflow is swept afterwards (fnc_requestSweep, SWEEP_LOADOUT_DELAY later): what fits no container goes
+ * onto the ground.
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -35,6 +39,44 @@ params [["_unit", objNull, [objNull]], ["_loadout", [], [[]]], ["_extended", cre
 
 if (isNull _unit) exitWith {};
 
+// Whatever the loadout brought beyond the grid - a loadout ignores our cells, with or without places in it -
+// moves on to the unit's next container with room (fnc_opMigrate), a moment after the places below are in.
+// The unit's own machine looks: told by an event when the loadout was set somewhere else.
+if (!is3DEN) then {
+    if (local _unit) then {
+        // A loadout is the unit's whole gear: the old containers' contents are gone with them, and so is
+        // what Strict mode's hidden holder kept out of them (fnc_opStrict). A loadout saved in an arsenal
+        // holds everything - the holder gives everything back while one is open -, and what the new
+        // loadout brought that may not lie in a Strict container is hidden again a moment later.
+        if (!isNil {_unit getVariable QGVAR(hidden)}) then {
+            _unit setVariable [QGVAR(hidden), nil, true];
+        };
+
+        [_unit] call FUNC(queueMigrate);
+    } else {
+        [QGVAR(migrateUnit), [_unit], _unit] call CBA_fnc_targetEvent;
+    };
+};
+
+// The engine stops filling a container at its maximumLoad, which this mod's grid does not: whatever the loadout
+// meant to hold beyond that is added now (fnc_topUpLoadout), before the places below are written so they find
+// it. Where the unit is local; otherwise its machine does it, a frame later when the containers have arrived.
+if (local _unit) then {
+    [_unit, _loadout] call FUNC(topUpLoadout);
+
+    [{
+        [_this select 0, _this select 1] call FUNC(topUpLoadout);
+    }, [_unit, _loadout]] call FUNC(nextFrame);
+
+    // The player's overflow is swept only after the top-up above, its second pass a frame later and the places
+    // below are in: nothing is put on the ground that the loadout meant to hold (fnc_requestSweep).
+    if (hasInterface && {_unit isEqualTo player}) then {
+        [SWEEP_LOADOUT_DELAY, true, true] call FUNC(queueSweep);
+    };
+} else {
+    [QGVAR(topUpLoadout), [_unit, _loadout], _unit] call CBA_fnc_targetEvent;
+};
+
 private _layout = _extended getOrDefault ["einv_layout", []];
 
 if !(_layout isEqualType [] && {(_layout param [0, 0]) isEqualTo 1} && {(_layout param [1, []]) isEqualType []}) exitWith {};
@@ -46,7 +88,10 @@ private _lists = [0, 1, 2] apply {
         && {count _x >= 6}
         && {(_x select 0) isEqualType ""}
         && {(_x select [1, 5]) isEqualTypeAll 0}
-    } apply {_x select [0, 6]}
+    } apply {
+        // Which way round (rot, 0 or 1) when the record says it; a loadout saved before has none.
+        (_x select [0, 6]) + ((_x select [6, 1]) select {_x isEqualTo 0 || {_x isEqualTo 1}})
+    }
 };
 
 if (_lists findIf {_x isNotEqualTo []} < 0) exitWith {};

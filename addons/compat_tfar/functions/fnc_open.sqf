@@ -25,11 +25,16 @@ params ["_radio"];
 [{
     params ["_radio"];
 
-    if (_radio isEqualType "") then {
+    // TFAR answers true when its dialog opened and nothing when it refused (a dialog open, no such radio): the RPT says which.
+    private _opened = if (_radio isEqualType "") then {
         TF_sw_dialog_radio = _radio;
-        [] call TFAR_fnc_onSwDialogOpen;
+        [] call TFAR_fnc_onSwDialogOpen
     } else {
         TF_lr_dialog_radio = _radio;
-        [] call TFAR_fnc_onLrDialogOpen;
+        [] call TFAR_fnc_onLrDialogOpen
+    };
+
+    if (isNil "_opened") then {
+        WARNING_3("TFAR opened no dialog for %1 (dialog open: %2, alive: %3)",_radio,dialog,alive TFAR_currentUnit);
     };
 }, [_radio]] call EFUNC(gui,stepAside);

@@ -4,12 +4,15 @@
  * Author: Miss Heda
  * Lays out the window, Enhanced First Aid Kits' glass:
  *
- *   | equipment |        free        | storage | loot |
+ *   | equipment |        free        | loot | storage |
  *
  * On the left what the unit wears, as cards (fnc_drawEquipmentCards). On the right its uniform, vest
- * and backpack stacked in one scrolling column, and while it loots a second column for that at the
- * far right, titled with what is looted ("Nearby" when it only shows what lies around) - the middle gets
- * narrower for it. The middle stays free: the camera shows the soldier there, and an open kit's window
+ * and backpack stacked in one scrolling column titled "Your gear", and while it loots a second column for
+ * that, titled with what is looted ("Loot - Miller", "Loot - Nearby" when it only shows what lies around) and
+ * drawn in the theme's loot look (fnc_drawColumn) - the middle gets narrower for it. By
+ * default the loot column opens left of the storage column, which stays where it is; the client setting
+ * einv_gui_lootSide can have it open at the right edge instead, with the storage column moving in
+ * (| storage | loot |). The middle stays free: an open kit's window
  * opens there (fnc_placeWindow). Kits never bring the loot column in: they float over the columns in
  * windows of their own (fnc_drawWindows).
  *
@@ -33,8 +36,7 @@
  * 2: Context, see fnc_build <HASHMAP>
  *
  * Return Value:
- * Where the soldier stands when the camera is on, [x, y, w, h] on the screen - [] when the middle is
- * too narrow for it <ARRAY>
+ * The free middle, [x, y, w, h] on the screen - [] when it is too narrow <ARRAY>
  *
  * Example:
  * [_display, _theme, _context] call einv_gui_fnc_layoutGlass;
@@ -48,7 +50,7 @@ params ["_display", "_theme", "_context"];
 
 (call FUNC(getCell)) params ["_cellW"];
 
-private _gap = SQUARE(UNIT * 0.8);
+private _gap = COLUMN_GAP;
 
 // The padding fnc_drawColumn gives its sections. The equipment column keeps to the same top, so its
 // first card lines up with the storage column's title.
@@ -57,12 +59,13 @@ private _padX = SQUARE(_padY);
 private _titleIcons = _theme getOrDefault ["titleIcons", true];
 
 // A storage column: the container's picture box and its compartments beside it (fnc_drawSection), the
-// column's padding - the right one wide enough for the scroll bar - and a little air.
-private _columnW = (STORAGE_COLS + 3) * _cellW + SQUARE(UNIT * 0.35) + ((_padX * 2) max (_padX + SCROLL_W + pixelW * 4)) + SQUARE(UNIT * 0.6);
+// column's padding - the right one wide enough for the scroll bar - and a little air. The same measure
+// caps the player's tile scale (fnc_getCell), so the two can never disagree.
+private _columnW = COLUMN_W(_cellW);
 
-// The columns from the right edge inwards: loot (while looting), storage, then the middle. A window that
-// attached keeps the place of the loot column although nothing is looted (the context's "rightColumn":
-// the Arsenal's catalog stands there) and may let it grow by what the middle has beyond "rightKeep" UNITs
+// The columns from the right edge inwards: storage and loot (while looting, in the order set below), then the
+// middle. A window that attached keeps the place of the loot column although nothing is looted (the context's
+// "rightColumn": it draws there itself) and may let it grow by what the middle has beyond "rightKeep" UNITs
 // of width - at most "rightGrow" of a column - so a wide screen does not leave the soldier a hall.
 private _looting = _context getOrDefault ["looting", false];
 private _reserved = _looting || {_context getOrDefault ["rightColumn", false]};
@@ -82,15 +85,38 @@ if (_reserved) then {
 };
 
 private _right = CONTENT_X + CONTENT_W;
-private _lootX = _right - _rightW;
 
-if (_reserved) then {
+// Where the loot column goes is the player's own taste (the setting einv_gui_lootSide): by default it opens
+// left of the storage column, which then never moves - looting or not, the storage column stands at the right
+// edge - and the other way round, the loot column takes the right edge and the storage column moves in. A
+// window that kept the right edge for itself ("rightColumn") has no say in it: its column stays there. The
+// column widths and the gaps are the same either way, so the free middle is just as wide, only it lies
+// against the loot column instead of the storage column.
+private _lootLeft = _looting
+    && {!(_context getOrDefault ["rightColumn", false])}
+    && {GVAR(lootSide) isNotEqualTo "right"};
+
+private _lootX = 0;
+private _storageX = 0;
+
+if (_lootLeft) then {
+    _storageX = _right - _columnW;
+    _lootX = _storageX - _gap - _rightW;
     _right = _lootX - _gap;
-    _context set ["rightRect", [_lootX, CONTENT_Y, _rightW, CONTENT_H]];
+} else {
+    _lootX = _right - _rightW;
+
+    if (_reserved) then {
+        _right = _lootX - _gap;
+    };
+
+    _storageX = _right - _columnW;
+    _right = _storageX - _gap;
 };
 
-private _storageX = _right - _columnW;
-_right = _storageX - _gap;
+if (_reserved) then {
+    _context set ["rightRect", [_lootX, CONTENT_Y, _rightW, CONTENT_H]];
+};
 
 _leftW = _leftW min ((_right - CONTENT_X) max 0);
 
@@ -106,6 +132,8 @@ private _cardsRect = if (_theme getOrDefault ["equipmentPanel", true]) then {
         _display, controlNull, [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["panel", []],
         _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
     ] call FUNC(uiPanel);
+
+    [_display, controlNull, [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
 
     [CONTENT_X + _padX, CONTENT_Y + _padY, _leftW - _padX * 2, CONTENT_H - _padY * 2]
 } else {
@@ -126,13 +154,13 @@ private _ownSections = _context getOrDefault ["storageSections", _context getOrD
 // Without a uniform, vest or backpack the column would stand there empty, as if something had failed.
 if (_ownSections isEqualTo []) then {
     private _font = _theme getOrDefault ["font", "PuristaMedium"];
-    private _size = UNIT * 0.6;
+    private _size = TEXT_UNIT * 0.6;
     private _textW = _columnW - _padX * 4;
 
     [
         _display, controlNull, [_storageX + _padX * 2, CONTENT_Y + UNIT * 2.4, _textW, UNIT],
         [LLSTRING(Storage_Empty), _textW, _font, _size] call FUNC(fitText), _size,
-        _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]], _font, 2
+        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2, "hint"
     ] call FUNC(uiLabel);
 };
 
@@ -163,9 +191,9 @@ if (_looting) then {
         _icon = UI_TEX(icon_ground_ca);
     };
 
-    if (_title isEqualTo "") then {
-        _title = LLSTRING(Column_Loot);
-    };
+    // "Loot - Miller", "Loot - Nearby": the column says that it is someone else's before it says whose (issue 7), as the
+    // player's own says "Your gear"; drawColumn gives it the theme's loot look by its id.
+    _title = if (_title isEqualTo "") then {LLSTRING(Column_Loot)} else {format [LLSTRING(Column_LootOf), _title]};
 
     [
         _display, [_lootX, CONTENT_Y, _rightW, CONTENT_H], _lootSections, _theme, _title, ["", _icon] select _titleIcons,
@@ -173,7 +201,7 @@ if (_looting) then {
     ] call FUNC(drawColumn);
 };
 
-// ----- The middle, for the camera -----
+// ----- The free middle -----
 
 private _middleX = CONTENT_X + _leftW + _gap;
 private _middleW = _right - _middleX;

@@ -4,14 +4,15 @@
  * Author: Miss Heda
  * A mouse button went down or up anywhere on the window. Down on a tile or a filled equipment slot
  * remembers the press - moving the mouse turns it into a drag (fnc_onFrame, fnc_startDrag). Down on an
- * empty cell of a column remembers the press as well: moved, it drags out a frame that selects the tiles
- * it touches (fnc_startBand). Up ends a drag (fnc_endDrag) or a frame (fnc_endBand), or, after a press
+ * empty cell of a column remembers the press as well, but moving the mouse does nothing with it. Up ends a
+ * drag (fnc_endDrag), or, after a press
  * that never moved:
  *   a plain click - a tile is selected (fnc_select); on a tile of a selection of several it does nothing,
  *                   so that a double click can move them all; on an empty cell the selection is cleared
  *   Ctrl  - a tile is selected or not (fnc_select "toggle"), a slot's item comes off (fnc_quickUnequip)
- *   Shift - a tile and all between it and the last one clicked are selected (fnc_select "range")
- *   Alt   - a tile is put on (fnc_quickEquip)
+ *   Shift - a stack is split: half of it goes onto the nearest free cell, as a stack of its own
+ *           (fnc_splitStack - only where the storage keeps separate stacks); else a tile and all between it
+ *           and the last one clicked are selected (fnc_select "range")
  *   a double click - a kit or a uniform, vest or backpack lying in a container opens, anything else
  *                    moves over (fnc_quickMove); a tile of a selection of several moves them all
  *                    (fnc_quickMoveGroup)
@@ -20,8 +21,14 @@
  * weapon, ... (fnc_quickEquip; magazines and attachments still move over) -, and Ctrl+click opens a
  * uniform, vest or backpack lying there (fnc_openNested) - anything else is selected as everywhere. The
  * hint names both while the mouse is on such a tile (fnc_updateHover).
- * Shift held while pressing a stack drags half of it. A right click opens the item's context menu
- * (fnc_contextMenu). Selecting works in the inventory only (fnc_isInventoryMode): where other windows
+ * The box of a uniform, vest or backpack opened from inside a container is pressed as its tile there
+ * (fnc_boxTile): dragged, clicked and double clicked like the tile itself.
+ * Shift held while pressing a stack drags half of it. Alt+click has no meaning of its own (it was the quick
+ * equip before; putting on is a drag onto a slot, a double click on the ground and the menu's Equip).
+ * A press on a filled slot of the hotbar strip (einv_hotbar) is a press of its own: moved, it becomes a drag
+ * of the binding (fnc_startStripDrag - dropped on another slot it moves there, anywhere else it is
+ * removed), let go in place it does nothing. A right click opens the item's context menu
+ * (fnc_contextMenu) - with another menu open, beside it, it closes that one and opens the new one at once. Selecting works in the inventory only (fnc_isInventoryMode): where other windows
  * attach, Ctrl+click moves a tile over as before.
  *
  * A window that attached with hooks (fnc_attach) is asked first: "mouseDown" and "mouseUp" before the right
@@ -31,6 +38,9 @@
  * clicks on empty slots and free cells, those are recorded as presses with no tile; a tile of a source
  * grid (fnc_createGrid, "source") is pressed like one in a container. A Shift double click counts as a
  * double click there.
+ *
+ * An action waiting for the hands (fnc_queueMoves) is marked on its tile or slot: a left press there
+ * cancels it (fnc_cancelQueued) and starts no drag or click.
  *
  * While a repack of magazines runs (einv_magazines - only when that addon is loaded) the hands are busy: a
  * button going down anywhere stops it and does nothing else, and that button coming up is no click either.
@@ -137,22 +147,39 @@ if (_layer isEqualTo "inspect") exitWith {
     false
 };
 
-// An open context menu takes the clicks itself (fnc_openMenu).
-if ((uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo []) exitWith {false};
+// An open context menu takes the clicks itself (fnc_openMenu) - except a right press beside it: that one
+// closes the menu and goes on as the right click it is, so the menu of the tile under the mouse opens in
+// the same go (on empty space nothing opens, and the menu is just closed). The menu's own rows keep it.
+private _menuOpen = (uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [];
 
-// A window that attached may take the button first - the Arsenal's camera turns with the right one.
+if (_menuOpen && {_down} && {_button == 1}) then {
+    (uiNamespace getVariable [QGVAR(menuRect), [0, 0, 0, 0]]) params ["_menuX", "_menuY", "_menuW", "_menuH"];
+
+    private _onMenu = _clickX >= _menuX && {_clickX < _menuX + _menuW} && {_clickY >= _menuY} && {_clickY < _menuY + _menuH};
+
+    if (!_onMenu) then {
+        call FUNC(closeMenu);
+        _menuOpen = false;
+    };
+};
+
+if (_menuOpen) exitWith {false};
+
+// A window that attached may take the button first - the Arsenal panel takes every press outside its own, so the
+// engine ignores it.
 private _taken = if (_down) then {
     ["mouseDown", [_button, [_clickX, _clickY], _shift, _ctrl, _alt], false] call FUNC(hook)
 } else {
-    ["mouseUp", [_button, [_clickX, _clickY]], false] call FUNC(hook)
+    ["mouseUp", [_button, [_clickX, _clickY], _shift, _ctrl, _alt], false] call FUNC(hook)
 };
 
 if (_taken isEqualTo true) exitWith {true};
 
 // Pressed on a kit window: on its cross, the cross closes it (fnc_drawWindow) and nothing happens here,
-// nor on its body's scroll bar. Anywhere else it comes to the top first - a right click's menu then
-// opens over it, a tile pressed there is the raised window's -, and a left press on its title holds it
-// to move it.
+// nor on its Sort, whose own clicks they are (a raise would draw them anew under the mouse and
+// the click would be lost), nor on its body's scroll bar. Anywhere else it comes to the top first - a right
+// click's menu then opens over it, a tile pressed there is the raised window's -, and a left press on its
+// title holds it to move it.
 private _onWindow = "";
 
 if (_down && {_layer isNotEqualTo ""} && {!GVAR(dragging)}) then {
@@ -177,6 +204,10 @@ if (_down && {_layer isNotEqualTo ""} && {!GVAR(dragging)}) then {
 
     if ([_record getOrDefault ["close", []]] call _fnc_inside) exitWith {
         _onWindow = "close";
+    };
+
+    if ((_record getOrDefault ["buttons", []]) findIf {[_x] call _fnc_inside} >= 0) exitWith {
+        _onWindow = "button";
     };
 
     // On its body's scroll bar it stays where it lies: that bar is the engine's, and the body drawn anew
@@ -204,7 +235,7 @@ if (_down && {_layer isNotEqualTo ""} && {!GVAR(dragging)}) then {
     };
 };
 
-if (_onWindow in ["close", "scrollbar"]) exitWith {false};
+if (_onWindow in ["close", "button", "scrollbar"]) exitWith {false};
 if (_onWindow isEqualTo "title") exitWith {true};
 
 // Right click: the choices for what the mouse is on (fnc_contextMenu).
@@ -242,9 +273,17 @@ if (_down) exitWith {
             private _grid = (uiNamespace getVariable [QGVAR(grids), []]) select _gridIndex;
             private _tile = (_grid get "tiles") select _tileIndex;
 
-            if (_tile getOrDefault ["hidden", false]) exitWith {};
+            // Not searched yet: searched next in its box (fnc_searchFirst).
+            if (_tile getOrDefault ["hidden", false]) exitWith {
+                [_grid, _tile] call FUNC(searchFirst);
+            };
 
-            // A tile of a source grid (the Arsenal's catalog) is lifted like one in a container, though no
+            // An action waiting for the hands (fnc_queueMoves): a click on its tile cancels it.
+            if ((_tile getOrDefault ["queued", 0]) > 0) exitWith {
+                [_tile get "queued"] call FUNC(cancelQueued);
+            };
+
+            // A tile of a source grid (ACE's list in the Arsenal panel) is lifted like one in a container, though no
             // container stands behind it: it brings the cell it is held by itself.
             if ((_grid getOrDefault ["source", ""]) isNotEqualTo "") exitWith {
                 GVAR(press) = [_gridIndex, _tileIndex, _mouse, _tile getOrDefault ["grab", [0, 0]], _ctrl, [], _alt, _shift];
@@ -296,6 +335,36 @@ if (_down) exitWith {
             private _slot = _record param [5, ""];
             private _unit = _record param [6, objNull];
 
+            // The box of a uniform, vest or backpack opened from inside a container: pressed as its tile there
+            // (fnc_boxTile), so the drag is the tile's own. Held by its middle cell - the ghost comes out
+            // centred on the mouse rather than hanging from its corner.
+            private _asTile = [_record param [8, objNull]] call FUNC(boxTile);
+
+            if (_asTile isNotEqualTo []) exitWith {
+                _asTile params ["_gridIndex", "_tileIndex"];
+
+                private _tile = (((uiNamespace getVariable [QGVAR(grids), []]) select _gridIndex) get "tiles") select _tileIndex;
+
+                // Waiting for the hands (fnc_queueMoves): a click cancels it.
+                if ((_tile getOrDefault ["queued", 0]) > 0) exitWith {
+                    [_tile get "queued"] call FUNC(cancelQueued);
+                };
+
+                GVAR(press) = [
+                    _gridIndex, _tileIndex, _mouse,
+                    [floor ((_tile getOrDefault ["w", 1]) / 2), floor ((_tile getOrDefault ["h", 1]) / 2)],
+                    _ctrl, [], _alt, _shift
+                ];
+            };
+
+            // A filled slot of the hotbar strip (einv_hotbar): its binding is dragged, not an item (fnc_startStripDrag).
+            // The press carries the slot's number as its tenth element. An empty one has nothing to lift.
+            if ((_record param [7, -1]) >= 0) exitWith {
+                if ((_record param [1, ""]) isNotEqualTo "" && {call FUNC(isInventoryMode)}) then {
+                    GVAR(press) = [-1, -1, _mouse, [0, 0], _ctrl, [], _alt, _shift, createHashMap, _record select 7];
+                };
+            };
+
             if (_slot isEqualTo "" || {isNull _unit}) exitWith {};
 
             // An empty slot cannot be lifted, but a window that attached hears the click on it.
@@ -303,6 +372,13 @@ if (_down) exitWith {
                 if (_listening) then {
                     GVAR(press) = [-1, -1, _mouse, [0, 0], _ctrl, [], _alt, _shift, ["slot", -1, -1, [], _slotIndex] call _fnc_target];
                 };
+            };
+
+            // Its item waits to be taken off (fnc_queueMoves): a click cancels that.
+            private _queuedId = [_unit, _slot] call FUNC(queuedSlot);
+
+            if (_queuedId > 0) exitWith {
+                [_queuedId] call FUNC(cancelQueued);
             };
 
             GVAR(press) = [-1, -1, _mouse, [0, 0], _ctrl, [_unit, _slot], _alt];
@@ -333,8 +409,7 @@ if (_down) exitWith {
                 GVAR(press) = [_gridIndex, -1, _mouse, [0, 0], _ctrl, [], _alt, _shift, _target];
             };
 
-            // An empty cell of a column (not under a kit window, which has no frame to drag out): the press
-            // may become a frame that selects, or a click that deselects.
+            // An empty cell of a column (not under a kit window): the press is a click that deselects.
             if (_layer isNotEqualTo "" || {!(call FUNC(isInventoryMode))}) exitWith {};
 
             private _cell = [];
@@ -357,7 +432,7 @@ if (_down) exitWith {
 
             if (isNull _column) exitWith {};
 
-            GVAR(bandPress) = [_column, _mouse, [_column] call FUNC(scrollPixels), _ctrl, _grid get "side"];
+            GVAR(emptyPress) = [_ctrl, _mouse];
         };
     };
 
@@ -369,19 +444,25 @@ if (GVAR(dragging)) exitWith {
     true
 };
 
-// A frame dragged out from an empty cell comes up: the tiles it touched are the selection.
-if (GVAR(band)) exitWith {
-    [_display] call FUNC(endBand);
+// A hotbar slot's binding dragged out: moved onto another slot, or removed (fnc_endStripDrag).
+if (GVAR(stripDrag) isNotEqualTo []) exitWith {
+    [_display] call FUNC(endStripDrag);
     true
 };
 
-// A press on an empty cell that never moved is a click on it: the selection goes, unless Ctrl is held.
-if (GVAR(bandPress) isNotEqualTo []) exitWith {
-    private _ctrlAtBandPress = GVAR(bandPress) select 3;
+// A press on an empty cell comes up: a click on it, so the selection goes unless Ctrl is held. A press that
+// moved on (dragged over the cells) does nothing.
+if (GVAR(emptyPress) isNotEqualTo []) exitWith {
+    GVAR(emptyPress) params ["_ctrlAtPress", "_pressAt"];
 
-    GVAR(bandPress) = [];
+    private _now = getMousePosition;
 
-    if (!_ctrl && {!_ctrlAtBandPress}) then {
+    GVAR(emptyPress) = [];
+
+    if (
+        !_ctrl && {!_ctrlAtPress} && {abs ((_now select 0) - (_pressAt select 0)) <= DRAG_THRESHOLD}
+        && {abs ((_now select 1) - (_pressAt select 1)) <= DRAG_THRESHOLD}
+    ) then {
         call FUNC(clearSelection);
     };
 
@@ -442,46 +523,15 @@ private _fnc_groundTile = {
     _tile
 };
 
-// Worn or carried in a slot of its own - never a part of a weapon, which is a slot id with an underscore.
-private _fnc_groundWear = {
-    private _tile = _this call _fnc_groundTile;
-
-    count _tile > 0 && {
-        private _slot = [GVAR(unit), _tile getOrDefault ["class", ""]] call EFUNC(storage,slotFor);
-        _slot isNotEqualTo "" && {(_slot find "_") < 0}
-    }
-};
-
 private _fnc_groundOpen = {
     private _tile = _this call _fnc_groundTile;
 
     count _tile > 0 && {!isNull (_tile getOrDefault ["container", objNull])}
 };
 
-// A double click: on a tile of a selection of several, all of them move over (fnc_quickMoveGroup). A kit
-// of Enhanced First Aid Kits or Enhanced Utility Pouches opens in a window of its own or closes
-// (einv_compat_efak_fnc_toggle - only when that addon is loaded, and only while that mod's double click
-// setting is on), so does a uniform, vest or backpack lying in a container (fnc_openNested) - anything
-// else moves over. Never other mods' context menu, which the vanilla inventory opens on a double click.
+// A double click does what the quick move key does (fnc_quickAction).
 if (_double) exitWith {
-    private _selected = if (call FUNC(isInventoryMode)) then {call FUNC(selectionTiles)} else {[]};
-
-    if (count _selected >= 2 && {[_gridIndex, _tileIndex] in _selected}) exitWith {
-        [_selected] call FUNC(quickMoveGroup);
-        true
-    };
-
-    // On the ground: what can be worn is put on.
-    if ([_gridIndex, _tileIndex] call _fnc_groundWear) exitWith {
-        [_gridIndex, _tileIndex] call FUNC(quickEquip);
-        true
-    };
-
-    private _handled = !isNil QEFUNC(compat_efak,toggle) && {[_gridIndex, _tileIndex, true] call EFUNC(compat_efak,toggle)};
-
-    if (!_handled && {!([_gridIndex, _tileIndex] call FUNC(openNested))}) then {
-        [_gridIndex, _tileIndex] call FUNC(quickMove);
-    };
+    [_gridIndex, _tileIndex] call FUNC(quickAction);
 
     true
 };
@@ -505,14 +555,14 @@ switch (true) do {
             };
         };
     };
-    case ((_alt || {_altAtPress}) && {_slotSource isEqualTo []}): {
-        [_gridIndex, _tileIndex] call FUNC(quickEquip);
-    };
     case (_slotSource isEqualTo [] && {call FUNC(isInventoryMode)}): {
-        // Shift: from the last tile clicked to this one. A plain click selects this one - but not when it
-        // is one of several selected: a double click on it moves them all (above).
+        // Shift: a stack is split where the storage keeps stacks apart (fnc_splitStack); else from the last
+        // tile clicked to this one. A plain click selects this one - but not when it is one of several
+        // selected: a double click on it moves them all (above).
         if (_shift) then {
-            [_gridIndex, _tileIndex, "range"] call FUNC(select);
+            if !([_gridIndex, _tileIndex] call FUNC(splitStack)) then {
+                [_gridIndex, _tileIndex, "range"] call FUNC(select);
+            };
         } else {
             private _selected = call FUNC(selectionTiles);
 

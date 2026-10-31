@@ -9,7 +9,3 @@
 
 // How deep a container may lie inside a locked one and still count as locked (fnc_lockHolder).
 #define MAX_DEPTH 3
-
-// The vanilla inventory on an object that just became locked closes when the player is this close to
-// it, in metres (fnc_refresh).
-#define VANILLA_CLOSE_DISTANCE 10

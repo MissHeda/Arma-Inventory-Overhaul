@@ -8,12 +8,13 @@
  * Extra: [cell, false].
  *
  * Arguments:
- * 0: Args, [holder, entry array, cell [col, row, block, w, h]] <ARRAY>
+ * 0: Args, [holder, entry array, cell [col, row, block, w, h, rot]] - rot as fnc_opPlaceMany reads it
+ *    <ARRAY>
  * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
- *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "TooHeavy", "NotLocal", "Moved",
+ *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "NotLocal", "Moved",
  *     "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason already
  *     in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled

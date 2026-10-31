@@ -96,7 +96,9 @@ class EINV_Edit: RscEdit {
     sizeEx = QUOTE(UNIT * 0.7);
     colorText[] = C_TOOLTIP_TEXT;
     colorBackground[] = C_CLEAR;
-    colorSelection[] = {0.84, 0.54, 0.1, 0.35};
+    // The accent (issue 14): the engine evaluates strings in a colour as script when the control is made, so the
+    // selection follows the profile's active element colour as ACE's does; orange without one.
+    colorSelection[] = {"(profileNamespace getVariable ['GUI_BCG_RGB_R',0.84])", "(profileNamespace getVariable ['GUI_BCG_RGB_G',0.54])", "(profileNamespace getVariable ['GUI_BCG_RGB_B',0.1])", 0.35};
     colorDisabled[] = {1, 1, 1, 0.3};
     autocomplete = "";
     maxChars = 40;
@@ -105,10 +107,20 @@ class EINV_Edit: RscEdit {
     tooltipColorShade[] = C_TOOLTIP_SHADE;
 };
 
+// A field for a whole palette as text (the colour popover's Import and Export): 40 characters cut it off mid-array.
+class EINV_EditLong: EINV_Edit {
+    maxChars = 20000;
+};
+
 // The hint in the footer: the size of the key hints' words beside it (fnc_uiKeyHint, a 0.9 UNIT key at
 // 0.62 of its height), so the line reads as one.
+// Left, right after the key hints and a thin line that parts it from them: an "align" set on composed text by script does
+// not reach the line, the control's own attributes do - for every hint written into it.
 class EINV_FooterHint: EINV_StructuredText {
     size = QUOTE(UNIT * 0.558);
+    class Attributes: Attributes {
+        align = "left";
+    };
 };
 
 // ---------------------------------------------------------------------------
@@ -130,10 +142,12 @@ class EINV_Picture: EINV_Icon {
     colorText[] = C_WHITE;
 };
 
-// A picture stretched over its whole box (ST_PICTURE): turned a quarter, the shape is worked out by
-// hand (fnc_uiPictureTurned) - the engine would keep it for the box before the turn.
-class EINV_PictureStretch: EINV_Icon {
+// An item's picture turned a quarter (issue #24, fnc_uiPictureTurned): a plain ST_PICTURE that stretches its texture
+// over the control. Keeping the shape (ST_KEEP_ASPECT_RATIO) is worked out on the turned box and squashed the picture;
+// the control is made in the texture's own shape instead, so the stretch changes nothing.
+class EINV_PictureTurned: EINV_Icon {
     style = 48;
+    colorText[] = C_WHITE;
 };
 
 // ---------------------------------------------------------------------------

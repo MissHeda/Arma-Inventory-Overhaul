@@ -3,9 +3,16 @@
 /*
  * Author: Miss Heda
  * Draws the header along the top of the window, the same in every look but in its colours: the title
- * on the left; on the right the cog of the setup wizard, the search field, the speaker for the search
- * rustle, the camera switch (in the accent colour while on) and Close, each on a piece of the window's
- * glass. A line under it, the width of the content.
+ * on the left; on the right the cog of the setup wizard, the search field (on the buttons' own surface), the speaker (it opens the dropdown
+ * of the sound volumes, fnc_openSoundMenu; a right click mutes everything or brings it back), the palette (it opens the popover
+ * of the colours, fnc_openPaletteMenu; left out where the server does not let players pick them - fnc_paletteAllowed)
+ * and Close, each on a piece of the
+ * window's glass. The buttons and the search field's frame are dark, the column panels' colour one step lighter
+ * (fnc_headerStyle), one step lighter again under the mouse. A button that is on - the speaker and the palette
+ * while their dropdown is open - shows it by an accent-tinted icon and a thin accent line under it, not by a fill; an
+ * icon that is off is dimmed. All of them are squares of the header's height with the same gap. A line under the
+ * header, the width of the content. The title's words grow with the tile scale (TEXT_UNIT, fnc_textScale); the
+ * buttons are icons on the header's fixed height and stay as they are.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -31,17 +38,19 @@ private _gap = SQUARE(UNIT * 0.3);
 
 private _iconH = UNIT * 1.1;
 
-[_display, controlNull, [_left, HEAD_Y + (HEAD_H - _iconH) / 2, SQUARE(_iconH), _iconH], UI_TEX(icon_inventory_ca), _theme get "accent"] call FUNC(uiIcon);
+// The window's icon stays white whatever the palette: it is the mark of the window, not a title.
+[_display, controlNull, [_left, HEAD_Y + (HEAD_H - _iconH) / 2, SQUARE(_iconH), _iconH], UI_TEX(icon_inventory_ca), [1, 1, 1, 1]] call FUNC(uiIcon);
 
 [
     _display,
     controlNull,
-    [_left + SQUARE(_iconH * 1.4), HEAD_Y, SQUARE(UNIT * 10), HEAD_H],
+    [_left + SQUARE(_iconH * 1.4), HEAD_Y, SQUARE(TEXT_UNIT * 10), HEAD_H],
     [LLSTRING(Title), _theme] call FUNC(caption),
-    UNIT * 0.95,
+    TEXT_UNIT * 0.95,
     _theme get "text",
     _theme get "fontBold",
-    0
+    0,
+    "window"
 ] call FUNC(uiLabel);
 
 // ----- Buttons, from the right edge inwards -----
@@ -72,54 +81,135 @@ private _fnc_place = {
     _rect
 };
 
+// The theme a header button is drawn with: the lit surface of fnc_headerStyle in place of the theme's button
+// colours, which are made for the columns. Dimmed: the icon at less than half its strength.
+private _fnc_buttonTheme = {
+    params [["_on", false], ["_dim", false]];
+
+    ([_theme, _on] call FUNC(headerStyle)) params ["_fill", "_hover", "_ink"];
+
+    if (_dim) then {
+        _ink = +_ink;
+        _ink set [3, (_ink param [3, 1]) * 0.45];
+    };
+
+    private _buttonTheme = createHashMap;
+    _buttonTheme merge _theme;
+    _buttonTheme set ["button", _fill];
+    _buttonTheme set ["buttonHover", _hover];
+    _buttonTheme set ["buttonText", _ink];
+
+    _buttonTheme
+};
+
 // The hit area is the last of a button's controls (fnc_uiButton). Tooltips are plain text.
 private _fnc_tooltip = {
     params ["_controls", "_text"];
 
     if (_controls isNotEqualTo []) then {
-        (_controls select (count _controls - 1)) ctrlSetTooltip _text;
+        [(_controls select -1), _text] call FUNC(setTooltip);
     };
 };
 
 private _square = SQUARE(HEAD_H);
 
-private _close = [_display, controlNull, [_square] call _fnc_place, "close", "", UI_TEX(icon_close_ca), _theme, {
-    (uiNamespace getVariable [QGVAR(display), displayNull]) closeDisplay 2;
+// The thin accent line under a button that is on, inside the bottom of its square and in from the round corners.
+// Made before the button, so its hit area lies over it.
+private _fnc_underline = {
+    params ["_rect", "_shown"];
+
+    private _inset = (_theme getOrDefault ["radius", 0]) max ((_rect select 3) * 0.2);
+    private _line = [
+        _display, controlNull, [(_rect select 0) + SQUARE(_inset), (_rect select 1) + (_rect select 3) - pixelH * 4, (_rect select 2) - SQUARE(_inset) * 2, pixelH * 2],
+        _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]
+    ] call FUNC(uiPanel);
+
+    // In the gradient where the colour panel switched the lines on (GRADIENT_LINES).
+    _line append ([
+        _display, controlNull, [(_rect select 0) + SQUARE(_inset), (_rect select 1) + (_rect select 3) - pixelH * 4, (_rect select 2) - SQUARE(_inset) * 2, pixelH * 2],
+        GRADIENT_LINES, +_line, 1
+    ] call FUNC(gradientSurface));
+
+    {_x ctrlShow _shown} forEach _line;
+
+    _line
+};
+
+private _closeRect = [_square] call _fnc_place;
+
+private _close = [_display, controlNull, _closeRect, "close", "", UI_TEX(icon_close_ca), [] call _fnc_buttonTheme, {
+    ["the close button"] call FUNC(closeDisplay);
 }] call FUNC(uiButton);
 [_close, LLSTRING(Close)] call _fnc_tooltip;
 
-// The switch shows its state in its icon's colour: the button's ink is the accent while it is on.
-private _cameraTheme = createHashMap;
-_cameraTheme merge _theme;
+// The palette: a click opens the popover of the colours under it (fnc_openPaletteMenu), where the player picks the accent, the
+// secondary colour, the panels' colour and the transparency and sees them at once. Not drawn where the server does not let players pick their colours
+// (fnc_paletteAllowed). Like the speaker it shows an accent icon and line while its popover is open (fnc_updatePaletteButton, which
+// keeps it up to date without a rebuild - the controls are kept for it).
+uiNamespace setVariable [QGVAR(paletteButton), []];
+uiNamespace setVariable [QGVAR(paletteLine), []];
 
-if (GVAR(cameraOn)) then {
-    _cameraTheme set ["buttonText", _theme get "accent"];
+if ([] call FUNC(paletteAllowed)) then {
+    private _paletteRect = [_square] call _fnc_place;
+    private _paletteLine = [_paletteRect, false] call _fnc_underline;
+
+    private _palette = [
+        _display, controlNull, _paletteRect, "palette", "", UI_TEX(icon_palette_ca), [false] call _fnc_buttonTheme, {
+            // A left click only.
+            if ((_this select 0) < 0) exitWith {};
+
+            // Once per rest for a run of clicks (fnc_coalesce).
+            ["palettemenu", {[uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openPaletteMenu)}, [], COALESCE_GAP] call FUNC(coalesce);
+        }
+    ] call FUNC(uiButton);
+    [_palette, LLSTRING(Palette_Tooltip)] call _fnc_tooltip;
+
+    uiNamespace setVariable [QGVAR(paletteButton), _palette];
+    uiNamespace setVariable [QGVAR(paletteLine), _paletteLine];
 };
 
-private _camera = [_display, controlNull, [_square] call _fnc_place, "camera", "", UI_TEX(icon_camera_ca), _cameraTheme, {
-    call FUNC(toggleCamera);
-}] call FUNC(uiButton);
-[_camera, LLSTRING(Camera_Tooltip)] call _fnc_tooltip;
+// The speaker: a click opens the dropdown of the sound volumes under it (fnc_openSoundMenu), a right click
+// mutes everything or brings it all back (fnc_soundSet). It shows the muted speaker, dimmed, while nothing
+// is audible, and an accent icon and line while its dropdown is open (fnc_updateSoundButton, which keeps it up to
+// date without a rebuild - the controls and the place under which the dropdown opens are kept for it).
+private _silent = [""] call FUNC(soundMuted);
+private _soundRect = [_square] call _fnc_place;
+private _soundLine = [_soundRect, false] call _fnc_underline;
 
-// The speaker: the rustle while searching, on or muted (fnc_toggleSearchSound).
 private _sound = [
-    _display, controlNull, [_square] call _fnc_place, "searchSound", "",
-    [UI_TEX(icon_sound_on_ca), UI_TEX(icon_sound_off_ca)] select GVAR(searchMuted), _theme, {call FUNC(toggleSearchSound)}
+    _display, controlNull, _soundRect, "sound", "", [UI_TEX(icon_sound_on_ca), UI_TEX(icon_sound_off_ca)] select _silent,
+    [false, _silent] call _fnc_buttonTheme, {
+        if ((_this select 0) < 0) then {
+            ["all"] call FUNC(soundSet);
+        } else {
+            // Once per rest for a run of clicks (fnc_coalesce).
+            ["soundmenu", {[uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openSoundMenu)}, [], COALESCE_GAP] call FUNC(coalesce);
+        };
+    }
 ] call FUNC(uiButton);
-[_sound, [LLSTRING(SearchSound_Mute), LLSTRING(SearchSound_Unmute)] select GVAR(searchMuted)] call _fnc_tooltip;
+[_sound, LLSTRING(Sound_Tooltip)] call _fnc_tooltip;
 
-// The search field (fnc_drawFilter).
-[_display, [SQUARE(UNIT * 11)] call _fnc_place, _theme] call FUNC(drawFilter);
+uiNamespace setVariable [QGVAR(soundButton), _sound];
+uiNamespace setVariable [QGVAR(soundLine), _soundLine];
+uiNamespace setVariable [QGVAR(soundAnchor), _soundRect];
+
+// The search field (fnc_drawFilter): on the window's glass that _fnc_place laid under it, with the one film of the buttons' surface over
+// it - not two (a film of its own under the field's made it lighter than the buttons beside it, Mia 0.5.7).
+private _searchRect = [SQUARE(UNIT * 11)] call _fnc_place;
+
+([_theme, false] call FUNC(headerStyle)) params ["_searchFill"];
+
+[_display, _searchRect, _theme, LLSTRING(Filter_Placeholder), _searchFill] call FUNC(drawFilter);
 
 // The cog: the setup wizard (einv_setup) - how big items are, how many share a tile, how containers are
-// split, the same for everyone. Everyone may open it: whoever may not change the server's setup sees it
-// read-only and can still copy it to share. This window closes for it and comes back when the wizard
-// closes (einv_setup_fnc_openFromGame).
-if (!isNil QEFUNC(setup,openFromGame)) then {
+// split, the same for everyone. Drawn only for whoever may open it (einv_setup_fnc_canOpen: who runs the
+// server or is logged in as admin), asked at every draw so a login shows at once. This window closes for it
+// and comes back when the wizard closes (einv_setup_fnc_openFromGame).
+if (!isNil QEFUNC(setup,openFromGame) && {call (missionNamespace getVariable [QEFUNC(setup,canOpen), {false}])}) then {
     private _target = ["direct"] call (missionNamespace getVariable [QEFUNC(setup,canEdit), {createHashMap}]);
     private _canSave = !isNil "_target" && {_target isEqualType createHashMap} && {_target getOrDefault ["canSave", false]};
 
-    private _setup = [_display, controlNull, [_square] call _fnc_place, "setup", "", UI_TEX(icon_setup_ca), _theme, {
+    private _setup = [_display, controlNull, [_square] call _fnc_place, "setup", "", UI_TEX(icon_setup_ca), [] call _fnc_buttonTheme, {
         [0, ""] call EFUNC(setup,openFromGame);
     }] call FUNC(uiButton);
     [_setup, [LELSTRING(setup,OpenWizard_ReadOnly), LELSTRING(setup,OpenWizard)] select _canSave] call _fnc_tooltip;

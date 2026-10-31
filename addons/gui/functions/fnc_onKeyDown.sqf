@@ -4,16 +4,20 @@
  * Author: Miss Heda
  * Display key down. Escape closes the window by itself - after the context menu, the inspect card, the kit
  * windows and the selection, one at a time. Ctrl+A selects everything in the section under the mouse
- * (fnc_selectSection). Delete drops the selected tiles, else the item under the mouse; the Gear key closes
- * the window again, as it closes the vanilla inventory. A key the hotbar has a use for goes to it first
- * (einv_hotbar_fnc_onWindowKey - only when that addon is loaded). A window that attached (fnc_attach) is
- * offered the keys after those (the "key" hook) and before the Delete and Gear keys, and hears Return in
+ * (fnc_selectSection). The drop key (fnc_isDropKey, set in Configure Addons; G) drops the selected tiles, else
+ * the item under the mouse - Delete does so only if the player bound it; the Gear key closes the window again,
+ * as it closes the vanilla inventory. A key the hotbar has a use for goes to it first
+ * (einv_hotbar_fnc_onWindowKey - only when that addon is loaded), then the quick move key (fnc_isQuickKey; its repeats while it is held
+ * only queue, see there). A window that attached (fnc_attach) is
+ * offered the keys after those (the "key" hook) and before the drop and Gear keys, and hears Return in
  * any field of its own ("submit").
  *
  * A movement key pressed while looting or searching closes the window (einv_gui_moveToStop): the search
  * stops and the soldier walks off. Keys already held as the window opened count only once they were let
- * go, keys pressed with Ctrl or Alt never (Ctrl+A is the selection's). While magazines are repacked
- * (einv_magazines) Escape stops the repack and the window stays, and Delete waits.
+ * go, keys pressed with Ctrl or Alt never (Ctrl+A is the selection's). Only on foot: a soldier in a seat
+ * walks off nowhere, and there the same keys are the vehicle's - the window stays, as the vanilla
+ * inventory stays in a vehicle. While magazines are repacked
+ * (einv_magazines) Escape stops the repack and the window stays, and the drop key waits.
  *
  * Not the press that opened the window, which can still be held down or repeating when it arrives here.
  *
@@ -35,7 +39,7 @@
 
 params ["_display", "_key", ["_shift", false], ["_ctrl", false], ["_alt", false]];
 
-// Repacking magazines (einv_magazines): Escape stops it and the window stays; Delete waits. Every other
+// Repacking magazines (einv_magazines): Escape stops it and the window stays; the drop key waits. Every other
 // key does what it always does - the Gear key closes the window, which stops the repack too.
 private _handled = false;
 
@@ -45,7 +49,7 @@ if (!isNil QEFUNC(magazines,isBusy) && {[] call EFUNC(magazines,isBusy)}) then {
         _handled = true;
     };
 
-    if (_key == DIK_DELETE) exitWith {
+    if ([_key, [_shift, _ctrl, _alt]] call FUNC(isDropKey)) exitWith {
         _handled = true;
     };
 };
@@ -59,8 +63,8 @@ private _filterEdit = uiNamespace getVariable [QGVAR(filterEdit), controlNull];
 private _focused = focusedCtrl _display;
 private _typing = !isNull _filterEdit && {_focused isEqualTo _filterEdit};
 
-// Any field with the cursor in it - the search field, or one a window that attached brought (the
-// Arsenal's name for a loadout) - has the keys.
+// Any field with the cursor in it - the search field, or one on a display this window is a guest on
+// (ACE Arsenal's search) - has the keys.
 private _editing = !isNull _focused && {ctrlType _focused == 2};
 
 if (_key == DIK_ESCAPE && {call FUNC(closeMenu)}) exitWith {true};
@@ -72,8 +76,8 @@ if (
     && {[GVAR(windowOrder) select -1] call FUNC(closeWindow)}
 ) exitWith {true};
 
-// R turns what is being dragged a quarter round - not several tiles dragged together.
-if (_key == DIK_R && {GVAR(dragging)}) exitWith {
+// The rotate key (R by default) turns what is being dragged a quarter round - not several tiles dragged together.
+if (GVAR(dragging) && {[_key, [_shift, _ctrl, _alt]] call FUNC(isRotateKey)}) exitWith {
     if (GVAR(dragGroup) isEqualTo []) then {
         [_display] call FUNC(rotateDrag);
     };
@@ -90,7 +94,10 @@ if (_editing) exitWith {
             _filterEdit ctrlSetText "";
             GVAR(filter) = "";
             (_filterEdit getVariable [QGVAR(placeholder), controlNull]) ctrlShow true;
-            call FUNC(applyFilter);
+
+            // Done now; a typed search still waiting (fnc_filterSoon) is this one.
+            ["filter"] call FUNC(coalesceDrop);
+            [true] call FUNC(applyFilter);
             true
         };
         case (!_typing && {_key == DIK_ESCAPE}): {
@@ -102,8 +109,47 @@ if (_editing) exitWith {
             ["submit", [_focused]] call FUNC(hook);
             true
         };
-        default {false};
+        default {
+            // Escape in the empty search field closes the window, as anywhere else.
+            if (_key == DIK_ESCAPE && {call FUNC(isInventoryMode)}) then {
+                GVAR(closeReason) = "Escape";
+            };
+
+            false
+        };
     };
+};
+
+// Page Up / Page Down turn the page of a paged box (a tall crate or vehicle, fnc_pageRanges): the box the dragged item is over, else
+// the box under the mouse - so an item can be carried from one page to another without holding it over the page bar's arrow.
+if (_key in [DIK_PRIOR, DIK_NEXT]) exitWith {
+    private _gridIndex = if (GVAR(dragging)) then {
+        [-1, GVAR(dragTarget) param [1, -1]] select ((GVAR(dragTarget) param [0, ""]) isEqualTo "grid")
+    } else {
+        [-1, GVAR(hover) param [1, -1]] select ((GVAR(hover) param [0, ""]) in ["tile", "cell"])
+    };
+    private _grids = uiNamespace getVariable [QGVAR(grids), []];
+    private _grid = _grids param [_gridIndex, createHashMap];
+
+    // Not over a box with pages (its page bar, an empty part of it, another compartment): the one box with pages on the window.
+    if (count (_grid getOrDefault ["pageRanges", []]) < 2) then {
+        private _paged = _grids select {count (_x getOrDefault ["pageRanges", []]) > 1};
+
+        _grid = [createHashMap, _paged select 0] select (count _paged == 1);
+    };
+
+    if (count (_grid getOrDefault ["pageRanges", []]) < 2) exitWith {false};
+
+    private _step = [1, -1] select (_key == DIK_PRIOR);
+
+    // A drag turns at once, as its hold over the bar does; a click's turn goes through the coalesced one.
+    if (GVAR(dragging)) then {
+        [_grid, _step] call FUNC(turnPage);
+    } else {
+        [_grid, _step] call FUNC(pageSoon);
+    };
+
+    true
 };
 
 // Moving while looting or searching: the soldier stops and walks off (einv_gui_moveToStop). A key that was
@@ -112,7 +158,8 @@ if (_editing) exitWith {
 // movement key pressed with Ctrl or Alt is something else (Ctrl+A selects the section, and A is MoveLeft).
 // Keyboard only: KeyDown gives DIK codes, and the combos, mouse and joystick bindings are left out. A movement
 // key pressed with Ctrl or Alt counts as held until it is let go: its repeats, once Ctrl is up first, close
-// nothing (Ctrl+A held a moment too long).
+// nothing (Ctrl+A held a moment too long). Seated in a vehicle the keys close nothing: the soldier does not walk
+// off, and a driver's W, S, A and D are the vehicle's - a tap meant for it closed the window he sat looking into.
 if (_ctrl || _alt) then {
     private _action = GVAR(moveKeys) getOrDefault [_key, ""];
 
@@ -123,7 +170,8 @@ if (_ctrl || _alt) then {
 
 if (
     GVAR(moveToStop) && {!_ctrl} && {!_alt}
-    && {!isNull GVAR(openedOn) || {GVAR(searchQueue) isNotEqualTo []}}
+    && {!isNull GVAR(openedOn) || {GVAR(searchQueue) findIf {!((_x select 0) in GVAR(searchIdle))} >= 0}}
+    && {isNull objectParent GVAR(unit)}
     && {call FUNC(isInventoryMode)}
     && {diag_tickTime - GVAR(openedAt) > MOVE_GRACE}
     && {
@@ -132,20 +180,50 @@ if (
         _action isNotEqualTo "" && {!(_action in GVAR(moveHeld))}
     }
 ) exitWith {
-    GVAR(closeReason) = "move";
-    _display closeDisplay 2;
+    ["move"] call FUNC(closeDisplay);
     true
 };
 
 // The hotbar's keys inside this window (einv_hotbar): a key bound to a slot puts what the mouse is on there,
-// Delete on a slot of the bar empties it.
+// the drop key on a slot of the bar empties it.
 if (
     !GVAR(dragging) && {call FUNC(isInventoryMode)} && {!isNil QEFUNC(hotbar,onWindowKey)}
     && {[_display, _key, _shift, _ctrl, _alt] call EFUNC(hotbar,onWindowKey)}
 ) exitWith {true};
 
+// The quick move key (fnc_isQuickKey, set in Configure Addons; F): the double click's work for the tile the
+// mouse is on, or for the whole selection when the mouse is on a tile of it. Over a worn slot or free cells it
+// is the key like any other.
+//
+// Held down the key repeats, and every repeat comes here as a press. The first press of a hold does all that a double
+// click does; the repeats (GVAR(quickHeldKey), until the key is let go - fnc_open) only queue: a tile that waits or
+// is on its way costs nothing, and one that opens (a nested container, a kit) or puts on is left to the first press,
+// so a held key sweeping over a crate never opens and closes a backpack with a build of the window each time.
+if (!GVAR(dragging) && {call FUNC(isInventoryMode)} && {[_key, [_shift, _ctrl, _alt]] call FUNC(isQuickKey)}) then {
+    private _repeat = GVAR(quickHeldKey) == _key;
+
+    GVAR(quickHeldKey) = _key;
+
+    if ((GVAR(hover) param [0, ""]) isEqualTo "tile") then {
+        GVAR(hover) params ["", "_gridIndex", "_tileIndex"];
+
+        private _grid = (uiNamespace getVariable [QGVAR(grids), []]) param [_gridIndex, createHashMap];
+        private _tile = (_grid getOrDefault ["tiles", []]) param [_tileIndex, createHashMap];
+
+        if (count _tile > 0 && {!(_grid getOrDefault ["virtual", true])} && {!(_tile getOrDefault ["hidden", false])}) then {
+            _handled = true;
+
+            if (!(_repeat && {_tile getOrDefault ["pending", false]})) then {
+                [_gridIndex, _tileIndex, _repeat] call FUNC(quickAction);
+            };
+        };
+    };
+};
+
+if (_handled) exitWith {true};
+
 // Selecting several (fnc_select): Escape lets go of the selection, Ctrl+A takes the whole section under
-// the mouse, Delete drops what is selected. Not while something is dragged.
+// the mouse, the drop key drops what is selected. Not while something is dragged.
 private _selecting = !GVAR(dragging) && {call FUNC(isInventoryMode)};
 
 if (_selecting && {_key == DIK_ESCAPE} && {call FUNC(clearSelection)}) exitWith {true};
@@ -172,26 +250,56 @@ if (_selecting && {_key == DIK_A} && {_ctrl}) exitWith {
     true
 };
 
-if (_selecting && {_key == DIK_DELETE} && {GVAR(selection) isNotEqualTo []}) exitWith {
+if (_selecting && {[_key, [_shift, _ctrl, _alt]] call FUNC(isDropKey)} && {GVAR(selection) isNotEqualTo []}) exitWith {
     [call FUNC(selectionTiles), true] call FUNC(quickMoveGroup);
     true
 };
 
-// The window that attached gets the keys the engine would act on next (the Arsenal's own: give back,
-// copy, hide, ...). True: taken.
+// The window that attached gets the keys the engine would act on next (the "key" hook). True: taken.
 if ((["key", [_display, _key, _shift, _ctrl, _alt], false] call FUNC(hook)) isEqualTo true) exitWith {true};
 
-// Delete drops what the mouse is on.
-if (_key == DIK_DELETE) exitWith {
-    if ((GVAR(hover) param [0, ""]) isEqualTo "tile" && {!GVAR(dragging)}) then {
-        [GVAR(hover) select 1, GVAR(hover) select 2] call FUNC(dropToGround);
+// The drop key (fnc_isDropKey) drops what the mouse is on: a tile, or the item of a worn slot (as the
+// slot's menu does, fnc_contextMenu; fnc_doUnequip says why not for a living person's). In a window that
+// attached too: the Arsenal hands it the key over its panel, and its own "key" hook was offered the press before.
+if ([_key, [_shift, _ctrl, _alt]] call FUNC(isDropKey)) exitWith {
+    if (!GVAR(dragging)) then {
+        switch (GVAR(hover) param [0, ""]) do {
+            case "tile": {
+                [GVAR(hover) select 1, GVAR(hover) select 2] call FUNC(dropToGround);
+            };
+            case "slot": {
+                private _record = (uiNamespace getVariable [QGVAR(slots), []]) param [GVAR(hover) select 1, []];
+                private _owner = _record param [6, objNull];
+                private _slot = _record param [5, ""];
+
+                if (
+                    _record isNotEqualTo [] && {(_record param [7, -1]) < 0} && {_slot isNotEqualTo ""} && {!isNull _owner}
+                    && {(_record param [1, ""]) isNotEqualTo ""}
+                ) then {
+                    [_owner, _slot, "ground", []] call FUNC(doUnequip);
+                };
+            };
+        };
     };
 
     true
 };
 
-if !(_key in actionKeys "Gear") exitWith {false};
+// Escape is left to the engine, which closes the dialog - told as the reason first (fnc_onUnload). Not on
+// a display the window is a guest on: that one's own handlers decide what Escape does there.
+if (_key == DIK_ESCAPE && {call FUNC(isInventoryMode)}) then {
+    GVAR(closeReason) = "Escape";
+};
+
+// A key the window has no use for goes no further than the window: not to the soldier's actions, the weapon, ACE's
+// or another mod's keys behind it - the inventory is a screen of its own, and a key pressed over it is not for the
+// game. What stays the engine's: Escape (it closes the dialog), PrintScreen, and talking - chat and the push to talk
+// keys (PASS_ACTIONS), so TFAR and ACRE2 still work from the window. A field with the cursor in it had its keys
+// above; a window that attached has its own handlers (the Arsenal).
+if !(_key in actionKeys "Gear") exitWith {
+    call FUNC(isInventoryMode) && {!(_key in [DIK_ESCAPE, DIK_PRINTSCREEN])} && {PASS_ACTIONS findIf {_key in actionKeys _x} < 0}
+};
 if (diag_tickTime - GVAR(openedAt) < GEAR_KEY_GRACE) exitWith {true};
 
-_display closeDisplay 2;
+["the Gear key"] call FUNC(closeDisplay);
 true

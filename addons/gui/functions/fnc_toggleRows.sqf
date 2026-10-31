@@ -36,8 +36,5 @@ if (_index >= 0) then {
 // Containers that are gone go with them.
 GVAR(expanded) = GVAR(expanded) select {_x isEqualType "" || {!isNull _x}};
 
-private _display = uiNamespace getVariable [QGVAR(display), displayNull];
-
-if (!isNull _display) then {
-    [_display] call FUNC(build);
-};
+// The state is changed; the window is built once for a run of clicks (fnc_buildSoon).
+[] call FUNC(buildSoon);

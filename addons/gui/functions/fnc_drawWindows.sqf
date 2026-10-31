@@ -30,6 +30,9 @@ disableSerialization;
 
 params ["_display"];
 
+// A draw a click asked for (fnc_windowsSoon) and not yet done is this one.
+["windows"] call FUNC(coalesceDrop);
+
 call FUNC(clearWindows);
 
 if (isNull _display) exitWith {};

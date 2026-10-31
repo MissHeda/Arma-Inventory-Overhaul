@@ -2,61 +2,122 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * An item's picture turned a quarter round, fitted into a box - the picture of a tile that lies turned.
+ * An item's picture turned a quarter clockwise (issue #24), the way the footprint of a tile turned with R
+ * lies: the turned tiles' pictures (fnc_turnPicture) and the dragged ghost held turned (fnc_makeGhost).
  *
- * ctrlSetAngle turns a control in the screen's own units, which are not square in pixels: a picture
- * laid out upright and then turned came out squashed (phase 1 test). So the control is made in the
- * shape it needs before the turn to have the right one after it - its width, which ends up running
- * down the screen, measured in the screen's heights, its height in its widths - and the picture is
- * stretched to it (ST_PICTURE without keeping its shape), sized by the picture's own proportions.
+ * How the engine turns a picture: ctrlSetAngle works on a plain static picture (ST_PICTURE) and turns what
+ * it draws about a point given as a share of the control itself - [0.5, 0.5] is its middle. Two things broke
+ * the earlier tries (0.4.7 to 0.5.17) and are left out here:
+ * - The picture kept its shape (ST_KEEP_ASPECT_RATIO). That fit is worked out on the box as it is turned, so a
+ *   picture that is not square came out squashed. EINV_PictureTurned stretches its texture over the control
+ *   instead, and the control is made in the texture's own shape (getTextureInfo), in whole pixels, so the
+ *   stretch is no stretch at all and the turn only swaps width and height on the screen.
+ * - A turned control inside a scrolled or moved controls group is drawn in the wrong place. The caller makes it
+ *   on the display (fnc_turnPicture keeps it over its tile; the ghost is on the display anyway).
+ *
+ * The control is fitted so that, turned, it fills the box along its longer side: shown, it is as wide as the
+ * control is high and as high as it is wide. An item's icon= scale makes it larger or smaller, never larger
+ * than the rectangle it must stay in; its offsets turn with it (what the upright picture moves right the
+ * turned one moves down, what it moves down the turned one moves left), and its middle is held inside that
+ * rectangle. The control keeps its turn in QGVAR(angle), so whoever moves it turns it again after the commit.
+ *
+ * With "Log window timings (debug)" on, the RPT gets one line per texture and box size: what the texture says
+ * of its shape, the box, the control before the turn and where it lies, and what ctrlAngle reads back.
  *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Controls group to create it in, or controlNull for the display <CONTROL>
- * 2: The box it lies in, [x, y, w, h] as it shows <ARRAY>
+ * 2: The box it is fitted into, [x, y, w, h] as it shows (the turned footprint) <ARRAY>
  * 3: Texture <STRING>
  * 4: Colour <ARRAY> (default: [1, 1, 1, 1])
- * 5: Width to height of the picture, when the texture does not say <NUMBER> (default: 1)
+ * 5: The icon, [scale, across, down] (the item's "icon") <ARRAY> (default: [1, 0, 0])
+ * 6: The rectangle it must stay in, [x, y, w, h]; the box when left out <ARRAY> (default: [])
+ * 7: The size the offsets are a share of, [w, h]; the rectangle's own when left out <ARRAY> (default: [])
  *
  * Return Value:
  * The picture <CONTROL>
  *
  * Example:
- * [_display, controlNull, [0.5, 0.2, 0.04, 0.16], _picture, [1, 1, 1, 1], 2] call einv_gui_fnc_uiPictureTurned;
+ * [_display, controlNull, [0.5, 0.2, 0.04, 0.16], _picture] call einv_gui_fnc_uiPictureTurned;
  *
  * Public: No
  */
 
 disableSerialization;
 
-params ["_display", "_parent", "_rect", "_texture", ["_color", [1, 1, 1, 1]], ["_aspect", 1]];
-_rect params ["_left", "_top", "_width", "_height"];
+params [
+    "_display", "_parent", "_box", "_texture", ["_color", [1, 1, 1, 1]], ["_icon", ICON_PLAIN, [[]]], ["_clip", []], ["_share", []]
+];
 
+_box params ["_boxX", "_boxY", "_boxW", "_boxH"];
+_icon params [["_scale", 1], ["_across", 0], ["_down", 0]];
+
+if (_clip isEqualTo []) then {
+    _clip = +_box;
+};
+
+_clip params ["_clipX", "_clipY", "_clipW", "_clipH"];
+
+if (_share isEqualTo []) then {
+    _share = [_clipW, _clipH];
+};
+
+_share params ["_shareW", "_shareH"];
+
+// The texture's own shape, width to height.
 private _info = getTextureInfo _texture;
+private _aspect = 1;
 
 if (_info isEqualType [] && {(_info param [0, 0]) > 0} && {(_info param [1, 0]) > 0}) then {
     _aspect = (_info select 0) / (_info select 1);
 };
 
-// The box in pixels. Turned, the picture's width runs down it and its height across.
-private _boxW = _width / pixelW;
-private _boxH = _height / pixelH;
-private _long = _boxH min (_boxW * _aspect);
-private _short = _long / _aspect;
+// In pixels. Turned, the control shows _ctrlH wide and _ctrlW high, and _ctrlW is _aspect times _ctrlH.
+private _boxWp = _boxW / pixelW;
+private _boxHp = _boxH / pixelH;
+private _ctrlH = (_boxWp min (_boxHp / _aspect)) * (_scale max 0.05);
+private _ctrlW = _ctrlH * _aspect;
 
-// Before the turn: as wide as it will be high, in heights, and as high as it will be wide, in widths.
-private _ctrlW = _long * pixelH;
-private _ctrlH = _short * pixelW;
+// Never larger than the rectangle it must stay in.
+private _fit = ((_clipW / pixelW) / (_ctrlH max 1)) min ((_clipH / pixelH) / (_ctrlW max 1)) min 1;
 
-private _ctrl = [_display, "EINV_PictureStretch", _parent, [
-    _left + (_width - _ctrlW) / 2,
-    _top + (_height - _ctrlH) / 2,
-    _ctrlW,
-    _ctrlH
+_ctrlW = (round (_ctrlW * _fit)) max 1;
+_ctrlH = (round (_ctrlH * _fit)) max 1;
+
+// Shown, in screen units.
+private _shownW = _ctrlH * pixelW;
+private _shownH = _ctrlW * pixelH;
+
+// The offsets turn with the picture, and its middle stays inside the rectangle.
+private _centerX = _boxX + _boxW / 2 - _down * _shareW;
+private _centerY = _boxY + _boxH / 2 + _across * _shareH;
+
+_centerX = (_centerX max (_clipX + _shownW / 2)) min (_clipX + _clipW - _shownW / 2);
+_centerY = (_centerY max (_clipY + _shownH / 2)) min (_clipY + _clipH - _shownH / 2);
+
+private _ctrl = [_display, "EINV_PictureTurned", _parent, [
+    _centerX - _ctrlW * pixelW / 2, _centerY - _ctrlH * pixelH / 2, _ctrlW * pixelW, _ctrlH * pixelH
 ]] call FUNC(uiCreate);
 
-_ctrl ctrlSetText _texture;
+_ctrl ctrlSetText ([_texture] call FUNC(safePicture));
 _ctrl ctrlSetTextColor _color;
-_ctrl ctrlSetAngle [90, 0.5, 0.5];
+_ctrl ctrlSetAngle [90, 0.5, 0.5, true];
+_ctrl setVariable [QGVAR(angle), 90];
+_ctrl setVariable [QGVAR(shown), [_shownW, _shownH]];
+
+if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
+    private _logged = uiNamespace getVariable [QGVAR(turnLogged), createHashMap];
+    private _key = format ["%1|%2|%3", _texture, round _boxWp, round _boxHp];
+
+    if !(_key in _logged) then {
+        _logged set [_key, true];
+        uiNamespace setVariable [QGVAR(turnLogged), _logged];
+
+        private _boxPixels = [round _boxWp, round _boxHp];
+        private _ctrlPixels = [_ctrlW, _ctrlH, ctrlPosition _ctrl, ctrlAngle _ctrl, ["group", "display"] select (isNull _parent)];
+
+        INFO_4("turned picture: %1 (texture %2), box %3 px, control before the turn and where (w h, position, ctrlAngle, made on) %4",_texture,_info,_boxPixels,_ctrlPixels);
+    };
+};
 
 _ctrl

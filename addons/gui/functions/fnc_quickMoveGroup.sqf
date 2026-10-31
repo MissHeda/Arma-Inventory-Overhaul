@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * A double click on one of several selected tiles, or Delete and "Drop" in the menu with a selection: the
+ * A double click on one of several selected tiles, or Delete with a selection: the
  * whole selection moves at once.
  *
  *   Move over - from the unit's own storage to the containers of the loot column in the order it shows

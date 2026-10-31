@@ -1,148 +1,98 @@
-// Arsenal boxes: telling them apart, opening one from the inventory window
-PREP(isArsenalBox);
+// ACE Arsenal's grid panel: ACE's display opened and closed, the open container and the panel's place
+PREP(onOpened);
+PREP(onClosed);
+PREP(selected);
+PREP(panelRect);
+PREP(isOver);
+
+// The hook table the inventory's engine is attached with, and the hooks themselves
+PREP(hooks);
+PREP(layout);
+PREP(footer);
+PREP(toggleCollapse);
+PREP(onFrame);
+PREP(hoverConfirm);
+PREP(onMouse);
+PREP(onClick);
+PREP(onWheel);
+PREP(onKey);
+PREP(dragCheck);
+PREP(onDrop);
+PREP(menu);
+
+// The staging space under the container's grid
+PREP(staging);
+PREP(growStaging);
+
+// Dragging an item out of ACE's list, and putting new things in - into a kit too
+PREP(onListPress);
+PREP(listDrag);
+PREP(addTo);
+PREP(listToKit);
+
+// Enhanced First Aid Kits' kits tab: whether it is open and the kit picked, its list in ACE's right column, the
+// note where the kit has no grid, and that list's rows greyed by the kit's cells
+PREP(focusedKit);
+PREP(rightList);
+PREP(drawNote);
+PREP(ungreyKit);
+
+// Taking things out of the open container or the staging space
+PREP(remove);
+PREP(removeKind);
+
+// Following ACE's adds and removals: what the container held, what had no room, ACE's list kept right
+PREP(countAll);
+PREP(keepPlaces);
+PREP(stageOverflow);
+PREP(snapshot);
+PREP(onCargoChanged);
+PREP(onItemsChanged);
+PREP(reconcile);
+PREP(sayNoRoom);
+PREP(tellAce);
+PREP(settle);
+PREP(syncAce);
+PREP(noteOpen);
+PREP(ungrey);
+PREP(pictures);
+
+// Opening an arsenal: from the inventory's menu, and ACE's with a vanilla box's items
 PREP(canOpen);
 PREP(open);
+PREP(openBI);
 
-// Adding in ACE's own window: what has no room on the grid comes back out
-PREP(getCargo);
-PREP(rememberCargo);
-PREP(onCargoChanged);
+// Arsenal boxes
+PREP(isArsenalBox);
+PREP(isBIBox);
+PREP(canOpenBI);
 
-// Whole loadouts in ACE's own window: telling the player what does not fit
+// What does not fit the grid, said once
 PREP(checkOverflow);
 PREP(reportOverflow);
 
-// The session: opening, handing over from ACE's display, closing, Eden, the window's hooks, keys, header
-PREP(openWindow);
-PREP(handOver);
-PREP(open3DEN);
-PREP(onLoad);
-PREP(onUnload);
-PREP(sessionStart);
-PREP(readSupply);
-PREP(sessionEnd);
-PREP(edenStart);
-PREP(edenEnd);
-PREP(hooks);
-PREP(keepOpen);
-PREP(theme);
-PREP(context);
-PREP(drawHeader);
-PREP(footerKeys);
-PREP(onKey);
-PREP(toggleHidden);
-PREP(onFrame);
-PREP(afterBuild);
-PREP(onBoxRefresh);
-PREP(onBoxRemoved);
+// What does not fit when ACE's window closes: asked first (ACE's Close button and Escape are taken over), then taken out
+PREP(findOverflow);
+PREP(dropOverflow);
+PREP(interceptClose);
+PREP(onCloseButton);
+PREP(onAceKey);
+PREP(confirmClose);
+PREP(answerConfirm);
+PREP(closeConfirm);
+PREP(onConfirmMouse);
+
+// The vanilla Virtual Arsenal: the wrapper's question, the items of a vanilla box, the safety net, the red
+// screen, and what is left alone
 PREP(compatCheck);
-PREP(close);
-PREP(openAce);
-PREP(isOpen);
-PREP(message);
-
-// The camera round the soldier and its mouse
-PREP(cameraStart);
-PREP(cameraStop);
-PREP(cameraFrame);
-PREP(cameraRect);
-PREP(cameraReset);
-PREP(onMouseDown);
-PREP(onMouseUp);
-PREP(onWheel);
-
-// The catalog: categories, rows, the list shown, the column and its cards
-PREP(layout);
-PREP(drawColumn);
-PREP(drawCatalogBar);
-PREP(drawCatalog);
-PREP(bindCatalog);
-PREP(categories);
-PREP(categoryForSlot);
-PREP(catalogRow);
-PREP(catalogList);
-PREP(catalogFrame);
-PREP(catalogWheel);
-PREP(showCategory);
-PREP(refreshCatalog);
-PREP(onFilter);
-PREP(carriedCounts);
-PREP(toggleFavorite);
-PREP(openChoices);
-
-// Adding and equipping: dropping, quick adds, swaps, trimming to the grid
-PREP(onDrop);
-PREP(dragCheck);
-PREP(addItem);
-PREP(quickAdd);
-PREP(equipItem);
-PREP(swapWeapon);
-PREP(swapContainer);
-PREP(storeAway);
-PREP(trimToFit);
-PREP(fill);
-PREP(stepCount);
-
-// Giving back, clicks, menus and marks
-PREP(onClick);
-PREP(onSlotClick);
-PREP(menu);
-PREP(giveBack);
-PREP(giveBackAll);
-PREP(emptyContainer);
-PREP(freeKits);
-PREP(isUnique);
-PREP(arm);
-PREP(tileBadge);
-PREP(hintParts);
-PREP(drawTargets);
-PREP(aceCargoEvent);
-PREP(weaponEvents);
-PREP(applyIdentity);
-PREP(copyClass);
-
-// Loadouts: the view, saving and loading, the clipboard
-PREP(drawLoadouts);
-PREP(loadoutsData);
-PREP(loadoutsFrame);
-PREP(verifyStep);
-PREP(loadoutSave);
-PREP(loadoutLoad);
-PREP(loadoutRename);
-PREP(loadoutDelete);
-PREP(loadoutShare);
-PREP(loadoutCopy);
-PREP(loadoutMakeDefault);
-PREP(loadoutImport);
-PREP(loadoutExport);
-PREP(applyLoadout);
-PREP(clipboardRead);
-PREP(clipboardWrite);
-PREP(onSubmit);
-
-// The vanilla Virtual Arsenal: the wrapper's helpers, the block screen, the safety net
-PREP(biInit);
-PREP(biCountHandlers);
-PREP(biMissionHooks);
 PREP(handleBIOpen);
 PREP(biItems);
-PREP(isBIBox);
-PREP(canOpenBI);
+PREP(biInit);
+PREP(biSafetyNet);
+PREP(biCountHandlers);
+PREP(biMissionHooks);
+PREP(biLeaveAlone);
+PREP(checkBIOverride);
 PREP(showBlocked);
 PREP(onBlockedLoad);
 PREP(onBlockedKey);
-PREP(biSafetyNet);
-PREP(biLeaveAlone);
-PREP(checkBIOverride);
-
-// The inspect card's rows, and what ACE adds to the catalog's sorts and the slots' menus
-PREP(inspectRows);
-PREP(aceSorts);
-PREP(aceActions);
-
-// The soldier on show, the view, the way over from ACE's window and out of Arsenal.VR, ACRE's notifications
-PREP(cycleVision);
-PREP(showItem);
-PREP(aceButton);
-PREP(leaveVR);
-PREP(acreDisplay);

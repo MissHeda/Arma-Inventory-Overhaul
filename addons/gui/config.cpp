@@ -21,5 +21,6 @@ class CfgPatches {
 #include "CfgEventHandlers.hpp"
 #include "CfgEinvSounds.hpp"
 #include "CfgActions.hpp"
+#include "Cfg3DEN.hpp"
 #include "RscBase.hpp"
 #include "RscInventory.hpp"

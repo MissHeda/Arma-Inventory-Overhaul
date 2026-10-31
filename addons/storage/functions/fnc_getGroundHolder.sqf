@@ -4,7 +4,8 @@
  * Where something put on the ground goes (op putGround): the nearest pile within GROUND_RANGE of the
  * ground point that is not empty, belongs to this machine and can be seen from the eyes - the same floor,
  * nothing in the way (fnc_isNear) -, else a fresh one on the point. Never an empty pile: the engine
- * deletes those.
+ * deletes an ordinary one it takes for empty, and a fresh one is a GroundWeaponHolder_Scripted, which the
+ * engine leaves alone (fnc_pruneScriptedPile removes it once it is emptied).
  *
  * The ground point is the surface under the feet taken when the move was asked for ("where",
  * fnc_groundPos); without one - settlement for a requester who sat in a vehicle that is gone, swam or
@@ -19,6 +20,10 @@
  *    OBJECT>
  * 1: What the line of sight ignores - the requester <OBJECT> (default: objNull - the unit given as 0)
  * 2: A fresh pile, whatever lies there <BOOL> (default: false)
+ * 3: Only a pile of ours may be joined - a GroundWeaponHolder_Scripted -, else a fresh one <BOOL>
+ *    (default: false). For a backpack: the engine keeps a backpack just taken off in a plain holder of
+ *    its own for the rest of the frame and deletes both at its end - joined, a dropped backpack went
+ *    with them (0.4.1).
  *
  * Return Value:
  * Weapon holder, objNull when there is no point to put it at <OBJECT>
@@ -29,7 +34,7 @@
  * Public: No
  */
 
-params [["_where", [], [[], objNull]], ["_ignore", objNull, [objNull]], ["_fresh", false, [false]]];
+params [["_where", [], [[], objNull]], ["_ignore", objNull, [objNull]], ["_fresh", false, [false]], ["_ownOnly", false, [false]]];
 
 // Older callers hand a unit: where it stands now.
 if (_where isEqualType objNull) then {
@@ -68,6 +73,8 @@ if (!_fresh) then {
         local _x
         && {!isObjectHidden _x}
         && {isNull attachedTo _x}
+        && {!_ownOnly || {typeOf _x == "GroundWeaponHolder_Scripted"}}
+        && {(everyBackpack _x) findIf {_x getVariable [QGVAR(takenOff), false]} < 0}
         && {([_x] call FUNC(getContents)) isNotEqualTo []}
         && {[_eyes, _point, _x, GROUND_RANGE, _ignore] call FUNC(isNear)}
     }) param [0, objNull];
@@ -75,7 +82,11 @@ if (!_fresh) then {
 
 if (!isNull _pile) exitWith {_pile};
 
-_pile = createVehicle ["GroundWeaponHolder", [0, 0, 0], [], 0, "CAN_COLLIDE"];
+// A scripted holder: an ordinary GroundWeaponHolder holding only a backpack - an object of its own, no cargo
+// the engine counts - is taken for empty and deleted with the backpack in it (0.4.0). The search above
+// still finds it, it is a GroundWeaponHolder as well; the empty ones are ours to delete
+// (fnc_pruneScriptedPile).
+_pile = createVehicle ["GroundWeaponHolder_Scripted", [0, 0, 0], [], 0, "CAN_COLLIDE"];
 _pile setPosASL _point;
 
 _pile

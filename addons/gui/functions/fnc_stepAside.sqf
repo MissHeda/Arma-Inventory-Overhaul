@@ -7,7 +7,8 @@
  * and ACRE2 refuse to open theirs while any dialog is open, so it cannot be opened over this window.
  *
  * The code runs a moment after the window closed (STEP_ASIDE_DELAY), as TFAR's own radio menu waits
- * before it opens a radio. If it opened a dialog, the window waits for that to close; if it opened none -
+ * before it opens a radio - and only once no dialog is open any more, for at most STEP_ASIDE_WAIT seconds: TFAR and ACRE2 quietly
+ * open nothing while one is, and a closing dialog can take longer than a frame or two. If it opened a dialog, the window waits for that to close; if it opened none -
  * the mod said why not - the window comes straight back. The window opens fresh: the uniforms, vests and
  * backpacks opened from inside a container are closed again, and so are the kits' windows.
  *
@@ -30,10 +31,10 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 private _back = [GVAR(unit), GVAR(container), GVAR(secondary)];
 
 if (!isNull _display) then {
-    _display closeDisplay 2;
+    ["stepped aside for another mod's dialog - it opens again when that one closes"] call FUNC(closeDisplay);
 };
 
-[{
+private _fnc_run = {
     params ["_code", "_args", "_back"];
 
     private _fnc_back = {
@@ -52,4 +53,13 @@ if (!isNull _display) then {
     };
 
     [{!dialog}, _fnc_back, _back] call CBA_fnc_waitUntilAndExecute;
-}, [_code, _args, _back], STEP_ASIDE_DELAY] call CBA_fnc_waitAndExecute;
+};
+
+[{
+    params ["_fnc_run", "_runArgs"];
+
+    [{!dialog}, _fnc_run, _runArgs, STEP_ASIDE_WAIT, {
+        WARNING("stepped aside, but a dialog was still open - the other mod's dialog may refuse to open");
+        _this call (_this select 3);
+    }] call CBA_fnc_waitUntilAndExecute;
+}, [_fnc_run, [_code, _args, _back, _fnc_run]], STEP_ASIDE_DELAY] call CBA_fnc_waitAndExecute;

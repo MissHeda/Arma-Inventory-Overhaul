@@ -6,19 +6,15 @@
  *
  * The answer to one of the window's transactions (fnc_onAnswer), once fnc_onFrame finishes it - the
  * places it names arrived, or it waited long enough: its in-flight entry goes (fnc_drawPending), what
- * moved is learnt where it is searched (fnc_learn), the window is built again with the landed tiles lit
- * up, and the hint sums it up - why not for a single move, "Moved 3 of 5" for several, what was put back
+ * moved is learnt where it is searched (fnc_learn), the sections it touched are drawn again with the
+ * landed tiles lit up - the window is built anew only when sections came or went, or the unit's gear
+ * changed (fnc_refresh; a build on every move showed as a small stutter, a tester on 0.4.7) -, and the
+ * hint sums it up - why not for a single move, "Moved 3 of 5" for several, what was put back
  * or onto the ground because there was no room any more, "Put elsewhere" when the cell asked for was
  * taken meanwhile. What lies around is read anew first (fnc_readNearby), so a pile the answer names shows
  * at once among the nearby boxes (einv_gui_showNearby); a pile that is not among them - those switched
  * off, or the pile out of their sight or reach - becomes what the window looks into: a new pile has to
  * show up somewhere.
- *
- * A move that was refused as too heavy says by how much: the in-flight record carries, for each move in the
- * order of the moves, where it went, what it was and how many (fnc_sendMoves), and the refused one's
- * container, entry and count go to fnc_flashHint, which names the kilograms (fnc_weightText). A hint a quick
- * move left for its answer (GVAR(pendingHint)) is only for one that went: any refusal, anything put back or
- * put on the ground clears it - the refusal's hint wins.
  *
  * The sound of an answer is played here, of the first item that really moved (fnc_feelAnswer, with what
  * fnc_sendMoves worked out when the moves were sent); a refused change is silent, the hint says why. A rebuild
@@ -85,11 +81,9 @@ private _fnc_adopt = {
 if ((_input param [1, objNull]) isEqualType []) exitWith {
     _input params [["_id", "", [""]], ["_summary", [], [[]]], "", ["_args", [], [[]]]];
 
-    // How its moves sound (fnc_sendMoves kept it with the record), played below once it is known how many went,
-    // and what a hint about each move needs - where it went, what, how many.
+    // How its moves sound (fnc_sendMoves kept it with the record), played below once it is known how many went.
     private _flight = GVAR(inFlight) getOrDefault [_id, []];
     private _feels = _flight param [3, []];
-    private _details = _flight param [4, []];
 
     GVAR(inFlight) deleteAt _id;
 
@@ -119,13 +113,11 @@ if ((_input param [1, objNull]) isEqualType []) exitWith {
     private _grids = uiNamespace getVariable [QGVAR(grids), []];
     private _moved = 0;
     private _reason = "";
-    private _reasonAt = -1;
     private _elsewhere = false;
     private _landed = [];
 
     {
         private _record = _x;
-        private _recordIndex = _forEachIndex;
         private _kind = _record getOrDefault ["kind", "move"];
         private _roles = _record getOrDefault ["roles", createHashMap];
         private _from = _record getOrDefault ["from", objNull];
@@ -207,7 +199,6 @@ if ((_input param [1, objNull]) isEqualType []) exitWith {
 
                     if !(_step in ["", "Skipped", "Bounced", "NotLocal"]) exitWith {
                         _reason = _step;
-                        _reasonAt = _recordIndex;
                     };
                 } forEach ["take", "land"];
 
@@ -228,24 +219,8 @@ if ((_input param [1, objNull]) isEqualType []) exitWith {
         } else {
             if (_reason isNotEqualTo "") then {
                 _hint = [_reason];
-
-                // Too heavy: for which container, what and how many (fnc_sendMoves recorded it).
-                private _detail = _details param [_reasonAt, []];
-
-                if (_reason isEqualTo "TooHeavy" && {_detail isEqualType []} && {count _detail >= 3}) then {
-                    _detail params ["_heavyTo", "_heavyEntry", "_heavyCount"];
-
-                    if (_heavyTo isEqualType objNull && {!isNull _heavyTo} && {_heavyEntry isEqualType []}) then {
-                        _hint = ["TooHeavy", [_heavyTo, [_heavyEntry] call EFUNC(storage,entryFromArray), _heavyCount]];
-                    };
-                };
             };
         };
-    };
-
-    // A refusal, or something put back, comes with its own hint: what a quick move left for its answer is void.
-    if (_moved < _total || {_back > 0} || {_vehicle + _ground > 0}) then {
-        GVAR(pendingHint) = [];
     };
 
     if (_hint isEqualTo []) then {
@@ -276,7 +251,9 @@ if ((_input param [1, objNull]) isEqualType []) exitWith {
         [_pile] call _fnc_adopt;
     };
 
-    [_display] call FUNC(build);
+    // Only what changed is drawn again: the sections the moves touched (and the weight card when one is the
+    // unit's own), or the whole window when sections came or went - a pile adopted above, a uniform put on.
+    [_display] call FUNC(refresh);
 
     if (_options getOrDefault ["flash", true]) then {
         {
@@ -284,7 +261,7 @@ if ((_input param [1, objNull]) isEqualType []) exitWith {
         } forEach _landed;
     };
 
-    // After the build, which gives the hint back to what the mouse is on.
+    // After the drawing, which gives the hint back to what the mouse is on.
     if (_hint isNotEqualTo []) then {
         _hint call FUNC(flashHint);
     };

@@ -7,13 +7,13 @@
  * for a slot what the slot is for. On nothing, the hint says what can be done - with several tiles
  * selected, what can be done with them.
  *
- * Two more places have something to say, and are found after the slots: a free cell of a container (hover
- * ["cell", grid index]) that is nearly or quite full by weight says so with the numbers, and the areas that
- * registered themselves in uiNamespace infoAreas - the weight card, a section's caption line (hover ["info",
- * index]) - explain the tiers and the container's load (fnc_infoHint). Everything else free says what can be done.
+ * One more place has something to say, and is found after the slots: the areas that registered themselves
+ * in uiNamespace infoAreas - the weight card, a section's caption line (hover ["info", index]) - explain
+ * the tiers and what the container's contents weigh (fnc_infoHint). Everything else free, a free cell
+ * included, says what can be done.
  *
  * What the pointer carries beside it: the item's name, or - over a vest, uniform, helmet or backpack, one that
- * lies in a container or hangs on a body or in the Arsenal's catalog, not the player's own worn one - the
+ * lies in a container or hangs on a body, not the player's own worn one - the
  * comparison card with what the player wears there (fnc_compareRows, fnc_drawCompare), unless
  * einv_gui_compareTooltip is off. Both are placed beside the pointer by fnc_onFrame; the one that shows is
  * uiNamespace tipShown. A radio of TFAR or ACRE2 brings its channel and frequency after its name, and its
@@ -25,12 +25,29 @@
  * key], ...] written after the window's own - on nothing, the whole hint. A tile may give its size to show
  * ("size") where it is no larger than its cell.
  *
+ * A frame costs as little as it can: where every grid, slot and info area lies is kept (fnc_hoverGeometry,
+ * worked out again only when a column scrolled, a window moved or the lists changed), only the grids whose
+ * cells lie under the mouse are asked for a cell, and a mouse that moves inside the cell of the tile found
+ * last (or inside its slot), with nothing else reaching into it, finds the same and ends at once - no
+ * lookup, no hint, no name at the mouse made again. Nothing is made or deleted unless what the mouse is
+ * on changed.
+ *
  * Tiles are found through their grid (fnc_screenToCell, fnc_tileAt), so scrolling is taken into
  * account; slots through the areas they registered in (uiNamespace getVariable [QGVAR(slots), []]). A slot that also registered where
  * it lies in its group - a fourth element, the HashMap with "rel" and "parent" fnc_gridOrigin takes -
  * is found where its scrolled group shows it now, and only on the part that shows (fnc_slotRect). A
- * tile gets brighter, a slot an outline in the accent colour that follows its round corners (fnc_uiRing).
+ * tile gets brighter and, as a slot does, an outline in the accent colour: a tile gets the square frame
+ * of the Ctrl selection, two pixels thick (fnc_hoverOutline; round at the corner of the compartment's panel it touches) - or the cells of a shaped tile (fnc_uiShape) -
+ * a slot (weapon, attachment, worn gear, hotbar) a ring with its own round corners (fnc_uiRing); a free
+ * cell of a grid that holds things (hover ["cell", grid, column, row]) gets the square frame around that
+ * one cell, and no hint but the idle one; there is one outline at a time,
+ * for the tile, slot or cell under the mouse, made in the group it lies in so it scrolls and
+ * clips with it, and deleted when the mouse leaves (a drag takes the tile's outline away,
+ * fnc_startDrag; the footprint shows then). The name at the mouse always lies over that outline: one made
+ * on the display itself comes after the name, so the name is made again over it (fnc_raiseTooltip).
  *
+ * The box of a uniform, vest or backpack opened from inside a container is named and hinted as its tile
+ * in that container (fnc_boxTile), the comparison card included.
  * Only what lies on top there counts (fnc_topAt): over the inspect card nothing, over a kit window only
  * that window's tiles - never a tile or slot of a column or another window under it.
  *
@@ -54,49 +71,145 @@ params ["_display", "_mouse", ["_force", false]];
 
 private _found = [];
 
+// What this call did, for the tally of the timing line (fnc_logFrame): "new" unless it ends sooner.
+GVAR(hoverNote) = "new";
+
 // What lies on top under the mouse: the inspect card hides all of the inventory under it (fnc_drawInspect),
 // a kit window all but its own grids - "inspect" is no grid's window.
 private _layer = [_mouse] call FUNC(topAt);
+private _held = false;
 
 if (_mouse isNotEqualTo [] && {_layer isNotEqualTo "inspect"}) then {
     _mouse params ["_mouseX", "_mouseY"];
 
+    // Where the grids, slots and info areas lie on the screen (fnc_hoverGeometry): worked out again only when
+    // something moved them, not for every mouse move.
+    private _geometry = [_force] call FUNC(hoverGeometry);
+
+    _geometry params ["_grids", "", "", "", "", "", "", "_gridBoxes", "_slotBoxes", "_areaBoxes"];
+
+    // Still on the tile or slot found last time, with nothing moved: there is nothing more to look for. The
+    // box is the cell (or the slot) with nothing else reaching into it, worked out when it was found.
+    private _hold = uiNamespace getVariable [QGVAR(hoverHold), []];
+
+    if (
+        !_force && {_hold isNotEqualTo []} && {(_hold select 0) isEqualRef _geometry} && {(_hold select 1) isEqualTo _layer}
+        && {GVAR(hover) isEqualTo (_hold select 2)} && {
+            (_hold select 3) params ["_holdLeft", "_holdTop", "_holdRight", "_holdBottom"];
+
+            _mouseX >= _holdLeft && {_mouseX < _holdRight} && {_mouseY >= _holdTop} && {_mouseY < _holdBottom}
+        }
+    ) exitWith {
+        _held = true;
+    };
+
+    // The first grid of this layer that has a cell under the mouse: only grids whose cells that show lie
+    // there are asked.
     private _cell = [];
-    private _gridIndex = (uiNamespace getVariable [QGVAR(grids), []]) findIf {
-        (_x getOrDefault ["window", ""]) isEqualTo _layer && {
-            _cell = [_x, _mouse] call FUNC(screenToCell);
+    private _gridIndex = _gridBoxes findIf {
+        _x params ["_grid", "_window", "_visible", "_originX", "_originY", "_box"];
+        _box params ["_boxLeft", "_boxTop", "_boxRight", "_boxBottom"];
+
+        _window isEqualTo _layer && {_mouseX >= _boxLeft} && {_mouseX < _boxRight} && {_mouseY >= _boxTop} && {_mouseY < _boxBottom} && {
+            _cell = [_grid, _mouse, false, [_visible, _originX, _originY]] call FUNC(screenToCell);
             _cell isNotEqualTo []
         }
     };
 
     if (_gridIndex >= 0) exitWith {
-        private _tileIndex = [(uiNamespace getVariable [QGVAR(grids), []]) select _gridIndex, _cell] call FUNC(tileAt);
+        private _grid = _grids select _gridIndex;
+        private _tileIndex = [_grid, _cell] call FUNC(tileAt);
 
+        // A tile that a category hides (fnc_applyFilter) is not there for the mouse: its cells look empty, so they are found as cells.
+        if (_tileIndex >= 0 && {((_grid get "tiles") select _tileIndex) getOrDefault ["filteredOut", false]}) then {
+            _tileIndex = -1;
+        };
+
+        // A free cell of a grid that holds things is found too, to get its outline; a grid that only shows
+        // (a list, the overflow row) has no free cell to point at.
         if (_tileIndex >= 0) then {
             _found = ["tile", _gridIndex, _tileIndex];
         } else {
-            // A free cell: nearly full by weight, the hint says so.
-            _found = ["cell", _gridIndex];
+            if (!(_grid getOrDefault ["virtual", true]) && {!(_grid getOrDefault ["overflow", false])}) then {
+                _found = ["cell", _gridIndex, _cell select 0, _cell select 1];
+            };
+        };
+
+        if (_found isNotEqualTo []) then {
+            // The cell it lies on, the part of it that shows, unless an earlier grid of the layer reaches into it.
+
+            (_gridBoxes select _gridIndex) params ["", "", "_visible", "_originX", "_originY"];
+            _cell params ["_col", "_row"];
+
+            private _pitchW = _grid get "cellW";
+            private _pitchH = _grid get "cellH";
+            private _holdLeft = _originX + ((_grid getOrDefault ["colX", []]) param [_col, _col * _pitchW]);
+            private _holdTop = _originY + ((_grid getOrDefault ["rowY", []]) param [_row, _row * _pitchH]);
+            private _holdRight = _holdLeft + _pitchW;
+            private _holdBottom = _holdTop + _pitchH;
+
+            if (_visible isNotEqualTo []) then {
+                _visible params ["_visibleX", "_visibleY", "_visibleW", "_visibleH"];
+
+                _holdLeft = _holdLeft max _visibleX;
+                _holdTop = _holdTop max _visibleY;
+                _holdRight = _holdRight min (_visibleX + _visibleW);
+                _holdBottom = _holdBottom min (_visibleY + _visibleH);
+            };
+
+            private _clear = true;
+
+            for "_i" from 0 to _gridIndex - 1 do {
+                (_gridBoxes select _i) params ["", "_otherWindow", "", "", "", "_otherBox"];
+                _otherBox params ["_otherLeft", "_otherTop", "_otherRight", "_otherBottom"];
+
+                if (
+                    _otherWindow isEqualTo _layer && {_otherLeft < _holdRight} && {_otherRight > _holdLeft}
+                    && {_otherTop < _holdBottom} && {_otherBottom > _holdTop}
+                ) exitWith {
+                    _clear = false;
+                };
+            };
+
+            uiNamespace setVariable [QGVAR(hoverHold), [[], [_geometry, _layer, _found, [_holdLeft, _holdTop, _holdRight, _holdBottom]]] select _clear];
         };
     };
 
     // The slots all lie in the columns and on the equipment cards, under every window.
     if (_layer isNotEqualTo "") exitWith {};
 
-    private _slotIndex = (uiNamespace getVariable [QGVAR(slots), []]) findIf {
-        ([_x] call FUNC(slotRect)) params [["_left", 0], ["_top", 0], ["_width", 0], ["_height", 0]];
+    private _slotIndex = _slotBoxes findIf {
+        _x params ["_left", "_top", "_right", "_bottom"];
 
-        _mouseX >= _left && {_mouseX < _left + _width} && {_mouseY >= _top} && {_mouseY < _top + _height}
+        _mouseX >= _left && {_mouseX < _right} && {_mouseY >= _top} && {_mouseY < _bottom}
     };
 
     if (_slotIndex >= 0) then {
         _found = ["slot", _slotIndex];
+
+        // Its box, unless a grid of the columns or an earlier slot reaches into it.
+        (_slotBoxes select _slotIndex) params ["_holdLeft", "_holdTop", "_holdRight", "_holdBottom"];
+
+        private _clear = (_gridBoxes findIf {
+            _x params ["", "_window", "", "", "", "_other"];
+            _other params ["_otherLeft", "_otherTop", "_otherRight", "_otherBottom"];
+
+            _window isEqualTo "" && {_otherLeft < _holdRight} && {_otherRight > _holdLeft} && {_otherTop < _holdBottom} && {_otherBottom > _holdTop}
+        }) < 0 && {
+            (_slotBoxes select [0, _slotIndex]) findIf {
+                _x params ["_otherLeft", "_otherTop", "_otherRight", "_otherBottom"];
+
+                _otherLeft < _holdRight && {_otherRight > _holdLeft} && {_otherTop < _holdBottom} && {_otherBottom > _holdTop}
+            } < 0
+        };
+
+        uiNamespace setVariable [QGVAR(hoverHold), [[], [_geometry, _layer, _found, [_holdLeft, _holdTop, _holdRight, _holdBottom]]] select _clear];
     } else {
         // The weight card and the captions (fnc_infoHint).
-        private _infoIndex = (uiNamespace getVariable [QGVAR(infoAreas), []]) findIf {
-            ([_x] call FUNC(slotRect)) params [["_left", 0], ["_top", 0], ["_width", 0], ["_height", 0]];
+        private _infoIndex = _areaBoxes findIf {
+            _x params ["_left", "_top", "_right", "_bottom"];
 
-            _mouseX >= _left && {_mouseX < _left + _width} && {_mouseY >= _top} && {_mouseY < _top + _height}
+            _mouseX >= _left && {_mouseX < _right} && {_mouseY >= _top} && {_mouseY < _bottom}
         };
 
         if (_infoIndex >= 0) then {
@@ -105,27 +218,38 @@ if (_mouse isNotEqualTo [] && {_layer isNotEqualTo "inspect"}) then {
     };
 };
 
+// Nothing else to do: the hover is what it was.
+if (_held) exitWith {
+    GVAR(hoverNote) = "held";
+};
+
 private _fnc_tile = {
     params ["", "_gridIndex", "_tileIndex"];
 
     (((uiNamespace getVariable [QGVAR(grids), []]) param [_gridIndex, createHashMap]) getOrDefault ["tiles", []]) param [_tileIndex, createHashMap]
 };
 
-// A tile in its own colour, or a little brighter; the slot frame around a slot, or hidden.
+// Whether a ring was made on the display itself just now: it lies over what was made before it, the name at
+// the mouse included, which is then made again over it (fnc_raiseTooltip).
+private _ringMade = false;
+
+// A tile in its own colour, or a little brighter; the outline around a tile, a slot or a free cell, or hidden.
 private _fnc_light = {
     params ["_hover", "_on"];
 
-    // Only tiles and slots light up.
-    if !((_hover param [0, ""]) in ["tile", "slot"]) exitWith {};
+    // Only tiles, slots and free cells light up.
+    if !((_hover param [0, ""]) in ["tile", "slot", "cell"]) exitWith {};
 
-    // A slot: an outline in the accent colour that follows its round corners (fnc_uiRing) - made in its
-    // column's group where it has one, so it scrolls and clips with the slot. It stays while the mouse is
-    // on that slot and goes with it.
+    // The outline goes with the hover, whichever it was.
+    if (!_on) then {
+        {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(hoverRing), []]);
+        uiNamespace setVariable [QGVAR(hoverRing), []];
+    };
+
+    // A slot: a ring with the slot's round corners (fnc_uiRing) - made in its column's group where it has
+    // one, so it scrolls and clips with the slot. It stays while the mouse is on that slot and goes with it.
     if ((_hover select 0) isEqualTo "slot") exitWith {
-        if (!_on) exitWith {
-            {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(hoverRing), []]);
-            uiNamespace setVariable [QGVAR(hoverRing), []];
-        };
+        if (!_on) exitWith {};
 
         if ((uiNamespace getVariable [QGVAR(hoverRing), []]) isNotEqualTo []) exitWith {};
 
@@ -143,37 +267,188 @@ private _fnc_light = {
             _rect = (_anchor get "rel") + [_slotRect select 2, _slotRect select 3];
         };
 
+        // The ring follows the round corners of the slot's own panel (fnc_drawSlot's radius).
         private _radius = (GVAR(theme) getOrDefault ["radius", 0]) min ((_rect select 3) / 4);
 
         uiNamespace setVariable [QGVAR(hoverRing), [
             _display, _parent, _rect, GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]], _radius
         ] call FUNC(uiRing)];
+
+        // In a group it lies under the name anyway: the group was made before it.
+        if (isNull _parent) then {
+            _ringMade = true;
+        };
+    };
+
+    // A free cell: the same outline around that one cell, in the group of its grid so it scrolls with it.
+    if ((_hover select 0) isEqualTo "cell") exitWith {
+        if (!_on) exitWith {};
+
+        if ((uiNamespace getVariable [QGVAR(hoverRing), []]) isNotEqualTo []) exitWith {};
+
+        _hover params ["", "_cellGridIndex", "_cellCol", "_cellRow"];
+
+        private _cellGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_cellGridIndex, createHashMap];
+
+        if (count _cellGrid == 0) exitWith {};
+
+        private _cellParent = _cellGrid getOrDefault ["parent", controlNull];
+        private _cellRect = [_cellGrid, _cellGrid get "rel", _cellCol, _cellRow] call FUNC(spanRect);
+
+        uiNamespace setVariable [QGVAR(hoverRing), [_display, _cellParent, _cellRect, _cellGrid] call FUNC(hoverOutline)];
+
+        if (isNull _cellParent) then {
+            _ringMade = true;
+        };
     };
 
     private _tile = _hover call _fnc_tile;
+
+    // A tile: the same outline around its footprint, wide and high as it lies (turned too), in the group of
+    // its column so it scrolls with the tile.
+    if (_on && {(uiNamespace getVariable [QGVAR(hoverRing), []]) isEqualTo []}) then {
+        private _tileGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_hover select 1, createHashMap];
+        private _box = _tile getOrDefault ["rect", []];
+
+        // A tile that lost its box (a page turned under it) is boxed again where its cells lie.
+        if (_box isEqualTo [] && {count _tileGrid > 0} && {count _tile > 0}) then {
+            _box = [
+                _tileGrid, _tileGrid get "rel", _tile getOrDefault ["col", 0], _tile getOrDefault ["row", 0],
+                _tile getOrDefault ["w", 1], _tile getOrDefault ["h", 1]
+            ] call FUNC(spanRect);
+        };
+
+        if (_box isNotEqualTo [] && {count _tileGrid > 0}) then {
+            private _tileParent = _tileGrid getOrDefault ["parent", controlNull];
+            private _tileHoles = _tile getOrDefault ["holes", []];
+            private _outline = [];
+
+            // A shaped tile on its own cells, as its border is drawn (fnc_createTile), two pixels thick.
+            if (
+                _tileHoles isNotEqualTo [] && {((_tile getOrDefault ["col", 0]) + (_tile getOrDefault ["w", 1])) <= (_tileGrid getOrDefault ["cols", 0])}
+            ) then {
+                private _footprint = [_tile getOrDefault ["w", 1], _tile getOrDefault ["h", 1], _tileHoles];
+                private _onGrid = [_tileGrid, _tile getOrDefault ["col", 0], _tile getOrDefault ["row", 0]];
+                private _accent = GVAR(theme) getOrDefault ["accent", [1, 1, 1, 1]];
+
+                {
+                    _outline append ([
+                        _display, _tileParent, [_box select 0, _box select 1], _tileGrid get "cellW", _tileGrid get "cellH",
+                        _footprint, _accent, "frame", _x, _onGrid
+                    ] call FUNC(uiShape));
+                } forEach [0, 1];
+            } else {
+                _outline = [_display, _tileParent, _box, _tileGrid] call FUNC(hoverOutline);
+            };
+
+            uiNamespace setVariable [QGVAR(hoverRing), _outline];
+
+            // In a group it lies under the name anyway: the group was made before it.
+            if (isNull _tileParent) then {
+                _ringMade = true;
+            };
+        };
+    };
+
     private _background = _tile getOrDefault ["background", controlNull];
     private _color = _tile getOrDefault ["color", []];
 
     if (isNull _background || {_color isEqualTo []}) exitWith {};
 
-    if (_on) then {
-        _color = +_color;
-        _color set [3, ((_color select 3) + HOVER_ALPHA) min 1];
+    // A tile that waits in the hands' queue keeps its tint when the light goes (fnc_queueColor).
+    if ((_tile getOrDefault ["queued", 0]) > 0) then {
+        _color = [_color] call FUNC(queueColor);
     };
 
-    _background ctrlSetBackgroundColor _color;
+    // Lit: a film's alpha goes up by HOVER_ALPHA; a solid surface (the palette's cells and tiles, fnc_theme), where more alpha would
+    // change nothing, goes as far towards white instead - what a white film of that strength over it would show.
+    if (_on) then {
+        _color = +_color;
+
+        if ((_color param [3, 1]) >= 1) then {
+            _color = ((_color select [0, 3]) apply {_x + (1 - _x) * HOVER_ALPHA}) + [1];
+        } else {
+            _color set [3, ((_color select 3) + HOVER_ALPHA) min 1];
+        };
+    };
+
+    // A shaped tile has a surface per run of its cells (fnc_createTile): all of them light up. Noted on the tile, so
+    // a redraw (fnc_drawTiles) puts the colour back on the tiles that were lit and touches no other.
+    _tile set ["lit", _on];
+
+    [_tile getOrDefault ["backgrounds", [_background]], _color] call FUNC(paintSurface);
 };
 
-if (!_force && {_found isEqualTo GVAR(hover)}) exitWith {
-    // A slot that did not change still moves when its column scrolls under a mouse that stands still.
-    if ((_found param [0, ""]) isEqualTo "slot") then {
+    // The button with a tip of its own under the mouse (fnc_setTooltip) - found before the hover is compared with the last one: over the
+// columns' empty room the hover stays "nothing" while the mouse goes onto such a button, and its tip would never be asked for.
+private _tipNow = uiNamespace getVariable [QGVAR(hoverTip), controlNull];
+
+    // No entering reported - the engine misses it on some buttons in the columns' groups (a section's fold tab and Sort),
+    // and as a guest on another mod's display (ACE Arsenal) on most: the last made control with a tip under the mouse, where
+    // it shows, over the columns (no kit window or inspect card there) and with no menu open.
+    if (
+        isNull _tipNow && {_mouse isNotEqualTo []}
+        && {_layer isEqualTo "" || {(["guest", [], false] call FUNC(hook)) isEqualTo true}}
+        && {(uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []}
+    ) then {
+        private _tipped = uiNamespace getVariable [QGVAR(tipCtrls), []];
+
+        for "_i" from (count _tipped - 1) to 0 step -1 do {
+            private _candidate = _tipped select _i;
+
+            if (!isNull _candidate && {ctrlShown _candidate}) then {
+                private _size = ctrlPosition _candidate;
+                private _at = if (isNull ctrlParentControlsGroup _candidate) then {_size} else {
+                    [[
+                        [0, 0, _size select 2, _size select 3], "", "",
+                        createHashMapFromArray [["rel", [_size select 0, _size select 1]], ["parent", ctrlParentControlsGroup _candidate]]
+                    ]] call FUNC(slotRect)
+                };
+
+                if (_at isNotEqualTo [] && {
+                    (_mouse select 0) >= (_at select 0) && {(_mouse select 0) < (_at select 0) + (_at select 2)}
+                    && {(_mouse select 1) >= (_at select 1)} && {(_mouse select 1) < (_at select 1) + (_at select 3)}
+                }) exitWith {
+                    _tipNow = _candidate;
+                };
+            };
+        };
+    };
+
+private _tipChanged = _tipNow isNotEqualTo (uiNamespace getVariable [QGVAR(hoverTipSeen), controlNull]);
+
+uiNamespace setVariable [QGVAR(hoverTipSeen), _tipNow];
+
+if (!_force && {!_tipChanged} && {_found isEqualTo GVAR(hover)}) exitWith {
+    GVAR(hoverNote) = "same";
+
+    // A slot that did not change still moves when its column scrolls under a mouse that stands still - and
+    // gets its ring again when a part was drawn anew under it (fnc_redrawPart), over the name at the mouse.
+    // A tile gets its outline back after a drag that left it where it was (fnc_endDrag).
+    if ((_found param [0, ""]) in ["slot", "tile", "cell"]) then {
         [_found, true] call _fnc_light;
+
+        if (_ringMade || {(uiNamespace getVariable [QGVAR(turnedPictures), []]) isNotEqualTo []}) then {
+            [] call FUNC(raiseTooltip);
+        };
     };
 };
 
 [GVAR(hover), false] call _fnc_light;
 GVAR(hover) = _found;
 [_found, true] call _fnc_light;
+
+// The box of a uniform, vest or backpack opened from inside a container is named and hinted as its tile
+// there (fnc_boxTile) - it is lifted as that tile too -, though it lights up as the box it is.
+private _shown = _found;
+
+if ((_found param [0, ""]) isEqualTo "slot") then {
+    private _asTile = [((uiNamespace getVariable [QGVAR(slots), []]) param [_found select 1, []]) param [8, objNull]] call FUNC(boxTile);
+
+    if (_asTile isNotEqualTo []) then {
+        _shown = ["tile"] + _asTile;
+    };
+};
 
 // The name at the mouse, as in Tarkov - of what is known; fnc_onFrame keeps it beside the pointer. Over a
 // vest, uniform, helmet or backpack that is not the player's own worn one, the comparison card instead.
@@ -183,9 +458,9 @@ if (!isNull _tooltip) then {
     private _class = "";
     private _comparable = false;
 
-    switch (_found param [0, ""]) do {
+    switch (_shown param [0, ""]) do {
         case "tile": {
-            private _tile = _found call _fnc_tile;
+            private _tile = _shown call _fnc_tile;
 
             if !(_tile getOrDefault ["hidden", false]) then {
                 _class = _tile getOrDefault ["class", ""];
@@ -193,7 +468,7 @@ if (!isNull _tooltip) then {
             };
         };
         case "slot": {
-            private _record = (uiNamespace getVariable [QGVAR(slots), []]) select (_found select 1);
+            private _record = (uiNamespace getVariable [QGVAR(slots), []]) select (_shown select 1);
 
             _class = _record param [1, ""];
 
@@ -202,23 +477,34 @@ if (!isNull _tooltip) then {
         };
     };
 
-    // Not over a context menu or the inspect card, nor while something is dragged.
-    if ((uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [] || {GVAR(dragging)}) then {
+    // Not over a context menu or the inspect card, nor while something is dragged (a hotbar slot's binding too).
+    if ((uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [] || {GVAR(dragging)} || {GVAR(stripDrag) isNotEqualTo []}) then {
         _class = "";
     };
 
     private _name = if (_class isEqualTo "") then {""} else {[_class] call FUNC(itemName)};
 
+    // Over a button or field of the window with a tip of its own (fnc_setTooltip): that tip, on the same glass.
+    private _ownTip = "";
+
+    if (_class isEqualTo "" && {!GVAR(dragging)} && {GVAR(stripDrag) isEqualTo []}) then {
+        private _tipCtrl = _tipNow;
+
+        if (!isNull _tipCtrl && {ctrlShown _tipCtrl} && {ctrlEnabled _tipCtrl}) then {
+            _ownTip = _tipCtrl getVariable [QGVAR(tip), ""];
+        };
+    };
+
     // A radio: its channel and frequency after the name (einv_compat_tfar, einv_compat_acre).
     if (_name isNotEqualTo "") then {
         private _radioHolder = objNull;
 
-        switch (_found param [0, ""]) do {
+        switch (_shown param [0, ""]) do {
             case "tile": {
-                _radioHolder = (_found call _fnc_tile) getOrDefault ["container", objNull];
+                _radioHolder = (_shown call _fnc_tile) getOrDefault ["container", objNull];
             };
             case "slot": {
-                private _radioRecord = (uiNamespace getVariable [QGVAR(slots), []]) select (_found select 1);
+                private _radioRecord = (uiNamespace getVariable [QGVAR(slots), []]) select (_shown select 1);
 
                 // The long-range radio on the back: the container object of the backpack worn.
                 if ((_radioRecord param [5, ""]) isEqualTo "backpack" && {!isNull (_radioRecord param [6, objNull])}) then {
@@ -232,6 +518,33 @@ if (!isNull _tooltip) then {
         if (_extra isNotEqualTo []) then {
             _name = ([_name] + _extra) joinString "  ·  ";
         };
+    };
+
+    // A tip of a control in the colour popover goes onto the popover's own hint line, never floating over it: the popover holds the
+    // focus and is drawn over everything, a floating tip included. The line keeps the last tip until another is pointed at.
+    private _menuHint = uiNamespace getVariable [QGVAR(menuHint), controlNull];
+
+    if (!isNull _menuHint && {_ownTip isNotEqualTo ""}) then {
+        private _menuLayer = (uiNamespace getVariable [QGVAR(menuFocus), []]) param [0, controlNull];
+        private _inMenu = false;
+        private _up = _tipNow;
+
+        while {!isNull _up} do {
+            if (_up isEqualTo _menuLayer) exitWith {_inMenu = true};
+
+            _up = ctrlParentControlsGroup _up;
+        };
+
+        if (_inMenu) then {
+            uiNamespace setVariable [QGVAR(menuHintText), _ownTip];
+            [_menuHint, _ownTip] call FUNC(setMenuHint);
+            _ownTip = "";
+        };
+    };
+
+    // No item there: the control's own tip, on one line.
+    if (_name isEqualTo "" && {_ownTip isNotEqualTo ""}) then {
+        _name = (_ownTip splitString toString [10]) joinString " ";
     };
 
     // The card of the last hover goes in any case: what it showed is not what the mouse is on now.
@@ -252,13 +565,24 @@ if (!isNull _tooltip) then {
     } else {
         if (_name isNotEqualTo "") then {
             private _font = GVAR(theme) getOrDefault ["font", "PuristaMedium"];
-            private _width = (_name getTextWidth [_font, UNIT * 0.58]) * TEXT_SLACK + SQUARE(UNIT * 0.8);
+            private _textUnit = TEXT_UNIT;
+            private _width = (_name getTextWidth [_font, _textUnit * 0.58]) * TEXT_SLACK + SQUARE(_textUnit * 0.8);
 
-            _tooltip ctrlSetText _name;
-            _tooltip ctrlSetPosition [-10, -10, _width, UNIT * 0.85];
+            // In the gradient each letter is a tag of its own and the line runs wider than measured: the glass gets that room.
+            if (_tooltip getVariable [QGVAR(gradient), false]) then {
+                _width = _width + (_name getTextWidth [_font, _textUnit * 0.58]) * 0.2;
+            };
+
+            // A long tip breaks into lines rather than running across the screen.
+            private _maxW = SQUARE(_textUnit * 15);
+            private _lines = ceil (_width / _maxW);
+            private _height = _textUnit * 0.85 + (_lines - 1) * _textUnit * 0.62;
+
+            _width = _width min _maxW;
+
+            _tooltip ctrlSetPosition [-10, -10, _width, _height];
             _tooltip ctrlCommit 0;
-            _tooltip setVariable [QGVAR(width), _width];
-            _tooltip setVariable [QGVAR(height), UNIT * 0.85];
+            [_tooltip, _name, _width, _height] call FUNC(setTipText);
         };
 
         _tooltip ctrlShow (_name isNotEqualTo "");
@@ -266,9 +590,17 @@ if (!isNull _tooltip) then {
     };
 
     GVAR(tooltipAt) = [];
+
+    // The ring made above, or a turned picture (fnc_turnPicture, made on the display), lies over the name just set:
+    // the name is made again over it.
+    // A tip of the colour popover or a menu lies under them unless made again over them - and so does the name after a click
+    // that drew controls again (a page turned, a crate opened): it was made before them. fnc_raiseTooltip does nothing where the
+    // name is the last control made.
+    [] call FUNC(raiseTooltip);
 };
 
-if (isNull (uiNamespace getVariable [QGVAR(hint), controlNull])) exitWith {};
+// A hotbar slot's binding being dragged writes its own hint (fnc_updateStripDrag).
+if (isNull (uiNamespace getVariable [QGVAR(hint), controlNull]) || {GVAR(stripDrag) isNotEqualTo []}) exitWith {};
 
 // ----- The hint -----
 
@@ -352,13 +684,47 @@ private _fnc_idle = {
     };
 };
 
-switch (_found param [0, ""]) do {
+// What a compartment that takes only some categories says: "Only medical items here", and for a single slot that it holds one
+// item whatever its size. [[text, colour key], ...], [] for a compartment like any other.
+private _fnc_locked = {
+    params ["_grid"];
+
+    private _accepts = _grid getOrDefault ["accepts", []];
+    private _parts = [];
+
+    if (_accepts isNotEqualTo []) then {
+        _parts pushBack [
+            format [LLSTRING(Hint_Only), (_accepts apply {(([_x] call EFUNC(items,categoryInfo)) get "only")}) joinString ", "], "accent"
+        ];
+    };
+
+    if (_grid getOrDefault ["single", false]) then {
+        _parts pushBack [LLSTRING(Hint_SingleSlot), "text2"];
+    };
+
+    _parts
+};
+
+switch (_shown param [0, ""]) do {
+    case "cell": {
+        private _cellGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_shown select 1, createHashMap];
+        private _lockedParts = [_cellGrid] call _fnc_locked;
+
+        if (_lockedParts isEqualTo []) exitWith {
+            call _fnc_idle;
+        };
+
+        {
+            _x call _fnc_add;
+        } forEach _lockedParts;
+    };
     case "tile": {
-        private _tile = _found call _fnc_tile;
+        private _tile = _shown call _fnc_tile;
 
         if (_tile getOrDefault ["hidden", false]) exitWith {
             [LLSTRING(Hint_Hidden), "text2"] call _fnc_add;
             [[_tile getOrDefault ["w", 1], _tile getOrDefault ["h", 1]] call _fnc_size, "muted"] call _fnc_add;
+            [LLSTRING(Hint_SearchFirst), "accent"] call _fnc_add;
         };
 
         private _class = _tile getOrDefault ["class", ""];
@@ -370,8 +736,8 @@ switch (_found param [0, ""]) do {
 
         [[_class] call FUNC(itemName), "text"] call _fnc_add;
 
-        // The size it takes - a catalog card (a source grid's tile) brings the item's true size, the card
-        // itself being one cell.
+        // The size it takes - a row of ACE's list (a source grid's tile) brings the item's true size, the
+        // row itself being one cell.
         [(_tile getOrDefault ["size", [_tile getOrDefault ["w", 1], _tile getOrDefault ["h", 1]]]) call _fnc_size, "muted"] call _fnc_add;
         [[_mass] call _fnc_kg, "muted"] call _fnc_add;
 
@@ -406,9 +772,40 @@ switch (_found param [0, ""]) do {
             [LLSTRING(Hint_Overflow), "loss"] call _fnc_add;
         };
 
+        // Waiting for the hands (fnc_queueMoves): a click on it cancels.
+        if ((_tile getOrDefault ["queued", 0]) > 0) then {
+            [LLSTRING(Hint_Queued), "accent"] call _fnc_add;
+        };
+
+        // Where the settings "Use items from ..." limit what can be used: said on an item of the player's own
+        // uniform, vest or backpack that cannot be used from there, or that was whitelisted for it.
+        if (missionNamespace getVariable [QEGVAR(storage,useActive), false]) then {
+            private _useGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_shown select 1, createHashMap];
+            private _useKind = [_useGrid getOrDefault ["container", objNull]] call EFUNC(storage,useKind);
+
+            switch ([_class, _useKind] call EFUNC(storage,useState)) do {
+                case "blocked": {
+                    // Kept out of the container altogether (Strict mode), or only not usable from it.
+                    private _hint = [LLSTRING(Hint_UseBlocked), LLSTRING(Hint_UseHidden)] select (_tile getOrDefault ["strict", false]);
+
+                    [format [_hint, [_useKind] call EFUNC(storage,useKindName)], "warn"] call _fnc_add;
+                };
+                case "allowed": {
+                    [format [LLSTRING(Hint_UseAllowed), [_useKind] call EFUNC(storage,useKindName)], "accent"] call _fnc_add;
+                };
+            };
+        };
+
+        // A compartment that takes only some categories, or is a single slot: said on whatever lies in it, as on its free cells.
+        private _lockedGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_shown select 1, createHashMap];
+
+        {
+            _x call _fnc_add;
+        } forEach ([_lockedGrid] call _fnc_locked);
+
         // On the ground a double click puts on what can be worn, and Ctrl+click opens a uniform, vest or
         // backpack (fnc_onMouseButton): said here, where it differs from the footer's keys.
-        private _hoverGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_found select 1, createHashMap];
+        private _hoverGrid = (uiNamespace getVariable [QGVAR(grids), []]) param [_shown select 1, createHashMap];
 
         if (
             [] call FUNC(isInventoryMode) && {!(_hoverGrid getOrDefault ["virtual", true])}
@@ -436,7 +833,7 @@ switch (_found param [0, ""]) do {
         } forEach (["hint", ["tile", _class, _tile], []] call FUNC(hook));
     };
     case "slot": {
-        private _record = (uiNamespace getVariable [QGVAR(slots), []]) select (_found select 1);
+        private _record = (uiNamespace getVariable [QGVAR(slots), []]) select (_shown select 1);
 
         // A slot of the hotbar (einv_hotbar - only when that addon is loaded): the hotbar says what it is
         // and what its key does.
@@ -464,6 +861,11 @@ switch (_found param [0, ""]) do {
 
         [[_class] call FUNC(itemName), "text"] call _fnc_add;
         [(_info getOrDefault ["size", [1, 1]]) call _fnc_size, "muted"] call _fnc_add;
+
+        // To be taken off once the hands are free (fnc_queueMoves): a click on the slot cancels.
+        if (([_record param [6, objNull], _record param [5, ""]] call FUNC(queuedSlot)) > 0) then {
+            [LLSTRING(Hint_Queued), "accent"] call _fnc_add;
+        };
 
         // A weapon slot that did not bring its weapon along shows the unit's own: the attachments come
         // from what the unit wears.
@@ -504,26 +906,8 @@ switch (_found param [0, ""]) do {
             _x call _fnc_add;
         } forEach (["hint", ["slot", _class, _record], []] call FUNC(hook));
     };
-    case "cell": {
-        // A free cell of a container that is nearly or quite full by weight says how full (fnc_infoHint).
-        private _container = ((uiNamespace getVariable [QGVAR(grids), []]) param [_found select 1, createHashMap]) getOrDefault ["container", objNull];
-        private _sectionInfo = (uiNamespace getVariable [QGVAR(sectionInfo), []]) param [
-            (uiNamespace getVariable [QGVAR(sectionInfo), []]) findIf {(_x getOrDefault ["holder", objNull]) isEqualTo _container}, createHashMap
-        ];
-        private _loadParts = if (isNull _container) then {[]} else {
-            ["cell", [_container, _sectionInfo getOrDefault ["caption", [_container] call FUNC(containerName)]]] call FUNC(infoHint)
-        };
-
-        if (_loadParts isEqualTo []) exitWith {
-            call _fnc_idle;
-        };
-
-        {
-            _x call _fnc_add;
-        } forEach _loadParts;
-    };
     case "info": {
-        private _area = (uiNamespace getVariable [QGVAR(infoAreas), []]) param [_found select 1, []];
+        private _area = (uiNamespace getVariable [QGVAR(infoAreas), []]) param [_shown select 1, []];
         private _infoParts = [_area param [4, ""], _area param [5, []]] call FUNC(infoHint);
 
         if (_infoParts isEqualTo []) exitWith {
@@ -539,4 +923,8 @@ switch (_found param [0, ""]) do {
     };
 };
 
-(uiNamespace getVariable [QGVAR(hint), controlNull]) ctrlSetStructuredText (composeText _parts setAttributes ["align", "center"]);
+// In the footer's text scale where it keeps one (fnc_drawFooter).
+private _hintCtrl = uiNamespace getVariable [QGVAR(hint), controlNull];
+
+_hintCtrl ctrlSetStructuredText (composeText _parts setAttributes ["align", "left", "size", str (_hintCtrl getVariable [QGVAR(textScale), 1])]);
+[_hintCtrl] call FUNC(fitHint);

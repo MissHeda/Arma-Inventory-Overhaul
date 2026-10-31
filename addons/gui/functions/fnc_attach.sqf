@@ -5,9 +5,11 @@
  * Makes a display the window. Everything fnc_open does once the inventory's dialog exists, for any
  * display that carries the dim layer and the first control (IDC_DIM, IDC_FIRST): the unit and the
  * containers it looks into, the window's state started afresh, the mouse handlers, the first build and
- * the frame. The inventory attaches with no hooks; the Arsenal and later editor windows attach with a
- * table of them (fnc_hook), which is how they differ from it. With no hooks every function of this addon
- * behaves as it always did (fnc_isInventoryMode).
+ * the frame. The inventory attaches with no hooks; ACE Arsenal's grid panel (einv_arsenal) and later
+ * editor windows attach with a table of them (fnc_hook), which is how they differ from it. With no hooks
+ * every function of this addon behaves as it always did (fnc_isInventoryMode). A display that belongs to
+ * another mod and carries neither the dim layer nor the first control takes part as a guest (the "guest"
+ * flag): only what this addon made there is ever swept, and that mod's handlers keep every click.
  *
  * Refuses when another display is the window already: there is one session of this addon at a time.
  *
@@ -16,7 +18,7 @@
  * before is closed (einv_compat_efak - only when that addon is loaded).
  *
  * Nothing the last window waited for carries over (moves under way, answers, drift), nor the tiles it
- * had selected or the frame it was dragging out; what lies around is read for the first build
+ * had selected; what lies around is read for the first build
  * (fnc_readNearby, in the inventory only).
  *
  * Arguments:
@@ -58,6 +60,12 @@ if (!isNull _current && {_current isNotEqualTo _display}) exitWith {false};
 
 uiNamespace setVariable [QGVAR(display), _display];
 
+// The cell is worked out afresh for this window, with the player's tile scale as it is now (fnc_getCell).
+uiNamespace setVariable [QGVAR(cell), []];
+
+// Nor does it close for a reason given to the last one (fnc_closeDisplay, fnc_onUnload).
+GVAR(closeReason) = "";
+
 GVAR(unit) = _unit;
 GVAR(container) = _container;
 GVAR(secondary) = _secondary;
@@ -65,9 +73,18 @@ GVAR(hooks) = _hooks;
 
 GVAR(openedAt) = diag_tickTime;
 
-// The item being searched starts again from now - the window was closed meanwhile.
+// The items being searched start again from now - the window was closed meanwhile.
 GVAR(searchStarted) = -1;
-GVAR(searchHead) = [];
+GVAR(searchRuns) = [];
+
+{
+    {ctrlDelete _x} forEach (_x select 2);
+    ctrlDelete (_x select 3);
+} forEach GVAR(searchMarks);
+
+GVAR(searchMarks) = [];
+GVAR(searchDirty) = true;
+GVAR(sealDragOver) = createHashMap;
 GVAR(opened) = [];
 
 // The kits opened in the last window close with it (einv_compat_efak - only when that addon is loaded).
@@ -77,6 +94,16 @@ if (!isNil QEFUNC(compat_efak,onWindowOpen)) then {
 
 GVAR(filter) = "";
 GVAR(filterFocus) = false;
+
+// Nothing is chosen at the side of a box, no box has its search stopped, and no caption line holds a chip yet.
+GVAR(groupFilters) = [];
+GVAR(stripPages) = [];
+GVAR(coalesced) = createHashMap;
+GVAR(pageWanted) = createHashMap;
+GVAR(searchPaused) = [];
+GVAR(searchIdle) = [];
+GVAR(searchSeen) = [];
+GVAR(statusLive) = false;
 
 // The inspect card went with the window it was opened in, however that closed - only where it stood is
 // kept for the next one (GVAR(inspectPos)).
@@ -108,23 +135,36 @@ GVAR(inFlight) = createHashMap;
 GVAR(answers) = [];
 GVAR(drift) = [];
 
-// A hint a quick move of the last window left for its answer belongs to that window (fnc_quickMove).
-GVAR(pendingHint) = [];
+// The hands' queue went with it: nothing was sent, so nothing is lost (fnc_queueMoves).
+GVAR(handQueue) = [];
+GVAR(handStarted) = -1;
+GVAR(queueDirty) = false;
+GVAR(queueFrom) = 0;
+GVAR(handWaiting) = createHashMap;
+GVAR(handBoxes) = [];
+GVAR(roomCache) = [];
+GVAR(quickHeldKey) = -1;
 
-// The selection is view state of one window, and nothing is dragged out yet.
+// The selection is view state of one window, and no press on an empty cell waits.
 GVAR(selection) = [];
 GVAR(selectionSide) = "";
 GVAR(selectionAnchor) = [];
-GVAR(bandPress) = [];
-GVAR(band) = false;
-GVAR(bandTiles) = [];
+GVAR(emptyPress) = [];
 GVAR(dragGroup) = [];
 GVAR(signatureParts) = [];
 
-// Moving items: the mouse buttons anywhere on the window (fnc_build adds the same to every group).
-_display displayAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton)}];
-_display displayAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton)}];
-_display displayAddEventHandler ["MouseZChanged", {[_this] call FUNC(onMouseZ)}];
+// Moving items: the mouse buttons anywhere on the window (fnc_build adds the same to every group). On
+// another mod's display (the "guest" flag) its own handlers and controls get every click and turn of the
+// wheel as well, whatever this addon made of them: these never answer that they took it.
+if ((["guest", [], false] call FUNC(hook)) isEqualTo true) then {
+    _display displayAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton); false}];
+    _display displayAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton); false}];
+    _display displayAddEventHandler ["MouseZChanged", {[_this] call FUNC(onMouseZ); false}];
+} else {
+    _display displayAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton)}];
+    _display displayAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton)}];
+    _display displayAddEventHandler ["MouseZChanged", {[_this] call FUNC(onMouseZ)}];
+};
 
 call FUNC(readNearby);
 [_display] call FUNC(build);

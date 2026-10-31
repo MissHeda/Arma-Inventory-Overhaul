@@ -8,27 +8,50 @@
  * Where the grid comes from, first answer wins:
  *   1. einv_grid on the object itself - a mission's word for this one crate, vehicle or unit's
  *      uniform, vest or backpack container: _crate setVariable ["einv_grid", "6x4+2x3", true]. Any
- *      grid the rules know (einv_items_fnc_parseGrid); one that cannot be read is named in the RPT
- *      once and the rules count instead.
+ *      grid the rules know (einv_items_fnc_parseGrid), shapes like "xxx/x-x" too; one that cannot be
+ *      read is named in the RPT once and the rules count instead. A script of this mod may give the
+ *      compartments as they are instead, [[cols, rows], ...]: taken exactly, never cut to MAX_ROWS - the
+ *      Arsenal's staging space grows with what lies in it, up to its own cap (einv_arsenal_fnc_growStaging).
  *   2. the rules for its class (einv_items_fnc_getInfo "grid"): the older container table, the rules
- *      text, einv_grids[] / einv_slots in config, the preset - "auto", by its load, when none says.
+ *      text, the class's own config - einv_grid = "1x3+5x7+1x3"; (written as grid= is, and inherited
+ *      by a subclass), else the older einv_grids[] / einv_slots - then the preset: "auto", by its
+ *      load, when none says. The config's grid is the item class's (the uniform, vest or backpack, or
+ *      the crate's or vehicle's own class); the object's einv_grid variable above is one object's.
  * The load is the object's own maximumLoad (fnc_getMaxLoad), the mass per cell the rules'.
  *
  * The ground has no compartments and no limit: [].
  *
+ * A holder that is no object, the key of a grid with no object of its own ("kit:" + lowercase class),
+ * has the compartments its type gives (GVAR(holderTypes) "blocks"): a kit of Enhanced First Aid Kits
+ * those a rule or its config gives it, else none - that mod's capacity is its room, and its grid an
+ * open one that grows (einv_compat_efak_fnc_kitBlocks). A type that says nothing has none.
+ *
  * Arguments:
- * 0: Container <OBJECT>
+ * 0: Container, or the key of a grid with no object <OBJECT or STRING>
  *
  * Return Value:
- * Compartments [[cols, rows], ...], [] for the ground <ARRAY>
+ * Compartments [[cols, rows, holes, pos], ...] (see fnc_blocksFor), [] for the ground and an open grid
+ * <ARRAY>
  *
  * Example:
  * [vestContainer player] call einv_storage_fnc_getBlocks;
+ * ["kit:efak_ifak_7"] call einv_storage_fnc_getBlocks;
  *
  * Public: No
  */
 
-params [["_container", objNull, [objNull]]];
+params [["_container", objNull, [objNull, ""]]];
+
+// A key first: isNull fails on it.
+if (_container isEqualType "") exitWith {
+    private _type = GVAR(holderTypes) getOrDefault [(_container splitString ":") param [0, ""], createHashMap];
+    private _code = _type get "blocks";
+    private _blocks = if (isNil "_code") then {[]} else {[_container] call _code};
+
+    if (isNil "_blocks" || {!(_blocks isEqualType [])}) then {_blocks = []};
+
+    _blocks
+};
 
 if (isNull _container || {[_container] call FUNC(isGroundHolder)}) exitWith {[]};
 
@@ -94,6 +117,11 @@ if (_kind isEqualTo "crate" && {getNumber (configFile >> "CfgVehicles" >> _class
 private _spec = [];
 private _objectGrid = _container getVariable [QGVARMAIN(grid), ""];
 
+// Compartments given as they are: no text to read, and no cut to the rules' limits.
+if (_objectGrid isEqualType [] && {_objectGrid isNotEqualTo []} && {_objectGrid findIf {!(_x isEqualTypeParams [0, 0])} < 0}) then {
+    _spec = ["blocks", _objectGrid];
+};
+
 if (_objectGrid isEqualType "" && {_objectGrid isNotEqualTo ""}) then {
     _spec = GVAR(objectGrids) get _objectGrid;
 
@@ -107,6 +135,11 @@ if (_objectGrid isEqualType "" && {_objectGrid isNotEqualTo ""}) then {
         _spec = _parsed;
         GVAR(objectGrids) set [_objectGrid, _spec];
     };
+};
+
+// A category the setup does not define accepts nothing for good: left out of the compartments that name it.
+if (_spec isNotEqualTo []) then {
+    _spec = [_spec] call EFUNC(items,cleanGrid);
 };
 
 // The rules for the class - a class that is no container to them (a mod's odd cargo object) gets its

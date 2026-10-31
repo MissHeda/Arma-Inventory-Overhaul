@@ -1,38 +1,42 @@
 #include "..\script_component.hpp"
+#include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Something was let go on a target of the window (the "drop" hook): a card or an item of the soldier's on a
- * free cell, a slot, the soldier, the give-back zone. Adds, equips or gives back, and says what it did.
- * Always ends a drag from the catalog.
+ * A tile of the panel let go (the "drop" hook). Within the panel the engine moves it as in the inventory -
+ * to a free spot, turned or not, onto another of its kind - a move of place within the container, or a
+ * move between the container and the staging space (fnc_staging), both the storage's own. For the latter
+ * the count of that class in the container is noted - of both classes when two tiles swap places or one
+ * joins a stack of its own class (the engine's plan, the 15th argument) -, and the frame hook tells ACE once
+ * the move landed (fnc_onFrame): the soldier gained or lost them. Let go outside the panel, where fnc_dragCheck pointed it at
+ * ACE's list, it is taken out of the container or the staging space: as much of the stack as was dragged
+ * (fnc_remove).
  *
- * A card on a grid makes the item there (fnc_addItem: as many as the wheel left, turned the way it was held,
- * on the cell under the mouse), on a slot puts it on (fnc_equipItem), on the soldier equips it like
- * Alt+click, on the catalog does nothing. On a kit - its open window's grid or its tile - it is packed into
- * the kit (einv_compat_efak_fnc_packNew: only when the kit's arsenal setting is everything, as many as the
- * kit takes), else the kit says why not. An item of the soldier's on the give-back zone - or outside every
- * panel - goes back (fnc_giveBack), on the soldier it is put on. Everything else of the soldier's own,
- * moves between his grids and slots, is the inventory's.
+ * An item dragged out of ACE's list or the kits tab's (fnc_listDrag) is always this hook's to end: on a grid of
+ * the panel it is put in, on the cell it was let go on and turned as it was, as many as the wheel left
+ * (fnc_addTo); on the kit's grid in the kits tab, or on a kit's tile (fnc_listToKit), it is packed into that kit,
+ * on that cell where it is free, as many as the kit takes (einv_compat_efak_fnc_packNew: its rules, and its room -
+ * its capacity, or the cells of a grid a rule or its config gives it); anywhere else it was nothing.
  *
  * Arguments:
- * 0: Kind of target - "grid", "slot", "zone", "kitTile", ... <STRING>
- * 1: Index of the grid the item was dragged from, -1 for a slot's item <NUMBER>
- * 2: Index of its tile there <NUMBER>
- * 3: Slot it was dragged from, [unit, slot], or [] <ARRAY>
- * 4: The entry that was dragged <HASHMAP>
- * 5: How many of a stack go, -1 for all <NUMBER>
- * 6: Index of the target (a grid, a slot, a zone) <NUMBER>
- * 7: Column of the cell - for a kit's tile the index of the tile in the grid <NUMBER>
+ * 0: Kind of target <STRING>
+ * 1: Index of the grid it comes from <NUMBER>
+ * 2: Index of its tile <NUMBER>
+ * 3: The slot it comes from, [] for a tile <ARRAY>
+ * 4: What is dragged <HASHMAP>
+ * 5: How many of a stack, -1 for all <NUMBER>
+ * 6: Index of the target - a grid's, a zone's <NUMBER>
+ * 7: Column of the cell <NUMBER>
  * 8: Row of the cell <NUMBER>
- * 9: Width the item lies in <NUMBER>
- * 10: Height the item lies in <NUMBER>
- * 11: Slot id of the target <STRING>
- * 12: Whether the cell is where it is to lie <BOOL>
+ * 9: Width it lies in there <NUMBER>
+ * 10: Height it lies in there <NUMBER>
+ * 13: Turned, 1 a quarter clockwise <NUMBER>
+ * 14: The swap or merge plan of the target (einv_gui_fnc_swapPlan), [] for a plain move <ARRAY>
  *
  * Return Value:
- * Handled <BOOL>
+ * Handled - the engine does nothing more <BOOL>
  *
  * Example:
- * _this call einv_arsenal_fnc_onDrop;
+ * ["zone", 0, 3, [], _entry, -1] call einv_arsenal_fnc_onDrop;
  *
  * Public: No
  */
@@ -40,108 +44,112 @@
 params [
     ["_kind", "", [""]], ["_sourceIndex", -1, [0]], ["_tileIndex", -1, [0]], ["_slotSource", [], [[]]],
     ["_entry", createHashMap, [createHashMap]], ["_count", -1, [0]], ["_targetIndex", -1, [0]], ["_col", 0, [0]],
-    ["_row", 0, [0]], ["_w", 1, [0]], ["_h", 1, [0]], ["_targetSlot", "", [""]], ["_place", true, [true]]
+    ["_row", 0, [0]], ["_w", 1, [0]], ["_h", 1, [0]], "", "", ["_rot", 0, [0]], ["_swap", [], [[]]]
 ];
 
+GVAR(dragZone) = "";
+
 private _grids = uiNamespace getVariable [QEGVAR(gui,grids), []];
-private _zones = uiNamespace getVariable [QEGVAR(gui,zones), []];
-private _fromGrid = if (_slotSource isEqualTo []) then {_grids param [_sourceIndex, createHashMap]} else {createHashMap};
-private _fromCatalog = (_fromGrid getOrDefault ["source", ""]) isNotEqualTo "";
+private _from = if (_slotSource isEqualTo []) then {_grids param [_sourceIndex, createHashMap]} else {createHashMap};
 
-(uiNamespace getVariable [QGVAR(column), createHashMap]) set ["dragZone", ""];
+// Out of ACE's list: into the grid it was let go on, or into the kit whose tile it was let go on.
+if ((_from getOrDefault ["source", ""]) isEqualTo "aceList") exitWith {
+    // A kit's target carries the kit's tile where a grid's has its column (fnc_listToKit).
+    if (_kind isEqualTo "kitTile" && {!isNil QEFUNC(compat_efak,packNew)}) then {
+        private _target = _grids param [_targetIndex, createHashMap];
+        private _kit = ((_target getOrDefault ["tiles", []]) param [_col, createHashMap]) getOrDefault ["class", ""];
+        private _class = _entry getOrDefault ["class", ""];
+        private _amount = [_count, _entry getOrDefault ["count", 1]] select (_count < 1);
+        private _root = _target getOrDefault ["root", objNull];
 
-// The zone under the drop, by its id. One that is not there (the index -1) is the give-back.
-private _zone = if (_targetIndex < 0) then {"giveBack"} else {(_zones param [_targetIndex, []]) param [1, "giveBack"]};
-
-// ----- From the catalog -----
-if (_fromCatalog) exitWith {
-    private _class = _entry getOrDefault ["class", ""];
-    private _stack = _entry getOrDefault ["count", 1];
-    private _amount = [_count, _stack] select (_count < 1);
-
-    if (_class isEqualTo "") exitWith {true};
-
-    // Into a kit, as many as it takes: the sound, the words, and the window looked at again.
-    private _fnc_pack = {
-        params ["_kit", "_cell"];
-
-        if (isNil QEFUNC(compat_efak,packNew)) exitWith {
-            [LLSTRING(Hint_KitFirst)] call EFUNC(gui,flashHint);
+        if (isNull _root) then {
+            _root = [_target getOrDefault ["container", objNull]] call EFUNC(storage,rootOf);
         };
 
-        ([_kit, _class, _amount, _cell, GVAR(center)] call EFUNC(compat_efak,packNew)) params ["_added", "_why"];
+        ([_kit, _class, _amount, [], _root] call EFUNC(compat_efak,packNew)) params ["_added", "_why"];
 
         if (_added < 1) exitWith {
-            [[_why, LLSTRING(Hint_KitLocked)] select (_why isEqualTo "ReadOnly")] call EFUNC(gui,flashHint);
+            [_why] call EFUNC(gui,flashHint);
         };
 
-        private _name = [_class] call EFUNC(gui,itemName);
+        ["move", _class, objNull, false] call EFUNC(gui,playSound);
 
-        ["move", _class] call EFUNC(gui,playSound);
+        if (_why isNotEqualTo "") then {
+            [_why, "accent"] call EFUNC(gui,showHint);
+        };
 
-        if (_added < _amount) then {
-            [format [LLSTRING(Hint_OnlySome), _added, _amount]] call EFUNC(gui,flashHint);
+        // The panel built again: the kit's tile, its hint and the load bar.
+        [] call FUNC(settle);
+    };
+
+    // The kit's grid in the kits tab (fnc_layout): packed into the kit, on the cell it was let go on when that is
+    // free, else where the kit's layout puts it.
+    private _kitGrid = _kind isEqualTo "grid" && {((_grids param [_targetIndex, createHashMap]) getOrDefault ["kit", ""]) isNotEqualTo ""};
+
+    if (_kitGrid) then {
+        private _target = _grids select _targetIndex;
+        private _amount = [_count, _entry getOrDefault ["count", 1]] select (_count < 1);
+        private _class = _entry getOrDefault ["class", ""];
+
+        ([
+            _target get "kit", _class, _amount, [_col, _row, _target getOrDefault ["block", 0], _w, _h, _rot], _target getOrDefault ["root", objNull]
+        ] call EFUNC(compat_efak,packNew)) params ["_added", "_why"];
+
+        if (_added < 1) then {
+            [_why] call EFUNC(gui,flashHint);
         } else {
-            [format [LLSTRING(Hint_AddedTo), [_name, format ["%1× %2", _added, _name]] select (_added > 1), [_kit] call EFUNC(gui,itemName)]] call FUNC(message);
+            ["move", _class, objNull, false] call EFUNC(gui,playSound);
+
+            if (_why isNotEqualTo "") then {
+                [_why, "accent"] call EFUNC(gui,showHint);
+            };
+
+            [] call FUNC(settle);
         };
     };
 
-    switch (_kind) do {
-        case "grid": {
-            private _grid = _grids param [_targetIndex, createHashMap];
-            private _kit = _grid getOrDefault ["kit", ""];
+    if (_kind isEqualTo "grid" && {!_kitGrid}) then {
+        private _target = _grids param [_targetIndex, createHashMap];
+        private _amount = [_count, _entry getOrDefault ["count", 1]] select (_count < 1);
 
-            if (_kit isNotEqualTo "") then {
-                // The cell asked for; a taken one is the kit's layout's to change.
-                [_kit, [_col, _row, 0, _w, _h]] call _fnc_pack;
-            } else {
-                [_class, _amount, _grid getOrDefault ["container", objNull], [_col, _row, _grid getOrDefault ["block", 0], _w, _h]] call FUNC(addItem);
-            };
-        };
-        case "slot": {
-            private _slot = _targetSlot;
-
-            if (_slot isEqualTo "") then {
-                _slot = ((uiNamespace getVariable [QEGVAR(gui,slots), []]) param [_targetIndex, []]) param [5, ""];
-            };
-
-            [_class, _slot] call FUNC(equipItem);
-        };
-        case "zone": {
-            if (_zone isEqualTo "soldier") then {
-                [_class, ""] call FUNC(equipItem);
-            };
-        };
-        // The index of the tile comes in the place of the column.
-        case "kitTile": {
-            private _tile = ((_grids param [_targetIndex, createHashMap]) getOrDefault ["tiles", []]) param [_col, createHashMap];
-
-            [_tile getOrDefault ["class", ""], []] call _fnc_pack;
-        };
-        default {};
+        [
+            _target getOrDefault ["container", objNull], _entry getOrDefault ["class", ""], _amount,
+            [_col, _row, _target getOrDefault ["block", 0], _w, _h, _rot]
+        ] call FUNC(addTo);
     };
 
     true
 };
 
-// ----- From the soldier's own things -----
-if (_kind isNotEqualTo "zone") exitWith {false};
+// Between the open container and the staging space or another worn container: ACE is told once it landed.
+if (_kind isEqualTo "grid") exitWith {
+    private _to = (_grids param [_targetIndex, createHashMap]) getOrDefault ["container", objNull];
+    private _source = _from getOrDefault ["container", objNull];
 
-switch (_zone) do {
-    case "giveBack": {
-        if (_slotSource isNotEqualTo []) then {
-            [[_slotSource select 0, _slotSource select 1]] call FUNC(giveBack);
-        } else {
-            [[_sourceIndex, _tileIndex], _count] call FUNC(giveBack);
+    (call FUNC(selected)) params ["", "_open"];
+
+    // Only with a container's tab open: in the kits tab (fnc_selected) ACE's list takes nothing to hear of.
+    if (!isNull _open && {_source isNotEqualTo _to} && {_open in [_source, _to]}) then {
+        private _classes = [_entry getOrDefault ["class", ""]];
+
+        // Two tiles swapping places between the container and staging change two classes there.
+        if (_swap isNotEqualTo []) then {
+            private _other = ((_grids param [_targetIndex, createHashMap]) getOrDefault ["tiles", []]) param [_swap select 0, createHashMap];
+
+            _classes pushBackUnique (_other getOrDefault ["class", ""]);
         };
+
+        GVAR(watch) = [_open, _classes apply {[_x, [_open, _x] call EFUNC(storage,countClass)]}, diag_tickTime + WATCH_TIME];
     };
-    case "soldier": {
-        // A tile is put on; what is on him already stays.
-        if (_slotSource isEqualTo []) then {
-            [_sourceIndex, _tileIndex] call EFUNC(gui,quickEquip);
-        };
-    };
-    default {};
+
+    false
+};
+
+if !(_kind in ["zone", "ground"]) exitWith {false};
+
+// Only the panel's own tiles are dragged here; a slot has nothing to take out.
+if (_slotSource isEqualTo []) then {
+    [[_sourceIndex, _tileIndex], _count] call FUNC(remove);
 };
 
 true

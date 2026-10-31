@@ -56,7 +56,7 @@ private _entry = [_entryArray] call EFUNC(storage,entryFromArray);
 // Asked before anything leaves: a refusal changes nothing, not even where the tile lay.
 private _n = [_count, _entry getOrDefault ["count", 1]] select (_count < 1);
 
-([_toKit, _entry getOrDefault ["class", ""], _n] call FUNC(canPack)) params ["_ok", "_why"];
+([_toKit, _entry getOrDefault ["class", ""], _n, _entry getOrDefault ["ammo", -1]] call FUNC(canPack)) params ["_ok", "_why"];
 
 if (!_ok) exitWith {[_why, [], [[], false, _why]]};
 

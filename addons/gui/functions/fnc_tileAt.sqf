@@ -1,7 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Which tile of a grid covers a cell.
+ * Which tile of a grid covers a cell. A shaped item (size=xx/x-) covers only its own cells: over one of
+ * its holes ("holes" as it lies, einv_storage_fnc_getLayout) it is not found - the tile that lies there
+ * is, or none.
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>
@@ -23,5 +25,8 @@ _cell params ["_col", "_row"];
     private _left = _x get "col";
     private _top = _x get "row";
 
-    _col >= _left && {_col < _left + (_x get "w")} && {_row >= _top} && {_row < _top + (_x get "h")}
+    private _w = _x get "w";
+
+    _col >= _left && {_col < _left + _w} && {_row >= _top} && {_row < _top + (_x get "h")}
+    && {!(((_row - _top) * _w + _col - _left) in (_x getOrDefault ["holes", []]))}
 }

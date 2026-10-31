@@ -5,8 +5,8 @@
  * person, and the person's uniform, vest or backpack it lies in. A uniform, vest or backpack opened
  * from inside another container (GVAR(opened)) belongs to the one it lies in, a few deep.
  *
- * The top container is handed back for every container - also the player's own or a crate - so
- * fnc_isShared can tell a vest lying in the player's backpack from one lying in a crate.
+ * The top container is handed back for every container - also the player's own or a crate - so a
+ * caller can tell a vest lying in the player's backpack from one lying in a crate.
  *
  * Arguments:
  * 0: Slot owner or container <OBJECT>

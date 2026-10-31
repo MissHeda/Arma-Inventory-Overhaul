@@ -33,21 +33,23 @@ params ["_display", ["_compare", createHashMap, [createHashMap]]];
 private _theme = GVAR(theme);
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _muted = _theme getOrDefault ["muted", [0.522, 0.553, 0.604, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 
-private _padX = SQUARE(UNIT * 0.2);
-private _padY = UNIT * 0.25;
-private _nameSize = UNIT * 0.58;
-private _smallSize = UNIT * 0.5;
-private _nameH = UNIT * 0.8;
-private _versusH = UNIT * 0.62;
+// The card and its words grow with the tiles (TEXT_UNIT, fnc_textScale).
+private _textUnit = TEXT_UNIT;
+private _padX = SQUARE(_textUnit * 0.2);
+private _padY = _textUnit * 0.25;
+private _nameSize = _textUnit * 0.58;
+private _smallSize = _textUnit * 0.5;
+private _nameH = _textUnit * 0.8;
+private _versusH = _textUnit * 0.62;
 
 private _name = _compare getOrDefault ["name", ""];
 private _rows = _compare getOrDefault ["rows", []];
 
 // As wide as the standard card, or the name when that is longer.
-private _width = COMPARE_W max (((_name getTextWidth [_fontBold, _nameSize]) * TEXT_SLACK) + _padX * 2);
+private _width = (COMPARE_W * TEXT_SCALE) max (((_name getTextWidth [_fontBold, _nameSize]) * TEXT_SLACK) + _padX * 2);
 private _valueX = _padX + COMPARE_LABEL_W;
 private _diffX = _width - _padX - COMPARE_DIFF_W;
 private _valueW = (_diffX - _valueX) max COMPARE_VALUE_W;
@@ -69,14 +71,14 @@ private _height = _padY * 2 + _nameH + _versusH;
 private _group = [_display, "EINV_Group", controlNull, [-10, -10, _width + pixelW * 2, _height + pixelH * 2]] call FUNC(uiCreate);
 
 // The glass of the tooltip.
-[_display, _group, [0, 0, _width, _height], _theme getOrDefault ["tooltipBg", [0.06, 0.066, 0.08, 0.94]], (_theme getOrDefault ["radius", 0]) * 0.5] call FUNC(uiPanel);
+[_display, _group, [0, 0, _width, _height], _theme getOrDefault ["tooltipBg", [0.03, 0.03, 0.03, 0.96]], (_theme getOrDefault ["radius", 0]) * 0.5] call FUNC(uiPanel);
 
 private _cursor = _padY;
 
-[_display, _group, [_padX, _cursor, _width - _padX * 2, _nameH], _name, _nameSize, _colorText, _fontBold, 0] call FUNC(uiLabel);
+[_display, _group, [_padX, _cursor, _width - _padX * 2, _nameH], _name, _nameSize, _colorText, _fontBold, 0, "hover"] call FUNC(uiLabel);
 _cursor = _cursor + _nameH;
 
-[_display, _group, [_padX, _cursor, _width - _padX * 2, _versusH], _compare getOrDefault ["versus", ""], _smallSize, _muted, _font, 0] call FUNC(uiLabel);
+[_display, _group, [_padX, _cursor, _width - _padX * 2, _versusH], _compare getOrDefault ["versus", ""], _smallSize, _muted, _font, 0, "hint"] call FUNC(uiLabel);
 _cursor = _cursor + _versusH;
 
 {
@@ -84,7 +86,7 @@ _cursor = _cursor + _versusH;
 
     private _rowH = _heights select _forEachIndex;
 
-    [_display, _group, [_padX, _cursor, COMPARE_LABEL_W, _rowH], _label, _smallSize, _muted, _font, 0] call FUNC(uiLabel);
+    [_display, _group, [_padX, _cursor, COMPARE_LABEL_W, _rowH], _label, _smallSize, _muted, _font, 0, "hint"] call FUNC(uiLabel);
 
     if (_structured) then {
         // Structured text sizes itself against its control's own: the card's rows are 0.5 where the class says 0.7.
@@ -92,13 +94,13 @@ _cursor = _cursor + _versusH;
 
         _text ctrlSetStructuredText (_value setAttributes ["size", str (_smallSize / (UNIT * 0.7)), "font", _font]);
     } else {
-        [_display, _group, [_valueX, _cursor, _valueW, _rowH], _value, _smallSize, _colorText, _font, 0] call FUNC(uiLabel);
+        [_display, _group, [_valueX, _cursor, _valueW, _rowH], _value, _smallSize, _colorText, _font, 0, "value"] call FUNC(uiLabel);
     };
 
     if (_diff isNotEqualTo "") then {
         [
             _display, _group, [_diffX, _cursor, COMPARE_DIFF_W, _rowH], _diff, _smallSize,
-            _theme getOrDefault [_diffKey, _muted], _fontBold, 1
+            _theme getOrDefault [_diffKey, _muted], _fontBold, 1, "value"
         ] call FUNC(uiLabel);
     };
 
@@ -107,6 +109,9 @@ _cursor = _cursor + _versusH;
 
 _group setVariable [QGVAR(width), _width];
 _group setVariable [QGVAR(height), _height];
+
+// What it was made from, to make it again over something made after it (fnc_raiseTooltip).
+_group setVariable [QGVAR(source), _compare];
 
 uiNamespace setVariable [QGVAR(compare), _group];
 

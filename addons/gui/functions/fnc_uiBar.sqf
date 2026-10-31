@@ -26,7 +26,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_rect", "_fraction", "_track", "_fill", ["_radius", 0]];
+params ["_display", "_parent", "_rect", "_fraction", "_track", "_fill", ["_radius", 0], ["_gradient", 0]];
 _rect params ["_left", "_top", "_width", "_height"];
 
 private _controls = [_display, _parent, _rect, _track, _radius] call FUNC(uiPanel);
@@ -36,7 +36,12 @@ if (_fraction > 0) then {
     private _ends = SQUARE(_radius min (_height / 2)) * 2;
     private _length = (_width * (_fraction min 1)) max _ends max pixelW;
 
-    _controls append ([_display, _parent, [_left, _top, _length, _height], _fill, _radius] call FUNC(uiPanel));
+    private _fillParts = [_display, _parent, [_left, _top, _length, _height], _fill, _radius] call FUNC(uiPanel);
+
+    _controls append _fillParts;
+
+    // The fill in the gradient where the colour panel switched the bars on (argument 7, GRADIENT_BARS).
+    _controls append ([_display, _parent, [_left, _top, _length, _height], _gradient, _fillParts, _fill param [3, 1], _radius] call FUNC(gradientSurface));
 };
 
 _controls

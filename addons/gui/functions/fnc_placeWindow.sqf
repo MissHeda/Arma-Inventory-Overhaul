@@ -5,7 +5,9 @@
  * Where a kit's window opens: next to the tile it was opened from, never over it, and where it covers
  * as little as it can of the columns and of the windows already open. The free middle comes first - a
  * kit in the vest or the backpack opens beside the storage column at the tile's height, a kit in a crate
- * likewise rather than over the column it would be unpacked into, a second kit beside the first. A
+ * likewise rather than over the column it would be unpacked into, a second kit beside the first (the
+ * middle lies against whichever column is the left one of the two while looting - the loot column
+ * by default, einv_gui_lootSide - so a kit from the storage column then opens one column away). A
  * window wider than the middle (16:9 and 16:10 while looting) still stands at its right edge and reaches
  * into the equipment column: it hides less of the cards there than it would of a column's grids. Then
  * left of the tile, right of it, below and above it - where the screen has no free middle (4:3 while

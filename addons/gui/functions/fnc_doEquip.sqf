@@ -7,6 +7,10 @@
  * the slot put back on the item's cell (fnc_sendMoves) - one transaction, so whatever does not go
  * where it should is settled, never lost. The window follows the answer (fnc_afterAction).
  *
+ * With a body given (the 5th argument) the item goes on that body's slot instead - dragged from the ground, a
+ * crate or the player's gear onto the body's paper doll (fnc_updateDrag): gear only, never from a kit, and
+ * what fnc_canPutOn says. What the body wore there goes back on the cell the item lay on.
+ *
  * Out of a living person's container only as the settings say and while in reach (fnc_checkTouch) - the
  * person's machine asks again -, never another living player's kit (einv_compat_efak_fnc_checkTile).
  *
@@ -19,6 +23,7 @@
  * 1: Container the item lies in, objNull for a kit <OBJECT>
  * 2: Entry <HASHMAP>
  * 3: Kit the item lies in, "" for a container <STRING> (default: "")
+ * 4: A body to put it on instead of the player, objNull for the player <OBJECT> (default: objNull)
  *
  * Return Value:
  * Asked for <BOOL>
@@ -29,7 +34,7 @@
  * Public: No
  */
 
-params ["_slot", "_from", "_entry", ["_kit", "", [""]]];
+params ["_slot", "_from", "_entry", ["_kit", "", [""]], ["_on", objNull, [objNull]]];
 
 private _unit = GVAR(unit);
 private _class = _entry getOrDefault ["class", ""];
@@ -37,8 +42,26 @@ private _class = _entry getOrDefault ["class", ""];
 // A move of it is under way already, or it was never searched.
 if (_entry getOrDefault ["pending", false] || {_entry getOrDefault ["hidden", false]}) exitWith {false};
 
-if !([_unit, _slot, _class] call EFUNC(storage,slotAccepts)) exitWith {
+// Onto a body's slot, not the player's. A kit has no way to put its item on another unit.
+private _onBody = !isNull _on && {_on isNotEqualTo _unit};
+
+if (_onBody) then {
+    _unit = _on;
+};
+
+if (_onBody && {_kit isNotEqualTo ""}) exitWith {
     ["NoFit"] call FUNC(flashHint);
+    false
+};
+
+private _refusal = if (_onBody) then {
+    [_class, _unit, _slot] call FUNC(canPutOn)
+} else {
+    ["NoFit", ""] select ([_unit, _slot, _class] call EFUNC(storage,slotAccepts))
+};
+
+if (_refusal isNotEqualTo "") exitWith {
+    [_refusal] call FUNC(flashHint);
     false
 };
 

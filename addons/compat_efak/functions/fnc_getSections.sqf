@@ -29,7 +29,6 @@
  *   "title"      - the kit's name (fnc_getName, else the window's), its window's title
  *   "class"      - the kit's class, for the picture on its window's title
  *   "container"  - objNull: a kit is no container
- *   "maxLoad"    - -1
  *   "entries"    - what it holds (fnc_getEntries), [] while that has not reached this machine
  *   "virtual"    - false: things move in and out of it
  *   "kit"        - the kit's class, for its grid
@@ -43,10 +42,9 @@
  *                  when that is not known
  *   "parent"     - where it lies: the container its tile lies in, or "kit:" + the lowercase class of the
  *                  kit it is packed in
- *   "load"       - how full it is, "used / capacity" in that mod's measure
- *   "loadOver"   - fuller than its capacity
- *   "loadFraction" - how full it is, used / capacity, 0 for a kit with no capacity: the load bar's fill
- *                  (einv_gui_fnc_drawSection)
+ *   "load"       - how full it is (fnc_fillState): "used / capacity" in that mod's measure, or - for a
+ *                  kit a rule or its config gives a grid (fnc_roomMode "cells") - "used / total cells"
+ *   "loadOver"   - fuller than its capacity, or tiles of it that found no cell in its grid
  *   "notice"     - "" or, while no kit may change yet - its contents have not reached this machine
  *                  (fnc_notReady) -, a line that says why, in its window in place of the grid
  *
@@ -88,9 +86,11 @@ private _containers = [];
     };
 } forEach (_ownSections + _lootSections);
 
+// The cargo, and what Strict mode's hidden holder keeps for the container (einv_storage_fnc_hiddenClasses):
+// a kit kept out of the backpack still opens from the window.
 private _cargo = _containers apply {
     private _container = _x;
-    private _classes = ((getItemCargo _container) param [0, []]) apply {toLowerANSI _x};
+    private _classes = (((getItemCargo _container) param [0, []]) apply {toLowerANSI _x}) + ([_container] call EFUNC(storage,hiddenClasses));
 
     [_container, _classes]
 };
@@ -140,27 +140,8 @@ for "_pass" from 1 to KIT_MAX_DEPTH do {
 GVAR(opened) = GVAR(opened) select {toLowerANSI _x in _resolved};
 GVAR(holders) = _resolved;
 
-private _synced = missionNamespace getVariable [QEFAKGVAR(core,contentsSynced), true];
-
-// Why no kit may change yet, shown in place of the grid, so nothing can be dropped there
-// (fnc_notReady).
-private _wait = call FUNC(notReady);
-
 GVAR(opened) apply {
     private _kit = _x;
-    private _key = "kit:" + toLowerANSI _kit;
-    private _used = [_kit] call EFAKFUNC(core,getUsedCapacity);
-    private _capacity = [_kit] call EFAKFUNC(core,getCapacity);
-    private _title = [_kit] call FUNC(getName);
-    private _fraction = 0;
-
-    if (_capacity > 0) then {
-        _fraction = _used / _capacity;
-    };
-
-    if (_title isEqualTo "") then {
-        _title = ([_kit] call EFUNC(items,getInfo)) getOrDefault ["name", _kit];
-    };
 
     // Where it lies, and up to the container the outermost kit lies in - whose root runs its ops.
     (_resolved getOrDefault [toLowerANSI _kit, [objNull, ""]]) params ["_container", "_parentKit"];
@@ -177,23 +158,5 @@ GVAR(opened) apply {
         _outer = _nextParent;
     };
 
-    createHashMapFromArray [
-        ["id", "kit"],
-        ["title", _title],
-        ["class", _kit],
-        ["container", objNull],
-        ["maxLoad", -1],
-        ["entries", if (_synced) then {[_kit] call FUNC(getEntries)} else {[]}],
-        ["virtual", false],
-        ["kit", _kit],
-        ["key", _key],
-        ["layoutKey", _key],
-        ["holder", _key],
-        ["root", if (isNull _top) then {objNull} else {[_top] call EFUNC(storage,rootOf)}],
-        ["parent", if (_parentKit isEqualTo "") then {_container} else {"kit:" + toLowerANSI _parentKit}],
-        ["load", format ["%1 / %2 %3", round _used, round _capacity, localize "STR_efak_gui_MassUnit"]],
-        ["loadOver", _used > _capacity + KIT_MASS_EPSILON],
-        ["loadFraction", _fraction],
-        ["notice", _wait]
-    ]
+    [_kit, _container, _parentKit, _top] call FUNC(kitSection)
 }

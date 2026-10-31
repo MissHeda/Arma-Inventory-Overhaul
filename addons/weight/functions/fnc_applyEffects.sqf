@@ -7,7 +7,8 @@
  * reason again that is set already changes nothing. Nothing is done with the animation speed - ACE's fatigue
  * takes that over once a second and would fight us.
  *
- * With einv_weight_effects off none of it is set and what was is taken off again.
+ * With einv_weight_effects or the tiers as a whole (einv_weight_enabled) off none of it is set and what was
+ * is taken off again.
  *
  * Arguments:
  * 0: Unit - local <OBJECT>
@@ -26,7 +27,7 @@ params [["_unit", objNull, [objNull]], ["_tier", TIER_LIGHT, [0]]];
 
 if (isNull _unit || {isNil QACEFUNC(common,statusEffect_set)}) exitWith {};
 
-private _on = missionNamespace getVariable [QGVAR(effects), true];
+private _on = (missionNamespace getVariable [QGVAR(enabled), true]) && {missionNamespace getVariable [QGVAR(effects), true]};
 
 [_unit, "blockSprint", QUOTE(ADDON), _on && {_tier >= TIER_OVERLOADED}] call ACEFUNC(common,statusEffect_set);
 [_unit, "forceWalk", QUOTE(ADDON), _on && {_tier >= TIER_CRITICAL}] call ACEFUNC(common,statusEffect_set);

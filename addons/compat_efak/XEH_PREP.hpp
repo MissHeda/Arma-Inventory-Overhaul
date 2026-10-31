@@ -6,14 +6,18 @@ PREP(hintParts);
 PREP(inspectRows);
 PREP(hideCbaOption);
 
-// Kits in the Arsenal: what it may change about a kit, packing a new item into one, taking one out
-PREP(arsenalEditing);
-PREP(packNew);
-PREP(onGivenBack);
+// A kit's room: that mod's capacity, or the cells of a grid a rule or its config gives it
+PREP(roomMode);
+PREP(capacity);
+PREP(kitBlocks);
+PREP(hasCells);
+PREP(cellFree);
+PREP(fillState);
 
 // Kits in windows of their own inside the inventory
 PREP(onWindowOpen);
 PREP(getSections);
+PREP(kitSection);
 PREP(getEntries);
 PREP(toggle);
 PREP(open);
@@ -24,9 +28,23 @@ PREP(menuChoices);
 PREP(signature);
 PREP(requestRebuild);
 
+// The kit in ACE Arsenal's panel while Enhanced First Aid Kits' kits tab is open: what that tab shows and its
+// controls, the kit's section, what its answers depend on, whether it may change there, that tab's staged edits
+// written first, taking things out and away, and the instances of kits taken away given back
+PREP(arsenalFocus);
+PREP(arsenalControls);
+PREP(arsenalKit);
+PREP(arsenalState);
+PREP(arsenalEditable);
+PREP(arsenalFlush);
+PREP(discard);
+PREP(arsenalFree);
+
 // Moving into and out of kits
 PREP(canDrop);
 PREP(canPack);
+PREP(canPackNew);
+PREP(packNew);
 PREP(contains);
 PREP(snapshot);
 PREP(repackable);

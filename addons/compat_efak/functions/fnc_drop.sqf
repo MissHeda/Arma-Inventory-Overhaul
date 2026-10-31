@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * A move into, out of or between kits, for the window - a drag let go (einv_gui_fnc_endDrag), Ctrl+click
- * (einv_gui_fnc_quickMove, fnc_takeOut), Delete and Drop (einv_gui_fnc_dropToGround). As many of a
+ * (einv_gui_fnc_quickMove, fnc_takeOut), the drop key and Drop (einv_gui_fnc_dropToGround). As many of a
  * stack as the drag counted, all of them or none.
  *
  * Checked here against what this machine sees, so a refusal says why at once and nothing is sent: what
@@ -124,11 +124,21 @@ if (_fromKit isNotEqualTo "") then {
     _wait = switch (true) do {
         case (isNull _fromWhere || {isNull _fromRoot}): {"Failed"};
         case (!([_fromWhere] call FUNC(mayReach))): {LLSTRING(NotYours)};
+        // In ACE Arsenal's window the kits tab's rules decide whether it lets things out, as for Remove there
+        // (fnc_discard): "Remove only" does, a kit that follows the default contents does not (fnc_arsenalEditable).
+        case (!([] call EFUNC(gui,isInventoryMode))): {[_fromKit, false] call FUNC(arsenalEditable)};
         default {[_fromWhere, "items"] call EFUNC(gui,checkTouch)};
     };
 };
 
 if (_wait isNotEqualTo "") exitWith {[_wait] call _fnc_refuse};
+
+// In ACE Arsenal's window what Enhanced First Aid Kits' kits tab still has staged is written before a kit changes
+// (fnc_arsenalFlush): the move is checked against the kit as that tab shows it, and nothing of the tab is replayed
+// onto it afterwards.
+if (!([] call EFUNC(gui,isInventoryMode)) && {_fromKit isNotEqualTo "" || {_toKit isNotEqualTo ""}}) then {
+    [] call FUNC(arsenalFlush);
+};
 
 // ----- Into a kit -----
 if (_toKit isNotEqualTo "") exitWith {
@@ -197,10 +207,10 @@ if (isNull _to) exitWith {false};
 private _toTouch = [_to, "items"] call EFUNC(gui,checkTouch);
 
 if (_toTouch isNotEqualTo "") exitWith {[_toTouch] call _fnc_refuse};
-if !([_to, _entry, _count] call EFUNC(storage,hasRoom)) exitWith {["TooHeavy"] call _fnc_refuse};
+if ([_to, _entry] call EFUNC(storage,backpackIntoBackpack)) exitWith {["NoBackpack"] call _fnc_refuse};
 
-// Only the grid limits (einv_storage_gridOnly) and nobody said where: there has to be a free spot.
-if (EGVAR(storage,gridOnly) && {_cell isEqualTo []} && {!([_to, _entry] call EFUNC(storage,hasSpace))}) exitWith {
+// Free cells are the only limit: nobody said where, so there has to be a free spot.
+if (_cell isEqualTo [] && {!([_to, _entry] call EFUNC(storage,hasSpace))}) exitWith {
     ["NoRoom"] call _fnc_refuse
 };
 

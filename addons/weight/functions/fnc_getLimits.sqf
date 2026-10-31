@@ -9,6 +9,11 @@
  * factor and the unit's performance factor. With ACE's fatigue off, Heavy is a share of Overloaded
  * (NO_ACE_HEAVY_SHARE). It is never later than Overloaded, so the bar always has its order.
  *
+ * With the tiers switched off (einv_weight_enabled) the marks are still worked out - the bar still needs
+ * an end - but "enabled" says so, and fnc_getTier, fnc_tierText and fnc_updateTier answer by it, so they
+ * agree with the limits they were handed. It is part of the key too: the window's signature redraws the
+ * weight card when the switch flips, and the tier check (XEH_postInit) looks again.
+ *
  * Every input is read on every call and the answer kept under a key made of them all, so a changed
  * setting, ACE setting or performance factor simply makes a new entry - nothing has to be told. The settings
  * are read with their defaults: in the Eden editor, where the Arsenal draws the weight card too, no
@@ -23,6 +28,7 @@
  *   "heavyKg", "overloadedKg", "criticalKg"   - the same in kilograms <NUMBER>
  *   "fromAce"     - Heavy comes from ACE's fatigue model <BOOL>
  *   "aceFatigue"  - ACE Advanced Fatigue is on <BOOL>
+ *   "enabled"     - the tiers count at all (einv_weight_enabled) <BOOL>
  *   "key"         - changes whenever any limit does <STRING>
  *
  * Example:
@@ -52,7 +58,9 @@ private _heavyAt = missionNamespace getVariable [QGVAR(heavyAt), 0];
 private _overloadedAt = missionNamespace getVariable [QGVAR(overloadedAt), 45];
 private _criticalAt = (missionNamespace getVariable [QGVAR(criticalAt), 60]) max (_overloadedAt + 1);
 
-private _key = str [_aceOn, _performance, _loadFactor, _heavyAt, _overloadedAt, _criticalAt];
+private _enabled = missionNamespace getVariable [QGVAR(enabled), true];
+
+private _key = str [_aceOn, _performance, _loadFactor, _heavyAt, _overloadedAt, _criticalAt, _enabled];
 private _known = GVAR(limitsCache) get _key;
 
 if (!isNil "_known") exitWith {_known};
@@ -81,7 +89,7 @@ _heavyKg = (_heavyKg min _overloadedAt) max 0;
 private _limits = createHashMapFromArray [
     ["heavy", _heavyKg * KG_TO_MASS], ["overloaded", _overloadedAt * KG_TO_MASS], ["critical", _criticalAt * KG_TO_MASS],
     ["heavyKg", _heavyKg], ["overloadedKg", _overloadedAt], ["criticalKg", _criticalAt],
-    ["fromAce", _fromAce], ["aceFatigue", _aceOn], ["key", _key]
+    ["fromAce", _fromAce], ["aceFatigue", _aceOn], ["enabled", _enabled], ["key", _key]
 ];
 
 GVAR(limitsCache) set [_key, _limits];

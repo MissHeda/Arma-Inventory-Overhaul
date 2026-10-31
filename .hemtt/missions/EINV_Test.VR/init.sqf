@@ -1,4 +1,4 @@
-// Test mission for Enhanced Inventory: a soldier with full gear, and around him what there is to loot -
+// Test mission for Arma Inventory Overhaul: a soldier with full gear, and around him what there is to loot -
 // a crate, an ACE Arsenal box, a vehicle with things loaded into it (ACE cargo), a body, things on the
 // ground (a vest with things in it), crates locked to a side and a long-range radio and an ACRE2 radio in
 // the crate (TFAR or ACRE2 when that mod is loaded; a class a mod does not have only logs a line).

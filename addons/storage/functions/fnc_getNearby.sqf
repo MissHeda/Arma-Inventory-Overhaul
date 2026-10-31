@@ -33,9 +33,10 @@ if (isNull _unit || {!isNull objectParent _unit}) exitWith {[]};
 private _eye = eyePos _unit;
 private _feet = getPosASL _unit;
 
-// Ground piles and crates. A uniform's or vest's container is a WeaponHolder as well (ContainerSupply),
-// and a backpack's is a crate - neither is wanted, the first is left out by name and the second is not a
-// ReammoBox_F.
+// Ground piles and crates. The piles fnc_getGroundHolder makes (GroundWeaponHolder_Scripted) are a kind of
+// WeaponHolder and so found here with the others. A uniform's or vest's container is a WeaponHolder as well
+// (ContainerSupply), and a backpack's is a crate - neither is wanted, the first is left out by name and the
+// second is not a ReammoBox_F.
 private _found = (nearestObjects [_unit, ["WeaponHolder", "WeaponHolderSimulated", "ReammoBox_F"], _range + 1, true]) select {
     !(_x isKindOf "ContainerSupply")
     && {alive _x}
@@ -44,7 +45,14 @@ private _found = (nearestObjects [_unit, ["WeaponHolder", "WeaponHolderSimulated
     && {isNull objectParent _x}
     && {!lockedInventory _x}
     && {(_x getVariable ["einv_nearby", true]) isNotEqualTo false}
-    && {!([_x] call FUNC(isGroundHolder)) || {([_x] call FUNC(getContents)) isNotEqualTo []}}
+    && {
+        // A pile holds something when any of its cargo lists does - asked of the engine's lists rather than of
+        // fnc_getContents, which would make every entry of a full pile only to see that there is one (the
+        // window asks this every second).
+        !([_x] call FUNC(isGroundHolder))
+        || {(weaponCargo _x) isNotEqualTo []} || {(magazineCargo _x) isNotEqualTo []}
+        || {(itemCargo _x) isNotEqualTo []} || {(backpackCargo _x) isNotEqualTo []}
+    }
     && {[_eye, _feet, _x, _range, _unit] call FUNC(isNear)}
 };
 

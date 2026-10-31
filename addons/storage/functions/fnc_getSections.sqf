@@ -13,7 +13,6 @@
  *   "title"     - the uniform's, vest's or backpack's name <STRING>
  *   "class"     - its class, for the picture on the header <STRING>
  *   "container" - its container object <OBJECT>
- *   "maxLoad"   - what it can hold (fnc_getMaxLoad) <NUMBER>
  *
  * Example:
  * [player] call einv_storage_fnc_getSections;
@@ -39,8 +38,7 @@ private _sections = [];
             ["id", _id],
             ["title", ([_class] call EFUNC(items,getInfo)) get "name"],
             ["class", _class],
-            ["container", _container],
-            ["maxLoad", [_container] call FUNC(getMaxLoad)]
+            ["container", _container]
         ];
     };
 } forEach [

@@ -2,16 +2,15 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Shows the selected tiles: a faint accent fill and a frame two pixels thick on each, made in the tile's
+ * Shows the selected tiles: a frame (no fill - a tinted item was hard on the eyes) two pixels thick on each, made in the tile's
  * own controls group so they scroll and clip with it. The ones made before go first, so it can be called
  * again after every change of the selection - and at the end of a build and of a redraw of tiles
  * (fnc_build, fnc_redrawTiles), which made the tiles anew.
  *
- * While a frame is dragged out from an empty cell (fnc_updateBand), the tiles it touches are shown the same
- * way before it is let go.
+ * The name at the mouse always lies over the frames (fnc_raiseTooltip).
  *
  * Arguments:
- * 0: Tiles that only look selected, [[grid index, tile index], ...] <ARRAY> (default: [])
+ * None
  *
  * Return Value:
  * None
@@ -24,8 +23,6 @@
 
 disableSerialization;
 
-params [["_preview", [], [[]]]];
-
 {ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(selectionFrames), []]);
 uiNamespace setVariable [QGVAR(selectionFrames), []];
 
@@ -35,16 +32,10 @@ if (isNull _display) exitWith {};
 
 private _tiles = call FUNC(selectionTiles);
 
-{
-    _tiles pushBackUnique _x;
-} forEach _preview;
-
 if (_tiles isEqualTo []) exitWith {};
 
 private _grids = uiNamespace getVariable [QGVAR(grids), []];
 private _accent = GVAR(theme) getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
-private _fill = +_accent;
-_fill set [3, SELECT_FILL_ALPHA];
 
 private _frames = [];
 
@@ -62,23 +53,34 @@ private _frames = [];
     private _cellW = _grid get "cellW";
     private _cellH = _grid get "cellH";
 
-    // As a tile ends a pixel before the next cell, so does its frame.
-    private _rect = [
-        _gridX + (_tile get "col") * _cellW,
-        _gridY + (_tile get "row") * _cellH,
-        (_tile get "w") * _cellW - pixelW,
-        (_tile get "h") * _cellH - pixelH
-    ];
+    // As a tile ends a pixel before the next cell, so does its frame, over a seam inside its compartment too
+    // (fnc_spanRect).
+    private _rect = [_grid, [_gridX, _gridY], _tile get "col", _tile get "row", _tile get "w", _tile get "h"] call FUNC(spanRect);
 
-    private _filled = [_display, "EINV_PanelRect", _parent, _rect] call FUNC(uiCreate);
-    _filled ctrlSetBackgroundColor _fill;
-    _frames pushBack _filled;
+    // A shaped tile (size=xx/x-) on its own cells only, as it is drawn (fnc_createTile, fnc_uiShape), where
+    // the grid's columns and rows lie (a canvas's seams).
+    private _holes = _tile getOrDefault ["holes", []];
+
+    if (_holes isNotEqualTo []) then {
+        private _footprint = [_tile get "w", _tile get "h", _holes];
+        private _origin = [_rect select 0, _rect select 1];
+        private _on = [_grid, _tile get "col", _tile get "row"];
+
+        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame", 0, _on] call FUNC(uiShape));
+        _frames append ([_display, _parent, _origin, _cellW, _cellH, _footprint, _accent, "frame", 1, _on] call FUNC(uiShape));
+        continue;
+    };
+
+    // At a corner of its compartment's panel the fill and the frame are round there (fnc_cornerRadii).
+    private _corners = [_grid, _rect] call FUNC(cornerRadii);
+
 
     // Two pixels thick: the frame, and another inside it.
-    _frames pushBack ([_display, _parent, _rect, _accent] call FUNC(uiFrame));
-    _frames pushBack ([
-        _display, _parent, [(_rect select 0) + pixelW, (_rect select 1) + pixelH, (_rect select 2) - pixelW * 2, (_rect select 3) - pixelH * 2], _accent
-    ] call FUNC(uiFrame));
+    _frames append ([_display, _parent, _rect, _accent, _corners, 2] call FUNC(uiOutline));
 } forEach _tiles;
 
 uiNamespace setVariable [QGVAR(selectionFrames), _frames];
+
+// A frame on a grid that is not in a group is made over the name at the mouse: the name is made again
+// over it (fnc_raiseTooltip).
+[] call FUNC(raiseTooltip);

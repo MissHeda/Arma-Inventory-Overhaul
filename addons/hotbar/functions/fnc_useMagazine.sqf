@@ -23,7 +23,7 @@
 params [["_unit", objNull, [objNull]], ["_class", "", [""]]];
 
 if (!isNull objectParent _unit && {!(_unit call CBA_fnc_canUseWeapon)}) exitWith {[false, LLSTRING(Reason_NotHere)]};
-if (missionNamespace getVariable ["ace_common_isReloading", false]) exitWith {[false, LLSTRING(Reason_Busy)]};
+if ([] call EFUNC(storage,reloadBusy)) exitWith {[false, LLSTRING(Reason_Busy)]};
 if (!([_unit] call FUNC(canAct))) exitWith {[false, LLSTRING(Reason_NotNow)]};
 
 // The weapon in the hands: a rifle, a pistol or a launcher - not the binocular, not nothing.
@@ -51,8 +51,9 @@ if (_part isEqualTo (_base + "_mag2")) then {
     } forEach getArray (configFile >> "CfgWeapons" >> _weapon >> "muzzles");
 };
 
-// The fullest one of the class that is not loaded.
-private _mags = (magazinesAmmoFull _unit) select {(_x select 0) == _class && {!(_x select 2)} && {(_x select 1) > 0}};
+// The fullest one of the class that is not loaded - and not one that lies in a container the settings "Use
+// items from ..." close to it.
+private _mags = (([_unit, [[], [], magazinesAmmoFull _unit]] call EFUNC(storage,useCarried)) select 2) select {(_x select 0) == _class && {!(_x select 2)} && {(_x select 1) > 0}};
 
 if (_mags isEqualTo []) exitWith {[false, LLSTRING(Reason_NoneLeft)]};
 
@@ -72,6 +73,7 @@ if (count _best < 7) exitWith {
     [false, LLSTRING(Reason_NotNow)]
 };
 
-_unit action ["LoadMagazine", _unit, _unit, _best select 6, _best select 5, _weapon, _muzzle];
+// Loaded as every reload of the mod is: the game's action, or by hand into an empty weapon.
+if !([_unit, _weapon, _muzzle, _best] call EFUNC(storage,loadMagazine)) exitWith {[false, LLSTRING(Reason_NotNow)]};
 
 [true, format [LLSTRING(Message_Reload), [_class] call EFUNC(gui,itemName), _best select 1]]

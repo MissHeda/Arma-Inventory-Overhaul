@@ -1,20 +1,18 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Sends what einv_storage_fnc_plan worked out for several tiles moved together - Take all, Put all in, a
- * group quick move, a group dragged over a container (fnc_takeAll, fnc_putAll, fnc_quickMoveGroup,
+ * Sends what einv_storage_fnc_plan worked out for several tiles moved together - a
+ * group quick move, a group dragged over a container (fnc_quickMoveGroup,
  * fnc_endDrag) - as moves (fnc_sendMoves): every tile to the cell planned for it, the ones that stay in
  * their own holder laid down at once (kind "placeMany"), so two of them never wait for each other's cells.
  *
- * A stack that only partly fits by weight is sent in part (the plan's fifth element, how many go): the hint
- * says "Moved 3 of 10 - the rest is too heavy for Backpack" (einv_gui_fnc_weightText). The hint says how
- * it went once everything planned did (fnc_afterAction): "Moved 4 of 6 - no room for the rest" when the
- * plan left some behind, and how many were not searched yet when the caller says so.
+ * The hint says how it went once everything planned did (fnc_afterAction): "Moved 4 of 6 - no room for
+ * the rest" when the plan left some behind, and how many were not searched yet when the caller says so.
  * With nothing planned there is nothing to send and the hint says that there is nowhere to go.
  *
  * Arguments:
- * 0: What was planned, [[item, holder, root, cell, count], ...] - as einv_storage_fnc_plan answers, each item
- *    with "holder" and "root" of where it lies; the count (-1 for all of it) may be left out <ARRAY>
+ * 0: What was planned, [[item, holder, root, cell], ...] - as einv_storage_fnc_plan answers, each item
+ *    with "holder" and "root" of where it lies <ARRAY>
  * 1: How many tiles were meant to move, those left behind included <NUMBER>
  * 2: Not searched yet, and so left out <NUMBER> (default: 0)
  * 3: Options for fnc_sendMoves <HASHMAP> (default: empty)
@@ -34,15 +32,6 @@ private _label = [];
 
 if (count _assigned < _total) then {
     _label pushBack format [LLSTRING(Hint_MovedSome), count _assigned, _total];
-};
-
-// A stack that went in part: how many of how many, and where the rest was too heavy for.
-private _partial = _assigned findIf {(_x param [4, -1]) > 0 && {(_x select 1) isEqualType objNull}};
-
-if (_partial >= 0) then {
-    (_assigned select _partial) params ["_partialItem", "_partialTo", "", "", "_partialCount"];
-
-    _label pushBack (["movedSome", _partialTo, _partialCount, _partialItem getOrDefault ["count", 1]] call FUNC(weightText));
 };
 
 if (_hidden > 0) then {
@@ -67,7 +56,7 @@ private _moves = [];
 private _laid = [];
 
 {
-    _x params ["_item", "_to", "_root", "_cell", ["_take", -1]];
+    _x params ["_item", "_to", "_root", "_cell"];
 
     private _from = _item getOrDefault ["holder", objNull];
     private _fromRoot = _item getOrDefault ["root", objNull];
@@ -84,7 +73,7 @@ private _laid = [];
         if (count _cell < 5) then {
             ((([_item getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]])) params [["_sizeW", 1], ["_sizeH", 1]];
 
-            _cell = [_cell select 0, _cell select 1, _cell param [2, 0], _sizeW, _sizeH];
+            _cell = [_cell select 0, _cell select 1, _cell param [2, 0], _sizeW, _sizeH, 0];
         };
 
         ((_laid select _at) select 2) pushBack [_item, _cell];
@@ -92,7 +81,7 @@ private _laid = [];
     };
 
     _moves pushBack createHashMapFromArray [
-        ["kind", "move"], ["from", _from], ["fromRoot", _fromRoot], ["entry", _item], ["count", _take],
+        ["kind", "move"], ["from", _from], ["fromRoot", _fromRoot], ["entry", _item],
         ["to", _to], ["toRoot", _root], ["cell", _cell]
     ];
 } forEach _assigned;

@@ -1,0 +1,341 @@
+#include "..\script_component.hpp"
+#include "..\defines.hpp"
+/*
+ * Author: Miss Heda
+ * Whether the dragged tile may swap places with the one it lies on (Tarkov's behaviour), and where each
+ * of the two would go. Asked by fnc_updateDrag for a footprint over taken cells, where the drop would
+ * be refused as "NoRoom" otherwise; the answer is kept per footprint for the drag (dragRoom "swap|..."),
+ * so it is worked out once per hovered tile, not per frame.
+ *
+ * A tile of the same class is no swap but a merge, where the storage keeps stacks apart
+ * (einv_storage_stackSplits): the footprint covers exactly one other tile of the same key - the same
+ * class, and for a magazine the same rounds - that is a stack of a class that stacks and has room left,
+ * searched and not on its way, and the dragged items go onto it, as many as fit (all of them, or as many
+ * as the wheel chose: the rest stays where it lies). The same rules of any move apply. The plan then has
+ * the merge as its fourth element and the number that merge as its fifth.
+ *
+ * A swap is a plain tile-on-tile drop only. The dragged tile lands where the footprint lies, which
+ * must cover the cells of exactly one other tile (the rest of it on free cells, or on cells the dragged
+ * tile leaves itself); that tile goes to the cell the dragged one came from, as it lies, else turned a
+ * quarter - its corner on the dragged one's corner - and must find that spot free too (cells the
+ * dragged tile and, on one grid, the other tile leave count as free, but the dragged tile's new cells
+ * do not). A swap is of whole stacks only (a count from the wheel is refused), of two different classes,
+ * neither of them a tile that was not searched or is on its way. Not for a kit's grid, ACE's list or a slot's item, and not
+ * where the pile on the ground would be left empty by the tile that leaves it (the engine deletes an
+ * empty pile). Magazines of a kind that repack, kits and everything else that has its own answer for a
+ * drop on its tile never get here (fnc_updateDrag asks them first).
+ *
+ * The rules that apply to any move apply to both: a backpack never into a backpack, nothing into itself
+ * (einv_storage_fnc_liesIn), a living person's gear only as the settings say (fnc_checkTouch), another
+ * player's kit stays where it is (einv_compat_efak_fnc_checkTile). Free cells are the only room there
+ * is - weight refuses nothing.
+ *
+ * Categories and single slots (einv_storage_fnc_blockMode): the other tile must be taken by the compartment the dragged one
+ * comes from, else the reason is "WrongKind"; into a single slot (the footprint fnc_updateDrag brings is then the slot) a tile
+ * goes whole, its own size aside, and a tile that leaves one lies at its own size again.
+ *
+ * Arguments:
+ * 0: Index of the grid under the mouse <NUMBER>
+ * 1: Column the footprint's corner lies on <NUMBER>
+ * 2: Row <NUMBER>
+ * 3: Width of what is held as it is held <NUMBER>
+ * 4: Height <NUMBER>
+ * 5: Which way round it is held, 1 turned a quarter clockwise <NUMBER>
+ * 6: Which tile lies on each cell of that grid, as fnc_updateDrag keeps it ("cells|n") <ARRAY>
+ * 7: The same for the grid the tile comes from <ARRAY>
+ * 8: How many of the stack are held, -1 for all of it <NUMBER> (default: -1)
+ *
+ * Return Value:
+ * [reason, plan] - reason "" when they swap or merge, else why not ("NoRoom" when it is neither); plan
+ * [index of the other tile, the cell the dragged one lands on, the cell the other lands on, merge, how
+ * many merge], each cell [col, row, compartment, width, height, rot] as op place takes it - the cell the
+ * other lands on is [] and merge true for a merge -, [] without either <ARRAY>
+ *
+ * Example:
+ * [_targetIndex, 2, 1, 1, 2, 0, _underTarget, _underSource] call einv_gui_fnc_swapPlan;
+ *
+ * Public: No
+ */
+
+params [
+    ["_targetIndex", -1, [0]], ["_col", 0, [0]], ["_row", 0, [0]], ["_w", 1, [0]], ["_h", 1, [0]], ["_rot", 0, [0]],
+    ["_underTarget", [], [[]]], ["_underSource", [], [[]]], ["_amount", -1, [0]]
+];
+
+private _none = ["NoRoom", []];
+
+private _entry = uiNamespace getVariable [QGVAR(dragEntry), createHashMap];
+private _grids = uiNamespace getVariable [QGVAR(grids), []];
+
+GVAR(press) params [["_sourceIndex", -1, [0]], ["_tileIndex", -1, [0]], "", "", "", ["_slotSource", [], [[]]]];
+
+if (_slotSource isNotEqualTo [] || {count _entry == 0}) exitWith {_none};
+
+private _target = _grids param [_targetIndex, createHashMap];
+private _source = _grids param [_sourceIndex, createHashMap];
+
+if (count _target == 0 || {count _source == 0}) exitWith {_none};
+
+// Containers only: a kit decides for itself, ACE's list has nothing behind its rows.
+if (
+    (_target getOrDefault ["kit", ""]) isNotEqualTo "" || {(_source getOrDefault ["kit", ""]) isNotEqualTo ""}
+    || {(_target getOrDefault ["source", ""]) isNotEqualTo ""} || {(_source getOrDefault ["source", ""]) isNotEqualTo ""}
+) exitWith {_none};
+
+private _to = _target getOrDefault ["container", objNull];
+private _from = _source getOrDefault ["container", objNull];
+
+if (isNull _to || {isNull _from}) exitWith {_none};
+
+private _sameHolder = _from isEqualTo _to;
+private _sameGrid = _targetIndex == _sourceIndex;
+private _toBlock = _target getOrDefault ["block", 0];
+private _fromBlock = _source getOrDefault ["block", 0];
+
+// The same compartment shown twice would hide one tile's cells from the other's answer.
+if (_sameHolder && {!_sameGrid} && {_toBlock == _fromBlock}) exitWith {_none};
+
+// ----- Where the dragged tile lands: its footprint, over exactly one other tile -----
+private _holesHeld = ([_entry getOrDefault ["class", ""], _rot] call EFUNC(items,footprintAs)) select 2;
+
+// A single slot takes a tile whole (einv_storage_fnc_slotOf): the footprint fnc_updateDrag brings is the slot, its holes the slot's.
+private _targetSingle = _target getOrDefault ["single", false];
+private _sourceSingle = _source getOrDefault ["single", false];
+
+if (_targetSingle) then {
+    _holesHeld = _target getOrDefault ["holes", []];
+};
+private _cols = _target get "cols";
+
+if (_col < 0 || {_row < (_target getOrDefault ["rowFrom", 0])} || {_col + _w > _cols} || {_row + _h > (_target getOrDefault ["rowTo", _target get "rows"])}) exitWith {_none};
+if ([_target, _col, _row, _w, _h, _holesHeld] call FUNC(hitsHole)) exitWith {_none};
+
+private _lifted = [-1, _tileIndex] select _sameGrid;
+private _indexB = -1;
+private _blocked = false;
+
+for "_r" from 0 to (_h - 1) do {
+    for "_c" from 0 to (_w - 1) do {
+        if (!((_r * _w + _c) in _holesHeld)) then {
+            private _under = _underTarget param [(_row + _r) * _cols + _col + _c, -1];
+
+            if (_under >= 0 && {_under != _lifted}) then {
+                if (_indexB < 0) then {
+                    _indexB = _under;
+                } else {
+                    if (_under != _indexB) then {
+                        _blocked = true;
+                    };
+                };
+            };
+        };
+    };
+};
+
+if (_blocked || {_indexB < 0}) exitWith {_none};
+
+private _tileB = (_target get "tiles") param [_indexB, createHashMap];
+
+if (count _tileB == 0 || {_tileB getOrDefault ["hidden", false]} || {_tileB getOrDefault ["pending", false]}) exitWith {_none};
+
+private _classA = _entry getOrDefault ["class", ""];
+private _classB = _tileB getOrDefault ["class", ""];
+
+// The same class merges - where stacks lie apart, into a stack of the same key that has room - and never
+// swaps; two others swap only as whole stacks.
+private _sameClass = toLowerANSI _classA isEqualTo toLowerANSI _classB;
+private _merge = false;
+private _mergeCount = 0;
+
+if (_sameClass) then {
+    private _stackSize = [_to, _classA] call EFUNC(storage,stackFor);
+    private _roomB = _stackSize - (_tileB getOrDefault ["count", 1]);
+    private _keyA = _entry getOrDefault ["key", ""];
+
+    if (
+        (missionNamespace getVariable [QEGVAR(storage,stackSplits), false]) && {_stackSize > 1} && {_roomB >= 1}
+        && {_keyA isNotEqualTo ""} && {_keyA isEqualTo (_tileB getOrDefault ["key", ""])}
+        && {(_entry getOrDefault ["attachments", []]) isEqualTo []} && {isNull (_entry getOrDefault ["container", objNull])}
+    ) then {
+        _merge = true;
+        _mergeCount = ([_entry getOrDefault ["count", 1], _amount] select (_amount > 0)) min _roomB;
+    };
+};
+
+if (_sameClass && {!_merge}) exitWith {_none};
+if (!_sameClass && {_amount > 0}) exitWith {_none};
+
+// A move under way already goes to cells of its own (fnc_drawPending outlines them).
+private _fnc_flying = {
+    params ["_grid", "_cellCol", "_cellRow", "_cellW", "_cellH", "_cellHoles"];
+
+    if (count GVAR(inFlight) == 0) exitWith {false};
+
+    private _holder = _grid getOrDefault ["holder", _grid getOrDefault ["container", objNull]];
+    private _block = _grid getOrDefault ["block", 0];
+    private _mask = [_cellCol, _cellRow, _cellW, _cellH, _cellHoles];
+    private _hit = false;
+
+    // A HashMap: _x is the request id, _y its record - the cells it goes to second.
+    {
+        if (((_y param [1, []]) findIf {
+            _x params [["_toHolder", objNull], ["_toBlock", 0], ["_toCol", 0], ["_toRow", 0], ["_toW", 1], ["_toH", 1]];
+
+            _toHolder isEqualTo _holder && {_toBlock == _block}
+            && {[_mask, [_toCol, _toRow, _toW, _toH]] call EFUNC(storage,overlaps)}
+        }) >= 0) exitWith {
+            _hit = true;
+        };
+    } forEach GVAR(inFlight);
+
+    _hit
+};
+
+if ([_target, _col, _row, _w, _h, _holesHeld] call _fnc_flying) exitWith {_none};
+
+// ----- Where the other tile lands: the cell the dragged one comes from -----
+// Free when nothing lies there but the dragged tile (and, on one grid, the other tile itself), and
+// where the dragged tile now lands on that same compartment, not on its cells.
+private _fnc_fits = {
+    params ["_grid", "_under", "_ignore", "_cellCol", "_cellRow", "_cellW", "_cellH", "_cellHoles"];
+
+    private _gridCols = _grid get "cols";
+
+    if (_cellCol < 0 || {_cellRow < 0} || {_cellCol + _cellW > _gridCols} || {_cellRow + _cellH > (_grid get "rows")}) exitWith {false};
+    if ([_grid, _cellCol, _cellRow, _cellW, _cellH, _cellHoles] call FUNC(hitsHole)) exitWith {false};
+
+    private _free = true;
+
+    for "_r" from 0 to (_cellH - 1) do {
+        for "_c" from 0 to (_cellW - 1) do {
+            private _tile = _under param [(_cellRow + _r) * _gridCols + _cellCol + _c, -1];
+
+            if (!((_r * _cellW + _c) in _cellHoles) && {_tile >= 0} && {!(_tile in _ignore)}) exitWith {
+                _free = false;
+            };
+        };
+
+        if (!_free) exitWith {};
+    };
+
+    _free
+};
+
+private _ignoreSource = [_tileIndex];
+
+if (_sameGrid) then {
+    _ignoreSource pushBack _indexB;
+};
+
+// Where the other tile goes: nowhere for a merge, which leaves it where it lies.
+private _cellB = [];
+
+private _originCol = _entry getOrDefault ["col", 0];
+private _originRow = _entry getOrDefault ["row", 0];
+// B as it lies - a tile in a single slot has the slot's size, its own is the item's (einv_items_fnc_footprintAs) - and, where
+// that takes other cells, turned a quarter.
+private _rotB = [parseNumber (_tileB getOrDefault ["rotated", false]), 0] select _targetSingle;
+private _sizeB = if (_targetSingle) then {
+    [_classB, 0] call EFUNC(items,footprintAs)
+} else {
+    [_tileB get "w", _tileB get "h", _tileB getOrDefault ["holes", []]]
+};
+private _holesB = _sizeB select 2;
+private _candidates = [[_sizeB select 0, _sizeB select 1, _holesB, _rotB]];
+
+([_classB, 1 - _rotB] call EFUNC(items,footprintAs)) params ["_turnW", "_turnH", "_turnHoles"];
+
+if (_turnW != (_sizeB select 0) || {_turnH != (_sizeB select 1)} || {_turnHoles isNotEqualTo _holesB}) then {
+    _candidates pushBack [_turnW, _turnH, _turnHoles, 1 - _rotB];
+};
+
+// The compartment it would go to must take it: one that accepts only other categories refuses (einv_storage_fnc_blockMode), and a
+// single slot takes it whole, upright, whatever its size.
+private _sourceAccepts = _source getOrDefault ["accepts", []];
+
+if (
+    _sourceAccepts isNotEqualTo []
+    && {((([_classB] call EFUNC(items,getInfo)) getOrDefault ["groups", ["misc"]]) findIf {_x in _sourceAccepts}) < 0}
+) exitWith {["WrongKind", []]};
+
+if (_sourceSingle) then {
+    _candidates = [[_source get "cols", _source get "rows", _source getOrDefault ["holes", []], 0]];
+};
+
+
+if (!_merge) then {
+    {
+        _x params ["_cellW", "_cellH", "_cellHoles", "_cellRot"];
+
+        private _clash = _sameHolder && {_toBlock == _fromBlock} && {
+            [[_originCol, _originRow, _cellW, _cellH, _cellHoles], [_col, _row, _w, _h, _holesHeld]] call EFUNC(storage,overlaps)
+        };
+
+        if (
+            !_clash
+            && {[_source, _underSource, _ignoreSource, _originCol, _originRow, _cellW, _cellH, _cellHoles] call _fnc_fits}
+            && {!([_source, _originCol, _originRow, _cellW, _cellH, _cellHoles] call _fnc_flying)}
+        ) exitWith {
+            _cellB = [_originCol, _originRow, _fromBlock, _cellW, _cellH, _cellRot];
+        };
+    } forEach _candidates;
+};
+
+if (!_merge && {_cellB isEqualTo []}) exitWith {_none};
+
+// ----- The rules of any move, for both ways -----
+private _reason = "";
+
+if (!_sameHolder) then {
+    // The engine deletes a pile that has nothing left in it: the tile that leaves it cannot be the last. A
+    // merge leaves the other tile where it lies and puts nothing into the source, so no pile is emptied.
+    if (
+        !_merge && {
+            (([_to] call EFUNC(storage,isGroundHolder)) && {count (_target get "tiles") <= 1})
+            || {([_from] call EFUNC(storage,isGroundHolder)) && {count (_source get "tiles") <= 1}}
+        }
+    ) then {
+        _reason = "NoRoom";
+    };
+
+    if (_reason isEqualTo "") then {
+        _reason = [_from, "items"] call FUNC(checkTouch);
+    };
+
+    if (_reason isEqualTo "") then {
+        _reason = [_to, "items"] call FUNC(checkTouch);
+    };
+
+    if (
+        _reason isEqualTo ""
+        && {([_to, _entry] call EFUNC(storage,backpackIntoBackpack)) || {[_from, _tileB] call EFUNC(storage,backpackIntoBackpack)}}
+    ) then {
+        _reason = "NoBackpack";
+    };
+
+    // A uniform, vest or backpack into what lies in it - either of them.
+    private _insideA = _entry getOrDefault ["container", objNull];
+    private _insideB = _tileB getOrDefault ["container", objNull];
+
+    if (
+        _reason isEqualTo ""
+        && {(!isNull _insideA && {_to isEqualTo _insideA || {[_to, _insideA] call EFUNC(storage,liesIn)}})
+            || {!isNull _insideB && {_from isEqualTo _insideB || {[_from, _insideB] call EFUNC(storage,liesIn)}}}}
+    ) then {
+        _reason = "IntoItself";
+    };
+
+    // Another living player's kit stays where it is (einv_compat_efak).
+    if (_reason isEqualTo "" && {!isNil QEFUNC(compat_efak,checkTile)}) then {
+        _reason = [_classA, _from] call EFUNC(compat_efak,checkTile);
+
+        if (_reason isEqualTo "") then {
+            _reason = [_classB, _to] call EFUNC(compat_efak,checkTile);
+        };
+    };
+};
+
+if (_reason isNotEqualTo "") exitWith {[_reason, []]};
+
+// In a single slot the dragged tile lies upright whatever turn it is held in, as the authority lays it (einv_storage_fnc_opPlaceMany).
+["", [_indexB, [_col, _row, _toBlock, _w, _h, [_rot, 0] select _targetSingle], _cellB, _merge, _mergeCount]]

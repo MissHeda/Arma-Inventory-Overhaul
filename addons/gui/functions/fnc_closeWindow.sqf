@@ -45,10 +45,7 @@ if ((GVAR(windowMove) param [0, ""]) isEqualTo _key) then {
     GVAR(windowMove) = [];
 };
 
-private _display = uiNamespace getVariable [QGVAR(display), displayNull];
-
-if (!isNull _display) then {
-    [_display] call FUNC(drawWindows);
-};
+// The windows are drawn once for a run of clicks (fnc_windowsSoon).
+[] call FUNC(windowsSoon);
 
 _index >= 0

@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project name="einv">
     <Package name="main">
+        <Key ID="STR_einv_main_Setting_Info">
+            <English>Also in the setup wizard (recommended)</English>
+        </Key>
+        <Key ID="STR_einv_main_Setting_Info_Desc">
+            <English>Every setting here is also on the setup\nwizard's General page; both stay in sync.</English>
+        </Key>
+        <Key ID="STR_einv_main_Setting_Info_Value">
+            <English>ESC &gt; Options &gt; Inventory setup</English>
+        </Key>
         <Key ID="STR_einv_main_URL">
             <English>https://discord.gg/Jud6gyzFYx</English>
         </Key>

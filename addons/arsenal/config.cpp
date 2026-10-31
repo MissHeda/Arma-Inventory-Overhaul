@@ -1,12 +1,11 @@
 #include "script_component.hpp"
 #include "defines.hpp"
 
-// The Enhanced Arsenal: ACE Arsenal's boxes, loadouts and events in the inventory's window, and the
-// vanilla Virtual Arsenal by setting. ACE is a hard requirement of the mod, so this addon is not skipped
-// when ace_arsenal is missing - the game should say so. ace_arsenal makes the patches of its display and
-// of Eden's Arsenal menu load after ACE's own, A3_Functions_F_Bootcamp the entry for BIS_fnc_arsenal after
-// BI's. ACE Arsenal Extended is neither required nor ordered against: only onLoad of ACE's display is
-// patched, which it leaves alone (CfgAceArsenal.hpp).
+// ACE Arsenal's grid panel: beside ACE's list, the open uniform's, vest's or backpack's grid, drawn by the
+// inventory's engine on ACE's own display - nothing of ACE's is patched or replaced. And the vanilla
+// Virtual Arsenal by setting. ACE is a hard requirement of the mod, so this addon is not skipped when
+// ace_arsenal is missing - the game should say so. A3_Functions_F_Bootcamp makes the entry for
+// BIS_fnc_arsenal load after BI's.
 class CfgPatches {
     class ADDON {
         name = COMPONENT_NAME;
@@ -32,6 +31,4 @@ class CfgPatches {
 
 #include "CfgEventHandlers.hpp"
 #include "CfgFunctions.hpp"
-#include "CfgAceArsenal.hpp"
-#include "Display3DEN.hpp"
 #include "RscArsenal.hpp"

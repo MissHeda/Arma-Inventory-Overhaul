@@ -13,7 +13,7 @@
  * be able to put on again what it took off.
  *
  * The result is not a list in ACE's form but the class names; ACE's own addVirtualItems makes the form of it
- * (fnc_openWindow), which also takes base weapons and drops classes the game does not know.
+ * (fnc_openBI), which also takes base weapons and drops classes the game does not know.
  *
  * Arguments:
  * 0: Box <OBJECT>

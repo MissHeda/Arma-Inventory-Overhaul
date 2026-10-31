@@ -6,11 +6,11 @@
  * of the stack goes - at least one, at most all of it. The middle button takes all of it again
  * (fnc_updateDrag). The columns do not scroll meanwhile (fnc_updateDrag holds them); a single item
  * leaves the wheel to them. A window that attached (fnc_attach) is offered the wheel first when nothing is
- * dragged (the "wheel" hook). A new count marks the containers anew: the ones that cannot carry that many
- * turn red, the ones that can no longer are back to normal (fnc_markWeight).
+ * dragged (the "wheel" hook). A new count moves the weight card's preview (fnc_previewWeight).
  *
  * Reported by the display and by every scrolling column, both for the same turn of the wheel: one
- * per frame counts.
+ * per frame counts. A picture's clip group over a tile reports it too, and passes it on to the column
+ * (fnc_passWheel).
  *
  * Arguments:
  * 0: The event's own arguments [control or display, scroll] <ARRAY>
@@ -25,10 +25,25 @@
  */
 
 params ["_args"];
-_args params ["", ["_scroll", 0]];
+_args params [["_source", displayNull], ["_scroll", 0]];
 
-// Not dragging: a window that attached may use the wheel itself (the Arsenal's catalog steps one card row
-// a turn, its camera zooms) - once per turn, though the display and the column both report it. The hook
+// A picture's clip group (fnc_uiItemPicture) lies over its tile and keeps the wheel from the column the tile
+// is in: it hands the turn on - unless the wheel is counting a stack just now.
+if (_source isEqualType controlNull && {_scroll != 0} && {_source getVariable [QGVAR(clip), false]}) then {
+    private _entry = uiNamespace getVariable [QGVAR(dragEntry), createHashMap];
+    private _counting = GVAR(dragging) && {GVAR(dragGroup) isEqualTo []} && {(_entry getOrDefault ["count", 1]) > 1};
+
+    if (!_counting) then {
+        [_source, _scroll] call FUNC(passWheel);
+    };
+
+    // The engine scrolls the group after this handler: put back at the frame's start as well (fnc_unscroll),
+    // also while the wheel counts a stack.
+    [_source] call FUNC(unscroll);
+};
+
+// Not dragging: a window that attached may use the wheel itself (the Arsenal panel adds or takes out one with
+// Ctrl over a tile) - once per turn, though the display and the column both report it. The hook
 // is told the turn and where the mouse is; a hook that scrolls a column itself sets its value every
 // frame, as fnc_updateDrag holds the columns: answering true does not stop the column's own step.
 if (!GVAR(dragging) && {_scroll != 0} && {"wheel" in GVAR(hooks)}) exitWith {
@@ -51,8 +66,7 @@ if (GVAR(lastWheel) isEqualTo diag_frameNo) exitWith {true};
 GVAR(lastWheel) = diag_frameNo;
 GVAR(dragCount) = ((GVAR(dragCount) + ([-1, 1] select (_scroll > 0))) max 1) min _stack;
 
-// The containers that cannot carry that many are marked, the others not (fnc_markWeight): only recoloured
-// - what lift made is all there is.
-[uiNamespace getVariable [QGVAR(display), displayNull], uiNamespace getVariable [QGVAR(dragEntry), createHashMap], GVAR(dragCount), false] call FUNC(markWeight);
+// The weight card's preview follows the count (fnc_previewWeight): only moved - what lift made is all there is.
+[uiNamespace getVariable [QGVAR(display), displayNull], uiNamespace getVariable [QGVAR(dragEntry), createHashMap], GVAR(dragCount), false] call FUNC(previewWeight);
 
 true

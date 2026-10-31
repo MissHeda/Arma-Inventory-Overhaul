@@ -12,8 +12,6 @@
  *
  * Arguments:
  * 0: Person <OBJECT>
- * 1: May open whole - false where the player switched the window off and the vanilla inventory,
- *    which shows a conscious person only by their backpack, stands in <BOOL> (default: true)
  *
  * Return Value:
  * "whole", "backpack", or "" when not at all <STRING>
@@ -24,7 +22,7 @@
  * Public: No
  */
 
-params [["_person", objNull, [objNull]], ["_wholeAllowed", true, [false]]];
+params [["_person", objNull, [objNull]]];
 
 if (!alive _person || {!(_person isKindOf "CAManBase")}) exitWith {""};
 
@@ -35,13 +33,13 @@ if (_person isKindOf QACEGVAR(dragging,clone) || {!isNil {_person getVariable QA
 if (_person getVariable ["einv_noAccess", false]) exitWith {""};
 
 // The unconscious always open whole, as ACE's "Inventory" opens them.
-if (_wholeAllowed && {
+if (
     switch (GVAR(personOpen)) do {
         case ACCESS_EVERYONE: {true};
         case ACCESS_HELPLESS: {[_person] call FUNC(isHelpless)};
         default {lifeState _person isEqualTo "INCAPACITATED"};
     }
-}) exitWith {"whole"};
+) exitWith {"whole"};
 
 // Otherwise their backpack, as the engine's own action opens it - one that can be opened at all
 // (ace_interaction_fnc_canOpenBackpack asks the same).

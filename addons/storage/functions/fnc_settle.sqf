@@ -6,18 +6,21 @@
  * the requester. Each step's phases run like any other; the next step looks at what is still left.
  *
  * Step 1, back where it came from: one phase per origin root, a put without a cell (into a holder of
- * another type with that type's "put" op, GVAR(holderTypes)); what came off a slot has no origin and
- * waits for step 2. Step 2, the requester's vehicle, when alive: a forced put, room not asked. Step 3,
- * the ground: putGround at the server, at the transaction's ground point, else the terrain under the
- * requester. Settlement phases skip reach and guards: the system puts things back.
+ * another type with that type's "put" op, GVAR(holderTypes)); what came off a slot (op takeOff) goes
+ * back on that slot (op putOn) while the slot is still empty - a backpack whose drop went wrong is on
+ * the back again rather than nowhere -, else it waits for step 2. Step 2, the requester's vehicle, when
+ * alive: a forced put, room not asked. Step 3, the ground: putGround at the server, at the
+ * transaction's ground point, else the terrain under the requester. Settlement phases skip reach and
+ * guards: the system puts things back.
  *
  * The books: a payload is the n-th one an op produced, named by its ref ["#ref", phase, op, n]; an op
  * that landed ("") or bounced ("Bounced") consumed every ref among its arguments - what bounced is a
  * payload of its own, produced by that op, and inherits the origin of what it was given. Where a payload
  * came from: the holder a take or move (also a holder type's "take" and "move" op) took it out of, at
- * that phase's root. So the transaction's phases must keep their refs - a driver fills the refs in a
- * copy of each phase it runs - and the phases of each step are appended to the transaction's phases,
- * their results to the results: a step's ops hold refs as well, filled in like any other.
+ * that phase's root; for a takeOff the unit and slot, [unit, slot], at the unit. So the transaction's
+ * phases must keep their refs - a driver fills the refs in a copy of each phase it runs - and the phases
+ * of each step are appended to the transaction's phases, their results to the results: a step's ops hold
+ * refs as well, filled in like any other.
  *
  * Arguments:
  * 0: Transaction, [id, requester, requester's machine, where, phases, silent] <ARRAY>
@@ -71,7 +74,8 @@ private _consumed = createHashMap;
     } forEach _x;
 } forEach _results;
 
-// Where a payload came from: [holder, root], or [] - it came off a slot, or was carried in as it was.
+// Where a payload came from: [holder, root] - the holder [unit, slot] when it came off a slot -, or []
+// when it was carried in as it was.
 private _fnc_origin = {
     params ["_p", "_o", "_n", ["_depth", 0]];
 
@@ -80,6 +84,7 @@ private _fnc_origin = {
     ((_phase param [1, []]) param [_o, []]) params [["_name", "", [""]], ["_args", [], [[]]]];
 
     if (_name in _sources) exitWith {[_args param [0, objNull], _phase param [0, objNull]]};
+    if (_name isEqualTo "takeOff") exitWith {[[_args param [0, objNull], _args param [1, ""]], _phase param [0, objNull]]};
 
     // Only what bounced inherits an origin: that of what it was given. The old item of a putOn that
     // bounced came off a slot.
@@ -128,15 +133,28 @@ if (_step == 1) then {
 
             private _op = [];
 
-            if (_holder isEqualType "") then {
-                private _type = GVAR(holderTypes) getOrDefault [(_holder splitString ":") param [0, ""], createHashMap];
-                private _put = _type getOrDefault ["put", ""];
+            switch (true) do {
+                // Off a slot: back on, only into an empty slot - anything worn there now stays, and the
+                // payload waits for the vehicle or the ground. Asked here, again where the unit is local
+                // (op putOn: what it would take off is handed on, never lost).
+                case (_holder isEqualType []): {
+                    _holder params [["_unit", objNull, [objNull]], ["_slot", "", [""]]];
 
-                if (_put isNotEqualTo "") then {
-                    _op = [_put, [_holder, _ref, []]];
+                    if (!isNull _unit && {_slot isNotEqualTo ""} && {count ([_unit, _slot] call FUNC(getSlot)) == 0}) then {
+                        _op = ["putOn", [_unit, _slot, _ref]];
+                    };
                 };
-            } else {
-                _op = ["put", [_holder, _ref, [], false]];
+                case (_holder isEqualType ""): {
+                    private _type = GVAR(holderTypes) getOrDefault [(_holder splitString ":") param [0, ""], createHashMap];
+                    private _put = _type getOrDefault ["put", ""];
+
+                    if (_put isNotEqualTo "") then {
+                        _op = [_put, [_holder, _ref, []]];
+                    };
+                };
+                default {
+                    _op = ["put", [_holder, _ref, [], false]];
+                };
             };
 
             if (_op isNotEqualTo [] && {_root isEqualType objNull}) then {

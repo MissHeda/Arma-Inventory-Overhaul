@@ -2,7 +2,8 @@
 /*
  * Author: Miss Heda
  * Whether an object is a pile of things on the ground rather than a crate or a vehicle. Such a pile has
- * no capacity of its own, and the engine deletes it once it is empty.
+ * no capacity of its own, and it is deleted once it is empty - by the engine, or for a scripted one by
+ * fnc_pruneScriptedPile.
  *
  * Arguments:
  * 0: Object <OBJECT>

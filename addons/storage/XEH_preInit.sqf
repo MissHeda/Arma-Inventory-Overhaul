@@ -20,7 +20,8 @@ GVAR(ops) = createHashMapFromArray [
     ["place", QFUNC(opPlace)], ["placeMany", QFUNC(opPlaceMany)], ["sort", QFUNC(opSort)],
     ["normalize", QFUNC(opNormalize)], ["move", QFUNC(opMove)], ["take", QFUNC(opTake)],
     ["put", QFUNC(opPut)], ["putGround", QFUNC(opPutGround)], ["takeOff", QFUNC(opTakeOff)],
-    ["putOn", QFUNC(opPutOn)], ["repack", QFUNC(opRepack)]
+    ["putOn", QFUNC(opPutOn)], ["repack", QFUNC(opRepack)], ["migrate", QFUNC(opMigrate)],
+    ["strict", QFUNC(opStrict)], ["split", QFUNC(opSplit)]
 ];
 
 // Checks every op passes on the machine that runs it: CODE [op, args, requester, root] -> "" or a reason.
@@ -32,17 +33,33 @@ GVAR(guards) = [];
 // window takes things out and puts them in anew, which makes a new object (a TFAR long-range radio keeps
 // its frequencies in "radio_settings"). Compat addons add names here in their preInit
 // (einv_compat_tfar); fnc_snapshot reads them, fnc_restore sets them.
-GVAR(carryVariables) = [];
+//
+// The first is the container's search state (issue 17), [id, source], public: the id every player's knowledge
+// of it is kept under (einv_gui_fnc_searchRecord, which gives it one the first time anything is known of it),
+// and where it came from - "body" or "person" when it was taken off one (fnc_takeOff), "" when not. A body's
+// backpack dropped on the ground is searched as the body is, and whoever searched it keeps it searched.
+GVAR(carryVariables) = [QGVAR(searchState)];
 
 // Holders that are no object, by the part of their key before ":" - "kit" from einv_compat_efak:
 // HashMap "entries" CODE [holder] -> entries, "root" CODE [holder, hint] -> root (fnc_rootOf hands on
-// its second argument as the hint), "verify" CODE [holder, root] -> BOOL, and the names of its ops for
-// "take", "put", "place" and "move" - settlement puts a payload back into such a holder with its "put"
-// op (fnc_settle), and the window builds its phases from them (einv_gui_fnc_sendMoves).
+// its second argument as the hint), "verify" CODE [holder, root] -> BOOL, "blocks" CODE [holder] ->
+// compartments as fnc_blocksFor gives them, [] for an open grid that grows (fnc_getBlocks; left out, the
+// grid is open), and the names of its ops for "take", "put", "place" and "move" - settlement puts a
+// payload back into such a holder with its "put" op (fnc_settle), and the window builds its phases from
+// them (einv_gui_fnc_sendMoves).
 GVAR(holderTypes) = createHashMap;
 
 // Same kind of item, class -> canonical key (fnc_layoutKey).
 GVAR(layoutKeys) = createHashMap;
+
+// Whether a holder of this class is one nobody wears (a crate, a vehicle, a pile on the ground), type -> BOOL: the places the
+// stack multiplier reaches (fnc_stackFor).
+GVAR(stackRoomy) = createHashMap;
+
+// What a weapon takes in one slot, "weapon|mag", "weapon|mag2" or "weapon|items" (lower case) -> a HashMap of the
+// lower case class names it takes (fnc_slotAccepts). Read from config once per weapon: config does not change
+// during a mission, and asking the engine for the compatible magazines of every slot at every lift is not cheap.
+GVAR(compatSets) = createHashMap;
 
 // Where a unit's uniform, vest and backpack keep their things travels inside its loadouts, in the extended
 // info CBA keeps with them: written when a loadout is read, read back when one is set (fnc_onLoadoutGet,
@@ -50,6 +67,36 @@ GVAR(layoutKeys) = createHashMap;
 // editor runs this too.
 ["CBA_loadoutGet", {_this call FUNC(onLoadoutGet)}] call CBA_fnc_addEventHandler;
 ["CBA_loadoutSet", {_this call FUNC(onLoadoutSet)}] call CBA_fnc_addEventHandler;
+
+// Units local here whose cargo changed and whose surplus - what their uniform, vest or backpack holds beyond
+// the grid - is to be looked at, [unit, not before, tries so far, requester] each (fnc_queueMigrate,
+// fnc_tickMigrate). Filled by the triggers in XEH_postInit, fnc_onLoadoutSet and the arsenal addon.
+GVAR(migrateDue) = [];
+
+// The player's overflow sweep (fnc_queueSweep, fnc_sweepTick, fnc_requestSweep): when it is due (-1 for not at all);
+// the time before which nothing is swept (a loadout was set, the unit is new); the time before which a pass that put
+// nothing down is not tried again; how many of those in a row; how many migrations in a row the look asked for;
+// until when a pass under way is waited for; whether the unit is new (its first sweep ignores the hold after a swapped
+// container); the last signature of the unit's load and counts (the watch) and when it is next compared; the overflow
+// seen by the last look that was about to put it on the ground, and until when the state is trusted without a second look.
+GVAR(sweepDue) = -1;
+GVAR(sweepNotBefore) = 0;
+GVAR(sweepQuiet) = 0;
+GVAR(sweepFails) = 0;
+GVAR(sweepMigrates) = 0;
+GVAR(sweepRunning) = 0;
+GVAR(sweepFresh) = false;
+GVAR(sweepSignature) = [];
+GVAR(sweepWatchAt) = 0;
+GVAR(sweepSeen) = "";
+GVAR(sweepTrusted) = 0;
+
+// The overflow, by class and count, that the asks to move it into another worn container (GVAR(sweepMigrates))
+// were counted for: they start again from 0 when it changed (fnc_requestSweep).
+GVAR(sweepOverSeen) = "";
+
+// The last verdict the sweep wrote to the RPT (fnc_requestSweep): a line only when it changed.
+GVAR(sweepTrace) = "";
 
 // While a phase's ops run here: the places they changed, [[holder, records], ...] - written once at the
 // end - and what the ops read of each holder, holder netId or kit key -> HashMap (fnc_execute).
@@ -102,13 +149,42 @@ GVAR(rootWaits) = createHashMap;
 GVAR(gone) = [];
 GVAR(hubTickAt) = 0;
 
-// The handshake with the server: the version of Enhanced Inventory it answered with, "" until it did, and
-// when this machine greeted it, -1 before (fnc_greetServer, XEH_postInit). A client hands nothing to the
-// hub before the server answered with this very version (fnc_hubReady): a server without the hub's
-// events, or with others, would drop what the client already took out.
+// The handshake with the server: the version of Arma Inventory Overhaul it answered with, "" until it did
+// (fnc_greetServer, XEH_postInit). A client hands nothing to the hub before the server answered with this
+// very version (fnc_hubReady): a server without the hub's events, or with others, would drop what the
+// client already took out.
 GVAR(serverVersion) = "";
-GVAR(greeted) = -1;
+
+// Whether any of the "Use items from ..." settings limits something; set by them (fnc_useRefresh) and read
+// by everything that asks where an item may be used from, which has nothing to do while it is false. And
+// whether any of them is on Strict: then what they block is kept out of the cargo, in a hidden holder on the
+// unit (fnc_hiddenRoute, fnc_opStrict), which costs this one read where it is not.
+GVAR(useActive) = false;
+GVAR(strictActive) = false;
+
+// Where the player's magazines lie, "creator:id" -> "uniform", "vest" or "backpack" (fnc_useTrack), so that
+// a reload the game did can be told to have come from a closed container (fnc_onReloaded); whether such a
+// reload is being taken back right now (fnc_reloadUndo) - until when, a time and not a flag, so one that a
+// script error left behind runs out -; a magazine the window loaded by hand, [unit, weapon, class, until]
+// (fnc_noteHandLoad); the one reload this mod asked the game for, spent by its first "Reloaded" event
+// (fnc_loadMagazine writes it, fnc_onReloaded spends it, it runs out); when ACE's "is reloading" was first
+// seen (fnc_reloadBusy); and the throw block (fnc_throwTick): whether ACE's blockThrow is set by us and for
+// which unit.
+GVAR(useIds) = createHashMap;
+GVAR(undoUntil) = 0;
+GVAR(handLoad) = [];
+GVAR(reloadToken) = [];
+GVAR(reloadBusySince) = 0;
+GVAR(throwBlocked) = false;
+GVAR(throwUnit) = objNull;
 
 #include "initSettings.inc.sqf"
+
+// Two stacks of one class apart in one container: the places' records carry how many a tile holds and the
+// ops put, take and split by that (fnc_stackCounts, fnc_opSplit, fnc_opPut). The window asks for the new
+// behaviour - a drop on a cell stays a stack of its own, Shift+click splits, a drop onto a stack of the same
+// class merges - only while this is true on its machine; false switches that off again, the records already
+// written stay as they are.
+GVAR(stackSplits) = true;
 
 ADDON = true;

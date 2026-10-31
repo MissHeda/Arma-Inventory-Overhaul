@@ -4,7 +4,6 @@
  * Whether a holder is part of what the window's unit carries: its uniform, vest or backpack, or anything
  * lying in them, however deep - the holder's root (einv_storage_fnc_rootOf) is the unit itself. Taking
  * something from anywhere else puts weight on the soldier; moving it around in his own gear does not.
- * Not einv_gui_fnc_isShared, which says nothing about whose it is in single player.
  *
  * Arguments:
  * 0: Holder - a container, or a kit's key <OBJECT or STRING>

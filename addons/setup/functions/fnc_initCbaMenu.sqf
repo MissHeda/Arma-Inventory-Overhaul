@@ -2,14 +2,21 @@
 /*
  * Author: Miss Heda
  * Puts an "Inventory setup" button on CBA's Addon Options, in the free place of its bottom row between
- * Load and Import, and shows it only while this mod's page is the one open. It opens the setup wizard
+ * Load and Import, and shows it only while this mod's server page ("Arma Inventory Overhaul - Server", where
+ * the rules are; the client page has nothing for the wizard) is the one open. It opens the setup wizard
  * over the menu, in menu mode: what the wizard applies arrives in the menu as a change still to be
  * confirmed - our row turns yellow - and CBA's own OK saves it, or Cancel throws it away, like any other
- * change made there.
+ * change made there. Shown only to who may see the wizard at all (fnc_canOpen) - CBA's menu has no condition
+ * for a control of its own, so the button is made hidden and asked again whenever it is brought up to date
+ * (below), and a login or logout while the menu is open is noticed at the next mouse move.
+ *
+ * The server settings on that page are the very ones the wizard's General page shows (einv_main_fnc_addSetting):
+ * either edits them, and the other shows the change. In Eden, what the scenario still keeps in the settings box of
+ * the test builds is moved into them first (einv_main_fnc_migrateSettings), so the rows show it.
  *
  * Runs when the menu loads (Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions), after CBA's
  * own handler, which made the controls looked for here. Their ids are CBA's internals, not a promise:
- * should any of them be missing or moved, the button is simply not made, and ESC > Options, the keybind,
+ * should any of them be missing or moved, the button is simply not made, and ESC > Options,
  * Eden's Tools menu and the inventory's cog still open the wizard.
  *
  * Arguments:
@@ -36,6 +43,10 @@ disableSerialization;
 params ["_display"];
 
 if (!hasInterface || {isNull _display}) exitWith {};
+
+if (is3DEN) then {
+    [] call (missionNamespace getVariable [QEFUNC(main,migrateSettings), {}]);
+};
 
 private _list = _display displayCtrl CBA_IDC_ADDONS_LIST;
 
@@ -77,11 +88,11 @@ _button ctrlAddEventHandler ["ButtonClick", {
 
 // The page of a category is its name in lower case after CBA localized it - read from the setting
 // itself, so a category that is ever turned into a stringtable entry still matches in every language.
-private _category = CBA_SETTINGS_EINV;
+private _category = CBA_SETTINGS_EINV_SERVER;
 private _defaults = missionNamespace getVariable "cba_settings_default";
 
 if (!isNil "_defaults") then {
-    _category = (_defaults getVariable [QEGVAR(items,rules), []]) param [4, CBA_SETTINGS_EINV];
+    _category = (_defaults getVariable [QEGVAR(items,rules), []]) param [4, CBA_SETTINGS_EINV_SERVER];
 };
 
 _display setVariable [QGVAR(cbaButton), _button];
@@ -106,6 +117,7 @@ _display setVariable [QGVAR(cbaSync), {
     private _list = _display displayCtrl CBA_IDC_ADDONS_LIST;
     private _index = lbCurSel _list;
     private _show = ctrlShown (_display displayCtrl CBA_IDC_ADDONS_GROUP)
+        && {call (missionNamespace getVariable [QFUNC(canOpen), {false}])}
         && {_index >= 0}
         && {(_list lbData _index) isEqualTo (_display getVariable [QGVAR(cbaCategory), ""])};
 

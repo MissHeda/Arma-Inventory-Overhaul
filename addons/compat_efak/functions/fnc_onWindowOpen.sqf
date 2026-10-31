@@ -19,4 +19,5 @@
 
 GVAR(opened) = [];
 GVAR(holders) = createHashMap;
+GVAR(arsenalHolders) = createHashMap;
 GVAR(kitStart) = createHashMap;

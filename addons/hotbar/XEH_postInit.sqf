@@ -37,50 +37,6 @@ call FUNC(loadSlots);
     };
 }] call CBA_fnc_addEventHandler;
 
-// In the vanilla inventory (the replacement switched off) the hotbar has no row to drag onto, so the
-// item context menu - the one CBA adds to it - offers it. Not while our own window is open: that
-// window shows the options other mods add to the same menu itself, and would show these twice.
-{
-    _x params ["_name", "_show", "_statement"];
-
-    ["#All", ["CONTAINER"], _name, [], "", [{true}, _show], _statement] call CBA_fnc_addItemContextMenuOption;
-} forEach [
-    [
-        LLSTRING(Menu_BindPlain),
-        {
-            params ["", "", "_item"];
-
-            call FUNC(isActive)
-            && {isNull (uiNamespace getVariable [QEGVAR(gui,display), displayNull])}
-            && {(GVAR(slots) findIf {_x == _item}) < 0}
-            && {(call FUNC(firstFree)) >= 0}
-            && {([_item] call FUNC(canBind)) select 0}
-        },
-        {
-            params ["", "", "_item"];
-
-            [call FUNC(firstFree), _item] call FUNC(bind);
-            false
-        }
-    ],
-    [
-        LLSTRING(Menu_UnbindPlain),
-        {
-            params ["", "", "_item"];
-
-            call FUNC(isActive)
-            && {isNull (uiNamespace getVariable [QEGVAR(gui,display), displayNull])}
-            && {(GVAR(slots) findIf {_x == _item}) >= 0}
-        },
-        {
-            params ["", "", "_item"];
-
-            [GVAR(slots) findIf {_x == _item}] call FUNC(unbind);
-            false
-        }
-    ]
-];
-
 // Once the settings are in: "always" shows the bar from the start, and the keys the slots share with
 // other mods and Arma's command menus are said once the keybinds of all mods are in too.
 private _fnc_settingsIn = {

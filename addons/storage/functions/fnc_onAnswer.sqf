@@ -35,4 +35,9 @@ GVAR(requests) deleteAt _id;
 
 _request params ["", "", ["_callback", {}, [{}]], ["_callbackArgs", []]];
 
+// Something may have moved from one container to another: where the magazines lie is noted again.
+if (hasInterface) then {
+    [] call FUNC(useTrack);
+};
+
 [_id, _summary, _revisions, _callbackArgs] call _callback;

@@ -4,8 +4,9 @@
  * Whether an item may go on the hotbar from where it lies: only what the player carries - the own
  * uniform, vest and backpack, a kit that is carried, the own equipment slots. What lies in a crate, on
  * the ground or on a body cannot be used from the bar, and neither can a uniform, vest or backpack
- * lying inside the own backpack (ACE's item list does not see into it). Then the item itself has to
- * be one for the bar (fnc_canBind).
+ * lying inside the own backpack (ACE's item list does not see into it), nor an item that lies in a
+ * uniform, vest or backpack the settings "Use items from ..." close to it (einv_storage_fnc_useState)
+ * unless it is whitelisted there. Then the item itself has to be one for the bar (fnc_canBind).
  *
  * Arguments:
  * 0: Class <STRING>
@@ -27,6 +28,9 @@ params [["_class", "", [""]], ["_from", [], [[]]]];
 
 private _unit = EGVAR(gui,unit);
 
+// The container it lies in, when that is one of the own three and the settings close it to this item.
+private _blockedIn = "";
+
 private _carried = switch (_from param [0, ""]) do {
     case "grid": {
         private _grid = _from param [1, createHashMap, [createHashMap]];
@@ -42,6 +46,11 @@ private _carried = switch (_from param [0, ""]) do {
         };
 
         private _container = _grid getOrDefault ["container", objNull];
+        private _kind = [_container, ACE_player] call EFUNC(storage,useKind);
+
+        if (([_class, _kind] call EFUNC(storage,useState)) isEqualTo "blocked") then {
+            _blockedIn = _kind;
+        };
 
         !isNull _container
         && {_unit isEqualTo ACE_player}
@@ -58,5 +67,9 @@ private _carried = switch (_from param [0, ""]) do {
 };
 
 if (!_carried) exitWith {[false, LLSTRING(Reason_NotCarried)]};
+
+if (_blockedIn isNotEqualTo "") exitWith {
+    [false, format [LLSTRING(Reason_UseBlocked), [_blockedIn] call EFUNC(storage,useKindName)]]
+};
 
 [_class] call FUNC(canBind)

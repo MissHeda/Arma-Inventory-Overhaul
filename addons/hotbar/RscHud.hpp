@@ -19,6 +19,18 @@ class EINV_HotbarPicture: RscPictureKeepAspect {
     idc = -1;
 };
 
+// Cuts the picture of an item whose rules draw it larger or moved (icon=) to the place of the picture in its
+// box (fnc_hudCreate, fnc_hudDraw). No scroll bars: the picture in it is larger than it.
+class EINV_HotbarClip: RscControlsGroupNoScrollbars {
+    idc = -1;
+    x = 0;
+    y = 0;
+    w = 0;
+    h = 0;
+
+    class controls {};
+};
+
 class EINV_HotbarKey: RscText {
     idc = -1;
     font = "PuristaSemibold";

@@ -8,8 +8,13 @@
  * "Verbandp%C3%A4ckchen". An underscore of its own is written %5F, so it does not come back as a
  * space. fnc_decodeName turns it back.
  *
+ * As a path (picture=) the same, but the way a path wants it: letters, digits, "-", "_", "." and "/"
+ * stay as they are, a backslash is written as a "/" (a backslash would be cleaned out of the setting,
+ * fnc_sanitizeText) and a space is "%20": "\A3\Weapons_F\kit 1.paa" -> "/A3/Weapons_F/kit%201.paa".
+ *
  * Arguments:
  * 0: Name as it should show <STRING>
+ * 1: Write it as a path <BOOL> (default: false)
  *
  * Return Value:
  * The name as the rules write it <STRING>
@@ -20,14 +25,16 @@
  * Public: Yes
  */
 
-params [["_text", "", [""]]];
+params [["_text", "", [""]], ["_path", false, [false]]];
 
 private _hex = toArray "0123456789ABCDEF";
 private _out = [];
 
 {
     switch (true) do {
-        case (_x == 32): {_out pushBack 95};
+        case (_path && {_x == 92}): {_out pushBack 47};
+        case (_path && {_x in [47, 95]}): {_out pushBack _x};
+        case (_x == 32 && {!_path}): {_out pushBack 95};
         case ((_x >= 48 && {_x <= 57}) || {_x >= 65 && {_x <= 90}} || {_x >= 97 && {_x <= 122}} || {_x in [45, 46]}): {
             _out pushBack _x;
         };

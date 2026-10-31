@@ -42,7 +42,23 @@ if (_kind isEqualTo "") exitWith {
 };
 
 if (([_class] call FUNC(count)) == 0) exitWith {
-    [_index, LLSTRING(Reason_NoneLeft), "warning"] call FUNC(flash);
+    // Some lie where the settings "Use items from ..." close them: say where to take them out of.
+    private _blockedIn = [_unit, _class] call EFUNC(storage,useBlockedIn);
+
+    if (_kind == "consume") then {
+        // A bottle that turned into a half one is the same key: the whole chain counts.
+        _blockedIn = [];
+
+        {
+            _blockedIn append ([_unit, _x] call EFUNC(storage,useBlockedIn));
+        } forEach (([_class] call FUNC(useOf)) select 1);
+    };
+
+    if (_blockedIn isEqualTo []) exitWith {
+        [_index, LLSTRING(Reason_NoneLeft), "warning"] call FUNC(flash);
+    };
+
+    [_index, format [LLSTRING(Reason_TakeOut), [USE_KINDS select {_x in _blockedIn}] call EFUNC(storage,useKindName)], "warning"] call FUNC(flash);
 };
 
 // What needs the hands puts a throwable away first.

@@ -48,6 +48,7 @@ private _kept = [];
                 && {(_x getOrDefault ["key", ""]) isEqualTo _key}
                 && {!(_x getOrDefault ["hidden", false])}
                 && {!(_x getOrDefault ["pending", false])}
+                && {!(_x getOrDefault ["offPage", false])}
             };
 
             if (_tileIndex >= 0) then {

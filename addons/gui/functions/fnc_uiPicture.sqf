@@ -2,7 +2,9 @@
 /*
  * Author: Miss Heda
  * Creates an item's picture in its own colours, fitted into its box without stretching and always
- * upright - turned pictures came out squashed in the phase 1 test.
+ * upright - turned pictures came out squashed in the phase 1 test. A path that cannot be shown - a
+ * placeholder word in a mod's config, a file that is not there - draws nothing (fnc_safePicture): the
+ * engine would pop up a message over the window for it.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -25,7 +27,7 @@ disableSerialization;
 params ["_display", "_parent", "_rect", "_texture", ["_color", [1, 1, 1, 1]]];
 
 private _ctrl = [_display, "EINV_Picture", _parent, _rect] call FUNC(uiCreate);
-_ctrl ctrlSetText _texture;
+_ctrl ctrlSetText ([_texture] call FUNC(safePicture));
 _ctrl ctrlSetTextColor _color;
 
 _ctrl

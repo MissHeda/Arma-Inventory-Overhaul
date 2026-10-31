@@ -15,6 +15,8 @@
  * 2: Theme <HASHMAP>
  * 3: Placeholder shown while the field is empty - another window names what it searches <STRING>
  *    (default: "Search items", the inventory's)
+ * 4: The surface of the field, the one film over what lies under it - the header gives it the buttons' (fnc_headerStyle), so the
+ *    field is exactly as light as they are <ARRAY> (default: the theme's button colour)
  *
  * Return Value:
  * None
@@ -27,13 +29,17 @@
 
 disableSerialization;
 
-params ["_display", "_rect", "_theme", ["_placeholderText", LLSTRING(Filter_Placeholder), [""]]];
+params ["_display", "_rect", "_theme", ["_placeholderText", LLSTRING(Filter_Placeholder), [""]], ["_fill", [], [[]]]];
 _rect params ["_left", "_top", "_width", "_height"];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
-private _muted = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 
-[_display, controlNull, _rect, _theme getOrDefault ["button", [1, 1, 1, 0.06]], (_theme getOrDefault ["radius", 0]) min (_height / 2)] call FUNC(uiPanel);
+if (_fill isEqualTo []) then {
+    _fill = _theme getOrDefault ["button", [1, 1, 1, 0.06]];
+};
+
+[_display, controlNull, _rect, _fill, (_theme getOrDefault ["radius", 0]) min (_height / 2)] call FUNC(uiPanel);
 
 private _iconH = _height * 0.5;
 private _padX = SQUARE(_height * 0.3);
@@ -44,7 +50,7 @@ private _textX = _left + _padX + SQUARE(_iconH) + SQUARE(_height * 0.2);
 private _textW = _left + _width - _padX - _textX;
 private _size = _height * 0.48;
 
-private _placeholder = [_display, controlNull, [_textX, _top, _textW, _height], _placeholderText, _size, _muted, _font, 0] call FUNC(uiLabel);
+private _placeholder = [_display, controlNull, [_textX, _top, _textW, _height], _placeholderText, _size, _muted, _font, 0, "hint"] call FUNC(uiLabel);
 _placeholder ctrlShow (GVAR(filter) isEqualTo "");
 
 // A click anywhere on the box puts the cursor in the field.
@@ -54,9 +60,9 @@ _hit ctrlAddEventHandler ["ButtonClick", {ctrlSetFocus (uiNamespace getVariable 
 private _edit = [_display, "EINV_Edit", controlNull, [_textX, _top + (_height - _size * 1.4) / 2, _textW, _size * 1.4]] call FUNC(uiCreate);
 _edit ctrlSetFont _font;
 _edit ctrlSetFontHeight _size;
-_edit ctrlSetTextColor (_theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]]);
+_edit ctrlSetTextColor (_theme getOrDefault ["text", [1, 1, 1, 1]]);
 _edit ctrlSetText GVAR(filter);
-_edit ctrlSetTooltip LLSTRING(Filter_Tooltip);
+[_edit, LLSTRING(Filter_Tooltip)] call FUNC(setTooltip);
 _edit setVariable [QGVAR(placeholder), _placeholder];
 
 _edit ctrlAddEventHandler ["EditChanged", {
@@ -64,7 +70,9 @@ _edit ctrlAddEventHandler ["EditChanged", {
 
     GVAR(filter) = trim _text;
     (_edit getVariable [QGVAR(placeholder), controlNull]) ctrlShow (_text isEqualTo "");
-    call FUNC(applyFilter);
+
+    // The tiles follow once typing pauses (fnc_filterSoon).
+    [true] call FUNC(filterSoon);
 }];
 
 // Somewhere for the cursor to go when typing is done (Return, or a click elsewhere): a button no one

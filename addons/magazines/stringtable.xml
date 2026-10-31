@@ -32,7 +32,7 @@
             <English>Repack magazines</English>
         </Key>
         <Key ID="STR_einv_magazines_Setting_Repack_Desc">
-            <English>Drop a partly filled magazine onto\nanother of the same kind, and ACE's\nMagazine Repack repacks the two - with\nits times, sounds and animation, right\nin the window. A magazine's menu offers\nRepack all, as ACE's does.\n\nOff: magazines are never repacked in\nthe window, and ACE's own Repack\nMagazines shows in the menu instead -\nfor mods with their own way to refill\nmagazines, such as GreenMag.</English>
+            <English>Drop a magazine onto another of its kind to repack them.\nOff: use ACE's Repack Magazines.</English>
         </Key>
     </Package>
 </Project>

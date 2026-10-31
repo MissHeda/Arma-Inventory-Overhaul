@@ -8,8 +8,8 @@
  *
  * Checked here first, so the hint says at once what this machine can tell: a living person's gear as
  * the settings say and while in reach (fnc_checkTouch) - their machine asks again -, a uniform, vest or
- * backpack never into itself or into anything lying in it, room for its load (einv_storage_fnc_roomByWeight;
- * a refusal for weight says how much is missing). The radio slot ACRE2 keeps for itself comes off never
+ * backpack never into itself or into anything lying in it, a backpack never into a backpack
+ * (einv_storage_fnc_backpackIntoBackpack), a free spot when no cell is given. The radio slot ACRE2 keeps for itself comes off never
  * (einv_compat_acre_fnc_isFixedSlot - only when that addon is loaded).
  *
  * "ground" is the surface under the feet, or the vehicle's cargo while seated. A ground pile the window
@@ -52,7 +52,6 @@ if (
 };
 
 private _why = [_unit, "worn"] call FUNC(checkTouch);
-private _details = [];
 
 if (_why isEqualTo "" && {_to isEqualType objNull}) then {
     _why = [_to, "items"] call FUNC(checkTouch);
@@ -71,23 +70,23 @@ if (_to isEqualType objNull) then {
         _why = "IntoItself";
     };
 
-    // Too heavy says by how much, a backpack into a backpack says that.
-    private _room = [_to, _entry] call EFUNC(storage,roomByWeight);
+    // A backpack never goes into a backpack, and with nobody saying where it needs a free spot.
+    if ([_to, _entry] call EFUNC(storage,backpackIntoBackpack)) exitWith {
+        _why = "NoBackpack";
+    };
 
-    if !(_room get "fits") then {
-        _why = _room get "reason";
-
-        if (_why isEqualTo "TooHeavy") then {
-            _details = [_to, [_entry] call EFUNC(storage,entryToArray), 1];
-        };
+    if (_cell isEqualTo [] && {!([_to, _entry] call EFUNC(storage,hasSpace))}) then {
+        _why = "NoRoom";
     };
 };
 
 if (_why isNotEqualTo "") exitWith {
-    [_why, _details] call FUNC(flashHint);
+    [_why] call FUNC(flashHint);
     false
 };
 
-[[createHashMapFromArray [
+private _sent = [[createHashMapFromArray [
     ["kind", "unequip"], ["unit", _unit], ["slot", _slot], ["to", _to], ["cell", _cell]
-]]] call FUNC(sendMoves)
+]]] call FUNC(sendMoves);
+
+_sent

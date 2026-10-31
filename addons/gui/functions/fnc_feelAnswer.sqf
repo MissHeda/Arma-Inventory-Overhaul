@@ -2,14 +2,13 @@
 /*
  * Author: Miss Heda
  * Plays the sound of an answer that is finished (fnc_afterAction): of the first item that really moved,
- * and only one per answer - a group dragged, Take all and a whole crate sound like their first item, each
+ * and only one per answer - a group dragged and a whole crate sound like their first item, each
  * chunk of BATCH_MAX moves once. Nothing when all of it was refused (the hint says why) or nothing was
  * asked for a sound.
  *
  * A magazine loaded into the weapon in the hands first tries that weapon's own reload (fnc_playReload,
  * with its gesture) and stops there when it played; else the generic sound of the action
- * (fnc_playSound). A suppressor put on or taken off the weapon in the hands also does the mount gesture
- * (fnc_gesture); the other attachments have none, as Arma's own are long full-body moves.
+ * (fnc_playSound).
  *
  * Arguments:
  * 0: How the moves of the answer sound, [[action, class, holder, slot, unit], ...] - fnc_feelFor, in the order
@@ -37,17 +36,3 @@ if (_action isEqualTo "") exitWith {};
 if (_action in ["loadMag", "loadMagHandgun", "loadMagLauncher", "loadMagUgl"] && {[_unit, _slot] call FUNC(playReload)}) exitWith {};
 
 [_action, _class, _holder] call FUNC(playSound);
-
-// A suppressor screwed on or off the weapon in the hands.
-if (_action in ["attach", "detach"] && {((_slot splitString "_") param [1, ""]) isEqualTo "muzzle"}) then {
-    private _weapon = switch ((_slot splitString "_") param [0, ""]) do {
-        case "primary": {primaryWeapon _unit};
-        case "handgun": {handgunWeapon _unit};
-        case "launcher": {secondaryWeapon _unit};
-        default {""};
-    };
-
-    if (_weapon isNotEqualTo "" && {currentWeapon _unit isEqualTo _weapon}) then {
-        [_unit, ["GestureDismountMuzzle", "GestureMountMuzzle"] select (_action isEqualTo "attach")] call FUNC(gesture);
-    };
-};

@@ -7,12 +7,13 @@
  *   - direct mode: the value of the source the wizard saves to, when that source has one of its own; the
  *     value in effect otherwise - what a player sees in the game, and what a mission maker starts from in
  *     Eden while the scenario has none yet.
+ * The server settings are fnc_activeSettings'.
  *
  * Arguments:
- * None
+ * 0: The setting <STRING> (default: the rules, RULES_SETTING)
  *
  * Return Value:
- * Rules text <STRING>
+ * Text <STRING>
  *
  * Example:
  * call einv_setup_fnc_getActive;
@@ -20,12 +21,14 @@
  * Public: No
  */
 
-private _setting = RULES_SETTING;
+params [["_setting", RULES_SETTING, [""]]];
+
+private _default = RULES_DEFAULT;
 
 if (isNil "cba_settings_fnc_get") exitWith {
-    private _value = missionNamespace getVariable [_setting, RULES_DEFAULT];
+    private _value = missionNamespace getVariable [_setting, _default];
 
-    [RULES_DEFAULT, _value] select (_value isEqualType "")
+    [_default, _value] select (_value isEqualType "")
 };
 
 private _value = if ((missionNamespace getVariable [QGVAR(mode), "direct"]) isEqualTo "menu") then {
@@ -45,7 +48,7 @@ private _value = if ((missionNamespace getVariable [QGVAR(mode), "direct"]) isEq
 };
 
 if (isNil "_value" || {!(_value isEqualType "")}) then {
-    _value = RULES_DEFAULT;
+    _value = _default;
 };
 
 _value

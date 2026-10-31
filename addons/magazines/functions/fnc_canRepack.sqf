@@ -7,7 +7,7 @@
  *
  * Checked in this order: repacking off or busy, other classes, a tile not searched yet (nothing is told
  * about what lies under a "?"), not a magazine of more than one round, a grid that is virtual, overflow,
- * a kit's or the Arsenal's catalog, a living person's gear; then the ones that say why not - a class ACE
+ * a kit's or ACE's list in the Arsenal panel, a living person's gear; then the ones that say why not - a class ACE
  * forbids repacking, a full or empty magazine, magazines under different roots (the player's own gear
  * and a crate, or two crates: "take it into your own gear first").
  *
@@ -37,9 +37,11 @@ private _class = _sourceTile getOrDefault ["class", ""];
 
 if (_class isEqualTo "" || {toLowerANSI _class isNotEqualTo toLowerANSI (_targetTile getOrDefault ["class", ""])}) exitWith {[false, ""]};
 
-// A tile not searched yet, or one a move is under way for.
+// A tile not searched yet, one kept in the hidden holder (Strict mode - not magazines of the cargo), or one a
+// move is under way for.
 if (
     _sourceTile getOrDefault ["hidden", false] || {_targetTile getOrDefault ["hidden", false]}
+    || {_sourceTile getOrDefault ["strict", false]} || {_targetTile getOrDefault ["strict", false]}
     || {_sourceTile getOrDefault ["pending", false]} || {_targetTile getOrDefault ["pending", false]}
 ) exitWith {[false, ""]};
 
@@ -48,7 +50,7 @@ private _capacity = _info getOrDefault ["capacity", 0];
 
 if ((_info getOrDefault ["kind", ""]) isNotEqualTo "magazine" || {_capacity < 2}) exitWith {[false, ""]};
 
-// Grids that are no place for it: a body's worn gear, the overflow row, a kit's window, the Arsenal's catalog.
+// Grids that are no place for it: a body's worn gear, the overflow row, a kit's window, ACE's list in the Arsenal panel.
 private _fnc_plain = {
     params ["_grid"];
 

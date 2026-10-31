@@ -6,7 +6,10 @@
  * "default", an empty text is the default. The result is plain data - no code - since it is kept in
  * the mission namespace and so in save games.
  *
- * 1. The text (fnc_parseRules) is the own layer.
+ * 1. The text (fnc_parseRules) is the own layer - but for its rules with "all", everything else, which
+ *    are a layer of their own (fallback): asked after the preset - before the preset's rules without
+ *    conditions, its own everything else - and before the built-in answer (fnc_resolve). A preset's rule
+ *    with "all" is left out with a warning: its rules without conditions already are its everything else.
  * 2. Its base= and the bases of that preset (CfgEinvRulesets, MAX_CHAIN deep, no loops) are the
  *    preset layer, the base first and each derived preset after it. Read presets are kept in
  *    uiNamespace: config does not change.
@@ -39,6 +42,9 @@
  *   "base"        - the preset it builds on in the end, "none" for none <STRING>
  *   "chain"       - the presets read, the base first <ARRAY>
  *   "cell"        - config mass per grid cell <NUMBER>
+ *   "categoryIds" - every category there is: the eight built-in ones (ITEM_GROUPS), then the text's own in the order it
+ *                   defines them (fnc_categories) <ARRAY of STRING>
+ *   "categoryDefs" - id -> [name, picture] the text gives it, "" for what it does not set (fnc_categoryInfo) <HASHMAP>
  *   "groups"      - group key -> its definitions, each a list of compiled conditions; the key of the
  *                   definition in effect is the group's name, replaced ones are "name#layer" <HASHMAP>
  *   "groupKeys"   - name -> key of the definition in effect <HASHMAP>
@@ -47,15 +53,20 @@
  *   "own"         - [[conditions, values, tag, text, kinds], ...]: the text's rules in text order, then
  *                   the tables'; tag "own:<i>" or "legacy:<setting>:<i>", kinds -1 for any <ARRAY>
  *   "preset"      - the same for the presets, tag "preset:<preset>:<i>" <ARRAY>
+ *   "fallback"    - the same for the text's rules with "all", in text order, tag "all:<i>" (the i-th
+ *                   rule of the text, counted as for "own:<i>") <ARRAY>
  *   "byKind"      - kind -> [own indices, preset indices (both highest first), fields own rules can
- *                   set, fields preset rules can set] <HASHMAP>
+ *                   set, fields preset rules can set, fallback indices (highest first), fields
+ *                   fallback rules can set] <HASHMAP>
  *   "hash"        - one value for all of it, to compare between machines <STRING>
  *   "warnings"    - everything left out or cut down <ARRAY of STRING>
- * A rule's values: "footprint" [w, h, []] or "mass", "stack" <NUMBER>, "grid" spec (fnc_parseGrid),
- * "weight" kg <NUMBER>, "name" <STRING>.
+ * A rule's values: "like" the class in lowercase <STRING>, "footprint" [w, h, holes] or "mass", "stack"
+ * <NUMBER>, "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING>, "icon" [scale, across,
+ * down] (fnc_parseIcon), "picture" <STRING> (fnc_parsePicture), "use" [containers] (fnc_parseUse), "cats" [categories] (fnc_parseGroups). A rule with like=
+ * counts in byKind as setting every one of LIKE_FIELDS, which fnc_resolve takes from that class.
  *
  * Example:
- * ["einv1 base=tarkov, kind=grenade > stack=3"] call einv_items_fnc_compileRules;
+ * ["einv1 base=default, kind=grenade > stack=3"] call einv_items_fnc_compileRules;
  *
  * Public: Yes
  */
@@ -66,6 +77,18 @@ private _warnings = [];
 private _ast = [_text] call FUNC(parseRules);
 
 _warnings append (_ast get "warnings");
+
+// ----- The categories -----
+// The eight built-in ones, then those the text defines (category=...). Only the text defines any: a preset has no say in them.
+private _categoryIds = ITEM_GROUPS;
+private _categoryDefs = createHashMap;
+
+{
+    _x params ["_categoryId", "_categoryName", "_categoryPicture", ["_categoryColor", ""]];
+
+    _categoryDefs set [_categoryId, [_categoryName, _categoryPicture, _categoryColor]];
+    _categoryIds pushBackUnique _categoryId;
+} forEach (_ast getOrDefault ["categories", []]);
 
 // ----- The preset chain -----
 
@@ -95,6 +118,14 @@ while {_next isNotEqualTo "" && {_next isNotEqualTo "none"}} do {
 
     _chain pushBack _next;
     _next = toLowerANSI (getText (_rulesets >> _next >> "base"));
+
+    // Another mod's preset may still build on a preset under its old id - unless a preset of that very name
+    // exists: a third party's own is not shadowed by the alias.
+    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _next && {!isClass (_rulesets >> _next)}};
+
+    if (_alias >= 0) then {
+        _next = (PRESET_ALIASES select _alias) select 1;
+    };
 };
 
 // Read as derived first; the base goes first.
@@ -481,13 +512,22 @@ private _fnc_values = {
                 if (_y isEqualTo "mass") then {
                     _compiledValues set ["footprint", "mass"];
                 } else {
-                    private _sides = _y splitString "x";
+                    // WxH has digits, a drawn shape none (fnc_parseRules let only those two through).
+                    if ((toArray _y) findIf {_x >= 48 && {_x <= 57}} >= 0) then {
+                        private _sides = _y splitString "x";
 
-                    _compiledValues set ["footprint", [parseNumber (_sides select 0), parseNumber (_sides select 1), []]];
+                        _compiledValues set ["footprint", [parseNumber (_sides select 0), parseNumber (_sides select 1), []]];
+                    } else {
+                        _compiledValues set ["footprint", [_y] call FUNC(parseMask)];
+                    };
                 };
             };
             case "grid": {
                 _compiledValues set ["grid", ([_y] call FUNC(parseGrid)) select 0];
+            };
+            // Config does not mind the case of a class: lowercase, as fnc_getFacts' "lc".
+            case "like": {
+                _compiledValues set ["like", toLowerANSI _y];
             };
             default {
                 _compiledValues set [_x, _y];
@@ -500,6 +540,7 @@ private _fnc_values = {
 
 private _own = [];
 private _preset = [];
+private _fallback = [];
 
 {
     _x params ["_layerName", "_layerAst"];
@@ -511,6 +552,15 @@ private _preset = [];
         _x params ["_conds", "_values"];
 
         private _statement = [_conds, _values] call _fnc_ruleText;
+
+        // Everything else (all): the text's rules for the gaps, a layer of their own under the preset.
+        private _isFallback = _conds findIf {(_x select 1) isEqualTo "all"} >= 0;
+
+        if (_isFallback && {!_isOwn}) then {
+            _warnings pushBack format ["Preset %1: '%2': 'all' is for the rules text, not a preset - left out.", _layerName, _statement];
+            continue;
+        };
+
         private _compiledConds = [];
         private _error = "";
 
@@ -530,12 +580,20 @@ private _preset = [];
             private _entry = [
                 _compiledConds,
                 [_values] call _fnc_values,
-                [format ["preset:%1:%2", _layerName, _forEachIndex], format ["own:%1", _forEachIndex]] select _isOwn,
+                switch (true) do {
+                    case (_isFallback): {format ["all:%1", _forEachIndex]};
+                    case (_isOwn): {format ["own:%1", _forEachIndex]};
+                    default {format ["preset:%1:%2", _layerName, _forEachIndex]};
+                },
                 _statement,
                 [_compiledConds] call _fnc_condsKinds
             ];
 
-            if (_isOwn) then {_own pushBack _entry} else {_preset pushBack _entry};
+            switch (true) do {
+                case (_isFallback): {_fallback pushBack _entry};
+                case (_isOwn): {_own pushBack _entry};
+                default {_preset pushBack _entry};
+            };
         } else {
             _warnings pushBack format [["Preset %3: '%1': %2 - left out.", "'%1': %2 - left out."] select _isOwn, _statement, _error, _layerName];
         };
@@ -628,22 +686,53 @@ if (_legacy) then {
     };
 };
 
+// ----- Categories nobody defined -----
+// An item or a compartment of the text that names a category the text does not define: left out where it is used
+// (fnc_getInfo, fnc_cleanGrid), said here once.
+private _undefined = [];
+
+{
+    private _values = _x select 1;
+    private _used = +(_values getOrDefault ["cats", []]);
+    private _gridSpec = _values getOrDefault ["grid", []];
+
+    if ((_gridSpec param [0, ""]) isEqualTo "blocks") then {
+        {
+            _used append (_x param [4, []]);
+        } forEach (_gridSpec select 1);
+    };
+
+    {
+        _undefined pushBackUnique _x;
+    } forEach (_used select {!(_x in _categoryIds)});
+} forEach _own;
+
+{
+    _warnings pushBack format ["There is no category '%1' - the items and compartments that name it ignore it. Add category=%1 > name=... to define it.", _x];
+} forEach _undefined;
+
 // ----- By kind -----
 
 private _byKind = createHashMap;
 
 {
     private _kind = _x;
-    private _buckets = [_own, _preset] apply {
+    private _buckets = [_own, _preset, _fallback] apply {
         private _indices = [];
         private _fields = [];
 
         {
             private _kinds = _x select 4;
 
-            if (_kinds isEqualType 0 || {_kind in _kinds}) then {
+            // A kit meets the rules about items too (KINDS_AS_ITEM, fnc_matches).
+            if (_kinds isEqualType 0 || {_kind in _kinds} || {_kind in KINDS_AS_ITEM && {"item" in _kinds}}) then {
                 _indices pushBack _forEachIndex;
                 _fields append (keys (_x select 1));
+
+                // like= answers these from another class (fnc_resolve).
+                if ("like" in (_x select 1)) then {
+                    _fields append LIKE_FIELDS;
+                };
             };
         } forEach _x;
 
@@ -653,7 +742,10 @@ private _byKind = createHashMap;
         [_indices, _fields arrayIntersect _fields]
     };
 
-    _byKind set [_kind, [(_buckets select 0) select 0, (_buckets select 1) select 0, (_buckets select 0) select 1, (_buckets select 1) select 1]];
+    _byKind set [_kind, [
+        (_buckets select 0) select 0, (_buckets select 1) select 0, (_buckets select 0) select 1, (_buckets select 1) select 1,
+        (_buckets select 2) select 0, (_buckets select 2) select 1
+    ]];
 } forEach ITEM_KINDS;
 
 // ----- All of it in one value -----
@@ -667,12 +759,15 @@ createHashMapFromArray [
     ["base", ["none", _base] select (_chain isNotEqualTo [])],
     ["chain", _chain],
     ["cell", _cell],
+    ["categoryIds", _categoryIds],
+    ["categoryDefs", _categoryDefs],
     ["groups", _groups],
     ["groupKeys", _groupKeys],
     ["groupSource", _groupSource],
     ["groupOrder", _groupOrder],
     ["own", _own],
     ["preset", _preset],
+    ["fallback", _fallback],
     ["byKind", _byKind],
     ["hash", hashValue [_cell, _chain, _layerTexts, _legacyTexts]],
     ["warnings", _warnings]

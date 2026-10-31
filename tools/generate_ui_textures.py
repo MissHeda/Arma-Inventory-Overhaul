@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draws the textures of Enhanced Inventory's window and converts them to PAA.
+"""Draws the textures of Arma Inventory Overhaul's window and converts them to PAA.
 
 Started as a copy of Enhanced First Aid Kits' generator, so both mods share one look: the same
 corners, icons, switches and scroll thumb, plus the icons and the glass this window needs.
@@ -265,6 +265,18 @@ def icon_style(d, s, w):
     line(d, [(s * 0.5, s * 0.18), (s * 0.84, s * 0.36), (s * 0.5, s * 0.54), (s * 0.16, s * 0.36), (s * 0.5, s * 0.18)], w)
     line(d, [(s * 0.16, s * 0.53), (s * 0.5, s * 0.71), (s * 0.84, s * 0.53)], w)
     line(d, [(s * 0.16, s * 0.69), (s * 0.5, s * 0.87), (s * 0.84, s * 0.69)], w)
+
+
+def icon_palette(d, s, w):
+    # A painter's palette: a round board with a bite out of its lower right and four dabs of paint. The colour
+    # button in the header, next to the speaker.
+    cx, cy, r = s * 0.5, s * 0.5, s * 0.36
+    body = arc_points(cx, cy, r, 78, 392, 72)
+    bite = [(s * 0.80, s * 0.66), (s * 0.70, s * 0.64), (s * 0.65, s * 0.70), (s * 0.64, s * 0.78)]
+    line(d, body + bite + [body[0]], w)
+    dab = w * 0.62
+    for x, y in ((0.3, 0.46), (0.43, 0.3), (0.6, 0.3), (0.72, 0.44)):
+        d.ellipse([s * x - dab, s * y - dab, s * x + dab, s * y + dab], fill=WHITE)
 
 
 def icon_weight(d, s, w):
@@ -827,6 +839,29 @@ def toggle(on, w=128, h=64):
     return finish(im, w, h)
 
 
+def toggle_track(w=128, h=64):
+    """The on state's track alone, white, so the game tints it with the player's accent."""
+    im = canvas(w, h)
+    d = ImageDraw.Draw(im)
+    W, H = w * SS, h * SS
+    pad = H * 0.08
+    d.rounded_rectangle([pad, pad, W - pad, H - pad], radius=(H - 2 * pad) / 2, fill=WHITE)
+    return whiten(finish(im, w, h))
+
+
+def toggle_knob(w=128, h=64):
+    """The on state's knob alone, white, at the right end - drawn over the tinted track."""
+    im = canvas(w, h)
+    d = ImageDraw.Draw(im)
+    W, H = w * SS, h * SS
+    pad = H * 0.08
+    r = (H - 2 * pad) / 2 - H * 0.1
+    cy = H / 2
+    cx = W - pad - (H - 2 * pad) / 2
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=WHITE)
+    return whiten(finish(im, w, h))
+
+
 def scroll_thumb(w=32, h=256):
     """A scroll bar's thumb: a slim bar with round ends in the middle of the bar's width. The game
     stretches it to the thumb's length, so its ends are drawn a little flat to come out round."""
@@ -843,6 +878,58 @@ def circle(size=128):
     im = canvas(size, size)
     ImageDraw.Draw(im).ellipse([0, 0, size * SS - 1, size * SS - 1], fill=WHITE)
     return whiten(finish(im, size, size))
+
+
+def cursor_ring(size=128):
+    """The cursor of the palette picker's colour square and hue strip (fnc_openPaletteMenu): a white ring with a dark rim inside and out,
+    so it reads on every colour from white to black, and the colour under it shows through the hole. Drawn in colour - the game
+    does not tint it."""
+    im = canvas(size, size)
+    d = ImageDraw.Draw(im)
+    s = size * SS
+    mid = s / 2
+    rim = (0, 0, 0, 200)
+    # Outside in: dark rim, the white band, dark rim, the hole. Each ellipse replaces what lies under it.
+    for r, fill in ((0.50, rim), (0.44, WHITE), (0.34, rim), (0.28, CLEAR)):
+        d.ellipse([mid - r * s, mid - r * s, mid + r * s - 1, mid + r * s - 1], fill=fill)
+    return finish(im, size, size)
+
+
+def hue_vstrip(w=16, h=256):
+    """Every hue from red round to red, top to bottom, fully lit: the strip beside the colour square of the palette's
+    picker (fnc_openPaletteMenu). The last row is one step short of red again, as the picker's hue goes from 0 to
+    359/360 so the end of the strip is not a jump. Drawn in colour - the game stretches it over the strip and does not tint it."""
+    import colorsys
+    im = Image.new("RGBA", (w, h))
+    px = im.load()
+    for y in range(h):
+        r, g, b = colorsys.hsv_to_rgb(y / h, 1.0, 1.0)
+        for x in range(w):
+            px[x, y] = (round(r * 255), round(g * 255), round(b * 255), 255)
+    return im
+
+
+def fade_strip(w=256, h=16):
+    """White that fades out from left to right. Laid over a panel of a pure hue and stretched over it, it makes the
+    saturation across the palette picker's colour square: white at the left, the full colour at the right
+    (fnc_openPaletteMenu); the shade strip below does the value."""
+    im = Image.new("RGBA", (w, h))
+    px = im.load()
+    for x in range(w):
+        for y in range(h):
+            px[x, y] = (255, 255, 255, round(255 * (1 - x / (w - 1))))
+    return im
+
+
+def shade_strip(w=16, h=256):
+    """Black that fades in from top to bottom: nothing at the top, solid at the bottom. Laid over the white fade above, it makes the
+    value down the palette picker's colour square: the colour at the top, black at the bottom (fnc_openPaletteMenu)."""
+    im = Image.new("RGBA", (w, h))
+    px = im.load()
+    for y in range(h):
+        for x in range(w):
+            px[x, y] = (0, 0, 0, round(255 * y / (h - 1)))
+    return im
 
 
 def hatch(size=256, stripes=8, duty=0.32):
@@ -945,6 +1032,34 @@ def gloss(tex_w, tex_h, width, height, radius, screen_h):
     return im.resize((tex_w, tex_h), Image.LANCZOS)
 
 
+def slot_cat_all(p):
+    # "All": four tiles of a grid, the way the loot strip's first button says "no filter".
+    for x0, y0 in ((0.14, 0.14), (0.54, 0.14), (0.14, 0.54), (0.54, 0.54)):
+        p.rect(x0, y0, x0 + 0.32, y0 + 0.32, r=0.06)
+
+
+def slot_cat_medical(p):
+    # A thick cross.
+    p.rect(0.38, 0.12, 0.62, 0.88, r=0.05)
+    p.rect(0.12, 0.38, 0.88, 0.62, r=0.05)
+
+
+def slot_cat_food(p):
+    # A fork and a knife side by side: the fork's tines are cut into its head.
+    p.rect(0.13, 0.1, 0.43, 0.42, r=0.04)
+    p.rect(0.2, 0.4, 0.36, 0.9, r=0.05)
+    for x in (0.2, 0.28, 0.36):
+        p.line([(x, 0.06), (x, 0.3)], 0.03, erase=True)
+    p.poly([(0.58, 0.08), (0.8, 0.24), (0.8, 0.54), (0.58, 0.54)])
+    p.rect(0.6, 0.5, 0.78, 0.9, r=0.05)
+
+
+def slot_cat_misc(p):
+    # Three dots: "everything else".
+    for x in (0.2, 0.5, 0.8):
+        p.ellipse(x, 0.5, 0.11)
+
+
 def build_images():
     """Every texture by its file name, as Pillow images."""
     images = {"search_ring_%02d_ca" % k: search_ring(k) for k in range(1, SEARCH_FRAMES + 1)}
@@ -977,6 +1092,7 @@ def build_images():
         "icon_sound_on_ca": stroke_icon(icon_sound_on),
         "icon_sound_off_ca": stroke_icon(icon_sound_off),
         "icon_style_ca": stroke_icon(icon_style),
+        "icon_palette_ca": stroke_icon(icon_palette),
         "icon_weight_ca": stroke_icon(icon_weight),
         # The setup wizard: its cog in the inventory's header and in Eden's Tools menu, and its controls.
         "icon_setup_ca": stroke_icon(icon_setup),
@@ -1004,8 +1120,14 @@ def build_images():
         "icon_unload_ca": stroke_icon(icon_unload),
         "toggle_on_ca": toggle(True),
         "toggle_off_ca": toggle(False),
+        "toggle_track_ca": toggle_track(),
+        "toggle_knob_ca": toggle_knob(),
         "scroll_thumb_ca": scroll_thumb(),
         "circle_ca": circle(),
+        "cursor_ring_ca": cursor_ring(),
+        "hue_vstrip_ca": hue_vstrip(),
+        "fade_strip_ca": fade_strip(),
+        "shade_strip_ca": shade_strip(),
         "hatch_ca": hatch(),
         "silhouette_ca": soldier(),
         "slot_headgear_ca": slot_icon(slot_headgear),
@@ -1029,6 +1151,12 @@ def build_images():
         "slot_handgun_ca": slot_icon(slot_handgun),
         "slot_rifle_ca": slot_icon(slot_rifle, 256, 128),
         "slot_launcher_ca": slot_icon(slot_launcher, 256, 128),
+        # The strip of categories at the side of a loot box (fnc_drawGroupStrip); the weapon, magazine, vest and radio
+        # pictures above stand for weapons, ammunition, gear and tools.
+        "slot_cat_all_ca": slot_icon(slot_cat_all),
+        "slot_cat_medical_ca": slot_icon(slot_cat_medical),
+        "slot_cat_food_ca": slot_icon(slot_cat_food),
+        "slot_cat_misc_ca": slot_icon(slot_cat_misc),
         # The window's glass, for its shape on a wide screen: INV_W x INV_VISIBLE_H in rows of
         # INV_H / 37, where INV_W is 33 cells of 1.5 rows (addons/gui/defines.hpp).
         "gloss_inventory_ca": gloss(1024, 1024, 33 * 1.5, 36, 0.6, 36 * 0.95 * 1080 / 37),
@@ -1037,11 +1165,26 @@ def build_images():
 
 
 def main():
-    tool = sys.argv[1] if len(sys.argv) > 1 else IMAGE_TO_PAA
+    # Usage: generate_ui_textures.py [path to ImageToPAA] [--only name,name] - with --only just those textures are
+    # made again, so a new picture does not rewrite every other file (a texture is a binary: each would show as changed).
+    args = sys.argv[1:]
+    only = None
+
+    if "--only" in args:
+        at = args.index("--only")
+        only = set(args[at + 1].split(","))
+        del args[at:at + 2]
+
+    tool = args[0] if args else IMAGE_TO_PAA
     if not os.path.isfile(tool):
         raise SystemExit("ImageToPAA not found: %s" % tool)
 
     images = build_images()
+    if only is not None:
+        missing = only - set(images)
+        if missing:
+            raise SystemExit("Unknown textures: %s" % ", ".join(sorted(missing)))
+        images = {name: im for name, im in images.items() if name in only}
     os.makedirs(OUT, exist_ok=True)
     tmp = tempfile.mkdtemp()
     for name, im in images.items():

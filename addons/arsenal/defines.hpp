@@ -1,6 +1,7 @@
-// The Enhanced Arsenal: the inventory's screen geometry and pixel snapping (gui/defines.hpp), and the
-// arsenal's own ids and measures. It is the inventory's window on a display of its own, so it is drawn
-// with the inventory's measures and takes its colours from the inventory's theme (einv_gui_fnc_theme).
+// ACE Arsenal's grid panel and the vanilla Virtual Arsenal: the inventory's screen geometry and pixel
+// snapping (gui/defines.hpp), and this addon's own ids and measures. The panel is drawn by the inventory's
+// engine with the inventory's measures, and takes its colours, fonts and corner radius from the inventory's
+// theme.
 
 #include "\z\einv\addons\gui\defines.hpp"
 
@@ -8,73 +9,109 @@
 #undef UI_TEX
 #define UI_TEX(NAME) QPATHTOEF(gui,ui\NAME.paa)
 
-// An icon drawn for the Arsenal, or an older one standing in for it while the new one is not in the gui
-// addon yet. All of them are there since 0.2.2; the second name is what a build without them would show:
-// arsenal -> icon_crate_ca, loadouts -> icon_inventory_ca, star -> icon_check_ca, unique -> icon_auto_ca,
-// import and export -> icon_undo_ca and icon_redo_ca, share -> icon_swap_ca, giveback -> icon_minus_ca,
-// blocked -> icon_close_ca, eye -> icon_search_ca.
-#define ICON(NEW,OLD) ([UI_TEX(OLD), UI_TEX(NEW)] select (fileExists UI_TEX(NEW)))
-
-// The Arsenal's own display, and the red screen for a Virtual Arsenal that is not allowed. 9601 to 9603
-// are the inventory's (IDC_DIM, IDC_FIRST, IDC_KEEP), 9620 to 9622 the setup wizard's. None of them is one
-// of ACE Arsenal's: what other mods address there finds nothing on this display.
-#define IDD_ARSENAL 9610
+// The red screen for a Virtual Arsenal that is not allowed. 9601 to 9603 are the inventory's (IDC_DIM,
+// IDC_FIRST, IDC_KEEP), 9620 to 9622 the setup wizard's.
 #define IDD_ARSENAL_BLOCKED 9611
 
-// The ACE Arsenal version the display patch (CfgAceArsenal.hpp) was checked against; a newer one is
-// reported once in the RPT (fnc_compatCheck).
+// The ACE Arsenal version whose ids and internals the panel was checked against; another one is reported
+// once in the RPT (fnc_compatCheck).
 #define ACE_TESTED "3.21.2"
 
-// How the camera sees the soldier (fnc_cameraStart): the zoom, the field of view of ACE's own.
-#define ARSENAL_FOV 0.5
+// The panel beside ACE's list (fnc_panelRect): the gap to the list, in UNITs, and the most of the screen's
+// width it may take - the soldier stands in the middle.
+#define PANEL_GAP 0.3
+#define PANEL_MAX_SHARE (1 / 3)
 
-// A catalog card (fnc_drawCatalog), in cells of the grid: its size and the gap between two, stretched
-// afterwards so that the cards fill the column exactly.
-#define CARD_W_CELLS 2.6
-#define CARD_H_CELLS 2.3
-#define CARD_GAP_CELLS 0.2
+// ACE's own measures (GRID_H in its defines.hpp): its grid unit - pixelGridNoUIScale / 4 screen pixels,
+// 4 px at 1080p, the same at every interface size -, and the rows of its list, 7 units high (sizeEx of
+// IDC 15, which leaves rowHeight at RscListNBox's 0): 28 px at 1080p.
+#define ACE_GRID_H (pixelH * pixelGridNoUIScale * 0.25)
+#define ACE_ROW_SIZE (7 * ACE_GRID_H)
 
-// The column the catalog stands in takes the place of the loot column and grows with a wide screen
-// (fnc_layout, fnc_layoutGlass): by what the middle has beyond RIGHT_KEEP UNITs, at most RIGHT_GROW of a
-// column.
-#define RIGHT_GROW 0.75
-#define RIGHT_KEEP 18
+// The panel is laid out the way the inventory's columns are (einv_gui_fnc_drawColumn), so a container reads
+// here as it does there: a title row on top, the sections under it, the hint line last, a hairline under
+// the title and one over the hint. PANEL_PAD, in UNITs, is the room round the block's content and between
+// its bands, high as it is - and as many pixels wide (SQUARE) -, so the picture, the section captions and
+// the grids all start on one left edge and the texts on the right end on one right edge. It stays on the
+// window engine's UNIT with the grids and the section captions the engine draws (einv_gui_fnc_drawSection).
+#define PANEL_PAD 0.4
 
-// The glass of the Arsenal's panels is a little more see-through than the inventory's, so a soldier who
-// slips behind one is still seen (fnc_theme).
-#define PANEL_ALPHA 0.7
+// The panel's own texts - the title row and the hint line - are in ACE's grid, as the rows of ACE's list
+// beside them are: the UNIT (a fortieth of the screen's height) and ACE's grid (a whole pixel count the
+// engine picks per resolution) do not keep one ratio, so texts sized in UNITs stood a size larger or
+// smaller than ACE's own on some screens. At 1080p they are what the UNITs gave there to half a pixel.
 
-// The catalog reads the rows of its items in the background (fnc_catalogFrame): for about this many
-// seconds a frame, and never more than WARM_MAX_PER_FRAME classes. A search is worked out once the typing
-// has been still for SEARCH_DEBOUNCE seconds.
-#define WARM_BUDGET 0.002
-#define WARM_MAX_PER_FRAME 150
-#define SEARCH_DEBOUNCE 0.15
+// The title row (fnc_layout): the container's picture, TITLE_H high and square (30 px at 1080p, between
+// ACE's row and its sort bar with its gap), and its name beside it in the bold font, TITLE_SIZE high
+// (18 px), centred in the row's height.
+#define TITLE_H (7.5 * ACE_GRID_H)
+#define TITLE_SIZE (4.5 * ACE_GRID_H)
 
-// Loadouts checked against the game and the Arsenal per frame (fnc_verifyStep).
-#define VERIFY_PER_FRAME 10
+// The hint line, the panel's last band (fnc_layout, fnc_footer): lines HINT_LINE_H high (22 px) of
+// HINT_SIZE text (15 px, the class EINV_ArsenalHint's), HINT_PAD room above and below them (8 px) - 38 px
+// for one line, the inventory footer's height. One line; a second only while the staging space holds
+// something, for the note that it goes when the window closes.
+#define HINT_LINE_H (5.5 * ACE_GRID_H)
+#define HINT_PAD (2 * ACE_GRID_H)
+#define HINT_SIZE (3.75 * ACE_GRID_H)
 
-// A click that would destroy something waits for a second one within this many seconds (fnc_arm), and the
-// arrow keys step at most once every STEP_REPEAT seconds while held (fnc_stepCount).
-#define ARM_TIME 3
-#define STEP_REPEAT 0.1
+// The staging space under the container's grid (fnc_staging): a crate of the game's own, made on this
+// machine only and hidden at the soldier's feet, with a grid of its own. A crate rather than a ground
+// holder: the ground has no grid and no limit (einv_storage_fnc_getBlocks). Its grid is STORAGE_COLS wide
+// and grows with what lies in it (fnc_growStaging): always STAGING_FREE_ROWS free rows under the lowest
+// one in use, never fewer than STAGING_MIN_ROWS rows nor than fill the panel down to its hint line, never
+// more than STAGING_MAX_ROWS - a cap of its own, as MAX_ROWS also bounds every item's and compartment's
+// size in the rules.
+#define STAGING_CLASS "Box_NATO_Support_F"
+#define STAGING_MIN_ROWS 10
+#define STAGING_FREE_ROWS 4
+#define STAGING_MAX_ROWS 100
 
-// ACE's display opens a frame after openBox: a request to leave the next display to ACE (GVAR(forceAce))
-// counts for this many frames (fnc_handOver).
-#define FORCE_ACE_FRAMES 3
+// The share of ACE's list, from its left edge, where a press may become a drag of its row
+// (fnc_onListPress): the list's scroll bar runs along its right edge.
+#define LIST_ROWS_SHARE 0.94
 
-// How long a Zeus's remote controlled unit is waited for to become local, in seconds (fnc_handOver).
-#define ZEUS_LOCAL_WAIT 2
+// How long a frame's turn of putting the rules' pictures on ACE's lists may take, in seconds (fnc_pictures).
+#define PICTURE_BUDGET 0.003
 
-// What a kit of Enhanced First Aid Kits lets the Arsenal do with it (its "arsenal editing" setting, as
-// einv_compat_efak_fnc_arsenalEditing answers): nothing, take things out, or take things out and pack new
-// ones in.
-#define EDIT_NOTHING 0
-#define EDIT_REMOVE 1
-#define EDIT_ALL 2
+// How long a frame's turn of asking the grid about ACE's rows may take, in seconds (fnc_ungrey).
+#define UNGREY_BUDGET 0.003
 
-// The views the vision key goes through (fnc_cycleVision): normal, night vision, thermal.
-#define VISION_MODES 3
+// How often the rows of Enhanced First Aid Kits' kits tab are greyed again by the kit's cells, in seconds
+// (fnc_onFrame, fnc_ungreyKit): that mod writes its own greying whenever it fills or counts its list. And the alpha
+// of a greyed row there, that mod's own (efak_arsenal_fnc_updateContents).
+#define KIT_UNGREY_EVERY 0.25
+#define KIT_GREY_ALPHA 0.25
+
+// What the kit's section of the panel folds by in GVAR(folded) while the kits tab is open (fnc_layout, the "fold"
+// hook): one key whichever kit it shows - a string, as a kit's grid has no container to fold by.
+#define KIT_FOLD_KEY "arsenalKit"
+
+// How far the mouse moves with the button held, in any direction and in the screen's pixels, before a
+// press on ACE's list becomes a drag of its row (fnc_onFrame). Less than the engine's DRAG_THRESHOLD,
+// which is in screen units - 6 px at 1080p and the normal interface size, 9 px at the largest - and let
+// a quick grab end before it counted; more than a hand's tremor on a click.
+#define LIST_DRAG_PX 5
+
+// How long an item dragged out of ACE's list is held over the title bar of the folded panel before the panel
+// unfolds under it, in seconds (fnc_onFrame).
+#define UNFOLD_HOVER 0.6
+
+// How long a move into or out of the staging space is waited for before ACE's list is no longer told,
+// in seconds (fnc_onFrame).
+#define WATCH_TIME 3
+
+// How often the places of the soldier's three containers are noted again while ACE's window is open, in
+// seconds (fnc_keepPlaces).
+#define KEPT_REFRESH 0.2
+
+// Frames after a loadout was set in which nothing is moved out of the soldier's containers (fnc_stageOverflow).
+#define LOADOUT_QUIET_FRAMES 4
+
+// The Ctrl keys, for Ctrl and the wheel over a tile (fnc_onKey, fnc_onWheel).
+#define DIK_LCONTROL 29
+#define DIK_RCONTROL 157
+
 
 // ---------------------------------------------------------------------------
 // ACE's own numbers, copied under names of ours (z\ace\addons\arsenal\defines.hpp, ACE 3.21.2)
@@ -108,57 +145,3 @@
 #define ACE_IDX_EXPLOSIVES 16
 #define ACE_IDX_MISC_ITEMS 17
 #define ACE_IDX_MISC_GOGGLES 18
-
-// The unique ones, items a soldier may carry that the arsenal does not offer (IDX_VIRT_UNIQUE_*).
-#define ACE_IDX_UNIQUE_MISC_ITEMS 19
-#define ACE_IDX_UNIQUE_ITEMS_ALL 20
-#define ACE_IDX_UNIQUE_GRENADES 21
-#define ACE_IDX_UNIQUE_EXPLOSIVES 22
-#define ACE_IDX_UNIQUE_ATTACHMENTS 23
-#define ACE_IDX_UNIQUE_BACKPACKS 24
-#define ACE_IDX_UNIQUE_GOGGLES 25
-#define ACE_IDX_UNIQUE_UNKNOWN_ITEMS 26
-
-// Where what the soldier carries lies in ace_arsenal_currentItems (IDX_CURR_*). The ones for the contents
-// of the uniform, vest and backpack are also ARSENAL_ITEMS_* in script_component.hpp, for the window of ACE.
-#define ITEM_INDEX_PRIMARY 0
-#define ITEM_INDEX_LAUNCHER 1
-#define ITEM_INDEX_HANDGUN 2
-#define ITEM_INDEX_HEADGEAR 3
-#define ITEM_INDEX_UNIFORM 4
-#define ITEM_INDEX_VEST 5
-#define ITEM_INDEX_BACKPACK 6
-#define ITEM_INDEX_GOGGLES 7
-#define ITEM_INDEX_NVG 8
-#define ITEM_INDEX_BINO 9
-#define ITEM_INDEX_MAP 10
-#define ITEM_INDEX_COMPASS 11
-#define ITEM_INDEX_RADIO 12
-#define ITEM_INDEX_WATCH 13
-#define ITEM_INDEX_COMMS 14
-#define ITEM_INDEX_UNIFORM_ITEMS 15
-#define ITEM_INDEX_VEST_ITEMS 16
-#define ITEM_INDEX_BACKPACK_ITEMS 17
-#define ITEM_INDEX_PRIMARY_ITEMS 18
-#define ITEM_INDEX_LAUNCHER_ITEMS 19
-#define ITEM_INDEX_HANDGUN_ITEMS 20
-#define ITEM_INDEX_BINO_ITEMS 21
-
-// ---------------------------------------------------------------------------
-// A row of the catalog (fnc_catalogRow), by place
-// ---------------------------------------------------------------------------
-#define ROW_CLASS 0
-#define ROW_SEARCH 1
-#define ROW_NAME 2
-#define ROW_SHORT 3
-#define ROW_PICTURE 4
-#define ROW_W 5
-#define ROW_H 6
-#define ROW_TILE_CATEGORY 7
-#define ROW_KIND 8
-#define ROW_STACK 9
-#define ROW_CAPACITY 10
-#define ROW_MASS 11
-#define ROW_MOD 12
-#define ROW_CATEGORY 13
-#define ROW_KEY 14

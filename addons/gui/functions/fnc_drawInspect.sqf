@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * Draws the inspect card (GVAR(inspect), fnc_inspect): a glass window with the item's picture - what is
  * on a weapon drawn onto it -, its name in its category's colour, its description and its figures:
- * weight, size, count, rounds, what it holds, whether it stacks, its category, the mod it comes from
+ * weight, size, count, rounds, whether it stacks, its category, the mod it comes from
  * and its class name. A kit of Enhanced First Aid Kits also how full it is and what is in it
  * (einv_compat_efak), a radio its channel, frequency and state (einv_compat_tfar, einv_compat_acre -
  * whichever mod is loaded). A window that attached (fnc_attach) adds rows of its own before the mod's name (the
@@ -38,15 +38,15 @@ uiNamespace setVariable [QGVAR(inspectRect), []];
 
 if (isNull _display || {GVAR(inspect) isEqualTo []}) exitWith {};
 
-GVAR(inspect) params ["_class", "_count", "_ammo", "_attachments"];
+GVAR(inspect) params ["_class", "_count", "_ammo", "_attachments", ["_holder", objNull, [objNull]]];
 
 private _info = [_class] call EFUNC(items,getInfo);
 private _theme = GVAR(theme);
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _colorText2 = _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]];
-private _muted = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
+private _muted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 
 private _fnc_hex = {
     params ["_color"];
@@ -90,7 +90,7 @@ if (_count > 1) then {
     _rows pushBack [LLSTRING(Inspect_Count), format ["×%1", _count]];
 };
 
-private _stack = _info getOrDefault ["stack", 1];
+private _stack = [_holder, _class, _info getOrDefault ["stack", 1]] call EFUNC(storage,stackFor);
 
 _rows pushBack [LLSTRING(Inspect_Stackable), [LLSTRING(Inspect_No), format [LLSTRING(Inspect_YesUpTo), _stack]] select (_stack > 1)];
 
@@ -98,12 +98,6 @@ private _capacity = _info getOrDefault ["capacity", 0];
 
 if (_capacity > 0) then {
     _rows pushBack [LLSTRING(Inspect_Rounds), format ["%1 / %2", [_ammo, _capacity] select (_ammo < 0), _capacity]];
-};
-
-private _maxLoad = _info getOrDefault ["maxLoad", 0];
-
-if (_maxLoad > 0) then {
-    _rows pushBack [LLSTRING(Inspect_Holds), [_maxLoad] call _fnc_kg];
 };
 
 _rows pushBack [LLSTRING(Inspect_Category), [
@@ -156,28 +150,30 @@ _rows pushBack [LLSTRING(Inspect_Class), _info getOrDefault ["class", _class]];
 
 // ----- Measures -----
 
-private _width = SQUARE(UNIT * 17);
-private _padY = UNIT * 0.7;
+// The card and its words grow with the tiles (TEXT_UNIT, fnc_textScale).
+private _textUnit = TEXT_UNIT;
+private _width = SQUARE(_textUnit * 17);
+private _padY = _textUnit * 0.7;
 private _padX = SQUARE(_padY);
 private _innerW = _width - _padX * 2;
-private _titleH = UNIT * 1.1;
-private _pictureH = UNIT * 6.5;
-private _rowH = UNIT * 0.8;
-private _gap = UNIT * 0.45;
+private _titleH = _textUnit * 1.1;
+private _pictureH = _textUnit * 6.5;
+private _rowH = _textUnit * 0.8;
+private _gap = _textUnit * 0.45;
 private _closeH = _titleH;
 private _closeW = SQUARE(_closeH);
 
 // The description, measured in a box of the card's width before anything is placed.
 private _description = _info getOrDefault ["description", ""];
 private _descText = parseText format [
-    "<t font='%1' color='%2' size='0.95'>%3</t>", _font, [_colorText2] call _fnc_hex, _description
+    "<t font='%1' color='%2' size='%4'>%3</t>", _font, [_colorText2] call _fnc_hex, _description, (0.95 * TEXT_SCALE) toFixed 3
 ];
 private _descH = 0;
 
 if (_description isNotEqualTo "") then {
     private _probe = [_display, "EINV_StructuredText", controlNull, [0, 0, _innerW, UNIT]] call FUNC(uiCreate);
     _probe ctrlSetStructuredText _descText;
-    _descH = (ctrlTextHeight _probe) min (UNIT * 6);
+    _descH = (ctrlTextHeight _probe) min (_textUnit * 6);
     ctrlDelete _probe;
 };
 
@@ -186,7 +182,7 @@ private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap
     + count _rows * _rowH;
 
 // Where it was put, or the middle of the screen - always whole on it.
-GVAR(inspectPos) params [["_left", safezoneX + (safezoneW - _width) / 2], ["_top", safezoneY + (((safezoneH - _height) / 2) max (UNIT * 2))]];
+GVAR(inspectPos) params [["_left", safezoneX + (safezoneW - _width) / 2], ["_top", safezoneY + (((safezoneH - _height) / 2) max (_textUnit * 2))]];
 
 _left = (_left max safezoneX) min (safezoneX + safezoneW - _width);
 _top = (_top max safezoneY) min ((safezoneY + safezoneH - _height) max safezoneY);
@@ -203,27 +199,27 @@ _group ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseBu
 
 [
     _display, _group, [0, 0, _width, _height],
-    _theme getOrDefault ["inspectBg", [0.075, 0.083, 0.1, 0.97]], _theme getOrDefault ["radius", 0]
+    _theme getOrDefault ["inspectBg", [0.06, 0.06, 0.06, 0.98]], _theme getOrDefault ["radius", 0]
 ] call FUNC(uiPanel);
 
 private _cursor = _padY;
 
 // The title, in its category's colour as a little bar beside it. Held, it moves the card.
-private _categoryColor = +((_theme getOrDefault ["tileBg", []]) param [_info getOrDefault ["category", 0], [1, 1, 1, 0.1]]);
+private _categoryColor = [_theme, _info, [1, 1, 1, 0.1]] call FUNC(tileColour);
 _categoryColor set [3, 1];
 
 [_display, _group, [_padX, _cursor + _titleH * 0.15, pixelW * 3, _titleH * 0.7], _categoryColor] call FUNC(uiPanel);
 
-private _titleW = _innerW - SQUARE(UNIT * 0.35) - _closeW;
+private _titleW = _innerW - SQUARE(_textUnit * 0.35) - _closeW;
 
 [
-    _display, _group, [_padX + SQUARE(UNIT * 0.35), _cursor, _titleW, _titleH],
-    [[_class] call FUNC(itemName), _titleW, _fontBold, UNIT * 0.8] call FUNC(fitText),
-    UNIT * 0.8, _colorText, _fontBold, 0
+    _display, _group, [_padX + SQUARE(_textUnit * 0.35), _cursor, _titleW, _titleH],
+    [[_class] call FUNC(itemName), _titleW, _fontBold, _textUnit * 0.8] call FUNC(fitText),
+    _textUnit * 0.8, _colorText, _fontBold, 0, "name"
 ] call FUNC(uiLabel);
 
 private _grip = [_display, "EINV_Hitbox", _group, [0, 0, _width - _padX - _closeW, _cursor + _titleH]] call FUNC(uiCreate);
-_grip ctrlSetTooltip LLSTRING(Inspect_Move);
+[_grip, LLSTRING(Inspect_Move)] call FUNC(setTooltip);
 _grip ctrlAddEventHandler ["MouseButtonDown", {
     params ["_ctrl", "_button"];
 
@@ -246,7 +242,11 @@ _cursor = _cursor + _titleH + _gap;
 
 private _pictureInner = [_padX * 2, _cursor + _padY * 0.5, _innerW - _padX * 2, _pictureH - _padY];
 
-[_display, _group, _pictureInner, _info getOrDefault ["picture", ""]] call FUNC(uiPicture);
+// As the rules draw it (icon=): larger, smaller or moved, and cut to the lighter box where it would reach out.
+[
+    _display, _group, _pictureInner, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1],
+    [_padX, _cursor, _innerW, _pictureH]
+] call FUNC(uiItemPicture);
 
 if (_attachments isNotEqualTo []) then {
     [_display, _group, _pictureInner, _attachments] call FUNC(drawAttachments);
@@ -266,26 +266,26 @@ if (_descH > 0) then {
 
     private _rowTop = _cursor + _forEachIndex * _rowH;
 
-    [_display, _group, [_padX, _rowTop, _innerW * 0.4, _rowH], _label, UNIT * 0.58, _muted, _font, 0] call FUNC(uiLabel);
+    [_display, _group, [_padX, _rowTop, _innerW * 0.4, _rowH], _label, _textUnit * 0.58, _muted, _font, 0, "hint"] call FUNC(uiLabel);
 
     // A number is how full something is: a bar over the first half of the value's room, its text after it.
     if (_value isEqualType 0) then {
         private _barW = _innerW * 0.3;
-        private _barH = (2 max round (UNIT * 0.1 / pixelH)) * pixelH;
+        private _barH = (2 max round (_textUnit * 0.1 / pixelH)) * pixelH;
 
         [
             _display, _group, [_padX + _innerW * 0.4, _rowTop + (_rowH - _barH) / 2, _barW, _barH], _value,
-            _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]], _theme getOrDefault ["barFill", [0.84, 0.54, 0.1, 1]], 0
+            _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]], _theme getOrDefault ["barFill", [0.84, 0.54, 0.1, 1]], _barH / 2, GRADIENT_BARS
         ] call FUNC(uiBar);
 
         [
-            _display, _group, [_padX + _innerW * 0.4 + _barW + SQUARE(UNIT * 0.3), _rowTop, _innerW * 0.3 - SQUARE(UNIT * 0.3), _rowH],
-            [_valueText, _innerW * 0.3 - SQUARE(UNIT * 0.3), _font, UNIT * 0.58] call FUNC(fitText), UNIT * 0.58, _colorText, _font, 1
+            _display, _group, [_padX + _innerW * 0.4 + _barW + SQUARE(_textUnit * 0.3), _rowTop, _innerW * 0.3 - SQUARE(_textUnit * 0.3), _rowH],
+            [_valueText, _innerW * 0.3 - SQUARE(_textUnit * 0.3), _font, _textUnit * 0.58] call FUNC(fitText), _textUnit * 0.58, _colorText, _font, 1, "value"
         ] call FUNC(uiLabel);
     } else {
         [
             _display, _group, [_padX + _innerW * 0.4, _rowTop, _innerW * 0.6, _rowH],
-            [_value, _innerW * 0.6, _font, UNIT * 0.58] call FUNC(fitText), UNIT * 0.58, _colorText, _font, 1
+            [_value, _innerW * 0.6, _font, _textUnit * 0.58] call FUNC(fitText), _textUnit * 0.58, _colorText, _font, 1, "value"
         ] call FUNC(uiLabel);
     };
 } forEach _rows;

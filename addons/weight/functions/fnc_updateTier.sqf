@@ -8,6 +8,10 @@
  * inventory is closed (fnc_notifyTier). The first look after a unit changed raises the event but says
  * nothing.
  *
+ * With the tiers switched off (einv_weight_enabled) the tier is always Light (fnc_getTier): the duty factor
+ * goes back to 1, the status effects come off on the next look and nothing is said - the switch is not a
+ * change of load the player would want to hear about.
+ *
  * Also keeps ACE's own number honest: ACE refreshes its total load (which its fatigue uses) on loadout
  * events and its own virtual loads only, so what is packed into a container lying in the backpack was
  * missing from it. When it differs from the load counted here, ACE is told to count again.
@@ -40,7 +44,8 @@ if (!isNil QACEFUNC(movement,handleVirtualMass) && {abs (_load - (_unit getVaria
 
 private _limits = [_unit] call FUNC(getLimits);
 private _tier = [_unit, _load] call FUNC(getTier);
-private _effects = missionNamespace getVariable [QGVAR(effects), true];
+private _enabled = _limits get "enabled";
+private _effects = _enabled && {missionNamespace getVariable [QGVAR(effects), true]};
 
 // The duty factor: ACE's loop asks for it every second (XEH_postInit).
 private _duty = 1;
@@ -65,7 +70,7 @@ _unit setVariable [QGVAR(effectsOn), _effectsNow];
 if (_old != _tier) then {
     [QGVAR(tierChanged), [_unit, _tier, _old]] call CBA_fnc_localEvent;
 
-    if (_old >= 0) then {
+    if (_old >= 0 && {_enabled}) then {
         [_tier, _old, _limits] call FUNC(notifyTier);
     };
 };

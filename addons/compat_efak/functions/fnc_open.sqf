@@ -6,7 +6,7 @@
  * the columns changes for it: the window is all that is drawn. Open already, its window comes to the
  * top where it is.
  *
- * The kit opens with its own sound - the family "medic" of Enhanced Inventory's sound table, a medic bag
+ * The kit opens with its own sound - the family "medic" of Arma Inventory Overhaul's sound table, a medic bag
  * ripped open.
  *
  * Kept by its class in GVAR(opened); where it lies is found anew whenever the windows are drawn

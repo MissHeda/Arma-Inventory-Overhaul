@@ -35,7 +35,7 @@ private _side = "";
     _side = _grid get "side";
 
     {
-        if (_x getOrDefault ["hidden", false] || {_x getOrDefault ["pending", false]}) then {continue};
+        if (_x getOrDefault ["hidden", false] || {_x getOrDefault ["pending", false]} || {_x getOrDefault ["offPage", false]}) then {continue};
 
         private _key = _x getOrDefault ["key", ""];
 

@@ -2,8 +2,10 @@
 /*
  * Author: Miss Heda
  * Op "take": out of a holder - produced the payload. Not there with that many: "Gone" - all or nothing
- * for the count asked for. A whole tile's record leaves the holder, and the execution's view of it
- * follows (fnc_findEntry: the tile's count lowered, at 0 it is gone).
+ * for the count asked for. A whole tile's record leaves the holder; of part of a stack the tile's own
+ * record loses that many (fnc_setCount), so two stacks of one class give up their items one at a time and
+ * the right one shrinks. The execution's view of it follows (fnc_findEntry: the tile's count lowered, at 0
+ * it is gone).
  *
  * The engine picks which weapon of a class leaves, and which of two uniforms, vests or backpacks of one
  * class: those go through fnc_removeSameClass - all of the class out, the very ones asked for handed on,
@@ -19,7 +21,7 @@
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
- *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "TooHeavy", "NotLocal", "Moved",
+ *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "NotLocal", "Moved",
  *     "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason already
  *     in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
@@ -54,6 +56,12 @@ private _fnc_taken = {
         [_from, _entry, []] call FUNC(setPlace);
         _entry set ["count", 0];
     } else {
+        // Of a stack that lies apart from others of its class, this tile gives the items: its record's
+        // count goes down, so the one the player took from is the one that shrinks (fnc_setCount).
+        if (!(_entry getOrDefault ["strict", false]) && {(_entry getOrDefault ["attachments", []]) isEqualTo []}) then {
+            [_from, _entry, _have - _n] call FUNC(setCount);
+        };
+
         _entry set ["count", _have - _n];
     };
 };
@@ -98,10 +106,16 @@ if (_weapon || {_wearable && {({toLowerANSI (_x select 0) isEqualTo _lower} coun
     _entry set ["claimed", true];
 
     for "_j" from (_opIndex + 1) to (count _ops - 1) do {
-        (_ops select _j) params [["_name", "", [""]], ["_jArgs", [], [[]]]];
+        // Only a later take is of interest; another op's arguments may be no array at all (sort takes a
+        // holder and an order), so they are never read as one.
+        private _name = (_ops select _j) param [0, ""];
+        private _jArgs = (_ops select _j) param [1, []];
+
+        if (_name isNotEqualTo "take" || {!(_jArgs isEqualType [])}) then {continue};
+
         _jArgs params [["_jFrom", objNull, [objNull, ""]], ["_jArray", [], [[]]]];
 
-        if (_name isEqualTo "take" && {_jFrom isEqualTo _from} && {toLowerANSI (_jArray param [0, ""]) isEqualTo _lower}) then {
+        if (_jFrom isEqualTo _from && {toLowerANSI (_jArray param [0, ""]) isEqualTo _lower}) then {
             _jArray params ["", "", "", "", "", "", ["_col", -1, [0]], ["_row", -1, [0]], "", "", ["_block", -1, [0]], ["_key", "", [""]]];
 
             if (_key isEqualTo "") then {

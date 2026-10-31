@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * A payload for something that is made rather than taken from somewhere - what the Arsenal hands out - in
+ * A payload for something that is made rather than taken from somewhere - what fnc_addNew puts in - in
  * the shape fnc_addPayload and fnc_putOn expect (the shapes fnc_removeEntry makes).
  *
  *   magazine, grenade - ["magazine", class, [rounds, ...]], one entry of rounds for each, full unless said

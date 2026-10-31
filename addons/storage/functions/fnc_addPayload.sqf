@@ -2,9 +2,10 @@
 /*
  * Author: Miss Heda
  * Puts a payload (fnc_removeEntry, fnc_takeOff) into a container and says what of it did not arrive,
- * counted before and after on this machine: a weapon or backpack by its class, items by their count,
- * magazines by how many of the class came in for each number of rounds. Only that rest may go anywhere
- * else - what arrived is here, and handing it on as well would make a copy.
+ * counted before and after on this machine: a weapon by its class, a backpack by its class or by one
+ * more backpack object there, items by their count, magazines by how many of the class came in for each
+ * number of rounds. Only that rest may go anywhere else - what arrived is here, and handing it on as
+ * well would make a copy.
  *
  * A uniform, vest or backpack comes with what was in it, its places and its id. The engine adds it
  * empty - or with its default contents - as a new object, found as the one container object that was
@@ -13,9 +14,15 @@
  * none or several, and what it held goes loose into this container instead - never into what may be a
  * sibling - and the RPT names it.
  *
+ * Strict mode: a magazine or item that the container's setting keeps out of it goes into the unit's hidden
+ * holder instead of the cargo (fnc_hiddenRoute, fnc_hiddenPut) - the window shows it as the container's
+ * all the same, and it always arrives whole. Raw puts it into the cargo whatever the settings say: for
+ * giving the holder back (fnc_hiddenReturn, fnc_opStrict).
+ *
  * Arguments:
  * 0: Container <OBJECT>
  * 1: Payload <ARRAY>
+ * 2: Raw - into the cargo, never into the hidden holder <BOOL> (default: false)
  *
  * Return Value:
  * What did not arrive, a payload of the same kind - [] when all of it did <ARRAY>
@@ -26,7 +33,7 @@
  * Public: No
  */
 
-params [["_container", objNull, [objNull]], ["_payload", [], [[]]]];
+params [["_container", objNull, [objNull]], ["_payload", [], [[]]], ["_raw", false, [false]]];
 
 if (_payload isEqualTo []) exitWith {[]};
 
@@ -34,6 +41,13 @@ if (_payload isEqualTo []) exitWith {[]};
 _payload = +_payload;
 
 if (isNull _container) exitWith {_payload};
+
+if (
+    !_raw && {(_payload select 0) in ["item", "magazine"]}
+    && {[_container, _payload param [1, ""]] call FUNC(hiddenRoute)}
+) exitWith {
+    [_container, _payload] call FUNC(hiddenPut)
+};
 
 // How many of a class the container holds at its top level, of every kind of cargo.
 private _fnc_held = {
@@ -129,6 +143,7 @@ switch (_payload select 0) do {
 
         private _key = toLowerANSI _class;
         private _before = [_key] call _fnc_held;
+        private _bags = everyBackpack _container;
         private _objects = [];
 
         if (_inner isNotEqualTo []) then {
@@ -137,7 +152,13 @@ switch (_payload select 0) do {
 
         _container addBackpackCargoGlobal [_class, 1];
 
-        if (([_key] call _fnc_held) > _before) then {
+        // Arrived when its class counts one more - or when one more backpack object lies there: a
+        // backpack the engine files under another class than the one added (a preset backpack under
+        // its empty one) is there all the same, and put down a second time it would be a copy.
+        private _new = (everyBackpack _container) - _bags;
+        private _arrived = ([_key] call _fnc_held) > _before || {_new isNotEqualTo []};
+
+        if (_arrived) then {
             [_class, _inner, _objects] call _fnc_fill;
         } else {
             _rest = _payload;

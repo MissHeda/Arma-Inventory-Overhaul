@@ -4,38 +4,48 @@
  * Author: Miss Heda
  * Right click on what the mouse is on: the choices for it, in a context menu (fnc_openMenu).
  *
+ * Only what belongs to the thing under the mouse is in it. The moves have their own ways and no row
+ * here: a double click moves a tile - or a whole selection - over (fnc_quickMove, fnc_quickMoveGroup),
+ * G drops what is under the mouse or selected (fnc_dropToGround, fnc_quickMoveGroup), a drag moves
+ * one tile or a selection anywhere, Ctrl+click takes a worn item off (fnc_quickUnequip), and the Sort
+ * button on a section's caption line sorts its container (fnc_sortHolder, fnc_drawSection,
+ * fnc_drawWindow).
+ *
  * A tile: inspect it (fnc_inspect), put it on (or, for an attachment or magazine, on which of the
  * player's weapons), repack all magazines of its kind when it is a magazine that is not full in the
  * player's own gear (einv_magazines_fnc_menuChoices - only when that addon is loaded; the slot of a loaded
  * magazine has the row too), put it on the hotbar or take it off (einv_hotbar_fnc_menuChoices - only when that
- * addon is loaded), move it over (what a double click does, fnc_quickMove - the way for a backpack lying
- * in a crate, which opens on a double click), drop it, open it (a uniform, vest or backpack lying there
- * in the loot column), sort its container, select everything in it (fnc_selectSection). A slot: inspect
- * it, take it off, drop it, and for a weapon take off each of its attachments and its magazines on their
- * own; a slot of the hotbar: clear it (einv_hotbar_fnc_stripMenu). Free cells: sort the container, select
- * all in it.
+ * addon is loaded), drop it, open it (a uniform, vest or backpack lying there in the loot column), select
+ * everything in its container (fnc_selectSection). A slot: inspect it, drop it (to the ground - it does
+ * not go into the player's own gear first, as Ctrl+click's take off does), and for a weapon take off each
+ * of its attachments and its magazines on their own; a slot of the hotbar: clear it
+ * (einv_hotbar_fnc_stripMenu). Free cells: select all in the container.
  *
- * On a tile of a selection of several only what can be done with all of them: move them over, drop them,
- * deselect (fnc_quickMoveGroup, fnc_clearSelection).
+ * On a tile of a selection of several nothing but deselect (fnc_clearSelection): what can be done with
+ * all of them is a double click, a drag and Delete (fnc_quickMoveGroup).
  *
- * Sort is the storage's op "sort" (fnc_sendMoves), run where the container's root is local: everyone
- * who looks into it sees it sorted. Drop goes to the ground at the feet, or into the vehicle's cargo
- * while seated. A tile a move is under way for only shows what it is, and opens or closes.
+ * An action waiting for the hands (fnc_queueMoves) - a tinted tile, or a slot whose item is to come
+ * off - has Cancel in its menu, after Inspect (and the container rows of a tile).
+ *
+ * Drop goes to the ground at the feet, or into the vehicle's cargo while seated. A tile a move is under
+ * way for only shows what it is, and opens or closes.
  *
  * A tile in a container or one of the player's own slots: also what other mods add to CBA's item
  * context menu for the item (fnc_cbaOptions), set apart by a line.
  *
  * A kit of Enhanced First Aid Kits or Enhanced Utility Pouches: open or close it in a window of its own
  * and unpack everything in it (einv_compat_efak_fnc_menuChoices - only when that addon is loaded). A
- * tile in an open kit's window: inspect, put on, drop, sort the kit - the kit has no container for other
- * mods' options, and no arsenal. Only what lies on top under the mouse counts (fnc_updateHover,
- * fnc_topAt): a tile or free cells of a column under a kit window have no menu there.
+ * tile in an open kit's window: inspect, put on, drop - the kit has no container for other mods'
+ * options, and no arsenal; free cells there have no menu at all. Only what lies on top under the mouse
+ * counts (fnc_updateHover, fnc_topAt): a tile or free cells of a column under a kit window have no menu
+ * there.
  *
  * A tile or free cells of an ACE arsenal box: also open its arsenal (einv_arsenal_fnc_open - only when
  * that addon is loaded).
  *
  * A radio of the player's own - the radio slot, the uniform, vest or backpack, the long-range backpack
- * worn: also "Open radio" (the window steps aside for TFAR's or ACRE2's dialog and comes back,
+ * worn - not one lying in a container the settings "Use items from ..." close to it (einv_storage_fnc_useState)
+ * and that it is not whitelisted for: also "Open radio" (the window steps aside for TFAR's or ACRE2's dialog and comes back,
  * einv_gui_fnc_stepAside) and "Use as active radio" for one that is not in use (einv_compat_tfar,
  * einv_compat_acre - whichever mod is loaded, through fnc_compatCollect). The dummy radio ACRE2 keeps in
  * the radio slot (einv_compat_acre_fnc_isFixedSlot) can only be inspected.
@@ -43,6 +53,13 @@
  * A living person's gear the player may only look at (fnc_checkTouch): only what changes nothing of
  * theirs - inspect, open or close a uniform, vest, backpack or kit lying there; no sorting, which
  * everyone looking at them would see, and no choices of other mods.
+ *
+ * For whoever may open the setup wizard (einv_setup_fnc_canOpen - only when that addon is loaded), a last
+ * row "Settings for <name>" on a tile, on a worn slot, on the box of an opened uniform, vest or backpack and on
+ * the free cells of a crate's or vehicle's grid: it closes this window and opens the wizard at the page of
+ * that item - the Containers page for what holds things (uniform, vest, backpack, crate, vehicle, kit), the
+ * Items page for the rest - with the class picked (einv_setup_fnc_openFromGame, which takes the step's index:
+ * found here by its id in einv_setup_steps, so a reordering of the pages does not matter).
  *
  * A window that attached (fnc_attach) gives its choices through the "menu" hook: they replace everything
  * above, an empty list means no menu at all.
@@ -69,8 +86,11 @@ private _mouse = [_at, getMousePosition] select (_at isEqualTo []);
 
 [_display, _mouse, true] call FUNC(updateHover);
 
-// Where it opened, to open it there again when an option of another mod asks to stay open (fnc_cbaRun).
+// Where it opened, to open it there again when an option of another mod asks to stay open (fnc_cbaRun), and
+// what for: its rows name a tile by its number in its grid, so fnc_redrawTiles closes the menu of a tile
+// whose section it draws anew.
 GVAR(menuAt) = _mouse;
+GVAR(menuFor) = +GVAR(hover);
 
 // A window that attached has its own menus (the "menu" hook): its choices replace the ones below; none, no
 // menu at all. Nothing answered, the choices below.
@@ -87,58 +107,21 @@ private _unit = GVAR(unit);
 private _grids = uiNamespace getVariable [QGVAR(grids), []];
 private _choices = [];
 
+// The class a "Settings for ..." row is for (see the header), the name it shows and the page of the wizard
+// when the kind of the class does not say ("items" or "containers").
+private _settingsClass = "";
+private _settingsName = "";
+private _settingsPage = "";
+
 private _fnc_name = {
     params ["_class"];
     [_class] call FUNC(itemName)
 };
 
-// Sort: the holder's places emptied and everything laid out anew - largest first, by kind - by its
-// authority, for everyone who looks into it (op "sort"). A kit's grid by the kit's key.
-private _fnc_sort = {
-    params ["_holder", "_root"];
-
-    // A rearrangement is a rummage, and it cannot be refused: it sounds when it is sent.
-    ["search", "", [_holder, objNull] select (_holder isEqualType "")] call FUNC(playSound);
-
-    [[createHashMapFromArray [["kind", "sort"], ["from", _holder], ["fromRoot", _root]]]] call FUNC(sendMoves);
-};
-
-// The holder a grid stands for, with its root when the grid knows it. Only where the player may change
-// it: a living person's as the settings say (fnc_checkTouch), a kit in their gear the same way
-// (einv_compat_efak_fnc_checkTouch).
-private _fnc_addSort = {
-    params ["_grid", ["_separator", false]];
-
-    private _kit = _grid getOrDefault ["kit", ""];
-    private _container = _grid getOrDefault ["container", objNull];
-
-    private _holder = if (_kit isEqualTo "") then {
-        _grid getOrDefault ["holder", _container]
-    } else {
-        _grid getOrDefault ["holder", _grid getOrDefault ["layoutKey", ""]]
-    };
-
-    if (_holder isEqualTo "" || {_holder isEqualType objNull && {isNull _holder}}) exitWith {};
-
-    private _why = if (_kit isEqualTo "") then {
-        [_container, "items"] call FUNC(checkTouch)
-    } else {
-        if (isNil QEFUNC(compat_efak,checkTouch)) then {""} else {[_kit] call EFUNC(compat_efak,checkTouch)}
-    };
-
-    if (_why isNotEqualTo "") exitWith {};
-
-    private _name = if (_kit isEqualTo "") then {[_container] call FUNC(containerName)} else {[_kit] call _fnc_name};
-
-    _choices pushBack [
-        format [LLSTRING(Menu_Sort), _name], [_holder, _grid getOrDefault ["root", objNull]], _fnc_sort,
-        createHashMapFromArray [["separator", _separator]]
-    ];
-};
-
-// Everything in a section selected - in the inventory only, for the grids of the columns.
+// Everything in a section selected - in the inventory only, for the grids of the columns. Set apart by a
+// line from what other mods' options put above it.
 private _fnc_addSelectAll = {
-    params ["_grid"];
+    params ["_grid", ["_separator", false]];
 
     if (!(call FUNC(isInventoryMode)) || {_grid getOrDefault ["virtual", true]} || {(_grid getOrDefault ["window", ""]) isNotEqualTo ""}) exitWith {};
     if ((_grid getOrDefault ["side", ""]) isEqualTo "" || {isNull (_grid getOrDefault ["container", objNull])}) exitWith {};
@@ -147,7 +130,10 @@ private _fnc_addSelectAll = {
 
     if (_holder isEqualType objNull && {isNull _holder}) exitWith {};
 
-    _choices pushBack [format [LLSTRING(Menu_SelectAll), [_grid get "container"] call FUNC(containerName)], [_holder], {_this call FUNC(selectSection)}];
+    _choices pushBack [
+        format [LLSTRING(Menu_SelectAll), [_grid get "container"] call FUNC(containerName)], [_holder], {_this call FUNC(selectSection)},
+        createHashMapFromArray [["separator", _separator]]
+    ];
 };
 
 // An ACE arsenal box: its arsenal, opened for the player once this window is closed. The arsenal
@@ -172,26 +158,32 @@ switch (GVAR(hover) param [0, ""]) do {
 
         if (_tile getOrDefault ["hidden", false] || {isNull _from && {_kit isEqualTo ""}} || {_grid getOrDefault ["virtual", true]}) exitWith {};
 
-        // On one of several selected tiles: what can be done with all of them.
+        // On one of several selected tiles: nothing but letting go of the selection. Moving and dropping
+        // them all is a double click, a drag and Delete (fnc_quickMoveGroup).
         private _selected = if (call FUNC(isInventoryMode)) then {call FUNC(selectionTiles)} else {[]};
 
         if (count _selected >= 2 && {[_gridIndex, _tileIndex] in _selected}) exitWith {
-            _choices pushBack [format [LLSTRING(Menu_MoveSelected), count _selected], [_selected], {_this call FUNC(quickMoveGroup)}];
-            _choices pushBack [format [LLSTRING(Menu_DropSelected), count _selected], [_selected, true], {_this call FUNC(quickMoveGroup)}];
             _choices pushBack [LLSTRING(Menu_Deselect), [], {call FUNC(clearSelection)}];
         };
 
         _choices pushBack [
             LLSTRING(Menu_Inspect),
-            [_class, _tile getOrDefault ["count", 1], _tile getOrDefault ["ammo", -1], _tile getOrDefault ["attachments", []]],
+            [_class, _tile getOrDefault ["count", 1], _tile getOrDefault ["ammo", -1], _tile getOrDefault ["attachments", []], _from],
             {_this call FUNC(inspect)}
         ];
+
+        _settingsClass = _class;
 
         // A move of it is under way: what it is, and opening or closing a uniform, vest or backpack it
         // is - nothing that would plan it a second time.
         private _inside = _tile getOrDefault ["container", objNull];
 
         if (_tile getOrDefault ["pending", false]) exitWith {
+            // Waiting for the hands (fnc_queueMoves): it can be cancelled.
+            if ((_tile getOrDefault ["queued", 0]) > 0) then {
+                _choices pushBack [LLSTRING(Menu_CancelQueued), [_tile get "queued"], {_this call FUNC(cancelQueued)}];
+            };
+
             if (!isNull _inside) then {
                 private _isOpen = GVAR(opened) findIf {(_x select 1) isEqualTo _inside} >= 0;
 
@@ -255,12 +247,7 @@ switch (GVAR(hover) param [0, ""]) do {
                 _choices append ([_class, ["grid", _grid]] call EFUNC(hotbar,menuChoices));
             };
 
-            // What a double click does: out of the player's gear into the loot, out of the loot into the
-            // gear - the way for a backpack in a crate or a kit's tile, which a double click opens.
-            if (call FUNC(isInventoryMode)) then {
-                _choices pushBack [LLSTRING(Menu_MoveOver), [_gridIndex, _tileIndex], {_this call FUNC(quickMove)}];
-            };
-
+            // Moving it over is a double click (fnc_quickMove) or a drag: no row for it here.
             if (_kit isNotEqualTo "" || {!([_from] call EFUNC(storage,isGroundHolder))}) then {
                 _choices pushBack [LLSTRING(Drop), [_gridIndex, _tileIndex], {_this call FUNC(dropToGround)}];
             };
@@ -282,7 +269,8 @@ switch (GVAR(hover) param [0, ""]) do {
             ];
         };
 
-        // A radio the player carries: open it, use it (einv_compat_tfar, einv_compat_acre). Not one in a kit.
+        // A radio the player carries: open it, use it (einv_compat_tfar, einv_compat_acre). Not one in a kit. The settings
+        // "Use items from ..." are about using things up: a radio in the backpack is opened as TFAR and ACRE2 open it.
         if (_kit isEqualTo "") then {
             private _carried = _from in [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
 
@@ -292,10 +280,8 @@ switch (GVAR(hover) param [0, ""]) do {
             ] call FUNC(compatCollect));
         };
 
-        // Inside a kit: its own grid is all there is to sort.
-        if (_kit isNotEqualTo "") exitWith {
-            [_grid] call _fnc_addSort;
-        };
+        // Inside a kit: the kit has no container for other mods' options, no selection and no arsenal.
+        if (_kit isNotEqualTo "") exitWith {};
 
         // What other mods offer for the item where it lies, then the window's own again below a line - not
         // for a living person's item the player may only look at: those choices would change it.
@@ -305,8 +291,7 @@ switch (GVAR(hover) param [0, ""]) do {
 
         _choices append _cba;
 
-        [_grid, _cba isNotEqualTo []] call _fnc_addSort;
-        [_grid] call _fnc_addSelectAll;
+        [_grid, _cba isNotEqualTo []] call _fnc_addSelectAll;
 
         [_from] call _fnc_addArsenal;
     };
@@ -320,6 +305,12 @@ switch (GVAR(hover) param [0, ""]) do {
             _choices append ([_record select 7] call EFUNC(hotbar,stripMenu));
         };
 
+        // The box of a uniform, vest or backpack opened from inside a container, and a worn slot: the setup
+        // wizard's page for the item.
+        if ((_record param [7, -1]) < 0) then {
+            _settingsClass = _record param [1, ""];
+        };
+
         if (_slot isEqualTo "" || {isNull _owner} || {(_record param [1, ""]) isEqualTo ""}) exitWith {};
 
         private _worn = [_owner, _slot] call EFUNC(storage,getSlot);
@@ -329,6 +320,13 @@ switch (GVAR(hover) param [0, ""]) do {
             [_record param [1, ""], 1, _worn getOrDefault ["ammo", -1], _worn getOrDefault ["attachments", []]],
             {_this call FUNC(inspect)}
         ];
+
+        // Waiting to be taken off (fnc_queueMoves): it can be cancelled, and nothing else is offered for it.
+        private _queuedId = [_owner, _slot] call FUNC(queuedSlot);
+
+        if (_queuedId > 0) exitWith {
+            _choices pushBack [LLSTRING(Menu_CancelQueued), [_queuedId], {_this call FUNC(cancelQueued)}];
+        };
 
         // The radio slot ACRE2 keeps for itself: nothing to do with it but look (einv_compat_acre).
         if (!isNil QEFUNC(compat_acre,isFixedSlot) && {[_owner, _slot] call EFUNC(compat_acre,isFixedSlot)}) exitWith {};
@@ -344,7 +342,8 @@ switch (GVAR(hover) param [0, ""]) do {
         // What a living person wears comes off only as the settings say (fnc_checkTouch) - else inspect only.
         if (([_owner, "worn"] call FUNC(checkTouch)) isNotEqualTo "") exitWith {};
 
-        _choices pushBack [LLSTRING(Menu_TakeOff), [_owner, _slot], {_this call FUNC(quickUnequip)}];
+        // Drop only - onto the ground. "Take off", which put it into the player's own gear first, is
+        // Ctrl+click on the slot (fnc_quickUnequip).
         _choices pushBack [LLSTRING(Drop), [_owner, _slot], {
             params ["_owner", "_slot"];
             [_owner, _slot, "ground", []] call FUNC(doUnequip);
@@ -380,8 +379,8 @@ switch (GVAR(hover) param [0, ""]) do {
         _choices append ([call CBA_fnc_currentUnit, _cbaContainer, _record param [1, ""], _cbaSlot] call FUNC(cbaOptions));
     };
     default {
-        // Free cells of a container: sort it - those of the topmost layer there, a kit window's own over a
-        // column's.
+        // Free cells of a container: select all in it - those of the topmost layer there, a kit window's own
+        // over a column's. Nothing for the free cells of an open kit's window.
         private _layer = [_mouse] call FUNC(topAt);
         private _grid = (_grids select {
             (_x getOrDefault ["window", ""]) isEqualTo _layer && {([_x, _mouse] call FUNC(screenToCell)) isNotEqualTo []}
@@ -389,18 +388,46 @@ switch (GVAR(hover) param [0, ""]) do {
         private _container = _grid getOrDefault ["container", objNull];
 
         if (_grid getOrDefault ["virtual", true]) exitWith {};
-
-        // Free cells of an open kit's window: sort the kit.
-        if ((_grid getOrDefault ["kit", ""]) isNotEqualTo "") exitWith {
-            [_grid] call _fnc_addSort;
-        };
-
+        if ((_grid getOrDefault ["kit", ""]) isNotEqualTo "") exitWith {};
         if (isNull _container) exitWith {};
 
-        [_grid] call _fnc_addSort;
         [_grid] call _fnc_addSelectAll;
 
         [_container] call _fnc_addArsenal;
+
+        // A crate or a vehicle: its grid in the wizard. Not the soldier's own containers, which are items there, and
+        // not the ground.
+        if (isNull (([_container] call EFUNC(storage,getOwner)) select 0) && {!([_container] call EFUNC(storage,isGroundHolder))}) then {
+            _settingsClass = typeOf _container;
+            _settingsName = [_container] call FUNC(containerName);
+            _settingsPage = "containers";
+        };
+    };
+};
+
+// The setup wizard, for whoever may open it: at the page of this class (einv_setup).
+if (
+    _settingsClass isNotEqualTo "" && {call FUNC(isInventoryMode)} && {!isNil QEFUNC(setup,openFromGame)}
+    && {call (missionNamespace getVariable [QEFUNC(setup,canOpen), {false}])}
+) then {
+    private _kind = ([_settingsClass] call EFUNC(items,getInfo)) getOrDefault ["kind", ""];
+    private _id = _settingsPage;
+
+    if (_id isEqualTo "") then {
+        _id = ["items", "containers"] select (_kind in ["uniform", "vest", "backpack", "crate", "vehicle", "kit"]);
+    };
+
+    private _step = (missionNamespace getVariable [QEGVAR(setup,steps), []]) findIf {(_x param [0, ""]) isEqualTo _id};
+
+    if (_settingsName isEqualTo "") then {
+        _settingsName = [_settingsClass] call _fnc_name;
+    };
+
+    if (_step >= 0) then {
+        _choices pushBack [
+            format [LLSTRING(Menu_Settings), _settingsName], [_step, _settingsClass], {_this call EFUNC(setup,openFromGame)},
+            createHashMapFromArray [["separator", _choices isNotEqualTo []]]
+        ];
     };
 };
 

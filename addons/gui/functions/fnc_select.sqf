@@ -35,7 +35,7 @@ private _fnc_ref = {
     params ["_grid", "_tile"];
 
     if (
-        count _tile == 0 || {_tile getOrDefault ["hidden", false]} || {_tile getOrDefault ["pending", false]}
+        count _tile == 0 || {_tile getOrDefault ["hidden", false]} || {_tile getOrDefault ["pending", false]} || {_tile getOrDefault ["offPage", false]}
         || {_grid getOrDefault ["virtual", true]} || {_grid getOrDefault ["overflow", false]}
         || {(_grid getOrDefault ["window", ""]) isNotEqualTo ""} || {(_grid getOrDefault ["side", ""]) isEqualTo ""}
     ) exitWith {[]};
@@ -56,6 +56,9 @@ private _ref = [_grid, _tile] call _fnc_ref;
 if (_ref isEqualTo [] || {(_ref select 0) isEqualType objNull && {isNull (_ref select 0)}}) exitWith {GVAR(selection) isNotEqualTo []};
 
 private _side = _grid get "side";
+
+// Set when the selection stays what it was, so that its frames are not made again for nothing.
+private _unchanged = false;
 
 switch (_mode) do {
     case "toggle": {
@@ -111,6 +114,9 @@ switch (_mode) do {
         };
     };
     default {
+        // The tile alone is selected already - lifting a tile that was clicked before: its frames stand.
+        _unchanged = GVAR(selection) isEqualTo [_ref] && {GVAR(selectionAnchor) isEqualTo _ref} && {GVAR(selectionSide) isEqualTo _side};
+
         GVAR(selection) = [_ref];
         GVAR(selectionAnchor) = _ref;
     };
@@ -122,6 +128,8 @@ if (GVAR(selection) isEqualTo []) then {
     GVAR(selectionAnchor) = [];
 };
 
-[] call FUNC(drawSelection);
+if (!_unchanged) then {
+    [] call FUNC(drawSelection);
+};
 
 GVAR(selection) isNotEqualTo []

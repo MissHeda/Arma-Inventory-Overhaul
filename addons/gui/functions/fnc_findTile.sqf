@@ -14,7 +14,7 @@
  * 6: Kit whose grid it lies in - with a container of objNull - "" for a container <STRING> (default: "")
  *
  * Return Value:
- * [grid, tile], [] when it is not on the window <ARRAY>
+ * [grid, tile], [] when it is not on the window - a tile on a page that is not turned to is not <ARRAY>
  *
  * Example:
  * (einv_gui_searchQueue select 0) call einv_gui_fnc_findTile;
@@ -39,6 +39,7 @@ private _result = [];
             && {(_x getOrDefault ["row", -1]) == _row}
             && {(_x getOrDefault ["col", -1]) == _col}
             && {(_x getOrDefault ["block", 0]) == _block}
+            && {!(_x getOrDefault ["offPage", false])}
         };
 
         if (_index >= 0) then {

@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * [[["Too heavy for Backpack", "loss"]]] call einv_gui_fnc_dragHint;
+ * [[["+2.4 kg: you will be Overloaded", "loss"]]] call einv_gui_fnc_dragHint;
  *
  * Public: No
  */
@@ -57,4 +57,5 @@ private _texts = [];
     ]);
 } forEach _parts;
 
-_hint ctrlSetStructuredText (composeText _texts setAttributes ["align", "center"]);
+_hint ctrlSetStructuredText (composeText _texts setAttributes ["align", "left", "size", str (_hint getVariable [QGVAR(textScale), 1])]);
+[_hint] call FUNC(fitHint);

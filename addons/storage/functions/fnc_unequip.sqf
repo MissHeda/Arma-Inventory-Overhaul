@@ -8,7 +8,7 @@
  * the unit sits in. Should it not fit after all, it settles like anything else that found no place. The
  * window no longer calls this.
  *
- * Room by the load (fnc_hasRoom) and, with einv_storage_gridOnly on and no cell given, a free spot
+ * A backpack into a backpack (fnc_backpackIntoBackpack) and, with no cell given, a free spot
  * (fnc_hasSpace) are asked here first; the machine that runs it asks again and decides.
  *
  * Arguments:
@@ -21,7 +21,7 @@
  *
  * Return Value:
  * "" when it was taken off and put there here and then, "Requested" when it went to the server and is
- * done shortly, else why not ("TooHeavy", "NoBackpack", "NoRoom", "IntoItself", "NoGround", "Gone", "OutOfReach",
+ * done shortly, else why not ("NoBackpack", "NoRoom", "IntoItself", "NoGround", "Gone", "OutOfReach",
  * "Moved", "NotReady", "Bounced" - it went somewhere else -, "Failed") <STRING>
  *
  * Example:
@@ -54,18 +54,11 @@ if (_ground && {isNull _vehicle} && {([_unit] call FUNC(groundPos)) isEqualTo []
 // A uniform, vest or backpack never goes into itself, or into anything lying in it.
 if (_container && {!isNull _inside} && {[_to, _inside] call FUNC(liesIn)}) exitWith {"IntoItself"};
 
-// Room by weight (a backpack into a backpack is "NoBackpack").
-private _room = createHashMapFromArray [["fits", true], ["reason", ""]];
+// A backpack never goes into a backpack.
+if (_container && {[_to, _entry] call FUNC(backpackIntoBackpack)}) exitWith {"NoBackpack"};
 
-if (_container) then {
-    _room = [_to, _entry] call FUNC(roomByWeight);
-};
-
-if !(_room get "fits") exitWith {
-    ["TooHeavy", "NoBackpack"] select ((_room get "reason") isEqualTo "NoBackpack")
-};
-
-if (_container && {GVAR(gridOnly)} && {_cell isEqualTo []} && {!([_to, _entry] call FUNC(hasSpace))}) exitWith {"NoRoom"};
+// Nothing may land beside the grid: with no cell given it needs a free spot.
+if (_container && {_cell isEqualTo []} && {!([_to, _entry] call FUNC(hasSpace))}) exitWith {"NoRoom"};
 
 private _takeOff = ["takeOff", [_unit, _slotId]];
 private _ref = ["#ref", 0, 0, 0];

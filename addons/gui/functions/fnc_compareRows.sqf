@@ -10,8 +10,7 @@
  *                 the head for headgear, as ACE's damage counts it (einv_items_fnc_getProtection)
  *   Covers        vests and helmets - the zones that have armor; kept ones in the text colour, ones the item
  *                 gains in green, the worn item's lost ones appended with a minus in red
- *   Space         vests, uniforms and backpacks - cells
- *   Holds         the same - the maximum load; left out while only the room limits (einv_storage_gridOnly)
+ *   Space         vests, uniforms and backpacks - cells, the one thing that limits what they take
  *   Weight        all four - the item alone; heavier is red
  *
  * More armor and room are better, more weight is worse: a difference reads green when it helps, red when it
@@ -97,14 +96,14 @@ private _fnc_zoneName = {
     }
 };
 
-// Cells of a set of compartments, [[cols, rows], ...].
+// Cells of a set of compartments, [[cols, rows, holes], ...] - a shaped one's holes are no room.
 private _fnc_cells = {
     params ["_blocks"];
 
     private _sum = 0;
 
     {
-        _sum = _sum + (_x select 0) * (_x select 1);
+        _sum = _sum + (_x select 0) * (_x select 1) - count (_x param [2, []]);
     } forEach _blocks;
 
     _sum
@@ -180,7 +179,7 @@ if (_kind in ["vest", "uniform", "headgear"]) then {
     };
 };
 
-// ----- Room: cells, and what it holds -----
+// ----- Room: cells -----
 if (_kind isNotEqualTo "headgear") then {
     private _cells = [[_class, _kind, _info getOrDefault ["maxLoad", 0], _info getOrDefault ["grid", []]] call EFUNC(storage,blocksFor)] call _fnc_cells;
     private _wornCells = if (isNull _container) then {0} else {[[_container] call EFUNC(storage,getBlocks)] call _fnc_cells};
@@ -190,18 +189,6 @@ if (_kind isNotEqualTo "headgear") then {
     private _value = format [LLSTRING(Compare_Cells), _cells];
 
     _rows pushBack [LLSTRING(Compare_Space), _value, _diffText, _diffKey, false, _value];
-
-    // With only the room limiting, a container's load limits nothing.
-    if (!EGVAR(storage,gridOnly)) then {
-        private _load = _info getOrDefault ["maxLoad", 0];
-        private _wornLoad = if (isNull _container) then {0} else {([_container] call EFUNC(storage,getMaxLoad)) max 0};
-
-        ([_load * MASS_TO_KG, _wornLoad * MASS_TO_KG, true, 1] call _fnc_diff) params ["_loadDiff", "_loadKey"];
-
-        private _loadValue = [_load] call _fnc_kg;
-
-        _rows pushBack [LLSTRING(Compare_Holds), _loadValue, _loadDiff, _loadKey, false, _loadValue];
-    };
 };
 
 // ----- Weight: the item alone -----

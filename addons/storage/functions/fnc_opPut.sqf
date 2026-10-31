@@ -2,29 +2,41 @@
 /*
  * Author: Miss Heda
  * Op "put": a payload into a holder - one an earlier op produced (a ref, filled in by the driver) or one
- * the transaction carries. A null holder or an empty ground pile: "Bounced" with all of it. Room and a
- * spot - the cell when free, else the first fit ("elsewhere") - else "Bounced"; forced (settlement into
- * the requester's vehicle) room is not asked and an overflow row is fine. What did not arrive
+ * the transaction carries. A null holder or an empty ground pile: "Bounced" with all of it. A spot -
+ * the cell when free, else the first fit ("elsewhere") - else "Bounced", and a backpack into a backpack
+ * is "NoBackpack"; forced (settlement into the requester's vehicle) neither is asked and an overflow row
+ * is fine. What did not arrive
  * (fnc_addPayload) is "Bounced" with the rest; the record at the spot, the nested places and tag
  * restored (fnc_addPayload). The execution's view of the holder follows (fnc_findEntry).
  *
- * The room is the payload's own mass (fnc_roomByWeight) - what lies in a uniform, vest or backpack it carries
- * is not weighed here: its object is gone. "move" weighs the tile itself before it calls this.
+ * Stacks. Of a class that stacks (items, grenades and the like), a payload either joins the tiles of its
+ * key that have room - in their order, a tile filled before the next one is looked at - and what is left
+ * opens new tiles (a full stack each, then the remainder), or, with "separate", is a tile of its own at the
+ * cell asked for (cut into full tiles when it is more than a stack): it joins nothing. With "merge into"
+ * the tile at that cell, when it is of the payload's key and has room, is filled first, then as without. Quick
+ * move, Sort, the plan and settlement never ask for either and so keep filling partial stacks.
+ * Only the tiles that open need a free spot; a payload that fits into the room of the tiles it joins needs
+ * none. The counts live in the places' records (fnc_setCount, fnc_setPlace), changed here in step with the
+ * cargo, so the stack that was chosen gains the items.
  *
- * Extra: [landed cell [col, row, block, w, h] - [] in an overflow row -, elsewhere]; when it bounced a
- * third element says why: "Gone" (nothing to put it into), "TooHeavy", "NoBackpack" (a backpack into a
- * backpack), "NoRoom", "Failed" (the engine took none of it).
+ * Extra: [landed cell [col, row, block, w, h, rot] - [] in an overflow row; for a payload that only joined
+ * a tile, that tile's [col, row, block] -, elsewhere]; when it bounced a third element says why: "Gone"
+ * (nothing to put it into), "NoBackpack" (a backpack into a backpack), "NoRoom", "Failed" (the engine
+ * took none of it).
  *
- * Checking only (args 4): nothing changes; the status is "" or that reason, the extra [spot, elsewhere].
+ * Checking only (args 4): nothing changes; the status is "" or that reason, the extra [spot, elsewhere,
+ * merged] - spot the first new tile's, [] when none opens; merged: the whole payload joins tiles that
+ * are there.
  *
  * Arguments:
  * 0: Args, [to, payload or ref, cell (default: []), forced (default: false), checking only (default:
- *    false)] <ARRAY>
+ *    false), separate (default: false), merge into (default: [])] <ARRAY>
+ *    merge into is the [col, row, compartment] of the tile to fill first
  * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
- *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "TooHeavy", "NoBackpack", "NotLocal",
+ *   status - "" done, else why not ("Gone", "Taken", "NoRoom", "NoBackpack", "NotLocal",
  *     "Moved", "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason
  *     already in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
@@ -44,7 +56,9 @@ _args params [
     ["_payload", [], [[]]],
     ["_cell", [], [[]]],
     ["_force", false, [false]],
-    ["_check", false, [false]]
+    ["_check", false, [false]],
+    ["_separate", false, [false]],
+    ["_mergeInto", [], [[]]]
 ];
 
 if (_payload isEqualTo []) exitWith {["Skipped", [], []]};
@@ -96,132 +110,109 @@ private _probe = createHashMapFromArray [
     ["container", objNull]
 ];
 
-// Room for it: a backpack into a backpack bounces as "NoBackpack", anything else as "TooHeavy".
-private _room = createHashMapFromArray [["fits", true], ["reason", ""]];
-
-if (!_force) then {
-    _room = [_to, _probe] call FUNC(roomByWeight);
+// A backpack into a backpack bounces; the cells decide everything else, below.
+if (!_force && {[_to, _probe] call FUNC(backpackIntoBackpack)}) exitWith {
+    ["NoBackpack"] call _fnc_bounce
 };
 
-if !(_room get "fits") exitWith {
-    [["TooHeavy", "NoBackpack"] select ((_room get "reason") isEqualTo "NoBackpack")] call _fnc_bounce
-};
+// ---------------------------------------------------------------------------
+// Does it stack? Items and magazines of a class that stacks, all with the same rounds, and not into the
+// hidden holder of Strict mode: those lie in tiles of a count, which the places' records keep. Anything
+// else is one tile. A grenade - one round and light, a small charge too - has no capacity: its rounds tell
+// nothing apart, it lies as an item does (fnc_getContents, fnc_payloadKey).
+// ---------------------------------------------------------------------------
+private _info = [_class] call EFUNC(items,getInfo);
+private _stack = [_to, _class, (_info getOrDefault ["stack", 1]) max 1] call FUNC(stackFor);
 
-// The view's cells, per compartment rows of booleans, true where a tile lies.
-private _blocks = _view getOrDefault ["blocks", []];
-private _open = _view getOrDefault ["open", false];
-private _taken = _blocks apply {[]};
+private _stackable = _stack > 1
+    && {_count > 0}
+    && {!((_info getOrDefault ["kind", ""]) in ["uniform", "vest", "backpack"])}
+    && {
+        (_type isEqualTo "item" && {(_payload param [3, []]) isEqualTo []})
+        || {_type isEqualTo "magazine" && {(_info getOrDefault ["capacity", 0]) == 0 || {count (_rounds arrayIntersect _rounds) == 1}}}
+    }
+    && {!([_to, _class] call FUNC(hiddenRoute))};
 
-private _fnc_mark = {
-    params ["_block", "_col", "_row", "_w", "_h"];
+private _key = [_payload] call FUNC(payloadKey);
 
-    if (_block < 0 || {_block >= count _blocks}) exitWith {};
+// The tiles of its key that can be joined: placed ones, in the order of their records.
+private _same = [];
 
-    private _cols = (_blocks select _block) select 0;
-    private _grid = _taken select _block;
-
-    while {count _grid < _row + _h} do {
-        private _line = [];
-
-        for "_i" from 1 to _cols do {
-            _line pushBack false;
-        };
-
-        _grid pushBack _line;
-    };
-
-    for "_r" from (_row max 0) to (_row + _h - 1) do {
-        private _line = _grid select _r;
-
-        for "_c" from (_col max 0) to ((_col + _w - 1) min (_cols - 1)) do {
-            _line set [_c, true];
-        };
+if (_stackable) then {
+    _same = _tiles select {
+        (_x getOrDefault ["count", 1]) > 0 && {!(_x getOrDefault ["overflow", false])} && {!(_x getOrDefault ["strict", false])}
+        && {(_x getOrDefault ["key", ""]) isEqualTo _key}
     };
 };
 
-private _fnc_free = {
-    params ["_block", "_col", "_row", "_w", "_h"];
+// What goes into which tile, for that many: [[index in _same, how many], ...] and the counts of the new
+// tiles. Joined: the tile asked for first, then the others with room in their order - unless it is to
+// stand apart.
+private _fnc_distribute = {
+    params ["_n"];
 
-    if (_block < 0 || {_block >= count _blocks}) exitWith {false};
+    private _joins = [];
+    private _left = _n;
 
-    (_blocks select _block) params ["_cols", "_rows"];
-
-    if (_col < 0 || {_row < 0} || {_col + _w > _cols} || {!_open && {_row + _h > _rows}}) exitWith {false};
-
-    private _grid = _taken select _block;
-    private _free = true;
-
-    for "_r" from _row to ((_row + _h - 1) min (count _grid - 1)) do {
-        if (((_grid select _r) select [_col, _w]) findIf {_x} >= 0) exitWith {
-            _free = false;
-        };
-    };
-
-    _free
-};
-
-// Compartment after compartment, row by row - past the last row of an open grid everything is free.
-private _fnc_firstFit = {
-    params ["_w", "_h"];
-
-    private _found = [];
-
-    {
-        _x params ["_cols", "_rows"];
-
-        private _block = _forEachIndex;
-        private _last = if (_open) then {count (_taken select _block)} else {_rows - _h};
-
-        for "_row" from 0 to _last do {
-            for "_col" from 0 to (_cols - _w) do {
-                if ([_block, _col, _row, _w, _h] call _fnc_free) exitWith {
-                    _found = [_col, _row, _block, _w, _h];
-                };
+    if (!_separate) then {
+        if (_mergeInto isNotEqualTo []) then {
+            private _at = _same findIf {
+                (_x getOrDefault ["col", -1]) == (_mergeInto param [0, -2])
+                && {(_x getOrDefault ["row", -1]) == (_mergeInto param [1, -2])}
+                && {(_x getOrDefault ["block", 0]) == (_mergeInto param [2, 0])}
             };
 
-            if (_found isNotEqualTo []) exitWith {};
+            if (_at >= 0) then {
+                private _add = _left min (_stack - ((_same select _at) get "count"));
+
+                if (_add > 0) then {
+                    _joins pushBack [_at, _add];
+                    _left = _left - _add;
+                };
+            };
         };
 
-        if (_found isNotEqualTo []) exitWith {};
-    } forEach _blocks;
+        {
+            if (_left > 0 && {(_joins findIf {(_x select 0) == _forEachIndex}) < 0}) then {
+                private _add = _left min (_stack - (_x get "count"));
 
-    _found
-};
-
-{
-    if ((_x getOrDefault ["count", 1]) > 0 && {!(_x getOrDefault ["overflow", false])}) then {
-        [_x getOrDefault ["block", -1], _x getOrDefault ["col", 0], _x getOrDefault ["row", 0], _x getOrDefault ["w", 1], _x getOrDefault ["h", 1]] call _fnc_mark;
+                if (_add > 0) then {
+                    _joins pushBack [_forEachIndex, _add];
+                    _left = _left - _add;
+                };
+            };
+        } forEach _same;
     };
-} forEach _tiles;
 
-// The requested cell when it is free - in the item's size, either way round -, else the first fit,
-// upright, then turned.
-(([_class] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]]) params [["_w", 1, [0]], ["_h", 1, [0]]];
-_cell params [["_col", -1, [0]], ["_row", -1, [0]], ["_block", 0, [0]], ["_cellW", _w, [0]], ["_cellH", _h, [0]]];
+    private _new = [];
 
-if !([_cellW, _cellH] isEqualTo [_w, _h] || {[_cellW, _cellH] isEqualTo [_h, _w]}) then {
-    _cellW = _w;
-    _cellH = _h;
+    while {_left > 0} do {
+        _new pushBack (_left min _stack);
+        _left = _left - _stack;
+    };
+
+    [_joins, _new]
 };
 
-private _spot = [];
+private _plan = if (_stackable) then {[_count] call _fnc_distribute} else {[[], [1]]};
+
+_plan params ["_joins", "_newCounts"];
+
+// A spot for every tile that opens: the cell asked for, else the first fit, upright, then turned. A payload
+// that fits into the room of the tiles it joins needs none.
+private _spots = [];
 private _elsewhere = false;
 
-if (_cell isNotEqualTo [] && {[_block, _col, _row, _cellW, _cellH] call _fnc_free}) then {
-    _spot = [_col, _row, _block, _cellW, _cellH];
-} else {
-    _spot = [_w, _h] call _fnc_firstFit;
+if (_newCounts isNotEqualTo []) then {
+    ([_view, _class, _cell, count _newCounts] call FUNC(findSpots)) params ["_found", "_else"];
 
-    if (_spot isEqualTo [] && {_w != _h}) then {
-        _spot = [_h, _w] call _fnc_firstFit;
-    };
-
-    _elsewhere = _cell isNotEqualTo [] && {_spot isNotEqualTo []};
+    _spots = _found;
+    _elsewhere = _else;
 };
 
 // Forced, an overflow row is fine: shown apart, never lost.
-if (_spot isEqualTo [] && {!_force}) exitWith {["NoRoom"] call _fnc_bounce};
-if (_check) exitWith {["", [], [_spot, _elsewhere]]};
+if (!_force && {(_spots findIf {_x isEqualTo []}) >= 0}) exitWith {["NoRoom"] call _fnc_bounce};
+if (_check) exitWith {["", [], [_spots param [0, []], _elsewhere, _newCounts isEqualTo []]]};
 
 private _rest = [_to, _payload] call FUNC(addPayload);
 
@@ -231,18 +222,52 @@ if (isNil "_rest" || {!(_rest isEqualType [])}) then {
 
 if (_rest isEqualTo _payload) exitWith {["Failed"] call _fnc_bounce};
 
-private _key = [_payload] call FUNC(payloadKey);
+// How much of it came in: a part that did not goes on as the rest.
+if (_stackable && {_rest isNotEqualTo []}) then {
+    private _arrived = _count - (switch (_type) do {
+        case "magazine": {count (_rest param [2, []])};
+        default {_rest param [2, 0]};
+    });
 
-if (_spot isNotEqualTo []) then {
-    private _landed = createHashMapFromArray [
-        ["class", _class],
-        ["key", _key],
-        ["w", _spot select 3],
-        ["h", _spot select 4]
-    ];
-
-    [_to, _landed, _spot, true] call FUNC(setPlace);
+    _plan = [_arrived max 0] call _fnc_distribute;
+    _joins = _plan select 0;
+    _newCounts = _plan select 1;
 };
+
+(_info getOrDefault ["footprint", [1, 1, []]]) params [["_w", 1, [0]], ["_h", 1, [0]], ["_holes", [], [[]]]];
+
+private _turnedHoles = (_info getOrDefault ["footprintTurned", [_h, _w, []]]) param [2, []];
+
+// The records, in step with the cargo: a tile joined gains its items, a tile that opens gets a record of
+// its own at its spot (the n-th record of a key is the n-th tile of the key, so it goes last).
+{
+    _x params ["_index", "_add"];
+
+    private _tile = _same select _index;
+    private _now = (_tile get "count") + _add;
+
+    [_to, _tile, _now] call FUNC(setCount);
+    _tile set ["count", _now];
+} forEach _joins;
+
+{
+    private _spot = _spots param [_forEachIndex, []];
+
+    if (_spot isNotEqualTo []) then {
+        private _landed = createHashMapFromArray [
+            ["class", _class],
+            ["key", _key],
+            ["w", _spot select 3],
+            ["h", _spot select 4]
+        ];
+
+        if (_stackable) then {
+            _landed set ["count", _x];
+        };
+
+        [_to, _landed, _spot, true] call FUNC(setPlace);
+    };
+} forEach _newCounts;
 
 // Landed: noted, should it have left a container in this very op (op "move"). A rest that did not is
 // out again until it lands somewhere.
@@ -253,29 +278,48 @@ if (_rest isNotEqualTo []) then {
 };
 
 // The view follows: a plain item, magazine or weapon that all landed lies where it was put. Anything
-// else - a uniform, vest or backpack is a new object with a new key, a stack may have joined another -
-// is laid out anew when asked.
+// else - a uniform, vest or backpack is a new object with a new key - is laid out anew when asked.
 if (_rest isEqualTo [] && {_type in ["weapon", "magazine"] || {_type isEqualTo "item" && {(_payload param [3, []]) isEqualTo []}}}) then {
-    _tiles pushBack createHashMapFromArray [
-        ["class", _class],
-        ["key", _key],
-        ["count", _probe get "count"],
-        ["ammo", _probe get "ammo"],
-        ["capacity", ([_class] call EFUNC(items,getInfo)) getOrDefault ["capacity", 0]],
-        ["attachments", _probe get "attachments"],
-        ["container", objNull],
-        ["block", _spot param [2, -1]],
-        ["col", _spot param [0, 0]],
-        ["row", _spot param [1, 0]],
-        ["w", _spot param [3, _w]],
-        ["h", _spot param [4, _h]],
-        ["rotated", (_spot param [3, _w]) != _w],
-        ["overflow", _spot isEqualTo []]
-    ];
+    {
+        private _spot = _spots param [_forEachIndex, []];
+        private _spotBlock = _spot param [2, -1];
+
+        // In a single slot it takes the compartment whole (fnc_slotOf); the window draws it scaled into the slot.
+        private _spotSingle = _spotBlock >= 0 && {(((_view getOrDefault ["blocks", []]) param [_spotBlock, []]) param [5, false])};
+
+        _tiles pushBack createHashMapFromArray [
+            ["class", _class],
+            ["key", _key],
+            ["count", [_probe get "count", _x] select _stackable],
+            ["ammo", _probe get "ammo"],
+            ["capacity", _info getOrDefault ["capacity", 0]],
+            ["attachments", _probe get "attachments"],
+            ["container", objNull],
+            ["strict", [_to, _class] call FUNC(hiddenRoute)],
+            ["block", _spot param [2, -1]],
+            ["col", _spot param [0, 0]],
+            ["row", _spot param [1, 0]],
+            ["w", _spot param [3, _w]],
+            ["h", _spot param [4, _h]],
+            ["rotated", (_spot param [5, 0]) == 1],
+            ["holes", _spot param [6, [_holes, _turnedHoles] select ((_spot param [5, 0]) == 1)]],
+            ["single", _spotSingle],
+            ["overflow", _spot isEqualTo []]
+        ];
+    } forEach _newCounts;
 } else {
     GVAR(cache) deleteAt (netId _to);
 };
 
-if (_rest isNotEqualTo []) exitWith {["Bounced", [+_rest], [_spot, _elsewhere, "NoRoom"]]};
+// Where it landed: the first tile that opened, else the tile it joined.
+private _landedCell = _spots param [0, []];
 
-["", [], [_spot, _elsewhere]]
+if (_landedCell isEqualTo [] && {_joins isNotEqualTo []}) then {
+    private _joined = _same select ((_joins select 0) select 0);
+
+    _landedCell = [_joined getOrDefault ["col", 0], _joined getOrDefault ["row", 0], _joined getOrDefault ["block", 0]];
+};
+
+if (_rest isNotEqualTo []) exitWith {["Bounced", [+_rest], [_landedCell, _elsewhere, "NoRoom"]]};
+
+["", [], [_landedCell, _elsewhere]]

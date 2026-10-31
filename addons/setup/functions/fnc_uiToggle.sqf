@@ -38,12 +38,21 @@ private _switchH = _height * 0.62;
 private _switchW = SQUARE(_switchH * 2);
 private _controls = [];
 
-// The textures bring their own colours: accent when on, a grey track when off.
-private _switch = [
-    _display, _parent, [_left, _top + (_height - _switchH) / 2, _switchW, _switchH],
-    [UI_TEX(toggle_off_ca), UI_TEX(toggle_on_ca)] select _value, [[1, 1, 1, 0.35], [1, 1, 1, 1]] select _enabled
-] call EFUNC(gui,uiIcon);
+// Off is the grey track texture; on is a white track tinted with the player's accent and a white knob over it,
+// so the switch follows the Arma colour the player picked rather than a fixed orange.
+private _switchRect = [_left, _top + (_height - _switchH) / 2, _switchW, _switchH];
+private _alpha = [0.35, 1] select _enabled;
+private _accent = +(_theme getOrDefault ["accent", [1, 1, 1, 1]]);
+_accent set [3, _alpha];
 
+private _switch = [_display, _parent, _switchRect, UI_TEX(toggle_off_ca), [1, 1, 1, _alpha]] call EFUNC(gui,uiIcon);
+private _track = [_display, _parent, _switchRect, UI_TEX(toggle_track_ca), _accent] call EFUNC(gui,uiIcon);
+private _knob = [_display, _parent, _switchRect, UI_TEX(toggle_knob_ca), [1, 1, 1, _alpha]] call EFUNC(gui,uiIcon);
+
+_switch ctrlShow !_value;
+_track ctrlShow _value;
+_knob ctrlShow _value;
+_controls append [_track, _knob];
 _controls pushBack _switch;
 
 if (_label isNotEqualTo "") then {
@@ -53,22 +62,24 @@ if (_label isNotEqualTo "") then {
 
     _controls pushBack ([
         _display, _parent, [_labelX, _top, _labelW, _height], [_label, _labelW, _font, TEXT_BODY] call EFUNC(gui,fitText), TEXT_BODY,
-        [DISABLED_INK, _theme getOrDefault ["text2", [0.698, 0.734, 0.784, 1]]] select _enabled, _font, 0
+        [DISABLED_INK, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] select _enabled, _font, 0
     ] call EFUNC(gui,uiLabel));
 };
 
 private _hit = [_display, _parent, _rect, [], [], [], {}, [], _enabled, _label] call FUNC(uiHit);
-_hit setVariable [QGVAR(toggle), [_switch, _value, _code, _arguments]];
+_hit setVariable [QGVAR(toggle), [_switch, _value, _code, _arguments, _track, _knob]];
 
 if (_enabled) then {
     _hit ctrlAddEventHandler ["ButtonClick", {
         params ["_hit"];
 
-        (_hit getVariable [QGVAR(toggle), [controlNull, false, {}, []]]) params ["_switch", "_value", "_code", "_arguments"];
+        (_hit getVariable [QGVAR(toggle), [controlNull, false, {}, [], controlNull, controlNull]]) params ["_switch", "_value", "_code", "_arguments", "_track", "_knob"];
 
         _value = !_value;
-        _hit setVariable [QGVAR(toggle), [_switch, _value, _code, _arguments]];
-        _switch ctrlSetText ([UI_TEX(toggle_off_ca), UI_TEX(toggle_on_ca)] select _value);
+        _hit setVariable [QGVAR(toggle), [_switch, _value, _code, _arguments, _track, _knob]];
+        _switch ctrlShow !_value;
+        _track ctrlShow _value;
+        _knob ctrlShow _value;
 
         [_code, [_value, _arguments]] call FUNC(defer);
     }];

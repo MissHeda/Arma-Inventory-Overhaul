@@ -3,9 +3,11 @@
 /*
  * Author: Miss Heda
  * Builds everything on the window in the chosen look: clears what was there, reads what the unit wears
- * and carries and what it loots, draws the header, the look's layout and the footer, and turns the
- * camera on where the layout left room for the soldier. Runs again whenever the look, the camera
- * switch or the contents change.
+ * and carries and what it loots, and draws the header, the look's layout and the footer. Runs again
+ * whenever the look, a section's fold or the sections shown change; a change of what some sections hold
+ * only draws those again (fnc_refresh).
+ *
+ * With einv_gui_debugTiming on, the RPT gets how long the build took.
  *
  * Last come what floats over the columns - the open kits' windows where they were, then the name at the
  * mouse and the inspect card (fnc_drawWindows, fnc_drawTopLayer): controls made later draw over earlier
@@ -18,18 +20,18 @@
  * (GVAR(nearby), fnc_readNearby) - all ordered by einv_storage_fnc_orderSections. Last of all the moves
  * under way are shown (fnc_drawPending) and the tiles selected (fnc_drawSelection), which survive every
  * build by what they stand for.
- * A repack of magazines in progress is drawn on the tiles last (einv_magazines_fnc_drawJob). A hint a quick move
- * left for its answer (GVAR(pendingHint)) is written over the hover's, once, right before that.
+ * A repack of magazines in progress is drawn on the tiles last (einv_magazines_fnc_drawJob).
+ * The palette popover (fnc_openPaletteMenu), if it was open, is made again after everything else.
  *
  * The layout is looked up by name, so a look that is missing or broken leaves a window with only its
- * header and footer - still one that can be closed or swapped for the vanilla inventory - rather than
- * no window at all.
+ * header and footer - still one that can be closed - rather than no window at all.
  *
  * A window that attached with hooks (fnc_attach) is asked at five places: the theme and the context may
- * be changed ("theme", "context"), the header and the layout can be its own ("header", "layout" - the
- * layout answers where the soldier stands), its camera is told that rect ("camera", and then this addon's
- * own camera stays off), and "afterBuild" comes last of all. A top-level control with the id IDC_KEEP
- * survives the sweep, with everything in it. Without hooks the build is exactly the inventory's.
+ * be changed ("theme", "context"), the header, the layout and the footer can be its own ("header",
+ * "layout" - the layout answers where its free middle is -, "footer"), and "afterBuild" comes last of all. A top-level
+ * control with the id IDC_KEEP survives the sweep, with everything in it; on a display of another mod
+ * (the "guest" flag) only what this addon registered is swept. Without hooks the build is exactly the
+ * inventory's.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -49,30 +51,44 @@ params ["_display"];
 
 if (isNull _display) exitWith {};
 
-// The soldier's live camera is this addon's own, unless the window brings one (the "camera" hook).
-private _ownCamera = !("camera" in GVAR(hooks));
+// A build a click asked for (fnc_buildSoon) and not yet done is this one: it draws what the state is now.
+["build"] call FUNC(coalesceDrop);
 
-if (_ownCamera) then {
-    call FUNC(cameraStop);
-};
+private _start = diag_tickTime;
 
-// A rebuild ends any drag, and the frame being dragged out: the tiles they pointed at are about to go.
+// For the tester's numbers (einv_gui_debugTiming): when each part of the build ended.
+private _timed = missionNamespace getVariable [QGVAR(debugTiming), false];
+private _marks = [];
+
+// A rebuild ends any drag: the tiles it pointed at are about to go. The drag's
+// timing line (einv_gui_debugTiming) is written first (fnc_logDrag).
+call FUNC(logDrag);
+
 GVAR(press) = [];
 GVAR(dragging) = false;
+GVAR(stripDrag) = [];
 ctrlDelete (uiNamespace getVariable [QGVAR(dragCounter), controlNull]);
 GVAR(dragTarget) = [];
 GVAR(dragGroup) = [];
-GVAR(bandPress) = [];
-GVAR(band) = false;
-GVAR(bandTiles) = [];
+GVAR(emptyPress) = [];
 uiNamespace setVariable [QGVAR(dragFootprints), []];
+uiNamespace setVariable [QGVAR(dragShapes), []];
+uiNamespace setVariable [QGVAR(dragCorners), []];
 uiNamespace setVariable [QGVAR(dragGhosts), []];
-uiNamespace setVariable [QGVAR(bandFrame), []];
 uiNamespace setVariable [QGVAR(selectionFrames), []];
 GVAR(searchQueue) = [];
 GVAR(panels) = [];
 GVAR(equipmentRect) = [];
-call FUNC(closeMenu);
+GVAR(storageRect) = [];
+GVAR(lootRect) = [];
+
+// The palette popover stays open across a build - what it sets is this build's colours - and is made again at its end. It is
+// closed here without being written to the profile (einv_gui_menuRemake, fnc_closeMenu).
+private _paletteOpen = !isNull ((uiNamespace getVariable [QGVAR(menu), []]) param [0, controlNull]) && {(GVAR(menuFor) param [0, ""]) isEqualTo "palette"};
+
+GVAR(menuRemake) = _paletteOpen;
+[] call FUNC(closeMenu);
+GVAR(menuRemake) = false;
 
 // The style, by its id - an unknown one falls back to the first.
 private _index = (GVAR(styles) findIf {(_x select 0) isEqualTo GVAR(style)}) max 0;
@@ -88,6 +104,12 @@ call FUNC(clearWindows);
 // the inspect card - are no columns.
 private _scroll = createHashMap;
 
+// A column that was scrolled keeps its panel, its title and its scroll group when it is drawn again in the same place with the
+// same words (fnc_drawColumn): a group made anew shows its top until a frame later. Not on another mod's display, where only
+// the window's own controls are ours to keep (the "guest" flag, ACE Arsenal's).
+private _guest = ["guest", [], false] call FUNC(hook);
+private _keep = createHashMap;
+
 if ((GVAR(theme) getOrDefault ["id", ""]) isEqualTo _id) then {
     {
         if (isNull _x || {ctrlType _x != 15}) then {continue};
@@ -95,10 +117,28 @@ if ((GVAR(theme) getOrDefault ["id", ""]) isEqualTo _id) then {
         private _column = _x getVariable [QGVAR(column), ""];
 
         if (_column isNotEqualTo "") then {
-            _scroll set [_column, [_x] call FUNC(scrollPixels)];
+            private _pixels = [_x] call FUNC(scrollPixels);
+
+            _scroll set [_column, _pixels];
+
+            if (_pixels > 0 && {_guest isNotEqualTo true} && {(_x getVariable [QGVAR(columnKey), []]) isNotEqualTo []}) then {
+                _keep set [_column, [_x, _x getVariable [QGVAR(columnParts), []], _x getVariable [QGVAR(columnKey), []]]];
+            };
         };
     } forEach (uiNamespace getVariable [QGVAR(created), []]);
 };
+
+// What a column left from the last drawing and what it was scrolled to, for fnc_drawColumn - the controls it keeps are not swept
+// below.
+uiNamespace setVariable [QGVAR(keepColumns), _keep];
+uiNamespace setVariable [QGVAR(keepPixels), _scroll];
+
+private _keptControls = [];
+
+{
+    _keptControls pushBack (_y select 0);
+    _keptControls append (_y select 1);
+} forEach _keep;
 
 // Whatever was still to be scrolled belonged to the groups that go now.
 uiNamespace setVariable [QGVAR(scrollRestore), []];
@@ -107,27 +147,51 @@ uiNamespace setVariable [QGVAR(scrollRestore), []];
 private _filterEdit = uiNamespace getVariable [QGVAR(filterEdit), controlNull];
 GVAR(filterFocus) = !isNull _filterEdit && {focusedCtrl _display isEqualTo _filterEdit};
 
-{ctrlDelete _x} forEach (uiNamespace getVariable [QGVAR(created), []]);
+{
+    if !(_x in _keptControls) then {
+        ctrlDelete _x;
+    };
+} forEach (uiNamespace getVariable [QGVAR(created), []]);
 uiNamespace setVariable [QGVAR(created), []];
 
 // Anything made on the display without being registered goes as well - left behind, it would pile up
 // with every rebuild. A group takes its own controls with it. What is kept: the dim layer, the first
-// control, and a control a window that attached keeps across builds (IDC_KEEP).
-{
-    if (isNull ctrlParentControlsGroup _x && {!(ctrlIDC _x in [IDC_DIM, IDC_FIRST, IDC_KEEP])}) then {
-        ctrlDelete _x;
-    };
-} forEach (allControls _display);
+// control, and a control a window that attached keeps across builds (IDC_KEEP), and the controls of a
+// column kept above. Not on another mod's display this addon is only a guest on (the "guest" flag, ACE
+// Arsenal's): every control there but the registered ones above is that mod's own.
+if (_guest isNotEqualTo true) then {
+    {
+        if (isNull ctrlParentControlsGroup _x && {!(ctrlIDC _x in [IDC_DIM, IDC_FIRST, IDC_KEEP])} && {!(_x in _keptControls)}) then {
+            ctrlDelete _x;
+        };
+    } forEach (allControls _display);
+};
+
+if (_timed) then {_marks pushBack ["sweep", diag_tickTime]};
 
 uiNamespace setVariable [QGVAR(grids), []];
+uiNamespace setVariable [QGVAR(foldAreas), []];
+uiNamespace setVariable [QGVAR(pageAreas), []];
 uiNamespace setVariable [QGVAR(zones), []];
 uiNamespace setVariable [QGVAR(slots), []];
+
+// The slots' drag highlights (fnc_glowSlot) went with the sweep above - but for a control a window that
+// attached keeps its group across builds: those are deleted here. They are made again, ahead of time, by
+// fnc_warmTargets.
+{
+    {ctrlDelete _x} forEach (_y select 1);
+} forEach (uiNamespace getVariable [QGVAR(glowCache), createHashMap]);
+
+uiNamespace setVariable [QGVAR(glowCache), createHashMap];
+uiNamespace setVariable [QGVAR(glowNext), 0];
+uiNamespace setVariable [QGVAR(dragGlow), []];
 uiNamespace setVariable [QGVAR(sectionInfo), []];
+uiNamespace setVariable [QGVAR(sortButtons), []];
+uiNamespace setVariable [QGVAR(parts), createHashMap];
 
 // The weight registries, drawn into again by the sections and the weight card (fnc_drawSection,
-// fnc_drawEquipmentCards): what lifting something marks, what the hint explains, the comparison card and the
-// name at the mouse - their controls went with the sweep above.
-uiNamespace setVariable [QGVAR(loadBars), []];
+// fnc_drawEquipmentCards): what the hint explains, the comparison card and the name at the mouse - their
+// controls went with the sweep above.
 uiNamespace setVariable [QGVAR(infoAreas), []];
 uiNamespace setVariable [QGVAR(weightBar), createHashMap];
 uiNamespace setVariable [QGVAR(weightPreview), controlNull];
@@ -171,8 +235,11 @@ private _now = diag_tickTime;
 // others are put back (einv_storage_fnc_removeSameClass): it is found again by its key - its own id, the
 // same on every machine (einv_storage_fnc_entryKey) - in the container it lay in, or in the new object of
 // that one. Kept a moment while it is missing - its id may reach this machine after its cargo -, then it
-// drops out. A key is only kept while no sibling there shares it.
+// drops out. A key is only kept while no sibling there shares it. One that left the container it lay in -
+// put on, taken into a crate, dropped elsewhere - drops out at once, and so does whatever was opened from
+// inside it: its box closes, and one put on shows in the storage column as the worn one it is now.
 private _keptOpened = [];
+private _gone = [];
 
 // An entry's key where it lies - set by einv_storage_fnc_getContents, made here should it be missing.
 private _fnc_keyOf = {
@@ -195,7 +262,30 @@ private _fnc_keyOf = {
         };
     };
 
+    // Opened from inside one that left where it lay: it went with it.
+    if (!isNull _parent && {_parent in _gone}) then {
+        _gone pushBack _object;
+        continue;
+    };
+
     private _contents = if (isNull _parent) then {[]} else {[_parent] call EFUNC(storage,getContents)};
+
+    // No longer listed where it lay (everyContainer): put on, moved, or that container is gone. Only while
+    // one of its class still lies there may it be that one made anew with its id still on the way - then it
+    // is missing, looked for by its key below. A crate looked into through its vehicle's cargo lies in no
+    // container: einv_compat_ace_cargo_fnc_pruneOpened sees to those (below).
+    if (
+        !isNull _object
+        && {isNull (_object getVariable [QEGVAR(compat_ace_cargo,openedFrom), objNull])}
+        && {_contents findIf {(_x getOrDefault ["container", objNull]) isEqualTo _object} < 0}
+    ) then {
+        if (_contents findIf {!isNull (_x getOrDefault ["container", objNull]) && {(_x getOrDefault ["class", ""]) == _class}} < 0) then {
+            _gone pushBack _object;
+            continue;
+        };
+
+        _object = objNull;
+    };
 
     if (isNull _object && {_key isNotEqualTo ""}) then {
         private _index = _contents findIf {!isNull (_x getOrDefault ["container", objNull]) && {([_x] call _fnc_keyOf) isEqualTo _key}};
@@ -273,16 +363,17 @@ private _context = createHashMapFromArray [
     ["equipment", [_unit] call EFUNC(storage,getEquipment)],
     ["ownSections", _ownSections],
     ["lootSections", _lootSections],
-    ["looting", _lootSections isNotEqualTo []],
-    ["cameraOn", GVAR(cameraOn) && {isNull objectParent _unit}]
+    ["looting", _lootSections isNotEqualTo []]
 ];
 
 // ... and what it shows (the Arsenal's storage column also holds the containers opened inside the
-// soldier's, and its camera is its own).
+// soldier's).
 ["context", [_context]] call FUNC(hook);
 
 GVAR(theme) = _theme;
 GVAR(context) = _context;
+
+if (_timed) then {_marks pushBack ["contents", diag_tickTime]};
 
 private _dim = _display displayCtrl IDC_DIM;
 _dim ctrlSetBackgroundColor (_theme getOrDefault ["dim", [0, 0, 0, 0.35]]);
@@ -315,29 +406,36 @@ if ("layout" in GVAR(hooks)) then {
     };
 };
 
+// A column the layout did not draw again - it went, or the window that attached made its own - leaves its kept controls: they go
+// now (fnc_drawColumn took what it kept out of the list).
+{
+    ctrlDelete (_y select 0);
+
+    {ctrlDelete _x} forEach (_y select 1);
+} forEach (uiNamespace getVariable [QGVAR(keepColumns), createHashMap]);
+
+uiNamespace setVariable [QGVAR(keepColumns), createHashMap];
+
 // The free middle, where a kit's window likes to open (fnc_placeWindow).
 GVAR(middle) = _rect;
 
-[_display, _theme] call FUNC(drawFooter);
+if (_timed) then {_marks pushBack ["columns", diag_tickTime]};
+
+// The footer is the look's too, unless the window that attached puts its own (or none) in its place.
+if ("footer" in GVAR(hooks)) then {
+    ["footer", [_display, _theme]] call FUNC(hook);
+} else {
+    [_display, _theme] call FUNC(drawFooter);
+};
 
 // What is still to be searched, one container after the other, each from the top left.
-private _containers = [];
+call FUNC(sortSearch);
 
-{
-    if !((_x select 0) in _containers) then {
-        _containers pushBack (_x select 0);
-    };
-} forEach GVAR(searchQueue);
-
-GVAR(searchQueue) = [GVAR(searchQueue), [], {
-    (_containers find (_x select 0)) * 1e7 + ((_x param [5, 0]) + 1) * 100000 + (_x select 2) * 100 + (_x select 3)
-}, "ASCEND"] call BIS_fnc_sortBy;
-
-// The first of it is being searched: the glass and the ring on its tile.
-[_display] call FUNC(showSearch);
+// What is being searched is told in the caption line of its box (fnc_updateStatus, from fnc_drawPending below).
 
 // The scrolling columns take the clicks over them, so they report the mouse buttons as the display does.
-// A group kept from the last build (IDC_KEEP) has them already - it must not collect more.
+// A group kept from the last build (IDC_KEEP) has them already - it must not collect more. A guest only
+// hooks the groups it made: the other mod's groups keep their clicks to themselves.
 {
     if (ctrlType _x == 15 && {!(_x getVariable [QGVAR(hooked), false])}) then {
         _x setVariable [QGVAR(hooked), true];
@@ -345,7 +443,7 @@ GVAR(searchQueue) = [GVAR(searchQueue), [], {
         _x ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton)}];
         _x ctrlAddEventHandler ["MouseZChanged", {[_this] call FUNC(onMouseZ)}];
     };
-} forEach (allControls _display);
+} forEach ([allControls _display, uiNamespace getVariable [QGVAR(created), []]] select (_guest isEqualTo true));
 
 // A frame later (fnc_onFrame): right after its controls are made a group does not know its height yet,
 // and the engine puts it back to the top (seen in the game after every move, 2026-10-08).
@@ -359,26 +457,13 @@ GVAR(searchQueue) = [GVAR(searchQueue), [], {
     };
 } forEach (uiNamespace getVariable [QGVAR(created), []]);
 
-// Where the soldier stands in the free middle, for the camera to find him again once the looting pose is
-// reached (fnc_poseCheck).
-GVAR(cameraRect) = _rect;
-
-if (_ownCamera) then {
-    if ((_context get "cameraOn") && {_rect isNotEqualTo []}) then {
-        [_unit, _rect] call FUNC(cameraStart);
-    };
-
-    if (!isNull GVAR(camera)) then {
-        _dim ctrlSetBackgroundColor (_theme getOrDefault ["dimCamera", [0, 0, 0, 0.1]]);
-    };
-} else {
-    // The window's own camera is told where the soldier stands (the free middle of the layout).
-    ["camera", [_rect]] call FUNC(hook);
-};
+if (_timed) then {_marks pushBack ["footer", diag_tickTime]};
 
 // The open kits' windows where they were, then the name at the mouse and the inspect card over them -
 // with the search field's fading and the hover (fnc_drawTopLayer).
 [_display] call FUNC(drawWindows);
+
+if (_timed) then {_marks pushBack ["kit windows and top layer", diag_tickTime]};
 
 // Drift is only reported for what is drawn: a holder no grid shows any more - closed, folded away, gone
 // - is nobody's to report now (fnc_drawCompartments notes the others).
@@ -393,17 +478,12 @@ call FUNC(drawPending);
 // survive this build - those that went or are under way drop out (fnc_selectionTiles).
 [] call FUNC(drawSelection);
 
-// A hint a quick move left for after its answer (fnc_quickMove, fnc_afterAction): written over what the mouse is
-// on, once - a refusal cleared it, so it only comes with a move that went.
-if (GVAR(pendingHint) isNotEqualTo []) then {
-    [GVAR(pendingHint)] call FUNC(dragHint);
-
-    GVAR(dragHintShown) = [];
-    GVAR(pendingHint) = [];
-};
+if (_timed) then {_marks pushBack ["under way and selection", diag_tickTime]};
 
 // What it was built from, so fnc_onFrame sees when that changes.
 GVAR(signatureParts) = call FUNC(getSignature);
+
+if (_timed) then {_marks pushBack ["signature", diag_tickTime]};
 
 // A repack in progress shows on the tiles built just now (einv_magazines).
 if (!isNil QEFUNC(magazines,drawJob)) then {
@@ -412,3 +492,46 @@ if (!isNil QEFUNC(magazines,drawJob)) then {
 
 // The window that attached has the last word: its own controls, counts and marks on what was just built.
 ["afterBuild", [_display]] call FUNC(hook);
+
+// The palette popover, over everything just built; a slider held in it stays held (fnc_paletteSlide).
+if (_paletteOpen) then {
+    [_display] call FUNC(openPaletteMenu);
+};
+
+// For the tester's numbers (einv_gui_debugTiming).
+if (_timed) then {
+    private _took = ((diag_tickTime - _start) * 1000) toFixed 1;
+    private _all = allControls _display;
+    private _shown = {ctrlShown _x} count _all;
+
+    // How many of each class: what the engine has to go through every frame, shown or not.
+    private _byClass = createHashMap;
+
+    {
+        private _name = ctrlClassName _x;
+
+        _byClass set [_name, (_byClass getOrDefault [_name, 0]) + 1];
+    } forEach _all;
+
+    private _classes = (toArray _byClass) apply {[_x select 1, _x select 0]};
+
+    _classes sort false;
+
+    private _top = (_classes select [0, 8]) apply {format ["%1 %2", _x select 1, _x select 0]};
+    private _total = count _all;
+
+    INFO_4("timing: build %1 ms (%2 controls on the display, %3 of them shown: %4)",_took,_total,_shown,_top joinString ", ");
+
+    // Where the build's time went, part by part.
+    private _from = _start;
+    private _parts = _marks apply {
+        _x params ["_name", "_at"];
+
+        private _part = format ["%1 %2", _name, ((_at - _from) * 1000) toFixed 1];
+
+        _from = _at;
+        _part
+    };
+
+    INFO_1("timing: build parts (ms) - %1",_parts joinString ", ");
+};

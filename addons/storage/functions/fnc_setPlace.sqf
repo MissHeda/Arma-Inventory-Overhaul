@@ -4,7 +4,11 @@
  * Changes where an entry lies in its holder's places (fnc_readPlaces): moves it to another cell, takes
  * it out, or puts a new one in - on the holder's authority only.
  *
- * The places keep one record per entry, keyed by fnc_entryKey: the n-th of a key for the n-th entry of
+ * A record is [key, col, row, w, h, block, rot] - always written with rot, 0 upright or 1 turned a
+ * quarter clockwise - and, for a tile of a class that stacks in a container, the count it holds as an
+ * eighth element (a new record takes the entry's "count"; a record that moves keeps its own); a cell that
+ * does not say it lies the way the entry lies when it keeps the entry's size, else as its size says (turned when not as wide as the item upright). The places keep one record
+ * per entry, keyed by fnc_entryKey: the n-th of a key for the n-th entry of
  * that key. An entry is found by its key and the cell it lies on now. Taking one out of the middle
  * removes its record too - left in, the entries after it would each take the record before theirs and
  * jump. An entry that lies where the layout put it without a record of its own (first fit, or on a
@@ -19,8 +23,9 @@
  * Arguments:
  * 0: Holder - a container, or the key of a grid with no object <OBJECT or STRING>
  * 1: Entry, with its "class" (or "key"), "block", "col", "row", "w", "h" <HASHMAP>
- * 2: New cell [col, row, compartment] - with [.., width, height] when it lies turned there - or [] to
- *    take the record out <ARRAY>
+ * 2: New cell [col, row, compartment] - with [.., width, height] when it lies turned there, and
+ *    [.., rot] to say which way round (1 turned a quarter clockwise) - or [] to take the record out
+ *    <ARRAY>
  * 3: Add a new record for an entry the holder did not have before <BOOL> (default: false)
  *
  * Return Value:
@@ -49,11 +54,26 @@ if (_key isEqualTo "") exitWith {};
 
 private _w = _entry getOrDefault ["w", 1];
 private _h = _entry getOrDefault ["h", 1];
+private _rot = parseNumber (_entry getOrDefault ["rotated", false]);
+private _sizeKept = true;
 
 // Turned while it was dragged (R): it lies in the size the cell brings.
 if (count _cell >= 5) then {
+    _sizeKept = [_cell select 3, _cell select 4] isEqualTo [_w, _h];
     _w = _cell select 3;
     _h = _cell select 4;
+};
+
+// Which way round: as the cell says; else as the entry lies while the size is its own; else by the size -
+// a square box (a shaped item in one) only turns when the cell says so.
+if ((_cell param [5, -1]) in [0, 1]) then {
+    _rot = _cell select 5;
+} else {
+    if (!_sizeKept || {!("rotated" in _entry)}) then {
+        private _class = _entry getOrDefault ["class", (_key splitString "|") param [0, ""]];
+
+        _rot = parseNumber (_w != ((([_class] call EFUNC(items,getInfo)) getOrDefault ["size", [_w, _h]]) select 0));
+    };
 };
 
 // What a running phase changed so far comes first (fnc_readPlaces) - a copy, changed here.
@@ -64,7 +84,23 @@ if (_new) then {
     // A new entry is the last of its key in the cargo, so its record goes last of its key - which the
     // canonical order keeps (fnc_writePlaces).
     if (_cell isNotEqualTo []) then {
-        _records pushBack [_key, _cell select 0, _cell select 1, _w, _h, _cell param [2, 0]];
+        private _record = [_key, _cell select 0, _cell select 1, _w, _h, _cell param [2, 0], _rot];
+
+        // A tile of a class that stacks says how many it holds, a stack of its own beside any other of the
+        // class (fnc_getContents, fnc_stackCounts).
+        private _count = _entry getOrDefault ["count", -1];
+        private _class = _entry getOrDefault ["class", (_key splitString "|") param [0, ""]];
+
+        if (
+            !_isKey && {_count isEqualType 0} && {_count >= 1} && {(_entry getOrDefault ["attachments", []]) isEqualTo []}
+            && {!(_entry getOrDefault ["strict", false])}
+            && {isNull (_entry getOrDefault ["container", objNull])}
+            && {(([_class] call EFUNC(items,getInfo)) getOrDefault ["stack", 1]) > 1}
+        ) then {
+            _record pushBack (floor (_count min ([_holder, _class] call FUNC(stackFor))));
+        };
+
+        _records pushBack _record;
         _changed = true;
     };
 } else {
@@ -105,7 +141,16 @@ if (_new) then {
         if (_cell isEqualTo []) then {
             _records deleteAt _index;
         } else {
-            _records set [_index, [_key, _cell select 0, _cell select 1, _w, _h, _cell param [2, 0]]];
+            private _record = [_key, _cell select 0, _cell select 1, _w, _h, _cell param [2, 0], _rot];
+
+            // It moves; how many it holds stays.
+            private _was = _records select _index;
+
+            if (count _was >= 8) then {
+                _record pushBack (_was select 7);
+            };
+
+            _records set [_index, _record];
         };
 
         _changed = true;
@@ -114,14 +159,4 @@ if (_new) then {
 
 if (!_changed) exitWith {};
 
-if (GVAR(executing)) then {
-    private _index = GVAR(buffer) findIf {(_x select 0) isEqualTo _holder};
-
-    if (_index >= 0) then {
-        (GVAR(buffer) select _index) set [1, _records];
-    } else {
-        GVAR(buffer) pushBack [_holder, _records];
-    };
-} else {
-    [_holder, _records] call FUNC(writePlaces);
-};
+[_holder, _records] call FUNC(setRecords);

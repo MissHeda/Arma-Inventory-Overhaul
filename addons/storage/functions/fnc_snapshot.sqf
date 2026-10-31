@@ -26,7 +26,7 @@
  * Return Value:
  * [items [[classes], [counts]], magazines [[class, ammo], ...], weapons (weaponsItemsCargo),
  *  backpacks [[classes], [counts]], nested [[class, object, snapshot], ...],
- *  [places records [[key, col, row, w, h, block], ...], tag [id, item class, objNull] or []],
+ *  [places records [[key, col, row, w, h, block, rot], ...] (rot missing in older ones), tag [id, item class, objNull] or []],
  *  carried variables [[name, value], ...]] <ARRAY>
  *
  * Example:

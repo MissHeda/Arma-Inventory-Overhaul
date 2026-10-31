@@ -28,12 +28,11 @@ GVAR(busy) = [];
 
 // The bar on the screen: the handler that keeps it (fnc_hudFrame), the time until which "while in use"
 // shows it (fnc_hudPing), the time the counts are read next, what was drawn at the last read (so a
-// change shows), and the counts and kinds of the slots.
+// change shows), and the kinds of the slots.
 GVAR(hudPFH) = -1;
 GVAR(hudUntil) = 0;
 GVAR(nextCount) = 0;
 GVAR(hudSignature) = "";
-GVAR(counts) = [];
 GVAR(hudKinds) = [];
 
 // Whether the bar is faded in, and when it has faded out.

@@ -25,6 +25,7 @@
  *   well, for     - data a set of lowercase magazine classes
  *   mass, rounds, load - data the numbers
  *   @             - data the group keys
+ *   all           - always holds: the rule's place, not a test (fnc_compileRules sorts it last) - data []
  *
  * Example:
  * [[false, "class", "=", ["ACE_fieldDressing+"]]] call einv_items_fnc_compileCond;
@@ -50,6 +51,9 @@ private _fnc_set = {
 };
 
 switch (_key) do {
+    case "all": {
+        ["", [false, "all", "", [], 0]]
+    };
     case "@": {
         private _keys = _values apply {_groupKeys getOrDefault [_x, ""]};
         private _missing = _keys find "";

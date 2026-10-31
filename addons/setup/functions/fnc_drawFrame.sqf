@@ -4,9 +4,9 @@
  * Author: Miss Heda
  * Draws what stays around every step, anew each time a step is drawn (fnc_showStep):
  *   - the header: the title; where it saves and how many changes wait ("Server · forced · 4 changes", or
- *     "Read-only"); Undo, Redo and Close; under it the steps - the open one in the accent, a dot on a step
- *     with changes, the steps not built yet greyed out with "Coming in the next version"; then, after
- *     someone else changed the setup, a banner to reload or keep the own changes.
+ *     "Read-only") - a click on it lists what Save would store (fnc_openChanges); Undo, Redo and Close; under it
+ *     the steps - the open one in the accent, a dot on a step with changes; then, after someone else changed the
+ *     setup, a banner to reload or keep the own changes.
  *   - the footer: the keys on the left, the last message in the middle (fnc_setHint), Back, Next and Save
  *     on the right - Apply in CBA's menu, where CBA's own OK saves.
  * Each in a group of its own inside the wizard's pane, so the step between them never lies under either.
@@ -36,8 +36,8 @@ private _root = uiNamespace getVariable [QGVAR(root), controlNull];
 private _theme = GVAR(theme);
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _colorText2 = _theme getOrDefault ["text2", [0.698, 0.734, 0.784, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
 private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
 private _line = _theme getOrDefault ["line", [1, 1, 1, 0.09]];
 
@@ -48,7 +48,7 @@ private _stepsY = _padY + WIZ_TITLE_H + UNIT * 0.45;
 private _lineY = _stepsY + WIZ_STEPS_H + UNIT * 0.5;
 private _headerH = _lineY + UNIT * 0.05 + ([0, WIZ_BANNER_H + UNIT * 0.3] select GVAR(banner));
 
-(call FUNC(countChanges)) params ["_changes", "_headChanged", "_statementsChanged"];
+(call FUNC(countChanges)) params ["_changes", "_changedSteps"];
 
 // ----- Header -----
 
@@ -126,14 +126,24 @@ if (_chipW > SQUARE(UNIT * 2)) then {
     private _chipRect = [_nextRight - _chipW, _padY + (WIZ_TITLE_H - _chipH) / 2, _chipW, _chipH];
     private _chipInk = [_colorText2, _theme getOrDefault ["accent", _colorText2]] select (_changes > 0 || {_notStored});
 
-    [_display, _header, _chipRect, _theme getOrDefault ["button", [1, 1, 1, 0.08]], _chipH / 2] call EFUNC(gui,uiPanel);
+    private _chipSurface = [_display, _header, _chipRect, _theme getOrDefault ["button", [1, 1, 1, 0.08]], _chipH / 2] call EFUNC(gui,uiPanel);
 
-    private _chip = [
+    [
         _display, _header, _chipRect, [_chipText, _chipW - SQUARE(_chipH * 0.6), _font, _chipSize] call EFUNC(gui,fitText), _chipSize,
         _chipInk, _font, 2
     ] call EFUNC(gui,uiLabel);
 
-    _chip ctrlSetTooltip ([format [LLSTRING(Save_ReadOnly), GVAR(target) getOrDefault ["reason", ""]], _chipText] select !GVAR(readOnly));
+    // A click on it opens what Save would store - the Review the wizard had, as a box over whatever step is open.
+    private _chipHit = [
+        _display, _header, _chipRect, _chipSurface, _theme getOrDefault ["button", [1, 1, 1, 0.08]], _theme getOrDefault ["buttonHover", [1, 1, 1, 0.12]], {},
+        [], true, ([format [LLSTRING(Save_ReadOnly), GVAR(target) getOrDefault ["reason", ""]], LLSTRING(Chip_Tip)] select !GVAR(readOnly))
+    ] call FUNC(uiHit);
+
+    _chipHit setVariable [QGVAR(action), [{
+        params ["_hit"];
+
+        [uiNamespace getVariable [QGVAR(display), displayNull], [_hit] call FUNC(screenRect)] call FUNC(openChanges);
+    }, [_chipHit]]];
 };
 
 // ----- The steps -----
@@ -143,13 +153,11 @@ private _gap = SQUARE(UNIT * 0.3);
 private _pillW = (_innerW - _gap * (count _steps - 1)) / count _steps;
 
 {
-    _x params ["", "_nameKey", "_function"];
+    _x params ["", "_nameKey"];
 
-    private _available = !isNil {missionNamespace getVariable _function};
     private _current = _forEachIndex == GVAR(step);
     private _rect = [_padX + _forEachIndex * (_pillW + _gap), _stepsY, _pillW, WIZ_STEPS_H];
     private _label = format ["%1   %2", _forEachIndex + 1, localize _nameKey];
-    private _tooltip = ["", LLSTRING(Step_Soon)] select !_available;
 
     // The open step in the accent; a click on it only draws it again.
     [
@@ -157,18 +165,19 @@ private _pillW = (_innerW - _gap * (count _steps - 1)) / count _steps;
             params ["_step"];
 
             [_step] call FUNC(showStep);
-        }, [_forEachIndex], _available, ["", "accent"] select _current, _tooltip
+        }, [_forEachIndex], true, ["", "accent"] select _current
     ] call FUNC(uiAction);
 
-    // A dot on a step holding changes: Start for the preset and the cell size, Review for the statements.
-    private _changed = [false, _headChanged, false, false, _statementsChanged] param [_forEachIndex, false];
+    // A dot on a step holding changes: General for the settings, the cell size and the kinds of container, Items and
+    // Containers for the rules of single classes (fnc_countChanges).
+    private _changed = (_x select 0) in _changedSteps;
 
     if (_changed) then {
         private _dotH = WIZ_STEPS_H * 0.26;
 
         [
             _display, _header, [(_rect select 0) + _pillW - SQUARE(WIZ_STEPS_H * 0.5), _stepsY + (WIZ_STEPS_H - _dotH) / 2, SQUARE(_dotH), _dotH],
-            UI_TEX(circle_ca), [_accent, _theme getOrDefault ["onAccent", [0.086, 0.094, 0.114, 1]]] select _current
+            UI_TEX(circle_ca), [_accent, _theme getOrDefault ["onAccent", [0.05, 0.05, 0.05, 1]]] select _current
         ] call EFUNC(gui,uiIcon);
     };
 } forEach _steps;
@@ -233,27 +242,14 @@ private _keyX = _padX;
     [LLSTRING(Key_Redo), LLSTRING(Redo)]
 ];
 
-// Save, Next and Back, from the right edge inwards. Back and Next skip the steps not built yet.
-private _available = _steps apply {!isNil {missionNamespace getVariable (_x select 2)}};
-private _back = -1;
-private _next = -1;
-
-for "_index" from (GVAR(step) - 1) to 0 step -1 do {
-    if (_available select _index) exitWith {
-        _back = _index;
-    };
-};
-
-for "_index" from (GVAR(step) + 1) to (count _steps - 1) do {
-    if (_available select _index) exitWith {
-        _next = _index;
-    };
-};
+// Save, Next and Back, from the right edge inwards. Back and Next are the neighbouring steps; none at the ends.
+private _back = GVAR(step) - 1;
+private _next = [-1, GVAR(step) + 1] select (GVAR(step) + 1 < count _steps);
 
 private _fnc_buttonW = {
     params ["_text"];
 
-    (SQUARE(UNIT * 4.5)) max (SQUARE(_rowH * 1.4) + (_text getTextWidth [_font, _rowH * 0.5]) * TEXT_SLACK)
+    [_text, _font] call FUNC(footerButtonW)
 };
 
 private _right = _width - _padX;

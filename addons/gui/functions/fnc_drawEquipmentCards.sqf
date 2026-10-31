@@ -4,8 +4,9 @@
  * Author: Miss Heda
  * Draws the equipment column of the Glass layout - what the unit wears, as cards:
  *
- *   WEIGHT  34.5 kg / 45.0 kg ........... HEAVY   how much it carries, as a word and a bar with the marks
- *                                                 where the tiers start (see below)
+ *   WEIGHT  34.5 kg . Overloaded at 41 kg ... HEAVY . jogging tires you
+ *                                                 how much it carries and what that does to it, over a bar
+ *                                                 that fills towards the Critical limit (see below)
  *   EQUIPMENT
  *   [1] primary ............ | mag | optic | rail  |   each weapon a big card, its attachments and
  *                            | muz | bipod | 2nd   |   loaded magazines as small slots beside it
@@ -13,7 +14,7 @@
  *                            | rail| muzzle|
  *   [3] launcher ........... | mag | optic |
  *   GEAR
- *   | headgear |  | uniform |  | vest |
+ *   | headgear |  | uniform |  | vest |  | backpack |
  *   | gog | nvg | bin | map | gps | radio | compass | watch |
  *   HOTBAR
  *   | 4 | 5 | 6 | 7 | 8 | 9 | 0 |                           the keys' items (einv_hotbar), when it is loaded
@@ -56,21 +57,21 @@ private _equipment = _context getOrDefault ["equipment", createHashMap];
 
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
-private _colorText = _theme getOrDefault ["text", [0.925, 0.933, 0.949, 1]];
-private _colorText2 = _theme getOrDefault ["text2", [0.639, 0.675, 0.725, 1]];
-private _colorMuted = _theme getOrDefault ["muted", [0.412, 0.443, 0.494, 1]];
+private _colorText = _theme getOrDefault ["text", [1, 1, 1, 1]];
+private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
+private _colorMuted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _colorAccent = _theme getOrDefault ["slotAccent", [0.84, 0.54, 0.1, 1]];
-private _colorOnAccent = _theme getOrDefault ["onAccent", [0.086, 0.094, 0.114, 1]];
+private _colorOnAccent = _theme getOrDefault ["onAccent", [0.05, 0.05, 0.05, 1]];
 private _colorStrip = _theme getOrDefault ["slotCaptionBg", [1, 1, 1, 0.1]];
-private _colorCard = _theme getOrDefault ["card", [1, 1, 1, 0.035]];
-private _barTrack = _theme getOrDefault ["barTrack", [1, 1, 1, 0.06]];
 private _border = _theme getOrDefault ["slotBorder", []];
 private _radius = _theme getOrDefault ["radius", 0];
 private _flat = _radius <= 0;
 
 // Captions over the slots take a line of their own above them - room the rows below have to leave.
-private _lineH = UNIT * 0.62;
-private _lineSize = UNIT * 0.46;
+// The words, and the rows and cards that hold them, grow with the tiles (TEXT_UNIT, fnc_textScale), as fnc_drawSlot's.
+private _textUnit = TEXT_UNIT;
+private _lineH = _textUnit * 0.62;
+private _lineSize = _textUnit * 0.46;
 private _capH = [0, _lineH] select ((_theme getOrDefault ["slotCaption", "none"]) isEqualTo "above");
 
 // The same theme with no captions on the slots, for the attachments and the small slots.
@@ -85,14 +86,16 @@ private _gapH = UNIT * 0.25;
 private _gapW = SQUARE(_gapH);
 private _groupGap = UNIT * 0.5;
 private _rowGap = UNIT * 0.4;
-private _statH = UNIT * 2.2;
-private _labelH = UNIT * 0.8;
+private _statH = _textUnit * 2.2;
+private _labelH = _textUnit * 0.8;
 private _gearGap = UNIT * 0.3;
 
-// Square slots: eight small ones across a row, three big gear cards across another.
+// Square slots: eight small ones across a row, four big gear cards across another. The gear cards take what
+// the width leaves after three gaps, so on the narrowest column they only grow a little smaller - the backpack
+// never wraps into a row of its own.
 private _smallW = ((_width - _gapW * 7) / 8) min SQUARE(UNIT * 2.2);
 private _smallH = UNSQUARE(_smallW);
-private _gearW = ((_width - _gapW * 2) / 3) min SQUARE(UNIT * 4.6);
+private _gearW = ((_width - _gapW * 3) / 4) min SQUARE(UNIT * 4.6);
 private _gearH = UNSQUARE(_gearW);
 
 // The hotbar's row under the gear (einv_hotbar - only when that addon is loaded and on, and only in the
@@ -123,14 +126,14 @@ private _fnc_weaponCard = {
     private _empty = _class isEqualTo "";
     private _info = if (_empty) then {createHashMap} else {[_class] call EFUNC(items,getInfo)};
     private _cardRadius = _radius min (_cardH / 4);
-    private _padY = UNIT * 0.22;
+    private _padY = _textUnit * 0.22;
     private _padX = SQUARE(_padY);
 
     [_display, _parent, _cardRect, _theme getOrDefault [["slot", "slotEmpty"] select _empty, [1, 1, 1, 0.035]], _cardRadius] call FUNC(uiPanel);
 
     if (_capH > 0 && {_caption isNotEqualTo ""}) then {
         private _shown = [[_caption, _theme] call FUNC(caption), _cardW, _font, _lineSize] call FUNC(fitText);
-        [_display, _parent, [_cardX, _cardY - _lineH, _cardW, _lineH], _shown, _lineSize, _colorText2, _font, 0] call FUNC(uiLabel);
+        [_display, _parent, [_cardX, _cardY - _lineH, _cardW, _lineH], _shown, _lineSize, _colorText2, _font, 0, "caption"] call FUNC(uiLabel);
     };
 
     // Where the picture and the name may go - right of the strip, under the key cap.
@@ -138,12 +141,12 @@ private _fnc_weaponCard = {
     private _innerTop = _cardY + _padY;
 
     if (_flat) then {
-        private _stripW = SQUARE(UNIT * 1.05);
+        private _stripW = SQUARE(_textUnit * 1.05);
 
         [_display, _parent, [_cardX, _cardY, _stripW, _cardH], [_colorStrip, _colorAccent] select _inHand] call FUNC(uiPanel);
         [
             _display, _parent, [_cardX, _cardY + _padY * 0.5, _stripW, _lineH], format ["[%1]", _number], _lineSize,
-            [_colorMuted, _colorOnAccent] select _inHand, _fontBold, 2
+            [_colorMuted, _colorOnAccent] select _inHand, _fontBold, 2, "key"
         ] call FUNC(uiLabel);
 
         _innerX = _cardX + _stripW;
@@ -154,7 +157,7 @@ private _fnc_weaponCard = {
         [_display, _parent, _key, [_theme getOrDefault ["keyBg", [1, 1, 1, 0.1]], _colorAccent] select _inHand, _lineH * 0.3] call FUNC(uiPanel);
         [
             _display, _parent, _key, _number, _lineSize * 0.9,
-            [_theme getOrDefault ["keyText", _colorText], _colorOnAccent] select _inHand, _fontBold, 2
+            [_theme getOrDefault ["keyText", _colorText], _colorOnAccent] select _inHand, _fontBold, 2, "key"
         ] call FUNC(uiLabel);
 
         _innerTop = _cardY + _padY * 1.5 + _lineH;
@@ -176,14 +179,18 @@ private _fnc_weaponCard = {
         [_display, _parent, [_contentX, _cardY + (_cardH - _iconH) / 2, _contentW, _iconH], _icon, _theme getOrDefault ["slotIcon", [1, 1, 1, 0.15]]] call FUNC(uiIcon);
     } else {
         private _nameTop = _cardY + _cardH - _padY * 0.5 - _lineH;
-        private _nameSize = UNIT * 0.5;
+        private _nameSize = _textUnit * 0.5;
         private _name = [[_info getOrDefault ["name", _class], _theme] call FUNC(caption), _contentW, _font, _nameSize] call FUNC(fitText);
 
-        [_display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _info getOrDefault ["picture", ""]] call FUNC(uiPicture);
+        // As the rules draw it (icon=): larger, smaller or moved, and cut to the card where it would reach out.
+        [
+            _display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _info getOrDefault ["picture", ""],
+            _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _cardRect
+        ] call FUNC(uiItemPicture);
 
         // What is on the weapon shows on its picture, the way Arma's own inventory draws it.
         [_display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _weapon] call FUNC(drawAttachments);
-        [_display, _parent, [_contentX, _nameTop, _contentW, _lineH], _name, _nameSize, _colorText, _font, 0] call FUNC(uiLabel);
+        [_display, _parent, [_contentX, _nameTop, _contentW, _lineH], _name, _nameSize, _colorText, _font, 0, "weapon"] call FUNC(uiLabel);
     };
 
     // The weapon in hand is framed in the accent colour, over everything else on the card.
@@ -266,146 +273,22 @@ private _fnc_weaponRow = {
 private _fnc_label = {
     params ["_labelTop", "_text"];
 
-    [_display, _parent, [_left, _labelTop, _width, _labelH], [_text, _theme] call FUNC(caption), UNIT * 0.55, _colorText2, _font, 0] call FUNC(uiLabel);
+    [_display, _parent, [_left, _labelTop, _width, _labelH], [_text, _theme] call FUNC(caption), _textUnit * 0.55, _colorText2, _font, 0, "section"] call FUNC(uiLabel);
 };
 
 // ---------------------------------------------------------------------------
-// Weight: what the unit carries, and how hard that is on it. Counted the way ACE counts it: what the
-// engine weighs, plus ACE's virtual load on the unit and its uniform, vest and backpack (einv_weight_fnc_getLoad).
-// That holds the weight overrides of the rules (weight=, handed to ACE by the weight addon), which the storage
-// sections weigh by too, and what Enhanced First Aid Kits' kits hold - so the total here is the one ACE shows
-// and tires the unit by.
-//
-// The bar runs from nothing to the Critical mark, with a tick where Heavy starts (yellow: ACE's jog begins
-// to tire the soldier) and one where Overloaded does (red: no sprinting, tiring faster), and a thin strip
-// under it in the colours of those two tiers from their ticks on. The fill and the word take the colour of the
-// tier the load is in. Where the ticks are comes from the weight addon (einv_weight_fnc_getLimits); this
-// card only draws it. While something from outside the soldier's own gear is dragged, a preview of its weight
-// lies on the bar (fnc_markWeight), found through uiNamespace weightBar.
+// Weight: what the unit carries, and how hard that is on it (fnc_drawWeightCard). On the inventory's own
+// display a part of its own (fnc_drawPart): drawn again alone when only what the unit carries changed
+// (fnc_refresh), under everything made after it.
 // ---------------------------------------------------------------------------
-private _limits = [_unit] call EFUNC(weight,getLimits);
-private _mass = [_unit] call EFUNC(weight,getLoad);
-private _tier = [_unit, _mass] call EFUNC(weight,getTier);
-private _end = (_limits get "critical") max 1;
-
-private _colorWarn = _theme getOrDefault ["warn", [0.98, 0.8, 0.24, 1]];
-private _loss = _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];
-private _word = ([_tier, _limits] call EFUNC(weight,tierText)) select 0;
-private _wordColor = [_colorText2, _colorWarn, _loss, _loss] select _tier;
-private _fill = [_colorText, _colorWarn, _loss, _loss] select _tier;
-
 private _cursor = _top;
-private _statPadY = UNIT * 0.22;
-private _statPadX = SQUARE(UNIT * 0.3);
-private _stripH = UNIT * 0.68;
-private _statBarH = (2 max round (UNIT * 0.2 / pixelH)) * pixelH;
-private _statBarY = _cursor + _statH - _statPadY - _statBarH;
-private _statBarW = _width - _statPadX * 2;
+private _weightRect = [_left, _cursor, _width, _statH];
 
-if (_flat) then {
-    // The caption on a strip of its own across the top.
-    [_display, _parent, [_left, _cursor, _width, _statH], _colorCard] call FUNC(uiPanel);
-    [_display, _parent, [_left, _cursor, _width, _stripH], _colorStrip] call FUNC(uiPanel);
+if (isNull _parent) then {
+    [_display, "weight", controlNull, _weightRect, {_this call FUNC(drawWeightCard)}, [_unit, _theme]] call FUNC(drawPart);
 } else {
-    [_display, _parent, [_left, _cursor, _width, _statH], _colorCard, _radius min (_statH / 4)] call FUNC(uiPanel);
+    [_display, _parent, _weightRect, _unit, _theme] call FUNC(drawWeightCard);
 };
-
-[
-    _display, _parent, [_left + _statPadX, _cursor, _statBarW, _stripH], [LLSTRING(Stat_Weight), _theme] call FUNC(caption),
-    UNIT * 0.42, _colorText2, _font, 0
-] call FUNC(uiLabel);
-
-private _valueY = _cursor + _stripH;
-private _valueH = _statBarY - _valueY;
-private _wordSize = UNIT * 0.46;
-private _wordText = [_word, _theme] call FUNC(caption);
-private _wordW = (_wordText getTextWidth [_fontBold, _wordSize]) * TEXT_SLACK;
-
-[_display, _parent, [_left + _statPadX + _statBarW - _wordW, _valueY, _wordW, _valueH], _wordText, _wordSize, _wordColor, _fontBold, 1] call FUNC(uiLabel);
-
-// The load, and after it what it counts against: the red mark, in kilograms.
-private _valueText = format ["%1 kg", (_mass * MASS_TO_KG) toFixed 1];
-private _valueSize = UNIT * 0.66;
-private _valueW = (_valueText getTextWidth [_fontBold, _valueSize]) * TEXT_SLACK;
-
-[_display, _parent, [_left + _statPadX, _valueY, _statBarW - _wordW, _valueH], _valueText, _valueSize, _colorText, _fontBold, 0] call FUNC(uiLabel);
-[
-    _display, _parent, [_left + _statPadX + _valueW + SQUARE(UNIT * 0.2), _valueY, _statBarW - _wordW - _valueW, _valueH],
-    format [LLSTRING(Load_Limit), (_limits get "overloadedKg") toFixed 1], UNIT * 0.46, _colorMuted, _font, 0
-] call FUNC(uiLabel);
-
-private _barRect = [_left + _statPadX, _statBarY, _statBarW, _statBarH];
-
-if (_flat) then {
-    // In a square look the bar is cut into segments with a small gap between them, each filling in turn.
-    private _segments = 10;
-    private _segmentGap = pixelW * 2;
-    private _segmentW = (_statBarW - _segmentGap * (_segments - 1)) / _segments;
-    private _share = (_mass / _end) min 1;
-
-    for "_i" from 0 to (_segments - 1) do {
-        [
-            _display, _parent, [_left + _statPadX + _i * (_segmentW + _segmentGap), _statBarY, _segmentW, _statBarH],
-            ((_share * _segments - _i) max 0) min 1, _barTrack, _fill, 0
-        ] call FUNC(uiBar);
-    };
-} else {
-    [_display, _parent, _barRect, (_mass / _end) min 1, _barTrack, _fill, _statBarH / 2] call FUNC(uiBar);
-};
-
-// The ticks where Heavy and Overloaded start - none at the bar's very start or end - and a strip under the
-// bar in their colours from there on.
-private _tickW = pixelW * 2;
-private _stripY = _statBarY + _statBarH + pixelH;
-
-{
-    _x params ["_from", "_to", "_tickColor", "_zoneColor"];
-
-    private _fromShare = _from / _end;
-    private _toShare = _to / _end;
-
-    if (_fromShare > 0 && {_fromShare < 1}) then {
-        [
-            _display, _parent, [_left + _statPadX + _statBarW * _fromShare - pixelW, _statBarY - pixelH * 2, _tickW, _statBarH + pixelH * 4],
-            _tickColor
-        ] call FUNC(uiPanel);
-    };
-
-    if (_toShare > _fromShare && {_fromShare < 1}) then {
-        [
-            _display, _parent, [_left + _statPadX + _statBarW * _fromShare, _stripY, _statBarW * ((_toShare min 1) - _fromShare), pixelH * 2],
-            _zoneColor
-        ] call FUNC(uiPanel);
-    };
-} forEach [
-    [_limits get "heavy", _limits get "overloaded", _colorWarn, _theme getOrDefault ["zoneWarn", [0.98, 0.8, 0.24, 0.45]]],
-    [_limits get "overloaded", _end, _loss, _theme getOrDefault ["zoneLoss", [0.941, 0.333, 0.353, 0.45]]]
-];
-
-if (_flat) then {
-    // Last, so nothing covers it.
-    if (_border isNotEqualTo []) then {
-        [_display, _parent, [_left, _cursor, _width, _statH], _border] call FUNC(uiFrame);
-    };
-};
-
-// What a drag previews on the bar and where (fnc_markWeight), and the hint over the whole card (fnc_infoHint).
-uiNamespace setVariable [QGVAR(weightBar), createHashMapFromArray [
-    ["parent", _parent], ["rect", _barRect], ["load", _mass], ["limits", _limits], ["unit", _unit]
-]];
-
-private _cardRect = [_left, _cursor, _width, _statH];
-private _cardAnchor = createHashMap;
-
-if (!isNull _parent) then {
-    _cardAnchor = createHashMapFromArray [["rel", [_left, _cursor]], ["parent", _parent]];
-
-    ([_cardAnchor] call FUNC(gridOrigin)) params ["_screenX", "_screenY"];
-
-    _cardRect = [_screenX, _screenY, _width, _statH];
-};
-
-(uiNamespace getVariable [QGVAR(infoAreas), []]) pushBack [_cardRect, "", "", _cardAnchor, "weight", [_unit]];
 
 _cursor = _cursor + _statH + _groupGap;
 
@@ -448,7 +331,7 @@ private _gearY = _smallY - _gearGap - _gearH;
     _x params ["_slot", "_slotCaption", "_slotIcon"];
 
     [
-        _display, _parent, [_left + _forEachIndex * (_width - _gearW) / 2, _gearY, _gearW, _gearH],
+        _display, _parent, [_left + _forEachIndex * (_width - _gearW) / 3, _gearY, _gearW, _gearH],
         _equipment getOrDefault [_slot, ""],
         createHashMapFromArray [["caption", _slotCaption], ["icon", _slotIcon], ["slot", _slot], ["unit", _unit]],
         _theme
@@ -456,7 +339,8 @@ private _gearY = _smallY - _gearGap - _gearH;
 } forEach [
     ["headgear", LLSTRING(Slot_Headgear), GEAR_ICON(ui_gear_helmet_gs)],
     ["uniform", LLSTRING(Slot_Uniform), GEAR_ICON(ui_gear_uniform_gs)],
-    ["vest", LLSTRING(Slot_Vest), GEAR_ICON(ui_gear_vest_gs)]
+    ["vest", LLSTRING(Slot_Vest), GEAR_ICON(ui_gear_vest_gs)],
+    ["backpack", LLSTRING(Slot_Backpack), GEAR_ICON(ui_gear_backpack_gs)]
 ];
 
 {
@@ -489,7 +373,20 @@ private _gearY = _smallY - _gearGap - _gearH;
 // ---------------------------------------------------------------------------
 // The hotbar, at the very bottom
 // ---------------------------------------------------------------------------
+// Its counts follow what the unit carries: on the inventory's own display a part of its own as well, drawn
+// again with the weight card (fnc_drawPart, fnc_refresh).
 if (_hotbar) then {
     [_top + _height - _smallH - _labelH, LELSTRING(hotbar,Strip_Title)] call _fnc_label;
-    [_display, _parent, [_left, _top + _height - _smallH, _width, _smallH], _smallW, _quiet] call EFUNC(hotbar,drawStrip);
+
+    private _stripRect = [_left, _top + _height - _smallH, _width, _smallH];
+
+    if (isNull _parent) then {
+        [_display, "hotbar", controlNull, _stripRect, {
+            params ["_display", "_group", "_rect", "_slotW", "_stripTheme"];
+
+            [_display, _group, _rect, _slotW, _stripTheme] call EFUNC(hotbar,drawStrip);
+        }, [_smallW, _quiet]] call FUNC(drawPart);
+    } else {
+        [_display, _parent, _stripRect, _smallW, _quiet] call EFUNC(hotbar,drawStrip);
+    };
 };

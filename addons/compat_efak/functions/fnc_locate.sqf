@@ -5,7 +5,8 @@
  * kit packed in kits lies in after all. Two ways to look:
  *
  *   Without a root - the window's side: where the kit windows were last drawn found it
- *   (GVAR(holders)), else among the contents of an open kit. A kit's tile in a container the window
+ *   (GVAR(holders)) or the ACE Arsenal's panel shows it as a section (GVAR(arsenalHolders)), else among
+ *   the contents of an open kit or of such a section. A kit's tile in a container the window
  *   shows comes with its holder from the caller instead (fnc_drop).
  *   With a root - the side that runs a kit op (einv_storage_fnc_execute): the real cargo under that
  *   root, nothing the window remembers - the uniform, vest and backpack of a unit (or the object
@@ -65,7 +66,9 @@ if (!isNull _root) exitWith {
 
     {
         private _container = _x;
-        private _classes = (getItemCargo _container) param [0, []];
+
+        // The cargo, and what Strict mode's hidden holder keeps for this container (lowercase classes).
+        private _classes = ((getItemCargo _container) param [0, []]) + ([_container] call EFUNC(storage,hiddenClasses));
 
         if ((_classes findIf {toLowerANSI _x isEqualTo _key}) >= 0) exitWith {
             _found = [[_container, ""], _container];
@@ -118,15 +121,22 @@ private _fnc_holder = {
 
     private _known = GVAR(holders) getOrDefault [toLowerANSI _class, []];
 
+    // The kit section of the ACE Arsenal's panel, where no kit window is open (fnc_arsenalKit).
+    if (_known isEqualTo []) then {
+        _known = GVAR(arsenalHolders) getOrDefault [toLowerANSI _class, []];
+    };
+
     if (_known isNotEqualTo []) exitWith {_known};
 
-    private _index = GVAR(opened) findIf {
+    // Packed in an open kit - or in a kit of the Arsenal's panel, where none is open.
+    private _shown = GVAR(opened) + keys GVAR(arsenalHolders);
+    private _index = _shown findIf {
         (([_x] call EFAKFUNC(core,getContents)) findIf {(_x select 0) == _class}) >= 0
     };
 
     if (_index < 0) exitWith {[objNull, ""]};
 
-    [objNull, GVAR(opened) select _index]
+    [objNull, _shown select _index]
 };
 
 if (_holder isEqualTo []) then {

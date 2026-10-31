@@ -14,6 +14,10 @@ GVAR(queued) = false;
 GVAR(limitsCache) = createHashMap;
 GVAR(lastState) = [];
 
+// Strict mode's hidden holder of the player's unit as the look saw it last (XEH_postInit): a tile moved into
+// or out of it from a crate changes the load without a loadout event.
+GVAR(lastHidden) = [];
+
 #include "initSettings.inc.sqf"
 
 ADDON = true;

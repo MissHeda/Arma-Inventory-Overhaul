@@ -8,7 +8,8 @@
  *
  *   1. the older table settings (sizes, stacks, container sizes) - read as rules after the text
  *   2. the rules text, einv_items_rules
- *   3. the item's own mod: einv_gridSize[], einv_stackSize, einv_grids[], einv_slots
+ *   3. the item's own mod: einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture, einv_use, and the older
+ *      einv_gridSize[], einv_stackSize, einv_grids[], einv_slots
  *   4. the preset the text builds on, with einv_items_stackSmall moved off its default
  *   5. built in: 1x1, alone on its tile, a grid by load
  * Weapons, binoculars, uniforms, vests and backpacks are always alone on their tile. A container
@@ -16,12 +17,16 @@
  *
  * A rule may also give an item a weight (weight=, in kg) and a name (name=). "mass", "name" and
  * "short" are then those; "configMass", "configDisplayName" and "configShort" keep what config says.
- * The engine still weighs every item by its config.
+ * The engine still weighs every item by its config. A rule or the config may also say how large its
+ * picture is drawn and where (icon=, einv_icon): "icon", and a picture of its own (picture=, einv_picture):
+ * "picture". A rule or the config may also whitelist it for use from a container (use=, einv_use): "use".
  *
  * Without compiled rules, the rules in effect are used and the result kept per class until the rules
- * change. Where no setting script runs (Eden, and the start of a mission before CBA's settings are
- * ready), those are compiled again first whenever the settings changed (fnc_currentRules), so even
- * there an item never shows by stale rules.
+ * change. An item whose rule says like=X is kept the same way: X is asked through the same compiled
+ * rules (fnc_resolve), and a change to X's rules is a change to the rules - fnc_loadRules empties
+ * the whole store, so the item follows X with nothing more to watch. Where no setting script runs
+ * (Eden, and the start of a mission before CBA's settings are ready), those are compiled again first
+ * whenever the settings changed (fnc_currentRules), so even there an item never shows by stale rules.
  *
  * Arguments:
  * 0: Class name <STRING>
@@ -35,23 +40,41 @@
  *   "class"             - configName, or the class as given when no config knows it <STRING>
  *   "name", "short"     - the rules' name, else displayName / displayNameShort (or the name) <STRING>
  *   "description"       - descriptionShort, may contain <br/>, "" if none <STRING>
- *   "picture"           - "" if none <STRING>
+ *   "picture"           - the texture it shows: the rules' picture (picture=, einv_picture) when the file is
+ *                         there, else config's; "" if none <STRING>
  *   "category"          - CATEGORY_* <NUMBER>
  *   "kind"              - see fnc_getFacts <STRING>
  *   "mass"              - in config units (tenths of a pound): the rules' weight, else config's
  *                         <NUMBER>
- *   "size"              - [w, h] in grid cells, upright <ARRAY>
+ *   "size"              - [w, h] in grid cells, upright - the box around it <ARRAY>
+ *   "footprint"         - [w, h, holes] upright, holes the indices row * w + col of the cells a
+ *                         shaped item (size=xx/x-) does not take, [] for a full rectangle <ARRAY>
+ *   "footprintTurned"   - the same turned a quarter clockwise (fnc_turnMask, fnc_footprintAs) <ARRAY>
  *   "stack"             - how many may share one tile, at least 1 <NUMBER>
  *   "capacity"          - a magazine's rounds, 0 for everything else <NUMBER>
- *   "maxLoad"           - what a uniform, vest, backpack, crate or vehicle holds, else 0 <NUMBER>
- *   "cells"             - cells it takes, w * h <NUMBER>
- *   "shape"             - its size as the rules write it, "2x3" <STRING>
+ *   "maxLoad"           - what a uniform, vest, backpack, crate or vehicle holds, a kit's capacity,
+ *                         else 0 <NUMBER>
+ *   "cells"             - cells it takes, w * h less its holes <NUMBER>
+ *   "shape"             - its size as the rules write it, "2x3" or "xx/x-" <STRING>
  *   "grid"              - a container's grid spec (fnc_parseGrid), [] for anything else <ARRAY>
+ *   "icon"              - how its picture is drawn in its tile, [scale, across, down] (icon=,
+ *                         fnc_parseIcon): the scale as a factor, the offsets as a share of the tile's
+ *                         width and height; [1, 0, 0] for the plain picture <ARRAY>
  *   "src"               - field -> where it came from, see fnc_resolve <HASHMAP>
  *   "configMass"        - config mass <NUMBER>
  *   "configDisplayName", "configShort" - config's names <STRING>
  *   "weightOverride"    - the rules' weight in kg, -1 when none <NUMBER>
  *   "nameOverride"      - the rules' name, "" when none <STRING>
+ *   "use"               - the containers it may be used from where a setting limits what can be used there,
+ *                         any of "uniform", "vest", "backpack" in that order, [] for none <ARRAY of STRING>
+ *   "cats"              - the categories the rules or the config put it in (cats=, einv_cat), [] when none does <ARRAY of STRING>
+ *   "groups"            - the categories it is in: "cats" when it has some, else the built-in one (fnc_defaultGroup) - of ITEM_GROUPS and the setup's own:
+ *                         weapon, ammo, grenade, gear, medical, food, tool, misc. Never empty. The strip of a loot box, the compartments
+ *                         that accept only some categories and the wizard read this <ARRAY of STRING>
+ *   "tileColor"         - the colour the setup gives its tiles (color= of the first of its "groups" that has one),
+ *                         [r, g, b] 0 to 1, [] for the look's own colour of its category <ARRAY>
+ *   "pictureOverride"   - the rules' picture path, "" when none - also when the file is missing <STRING>
+ *   "configPicture"     - config's picture <STRING>
  *   and from fnc_getFacts: "lc", "root", "rounds", "lineage", "addon", "mod"
  *
  * Example:
@@ -83,13 +106,43 @@ private _facts = [_class] call FUNC(getFacts);
 private _resolved = [_facts, _compiled] call FUNC(resolve);
 private _info = +_facts;
 
-(_resolved get "footprint") params ["_w", "_h"];
+private _footprint = _resolved get "footprint";
 
+_footprint params ["_w", "_h", ["_holes", []]];
+
+// The box for everything that only needs that, the cells for whatever places or draws it - turned
+// once here, so a layout trying it both ways round does not turn it again for every cell it tries.
 _info set ["size", [_w, _h]];
-_info set ["cells", _w * _h];
-_info set ["shape", format ["%1x%2", _w, _h]];
+_info set ["footprint", [_w, _h, _holes]];
+_info set ["footprintTurned", [_w, _h, _holes] call FUNC(turnMask)];
+_info set ["cells", _w * _h - count _holes];
+_info set ["shape", [_w, _h, _holes] call FUNC(formatMask)];
 _info set ["stack", _resolved get "stack"];
-_info set ["grid", _resolved get "grid"];
+
+// The categories there are: an item or a compartment that names one the setup does not define ignores it.
+private _categoryIds = _compiled getOrDefault ["categoryIds", ITEM_GROUPS];
+
+_info set ["grid", [_resolved get "grid", _categoryIds] call FUNC(cleanGrid)];
+_info set ["icon", _resolved get "icon"];
+_info set ["use", _resolved get "use"];
+
+// The categories: the rules' and the config's, else the built-in one.
+private _cats = (_resolved get "cats") select {_x in _categoryIds};
+
+_info set ["cats", _cats];
+_info set ["groups", [[[_facts] call FUNC(defaultGroup)], _cats] select (_cats isNotEqualTo [])];
+
+// The tiles' colour: the first of its categories that the setup gives one (category=... color=).
+private _tileColor = [];
+private _categoryDefs = _compiled getOrDefault ["categoryDefs", createHashMap];
+
+{
+    if (((_categoryDefs getOrDefault [_x, []]) param [2, ""]) isNotEqualTo "") exitWith {
+        _tileColor = ([_x, _compiled] call FUNC(categoryInfo)) get "color";
+    };
+} forEach (_info get "groups");
+
+_info set ["tileColor", _tileColor];
 _info set ["src", _resolved get "src"];
 
 // What config says stays readable next to what the rules make of it.
@@ -101,6 +154,32 @@ _info set ["configDisplayName", _facts get "name"];
 _info set ["configShort", _facts get "short"];
 _info set ["weightOverride", _weight];
 _info set ["nameOverride", _name];
+
+// A picture of its own: the texture the rules give it, if the game has the file - else config's, said once.
+private _picture = _resolved get "picture";
+
+_info set ["configPicture", _facts get "picture"];
+_info set ["pictureOverride", _picture];
+
+if (_picture isNotEqualTo "") then {
+    // The engine reads a path with or without its leading backslash.
+    private _otherForm = if ((_picture select [0, 1]) isEqualTo "\") then {_picture select [1]} else {"\" + _picture};
+
+    if (fileExists _picture || {fileExists _otherForm}) then {
+        _info set ["picture", _picture];
+    } else {
+        if (isNil QGVAR(pictureWarned)) then {
+            GVAR(pictureWarned) = createHashMap;
+        };
+
+        private _lowerPicture = toLowerANSI _picture;
+
+        if !(_lowerPicture in GVAR(pictureWarned)) then {
+            GVAR(pictureWarned) set [_lowerPicture, true];
+            WARNING_2("Picture of %1: %2 is not there - the config picture instead",_class,_picture);
+        };
+    };
+};
 
 if (_weight >= 0) then {
     _info set ["mass", _weight / MASS_TO_KG];

@@ -2,18 +2,20 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * A magazine went into a slot of the weapon the soldier holds in his hands: that weapon's own reload sound
- * (its config entry reloadMagazineSound - any mod's weapon) and its reload gesture (reloadAction) play, so
- * the soldier reloads in the window and everyone near hears and sees it. A second magazine at once cuts
- * the first one's sound. For any other weapon - holstered, slung, without a sound of its own - nothing
- * plays here and the caller plays the generic seating click.
+ * A magazine went into a slot of the weapon the soldier holds in his hands: that weapon's reload action
+ * (reloadAction, fnc_reloadGesture) and its own reload sound (its config entry reloadMagazineSound - any
+ * mod's weapon) play, so the soldier reloads in the window and everyone near hears and sees it. The action
+ * plays whether or not the weapon has a sound of its own. A second magazine at once cuts the first one's
+ * sound. For any other weapon - holstered, slung, or the second muzzle of one that is not in the hands -
+ * nothing plays here, and neither does a sound for a weapon without one of its own: the caller plays the
+ * generic seating click.
  *
  * Arguments:
  * 0: The unit <OBJECT>
  * 1: The slot, "primary_mag", "primary_mag2" (the grenade launcher), "handgun_mag" or "launcher_mag" <STRING>
  *
  * Return Value:
- * It played <BOOL>
+ * Its own sound played <BOOL>
  *
  * Example:
  * [player, "primary_mag"] call einv_gui_fnc_playReload;
@@ -43,6 +45,9 @@ if (_part isEqualTo "mag2") then {
     _config = if (_muzzle isNotEqualTo "") then {_config >> _muzzle} else {configNull};
 };
 
+// The reload itself, after the swap: the answer said the magazine is in.
+[_unit, getText (_config >> "reloadAction")] call FUNC(reloadGesture);
+
 private _sound = [_config] call FUNC(reloadSound);
 
 if (_sound isEqualTo []) exitWith {false};
@@ -56,11 +61,12 @@ if (GVAR(reloadSoundId) >= 0) then {
     stopSound GVAR(reloadSoundId);
 };
 
-if (missionNamespace getVariable [QGVAR(sounds), true]) then {
-    GVAR(reloadSoundId) = [_layer, missionNamespace getVariable [QGVAR(soundVolume), 1]] call FUNC(playLayer);
+private _scale = ["reload"] call FUNC(soundGain);
+
+if (_scale > 0) then {
+    GVAR(reloadSoundId) = [_layer, _scale] call FUNC(playLayer);
 };
 
 [[_layer], _range min 25, NOISE_GAP, false] call FUNC(sendNoise);
-[_unit, getText (_config >> "reloadAction")] call FUNC(gesture);
 
 true

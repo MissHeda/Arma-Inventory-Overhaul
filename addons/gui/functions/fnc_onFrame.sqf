@@ -7,14 +7,12 @@
  * still what the containers hold - built again when not.
  *
  * That check reads what lies around the unit anew (fnc_readNearby) and compares the signature part by
- * part (fnc_getSignature): the unit's own gear or the list of sections changed, and the window is built
- * again; only the cargo or places of some sections of the loot column changed - another player
- * rearranging a crate -, and only those sections draw their tiles again (fnc_redrawTiles), the rest of
- * the window and every column's scroll stays; a section that cannot be drawn again in place builds the
- * window after all.
- *
- * A frame dragged out from an empty cell (fnc_startBand) is followed here like a drag, and nothing is
- * built while it is held.
+ * part (fnc_refresh, fnc_getSignature): the unit's own gear or the list of sections changed, and the window
+ * is built again; only the cargo or places of some sections changed - another player rearranging a crate -,
+ * and only those sections draw their tiles again (fnc_redrawTiles), with the weight card when they are the
+ * unit's own; the rest of the window and every column's scroll stays; a section that cannot be drawn again
+ * in place builds the window after all. Nothing of it runs more often than SIGNATURE_INTERVAL: the frame
+ * itself only follows the mouse and what is held.
  *
  * The mouse is read here rather than from mouse events: the tiles are drawn by many small controls,
  * and which of them gets an event says little about the cell the mouse is on. The cell comes from the
@@ -30,19 +28,25 @@
  *
  * The window's moves are transactions (fnc_sendMoves): their answers (GVAR(answers)) are finished here
  * once the places they name reached this machine, each by fnc_afterAction - the tiles no longer under
- * way, what moved learnt, the window built again, where it landed lit up, the hint saying what did not
- * go as asked. At each contents check it reports drift to the authorities (fnc_requestNormalize) and
- * stops waiting for moves with no answer after PENDING_TIMEOUT; while its own moves are under way it
- * does not build for a change of contents - their answers do.
+ * way, what moved learnt, the sections it touched drawn again (fnc_refresh), where it landed lit up, the
+ * hint saying what did not go as asked. At each contents check it reports drift to the authorities
+ * (fnc_requestNormalize) and stops waiting for moves with no answer after PENDING_TIMEOUT; while its own
+ * moves are under way it does not draw for a change of contents - their answers do.
  *
  * While magazines are repacked (einv_magazines - only when that addon is loaded) the hands are busy: the
  * repack is followed every frame (einv_magazines_fnc_onFrame) and nothing else is - no hover, no drag, no
  * searching, no answers finished - but the checks whether the window should still be open and whether
  * what it shows is what the containers hold. Another window over this one stops the repack.
  *
- * At each check, after those whether the window should stay open, the looting pose is looked after: a
- * soldier taken away from the loot closes the window, the pose comes back after a weapon change
- * (fnc_poseCheck).
+ * At each check, after those whether the window should stay open, a soldier taken away from the loot
+ * closes the window (fnc_checkTaken).
+ *
+ * What clicks asked for that is heavy and had to rest (fnc_coalesce) is run once per key when its time is up
+ * (fnc_coalesceTick), not while another window lies over this one.
+ *
+ * The hands' queue (fnc_queueMoves) runs every frame while it holds something (fnc_animateQueue), not while another
+ * window lies over this one; the activity chips of the boxes' caption lines move with it and with the search
+ * (fnc_animateStatus).
  *
  * The sound of each answer is played as it is finished (fnc_afterAction, fnc_feelAnswer).
  *
@@ -52,6 +56,10 @@
  * window lies over this one), and whether the focus is given back to the sink for every control that
  * has it ("focusAll", only while no mouse button is held: a button pressed keeps the focus until its
  * click came).
+ *
+ * With "Log window timings (debug)" on, fnc_frame times it and each part says where it begins (NOTE_PHASE,
+ * fnc_notePhase): start, queue, lift, drag, hover, search, warm, answers, check, contents. Off, that is an
+ * isNil each.
  *
  * Arguments:
  * None - it is called by the driver of the frame (fnc_startFrame)
@@ -69,11 +77,18 @@
 // which cannot hold a display.
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
-// Gone without its unload handler having run - the frame must not outlive it, nor the camera
-// (fnc_stopFrame ends whichever driver called this).
+// Gone without its unload handler having run - the frame must not outlive it
+// (fnc_stopFrame ends whichever driver called this). The inventory's own dialog always runs its unload
+// handler: one that did not was taken away with no event at all, and is ended here as any other close, so
+// the RPT says so and nothing of it is left open. A display the window is a guest on ends it from its own
+// close (the Arsenal's fnc_onClosed).
 if (isNull _display) exitWith {
-    call FUNC(stopFrame);
-    call FUNC(cameraStop);
+    if (call FUNC(isInventoryMode)) then {
+        GVAR(closeReason) = "display lost - it went without its unload event";
+        [displayNull, -1] call FUNC(onUnload);
+    } else {
+        call FUNC(stopFrame);
+    };
 };
 
 // Kit windows that went inside an event of their own - raised, closed, drawn again: hidden at once, and
@@ -83,6 +98,20 @@ private _trash = uiNamespace getVariable [QGVAR(windowTrash), []];
 if (_trash isNotEqualTo []) then {
     {ctrlDelete _x} forEach _trash;
     uiNamespace setVariable [QGVAR(windowTrash), []];
+};
+
+// Clip groups of pictures the wheel turned over: the engine scrolled them after the handler put them back, so
+// they go back to the top again before this frame is drawn, for UNSCROLL_FRAMES frames (fnc_unscroll).
+private _unscroll = uiNamespace getVariable [QGVAR(unscroll), []];
+
+if (_unscroll isNotEqualTo []) then {
+    _unscroll = _unscroll select {!isNull (_x select 0) && {diag_frameNo <= (_x select 1)}};
+
+    {
+        (_x select 0) ctrlSetScrollValues [0, 0];
+    } forEach _unscroll;
+
+    uiNamespace setVariable [QGVAR(unscroll), _unscroll];
 };
 
 // Groups made a frame ago know their height now: each goes back to where it was scrolled, in screen
@@ -114,35 +143,53 @@ if (_restore isNotEqualTo []) then {
     uiNamespace setVariable [QGVAR(scrollRestore), _later];
 };
 
+// The turned pictures of turned tiles lie on the display: they follow their tiles' scroll and windows (fnc_syncTurned).
+[] call FUNC(syncTurned);
+
 private _mouse = getMousePosition;
 private _now = diag_tickTime;
 private _check = _now >= GVAR(nextCheck);
+
+// A vanilla inventory that came up over this window - another mod's doing - is closed again. The display's
+// load event does that already; this is for one it missed.
+if (_check) then {
+    [] call FUNC(guardVanilla);
+};
 
 // The vanilla inventory closes when its unit dies or passes out, and when the player stops being it.
 // A living person walks off by themselves, unlike a crate: the window goes when they are gone, out of
 // reach, in a vehicle, taken by someone else (ACE dragging, carrying, escorting), when their backpack is
 // no longer on them, or when they may no longer be opened as shown (fnc_canOpenPerson). One who dies
 // meanwhile is a body now, and the window stays while it lies in reach. Asked while another window lies
-// over this one as well: the person may walk off meanwhile.
+// over this one as well: the person may walk off meanwhile. The answer is why, for the RPT (fnc_onUnload),
+// "" to stay open.
 private _fnc_mustClose = {
     // A window with its own rules for it (the Arsenal's: its unit is not ACE_player in Eden or Zeus).
     if ("keepOpen" in GVAR(hooks)) exitWith {
-        !(["keepOpen", [], false] call FUNC(hook))
+        ["", "the window's own rule (keepOpen hook)"] select !(["keepOpen", [], false] call FUNC(hook))
     };
 
-    !alive GVAR(unit)
-    || {GVAR(unit) isNotEqualTo ACE_player}
-    || {GVAR(unit) getVariable ["ACE_isUnconscious", false]}
-    || {GVAR(personMode) isNotEqualTo "" && {
-        private _person = GVAR(person);
+    if (!alive GVAR(unit)) exitWith {"the unit died"};
+    if (GVAR(unit) isNotEqualTo ACE_player) exitWith {"the player is no longer this unit (ACE_player changed)"};
+    if (GVAR(unit) getVariable ["ACE_isUnconscious", false]) exitWith {"the unit is unconscious"};
+    if (GVAR(personMode) isEqualTo "") exitWith {""};
 
-        !([GVAR(unit), _person, true] call FUNC(personInReach))
-        || {GVAR(personMode) isEqualTo "backpack" && {GVAR(container) isNotEqualTo backpackContainer _person}}
-        || {alive _person && {
-            private _mode = [_person] call FUNC(canOpenPerson);
-            _mode isEqualTo "" || {_mode isEqualTo "backpack" && {GVAR(personMode) isEqualTo "whole"}}
-        }}
-    }}
+    private _person = GVAR(person);
+
+    if !([GVAR(unit), _person, true] call FUNC(personInReach)) exitWith {"the person is out of reach"};
+
+    if (GVAR(personMode) isEqualTo "backpack" && {GVAR(container) isNotEqualTo backpackContainer _person}) exitWith {
+        "the person's backpack is no longer on them"
+    };
+
+    if (alive _person && {
+        private _mode = [_person] call FUNC(canOpenPerson);
+        _mode isEqualTo "" || {_mode isEqualTo "backpack" && {GVAR(personMode) isEqualTo "whole"}}
+    }) exitWith {
+        "the person may no longer be opened like this"
+    };
+
+    ""
 };
 
 // Another window over this one - one an option of another mod's context menu opened, or Enhanced First
@@ -159,6 +206,10 @@ if (_covered isNotEqualTo GVAR(covered)) then {
         if (GVAR(dragging)) then {
             GVAR(dragTarget) = [];
             [_display] call FUNC(endDrag);
+        };
+
+        if (GVAR(stripDrag) isNotEqualTo []) then {
+            [_display, true] call FUNC(endStripDrag);
         };
 
         GVAR(press) = [];
@@ -185,17 +236,46 @@ if (_covered) exitWith {
 
     GVAR(nextCheck) = _now + CHECK_INTERVAL;
 
-    if (call _fnc_mustClose) then {
-        _display closeDisplay 2;
+    private _why = call _fnc_mustClose;
+
+    if (_why isNotEqualTo "") then {
+        [_why] call FUNC(closeDisplay);
     };
+};
+
+// What clicks asked for that is heavy - a build, the pages, the search's fade - and had to rest (fnc_coalesce): one run per
+// key when its time is up. Not under another window, which keeps still.
+[] call FUNC(coalesceTick);
+
+// The hands' queue: the first action is sent when its time is up (fnc_animateQueue). Not under
+// another window, and the time it stood still does not count.
+if (GVAR(handQueue) isNotEqualTo []) then {
+    NOTE_PHASE("queue");
+    [_display, _now] call FUNC(animateQueue);
+    NOTE_PHASE("start");
+};
+
+// An open context menu made again on top once something was made on the display after it (fnc_raiseMenu). Asked
+// only while one is open: that is all it answers to, and it runs twice every frame.
+if (GVAR(menuState) isNotEqualTo []) then {
+    [] call FUNC(raiseMenu);
 };
 
 // A click into a column gives it the focus, and the engine draws the focused control over every other -
 // the context menu, the inspect card, the dragged ghost and the name at the mouse would end up under
 // it. The focus goes straight back to the search field's sink (fnc_drawFilter), unless the field is
-// being typed in. A window with buttons of its own in groups (the "focusAll" flag) has every control but
-// a field sent back - while no mouse button is held: a button pressed keeps the focus until its click
-// came, or the click would be lost.
+// being typed in. So does a button of the window's own in a group - a section's Sort, a kit
+// window's cross - once its click came: it kept the focus, and its column drew its tiles over the
+// context menu and the name at the mouse until the next build (a tester's report on 0.4.6). A window
+// with buttons of its own in groups (the "focusAll" flag) has every control but a field sent back. Both
+// only while no mouse button is held: a button pressed keeps the focus until its click came, or the
+// click would be lost. The context menu's own focus stays where it is (fnc_openMenu).
+// While something is held the focus goes back whatever the buttons say (fnc_takeFocus): the ghost and the footprint
+// lie over everything only while no other control has it.
+if (GVAR(dragging) || {GVAR(stripDrag) isNotEqualTo []}) then {
+    [_display] call FUNC(takeFocus);
+};
+
 private _focus = focusedCtrl _display;
 
 if (!isNull _focus) then {
@@ -207,8 +287,29 @@ if (!isNull _focus) then {
             (["focusAll", [], false] call FUNC(hook)) && {inputMouse 0 == 0} && {inputMouse 1 == 0}
             && {ctrlType _focus != 2} && {_focus isNotEqualTo _sink}
         }
+        || {
+            !isNull _sink && {_focus isNotEqualTo _sink} && {inputMouse 0 == 0} && {inputMouse 1 == 0}
+            && {!(ctrlType _focus in [2, 4])} && {!isNull ctrlParentControlsGroup _focus}
+            && {
+                // The group it lies in at the top, one the window made (fnc_uiCreate) - not another mod's.
+                private _group = ctrlParentControlsGroup _focus;
+                private _outer = _group;
+
+                while {!isNull _group} do {
+                    _outer = _group;
+                    _group = ctrlParentControlsGroup _group;
+                };
+
+                _outer in (uiNamespace getVariable [QGVAR(created), []])
+                && {!(_outer in (uiNamespace getVariable [QGVAR(menu), []]))}
+            }
+        }
     ) then {
         ctrlSetFocus _sink;
+
+        // The focused control was drawn over the name at the mouse meanwhile; it is made again on top (fnc_raiseTooltip).
+        uiNamespace setVariable [QGVAR(tipStale), true];
+        [] call FUNC(raiseTooltip);
     };
 };
 
@@ -221,8 +322,10 @@ if (!isNil QEFUNC(magazines,isBusy) && {[] call EFUNC(magazines,isBusy)}) exitWi
 
     GVAR(nextCheck) = _now + CHECK_INTERVAL;
 
-    if (call _fnc_mustClose) exitWith {
-        _display closeDisplay 2;
+    private _why = call _fnc_mustClose;
+
+    if (_why isNotEqualTo "") exitWith {
+        [_why] call FUNC(closeDisplay);
     };
 
     if (_now < GVAR(nextSignature) || {count GVAR(inFlight) > 0}) exitWith {};
@@ -282,48 +385,64 @@ if (GVAR(windowMove) isNotEqualTo []) then {
     };
 };
 
-// A press on a tile becomes a drag once the mouse moves; a drag follows the mouse every frame.
-if (GVAR(press) isNotEqualTo [] && {!GVAR(dragging)}) then {
+// A press on a tile becomes a drag once the mouse moves; a drag follows the mouse every frame. A press on a
+// filled slot of the hotbar strip carries the slot's number as its tenth element: it drags the binding.
+if (GVAR(press) isNotEqualTo [] && {!GVAR(dragging)} && {GVAR(stripDrag) isEqualTo []}) then {
+    NOTE_PHASE("lift");
+
     (GVAR(press) select 2) params ["_startX", "_startY"];
 
     if (abs ((_mouse select 0) - _startX) > DRAG_THRESHOLD || {abs ((_mouse select 1) - _startY) > DRAG_THRESHOLD}) then {
-        [_display] call FUNC(startDrag);
+        if ((GVAR(press) param [9, -1]) >= 0) then {
+            // The button must still be down: a press whose release never reached the window is no drag.
+            if (inputMouse 0 > 0) then {
+                [_display] call FUNC(startStripDrag);
+            } else {
+                GVAR(press) = [];
+            };
+        } else {
+            [_display] call FUNC(startDrag);
+        };
     };
 };
 
 // What a window that attached has to do every frame, also while something is dragged (its camera, its
 // scrolling list).
-["frame", [_display, _mouse, _now]] call FUNC(hook);
+if ("frame" in GVAR(hooks)) then {
+    ["frame", [_display, _mouse, _now]] call FUNC(hook);
+};
+
+// A hotbar slot's binding held (fnc_startStripDrag): it follows the mouse; let go outside the window - where
+// no event reaches - it ends all the same.
+NOTE_PHASE("drag");
+
+if (GVAR(stripDrag) isNotEqualTo []) exitWith {
+    GVAR(lastMouse) = _mouse;
+
+    if (inputMouse 0 == 0) then {
+        [_display] call FUNC(endStripDrag);
+    } else {
+        [_display, _mouse] call FUNC(updateStripDrag);
+    };
+};
 
 if (GVAR(dragging)) exitWith {
     GVAR(lastMouse) = _mouse;
     [_display, _mouse] call FUNC(updateDrag);
-};
 
-// A press on an empty cell of a column becomes a frame once the mouse moves; the frame follows the mouse
-// every frame. Let go outside the window - where no event reaches - it ends all the same.
-if (GVAR(bandPress) isNotEqualTo [] && {!GVAR(band)}) then {
-    (GVAR(bandPress) select 1) params ["_bandStartX", "_bandStartY"];
-
-    if (inputMouse 0 == 0) then {
-        // The button came up where no click reached us: it was a click on an empty cell all the same.
-        GVAR(bandPress) = [];
-    } else {
-        if (abs ((_mouse select 0) - _bandStartX) > DRAG_THRESHOLD || {abs ((_mouse select 1) - _bandStartY) > DRAG_THRESHOLD}) then {
-            [_display] call FUNC(startBand);
-        };
+    // A sealed block under the drag says why it takes nothing (the chips below are not reached while it is held).
+    if (GVAR(statusLive)) then {
+        [_display, _now, true] call FUNC(animateStatus);
     };
 };
 
-if (GVAR(band)) exitWith {
-    GVAR(lastMouse) = _mouse;
-
-    if (inputMouse 0 == 0) then {
-        [_display] call FUNC(endBand);
-    } else {
-        [_display, _mouse] call FUNC(updateBand);
-    };
+// A press on an empty cell is a click and nothing more: let go outside the window, where no event reaches,
+// it is forgotten.
+if (GVAR(emptyPress) isNotEqualTo [] && {inputMouse 0 == 0}) then {
+    GVAR(emptyPress) = [];
 };
+
+NOTE_PHASE("hover");
 
 // Scrolling a column moves the tiles under a mouse that stands still, so the hover is looked at again
 // on every check as well.
@@ -332,30 +451,104 @@ if (_check || {_mouse isNotEqualTo GVAR(lastMouse)}) then {
     [_display, _mouse] call FUNC(updateHover);
 };
 
-// The name at the mouse, or the comparison card in its place, stays beside the pointer - on its left near the
-// screen's right edge, above it near the bottom. Whichever shows (fnc_updateHover) says how wide and high it is.
+// The name at the mouse, or the comparison card in its place, stays centred under the pointer - pushed in from a screen edge
+// rather than thrown to the pointer's other side, which made it jump from right to left and back as names of other widths came
+// along; above the pointer only where it would run off the bottom. Whichever shows (fnc_updateHover) says how wide and high it is.
 private _tip = uiNamespace getVariable [QGVAR(tipShown), controlNull];
+private _tipUp = !isNull _tip && {ctrlShown _tip};
 
-if (!isNull _tip && {ctrlShown _tip} && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
+// An open menu or the colour popover is drawn over everything only while a control in it holds the focus (fnc_openMenu,
+// fnc_openPaletteMenu). Should the focus go elsewhere - a deleted control's, a click that reached the window under it -, the layer
+// sinks under the columns and they take every click meant for it: the focus goes back to the layer.
+(uiNamespace getVariable [QGVAR(menuFocus), []]) params [["_menuLayer", controlNull], ["_menuFocus", controlNull]];
+
+if (GVAR(menuState) isNotEqualTo [] && {!isNull _menuLayer} && {!isNull _menuFocus}) then {
+    private _focused = focusedCtrl _display;
+    private _inLayer = false;
+
+    while {!isNull _focused} do {
+        if (_focused isEqualTo _menuLayer) exitWith {_inLayer = true};
+
+        _focused = ctrlParentControlsGroup _focused;
+    };
+
+    if (!_inLayer) then {
+        ctrlSetFocus _menuFocus;
+    };
+};
+
+if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
     GVAR(tooltipAt) = _mouse;
     _mouse params ["_mouseX", "_mouseY"];
 
     private _width = _tip getVariable [QGVAR(width), 0];
     private _height = _tip getVariable [QGVAR(height), UNIT];
-    private _tipX = _mouseX + TOOLTIP_DX;
+    private _tipX = ((_mouseX - _width / 2) min (safezoneX + safezoneW - TOOLTIP_MARGIN - _width)) max (safezoneX + TOOLTIP_MARGIN);
     private _tipY = _mouseY + TOOLTIP_DY;
 
-    if (_tipX + _width > safezoneX + safezoneW) then {_tipX = _mouseX - TOOLTIP_DX - _width};
-    if (_tipY + _height > safezoneY + safezoneH) then {_tipY = (_mouseY - TOOLTIP_DY - _height) max safezoneY};
+    if (_tipY + _height > safezoneY + safezoneH - TOOLTIP_MARGIN) then {
+        _tipY = (_mouseY - UNIT * 0.3 - _height) max safezoneY;
+    };
 
     _tip ctrlSetPosition [_tipX, _tipY];
     _tip ctrlCommit 0;
 };
 
-// Searching, every frame: the ring fills and the glass goes round, and the item shows once its time is
+// Searching, every frame: the item shows once its time is
 // up (fnc_animateSearch). Not while something is held: a rebuild would pull it from under the mouse.
+NOTE_PHASE("search");
+
 if (GVAR(press) isEqualTo []) then {
-    [_display, _now] call FUNC(animateSearch);
+    // Nothing being searched: only the clock of the pause is kept (fnc_animateSearch does no more than that
+    // with no search under way).
+    if (GVAR(searchQueue) isEqualTo [] && {GVAR(searchStarted) < 0}) then {
+        GVAR(searchLast) = _now;
+    } else {
+        [_display, _now] call FUNC(animateSearch);
+    };
+
+    // Nothing held, no menu open: one more slot's drag highlight is made and kept hidden, so that lifting
+    // an item makes none (fnc_warmTargets). Not while a menu is open - it would be made again over them.
+    // Not once every slot has had its turn.
+    if (
+        (uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []
+        && {(uiNamespace getVariable [QGVAR(glowNext), 0]) < count (uiNamespace getVariable [QGVAR(slots), []])}
+    ) then {
+        NOTE_PHASE("warm");
+        [_display] call FUNC(warmTargets);
+    };
+};
+
+// The chips in the boxes' caption lines: the ring goes round, the count and the time are written when they changed
+// (fnc_animateStatus).
+if (GVAR(statusLive)) then {
+    [_display, _now] call FUNC(animateStatus);
+};
+
+// The hover above may have lit a slot with a ring made on the display: the menu goes over it in this frame.
+if (GVAR(menuState) isNotEqualTo []) then {
+    [] call FUNC(raiseMenu);
+};
+
+// The name at the mouse - a button's tip too - over whatever a click drew since or gave the focus (a column refreshed after Sort,
+// a part drawn again): every frame, as the menu. It does nothing while it is the last control made and nothing marked it stale.
+// While a mouse button is held the engine draws the group pressed on over everything, whatever was made after it - the name went
+// behind the tile it belongs to. It hides for the press, as a tooltip does, and comes back fresh on the release.
+private _tipShown = uiNamespace getVariable [QGVAR(tipShown), controlNull];
+
+if (inputMouse 0 != 0 || {inputMouse 1 != 0}) then {
+    if (!isNull _tipShown && {ctrlShown _tipShown}) then {
+        _tipShown ctrlShow false;
+        GVAR(tipHeld) = true;
+    };
+} else {
+    if (GVAR(tipHeld)) then {
+        GVAR(tipHeld) = false;
+        GVAR(lastMouse) = getMousePosition;
+        [_display, GVAR(lastMouse), true] call FUNC(updateHover);
+    };
+
+    [] call FUNC(raiseTooltip);
 };
 
 // ----- Answers to the window's moves -----
@@ -364,6 +557,8 @@ if (GVAR(press) isEqualTo []) then {
 // seconds after it came (fnc_onAnswer): a tile never shows on a first-fit cell for a frame because its
 // cargo arrived before its place. Every frame, so a move in single player - answered in the frame it was
 // asked for - shows at once; not while something is held: a build would pull it from under the mouse.
+NOTE_PHASE("answers");
+
 if (GVAR(answers) isNotEqualTo [] && {GVAR(press) isEqualTo []}) then {
     private _ready = [];
     private _waiting = [];
@@ -391,8 +586,8 @@ if (GVAR(answers) isNotEqualTo [] && {GVAR(press) isEqualTo []}) then {
     GVAR(answers) = _waiting;
 
     // Each handed to fnc_afterAction, in the order they came: its tiles no longer under way, what moved
-    // learnt, the window built again with where it landed lit up, the hint saying what did not go as
-    // asked.
+    // learnt, the sections it touched drawn again with where it landed lit up, the hint saying what did
+    // not go as asked.
     {
         _x call FUNC(afterAction);
     } forEach _ready;
@@ -400,21 +595,25 @@ if (GVAR(answers) isNotEqualTo [] && {GVAR(press) isEqualTo []}) then {
 
 if (!_check) exitWith {};
 
+NOTE_PHASE("check");
+
 GVAR(nextCheck) = _now + CHECK_INTERVAL;
 
-if (call _fnc_mustClose) exitWith {
-    _display closeDisplay 2;
+private _why = call _fnc_mustClose;
+
+if (_why isNotEqualTo "") exitWith {
+    [_why] call FUNC(closeDisplay);
 };
 
-// The looting pose: the soldier taken away from the loot closes the window; a pose that is not reached yet,
-// or lost to a weapon change, is looked after (fnc_poseCheck).
-if ([_display] call FUNC(poseCheck)) exitWith {};
+// The soldier taken away from the loot closes the window (fnc_checkTaken).
+if ([_display] call FUNC(checkTaken)) exitWith {};
 
-// Not while a tile is held, or a frame is about to be dragged out: a rebuild would pull it from under the
-// mouse.
-if (_now < GVAR(nextSignature) || {GVAR(press) isNotEqualTo []} || {GVAR(bandPress) isNotEqualTo []}) exitWith {};
+// Not while a tile is held: a rebuild would pull it from under the mouse.
+if (_now < GVAR(nextSignature) || {GVAR(press) isNotEqualTo []}) exitWith {};
 
 GVAR(nextSignature) = _now + SIGNATURE_INTERVAL;
+
+NOTE_PHASE("contents");
 
 // Holders whose places disagree with what they hold are reported to their authorities
 // (fnc_requestNormalize, from what fnc_drawCompartments noted).
@@ -449,31 +648,7 @@ if (count GVAR(inFlight) > 0) exitWith {};
 // What lies around now - a pile that came or went changes the list of sections.
 call FUNC(readNearby);
 
-private _signature = call FUNC(getSignature);
-private _before = GVAR(signatureParts);
-
-// The unit's own gear, or which sections the loot column shows: the window is built again.
-if (
-    _before isEqualTo [] || {(_signature select 0) isNotEqualTo (_before select 0)}
-    || {(_signature select 1) isNotEqualTo (_before select 1)} || {GVAR(opened) findIf {isNull (_x select 1)} >= 0}
-    || {count (_signature select 2) != count (_before select 2)}
-) exitWith {
-    [_display] call FUNC(build);
-};
-
-// Only what some sections of the loot column hold or where it lies: those sections draw their tiles again.
-private _changed = [];
-
-{
-    if (_x isNotEqualTo ((_before select 2) param [_forEachIndex, []])) then {
-        _changed pushBack (_x select 0);
-    };
-} forEach (_signature select 2);
-
-if (_changed isEqualTo []) exitWith {};
-
-if ([_changed] call FUNC(redrawTiles)) then {
-    GVAR(signatureParts) = _signature;
-} else {
-    [_display] call FUNC(build);
-};
+// The unit's own gear, or which sections the columns show: the window is built again. Only what some
+// sections hold or where it lies: those sections draw their tiles again, and the weight card when it is the
+// unit's own (fnc_refresh).
+[_display] call FUNC(refresh);

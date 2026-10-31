@@ -9,21 +9,136 @@
 #define IDC_FIRST     9602
 
 // A top-level control with this id, and everything in it, survives every build (fnc_build): a window that
-// attaches to this one (the Arsenal) keeps its catalog in such a control rather than make it again each
-// time.
+// attaches to this one may keep a control in such an id rather than make it again each time.
 #define IDC_KEEP      9603
 
-// The vanilla inventory (RscDisplayInventory), where a player who switched this window off still opens
-// persons (fnc_openPerson).
+// The accent colour (fnc_accentColour, issue 14): the player's own active element colour from the profile (Options > Game >
+// Colors), which every theme takes as its accent. One too dark for the near-black panes is brightened until its luminance
+// (gamma 2.2) reaches ACCENT_MIN_LUMA - about 3.3 : 1 against a pane of 0.05, which Arma's own red (0.8, 0, 0) just keeps; the
+// profile with none gives ACCENT_FALLBACK, the orange the mod always had. The shades: "soft" is the accent as a film of
+// ACCENT_SOFT_ALPHA, "hover" is the accent lighter by ACCENT_HOVER_MIX towards white, and "on" is the text on a fill of it,
+// ACCENT_INK_DARK or ACCENT_INK_LIGHT by what contrasts more.
+#define ACCENT_FALLBACK [0.84, 0.54, 0.1, 1]
+#define ACCENT_MIN_LUMA 0.12
+#define ACCENT_MIN_CONTRAST 3.3
+#define ACCENT_SOFT_ALPHA 0.2
+#define ACCENT_HOVER_MIX 0.25
+#define ACCENT_INK_DARK [0.05, 0.05, 0.05, 1]
+#define ACCENT_INK_LIGHT [1, 1, 1, 1]
+
+// The palette (fnc_palette, fnc_openPaletteMenu): what a player may set about the window's colours. The panels' alpha the themes
+// start with is PANEL_ALPHA; a player may make them see-through down to PALETTE_ALPHA_MIN (0: fully see-through, 100 %), and the
+// item tiles' alpha the same way (the "Tile transparency" slider, the palette's ninth entry). A colour is picked as hue,
+// saturation and value (a square of saturation across and value down, a strip of hues beside it, R G B and hex fields): the
+// mouse moves in PALETTE_HUE_STEPS steps along the strip and PALETTE_SV_STEPS along each side of the square, the transparencies
+// in steps of PALETTE_ALPHA_STEP; typed values are kept as they are.
+// The panels' colour stays dark so that the light text on them stays readable (fnc_panelColour): its value is at most
+// PALETTE_PANEL_VALUE_MAX (a luminance of 0.07 at the very most, 8 : 1 against white), PANEL_COLOR is what it is without a choice.
+// The cells and the tiles are surfaces under text as well and are cut at the same value. The text, its dimmer shades and the inks
+// beside it are lifted where they would fall below PALETTE_CONTRAST_TEXT, PALETTE_CONTRAST_TEXT2 (the second line) and
+// PALETTE_CONTRAST_MUTED to 1 against the lightest of the panels, the cells and the tiles (fnc_theme), and the accent is lifted
+// until it keeps ACCENT_MIN_CONTRAST against the panel it sits on (fnc_accentColour).
+#define PANEL_ALPHA 0.92
+#define PANEL_COLOR [0.05, 0.05, 0.05]
+#define PALETTE_ALPHA_MIN 0
+#define PALETTE_ALPHA_STEP 0.01
+#define PALETTE_HUE_STEPS 360
+#define PALETTE_SV_STEPS 100
+#define PALETTE_PANEL_VALUE_MAX 0.3
+#define PALETTE_CONTRAST_TEXT 4.5
+#define PALETTE_CONTRAST_TEXT2 4.5
+#define PALETTE_CONTRAST_MUTED 3
+
+// The palette's colours by number - 0 accent, 1 secondary, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines (fnc_paletteSet,
+// fnc_paletteSlide, fnc_openPaletteMenu): PALETTE_COLOURS of them, each one's id (what its button takes away, fnc_paletteSet
+// "reset"), where it lies in einv_gui_palette (the transparencies, at 2 and 8, are no colour) and how light it may be - the surfaces under
+// the text (panels, cells, tiles) at most PALETTE_PANEL_VALUE_MAX. PALETTE_UNSET is the palette with nothing chosen.
+#define PALETTE_COLOURS 10
+#define PALETTE_IDS ["accent", "secondary", "panel", "cells", "tiles", "text", "lines", "titleEnd", "title", "panelEnd"]
+#define PALETTE_SLOTS [0, 1, 3, 4, 5, 6, 7, 10, 12, 13]
+#define PALETTE_VALUE_MAX [1, 1, PALETTE_PANEL_VALUE_MAX, PALETTE_PANEL_VALUE_MAX, PALETTE_PANEL_VALUE_MAX, 1, 1, 1, 1, PALETTE_PANEL_VALUE_MAX]
+// [accent, secondary, panels' alpha, panels, cells, tiles (no longer offered: the setup colours the tiles by category), text,
+// lines, tiles' alpha, cells' alpha, the titles' gradient end, the style picked last ("" when changed by hand since), the titles'
+// colour, the panels' gradient end, the secondary films' alpha, the lines' alpha]. A row's gradient is on while its end is set.
+#define PALETTE_UNSET [[], [], -1, [], [], [], [], [], -1, -1, [], "", [], [], -1, -1, -1, -1, []]
+// The window as it ships: the Arma 3 style (fnc_paletteStyles). What a new
+// player starts with, what Reset takes things back to, and all there is where players may not pick their colours.
+// Where the titles' gradient shows (palette slot 17, fnc_uiLabel): a sum of these. Unset, GRADIENT_PARTS_DEFAULT. Slot 16 held
+// an older, coarser set and is no longer read.
+#define GRADIENT_WINDOW 1
+#define GRADIENT_COLUMNS 2
+#define GRADIENT_SECTIONS 4
+#define GRADIENT_CAPTIONS 8
+#define GRADIENT_TABS 16
+#define GRADIENT_NAMES 32
+#define GRADIENT_WEAPONS 64
+#define GRADIENT_STACKS 128
+#define GRADIENT_AMMO 256
+#define GRADIENT_KEYS 512
+#define GRADIENT_WEIGHT 1024
+#define GRADIENT_VALUES 2048
+#define GRADIENT_HOVER 4096
+#define GRADIENT_NOTES 8192
+#define GRADIENT_BUTTONS 16384
+#define GRADIENT_KEYHINTS 32768
+#define GRADIENT_MENUS 65536
+#define GRADIENT_WEAPONAMMO 131072
+// Surfaces rather than words (fnc_gradientSurface): the bars' fills, the buttons and chips, the line under a header button.
+#define GRADIENT_BARS 262144
+#define GRADIENT_CHIPS 524288
+#define GRADIENT_LINES 1048576
+#define GRADIENT_PARTS_DEFAULT 4127
+#define GRADIENT_PARTS_ALL 2097151
+// How many parts there are, and the colours of their own (palette slot 18, sparse: [[part, start, end], ...], the part by its place
+// 0 to GRADIENT_PART_COUNT - 1, start and end [] for the main gradient's): each part's start and end are picker colours of their own,
+// numbered PALETTE_COLOURS + part * 2 (+ 1 for the end) (fnc_paletteInfo, fnc_paletteSet, fnc_openPaletteMenu).
+#define GRADIENT_PART_COUNT 21
+#define GRADIENT_PART_COLOURS 42
+// The colour popover's checkboxes for them, in groups of a few rows, two to a row: [group's words, [[part, words, tip], ...]].
+#define GRADIENT_PART_GROUPS [[LLSTRING(Palette_Group_Window), [[GRADIENT_WINDOW, LLSTRING(Palette_Part_Window), LLSTRING(Palette_Part_Window_Tip)], [GRADIENT_COLUMNS, LLSTRING(Palette_Part_Columns), LLSTRING(Palette_Part_Columns_Tip)], [GRADIENT_SECTIONS, LLSTRING(Palette_Part_Sections), LLSTRING(Palette_Part_Sections_Tip)], [GRADIENT_CAPTIONS, LLSTRING(Palette_Part_Captions), LLSTRING(Palette_Part_Captions_Tip)], [GRADIENT_TABS, LLSTRING(Palette_Part_Tabs), LLSTRING(Palette_Part_Tabs_Tip)]]], [LLSTRING(Palette_Group_Items), [[GRADIENT_NAMES, LLSTRING(Palette_Part_Names), LLSTRING(Palette_Part_Names_Tip)], [GRADIENT_WEAPONS, LLSTRING(Palette_Part_Weapons), LLSTRING(Palette_Part_Weapons_Tip)], [GRADIENT_STACKS, LLSTRING(Palette_Part_Stacks), LLSTRING(Palette_Part_Stacks_Tip)], [GRADIENT_AMMO, LLSTRING(Palette_Part_Ammo), LLSTRING(Palette_Part_Ammo_Tip)], [GRADIENT_WEAPONAMMO, LLSTRING(Palette_Part_WeaponAmmo), LLSTRING(Palette_Part_WeaponAmmo_Tip)], [GRADIENT_KEYS, LLSTRING(Palette_Part_Keys), LLSTRING(Palette_Part_Keys_Tip)]]], [LLSTRING(Palette_Group_Info), [[GRADIENT_WEIGHT, LLSTRING(Palette_Part_Weight), LLSTRING(Palette_Part_Weight_Tip)], [GRADIENT_VALUES, LLSTRING(Palette_Part_Values), LLSTRING(Palette_Part_Values_Tip)], [GRADIENT_HOVER, LLSTRING(Palette_Part_Hover), LLSTRING(Palette_Part_Hover_Tip)], [GRADIENT_NOTES, LLSTRING(Palette_Part_Notes), LLSTRING(Palette_Part_Notes_Tip)]]], [LLSTRING(Palette_Group_Controls), [[GRADIENT_BUTTONS, LLSTRING(Palette_Part_Buttons), LLSTRING(Palette_Part_Buttons_Tip)], [GRADIENT_KEYHINTS, LLSTRING(Palette_Part_KeyHints), LLSTRING(Palette_Part_KeyHints_Tip)], [GRADIENT_MENUS, LLSTRING(Palette_Part_Menus), LLSTRING(Palette_Part_Menus_Tip)]]], [LLSTRING(Palette_Group_Surfaces), [[GRADIENT_BARS, LLSTRING(Palette_Part_Bars), LLSTRING(Palette_Part_Bars_Tip)], [GRADIENT_CHIPS, LLSTRING(Palette_Part_Chips), LLSTRING(Palette_Part_Chips_Tip)], [GRADIENT_LINES, LLSTRING(Palette_Part_Lines), LLSTRING(Palette_Part_Lines_Tip)]]]]
+#define PALETTE_DEFAULT [[], [], -1, [], [], [], [], [], -1, -1, [], "classic", [], [], -1, -1, -1, -1, []]
+// Where each transparency lies in the palette, by its slider's id.
+#define PALETTE_ALPHAS [["alpha", 2], ["cellAlpha", 9], ["tileAlpha", 8], ["secondaryAlpha", 14], ["linesAlpha", 15]]
+
+// The vanilla inventory (RscDisplayInventory), which this mod keeps closed (fnc_guardVanilla).
 #define IDD_VANILLA_INVENTORY 602
+
+// How often every client looks whether a vanilla inventory is on the screen that its load event missed,
+// in seconds (XEH_postInit, fnc_guardVanilla).
+#define GUARD_INTERVAL 0.25
+
+// How many frames fnc_open waits for a vanilla inventory to go before it makes the window: made while
+// one is open, the window would be its child dialog and close with it (fnc_guardVanilla).
+#define OPEN_TRIES 10
+
+// The window made again after the vanilla inventory under it was closed takes it down with it
+// (fnc_guardVanilla) - not again within this many seconds, so two mods fighting over it cannot loop.
+#define REOPEN_PAUSE 2
+
+// The unit's handler is put behind every other handler of the same event (fnc_initUnit): once this many
+// seconds after the mission's display exists - mods add theirs in their own postInit or in a script that
+// waits for that display - and again when a vanilla inventory came up although the handler had answered
+// (fnc_guardVanilla), not more often than every HANDLER_PAUSE seconds, so two mods that both want to be
+// last cannot loop.
+#define HANDLER_RECHECK 3
+#define HANDLER_PAUSE 5
+
+// A vanilla inventory that comes up within this many frames of the handler's answer belongs to that
+// opening: the handler was asked and another handler's answer let the engine open the display anyway. One
+// that comes later, or with no answer at all, was not asked for by the handler (fnc_guardVanilla).
+#define ASK_FRAMES 12
 
 // DIK codes the window looks at itself
 #define DIK_ESCAPE 1
 #define DIK_RETURN 28
 #define DIK_NUMPADENTER 156
 #define DIK_A      30
+#define DIK_G      34
+#define DEFAULT_QUICK_KEY 33
 #define DIK_R      19
 #define DIK_DELETE 211
+#define DIK_PRIOR  201
+#define DIK_NEXT   209
 
 // The Gear key (I) closes the window again - but not the press that opened it, still held down or
 // repeating, which arrives within this many seconds.
@@ -32,6 +147,21 @@
 // How often the open window checks whether it should still be open, in seconds.
 #define CHECK_INTERVAL 0.25
 
+// What a click may ask for when it is clicked fast (fnc_coalesce): the least time between two runs of the same heavy
+// action, in seconds - and the share of its own duration it is left alone for after a run, so a slow build is
+// run less often than a quick one. A search typed in waits COALESCE_TYPING after the last key; a request to the
+// authority or a plan of a whole container (Sort) rests COALESCE_REQUEST.
+#define COALESCE_GAP 0.1
+#define COALESCE_REST 1.5
+#define COALESCE_TYPING 0.15
+#define COALESCE_REQUEST 0.3
+
+// How many timed frames make one line of the timing log (fnc_logFrame).
+#define FRAME_LOG_COUNT 1500
+
+// Where a timed frame's time goes (fnc_notePhase): only while fnc_frame times it, nothing but an isNil otherwise.
+#define NOTE_PHASE(NAME) if (!isNil QGVAR(phase)) then {[NAME] call FUNC(notePhase)}
+
 // How often it compares what the containers hold with what it shows (fnc_getSignature), in seconds.
 // Rarely enough that reading a full crate's cargo costs nothing noticeable.
 #define SIGNATURE_INTERVAL 1
@@ -39,6 +169,7 @@
 // How long the window stays closed before the code it stepped aside for runs (fnc_stepAside): TFAR's own
 // radio menu waits as long before it opens a radio, so its dialog finds none open.
 #define STEP_ASIDE_DELAY 0.2
+#define STEP_ASIDE_WAIT 2
 
 // Moves under way (fnc_sendMoves). Nothing is shown before it happened, so without an answer after
 // PENDING_TIMEOUT seconds the window stops waiting and shows what is there ("Still waiting for an
@@ -78,21 +209,60 @@
 // mods use as well: rgb 123 132 129 (fnc_uiPictureRounded).
 #define EDITOR_PREVIEW_BACKDROP [0.482, 0.518, 0.506, 1]
 
-// Searching, as Tarkov shows it (fnc_showSearch, fnc_animateSearch, fnc_revealFx). The ring that fills
-// comes in SEARCH_FRAMES steps (search_ring_01_ca to _32_ca, drawn by tools/generate_ui_textures.py),
-// as big as SEARCH_RING_SIZE of the tile's shorter side. The glass in it is SEARCH_GLASS_SIZE of the
-// ring and goes round a circle of SEARCH_GLASS_ORBIT of it, SEARCH_GLASS_SPEED degrees a second. A
-// rustle every SEARCH_SOUND_GAP seconds, plus up to as much again.
+// ACE's previews lie on a lighter grey (rgb 135 144 141), other mods' differ again, and a script cannot read a
+// picture's pixels: the edges of the image fade into the backdrop over FADE_SHARE of the box's height in
+// FADE_STEPS strips so no rectangle shows (fnc_uiPictureRounded).
+#define FADE_STEPS 4
+#define FADE_SHARE 0.05
+
+// Searching (fnc_updateStatus, fnc_animateSearch, fnc_revealFx): what is not searched yet shows as hatched tiles, and the
+// search itself only in the caption line of its box. The ring pictures (search_ring_01_ca to _32_ca, drawn by
+// tools/generate_ui_textures.py) are the spinner there - STATUS_ARC is the step that is its arc - and the repack's
+// progress ring (einv_magazines), as big as SEARCH_RING_SIZE of the tile's shorter side. A rustle every
+// SEARCH_SOUND_GAP seconds, plus up to as much again.
 #define SEARCH_FRAMES 32
 #define SEARCH_RING(N) format ["%1\search_ring_%2_ca.paa", QPATHTOF(ui), [str (N), "0" + str (N)] select ((N) < 10)]
 #define SEARCH_RING_SIZE 0.72
-#define SEARCH_GLASS_SIZE 0.5
-#define SEARCH_GLASS_ORBIT 0.12
-#define SEARCH_GLASS_SPEED 300
 #define SEARCH_SOUND_GAP 0.3
 
-// Longer than this between two frames of searching, and the search was paused (something held).
+// Longer than this between two frames of searching, and the search was paused (something held): every box that searches
+// takes up again where it stood.
 #define SEARCH_PAUSE 0.25
+
+// The caption line's activity chip (fnc_updateStatus, fnc_animateStatus): a ring that goes round STATUS_SPIN_SPEED degrees
+// a second, what the box is doing and a button to stop it. Its parts are STATUS_ICON of the line's height tall.
+#define STATUS_ARC 8
+#define STATUS_SPIN_SPEED 300
+#define STATUS_ICON 0.62
+
+// A box this player has to search and has not opened yet is a sealed block (fnc_isSealed, fnc_drawSection): SEAL_ROWS cells
+// high and STORAGE_COLS wide whatever the container really is, hatched, with nothing of what it holds. Its search starts with
+// one entry of the queue of its own (fnc_markHidden), the seal: SEAL_CELLS cells of the box's search time - about two seconds
+// at the default time per cell, also for an empty one -, in compartment SEAL_BLOCK, so it sorts before every item of the
+// container (fnc_build) and its class "" tells it apart. When it is done the box opens (fnc_animateSearch): its real grid
+// with every item a hatched footprint, which are then found one by one.
+#define SEAL_ROWS 3
+#define SEAL_CELLS 5
+#define SEAL_BLOCK -1
+
+// The hands' queue (fnc_queueMoves, fnc_drawQueue, fnc_animateQueue): an action that waits for the hands marks its tile (the
+// surface in a tint of the accent colour, the picture faded - fnc_queueColor) and counts in the activity chip of the box it
+// takes from. Longer than QUEUE_PAUSE between two frames of the queue, and it was paused (another window over this one):
+// the time it stood still does not count.
+#define QUEUE_PAUSE 0.25
+
+// The strip of categories at the side of a loot box (fnc_drawGroupStrip): its icons are STRIP_ICON of a UNIT tall at the
+// most and at least STRIP_ICON_MIN, which the strip's room is divided by.
+#define STRIP_ICON 1.1
+#define STRIP_ICON_MIN 0.75
+
+// How many fields the strip has: All and the categories. With more categories than that the last field turns to the next
+// group of them (fnc_stripEntries, fnc_stripMore).
+#define STRIP_SLOTS 9
+
+// What a compartment that takes only some categories shows (fnc_drawBadge): the faint pictures on its free cells while at most
+// this many cells are free.
+#define WATERMARK_CELLS_MAX 12
 
 // Tiles that do not match the search field fade this far, this quickly (fnc_applyFilter).
 #define FILTER_FADE 0.82
@@ -101,9 +271,10 @@
 // The slots that take a dragged item: their fill, under a green outline (fnc_showTargets).
 #define TARGET_FILL_ALPHA 0.1
 
-// The name at the mouse (fnc_updateHover, fnc_onFrame): this far right of and below the pointer.
-#define TOOLTIP_DX SQUARE(UNIT * 0.7)
-#define TOOLTIP_DY (UNIT * 0.8)
+// The name at the mouse (fnc_updateHover, fnc_onFrame): centred under the pointer, this far below its tip (clear of the arrow),
+// kept this far from the screen's edges.
+#define TOOLTIP_DY (UNIT * 1.1)
+#define TOOLTIP_MARGIN SQUARE(UNIT * 0.3)
 
 // Where a dragged item landed lights up, this strong, for this long (fnc_flashTile).
 #define LAND_FLASH_ALPHA 0.28
@@ -118,6 +289,8 @@
 // A kit's window fades in over this many seconds when it opens (fnc_drawWindow), its title lit up in the
 // accent colour as a landed tile is.
 #define WINDOW_FADE 0.15
+// Rows of cells a kit window shows at most; a taller grid scrolls inside it.
+#define WINDOW_VIEW_ROWS 10
 
 // How thick a round outline is, as a share of its corner (fnc_uiRing) - as tools/generate_ui_textures.py
 // draws the ring corners.
@@ -125,6 +298,31 @@
 
 // getTextWidth reports less than the engine draws: every measured text gets this much more room.
 #define TEXT_SLACK 1.3
+
+// One turn of the mouse wheel scrolls a column this far when a picture's clip group has taken the turn from it
+// (fnc_passWheel): about the three rows the engine's own step comes to.
+#define WHEEL_STEP (UNIT * 3)
+
+// How many frames a clip group the wheel turned over is put back to the top, after the engine scrolled it
+// (fnc_unscroll, fnc_onFrame).
+#define UNSCROLL_FRAMES 3
+
+// A label draws its text from its top edge down whatever its height, so a text that has to sit in the middle of
+// a box starts a little above the box's middle: the middle of the line of capitals lies this share of the font
+// height under the label's top (Purista's capitals run from about 0.4 to 0.9 of it) - fnc_uiButton in a button,
+// the title row of the Arsenal panel.
+#define TEXT_MID 0.66
+
+// A button (fnc_uiButton, fnc_buttonWidth), as shares of its height: the room either side of what it holds,
+// the icon, and the gap between an icon and its label.
+#define BUTTON_PAD 0.3
+#define BUTTON_ICON 0.56
+#define BUTTON_GAP 0.22
+
+// The caption line of a section and the title row's buttons of a kit window (fnc_drawSection, fnc_drawWindow) are
+// CAPTION_LINE of a UNIT high. A section's buttons are lower than that and stand in the middle of the line, and their hit area
+// is what is drawn and two pixels (fnc_uiButton cuts it to that whatever is asked for).
+#define CAPTION_LINE 0.8
 
 // How far the mouse has to move with the button held before a press on a tile becomes a drag, and how
 // faint the tile it was lifted from stays while it is dragged.
@@ -141,13 +339,33 @@
 #define COLLAPSE_MIN_ROWS 4
 #define COLLAPSE_HIDE_MIN 4
 
+// A tall compartment of what is looted shows PAGE_ROWS (the client setting einv_gui_pageRows) rows at a time with a bar
+// under it to turn the pages (fnc_pageRanges, fnc_drawPageBar). At least PAGE_MIN_ROWS rows to a page; the setting 0
+// or MAX_ROWS (or more) turns the pages off. A dragged item held over an arrow of the bar turns the page after
+// PAGE_HOVER_TIME seconds, and again every PAGE_HOVER_TIME while it stays. The bar is PAGE_BAR_H of a UNIT tall and is the
+// bottom part of the compartment's panel: it starts where the panel's pad under the cells ends, with no gap, and the panel's
+// bottom corners are its corners; its left half turns back and its right half on (the whole half is
+// the button), and the count of what lies on other pages is in the bar's own text - nothing lies over the tiles. A dragged
+// item turns the page over the outer PAGE_ZONE of the bar's width on each side; the middle stays the place where a drop
+// is laid down in the first free spot.
+#define PAGE_MIN_ROWS 4
+#define PAGE_HOVER_TIME 0.7
+#define PAGE_BAR_H 1.15
+#define PAGE_ZONE 0.35
+
+// The room a paged compartment keeps under its panel's pad for the bar, which is part of the panel (fnc_drawSection reserves it in
+// the flow, fnc_drawPageBar draws in it). Where the bar starts, for a compartment whose cells start at TOP and which is ROWS
+// rows tall on its tallest page: PAGE_BAR_TOP - the last cell's far edge and the pad under it, exactly where the panel of the
+// cells ends (fnc_drawPagePanel).
+#define PAGE_RESERVE(CELLW) (UNIT * PAGE_BAR_H)
+#define PAGE_BAR_TOP(TOP,ROWS,CELLW,CELLH) ((TOP) + (ROWS) * (CELLH) - pixelH + COMPARTMENT_PAD_PX(CELLW) * pixelH)
+
 // ---------------------------------------------------------------------------
-// Weight: the load bar under a section's caption, what lifting something previews on it, and the
-// comparison card at the mouse (fnc_drawSection, fnc_markWeight, fnc_drawCompare)
+// Weight: what lifting something previews on the weight card, and the comparison card at the mouse
+// (fnc_previewWeight, fnc_drawCompare)
 // ---------------------------------------------------------------------------
 
-// The load bar is two pixels high; a preview of what would be added to it is this strong.
-#define LOAD_BAR_H (pixelH * 2)
+// A preview of what would be added to the weight bar is this strong.
 #define PREVIEW_ALPHA 0.6
 
 // The comparison card: its width, the room of the label, of the value and of the difference, and one row.
@@ -168,12 +386,10 @@
 #define DRAG_FOOTPRINT_ALPHA 0.35
 
 // Several tiles selected (fnc_drawSelection) and dragged together (fnc_makeGhost): a selected tile gets
-// an accent frame and a fill SELECT_FILL_ALPHA strong, the frame dragged out from an empty cell
-// (fnc_startBand) a fill BAND_FILL_ALPHA strong. A group drag shows at most GROUP_GHOSTS pictures
+// an accent frame and a fill SELECT_FILL_ALPHA strong. A group drag shows at most GROUP_GHOSTS pictures
 // at the mouse - the rest still goes along, and every tile gets its footprint.
 #define GROUP_GHOSTS 12
 #define SELECT_FILL_ALPHA 0.1
-#define BAND_FILL_ALPHA 0.08
 
 // The sounds (fnc_playSound, fnc_playLayer, fnc_sendNoise). The same sound twice within SOUND_REPEAT_GAP plays
 // once. Others hear a looter at most every NOISE_GAP seconds, NOISE_GAIN as loud as he does, from NOISE_POINT on
@@ -187,21 +403,26 @@
 #define RELOAD_GAIN 0.4
 #define SURFACE_CACHE 2
 
-// The looting pose (fnc_poseStart, fnc_poseCheck, fnc_poseEnd). A crate whose top is less than LOW_TARGET metres
-// above the player's feet is looted kneeling. Moved more than POSE_LEASH metres from where the window opened, the
-// player has left the loot. A pose not reached within POSE_REACH_TIME seconds is someone else's turn; after a
-// weapon change it comes back POSE_REENTRIES times at most. Closed by a key tap that moved nothing, the soldier
-// stands up after POSE_MOVE_GRACE seconds. Movement keys count only MOVE_GRACE seconds after the window opened.
-#define LOW_TARGET 0.6
-#define POSE_LEASH 1.5
-#define POSE_REACH_TIME 2.5
-#define POSE_REENTRIES 3
-#define POSE_MOVE_GRACE 0.6
+// A volume slider of the dropdown under the speaker (fnc_soundSlide) moves in steps of SOUND_STEP of the full volume.
+#define SOUND_STEP 0.05
+
+// A soldier moved more than TAKEN_LEASH metres from where the window opened has left the loot (fnc_checkTaken).
+// Movement keys count only MOVE_GRACE seconds after the window opened.
+#define TAKEN_LEASH 1.5
 #define MOVE_GRACE 0.5
 #define MOVE_ACTIONS ["MoveForward", "MoveBack", "TurnLeft", "TurnRight", "MoveLeft", "MoveRight", "MoveFastForward", "MoveSlowForward", "EvasiveLeft", "EvasiveRight"]
 
+// The keys the engine keeps while the inventory window is open: those of the actions in this list - talking (chat,
+// the push to talk keys, the channel keys) - and Escape and PrintScreen. Every other key the window does not use
+// itself is held back (fnc_onKeyDown), so nothing gets through to the game behind it.
+#define PASS_ACTIONS ["Chat", "PushToTalk", "PushToTalkAll", "PushToTalkCommand", "PushToTalkDirect", "PushToTalkGroup", "PushToTalkSide", "PushToTalkVehicle", "VoiceOverNet", "NextChannel", "PrevChannel"]
+#define DIK_PRINTSCREEN 183
+
 // Textures, drawn by tools/generate_ui_textures.py
 #define UI_TEX(NAME) QPATHTOF(ui\NAME.paa)
+
+// ACE's mouse pictures for the key hints (fnc_uiKeyHint): mouse_left_ca.paa, mouse_right_ca.paa, mouse_scroll_ca.paa.
+#define MOUSE_ICON_PATH "\z\ace\addons\interaction\UI"
 
 // The silhouettes of empty equipment slots are Arma's own, from its vanilla inventory: players know
 // them, and they match the game's items better than anything drawn for this mod.
@@ -218,7 +439,7 @@
 // Screen geometry, relative to the safezone so it scales with the UI size. The window takes the whole
 // screen; the looks share its frame and lay out the content between header and footer themselves:
 //
-//    0.6 -  2.2   header: title, Style, camera, Vanilla, Close           (in UNITs from the top)
+//    0.6 -  2.2   header: title, buttons, Close                          (in UNITs from the top)
 //    3.0 - 37.4   content: whatever the look draws
 //   38.0 - 39.4   footer: key hints, the hint, the version
 // ---------------------------------------------------------------------------
@@ -256,26 +477,56 @@
 // config as it is.
 #define SCROLL_W 0.006
 
-// ---------------------------------------------------------------------------
-// The live camera on the player's soldier (fnc_cameraStart). Starting values - tuned in the game.
-// ---------------------------------------------------------------------------
+// A storage column for cells CELLW wide (fnc_layoutGlass): the container's picture box and its compartments
+// beside it (STORAGE_COLS + 3 cells), the column's padding - the right one wide enough for the scroll bar -
+// and a little air; the gap between two columns. fnc_getCell sizes the player's tile scale by them.
+#define COLUMN_PAD_X SQUARE(UNIT * 0.4)
+#define COLUMN_W(CELLW) ((STORAGE_COLS + 3) * (CELLW) + SQUARE(UNIT * 0.35) + ((COLUMN_PAD_X * 2) max (COLUMN_PAD_X + SCROLL_W + pixelW * 4)) + SQUARE(UNIT * 0.6))
+#define COLUMN_GAP SQUARE(UNIT * 0.8)
 
-// How far in front of the soldier it stands, in metres, and how close a wall may pull it in.
-#define CAMERA_DISTANCE     2.5
-#define CAMERA_MIN_DISTANCE 0.9
+// The least of the equipment column, in UNITs, that a larger tile scale leaves beside the storage and loot
+// columns (fnc_getCell) - about what it gets at 4:3 with the scale at 1.
+#define CELL_FIT_LEFT 16
 
-// How far it stays off a wall it was pulled in front of, in metres.
-#define CAMERA_WALL_GAP 0.25
+// The tile scale's limits (einv_gui_cellScale), a share of the cell fnc_getCell works out.
+#define CELL_SCALE_MIN 0.8
+#define CELL_SCALE_MAX 1.3
 
-// Its zoom (camSetFov). The soldier is placed on the screen as if this were the tangent of half the
-// view's height; should the soldier land off the middle of the look's free space, CAMERA_FOV_SCALE
-// corrects that assumption without changing the zoom.
-#define CAMERA_FOV       0.7
-#define CAMERA_FOV_SCALE 1
+// The cell at tile scale 1, in whole pixels (fnc_getCell): 1.45 rows where the screen is wide enough, else as many
+// pixels as leave 52 cells across.
+#define CELL_BASE_PX (round (((UNIT * 1.45) min UNSQUARE(safezoneW / 52)) / pixelH))
 
-// The chest's height in the soldier's model when its bones cannot be read, in metres.
-#define CAMERA_CHEST_Z 1.3
+// The text scale (fnc_textScale): the window's words grow with its tiles. It is the cell the window really has over the
+// cell at tile scale 1 - after every cap, fnc_getCell's and the Arsenal panel's (fnc_capCell) - never below
+// TEXT_SCALE_MIN (the tile scale's own floor, so the words follow the tiles both ways), and never above TEXT_SCALE_MAX. And never so small
+// that the caption's words (TEXT_REF of a UNIT, the section chips' size) come out under TEXT_MIN_PX pixels: a low
+// resolution gets larger words rather than unreadable ones. TEXT_UNIT is a UNIT grown by it - what every text size and
+// every row that holds words (caption lines, buttons, title rows, key caps) is measured in, so a button stays as high
+// as its words need and fnc_buttonWidth measures the words in the size they are drawn in.
+#define TEXT_SCALE_MIN CELL_SCALE_MIN
+#define TEXT_SCALE_MAX CELL_SCALE_MAX
+#define TEXT_REF 0.42
+#define TEXT_MIN_PX 12
+#define TEXT_SCALE (call einv_gui_fnc_textScale)
+#define TEXT_UNIT (UNIT * TEXT_SCALE)
 
-// The light it brings along at night: weak, so the soldier is seen but the night stays night.
-#define CAMERA_LIGHT_BRIGHTNESS 0.2
-#define CAMERA_LIGHT_SUN        0.5
+// The room between two compartments of a container, a share of a cell rounded to whole pixels: between
+// blocks that flow side by side or one under another (fnc_flowCompartments).
+#define COMPARTMENT_GAP 0.22
+
+// Where two compartments of a canvas touch (grid=aab/acc), the drawing opens up between them: a column
+// boundary at which some row has cells of two different compartments on its two sides, and a row boundary
+// at which some column has, gets this much more room, a share of a cell rounded to whole pixels (across for
+// a column boundary, down for a row boundary). Everything beyond it moves on by that much, so the
+// compartments keep where they were painted relative to each other and every cell keeps its size and the
+// plain gap to the next; a boundary where a compartment meets an empty place gets none (fnc_flowCompartments).
+// The same room as between two flowed blocks: the wizard writes a painted drawing the flow can make as
+// flowed blocks (einv_setup_fnc_canvasBlocks), and it must look like one it cannot.
+#define SEAM_GAP COMPARTMENT_GAP
+
+// The panel behind each compartment's cells (fnc_drawCompartments): how far it reaches past them, a share of
+// a cell rounded to whole pixels, at least one. Its corners are round up to three times that, so the corner
+// cells stay inside the round. COMPARTMENT_PAD_PX gives it in pixels for a cell CELLW wide.
+#define COMPARTMENT_PAD 0.06
+#define COMPARTMENT_PAD_PX(CELLW) ((round ((CELLW) * COMPARTMENT_PAD / pixelW)) max 1)
+

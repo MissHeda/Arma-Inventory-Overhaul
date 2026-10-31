@@ -5,139 +5,204 @@ ADDON = false;
 
 #include "XEH_PREP.hpp"
 
-// ----- ACE's own window (the box action, the inventory's menu with the setting on "ACE Arsenal") -----
+// ----- ACE Arsenal's grid panel -----
 
-// What the uniform, vest or backpack open in the arsenal held at the last look, [0 uniform / 1 vest /
-// 2 backpack, container, items] (fnc_rememberCargo) - so an add can tell how many really arrived, and
-// a new container in the same panel shows that one was swapped. Empty while no arsenal is open or
-// another panel is.
-GVAR(snapshot) = [];
-
-// ----- The Enhanced Arsenal's session -----
-
-// The ACE functions and data this addon relies on exist (fnc_compatCheck) - false until that has looked,
-// and then ACE's own window opens every time. Our window is open. The box, the unit it dresses (the copy in
-// the Eden editor), whether the box's list is ignored, and where the items come from: "ace", "bi" or "eden".
+// The ACE functions and data this addon relies on exist (fnc_compatCheck) - false until that has looked;
+// then ACE Arsenal opens without the panel and the vanilla Virtual Arsenal stays vanilla. The inventory's
+// engine is attached to ACE's display, whose panels are shown (Backspace hides them).
 GVAR(ready) = false;
-GVAR(isOpen) = false;
-GVAR(box) = objNull;
-GVAR(center) = objNull;
-GVAR(full) = false;
-GVAR(source) = "ace";
+GVAR(attached) = false;
+GVAR(shown) = true;
 
-// The next ACE display stays ACE's: a diag_frameNo stamp set right before openBox is called, honoured while
-// diag_frameNo is at most the stamp and FORCE_ACE_FRAMES more (openBox makes its display a frame later), so
-// it expires when openBox exits early instead of sending some later box to ACE's window; -1 for none. The
-// panels are hidden (Backspace). Closing for the button that opens ACE's window keeps a Zeus's remote
-// control.
-GVAR(forceAce) = -1;
-GVAR(hidden) = false;
-GVAR(keepRemote) = false;
+// ACE's display while it is open - a display, so in uiNamespace.
+uiNamespace setVariable [QGVAR(display), displayNull];
 
-// An inventory window was closed to make room and the opening runs again a frame later (fnc_openWindow):
-// set for that second run only, so a window that stays open cannot make it wait for ever.
-GVAR(reopening) = false;
+// Where the last build put the panel, [x, y, w, h] on the screen, [] for nowhere; the hint line at its
+// bottom; which of the engine's zones is ACE's list (a drop there, or anywhere outside the panel, takes the
+// item out); and what the drag stood over, for its hint once ("remove", "cancel" for an item out of ACE's
+// list over no grid, "" for none).
+GVAR(panelRect) = [];
+GVAR(hintRect) = [];
+GVAR(removeZone) = -1;
+GVAR(dragZone) = "";
 
-// What fnc_openWindow hands to fnc_onLoad: [box, unit, full, items, source].
-uiNamespace setVariable [QGVAR(openArgs), []];
+// What the open uniform, vest or backpack held at the last look: [container, lowercase class -> count]
+// (fnc_snapshot).
+GVAR(snapshot) = [objNull, createHashMap];
 
-// The Eden editor: the entity being edited, the light under the copy, and the editor's vision mode to give
-// back.
-GVAR(edenOrigin) = objNull;
-GVAR(edenLight) = objNull;
-GVAR(edenVision) = -1;
+// Where things lay in the uniform, vest and backpack at the last look, [[container, lowercase class, records],
+// ...], and when to look again (fnc_keepPlaces): ACE makes all three new when one is picked.
+GVAR(kept) = [];
+GVAR(keptAt) = 0;
 
-// What the session offers, read after every handler of ace_arsenal_displayOpened ran (fnc_readSupply): the
-// lowercase classes that are offered, a counter raised whenever they change, and the category lists the
-// catalog reads - ACE Arsenal Extended's full copy when it is loaded, else ACE's own.
-GVAR(availableLc) = createHashMap;
-GVAR(availableStamp) = 0;
-GVAR(catalogItems) = [];
+// The last frame of the quiet time after a loadout was set on ACE's unit: until then nothing is moved out of
+// the containers (fnc_stageOverflow) and no old places are written onto them (fnc_keepPlaces).
+GVAR(loadoutFrame) = -1;
 
-// The camera round the soldier (fnc_cameraStart): [distance, direction, pitch, target [x, y, z]], kept for the
-// mission like ACE's; the camera, its light, the rectangle the soldier is to stand in, whether the mouse
-// turns it (the mouse where the last frame saw it, [] for no), how close it may come, the curator's camera
-// it replaced, the player's own view to give back, and the last click in the free middle for the double
-// click that resets the view ([time, mouse]). The left button moves the target point (the mouse where the
-// last frame saw it, [] for no), and the vision the view shows through: 0 normal, 1 night vision, 2 thermal
-// (fnc_cycleVision).
-GVAR(cameraPosition) = [3, 0, 5, [0, 0, 0.9]];
-GVAR(camera) = objNull;
-GVAR(cameraLight) = objNull;
-GVAR(cameraRect) = [];
-GVAR(cameraDrag) = [];
-GVAR(cameraPan) = [];
-GVAR(visionMode) = 0;
-GVAR(cameraMinDistance) = 0;
-GVAR(curatorCameraData) = [];
-GVAR(cameraView) = "";
-GVAR(cameraClick) = [-1, [0, 0]];
+// Following ACE's events: ace_arsenal_itemsChanged came since the last ace_arsenal_cargoChanged (an ACE
+// that has it); a cargoChanged waits for its pass a frame later; that pass is asked for already
+// (fnc_settle); the panel is to be built again once nothing of it is held (fnc_onFrame).
+GVAR(itemsSeen) = false;
+GVAR(cargoPending) = false;
+GVAR(settleQueued) = false;
+GVAR(dirty) = false;
 
-// The catalog (fnc_catalogList): "items" or "loadouts"; the group and category shown and the category
-// last shown in each group; what the parts and magazines have to fit; the sort, [id, ascending]; the row each
-// category was scrolled to. Kept for the mission, as ACE keeps its tabs.
-GVAR(view) = "items";
-GVAR(group) = "";
-GVAR(category) = "";
-GVAR(lastCategory) = createHashMap;
-GVAR(fits) = "";
-GVAR(sort) = ["name", true];
-GVAR(scrollRows) = createHashMap;
+// The staging space under the container's grid (fnc_staging), a crate of this machine's own while ACE's
+// window is open, and how much lies in it at the last build, for the hint line.
+GVAR(staging) = objNull;
+GVAR(stagingCount) = 0;
 
-// The catalog's column, kept across builds - a control, so in uiNamespace: a HashMap with its group, its
-// rectangle, the pool and its cards, the source grid, the list shown, the columns, the rows, the first row
-// and the scroll it was set to.
-uiNamespace setVariable [QGVAR(column), createHashMap];
+// The panel's folded sections while ACE's window is open, container class (or "staging") -> true, and
+// which class each section of the last build showed, [[container, class], ...] (fnc_layout, the "fold"
+// hook); the tab - or "kits" for Enhanced First Aid Kits' kits tab - the folds were last set anew for, as a
+// switch folds the panel anew (fnc_layout).
+GVAR(folded) = createHashMap;
+GVAR(foldKeys) = [];
+GVAR(foldTab) = "";
 
-// The rows of the items (fnc_catalogRow, class -> row, emptied when the rules change), the lists of the
-// categories (category id -> [supply stamp, classes]) and what the soldier carries by layout key, after every
-// build.
-GVAR(rows) = createHashMap;
-GVAR(lists) = createHashMap;
-GVAR(carried) = createHashMap;
+// Enhanced First Aid Kits' kits tab as last seen, [open, class of the row picked, being made ready] - by the frame
+// hook, which sets the tab's state against it, or a build (fnc_onFrame, fnc_layout) -, and as the last build showed
+// it (fnc_ungreyKit waits for that); the kit whose grid the panel shows there, "" for none; that kit's answers to
+// one more of each class, [the kit's state, lowercase class -> 1 or 0] (fnc_ungreyKit); when the tab's rows are
+// greyed again next (diag_tickTime).
+GVAR(focusSeen) = [false, "", false];
+GVAR(focusBuilt) = [false, "", false];
+GVAR(focusKit) = "";
+GVAR(kitVerdicts) = [[], createHashMap];
+GVAR(kitUngreyAt) = 0;
 
-// Where double clicks and quick adds go first: the slot, the container; the first click of a two-click
-// confirmation, [key, until]; the three weapons at the last build, for the parts that changed; whether a
-// class is not offered here (emptied with the supply); where the last thing added landed, flashed after the
-// build; the uniform and backpack at the last build, for ACE Arsenal Extended's textures.
-GVAR(targetSlot) = "";
-GVAR(targetContainer) = objNull;
-GVAR(armed) = ["", -1];
-GVAR(lastWeapons) = [];
-GVAR(uniqueCache) = createHashMap;
-GVAR(pendingFlash) = [];
-GVAR(lastGear) = [];
+// The whole panel folded to its title bar (the button at the right end of the title row, fnc_toggleCollapse):
+// kept for the session and, per player, in the profile; where the column was scrolled to when it folded,
+// [container class, pixels], to put it back (fnc_layout); the list row's class a drag out of ACE's list began
+// with and since when it is held over the folded panel's title bar, to unfold it (fnc_listDrag, fnc_onFrame).
+GVAR(collapsed) = [profileNamespace getVariable [QGVAR(collapsed), false]] param [0, false, [false]];
+GVAR(collapsedScroll) = ["", 0];
+GVAR(listDragClass) = "";
+GVAR(listDragIdc) = ARSENAL_IDC_LIST;
+GVAR(unfoldSince) = -1;
 
-// ACRE's notifications show over this window once its display is registered with ACRE (fnc_acreDisplay).
-GVAR(acreRegistered) = false;
+// A left press on a row of ACE's list (or the kits tab's) that may yet become a drag of its item, [where, shift,
+// frame, row, the list's IDC] or [] (fnc_onListPress, fnc_onFrame); the row a list picked last, [row, frame, the
+// list's IDC] or [] (fnc_listDrag); a move
+// into or out of the staging space waited for, to tell ACE, [container, class, count before, until] or []
+// (fnc_onDrop); where the column stood when Ctrl and the wheel changed a tile, [pixels, until frame] or []
+// (fnc_onWheel); Ctrl held (fnc_onKey).
+GVAR(listPress) = [];
+GVAR(listSel) = [];
+GVAR(watch) = [];
+GVAR(scrollHold) = [];
 
-// The loadouts view: the tab, the one selected, the name typed, what has been checked (and the queue still
-// to check), and whether a shared or default loadout changed since the list was drawn.
-GVAR(loadoutsTab) = "mine";
-GVAR(loadoutSelected) = "";
-GVAR(loadoutName) = "";
-GVAR(verified) = createHashMap;
-GVAR(verifyQueue) = [];
-GVAR(loadoutsDirty) = false;
+// Where the column stood last and for which set of containers (fnc_layout, fnc_onFrame): kept across every rebuild.
+GVAR(scrollKey) = "";
+GVAR(scrollPixels) = 0;
+GVAR(ctrlHeld) = false;
 
-// The vanilla Virtual Arsenal: this open goes to the vanilla window (a mission hooks it, the unit is not the
-// player's); the player left it alone this time; the catalog as BI built it, to tell what a mission changed;
-// and how many handlers mods had on its events when the game started (fnc_biCountHandlers), [arsenalOpened,
-// arsenalPreOpen].
+// The rules' pictures on ACE's lists (fnc_pictures): the pass that is going, and the picture of each class
+// asked about, "" for none.
+GVAR(picturePass) = 0;
+GVAR(pictureStat) = [0, 0, 0, 0];
+GVAR(ungreyStat) = [0, 0, 0];
+GVAR(openedAt) = diag_tickTime;
+GVAR(pictureCache) = createHashMap;
+
+// The question asked when ACE's window is about to close with things that do not fit (fnc_confirmClose):
+// its card, a control, so in uiNamespace (controlNull for none), and the exit code the window then closes with.
+uiNamespace setVariable [QGVAR(confirm), controlNull];
+uiNamespace setVariable [QGVAR(confirmCode), 1];
+uiNamespace setVariable [QGVAR(confirmControls), []];
+uiNamespace setVariable [QGVAR(confirmMoved), []];
+uiNamespace setVariable [QGVAR(confirmBar), [controlNull, 0]];
+uiNamespace setVariable [QGVAR(confirmButtons), []];
+
+// The answer a press began on (fnc_onConfirmMouse): 0 Keep editing, 1 Remove and close, -1 none.
+GVAR(confirmPress) = -1;
+
+// What of ACE's internals was found missing and said in the RPT already, once each.
+GVAR(missingSaid) = [];
+
+// The pass that greys and lights ACE's rows by the grid (fnc_ungrey): a newer one takes over from one that is
+// still going; and the alpha ACE gave the rows it greyed, as last seen, to grey the rows it left lit alike.
+GVAR(ungreyPass) = 0;
+GVAR(ungreyQueued) = false;
+GVAR(greyAlpha) = 0.25;
+
+// ----- The vanilla Virtual Arsenal -----
+
+// This open goes to the vanilla window (a mission hooks it, the unit is not the player's); the player left
+// it alone this time; the catalog as BI built it, to tell what a mission changed; how many handlers mods
+// had on its events when the game started (fnc_biCountHandlers), [arsenalOpened, arsenalPreOpen]; and the
+// helper that carries a vanilla box's items into ACE Arsenal (fnc_openBI).
 GVAR(biLetThrough) = false;
 GVAR(biLeave) = [];
 GVAR(biCatalogBase) = [];
 GVAR(biModHandlers) = [0, 0];
+GVAR(biHelper) = objNull;
 
 // Checked once: ACE's pieces this addon relies on, and that BIS_fnc_arsenal is the one with our file.
 call FUNC(compatCheck);
 call FUNC(biInit);
 
-// ACE's own window gets a button for the way over to this one (fnc_aceButton picks ACE's display out of the
-// ones that raise the event). Registered here, not in postInit, so ACE's window in the Eden editor has it too.
-[QACEGVAR(arsenal,displayOpened), {
-    _this call FUNC(aceButton);
-}] call CBA_fnc_addEventHandler;
+// ACE Arsenal's events, all local to the machine whose player has it open. Registered here, not in
+// postInit: the Eden editor runs no postInit, and its ACE Arsenal gets the panel too.
+if (hasInterface) then {
+    // The display: the panel moves in a frame later, and out with it.
+    [QACEGVAR(arsenal,displayOpened), {
+        _this call FUNC(onOpened);
+    }] call CBA_fnc_addEventHandler;
+
+    [QACEGVAR(arsenal,displayClosed), {
+        call FUNC(onClosed);
+    }] call CBA_fnc_addEventHandler;
+
+    // A loadout set on ACE's unit (loaded in the arsenal, imported): its containers are new objects with other
+    // contents. The places noted before are stale for them and dropped, and nothing is moved out for a few
+    // frames, while the storage addon adds what the engine left out (fnc_topUpLoadout) and writes the places
+    // the loadout carries.
+    ["CBA_loadoutSet", {
+        params [["_unit", objNull, [objNull]]];
+
+        if (GVAR(attached) && {_unit isEqualTo (missionNamespace getVariable [QACEGVAR(arsenal,center), objNull])}) then {
+            GVAR(kept) = [];
+            GVAR(keptAt) = 0;
+            GVAR(loadoutFrame) = diag_frameNo + LOADOUT_QUIET_FRAMES;
+
+            [] call FUNC(settle);
+        };
+    }] call CBA_fnc_addEventHandler;
+
+    // A tab of the left bar filled (also after ACE's refresh, a loadout imported or loaded), the list of
+    // the right filled (a filter, another container put on): the panel shows what is open now.
+    {
+        [_x, {
+            if (GVAR(attached)) then {
+                [] call FUNC(settle);
+            };
+        }] call CBA_fnc_addEventHandler;
+    } forEach [
+        QACEGVAR(arsenal,leftPanelFilled), QACEGVAR(arsenal,rightPanelFilled),
+        QACEGVAR(arsenal,loadoutImported), QACEGVAR(arsenal,onLoadoutLoad)
+    ];
+
+    // Backspace hides ACE's panels: the panel goes with them.
+    [QACEGVAR(arsenal,showToggle), {
+        params ["", ["_shown", true, [true]]];
+
+        GVAR(shown) = _shown;
+
+        if (GVAR(attached)) then {
+            [] call FUNC(settle);
+        };
+    }] call CBA_fnc_addEventHandler;
+
+    // ACE's "+" and "-", and what really changed.
+    [QACEGVAR(arsenal,cargoChanged), {
+        _this call FUNC(onCargoChanged);
+    }] call CBA_fnc_addEventHandler;
+
+    [QACEGVAR(arsenal,itemsChanged), {
+        _this call FUNC(onItemsChanged);
+    }] call CBA_fnc_addEventHandler;
+};
 
 #include "initSettings.inc.sqf"
 

@@ -2,7 +2,8 @@
 /*
  * Author: Miss Heda
  * Where a grid's top left corner is on the screen right now. A grid in a scrolling column moves with
- * its scroll, so this is asked again each time rather than kept.
+ * its scroll, so this is asked again each time rather than kept. Its cells lie where their columns and
+ * rows start from that corner (fnc_createGrid "colX", "rowY"), which never changes.
  *
  * Climbs from the grid's group through every group around it, adding their positions and taking off
  * how far each is scrolled: its scroll bar's place (ctrlScrollValues, 0 to 1) times how much of its

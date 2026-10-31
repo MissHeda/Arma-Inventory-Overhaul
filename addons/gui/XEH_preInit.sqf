@@ -17,9 +17,19 @@ GVAR(openedAt) = -1;
 GVAR(person) = objNull;
 GVAR(personMode) = "";
 
-// Until this time the vanilla inventory is let through instead of taken over - set by fnc_openVanilla,
-// which asks the engine for it.
-GVAR(bypassUntil) = -1;
+// The unit's InventoryOpened handler and the vanilla inventory that comes up behind it (fnc_initUnit,
+// fnc_onInventoryOpened, fnc_guardVanilla, fnc_open): the frame the handler last answered, when it was last
+// put behind the other handlers of the event, and - in uiNamespace - the vanilla inventories the guard
+// closed that may still be held, [display, ...]: no window is made while one is, it would be its child.
+GVAR(askedFrame) = -1e9;
+GVAR(handlerAgain) = -1e9;
+uiNamespace setVariable [QGVAR(closing), []];
+
+// The open window was made on the guard's guess, not on what the engine named (fnc_guardVanilla, fnc_open): the
+// engine's opening that comes after it takes its place (fnc_onInventoryOpened). And the frame an opening that was
+// asked for last waited for a vanilla inventory to go: a guess made meanwhile gives way to it.
+GVAR(openGuess) = false;
+GVAR(openWaiting) = -1e9;
 
 // What runs the open window's frame (fnc_onFrame): [driver, id] - "pfh", a CBA per-frame handler, or
 // "draw3d", a Draw3D mission event handler (fnc_startFrame, fnc_stopFrame) - and ["", -1] while none runs.
@@ -39,6 +49,10 @@ uiNamespace setVariable [QGVAR(zones), []];
 // What is on the window, all of it made by fnc_build and gone with the next rebuild:
 //   created  - the controls made on the display itself (a group takes its own controls with it)
 //   grids    - each a HashMap (fnc_createGrid)
+//   foldAreas - where a drag may let go to be laid down in a folded container's hidden rows: HashMaps "rel", "parent",
+//              "size", "container" (fnc_drawSection, fnc_updateDrag)
+//   pageAreas - the arrows of the page bars (fnc_drawPageBar): HashMaps "rel", "parent", "size", "grid", "step" - a dragged
+//              item held over one turns the page (fnc_updateDrag)
 //   slots    - hover areas of the dedicated slots, [[x, y, w, h] on the screen, class, caption] and,
 //              optionally, its place in a scrolling group and its weapon array (see fnc_drawSlot)
 //   hover    - what the mouse is on: ["tile", grid index, tile index], ["slot", slot index] or []
@@ -48,6 +62,8 @@ uiNamespace setVariable [QGVAR(zones), []];
 // cannot hold controls - "does not support serialization" (seen in the ACE Arsenal, 2026-10-07).
 uiNamespace setVariable [QGVAR(created), []];
 uiNamespace setVariable [QGVAR(grids), []];
+uiNamespace setVariable [QGVAR(foldAreas), []];
+uiNamespace setVariable [QGVAR(pageAreas), []];
 uiNamespace setVariable [QGVAR(slots), []];
 GVAR(hover) = [];
 GVAR(lastMouse) = [];
@@ -69,6 +85,11 @@ GVAR(press) = [];
 GVAR(dragging) = false;
 GVAR(dragTarget) = [];
 GVAR(dragRoom) = createHashMap;
+
+// A hotbar slot's binding being dragged (fnc_startStripDrag): [slot number, ghost control, the strip's box
+// [left, top, right, bottom] or [], what the hint last said] - or [] when none is. The press that began it
+// stays in GVAR(press) until it ends, so nothing is built meanwhile.
+GVAR(stripDrag) = [];
 GVAR(lastButton) = [];
 
 // The button whose press stopped a repack: its release is no click (fnc_onMouseButton).
@@ -77,6 +98,10 @@ GVAR(swallowUp) = -1;
 // What is held while dragging: its size as it is held, [w, h] - turned with R (fnc_rotateDrag) - and how
 // many of a stack go, changed with the mouse wheel (fnc_onMouseZ) or the middle button (all of it).
 GVAR(dragSize) = [1, 1];
+
+// ... and which way round: 1 turned a quarter clockwise. Apart from the size, as a shaped item in a
+// square box turns without changing it (fnc_rotateDrag).
+GVAR(dragRot) = 0;
 GVAR(dragCount) = 1;
 GVAR(middleHeld) = false;
 GVAR(lastWheel) = -1;
@@ -93,13 +118,10 @@ GVAR(selectionSide) = "";
 GVAR(selectionAnchor) = [];
 uiNamespace setVariable [QGVAR(selectionFrames), []];
 
-// A frame dragged out from an empty cell (fnc_startBand): the press, [column group, mouse, how far the
-// column was scrolled in pixels, Ctrl held, side] or [], whether the frame is out, and the tiles it
-// touches now - drawn as selected before it is let go. Its controls are in uiNamespace (bandFrame).
-GVAR(bandPress) = [];
-GVAR(band) = false;
-GVAR(bandTiles) = [];
-uiNamespace setVariable [QGVAR(bandFrame), []];
+// A press on an empty cell of a column (fnc_onMouseButton): [Ctrl held, mouse] or [] for none. Let go in place it
+// is a click that clears the selection; dragged away it does nothing.
+GVAR(emptyPress) = [];
+GVAR(tipHeld) = false;
 
 // The tiles dragged together while several are selected, [grid index, tile index] each, or [] for a single
 // item (fnc_startDrag, fnc_updateDrag). The footprints and the pictures at the mouse are controls, so they
@@ -108,16 +130,29 @@ GVAR(dragGroup) = [];
 uiNamespace setVariable [QGVAR(dragFootprints), []];
 uiNamespace setVariable [QGVAR(dragGhosts), []];
 
+// The green highlights of the slots that take what is dragged: made once per build by slot number (glowCache,
+// slot number -> [[box, parent], controls], fnc_glowSlot), ahead of time by fnc_warmTargets (glowNext: the next
+// slot number to look at), shown by a drag (dragGlow: the controls shown, fnc_showTargets) and only hidden by
+// its end (fnc_endDrag). A build empties all three along with the controls.
+uiNamespace setVariable [QGVAR(glowCache), createHashMap];
+uiNamespace setVariable [QGVAR(glowNext), 0];
+uiNamespace setVariable [QGVAR(dragGlow), []];
+
 // What each section of the columns drew that a later redraw needs (fnc_drawSection): its container, the
-// load text and the button on its caption line - controls, so in uiNamespace.
+// weight text and the button on its caption line - controls, so in uiNamespace.
 uiNamespace setVariable [QGVAR(sectionInfo), []];
+
+// The pieces of the window that are drawn again on their own - the weight card and the hotbar's counts -,
+// key -> [outer group, inner group, code, arguments, position] (fnc_drawPart, fnc_redrawPart): controls, so
+// in uiNamespace, emptied by every build.
+uiNamespace setVariable [QGVAR(parts), createHashMap];
 
 // How many times the window was built: a button that finds its section by its place in sectionInfo
 // carries the build it was drawn in, so its click a frame later never lands on another build's section.
 GVAR(buildCount) = 0;
 
-// Loot still to be searched, [container, class, row, col, cells] in the order it is revealed, and when
-// the item being searched now was started (fnc_markHidden, fnc_onFrame).
+// Loot still to be searched, [container, class, row, col, cells, compartment] in the order it is revealed, box after box,
+// each box's seal (class "") before its items (fnc_markHidden, fnc_onFrame).
 GVAR(searchQueue) = [];
 
 // Where the window's panels are, [x, y, w, h] on the screen: a dragged item let go outside all of them
@@ -128,12 +163,70 @@ GVAR(panels) = [];
 // goes into the slot that takes it (fnc_updateDrag).
 GVAR(equipmentRect) = [];
 
-GVAR(searchStarted) = -1;
+// The unit's storage column of the last build, [x, y, w, h] - [] for none (fnc_drawColumn): a uniform,
+// vest or backpack let go on it off its grids is put on; while the unit wears none of them, anything else
+// let go there is refused (fnc_updateDrag).
+GVAR(storageRect) = [];
+GVAR(lootRect) = [];
 
-// The item being searched as it stood in the queue, and when the next rustle plays (fnc_animateSearch).
-GVAR(searchHead) = [];
+// The boxes searched now, side by side (fnc_animateSearch): one run per box that has something queued and is not stopped,
+// [container, the entry being searched as it stood in the queue, when it was started, how long it takes]. searchDirty: the
+// queue or the stopped boxes changed, so the runs are matched with them again in the next frame; searchSynced is the queue
+// they were matched with (a build or a find puts a new one in its place). searchStarted is -1 while no box searches, else
+// the frame of the last step (fnc_onFrame asks it). When the next rustle plays, and the last frame of searching.
+GVAR(searchRuns) = [];
+// The marks on the tiles being searched (fnc_searchMarks).
+GVAR(searchMarks) = [];
+GVAR(searchDirty) = false;
+GVAR(searchSynced) = [];
+GVAR(searchStarted) = -1;
 GVAR(searchSoundAt) = 0;
 GVAR(searchLast) = 0;
+
+// What this player knows of the containers that move about (fnc_searchRecord): the id a uniform, vest or backpack carries
+// (einv_storage_searchState) -> [["known", class -> count], ["unsealed", true]]. Kept for the whole mission and never
+// broadcast, so a body's backpack this player searched stays searched on the ground, in a crate or on another body.
+GVAR(searchMemory) = createHashMap;
+
+// The sealed block a drag is held over (fnc_animateStatus): its seal info while it shows "Search it first".
+GVAR(sealDragOver) = createHashMap;
+
+// The boxes whose search the player stopped (the button in the caption line, fnc_stopStatus): their containers. Nothing of
+// them is searched until the button says "Search" again; the window's own state, empty for every window.
+GVAR(searchPaused) = [];
+
+// With "Search starts on click" (einv_gui_searchOnClick): the boxes that wait for the click, and the boxes the window has met
+// (so a rebuild does not make a searched or stopped box wait again). The window's own state.
+GVAR(searchIdle) = [];
+GVAR(searchSeen) = [];
+
+// The hands' queue (fnc_queueMoves): the actions waiting for the hands, in order, each a HashMap - "id", "move" (the
+// move fnc_sendMoves was given), "options", "hand" ("drop", "move" or "equip"), "time" (seconds), "sources" (the tiles it
+// takes from, as the moves in flight name them), "slot" ([unit, slot] of a worn item it takes off), "box" (the container
+// whose caption line says it, objNull for none), "fx" (the one control that marks a worn item's slot, made by fnc_drawQueue)
+// and what fnc_drawQueue keeps to tell whether its marks are still good: "tiles" ([[grid, tile], ...] it marked), "marks"
+// (those tiles' surfaces) and "slotAt". Only the first runs; handStarted is when it began (-1: not yet), handLast the last
+// frame of the queue, handId counts the entries made. queueDirty: entries were queued or cancelled, so the marks are brought
+// up to date in the next frame (fnc_animateQueue), once - queueFrom is the first place in the queue that needs it (entries
+// added at the end leave the ones before them alone). handWaiting is the queue's sources by cell, "col_row" ->
+// [[holder, key, block], ...] (fnc_queueIndex): asking whether a tile waits is one look, however long the queue is. "hint" on an
+// entry is the tile it was queued for (fnc_queueTiles). roomCache is the room each target container has for the quick move
+// key (fnc_roomFor), one entry per container.
+// handBoxes is what the caption lines say: one HashMap per box that has something waiting - "holder", "verb" ("grab", "put", "drop"
+// or "move"), "total" and "done" of the entries of this run (fnc_queueMoves adds, fnc_runQueue and fnc_cancelQueued count). A
+// box is dropped from it once nothing of it waits. instantFrame is the frame a drag let go in: what the drag sends goes at once
+// (fnc_endDrag, fnc_queueTime).
+GVAR(handQueue) = [];
+GVAR(handStarted) = -1;
+GVAR(handLast) = 0;
+GVAR(handId) = 0;
+GVAR(queueDirty) = false;
+GVAR(queueFrom) = 0;
+GVAR(handWaiting) = createHashMap;
+GVAR(handBoxes) = [];
+GVAR(instantFrame) = -1;
+GVAR(roomCache) = [];
+GVAR(quickHeldKey) = -1;
 
 // The sounds: each item class's family, each family's actions as read from CfgEinvSounds, when each sound last
 // played and which variant, the files found for config paths, the weapons' reload sounds, the ground under the
@@ -148,19 +241,12 @@ GVAR(noiseNext) = 0;
 GVAR(noiseSearchNext) = 0;
 GVAR(reloadSoundId) = -1;
 
-// The looting pose: what the window was opened on, the stance, vehicle and place the soldier had then, the pose
-// itself ([unit, stance at opening, pose state, started, token, reached, re-entries] or []), a counter that tells
-// one window's pose from the next, whether the pose was tried at all in this window, why the window closed
-// ("move", "taken" or ""), and where the camera frames the soldier (fnc_poseStart, fnc_poseCheck, fnc_poseEnd).
+// What the window was opened on, the vehicle and place the soldier had then (fnc_checkTaken), why the window
+// closed ("move", "taken" or "").
 GVAR(openedOn) = objNull;
-GVAR(openStance) = "";
 GVAR(openParent) = objNull;
 GVAR(openPos) = [];
-GVAR(pose) = [];
-GVAR(poseToken) = 0;
-GVAR(poseTried) = false;
 GVAR(closeReason) = "";
-GVAR(cameraRect) = [];
 
 // Moving stops looting: DIK code -> movement action, and the actions held already when the window opened
 // (fnc_open, fnc_onKeyDown).
@@ -177,6 +263,17 @@ GVAR(opened) = [];
 // (fnc_drawFilter, fnc_applyFilter).
 GVAR(filter) = "";
 GVAR(filterFocus) = false;
+
+// The category chosen at the side of a loot box (fnc_drawGroupStrip, fnc_setGroup): [[container, group], ...], one pair per
+// box that has one - the id of a category, one of ITEM_GROUPS or one the setup defines; a box with none shows everything. It fades
+// the tiles of its box that are not of the category as the search field does (fnc_applyFilter).
+GVAR(groupFilters) = [];
+// Which group of categories the strip of a box shows when there are more than its fields hold (fnc_stripMore): [[container, page], ...].
+GVAR(stripPages) = [];
+// Whether the caption lines hold a chip that moves every frame (fnc_updateStatus, fnc_animateStatus), and the last whole
+// second of the search's time it said.
+GVAR(statusLive) = false;
+GVAR(statusSecond) = -1;
 
 // Where the mouse was when the name beside it was last placed (fnc_onFrame).
 GVAR(tooltipAt) = [];
@@ -214,13 +311,62 @@ GVAR(collapsed) = [];
 // the whole mission.
 GVAR(expanded) = [];
 
-// The rustle while searching, muted with the speaker in the header (fnc_toggleSearchSound). Each
-// player's own, kept in the profile.
-GVAR(searchMuted) = profileNamespace getVariable [QGVAR(searchMuted), false];
+// The page each tall compartment of what is looted is turned to, [[holder, compartment, page], ...], for the whole
+// mission (fnc_pageOf, fnc_viewBlocks), and the pages a search moved, [[holder, compartment, page it was on], ...],
+// given back when the search is emptied (fnc_applyFilter). pageHover is what a dragged item is held over: [which
+// arrow, since when] (fnc_updateDrag).
+GVAR(pages) = [];
+GVAR(pagesMoved) = [];
+GVAR(pageHover) = [];
+// The page a fast run of clicks on a bar has asked for so far, by container and compartment (fnc_pageSoon).
+GVAR(pageWanted) = createHashMap;
 
-if !(GVAR(searchMuted) isEqualType true) then {
-    GVAR(searchMuted) = false;
+// What a click asked for that is heavy to do and is run at most once per rest (fnc_coalesce): by key, [code, arguments, when it
+// is due or -1, when the key rests until, its gap]. Emptied with every window (fnc_attach, fnc_onUnload).
+GVAR(coalesced) = createHashMap;
+
+// The window's sounds, set in the dropdown under the speaker in the header (fnc_openSoundMenu): one volume per kind
+// of sound (GVAR(soundGroups), fnc_soundGroup), 0 to 1. Each level is
+// [volume, the volume to come back to when its switch is turned on again]; a kind at volume 0 is off. Each player's
+// own, kept in the profile when the dropdown closes (fnc_soundSettle). The speaker used to mute with one flag,
+// einv_gui_muted (einv_gui_searchMuted before that): a player who had it set starts with every kind off.
+GVAR(soundGroups) = ["moves", "magazines", "containers", "search", "other"];
+GVAR(soundLevels) = GVAR(soundGroups) apply {[1, 1]};
+GVAR(soundDirty) = false;
+
+private _savedMix = profileNamespace getVariable [QGVAR(soundMix), []];
+
+if (
+    _savedMix isEqualType [] && {count _savedMix == 2} && {(_savedMix select 0) isEqualType 0}
+    && {(_savedMix select 1) isEqualType []} && {count (_savedMix select 1) == count GVAR(soundGroups)}
+) then {
+    // The first number was a master volume (the dropdown has none now): worked into the levels, so a player who had
+    // set one still hears what he set. At 0 it silences the kinds but leaves what they come back to.
+    private _master = ((_savedMix select 0) max 0) min 1;
+
+    GVAR(soundLevels) = (_savedMix select 1) apply {
+        _x params [["_volume", 1, [0]], ["_last", 1, [0]]];
+
+        [((_volume max 0) min 1) * _master, ((_last max 0) min 1) * ([_master, 1] select (_master <= 0))]
+    };
+} else {
+    private _wasMuted = profileNamespace getVariable [QGVAR(muted), profileNamespace getVariable [QGVAR(searchMuted), false]];
+
+    if (_wasMuted isEqualTo true) then {
+        GVAR(soundLevels) = GVAR(soundGroups) apply {[0, 1]};
+    };
 };
+
+// The order the Sort buttons lay a container out by (fnc_sortHolder, one of SORT_MODES): the one the last
+// click chose, each player's own, kept in the profile. The Sort buttons drawn on the window with their label
+// and hit area, to show it as it changes (fnc_sortButtons).
+GVAR(sortMode) = profileNamespace getVariable [QGVAR(sortMode), SORT_DEFAULT];
+
+if !(GVAR(sortMode) isEqualType "" && {GVAR(sortMode) in SORT_MODES}) then {
+    GVAR(sortMode) = SORT_DEFAULT;
+};
+
+uiNamespace setVariable [QGVAR(sortButtons), []];
 
 // The window's moves under way, request id (einv_storage_fnc_request) -> [sources, targets, time, feels,
 // details] (fnc_sendMoves): sources [[holder, key, block, col, row], ...] are faded and cannot be lifted,
@@ -245,11 +391,6 @@ GVAR(driftKits) = createHashMap;
 // The outlines fnc_drawPending made on the cells moves are heading for - controls, so in uiNamespace.
 uiNamespace setVariable [QGVAR(pendingFrames), []];
 
-// A hint fnc_open shows once the window is up, "" for none - and whether the one saying that shared
-// containers always open here in multiplayer was shown this mission (fnc_onInventoryOpened).
-GVAR(openHint) = "";
-GVAR(sharedHintShown) = false;
-
 // A living person's gear changes only as the server's settings for persons allow, checked on the
 // machine that runs each change (einv_storage_fnc_execute). Called by name, so a function compiled again
 // while testing is the one asked.
@@ -272,8 +413,13 @@ GVAR(cbaSlots) = createHashMapFromArray [
 ];
 
 // Where the context menu was opened, to open it there again when a choice of another mod asks to stay
-// open (fnc_cbaRun).
+// open (fnc_cbaRun); what the mouse was on then (GVAR(hover)'s form - fnc_redrawTiles closes a menu of a
+// tile it draws anew); and the open menu's choices and place [choices, [x, y]] or [], to make it again on
+// top (fnc_openMenu, fnc_raiseMenu). Its layer, where it lies and the field that had the focus before live
+// in uiNamespace (menu, menuRect, menuFocusBack).
 GVAR(menuAt) = [];
+GVAR(menuFor) = [];
+GVAR(menuState) = [];
 
 // Another window lies over this one - a dialog a choice of another mod opened, or Enhanced First Aid
 // Kits' own (fnc_isCovered). The window keeps still meanwhile (fnc_onFrame).
@@ -308,28 +454,32 @@ GVAR(aceInventoryAction) = isClass (configFile >> "CfgPatches" >> "ace_medical_s
 // (fnc_agentActionCondition, fnc_addAgentAction).
 GVAR(actionAgent) = objNull;
 
-// The live camera on the player's soldier and its light at night (fnc_cameraStart).
-GVAR(camera) = objNull;
-GVAR(cameraLight) = objNull;
-
-// What the containers held when the window was last built, in the three parts fnc_getSignature gives:
-// the unit's own gear, the list of sections shown, and per loot section what it holds and where it lies.
-// fnc_onFrame compares them part by part: an own or list change builds the window anew, a change in some
-// loot sections only draws those again (fnc_redrawTiles).
+// What the containers held when the window was last drawn, in the five parts fnc_getSignature gives:
+// the unit's own gear, the list of sections shown, per loot and per storage section what it holds and
+// where it lies, and what else the weight card shows. fnc_refresh compares them part by part: an own or
+// list change builds the window anew, a change in some sections only draws those again (fnc_redrawTiles),
+// with the weight card and the hotbar when they are the unit's own (fnc_redrawPart).
 GVAR(signatureParts) = [];
 
-// Weight (fnc_drawSection, fnc_markWeight, fnc_drawCompare), all made by the build and gone with the next one:
-//   loadBars   - one record per section with a container and a limit in play (HashMap: container, parent,
-//                bar [x, y, w, h] in the parent, label, labelRect, text, color, extras, mass, maxLoad, state,
-//                grids - indices into grids -, cellColor, fill, preview, tinted, worded): what lifting something
-//                shows on them
+// "Log window timings (debug)" (einv_gui_debugTiming), nothing of it read while the setting is off:
+//   redrawCounts - the last redraw of tiles: [tiles kept, tiles made, its milliseconds] (fnc_redrawTiles,
+//                  written in the redraw's line by fnc_refresh)
+//   phase        - [part of the frame now running, when it began] while fnc_frame times a frame, nil
+//                  otherwise: fnc_onFrame says where each part begins (fnc_notePhase)
+//   phaseTally   - per part of the frame [milliseconds in all, most in one frame], and "frame" the whole
+//                  frames from one to the next, written by fnc_logFrame with the frames' line
+//   frameLast    - when the last timed frame began, -1 before the window's first (fnc_startFrame)
+GVAR(redrawCounts) = [0, 0, 0];
+GVAR(phaseTally) = createHashMap;
+GVAR(frameLast) = -1;
+
+// Weight (fnc_drawSection, fnc_previewWeight, fnc_drawCompare), all made by the build and gone with the next one:
 //   infoAreas  - [[x, y, w, h], "", "", anchor, kind, args] where the hint has something to say that is
 //                no tile and no slot: the weight card and the section captions (fnc_updateHover)
 //   weightBar  - the weight card's bar: HashMap parent, rect, load, limits, unit (fnc_drawEquipmentCards)
 //   compare    - the comparison card at the mouse, or controlNull; tipShown - whichever of it and the name is
 //                on show, with its width and height (fnc_updateHover, fnc_onFrame)
 //   weightPreview - the added weight on the weight card while something is dragged
-uiNamespace setVariable [QGVAR(loadBars), []];
 uiNamespace setVariable [QGVAR(infoAreas), []];
 uiNamespace setVariable [QGVAR(weightBar), createHashMap];
 uiNamespace setVariable [QGVAR(compare), controlNull];
@@ -337,11 +487,9 @@ uiNamespace setVariable [QGVAR(tipShown), controlNull];
 uiNamespace setVariable [QGVAR(weightPreview), controlNull];
 
 // What the hint says about the keys while something is dragged, [[text, colour key], ...], and what it shows
-// now (fnc_startDrag, fnc_dragHint); a hint a move leaves for the build to write once its answer says yes
-// (fnc_quickMove, fnc_build, fnc_afterAction).
+// now (fnc_startDrag, fnc_dragHint).
 GVAR(dragKeys) = [];
 GVAR(dragHintShown) = [];
-GVAR(pendingHint) = [];
 
 // What lies around the unit and shows as boxes of its own in the loot column, read by fnc_readNearby -
 // objects, nearest first. Stays [] with the switch off and in the other windows that attach to this one
@@ -355,12 +503,26 @@ GVAR(styles) = [
 ];
 GVAR(style) = "main";
 
-// The player's own choice of camera, kept in the profile across missions.
+// The player's colours, picked in the popover under the header's palette button (fnc_openPaletteMenu): [accent, secondary, alpha,
+// panel, cells, tiles, text, lines, tile alpha] (fnc_palette) - each colour [hue, saturation, value] (0 to 1) or [] for none, the
+// panels' alpha and the tiles' alpha PALETTE_ALPHA_MIN to 1 or -1 for none. Each player's own, kept in the profile as
+// einv_gui_palette when the popover closes (fnc_paletteSettle); whether the themes use it is the server's to say
+// (einv_gui_playerColours, fnc_paletteAllowed).
+// Anything in the profile that is not that shape is no choice; what the first version of the palette saved - three entries, a
+// colour as [hue, vividness] - still reads (value 1), and so does a palette of four entries from before the cells, tiles, text and
+// lines rows (those unset) and a palette of eight entries from before the tiles' own transparency (that one unset). An alpha beyond
+// the range is cut to it, and the value of the panels, the cells and the tiles is cut at PALETTE_PANEL_VALUE_MAX as fnc_paletteSet
+// cuts it. einv_gui_paletteDirty says there is something to write, and einv_gui_menuRemake that the menu being closed is only
+// made again (fnc_closeMenu).
+GVAR(palette) = +PALETTE_DEFAULT;
+GVAR(paletteDirty) = false;
+GVAR(menuRemake) = false;
 
-GVAR(cameraOn) = profileNamespace getVariable [QGVAR(cameraOn), true];
+// What the profile holds, read as fnc_paletteRead reads any palette: nothing usable keeps the window as it ships.
+private _savedPalette = [profileNamespace getVariable [QGVAR(palette), []]] call FUNC(paletteRead);
 
-if !(GVAR(cameraOn) isEqualType true) then {
-    GVAR(cameraOn) = true;
+if (_savedPalette isNotEqualTo []) then {
+    GVAR(palette) = _savedPalette;
 };
 
 #include "initSettings.inc.sqf"
