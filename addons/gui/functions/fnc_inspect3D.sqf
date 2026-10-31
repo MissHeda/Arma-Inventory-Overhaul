@@ -1,8 +1,8 @@
 #include "..\script_component.hpp"
 #include "..\defines.hpp"
 /*
- * Author: Miss Heda, after KPBLM Item Preview by KPBLM (Workshop 3822903400) - its showcase scene, included with its author's
- * permission
+ * Author: Miss Heda, after KPblM Item Preview by Dimon UA (KPBLM, Workshop 3822903400) - its showcase scene, included with the
+ * author's permission
  * The inspect card's 3D view (fnc_drawInspect): the item in a small scene of its own far off the map (INSPECT_3D_PLACE) - a
  * dark sphere round it and three lights, key, fill and rim - filmed by a camera of its own into a texture (render to texture,
  * INSPECT_3D_TARGET) that the card shows in its picture box. The window's own view stays as it is. Held and dragged in the box

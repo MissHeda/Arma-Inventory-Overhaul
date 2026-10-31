@@ -345,5 +345,5 @@ at once; should the window ever fail to open, nothing opens and the RPT says why
 
 ## Credits
 
-The inspect card's 3D view is built on the showcase scene of [KPBLM Item Preview](https://steamcommunity.com/sharedfiles/filedetails/?id=3822903400)
-by KPBLM, included with its author's permission.
+The inspect card's 3D view is built on the showcase scene of [KPblM Item Preview](https://steamcommunity.com/sharedfiles/filedetails/?id=3822903400)
+by Dimon UA (KPBLM), included with the author's permission - thank you!
