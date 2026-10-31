@@ -166,10 +166,15 @@ def icon_sort(d, s, w, ascending):
 
 
 def icon_inventory(d, s, w):
-    # A backpack: rounded body, carry loop on top, front pocket.
-    d.rounded_rectangle([s * 0.24, s * 0.3, s * 0.76, s * 0.84], radius=s * 0.13, outline=WHITE, width=int(w))
-    line(d, [(s * 0.39, s * 0.3), (s * 0.39, s * 0.2), (s * 0.61, s * 0.2), (s * 0.61, s * 0.3)], w)
-    d.rounded_rectangle([s * 0.35, s * 0.56, s * 0.65, s * 0.84], radius=s * 0.05, outline=WHITE, width=int(w))
+    # A rucksack: rounded body, a carry loop on top, the lid's edge over the front with its buckle, and the seam of
+    # a pocket across the bottom. The lid's line ends on the middle of the outline, so it does not stick out.
+    d.rounded_rectangle([s * 0.22, s * 0.22, s * 0.78, s * 0.9], radius=s * 0.18, outline=WHITE, width=int(w))
+    loop = [(s * 0.5 + s * 0.1 * math.cos(math.radians(a)), s * 0.22 + s * 0.09 * math.sin(math.radians(a))) for a in range(180, 361, 5)]
+    line(d, loop, w)
+    edge = s * 0.22 + w / 2
+    line(d, [(edge, s * 0.42), (s * 0.4, s * 0.5), (s * 0.6, s * 0.5), (s - edge, s * 0.42)], w)
+    d.rounded_rectangle([s * 0.45, s * 0.5, s * 0.55, s * 0.6], radius=s * 0.02, fill=WHITE)
+    line(d, [(s * 0.3, s * 0.72), (s * 0.7, s * 0.72)], w)
 
 
 def icon_crate(d, s, w):
