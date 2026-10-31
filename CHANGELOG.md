@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.10 - beta
+
+### Fixed
+
+- Pressing on the window - a tile, Sort, a fold tab - no longer hides the turned pictures and the tip at the mouse while the button is held. The control pressed took the focus, and the engine drew its whole column over everything made on the window, the turned pictures and the name at the mouse among them (found in game). A button of the window's own now gives the focus back at once and gets its click at the release (`ctrlActivate`, once, when the mouse is still on it); the tip stays for the press and is read again once a click drew its button anew (Sort shows the next order right away) (issue #28).
+
 ## 0.6.9 - beta
 
 ### Changed

@@ -278,6 +278,38 @@ if (GVAR(dragging) || {GVAR(stripDrag) isNotEqualTo []}) then {
 
 private _focus = focusedCtrl _display;
 
+// A button of the window's own in a column, pressed and held: its column was drawn over the turned pictures and the name
+// at the mouse for as long as the button was held (issue #28, the tips of Sort and the fold tab). The focus goes back at
+// once; the click the engine would no longer give it is given at the release by fnc_onMouseButton (ctrlActivate, when the
+// mouse is still on it).
+if (
+    !isNull _focus && {ctrlType _focus in [1, 16]} && {inputMouse 0 != 0 || {inputMouse 1 != 0}}
+    && {!isNull ctrlParentControlsGroup _focus}
+    && {!(["focusAll", [], false] call FUNC(hook))}
+    && {
+        private _group = ctrlParentControlsGroup _focus;
+        private _outer = _group;
+
+        while {!isNull _group} do {
+            _outer = _group;
+            _group = ctrlParentControlsGroup _group;
+        };
+
+        _outer in (uiNamespace getVariable [QGVAR(created), []])
+        && {!(_outer in (uiNamespace getVariable [QGVAR(menu), []]))}
+    }
+) then {
+    private _sink = uiNamespace getVariable [QGVAR(filterSink), controlNull];
+
+    if (!isNull _sink) then {
+        GVAR(pressedButton) = [_focus, inputMouse 0 != 0];
+        ctrlSetFocus _sink;
+        uiNamespace setVariable [QGVAR(tipStale), true];
+        [] call FUNC(raiseTooltip);
+        _focus = _sink;
+    };
+};
+
 if (!isNull _focus) then {
     private _sink = uiNamespace getVariable [QGVAR(filterSink), controlNull];
 
@@ -533,10 +565,13 @@ if (GVAR(menuState) isNotEqualTo []) then {
 // The name at the mouse - a button's tip too - over whatever a click drew since or gave the focus (a column refreshed after Sort,
 // a part drawn again): every frame, as the menu. It does nothing while it is the last control made and nothing marked it stale.
 // While a mouse button is held the engine draws the group pressed on over everything, whatever was made after it - the name went
-// behind the tile it belongs to. It hides for the press, as a tooltip does, and comes back fresh on the release.
+// behind the tile it belongs to. A button of the window's own gives the focus back at once now (above, GVAR(pressedButton)), so the
+// name stays; only where something else still holds the focus it hides for the press, as a tooltip does, and comes back fresh
+// on the release.
 private _tipShown = uiNamespace getVariable [QGVAR(tipShown), controlNull];
+private _held = focusedCtrl _display;
 
-if (inputMouse 0 != 0 || {inputMouse 1 != 0}) then {
+if ((inputMouse 0 != 0 || {inputMouse 1 != 0}) && {!isNull _held} && {_held isNotEqualTo (uiNamespace getVariable [QGVAR(filterSink), controlNull])}) then {
     if (!isNull _tipShown && {ctrlShown _tipShown}) then {
         _tipShown ctrlShow false;
         GVAR(tipHeld) = true;

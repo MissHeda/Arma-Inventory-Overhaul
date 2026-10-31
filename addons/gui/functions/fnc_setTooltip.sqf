@@ -56,6 +56,9 @@ _ctrl ctrlAddEventHandler ["MouseEnter", {
 
         uiNamespace setVariable [QGVAR(hoverTip), _ctrl];
         GVAR(lastMouse) = [];
+
+        // A click often draws the button anew (Sort, a fold tab): its tip is asked for again once that is done.
+        [{GVAR(lastMouse) = []}, [], 4] call CBA_fnc_execAfterNFrames;
     }];
 } forEach ["MouseButtonDown", "MouseButtonUp", "ButtonClick"];
 

@@ -86,6 +86,31 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
 if (isNull _display) exitWith {false};
 
+// A button of the window's own that lost the focus while it was held (fnc_onFrame): the left button's release over it is
+// its click, as the engine would have given it.
+if (!_down && {GVAR(pressedButton) isNotEqualTo []}) then {
+    GVAR(pressedButton) params [["_pressed", controlNull], ["_left", false]];
+
+    GVAR(pressedButton) = [];
+
+    if (_button == 0 && {_left} && {!isNull _pressed} && {ctrlShown _pressed} && {ctrlEnabled _pressed}) then {
+        private _size = ctrlPosition _pressed;
+        private _at = [[
+            [0, 0, _size select 2, _size select 3], "", "",
+            createHashMapFromArray [["rel", [_size select 0, _size select 1]], ["parent", ctrlParentControlsGroup _pressed]]
+        ]] call FUNC(slotRect);
+
+        getMousePosition params ["_mouseX", "_mouseY"];
+
+        if (_at isNotEqualTo [] && {
+            _mouseX >= (_at select 0) && {_mouseX < (_at select 0) + (_at select 2)}
+            && {_mouseY >= (_at select 1)} && {_mouseY < (_at select 1) + (_at select 3)}
+        }) then {
+            ctrlActivate _pressed;
+        };
+    };
+};
+
 // Repacking magazines (aio_magazines): a press anywhere stops it and does nothing else - nor does
 // letting go of that button. The header's buttons keep their own click: Close during a repack stops it
 // and closes.

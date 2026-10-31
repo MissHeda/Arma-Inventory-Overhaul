@@ -82,6 +82,9 @@ GVAR(context) = createHashMap;
 // "pack", "kit" or "none" (fnc_groupMode), its plan kept in dragRoom. Its ghost and footprint are
 // controls, so they live in uiNamespace (dragGhost, dragFootprint).
 GVAR(press) = [];
+
+// A window button pressed whose focus went back while it was held: [control, left button], fnc_onFrame / fnc_onMouseButton.
+GVAR(pressedButton) = [];
 GVAR(dragging) = false;
 GVAR(dragTarget) = [];
 GVAR(dragRoom) = createHashMap;
