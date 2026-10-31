@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.24 - beta
+
+### Changed
+
+- Inspect card 3D view: rendered at 2048 x 1024 instead of 1024 x 512, so the item is sharper and its edges smoother.
+
 ## 0.6.23 - beta
 
 ### Fixed

@@ -532,10 +532,12 @@
 
 
 // The inspect card's 3D view (fnc_inspect3D): the render target its camera films into, shown in the card's picture box as
-// #(argb,1024,512,1)r2t(INSPECT_3D_TARGET,aspect); the camera's field of view; where the scene stands, far off any map, high
+// #(argb,W,H,1)r2t(INSPECT_3D_TARGET,2.0) at INSPECT_3D_RES - twice the pixels the box has on a 4K screen, so the
+// item is drawn smooth, its edges sampled down; the camera's field of view; where the scene stands, far off any map, high
 // above the sea (its dark sphere would show in the sky of anyone near); the size every item is framed by at most, in metres -
 // the boxes of many mods' models are blown up by their hit geometry - and the distance per metre of it.
 #define INSPECT_3D_TARGET "aio_inspect3d"
+#define INSPECT_3D_RES [2048, 1024]
 #define INSPECT_3D_FOV 0.35
 #define INSPECT_3D_PLACE [-2048, -2048]
 #define INSPECT_3D_FRAME 1.2

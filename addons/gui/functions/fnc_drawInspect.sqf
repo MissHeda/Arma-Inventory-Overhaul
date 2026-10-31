@@ -168,7 +168,7 @@ private _closeW = SQUARE(_closeH);
 
 // The item in 3D instead of its picture, for one with a model of its own (fnc_hasModel) and with 3D picked in the box's corner:
 // its scene's camera films into a texture shown in the box (fnc_inspect3D). Picture-in-Picture renders it - off in the video
-// options, there is no 3D. The box is then exactly twice as wide as high in pixels, as the texture (1024 x 512) is, so the
+// options, there is no 3D. The box is then exactly twice as wide as high in pixels, as the texture (INSPECT_3D_RES) is, so the
 // item is never squeezed; under it how to move it.
 private _can3D = [_class] call FUNC(hasModel);
 private _show3D = _can3D && {isPiPEnabled} && {GVAR(inspectView) isEqualTo "3d"};
@@ -277,7 +277,7 @@ if (_show3D) then {
     _viewRect params ["_viewX", "_viewY", "_viewW", "_viewH"];
 
     private _view = [_display, "AIO_PictureTurned", _group, _viewRect] call FUNC(uiCreate);
-    _view ctrlSetText format ["#(argb,1024,512,1)r2t(%1,2.0)", INSPECT_3D_TARGET];
+    _view ctrlSetText format ["#(argb,%1,%2,1)r2t(%3,2.0)", INSPECT_3D_RES select 0, INSPECT_3D_RES select 1, INSPECT_3D_TARGET];
 
     // The areas that turn it: the view but the switch. A held control is drawn over every other (the engine draws the focused
     // one last) - one lying under the switch as well hid it after the first turn, and took its clicks.
