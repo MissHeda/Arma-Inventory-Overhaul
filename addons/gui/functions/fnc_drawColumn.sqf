@@ -67,7 +67,7 @@ if (_id isEqualTo "storage") then {
     GVAR(storageRect) = _rect;
 };
 
-// So is the loot column off its grids: what is let go there goes into its first container, or onto the ground (fnc_updateDrag).
+// So is the loot column off its grids: what is let go there goes onto the ground (fnc_updateDrag).
 if (_id isEqualTo "loot") then {
     GVAR(lootRect) = _rect;
 };

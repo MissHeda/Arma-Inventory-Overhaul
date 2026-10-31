@@ -405,6 +405,21 @@ if (GVAR(inspect3DTurn) isNotEqualTo []) then {
     };
 };
 
+// ... and moves the camera while the middle button holds it.
+if (GVAR(inspect3DPan) isNotEqualTo []) then {
+    if (inputMouse 2 == 0) then {
+        GVAR(inspect3DPan) = [];
+    } else {
+        GVAR(inspect3DPan) params ["_fromX", "_fromY"];
+        _mouse params ["_toX", "_toY"];
+
+        if (_toX != _fromX || {_toY != _fromY}) then {
+            ["pan", [_toX - _fromX, _toY - _fromY]] call FUNC(inspect3D);
+            GVAR(inspect3DPan) = [_toX, _toY];
+        };
+    };
+};
+
 // A kit window follows the mouse the same way while its title is held (fnc_onMouseButton) - whole on the
 // screen's sides and between header and footer, its corner on a pixel so every see-through edge stays
 // sharp. Looked up by its key every frame: a build meanwhile makes it anew.

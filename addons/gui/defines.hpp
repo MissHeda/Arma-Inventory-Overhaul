@@ -543,9 +543,15 @@
 #define INSPECT_3D_FRAME 1.2
 #define INSPECT_3D_DISTANCE 0.7
 
+// A worn uniform stands as tall as a soldier: its frame is its height times this, so all of it fits the box's height.
+#define INSPECT_3D_TALL 2.3
+
 // How far the 3D view's item turns for a drag across the whole screen, in degrees: round, and up or down.
 #define INSPECT_3D_TURN_ACROSS 200
 #define INSPECT_3D_TURN_DOWN 100
+
+// How far the 3D view's camera moves for a middle-button drag across the whole screen, in its distances to the item.
+#define INSPECT_3D_PAN 1.5
 
 // The engine's stand-in models an item without one of its own inherits (ItemCore, CA_Magazine and the dummies), in lowercase,
 // without the leading backslash and the extension (fnc_itemModel): such an item has nothing to show in 3D.

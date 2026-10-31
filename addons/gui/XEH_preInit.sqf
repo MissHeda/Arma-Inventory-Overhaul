@@ -293,6 +293,7 @@ GVAR(inspectMove) = [];
 GVAR(inspectView) = profileNamespace getVariable [QGVAR(inspectView), "2d"];
 GVAR(scene3D) = createHashMap;
 GVAR(inspect3DTurn) = [];
+GVAR(inspect3DPan) = [];
 GVAR(lastWheel3D) = -1;
 GVAR(itemModels) = createHashMap;
 

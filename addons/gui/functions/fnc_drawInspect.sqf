@@ -290,11 +290,16 @@ if (_show3D) then {
     {
         private _hit = [_display, "AIO_Hitbox", _group, _x] call FUNC(uiCreate);
 
+        // The left button turns, the middle one moves the camera (fnc_onFrame).
         _hit ctrlAddEventHandler ["MouseButtonDown", {
             params ["", "_button"];
 
             if (_button == 0) then {
                 GVAR(inspect3DTurn) = getMousePosition;
+            };
+
+            if (_button == 2) then {
+                GVAR(inspect3DPan) = getMousePosition;
             };
         }];
         _hit ctrlAddEventHandler ["MouseButtonDblClick", {

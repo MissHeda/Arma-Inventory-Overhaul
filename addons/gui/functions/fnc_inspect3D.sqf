@@ -24,6 +24,8 @@
  *    "stop"    the scene goes: camera, lights, objects
  *    "turn"    the camera goes round by how far the mouse moved, a share of the screen (arguments: [across, down])
  *    "zoom"    nearer for a turn of the wheel up, farther for one down (arguments: [turn])
+ *    "pan"     the camera and what it looks at move across and up or down, as the middle mouse button drags them - the item
+ *              moves with the mouse, at most its frame away from where it was (arguments: [across, down])
  *    "reset"   the view the scene started with
  * 1: Arguments <ARRAY> (default: [])
  *
@@ -156,65 +158,92 @@ switch (_mode) do {
         private _target = +_holderPos;
         private _frame = INSPECT_3D_FRAME;
 
-        if (_model isNotEqualTo "") then {
-            private _probe = createSimpleObject [_model, [0, 0, 0], true];
+        // A uniform as it is worn, not the bundle it lies on the ground as: the soldier class it dresses (ItemInfo uniformClass),
+        // made from its class so its textures are the uniform's - and framed whole, as tall as it is.
+        private _wornClass = if (getNumber (_itemConfig >> "ItemInfo" >> "type") == 801) then {
+            getText (_itemConfig >> "ItemInfo" >> "uniformClass")
+        } else {
+            ""
+        };
 
-            if (isNull _probe) exitWith {};
+        private _worn = if (_wornClass isNotEqualTo "" && {isClass (configFile >> "CfgVehicles" >> _wornClass)}) then {
+            createSimpleObject [_wornClass, _holderPos, true]
+        } else {
+            objNull
+        };
 
-            (0 boundingBoxReal _probe) params ["_boxMin", "_boxMax"];
-            deleteVehicle _probe;
+        // Standing, a body is tall where the view is wide: framed by its height (a share the box shows up and down, as the field
+        // of view gives it), not by the width a weapon is. A uniform that cannot be made so lies there as its model.
+        if (!isNull _worn) then {
+            _objects pushBack _worn;
 
-            private _middle = (_boxMin vectorAdd _boxMax) vectorMultiply 0.5;
-            private _extent = _boxMax vectorDiff _boxMin;
-            private _size = vectorMagnitude _extent;
+            (0 boundingBoxReal _worn) params ["_boxMin", "_boxMax"];
 
-            _frame = (_size max 0.1) min INSPECT_3D_FRAME;
+            _target = _worn modelToWorldWorld ((_boxMin vectorAdd _boxMax) vectorMultiply 0.5);
+            _frame = (((_boxMax select 2) - (_boxMin select 2)) max 1) * INSPECT_3D_TALL;
+        } else {
+            if (_model isNotEqualTo "") then {
+                private _probe = createSimpleObject [_model, [0, 0, 0], true];
 
-            // On the holder: weapons, and gear whose box is blown up past the frame - it stands right there. Small things from
-            // CfgWeapons (a radio, a compass) the holder lays upside down: they stand as their model, as magazines do.
-            private _onHolder = _holderTakes && {_isWeapon || {_size > INSPECT_3D_FRAME}};
+                if (isNull _probe) exitWith {};
 
-            if (_onHolder) then {
-                _holder addWeaponWithAttachmentsCargo [[_class, _muzzle, _pointer, _optic, _magazine, _magazine2, _bipod], 1];
+                (0 boundingBoxReal _probe) params ["_boxMin", "_boxMax"];
+                deleteVehicle _probe;
 
-                private _base = [[0.25, 0] select _isWeapon] call _fnc_base;
+                private _middle = (_boxMin vectorAdd _boxMax) vectorMultiply 0.5;
+                private _extent = _boxMax vectorDiff _boxMin;
+                private _size = vectorMagnitude _extent;
 
-                if (_base isNotEqualTo []) then {
-                    _target = _base;
-                };
-            } else {
-                private _base = [0] call _fnc_base;
-                private _placed = [_base, _holderPos] select (_base isEqualTo []);
-                private _prop = createSimpleObject [_model, _placed, true];
+                _frame = (_size max 0.1) min INSPECT_3D_FRAME;
 
-                // A magazine is modelled as it sits in its weapon: stood up, its mouth up, by the axis it is longest along. A small
-                // thing from CfgWeapons laid out as worn hangs below its base, its top on local -z: turned half round its thin axis.
-                private _turn = [];
+                // On the holder: weapons, and gear whose box is blown up past the frame - it stands right there. Small things from
+                // CfgWeapons (a radio, a compass) the holder lays upside down: they stand as their model, as magazines do.
+                private _onHolder = _holderTakes && {_isWeapon || {_size > INSPECT_3D_FRAME}};
 
-                if (isClass (configFile >> "CfgMagazines" >> _class)) then {
-                    _turn = [[[0, 1, 0], [0, 0, 1]], [[0, 0, -1], [0, -1, 0]]] select (abs (_extent select 1) >= abs (_extent select 2));
-                } else {
-                    if (abs (_extent select 2) > abs (_extent select 1) && {(_middle select 2) < 0}) then {
-                        _turn = [[0, 1, 0], [0, 0, -1]];
+                if (_onHolder) then {
+                    _holder addWeaponWithAttachmentsCargo [[_class, _muzzle, _pointer, _optic, _magazine, _magazine2, _bipod], 1];
+
+                    private _base = [[0.25, 0] select _isWeapon] call _fnc_base;
+
+                    if (_base isNotEqualTo []) then {
+                        _target = _base;
                     };
-                };
+                } else {
+                    private _base = [0] call _fnc_base;
+                    private _placed = [_base, _holderPos] select (_base isEqualTo []);
+                    private _prop = createSimpleObject [_model, _placed, true];
 
-                if (_turn isNotEqualTo []) then {
-                    _prop setVectorDirAndUp _turn;
-                };
+                    // A magazine is modelled as it sits in its weapon: stood up, its mouth up, by the axis it is longest along. A small
+                    // thing from CfgWeapons laid out as worn hangs below its base, its top on local -z: turned half round its thin axis.
+                    private _turn = [];
 
-                _objects pushBack _prop;
+                    if (isClass (configFile >> "CfgMagazines" >> _class)) then {
+                        _turn = [[[0, 1, 0], [0, 0, 1]], [[0, 0, -1], [0, -1, 0]]] select (abs (_extent select 1) >= abs (_extent select 2));
+                    } else {
+                        if (abs (_extent select 2) > abs (_extent select 1) && {(_middle select 2) < 0}) then {
+                            _turn = [[0, 1, 0], [0, 0, -1]];
+                        };
+                    };
 
-                // Aimed at the middle of the model as it stands now - moving a turned simple object would undo its turn.
-                private _seen = _prop modelToWorldWorld _middle;
+                    if (_turn isNotEqualTo []) then {
+                        _prop setVectorDirAndUp _turn;
+                    };
 
-                if (count _seen == 3 && {vectorMagnitude (_seen vectorDiff _placed) < 3}) then {
-                    _target = _seen;
+                    _objects pushBack _prop;
+
+                    // Aimed at the middle of the model as it stands now - moving a turned simple object would undo its turn.
+                    private _seen = _prop modelToWorldWorld _middle;
+
+                    if (count _seen == 3 && {vectorMagnitude (_seen vectorDiff _placed) < 3}) then {
+                        _target = _seen;
+                    };
                 };
             };
         };
 
         _scene set ["target", _target];
+        _scene set ["origin", +_target];
+        _scene set ["frame", _frame];
 
         // The lights, placed with the camera.
         private _lights = [[30, [1, 0.97, 0.92], [1, 0.97, 0.92]], [12, [0.6, 0.7, 0.9], [0.7, 0.8, 1]], [20, [1, 1, 1], [1, 0.9, 0.8]]] apply {
@@ -272,6 +301,7 @@ switch (_mode) do {
 
         GVAR(scene3D) = createHashMap;
         GVAR(inspect3DTurn) = [];
+        GVAR(inspect3DPan) = [];
     };
     case "turn": {
         if (count _scene == 0) exitWith {};
@@ -298,9 +328,34 @@ switch (_mode) do {
 
         call _fnc_camera;
     };
+    case "pan": {
+        if (count _scene == 0) exitWith {};
+
+        _arguments params [["_across", 0, [0]], ["_down", 0, [0]]];
+
+        private _dir = _scene get "dir";
+        private _distance = _scene get "distance";
+        private _side = [cos _dir, -(sin _dir), 0];
+        private _origin = _scene get "origin";
+
+        // Dragged right, the item goes right: the camera and its target go left. Dragged down, they go up.
+        private _target = ((_scene get "target") vectorAdd (_side vectorMultiply (-_across * _distance * INSPECT_3D_PAN)))
+            vectorAdd [0, 0, _down * _distance * INSPECT_3D_PAN];
+        private _offset = _target vectorDiff _origin;
+        private _limit = _scene getOrDefault ["frame", INSPECT_3D_FRAME];
+
+        if (vectorMagnitude _offset > _limit) then {
+            _target = _origin vectorAdd ((vectorNormalized _offset) vectorMultiply _limit);
+        };
+
+        _scene set ["target", _target];
+
+        call _fnc_camera;
+    };
     case "reset": {
         if (count _scene == 0) exitWith {};
 
+        _scene set ["target", +(_scene get "origin")];
         _scene set ["dir", 45];
         _scene set ["pitch", 15];
         _scene set ["distance", _scene get "start"];

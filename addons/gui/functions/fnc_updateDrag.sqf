@@ -1222,25 +1222,10 @@ call {
         };
     };
 
-    // On the loot column off its grids, from outside that column: into its first container, laid down in its first free spot
-    // as on a folded one - or, where that is the ground (or it shows none), onto the ground.
-    private _lootGround = false;
-
-    if (_targetIndex < 0 && {_inLoot} && {
+    // On the loot column off its grids, from outside that column: onto the ground, whatever container it shows - one let go
+    // there is put down, not pushed into the crate at the top (that one is for a quick move, fnc_quickMove).
+    private _lootGround = _targetIndex < 0 && {_inLoot} && {
         _slotSource isNotEqualTo [] || {((_grids select _sourceIndex) getOrDefault ["side", ""]) isNotEqualTo "loot"}
-    }) then {
-        private _lootIndex = _grids findIf {
-            (_x getOrDefault ["side", ""]) isEqualTo "loot" && {!(_x getOrDefault ["virtual", true])} && {!(_x getOrDefault ["overflow", false])}
-            && {(_x getOrDefault ["window", ""]) isEqualTo ""} && {!isNull (_x getOrDefault ["container", objNull])}
-        };
-
-        if (_lootIndex < 0 || {[(_grids select _lootIndex) get "container"] call EFUNC(storage,isGroundHolder)}) then {
-            _lootGround = true;
-        } else {
-            _targetIndex = _lootIndex;
-            _viaFold = true;
-            _cell = [0, 0];
-        };
     };
 
     if (_targetIndex < 0) exitWith {

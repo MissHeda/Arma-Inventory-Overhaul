@@ -275,7 +275,7 @@
             <English>3D needs Picture-in-Picture - turn it on in the video options</English>
         </Key>
         <Key ID="STR_aio_gui_Inspect_3DTip">
-            <English>Drag to turn, wheel to zoom, double click to reset</English>
+            <English>Drag to turn, middle button to move, wheel to zoom, double click to reset</English>
         </Key>
         <Key ID="STR_aio_gui_Inspect_Attached">
             <English>Attached</English>

@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.25 - beta
+
+### Changed
+
+- An item let go on the loot column off its grids goes onto the ground now, whatever container the column shows - before, it was pushed into the container at the top (a desk, a crate) and refused there when it did not fit. Quick move still fills the first open container.
+- Inspect card 3D view: holding the middle mouse button moves the camera across and up or down (at most the item's size away; a double click puts it back), and a uniform shows as it is worn - its soldier model in the uniform's textures - instead of the bundle it lies on the ground as.
+
 ## 0.6.24 - beta
 
 ### Changed
