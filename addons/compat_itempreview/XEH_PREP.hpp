@@ -1,1 +1,2 @@
+PREP(hasModel);
 PREP(open);

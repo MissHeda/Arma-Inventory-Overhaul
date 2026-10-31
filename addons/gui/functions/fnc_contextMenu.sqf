@@ -147,9 +147,9 @@ private _fnc_addArsenal = {
 };
 
 // After Inspect: the item on KPBLM Item Preview's showcase, in 3D (aio_compat_itempreview - only when that addon is
-// loaded). _class is the caller's.
+// loaded), for an item with a model of its own. _class is the caller's.
 private _fnc_addView3D = {
-    if (!isNil QEFUNC(compat_itempreview,open)) then {
+    if (!isNil QEFUNC(compat_itempreview,open) && {[_class] call EFUNC(compat_itempreview,hasModel)}) then {
         _choices pushBack [LELSTRING(compat_itempreview,Menu_View3D), [_class], {_this call EFUNC(compat_itempreview,open)}];
     };
 };
