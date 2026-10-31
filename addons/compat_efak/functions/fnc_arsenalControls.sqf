@@ -3,9 +3,9 @@
  * Author: Miss Heda
  * The controls of Enhanced First Aid Kits' kits tab in ACE Arsenal that the panel works with: the list of what the
  * picked kit may hold - the tab's right list, at the place of ACE's own and built like it, which items are dragged
- * out of into the kit's grid and greyed by its room (einv_arsenal_fnc_listDrag, einv_arsenal_fnc_ungreyKit) -, the
- * tab's sort bar, where ACE's own is (einv_arsenal_fnc_panelRect), and the "-" and "+" of that list, which lie over
- * the row picked (einv_arsenal_fnc_onListPress). They are part of ACE's display from that mod's config, there from
+ * out of into the kit's grid and greyed by its room (aio_arsenal_fnc_listDrag, aio_arsenal_fnc_ungreyKit) -, the
+ * tab's sort bar, where ACE's own is (aio_arsenal_fnc_panelRect), and the "-" and "+" of that list, which lie over
+ * the row picked (aio_arsenal_fnc_onListPress). They are part of ACE's display from that mod's config, there from
  * the start and hidden while the tab is closed; null where that mod's arsenal addon is not loaded.
  *
  * Arguments:
@@ -15,7 +15,7 @@
  * [list <CONTROL>, sort bar <CONTROL>, [IDC of "-", IDC of "+"] <ARRAY>] <ARRAY>
  *
  * Example:
- * ([findDisplay 1127001] call einv_compat_efak_fnc_arsenalControls) params ["_list", "_sort", "_arrows"];
+ * ([findDisplay 1127001] call aio_compat_efak_fnc_arsenalControls) params ["_list", "_sort", "_arrows"];
  *
  * Public: No
  */

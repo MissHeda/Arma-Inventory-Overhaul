@@ -1,157 +1,157 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="items">
-        <Key ID="STR_einv_items_Group_assigned">
+        <Key ID="STR_aio_items_Group_assigned">
             <English>Map, compass, watch, radio and GPS</English>
         </Key>
-        <Key ID="STR_einv_items_Group_backpack_large">
+        <Key ID="STR_aio_items_Group_backpack_large">
             <English>Large backpacks</English>
         </Key>
-        <Key ID="STR_einv_items_Group_backpack_medium">
+        <Key ID="STR_aio_items_Group_backpack_medium">
             <English>Medium backpacks</English>
         </Key>
-        <Key ID="STR_einv_items_Group_backpack_small">
+        <Key ID="STR_aio_items_Group_backpack_small">
             <English>Small backpacks</English>
         </Key>
-        <Key ID="STR_einv_items_Group_belt">
+        <Key ID="STR_aio_items_Group_belt">
             <English>Belts and drums</English>
         </Key>
-        <Key ID="STR_einv_items_Group_crate">
+        <Key ID="STR_aio_items_Group_crate">
             <English>Crates and vehicles</English>
         </Key>
-        <Key ID="STR_einv_items_Group_goggles">
+        <Key ID="STR_aio_items_Group_goggles">
             <English>Facewear</English>
         </Key>
-        <Key ID="STR_einv_items_Group_grenade">
+        <Key ID="STR_aio_items_Group_grenade">
             <English>Grenades, smokes and shells</English>
         </Key>
-        <Key ID="STR_einv_items_Group_handgun">
+        <Key ID="STR_aio_items_Group_handgun">
             <English>Handguns</English>
         </Key>
-        <Key ID="STR_einv_items_Group_headgear">
+        <Key ID="STR_aio_items_Group_headgear">
             <English>Headgear</English>
         </Key>
-        <Key ID="STR_einv_items_Group_item_large">
+        <Key ID="STR_aio_items_Group_item_large">
             <English>Large items</English>
         </Key>
-        <Key ID="STR_einv_items_Group_item_medium">
+        <Key ID="STR_aio_items_Group_item_medium">
             <English>Medium items</English>
         </Key>
-        <Key ID="STR_einv_items_Group_item_small">
+        <Key ID="STR_aio_items_Group_item_small">
             <English>Small items</English>
         </Key>
-        <Key ID="STR_einv_items_Group_item_xlarge">
+        <Key ID="STR_aio_items_Group_item_xlarge">
             <English>Very large items</English>
         </Key>
-        <Key ID="STR_einv_items_Group_launcher">
+        <Key ID="STR_aio_items_Group_launcher">
             <English>Launchers</English>
         </Key>
-        <Key ID="STR_einv_items_Group_mag_large">
+        <Key ID="STR_aio_items_Group_mag_large">
             <English>Large magazines</English>
         </Key>
-        <Key ID="STR_einv_items_Group_mag_rifle">
+        <Key ID="STR_aio_items_Group_mag_rifle">
             <English>Rifle magazines</English>
         </Key>
-        <Key ID="STR_einv_items_Group_mag_small">
+        <Key ID="STR_aio_items_Group_mag_small">
             <English>Small magazines</English>
         </Key>
-        <Key ID="STR_einv_items_Group_medical">
+        <Key ID="STR_aio_items_Group_medical">
             <English>Medical</English>
         </Key>
-        <Key ID="STR_einv_items_Group_muzzle">
+        <Key ID="STR_aio_items_Group_muzzle">
             <English>Muzzle attachments</English>
         </Key>
-        <Key ID="STR_einv_items_Group_nvg_binocular">
+        <Key ID="STR_aio_items_Group_nvg_binocular">
             <English>Night vision and binoculars</English>
         </Key>
-        <Key ID="STR_einv_items_Group_optic_large">
+        <Key ID="STR_aio_items_Group_optic_large">
             <English>Large optics</English>
         </Key>
-        <Key ID="STR_einv_items_Group_optic_small">
+        <Key ID="STR_aio_items_Group_optic_small">
             <English>Small optics</English>
         </Key>
-        <Key ID="STR_einv_items_Group_rail_bipod">
+        <Key ID="STR_aio_items_Group_rail_bipod">
             <English>Rail attachments and bipods</English>
         </Key>
-        <Key ID="STR_einv_items_Group_rifle_heavy">
+        <Key ID="STR_aio_items_Group_rifle_heavy">
             <English>Heavy rifles</English>
         </Key>
-        <Key ID="STR_einv_items_Group_rifle_light">
+        <Key ID="STR_aio_items_Group_rifle_light">
             <English>Light rifles</English>
         </Key>
-        <Key ID="STR_einv_items_Group_rifle_medium">
+        <Key ID="STR_aio_items_Group_rifle_medium">
             <English>Rifles</English>
         </Key>
-        <Key ID="STR_einv_items_Group_rifle_xheavy">
+        <Key ID="STR_aio_items_Group_rifle_xheavy">
             <English>Very heavy rifles and machine guns</English>
         </Key>
-        <Key ID="STR_einv_items_Group_rocket">
+        <Key ID="STR_aio_items_Group_rocket">
             <English>Rockets</English>
         </Key>
-        <Key ID="STR_einv_items_Group_rocket_heavy">
+        <Key ID="STR_aio_items_Group_rocket_heavy">
             <English>Heavy rockets and missiles</English>
         </Key>
-        <Key ID="STR_einv_items_Group_stack_10">
+        <Key ID="STR_aio_items_Group_stack_10">
             <English>Bandages, injectors and small infusions (10 to a tile)</English>
         </Key>
-        <Key ID="STR_einv_items_Group_stack_2">
+        <Key ID="STR_aio_items_Group_stack_2">
             <English>Heavy infusions and blood bags (2 to a tile)</English>
         </Key>
-        <Key ID="STR_einv_items_Group_stack_20">
+        <Key ID="STR_aio_items_Group_stack_20">
             <English>Sutures, cable ties and earplugs (20 to a tile)</English>
         </Key>
-        <Key ID="STR_einv_items_Group_stack_5">
+        <Key ID="STR_aio_items_Group_stack_5">
             <English>Rations, splints, bigger infusions and first aid kits (5 to a tile)</English>
         </Key>
-        <Key ID="STR_einv_items_Group_uniform">
+        <Key ID="STR_aio_items_Group_uniform">
             <English>Uniforms</English>
         </Key>
-        <Key ID="STR_einv_items_Group_vest">
+        <Key ID="STR_aio_items_Group_vest">
             <English>Vests</English>
         </Key>
-        <Key ID="STR_einv_items_Ruleset_Default">
+        <Key ID="STR_aio_items_Ruleset_Default">
             <English>Default</English>
         </Key>
-        <Key ID="STR_einv_items_Ruleset_Default_Desc">
+        <Key ID="STR_aio_items_Ruleset_Default_Desc">
             <English>Realistic sizes. Only bandages, injectors, infusions, rations and first aid kits stack. Container size follows the load.</English>
         </Key>
-        <Key ID="STR_einv_items_Setting_MassPerCell">
+        <Key ID="STR_aio_items_Setting_MassPerCell">
             <English>Load per cell</English>
         </Key>
-        <Key ID="STR_einv_items_Setting_MassPerCell_Desc">
+        <Key ID="STR_aio_items_Setting_MassPerCell_Desc">
             <English>Load per grid cell. Lower means bigger grids.\ncell= in the rules wins.</English>
         </Key>
-        <Key ID="STR_einv_items_Setting_Rules">
+        <Key ID="STR_aio_items_Setting_Rules">
             <English>Inventory rules</English>
         </Key>
-        <Key ID="STR_einv_items_Setting_Rules_Desc">
+        <Key ID="STR_aio_items_Setting_Rules_Desc">
             <English>Item sizes, stacks and compartments. Empty uses the defaults.\nThe setup wizard writes this for you.</English>
         </Key>
-        <Key ID="STR_einv_items_Setting_SizeTable">
+        <Key ID="STR_aio_items_Setting_SizeTable">
             <English>Grid sizes by class</English>
         </Key>
-        <Key ID="STR_einv_items_Setting_SizeTable_Desc">
+        <Key ID="STR_aio_items_Setting_SizeTable_Desc">
             <English>Item sizes as class:WxH, comma-separated.\nExample: rhsusf_100Rnd_762x51:1x3</English>
         </Key>
-        <Key ID="STR_einv_items_Setting_StackSmall">
+        <Key ID="STR_aio_items_Setting_StackSmall">
             <English>Small items per tile</English>
         </Key>
-        <Key ID="STR_einv_items_Setting_StackSmall_Desc">
+        <Key ID="STR_aio_items_Setting_StackSmall_Desc">
             <English>How many small items share a tile (default 10).</English>
         </Key>
-        <Key ID="STR_einv_items_Setting_StackTable">
+        <Key ID="STR_aio_items_Setting_StackTable">
             <English>Stack sizes by class</English>
         </Key>
-        <Key ID="STR_einv_items_Setting_StackTable_Desc">
+        <Key ID="STR_aio_items_Setting_StackTable_Desc">
             <English>Items per tile as class:N, comma-separated.\nExample: ACE_fieldDressing:20</English>
         </Key>
-        <Key ID="STR_einv_items_SubCategory_Grids">
+        <Key ID="STR_aio_items_SubCategory_Grids">
             <English>Grids</English>
         </Key>
-        <Key ID="STR_einv_items_Warning_HashMismatch">
+        <Key ID="STR_aio_items_Warning_HashMismatch">
             <English>Arma Inventory Overhaul: the inventory rules here differ from the server's - use the server's mod version.</English>
         </Key>
-        <Key ID="STR_einv_items_Warning_VersionMismatch">
+        <Key ID="STR_aio_items_Warning_VersionMismatch">
             <English>Arma Inventory Overhaul %1 here, %2 on the server - item sizes and grids may not match.</English>
         </Key>
     </Package>

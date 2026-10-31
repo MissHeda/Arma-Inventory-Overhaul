@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Reads how a container is split into compartments, as "grid=" in the rules and the object variable
- * einv_grid write it. einv_storage_fnc_blocksFor lays a container out by the result.
+ * aio_grid write it. aio_storage_fnc_blocksFor lays a container out by the result.
  *
  *   auto          - by its load: maximum load / mass per cell cells, laid out the way its kind is
  *                   (pockets, pouches, one big compartment)
@@ -44,7 +44,7 @@
  * is two compartments, while a pattern's name mistyped ("rigg") stays no grid.
  *
  * The compartments come in the order of the pieces; a canvas's own in reading order of each one's
- * first cell - the order the place records count them in (einv_storage_fnc_getLayout).
+ * first cell - the order the place records count them in (aio_storage_fnc_getLayout).
  *
  * Within limits: at most STORAGE_COLS across, MAX_ROWS down, MAX_BLOCKS compartments and MAX_CELLS
  * cells in all, holes not counted - the window makes a control per cell. A value past a limit is cut
@@ -61,13 +61,13 @@
  *              the cells a shape does not have, ascending, [] for a full rectangle; pos [x, y] the
  *              compartment's top left cell on its canvas, [] for one that flows; and for a compartment with
  *              attributes two more: accepts, the categories it takes ([] for all of them), and single, true
- *              for a slot of one item of any size (fnc_blocksFor, einv_storage_fnc_blockMode). A compartment
+ *              for a slot of one item of any size (fnc_blocksFor, aio_storage_fnc_blockMode). A compartment
  *              without attributes has the four only; [] when the text cannot be read <ARRAY>
  *   messages - what was cut down, or why it cannot be read <ARRAY of STRING>
  *
  * Example:
- * ["6x4+xxx/x-x"] call einv_items_fnc_parseGrid;
- * ["aaa/aba/aaa"] call einv_items_fnc_parseGrid; // [["blocks", [[3, 3, [4], [0, 0]], [1, 1, [], [1, 1]]]], []]
+ * ["6x4+xxx/x-x"] call aio_items_fnc_parseGrid;
+ * ["aaa/aba/aaa"] call aio_items_fnc_parseGrid; // [["blocks", [[3, 3, [4], [0, 0]], [1, 1, [], [1, 1]]]], []]
  *
  * Public: No
  */
@@ -355,7 +355,7 @@ private _spec = switch (true) do {
                     _lettered pushBack ([_x, _attrs getOrDefault [_letters param [_forEachIndex, ""], [[], false]]] call _fnc_extra);
                 } forEach _parts;
 
-                // The flow keeps one canvas whole (einv_gui_fnc_flowCompartments); a second one has
+                // The flow keeps one canvas whole (aio_gui_fnc_flowCompartments); a second one has
                 // nothing to say where it lies against the first.
                 if (_canvases > 0) then {
                     if (_canvases == 1) then {

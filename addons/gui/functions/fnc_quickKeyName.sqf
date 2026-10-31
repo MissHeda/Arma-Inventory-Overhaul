@@ -12,14 +12,14 @@
  * Key name, "" when the key is not set <STRING>
  *
  * Example:
- * call einv_gui_fnc_quickKeyName;
+ * call aio_gui_fnc_quickKeyName;
  *
  * Public: No
  */
 
 if (isNil "CBA_fnc_getKeybind") exitWith {""};
 
-private _entry = [CBA_SETTINGS_EINV, QGVAR(quickMove)] call CBA_fnc_getKeybind;
+private _entry = [CBA_SETTINGS_AIO, QGVAR(quickMove)] call CBA_fnc_getKeybind;
 
 if (isNil "_entry") exitWith {""};
 

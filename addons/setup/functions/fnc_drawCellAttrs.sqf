@@ -32,7 +32,7 @@
  * The height the rows took <NUMBER>
  *
  * Example:
- * [_display, _box, [0, 0.2, 0.4], _theme, "V_PlateCarrier1_rgr", _shown, 0] call einv_setup_fnc_drawCellAttrs;
+ * [_display, _box, [0, 0.2, 0.4], _theme, "V_PlateCarrier1_rgr", _shown, 0] call aio_setup_fnc_drawCellAttrs;
  *
  * Public: No
  */

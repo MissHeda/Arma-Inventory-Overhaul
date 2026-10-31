@@ -43,7 +43,7 @@
  *   - Apply, once something changed since the cells were loaded (an untouched class is never rewritten:
  *     a mask like x-x loads as one block and would be written back as two): class=X > grid=..., painted
  *     as one canvas with a letter per compartment in reading order of its first cell
- *     (einv_items_fnc_formatGrid: abbbbbc/abbbbbc/-bbbbb-; a single compartment stays xxxx/x--x or WxH),
+ *     (aio_items_fnc_formatGrid: abbbbbc/abbbbbc/-bbbbb-; a single compartment stays xxxx/x--x or WxH),
  *     blocks as 6x4+xxx/x-x (fnc_upsertRule), and - once the picture was changed - icon=ZOOM@ACROSS:DOWN and
  *     picture=PATH, which Apply also writes alone. Discard drops the edits, Back to the default takes the
  *     class's own grid, like=, icon and picture away.
@@ -78,7 +78,7 @@
  * None
  *
  * Example:
- * [_display, _group, [0.3, 0, 0.4, 0.5], _theme] call einv_setup_fnc_drawCellEditor;
+ * [_display, _group, [0.3, 0, 0.4, 0.5], _theme] call aio_setup_fnc_drawCellEditor;
  *
  * Public: No
  */
@@ -113,7 +113,7 @@ ctrlDelete (uiNamespace getVariable [QGVAR(editor), controlNull]);
 
 _rect params ["", "", "_width", "_height"];
 
-private _box = [_display, "EINV_Group", _parent, _rect] call EFUNC(gui,uiCreate);
+private _box = [_display, "AIO_Group", _parent, _rect] call EFUNC(gui,uiCreate);
 
 uiNamespace setVariable [QGVAR(editor), _box];
 
@@ -274,7 +274,7 @@ private _ownPicture = "picture" in _own || {_tree && {"picture" in (_treeRules g
 
 private _picH = UNIT * 2.2;
 private _picW = SQUARE(_picH);
-// A placeholder word or a missing file in the class's config is no picture (einv_gui_fnc_safePicture).
+// A placeholder word or a missing file in the class's config is no picture (aio_gui_fnc_safePicture).
 private _picture = [_info getOrDefault ["picture", ""]] call EFUNC(gui,safePicture);
 
 if (_picture isNotEqualTo "") then {
@@ -285,7 +285,7 @@ private _textX = _innerX + _picW + SQUARE(UNIT * 0.4);
 private _textW = _innerX + _innerW - _textX;
 private _byClass = (uiNamespace getVariable [QGVAR(index), createHashMap]) getOrDefault ["byClass", createHashMap];
 private _row = _byClass getOrDefault [_lc, []];
-private _about = format ["%1 · %2 · %3", _class, localize format ["STR_einv_setup_Kind_%1", _kind], _row param [ROW_MOD, _info getOrDefault ["addon", ""]]];
+private _about = format ["%1 · %2 · %3", _class, localize format ["STR_aio_setup_Kind_%1", _kind], _row param [ROW_MOD, _info getOrDefault ["addon", ""]]];
 
 [
     _display, _box, [_textX, _cursorY, _textW, UNIT * 0.85],
@@ -516,7 +516,7 @@ if (_blocksMode) then {
                 GVAR(cellBrush) = _value;
 
                 [] call FUNC(drawCellEditor);
-            }, [_value], true, if (_value == 0) then {LLSTRING(Paint_None)} else {localize format ["STR_einv_setup_Paint_%1", _value]}] call FUNC(uiHit);
+            }, [_value], true, if (_value == 0) then {LLSTRING(Paint_None)} else {localize format ["STR_aio_setup_Paint_%1", _value]}] call FUNC(uiHit);
 
             _toolX = _toolX + _dotW + _dotGap;
         } forEach [1, 2, 3, 4, 5, 6, 7, 8, 0];
@@ -741,7 +741,7 @@ if (_editable || _pictureDirty) then {
         // The cells, when they were changed.
         if (_gridDirty) then {
             private _blocks = if ("blocks" in _work) then {
-                // A compartment left without a single cell cannot be written (einv_items_fnc_parseGrid): it goes.
+                // A compartment left without a single cell cannot be written (aio_items_fnc_parseGrid): it goes.
                 (_work get "blocks") select {(_x select 0) * (_x select 1) > count (_x select 2)}
             } else {
                 [_work] call FUNC(canvasBlocks)
@@ -761,7 +761,7 @@ if (_editable || _pictureDirty) then {
             };
 
             // Only a drawing loaded taller than MAX_ROWS can hold one this tall. Painted compartments are
-            // written as one canvas where they lie (einv_items_fnc_formatGrid), so it is the drawing that must fit.
+            // written as one canvas where they lie (aio_items_fnc_formatGrid), so it is the drawing that must fit.
             if (_blocks findIf {((_x param [3, []]) param [1, 0]) + (_x select 1) > MAX_ROWS} >= 0) exitWith {
                 [format [LLSTRING(Hint_TooTall), MAX_ROWS], "loss"] call FUNC(setHint);
             };

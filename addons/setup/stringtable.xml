@@ -1,1520 +1,1520 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="setup">
-        <Key ID="STR_einv_setup_Answer_All">
+        <Key ID="STR_aio_setup_Answer_All">
             <English>set in General</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Builtin">
+        <Key ID="STR_aio_setup_Answer_Builtin">
             <English>built in</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_ByLoad">
+        <Key ID="STR_aio_setup_Answer_ByLoad">
             <English>size from its load</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Efak">
+        <Key ID="STR_aio_setup_Answer_Efak">
             <English>EFAK</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Forced">
+        <Key ID="STR_aio_setup_Answer_Forced">
             <English>always 1</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Holes">
+        <Key ID="STR_aio_setup_Answer_Holes">
             <English>%1, %2 holes</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Inherited">
+        <Key ID="STR_aio_setup_Answer_Inherited">
             <English>inherited from %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_KitCapacity">
+        <Key ID="STR_aio_setup_Answer_KitCapacity">
             <English>capacity %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Legacy">
+        <Key ID="STR_aio_setup_Answer_Legacy">
             <English>old table setting</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Like">
+        <Key ID="STR_aio_setup_Answer_Like">
             <English>same as %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Line">
+        <Key ID="STR_aio_setup_Answer_Line">
             <English>%1 (%2)</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Mod">
+        <Key ID="STR_aio_setup_Answer_Mod">
             <English>its mod</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_NoRoom">
+        <Key ID="STR_aio_setup_Answer_NoRoom">
             <English>no room by default</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Own">
+        <Key ID="STR_aio_setup_Answer_Own">
             <English>your rule</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Percent">
+        <Key ID="STR_aio_setup_Answer_Percent">
             <English>%1 percent of its load</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Preset">
+        <Key ID="STR_aio_setup_Answer_Preset">
             <English>default rules</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Run">
+        <Key ID="STR_aio_setup_Answer_Run">
             <English>%1 × %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Answer_Stack">
+        <Key ID="STR_aio_setup_Answer_Stack">
             <English>%1 per tile</English>
         </Key>
-        <Key ID="STR_einv_setup_Apply">
+        <Key ID="STR_aio_setup_Apply">
             <English>Apply to Addon Options</English>
         </Key>
-        <Key ID="STR_einv_setup_Back">
+        <Key ID="STR_aio_setup_Back">
             <English>Back</English>
         </Key>
-        <Key ID="STR_einv_setup_Banner_Changed">
+        <Key ID="STR_aio_setup_Banner_Changed">
             <English>Someone else changed the setup while you were working on it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Banner_Keep">
+        <Key ID="STR_aio_setup_Banner_Keep">
             <English>Keep mine</English>
         </Key>
-        <Key ID="STR_einv_setup_Banner_Reload">
+        <Key ID="STR_aio_setup_Banner_Reload">
             <English>Reload</English>
         </Key>
-        <Key ID="STR_einv_setup_Cancel">
+        <Key ID="STR_aio_setup_Cancel">
             <English>Cancel</English>
         </Key>
-        <Key ID="STR_einv_setup_Cat_ammo">
+        <Key ID="STR_aio_setup_Cat_ammo">
             <English>Ammo</English>
         </Key>
-        <Key ID="STR_einv_setup_Cat_food">
+        <Key ID="STR_aio_setup_Cat_food">
             <English>Food</English>
         </Key>
-        <Key ID="STR_einv_setup_Cat_gear">
+        <Key ID="STR_aio_setup_Cat_gear">
             <English>Gear</English>
         </Key>
-        <Key ID="STR_einv_setup_Cat_grenade">
+        <Key ID="STR_aio_setup_Cat_grenade">
             <English>Grenade</English>
         </Key>
-        <Key ID="STR_einv_setup_Cat_medical">
+        <Key ID="STR_aio_setup_Cat_medical">
             <English>Medical</English>
         </Key>
-        <Key ID="STR_einv_setup_Cat_misc">
+        <Key ID="STR_aio_setup_Cat_misc">
             <English>Misc</English>
         </Key>
-        <Key ID="STR_einv_setup_Cat_tool">
+        <Key ID="STR_aio_setup_Cat_tool">
             <English>Tool</English>
         </Key>
-        <Key ID="STR_einv_setup_Cat_weapon">
+        <Key ID="STR_aio_setup_Cat_weapon">
             <English>Weapon</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_Add">
+        <Key ID="STR_aio_setup_Categories_Add">
             <English>Add</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_AddPlaceholder">
+        <Key ID="STR_aio_setup_Categories_AddPlaceholder">
             <English>New category, like Bandit loot</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_AddTip">
+        <Key ID="STR_aio_setup_Categories_AddTip">
             <English>Add a category of your own with this name</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_BadColour">
+        <Key ID="STR_aio_setup_Categories_BadColour">
             <English>That is no colour - six hex digits like C83232 or #C83232, empty for the default.</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_BuiltIn">
+        <Key ID="STR_aio_setup_Categories_BuiltIn">
             <English>Built in</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_ColourPlaceholder">
+        <Key ID="STR_aio_setup_Categories_ColourPlaceholder">
             <English>Default colour</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_ColourShort">
+        <Key ID="STR_aio_setup_Categories_ColourShort">
             <English>Default</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_ColourTip">
+        <Key ID="STR_aio_setup_Categories_ColourTip">
             <English>The colour of this category's item tiles, six hex digits like C83232. Empty: the default colour.
 An item in several categories takes the first one's that has a colour.</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_Delete">
+        <Key ID="STR_aio_setup_Categories_Delete">
             <English>Delete this category</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_DeleteConfirm">
+        <Key ID="STR_aio_setup_Categories_DeleteConfirm">
             <English>Delete the category %1? It is taken out of every item and compartment that names it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_DeleteYes">
+        <Key ID="STR_aio_setup_Categories_DeleteYes">
             <English>Delete</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_Help">
+        <Key ID="STR_aio_setup_Categories_Help">
             <English>Categories sort items for the loot strip and compartments. Rename, pick a picture or a tile colour; select rows to colour several at once.</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_MassApply">
+        <Key ID="STR_aio_setup_Categories_MassApply">
             <English>Colour selected</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_MassApplyTip">
+        <Key ID="STR_aio_setup_Categories_MassApplyTip">
             <English>Gives every selected category the colour typed beside it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_MassClear">
+        <Key ID="STR_aio_setup_Categories_MassClear">
             <English>Clear colour</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_Max">
+        <Key ID="STR_aio_setup_Categories_Max">
             <English>At most %1 categories of your own</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_NamePlaceholder">
+        <Key ID="STR_aio_setup_Categories_NamePlaceholder">
             <English>Name</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_NameTip">
+        <Key ID="STR_aio_setup_Categories_NameTip">
             <English>The name the strip, the hints and the wizard show. Return keeps it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_NeedName">
+        <Key ID="STR_aio_setup_Categories_NeedName">
             <English>A category needs a name</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_Picture">
+        <Key ID="STR_aio_setup_Categories_Picture">
             <English>Picture...</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_PictureTip">
+        <Key ID="STR_aio_setup_Categories_PictureTip">
             <English>Pick the picture this category is drawn with: one of this mod's icons or the picture of any item.</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_ResetBuiltIn">
+        <Key ID="STR_aio_setup_Categories_ResetBuiltIn">
             <English>Back to the name and picture this mod ships</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_ResetPicture">
+        <Key ID="STR_aio_setup_Categories_ResetPicture">
             <English>Back to the default picture</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_SelectAll">
+        <Key ID="STR_aio_setup_Categories_SelectAll">
             <English>All</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_SelectNone">
+        <Key ID="STR_aio_setup_Categories_SelectNone">
             <English>None</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_Selected">
+        <Key ID="STR_aio_setup_Categories_Selected">
             <English>%1 selected</English>
         </Key>
-        <Key ID="STR_einv_setup_Categories_Title">
+        <Key ID="STR_aio_setup_Categories_Title">
             <English>Categories</English>
         </Key>
-        <Key ID="STR_einv_setup_Cell_Default">
+        <Key ID="STR_aio_setup_Cell_Default">
             <English>the default</English>
         </Key>
-        <Key ID="STR_einv_setup_Cell_Own">
+        <Key ID="STR_aio_setup_Cell_Own">
             <English>your own value</English>
         </Key>
-        <Key ID="STR_einv_setup_Cell_ResetTip">
+        <Key ID="STR_aio_setup_Cell_ResetTip">
             <English>Back to the default load per cell.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cell_Title">
+        <Key ID="STR_aio_setup_Cell_Title">
             <English>Cell size</English>
         </Key>
-        <Key ID="STR_einv_setup_Cell_Value">
+        <Key ID="STR_aio_setup_Cell_Value">
             <English>1 cell = %1 kg</English>
         </Key>
-        <Key ID="STR_einv_setup_Change_Before">
+        <Key ID="STR_aio_setup_Change_Before">
             <English>%1 - before: %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Change_CellPreset">
+        <Key ID="STR_aio_setup_Change_CellPreset">
             <English>the default</English>
         </Key>
-        <Key ID="STR_einv_setup_Change_Changed">
+        <Key ID="STR_aio_setup_Change_Changed">
             <English>changed</English>
         </Key>
-        <Key ID="STR_einv_setup_Change_From">
+        <Key ID="STR_aio_setup_Change_From">
             <English>%1 » %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Change_New">
+        <Key ID="STR_aio_setup_Change_New">
             <English>new</English>
         </Key>
-        <Key ID="STR_einv_setup_Change_OverrideOff">
+        <Key ID="STR_aio_setup_Change_OverrideOff">
             <English>No longer forced over the mission's own setup</English>
         </Key>
-        <Key ID="STR_einv_setup_Change_OverrideOn">
+        <Key ID="STR_aio_setup_Change_OverrideOn">
             <English>Forced over the mission's own setup</English>
         </Key>
-        <Key ID="STR_einv_setup_Change_Preset">
+        <Key ID="STR_aio_setup_Change_Preset">
             <English>Preset</English>
         </Key>
-        <Key ID="STR_einv_setup_Change_Removed">
+        <Key ID="STR_aio_setup_Change_Removed">
             <English>removed</English>
         </Key>
-        <Key ID="STR_einv_setup_Change_Undo">
+        <Key ID="STR_aio_setup_Change_Undo">
             <English>Take this change back</English>
         </Key>
-        <Key ID="STR_einv_setup_Changes_Count">
+        <Key ID="STR_aio_setup_Changes_Count">
             <English>%1 changes from the default setup</English>
         </Key>
-        <Key ID="STR_einv_setup_Changes_CountOne">
+        <Key ID="STR_aio_setup_Changes_CountOne">
             <English>1 change from the default setup</English>
         </Key>
-        <Key ID="STR_einv_setup_Changes_Help">
+        <Key ID="STR_aio_setup_Changes_Help">
             <English>Click one to open it. The cross takes that change back.</English>
         </Key>
-        <Key ID="STR_einv_setup_Changes_None">
+        <Key ID="STR_aio_setup_Changes_None">
             <English>Nothing changed yet: this is the default setup.</English>
         </Key>
-        <Key ID="STR_einv_setup_Changes_Title">
+        <Key ID="STR_aio_setup_Changes_Title">
             <English>What you changed</English>
         </Key>
-        <Key ID="STR_einv_setup_Chip_Changes">
+        <Key ID="STR_aio_setup_Chip_Changes">
             <English>%1 changes</English>
         </Key>
-        <Key ID="STR_einv_setup_Chip_Forced">
+        <Key ID="STR_aio_setup_Chip_Forced">
             <English>forced</English>
         </Key>
-        <Key ID="STR_einv_setup_Chip_Menu">
+        <Key ID="STR_aio_setup_Chip_Menu">
             <English>%1 tab of Addon Options</English>
         </Key>
-        <Key ID="STR_einv_setup_Chip_NoChanges">
+        <Key ID="STR_aio_setup_Chip_NoChanges">
             <English>no changes</English>
         </Key>
-        <Key ID="STR_einv_setup_Chip_NotStored">
+        <Key ID="STR_aio_setup_Chip_NotStored">
             <English>not saved there yet</English>
         </Key>
-        <Key ID="STR_einv_setup_Chip_OneChange">
+        <Key ID="STR_aio_setup_Chip_OneChange">
             <English>1 change</English>
         </Key>
-        <Key ID="STR_einv_setup_Chip_Override">
+        <Key ID="STR_aio_setup_Chip_Override">
             <English>forced over the mission</English>
         </Key>
-        <Key ID="STR_einv_setup_Chip_ReadOnly">
+        <Key ID="STR_aio_setup_Chip_ReadOnly">
             <English>Read-only</English>
         </Key>
-        <Key ID="STR_einv_setup_Chip_Tip">
+        <Key ID="STR_aio_setup_Chip_Tip">
             <English>Click to see what Save would store.</English>
         </Key>
-        <Key ID="STR_einv_setup_ClassImport_Apply">
+        <Key ID="STR_aio_setup_ClassImport_Apply">
             <English>Apply</English>
         </Key>
-        <Key ID="STR_einv_setup_ClassImport_Config">
+        <Key ID="STR_aio_setup_ClassImport_Config">
             <English>Imported config lines for %1 classes (%2 warnings). Save puts them to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_ClassImport_ConfigLeft">
+        <Key ID="STR_aio_setup_ClassImport_ConfigLeft">
             <English>Imported config lines for %1 classes (%3 warnings); %2 classes this game does not have were left out. Save puts them to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_ClassImport_Help">
+        <Key ID="STR_aio_setup_ClassImport_Help">
             <English>Paste config lines, a layout or rules with Ctrl+V. Undo takes them back.</English>
         </Key>
-        <Key ID="STR_einv_setup_ClassImport_Layout">
+        <Key ID="STR_aio_setup_ClassImport_Layout">
             <English>Applied the layout to %1 (%2 warnings). Save puts it to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_ClassImport_NotFit">
+        <Key ID="STR_aio_setup_ClassImport_NotFit">
             <English>Nothing applied: none of the values fits %1.</English>
         </Key>
-        <Key ID="STR_einv_setup_ClassImport_Nothing">
+        <Key ID="STR_aio_setup_ClassImport_Nothing">
             <English>Nothing to import: no config lines or rules found.</English>
         </Key>
-        <Key ID="STR_einv_setup_ClassImport_Redirected">
+        <Key ID="STR_aio_setup_ClassImport_Redirected">
             <English>%1 is not in this game: its values went to the selected class %2 instead (%3 warnings). Save puts them to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_ClassImport_Skipped">
+        <Key ID="STR_aio_setup_ClassImport_Skipped">
             <English>Nothing applied: the text names %1 classes this game does not have. Select one class and paste a layout or a single class.</English>
         </Key>
-        <Key ID="STR_einv_setup_ClassImport_Title">
+        <Key ID="STR_aio_setup_ClassImport_Title">
             <English>Import config lines or rules</English>
         </Key>
-        <Key ID="STR_einv_setup_Close">
+        <Key ID="STR_aio_setup_Close">
             <English>Close</English>
         </Key>
-        <Key ID="STR_einv_setup_Col_Size">
+        <Key ID="STR_aio_setup_Col_Size">
             <English>Size</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_addon">
+        <Key ID="STR_aio_setup_Cond_addon">
             <English>from addon %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_addonContains">
+        <Key ID="STR_aio_setup_Cond_addonContains">
             <English>from an addon containing %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_cat">
+        <Key ID="STR_aio_setup_Cond_cat">
             <English>category %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_class">
+        <Key ID="STR_aio_setup_Cond_class">
             <English>class %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_classContains">
+        <Key ID="STR_aio_setup_Cond_classContains">
             <English>class contains %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_classPlus">
+        <Key ID="STR_aio_setup_Cond_classPlus">
             <English>%1 and everything based on it</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_for">
+        <Key ID="STR_aio_setup_Cond_for">
             <English>fits %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_kind">
+        <Key ID="STR_aio_setup_Cond_kind">
             <English>kind %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_load">
+        <Key ID="STR_aio_setup_Cond_load">
             <English>load %1 %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_mass">
+        <Key ID="STR_aio_setup_Cond_mass">
             <English>mass %1 %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_rounds">
+        <Key ID="STR_aio_setup_Cond_rounds">
             <English>rounds %1 %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Cond_well">
+        <Key ID="STR_aio_setup_Cond_well">
             <English>in magazine well %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Conflict_Overwrite">
+        <Key ID="STR_aio_setup_Conflict_Overwrite">
             <English>Overwrite</English>
         </Key>
-        <Key ID="STR_einv_setup_Conflict_Replay">
+        <Key ID="STR_aio_setup_Conflict_Replay">
             <English>Mine on top of theirs</English>
         </Key>
-        <Key ID="STR_einv_setup_Conflict_Replayed">
+        <Key ID="STR_aio_setup_Conflict_Replayed">
             <English>Your changes are on top of the new setup - look it over and save again.</English>
         </Key>
-        <Key ID="STR_einv_setup_Conflict_Text">
+        <Key ID="STR_aio_setup_Conflict_Text">
             <English>Someone else saved the setup meanwhile. Put your changes on top of theirs, or overwrite them?</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Accepts">
+        <Key ID="STR_aio_setup_Cont_Accepts">
             <English>Accepts</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_AcceptsAll">
+        <Key ID="STR_aio_setup_Cont_AcceptsAll">
             <English>All</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Add">
+        <Key ID="STR_aio_setup_Cont_Add">
             <English>Add</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_AddTip">
+        <Key ID="STR_aio_setup_Cont_AddTip">
             <English>Add a compartment.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Apply">
+        <Key ID="STR_aio_setup_Cont_Apply">
             <English>Apply</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_ApplyTip">
+        <Key ID="STR_aio_setup_Cont_ApplyTip">
             <English>Keep these cells and this picture for this class. Save puts them to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_ApplyTipTree">
+        <Key ID="STR_aio_setup_Cont_ApplyTipTree">
             <English>Keep these cells for this class and every class built on it, as one rule; a class with a rule of its own keeps it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Blocks">
+        <Key ID="STR_aio_setup_Cont_Blocks">
             <English>%1 compartments · %2 cells</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_BlocksFlowNote">
+        <Key ID="STR_aio_setup_Cont_BlocksFlowNote">
             <English>Blocks puts compartments side by side: Apply here loses where they were painted.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_BlocksHelp">
+        <Key ID="STR_aio_setup_Cont_BlocksHelp">
             <English>Click a compartment's name to pick it, a cell to make it a hole. Compartments sit side by side.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_CanvasRows">
+        <Key ID="STR_aio_setup_Cont_CanvasRows">
             <English>%1 rows</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Cells">
+        <Key ID="STR_aio_setup_Cont_Cells">
             <English>%1 cells</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_ClearTip">
+        <Key ID="STR_aio_setup_Cont_ClearTip">
             <English>Take every colour away and start again.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Cols">
+        <Key ID="STR_aio_setup_Cont_Cols">
             <English>%1 across</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Discard">
+        <Key ID="STR_aio_setup_Cont_Discard">
             <English>Discard</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Fill">
+        <Key ID="STR_aio_setup_Cont_Fill">
             <English>Fill</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_FillTip">
+        <Key ID="STR_aio_setup_Cont_FillTip">
             <English>Paint every empty place in the brush colour.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Help">
+        <Key ID="STR_aio_setup_Cont_Help">
             <English>Pick a container, draw its cells. Apply keeps it, Save uses it. Search takes wildcards (B_Bergen*).</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_KitCellsNote">
+        <Key ID="STR_aio_setup_Cont_KitCellsNote">
             <English>Its own cells are all its room; the kit's capacity no longer counts. Back to the default restores it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_KitNote">
+        <Key ID="STR_aio_setup_Cont_KitNote">
             <English>Without cells of its own, the kit follows Enhanced First Aid Kits' capacity. Once Apply gives it cells, they are all its room. Back to the default returns it to the capacity.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_LegacyNote">
+        <Key ID="STR_aio_setup_Cont_LegacyNote">
             <English>An old table setting still decides this class. Remove the class there for these cells to count.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_LikeRest">
+        <Key ID="STR_aio_setup_Cont_LikeRest">
             <English>Its own cells. Everything else is the same as %1.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_LinkedNote">
+        <Key ID="STR_aio_setup_Cont_LinkedNote">
             <English>Same as %1: these are its cells, and they change only there. Unlink to draw its own.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Load">
+        <Key ID="STR_aio_setup_Cont_Load">
             <English>Load %1 (%2 kg)</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_ModeBlocks">
+        <Key ID="STR_aio_setup_Cont_ModeBlocks">
             <English>Blocks</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_ModePaint">
+        <Key ID="STR_aio_setup_Cont_ModePaint">
             <English>Paint</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_NoBlocks">
+        <Key ID="STR_aio_setup_Cont_NoBlocks">
             <English>No compartment yet</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_NotContainer">
+        <Key ID="STR_aio_setup_Cont_NotContainer">
             <English>%1 holds nothing - there are no cells to draw.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_PaintHelp">
+        <Key ID="STR_aio_setup_Cont_PaintHelp">
             <English>Pick a colour, then click or drag over cells; touching cells of one colour are one compartment. The rows above pick a compartment and set what it accepts.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_PaintSelect">
+        <Key ID="STR_aio_setup_Cont_PaintSelect">
             <English>Select on canvas</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_PaintStepTip">
+        <Key ID="STR_aio_setup_Cont_PaintStepTip">
             <English>Go through the compartments of the drawing, in reading order.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_PatternNote">
+        <Key ID="STR_aio_setup_Cont_PatternNote">
             <English>These cells come from its load or a pattern. A change here replaces that with exactly these cells.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_PickBlock">
+        <Key ID="STR_aio_setup_Cont_PickBlock">
             <English>Pick this compartment.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_PickHint">
+        <Key ID="STR_aio_setup_Cont_PickHint">
             <English>Pick a container on the left to see and draw its cells.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Picked">
+        <Key ID="STR_aio_setup_Cont_Picked">
             <English>Compartment %1 of %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Remove">
+        <Key ID="STR_aio_setup_Cont_Remove">
             <English>Remove</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_RemoveTip">
+        <Key ID="STR_aio_setup_Cont_RemoveTip">
             <English>Remove the picked compartment.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_ResetTip">
+        <Key ID="STR_aio_setup_Cont_ResetTip">
             <English>Remove its own cells, the link to another class and its picture settings. The default decides again.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_ResetTipTree">
+        <Key ID="STR_aio_setup_Cont_ResetTipTree">
             <English>Remove the cells and the class link of this class and its tree. The default decides again.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Rows">
+        <Key ID="STR_aio_setup_Cont_Rows">
             <English>%1 down</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_SameAs">
+        <Key ID="STR_aio_setup_Cont_SameAs">
             <English>Same as another class...</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_SameAsShort">
+        <Key ID="STR_aio_setup_Cont_SameAsShort">
             <English>Same as...</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_SameAsTip">
+        <Key ID="STR_aio_setup_Cont_SameAsTip">
             <English>Give this class the cells of another one: follow it, or copy its cells and change them.</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_SameChip">
+        <Key ID="STR_aio_setup_Cont_SameChip">
             <English>Same as %1 · Unlink</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Single">
+        <Key ID="STR_aio_setup_Cont_Single">
             <English>Single slot</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_SingleChip">
+        <Key ID="STR_aio_setup_Cont_SingleChip">
             <English>One item, any size</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_SingleShort">
+        <Key ID="STR_aio_setup_Cont_SingleShort">
             <English>one item</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Title">
+        <Key ID="STR_aio_setup_Cont_Title">
             <English>Containers: the cells of uniforms, vests and backpacks</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Totals">
+        <Key ID="STR_aio_setup_Cont_Totals">
             <English>%1 of %2 cells · %3 of %4 compartments</English>
         </Key>
-        <Key ID="STR_einv_setup_Cont_Unapplied">
+        <Key ID="STR_aio_setup_Cont_Unapplied">
             <English>Not applied yet. Apply keeps it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Containers_Help">
+        <Key ID="STR_aio_setup_Containers_Help">
             <English>Cells per container kind: Auto from its load, or Fixed. Class rules always win.</English>
         </Key>
-        <Key ID="STR_einv_setup_Containers_Title">
+        <Key ID="STR_aio_setup_Containers_Title">
             <English>Containers</English>
         </Key>
-        <Key ID="STR_einv_setup_Desc_All">
+        <Key ID="STR_aio_setup_Desc_All">
             <English>Everything else</English>
         </Key>
-        <Key ID="STR_einv_setup_Desc_AllKind">
+        <Key ID="STR_aio_setup_Desc_AllKind">
             <English>Every %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Desc_AllWhere">
+        <Key ID="STR_aio_setup_Desc_AllWhere">
             <English>Everything else, %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Desc_Category">
+        <Key ID="STR_aio_setup_Desc_Category">
             <English>Category %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Desc_CategoryColour">
+        <Key ID="STR_aio_setup_Desc_CategoryColour">
             <English>tile colour #%1</English>
         </Key>
-        <Key ID="STR_einv_setup_Desc_Every">
+        <Key ID="STR_aio_setup_Desc_Every">
             <English>Every item</English>
         </Key>
-        <Key ID="STR_einv_setup_Desc_Group">
+        <Key ID="STR_aio_setup_Desc_Group">
             <English>Group %1: %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Desc_Not">
+        <Key ID="STR_aio_setup_Desc_Not">
             <English>not %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Desc_Or">
+        <Key ID="STR_aio_setup_Desc_Or">
             <English>or</English>
         </Key>
-        <Key ID="STR_einv_setup_Desc_Rule">
+        <Key ID="STR_aio_setup_Desc_Rule">
             <English>%1: %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Discard_Body">
+        <Key ID="STR_aio_setup_Discard_Body">
             <English>If you close now, they are lost.</English>
         </Key>
-        <Key ID="STR_einv_setup_Discard_Close">
+        <Key ID="STR_aio_setup_Discard_Close">
             <English>Close without saving</English>
         </Key>
-        <Key ID="STR_einv_setup_Discard_Keep">
+        <Key ID="STR_aio_setup_Discard_Keep">
             <English>Keep editing</English>
         </Key>
-        <Key ID="STR_einv_setup_Discard_Save">
+        <Key ID="STR_aio_setup_Discard_Save">
             <English>Save and close</English>
         </Key>
-        <Key ID="STR_einv_setup_Discard_Title">
+        <Key ID="STR_aio_setup_Discard_Title">
             <English>You have unsaved changes.</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Backpacks">
+        <Key ID="STR_aio_setup_Explain_Backpacks">
             <English>One near-square block, up to %1 columns: a load of 280 makes %2 cells, %3 across and %4 down.</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Backpacks_Label">
+        <Key ID="STR_aio_setup_Explain_Backpacks_Label">
             <English>Backpacks</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Cargo">
+        <Key ID="STR_aio_setup_Explain_Cargo">
             <English>One block %1 wide with as many cells as the load gives, no more: a load of 1000 is %2 cells.</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Cargo_Label">
+        <Key ID="STR_aio_setup_Explain_Cargo_Label">
             <English>Vehicles, crates</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Containers">
+        <Key ID="STR_aio_setup_Explain_Containers">
             <English>Cells = the container's load divided by the load per cell (%1 units, %2 kg), rounded up; worn gear gets a fifth more. A vest carrying 120 gets %3 cells, a backpack carrying 280 gets %4.</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Containers_Label">
+        <Key ID="STR_aio_setup_Explain_Containers_Label">
             <English>Containers</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Items">
+        <Key ID="STR_aio_setup_Explain_Items">
             <English>An item's size follows what it is, not its weight: rifles 4×2 to 7×2, handguns 2×1, launchers 6×2, magazines 1×1 to 2×2, grenades, optics and small things 1×1, helmets 2×2.</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Items_Label">
+        <Key ID="STR_aio_setup_Explain_Items_Label">
             <English>Items</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Rules">
+        <Key ID="STR_aio_setup_Explain_Rules">
             <English>Your own rules for a class (Items and Containers steps) and mods' own settings win over all of this.</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Rules_Label">
+        <Key ID="STR_aio_setup_Explain_Rules_Label">
             <English>Your rules</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Stacks">
+        <Key ID="STR_aio_setup_Explain_Stacks">
             <English>Only consumables stack: bandages, vials, cannulas, seals, syringes 5 per tile; injectors, sprays, tourniquets 4; lozenges, IV lines 10 (cable ties, ear plugs 20); rations, splints, first aid kits 5; blood bags, IV bags and devices 1. In crates, vehicles and piles on the ground the stack multiplier (Looting and searching) makes every stack larger.</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Stacks_Label">
+        <Key ID="STR_aio_setup_Explain_Stacks_Label">
             <English>Stacking</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Uniforms">
+        <Key ID="STR_aio_setup_Explain_Uniforms">
             <English>One block %1 cells wide, %2 to %3 rows high by load: a plain uniform is 6×2.</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Uniforms_Label">
+        <Key ID="STR_aio_setup_Explain_Uniforms_Label">
             <English>Uniforms</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Vests">
+        <Key ID="STR_aio_setup_Explain_Vests">
             <English>Magazine pouches like a real rig: a tall 1×2, then a square 2×2 and so on, as many as the load needs, at most %1.</English>
         </Key>
-        <Key ID="STR_einv_setup_Explain_Vests_Label">
+        <Key ID="STR_aio_setup_Explain_Vests_Label">
             <English>Vests</English>
         </Key>
-        <Key ID="STR_einv_setup_Export">
+        <Key ID="STR_aio_setup_Export">
             <English>Export</English>
         </Key>
-        <Key ID="STR_einv_setup_ExportChoice_Config">
+        <Key ID="STR_aio_setup_ExportChoice_Config">
             <English>Config entry (for a mod)</English>
         </Key>
-        <Key ID="STR_einv_setup_ExportChoice_ConfigHelp">
+        <Key ID="STR_aio_setup_ExportChoice_ConfigHelp">
             <English>The config lines with the class name, to paste into a mod's config.</English>
         </Key>
-        <Key ID="STR_einv_setup_ExportChoice_Layout">
+        <Key ID="STR_aio_setup_ExportChoice_Layout">
             <English>Layout only (to share)</English>
         </Key>
-        <Key ID="STR_einv_setup_ExportChoice_LayoutHelp">
+        <Key ID="STR_aio_setup_ExportChoice_LayoutHelp">
             <English>Just the values, no class name: a short text to paste into Import at any class, from any mod.</English>
         </Key>
-        <Key ID="STR_einv_setup_ExportChoice_LayoutHelpTree">
+        <Key ID="STR_aio_setup_ExportChoice_LayoutHelpTree">
             <English>Just the values of the picked class, no class name: paste them into Import at any class.</English>
         </Key>
-        <Key ID="STR_einv_setup_ExportChoice_Title">
+        <Key ID="STR_aio_setup_ExportChoice_Title">
             <English>Export as</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_ByHandCba">
+        <Key ID="STR_aio_setup_Export_ByHandCba">
             <English>Select the text (Ctrl+A) and copy it (Ctrl+C): copying by script is off for players in multiplayer.</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_ClassByHand">
+        <Key ID="STR_aio_setup_Export_ClassByHand">
             <English>Copying is off for players in multiplayer: select the text below (Ctrl+A) and press Ctrl+C.</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_ClassCopied">
+        <Key ID="STR_aio_setup_Export_ClassCopied">
             <English>Copied the config lines of %1 classes: paste them into a mod's config.</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_ClassCopiedOne">
+        <Key ID="STR_aio_setup_Export_ClassCopiedOne">
             <English>Copied the config line of the class: paste it into a mod's config.</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_ClassNothing">
+        <Key ID="STR_aio_setup_Export_ClassNothing">
             <English>Nothing to export: the draft leaves this class as the game already has it, so it needs no config line.</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_ClassTitle">
+        <Key ID="STR_aio_setup_Export_ClassTitle">
             <English>Config lines to copy</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_Help">
+        <Key ID="STR_aio_setup_Export_Help">
             <English>The setup as text, to keep or to share. Import takes it back.</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_LayoutCopied">
+        <Key ID="STR_aio_setup_Export_LayoutCopied">
             <English>Copied the layout of %1: paste it into Import at the class it is for.</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_LayoutNothing">
+        <Key ID="STR_aio_setup_Export_LayoutNothing">
             <English>Nothing to export: the draft leaves this class as the game already has it, so there is no layout to share.</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_LayoutTitle">
+        <Key ID="STR_aio_setup_Export_LayoutTitle">
             <English>Layout to copy</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_Tip">
+        <Key ID="STR_aio_setup_Export_Tip">
             <English>The setup as text: the lines for a cba_settings.sqf, the whole of it written out, or the own rules.</English>
         </Key>
-        <Key ID="STR_einv_setup_Export_Title">
+        <Key ID="STR_aio_setup_Export_Title">
             <English>Export the setup</English>
         </Key>
-        <Key ID="STR_einv_setup_Family_gear">
+        <Key ID="STR_aio_setup_Family_gear">
             <English>Gear</English>
         </Key>
-        <Key ID="STR_einv_setup_Family_item">
+        <Key ID="STR_aio_setup_Family_item">
             <English>Item</English>
         </Key>
-        <Key ID="STR_einv_setup_Family_magazine">
+        <Key ID="STR_aio_setup_Family_magazine">
             <English>Magazine</English>
         </Key>
-        <Key ID="STR_einv_setup_Family_weapon">
+        <Key ID="STR_aio_setup_Family_weapon">
             <English>Weapon</English>
         </Key>
-        <Key ID="STR_einv_setup_Filter_Cargo">
+        <Key ID="STR_aio_setup_Filter_Cargo">
             <English>Cargo</English>
         </Key>
-        <Key ID="STR_einv_setup_Filter_Gear">
+        <Key ID="STR_aio_setup_Filter_Gear">
             <English>Gear</English>
         </Key>
-        <Key ID="STR_einv_setup_Filter_Items">
+        <Key ID="STR_aio_setup_Filter_Items">
             <English>Items</English>
         </Key>
-        <Key ID="STR_einv_setup_Filter_Magazines">
+        <Key ID="STR_aio_setup_Filter_Magazines">
             <English>Magazines</English>
         </Key>
-        <Key ID="STR_einv_setup_Filter_Weapons">
+        <Key ID="STR_aio_setup_Filter_Weapons">
             <English>Weapons</English>
         </Key>
-        <Key ID="STR_einv_setup_General_CbaNote">
+        <Key ID="STR_aio_setup_General_CbaNote">
             <English>These are the same settings as in CBA's Addon Options &gt; %1, and both stay in sync. Either place works; this page is the recommended one.</English>
         </Key>
-        <Key ID="STR_einv_setup_General_Title">
+        <Key ID="STR_aio_setup_General_Title">
             <English>General</English>
         </Key>
-        <Key ID="STR_einv_setup_Groups_All">
+        <Key ID="STR_aio_setup_Groups_All">
             <English>All</English>
         </Key>
-        <Key ID="STR_einv_setup_Groups_Reset">
+        <Key ID="STR_aio_setup_Groups_Reset">
             <English>Back to the default</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_BadClass">
+        <Key ID="STR_aio_setup_Hint_BadClass">
             <English>%1 cannot be written into the rules: class names there take letters, digits and _ only.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_BadWeight">
+        <Key ID="STR_aio_setup_Hint_BadWeight">
             <English>The weight is a number in kg like 0.5 - or empty, for config's own.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_CatOne">
+        <Key ID="STR_aio_setup_Hint_CatOne">
             <English>An item is in at least one category</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_CellsApplied">
+        <Key ID="STR_aio_setup_Hint_CellsApplied">
             <English>The cells of %1 are kept. Save puts them to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_Copied">
+        <Key ID="STR_aio_setup_Hint_Copied">
             <English>The cells of %1 are copied to %2. Apply keeps them.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_Linked">
+        <Key ID="STR_aio_setup_Hint_Linked">
             <English>%1 now has the same cells as %2. Save puts it to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_NoCells">
+        <Key ID="STR_aio_setup_Hint_NoCells">
             <English>Not one cell left. A container needs at least one.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_NothingToApply">
+        <Key ID="STR_aio_setup_Hint_NothingToApply">
             <English>Nothing is different from now, so there is nothing to apply.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_NothingToCopy">
+        <Key ID="STR_aio_setup_Hint_NothingToCopy">
             <English>%1 has no cells to copy.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_PictureApplied">
+        <Key ID="STR_aio_setup_Hint_PictureApplied">
             <English>The picture of %1 is kept. Save puts it to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_Reset">
+        <Key ID="STR_aio_setup_Hint_Reset">
             <English>%1 is back to the default. Save puts it to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_SizeApplied">
+        <Key ID="STR_aio_setup_Hint_SizeApplied">
             <English>The size of %1 is kept. Save puts it to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_TooMany">
+        <Key ID="STR_aio_setup_Hint_TooMany">
             <English>Too many: at most %1 cells and %2 compartments.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_TooTall">
+        <Key ID="STR_aio_setup_Hint_TooTall">
             <English>The drawing can be at most %1 rows tall.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_TreeApplied">
+        <Key ID="STR_aio_setup_Hint_TreeApplied">
             <English>%1 and the %2 classes built on it now follow one rule. Save puts it to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_TreeReset">
+        <Key ID="STR_aio_setup_Hint_TreeReset">
             <English>%1 and the %2 classes built on it are back to the default. Save puts it to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Hint_Unlinked">
+        <Key ID="STR_aio_setup_Hint_Unlinked">
             <English>%1 no longer follows another class. Save puts it to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Import">
+        <Key ID="STR_aio_setup_Import">
             <English>Import...</English>
         </Key>
-        <Key ID="STR_einv_setup_ImportChoice_Many">
+        <Key ID="STR_aio_setup_ImportChoice_Many">
             <English>The text names %1 classes, and you have %2 selected.</English>
         </Key>
-        <Key ID="STR_einv_setup_ImportChoice_Named">
+        <Key ID="STR_aio_setup_ImportChoice_Named">
             <English>Apply to the classes named in the text (%1)</English>
         </Key>
-        <Key ID="STR_einv_setup_ImportChoice_One">
+        <Key ID="STR_aio_setup_ImportChoice_One">
             <English>The text is for %1, and you have %2 selected.</English>
         </Key>
-        <Key ID="STR_einv_setup_ImportChoice_Selected">
+        <Key ID="STR_aio_setup_ImportChoice_Selected">
             <English>Apply to the selected class (%1)</English>
         </Key>
-        <Key ID="STR_einv_setup_ImportChoice_Title">
+        <Key ID="STR_aio_setup_ImportChoice_Title">
             <English>Where should it go?</English>
         </Key>
-        <Key ID="STR_einv_setup_Import_Add">
+        <Key ID="STR_aio_setup_Import_Add">
             <English>Add to mine</English>
         </Key>
-        <Key ID="STR_einv_setup_Import_Done">
+        <Key ID="STR_aio_setup_Import_Done">
             <English>Imported %1 rules, %2 settings and %3 warnings.</English>
         </Key>
-        <Key ID="STR_einv_setup_Import_Help">
+        <Key ID="STR_aio_setup_Import_Help">
             <English>Paste a shared setup with Ctrl+V: rules or cba_settings lines.</English>
         </Key>
-        <Key ID="STR_einv_setup_Import_Nothing">
+        <Key ID="STR_aio_setup_Import_Nothing">
             <English>Nothing to import: no rules or settings found.</English>
         </Key>
-        <Key ID="STR_einv_setup_Import_Placeholder">
+        <Key ID="STR_aio_setup_Import_Placeholder">
             <English>Paste here</English>
         </Key>
-        <Key ID="STR_einv_setup_Import_Replace">
+        <Key ID="STR_aio_setup_Import_Replace">
             <English>Use instead of mine</English>
         </Key>
-        <Key ID="STR_einv_setup_Import_Tip">
+        <Key ID="STR_aio_setup_Import_Tip">
             <English>Paste a setup someone sent you: rules and server settings. It is checked and becomes your draft.</English>
         </Key>
-        <Key ID="STR_einv_setup_Import_Title">
+        <Key ID="STR_aio_setup_Import_Title">
             <English>Import a setup</English>
         </Key>
-        <Key ID="STR_einv_setup_Index_Reading">
+        <Key ID="STR_aio_setup_Index_Reading">
             <English>Reading the game's classes - %1 percent done...</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Apply">
+        <Key ID="STR_aio_setup_Items_Apply">
             <English>Apply</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_ApplyTip">
+        <Key ID="STR_aio_setup_Items_ApplyTip">
             <English>Keep this size, stack, weight, name and picture zoom for this class. Save puts it to use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_ApplyTipTree">
+        <Key ID="STR_aio_setup_Items_ApplyTipTree">
             <English>Keep this for the class and every class built on it, as one rule; a class with a rule of its own keeps it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_CanvasHelp">
+        <Key ID="STR_aio_setup_Items_CanvasHelp">
             <English>Click the cells it takes: an L, a T, any shape in one piece. Across and down make a rectangle.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_CatField">
+        <Key ID="STR_aio_setup_Items_CatField">
             <English>Category</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Clear">
+        <Key ID="STR_aio_setup_Items_Clear">
             <English>Clear</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Forced">
+        <Key ID="STR_aio_setup_Items_Forced">
             <English>Weapons, uniforms, vests and backpacks never share a tile.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Help">
+        <Key ID="STR_aio_setup_Items_Help">
             <English>Pick an item, draw its cells, set its stack. Apply keeps it, Save uses it. Search takes wildcards (B_Bergen*).</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_NameField">
+        <Key ID="STR_aio_setup_Items_NameField">
             <English>Name</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_NoCells">
+        <Key ID="STR_aio_setup_Items_NoCells">
             <English>Click at least one cell.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_NoCellsTitle">
+        <Key ID="STR_aio_setup_Items_NoCellsTitle">
             <English>No cells</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_NotConnected">
+        <Key ID="STR_aio_setup_Items_NotConnected">
             <English>Its cells must touch side by side or one above the other: an item is one piece.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Now">
+        <Key ID="STR_aio_setup_Items_Now">
             <English>Now</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PerTile">
+        <Key ID="STR_aio_setup_Items_PerTile">
             <English>Per tile</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PickButton">
+        <Key ID="STR_aio_setup_Items_PickButton">
             <English>Pick...</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PickHint">
+        <Key ID="STR_aio_setup_Items_PickHint">
             <English>Pick an item on the left to see and set its size.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PickTip">
+        <Key ID="STR_aio_setup_Items_PickTip">
             <English>Choose another picture from the game's items, or type a texture path.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PictureAcross">
+        <Key ID="STR_aio_setup_Items_PictureAcross">
             <English>Across %1 %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PictureConfigTip">
+        <Key ID="STR_aio_setup_Items_PictureConfigTip">
             <English>The picture from the item's config. Click to select its path, Ctrl+C copies it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PictureDown">
+        <Key ID="STR_aio_setup_Items_PictureDown">
             <English>Down %1 %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PictureField">
+        <Key ID="STR_aio_setup_Items_PictureField">
             <English>Picture</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PictureLook">
+        <Key ID="STR_aio_setup_Items_PictureLook">
             <English>Zoom and place</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PictureNone">
+        <Key ID="STR_aio_setup_Items_PictureNone">
             <English>no picture</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PictureOwnTip">
+        <Key ID="STR_aio_setup_Items_PictureOwnTip">
             <English>The picture set for this item. Click to select its path, Ctrl+C copies it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PictureReset">
+        <Key ID="STR_aio_setup_Items_PictureReset">
             <English>Reset</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PictureStepTip">
+        <Key ID="STR_aio_setup_Items_PictureStepTip">
             <English>Click for one step, Shift and click for ten. Or type the number in the box beside it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PictureTypeTip">
+        <Key ID="STR_aio_setup_Items_PictureTypeTip">
             <English>Type an exact number and press Enter (or click elsewhere).</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_PictureZoom">
+        <Key ID="STR_aio_setup_Items_PictureZoom">
             <English>Zoom %1 %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Pieces">
+        <Key ID="STR_aio_setup_Items_Pieces">
             <English>%1 pieces</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_ResetTip">
+        <Key ID="STR_aio_setup_Items_ResetTip">
             <English>Remove its own size, stack, weight, name, picture and picture zoom. The default decides again.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Search">
+        <Key ID="STR_aio_setup_Items_Search">
             <English>Search name or class (* ?)</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Title">
+        <Key ID="STR_aio_setup_Items_Title">
             <English>Items: how big each one is</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Unapplied">
+        <Key ID="STR_aio_setup_Items_Unapplied">
             <English>Not applied yet. Apply keeps it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_UseField">
+        <Key ID="STR_aio_setup_Items_UseField">
             <English>Use from</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_Weight">
+        <Key ID="STR_aio_setup_Items_Weight">
             <English>%1 kg</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_WeightConfig">
+        <Key ID="STR_aio_setup_Items_WeightConfig">
             <English>Config: %1 kg</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_WeightField">
+        <Key ID="STR_aio_setup_Items_WeightField">
             <English>Weight</English>
         </Key>
-        <Key ID="STR_einv_setup_Items_WeightKg">
+        <Key ID="STR_aio_setup_Items_WeightKg">
             <English>kg</English>
         </Key>
-        <Key ID="STR_einv_setup_Key_Escape">
+        <Key ID="STR_aio_setup_Key_Escape">
             <English>Esc</English>
         </Key>
-        <Key ID="STR_einv_setup_Key_Redo">
+        <Key ID="STR_aio_setup_Key_Redo">
             <English>Ctrl+Y</English>
         </Key>
-        <Key ID="STR_einv_setup_Key_Undo">
+        <Key ID="STR_aio_setup_Key_Undo">
             <English>Ctrl+Z</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_Auto_backpack">
+        <Key ID="STR_aio_setup_Kind_Auto_backpack">
             <English>one big block, by load</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_Auto_crate">
+        <Key ID="STR_aio_setup_Kind_Auto_crate">
             <English>one block, 10 wide, by load</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_Auto_uniform">
+        <Key ID="STR_aio_setup_Kind_Auto_uniform">
             <English>one block, 6 wide, by load</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_Auto_vehicle">
+        <Key ID="STR_aio_setup_Kind_Auto_vehicle">
             <English>one block, 10 wide, by load</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_Auto_vest">
+        <Key ID="STR_aio_setup_Kind_Auto_vest">
             <English>pouches of 1×2 and 2×2, by load</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_Fixed">
+        <Key ID="STR_aio_setup_Kind_Fixed">
             <English>every one exactly this size</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_Other">
+        <Key ID="STR_aio_setup_Kind_Other">
             <English>set by a rule: %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_backpack">
+        <Key ID="STR_aio_setup_Kind_backpack">
             <English>Backpack</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_crate">
+        <Key ID="STR_aio_setup_Kind_crate">
             <English>Crate</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_kit">
+        <Key ID="STR_aio_setup_Kind_kit">
             <English>Kit</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_uniform">
+        <Key ID="STR_aio_setup_Kind_uniform">
             <English>Uniform</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_vehicle">
+        <Key ID="STR_aio_setup_Kind_vehicle">
             <English>Vehicle</English>
         </Key>
-        <Key ID="STR_einv_setup_Kind_vest">
+        <Key ID="STR_aio_setup_Kind_vest">
             <English>Vest</English>
         </Key>
-        <Key ID="STR_einv_setup_Kinds_Auto">
+        <Key ID="STR_aio_setup_Kinds_Auto">
             <English>Auto</English>
         </Key>
-        <Key ID="STR_einv_setup_Kinds_Fixed">
+        <Key ID="STR_aio_setup_Kinds_Fixed">
             <English>Fixed</English>
         </Key>
-        <Key ID="STR_einv_setup_Kinds_backpack">
+        <Key ID="STR_aio_setup_Kinds_backpack">
             <English>Backpacks</English>
         </Key>
-        <Key ID="STR_einv_setup_Kinds_crate">
+        <Key ID="STR_aio_setup_Kinds_crate">
             <English>Crates</English>
         </Key>
-        <Key ID="STR_einv_setup_Kinds_uniform">
+        <Key ID="STR_aio_setup_Kinds_uniform">
             <English>Uniforms</English>
         </Key>
-        <Key ID="STR_einv_setup_Kinds_vehicle">
+        <Key ID="STR_aio_setup_Kinds_vehicle">
             <English>Vehicles</English>
         </Key>
-        <Key ID="STR_einv_setup_Kinds_vest">
+        <Key ID="STR_aio_setup_Kinds_vest">
             <English>Vests</English>
         </Key>
-        <Key ID="STR_einv_setup_List_None">
+        <Key ID="STR_aio_setup_List_None">
             <English>Nothing found</English>
         </Key>
-        <Key ID="STR_einv_setup_List_OwnOnlyContainers">
+        <Key ID="STR_aio_setup_List_OwnOnlyContainers">
             <English>Only containers with their own cells</English>
         </Key>
-        <Key ID="STR_einv_setup_List_OwnOnlyItems">
+        <Key ID="STR_aio_setup_List_OwnOnlyItems">
             <English>Only items with their own size or stack</English>
         </Key>
-        <Key ID="STR_einv_setup_List_Range">
+        <Key ID="STR_aio_setup_List_Range">
             <English>%1-%2 of %3</English>
         </Key>
-        <Key ID="STR_einv_setup_Next">
+        <Key ID="STR_aio_setup_Next">
             <English>Next</English>
         </Key>
-        <Key ID="STR_einv_setup_Op_ge">
+        <Key ID="STR_aio_setup_Op_ge">
             <English>at least</English>
         </Key>
-        <Key ID="STR_einv_setup_Op_gt">
+        <Key ID="STR_aio_setup_Op_gt">
             <English>more than</English>
         </Key>
-        <Key ID="STR_einv_setup_Op_is">
+        <Key ID="STR_aio_setup_Op_is">
             <English>is</English>
         </Key>
-        <Key ID="STR_einv_setup_Op_le">
+        <Key ID="STR_aio_setup_Op_le">
             <English>at most</English>
         </Key>
-        <Key ID="STR_einv_setup_Op_lt">
+        <Key ID="STR_aio_setup_Op_lt">
             <English>less than</English>
         </Key>
-        <Key ID="STR_einv_setup_OpenWizard">
+        <Key ID="STR_aio_setup_OpenWizard">
             <English>Inventory setup</English>
         </Key>
-        <Key ID="STR_einv_setup_OpenWizard_ReadOnly">
+        <Key ID="STR_aio_setup_OpenWizard_ReadOnly">
             <English>See and copy the inventory setup</English>
         </Key>
-        <Key ID="STR_einv_setup_OpenWizard_Tooltip">
+        <Key ID="STR_aio_setup_OpenWizard_Tooltip">
             <English>The inventory rules and the server settings, for everyone</English>
         </Key>
-        <Key ID="STR_einv_setup_Paint_1">
+        <Key ID="STR_aio_setup_Paint_1">
             <English>Red</English>
         </Key>
-        <Key ID="STR_einv_setup_Paint_2">
+        <Key ID="STR_aio_setup_Paint_2">
             <English>Blue</English>
         </Key>
-        <Key ID="STR_einv_setup_Paint_3">
+        <Key ID="STR_aio_setup_Paint_3">
             <English>Green</English>
         </Key>
-        <Key ID="STR_einv_setup_Paint_4">
+        <Key ID="STR_aio_setup_Paint_4">
             <English>Yellow</English>
         </Key>
-        <Key ID="STR_einv_setup_Paint_5">
+        <Key ID="STR_aio_setup_Paint_5">
             <English>Orange</English>
         </Key>
-        <Key ID="STR_einv_setup_Paint_6">
+        <Key ID="STR_aio_setup_Paint_6">
             <English>Purple</English>
         </Key>
-        <Key ID="STR_einv_setup_Paint_7">
+        <Key ID="STR_aio_setup_Paint_7">
             <English>Cyan</English>
         </Key>
-        <Key ID="STR_einv_setup_Paint_8">
+        <Key ID="STR_aio_setup_Paint_8">
             <English>Pink</English>
         </Key>
-        <Key ID="STR_einv_setup_Paint_None">
+        <Key ID="STR_aio_setup_Paint_None">
             <English>None: takes the colour away</English>
         </Key>
-        <Key ID="STR_einv_setup_Pattern_block">
+        <Key ID="STR_aio_setup_Pattern_block">
             <English>One block</English>
         </Key>
-        <Key ID="STR_einv_setup_Pattern_long">
+        <Key ID="STR_aio_setup_Pattern_long">
             <English>Long pouches</English>
         </Key>
-        <Key ID="STR_einv_setup_Pattern_mixed">
+        <Key ID="STR_aio_setup_Pattern_mixed">
             <English>Mixed pouches</English>
         </Key>
-        <Key ID="STR_einv_setup_Pattern_plate">
+        <Key ID="STR_aio_setup_Pattern_plate">
             <English>Plate carrier</English>
         </Key>
-        <Key ID="STR_einv_setup_Pattern_pockets">
+        <Key ID="STR_aio_setup_Pattern_pockets">
             <English>Pockets</English>
         </Key>
-        <Key ID="STR_einv_setup_Pattern_pockets_mixed">
+        <Key ID="STR_aio_setup_Pattern_pockets_mixed">
             <English>Mixed pockets</English>
         </Key>
-        <Key ID="STR_einv_setup_Pattern_pouches">
+        <Key ID="STR_aio_setup_Pattern_pouches">
             <English>Magazine pouches</English>
         </Key>
-        <Key ID="STR_einv_setup_Pattern_rig">
+        <Key ID="STR_aio_setup_Pattern_rig">
             <English>Magazine rig</English>
         </Key>
-        <Key ID="STR_einv_setup_Pattern_single">
+        <Key ID="STR_aio_setup_Pattern_single">
             <English>One compartment</English>
         </Key>
-        <Key ID="STR_einv_setup_Pattern_wide">
+        <Key ID="STR_aio_setup_Pattern_wide">
             <English>Full width</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_BadPath">
+        <Key ID="STR_aio_setup_Pic_BadPath">
             <English>That path is no picture the game can find.</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_CatAll">
+        <Key ID="STR_aio_setup_Pic_CatAll">
             <English>All</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_CatGear">
+        <Key ID="STR_aio_setup_Pic_CatGear">
             <English>Uniforms &amp; gear</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_CatIcons">
+        <Key ID="STR_aio_setup_Pic_CatIcons">
             <English>Category icons</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_CatItems">
+        <Key ID="STR_aio_setup_Pic_CatItems">
             <English>Item icons</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_CatVehicles">
+        <Key ID="STR_aio_setup_Pic_CatVehicles">
             <English>Vehicles &amp; boxes</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_Custom">
+        <Key ID="STR_aio_setup_Pic_Custom">
             <English>Or type the path of any texture</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_CustomHint">
+        <Key ID="STR_aio_setup_Pic_CustomHint">
             <English>a3\ui_f\data\gui\cfg\hints\gear_ca.paa</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_Found">
+        <Key ID="STR_aio_setup_Pic_Found">
             <English>The game has this picture.</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_Missing">
+        <Key ID="STR_aio_setup_Pic_Missing">
             <English>No such picture in the game or its mods.</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_Nothing">
+        <Key ID="STR_aio_setup_Pic_Nothing">
             <English>Click a picture in the list, or type a path.</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_Reading">
+        <Key ID="STR_aio_setup_Pic_Reading">
             <English>Collecting pictures... %1 %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_Search">
+        <Key ID="STR_aio_setup_Pic_Search">
             <English>Search name, class or path (* ?)</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_Title">
+        <Key ID="STR_aio_setup_Pic_Title">
             <English>Pick a picture</English>
         </Key>
-        <Key ID="STR_einv_setup_Pic_Use">
+        <Key ID="STR_aio_setup_Pic_Use">
             <English>Use picture</English>
         </Key>
-        <Key ID="STR_einv_setup_Preset_None">
+        <Key ID="STR_aio_setup_Preset_None">
             <English>No preset</English>
         </Key>
-        <Key ID="STR_einv_setup_Preview_Title">
+        <Key ID="STR_aio_setup_Preview_Title">
             <English>This is how it looks</English>
         </Key>
-        <Key ID="STR_einv_setup_Reason_Client">
+        <Key ID="STR_aio_setup_Reason_Client">
             <English>client values never count for this setting - switch to the Server or Mission tab.</English>
         </Key>
-        <Key ID="STR_einv_setup_Reason_LockedMission">
+        <Key ID="STR_aio_setup_Reason_LockedMission">
             <English>the mission's cba_settings.sqf sets the rules - a change here would be lost on the next restart.</English>
         </Key>
-        <Key ID="STR_einv_setup_Reason_LockedServer">
+        <Key ID="STR_aio_setup_Reason_LockedServer">
             <English>the server's cba_settings.sqf sets the rules - a change here would be lost on the next restart.</English>
         </Key>
-        <Key ID="STR_einv_setup_Reason_NoAdmin">
+        <Key ID="STR_aio_setup_Reason_NoAdmin">
             <English>only the server or a logged-in admin can change it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Reason_NoCba">
+        <Key ID="STR_aio_setup_Reason_NoCba">
             <English>CBA's settings could not be reached.</English>
         </Key>
-        <Key ID="STR_einv_setup_Reason_NoMission">
+        <Key ID="STR_aio_setup_Reason_NoMission">
             <English>the mission's setup can only be changed in Eden.</English>
         </Key>
-        <Key ID="STR_einv_setup_Redo">
+        <Key ID="STR_aio_setup_Redo">
             <English>Redo</English>
         </Key>
-        <Key ID="STR_einv_setup_Reset">
+        <Key ID="STR_aio_setup_Reset">
             <English>Reset to default</English>
         </Key>
-        <Key ID="STR_einv_setup_Reset_Already">
+        <Key ID="STR_aio_setup_Reset_Already">
             <English>This is the default already.</English>
         </Key>
-        <Key ID="STR_einv_setup_Reset_Confirm">
+        <Key ID="STR_aio_setup_Reset_Confirm">
             <English>Reset to the default: no rules of your own, every server setting default? Undo works until you close the wizard.</English>
         </Key>
-        <Key ID="STR_einv_setup_Reset_Done">
+        <Key ID="STR_aio_setup_Reset_Done">
             <English>Back to the default - save to use it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Reset_Field">
+        <Key ID="STR_aio_setup_Reset_Field">
             <English>Back to the default</English>
         </Key>
-        <Key ID="STR_einv_setup_Reset_Tip">
+        <Key ID="STR_aio_setup_Reset_Tip">
             <English>Back to the default: no rules of your own, every server setting at its default.</English>
         </Key>
-        <Key ID="STR_einv_setup_Reset_Yes">
+        <Key ID="STR_aio_setup_Reset_Yes">
             <English>Reset</English>
         </Key>
-        <Key ID="STR_einv_setup_Review_Changes">
+        <Key ID="STR_aio_setup_Review_Changes">
             <English>Not saved yet</English>
         </Key>
-        <Key ID="STR_einv_setup_Review_Count">
+        <Key ID="STR_aio_setup_Review_Count">
             <English>%1 changes not saved yet</English>
         </Key>
-        <Key ID="STR_einv_setup_Review_CountOne">
+        <Key ID="STR_aio_setup_Review_CountOne">
             <English>1 change not saved yet</English>
         </Key>
-        <Key ID="STR_einv_setup_Review_None">
+        <Key ID="STR_aio_setup_Review_None">
             <English>Everything is saved: this is what is in use.</English>
         </Key>
-        <Key ID="STR_einv_setup_Review_NotStored">
+        <Key ID="STR_aio_setup_Review_NotStored">
             <English>This setup is in use but not stored where Save goes yet: Save stores it there.</English>
         </Key>
-        <Key ID="STR_einv_setup_Review_Warnings">
+        <Key ID="STR_aio_setup_Review_Warnings">
             <English>What the engine left out (%1)</English>
         </Key>
-        <Key ID="STR_einv_setup_Room_Cell">
+        <Key ID="STR_aio_setup_Room_Cell">
             <English>Load per cell</English>
         </Key>
-        <Key ID="STR_einv_setup_Room_Title">
+        <Key ID="STR_aio_setup_Room_Title">
             <English>How room is worked out</English>
         </Key>
-        <Key ID="STR_einv_setup_Same_Copy">
+        <Key ID="STR_aio_setup_Same_Copy">
             <English>Copy cells of %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Same_CopyHelp">
+        <Key ID="STR_aio_setup_Same_CopyHelp">
             <English>The cells of %1 become this class's own, to change here. Apply keeps them.</English>
         </Key>
-        <Key ID="STR_einv_setup_Same_Follow">
+        <Key ID="STR_aio_setup_Same_Follow">
             <English>Follow %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Same_FollowHelp">
+        <Key ID="STR_aio_setup_Same_FollowHelp">
             <English>Always the same cells as %1, also when %1 changes. They cannot be drawn here.</English>
         </Key>
-        <Key ID="STR_einv_setup_Same_Title">
+        <Key ID="STR_aio_setup_Same_Title">
             <English>Pick the class to copy from</English>
         </Key>
-        <Key ID="STR_einv_setup_Save">
+        <Key ID="STR_aio_setup_Save">
             <English>Save</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_Failed">
+        <Key ID="STR_aio_setup_Save_Failed">
             <English>Could not save - the RPT says why.</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_MissionWins">
+        <Key ID="STR_aio_setup_Save_MissionWins">
             <English>This mission sets its own setup, which wins over the server's. Force over it to use yours.</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_NothingYet">
+        <Key ID="STR_aio_setup_Save_NothingYet">
             <English>Nothing changed yet.</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_Override">
+        <Key ID="STR_aio_setup_Save_Override">
             <English>Force over the mission's own setup</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_ReadOnly">
+        <Key ID="STR_aio_setup_Save_ReadOnly">
             <English>Cannot save: %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_ReadOnlyHelp">
+        <Key ID="STR_aio_setup_Save_ReadOnlyHelp">
             <English>You can still try changes, or export them.</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_Saved">
+        <Key ID="STR_aio_setup_Save_Saved">
             <English>Saved to the server: in use for everyone.</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_SavedMission">
+        <Key ID="STR_aio_setup_Save_SavedMission">
             <English>Saved into the scenario - save the scenario as well.</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_SavedMissionWins">
+        <Key ID="STR_aio_setup_Save_SavedMissionWins">
             <English>Saved - but this mission's own setup still wins. Force over it to use yours.</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_ToMenu">
+        <Key ID="STR_aio_setup_Save_ToMenu">
             <English>Applies to the %1 tab of Addon Options: OK there keeps it, Cancel throws it away.</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_ToMission">
+        <Key ID="STR_aio_setup_Save_ToMission">
             <English>Saves into the scenario, for everyone who plays it. Save the scenario as well to keep it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_ToServer">
+        <Key ID="STR_aio_setup_Save_ToServer">
             <English>Saves to the server, for everyone - players who join later too.</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_Tooltip">
+        <Key ID="STR_aio_setup_Save_Tooltip">
             <English>Saves the setup.</English>
         </Key>
-        <Key ID="STR_einv_setup_Save_Unchanged">
+        <Key ID="STR_aio_setup_Save_Unchanged">
             <English>Nothing to save: it is in use already.</English>
         </Key>
-        <Key ID="STR_einv_setup_Scope_KitNote">
+        <Key ID="STR_aio_setup_Scope_KitNote">
             <English>Applies to %1 and all its kits in the game (%2 from Enhanced First Aid Kits) as one rule, class=%3+.</English>
         </Key>
-        <Key ID="STR_einv_setup_Scope_OnlyThis">
+        <Key ID="STR_aio_setup_Scope_OnlyThis">
             <English>Only this class</English>
         </Key>
-        <Key ID="STR_einv_setup_Scope_TreeNote">
+        <Key ID="STR_aio_setup_Scope_TreeNote">
             <English>Applies to %1 and the %2 classes built on it as one rule, class=%3+. A class with its own rule keeps it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Setting_LockedMission">
+        <Key ID="STR_aio_setup_Setting_LockedMission">
             <English>Set by the mission's cba_settings.sqf - change it there.</English>
         </Key>
-        <Key ID="STR_einv_setup_Setting_LockedServer">
+        <Key ID="STR_aio_setup_Setting_LockedServer">
             <English>Set by the server's cba_settings.sqf - change it there.</English>
         </Key>
-        <Key ID="STR_einv_setup_Source_client">
+        <Key ID="STR_aio_setup_Source_client">
             <English>Client</English>
         </Key>
-        <Key ID="STR_einv_setup_Source_mission">
+        <Key ID="STR_aio_setup_Source_mission">
             <English>Mission</English>
         </Key>
-        <Key ID="STR_einv_setup_Source_server">
+        <Key ID="STR_aio_setup_Source_server">
             <English>Server</English>
         </Key>
-        <Key ID="STR_einv_setup_Step_Containers">
+        <Key ID="STR_aio_setup_Step_Containers">
             <English>Containers</English>
         </Key>
-        <Key ID="STR_einv_setup_Step_General">
+        <Key ID="STR_aio_setup_Step_General">
             <English>General</English>
         </Key>
-        <Key ID="STR_einv_setup_Step_Items">
+        <Key ID="STR_aio_setup_Step_Items">
             <English>Items</English>
         </Key>
-        <Key ID="STR_einv_setup_Tab_Backpacks">
+        <Key ID="STR_aio_setup_Tab_Backpacks">
             <English>Backpacks</English>
         </Key>
-        <Key ID="STR_einv_setup_Tab_Kits">
+        <Key ID="STR_aio_setup_Tab_Kits">
             <English>Kits</English>
         </Key>
-        <Key ID="STR_einv_setup_Tab_Uniforms">
+        <Key ID="STR_aio_setup_Tab_Uniforms">
             <English>Uniforms</English>
         </Key>
-        <Key ID="STR_einv_setup_Tab_Vests">
+        <Key ID="STR_aio_setup_Tab_Vests">
             <English>Vests</English>
         </Key>
-        <Key ID="STR_einv_setup_Text_Cba">
+        <Key ID="STR_aio_setup_Text_Cba">
             <English>CBA lines</English>
         </Key>
-        <Key ID="STR_einv_setup_Text_CbaNote">
+        <Key ID="STR_aio_setup_Text_CbaNote">
             <English>For a cba_settings.sqf, or CBA's own Import.</English>
         </Key>
-        <Key ID="STR_einv_setup_Text_Chars">
+        <Key ID="STR_aio_setup_Text_Chars">
             <English>%1 characters</English>
         </Key>
-        <Key ID="STR_einv_setup_Text_Copied">
+        <Key ID="STR_aio_setup_Text_Copied">
             <English>Copied.</English>
         </Key>
-        <Key ID="STR_einv_setup_Text_Copy">
+        <Key ID="STR_aio_setup_Text_Copy">
             <English>Copy</English>
         </Key>
-        <Key ID="STR_einv_setup_Text_Full">
+        <Key ID="STR_aio_setup_Text_Full">
             <English>Full</English>
         </Key>
-        <Key ID="STR_einv_setup_Text_FullNote">
+        <Key ID="STR_aio_setup_Text_FullNote">
             <English>The whole default written out, so later versions cannot change it; its rules also beat a mod's own sizes.</English>
         </Key>
-        <Key ID="STR_einv_setup_Text_Own">
+        <Key ID="STR_aio_setup_Text_Own">
             <English>Own</English>
         </Key>
-        <Key ID="STR_einv_setup_Text_OwnRead">
+        <Key ID="STR_aio_setup_Text_OwnRead">
             <English>One rule per line. The settings are in the lines for a cba_settings.sqf.</English>
         </Key>
-        <Key ID="STR_einv_setup_Title">
+        <Key ID="STR_aio_setup_Title">
             <English>Inventory setup</English>
         </Key>
-        <Key ID="STR_einv_setup_Tools_ExportTip">
+        <Key ID="STR_aio_setup_Tools_ExportTip">
             <English>Copy this class as config lines for a mod, or as a layout without a class name to share.</English>
         </Key>
-        <Key ID="STR_einv_setup_Tools_ExportTipTree">
+        <Key ID="STR_aio_setup_Tools_ExportTipTree">
             <English>Copy this tree as config lines for a mod (every class), or the picked class as a layout to share.</English>
         </Key>
-        <Key ID="STR_einv_setup_Tools_ImportTip">
+        <Key ID="STR_aio_setup_Tools_ImportTip">
             <English>Paste config lines, a layout or rules and apply them to the draft.</English>
         </Key>
-        <Key ID="STR_einv_setup_Topic_arsenal">
+        <Key ID="STR_aio_setup_Topic_arsenal">
             <English>Vanilla Arsenal</English>
         </Key>
-        <Key ID="STR_einv_setup_Topic_containers">
+        <Key ID="STR_aio_setup_Topic_containers">
             <English>Containers and use</English>
         </Key>
-        <Key ID="STR_einv_setup_Topic_extras">
+        <Key ID="STR_aio_setup_Topic_extras">
             <English>Hotbar, repacking and locks</English>
         </Key>
-        <Key ID="STR_einv_setup_Topic_look">
+        <Key ID="STR_aio_setup_Topic_look">
             <English>Look</English>
         </Key>
-        <Key ID="STR_einv_setup_Topic_looting">
+        <Key ID="STR_aio_setup_Topic_looting">
             <English>Looting and searching</English>
         </Key>
-        <Key ID="STR_einv_setup_Topic_other">
+        <Key ID="STR_aio_setup_Topic_other">
             <English>Other</English>
         </Key>
-        <Key ID="STR_einv_setup_Topic_persons">
+        <Key ID="STR_aio_setup_Topic_persons">
             <English>Living persons</English>
         </Key>
-        <Key ID="STR_einv_setup_Topic_weight">
+        <Key ID="STR_aio_setup_Topic_weight">
             <English>Weight</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_Below">
+        <Key ID="STR_aio_setup_Tree_Below">
             <English>%1 below</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_Count">
+        <Key ID="STR_aio_setup_Tree_Count">
             <English>%1 classes built on it</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_CountOne">
+        <Key ID="STR_aio_setup_Tree_CountOne">
             <English>%1 class built on it</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_Of">
+        <Key ID="STR_aio_setup_Tree_Of">
             <English>Tree of %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_PickFirst">
+        <Key ID="STR_aio_setup_Tree_PickFirst">
             <English>Pick a class in the list, then open the tree to see everything built on it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_Start">
+        <Key ID="STR_aio_setup_Tree_Start">
             <English>Start the tree at this class</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_ToPicked">
+        <Key ID="STR_aio_setup_Tree_ToPicked">
             <English>Go to picked</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_ToPickedTip">
+        <Key ID="STR_aio_setup_Tree_ToPickedTip">
             <English>Show the picked class in its family again.</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_Unknown">
+        <Key ID="STR_aio_setup_Tree_Unknown">
             <English>No class tree is known for %1.</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_Up">
+        <Key ID="STR_aio_setup_Tree_Up">
             <English>Up one level</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_UpNone">
+        <Key ID="STR_aio_setup_Tree_UpNone">
             <English>Nothing above this class.</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_UpTip">
+        <Key ID="STR_aio_setup_Tree_UpTip">
             <English>Start the tree at %1, the class this one is built on: its other variants are in it.</English>
         </Key>
-        <Key ID="STR_einv_setup_Tree_UpTooBroad">
+        <Key ID="STR_aio_setup_Tree_UpTooBroad">
             <English>The class above it has too many classes built on it to change them at once.</English>
         </Key>
-        <Key ID="STR_einv_setup_Undo">
+        <Key ID="STR_aio_setup_Undo">
             <English>Undo</English>
         </Key>
-        <Key ID="STR_einv_setup_Use_Limited">
+        <Key ID="STR_aio_setup_Use_Limited">
             <English>Limited now: %1.</English>
         </Key>
-        <Key ID="STR_einv_setup_Use_NoneLimited">
+        <Key ID="STR_aio_setup_Use_NoneLimited">
             <English>No container is limited yet - the settings &quot;Use items from ...&quot; (Use from containers) do that.</English>
         </Key>
-        <Key ID="STR_einv_setup_Use_PartList">
+        <Key ID="STR_aio_setup_Use_PartList">
             <English>%1: only whitelisted</English>
         </Key>
-        <Key ID="STR_einv_setup_Use_PartNone">
+        <Key ID="STR_aio_setup_Use_PartNone">
             <English>%1: nothing</English>
         </Key>
-        <Key ID="STR_einv_setup_Use_backpack">
+        <Key ID="STR_aio_setup_Use_backpack">
             <English>Backpack</English>
         </Key>
-        <Key ID="STR_einv_setup_Use_uniform">
+        <Key ID="STR_aio_setup_Use_uniform">
             <English>Uniform</English>
         </Key>
-        <Key ID="STR_einv_setup_Use_vest">
+        <Key ID="STR_aio_setup_Use_vest">
             <English>Vest</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Cats">
+        <Key ID="STR_aio_setup_Value_Cats">
             <English>category: %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Empty">
+        <Key ID="STR_aio_setup_Value_Empty">
             <English>empty</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_GridAuto">
+        <Key ID="STR_aio_setup_Value_GridAuto">
             <English>cells from its load</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_GridBlocks">
+        <Key ID="STR_aio_setup_Value_GridBlocks">
             <English>compartments %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_GridCanvas">
+        <Key ID="STR_aio_setup_Value_GridCanvas">
             <English>%1 compartments in a %2×%3 drawing</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_GridCells">
+        <Key ID="STR_aio_setup_Value_GridCells">
             <English>%1 cells</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_GridLocks">
+        <Key ID="STR_aio_setup_Value_GridLocks">
             <English>(takes only: %1)</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_GridPattern">
+        <Key ID="STR_aio_setup_Value_GridPattern">
             <English>cells laid out as %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_GridPatternCells">
+        <Key ID="STR_aio_setup_Value_GridPatternCells">
             <English>%2 cells laid out as %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_GridPercent">
+        <Key ID="STR_aio_setup_Value_GridPercent">
             <English>cells from %1 percent of its load</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_GridShape">
+        <Key ID="STR_aio_setup_Value_GridShape">
             <English>%1×%2 shaped, %3 cells</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Icon">
+        <Key ID="STR_aio_setup_Value_Icon">
             <English>picture at %1 %2</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_IconMoved">
+        <Key ID="STR_aio_setup_Value_IconMoved">
             <English>picture at %1 %4, moved %2 %4 across and %3 %4 down</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Like">
+        <Key ID="STR_aio_setup_Value_Like">
             <English>same as %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Mass">
+        <Key ID="STR_aio_setup_Value_Mass">
             <English>size from its mass</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Name">
+        <Key ID="STR_aio_setup_Value_Name">
             <English>called %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_NoStack">
+        <Key ID="STR_aio_setup_Value_NoStack">
             <English>does not stack</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Off">
+        <Key ID="STR_aio_setup_Value_Off">
             <English>off</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_On">
+        <Key ID="STR_aio_setup_Value_On">
             <English>on</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Picture">
+        <Key ID="STR_aio_setup_Value_Picture">
             <English>picture %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_PictureFrom">
+        <Key ID="STR_aio_setup_Value_PictureFrom">
             <English>picture from %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Shape">
+        <Key ID="STR_aio_setup_Value_Shape">
             <English>shape %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Size">
+        <Key ID="STR_aio_setup_Value_Size">
             <English>%1×%2 cells</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_SizeShape">
+        <Key ID="STR_aio_setup_Value_SizeShape">
             <English>%3 cells shaped in %1×%2</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Stack">
+        <Key ID="STR_aio_setup_Value_Stack">
             <English>%1 per tile</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Use">
+        <Key ID="STR_aio_setup_Value_Use">
             <English>usable from the %1</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_UseNone">
+        <Key ID="STR_aio_setup_Value_UseNone">
             <English>usable from no container</English>
         </Key>
-        <Key ID="STR_einv_setup_Value_Weight">
+        <Key ID="STR_aio_setup_Value_Weight">
             <English>weighs %1 kg</English>
         </Key>
-        <Key ID="STR_einv_setup_View_List">
+        <Key ID="STR_aio_setup_View_List">
             <English>List</English>
         </Key>
-        <Key ID="STR_einv_setup_View_ListTip">
+        <Key ID="STR_aio_setup_View_ListTip">
             <English>Back to the list.</English>
         </Key>
-        <Key ID="STR_einv_setup_View_Tree">
+        <Key ID="STR_aio_setup_View_Tree">
             <English>Tree</English>
         </Key>
-        <Key ID="STR_einv_setup_View_TreeTip">
+        <Key ID="STR_aio_setup_View_TreeTip">
             <English>Open the tree at the picked class to see its relatives.</English>
         </Key>
-        <Key ID="STR_einv_setup_Warning_TooLong">
+        <Key ID="STR_aio_setup_Warning_TooLong">
             <English>The text is %1 characters long: more than 262,144 cannot be saved.</English>
         </Key>
     </Package>

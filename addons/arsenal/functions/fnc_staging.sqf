@@ -9,13 +9,13 @@
  *
  * It is a crate of the game's own, made on this machine only (createVehicleLocal), hidden and without
  * simulation at the soldier's feet - in reach, so the storage's moves accept it like any crate nearby -,
- * emptied of what the class brings along and given a grid of its own (einv_grid, which grows with what
+ * emptied of what the class brings along and given a grid of its own (aio_grid, which grows with what
  * lies in it - fnc_growStaging) and no search
- * (einv_noSearch). Nobody else ever sees it, and the storage runs its moves here (einv_storage_localOnly,
- * einv_storage_fnc_isLocalRoot). It is nothing of the soldier's: loadouts never carry it, and ACE's
+ * (aio_noSearch). Nobody else ever sees it, and the storage runs its moves here (aio_storage_localOnly,
+ * aio_storage_fnc_isLocalRoot). It is nothing of the soldier's: loadouts never carry it, and ACE's
  * rebuilds of the uniform, vest or backpack leave it alone.
  *
- * Only for a soldier whose moves the storage runs on this machine at once (einv_storage_fnc_isLocalRoot:
+ * Only for a soldier whose moves the storage runs on this machine at once (aio_storage_fnc_isLocalRoot:
  * the player's own unit, any unit in single player and Eden): objNull for any other, whose moves go
  * through the hub.
  *
@@ -26,7 +26,7 @@
  * The staging crate, objNull for none <OBJECT>
  *
  * Example:
- * [] call einv_arsenal_fnc_staging;
+ * [] call aio_arsenal_fnc_staging;
  *
  * Public: No
  */
@@ -61,7 +61,7 @@ _holder setPosATL (getPosATL _center);
 _holder setVariable [QGVARMAIN(grid), [[STORAGE_COLS, STAGING_MIN_ROWS]]];
 _holder setVariable [QEGVAR(storage,localOnly), true];
 
-// What the player put there himself is never searched for again (einv_gui_fnc_isSearched).
+// What the player put there himself is never searched for again (aio_gui_fnc_isSearched).
 _holder setVariable [QGVARMAIN(noSearch), true];
 
 GVAR(staging) = _holder;

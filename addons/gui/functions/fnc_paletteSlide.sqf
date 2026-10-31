@@ -35,7 +35,7 @@
  * None
  *
  * Example:
- * ["begin", [_display, "square", 0, [0.4, 0.2, 0.1, 0.1]]] call einv_gui_fnc_paletteSlide;
+ * ["begin", [_display, "square", 0, [0.4, 0.2, 0.1, 0.1]]] call aio_gui_fnc_paletteSlide;
  *
  * Public: No
  */

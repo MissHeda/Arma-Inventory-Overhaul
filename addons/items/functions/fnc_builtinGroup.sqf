@@ -13,7 +13,7 @@
  * "weapon", "ammo", "grenade", "gear", "medical", "food", "tool" or "misc"; "" when the word is none of them <STRING>
  *
  * Example:
- * ["Magazines"] call einv_items_fnc_builtinGroup; // "ammo"
+ * ["Magazines"] call aio_items_fnc_builtinGroup; // "ammo"
  *
  * Public: No
  */

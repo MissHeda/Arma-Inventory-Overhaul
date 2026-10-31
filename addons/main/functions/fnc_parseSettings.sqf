@@ -2,11 +2,11 @@
 /*
  * Author: Miss Heda
  * Reads a text of server settings - the setup wizard's own short form of them (its draft, undo steps and
- * changes compare as such texts), and what the settings box of the test builds, einv_main_settings, held
+ * changes compare as such texts), and what the settings box of the test builds, aio_main_settings, held
  * (fnc_migrateSettings) - the way the rules text is read: statements
  * separated by commas, a line break counts as a comma, one setting each as key=value, the key being the
- * setting's name without "einv_" (gui_searchTime=0.6, weight_enabled=0, arsenal_biMessage=Closed%0020today). A
- * first statement of "einv" and a number is the header and carries nothing yet. Only what the text says is in the
+ * setting's name without "aio_" (gui_searchTime=0.6, weight_enabled=0, arsenal_biMessage=Closed%0020today). A
+ * first statement of "aio" and a number is the header and carries nothing yet. Only what the text says is in the
  * answer; a setting it does not name stays at its default, which the caller's business is. What cannot be
  * read - an unknown key, a value of the wrong kind - is left out with a warning that names it, so one typo
  * never costs the rest. A setting the mod once had and no longer has (GVAR(retiredSettings): gui_animation, the looting
@@ -20,7 +20,7 @@
  * left out <ARRAY of STRING>
  *
  * Example:
- * ["einv1, gui_searchTime=0.6, weight_enabled=0"] call einv_main_fnc_parseSettings;
+ * ["aio1, gui_searchTime=0.6, weight_enabled=0"] call aio_main_fnc_parseSettings;
  *
  * Public: Yes
  */
@@ -34,8 +34,8 @@ private _statements = ((_text splitString (toString [10, 13] + ",")) apply {trim
 {
     private _statement = _x;
 
-    // The header: einv and a version, first of all.
-    if (_forEachIndex == 0 && {(toLowerANSI _statement) regexMatch "^einv[0-9]+$"}) then {
+    // The header: aio and a version, first of all - or einv and a version, as texts were headed before the rename.
+    if (_forEachIndex == 0 && {(toLowerANSI _statement) regexMatch "^(aio|einv)[0-9]+$"}) then {
         continue;
     };
 

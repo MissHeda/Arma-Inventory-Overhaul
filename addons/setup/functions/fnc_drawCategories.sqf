@@ -12,10 +12,10 @@
  *   - before all that a switch that selects the row for the mass edit, and after the name the colour of its items' tiles: a
  *     swatch and a field for six hex digits (color=, fnc_setCategoryColours; empty is the look's own colour of the tile).
  *   - the mass edit: how many rows are selected, All / None, a colour field and "Colour selected" / "Clear colour", which give
- *     every selected category that colour (or none) in one step. The selection is the wizard's own (einv_setup_catSelected).
+ *     every selected category that colour (or none) in one step. The selection is the wizard's own (aio_setup_catSelected).
  *   - the row to add one: a name field and Add (fnc_addCategory). The eight built-in ones can be renamed and given another
  *     picture, not removed; at most MAX_CUSTOM_CATEGORIES of the setup's own.
- * All of it is the statements category=ID > name=... picture=... of the rules text (einv_items_fnc_parseRules), so it saves,
+ * All of it is the statements category=ID > name=... picture=... of the rules text (aio_items_fnc_parseRules), so it saves,
  * exports and imports with the rules, and the list of changes words it (fnc_describeRule).
  *
  * Arguments:
@@ -29,7 +29,7 @@
  * The height the card took <NUMBER>
  *
  * Example:
- * [_display, _page, [_padX, _cursorY, _innerW], _theme, _probe] call einv_setup_fnc_drawCategories;
+ * [_display, _page, [_padX, _cursorY, _innerW], _theme, _probe] call aio_setup_fnc_drawCategories;
  *
  * Public: No
  */

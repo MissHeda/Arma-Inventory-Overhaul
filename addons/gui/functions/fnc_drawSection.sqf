@@ -56,20 +56,20 @@
  * scroll through, and nothing of the room hidden (Mia, 0.2.3).
  * A drag let go on that line or on the box lays the item down in the first free spot, the folded rows too
  * (fnc_updateDrag).
- * Taller than a page (the client setting einv_gui_pageRows), the compartment is cut into pages instead: a bar under it
+ * Taller than a page (the client setting aio_gui_pageRows), the compartment is cut into pages instead: a bar under it
  * turns them, the fold line is not drawn and the pages end two rows after the last in use (fnc_pageRanges,
  * fnc_drawPageBar); a drop on the box or on the bar's name lies in the first free spot as on the fold line.
  *
  * Four kinds of section are drawn their own way:
  *   "drawer"            - a function name: another addon draws it (ACE cargo's cards,
- *                         einv_compat_ace_cargo_fnc_drawSection), called with this function's six
+ *                         aio_compat_ace_cargo_fnc_drawSection), called with this function's six
  *                         arguments and returning the height used
  *   "placeholder" true  - a uniform, vest or backpack the unit does not have: the box, empty and
  *                         hatched, and no grid; with an "owner" (the unit) the box is that unit's slot
  *                         of the section's id - right click and drop work on it, to put one on
  *   "worn" with "unit"  - a body's gear: its compact paper doll (fnc_drawEquipmentDoll) instead of
  *                         a grid of what it wears
- *   "locked" true       - locked to this player (einv_locks_fnc_decorate): the caption with a padlock
+ *   "locked" true       - locked to this player (aio_locks_fnc_decorate): the caption with a padlock
  *                         and "notice", why, in one muted line - nothing of what it holds;
  *                         "lockedObject" is the object behind it
  * A section the player may open only because of who they are brings "lockTip": an open padlock left of
@@ -79,8 +79,8 @@
  * (fnc_drawCompartments):
  *   "entries"   - what it shows; a grid of them is "virtual" unless the section says otherwise
  *   "virtual"   - false: things move in and out of its grid like a container's
- *   "kit"       - the kit class its grid stands for (einv_compat_efak)
- *   "layoutKey" - where its layout is kept (einv_storage_fnc_getLayout)
+ *   "kit"       - the kit class its grid stands for (aio_compat_efak)
+ *   "layoutKey" - where its layout is kept (aio_storage_fnc_getLayout)
  *   "side"      - "own" or "loot" (the column it is in, when left out)
  *   "folded"    - starts folded
  *   "foldKey"   - a string the tab folds it by where it has no container (the Arsenal's kit sections)
@@ -96,14 +96,14 @@
  * 1: Controls group to draw in - the column's <CONTROL>
  * 2: Top of the section in the group <NUMBER>
  * 3: Width the section may take <NUMBER>
- * 4: Section, see einv_storage_fnc_getSections <HASHMAP>
+ * 4: Section, see aio_storage_fnc_getSections <HASHMAP>
  * 5: Theme <HASHMAP>
  *
  * Return Value:
  * Height used <NUMBER>
  *
  * Example:
- * [_display, _group, 0, 0.3, _section, _theme] call einv_gui_fnc_drawSection;
+ * [_display, _group, 0, 0.3, _section, _theme] call aio_gui_fnc_drawSection;
  *
  * Public: No
  */
@@ -180,7 +180,7 @@ if (_id isEqualTo "worn" && {!isNull _body}) exitWith {
     [_display, _parent, [_blockX, _top, _blockW min _width, -1], [_body] call EFUNC(storage,getEquipment), _theme, true, _body] call FUNC(drawEquipmentDoll)
 };
 
-// Locked to this player (einv_locks_fnc_decorate): the caption with a padlock where the chevron would
+// Locked to this player (aio_locks_fnc_decorate): the caption with a padlock where the chevron would
 // be, why in one muted line - and nothing of what is inside: no box, no grid, no load, no button.
 if (_section getOrDefault ["locked", false]) exitWith {
     private _lineH = _textUnit * 0.62;
@@ -204,7 +204,7 @@ if (_section getOrDefault ["locked", false]) exitWith {
     [_display, _parent, [_blockX + _lockW, _top, _tabW - _lockW, _lineH], _shown, _lineSize, _colorText2, _fontBold, 2, "tab"] call FUNC(uiLabel);
 
     // Why, when the mouse rests on the tab.
-    private _tip = [_display, "EINV_Hitbox", _parent, [_blockX, _top, _tabW, _lineH]] call FUNC(uiCreate);
+    private _tip = [_display, "AIO_Hitbox", _parent, [_blockX, _top, _tabW, _lineH]] call FUNC(uiCreate);
     [_tip, _notice] call FUNC(setTooltip);
 
     [_display, _parent, [_blockX, _top + _lineH, _blockW, pixelH], _colorLine] call FUNC(uiPanel);
@@ -333,7 +333,7 @@ private _closeW = [0, SQUARE(_lineH)] select _nested;
 private _tabIcon = _section getOrDefault ["tabIcon", ""];
 private _tabIconW = [0, SQUARE(_buttonH * 0.95)] select (_tabIcon isNotEqualTo "");
 
-// Open to this player only because of who they are (einv_locks_fnc_decorate): an open padlock left of
+// Open to this player only because of who they are (aio_locks_fnc_decorate): an open padlock left of
 // the weight says so when the mouse rests on it.
 private _lockTip = _section getOrDefault ["lockTip", ""];
 private _lockW = [0, SQUARE(_lineH)] select (_lockTip isNotEqualTo "");
@@ -475,7 +475,7 @@ if (_chevronW > 0) then {
 
     // The drawn pill and two pixels round it.
     private _toggle = [
-        _display, "EINV_Hitbox", _parent, [_blockX - pixelW * 2, _buttonTop - pixelH * 2, (_tabW max _chevronW) + pixelW * 4, _buttonH + pixelH * 4]
+        _display, "AIO_Hitbox", _parent, [_blockX - pixelW * 2, _buttonTop - pixelH * 2, (_tabW max _chevronW) + pixelW * 4, _buttonH + pixelH * 4]
     ] call FUNC(uiCreate);
     [_toggle, LLSTRING(Section_Toggle)] call FUNC(setTooltip);
     _toggle setVariable [QGVAR(key), _foldKey];
@@ -560,7 +560,7 @@ if (_lockTip isNotEqualTo "") then {
         UI_TEX(icon_lock_open_ca), _colorText2
     ] call FUNC(uiIcon);
 
-    private _lockHit = [_display, "EINV_Hitbox", _parent, [_lockX, _top, _lockW, _lineH]] call FUNC(uiCreate);
+    private _lockHit = [_display, "AIO_Hitbox", _parent, [_lockX, _top, _lockW, _lineH]] call FUNC(uiCreate);
     [_lockHit, _lockTip] call FUNC(setTooltip);
 };
 
@@ -581,7 +581,7 @@ if (_nested) then {
     [_display, _parent, [_closeX + (_closeW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH], UI_TEX(icon_close_ca), _colorText2] call FUNC(uiIcon);
 
     private _close = [
-        _display, "EINV_Hitbox", _parent, [_closeX - pixelW * 2, _top - pixelH * 2, _closeW + pixelW * 4, _lineH + pixelH * 4]
+        _display, "AIO_Hitbox", _parent, [_closeX - pixelW * 2, _top - pixelH * 2, _closeW + pixelW * 4, _lineH + pixelH * 4]
     ] call FUNC(uiCreate);
     [_close, LLSTRING(Section_Close)] call FUNC(setTooltip);
     _close setVariable [QGVAR(key), _sectionContainer];
@@ -609,7 +609,7 @@ private _view = if (isNull _sectionContainer || {_placeholder} || {_sealed} || {
 };
 _view params ["_viewBlocks", "_hiddenRows", "_rowsFoldable", "_hiddenCells", ["_paging", []]];
 
-// A compartment taller than a page (einv_gui_pageRows) is cut into pages with a bar under it (fnc_drawPageBar); the
+// A compartment taller than a page (aio_gui_pageRows) is cut into pages with a bar under it (fnc_drawPageBar); the
 // bar takes room in the flow, below the page's rows. Its page is as tall as the tallest of its pages, so turning one
 // never moves what lies below.
 private _anyPaged = _paging findIf {_x isNotEqualTo []} >= 0;
@@ -626,7 +626,7 @@ if (_rowsFoldable || {_anyPaged}) then {
     _drawLayout set ["paging", _paging];
 };
 
-// The compartments (einv_storage_fnc_getBlocks), side by side as far as STORAGE_COLS cells reach, then
+// The compartments (aio_storage_fnc_getBlocks), side by side as far as STORAGE_COLS cells reach, then
 // on the next line - and, should anything not fit any of them, a line of its own for that. A paged one takes the room
 // of its tallest page and its bar.
 private _flowLayout = _drawLayout;
@@ -842,7 +842,7 @@ if (_sealed) then {
     // With "Search starts on click" a click on the block starts or resumes its search, as the chip's Search button does;
     // it never stops it (the chip's cross does).
     if (GVAR(searchOnClick)) then {
-        private _sealHit = [_display, "EINV_Hitbox", _parent, [_gridX, _bodyTop, _sealW, _sealH]] call FUNC(uiCreate);
+        private _sealHit = [_display, "AIO_Hitbox", _parent, [_gridX, _bodyTop, _sealW, _sealH]] call FUNC(uiCreate);
 
         [_sealHit, LLSTRING(Status_StartSearch)] call FUNC(setTooltip);
         _sealHit setVariable [QGVAR(key), _sectionContainer];
@@ -944,7 +944,7 @@ if (_rowsFoldable) then {
     ] call FUNC(uiLabel);
 
     private _rowsToggle = [
-        _display, "EINV_Hitbox", _parent, [_gridX - pixelW * 2, _rowsTop - pixelH * 2, _rowsW + pixelW * 4, _lineH + pixelH * 4]
+        _display, "AIO_Hitbox", _parent, [_gridX - pixelW * 2, _rowsTop - pixelH * 2, _rowsW + pixelW * 4, _lineH + pixelH * 4]
     ] call FUNC(uiCreate);
     [_rowsToggle, LLSTRING(Rows_Tooltip)] call FUNC(setTooltip);
     _rowsToggle setVariable [QGVAR(key), _sectionContainer];

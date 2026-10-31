@@ -32,7 +32,7 @@
  * The compartments' scrolling group <CONTROL>
  *
  * Example:
- * [_display, _box, [0, 0.2, 0.4, 0.03], [0, 0.25, 0.2, 0.3], _theme, "B_Carryall_khk", [[4, 3, []]], 0, true] call einv_setup_fnc_drawCellBlocks;
+ * [_display, _box, [0, 0.2, 0.4, 0.03], [0, 0.25, 0.2, 0.3], _theme, "B_Carryall_khk", [[4, 3, []]], 0, true] call aio_setup_fnc_drawCellBlocks;
  *
  * Public: No
  */
@@ -182,7 +182,7 @@ if (_editable) then {
 
 // ----- The compartments -----
 
-private _area = [_display, "EINV_ScrollGroup", _box, _areaRect] call EFUNC(gui,uiCreate);
+private _area = [_display, "AIO_ScrollGroup", _box, _areaRect] call EFUNC(gui,uiCreate);
 
 _area setVariable [QGVAR(scrollId), "cellCanvas"];
 

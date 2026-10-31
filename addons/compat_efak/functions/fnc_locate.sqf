@@ -8,10 +8,10 @@
  *   (GVAR(holders)) or the ACE Arsenal's panel shows it as a section (GVAR(arsenalHolders)), else among
  *   the contents of an open kit or of such a section. A kit's tile in a container the window
  *   shows comes with its holder from the caller instead (fnc_drop).
- *   With a root - the side that runs a kit op (einv_storage_fnc_execute): the real cargo under that
+ *   With a root - the side that runs a kit op (aio_storage_fnc_execute): the real cargo under that
  *   root, nothing the window remembers - the uniform, vest and backpack of a unit (or the object
  *   itself: a crate, a vehicle, a pile), the uniforms, vests and backpacks lying in them three deep as
- *   the storage walks them (einv_storage_fnc_verifyChain), and the kits packed in kits there, as deep
+ *   the storage walks them (aio_storage_fnc_verifyChain), and the kits packed in kits there, as deep
  *   as kits go (KIT_MAX_DEPTH).
  *
  * Arguments:
@@ -23,8 +23,8 @@
  * [where it lies [container, kit], the container at the top - objNull when it is found nowhere] <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7"] call einv_compat_efak_fnc_locate;
- * ["efak_ifak_7", [], _crate] call einv_compat_efak_fnc_locate;
+ * ["efak_IFAK_7"] call aio_compat_efak_fnc_locate;
+ * ["efak_ifak_7", [], _crate] call aio_compat_efak_fnc_locate;
  *
  * Public: No
  */

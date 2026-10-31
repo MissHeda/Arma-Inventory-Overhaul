@@ -1,9 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Reads the value of use= (a rule) or einv_use (an item's config): the containers an item may be used
- * from even where a setting limits what can be used there (einv_storage_useUniform, einv_storage_useVest,
- * einv_storage_useBackpack set to "Only whitelisted"). The one reader of that value, as fnc_parseIcon is of
+ * Reads the value of use= (a rule) or aio_use (an item's config): the containers an item may be used
+ * from even where a setting limits what can be used there (aio_storage_useUniform, aio_storage_useVest,
+ * aio_storage_useBackpack set to "Only whitelisted"). The one reader of that value, as fnc_parseIcon is of
  * icon=.
  *
  *   uniform+vest+backpack   any of the three words, joined with + (the rules text) or with a comma, a bar
@@ -27,7 +27,7 @@
  *   readable   - false when nothing of the value could be read <BOOL>
  *
  * Example:
- * ["backpack+vest"] call einv_items_fnc_parseUse;
+ * ["backpack+vest"] call aio_items_fnc_parseUse;
  * // [["vest", "backpack"], [], true]
  *
  * Public: No

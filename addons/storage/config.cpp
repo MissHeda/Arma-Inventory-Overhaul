@@ -7,7 +7,7 @@ class CfgPatches {
         weapons[] = {};
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {
-            "einv_items"
+            "aio_items"
         };
         author = "Miss Heda";
         url = ECSTRING(main,URL);

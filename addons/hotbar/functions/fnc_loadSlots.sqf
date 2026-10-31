@@ -14,12 +14,12 @@
  * None
  *
  * Example:
- * call einv_hotbar_fnc_loadSlots;
+ * call aio_hotbar_fnc_loadSlots;
  *
  * Public: No
  */
 
-private _saved = profileNamespace getVariable ["einv_hotbar_slots", []];
+private _saved = profileNamespace getVariable ["aio_hotbar_slots", []];
 
 if !(_saved isEqualType []) then {
     _saved = [];

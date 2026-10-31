@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="compat_ace_vehiclelock">
-        <Key ID="STR_einv_compat_ace_vehiclelock_NoKey">
+        <Key ID="STR_aio_compat_ace_vehiclelock_NoKey">
             <English>Locked - you have no key for it</English>
         </Key>
     </Package>

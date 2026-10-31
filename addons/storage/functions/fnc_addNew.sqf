@@ -30,7 +30,7 @@
  * all of it arrived <STRING>
  *
  * Example:
- * [vestContainer player, "ACE_fieldDressing", 5] call einv_storage_fnc_addNew;
+ * [vestContainer player, "ACE_fieldDressing", 5] call aio_storage_fnc_addNew;
  *
  * Public: Yes
  */

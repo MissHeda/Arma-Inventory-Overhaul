@@ -12,7 +12,7 @@
  * It is a finite number <BOOL>
  *
  * Example:
- * [_boxX] call einv_gui_fnc_isFinite;
+ * [_boxX] call aio_gui_fnc_isFinite;
  *
  * Public: No
  */

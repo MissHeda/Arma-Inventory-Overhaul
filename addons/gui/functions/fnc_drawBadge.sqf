@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_display, _grid, _state] call einv_gui_fnc_drawBadge;
+ * [_display, _grid, _state] call aio_gui_fnc_drawBadge;
  *
  * Public: No
  */

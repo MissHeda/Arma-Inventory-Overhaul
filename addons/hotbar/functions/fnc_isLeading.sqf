@@ -11,7 +11,7 @@
  * Leads a group with AI soldiers in it <BOOL>
  *
  * Example:
- * [player] call einv_hotbar_fnc_isLeading;
+ * [player] call aio_hotbar_fnc_isLeading;
  *
  * Public: No
  */

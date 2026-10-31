@@ -12,7 +12,7 @@
  * On the panel <BOOL>
  *
  * Example:
- * [getMousePosition] call einv_arsenal_fnc_isOver;
+ * [getMousePosition] call aio_arsenal_fnc_isOver;
  *
  * Public: No
  */

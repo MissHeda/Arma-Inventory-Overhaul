@@ -9,7 +9,7 @@
  * are set here at once and broadcast within OWN_WRITE_DELAY seconds (GVAR(dirty), fnc_flushPlaces); any
  * other write is public at once and takes the holder out of GVAR(dirty) - unless a nested tag or a copy
  * of nested places on it still waits there. Kits are written as a public mission variable; a root made on
- * this machine only (einv_storage_localOnly) is set here and never broadcast. The Arsenal
+ * this machine only (aio_storage_localOnly) is set here and never broadcast. The Arsenal
  * and Eden write the same way, outside any phase.
  *
  * In multiplayer the authority keeps its latest write and looks again after HEAL_DELAYS whether an older
@@ -17,7 +17,7 @@
  * write is ever re-asserted.
  *
  * A uniform, vest or backpack lying in a container keeps its places on its own object, and in
- * multiplayer also in the copy on the outermost container it lies under (einv_storage_nested,
+ * multiplayer also in the copy on the outermost container it lies under (aio_storage_nested,
  * fnc_tagNested): whether variables on nested objects reach every machine is not known, the outermost
  * container's always do. A forced write sends that copy again as well.
  *
@@ -39,7 +39,7 @@
  *    RPT error names it) <NUMBER>
  *
  * Example:
- * [backpackContainer player, _records] call einv_storage_fnc_writePlaces;
+ * [backpackContainer player, _records] call aio_storage_fnc_writePlaces;
  *
  * Public: No
  */
@@ -145,7 +145,7 @@ if (isMultiplayer && {hasInterface} && {!_isKey} && {_ownRoot}) then {
     _own = _bar < 0 || {(_journalKey select [0, _bar]) in GVAR(requests)};
 };
 
-// A root made on this machine only (the Arsenal's staging space, einv_storage_localOnly) is never sent
+// A root made on this machine only (the Arsenal's staging space, aio_storage_localOnly) is never sent
 // anywhere: nobody else has the object.
 private _public = isMultiplayer && {!_own} && {!(_root getVariable [QGVAR(localOnly), false])};
 private _dirty = [];

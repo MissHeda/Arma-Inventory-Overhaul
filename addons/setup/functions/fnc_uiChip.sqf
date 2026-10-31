@@ -21,7 +21,7 @@
  * The controls, the hit area last <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.06, 0.025], "Weapons", true, _theme, {params ["_on"]}] call einv_setup_fnc_uiChip;
+ * [_display, _group, [0, 0, 0.06, 0.025], "Weapons", true, _theme, {params ["_on"]}] call aio_setup_fnc_uiChip;
  *
  * Public: No
  */

@@ -14,7 +14,7 @@
  * [label, tooltip, tooltip of a compact button] <ARRAY>
  *
  * Example:
- * ["weight"] call einv_gui_fnc_sortText;
+ * ["weight"] call aio_gui_fnc_sortText;
  *
  * Public: No
  */

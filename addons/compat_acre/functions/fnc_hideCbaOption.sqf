@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Whether the window leaves out an option of CBA's item context menu because it offers its own instead:
  * ACRE2's "Open" on one of its radios (the window's "Open radio" steps aside first, which ACRE's own call
- * from inside the window could not). Asked for every option of the menu (einv_gui_fnc_cbaOptions), with
+ * from inside the window could not). Asked for every option of the menu (aio_gui_fnc_cbaOptions), with
  * the option's name already localized.
  *
  * Arguments:
@@ -14,7 +14,7 @@
  * Leave it out <BOOL>
  *
  * Example:
- * ["ACRE_PRC152_ID_1", "Open"] call einv_compat_acre_fnc_hideCbaOption;
+ * ["ACRE_PRC152_ID_1", "Open"] call aio_compat_acre_fnc_hideCbaOption;
  *
  * Public: No
  */

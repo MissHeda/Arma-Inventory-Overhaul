@@ -18,7 +18,7 @@
  * Arguments:
  * 0: Args, [holder, entry array (fnc_entryToArray) of the tile, how many to split off, cell (default: [])]
  *    <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -28,7 +28,7 @@
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[_crate, _entryArray, 5, []], _context] call einv_storage_fnc_opSplit;
+ * [[_crate, _entryArray, 5, []], _context] call aio_storage_fnc_opSplit;
  *
  * Public: No
  */

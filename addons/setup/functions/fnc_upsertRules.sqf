@@ -6,7 +6,7 @@
  *   - the class alone: the rules written for exactly that class (class=X, fnc_ownClassRules) become one,
  *     the values given are set and the fields named are taken away. Whatever else they set stays - a name,
  *     a weight, a size on a container whose cells are edited. The rule goes last: later rules win
- *     (einv_items_fnc_resolve), so a broader rule further down - a group, a kind - would otherwise still
+ *     (aio_items_fnc_resolve), so a broader rule further down - a group, a kind - would otherwise still
  *     decide what the class gets, and the step would show something else than what was just applied.
  *   - the class and every class built on it (tree): the same with the inheritance selector, class=X+ - one
  *     rule for the whole tree. The classes of the tree (fnc_classTree) that have a rule of their own
@@ -22,9 +22,9 @@
  * Arguments:
  * 0: What to write <ARRAY>, one entry per class: [class, set, remove, tree]
  *    class  - as config names it <STRING>
- *    set    - values: "footprint" ("2x3" or a mask), "stack" <NUMBER>, "grid" (as einv_items_fnc_formatGrid
+ *    set    - values: "footprint" ("2x3" or a mask), "stack" <NUMBER>, "grid" (as aio_items_fnc_formatGrid
  *             writes it), "like" (a class), "weight" (kg) <NUMBER>, "name" <STRING>, "icon" ([scale, across,
- *             down] <ARRAY>, einv_items_fnc_parseIcon) <HASHMAP> (default: none)
+ *             down] <ARRAY>, aio_items_fnc_parseIcon) <HASHMAP> (default: none)
  *    remove - fields to take away <ARRAY of STRING> (default: [])
  *    tree   - for the class and every class built on it <BOOL> (default: false)
  *
@@ -33,7 +33,7 @@
  * letters, digits and _ only, and a rule for any other would be left out when the text is read again) <BOOL>
  *
  * Example:
- * [[["V_PlateCarrier1_rgr", createHashMapFromArray [["grid", "xxxx/x--x+2x3"]]]]] call einv_setup_fnc_upsertRules;
+ * [[["V_PlateCarrier1_rgr", createHashMapFromArray [["grid", "xxxx/x--x+2x3"]]]]] call aio_setup_fnc_upsertRules;
  *
  * Public: No
  */

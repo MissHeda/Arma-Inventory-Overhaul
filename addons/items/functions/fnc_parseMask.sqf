@@ -30,8 +30,8 @@
  * order ("a", "b", ...), which fnc_parseGrid needs to hand each its attributes <ARRAY>
  *
  * Example:
- * ["xx/x-"] call einv_items_fnc_parseMask; // [2, 2, [3]]
- * ["aaa/aba/aaa", 10, 40, true] call einv_items_fnc_parseMask; // [3, 3, [], [[3, 3, [4], [0, 0]], [1, 1, [], [1, 1]]], ["a", "b"]]
+ * ["xx/x-"] call aio_items_fnc_parseMask; // [2, 2, [3]]
+ * ["aaa/aba/aaa", 10, 40, true] call aio_items_fnc_parseMask; // [3, 3, [], [[3, 3, [4], [0, 0]], [1, 1, [], [1, 1]]], ["a", "b"]]
  *
  * Public: No
  */

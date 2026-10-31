@@ -12,7 +12,7 @@
  * It waits <BOOL>
  *
  * Example:
- * [[_crate, "arifle_MX_F", 0, 2, 3]] call einv_gui_fnc_queueWaits;
+ * [[_crate, "arifle_MX_F", 0, 2, 3]] call aio_gui_fnc_queueWaits;
  *
  * Public: No
  */

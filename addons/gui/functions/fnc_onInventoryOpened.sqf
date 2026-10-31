@@ -16,7 +16,7 @@
  * the backpack it wears - ACE's "Open <backpack>" on the dead, a script - is the whole body as well,
  * the way its "Inventory" opens it: bodies are open to everyone, so nothing is asked.
  *
- * What is locked to the player (einv_locks_fnc_canReach: a lock of a side, a group or the admins, a
+ * What is locked to the player (aio_locks_fnc_canReach: a lock of a side, a group or the admins, a
  * mission's lockInventory, ACE's vehicle lock) is asked first. The engine's own lock keeps the player out
  * of it already, this window is for a lock set a moment ago and for any script that asks the engine
  * anyway: ACE's click sounds, as for a locked vehicle, and the window opens all the same and shows the
@@ -45,7 +45,7 @@
  * None
  *
  * Example:
- * [player, cursorObject, objNull] call einv_gui_fnc_onInventoryOpened;
+ * [player, cursorObject, objNull] call aio_gui_fnc_onInventoryOpened;
  *
  * Public: No
  */
@@ -74,7 +74,7 @@ if (_unit isNotEqualTo ACE_player) exitWith {
 // show it with a holder of the engine's single weapon model hanging on him (taken out here, it would be there twice -
 // that mod still has it). Only those: a holder of another shape hanging on someone (BackpackOnChest's pack) is a mod's
 // own business, opened as it asks. The nearby list and the ground leave anything hanging on someone out as well
-// (einv_storage_fnc_getNearby).
+// (aio_storage_fnc_getNearby).
 {
     if (
         !isNull _x && {(attachedTo _x) isKindOf "CAManBase"}
@@ -116,7 +116,7 @@ if (isNull objectParent _unit && {!_namesLoot}) then {
     };
 };
 
-// Locked to this player (einv_locks). The engine's own lock keeps them out already; this is for a lock set a
+// Locked to this player (aio_locks). The engine's own lock keeps them out already; this is for a lock set a
 // moment ago and for any script that asks the engine anyway. ACE's click, as for a locked vehicle. The window
 // opens all the same and shows it as a locked section; the RPT says why.
 private _refused = [];
@@ -202,7 +202,7 @@ private _mode = if (isNull _person) then {""} else {[_person] call FUNC(canOpenP
 
 // An ACE dragging clone (a copy of a body's gear) or a person the mission closed: nothing opens.
 if (!isNull _person && {_mode isEqualTo ""}) exitWith {
-    INFO_1("refused: %1 may not be opened (a dragging clone or einv_noAccess) - nothing opens.",typeOf _person);
+    INFO_1("refused: %1 may not be opened (a dragging clone or aio_noAccess) - nothing opens.",typeOf _person);
     [LLSTRING(Hint_NoAccess)] call ACEFUNC(common,displayTextStructured);
 };
 

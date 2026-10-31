@@ -11,7 +11,7 @@
  * A kit <BOOL>
  *
  * Example:
- * ["efak_IFAK_7"] call einv_compat_efak_fnc_isKit;
+ * ["efak_IFAK_7"] call aio_compat_efak_fnc_isKit;
  *
  * Public: Yes
  */

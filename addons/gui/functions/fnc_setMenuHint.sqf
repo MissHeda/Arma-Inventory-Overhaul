@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * [_line, "Turns the item you are dragging"] call einv_gui_fnc_setMenuHint;
+ * [_line, "Turns the item you are dragging"] call aio_gui_fnc_setMenuHint;
  *
  * Public: No
  */

@@ -15,7 +15,7 @@
  * Load, in tenths of a pound like config mass - 0 for no unit <NUMBER>
  *
  * Example:
- * [player] call einv_weight_fnc_getLoad;
+ * [player] call aio_weight_fnc_getLoad;
  *
  * Public: Yes
  */

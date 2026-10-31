@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_group, 1] call einv_gui_fnc_passWheel;
+ * [_group, 1] call aio_gui_fnc_passWheel;
  *
  * Public: No
  */

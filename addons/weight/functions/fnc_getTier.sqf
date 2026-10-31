@@ -5,7 +5,7 @@
  * fnc_getLimits. Nothing is ever refused because of the tier; it only decides what the bar shows and what
  * ACE does to the soldier (fnc_updateTier).
  *
- * With the tiers switched off (einv_weight_enabled) every load is Light: the window's bar keeps one colour
+ * With the tiers switched off (aio_weight_enabled) every load is Light: the window's bar keeps one colour
  * and the soldier gets nothing of ours, with no caller having to ask about the switch itself.
  *
  * Arguments:
@@ -17,8 +17,8 @@
  * TIER_LIGHT, TIER_HEAVY, TIER_OVERLOADED or TIER_CRITICAL <NUMBER>
  *
  * Example:
- * [player] call einv_weight_fnc_getTier;
- * [player, 600] call einv_weight_fnc_getTier;
+ * [player] call aio_weight_fnc_getTier;
+ * [player, 600] call aio_weight_fnc_getTier;
  *
  * Public: Yes
  */

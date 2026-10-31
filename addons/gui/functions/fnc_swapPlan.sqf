@@ -8,7 +8,7 @@
  * so it is worked out once per hovered tile, not per frame.
  *
  * A tile of the same class is no swap but a merge, where the storage keeps stacks apart
- * (einv_storage_stackSplits): the footprint covers exactly one other tile of the same key - the same
+ * (aio_storage_stackSplits): the footprint covers exactly one other tile of the same key - the same
  * class, and for a magazine the same rounds - that is a stack of a class that stacks and has room left,
  * searched and not on its way, and the dragged items go onto it, as many as fit (all of them, or as many
  * as the wheel chose: the rest stays where it lies). The same rules of any move apply. The plan then has
@@ -26,11 +26,11 @@
  * drop on its tile never get here (fnc_updateDrag asks them first).
  *
  * The rules that apply to any move apply to both: a backpack never into a backpack, nothing into itself
- * (einv_storage_fnc_liesIn), a living person's gear only as the settings say (fnc_checkTouch), another
- * player's kit stays where it is (einv_compat_efak_fnc_checkTile). Free cells are the only room there
+ * (aio_storage_fnc_liesIn), a living person's gear only as the settings say (fnc_checkTouch), another
+ * player's kit stays where it is (aio_compat_efak_fnc_checkTile). Free cells are the only room there
  * is - weight refuses nothing.
  *
- * Categories and single slots (einv_storage_fnc_blockMode): the other tile must be taken by the compartment the dragged one
+ * Categories and single slots (aio_storage_fnc_blockMode): the other tile must be taken by the compartment the dragged one
  * comes from, else the reason is "WrongKind"; into a single slot (the footprint fnc_updateDrag brings is then the slot) a tile
  * goes whole, its own size aside, and a tile that leaves one lies at its own size again.
  *
@@ -52,7 +52,7 @@
  * other lands on is [] and merge true for a merge -, [] without either <ARRAY>
  *
  * Example:
- * [_targetIndex, 2, 1, 1, 2, 0, _underTarget, _underSource] call einv_gui_fnc_swapPlan;
+ * [_targetIndex, 2, 1, 1, 2, 0, _underTarget, _underSource] call aio_gui_fnc_swapPlan;
  *
  * Public: No
  */
@@ -98,7 +98,7 @@ if (_sameHolder && {!_sameGrid} && {_toBlock == _fromBlock}) exitWith {_none};
 // ----- Where the dragged tile lands: its footprint, over exactly one other tile -----
 private _holesHeld = ([_entry getOrDefault ["class", ""], _rot] call EFUNC(items,footprintAs)) select 2;
 
-// A single slot takes a tile whole (einv_storage_fnc_slotOf): the footprint fnc_updateDrag brings is the slot, its holes the slot's.
+// A single slot takes a tile whole (aio_storage_fnc_slotOf): the footprint fnc_updateDrag brings is the slot, its holes the slot's.
 private _targetSingle = _target getOrDefault ["single", false];
 private _sourceSingle = _source getOrDefault ["single", false];
 
@@ -232,7 +232,7 @@ private _cellB = [];
 
 private _originCol = _entry getOrDefault ["col", 0];
 private _originRow = _entry getOrDefault ["row", 0];
-// B as it lies - a tile in a single slot has the slot's size, its own is the item's (einv_items_fnc_footprintAs) - and, where
+// B as it lies - a tile in a single slot has the slot's size, its own is the item's (aio_items_fnc_footprintAs) - and, where
 // that takes other cells, turned a quarter.
 private _rotB = [parseNumber (_tileB getOrDefault ["rotated", false]), 0] select _targetSingle;
 private _sizeB = if (_targetSingle) then {
@@ -249,7 +249,7 @@ if (_turnW != (_sizeB select 0) || {_turnH != (_sizeB select 1)} || {_turnHoles 
     _candidates pushBack [_turnW, _turnH, _turnHoles, 1 - _rotB];
 };
 
-// The compartment it would go to must take it: one that accepts only other categories refuses (einv_storage_fnc_blockMode), and a
+// The compartment it would go to must take it: one that accepts only other categories refuses (aio_storage_fnc_blockMode), and a
 // single slot takes it whole, upright, whatever its size.
 private _sourceAccepts = _source getOrDefault ["accepts", []];
 
@@ -325,7 +325,7 @@ if (!_sameHolder) then {
         _reason = "IntoItself";
     };
 
-    // Another living player's kit stays where it is (einv_compat_efak).
+    // Another living player's kit stays where it is (aio_compat_efak).
     if (_reason isEqualTo "" && {!isNil QEFUNC(compat_efak,checkTile)}) then {
         _reason = [_classA, _from] call EFUNC(compat_efak,checkTile);
 
@@ -337,5 +337,5 @@ if (!_sameHolder) then {
 
 if (_reason isNotEqualTo "") exitWith {[_reason, []]};
 
-// In a single slot the dragged tile lies upright whatever turn it is held in, as the authority lays it (einv_storage_fnc_opPlaceMany).
+// In a single slot the dragged tile lies upright whatever turn it is held in, as the authority lays it (aio_storage_fnc_opPlaceMany).
 ["", [_indexB, [_col, _row, _toBlock, _w, _h, [_rot, 0] select _targetSingle], _cellB, _merge, _mergeCount]]

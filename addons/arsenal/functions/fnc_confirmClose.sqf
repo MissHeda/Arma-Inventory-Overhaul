@@ -10,7 +10,7 @@
  * for every press); the clicks on the answers are taken by the display's handler (fnc_onConfirmMouse), the
  * wheel is absorbed (fnc_onOpened); keys are held by fnc_onAceKey. All of it is made straight on the
  * display, in no controls group - a group moved the card with the wheel. The card can be dragged by its
- * title strip (einv_gui_fnc_dragHandle, begun by fnc_onConfirmMouse on the press): all its controls are moved
+ * title strip (aio_gui_fnc_dragHandle, begun by fnc_onConfirmMouse on the press): all its controls are moved
  * one by one, the dimming staying; they are kept in a list for that and the strip's film. While the window
  * is open those tiles stay what they are, red and shown apart. With nothing to remove, or a unit that is not local
  * here, the window closes at once, as it always did.
@@ -23,7 +23,7 @@
  * None
  *
  * Example:
- * [findDisplay 1127001, 2] call einv_arsenal_fnc_confirmClose;
+ * [findDisplay 1127001, 2] call aio_arsenal_fnc_confirmClose;
  *
  * Public: No
  */
@@ -105,7 +105,7 @@ private _words = text _text setAttributes ["align", "center", "valign", "top", "
 private _cardW = SQUARE(UNIT * 24);
 private _pad = SQUARE(UNIT * 1.2);
 private _innerW = _cardW - _pad * 2;
-private _probe = _display ctrlCreate ["EINV_StructuredText", -1];
+private _probe = _display ctrlCreate ["AIO_StructuredText", -1];
 
 _probe ctrlSetPosition [safezoneX, safezoneY, _innerW, UNIT * 20];
 _probe ctrlCommit 0;
@@ -141,7 +141,7 @@ uiNamespace setVariable [QGVAR(confirm), _dim select 0];
 // (fnc_onConfirmMouse), never lit on hover; under the title, over the card.
 private _inset = _radius max (UNIT * 0.15);
 private _film = [
-    _display, "EINV_PanelRect", controlNull, [_cardX + _inset, _cardY + _inset, _cardW - _inset * 2, UNIT * 2.6 - _inset]
+    _display, "AIO_PanelRect", controlNull, [_cardX + _inset, _cardY + _inset, _cardW - _inset * 2, UNIT * 2.6 - _inset]
 ] call EFUNC(gui,uiCreate);
 
 _film ctrlSetBackgroundColor [1, 1, 1, 0];
@@ -156,7 +156,7 @@ private _titleSize = UNIT * 1.0;
 
 _y = _y + UNIT * 1.8;
 
-private _box = [_display, "EINV_StructuredText", controlNull, [_cardX + _pad, _y, _innerW, _textH]] call EFUNC(gui,uiCreate);
+private _box = [_display, "AIO_StructuredText", controlNull, [_cardX + _pad, _y, _innerW, _textH]] call EFUNC(gui,uiCreate);
 
 _box ctrlSetStructuredText _words;
 
@@ -205,7 +205,7 @@ uiNamespace setVariable [QGVAR(confirmBar), [_film, _inset]];
 private _sink = uiNamespace getVariable [QGVAR(focusSink), controlNull];
 
 if (isNull _sink) then {
-    _sink = _display ctrlCreate ["EINV_Hitbox", -1];
+    _sink = _display ctrlCreate ["AIO_Hitbox", -1];
     _sink ctrlSetPosition [safezoneX, safezoneY, 0, 0];
     _sink ctrlCommit 0;
 

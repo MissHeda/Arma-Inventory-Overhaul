@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * What the window shows of ACE cargo, for the signature it compares to see that it must be built again
- * (einv_gui_fnc_getSignature): what is loaded in the containers it looks into, the crates opened from
+ * (aio_gui_fnc_getSignature): what is loaded in the containers it looks into, the crates opened from
  * cargo and what lies around, and what is being unloaded - so someone else loading or unloading redraws
  * the cards, and so does the unloading starting or stopping.
  *
@@ -13,7 +13,7 @@
  * Parts of the signature <ARRAY>
  *
  * Example:
- * call einv_compat_ace_cargo_fnc_signature;
+ * call aio_compat_ace_cargo_fnc_signature;
  *
  * Public: No
  */

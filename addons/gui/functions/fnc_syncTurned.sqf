@@ -24,7 +24,7 @@
  * None
  *
  * Example:
- * [] call einv_gui_fnc_syncTurned;
+ * [] call aio_gui_fnc_syncTurned;
  *
  * Public: No
  */

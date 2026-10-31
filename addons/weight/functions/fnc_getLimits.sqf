@@ -3,13 +3,13 @@
  * Author: Miss Heda
  * Where the tiers start for a unit: Heavy, Overloaded and Critical, in config mass and in kilograms.
  *
- * Overloaded and Critical are the settings (einv_weight_overloadedAt, einv_weight_criticalAt, the latter at
- * least 1 kg above the first). Heavy is the setting too (einv_weight_heavyAt), or - at 0, the default -
+ * Overloaded and Critical are the settings (aio_weight_overloadedAt, aio_weight_criticalAt, the latter at
+ * least 1 kg above the first). Heavy is the setting too (aio_weight_heavyAt), or - at 0, the default -
  * follows ACE Advanced Fatigue: the load at which ACE's jog tires the unit (fnc_heavyFromAce), by ACE's load
  * factor and the unit's performance factor. With ACE's fatigue off, Heavy is a share of Overloaded
  * (NO_ACE_HEAVY_SHARE). It is never later than Overloaded, so the bar always has its order.
  *
- * With the tiers switched off (einv_weight_enabled) the marks are still worked out - the bar still needs
+ * With the tiers switched off (aio_weight_enabled) the marks are still worked out - the bar still needs
  * an end - but "enabled" says so, and fnc_getTier, fnc_tierText and fnc_updateTier answer by it, so they
  * agree with the limits they were handed. It is part of the key too: the window's signature redraws the
  * weight card when the switch flips, and the tier check (XEH_postInit) looks again.
@@ -28,11 +28,11 @@
  *   "heavyKg", "overloadedKg", "criticalKg"   - the same in kilograms <NUMBER>
  *   "fromAce"     - Heavy comes from ACE's fatigue model <BOOL>
  *   "aceFatigue"  - ACE Advanced Fatigue is on <BOOL>
- *   "enabled"     - the tiers count at all (einv_weight_enabled) <BOOL>
+ *   "enabled"     - the tiers count at all (aio_weight_enabled) <BOOL>
  *   "key"         - changes whenever any limit does <STRING>
  *
  * Example:
- * [player] call einv_weight_fnc_getLimits;
+ * [player] call aio_weight_fnc_getLimits;
  *
  * Public: Yes
  */

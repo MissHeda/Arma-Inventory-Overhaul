@@ -77,7 +77,7 @@ GVAR(context) = createHashMap;
 // dragged, and where it would land or []: ["grid", grid index, col, row, fits, why not, "", place] -
 // place false when the cell is taken in a kit's grid, whose layout finds it one -, ["slot", slot
 // index, 0, 0, fits, why not, slot id], ["kitTile", grid index, tile index, 0, fits, why not] onto a
-// kit's tile (einv_compat_efak), ["ground", -1, 0, 0, true, ""] or, while several tiles are dragged
+// kit's tile (aio_compat_efak), ["ground", -1, 0, 0, true, ""] or, while several tiles are dragged
 // together, ["group", grid index, mode, kit tile index or -1, fits, why not] with the mode "keep",
 // "pack", "kit" or "none" (fnc_groupMode), its plan kept in dragRoom. Its ghost and footprint are
 // controls, so they live in uiNamespace (dragGhost, dragFootprint).
@@ -184,7 +184,7 @@ GVAR(searchSoundAt) = 0;
 GVAR(searchLast) = 0;
 
 // What this player knows of the containers that move about (fnc_searchRecord): the id a uniform, vest or backpack carries
-// (einv_storage_searchState) -> [["known", class -> count], ["unsealed", true]]. Kept for the whole mission and never
+// (aio_storage_searchState) -> [["known", class -> count], ["unsealed", true]]. Kept for the whole mission and never
 // broadcast, so a body's backpack this player searched stays searched on the ground, in a crate or on another body.
 GVAR(searchMemory) = createHashMap;
 
@@ -195,7 +195,7 @@ GVAR(sealDragOver) = createHashMap;
 // them is searched until the button says "Search" again; the window's own state, empty for every window.
 GVAR(searchPaused) = [];
 
-// With "Search starts on click" (einv_gui_searchOnClick): the boxes that wait for the click, and the boxes the window has met
+// With "Search starts on click" (aio_gui_searchOnClick): the boxes that wait for the click, and the boxes the window has met
 // (so a rebuild does not make a searched or stopped box wait again). The window's own state.
 GVAR(searchIdle) = [];
 GVAR(searchSeen) = [];
@@ -228,7 +228,7 @@ GVAR(instantFrame) = -1;
 GVAR(roomCache) = [];
 GVAR(quickHeldKey) = -1;
 
-// The sounds: each item class's family, each family's actions as read from CfgEinvSounds, when each sound last
+// The sounds: each item class's family, each family's actions as read from CfgAioSounds, when each sound last
 // played and which variant, the files found for config paths, the weapons' reload sounds, the ground under the
 // player, when others may next hear a sound and a search tick, and the reload sound playing now (fnc_playSound).
 GVAR(soundFamilies) = createHashMap;
@@ -284,7 +284,7 @@ GVAR(inspect) = [];
 GVAR(inspectPos) = [];
 GVAR(inspectMove) = [];
 
-// The kits and pouches open in floating windows of their own (einv_compat_efak, fnc_drawWindows), each
+// The kits and pouches open in floating windows of their own (aio_compat_efak, fnc_drawWindows), each
 // known by its key: the order they lie in, bottom first - the last one is on top -, where each was put
 // [x, y], the tile one was opened from [x, y, w, h] - only its first draw places it by that -, which ones
 // fade in at their next draw, how far down each one's body was scrolled, in screen height, and while a
@@ -329,7 +329,7 @@ GVAR(coalesced) = createHashMap;
 // of sound (GVAR(soundGroups), fnc_soundGroup), 0 to 1. Each level is
 // [volume, the volume to come back to when its switch is turned on again]; a kind at volume 0 is off. Each player's
 // own, kept in the profile when the dropdown closes (fnc_soundSettle). The speaker used to mute with one flag,
-// einv_gui_muted (einv_gui_searchMuted before that): a player who had it set starts with every kind off.
+// aio_gui_muted (aio_gui_searchMuted before that): a player who had it set starts with every kind off.
 GVAR(soundGroups) = ["moves", "magazines", "containers", "search", "other"];
 GVAR(soundLevels) = GVAR(soundGroups) apply {[1, 1]};
 GVAR(soundDirty) = false;
@@ -368,7 +368,7 @@ if !(GVAR(sortMode) isEqualType "" && {GVAR(sortMode) in SORT_MODES}) then {
 
 uiNamespace setVariable [QGVAR(sortButtons), []];
 
-// The window's moves under way, request id (einv_storage_fnc_request) -> [sources, targets, time, feels,
+// The window's moves under way, request id (aio_storage_fnc_request) -> [sources, targets, time, feels,
 // details] (fnc_sendMoves): sources [[holder, key, block, col, row], ...] are faded and cannot be lifted,
 // targets [[holder, block, col, row, w, h], ...] outlined (fnc_drawPending) until the answer is finished;
 // time is when it was sent (PENDING_TIMEOUT); feels - how each move sounds - and details - what a hint
@@ -384,7 +384,7 @@ GVAR(answers) = [];
 // Holders drawn with places that disagree with their cargo, [holder, root, since] each - holder an
 // object or a kit's key - noted by fnc_drawSection, reported to their authority once they drifted for
 // DRIFT_WAIT seconds (fnc_requestNormalize). When a kit was last reported, kit key -> time; an object
-// keeps that on itself (einv_gui_normalizedAt), at most every DRIFT_REPEAT seconds.
+// keeps that on itself (aio_gui_normalizedAt), at most every DRIFT_REPEAT seconds.
 GVAR(drift) = [];
 GVAR(driftKits) = createHashMap;
 
@@ -392,7 +392,7 @@ GVAR(driftKits) = createHashMap;
 uiNamespace setVariable [QGVAR(pendingFrames), []];
 
 // A living person's gear changes only as the server's settings for persons allow, checked on the
-// machine that runs each change (einv_storage_fnc_execute). Called by name, so a function compiled again
+// machine that runs each change (aio_storage_fnc_execute). Called by name, so a function compiled again
 // while testing is the one asked.
 EGVAR(storage,guards) pushBack {_this call FUNC(personGuard)};
 
@@ -461,7 +461,7 @@ GVAR(actionAgent) = objNull;
 // with the weight card and the hotbar when they are the unit's own (fnc_redrawPart).
 GVAR(signatureParts) = [];
 
-// "Log window timings (debug)" (einv_gui_debugTiming), nothing of it read while the setting is off:
+// "Log window timings (debug)" (aio_gui_debugTiming), nothing of it read while the setting is off:
 //   redrawCounts - the last redraw of tiles: [tiles kept, tiles made, its milliseconds] (fnc_redrawTiles,
 //                  written in the redraw's line by fnc_refresh)
 //   phase        - [part of the frame now running, when it began] while fnc_frame times a frame, nil
@@ -506,13 +506,13 @@ GVAR(style) = "main";
 // The player's colours, picked in the popover under the header's palette button (fnc_openPaletteMenu): [accent, secondary, alpha,
 // panel, cells, tiles, text, lines, tile alpha] (fnc_palette) - each colour [hue, saturation, value] (0 to 1) or [] for none, the
 // panels' alpha and the tiles' alpha PALETTE_ALPHA_MIN to 1 or -1 for none. Each player's own, kept in the profile as
-// einv_gui_palette when the popover closes (fnc_paletteSettle); whether the themes use it is the server's to say
-// (einv_gui_playerColours, fnc_paletteAllowed).
+// aio_gui_palette when the popover closes (fnc_paletteSettle); whether the themes use it is the server's to say
+// (aio_gui_playerColours, fnc_paletteAllowed).
 // Anything in the profile that is not that shape is no choice; what the first version of the palette saved - three entries, a
 // colour as [hue, vividness] - still reads (value 1), and so does a palette of four entries from before the cells, tiles, text and
 // lines rows (those unset) and a palette of eight entries from before the tiles' own transparency (that one unset). An alpha beyond
 // the range is cut to it, and the value of the panels, the cells and the tiles is cut at PALETTE_PANEL_VALUE_MAX as fnc_paletteSet
-// cuts it. einv_gui_paletteDirty says there is something to write, and einv_gui_menuRemake that the menu being closed is only
+// cuts it. aio_gui_paletteDirty says there is something to write, and aio_gui_menuRemake that the menu being closed is only
 // made again (fnc_closeMenu).
 GVAR(palette) = +PALETTE_DEFAULT;
 GVAR(paletteDirty) = false;

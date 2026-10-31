@@ -7,7 +7,7 @@
  * whenever the look, a section's fold or the sections shown change; a change of what some sections hold
  * only draws those again (fnc_refresh).
  *
- * With einv_gui_debugTiming on, the RPT gets how long the build took.
+ * With aio_gui_debugTiming on, the RPT gets how long the build took.
  *
  * Last come what floats over the columns - the open kits' windows where they were, then the name at the
  * mouse and the inspect card (fnc_drawWindows, fnc_drawTopLayer): controls made later draw over earlier
@@ -17,10 +17,10 @@
  * A uniform, vest or backpack opened from inside a container whose object the engine made anew - a
  * sibling of its class was taken out and the others put back - is found again by its key in the same
  * container and stays open. The loot column shows what the window was opened on, then what lies around
- * (GVAR(nearby), fnc_readNearby) - all ordered by einv_storage_fnc_orderSections. Last of all the moves
+ * (GVAR(nearby), fnc_readNearby) - all ordered by aio_storage_fnc_orderSections. Last of all the moves
  * under way are shown (fnc_drawPending) and the tiles selected (fnc_drawSelection), which survive every
  * build by what they stand for.
- * A repack of magazines in progress is drawn on the tiles last (einv_magazines_fnc_drawJob).
+ * A repack of magazines in progress is drawn on the tiles last (aio_magazines_fnc_drawJob).
  * The palette popover (fnc_openPaletteMenu), if it was open, is made again after everything else.
  *
  * The layout is looked up by name, so a look that is missing or broken leaves a window with only its
@@ -40,7 +40,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_build;
+ * [_display] call aio_gui_fnc_build;
  *
  * Public: No
  */
@@ -56,12 +56,12 @@ if (isNull _display) exitWith {};
 
 private _start = diag_tickTime;
 
-// For the tester's numbers (einv_gui_debugTiming): when each part of the build ended.
+// For the tester's numbers (aio_gui_debugTiming): when each part of the build ended.
 private _timed = missionNamespace getVariable [QGVAR(debugTiming), false];
 private _marks = [];
 
 // A rebuild ends any drag: the tiles it pointed at are about to go. The drag's
-// timing line (einv_gui_debugTiming) is written first (fnc_logDrag).
+// timing line (aio_gui_debugTiming) is written first (fnc_logDrag).
 call FUNC(logDrag);
 
 GVAR(press) = [];
@@ -83,7 +83,7 @@ GVAR(storageRect) = [];
 GVAR(lootRect) = [];
 
 // The palette popover stays open across a build - what it sets is this build's colours - and is made again at its end. It is
-// closed here without being written to the profile (einv_gui_menuRemake, fnc_closeMenu).
+// closed here without being written to the profile (aio_gui_menuRemake, fnc_closeMenu).
 private _paletteOpen = !isNull ((uiNamespace getVariable [QGVAR(menu), []]) param [0, controlNull]) && {(GVAR(menuFor) param [0, ""]) isEqualTo "palette"};
 
 GVAR(menuRemake) = _paletteOpen;
@@ -232,8 +232,8 @@ private _now = diag_tickTime;
 // Uniforms, vests and backpacks opened from inside a container, as [class, object, the container it
 // lies in, its key there, the key of that container when it was opened from inside one too, when it went
 // missing]. The engine makes a new object for one whenever a sibling of its class is taken out and the
-// others are put back (einv_storage_fnc_removeSameClass): it is found again by its key - its own id, the
-// same on every machine (einv_storage_fnc_entryKey) - in the container it lay in, or in the new object of
+// others are put back (aio_storage_fnc_removeSameClass): it is found again by its key - its own id, the
+// same on every machine (aio_storage_fnc_entryKey) - in the container it lay in, or in the new object of
 // that one. Kept a moment while it is missing - its id may reach this machine after its cargo -, then it
 // drops out. A key is only kept while no sibling there shares it. One that left the container it lay in -
 // put on, taken into a crate, dropped elsewhere - drops out at once, and so does whatever was opened from
@@ -241,7 +241,7 @@ private _now = diag_tickTime;
 private _keptOpened = [];
 private _gone = [];
 
-// An entry's key where it lies - set by einv_storage_fnc_getContents, made here should it be missing.
+// An entry's key where it lies - set by aio_storage_fnc_getContents, made here should it be missing.
 private _fnc_keyOf = {
     params ["_entry"];
 
@@ -273,7 +273,7 @@ private _fnc_keyOf = {
     // No longer listed where it lay (everyContainer): put on, moved, or that container is gone. Only while
     // one of its class still lies there may it be that one made anew with its id still on the way - then it
     // is missing, looked for by its key below. A crate looked into through its vehicle's cargo lies in no
-    // container: einv_compat_ace_cargo_fnc_pruneOpened sees to those (below).
+    // container: aio_compat_ace_cargo_fnc_pruneOpened sees to those (below).
     if (
         !isNull _object
         && {isNull (_object getVariable [QEGVAR(compat_ace_cargo,openedFrom), objNull])}
@@ -329,14 +329,14 @@ private _fnc_keyOf = {
 GVAR(opened) = _keptOpened;
 
 private _ownSections = [_unit] call EFUNC(storage,getSections);
-// Crates ACE unloaded meanwhile are no longer looked into through their vehicle (einv_compat_ace_cargo).
+// Crates ACE unloaded meanwhile are no longer looked into through their vehicle (aio_compat_ace_cargo).
 if (!isNil QEFUNC(compat_ace_cargo,pruneOpened)) then {
     GVAR(opened) = [GVAR(opened)] call EFUNC(compat_ace_cargo,pruneOpened);
 };
 
 private _lootSections = [GVAR(container), GVAR(secondary), GVAR(opened) select {!isNull (_x select 1)}, GVAR(nearby)] call EFUNC(storage,getLootSections);
 
-// What is locked to this player: its name and why, nothing of what it holds (einv_locks).
+// What is locked to this player: its name and why, nothing of what it holds (aio_locks).
 _lootSections = [_unit, _lootSections, GVAR(opened)] call EFUNC(locks,decorate);
 
 // Containers opened from inside one that is locked now have gone with their section. An entry whose
@@ -347,7 +347,7 @@ GVAR(opened) = GVAR(opened) select {
     isNull _object || {_lootSections findIf {(_x getOrDefault ["container", objNull]) isEqualTo _object} >= 0}
 };
 
-// ACE cargo: what is loaded into a vehicle or crate, right under it (einv_compat_ace_cargo).
+// ACE cargo: what is loaded into a vehicle or crate, right under it (aio_compat_ace_cargo).
 if (!isNil QEFUNC(compat_ace_cargo,getSections)) then {
     _lootSections = [_lootSections] call EFUNC(compat_ace_cargo,getSections);
 };
@@ -485,7 +485,7 @@ GVAR(signatureParts) = call FUNC(getSignature);
 
 if (_timed) then {_marks pushBack ["signature", diag_tickTime]};
 
-// A repack in progress shows on the tiles built just now (einv_magazines).
+// A repack in progress shows on the tiles built just now (aio_magazines).
 if (!isNil QEFUNC(magazines,drawJob)) then {
     [_display] call EFUNC(magazines,drawJob);
 };
@@ -498,7 +498,7 @@ if (_paletteOpen) then {
     [_display] call FUNC(openPaletteMenu);
 };
 
-// For the tester's numbers (einv_gui_debugTiming).
+// For the tester's numbers (aio_gui_debugTiming).
 if (_timed) then {
     private _took = ((diag_tickTime - _start) * 1000) toFixed 1;
     private _all = allControls _display;

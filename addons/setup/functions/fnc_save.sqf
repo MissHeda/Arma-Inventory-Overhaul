@@ -30,7 +30,7 @@
  * None
  *
  * Example:
- * [] call einv_setup_fnc_save;
+ * [] call aio_setup_fnc_save;
  *
  * Public: No
  */

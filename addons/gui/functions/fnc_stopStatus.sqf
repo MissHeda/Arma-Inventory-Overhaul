@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * [_crate, "search"] call einv_gui_fnc_stopStatus;
+ * [_crate, "search"] call aio_gui_fnc_stopStatus;
  *
  * Public: No
  */

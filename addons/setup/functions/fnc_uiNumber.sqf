@@ -26,7 +26,7 @@
  * The controls, the field last <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.05, 0.03], 100, [25, 400], _theme, {params ["_zoom"]}] call einv_setup_fnc_uiNumber;
+ * [_display, _group, [0, 0, 0.05, 0.03], 100, [25, 400], _theme, {params ["_zoom"]}] call aio_setup_fnc_uiNumber;
  *
  * Public: No
  */

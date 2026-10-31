@@ -11,7 +11,7 @@
  * The draft is the default <BOOL>
  *
  * Example:
- * call einv_setup_fnc_atDefault;
+ * call aio_setup_fnc_atDefault;
  *
  * Public: No
  */

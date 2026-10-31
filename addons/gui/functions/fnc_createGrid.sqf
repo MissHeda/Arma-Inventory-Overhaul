@@ -18,7 +18,7 @@
  * scrolling column would take the mouse wheel from it. The grid's corner sits on a pixel and a cell is
  * a whole number of them (fnc_getCell), so every edge of the grid falls on a pixel.
  *
- * A shaped compartment's holes (einv_items_fnc_parseGrid, "xxx/x-x") get no control at all: nothing
+ * A shaped compartment's holes (aio_items_fnc_parseGrid, "xxx/x-x") get no control at all: nothing
  * is drawn there and nothing there can be hovered. Their place in "cells" holds controlNull for good
  * (fnc_drawCells passes over them), so a cell is still found at row * cols + col, and whatever shows or
  * hides cells passes over a hole without a word.
@@ -67,7 +67,7 @@
  *               pixels (fnc_gridCorner); the window of a page changes "corner" (fnc_setWindow) <NUMBER>
  *
  * Example:
- * [_display, _group, [0, 0.05], 6, _theme, "vest"] call einv_gui_fnc_createGrid;
+ * [_display, _group, [0, 0.05], 6, _theme, "vest"] call aio_gui_fnc_createGrid;
  *
  * Public: No
  */

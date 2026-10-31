@@ -31,7 +31,7 @@
  * 0: Display <DISPLAY>
  * 1: Controls group to draw in, or controlNull for the display <CONTROL>
  * 2: Room [x, y, w, h] - h is how tall the doll may get, -1 for as tall as it needs <ARRAY>
- * 3: Equipment, see einv_storage_fnc_getEquipment <HASHMAP>
+ * 3: Equipment, see aio_storage_fnc_getEquipment <HASHMAP>
  * 4: Theme <HASHMAP>
  * 5: Compact - a body's doll in the loot column <BOOL> (default: false)
  * 6: Whose gear it is, so its slots can be taken off and put on <OBJECT> (default: objNull)
@@ -40,7 +40,7 @@
  * Height used, from the top of the room <NUMBER>
  *
  * Example:
- * [_display, controlNull, [0.1, 0.2, 0.4, 0.7], [player] call einv_storage_fnc_getEquipment, _theme] call einv_gui_fnc_drawEquipmentDoll;
+ * [_display, controlNull, [0.1, 0.2, 0.4, 0.7], [player] call aio_storage_fnc_getEquipment, _theme] call aio_gui_fnc_drawEquipmentDoll;
  *
  * Public: No
  */

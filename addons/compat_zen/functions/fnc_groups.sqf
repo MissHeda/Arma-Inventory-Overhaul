@@ -11,7 +11,7 @@
  * [[group, label], ...] <ARRAY>
  *
  * Example:
- * call einv_compat_zen_fnc_groups;
+ * call aio_compat_zen_fnc_groups;
  *
  * Public: No
  */

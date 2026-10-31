@@ -19,31 +19,31 @@
  *     while the value differs from what the draft would make of the class without its own rule for it
  *     (fnc_classDefault): a click takes that field back at once (fnc_resetField).
  *   - Under the picture a Use from row (fnc_drawUseRow): a chip each for the uniform, vest and backpack, on for the
- *     containers the item is whitelisted for (use=, einv_use) - it may be used from them even where the settings
- *     "Use items from ..." (einv_storage) close them - and a line of what those settings limit now. The working
+ *     containers the item is whitelisted for (use=, aio_use) - it may be used from them even where the settings
+ *     "Use items from ..." (aio_storage) close them - and a line of what those settings limit now. The working
  *     copy keeps the list as "useList"; Apply writes use=uniform+backpack (use=none for an emptied one).
  *   - Under it a Category row (fnc_drawCatRow): a chip each for the categories (the eight of ITEM_GROUPS and the draft's own), on for the ones the item is in
- *     (cats=, einv_cat, else the built-in one), at least one on; a reset button back to the built-in one. The working copy keeps
+ *     (cats=, aio_cat, else the built-in one), at least one on; a reset button back to the built-in one. The working copy keeps
  *     the list as "catsList"; Apply writes cats=medical+misc, and takes the class's own cats away when it is the built-in one again.
  *   - Under them the canvas (fnc_uiCanvas), SHAPE_MAX cells each way, always shown: a click makes a place
  *     one of the item's cells or takes it away, so an L or a T is drawn cell by cell. The steppers and the
  *     canvas are one: a stepper lays a rectangle of its size where the cells are - the places that were
  *     in their box keep what they were, the new ones become cells, the rest goes -, and the steppers say
  *     the box of what is drawn. Beside it how it looks as a tile (fnc_drawPreview, which draws the tile with
- *     the inventory's own routine, einv_gui_fnc_createTile, at the inventory's cell size where there is room),
+ *     the inventory's own routine, aio_gui_fnc_createTile, at the inventory's cell size where there is room),
  *     its size in words, and a warning while its cells are not one piece (fnc_canvasBlocks) - then Apply
  *     cannot be pressed.
  *   - Beside that tile its picture (fnc_drawIconBlock): a zoom stepper (25 to 400 %, 1 per click, 10 with
  *     Shift, with 50, 100, 150 and 200 % at one click) and two shift steppers, across and down (-100 to 100 % of
  *     the tile, the same steps), each with a small box to type the number in, with Reset back to the plain picture. The tile follows every click: it is drawn by the working copy, so what is
- *     seen is what Apply writes (icon=, einv_items_fnc_parseIcon). The inventory cuts a picture that would
+ *     seen is what Apply writes (icon=, aio_items_fnc_parseIcon). The inventory cuts a picture that would
  *     reach out of its tile at the tile's edge.
  *   - Apply writes what differs from now as class=X > size=WxH, or size=xx/x- for a shape
- *     (einv_items_fnc_formatMask), stack=N, weight=KG, name=..., picture=PATH, use=LIST and icon=ZOOM@ACROSS:DOWN (fnc_upsertRule) - the
+ *     (aio_items_fnc_formatMask), stack=N, weight=KG, name=..., picture=PATH, use=LIST and icon=ZOOM@ACROSS:DOWN (fnc_upsertRule) - the
  *     rest of that rule stays -, Discard drops the edits, Back to the default takes the class's own size, stack,
  *     weight, name, picture, use and icon away. A field emptied takes its own value away; Reset and Apply take a class's own
  *     icon away, or write the plain picture where the item's config draws it otherwise, and a class's own
- *     picture away, or write config's own picture path where the item's config (einv_picture) sets another.
+ *     picture away, or write config's own picture path where the item's config (aio_picture) sets another.
  *   - Picked in the tree view (fnc_editScope), the edit is for the class and every class built on it: a
  *     line says so, with how many, and Apply, Back to the default and Export work on the whole tree - one
  *     rule class=X+ instead of one per class. A chip returns to the class alone.
@@ -65,7 +65,7 @@
  * None
  *
  * Example:
- * [_display, _group, [0.3, 0, 0.4, 0.5], _theme] call einv_setup_fnc_drawItemEditor;
+ * [_display, _group, [0.3, 0, 0.4, 0.5], _theme] call aio_setup_fnc_drawItemEditor;
  *
  * Public: No
  */
@@ -87,7 +87,7 @@ ctrlDelete (uiNamespace getVariable [QGVAR(editor), controlNull]);
 
 _rect params ["", "", "_width", "_height"];
 
-private _box = [_display, "EINV_Group", _parent, _rect] call EFUNC(gui,uiCreate);
+private _box = [_display, "AIO_Group", _parent, _rect] call EFUNC(gui,uiCreate);
 
 uiNamespace setVariable [QGVAR(editor), _box];
 
@@ -140,15 +140,15 @@ private _startIcon = (_info getOrDefault ["icon", ICON_PLAIN]) apply {round (_x 
 // Whether a rule of the class's own (or the tree's) draws it, which Apply may then take away.
 private _ownIcon = "icon" in _own || {_tree && {"icon" in (_treeRules getOrDefault [_lc, createHashMap])}};
 
-// The picture it shows instead of config's (picture=, or the item's own einv_picture): the path, "" for none.
+// The picture it shows instead of config's (picture=, or the item's own aio_picture): the path, "" for none.
 private _startPicture = _info getOrDefault ["pictureOverride", ""];
 private _configPicture = _info getOrDefault ["configPicture", ""];
 private _ownPicture = "picture" in _own || {_tree && {"picture" in (_treeRules getOrDefault [_lc, createHashMap])}};
 
-// The containers it may be used from where a setting closes them (use=, einv_use): any of uniform, vest, backpack.
+// The containers it may be used from where a setting closes them (use=, aio_use): any of uniform, vest, backpack.
 private _startUse = _info getOrDefault ["use", []];
 
-// The categories it is in now (cats=, einv_cat, else the built-in one): any category of the draft.
+// The categories it is in now (cats=, aio_cat, else the built-in one): any category of the draft.
 private _startGroups = _info getOrDefault ["groups", ["misc"]];
 private _canvas = GVAR(itemWork) getOrDefault [_lc, createHashMap];
 
@@ -186,7 +186,7 @@ private _dirty = _blocks isNotEqualTo (_canvas getOrDefault ["start", []]) || {_
 
 private _picH = UNIT * 2.2;
 private _picW = SQUARE(_picH * 2);
-// A placeholder word or a missing file in the class's config is no picture (einv_gui_fnc_safePicture).
+// A placeholder word or a missing file in the class's config is no picture (aio_gui_fnc_safePicture).
 private _picture = [_info getOrDefault ["picture", ""]] call EFUNC(gui,safePicture);
 
 if (_picture isNotEqualTo "") then {
@@ -212,7 +212,7 @@ private _family = _row param [ROW_FAMILY, ""];
 private _about = format ["%1 · %2", _class, _row param [ROW_MOD, _info getOrDefault ["addon", ""]]];
 
 if (_family isNotEqualTo "") then {
-    _about = format ["%1 · %2 · %3", _class, localize format ["STR_einv_setup_Family_%1", _family], _row select ROW_MOD];
+    _about = format ["%1 · %2 · %3", _class, localize format ["STR_aio_setup_Family_%1", _family], _row select ROW_MOD];
 };
 
 [
@@ -703,7 +703,7 @@ private _buttonX = _innerX;
     };
 
     // The picture (icon=), in per cent: only what differs from now. Back to the plain one takes the class's own
-    // icon away when nothing below it draws the picture otherwise (the item's own config, einv_icon); else the
+    // icon away when nothing below it draws the picture otherwise (the item's own config, aio_icon); else the
     // plain picture is written, to win over that.
     private _icon = _canvas getOrDefault ["iconPercent", _startIcon];
 
@@ -718,7 +718,7 @@ private _buttonX = _innerX;
     };
 
     // The picture (picture=): only what differs from now. Reset takes the class's own away; where the item's config
-    // sets another (einv_picture) that would win again, config's own picture path is written to win over it.
+    // sets another (aio_picture) that would win again, config's own picture path is written to win over it.
     private _picture = _canvas getOrDefault ["pictureText", _startPicture];
 
     if (_picture isNotEqualTo _startPicture) then {

@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Takes out of a unit's uniform, vest and backpack everything that lies on no cell (fnc_findOverflow): entry
- * after entry through the storage (einv_storage_fnc_removeEntry), the layout read again after each, as taking
+ * after entry through the storage (aio_storage_fnc_removeEntry), the layout read again after each, as taking
  * a weapon out puts its siblings back as new objects. What leaves is the same as what "Remove" in the panel's
  * menu takes out (fnc_remove), and ACE hears of it the same way (fnc_tellAce) while its window is still open,
  * which keeps its counts, load bar and greyed rows right.
@@ -17,7 +17,7 @@
  * What was taken out, class -> count <HASHMAP>
  *
  * Example:
- * [player] call einv_arsenal_fnc_dropOverflow;
+ * [player] call aio_arsenal_fnc_dropOverflow;
  *
  * Public: No
  */
@@ -52,7 +52,7 @@ if (isNull _unit || {!local _unit}) exitWith {_gone};
     };
 } forEach ([_unit] call EFUNC(storage,getSections));
 
-// Kits taken away for good: their instances back to that mod's pool (einv_compat_efak_fnc_arsenalFree).
+// Kits taken away for good: their instances back to that mod's pool (aio_compat_efak_fnc_arsenalFree).
 if (count _gone > 0 && {!isNil QEFUNC(compat_efak,arsenalFree)}) then {
     [keys _gone, [uniformContainer _unit, vestContainer _unit, backpackContainer _unit, GVAR(staging)]] call EFUNC(compat_efak,arsenalFree);
 };

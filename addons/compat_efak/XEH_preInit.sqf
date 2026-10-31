@@ -4,7 +4,7 @@ ADDON = false;
 
 #include "XEH_PREP.hpp"
 
-// Kits open in windows of their own inside the inventory (einv_gui_fnc_drawWindows), by class, in the
+// Kits open in windows of their own inside the inventory (aio_gui_fnc_drawWindows), by class, in the
 // order they were opened (fnc_open). Emptied whenever the window opens anew (fnc_onWindowOpen).
 GVAR(opened) = [];
 
@@ -44,8 +44,8 @@ EGVAR(storage,ops) set ["kitRemoveIfEmpty", QFUNC(opKitRemoveIfEmpty)];
 // A kit as a holder of the storage, "kit:" + its lowercase class: what it holds, the compartments of its
 // grid (none - an open grid that grows - while that mod's capacity is its room, fnc_kitBlocks), its root
 // and whether it still lies under that root, and which of its ops take, put, place and move - settlement
-// puts a payload back into a kit with its "put" op (einv_storage_fnc_settle), and the window builds a
-// kit's phases from them (einv_gui_fnc_sendMoves) without naming an op of this addon. fnc_getEntries
+// puts a payload back into a kit with its "put" op (aio_storage_fnc_settle), and the window builds a
+// kit's phases from them (aio_gui_fnc_sendMoves) without naming an op of this addon. fnc_getEntries
 // takes the class: that mod keeps its tables by the lowercase class, so the one in the key reads the same
 // kit.
 EGVAR(storage,holderTypes) set ["kit", createHashMapFromArray [

@@ -1,5 +1,5 @@
-// The preset a rules text builds on: "base=default" in its first statement (einv_items_rules,
-// einv_items_fnc_compileRules). A preset is a list of statements in the same language as the text,
+// The preset a rules text builds on: "base=default" in its first statement (aio_items_rules,
+// aio_items_fnc_compileRules). A preset is a list of statements in the same language as the text,
 // one statement per element and no commas in it. Its own base is read first and the preset's rules
 // come after it, so they win - up to MAX_CHAIN presets deep.
 //
@@ -7,7 +7,7 @@
 //   revision          - shown only; base= always means the preset as installed
 //   base              - the preset it builds on, "" for none
 //   cell              - config mass per grid cell, -1 to leave it to its base or to the slider
-//                       einv_items_massPerCell. cell= in a text's own header beats it.
+//                       aio_items_massPerCell. cell= in a text's own header beats it.
 //   rules[]           - its statements
 //   class Groups      - a label, a family (its filter chip), an example class for the row's picture
 //                       and overlay = 1 for a group that overlaps the others on purpose (its rules
@@ -19,13 +19,13 @@
 // as this one (PRESET_ALIASES, fnc_parseRules), so a saved setup that names one still loads. Other mods may
 // add presets of their own as classes here, for a text that names them in base=. Only the case of a class
 // name is free: the config finds a class whatever its case, and the ids are read lowercased.
-class CfgEinvRulesets {
+class CfgAioRulesets {
     // The default, the one preset: the sizes a rig and a rifle really take, and nothing stacks but what
     // is listed by class (the last groups, @stack_*, and the rules after them for the medical items of
     // ACE, ACM, ACME and Enhanced First Aid Kits, with their own sizes). A rifle is a column longer than it was before presets went, a
     // backpack's tile as large as its room. No rule here sets a container's grid: a uniform, vest or
     // backpack with no rule, mod or setting of its own gets what the built-in answer makes of its load
-    // (einv_storage_fnc_blocksFor), so the kind settings of the setup wizard's General page - the text's
+    // (aio_storage_fnc_blocksFor), so the kind settings of the setup wizard's General page - the text's
     // rules with "all" - decide for every container no class rule or mod answers. The groups are a
     // partition: an item is in at most one of them (but medical and the stack groups, which are only
     // handles), so that a rule for one of them never reaches into another. The magazine groups leave
@@ -129,7 +129,7 @@ class CfgEinvRulesets {
             // name with a plus is the class and every class built on it ("all types"). A stack above 1 on a class the game
             // treats as a magazine (ACM_Paracetamol, ACM_AmmoniaInhalant, ACM_Inhaler_Penthrox, ACM_Syringe_10 and its types,
             // ACM_OxygenTank_425) is all it takes to let it share a tile: only magazines with the same rounds meet. The stacks
-            // are for worn containers; a crate, a vehicle or a pile on the ground multiplies them (einv_storage_stackMultiplier).
+            // are for worn containers; a crate, a vehicle or a pile on the ground multiplies them (aio_storage_stackMultiplier).
             // Every vial (ACM_Vial_*, ACME_Vial_*, ACME_MannitolVial) by a part of its class name, so a vial added
             // later is covered too: five to a tile.
             "class~ACM_Vial_|ACME_Vial_|ACME_MannitolVial > size=1x1 stack=5",

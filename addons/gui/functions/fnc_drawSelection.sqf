@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_drawSelection;
+ * call aio_gui_fnc_drawSelection;
  *
  * Public: No
  */

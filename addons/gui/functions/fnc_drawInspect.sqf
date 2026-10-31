@@ -6,7 +6,7 @@
  * on a weapon drawn onto it -, its name in its category's colour, its description and its figures:
  * weight, size, count, rounds, whether it stacks, its category, the mod it comes from
  * and its class name. A kit of Enhanced First Aid Kits also how full it is and what is in it
- * (einv_compat_efak), a radio its channel, frequency and state (einv_compat_tfar, einv_compat_acre -
+ * (aio_compat_efak), a radio its channel, frequency and state (aio_compat_tfar, aio_compat_acre -
  * whichever mod is loaded). A window that attached (fnc_attach) adds rows of its own before the mod's name (the
  * "inspectRows" hook) - a text, or a text beside a small bar. Everything lies in one controls group, so the card moves as one: by its title
  * (fnc_onFrame follows the mouse while it is held), and it closes with the cross in its corner.
@@ -23,7 +23,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_drawInspect;
+ * call aio_gui_fnc_drawInspect;
  *
  * Public: No
  */
@@ -69,7 +69,7 @@ private _fnc_kg = {
 
 private _rows = [];
 
-// A kit of Enhanced First Aid Kits weighs what it holds as well (einv_compat_efak, when loaded).
+// A kit of Enhanced First Aid Kits weighs what it holds as well (aio_compat_efak, when loaded).
 private _kitMass = if (isNil QEFUNC(compat_efak,getMass)) then {-1} else {[_class] call EFUNC(compat_efak,getMass)};
 private _mass = if (_kitMass >= 0) then {
     _kitMass * _count
@@ -116,7 +116,7 @@ private _attachedLabel = LLSTRING(Inspect_Attached);
     };
 } forEach (_attachments select [1]);
 
-// A kit: how full it is and what it holds (einv_compat_efak, when loaded).
+// A kit: how full it is and what it holds (aio_compat_efak, when loaded).
 if (!isNil QEFUNC(compat_efak,inspectRows)) then {
     _rows append ([_class] call EFUNC(compat_efak,inspectRows));
 };
@@ -171,7 +171,7 @@ private _descText = parseText format [
 private _descH = 0;
 
 if (_description isNotEqualTo "") then {
-    private _probe = [_display, "EINV_StructuredText", controlNull, [0, 0, _innerW, UNIT]] call FUNC(uiCreate);
+    private _probe = [_display, "AIO_StructuredText", controlNull, [0, 0, _innerW, UNIT]] call FUNC(uiCreate);
     _probe ctrlSetStructuredText _descText;
     _descH = (ctrlTextHeight _probe) min (_textUnit * 6);
     ctrlDelete _probe;
@@ -187,7 +187,7 @@ GVAR(inspectPos) params [["_left", safezoneX + (safezoneW - _width) / 2], ["_top
 _left = (_left max safezoneX) min (safezoneX + safezoneW - _width);
 _top = (_top max safezoneY) min ((safezoneY + safezoneH - _height) max safezoneY);
 
-private _group = [_display, "EINV_Group", controlNull, [_left, _top, _width, _height]] call FUNC(uiCreate);
+private _group = [_display, "AIO_Group", controlNull, [_left, _top, _width, _height]] call FUNC(uiCreate);
 
 uiNamespace setVariable [QGVAR(inspectGroup), _group];
 uiNamespace setVariable [QGVAR(inspectRect), [_left, _top, _width, _height]];
@@ -218,7 +218,7 @@ private _titleW = _innerW - SQUARE(_textUnit * 0.35) - _closeW;
     _textUnit * 0.8, _colorText, _fontBold, 0, "name"
 ] call FUNC(uiLabel);
 
-private _grip = [_display, "EINV_Hitbox", _group, [0, 0, _width - _padX - _closeW, _cursor + _titleH]] call FUNC(uiCreate);
+private _grip = [_display, "AIO_Hitbox", _group, [0, 0, _width - _padX - _closeW, _cursor + _titleH]] call FUNC(uiCreate);
 [_grip, LLSTRING(Inspect_Move)] call FUNC(setTooltip);
 _grip ctrlAddEventHandler ["MouseButtonDown", {
     params ["_ctrl", "_button"];
@@ -255,7 +255,7 @@ if (_attachments isNotEqualTo []) then {
 _cursor = _cursor + _pictureH + _gap;
 
 if (_descH > 0) then {
-    private _desc = [_display, "EINV_StructuredText", _group, [_padX, _cursor, _innerW, _descH]] call FUNC(uiCreate);
+    private _desc = [_display, "AIO_StructuredText", _group, [_padX, _cursor, _innerW, _descH]] call FUNC(uiCreate);
     _desc ctrlSetStructuredText _descText;
 
     _cursor = _cursor + _descH + _gap;

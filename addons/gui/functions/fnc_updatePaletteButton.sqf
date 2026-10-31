@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * [] call einv_gui_fnc_updatePaletteButton;
+ * [] call aio_gui_fnc_updatePaletteButton;
  *
  * Public: No
  */
@@ -32,8 +32,8 @@ private _open = (uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [] && {
 // The accent line under the button shows while the popover is open.
 {_x ctrlShow _open} forEach (uiNamespace getVariable [QGVAR(paletteLine), []]);
 
-private _rects = _controls select {ctrlClassName _x isEqualTo "EINV_PanelRect"};
-private _corners = _controls select {ctrlClassName _x isEqualTo "EINV_PanelCorner"};
+private _rects = _controls select {ctrlClassName _x isEqualTo "AIO_PanelRect"};
+private _corners = _controls select {ctrlClassName _x isEqualTo "AIO_PanelCorner"};
 
 // A surface in the gradient (fnc_gradientSurface) keeps its pieces' colours: the fill is the same open or closed.
 if ((((_controls select -1) getVariable [QGVAR(graded), [[]]]) select 0) isEqualTo []) then {
@@ -43,4 +43,4 @@ if ((((_controls select -1) getVariable [QGVAR(graded), [[]]]) select 0) isEqual
     (_controls select -1) setVariable [QGVAR(surface), [_rects, _corners, _fill, _hover]];
 };
 
-{_x ctrlSetTextColor _ink} forEach (_controls select {ctrlClassName _x isEqualTo "EINV_Icon"});
+{_x ctrlSetTextColor _ink} forEach (_controls select {ctrlClassName _x isEqualTo "AIO_Icon"});

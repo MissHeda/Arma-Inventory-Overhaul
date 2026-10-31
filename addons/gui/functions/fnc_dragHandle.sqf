@@ -49,7 +49,7 @@
  * None
  *
  * Example:
- * [_display, _card, [0, 0, 0.3, 0.04], "picker", [0.004, 0.004, 0.292, 0.032]] call einv_gui_fnc_dragHandle;
+ * [_display, _card, [0, 0, 0.3, 0.04], "picker", [0.004, 0.004, 0.292, 0.032]] call aio_gui_fnc_dragHandle;
  *
  * Public: No
  */
@@ -233,11 +233,11 @@ if (isNull _parent) then {
 private _film = controlNull;
 
 if (_filmRect isNotEqualTo []) then {
-    _film = [_display, "EINV_PanelRect", _parent, _filmRect] call FUNC(uiCreate);
+    _film = [_display, "AIO_PanelRect", _parent, _filmRect] call FUNC(uiCreate);
     _film ctrlSetBackgroundColor FILM_OFF;
 };
 
-private _handle = [_display, "EINV_Hitbox", _parent, _rect] call FUNC(uiCreate);
+private _handle = [_display, "AIO_Hitbox", _parent, _rect] call FUNC(uiCreate);
 
 _handle setVariable [QGVAR(drag), [_window, _kind, _film]];
 

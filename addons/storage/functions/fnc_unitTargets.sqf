@@ -19,7 +19,7 @@
  * Containers, the first to try first <ARRAY of OBJECTs>
  *
  * Example:
- * [player, "30Rnd_65x39_caseless_mag"] call einv_storage_fnc_unitTargets;
+ * [player, "30Rnd_65x39_caseless_mag"] call aio_storage_fnc_unitTargets;
  *
  * Public: No
  */

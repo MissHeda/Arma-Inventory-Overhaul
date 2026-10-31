@@ -18,7 +18,7 @@
  * Each number of a colour is 0 to 1 (fnc_hsv; saturation 0 is grey or white, value 0 black). Which theme key follows which entry is
  * the table at the top of fnc_theme. Where the server switched the palette off (fnc_paletteAllowed), all of them come back unset
  * (PALETTE_UNSET), whatever the player has saved: the profile's accent and the themes' own colours. The choices are kept in
- * einv_gui_palette - read from the profile once in XEH_preInit (a palette saved before the last four rows existed reads them as
+ * aio_gui_palette - read from the profile once in XEH_preInit (a palette saved before the last four rows existed reads them as
  * unset, and so does one from before the tile transparency), written back when the palette closes (fnc_paletteSettle).
  *
  * Arguments:
@@ -28,12 +28,12 @@
  * [accent, secondary, alpha, panel, cells, tiles, text, lines, tileAlpha] <ARRAY>
  *
  * Example:
- * ([] call einv_gui_fnc_palette) params ["_accent", "_secondary", "_alpha", "_panel", "_cells", "_tiles", "_text", "_lines", "_tileAlpha"];
+ * ([] call aio_gui_fnc_palette) params ["_accent", "_secondary", "_alpha", "_panel", "_cells", "_tiles", "_text", "_lines", "_tileAlpha"];
  *
  * Public: No
  */
 
-// The colours a server or mission forces (einv_gui_paletteText): everyone wears those.
+// The colours a server or mission forces (aio_gui_paletteText): everyone wears those.
 if ([] call FUNC(paletteForced)) exitWith {
     private _forced = [parseSimpleArray (missionNamespace getVariable [QGVAR(paletteText), ""])] call FUNC(paletteRead);
 

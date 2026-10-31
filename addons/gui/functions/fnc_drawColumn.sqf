@@ -34,19 +34,19 @@
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Position [x, y, w, h] on the screen <ARRAY>
- * 2: Sections, see einv_storage_fnc_getSections <ARRAY>
+ * 2: Sections, see aio_storage_fnc_getSections <ARRAY>
  * 3: Theme <HASHMAP>
  * 4: Title, "" for no title row <STRING> (default: "")
  * 5: Title icon, "" for none <STRING> (default: "")
  * 6: Drawer, called as [display, group, y, width, section, theme] and returning the height it used -
- *    code, or a function's name <CODE or STRING> (default: einv_gui_fnc_drawSection)
+ *    code, or a function's name <CODE or STRING> (default: aio_gui_fnc_drawSection)
  * 7: Id, "storage" or "loot" <STRING> (default: "")
  *
  * Return Value:
  * The scrolling group <CONTROL>
  *
  * Example:
- * [_display, [0.3, 0.1, 0.3, 0.8], _context get "ownSections", _theme, "Storage", "", "einv_gui_fnc_drawSection", "storage"] call einv_gui_fnc_drawColumn;
+ * [_display, [0.3, 0.1, 0.3, 0.8], _context get "ownSections", _theme, "Storage", "", "aio_gui_fnc_drawSection", "storage"] call aio_gui_fnc_drawColumn;
  *
  * Public: No
  */
@@ -157,7 +157,7 @@ if (!_reuse) then {
         _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
     ] call FUNC(uiPanel);
 
-    _paint set [0, _panelParts select {ctrlClassName _x in ["EINV_PanelRect", "EINV_PanelCorner"]}];
+    _paint set [0, _panelParts select {ctrlClassName _x in ["AIO_PanelRect", "AIO_PanelCorner"]}];
 
     if (_panelColor isNotEqualTo []) then {
         [_display, controlNull, _rect, _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
@@ -190,7 +190,7 @@ if (_title isNotEqualTo "") then {
 
         // A hairline under the title, like the header's - the loot column's is its accent strip, two pixels in its colour.
         private _lineH = pixelH;
-        private _line = [_display, "EINV_PanelRect", controlNull, [_left + _padX, _innerTop + _titleH + _padY * 0.4, _width - _padX * 2, _lineH]] call FUNC(uiCreate);
+        private _line = [_display, "AIO_PanelRect", controlNull, [_left + _padX, _innerTop + _titleH + _padY * 0.4, _width - _padX * 2, _lineH]] call FUNC(uiCreate);
         _line ctrlSetBackgroundColor _lineColor;
         _paint set [1, _line];
     };
@@ -226,7 +226,7 @@ if (_reuse) then {
     // What it holds now goes once the new sections are in: a group never stands empty between the two.
     _old = (allControls _group) select {ctrlParentControlsGroup _x isEqualTo _group};
 } else {
-    _group = [_display, "EINV_ScrollGroup", controlNull, _groupRect] call FUNC(uiCreate);
+    _group = [_display, "AIO_ScrollGroup", controlNull, _groupRect] call FUNC(uiCreate);
 };
 
 // Known to the drawers from the start (fnc_drawSection reads the side from it).
@@ -260,7 +260,7 @@ private _contentH = (_cursor - _gap) max 0;
 // A clear speck at the very bottom: the engine scrolls as far as the lowest control reaches, and this
 // makes that exactly the height stored here - a grid's last cell ends a pixel short of it.
 if (_contentH > 0) then {
-    private _end = [_display, "EINV_PanelRect", _group, [0, _contentH - pixelH, pixelW, pixelH]] call FUNC(uiCreate);
+    private _end = [_display, "AIO_PanelRect", _group, [0, _contentH - pixelH, pixelW, pixelH]] call FUNC(uiCreate);
     _end ctrlSetBackgroundColor [0, 0, 0, 0];
 };
 

@@ -7,14 +7,14 @@
  *
  * Arguments:
  * 0: Theme <HASHMAP>
- * 1: The item's info (einv_items_fnc_getInfo) <HASHMAP>
+ * 1: The item's info (aio_items_fnc_getInfo) <HASHMAP>
  * 2: Fallback <ARRAY> (default: [1, 1, 1, 0.075])
  *
  * Return Value:
  * Colour [r, g, b, a] <ARRAY>
  *
  * Example:
- * [_theme, _info] call einv_gui_fnc_tileColour;
+ * [_theme, _info] call aio_gui_fnc_tileColour;
  *
  * Public: No
  */

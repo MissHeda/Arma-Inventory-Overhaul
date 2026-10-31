@@ -18,7 +18,7 @@
  * Meets them all - false too when a condition cannot be compiled <BOOL>
  *
  * Example:
- * [["arifle_MX_F"] call einv_items_fnc_getFacts, [[false, "kind", "=", ["rifle"]]], call einv_items_fnc_currentRules] call einv_items_fnc_matches;
+ * [["arifle_MX_F"] call aio_items_fnc_getFacts, [[false, "kind", "=", ["rifle"]]], call aio_items_fnc_currentRules] call aio_items_fnc_matches;
  *
  * Public: No
  */

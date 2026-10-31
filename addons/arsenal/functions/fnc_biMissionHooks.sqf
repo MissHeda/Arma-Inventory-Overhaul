@@ -7,7 +7,7 @@
  *
  * Handlers a mission adds before the first frame after postInit (an object's init field, a function of its
  * own that runs at preInit) are counted as the mods'; a mission like that says so itself with
- * einv_arsenal_biPassThrough.
+ * aio_arsenal_biPassThrough.
  *
  * Arguments:
  * None
@@ -16,7 +16,7 @@
  * The mission hooks the vanilla arsenal <BOOL>
  *
  * Example:
- * call einv_arsenal_fnc_biMissionHooks;
+ * call aio_arsenal_fnc_biMissionHooks;
  *
  * Public: No
  */

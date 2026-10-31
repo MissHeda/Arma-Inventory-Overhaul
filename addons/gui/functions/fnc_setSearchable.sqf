@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Turns the search off for a single object, or gives it back to the settings: a crate, a vehicle, a body or a
  * living person whose loot shows at once, without the "?" tiles (fnc_isSearched). The mark is the object variable
- * einv_noSearch, set public so a player who joins later has it too - the call may come from any machine, a mission's
+ * aio_noSearch, set public so a player who joins later has it too - the call may come from any machine, a mission's
  * init, a trigger or a Zeus module alike.
  *
  * It is an override in one direction only: true gives the object back to the settings (Search crates and vehicles,
@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [_supplyCrate, false] call einv_gui_fnc_setSearchable;
+ * [_supplyCrate, false] call aio_gui_fnc_setSearchable;
  *
  * Public: Yes
  */

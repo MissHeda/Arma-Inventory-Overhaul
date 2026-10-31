@@ -17,7 +17,7 @@
  * [value, priority] <ARRAY>
  *
  * Example:
- * call einv_setup_fnc_targetValue;
+ * call aio_setup_fnc_targetValue;
  *
  * Public: No
  */

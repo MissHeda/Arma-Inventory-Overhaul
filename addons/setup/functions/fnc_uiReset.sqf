@@ -19,7 +19,7 @@
  * The controls, the hit area last <ARRAY>
  *
  * Example:
- * [_display, _group, [0.4, 0.1, 0.03, 0.03], _theme, {["einv_gui_searchTime"] call einv_setup_fnc_setSetting}] call einv_setup_fnc_uiReset;
+ * [_display, _group, [0.4, 0.1, 0.03, 0.03], _theme, {["aio_gui_searchTime"] call aio_setup_fnc_setSetting}] call aio_setup_fnc_uiReset;
  *
  * Public: No
  */

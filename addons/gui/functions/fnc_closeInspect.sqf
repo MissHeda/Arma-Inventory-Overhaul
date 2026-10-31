@@ -12,7 +12,7 @@
  * A card was open <BOOL>
  *
  * Example:
- * call einv_gui_fnc_closeInspect;
+ * call aio_gui_fnc_closeInspect;
  *
  * Public: No
  */

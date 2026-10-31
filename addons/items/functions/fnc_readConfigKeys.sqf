@@ -2,31 +2,31 @@
 /*
  * Author: Miss Heda
  * Reads what an item's own config says about its size, stack, container grid, weight, name and how its
- * picture is drawn: the keys einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture, einv_use and einv_cat
+ * picture is drawn: the keys aio_size, aio_stack, aio_grid, aio_weight, aio_name, aio_icon, aio_picture, aio_use and aio_cat
  * (CONFIG_KEYS). A value is written the way the rules text writes the same thing, so a mod author
  * learns one language:
  *
- *   einv_size = "2x1";                   size=  - WxH, a mask like "xx/x-", or "mass" (fnc_parseRules)
- *   einv_stack = 10;                     stack= - a whole number, 1 to MAX_STACK
- *   einv_grid = "1x3+5x7+1x3";           grid=  - anything fnc_parseGrid reads: "auto", "24", "120%", a
+ *   aio_size = "2x1";                   size=  - WxH, a mask like "xx/x-", or "mass" (fnc_parseRules)
+ *   aio_stack = 10;                     stack= - a whole number, 1 to MAX_STACK
+ *   aio_grid = "1x3+5x7+1x3";           grid=  - anything fnc_parseGrid reads: "auto", "24", "120%", a
  *                                        pattern, compartments, shapes, a canvas. A plain number in
- *                                        config, einv_grid = 24, is read as the string "24".
- *   einv_weight = 0.5;                   weight= - kilograms, 0 to MAX_WEIGHT, rounded to the gram
- *   einv_name = "Short name";            name=  - the name as it shows: plain text, a space is a
+ *                                        config, aio_grid = 24, is read as the string "24".
+ *   aio_weight = 0.5;                   weight= - kilograms, 0 to MAX_WEIGHT, rounded to the gram
+ *   aio_name = "Short name";            name=  - the name as it shows: plain text, a space is a
  *                                        space (the rules text writes it with _), at most MAX_NAME
  *                                        characters
- *   einv_picture = "a3\ui_f\x_ca.paa";  picture= - the texture to show instead of config's picture;
+ *   aio_picture = "a3\ui_f\x_ca.paa";  picture= - the texture to show instead of config's picture;
  *                                        backslashes or slashes, spaces as they are (fnc_parsePicture)
- *   einv_use = "backpack,vest";         use=   - the containers it may be used from where a setting limits
+ *   aio_use = "backpack,vest";         use=   - the containers it may be used from where a setting limits
  *                                        what can be used there: uniform, vest, backpack, all or none, joined
  *                                        with a comma, a plus or a bar (fnc_parseUse); "" takes an inherited
  *                                        value back, so "none" says no container
- *   einv_cat = "medical,misc";          cats=  - the categories it is in instead of the built-in one: weapon, ammo,
+ *   aio_cat = "medical,misc";          cats=  - the categories it is in instead of the built-in one: weapon, ammo,
  *                                        grenade, gear, medical, food, tool, misc, joined with a comma, a plus
  *                                        or a bar (fnc_parseGroups); "" takes an inherited value back
- *   einv_icon = "1.4@0.1,-0.05";         icon=  - how large the picture is drawn in its tile (0.25 to 4) and
+ *   aio_icon = "1.4@0.1,-0.05";         icon=  - how large the picture is drawn in its tile (0.25 to 4) and
  *                                        moved across and down by a share of the tile (-1 to 1); a plain
- *                                        number, einv_icon = 1.4;, is the scale alone (fnc_parseIcon)
+ *                                        number, aio_icon = 1.4;, is the scale alone (fnc_parseIcon)
  *
  * Spaces in a size or grid do not matter ("1x3 + 5x7" is "1x3+5x7"). An empty value says nothing,
  * which is how a subclass takes back what it inherited. A value that cannot be read, or is past a
@@ -36,21 +36,21 @@
  * Shared by fnc_getFacts (the item's own config) and fnc_parseConfigEntry (a pasted snippet).
  *
  * Arguments:
- * 0: What was found: key in lowercase (einv_grid, ...) -> STRING or NUMBER, as config gives it <HASHMAP>
+ * 0: What was found: key in lowercase (aio_grid, ...) -> STRING or NUMBER, as config gives it <HASHMAP>
  *
  * Return Value:
  * [canonical, compiled, messages] <ARRAY>
  *   canonical - the values that could be read, as the rules write them, by config key:
- *               "einv_size" "2x1" / "xx/x-" / "mass", "einv_stack" <NUMBER>, "einv_grid" as
- *               fnc_formatGrid writes it, "einv_weight" kg <NUMBER>, "einv_name" <STRING>, "einv_icon"
- *               [scale, across, down] <ARRAY>, "einv_picture" <STRING>, "einv_use" [containers] <ARRAY>, "einv_cat" [categories] <ARRAY> <HASHMAP>
+ *               "aio_size" "2x1" / "xx/x-" / "mass", "aio_stack" <NUMBER>, "aio_grid" as
+ *               fnc_formatGrid writes it, "aio_weight" kg <NUMBER>, "aio_name" <STRING>, "aio_icon"
+ *               [scale, across, down] <ARRAY>, "aio_picture" <STRING>, "aio_use" [containers] <ARRAY>, "aio_cat" [categories] <ARRAY> <HASHMAP>
  *   compiled  - the same for fnc_resolve, by field: "size" [w, h, holes] or "mass", "stack" <NUMBER>,
  *               "grid" spec (fnc_parseGrid), "weight" kg <NUMBER>, "name" <STRING>, "icon" [scale,
  *               across, down] <ARRAY>, "picture" <STRING>, "use" [containers] <ARRAY>, "cats" [categories] <ARRAY> <HASHMAP>
  *   messages  - what was left out or cut down, and why <ARRAY of STRING>
  *
  * Example:
- * [createHashMapFromArray [["einv_grid", "1x3 + 5x7"], ["einv_stack", 4]]] call einv_items_fnc_readConfigKeys;
+ * [createHashMapFromArray [["aio_grid", "1x3 + 5x7"], ["aio_stack", 4]]] call aio_items_fnc_readConfigKeys;
  *
  * Public: No
  */
@@ -163,7 +163,7 @@ if (_stack isNotEqualTo "") then {
 
 private _grid = _found getOrDefault [QGVARMAIN(grid), ""];
 
-// einv_grid = 24; is a number of cells, the same as "24".
+// aio_grid = 24; is a number of cells, the same as "24".
 if (_grid isEqualType 0) then {
     _grid = if (finite _grid) then {str (((floor _grid) max 0) min MAX_CELLS)} else {""};
 };

@@ -16,7 +16,7 @@
  * There was a window to close <BOOL>
  *
  * Example:
- * ["the close button"] call einv_gui_fnc_closeDisplay;
+ * ["the close button"] call aio_gui_fnc_closeDisplay;
  *
  * Public: No
  */

@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Reads a rules text - the setting einv_items_rules, a preset's statements or a pasted setup - into
+ * Reads a rules text - the setting aio_items_rules, a preset's statements or a pasted setup - into
  * its parts. What they mean (which groups exist, which preset is there) is fnc_compileRules' job; this
  * only reads, and leaves out what it cannot read with a warning that names it, so one typo never costs
  * the rest.
@@ -9,9 +9,9 @@
  * Statements are separated by commas; line breaks count as commas too. The writer (fnc_writeRules)
  * only ever uses ", ".
  *
- *   einv1 base=default cell=5             the header, read only as the first statement: the preset to
+ *   aio1 base=default cell=5             the header, read only as the first statement: the preset to
  *                                         build on (base=none for none) and the config mass per grid
- *                                         cell. Without one, the text reads as einv1 base=default.
+ *                                         cell. Without one, the text reads as aio1 base=default.
  *                                         A renamed preset's old id reads as the new one
  *                                         (PRESET_ALIASES: base=tarkov, realism and weight are base=default).
  *   category=bandit > name=Bandit_loot picture=/a3/ui_f/data/gui/cfg/hints/gear_ca.paa
@@ -101,7 +101,7 @@
  * Return Value:
  * The text's parts <HASHMAP>
  *   "version"  - the header's number <NUMBER>
- *   "base"     - the preset it builds on: "default", "none" or a CfgEinvRulesets class, lowercase
+ *   "base"     - the preset it builds on: "default", "none" or a CfgAioRulesets class, lowercase
  *                <STRING>
  *   "cell"     - config mass per grid cell, -1 when the header sets none <NUMBER>
  *   "categories" - [[id, name, picture], ...] in text order, ids lowercase; name and picture "" where the text sets none <ARRAY>
@@ -119,7 +119,7 @@
  * order of fnc_orderGroups <ARRAY of STRING> - see fnc_parseGroups).
  *
  * Example:
- * ["einv1 base=default, kind=grenade > stack=3"] call einv_items_fnc_parseRules;
+ * ["aio1 base=default, kind=grenade > stack=3"] call aio_items_fnc_parseRules;
  *
  * Public: Yes
  */
@@ -635,10 +635,13 @@ private _fnc_cond = {
 private _fnc_header = {
     params ["_tokens"];
 
-    _version = (parseNumber ((toLowerANSI (_tokens select 0)) select [4])) max 1;
+    // aio1, or einv1 as texts were headed before the mod's prefix was renamed.
+    private _word = toLowerANSI (_tokens select 0);
+
+    _version = (parseNumber (_word select [[3, 4] select ((_word select [0, 4]) isEqualTo "einv")])) max 1;
 
     if (_version > 1) then {
-        _warnings pushBack format ["The text was written for a newer version (einv%1) - read as far as this one understands it.", _version];
+        _warnings pushBack format ["The text was written for a newer version (aio%1) - read as far as this one understands it.", _version];
     };
 
     {
@@ -659,7 +662,7 @@ private _fnc_header = {
                     // A preset renamed since the text was written: built on the new one, said once in
                     // the RPT - the wizard writes the new id the next time it saves.
                     // Not when a preset of that name exists: a third party's own is not shadowed by the alias.
-                    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _value && {!isClass (configFile >> "CfgEinvRulesets" >> _value)}};
+                    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _value && {!isClass (configFile >> "CfgAioRulesets" >> _value)}};
 
                     if (_alias >= 0) then {
                         _base = (PRESET_ALIASES select _alias) select 1;
@@ -987,11 +990,15 @@ private _count = 0;
     private _tokens = _statement splitString (toString [32, 9]);
     private _first = toLowerANSI (_tokens select 0);
 
-    if ((_first select [0, 4]) isEqualTo "einv" && {[_first select [4]] call _fnc_isWhole}) then {
+    // aio and a number - or einv and a number, the header before the mod's prefix was renamed.
+    if (
+        ((_first select [0, 3]) isEqualTo "aio" && {[_first select [3]] call _fnc_isWhole})
+        || {(_first select [0, 4]) isEqualTo "einv" && {[_first select [4]] call _fnc_isWhole}}
+    ) then {
         if (_count == 1) then {
             [_tokens] call _fnc_header;
         } else {
-            _warnings pushBack format ["'%1': the header (einv1 ...) is only read as the first statement - left out.", _short];
+            _warnings pushBack format ["'%1': the header (aio1 ...) is only read as the first statement - left out.", _short];
         };
 
         continue;

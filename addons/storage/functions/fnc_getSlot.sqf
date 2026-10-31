@@ -16,7 +16,7 @@
  * Entry, or an empty HashMap when the slot is empty <HASHMAP>
  *
  * Example:
- * [player, "primary_optic"] call einv_storage_fnc_getSlot;
+ * [player, "primary_optic"] call aio_storage_fnc_getSlot;
  *
  * Public: No
  */

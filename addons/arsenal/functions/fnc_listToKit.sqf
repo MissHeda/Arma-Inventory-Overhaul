@@ -5,10 +5,10 @@
  * panel (the "dragCheck" hook, fnc_dragCheck): it goes into that kit, wherever the kit lies - a container or the
  * staging space. The cell under
  * the mouse decides, as in the inventory: the footprint's corner plus where the item was taken by
- * (einv_gui_press), or the cell the engine names. The kit answers (einv_compat_efak_fnc_canPackNew): whether it may be
+ * (aio_gui_press), or the cell the engine names. The kit answers (aio_compat_efak_fnc_canPackNew): whether it may be
  * filled in the arsenal (the kit type's Arsenal setting, a kit that follows the default contents), that mod's rules
  * for it, and its room in the measure it is counted in
- * (einv_compat_efak_fnc_roomMode) - that mod's capacity, or the free cells of a grid a rule or its config
+ * (aio_compat_efak_fnc_roomMode) - that mod's capacity, or the free cells of a grid a rule or its config
  * gives the kit, never the capacity then. Green when some of them fit - the hint says how many -, red
  * with the reason when none does. The same over a cell of the kit's grid in the kits tab (fnc_layout): the
  * engine's grid target stands, with the kit's verdict.
@@ -21,7 +21,7 @@
  * ["kitTile", grid index, tile index, 0, fits, why] - [] when it is over no kit's tile <ARRAY>
  *
  * Example:
- * [_target, _entry] call einv_arsenal_fnc_listToKit;
+ * [_target, _entry] call aio_arsenal_fnc_listToKit;
  *
  * Public: No
  */

@@ -25,7 +25,7 @@
  * None
  *
  * Example:
- * ["all"] call einv_setup_fnc_drawSameAs;
+ * ["all"] call aio_setup_fnc_drawSameAs;
  *
  * Public: No
  */
@@ -56,7 +56,7 @@ private _listH = _height - _listY - _buttonH - UNIT * 0.3;
 if (_part isEqualTo "all") then {
     ctrlDelete (uiNamespace getVariable [QGVAR(sameAsBox), controlNull]);
 
-    private _box = [_display, "EINV_Group", _inner, [0, 0, _width, _height]] call EFUNC(gui,uiCreate);
+    private _box = [_display, "AIO_Group", _inner, [0, 0, _width, _height]] call EFUNC(gui,uiCreate);
 
     uiNamespace setVariable [QGVAR(sameAsBox), _box];
     uiNamespace setVariable [QGVAR(sameAsList), controlNull];
@@ -74,7 +74,7 @@ if (_part isEqualTo "all") then {
 
         [
             _display, _box, [0, _cursorY, _width, UNIT * 0.65],
-            [format ["%1 · %2", _picked, localize format ["STR_einv_setup_Kind_%1", _row param [ROW_KIND, "backpack"]]], _width, _font, TEXT_SMALL] call EFUNC(gui,fitText),
+            [format ["%1 · %2", _picked, localize format ["STR_aio_setup_Kind_%1", _row param [ROW_KIND, "backpack"]]], _width, _font, TEXT_SMALL] call EFUNC(gui,fitText),
             TEXT_SMALL, _muted, _font, 0
         ] call EFUNC(gui,uiLabel);
 
@@ -169,7 +169,7 @@ if (isNull _box) exitWith {};
 
 ctrlDelete (uiNamespace getVariable [QGVAR(sameAsList), controlNull]);
 
-private _list = [_display, "EINV_Group", _box, [0, _listY, _width, _listH + _buttonH + UNIT * 0.3]] call EFUNC(gui,uiCreate);
+private _list = [_display, "AIO_Group", _box, [0, _listY, _width, _listH + _buttonH + UNIT * 0.3]] call EFUNC(gui,uiCreate);
 
 uiNamespace setVariable [QGVAR(sameAsList), _list];
 
@@ -236,7 +236,7 @@ GVAR(sameAs) set ["page", _page];
 
     [
         _display, _list, [_aboutX, _rowY, _aboutW, _rowH],
-        [format ["%1 · %2", _class, localize format ["STR_einv_setup_Kind_%1", _kind]], _aboutW, _font, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL, _muted, _font, 0
+        [format ["%1 · %2", _class, localize format ["STR_aio_setup_Kind_%1", _kind]], _aboutW, _font, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL, _muted, _font, 0
     ] call EFUNC(gui,uiLabel);
 
     [_display, _list, [0, _rowY, _width, _rowH - pixelH * 2], _surface, [0, 0, 0, 0], [1, 1, 1, 0.085], {

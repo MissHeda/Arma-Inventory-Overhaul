@@ -12,7 +12,7 @@
  * The weapon array with seven entries <ARRAY>
  *
  * Example:
- * [(weaponsItemsCargo _box) select 0] call einv_storage_fnc_normalizeWeapon;
+ * [(weaponsItemsCargo _box) select 0] call aio_storage_fnc_normalizeWeapon;
  *
  * Public: No
  */

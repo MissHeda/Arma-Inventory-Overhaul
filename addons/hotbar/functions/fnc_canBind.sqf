@@ -13,7 +13,7 @@
  * [may, reason] - reason is a text to show, "" when it may <ARRAY>
  *
  * Example:
- * ["ACE_tourniquet"] call einv_hotbar_fnc_canBind;
+ * ["ACE_tourniquet"] call aio_hotbar_fnc_canBind;
  *
  * Public: No
  */

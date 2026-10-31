@@ -38,7 +38,7 @@
  *   undo      - [code, arguments], the code called with the arguments as _this
  *
  * Example:
- * count (["saved", false] call einv_setup_fnc_changeRows);
+ * count (["saved", false] call aio_setup_fnc_changeRows);
  *
  * Public: No
  */

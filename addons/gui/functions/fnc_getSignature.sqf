@@ -12,7 +12,7 @@
  *             window looks into, the uniform, vest and backpack the unit wears (the very objects), what
  *             lies around (GVAR(nearby)), what was opened from inside a container - and whether it still
  *             lies there - and the bodies' and persons' gear on their dolls, a count of changes to the kits
- *             shown (einv_compat_efak) and the places of the kits' windows. A change here builds the window
+ *             shown (aio_compat_efak) and the places of the kits' windows. A change here builds the window
  *             anew as well.
  *   loot    - per section of the loot column that has a container, [its number in the list of sections,
  *             what it holds and where it lies]: its cargo - and that of every uniform, vest and backpack
@@ -29,7 +29,7 @@
  *             builds on any change there.
  *   card    - what else the weight card shows: ACE's virtual load on the unit and its uniform, vest and
  *             backpack (which its weight counts), and the key of the weight limits
- *             (einv_weight_fnc_getLimits) - the card's marks move with a changed setting, ACE's load factor
+ *             (aio_weight_fnc_getLimits) - the card's marks move with a changed setting, ACE's load factor
  *             or the soldier's performance factor. A change here draws only the card again.
  *
  * A living person's loadout leaves out the rounds in their loaded magazines: one who fires would build
@@ -53,7 +53,7 @@
  *   card    <ARRAY>
  *
  * Example:
- * call einv_gui_fnc_getSignature;
+ * call aio_gui_fnc_getSignature;
  *
  * Public: No
  */
@@ -136,14 +136,14 @@ _list pushBack (GVAR(opened) select {!isNull (_x select 1)} apply {
     [_object, isNull _parent || {(everyContainer _parent) findIf {(_x select 1) isEqualTo _object} >= 0}]
 });
 
-// Strict mode's hidden holders of the people the window shows (einv_storage_hidden): a tile that went into
+// Strict mode's hidden holders of the people the window shows (aio_storage_hidden): a tile that went into
 // or came out of one changes no cargo the lists above read.
 _list pushBack ([GVAR(unit), GVAR(container), GVAR(secondary)] apply {
     if (!isNull _x && {_x isKindOf "CAManBase"}) then {_x getVariable [QEGVAR(storage,hidden), []]} else {[]}
 });
 
 // A kit of Enhanced First Aid Kits the window shows changed - its contents, or the name a player gave
-// it - without any cargo changing (einv_compat_efak - only when that addon is loaded).
+// it - without any cargo changing (aio_compat_efak - only when that addon is loaded).
 if (!isNil QEFUNC(compat_efak,signature)) then {
     _list pushBack (call EFUNC(compat_efak,signature));
 };
@@ -151,12 +151,12 @@ if (!isNil QEFUNC(compat_efak,signature)) then {
 // Where things lie in the kits' windows, by the key their places are kept under (GVAR(windowOrder)).
 _list pushBack (GVAR(windowOrder) apply {[_x] call _fnc_revision});
 
-// Who may open what changed (einv_locks): a lock set, lifted or passed on to another group, and ACE
+// Who may open what changed (aio_locks): a lock set, lifted or passed on to another group, and ACE
 // lockpicking or a key changing `locked` while the window is open.
 _list pushBack EGVAR(locks,stamp);
 _list pushBack ([GVAR(container), GVAR(secondary)] apply {if (isNull _x) then {-1} else {locked _x}});
 
-// What ACE cargo has loaded in everything the window looks into, and what unloads (einv_compat_ace_cargo).
+// What ACE cargo has loaded in everything the window looks into, and what unloads (aio_compat_ace_cargo).
 if (!isNil QEFUNC(compat_ace_cargo,signature)) then {
     _list pushBack ([] call EFUNC(compat_ace_cargo,signature));
 };

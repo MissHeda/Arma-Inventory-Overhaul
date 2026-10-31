@@ -18,7 +18,7 @@
  * May reach <BOOL>
  *
  * Example:
- * [vestContainer cursorObject] call einv_compat_efak_fnc_mayReach;
+ * [vestContainer cursorObject] call aio_compat_efak_fnc_mayReach;
  *
  * Public: No
  */

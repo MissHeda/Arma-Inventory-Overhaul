@@ -12,8 +12,8 @@
  * read without its alpha while the tiles' alpha is chosen, so the Tiles swatch does not change with the slider). A colour is shown as hue, saturation and value (fnc_hsv): for a colour without a choice they are worked out from the
  * colour the window wears, so the first move of a picker starts from it and changes only what it moves.
  *
- * Reads the player's own choices (einv_gui_palette), not what fnc_palette hands the themes: the popover only exists where
- * the server allows the palette. What the window wears is read from its theme (einv_gui_theme), the one of its last build: a choice
+ * Reads the player's own choices (aio_gui_palette), not what fnc_palette hands the themes: the popover only exists where
+ * the server allows the palette. What the window wears is read from its theme (aio_gui_theme), the one of its last build: a choice
  * just taken away shows its plain colour once the build that follows has made the popover again.
  *
  * Arguments:
@@ -33,7 +33,7 @@
  *   any      any of them is chosen
  *
  * Example:
- * private _info = [] call einv_gui_fnc_paletteInfo;
+ * private _info = [] call aio_gui_fnc_paletteInfo;
  *
  * Public: No
  */

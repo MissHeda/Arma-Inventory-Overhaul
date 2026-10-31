@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The answer to a request of this machine (event einv_storage_answer, or the local path of
+ * The answer to a request of this machine (event aio_storage_answer, or the local path of
  * fnc_requestNext): the request is forgotten (GVAR(requests)) and its callback called with [id, summary,
  * revisions, callback args]. An answer to a request this machine does not know does nothing.
  *
@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * ["2:14", _summary, _revisions] call einv_storage_fnc_onAnswer;
+ * ["2:14", _summary, _revisions] call aio_storage_fnc_onAnswer;
  *
  * Public: No
  */

@@ -3,8 +3,8 @@
 /*
  * Author: Miss Heda
  * The mouse button let go of a hotbar slot's binding (fnc_startStripDrag), or the drag was cut short: on
- * another slot of the strip the two bindings change places (einv_hotbar_fnc_moveSlot), anywhere outside the
- * strip the slot is emptied (einv_hotbar_fnc_unbind) - the item itself is not touched -, on the strip between
+ * another slot of the strip the two bindings change places (aio_hotbar_fnc_moveSlot), anywhere outside the
+ * strip the slot is emptied (aio_hotbar_fnc_unbind) - the item itself is not touched -, on the strip between
  * its slots, or cancelled, nothing happens (fnc_stripTarget). The ghost goes and the hint goes back to what
  * the mouse is on.
  *
@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_endStripDrag;
+ * [_display] call aio_gui_fnc_endStripDrag;
  *
  * Public: No
  */

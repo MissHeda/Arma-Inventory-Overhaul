@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_hookCurators;
+ * call aio_gui_fnc_hookCurators;
  *
  * Public: No
  */

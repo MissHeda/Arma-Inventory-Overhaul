@@ -19,7 +19,7 @@
  *   fields    - of "footprint", "stack", "grid", "weight", "name", "icon", "picture", "use", "cats" <ARRAY>
  *
  * Example:
- * ["30Rnd_65x39_caseless_mag"] call einv_items_fnc_explain;
+ * ["30Rnd_65x39_caseless_mag"] call aio_items_fnc_explain;
  *
  * Public: Yes
  */

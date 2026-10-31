@@ -11,7 +11,7 @@
  * Text for parseText <STRING>
  *
  * Example:
- * ["mass<=10"] call einv_setup_fnc_escape;
+ * ["mass<=10"] call aio_setup_fnc_escape;
  *
  * Public: No
  */

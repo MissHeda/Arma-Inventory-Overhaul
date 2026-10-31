@@ -27,7 +27,7 @@
  * Drawn <BOOL>
  *
  * Example:
- * [_display, "weight", controlNull, _rect, {_this call einv_gui_fnc_drawWeightCard}, [player, _theme]] call einv_gui_fnc_drawPart;
+ * [_display, "weight", controlNull, _rect, {_this call aio_gui_fnc_drawWeightCard}, [player, _theme]] call aio_gui_fnc_drawPart;
  *
  * Public: No
  */
@@ -38,7 +38,7 @@ params ["_display", ["_key", "", [""]], ["_parent", controlNull, [controlNull]],
 
 if (isNull _display || {_key isEqualTo ""}) exitWith {false};
 
-private _outer = [_display, "EINV_Group", _parent, _rect] call FUNC(uiCreate);
+private _outer = [_display, "AIO_Group", _parent, _rect] call FUNC(uiCreate);
 
 // The build hooks every group it finds (fnc_build): this one has its handlers already.
 _outer setVariable [QGVAR(hooked), true];

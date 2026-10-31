@@ -32,7 +32,7 @@
  * [moves to send now, how many were queued] <ARRAY>
  *
  * Example:
- * [_moves, createHashMap] call einv_gui_fnc_queueMoves;
+ * [_moves, createHashMap] call aio_gui_fnc_queueMoves;
  *
  * Public: No
  */

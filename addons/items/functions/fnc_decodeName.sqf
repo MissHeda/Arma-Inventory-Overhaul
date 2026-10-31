@@ -17,7 +17,7 @@
  * The name as it should show <STRING>
  *
  * Example:
- * ["Field_kit_%283%29"] call einv_items_fnc_decodeName;
+ * ["Field_kit_%283%29"] call aio_items_fnc_decodeName;
  *
  * Public: Yes
  */

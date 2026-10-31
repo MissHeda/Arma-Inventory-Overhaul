@@ -12,7 +12,7 @@
  * while looting at 16:9: 37 pixels at 1920x1080, where 46 across gave 39 at eight columns - a cell a
  * twentieth smaller rather than a fifth (eight columns' width over ten), and the column 13 cells wide.
  *
- * Then the player's tile scale (einv_gui_cellScale, 0.8 to 1.3): small pictures are hard to make out on
+ * Then the player's tile scale (aio_gui_cellScale, 0.8 to 1.3): small pictures are hard to make out on
  * some screens. Larger cells widen both columns, so the scale goes only as far as both of them, their gaps
  * and CELL_FIT_LEFT UNITs of the equipment column still fit across - the largest that fits, said once in the
  * RPT, never less than the cell at scale 1 (a 4:3 screen keeps the layout it had). ACE Arsenal's panel, which
@@ -20,7 +20,7 @@
  * The window's words grow with the cell this gives (fnc_textScale, TEXT_UNIT).
  *
  * Worked out at the first ask after a window attached (fnc_attach) and kept until it closes
- * (uiNamespace einv_gui_cell): a changed setting takes effect at the next opening, and nothing drawn
+ * (uiNamespace aio_gui_cell): a changed setting takes effect at the next opening, and nothing drawn
  * meanwhile - a tile drawn again, the dragged ghost - can differ by a pixel from the grid it lies on.
  *
  * Arguments:
@@ -30,7 +30,7 @@
  * [width, height] in screen units <ARRAY>
  *
  * Example:
- * (call einv_gui_fnc_getCell) params ["_cellW", "_cellH"];
+ * (call aio_gui_fnc_getCell) params ["_cellW", "_cellH"];
  *
  * Public: No
  */

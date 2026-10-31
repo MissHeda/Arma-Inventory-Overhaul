@@ -10,7 +10,7 @@
  *    are a layer of their own (fallback): asked after the preset - before the preset's rules without
  *    conditions, its own everything else - and before the built-in answer (fnc_resolve). A preset's rule
  *    with "all" is left out with a warning: its rules without conditions already are its everything else.
- * 2. Its base= and the bases of that preset (CfgEinvRulesets, MAX_CHAIN deep, no loops) are the
+ * 2. Its base= and the bases of that preset (CfgAioRulesets, MAX_CHAIN deep, no loops) are the
  *    preset layer, the base first and each derived preset after it. Read presets are kept in
  *    uiNamespace: config does not change.
  * 3. Groups: a later preset's or the text's definition of a name replaces the earlier one; the same
@@ -21,18 +21,18 @@
  *    that cannot be read: the definition below it counts again, so a typo in the text's @mag_rifle
  *    leaves the preset's @mag_rifle in effect. With none below, the group does not exist - and a rule
  *    using it is left out, rather than "not in that group" reaching every item.
- * 4. The older tables (einv_items_sizeTable, einv_items_stackTable, einv_storage_containerTable) are
+ * 4. The older tables (aio_items_sizeTable, aio_items_stackTable, aio_storage_containerTable) are
  *    read as rules of the own layer after the text, class=X+ each, the classes built on fewer others
- *    first - so the nearest class listed wins, as it did. einv_items_stackSmall, when moved off its
+ *    first - so the nearest class listed wins, as it did. aio_items_stackSmall, when moved off its
  *    default, is the preset layer's last word on @item_small: a rule or a mod still beats it, as they
  *    did.
  * 5. Rules are sorted by the kinds they can be about, so an item meets only those (byKind).
  * 6. The mass per grid cell: the text's cell=, else the nearest preset that sets one, else the slider
- *    einv_items_massPerCell.
+ *    aio_items_massPerCell.
  *
  * Arguments:
  * 0: Rules text <STRING>
- * 1: Read the older tables and einv_items_stackSmall too, as the rules in effect do <BOOL>
+ * 1: Read the older tables and aio_items_stackSmall too, as the rules in effect do <BOOL>
  *    (default: true)
  *
  * Return Value:
@@ -66,7 +66,7 @@
  * counts in byKind as setting every one of LIKE_FIELDS, which fnc_resolve takes from that class.
  *
  * Example:
- * ["einv1 base=default, kind=grenade > stack=3"] call einv_items_fnc_compileRules;
+ * ["aio1 base=default, kind=grenade > stack=3"] call aio_items_fnc_compileRules;
  *
  * Public: Yes
  */
@@ -92,7 +92,7 @@ private _categoryDefs = createHashMap;
 
 // ----- The preset chain -----
 
-private _rulesets = configFile >> "CfgEinvRulesets";
+private _rulesets = configFile >> "CfgAioRulesets";
 private _base = _ast get "base";
 
 if (_base isNotEqualTo "none" && {!isClass (_rulesets >> _base)}) then {
@@ -148,7 +148,7 @@ private _layers = [];
     if (isNil "_presetAst") then {
         private _statements = (getArray (_rulesets >> _preset >> "rules")) select {_x isEqualType ""};
 
-        _presetAst = [(["einv1 base=none"] + _statements) joinString ", "] call FUNC(parseRules);
+        _presetAst = [(["aio1 base=none"] + _statements) joinString ", "] call FUNC(parseRules);
         _presetCache set [_preset, _presetAst];
     };
 

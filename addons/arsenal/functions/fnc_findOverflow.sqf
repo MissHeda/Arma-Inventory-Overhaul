@@ -13,7 +13,7 @@
  * One [container, entry] per entry with no room or in the staging space, an entry as fnc_getContents makes it <ARRAY>
  *
  * Example:
- * [player] call einv_arsenal_fnc_findOverflow;
+ * [player] call aio_arsenal_fnc_findOverflow;
  *
  * Public: No
  */

@@ -2,20 +2,20 @@
 /*
  * Author: Miss Heda
  * Op "normalize": a viewer's report that a holder's places and cargo disagree
- * (einv_gui_fnc_requestNormalize). Skipped for a holder normalised here less than half a second ago;
+ * (aio_gui_fnc_requestNormalize). Skipped for a holder normalised here less than half a second ago;
  * else normalised (fnc_normalize). When that wrote nothing and the viewer's revision and hash differ
  * from this machine's, the viewer holds a stale copy: the records are written again publicly (forced)
  * and the nested containers' tags set again (fnc_tagNested, forced) - at most once per holder every
  * FORCE_REPEAT seconds.
  *
  * When it last normalised and last wrote again for a stale copy is kept on the holder, local
- * (einv_storage_normalized), for kits in GVAR(normalizedKits). It runs as outside a phase: what it
+ * (aio_storage_normalized), for kits in GVAR(normalizedKits). It runs as outside a phase: what it
  * writes is final at once, not buffered for the end of the phase.
  *
  * Arguments:
  * 0: Args, [holder, the viewer's revision (default: -1), the hash of the viewer's records (default: "" -
  *    not compared)] <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -23,11 +23,11 @@
  *     "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason already
  *     in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
- *     (einv_storage_fnc_settle)
+ *     (aio_storage_fnc_settle)
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[cursorObject, 4, _hash], _context] call einv_storage_fnc_opNormalize;
+ * [[cursorObject, 4, _hash], _context] call aio_storage_fnc_opNormalize;
  *
  * Public: No
  */

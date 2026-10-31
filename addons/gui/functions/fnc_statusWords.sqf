@@ -25,7 +25,7 @@
  * The words, "" when the box has nothing left of that kind <STRING>
  *
  * Example:
- * [_crate, "search", false, false, false, diag_tickTime, 0.1, "PuristaSemibold", 0.012] call einv_gui_fnc_statusWords;
+ * [_crate, "search", false, false, false, diag_tickTime, 0.1, "PuristaSemibold", 0.012] call aio_gui_fnc_statusWords;
  *
  * Public: No
  */

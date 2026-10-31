@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The rule for ACRE2's radio slot on every op of a transaction (einv_storage_guards), checked on the machine
+ * The rule for ACRE2's radio slot on every op of a transaction (aio_storage_guards), checked on the machine
  * that runs the op: taking the dummy radio off and putting anything on in its place are refused for any
  * transaction that reaches the slot, whoever sent it and whatever the window showed (fnc_isFixedSlot).
  * Settlement phases do not ask guards.
@@ -16,7 +16,7 @@
  * "" when it may, "Failed" when it may not <STRING>
  *
  * Example:
- * ["takeOff", [player, "radio"], player, player] call einv_compat_acre_fnc_guard;
+ * ["takeOff", [player, "radio"], player, player] call aio_compat_acre_fnc_guard;
  *
  * Public: No
  */

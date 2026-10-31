@@ -15,7 +15,7 @@
  * [done, text] - what is loaded, or why not <ARRAY>
  *
  * Example:
- * [player, "30Rnd_65x39_caseless_mag", 0] call einv_hotbar_fnc_useMagazine;
+ * [player, "30Rnd_65x39_caseless_mag", 0] call aio_hotbar_fnc_useMagazine;
  *
  * Public: No
  */

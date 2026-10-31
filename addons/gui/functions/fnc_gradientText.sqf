@@ -16,10 +16,10 @@
  * 6: Keep it on one line: its spaces are ones the line never breaks at (a name, a title) <BOOL> (default: false)
  *
  * Return Value:
- * Structured text, for EINV_StructuredText <TEXT>
+ * Structured text, for AIO_StructuredText <TEXT>
  *
  * Example:
- * ["Inventory", "PuristaSemibold", 0.03, 0, [0.3, 0.6, 1, 1], [0.7, 0.4, 1]] call einv_gui_fnc_gradientText;
+ * ["Inventory", "PuristaSemibold", 0.03, 0, [0.3, 0.6, 1, 1], [0.7, 0.4, 1]] call aio_gui_fnc_gradientText;
  *
  * Public: No
  */

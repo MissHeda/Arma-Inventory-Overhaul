@@ -3,12 +3,12 @@
  * Author: Miss Heda
  * Works out the load tier of a local unit and makes it count: the duty factor ACE's fatigue multiplies the
  * cost of every movement by - 1 up to Overloaded, then climbing to OVERLOAD_DUTY_MAX at Critical - and, when
- * the tier (or einv_weight_effects) changed since last time, the status effects (fnc_applyEffects), the
- * local CBA event einv_weight_tierChanged [unit, tier, old tier] and a one-line message while the
+ * the tier (or aio_weight_effects) changed since last time, the status effects (fnc_applyEffects), the
+ * local CBA event aio_weight_tierChanged [unit, tier, old tier] and a one-line message while the
  * inventory is closed (fnc_notifyTier). The first look after a unit changed raises the event but says
  * nothing.
  *
- * With the tiers switched off (einv_weight_enabled) the tier is always Light (fnc_getTier): the duty factor
+ * With the tiers switched off (aio_weight_enabled) the tier is always Light (fnc_getTier): the duty factor
  * goes back to 1, the status effects come off on the next look and nothing is said - the switch is not a
  * change of load the player would want to hear about.
  *
@@ -26,7 +26,7 @@
  * None
  *
  * Example:
- * [ACE_player] call einv_weight_fnc_updateTier;
+ * [ACE_player] call aio_weight_fnc_updateTier;
  *
  * Public: No
  */

@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * ["bandit"] call einv_setup_fnc_deleteCategory;
+ * ["bandit"] call aio_setup_fnc_deleteCategory;
  *
  * Public: No
  */

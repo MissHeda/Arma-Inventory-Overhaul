@@ -4,8 +4,8 @@
  * Author: Miss Heda
  * The row "Use from" of the Items step: which containers the item may be used from even where a setting
  * closes them - a chip each for the uniform, vest and backpack, on for the ones it is whitelisted for
- * (use=, einv_use). Under it one line of what the settings "Use items from ..." (einv_storage_useUniform,
- * einv_storage_useVest, einv_storage_useBackpack) limit right now, so a chip is read in the light of it:
+ * (use=, aio_use). Under it one line of what the settings "Use items from ..." (aio_storage_useUniform,
+ * aio_storage_useVest, aio_storage_useBackpack) limit right now, so a chip is read in the light of it:
  * with a container on Everything its chip changes nothing in the game, and with one on Nothing even a
  * whitelisted item is not usable there. The chips are always clickable - the rule belongs to the item, not
  * to the settings of this mission - and nothing is written here: the code gets the new list and puts it
@@ -25,7 +25,7 @@
  * The height the row and its line took <NUMBER>
  *
  * Example:
- * [_display, _box, [0, 0, 0.4], _theme, 0.08, ["backpack"], {params ["_list"]}] call einv_setup_fnc_drawUseRow;
+ * [_display, _box, [0, 0, 0.4], _theme, 0.08, ["backpack"], {params ["_list"]}] call aio_setup_fnc_drawUseRow;
  *
  * Public: No
  */
@@ -52,7 +52,7 @@ private _chipX = _left + _labelW;
 
 {
     private _kind = _x;
-    private _text = localize format ["STR_einv_setup_Use_%1", _kind];
+    private _text = localize format ["STR_aio_setup_Use_%1", _kind];
     private _chipW = SQUARE(_chipH * 0.9) + (_text getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK;
 
     [_display, _parent, [_chipX, _top + (_rowH - _chipH) / 2, _chipW, _chipH], _text, _kind in _work, _theme, {
@@ -76,7 +76,7 @@ private _limited = [];
 
     if (_mode isNotEqualTo USE_ALL) then {
         _limited pushBack format [
-            [LLSTRING(Use_PartList), LLSTRING(Use_PartNone)] select (_mode isEqualTo USE_NONE), localize format ["STR_einv_setup_Use_%1", _x]
+            [LLSTRING(Use_PartList), LLSTRING(Use_PartNone)] select (_mode isEqualTo USE_NONE), localize format ["STR_aio_setup_Use_%1", _x]
         ];
     };
 } forEach USE_KINDS;

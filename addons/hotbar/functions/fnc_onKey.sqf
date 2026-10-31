@@ -22,7 +22,7 @@
  * The key is taken <BOOL>
  *
  * Example:
- * [0] call einv_hotbar_fnc_onKey;
+ * [0] call aio_hotbar_fnc_onKey;
  *
  * Public: No
  */

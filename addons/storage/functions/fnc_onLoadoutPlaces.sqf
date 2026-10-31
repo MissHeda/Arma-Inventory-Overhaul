@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Writes the places of a loadout that was set on another machine (CBA_fnc_setLoadout carrying
- * einv_layout, event einv_storage_loadoutPlaces) here, where the unit is local, a frame later: the
+ * aio_layout, event aio_storage_loadoutPlaces) here, where the unit is local, a frame later: the
  * loadout's containers have arrived by then. Records whose items are not there drop out at the next
  * layout.
  *
@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [player, [_uniformRecords, _vestRecords, _backpackRecords]] call einv_storage_fnc_onLoadoutPlaces;
+ * [player, [_uniformRecords, _vestRecords, _backpackRecords]] call aio_storage_fnc_onLoadoutPlaces;
  *
  * Public: No
  */

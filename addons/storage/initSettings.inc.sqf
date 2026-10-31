@@ -1,8 +1,8 @@
 // Settings are ordered by topic, and within a topic numbers, then switches, then lists, then text boxes.
 //
-// What is the same for everyone (a server's or a mission's to decide) is registered with einv_main_fnc_addSetting: it
+// What is the same for everyone (a server's or a mission's to decide) is registered with aio_main_fnc_addSetting: it
 // has no row in CBA's menu but a control on the setup wizard's General page, and its value comes from the one
-// text box einv_main_settings (addons/main). The variable, its name, its kind of value and its script are as they were.
+// text box aio_main_settings (addons/main). The variable, its name, its kind of value and its script are as they were.
 
 // ----- Nearby -----
 
@@ -38,13 +38,13 @@
 
 // The same for everyone, like the rules: every machine has to agree on a container's compartments, or
 // a layout worked out on one would not fit on another. The older way to size containers by class -
-// the items addon reads it as rules of its own, after the rules text (einv_items_fnc_compileRules),
-// so it still wins over it. A ";" turns into a comma as it is typed (einv_items_fnc_sanitizeText).
+// the items addon reads it as rules of its own, after the rules text (aio_items_fnc_compileRules),
+// so it still wins over it. A ";" turns into a comma as it is typed (aio_items_fnc_sanitizeText).
 [
     QGVAR(containerTable),
     "EDITBOX",
     [LLSTRING(Setting_ContainerTable), LLSTRING(Setting_ContainerTable_Desc)],
-    [CBA_SETTINGS_EINV_SERVER, LLSTRING(SubCategory_Containers)],
+    [CBA_SETTINGS_AIO_SERVER, LLSTRING(SubCategory_Containers)],
     ["", false, EFUNC(items,sanitizeText)],
     1,
     {[] call EFUNC(items,loadRules)}

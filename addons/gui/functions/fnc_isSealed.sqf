@@ -22,7 +22,7 @@
  * Sealed <BOOL>
  *
  * Example:
- * [uniformContainer cursorObject] call einv_gui_fnc_isSealed;
+ * [uniformContainer cursorObject] call aio_gui_fnc_isSealed;
  *
  * Public: No
  */

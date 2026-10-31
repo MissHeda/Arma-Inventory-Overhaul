@@ -29,7 +29,7 @@
  * None
  *
  * Example:
- * [_display, _group, [0.5, 0.2, 0.3, 0.3], _theme, "saved"] call einv_setup_fnc_drawChanges;
+ * [_display, _group, [0.5, 0.2, 0.3, 0.3], _theme, "saved"] call aio_setup_fnc_drawChanges;
  *
  * Public: No
  */
@@ -81,7 +81,7 @@ if (_count == 0) exitWith {};
 
 _cursorY = _cursorY + ([_display, _group, [_innerX, _cursorY, _innerW], LLSTRING(Changes_Help), TEXT_SMALL, _muted, _font] call FUNC(uiText)) + UNIT * 0.3;
 
-private _list = [_display, "EINV_ScrollGroup", _group, [_innerX, _cursorY, _innerW, (_bottom - _cursorY) max (UNIT * 1.2)]] call EFUNC(gui,uiCreate);
+private _list = [_display, "AIO_ScrollGroup", _group, [_innerX, _cursorY, _innerW, (_bottom - _cursorY) max (UNIT * 1.2)]] call EFUNC(gui,uiCreate);
 
 _list setVariable [QGVAR(scrollId), ["generalChanges", "savedChanges"] select _saved];
 

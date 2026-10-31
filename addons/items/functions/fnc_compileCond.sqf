@@ -28,7 +28,7 @@
  *   all           - always holds: the rule's place, not a test (fnc_compileRules sorts it last) - data []
  *
  * Example:
- * [[false, "class", "=", ["ACE_fieldDressing+"]]] call einv_items_fnc_compileCond;
+ * [[false, "class", "=", ["ACE_fieldDressing+"]]] call aio_items_fnc_compileCond;
  *
  * Public: No
  */

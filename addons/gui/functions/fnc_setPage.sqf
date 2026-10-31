@@ -17,7 +17,7 @@
  * It turned <BOOL>
  *
  * Example:
- * [_grid, 3] call einv_gui_fnc_setPage;
+ * [_grid, 3] call aio_gui_fnc_setPage;
  *
  * Public: No
  */

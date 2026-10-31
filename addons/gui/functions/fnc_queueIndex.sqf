@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [[_entry], true] call einv_gui_fnc_queueIndex;
+ * [[_entry], true] call aio_gui_fnc_queueIndex;
  *
  * Public: No
  */

@@ -12,7 +12,7 @@
  * Setting's name -> [value, priority] <HASHMAP>
  *
  * Example:
- * GVAR(originSource) = call einv_setup_fnc_targetValues;
+ * GVAR(originSource) = call aio_setup_fnc_targetValues;
  *
  * Public: No
  */

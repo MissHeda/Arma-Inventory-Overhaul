@@ -9,12 +9,12 @@
  *
  * After the request's own phases come the settlement steps 1-3 (fnc_settle): each step's phases are
  * added to the transaction and its results, and run like any other, so the next step sees what the
- * earlier ones did. After the last step the requester's machine gets the answer (einv_storage_answer -
+ * earlier ones did. After the last step the requester's machine gets the answer (aio_storage_answer -
  * not for a silent transaction, nor when that machine left) and the transaction is forgotten.
  *
  * Answer: [id, summary, revisions] - summary [per own phase per op [status, extra], [went back, into
  * the requester's vehicle, onto the ground] - payloads settlement put there, the ground pile something
- * was put on or objNull] (einv_storage_fnc_onAnswer).
+ * was put on or objNull] (aio_storage_fnc_onAnswer).
  *
  * Arguments:
  * 0: Request id <STRING>
@@ -23,7 +23,7 @@
  * None
  *
  * Example:
- * ["2:14"] call einv_storage_fnc_hubNext;
+ * ["2:14"] call aio_storage_fnc_hubNext;
  *
  * Public: No
  */

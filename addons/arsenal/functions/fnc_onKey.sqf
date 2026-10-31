@@ -5,7 +5,7 @@
  * A key pressed on ACE Arsenal's display, beside ACE's own handler, which runs as always: Escape closes,
  * the arrows add and take out, typing goes into ACE's search fields. The engine gets only two keys: R
  * while it drags something (a quarter turn), and the drop key (the player's, G by default -
- * einv_gui_fnc_isDropKey) while the mouse is over the panel (the tile there is taken out - the engine's drop
+ * aio_gui_fnc_isDropKey) while the mouse is over the panel (the tile there is taken out - the engine's drop
  * ends in the "ground" hook, fnc_remove). Nothing while a field of
  * ACE's has the cursor.
  *
@@ -26,7 +26,7 @@
  * Handled <BOOL>
  *
  * Example:
- * [_display, 211, false, false, false] call einv_arsenal_fnc_onKey;
+ * [_display, 211, false, false, false] call aio_arsenal_fnc_onKey;
  *
  * Public: No
  */

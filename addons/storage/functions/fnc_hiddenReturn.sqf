@@ -22,7 +22,7 @@
  * How many entries of the holder were put back, whole or in part <NUMBER>
  *
  * Example:
- * [player, "backpack"] call einv_storage_fnc_hiddenReturn;
+ * [player, "backpack"] call aio_storage_fnc_hiddenReturn;
  *
  * Public: No
  */

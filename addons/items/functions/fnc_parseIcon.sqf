@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Reads the value of icon= (a rule) or einv_icon (an item's config): how large an item's picture is drawn in
+ * Reads the value of icon= (a rule) or aio_icon (an item's config): how large an item's picture is drawn in
  * its tile and where. The one reader of that value, as fnc_parseMask is of masks.
  *
  *   1.4              the picture 1.4 times as large as it is fitted into the tile
@@ -26,7 +26,7 @@
  *   notes - what was left out or cut down, each naming the value <ARRAY of STRING>
  *
  * Example:
- * ["1.4@0.1:-0.05"] call einv_items_fnc_parseIcon;
+ * ["1.4@0.1:-0.05"] call aio_items_fnc_parseIcon;
  * // [[1.4, 0.1, -0.05], []]
  *
  * Public: No

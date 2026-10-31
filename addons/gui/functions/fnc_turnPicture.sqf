@@ -29,7 +29,7 @@
  * The turned picture, or controlNull where none is made <CONTROL>
  *
  * Example:
- * [_display, _grid, _box, _picture, ICON_PLAIN, _tileRect, _fallback] call einv_gui_fnc_turnPicture;
+ * [_display, _grid, _box, _picture, ICON_PLAIN, _tileRect, _fallback] call aio_gui_fnc_turnPicture;
  *
  * Public: No
  */

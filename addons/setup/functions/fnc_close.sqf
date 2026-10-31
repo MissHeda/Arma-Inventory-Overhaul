@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * call einv_setup_fnc_close;
+ * call aio_setup_fnc_close;
  *
  * Public: No
  */

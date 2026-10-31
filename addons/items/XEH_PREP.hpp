@@ -49,7 +49,7 @@ PREP(checkServerRules);
 // Sizes, stacks and container grids by class, from the older table settings
 PREP(parseTable);
 
-// An item's own config keys (einv_size, einv_grid, ...): reading them, and writing or reading a snippet of them
+// An item's own config keys (aio_size, aio_grid, ...): reading them, and writing or reading a snippet of them
 PREP(readConfigKeys);
 PREP(configEntry);
 PREP(parseConfigEntry);

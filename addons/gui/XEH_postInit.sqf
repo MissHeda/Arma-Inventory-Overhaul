@@ -61,7 +61,7 @@ if (!hasInterface) exitWith {};
     [_x] call FUNC(addPersonAction);
 } forEach allUnits;
 
-// The rules for sizes, stacks and grids changed (einv_items_fnc_loadRules: the server's or the mission's
+// The rules for sizes, stacks and grids changed (aio_items_fnc_loadRules: the server's or the mission's
 // setup changed, maybe saved by the wizard just now). An open window is built again under them, so a
 // player looking at their gear sees the new sizes at once. Whatever no longer fits where it lay is
 // placed anew or shown as overflow; nothing leaves the cargo.

@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [player, "primary", ["arifle_MX_F", "", "", "optic_Aco", ["30Rnd_65x39_caseless_mag", 17], [], ""]] call einv_storage_fnc_addWeapon;
+ * [player, "primary", ["arifle_MX_F", "", "", "optic_Aco", ["30Rnd_65x39_caseless_mag", 17], [], ""]] call aio_storage_fnc_addWeapon;
  *
  * Public: No
  */

@@ -25,7 +25,7 @@
  * ["", "", why not as a text] <ARRAY>
  *
  * Example:
- * [player, "ACE_elasticBandage"] call einv_hotbar_fnc_pickTreatment;
+ * [player, "ACE_elasticBandage"] call aio_hotbar_fnc_pickTreatment;
  *
  * Public: No
  */

@@ -4,7 +4,7 @@
  * Everything a kit's answer to "one more of this?" depends on, as one value that compares equal while none of it
  * changed: what it holds (that mod's table, copied), where its tiles lie (its places' revision), the rules, whether
  * it follows the default contents, what the kits tab may change about its type, and whether its contents are here.
- * ACE Arsenal's panel keeps its answers per class while this stays the same (einv_arsenal_fnc_ungreyKit).
+ * ACE Arsenal's panel keeps its answers per class while this stays the same (aio_arsenal_fnc_ungreyKit).
  *
  * Arguments:
  * 0: Kit class <STRING>
@@ -13,7 +13,7 @@
  * The state <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7"] call einv_compat_efak_fnc_arsenalState;
+ * ["efak_IFAK_7"] call aio_compat_efak_fnc_arsenalState;
  *
  * Public: No
  */

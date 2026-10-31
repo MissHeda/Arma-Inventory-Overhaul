@@ -25,7 +25,7 @@
  * and what they read when it was made; the last three are what the hover wants
  *
  * Example:
- * (call einv_gui_fnc_hoverGeometry) select 8;
+ * (call aio_gui_fnc_hoverGeometry) select 8;
  *
  * Public: No
  */

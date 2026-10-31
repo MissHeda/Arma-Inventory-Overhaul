@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * [1, 4] call einv_hotbar_fnc_moveSlot;
+ * [1, 4] call aio_hotbar_fnc_moveSlot;
  *
  * Public: No
  */

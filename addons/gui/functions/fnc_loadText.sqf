@@ -11,7 +11,7 @@
  * The text <STRING>
  *
  * Example:
- * [_entries] call einv_gui_fnc_loadText;
+ * [_entries] call aio_gui_fnc_loadText;
  *
  * Public: No
  */

@@ -8,10 +8,10 @@
  *
  * Into the soldier's container the way ACE's "+" does it, with the engine's addItemToUniform, addItemToVest
  * or addItemToBackpack, which refuse by the container's weight; what of it did not land is put in past
- * that with einv_storage_fnc_addNew, as for ACE's own adds (fnc_onCargoChanged) - cells are the only limit.
+ * that with aio_storage_fnc_addNew, as for ACE's own adds (fnc_onCargoChanged) - cells are the only limit.
  * Into the staging space with addNew alone. The places written so far are pinned first
- * (einv_storage_fnc_normalize), so the new thing is the last of its kind and the cell's record is its own
- * (einv_storage_fnc_setPlace). ACE is told afterwards as after a removal (fnc_syncAce, fnc_tellAce) - for
+ * (aio_storage_fnc_normalize), so the new thing is the last of its kind and the cell's record is its own
+ * (aio_storage_fnc_setPlace). ACE is told afterwards as after a removal (fnc_syncAce, fnc_tellAce) - for
  * the staging space only the panel is built again: nothing of the soldier's changed.
  *
  * Arguments:
@@ -24,7 +24,7 @@
  * "" when it went in, else why not ("NoRoom", "NoBackpack", "Failed") <STRING>
  *
  * Example:
- * [backpackContainer player, "ACE_fieldDressing", 5, [2, 0, 0, 1, 1]] call einv_arsenal_fnc_addTo;
+ * [backpackContainer player, "ACE_fieldDressing", 5, [2, 0, 0, 1, 1]] call aio_arsenal_fnc_addTo;
  *
  * Public: No
  */

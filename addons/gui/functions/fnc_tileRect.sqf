@@ -4,7 +4,7 @@
  * Where a tile is on the screen right now - through its grid's place, so a scrolled column or window is
  * taken into account (fnc_gridOrigin), and its cells' places on the grid, seams of a canvas included
  * (fnc_spanRect). As a tile ends a pixel before the next cell, so does this. A kit window opens beside
- * the tile it was opened from (einv_compat_efak_fnc_toggle, fnc_placeWindow).
+ * the tile it was opened from (aio_compat_efak_fnc_toggle, fnc_placeWindow).
  *
  * Arguments:
  * 0: Grid, see fnc_createGrid <HASHMAP>
@@ -14,7 +14,7 @@
  * [x, y, w, h] on the screen <ARRAY>
  *
  * Example:
- * [_grid, _tile] call einv_gui_fnc_tileRect;
+ * [_grid, _tile] call aio_gui_fnc_tileRect;
  *
  * Public: No
  */

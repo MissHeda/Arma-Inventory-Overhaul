@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The block that sets how large an item's picture is drawn and where (icon=, einv_items_fnc_parseIcon), for the
+ * The block that sets how large an item's picture is drawn and where (icon=, aio_items_fnc_parseIcon), for the
  * Items step (beside the tile it moves) and the Containers step (beside the box): a caption with Reset at its
  * end (back to the plain picture, enabled while it is not), the zoom (25 to 400 %) with a few common ones at
  * one click (50, 100, 150, 200 %), and two shift steppers, across and down (-100 to 100 % of the tile). Each
@@ -25,7 +25,7 @@
  * Height taken <NUMBER>
  *
  * Example:
- * [_display, _box, [0, 0, 0.3], _theme, [100, 0, 0], {params ["_icon"]}] call einv_setup_fnc_drawIconBlock;
+ * [_display, _box, [0, 0, 0.3], _theme, [100, 0, 0], {params ["_icon"]}] call aio_setup_fnc_drawIconBlock;
  *
  * Public: No
  */

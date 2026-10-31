@@ -13,13 +13,13 @@
  *
  * Arguments:
  * 0: The text's parts, as fnc_parseRules gives them <HASHMAP>
- * 1: Write the header (einv1 base=...) <BOOL> (default: true)
+ * 1: Write the header (aio1 base=...) <BOOL> (default: true)
  *
  * Return Value:
  * Rules text <STRING>
  *
  * Example:
- * [["einv1 base=default,kind=grenade>stack=3"] call einv_items_fnc_parseRules] call einv_items_fnc_writeRules;
+ * [["aio1 base=default,kind=grenade>stack=3"] call aio_items_fnc_parseRules] call aio_items_fnc_writeRules;
  *
  * Public: Yes
  */
@@ -65,7 +65,7 @@ private _fnc_values = {
 };
 
 if (_header) then {
-    private _line = format ["einv1 base=%1", _ast getOrDefault ["base", "default"]];
+    private _line = format ["aio1 base=%1", _ast getOrDefault ["base", "default"]];
     private _cell = _ast getOrDefault ["cell", -1];
 
     if (_cell > 0) then {

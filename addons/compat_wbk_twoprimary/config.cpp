@@ -12,8 +12,8 @@ class CfgPatches {
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {
             "cba_main",
-            "einv_main",
-            "einv_gui",
+            "aio_main",
+            "aio_gui",
             "WBK_TwoWeaponsOnBack"
         };
         skipWhenMissingDependencies = 1;

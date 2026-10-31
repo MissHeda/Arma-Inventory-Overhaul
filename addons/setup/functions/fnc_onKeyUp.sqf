@@ -16,7 +16,7 @@
  * Key handled <BOOL>
  *
  * Example:
- * [_display, 28, false, false, false] call einv_setup_fnc_onKeyUp;
+ * [_display, 28, false, false, false] call aio_setup_fnc_onKeyUp;
  *
  * Public: No
  */

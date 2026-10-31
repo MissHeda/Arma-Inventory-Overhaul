@@ -8,7 +8,7 @@
  * picturething not found" over the window (Mia, 0.4.0), and so does a path to a file that is not there.
  *
  * Each path is looked at once (fileExists, with and without its leading backslash) and the answer kept
- * for the session (uiNamespace einv_gui_pictures): a draw only looks it up.
+ * for the session (uiNamespace aio_gui_pictures): a draw only looks it up.
  *
  * Arguments:
  * 0: Picture path <STRING>
@@ -17,7 +17,7 @@
  * The path, or "" when it cannot be shown <STRING>
  *
  * Example:
- * [getText (configFile >> "CfgWeapons" >> "arifle_MX_F" >> "picture")] call einv_gui_fnc_safePicture;
+ * [getText (configFile >> "CfgWeapons" >> "arifle_MX_F" >> "picture")] call aio_gui_fnc_safePicture;
  *
  * Public: No
  */

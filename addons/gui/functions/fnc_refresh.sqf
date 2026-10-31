@@ -25,7 +25,7 @@
  * in, unless the search field fades them (fnc_applyFilter) -, and what is still under way is shown again
  * (fnc_drawPending): a section that is not drawn again keeps its tiles.
  *
- * With einv_gui_debugTiming on, the RPT gets one line per refresh that did something - how long it took
+ * With aio_gui_debugTiming on, the RPT gets one line per refresh that did something - how long it took
  * (the build writes its own).
  *
  * Arguments:
@@ -35,7 +35,7 @@
  * What it did - "" nothing had changed, "redraw", "build" <STRING>
  *
  * Example:
- * [_display] call einv_gui_fnc_refresh;
+ * [_display] call aio_gui_fnc_refresh;
  *
  * Public: No
  */
@@ -146,7 +146,7 @@ if (_settled && {_lootChanged isEqualTo []} && {_storageChanged isEqualTo []}) t
 
 GVAR(signatureParts) = _signature;
 
-// For the tester's numbers (einv_gui_debugTiming): with the signature it compared.
+// For the tester's numbers (aio_gui_debugTiming): with the signature it compared.
 if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
     private _took = ((diag_tickTime - _start) * 1000) toFixed 1;
     private _what = format ["%1 loot and %2 storage sections%3", count _lootChanged, count _storageChanged, ["", ", weight card"] select _cardChanged];

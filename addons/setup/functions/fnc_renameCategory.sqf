@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * ["bandit", "Bandit loot"] call einv_setup_fnc_renameCategory;
+ * ["bandit", "Bandit loot"] call aio_setup_fnc_renameCategory;
  *
  * Public: No
  */
@@ -27,7 +27,7 @@ if (_name isEqualTo "" && {!_builtin}) exitWith {
     [GVAR(step)] call FUNC(showStep);
 };
 
-if (_builtin && {_name isEqualTo (localize format ["STR_einv_setup_Cat_%1", _id])}) then {
+if (_builtin && {_name isEqualTo (localize format ["STR_aio_setup_Cat_%1", _id])}) then {
     _name = "";
 };
 

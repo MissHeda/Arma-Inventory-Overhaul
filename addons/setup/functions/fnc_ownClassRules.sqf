@@ -18,13 +18,13 @@
  *
  * Return Value:
  * [exact, named, tree] <ARRAY>
- *   exact - lowercase class -> the values, as einv_items_fnc_parseRules gives a rule's <HASHMAP>
+ *   exact - lowercase class -> the values, as aio_items_fnc_parseRules gives a rule's <HASHMAP>
  *   named - lowercase class -> the values those rules set, by key ("footprint", "stack", "grid", "like",
  *           ...) -> true <HASHMAP>
  *   tree  - lowercase class -> the values of its class=X+ rules, as for exact <HASHMAP>
  *
  * Example:
- * ([] call einv_setup_fnc_ownClassRules) params ["_exact", "_named", "_tree"];
+ * ([] call aio_setup_fnc_ownClassRules) params ["_exact", "_named", "_tree"];
  *
  * Public: No
  */

@@ -27,7 +27,7 @@
  * None
  *
  * Example:
- * [_display, _group, _theme, []] call einv_setup_fnc_drawContainers;
+ * [_display, _group, _theme, []] call aio_setup_fnc_drawContainers;
  *
  * Public: No
  */

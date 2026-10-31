@@ -15,7 +15,7 @@
  * The group <CONTROL>
  *
  * Example:
- * [_display] call einv_gui_fnc_makeTooltip;
+ * [_display] call aio_gui_fnc_makeTooltip;
  *
  * Public: No
  */
@@ -24,7 +24,7 @@ disableSerialization;
 
 params ["_display"];
 
-private _tip = [_display, "EINV_Group", controlNull, [-10, -10, 0, TEXT_UNIT * 0.85]] call FUNC(uiCreate);
+private _tip = [_display, "AIO_Group", controlNull, [-10, -10, 0, TEXT_UNIT * 0.85]] call FUNC(uiCreate);
 
 // With the titles' gradient on, its words are structured text: their letters take the gradient (fnc_setTipText).
 _tip setVariable [QGVAR(gradient), (

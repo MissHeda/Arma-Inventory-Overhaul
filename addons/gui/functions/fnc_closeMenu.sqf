@@ -5,9 +5,9 @@
  * (fnc_openPaletteMenu), if one is open. Its layer goes with everything in it, and the
  * focus it took goes back to what had it before - or the search field's sink when that is gone - so a field
  * being typed in has the keys again. A palette popover that is only made again keeps the text of the field being typed in
- * (einv_gui_paletteTyping).
+ * (aio_gui_paletteTyping).
  *
- * The layer is hidden at once and deleted in the next frame (einv_gui_windowTrash, fnc_onFrame), as a kit
+ * The layer is hidden at once and deleted in the next frame (aio_gui_windowTrash, fnc_onFrame), as a kit
  * window is: a right press beside the card closes it from the layer's own mouse event, and a control must
  * not be deleted inside its own event.
  *
@@ -18,7 +18,7 @@
  * A menu was open <BOOL>
  *
  * Example:
- * call einv_gui_fnc_closeMenu;
+ * call aio_gui_fnc_closeMenu;
  *
  * Public: No
  */
@@ -35,7 +35,7 @@ private _hadFocus = !isNull _display && {
     !isNull _focused && {ctrlParentControlsGroup _focused in _controls}
 };
 
-// The palette popover being made again (einv_gui_menuRemake) while a number or the hex code is typed in one of its fields: the
+// The palette popover being made again (aio_gui_menuRemake) while a number or the hex code is typed in one of its fields: the
 // field and its text are kept for the new one (fnc_openPaletteMenu), whose cursor is in it again.
 if (GVAR(menuRemake) && {_controls isNotEqualTo []} && {(GVAR(menuFor) param [0, ""]) isEqualTo "palette"} && {!isNull _display}) then {
     private _focused = focusedCtrl _display;
@@ -84,7 +84,7 @@ if (_controls isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) isEqualTo "sound
 };
 
 // So is the palette popover (fnc_openPaletteMenu): what was chosen is written to the profile. Not when it is only made
-// again - over a build or on top of a redraw (einv_gui_menuRemake) - where it stays open and a slider held goes on.
+// again - over a build or on top of a redraw (aio_gui_menuRemake) - where it stays open and a slider held goes on.
 if (_controls isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) isEqualTo "palette"}) then {
     GVAR(menuFor) = [];
 

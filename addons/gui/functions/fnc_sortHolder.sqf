@@ -17,14 +17,14 @@
  *
  * Arguments:
  * 0: The container, or the key of a kit's grid <OBJECT or STRING>
- * 1: Its root, objNull to look it up (einv_storage_fnc_rootOf) <OBJECT> (default: objNull)
+ * 1: Its root, objNull to look it up (aio_storage_fnc_rootOf) <OBJECT> (default: objNull)
  * 2: Step to the next order first <BOOL> (default: false)
  *
  * Return Value:
  * None
  *
  * Example:
- * [cursorObject, objNull, true] call einv_gui_fnc_sortHolder;
+ * [cursorObject, objNull, true] call aio_gui_fnc_sortHolder;
  *
  * Public: No
  */

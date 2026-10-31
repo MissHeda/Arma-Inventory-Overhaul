@@ -26,7 +26,7 @@
  * The controls, rectangles first, then corners, then the border <ARRAY>
  *
  * Example:
- * [_display, controlNull, [0.1, 0.1, 0.3, 0.2], [1, 1, 1, 0.05], 0.01] call einv_gui_fnc_uiPanel;
+ * [_display, controlNull, [0.1, 0.1, 0.3, 0.2], [1, 1, 1, 0.05], 0.01] call aio_gui_fnc_uiPanel;
  *
  * Public: No
  */
@@ -48,7 +48,7 @@ private _controls = [];
 
 if (_color isNotEqualTo []) then {
     if (_corner < 1) exitWith {
-        private _ctrl = [_display, "EINV_PanelRect", _parent, [_x0, _y0, _x1 - _x0, _y1 - _y0]] call FUNC(uiCreate);
+        private _ctrl = [_display, "AIO_PanelRect", _parent, [_x0, _y0, _x1 - _x0, _y1 - _y0]] call FUNC(uiCreate);
         _ctrl ctrlSetBackgroundColor _color;
         _controls pushBack _ctrl;
     };
@@ -60,7 +60,7 @@ if (_color isNotEqualTo []) then {
         // The sides of a pill have no height left between their corners.
         if (_x select 3 <= 0) then {continue};
 
-        private _ctrl = [_display, "EINV_PanelRect", _parent, _x] call FUNC(uiCreate);
+        private _ctrl = [_display, "AIO_PanelRect", _parent, _x] call FUNC(uiCreate);
         _ctrl ctrlSetBackgroundColor _color;
         _controls pushBack _ctrl;
     } forEach [
@@ -72,7 +72,7 @@ if (_color isNotEqualTo []) then {
     {
         _x params ["_texture", "_cornerRect"];
 
-        private _ctrl = [_display, "EINV_PanelCorner", _parent, _cornerRect] call FUNC(uiCreate);
+        private _ctrl = [_display, "AIO_PanelCorner", _parent, _cornerRect] call FUNC(uiCreate);
         _ctrl ctrlSetText _texture;
         _ctrl ctrlSetTextColor _color;
         _controls pushBack _ctrl;

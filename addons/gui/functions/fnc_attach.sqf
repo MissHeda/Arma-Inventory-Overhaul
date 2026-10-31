@@ -5,7 +5,7 @@
  * Makes a display the window. Everything fnc_open does once the inventory's dialog exists, for any
  * display that carries the dim layer and the first control (IDC_DIM, IDC_FIRST): the unit and the
  * containers it looks into, the window's state started afresh, the mouse handlers, the first build and
- * the frame. The inventory attaches with no hooks; ACE Arsenal's grid panel (einv_arsenal) and later
+ * the frame. The inventory attaches with no hooks; ACE Arsenal's grid panel (aio_arsenal) and later
  * editor windows attach with a table of them (fnc_hook), which is how they differ from it. With no hooks
  * every function of this addon behaves as it always did (fnc_isInventoryMode). A display that belongs to
  * another mod and carries neither the dim layer nor the first control takes part as a guest (the "guest"
@@ -15,7 +15,7 @@
  *
  * The state of a living person looked into (GVAR(person), GVAR(personMode)) is the inventory's own and
  * is set by fnc_open before it attaches. A kit window of Enhanced First Aid Kits opened in the window
- * before is closed (einv_compat_efak - only when that addon is loaded).
+ * before is closed (aio_compat_efak - only when that addon is loaded).
  *
  * Nothing the last window waited for carries over (moves under way, answers, drift), nor the tiles it
  * had selected; what lies around is read for the first build
@@ -34,7 +34,7 @@
  * Attached <BOOL>
  *
  * Example:
- * [_display, player, objNull, objNull, createHashMap, "pfh"] call einv_gui_fnc_attach;
+ * [_display, player, objNull, objNull, createHashMap, "pfh"] call aio_gui_fnc_attach;
  *
  * Public: No
  */
@@ -87,7 +87,7 @@ GVAR(searchDirty) = true;
 GVAR(sealDragOver) = createHashMap;
 GVAR(opened) = [];
 
-// The kits opened in the last window close with it (einv_compat_efak - only when that addon is loaded).
+// The kits opened in the last window close with it (aio_compat_efak - only when that addon is loaded).
 if (!isNil QEFUNC(compat_efak,onWindowOpen)) then {
     call EFUNC(compat_efak,onWindowOpen);
 };

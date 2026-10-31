@@ -5,11 +5,11 @@
  * How long the hands are busy with one move of the window (fnc_sendMoves), and with what kind of work: a
  * drop onto the ground (or onto a pile the window shows), a move to a different container or holder (a kit
  * too, and two tiles that swap places between containers), or putting on and taking off worn gear (equip,
- * unequip, swap with another unit). The times are the server settings einv_gui_handDrop, handMove and
+ * unequip, swap with another unit). The times are the server settings aio_gui_handDrop, handMove and
  * handEquip, in seconds; 0 is no wait at all.
  *
  * Whether the kind waits at all is the server's second word, four switches: the quick move and group moves
- * (einv_gui_waitMove, on by default), dropping (waitDrop, on), putting on and taking off a uniform, vest, backpack or
+ * (aio_gui_waitMove, on by default), dropping (waitDrop, on), putting on and taking off a uniform, vest, backpack or
  * headgear (waitWorn, off) and equipping anything else (waitEquip, off). A drag out of the window never waits: what
  * fnc_endDrag sends in the frame it was let go in (GVAR(instantFrame)) goes at once, whatever the switches say.
  *
@@ -23,7 +23,7 @@
  * [kind, seconds] - kind "drop", "move" or "equip", "" for a move that needs no hands or does not wait <ARRAY>
  *
  * Example:
- * [createHashMapFromArray [["from", _crate], ["to", "ground"]]] call einv_gui_fnc_queueTime;
+ * [createHashMapFromArray [["from", _crate], ["to", "ground"]]] call aio_gui_fnc_queueTime;
  *
  * Public: No
  */

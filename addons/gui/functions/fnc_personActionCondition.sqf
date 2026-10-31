@@ -20,7 +20,7 @@
  * Shown <BOOL>
  *
  * Example:
- * [cursorObject, 3] call einv_gui_fnc_personActionCondition;
+ * [cursorObject, 3] call aio_gui_fnc_personActionCondition;
  *
  * Public: No
  */

@@ -8,7 +8,7 @@
  * (GVAR(holderTypes) "root").
  *
  * Where a nested container lies is known from the marks every read of its parent leaves on it
- * (fnc_getContents, fnc_verifyChain: einv_storage_parent, on this machine only), from its tag, or from
+ * (fnc_getContents, fnc_verifyChain: aio_storage_parent, on this machine only), from its tag, or from
  * the caller - each checked against the real cargo (everyContainer) before it counts: the engine makes
  * a new object on every move, but a backpack worn again may still carry a mark of where it lay.
  *
@@ -23,7 +23,7 @@
  *    "root"   - the root
  *    "top"    - the outermost container it lies in (a crate, vehicle, pile or a unit's uniform, vest or
  *               backpack), the holder itself when it lies in none - where copies of nested tags and
- *               places are kept (einv_storage_nested, fnc_tagNested); objNull for a holder that is no
+ *               places are kept (aio_storage_nested, fnc_tagNested); objNull for a holder that is no
  *               object
  *    "parent" - the container it lies in, objNull when none
  *
@@ -31,14 +31,14 @@
  * Root (or what was asked for), objNull when none is known <OBJECT>
  *
  * Example:
- * [backpackContainer player] call einv_storage_fnc_rootOf;
+ * [backpackContainer player] call aio_storage_fnc_rootOf;
  *
  * Public: Yes
  */
 
 params [["_holder", objNull, [objNull, ""]], ["_parent", objNull, [objNull]], ["_want", "root", [""]]];
 
-// A holder that is no object: its type knows (einv_compat_efak for kits), with the caller's hint - a
+// A holder that is no object: its type knows (aio_compat_efak for kits), with the caller's hint - a
 // machine without a window knows a kit's root only from that.
 if (_holder isEqualType "") exitWith {
     if (_want isNotEqualTo "root") exitWith {objNull};

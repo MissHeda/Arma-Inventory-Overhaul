@@ -25,7 +25,7 @@
  * The controls <ARRAY>
  *
  * Example:
- * [_display, _group, [0.1, 0.2], 10, 10, 20, [], _theme] call einv_gui_fnc_drawPagePanel;
+ * [_display, _group, [0.1, 0.2], 10, 10, 20, [], _theme] call aio_gui_fnc_drawPagePanel;
  *
  * Public: No
  */

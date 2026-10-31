@@ -15,7 +15,7 @@
  *   "container" - its container object <OBJECT>
  *
  * Example:
- * [player] call einv_storage_fnc_getSections;
+ * [player] call aio_storage_fnc_getSections;
  *
  * Public: No
  */

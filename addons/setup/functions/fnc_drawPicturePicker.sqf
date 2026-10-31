@@ -16,7 +16,7 @@
  *     owner's name under it; the page turned by the arrows beside the range. A click picks one (a ring round it),
  *     a second click on it takes it.
  *   - A field for any texture path, for an advanced user: it is read as a config would have it (backslashes or
- *     slashes, einv_items_fnc_parsePicture) and a thumbnail beside it shows the picture while the game has the
+ *     slashes, aio_items_fnc_parsePicture) and a thumbnail beside it shows the picture while the game has the
  *     file (fileExists), with a line that says so. The last of the two - the list or this field - that was used
  *     is the one "Use picture" takes.
  * What it shows is kept in GVAR(picker). Typing in the search draws only the list, so the field keeps the cursor;
@@ -31,7 +31,7 @@
  * None
  *
  * Example:
- * ["all"] call einv_setup_fnc_drawPicturePicker;
+ * ["all"] call aio_setup_fnc_drawPicturePicker;
  *
  * Public: No
  */
@@ -70,7 +70,7 @@ private _useW = SQUARE(UNIT * 8);
 private _summaryW = _width - _cancelW - _useW - SQUARE(UNIT * 0.6);
 
 // Whether the game has the file: the path as the engine reads it, with or without its leading backslash
-// (einv_items_fnc_getInfo asks the same).
+// (aio_items_fnc_getInfo asks the same).
 private _fnc_there = {
     params ["_path"];
 
@@ -112,7 +112,7 @@ if (_part isEqualTo "chips") exitWith {
 
     if (isNull _box) exitWith {};
 
-    private _row = [_display, "EINV_Group", _box, [0, _chipsY, _width, _chipsH]] call EFUNC(gui,uiCreate);
+    private _row = [_display, "AIO_Group", _box, [0, _chipsY, _width, _chipsH]] call EFUNC(gui,uiCreate);
     private _now = GVAR(picker) getOrDefault ["chip", "all"];
     private _chipX = 0;
 
@@ -151,7 +151,7 @@ if (_part isEqualTo "chips") exitWith {
 if (_part isEqualTo "all") then {
     ctrlDelete (uiNamespace getVariable [QGVAR(pickerBox), controlNull]);
 
-    private _box = [_display, "EINV_Group", _inner, [0, 0, _width, _height]] call EFUNC(gui,uiCreate);
+    private _box = [_display, "AIO_Group", _inner, [0, 0, _width, _height]] call EFUNC(gui,uiCreate);
 
     uiNamespace setVariable [QGVAR(pickerBox), _box];
     uiNamespace setVariable [QGVAR(pickerList), controlNull];
@@ -256,7 +256,7 @@ if (isNull _box) exitWith {};
 
 ctrlDelete (uiNamespace getVariable [QGVAR(pickerList), controlNull]);
 
-private _list = [_display, "EINV_Group", _box, [0, _gridY, _width, _listH]] call EFUNC(gui,uiCreate);
+private _list = [_display, "AIO_Group", _box, [0, _gridY, _width, _listH]] call EFUNC(gui,uiCreate);
 
 uiNamespace setVariable [QGVAR(pickerList), _list];
 

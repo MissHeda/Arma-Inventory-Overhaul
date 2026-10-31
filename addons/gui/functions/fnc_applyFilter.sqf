@@ -16,7 +16,7 @@
  * a window that attached is told afterwards (the "filter" hook).
  *
  * A tile whose controls were just made (a page turned to, a box drawn again) takes its state at once, with no fade in
- * between: its first control carries the state it was given (einv_gui_fx: 0 shown, 1 dimmed, 2 hidden) and none yet means
+ * between: its first control carries the state it was given (aio_gui_fx: 0 shown, 1 dimmed, 2 hidden) and none yet means
  * new - so nothing lights up for a moment on a page of a filtered box (Mia, 0.5.7).
  *
  * A tall compartment cut into pages (fnc_pageRanges) is searched on every page, not only the one shown: the
@@ -38,8 +38,8 @@
  * None
  *
  * Example:
- * [] call einv_gui_fnc_applyFilter;
- * [true] call einv_gui_fnc_applyFilter;
+ * [] call aio_gui_fnc_applyFilter;
+ * [true] call aio_gui_fnc_applyFilter;
  *
  * Public: No
  */

@@ -35,7 +35,7 @@
  * Whether the key is swallowed <BOOL>
  *
  * Example:
- * [_display, 19, false, false, false] call einv_storage_fnc_reloadGuard;
+ * [_display, 19, false, false, false] call aio_storage_fnc_reloadGuard;
  *
  * Public: No
  */
@@ -89,7 +89,7 @@ if (_best isEqualTo []) exitWith {
         _where = USE_KINDS select {([_x] call FUNC(useMode)) isNotEqualTo USE_ALL};
     };
 
-    [format [localize "STR_einv_storage_Hint_NoReload", [USE_KINDS select {_x in _where}] call FUNC(useKindName)]] call FUNC(useHint);
+    [format [localize "STR_aio_storage_Hint_NoReload", [USE_KINDS select {_x in _where}] call FUNC(useKindName)]] call FUNC(useHint);
 
     true
 };

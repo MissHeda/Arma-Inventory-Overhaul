@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [call einv_hotbar_fnc_counts] call einv_hotbar_fnc_hudDraw;
+ * [call aio_hotbar_fnc_counts] call aio_hotbar_fnc_hudDraw;
  *
  * Public: No
  */

@@ -1,14 +1,14 @@
 #define COMPONENT items
-#define COMPONENT_BEAUTIFIED EINV - Items
-#include "\z\einv\addons\main\script_mod.hpp"
-#include "\z\einv\addons\main\script_macros.hpp"
+#define COMPONENT_BEAUTIFIED AIO - Items
+#include "\z\aio\addons\main\script_mod.hpp"
+#include "\z\aio\addons\main\script_macros.hpp"
 
 // ---------------------------------------------------------------------------
-// The rules (einv_items_rules, fnc_parseRules, fnc_compileRules)
+// The rules (aio_items_rules, fnc_parseRules, fnc_compileRules)
 // ---------------------------------------------------------------------------
 
 // What the setting holds until someone changes it, and what an empty or unreadable text means.
-#define DEFAULT_RULES "einv1 base=default"
+#define DEFAULT_RULES "aio1 base=default"
 
 // The defaults of the two older sliders. Moved off them, they still count (fnc_compileRules).
 #define DEFAULT_MASS_PER_CELL 5
@@ -21,7 +21,7 @@
 // The kinds that hold things and so get a grid, and the kinds that never share a tile: each of them
 // holds things of its own or carries attachments, and a tile moves only one of them with all that. A kit
 // of Enhanced First Aid Kits or a pouch of Enhanced Utility Pouches holds things too, but its grid counts
-// only where a rule or its config gives it one (einv_compat_efak_fnc_roomMode): else that mod's capacity
+// only where a rule or its config gives it one (aio_compat_efak_fnc_roomMode): else that mod's capacity
 // is its room.
 #define KINDS_CONTAINER ["uniform", "vest", "backpack", "crate", "vehicle", "kit"]
 
@@ -35,13 +35,13 @@
 #define KINDS_SINGLE ["rifle", "handgun", "launcher", "binocular", "uniform", "vest", "backpack", "kit"]
 
 // The words that stand for one of the eight categories of ITEM_GROUPS, [word, category]: read as that category in cats=,
-// einv_cat and the attributes of a grid, and never usable as the id of a category of the server's own (fnc_builtinGroup).
+// aio_cat and the attributes of a grid, and never usable as the id of a category of the server's own (fnc_builtinGroup).
 #define GROUP_ALIASES [["magazine", "ammo"], ["mag", "ammo"], ["ammunition", "ammo"], ["throwable", "grenade"], ["explosive", "grenade"], ["clothing", "gear"], ["armour", "gear"], ["armor", "gear"], ["medic", "medical"], ["drink", "food"], ["gadget", "tool"], ["other", "misc"]]
 
 // The tile categories by their names in the rules (cat=), in the order of the CATEGORY_* numbers.
 #define CATEGORY_NAMES ["misc", "gear", "weapon", "ammo", "medical"]
 
-// The grid patterns a container can be laid out by (grid=rig, ...), see einv_storage_fnc_blocksFor. "pouches"
+// The grid patterns a container can be laid out by (grid=rig, ...), see aio_storage_fnc_blocksFor. "pouches"
 // is what a vest gets when no rule says otherwise, "block" a uniform.
 #define GRID_PATTERNS ["pockets", "pockets_mixed", "rig", "mixed", "plate", "long", "single", "wide", "pouches", "block"]
 
@@ -57,7 +57,7 @@
 #define PRESET_ALIASES [["tarkov", "default"], ["realism", "default"], ["weight", "default"]]
 
 // The keys an item's own config may set, each written the way the rules write the same value
-// (fnc_readConfigKeys): einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture, einv_use, einv_cat. fnc_configEntry
+// (fnc_readConfigKeys): aio_size, aio_stack, aio_grid, aio_weight, aio_name, aio_icon, aio_picture, aio_use, aio_cat. fnc_configEntry
 // writes them, fnc_parseConfigEntry reads them back from a snippet.
 #define CONFIG_KEYS [QGVARMAIN(size), QGVARMAIN(stack), QGVARMAIN(grid), QGVARMAIN(weight), QGVARMAIN(name), QGVARMAIN(icon), QGVARMAIN(picture), QGVARMAIN(use), QGVARMAIN(cat)]
 

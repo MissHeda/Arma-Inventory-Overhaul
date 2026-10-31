@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Forgets where things lie in a holder, for everyone - on its authority only. Used when Enhanced First
- * Aid Kits frees a kit instance class (einv_compat_efak): that mod reuses instance classes, so the next
+ * Aid Kits frees a kit instance class (aio_compat_efak): that mod reuses instance classes, so the next
  * kit of the class must not inherit the arrangement, and the variable must leave what joining players
  * receive. Objects need nothing: their variables go with them - one dropped all the same loses its
  * places and its copy on the outermost container it lies in.
@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * ["kit:efak_ifak_7"] call einv_storage_fnc_dropPlaces;
+ * ["kit:efak_ifak_7"] call aio_storage_fnc_dropPlaces;
  *
  * Public: No
  */

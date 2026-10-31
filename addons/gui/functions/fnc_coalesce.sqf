@@ -28,7 +28,7 @@
  * It ran now <BOOL>
  *
  * Example:
- * ["filter", {[true] call einv_gui_fnc_applyFilter}, [], COALESCE_TYPING, true] call einv_gui_fnc_coalesce;
+ * ["filter", {[true] call aio_gui_fnc_applyFilter}, [], COALESCE_TYPING, true] call aio_gui_fnc_coalesce;
  *
  * Public: No
  */

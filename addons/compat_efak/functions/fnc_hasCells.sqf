@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Whether so many of an item still find free cells in a kit whose grid a rule or its config gives it
  * (fnc_roomMode "cells") - its room then, instead of Enhanced First Aid Kits' capacity. As in any
- * container (einv_storage_fnc_hasSpace): what it holds is laid out once more with them added, from the
+ * container (aio_storage_fnc_hasSpace): what it holds is laid out once more with them added, from the
  * places everyone shares; nothing is kept. They first fill the piles of their kind that are not full
  * yet - a magazine only those of its rounds -, and only what is left needs free cells, a tile per
  * stack's worth. Magazines of different rounds lie on tiles of their own.
@@ -19,7 +19,7 @@
  * They all have room <BOOL>
  *
  * Example:
- * ["efak_IFAK_7", "ACE_fieldDressing", 3] call einv_compat_efak_fnc_hasCells;
+ * ["efak_IFAK_7", "ACE_fieldDressing", 3] call aio_compat_efak_fnc_hasCells;
  *
  * Public: No
  */

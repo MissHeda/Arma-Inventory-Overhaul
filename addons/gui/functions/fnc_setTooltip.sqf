@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * [_button, "Fold this box"] call einv_gui_fnc_setTooltip;
+ * [_button, "Fold this box"] call aio_gui_fnc_setTooltip;
  *
  * Public: No
  */

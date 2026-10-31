@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * [{systemChat str _this}, [1, 2]] call einv_storage_fnc_nextFrame;
+ * [{systemChat str _this}, [1, 2]] call aio_storage_fnc_nextFrame;
  *
  * Public: No
  */

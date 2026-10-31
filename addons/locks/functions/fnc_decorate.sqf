@@ -14,14 +14,14 @@
  *
  * Arguments:
  * 0: Unit <OBJECT>
- * 1: Sections of the loot column (einv_storage_fnc_getLootSections) <ARRAY of HASHMAPs>
+ * 1: Sections of the loot column (aio_storage_fnc_getLootSections) <ARRAY of HASHMAPs>
  * 2: What the window opened from inside containers, [[class, object, parent], ...] <ARRAY> (default: [])
  *
  * Return Value:
  * The sections, locked ones changed <ARRAY of HASHMAPs>
  *
  * Example:
- * [player, _lootSections, einv_gui_opened] call einv_locks_fnc_decorate;
+ * [player, _lootSections, aio_gui_opened] call aio_locks_fnc_decorate;
  *
  * Public: No
  */

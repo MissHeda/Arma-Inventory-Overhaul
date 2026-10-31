@@ -11,7 +11,7 @@
  * The text <STRING>
  *
  * Example:
- * ["Not%0020allowed"] call einv_main_fnc_decodeText;
+ * ["Not%0020allowed"] call aio_main_fnc_decodeText;
  *
  * Public: No
  */

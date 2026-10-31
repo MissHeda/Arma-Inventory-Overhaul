@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Takes colours as text - what the colour popover's Export gives, or the CBA setting einv_gui_paletteText - as the player's
+ * Takes colours as text - what the colour popover's Export gives, or the CBA setting aio_gui_paletteText - as the player's
  * palette: read as the profile is (fnc_paletteRead), kept and shown at once. Text that is no palette changes nothing.
  *
  * Arguments:
@@ -12,7 +12,7 @@
  * Taken <BOOL>
  *
  * Example:
- * ["[[0.6,0.7,1],[],-1]"] call einv_gui_fnc_paletteImport;
+ * ["[[0.6,0.7,1],[],-1]"] call aio_gui_fnc_paletteImport;
  *
  * Public: No
  */

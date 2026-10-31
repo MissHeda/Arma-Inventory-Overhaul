@@ -24,7 +24,7 @@
  *   "colorSet" - the setup's own color= as written, six hex digits, "" for none <STRING>
  *
  * Example:
- * ["medical"] call einv_items_fnc_categoryInfo;
+ * ["medical"] call aio_items_fnc_categoryInfo;
  *
  * Public: Yes
  */
@@ -61,9 +61,9 @@ private _only = _ownName;
 
 if (_ownName isEqualTo "") then {
     if (_builtin) then {
-        _name = localize format ["STR_einv_setup_Cat_%1", _id];
-        _label = localize format ["STR_einv_gui_Group_%1", _titled];
-        _only = localize format ["STR_einv_gui_Only_%1", _id];
+        _name = localize format ["STR_aio_setup_Cat_%1", _id];
+        _label = localize format ["STR_aio_gui_Group_%1", _titled];
+        _only = localize format ["STR_aio_gui_Only_%1", _id];
     } else {
         // No name given: the id, as words.
         private _words = (_id splitString "_") joinString " ";

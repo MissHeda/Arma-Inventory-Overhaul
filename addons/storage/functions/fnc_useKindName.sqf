@@ -11,7 +11,7 @@
  * The words <STRING>
  *
  * Example:
- * [["vest", "backpack"]] call einv_storage_fnc_useKindName;
+ * [["vest", "backpack"]] call aio_storage_fnc_useKindName;
  * // "vest and backpack"
  *
  * Public: Yes
@@ -23,4 +23,4 @@ if (_kinds isEqualType "") then {
     _kinds = [_kinds];
 };
 
-(_kinds apply {localize format ["STR_einv_storage_Kind_%1", _x]}) joinString (" " + localize "STR_einv_storage_Kind_And" + " ")
+(_kinds apply {localize format ["STR_aio_storage_Kind_%1", _x]}) joinString (" " + localize "STR_aio_storage_Kind_And" + " ")

@@ -5,7 +5,7 @@
  * for refilling magazines switches it off for everyone), ACE's repack and its interaction check are
  * there (ACE's repack schedule is not public - a renamed function switches the feature off rather than
  * break it), and the window is the plain inventory. The Arsenal and later editor windows attach with a
- * hook table (einv_gui_fnc_isInventoryMode) and hand out full magazines anyway.
+ * hook table (aio_gui_fnc_isInventoryMode) and hand out full magazines anyway.
  *
  * Arguments:
  * None
@@ -14,7 +14,7 @@
  * Repacking is on <BOOL>
  *
  * Example:
- * call einv_magazines_fnc_isEnabled;
+ * call aio_magazines_fnc_isEnabled;
  *
  * Public: No
  */

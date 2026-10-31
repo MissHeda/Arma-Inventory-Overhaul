@@ -8,7 +8,7 @@
  * rows go grey), and leaves every other row lit, however the cells lie. Cells are the only limit here, so
  * both ways: a row ACE greyed whose item the grid would take is lit again, and a row ACE left lit whose
  * item the grid has no spot for is greyed, as ACE greys one - a 2x2 magazine does not fit into a vest with
- * four cells free in singles. Asked as an add asks it (einv_storage_fnc_hasSpace, the layout fnc_addNew
+ * four cells free in singles. Asked as an add asks it (aio_storage_fnc_hasSpace, the layout fnc_addNew
  * and fnc_addTo place a new item by): a free spot of the item's shape, upright or turned, in one of the
  * compartments, or a pile of the same kind (class and rounds) with room left. The "+" of the row picked
  * is enabled or disabled the same way.
@@ -37,7 +37,7 @@
  * None
  *
  * Example:
- * [_display] call einv_arsenal_fnc_ungrey;
+ * [_display] call aio_arsenal_fnc_ungrey;
  *
  * Public: No
  */
@@ -163,7 +163,7 @@ while {_row < _size && {diag_tickTime < _until}} do {
     _row = _row + 1;
 };
 
-// For the tester's numbers (einv_gui_debugTiming): what the whole pass spent, over all its frames.
+// For the tester's numbers (aio_gui_debugTiming): what the whole pass spent, over all its frames.
 GVAR(ungreyStat) params ["_passBegin", "_slices", "_spent"];
 GVAR(ungreyStat) = [_passBegin, _slices + 1, _spent + (diag_tickTime - _sliceBegin)];
 

@@ -12,7 +12,7 @@
  * The caption <STRING>
  *
  * Example:
- * ["Backpack", _theme] call einv_gui_fnc_caption;
+ * ["Backpack", _theme] call aio_gui_fnc_caption;
  *
  * Public: No
  */

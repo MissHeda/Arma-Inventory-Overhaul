@@ -16,7 +16,7 @@
  * Where its content starts, as a y in the group <NUMBER>
  *
  * Example:
- * private _contentY = [_display, _group, [0, 0, 0.3, 0.2], "Cell size", _theme] call einv_setup_fnc_uiCard;
+ * private _contentY = [_display, _group, [0, 0, 0.3, 0.2], "Cell size", _theme] call aio_setup_fnc_uiCard;
  *
  * Public: No
  */

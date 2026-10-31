@@ -6,9 +6,9 @@
  * what makes a lock per player possible. The key, the scroll action and any script that asks the
  * engine to open the object all stop at it.
  *
- * Only ever undoes the lock this machine set itself (einv_locks_engineMine): a lock the mission set is
+ * Only ever undoes the lock this machine set itself (aio_locks_engineMine): a lock the mission set is
  * never lifted here, and never taken over. When the answer changes, the window's signature changes with
- * it (einv_locks_stamp).
+ * it (aio_locks_stamp).
  *
  * Arguments:
  * 0: Locked object, or one that was locked a moment ago <OBJECT>
@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [_crate] call einv_locks_fnc_refresh;
+ * [_crate] call aio_locks_fnc_refresh;
  *
  * Public: No
  */

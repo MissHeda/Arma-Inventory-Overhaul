@@ -14,7 +14,7 @@
  * "inspect" on the inspect card, the key of the topmost kit window there, "" for the columns <STRING>
  *
  * Example:
- * [getMousePosition] call einv_gui_fnc_topAt;
+ * [getMousePosition] call aio_gui_fnc_topAt;
  *
  * Public: No
  */

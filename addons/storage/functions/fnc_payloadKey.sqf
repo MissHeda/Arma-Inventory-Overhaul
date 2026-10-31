@@ -19,7 +19,7 @@
  * Key, "" for an empty payload <STRING>
  *
  * Example:
- * [["magazine", "30Rnd_65x39_caseless_mag", [30]]] call einv_storage_fnc_payloadKey;
+ * [["magazine", "30Rnd_65x39_caseless_mag", [30]]] call aio_storage_fnc_payloadKey;
  *
  * Public: No
  */

@@ -12,7 +12,7 @@
  * 0 none, 1 short-range radio of its own, 2 prototype, 3 long-range backpack <NUMBER>
  *
  * Example:
- * ["TFAR_anprc152_1"] call einv_compat_tfar_fnc_radioType;
+ * ["TFAR_anprc152_1"] call aio_compat_tfar_fnc_radioType;
  *
  * Public: No
  */

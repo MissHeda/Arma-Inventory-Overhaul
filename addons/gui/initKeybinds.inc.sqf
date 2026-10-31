@@ -4,7 +4,7 @@
 
 // Quick move: the double click's work for the tile under the mouse, from the keyboard.
 [
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_AIO, LLSTRING(SubCategory_General)],
     QGVAR(quickMove),
     [LLSTRING(Keybind_QuickMove), LLSTRING(Keybind_QuickMove_Tooltip)],
     {false},
@@ -16,7 +16,7 @@
 // a slot of the hotbar is emptied; on ACE Arsenal's panel the item is taken out. No other key does this - Delete
 // does nothing unless the player binds it here.
 [
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_AIO, LLSTRING(SubCategory_General)],
     QGVAR(drop),
     [LLSTRING(Keybind_Drop), LLSTRING(Keybind_Drop_Tooltip)],
     {false},
@@ -26,7 +26,7 @@
 
 // Rotate: what is being dragged turns a quarter round (one tile, not several dragged together).
 [
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_AIO, LLSTRING(SubCategory_General)],
     QGVAR(rotate),
     [LLSTRING(Keybind_Rotate), LLSTRING(Keybind_Rotate_Tooltip)],
     {false},

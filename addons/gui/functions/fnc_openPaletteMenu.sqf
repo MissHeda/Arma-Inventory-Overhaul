@@ -19,7 +19,7 @@
  * Every row is folded to one line - name, swatch, its button back to the default - and opens on a click: its picker and its slider
  * under it, one row open at a time. Folding it (a click on the open row) hides all of it, the slider too. A row that can run as a
  * gradient (Titles, Panels) shows a Gradient switch when open, and with it on two colour boxes, Start and End: a click on one binds
- * the picker to it (uiNamespace einv_gui_paletteEnd). Its folded swatch shows both halves. "Reset all" in the title
+ * the picker to it (uiNamespace aio_gui_paletteEnd). Its folded swatch shows both halves. "Reset all" in the title
  * row takes every choice away. The buttons show only while there is a choice to take away.
  *
  * The picker is the kind that painting programs have: a colour square (the saturation across, the value down; a pure-hue rectangle
@@ -30,19 +30,19 @@
  * card in place (fnc_updatePaletteMenu) and builds the window again. The squares of the panels and the cells show only the values
  * up to PALETTE_PANEL_VALUE_MAX: a black film over them, so what they show is what is chosen.
  *
- * Which row is open is kept in uiNamespace einv_gui_paletteOpen (its id, "" none), and its colour's number in einv_gui_paletteTab
- * (-1 for none, fnc_closeMenu keeps a field being typed in by it); whether the style list is open in einv_gui_paletteStylesOpen.
+ * Which row is open is kept in uiNamespace aio_gui_paletteOpen (its id, "" none), and its colour's number in aio_gui_paletteTab
+ * (-1 for none, fnc_closeMenu keeps a field being typed in by it); whether the style list is open in aio_gui_paletteStylesOpen.
  *
  * The card is the sound dropdown's (fnc_openSoundMenu) in look and machinery: darker than the panels, a one-pixel border, a
  * soft shadow, neutral greys and white words whatever the palette sets - the swatches and the picker are the only colour -,
- * right-aligned to the window's right edge a small gap under the header's line; a layer over the screen in einv_gui_menu with the
- * hit area beside the card, einv_gui_menuFor "palette", closing on a click beside it, on Escape and on a click on the palette
+ * right-aligned to the window's right edge a small gap under the header's line; a layer over the screen in aio_gui_menu with the
+ * hit area beside the card, aio_gui_menuFor "palette", closing on a click beside it, on Escape and on a click on the palette
  * button again, and then written to the profile (fnc_paletteSettle, via fnc_closeMenu).
  *
  * Unlike the dropdown it stays open while the window is built again: fnc_build asks for it to be made again at its end and
  * fnc_raiseMenu makes it again on top of a redraw. That is this function with the popover already open; it then closes the old
- * one without writing anything (einv_gui_menuRemake), a picker that is held stays held (fnc_paletteSlide) and the text that was being
- * typed in a field is put back with the cursor in it (fnc_closeMenu keeps it, einv_gui_paletteTyping).
+ * one without writing anything (aio_gui_menuRemake), a picker that is held stays held (fnc_paletteSlide) and the text that was being
+ * typed in a field is put back with the cursor in it (fnc_closeMenu keeps it, aio_gui_paletteTyping).
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -51,7 +51,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_openPaletteMenu;
+ * [_display] call aio_gui_fnc_openPaletteMenu;
  *
  * Public: No
  */
@@ -305,7 +305,7 @@ private _cardY = _top - safezoneY;
 
 // ----- The layer, the hit area beside the card, the card -----
 
-private _layer = [_display, "EINV_Group", controlNull, [safezoneX, safezoneY, safezoneW, safezoneH]] call FUNC(uiCreate);
+private _layer = [_display, "AIO_Group", controlNull, [safezoneX, safezoneY, safezoneW, safezoneH]] call FUNC(uiCreate);
 
 // Settings, not the inventory: no word in it takes the gradient (fnc_uiLabel).
 _layer setVariable [QGVAR(plain), true];
@@ -316,7 +316,7 @@ _layer setVariable [QGVAR(hooked), true];
 _layer ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton); false}];
 _layer ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton); false}];
 
-private _catcher = [_display, "EINV_Hitbox", _layer, [0, 0, safezoneW, safezoneH]] call FUNC(uiCreate);
+private _catcher = [_display, "AIO_Hitbox", _layer, [0, 0, safezoneW, safezoneH]] call FUNC(uiCreate);
 _catcher ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton); false}];
 _catcher ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton); false}];
 _catcher ctrlAddEventHandler ["ButtonClick", {[{[] call FUNC(closeMenu)}] call FUNC(later)}];
@@ -330,7 +330,7 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{[] call FUNC(closeMenu)}] call F
 
 // A click on the card between its controls is no click beside it: this takes it, and does nothing (the catcher above closes the
 // popover only for a click beside the card).
-[_display, "EINV_Hitbox", _layer, [_cardX, _cardY, _width, _height]] call FUNC(uiCreate);
+[_display, "AIO_Hitbox", _layer, [_cardX, _cardY, _width, _height]] call FUNC(uiCreate);
 
 // What the small buttons are drawn with: neutral films, the light ink of the card.
 private _buttonTheme = createHashMapFromArray [
@@ -447,12 +447,12 @@ private _fnc_picker = {
 
     // The square: the pure hue, white fading out over it to the right (saturation), black fading in over that downwards (value).
     private _squareRect = [_squareX, _pickTop, _pickW, _pickH];
-    private _base = [_display, "EINV_PanelRect", _layer, _squareRect] call FUNC(uiCreate);
+    private _base = [_display, "AIO_PanelRect", _layer, _squareRect] call FUNC(uiCreate);
 
     _base ctrlSetBackgroundColor [1, 0, 0, 1];
 
     {
-        private _fade = [_display, "EINV_PanelCorner", _layer, _squareRect] call FUNC(uiCreate);
+        private _fade = [_display, "AIO_PanelCorner", _layer, _squareRect] call FUNC(uiCreate);
 
         _fade ctrlSetText _x;
         _fade ctrlSetTextColor [1, 1, 1, 1];
@@ -470,7 +470,7 @@ private _fnc_picker = {
 
     // The strip of hues beside it.
     private _stripRect = [_stripX, _pickTop, _stripW, _pickH];
-    private _strip = [_display, "EINV_PanelCorner", _layer, _stripRect] call FUNC(uiCreate);
+    private _strip = [_display, "AIO_PanelCorner", _layer, _stripRect] call FUNC(uiCreate);
 
     _strip ctrlSetText UI_TEX(hue_vstrip_ca);
     _strip ctrlSetTextColor [1, 1, 1, 1];
@@ -485,7 +485,7 @@ private _fnc_picker = {
     {
         _x params ["_kind", "_rect"];
 
-        private _hit = [_display, "EINV_Hitbox", _layer, _rect] call FUNC(uiCreate);
+        private _hit = [_display, "AIO_Hitbox", _layer, _rect] call FUNC(uiCreate);
 
         _hit setVariable [QGVAR(picker), [_kind, _which, [safezoneX + (_rect select 0), safezoneY + (_rect select 1), _rect select 2, _rect select 3]]];
 
@@ -514,10 +514,10 @@ private _fnc_picker = {
         [_display, _layer, [_fieldsX, _rowTop, _fieldsW, _fieldH], [1, 1, 1, 0.08], UNIT * 0.25] call FUNC(uiPanel);
         [_display, _layer, [_fieldsX + _fieldPadX, _rowTop, _fieldLabelW, _fieldH], _label, _fieldSize, _muted, _font, 0, "menu"] call FUNC(uiLabel);
 
-        private _hit = [_display, "EINV_Hitbox", _layer, [_fieldsX, _rowTop, _fieldsW, _fieldH]] call FUNC(uiCreate);
+        private _hit = [_display, "AIO_Hitbox", _layer, [_fieldsX, _rowTop, _fieldsW, _fieldH]] call FUNC(uiCreate);
         private _editX = _fieldsX + _fieldPadX + _fieldLabelW;
         private _edit = [
-            _display, "EINV_Edit", _layer, [_editX, _rowTop + (_fieldH - _fieldSize * 1.4) / 2, _fieldsX + _fieldsW - _fieldPadX - _editX, _fieldSize * 1.4]
+            _display, "AIO_Edit", _layer, [_editX, _rowTop + (_fieldH - _fieldSize * 1.4) / 2, _fieldsX + _fieldsW - _fieldPadX - _editX, _fieldSize * 1.4]
         ] call FUNC(uiCreate);
 
         _edit ctrlSetFont _font;
@@ -575,7 +575,7 @@ if (_io isNotEqualTo "") then {
     [_display, _layer, _fieldRect, [1, 1, 1, 0.08], UNIT * 0.25] call FUNC(uiPanel);
 
     private _ioEdit = [
-        _display, "EINV_EditLong", _layer,
+        _display, "AIO_EditLong", _layer,
         [(_fieldRect select 0) + SQUARE(UNIT * 0.3), _y + (_rowH - _small * 1.4) / 2, (_fieldRect select 2) - SQUARE(UNIT * 0.6), _small * 1.4]
     ] call FUNC(uiCreate);
 
@@ -699,7 +699,7 @@ if (_stylesOpen) then {
             ] call FUNC(uiIcon);
         };
 
-        private _hit = [_display, "EINV_Hitbox", _layer, [_cardX + _padX, _rowTop, _width - _padX * 2, _rowH]] call FUNC(uiCreate);
+        private _hit = [_display, "AIO_Hitbox", _layer, [_cardX + _padX, _rowTop, _width - _padX * 2, _rowH]] call FUNC(uiCreate);
 
         _hit setVariable [QGVAR(id), _styleId];
         _hit ctrlAddEventHandler ["ButtonClick", {
@@ -787,7 +787,7 @@ private _sliders = createHashMap;
     _chips set [_id, [_id, _words, _y, _headH] call _fnc_chip];
 
     // A click on the arrow, the name or the swatch opens the row (the one open before folds), or folds it where it is open.
-    private _nameHit = [_display, "EINV_Hitbox", _layer, [_cardX + _padX, _y, _swatchX + _swatchW + SQUARE(UNIT * 0.3) - _padX, _headH]] call FUNC(uiCreate);
+    private _nameHit = [_display, "AIO_Hitbox", _layer, [_cardX + _padX, _y, _swatchX + _swatchW + SQUARE(UNIT * 0.3) - _padX, _headH]] call FUNC(uiCreate);
 
     [_nameHit, _tip] call FUNC(setTooltip);
     _nameHit setVariable [QGVAR(id), _id];
@@ -854,7 +854,7 @@ private _sliders = createHashMap;
 
                     [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0, "menu"] call FUNC(uiLabel);
 
-                    private _boxHit = [_display, "EINV_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(UNIT * 1.7), _rowH]] call FUNC(uiCreate);
+                    private _boxHit = [_display, "AIO_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(UNIT * 1.7), _rowH]] call FUNC(uiCreate);
 
                     _boxHit setVariable [QGVAR(id), _isEnd];
                     _boxHit ctrlAddEventHandler ["ButtonClick", {
@@ -946,7 +946,7 @@ private _sliders = createHashMap;
                     {
                         _x params ["_halfRect", "_isEnd"];
 
-                        private _pillHit = [_display, "EINV_Hitbox", _layer, _halfRect] call FUNC(uiCreate);
+                        private _pillHit = [_display, "AIO_Hitbox", _layer, _halfRect] call FUNC(uiCreate);
 
                         [_pillHit, LLSTRING(Palette_PartPick)] call FUNC(setTooltip);
                         _pillHit setVariable [QGVAR(id), [_partIndex, _isEnd]];
@@ -984,7 +984,7 @@ private _sliders = createHashMap;
 
                     // The checkbox and the words take the click - two hit areas either side of the pill, which has its own.
                     {
-                        private _partHit = [_display, "EINV_Hitbox", _layer, _x] call FUNC(uiCreate);
+                        private _partHit = [_display, "AIO_Hitbox", _layer, _x] call FUNC(uiCreate);
 
                         [_partHit, _partTip] call FUNC(setTooltip);
                         _partHit setVariable [QGVAR(id), _bit];
@@ -1082,7 +1082,7 @@ private _sliders = createHashMap;
 
                     [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0] call FUNC(uiLabel);
 
-                    private _boxHit = [_display, "EINV_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(UNIT * 1.7), _rowH]] call FUNC(uiCreate);
+                    private _boxHit = [_display, "AIO_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(UNIT * 1.7), _rowH]] call FUNC(uiCreate);
 
                     [_boxHit, LLSTRING(Palette_PartColours_Tip)] call FUNC(setTooltip);
                     _boxHit setVariable [QGVAR(id), _isEnd];
@@ -1147,7 +1147,7 @@ private _sliders = createHashMap;
 
             [_display, _layer, _trackRect, [1, 1, 1, 0.12], _trackH / 2] call FUNC(uiPanel);
 
-            private _fill = [_display, "EINV_PanelRect", _layer, _trackRect] call FUNC(uiCreate);
+            private _fill = [_display, "AIO_PanelRect", _layer, _trackRect] call FUNC(uiCreate);
 
             _fill ctrlSetBackgroundColor [0.72, 0.72, 0.72, 1];
 
@@ -1167,7 +1167,7 @@ private _sliders = createHashMap;
 
             // The hit area is the slider's whole room, a knob's width beyond the track at each end: a press near an end is that end.
             // The track's place on the screen goes with it, for the mouse's place along it (fnc_paletteSlide).
-            private _hit = [_display, "EINV_Hitbox", _layer, [_cardX + _sliderX, _y, _sliderW, _rowH]] call FUNC(uiCreate);
+            private _hit = [_display, "AIO_Hitbox", _layer, [_cardX + _sliderX, _y, _sliderW, _rowH]] call FUNC(uiCreate);
 
             _hit setVariable [QGVAR(picker), [_kind, 0, [safezoneX + _cardX + _trackX, safezoneY + _trackY, _trackW, _trackH]]];
 
@@ -1198,7 +1198,7 @@ private _hintTop = _cardY + _height - _padY - _hintH;
 
 [_display, _layer, [_cardX + _padX, _hintTop - _gapY / 2, _width - _padX * 2, pixelH], [1, 1, 1, 0.05]] call FUNC(uiPanel);
 
-private _hintLine = [_display, "EINV_StructuredText", _layer, [_cardX + _padX, _hintTop, _hintW, _hintH]] call FUNC(uiCreate);
+private _hintLine = [_display, "AIO_StructuredText", _layer, [_cardX + _padX, _hintTop, _hintW, _hintH]] call FUNC(uiCreate);
 
 _hintLine ctrlEnable false;
 _hintLine setVariable [QGVAR(hintSize), _hintSize];
@@ -1209,7 +1209,7 @@ uiNamespace setVariable [QGVAR(menuHint), _hintLine];
 
 // The focus into the layer, so it is drawn over everything: a button no one sees, one pixel in the card's
 // padding. Return and Space press nothing on it (fnc_openMenu).
-private _focus = [_display, "EINV_Hitbox", _layer, [_cardX + _padX / 2, _cardY + _padY / 2, pixelW, pixelH]] call FUNC(uiCreate);
+private _focus = [_display, "AIO_Hitbox", _layer, [_cardX + _padX / 2, _cardY + _padY / 2, pixelW, pixelH]] call FUNC(uiCreate);
 ctrlSetFocus _focus;
 
 // Kept, so the frame can give the focus back should it leave the layer (fnc_onFrame): without it the layer sinks under the columns,

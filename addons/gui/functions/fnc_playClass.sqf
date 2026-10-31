@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * ["ACE_Sound_Click", "warn"] call einv_gui_fnc_playClass;
+ * ["ACE_Sound_Click", "warn"] call aio_gui_fnc_playClass;
  *
  * Public: Yes
  */

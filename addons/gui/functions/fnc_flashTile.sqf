@@ -15,7 +15,7 @@
  * The tile, an empty HashMap when it is not on the window <HASHMAP>
  *
  * Example:
- * [_display, [_box, "firstaidkit", 0, 2, 1, 0]] call einv_gui_fnc_flashTile;
+ * [_display, [_box, "firstaidkit", 0, 2, 1, 0]] call aio_gui_fnc_flashTile;
  *
  * Public: No
  */

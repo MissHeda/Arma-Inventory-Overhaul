@@ -31,7 +31,7 @@
  * close, "the window closes at once". So while a vanilla inventory is open it is closed first and the
  * window opens a frame later, at most OPEN_TRIES frames on. "Open" includes a display the guard closed
  * that is not gone yet: the engine may no longer list it (findDisplay) while it still holds it, and a
- * window made then hangs under it all the same - the guard keeps those (uiNamespace einv_gui_closing) and
+ * window made then hangs under it all the same - the guard keeps those (uiNamespace aio_gui_closing) and
  * the window waits for them too. One still held after OPEN_TRIES frames that findDisplay no longer finds
  * does not keep the window from opening.
  *
@@ -57,7 +57,7 @@
  * Opened, or opens a frame later <BOOL>
  *
  * Example:
- * [player, cursorObject, objNull] call einv_gui_fnc_open;
+ * [player, cursorObject, objNull] call aio_gui_fnc_open;
  *
  * Public: Yes
  */
@@ -125,7 +125,7 @@ if (_wait) exitWith {
     true
 };
 
-if !(createDialog "EINV_InventoryDialog") exitWith {
+if !(createDialog "AIO_InventoryDialog") exitWith {
     ERROR("Could not create the inventory dialog.");
     false
 };
@@ -167,7 +167,7 @@ if !([_display, _unit, _container, _secondary, createHashMap, "pfh"] call FUNC(a
 GVAR(openGuess) = _guess >= 0;
 
 // What it opened on, for the RPT: each container's class, its family (fnc_containerFamily: vehicle, crate,
-// ground, body), its compartments as rows x cols (einv_storage_fnc_getBlocks - the ground's is open, it grows),
+// ground, body), its compartments as rows x cols (aio_storage_fnc_getBlocks - the ground's is open, it grows),
 // its load, and what the window made of it: in the loot column, locked and why, the player's own gear, or no
 // section at all - a pile with nothing in it has none, anything else without one was left out on the way.
 private _lootSections = GVAR(context) getOrDefault ["lootSections", []];

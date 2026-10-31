@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * [_button] call einv_arsenal_fnc_onCloseButton;
+ * [_button] call aio_arsenal_fnc_onCloseButton;
  *
  * Public: No
  */

@@ -10,7 +10,7 @@ ADDON = false;
 // disagree: what is set in CBA's menu shows in the wizard, what the wizard saves shows in CBA's menu. Every addon
 // registers its own with fnc_addSetting, in its initSettings.inc.sqf: it calls CBA_fnc_addSetting and keeps what
 // the wizard needs to draw the setting.
-//   serverSettings  - name (the variable's, einv_gui_searchTime) -> its definition, a HashMap
+//   serverSettings  - name (the variable's, aio_gui_searchTime) -> its definition, a HashMap
 //   serverKeys      - key (the name without the prefix, lowercase) -> name; the key is how the wizard's own text
 //                     of the settings names one (fnc_parseSettings, fnc_writeSettings)
 //   serverOrder     - the names in the order they were registered
@@ -30,25 +30,25 @@ GVAR(retiredSettings) = ["gui_animation"];
 // loaded is simply not there.
 GVAR(topics) = [
     ["looting", ELSTRING(setup,Topic_looting), [
-        "einv_gui_searchTime", "einv_gui_searchTimeUniform", "einv_gui_searchTimeVest", "einv_gui_searchTimeBackpack",
-        "einv_gui_searchTimeCrate", "einv_gui_searchTimeVehicle", "einv_gui_searchTimeGround", "einv_gui_searchTimeBody",
-        "einv_storage_nearbyRange", "einv_storage_stackMultiplier", "einv_gui_handDrop", "einv_gui_handMove", "einv_gui_handEquip",
-        "einv_gui_waitMove", "einv_gui_waitDrop", "einv_gui_waitWorn", "einv_gui_waitEquip",
-        "einv_gui_searchBodies", "einv_gui_searchPersons",
-        "einv_gui_searchContainers", "einv_gui_searchZeus", "einv_gui_searchGround", "einv_gui_searchOnClick", "einv_gui_soundsWorld"
+        "aio_gui_searchTime", "aio_gui_searchTimeUniform", "aio_gui_searchTimeVest", "aio_gui_searchTimeBackpack",
+        "aio_gui_searchTimeCrate", "aio_gui_searchTimeVehicle", "aio_gui_searchTimeGround", "aio_gui_searchTimeBody",
+        "aio_storage_nearbyRange", "aio_storage_stackMultiplier", "aio_gui_handDrop", "aio_gui_handMove", "aio_gui_handEquip",
+        "aio_gui_waitMove", "aio_gui_waitDrop", "aio_gui_waitWorn", "aio_gui_waitEquip",
+        "aio_gui_searchBodies", "aio_gui_searchPersons",
+        "aio_gui_searchContainers", "aio_gui_searchZeus", "aio_gui_searchGround", "aio_gui_searchOnClick", "aio_gui_soundsWorld"
     ]],
-    ["persons", ELSTRING(setup,Topic_persons), ["einv_gui_personNotify", "einv_gui_personOpen", "einv_gui_personItems", "einv_gui_personWorn"]],
-    ["containers", ELSTRING(storage,SubCategory_Containers), ["einv_storage_migrate", "einv_storage_useUniform", "einv_storage_useVest", "einv_storage_useBackpack"]],
-    ["weight", ELSTRING(weight,SubCategory_Weight), ["einv_weight_enabled", "einv_weight_heavyAt", "einv_weight_overloadedAt", "einv_weight_criticalAt", "einv_weight_effects"]],
-    ["extras", ELSTRING(setup,Topic_extras), ["einv_hotbar_enabled", "einv_magazines_repack", "einv_locks_zeusOpens"]],
-    ["arsenal", ELSTRING(setup,Topic_arsenal), ["einv_arsenal_biArsenal", "einv_arsenal_biMessage"]],
-    ["look", ELSTRING(setup,Topic_look), ["einv_gui_playerColours"]],
-    ["grids", ELSTRING(items,SubCategory_Grids), ["einv_items_massPerCell", "einv_items_stackSmall"]]
+    ["persons", ELSTRING(setup,Topic_persons), ["aio_gui_personNotify", "aio_gui_personOpen", "aio_gui_personItems", "aio_gui_personWorn"]],
+    ["containers", ELSTRING(storage,SubCategory_Containers), ["aio_storage_migrate", "aio_storage_useUniform", "aio_storage_useVest", "aio_storage_useBackpack"]],
+    ["weight", ELSTRING(weight,SubCategory_Weight), ["aio_weight_enabled", "aio_weight_heavyAt", "aio_weight_overloadedAt", "aio_weight_criticalAt", "aio_weight_effects"]],
+    ["extras", ELSTRING(setup,Topic_extras), ["aio_hotbar_enabled", "aio_magazines_repack", "aio_locks_zeusOpens"]],
+    ["arsenal", ELSTRING(setup,Topic_arsenal), ["aio_arsenal_biArsenal", "aio_arsenal_biMessage"]],
+    ["look", ELSTRING(setup,Topic_look), ["aio_gui_playerColours"]],
+    ["grids", ELSTRING(items,SubCategory_Grids), ["aio_items_massPerCell", "aio_items_stackSmall"]]
 ];
 
 #include "initSettings.inc.sqf"
 
-// The test builds 0.4.27 to 0.5.42 kept all these settings in one CBA text box, einv_main_settings, which is no
+// The test builds 0.4.27 to 0.5.42 kept all these settings in one CBA text box, aio_main_settings, which is no
 // setting any more. What such a box still holds - in the server's profile or file, the mission's cba_settings.sqf
 // or its Eden attributes - is put into the settings of its own once, before CBA puts the values into effect
 // (fnc_migrateSettings). Eden has no such moment: there it is done as the wizard or CBA's menu opens.

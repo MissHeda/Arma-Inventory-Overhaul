@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Op "repack": magazines of one class share their rounds out anew (einv_magazines) - each listed magazine
+ * Op "repack": magazines of one class share their rounds out anew (aio_magazines) - each listed magazine
  * leaves its container with exactly the rounds it had and comes back with the rounds it has now, an
  * emptied one stays out (ACE leaves empties out too). Everything lies under the phase's root, so it runs
  * where those containers are local, in one go, and a ground pile that holds only these magazines is never
@@ -21,7 +21,7 @@
  * Arguments:
  * 0: Args, [parts] - each part [container, class, rounds before, rounds after, cell [col, row, compartment,
  *    w, h]], in the order the new magazines go back in <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -30,7 +30,7 @@
  *   extra - [] for nothing
  *
  * Example:
- * [[[[_crate, "30Rnd_65x39_caseless_mag", 9, 4, [0, 0, 0, 1, 1]], [_crate, "30Rnd_65x39_caseless_mag", 25, 30, [1, 0, 0, 1, 1]]]], _context] call einv_storage_fnc_opRepack;
+ * [[[[_crate, "30Rnd_65x39_caseless_mag", 9, 4, [0, 0, 0, 1, 1]], [_crate, "30Rnd_65x39_caseless_mag", 25, 30, [1, 0, 0, 1, 1]]]], _context] call aio_storage_fnc_opRepack;
  *
  * Public: No
  */

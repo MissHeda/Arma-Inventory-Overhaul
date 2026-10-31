@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_soundSettle;
+ * call aio_gui_fnc_soundSettle;
  *
  * Public: No
  */

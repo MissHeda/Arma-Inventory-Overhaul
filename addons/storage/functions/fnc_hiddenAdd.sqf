@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * [_list, "HandGrenade", 2, 1] call einv_storage_fnc_hiddenAdd;
+ * [_list, "HandGrenade", 2, 1] call aio_storage_fnc_hiddenAdd;
  *
  * Public: No
  */

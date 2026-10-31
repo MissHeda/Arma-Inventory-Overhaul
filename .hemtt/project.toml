@@ -1,5 +1,5 @@
 name = "AIO - Arma Inventory Overhaul"
-prefix = "einv"
+prefix = "aio"
 author = "Miss Heda"
 mainprefix = "z"
 
@@ -41,7 +41,7 @@ workshop = [
     "2976569274", # WebKnight's Two Primary Weapons, for the compat_wbk_twoprimary addon
 ]
 
-# A test scene for the inventory (.hemtt/missions/EINV_Test.VR): a soldier with full gear, a crate, an
+# A test scene for the inventory (.hemtt/missions/AIO_Test.VR): a soldier with full gear, a crate, an
 # ACE Arsenal box, a vehicle, a body and things on the ground. Opens in Eden - play it from there.
 #
 #   hemtt launch test
@@ -56,7 +56,7 @@ workshop = [
     "894678801",  # Task Force Arrowhead Radio (BETA)
     # "2129532219", # SFX Project: Remastered, adds an InventoryOpened handler of its own (the window must still open)
 ]
-mission = "EINV_Test.VR"
+mission = "AIO_Test.VR"
 
 # The same scene with ACRE2 instead of TFAR - the two never load together.
 #
@@ -72,4 +72,4 @@ workshop = [
     "751965892",  # ACRE2, for the radio compat
     # "2129532219", # SFX Project: Remastered, adds an InventoryOpened handler of its own (the window must still open)
 ]
-mission = "EINV_Test.VR"
+mission = "AIO_Test.VR"

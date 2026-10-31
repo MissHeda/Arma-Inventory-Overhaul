@@ -19,7 +19,7 @@
  * Parts, [[text, colour key], ...] - [] for none <ARRAY>
  *
  * Example:
- * ["load", [vestContainer player, "Tactical Rig"]] call einv_gui_fnc_infoHint;
+ * ["load", [vestContainer player, "Tactical Rig"]] call aio_gui_fnc_infoHint;
  *
  * Public: No
  */
@@ -47,7 +47,7 @@ switch (_kind) do {
 
         private _loadKg = [_load] call _fnc_kg;
         private _colors = ["text2", "accent", "loss", "loss"];
-        // With the tiers off (einv_weight_enabled) there is no word: the kilograms alone, and no tiers above.
+        // With the tiers off (aio_weight_enabled) there is no word: the kilograms alone, and no tiers above.
         private _parts = [[
             if (_word isEqualTo "") then {
                 format ["%1 kg", _loadKg]

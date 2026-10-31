@@ -12,7 +12,7 @@
  * The queue entry's id, 0 when it does not wait <NUMBER>
  *
  * Example:
- * [player, "headgear"] call einv_gui_fnc_queuedSlot;
+ * [player, "headgear"] call aio_gui_fnc_queuedSlot;
  *
  * Public: No
  */

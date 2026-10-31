@@ -14,13 +14,13 @@
  *
  * Where it lands: on the cell asked for when that is free in the kit as it lies now; taken, the kit's
  * layout gives it the first free spot - "put elsewhere". Its record goes there at once
- * (einv_storage_fnc_setPlace), so the phase writes the kit's places with the kit. Put onto a pile of its
+ * (aio_storage_fnc_setPlace), so the phase writes the kit's places with the kit. Put onto a pile of its
  * kind that takes it, it joins that pile where it lies: only a tile the kit did not have before gets a
  * record of its own, so nothing else in the kit moves.
  *
  * Arguments:
  * 0: Kit class <STRING>
- * 1: Payload, see einv_storage_fnc_removeEntry <ARRAY>
+ * 1: Payload, see aio_storage_fnc_removeEntry <ARRAY>
  * 2: Cell [col, row, compartment, w, h, rot] in the kit's grid (rot 1 turned a quarter clockwise; left
  *    out, by its size), [] to let its layout find one <ARRAY>
  *    (default: [])
@@ -30,7 +30,7 @@
  *  compartment, w, h, rot] - [] when unknown, put elsewhere than asked] <ARRAY>
  *
  * Example:
- * ["efak_ifak_7", ["item", "ACE_fieldDressing", 3, []], [2, 0, 0, 1, 1]] call einv_compat_efak_fnc_putIntoKit;
+ * ["efak_ifak_7", ["item", "ACE_fieldDressing", 3, []], [2, 0, 0, 1, 1]] call aio_compat_efak_fnc_putIntoKit;
  *
  * Public: No
  */
@@ -53,7 +53,7 @@ private _n = switch (_kind) do {
 };
 
 // What a uniform, vest or backpack held - [] or an empty one's snapshot when nothing. Only its first
-// five parts are cargo (einv_storage_fnc_snapshot): what follows - its places, its tag - goes with it.
+// five parts are cargo (aio_storage_fnc_snapshot): what follows - its places, its tag - goes with it.
 private _inner = switch (_kind) do {
     case "item": {_payload param [3, []]};
     case "backpack": {_payload param [2, []]};
@@ -112,7 +112,7 @@ if (_cell isNotEqualTo []) then {
 
 if !([_kit, _class, _n, _rounds] call FUNC(changeKit)) exitWith {[LLSTRING(EmptyMagazine), [], false]};
 
-// What this execution read of the kit is out of date now (einv_storage_fnc_findEntry).
+// What this execution read of the kit is out of date now (aio_storage_fnc_findEntry).
 EGVAR(storage,cache) deleteAt _kitKey;
 
 private _after = [_kit, true] call FUNC(getEntries);

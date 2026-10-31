@@ -19,10 +19,10 @@
  * list picked one since the press (GVAR(listSel), noted by its LBSelChanged handler, fnc_onOpened): before
  * it, lnbCurSelRow is the row picked before.
  *
- * The item is put on a source grid of its own (einv_gui's "source", here "aceList"), off the screen, as a
+ * The item is put on a source grid of its own (aio_gui's "source", here "aceList"), off the screen, as a
  * tile that brings the entry that is dragged: the item at its true size, a whole stack at most, one at
  * first or the whole stack with Shift. From there it is the engine's drag - the ghost with its footprint,
- * R to turn it, the wheel for how many with the count on the ghost (einv_gui_fnc_onMouseZ) - and the
+ * R to turn it, the wheel for how many with the count on the ghost (aio_gui_fnc_onMouseZ) - and the
  * engine leaves its end to the "drop" hook (fnc_onDrop, fnc_addTo). The focus leaves ACE's list, which the
  * engine would otherwise draw over the ghost (fnc_onFrame).
  *
@@ -38,7 +38,7 @@
  * A drag started <BOOL>
  *
  * Example:
- * [_display, [0.6, 0.4], false, 12, diag_frameNo] call einv_arsenal_fnc_listDrag;
+ * [_display, [0.6, 0.4], false, 12, diag_frameNo] call aio_arsenal_fnc_listDrag;
  *
  * Public: No
  */
@@ -111,7 +111,7 @@ uiNamespace setVariable [QEGVAR(gui,grids), _grids];
 
 GVAR(dragZone) = "";
 
-// The press as the engine notes one on a tile of a source grid (einv_gui_fnc_onMouseButton).
+// The press as the engine notes one on a tile of a source grid (aio_gui_fnc_onMouseButton).
 EGVAR(gui,press) = [_index, 0, _pressed, _grab, false, [], false, _shift];
 
 // The ghost lies over ACE's list as it starts: the list must not keep the focus - the panel's sink takes it

@@ -25,9 +25,9 @@
  *   all kind=magazine > stack=30          Everything else, kind magazine: 30 per tile
  *
  * Arguments:
- * 0: The statement: a rule, [conditions, values] as einv_items_fnc_parseRules lists them under "rules" -
+ * 0: The statement: a rule, [conditions, values] as aio_items_fnc_parseRules lists them under "rules" -
  *    or, with 2, a group, [id, conditions] as under "groups" <ARRAY>
- * 1: The setup it belongs to, as einv_items_fnc_parseRules returns it - its preset names the groups first <HASHMAP> (default: empty)
+ * 1: The setup it belongs to, as aio_items_fnc_parseRules returns it - its preset names the groups first <HASHMAP> (default: empty)
  * 2: It is a group <BOOL> (default: false)
  * 3: Only what a rule sets, without whom it is for - for a list that names the class itself, by its
  *    picture and display name (fnc_changeRows) <BOOL> (default: false)
@@ -37,7 +37,7 @@
  * Sentence <STRING>
  *
  * Example:
- * [(einv_setup_draft get "rules") select 0, einv_setup_draft] call einv_setup_fnc_describeRule;
+ * [(aio_setup_draft get "rules") select 0, aio_setup_draft] call aio_setup_fnc_describeRule;
  *
  * Public: No
  */
@@ -57,12 +57,12 @@ private _fnc_capital = {
 private _fnc_groupLabel = {
     params ["_id"];
 
-    private _key = format ["STR_einv_items_Group_%1", _id];
+    private _key = format ["STR_aio_items_Group_%1", _id];
 
     if (isLocalized _key) exitWith {localize _key};
 
     // A preset of another mod may name its groups in its own config: the setup's preset first.
-    private _presets = configFile >> "CfgEinvRulesets";
+    private _presets = configFile >> "CfgAioRulesets";
     private _label = "";
 
     {
@@ -226,7 +226,7 @@ private _fnc_grid = {
             // A pattern by name, perhaps with its number of cells: rig, rig:16.
             (_lower splitString ":") params [["_pattern", ""], ["_cells", ""]];
 
-            private _key = format ["STR_einv_setup_Pattern_%1", _pattern];
+            private _key = format ["STR_aio_setup_Pattern_%1", _pattern];
             private _name = [_pattern, localize _key] select (isLocalized _key);
 
             [format [LLSTRING(Value_GridPatternCells), _name, _cells], format [LLSTRING(Value_GridPattern), _name]] select (_cells isEqualTo "")
@@ -315,7 +315,7 @@ private _fnc_values = {
 
         _parts pushBack ([
             LLSTRING(Value_UseNone),
-            format [LLSTRING(Value_Use), (_use apply {localize format ["STR_einv_setup_Use_%1", _x]}) joinString ", "]
+            format [LLSTRING(Value_Use), (_use apply {localize format ["STR_aio_setup_Use_%1", _x]}) joinString ", "]
         ] select (_use isNotEqualTo []));
     };
 
@@ -378,7 +378,7 @@ private _subject = switch (true) do {
     case (!_isAll && {_conditions isEqualTo []}): {LLSTRING(Desc_Every)};
     case (!_isAll): {[(_conditions apply {_x call _fnc_condition}) joinString ", "] call _fnc_capital};
     case (_narrower isEqualTo []): {LLSTRING(Desc_All)};
-    case (_kindIndex >= 0): {format [LLSTRING(Desc_AllKind), toLower localize format ["STR_einv_setup_Kind_%1", GENERAL_KINDS select _kindIndex]]};
+    case (_kindIndex >= 0): {format [LLSTRING(Desc_AllKind), toLower localize format ["STR_aio_setup_Kind_%1", GENERAL_KINDS select _kindIndex]]};
     default {format [LLSTRING(Desc_AllWhere), (_narrower apply {_x call _fnc_condition}) joinString ", "]};
 };
 

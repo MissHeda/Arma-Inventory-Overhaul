@@ -19,7 +19,7 @@
  * "Failed") <STRING>
  *
  * Example:
- * [player, "primary_optic", backpackContainer player, _entry] call einv_storage_fnc_equip;
+ * [player, "primary_optic", backpackContainer player, _entry] call aio_storage_fnc_equip;
  *
  * Public: Yes
  */

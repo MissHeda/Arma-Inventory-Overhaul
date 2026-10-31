@@ -13,7 +13,7 @@
  * Parts, [[text, theme colour key], ...] <ARRAY>
  *
  * Example:
- * ["TFAR_anprc152_1", objNull] call einv_compat_tfar_fnc_hintParts;
+ * ["TFAR_anprc152_1", objNull] call aio_compat_tfar_fnc_hintParts;
  *
  * Public: No
  */

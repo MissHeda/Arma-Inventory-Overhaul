@@ -8,10 +8,10 @@
  * while dragging).
  *
  * Arguments:
- * 0: Args, [kit holder "kit:" + lowercase class, entry array (einv_storage_fnc_entryToArray), cell
+ * 0: Args, [kit holder "kit:" + lowercase class, entry array (aio_storage_fnc_entryToArray), cell
  *    [col, row, compartment, w, h, rot] - rot 1 turned a quarter clockwise, left out as the tile lies]
  *    <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -20,7 +20,7 @@
  *   extra    - [the cell [col, row, compartment, w, h, rot] it lies on now] when moved, else []
  *
  * Example:
- * [["kit:efak_ifak_7", _entryArray, [2, 0, 0, 1, 1]], _context] call einv_compat_efak_fnc_opKitPlace;
+ * [["kit:efak_ifak_7", _entryArray, [2, 0, 0, 1, 1]], _context] call aio_compat_efak_fnc_opKitPlace;
  *
  * Public: No
  */
@@ -88,7 +88,7 @@ private _kitKey = "kit:" + toLowerANSI _kit;
 
 [_kitKey, _tile, [_col, _row, _block, _w, _h, _rot]] call EFUNC(storage,setPlace);
 
-// What this execution read of the kit is out of date now (einv_storage_fnc_findEntry).
+// What this execution read of the kit is out of date now (aio_storage_fnc_findEntry).
 EGVAR(storage,cache) deleteAt _kitKey;
 
 ["", [], [[_col, _row, _block, _w, _h, _rot]]]

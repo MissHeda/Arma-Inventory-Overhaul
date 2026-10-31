@@ -12,8 +12,8 @@ class CfgPatches {
         requiredAddons[] = {
             "cba_main",
             "ace_vehiclelock",
-            "einv_main",
-            "einv_locks"
+            "aio_main",
+            "aio_locks"
         };
         skipWhenMissingDependencies = 1;
         author = "Miss Heda";

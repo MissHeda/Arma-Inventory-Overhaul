@@ -7,12 +7,12 @@
  * list, read from those controls themselves, so it follows the player's interface size and whatever ACE
  * changes about them. Without a sort bar it starts where the list does. While Enhanced First Aid Kits' kits
  * tab lies over ACE's panels, ACE's sort bar is hidden and that tab's own stands in its place
- * (einv_compat_efak_fnc_arsenalControls): the panel keeps its top. As wide as the inventory's grid,
- * STORAGE_COLS cells of the engine's size (einv_gui_fnc_getCell) with the column's padding and scroll bar
+ * (aio_compat_efak_fnc_arsenalControls): the panel keeps its top. As wide as the inventory's grid,
+ * STORAGE_COLS cells of the engine's size (aio_gui_fnc_getCell) with the column's padding and scroll bar
  * beside them, at most a third of the screen and never past the screen's left edge. A large tile scale
- * (einv_gui_cellScale) that would not fit there is capped for this window (einv_gui_fnc_capCell): the grid
+ * (aio_gui_cellScale) that would not fit there is capped for this window (aio_gui_fnc_capCell): the grid
  * keeps all its columns rather than running out of the panel. A painted container (a canvas, grid=aab/acc) is
- * wider than STORAGE_COLS cells where seams open it between two compartments (einv_gui_fnc_flowCompartments):
+ * wider than STORAGE_COLS cells where seams open it between two compartments (aio_gui_fnc_flowCompartments):
  * the panel takes that width, and the cap counts it - the widest of the holders given (the kits tab shows a kit's
  * grid and the soldier's containers).
  *
@@ -28,7 +28,7 @@
  * [x, y, w, h] on the screen, [] when ACE's list is not there <ARRAY>
  *
  * Example:
- * [findDisplay 1127001, _container] call einv_arsenal_fnc_panelRect;
+ * [findDisplay 1127001, _container] call aio_arsenal_fnc_panelRect;
  *
  * Public: No
  */
@@ -62,7 +62,7 @@ if (!isNil QEFUNC(compat_efak,arsenalControls)) then {
 } forEach _sorts;
 
 // The column's own padding on both sides, or on one side and its scroll bar on the other, whichever is
-// wider (einv_gui_fnc_drawColumn), so the grid gets its full width and no box beside it.
+// wider (aio_gui_fnc_drawColumn), so the grid gets its full width and no box beside it.
 private _padX = SQUARE(UNIT * PANEL_PAD);
 private _padW = ((_padX * 2) max (_padX + SCROLL_W + pixelW * 4)) + pixelW * 2;
 

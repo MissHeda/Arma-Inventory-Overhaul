@@ -1,6 +1,6 @@
 // The way into the setup wizard that has to be registered while the mission starts. The others come
 // by themselves: the button on CBA's Addon Options with the menu (fnc_initCbaMenu), the entry in Eden's
-// Tools menu from config (Display3DEN.hpp), the cog with the inventory's header (einv_gui_fnc_drawHeader).
+// Tools menu from config (Display3DEN.hpp), the cog with the inventory's header (aio_gui_fnc_drawHeader).
 //
 // Included by XEH_preInit for machines with a screen. The call does nothing harmful elsewhere: the pause
 // menu entry is only a line in CBA's list. There is no keybind for the wizard; the pause menu, the cog and the

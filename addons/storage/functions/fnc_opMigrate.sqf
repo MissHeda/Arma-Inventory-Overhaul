@@ -20,7 +20,7 @@
  * guard lets it through for any requester (the unit's own gear moves between its own containers, which
  * changes nothing a viewer could not already see). It does nothing while ACE Arsenal or the vanilla
  * arsenal is open (ARSENAL_OPEN) - the arsenals give back what does not fit themselves - or when the
- * setting einv_storage_migrate is switched off.
+ * setting aio_storage_migrate is switched off.
  *
  * "wide" is the player's overflow sweep (fnc_requestSweep): after the passes on, what still lies on no cell
  * is offered to the containers before its own as well (fnc_migratePasses), since a free cell anywhere is
@@ -30,18 +30,18 @@
  *
  * Arguments:
  * 0: Args, [unit, wide (default: false)] <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
  *   status - "" done (also when nothing could move), else why not ("Moved" the unit is gone, "Skipped" an
  *     arsenal is open or the switch is off, "Bounced" something is produced)
  *   produced - the payloads it handed on, each consumed by a later op or settled
- *     (einv_storage_fnc_settle)
+ *     (aio_storage_fnc_settle)
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[player], _context] call einv_storage_fnc_opMigrate;
+ * [[player], _context] call aio_storage_fnc_opMigrate;
  *
  * Public: No
  */

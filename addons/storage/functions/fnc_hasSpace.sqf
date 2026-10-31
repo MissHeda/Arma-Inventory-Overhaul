@@ -22,7 +22,7 @@
  * A spot is free <BOOL>
  *
  * Example:
- * [vestContainer player, _entry] call einv_storage_fnc_hasSpace;
+ * [vestContainer player, _entry] call aio_storage_fnc_hasSpace;
  *
  * Public: No
  */

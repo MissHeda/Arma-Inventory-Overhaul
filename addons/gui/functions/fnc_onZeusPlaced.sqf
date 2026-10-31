@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * [_curator, _crate] call einv_gui_fnc_onZeusPlaced;
+ * [_curator, _crate] call aio_gui_fnc_onZeusPlaced;
  *
  * Public: No
  */

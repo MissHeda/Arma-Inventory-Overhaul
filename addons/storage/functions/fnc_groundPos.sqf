@@ -13,7 +13,7 @@
  * Position ASL, [] for none <ARRAY>
  *
  * Example:
- * [player] call einv_storage_fnc_groundPos;
+ * [player] call aio_storage_fnc_groundPos;
  *
  * Public: No
  */

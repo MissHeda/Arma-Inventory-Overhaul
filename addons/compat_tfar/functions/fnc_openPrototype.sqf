@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * ["TFAR_anprc152"] call einv_compat_tfar_fnc_openPrototype;
+ * ["TFAR_anprc152"] call aio_compat_tfar_fnc_openPrototype;
  *
  * Public: No
  */

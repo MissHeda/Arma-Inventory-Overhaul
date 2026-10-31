@@ -1,7 +1,7 @@
 #define COMPONENT storage
-#define COMPONENT_BEAUTIFIED EINV - Storage
-#include "\z\einv\addons\main\script_mod.hpp"
-#include "\z\einv\addons\main\script_macros.hpp"
+#define COMPONENT_BEAUTIFIED AIO - Storage
+#include "\z\aio\addons\main\script_mod.hpp"
+#include "\z\aio\addons\main\script_macros.hpp"
 
 // How far from a unit a pile on the ground still counts as at its feet (fnc_getGroundHolder).
 #define GROUND_RANGE 2
@@ -99,10 +99,10 @@
 // rules that size containers and has to keep to the same limits.
 
 // ---------------------------------------------------------------------------
-// Use from containers (the settings einv_storage_useUniform, useVest and useBackpack)
+// Use from containers (the settings aio_storage_useUniform, useVest and useBackpack)
 // ---------------------------------------------------------------------------
 
-// The kinds of item (einv_items_fnc_getInfo "kind") that are used from where they lie: magazines to reload,
+// The kinds of item (aio_items_fnc_getInfo "kind") that are used from where they lie: magazines to reload,
 // grenades to throw, medicine, food and tools (item), kits and radios. A rifle, an attachment or a piece of
 // clothing is worn or fitted, not used from a container, so the settings never touch them. An array literal -
 // used in code only, never inside a macro's arguments.

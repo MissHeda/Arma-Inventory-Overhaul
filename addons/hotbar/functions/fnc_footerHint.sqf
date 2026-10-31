@@ -13,7 +13,7 @@
  * <ARRAY>
  *
  * Example:
- * call einv_hotbar_fnc_footerHint;
+ * call aio_hotbar_fnc_footerHint;
  *
  * Public: No
  */

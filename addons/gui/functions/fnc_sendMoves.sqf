@@ -2,10 +2,10 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Turns the window's moves into transactions (einv_storage_fnc_request) with this function's answer
+ * Turns the window's moves into transactions (aio_storage_fnc_request) with this function's answer
  * (fnc_onAnswer): each move becomes its phases - within one root a move, between two roots a take at the
  * source and a put at the target, equipping and unequipping as take, putOn, takeOff and put, a kit
- * holder through its type's ops (einv_storage_holderTypes) -, at most BATCH_MAX moves per transaction,
+ * holder through its type's ops (aio_storage_holderTypes) -, at most BATCH_MAX moves per transaction,
  * the next chunk sent when the last one is answered.
  *
  * Phases on the same root follow each other where they can, so a crate emptied into own gear is one
@@ -14,7 +14,7 @@
  *
  * "The ground" is the surface under the feet - the server finds or makes the pile (op putGround) -, or
  * the vehicle's cargo for a seated player. The old item of an equip goes back to the item's own cell;
- * out of a kit it goes into the kit where that kit takes it (einv_compat_efak_fnc_canPack), else into
+ * out of a kit it goes into the kit where that kit takes it (aio_compat_efak_fnc_canPack), else into
  * the first of the player's own uniform, vest and backpack with room, else wherever settlement puts it.
  *
  * How the first three moves of a transaction will sound once they happened (fnc_feelFor) is kept with its record
@@ -25,12 +25,12 @@
  * with a hint: a move into itself ("IntoItself"), a drop onto the ground on
  * foot with nothing under the feet ("NoGround"), anything that needs the server's hub before it answered
  * ("NotReady"), a holder whose root is not known ("Moved"), and a move into or out of a container that is
- * locked to the player ("Locked", einv_locks_fnc_canReach): the lock may have been set after the window
+ * locked to the player ("Locked", aio_locks_fnc_canReach): the lock may have been set after the window
  * was built, or by a script; every op asks the lock again where it runs.
  *
  * The hands (fnc_queueMoves): a drop, a move to a different container or holder and putting on or taking
  * off do not go out at once while the window is the inventory and the server's setting for that kind
- * (einv_gui_handDrop, handMove, handEquip - seconds) is more than 0: each such move waits in the window's
+ * (aio_gui_handDrop, handMove, handEquip - seconds) is more than 0: each such move waits in the window's
  * queue with a circle on its tile, and goes out through this function again, with the option "now", when the
  * circle is full (fnc_runQueue). What needs no hands - a rearrangement within one holder, sorting - goes at
  * once, and the function says it was asked for when it queued something.
@@ -51,13 +51,13 @@
  * Arguments:
  * 0: Moves, each a HashMap <ARRAY>
  *    "kind"     - "move" (default), "equip", "unequip", "swap", "sort", "placeMany" or "exchange"
- *    "from"     - holder it lies in: a container, or a key like "kit:..." (einv_storage_holderTypes);
+ *    "from"     - holder it lies in: a container, or a key like "kit:..." (aio_storage_holderTypes);
  *                 for "sort" the holder to sort
- *    "fromRoot" - its root, objNull to look it up (einv_storage_fnc_rootOf)
+ *    "fromRoot" - its root, objNull to look it up (aio_storage_fnc_rootOf)
  *    "entry"    - the tile (move, equip) <HASHMAP>
  *    "count"    - how many of a stack, -1 for all of it (move; default -1)
  *    "to"       - holder it goes to, "ground" or "vehicle" (move, unequip); for an equip, where its old
- *                 item goes when the caller decided that (einv_compat_efak_fnc_equip) - left out, it is
+ *                 item goes when the caller decided that (aio_compat_efak_fnc_equip) - left out, it is
  *                 decided here
  *    "toRoot"   - its root, objNull to look it up
  *    "cell"     - [col, row, compartment] - with [.., width, height] when it lies turned - or [] for the
@@ -66,8 +66,8 @@
  *                 class in the holder (move; default false). Within one holder, part of a stack moved
  *                 with it is split off onto the cell - or, with no cell, onto the nearest free one: op
  *                 "split" [holder, payload, count, cell]. The ops take it as their sixth argument
- *                 (einv_storage_fnc_opPut, fnc_opMove); the window sends it only while
- *                 einv_storage_stackSplits is true
+ *                 (aio_storage_fnc_opPut, fnc_opMove); the window sends it only while
+ *                 aio_storage_stackSplits is true
  *    "mergeInto" - [col, row, compartment] of a stack of the same key in "to": what lands joins that stack
  *                 first (move; default none). Within one holder, take and put in one phase; the ops take it
  *                 as their seventh argument, after "separate"
@@ -92,7 +92,7 @@
  * Something was sent <BOOL>
  *
  * Example:
- * [[createHashMapFromArray [["from", _crate], ["to", backpackContainer player], ["entry", _tile]]]] call einv_gui_fnc_sendMoves;
+ * [[createHashMapFromArray [["from", _crate], ["to", backpackContainer player], ["entry", _tile]]]] call aio_gui_fnc_sendMoves;
  *
  * Public: No
  */
@@ -157,7 +157,7 @@ private _fnc_rootOf = {
 // Whether a move reaches into a container that is locked to the player - out of it or into it. People's
 // gear and the player's own are never locked, a kit is left to its root (the guard asks there), and so are
 // the ground and the vehicle, which are no containers of the window. The root a container was opened from
-// counts: a backpack in a locked crate is as locked as the crate (einv_locks_fnc_canReach).
+// counts: a backpack in a locked crate is as locked as the crate (aio_locks_fnc_canReach).
 private _fnc_locked = {
     params ["_move"];
 
@@ -350,7 +350,7 @@ private _fnc_equipSteps = {
     private _oldTo = objNull;
 
     // Where the caller said it goes - a kit that takes it, or one of the player's own containers
-    // (einv_compat_efak_fnc_equip decides by that mod's rules).
+    // (aio_compat_efak_fnc_equip decides by that mod's rules).
     private _given = _move getOrDefault ["to", objNull];
     private _givenPut = if (_given isEqualType "" || {!isNull _given}) then {[_given, "put"] call _fnc_opName} else {""};
     private _givenRoot = if (_givenPut isEqualTo "") then {objNull} else {

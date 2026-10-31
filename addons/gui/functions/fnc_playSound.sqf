@@ -4,15 +4,15 @@
  * Author: Miss Heda
  * The sound of something happening to an item or a container, by what it is: a rifle lifted sounds like a
  * rifle, a magazine like a magazine pulled from a pouch, a vest like webbing and buckles, a bandage like a
- * crinkling packet, a crate opened like its latch. The table is the config CfgEinvSounds (families of
+ * crinkling packet, a crate opened like its latch. The table is the config CfgAioSounds (families of
  * actions, each up to four variants of up to three layers, all of Arma's own files by their paths); an item
- * picks its family with the config entry einv_sound, else it is found by what the item is
+ * picks its family with the config entry aio_sound, else it is found by what the item is
  * (fnc_soundFamily). Without a class the family is the container's (fnc_containerFamily).
  *
  * The looter hears it on the interface, through the effects bus, so the game's effects volume, earplugs
  * and a blast's deafness apply, times the volume of its kind and the master volume the player set in the
  * dropdown under the speaker in the header (fnc_soundGain, fnc_openSoundMenu); at 0 he hears nothing. Others
- * near the looter hear the louder ones, quieter, where his hands are (einv_gui_soundsWorld, fnc_sendNoise) -
+ * near the looter hear the louder ones, quieter, where his hands are (aio_gui_soundsWorld, fnc_sendNoise) -
  * the dropdown does not touch that. The same sound twice within a moment plays once; of several variants
  * never the one before.
  *
@@ -37,8 +37,8 @@
  * None
  *
  * Example:
- * ["lift", "arifle_MX_F"] call einv_gui_fnc_playSound;
- * ["open", "", cursorObject] call einv_gui_fnc_playSound;
+ * ["lift", "arifle_MX_F"] call aio_gui_fnc_playSound;
+ * ["open", "", cursorObject] call aio_gui_fnc_playSound;
  *
  * Public: Yes
  */

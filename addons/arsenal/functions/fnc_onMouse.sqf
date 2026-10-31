@@ -27,7 +27,7 @@
  * Taken - the engine leaves it alone <BOOL>
  *
  * Example:
- * [true, 0, getMousePosition] call einv_arsenal_fnc_onMouse;
+ * [true, 0, getMousePosition] call aio_arsenal_fnc_onMouse;
  *
  * Public: No
  */

@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * call einv_setup_fnc_replay;
+ * call aio_setup_fnc_replay;
  *
  * Public: No
  */

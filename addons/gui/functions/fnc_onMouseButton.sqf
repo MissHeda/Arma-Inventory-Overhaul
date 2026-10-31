@@ -25,7 +25,7 @@
  * (fnc_boxTile): dragged, clicked and double clicked like the tile itself.
  * Shift held while pressing a stack drags half of it. Alt+click has no meaning of its own (it was the quick
  * equip before; putting on is a drag onto a slot, a double click on the ground and the menu's Equip).
- * A press on a filled slot of the hotbar strip (einv_hotbar) is a press of its own: moved, it becomes a drag
+ * A press on a filled slot of the hotbar strip (aio_hotbar) is a press of its own: moved, it becomes a drag
  * of the binding (fnc_startStripDrag - dropped on another slot it moves there, anywhere else it is
  * removed), let go in place it does nothing. A right click opens the item's context menu
  * (fnc_contextMenu) - with another menu open, beside it, it closes that one and opens the new one at once. Selecting works in the inventory only (fnc_isInventoryMode): where other windows
@@ -42,7 +42,7 @@
  * An action waiting for the hands (fnc_queueMoves) is marked on its tile or slot: a left press there
  * cancels it (fnc_cancelQueued) and starts no drag or click.
  *
- * While a repack of magazines runs (einv_magazines - only when that addon is loaded) the hands are busy: a
+ * While a repack of magazines runs (aio_magazines - only when that addon is loaded) the hands are busy: a
  * button going down anywhere stops it and does nothing else, and that button coming up is no click either.
  *
  * Added to the display and to every controls group of the window: which of them gets a click depends
@@ -64,7 +64,7 @@
  * Handled <BOOL>
  *
  * Example:
- * [true, _this] call einv_gui_fnc_onMouseButton;
+ * [true, _this] call aio_gui_fnc_onMouseButton;
  *
  * Public: No
  */
@@ -86,7 +86,7 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
 if (isNull _display) exitWith {false};
 
-// Repacking magazines (einv_magazines): a press anywhere stops it and does nothing else - nor does
+// Repacking magazines (aio_magazines): a press anywhere stops it and does nothing else - nor does
 // letting go of that button. The header's buttons keep their own click: Close during a repack stops it
 // and closes.
 if (_down && {!isNil QEFUNC(magazines,isBusy)} && {[] call EFUNC(magazines,isBusy)}) exitWith {
@@ -307,7 +307,7 @@ if (_down) exitWith {
             };
 
             // A grid with no container takes nothing out - but for the contents of an open kit's window
-            // (einv_compat_efak), which has its own way out.
+            // (aio_compat_efak), which has its own way out.
             if (isNull (_grid getOrDefault ["container", objNull]) && {(_grid getOrDefault ["kit", ""]) isEqualTo ""}) exitWith {};
 
             private _cell = [_grid, _mouse] call FUNC(screenToCell);
@@ -357,7 +357,7 @@ if (_down) exitWith {
                 ];
             };
 
-            // A filled slot of the hotbar strip (einv_hotbar): its binding is dragged, not an item (fnc_startStripDrag).
+            // A filled slot of the hotbar strip (aio_hotbar): its binding is dragged, not an item (fnc_startStripDrag).
             // The press carries the slot's number as its tenth element. An empty one has nothing to lift.
             if ((_record param [7, -1]) >= 0) exitWith {
                 if ((_record param [1, ""]) isNotEqualTo "" && {call FUNC(isInventoryMode)}) then {

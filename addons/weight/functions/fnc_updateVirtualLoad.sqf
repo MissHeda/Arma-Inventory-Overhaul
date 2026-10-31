@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Makes what a unit carries weigh what the rules say, through ACE's virtual load - so a weight
- * override ("weight=" in einv_items_rules) counts in ACE's weight and in its fatigue, not only in the
+ * override ("weight=" in aio_items_rules) counts in ACE's weight and in its fatigue, not only in the
  * numbers the inventory window shows. The engine itself keeps weighing every item by its config.
  *
  * The load goes on the unit itself, never on the uniform, vest or backpack. ACE only ever uses the
@@ -10,7 +10,7 @@
  * walk off with our share still on it. Enhanced First Aid Kits does the same for its kits, with a
  * variable of its own - ACE adds both up.
  *
- * Works on the difference: remembers what it has applied (einv_weight_appliedLoad on the unit), works
+ * Works on the difference: remembers what it has applied (aio_weight_appliedLoad on the unit), works
  * out the new total (fnc_getExtraLoad) and hands ACE only the change, so a new setup or a dropped item
  * takes off exactly what was added for it.
  *
@@ -24,7 +24,7 @@
  * None
  *
  * Example:
- * [player] call einv_weight_fnc_updateVirtualLoad;
+ * [player] call aio_weight_fnc_updateVirtualLoad;
  *
  * Public: No
  */

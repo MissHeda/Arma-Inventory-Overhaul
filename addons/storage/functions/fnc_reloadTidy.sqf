@@ -18,7 +18,7 @@
  * It was moved <BOOL>
  *
  * Example:
- * [player, ["30Rnd_65x39_caseless_mag", 30], "vest", [0, 1, 0]] call einv_storage_fnc_reloadTidy;
+ * [player, ["30Rnd_65x39_caseless_mag", 30], "vest", [0, 1, 0]] call aio_storage_fnc_reloadTidy;
  *
  * Public: No
  */

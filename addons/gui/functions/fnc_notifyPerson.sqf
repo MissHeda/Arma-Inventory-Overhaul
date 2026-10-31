@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Tells a living person that someone is going through their gear, when the server wants that
- * (einv_gui_personNotify): ACE's own sign that someone is in your backpack - a zipper everyone near
+ * (aio_gui_personNotify): ACE's own sign that someone is in your backpack - a zipper everyone near
  * hears, a tug for a player (ace_backpacks_fnc_backpackOpened) - and a line of text naming who it is.
  * Once per opening.
  *
@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [ACE_player, cursorObject] call einv_gui_fnc_notifyPerson;
+ * [ACE_player, cursorObject] call aio_gui_fnc_notifyPerson;
  *
  * Public: No
  */

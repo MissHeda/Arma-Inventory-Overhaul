@@ -19,7 +19,7 @@
  * The controls, the track's first <ARRAY>
  *
  * Example:
- * [_display, controlNull, [0.1, 0.1, 0.2, 0.005], 0.4, [1, 1, 1, 0.1], [1, 1, 1, 0.8], 0.0025] call einv_gui_fnc_uiBar;
+ * [_display, controlNull, [0.1, 0.1, 0.2, 0.005], 0.4, [1, 1, 1, 0.1], [1, 1, 1, 0.8], 0.0025] call aio_gui_fnc_uiBar;
  *
  * Public: No
  */

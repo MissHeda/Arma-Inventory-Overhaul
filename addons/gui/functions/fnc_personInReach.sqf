@@ -17,7 +17,7 @@
  * In reach <BOOL>
  *
  * Example:
- * [ACE_player, cursorObject, true] call einv_gui_fnc_personInReach;
+ * [ACE_player, cursorObject, true] call aio_gui_fnc_personInReach;
  *
  * Public: No
  */

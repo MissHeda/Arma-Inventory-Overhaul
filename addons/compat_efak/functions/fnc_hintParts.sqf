@@ -12,7 +12,7 @@
  * Parts [[text, theme colour key], ...] <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7"] call einv_compat_efak_fnc_hintParts;
+ * ["efak_IFAK_7"] call aio_compat_efak_fnc_hintParts;
  *
  * Public: No
  */

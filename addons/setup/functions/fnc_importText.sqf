@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Reads the rules of a shared setup pasted into the wizard: a bare rules text, or lines out of a cba_settings.sqf or
- * CBA's Export - then only the einv_items_rules line counts (read with CBA's own reader,
+ * CBA's Export - then only the aio_items_rules line counts (read with CBA's own reader,
  * cba_settings_fnc_parse), the rest of the mods' settings are left alone; the server settings' lines are read by
  * fnc_importSettings, and lines with server settings but no rules have no rules text at all. Its priority
  * ("force") is not taken over: where and how this machine saves is the wizard's own choice.
@@ -15,11 +15,11 @@
  * 0: Pasted text <STRING>
  *
  * Return Value:
- * The setup as einv_items_fnc_parseRules returns it; an empty HashMap when no rules text was found; only
+ * The setup as aio_items_fnc_parseRules returns it; an empty HashMap when no rules text was found; only
  * "tooLong" (its length) when the rules text is longer than TEXT_MAX <HASHMAP>
  *
  * Example:
- * ["force einv_items_rules = ""einv1 base=default cell=4"";"] call einv_setup_fnc_importText;
+ * ["force aio_items_rules = ""aio1 base=default cell=4"";"] call aio_setup_fnc_importText;
  *
  * Public: No
  */
@@ -62,12 +62,14 @@ if (count _rules > TEXT_MAX) exitWith {createHashMapFromArray [["tooLong", count
 private _ast = [_rules] call EFUNC(items,parseRules);
 
 // Nothing the engine could use - another mod's line, any other text - is nothing to import either, not
-// the default the engine reads it as. A header alone (einv1 base=default) is something: the engine takes it
-// as the header when the first statement starts with einv and a number.
+// the default the engine reads it as. A header alone (aio1 base=default) is something: the engine takes it
+// as the header when the first statement starts with aio and a number.
 private _first = (((_rules splitString ",") apply {trim _x}) select {_x isNotEqualTo ""}) param [0, ""];
 private _word = toLowerANSI ((_first splitString " ") param [0, ""]);
-private _digits = toArray (_word select [4]);
-private _header = (_word select [0, 4]) isEqualTo "einv" && {_digits isNotEqualTo []} && {(_digits findIf {_x < 48 || {_x > 57}}) < 0};
+// aio1 - or einv1, the header before the mod's prefix was renamed.
+private _prefix = [3, 4] select ((_word select [0, 4]) isEqualTo "einv");
+private _digits = toArray (_word select [_prefix]);
+private _header = ((_word select [0, _prefix]) in ["aio", "einv"]) && {_digits isNotEqualTo []} && {(_digits findIf {_x < 48 || {_x > 57}}) < 0};
 
 if ((_ast getOrDefault ["categories", []]) isEqualTo [] && {(_ast getOrDefault ["groups", []]) isEqualTo []} && {(_ast getOrDefault ["rules", []]) isEqualTo []} && {!_header}) exitWith {createHashMap};
 

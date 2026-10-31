@@ -13,7 +13,7 @@
  * Weight in kg; -1 for nothing typed; -2 for text that is no weight <NUMBER>
  *
  * Example:
- * ["0,45"] call einv_setup_fnc_weightValue;
+ * ["0,45"] call aio_setup_fnc_weightValue;
  *
  * Public: No
  */

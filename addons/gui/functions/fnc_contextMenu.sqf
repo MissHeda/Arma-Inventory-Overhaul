@@ -13,13 +13,13 @@
  *
  * A tile: inspect it (fnc_inspect), put it on (or, for an attachment or magazine, on which of the
  * player's weapons), repack all magazines of its kind when it is a magazine that is not full in the
- * player's own gear (einv_magazines_fnc_menuChoices - only when that addon is loaded; the slot of a loaded
- * magazine has the row too), put it on the hotbar or take it off (einv_hotbar_fnc_menuChoices - only when that
+ * player's own gear (aio_magazines_fnc_menuChoices - only when that addon is loaded; the slot of a loaded
+ * magazine has the row too), put it on the hotbar or take it off (aio_hotbar_fnc_menuChoices - only when that
  * addon is loaded), drop it, open it (a uniform, vest or backpack lying there in the loot column), select
  * everything in its container (fnc_selectSection). A slot: inspect it, drop it (to the ground - it does
  * not go into the player's own gear first, as Ctrl+click's take off does), and for a weapon take off each
  * of its attachments and its magazines on their own; a slot of the hotbar: clear it
- * (einv_hotbar_fnc_stripMenu). Free cells: select all in the container.
+ * (aio_hotbar_fnc_stripMenu). Free cells: select all in the container.
  *
  * On a tile of a selection of several nothing but deselect (fnc_clearSelection): what can be done with
  * all of them is a double click, a drag and Delete (fnc_quickMoveGroup).
@@ -34,32 +34,32 @@
  * context menu for the item (fnc_cbaOptions), set apart by a line.
  *
  * A kit of Enhanced First Aid Kits or Enhanced Utility Pouches: open or close it in a window of its own
- * and unpack everything in it (einv_compat_efak_fnc_menuChoices - only when that addon is loaded). A
+ * and unpack everything in it (aio_compat_efak_fnc_menuChoices - only when that addon is loaded). A
  * tile in an open kit's window: inspect, put on, drop - the kit has no container for other mods'
  * options, and no arsenal; free cells there have no menu at all. Only what lies on top under the mouse
  * counts (fnc_updateHover, fnc_topAt): a tile or free cells of a column under a kit window have no menu
  * there.
  *
- * A tile or free cells of an ACE arsenal box: also open its arsenal (einv_arsenal_fnc_open - only when
+ * A tile or free cells of an ACE arsenal box: also open its arsenal (aio_arsenal_fnc_open - only when
  * that addon is loaded).
  *
  * A radio of the player's own - the radio slot, the uniform, vest or backpack, the long-range backpack
- * worn - not one lying in a container the settings "Use items from ..." close to it (einv_storage_fnc_useState)
+ * worn - not one lying in a container the settings "Use items from ..." close to it (aio_storage_fnc_useState)
  * and that it is not whitelisted for: also "Open radio" (the window steps aside for TFAR's or ACRE2's dialog and comes back,
- * einv_gui_fnc_stepAside) and "Use as active radio" for one that is not in use (einv_compat_tfar,
- * einv_compat_acre - whichever mod is loaded, through fnc_compatCollect). The dummy radio ACRE2 keeps in
- * the radio slot (einv_compat_acre_fnc_isFixedSlot) can only be inspected.
+ * aio_gui_fnc_stepAside) and "Use as active radio" for one that is not in use (aio_compat_tfar,
+ * aio_compat_acre - whichever mod is loaded, through fnc_compatCollect). The dummy radio ACRE2 keeps in
+ * the radio slot (aio_compat_acre_fnc_isFixedSlot) can only be inspected.
  *
  * A living person's gear the player may only look at (fnc_checkTouch): only what changes nothing of
  * theirs - inspect, open or close a uniform, vest, backpack or kit lying there; no sorting, which
  * everyone looking at them would see, and no choices of other mods.
  *
- * For whoever may open the setup wizard (einv_setup_fnc_canOpen - only when that addon is loaded), a last
+ * For whoever may open the setup wizard (aio_setup_fnc_canOpen - only when that addon is loaded), a last
  * row "Settings for <name>" on a tile, on a worn slot, on the box of an opened uniform, vest or backpack and on
  * the free cells of a crate's or vehicle's grid: it closes this window and opens the wizard at the page of
  * that item - the Containers page for what holds things (uniform, vest, backpack, crate, vehicle, kit), the
- * Items page for the rest - with the class picked (einv_setup_fnc_openFromGame, which takes the step's index:
- * found here by its id in einv_setup_steps, so a reordering of the pages does not matter).
+ * Items page for the rest - with the class picked (aio_setup_fnc_openFromGame, which takes the step's index:
+ * found here by its id in aio_setup_steps, so a reordering of the pages does not matter).
  *
  * A window that attached (fnc_attach) gives its choices through the "menu" hook: they replace everything
  * above, an empty list means no menu at all.
@@ -73,7 +73,7 @@
  * A menu opened <BOOL>
  *
  * Example:
- * [_display] call einv_gui_fnc_contextMenu;
+ * [_display] call aio_gui_fnc_contextMenu;
  *
  * Public: No
  */
@@ -197,7 +197,7 @@ switch (GVAR(hover) param [0, ""]) do {
 
         // Equip, attach, load and drop take it out of where it lies - a living person's item only as the
         // settings say (fnc_checkTouch), also out of a kit lying in their gear, and never another living
-        // player's kit (einv_compat_efak).
+        // player's kit (aio_compat_efak).
         private _touch = if (_kit isNotEqualTo "" && {!isNil QEFUNC(compat_efak,checkTouch)}) then {
             ([_kit] call EFUNC(compat_efak,checkTouch)) isEqualTo ""
         } else {
@@ -237,12 +237,12 @@ switch (GVAR(hover) param [0, ""]) do {
             };
 
             // A magazine that is not full, in the player's own gear: all of its kind there repacked
-            // (einv_magazines, when loaded).
+            // (aio_magazines, when loaded).
             if (!isNil QEFUNC(magazines,menuChoices) && {_kit isEqualTo ""}) then {
                 _choices append ([_class, _from, _tile getOrDefault ["ammo", 0]] call EFUNC(magazines,menuChoices));
             };
 
-            // The hotbar: put it on a key, or take it off (einv_hotbar - only when that addon is loaded).
+            // The hotbar: put it on a key, or take it off (aio_hotbar - only when that addon is loaded).
             if (call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,menuChoices)}) then {
                 _choices append ([_class, ["grid", _grid]] call EFUNC(hotbar,menuChoices));
             };
@@ -269,7 +269,7 @@ switch (GVAR(hover) param [0, ""]) do {
             ];
         };
 
-        // A radio the player carries: open it, use it (einv_compat_tfar, einv_compat_acre). Not one in a kit. The settings
+        // A radio the player carries: open it, use it (aio_compat_tfar, aio_compat_acre). Not one in a kit. The settings
         // "Use items from ..." are about using things up: a radio in the backpack is opened as TFAR and ACRE2 open it.
         if (_kit isEqualTo "") then {
             private _carried = _from in [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
@@ -300,7 +300,7 @@ switch (GVAR(hover) param [0, ""]) do {
         private _slot = _record param [5, ""];
         private _owner = _record param [6, objNull];
 
-        // A slot of the hotbar (einv_hotbar - only when that addon is loaded): clear it.
+        // A slot of the hotbar (aio_hotbar - only when that addon is loaded): clear it.
         if (call FUNC(isInventoryMode) && {(_record param [7, -1]) >= 0} && {!isNil QEFUNC(hotbar,stripMenu)}) then {
             _choices append ([_record select 7] call EFUNC(hotbar,stripMenu));
         };
@@ -328,7 +328,7 @@ switch (GVAR(hover) param [0, ""]) do {
             _choices pushBack [LLSTRING(Menu_CancelQueued), [_queuedId], {_this call FUNC(cancelQueued)}];
         };
 
-        // The radio slot ACRE2 keeps for itself: nothing to do with it but look (einv_compat_acre).
+        // The radio slot ACRE2 keeps for itself: nothing to do with it but look (aio_compat_acre).
         if (!isNil QEFUNC(compat_acre,isFixedSlot) && {[_owner, _slot] call EFUNC(compat_acre,isFixedSlot)}) exitWith {};
 
         // A radio of the player's own in a slot, or the long-range radio on their back: open it, use it.
@@ -350,7 +350,7 @@ switch (GVAR(hover) param [0, ""]) do {
         }];
 
         // A magazine loaded in one of the player's weapons: all of its kind in the gear repacked, the loaded
-        // one stays as it is (einv_magazines, when loaded).
+        // one stays as it is (aio_magazines, when loaded).
         if (!isNil QEFUNC(magazines,menuChoices) && {_owner isEqualTo _unit} && {_slot in ["primary_mag", "primary_mag2", "handgun_mag", "launcher_mag"]}) then {
             _choices append ([_record param [1, ""], _owner] call EFUNC(magazines,menuChoices));
         };
@@ -405,7 +405,7 @@ switch (GVAR(hover) param [0, ""]) do {
     };
 };
 
-// The setup wizard, for whoever may open it: at the page of this class (einv_setup).
+// The setup wizard, for whoever may open it: at the page of this class (aio_setup).
 if (
     _settingsClass isNotEqualTo "" && {call FUNC(isInventoryMode)} && {!isNil QEFUNC(setup,openFromGame)}
     && {call (missionNamespace getVariable [QEFUNC(setup,canOpen), {false}])}

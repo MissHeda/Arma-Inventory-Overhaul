@@ -15,7 +15,7 @@
  * Can open it <BOOL>
  *
  * Example:
- * [player, cursorObject] call einv_arsenal_fnc_canOpen;
+ * [player, cursorObject] call aio_arsenal_fnc_canOpen;
  *
  * Public: No
  */

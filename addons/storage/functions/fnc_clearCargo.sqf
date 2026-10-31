@@ -17,7 +17,7 @@
  * It is empty now <BOOL>
  *
  * Example:
- * [backpackContainer player] call einv_storage_fnc_clearCargo;
+ * [backpackContainer player] call aio_storage_fnc_clearCargo;
  *
  * Public: No
  */

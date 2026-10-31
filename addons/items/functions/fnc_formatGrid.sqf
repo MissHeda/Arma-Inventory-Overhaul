@@ -26,8 +26,8 @@
  * <STRING>
  *
  * Example:
- * [["blocks", [[6, 4, []], [3, 2, [4]]]]] call einv_items_fnc_formatGrid; // "6x4+xxx/x-x"
- * [["blocks", [[3, 3, [4], [0, 0]], [1, 1, [], [1, 1]]]]] call einv_items_fnc_formatGrid; // "aaa/aba/aaa"
+ * [["blocks", [[6, 4, []], [3, 2, [4]]]]] call aio_items_fnc_formatGrid; // "6x4+xxx/x-x"
+ * [["blocks", [[3, 3, [4], [0, 0]], [1, 1, [], [1, 1]]]]] call aio_items_fnc_formatGrid; // "aaa/aba/aaa"
  *
  * Public: No
  */

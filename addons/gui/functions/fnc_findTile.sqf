@@ -17,7 +17,7 @@
  * [grid, tile], [] when it is not on the window - a tile on a page that is not turned to is not <ARRAY>
  *
  * Example:
- * (einv_gui_searchQueue select 0) call einv_gui_fnc_findTile;
+ * (aio_gui_searchQueue select 0) call aio_gui_fnc_findTile;
  *
  * Public: No
  */

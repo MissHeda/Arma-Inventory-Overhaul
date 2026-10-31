@@ -6,10 +6,10 @@
  * non-empty server-local pile within GROUND_RANGE, else a fresh one; a rest into a second fresh pile at
  * the same point. What even that would not take bounces (an RPT error names it) - settled like any
  * bounce, back where it came from. Never into an empty pile, never in the air; first fit on the pile -
- * the end of the phase lays it out and writes it (einv_storage_fnc_execute). A fresh pile that took
+ * the end of the phase lays it out and writes it (aio_storage_fnc_execute). A fresh pile that took
  * nothing is deleted again (fnc_pruneScriptedPile).
  *
- * A client runs it only when it could not hand it to the hub (einv_storage_fnc_requestNext: the server
+ * A client runs it only when it could not hand it to the hub (aio_storage_fnc_requestNext: the server
  * never answered): then onto a fresh pile of its own.
  *
  * A backpack joins only a pile of ours (a GroundWeaponHolder_Scripted) or a fresh one - the plain holder
@@ -18,12 +18,12 @@
  *
  * Extra: [the pile it went onto, the second pile when it took a rest].
  *
- * Event "einv_storage_groundPut" (local, on this machine) when it landed: [requester, payload, piles]. The
+ * Event "aio_storage_groundPut" (local, on this machine) when it landed: [requester, payload, piles]. The
  * engine's "Put" event never comes for a drop through the storage.
  *
  * Arguments:
  * 0: Args, [payload or ref] <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -31,11 +31,11 @@
  *     "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason already
  *     in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
- *     (einv_storage_fnc_settle)
+ *     (aio_storage_fnc_settle)
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[_payload], _context] call einv_storage_fnc_opPutGround;
+ * [[_payload], _context] call aio_storage_fnc_opPutGround;
  *
  * Public: No
  */

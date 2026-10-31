@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * Closes the window, runs something that opens a dialog of another mod, and opens the window again on the
- * same containers once that dialog is closed. For a radio's dialog (einv_compat_tfar, einv_compat_acre): TFAR
+ * same containers once that dialog is closed. For a radio's dialog (aio_compat_tfar, aio_compat_acre): TFAR
  * and ACRE2 refuse to open theirs while any dialog is open, so it cannot be opened over this window.
  *
  * The code runs a moment after the window closed (STEP_ASIDE_DELAY), as TFAR's own radio menu waits
@@ -20,7 +20,7 @@
  * None
  *
  * Example:
- * [{params ["_id"]; [_id] call acre_sys_gui_fnc_openRadio}, ["ACRE_PRC152_ID_1"]] call einv_gui_fnc_stepAside;
+ * [{params ["_id"]; [_id] call acre_sys_gui_fnc_openRadio}, ["ACRE_PRC152_ID_1"]] call aio_gui_fnc_stepAside;
  *
  * Public: No
  */

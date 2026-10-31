@@ -7,9 +7,9 @@
  * vehicle's cargo, as vanilla does. With nothing under the feet (swimming, falling) it stays, and the
  * hint says so (fnc_sendMoves).
  *
- * Out of an open kit of Enhanced First Aid Kits too (einv_compat_efak - only when that addon is loaded):
+ * Out of an open kit of Enhanced First Aid Kits too (aio_compat_efak - only when that addon is loaded):
  * by the kit's own ops, at the kit's authority - out of a kit in a living person's gear only as the
- * window's settings for it say (einv_compat_efak_fnc_checkTouch). Something already on the ground, not
+ * window's settings for it say (aio_compat_efak_fnc_checkTouch). Something already on the ground, not
  * searched yet or under way stays.
  *
  * Arguments:
@@ -21,7 +21,7 @@
  * Asked for <BOOL>
  *
  * Example:
- * [0, 3] call einv_gui_fnc_dropToGround;
+ * [0, 3] call aio_gui_fnc_dropToGround;
  *
  * Public: No
  */

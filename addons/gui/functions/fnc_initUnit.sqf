@@ -36,8 +36,8 @@
  * None
  *
  * Example:
- * [player] call einv_gui_fnc_initUnit;
- * [player, true] call einv_gui_fnc_initUnit;
+ * [player] call aio_gui_fnc_initUnit;
+ * [player, true] call aio_gui_fnc_initUnit;
  *
  * Public: No
  */

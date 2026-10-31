@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * The children of "Change Ammo Type": one entry for each class of magazine the weapon in the hands takes in
  * its muzzle that the unit has and may use - the ones in a container the "Use items from ..." settings close
- * to it are not offered (einv_storage_fnc_useCarried), as AIME lists every magazine in every container. The
+ * to it are not offered (aio_storage_fnc_useCarried), as AIME lists every magazine in every container. The
  * class already loaded is left out, as AIME leaves it out. Choosing one loads the fullest magazine of that
  * class (fnc_ammoLoad).
  *
@@ -21,7 +21,7 @@
  * Children for ACE, [[action, [], target], ...] <ARRAY>
  *
  * Example:
- * [ACE_player, ACE_player, []] call einv_compat_aime_fnc_ammoMenus;
+ * [ACE_player, ACE_player, []] call aio_compat_aime_fnc_ammoMenus;
  *
  * Public: No
  */
@@ -106,7 +106,7 @@ if (_menus isEqualTo [] && {_candidates isNotEqualTo []}) then {
                 } forEach ([_player, _x] call EFUNC(storage,useBlockedIn));
             } forEach _args;
 
-            [format [localize "STR_einv_storage_Hint_NoReload", [USE_KINDS select {_x in _where}] call EFUNC(storage,useKindName)]] call EFUNC(storage,useHint);
+            [format [localize "STR_aio_storage_Hint_NoReload", [USE_KINDS select {_x in _where}] call EFUNC(storage,useKindName)]] call EFUNC(storage,useHint);
         },
         {true},
         nil,

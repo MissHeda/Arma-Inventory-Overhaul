@@ -11,7 +11,7 @@
  * ["", ""] when it is not locked <ARRAY>
  *
  * Example:
- * [_crate] call einv_locks_fnc_getLock;
+ * [_crate] call aio_locks_fnc_getLock;
  *
  * Public: Yes
  */

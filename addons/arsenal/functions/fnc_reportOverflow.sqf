@@ -5,7 +5,7 @@
  * (fnc_checkOverflow): in ACE Arsenal's message line while it is open, as ACE's text on the screen once it
  * is closed - after ACE Arsenal (a loadout brought it) or the vanilla one left alone. Nothing is taken
  * out. Once the arsenal is closed, what has somewhere to go has been moved on to the unit's next
- * container with room just before (einv_storage_fnc_requestMigrate), so what is named then is what the
+ * container with room just before (aio_storage_fnc_requestMigrate), so what is named then is what the
  * containers cannot take between them - the player's to sort.
  *
  * Arguments:
@@ -16,7 +16,7 @@
  * Something did not fit <BOOL>
  *
  * Example:
- * [player, findDisplay 1127001] call einv_arsenal_fnc_reportOverflow;
+ * [player, findDisplay 1127001] call aio_arsenal_fnc_reportOverflow;
  *
  * Public: No
  */

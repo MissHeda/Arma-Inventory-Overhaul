@@ -19,7 +19,7 @@ all") or puts everything of yours into the box beside it ("Put all in").
   is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is
   blocked, by server setting.
 
-**Status:** 0.6.1, public beta: drag and drop between containers and equipment slots, searching loot,
+**Status:** 0.6.2, public beta: drag and drop between containers and equipment slots, searching loot,
 server-checked moves in multiplayer, the grid panel in ACE Arsenal, shaped grids and items, the hotbar, the
 setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
 Bugs and wishes go to Discord or the GitHub issues.
@@ -69,7 +69,7 @@ Tools).
 ## For mission makers and admins
 
 How big items are, how many share a tile and how containers are split up is one text of rules, the
-CBA setting "Inventory rules" (`einv_items_rules`), the same for everyone. The setup wizard writes it for you
+CBA setting "Inventory rules" (`aio_items_rules`), the same for everyone. The setup wizard writes it for you
 (ESC > Options > Inventory setup, the "Inventory setup" button on CBA's Addon Options, Eden's Tools menu, the cog in the inventory - shown only to the server, the host,
 single player and logged-in admins, other players never see it: the pause menu leaves the entry out and CBA's menu hides the button).
 Its three pages:
@@ -105,14 +105,14 @@ their load. A text that names a preset of an older version (`base=realism`, `wei
   a control of the wizard's General page, and a row of CBA's Addon Options, category "Arma Inventory Overhaul - Server", by topic. Change it in either and the
   other shows it - the wizard follows a change made in CBA's menu even while it is open, and what the wizard saves is what CBA's Server tab (in Eden its Mission
   tab) shows. We recommend the wizard; CBA's menu is 1:1 the same, and its first row says so. Each is a plain CBA setting under its own name
-  (`einv_gui_searchTime`, `einv_weight_enabled`, ...), saved by the server, the mission or a `cba_settings.sqf`, forced or not, like the rules - so a
-  `cba_settings.sqf` line `force einv_gui_searchTime = 0.6;` works, and the wizard's Export gives those lines. A setting set in the server's or the mission's
+  (`aio_gui_searchTime`, `aio_weight_enabled`, ...), saved by the server, the mission or a `cba_settings.sqf`, forced or not, like the rules - so a
+  `cba_settings.sqf` line `force aio_gui_searchTime = 0.6;` works, and the wizard's Export gives those lines. A setting set in the server's or the mission's
   `cba_settings.sqf` is greyed in the wizard: change it in that file. Saving in the wizard writes only what you changed, so a value the mission sets is never
-  copied into the server's profile. The test builds 0.4.27 to 0.5.42 kept these settings in one text box, `einv_main_settings`; whatever is still saved
+  copied into the server's profile. The test builds 0.4.27 to 0.5.42 kept these settings in one text box, `aio_main_settings`; whatever is still saved
   there - in the server's profile or file, a mission or a scenario - is moved into the settings of their own by itself (the server's profile once and for
   good, a scenario as you open the wizard or CBA's menu in Eden; save the scenario then). What players set for themselves (tile scale, tile names, keys, the
-  hotbar's look) stays in CBA's menu, per player, in the category "Arma Inventory Overhaul - Client". The old tables (`einv_items_sizeTable`, `stackTable`,
-  `einv_storage_containerTable`) and the rules text are CBA text boxes of the Server category too (the setting names do not carry the category, so a
+  hotbar's look) stays in CBA's menu, per player, in the category "Arma Inventory Overhaul - Client". The old tables (`aio_items_sizeTable`, `stackTable`,
+  `aio_storage_containerTable`) and the rules text are CBA text boxes of the Server category too (the setting names do not carry the category, so a
   `cba_settings.sqf` is the same under either).
 
 - **Your own classes and kits:** `class=X+` covers X and every class built on it, from any mod -
@@ -130,55 +130,55 @@ their load. A text that names a preset of an older version (`base=realism`, `wei
   capacity allows and its window's grid grows as needed. Give it cells of its own and those cells are all its room - the
   capacity no longer counts, in the inventory, in kit windows ("8 / 12 cells") and in ACE Arsenal:
   `class=efak_IFAK+ > grid=4x3` (the `+` matters - the kits players carry are numbered copies of the type, `efak_IFAK_7`),
-  `kind=kit > grid=12` for every kit, or `einv_grid = "4x3";` on the kit's class in a mod. The wizard's Containers step has a
+  `kind=kit > grid=12` for every kit, or `aio_grid = "4x3";` on the kit's class in a mod. The wizard's Containers step has a
   Kits chip and writes the `+` rule for you; "Back to the default" returns a kit to the capacity. That mod's own kit window and the
   "+" of its kits tab in ACE Arsenal still go by the capacity. In ACE Arsenal the kits tab shows the picked kit's grid in the panel
   (drag from the tab's list into it, out of it to remove, to and from your containers and the staging space), and an item dragged
   from ACE's list onto a kit's tile in the panel is packed into that kit - where the kit type's Arsenal setting allows it ("Remove
   only" lets things out, not in) and the kit does not follow "Use CBA default".
 - **One crate, vehicle or a unit's uniform, vest or backpack:** give the object its own grid, which wins
-  over every rule - `_crate setVariable ["einv_grid", "6x4+2x3", true];` (also `"24"`, `"rig:16"`, `"auto"`).
-- **Mods:** add a preset of your own as a class of `CfgEinvRulesets` (see `addons/items/CfgEinvRulesets.hpp`; a text names it with
+  over every rule - `_crate setVariable ["aio_grid", "6x4+2x3", true];` (also `"24"`, `"rig:16"`, `"auto"`).
+- **Mods:** add a preset of your own as a class of `CfgAioRulesets` (see `addons/items/CfgAioRulesets.hpp`; a text names it with
   `base=`, the wizard offers no choice of presets), or predefine your items in their own config class, in exactly the language of the rules text - a custom vest
   writes how its compartments are:
   ```cpp
-  class CfgWeapons { class My_Vest { einv_grid = "1x3+5x7+1x3"; }; };       // grid=, also "xxxx/x--x+2x3", a canvas, "rig:16", "24"
-  class CfgVehicles { class My_Pack { einv_grid = "abbbbbc/abbbbbc/-bbbbb-"; }; };
-  class CfgWeapons { class My_Kit { einv_size = "2x1"; einv_stack = 1; einv_weight = 0.5; einv_name = "Short name"; }; };
-  class CfgWeapons { class My_Bandage { einv_icon = "1.4@0.1,-0.05"; }; };  // icon=, the picture 1.4 times as large, moved a tenth right and a twentieth up
-  class CfgWeapons { class My_Bandage { einv_picture = "my_mod\ui\bandage_ca.paa"; }; };  // picture=, shown instead of the config picture
-  class CfgWeapons { class My_Bandage { einv_use = "backpack,vest"; }; };  // use=, usable from these containers even where a setting closes them (below)
-  class CfgWeapons { class My_Bandage { einv_cat = "medical,misc"; }; };  // cats=, the categories it is in instead of the built-in one (below)
+  class CfgWeapons { class My_Vest { aio_grid = "1x3+5x7+1x3"; }; };       // grid=, also "xxxx/x--x+2x3", a canvas, "rig:16", "24"
+  class CfgVehicles { class My_Pack { aio_grid = "abbbbbc/abbbbbc/-bbbbb-"; }; };
+  class CfgWeapons { class My_Kit { aio_size = "2x1"; aio_stack = 1; aio_weight = 0.5; aio_name = "Short name"; }; };
+  class CfgWeapons { class My_Bandage { aio_icon = "1.4@0.1,-0.05"; }; };  // icon=, the picture 1.4 times as large, moved a tenth right and a twentieth up
+  class CfgWeapons { class My_Bandage { aio_picture = "my_mod\ui\bandage_ca.paa"; }; };  // picture=, shown instead of the config picture
+  class CfgWeapons { class My_Bandage { aio_use = "backpack,vest"; }; };  // use=, usable from these containers even where a setting closes them (below)
+  class CfgWeapons { class My_Bandage { aio_cat = "medical,misc"; }; };  // cats=, the categories it is in instead of the built-in one (below)
   ```
-  `einv_size` is `size=` (`"2x1"`, a mask like `"xx/x-"`, `"mass"`), `einv_stack` is `stack=` (a number), `einv_grid` is
-  `grid=` (containers: uniform, vest, backpack, crate, vehicle, kit), `einv_weight` is `weight=` in **kilograms** (not config mass)
-  and `einv_name` is `name=` as plain text (a space is a space). `einv_icon` is `icon=`: how the item's picture is drawn in its
+  `aio_size` is `size=` (`"2x1"`, a mask like `"xx/x-"`, `"mass"`), `aio_stack` is `stack=` (a number), `aio_grid` is
+  `grid=` (containers: uniform, vest, backpack, crate, vehicle, kit), `aio_weight` is `weight=` in **kilograms** (not config mass)
+  and `aio_name` is `name=` as plain text (a space is a space). `aio_icon` is `icon=`: how the item's picture is drawn in its
   tile for a picture that is too small or too large - `"1.4"` is 1.4 times as large (0.25 to 4), `"1.4@0.1,-0.05"` moves it too, a
   tenth of the tile across (right is positive) and a twentieth down (-1 to 1; the comma is the config's, a rules text writes
-  `icon=1.4@0.1:-0.05` since its comma ends a statement). The tile cuts the picture at its edge, so it never leaves it. `einv_picture` is
+  `icon=1.4@0.1:-0.05` since its comma ends a statement). The tile cuts the picture at its edge, so it never leaves it. `aio_picture` is
   `picture=`: the texture the item shows instead of the one its config names (a file the game does not have falls back to the config
-  picture and is named once in the RPT; a rules text writes `picture=/my_mod/ui/bandage_ca.paa`, slashes and `%20` for a space). `einv_use` is `use=`: the
+  picture and is named once in the RPT; a rules text writes `picture=/my_mod/ui/bandage_ca.paa`, slashes and `%20` for a space). `aio_use` is `use=`: the
   containers the item is whitelisted for - `uniform`, `vest`, `backpack`, `all` or `none` (a comma, a plus or a bar between; a rules text writes
   `use=backpack+vest`) - see "Use from containers". A subclass
-  inherits what its parent sets, as everything in config does; `einv_grid = "";` takes it back. These sit below the server's rules text - a rule for the class still wins - and
+  inherits what its parent sets, as everything in config does; `aio_grid = "";` takes it back. These sit below the server's rules text - a rule for the class still wins - and
   above the preset. Values are cut to the same limits as in the rules, and a mistake is named in the RPT. The older
-  `einv_gridSize[]`, `einv_stackSize`, `einv_grids[]` and `einv_slots` still work (the new keys win). To get the lines for a
-  class from what it is now, call `["V_PlateCarrier1_rgr"] call einv_items_fnc_configEntry`; `einv_items_fnc_parseConfigEntry`
+  `aio_gridSize[]`, `aio_stackSize`, `aio_grids[]` and `aio_slots` still work (the new keys win). To get the lines for a
+  class from what it is now, call `["V_PlateCarrier1_rgr"] call aio_items_fnc_configEntry`; `aio_items_fnc_parseConfigEntry`
   reads such lines back.
 
 The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) ("Rules engine").
 
 - **Living persons:** anyone can be opened from the action menu ("Inventory") - awake, unconscious or
-  captive. Who may open whom, take and put items or take off worn gear are server settings on the wizard's General page, under "Living persons". Close one person to everyone with `_unit setVariable ["einv_noAccess", true, true];`;
+  captive. Who may open whom, take and put items or take off worn gear are server settings on the wizard's General page, under "Living persons". Close one person to everyone with `_unit setVariable ["aio_noAccess", true, true];`;
   a container locked with `lockInventory` stays shut. A body opens whole as well, also through ACE's
   "Open <backpack>".
 - **Everything nearby:** every pile on the ground and every crate within reach (setting "Reach", 3 m by
   default, on the same floor and in sight, at most ten) shows as a box of its own in the loot column; vehicles
-  and bodies show when they are opened. `_object setVariable ["einv_nearby", false, true];` keeps an object
+  and bodies show when they are opened. `_object setVariable ["aio_nearby", false, true];` keeps an object
   out of that list, `lockInventory` as well. Each player can switch it off ("Show everything nearby").
 - **Locks:** lock a crate or a vehicle to one side, one group or the admins: the Eden attribute *Inventory
   locked to* (category Arma Inventory Overhaul), Zeus Enhanced's right-click *Inventory lock* and module, or
-  `[_crate, "side", west] call einv_locks_fnc_setLock;` (`"group"` with a group or a group's callsign,
+  `[_crate, "side", west] call aio_locks_fnc_setLock;` (`"group"` with a group or a group's callsign,
   `"admins"`, `""` opens it again). Logged-in admins always open it, Zeus too unless the server switches
   that off (*Zeus opens locked containers*); in single player nobody is an admin. Players who may not open it
   see the crate as a locked box in the window, with a padlock and who it is for - nothing of what is inside -,
@@ -191,24 +191,24 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   is ever refused because of weight, and no container has a weight limit: what fits into a uniform, vest,
   backpack, crate or vehicle is decided by its free cells alone (a container's config load is only used to size
   its default grid when nobody defined one). A section's caption still tells what its contents weigh.
-- **Hotbar:** the keys 4 to 0 belong to the hotbar unless the setting "Hotbar" (`einv_hotbar_enabled`, the wizard's General page) is
+- **Hotbar:** the keys 4 to 0 belong to the hotbar unless the setting "Hotbar" (`aio_hotbar_enabled`, the wizard's General page) is
   switched off - a server setting, the same for everyone. Only items that do something can be bound: bandages,
   tourniquets, splints and other ACE/ACM medicine are used on yourself through ACE's own treatment, grenades
   go into the hand, magazines reload the weapon in the hands, food and drink use ACE's field rations,
   Enhanced First Aid Kits open. Each player moves the bar in Arma's layout editor and chooses when it shows.
-  `[0, "ACE_elasticBandage"] call einv_hotbar_fnc_bind;` and `[0] call einv_hotbar_fnc_use;` drive it from
+  `[0, "ACE_elasticBandage"] call aio_hotbar_fnc_bind;` and `[0] call aio_hotbar_fnc_use;` drive it from
   scripts.
 - **Categories, locked compartments and single slots:** every item is in one or more categories - weapon, ammo (magazines), grenade
   (throwables and explosives), gear, medical, food, tool, misc - by a built-in mapping, which a rule or a mod can change: the rule
-  value `cats=` (`class=ACE_fieldDressing > cats=medical+misc`) and the config key `einv_cat = "medical,misc";` (the wizard's Items
+  value `cats=` (`class=ACE_fieldDressing > cats=medical+misc`) and the config key `aio_cat = "medical,misc";` (the wizard's Items
   step has a Category row of chips; the key is `cats=` because `cat=` is the condition on a tile's colour). The strip at the side of a
   loot box shows an item under each of its categories. A container can lock a compartment to categories: after a compartment's colon
   `grid=` takes a list joined with `|`, and the word `one` makes it a single slot that holds one item of any size.
   ```
   # a vest: two front pouches only for magazines, a loop for one grenade of any size, the back for anything
-  class CfgWeapons { class My_Vest { einv_grid = "1x2:ammo+1x2:ammo+1x1:grenade|one+4x2"; }; };
+  class CfgWeapons { class My_Vest { aio_grid = "1x2:ammo+1x2:ammo+1x1:grenade|one+4x2"; }; };
   # a canvas: the side pockets a and c take medical items only
-  class CfgVehicles { class My_Pack { einv_grid = "abbbbbc/abbbbbc/abbbbbc:a=medical:c=medical"; }; };
+  class CfgVehicles { class My_Pack { aio_grid = "abbbbbc/abbbbbc/abbbbbc:a=medical:c=medical"; }; };
   ```
   Nothing is locked by default. An item never lands in a compartment that refuses it - dragging, quick move, Take all, the arsenals
   and scripts that add to the cargo all follow it; what the compartments refuse is put in another compartment or counts as no room.
@@ -218,11 +218,11 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   The eight categories are not all there is: the wizard's General page has a Categories card where you rename them, give them another picture
   (any of this mod's icons or any item's picture), and add categories of your own. They are statements of the rules text, so they are saved on
   the server and export and import with it: `category=bandit > name=Bandit_loot picture=/a3/ui_f/data/gui/cfg/hints/gear_ca.paa` (an id of
-  letters, digits and `_`, at most 16 of your own), and then `cats=bandit`, `einv_cat = "bandit";` and `grid=2x2:bandit` use it like the others.
+  letters, digits and `_`, at most 16 of your own), and then `cats=bandit`, `aio_cat = "bandit";` and `grid=2x2:bandit` use it like the others.
   The strip at the side of a loot box, the Items step's Category chips and the Containers step's Accepts chips list them too. Deleting one in the
   wizard takes it out of every item and compartment that names it.
 - **Use from containers:** three server settings on the wizard's General page, under "Containers and use", "Use items from the uniform / vest /
-  backpack" (`einv_storage_useUniform`, `useVest`, `useBackpack`), each Everything (the game's way, the default),
+  backpack" (`aio_storage_useUniform`, `useVest`, `useBackpack`), each Everything (the game's way, the default),
   Only whitelisted or Nothing. What lies in a limited container - magazines, grenades, medicine, food, kits, radios - is
   not usable from there: its tile wears a small padlock ("Cannot be used from the backpack" in the footer), the hotbar
   refuses to bind it and counts only what it may use, and the context menu leaves out its use rows. Items opt back in
@@ -249,14 +249,14 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
 - **Multiplayer:** where things lie syncs by itself - every player sees the same arrangement, also of
   containers your scripts fill. Every change runs where the container is local and the server carries what
   moves between machines, so the server has to run the same version of Arma Inventory Overhaul. Scripts can move
-  items with `einv_storage_fnc_moveEntry`, `einv_storage_fnc_equip` and `einv_storage_fnc_unequip`;
-  `[cursorObject] call einv_storage_fnc_dumpPlaces` writes where things lie to the RPT. The engine's own commands (`addItem`,
+  items with `aio_storage_fnc_moveEntry`, `aio_storage_fnc_equip` and `aio_storage_fnc_unequip`;
+  `[cursorObject] call aio_storage_fnc_dumpPlaces` writes where things lie to the RPT. The engine's own commands (`addItem`,
   `addMagazine`, `addWeapon`, loadouts, ACE) ignore the grid: what a unit's uniform, vest or backpack then holds
   beyond its cells moves on to the next container with free cells (uniform, vest, backpack) a moment later, on the
   machine the unit is local on; what fits nowhere is, for the player's own unit, put on the ground next to him with the hint "No room
   for <name> - put on the ground" (an AI, a body or a crate keeps it as overflow, shown apart). The server setting
-  `einv_storage_migrate` ("Move overfull items on": overfull items go to another container, else to the ground) switches that off.
-- **Adding things from a script or another mod:** `[unit, "class", count, rounds] call einv_storage_fnc_addToUnit` (any machine; the
+  `aio_storage_migrate` ("Move overfull items on": overfull items go to another container, else to the ground) switches that off.
+- **Adding things from a script or another mod:** `[unit, "class", count, rounds] call aio_storage_fnc_addToUnit` (any machine; the
   last argument is optional and only for magazines, -1 or left out for full ones) puts new things into the unit's uniform, vest
   and backpack - the first with free cells, one with a slot for the item's category first - and returns how many it placed,
   `0` when the grid has no room. The engine's `addItem`, `addMagazine`, `addWeapon` and `addBackpack` stop at a container's config
@@ -267,22 +267,22 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   machine's picture of the unit says will fit.
 - **Loadouts beyond the config load:** a container may hold more than its config `maximumLoad`, but the engine's `setUnitLoadout` stops
   filling a container there. Loadouts set through CBA (`CBA_fnc_setLoadout`, ACE Arsenal's Load) are topped up by the mod on their own. In a
-  mission use `[unit, loadout] call einv_storage_fnc_setUnitLoadout` instead of `setUnitLoadout` (any machine; it runs where the unit is local,
+  mission use `[unit, loadout] call aio_storage_fnc_setUnitLoadout` instead of `setUnitLoadout` (any machine; it runs where the unit is local,
   adds only what the engine left out, and what then lies beyond the grid moves on as above).
 - **Arsenal:** ACE Arsenal is the arsenal - `ace_arsenal_fnc_initBox` and `ace_arsenal_fnc_openBox`, its boxes,
   loadouts and Zeus arsenal work as always; the grid panel hooks into its window (also in the Eden editor), and
   free cells are the only limit on what goes in. The vanilla Virtual Arsenal is a server setting,
-  `einv_arsenal_biArsenal`: `"ace"` (default - BI boxes, Eden's "Virtual" storage and Zeus open ACE Arsenal with
-  the same items), `"block"` (a red screen says it is not allowed, with the text of `einv_arsenal_biMessage`;
-  Zeus is never blocked) or `"vanilla"`. A mission can decide per mission with `einv_arsenal_biPassThrough`:
+  `aio_arsenal_biArsenal`: `"ace"` (default - BI boxes, Eden's "Virtual" storage and Zeus open ACE Arsenal with
+  the same items), `"block"` (a red screen says it is not allowed, with the text of `aio_arsenal_biMessage`;
+  Zeus is never blocked) or `"vanilla"`. A mission can decide per mission with `aio_arsenal_biPassThrough`:
   `true` - always BI's window, `false` - always ACE's, unset - BI's only for missions with their own
   `arsenalOpened` / `arsenalPreOpen` handlers. It is read on each client, so set it with the public flag
-  (`missionNamespace setVariable ["einv_arsenal_biPassThrough", true, true]`) or in `initPlayerLocal.sqf`.
+  (`missionNamespace setVariable ["aio_arsenal_biPassThrough", true, true]`) or in `initPlayerLocal.sqf`.
 - **Magazines:** a partly filled magazine dropped on another of the same kind is repacked with ACE's Magazine
   Repack, in the window (a click or Escape stops it, what was moved stays moved), and "Repack all" in a
   magazine's menu repacks every one of its kind in your gear. Both magazines have to lie in your own gear or in
   the same crate, vehicle or pile. Servers with their own way to refill magazines (GreenMag) switch "Repack
-  magazines" (`einv_magazines_repack`) off; the fill bar on magazines that are not full is each player's own
+  magazines" (`aio_magazines_repack`) off; the fill bar on magazines that are not full is each player's own
   setting.
 - **Hands:** the quick move (F, double click), Take all, Put all in and dropping with the drop key or the menu take a moment, as in Wardogs: the
   items go one after another, and the caption line of the box they come from (the bar with Take all and Sort) says how far it is - a ring that goes
@@ -291,17 +291,17 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   closing the window cancels what still waits, and nothing is lost or half done, since nothing happens before its turn. **A drag never waits**, nor does
   rearranging within a container, turning an item, splitting a stack, or ACE Arsenal's panel. Putting on and taking off a uniform, vest, backpack or
   helmet is instant too, unless the server wants it to wait. The times and what waits are server settings on the wizard's General page, under "Looting and
-  searching" (`einv_gui_handDrop` 0.3 s, `einv_gui_handMove` 0.4 s, `einv_gui_handEquip` 1 s - 0 is no wait; the switches `einv_gui_waitMove` and
-  `einv_gui_waitDrop` on, `einv_gui_waitWorn` and `einv_gui_waitEquip` off).
+  searching" (`aio_gui_handDrop` 0.3 s, `aio_gui_handMove` 0.4 s, `aio_gui_handEquip` 1 s - 0 is no wait; the switches `aio_gui_waitMove` and
+  `aio_gui_waitDrop` on, `aio_gui_waitWorn` and `aio_gui_waitEquip` off).
 - **Searching:** loot you have not searched shows as diagonally striped tiles in the size of what lies there; they turn into items one by one. The
   caption line of the box says "Searching 0:07" with a ring that goes round and a cross that stops the search of that box (the button then reads
   "Search" and goes on again). A strip of icons at the side of a loot box - all, weapons, ammunition, gear, medical, food and drink, tools, other - shows
   only that kind of item in the box (the rest fades, like with the search field; a paged box turns to its first page with a match).
   Searching can be left out for a single crate, vehicle or body: in Eden by the attribute *Skip searching* (category Arma Inventory Overhaul), in Zeus Enhanced
-  by the right-click choices *Searching: turn off* / *Searching: turn on*, in a script by `[_crate, false] call einv_gui_fnc_setSearchable;` (`true` gives it back to the
+  by the right-click choices *Searching: turn off* / *Searching: turn on*, in a script by `[_crate, false] call aio_gui_fnc_setSearchable;` (`true` gives it back to the
   settings; the mark is public, so a player who joins later has it). The server setting *Search Zeus-placed crates and vehicles* (on by default) leaves out
   everything a game master places when switched off.
-- **Big containers in pages:** a crate or vehicle taller than "Rows per page of a container" (`einv_gui_pageRows`, in "Arma Inventory Overhaul - Client",
+- **Big containers in pages:** a crate or vehicle taller than "Rows per page of a container" (`aio_gui_pageRows`, in "Arma Inventory Overhaul - Client",
   General, 10 rows by default, 0 or 40 for no pages) shows that many rows at a time. The bar under it turns the pages, a fade over the page's last row
   with a chip such as "+37 items on other pages" says there is more, and an item dragged over an arrow of the bar turns the page after a moment so it can be let go
   on another page. Quick move, Take all and placing use the whole container; the pages are only the view, and only the page shown has controls on the
@@ -309,15 +309,15 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   Your own gear is never paged.
 - **Where other storage opens:** your own storage column stays at the right edge of the window, and the column of what you loot (the ground, a crate,
   a vehicle, a body, what lies nearby) opens left of it, between your equipment and your storage. "Where other storage opens"
-  (`einv_gui_lootSide`, in "Arma Inventory Overhaul - Client", General) can put it at the right edge instead, with your storage moving in as it did in earlier
+  (`aio_gui_lootSide`, in "Arma Inventory Overhaul - Client", General) can put it at the right edge instead, with your storage moving in as it did in earlier
   versions. The soldier in the middle moves with the free space without leaving third person.
 - **Sounds and looting:** every kind of gear sounds like what it is - weapons, magazines, vests, helmets, medical
-  items, radios -, using Arma's own sound files only; players within earshot hear someone loot (`einv_gui_soundsWorld`,
+  items, radios -, using Arma's own sound files only; players within earshot hear someone loot (`aio_gui_soundsWorld`,
   a server setting). A movement key stops looting and closes the window (each player's setting).
   The speaker in the window's header opens a dropdown with a switch and a volume slider for each kind of sound you hear (moving items, magazines,
   opening containers, searching, other) and a master volume; they are no CBA settings but each player's own, kept in the profile. A right click on the speaker mutes everything or brings it back.
-  Add your own sounds as classes of `CfgEinvSounds` (see `addons/gui/CfgEinvSounds.hpp`), or give an item the
-  family of another with `einv_sound = "vest";` in its config.
+  Add your own sounds as classes of `CfgAioSounds` (see `addons/gui/CfgAioSounds.hpp`), or give an item the
+  family of another with `aio_sound = "vest";` in its config.
 - **Colours:** the palette button in the window's header, right of the speaker, opens a popover where you set each part of the window on its
   own, and the window follows as you drag: **Accent**, **Secondary**, **Panels**, **Transparency** (how see-through the panels are, up to 75 %),
   **Cells** (the empty grid cells and the slot boxes), **Tiles** (the item tiles' background), **Text** (captions, names and labels; the dimmer
@@ -328,8 +328,8 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   tints the caption tabs, chips, buttons, what lights under the mouse, bar tracks and picked rows. The panels' colour and transparency change only
   the panels: the cells, slots and tiles keep their own colour and stay solid. The panels, cells and tiles are kept dark and the text is lightened
   where it would be hard to read, so everything stays readable: a lighter colour comes back as the lightest they may have. Your choices are kept
-  in your profile (`einv_gui_palette`); the setup wizard and the ACE Arsenal panel use them the next time they
-  open. A server can switch the palette off with "Players may pick their colours" (`einv_gui_playerColours`, on the wizard's General page): there is
+  in your profile (`aio_gui_palette`); the setup wizard and the ACE Arsenal panel use them the next time they
+  open. A server can switch the palette off with "Players may pick their colours" (`aio_gui_playerColours`, on the wizard's General page): there is
   no button then, and everyone sees the Arma colour of their profile and the standard look.
 
 ## The vanilla inventory

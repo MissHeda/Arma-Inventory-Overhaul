@@ -17,7 +17,7 @@
  * [text, over, used, room] <ARRAY>
  *
  * Example:
- * (["efak_IFAK_7"] call einv_compat_efak_fnc_fillState) params ["_text", "_over"];
+ * (["efak_IFAK_7"] call aio_compat_efak_fnc_fillState) params ["_text", "_over"];
  *
  * Public: No
  */

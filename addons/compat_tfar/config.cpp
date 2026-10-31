@@ -2,7 +2,7 @@
 
 // Loads only when Task Force Arrowhead Radio is there: an addon whose required addons are missing is
 // skipped, quietly - the rest of the mod works the same without it. TFAR and ACRE2 never load together;
-// each has an addon of its own that answers the same questions about a radio (einv_gui_fnc_compatCollect
+// each has an addon of its own that answers the same questions about a radio (aio_gui_fnc_compatCollect
 // asks both).
 class CfgPatches {
     class ADDON {
@@ -13,9 +13,9 @@ class CfgPatches {
         requiredAddons[] = {
             "cba_main",
             "tfar_core",
-            "einv_main",
-            "einv_storage",
-            "einv_gui"
+            "aio_main",
+            "aio_storage",
+            "aio_gui"
         };
         skipWhenMissingDependencies = 1;
         author = "Miss Heda";

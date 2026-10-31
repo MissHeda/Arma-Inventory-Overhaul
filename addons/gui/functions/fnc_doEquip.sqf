@@ -12,10 +12,10 @@
  * what fnc_canPutOn says. What the body wore there goes back on the cell the item lay on.
  *
  * Out of a living person's container only as the settings say and while in reach (fnc_checkTouch) - the
- * person's machine asks again -, never another living player's kit (einv_compat_efak_fnc_checkTile).
+ * person's machine asks again -, never another living player's kit (aio_compat_efak_fnc_checkTile).
  *
  * From an open kit of Enhanced First Aid Kits the kit's addon checks it first and sends it
- * (einv_compat_efak_fnc_equip - only when that addon is loaded); what was in the slot goes into the kit
+ * (aio_compat_efak_fnc_equip - only when that addon is loaded); what was in the slot goes into the kit
  * where that kit takes it, else into the player's own gear (fnc_sendMoves).
  *
  * Arguments:
@@ -29,7 +29,7 @@
  * Asked for <BOOL>
  *
  * Example:
- * ["primary_optic", backpackContainer player, _entry] call einv_gui_fnc_doEquip;
+ * ["primary_optic", backpackContainer player, _entry] call aio_gui_fnc_doEquip;
  *
  * Public: No
  */
@@ -91,7 +91,7 @@ if (isNull _from) exitWith {false};
 
 private _why = [_from, "items"] call FUNC(checkTouch);
 
-// Another living player's kit stays where it is (einv_compat_efak), should a slot ever take one.
+// Another living player's kit stays where it is (aio_compat_efak), should a slot ever take one.
 if (_why isEqualTo "" && {!isNil QEFUNC(compat_efak,checkTile)}) then {
     _why = [_class, _from] call EFUNC(compat_efak,checkTile);
 };

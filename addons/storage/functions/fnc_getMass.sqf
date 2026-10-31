@@ -13,7 +13,7 @@
  * Mass, in tenths of a pound <NUMBER>
  *
  * Example:
- * [[uniformContainer player] call einv_storage_fnc_getContents] call einv_storage_fnc_getMass;
+ * [[uniformContainer player] call aio_storage_fnc_getContents] call aio_storage_fnc_getMass;
  *
  * Public: No
  */

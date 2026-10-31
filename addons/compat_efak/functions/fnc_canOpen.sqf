@@ -12,7 +12,7 @@
  * living player wears - his machine writes it (fnc_mayReach). Asked first: a kit out of reach is
  * refused as such, also one nobody has carried yet - since the window opens the living, it shows
  * another player's kits as well. Contents that have not reached this machine yet are no reason: its
- * window opens and says so, the notice in place of its grid (einv_gui_fnc_drawWindow).
+ * window opens and says so, the notice in place of its grid (aio_gui_fnc_drawWindow).
  *
  * Arguments:
  * 0: Kit class <STRING>
@@ -22,7 +22,7 @@
  * [may open, reason - "" when it may or when it is no kit] <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7", backpackContainer player] call einv_compat_efak_fnc_canOpen;
+ * ["efak_IFAK_7", backpackContainer player] call aio_compat_efak_fnc_canOpen;
  *
  * Public: No
  */

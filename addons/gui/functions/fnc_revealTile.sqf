@@ -20,7 +20,7 @@
  * Done - false: the window has to be built anew <BOOL>
  *
  * Example:
- * [_display, _head] call einv_gui_fnc_revealTile;
+ * [_display, _head] call aio_gui_fnc_revealTile;
  *
  * Public: No
  */

@@ -15,13 +15,13 @@
  * container's whole compartments. Rows a move under way goes to (GVAR(inFlight)) count as in use, so
  * their outline is never cut off. A compartment that would hide fewer than COLLAPSE_HIDE_MIN rows shows
  * all of them; one the player opened (GVAR(expanded)) as well, and it can be folded again. A
- * compartment drawn on a canvas (a pos of its own, einv_storage_fnc_blocksFor) never folds: its
+ * compartment drawn on a canvas (a pos of its own, aio_storage_fnc_blocksFor) never folds: its
  * neighbours lie where they were drawn beside it, and a shorter one would leave a hole in the drawing.
  *
  * Arguments:
- * 0: Layout, see einv_storage_fnc_getLayout <HASHMAP>
+ * 0: Layout, see aio_storage_fnc_getLayout <HASHMAP>
  * 1: Holder its places are kept on - the container, or a key <OBJECT or STRING>
- * 2: Cut tall compartments into pages (einv_gui_pageRows) - false for a section that is never paged (default: true) <BOOL>
+ * 2: Cut tall compartments into pages (aio_gui_pageRows) - false for a section that is never paged (default: true) <BOOL>
  *
  * Return Value:
  * [blocks, hidden, foldable, cells, paging] <ARRAY>
@@ -30,12 +30,12 @@
  *   hidden   - how many rows are folded away, all compartments together <NUMBER>
  *   foldable - rows are folded away now, or would be without the player having opened them <BOOL>
  *   cells    - how many cells those rows hold, holes not counted <NUMBER>
- *   paging   - per compartment, [page, [[from, to], ...]] when it is cut into pages (einv_gui_pageRows, fnc_pageRanges:
+ *   paging   - per compartment, [page, [[from, to], ...]] when it is cut into pages (aio_gui_pageRows, fnc_pageRanges:
  *              its blocks entry then holds all the rows the pages cover, and it neither folds nor counts in hidden,
  *              foldable and cells), [] when it is not <ARRAY>
  *
  * Example:
- * ([_layout, _crate] call einv_gui_fnc_viewBlocks) params ["_blocks", "_hidden", "_foldable", "_cells"];
+ * ([_layout, _crate] call aio_gui_fnc_viewBlocks) params ["_blocks", "_hidden", "_foldable", "_cells"];
  *
  * Public: No
  */
@@ -81,7 +81,7 @@ private _perPage = [0, call FUNC(pageRows)] select _pages;
 {
     _x params ["_cols", "_rows", ["_holes", []], ["_pos", []]];
 
-    // What a compartment accepts and whether it is a single slot (grid=2x2:ammo, einv_storage_fnc_blockMode) travels on.
+    // What a compartment accepts and whether it is a single slot (grid=2x2:ammo, aio_storage_fnc_blockMode) travels on.
     private _extra = _x select [4];
 
     private _want = ((_used select _forEachIndex) + COLLAPSE_SPARE_ROWS) max COLLAPSE_MIN_ROWS;

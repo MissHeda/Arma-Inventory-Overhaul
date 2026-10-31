@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * call einv_arsenal_fnc_biSafetyNet;
+ * call aio_arsenal_fnc_biSafetyNet;
  *
  * Public: No
  */
@@ -32,7 +32,7 @@
     if (!hasInterface || {is3DEN}) exitWith {};
 
     private _mode = missionNamespace getVariable [QGVAR(biArsenal), "vanilla"];
-    private _passThrough = missionNamespace getVariable "einv_arsenal_biPassThrough";
+    private _passThrough = missionNamespace getVariable "aio_arsenal_biPassThrough";
 
     if (
         _mode isEqualTo "vanilla" || {GVAR(biLetThrough)} || {!GVAR(ready)} || {_passThrough isEqualTo true}

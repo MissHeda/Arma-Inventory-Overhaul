@@ -14,7 +14,7 @@
  * Show the bar <BOOL>
  *
  * Example:
- * call einv_hotbar_fnc_hudWanted;
+ * call aio_hotbar_fnc_hudWanted;
  *
  * Public: No
  */

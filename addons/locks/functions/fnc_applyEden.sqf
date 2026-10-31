@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Makes the locks the mission maker set in Eden ("Inventory locked to" and "Group callsign" in the
  * category Arma Inventory Overhaul), on the server at the start, once every object has its own values (the
- * attribute expressions only queue the objects: einv_locks_edenQueue).
+ * attribute expressions only queue the objects: aio_locks_edenQueue).
  *
  * A side or the admins lock at once. "One group": a callsign found among the groups becomes that group -
  * the lock then follows a rename -, one not found is matched by name from then on; without a callsign
@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * call einv_locks_fnc_applyEden;
+ * call aio_locks_fnc_applyEden;
  *
  * Public: No
  */

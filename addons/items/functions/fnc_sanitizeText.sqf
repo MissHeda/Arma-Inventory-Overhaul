@@ -16,7 +16,7 @@
  * The cleaned text <STRING>
  *
  * Example:
- * "einv1 base=default; @grenade > stack=3" call einv_items_fnc_sanitizeText;
+ * "aio1 base=default; @grenade > stack=3" call aio_items_fnc_sanitizeText;
  *
  * Public: No
  */

@@ -25,7 +25,7 @@
  * The controls <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.2, 0.1], (weaponsItems player) select 0] call einv_gui_fnc_drawAttachments;
+ * [_display, _group, [0, 0, 0.2, 0.1], (weaponsItems player) select 0] call aio_gui_fnc_drawAttachments;
  *
  * Public: No
  */

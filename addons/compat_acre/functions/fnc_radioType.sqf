@@ -12,7 +12,7 @@
  * 0 none, 1 radio of its own, 2 base radio <NUMBER>
  *
  * Example:
- * ["ACRE_PRC152_ID_1"] call einv_compat_acre_fnc_radioType;
+ * ["ACRE_PRC152_ID_1"] call aio_compat_acre_fnc_radioType;
  *
  * Public: No
  */

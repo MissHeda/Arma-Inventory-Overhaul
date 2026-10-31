@@ -2,9 +2,9 @@
 /*
  * Author: Miss Heda
  * Finds the server settings in a pasted text: the lines of a cba_settings.sqf or of CBA's Export that set one of
- * them (einv_gui_searchTime = 0.6;), read with CBA's own reader (cba_settings_fnc_parse) - and the one line of the
- * settings box of the test builds (einv_main_settings = "einv1, gui_searchTime=0.6";), whose values count where no
- * line of their own sets them. Each value is held to what its setting takes (einv_main_fnc_parseValue): a number cut to
+ * them (aio_gui_searchTime = 0.6;), read with CBA's own reader (cba_settings_fnc_parse) - and the one line of the
+ * settings box of the test builds (aio_main_settings = "aio1, gui_searchTime=0.6";), whose values count where no
+ * line of their own sets them. Each value is held to what its setting takes (aio_main_fnc_parseValue): a number cut to
  * its range, a choice by its value. Their priority ("force") is not taken over: where and how this machine saves
  * is the wizard's own choice. A text that is no such file has no settings - a bare line of statements could as
  * well be rules.
@@ -17,7 +17,7 @@
  * was left out <ARRAY of STRING>
  *
  * Example:
- * ["force einv_gui_searchTime = 0.8;"] call einv_setup_fnc_importSettings;
+ * ["force aio_gui_searchTime = 0.8;"] call aio_setup_fnc_importSettings;
  *
  * Public: No
  */
@@ -27,7 +27,7 @@ params [["_text", "", [""]]];
 private _values = createHashMap;
 private _warnings = [];
 
-if ((toLower _text) find "einv_" < 0 || {isNil "cba_settings_fnc_parse"}) exitWith {[_values, _warnings]};
+if ((toLower _text) find "aio_" < 0 || {isNil "cba_settings_fnc_parse"}) exitWith {[_values, _warnings]};
 
 private _registry = missionNamespace getVariable [QEGVAR(main,serverSettings), createHashMap];
 

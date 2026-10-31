@@ -12,7 +12,7 @@
  * Is a weapon holder <BOOL>
  *
  * Example:
- * [cursorObject] call einv_storage_fnc_isGroundHolder;
+ * [cursorObject] call aio_storage_fnc_isGroundHolder;
  *
  * Public: No
  */

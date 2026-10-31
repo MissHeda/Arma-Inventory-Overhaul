@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * [_object] call einv_gui_fnc_closeNested;
+ * [_object] call aio_gui_fnc_closeNested;
  *
  * Public: No
  */

@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * A magazine dropped onto another of its kind (einv_gui_fnc_endDrag): asked again whether it may
+ * A magazine dropped onto another of its kind (aio_gui_fnc_endDrag): asked again whether it may
  * (fnc_canRepack - a refusal with a reason is shown in the hint), then started (fnc_begin) with ACE's
  * order: the fuller magazine is filled from the emptier one, the fewest rounds to move. Of two with the
  * same rounds the one dropped on is filled - it comes last, and the last one receives.
@@ -16,7 +16,7 @@
  * A repack started <BOOL>
  *
  * Example:
- * [_sourceGrid, _entry, _targetGrid, _under] call einv_magazines_fnc_startPair;
+ * [_sourceGrid, _entry, _targetGrid, _under] call aio_magazines_fnc_startPair;
  *
  * Public: No
  */

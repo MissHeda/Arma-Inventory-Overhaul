@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The presets there are (CfgEinvRulesets): this mod's one, Default, and any that another mod adds, in config
+ * The presets there are (CfgAioRulesets): this mod's one, Default, and any that another mod adds, in config
  * order. The wizard offers no choice among them any more - a text names its preset by base=, which is the
  * default unless another mod's preset was named by hand -; this is what names them.
  *
@@ -12,7 +12,7 @@
  * [[id (lower case), name, description, revision, cell (-1 when it takes its base's)], ...] <ARRAY>
  *
  * Example:
- * call einv_setup_fnc_shippedPresets;
+ * call aio_setup_fnc_shippedPresets;
  *
  * Public: No
  */
@@ -28,7 +28,7 @@ private _fnc_text = {
     _text
 };
 
-("true" configClasses (configFile >> "CfgEinvRulesets")) apply {
+("true" configClasses (configFile >> "CfgAioRulesets")) apply {
     private _id = toLower configName _x;
     private _name = [getText (_x >> "name")] call _fnc_text;
 

@@ -4,18 +4,18 @@
  * Author: Miss Heda
  * "This is how it looks": what an editor's canvas (fnc_uiCanvas) gives, the way the inventory draws it -
  * on the inventory's panel, in its cells, a pixel apart.
- *   - A container's compartments laid out as the inventory lays them out (einv_gui_fnc_flowCompartments):
+ *   - A container's compartments laid out as the inventory lays them out (aio_gui_fnc_flowCompartments):
  *     side by side as far as STORAGE_COLS cells reach, a gap between two, then on the next line - and the
  *     ones of a canvas where they were drawn, with the seam's room opened where two of them touch, so
  *     the painted compartments read as the blocks they are.
- *   - Each compartment on its own panel behind its cells, as einv_gui_fnc_drawCompartments draws it: the
+ *   - Each compartment on its own panel behind its cells, as aio_gui_fnc_drawCompartments draws it: the
  *     theme's card, COMPARTMENT_PAD_PX past the cells, round as far as the corner cells stay inside, a
- *     shaped one's holes left open (einv_gui_fnc_uiShape "panel").
+ *     shaped one's holes left open (aio_gui_fnc_uiShape "panel").
  *   - Every cell the same size with the same gap to the next, whichever compartment it belongs to: the
  *     cell is a whole number of pixels and so is every offset, so no cell comes out a pixel wider than
  *     its neighbour and no gap a pixel wider than another. A canvas that its seams make wider than the
  *     card gets smaller cells, all of them alike, rather than being cut.
- *   - An item's tile on a piece of grid: its surface on its cells only (einv_gui_fnc_uiShape), its
+ *   - An item's tile on a piece of grid: its surface on its cells only (aio_gui_fnc_uiShape), its
  *     picture over its box, as a tile is drawn.
  * The one routine for Paint and Blocks alike: the same cell, gap and flow for the same compartments, so
  * the two ways give the same picture for the same configuration (fnc_canvasBlocks hands over a painted
@@ -38,7 +38,7 @@
  * None
  *
  * Example:
- * [_display, _box, [0.2, 0.1, 0.2, 0.2], _theme, [[2, 2, [3]]], [_picture, 2]] call einv_setup_fnc_drawPreview;
+ * [_display, _box, [0.2, 0.1, 0.2, 0.2], _theme, [[2, 2, [3]]], [_picture, 2]] call aio_setup_fnc_drawPreview;
  *
  * Public: No
  */
@@ -51,7 +51,7 @@ ctrlDelete (uiNamespace getVariable [QGVAR(preview), controlNull]);
 
 _rect params ["", "", "_width", "_height"];
 
-private _group = [_display, "EINV_ScrollGroup", _parent, _rect] call EFUNC(gui,uiCreate);
+private _group = [_display, "AIO_ScrollGroup", _parent, _rect] call EFUNC(gui,uiCreate);
 
 uiNamespace setVariable [QGVAR(preview), _group];
 
@@ -131,7 +131,7 @@ if (_item isNotEqualTo []) exitWith {
 };
 
 // A container: the compartments where the inventory puts them, as large as fits across - the seams of a
-// canvas may make it wider than STORAGE_COLS cells (einv_gui_fnc_flowCompartments says how wide).
+// canvas may make it wider than STORAGE_COLS cells (aio_gui_fnc_flowCompartments says how wide).
 private _cellPixels = (floor (((UNIT * 0.85) min (_areaW / (STORAGE_COLS + 0.5) * pixelH / pixelW)) / pixelH)) max 1;
 private _layout = createHashMapFromArray [["blocks", _blocks]];
 private _flow = [_layout, [_cellPixels * pixelW, _cellPixels * pixelH]] call EFUNC(gui,flowCompartments);
@@ -157,7 +157,7 @@ private _cellW = _cellPixels * pixelW;
     _theme getOrDefault ["panel", [0.05, 0.05, 0.05, 0.92]], (_theme getOrDefault ["radius", 0]) min (UNIT * 0.3)
 ] call EFUNC(gui,uiPanel);
 
-// The compartments' panels, as the inventory draws them (einv_gui_fnc_drawCompartments): the card, the pad
+// The compartments' panels, as the inventory draws them (aio_gui_fnc_drawCompartments): the card, the pad
 // past the cells, round up to three times the pad.
 private _pad = COMPARTMENT_PAD_PX(_cellW);
 private _padW = _pad * pixelW;
@@ -229,7 +229,7 @@ private _drawn = [];
     };
 
     // A compartment that takes only some categories shows the first one's picture, large and faint in its middle, as the empty
-    // one does in the inventory (einv_gui_fnc_drawBadge); a single slot a little stronger.
+    // one does in the inventory (aio_gui_fnc_drawBadge); a single slot a little stronger.
     private _texture = "";
 
     if (_accepts isNotEqualTo []) then {

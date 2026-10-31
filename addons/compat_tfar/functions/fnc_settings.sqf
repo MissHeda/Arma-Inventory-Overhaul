@@ -17,7 +17,7 @@
  * Settings, [] while there are none <ARRAY>
  *
  * Example:
- * ["TFAR_anprc152_1"] call einv_compat_tfar_fnc_settings;
+ * ["TFAR_anprc152_1"] call aio_compat_tfar_fnc_settings;
  *
  * Public: No
  */

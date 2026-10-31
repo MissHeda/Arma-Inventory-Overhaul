@@ -17,7 +17,7 @@
  * mass]; shared, do not change it <HASHMAP>
  *
  * Example:
- * [] call einv_items_fnc_kitTypes;
+ * [] call aio_items_fnc_kitTypes;
  *
  * Public: No
  */

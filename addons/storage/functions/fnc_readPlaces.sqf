@@ -9,12 +9,12 @@
  * the entry's index within its key, so two machines with the same data hold the same array.
  *
  * A holder is a container object or the key of a grid with no object of its own ("kit:" + the lowercase
- * class, einv_compat_efak). While a phase runs here (fnc_execute), what its ops changed comes first,
+ * class, aio_compat_efak). While a phase runs here (fnc_execute), what its ops changed comes first,
  * from the execution's buffer.
  *
- * Kept on the holder object (einv_storage_places), for kits in a mission variable
- * (einv_storage_places_kit_<class>). In multiplayer a uniform, vest or backpack lying in a container has
- * a copy on the outermost container it lies under as well (einv_storage_nested, fnc_tagNested), which
+ * Kept on the holder object (aio_storage_places), for kits in a mission variable
+ * (aio_storage_places_kit_<class>). In multiplayer a uniform, vest or backpack lying in a container has
+ * a copy on the outermost container it lies under as well (aio_storage_nested, fnc_tagNested), which
  * reaches every machine - whether its own variable does is not known. The fresher of the two counts:
  * the higher revision, the object's own on a tie. The copy only counts while it carries the same id as
  * the object's own tag, or the object has none here - so a copy can never hand one container's places
@@ -29,7 +29,7 @@
  * [revision, records], [0, []] when nothing was written - a copy, free to change <ARRAY>
  *
  * Example:
- * [backpackContainer player] call einv_storage_fnc_readPlaces;
+ * [backpackContainer player] call aio_storage_fnc_readPlaces;
  *
  * Public: Yes
  */
@@ -43,7 +43,7 @@ if ((_isKey && {_holder isEqualTo ""}) || {!_isKey && {isNull _holder}}) exitWit
 private _places = [0, []];
 
 if (_isKey) then {
-    // "kit:efak_ifak_7" -> einv_storage_places_kit_efak_ifak_7
+    // "kit:efak_ifak_7" -> aio_storage_places_kit_efak_ifak_7
     _places = missionNamespace getVariable [format ["%1_%2", QGVAR(places), (_holder splitString ":") joinString "_"], [0, []]];
 } else {
     _places = _holder getVariable [QGVAR(places), [0, []]];

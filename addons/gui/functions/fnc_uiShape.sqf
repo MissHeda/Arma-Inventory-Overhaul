@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Draws a shaped item's tile (size=xx/x-, einv_items_fnc_footprintAs) on its cells only: its surface, or
+ * Draws a shaped item's tile (size=xx/x-, aio_items_fnc_footprintAs) on its cells only: its surface, or
  * the one-pixel border around it, in the same look a rectangle has - or a shaped compartment's panel,
  * its cells grown by some pixels with its holes left open (fnc_drawCompartments). fnc_shapeRects says
  * where, on a grid where its columns and rows start (a canvas's seams).
@@ -24,7 +24,7 @@
  * The controls; for a surface the first is the top row's first run (its middle piece, where that run is round) <ARRAY>
  *
  * Example:
- * [_display, _group, [_left, _top], _cellW, _cellH, [2, 2, [3]], _color] call einv_gui_fnc_uiShape;
+ * [_display, _group, [_left, _top], _cellW, _cellH, [2, 2, [3]], _color] call aio_gui_fnc_uiShape;
  *
  * Public: No
  */
@@ -48,7 +48,7 @@ if (_round && {_part isEqualTo "surface"} && {_grid isEqualType createHashMap} &
 };
 
 _rects apply {
-    private _ctrl = [_display, "EINV_PanelRect", _parent, _x] call FUNC(uiCreate);
+    private _ctrl = [_display, "AIO_PanelRect", _parent, _x] call FUNC(uiCreate);
 
     _ctrl ctrlSetBackgroundColor _color;
     _ctrl

@@ -2,10 +2,10 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Lets the players near the looter hear what he does (einv_gui_soundsWorld, a server setting). The sound
+ * Lets the players near the looter hear what he does (aio_gui_soundsWorld, a server setting). The sound
  * has been resolved already - the variant picked, the pitch, the ground, the vehicle's door -, so every
  * listener plays the same one and needs neither the config nor the settings. It goes as a CBA event
- * (einv_gui_noise, fnc_onNoise) to the players within the sound's range plus NOISE_MARGIN metres, and to
+ * (aio_gui_noise, fnc_onNoise) to the players within the sound's range plus NOISE_MARGIN metres, and to
  * nobody else: a lone looter costs no network at all. At most one sound every NOISE_GAP seconds goes out
  * (a search's ticks have their own clock, slower), at most three layers of it.
  *
@@ -21,7 +21,7 @@
  * None
  *
  * Example:
- * [_layers, 12, 0.2] call einv_gui_fnc_sendNoise;
+ * [_layers, 12, 0.2] call aio_gui_fnc_sendNoise;
  *
  * Public: No
  */

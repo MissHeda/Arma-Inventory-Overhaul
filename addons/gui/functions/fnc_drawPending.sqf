@@ -21,7 +21,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_drawPending;
+ * call aio_gui_fnc_drawPending;
  *
  * Public: No
  */

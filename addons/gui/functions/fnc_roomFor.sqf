@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * Whether a container has room for a tile - the quick move key's question (fnc_quickMove), asked again at every
- * repeat of the key while it is held. einv_storage_fnc_hasSpace answers it exactly but lays the whole container out
+ * repeat of the key while it is held. aio_storage_fnc_hasSpace answers it exactly but lays the whole container out
  * anew each time, and a held key asks three containers per tile.
  *
  * Here the container is laid out once and the answer is kept with the container's signature (the places' revision and the
@@ -14,7 +14,7 @@
  * are counted as waiting at once, so the next tile of a held key does not find the room the last one is going to
  * fill. The authority still decides when the move arrives (a move that finds no room there says NoRoom).
  *
- * What the cells cannot tell is asked of einv_storage_fnc_hasSpace and the answer kept for this signature and tile
+ * What the cells cannot tell is asked of aio_storage_fnc_hasSpace and the answer kept for this signature and tile
  * (one question per kind of tile and per change of the container, however long the key is held): a tile that
  * stacks (it may join a pile that has room), a shaped one, and any tile for which no free spot is found (so a
  * container that looks full is never taken for full without the exact answer - only room counted out by what
@@ -29,7 +29,7 @@
  * There is room <BOOL>
  *
  * Example:
- * [backpackContainer player, _tile, true] call einv_gui_fnc_roomFor;
+ * [backpackContainer player, _tile, true] call aio_gui_fnc_roomFor;
  *
  * Public: No
  */
@@ -134,7 +134,7 @@ private _fnc_exact = {
 };
 
 // A tile that stacks may join a pile, a shaped one lies on cells the plain look does not know, and a compartment that
-// accepts only some categories or holds one item of any size (einv_storage_fnc_blockMode) is not a matter of free cells.
+// accepts only some categories or holds one item of any size (aio_storage_fnc_blockMode) is not a matter of free cells.
 if (
     _stack > 1 || {(_upright select 2) isNotEqualTo []} || {(_turned select 2) isNotEqualTo []}
     || {_blocks findIf {count _x > 4} >= 0}

@@ -14,7 +14,7 @@
  * The class to start the tree at, lowercase; the class itself when nothing above it is small enough or it is not known <STRING>
  *
  * Example:
- * ["B_Carryall_mcamo"] call einv_setup_fnc_treeTop;
+ * ["B_Carryall_mcamo"] call aio_setup_fnc_treeTop;
  *
  * Public: No
  */

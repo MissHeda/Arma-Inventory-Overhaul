@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * A loadout is read (CBA_fnc_getLoadout, event CBA_loadoutGet): where the unit's uniform, vest and backpack
- * keep their things goes along in its extended info, under "einv_layout" - [1, [uniform, vest, backpack]],
+ * keep their things goes along in its extended info, under "aio_layout" - [1, [uniform, vest, backpack]],
  * each a list of [key, col, row, w, h, block, rot] in the records' own shape (fnc_readPlaces). So a loadout
  * saved in the Arsenal or ACE's, exported, kept for a respawn, comes back with everything on its cell;
  * ACE leaves a key it does not know alone.
@@ -23,7 +23,7 @@
  * None
  *
  * Example:
- * [player, getUnitLoadout player, createHashMap] call einv_storage_fnc_onLoadoutGet;
+ * [player, getUnitLoadout player, createHashMap] call aio_storage_fnc_onLoadoutGet;
  *
  * Public: No
  */
@@ -56,5 +56,5 @@ private _lists = [uniformContainer _unit, vestContainer _unit, backpackContainer
 };
 
 if (_any) then {
-    _extended set ["einv_layout", [1, _lists]];
+    _extended set ["aio_layout", [1, _lists]];
 };

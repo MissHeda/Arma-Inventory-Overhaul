@@ -5,12 +5,12 @@
  * The answer to the repack's transaction (the callback of fnc_commit): the status of its one op - "" done,
  * "Gone" a magazine was taken meanwhile, else a reason (out of reach, locked, not ready ...) - is handed to
  * fnc_finish. When it is done the window waits for the places it wrote to reach this machine, as it does for
- * its moves (einv_gui_fnc_onFrame), or at most ANSWER_WAIT seconds: the cargo can arrive before its places,
+ * its moves (aio_gui_fnc_onFrame), or at most ANSWER_WAIT seconds: the cargo can arrive before its places,
  * and a magazine would show on a first-fit cell for a moment.
  *
  * Arguments:
  * 0: Request id <STRING>
- * 1: Summary (einv_storage_fnc_onAnswer) <ARRAY>
+ * 1: Summary (aio_storage_fnc_onAnswer) <ARRAY>
  * 2: Revisions, [[holder, revision], ...] <ARRAY>
  * 3: The record fnc_commit gave along <HASHMAP>
  *
@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * ["2:14", _summary, _revisions, _record] call einv_magazines_fnc_onCommitted;
+ * ["2:14", _summary, _revisions, _record] call aio_magazines_fnc_onCommitted;
  *
  * Public: No
  */

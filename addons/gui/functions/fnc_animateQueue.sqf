@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_display, diag_tickTime] call einv_gui_fnc_animateQueue;
+ * [_display, diag_tickTime] call aio_gui_fnc_animateQueue;
  *
  * Public: No
  */

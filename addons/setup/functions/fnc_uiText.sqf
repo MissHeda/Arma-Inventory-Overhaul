@@ -21,7 +21,7 @@
  * Height taken <NUMBER>
  *
  * Example:
- * private _height = [_display, _group, [0, 0, 0.3], "A long text", 0.02, [1, 1, 1, 1], "PuristaMedium"] call einv_setup_fnc_uiText;
+ * private _height = [_display, _group, [0, 0, 0.3], "A long text", 0.02, [1, 1, 1, 1], "PuristaMedium"] call aio_setup_fnc_uiText;
  *
  * Public: No
  */
@@ -33,7 +33,7 @@ _position params ["_left", "_top", "_width"];
 
 if (_text isEqualTo "") exitWith {0};
 
-private _ctrl = [_display, "EINV_StructuredText", _parent, [_left, _top, _width, UNIT * 10]] call EFUNC(gui,uiCreate);
+private _ctrl = [_display, "AIO_StructuredText", _parent, [_left, _top, _width, UNIT * 10]] call EFUNC(gui,uiCreate);
 _ctrl ctrlSetStructuredText parseText format [
     "<t font='%1' color='%2' size='%3'>%4</t>",
     _font, [_color] call FUNC(hex), _size / STRUCTURED_SIZE, [_text] call FUNC(escape)

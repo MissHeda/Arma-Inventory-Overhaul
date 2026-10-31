@@ -13,7 +13,7 @@
  * The colour it has while it waits <ARRAY>
  *
  * Example:
- * [[1, 1, 1, 0.075]] call einv_gui_fnc_queueColor;
+ * [[1, 1, 1, 0.075]] call aio_gui_fnc_queueColor;
  *
  * Public: No
  */

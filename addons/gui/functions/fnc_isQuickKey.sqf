@@ -14,7 +14,7 @@
  * It is the quick move key <BOOL>
  *
  * Example:
- * [33, [false, false, false]] call einv_gui_fnc_isQuickKey;
+ * [33, [false, false, false]] call aio_gui_fnc_isQuickKey;
  *
  * Public: No
  */
@@ -23,6 +23,6 @@ params [["_key", 0, [0]], ["_modifiers", [false, false, false], [[]]]];
 
 if (isNil "CBA_fnc_getKeybind") exitWith {false};
 
-private _entry = [CBA_SETTINGS_EINV, QGVAR(quickMove)] call CBA_fnc_getKeybind;
+private _entry = [CBA_SETTINGS_AIO, QGVAR(quickMove)] call CBA_fnc_getKeybind;
 
 !isNil "_entry" && {((_entry param [8, []]) findIf {_x isEqualTo [_key, _modifiers]}) >= 0}

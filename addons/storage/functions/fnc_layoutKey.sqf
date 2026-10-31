@@ -16,7 +16,7 @@
  * Key, "" for no class <STRING>
  *
  * Example:
- * ["ACRE_PRC343_ID_1"] call einv_storage_fnc_layoutKey;
+ * ["ACRE_PRC343_ID_1"] call aio_storage_fnc_layoutKey;
  *
  * Public: No
  */

@@ -23,7 +23,7 @@
  * Seconds left of the hold, 0 for none <NUMBER>
  *
  * Example:
- * [player] call einv_storage_fnc_wornHeld;
+ * [player] call aio_storage_fnc_wornHeld;
  *
  * Public: No
  */

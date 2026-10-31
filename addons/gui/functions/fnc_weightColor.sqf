@@ -17,7 +17,7 @@
  * Colour [r, g, b, a] <ARRAY>
  *
  * Example:
- * [player, 640, _theme] call einv_gui_fnc_weightColor;
+ * [player, 640, _theme] call aio_gui_fnc_weightColor;
  *
  * Public: No
  */

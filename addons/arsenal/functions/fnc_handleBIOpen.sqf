@@ -18,7 +18,7 @@
  * This addon took it - the vanilla one must not open <BOOL>
  *
  * Example:
- * [[false, _box, player]] call einv_arsenal_fnc_handleBIOpen;
+ * [[false, _box, player]] call aio_arsenal_fnc_handleBIOpen;
  *
  * Public: No
  */
@@ -31,7 +31,7 @@ private _mode = missionNamespace getVariable [QGVAR(biArsenal), "vanilla"];
 if (_mode isEqualTo "vanilla") exitWith {false};
 
 // 2. What always keeps the vanilla arsenal.
-private _passThrough = missionNamespace getVariable "einv_arsenal_biPassThrough";
+private _passThrough = missionNamespace getVariable "aio_arsenal_biPassThrough";
 
 if (
     !hasInterface || {!GVAR(ready)} || {_passThrough isEqualTo true}
@@ -44,7 +44,7 @@ if (
 };
 
 // A mission that hooks the vanilla arsenal itself restricts it there: it keeps the one it was written for,
-// unless it says ours is fine (einv_arsenal_biPassThrough set to false). Not under "not allowed": a server
+// unless it says ours is fine (aio_arsenal_biPassThrough set to false). Not under "not allowed": a server
 // that forbids the vanilla arsenal forbids it for those missions too.
 if (_mode isEqualTo "ace" && {isNil "_passThrough"} && {call FUNC(biMissionHooks)}) exitWith {
     GVAR(biLetThrough) = true;

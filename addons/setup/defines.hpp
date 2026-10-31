@@ -1,8 +1,8 @@
 // The setup wizard's window: the inventory's screen geometry and pixel snapping (gui/defines.hpp), and
 // the wizard's own ids and measures. It looks like the inventory - Enhanced First Aid Kits' glass - and
-// takes its colours from the inventory's theme (einv_gui_fnc_theme).
+// takes its colours from the inventory's theme (aio_gui_fnc_theme).
 
-#include "\z\einv\addons\gui\defines.hpp"
+#include "\z\aio\addons\gui\defines.hpp"
 
 // The textures are the inventory's own, drawn by tools/generate_ui_textures.py into the gui addon.
 #undef UI_TEX
@@ -64,7 +64,7 @@
 #define TEXT_BODY (UNIT * 0.64)
 #define TEXT_SMALL (UNIT * 0.56)
 
-// The size EINV_StructuredText is made with (gui/RscBase.hpp): a text of another size is written as a
+// The size AIO_StructuredText is made with (gui/RscBase.hpp): a text of another size is written as a
 // share of it.
 #define STRUCTURED_SIZE (UNIT * 0.7)
 
@@ -72,7 +72,7 @@
 #define MENU_BG [0.06, 0.06, 0.06, 0.98]
 #define MENU_EDGE [1, 1, 1, 0.14]
 // The accent under the mouse: the theme's accentHover, a lighter shade of the player's own accent colour
-// (einv_gui_fnc_accentColour, issue 14). Read from the _theme of the function that uses it.
+// (aio_gui_fnc_accentColour, issue 14). Read from the _theme of the function that uses it.
 #define ACCENT_HOVER (_theme getOrDefault ["accentHover", _theme getOrDefault ["accent", ACCENT_FALLBACK]])
 #define DISABLED_FILL [1, 1, 1, 0.035]
 #define DISABLED_INK [1, 1, 1, 0.3]
@@ -94,7 +94,7 @@
 #define ROW_MOD 7
 #define ROW_LOAD 8
 
-// Where the index looks, in the order the rules engine does (einv_items_fnc_getFacts).
+// Where the index looks, in the order the rules engine does (aio_items_fnc_getFacts).
 #define INDEX_ROOTS ["CfgWeapons", "CfgMagazines", "CfgGlasses", "CfgVehicles"]
 
 // One piece of the index may take this long (s) - the window keeps its frame rate while it is read -, and
@@ -103,12 +103,12 @@
 #define INDEX_STRIDE 64
 
 // The kinds the Containers step lists: what holds things and has a grid - a kit of Enhanced First Aid Kits
-// too, whose grid counts only once a rule or its config gives it one (einv_compat_efak_fnc_roomMode).
+// too, whose grid counts only once a rule or its config gives it one (aio_compat_efak_fnc_roomMode).
 #define CONTAINER_KINDS ["uniform", "vest", "backpack", "crate", "vehicle", "kit"]
 
 // The containers the General step sets a size for, one kind at a time (fnc_drawGeneral, fnc_kindRule): what a soldier
 // wears and what holds cargo - each a rule "all kind=... > grid=WxH" of the text, which the engine asks after
-// everything that is about a class (einv_items_fnc_resolve). Kits stay out: a grid for them all would turn off
+// everything that is about a class (aio_items_fnc_resolve). Kits stay out: a grid for them all would turn off
 // Enhanced First Aid Kits' capacity for every kit at once.
 #define GENERAL_KINDS ["uniform", "vest", "backpack", "vehicle", "crate"]
 
@@ -129,7 +129,7 @@
 
 // What a layout text starts with (fnc_exportClasses "layout", fnc_importClasses): the values of one class
 // without its name, to share and to apply to whichever class is selected where it is imported.
-#define LAYOUT_MARKER "einv-layout:"
+#define LAYOUT_MARKER "aio-layout:"
 
 // What fnc_drawIconBlock takes in height: its caption, the zoom row and the shift row with their gaps.
 #define ICON_BLOCK_H (UNIT * 3.46)

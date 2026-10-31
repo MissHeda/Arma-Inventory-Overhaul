@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * call einv_hotbar_fnc_checkKeys;
+ * call aio_hotbar_fnc_checkKeys;
  *
  * Public: No
  */
@@ -44,7 +44,7 @@ private _others = [];
     };
 
     // The slots' own keybinds are not "something else".
-    if ((_x find "einv_hotbar") >= 0 || {_name isEqualTo ""}) then {continue};
+    if ((_x find "aio_hotbar") >= 0 || {_name isEqualTo ""}) then {continue};
 
     {
         _others pushBack [_x select 0, _x select 1, format ["%1 - %2", _addon, _name]];
@@ -52,7 +52,7 @@ private _others = [];
 } forEach (allVariables cba_keybinding_actions);
 
 for "_i" from 0 to (SLOT_COUNT - 1) do {
-    private _entry = [CBA_SETTINGS_EINV, format [QGVAR(slot%1), _i + 1]] call CBA_fnc_getKeybind;
+    private _entry = [CBA_SETTINGS_AIO, format [QGVAR(slot%1), _i + 1]] call CBA_fnc_getKeybind;
 
     if (isNil "_entry") then {continue};
 
@@ -90,9 +90,9 @@ if (_lines isEqualTo []) exitWith {};
 
 private _text = _lines joinString "; ";
 
-if ((profileNamespace getVariable ["einv_hotbar_keysNoticed", ""]) isEqualTo _text) exitWith {};
+if ((profileNamespace getVariable ["aio_hotbar_keysNoticed", ""]) isEqualTo _text) exitWith {};
 
 systemChat format [LLSTRING(Notice_SharedKeys), _text];
 
-profileNamespace setVariable ["einv_hotbar_keysNoticed", _text];
+profileNamespace setVariable ["aio_hotbar_keysNoticed", _text];
 saveProfileNamespace;

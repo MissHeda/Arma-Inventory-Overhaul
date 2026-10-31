@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * [_crate] call einv_gui_fnc_paintGroupStrip;
+ * [_crate] call aio_gui_fnc_paintGroupStrip;
  *
  * Public: No
  */

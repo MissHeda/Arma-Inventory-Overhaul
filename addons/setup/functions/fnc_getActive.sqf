@@ -16,7 +16,7 @@
  * Text <STRING>
  *
  * Example:
- * call einv_setup_fnc_getActive;
+ * call aio_setup_fnc_getActive;
  *
  * Public: No
  */

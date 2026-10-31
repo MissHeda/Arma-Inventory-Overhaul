@@ -17,7 +17,7 @@
  * [CBA slot, container], ["", objNull] for none <ARRAY>
  *
  * Example:
- * [_grid] call einv_gui_fnc_cbaTileTarget;
+ * [_grid] call aio_gui_fnc_cbaTileTarget;
  *
  * Public: No
  */

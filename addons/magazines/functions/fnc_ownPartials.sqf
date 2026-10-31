@@ -16,7 +16,7 @@
  * Parts, ascending by rounds <ARRAY>
  *
  * Example:
- * ["30Rnd_65x39_caseless_mag"] call einv_magazines_fnc_ownPartials;
+ * ["30Rnd_65x39_caseless_mag"] call aio_magazines_fnc_ownPartials;
  *
  * Public: No
  */

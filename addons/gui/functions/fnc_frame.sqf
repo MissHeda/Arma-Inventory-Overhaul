@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The frame of the window with its time taken, for "Log window timings (debug)" (einv_gui_debugTiming): fnc_startFrame
+ * The frame of the window with its time taken, for "Log window timings (debug)" (aio_gui_debugTiming): fnc_startFrame
  * lets the driver call this instead of fnc_onFrame when the setting is on as the window opens. It runs
  * fnc_onFrame, and hands what the frame cost to fnc_logFrame under what the frame was: "idle" (the mouse
  * stood still), "held", "same" or "new" (the mouse moved, and the hover ended at once in the cell it was
@@ -21,7 +21,7 @@
  * None
  *
  * Example:
- * [] call einv_gui_fnc_frame;
+ * [] call aio_gui_fnc_frame;
  *
  * Public: No
  */

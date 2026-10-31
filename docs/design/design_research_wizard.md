@@ -2,17 +2,17 @@
 
 ## 0. Decisions
 
-- **One setting holds the whole setup.** `einv_items_rules` is an EDITBOX with global = 1. Its default is `einv1 base=default`. The wizard only edits this text. CBA takes care of storage (client, mission, server, force), sync, JIP and its own settings import/export.
-- **What the text holds.** A ruleset is a base preset plus your own statements. Base presets ship in config (`CfgEinvRulesets`), so a mod update can improve the default for everyone who has not changed it.
+- **One setting holds the whole setup.** `aio_items_rules` is an EDITBOX with global = 1. Its default is `aio1 base=default`. The wizard only edits this text. CBA takes care of storage (client, mission, server, force), sync, JIP and its own settings import/export.
+- **What the text holds.** A ruleset is a base preset plus your own statements. Base presets ship in config (`CfgAioRulesets`), so a mod update can improve the default for everyone who has not changed it.
 - **How rules apply.** Rules are an ordered list, and a later rule wins field by field. A rule can set three fields:
   - **footprint**: size and shape together, as one field
   - **stack**
   - **grid**: containers only
-- **Layers, highest first:** your own rules, then mod config (`einv_*`), then preset rules, then the built-in fallback. Your own rules beat mod config, as the current code already does.
+- **Layers, highest first:** your own rules, then mod config (`aio_*`), then preset rules, then the built-in fallback. Your own rules beat mod config, as the current code already does.
 - **No language-dependent selectors.** Selectors only use class names, CfgPatches names, kinds and config numbers, so every machine resolves the same result. A search by display name is saved as a list of classes.
 - **Where the code goes.**
   - The rules engine goes in `items`, because every machine runs it, including the dedicated server and headless clients.
-  - The wizard goes in a new addon `setup` (`einv_setup`, requires `einv_gui`). It reuses the gui UI kit and `fnc_theme`.
+  - The wizard goes in a new addon `setup` (`aio_setup`, requires `aio_gui`). It reuses the gui UI kit and `fnc_theme`.
 - **Fold the other job's tables in before release.** `sizeTable`, `stackTable`, `containerTable` and the `massPerCell` / `stackSmall` sliders are unreleased. Each maps 1:1 into this format (section 3.5). If they stay, they compile as your own rules appended last.
 
 ---
@@ -23,7 +23,7 @@
 
 ```
 ruleset   = header *(SEP statement)        SEP = ";" or a line break
-header    = "einv1" *(" " ("base=" ID ["@" REV] | "cell=" NUMBER))
+header    = "aio1" *(" " ("base=" ID ["@" REV] | "cell=" NUMBER))
             base omitted = default, base=none = no preset; cell = config mass per cell
 statement = group | rule | "#" comment-to-SEP
 group     = "@" ID ":" cond *(" " cond)
@@ -78,7 +78,7 @@ Footprint is one field, so a later `shape=` fully replaces an earlier `size=` an
 ### 1.4 Examples
 
 ```
-einv1 base=default
+aio1 base=default
 kind=grenade > stack=3                                  # all grenades stack to 3
 @mag_rifle > size=1x3                                   # step 2 edit of a group: one rule, not N entries
 class~caseless_green kind=magazine > shape=10/11        # "the green mag" (Katiba 6.5 mm, plain and tracer): L, 3 cells; the other mags stay 1x2
@@ -99,16 +99,16 @@ Your own statements are usually under 1 KB.
 **Export variants:**
 - The setting text itself, compact.
 - "Full", with the base inlined as `base=none`, so it survives changes to the default.
-- A line ready for a server's `cba_settings.sqf`: `force einv_items_rules = "...";`
+- A line ready for a server's `cba_settings.sqf`: `force aio_items_rules = "...";`
 
 ---
 
 ## 2. Shipped rulesets
 
-`CfgEinvRulesets` lives in `items`:
+`CfgAioRulesets` lives in `items`:
 
 ```
-class CfgEinvRulesets {
+class CfgAioRulesets {
     class default { name = "$STR_..."; description = "$STR_..."; revision = 1; rules[] = {"...", ...}; };
     class tarkov  { ... };
     class weight  { ... };
@@ -122,7 +122,7 @@ class CfgEinvRulesets {
 This is the current `fnc_getSize` and stack logic as groups, so the starting behaviour does not change. Each step-2 row is one group with one rule. Overlaps are resolved by order, most specific last.
 
 ```
-einv1 base=none cell=5
+aio1 base=none cell=5
 > size=1x1 stack=1
 # weapons
 @rifle_light: kind=rifle mass<=55
@@ -210,7 +210,7 @@ kind=crate|vehicle > grid=auto
 ### 2.2 `tarkov`
 
 ```
-einv1 base=default
+aio1 base=default
 @grenade > stack=1
 @item_small > stack=1
 @med_small > stack=1
@@ -230,7 +230,7 @@ Fixed grids per backpack bracket, almost nothing stacks, longer rifles.
 ### 2.3 `weight` (volume follows mass, so the grid enforces Arma's load)
 
 ```
-einv1 base=default cell=4
+aio1 base=default cell=4
 > size=mass
 @grenade|@item_small|@med_small|@mag_pistol > stack=10
 ```
@@ -241,7 +241,7 @@ All containers stay on `grid=auto`.
 
 ## 3. Compile, resolve, cache
 
-### 3.1 Facts (static per class, cached for good in `einv_items_facts`)
+### 3.1 Facts (static per class, cached for good in `aio_items_facts`)
 
 Split `fnc_getInfo` into two parts:
 - **`fnc_getFacts`**: config only, never cleared.
@@ -253,14 +253,14 @@ Facts:
 - `addon`, `author` (raw)
 - `ammoLineage` (magazines)
 - `wells`: from a reverse index of `CfgMagazineWells` built once
-- `modConfig`: `einv_gridSize[]`, `einv_shape`, `einv_stackSize`, `einv_grids[]`, `einv_slots`
+- `modConfig`: `aio_gridSize[]`, `aio_shape`, `aio_stackSize`, `aio_grids[]`, `aio_slots`
 
 The localized name and picture are kept for the UI but are never used for matching.
 
-### 3.2 Compile (`einv_items_fnc_compileRules [text] -> HashMap`)
+### 3.2 Compile (`aio_items_fnc_compileRules [text] -> HashMap`)
 
 1. Parse your own statements into layer U.
-2. Expand the `base` chain from `CfgEinvRulesets` into layer P. The base is parsed first. `@rev` picks that revision; if it is unknown, the current one is used with an RPT warning.
+2. Expand the `base` chain from `CfgAioRulesets` into layer P. The base is parsed first. `@rev` picks that revision; if it is unknown, the current one is used with an RPT warning.
 3. Group table: P definitions, then U. A U definition of an existing id replaces it. Several definitions of one id within a layer are ORed.
 4. Expand each rule's group references into DNF, a list of alternatives, each a list of conditions. Above 32 alternatives the rule is rejected with a warning.
 5. Precompile conditions:
@@ -274,7 +274,7 @@ The localized name and picture are kept for the UI but are never used for matchi
 6. Bucket by kind. For every kind (about 25), precompute an array of rule references in descending order, for U and P separately. Each array holds the rules whose alternatives can match that kind, merged with the rules that have no kind condition. Resolve then never sorts.
 7. Store `hash = hashValue` of the expanded canonical text, plus `cell`.
 
-### 3.3 Resolve (`einv_items_fnc_resolve [class, compiled = GVAR(rules), cache = GVAR(resolved)]`)
+### 3.3 Resolve (`aio_items_fnc_resolve [class, compiled = GVAR(rules), cache = GVAR(resolved)]`)
 
 ```
 key = toLowerANSI class; cache hit -> return it
@@ -284,7 +284,7 @@ for layer in [U, MOD, P, BUILTIN]:
     U, P:    for r in compiled.layer.byKind[f.kind] (descending):
                  if r.fields ∩ need ≠ ∅ and match(f, r): take those fields, src = "u:<i>" / "p:<preset>:<i>"; need -= them
                  stop as soon as need is empty
-    MOD:     fp <- einv_shape / einv_gridSize, stack <- einv_stackSize, grid <- einv_grids / einv_slots   (only what is still needed)
+    MOD:     fp <- aio_shape / aio_gridSize, stack <- aio_stackSize, grid <- aio_grids / aio_slots   (only what is still needed)
     BUILTIN: fp [1,1] full, stack 1, grid auto
 finalize: size=mass -> formula with compiled.cell; w > STORAGE_COLS -> clamp (a mask that is too wide is dropped to a rectangle, warned once);
           stack = floor max 1
@@ -292,11 +292,11 @@ result {size [w,h], mask "" | "10/11", cells, stack, grid, src {field -> source}
 cache set key
 ```
 
-`fnc_getInfo` stays the public entry point. It returns facts plus the resolved values, adding the keys `shape`, `cells`, `grid` and `src`. `fnc_getBlocks` asks for `getInfo get "grid"` instead of `containerSpecs` / `einv_grids` / `einv_slots`. Those config keys are now read by resolve's mod layer.
+`fnc_getInfo` stays the public entry point. It returns facts plus the resolved values, adding the keys `shape`, `cells`, `grid` and `src`. `fnc_getBlocks` asks for `getInfo get "grid"` instead of `containerSpecs` / `aio_grids` / `aio_slots`. Those config keys are now read by resolve's mod layer.
 
 Required refactor: split `getBlocks` into an object-to-class part and `fnc_blocksFor [class, kind, maxLoad, grid]`, which is pure. Step 4 can then preview without a real container.
 
-`einv_items_fnc_explain [class, compiled]` returns every matching rule from top to bottom, with the fields it set and whether it won. It powers the "Why?" popover in the wizard.
+`aio_items_fnc_explain [class, compiled]` returns every matching rule from top to bottom, with the fields it set and whether it won. It powers the "Why?" popover in the wizard.
 
 Typical cost:
 - Resolving one class: about 50 rules × 3 conditions, roughly 0.05–0.2 ms.
@@ -305,7 +305,7 @@ Typical cost:
 ### 3.4 Determinism in multiplayer
 
 The same text plus the same config gives the same result on every machine. To catch version drift (`base=default` with a different mod version):
-- After compiling, the server sets `einv_items_rulesHash` (public).
+- After compiling, the server sets `aio_items_rulesHash` (public).
 - Each client compares it with its own hash and, on a mismatch, logs to the RPT and shows a hint to admins: "Your Enhanced Inventory resolves sizes differently from the server; update the mod".
 
 Layout records grow by one element, the mask: `[class, col, row, w, h, block, mask]`. Reconcile then only keeps a record whose footprint still matches, either way round.
@@ -319,7 +319,7 @@ Layout records grow by one element, the mask: `[class, col, row, w, h, block, ma
 | `containerTable "X:N"` / `"X:6x4+2x3"` | `class=X+ > grid=N` / `grid=6x4+2x3` |
 | `massPerCell` | header `cell=` |
 | `stackSmall` | `@item_small > stack=N` (and `@med_small`) |
-| `einv_items_sizeCorrections` | the class anchors in `default` |
+| `aio_items_sizeCorrections` | the class anchors in `default` |
 
 The old tables matched the nearest parent. The wizard keeps that behaviour by sorting class rules by lineage depth, deepest last.
 
@@ -333,16 +333,16 @@ The old tables matched the nearest parent. The wizard keeps that behaviour by so
 | Singleplayer / editor preview | yes | yes | source `server` (own profile) | — |
 | MP host | yes | yes | source `server` | CBA broadcast to all clients, JIP included |
 | MP dedicated, logged-in admin (`IS_ADMIN_LOGGED`) | yes | yes | source `server`, as CBA's Server tab does it | CBA broadcast |
-| Other players | view only | no; export and personal presets only | `profileNamespace einv_setup_presets` `[[name, text, date]]` | — |
+| Other players | view only | no; export and personal presets only | `profileNamespace aio_setup_presets` `[[name, text, date]]` | — |
 
-- **Save** calls `["einv_items_rules", text, priority, source] call CBA_settings_fnc_set`. A "Force" toggle sets priority 1, or 2 for the server, as EFAK's `fnc_applyPreset` does. The header chip shows where the active value comes from, using CBA's get and priority per source.
+- **Save** calls `["aio_items_rules", text, priority, source] call CBA_settings_fnc_set`. A "Force" toggle sets priority 1, or 2 for the server, as EFAK's `fnc_applyPreset` does. The header chip shows where the active value comes from, using CBA's get and priority per source.
 - **Conflicts.** At save time the wizard compares the active text with the text it started from. If someone else saved in between, it offers: reload and replay my edits, overwrite, or cancel.
-- **Live pickup, on every machine.** The setting's script runs `einv_items_fnc_loadRules`, which:
+- **Live pickup, on every machine.** The setting's script runs `aio_items_fnc_loadRules`, which:
   1. compiles the text; if that fails, it falls back to `base=default` and warns
   2. swaps `GVAR(rules)` and clears `GVAR(resolved)` and `GVAR(info)`; facts stay
   3. increments `GVAR(rulesRevision)`
   4. on the server, publishes the hash
-  5. raises the local CBA event `einv_items_rulesChanged`
+  5. raises the local CBA event `aio_items_rulesChanged`
 - **The gui listens for that event.** If the inventory is open, it cancels a drag, closes the menu and runs `fnc_build` on the next frame. The revision also goes into `fnc_getSignature` as a safety net.
   - Records whose footprint changed are placed again first-fit.
   - What fits nowhere shows as red overflow. Nothing leaves the cargo.
@@ -351,7 +351,7 @@ The old tables matched the nearest parent. The wizard keeps that behaviour by so
 
 ---
 
-## 5. Wizard UI (`EINV_SetupDialog`, glass, same geometry defines)
+## 5. Wizard UI (`AIO_SetupDialog`, glass, same geometry defines)
 
 ### 5.1 Entry points
 
@@ -365,7 +365,7 @@ The old tables matched the nearest parent. The wizard keeps that behaviour by so
 3. **Inventory header:** a gear icon for those allowed to save. The context menu also gets "Change size / shape..." on a tile, which opens step 3 with that class already selected. That is the green-magazine case in one click. The inventory closes first.
 4. **Fallback** if a CBA update breaks the hook:
    - a CBA keybind, "Open inventory setup"
-   - the chat command `#einv setup` (`CBA_fnc_registerChatCommand`)
+   - the chat command `#aio setup` (`CBA_fnc_registerChatCommand`)
    - an EFAK-style LIST setting, "Setup wizard: — / Open now", which resets itself after it fires
 
 ### 5.2 Frame (all steps)
@@ -385,7 +385,7 @@ footer : [ESC] Close  [Ctrl+Z] Undo  [Ctrl+F] Search    <hint>                  
 
 ### 5.3 Step 1: Start
 
-- **Preset cards in a row:** Default, Tarkov-like, Weight-like, Empty (`base=none`), plus one card per extra `CfgEinvRulesets` class and per saved personal preset. Each card shows:
+- **Preset cards in a row:** Default, Tarkov-like, Weight-like, Empty (`base=none`), plus one card per extra `CfgAioRulesets` class and per saved personal preset. Each card shows:
   - name and three lines of description
   - a mini preview: a real `createGrid` 8×4 with tiles laid out by `getLayout` under that preset's rules. The sample is `arifle_MX_F`, 3× `30Rnd_65x39_caseless_mag`, `HandGrenade` and `FirstAidKit`.
   - The selected card gets an accent `uiRing`.
@@ -399,7 +399,7 @@ footer : [ESC] Close  [Ctrl+Z] Undo  [Ctrl+F] Search    <hint>                  
 
 - A table with one row per group: the preset's groups first, then your own. Family chips filter the rows: Weapons, Ammo, Attachments, Items, Medical, Worn gear, Containers.
 - **Columns:**
-  - **Group:** localized label from `STR_einv_setup_Group_<id>` (own ids are shown with `_` as space), an example picture, and "covers 214 items". The count is the number of indexed classes whose footprint winner is this row.
+  - **Group:** localized label from `STR_aio_setup_Group_<id>` (own ids are shown with `_` as space), an example picture, and "covers 214 items". The count is the number of indexed classes whose footprint winner is this row.
   - **Size:** a `1×2` button that opens the footprint popover (W/H steppers plus cell editor).
   - **Shape:** a small mask glyph, which opens the same popover.
   - **Stack:** toggle plus count stepper (2–100); the stepper is disabled while the toggle is off.
@@ -485,7 +485,7 @@ footer : [ESC] Close  [Ctrl+Z] Undo  [Ctrl+F] Search    <hint>                  
   - classes from mods that are not loaded (kept, but inactive)
   - name searches that were turned into class lists
   - the text is longer than 16 KB (suggest a group instead of a list)
-- **Text:** a read-only multi-line field (new `EINV_EditArea`, ST_MULTI, large maxChars) with the character count, buttons for Copy / Copy full / Copy as `cba_settings.sqf` line, and an advanced "Edit as text" mode that re-parses live.
+- **Text:** a read-only multi-line field (new `AIO_EditArea`, ST_MULTI, large maxChars) with the character count, buttons for Copy / Copy full / Copy as `cba_settings.sqf` line, and an advanced "Edit as text" mode that re-parses live.
 - **Save card:**
   - target: Server, Mission (Eden only), Only for me (personal preset), each disabled with its reason
   - Force toggle
@@ -522,12 +522,12 @@ footer : [ESC] Close  [Ctrl+Z] Undo  [Ctrl+F] Search    <hint>                  
   - `fnc_uiCellEditor`
   - `fnc_uiMask` (mask glyph made of rectangles)
 - **New config classes:**
-  - `EINV_EditArea`: ST_MULTI + ST_NO_RECT, large maxChars
-  - `EINV_SetupDialog`: idd 9620, only the dim layer, everything else created at run time, like the inventory
+  - `AIO_EditArea`: ST_MULTI + ST_NO_RECT, large maxChars
+  - `AIO_SetupDialog`: idd 9620, only the dim layer, everything else created at run time, like the inventory
 - **New items functions:** `fnc_getFacts`, `fnc_parseRules`, `fnc_writeRules` (canonical form, config-case class names), `fnc_compileRules`, `fnc_loadRules`, `fnc_resolve`, `fnc_explain`.
 - **New setup functions:** `fnc_open [step, focusClass]`, `fnc_canEdit`, `fnc_buildIndex`, `fnc_filter`, `fnc_drawStart`, `fnc_drawGroups`, `fnc_drawItems`, `fnc_drawContainers`, `fnc_drawReview`, `fnc_applyEdit [scope, fields]`, `fnc_save [target, force]`, `fnc_import`, `fnc_onOptionsLoad`.
 - **New storage function:** `fnc_blocksFor`.
-- The CBA setting `einv_items_rules` goes last in the Grids subcategory (text boxes come last).
+- The CBA setting `aio_items_rules` goes last in the Grids subcategory (text boxes come last).
 
 ---
 
@@ -545,7 +545,7 @@ footer : [ESC] Close  [Ctrl+Z] Undo  [Ctrl+F] Search    <hint>                  
 - **Virtual list:**
   - a fixed pool of visible rows + 2 (about 25 rows × about 9 controls, created once, about 30–60 ms)
   - scrolling by wheel, scroll-bar thumb or keys only re-fills texts and pictures with `ctrlSetText`, about 2 ms
-  - never one control per result, and no `EINV_ScrollGroup` with 5000 children
+  - never one control per result, and no `AIO_ScrollGroup` with 5000 children
   - fallback if the pool is too much work: a theme-coloured `RscListNBox`, which is engine-virtualised, with selection drawn as a checkbox column
 - **Lazy pictures and lazy resolve:**
   - only pooled rows get a picture; a missing picture gets an icon
@@ -567,7 +567,7 @@ footer : [ESC] Close  [Ctrl+Z] Undo  [Ctrl+F] Search    <hint>                  
   - whether the OK button is IDC 1
   - whether the menu writes back only the settings that were changed in it
 - **CBA writes from a client:** that `CBA_settings_fnc_set` with source `server` from a logged-in admin client is forwarded to the server. Also how a setting locked by the server's `cba_settings.sqf` reports itself.
-- **Clipboard in multiplayer:** `copyToClipboard` / `copyFromClipboard` are restricted in MP. Ctrl+C / Ctrl+V in `EINV_EditArea` is the path that always works.
+- **Clipboard in multiplayer:** `copyToClipboard` / `copyFromClipboard` are restricted in MP. Ctrl+C / Ctrl+V in `AIO_EditArea` is the path that always works.
 - **Long text:** that CBA's EDITBOX and the mission attribute accept 10–20 KB strings, and whether this CBA version's multi-line EDITBOX option is worth using for the setting.
 - **Config names:** magazine well names (e.g. `CBA_556x45_STANAG`), ACE item masses behind the `med_small` threshold, and the vanilla example classes (`30Rnd_65x39_caseless_green`, `B_Carryall_Base`, `V_PlateCarrier*`). Step 3 of the wizard is the tool to check them in the game.
 - **Owned by other tracks:**

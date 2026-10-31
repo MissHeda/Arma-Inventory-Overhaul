@@ -21,7 +21,7 @@
  * None
  *
  * Example:
- * call einv_storage_fnc_hubTick;
+ * call aio_storage_fnc_hubTick;
  *
  * Public: No
  */

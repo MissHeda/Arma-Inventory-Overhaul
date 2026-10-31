@@ -8,7 +8,7 @@
  * whole area.
  *
  * The engine draws a display's controls in the order they were made, and the one holding the focus over
- * all of them. A popover made on the display itself lay under the pane (einv_setup_root) as soon as the
+ * all of them. A popover made on the display itself lay under the pane (aio_setup_root) as soon as the
  * pane held the focus - after every redraw its sink has it, and a click on a dropdown gives it to the
  * dropdown in the pane: the list and the closing question showed behind the wizard and could not be
  * clicked (Mia, 0.4.0). The layer is made after everything else (at the end of every step drawn,
@@ -21,7 +21,7 @@
  * The layer <CONTROL>
  *
  * Example:
- * [_display] call einv_setup_fnc_topLayer;
+ * [_display] call aio_setup_fnc_topLayer;
  *
  * Public: No
  */
@@ -40,8 +40,8 @@ if (isNull _display) exitWith {
 };
 
 // On the display itself, not through the kit's uiCreate: what that makes on a display the inventory's next
-// build deletes (einv_gui_fnc_uiCreate).
-private _layer = _display ctrlCreate ["EINV_Group", -1];
+// build deletes (aio_gui_fnc_uiCreate).
+private _layer = _display ctrlCreate ["AIO_Group", -1];
 _layer ctrlSetPosition [safezoneX, safezoneY, safezoneW, safezoneH];
 _layer ctrlCommit 0;
 _layer ctrlShow false;

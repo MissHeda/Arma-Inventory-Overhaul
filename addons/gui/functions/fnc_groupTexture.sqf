@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * The picture of a category (ITEM_GROUPS or one the setup defines): the strip at the side of a loot box, the watermark and the
  * badge of a compartment that accepts only that category (fnc_drawCompartments, fnc_drawBadge). The picture the setup gave the
- * category (picture=, einv_items_fnc_categoryInfo) - for a built-in one too -, else the slot pictures of the equipment column
+ * category (picture=, aio_items_fnc_categoryInfo) - for a built-in one too -, else the slot pictures of the equipment column
  * for the eight built-in ones and a star for a category of the setup's own that has none.
  *
  * Arguments:
@@ -15,7 +15,7 @@
  * The texture, "" for a word that is no category <STRING>
  *
  * Example:
- * ["grenade"] call einv_gui_fnc_groupTexture;
+ * ["grenade"] call aio_gui_fnc_groupTexture;
  *
  * Public: No
  */

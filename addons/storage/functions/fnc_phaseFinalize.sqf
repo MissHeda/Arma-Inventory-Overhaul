@@ -23,7 +23,7 @@
  * None
  *
  * Example:
- * ["2:14|0|0"] call einv_storage_fnc_phaseFinalize;
+ * ["2:14|0|0"] call aio_storage_fnc_phaseFinalize;
  *
  * Public: No
  */

@@ -11,7 +11,7 @@
  * This addon's file is in force <BOOL>
  *
  * Example:
- * call einv_arsenal_fnc_checkBIOverride;
+ * call aio_arsenal_fnc_checkBIOverride;
  *
  * Public: No
  */

@@ -15,7 +15,7 @@
  * [living person other than the player, or objNull; top container, objNull for a unit] <ARRAY>
  *
  * Example:
- * [backpackContainer cursorObject] call einv_gui_fnc_personOf;
+ * [backpackContainer cursorObject] call aio_gui_fnc_personOf;
  *
  * Public: No
  */
@@ -45,7 +45,7 @@ for "_i" from 1 to 8 do {
 
 // The person the window is open on is known for sure - also when only their backpack is shown, which
 // fnc_getSections never marks, or when they changed into a uniform marked with its last owner here.
-// Anyone else's is asked of the mark or the engine (einv_storage_fnc_getOwner).
+// Anyone else's is asked of the mark or the engine (aio_storage_fnc_getOwner).
 private _person = GVAR(person);
 
 private _owner = if (!isNull _person && {_root in [uniformContainer _person, vestContainer _person, backpackContainer _person]}) then {

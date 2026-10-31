@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The storage's event "einv_storage_groundPut" (fnc_opPutGround, on the machine that made the pile): a payload
+ * The storage's event "aio_storage_groundPut" (fnc_opPutGround, on the machine that made the pile): a payload
  * has been laid on the ground. A drone item of Mavic 3 (Improved) in it is taken out of the pile again, a
  * moment later (the phase's own bookkeeping is done by then), and the machine of the unit that dropped it is
  * asked to deploy the drone (fnc_deploy), as the mod's "Put" handler would have done.
@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * [player, ["magazine", "Item_Mavic3", [100]], [_pile]] call einv_compat_mavic_fnc_onGroundPut;
+ * [player, ["magazine", "Item_Mavic3", [100]], [_pile]] call aio_compat_mavic_fnc_onGroundPut;
  *
  * Public: No
  */

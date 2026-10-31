@@ -5,7 +5,7 @@
  * uniform, vest and backpack, a kit that is carried, the own equipment slots. What lies in a crate, on
  * the ground or on a body cannot be used from the bar, and neither can a uniform, vest or backpack
  * lying inside the own backpack (ACE's item list does not see into it), nor an item that lies in a
- * uniform, vest or backpack the settings "Use items from ..." close to it (einv_storage_fnc_useState)
+ * uniform, vest or backpack the settings "Use items from ..." close to it (aio_storage_fnc_useState)
  * unless it is whitelisted there. Then the item itself has to be one for the bar (fnc_canBind).
  *
  * Arguments:
@@ -19,7 +19,7 @@
  * [may, reason] - reason is a text to show, "" when it may <ARRAY>
  *
  * Example:
- * ["ACE_elasticBandage", ["grid", _grid]] call einv_hotbar_fnc_canBindFrom;
+ * ["ACE_elasticBandage", ["grid", _grid]] call aio_hotbar_fnc_canBindFrom;
  *
  * Public: No
  */

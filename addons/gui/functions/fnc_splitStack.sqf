@@ -7,7 +7,7 @@
  * class. Shift+drag lifts half of a stack as ever (fnc_startDrag) and the wheel changes how many, so a
  * chosen count can be put down anywhere.
  *
- * Only where the storage keeps separate stacks (einv_storage_stackSplits, op "split"), and only
+ * Only where the storage keeps separate stacks (aio_storage_stackSplits, op "split"), and only
  * for a stack of two or more on a grid of a container, searched and not on its way, in the inventory.
  * The cell is left to the storage (op "split" with no cell: the nearest free one), which says "NoRoom"
  * when the container has none. Checked first as any move is (fnc_applyMove, fnc_checkTouch).
@@ -20,7 +20,7 @@
  * Asked for <BOOL>
  *
  * Example:
- * [0, 3] call einv_gui_fnc_splitStack;
+ * [0, 3] call aio_gui_fnc_splitStack;
  *
  * Public: No
  */

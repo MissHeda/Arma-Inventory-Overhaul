@@ -16,7 +16,7 @@
  * [grid index, tile index], [] for none <ARRAY>
  *
  * Example:
- * [_record param [8, objNull]] call einv_gui_fnc_boxTile;
+ * [_record param [8, objNull]] call aio_gui_fnc_boxTile;
  *
  * Public: No
  */

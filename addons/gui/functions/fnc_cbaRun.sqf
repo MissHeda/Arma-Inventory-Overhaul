@@ -21,7 +21,7 @@
  * The menu asked to stay open <BOOL>
  *
  * Example:
- * [{true}, {systemChat str _this}, false, [player, vestContainer player, "ACE_EarPlugs", "VEST_CONTAINER", [], "0"]] call einv_gui_fnc_cbaRun;
+ * [{true}, {systemChat str _this}, false, [player, vestContainer player, "ACE_EarPlugs", "VEST_CONTAINER", [], "0"]] call aio_gui_fnc_cbaRun;
  *
  * Public: No
  */

@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * [] call einv_gui_fnc_updatePaletteMenu;
+ * [] call aio_gui_fnc_updatePaletteMenu;
  *
  * Public: No
  */

@@ -13,7 +13,7 @@
  * The colour was understood <BOOL>
  *
  * Example:
- * [["medical", "food"], "c83232"] call einv_setup_fnc_setCategoryColours;
+ * [["medical", "food"], "c83232"] call aio_setup_fnc_setCategoryColours;
  *
  * Public: No
  */

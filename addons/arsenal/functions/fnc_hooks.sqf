@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The hook table the inventory's engine is attached to ACE Arsenal's display with (einv_gui_fnc_attach).
+ * The hook table the inventory's engine is attached to ACE Arsenal's display with (aio_gui_fnc_attach).
  * The engine is a guest there: it sweeps only what it made, and ACE's own handlers keep every click. It
  * draws neither the inventory's header nor its footer, only the open container's grid and the staging
  * space in the panel and a line for its hints (fnc_layout, fnc_footer), in the inventory's look; the
@@ -27,7 +27,7 @@
  * Hooks, name -> CODE or flag <HASHMAP>
  *
  * Example:
- * call einv_arsenal_fnc_hooks;
+ * call aio_arsenal_fnc_hooks;
  *
  * Public: No
  */

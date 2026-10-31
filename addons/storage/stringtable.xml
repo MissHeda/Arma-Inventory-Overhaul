@@ -1,88 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="storage">
-        <Key ID="STR_einv_storage_Ground">
+        <Key ID="STR_aio_storage_Ground">
             <English>Ground</English>
         </Key>
-        <Key ID="STR_einv_storage_Hint_NoReload">
+        <Key ID="STR_aio_storage_Hint_NoReload">
             <English>Cannot reload: the magazines are in the %1. Take one out first.</English>
         </Key>
-        <Key ID="STR_einv_storage_Hint_NoReloadFrom">
+        <Key ID="STR_aio_storage_Hint_NoReloadFrom">
             <English>Cannot reload from the %1.</English>
         </Key>
-        <Key ID="STR_einv_storage_Hint_NoRoomGround">
+        <Key ID="STR_aio_storage_Hint_NoRoomGround">
             <English>No room for %1 - put on the ground</English>
         </Key>
-        <Key ID="STR_einv_storage_Hint_NoThrow">
+        <Key ID="STR_aio_storage_Hint_NoThrow">
             <English>Cannot throw: the grenades are in the %1. Take one out first.</English>
         </Key>
-        <Key ID="STR_einv_storage_Kind_And">
+        <Key ID="STR_aio_storage_Kind_And">
             <English>and</English>
         </Key>
-        <Key ID="STR_einv_storage_Kind_backpack">
+        <Key ID="STR_aio_storage_Kind_backpack">
             <English>backpack</English>
         </Key>
-        <Key ID="STR_einv_storage_Kind_uniform">
+        <Key ID="STR_aio_storage_Kind_uniform">
             <English>uniform</English>
         </Key>
-        <Key ID="STR_einv_storage_Kind_vest">
+        <Key ID="STR_aio_storage_Kind_vest">
             <English>vest</English>
         </Key>
-        <Key ID="STR_einv_storage_Option_UseAll">
+        <Key ID="STR_aio_storage_Option_UseAll">
             <English>Everything</English>
         </Key>
-        <Key ID="STR_einv_storage_Option_UseList">
+        <Key ID="STR_aio_storage_Option_UseList">
             <English>Only whitelisted</English>
         </Key>
-        <Key ID="STR_einv_storage_Option_UseNone">
+        <Key ID="STR_aio_storage_Option_UseNone">
             <English>Nothing</English>
         </Key>
-        <Key ID="STR_einv_storage_Option_UseStrict">
+        <Key ID="STR_aio_storage_Option_UseStrict">
             <English>Strict (hidden)</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_ContainerTable">
+        <Key ID="STR_aio_storage_Setting_ContainerTable">
             <English>Container sizes</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_ContainerTable_Desc">
+        <Key ID="STR_aio_storage_Setting_ContainerTable_Desc">
             <English>Cells per container as class:size, comma-separated.\nExample: B_Carryall_cbr:6x4+2x3</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_Migrate">
+        <Key ID="STR_aio_storage_Setting_Migrate">
             <English>Move overfull items on</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_Migrate_Desc">
+        <Key ID="STR_aio_storage_Setting_Migrate_Desc">
             <English>Overfull items go to another container,\nelse to the ground.</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_NearbyRange">
+        <Key ID="STR_aio_storage_Setting_NearbyRange">
             <English>Reach</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_NearbyRange_Desc">
+        <Key ID="STR_aio_storage_Setting_NearbyRange_Desc">
             <English>Metres within which piles and crates show in the loot column.</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_StackMultiplier">
+        <Key ID="STR_aio_storage_Setting_StackMultiplier">
             <English>Stack multiplier for crates and vehicles</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_StackMultiplier_Desc">
+        <Key ID="STR_aio_storage_Setting_StackMultiplier_Desc">
             <English>Stacks in crates, vehicles and ground\npiles grow this many times. 1 = off.</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_UseBackpack">
+        <Key ID="STR_aio_storage_Setting_UseBackpack">
             <English>Use items from the backpack</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_UseBackpack_Desc">
+        <Key ID="STR_aio_storage_Setting_UseBackpack_Desc">
             <English>What can be used from the backpack.\nStrict also hides it from other mods - use only if needed.</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_UseUniform">
+        <Key ID="STR_aio_storage_Setting_UseUniform">
             <English>Use items from the uniform</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_UseUniform_Desc">
+        <Key ID="STR_aio_storage_Setting_UseUniform_Desc">
             <English>What can be used from the uniform.\nStrict also hides it from other mods - use only if needed.</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_UseVest">
+        <Key ID="STR_aio_storage_Setting_UseVest">
             <English>Use items from the vest</English>
         </Key>
-        <Key ID="STR_einv_storage_Setting_UseVest_Desc">
+        <Key ID="STR_aio_storage_Setting_UseVest_Desc">
             <English>What can be used from the vest.\nStrict also hides it from other mods - use only if needed.</English>
         </Key>
-        <Key ID="STR_einv_storage_SubCategory_Containers">
+        <Key ID="STR_aio_storage_SubCategory_Containers">
             <English>Containers</English>
         </Key>
     </Package>

@@ -19,7 +19,7 @@
  * Handled <BOOL>
  *
  * Example:
- * [_display, 1, false, false, false] call einv_arsenal_fnc_onAceKey;
+ * [_display, 1, false, false, false] call aio_arsenal_fnc_onAceKey;
  *
  * Public: No
  */

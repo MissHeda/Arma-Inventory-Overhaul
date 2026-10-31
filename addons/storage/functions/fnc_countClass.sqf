@@ -16,7 +16,7 @@
  * How many <NUMBER>
  *
  * Example:
- * [vestContainer player, "ACE_fieldDressing"] call einv_storage_fnc_countClass;
+ * [vestContainer player, "ACE_fieldDressing"] call aio_storage_fnc_countClass;
  *
  * Public: No
  */

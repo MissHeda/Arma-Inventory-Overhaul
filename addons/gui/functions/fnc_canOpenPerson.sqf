@@ -8,7 +8,7 @@
  * (fnc_canTouchPerson, fnc_personGuard).
  *
  * Nothing opens an ACE dragging clone (a copy of a body's gear) or a person a mission closed with
- * einv_noAccess.
+ * aio_noAccess.
  *
  * Arguments:
  * 0: Person <OBJECT>
@@ -17,7 +17,7 @@
  * "whole", "backpack", or "" when not at all <STRING>
  *
  * Example:
- * [cursorObject] call einv_gui_fnc_canOpenPerson;
+ * [cursorObject] call aio_gui_fnc_canOpenPerson;
  *
  * Public: No
  */
@@ -30,7 +30,7 @@ if (!alive _person || {!(_person isKindOf "CAManBase")}) exitWith {""};
 // make everything twice. Its class can be changed in config, its variable cannot.
 if (_person isKindOf QACEGVAR(dragging,clone) || {!isNil {_person getVariable QACEGVAR(dragging,original)}}) exitWith {""};
 
-if (_person getVariable ["einv_noAccess", false]) exitWith {""};
+if (_person getVariable ["aio_noAccess", false]) exitWith {""};
 
 // The unconscious always open whole, as ACE's "Inventory" opens them.
 if (

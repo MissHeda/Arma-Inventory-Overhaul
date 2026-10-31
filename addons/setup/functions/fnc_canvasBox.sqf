@@ -11,7 +11,7 @@
  * [col, row, cols, rows] - its top left place and its size; [0, 0, 0, 0] for a canvas without a cell <ARRAY>
  *
  * Example:
- * ([_canvas] call einv_setup_fnc_canvasBox) params ["_col", "_row", "_w", "_h"];
+ * ([_canvas] call aio_setup_fnc_canvasBox) params ["_col", "_row", "_w", "_h"];
  *
  * Public: No
  */

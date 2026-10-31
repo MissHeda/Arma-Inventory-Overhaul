@@ -31,7 +31,7 @@
  * None
  *
  * Example:
- * [_ops, _context, "2:14|0|0", {}, []] call einv_storage_fnc_execute;
+ * [_ops, _context, "2:14|0|0", {}, []] call aio_storage_fnc_execute;
  *
  * Public: No
  */

@@ -15,7 +15,7 @@
  * Something was asked to be written <BOOL>
  *
  * Example:
- * [] call einv_compat_efak_fnc_arsenalFlush;
+ * [] call aio_compat_efak_fnc_arsenalFlush;
  *
  * Public: No
  */

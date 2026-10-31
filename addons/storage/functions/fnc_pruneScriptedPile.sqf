@@ -20,7 +20,7 @@
  * None
  *
  * Example:
- * [_pile] call einv_storage_fnc_pruneScriptedPile;
+ * [_pile] call aio_storage_fnc_pruneScriptedPile;
  *
  * Public: No
  */

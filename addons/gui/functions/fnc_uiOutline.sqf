@@ -20,7 +20,7 @@
  * The controls <ARRAY>
  *
  * Example:
- * [_display, _group, _rect, _color, [_grid, _rect] call einv_gui_fnc_cornerRadii, 2] call einv_gui_fnc_uiOutline;
+ * [_display, _group, _rect, _color, [_grid, _rect] call aio_gui_fnc_cornerRadii, 2] call aio_gui_fnc_uiOutline;
  *
  * Public: No
  */

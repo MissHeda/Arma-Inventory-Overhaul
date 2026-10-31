@@ -13,7 +13,7 @@
  * Rounds, or -1 <NUMBER>
  *
  * Example:
- * ["30Rnd_65x39_caseless_mag", 17] call einv_storage_fnc_hiddenAmmo;
+ * ["30Rnd_65x39_caseless_mag", 17] call aio_storage_fnc_hiddenAmmo;
  *
  * Public: No
  */

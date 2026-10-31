@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * [] call einv_arsenal_fnc_closeConfirm;
+ * [] call aio_arsenal_fnc_closeConfirm;
  *
  * Public: No
  */

@@ -11,7 +11,7 @@
  * that, titled with what is looted ("Loot - Miller", "Loot - Nearby" when it only shows what lies around) and
  * drawn in the theme's loot look (fnc_drawColumn) - the middle gets narrower for it. By
  * default the loot column opens left of the storage column, which stays where it is; the client setting
- * einv_gui_lootSide can have it open at the right edge instead, with the storage column moving in
+ * aio_gui_lootSide can have it open at the right edge instead, with the storage column moving in
  * (| storage | loot |). The middle stays free: an open kit's window
  * opens there (fnc_placeWindow). Kits never bring the loot column in: they float over the columns in
  * windows of their own (fnc_drawWindows).
@@ -39,7 +39,7 @@
  * The free middle, [x, y, w, h] on the screen - [] when it is too narrow <ARRAY>
  *
  * Example:
- * [_display, _theme, _context] call einv_gui_fnc_layoutGlass;
+ * [_display, _theme, _context] call aio_gui_fnc_layoutGlass;
  *
  * Public: No
  */
@@ -86,7 +86,7 @@ if (_reserved) then {
 
 private _right = CONTENT_X + CONTENT_W;
 
-// Where the loot column goes is the player's own taste (the setting einv_gui_lootSide): by default it opens
+// Where the loot column goes is the player's own taste (the setting aio_gui_lootSide): by default it opens
 // left of the storage column, which then never moves - looting or not, the storage column stands at the right
 // edge - and the other way round, the loot column takes the right edge and the storage column moves in. A
 // window that kept the right edge for itself ("rightColumn") has no say in it: its column stays there. The

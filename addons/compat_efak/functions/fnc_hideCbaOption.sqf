@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Whether an option of CBA's item context menu stays out of the window's context menu
- * (einv_gui_fnc_cbaOptions): Enhanced First Aid Kits' "Open" on its kits. It opens that mod's own kit
+ * (aio_gui_fnc_cbaOptions): Enhanced First Aid Kits' "Open" on its kits. It opens that mod's own kit
  * window, guessing where the kit lies; the window offers its own Open instead, which opens the kit in a
  * window of its own inside the inventory, from exactly where it lies (fnc_menuChoices).
  *
@@ -17,7 +17,7 @@
  * Left out <BOOL>
  *
  * Example:
- * ["efak_IFAK_7", "Open"] call einv_compat_efak_fnc_hideCbaOption;
+ * ["efak_IFAK_7", "Open"] call aio_compat_efak_fnc_hideCbaOption;
  *
  * Public: No
  */

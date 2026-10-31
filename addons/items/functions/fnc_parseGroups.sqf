@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Reads the value of cats= (a rule) or einv_cat (an item's config): the categories an item is in. The one
+ * Reads the value of cats= (a rule) or aio_cat (an item's config): the categories an item is in. The one
  * reader of that value, as fnc_parseUse is of use=. A category is one of the eight built-in ones (ITEM_GROUPS: weapon, ammo,
  * grenade, gear, medical, food, tool, misc) or one the setup defines itself (category=... in the rules text, fnc_parseRules).
  * The categories decide which button of a loot box's strip shows an item and which compartments accept it (grid=, see
@@ -22,7 +22,7 @@
  *
  * Arguments:
  * 0: The value <STRING>
- * 1: What to call the key in a note, "cats" in a rules text and "einv_cat" in config <STRING> (default: "cats")
+ * 1: What to call the key in a note, "cats" in a rules text and "aio_cat" in config <STRING> (default: "cats")
  *
  * Return Value:
  * [groups, notes, readable] <ARRAY>
@@ -31,7 +31,7 @@
  *   readable - false when nothing of the value could be read <BOOL>
  *
  * Example:
- * ["misc+medical"] call einv_items_fnc_parseGroups;
+ * ["misc+medical"] call aio_items_fnc_parseGroups;
  * // [["medical", "misc"], [], true]
  *
  * Public: No

@@ -13,10 +13,10 @@
  * 0: The action of fnc_playSound, or "reload", "repack", "warn" <STRING>
  *
  * Return Value:
- * The kind, one of einv_gui_soundGroups <STRING>
+ * The kind, one of aio_gui_soundGroups <STRING>
  *
  * Example:
- * ["loadMag"] call einv_gui_fnc_soundGroup;
+ * ["loadMag"] call aio_gui_fnc_soundGroup;
  *
  * Public: No
  */

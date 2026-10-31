@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * The id for a new category from the name it was given: lowercase letters and digits, anything else (a space, an accent) an
  * underscore, cut to CAT_ID_MAX, and made to differ from every category the draft has and from every word that cats= would read as
- * one of the eight built-in categories (einv_items_fnc_builtinGroup) or from a word of its own (CAT_ID_RESERVED) by a number on the end.
+ * one of the eight built-in categories (aio_items_fnc_builtinGroup) or from a word of its own (CAT_ID_RESERVED) by a number on the end.
  *
  * Arguments:
  * 0: The name <STRING>
@@ -12,7 +12,7 @@
  * The id <STRING>
  *
  * Example:
- * ["Bandit loot"] call einv_setup_fnc_newCategoryId; // "bandit_loot"
+ * ["Bandit loot"] call aio_setup_fnc_newCategoryId; // "bandit_loot"
  *
  * Public: No
  */

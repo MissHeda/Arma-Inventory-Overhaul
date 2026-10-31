@@ -8,7 +8,7 @@
  * cell for it, and it would stay as a lone tile outside the grid for ever.
  *
  * Only the player's own unit: never an AI, a body, a crate or a vehicle - their overflow stays as it is. Not at
- * all with the setting einv_storage_migrate off, and never while the player is in the middle of moving something:
+ * all with the setting aio_storage_migrate off, and never while the player is in the middle of moving something:
  * an arsenal is open, a tile is dragged or waits in the hands' queue, a move of the window is under way
  * (fnc_sweepBusy), or a worn container was swapped a minute ago (fnc_wornHeld: only some of them, and only until
  * something new comes in; a new unit's first sweep ignores that). It looks again a moment later instead (fnc_queueSweep), and after the time a loadout needs for its top-up
@@ -23,7 +23,7 @@
  *     a "putGround" at the server with the take's payload as its input - the same two phases as a drag out of
  *     the window, so the server finds the pile at the feet or makes one, and a tile that could not be put down
  *     settles back where it came from (fnc_settle): nothing is lost or doubled. The pile is the dropper's own
- *     (what he put there he knows, einv_gui_fnc_learn), so it opens at once in the Ground section.
+ *     (what he put there he knows, aio_gui_fnc_learn), so it opens at once in the Ground section.
  *
  * Not while seated (a drop goes into the vehicle's cargo there, which may be full and bounce everything back) and
  * not with nothing under the feet (swimming, falling): looked at again SWEEP_BLOCKED seconds later. Nothing goes onto the
@@ -39,7 +39,7 @@
  * A request was made <BOOL>
  *
  * Example:
- * [] call einv_storage_fnc_requestSweep;
+ * [] call aio_storage_fnc_requestSweep;
  *
  * Public: No
  */
@@ -287,7 +287,7 @@ private _id = [[[_unit, _takes], [objNull, _puts]], {
 
         private _class = _tile select 0;
 
-        // What you put somewhere you know is there: a pile you dropped onto opens to you at once (einv_gui).
+        // What you put somewhere you know is there: a pile you dropped onto opens to you at once (aio_gui).
         if (_pile isEqualType objNull && {!isNull _pile} && {!isNil QEFUNC(gui,learn)}) then {
             [_pile, _class, 1] call EFUNC(gui,learn);
         };

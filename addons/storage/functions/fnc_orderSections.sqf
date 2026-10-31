@@ -17,7 +17,7 @@
  * The same sections, in order <ARRAY of HASHMAPs>
  *
  * Example:
- * [_sections] call einv_storage_fnc_orderSections;
+ * [_sections] call aio_storage_fnc_orderSections;
  *
  * Public: No
  */

@@ -4,7 +4,7 @@
  * How many of each class the hidden holder keeps for a container (Strict mode): lowercase class -> count,
  * magazines of every rounds added up. Empty for a container that is not one of a unit's uniform, vest or
  * backpack, or whose unit has no holder. For whoever counts a container's cargo by hand (fnc_countClass,
- * the Arsenal panel's einv_arsenal_fnc_countAll) and must see the merged view fnc_getContents shows.
+ * the Arsenal panel's aio_arsenal_fnc_countAll) and must see the merged view fnc_getContents shows.
  *
  * Arguments:
  * 0: Container <OBJECT>
@@ -13,7 +13,7 @@
  * Lowercase class -> count <HASHMAP>
  *
  * Example:
- * [backpackContainer player] call einv_storage_fnc_hiddenCounts;
+ * [backpackContainer player] call aio_storage_fnc_hiddenCounts;
  *
  * Public: Yes
  */

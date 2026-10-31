@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * ["Cannot reload from the backpack."] call einv_storage_fnc_useHint;
+ * ["Cannot reload from the backpack."] call aio_storage_fnc_useHint;
  *
  * Public: No
  */

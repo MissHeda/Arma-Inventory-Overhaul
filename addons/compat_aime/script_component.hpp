@@ -1,7 +1,7 @@
 #define COMPONENT compat_aime
-#define COMPONENT_BEAUTIFIED EINV - ACE Interaction Menu Expansion
-#include "\z\einv\addons\main\script_mod.hpp"
-#include "\z\einv\addons\main\script_macros.hpp"
+#define COMPONENT_BEAUTIFIED AIO - ACE Interaction Menu Expansion
+#include "\z\aio\addons\main\script_mod.hpp"
+#include "\z\aio\addons\main\script_macros.hpp"
 
 // AIME's own names (author upsilon, Workshop 1376867375): the CBA settings its actions read, and the action
 // of its "Change Ammo Type" menu, which this addon takes the place of (XEH_postInit).

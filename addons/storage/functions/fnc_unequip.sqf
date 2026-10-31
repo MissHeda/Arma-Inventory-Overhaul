@@ -25,7 +25,7 @@
  * "Moved", "NotReady", "Bounced" - it went somewhere else -, "Failed") <STRING>
  *
  * Example:
- * [player, "headgear", backpackContainer player] call einv_storage_fnc_unequip;
+ * [player, "headgear", backpackContainer player] call aio_storage_fnc_unequip;
  *
  * Public: Yes
  */

@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The rule for a living person's gear, checked on the machine that runs each op (einv_storage_guards):
+ * The rule for a living person's gear, checked on the machine that runs each op (aio_storage_guards):
  * on a root that is a living person the server's settings (fnc_canTouchPerson) - "worn" for takeOff and
  * putOn, "items" for every other op, with the person's top container the op's holder lies in - and the
  * requester still near (fnc_personInReach, lenient). Any other root: no objection. Settlement skips
@@ -10,14 +10,14 @@
  *
  * A person changing their own gear, a viewer's report that places and cargo disagree (op
  * "normalize", which persists what everyone already sees) and the move of a surplus the grid has no room
- * for on to the person's next container (op "migrate", einv_storage_fnc_opMigrate: nothing leaves the
+ * for on to the person's next container (op "migrate", aio_storage_fnc_opMigrate: nothing leaves the
  * person's own containers) are never refused. Rearranging and sorting their containers changes what
  * everyone sees of them: that is "items" as well. A uniform, vest or backpack the mission locked
  * (lockInventory) does not come off either.
  *
  * The top container is the uniform, vest or backpack itself or the one it lies in, a few deep - found
  * the way the machine that runs the op sees the cargo, never by the window's list of what it opened. A
- * kit ("kit:..." holder, einv_compat_efak) by its class in that cargo, else by its type's own "verify";
+ * kit ("kit:..." holder, aio_compat_efak) by its class in that cargo, else by its type's own "verify";
  * found in none of them - a kit packed in a kit -, the person's rule for no container decides.
  *
  * Arguments:
@@ -30,7 +30,7 @@
  * "" when allowed, else why not - "LookOnly" or "Failed" <STRING>
  *
  * Example:
- * ["take", [backpackContainer _person, _entryArray, 1], player, _person] call einv_gui_fnc_personGuard;
+ * ["take", [backpackContainer _person, _entryArray, 1], player, _person] call aio_gui_fnc_personGuard;
  *
  * Public: No
  */

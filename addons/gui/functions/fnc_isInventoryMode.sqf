@@ -12,7 +12,7 @@
  * No hooks are attached <BOOL>
  *
  * Example:
- * call einv_gui_fnc_isInventoryMode;
+ * call aio_gui_fnc_isInventoryMode;
  *
  * Public: No
  */

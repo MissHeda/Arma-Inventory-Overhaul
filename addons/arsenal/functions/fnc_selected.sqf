@@ -14,7 +14,7 @@
  * in ace_arsenal_currentItems or -1, where it lies in a getUnitLoadout array or -1] <ARRAY>
  *
  * Example:
- * (call einv_arsenal_fnc_selected) params ["_id", "_container"];
+ * (call aio_arsenal_fnc_selected) params ["_id", "_container"];
  *
  * Public: No
  */

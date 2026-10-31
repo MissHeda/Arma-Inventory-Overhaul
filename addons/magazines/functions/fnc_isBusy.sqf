@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Whether a repack is running in the window (fnc_begin, fnc_stop). The window keeps its hands off
- * everything else meanwhile (einv_gui_fnc_onFrame, fnc_onMouseButton, fnc_onKeyDown).
+ * everything else meanwhile (aio_gui_fnc_onFrame, fnc_onMouseButton, fnc_onKeyDown).
  *
  * Arguments:
  * None
@@ -11,7 +11,7 @@
  * A repack runs <BOOL>
  *
  * Example:
- * call einv_magazines_fnc_isBusy;
+ * call aio_magazines_fnc_isBusy;
  *
  * Public: No
  */

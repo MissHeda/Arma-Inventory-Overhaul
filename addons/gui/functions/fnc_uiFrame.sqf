@@ -13,7 +13,7 @@
  * The frame <CONTROL>
  *
  * Example:
- * [_display, controlNull, [0.1, 0.1, 0.05, 0.05], [1, 1, 1, 0.2]] call einv_gui_fnc_uiFrame;
+ * [_display, controlNull, [0.1, 0.1, 0.05, 0.05], [1, 1, 1, 0.2]] call aio_gui_fnc_uiFrame;
  *
  * Public: No
  */
@@ -22,7 +22,7 @@ disableSerialization;
 
 params ["_display", "_parent", "_rect", "_color"];
 
-private _ctrl = [_display, "EINV_Frame", _parent, _rect] call FUNC(uiCreate);
+private _ctrl = [_display, "AIO_Frame", _parent, _rect] call FUNC(uiCreate);
 _ctrl ctrlSetText "";
 _ctrl ctrlSetTextColor _color;
 

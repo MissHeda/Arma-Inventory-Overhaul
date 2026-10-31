@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Ctrl+click or a double click on a tile of an open kit (einv_gui_fnc_quickMove): into the player's own
+ * Ctrl+click or a double click on a tile of an open kit (aio_gui_fnc_quickMove): into the player's own
  * gear - the kit's "take into" choice first, then uniform, vest, backpack (fnc_ownTargets) - the first
  * with a free spot on its grid. The layout finds it a cell.
  *
@@ -13,7 +13,7 @@
  * Moved <BOOL>
  *
  * Example:
- * ["efak_IFAK_7", _tile] call einv_compat_efak_fnc_takeOut;
+ * ["efak_IFAK_7", _tile] call aio_compat_efak_fnc_takeOut;
  *
  * Public: No
  */

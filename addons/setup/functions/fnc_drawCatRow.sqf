@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * The row "Category" of the Items step: which categories the item is in - a chip each for weapon, ammo, grenade, gear,
  * medical, food, tool and misc (ITEM_GROUPS) and the ones the draft defines (General step), more than one on when it is in several
- * (cats=, einv_cat). The strip at the
+ * (cats=, aio_cat). The strip at the
  * side of a loot box shows an item under each of them, and a compartment that accepts only some categories (the Containers
  * step) takes it when it is in one of them. Like the Use from row, the chips are always clickable and nothing is written
  * here: the code gets the new list and puts it into the editor's working copy; Apply writes cats=. At least one stays on.
@@ -24,7 +24,7 @@
  * The height the row took <NUMBER>
  *
  * Example:
- * [_display, _box, [0, 0, 0.4], _theme, 0.08, ["medical"], {params ["_list"]}] call einv_setup_fnc_drawCatRow;
+ * [_display, _box, [0, 0, 0.4], _theme, 0.08, ["medical"], {params ["_list"]}] call aio_setup_fnc_drawCatRow;
  *
  * Public: No
  */

@@ -22,7 +22,7 @@
  * None - the controls shown are kept as uiNamespace QGVAR(dragGlow), hidden again with fnc_endDrag
  *
  * Example:
- * [_display, _entry] call einv_gui_fnc_showTargets;
+ * [_display, _entry] call aio_gui_fnc_showTargets;
  *
  * Public: No
  */

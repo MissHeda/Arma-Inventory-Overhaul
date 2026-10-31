@@ -21,7 +21,7 @@
  * The wizard's display, displayNull when it could not or may not open <DISPLAY>
  *
  * Example:
- * [findDisplay 313, "direct", 0, ""] call einv_setup_fnc_open;
+ * [findDisplay 313, "direct", 0, ""] call aio_setup_fnc_open;
  *
  * Public: Yes
  */

@@ -8,7 +8,7 @@
  * that writes out the same text leaves an undo step behind.
  *
  * Arguments:
- * 0: The new rules, as einv_items_fnc_parseRules returns them - an empty HashMap leaves them as they are <HASHMAP>
+ * 0: The new rules, as aio_items_fnc_parseRules returns them - an empty HashMap leaves them as they are <HASHMAP>
  *    (default: empty)
  * 1: The new server settings, setting's name -> value - nothing leaves them as they are <HASHMAP> (default: nothing)
  * 2: Draw the step again <BOOL> (default: true)
@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [createHashMap, createHashMap] call einv_setup_fnc_commitSetup;
+ * [createHashMap, createHashMap] call aio_setup_fnc_commitSetup;
  *
  * Public: No
  */

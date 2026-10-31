@@ -22,7 +22,7 @@
  * Reason, a text <STRING>
  *
  * Example:
- * [player, _actions, _candidates] call einv_hotbar_fnc_whyNot;
+ * [player, _actions, _candidates] call aio_hotbar_fnc_whyNot;
  *
  * Public: No
  */

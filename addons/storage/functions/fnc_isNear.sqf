@@ -21,7 +21,7 @@
  * Near and in sight <BOOL>
  *
  * Example:
- * [eyePos player, getPosASL player, cursorObject, 3, player] call einv_storage_fnc_isNear;
+ * [eyePos player, getPosASL player, cursorObject, 3, player] call aio_storage_fnc_isNear;
  *
  * Public: No
  */

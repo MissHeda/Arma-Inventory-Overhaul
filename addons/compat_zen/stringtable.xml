@@ -1,64 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="compat_zen">
-        <Key ID="STR_einv_compat_zen_Action_Admins">
+        <Key ID="STR_aio_compat_zen_Action_Admins">
             <English>Admins only</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Action_Everyone">
+        <Key ID="STR_aio_compat_zen_Action_Everyone">
             <English>Not locked</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Action_Group">
+        <Key ID="STR_aio_compat_zen_Action_Group">
             <English>One group...</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Action_Lock">
+        <Key ID="STR_aio_compat_zen_Action_Lock">
             <English>Inventory lock</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Action_SearchOff">
+        <Key ID="STR_aio_compat_zen_Action_SearchOff">
             <English>Searching: turn off</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Action_SearchOn">
+        <Key ID="STR_aio_compat_zen_Action_SearchOn">
             <English>Searching: turn on</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Action_Side">
+        <Key ID="STR_aio_compat_zen_Action_Side">
             <English>%1 only</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Category">
+        <Key ID="STR_aio_compat_zen_Category">
             <English>Arma Inventory Overhaul</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Dialog_Group">
+        <Key ID="STR_aio_compat_zen_Dialog_Group">
             <English>Group</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Dialog_Group_Tooltip">
+        <Key ID="STR_aio_compat_zen_Dialog_Group_Tooltip">
             <English>Used with &quot;One group&quot;</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Dialog_Mode">
+        <Key ID="STR_aio_compat_zen_Dialog_Mode">
             <English>Locked to</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Dialog_OneGroup">
+        <Key ID="STR_aio_compat_zen_Dialog_OneGroup">
             <English>One group</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Dialog_Title">
+        <Key ID="STR_aio_compat_zen_Dialog_Title">
             <English>Lock inventory</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Feedback_Locked">
+        <Key ID="STR_aio_compat_zen_Feedback_Locked">
             <English>Locked: %1</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Feedback_NoGroups">
+        <Key ID="STR_aio_compat_zen_Feedback_NoGroups">
             <English>There is no group to lock to</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Feedback_NoTarget">
+        <Key ID="STR_aio_compat_zen_Feedback_NoTarget">
             <English>Place it on a crate or a vehicle</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Feedback_Open">
+        <Key ID="STR_aio_compat_zen_Feedback_Open">
             <English>Not locked any more</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Feedback_SearchOff">
+        <Key ID="STR_aio_compat_zen_Feedback_SearchOff">
             <English>Not searched: the loot shows at once</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Feedback_SearchOn">
+        <Key ID="STR_aio_compat_zen_Feedback_SearchOn">
             <English>Searched as the server's settings say</English>
         </Key>
-        <Key ID="STR_einv_compat_zen_Module_Lock">
+        <Key ID="STR_aio_compat_zen_Module_Lock">
             <English>Lock inventory</English>
         </Key>
     </Package>

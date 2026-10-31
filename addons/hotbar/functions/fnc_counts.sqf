@@ -10,7 +10,7 @@
  * Count per slot, 0 for an empty one <ARRAY>
  *
  * Example:
- * call einv_hotbar_fnc_counts;
+ * call aio_hotbar_fnc_counts;
  *
  * Public: No
  */

@@ -1,11 +1,11 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The root of a kit holder, for the storage's transactions (einv_storage_holderTypes "kit" "root",
- * einv_storage_fnc_rootOf): the root of the container the kit lies in, or of the container the
+ * The root of a kit holder, for the storage's transactions (aio_storage_holderTypes "kit" "root",
+ * aio_storage_fnc_rootOf): the root of the container the kit lies in, or of the container the
  * outermost kit it is packed in lies in. Each answer only once the kit really lies under it
  * (fnc_holderVerify), tried in this order:
- *   the hint einv_storage_fnc_rootOf passes on - a container it lies in or a root it lay under, e.g.
+ *   the hint aio_storage_fnc_rootOf passes on - a container it lies in or a root it lay under, e.g.
  *   the root of the phase it was taken out in, which settlement puts it back by - and that one's root
  *   where the kit windows were last drawn found it (fnc_locate)
  *   the gear of the unit this machine controls
@@ -23,8 +23,8 @@
  * Root, objNull when the kit is found nowhere <OBJECT>
  *
  * Example:
- * ["kit:efak_ifak_7"] call einv_compat_efak_fnc_holderRoot;
- * ["kit:efak_ifak_7", _crate] call einv_compat_efak_fnc_holderRoot;
+ * ["kit:efak_ifak_7"] call aio_compat_efak_fnc_holderRoot;
+ * ["kit:efak_ifak_7", _crate] call aio_compat_efak_fnc_holderRoot;
  *
  * Public: No
  */

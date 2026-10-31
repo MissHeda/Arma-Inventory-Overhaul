@@ -15,7 +15,7 @@
  * [x, y, w, h] on the screen <ARRAY>
  *
  * Example:
- * [_button] call einv_setup_fnc_screenRect;
+ * [_button] call aio_setup_fnc_screenRect;
  *
  * Public: No
  */

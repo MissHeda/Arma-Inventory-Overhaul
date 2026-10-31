@@ -21,7 +21,7 @@
  * None
  *
  * Example:
- * [_saved, GVAR(drawn)] call einv_setup_fnc_restoreScroll;
+ * [_saved, GVAR(drawn)] call aio_setup_fnc_restoreScroll;
  *
  * Public: No
  */

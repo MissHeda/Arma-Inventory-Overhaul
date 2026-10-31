@@ -4,7 +4,7 @@
  * Notes what the open uniform, vest or backpack holds now (GVAR(snapshot)), so the next add of ACE can
  * be told from what was there: [container, lowercase class -> count] (fnc_countAll).
  *
- * Where everything lies is written down first (einv_storage_fnc_normalize, on the container's authority -
+ * Where everything lies is written down first (aio_storage_fnc_normalize, on the container's authority -
  * the player's own machine): laid out again after an add, every old tile then keeps its record and only
  * the new things look for a free spot - what finds none is that add, never something that lay there
  * already (fnc_reconcile).
@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [] call einv_arsenal_fnc_snapshot;
+ * [] call aio_arsenal_fnc_snapshot;
  *
  * Public: No
  */

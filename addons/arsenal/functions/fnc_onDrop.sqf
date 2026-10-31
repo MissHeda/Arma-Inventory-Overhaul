@@ -14,7 +14,7 @@
  * An item dragged out of ACE's list or the kits tab's (fnc_listDrag) is always this hook's to end: on a grid of
  * the panel it is put in, on the cell it was let go on and turned as it was, as many as the wheel left
  * (fnc_addTo); on the kit's grid in the kits tab, or on a kit's tile (fnc_listToKit), it is packed into that kit,
- * on that cell where it is free, as many as the kit takes (einv_compat_efak_fnc_packNew: its rules, and its room -
+ * on that cell where it is free, as many as the kit takes (aio_compat_efak_fnc_packNew: its rules, and its room -
  * its capacity, or the cells of a grid a rule or its config gives it); anywhere else it was nothing.
  *
  * Arguments:
@@ -30,13 +30,13 @@
  * 9: Width it lies in there <NUMBER>
  * 10: Height it lies in there <NUMBER>
  * 13: Turned, 1 a quarter clockwise <NUMBER>
- * 14: The swap or merge plan of the target (einv_gui_fnc_swapPlan), [] for a plain move <ARRAY>
+ * 14: The swap or merge plan of the target (aio_gui_fnc_swapPlan), [] for a plain move <ARRAY>
  *
  * Return Value:
  * Handled - the engine does nothing more <BOOL>
  *
  * Example:
- * ["zone", 0, 3, [], _entry, -1] call einv_arsenal_fnc_onDrop;
+ * ["zone", 0, 3, [], _entry, -1] call aio_arsenal_fnc_onDrop;
  *
  * Public: No
  */

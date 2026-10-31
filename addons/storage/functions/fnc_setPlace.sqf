@@ -18,7 +18,7 @@
  * the phase ends; outside a phase - the Arsenal, Eden - it is written at once (fnc_writePlaces), which
  * refuses on any machine but the authority.
  *
- * A grid with no object of its own is given by its key ("kit:" + lowercase class, einv_compat_efak).
+ * A grid with no object of its own is given by its key ("kit:" + lowercase class, aio_compat_efak).
  *
  * Arguments:
  * 0: Holder - a container, or the key of a grid with no object <OBJECT or STRING>
@@ -32,7 +32,7 @@
  * None
  *
  * Example:
- * [backpackContainer player, _entry, [2, 0, 0]] call einv_storage_fnc_setPlace;
+ * [backpackContainer player, _entry, [2, 0, 0]] call aio_storage_fnc_setPlace;
  *
  * Public: No
  */

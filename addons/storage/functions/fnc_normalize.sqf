@@ -22,7 +22,7 @@
  * Places were written <BOOL>
  *
  * Example:
- * [cursorObject] call einv_storage_fnc_normalize;
+ * [cursorObject] call aio_storage_fnc_normalize;
  *
  * Public: No
  */

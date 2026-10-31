@@ -14,7 +14,7 @@
  * The value as the setting's variable holds it - nil when it cannot be read as one <ANY>
  *
  * Example:
- * [einv_main_serverSettings get "einv_gui_searchTime", "0.6"] call einv_main_fnc_parseValue;
+ * [aio_main_serverSettings get "aio_gui_searchTime", "0.6"] call aio_main_fnc_parseValue;
  *
  * Public: No
  */

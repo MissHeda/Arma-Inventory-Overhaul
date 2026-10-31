@@ -19,7 +19,7 @@
  * The record was found and changed <BOOL>
  *
  * Example:
- * [_crate, _entry, 4] call einv_storage_fnc_setCount;
+ * [_crate, _entry, 4] call aio_storage_fnc_setCount;
  *
  * Public: No
  */

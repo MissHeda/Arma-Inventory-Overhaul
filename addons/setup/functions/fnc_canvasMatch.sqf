@@ -20,7 +20,7 @@
  * The compartment's number, -1 when none of its places is in a compartment that may be chosen <NUMBER>
  *
  * Example:
- * [[0, 0, -1, 1], 2, [1, 2, 3]] call einv_setup_fnc_canvasMatch; // 0
+ * [[0, 0, -1, 1], 2, [1, 2, 3]] call aio_setup_fnc_canvasMatch; // 0
  *
  * Public: No
  */

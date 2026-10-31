@@ -10,16 +10,16 @@
  * uniform, vest or backpack, the first of them with room. The layout finds it a cell - the authority's,
  * once the move arrives there (fnc_applyMove, fnc_sendMoves).
  *
- * Kits are Enhanced First Aid Kits' and its pouches' (einv_compat_efak - only when that addon is
+ * Kits are Enhanced First Aid Kits' and its pouches' (aio_compat_efak - only when that addon is
  * loaded): out of an open kit an item goes into the unit's own gear, the kit's "take into" choice first
- * (einv_compat_efak_fnc_takeOut); into one only what that kit takes (einv_compat_efak_fnc_canDrop).
+ * (aio_compat_efak_fnc_takeOut); into one only what that kit takes (aio_compat_efak_fnc_canDrop).
  *
  * A living person's container the player may not put into (fnc_checkTouch) is passed over; when the
  * loot is nothing else, the hint says why - the ground is only for when nothing is being looted. A tile
  * not searched yet, or one a move is under way for, stays.
  *
  * When something is being looted but all of it is locked to the player (a locked section of the loot
- * column, einv_locks), the ground is no place for it either: the hint says "Locked".
+ * column, aio_locks), the ground is no place for it either: the hint says "Locked".
  *
  * Free cells decide: the first container with a free spot for all of it takes it, whatever it weighs. A
  * backpack that has nowhere but backpacks to go says that. The room is asked of fnc_roomFor, not laid out
@@ -33,7 +33,7 @@
  * Moved - or asked for <BOOL>
  *
  * Example:
- * [0, 3] call einv_gui_fnc_quickMove;
+ * [0, 3] call aio_gui_fnc_quickMove;
  *
  * Public: No
  */
@@ -147,7 +147,7 @@ reverse _order;
 
 // Nothing looted and no kit open: the ground - the server finds the pile at the feet or makes one.
 if (_loot isEqualTo [] && {_kits isEqualTo []}) exitWith {
-    // Something is being looted, all of it locked to the player (einv_locks): not the ground then either.
+    // Something is being looted, all of it locked to the player (aio_locks): not the ground then either.
     if ((GVAR(context) getOrDefault ["lootSections", []]) findIf {_x getOrDefault ["locked", false]} >= 0) exitWith {
         ["Locked"] call FUNC(flashHint);
         false

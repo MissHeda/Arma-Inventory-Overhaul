@@ -14,7 +14,7 @@
  * Choices [[text, arguments, code], ...], [] for no menu <ARRAY>
  *
  * Example:
- * [_display] call einv_arsenal_fnc_menu;
+ * [_display] call aio_arsenal_fnc_menu;
  *
  * Public: No
  */

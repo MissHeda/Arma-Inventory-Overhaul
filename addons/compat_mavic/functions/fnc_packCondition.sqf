@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Condition of ACE interaction > Pack up drone on a Mavic 3 (Improved) drone: the mod's own check
  * (Mavic_fnc_canDisassembly) without the engine's canAdd, which asks the config load - instead one of the
- * containers the unit wears has a free spot for the item (einv_storage_fnc_hasSpace).
+ * containers the unit wears has a free spot for the item (aio_storage_fnc_hasSpace).
  *
  * Arguments:
  * 0: Drone <OBJECT>
@@ -13,7 +13,7 @@
  * Offered <BOOL>
  *
  * Example:
- * [_drone, player] call einv_compat_mavic_fnc_packCondition;
+ * [_drone, player] call aio_compat_mavic_fnc_packCondition;
  *
  * Public: No
  */

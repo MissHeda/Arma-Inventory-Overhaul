@@ -15,7 +15,7 @@
  * [all changes, the ids of the steps that hold some] <ARRAY>
  *
  * Example:
- * (call einv_setup_fnc_countChanges) select 0;
+ * (call aio_setup_fnc_countChanges) select 0;
  *
  * Public: No
  */

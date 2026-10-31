@@ -12,7 +12,7 @@
  * hint sums it up - why not for a single move, "Moved 3 of 5" for several, what was put back
  * or onto the ground because there was no room any more, "Put elsewhere" when the cell asked for was
  * taken meanwhile. What lies around is read anew first (fnc_readNearby), so a pile the answer names shows
- * at once among the nearby boxes (einv_gui_showNearby); a pile that is not among them - those switched
+ * at once among the nearby boxes (aio_gui_showNearby); a pile that is not among them - those switched
  * off, or the pile out of their sight or reach - becomes what the window looks into: a new pile has to
  * show up somewhere.
  *
@@ -20,12 +20,12 @@
  * fnc_sendMoves worked out when the moves were sent); a refused change is silent, the hint says why. A rebuild
  * the hotbar asks for (binding a slot) is silent too.
  *
- * Also the plain result of a change made some other way (einv_compat_efak): the window built again when
+ * Also the plain result of a change made some other way (aio_compat_efak): the window built again when
  * it happened, the reason in the hint when not.
  *
  * Arguments - an answer as GVAR(answers) keeps it (also wrapped in an array):
  * 0: Request id <STRING>
- * 1: Summary (einv_storage_fnc_onAnswer) <ARRAY>
+ * 1: Summary (aio_storage_fnc_onAnswer) <ARRAY>
  * 2: Revisions, [[holder, revision], ...] <ARRAY>
  * 3: Args fnc_sendMoves gave along, [move records, options, moves of the next chunks] <ARRAY>
  * 4: When it arrived - not looked at here <NUMBER>
@@ -38,8 +38,8 @@
  * Something happened <BOOL>
  *
  * Example:
- * _answer call einv_gui_fnc_afterAction;
- * ["", _holder] call einv_gui_fnc_afterAction;
+ * _answer call aio_gui_fnc_afterAction;
+ * ["", _holder] call aio_gui_fnc_afterAction;
  *
  * Public: No
  */

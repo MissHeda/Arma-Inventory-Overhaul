@@ -29,7 +29,7 @@
  * Weapon holder, objNull when there is no point to put it at <OBJECT>
  *
  * Example:
- * [_where, player] call einv_storage_fnc_getGroundHolder;
+ * [_where, player] call aio_storage_fnc_getGroundHolder;
  *
  * Public: No
  */

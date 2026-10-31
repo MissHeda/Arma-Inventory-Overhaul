@@ -13,7 +13,7 @@
  * Slot index, -1 when the key is no slot's <NUMBER>
  *
  * Example:
- * [6, [false, false, false]] call einv_hotbar_fnc_keyIndex;
+ * [6, [false, false, false]] call aio_hotbar_fnc_keyIndex;
  *
  * Public: No
  */
@@ -24,7 +24,7 @@ private _pressed = [_key, _modifiers];
 private _found = -1;
 
 for "_i" from 0 to (SLOT_COUNT - 1) do {
-    private _entry = [CBA_SETTINGS_EINV, format [QGVAR(slot%1), _i + 1]] call CBA_fnc_getKeybind;
+    private _entry = [CBA_SETTINGS_AIO, format [QGVAR(slot%1), _i + 1]] call CBA_fnc_getKeybind;
 
     if (!isNil "_entry" && {((_entry param [8, []]) findIf {_x isEqualTo _pressed}) >= 0}) exitWith {
         _found = _i;

@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * A compartment of the Blocks way (fnc_drawCellBlocks) in the one form its working copy keeps: [cols, rows, holes] for a
  * compartment that takes anything and is a compartment like any other, [cols, rows, holes, [], accepts, single] once it
- * accepts only some categories or is a single slot - the form einv_items_fnc_parseGrid gives and fnc_formatGrid writes, so the
+ * accepts only some categories or is a single slot - the form aio_items_fnc_parseGrid gives and fnc_formatGrid writes, so the
  * working copy goes to the preview, to the total and to Apply as it is, and two copies of the same thing compare equal.
  *
  * Arguments:
@@ -15,7 +15,7 @@
  * The compartment <ARRAY>
  *
  * Example:
- * [[1, 1, []], ["grenade"], true] call einv_setup_fnc_cellBlock; // [1, 1, [], [], ["grenade"], true]
+ * [[1, 1, []], ["grenade"], true] call aio_setup_fnc_cellBlock; // [1, 1, [], [], ["grenade"], true]
  *
  * Public: No
  */

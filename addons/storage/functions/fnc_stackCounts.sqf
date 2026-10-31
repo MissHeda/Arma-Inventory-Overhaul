@@ -31,7 +31,7 @@
  * The count of each tile, in order, none of them 0 - they add up to the total <ARRAY of NUMBERs>
  *
  * Example:
- * [6, 10, [5, 1]] call einv_storage_fnc_stackCounts;
+ * [6, 10, [5, 1]] call aio_storage_fnc_stackCounts;
  *
  * Public: No
  */

@@ -15,7 +15,7 @@
  * [line, an own rule of the draft decides it] <ARRAY>
  *
  * Example:
- * ["B_Carryall_blk", "containers"] call einv_setup_fnc_answerLine;
+ * ["B_Carryall_blk", "containers"] call aio_setup_fnc_answerLine;
  *
  * Public: No
  */

@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Sends the phase a transaction waits for to its root's authority, one machine per root at a time
  * (GVAR(rootWaits)): a phase on objNull - the server's ground work - and on the server's own roots runs
- * here; any other goes to the root's owner (einv_storage_runPhase [id, phase, attempt, root, ops,
+ * here; any other goes to the root's owner (aio_storage_runPhase [id, phase, attempt, root, ops,
  * requester, where, settlement]). It is held (GVAR(held)) while another machine still holds phases of
  * that root it was sent, for LOCALITY_SETTLE seconds after the root changed owner - the engine tells the
  * old and the new owner separately, so for a moment both can see it local -, and while the owner is a
@@ -21,7 +21,7 @@
  * Finished at once - the caller drives the transaction on (fnc_hubNext) <BOOL>
  *
  * Example:
- * ["2:14", 1] call einv_storage_fnc_hubRoute;
+ * ["2:14", 1] call aio_storage_fnc_hubRoute;
  *
  * Public: No
  */

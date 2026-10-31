@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="compat_mavic">
-        <Key ID="STR_einv_compat_mavic_Action_PackUp">
+        <Key ID="STR_aio_compat_mavic_Action_PackUp">
             <English>Pack up drone</English>
         </Key>
     </Package>

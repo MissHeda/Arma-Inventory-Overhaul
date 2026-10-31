@@ -17,7 +17,7 @@
  * have, and the fields show it.
  *
  * Colours are numbered 0 accent, 1 secondary colour, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines (PALETTE_IDS); each lies in
- * einv_gui_palette where PALETTE_SLOTS says (the panels' transparency, at 2, and the tiles', at 8, are no colours).
+ * aio_gui_palette where PALETTE_SLOTS says (the panels' transparency, at 2, and the tiles', at 8, are no colours).
  *
  * Modes:
  *   "alpha"  - the place 0 to 1 along the panels' slider: 0 is opaque, 1 as see-through as PALETTE_ALPHA_MIN allows (all the way)
@@ -40,7 +40,7 @@
  * None
  *
  * Example:
- * ["hue", [0, 0.5]] call einv_gui_fnc_paletteSet;
+ * ["hue", [0, 0.5]] call aio_gui_fnc_paletteSet;
  *
  * Public: No
  */

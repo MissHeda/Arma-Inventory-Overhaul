@@ -14,7 +14,7 @@
  * The categories, in order <ARRAY of STRING>
  *
  * Example:
- * [["bandit", "misc", "ammo"]] call einv_items_fnc_orderGroups; // ["ammo", "misc", "bandit"]
+ * [["bandit", "misc", "ammo"]] call aio_items_fnc_orderGroups; // ["ammo", "misc", "bandit"]
  *
  * Public: No
  */

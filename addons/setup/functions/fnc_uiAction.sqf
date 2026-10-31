@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Creates a button the way the inventory draws them (einv_gui_fnc_uiButton): a flat surface with an icon
+ * Creates a button the way the inventory draws them (aio_gui_fnc_uiButton): a flat surface with an icon
  * and a label centred in the middle, lighting up under the mouse - but with the wizard's own way to run its
  * code a moment later (fnc_uiHit), which also works in Eden.
  *
@@ -27,7 +27,7 @@
  * The controls, the hit area last <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.1, 0.03], "Save", "", _theme, {[] call einv_setup_fnc_save}, [], true, "accent"] call einv_setup_fnc_uiAction;
+ * [_display, _group, [0, 0, 0.1, 0.03], "Save", "", _theme, {[] call aio_setup_fnc_save}, [], true, "accent"] call aio_setup_fnc_uiAction;
  *
  * Public: No
  */
@@ -68,7 +68,7 @@ private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _controls = [_display, _parent, _rect, _fill, (_theme getOrDefault ["radius", 0]) min (_height / 2)] call EFUNC(gui,uiPanel);
 private _surface = +_controls;
 
-// Laid out as the inventory's buttons are (einv_gui_fnc_uiButton, "centred"): an icon alone in the middle,
+// Laid out as the inventory's buttons are (aio_gui_fnc_uiButton, "centred"): an icon alone in the middle,
 // with a label it keeps to the left padding, and the label is centred by the engine in the room beside it -
 // getTextWidth says less than the engine draws, so a label placed by its measured width sat off the middle,
 // and the line stands in the middle of the button's height, not below it. The label is fitted with some slack:

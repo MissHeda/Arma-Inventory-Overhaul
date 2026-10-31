@@ -7,7 +7,7 @@
  * of ACE's schedule and by fnc_drawJob. It skips whatever the overlay does not hold - after a tile was
  * lost the overlay is empty until the deferred stop.
  *
- * The ring is made as the search's is (einv_gui_fnc_showSearch): the track faint, the arc over it filling
+ * The ring is made as the search's is (aio_gui_fnc_showSearch): the track faint, the arc over it filling
  * with the time (fnc_onFrame), as big as SEARCH_RING_SIZE of the tile's shorter side, in the tile's group.
  *
  * Arguments:
@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * call einv_magazines_fnc_showProgress;
+ * call aio_magazines_fnc_showProgress;
  *
  * Public: No
  */

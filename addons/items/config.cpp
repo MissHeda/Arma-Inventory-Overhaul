@@ -7,7 +7,7 @@ class CfgPatches {
         weapons[] = {};
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {
-            "einv_main"
+            "aio_main"
         };
         author = "Miss Heda";
         url = ECSTRING(main,URL);
@@ -16,4 +16,4 @@ class CfgPatches {
 };
 
 #include "CfgEventHandlers.hpp"
-#include "CfgEinvRulesets.hpp"
+#include "CfgAioRulesets.hpp"

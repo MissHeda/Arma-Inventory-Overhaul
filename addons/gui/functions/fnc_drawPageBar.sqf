@@ -38,7 +38,7 @@
  * None
  *
  * Example:
- * [_display, _grid] call einv_gui_fnc_drawPageBar;
+ * [_display, _grid] call aio_gui_fnc_drawPageBar;
  *
  * Public: No
  */
@@ -327,7 +327,7 @@ private _hits = [];
     _buttonRect params ["_hitLeft", "_hitTop", "_hitW", "_hitH"];
 
     private _hit = [
-        _display, "EINV_Hitbox", _parent, [_hitLeft - _hitX, _hitTop - _hitY, _hitW + _hitX * 2, _hitH + _hitY * 2]
+        _display, "AIO_Hitbox", _parent, [_hitLeft - _hitX, _hitTop - _hitY, _hitW + _hitX * 2, _hitH + _hitY * 2]
     ] call FUNC(uiCreate);
 
     _controls pushBack _hit;
@@ -367,7 +367,7 @@ private _hits = [];
 } forEach _hits;
 
 if (_hasPrev) then {
-    private _words = [_display, "EINV_Hitbox", _parent, [_labelRect select 0, _barTop, _labelW, _barH]] call FUNC(uiCreate);
+    private _words = [_display, "AIO_Hitbox", _parent, [_labelRect select 0, _barTop, _labelW, _barH]] call FUNC(uiCreate);
 
     _controls pushBack _words;
 

@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The open kits, each as the section its floating window is drawn from (einv_gui_fnc_drawWindows, at
+ * The open kits, each as the section its floating window is drawn from (aio_gui_fnc_drawWindows, at
  * every build and whenever a kit opens or closes): the kit's picture and name on the window's title, how
  * full it is beside them, and a grid of tiles under them. No longer part of the loot column - a kit
  * opening or closing changes nothing there.
@@ -20,8 +20,8 @@
  * real takes one of that mod's kit ids.
  *
  * Arguments:
- * 0: The player's own sections (einv_storage_fnc_getSections) <ARRAY>
- * 1: The loot column's sections (einv_storage_fnc_getLootSections) - real loot only, no kits <ARRAY>
+ * 0: The player's own sections (aio_storage_fnc_getSections) <ARRAY>
+ * 1: The loot column's sections (aio_storage_fnc_getLootSections) - real loot only, no kits <ARRAY>
  *
  * Return Value:
  * Sections, one per open kit in the order they were opened <ARRAY of HASHMAPs>
@@ -32,13 +32,13 @@
  *   "entries"    - what it holds (fnc_getEntries), [] while that has not reached this machine
  *   "virtual"    - false: things move in and out of it
  *   "kit"        - the kit's class, for its grid
- *   "key"        - "kit:" + the lowercase class: its window's key (einv_gui_fnc_openWindow,
- *                  einv_gui_fnc_closeWindow)
- *   "layoutKey"  - the same, the holder its places are kept for (einv_storage_fnc_getLayout)
+ *   "key"        - "kit:" + the lowercase class: its window's key (aio_gui_fnc_openWindow,
+ *                  aio_gui_fnc_closeWindow)
+ *   "layoutKey"  - the same, the holder its places are kept for (aio_storage_fnc_getLayout)
  *   "holder"     - the same: the kit as a holder of the storage's transactions
- *                  (einv_storage_holderTypes "kit")
+ *                  (aio_storage_holderTypes "kit")
  *   "root"       - the root of the container it lies in, or of the container the outermost kit it is
- *                  packed in lies in - whose authority runs its ops (einv_storage_fnc_rootOf); objNull
+ *                  packed in lies in - whose authority runs its ops (aio_storage_fnc_rootOf); objNull
  *                  when that is not known
  *   "parent"     - where it lies: the container its tile lies in, or "kit:" + the lowercase class of the
  *                  kit it is packed in
@@ -49,7 +49,7 @@
  *                  (fnc_notReady) -, a line that says why, in its window in place of the grid
  *
  * Example:
- * [_ownSections, _lootSections] call einv_compat_efak_fnc_getSections;
+ * [_ownSections, _lootSections] call aio_compat_efak_fnc_getSections;
  *
  * Public: No
  */
@@ -86,7 +86,7 @@ private _containers = [];
     };
 } forEach (_ownSections + _lootSections);
 
-// The cargo, and what Strict mode's hidden holder keeps for the container (einv_storage_fnc_hiddenClasses):
+// The cargo, and what Strict mode's hidden holder keeps for the container (aio_storage_fnc_hiddenClasses):
 // a kit kept out of the backpack still opens from the window.
 private _cargo = _containers apply {
     private _container = _x;

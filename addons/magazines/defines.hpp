@@ -1,5 +1,5 @@
 // The window's geometry and timings (UNIT, SEARCH_FRAMES, SEARCH_RING_SIZE, DIK codes).
-#include "\z\einv\addons\gui\defines.hpp"
+#include "\z\aio\addons\gui\defines.hpp"
 
 // ACE's progress bar lets a repack go on in a vehicle, swimming and sitting
 // (ace_magazinerepack_fnc_startRepackingMagazine) - so does ours.

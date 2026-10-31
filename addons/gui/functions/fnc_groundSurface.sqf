@@ -18,7 +18,7 @@
  * The surface <STRING>
  *
  * Example:
- * [player] call einv_gui_fnc_groundSurface;
+ * [player] call aio_gui_fnc_groundSurface;
  *
  * Public: No
  */

@@ -29,7 +29,7 @@
  *   old - payload of what was in the slot and left it, [] for nothing <ARRAY>
  *
  * Example:
- * [player, "headgear", ["item", "H_HelmetB", 1, []]] call einv_storage_fnc_putOn;
+ * [player, "headgear", ["item", "H_HelmetB", 1, []]] call aio_storage_fnc_putOn;
  *
  * Public: No
  */

@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * [2] call einv_hotbar_fnc_use;
+ * [2] call aio_hotbar_fnc_use;
  *
  * Public: Yes
  */
@@ -69,7 +69,7 @@ if (_kind in ["medical", "consume", "reload"] && {_unit getVariable ["ace_advanc
     };
 
     if (!isNil "ace_advanced_throwing_fnc_exitThrowMode") then {
-        [_unit, "einv hotbar"] call ace_advanced_throwing_fnc_exitThrowMode;
+        [_unit, "aio hotbar"] call ace_advanced_throwing_fnc_exitThrowMode;
     };
 };
 

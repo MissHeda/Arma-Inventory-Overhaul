@@ -15,7 +15,7 @@
  * items per tile, mass per cell] <ARRAY>
  *
  * Example:
- * call einv_items_fnc_rulesInputs;
+ * call aio_items_fnc_rulesInputs;
  *
  * Public: No
  */

@@ -21,7 +21,7 @@
  *   [text, expression, literal] - a wildcard: the text, the expression, its longest literal run
  *
  * Example:
- * ["B_Bergen*"] call einv_setup_fnc_searchFilter;
+ * ["B_Bergen*"] call aio_setup_fnc_searchFilter;
  *
  * Public: No
  */

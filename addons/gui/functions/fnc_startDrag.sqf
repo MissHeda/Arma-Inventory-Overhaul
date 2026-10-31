@@ -19,8 +19,8 @@
  *
  * Nothing is lifted that could go nowhere: a living person's item or slot the player may not touch
  * (fnc_checkTouch) stays, and the hint says why - also out of a kit lying in their gear
- * (einv_compat_efak_fnc_checkTouch), and a kit lying in the gear another living player wears
- * (einv_compat_efak_fnc_checkTile).
+ * (aio_compat_efak_fnc_checkTouch), and a kit lying in the gear another living player wears
+ * (aio_compat_efak_fnc_checkTile).
  *
  * What is picked up sounds like what it is (fnc_playSound "lift": a rifle, a magazine, a vest ...).
  *
@@ -40,7 +40,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_startDrag;
+ * [_display] call aio_gui_fnc_startDrag;
  *
  * Public: No
  */
@@ -72,7 +72,7 @@ private _entry = if (_slotSource isEqualTo []) then {
     _slotSource call EFUNC(storage,getSlot)
 };
 
-// ACRE2's dummy radio stays in its slot (einv_compat_acre): not lifted at all.
+// ACRE2's dummy radio stays in its slot (aio_compat_acre): not lifted at all.
 if (
     _slotSource isNotEqualTo []
     && {!isNil QEFUNC(compat_acre,isFixedSlot)}
@@ -124,7 +124,7 @@ if (_pending) exitWith {
 };
 
 // A living person's gear the player may only look at, or who is out of reach by now - also a kit lying
-// in it, and another living player's kit, which stays where it is (einv_compat_efak).
+// in it, and another living player's kit, which stays where it is (aio_compat_efak).
 private _why = switch (true) do {
     // Nothing to touch: a source grid is no living person's.
     case (_fromSource): {""};
@@ -164,7 +164,7 @@ if (_slotSource isEqualTo [] && {call FUNC(isInventoryMode)}) then {
                 private _groupContainer = _groupGrid getOrDefault ["container", objNull];
                 private _groupWhy = [_groupContainer, "items"] call FUNC(checkTouch);
 
-                // Another living player's kit stays where it is, as for a single tile (einv_compat_efak).
+                // Another living player's kit stays where it is, as for a single tile (aio_compat_efak).
                 if (_groupWhy isEqualTo "" && {!isNil QEFUNC(compat_efak,checkTile)}) then {
                     private _groupTile = (_groupGrid getOrDefault ["tiles", []]) param [_x select 1, createHashMap];
 
@@ -215,7 +215,7 @@ GVAR(pageHover) = [];
 // The frames before it are written first (fnc_logFrame), so the drag line stands beside its own.
 [""] call FUNC(logFrame);
 
-private _footprint = [_display, "EINV_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
+private _footprint = [_display, "AIO_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
 _footprint ctrlShow false;
 
 private _stack = _entry getOrDefault ["count", 1];
@@ -223,7 +223,7 @@ private _stack = _entry getOrDefault ["count", 1];
 GVAR(dragSize) = [_entry getOrDefault ["w", 1], _entry getOrDefault ["h", 1]];
 GVAR(dragRot) = parseNumber (_entry getOrDefault ["rotated", false]);
 
-// A tile in a single slot has the slot's size (einv_storage_fnc_getLayout "single"): lifted it is its own size again.
+// A tile in a single slot has the slot's size (aio_storage_fnc_getLayout "single"): lifted it is its own size again.
 if (_entry getOrDefault ["single", false]) then {
     GVAR(dragSize) = (([_entry getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["size", [1, 1]]) select [0, 2];
     GVAR(dragRot) = 0;
@@ -249,7 +249,7 @@ uiNamespace setVariable [QGVAR(dragFootprint), _footprint];
 private _swapFootprint = controlNull;
 
 if (_group isEqualTo [] && {_slotSource isEqualTo []}) then {
-    _swapFootprint = [_display, "EINV_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
+    _swapFootprint = [_display, "AIO_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
     _swapFootprint ctrlShow false;
 };
 
@@ -267,7 +267,7 @@ if (_keepable) then {
     private _footprints = [];
 
     for "_i" from 1 to (count _group min 150) do {
-        private _more = [_display, "EINV_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
+        private _more = [_display, "AIO_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
 
         _more ctrlShow false;
         _footprints pushBack _more;
@@ -307,7 +307,7 @@ if (_group isEqualTo []) then {
 private _shapes = [];
 
 for "_i" from 1 to _shapeCount do {
-    private _shape = [_display, "EINV_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
+    private _shape = [_display, "AIO_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
 
     _shape ctrlShow false;
     _shapes pushBack _shape;
@@ -322,11 +322,11 @@ private _roundPieces = [];
 
 if (_group isEqualTo []) then {
     for "_i" from 1 to 2 do {
-        _roundPieces pushBack ([_display, "EINV_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate));
+        _roundPieces pushBack ([_display, "AIO_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate));
     };
 
     {
-        private _piece = [_display, "EINV_PanelCorner", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
+        private _piece = [_display, "AIO_PanelCorner", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
 
         _piece ctrlSetText _x;
         _roundPieces pushBack _piece;
@@ -431,7 +431,7 @@ GVAR(dragTarget) = [];
 // What was picked up sounds like what it is (fnc_playSound): a rifle like a rifle, a magazine like a magazine.
 ["lift", _entry getOrDefault ["class", ""], _sourceGrid getOrDefault ["container", objNull]] call FUNC(playSound);
 
-// For the tester's numbers (einv_gui_debugTiming): the lift up to its first frame, then each frame of the drag
+// For the tester's numbers (aio_gui_debugTiming): the lift up to its first frame, then each frame of the drag
 // (fnc_updateDrag) - [lift ms, frames, their ms together, the slowest frame's ms, what its parts took, how many
 // worked the target out anew], written as one line when it ends (fnc_endDrag).
 if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {

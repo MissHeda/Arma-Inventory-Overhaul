@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * [cursorObject] call einv_compat_zen_fnc_module;
+ * [cursorObject] call aio_compat_zen_fnc_module;
  *
  * Public: No
  */

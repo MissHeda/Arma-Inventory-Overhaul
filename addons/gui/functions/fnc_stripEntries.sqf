@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * What the strip at the side of a loot box lists (fnc_drawGroupStrip): "All" first, then every category there is (the eight
- * built-in ones and the setup's own, einv_items_fnc_categories) with its picture and its name. When they do not fit
+ * built-in ones and the setup's own, aio_items_fnc_categories) with its picture and its name. When they do not fit
  * the STRIP_SLOTS fields, All stays on top, the categories come STRIP_SLOTS - 2 at a time and the last field is "more",
  * which turns to the next group (fnc_stripMore).
  *
@@ -17,7 +17,7 @@
  *   page    - the group these entries are of <NUMBER>
  *
  * Example:
- * [1] call einv_gui_fnc_stripEntries;
+ * [1] call aio_gui_fnc_stripEntries;
  *
  * Public: No
  */

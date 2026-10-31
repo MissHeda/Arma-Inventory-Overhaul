@@ -21,7 +21,7 @@
  * None
  *
  * Example:
- * [_display, [0.5, 0.5, 0.1, 0.03], "B_Carryall_blk", false] call einv_setup_fnc_openClassImport;
+ * [_display, [0.5, 0.5, 0.1, 0.03], "B_Carryall_blk", false] call aio_setup_fnc_openClassImport;
  *
  * Public: No
  */

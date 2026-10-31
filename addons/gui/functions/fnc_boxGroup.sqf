@@ -11,7 +11,7 @@
  * the id of a category - "weapon", "ammo", "grenade", "gear", "medical", "food", "tool", "misc" (ITEM_GROUPS) or one the setup defines; "" when the box shows everything <STRING>
  *
  * Example:
- * [_crate] call einv_gui_fnc_boxGroup;
+ * [_crate] call aio_gui_fnc_boxGroup;
  *
  * Public: No
  */

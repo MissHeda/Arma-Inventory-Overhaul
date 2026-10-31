@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * [einv_compat_ace_cargo_fnc_unloadFrame, 0, []] call CBA_fnc_addPerFrameHandler;
+ * [aio_compat_ace_cargo_fnc_unloadFrame, 0, []] call CBA_fnc_addPerFrameHandler;
  *
  * Public: No
  */

@@ -23,7 +23,7 @@
  * None
  *
  * Example:
- * [_display, _entry, 5, true] call einv_gui_fnc_previewWeight;
+ * [_display, _entry, 5, true] call aio_gui_fnc_previewWeight;
  *
  * Public: No
  */
@@ -86,7 +86,7 @@ if (count _bar > 0 && {_external}) then {
     private _preview = uiNamespace getVariable [QGVAR(weightPreview), controlNull];
 
     if (_create && {isNull _preview}) then {
-        _preview = [_display, "EINV_PanelRect", _bar get "parent", _rect] call FUNC(uiCreate);
+        _preview = [_display, "AIO_PanelRect", _bar get "parent", _rect] call FUNC(uiCreate);
         uiNamespace setVariable [QGVAR(weightPreview), _preview];
     };
 

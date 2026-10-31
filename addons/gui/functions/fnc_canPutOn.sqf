@@ -11,7 +11,7 @@
  * Only the gear one wears (SWAP_SLOTS) and only a body's: a weapon is not handed to a body, and a living
  * person's gear is changed as the server's settings say (fnc_canTouchPerson), which never lets an item be
  * put on them from here. The body's containers are not asked: a locked section has no slot, and a
- * body's gear is never locked (einv_locks).
+ * body's gear is never locked (aio_locks).
  *
  * Arguments:
  * 0: Class of the item <STRING>
@@ -22,7 +22,7 @@
  * "" when it may, else the reason (fnc_flashHint) <STRING>
  *
  * Example:
- * ["V_PlateCarrier1_rgr", cursorObject, "vest"] call einv_gui_fnc_canPutOn;
+ * ["V_PlateCarrier1_rgr", cursorObject, "vest"] call aio_gui_fnc_canPutOn;
  *
  * Public: No
  */

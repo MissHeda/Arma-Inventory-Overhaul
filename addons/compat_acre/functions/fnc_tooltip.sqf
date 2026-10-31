@@ -12,7 +12,7 @@
  * Texts to join after the name <ARRAY of STRINGs>
  *
  * Example:
- * ["ACRE_PRC152_ID_1", objNull] call einv_compat_acre_fnc_tooltip;
+ * ["ACRE_PRC152_ID_1", objNull] call aio_compat_acre_fnc_tooltip;
  *
  * Public: No
  */

@@ -12,7 +12,7 @@
  * Rows, [[label, value], ...] <ARRAY>
  *
  * Example:
- * ["TFAR_anprc152_1", objNull] call einv_compat_tfar_fnc_inspectRows;
+ * ["TFAR_anprc152_1", objNull] call aio_compat_tfar_fnc_inspectRows;
  *
  * Public: No
  */

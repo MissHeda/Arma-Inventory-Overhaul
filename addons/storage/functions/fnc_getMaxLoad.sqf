@@ -17,7 +17,7 @@
  * Maximum load from the config, -1 for the ground, which has no config load <NUMBER>
  *
  * Example:
- * [uniformContainer player] call einv_storage_fnc_getMaxLoad;
+ * [uniformContainer player] call aio_storage_fnc_getMaxLoad;
  *
  * Public: No
  */

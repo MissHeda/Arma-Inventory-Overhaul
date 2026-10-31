@@ -6,7 +6,7 @@
  * before, and the menu is no longer the last control once anything was made on the display after it - a
  * slot's hover ring, a tile drawn again. Asked every frame (fnc_onFrame) and after the loot column's tiles
  * were drawn again (fnc_redrawTiles); it only acts when the menu's layer is no longer the last control
- * registered on the display (einv_gui_created, fnc_uiCreate), or when told to.
+ * registered on the display (aio_gui_created, fnc_uiCreate), or when told to.
  *
  * Arguments:
  * 0: Make it again even when nothing was made after it <BOOL> (default: false)
@@ -15,7 +15,7 @@
  * Made again <BOOL>
  *
  * Example:
- * [true] call einv_gui_fnc_raiseMenu;
+ * [true] call aio_gui_fnc_raiseMenu;
  *
  * Public: No
  */

@@ -21,7 +21,7 @@
  * [kind, data] - the kind above, data as it says, [] when it has none <ARRAY>
  *
  * Example:
- * ["ACE_elasticBandage"] call einv_hotbar_fnc_useOf;
+ * ["ACE_elasticBandage"] call aio_hotbar_fnc_useOf;
  *
  * Public: Yes
  */

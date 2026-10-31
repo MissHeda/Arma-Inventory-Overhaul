@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * Which config root a class is in, looked for in the order the rules engine reads them (INDEX_ROOTS,
- * einv_items_fnc_getFacts): a class in two roots counts under the first.
+ * aio_items_fnc_getFacts): a class in two roots counts under the first.
  *
  * Arguments:
  * 0: Class <STRING>
@@ -12,7 +12,7 @@
  * "CfgWeapons", "CfgMagazines", "CfgGlasses" or "CfgVehicles"; "" for a class no config knows <STRING>
  *
  * Example:
- * ["B_Carryall_blk"] call einv_setup_fnc_classRoot;
+ * ["B_Carryall_blk"] call aio_setup_fnc_classRoot;
  *
  * Public: No
  */

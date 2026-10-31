@@ -2,11 +2,11 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Where a container's compartments (einv_storage_fnc_getBlocks) lie in a block STORAGE_COLS cells wide:
+ * Where a container's compartments (aio_storage_fnc_getBlocks) lie in a block STORAGE_COLS cells wide:
  * side by side as far as that reaches, then on the next line - and, should anything not fit any of
  * them, a line of its own for that, each such item in a little compartment of its own size. A column's
  * section (fnc_drawSection) and a kit's window (fnc_drawWindow) lay their grids out the same way, and
- * fnc_drawCompartments draws them where this put them. The setup wizard's preview (einv_setup_fnc_drawPreview)
+ * fnc_drawCompartments draws them where this put them. The setup wizard's preview (aio_setup_fnc_drawPreview)
  * lays its compartments out here too, so it shows what the window shows.
  *
  * Compartments drawn on a canvas (grid=aab/acc, a pos of their own) are not flowed: they lie where they
@@ -32,7 +32,7 @@
  * block: every place moves on by it, and the height and width count it on both sides.
  *
  * Arguments:
- * 0: Layout, see einv_storage_fnc_getLayout <HASHMAP>
+ * 0: Layout, see aio_storage_fnc_getLayout <HASHMAP>
  * 1: Cell size [w, h] <ARRAY> (default: fnc_getCell's)
  *
  * Return Value:
@@ -45,7 +45,7 @@
  *   width  - how wide its widest line is: more than STORAGE_COLS cells where a canvas has seams across
  *
  * Example:
- * ([_layout] call einv_gui_fnc_flowCompartments) params ["_places", "_height", "_width"];
+ * ([_layout] call aio_gui_fnc_flowCompartments) params ["_places", "_height", "_width"];
  *
  * Public: No
  */

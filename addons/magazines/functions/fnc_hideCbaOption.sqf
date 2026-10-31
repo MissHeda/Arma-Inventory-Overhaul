@@ -5,7 +5,7 @@
  * this addon does it itself: ACE's "Repack Magazines" takes every magazine of the kind out of the unit and
  * puts them back wherever the engine finds room, after closing the window - ours keeps them in place.
  * While repacking is off the option shows and behaves as in the vanilla inventory
- * (einv_gui_fnc_cbaOptions asks).
+ * (aio_gui_fnc_cbaOptions asks).
  *
  * Arguments:
  * 0: Item class <STRING>
@@ -15,7 +15,7 @@
  * Leave it out <BOOL>
  *
  * Example:
- * ["30Rnd_65x39_caseless_mag", "Repack Magazines"] call einv_magazines_fnc_hideCbaOption;
+ * ["30Rnd_65x39_caseless_mag", "Repack Magazines"] call aio_magazines_fnc_hideCbaOption;
  *
  * Public: No
  */

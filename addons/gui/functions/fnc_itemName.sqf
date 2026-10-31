@@ -6,8 +6,8 @@
  *
  * A kit of Enhanced First Aid Kits or Enhanced Utility Pouches goes by what that mod calls it: the name
  * a player gave it, the mission's name for its type, and for the short name its own ("IFAK")
- * (einv_compat_efak_fnc_getName - only when that addon is loaded). Anything else, and a kit with no
- * such name, by the rules' name (name=) or its config's (einv_items_fnc_getInfo).
+ * (aio_compat_efak_fnc_getName - only when that addon is loaded). Anything else, and a kit with no
+ * such name, by the rules' name (name=) or its config's (aio_items_fnc_getInfo).
  *
  * Arguments:
  * 0: Class <STRING>
@@ -17,7 +17,7 @@
  * Name, the class when nothing has one <STRING>
  *
  * Example:
- * ["efak_IFAK_7", true] call einv_gui_fnc_itemName;
+ * ["efak_IFAK_7", true] call aio_gui_fnc_itemName;
  *
  * Public: No
  */

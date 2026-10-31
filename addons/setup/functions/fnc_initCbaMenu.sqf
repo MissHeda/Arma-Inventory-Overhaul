@@ -10,9 +10,9 @@
  * for a control of its own, so the button is made hidden and asked again whenever it is brought up to date
  * (below), and a login or logout while the menu is open is noticed at the next mouse move.
  *
- * The server settings on that page are the very ones the wizard's General page shows (einv_main_fnc_addSetting):
+ * The server settings on that page are the very ones the wizard's General page shows (aio_main_fnc_addSetting):
  * either edits them, and the other shows the change. In Eden, what the scenario still keeps in the settings box of
- * the test builds is moved into them first (einv_main_fnc_migrateSettings), so the rows show it.
+ * the test builds is moved into them first (aio_main_fnc_migrateSettings), so the rows show it.
  *
  * Runs when the menu loads (Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions), after CBA's
  * own handler, which made the controls looked for here. Their ids are CBA's internals, not a promise:
@@ -26,7 +26,7 @@
  * None
  *
  * Example:
- * [_display] call einv_setup_fnc_initCbaMenu;
+ * [_display] call aio_setup_fnc_initCbaMenu;
  *
  * Public: No
  */
@@ -88,11 +88,11 @@ _button ctrlAddEventHandler ["ButtonClick", {
 
 // The page of a category is its name in lower case after CBA localized it - read from the setting
 // itself, so a category that is ever turned into a stringtable entry still matches in every language.
-private _category = CBA_SETTINGS_EINV_SERVER;
+private _category = CBA_SETTINGS_AIO_SERVER;
 private _defaults = missionNamespace getVariable "cba_settings_default";
 
 if (!isNil "_defaults") then {
-    _category = (_defaults getVariable [QEGVAR(items,rules), []]) param [4, CBA_SETTINGS_EINV_SERVER];
+    _category = (_defaults getVariable [QEGVAR(items,rules), []]) param [4, CBA_SETTINGS_AIO_SERVER];
 };
 
 _display setVariable [QGVAR(cbaButton), _button];

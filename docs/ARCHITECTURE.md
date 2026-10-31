@@ -25,7 +25,7 @@ no setting to bring it back and no fallback to it (section 4, Opening).
   the storage column (uniform, vest, backpack) and, only while looting, the loot column. Kits and pouches of Enhanced
   First Aid Kits float as windows of their own. Loot has to be searched before it is seen.
 - **A rules engine** decides every item's size, stack, container grid, weight and name from one text, the CBA setting
-  `einv_items_rules`, built on the one preset there is, the default (section 2); **a setup wizard** edits that text - and the server
+  `aio_items_rules`, built on the one preset there is, the default (section 2); **a setup wizard** edits that text - and the server
   settings, one more text (section 8) - without writing them by hand (section 6).
 - **The ACE Arsenal panel.** There is no arsenal window of our own: while the uniform, vest or backpack tab of ACE Arsenal's left
   bar is open, the same window engine draws that container's grid and a staging space beside ACE's list (section 5).
@@ -42,7 +42,7 @@ The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
 
 - HEMTT 1.11.2 (`hemtt check`, `build`, `launch`), run by `.github/workflows/check.yml` on every push. Minimum game version 2.16:
   no SQF command newer than that. CBA macros (`GVAR`, `QGVAR`, `FUNC`, `QFUNC`, `EFUNC`, `LLSTRING`, `CSTRING`, `ARR_N`), `PREP`
-  lines in each addon's `XEH_PREP.hpp`. Prefix `einv`, mainprefix `z`; the version is in `addons/main/script_version.hpp`.
+  lines in each addon's `XEH_PREP.hpp`. Prefix `aio`, mainprefix `z`; the version is in `addons/main/script_version.hpp`.
 - One addon per feature, named after what it does, plus `main`. Everything in the repo is English, stringtables only `<English>`.
   A function file has the header of the existing ones (Author, description, Arguments, Return Value, Example, Public); comments
   explain WHY, in plain sentences. CBA setting descriptions are wrapped with `\n` about every 40 characters, no scope line;
@@ -54,7 +54,7 @@ The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
   kilograms.
 - Controls cannot be saved with a game, so every control lives in `uiNamespace`. Eden runs no postInit and no CBA frame handlers:
   what must work there is registered in preInit and driven by a `Draw3D` handler or by the display's own events (sections 4 to 6).
-- Tests: `tools/check_default_ruleset.sqf` (section 2) and the mission `.hemtt/missions/EINV_Test.VR` (full gear, a crate, an ACE
+- Tests: `tools/check_default_ruleset.sqf` (section 2) and the mission `.hemtt/missions/AIO_Test.VR` (full gear, a crate, an ACE
   Arsenal box, a vehicle, a body, loot on the ground); `tools/generate_ui_textures.py` draws `addons/gui/ui/`; `python -I tools/find_dead_code.py` lists
   the functions, preInit variables and defines nothing uses.
 
@@ -63,7 +63,7 @@ The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
 | Addon | Does |
 |---|---|
 | `main` | version, macros and the shared defines of `script_macros.hpp`; the registry of the server settings - each a CBA setting and a control of the wizard's General page -, their topics, and the one-time move out of the settings box of the test builds (section 8). |
-| `items` | what an item is (`einv_items_fnc_getInfo`) and the rules engine behind it: text, presets, compile, resolve. |
+| `items` | what an item is (`aio_items_fnc_getInfo`) and the rules engine behind it: text, presets, compile, resolve. |
 | `storage` | what a container holds and where it lies; what a unit wears; the transactions, hub, places sync and loadouts that change anything. |
 | `gui` | the window: engine, Glass theme, layout, tiles, drag, menus, searching, sounds, people, CBA item menu, kit windows. |
 | `weight` | the soldier's load: `weight=` overrides into ACE's virtual load, the tiers Light, Heavy, Overloaded, Critical and their effects. |
@@ -86,9 +86,9 @@ The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
 
 ## 2. Rules engine (items)
 
-Size, stack, container grid, weight and name of every item come from one text of rules, the CBA setting `einv_items_rules`, built
-on a preset (`CfgEinvRulesets`, `addons/items/CfgEinvRulesets.hpp`). Everything that asks "what is this item" asks
-`einv_items_fnc_getInfo`; nothing else decides a size. The text is short on purpose: a preset does the bulk, the text only says
+Size, stack, container grid, weight and name of every item come from one text of rules, the CBA setting `aio_items_rules`, built
+on a preset (`CfgAioRulesets`, `addons/items/CfgAioRulesets.hpp`). Everything that asks "what is this item" asks
+`aio_items_fnc_getInfo`; nothing else decides a size. The text is short on purpose: a preset does the bulk, the text only says
 where a setup differs.
 
 ### The text (`fnc_parseRules`, `fnc_writeRules`)
@@ -99,7 +99,7 @@ stays the same, so two setups that mean the same compare as texts.
 
 | Statement | Example | |
 |---|---|---|
-| header | `einv1 base=default cell=5` | only as the first statement. `base=` a preset id or `none`; `cell=` config mass per grid cell, 1 to 50, two decimals. No header reads as `einv1 base=default`; a newer `einvN` warns and reads what it can. |
+| header | `aio1 base=default cell=5` | only as the first statement. `base=` a preset id or `none`; `cell=` config mass per grid cell, 1 to 50, two decimals. No header reads as `aio1 base=default`; a newer `aioN` warns and reads what it can. |
 | category | `category=bandit > name=Bandit_loot picture=/a3/ui_f/data/gui/cfg/hints/gear_ca.paa` | a category of the setup's own on top of the eight built-in ones (`ITEM_GROUPS`): an id of `a-z 0-9 _`, at most `CAT_ID_MAX` 24 long, its `name=` (written as a rule's, at most `CAT_NAME_MAX` 30 characters) and the `picture=` it is drawn with (written as a rule's), both optional - `category=bandit` alone is legal. The same id again: what the later statement sets counts, field by field. For one of the eight ids it gives that category another name or picture (it never goes away; a statement that sets neither is left out). At most `MAX_CUSTOM_CATEGORIES` 16 of the setup's own; an id that `cats=` would read as a built-in word (`fnc_builtinGroup`: `tools`, `magazine`, `other` ...) or that means something else where a category stands (`CAT_ID_RESERVED`: `one`, `single`, `all`, `more`, `none`) is refused. Parsed into the AST's `categories`, `[[id, name, picture], ...]` in text order, and written right after the header (`fnc_writeRules`). Only the text defines categories: a preset has no say. Items and compartments name them through `cats=` and `grid=`; the lists of the window and of the wizard come from `fnc_categories`. |
 | group | `@rifle_mags: kind=magazine mass<=20` | an id of `a-z 0-9 _`. The same id twice in one layer means either. An own group replaces the preset's group of that name; `@itself` inside it means the preset's definition (`@mag_rifle: @mag_rifle` then `@mag_rifle: class=X+` adds X). A definition that does not hold up (unknown group, a loop, deeper than `MAX_GROUP_DEPTH` 4) is left out and the one below counts again. |
 | rule | `kind=grenade > stack=3` | conditions, then what it sets; the `>` only reads better. No condition means every item. A later rule beats an earlier one, field by field. |
@@ -130,7 +130,7 @@ Values - what a rule sets. `like` is written first, the others in any order:
 | `name=Field_kit` | the name it shows, at most `MAX_NAME` 100 characters: `_` is a space and `%5F` an underscore; letters, digits, `-` and `.` stand as they are, every other character is `%XX` per UTF-8 byte (`Field kit (3)` is `Field_kit_%283%29`). `fnc_encodeName` writes it, `fnc_decodeName` reads it. |
 | `icon=1.4`, `icon=1.4@0.1:-0.05` | how the item's **picture** is drawn in its tile: `SCALE` or `SCALE@ACROSS:DOWN` (`fnc_parseIcon` reads it, `fnc_formatIcon` writes it). The scale is 0.25 to 4 (`ICON_SCALE_MIN`, `ICON_SCALE_MAX`) times the picture as it is fitted into the tile, about the tile's middle; the offsets are -1 to 1 (`ICON_OFFSET_MAX`) of the tile's width across (positive: right) and of its height down (positive: down); all to two decimals, a value past a limit is cut down with a warning. `icon=1` is the plain picture and a legal value (it takes back what a broader rule set). A comma ends a statement, so the text's offsets are split by `:` - the writer always writes the colon; config's `"1.4@0.1,-0.05"` is read as it stands, and a comma typed into a rules text is read as the colon (a number on its own right after an `icon=` with one offset is its second one). Parsed into the rule's values as `"icon"`, `[scale, across, down]`. Not taken by `like=`. |
 | `picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa` | **which picture** the item shows instead of the one its config names (`fnc_parsePicture` reads it): a texture path of at most `PICTURE_MAX` 260 characters with a file name that has an extension. In a rules text it is written the way `name=` is, but for a path (`fnc_encodeName` / `fnc_decodeName` with their `path` switch): letters, digits, `-`, `_`, `.` and `/` stay, a backslash is written `/` (the setting's text box cleans a backslash out - `fnc_sanitizeText` now turns one into a `/` instead of dropping it, so a path typed there keeps its folders), a space is `%20` and every other character `%XX` per UTF-8 byte; read back, `/` is the backslash of the engine's own paths. Parsed into the rule's values as `"picture"`, the path with backslashes. Whether the file exists is asked by `fnc_getInfo` (`fileExists`, with and without the leading backslash), not by the reader: a missing file falls back to the config picture and is named once per path in the RPT. Not taken by `like=`. |
-| `use=backpack+vest` | **which containers it may be used from** even where a setting closes them (`fnc_parseUse` reads it, `fnc_formatUse` writes it; section 3, "Use from containers"): any of `uniform`, `vest`, `backpack` joined with `+` (a comma would end the statement; config's `einv_use` also takes a comma or a bar), `all` for the three, `none` for no container - the one value that takes back what a broader rule whitelisted. Words are lowercase or not, plurals are read, a word that is none of these is left out with a note. Written always in the order uniform, vest, backpack. Parsed into the rule's values as `"use"`, an array of those words (`[]` for `none`). Only means something for the kinds that are used from where they lie (`USE_ITEM_KINDS` in storage: magazine, grenade, item, kit, radio). Not taken by `like=`. |
+| `use=backpack+vest` | **which containers it may be used from** even where a setting closes them (`fnc_parseUse` reads it, `fnc_formatUse` writes it; section 3, "Use from containers"): any of `uniform`, `vest`, `backpack` joined with `+` (a comma would end the statement; config's `aio_use` also takes a comma or a bar), `all` for the three, `none` for no container - the one value that takes back what a broader rule whitelisted. Words are lowercase or not, plurals are read, a word that is none of these is left out with a note. Written always in the order uniform, vest, backpack. Parsed into the rule's values as `"use"`, an array of those words (`[]` for `none`). Only means something for the kinds that are used from where they lie (`USE_ITEM_KINDS` in storage: magazine, grenade, item, kit, radio). Not taken by `like=`. |
 | `cats=medical+misc` | **which categories it is in** instead of the built-in one (`fnc_parseGroups` reads it, `fnc_formatGroups` writes it): any of `weapon`, `ammo`, `grenade`, `gear`, `medical`, `food`, `tool`, `misc` (`ITEM_GROUPS`) or the id of a category the text defines (`category=`), joined with `+`; plurals and a few words (`magazine`, `throwable`, `explosive`, `clothing`; `GROUP_ALIASES`) are read as the built-in category they mean (`fnc_builtinGroup`), any other word that is an id (`a-z 0-9 _`, `CAT_ID_PATTERN`) is kept as the id of a category of the setup's own - whether the setup defines it is asked later, not by the reader, which also reads a mod's config before the rules exist -, anything else is left out with a note, a value with no readable word is left out. Written in the order of `fnc_orderGroups`: the eight as `ITEM_GROUPS` lists them, then the others alphabetically, so a text reads and writes the same under any setup. Parsed into the rule's values as `"cats"`, an array. The strip at the side of a loot box shows an item under each of its categories, and a compartment that accepts only some categories (`grid=`, below) takes it when it is in one of them. The key is `cats=`, not `cat=`: `cat=` is the condition on the tile's colour (`CATEGORY_NAMES`). Not taken by `like=`. |
 
 `grid=` takes one of these (`fnc_parseGrid`, `fnc_formatGrid`):
@@ -169,7 +169,7 @@ Values - what a rule sets. `like` is written first, the others in any order:
 
 What may stand in a statement: letters, digits, space, tab and `_ + . / % : | @ ! < > = ~ -`. Never a `;`, a quote, `#` or a
 backslash: CBA's export, import and every `cba_settings.sqf` split lines at `;`, and the preprocessor reads the others. The
-EDITBOXes (rules and the three tables) use `einv_items_fnc_sanitizeText` as CBA's sanitizer, which turns `;` and line breaks into
+EDITBOXes (rules and the three tables) use `aio_items_fnc_sanitizeText` as CBA's sanitizer, which turns `;` and line breaks into
 commas and drops quotes, `#` and backslashes as they are typed.
 
 Left out, each with a warning that names it (RPT on load, the General page's notes): a statement with any other character, an unknown
@@ -202,16 +202,16 @@ Each field - footprint, stack, grid, weight, name, icon, picture, use, cats - go
 
 1. **forced** - rifles, handguns, launchers, binoculars, uniforms, vests and backpacks always stack 1 (`KINDS_SINGLE`), whatever
    any rule says: each carries attachments or contents of its own, and a tile moves only one of them.
-2. **the older tables** - `einv_items_sizeTable`, `einv_items_stackTable`, `einv_storage_containerTable`, compiled as `class=X+`
+2. **the older tables** - `aio_items_sizeTable`, `aio_items_stackTable`, `aio_storage_containerTable`, compiled as `class=X+`
    rules appended after the text's own, each table sorted shallow-first (fewest parents first) so the nearest class listed wins.
    They sit in the same layer as the text but come after it, so a table beats the text.
-3. **the own text** - `einv_items_rules`, a later rule before an earlier one.
-4. **the item's mod config** - `einv_size`, `einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, `einv_icon`, `einv_picture`, `einv_use`, `einv_cat`, written as the rules write the same
-   value ("Config keys of an item" below); for a field those leave open the older `einv_gridSize[]`, `einv_stackSize`,
-   `einv_grids[]`, then `einv_slots`. Grids and slots from config stay within the limits above. The text above still overrides all
+3. **the own text** - `aio_items_rules`, a later rule before an earlier one.
+4. **the item's mod config** - `aio_size`, `aio_stack`, `aio_grid`, `aio_weight`, `aio_name`, `aio_icon`, `aio_picture`, `aio_use`, `aio_cat`, written as the rules write the same
+   value ("Config keys of an item" below); for a field those leave open the older `aio_gridSize[]`, `aio_stackSize`,
+   `aio_grids[]`, then `aio_slots`. Grids and slots from config stay within the limits above. The text above still overrides all
    of it, so a server's rules have the last word over any mod.
 5. **the preset chain** - `base=` and its own bases, up to `MAX_CHAIN` deep, a derived preset's rules before its base's, a later
-   rule before an earlier one. `einv_items_stackSmall`, when moved off its default 10, is this layer's last word on `@item_small`:
+   rule before an earlier one. `aio_items_stackSmall`, when moved off its default 10, is this layer's last word on `@item_small`:
    it beats the preset's stacks, not a rule or a mod.
 6. **everything else** - the text's rules with `all` (`fnc_compileRules` puts them in `"fallback"`, tag `all:<i>`, the i-th rule of
    the text; `byKind` gains a fifth and sixth element, their indices and fields), later rule first. They answer only what every layer
@@ -226,12 +226,12 @@ Only the rules that can be about the item's kind are asked (`fnc_compileRules` s
 nothing it could still set is open. Afterwards `size=mass` becomes cells, stacks become whole numbers of at least 1, the footprint
 is cut to `SHAPE_MAX`, and non-containers get no grid. `fnc_explain [class, compiled]` lists every layer that has a say, highest
 first, with what it sets and wins (for the debug console; the wizard words the answer and its source with
-`einv_setup_fnc_answerText`). The `src` tags are `own:<i>`, `legacy:<setting>:<i>`, `mod:<config key>`, `preset:<id>:<i>`,
+`aio_setup_fnc_answerText`). The `src` tags are `own:<i>`, `legacy:<setting>:<i>`, `mod:<config key>`, `preset:<id>:<i>`,
 `all:<i>`, `builtin` and `forced`.
 
-For a container **object** (`einv_storage_fnc_getBlocks`), its own `einv_grid` beats all of these for its compartments (section
+For a container **object** (`aio_storage_fnc_getBlocks`), its own `aio_grid` beats all of these for its compartments (section
 3). Mass per grid cell: the header's `cell=`, else the nearest preset in the chain with a `cell` over 0, else the slider
-`einv_items_massPerCell` (default 5); clamped to 1 to 50.
+`aio_items_massPerCell` (default 5); clamped to 1 to 50.
 
 ### Config keys of an item (`fnc_getFacts`, `fnc_readConfigKeys`)
 
@@ -241,15 +241,15 @@ layer above: a server's rules text still beats them, and they beat a preset.
 
 | Key | On | Value | Same as |
 |---|---|---|---|
-| `einv_size = "2x1";` | any item | `WxH`, a mask like `"xx/x-"`, or `"mass"` | `size=` |
-| `einv_stack = 10;` | anything but a rifle, handgun, launcher, binocular, uniform, vest or backpack (those stay 1) | a whole number, 1 to `MAX_STACK` | `stack=` |
-| `einv_grid = "1x3+5x7+1x3";` | uniform, vest, backpack, crate, vehicle, kit | anything `grid=` takes: `"auto"`, `"24"` (a plain number `24` too), `"120%"`, `"rig:16"`, compartments, shapes, a canvas | `grid=` |
-| `einv_weight = 0.5;` | any item | kilograms, 0 to `MAX_WEIGHT`, rounded to the gram | `weight=` (kg, not config mass) |
-| `einv_name = "Short name";` | any item | the name as it shows, at most `MAX_NAME` characters; a space is a space | `name=`, but plain text (the rules text writes `_` for a space and `%XX` for the rest) |
-| `einv_picture = "a3\ui_f\data\gui\cfg\hints\gear_ca.paa";` | any item | the texture it shows instead of its config `picture`: backslashes or slashes, spaces as they are (`fnc_parsePicture` with `encoded = false`) | `picture=` (config writes the plain path, the rules text the encoded one) |
-| `einv_use = "backpack,vest";` | any item | the containers it may be used from where a setting closes them: `uniform`, `vest`, `backpack`, `all` or `none`, joined with a comma, a plus or a bar (`fnc_parseUse`). `""` takes an inherited value back, so `"none"` says no container | `use=` (config writes the comma, the rules text the plus) |
-| `einv_cat = "medical,misc";` | any item | the categories it is in instead of the built-in one: `weapon`, `ammo`, `grenade`, `gear`, `medical`, `food`, `tool`, `misc` joined with a comma, a plus or a bar (`fnc_parseGroups`). `""` takes an inherited value back | `cats=` (config writes the comma, the rules text the plus) |
-| `einv_icon = "1.4@0.1,-0.05";` | any item | how the picture is drawn in its tile: a scale 0.25 to 4, and after an `@` how far it is moved across and down, -1 to 1 of the tile (a comma or a colon between the two); a plain number `1.4` is the scale alone | `icon=` (config writes the comma, the rules text the colon) |
+| `aio_size = "2x1";` | any item | `WxH`, a mask like `"xx/x-"`, or `"mass"` | `size=` |
+| `aio_stack = 10;` | anything but a rifle, handgun, launcher, binocular, uniform, vest or backpack (those stay 1) | a whole number, 1 to `MAX_STACK` | `stack=` |
+| `aio_grid = "1x3+5x7+1x3";` | uniform, vest, backpack, crate, vehicle, kit | anything `grid=` takes: `"auto"`, `"24"` (a plain number `24` too), `"120%"`, `"rig:16"`, compartments, shapes, a canvas | `grid=` |
+| `aio_weight = 0.5;` | any item | kilograms, 0 to `MAX_WEIGHT`, rounded to the gram | `weight=` (kg, not config mass) |
+| `aio_name = "Short name";` | any item | the name as it shows, at most `MAX_NAME` characters; a space is a space | `name=`, but plain text (the rules text writes `_` for a space and `%XX` for the rest) |
+| `aio_picture = "a3\ui_f\data\gui\cfg\hints\gear_ca.paa";` | any item | the texture it shows instead of its config `picture`: backslashes or slashes, spaces as they are (`fnc_parsePicture` with `encoded = false`) | `picture=` (config writes the plain path, the rules text the encoded one) |
+| `aio_use = "backpack,vest";` | any item | the containers it may be used from where a setting closes them: `uniform`, `vest`, `backpack`, `all` or `none`, joined with a comma, a plus or a bar (`fnc_parseUse`). `""` takes an inherited value back, so `"none"` says no container | `use=` (config writes the comma, the rules text the plus) |
+| `aio_cat = "medical,misc";` | any item | the categories it is in instead of the built-in one: `weapon`, `ammo`, `grenade`, `gear`, `medical`, `food`, `tool`, `misc` joined with a comma, a plus or a bar (`fnc_parseGroups`). `""` takes an inherited value back | `cats=` (config writes the comma, the rules text the plus) |
+| `aio_icon = "1.4@0.1,-0.05";` | any item | how the picture is drawn in its tile: a scale 0.25 to 4, and after an `@` how far it is moved across and down, -1 to 1 of the tile (a comma or a colon between the two); a plain number `1.4` is the scale alone | `icon=` (config writes the comma, the rules text the colon) |
 
 - **Read by the rules' own readers.** `fnc_readConfigKeys` hands the size to `fnc_parseRules` and the grid to
   `fnc_parseGrid`/`fnc_formatGrid`, so the limits, the cuts and the words of a message are those of the rules. A value that cannot be
@@ -257,24 +257,24 @@ layer above: a server's rules text still beats them, and they beat a preset.
   facts are kept); one wrong key never costs the others. Spaces in a size or grid are ignored (`"1x3 + 5x7"`).
 - **Where.** On the item's own class: CfgWeapons for uniforms, vests, headgear and most items, CfgVehicles for backpacks, crates and
   vehicles, CfgMagazines, CfgGlasses. The grid of a uniform, vest or backpack belongs to the item class, not to the container class
-  it brings along. `einv_storage_fnc_getBlocks` needs nothing of its own for it: it asks `getInfo "grid"`.
+  it brings along. `aio_storage_fnc_getBlocks` needs nothing of its own for it: it asks `getInfo "grid"`.
 - **Inheritance.** Config reads these as it reads everything: a subclass has its parent's value unless it sets its own, key by key
-  (`getText`, `getNumber` and `isText` walk the parents). `einv_grid = "";` (an empty text for any key) on a subclass takes an
-  inherited value back. New keys win over the older ones, so a key the parent set beats an older key (`einv_grids[]`) set on the
+  (`getText`, `getNumber` and `isText` walk the parents). `aio_grid = "";` (an empty text for any key) on a subclass takes an
+  inherited value back. New keys win over the older ones, so a key the parent set beats an older key (`aio_grids[]`) set on the
   subclass: set the new key on the subclass to override.
-- **The older keys stay as aliases.** `einv_gridSize[] = {w, h}` is `einv_size`, `einv_stackSize` is `einv_stack`, `einv_grids[] =
-  {{cols, rows}, ...}` and `einv_slots = N` are `einv_grid`. For one field the new key wins; then `einv_gridSize[]` /
-  `einv_stackSize`; for the grid `einv_grids[]`, last `einv_slots`. The `src` tag says which one answered (`mod:einv_grid`,
-  `mod:einv_gridSize`, ...).
-- **One object** can still carry its own grid, which beats everything: `_crate setVariable ["einv_grid", "6x4+2x3", true]` (section
+- **The older keys stay as aliases.** `aio_gridSize[] = {w, h}` is `aio_size`, `aio_stackSize` is `aio_stack`, `aio_grids[] =
+  {{cols, rows}, ...}` and `aio_slots = N` are `aio_grid`. For one field the new key wins; then `aio_gridSize[]` /
+  `aio_stackSize`; for the grid `aio_grids[]`, last `aio_slots`. The `src` tag says which one answered (`mod:aio_grid`,
+  `mod:aio_gridSize`, ...).
+- **One object** can still carry its own grid, which beats everything: `_crate setVariable ["aio_grid", "6x4+2x3", true]` (section
   3). Same name, different place: the class's config key is for every object of the class, the variable for one.
 - `fnc_getFacts` keeps the readable keys in `"mod"` by field: `"size"` ([w, h, holes] or `"mass"`), `"stack"`, `"grid"` (a spec),
   `"weight"` (kg), `"name"`, `"icon"` (`[scale, across, down]`), `"picture"` (a path), next to the older `"gridSize"`, `"stackSize"`, `"grids"`, `"slots"`.
 
 Two public functions turn the keys into a snippet and back, for mod authors and for the setup wizard's export and import:
 
-- `einv_items_fnc_configEntry [class, all = false, compiled = nil]` -> STRING: the lines for a class from its current answer, in one
-  line, `class CfgVehicles { class B_Carryall_blk { einv_grid = "1x3+5x7+1x3"; }; };`. The root is the class's own. Only the keys that
+- `aio_items_fnc_configEntry [class, all = false, compiled = nil]` -> STRING: the lines for a class from its current answer, in one
+  line, `class CfgVehicles { class B_Carryall_blk { aio_grid = "1x3+5x7+1x3"; }; };`. The root is the class's own. Only the keys that
   differ from what the class would get without the rules text and the older tables - from its own config, the preset the rules
   are built on, and the built-in answer - are written, and only those that apply (no stack for a vest, no grid for a rifle). So a
   vest whose size the preset gives and whose grid was painted yields its grid alone, and the preset stays the server's choice.
@@ -283,10 +283,10 @@ Two public functions turn the keys into a snippet and back, for mod authors and 
   another set of rules, the wizard's draft (its own rules are the ones left out). `""` for a class no config knows or when
   nothing differs. The lines go inside the class's definition in the mod's config; another mod's class is patched with an
   external class declaration and that mod in `requiredAddons`.
-- `einv_items_fnc_parseConfigEntry [text, messages = nil]` -> `[[class, keys], ...]`: reads such lines - one class or many, under
+- `aio_items_fnc_parseConfigEntry [text, messages = nil]` -> `[[class, keys], ...]`: reads such lines - one class or many, under
   their root or without it; comments, `class X;` declarations, parents (`class X: Y`), other properties and nested classes are
-  skipped - into `keys`, a HashMap by lowercase config key (`"einv_size"`, `"einv_stack"`, `"einv_grid"`, `"einv_weight"`,
-  `"einv_name"`, `"einv_icon"`, `"einv_picture"`, `"einv_use"`, `"einv_cat"`) with the values as the rules write them (size and grid STRING, stack and weight NUMBER, name
+  skipped - into `keys`, a HashMap by lowercase config key (`"aio_size"`, `"aio_stack"`, `"aio_grid"`, `"aio_weight"`,
+  `"aio_name"`, `"aio_icon"`, `"aio_picture"`, `"aio_use"`, `"aio_cat"`) with the values as the rules write them (size and grid STRING, stack and weight NUMBER, name
   STRING, icon `[scale, across, down]`, picture STRING); only keys
   that could be read, and only classes that have one. What was left out is added to the `messages` array when one is given, else
   to the RPT. A text over `CONFIG_TEXT_MAX` 65536 characters is not read.
@@ -296,16 +296,16 @@ Two public functions turn the keys into a snippet and back, for mod authors and 
 `class=My_Vest > like=V_PlateCarrier1_rgr grid=6x4`: when the rule matches, every field of `LIKE_FIELDS` (footprint, stack, grid,
 weight - never the name or the picture) that is still open and not set by the rule itself takes what `fnc_resolve` makes of the source class
 right then, through the same compiled rules (its own rules, mod config and presets). A later change to the source follows. The
-source's grid becomes the compartments it really has (`einv_storage_fnc_blocksFor` with its class, kind and load, as `["blocks",
+source's grid becomes the compartments it really has (`aio_storage_fnc_blocksFor` with its class, kind and load, as `["blocks",
 ...]` - "auto" by the target's load would be another grid); a source that is no container gives "auto". Its weight is taken only
-when a rule or its own `einv_weight` sets one on it, else -1 and the target keeps its own config weight. A higher rule still wins a field, and the like
+when a rule or its own `aio_weight` sets one on it, else -1 and the target keeps its own config weight. A higher rule still wins a field, and the like
 rule closes the fields it fills. A circle, more than `LIKE_DEPTH` 8 like= one after the other, or a class no config knows gives
-the built-in answer for those fields (src `builtin`) and one RPT line per problem (`einv_items_likeWarned`). `fnc_explain` counts
+the built-in answer for those fields (src `builtin`) and one RPT line per problem (`aio_items_likeWarned`). `fnc_explain` counts
 `LIKE_FIELDS` as set by such a rule.
 
 ### Presets
 
-A preset is a class of `CfgEinvRulesets` with `name`, `description`, `revision` (shown only; `base=` always means the preset as
+A preset is a class of `CfgAioRulesets` with `name`, `description`, `revision` (shown only; `base=` always means the preset as
 installed), `base`, `cell` (-1 to leave it to its base or the slider), `rules[]` (statements of the same language, one per
 element, no commas) and `class Groups` (labels and examples of the groups). The group ids are what own rules refer to and a preset's id
 is what a text names in `base=`: never rename one. Other mods may add presets as classes there; the wizard offers no choice among them.
@@ -316,21 +316,21 @@ is what a text names in `base=`: never rename one. Other mods may add presets as
   **nothing stacks** but the groups `@stack_20`, `@stack_10`, `@stack_5` and `@stack_2`: consumables of ACE, ACM and the vanilla first aid kit,
   by class (`class=ACE_fieldDressing|ACM_IV_16g+|...`). The rules are keyed by class, so a mod that is not loaded matches nothing; a name with a
   plus is that class and everything built on it, used where all of them are of the same sort. A rule of the text for a class wins over them like
-  over any preset rule. The medical list of issue #9 (ACE, ACM, ACME and Enhanced First Aid Kits: one `class=` rule per size and stack, vials by `class~`) sits after the `@stack_*` groups and wins over them. Its stacks are the ones for play of issue #21 (revision 5), for worn containers: vials, dressings and wraps (field, elastic, packing, quikclot, pressure bandage, elastic wrap, combat gauze, emergency trauma dressing), cannulas, IO devices, chest seals, airways, flushes and syringes five to a tile, injectors, sprays, tourniquets and kits four, lozenges, IV lines and Y tubing ten; blood bags, IV bags and devices stay at one. A crate, a vehicle or a pile multiplies them (`fnc_stackFor`, section 3). It sets **no grid**: a uniform, vest or backpack gets the built-in answer (`grid=120%`, `einv_storage_fnc_blocksFor`),
+  over any preset rule. The medical list of issue #9 (ACE, ACM, ACME and Enhanced First Aid Kits: one `class=` rule per size and stack, vials by `class~`) sits after the `@stack_*` groups and wins over them. Its stacks are the ones for play of issue #21 (revision 5), for worn containers: vials, dressings and wraps (field, elastic, packing, quikclot, pressure bandage, elastic wrap, combat gauze, emergency trauma dressing), cannulas, IO devices, chest seals, airways, flushes and syringes five to a tile, injectors, sprays, tourniquets and kits four, lozenges, IV lines and Y tubing ten; blood bags, IV bags and devices stay at one. A crate, a vehicle or a pile multiplies them (`fnc_stackFor`, section 3). It sets **no grid**: a uniform, vest or backpack gets the built-in answer (`grid=120%`, `aio_storage_fnc_blocksFor`),
   a crate or vehicle `auto`, so the text's rules with `all` - the General step's kind sizes - decide for every container no class rule, table or mod
   answers. The groups are a partition (an item is in at most one, `medical` and the `stack_*` groups excepted, which are only handles), so a rule for
   one never reaches into another. Kits of Enhanced First Aid Kits are items to `kind=` as well, so the item groups size them; none of
   these gives a kit a grid.
 - **`realism`, `weight` and `tarkov` are read as `default`.** `PRESET_ALIASES` maps them in `fnc_parseRules` (one RPT line,
-  `einv_items_aliasWarned`) and in `fnc_compileRules`' chain (another mod's preset built on one of them), unless a preset of that
+  `aio_items_aliasWarned`) and in `fnc_compileRules`' chain (another mod's preset built on one of them), unless a preset of that
   name exists. A text that says `base=weight` therefore loads, without an error, with the default's sizes - the old presets' own rules are gone.
 
 ### What `fnc_getInfo` returns
 
-`[class, compiled (opt), cache (opt)] call einv_items_fnc_getInfo` -> HashMap (Public). Without `compiled`: the rules in effect,
-cached per lowercase class in `einv_items_info`. With `compiled` (a wizard's draft) and a `cache`: kept there; with `compiled` and
+`[class, compiled (opt), cache (opt)] call aio_items_fnc_getInfo` -> HashMap (Public). Without `compiled`: the rules in effect,
+cached per lowercase class in `aio_items_info`. With `compiled` (a wizard's draft) and a `cache`: kept there; with `compiled` and
 no cache: not kept. Callers must not modify it. The config part comes from `fnc_getFacts` (cached for good in uiNamespace
-`einv_items_facts`), the rest from `fnc_resolve`.
+`aio_items_facts`), the rest from `fnc_resolve`.
 
 | Key | Type | |
 |---|---|---|
@@ -350,22 +350,22 @@ no cache: not kept. Callers must not modify it. The config part comes from `fnc_
 | `src` | HashMap | field -> where it came from |
 | `configMass`, `configDisplayName`, `configShort` | | config's values, whatever the rules say |
 | `weightOverride`, `nameOverride` | NUMBER, STRING | the rules' weight in kg (-1 for none), the rules' name ("" for none) |
-| `picture`, `pictureOverride`, `configPicture` | STRING | the texture the item shows: the rules' (`picture=`, `einv_picture`) when `fileExists` says it is there - `pictureOverride` is the rules' path whether it is or not, "" for none -, else config's `picture`, which `configPicture` keeps whatever the rules say. Every drawing of the item reads `picture` |
-| `use` | ARRAY | the containers it may be used from where a setting closes them: any of `"uniform"`, `"vest"`, `"backpack"` in that order, `[]` for none (`use=`, `einv_use`, `fnc_parseUse`). Read by `einv_storage_fnc_useState` |
-| `cats` | ARRAY | the categories the rules or the item's config put it in (`cats=`, `einv_cat`, `fnc_parseGroups`) that exist - one the setup does not define is dropped here -, in the order of `fnc_orderGroups`; `[]` when none does |
-| `groups` | ARRAY | the categories it is in: `cats` when it has some, else the built-in one (`fnc_defaultGroup`, worked out from the item's facts and kept there as `"group"`) - never empty. Read by the strip of a loot box, by `einv_storage_fnc_blockMode` for the compartments that accept only some categories, and by the wizard's Category row |
-| `icon` | ARRAY | how the picture is drawn in the item's tile: `[scale, across, down]`, the scale a factor (0.25 to 4), the offsets a share of the tile's width and height (-1 to 1); `[1, 0, 0]` (`ICON_PLAIN`) for the plain picture. From `icon=` / `einv_icon` (`fnc_parseIcon`); every picture of the window draws by it (section 4, "Grids and tiles") |
-| `lc`, `root`, `rounds`, `lineage`, `addon`, `mod` | | from `fnc_getFacts`: lowercase class, config root, a CfgMagazines `count`, lowercase classes from itself up, the CfgPatches class, what its own config says (`einv_size` and the other keys, "Config keys of an item") |
+| `picture`, `pictureOverride`, `configPicture` | STRING | the texture the item shows: the rules' (`picture=`, `aio_picture`) when `fileExists` says it is there - `pictureOverride` is the rules' path whether it is or not, "" for none -, else config's `picture`, which `configPicture` keeps whatever the rules say. Every drawing of the item reads `picture` |
+| `use` | ARRAY | the containers it may be used from where a setting closes them: any of `"uniform"`, `"vest"`, `"backpack"` in that order, `[]` for none (`use=`, `aio_use`, `fnc_parseUse`). Read by `aio_storage_fnc_useState` |
+| `cats` | ARRAY | the categories the rules or the item's config put it in (`cats=`, `aio_cat`, `fnc_parseGroups`) that exist - one the setup does not define is dropped here -, in the order of `fnc_orderGroups`; `[]` when none does |
+| `groups` | ARRAY | the categories it is in: `cats` when it has some, else the built-in one (`fnc_defaultGroup`, worked out from the item's facts and kept there as `"group"`) - never empty. Read by the strip of a loot box, by `aio_storage_fnc_blockMode` for the compartments that accept only some categories, and by the wizard's Category row |
+| `icon` | ARRAY | how the picture is drawn in the item's tile: `[scale, across, down]`, the scale a factor (0.25 to 4), the offsets a share of the tile's width and height (-1 to 1); `[1, 0, 0]` (`ICON_PLAIN`) for the plain picture. From `icon=` / `aio_icon` (`fnc_parseIcon`); every picture of the window draws by it (section 4, "Grids and tiles") |
+| `lc`, `root`, `rounds`, `lineage`, `addon`, `mod` | | from `fnc_getFacts`: lowercase class, config root, a CfgMagazines `count`, lowercase classes from itself up, the CfgPatches class, what its own config says (`aio_size` and the other keys, "Config keys of an item") |
 
 `fnc_getFacts` takes kinds from config by weapon `type` and ItemInfo type (its header lists them); any other CfgWeapons class is
 `item` - CBA's misc item class counts there although it inherits the bipod type; CfgMagazines with count 1 and mass up to 15 are
 `grenade`; CfgVehicles with `isBackpack` 1 are `backpack`, others of `AllVehicles` `vehicle`, the rest `crate`. A class no config
 knows is `unknown`, under its own name. An `item` that Enhanced First Aid Kits registers as a kit is **`kit`** (a pouch of Enhanced
-Utility Pouches too): `fnc_kitTypes` reads that mod's registry `EFAK_Kits` from config once (uiNamespace `einv_items_kitTypes`,
+Utility Pouches too): `fnc_kitTypes` reads that mod's registry `EFAK_Kits` from config once (uiNamespace `aio_items_kitTypes`,
 lowercase prototype -> `[prototype, instances, capacity]`), and `fnc_kitOf [class]` (public) -> `[prototype, n, instances, capacity]`
 or `[]` names the type's own class (n 0) and the instance classes that mod makes of it, `<prototype>_<n>` for n 1 to `instances` -
 the same list `efak_core_fnc_isKit` reads, without that mod's functions, so Eden and the menus know it too. A kit's `maxLoad` is the
-capacity the registry gives its type (a mission's CBA setting for it is that mod's; `einv_compat_efak_fnc_capacity` reads it). To
+capacity the registry gives its type (a mission's CBA setting for it is that mod's; `aio_compat_efak_fnc_capacity` reads it). To
 `kind=` a kit is an `item` as well (`KINDS_AS_ITEM`): `fnc_matches` lets `kind=item` reach it and `fnc_compileRules` puts the item
 rules into its `byKind` bucket, so servers' `kind=item` rules and the presets' item groups size and stack it as before, while
 `kind=kit` reaches only kits. Kits are containers (`KINDS_CONTAINER`): their grid comes from the rules and config keys like any other, but only counts where a rule or
@@ -385,19 +385,19 @@ a config key sets it (section 7, compat_efak).
 | `fnc_currentRules []` | Yes | the rules in effect, compiled again first when `fnc_rulesInputs` changed |
 | `fnc_explain [class, compiled]`, `fnc_encodeName [text, path = false]`, `fnc_decodeName [text, path = false]`, `fnc_getProtection [class]` | Yes | every layer's say; `name=` encoding (with `path`: the `picture=` form, `_` stays and `\` is `/`); the zones a vest, uniform or helmet covers (with `fnc_getArmor`: ACE's own armor number) |
 | `fnc_parseGrid [text]`, `fnc_formatGrid [spec]`, `fnc_parseMask`, `fnc_formatMask`, `fnc_turnMask` | No | grid specs and masks; `fnc_parseMask` is the one reader of masks, for items and compartments alike |
-| `fnc_parseIcon [text]`, `fnc_formatIcon [icon, separator = ":"]` | No | the value of `icon=` / `einv_icon`: `"1.4@0.1:-0.05"` -> `[[1.4, 0.1, -0.05], notes]` (`[]` when unreadable; limits cut with a note) and back, the colon for a text, `","` for config |
-| `fnc_parsePicture [text, encoded = true]` | No | the value of `picture=` / `einv_picture` -> `[path, notes]` (`""` when unreadable or too long) |
-| `fnc_parseUse [text]`, `fnc_formatUse [containers, separator = "+"]` | No | the value of `use=` / `einv_use` -> `[containers, notes, readable]` (the containers in the order uniform, vest, backpack, `[]` for none), and back (`"none"` for `[]`) |
+| `fnc_parseIcon [text]`, `fnc_formatIcon [icon, separator = ":"]` | No | the value of `icon=` / `aio_icon`: `"1.4@0.1:-0.05"` -> `[[1.4, 0.1, -0.05], notes]` (`[]` when unreadable; limits cut with a note) and back, the colon for a text, `","` for config |
+| `fnc_parsePicture [text, encoded = true]` | No | the value of `picture=` / `aio_picture` -> `[path, notes]` (`""` when unreadable or too long) |
+| `fnc_parseUse [text]`, `fnc_formatUse [containers, separator = "+"]` | No | the value of `use=` / `aio_use` -> `[containers, notes, readable]` (the containers in the order uniform, vest, backpack, `[]` for none), and back (`"none"` for `[]`) |
 | `fnc_builtinGroup [word]`, `fnc_orderGroups [list]` | No | which of the eight a word means (itself, a `GROUP_ALIASES` word, a plural; `""` for none); a list of categories in the stored order (the eight, then the rest alphabetically, no doubles) |
-| `fnc_categories [compiled]`, `fnc_categoryInfo [id, compiled]` | Yes | the ids of every category there is, the eight then the setup's own in definition order (the rules in effect, or a compiled draft); a category's `name` (the wizard's chips), `label` (the strip's tooltip), `only` ("Only ... here"), `picture` (the setup's, only where the game has the file), `nameSet`, `pictureSet`, `builtin`, `known`: the name the setup gave it, else the one this mod ships (`STR_einv_setup_Cat_<id>`, `STR_einv_gui_Group_<Id>`, `STR_einv_gui_Only_<id>`), for an own category with none its id as words |
-| `fnc_cleanGrid [spec, ids]` | No | a grid spec with the categories its compartments accept cut down to the ids given (default: those that exist); read by `fnc_getInfo` and by `einv_storage_fnc_getBlocks` for an object's own `einv_grid` |
-| `fnc_parseGroups [text, key]`, `fnc_formatGroups [groups, separator = "+"]`, `fnc_defaultGroup [facts]` | No | the value of `cats=` / `einv_cat` -> `[groups, notes, readable]` and back; the built-in category of an item, the mapping that used to live in the window (medical, weapon, grenade - the kind grenade and a mine or charge -, ammo, gear, food, tool, misc) |
+| `fnc_categories [compiled]`, `fnc_categoryInfo [id, compiled]` | Yes | the ids of every category there is, the eight then the setup's own in definition order (the rules in effect, or a compiled draft); a category's `name` (the wizard's chips), `label` (the strip's tooltip), `only` ("Only ... here"), `picture` (the setup's, only where the game has the file), `nameSet`, `pictureSet`, `builtin`, `known`: the name the setup gave it, else the one this mod ships (`STR_aio_setup_Cat_<id>`, `STR_aio_gui_Group_<Id>`, `STR_aio_gui_Only_<id>`), for an own category with none its id as words |
+| `fnc_cleanGrid [spec, ids]` | No | a grid spec with the categories its compartments accept cut down to the ids given (default: those that exist); read by `fnc_getInfo` and by `aio_storage_fnc_getBlocks` for an object's own `aio_grid` |
+| `fnc_parseGroups [text, key]`, `fnc_formatGroups [groups, separator = "+"]`, `fnc_defaultGroup [facts]` | No | the value of `cats=` / `aio_cat` -> `[groups, notes, readable]` and back; the built-in category of an item, the mapping that used to live in the window (medical, weapon, grenade - the kind grenade and a mine or charge -, ammo, gear, food, tool, misc) |
 | `fnc_compileCond`, `fnc_matches`, `fnc_parseTable [text, type, warnings]`, `fnc_sanitizeText` | No | conditions; the older tables; the EDITBOXes' sanitizer |
 | `fnc_resolve [facts, compiled]` | No | -> `footprint`, `stack`, `grid`, `weight` (kg, -1), `name` ("" none), `src` |
 | `fnc_setBy [info, field]` | Yes | who set a field, from its `src` tag: `"rule"` (`own:`, `legacy:` but the stack slider, `all:`), `"config"` (`mod:`), `"preset"` (`preset:`, the stack slider), `"default"` (`builtin`, `forced`) |
 | `fnc_kitTypes []`, `fnc_kitOf [class]` | No, Yes | Enhanced First Aid Kits' kit types from its config registry; which kit type a class is (above) |
 | `fnc_rulesInputs []` | No | `[rules text, size table, stack table, container table, stackSmall, massPerCell]` |
-| `fnc_loadRules [text]` | No | compiles when the inputs changed; a text stands in for the setting (testing, `einv_items_rulesOverride`), `""` ends that |
+| `fnc_loadRules [text]` | No | compiles when the inputs changed; a text stands in for the setting (testing, `aio_items_rulesOverride`), `""` ends that |
 | `fnc_checkServerRules [published]` | No | warns once when the server reads the same settings differently |
 
 The compiled form is plain data, no code (it is kept in missionNamespace): `text`, `ast`, `base`, `chain`, `cell`, `warnings`, the
@@ -407,35 +407,35 @@ and `hash`.
 
 ### Caching, the event and the server's hash
 
-- missionNamespace: `einv_items_ruleset` (compiled; nil until the first compile), `einv_items_rulesInputs`,
-  `einv_items_rulesInputsKey`, `einv_items_rulesRevision` (from 0, +1 per compile), `einv_items_info` (lowercase class -> getInfo,
-  replaced by an empty map on every compile, which is all a changing `like=` source needs), `einv_items_rulesOverride`,
-  `einv_items_likeWarned`, `einv_items_aliasWarned`.
-- `einv_items_rulesHash` - public, set by the server (not in Eden): `[inputsKey, hash, version]`. The server also sends it as the
-  CBA event `einv_items_rulesPublished [published]`; a client joining later finds the variable set. A client compares only a hash
+- missionNamespace: `aio_items_ruleset` (compiled; nil until the first compile), `aio_items_rulesInputs`,
+  `aio_items_rulesInputsKey`, `aio_items_rulesRevision` (from 0, +1 per compile), `aio_items_info` (lowercase class -> getInfo,
+  replaced by an empty map on every compile, which is all a changing `like=` source needs), `aio_items_rulesOverride`,
+  `aio_items_likeWarned`, `aio_items_aliasWarned`.
+- `aio_items_rulesHash` - public, set by the server (not in Eden): `[inputsKey, hash, version]`. The server also sends it as the
+  CBA event `aio_items_rulesPublished [published]`; a client joining later finds the variable set. A client compares only a hash
   it compiled from the same settings and says once, in the RPT and in chat, when it reads them differently (another version of the
   mod or of a preset).
-- uiNamespace (not in save games): `einv_items_facts`, `einv_items_presetCache`.
-- The local CBA event **`einv_items_rulesChanged [revision]`** is raised by `fnc_loadRules` on every machine after a compile.
+- uiNamespace (not in save games): `aio_items_facts`, `aio_items_presetCache`.
+- The local CBA event **`aio_items_rulesChanged [revision]`** is raised by `fnc_loadRules` on every machine after a compile.
   Listeners: gui (an open window is built again after a held tile is let go), setup (an open wizard takes the new setup in),
   weight (the player's virtual load is worked out again).
-- Eden runs no setting scripts, so `fnc_getInfo` calls `fnc_currentRules` while `einv_items_ruleset` is nil or
+- Eden runs no setting scripts, so `fnc_getInfo` calls `fnc_currentRules` while `aio_items_ruleset` is nil or
   `cba_settings_ready` is not set, and that compiles the current text whenever `fnc_rulesInputs` differs from what it compiled.
 
 ### Settings of the engine
 
-All global, each runs `fnc_loadRules` when it changes: `einv_items_rules` (EDITBOX, default `einv1 base=default`),
-`einv_items_massPerCell` (the fallback, default 5), `einv_items_stackSmall` (default 10) and the older tables
-`einv_items_sizeTable` (`class:WxH, ...`), `einv_items_stackTable` (`class:N, ...`), `einv_storage_containerTable` (`class:N` or
+All global, each runs `fnc_loadRules` when it changes: `aio_items_rules` (EDITBOX, default `aio1 base=default`),
+`aio_items_massPerCell` (the fallback, default 5), `aio_items_stackSmall` (default 10) and the older tables
+`aio_items_sizeTable` (`class:WxH, ...`), `aio_items_stackTable` (`class:N, ...`), `aio_storage_containerTable` (`class:N` or
 `class:WxH+WxH`), which still work and win over the text. Section 8 lists them all.
 
-### What the wizard writes (`einv_setup_fnc_upsertRule`, `fnc_upsertRules`)
+### What the wizard writes (`aio_setup_fnc_upsertRule`, `fnc_upsertRules`)
 
 `fnc_upsertRule [class, set, remove, tree = false]` writes what the Items or Containers step sets for one class into the draft, as that
 class's own rule `class=X > ...`; `fnc_upsertRules [[class, set, remove, tree], ...]` does the same for several classes in one undo step
 (the editors' import). `set` is a HashMap of `footprint` (`"2x3"` or a mask), `stack`, `grid` (as `fnc_formatGrid` writes it), `like` (a
 class), `weight` (kg), `name`, `icon` (`[scale, across, down]`), `picture` (a path) and `use` (an array of container words); `remove` is an array of fields to take away. The rules written for exactly that class
-(`einv_setup_fnc_ownClassRules`) become one; whatever else they set stays. The rule goes **last**: later rules win, so a broader rule
+(`aio_setup_fnc_ownClassRules`) become one; whatever else they set stays. The rule goes **last**: later rules win, so a broader rule
 further down (a group, a kind) would otherwise still decide what the class gets and the step would show something other than what
 was just applied. A rule left with nothing to set goes altogether. It returns false for a class name the language cannot hold, and ends
 in `fnc_commit` (an undo step, the step drawn again).
@@ -452,7 +452,7 @@ alone. A tree that holds nothing but X is written as X alone.
 (`fnc_allRule [rules, kinds]`: `all kind=uniform` for one of `GENERAL_KINDS`, `all` alone, in any order of kinds): found anywhere in the text and
 edited in place (a new one goes last), other values kept, a rule left with nothing goes; other hand-written `all` rules are not touched. One
 `fnc_commit`. `fnc_kindRule [kind]` reads it back as `["auto"]`, `["fixed", across, down]` or `["other"]` (a grid the row cannot show as a size).
-`tools/check_default_ruleset.sqf` round-trips `einv1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4`.
+`tools/check_default_ruleset.sqf` round-trips `aio1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4`.
 
 ### `tools/check_default_ruleset.sqf`
 
@@ -496,7 +496,7 @@ without a count (an older save, a loadout) stand for "as many as the cargo gives
 stacks first, then the remainder. A tile of the hidden holder (Strict mode) and anything that does not stack have no counts.
 
 **How big a tile can be** (`fnc_stackFor [holder, class, own stack (optional)]`). The one place a stack size is read for a place where
-tiles lie: `getInfo "stack"` in a uniform, vest, backpack or kit, and that times the server setting `einv_storage_stackMultiplier` (1 to 10,
+tiles lie: `getInfo "stack"` in a uniform, vest, backpack or kit, and that times the server setting `aio_storage_stackMultiplier` (1 to 10,
 default 5, 1 is off; Looting and searching on the wizard's General page), rounded up, in a crate, a vehicle or a pile on the ground - a
 holder that is no `ContainerSupply` (a uniform's or vest's container), no `Bag_Base` (a backpack) and no `CAManBase`, worked out once per
 type in `GVAR(stackRoomy)`. A class that does not stack (stack 1: rifles, magazines, kits, bulky things) stays 1 everywhere, so the
@@ -510,8 +510,8 @@ tiles. A record whose count is above the stack - the setting went down, or place
 every step places at least one item, so it ends, and `fnc_getLayout` writes the cut places back once.
 
 `fnc_getLayout` adds `block`, `col`, `row`, `w`, `h` (as it lies), `holes`, `rotated` and `overflow`. Every nested container gets
-two local marks as it is read: `einv_storage_itemClass` (its compartments go by the item, since its container object is only a
-Supply class) and `einv_storage_parent` (what it lies in, for `fnc_rootOf`). `fnc_entryToArray` / `fnc_entryFromArray` carry an
+two local marks as it is read: `aio_storage_itemClass` (its compartments go by the item, since its container object is only a
+Supply class) and `aio_storage_parent` (what it lies in, for `fnc_rootOf`). `fnc_entryToArray` / `fnc_entryFromArray` carry an
 entry over the network, never with a tile's controls in it.
 
 **Keys** (`fnc_entryKey`): `class|w<hash>` a weapon by what is on it, `class|m<rounds>` a magazine, `class|c<id>` a uniform, vest
@@ -526,7 +526,7 @@ lowercase class.
 `fnc_blocksFor [class, kind, maxLoad, spec, cell]` -> `[[cols, rows, holes, pos], ...]`. It works on the class alone, so the
 wizard can show a container nobody carries. `spec` is a parsed grid (section 2). `holes` are the indices `row * cols + col` of
 cells a shaped compartment does not have, `[]` for a full rectangle (every pattern gives that); `pos` `[x, y]` is the
-compartment's top left cell on its canvas, `[]` for one the window flows (patterns, `WxH`, shapes, `einv_grids[]`, the open grid).
+compartment's top left cell on its canvas, `[]` for one the window flows (patterns, `WxH`, shapes, `aio_grids[]`, the open grid).
 Readers with `params ["_cols", "_rows"]` or `["_cols", "_rows", "_holes"]` stay valid. The order is the pieces' order, a canvas's
 own in reading order of each one's first cell; that index is the place record's `block`. Every compartment keeps cells of its own,
 numbered from its own top left corner, wherever it is drawn. No cells at all gives `[[STORAGE_COLS, 0, [], []]]`.
@@ -536,26 +536,26 @@ look the same: uniform - `block`, one compartment `UNIFORM_COLS` 6 wide and as m
 `UNIFORM_ROWS_MAX` 5 (6x2 for a plain uniform); vest - `pouches`, a tall 1x2 and a square 2x2 after each other as a real magazine rig has them, as many as
 the load asks for, at most `VEST_POUCHES_MAX` 20; backpack and kit - `single`, one compartment as near square as `STORAGE_COLS` allows; crates and
 vehicles - `wide`, one compartment `STORAGE_COLS` wide. By name a rule or config key can also ask for `pockets` (1x2, at most six), `pockets_mixed`, `rig`
-(1x2), `mixed`, `plate` and `long` (at most sixteen), `pouches` and `block` (`grid=rig:16`). A given number (`24`, `einv_grid = "24"`, `einv_slots`) is met exactly; one from the load is a rough measure. The load is
+(1x2), `mixed`, `plate` and `long` (at most sixteen), `pouches` and `block` (`grid=rig:16`). A given number (`24`, `aio_grid = "24"`, `aio_slots`) is met exactly; one from the load is a rough measure. The load is
 `fnc_getMaxLoad` (config `maximumLoad`, -1 for a weapon holder or null): since weight limits nothing, it only sizes the "auto",
 "percent" and "pattern" grids.
 
 `fnc_getBlocks [container]` finds what to ask for a real one. First answer wins:
 
-1. The object's **`einv_grid`**: a STRING grid as in `grid=` (`"6x4+2x3"`, `"rig:16"`, `"xxx/x-x"`, a canvas, `"auto"`), set by a
+1. The object's **`aio_grid`**: a STRING grid as in `grid=` (`"6x4+2x3"`, `"rig:16"`, `"xxx/x-x"`, a canvas, `"auto"`), set by a
    mission with the public flag on a crate, a vehicle, or a unit's uniform, vest or backpack container: `_crate setVariable
-   ["einv_grid", "6x4+2x3", true]`. One that cannot be read is named in the RPT once (cache `einv_storage_objectGrids`) and the
+   ["aio_grid", "6x4+2x3", true]`. One that cannot be read is named in the RPT once (cache `aio_storage_objectGrids`) and the
    rules count instead. Scripts of this mod may give the compartments as they are, `[[cols, rows], ...]`: taken exactly, never cut
    to `MAX_ROWS` (the Arsenal's staging space).
-2. The rules for its class (`getInfo "grid"`): the older container table, the text, the class's own config `einv_grid = "..."` (a
+2. The rules for its class (`getInfo "grid"`): the older container table, the text, the class's own config `aio_grid = "..."` (a
    mod's word for every container of that class, a subclass inherits it; section 2, "Config keys of an item") or else the older
-   `einv_grids[]` / `einv_slots`, the preset, else "auto". For a unit's uniform, vest or backpack the class is the item's; for a
+   `aio_grids[]` / `aio_slots`, the preset, else "auto". For a unit's uniform, vest or backpack the class is the item's; for a
    crate or vehicle its own, `typeOf`.
 
 The ground has no compartments and no limit: `[]`; the window draws it as one open grid, `STORAGE_COLS` wide, always a row more
 than it needs and at least three rows. A key (a holder that is no object, `"kit:..."`) has the compartments its holder type's
-`"blocks"` gives (`einv_storage_holderTypes`), `[]` - an open grid that grows - when it gives none: a kit has those of a grid a
-rule or its config gives it (`einv_compat_efak_fnc_kitBlocks`), else none. `fnc_getLayout`, `fnc_hasSpace` and `fnc_findEntry`
+`"blocks"` gives (`aio_storage_holderTypes`), `[]` - an open grid that grows - when it gives none: a kit has those of a grid a
+rule or its config gives it (`aio_compat_efak_fnc_kitBlocks`), else none. `fnc_getLayout`, `fnc_hasSpace` and `fnc_findEntry`
 (`"open"`) ask `fnc_getBlocks` for keys as for objects. A uniform or vest container's class derives from a weapon holder, so `fnc_isGroundHolder`
 excludes `ContainerSupply`: only a pile is a ground. A backpack with a load of 0 takes an own grid like any other.
 
@@ -597,7 +597,7 @@ fits nowhere stays overflow - except for the player's own unit, whose overflow t
 writes the count of every stackable tile it placed; `fnc_getLayout` reports no drift for a record that only lacks the count the
 picture gives it, so older places are not all written again at once. A record without it (saved places, loadouts, snapshots, payloads of older shape; six
 elements) reads as turned when its `w` is not the upright one, and `fnc_getLayout` counts no drift for that alone. The holes of a
-shaped item always come from its class at use time (`einv_items_fnc_footprintAs [class, rot]`), so only `rot` is stored and
+shaped item always come from its class at use time (`aio_items_fnc_footprintAs [class, rot]`), so only `rot` is stored and
 synced.
 
 **Rotation convention.** Turned is a quarter clockwise (the picture is not turned, see "Grids and tiles"): the cell `(c, r)` of an upright
@@ -645,7 +645,7 @@ never lands in a compartment that refuses it, on any machine:
   a cell without a size is the item's own (`opPlaceMany`). The slot's box is a plain rectangle (or a shape with holes), so every
   existing cell test, the plan's and the window's, treats it like a tile of that size.
 
-The categories a compartment accepts are those that exist: `fnc_getInfo` cuts the list of `"grid"` down to the setup's categories (`fnc_cleanGrid`) and `fnc_getBlocks` does the same for an object's own `einv_grid`, so a category taken out of the text, or named in a text written for another setup, never leaves a compartment that accepts nothing for good - one with no category left takes anything again. The wizard's *Delete* on a category of its own does the same to the draft's text (section 6).
+The categories a compartment accepts are those that exist: `fnc_getInfo` cuts the list of `"grid"` down to the setup's categories (`fnc_cleanGrid`) and `fnc_getBlocks` does the same for an object's own `aio_grid`, so a category taken out of the text, or named in a text written for another setup, never leaves a compartment that accepts nothing for good - one with no category left takes anything again. The wizard's *Delete* on a category of its own does the same to the draft's text (section 6).
 
 A kit's grid (`compat_efak`) honours both wherever it is laid out (room checks, first fit; `fnc_kitBlocks` carries the two
 elements on). A cell named in a kit (`fnc_opKitPlace`, `fnc_putIntoKit`, both through `fnc_cellFree`) is checked as the slot's box
@@ -681,7 +681,7 @@ putting in with the cargo commands.
 
 - `fnc_snapshot [container, itemClass]` -> everything a container holds in a form `fnc_restore` can put back: `[items, magazines,
   weapons, backpacks, nested [[class, object, snapshot], ...], [place records, tag], carried variables]`; `tag` is `[id, item
-  class, parent]` or `[]`; the carried variables `[[name, value], ...]` are those in `einv_storage_carryVariables` (TFAR keeps a
+  class, parent]` or `[]`; the carried variables `[[name, value], ...]` are those in `aio_storage_carryVariables` (TFAR keeps a
   long-range radio's settings on the backpack object, and every move makes a new object). A moved backpack keeps its inside
   arrangement and id.
 - `fnc_removeEntry` / `fnc_removeSameClass` take an entry out and hand a **payload** on: `["weapon", weapon array]`, `["magazine",
@@ -696,7 +696,7 @@ putting in with the cargo commands.
   / `"Failed"` make what did not exist (the Arsenal's adds), a free spot when no cell is given, magazines full unless `rounds` (-1 =
   full) says otherwise; `fnc_countClass [container, class]` counts by class. `addNew` and everything else adds by the cargo
   commands, never by `canAdd`.
-- **`einv_storage_fnc_addToUnit [unit, class, count, rounds]`** (public) -> how many were put in: the way for a mission or another mod
+- **`aio_storage_fnc_addToUnit [unit, class, count, rounds]`** (public) -> how many were put in: the way for a mission or another mod
   to add new things to a person without the engine's `addItem` / `addMagazine` / `addWeapon` / `addBackpack`, which refuse at a
   container's config `maximumLoad` (the grid does not care about it) and load a magazine straight into an empty compatible weapon -
   a script that took the thing from somewhere first (a ground pile, another unit) loses it when the engine says no. The things go
@@ -706,7 +706,7 @@ putting in with the cargo commands.
   (`fnc_hasRoom`: the stacks of the key first, a backpack never into a backpack; found by halving, a few layouts however many are
   asked for) and `fnc_addNew` adds that many, counted before and after (`fnc_countClass`). What no container has room for is not
   added - never into a weapon, never onto the ground - and is the difference between the count asked for and the number returned.
-  The unit may be on another machine: the call is a CBA targeted event (`einv_storage_addToUnit`, hops counted up to 3 in case the
+  The unit may be on another machine: the call is a CBA targeted event (`aio_storage_addToUnit`, hops counted up to 3 in case the
   unit changes hands in flight), the add runs where the unit is local, and the caller's number is this machine's `fnc_addFit`
   answer, exact while the unit's cargo and places are as this machine reads them. A local add queues the unit (`fnc_queueMigrate`)
   in case the layout the add used differed from the cells. The class must exist in CfgWeapons, CfgMagazines, CfgVehicles or
@@ -728,14 +728,14 @@ putting in with the cargo commands.
   cell `[]` or not free - on the free spot nearest to the source tile (its compartment first, then the others; upright, then turned);
   no spot is `"NoRoom"` with nothing changed; the cargo is not touched, so it is a change of records only (the lock and person guards
   treat it like `place`). Stackable payloads of mixed rounds and anything that cannot be told by record (the hidden holder, an
-  overflow tile) are left to the reconciliation, which does the same sum in tile order. `GVAR(stackSplits)` (`einv_storage_stackSplits`,
+  overflow tile) are left to the reconciliation, which does the same sum in tile order. `GVAR(stackSplits)` (`aio_storage_stackSplits`,
   set true in preInit on every machine) is what the window reads to ask for the new behaviour at all; false switches it off, the
   records already written stay. The Arsenal's `fnc_remove` of part of a stack lowers its tile's count the same way and `fnc_addNew`
   with a cell lays the new items down as a tile of their own.
 - **Nested containers.** A uniform, vest or backpack lying in a container carries a tag `[uid, itemClass, parent]`
   (`fnc_tagNested`, ids `<machine id>-<n>` from `fnc_newUid`) and travels with its places in payloads. Whether variables on nested
   objects reach every machine is not known, so both ways are kept: tag and places stay on the nested object, and in multiplayer a
-  copy goes onto the outermost container, `einv_storage_nested = [[netId, uid, itemClass, places], ...]`. Readers take the
+  copy goes onto the outermost container, `aio_storage_nested = [[netId, uid, itemClass, places], ...]`. Readers take the
   object's own tag first, else the copy's; for places the higher revision of the two (the object's own on a tie, the copy only
   when its uid matches); `fnc_verifyChain` brings objects up to their copies. It needs the same `netId` on every machine.
 
@@ -747,12 +747,12 @@ root of the container it lies in. `what` `"top"` gives the outermost container, 
 [holder, root]` walks the real cargo (`everyContainer`, three levels) before an op, so a holder no longer under its root is
 `"Moved"`. `fnc_isLocalRoot [root]` says whether a phase on that root runs on this machine at once without the hub: single player
 and Eden always; in multiplayer only this machine's own player unit, an object made on this machine only and marked
-**`einv_storage_localOnly`** (the Arsenal's staging space; the hub could not even see it), and, on the server, objNull. Everything
+**`aio_storage_localOnly`** (the Arsenal's staging space; the hub could not even see it), and, on the server, objNull. Everything
 else goes through the hub, also on the hosting player's machine and for a unit remote controlled with Zeus. `fnc_inReach` is the
 reach check (`REACH_SLACK` 2 m beyond the setting).
 
-**Requests** - `einv_storage_fnc_request [phases, callback, args, silent, requester]` (public). A phase is `[root, ops]`, ops on
-one root; an op is `[name, args]` from `einv_storage_ops`: `place` (one tile to another cell of one holder), `placeMany` (several
+**Requests** - `aio_storage_fnc_request [phases, callback, args, silent, requester]` (public). A phase is `[root, ops]`, ops on
+one root; an op is `[name, args]` from `aio_storage_ops`: `place` (one tile to another cell of one holder), `placeMany` (several
 lifted and put down at once, refused as a whole when any cell is not free), `sort` (`[holder, order]`, the order one of `SORT_MODES` -
 name, weight, size, type; laid out where the root is local), `normalize`, `migrate`, `move` (within one root), `take`,
 `put`, `split` (part of a stack to a tile of its own, within one holder), `putGround` (on the server), `takeOff`, `putOn`, `repack`, and compat's `kitTake`, `kitPut`, `kitPlace`, `kitMove`,
@@ -765,10 +765,10 @@ answer is the callback's `[id, summary, revisions, args]` (`fnc_onAnswer`); the 
 start: every op `"NotReady"`.
 
 **Running a phase.** `fnc_execute [ops, context, journalKey, continuation, args]` runs one phase on the root's authority: per op
-the holder check (`fnc_verifyChain`), the requester's reach and every guard in `einv_storage_guards` (`CODE [op, args, requester,
-root] -> "" or reason`: the window's `einv_gui_fnc_personGuard`, the locks' `einv_locks_fnc_guard`, ACRE2's slot guard) - reach
-and guards not for settlement -, then the op. Reads and `fnc_setPlace` go through the phase's buffer (`einv_storage_buffer`);
-every holder touched is laid out and written **once** at the end. Phases are journaled (`einv_storage_journal`, key
+the holder check (`fnc_verifyChain`), the requester's reach and every guard in `aio_storage_guards` (`CODE [op, args, requester,
+root] -> "" or reason`: the window's `aio_gui_fnc_personGuard`, the locks' `aio_locks_fnc_guard`, ACRE2's slot guard) - reach
+and guards not for settlement -, then the op. Reads and `fnc_setPlace` go through the phase's buffer (`aio_storage_buffer`);
+every holder touched is laid out and written **once** at the end. Phases are journaled (`aio_storage_journal`, key
 `"id|phase|attempt"`, kept `JOURNAL_KEEP` 300 s): a phase the hub sends again is answered from it and never runs twice, and a
 script error stops the phase and `fnc_phaseFinalize` answers it from the journal a frame later (`fnc_nextFrame` works in Eden).
 `fnc_tick` runs at most `PHASE_FRAME_OPS` 30 ops a frame, whole phases only.
@@ -777,8 +777,8 @@ script error stops the phase and `fnc_phaseFinalize` answers it from the journal
 each phase to its root's owner, never to two owners of one root at once (`LOCALITY_SETTLE` 1 s after a change of owner), re-sends
 an unanswered phase every `PHASE_RESEND` 10 s, holds payloads in escrow while they travel, treats a root whose owner left for
 `ROUTE_TIMEOUT` 15 s as `"Moved"`, and re-routes a leaving player's phases (`PlayerDisconnected`, `allUsers` as a safety net). In
-multiplayer the requester must be the unit of the machine that sent it. **Handshake:** a client greets (`einv_storage_hello
-[machine id, version]`, every 5 s until answered, `fnc_greetServer`) and the server answers `einv_storage_welcome [version]`;
+multiplayer the requester must be the unit of the machine that sent it. **Handshake:** a client greets (`aio_storage_hello
+[machine id, version]`, every 5 s until answered, `fnc_greetServer`) and the server answers `aio_storage_welcome [version]`;
 `fnc_hubReady` is true in single player, on the server and on a client after a welcome with the same version. Before that the
 window refuses moves that need the hub ("Waiting for the server"): a server without these events would drop what the client
 already took out.
@@ -807,16 +807,16 @@ holds no item, weapon, magazine or backpack is deleted (a frame, so the answer a
 
 ### Places sync (`fnc_writePlaces`, `fnc_flushPlaces`, drift)
 
-Places are `einv_storage_places = [revision, records]`, public, on the container (kits: the mission variable
-`einv_storage_places_kit_<class>`), written only by the authority (`fnc_writePlaces [holder, records, force]`: revision = the
+Places are `aio_storage_places = [revision, records]`, public, on the container (kits: the mission variable
+`aio_storage_places_kit_<class>`), written only by the authority (`fnc_writePlaces [holder, records, force]`: revision = the
 higher of the one read and the last written, plus one; records canonical; not written when unchanged unless forced; -1 and an RPT
 error on a machine that is not the authority). The player's own containers are set at once and **broadcast at most every
-`OWN_WRITE_DELAY` 2 s** (`einv_storage_dirty`, `fnc_flushPlaces`, also when the window closes and when the player dies, so a
+`OWN_WRITE_DELAY` 2 s** (`aio_storage_dirty`, `fnc_flushPlaces`, also when the window closes and when the player dies, so a
 body's places are public for its looters); any other write is public at once. In multiplayer the authority looks again after
 `HEAL_DELAYS` 1.5 s and 6 s whether an older write of a previous authority overtook its own, and writes its own again.
 `fnc_readPlaces [holder, asStored]` (public) returns `[revision, records]`, the fresher of the object's own and the nested copy.
 **Drift:** a holder whose places disagree with its cargo (something came or went without a place) is noted by the window
-(`einv_gui_drift`) and reported after `DRIFT_WAIT` 1 s as a silent op `normalize [holder, revision, hashValue records]`; the
+(`aio_gui_drift`) and reported after `DRIFT_WAIT` 1 s as a silent op `normalize [holder, revision, hashValue records]`; the
 authority lays the holder out and writes the picture (`fnc_normalize`, `fnc_opNormalize`; a stale viewer copy at most every
 `FORCE_REPEAT` 30 s) - exactly what every viewer already shows, so nothing visibly moves. `fnc_dumpPlaces [holder]` (public)
 writes revision, records, nested tags and this machine's drawn view to the RPT and returns the text.
@@ -842,8 +842,8 @@ Never copied, never lost.
 - **Triggers** only note a unit local here (`fnc_queueMigrate`, `MIGRATE_DELAY` 0.3 s, a waiting unit keeps its earlier time);
   `fnc_tickMigrate`, a `MIGRATE_TICK` per-frame handler, looks at up to `MIGRATE_PER_TICK` of them. Nothing raises an event for
   `addItem`, so: CBA's polled `loadout` and `unit` player events (the player), `Take` / `Put` / `InventoryClosed` on `CAManBase` (any
-  unit local here), every loadout set (`fnc_onLoadoutSet`; `einv_storage_migrateUnit` tells the owner when it was set elsewhere), a
-  changed rule set, and the window: `einv_gui_fnc_requestNormalize` asks for every person whose uniform, vest or backpack shows an
+  unit local here), every loadout set (`fnc_onLoadoutSet`; `aio_storage_migrateUnit` tells the owner when it was set elsewhere), a
+  changed rule set, and the window: `aio_gui_fnc_requestNormalize` asks for every person whose uniform, vest or backpack shows an
   overflow tile (bodies and looted persons included), every `DRIFT_REPEAT`. An AI whose gear a script filled, and nobody looks at,
   waits for one of these.
 - **Arsenals.** While ACE Arsenal (display 1127001) or the vanilla one is open (`ARSENAL_OPEN`) nothing migrates: they add and take
@@ -852,23 +852,23 @@ Never copied, never lost.
 - **Locality, no loss, no copy.** Only the unit's authority changes its containers, one phase at a time per root, journaled (a phase
   the hub sends again is answered from the journal and never runs twice); every move is verified by counting, and a tile that did not
   land goes back to where it was taken from. A change of owner between request and run is `"Moved"` or runs on the new owner, which
-  plans again from what it finds. The server setting `einv_storage_migrate` (default on; "Move overfull items on", its text "Overfull
+  plans again from what it finds. The server setting `aio_storage_migrate` (default on; "Move overfull items on", its text "Overfull
   items go to another container, else to the ground.") switches the whole thing off, the overflow sweep below included.
 - **Overflow sweep** (`fnc_queueSweep`, `fnc_sweepTick`, `fnc_requestSweep`, `fnc_sweepBusy`; `fnc_wornHeld` and `fnc_migratePasses` are
   shared with the pass above). The player's own unit only - never an AI, a body, a looted person, a crate or a vehicle, whose overflow
   stays as above. An add that the engine took (its config load allows it) and the grid has no cell for - ACE's pick-up, another mod's
   action doing `player addItem` / `addItemToUniform` - and that no later container could take stayed a lone red tile outside the grid
   for ever. Now it goes to another worn container with room, else onto the ground next to the player, with the hint "No room for
-  <name> - put on the ground" (`fnc_useHint`, the line `STR_einv_storage_Hint_NoRoomGround`) and one RPT INFO line.
+  <name> - put on the ground" (`fnc_useHint`, the line `STR_aio_storage_Hint_NoRoomGround`) and one RPT INFO line.
   - *Triggers* all end in `fnc_queueSweep [wait, floor, fresh]`, which sets one due time (the earliest stays: a burst is one sweep;
     `GVAR(sweepNotBefore)` is the floor a loadout or a new unit sets, `GVAR(sweepQuiet)` the one a failed pass sets) and costs a few
     assignments. `fnc_sweepTick`, a `SWEEP_TICK` 0.25 s per-frame handler on a machine with an interface (postInit, not in Eden), runs
     `fnc_requestSweep` once the time is due. The triggers: CBA's polled `loadout` event (`SWEEP_DELAY` 0.5 s later); the engine's `Take`
-    and `InventoryClosed` on the player; a loadout set (`fnc_onLoadoutSet`, and `einv_storage_migrateUnit` where the unit is local):
+    and `InventoryClosed` on the player; a loadout set (`fnc_onLoadoutSet`, and `aio_storage_migrateUnit` where the unit is local):
     not before `SWEEP_LOADOUT_DELAY` 1.5 s, after `fnc_topUpLoadout` (at once and a frame later) and the places are in; the `unit`
     player event (the start, JIP, a respawn, a team switch): not before `SWEEP_INIT_DELAY` 4 s, so a loadout with more than fits is
     tidied once it is in - the first sweep of a new unit and of a loadout set ignores the hold below; the open window that shows an
-    overflow tile of the player's gear (`einv_gui_fnc_requestNormalize`, each signature check); and the watch.
+    overflow tile of the player's gear (`aio_gui_fnc_requestNormalize`, each signature check); and the watch.
   - *The watch* (the net under the events): every `SWEEP_WATCH` 1 s `fnc_sweepTick` compares a signature of five numbers - `loadAbs` of
     the uniform, vest and backpack and the counts of `items` and `magazines` of the unit - with the last one, and queues a sweep on a
     change. It builds no loadout array: about a tenth of a millisecond a second for a full kit, two comparisons between the checks and
@@ -887,15 +887,15 @@ Never copied, never lost.
     each tile (at most `SWEEP_MAX` 6 a pass, the rest on the next one), phase 1 on the server a `putGround` per tile with the take's
     payload as its input - the same two phases as a drag out of the window (section "The backpack take-off path"), so the pile at the
     feet is found or made by the server, a tile that could not be put down settles back where it came from (`fnc_settle`) and nothing is
-    lost or copied. The answer teaches the pile to the dropper (`einv_gui_fnc_learn`, only when the window addon is there), so the Ground
+    lost or copied. The answer teaches the pile to the dropper (`aio_gui_fnc_learn`, only when the window addon is there), so the Ground
     section shows it at once and the item is not "unsearched" to him, says the hint and the RPT line, and looks again when tiles were left.
     A pass that put nothing down holds the next one back `SWEEP_FAIL` 5 s times the failures in a row, at most `SWEEP_FAIL_MAX` 60 s.
     That hold (`GVAR(sweepQuiet)`, also set while seated) is the ground step's only: `fnc_requestSweep` looks at it just before the
     ground and `fnc_queueSweep` no longer delays the due time by it, so a move into a free cell of another worn container still runs
     within a second.
   - *When it waits*: with the setting off it never runs. While `fnc_sweepBusy` - an arsenal is open (`ARSENAL_OPEN`), ACE Arsenal's
-    `LOADOUT_QUIET_FRAMES` after a loadout set (`einv_arsenal_loadoutFrame`), a magazine repack, and with the window open a tile pressed or
-    dragged (`einv_gui_press`, `dragging`, `stripDrag`), a move of the window in flight (`inFlight`, `answers`) or in the hands' queue
+    `LOADOUT_QUIET_FRAMES` after a loadout set (`aio_arsenal_loadoutFrame`), a magazine repack, and with the window open a tile pressed or
+    dragged (`aio_gui_press`, `dragging`, `stripDrag`), a move of the window in flight (`inFlight`, `answers`) or in the hands' queue
     (`handQueue`) - it looks again `SWEEP_BUSY` 1 s later (the window's variables are not read while it is closed). For
     `SWAP_HOLD` 60 s after a worn container was swapped (`fnc_wornHeld`, the hold `fnc_requestMigrate` has had since 0.5.19, now one function
     for both) it looks again when the hold ends. The hold starts only for a swap of some containers while another worn one stayed the
@@ -905,16 +905,16 @@ Never copied, never lost.
     `addMagazine`), ACE's detach (`addItem`), a pick-up. Before 0.5.51 every loadout and every ACE Arsenal session armed the hold, so an
     unloaded magazine or a detached strobe stayed red for a minute (issue #23). Seated (a drop would go into the vehicle's cargo and may bounce), with nothing under the
     feet (`fnc_groundPos`) or before the server answered the greeting (`fnc_hubReady`) the wide migrate runs and the ground waits
-    `SWEEP_BLOCKED` 5 s at a time. After ACE Arsenal closes `einv_arsenal_fnc_onClosed` takes out what does not fit (section 5) first; the
+    `SWEEP_BLOCKED` 5 s at a time. After ACE Arsenal closes `aio_arsenal_fnc_onClosed` takes out what does not fit (section 5) first; the
     sweep sees what is left.
   - *Multiplayer*: nothing new is asked of the network. The migrate is a request on the player's own unit, the take runs on the player's
     machine and the ground put is the existing op `putGround` on the server through the hub, like every drop.
 - **Adds of the engine that a script made after a check.** A script that asks `canAdd` and then `addMagazine`, or takes an item out
   of a pile and adds it, depends on the engine's load limit, which the grid does not follow: an add the engine refuses is lost
-  where nothing can see it (no event, no return value). What this mod can see is only what it does itself: `einv_storage_fnc_addToUnit`
+  where nothing can see it (no event, no return value). What this mod can see is only what it does itself: `aio_storage_fnc_addToUnit`
   (above) is the replacement for such scripts, AIME's one-click pick-up goes through the grid instead (`fnc_moveEntry`, section 7, compat_aime), and the engine's
   own `Take` from one of our scripted piles that empties it deletes the pile (`GroundWeaponHolder_Scripted`, never deleted by the
-  engine - the `Take` handler in postInit asks `fnc_pruneScriptedPile`, on the pile's machine through `einv_storage_prunePile`). A
+  engine - the `Take` handler in postInit asks `fnc_pruneScriptedPile`, on the pile's machine through `aio_storage_prunePile`). A
   vanilla `TakeMagazine` / `TakeItem` / `TakeWeapon` action that the engine refuses leaves the item in the pile and raises no
   event; nothing of ours reacts to it. A magazine an engine add puts into an empty compatible muzzle (a spent launcher) is the
   engine's loading, not an add into the cargo; the reload machinery leaves it alone - `fnc_onReloaded` acts only on a loaded magazine
@@ -941,34 +941,34 @@ section (`entries`, one per worn thing, each with its `slot`) then its uniform, 
 `container`; the uniforms, vests and backpacks opened from inside a container; and what lies around. Every section of a container
 carries `holder`, `root`, `parent`, `nearby`, `folded` (crates found around start folded) and `side` ("loot"); `fnc_orderSections`
 puts a section with a `parent` right below its parent's. `fnc_getNearby [unit, range, max]` (public): every pile that holds
-something and every crate within `einv_storage_nearbyRange`, same floor and in sight (`fnc_isNear`), nearest first, at most
-`NEARBY_MAX`; not vehicles, bodies, persons, hidden, carried, loaded or locked objects, nor `einv_nearby = false` on the object.
+something and every crate within `aio_storage_nearbyRange`, same floor and in sight (`fnc_isNear`), nearest first, at most
+`NEARBY_MAX`; not vehicles, bodies, persons, hidden, carried, loaded or locked objects, nor `aio_nearby = false` on the object.
 Whether a pile holds something is asked of the engine's cargo lists, not of `fnc_getContents` (the window asks every second).
 
 ### Loadouts
 
-CBA's loadouts carry the arrangement. `fnc_onLoadoutGet` (event `CBA_loadoutGet`) writes `einv_layout = [1, [uniform, vest,
+CBA's loadouts carry the arrangement. `fnc_onLoadoutGet` (event `CBA_loadoutGet`) writes `aio_layout = [1, [uniform, vest,
 backpack]]` into the extended info - the records of `fnc_readPlaces` with the key cut down to `fnc_layoutKey` of its class - and
 `fnc_onLoadoutSet` (`CBA_loadoutSet`) writes them back with `fnc_writePlaces` where the unit is local, else sends them to its
-machine (`einv_storage_loadoutPlaces`, `fnc_onLoadoutPlaces`). Only well-formed records are kept; a record the new items do not
+machine (`aio_storage_loadoutPlaces`, `fnc_onLoadoutPlaces`). Only well-formed records are kept; a record the new items do not
 match drops out at the next layout, and a loadout without the key leaves everything to the first fit. Both handlers are registered
 in preInit on every machine, Eden too.
 
 **The container load.** The engine's `setUnitLoadout` stops filling a uniform, vest or backpack at its config `maximumLoad`, which the grid does not
 respect, so a saved loadout would come back short. `fnc_onLoadoutSet` therefore calls `fnc_topUpLoadout [unit, loadout]` (where the unit is local at
-once and a frame later, else it sends `einv_storage_topUpLoadout` to the unit's machine) before the places are written: for the uniform, vest and
+once and a frame later, else it sends `aio_storage_topUpLoadout` to the unit's machine) before the places are written: for the uniform, vest and
 backpack the loadout names (a different worn class is skipped) the intended items are compared with `getUnitLoadout` as a map - an item by class,
 a magazine by class and rounds, a weapon by class and attachments without its loaded magazines, a backpack by class - and only the positive
 difference is added to the container object with `addItemCargoGlobal`, `addMagazineAmmoCargo`, `addWeaponWithAttachmentsCargoGlobal` or
 `addBackpackCargoGlobal` (classes the game lacks are left out as the engine left them), so a second pass adds nothing. The layout and
 `fnc_queueMigrate` do the rest; for the player's own unit the overflow sweep (section "Surplus") then puts what fits nowhere on the ground,
 `SWEEP_LOADOUT_DELAY` 1.5 s after the set, after the top-up and the places. Every path through `CBA_fnc_setLoadout` is covered, ACE Arsenal's Load and the loadouts screen included; a plain
-`setUnitLoadout` raises no event, so scripts that need this call the public **`einv_storage_fnc_setUnitLoadout [unit, loadout]`** (`setUnitLoadout`
-plus the top-up and the migrate note, on any machine: a unit that is not local gets a `einv_storage_setUnitLoadout` CBA event).
+`setUnitLoadout` raises no event, so scripts that need this call the public **`aio_storage_fnc_setUnitLoadout [unit, loadout]`** (`setUnitLoadout`
+plus the top-up and the migrate note, on any machine: a unit that is not local gets a `aio_storage_setUnitLoadout` CBA event).
 
 ### The backpack take-off path
 
-The drop of any worn slot (menu Drop, a drag to the ground): `einv_gui_fnc_doUnequip` -> `fnc_sendMoves` (`unequip` to `"ground"`:
+The drop of any worn slot (menu Drop, a drag to the ground): `aio_gui_fnc_doUnequip` -> `fnc_sendMoves` (`unequip` to `"ground"`:
 phase 0 `takeOff` at the unit, phase 1 `putGround` at objNull = the server, its payload a ref) -> `fnc_request` ->
 `fnc_requestNext` runs phase 0 here (`fnc_opTakeOff` -> `fnc_takeOff`: `fnc_snapshot`, **`removeBackpack`** - the unit is local
 there; the delayed `removeBackpackGlobal` showed the slot still worn, handed nothing on and lost the backpack when the engine then
@@ -979,13 +979,13 @@ after `removeBackpack` is looked at a frame later and put back on from its snaps
 `fnc_addPayload` counts a backpack as arrived also by one more `everyBackpack` object; settlement step 1 puts it back on the back
 while the slot is empty. `fnc_putOn` uses `addBackpack`, which fills the container at once.
 
-**Dragged out of the window.** `einv_gui_fnc_updateDrag` makes the target `["ground", -1, 0, 0, true, ""]` outside every panel, and
+**Dragged out of the window.** `aio_gui_fnc_updateDrag` makes the target `["ground", -1, 0, 0, true, ""]` outside every panel, and
 `fnc_endDrag` gives a slot's item to `fnc_doUnequip [unit, slot, "ground", []]` - the menu Drop's own call, only inside the mouse-up
 event instead of a frame later. The window makes no pile, asks no hook (`ground` is asked only by `fnc_quickUnequip`,
 `fnc_dropToGround`, `fnc_quickMove`), and `fnc_settle` works from the phases, not the window's in-flight record; with no pile in
 reach `fnc_getGroundHolder` makes one. The step that differs from a vest's is the engine's cleanup of a pile holding only a backpack,
 an object of its own and no item cargo, which the scripted holder avoids (see Ground above). A backpack joins only a pile of ours
-(`GroundWeaponHolder_Scripted`) or a fresh one, and the backpack just taken off is marked (`einv_storage_takenOff`) so that the plain
+(`GroundWeaponHolder_Scripted`) or a fresh one, and the backpack just taken off is marked (`aio_storage_takenOff`) so that the plain
 holder the engine keeps it in until the end of the frame is never taken for a pile. `fnc_opPutGround` writes one RPT line per
 backpack, "Backpack CLASS goes onto pile NETID".
 
@@ -997,8 +997,8 @@ are unchanged); a payload restored loose, when `fnc_addPayload` cannot tell whic
 
 ### Use from containers (`fnc_useState`, `fnc_useCarried`, `fnc_reloadGuard`)
 
-Three global CBA settings, topic "Use from containers" (`addons/storage/initSettings.inc.sqf`): `einv_storage_useUniform`,
-`einv_storage_useVest`, `einv_storage_useBackpack` - "Use items from the <container>" - each a list **Everything** (`USE_ALL`
+Three global CBA settings, topic "Use from containers" (`addons/storage/initSettings.inc.sqf`): `aio_storage_useUniform`,
+`aio_storage_useVest`, `aio_storage_useBackpack` - "Use items from the <container>" - each a list **Everything** (`USE_ALL`
 "all", the default and how the game works), **Only whitelisted** (`USE_LIST` "list"), **Nothing** (`USE_NONE` "none") or
 **Strict (hidden)** (`USE_STRICT` "strict": Only whitelisted, and what is blocked is kept out of the container's cargo altogether -
 the next section). They decide what counts as *usable* while it lies in the player's own uniform, vest or backpack: a magazine to
@@ -1008,14 +1008,14 @@ container, on Nothing nothing does, whitelisted or not. Only the kinds in `USE_I
 are ever limited - a rifle, an attachment or a uniform in the backpack is stowed, not used. A crate, the ground or a body are never
 limited.
 
-- **The question** is `einv_storage_fnc_useState [class, container]` -> `""` (nothing limits it), `"allowed"` (whitelisted on a
+- **The question** is `aio_storage_fnc_useState [class, container]` -> `""` (nothing limits it), `"allowed"` (whitelisted on a
   limited container) or `"blocked"`; `fnc_useKind [container object]` says which of the player's three a container is (`""` for any
   other), `fnc_useMode [container]` is the setting's answer. Each setting runs `fnc_useRefresh` when it is set or changed, which
   keeps `GVAR(useActive)`: while all three are on Everything every function above answers at once, so the default costs one
   variable read where it is asked.
 - **What is checked** (the practical, robust set - things this mod owns): the window's tiles (a small padlock in the corner,
   `fnc_createTile`; the footer hint says "Cannot be used from the backpack" or "Whitelisted: can be used from the backpack",
-  `fnc_updateHover`); the context menu (the hotbar's bind row is gone because `einv_hotbar_fnc_canBindFrom` refuses, a radio's
+  `fnc_updateHover`); the context menu (the hotbar's bind row is gone because `aio_hotbar_fnc_canBindFrom` refuses, a radio's
   Open radio and Use as active radio are not offered, and a CBA row that uses the item up - ACE rations, medical items - is left out,
   `fnc_cbaOptions`); the hotbar (a drag or the menu cannot bind an item from a blocked container - "Cannot be used from the
   backpack" -, and the slot's count, the magazine the key loads, the kit it opens and the grenade it takes only look at what
@@ -1043,7 +1043,7 @@ limited.
   later `fnc_reloadTidy` moves the magazine the game put away out of a container that is blocked for it into the container the new
   one came from, when that has room - once. When the game loaded another one, an RPT INFO says so and the undo below decides. The
   token runs out after `RELOAD_TOKEN_MAX` 12 s and is cleared when a magazine is taken out of a weapon (`fnc_takeOff`).
-- **Nothing waits for ever**. `einv_storage_fnc_reloadBusy` (the hotbar's magazine and throwable keys, AIME's menu, the undo's
+- **Nothing waits for ever**. `aio_storage_fnc_reloadBusy` (the hotbar's magazine and throwable keys, AIME's menu, the undo's
   delayed load) is the player's weapon reload phase (`weaponState` entry 6) or ACE's `ace_common_isReloading`, the flag believed
   for `RELOAD_BUSY_MAX` 5 s from the first time it was seen set, then ignored until it was seen cleared once. The undo's busy mark
   is a time, `GVAR(undoUntil)` (`UNDO_BUSY_MAX` 3 s), not a flag, so a script error in the middle of `fnc_reloadUndo` cannot disable
@@ -1070,13 +1070,13 @@ limited.
   magazine that may be used is left (`fnc_reloadPick`, the fullest) and the undo left the muzzle empty, `UNDO_RELOAD_WAIT` later it is put in by hand with `fnc_loadMagazine` - an undo never starts a reload of the game's, so it cannot loop. Its own `addWeaponItem` restores are noted as hand loads (`fnc_noteHandLoad`), so a `Reloaded` they raise is not undone in turn. Never done twice (`GVAR(undoUntil)`, a time that runs out), and not when the magazine's origin is unknown. Untested in the game: the exact shape
   of the `Reloaded` arguments and whether `removePrimaryWeaponItem` returns the magazine to the cargo are checked by counting, not
   assumed.
-- **Loading a chosen magazine** (`einv_storage_fnc_loadMagazine [unit, weapon, muzzle, entry]`, public): the one way every reload of
+- **Loading a chosen magazine** (`aio_storage_fnc_loadMagazine [unit, weapon, muzzle, entry]`, public): the one way every reload of
   this mod ends - the key's guard, the undo of a refused reload, the hotbar, `compat_aime`'s menu. `entry` is a row of
   `magazinesAmmoFull` (seven items). A muzzle that holds a magazine gets the game's `LoadMagazine` action with its animation,
   after the reload token above is written. An
   **empty** muzzle - no magazine in the weapon - is loaded by hand: the magazine is taken out of the container it lies in
   (`addMagazineAmmoCargo [class, -1, rounds]`, counted before and after), put in with `fnc_weaponPart` (below), the window's reload
-  gesture and sound play (`einv_gui_fnc_playReload`, when loaded), `fnc_queueMigrate` and `fnc_useTrack` follow; a magazine that did
+  gesture and sound play (`aio_gui_fnc_playReload`, when loaded), `fnc_queueMigrate` and `fnc_useTrack` follow; a magazine that did
   not go in is put back and only then the action is tried. Why: the reload key's guard used to load its pick with the action alone,
   which is not reliable for a weapon with no magazine in it (Mia, 0.5.13: R does nothing with an empty weapon, whatever lies where,
   and a popup says the backpack's magazines do not work). Found by reading, not by running the game: untested in Arma. `fnc_reloadPick` chooses: the fullest usable
@@ -1095,7 +1095,7 @@ limited.
   thrown and the selected one may not, the selection is moved on (`fnc_throwSelect`, in the order of `throwables`) and the key is the
   game's. ACE's advanced throwing has no key to swallow - its "Prepare grenade" (`ace_advanced_throwing_prepare` in "ACE3 Weapons",
   Shift+G by default) is a CBA keybind that runs in CBA's own handler. So `fnc_throwTick` (`THROW_TICK`) sets ACE's `blockThrow`
-  status effect (`ace_common_fnc_statusEffect_set`, reason `einv_storage`) on the unit while nothing may be thrown: ACE's
+  status effect (`ace_common_fnc_statusEffect_set`, reason `aio_storage`) on the unit while nothing may be thrown: ACE's
   `canPrepare` asks it. It also puts a throwable in the hands away for the weapon then, and moves a closed selection to an open one.
   `fnc_throwGuard` says why when ACE's key is pressed (looked up with `CBA_fnc_getKeybind`) but cannot hold it back itself.
 - **What cannot be blocked, and why.** The throwable the game takes when the selected class also lies in an open container (it may
@@ -1115,7 +1115,7 @@ not a script's `items` or `magazines`. Everything else stays as it was: the wind
 move, drop, weigh and keep their places; whitelisted items stay physically in the container and work. Mia's word for the setting's
 text: it can break things, say so - the setting's description does.
 
-**The holder is no object.** It is the public variable **`einv_storage_hidden`** on the unit: `[[uniform list, vest list, backpack
+**The holder is no object.** It is the public variable **`aio_storage_hidden`** on the unit: `[[uniform list, vest list, backpack
 list], [uniform container, vest container, backpack container]]`, each list `[[class, count, rounds], ...]` with -1 rounds for an
 item that is no magazine (`fnc_hiddenAmmo`; a magazine or grenade keeps one entry per rounds), and per list the container object
 its things were taken out of (`fnc_hiddenLists` reads it well-formed, `fnc_hiddenWrite` writes it public, empty it goes away).
@@ -1135,7 +1135,7 @@ holder's list of that kind after the cargo's entries, stacked like cargo (`_fnc_
 are the keys their cargo twins would have, so the places need no change when a tile goes into or comes out of the holder, the layout
 (`fnc_getLayout`), the room checks (`fnc_hasSpace`, `fnc_plan`), the mass of a section (`fnc_getMass`), `fnc_findEntry`, the Arsenal
 panel (through `fnc_getContents` and `fnc_countAll` + `fnc_hiddenCounts`), `fnc_countClass` and `fnc_addNew`, the EFAK kit finder
-(`einv_compat_efak_fnc_locate`, `fnc_getSections` + `fnc_hiddenClasses`) all see one container, and every machine the same one.
+(`aio_compat_efak_fnc_locate`, `fnc_getSections` + `fnc_hiddenClasses`) all see one container, and every machine the same one.
 The window draws a `strict` tile with a crossed eye (`icon_eye_off_ca`) after the padlock (`fnc_createTile`; it was keyed `hidden` until 0.5.0, the window's "not searched yet", so the eye was never reached and a Strict tile showed as "?") and the footer says
 "Hidden: kept out of the backpack, so nothing else can use it" (`fnc_updateHover`); `fnc_getSignature` watches the holders of the
 people shown, so a move into or out of one redraws.
@@ -1153,7 +1153,7 @@ onto the ground, into a crate, into a slot; a quick move between the unit's own 
 target's whitelist; the Arsenal's adds, settlement's "back where it came from" and `fnc_moveEntry` all go through the same two
 functions. Counts are verified where the engine is involved (before and after, as always) and inherent where the list is.
 
-**Reconcile - op `strict [unit]`** (`fnc_opStrict`, root the unit, holders its three containers, in `einv_storage_ops`; the person
+**Reconcile - op `strict [unit]`** (`fnc_opStrict`, root the unit, holders its three containers, in `aio_storage_ops`; the person
 guard lets it through like `migrate`, `fnc_execute` walks the containers and drops their views). Asked for by the same look as the
 surplus: `fnc_requestMigrate` puts `["strict", [unit]]` in front of `["migrate", [unit]]` when `fnc_hiddenDue` says the holder and
 the cargo disagree with the settings - the holder keeps things of a kind that is not Strict any more or while the holder is not in
@@ -1200,7 +1200,7 @@ keeps the holder out of force while any arsenal display is open, the vanilla one
 - *Locality change mid-transaction, JIP, the hub:* the holder is written only by the owner inside its ops; a phase answered by the
   journal is never run twice; a public object variable reaches a new owner before any phase for it (the hub waits `LOCALITY_SETTLE`)
   and a JIP player with the object.
-- *Weight:* `einv_weight_fnc_getExtraLoad` adds the whole rules mass of every hidden entry (not only the override's difference, since
+- *Weight:* `aio_weight_fnc_getExtraLoad` adds the whole rules mass of every hidden entry (not only the override's difference, since
   no cargo weighs it) to the virtual load ACE carries, and the tier look (`TIER_CHECK_INTERVAL`) queues an update when the holder
   changed, since a move from a crate into the holder raises no loadout event. The section header's weight counts the merged entries.
 - *Kits and radios:* a hidden EFAK kit still opens from the window (the kit finder sees the holder) and its contents live with EFAK
@@ -1217,15 +1217,15 @@ the game, like the rest of Use from containers.
 
 ### Public functions and tables
 
-Public: `einv_storage_fnc_useState`, `fnc_useKind`, `fnc_useMode`, `fnc_useCarried`, `fnc_useBlockedIn`, `fnc_useKindName`, `fnc_loadMagazine`, `fnc_reloadBusy`,
+Public: `aio_storage_fnc_useState`, `fnc_useKind`, `fnc_useMode`, `fnc_useCarried`, `fnc_useBlockedIn`, `fnc_useKindName`, `fnc_loadMagazine`, `fnc_reloadBusy`,
 `fnc_hiddenCounts`, `fnc_hiddenClasses`,
-`einv_storage_fnc_request`, `fnc_moveEntry`, `fnc_equip`, `fnc_unequip`, `fnc_getEquipment`, `fnc_getNearby`,
+`aio_storage_fnc_request`, `fnc_moveEntry`, `fnc_equip`, `fnc_unequip`, `fnc_getEquipment`, `fnc_getNearby`,
 `fnc_readPlaces`, `fnc_rootOf`, `fnc_dumpPlaces`, `fnc_addNew`, `fnc_addToUnit`. Other addons extend the storage only through tables they fill in
-preInit: `einv_storage_ops` (op name -> function name), `einv_storage_guards`, `einv_storage_carryVariables` and
-`einv_storage_holderTypes` (a holder that is no object, by the part of its key before `:`; `kit` from compat_efak: `entries`,
+preInit: `aio_storage_ops` (op name -> function name), `aio_storage_guards`, `aio_storage_carryVariables` and
+`aio_storage_holderTypes` (a holder that is no object, by the part of its key before `:`; `kit` from compat_efak: `entries`,
 `blocks` (its compartments, `[]` for an open grid; left out, open), `root`, `verify`, and the names of its ops for `take`, `put`,
 `place`, `move`; it names no `split`, which tells the window that a kit's stacks are not kept apart). The mission variable
-`einv_storage_stackSplits` (true on every machine once the storage is loaded) is what the window reads before it asks for stacks
+`aio_storage_stackSplits` (true on every machine once the storage is loaded) is what the window reads before it asks for stacks
 apart, split or merge; setting it false switches that behaviour off.
 
 ## 4. GUI window engine (gui)
@@ -1241,7 +1241,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   Every way into the engine's inventory ends in that handler: the Gear key, `action ["Gear" | "OpenBag", container]` from a
   script, ACE's "Inventory" on the unconscious, ACE's backpack interaction and "Open <backpack>" on bodies, the vehicle and crate
   actions, the setup wizard handing the inventory back. For a unit that is not `ACE_player` nothing opens (the answer is still
-  true); a person who may not be opened (`einv_noAccess`, an ACE dragging clone, out of reach) gets a hint instead of a window.
+  true); a person who may not be opened (`aio_noAccess`, an ACE dragging clone, out of reach) gets a hint instead of a window.
 - **No vanilla inventory.** There is no setting that brings it back, no bypass and no fallback: a window that cannot open
   (`fnc_open` returns false, the RPT says why) opens nothing. A vanilla display that comes up anyway - Better Inventory patches
   `RscDisplayInventory` and runs its own XEH `InventoryOpened` handler, another mod's handler may answer the engine after ours,
@@ -1251,14 +1251,14 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   writes one INFO line per display saying where it stood: no window open, over the window, beside it, or **under** it - the
   window was made as its child dialog and closes with it, so it is opened again a frame later on the same unit and containers
   (at most once every `REOPEN_PAUSE` 2 s). `fnc_open` never makes the window over a vanilla inventory: while `findDisplay 602`
-  is open, or a display the guard closed is still held (uiNamespace `einv_gui_closing` - the engine may stop listing a closing
+  is open, or a display the guard closed is still held (uiNamespace `aio_gui_closing` - the engine may stop listing a closing
   display and still hold it, and a dialog made then hangs under it all the same), it closes it and tries again next frame (at
   most `OPEN_TRIES` 10; held but no longer listed after that, the window opens anyway). The guard's second close, a frame after
   the first (a display closed inside its own load event is not always gone), is the guard called again with the display
   (`[display, true]`), never a bare `closeDisplay`: it looks where the window stands, and a close of a display the window hangs
   under is told and followed by the reopen. It closes the display object itself, never `closeDialog` (topmost dialog, maybe the
   window); the window has no `InventoryClosed` handler, so the engine raising that event for the closed display touches nothing
-  of it (`einv_storage` only notes the unit for its surplus check).
+  of it (`aio_storage` only notes the unit for its surplus check).
   Three places call the guard: an `Extended_DisplayLoad_EventHandlers` entry on
   `RscDisplayInventory` (`gui/CfgEventHandlers.hpp`; CBA raises that event from `BIS_fnc_initDisplay`), a per-frame handler
   every `GUARD_INTERVAL` 0.25 s from `XEH_postInit` for a display that loaded without raising it, and the check each
@@ -1271,7 +1271,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   `findDisplay 46` exists - after this mod's postInit). The window does not depend on it: the display that opens anyway is closed
   by the guard and the window opens a frame later. But the handler (`fnc_initUnit [unit, again]`) is kept behind the others: put
   on at the CBA `unit` event with `again`, once more `HANDLER_RECHECK` 3 s after `findDisplay 46` exists (`XEH_postInit`), and
-  whenever a vanilla inventory came up although the handler had answered within `ASK_FRAMES` frames (`einv_gui_askedFrame`, set
+  whenever a vanilla inventory came up although the handler had answered within `ASK_FRAMES` frames (`aio_gui_askedFrame`, set
   first thing in `fnc_onInventoryOpened`) - the RPT says "The unit's handler had answered true for it - another handler's answer
   let it open" and "The unit handler goes behind the other handlers of the event again" (at most every `HANDLER_PAUSE` 5 s, so two
   mods that both want the last place cannot loop). Only this mod's handler, by its id, is removed and added again - never
@@ -1280,11 +1280,11 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   ("Nothing asked for the window"). That is a guess, and what the engine names always wins over it (in 0.4.9, a display whose
   load came before the handler's event queued the guess first, and a vehicle opened showed only the soldier's own gear): it is made a
   frame later and only when the handler was not asked in the frame the display came up or since and no asked opening waits for
-  the display (`einv_gui_askedFrame`, `einv_gui_openWaiting`); it gives way while it waits in `fnc_open` (argument 4, the frame
-  the display came up in); and a window made on it (`einv_gui_openGuess`) closes when the handler is then asked with something
+  the display (`aio_gui_askedFrame`, `aio_gui_openWaiting`); it gives way while it waits in `fnc_open` (argument 4, the frame
+  the display came up in); and a window made on it (`aio_gui_openGuess`) closes when the handler is then asked with something
   to loot, which opens a frame later (RPT `replaced: ...`). Where the engine really takes the last handler's answer, being last keeps the display from
   opening at all; where it does not, the guard path is all that runs.
-- **Closing.** Every way the window closes itself goes through `fnc_closeDisplay [reason]` (sets `einv_gui_closeReason`, then
+- **Closing.** Every way the window closes itself goes through `fnc_closeDisplay [reason]` (sets `aio_gui_closeReason`, then
   `closeDisplay 2`), and `fnc_onUnload` writes one INFO line `window closed: <reason>`: `a movement key` (`"move"`), `Escape`
   (set by `fnc_onKeyDown` where it leaves Escape to the engine, inventory only), `the Gear key`, `the close button`,
   `the soldier was taken away from what he looted` (`"taken"`, `fnc_checkTaken`), each rule of `fnc_onFrame`'s must-close
@@ -1296,16 +1296,16 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
 - **Attaching.** `fnc_attach [display, unit, container, secondary, hooks = createHashMap, driver = "pfh"]` -> BOOL makes any
   display that carries the dim layer (`IDC_DIM` 9601) and the first control (`IDC_FIRST` 9602) **the window**: it sets the unit
   and containers, starts all window state afresh, adds the mouse handlers, builds once and starts the frame. It refuses when
-  another display is the window (one session at a time; uiNamespace `einv_gui_display`). The inventory attaches with no hooks, ACE
+  another display is the window (one session at a time; uiNamespace `aio_gui_display`). The inventory attaches with no hooks, ACE
   Arsenal's panel with a table of them. `fnc_onUnload` stops the frame and empties hooks and zones. A top-level control with
   `IDC_KEEP` 9603 survives the build's sweep.
-- **State** (documented variable by variable in `gui/XEH_preInit.sqf`): who and what - `einv_gui_unit`, `container`, `secondary`,
+- **State** (documented variable by variable in `gui/XEH_preInit.sqf`): who and what - `aio_gui_unit`, `container`, `secondary`,
   `person`, `personMode`; the frame - `frameDriver`, `nextCheck`, `nextSignature`, `hooks`; what the build made (controls, so in
   uiNamespace) - `created`, `grids`, `slots`, `hint`, `windows`, `scrollRestore`; the mouse - `hover`, `press`, `dragging`,
   `dragTarget`, `dragSize`, `dragRot`, `dragCount`, `dragGroup`, `selection`, `emptyPress`; the moves - `inFlight`, `answers`,
   `drift`; view state kept for the mission - `collapsed`, `expanded`, `opened` (nested containers opened in the loot column,
   `[class, object, parent]`), `filter`; and `nearby`, `searchQueue`, `panels`, `equipmentRect`.
-- **Frame drivers.** `fnc_startFrame [driver]` / `fnc_stopFrame`, kept as `einv_gui_frameDriver = [driver, id]`: `"pfh"` is a CBA
+- **Frame drivers.** `fnc_startFrame [driver]` / `fnc_stopFrame`, kept as `aio_gui_frameDriver = [driver, id]`: `"pfh"` is a CBA
   per-frame handler, `"draw3d"` a Draw3D mission event handler (the only one that runs in Eden). Either calls `fnc_onFrame`.
   `fnc_later [code, args]` runs code a frame later: controls must not be deleted inside their own event.
 - **`fnc_build [display]`** takes the kit windows away, reads each column's scroll by its id, deletes the registered controls (on
@@ -1349,11 +1349,11 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   is not `queued`, faded in; everything else is made by `fnc_createTile` and the old controls left over are deleted. Tiles go on
   the grid in the layout's order either way. One item taken from a pile of ninety makes one tile less instead of ninety again, and
   the queue's marks on the tiles that stayed stay (`fnc_drawQueue` finds their surfaces unchanged).
-- **Parts** (`fnc_drawPart [display, key, parent, rect, code, args]`, uiNamespace `einv_gui_parts`, emptied by each build): an
-  outer `EINV_Group` made by the build where the piece belongs (so it keeps its z-order) holding an inner group the piece is drawn
+- **Parts** (`fnc_drawPart [display, key, parent, rect, code, args]`, uiNamespace `aio_gui_parts`, emptied by each build): an
+  outer `AIO_Group` made by the build where the piece belongs (so it keeps its z-order) holding an inner group the piece is drawn
   in; a redraw deletes the inner group, leaves its `slots` / `infoAreas` entries as dead stubs (numbers stay valid), and draws into a
   new one. The weight card (`fnc_drawWeightCard`, split out of `fnc_drawEquipmentCards`) and the hotbar strip are parts.
-- `einv_gui_debugTiming` (client,
+- `aio_gui_debugTiming` (client,
   default off) writes `timing: build 12.3 ms (N controls on the display, N of them shown: PanelRect N, ...)` (the controls by class,
   the eight most) with `timing: build parts (ms) - sweep 2.1, contents 1.0, columns 30.2, footer 0.8, kit windows and
   top layer 0.3, under way and selection 0.2, signature 0.9`, `timing: redraw 2.1 ms (N loot and N storage sections, N tiles kept,
@@ -1376,13 +1376,13 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   only checks whether to close.
 - **Moves under way.** The window predicts nothing: `fnc_sendMoves` turns each move into phases (at most `BATCH_MAX` moves per
   transaction, the next chunk when the answer came; kinds `move`, `equip`, `unequip`, `swap`, `sort`, `placeMany`, `exchange`; a kit
-  through its holder type's ops). Moved tiles stay faded and cannot be lifted, their target cells outlined (`einv_gui_inFlight`,
-  `fnc_drawPending`) until the answer and the new places arrived (`einv_gui_answers`, finished by `fnc_afterAction`, at the latest
+  through its holder type's ops). Moved tiles stay faded and cannot be lifted, their target cells outlined (`aio_gui_inFlight`,
+  `fnc_drawPending`) until the answer and the new places arrived (`aio_gui_answers`, finished by `fnc_afterAction`, at the latest
   `ANSWER_WAIT` 3 s after the answer; given up after `PENDING_TIMEOUT` 15 s); each sounds when finished. The flash on the tile where an item landed
-  (`fnc_flashTile`, also the search's reveal) is deleted once it has faded (uiNamespace `einv_gui_flashes`, `[control, when it has faded]`): one made for every finished
+  (`fnc_flashTile`, also the search's reveal) is deleted once it has faded (uiNamespace `aio_gui_flashes`, `[control, when it has faded]`): one made for every finished
   move of a long group move used to stay on the window, invisible, until the next build. What a finished move touches: its source and target tiles (made or removed), the marks of the entries on them, the chip's count (written in place), the flash, the bars of paged boxes only where what they say changed - no
   other tile gets a command and no box moves unless its rows' shape changed. On
-  `einv_items_rulesChanged` an open window is built again once a held tile is let go.
+  `aio_items_rulesChanged` an open window is built again once a held tile is let go.
 - **The hands' queue** (`fnc_queueMoves`, `fnc_queueTime`, `fnc_queueTiles`, `fnc_queuedSlot`, `fnc_drawQueue`, `fnc_animateQueue`,
   `fnc_runQueue`, `fnc_cancelQueued`, `fnc_boxStep`, `fnc_unmarkQueued`, `fnc_queueColor`; state `GVAR(handQueue)`, `handStarted`, `handLast`, `handId`,
   `handBoxes`, `instantFrame` in `XEH_preInit.sqf`). What takes the hands is not sent at once but waits in the window's own queue, one entry per move,
@@ -1391,14 +1391,14 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   checked early; a refusal, Gone or NoRoom shows its hint and the next entry goes on). The funnel is `fnc_sendMoves` itself: unless the option `"now"` is
   set it hands its moves to `fnc_queueMoves` first, which answers `[moves to send now, how many were queued]`; the rest goes on in the same call, and the
   call answers true when it queued something. Every caller gets it without a change: the quick move and double click, the drop key and Drop, the group moves
-  (`fnc_sendPlan`, one entry per move), the menu's Equip, the kits' ops (`einv_compat_efak`).
+  (`fnc_sendPlan`, one entry per move), the menu's Equip, the kits' ops (`aio_compat_efak`).
   **What waits is decided by `fnc_queueTime [move]`** -> `[kind, seconds]` (`""` and 0 for no wait). A **drag never waits**: `fnc_endDrag` sets
   `GVAR(instantFrame)` to `diag_frameNo` before it sends and `fnc_queueTime` answers `""` for the rest of that frame, so `fnc_applyMove`,
   `fnc_dropToGround`, `fnc_doEquip`, `fnc_doUnequip`, `fnc_doSwap`, `fnc_applySwap` and a group's `fnc_sendPlan` go out at once from a drag (a frame number
   instead of a flag: nothing to reset should a script error end `fnc_endDrag` early). Otherwise by the kind of move and four server switches: `drop` (to
-  `"ground"`, `"vehicle"` or a pile - `einv_gui_handDrop` seconds, `einv_gui_waitDrop`, on), `move` (to a different holder, and an `exchange` -
-  `einv_gui_handMove`, `einv_gui_waitMove`, on: the quick move and the menu's moves), `equip` (`equip`, `unequip`, `swap` -
-  `einv_gui_handEquip`; by the slot: `uniform`, `vest`, `backpack` and `headgear` follow `einv_gui_waitWorn`, off, every other slot `einv_gui_waitEquip`, off);
+  `"ground"`, `"vehicle"` or a pile - `aio_gui_handDrop` seconds, `aio_gui_waitDrop`, on), `move` (to a different holder, and an `exchange` -
+  `aio_gui_handMove`, `aio_gui_waitMove`, on: the quick move and the menu's moves), `equip` (`equip`, `unequip`, `swap` -
+  `aio_gui_handEquip`; by the slot: `uniform`, `vest`, `backpack` and `headgear` follow `aio_gui_waitWorn`, off, every other slot `aio_gui_waitEquip`, off);
   `""` and no wait for a move within one holder, `placeMany`, `sort`. A kind with 0 seconds or its switch off is never queued. Not queued either: any window
   that is not the inventory (ACE Arsenal's panel does not use `fnc_sendMoves` anyway), a move with nothing of it on the window (no tile found by
   `fnc_queueTiles`, no slot drawn: say a kit unpacked from the menu with its window closed), and one whose tile or worn item already waits (dropped, no
@@ -1439,7 +1439,7 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   -> `fnc_sendMoves` -> answer -> `fnc_refresh` redraws only the touched sections (`fnc_redrawTiles`; a build only when sections came or went or the unit's gear
   changed, as for any move), and `fnc_drawQueue` marks only the entries on those redrawn tiles. The queue is dropped by `fnc_attach` and `fnc_onUnload`: closing
   the window (Escape, the Gear key, a movement key, ...) cancels everything that still waits, which only waited - a move already sent finishes on its own. Group
-  moves skip tiles that wait (`handQueue` sources next to `inFlight`'s). Walking does not cancel (only `einv_gui_moveToStop` closes the window while
+  moves skip tiles that wait (`handQueue` sources next to `inFlight`'s). Walking does not cancel (only `aio_gui_moveToStop` closes the window while
   looting, as ever). The target cells of a queued move are not reserved or outlined: something else put there meanwhile makes it land elsewhere ("Put elsewhere")
   or bounce, as for any move whose cell was taken. Times do not depend on weight.
 - **The quick move key held down** (`fnc_onKeyDown`, `fnc_quickAction` argument 3, `fnc_quickMove`, `fnc_roomFor`). What a repeat costs, and what it does not: it never reaches
@@ -1447,9 +1447,9 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
   entry, as for a move never queued). With the hands' time at 0, or its switch off, a move goes out at once; `fnc_sendMoves` now flags and fades the tiles it takes from the moment it
   records the transaction in flight (before, `fnc_drawPending` did at the next build, so a repeat before the answer sent the same tile again). Per repeat the work is
   bounded and does not grow with the queue: a tile that is `pending` is skipped before anything is asked; a container or kit tile is left to the first press;
-  `fnc_roomFor [container, tile, reserve]` replaces `einv_storage_fnc_hasSpace` (a whole layout for each of up to three containers, and `fnc_applyMove` once more - now told
+  `fnc_roomFor [container, tile, reserve]` replaces `aio_storage_fnc_hasSpace` (a whole layout for each of up to three containers, and `fnc_applyMove` once more - now told
   `roomChecked`): per container it keeps, for the container's signature (places revision and the counts of items, magazines, weapons and backpacks), the taken cells
-  (`einv_storage_fnc_seedTaken`, `takeCells`), the free cell count, the cells the waiting moves to that container take (read from the queue when the picture is made) and the exact
+  (`aio_storage_fnc_seedTaken`, `takeCells`), the free cell count, the cells the waiting moves to that container take (read from the queue when the picture is made) and the exact
   answers asked so far; a plain rectangular tile needs one look for a free spot (`cellsFree`, upright then turned) and `free - waiting` to cover it, and with `reserve` the cells it
   takes count as waiting at once. A stackable or shaped tile, and any tile for which no spot is found, gets `hasSpace`'s exact answer, once per signature and kind of tile; room is
   refused on the cells' word only when the waiting moves have filled it. `fnc_cancelQueued` empties the cache. The queue itself: `fnc_queueMoves` finds a tile by its `hint`
@@ -1466,45 +1466,45 @@ Functions are `Public: No` unless noted (`fnc_open`, `fnc_openPerson`, `fnc_play
 window's glass (the `panel` colour) with the theme's `button` film over it from `fnc_headerStyle [theme, on]` -> `[surface, surface under the mouse, ink]`: the
 panel colour one step lighter, as the buttons in the columns, and one step lighter again under the mouse (`buttonHover` at 0.75 of its alpha, at least 0.04 over the
 surface) - dark like the inventory, no bright grey. A button that is on (Mia, 0.5.5) has the same surface and shows it by the `accent` ink on its icon and a thin
-accent line (2 pixels) inside its bottom edge, made before the button so its hit area lies over it; the speaker's is kept in uiNamespace `einv_gui_soundLine` and shown by `fnc_updateSoundButton`. The search field is on the same
+accent line (2 pixels) inside its bottom edge, made before the button so its hit area lies over it; the speaker's is kept in uiNamespace `aio_gui_soundLine` and shown by `fnc_updateSoundButton`. The search field is on the same
 footing (Mia, 0.5.7: it was lighter): the glass `_fnc_place` lays down and ONE film, `headerStyle`'s surface, which `fnc_drawFilter` takes as its 5th argument -
-no frame of its own under the field's. The speaker's controls and its rectangle are kept in uiNamespace `einv_gui_soundButton` and `einv_gui_soundAnchor`
+no frame of its own under the field's. The speaker's controls and its rectangle are kept in uiNamespace `aio_gui_soundButton` and `aio_gui_soundAnchor`
 (the dropdown opens under it and right-aligned to the window's right edge, `CONTENT_X + CONTENT_W`); `fnc_updateSoundButton` recolours it in place (accent icon and line while the dropdown is open, muted icon, dimmed, while nothing is audible).
-The palette button (`icon_palette_ca`, between Close and the speaker; not drawn while `fnc_paletteAllowed` is false) is made the same way, its controls and line kept in uiNamespace `einv_gui_paletteButton` and `einv_gui_paletteLine` for `fnc_updatePaletteButton`; only a left click opens the popover (`fnc_openPaletteMenu`, coalesced under the key `palettemenu`).
+The palette button (`icon_palette_ca`, between Close and the speaker; not drawn while `fnc_paletteAllowed` is false) is made the same way, its controls and line kept in uiNamespace `aio_gui_paletteButton` and `aio_gui_paletteLine` for `fnc_updatePaletteButton`; only a left click opens the popover (`fnc_openPaletteMenu`, coalesced under the key `palettemenu`).
 
 **`fnc_getCell`** -> `[cellW, cellH]`, whole pixels, the same across and down: `round(((UNIT * 1.45) min UNSQUARE(safezoneW / 52))
 / pixelH)`. Every grid uses it. 52 cells across is what two columns of `STORAGE_COLS` 10 cells with their boxes (13 cells each),
 the equipment column and the middle take at 16:9 - 37 px at 1920x1080, which leaves the middle 5 UNIT for the soldier while
-looting. Times the player's **tile scale** `einv_gui_cellScale` (0.8 to 1.3), capped so both columns (`COLUMN_W(cell)`, the
+looting. Times the player's **tile scale** `aio_gui_cellScale` (0.8 to 1.3), capped so both columns (`COLUMN_W(cell)`, the
 same macro `fnc_layoutGlass` sizes them with), three `COLUMN_GAP`s and `CELL_FIT_LEFT` 16 UNIT of equipment column still fit
 `CONTENT_W` - never below the cell at scale 1; 1.3 just fits at 1920x1080 (48 px), 4:3 caps it at about 30 px. A cap is said
-once in the RPT. The cell is worked out at the first ask after `fnc_attach` and kept in uiNamespace `einv_gui_cell` until
+once in the RPT. The cell is worked out at the first ask after `fnc_attach` and kept in uiNamespace `aio_gui_cell` until
 `fnc_onUnload`: a changed scale shows at the next opening, and nothing drawn meanwhile differs. A window with less room caps it
-for itself with **`fnc_capCell [pixels, where]`**: ACE Arsenal's panel (`einv_arsenal_fnc_panelRect`) so its `STORAGE_COLS`
+for itself with **`fnc_capCell [pixels, where]`**: ACE Arsenal's panel (`aio_arsenal_fnc_panelRect`) so its `STORAGE_COLS`
 cells fit within a third of the screen and left of ACE's list; its grids, kit windows and ghosts follow.
 
 **The text scale** (`fnc_textScale`, issue #10): the window's words grow with its tiles. The factor is the cell the window really
 has (`fnc_getCell`, after `fnc_capCell` where a window caps it) over the cell at tile scale 1 (`CELL_BASE_PX`, the same base
 `fnc_getCell` starts from), at least `TEXT_SCALE_MIN` 1 (a tile scale under 1 leaves the words as they were), at most
 `TEXT_SCALE_MAX` (= `CELL_SCALE_MAX` 1.3), and at least what brings a caption's words (`TEXT_REF` 0.42 UNIT) to `TEXT_MIN_PX` 12
-pixels - 1080p at tile scale 1 gets 1.06, a lower resolution more (up to the cap). It is kept in uiNamespace `einv_gui_textScale`
+pixels - 1080p at tile scale 1 gets 1.06, a lower resolution more (up to the cap). It is kept in uiNamespace `aio_gui_textScale`
 with the cell and UNIT it was worked out for, so it changes only when they do. **`TEXT_UNIT`** = `UNIT * TEXT_SCALE` is what the
 words and the rows that hold them are measured in: the section's caption line (`CAPTION_LINE` TEXT_UNITs), its tab, buttons
 (0.6, labels `TEXT_REF`), weight (0.46), box name and fold line (`fnc_drawSection`, and the weight's measure in `fnc_redrawTiles`),
 the activity chip's place and size (handed to `fnc_updateStatus` in `statusRect` / `statusSize`), the column title row (1.1, words
 0.66; `fnc_drawColumn`), the empty storage line (`fnc_layoutGlass`), the page bar's words (the bar keeps `PAGE_BAR_H`), a kit
 window's title row, its buttons and name (`fnc_drawWindow`), the footer's key caps (0.9, `fnc_uiKeyHint`'s default too), version and
-hint box (`fnc_drawFooter`; the hint's words, fixed by `EINV_FooterHint`, take the factor as the structured text's `size`, kept on
-the footer's own hint control as `einv_gui_textScale` - another window's hint line carries none and stays as it is) and the window
+hint box (`fnc_drawFooter`; the hint's words, fixed by `AIO_FooterHint`, take the factor as the structured text's `size`, kept on
+the footer's own hint control as `aio_gui_textScale` - another window's hint line carries none and stays as it is) and the window
 title (`fnc_drawHeader`; its buttons keep the header's height), ACE cargo's cards (`compat_ace_cargo`'s `fnc_drawSection`, its own
 `TEXT_UNIT`; their tab and hairline take the loot colours) and the Arsenal panel's staging subtitle and its prediction of the caption
-line (`einv_arsenal_fnc_layout`: `TEXT_UNIT * CAPTION_LINE + UNIT * 0.25`). `fnc_buttonWidth` and `fnc_sortChip` measure with the sizes they are
+line (`aio_arsenal_fnc_layout`: `TEXT_UNIT * CAPTION_LINE + UNIT * 0.25`). `fnc_buttonWidth` and `fnc_sortChip` measure with the sizes they are
 handed, so the buttons widen with their labels. The equipment column, the menus, the inspect and comparison cards keep their
 sizes; what lies on a tile goes by the cell already.
 **Since issue #24 (0.5.50) everything follows it:** `TEXT_SCALE_MIN` is `CELL_SCALE_MIN`, so the words shrink with the tiles
 too (still never under `TEXT_MIN_PX`), and the equipment column (`fnc_drawEquipmentCards`: caption lines, the weapon cards' padding,
 number strip and names, the Equipment and hotbar labels, the weight card's row), `fnc_drawSlot` (caption line and size, count box,
-number, badge - so the hotbar's slots of `einv_hotbar_fnc_drawStrip` too), `fnc_drawWeightCard` (all of it), `fnc_drawEquipmentDoll`,
+number, badge - so the hotbar's slots of `aio_hotbar_fnc_drawStrip` too), `fnc_drawWeightCard` (all of it), `fnc_drawEquipmentDoll`,
 the tile marks of `fnc_createTile` (window badge, padlock, crossed eye), `fnc_drawInspect` (the whole card, its description's
 structured `size`), `fnc_drawCompare` (the card, `COMPARE_W` times the scale), the name at the mouse (`fnc_makeTooltip`,
 `fnc_updateHover`), the context menu (`fnc_openMenu`) and the drag counter (`fnc_makeGhost`) measure in `TEXT_UNIT`. Left fixed:
@@ -1514,10 +1514,10 @@ the palette and sound popovers of the header, the search field (it goes by the h
 ### Themes
 
 `fnc_themeBase` returns a HashMap with every key; a look copies it and overrides. There is one look, **Glass** (`fnc_theme`, id
-`"main"`, in the feel of Arma's and ACE's menus and Enhanced First Aid Kits); `einv_gui_styles` holds that one entry, kept as a
+`"main"`, in the feel of Arma's and ACE's menus and Enhanced First Aid Kits); `aio_gui_styles` holds that one entry, kept as a
 list so a look could be added. `fnc_theme` adds `equipmentPanel` (a pane under the equipment cards), `titleIcons` and `onAccent`. The accent keys (`accent`, `accentSoft`, `accentHover`, `slotAccent`, `barFill`) are the player's own active element colour from Arma's Options > Game > Colors (profile `GUI_BCG_RGB_*`), read by `fnc_accentColour` whenever a theme is built (the window, the wizard, the Arsenal panel), brightened when too dark for the near-black panes, with the translucent and hover shades and the ink on it (`onAccent`, dark or white by contrast) derived from that one base and the old orange as the fallback without a profile value (issue #14).
-**The palette** (`fnc_palette`, the header's palette button) lets a player change eight things on top of that, each kept as `[]` or `-1` (no choice) until set: `[accent, secondary, alpha, panel, cells, tiles, text, lines]`. A colour is `[hue, saturation, value]`, each 0 to 1 (`fnc_hsv` converts; an older save of `[hue, vividness]` reads as value 1). **Every colour key of the theme follows exactly one row**, and only that row; the table at the top of `fnc_theme` is the reference: **Accent** - `accent`, `accentHover`, `slotAccent`, `barFill`, `onAccent` (read by `fnc_accentColour` in place of the profile's colour, brightened for the dark panes as the profile's colour is, so a pure blue still reads; the hover and the ink on it worked out from it). **Secondary** - the tint of the films `slotCaptionBg` (the caption tabs and chips), `button`, `buttonHover` (what lights under the mouse), `barTrack` and `keyBg`, which keep their own alpha and take its colour (saturation 0 and value 1 is the white they had), and `accentSoft` (queued tiles, picked rows, banners, the pending outline), which is it at `ACCENT_SOFT_ALPHA` instead of the accent's; unset, the swatch shows the accent. **Panels** - the RGB of `panel` (`fnc_panelColour`; `PANEL_COLOR`, the 0.05 grey, without a choice), the near-black of the columns, the header and the footer; `tooltipBg` and `inspectBg` (the comparison card and the mouse's name, the inspect card and kit windows) shifted by the step they have from the plain panel; `card` stays a white film, a step above whatever the panel is. **Transparency** - the alpha of `panel` only (`PANEL_ALPHA` 0.92 by default, down to `PALETTE_ALPHA_MIN` 0.25; the popover shows it as 0 to 75 % see-through). **Cells** - `cell` (the free cells, `fnc_createGrid`'s `cellColor`, and the unsearched tile a step above it), `slot` and `slotEmpty` (the slot boxes and equipment cards). **Tiles** - the five `tileBg` and the count boxes `raised` and `tileCountBg`. **Text** - `text`, `text2`, `muted`, `buttonText`, `keyText`, `tileCountColor`, `slotIcon`: the colour times the grey each has against the white text (0.78, 0.56, 0.88, ...), its dimmer shades. **Lines** - the tint of the films `line` (hairlines, box outlines, and the hatch stripes, which `fnc_createTile`, `fnc_drawSlot` and `fnc_drawSection` draw from it) and of `panelBorder`, `slotBorder`, `tileBorder` where a look sets them (`[]` stays none). **Fixed:** `dim` (the world behind the window), the loot keys and the status colours `gain`, `loss`, `warn`, `info`; the keys that are no colour are the look's own. **Why cells and tiles took on the panel (0.5.44 to 0.5.46):** `cell` (white at 5 %), `slot`, `slotEmpty` and the card under the grid were translucent films and `tileBg` 92 % opaque, laid over `panel`, so a blue panel showed through them blue and a see-through panel made them see-through as well - no key was derived from `panelColour`, the compositing did it. Now `fnc_theme` works out once what each of them looks like on the plain panel (`_fnc_seen`: the film over the card over the panel) and, **as soon as the panels' colour or transparency is chosen, draws them solid in exactly that colour**; a Cells or Tiles choice is solid too: `cell` is the colour and `slot`, `slotEmpty` keep the step they have from the plain cell, the misc tile is the colour and the other four (and the count boxes) keep their step from the plain misc tile, so a weapon keeps its blue hint - a choice equal to the plain colour changes nothing. With none of these choices they stay the films they always were. Where a film was lit by more alpha, a solid one is mixed towards white by the same amount instead: the mouse's light on a tile (`fnc_updateHover`, `HOVER_ALPHA`), the unsearched tile's step above the cell (`fnc_createTile`) and the hover on the wizard's paint canvas (`einv_setup_fnc_uiCanvas`). **Keeping the text readable:** the window's text is white (`text`), light grey (`text2`, 0.78) and grey (`muted`, 0.56), tuned for the near-black panel, so the surfaces under it give way. The value of the panels, the cells and the tiles is cut at `PALETTE_PANEL_VALUE_MAX` 0.3 (`PALETTE_VALUE_MAX` by colour) in three places - `fnc_paletteSet` (what the popover chooses, and what is typed), `XEH_preInit` (what the profile held) and `fnc_theme` / `fnc_panelColour` (whatever else) - which bounds their luminance (gamma 2.2) at 0.07 (white 8.7 : 1, `text2` 5.2 : 1). What still falls short is derived: `fnc_theme` lifts `text`, `buttonText`, `keyText` and `tileCountColor` to `PALETTE_CONTRAST_TEXT` 4.5, `text2` to `PALETTE_CONTRAST_TEXT2` 4.5 and `muted` to `PALETTE_CONTRAST_MUTED` 3 : 1 against the lightest of the panel, the cells and the tiles as they are seen - its hue kept, scaled up to full brightness, then towards white, by halving the step twelve times (a neutral grey comes out as `(c (ground + 0.05) - 0.05) ^ (1 / 2.2)`; with white text only `muted` moves, to 0.59, and only at the lightest panels; nothing moves at the plain look) - and `fnc_accentColour` raises its brightening bar from `ACCENT_MIN_LUMA` 0.12 to `ACCENT_MIN_CONTRAST` 3.3 against the panel, `3.3 (panel + 0.05) - 0.05` (0.35 at the lightest panel, still 0.12 at the default one). The squares of the panels, cells and tiles show only the values up to the cut, so nothing they offer is cut afterwards. Every theme is built from scratch at each `fnc_build`, and the wizard's and the Arsenal's cards when they open, so there is no theme cache: a change shows at the next build, and the window is built again for each step of a drag (`fnc_paletteSet` -> `fnc_buildSoon`, coalesced, columns keeping their scroll) - the same path for every row. `fnc_drawColumn` keeps a scrolled column's panel, title and scroll group across builds, and the colours it was drawn with go with them: a changed panel colour, hairline colour or title colour (what the panels, the transparency, the lines and the text change) is painted over the kept controls (`columnPaint` - panel pieces, hairline, title label, title icon - and `columnPaintLook` on the group, `fnc_paintSurface`), and a change of anything it cannot paint (`columnLook`: ring, accent strip, radius, border) draws the column anew - so a drag with a column scrolled does not send it to the top for a frame at every build; the cells and tiles lie in the sections, which are drawn anew anyway. The server setting `einv_gui_playerColours` ("Players may pick their colours", global, on by default; `fnc_paletteAllowed`) switches the whole thing off: no button, and `fnc_palette` answers `PALETTE_UNSET` (`[[], [], -1, [], [], [], [], []]`) whatever the profile holds, so the accent is the Arma colour and everything else is the theme's own. The choice is `einv_gui_palette` in the profile, read once in `XEH_preInit` (3 to 8 entries: a save from before the cells, tiles, text and lines rows reads them as unset; anything not of that shape is dropped, an alpha beyond the range is cut to it) and written by `fnc_paletteSettle`. The Arsenal panel and the wizard follow the next time they open (they call `fnc_theme` then); the open inventory window is the only one that follows live.
-**No camera.** The live camera on the soldier in the middle, its header button and `einv_gui_cameraDefault` were removed before the first release: the middle shows the world as seen from the soldier's eyes.
+**The palette** (`fnc_palette`, the header's palette button) lets a player change eight things on top of that, each kept as `[]` or `-1` (no choice) until set: `[accent, secondary, alpha, panel, cells, tiles, text, lines]`. A colour is `[hue, saturation, value]`, each 0 to 1 (`fnc_hsv` converts; an older save of `[hue, vividness]` reads as value 1). **Every colour key of the theme follows exactly one row**, and only that row; the table at the top of `fnc_theme` is the reference: **Accent** - `accent`, `accentHover`, `slotAccent`, `barFill`, `onAccent` (read by `fnc_accentColour` in place of the profile's colour, brightened for the dark panes as the profile's colour is, so a pure blue still reads; the hover and the ink on it worked out from it). **Secondary** - the tint of the films `slotCaptionBg` (the caption tabs and chips), `button`, `buttonHover` (what lights under the mouse), `barTrack` and `keyBg`, which keep their own alpha and take its colour (saturation 0 and value 1 is the white they had), and `accentSoft` (queued tiles, picked rows, banners, the pending outline), which is it at `ACCENT_SOFT_ALPHA` instead of the accent's; unset, the swatch shows the accent. **Panels** - the RGB of `panel` (`fnc_panelColour`; `PANEL_COLOR`, the 0.05 grey, without a choice), the near-black of the columns, the header and the footer; `tooltipBg` and `inspectBg` (the comparison card and the mouse's name, the inspect card and kit windows) shifted by the step they have from the plain panel; `card` stays a white film, a step above whatever the panel is. **Transparency** - the alpha of `panel` only (`PANEL_ALPHA` 0.92 by default, down to `PALETTE_ALPHA_MIN` 0.25; the popover shows it as 0 to 75 % see-through). **Cells** - `cell` (the free cells, `fnc_createGrid`'s `cellColor`, and the unsearched tile a step above it), `slot` and `slotEmpty` (the slot boxes and equipment cards). **Tiles** - the five `tileBg` and the count boxes `raised` and `tileCountBg`. **Text** - `text`, `text2`, `muted`, `buttonText`, `keyText`, `tileCountColor`, `slotIcon`: the colour times the grey each has against the white text (0.78, 0.56, 0.88, ...), its dimmer shades. **Lines** - the tint of the films `line` (hairlines, box outlines, and the hatch stripes, which `fnc_createTile`, `fnc_drawSlot` and `fnc_drawSection` draw from it) and of `panelBorder`, `slotBorder`, `tileBorder` where a look sets them (`[]` stays none). **Fixed:** `dim` (the world behind the window), the loot keys and the status colours `gain`, `loss`, `warn`, `info`; the keys that are no colour are the look's own. **Why cells and tiles took on the panel (0.5.44 to 0.5.46):** `cell` (white at 5 %), `slot`, `slotEmpty` and the card under the grid were translucent films and `tileBg` 92 % opaque, laid over `panel`, so a blue panel showed through them blue and a see-through panel made them see-through as well - no key was derived from `panelColour`, the compositing did it. Now `fnc_theme` works out once what each of them looks like on the plain panel (`_fnc_seen`: the film over the card over the panel) and, **as soon as the panels' colour or transparency is chosen, draws them solid in exactly that colour**; a Cells or Tiles choice is solid too: `cell` is the colour and `slot`, `slotEmpty` keep the step they have from the plain cell, the misc tile is the colour and the other four (and the count boxes) keep their step from the plain misc tile, so a weapon keeps its blue hint - a choice equal to the plain colour changes nothing. With none of these choices they stay the films they always were. Where a film was lit by more alpha, a solid one is mixed towards white by the same amount instead: the mouse's light on a tile (`fnc_updateHover`, `HOVER_ALPHA`), the unsearched tile's step above the cell (`fnc_createTile`) and the hover on the wizard's paint canvas (`aio_setup_fnc_uiCanvas`). **Keeping the text readable:** the window's text is white (`text`), light grey (`text2`, 0.78) and grey (`muted`, 0.56), tuned for the near-black panel, so the surfaces under it give way. The value of the panels, the cells and the tiles is cut at `PALETTE_PANEL_VALUE_MAX` 0.3 (`PALETTE_VALUE_MAX` by colour) in three places - `fnc_paletteSet` (what the popover chooses, and what is typed), `XEH_preInit` (what the profile held) and `fnc_theme` / `fnc_panelColour` (whatever else) - which bounds their luminance (gamma 2.2) at 0.07 (white 8.7 : 1, `text2` 5.2 : 1). What still falls short is derived: `fnc_theme` lifts `text`, `buttonText`, `keyText` and `tileCountColor` to `PALETTE_CONTRAST_TEXT` 4.5, `text2` to `PALETTE_CONTRAST_TEXT2` 4.5 and `muted` to `PALETTE_CONTRAST_MUTED` 3 : 1 against the lightest of the panel, the cells and the tiles as they are seen - its hue kept, scaled up to full brightness, then towards white, by halving the step twelve times (a neutral grey comes out as `(c (ground + 0.05) - 0.05) ^ (1 / 2.2)`; with white text only `muted` moves, to 0.59, and only at the lightest panels; nothing moves at the plain look) - and `fnc_accentColour` raises its brightening bar from `ACCENT_MIN_LUMA` 0.12 to `ACCENT_MIN_CONTRAST` 3.3 against the panel, `3.3 (panel + 0.05) - 0.05` (0.35 at the lightest panel, still 0.12 at the default one). The squares of the panels, cells and tiles show only the values up to the cut, so nothing they offer is cut afterwards. Every theme is built from scratch at each `fnc_build`, and the wizard's and the Arsenal's cards when they open, so there is no theme cache: a change shows at the next build, and the window is built again for each step of a drag (`fnc_paletteSet` -> `fnc_buildSoon`, coalesced, columns keeping their scroll) - the same path for every row. `fnc_drawColumn` keeps a scrolled column's panel, title and scroll group across builds, and the colours it was drawn with go with them: a changed panel colour, hairline colour or title colour (what the panels, the transparency, the lines and the text change) is painted over the kept controls (`columnPaint` - panel pieces, hairline, title label, title icon - and `columnPaintLook` on the group, `fnc_paintSurface`), and a change of anything it cannot paint (`columnLook`: ring, accent strip, radius, border) draws the column anew - so a drag with a column scrolled does not send it to the top for a frame at every build; the cells and tiles lie in the sections, which are drawn anew anyway. The server setting `aio_gui_playerColours` ("Players may pick their colours", global, on by default; `fnc_paletteAllowed`) switches the whole thing off: no button, and `fnc_palette` answers `PALETTE_UNSET` (`[[], [], -1, [], [], [], [], []]`) whatever the profile holds, so the accent is the Arma colour and everything else is the theme's own. The choice is `aio_gui_palette` in the profile, read once in `XEH_preInit` (3 to 8 entries: a save from before the cells, tiles, text and lines rows reads them as unset; anything not of that shape is dropped, an alpha beyond the range is cut to it) and written by `fnc_paletteSettle`. The Arsenal panel and the wizard follow the next time they open (they call `fnc_theme` then); the open inventory window is the only one that follows live.
+**No camera.** The live camera on the soldier in the middle, its header button and `aio_gui_cameraDefault` were removed before the first release: the middle shows the world as seen from the soldier's eyes.
 
 | Key | |
 |---|---|
@@ -1541,16 +1541,16 @@ The Arsenal panel has no theme of its own: it is drawn in Glass as it is, with i
 (left click runs `code` with `[1, id]`, right click `[-1, id]`; **the hit area is the drawn button and 2 pixels (`pixelW`, `pixelH`) on each side**, for every button
 (Mia, 0.5.5: easy to hit by a hair, but a button must not take the clicks of the room beside it). `hitPad` - `[x, y]` or `[left, top, right, bottom]` - is kept as the
 12th argument only so that old callers work: whatever is asked is cut to that, the section captions' and the kit windows' large zones included, see "Hit areas" under Section) take a `parent` (`controlNull` for the display, a group for relative coordinates), snap to
-pixels and register top-level controls in `einv_gui_created`.
+pixels and register top-level controls in `aio_gui_created`.
 A **centred** button (`centred` true: the section buttons, the kit windows' buttons, the red Arsenal screen's OK) leaves the centring to the
-engine: its label is a centred `EINV_LabelCenter` as wide as the room between the paddings (`BUTTON_PAD` 0.3 of the height each
+engine: its label is a centred `AIO_LabelCenter` as wide as the room between the paddings (`BUTTON_PAD` 0.3 of the height each
 side; beside an icon, which keeps to the left padding, the room right of it and its gap `BUTTON_GAP` 0.22), and starts above the
 button's middle by `TEXT_MID` 0.66 of its font height, so the line of capitals sits in the middle of the height too - a left-aligned
 label started where the *measured* text would be centred, and `getTextWidth` is short of what the engine draws, so it stood right of
 the middle. `fnc_buttonWidth [text, icon, height, size, theme]` gives the width that fits such a button (paddings, icon, gap and the
 text with `TEXT_SLACK`).
 `fnc_safePicture [path]` -> path or "": a file path (`\` or `/`) ending .paa/.jpg/.png, or none when its .paa exists, that
-`fileExists` finds - asked once per path (uiNamespace `einv_gui_pictures`); `#(...)` passes. `fnc_uiPicture`
+`fileExists` finds - asked once per path (uiNamespace `aio_gui_pictures`); `#(...)` passes. `fnc_uiPicture`
 draws nothing for ""; the wizard's index and editors, the Arsenal header and ACE cargo's cards ask it too (`picture = "picturething"`).
 `fnc_uiItemPicture [display, parent, box, texture, icon, colour, clip, events, share]` -> the control is how the **item's
 own picture** is drawn wherever it is (tiles, slots, the equipment cards, the inspect card, the dragged ghost; see "Grids and
@@ -1558,8 +1558,8 @@ tiles"): the picture of `fnc_uiPicture` made `icon` (`getInfo "icon"`, `[scale, 
 smaller about the box's middle and moved by the offsets, which are a share of the `clip` rectangle's (the tile's, the slot's)
 width and height. The plain icon (`ICON_PLAIN`) is the one control it was. Otherwise the image is measured by the texture's own
 shape (`getTextureInfo`), not by the control it is fitted into: where it stays inside `clip` (half a pixel of give) it is still one
-control, where it would reach out it is made inside an `EINV_Group` of exactly `clip`, which cuts it - the group is what comes
-back, the picture is `getVariable "einv_gui_inner"`. `fnc_uiPictureRounded [display, parent, rect, texture, radius, film, backdrop, icon, events]` draws the same for the editor's picture of a crate or vehicle on its grey (which not every mod's pictures share - ACE's is lighter than BI's, and a script cannot read a picture's pixels - so the backdrop's colour is laid over the edges of the image in `FADE_STEPS` strips of falling strength, clipped to the round box, and no rectangle shows); `fnc_uiPictureCut [display, parent, box, texture, icon, clip, radius, events]` draws a picture by `icon=` cut at a round box: one that reaches out of the box is three groups as `fnc_uiPanel` has three rectangles (the middle and the two sides between the corners), each holding the whole picture, so the box's round corners show the backdrop instead of the group's square ones; `fnc_uiBoxPicture [display, parent, rect, theme, own, preview, icon, radius, events]` is what fills such a box: the rules' picture `own` (`picture=`, on the slot surface with a little air) else the editor's `preview`, both by the class's `icon=` and cut at the box; `[]` when there is neither (the caller shows its icon). A group over a tile reports the buttons and the wheel as the display does (`events`, true except in the wizard's
+control, where it would reach out it is made inside an `AIO_Group` of exactly `clip`, which cuts it - the group is what comes
+back, the picture is `getVariable "aio_gui_inner"`. `fnc_uiPictureRounded [display, parent, rect, texture, radius, film, backdrop, icon, events]` draws the same for the editor's picture of a crate or vehicle on its grey (which not every mod's pictures share - ACE's is lighter than BI's, and a script cannot read a picture's pixels - so the backdrop's colour is laid over the edges of the image in `FADE_STEPS` strips of falling strength, clipped to the round box, and no rectangle shows); `fnc_uiPictureCut [display, parent, box, texture, icon, clip, radius, events]` draws a picture by `icon=` cut at a round box: one that reaches out of the box is three groups as `fnc_uiPanel` has three rectangles (the middle and the two sides between the corners), each holding the whole picture, so the box's round corners show the backdrop instead of the group's square ones; `fnc_uiBoxPicture [display, parent, rect, theme, own, preview, icon, radius, events]` is what fills such a box: the rules' picture `own` (`picture=`, on the slot surface with a little air) else the editor's `preview`, both by the class's `icon=` and cut at the box; `[]` when there is neither (the caller shows its icon). A group over a tile reports the buttons and the wheel as the display does (`events`, true except in the wizard's
 preview) and hands the wheel to the scrolling group it lies in, `fnc_passWheel` (`WHEEL_STEP` 3 `UNIT`): a group nested in a
 column takes the wheel from it (`fnc_createGrid`), and its picture, larger than it, would make it scrollable - its scroll is put
 back to the top at every turn, and again for `UNSCROLL_FRAMES` frames from `fnc_onFrame` (`fnc_unscroll`): the engine scrolls the group after
@@ -1568,7 +1568,7 @@ the handler ran, so a reset in the handler alone left it one step down each turn
 ### The hook table (window engine for other displays)
 
 The rule that keeps the inventory safe: **with an empty hook table every function of the gui addon behaves as the plain
-inventory.** A hook may only be asked through `einv_gui_fnc_hook [name, args, default]`: absent gives the default; a flag gives
+inventory.** A hook may only be asked through `aio_gui_fnc_hook [name, args, default]`: absent gives the default; a flag gives
 its value; code is called with `args` and its answer used unless nil. `fnc_isInventoryMode` is true with no hooks, and every
 inventory-only feature asks it: nearby boxes, selecting, the band, group drags, the hotbar, repacking.
 
@@ -1592,7 +1592,7 @@ inventory-only feature asks it: nearby boxes, selecting, the band, group drags, 
 | `dragCheck` | `[dragTarget, entry, sourceGrid, slotSource]` | the target as it is to stand, `[]` for none, nil to leave it - last of everything | `fnc_updateDrag` |
 | `drop` | `[kind, sourceIndex, tileIndex, slotSource, entry, count, targetIndex, col, row, w, h, targetSlot, place, rot]` (**14**) | BOOL, true = handled - after the `!fits` exit | `fnc_endDrag` |
 | `ground` | `[source, count]` | BOOL, true = handled - `source` is `[unit, slot]` or `[grid index, tile index]`, count -1 for all | `fnc_quickUnequip`, `fnc_dropToGround`, `fnc_quickMove`, just before each falls back to the ground |
-| `fold` | `[container]` | BOOL, true = the window keeps its folds itself (`einv_gui_collapsed` is left alone, the window is drawn again) | `fnc_toggleSection` |
+| `fold` | `[container]` | BOOL, true = the window keeps its folds itself (`aio_gui_collapsed` is left alone, the window is drawn again) | `fnc_toggleSection` |
 | `signature` | `[]` | `[holder, ...]` - holders the window draws itself, beside the unit's sections; their cargo and places are part of the "storage" signature, so a change there (a move inside the Arsenal's staging space) builds the window | `fnc_getSignature` |
 | `menu` | `[display]` | choices - replace the default, `[]` = no menu, nil = the default | `fnc_contextMenu` |
 | `filter` | `[]` | nothing - after the tiles were dimmed and hidden for the search and the categories | `fnc_applyFilter` |
@@ -1606,7 +1606,7 @@ ACE Arsenal's panel is the only window that attaches today. It sets `guest`, `th
 kept as the surface for a later window.
 
 `drop`'s `place` is false when the cell is taken in a kit's grid (whose layout finds another); `rot` is 0 upright, 1 turned. **The
-click target** (the `click` hook; element 8 of `einv_gui_press`) is a HashMap: `type` (`"tile"`, `"slot"`, `"cell"`, `"none"`),
+click target** (the `click` hook; element 8 of `aio_gui_press`) is a HashMap: `type` (`"tile"`, `"slot"`, `"cell"`, `"none"`),
 `grid`, `tile` (-1 unless a tile), `cell` `[col, row]`, `slot` (an index into the slots), `source`. A window that listens also
 gets presses on empty slots, free cells and nothing (nothing is lifted from them), and a Shift double click counts as a double
 click.
@@ -1614,14 +1614,14 @@ click.
 **Source grids and zones.** A grid with `"source"` (a STRING) is a place things come from and never a target: `virtual`, no
 container, never faded by the search nor searched. A tile on it may carry `dragEntry` (class, `w`, `h`, `count` = how many may go
 at once, `ammo`, `capacity`, `attachments`, `controls`), `dragStart` (the first count, 1; Shift takes the stack), `grab`, `size`;
-a drag from it is **always ended by the `drop` hook**, `fnc_endDrag` then only cleans up. Zones are `uiNamespace einv_gui_zones =
+a drag from it is **always ended by the `drop` hook**, `fnc_endDrag` then only cleans up. Zones are `uiNamespace aio_gui_zones =
 [[rect, id], ...]`, emptied by every build and filled by whoever draws the area; over one (and no slot or grid) the target is
 `["zone", index, 0, 0, true, ""]` and only the `drop` hook acts on it.
 
 ### Layout
 
 `| equipment | free middle | loot | storage |` (`fnc_layoutGlass`). **Where the loot column goes** is the client setting
-`einv_gui_lootSide` (read at every build, so an open window follows at its next one): `left` (default) puts the storage column at the right
+`aio_gui_lootSide` (read at every build, so an open window follows at its next one): `left` (default) puts the storage column at the right
 edge always, looting or not, and the loot column left of it; `right` is the order before the setting, `| storage | loot |`, with the loot
 column at the right edge and the storage column moving in once something is looted. The columns have the same widths either way, so the
 free middle is as wide in both and only lies against the other column, the storage column is made at the same x with its scroll kept by its id. A window that reserves the right edge for itself
@@ -1631,7 +1631,7 @@ column shows now opens in the middle, one column away from its tile - and the in
 `secondary`, `equipment` (`fnc_getEquipment`), `ownSections`, `lootSections`, `looting`; a window that attached may
 add `rightColumn`, `rightKeep`, `rightGrow` (reserve and grow the loot column's place; the rect comes back as `rightRect`) and
 `storageSections`. The layout answers where the soldier stands, or `[]` when the middle is too narrow; on 4:3 the middle gives way
-first, then the equipment column. Every panel goes into `einv_gui_panels`: an item let go outside all of them goes on the ground.
+first, then the equipment column. Every panel goes into `aio_gui_panels`: an item let go outside all of them goes on the ground.
 
 - **Equipment column** (`fnc_drawEquipmentCards`): the weight card; three weapon cards (primary, handgun, launcher: the picture,
   every attachment slot and loaded magazines as small slots; the weapon in hand in the accent colour); the gear row **headgear |
@@ -1645,11 +1645,11 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   with one section per container. **Loot and own apart** (issue #7): the own column is titled "Your gear" (`Column_Storage`), the loot
   column "Loot - <what>" (`Column_LootOf`: the body's or person's name, the crate, "Ground", "Nearby"; `fnc_layoutGlass`), and the
   column with id `"loot"` takes the theme's loot look - `lootPanel` pane, a `lootBorder` ring, a 2 px `lootAccent` strip under the title
-  and the title icon in it - in either order of `einv_gui_lootSide`, since it goes by the id, not the side of the screen. In the loot
-  column a uniform, vest or backpack's caption names its wearer, "Backpack - Miller" (`Section_OwnedBy`, `einv_storage_fnc_getOwner`,
+  and the title icon in it - in either order of `aio_gui_lootSide`, since it goes by the id, not the side of the screen. In the loot
+  column a uniform, vest or backpack's caption names its wearer, "Backpack - Miller" (`Section_OwnedBy`, `aio_storage_fnc_getOwner`,
   `fnc_ownerName`: ACE's name, else the unit's displayName), and its tab, fold line and hairline take `lootTab` / `lootLine`. ACE
   Arsenal's panel draws a `"storage"` column with `"own"` sections and is untouched; the column's `id` (`"storage"`, `"loot"`) is how `fnc_build` keeps its scroll
-  (`fnc_scrollPixels`, restored a frame later through `einv_gui_scrollRestore`). Cells are controls created directly in the group:
+  (`fnc_scrollPixels`, restored a frame later through `aio_gui_scrollRestore`). Cells are controls created directly in the group:
   a nested group would eat the wheel. **A column scrolled down keeps its group:** `fnc_build` notes each column group with a scroll (its id, `scrollPixels`) and hands it over in
   uiNamespace `keepColumns` (id -> [group, panel and title controls, [rect, title, icon]], what `fnc_drawColumn` stores on the group as `columnParts`/`columnKey`), spares those controls in its
   sweep and, in `fnc_drawColumn`, a column drawn again in the same rect with the same title and icon draws its sections into the old group first, deletes what stood in it in the same call
@@ -1664,20 +1664,20 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   row for it; on every container section of the inventory the player may change, also an empty one, never on a section that only
   shows - `virtual`). **The Sort button cycles:** its label names the order the player sorts by now - Name, Weight, Size or Type
   (`SORT_MODES`, `fnc_sortText`) - and a click steps to the next one and sorts by it (`step`). The order is each player's own,
-  `einv_gui_sortMode` in the profile, and travels as the op's second argument and the move's `"order"`; the op runs where the
+  `aio_gui_sortMode` in the profile, and travels as the op's second argument and the move's `"order"`; the op runs where the
   container's root is local and writes the places everyone reads (section 3, `fnc_getLayout`). The button is as wide as the widest
   of its four labels (`fnc_sortChip`), so the caption line never moves; every Sort button on the window - sections and kit windows
-  (`fnc_drawWindow`) - is registered with its label and hit area (`fnc_sortButtons`, uiNamespace `einv_gui_sortButtons`, emptied by
+  (`fnc_drawWindow`) - is registered with its label and hit area (`fnc_sortButtons`, uiNamespace `aio_gui_sortButtons`, emptied by
   each build) and changes its label and tooltip in place when any of them is clicked. The tooltip says what the next click sorts by.
   The tab gives up room down to three characters, then the last button goes, then the one before it; both are drawn disabled
   while a move out of the section is under way. A cross on a container opened from inside another (`fnc_closeNested`). Beyond the keys of the storage's
   sections (section 3) a section may say `drawer` (a function name another addon draws it with: ACE cargo's cards), `placeholder`
   (a container the unit lacks: a hatched box that is its slot when it has an `owner`), `worn` + `unit` (a body's compact doll,
   `fnc_drawEquipmentDoll`), `locked` (a padlock and one muted line, nothing of what it holds; `lockTip` adds an open padlock). Own
-  sections start open, crates found around start folded; `einv_gui_collapsed` holds the containers the player turned the other
+  sections start open, crates found around start folded; `aio_gui_collapsed` holds the containers the player turned the other
   way. **Hit areas** (Mia, 0.5.5, 0.5.7): the caption line is `CAPTION_LINE` 0.8 UNIT high; its buttons are 0.6 UNIT high and centred on it, and **every hit area is the drawn
   thing and 2 pixels on each side** - `fnc_uiButton` cuts any `hitPad` it is asked for to that (see "The UI kit"), the tab and chevron (`fnc_toggleSection`), a nested container's cross
-  and the fold line (`EINV_Hitbox` made with the same 2 pixels) the same. The kit window's buttons and cross and the header's four buttons are buttons and have only that. Nothing reaches
+  and the fold line (`AIO_Hitbox` made with the same 2 pixels) the same. The kit window's buttons and cross and the header's four buttons are buttons and have only that. Nothing reaches
   over the empty room between the lines, and nothing over a grid's cells. (The larger zones of 0.5.1 - `CAPTION_HIT_UP` and the like, a cell high - are gone.)
 - **Section bars: the activity chip and the strip of categories** (`fnc_updateStatus`, `fnc_animateStatus`, `fnc_stopStatus`, `fnc_drawGroupStrip`,
   `fnc_paintGroupStrip`, `fnc_setGroup`, `fnc_itemGroup`, `fnc_boxGroup`, `fnc_matchesGroup`). **The chip** is the one place the hands' queue and the search show
@@ -1696,7 +1696,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   time alone. `fnc_onFrame` calls `fnc_animateStatus` while `GVAR(statusLive)` (the caption lines hold a chip): one `ctrlSetAngle` on each
   ring (`STATUS_SPIN_SPEED` degrees a second) and a `ctrlSetText` only when the words changed - the hands' count when an entry finished, the search's time once a second;
   a chip whose box has nothing left asks `fnc_updateStatus`, which deletes it and shows the weight again. **The strip** (`fnc_drawGroupStrip`) is one rounded bar (`slotCaptionBg`, the theme's radius at most half its width, `SQUARE(UNIT)` wide) holding a column of
-  white pictures between a loot box's picture and its grid - All (`slot_cat_all_ca`), then every category there is (`fnc_stripEntries`: `einv_items_fnc_categories`, each with `fnc_groupTexture` and the `label` of `fnc_categoryInfo`): weapons (`slot_rifle_ca`), ammunition (`slot_magazine_ca`), grenades (`slot_grenade_ca`), gear (`slot_vest_ca`), medical
+  white pictures between a loot box's picture and its grid - All (`slot_cat_all_ca`), then every category there is (`fnc_stripEntries`: `aio_items_fnc_categories`, each with `fnc_groupTexture` and the `label` of `fnc_categoryInfo`): weapons (`slot_rifle_ca`), ammunition (`slot_magazine_ca`), grenades (`slot_grenade_ca`), gear (`slot_vest_ca`), medical
   (`slot_cat_medical_ca`), food and drink (`slot_cat_food_ca`), tools and electronics (`slot_radio_ca`), other (`slot_cat_misc_ca`), the four `slot_cat_*` drawn by
   `tools/generate_ui_textures.py` (`--only name,name` makes just those), then the setup's own (the picture it gave them, else `icon_star_ca`), and a built-in category too wears the picture the setup gave it. The strip has `STRIP_SLOTS` 9 fields (the eight built-in categories fill them with All); with more categories the last field is "more" (`icon_chevron_down_ca`, tooltip "More categories (1 of 2)"): All stays on top, the categories come 7 at a time, and a click on "more" (`fnc_stripMore`) gives the same fields the next group's picture, tooltip and category - nothing is made or deleted, a field a short last group leaves over is hidden - and goes round to the first; the group shown is kept per box in `GVAR(stripPages)` until the window is attached again, the strip's `strip` info entries are `[id, field, picture, hit]` (the id changes with the group, "" for a hidden field) and `fnc_paintGroupStrip` lights "more" while the chosen category is on another group. Only for a section in the loot column with a container and a grid of its own (not the player's
   own containers, not a kit's grid, not a locked or placeholder section), and where the column can spare `strip + gap` beyond the grid: the strip takes its room from the
@@ -1709,9 +1709,9 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   search field dims** (Mia, 0.5.7: "only items of this kind"): `fnc_applyFilter` sets the tile's `filteredOut` and hides the controls of every tile that is not of the chosen group (a tile not
   searched yet is of none), makes or shows the squares of the cells such a tile lies on (grid `filterCells`; `fnc_drawCells` makes none under a tile) and hides them again under a tile that is back,
   so the box reads as a grid with only that kind in it; `fnc_updateHover` does not find a `filteredOut` tile (its cells are found as free cells), though the cells stay taken in the layout:
-  a drop there is refused as on any tile. The state of a tile is kept on its first control (`einv_gui_fx`: 0 shown, 1 dimmed, 2 hidden, none = made new): controls made new take their state at
+  a drop there is refused as on any tile. The state of a tile is kept on its first control (`aio_gui_fx`: 0 shown, 1 dimmed, 2 hidden, none = made new): controls made new take their state at
   once, with no fade (a page turned to in a filtered box showed every tile at full strength for the tenth of a second the fade took), the typing and the strip's own passes (`jump`) fade as before.
-  `fnc_itemGroup [class]` is the first of the item's "groups" (`einv_items_fnc_getInfo`: what `cats=` / `einv_cat` say, else the built-in mapping `einv_items_fnc_defaultGroup`, which used to live here; section 2) and `fnc_matchesGroup [class, group]` is true when the chosen category is any of them - an item in several categories shows under each; nothing is kept here, since the rules can move an item and `getInfo` answers from its own store until they change. The built-in mapping is the first that applies of: medical (category medical or a kit) -> weapon (rifle, handgun, launcher, muzzle, optic, rail, bipod) -> grenade (the kind grenade, or a magazine whose ammo simulates a mine or a directional bomb) -> ammo (every other magazine) -> gear (uniform, vest, backpack, headgear, nvg, goggles, binocular) -> food (ACE field rations' `acex_field_rations_hungerSatiated` / `thirstQuenched` in config, or a class name that says ration, canteen, food, drink ...) -> tool (map, gps, radio, compass, watch, an ACRE or TFAR radio or `einv_sound = "device"`, or a name that says wire cutter, cable tie, flashlight, defusal kit ...) -> other. A tile not searched yet matches no category. A category chosen at a box that the setup has since taken out matches nothing; choosing it again, or All, clears it (the window is built again when the rules change).
+  `fnc_itemGroup [class]` is the first of the item's "groups" (`aio_items_fnc_getInfo`: what `cats=` / `aio_cat` say, else the built-in mapping `aio_items_fnc_defaultGroup`, which used to live here; section 2) and `fnc_matchesGroup [class, group]` is true when the chosen category is any of them - an item in several categories shows under each; nothing is kept here, since the rules can move an item and `getInfo` answers from its own store until they change. The built-in mapping is the first that applies of: medical (category medical or a kit) -> weapon (rifle, handgun, launcher, muzzle, optic, rail, bipod) -> grenade (the kind grenade, or a magazine whose ammo simulates a mine or a directional bomb) -> ammo (every other magazine) -> gear (uniform, vest, backpack, headgear, nvg, goggles, binocular) -> food (ACE field rations' `acex_field_rations_hungerSatiated` / `thirstQuenched` in config, or a class name that says ration, canteen, food, drink ...) -> tool (map, gps, radio, compass, watch, an ACRE or TFAR radio or `aio_sound = "device"`, or a name that says wire cutter, cable tie, flashlight, defusal kit ...) -> other. A tile not searched yet matches no category. A category chosen at a box that the setup has since taken out matches nothing; choosing it again, or All, clears it (the window is built again when the rules change).
 - **Compartments.** `fnc_flowCompartments [layout, cell]` -> `[places, height, width]`, drawn by `fnc_drawCompartments [display,
   parent, [left, top], section, layout, places, theme, window]`. Flowed compartments (`pos` `[]`) lie side by side as far as
   `STORAGE_COLS` cells reach, then on the next line, `COMPARTMENT_GAP` (0.22 cell, pixel-rounded) between blocks. A compartment
@@ -1734,7 +1734,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   cell)` names a stretch, `colAt`/`rowAt` the last column starting in it or before, and the point lies in that one or the one
   before; the room of a seam belongs to the cell before it only where the cells across it are the same grid's (a tile can lie
   over it), so the room between two compartments is no cell. The drag's geometry (`dragRoom` "geometry", "hold") uses the same
-  extents and rule. `einv_setup_fnc_drawPreview` draws the same flow and panels, its cell shrinking until the width fits.
+  extents and rule. `aio_setup_fnc_drawPreview` draws the same flow and panels, its cell shrinking until the width fits.
 - **Grids and tiles.** `fnc_createGrid [display, parent, [relX, relY], rows, theme, section id, cols, holes, [colX, rowY]]` -> a
   HashMap: `parent`, `rel`, `cols`, `rows`, `cellW`, `cellH`, `colX`, `rowY` (where each column and row starts from `rel`; the
   plain pitch unless a canvas's seams), `colAt`, `rowAt` (per stretch of one cell, the last column or row starting in it or
@@ -1748,32 +1748,32 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   theme]` draws the surface in the category's colour over the entry's cells only (a shaped tile: runs of cells with one-pixel
   bridges; `"backgrounds"` and `"rect"` kept for hover, flash, reveal and the repack film), the picture, the short name, a
   stack's count and a magazine's fill. A **turned tile** (`rotated`; the dragged ghost held turned, also a row dragged from
-  ACE's list) draws its picture **upright**, in the one plain `EINV_Picture` of any other tile, fitted with its shape kept
+  ACE's list) draws its picture **upright**, in the one plain `AIO_Picture` of any other tile, fitted with its shape kept
   (`ST_KEEP_ASPECT_RATIO`) into the turned footprint (the swapped `w` and `h` as the box). Nothing is rotated: `ctrlSetAngle` on a
   picture came out squashed or out of the tile for pictures that are not square (0.4.7 to 0.5.17 tried a square control and one in
   the picture's own proportion), so a wide texture is simply small in a tall footprint and item pictures should be square. The
   footprint itself (R, the swapped size, placement, records) is unchanged, and the ghost is drawn exactly as its tile. The
   hotbar and the inspect card draw upright as ever.
   **Since issue #24 (0.5.50) a turned tile's picture is turned along**, which supersedes the above. `fnc_uiPictureTurned
-  [display, parent, box, texture, colour, icon, clip, share]` makes an `EINV_PictureTurned` (ST_PICTURE 48 without
+  [display, parent, box, texture, colour, icon, clip, share]` makes an `AIO_PictureTurned` (ST_PICTURE 48 without
   ST_KEEP_ASPECT_RATIO - the keep-aspect fit is worked out on the turned box and was what squashed 0.5.17's) in the texture's
   own shape (`getTextureInfo`), in whole pixels, fitted so that turned (shown `h` wide and `w` high) it fills the turned box
   along its longer side, times icon= scale, capped to the clip rectangle, its offsets turned (right -> down, down -> left) and
   its middle held inside; then `ctrlSetAngle [90, 0.5, 0.5, true]` (the point is a share of the control: its middle) and the
-  angle kept in `einv_gui_angle` so a mover turns it again after each commit (`fnc_updateDrag` for the ghost and the group
+  angle kept in `aio_gui_angle` so a mover turns it again after each commit (`fnc_updateDrag` for the ghost and the group
   ghosts). A turned control inside a controls group that is moved or scrolled is drawn in the wrong place, so a **turned
   tile** (`fnc_createTile`, not the wizard's preview, only on the inventory's display) keeps its upright `fnc_uiItemPicture`
   as the fallback and `fnc_turnPicture` lays a turned one over it **on the display** (disabled, so the mouse and wheel pass
-  to what is under it), recorded in uiNamespace `einv_gui_turnedPictures` as `[turned, fallback, its picture, its colour,
+  to what is under it), recorded in uiNamespace `aio_gui_turnedPictures` as `[turned, fallback, its picture, its colour,
   grid parent, middle in the parent's space, state]`. `fnc_syncTurned` (every frame from `fnc_onFrame`, before anything can
   exit, and once at creation) walks each tile's groups from the top as `fnc_gridOrigin` counts (a pending scroll included)
   for where its space lies and what the groups show; the turned picture shows only where the fallback is shown with every
-  group, lies wholly inside what they show (half a pixel of give) and under no kit window later in `einv_gui_windows` than the
+  group, lies wholly inside what they show (half a pixel of give) and under no kit window later in `aio_gui_windows` than the
   tile's own, inspect card, comparison card or name at the mouse - then it takes the fallback's fade and the fallback's
   picture goes alpha 0; otherwise it hides and the fallback shows upright. A record whose fallback is gone is dropped and
-  its turned picture deleted (a build's sweep of `einv_gui_created` deletes them anyway). The dragged ghost held turned
+  its turned picture deleted (a build's sweep of `aio_gui_created` deletes them anyway). The dragged ghost held turned
   (`GVAR(dragRot)` 1) and a group ghost of a tile lying turned are `fnc_uiPictureTurned` directly (on the display already).
-  With `einv_gui_debugTiming` on, `fnc_uiPictureTurned` writes one RPT line per texture and box size: texture info, box px,
+  With `aio_gui_debugTiming` on, `fnc_uiPictureTurned` writes one RPT line per texture and box size: texture info, box px,
   control px before the turn, its position, `ctrlAngle` and whether it was made on the display or in a group.
   **The picture is drawn by the item's `icon`** (`icon=`, `getInfo "icon"`, `fnc_uiItemPicture`): `fnc_createTile` (clip: the
   tile's rectangle, its box for a shaped item; an entry may carry its own `"icon"`, and `"preview"` for the wizard's tile),
@@ -1797,17 +1797,17 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   small flat box in the `raised` colour at the bottom right - one label with the box as its own background
   (`fnc_drawCountBackdrop` with "only measure", argument 11; a hotbar slot's count the same) -; one that does not stack shows nothing; a magazine's rounds then
   move to the bottom left. Counts over a picture stand on a dark pill (`fnc_drawCountBackdrop`, sized for the widest text the
-  label can become, since a repack writes rounds live). The fill bar (`einv_gui_magazineFillBar`) shows on magazines that are
-  not full; the rounds as words only while `einv_gui_magazineText` is on (tiles only - a weapon's magazine slot keeps them;
+  label can become, since a repack writes rounds live). The fill bar (`aio_gui_magazineFillBar`) shows on magazines that are
+  not full; the rounds as words only while `aio_gui_magazineText` is on (tiles only - a weapon's magazine slot keeps them;
   without the label a repack writes no rounds, its bar still runs).
 - **Tall compartments.** `fnc_viewBlocks [layout, holder]` -> `[blocks, hidden, foldable, cells, paging]` shows a tall compartment down to
   its last row in use plus `COLLAPSE_SPARE_ROWS` 2, at least `COLLAPSE_MIN_ROWS` 4, and only folds when that hides
   `COLLAPSE_HIDE_MIN` 4 rows or more; one line under the grid, "+32 empty rows (256 cells)", opens them (`fnc_toggleRows`,
-  `einv_gui_expanded`). A positional compartment never folds; kit windows and the own storage column are not folded. Only the
-  view: the grid stays whole. A container with rows folded away registers its fold line and its box in uiNamespace `einv_gui_foldAreas`
+  `aio_gui_expanded`). A positional compartment never folds; kit windows and the own storage column are not folded. Only the
+  view: the grid stays whole. A container with rows folded away registers its fold line and its box in uiNamespace `aio_gui_foldAreas`
   (`fnc_drawSection`, emptied by each build): a drag let go on either, or on a cell that does not take the item, lays it down in the
   first free spot of the whole container (below, `fnc_updateDrag`).
-- **Pages** (`einv_gui_pageRows`, client; `fnc_pageRows`: 0 or `MAX_ROWS` 40 off, else at least `PAGE_MIN_ROWS` 4). A compartment of the loot column
+- **Pages** (`aio_gui_pageRows`, client; `fnc_pageRows`: 0 or `MAX_ROWS` 40 off, else at least `PAGE_MIN_ROWS` 4). A compartment of the loot column
   (not canvas compartments, not the own storage, not kit windows) whose view - its rows down to the last in use plus the spare rows, or all of
   them where the fold would hide fewer than four - is taller than the page is cut into pages: `fnc_viewBlocks` answers `paging` per compartment,
   `[page, [[from, to], ...]]` (`fnc_pageRanges`: cut in steps of the page size, but never through a tile, so a page can be a row or two short; one tile
@@ -1829,10 +1829,10 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   the box, **nothing lies over the tiles** (the fade strips and the chip over the page's edge of 0.5.0 are gone: they covered the first or last row's tiles).
   It is one control: a track with a round arrow button at each end (0.5.5: nearly the bar's height, 1.5 times as wide as high; a surface of its own, dimmed and inert when there is no page that way, a second surface over it
   that fades in under the mouse - `ctrlSetFade` 0.08 s in, 0.2 s out - and the search's mark at the button's corner) and, between them, one line that says where it stands and
-  what lies elsewhere: "Page 2 / 5 · +180 items on other pages · 12 queued". The hit area of an arrow is its button and 2 pixels around it (an `EINV_Hitbox` made last,
+  what lies elsewhere: "Page 2 / 5 · +180 items on other pages · 12 queued". The hit area of an arrow is its button and 2 pixels around it (an `AIO_Hitbox` made last,
   so nothing lies over it; the bar between is free). **On the last page** (not the first) the line reads "Last page · 174 items on earlier pages" (`Page_Last_None`,
   `Page_Earlier`; the matches replace the items while the search holds something), in the brightest text, and the arrow back is the emphasised one: the `buttonHover` surface
-  and an `accent` icon. Whenever there is a page before, the words are a hit area of their own (the label's rectangle, an `EINV_Hitbox` with the tooltip "First page") that
+  and an `accent` icon. Whenever there is a page before, the words are a hit area of their own (the label's rectangle, an `AIO_Hitbox` with the tooltip "First page") that
   jumps to page 1 (`fnc_setPage [grid, 0]`) and lights the words under the mouse. `fnc_pageCounts` says how many tiles and matches each page holds; while the search field holds something the
   matches on other pages replace the items, and the queued count is the tiles of the box that are `offPage` and `queued` (the hands' queue marks them in `fnc_drawQueue` though
   they have no controls: an entry whose tile is not drawn has no tint). A last page that would hold no tile at all - only the spare rows after the last item in use - is not made: `fnc_pageRanges` joins its rows to the page
@@ -1856,7 +1856,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   right-aligned before the fill text with one gap each; the name keeps its width up to 4 UNIT, else Sort gets compact - `fnc_sortChip` argument 3: 1 the icon and "Sort", 2 the
   icon alone, the order in the tooltip (`fnc_sortText`'s third answer, `fnc_sortButtons [controls, compact]`) -, then goes; a
   press on a button neither raises nor moves the window, record key `buttons`) and a scroll body with the kit's grid (`window` =
-  its key; the body is at most `WINDOW_VIEW_ROWS` 10 rows of cells high, a taller grid or several compartments scroll inside it with the engine's own scroll bar, `fnc_gridOrigin` counting the offset). Open windows are `einv_gui_windowOrder` (bottom first), placed by `fnc_placeWindow` beside the tile they were opened from, moved by a
+  its key; the body is at most `WINDOW_VIEW_ROWS` 10 rows of cells high, a taller grid or several compartments scroll inside it with the engine's own scroll bar, `fnc_gridOrigin` counting the offset). Open windows are `aio_gui_windowOrder` (bottom first), placed by `fnc_placeWindow` beside the tile they were opened from, moved by a
   press on the title, raised by any press (`fnc_raiseWindow`: that window alone is made again, last), opened by `fnc_openWindow
   [key, anchor]`, closed by the cross, Escape on the topmost, or `fnc_closeWindow [key]`. **Hit testing** is by layer (`fnc_topAt
   [point]` -> `"inspect"`, a window key or `""`): menu, inspect card, windows (top first), columns; hover, drag targets, press,
@@ -1868,7 +1868,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   ghost, `fnc_makeGhost`, **held by its middle** - the middle of the picture is the pointer whichever cell was pressed, and the press's grab is
   set to the middle cell, `floor(w/2)`, `floor(h/2)`, again after each turn; the source fades; a footprint shows green where it fits, red where not). A stack goes whole, **Shift**
   half; the **wheel** changes the count (`fnc_onMouseZ`), the middle button takes all; **R** turns what is held (`fnc_rotateDrag`:
-  `einv_gui_dragRot` apart from `einv_gui_dragSize`, a quarter clockwise and back, the item staying held by the same cell). Column
+  `aio_gui_dragRot` apart from `aio_gui_dragSize`, a quarter clockwise and back, the item staying held by the same cell). Column
   and window edges scroll while dragging. Nothing is lifted that could go nowhere (a living person's item the player may not
   touch).
 - **What a locked compartment shows** (`fnc_drawBadge`, called at the end of `fnc_drawCells`, so after every draw of tiles, a page turned and a move). A compartment that accepts only some categories or is a single slot says so when something lies in it too, by the **watermark**: an empty compartment shows its first category's picture (`fnc_groupTexture`) large and faint in the middle, one with something in it the same picture, half a cell, on each free cell while at most `WATERMARK_CELLS_MAX` 12 are free (alpha 0.12, single slots 0.2). It is made over the tiles and kept in the grid's `badge` list, deleted and made again with the cells; 1 control for an ordinary compartment's nothing, 1 to 12 for a locked one. There is **no badge in the corner** since 0.5.12 (the film with the category pictures and the "1" of a single slot, `BADGE_ICONS_MAX`, was taken out: Mia found the faint pictures enough; the function keeps its name). A single slot without a category has no picture to show and only the hover hint. Hovering a tile or a free cell of such a compartment says what it takes in the footer (`fnc_updateHover`, the `cell` case and the tile's own: "Only medical items here" in the accent colour, and "holds one item, whatever its size" for a single slot) - the hint line is this window's tooltip, and a control over the cells would take the mouse from the tiles.
@@ -1888,22 +1888,22 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   compartment at half strength, the hint "Goes to the first free spot of this box - not onto a hidden item" - and is refused within one
   box.
 - **What a lift costs.** It makes few controls and reads little: the green highlight of each slot that takes the item (some fifteen
-  controls with round corners) is made once per build by `fnc_glowSlot` into uiNamespace `einv_gui_glowCache`, ahead of time by
+  controls with round corners) is made once per build by `fnc_glowSlot` into uiNamespace `aio_gui_glowCache`, ahead of time by
   `fnc_warmTargets` (one of the player's own slots per idle frame from `fnc_onFrame`, `glowNext` remembers how far), and a drag only
   shows it (`fnc_showTargets`, `dragGlow`) and hides it again (`fnc_endDrag`); a build empties the cache. `fnc_showTargets` reads
-  the unit's equipment once and only for an item that may go on a weapon's part; `einv_storage_fnc_slotAccepts` answers a part slot
-  from the item's kind before it looks at the weapon, and keeps what each weapon takes in `einv_storage_compatSets` (class names in
+  the unit's equipment once and only for an item that may go on a weapon's part; `aio_storage_fnc_slotAccepts` answers a part slot
+  from the item's kind before it looks at the weapon, and keeps what each weapon takes in `aio_storage_compatSets` (class names in
   lower case, config read once). `fnc_select "only"` draws no frames again when the tile is the selection already; a group makes
   footprints, shapes and pictures only when its tiles lie in one compartment (the only case `fnc_groupMode` keeps their
   arrangement).
 - **What a hovering frame costs.** `fnc_updateHover` runs when the mouse moved and at every check. Where every grid (its window,
   the box its column shows, its origin, the box of its cells that show), slot and info area lies is `fnc_hoverGeometry`'s answer, kept in
-  uiNamespace `einv_gui_hoverGeom` and handed out again while the lists of grids, slots and info areas are the same arrays with as
+  uiNamespace `aio_gui_hoverGeom` and handed out again while the lists of grids, slots and info areas are the same arrays with as
   many entries, no window or the inspect card moved, the groups they lie in (their scroll and `contentH` are read per call, a
   handful of commands) did not change, no scroll waits to be put back, and `CHECK_INTERVAL` has not passed; `force` always works it
   out again. The lookup then compares boxes (only a grid whose cells that show hold the mouse is asked, `fnc_screenToCell` with its
   4th argument so no group chain is walked) instead of walking the groups of every grid and slot. Once a tile or a slot is found,
-  the box of its cell (or slot) that no earlier grid or slot reaches into is kept as `einv_gui_hoverHold` with the hover it belongs
+  the box of its cell (or slot) that no earlier grid or slot reaches into is kept as `aio_gui_hoverHold` with the hover it belongs
   to: a mouse moving inside it, with the same geometry and layer, ends the call after the stamp check - no lookup, no hint, no
   name or card made again. Only a changed target does work: the light, the name at the mouse or the comparison card (a control
   made then, never per frame), the hint's text. A free cell is held like a tile ("nothing" never is: a redraw resets the hover to `[]`, and
@@ -1917,7 +1917,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   A free cell of a grid that holds things (not a virtual or
   overflow grid) around that one cell (`fnc_spanRect`), found as the hover `["cell", grid, column, row]` when `fnc_tileAt` finds no
   tile - such a hover has no name and the idle hint, and nothing else reads it (the clicks and keys look at `"tile"` and `"slot"`
-  only). There is one outline at a time, `einv_gui_hoverRing`, the slot's, tile's or cell's: `fnc_updateHover`'s light makes it in
+  only). There is one outline at a time, `aio_gui_hoverRing`, the slot's, tile's or cell's: `fnc_updateHover`'s light makes it in
   the column's group when the hover changes (so it scrolls and clips with it, and lies under the name at the mouse; a grid on the
   display itself asks `fnc_raiseTooltip`) and deletes it when the hover leaves - nothing per tile, nothing per frame. `fnc_startDrag`
   deletes a lifted tile's outline (the footprint shows instead), `fnc_endDrag` clears `hoverHold` so the next frame gives what is
@@ -1926,7 +1926,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 - **What a frame of a drag costs.** `fnc_updateDrag` works out only what changed. Every frame it reads the middle button and holds
   or edge-scrolls the columns (each column's box is worked out at its first frame, element 3 of its `dragScroll` entry), then
   compares the mouse and what is held (`dragCount`, `dragRot`, `count inFlight`) with the last frame (`dragRoom` "frame"); nothing
-  changed, it stops there. Mouse moved: the ghost, the counter (a rounded chip - a group of `fnc_uiPanel` and a label, `einv_gui_dragCounter`, its label in the group's variable `einv_gui_label`) and a kept group's pictures follow it. What lies under the mouse is
+  changed, it stops there. Mouse moved: the ghost, the counter (a rounded chip - a group of `fnc_uiPanel` and a label, `aio_gui_dragCounter`, its label in the group's variable `aio_gui_label`) and a kept group's pictures follow it. What lies under the mouse is
   read from `dragRoom` "geometry" - every slot's `fnc_slotRect` and every target grid's visible box, origin and visible cells,
   worked out at the first frame and again only after a column scrolled - and gives the "spot": the slots whose box holds the mouse,
   the grid and cell (`fnc_screenToCell`'s rule, a cell before a hole), the equipment column, or off the grids the storage column, a
@@ -1936,7 +1936,7 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   ghost. Which tile lies on each cell and which cells a tile other than the lifted one takes are worked out once per drag and grid
   (`dragRoom` "cells|n") and answer `fnc_tileAt` and the free-cell test without a pass over the tiles. The answers per target stay
   (`slot|n`, `forecast|kg`, `mass`, `taken`, `backpack|n`, `fromGround`, ...). A build ends the drag and `fnc_startDrag` makes a new
-  `dragRoom`, so nothing kept goes stale. With `einv_gui_debugTiming` on, `fnc_startDrag` puts `timing` into `dragRoom`, each frame
+  `dragRoom`, so nothing kept goes stale. With `aio_gui_debugTiming` on, `fnc_startDrag` puts `timing` into `dragRoom`, each frame
   notes its parts (scroll, ghost, find, target, hint) and `fnc_logDrag` writes `timing: drag N ms avg, N ms max over N frames (start N ms;
   slowest frame: ...; target worked out anew in N frames)` - from `fnc_endDrag`, and from `fnc_build` and `fnc_onUnload`, which end a drag without it.
 - **What lies over what, and where the picture is.** The engine draws the focused control - with the group it lies in - over every other,
@@ -1952,11 +1952,11 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   valid instead of hanging out red. Groups keep the arrangement they had by the middle cell of the grabbed tile.
 - **A folded container takes it anywhere** (`GVAR(foldAreas)`). Over a container whose empty rows are folded away, and no cell works for the
   item (taken, or taller than the visible rows), an item from another container is laid down in the first free spot of the whole container
-  when `einv_storage_fnc_hasSpace` says there is one (asked once per drag and container, "autofit|n"): the target's place is false (no cell,
+  when `aio_storage_fnc_hasSpace` says there is one (asked once per drag and container, "autofit|n"): the target's place is false (no cell,
   as for a kit's grid), `fnc_endDrag` sends a move without a cell and the layout finds it; the footprint is the visible compartment at half
   strength and the hint says "Goes to the first free spot - the folded rows too". The same for the fold line under the grid and the
   container's box (single items only; the fold areas' boxes are worked out with the rest of the drag's geometry). Not within one container.
-- **Where it lands** (`fnc_updateDrag`; `einv_gui_dragTarget` is `["grid", gridIndex, col, row, fits, why not, "", place, unit, swap plan, cell under the mouse]`,
+- **Where it lands** (`fnc_updateDrag`; `aio_gui_dragTarget` is `["grid", gridIndex, col, row, fits, why not, "", place, unit, swap plan, cell under the mouse]`,
   `["slot", ...]`, `["kitTile", ...]`, `["hotbar", slot, ...]`, `["repack", ...]`, `["zone", ...]`, `["ground", ...]` or
   `["group", ...]`): on a grid the footprint must lie inside the compartment on free cells (a hole is red; an item's own holes
   over free cells are fine; cells a move under way goes to count as taken), another container must be able to carry it
@@ -1989,25 +1989,25 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   guards and reach checks. It counts for two moves in a chunk, has two records (one per tile; the answer says "moved N of 2" when one
   failed), fades both tiles and outlines both target cells while under way. Nothing is lost or doubled: a take that did not go leaves
   its tile where it is, a put that did not fit bounces and settlement (`fnc_settle`) puts the payload back where it came from.
-- **Group mode** (`einv_gui_dragGroup`, `fnc_groupMode`): whole stacks, no turning, no wheel; over a grid *keep* (one compartment,
-  every tile's cell free or lifted), *pack* (`einv_storage_fnc_plan` into the hovered container: an outline green, amber or red,
+- **Group mode** (`aio_gui_dragGroup`, `fnc_groupMode`): whole stacks, no turning, no wheel; over a grid *keep* (one compartment,
+  every tile's cell free or lifted), *pack* (`aio_storage_fnc_plan` into the hovered container: an outline green, amber or red,
   "4 / 6" on the counter), *kit* (the kit decides) or *none* (into itself, a slot, a person's container the player may not put
   into). `fnc_sendPlan` sends keep and pack: tiles that stay in their holder are one `placeMany`, the others one move each with
   the planned cell.
 - **Selection** (inventory only): click selects, Ctrl+click toggles, Shift+click takes the range, Ctrl+A the section
-  (`fnc_selectSection`). A press on an empty cell is only a click that clears the selection (`einv_gui_emptyPress`, `[Ctrl held, mouse]`); dragging
+  (`fnc_selectSection`). A press on an empty cell is only a click that clears the selection (`aio_gui_emptyPress`, `[Ctrl held, mouse]`); dragging
   from it does nothing - there is no frame to drag out. Refs
-  are `[holder, key, compartment, col, row]` (`einv_gui_selection`), found again on every build by `fnc_selectionTiles`; one side
-  at a time (`own` or `loot`); searched tiles only. **Double click** - or the quick move key, F by default (CBA keybind `einv_gui_quickMove`, `fnc_isQuickKey`, read by `fnc_onKeyDown` since CBA's keys do not run in a dialog; both do `fnc_quickAction`; held, the key repeats and each repeat is a press: the first press of a hold (`GVAR(quickHeldKey)`, cleared by the display's KeyUp) does all a double click does, the repeats only queue - a tile that waits or is on its way costs nothing, and what opens (a nested container, a kit) or puts on is the first press's) - moves a tile over (`fnc_quickMove`: from own gear into the
+  are `[holder, key, compartment, col, row]` (`aio_gui_selection`), found again on every build by `fnc_selectionTiles`; one side
+  at a time (`own` or `loot`); searched tiles only. **Double click** - or the quick move key, F by default (CBA keybind `aio_gui_quickMove`, `fnc_isQuickKey`, read by `fnc_onKeyDown` since CBA's keys do not run in a dialog; both do `fnc_quickAction`; held, the key repeats and each repeat is a press: the first press of a hold (`GVAR(quickHeldKey)`, cleared by the display's KeyUp) does all a double click does, the repeats only queue - a tile that waits or is on its way costs nothing, and what opens (a nested container, a kit) or puts on is the first press's) - moves a tile over (`fnc_quickMove`: from own gear into the
   loot column's containers in order, else the ground; from loot into uniform, vest, backpack; the room is asked of `fnc_roomFor`, see below), opens a kit or nested container, or
   moves a whole selection (`fnc_quickMoveGroup`); Ctrl+click on a slot takes off (`fnc_quickUnequip`); the **drop key** (CBA
-  keybind `einv_gui_drop`, G by default, read like the quick move key by `fnc_isDropKey`, modifiers respected; the footer shows it,
+  keybind `aio_gui_drop`, G by default, read like the quick move key by `fnc_isDropKey`, modifiers respected; the footer shows it,
   `fnc_dropKeyName`, and leaves the hint out while it is unbound; no other key drops, Delete included; the hotbar's strip clear and
   the Arsenal's panel use the same key) and "Drop" put the selection on the ground - with
   nothing selected, the key drops the tile under the mouse, or the item of the worn slot there (`fnc_doUnequip` to the ground).
   Alt+click has no meaning of its own any more (it was the quick equip: putting on is a drag onto a slot, a double click on the
   ground and the menu's Equip). **Shift+click** on a stack (two or more) splits it - half onto the nearest free cell as a stack
-  of its own (`fnc_splitStack`, an `applyMove` from = to with `separate`) - but only while `einv_storage_stackSplits` is true;
+  of its own (`fnc_splitStack`, an `applyMove` from = to with `separate`) - but only while `aio_storage_stackSplits` is true;
   with it false it is the range select as before. In the same way a drop on a free cell passes `"separate"` (`fnc_endDrag`,
   `fnc_applyMove`, `fnc_sendMoves`: the `put` and `move` steps get it as their sixth argument, a part of a stack within one holder
   becomes the op `split`). **A drop onto a stack of the same key with room left merges** (`fnc_swapPlan` answers the plan with
@@ -2032,29 +2032,29 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   a uniform, vest or backpack lying in a container open on it instead, so those are dragged), a drag moves it anywhere, G
   drops, Ctrl+click on a slot takes the item off into the player's own gear (`fnc_quickUnequip`), and Sort is the button on the
   caption line.
-  **Settings for ...** (last row, set apart by a line): for whoever may open the wizard (`einv_setup_fnc_canOpen`, asked at every
+  **Settings for ...** (last row, set apart by a line): for whoever may open the wizard (`aio_setup_fnc_canOpen`, asked at every
   menu) on a tile, a worn slot, the box of an opened uniform, vest or backpack and the free cells of a crate or vehicle. It calls
-  `einv_setup_fnc_openFromGame [step, class]`, which takes the step's *index*: the menu finds it by id (`"items"` or
-  `"containers"`, by the item's kind: uniform, vest, backpack, crate, vehicle, kit open Containers) in `einv_setup_steps`, so a
+  `aio_setup_fnc_openFromGame [step, class]`, which takes the step's *index*: the menu finds it by id (`"items"` or
+  `"containers"`, by the item's kind: uniform, vest, backpack, crate, vehicle, kit open Containers) in `aio_setup_steps`, so a
   reordering of the pages changes nothing here.
-  **Right click with a menu open:** `fnc_openMenu` keeps the menu's rectangle (uiNamespace `einv_gui_menuRect`, cleared by
+  **Right click with a menu open:** `fnc_openMenu` keeps the menu's rectangle (uiNamespace `aio_gui_menuRect`, cleared by
   `fnc_closeMenu`); a right press beside it closes it and goes on as an ordinary right click, so the tile under the mouse gets its
   menu in the same go (on empty space nothing opens); a press on the menu and every left press are the menu's.
-  **The menu's layer.** The menu is one full-screen `EINV_Group` (uiNamespace `einv_gui_menu` = `[layer]`) made last, with the
+  **The menu's layer.** The menu is one full-screen `AIO_Group` (uiNamespace `aio_gui_menu` = `[layer]`) made last, with the
   mouse handlers the columns get, and it takes the focus into a one-pixel button on its card, as the wizard's popovers do: the
   engine draws the focused control over all others, and a column whose Sort button kept the focus after its click
   drew its tiles over the menu. `fnc_closeMenu` hides the layer and leaves its deletion to the next frame
-  (`einv_gui_windowTrash`: a right press beside the card closes it from the layer's own event) and gives the focus back to a
+  (`aio_gui_windowTrash`: a right press beside the card closes it from the layer's own event) and gives the focus back to a
   field that had it, else to the search field's sink. Anything registered on the display after the menu (its layer no longer the
-  last of `einv_gui_created`: a slot's hover ring) makes it again on top - **`fnc_raiseMenu`**, asked twice a frame by
-  `fnc_onFrame` and by `fnc_redrawTiles`: same choices and place (`einv_gui_menuState`), the row under the mouse lit.
-  `fnc_redrawTiles` closes instead a menu opened on a tile of a section it drew anew (`einv_gui_menuFor`: its rows name the tile
+  last of `aio_gui_created`: a slot's hover ring) makes it again on top - **`fnc_raiseMenu`**, asked twice a frame by
+  `fnc_onFrame` and by `fnc_redrawTiles`: same choices and place (`aio_gui_menuState`), the row under the mouse lit.
+  `fnc_redrawTiles` closes instead a menu opened on a tile of a section it drew anew (`aio_gui_menuFor`: its rows name the tile
   by its index). A build closes it as ever. The focus rule of `fnc_onFrame` also sends back a non-field control in one of the
   window's own groups once no button is held, so the name at the mouse and the inspect card are not drawn under a column either.
   The Arsenal panel's menu (guest) is the same.
-- **Use from containers in the window.** While one of the settings "Use items from ..." limits something (`einv_storage_useActive`),
-  a tile of the player's own uniform, vest or backpack (`einv_storage_fnc_useKind` of the grid's container) that cannot be used
-  from there (`einv_storage_fnc_useState` is "blocked") wears a small padlock (`icon_lock_ca`) in its top left corner, beside the
+- **Use from containers in the window.** While one of the settings "Use items from ..." limits something (`aio_storage_useActive`),
+  a tile of the player's own uniform, vest or backpack (`aio_storage_fnc_useKind` of the grid's container) that cannot be used
+  from there (`aio_storage_fnc_useState` is "blocked") wears a small padlock (`icon_lock_ca`) in its top left corner, beside the
   window's own badge if it has one (`fnc_createTile`; never in the wizard's preview), and its footer hint says "Cannot be used from
   the backpack", or - on a limited container where the item is whitelisted - "Whitelisted: can be used from the backpack"
   (`fnc_updateHover`). A tile the Strict setting keeps in the unit's hidden holder (the entry's `strict`, section 3, Strict mode)
@@ -2068,20 +2068,20 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   with a smaller picture; the caps of one key and the cap and its words are `0.3` of the cap's height apart, the next hint `0.9`
   after the words, which are measured as they are (the label has the slack, `TEXT_SLACK`, the advance does not). `fnc_drawFooter` measures the hints first (`fnc_uiKeyHint`
   with `only measure`), leaves out from the last backwards what does not fit before the version, Esc staying, and hides the hint line
-  (`einv_gui_hint`) when less than `UNIT * 6` is left between the hints and the version; contextual hints (R rotate, the drag's keys) come in the hint line, not here. A mouse button in a key hint is ACE's own
+  (`aio_gui_hint`) when less than `UNIT * 6` is left between the hints and the version; contextual hints (R rotate, the drag's keys) come in the hint line, not here. A mouse button in a key hint is ACE's own
   picture, not words: a key string may carry the tokens `@left`, `@right`, `@scroll` and `@double` (two left clicks), alone or after
   modifiers joined by `+` (`"Ctrl+@left"`: a key cap `Ctrl`, then a cap with the mouse picture). The pictures are
   `\z\ace\addons\interaction\UI\mouse_left_ca.paa`, `mouse_right_ca.paa` and `mouse_scroll_ca.paa` (`MOUSE_ICON_PATH`; ACE has no
   double click or middle button picture); a picture that is not there (`fnc_safePicture`) falls back to the words ("Right click").
   There is no card of keys at the mouse any more (0.4.24 had one; it was taken out again).
 - **A hotbar slot's binding is dragged** (`fnc_startStripDrag`, `fnc_updateStripDrag`, `fnc_stripTarget`, `fnc_endStripDrag`;
-  `einv_gui_stripDrag` = `[slot number, ghost, strip box, ghost offset, ghost size]`): a press on a filled slot of the strip
-  (`fnc_onMouseButton`) records `einv_gui_press` with the slot's number as its tenth element, and `fnc_onFrame` starts this drag
+  `aio_gui_stripDrag` = `[slot number, ghost, strip box, ghost offset, ghost size]`): a press on a filled slot of the strip
+  (`fnc_onMouseButton`) records `aio_gui_press` with the slot's number as its tenth element, and `fnc_onFrame` starts this drag
   instead of `fnc_startDrag` once the mouse moved. The item's picture follows the mouse as a ghost the size of the slot (it fades
   where it would be removed), the slot under it lights up as any hover does, and the footer says what letting go does (`Hint_Strip*`).
-  Let go on another slot: `einv_hotbar_fnc_moveSlot` (the two swap); anywhere outside the strip's box (the slots' union, a margin
-  around it): `einv_hotbar_fnc_unbind` (the item is not touched); on the strip between its slots: nothing. The press stays
-  in `einv_gui_press` meanwhile, so nothing is built; a build, the window closing or another window covering this one ends it
+  Let go on another slot: `aio_hotbar_fnc_moveSlot` (the two swap); anywhere outside the strip's box (the slots' union, a margin
+  around it): `aio_hotbar_fnc_unbind` (the item is not touched); on the strip between its slots: nothing. The press stays
+  in `aio_gui_press` meanwhile, so nothing is built; a build, the window closing or another window covering this one ends it
   without a change.
 - **Keys held back.** What `fnc_onKeyDown` has no use for goes no further than the window (inventory only; it returns true, so the engine
   does not act on it): not to the soldier's actions, the weapon, ACE's or another mod's keys behind the window. What stays the engine's:
@@ -2092,24 +2092,24 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 - **Hints:** `fnc_updateHover` names what the mouse is on in the footer; `fnc_showHint [text, colourKey]`; `fnc_flashHint [reason,
   details]` (a reason key such as `"NoRoom"`, `"LookOnly"`, `"Locked"`, `"NoBackpack"`, any other text as it is, `""` nothing);
   `fnc_dragHint`; `fnc_infoHint [kind, args]` for the weight card and each caption. The **inspect card** (`fnc_inspect` with the
-  container the tile lies in as its fifth argument, for the "Stackable" row's `fnc_stackFor`; `fnc_drawInspect`) and the **comparison card** (`fnc_compareRows`, `fnc_drawCompare`, `einv_gui_compareTooltip`: over a vest,
+  container the tile lies in as its fifth argument, for the "Stackable" row's `fnc_stackFor`; `fnc_drawInspect`) and the **comparison card** (`fnc_compareRows`, `fnc_drawCompare`, `aio_gui_compareTooltip`: over a vest,
   uniform, helmet or backpack that is not the soldier's own, "vs. <worn item>" with Armor, Covers, Space, Weight) float over the
   columns. **The name at the mouse lies over every highlight.** It is one label (`fnc_makeTooltip`, made by `fnc_drawTopLayer` after
-  each build, uiNamespace `einv_gui_tooltip`), and the engine draws what is made later over what is made before, so a ring made on
+  each build, uiNamespace `aio_gui_tooltip`), and the engine draws what is made later over what is made before, so a ring made on
   the display after it - the hover ring of a slot that lies on the display, as the equipment's gear row does (a slot in a group has
   its ring in that group, under the label) - would cover it. `fnc_raiseTooltip` makes the label (or the comparison card, from
   the rows kept on it) again when something live was made after it; `fnc_updateHover` asks after it made a ring on the display and
   `fnc_drawSelection` after its frames. It does nothing while a menu is open or an item is dragged (the name is hidden then), and it
   never uses the focus: the engine draws a focused control over everything, which is why the focus rule of `fnc_onFrame` sends
   it back. The **search field** (`fnc_drawFilter`, `fnc_applyFilter`) dims non-matching tiles; a category chosen at a loot box's side hides them (see "Section bars").
-- **The weight card** reads `einv_weight_fnc_getLoad` (ACE's total, the rules' weights and EFAK's kits included), the limits and
+- **The weight card** reads `aio_weight_fnc_getLoad` (ACE's total, the rules' weights and EFAK's kits included), the limits and
   the tier. The bar has no tick marks or zone strip; it fills by load over the Critical limit. The fill, the tier's words and the
   preview take **`fnc_weightColor [unit, load, theme]`**: `text2` in Light, `warn` in Heavy, `loss` in Overloaded and Critical,
   blending into the next tier's colour over the last 6 % of the bar before its limit. The right text is the tier and its effect
-  ("Heavy · jogging tires you", `einv_weight_fnc_tierText`); the left the load and where the next tier starts ("12.4 kg · Heavy at
+  ("Heavy · jogging tires you", `aio_weight_fnc_tierText`); the left the load and where the next tier starts ("12.4 kg · Heavy at
   26.7 kg", `Load_Next`; nothing at Critical); on a narrow column the next limit goes first, then the effect. Lifting something
   from outside the soldier's own gear (`fnc_isOwnStorage`) puts a **preview** of the added weight on the bar
-  (`einv_gui_weightBar`, `fnc_previewWeight`, `fnc_clearWeightPreview`) in the colour of the tier it lands in, and the hint says
+  (`aio_gui_weightBar`, `fnc_previewWeight`, `fnc_clearWeightPreview`) in the colour of the tier it lands in, and the hint says
   "+2.4 kg: you will be Overloaded (46.9 kg)" (`fnc_weightText`) - a forecast, never a refusal.
 
 ### Searching, sounds, moving stops looting
@@ -2117,13 +2117,13 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 - **Searching** (issues #6, #16, #17; `fnc_isSearched`, `fnc_isSealed`, `fnc_searchKind`, `fnc_searchTime`, `fnc_searchRecord`, `fnc_markHidden`,
   `fnc_animateSearch`, `fnc_updateStatus`, `fnc_statusWords`, `fnc_animateStatus`, `fnc_stopStatus`, `fnc_revealTile`, `fnc_learn`). **What is
   searched:** loot of the kinds the settings name (`fnc_isSearched`: bodies, living persons, crates and vehicles - the cargo of the one the player
-  sits in too -, the ground, a bag lying about; never the player's own gear or anything lying in it, an object with `einv_noSearch` - see
+  sits in too -, the ground, a bag lying about; never the player's own gear or anything lying in it, an object with `aio_noSearch` - see
   "Leaving an object out" below -, an ACE arsenal box), a uniform, vest or backpack opened from inside a container as that container is, and
   one that carries a search state of its own (below) as the body or person it came off is. A kind whose time is 0 is not searched at all.
-  **How long:** `fnc_searchTime [container]` is seconds per cell, `einv_gui_searchTime` times the factor of the box's kind (`fnc_searchKind`:
+  **How long:** `fnc_searchTime [container]` is seconds per cell, `aio_gui_searchTime` times the factor of the box's kind (`fnc_searchKind`:
   uniform, vest, backpack by the slot it is worn in or by its class wherever it lies - Bag_Base, a Supply container told apart by the item
-  class it lies as -, ground, vehicle (`AllVehicles`), crate; settings `einv_gui_searchTimeUniform`, `Vest`, `Backpack`, `Crate`, `Vehicle`,
-  `Ground`, all 1 by default) and for what a body carries also `einv_gui_searchTimeBody`. An item takes its cells' time; the seal
+  class it lies as -, ground, vehicle (`AllVehicles`), crate; settings `aio_gui_searchTimeUniform`, `Vest`, `Backpack`, `Crate`, `Vehicle`,
+  `Ground`, all 1 by default) and for what a body carries also `aio_gui_searchTimeBody`. An item takes its cells' time; the seal
   `SEAL_CELLS` 5 cells, two seconds at the default 0.4.
   **The Tarkov model:** a box of the loot column this player has to search and has not opened yet is **sealed** (`fnc_isSealed`; drawn by
   `fnc_drawSection` for the ids uniform, vest, backpack, container - crates, vehicles, bags, nested ones - and ground, not for a section that
@@ -2176,14 +2176,14 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   **What a player knows** (`fnc_searchRecord [container, create]`, a HashMap `known` class -> count of entries, `unsealed`, `first`): local, never
   broadcast - every player searches for himself; the n-th entry of a class is known while n is below the count, counted in the
   arrangement's order so everyone reveals the same top-left ones; what you put in you know (`fnc_afterAction` -> `fnc_learn` +1, -1 for
-  what is taken out). A crate, a vehicle or a pile keeps it on the object (`einv_gui_searchRecord`). A uniform, vest or backpack is made
+  what is taken out). A crate, a vehicle or a pile keeps it on the object (`aio_gui_searchRecord`). A uniform, vest or backpack is made
   anew by the engine on every move, so its record is in `GVAR(searchMemory)` under the id of its **search state**: the public
-  `einv_storage_searchState` `[id, source]`, one of `einv_storage_carryVariables`, so `einv_storage_fnc_snapshot` / `fnc_restore` carry
+  `aio_storage_searchState` `[id, source]`, one of `aio_storage_carryVariables`, so `aio_storage_fnc_snapshot` / `fnc_restore` carry
   it to every new object. The first time anything is known of one without an id, `fnc_searchRecord` makes one and broadcasts it; a
-  machine whose own id lost a race keeps its record under `einv_gui_searchKey` and merges it into the one that stands.
-  **The search travels** (issue #17): `einv_storage_fnc_takeOff` writes the source onto a uniform, vest or backpack before its snapshot -
+  machine whose own id lost a race keeps its record under `aio_gui_searchKey` and merges it into the one that stands.
+  **The search travels** (issue #17): `aio_storage_fnc_takeOff` writes the source onto a uniform, vest or backpack before its snapshot -
   "body" off a dead man, "person" off a living one who is not the player there (an AI, a captive), "" off a player himself or with
-  `einv_noSearch` - and keeps or makes the id. Lying on the ground, in a crate, opened from either, it is searched as that body or person
+  `aio_noSearch` - and keeps or makes the id. Lying on the ground, in a crate, opened from either, it is searched as that body or person
   is (`fnc_isSearched`; not while it lies in the player's own gear), sealed until searched, with the body's factor on its time; searching
   it there or on the body is the same search, and whoever searched it keeps it searched. Before the server's restore sets the state on the
   new object a client may see it for a moment as the pile it lies in is searched; the state arriving changes the signature and builds.
@@ -2200,45 +2200,45 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
   other pages, as for a word. Whether a box is filtered is per box (the field is every box's, a category the one box's): when a box is filtered no more - the field empty and its
   own category cleared - `fnc_applyFilter [true]` gives it back the page the jump moved it from (`GVAR(pagesMoved)`), also while another box still has a category chosen; the entries
   of boxes that are still filtered stay.
-- **Leaving an object out of the search** (0.5.12). The one mark is the object variable `einv_noSearch` (`QGVARMAIN(noSearch)`, a BOOL, default false), read by `fnc_isSearched` for the container and for the body or person that owns it, so it holds for a crate, a vehicle, a body, a living person and the things they wear; every other question (`fnc_markHidden`, `fnc_learn`, `fnc_openNested`, the cargo chain of compat_ace_cargo) goes through `fnc_isSearched`. It is an override in one direction: it can switch the search off, never force it on where the settings say off. Ways to set it: (a) **Eden**: the attribute `einv_gui_edenNoSearch` (`gui/Cfg3DEN.hpp`, Checkbox "Skip searching", on every object with inventory cargo, in the locks addon's category `EINV_Attributes`, which gui loads after); its expression sets the variable locally on every machine when the mission starts (not in the editor), which needs no broadcast and covers a joiner. (b) **`einv_gui_fnc_setSearchable [object, searchable]`** (public): `false` marks the object, `true` gives it back to the settings; `setVariable` with the broadcast flag, so it works from any machine and for JIP. (c) **Zeus**: the server setting `einv_gui_searchZeus` (CHECKBOX, default on, in the "looting" topic after `searchContainers`) - with it off `fnc_onZeusPlaced` marks every non-person object with `maxLoad > 0` that a curator places. The handler is on the "CuratorObjectPlaced" event of every curator module, put there by `fnc_hookCurators`, which a 5 s per-frame handler in `XEH_postInit` calls on every machine (a game master can be assigned at any time and the event fires where the module is local, which differs by setup); the variable is public and the same from every machine, so a double run is harmless. compat_zen adds the right-click choices "Searching: turn off" and "Searching: turn on" (`fnc_setSearch`, `fnc_canSetSearch`; each is shown while some target would change, targets are `fnc_targets`: crates and vehicles, no persons), which call `fnc_setSearchable` and show the curator feedback line.
-- **Sounds** (`fnc_playSound [action, class, container, world, ui]`, public): by family from the config `CfgEinvSounds`
-  (`gui/CfgEinvSounds.hpp`; its header explains the layers): `Default`, 17 item families and 4 container families (crate, vehicle,
-  body, ground), Arma's own files only; the family is the item's config `einv_sound`, else `fnc_soundFamily`. Actions: `lift`,
+- **Leaving an object out of the search** (0.5.12). The one mark is the object variable `aio_noSearch` (`QGVARMAIN(noSearch)`, a BOOL, default false), read by `fnc_isSearched` for the container and for the body or person that owns it, so it holds for a crate, a vehicle, a body, a living person and the things they wear; every other question (`fnc_markHidden`, `fnc_learn`, `fnc_openNested`, the cargo chain of compat_ace_cargo) goes through `fnc_isSearched`. It is an override in one direction: it can switch the search off, never force it on where the settings say off. Ways to set it: (a) **Eden**: the attribute `aio_gui_edenNoSearch` (`gui/Cfg3DEN.hpp`, Checkbox "Skip searching", on every object with inventory cargo, in the locks addon's category `AIO_Attributes`, which gui loads after); its expression sets the variable locally on every machine when the mission starts (not in the editor), which needs no broadcast and covers a joiner. (b) **`aio_gui_fnc_setSearchable [object, searchable]`** (public): `false` marks the object, `true` gives it back to the settings; `setVariable` with the broadcast flag, so it works from any machine and for JIP. (c) **Zeus**: the server setting `aio_gui_searchZeus` (CHECKBOX, default on, in the "looting" topic after `searchContainers`) - with it off `fnc_onZeusPlaced` marks every non-person object with `maxLoad > 0` that a curator places. The handler is on the "CuratorObjectPlaced" event of every curator module, put there by `fnc_hookCurators`, which a 5 s per-frame handler in `XEH_postInit` calls on every machine (a game master can be assigned at any time and the event fires where the module is local, which differs by setup); the variable is public and the same from every machine, so a double run is harmless. compat_zen adds the right-click choices "Searching: turn off" and "Searching: turn on" (`fnc_setSearch`, `fnc_canSetSearch`; each is shown while some target would change, targets are `fnc_targets`: crates and vehicles, no persons), which call `fnc_setSearchable` and show the curator feedback line.
+- **Sounds** (`fnc_playSound [action, class, container, world, ui]`, public): by family from the config `CfgAioSounds`
+  (`gui/CfgAioSounds.hpp`; its header explains the layers): `Default`, 17 item families and 4 container families (crate, vehicle,
+  body, ground), Arma's own files only; the family is the item's config `aio_sound`, else `fnc_soundFamily`. Actions: `lift`,
   `move`, `drop`, `equip`, `unequip`, `attach`, `detach`, `loadMag...`, `unloadMag`, `rotate`, `open`, `close`, `search`,
   `uncover`, `inspect`, `giveBack`. The looter hears them on the UI channel at the volume of their kind
-  (`fnc_soundGain [action]`; there is no master volume since 0.5.5); others within the action's range hear a quieter copy (`einv_gui_soundsWorld`: `fnc_sendNoise` -> the target
-  event `einv_gui_noise`, `fnc_onNoise`; never from the Arsenal) which the volumes below do not scale: they are only the looter's ears.
+  (`fnc_soundGain [action]`; there is no master volume since 0.5.5); others within the action's range hear a quieter copy (`aio_gui_soundsWorld`: `fnc_sendNoise` -> the target
+  event `aio_gui_noise`, `fnc_onNoise`; never from the Arsenal) which the volumes below do not scale: they are only the looter's ears.
   **The speaker in the header** opens the **sound dropdown** (`fnc_openSoundMenu`; there are no client CBA settings for sound). The kinds
-  (`fnc_soundGroup [action]` -> one of `einv_gui_soundGroups`): `moves` (lift, move, drop, equip, unequip, attach, detach, rotate, giveBack and any other
+  (`fnc_soundGroup [action]` -> one of `aio_gui_soundGroups`): `moves` (lift, move, drop, equip, unequip, attach, detach, rotate, giveBack and any other
   action), `magazines` (the `loadMag...` actions, `unloadMag`, the reload's own sound in `fnc_playReload` as "reload", the repack's finished sound as "repack"),
   `containers` (open, close), `search` (search, uncover) and `other` (inspect, and "warn": the click of a refused opening in `fnc_onInventoryOpened`, the Arsenal's
-  blocked sound in `einv_arsenal_fnc_showBlocked`). State: `einv_gui_soundLevels` (per kind `[volume 0..1, volume to come back to]`; a kind at 0 is off),
-  written to the profile as `einv_gui_soundMix` = `[1, levels]` by `fnc_soundSettle` when the dropdown closes (the first number was the master volume; it is written as 1 for the sake of the format, and a saved one is worked into the levels once in `XEH_preInit`) (and by
-  `fnc_onUnload`; never per frame) - `einv_gui_soundDirty` says there is something to write. `fnc_soundSet [mode, argument]` is the one place that changes them ("volume"
+  blocked sound in `aio_arsenal_fnc_showBlocked`). State: `aio_gui_soundLevels` (per kind `[volume 0..1, volume to come back to]`; a kind at 0 is off),
+  written to the profile as `aio_gui_soundMix` = `[1, levels]` by `fnc_soundSettle` when the dropdown closes (the first number was the master volume; it is written as 1 for the sake of the format, and a saved one is worked into the levels once in `XEH_preInit`) (and by
+  `fnc_onUnload`; never per frame) - `aio_gui_soundDirty` says there is something to write. `fnc_soundSet [mode, argument]` is the one place that changes them ("volume"
   `[index, v]`, "toggle" index - off sets the volume to 0 and keeps the old one, on brings it back -, "all": mute everything or, when nothing is audible,
   bring it all back; only the speaker's right click, the dropdown has no button for it) and then updates the open dropdown (`fnc_updateSoundMenu`, in place) and the speaker (`fnc_updateSoundButton`).
   `fnc_soundMuted [action]` is `fnc_soundGain <= 0` (action "" asks about everything: what the speaker shows). `fnc_playSound` and `fnc_playReload` scale their layers
   with `fnc_soundGain`; the three sounds played by the game's `playSound` (the refused opening's click, the blocked arsenal, a repack's finished sound) go through
   `fnc_playClass [CfgSounds class, action]` (public), which reads the class's file, volume and pitch and plays it as a layer at the scaled volume (`playSound`
-  itself if the file cannot be found and the kind is not silenced). The dropdown is the context menu's machinery: a layer in `einv_gui_menu`, `einv_gui_menuRect`,
-  `einv_gui_menuFor = ["sound", -1]` and `einv_gui_menuState = ["sound"]`, so Escape, a click or right press beside it, `fnc_build` and the
+  itself if the file cannot be found and the kind is not silenced). The dropdown is the context menu's machinery: a layer in `aio_gui_menu`, `aio_gui_menuRect`,
+  `aio_gui_menuFor = ["sound", -1]` and `aio_gui_menuState = ["sound"]`, so Escape, a click or right press beside it, `fnc_build` and the
   `fnc_raiseMenu` of `fnc_onFrame`/`fnc_redrawTiles` (which makes it again from the current volumes) treat it as a menu, and `fnc_closeMenu` calls `fnc_soundSettle`
   when it closes it. A click on the speaker while it is open lands on the layer's hit area and closes it. The card (0.5.5) is a small one: a shadow, a one-pixel border and the card inside it, darker than the panels (`0.015` grey, opaque) so it separates, right-aligned to the window's right edge
   (`CONTENT_X + CONTENT_W`, flush with the Close button: Mia, 0.5.7) `UNIT * 0.5` under the header and never above its line; it is `UNIT * 14` wide with one rhythm inside - `UNIT * 0.6` padding left and right,
   `UNIT * 0.45` between the switch, the name, the slider and the percentage, the track ending at the knob's middle at either end, a row's hover film inset by half the padding and round -, its rows are `UNIT * 1` high with a `UNIT * 0.55` font, and everything is neutral - white and grey checkboxes, tracks
-  (`[1,1,1,0.12]`) and fills, the accent is not used. Sliders are a track, a fill and a knob with a hit area (`einv_gui_soundRows` is the list of rows for `fnc_updateSoundMenu`); a left press
+  (`[1,1,1,0.12]`) and fills, the accent is not used. Sliders are a track, a fill and a knob with a hit area (`aio_gui_soundRows` is the list of rows for `fnc_updateSoundMenu`); a left press
   starts `fnc_soundSlide ["begin", ...]` (the mouse is read with `getMousePosition` there and at every move - 0.5.7 took it from the events' arguments, which were not in the space of the track's place, and gave only 0 and
   100 %; the volume goes in steps of `SOUND_STEP` 0.05), which adds `MouseMoving`, `MouseHolding` and `MouseButtonUp` to the display for the drag (the way `fnc_dragHandle` does) and plays
-  a sample of the kind when the button is let go. The profile variables `einv_gui_muted` (and `einv_gui_searchMuted` before it) are read once, only when no `einv_gui_soundMix`
+  a sample of the kind when the button is let go. The profile variables `aio_gui_muted` (and `aio_gui_searchMuted` before it) are read once, only when no `aio_gui_soundMix`
   is saved: a muted speaker then starts with every kind off.
-- **The palette popover** (`fnc_openPaletteMenu`; the palette button in the header) is the sound dropdown's twin in machinery and look (a layer in `einv_gui_menu`, the hit area beside the card, `einv_gui_menuFor = ["palette", -1]`, `einv_gui_menuState = ["palette"]`, a shadow, a one-pixel border, the `0.015` grey card, right-aligned under the header's line, neutral greys and its own white and grey words whatever the palette sets; Escape, a click beside it and a click on its button close it) and differs where it must: it **stays open while the window is built again**. A title row with "Reset all" (shown while anything is chosen), then **a row for each element** of the window, 1.05 UNIT high with a 0.12 UNIT gap - Accent, Secondary, Panels, Transparency, Cells, Tiles, Text, Lines (`_rowDefs`: id, colour number, name, tooltip, the button's words; what each sets is the table at the top of `fnc_theme`): an arrow (`icon_chevron_right_ca`, `icon_chevron_down_ca` while open; not on the Transparency row), the name (a tooltip says what it sets), a swatch of what is set with a light one-pixel edge so that a near-black one is seen, and a small button that takes the choice away ("Use my Arma colour", "Match accent", "Default" for the others; shown only while there is a choice) - **and one shared picker, open under the row it is bound to**: a click on a colour row's arrow, name or swatch (a hit area over them) binds the picker to that colour and moves it under that row, a click on the row it is open under folds it; the choice is uiNamespace `einv_gui_paletteTab` (the colour's number as `PALETTE_IDS`: 0 accent, 1 secondary, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines, -1 none; 0 at first) and the popover is made again for it (`fnc_later`: the click is the event of a control that is deleted), so it is 6.8 UNIT taller with the picker open and no wider - about 12 UNIT folded and 19 open, under half the screen's 40, so it needs neither a scroll nor a second column. The **Transparency** row (name, swatch of the panels' colour with its alpha over a grey, "Default") has its slider under it (a plain track with a fill, a knob that is a white circle on a dark ring: `circle_ca` twice). **The picker** is the kind painting programs and Advanced Developer Tools' colour window (a hue-and-brightness field, a luminance bar, R G B and A bars with number boxes, a hex box and a preview) have, made of what this mod has: a **colour square** - a rectangle in the pure hue (`EINV_PanelRect`, recoloured by `fnc_updatePaletteMenu`) with `fade_strip_ca` (white fading out to the right: saturation) and then `shade_strip_ca` (black fading in downwards: value) stretched over it, a one-pixel frame, and for the surfaces under the text (panels, cells, tiles: `PALETTE_VALUE_MAX` below 1) a black film of alpha `1 - PALETTE_PANEL_VALUE_MAX` over all of it (the square then shows the dark values they may have, and what it shows is what is chosen) - a **hue strip** beside it (`hue_vstrip_ca`, the rainbow top to bottom, drawn in colour, one step short of red at the bottom) - a round **cursor** on each (`cursor_ring_ca`, a white ring with a dark rim in and out, drawn in colour; one control each, placed by `fnc_updatePaletteMenu`) - and four **fields** at the right, **R**, **G**, **B** (0 to 255) and **Hex** (`#RRGGBB`, `RRGGBB`, `#RGB`): `EINV_Edit` on a film with a hit area that puts the cursor in it. The textures are made by `tools/generate_ui_textures.py` (`--only cursor_ring_ca,fade_strip_ca,hue_vstrip_ca,shade_strip_ca`). Where nothing is chosen the picker stands at the colour the window wears (`fnc_paletteInfo`: the accent from `fnc_accentColour` through `fnc_hsv`, the secondary colour following it, the panels' `PANEL_COLOR`, the cells and the tiles as they are seen on the panel - worked out from `einv_gui_theme`, the last build's -, the text's white and the white the lines' films are tinted with), so the first move changes only what it moves. `fnc_paletteSlide` drags the square, the strip and the slider as `fnc_soundSlide` does (display `MouseMoving`, `MouseHolding` and `MouseButtonUp`, the mouse read with `getMousePosition`) from a state `[display, kind, colour, rect, handler ids]` and hands the place in the picker's rectangle to `fnc_paletteSet`: `["square", [colour, across, down]]` (saturation and value in `PALETTE_SV_STEPS` 100 steps, the value of a surface's square scaled to `PALETTE_PANEL_VALUE_MAX`), `["hue", [colour, down]]` (`PALETTE_HUE_STEPS` 360 steps, the last one short of red) and `["alpha", across]` (`PALETTE_ALPHA_STEP` 0.01). The fields are **read when the cursor leaves them** (a `KillFocus` handler, only while the popover's layer is shown: Return gives the cursor to the sink, `fnc_onKeyDown`, and a click anywhere else takes it; Escape closes the popover and what was typed goes), not on every key, because every change builds the window again and the build makes the popover - the field - again: `["field", [colour, field, text]]` parses 0 to 255 or the hex code, ignores anything else (the fields are set to what is there again), does nothing when the value is what the fields showed (a click into a field and out is no choice), keeps the picker's hue for a grey and hue and saturation for black (or the cursor would jump to the corner) and cuts a surface's value, then the fields show what was applied. Every value is rounded to five decimals, does nothing when it is the choice already, updates the card in place (`fnc_updatePaletteMenu`: cursors, the square's hue, fields, slider, swatches, buttons) and asks for a build a frame later (a press is the event of a control the build deletes). `fnc_paletteSet ["reset", "accent"|"secondary"|"panel"|"cells"|"tiles"|"text"|"lines"|"alpha"|"all"]` takes choices away (where each lies in the palette: `PALETTE_SLOTS` by `PALETTE_IDS`, the transparency at 2). **Surviving the build:** `fnc_build` notes that the popover was open, closes it with `einv_gui_menuRemake` true - `fnc_closeMenu` then does not call `fnc_paletteSettle`, so nothing is written and a held picker is not let go, and it keeps the field being typed in and its text in uiNamespace `einv_gui_paletteTyping` (`[colour, field, text]`) - and makes it again with `fnc_openPaletteMenu` after everything else (and after the `afterBuild` hook, so it lies on top), which puts the text and the cursor back; `fnc_raiseMenu` does the same on top of a redraw, and `fnc_openPaletteMenu` finding itself open takes the same path. The drag keeps going because its handlers are the display's and the picker's place on the screen is kept in `einv_gui_paletteSlideState`. A real close (Escape, a click beside, the button, another menu, a window over this one) and `fnc_onUnload` call `fnc_paletteSettle`: the profile variable `einv_gui_palette` is written only when `einv_gui_paletteDirty` says so, once per closing, never per move. The state is `einv_gui_palette` in missionNamespace, changed in place by `fnc_paletteSet` only; what the controls are is in uiNamespace `einv_gui_paletteRows` (a HashMap: `tab`, `picker` - `base`, `squareKnob`, `squareGeo`, `hueKnob`, `hueGeo`, `fields` -, `fields`, `alpha`, `swatches` and `chips` - each a HashMap by row id, the colours' `PALETTE_IDS` and `"alpha"` -, `resetAll`).
-- **Moving stops looting** (`einv_gui_moveToStop`): a movement key closes the window while it was opened on something or a search runs
+- **The palette popover** (`fnc_openPaletteMenu`; the palette button in the header) is the sound dropdown's twin in machinery and look (a layer in `aio_gui_menu`, the hit area beside the card, `aio_gui_menuFor = ["palette", -1]`, `aio_gui_menuState = ["palette"]`, a shadow, a one-pixel border, the `0.015` grey card, right-aligned under the header's line, neutral greys and its own white and grey words whatever the palette sets; Escape, a click beside it and a click on its button close it) and differs where it must: it **stays open while the window is built again**. A title row with "Reset all" (shown while anything is chosen), then **a row for each element** of the window, 1.05 UNIT high with a 0.12 UNIT gap - Accent, Secondary, Panels, Transparency, Cells, Tiles, Text, Lines (`_rowDefs`: id, colour number, name, tooltip, the button's words; what each sets is the table at the top of `fnc_theme`): an arrow (`icon_chevron_right_ca`, `icon_chevron_down_ca` while open; not on the Transparency row), the name (a tooltip says what it sets), a swatch of what is set with a light one-pixel edge so that a near-black one is seen, and a small button that takes the choice away ("Use my Arma colour", "Match accent", "Default" for the others; shown only while there is a choice) - **and one shared picker, open under the row it is bound to**: a click on a colour row's arrow, name or swatch (a hit area over them) binds the picker to that colour and moves it under that row, a click on the row it is open under folds it; the choice is uiNamespace `aio_gui_paletteTab` (the colour's number as `PALETTE_IDS`: 0 accent, 1 secondary, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines, -1 none; 0 at first) and the popover is made again for it (`fnc_later`: the click is the event of a control that is deleted), so it is 6.8 UNIT taller with the picker open and no wider - about 12 UNIT folded and 19 open, under half the screen's 40, so it needs neither a scroll nor a second column. The **Transparency** row (name, swatch of the panels' colour with its alpha over a grey, "Default") has its slider under it (a plain track with a fill, a knob that is a white circle on a dark ring: `circle_ca` twice). **The picker** is the kind painting programs and Advanced Developer Tools' colour window (a hue-and-brightness field, a luminance bar, R G B and A bars with number boxes, a hex box and a preview) have, made of what this mod has: a **colour square** - a rectangle in the pure hue (`AIO_PanelRect`, recoloured by `fnc_updatePaletteMenu`) with `fade_strip_ca` (white fading out to the right: saturation) and then `shade_strip_ca` (black fading in downwards: value) stretched over it, a one-pixel frame, and for the surfaces under the text (panels, cells, tiles: `PALETTE_VALUE_MAX` below 1) a black film of alpha `1 - PALETTE_PANEL_VALUE_MAX` over all of it (the square then shows the dark values they may have, and what it shows is what is chosen) - a **hue strip** beside it (`hue_vstrip_ca`, the rainbow top to bottom, drawn in colour, one step short of red at the bottom) - a round **cursor** on each (`cursor_ring_ca`, a white ring with a dark rim in and out, drawn in colour; one control each, placed by `fnc_updatePaletteMenu`) - and four **fields** at the right, **R**, **G**, **B** (0 to 255) and **Hex** (`#RRGGBB`, `RRGGBB`, `#RGB`): `AIO_Edit` on a film with a hit area that puts the cursor in it. The textures are made by `tools/generate_ui_textures.py` (`--only cursor_ring_ca,fade_strip_ca,hue_vstrip_ca,shade_strip_ca`). Where nothing is chosen the picker stands at the colour the window wears (`fnc_paletteInfo`: the accent from `fnc_accentColour` through `fnc_hsv`, the secondary colour following it, the panels' `PANEL_COLOR`, the cells and the tiles as they are seen on the panel - worked out from `aio_gui_theme`, the last build's -, the text's white and the white the lines' films are tinted with), so the first move changes only what it moves. `fnc_paletteSlide` drags the square, the strip and the slider as `fnc_soundSlide` does (display `MouseMoving`, `MouseHolding` and `MouseButtonUp`, the mouse read with `getMousePosition`) from a state `[display, kind, colour, rect, handler ids]` and hands the place in the picker's rectangle to `fnc_paletteSet`: `["square", [colour, across, down]]` (saturation and value in `PALETTE_SV_STEPS` 100 steps, the value of a surface's square scaled to `PALETTE_PANEL_VALUE_MAX`), `["hue", [colour, down]]` (`PALETTE_HUE_STEPS` 360 steps, the last one short of red) and `["alpha", across]` (`PALETTE_ALPHA_STEP` 0.01). The fields are **read when the cursor leaves them** (a `KillFocus` handler, only while the popover's layer is shown: Return gives the cursor to the sink, `fnc_onKeyDown`, and a click anywhere else takes it; Escape closes the popover and what was typed goes), not on every key, because every change builds the window again and the build makes the popover - the field - again: `["field", [colour, field, text]]` parses 0 to 255 or the hex code, ignores anything else (the fields are set to what is there again), does nothing when the value is what the fields showed (a click into a field and out is no choice), keeps the picker's hue for a grey and hue and saturation for black (or the cursor would jump to the corner) and cuts a surface's value, then the fields show what was applied. Every value is rounded to five decimals, does nothing when it is the choice already, updates the card in place (`fnc_updatePaletteMenu`: cursors, the square's hue, fields, slider, swatches, buttons) and asks for a build a frame later (a press is the event of a control the build deletes). `fnc_paletteSet ["reset", "accent"|"secondary"|"panel"|"cells"|"tiles"|"text"|"lines"|"alpha"|"all"]` takes choices away (where each lies in the palette: `PALETTE_SLOTS` by `PALETTE_IDS`, the transparency at 2). **Surviving the build:** `fnc_build` notes that the popover was open, closes it with `aio_gui_menuRemake` true - `fnc_closeMenu` then does not call `fnc_paletteSettle`, so nothing is written and a held picker is not let go, and it keeps the field being typed in and its text in uiNamespace `aio_gui_paletteTyping` (`[colour, field, text]`) - and makes it again with `fnc_openPaletteMenu` after everything else (and after the `afterBuild` hook, so it lies on top), which puts the text and the cursor back; `fnc_raiseMenu` does the same on top of a redraw, and `fnc_openPaletteMenu` finding itself open takes the same path. The drag keeps going because its handlers are the display's and the picker's place on the screen is kept in `aio_gui_paletteSlideState`. A real close (Escape, a click beside, the button, another menu, a window over this one) and `fnc_onUnload` call `fnc_paletteSettle`: the profile variable `aio_gui_palette` is written only when `aio_gui_paletteDirty` says so, once per closing, never per move. The state is `aio_gui_palette` in missionNamespace, changed in place by `fnc_paletteSet` only; what the controls are is in uiNamespace `aio_gui_paletteRows` (a HashMap: `tab`, `picker` - `base`, `squareKnob`, `squareGeo`, `hueKnob`, `hueGeo`, `fields` -, `fields`, `alpha`, `swatches` and `chips` - each a HashMap by row id, the colours' `PALETTE_IDS` and `"alpha"` -, `resetAll`).
+- **Moving stops looting** (`aio_gui_moveToStop`): a movement key closes the window while it was opened on something or a search runs
   (not keys with Ctrl or Alt; `fnc_onKeyDown`), and `fnc_checkTaken` (every `CHECK_INTERVAL` from `fnc_onFrame`) closes it with the
   reason `"taken"` when the soldier was taken away from what he looted - into a vehicle, handcuffed or surrendering by ACE, dragging or carrying, or
-  moved more than `TAKEN_LEASH` 1.5 m from where the window opened (seated, `einv_storage_fnc_inReach` of the vehicle and what he opened).
-  There is no looting pose: the soldier keeps whatever stance and animation he has (the looting animation of 0.4.x, `einv_gui_animation`, with its
+  moved more than `TAKEN_LEASH` 1.5 m from where the window opened (seated, `aio_storage_fnc_inReach` of the vehicle and what he opened).
+  There is no looting pose: the soldier keeps whatever stance and animation he has (the looting animation of 0.4.x, `aio_gui_animation`, with its
   `fnc_poseStart`, `fnc_poseCheck`, `fnc_poseEnd`, `fnc_gesture`, `fnc_raiseWeapon` and the rest, was taken out before 0.5.0 was released; a settings box
-  that still names `gui_animation` reads clean, `einv_main_retiredSettings`). A magazine into the weapon in the hands (`fnc_playReload`) plays its
+  that still names `gui_animation` reads clean, `aio_main_retiredSettings`). A magazine into the weapon in the hands (`fnc_playReload`) plays its
   `reloadAction` with `playActionNow` (`fnc_reloadGesture`: player, local, on foot, `currentWeapon`, not while ACE reloads or holds him).
 
 ### People, the CBA menu and other mods in the window
@@ -2246,13 +2246,13 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 - **Living persons.** Every soldier carries one scroll action per client (`fnc_addPersonAction`; agents through the player's
   `fnc_addAgentAction`); `fnc_openPerson` (public) opens the window on the whole person and tells them (`fnc_notifyPerson`).
   `fnc_canOpenPerson [person]` -> `"whole"`, `"backpack"` or `""`; `fnc_canTouchPerson` takes `"items"` or `"worn"`; the server settings
-  `einv_gui_personOpen`, `personItems`, `personWorn`, `personNotify`, `searchPersons` decide. The rule on the machine that runs
-  each change is the guard `fnc_personGuard` (in `einv_storage_guards`); the looter's `fnc_checkTouch` returns a reason
+  `aio_gui_personOpen`, `personItems`, `personWorn`, `personNotify`, `searchPersons` decide. The rule on the machine that runs
+  each change is the guard `fnc_personGuard` (in `aio_storage_guards`); the looter's `fnc_checkTouch` returns a reason
   ("LookOnly") for the hint. A locked uniform, vest or backpack stays on them; the window closes beyond `PERSON_KEEP` 4 m. Bodies
-  open whole from "Inventory" and from the backpack they wear. `einv_locks_fnc_decorate` is called by `fnc_build` right after the
+  open whole from "Inventory" and from the backpack they wear. `aio_locks_fnc_decorate` is called by `fnc_build` right after the
   loot sections are read.
 - **CBA item context menu.** Other mods' options of `CBA_fnc_addItemContextMenuOption` appear in the menu of a tile in a real
-  container and of the player's own slots (`fnc_cbaTileTarget`, `fnc_cbaSlotTarget`, `einv_gui_cbaSlots`). `fnc_cbaOptions [unit,
+  container and of the player's own slots (`fnc_cbaTileTarget`, `fnc_cbaSlotTarget`, `aio_gui_cbaSlots`). `fnc_cbaOptions [unit,
   container, item, cbaSlot]` reads them exactly as `cba_ui_fnc_openItemContextMenu` does (the first option of an id wins; shown
   when the slot matches and the show condition agrees, greyed when the enable condition says no); `fnc_cbaRun [condition,
   statement, consume, args]` runs one (`true` reopens the menu where it was, anything else asks `fnc_requestRebuild`). Compat
@@ -2265,8 +2265,8 @@ first, then the equipment column. Every panel goes into `einv_gui_panels`: an it
 - **Opened containers follow their object.** `fnc_build` keeps an `opened` entry only while `everyContainer` of the container it
   was opened from still lists it: put on, taken into a crate or dropped elsewhere it drops out at once, with whatever was opened
   from inside it (a worn one shows in the storage column). Only while one of its class still lies there is it taken for one made
-  anew and looked for by its key (`ANSWER_WAIT`); ACE cargo crates (`einv_compat_ace_cargo_openedFrom`) stay with `fnc_pruneOpened`.
-- **The storage column takes what is worn there** (`einv_gui_storageRect`, from `fnc_drawColumn`): a uniform, vest or backpack let
+  anew and looked for by its key (`ANSWER_WAIT`); ACE cargo crates (`aio_compat_ace_cargo_openedFrom`) stay with `fnc_pruneOpened`.
+- **The storage column takes what is worn there** (`aio_gui_storageRect`, from `fnc_drawColumn`): a uniform, vest or backpack let
   go on it off its grids is `["slot", -1, ..., slot]` - put on by `fnc_doEquip` (the worn one comes off onto its cell), a body's
   exchanged (`fnc_canSwap`); the footprint lies faint over the column. Wearing none of the three, anything else there is `NoFit`.
 - **An opened container's box is its tile.** Its slot record carries the container (element 8, `fnc_drawSlot` option `container`);
@@ -2291,9 +2291,9 @@ Registered in preInit, so Eden has them too.
 
 | Event | Does |
 |---|---|
-| `ace_arsenal_displayOpened` | `fnc_onOpened`: state reset, `KeyDown` / `KeyUp` and the list's `LBSelChanged` / `MouseButtonDown` handlers, and `einv_gui_fnc_attach` a frame later (one more if the inventory is still closing), driver `"draw3d"` |
-| `ace_arsenal_displayClosed` | `fnc_onClosed`: `einv_gui_fnc_onUnload`, state reset, the BI helper and the staging crate deleted a frame later, `fnc_dropOverflow` (what still lies on no cell is taken out, RPT INFO and ACE's text; a unit not local here keeps `einv_storage_fnc_requestMigrate`, the surplus moves on) and `fnc_reportOverflow` a frame later (not in Eden) |
-| `ace_arsenal_cargoChanged` | `fnc_onCargoChanged`: what of an add the engine refused by `maximumLoad` is put in with `einv_storage_fnc_addNew` while there is a free spot; flags the frame-later pass |
+| `ace_arsenal_displayOpened` | `fnc_onOpened`: state reset, `KeyDown` / `KeyUp` and the list's `LBSelChanged` / `MouseButtonDown` handlers, and `aio_gui_fnc_attach` a frame later (one more if the inventory is still closing), driver `"draw3d"` |
+| `ace_arsenal_displayClosed` | `fnc_onClosed`: `aio_gui_fnc_onUnload`, state reset, the BI helper and the staging crate deleted a frame later, `fnc_dropOverflow` (what still lies on no cell is taken out, RPT INFO and ACE's text; a unit not local here keeps `aio_storage_fnc_requestMigrate`, the surplus moves on) and `fnc_reportOverflow` a frame later (not in Eden) |
+| `ace_arsenal_cargoChanged` | `fnc_onCargoChanged`: what of an add the engine refused by `maximumLoad` is put in with `aio_storage_fnc_addNew` while there is a free spot; flags the frame-later pass |
 | `ace_arsenal_itemsChanged` | `fnc_onItemsChanged`: for the open container's tab `fnc_reconcile` at once, before ACE greys its list |
 | `leftPanelFilled`, `rightPanelFilled`, `loadoutImported`, `onLoadoutLoad`, `showToggle` | `fnc_settle` a frame later |
 
@@ -2302,7 +2302,7 @@ A loadout loaded in ACE Arsenal reaches the unit through `CBA_loadoutSet`, where
 (`fnc_layout`): the panel's colour as its surface, lighter under the mouse, no inner square or frame, and a `SetFocus` handler that hands the focus
 to ACE's list so the engine draws no focus frame.
 
-The hook table (`einv_arsenal_fnc_hooks`, section 4) sets `guest`, `header` (none), `layout`
+The hook table (`aio_arsenal_fnc_hooks`, section 4) sets `guest`, `header` (none), `layout`
 (`fnc_layout`), `footer` (`fnc_footer`: the hint line), `keepOpen` (true: ACE decides when it
 closes), `frame`, `mouseDown` / `mouseUp` (`fnc_onMouse`: outside the panel taken, so the engine ignores it), `click`
 (`fnc_onClick`: double, Ctrl and Alt clicks swallowed - no equip or quick move past ACE), `wheel`, `dragCheck`, `drop`, `ground`
@@ -2313,58 +2313,58 @@ item out.
 ### The panel
 
 - **Rect** (`fnc_panelRect`): top at ACE's sort bar (IDC 17, else the list's top), bottom at the list's bottom, like ACE's right
-  column; width `STORAGE_COLS` cells of `einv_gui_fnc_getCell` plus padding and scroll bar, at most `PANEL_MAX_SHARE` 1/3
+  column; width `STORAGE_COLS` cells of `aio_gui_fnc_getCell` plus padding and scroll bar, at most `PANEL_MAX_SHARE` 1/3
   of the screen. `fnc_layout` draws it the way the inventory's columns are drawn: one block of Glass - the theme's `panel` and
   `radius` - laid out in UNITs on one grid, `PANEL_PAD` 0.4 UNIT of room round the content and between the bands (as many pixels wide as high),
   so the picture, the section captions and the grids start on one left edge and the loads end on one right edge. **Title row** at the top: the
   container's picture (`getInfo "picture"`) `TITLE_H` high and square, its name in the theme's bold font at `TITLE_SIZE`
   with its capitals centred in the row's height (`TEXT_MID`), and under the row a hairline in the theme's `line` colour 0.4
-  padding below it, as `fnc_drawColumn` draws it. **Sections** in `einv_gui_fnc_drawColumn`
-  (id `"storage"`): the open container, then staging; both with `"box"` false, so `einv_gui_fnc_drawSection` draws no picture
+  padding below it, as `fnc_drawColumn` draws it. **Sections** in `aio_gui_fnc_drawColumn`
+  (id `"storage"`): the open container, then staging; both with `"box"` false, so `aio_gui_fnc_drawSection` draws no picture
   box and the grid starts at the left edge (the inventory keeps its boxes). The caption lines are the inventory's - chevron, tab, load
   right-aligned, the staging space's subtitle in the same 0.46 UNIT; no Sort there (the inventory only). The column
-  reaches down to the **hint line**, the block's last band: no box of its own, a hairline over it, `EINV_ArsenalHint` at `HINT_SIZE`,
+  reaches down to the **hint line**, the block's last band: no box of its own, a hairline over it, `AIO_ArsenalHint` at `HINT_SIZE`,
   a line `HINT_LINE_H` high with `HINT_PAD` above and below - one line, two while staging holds something (the note, in the
   accent colour, from the `hint` hook; the idle text is cut to one line, Ctrl+wheel only where it fits beside). ACE's list is
   registered as the zone `"remove"`.
   The panel's own texts are in **ACE's grid** (`ACE_GRID_H` = `pixelH * pixelGridNoUIScale * 0.25`, 4 px at 1080p at every UI
   size), as ACE's list rows beside them (7 units, 28 px): `TITLE_H` 7.5 (30 px), `TITLE_SIZE` 4.5 (18 px), `HINT_LINE_H` 5.5
-  (22 px), `HINT_PAD` 2 (8 px), `HINT_SIZE` 3.75 (15 px, class `EINV_ArsenalHint`, a child of `EINV_FooterHint` in
+  (22 px), `HINT_PAD` 2 (8 px), `HINT_SIZE` 3.75 (15 px, class `AIO_ArsenalHint`, a child of `AIO_FooterHint` in
   `RscArsenal.hpp`). At 1080p that is what the UNITs gave to half a pixel; UNIT (screen height / 40) and ACE's whole-pixel grid
   do not keep one ratio across resolutions, so UNIT-sized texts stood off ACE's on some screens. `PANEL_PAD` (0.4 UNIT), the grid
-  cells and the section captions (drawn by `einv_gui_fnc_drawSection`, 0.46 UNIT; the staging subtitle shares their baseline)
+  cells and the section captions (drawn by `aio_gui_fnc_drawSection`, 0.46 UNIT; the staging subtitle shares their baseline)
   stay on the engine's UNIT.
 - **Folds.** A caption's chevron folds its section (the `fold` hook), kept per container class - lowercase, the staging space as
-  `"staging"` - in `einv_arsenal_folded` while ACE's window is open: ACE makes a new uniform, vest or backpack for every one
+  `"staging"` - in `aio_arsenal_folded` while ACE's window is open: ACE makes a new uniform, vest or backpack for every one
   picked, so folding per object would be lost. `fnc_layout` notes `foldKeys` `[[container, key], ...]` and sets each section's
-  `folded` to `key in folded` XOR `container in einv_gui_collapsed`, so the inventory's own list is never touched.
+  `folded` to `key in folded` XOR `container in aio_gui_collapsed`, so the inventory's own list is never touched.
   **A tab switch folds anew** (issue #3): `fnc_layout` keeps the tab the folds were last set for in `GVAR(foldTab)` - ACE's
   tab id (`fnc_selected`, "" for a tab without the panel) or `"kits"` while Enhanced First Aid Kits' kits tab is open -; when it
   changes, `GVAR(folded)` is emptied but for `"staging"`, so the picked container (or the kit's section) is open, the other worn
   containers folded, the staging space as it was. Order and scroll are untouched. Another kit picked in the kits tab is no switch:
   only the kit's section opens again (its key `KIT_FOLD_KEY` leaves `GVAR(folded)`), see "Enhanced First Aid Kits' kits tab".
 - **Other worn containers.** `fnc_layout` adds the soldier's other two containers as sections between the open one and the staging space,
-  folded to their captions (key `"other_" + class` in `einv_arsenal_folded`; present = unfolded), so items can be dragged between all three;
+  folded to their captions (key `"other_" + class` in `aio_arsenal_folded`; present = unfolded), so items can be dragged between all three;
   the staging space is one shared area in every tab. `fnc_addTo`, `fnc_remove`, `fnc_removeKind` and the drop's watch accept them like the staging
   space (ACE is told only of the open container).
 - **Folding the whole panel** (`fnc_toggleCollapse`). Folded, the whole
   panel is a small square button with the inventory's picture (at the right edge of the panel's rect, a click unfolds it); the text below
-  that speaks of a title row when folded is out of date. The open panel's fold button is a round button (`EFUNC(gui,uiButton)` in `headerStyle`'s colours, as the inventory's header buttons; hit area = button + 2 px) at the right end of the title row, `TITLE_H` square, chevron down while open and right while folded, its tooltip "Fold the panel to its title bar" / "Unfold the panel"; the container's name ends a gap before it. `GVAR(collapsed)` is the state: set in preInit from `profileNamespace` (`einv_arsenal_collapsed`, written on every toggle, saved by the game with the profile), so it holds through tabs and later openings. `fnc_layout` folded makes only the glass, picture, name and button: no hairline, column, staging crate (made when the panel unfolds), hint line (`hintRect` stays `[]`, so `fnc_footer` and the `hint` hook do nothing) or ACE-list zone, and the panel's rectangle (`panelRect`, `EGVAR(gui,panels)`) is the row with `PANEL_PAD` under it - so `fnc_isOver`, the mouse hooks, the wheel and the focus sink see only that, and no control is left over ACE's own. It is one build when toggled (`buildSoon`, a frame later through the button), never one per frame. The column's scroll is noted in `GVAR(collapsedScroll)` `[container class, pixels]` from the engine's `keepPixels` (the build before the fold still had the column) and put back into `keepPixels` when the same class unfolds. **Unfolding under a drag:** an item dragged from ACE's list (`fnc_listDrag` notes its class in `GVAR(listDragClass)`) over the folded row gets the hint "Hold it over the title bar to unfold the panel" (`fnc_dragCheck`); `fnc_onFrame` counts `UNFOLD_HOVER` 0.6 s on the row (`GVAR(unfoldSince)`), then `fnc_toggleCollapse [0, true, true]` builds at once - which ends the drag, as every build does - and the row (found again by its class) is lifted again with `fnc_listDrag` while the button is still down. A drop on the folded panel does nothing. **Closing:** the question of `fnc_confirmClose` does not depend on the panel, so it works folded; its Keep editing (`fnc_closeConfirm`) unfolds the panel for the session (not in the profile) as the things that do not fit lie in its grid.
+  that speaks of a title row when folded is out of date. The open panel's fold button is a round button (`EFUNC(gui,uiButton)` in `headerStyle`'s colours, as the inventory's header buttons; hit area = button + 2 px) at the right end of the title row, `TITLE_H` square, chevron down while open and right while folded, its tooltip "Fold the panel to its title bar" / "Unfold the panel"; the container's name ends a gap before it. `GVAR(collapsed)` is the state: set in preInit from `profileNamespace` (`aio_arsenal_collapsed`, written on every toggle, saved by the game with the profile), so it holds through tabs and later openings. `fnc_layout` folded makes only the glass, picture, name and button: no hairline, column, staging crate (made when the panel unfolds), hint line (`hintRect` stays `[]`, so `fnc_footer` and the `hint` hook do nothing) or ACE-list zone, and the panel's rectangle (`panelRect`, `EGVAR(gui,panels)`) is the row with `PANEL_PAD` under it - so `fnc_isOver`, the mouse hooks, the wheel and the focus sink see only that, and no control is left over ACE's own. It is one build when toggled (`buildSoon`, a frame later through the button), never one per frame. The column's scroll is noted in `GVAR(collapsedScroll)` `[container class, pixels]` from the engine's `keepPixels` (the build before the fold still had the column) and put back into `keepPixels` when the same class unfolds. **Unfolding under a drag:** an item dragged from ACE's list (`fnc_listDrag` notes its class in `GVAR(listDragClass)`) over the folded row gets the hint "Hold it over the title bar to unfold the panel" (`fnc_dragCheck`); `fnc_onFrame` counts `UNFOLD_HOVER` 0.6 s on the row (`GVAR(unfoldSince)`), then `fnc_toggleCollapse [0, true, true]` builds at once - which ends the drag, as every build does - and the row (found again by its class) is lifted again with `fnc_listDrag` while the button is still down. A drop on the folded panel does nothing. **Closing:** the question of `fnc_confirmClose` does not depend on the panel, so it works folded; its Keep editing (`fnc_closeConfirm`) unfolds the panel for the session (not in the profile) as the things that do not fit lie in its grid.
 - **Staging space** (`fnc_staging`): `Box_NATO_Support_F` by `createVehicleLocal` at the first draw, hidden, no simulation,
-  emptied, at the unit's feet (in reach), `einv_noSearch`, **`einv_storage_localOnly`**. Only for a soldier whose moves the
+  emptied, at the unit's feet (in reach), `aio_noSearch`, **`aio_storage_localOnly`**. Only for a soldier whose moves the
   storage runs on this machine at once (`fnc_isLocalRoot`: the player's own unit, any unit in single player and Eden); objNull for
   any other. Because `localOnly` objects count as local roots, moves between the container (root: the player) and staging (its own
   root) run here with the normal reach, lock and verify checks. Its grid grows (`fnc_growStaging`, from `fnc_layout`'s drawer
-  just before its section): `einv_grid = [[STORAGE_COLS, rows]]` with rows = the lowest row in use (plus the heights of overflow
+  just before its section): `aio_grid = [[STORAGE_COLS, rows]]` with rows = the lowest row in use (plus the heights of overflow
   entries) + `STAGING_FREE_ROWS` 4, at least `STAGING_MIN_ROWS` 10 and the rows that fill the column down to the hint line, at
   most `STAGING_MAX_ROWS` 100 (its own cap, since `MAX_ROWS` 40 also bounds item and compartment sizes in the rules); rows past
   the column scroll; `getBlocks` takes that form exactly. Section id `"staging"`, side `"own"`, a crate icon (`tabIcon`) before
-  its caption. `fnc_onClosed` deletes it with its contents. `fnc_onDrop` notes `einv_arsenal_watch` `[container, [[class, count], ...],
+  its caption. `fnc_onClosed` deletes it with its contents. `fnc_onDrop` notes `aio_arsenal_watch` `[container, [[class, count], ...],
   until]` and the frame hook calls `fnc_syncAce` and `fnc_tellAce` once the count changed (`WATCH_TIME` 3 s at most). The staging
   crate is no section of the soldier's (`GVAR(context)` "ownSections"), which the engine's signature reads (`fnc_getSignature`), so a
   move that only rearranged it - a tile moved or turned inside the staging space - was never seen and its tiles stayed where they were
   drawn: the next lift found nothing at the old cell ("Someone else was quicker"). The `signature` hook names the crate
-  (`[einv_arsenal_staging]`), its cargo and places go into the "storage" part, and a change there builds the panel.
+  (`[aio_arsenal_staging]`), its cargo and places go into the "storage" part, and a change there builds the panel.
 
 ### Closing with things that do not fit
 
@@ -2382,19 +2382,19 @@ they are **taken out**, not left in or moved on, and the player is asked first.
   in the RPT and the close then goes the old way (below).
 - **The question** (`fnc_confirmClose [display, exit code]`). Without overflow, with a unit that is not local here, in Eden or with
   the panel not `ready` it is `closeDisplay` at once. Otherwise a card on ACE's display, built like the red screen's (a controls
-  group made with `ctrlCreate` and held in uiNamespace `einv_arsenal_confirm`, so the engine's sweep leaves it alone; a dimming
-  and a full-screen `EINV_Hitbox` under the card take the mouse from ACE's controls): "N items do not fit your gear and will be
+  group made with `ctrlCreate` and held in uiNamespace `aio_arsenal_confirm`, so the engine's sweep leaves it alone; a dimming
+  and a full-screen `AIO_Hitbox` under the card take the mouse from ACE's controls): "N items do not fit your gear and will be
   removed: <names x count>" (six names at most, then "+K"), **Keep editing** and **Remove and close** (loss colour). While it
   is up `fnc_isOver` says nowhere, `fnc_onKey` does nothing and `fnc_onAceKey` holds every key: Escape is Keep editing
   (`fnc_closeConfirm`), the rest is swallowed. **Moving the card:** its controls lie straight on ACE's display and do not hear
   the mouse themselves, so a left press from `fnc_onConfirmMouse` on no answer and inside the title strip (the live position of
-  the film in uiNamespace `einv_arsenal_confirmBar`) starts `["begin", ...] call einv_gui_fnc_dragHandle` with the list in
-  `einv_arsenal_confirmMoved` (all the card's controls except the dimming). The helper moves them one by one with the display's
+  the film in uiNamespace `aio_arsenal_confirmBar`) starts `["begin", ...] call aio_gui_fnc_dragHandle` with the list in
+  `aio_arsenal_confirmMoved` (all the card's controls except the dimming). The helper moves them one by one with the display's
   own `MouseMoving` / `MouseHolding` / `MouseButtonUp`; the answers' hit tests read their live positions, so they follow;
   `fnc_hoverConfirm` lights the film on hover when no drag is running. The red screen (`fnc_onBlockedLoad`) has its card as a group
   inside the full-screen one and a plain `attach` handle over its sign and title.
 - **Remove and close** (`fnc_answerConfirm`): `fnc_dropOverflow` - per container the first overflow entry through
-  `einv_storage_fnc_removeEntry`, the layout read again after each, `fnc_tellAce` with the class counts before and after, the
+  `aio_storage_fnc_removeEntry`, the layout read again after each, `fnc_tellAce` with the class counts before and after, the
   `giveBack` sound once -, an RPT INFO line, then `closeDisplay` with the code the player asked for.
 - **A close nothing could ask first** (a script's `closeDisplay`, a handler that could not be replaced): `fnc_onClosed`, a frame
   after `ace_arsenal_displayClosed`, runs `fnc_dropOverflow` for a local unit, says it in the RPT (INFO) and once on the screen
@@ -2405,21 +2405,21 @@ they are **taken out**, not left in or moved on, and the player is asked first.
 - **Picking another container** (`fnc_keepPlaces`). ACE goes through `setUnitLoadout`, which makes all three containers new objects with first-fit
   places. `GVAR(kept)` holds `[container, class, records]` per slot (re-read every `KEPT_REFRESH` 0.2 s while the object is the same); when a slot
   holds a new object - of any class, ACE carries the contents over to the one picked - the records that still fit its grid are written back
-  with `einv_storage_fnc_writePlaces` (records that no longer match the contents drop out at the next layout). Called from the frame hook,
+  with `aio_storage_fnc_writePlaces` (records that no longer match the contents drop out at the next layout). Called from the frame hook,
   `fnc_snapshot`, `fnc_onItemsChanged` and `fnc_onCargoChanged`, before anything normalizes the new containers. Which records fit says
-  `einv_storage_fnc_fitRecords [container, records]`: the compartment exists, the box lies inside it, none of its cells is a hole of the
-  compartment (a shaped item asked with its own holes, `einv_items_fnc_footprintAs`) and it takes no cell an earlier kept record took; a
+  `aio_storage_fnc_fitRecords [container, records]`: the compartment exists, the box lies inside it, none of its cells is a hole of the
+  compartment (a shaped item asked with its own holes, `aio_items_fnc_footprintAs`) and it takes no cell an earlier kept record took; a
   single slot keeps a record whose first cell lies in it while it is empty. So a container of the exact same grid keeps everything, and in
   another one only what has no room where it lay gets a first fit (before 0.5.51 only the same class kept its records, issue #22). The
-  owner is set on the new object first (`einv_storage_owner`), its compartments depend on it. Changing the insignia does not make new
+  owner is set on the new object first (`aio_storage_owner`), its compartments depend on it. Changing the insignia does not make new
   containers (ACE 3.21 calls only `BIS_fnc_setUnitInsignia`); re-picking the uniform, which re-applies it, goes through the path above. A loadout set on ACE's unit (`CBA_loadoutSet`) empties `GVAR(kept)` (the old records are stale for the new contents) and sets `GVAR(loadoutFrame)`, `LOADOUT_QUIET_FRAMES` 4 frames in which `fnc_stageOverflow` moves nothing and asks for `fnc_settle` again.
 - **Overflow to staging** (`fnc_stageOverflow`, in `fnc_settle` before the snapshot): entries with no cell are moved first to another worn container with a free spot (uniform, vest, backpack order), and only what fits none to the staging
-  space (`einv_storage_fnc_moveEntry`, `fnc_growStaging` first), ACE told for the open container; what the staging space cannot take stays red.
+  space (`aio_storage_fnc_moveEntry`, `fnc_growStaging` first), ACE told for the open container; what the staging space cannot take stays red.
   `fnc_findOverflow` also lists everything in the staging space, so the close card names it.
 
-- **ACE's own "+"**: `fnc_snapshot` normalizes the container's places (`einv_storage_fnc_normalize`) and notes its counts by
+- **ACE's own "+"**: `fnc_snapshot` normalizes the container's places (`aio_storage_fnc_normalize`) and notes its counts by
   class, so after an add every old tile keeps its record and only the new things are laid out first-fit. `fnc_reconcile`: gains
-  against the snapshot; overflow entries of a gained class are taken back out (`einv_storage_fnc_removeEntry`, at most the gained
+  against the snapshot; overflow entries of a gained class are taken back out (`aio_storage_fnc_removeEntry`, at most the gained
   count), "No room in the vest - move things to free a 1x2 space" appears in ACE's message line and the hint line
   (`fnc_sayNoRoom`), and ACE is told with `ace_arsenal_fnc_fireItemsChangedEvent` (`fnc_tellAce`; an ACE without it gets the
   follow-up in the frame-later pass). Nothing else is ever taken out.
@@ -2431,25 +2431,25 @@ they are **taken out**, not left in or moved on, and the player is asked first.
   `LIST_DRAG_PX` 5 screen pixels **in any direction** with the button held (the list scrolls by wheel and bar, so up/down is a drag
   too; the engine's `DRAG_THRESHOLD` is 6-9 px at 1080p), and does not drop the press in its own frame or the next for a button
   that does not read as held yet. `fnc_listDrag` takes the press's row; only out of range the row the list picked since the press
-  (`LBSelChanged`, `einv_arsenal_listSel`). A unique row (`lnbValue [row, 2]` 1) does not drag and flashes "ACE does not allow
+  (`LBSelChanged`, `aio_arsenal_listSel`). A unique row (`lnbValue [row, 2]` 1) does not drag and flashes "ACE does not allow
   this item here" once; a greyed row drags (the staging space may take it). The row's class is read from `lnbData [row, 0]` into
   a virtual off-screen source grid `"aceList"` whose tile carries `dragEntry` with `count` = the stack (Shift: all); then
-  `einv_gui_press` and `einv_gui_fnc_startDrag`. `fnc_dragCheck`: only a
+  `aio_gui_press` and `aio_gui_fnc_startDrag`. `fnc_dragCheck`: only a
   grid of the panel is a target (else `[]`) - or, with compat_efak loaded, a **kit's tile** there (`fnc_listToKit`: the cell under the
-  mouse, the footprint's corner plus `einv_gui_press`'s grab, lies on a tile `einv_compat_efak_fnc_isKit` knows): the target becomes
-  `["kitTile", grid, tile, 0, fits, why]` by `einv_compat_efak_fnc_canPackNew [kit, class, count]` - whether the kit may be filled in
-  the arsenal (`einv_compat_efak_fnc_arsenalEditable`), that mod's rules, and the kit's room by `fnc_roomMode`: its
+  mouse, the footprint's corner plus `aio_gui_press`'s grab, lies on a tile `aio_compat_efak_fnc_isKit` knows): the target becomes
+  `["kitTile", grid, tile, 0, fits, why]` by `aio_compat_efak_fnc_canPackNew [kit, class, count]` - whether the kit may be filled in
+  the arsenal (`aio_compat_efak_fnc_arsenalEditable`), that mod's rules, and the kit's room by `fnc_roomMode`: its
   capacity, or the free cells of its own grid and never the capacity then; green when some fit (the hint says how many), red with
-  the reason when none. `fnc_onDrop` packs them with `einv_compat_efak_fnc_packNew` and runs `fnc_settle`. The kits tab's list is
+  the reason when none. `fnc_onDrop` packs them with `aio_compat_efak_fnc_packNew` and runs `fnc_settle`. The kits tab's list is
   dragged from the same way, and a kit's own grid shows only in that tab (next section). The target's 11th element is the cell under
   the mouse (the item is held by its middle, so the footprint's corner is no longer the cell
   minus a fixed grab): `fnc_listToKit` takes the cell from it. The drop (`fnc_onDrop`) calls `fnc_addTo [container, class, count, [col, row, block,
   w, h]]`: `normalize`, then `addItemToUniform` / `Vest` / `Backpack` for the open container, `addNew` for staging and for what
   the engine refused, the cell as a new record (`setPlace`); then `syncAce` and `tellAce`.
-- **Swapping tiles in the panel.** Dragging a tile onto another of the open container swaps the two as in the inventory (`einv_gui_fnc_swapPlan`,
+- **Swapping tiles in the panel.** Dragging a tile onto another of the open container swaps the two as in the inventory (`aio_gui_fnc_swapPlan`,
   a `placeMany` inside one container: counts do not change, so ACE has nothing to hear). Between the container and the staging space the
   swap is an `exchange` through the hub; `fnc_onDrop` is handed the plan (its 15th argument) and notes the counts of both classes
-  (`einv_arsenal_watch` `[container, [[class, before], ...], until]`), so the frame hook tells ACE of each (`fnc_syncAce` once, `fnc_tellAce`
+  (`aio_arsenal_watch` `[container, [[class, before], ...], until]`), so the frame hook tells ACE of each (`fnc_syncAce` once, `fnc_tellAce`
   per class) - and likewise for a tile that joins a stack of its own class there.
 - **Wheel and remove.** During a list drag the engine's wheel sets the count on the ghost. Else `fnc_onWheel`: plain is the
   column's scroll; **Ctrl** over a tile adds one of its class (`fnc_addTo`, if in `ace_arsenal_virtualItemsFlat`) or takes one out
@@ -2465,7 +2465,7 @@ they are **taken out**, not left in or moved on, and the player is asked first.
 - **Mouse and focus.** A press on the panel empties `ace_arsenal_mouseButtonState` (now and a frame later); the frame hook keeps
   it empty while something is held or a list press waits, and ends a drag whose button came up where no display event reached the
   engine. The engine draws the focused control over all, and a row click focuses the list; so the frame hook gives the focus to
-  the panel's sink (uiNamespace `einv_arsenal_focusSink`: an `EINV_Hitbox` of no size in the screen's corner, made by
+  the panel's sink (uiNamespace `aio_arsenal_focusSink`: an `AIO_Hitbox` of no size in the screen's corner, made by
   `fnc_layout`) while the mouse is over the panel with no button held or a drag is on, unless a field (type 2) or the sort bar
   (type 4) has it, and **gives it back to ACE's list (IDC 15) once the mouse has left the panel with nothing held**, so ACE's
   arrow keys work. It is not ACE's 3D area (IDC 0) that gets the focus: it covers the screen, and focused it lay over the panel.
@@ -2488,20 +2488,20 @@ setting (`efak_core_fnc_getArsenalEditing`: nothing, remove only, everything - e
 for them and gives an instance taken out with ACE's "-" back to its pool. Kits keep their contents through loadouts by that mod's
 own CBA loadout handling; nothing of that is repeated here (the storage's top-up never tops up kits).
 
-- **The signal.** compat_efak reads the tab: `einv_compat_efak_fnc_arsenalFocus [display]` -> `[open, picked class, being made
+- **The signal.** compat_efak reads the tab: `aio_compat_efak_fnc_arsenalFocus [display]` -> `[open, picked class, being made
   ready]` (`efak_arsenal_active`, the row picked in 88503, else `efak_arsenal_selected`), and names its controls
   (`fnc_arsenalControls` -> `[list 88510, sort bar 88522, [88508, 88509]]`); the panel asks through `fnc_focusedKit` (never open
   without compat_efak). The frame hook sets it against `GVAR(focusSeen)` every frame: opened or closed -> `fnc_settle`, as after
-  ACE's own events; another kit picked -> `einv_gui_fnc_buildSoon`, one build for a run of picks with the arrow keys (something
+  ACE's own events; another kit picked -> `aio_gui_fnc_buildSoon`, one build for a run of picks with the arrow keys (something
   held: `GVAR(dirty)`). While the tab is open `fnc_selected` names no container - ACE's list takes nothing -, so `fnc_tellAce` and
   the drop's watch stay silent, `fnc_addTo` uses `addNew` for every worn container, and `fnc_syncAce` keeps only
   `ace_arsenal_currentItems` of the three containers right (things move between them and the kit) and the weight text (IDC 801,
   three frames later, as that mod's flush does): ACE's `updateRightPanel` would show its "Remove all" over the tab.
 - **The layout** (`fnc_layout`). Uniform, vest and backpack folded to their captions (`"other_" + class`), in that order, then the
-  kit's section unfolded, then the staging space. `einv_compat_efak_fnc_arsenalKit [picked, preparing, holders]` finds the kit: the
-  row's very instance where it lies in a worn container or the staging space (cargo or `einv_storage_fnc_hiddenClasses`), else the
+  kit's section unfolded, then the staging space. `aio_compat_efak_fnc_arsenalKit [picked, preparing, holders]` finds the kit: the
+  row's very instance where it lies in a worn container or the staging space (cargo or `aio_storage_fnc_hiddenClasses`), else the
   first instance of its type lying there that is no prototype (the tab's list follows a moved or re-instanced kit only at its next
-  look); notes it alone in `einv_compat_efak_arsenalHolders`, and returns `fnc_kitSection` titled `"Kit: <name> (<used>/<room>)"`
+  look); notes it alone in `aio_compat_efak_arsenalHolders`, and returns `fnc_kitSection` titled `"Kit: <name> (<used>/<room>)"`
   (`fnc_getName`, else `efak_core_fnc_getKitName`; `fnc_fillState`'s numbers, mass against capacity or cells) with `panelTitle`
   for the title row, which pictures the kit. With no grid to show it returns a note (`note`, drawn by `fnc_drawNote` as a caption
   and one muted line): "Take the kit first" (none in the gear or the staging space, a notice row), "being made ready" (a preparing
@@ -2509,29 +2509,29 @@ own CBA loadout handling; nothing of that is repeated here (the storage's top-up
   `"kits"`, so opening the tab folds the panel anew but a pick does not; its `scrollClass` "kit" keeps the column's scroll across
   picks (`GVAR(scrollKey)`). `fnc_panelRect` takes the widest of the holders shown and the tab's sort bar for its top.
 - **Into and out of the kit.** The tab's list gets the handlers ACE's has (`fnc_onOpened`: each list keeps its arrows in
-  `einv_arsenal_arrows`, its row height comes from its config by IDC, `GVAR(listPress)` and `GVAR(listSel)` carry the IDC); a press
+  `aio_arsenal_arrows`, its row height comes from its config by IDC, `GVAR(listPress)` and `GVAR(listSel)` carry the IDC); a press
   becomes a drag (`fnc_listDrag [display, where, shift, row, frame, idc]`), a row with `lnbValue` 1 flashes "This kit does not take
   it here". Over the kit's grid `fnc_listToKit` puts the kit's verdict on the engine's grid target (`canPackNew`, red footprint and
   the reason when none fits) and `fnc_onDrop` packs it (`packNew`, on the cell when it is free, else where the layout puts it).
-  Between the kit and the worn containers or the staging space it is the engine's kit ops (`einv_compat_efak_fnc_drop`, the kit
+  Between the kit and the worn containers or the staging space it is the engine's kit ops (`aio_compat_efak_fnc_drop`, the kit
   found through `arsenalHolders`). `fnc_dragCheck` turns a tile red that would leave a kit which lets nothing out
   (`fnc_arsenalEditable [kit, false]`; a place within its own grid always goes). Out onto the list, Ctrl+wheel down and the menu's
-  Remove take it out and away (`fnc_remove` -> `einv_compat_efak_fnc_discard`); Ctrl+wheel up packs one more (`packNew`, only what
+  Remove take it out and away (`fnc_remove` -> `aio_compat_efak_fnc_discard`); Ctrl+wheel up packs one more (`packNew`, only what
   the arsenal has, as ACE's "+").
-- **The rules** (`einv_compat_efak_fnc_arsenalEditable [kit, adding]`, as the tab's): contents not here yet (`fnc_notReady`); the
+- **The rules** (`aio_compat_efak_fnc_arsenalEditable [kit, adding]`, as the tab's): contents not here yet (`fnc_notReady`); the
   Arsenal setting "nothing" refuses, "remove only" lets things out but not in; a kit following the default contents is locked
   ("untick Use CBA default"). That mod's words where they are localized (`isLocalized`), else ours. Asked by `canPackNew`,
   `discard`, `canDrop` (the target in, a kit source out) and `drop` (the source out) in ACE's window.
-- **That tab's staged edits first** (`einv_compat_efak_fnc_arsenalFlush`): `packNew`, `discard` and `drop` in ACE's window call
+- **That tab's staged edits first** (`aio_compat_efak_fnc_arsenalFlush`): `packNew`, `discard` and `drop` in ACE's window call
   `efak_arsenal_fnc_flush` while the tab is up, so the kit is checked and written as the tab shows it and nothing it staged is
   replayed onto the panel's change. The tab's counts then follow by its own `contentsChanged` handler.
 - **Greying the tab's rows** (`fnc_ungreyKit`): only while the kit's room is its cells (`roomMode` "cells"); with the capacity the
   tab's own greying is the kit's room and stays. Per class `canPackNew [kit, class, 1]`, kept in `GVAR(kitVerdicts)` while
-  `einv_compat_efak_fnc_arsenalState` (contents, places' revision, rules revision, defaults lock, editing, synced) is the same;
+  `aio_compat_efak_fnc_arsenalState` (contents, places' revision, rules revision, defaults lock, editing, synced) is the same;
   rows with `lnbValue` 0 get alpha 1 or `KIT_GREY_ALPHA`, only where it differs; the picked row's "+" is only ever turned off.
   The tab writes its greying at every fill, so the frame hook runs it every `KIT_UNGREY_EVERY` 0.25 s and a pick a frame later,
   once the build shows the tab's pick (`GVAR(focusBuilt)`), in turns of `UNGREY_BUDGET`.
-- **Instances back to the pool** (`einv_compat_efak_fnc_arsenalFree [classes, holders]`): a kit taken away in the panel
+- **Instances back to the pool** (`aio_compat_efak_fnc_arsenalFree [classes, holders]`): a kit taken away in the panel
   (`fnc_remove`, `fnc_removeKind`, `fnc_dropOverflow`, `fnc_discard`, and what lies in the staging space when the window closes,
   `fnc_onClosed`) gives its instance back (`efak_core_fnc_freeInstance`, its packed kits with it) unless one of the class still lies
   in the holders - as that mod does for ACE's "-".
@@ -2545,22 +2545,22 @@ own CBA loadout handling; nothing of that is repeated here (the storage's top-up
 ### The vanilla Virtual Arsenal
 
 `BIS_fnc_arsenal` is wrapped (`CfgFunctions.hpp`): "Open" asks `fnc_handleBIOpen`; everything else is BI's own code. The server
-setting `einv_arsenal_biArsenal` has three values: **`"ace"`** (default; ACE Arsenal opens with the box's items on a local helper,
-`fnc_biItems` -> `fnc_openBI`), **`"block"`** (a red glass screen `EINV_ArsenalBlocked`, IDD 9611, with `einv_arsenal_biMessage`;
+setting `aio_arsenal_biArsenal` has three values: **`"ace"`** (default; ACE Arsenal opens with the box's items on a local helper,
+`fnc_biItems` -> `fnc_openBI`), **`"block"`** (a red glass screen `AIO_ArsenalBlocked`, IDD 9611, with `aio_arsenal_biMessage`;
 `fnc_showBlocked`) and **`"vanilla"`** (BI's untouched; what does not fit the grid is reported afterwards). Always BI's: no
-interface, not ready, a mission that sets `einv_arsenal_biPassThrough` true, BI's showcase, Warlords, Eden's editor, a remote,
+interface, not ready, a mission that sets `aio_arsenal_biPassThrough` true, BI's showcase, Warlords, Eden's editor, a remote,
 non-soldier or seated center. In `"ace"` mode also a mission with more `arsenalOpened` / `arsenalPreOpen` handlers than mods had
-(`fnc_biCountHandlers`, counted the first frame after postInit), unless it sets `einv_arsenal_biPassThrough` to false; Zeus is
+(`fnc_biCountHandlers`, counted the first frame after postInit), unless it sets `aio_arsenal_biPassThrough` to false; Zeus is
 never blocked. `fnc_biSafetyNet` (an `arsenalOpened` handler) closes a vanilla display that opened though nothing here let it, a
 frame later with exit code 2, and opens ours or blocks. In the inventory, `fnc_isArsenalBox` (ACE's `virtualItems`, or a BI box)
 makes a box never searched and gives it "Open Arsenal" (`fnc_canOpen`, `fnc_open`).
 
 ## 6. Setup wizard (setup)
 
-The wizard edits the text of `einv_items_rules`, through the rules engine's own functions (`parseRules`, `writeRules`,
+The wizard edits the text of `aio_items_rules`, through the rules engine's own functions (`parseRules`, `writeRules`,
 `compileRules`, `getInfo [class, draft, cache]`), and the server settings - the very CBA settings of CBA's Addon Options, page
-"Arma Inventory Overhaul - Server" (section 8) -, and draws with the inventory's UI kit and theme (`einv_gui_fnc_ui*`,
-`einv_gui_fnc_theme`). Nothing reaches the game before Save. Its functions are PREPed in preStart as well as preInit
+"Arma Inventory Overhaul - Server" (section 8) -, and draws with the inventory's UI kit and theme (`aio_gui_fnc_ui*`,
+`aio_gui_fnc_theme`). Nothing reaches the game before Save. Its functions are PREPed in preStart as well as preInit
 (`XEH_PREP_entry.hpp`: `fnc_initCbaMenu`, `fnc_initPauseMenu`, `fnc_openFromGame`), so CBA's menu, the pause menu and the wizard's
 display find them in `uiNamespace` over the main menu and in Eden.
 
@@ -2568,19 +2568,19 @@ display find them in `uiNamespace` over the main menu and in Eden.
 
 | Where | Mode | How |
 |---|---|---|
-| CBA's Addon Options, a button in the bottom row (between Load and Import) while this mod's Server page (the category of `einv_items_rules`) is open, for whoever passes `fnc_canOpen` | menu | `fnc_initCbaMenu` (`Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions`); missing CBA controls mean no button and nothing else breaks. CBA has no condition for a control of its own: the button is made hidden and shown while `fnc_canOpen` holds, asked at every sync (mouse move, key, list pick), so a login while the menu is open shows it. In Eden it first runs `einv_main_fnc_migrateSettings` |
-| ESC > Options > Inventory setup, for whoever passes `fnc_canOpen` | direct | `CBA_fnc_addPauseMenuOption` with the display `einv_setup_RscWizard` (idd 9620); CBA's entries take no condition, so `fnc_initPauseMenu` (`Extended_DisplayLoad_EventHandlers >> RscDisplayInterrupt`, `RscDisplayMPInterrupt`, after CBA's own handler) deletes the button again as the pause menu opens for anyone else and moves the buttons above it down a row (CBA's buttons on the display, `cba_ui_MenuButtons`: the game's four, then one per entry of CBA's list `cba_ui_MenuButtons` in missionNamespace). Asked at every opening of the pause menu |
+| CBA's Addon Options, a button in the bottom row (between Load and Import) while this mod's Server page (the category of `aio_items_rules`) is open, for whoever passes `fnc_canOpen` | menu | `fnc_initCbaMenu` (`Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions`); missing CBA controls mean no button and nothing else breaks. CBA has no condition for a control of its own: the button is made hidden and shown while `fnc_canOpen` holds, asked at every sync (mouse move, key, list pick), so a login while the menu is open shows it. In Eden it first runs `aio_main_fnc_migrateSettings` |
+| ESC > Options > Inventory setup, for whoever passes `fnc_canOpen` | direct | `CBA_fnc_addPauseMenuOption` with the display `aio_setup_RscWizard` (idd 9620); CBA's entries take no condition, so `fnc_initPauseMenu` (`Extended_DisplayLoad_EventHandlers >> RscDisplayInterrupt`, `RscDisplayMPInterrupt`, after CBA's own handler) deletes the button again as the pause menu opens for anyone else and moves the buttons above it down a row (CBA's buttons on the display, `cba_ui_MenuButtons`: the game's four, then one per entry of CBA's list `cba_ui_MenuButtons` in missionNamespace). Asked at every opening of the pause menu |
 | Eden: Tools menu | direct | `Display3DEN.hpp`, over display 313; saves into the scenario |
-| the inventory's cog (`einv_gui_fnc_drawHeader`) | direct | `fnc_openFromGame`; the tooltip says read-only when `fnc_canEdit` says so; the inventory comes back on close (`einv_setup_reopenInventory`), as a person window when it was one |
+| the inventory's cog (`aio_gui_fnc_drawHeader`) | direct | `fnc_openFromGame`; the tooltip says read-only when `fnc_canEdit` says so; the inventory comes back on close (`aio_setup_reopenInventory`), as a person window when it was one |
 
 - `fnc_open [parent = displayNull, mode = "direct", step = 0, class = ""]` (public) -> display; one wizard at a time, an open
-  inventory closes first. The wizard edits `einv_items_rules`, has no keybind and no setting of its
+  inventory closes first. The wizard edits `aio_items_rules`, has no keybind and no setting of its
   own. `fnc_canOpen []` (public) -> BOOL is the one gate every way in passes: `fnc_openFromGame` (the inventory's cog; asked
   before the inventory closes, so a refusal keeps it open and says nothing), `fnc_open` (a mission's own call), `fnc_initCbaMenu` (the
   button on CBA's Addon Options, asked at every sync) and `fnc_onLoad` (ESC > Options, where the engine makes the display itself:
   closed again through `fnc_defer`, silently). It is `is3DEN || isServer || !isMultiplayer || serverCommandAvailable "#kick"`: the
   editor, the server itself, the host, single player, a logged-in or voted admin. Nobody else sees the wizard: the cog in the
-  inventory header (`einv_gui_fnc_drawHeader`) is not drawn, asked at every draw, so a login shows at once (the game has no event for
+  inventory header (`aio_gui_fnc_drawHeader`) is not drawn, asked at every draw, so a login shows at once (the game has no event for
   it); ESC > Options leaves the entry out (`fnc_initPauseMenu`, asked as the pause menu opens) and CBA's Addon Options hide the
   button (`fnc_initCbaMenu`). Should the pause menu's entry slip through all the same, the wizard closes again at once.
   Saving is a question of its own (`fnc_canEdit`); the read-only mode stays in the code for the CBA whitelist case.
@@ -2597,7 +2597,7 @@ display find them in `uiNamespace` over the main menu and in Eden.
   scenario; menu mode the value and priority into CBA's temporary values of the menu's source (`cba_settings_<source>Temp`, what
   `cba_settings_fnc_import` does with a line - without the line, since a free text may hold a `;`), `cba_settings_fnc_gui_refresh`,
   and the wizard closes - CBA's OK keeps it. Someone else saved the rules meanwhile: replay my edits on top (`fnc_replay`), overwrite,
-  or cancel. `einv_items_rulesChanged` while the wizard is open -> `fnc_onRulesChanged` (deferred): rules not edited here - take the
+  or cancel. `aio_items_rulesChanged` while the wizard is open -> `fnc_onRulesChanged` (deferred): rules not edited here - take the
   new ones (the server settings of the draft stay); edited - keep them and show a banner (Reload / keep mine). A server setting
   changed elsewhere -> `fnc_onSettingChanged` (below).
 
@@ -2605,7 +2605,7 @@ display find them in `uiNamespace` over the main menu and in Eden.
 
 Eden runs no postInit, so CBA's frame handlers and `CBA_fnc_execNextFrame` never run there. Every widget therefore hands its code
 to `fnc_defer [code, args, delay]` (a button that redraws the wizard deletes itself, which must not happen inside its own click),
-and the queue (uiNamespace `einv_setup_deferred`) is emptied by `fnc_runDeferred`, whichever comes first: the display's
+and the queue (uiNamespace `aio_setup_deferred`) is emptied by `fnc_runDeferred`, whichever comes first: the display's
 `MouseMoving` / `MouseHolding` events (`fnc_onMouse`, every frame while the mouse is over it) or a spawned script that runs it
 unscheduled (`isNil`). The queue is taken before it runs, so code that queues more starts a new queue. **Every click of the wizard
 goes through `fnc_uiHit` / `fnc_defer`, never through CBA's frame handlers.**
@@ -2613,33 +2613,33 @@ goes through `fnc_uiHit` / `fnc_defer`, never through CBA's frame handlers.**
 ### Popovers and the top layer
 
 Every popover (`fnc_popover`: a dropdown's list, the Same as picker, the import box, `fnc_confirm`'s questions such as closing with
-unsaved changes) is made in the **top layer** (`fnc_topLayer`, uiNamespace `einv_setup_layer`): a controls group over the screen,
+unsaved changes) is made in the **top layer** (`fnc_topLayer`, uiNamespace `aio_setup_layer`): a controls group over the screen,
 made anew at the end of every step drawn so it is the display's last control, hidden while empty. The engine draws the focused
 control over all others, and the pane holds the focus after a redraw (its sink) or a click - popovers made on the display lay behind
 it. A popover therefore takes the focus into the layer (a button of no size on its card) before its content is drawn, its
 full-screen hit area closes it on a click beside the card and lets nothing through, and the keys wait while one is open
 (`fnc_onKeyDown`, `fnc_onKeyUp`); `fnc_closePopover` hides the layer and gives the focus back to the sink. A popover with an anchor opens below it (above when there is no room), at the anchor's place on the screen as `fnc_screenRect` works it out: the groups around the control add their corner and take off how far each is scrolled (`ctrlScrollValues` times the content's height less the group's; a step that draws a scrolling page says its height in the group's `contentH`, else it is the lowest bottom edge of the group's controls). A step drawn again keeps where its groups were scrolled (`scrollId` on the group): `fnc_showStep` saves them and `fnc_restoreScroll` sets them again until they hold, a page that came out longer or shorter at the same distance from its top. A popover without an anchor sits in the middle of the screen, or - with its seventh argument - centred on a point (`fnc_confirm` centres on the wizard's middle). **`fnc_confirm`** is a card with its question centred (a bold title above it when it has one) and its answers right-aligned along the bottom with one gap, as wide as the answers need; the answer that does nothing is first on the left, Escape and a click beside the card are that answer. Closing with unsaved changes (`fnc_close`) asks "You have unsaved changes.": **Keep editing**, **Close without saving** (style `danger`) and - only when the wizard may save (`!readOnly`) - **Save and close**, which calls `fnc_save` and closes the display once the draft is no longer dirty (a conflict question or a refusal leaves it open).
 
-**Moving a popup window** (`einv_gui_fnc_dragHandle`, gui addon, shared by setup and arsenal). A titled popover is a window: `fnc_popover` makes the title bar (from the card's edge to the cross, down to the content) a drag handle - a transparent `EINV_Hitbox` in the card group, made after the title and before the cross, with a faint film under it that lights on hover (`MouseEnter` / `MouseExit`). A left press on it ("begin") adds `MouseMoving`, `MouseHolding` and `MouseButtonUp` to the display and nothing else runs until then; each move sets the **card group** with `ctrlSetPosition` + `ctrlCommit 0` (a group carries all it holds), the release removes the three handlers. The dimming and the full-screen catcher are siblings of the card in the layer and stay put. The move is the mouse's distance since the press, rounded to whole pixels and clamped so the whole handle stays in the safe zone. The state is uiNamespace `einv_gui_drag` (empty when idle); `["busy"] call einv_gui_fnc_dragHandle` is true while dragging and for 0.3 s after, which the catcher's `ButtonClick` asks so the release that ends a drag never counts as a click beside the card. The popover's eighth argument is a *kind* (`picker`, `export`, `exportClasses`, `exportChoice`, `import`, `importChoice`, `classImport`, `sameAs`; `changes` for the changes list): where a window of that kind was let go is kept in uiNamespace `einv_gui_places` for the session and the next one is put there (brought back inside the screen by the same clamp). Untitled cards make a handle of their own through the same function on the card (`ctrlParentControlsGroup` of the content group): `fnc_confirm` over its words and padding (not the answers; no kind, a question opens in the middle each time), `fnc_openChanges` over its caption strip. Dropdown lists are anchored menus and are not moved.
+**Moving a popup window** (`aio_gui_fnc_dragHandle`, gui addon, shared by setup and arsenal). A titled popover is a window: `fnc_popover` makes the title bar (from the card's edge to the cross, down to the content) a drag handle - a transparent `AIO_Hitbox` in the card group, made after the title and before the cross, with a faint film under it that lights on hover (`MouseEnter` / `MouseExit`). A left press on it ("begin") adds `MouseMoving`, `MouseHolding` and `MouseButtonUp` to the display and nothing else runs until then; each move sets the **card group** with `ctrlSetPosition` + `ctrlCommit 0` (a group carries all it holds), the release removes the three handlers. The dimming and the full-screen catcher are siblings of the card in the layer and stay put. The move is the mouse's distance since the press, rounded to whole pixels and clamped so the whole handle stays in the safe zone. The state is uiNamespace `aio_gui_drag` (empty when idle); `["busy"] call aio_gui_fnc_dragHandle` is true while dragging and for 0.3 s after, which the catcher's `ButtonClick` asks so the release that ends a drag never counts as a click beside the card. The popover's eighth argument is a *kind* (`picker`, `export`, `exportClasses`, `exportChoice`, `import`, `importChoice`, `classImport`, `sameAs`; `changes` for the changes list): where a window of that kind was let go is kept in uiNamespace `aio_gui_places` for the session and the next one is put there (brought back inside the screen by the same clamp). Untitled cards make a handle of their own through the same function on the card (`ctrlParentControlsGroup` of the content group): `fnc_confirm` over its words and padding (not the answers; no kind, a question opens in the middle each time), `fnc_openChanges` over its caption strip. Dropdown lists are anchored menus and are not moved.
 
 ### State and the draft
 
-`einv_setup_steps = [[id, name key, function], ...]`: `general` (`fnc_drawGeneral`), `items` (`fnc_drawItems`), `containers`
+`aio_setup_steps = [[id, name key, function], ...]`: `general` (`fnc_drawGeneral`), `items` (`fnc_drawItems`), `containers`
 (`fnc_drawContainers`); step functions get `[display, group, theme, args]`. The ids are what others look a page up by - the inventory's
 "Settings for <name>" row finds `items` and `containers` there, and `fnc_openFromGame [step, class]` takes the step's place in the list
 (0 General, 1 Items, 2 Containers). Group rules (`@group > ...`) have no step of their own: they are text, written and read through Export
 and Import. missionNamespace holds the mode, `target` (canEdit's answer), `readOnly`, the draft - two texts, the rules and the server settings:
 `origin`, `originSource` (name -> [value, priority] of the source for the rules), `draft` (AST), `draftText` (canonical),
 `draftRules` (compiled), `draftCache`, `parseWarnings`, `clean`, and for the settings `draftSettings` (what the text names,
-setting's name -> value), `draftSettingsText`, `cleanSettings` (the wizard's short text of the server settings, `einv_main_fnc_writeSettings`:
-only what is off its default, `einv1, gui_searchTime=0.6`; nothing CBA stores); `sourceEmpty` (rules only), `settingsQueue`, `undo`, `redo`
+setting's name -> value), `draftSettingsText`, `cleanSettings` (the wizard's short text of the server settings, `aio_main_fnc_writeSettings`:
+only what is off its default, `aio1, gui_searchTime=0.6`; nothing CBA stores); `sourceEmpty` (rules only), `settingsQueue`, `undo`, `redo`
 (entries `[rules text, settings text]`) -, the
 window (`step`, `focus`, `selection`, `theme`) and what steps keep between redraws (`listState`, `treeState`, `editScope`, `cellWork`,
 `itemWork`, `cellMode`, `cellBrush`, `sameAs`, `kindEdit`, `exportMode`, ...); controls stay in uiNamespace. **Every edit of the rules ends in
 `fnc_commit [ast, redraw = true]`** (an undo step, `fnc_setDraft`, redraw); **every edit of a server setting in `fnc_setSetting [name, value]`**
 (nothing for the default; `fnc_commitSettings`, `fnc_setSettingsDraft`); an import and Reset to default change both at once in one
 undo step (`fnc_commitSetup`). `fnc_setDraft [text]` parses, writes out again, compiles with a fresh cache and raises the local event
-`einv_setup_draftChanged [draftText]`. A change that writes out the same text is no change.
+`aio_setup_draftChanged [draftText]`. A change that writes out the same text is no change.
 
 Every change ends in `fnc_showStep`, which draws the step again. A scroll group made anew starts at the top and only knows its height a
 frame later, so the lists keep their place by `scrollId`: read before the redraw and put back by `fnc_restoreScroll` a few hundredths
@@ -2667,9 +2667,9 @@ back. A conflict is asked only for the rules (`fnc_targetValue`, `fnc_targetValu
 ### Steps
 
 - **General** (`fnc_drawGeneral`): one page that scrolls. Its top row has the title and Import (`fnc_openImport`: rules, and server settings from
-  the lines of a `cba_settings.sqf` or CBA's Export - one line per setting, or the old box line `einv_main_settings`, `fnc_importSettings` -; lines with
+  the lines of a `cba_settings.sqf` or CBA's Export - one line per setting, or the old box line `aio_main_settings`, `fnc_importSettings` -; lines with
   settings and no rules have no rules text, `fnc_importText`), Export (`fnc_openExport`: a box with the own rules, the whole setup written out or the
-  lines for a `cba_settings.sqf` - the rules and one line per server setting off its default, `force einv_gui_searchTime = 0.6;` -, read only,
+  lines for a `cba_settings.sqf` - the rules and one line per server setting off its default, `force aio_gui_searchTime = 0.6;` -, read only,
   with Copy where `copyToClipboard` works) and Reset to default (`fnc_resetAll`, after `fnc_confirm`); under it where Save goes,
   or why it may not (in red), the switch to force it over the mission where `canEdit` allows it, and a muted line (`General_CbaNote`) that these
   are the same settings as CBA's Addon Options > "Arma Inventory Overhaul - Server", both in sync, this page the recommended one. Only when there
@@ -2677,23 +2677,23 @@ back. A conflict is asked only for the rules (`fnc_targetValue`, `fnc_targetValu
   - **Containers**: a row for each of `GENERAL_KINDS` (uniform, vest, backpack, vehicle, crate): Auto | Fixed, two steppers (across 1 to `STORAGE_COLS`,
     down 1 to `MAX_ROWS`) greyed while Auto, a reset button while there is a rule, and a few words of what Auto gives. Each is the rule `all kind=K >
     grid=WxH` of the draft (`fnc_kindRule`, `fnc_upsertKinds`); Auto takes `grid` out of it. The engine asks these rules after everything about a class
-    (`fnc_resolve`, layer `all`), so a class rule, a table, a mod's `einv_grid` and the preset win over them. The last numbers stepped to are kept per kind
+    (`fnc_resolve`, layer `all`), so a class rule, a table, a mod's `aio_grid` and the preset win over them. The last numbers stepped to are kept per kind
     (`kindEdit`) for when Fixed is switched on again.
-  - **Categories** (`fnc_drawCategories`, the card after "How room is worked out"): one row per category there is in the draft (`einv_items_fnc_categories` of `GVAR(draftRules)`, the eight built-in ones first): its picture as the window draws it (`einv_gui_fnc_groupTexture` of the draft), a name field (`fnc_uiField`, applied on Return or when the cursor leaves it: `fnc_renameCategory` - a name of its own category cannot be empty, a built-in one given its shipped name or none is the shipped one), "Built in" or the id, **Picture...** (`fnc_openPicturePicker` with the class `#category`: the picker opens on its extra chip **Category icons**, the slot pictures and symbols of this mod's own `ui` folder, `fnc_iconEntries`, which needs no catalog and is ringed without it; the other chips are the item pictures as before), a reset button (a built-in category back to its shipped name and picture - its statement goes -, one of the setup's own back to the star) and, for the setup's own, a cross that asks (`fnc_confirm`, "danger") and runs `fnc_deleteCategory`. The last row is Add: a field and a button (`fnc_addCategory`; the id is made from the name by `fnc_newCategoryId` - lowercase letters and digits, the rest `_`, `CAT_ID_MAX`, a number on the end where it is taken or reads as a built-in word; Return in the field adds too; refused with a hint without a name and at `MAX_CUSTOM_CATEGORIES`). Every edit is the statement `category=ID > name=... picture=...` of the draft (`fnc_setCategory`, one `fnc_commit`, so undo, Save, Export, Import, the change lists and the server's hash see it as any rules text; Import of a text with `category=` statements joins them, the later statement of an id counting, and Export "full" keeps them). **Delete** (`fnc_deleteCategory`) takes the statement out and the id out of every rule's `cats=` (a rule left with nothing to set goes) and of every `grid=` it accepts (`fnc_cleanGrid` on the parsed grid, written again), and out of the editors' unapplied work (`itemWork` `catsList`, `cellWork` accepts) - in one undo step, so nothing is left that lists a category that is gone. The Items step's Category chips (`fnc_drawCatRow`) and the Containers step's Accepts chips (`fnc_drawCellAttrs`) list the draft's categories by `categoryInfo` `name`, in the order they were defined, and store in the order of `fnc_orderGroups`. The changes list has a row kind `category` (new / changed / removed, "Category bandit: name Bandit loot", `fnc_describeRule` with its fifth argument) which `fnc_countChanges` counts under the General step and the General step's "What you changed" lists too.
+  - **Categories** (`fnc_drawCategories`, the card after "How room is worked out"): one row per category there is in the draft (`aio_items_fnc_categories` of `GVAR(draftRules)`, the eight built-in ones first): its picture as the window draws it (`aio_gui_fnc_groupTexture` of the draft), a name field (`fnc_uiField`, applied on Return or when the cursor leaves it: `fnc_renameCategory` - a name of its own category cannot be empty, a built-in one given its shipped name or none is the shipped one), "Built in" or the id, **Picture...** (`fnc_openPicturePicker` with the class `#category`: the picker opens on its extra chip **Category icons**, the slot pictures and symbols of this mod's own `ui` folder, `fnc_iconEntries`, which needs no catalog and is ringed without it; the other chips are the item pictures as before), a reset button (a built-in category back to its shipped name and picture - its statement goes -, one of the setup's own back to the star) and, for the setup's own, a cross that asks (`fnc_confirm`, "danger") and runs `fnc_deleteCategory`. The last row is Add: a field and a button (`fnc_addCategory`; the id is made from the name by `fnc_newCategoryId` - lowercase letters and digits, the rest `_`, `CAT_ID_MAX`, a number on the end where it is taken or reads as a built-in word; Return in the field adds too; refused with a hint without a name and at `MAX_CUSTOM_CATEGORIES`). Every edit is the statement `category=ID > name=... picture=...` of the draft (`fnc_setCategory`, one `fnc_commit`, so undo, Save, Export, Import, the change lists and the server's hash see it as any rules text; Import of a text with `category=` statements joins them, the later statement of an id counting, and Export "full" keeps them). **Delete** (`fnc_deleteCategory`) takes the statement out and the id out of every rule's `cats=` (a rule left with nothing to set goes) and of every `grid=` it accepts (`fnc_cleanGrid` on the parsed grid, written again), and out of the editors' unapplied work (`itemWork` `catsList`, `cellWork` accepts) - in one undo step, so nothing is left that lists a category that is gone. The Items step's Category chips (`fnc_drawCatRow`) and the Containers step's Accepts chips (`fnc_drawCellAttrs`) list the draft's categories by `categoryInfo` `name`, in the order they were defined, and store in the order of `fnc_orderGroups`. The changes list has a row kind `category` (new / changed / removed, "Category bandit: name Bandit loot", `fnc_describeRule` with its fifth argument) which `fnc_countChanges` counts under the General step and the General step's "What you changed" lists too.
   - **How room is worked out**: the load per cell - the header's `cell=` (`fnc_commit`), 1 to 50, with "1 cell = X kg", its source and a reset - and, in
     words with the numbers of the moment (the cell, `UNIFORM_COLS`, `UNIFORM_ROWS_MIN`/`MAX`, `VEST_POUCHES_MAX`, a vest of load 120, a backpack of 280, a crate
     of 1000): containers, uniforms, vests, backpacks, vehicles and crates, items, stacking, and that a rule of the class beats it all. The sizes of items and
     the stack numbers in the words are those of the default preset - keep them together.
-  - **Server settings** by topic (`einv_main_topics`: looting and searching with the hands' queue times, living persons, containers, weight, hotbar/repacking/locks, vanilla arsenal, look; a registered setting that
+  - **Server settings** by topic (`aio_main_topics`: looting and searching with the hands' queue times, living persons, containers, weight, hotbar/repacking/locks, vanilla arsenal, look; a registered setting that
     no topic names goes under Other, one whose addon is not loaded is not shown): two to a line, a text box a line to itself. One that the source's
     `cba_settings.sqf` sets (`lockedSettings`) is greyed - its control disabled, a text box shown as text, no reset button - with why in its tooltip. A control by the registry's type
-    (`einv_main_serverSettings`): CHECKBOX `fnc_uiToggle`, SLIDER `fnc_uiStepper` (a step of 1, or 0.5 or 0.05 for a short range with decimals; the value
+    (`aio_main_serverSettings`): CHECKBOX `fnc_uiToggle`, SLIDER `fnc_uiStepper` (a step of 1, or 0.5 or 0.05 for a short range with decimals; the value
     rounded to the setting's decimals), LIST `fnc_uiDropdown`, EDITBOX `fnc_uiField` (a text box applied on Return or when it loses the cursor, not per key).
     The label's tooltip is the setting's description, the label is in the accent and a reset button (`fnc_uiReset`) shows while the value is off its default
-    (the setting is in `draftSettings`). Settings with `hidden` (`einv_items_massPerCell`, `einv_items_stackSmall`) have none; they are rows of CBA's
+    (the setting is in `draftSettings`). Settings with `hidden` (`aio_items_massPerCell`, `aio_items_stackSmall`) have none; they are rows of CBA's
     menu only (sub-category Grids).
   - **What you changed** (`fnc_drawChanges "default"`): everything the draft sets that is not the default - `fnc_changeRows "default"` compares the draft with
-    `einv1 base=default` and no server setting set: the cell size, each server setting off its default ("Search on click: on » off"), each kind of container with a size
+    `aio1 base=default` and no server setting set: the cell size, each server setting off its default ("Search on click: on » off"), each kind of container with a size
     (`all kind=backpack > grid=8x6`, worded "Every backpack: compartments 8×6"), the categories, and the rules of single classes, so when all uniforms are 10x10 by their kind
     and one is 5x5, both are rows. It is the "saved" list's rows with another reference and no new / changed / removed tags. A click on a row of the General step's own
     does nothing (the page is open already); a class opens at its step; the cross takes that one change back.
@@ -2709,18 +2709,18 @@ back. A conflict is asked only for the rules (`fnc_targetValue`, `fnc_targetValu
   A button beside the search - Tree in the list, List in the tree - switches between the cards and the tree view; the tree opens where the picked class
   stands among its relatives (`fnc_treeTop`, `focus` in `treeState`). "Only classes with own rules" lists, on Items,
   classes whose rules set `footprint` or `stack`; on Containers, `grid` or `like` (`fnc_ownClassRules`' `named`). The Containers
-  chips are All, Uniforms, Vests, Backpacks, Cargo and - where Enhanced First Aid Kits brought kit types (`einv_items_fnc_kitTypes`)
+  chips are All, Uniforms, Vests, Backpacks, Cargo and - where Enhanced First Aid Kits brought kit types (`aio_items_fnc_kitTypes`)
   - Kits.
 - **Kits** (kind `kit`, section 2) are containers of the Containers step and items of the Items step (family `item`): the type's own
   class is listed, its load the type's capacity (`fnc_classKind`); the instance classes that mod makes of it are in no list and no
   tree. An edit of a kit is always for its tree (`fnc_editScope` -> `[true, instances]`, a note instead of "Only this class"), so the
   rule is `class=efak_IFAK+` and reaches the kits players carry; Import writes it the same way (`fnc_importClasses`), Export gives
   the type's line, which its instances inherit in config. `fnc_kitRoom [info]` -> `"capacity"` / `"cells"` / `""` asks
-  `einv_compat_efak_fnc_roomMode` with the draft (else the same test on `einv_items_fnc_setBy`): by capacity, `fnc_answerText` words
-  the grid "capacity 35" from "EFAK" (`einv_compat_efak_fnc_capacity`, the mission's setting included), the editor's "Now:" line
+  `aio_compat_efak_fnc_roomMode` with the draft (else the same test on `aio_items_fnc_setBy`): by capacity, `fnc_answerText` words
+  the grid "capacity 35" from "EFAK" (`aio_compat_efak_fnc_capacity`, the mission's setting included), the editor's "Now:" line
   has no compartments part and a note says the cells drawn are only a start - Apply gives the kit them and the capacity no longer
   counts; with a grid of its own, "Now:" is the grid and a note says the capacity no longer counts; Back to the default returns it
-  to the capacity. A kit opened for (`einv_setup_focus`) as an instance picks its type.
+  to the capacity. A kit opened for (`aio_setup_focus`) as an instance picks its type.
 - **Per field reset** (`fnc_uiReset`, `fnc_resetField`, `fnc_classDefault`): beside the size, stack, weight, name and use of the Items editor and the
   cells of the Containers editor, a small button shows while the value differs from what the draft makes of the class without its own rule for that field
   (`fnc_classDefault [class, fields]`: the rules with those fields taken out of `class=X` and `class=X+`, compiled and asked once per text and class). A click
@@ -2729,7 +2729,7 @@ back. A conflict is asked only for the rules (`fnc_targetValue`, `fnc_targetValu
   words, picture, before, class, statement, undo]` (kind `rule`, `group`, `category`, `setting`, `preset`, `cell`, `override`) for the preset (only a text can change it now), the cell size, the override switch (saved only), every server
   setting (kind `setting`, words "before » after" by `fnc_settingText`, the cross sets it back; against the default each one set is "new"), then every group and rule matched by what it is for
   (a group by name, a rule by its conditions), so a class given another size is one "changed" row. Against `"saved"` the reference is `clean` and
-  `cleanSettings`; against `"default"` it is `einv1 base=default` (`RULES_DEFAULT`) and no settings, so what the General step sets (cell size, settings,
+  `cleanSettings`; against `"default"` it is `aio1 base=default` (`RULES_DEFAULT`) and no settings, so what the General step sets (cell size, settings,
   kind sizes, categories) is listed with the rest. A single-class
   rule shows the class's picture and display name plus `fnc_describeRule [.. , valuesOnly = true]`; `all kind=uniform > grid=5x5` is worded "Every uniform:
   compartments 5×5". `undo` is `[code, args]` and ends in `fnc_commit` (or `fnc_setSetting`), so undo/redo keep working; a removed statement goes back after
@@ -2786,21 +2786,21 @@ write that rule.
 Both editors have Export and Import in the corner (`fnc_editorTools`).
 
 - **Export** (the button opens `fnc_openExportChoice`, a box under it with two buttons; `fnc_exportClasses [step, class, tree, format]`)
-  - **Config entry (for a mod)**, `"config"`: asks `einv_items_fnc_configEntry [class, false, draftRules]` for the config
+  - **Config entry (for a mod)**, `"config"`: asks `aio_items_fnc_configEntry [class, false, draftRules]` for the config
     lines of the class - of every listed class of the tree, one line each, for a tree edit -, so they come from the draft and a design
     can be exported before Save, and only the keys that differ from what the class gets without the rules text. Where `configEntry`
     is missing the wizard writes the lines itself from the draft, every key that has an answer.
   - **Layout only (to share)**, `"layout"`: the same keys for the class alone (a layout has no tree), read back with
     `parseConfigEntry` and `fnc_configValues` (config key -> rule field) and written as a rule without conditions
-    (`einv_items_fnc_writeRules`) after the marker `LAYOUT_MARKER`: `einv-layout: grid=1x3+5x7+1x3 weight=1.2 picture=/a3/...`.
+    (`aio_items_fnc_writeRules`) after the marker `LAYOUT_MARKER`: `aio-layout: grid=1x3+5x7+1x3 weight=1.2 picture=/a3/...`.
     No class name, so it works across mods.
   They go to the clipboard where `copyToClipboard` works (`isServer || !isMultiplayer`, as at the General page's Export); a client gets a box with the text
   to select and copy.
 - **Import** (`fnc_openClassImport`, a paste box under the button, which knows the selected class and whether the edit is for its tree;
   Apply runs `fnc_applyClassImport`, which calls `fnc_importClasses [text, selected, tree, choice]` and words the result line). What
-  is read, in this order: a **layout** (`LAYOUT_MARKER`; its values, no class), **config lines** (`einv_items_fnc_parseConfigEntry`; each class
+  is read, in this order: a **layout** (`LAYOUT_MARKER`; its values, no class), **config lines** (`aio_items_fnc_parseConfigEntry`; each class
   with its keys, `size` -> `footprint`, `stack`, `grid`, `weight`, `name`, `icon`, `picture`, by `fnc_configValues`), **rules of single
-  classes** (every rule is exactly `class=X` or `class=X+`, no groups, no `einv` header, no setting around them: a class each, as config
+  classes** (every rule is exactly `class=X` or `class=X+`, no groups, no `aio` header, no setting around them: a class each, as config
   lines), and else any **rules**, as the General page's Import reads them (`fnc_importText`), whose statements join the own ones without repeating
   one that is already there. A text of the first three never creates a rule for a class this game does not have (`getFacts "root"` is
   ""), and where the values go depends on the selected class:
@@ -2819,14 +2819,14 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
 
 - **The Picture row** (`fnc_drawPictureRow`, under Name in the Items step and under the preview of the cells in the Containers step):
   the label, a read-only field with the whole texture path as text - the working copy's, else config's own in the muted ink -,
-  **Pick...** and **Reset** (enabled while a picture is set). The field is `fnc_uiEdit` with `selectable` (`EINV_EditReadOnly`,
+  **Pick...** and **Reset** (enabled while a picture is set). The field is `fnc_uiEdit` with `selectable` (`AIO_EditReadOnly`,
   `canModify = 0`, enabled): a click puts the cursor in, Ctrl+A / Ctrl+C copy it, and Ctrl+C or Return in it gives the focus back to the sink
   (`fnc_onLoad`) so the wizard's keys (display `KeyDown` returns early while an edit has the focus) work again; it opens nothing. The working copy holds `pictureText` (Items: in the item's canvas under `GVAR(itemWork)`; Containers:
   `GVAR(boxWork)`, per lowercase class, with `iconPercent`, apart from the cells' `GVAR(cellWork)`); the row hands every choice to
   the editor's code, which stores it and draws the editor again. Everything that shows the item by the working copy uses the
   picture at once: the tile preview (`fnc_drawPreview` passes `"picture"` in the tile's entry), the canvas, the box preview.
 - **Apply** writes `picture=PATH` when it differs from now; Reset then Apply takes the class's own `picture` away - or, where the item's
-  own config sets `einv_picture` that would win again, writes config's own picture path (`getFacts "picture"`, read by
+  own config sets `aio_picture` that would win again, writes config's own picture path (`getFacts "picture"`, read by
   `fnc_parsePicture`) to win over it. The Containers step's Apply writes the cells (when changed) and `icon=` / `picture=` in one
   `fnc_upsertRule`, and is enabled for a picture change alone; Discard and Back to the default (`grid`, `like`, `icon`, `picture`) clear
   both working copies.
@@ -2845,7 +2845,7 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   ringed and its page turned to - only that file, never another picture of a class that owns it too. A crate or vehicle with no picture
   set is drawn by its `editorPreview`, so that is the one in use (config's picture is only the Picture row's text); where the chip does not hold it the chip turns to All; a path the catalog does
   not have is the path field's. A click on a chip or typing in the search before the catalog is read ends `reveal`.
-- **The catalog** (`fnc_pictureCatalog`, `fnc_pictureChunk`; uiNamespace `einv_setup_pictures`): the picker's pictures are the distinct
+- **The catalog** (`fnc_pictureCatalog`, `fnc_pictureChunk`; uiNamespace `aio_setup_pictures`): the picker's pictures are the distinct
   `picture` values of the class index's rows (`ROW_PICTURE`, already looked at by `safePicture`), one entry each - `[path, lowercase
   path, search text, first owner's name, its class, how many own it (a class once, though its list and editor picture be one file), up to
   `PICKER_OWNERS` 8 classes in lowercase, their names, categories, its `fnc_pictureKey`, the class that owned it last]`,
@@ -2857,7 +2857,7 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   window closed is taken up again), and kept for the session. The search is `fnc_searchFilter`'s: a plain text anywhere in the path,
   classes and names, a wildcard on the path, a class or a name as a whole; it is worked out once per text, so turning a page does not
   look through the catalog again.
-- **The box** (`fnc_drawBoxPreview` -> `einv_gui_fnc_uiBoxPicture`): in the Containers step the box of the class drawn as the window draws
+- **The box** (`fnc_drawBoxPreview` -> `aio_gui_fnc_uiBoxPicture`): in the Containers step the box of the class drawn as the window draws
   it (a crate or vehicle with its editor picture unless a picture is set, a uniform, vest or backpack with its config picture or the
   set one), by the working zoom and shift. The change lists word a rule's picture "picture from <class>" where the catalog knows the owner
   (`fnc_describeRule`), else "picture <path>".
@@ -2868,17 +2868,17 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   (0 none, 1 to `PAINT_COUNT` 8, Containers, option `palette`). A panel and a hit box per place; a click recolours that one panel,
   rebuilds the outline lines of that place and its four neighbours (at most 20 controls) and calls `onChange [canvas, arguments]`.
   Painting starts on `MouseButtonDown` (deferred); `MouseEnter` with `inputMouse 0` down continues the stroke with the value the
-  press decided (uiNamespace `einv_setup_canvasStroke`), so a drag paints a run; any `MouseButtonUp` ends it. Where no press
+  press decided (uiNamespace `aio_setup_canvasStroke`), so a drag paints a run; any `MouseButtonUp` ends it. Where no press
   arrives, the click alone paints.
-- **Colours -> components -> letters.** The brush `einv_setup_cellBrush` (0 none, 1 to 8: `PAINT_COLORS` red, blue, green, yellow,
+- **Colours -> components -> letters.** The brush `aio_setup_cellBrush` (0 none, 1 to 8: `PAINT_COLORS` red, blue, green, yellow,
   orange, purple, cyan, pink; theme-independent): a click paints, a click with the same colour clears. **Compartments**
   (`fnc_canvasBlocks`) are the 4-neighbour components of one colour, in reading order of their first cell, each `[w, h, holes,
   pos]` (holes: box places not its own; `pos` only when there are two or more): two red columns and a blue middle are three
   compartments; an unpainted place is no cell. Apply writes them as one canvas, a letter per component in that order
-  (`einv_items_fnc_formatGrid`; one component alone falls back to `WxH` or a mask). The drawing reads like the preview: the theme
+  (`aio_items_fnc_formatGrid`; one component alone falls back to `WxH` or a mask). The drawing reads like the preview: the theme
   `panel` behind, each place the preview's empty `cell`, painted ones under a `PAINT_TINT` 0.35 tint, each compartment framed in
   its colour.
-- **Loading** (`fnc_canvasFromBlocks [blocks, min, max, cols, painted]`): blocks are placed as `einv_gui_fnc_flowCompartments`
+- **Loading** (`fnc_canvasFromBlocks [blocks, min, max, cols, painted]`): blocks are placed as `aio_gui_fnc_flowCompartments`
   places them. Painted, each block takes a colour greedily in block order from `index mod 8` on, skipping every colour of a block
   it touches, so neighbours never share one. A block whose own holes split it (`x-x`) reads back as two. Rows go up to
   `CANVAS_ROWS_LOADED` 80 when loaded, `MAX_ROWS` when drawn on; the item board is `SHAPE_MAX` wide. An untouched class is never
@@ -2895,38 +2895,38 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   number; one `apply` code shared by both, run once - a `done` flag stops the redraw that follows from reading it a second time)
   that calls the same code as the stepper with `[value, arguments]`. A blur that leaves for another control redraws the editor, so
   that control's own click may be lost once, and the preview is `fnc_drawPreview` drawing the
-  tile with **`einv_gui_fnc_createTile`** itself - on a piece of grid, the cells under the tile made way for it, name, count and
-  full magazine as in a container, at the inventory's cell (`einv_gui_fnc_getCell`) where it fits and as big as fits where not, the
+  tile with **`aio_gui_fnc_createTile`** itself - on a piece of grid, the cells under the tile made way for it, name, count and
+  full magazine as in a container, at the inventory's cell (`aio_gui_fnc_getCell`) where it fits and as big as fits where not, the
   entry carrying the working `"icon"` - so the picture is seen as Apply will write it. Apply writes `class=X > size=WxH` or
   `size=xx/x-`, `stack=N`, `weight=KG`, `name=...`, `picture=PATH`, `use=LIST` and `icon=ZOOM@ACROSS:DOWN` (as `[scale, across, down]`, 1.4 and 0.1 for 140 % and
   10 %), each only when it differs from now; a field emptied takes its own value away. Reset then Apply takes the class's own `icon`
-  away when nothing below draws the picture otherwise, else writes the plain picture (`icon=1`) to win over the item's `einv_icon`.
+  away when nothing below draws the picture otherwise, else writes the plain picture (`icon=1`) to win over the item's `aio_icon`.
   "Back to the default" removes `icon` with the rest; the tree view's edits write `class=X+ > icon=...` like the other fields;
-  Export writes `einv_icon = "1.4@0.1,-0.05";` (`fnc_configEntry`) and Import reads it (`fnc_configValues` maps `einv_icon` to
+  Export writes `aio_icon = "1.4@0.1,-0.05";` (`fnc_configEntry`) and Import reads it (`fnc_configValues` maps `aio_icon` to
   `icon`); The change lists word it ("picture at 140 %, moved 10 % across and -5 % down", `fnc_describeRule`). The weight is read by `fnc_weightValue` (a dot or a comma,
   rounded to the gram, at most `EDIT_WEIGHT_MAX` 1000; -1 for nothing typed, -2 for text that is no weight, which Apply refuses and
   says), the name cut to `EDIT_NAME_MAX` 100 (the rules' `name=` encoding is `writeRules`' business). Typing goes into the working
   copy (`weightText`, `nameText`) without drawing the editor again - the field would lose the cursor -, Return draws it again, and
   Apply reads the working copy.
 - **Use from** (`fnc_drawUseRow`, the Items step, under the Picture row): a chip each for Uniform, Vest and Backpack, on for the
-  containers the class is whitelisted for (`use=`, `einv_use`; `info "use"`), and a muted line under them of what the settings
-  "Use items from ..." (`einv_storage_useUniform`, `useVest`, `useBackpack`) limit now - "Limited now: Backpack: only
+  containers the class is whitelisted for (`use=`, `aio_use`; `info "use"`), and a muted line under them of what the settings
+  "Use items from ..." (`aio_storage_useUniform`, `useVest`, `useBackpack`) limit now - "Limited now: Backpack: only
   whitelisted." or, when all three are on Everything, a note naming the settings. The chips are always clickable: the rule belongs to
   the item and travels with the rules text and the config export, whatever this mission's settings are; with a container on
   Everything its chip changes nothing in the game, and with one on Nothing a whitelisted item is not usable there either. The
   click goes into the working copy (`useList`, in the order uniform, vest, backpack), the editor is drawn again and Apply
   writes `use=` only when it differs from now - an emptied list as `use=none`, which takes back what a broader rule whitelisted
   (Back to the default removes the class's own `use` with the rest). The tree view's edits write `class=X+ > use=...` like the other
-  fields, so `kind=grenade` is one tree edit away. Export writes `einv_use = "backpack,vest";` (`fnc_configEntry`), Import maps
-  `einv_use` to `use` (`fnc_configValues`), The change lists word it ("usable from the Vest, Backpack", `fnc_describeRule`).
+  fields, so `kind=grenade` is one tree edit away. Export writes `aio_use = "backpack,vest";` (`fnc_configEntry`), Import maps
+  `aio_use` to `use` (`fnc_configValues`), The change lists word it ("usable from the Vest, Backpack", `fnc_describeRule`).
 - **Category** (`fnc_drawCatRow`, the Items step, under Use from): a chip for each of the eight categories (`ITEM_GROUPS`), on for the
-  ones the class is in now (`info "groups"`: `cats=` / `einv_cat`, else the built-in one), wrapping onto a second line where they do
+  ones the class is in now (`info "groups"`: `cats=` / `aio_cat`, else the built-in one), wrapping onto a second line where they do
   not fit; at least one stays on. A click goes into the working copy (`catsList`, in the order of `ITEM_GROUPS`), the editor is drawn
   again, and a reset button appears while the list differs from the built-in one (`fnc_classDefault`). Apply writes `cats=` when it
   differs from now, and takes the class's own `cats` away when the list is the built-in one again; the tree view writes
-  `class=X+ > cats=...`. Export writes `einv_cat = "medical,misc";` (`fnc_configEntry`), Import maps `einv_cat` to `cats`
+  `class=X+ > cats=...`. Export writes `aio_cat = "medical,misc";` (`fnc_configEntry`), Import maps `aio_cat` to `cats`
   (`fnc_configValues`), the change lists word it ("category: Medical, Misc", `fnc_describeRule`).
-- **Blocks mode** (`fnc_drawCellBlocks`): the switch "Paint | Blocks" (`einv_setup_cellMode`, 0/1, kept for the session). One
+- **Blocks mode** (`fnc_drawCellBlocks`): the switch "Paint | Blocks" (`aio_setup_cellMode`, 0/1, kept for the session). One
   small drawing per compartment (a click toggles a hole), width and height steppers for the picked one, Add and Remove; working
   copy `{blocks, picked}`; Apply writes the blocks joined by `+` (flow layout). A class drawn as a canvas gets a note that Blocks
   loses the positions. Switching converts the working copy: Paint -> Blocks takes the components in reading order without `pos`;
@@ -2940,7 +2940,7 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   compartment with its category's picture.
 - **Accepts and single slots in the Paint way** (the same `fnc_drawCellAttrs`, `fnc_canvasBlocks`, `fnc_canvasMatch`,
   `fnc_canvasPick`): each compartment the painter produces has the same two rows. Above them a row picks the compartment: a stepper
-  "Compartment 2 / 5" through the compartments in reading order and the chip "Select on canvas" (`einv_setup_cellBrush` -1: a click on
+  "Compartment 2 / 5" through the compartments in reading order and the chip "Select on canvas" (`aio_setup_cellBrush` -1: a click on
   the drawing picks the compartment it hits and paints nothing, no stroke). The picked one is framed in white and a pixel thicker on
   the drawing (`fnc_uiCanvas` options `picked` and `onPick`; `canvasPickSet` on the group changes the frame without drawing the
   canvas again). The canvas (`fnc_canvasFromBlocks` painted) carries `attrs`, `[[places, accepts, single], ...]` for the
@@ -2968,8 +2968,8 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
   **Copy cells of X** (X's `fnc_classBlocks` into a working copy in the current mode, `unlink` set when the class has `like=`, so
   Apply also removes it). A linked class shows X's cells read-only with a chip "Same as X · Unlink"; a copied working copy is
   editable even while `like=` stands.
-- **Working copies**: `einv_setup_cellWork` (lowercase class -> a painted canvas, or `blocks` and `picked`; optional `unlink`),
-  `einv_setup_itemWork`; the first change makes the copy, Discard drops it, "Back to the default" removes `grid` and `like`. Apply
+- **Working copies**: `aio_setup_cellWork` (lowercase class -> a painted canvas, or `blocks` and `picked`; optional `unlink`),
+  `aio_setup_itemWork`; the first change makes the copy, Discard drops it, "Back to the default" removes `grid` and `like`. Apply
   checks no cell, `MAX_CELLS`, `MAX_BLOCKS` and a drawing taller than `MAX_ROWS`, and writes through `fnc_upsertRule`. A grid laid
   out by load or by a pattern is shown as the compartments it gives; editing it writes those cells instead.
 - **Preview** (`fnc_drawPreview`): the window's own `flowCompartments` with the blocks Apply would write, so painted
@@ -2983,7 +2983,7 @@ Both editors have Export and Import in the corner (`fnc_editorTools`).
 
 ## 7. Other addons
 
-### hotbar (`einv_hotbar`)
+### hotbar (`aio_hotbar`)
 
 The keys 4 to 0 use what lies on them, and every item on the bar really does something: a bandage bandages the part that bleeds
 most, a tourniquet goes on the worst bleeding limb, a grenade goes into the hand, a magazine reloads the weapon in the hands, a
@@ -2994,12 +2994,12 @@ in the inventory: the row under the gear (`fnc_drawStrip`), `fnc_hintParts`, the
 is an ordinary slot record of `fnc_drawSlot` with the slot's number at element 7 (-1 for every other slot), so nothing that drags,
 equips or shows targets for real slots touches it.
 
-- **Slots.** `SLOT_COUNT` 7 on 4 5 6 7 8 9 0 (DIK 5 to 11); CBA keybinds `einv_hotbar_slot1` to `slot7` and `einv_hotbar_show`. A
+- **Slots.** `SLOT_COUNT` 7 on 4 5 6 7 8 9 0 (DIK 5 to 11); CBA keybinds `aio_hotbar_slot1` to `slot7` and `aio_hotbar_show`. A
   slot is bound to a **class**: any carried item of that class is used and the bar shows how many there are; a class sits in at
-  most one slot. Kept per player in the profile (`einv_hotbar_slots`), so a respawn keeps the bar.
+  most one slot. Kept per player in the profile (`aio_hotbar_slots`), so a respawn keeps the bar.
 - **What an item does** (`fnc_useOf [class] -> [kind, data]`, public, cached): `"kit"`, `"throw"` (anything the `Throw` weapon
   takes), `"consume"` (ACE field rations), `"medical"` (an item one of ACE's treatments lists), `"reload"` (a magazine that
-  `storage fnc_partFor` puts on a carried weapon), `""` (refused). Binding is refused for what is not carried (`fnc_canBindFrom`) and for what lies in a container the settings "Use items from ..." close to it (`einv_storage_fnc_useState`: "Cannot be used from the backpack"); counts, the magazine, the kit and the grenade only see what `einv_storage_fnc_useCarried` leaves (section 3, Use from containers).
+  `storage fnc_partFor` puts on a carried weapon), `""` (refused). Binding is refused for what is not carried (`fnc_canBindFrom`) and for what lies in a container the settings "Use items from ..." close to it (`aio_storage_fnc_useState`: "Cannot be used from the backpack"); counts, the magazine, the kit and the grenade only see what `aio_storage_fnc_useCarried` leaves (section 3, Use from containers).
 - **Medical** (`fnc_treatmentIndex`, `fnc_pickTreatment`, `fnc_whyNot`, `fnc_useMedical`): the index is read from
   `ace_medical_treatment_actions` (ACE's and other mods', ACM's among them); the role (bandage, tourniquet, splint, any) picks the
   part: bandage - the largest sum of wound amount times bleeding rate; tourniquet - the worst bleeding limb without one; splint -
@@ -3011,85 +3011,85 @@ equips or shows targets for real slots touches it.
   fullest magazine of the class not loaded; food and drink call `ace_field_rations_fnc_consumeItem`; a kit opens the window on the
   own gear with the kit inside, else `efak_core_fnc_openKit`.
 - **Keys** (`fnc_onKey`, a frame later `fnc_use`): left to Arma and ACE when the slot is empty, while a command menu is open, in
-  Zeus or a feature camera, and - `einv_hotbar_leaderKeys` - while the player leads AI; a second press within `USE_LOCK` 0.4 s is
+  Zeus or a feature camera, and - `aio_hotbar_leaderKeys` - while the player leads AI; a second press within `USE_LOCK` 0.4 s is
   ignored. CBA keybinds do not run in a dialog, so the window asks `fnc_onWindowKey` itself: over a tile or an own slot a slot's
   key binds the item, over a hotbar slot it swaps the two, the drop key (`fnc_isDropKey`) empties it. A filled slot of the
   window's row can also be dragged: onto another slot it swaps, anywhere else it is removed (gui `fnc_startStripDrag`). `fnc_checkKeys` names, once per profile, every other
   keybind on the same keys. `fnc_bind [index, class, from, checked]`, `fnc_unbind`, `fnc_use` are public.
-- **The bar on the screen** (`RscTitles >> einv_hotbar_RscHud`, `CfgUIGrids` entry `einv_hotbar_grid`, movable in Arma's layout
+- **The bar on the screen** (`RscTitles >> aio_hotbar_RscHud`, `CfgUIGrids` entry `aio_hotbar_grid`, movable in Arma's layout
   editor): seven boxes (key, picture, count, a thin bar) and a message line, run by `fnc_hudPing` / `fnc_hudFrame` /
-  `fnc_hudDraw`; `fnc_hudWanted` hides it in dialogs, Zeus, when unconscious, in the map; then `einv_hotbar_hudMode` decides.
+  `fnc_hudDraw`; `fnc_hudWanted` hides it in dialogs, Zeus, when unconscious, in the map; then `aio_hotbar_hudMode` decides.
   An item whose rules draw its picture larger, smaller or moved (`icon=`; `fnc_slotInfo` has its `"icon"`) shows it in the slot's
-  twin of the picture, inside an `EINV_HotbarClip` group of the picture's place that cuts it (made with the box by `fnc_hudCreate`,
+  twin of the picture, inside an `AIO_HotbarClip` group of the picture's place that cuts it (made with the box by `fnc_hudCreate`,
   hidden until a slot needs it; the plain picture is hidden meanwhile, and the offsets are a share of the whole box).
   Nothing goes over the network.
 
-### weight (`einv_weight`)
+### weight (`aio_weight`)
 
 The engine weighs every item by its config whatever `weight=` says. This addon makes the rules' overrides count where players feel
 them, and adds the tiers.
 
 - **Virtual load.** `fnc_getExtraLoad [unit]` is, for everything the unit carries (worn, weapons with attachments and loaded
   magazines, the contents of uniform, vest and backpack, nested containers), `getInfo "mass" - getInfo "configMass"` times the
-  count. `fnc_updateVirtualLoad` hands ACE only the difference to what it applied before (`einv_weight_appliedLoad` on the unit,
+  count. `fnc_updateVirtualLoad` hands ACE only the difference to what it applied before (`aio_weight_appliedLoad` on the unit,
   public) through `ace_movement_fnc_addLoadToUnitContainer` on the unit itself, never on a container, which could be dropped with
   our share on it. `fnc_queueVirtualLoad` runs it and `fnc_updateTier` once a frame, queued on the player's unit changing, CBA's
-  loadout event, `einv_items_rulesChanged` and every `NESTED_CHECK_INTERVAL` 3 s; a check every `TIER_CHECK_INTERVAL` 1 s compares
+  loadout event, `aio_items_rulesChanged` and every `NESTED_CHECK_INTERVAL` 3 s; a check every `TIER_CHECK_INTERVAL` 1 s compares
   `[load, limits key, effects switch]`. Nothing runs in Eden, but `getLimits`, `getLoad`, `getTier` answer there.
 - **Tiers.** `fnc_getLoad [unit]` (public) is ACE's total. `fnc_getLimits [unit]` (public) gives `heavy`, `overloaded`, `critical`
   in config mass and `heavyKg`, ..., `fromAce`, `aceFatigue`, `key`, cached under a key made of every input. Overloaded
-  (`einv_weight_overloadedAt`, 45 kg) and Critical (`criticalAt`, 60 kg, at least 1 kg above Overloaded) are settings; Heavy
+  (`aio_weight_overloadedAt`, 45 kg) and Critical (`criticalAt`, 60 kg, at least 1 kg above Overloaded) are settings; Heavy
   (`heavyAt`, 0 = follow ACE) is where ACE Advanced Fatigue's own jog (12 km/h, weapon lowered, `JOG_SPEED`) costs more than the
   body keeps up aerobically (`fnc_heavyFromAce [performance, load factor]`; 26.7 kg at ACE's defaults). With ACE's fatigue off,
   Heavy is 60 % of Overloaded; never later than Overloaded. `fnc_getTier [unit, load = -1]` (public) answers `TIER_LIGHT` to
   `TIER_CRITICAL`; `fnc_tierText [tier, limits]` (public) the words and the effect ("jogging tires you", "no sprinting, tiring
   faster", "walking only"; "" where it does not apply).
 - **Effects** (`fnc_updateTier`, `fnc_applyEffects`, the player's machine only): from Overloaded ACE's status effect
-  `blockSprint`; from Critical `forceWalk` (reason `einv_weight`, through `ace_common_fnc_statusEffect_set`); and an ACE Advanced
-  Fatigue duty factor (`addDutyFactor`, reading `einv_weight_duty` on the unit) climbing from 1 at Overloaded to
-  `OVERLOAD_DUTY_MAX` 1.5 at Critical. `einv_weight_effects` off keeps the bar and takes the effects off. No `setAnimSpeedCoef`:
-  ACE resets it every second. A tier change raises the local CBA event `einv_weight_tierChanged [unit, tier, old tier]` and, with
-  the inventory closed and `einv_weight_notify` on, an ACE message (`fnc_notifyTier`). Nothing is ever refused because of a tier.
-- **Off switch** (`einv_weight_enabled`, global, default on, first in the Weight category). Off: `fnc_getLimits` still works out
+  `blockSprint`; from Critical `forceWalk` (reason `aio_weight`, through `ace_common_fnc_statusEffect_set`); and an ACE Advanced
+  Fatigue duty factor (`addDutyFactor`, reading `aio_weight_duty` on the unit) climbing from 1 at Overloaded to
+  `OVERLOAD_DUTY_MAX` 1.5 at Critical. `aio_weight_effects` off keeps the bar and takes the effects off. No `setAnimSpeedCoef`:
+  ACE resets it every second. A tier change raises the local CBA event `aio_weight_tierChanged [unit, tier, old tier]` and, with
+  the inventory closed and `aio_weight_notify` on, an ACE message (`fnc_notifyTier`). Nothing is ever refused because of a tier.
+- **Off switch** (`aio_weight_enabled`, global, default on, first in the Weight category). Off: `fnc_getLimits` still works out
   the marks (the bar needs an end) but sets `enabled` false in the map and in its `key`; `fnc_getTier` then answers `TIER_LIGHT`
   for every load, `fnc_tierText` `["", ""]`, `fnc_notifyTier` says nothing, and `fnc_updateTier` sets duty 1 and, as the tier fell
   to Light, takes `blockSprint` / `forceWalk` off through `fnc_applyEffects` (which also reads the switch). The duty factor
   registered with ACE answers 1 at once while off. The flip is seen by the 1 s tier check (the limits key changed) and redraws an
-  open window (its signature holds the key). The weight card and its hint (`einv_gui_fnc_drawEquipmentCards`, `fnc_infoHint`) read
+  open window (its signature holds the key). The weight card and its hint (`aio_gui_fnc_drawEquipmentCards`, `fnc_infoHint`) read
   `enabled` too: only the kilograms, no next tier, no tiers above. What stays: the load (`fnc_getLoad`), the virtual load of the
   rules' `weight=` overrides handed to ACE, and ACE's own fatigue, untouched.
 
-### magazines (`einv_magazines`)
+### magazines (`aio_magazines`)
 
-Repacking, needing `ace_magazinerepack`; setting `einv_magazines_repack`. A partly filled magazine dropped on a partly filled one
+Repacking, needing `ace_magazinerepack`; setting `aio_magazines_repack`. A partly filled magazine dropped on a partly filled one
 of the same class (target `["repack", gridIndex, tileIndex, 0, fits, reason]`, footprint in the accent colour), or "Repack all
 <name>" in the menu of an own magazine, runs ACE's schedule (`ace_magazinerepack_fnc_simulateRepackEvents`, ACE's time settings),
 sounds, kneel and gesture; the progress shows in the window (a film on the tiles, a bar moving with every round, live rounds
 text), not in ACE's progress bar, which closes dialogs. Rounds go from the emptier into the fuller; each result stays in its cell;
-an emptied magazine is gone. Both magazines must lie under the same root (`fnc_domain` via `einv_storage_fnc_rootOf`): the
+an emptied magazine is gone. Both magazines must lie under the same root (`fnc_domain` via `aio_storage_fnc_rootOf`): the
 player's own gear or one crate, vehicle, pile or body; a living person's gear, kits, virtual grids and loaded magazines never take
-part. A mouse press or Escape stops it (`einv_gui_swallowUp`). **One commit** at the end (done, stopped, closed): `fnc_commit`
-sends one phase `[root, [["repack", [parts]]]]` through `einv_storage_fnc_request`, parts `[container, class, rounds before,
-rounds after, cell]`; the op `repack` (`einv_storage_fnc_opRepack`) checks at the authority that each was partly filled before,
+part. A mouse press or Escape stops it (`aio_gui_swallowUp`). **One commit** at the end (done, stopped, closed): `fnc_commit`
+sends one phase `[root, [["repack", [parts]]]]` through `aio_storage_fnc_request`, parts `[container, class, rounds before,
+rounds after, cell]`; the op `repack` (`aio_storage_fnc_opRepack`) checks at the authority that each was partly filled before,
 none over full after, whole rounds, the same sum, and that every magazine is still there with those rounds ("Gone" otherwise,
 nothing changed); the record of a magazine that lay alone comes back at the same cell with the key of its new rounds
 (`class|m<rounds>`). ACE's CBA menu row "Repack Magazines" is hidden while repacking is on (`fnc_hideCbaOption`).
 
-### locks (`einv_locks`)
+### locks (`aio_locks`)
 
-A crate or vehicle can be locked to one side, one group or the admins. **The record** `einv_locks_lock = [mode, who]` on the
+A crate or vehicle can be locked to one side, one group or the admins. **The record** `aio_locks_lock = [mode, who]` on the
 object, public: `["side", west]`, `["group", <GROUP>]` or `["group", "Alpha 1-1"]` (a callsign), `["admins", ""]`; nil when not
 locked. Written only by `fnc_setLock [object, mode, who]` (public; `""` opens it again; people are refused), which sends a
-client's request as the server event `einv_locks_set`; the server writes the record, the public list `einv_locks_objects` and
-raises the CBA event `einv_locks_changed [object]`. `fnc_getLock` and `fnc_describe` (public) read and say it. `fnc_isAllowed
+client's request as the server event `aio_locks_set`; the server writes the record, the public list `aio_locks_objects` and
+raises the CBA event `aio_locks_changed [object]`. `fnc_getLock` and `fnc_describe` (public) read and say it. `fnc_isAllowed
 [unit, lock]` passes members (the side of the unit's group, the group, the callsign), logged-in admins (`fnc_isAdmin`) and Zeus
-while `einv_locks_zeusOpens` is on. **The engine lock** per client (`fnc_refresh`, `fnc_refreshAll`, re-evaluated on every change
+while `aio_locks_zeusOpens` is on. **The engine lock** per client (`fnc_refresh`, `fnc_refreshAll`, re-evaluated on every change
 and every `LOCK_RECHECK` 1 s): each client runs `lockInventory true` on its own machine on every locked object its player may not
 open, undoing only the lock it set (a mission's own is never lifted). **The question** every gate asks: `fnc_canReach [unit,
 container, root] -> [ok, reason, tip]` (public): the container's own lock, the lock of the object it is attached to or lies in up
 to `MAX_DEPTH` 3 containers deep (`fnc_lockHolder`), or the root's; then a mission's `lockInventory`; then the **providers**
 (`fnc_addProvider [code]`, public: `[unit, container] -> refusal text or ""`; they read only what is the same everywhere). **The
-guard** `fnc_guard [op, args, requester, root]` is in `einv_storage_guards`, runs on the machine that runs the op, whoever sent
+guard** `fnc_guard [op, args, requester, root]` is in `aio_storage_guards`, runs on the machine that runs the op, whoever sent
 it, and answers `"Locked"`; settlement skips it. **Eden** (`Cfg3DEN.hpp`): "Inventory locked to" and "Group callsign" on crates
 and vehicles, applied at mission start (`fnc_applyEden`). **In the window** `fnc_decorate [unit, sections, opened]` turns a
 section the unit may not reach into a `locked` one; the other gates are the engine lock, `fnc_onInventoryOpened`,
@@ -3099,26 +3099,26 @@ section the unit may not reach into a `locked` one; the other gates are the engi
 
 A kit opens as a **floating window** inside the window (section 4), its contents tiles; dragging packs and unpacks. Kit contents
 are EFAK's global table keyed by the instance class, so a kit opens wherever the window shows its tile. A kit is a holder of the
-storage, `"kit:" + lowercase class` (`einv_storage_holderTypes "kit"`), whose root is the root of the container it lies in
+storage, `"kit:" + lowercase class` (`aio_storage_holderTypes "kit"`), whose root is the root of the container it lies in
 (`fnc_holderRoot`, `fnc_holderVerify`); its ops `kitTake`, `kitPut`, `kitPlace`, `kitMove`, `kitRemoveIfEmpty` run at that root's
 authority, so every write of one kit happens on one machine (EFAK sends the whole kit with every write and the last write wins). A
 kit grid is non-virtual with `container` objNull plus `kit` and `layoutKey`; every move path outside the compat exits on objNull.
-Open kits are `einv_compat_efak_opened`; where each lies is found anew at every build (`fnc_getSections`: in the cargo of every
+Open kits are `aio_compat_efak_opened`; where each lies is found anew at every build (`fnc_getSections`: in the cargo of every
 container the window shows, else in another open kit, up to `KIT_MAX_DEPTH` 4); found nowhere it closes. `fnc_drop [source,
-target, entry, count, cell, slotSource]` is the dispatcher (checks `fnc_canDrop`, `fnc_mayReach`, `einv_gui_fnc_checkTouch`, then
+target, entry, count, cell, slotSource]` is the dispatcher (checks `fnc_canDrop`, `fnc_mayReach`, `aio_gui_fnc_checkTouch`, then
 one `sendMoves` move). Prototypes (`efak_core_needsConversion`) are refused until EFAK made them. Another living player's kits are
 shown but neither opened nor moved (`fnc_isPlayerGear`, `fnc_checkTile`). No `efak_*` function is called outside this addon;
 `fnc_isKit` is public.
 
 **A kit's room** (`fnc_roomMode [kit, compiled, cache]` -> `"capacity"` / `"cells"`, public): a kit is a container of the rules
 (kind `kit`, section 2) whose grid counts only where someone set it - a rule of the rules text or the older table, or the class's
-config key (`einv_items_fnc_setBy` `"rule"` / `"config"` on the `grid` field). Then **cells**: the grid is all its room, Enhanced
+config key (`aio_items_fnc_setBy` `"rule"` / `"config"` on the `grid` field). Then **cells**: the grid is all its room, Enhanced
 First Aid Kits' capacity counts nowhere in this mod. Else - the preset's or the built-in answer - **capacity**, as before: that mod's
 masses against its capacity, and an open grid that grows. Everything that decides what goes into a kit asks it:
 
-- `fnc_kitBlocks [kit]` -> the compartments of its grid (`einv_storage_fnc_blocksFor` with kind `kit`, its `maxLoad` the type's
+- `fnc_kitBlocks [kit]` -> the compartments of its grid (`aio_storage_fnc_blocksFor` with kind `kit`, its `maxLoad` the type's
   capacity, so `grid=auto` and `grid=120%` are by capacity), `[]` by capacity; kept per class until the rules change
-  (`einv_compat_efak_blocksCache` `[revision, map]`). It is the holder type's `"blocks"`, so the storage lays the kit out in those
+  (`aio_compat_efak_blocksCache` `[revision, map]`). It is the holder type's `"blocks"`, so the storage lays the kit out in those
   compartments (`fnc_getLayout`, `fnc_hasSpace`, `fnc_findEntry`) and the window draws them in its kit window.
 - `fnc_canPack [kit, class, count, rounds]`: that mod's rules and defaults as before, then the room - capacity, or
   `fnc_hasCells [kit, class, count, rounds]` (the kit laid out with them added, piles of their kind filled first, magazines by their
@@ -3141,10 +3141,10 @@ build; `fnc_onWindowOpen` and no holders empty it) - no kit window is open in AC
 were refused with "Failed" before, issue #4). Changes there: `fnc_canPackNew [kit, class, count]` -> `[how many it takes, why not
 all]` (`fnc_arsenalEditable`, `fnc_canPack`; as many as fit by halving), `fnc_packNew [kit, class, count, cell, root]` -> `[added,
 why, landed]` and `fnc_discard [kit, tile, count, root]` -> `[taken, why]`: only for a root whose phases run here
-(`einv_storage_fnc_isLocalRoot`) with the kit under it (`fnc_holderVerify`), so the one writer of the kit is this machine -
-written where they are called, outside any phase, as `einv_storage_fnc_addNew` does (`einv_storage_fnc_makePayload`,
+(`aio_storage_fnc_isLocalRoot`) with the kit under it (`fnc_holderVerify`), so the one writer of the kit is this machine -
+written where they are called, outside any phase, as `aio_storage_fnc_addNew` does (`aio_storage_fnc_makePayload`,
 `fnc_putIntoKit`, `fnc_takeFromKit`, `fnc_requestRebuild`), after what the tab staged (`fnc_arsenalFlush`). In ACE's window
-(`einv_gui_fnc_isInventoryMode` false) `fnc_canDrop` and `fnc_drop` ask `fnc_arsenalEditable` - the target lets things in, a kit
+(`aio_gui_fnc_isInventoryMode` false) `fnc_canDrop` and `fnc_drop` ask `fnc_arsenalEditable` - the target lets things in, a kit
 source lets them out - not the field's packing-off rule. `fnc_arsenalState` is what a kit's answers depend on, `fnc_arsenalFree`
 gives the instances of kits taken away back to that mod's pool. `efak_core_contentsChanged` and `followDefaultsChanged` for that
 kit rebuild the panel. Enhanced First Aid Kits' own kit window and its kits tab's "+" still count the capacity: a kit with a grid of
@@ -3160,18 +3160,18 @@ its own may hold more than its capacity there, or get more than its cells by tha
   `[class, crate, vehicle]` (`fnc_pruneOpened` drops it once it left the cargo). Unloading (`fnc_startUnload`, `fnc_unloadFrame`,
   `fnc_stopUnload`, `fnc_finishUnload`) does not use ACE's progress bar, which closes dialogs: the button becomes a bar over ACE's
   time, kept up by a per-frame handler applying ACE's own condition, and at the end `ace_cargo_fnc_unloadItem` runs.
-- **compat_tfar / compat_acre.** The same function names in both, asked through `einv_gui_fnc_compatCollect`: `fnc_tooltip [class,
+- **compat_tfar / compat_acre.** The same function names in both, asked through `aio_gui_fnc_compatCollect`: `fnc_tooltip [class,
   holder]`, `fnc_hintParts`, `fnc_inspectRows`, `fnc_menuChoices [class, holder, own, inSlot]` ("Open radio", "Use as active
   radio"), `fnc_open`, `fnc_makeActive`. Everything is read-only from the mods' data (TFAR's raw `TFAR_RadioSettingsNamespace`,
   since `getSwSettings` writes defaults; ACRE2's through `acre_sys_data_fnc_dataEvent`). "Open radio" steps aside
-  (`einv_gui_fnc_stepAside`) and calls the mod's own dialog function, for the player's own radios only; "Use as active radio" is
-  the mod's call followed by `einv_gui_fnc_requestRebuild`. compat_tfar adds `"radio_settings"` to `einv_storage_carryVariables`.
+  (`aio_gui_fnc_stepAside`) and calls the mod's own dialog function, for the player's own radios only; "Use as active radio" is
+  the mod's call followed by `aio_gui_fnc_requestRebuild`. compat_tfar adds `"radio_settings"` to `aio_storage_carryVariables`.
   compat_acre fixes the dummy radio ACRE2 keeps in the radio slot (`fnc_isFixedSlot [unit, slot]`): it cannot be lifted, taken off
-  or dropped, accepts nothing (`slotAccepts`), its menu has Inspect only, and `fnc_guard` in `einv_storage_guards` answers
+  or dropped, accepts nothing (`slotAccepts`), its menu has Inspect only, and `fnc_guard` in `aio_storage_guards` answers
   `"Failed"` to `takeOff` and `putOn` there.
 - **compat_zen.** The right-click menu "Inventory lock" on crates and vehicles and the module "Lock inventory" (`fnc_module`,
-  `fnc_apply`, `fnc_groupDialog`, `fnc_groups`, `fnc_targets`); the lock goes through `einv_locks_fnc_setLock`. It also adds "Searching: turn off" / "Searching: turn on" to the same menu (`fnc_setSearch`, `fnc_canSetSearch`): the mark `einv_noSearch` through `einv_gui_fnc_setSearchable` (section 4, "Leaving an object out of the search").
-- **compat_ace_vehiclelock.** ACE's vehicle lock as a provider of `einv_locks` (`fnc_check`):
+  `fnc_apply`, `fnc_groupDialog`, `fnc_groups`, `fnc_targets`); the lock goes through `aio_locks_fnc_setLock`. It also adds "Searching: turn off" / "Searching: turn on" to the same menu (`fnc_setSearch`, `fnc_canSetSearch`): the mark `aio_noSearch` through `aio_gui_fnc_setSearchable` (section 4, "Leaving an object out of the search").
+- **compat_ace_vehiclelock.** ACE's vehicle lock as a provider of `aio_locks` (`fnc_check`):
   `ace_vehiclelock_LockVehicleInventory` on, the player on foot, a Car, Tank or Helicopter, `locked` 2 or 3, and no key by
   `ace_vehiclelock_fnc_hasKeyForVehicle`. ACE blocks only the vanilla display 602, which this window never opens - without the
   provider ACE's lock would be bypassed.
@@ -3184,26 +3184,26 @@ its own may hold more than its capacity there, or get more than its cells by tha
     **Replaced**: postInit waits until AIME has put its action into `ace_interact_menu_inheritedActionsMan`, takes it out
     (`removeActionFromClass` with inheritance: out of every class built so far and kept out of every later one) and adds one of the
     same name, label, icon and place (`fnc_ammoCondition`, `fnc_ammoMenus`, `fnc_ammoLoad`). AIME's setting "Enable ammo switch
-    menu" is still read. The list is the magazines `einv_storage_fnc_useCarried` leaves that the muzzle takes and that are not
+    menu" is still read. The list is the magazines `aio_storage_fnc_useCarried` leaves that the muzzle takes and that are not
     loaded, grouped by class (the class in the weapon is left out, as AIME leaves it out); with only closed containers' magazines
     left, one entry says where to take one out of. A click loads the fullest usable magazine of the class (ties: uniform, vest,
-    backpack) with `einv_storage_fnc_loadMagazine`. AIME's `Reloaded` handler (it gives the old magazine back with `addMagazine`)
+    backpack) with `aio_storage_fnc_loadMagazine`. AIME's `Reloaded` handler (it gives the old magazine back with `addMagazine`)
     never has a flag to act on, since its own loader no longer runs.
   - *Self action "Change Ammo Type" of a vehicle gunner* (`..._vehicle_ammo_class`, LandVehicle): the vehicle's turret magazines, not
     the unit's inventory. Left alone.
   - *"Inventory" on a vehicle* (`UPSL_aime_inventory_open_action`; Car, Tank, Helicopter, Plane, Ship_F), *"Open backpack"* on a
     living person (`..._backpack_action_3d` and `..._backpack_action`), *"Inventory" on a body* (`..._open_action` on CAManBase),
     *"Open"* on a pile's backpack (`..._holder_open_action`): all end in the engine's `action ["Gear" | "OpenBag", ...]`, which
-    section 4 ("Opening") answers with this window and its checks (locks, `einv_noAccess`, `fnc_personInReach`, the search), so they
+    section 4 ("Opening") answers with this window and its checks (locks, `aio_noAccess`, `fnc_personInReach`, the search), so they
     cannot bypass anything. What the config patch changes is when they show: the vehicle entry only where
-    `einv_gui_fnc_canOpenVehicle` holds (`fnc_vehicleCondition`) and not at all beside `compat_ace_interaction`'s own "Inventory"; the
+    `aio_gui_fnc_canOpenVehicle` holds (`fnc_vehicleCondition`) and not at all beside `compat_ace_interaction`'s own "Inventory"; the
     living person's backpack entries only where `fnc_canOpenPerson` and `fnc_personInReach` hold (`fnc_personCondition`). The body's
     entry is as it was (bodies are open to everyone).
   - *Ground pile action* (`UPSL_aime_inventory_holder_action`, WeaponHolder and WeaponHolderSimulated): one click picks up the only
     weapon, magazine or backpack lying there (items are not counted; `UPSL_aime_inventory_fnc_can_pickup`) with no search -
     `TakeWeapon`, `canAdd` then `addMagazine` + `clearMagazineCargoGlobal` (cleared whatever the add did), `PutBag` / `AddBag` - and
-    opens the window with more. Its statement is patched to `fnc_holderRun`: while `einv_gui_searchTime` is above 0,
-    `einv_gui_searchGround` is on and the pile has no `einv_noSearch`, the click opens the window on the pile (`action ["Gear",
+    opens the window with more. Its statement is patched to `fnc_holderRun`: while `aio_gui_searchTime` is above 0,
+    `aio_gui_searchGround` is on and the pile has no `aio_noSearch`, the click opens the window on the pile (`action ["Gear",
     pile]`); otherwise `fnc_holderPick` (issue 20: an RHS RPG round picked up with a launcher carried was "loaded into the RPG" or gone
     - the engine's add stops at a container's config load, which the grid does not follow, loads an empty weapon, and AIME cleared the
     pile after it whatever happened). `fnc_holderPick` handles a lone **magazine** and a lone **weapon that does not fit an empty slot of
@@ -3211,7 +3211,7 @@ its own may hold more than its capacity there, or get more than its cells by tha
     `fnc_unitTargets` that `fnc_hasRoom` says has a spot for it, by `fnc_moveEntry` (take at the pile's root, put at the unit's: the same
     transaction as a quick move out of a pile, the hub in multiplayer, settlement back to the pile when the put bounces), after the
     same "PutDown" movement AIME played. No container with room: nothing is touched and the hint "No container has room for that"
-    (`STR_einv_gui_Hint_NowhereToGo`, through `einv_storage_fnc_useHint`, since no window is open) shows; a refusal of the
+    (`STR_aio_gui_Hint_NowhereToGo`, through `aio_storage_fnc_useHint`, since no window is open) shows; a refusal of the
     transaction shows the matching gui hint. Left to AIME's own function (`fnc_holderPick` answers false): a backpack (AIME takes the
     worn one off and puts this on - a wearing), a weapon for a free slot (the game's `TakeWeapon` wields it), and a pile with more than
     one such thing (the Gear action, the window).
@@ -3220,130 +3220,130 @@ its own may hold more than its capacity there, or get more than its cells by tha
     vehicle seat and vehicle control actions do not touch the inventory.
 - **compat_ace_interaction.** Needs `ace_interact_menu` (skipped without it). In postInit, on machines with a screen: ACE
   interaction "Inventory" with the inventory icon, under `ACE_MainActions` of `CAManBase` (type 0, with inheritance, so agents and
-  respawned units too). Condition `fnc_canOpen [target, player]`: not the player, `einv_gui_fnc_canOpenPerson` not "" (the
-  "Living persons" settings: whole or only the backpack) and `einv_gui_fnc_personInReach [player, target, true]` (both on foot,
-  `PERSON_KEEP`, ACE's `canInteractWith` with `isNotSwimming`). Statement: `einv_gui_fnc_openPerson [target]` a frame later
-  (`CBA_fnc_execNextFrame`), exactly as the action menu's "Inventory" (`einv_gui_fnc_addPersonAction`), which stays.
+  respawned units too). Condition `fnc_canOpen [target, player]`: not the player, `aio_gui_fnc_canOpenPerson` not "" (the
+  "Living persons" settings: whole or only the backpack) and `aio_gui_fnc_personInReach [player, target, true]` (both on foot,
+  `PERSON_KEEP`, ACE's `canInteractWith` with `isNotSwimming`). Statement: `aio_gui_fnc_openPerson [target]` a frame later
+  (`CBA_fnc_execNextFrame`), exactly as the action menu's "Inventory" (`aio_gui_fnc_addPersonAction`), which stays.
 
 ## 8. Settings
 
 Every CBA setting of the mod (`initSettings.inc.sqf` of each addon) is in one of two categories of CBA's Addon Options:
-`CBA_SETTINGS_EINV_CLIENT` "Arma Inventory Overhaul - Client" for what each player sets for himself (scope 0) and `CBA_SETTINGS_EINV_SERVER`
-"Arma Inventory Overhaul - Server" for every server setting, the rules and the older tables (scope 1). The keybinds stay under `CBA_SETTINGS_EINV`
+`CBA_SETTINGS_AIO_CLIENT` "Arma Inventory Overhaul - Client" for what each player sets for himself (scope 0) and `CBA_SETTINGS_AIO_SERVER`
+"Arma Inventory Overhaul - Server" for every server setting, the rules and the older tables (scope 1). The keybinds stay under `CBA_SETTINGS_AIO`
 "Arma Inventory Overhaul" (CBA's Controls, `CBA_fnc_getKeybind` asks for it). A setting's name does not carry its category, so a `cba_settings.sqf` and
-saved values are the same under either; `fnc_initCbaMenu` takes its page from the category of `einv_items_rules` (the Server page). Scope **client** is
+saved values are the same under either; `fnc_initCbaMenu` takes its page from the category of `aio_items_rules` (the Server page). Scope **client** is
 `0` (each player's own value), **global** is `1` (the same for everyone; the server or mission decides). Descriptions in the
 stringtables are wrapped as BRIEFING asks.
 
 **Server settings** - the ones of scope 1 - are CBA settings of their own and, at the same time, controls of the setup wizard's General page
 (section 6). Both edit the very same CBA value, so they never disagree: what is set in CBA's menu shows in the wizard, what the wizard saves
-shows in CBA's menu. Each addon registers its own with `einv_main_fnc_addSetting [name, type, [label, description], valueInfo, script = {},
+shows in CBA's menu. Each addon registers its own with `aio_main_fnc_addSetting [name, type, [label, description], valueInfo, script = {},
 hidden = false]` (the arguments of `CBA_fnc_addSetting` less the category and the scope, in `initSettings.inc.sqf`), which calls
-`CBA_fnc_addSetting [name, type, [label, description], [CBA_SETTINGS_EINV_SERVER, sub-category], valueInfo, 1, script]` and keeps what the wizard
-needs: `einv_main_serverSettings` (name -> definition: `type`, `label`, `tip`, `default`, `min`, `max`, `decimals`, `values`, `labels`, `script`,
-`hidden`, `key`, `topic`, `subCategory`), `einv_main_serverKeys` (key -> name; the key is the name without `einv_`), `einv_main_serverOrder`.
+`CBA_fnc_addSetting [name, type, [label, description], [CBA_SETTINGS_AIO_SERVER, sub-category], valueInfo, 1, script]` and keeps what the wizard
+needs: `aio_main_serverSettings` (name -> definition: `type`, `label`, `tip`, `default`, `min`, `max`, `decimals`, `values`, `labels`, `script`,
+`hidden`, `key`, `topic`, `subCategory`), `aio_main_serverKeys` (key -> name; the key is the name without `aio_`), `aio_main_serverOrder`.
 From there on it is a CBA setting like any other: CBA reads it from the server (profile, `userconfig\cba_settings.sqf`), the mission
 (`cba_settings.sqf`, Eden's attributes) and the client, sets the variable at once, runs the script when its settings are ready and on every change,
 on every machine, and raises `CBA_SettingChanged [name, value]` (the hotbar and an open wizard listen to it). Old `cba_settings.sqf` lines for
-these names (`force einv_gui_searchTime = 0.6;`) work as they always did. `hidden` only means no control in the wizard; the row in CBA's menu
+these names (`force aio_gui_searchTime = 0.6;`) work as they always did. `hidden` only means no control in the wizard; the row in CBA's menu
 is there all the same.
 
-**Topics** (`einv_main_topics`, main's `XEH_preInit`): `[id, CBA sub-category (a stringtable key), [names]]` - `looting`, `persons`, `containers`
-(CBA's "Containers", shared with `einv_storage_containerTable`), `weight`, `extras`, `arsenal`, `look`, and `grids` for the hidden ones (beside the
+**Topics** (`aio_main_topics`, main's `XEH_preInit`): `[id, CBA sub-category (a stringtable key), [names]]` - `looting`, `persons`, `containers`
+(CBA's "Containers", shared with `aio_storage_containerTable`), `weight`, `extras`, `arsenal`, `look`, and `grids` for the hidden ones (beside the
 rules). The wizard shows a topic as `Topic_<id>` of its stringtable, its settings in the order listed; CBA sorts its sub-categories by name and a
 sub-category's settings by registration order. A registered setting named in no topic is "Other" in both.
 
-**The first row of the Server page** is `einv_main_settingsInfo` (LIST with the one choice "ESC > Options > Inventory setup", global, no
+**The first row of the Server page** is `aio_main_settingsInfo` (LIST with the one choice "ESC > Options > Inventory setup", global, no
 sub-category so CBA puts it first, read by nothing): "Also in the setup wizard (recommended)", its description that both stay in sync.
 
-**The wizard's text of the settings.** The wizard holds its draft of them as one short text (`einv1, gui_searchTime=0.6, weight_enabled=0` -
+**The wizard's text of the settings.** The wizard holds its draft of them as one short text (`aio1, gui_searchTime=0.6, weight_enabled=0` -
 the header, then `key=value` for each setting off its default, in registration order). A switch is `1` or `0` (also `on`, `off`, `true`,
 `false`), a slider a number cut to its range and rounded to its decimals, a list the value of one of its choices, a text box free text with `%`
 and four hex digits for every character that is not a letter, a digit, `-` or `.` (`fnc_encodeText`, `fnc_decodeText`). `fnc_parseSettings
-[text]` -> `[values, warnings]` (public; a typo is left out with a warning, never the rest; a key of `einv_main_retiredSettings` reads clean),
+[text]` -> `[values, warnings]` (public; a typo is left out with a warning, never the rest; a key of `aio_main_retiredSettings` reads clean),
 `fnc_writeSettings [values]` -> the canonical text ("" for none; public), `fnc_parseValue [entry, text]`. Nothing of this text is stored by CBA.
 
-**The settings box of the test builds.** 0.4.27 to 0.5.42 kept every server setting in one CBA EDITBOX, `einv_main_settings` (that text). It
+**The settings box of the test builds.** 0.4.27 to 0.5.42 kept every server setting in one CBA EDITBOX, `aio_main_settings` (that text). It
 is no setting any more; what CBA still keeps for it is moved into the settings of their own by `fnc_migrateSettings`, on every machine at
 CBA's `CBA_beforeSettingsInitialized` (before the scripts run): each value it names is set through `CBA_settings_fnc_set` into the source it
 was saved in, at the priority it had there, where that source still has the setting at its default. The server's profile (server and single
 player): set and stored, then the box is taken out of the profile hash - once. The server's own `cba_settings.sqf`: set for the session, a
 warning in the RPT. The mission's `cba_settings.sqf`, else its Eden attributes: set for the session on every machine. In Eden (no postInit)
 it runs as the wizard (`fnc_onLoad`) or CBA's menu (`fnc_initCbaMenu`) opens: the scenario's attributes are set and stored, and the box taken
-out of them (kept once the scenario is saved). The wizard's Import still reads a pasted box line (`einv_setup_fnc_importSettings`,
+out of them (kept once the scenario is saved). The wizard's Import still reads a pasted box line (`aio_setup_fnc_importSettings`,
 `fnc_sanitizeSettings`).
 
-| `einv_items_rules` | EDITBOX | global | `einv1 base=default` | the setup (section 2); runs `fnc_loadRules` |
-| `einv_items_massPerCell` | SLIDER 2 to 20 | global (hidden) | 5 | fallback mass per cell, when a text has no `cell=` - the General page sets `cell=` |
-| `einv_items_stackSmall` | SLIDER 1 to 50 | global (hidden) | 10 | `@item_small`'s stack, only when moved off 10 - in CBA's menu (Grids) |
-| `einv_main_settingsInfo` | LIST, one choice | global | 0 | the Server page's first row: "Also in the setup wizard (recommended)", both stay in sync; read by nothing |
-| `einv_items_sizeTable`, `einv_items_stackTable` | EDITBOX | global | "" | older tables, `class:WxH` / `class:N`; win over the text |
-| `einv_storage_migrate` | CHECKBOX | global | on | "Move overfull items on": move a unit's surplus (overflow) on to its next container with room, and put the player's own on the ground when nothing has room (section 3, Surplus); off: nothing moves |
-| `einv_storage_containerTable` | EDITBOX | global | "" | `class:N` or `class:WxH+WxH`; wins over the text |
-| `einv_storage_nearbyRange` | SLIDER 1 to 5 | global | 3 | m, how far crates and piles count as nearby |
-| `einv_storage_stackMultiplier` | SLIDER 1 to 10 | global | 5 | "Stack multiplier for crates and vehicles": what stacks stacks this many times higher in a crate, a vehicle or a pile on the ground, not in what is worn (section 3, `fnc_stackFor`); 1 is off |
-| `einv_storage_useUniform`, `useVest`, `useBackpack` | LIST | global | `all` | "Use items from the uniform / vest / backpack": `all` Everything, `list` Only whitelisted (items with `use=` for it), `none` Nothing, `strict` Strict (hidden) - Only whitelisted, and the blocked items are kept out of the cargo in the unit's hidden holder; what the padlocks, the hotbar, the window's use rows and the reload key honour (section 3, Use from containers and Strict mode) |
-| `einv_gui_cellScale` | SLIDER 0.8 to 1.3 | client | 1.1 | tile scale: the cell size, capped where the columns no longer fit; next opening |
-| `einv_gui_pageRows` | SLIDER 0 to 40 | client | 10 | rows per page of a tall compartment of what is looted (section 4, "Tall compartments"); 0 or 40 no pages, at least 4 |
-| `einv_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
-| `einv_gui_tileNames` | CHECKBOX | client | off | the item's short name in the top corner of every tile (`fnc_createTile`, a name that does not fit set a fifth smaller before it is cut; the setup wizard's preview always has it); the name at the mouse stays; ACE Arsenal's panel follows |
-| `einv_gui_lootSide` | LIST | client | `left` | where the loot column opens: `left` of the storage column, which never moves (default), or `right`, at the right edge with the storage column moving in (`fnc_layoutGlass`); read at every build |
-| `einv_gui_showNearby` | CHECKBOX | client | on | nearby piles and crates as boxes in the loot column |
-| `einv_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |
-| `einv_gui_magazineText` | CHECKBOX | client | on | the rounds ("17/30") on magazine tiles; off leaves the bar alone |
-| `einv_gui_soundsWorld` | CHECKBOX | global | on | players nearby hear someone loot |
-| `einv_gui_playerColours` | CHECKBOX | global | on | players may pick their colours with the palette button in the header (`fnc_paletteAllowed`); off hides the button and ignores what players saved (topic Look, `einv_main_topics`) |
-| `einv_gui_moveToStop` | CHECKBOX | client | on | a movement key closes the window while looting |
-| `einv_gui_searchTime` | SLIDER 0 to 3 | global | 0.4 | seconds per cell searched; 0 shows everything |
-| `einv_gui_searchTimeUniform`, `Vest`, `Backpack`, `Crate`, `Vehicle`, `Ground`, `Body` | SLIDER 0 to 5 | global | 1 | factor of the time per cell for that kind of box (`fnc_searchTime`); a body's on top of its uniform's, vest's or backpack's; 0 shows that kind at once |
-| `einv_gui_handDrop` | SLIDER 0 to 3 | global | 0.3 | seconds the hands are busy dropping one item (hands' queue, section 4); 0 drops at once |
-| `einv_gui_handMove` | SLIDER 0 to 3 | global | 0.4 | seconds to move one item to a different container or holder (the quick move; never a drag); 0 at once |
-| `einv_gui_handEquip` | SLIDER 0 to 5 | global | 1 | seconds to put one item on or take it off (a drag never waits); 0 at once |
-| `einv_gui_waitMove` | CHECKBOX | global | on | the quick move and the menu's moves take the hands' time; off: at once |
-| `einv_gui_waitDrop` | CHECKBOX | global | on | the drop key and Drop in the menu take the hands' time; off: at once |
-| `einv_gui_waitWorn` | CHECKBOX | global | off | putting on and taking off a uniform, vest, backpack or headgear takes the hands' time; off: at once |
-| `einv_gui_waitEquip` | CHECKBOX | global | off | equipping anything else (goggles, night vision, a map, weapon parts) takes the hands' time; off: at once |
-| `einv_gui_searchBodies`, `searchPersons`, `searchContainers` | CHECKBOX | global | on | what has to be searched |
-| `einv_gui_searchZeus` | CHECKBOX | global | on | crates and vehicles a game master places are searched; off marks them `einv_noSearch` (needs `searchContainers`) |
-| `einv_gui_searchGround` | CHECKBOX | global | off | loose items on the ground too |
-| `einv_gui_personNotify` | CHECKBOX | global | on | the person whose gear is opened is told |
-| `einv_gui_personOpen` | LIST | global | Everyone | Everyone, Unconscious and captives, Only the unconscious |
-| `einv_gui_personItems` | LIST | global | Everyone | who may take items from and put into a living person's gear: Everyone, Unconscious and captives, Nobody - look only |
-| `einv_gui_personWorn` | LIST | global | Unconscious and captives | who may take off what a living person wears: Everyone, Unconscious and captives, Nobody |
-| `einv_gui_debugTiming` | CHECKBOX | client | off | "Log window timings (debug)": build and redraw times and the display's controls, the script cost of idle, hovering and dragging frames, and each drag's lift and frames, to the RPT (read as the window opens) |
-| `einv_arsenal_biArsenal` | LIST | global | `ace` | the vanilla Virtual Arsenal: `ace` (ACE Arsenal with the box's items), `block`, `vanilla` |
-| `einv_arsenal_biMessage` | EDITBOX | global | "" | the line on the "not allowed" screen |
-| `einv_hotbar_enabled` | CHECKBOX | global | on | the hotbar row, bar and keys |
-| `einv_hotbar_leaderKeys` | CHECKBOX | client | on | leave the keys to Arma while leading AI |
-| `einv_hotbar_hudMode` | LIST | client | While in use | Never, While in use, Always |
-| `einv_hotbar_hudTime` | SLIDER 1 to 15 | client | 4 | seconds the bar stays after a key |
-| `einv_magazines_repack` | CHECKBOX | global | on | the window's own repack |
-| `einv_weight_enabled` | CHECKBOX | global | on | the tiers at all; off: plain kilograms, no effects, no duty factor, no messages (ACE's fatigue alone) |
-| `einv_weight_heavyAt` | SLIDER 0 to 100 | global | 0 | kg; 0 follows ACE's fatigue |
-| `einv_weight_overloadedAt` | SLIDER 10 to 100 | global | 45 | kg |
-| `einv_weight_criticalAt` | SLIDER 10 to 150 | global | 60 | kg, at least 1 above Overloaded |
-| `einv_weight_effects` | CHECKBOX | global | on | no sprinting from Overloaded, walking only at Critical |
-| `einv_weight_notify` | CHECKBOX | client | on | a message when the tier changes with the inventory closed |
-| `einv_locks_zeusOpens` | CHECKBOX | global | on | Zeus may open locked containers |
+| `aio_items_rules` | EDITBOX | global | `aio1 base=default` | the setup (section 2); runs `fnc_loadRules` |
+| `aio_items_massPerCell` | SLIDER 2 to 20 | global (hidden) | 5 | fallback mass per cell, when a text has no `cell=` - the General page sets `cell=` |
+| `aio_items_stackSmall` | SLIDER 1 to 50 | global (hidden) | 10 | `@item_small`'s stack, only when moved off 10 - in CBA's menu (Grids) |
+| `aio_main_settingsInfo` | LIST, one choice | global | 0 | the Server page's first row: "Also in the setup wizard (recommended)", both stay in sync; read by nothing |
+| `aio_items_sizeTable`, `aio_items_stackTable` | EDITBOX | global | "" | older tables, `class:WxH` / `class:N`; win over the text |
+| `aio_storage_migrate` | CHECKBOX | global | on | "Move overfull items on": move a unit's surplus (overflow) on to its next container with room, and put the player's own on the ground when nothing has room (section 3, Surplus); off: nothing moves |
+| `aio_storage_containerTable` | EDITBOX | global | "" | `class:N` or `class:WxH+WxH`; wins over the text |
+| `aio_storage_nearbyRange` | SLIDER 1 to 5 | global | 3 | m, how far crates and piles count as nearby |
+| `aio_storage_stackMultiplier` | SLIDER 1 to 10 | global | 5 | "Stack multiplier for crates and vehicles": what stacks stacks this many times higher in a crate, a vehicle or a pile on the ground, not in what is worn (section 3, `fnc_stackFor`); 1 is off |
+| `aio_storage_useUniform`, `useVest`, `useBackpack` | LIST | global | `all` | "Use items from the uniform / vest / backpack": `all` Everything, `list` Only whitelisted (items with `use=` for it), `none` Nothing, `strict` Strict (hidden) - Only whitelisted, and the blocked items are kept out of the cargo in the unit's hidden holder; what the padlocks, the hotbar, the window's use rows and the reload key honour (section 3, Use from containers and Strict mode) |
+| `aio_gui_cellScale` | SLIDER 0.8 to 1.3 | client | 1.1 | tile scale: the cell size, capped where the columns no longer fit; next opening |
+| `aio_gui_pageRows` | SLIDER 0 to 40 | client | 10 | rows per page of a tall compartment of what is looted (section 4, "Tall compartments"); 0 or 40 no pages, at least 4 |
+| `aio_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
+| `aio_gui_tileNames` | CHECKBOX | client | off | the item's short name in the top corner of every tile (`fnc_createTile`, a name that does not fit set a fifth smaller before it is cut; the setup wizard's preview always has it); the name at the mouse stays; ACE Arsenal's panel follows |
+| `aio_gui_lootSide` | LIST | client | `left` | where the loot column opens: `left` of the storage column, which never moves (default), or `right`, at the right edge with the storage column moving in (`fnc_layoutGlass`); read at every build |
+| `aio_gui_showNearby` | CHECKBOX | client | on | nearby piles and crates as boxes in the loot column |
+| `aio_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |
+| `aio_gui_magazineText` | CHECKBOX | client | on | the rounds ("17/30") on magazine tiles; off leaves the bar alone |
+| `aio_gui_soundsWorld` | CHECKBOX | global | on | players nearby hear someone loot |
+| `aio_gui_playerColours` | CHECKBOX | global | on | players may pick their colours with the palette button in the header (`fnc_paletteAllowed`); off hides the button and ignores what players saved (topic Look, `aio_main_topics`) |
+| `aio_gui_moveToStop` | CHECKBOX | client | on | a movement key closes the window while looting |
+| `aio_gui_searchTime` | SLIDER 0 to 3 | global | 0.4 | seconds per cell searched; 0 shows everything |
+| `aio_gui_searchTimeUniform`, `Vest`, `Backpack`, `Crate`, `Vehicle`, `Ground`, `Body` | SLIDER 0 to 5 | global | 1 | factor of the time per cell for that kind of box (`fnc_searchTime`); a body's on top of its uniform's, vest's or backpack's; 0 shows that kind at once |
+| `aio_gui_handDrop` | SLIDER 0 to 3 | global | 0.3 | seconds the hands are busy dropping one item (hands' queue, section 4); 0 drops at once |
+| `aio_gui_handMove` | SLIDER 0 to 3 | global | 0.4 | seconds to move one item to a different container or holder (the quick move; never a drag); 0 at once |
+| `aio_gui_handEquip` | SLIDER 0 to 5 | global | 1 | seconds to put one item on or take it off (a drag never waits); 0 at once |
+| `aio_gui_waitMove` | CHECKBOX | global | on | the quick move and the menu's moves take the hands' time; off: at once |
+| `aio_gui_waitDrop` | CHECKBOX | global | on | the drop key and Drop in the menu take the hands' time; off: at once |
+| `aio_gui_waitWorn` | CHECKBOX | global | off | putting on and taking off a uniform, vest, backpack or headgear takes the hands' time; off: at once |
+| `aio_gui_waitEquip` | CHECKBOX | global | off | equipping anything else (goggles, night vision, a map, weapon parts) takes the hands' time; off: at once |
+| `aio_gui_searchBodies`, `searchPersons`, `searchContainers` | CHECKBOX | global | on | what has to be searched |
+| `aio_gui_searchZeus` | CHECKBOX | global | on | crates and vehicles a game master places are searched; off marks them `aio_noSearch` (needs `searchContainers`) |
+| `aio_gui_searchGround` | CHECKBOX | global | off | loose items on the ground too |
+| `aio_gui_personNotify` | CHECKBOX | global | on | the person whose gear is opened is told |
+| `aio_gui_personOpen` | LIST | global | Everyone | Everyone, Unconscious and captives, Only the unconscious |
+| `aio_gui_personItems` | LIST | global | Everyone | who may take items from and put into a living person's gear: Everyone, Unconscious and captives, Nobody - look only |
+| `aio_gui_personWorn` | LIST | global | Unconscious and captives | who may take off what a living person wears: Everyone, Unconscious and captives, Nobody |
+| `aio_gui_debugTiming` | CHECKBOX | client | off | "Log window timings (debug)": build and redraw times and the display's controls, the script cost of idle, hovering and dragging frames, and each drag's lift and frames, to the RPT (read as the window opens) |
+| `aio_arsenal_biArsenal` | LIST | global | `ace` | the vanilla Virtual Arsenal: `ace` (ACE Arsenal with the box's items), `block`, `vanilla` |
+| `aio_arsenal_biMessage` | EDITBOX | global | "" | the line on the "not allowed" screen |
+| `aio_hotbar_enabled` | CHECKBOX | global | on | the hotbar row, bar and keys |
+| `aio_hotbar_leaderKeys` | CHECKBOX | client | on | leave the keys to Arma while leading AI |
+| `aio_hotbar_hudMode` | LIST | client | While in use | Never, While in use, Always |
+| `aio_hotbar_hudTime` | SLIDER 1 to 15 | client | 4 | seconds the bar stays after a key |
+| `aio_magazines_repack` | CHECKBOX | global | on | the window's own repack |
+| `aio_weight_enabled` | CHECKBOX | global | on | the tiers at all; off: plain kilograms, no effects, no duty factor, no messages (ACE's fatigue alone) |
+| `aio_weight_heavyAt` | SLIDER 0 to 100 | global | 0 | kg; 0 follows ACE's fatigue |
+| `aio_weight_overloadedAt` | SLIDER 10 to 100 | global | 45 | kg |
+| `aio_weight_criticalAt` | SLIDER 10 to 150 | global | 60 | kg, at least 1 above Overloaded |
+| `aio_weight_effects` | CHECKBOX | global | on | no sprinting from Overloaded, walking only at Critical |
+| `aio_weight_notify` | CHECKBOX | client | on | a message when the tier changes with the inventory closed |
+| `aio_locks_zeusOpens` | CHECKBOX | global | on | Zeus may open locked containers |
 
-CBA keybinds: `einv_hotbar_slot1` to `slot7` (4 to 0), `einv_hotbar_show`, `einv_gui_quickMove` (F, the quick move in the inventory window), `einv_gui_drop` (G, the drop in the inventory window). Kept in the player's
-profile: `einv_gui_palette` (the palette popover's choices, `[accent, secondary, alpha, panel, cells, tiles, text, lines]`), `einv_gui_soundMix` (the sound dropdown's volumes; the speaker's `einv_gui_muted`, `einv_gui_searchMuted` before it, are read once), `einv_hotbar_slots` (`einv_gui_cameraOn` no longer since 0.5.0: `einv_gui_cameraDefault`).
+CBA keybinds: `aio_hotbar_slot1` to `slot7` (4 to 0), `aio_hotbar_show`, `aio_gui_quickMove` (F, the quick move in the inventory window), `aio_gui_drop` (G, the drop in the inventory window). Kept in the player's
+profile: `aio_gui_palette` (the palette popover's choices, `[accent, secondary, alpha, panel, cells, tiles, text, lines]`), `aio_gui_soundMix` (the sound dropdown's volumes; the speaker's `aio_gui_muted`, `aio_gui_searchMuted` before it, are read once), `aio_hotbar_slots` (`aio_gui_cameraOn` no longer since 0.5.0: `aio_gui_cameraDefault`).
 
-**What missions and other mods may set** (all optional): on an object `einv_grid` (a grid text, public), `einv_noSearch`,
-`einv_nearby = false`, `einv_noAccess` (a person); in a mission `einv_arsenal_biPassThrough`; in an item's config `einv_size`,
-`einv_stack`, `einv_grid`, `einv_weight`, `einv_name`, `einv_icon`, `einv_picture`, `einv_use` (section 2, "Config keys of an item"; the older `einv_gridSize[]`,
-`einv_stackSize`, `einv_grids[]` and `einv_slots` still work), `einv_sound = "family"`; a preset as a class of
-`CfgEinvRulesets`; a sound family or action in `CfgEinvSounds`; a lock through `einv_locks_fnc_setLock` or `addProvider`; an op,
+**What missions and other mods may set** (all optional): on an object `aio_grid` (a grid text, public), `aio_noSearch`,
+`aio_nearby = false`, `aio_noAccess` (a person); in a mission `aio_arsenal_biPassThrough`; in an item's config `aio_size`,
+`aio_stack`, `aio_grid`, `aio_weight`, `aio_name`, `aio_icon`, `aio_picture`, `aio_use` (section 2, "Config keys of an item"; the older `aio_gridSize[]`,
+`aio_stackSize`, `aio_grids[]` and `aio_slots` still work), `aio_sound = "family"`; a preset as a class of
+`CfgAioRulesets`; a sound family or action in `CfgAioSounds`; a lock through `aio_locks_fnc_setLock` or `addProvider`; an op,
 guard or carried variable in the storage's tables (section 3).
 
 ## 9. Known limits and untested
 
 ### Known limits
 
-- **Categories are per class, not per instance.** `cats=` and `einv_cat` put a class in categories; a compartment's `accepts` is by
+- **Categories are per class, not per instance.** `cats=` and `aio_cat` put a class in categories; a compartment's `accepts` is by
   category. An ACE item that two mods put in different categories is one item to the rules. A magazine of a grenade launcher is a
   grenade only when its kind is (one round, light) or its ammo simulates a mine or a bomb - a heavy rocket is ammo. A category of the
-  setup's own is a word of the rules text, shared by the server's text alone: a mod's `einv_cat` or `einv_grid` may name one, and it counts only
+  setup's own is a word of the rules text, shared by the server's text alone: a mod's `aio_cat` or `aio_grid` may name one, and it counts only
   where the setup defines it (`category=...`); until then it is ignored where it is used and the text's compile warns once. The strip shows at most
   `MAX_CUSTOM_CATEGORIES` + 8 categories, 7 at a time once there are more than 8 (click "more"); there is no scroll or wheel on it.
 - **A single slot holds one tile, not one item.** A stack in a slot is one tile with its count (`stack=` over 1 puts several grenades in a
@@ -3388,7 +3388,7 @@ guard or carried variable in the storage's tables (section 3).
   display 602, and mods that hook `RscDisplayInventory`, never see the window; CBA's item renames are not applied.
 - **Locks.** The engine's "Rearm" scroll action on an ammo crate may not respect `lockInventory` (the code does what is safe
   either way and does not hide the action: that would take over `inGameUISetEventHandler`, which ACE owns). A raw `setVariable
-  ["einv_locks_lock", ...]` works in the guard and the window but sets no engine lock and is not in the list for joining players:
+  ["aio_locks_lock", ...]` works in the guard and the window but sets no engine lock and is not in the list for joining players:
   always use `fnc_setLock`. An admin moving things in a *driven* vehicle locked to admins is refused: the guard runs at the
   driver's machine, which cannot tell about another client's login.
 - **Weight.** Heavy is where *jogging* stops being free in ACE's model at ACE's jog speed; running uphill, raised weapons, wounds,
@@ -3400,7 +3400,7 @@ guard or carried variable in the storage's tables (section 3).
   with the message). The undo is after the fact: other mods see ACE's add and then the removal; adds from the list or the wheel
   raise `itemsChanged` but not ACE's `cargoChanged`. The panel's bottom reaches into the top of ACE's message line, so a long
   message can be partly under it. A press below the last row of ACE's list starts no drag. A mission that registers BI arsenal
-  handlers before the first frame after postInit counts as mods': it sets `einv_arsenal_biPassThrough`.
+  handlers before the first frame after postInit counts as mods': it sets `aio_arsenal_biPassThrough`.
 - **The window.** Controls made on the display later than a kit window draw over it where the window has been moved onto the
   equipment cards (a hovered slot's ring, the green glow of slots taking a dragged item, a footprint under a window's edge).
   Dropping the first item on the ground with nothing looted brings the loot column in, but the storage column keeps its scroll. A
@@ -3442,9 +3442,9 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
   fewer than three free cells), drag 3 onto a tile of 2 in the vest (merge to 5); put 30 into the vest back into the crate; the setting at
   1 (crate tiles of 5 again, the places with counts of 25 cut and the surplus opened as tiles, no loop), at 10; a client of a
   dedicated server sees the same tiles as the host; the Arsenal's panel and a worn vest never multiply.
-- **Searching left out for one object** (0.5.12): the Eden attribute "Skip searching", the "CuratorObjectPlaced" hook (on which machines it fires), the compat_zen choices and `fnc_setSearchable` were written and read through, not run. To try: place a crate in Eden with the box ticked and loot it (no stripes); in Zeus place a crate with *Search Zeus-placed crates and vehicles* off (no stripes), right-click it, *Searching: turn on* (stripes again for a player who opens it fresh), then *Searching: turn off*; call `[_crate, false] call einv_gui_fnc_setSearchable;` from the debug console and join as a second player.
+- **Searching left out for one object** (0.5.12): the Eden attribute "Skip searching", the "CuratorObjectPlaced" hook (on which machines it fires), the compat_zen choices and `fnc_setSearchable` were written and read through, not run. To try: place a crate in Eden with the box ticked and loot it (no stripes); in Zeus place a crate with *Search Zeus-placed crates and vehicles* off (no stripes), right-click it, *Searching: turn on* (stripes again for a player who opens it fresh), then *Searching: turn off*; call `[_crate, false] call aio_gui_fnc_setSearchable;` from the debug console and join as a second player.
 - **Categories of the setup's own and the locked compartments' faint pictures** (0.5.0): the `category=` statements and their registry, the Categories card of the General step (add, rename, picture, delete with its clean-up), the picker's Category icons chip, the strip with more than eight categories (the "more" field), the watermark on the free cells (also on a paged box and in a kit; the corner badge was taken out in 0.5.12), and the footer hint on a locked compartment were written and read through, not run. To try: a vest with a 2x2 `:medical` compartment holding a pulse oximeter (the cells carry the faint picture, no badge in the corner, hovering says "Only medical items here"); add a category, give it a picture, put an item in it (Items step) and a compartment (Containers step, Blocks), loot a crate holding it (the strip lists it; add 9 and click "more"); delete the category (the chips, the item and the compartment lose it, one undo brings it back); export and import the setup on a client.
-- **AIME's pick-up through the grid and `einv_storage_fnc_addToUnit`** (0.5.0, issue #20): `fnc_holderPick`, `fnc_addToUnit`, `fnc_addFit`,
+- **AIME's pick-up through the grid and `aio_storage_fnc_addToUnit`** (0.5.0, issue #20): `fnc_holderPick`, `fnc_addToUnit`, `fnc_addFit`,
   `fnc_unitTargets`, the rounds argument of `fnc_addNew` and the `Take` handler that deletes an emptied scripted pile were written and read
   through, not run; the engine behaviours they work around (a spent launcher loading an added magazine, `addMagazine` refusing at the
   config load after `canAdd`) are read from the command descriptions, not seen. To try (ACE + AIME + RHS AFRF, "Searching" off for the
@@ -3452,7 +3452,7 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
   container with free cells, the launcher unchanged, the pile gone; the same with the RPG-7 spent (the round is in the pockets, not in
   the launcher); every container full -> the hint "No container has room for that", the round stays; a lone rifle with a rifle already
   carried (goes into a container), with the slot free (wielded, AIME's action); a backpack (AIME's); two magazines on the pile (the window
-  opens). `[player, "ACE_fieldDressing", 8] call einv_storage_fnc_addToUnit` with room for 5 returns 5; a magazine with rounds; a unit of
+  opens). `[player, "ACE_fieldDressing", 8] call aio_storage_fnc_addToUnit` with room for 5 returns 5; a magazine with rounds; a unit of
   another machine (the number is the local estimate, the add follows); a Take from a scripted pile through the scroll menu leaves no
   empty pile.
 - **The kit of Enhanced First Aid Kits' kits tab in ACE Arsenal's panel** (0.5.0, issues #4 and #19): `fnc_arsenalFocus` and the
@@ -3467,14 +3467,14 @@ Built and checked in code only (`hemtt check`, reading), as far as this reposito
   drag within a second (nothing doubled); the IFAK itself into the staging space and back; no kit carried ("Take the kit first");
   a loadout loaded with kits; close with a kit in the staging space (named on the card, its instance freed); the same without a
   grid rule (capacity: the tab's own greying, "(12/35)").
-- **Server settings as CBA settings of their own, linked with the wizard; the admin-only entries** (0.5.0): `einv_main_fnc_addSetting`
-  calling `CBA_fnc_addSetting`, `fnc_migrateSettings`, `einv_setup_fnc_activeSettings`, `fnc_onSettingChanged`, the per-setting
+- **Server settings as CBA settings of their own, linked with the wizard; the admin-only entries** (0.5.0): `aio_main_fnc_addSetting`
+  calling `CBA_fnc_addSetting`, `fnc_migrateSettings`, `aio_setup_fnc_activeSettings`, `fnc_onSettingChanged`, the per-setting
   `fnc_save`, `fnc_initPauseMenu` and the greyed rows were written against CBA 3.19's source and read through, not run. To try: the
   wizard (SP) shows a value set in CBA's Server tab; change one in the wizard, Save, CBA's Server tab shows it; with the wizard open,
   change another in CBA's menu (the row follows; one changed in the wizard first keeps the wizard's); Eden: Save writes the Mission
   tab, the scenario keeps it after saving; a dedicated server as a logged-in admin (Save reaches every client, a joiner too) and as
   a plain player (no "Inventory setup" under ESC > Options, no button on CBA's Server page; log in, reopen - both there); menu mode
-  (button on CBA's page, Apply, rows yellow, OK keeps); a profile with the old `einv_main_settings` (values moved once, the box gone
-  from the profile); a mission `cba_settings.sqf` with `force einv_gui_searchTime = 1;` (the row greyed when saving to the mission).
+  (button on CBA's page, Apply, rows yellow, OK keeps); a profile with the old `aio_main_settings` (values moved once, the box gone
+  from the profile); a mission `cba_settings.sqf` with `force aio_gui_searchTime = 1;` (the row greyed when saving to the mission).
 - **Multiplayer on a dedicated server**: the hub, the handshake and the nested copies are designed for it; `HISTORY.md` records no
   dedicated-server run.

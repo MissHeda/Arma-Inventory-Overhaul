@@ -22,7 +22,7 @@
  * Something to do <BOOL>
  *
  * Example:
- * [player] call einv_storage_fnc_hiddenDue;
+ * [player] call aio_storage_fnc_hiddenDue;
  *
  * Public: No
  */

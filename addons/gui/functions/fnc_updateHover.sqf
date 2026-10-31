@@ -15,9 +15,9 @@
  * What the pointer carries beside it: the item's name, or - over a vest, uniform, helmet or backpack, one that
  * lies in a container or hangs on a body, not the player's own worn one - the
  * comparison card with what the player wears there (fnc_compareRows, fnc_drawCompare), unless
- * einv_gui_compareTooltip is off. Both are placed beside the pointer by fnc_onFrame; the one that shows is
+ * aio_gui_compareTooltip is off. Both are placed beside the pointer by fnc_onFrame; the one that shows is
  * uiNamespace tipShown. A radio of TFAR or ACRE2 brings its channel and frequency after its name, and its
- * channel, frequency, alternate channel and state into the hint (einv_compat_tfar, einv_compat_acre, through
+ * channel, frequency, alternate channel and state into the hint (aio_compat_tfar, aio_compat_acre, through
  * fnc_compatCollect - whichever is loaded).
  *
  * A window that attached (fnc_attach) adds to the hint: the "hint" hook is told what the mouse is on
@@ -60,7 +60,7 @@
  * None
  *
  * Example:
- * [_display, getMousePosition] call einv_gui_fnc_updateHover;
+ * [_display, getMousePosition] call aio_gui_fnc_updateHover;
  *
  * Public: No
  */
@@ -495,7 +495,7 @@ if (!isNull _tooltip) then {
         };
     };
 
-    // A radio: its channel and frequency after the name (einv_compat_tfar, einv_compat_acre).
+    // A radio: its channel and frequency after the name (aio_compat_tfar, aio_compat_acre).
     if (_name isNotEqualTo "") then {
         private _radioHolder = objNull;
 
@@ -730,7 +730,7 @@ switch (_shown param [0, ""]) do {
         private _class = _tile getOrDefault ["class", ""];
 
         // A kit of Enhanced First Aid Kits by the name its player gave it (fnc_itemName), and at what it
-        // really weighs - its contents count - and how full it is (einv_compat_efak, when loaded).
+        // really weighs - its contents count - and how full it is (aio_compat_efak, when loaded).
         private _kitMass = if (isNil QEFUNC(compat_efak,getMass)) then {-1} else {[_class] call EFUNC(compat_efak,getMass)};
         private _mass = if (_kitMass >= 0) then {_kitMass * (_tile getOrDefault ["count", 1])} else {[[_tile]] call EFUNC(storage,getMass)};
 
@@ -822,7 +822,7 @@ switch (_shown param [0, ""]) do {
             };
         };
 
-        // A radio's channel, frequency, alternate channel and state (einv_compat_tfar, einv_compat_acre).
+        // A radio's channel, frequency, alternate channel and state (aio_compat_tfar, aio_compat_acre).
         {
             _x call _fnc_add;
         } forEach ([[QEFUNC(compat_tfar,hintParts), QEFUNC(compat_acre,hintParts)], [_class, _tile getOrDefault ["container", objNull]]] call FUNC(compatCollect));
@@ -835,7 +835,7 @@ switch (_shown param [0, ""]) do {
     case "slot": {
         private _record = (uiNamespace getVariable [QGVAR(slots), []]) select (_shown select 1);
 
-        // A slot of the hotbar (einv_hotbar - only when that addon is loaded): the hotbar says what it is
+        // A slot of the hotbar (aio_hotbar - only when that addon is loaded): the hotbar says what it is
         // and what its key does.
         if ((_record param [7, -1]) >= 0 && {!isNil QEFUNC(hotbar,hintParts)}) exitWith {
             {
@@ -890,7 +890,7 @@ switch (_shown param [0, ""]) do {
         };
 
         // A radio's channel, frequency, alternate channel and state - a long-range one on the back by the
-        // backpack's container object (einv_compat_tfar, einv_compat_acre). The dummy radio ACRE2 keeps in
+        // backpack's container object (aio_compat_tfar, aio_compat_acre). The dummy radio ACRE2 keeps in
         // the radio slot says so.
         private _radioHolder = objNull;
 

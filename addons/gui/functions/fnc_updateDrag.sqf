@@ -5,9 +5,9 @@
  * Follows the mouse while something is dragged: moves the ghost and finds where it would land.
  *
  * On one of the player's own equipment slots (only a tile can go there): it fits when the slot takes
- * that item (einv_storage_fnc_slotAccepts) - on a weapon also a magazine or attachment it takes, which
- * goes on that part (einv_storage_fnc_partFor). Anywhere else over the equipment column it goes into
- * the slot that takes it (einv_storage_fnc_slotFor). Worn gear dragged from a slot onto the same slot of
+ * that item (aio_storage_fnc_slotAccepts) - on a weapon also a magazine or attachment it takes, which
+ * goes on that part (aio_storage_fnc_partFor). Anywhere else over the equipment column it goes into
+ * the slot that takes it (aio_storage_fnc_slotFor). Worn gear dragged from a slot onto the same slot of
  * another unit - the player's onto a body's, a body's onto the player's or anywhere over the player's
  * equipment column - is exchanged (fnc_canSwap); the target then names that unit as its 9th element. A tile
  * from a container (the ground, a crate, the player's gear) let go on a slot of a dead body's paper doll is put
@@ -30,26 +30,26 @@
  * before ("NoRoom", or the reason a rule gives).
  *
  * Over a stack of the same class (and key) with room left, where the storage keeps stacks apart
- * (einv_storage_stackSplits), the same plan says merge instead (its 4th element, fnc_swapPlan): the footprint
+ * (aio_storage_stackSplits), the same plan says merge instead (its 4th element, fnc_swapPlan): the footprint
  * lies on that stack in the accent colour, the hint says so, and fnc_endDrag adds as many as fit (the whole
  * stack, or as many as the wheel left) to that very stack. A drop on a free cell is a stack of its own.
  *
  * A uniform, vest or backpack never goes into its own grid or into that of anything lying in it
- * (einv_storage_fnc_liesIn): red, "It cannot go into itself". The cells a move under way goes to
+ * (aio_storage_fnc_liesIn): red, "It cannot go into itself". The cells a move under way goes to
  * (GVAR(inFlight)) count as taken - empty until it arrived, but not for long.
  *
  * Only what lies on top under the mouse is a target (fnc_topAt): over a kit window only that window's
  * grids and the kit tiles in them - no slot, no column's grid and not the ground under it; over the
  * window's title or edge it goes back.
  *
- * Kits of Enhanced First Aid Kits (einv_compat_efak, when loaded): on a kit's tile it goes into that
+ * Kits of Enhanced First Aid Kits (aio_compat_efak, when loaded): on a kit's tile it goes into that
  * kit, the footprint on the tile; on an open kit window's grid a taken cell is no reason not to for what comes
  * from elsewhere - the kit's layout finds it another. Either way the kit decides whether it takes it
- * (einv_compat_efak_fnc_canDrop), and the red footprint says why not. Moved within one kit, or onto the
+ * (aio_compat_efak_fnc_canDrop), and the red footprint says why not. Moved within one kit, or onto the
  * tile of the kit it comes out of, it is a grid like any other: a taken cell is no room.
  *
- * A magazine over a partly filled one of its kind (einv_magazines, when loaded): the footprint lies on
- * that tile in the accent colour - the two would be repacked (einv_magazines_fnc_canRepack); red, with the
+ * A magazine over a partly filled one of its kind (aio_magazines, when loaded): the footprint lies on
+ * that tile in the accent colour - the two would be repacked (aio_magazines_fnc_canRepack); red, with the
  * reason, when they cannot be (a full one, the player's gear and a crate). Anything that is no repack goes on
  * as it did.
  *
@@ -58,10 +58,10 @@
  * mouse), else they are packed into the hovered container (an outline round the compartment: green when
  * all fit, amber when some do, red when none, "4 / 6" on the counter), over a kit the kit decides, over
  * a dragged container or one that lies in it, or a slot, nothing happens (red, and the reason). The
- * hotbar's slots take a single item only (einv_hotbar - only when that addon is loaded).
+ * hotbar's slots take a single item only (aio_hotbar - only when that addon is loaded).
  *
  * Free cells are the only room there is: a cell that is taken is red, and weight refuses nothing (a backpack
- * into a backpack is the one kind rule left, einv_storage_fnc_backpackIntoBackpack). When the item comes
+ * into a backpack is the one kind rule left, aio_storage_fnc_backpackIntoBackpack). When the item comes
  * from outside the soldier's own gear into it, the hint warns what it would make of him: "+2.4 kg: you
  * will be Overloaded" (fnc_dragHint, fnc_weightText; an own empty slot too - a swap moves another item off,
  * so no forecast for a filled one), worked out once per drag, target and count (GVAR(dragRoom)); so are
@@ -81,7 +81,7 @@
  * zone, the panels ("spot") - and only when that differs from the last frame's is the target worked out again,
  * the footprint painted, the hint written and the window that attached asked ("dragCheck"). In a cell of a grid
  * that no slot, other grid or the equipment column reaches into, a mouse that stays in that cell moves the ghost
- * and nothing else ("hold"). With "Log window timings (debug)" on (einv_gui_debugTiming), each frame notes what
+ * and nothing else ("hold"). With "Log window timings (debug)" on (aio_gui_debugTiming), each frame notes what
  * its parts took (fnc_startDrag, fnc_endDrag).
  *
  * Arguments:
@@ -92,7 +92,7 @@
  * None
  *
  * Example:
- * [_display, getMousePosition] call einv_gui_fnc_updateDrag;
+ * [_display, getMousePosition] call aio_gui_fnc_updateDrag;
  *
  * Public: No
  */
@@ -106,7 +106,7 @@ private _entry = uiNamespace getVariable [QGVAR(dragEntry), createHashMap];
 
 if (count _entry == 0) exitWith {};
 
-// For the tester's numbers (einv_gui_debugTiming): with the setting on, fnc_startDrag put "timing" into the
+// For the tester's numbers (aio_gui_debugTiming): with the setting on, fnc_startDrag put "timing" into the
 // drag's record and each part of this frame notes when it ended (fnc_endDrag writes the line). Off, nothing is.
 private _timed = "timing" in GVAR(dragRoom);
 private _marks = [];
@@ -833,7 +833,7 @@ private _fnc_show = {
                 if (_on) then {
                     _piece ctrlSetPosition _pieceRect;
 
-                    if (ctrlClassName _piece isEqualTo "EINV_PanelCorner") then {
+                    if (ctrlClassName _piece isEqualTo "AIO_PanelCorner") then {
                         _piece ctrlSetTextColor _paint;
                     } else {
                         _piece ctrlSetBackgroundColor _paint;
@@ -993,7 +993,7 @@ private _fnc_tileUnder = {
 // in it), a zone, the ground. A block of its own, so that the window that attached can look at the answer
 // whichever way it was reached (below).
 call {
-    // ----- On the hotbar (einv_hotbar): nothing moves, the item's class goes on that key -----
+    // ----- On the hotbar (aio_hotbar): nothing moves, the item's class goes on that key -----
     // Its slots are drawn in the equipment column as slots without a place of their own (record element 7 is
     // the key's number). Only one item at a time, and only while that addon is loaded.
     private _hotbarSlot = -1;
@@ -1033,7 +1033,7 @@ call {
 
         // Whether the slot takes it, and the slot it goes into - worked out once per drag and slot, not on
         // every frame the mouse is on it: a weapon's parts read the unit's loadout and the weapon's
-        // compatible magazines (einv_storage_fnc_slotAccepts, partFor).
+        // compatible magazines (aio_storage_fnc_slotAccepts, partFor).
         private _fitKey = "slot|" + str _slotIndex;
         private _fitAnswer = GVAR(dragRoom) get _fitKey;
 
@@ -1157,7 +1157,7 @@ call {
 
     // ----- Anywhere on the equipment column: into the player's slot that takes it -----
     // Not only right onto its slot (Mia, 0.2.3): a helmet let go anywhere over the cards goes on the head,
-    // a magazine into the weapon that takes it (einv_storage_fnc_slotFor). A body's worn item is exchanged
+    // a magazine into the weapon that takes it (aio_storage_fnc_slotFor). A body's worn item is exchanged
     // with the player's own there (fnc_canSwap); the player's own worn gear has its slots right there.
     // The footprint lies on that slot where the column shows one - every piece of worn gear has its slot in
     // the gear row, the backpack's too, empty or not -, else (nothing here takes it) faintly over the whole
@@ -1357,7 +1357,7 @@ call {
     private _place = true;
 
     // Where it comes from and where it would go: a grid is its container - or, with none, the open kit it
-    // stands for (einv_compat_efak). A slot's item comes from no grid at all.
+    // stands for (aio_compat_efak). A slot's item comes from no grid at all.
     private _sourceGrid = if (_slotSource isEqualTo []) then {_grids select _sourceIndex} else {createHashMap};
     private _from = _sourceGrid getOrDefault ["container", objNull];
     private _fromKit = _sourceGrid getOrDefault ["kit", ""];
@@ -1467,7 +1467,7 @@ call {
         };
     };
 
-    // ----- On a kit's tile: into that kit, wherever it lies (einv_compat_efak, when loaded) -----
+    // ----- On a kit's tile: into that kit, wherever it lies (aio_compat_efak, when loaded) -----
     // The cell under the mouse decides, not the footprint's corner. Not the dragged tile itself, not a kit
     // nobody has found yet, and not the tile of the kit it comes out of: that is where it lies already, so
     // the grid below says no room, as for a tile out of an opened backpack dropped on that backpack.
@@ -1510,7 +1510,7 @@ call {
         [_kitRect, _fits, DRAG_FOOTPRINT_ALPHA, "", [_target, _kitRect, [_originX, _originY]] call FUNC(cornerRadii)] call _fnc_show;
     };
 
-    // ----- On a magazine of its kind: the two repacked (einv_magazines, when loaded) -----
+    // ----- On a magazine of its kind: the two repacked (aio_magazines, when loaded) -----
     // The cell under the mouse decides, as for a kit's tile. Not a slot's item, not the dragged tile itself.
     // A repack the player clearly meant but cannot have is red with its reason; anything that is no repack
     // goes on below as it always did.
@@ -1555,7 +1555,7 @@ call {
     };
 
     // ----- What the compartment makes of it -----
-    // A compartment that takes only some categories (grid=2x2:ammo, einv_storage_fnc_blockMode) refuses the rest: red, and the
+    // A compartment that takes only some categories (grid=2x2:ammo, aio_storage_fnc_blockMode) refuses the rest: red, and the
     // hint says what it takes. A single slot holds one tile whatever its size and the tile takes it whole: the footprint is the
     // slot, wherever in it the mouse is, whatever the item's own size and turn.
     private _targetAccepts = _target getOrDefault ["accepts", []];
@@ -1579,7 +1579,7 @@ call {
 
     // ----- Into itself -----
     // A uniform, vest or backpack - lying somewhere or worn - cannot go into its own grid, nor into that of
-    // anything lying in it (einv_storage_fnc_liesIn): the footprint is red and says so.
+    // anything lying in it (aio_storage_fnc_liesIn): the footprint is red and says so.
     private _inside = _entry getOrDefault ["container", objNull];
 
     if (!isNull _inside) then {
@@ -1601,7 +1601,7 @@ call {
     if (_reason isEqualTo "") then {
         // Inside the compartment, none of its cells on a shaped one's holes, and free - the dragged tile
         // does not count where it was lifted from. A shaped item takes only its own cells, and a shaped
-        // tile there only its own (einv_storage_fnc_overlaps).
+        // tile there only its own (aio_storage_fnc_overlaps).
         // Looked at again only when the footprint stands on other cells: nothing on the grid changes while a
         // tile is held (a build waits for it), so a mouse that stays in its cell costs one comparison instead of
         // a pass over every tile of the grid.
@@ -1618,7 +1618,7 @@ call {
                 || {_row + _h > (_target getOrDefault ["rowTo", _target get "rows"])}
                 || {[_target, _col, _row, _w, _h, _dragHoles] call FUNC(hitsHole)};
 
-            // A cell of its own (none of its holes) that a tile other than the lifted one takes (einv_storage_fnc_overlaps,
+            // A cell of its own (none of its holes) that a tile other than the lifted one takes (aio_storage_fnc_overlaps,
             // from the grid's cells above).
             if (!_taken) then {
                 private _takenCells = ([_targetIndex] call _fnc_cells) select 1;
@@ -1663,8 +1663,8 @@ call {
         };
 
         // In a kit's grid the cell only says where something from elsewhere would like to lie: taken, the
-        // kit's layout finds it another (einv_storage_fnc_getLayout). Moved within the kit, the cell is all
-        // the move is about (einv_compat_efak_fnc_drop) - there, as in a container, whose cells are its room,
+        // kit's layout finds it another (aio_storage_fnc_getLayout). Moved within the kit, the cell is all
+        // the move is about (aio_compat_efak_fnc_drop) - there, as in a container, whose cells are its room,
         // a taken one is no room.
         if (_taken) then {
             if (_toKit isEqualTo "" || {[_from, _fromKit] isEqualTo [_to, _toKit]}) then {
@@ -1778,7 +1778,7 @@ call {
 
     if (_reason isEqualTo "" && {[_from, _fromKit] isNotEqualTo [_to, _toKit]}) then {
         if (_toKit isNotEqualTo "") exitWith {
-            // Into an open kit: what the kit takes and has room for (einv_compat_efak_fnc_canDrop).
+            // Into an open kit: what the kit takes and has room for (aio_compat_efak_fnc_canDrop).
             private _key = format ["kit|%1|%2", _targetIndex, GVAR(dragCount)];
             private _answer = GVAR(dragRoom) get _key;
 

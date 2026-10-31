@@ -3,11 +3,11 @@
  * Author: Miss Heda
  * The config lines that give a class what the rules make of it now, ready to paste into a mod:
  *
- *   class CfgVehicles { class B_Carryall_blk { einv_grid = "1x3+5x7+1x3"; }; };
+ *   class CfgVehicles { class B_Carryall_blk { aio_grid = "1x3+5x7+1x3"; }; };
  *
  * The root is the class's own (CfgWeapons for uniforms, vests, headgear and most items, CfgVehicles for
  * backpacks, crates and vehicles, CfgMagazines, CfgGlasses), the keys are the ones an item's config may
- * set (fnc_readConfigKeys): einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture, einv_use and einv_cat, each
+ * set (fnc_readConfigKeys): aio_size, aio_stack, aio_grid, aio_weight, aio_name, aio_icon, aio_picture, aio_use and aio_cat, each
  * as applicable - a container has a grid, a rifle, vest or backpack no stack. They are written as the
  * rules write the same value, so a shaped grid or a canvas comes out as the text that draws it.
  *
@@ -33,8 +33,8 @@
  * One line of config, "" for a class no config knows or when nothing differs <STRING>
  *
  * Example:
- * ["B_Carryall_blk"] call einv_items_fnc_configEntry;
- * ["V_PlateCarrier1_rgr", true] call einv_items_fnc_configEntry;
+ * ["B_Carryall_blk"] call aio_items_fnc_configEntry;
+ * ["V_PlateCarrier1_rgr", true] call aio_items_fnc_configEntry;
  *
  * Public: Yes
  */

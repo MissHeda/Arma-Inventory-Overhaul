@@ -11,7 +11,7 @@
  * Colour <STRING>
  *
  * Example:
- * [[0.84, 0.54, 0.1, 1]] call einv_setup_fnc_hex;
+ * [[0.84, 0.54, 0.1, 1]] call aio_setup_fnc_hex;
  *
  * Public: No
  */

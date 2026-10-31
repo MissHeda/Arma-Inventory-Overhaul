@@ -20,7 +20,7 @@
  * None
  *
  * Example:
- * [{systemChat str _this}, [1, 2]] call einv_setup_fnc_defer;
+ * [{systemChat str _this}, [1, 2]] call aio_setup_fnc_defer;
  *
  * Public: No
  */

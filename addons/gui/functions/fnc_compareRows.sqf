@@ -7,7 +7,7 @@
  * weighs, each with the difference.
  *
  *   Armor (zone)  vests and helmets; uniforms only when the two differ - the chest for a vest or uniform,
- *                 the head for headgear, as ACE's damage counts it (einv_items_fnc_getProtection)
+ *                 the head for headgear, as ACE's damage counts it (aio_items_fnc_getProtection)
  *   Covers        vests and helmets - the zones that have armor; kept ones in the text colour, ones the item
  *                 gains in green, the worn item's lost ones appended with a minus in red
  *   Space         vests, uniforms and backpacks - cells, the one thing that limits what they take
@@ -29,7 +29,7 @@
  *              plain text], ...] - a structured value is TEXT <ARRAY>
  *
  * Example:
- * [player, "V_PlateCarrier2_rgr"] call einv_gui_fnc_compareRows;
+ * [player, "V_PlateCarrier2_rgr"] call aio_gui_fnc_compareRows;
  *
  * Public: No
  */

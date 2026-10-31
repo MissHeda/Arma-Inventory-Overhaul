@@ -1,9 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Asks the server which version of the hub it runs (einv_storage_hello [machine id, version]) as soon as
+ * Asks the server which version of the hub it runs (aio_storage_hello [machine id, version]) as soon as
  * CBA's client id arrived (fnc_machineId; after 10 seconds without it, with clientOwner). The answer
- * (einv_storage_welcome) is kept in GVAR(serverVersion) (XEH_postInit). A server without the hub's
+ * (aio_storage_welcome) is kept in GVAR(serverVersion) (XEH_postInit). A server without the hub's
  * events, or with another version of them, would drop what this machine already took out: until it
  * answered with this very version nothing goes through it (fnc_hubReady).
  *
@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * call einv_storage_fnc_greetServer;
+ * call aio_storage_fnc_greetServer;
  *
  * Public: No
  */

@@ -18,7 +18,7 @@
  * The page, from 0 <NUMBER>
  *
  * Example:
- * private _page = [_grid, 1, -1] call einv_gui_fnc_pageStep;
+ * private _page = [_grid, 1, -1] call aio_gui_fnc_pageStep;
  *
  * Public: No
  */

@@ -33,8 +33,8 @@
  * (fnc_requestNormalize) and stops waiting for moves with no answer after PENDING_TIMEOUT; while its own
  * moves are under way it does not draw for a change of contents - their answers do.
  *
- * While magazines are repacked (einv_magazines - only when that addon is loaded) the hands are busy: the
- * repack is followed every frame (einv_magazines_fnc_onFrame) and nothing else is - no hover, no drag, no
+ * While magazines are repacked (aio_magazines - only when that addon is loaded) the hands are busy: the
+ * repack is followed every frame (aio_magazines_fnc_onFrame) and nothing else is - no hover, no drag, no
  * searching, no answers finished - but the checks whether the window should still be open and whether
  * what it shows is what the containers hold. Another window over this one stops the repack.
  *
@@ -68,7 +68,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_onFrame;
+ * call aio_gui_fnc_onFrame;
  *
  * Public: No
  */
@@ -222,7 +222,7 @@ if (_covered isNotEqualTo GVAR(covered)) then {
         uiNamespace setVariable [QGVAR(compare), controlNull];
         uiNamespace setVariable [QGVAR(tipShown), controlNull];
 
-        // Repacking magazines goes no further under another window (einv_magazines).
+        // Repacking magazines goes no further under another window (aio_magazines).
         if (!isNil QEFUNC(magazines,stop)) then {
             ["Interrupted"] call EFUNC(magazines,stop);
         };
@@ -313,7 +313,7 @@ if (!isNull _focus) then {
     };
 };
 
-// Repacking magazines (einv_magazines): the hands are busy - nothing is picked up, lit up or searched
+// Repacking magazines (aio_magazines): the hands are busy - nothing is picked up, lit up or searched
 // meanwhile. The repack runs its course; the window still closes and shows changes as always.
 if (!isNil QEFUNC(magazines,isBusy) && {[] call EFUNC(magazines,isBusy)}) exitWith {
     [_display, _now] call EFUNC(magazines,onFrame);

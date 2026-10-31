@@ -18,7 +18,7 @@
  * [radius in pixels, [top left, top right, bottom left, bottom right] <BOOL>], [] when it touches none <ARRAY>
  *
  * Example:
- * [_grid, [_left, _top, _width, _height]] call einv_gui_fnc_cornerRadii;
+ * [_grid, [_left, _top, _width, _height]] call aio_gui_fnc_cornerRadii;
  *
  * Public: No
  */

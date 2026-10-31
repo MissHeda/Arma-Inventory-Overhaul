@@ -34,7 +34,7 @@
  * None
  *
  * Example:
- * [_display, [["Drop", [0, 3], {_this call einv_gui_fnc_dropToGround}]]] call einv_gui_fnc_openMenu;
+ * [_display, [["Drop", [0, 3], {_this call aio_gui_fnc_dropToGround}]]] call aio_gui_fnc_openMenu;
  *
  * Public: No
  */
@@ -98,7 +98,7 @@ private _top = _mouseY min (safezoneY + safezoneH - _height);
 private _mouse = getMousePosition;
 
 // The layer over the screen; everything of the menu in it, at its place relative to the screen's corner.
-private _layer = [_display, "EINV_Group", controlNull, [safezoneX, safezoneY, safezoneW, safezoneH]] call FUNC(uiCreate);
+private _layer = [_display, "AIO_Group", controlNull, [safezoneX, safezoneY, safezoneW, safezoneH]] call FUNC(uiCreate);
 private _cardX = _left - safezoneX;
 private _cardY = _top - safezoneY;
 
@@ -111,7 +111,7 @@ _layer ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseB
 _layer ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton); false}];
 
 // Under the card, over everything else: a click beside the menu closes it.
-private _catcher = [_display, "EINV_Hitbox", _layer, [0, 0, safezoneW, safezoneH]] call FUNC(uiCreate);
+private _catcher = [_display, "AIO_Hitbox", _layer, [0, 0, safezoneW, safezoneH]] call FUNC(uiCreate);
 _catcher ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton); false}];
 _catcher ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton); false}];
 _catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closeMenu)}] call FUNC(later)}];
@@ -176,7 +176,7 @@ private _rowRadius = (_radius * 0.6) min (_rowH / 2);
     [_display, _layer, [_cardX + _padX + _textX, _rowTop, _width - _padX * 2 - _textX, _rowH], _text, _size, _color, _font, 0, "menu"] call FUNC(uiLabel);
 
     // A greyed-out row takes the click, so it closes nothing and runs nothing.
-    private _hit = [_display, "EINV_Hitbox", _layer, [_cardX, _rowTop, _width, _rowH]] call FUNC(uiCreate);
+    private _hit = [_display, "AIO_Hitbox", _layer, [_cardX, _rowTop, _width, _rowH]] call FUNC(uiCreate);
     private _tooltip = _options getOrDefault ["tooltip", ""];
 
     if (_tooltip isEqualType "" && {_tooltip isNotEqualTo ""}) then {
@@ -203,7 +203,7 @@ private _rowRadius = (_radius * 0.6) min (_rowH / 2);
 
 // The focus into the layer, so it is drawn over everything: a button no one sees, one pixel in the card's
 // padding - the engine may refuse the focus to a control of no size. Return and Space press nothing on it.
-private _focus = [_display, "EINV_Hitbox", _layer, [_cardX + _padX / 2, _cardY + _padY / 2, pixelW, pixelH]] call FUNC(uiCreate);
+private _focus = [_display, "AIO_Hitbox", _layer, [_cardX + _padX / 2, _cardY + _padY / 2, pixelW, pixelH]] call FUNC(uiCreate);
 ctrlSetFocus _focus;
 
 uiNamespace setVariable [QGVAR(menu), [_layer]];

@@ -19,7 +19,7 @@
  * Raised - false for a window not open or on top already <BOOL>
  *
  * Example:
- * ["kit:efak_ifak_7"] call einv_gui_fnc_raiseWindow;
+ * ["kit:efak_ifak_7"] call aio_gui_fnc_raiseWindow;
  *
  * Public: No
  */

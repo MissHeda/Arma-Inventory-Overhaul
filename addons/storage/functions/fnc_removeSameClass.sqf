@@ -26,7 +26,7 @@
  *  journal indices (-1 for none or outside a phase), the strays' journal indices] <ARRAY>
  *
  * Example:
- * [cursorObject, "arifle_MX_F", [_entry]] call einv_storage_fnc_removeSameClass;
+ * [cursorObject, "arifle_MX_F", [_entry]] call aio_storage_fnc_removeSameClass;
  *
  * Public: No
  */

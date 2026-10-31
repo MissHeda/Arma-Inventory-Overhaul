@@ -7,19 +7,19 @@
  * the rules (fnc_resolve) - see there for which layer wins:
  *
  *   1. the older table settings (sizes, stacks, container sizes) - read as rules after the text
- *   2. the rules text, einv_items_rules
- *   3. the item's own mod: einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon, einv_picture, einv_use, and the older
- *      einv_gridSize[], einv_stackSize, einv_grids[], einv_slots
- *   4. the preset the text builds on, with einv_items_stackSmall moved off its default
+ *   2. the rules text, aio_items_rules
+ *   3. the item's own mod: aio_size, aio_stack, aio_grid, aio_weight, aio_name, aio_icon, aio_picture, aio_use, and the older
+ *      aio_gridSize[], aio_stackSize, aio_grids[], aio_slots
+ *   4. the preset the text builds on, with aio_items_stackSmall moved off its default
  *   5. built in: 1x1, alone on its tile, a grid by load
  * Weapons, binoculars, uniforms, vests and backpacks are always alone on their tile. A container
- * object can still carry a grid of its own (einv_grid, see einv_storage_fnc_getBlocks).
+ * object can still carry a grid of its own (aio_grid, see aio_storage_fnc_getBlocks).
  *
  * A rule may also give an item a weight (weight=, in kg) and a name (name=). "mass", "name" and
  * "short" are then those; "configMass", "configDisplayName" and "configShort" keep what config says.
  * The engine still weighs every item by its config. A rule or the config may also say how large its
- * picture is drawn and where (icon=, einv_icon): "icon", and a picture of its own (picture=, einv_picture):
- * "picture". A rule or the config may also whitelist it for use from a container (use=, einv_use): "use".
+ * picture is drawn and where (icon=, aio_icon): "icon", and a picture of its own (picture=, aio_picture):
+ * "picture". A rule or the config may also whitelist it for use from a container (use=, aio_use): "use".
  *
  * Without compiled rules, the rules in effect are used and the result kept per class until the rules
  * change. An item whose rule says like=X is kept the same way: X is asked through the same compiled
@@ -40,7 +40,7 @@
  *   "class"             - configName, or the class as given when no config knows it <STRING>
  *   "name", "short"     - the rules' name, else displayName / displayNameShort (or the name) <STRING>
  *   "description"       - descriptionShort, may contain <br/>, "" if none <STRING>
- *   "picture"           - the texture it shows: the rules' picture (picture=, einv_picture) when the file is
+ *   "picture"           - the texture it shows: the rules' picture (picture=, aio_picture) when the file is
  *                         there, else config's; "" if none <STRING>
  *   "category"          - CATEGORY_* <NUMBER>
  *   "kind"              - see fnc_getFacts <STRING>
@@ -67,7 +67,7 @@
  *   "nameOverride"      - the rules' name, "" when none <STRING>
  *   "use"               - the containers it may be used from where a setting limits what can be used there,
  *                         any of "uniform", "vest", "backpack" in that order, [] for none <ARRAY of STRING>
- *   "cats"              - the categories the rules or the config put it in (cats=, einv_cat), [] when none does <ARRAY of STRING>
+ *   "cats"              - the categories the rules or the config put it in (cats=, aio_cat), [] when none does <ARRAY of STRING>
  *   "groups"            - the categories it is in: "cats" when it has some, else the built-in one (fnc_defaultGroup) - of ITEM_GROUPS and the setup's own:
  *                         weapon, ammo, grenade, gear, medical, food, tool, misc. Never empty. The strip of a loot box, the compartments
  *                         that accept only some categories and the wizard read this <ARRAY of STRING>
@@ -78,7 +78,7 @@
  *   and from fnc_getFacts: "lc", "root", "rounds", "lineage", "addon", "mod"
  *
  * Example:
- * ["arifle_MX_F"] call einv_items_fnc_getInfo;
+ * ["arifle_MX_F"] call aio_items_fnc_getInfo;
  *
  * Public: Yes
  */

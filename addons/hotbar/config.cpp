@@ -11,10 +11,10 @@ class CfgPatches {
             "cba_main",
             "ace_common",
             "A3_Ui_F",
-            "einv_main",
-            "einv_items",
-            "einv_storage",
-            "einv_gui"
+            "aio_main",
+            "aio_items",
+            "aio_storage",
+            "aio_gui"
         };
         author = "Miss Heda";
         url = ECSTRING(main,URL);

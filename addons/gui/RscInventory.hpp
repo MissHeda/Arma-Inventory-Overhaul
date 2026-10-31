@@ -1,7 +1,7 @@
 // The inventory window. Only the dim layer is here: everything on it is created at run time
 // (fnc_build), because the style decides the layout - and switching the style rebuilds the window.
 
-class EINV_InventoryDialog {
+class AIO_InventoryDialog {
     idd = IDD_INVENTORY;
     movingEnable = 0;
     enableSimulation = 1;
@@ -11,7 +11,7 @@ class EINV_InventoryDialog {
 
     class ControlsBackground {
         // The world behind, dimmed, so the window has the attention. The style recolours it.
-        class Dim: EINV_PanelRect {
+        class Dim: AIO_PanelRect {
             idc = IDC_DIM;
             x = QUOTE(safezoneX);
             y = QUOTE(safezoneY);
@@ -24,7 +24,7 @@ class EINV_InventoryDialog {
     class Controls {
         // In Enhanced First Aid Kits the first control here drew no background (2026-09). This empty one
         // takes the place, so no real control lands on it.
-        class First: EINV_Label {
+        class First: AIO_Label {
             idc = IDC_FIRST;
             x = 0;
             y = 0;

@@ -5,9 +5,9 @@
  * (UPSL_aime_inventory_backpack_action_3d) and the entry in the main actions
  * (UPSL_aime_inventory_backpack_action), patched in this addon's config. AIME shows one or the other by its
  * setting "Show 3D icon on backpacks", and only for a person with a backpack that can be opened; added is
- * what this window asks of the engine's own backpack action (einv_gui_fnc_canOpenPerson: the server's
+ * what this window asks of the engine's own backpack action (aio_gui_fnc_canOpenPerson: the server's
  * "Living persons" setting and the person's state, nothing for a dragging clone or a person a mission closed)
- * and the reach (einv_gui_fnc_personInReach). The action ends in the engine's OpenBag action, which this mod
+ * and the reach (aio_gui_fnc_personInReach). The action ends in the engine's OpenBag action, which this mod
  * answers with its window and the same two checks, so a person it would refuse is not offered either.
  *
  * Arguments:
@@ -18,7 +18,7 @@
  * Shown <BOOL>
  *
  * Example:
- * [[cursorObject, ACE_player, []], true] call einv_compat_aime_fnc_personCondition;
+ * [[cursorObject, ACE_player, []], true] call aio_compat_aime_fnc_personCondition;
  *
  * Public: No
  */

@@ -9,7 +9,7 @@
  * it draws about a point given as a share of the control itself - [0.5, 0.5] is its middle. Two things broke
  * the earlier tries (0.4.7 to 0.5.17) and are left out here:
  * - The picture kept its shape (ST_KEEP_ASPECT_RATIO). That fit is worked out on the box as it is turned, so a
- *   picture that is not square came out squashed. EINV_PictureTurned stretches its texture over the control
+ *   picture that is not square came out squashed. AIO_PictureTurned stretches its texture over the control
  *   instead, and the control is made in the texture's own shape (getTextureInfo), in whole pixels, so the
  *   stretch is no stretch at all and the turn only swaps width and height on the screen.
  * - A turned control inside a scrolled or moved controls group is drawn in the wrong place. The caller makes it
@@ -38,7 +38,7 @@
  * The picture <CONTROL>
  *
  * Example:
- * [_display, controlNull, [0.5, 0.2, 0.04, 0.16], _picture] call einv_gui_fnc_uiPictureTurned;
+ * [_display, controlNull, [0.5, 0.2, 0.04, 0.16], _picture] call aio_gui_fnc_uiPictureTurned;
  *
  * Public: No
  */
@@ -95,7 +95,7 @@ private _centerY = _boxY + _boxH / 2 + _across * _shareH;
 _centerX = (_centerX max (_clipX + _shownW / 2)) min (_clipX + _clipW - _shownW / 2);
 _centerY = (_centerY max (_clipY + _shownH / 2)) min (_clipY + _clipH - _shownH / 2);
 
-private _ctrl = [_display, "EINV_PictureTurned", _parent, [
+private _ctrl = [_display, "AIO_PictureTurned", _parent, [
     _centerX - _ctrlW * pixelW / 2, _centerY - _ctrlH * pixelH / 2, _ctrlW * pixelW, _ctrlH * pixelH
 ]] call FUNC(uiCreate);
 

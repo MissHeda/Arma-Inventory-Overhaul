@@ -32,8 +32,8 @@
  * Colour [r, g, b, a] <ARRAY>
  *
  * Example:
- * private _accent = call einv_gui_fnc_accentColour;
- * private _soft = ["soft", _accent] call einv_gui_fnc_accentColour;
+ * private _accent = call aio_gui_fnc_accentColour;
+ * private _soft = ["soft", _accent] call aio_gui_fnc_accentColour;
  *
  * Public: No
  */

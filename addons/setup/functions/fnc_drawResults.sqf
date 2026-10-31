@@ -24,7 +24,7 @@
  * None
  *
  * Example:
- * [] call einv_setup_fnc_drawResults;
+ * [] call aio_setup_fnc_drawResults;
  *
  * Public: No
  */
@@ -37,7 +37,7 @@ if (isNull _display || {isNull _parent}) exitWith {};
 
 ctrlDelete (uiNamespace getVariable [QGVAR(results), controlNull]);
 
-private _box = [_display, "EINV_Group", _parent, _rect] call EFUNC(gui,uiCreate);
+private _box = [_display, "AIO_Group", _parent, _rect] call EFUNC(gui,uiCreate);
 
 uiNamespace setVariable [QGVAR(results), _box];
 
@@ -91,7 +91,7 @@ private _ownKeys = [["footprint", "stack"], ["grid", "like"]] select _containers
 
 private _matches = ((uiNamespace getVariable QGVAR(index)) get "rows") select {
     (if (_containers) then {
-        // A backpack is listed with no load of its own on purpose (einv_setup_fnc_indexChunk): its cells are
+        // A backpack is listed with no load of its own on purpose (aio_setup_fnc_indexChunk): its cells are
         // all there is to set, so it is not hidden with the load-0 rest.
         ((_x select ROW_LOAD) > 0 || {(_x select ROW_KIND) isEqualTo "backpack"}) && {(_x select ROW_KIND) in CONTAINER_KINDS} && {_chip isEqualTo "all" || {(_x select ROW_KIND) in _chipKinds}}
     } else {
@@ -132,7 +132,7 @@ private _footY = _height - _footH;
 
 // ----- The cards -----
 
-private _list = [_display, "EINV_ScrollGroup", _box, [0, 0, _width, _footY - UNIT * 0.2]] call EFUNC(gui,uiCreate);
+private _list = [_display, "AIO_ScrollGroup", _box, [0, 0, _width, _footY - UNIT * 0.2]] call EFUNC(gui,uiCreate);
 
 _list setVariable [QGVAR(scrollId), "list_" + _mode];
 
@@ -168,7 +168,7 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
         [_name, _textW, _fontBold, TEXT_BODY] call EFUNC(gui,fitText), TEXT_BODY, _colorText, _fontBold, 0
     ] call EFUNC(gui,uiLabel);
 
-    private _kindWord = localize format [["STR_einv_setup_Family_%1", "STR_einv_setup_Kind_%1"] select _containers, [_family, _kind] select _containers];
+    private _kindWord = localize format [["STR_aio_setup_Family_%1", "STR_aio_setup_Kind_%1"] select _containers, [_family, _kind] select _containers];
     private _about = format ["%1 · %2 · %3", _class, _kindWord, _mod];
 
     [

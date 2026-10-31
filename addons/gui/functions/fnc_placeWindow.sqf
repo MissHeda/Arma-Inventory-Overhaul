@@ -7,7 +7,7 @@
  * kit in the vest or the backpack opens beside the storage column at the tile's height, a kit in a crate
  * likewise rather than over the column it would be unpacked into, a second kit beside the first (the
  * middle lies against whichever column is the left one of the two while looting - the loot column
- * by default, einv_gui_lootSide - so a kit from the storage column then opens one column away). A
+ * by default, aio_gui_lootSide - so a kit from the storage column then opens one column away). A
  * window wider than the middle (16:9 and 16:10 while looting) still stands at its right edge and reaches
  * into the equipment column: it hides less of the cards there than it would of a column's grids. Then
  * left of the tile, right of it, below and above it - where the screen has no free middle (4:3 while
@@ -25,7 +25,7 @@
  * Its top left corner [x, y], on the screen's pixels <ARRAY>
  *
  * Example:
- * [[0.3, 0.2], [0.6, 0.4, 0.05, 0.05]] call einv_gui_fnc_placeWindow;
+ * [[0.3, 0.2], [0.6, 0.4, 0.05, 0.05]] call aio_gui_fnc_placeWindow;
  *
  * Public: No
  */

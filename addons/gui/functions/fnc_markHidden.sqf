@@ -19,7 +19,7 @@
  * holds is shown or timed until the seal is done and the window is built with its real grid, which queues the items.
  *
  * Never for the player's own uniform, vest and backpack, nor where the settings or the mission
- * (einv_noSearch on the object) say not to.
+ * (aio_noSearch on the object) say not to.
  *
  * Arguments:
  * 0: Container <OBJECT>
@@ -32,7 +32,7 @@
  * None
  *
  * Example:
- * [_box, _entries] call einv_gui_fnc_markHidden;
+ * [_box, _entries] call aio_gui_fnc_markHidden;
  *
  * Public: No
  */

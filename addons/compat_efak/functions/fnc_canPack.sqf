@@ -30,7 +30,7 @@
  * [takes them, reason - "" when it does] <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7", "ACE_fieldDressing", 3] call einv_compat_efak_fnc_canPack;
+ * ["efak_IFAK_7", "ACE_fieldDressing", 3] call aio_compat_efak_fnc_canPack;
  *
  * Public: No
  */

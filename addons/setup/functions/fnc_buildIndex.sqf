@@ -11,7 +11,7 @@
  * Kept in uiNamespace for the whole game session: classes do not change while the game runs, and nothing
  * of it should end up in a save game, which missionNamespace would be. What the rules make of a class is
  * not in it - that changes with every edit - and is asked only for the rows shown
- * (einv_items_fnc_getInfo with the draft).
+ * (aio_items_fnc_getInfo with the draft).
  *
  * Arguments:
  * None
@@ -20,7 +20,7 @@
  * The index is complete <BOOL>
  *
  * Example:
- * call einv_setup_fnc_buildIndex;
+ * call aio_setup_fnc_buildIndex;
  *
  * Public: No
  */

@@ -8,12 +8,12 @@
  *
  * On the way it sets the local marks every machine that lays out a holder needs: the owner mark on a
  * unit's container (fnc_getOwner), so the server lays out a body's pockets as the clients do, and the
- * item class on every nested container it passes (fnc_getBlocks) - with where it lies (einv_storage_parent,
+ * item class on every nested container it passes (fnc_getBlocks) - with where it lies (aio_storage_parent,
  * fnc_rootOf), so the places written next find the outermost container to keep their copy on.
  *
  * Where the root is local - the authority, about to run ops - the whole cargo under it is walked, and
  * every nested container whose tag or places on its own object are missing or older here than the copy
- * on its outermost container (einv_storage_nested, fnc_tagNested) takes the copy's, on this machine
+ * on its outermost container (aio_storage_nested, fnc_tagNested) takes the copy's, on this machine
  * only: a machine that just became the authority may never have received them on the objects, and the
  * ops read them from there (fnc_snapshot carries them along). The copy counts only with the same id as
  * the object's own tag, or with none here.
@@ -26,14 +26,14 @@
  * It lies there <BOOL>
  *
  * Example:
- * [backpackContainer _unit, _unit] call einv_storage_fnc_verifyChain;
+ * [backpackContainer _unit, _unit] call aio_storage_fnc_verifyChain;
  *
  * Public: No
  */
 
 params [["_holder", objNull, [objNull, ""]], ["_root", objNull, [objNull]]];
 
-// A holder that is no object: its type knows (einv_compat_efak for kits).
+// A holder that is no object: its type knows (aio_compat_efak for kits).
 if (_holder isEqualType "") exitWith {
     private _type = GVAR(holderTypes) getOrDefault [(_holder splitString ":") param [0, ""], createHashMap];
     private _code = _type get "verify";

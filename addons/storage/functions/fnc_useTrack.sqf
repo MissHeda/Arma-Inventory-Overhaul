@@ -23,7 +23,7 @@
  * How many magazines are noted <NUMBER>
  *
  * Example:
- * [player] call einv_storage_fnc_useTrack;
+ * [player] call aio_storage_fnc_useTrack;
  *
  * Public: No
  */

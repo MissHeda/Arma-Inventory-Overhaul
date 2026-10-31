@@ -19,7 +19,7 @@
  * Into the holder <BOOL>
  *
  * Example:
- * [backpackContainer player, "HandGrenade"] call einv_storage_fnc_hiddenRoute;
+ * [backpackContainer player, "HandGrenade"] call aio_storage_fnc_hiddenRoute;
  *
  * Public: No
  */

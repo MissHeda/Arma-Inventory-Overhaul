@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * ["Saved.", "gain"] call einv_setup_fnc_setHint;
+ * ["Saved.", "gain"] call aio_setup_fnc_setHint;
  *
  * Public: No
  */

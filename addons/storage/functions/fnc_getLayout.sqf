@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Where each entry lies in a holder: in which of its compartments (fnc_getBlocks) and on which cell,
  * upright or turned a quarter. Every entry gets "block", "col", "row", "w", "h" (as it lies), "holes"
- * (the cells of its box a shaped item does not take, as it lies, einv_items_fnc_footprintAs),
+ * (the cells of its box a shaped item does not take, as it lies, aio_items_fnc_footprintAs),
  * "rotated" and "overflow" set on it, and "key" where it had none (fnc_entryKey) - the entry HashMaps
  * change in place. A shaped item takes only its own cells: something else may lie in the corner an L
  * leaves open (fnc_cellsFree, fnc_takeCells).
@@ -36,7 +36,7 @@
  * is kept for any entry the slot accepts, its own size aside.
  * An entry no compartment has room for - the engine took it from a script or another mod - is
  * "overflow": shown apart, never lost. The ground and a grid with no object of its own (a kit of
- * Enhanced First Aid Kits, einv_compat_efak) have no compartments: one STORAGE_COLS wide that grows with
+ * Enhanced First Aid Kits, aio_compat_efak) have no compartments: one STORAGE_COLS wide that grows with
  * what lies there, always a row more than it needs. A kit that a rule or its config gives a grid has the
  * compartments of that grid instead (fnc_getBlocks, GVAR(holderTypes) "blocks").
  *
@@ -71,7 +71,7 @@
  *
  * Example:
  * private _container = backpackContainer player;
- * [_container, [_container] call einv_storage_fnc_getContents] call einv_storage_fnc_getLayout;
+ * [_container, [_container] call aio_storage_fnc_getContents] call aio_storage_fnc_getLayout;
  *
  * Public: No
  */
@@ -227,7 +227,7 @@ private _fnc_put = {
 // ---------------------------------------------------------------------------
 private _byKey = createHashMap;     // key -> entry indices, in order
 private _meta = [];                 // per entry: [key, index within its key, kind (fnc_layoutKey), category]
-private _infos = [];                // per entry: what einv_items_fnc_getInfo gives for its class
+private _infos = [];                // per entry: what aio_items_fnc_getInfo gives for its class
 
 {
     private _entry = _x;

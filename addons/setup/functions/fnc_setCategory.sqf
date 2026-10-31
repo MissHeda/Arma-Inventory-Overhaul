@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * ["bandit", createHashMapFromArray [["name", "Bandit loot"]]] call einv_setup_fnc_setCategory;
+ * ["bandit", createHashMapFromArray [["name", "Bandit loot"]]] call aio_setup_fnc_setCategory;
  *
  * Public: No
  */

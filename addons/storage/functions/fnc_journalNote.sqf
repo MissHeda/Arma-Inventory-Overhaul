@@ -22,7 +22,7 @@
  * The note's index in the journal entry, -1 outside a phase or for nothing to mark <NUMBER>
  *
  * Example:
- * ["out", _payload] call einv_storage_fnc_journalNote;
+ * ["out", _payload] call aio_storage_fnc_journalNote;
  *
  * Public: No
  */

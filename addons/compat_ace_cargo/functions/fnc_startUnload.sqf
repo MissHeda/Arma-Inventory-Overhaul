@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [_vehicle, _crate] call einv_compat_ace_cargo_fnc_startUnload;
+ * [_vehicle, _crate] call aio_compat_ace_cargo_fnc_startUnload;
  *
  * Public: No
  */

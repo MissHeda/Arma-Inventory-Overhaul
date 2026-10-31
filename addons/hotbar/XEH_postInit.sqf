@@ -25,7 +25,7 @@ call FUNC(loadSlots);
 ["CBA_SettingChanged", {
     params ["_setting"];
 
-    if ((_setting select [0, 12]) isNotEqualTo "einv_hotbar_") exitWith {};
+    if ((_setting select [0, 11]) isNotEqualTo "aio_hotbar_") exitWith {};
 
     GVAR(nextCount) = 0;
     GVAR(hudSignature) = "";

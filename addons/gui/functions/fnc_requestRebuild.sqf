@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_requestRebuild;
+ * call aio_gui_fnc_requestRebuild;
  *
  * Public: Yes
  */

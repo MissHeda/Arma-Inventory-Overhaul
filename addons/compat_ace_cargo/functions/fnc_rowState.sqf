@@ -16,7 +16,7 @@
  * <STRING> <HASHMAP>
  *
  * Example:
- * [cursorObject, _crate, player] call einv_compat_ace_cargo_fnc_rowState;
+ * [cursorObject, _crate, player] call aio_compat_ace_cargo_fnc_rowState;
  *
  * Public: No
  */
@@ -35,7 +35,7 @@ switch (true) do {
     case (_isString): {
         _openTip = LLSTRING(Tip_Packed);
     };
-    // What a vehicle carries is no tile to uncover: the loot of the vehicle is searched first (einv_gui).
+    // What a vehicle carries is no tile to uncover: the loot of the vehicle is searched first (aio_gui).
     case (!isNull (uiNamespace getVariable [QEGVAR(gui,display), displayNull]) && {[_holder] call EFUNC(gui,isSearched)} && {EGVAR(gui,searchQueue) findIf {(_x select 0) isEqualTo _holder} >= 0}): {
         _openTip = LLSTRING(Tip_Unsearched);
     };

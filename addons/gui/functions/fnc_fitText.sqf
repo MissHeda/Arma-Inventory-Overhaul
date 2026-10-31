@@ -18,7 +18,7 @@
  * The text, shortened where it has to be <STRING>
  *
  * Example:
- * ["Multiple First Aid Kit Plus (MFAK+)", 0.1, "PuristaMedium", 0.025] call einv_gui_fnc_fitText;
+ * ["Multiple First Aid Kit Plus (MFAK+)", 0.1, "PuristaMedium", 0.025] call aio_gui_fnc_fitText;
  *
  * Public: No
  */

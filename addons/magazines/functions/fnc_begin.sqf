@@ -15,13 +15,13 @@
  * Arguments:
  * 0: Magazine class <STRING>
  * 1: Parts, see fnc_ownPartials - ascending by rounds <ARRAY>
- * 2: Their root, whose authority writes the result (einv_storage_fnc_rootOf) <OBJECT>
+ * 2: Their root, whose authority writes the result (aio_storage_fnc_rootOf) <OBJECT>
  *
  * Return Value:
  * Started <BOOL>
  *
  * Example:
- * ["30Rnd_65x39_caseless_mag", _parts, player] call einv_magazines_fnc_begin;
+ * ["30Rnd_65x39_caseless_mag", _parts, player] call aio_magazines_fnc_begin;
  *
  * Public: No
  */

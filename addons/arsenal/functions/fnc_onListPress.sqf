@@ -42,7 +42,7 @@
  * None
  *
  * Example:
- * [_list, 0, false] call einv_arsenal_fnc_onListPress;
+ * [_list, 0, false] call aio_arsenal_fnc_onListPress;
  *
  * Public: No
  */

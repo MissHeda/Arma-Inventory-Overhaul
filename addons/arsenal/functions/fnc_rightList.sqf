@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * The list in ACE's right column that is shown now: ACE's own (IDC 15), or - while Enhanced First Aid Kits' kits tab
  * lies over ACE's panels (fnc_focusedKit) - that tab's list of what the picked kit may hold, at the same place
- * (einv_compat_efak_fnc_arsenalControls). For the focus given back once the mouse leaves the panel (fnc_onFrame).
+ * (aio_compat_efak_fnc_arsenalControls). For the focus given back once the mouse leaves the panel (fnc_onFrame).
  *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
@@ -13,7 +13,7 @@
  * The list <CONTROL>
  *
  * Example:
- * [_display] call einv_arsenal_fnc_rightList;
+ * [_display] call aio_arsenal_fnc_rightList;
  *
  * Public: No
  */

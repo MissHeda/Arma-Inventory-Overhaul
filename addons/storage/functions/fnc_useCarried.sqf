@@ -18,7 +18,7 @@
  * The three lists, what can be used <ARRAY>
  *
  * Example:
- * [player, [items player, magazines player, magazinesAmmoFull player]] call einv_storage_fnc_useCarried;
+ * [player, [items player, magazines player, magazinesAmmoFull player]] call aio_storage_fnc_useCarried;
  *
  * Public: Yes
  */

@@ -11,11 +11,11 @@
  * closeDialog or closeDisplay, with the exit code it used. A window that closes "at once" with another
  * mod loaded says here which it was.
  *
- * A repack of magazines still running ends with it, its result written (einv_magazines). What the window was
+ * A repack of magazines still running ends with it, its result written (aio_magazines). What the window was
  * opened on closes with a sound.
  *
  * The places of the player's own uniform, vest and backpack, set here at once by their own moves and
- * sent to everyone else at most every two seconds, go out now (einv_storage_fnc_flushPlaces): whoever
+ * sent to everyone else at most every two seconds, go out now (aio_storage_fnc_flushPlaces): whoever
  * looks into the player next sees what the window showed.
  *
  * Arguments:
@@ -26,7 +26,7 @@
  * None
  *
  * Example:
- * [_display, 2] call einv_gui_fnc_onUnload;
+ * [_display, 2] call aio_gui_fnc_onUnload;
  *
  * Public: No
  */
@@ -61,7 +61,7 @@ if ((GVAR(menuFor) param [0, ""]) isEqualTo "palette") then {
     GVAR(menuState) = [];
 };
 
-// A repack in progress ends with the window: what was moved so far is written (einv_magazines).
+// A repack in progress ends with the window: what was moved so far is written (aio_magazines).
 if (!isNil QEFUNC(magazines,stop)) then {
     ["Closed"] call EFUNC(magazines,stop);
 };
@@ -90,7 +90,7 @@ call FUNC(stopFrame);
 
 call EFUNC(storage,flushPlaces);
 
-// A drag under way ends with the window, without fnc_endDrag: its timing line (einv_gui_debugTiming) is written here.
+// A drag under way ends with the window, without fnc_endDrag: its timing line (aio_gui_debugTiming) is written here.
 call FUNC(logDrag);
 [""] call FUNC(logFrame);
 

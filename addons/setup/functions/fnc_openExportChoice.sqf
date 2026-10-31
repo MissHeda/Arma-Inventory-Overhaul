@@ -5,7 +5,7 @@
  * The box under the Export button of the Items and Containers editors: what kind of export is wanted, as two
  * buttons, each with a line that says what it gives (fnc_exportClasses):
  *   - "Config entry (for a mod)": the config lines with the class name, for a mod's own config.
- *   - "Layout only (to share)": the values alone, one short text that starts with "einv-layout:" - for anyone
+ *   - "Layout only (to share)": the values alone, one short text that starts with "aio-layout:" - for anyone
  *     to paste into Import at the class they have selected, with whichever mod that class is from.
  *
  * Arguments:
@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_display, [0.5, 0.5, 0.1, 0.03], "containers", "B_Carryall_blk", false] call einv_setup_fnc_openExportChoice;
+ * [_display, [0.5, 0.5, 0.1, 0.03], "containers", "B_Carryall_blk", false] call aio_setup_fnc_openExportChoice;
  *
  * Public: No
  */

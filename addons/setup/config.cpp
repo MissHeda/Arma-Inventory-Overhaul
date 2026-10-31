@@ -2,7 +2,7 @@
 #include "defines.hpp"
 
 // The setup wizard: sizes, stacks and container grids for everyone, as one text in the setting
-// einv_items_rules. It edits that text and nothing else - the rules engine itself is the items addon's,
+// aio_items_rules. It edits that text and nothing else - the rules engine itself is the items addon's,
 // the window's kit the gui addon's.
 class CfgPatches {
     class ADDON {
@@ -11,9 +11,9 @@ class CfgPatches {
         weapons[] = {};
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {
-            "einv_gui",
-            "einv_items",
-            "einv_storage"
+            "aio_gui",
+            "aio_items",
+            "aio_storage"
         };
         author = "Miss Heda";
         url = ECSTRING(main,URL);

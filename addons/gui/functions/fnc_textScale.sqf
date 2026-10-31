@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * How much larger than at tile scale 1 the window's words are drawn (TEXT_UNIT): the words grow with the tiles
- * (einv_gui_cellScale), so a player who makes his tiles larger to make them out gets captions, buttons, the footer's
+ * (aio_gui_cellScale), so a player who makes his tiles larger to make them out gets captions, buttons, the footer's
  * key hints, the page bars and the kit windows' title rows that are just as easy to read (a tester, 2026-10-19: the
  * tiles grew, the captions stayed tiny).
  *
@@ -13,7 +13,7 @@
  * never so small that a caption's words (TEXT_REF of a UNIT) are under TEXT_MIN_PX pixels high: on a low resolution
  * the words are the floor's size whatever the tiles are.
  *
- * Kept in uiNamespace einv_gui_textScale with the cell and the UNIT it was worked out for, so it is worked out again
+ * Kept in uiNamespace aio_gui_textScale with the cell and the UNIT it was worked out for, so it is worked out again
  * only when either changes (a window caps its cell, the resolution changes) and is the same for everything drawn
  * meanwhile.
  *
@@ -24,7 +24,7 @@
  * The share, TEXT_SCALE_MIN to TEXT_SCALE_MAX <NUMBER>
  *
  * Example:
- * private _size = UNIT * 0.42 * (call einv_gui_fnc_textScale);
+ * private _size = UNIT * 0.42 * (call aio_gui_fnc_textScale);
  *
  * Public: No
  */

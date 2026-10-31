@@ -11,7 +11,7 @@
  * Text, "" when not locked <STRING>
  *
  * Example:
- * [[_crate] call einv_locks_fnc_getLock] call einv_locks_fnc_describe;
+ * [[_crate] call aio_locks_fnc_getLock] call aio_locks_fnc_describe;
  *
  * Public: Yes
  */

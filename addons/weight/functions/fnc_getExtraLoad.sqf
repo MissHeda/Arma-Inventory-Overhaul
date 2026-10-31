@@ -10,7 +10,7 @@
  * everything in its uniform, vest and backpack - weapons in there with their attachments and
  * magazines too, and uniforms, vests and backpacks lying in there with whatever they hold.
  *
- * The weights come from einv_items_fnc_getInfo: "mass" is the weight by the rules, "configMass" the
+ * The weights come from aio_items_fnc_getInfo: "mass" is the weight by the rules, "configMass" the
  * config's. An item without "configMass" has no override.
  *
  * Arguments:
@@ -20,7 +20,7 @@
  * Extra load, in tenths of a pound like config mass <NUMBER>
  *
  * Example:
- * [player] call einv_weight_fnc_getExtraLoad;
+ * [player] call aio_weight_fnc_getExtraLoad;
  *
  * Public: No
  */
@@ -130,7 +130,7 @@ private _load = 0;
     _load = _load + (_mass - (_info getOrDefault ["configMass", _mass])) * _y;
 } forEach _carried;
 
-// Strict mode's hidden holder (einv_storage_fnc_opStrict): what it keeps out of the uniform, vest and
+// Strict mode's hidden holder (aio_storage_fnc_opStrict): what it keeps out of the uniform, vest and
 // backpack is in no cargo the engine weighs, so its whole mass - the rules' - is added, not only the
 // override's difference. [[uniform, vest, backpack] lists of [class, count, rounds], containers].
 private _hidden = _unit getVariable [QEGVAR(storage,hidden), []];

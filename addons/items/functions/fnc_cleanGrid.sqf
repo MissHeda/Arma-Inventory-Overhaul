@@ -14,7 +14,7 @@
  * The spec <ARRAY>
  *
  * Example:
- * [["blocks", [[2, 2, [], [], ["bandit"], false]]], ["weapon"]] call einv_items_fnc_cleanGrid; // ["blocks", [[2, 2, [], []]]]
+ * [["blocks", [[2, 2, [], [], ["bandit"], false]]], ["weapon"]] call aio_items_fnc_cleanGrid; // ["blocks", [[2, 2, [], []]]]
  *
  * Public: No
  */

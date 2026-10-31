@@ -11,7 +11,7 @@
  * Text <STRING>
  *
  * Example:
- * [0.4499] call einv_setup_fnc_weightText;
+ * [0.4499] call aio_setup_fnc_weightText;
  *
  * Public: No
  */

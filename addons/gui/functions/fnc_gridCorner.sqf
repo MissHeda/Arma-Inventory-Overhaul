@@ -17,7 +17,7 @@
  * The corner in pixels, 0 for none <NUMBER>
  *
  * Example:
- * [_grid] call einv_gui_fnc_gridCorner;
+ * [_grid] call aio_gui_fnc_gridCorner;
  *
  * Public: No
  */

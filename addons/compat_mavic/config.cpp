@@ -12,8 +12,8 @@ class CfgPatches {
         requiredAddons[] = {
             "cba_main",
             "ace_interact_menu",
-            "einv_main",
-            "einv_storage",
+            "aio_main",
+            "aio_storage",
             "Mavic_Core"
         };
         skipWhenMissingDependencies = 1;

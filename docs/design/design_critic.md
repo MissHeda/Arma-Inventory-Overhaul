@@ -19,9 +19,9 @@ These CBA claims in the design are confirmed:
 - CBA's per-frame loop is started only in `cba_common` XEH_postInit, and postInit does not run in Eden.
 - The gui kit's only button defers every click through `CBA_fnc_execNextFrame` (`fnc_uiButton.sqf` lines 109 and 117). Every button would do nothing when the wizard is opened from the Eden Tools menu or from CBA's menu in Eden. Indexing in chunks per frame and the coverage counts would never run either.
 - CBA runs a setting's script only after `cba_settings_ready` is set, which happens in postInit. So `loadRules` never runs in Eden.
-- The planned fallback ("compile `einv1 base=default` if nothing is compiled yet") then shows the shipped default, not the mission's text.
+- The planned fallback ("compile `aio1 base=default` if nothing is compiled yet") then shows the shipped default, not the mission's text.
 - **Fix, part 1:** the wizard gets its own way to defer code, either `_this spawn {isNil {...}}` (what CBA's own Eden code uses) or its own EachFrame handler tied to the wizard display. Setup code must never use `EFUNC(gui,uiButton)`, `fnc_openMenu` or CBA per-frame handlers.
-- **Fix, part 2:** the fallback compiles `missionNamespace getVariable "einv_items_rules"`, not the default, and recompiles whenever that text differs from the one it compiled. This also covers the gap between preInit and the moment CBA settings are ready, where every machine would otherwise cache sizes from the default.
+- **Fix, part 2:** the fallback compiles `missionNamespace getVariable "aio_items_rules"`, not the default, and recompiles whenever that text differs from the one it compiled. This also covers the gap between preInit and the moment CBA settings are ready, where every machine would otherwise cache sizes from the default.
 
 **2. The default groups are not a partition, although the design relies on that.**
 - `@mag_large` (mass over 20) also contains `@rocket` (20 to 60), `@rocket_heavy` and `@belt` above 20.
@@ -41,7 +41,7 @@ These CBA claims in the design are confirmed:
 - Section 2.2 still reads `;`, and CBA's own text box accepts it.
 - **Fix:**
   - The parser treats `;` as an invalid character.
-  - Register the setting with CBA 3.19's EDITBOX sanitizer, which CBA calls on every key press in its row: `valueInfo = ["einv1 base=default", false, {sanitize}]`. The sanitizer turns `;` and line breaks into `,` and removes `"`, `'`, `#` and `\`.
+  - Register the setting with CBA 3.19's EDITBOX sanitizer, which CBA calls on every key press in its row: `valueInfo = ["aio1 base=default", false, {sanitize}]`. The sanitizer turns `;` and line breaks into `,` and removes `"`, `'`, `#` and `\`.
 
 ## B. Wrong or contradicting the code
 
@@ -69,8 +69,8 @@ These CBA claims in the design are confirmed:
 9. **Retiring the three tables is Mia's call.** They come from the earlier "Milsim definitions" round. The fallback (read them as own rules appended last) is cheap and keeps her choice open.
 10. **The version-mismatch warning would fire on every change.** The public hash and CBA's setting refresh reach a client in either order.
     - Publish `[text, hash]` and compare only when the texts match.
-    - The hash cannot see another mod patching `einv_gridSize` or `einv_gridShape`. Document that.
-    - Comparing `CfgPatches >> einv_main >> versionStr` between server and client is simpler and catches different mod versions too.
+    - The hash cannot see another mod patching `aio_gridSize` or `aio_gridShape`. Document that.
+    - Comparing `CfgPatches >> aio_main >> versionStr` between server and client is simpler and catches different mod versions too.
 11. **The conflict check compares against the wrong value.**
     - "Someone else saved in between" must compare with the target source's own value (`[setting, source] call cba_settings_fnc_get`), not the value in effect.
     - In Eden the value in effect is the server tab, which is the mission maker's own profile.
@@ -83,7 +83,7 @@ These CBA claims in the design are confirmed:
 - **Override in single player is dangerous.** There "server" is the player's own profile. Priority 2 would stay in force for every later mission, hosted multiplayer included. Hide the override in SP or warn.
 - **Repack after a rules change.**
   - getLayout keeps every record that still matches and first-fits the rest. Gaps left behind can push items into overflow that would fit in a fresh layout.
-  - Store the rules hash next to the layout (`einv_storage_layoutRules`).
+  - Store the rules hash next to the layout (`aio_storage_layoutRules`).
   - When it differs, also lay the container out without records and keep that result if it has less overflow.
 - **Arsenal timing.** The arsenal sees new rules only at its next event. Loadouts that overflow after a mid-mission change just show red until then.
 - **Keep the wizard's facts out of save games.** Facts for 20,000+ classes in missionNamespace end up in single-player saves. Keep the wizard's facts and index in uiNamespace: they don't change within a game session.

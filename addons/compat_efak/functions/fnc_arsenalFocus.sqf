@@ -7,7 +7,7 @@
  * picked in its list of the kits carried (EFAK_IDC_KIT_LIST): one row per kit, whose data is that kit's instance
  * class; a row of kits still being made ready has the type's prototype; a notice row ("no kits") has nothing.
  * Without that list, what the tab noted of the pick (efak_arsenal_selected). Cheap enough to be asked every frame
- * (einv_arsenal_fnc_onFrame).
+ * (aio_arsenal_fnc_onFrame).
  *
  * Arguments:
  * 0: ACE Arsenal's display <DISPLAY>
@@ -16,7 +16,7 @@
  * [the tab is open <BOOL>, class of the row picked, "" for none <STRING>, a row of kits being made ready <BOOL>] <ARRAY>
  *
  * Example:
- * [findDisplay 1127001] call einv_compat_efak_fnc_arsenalFocus;
+ * [findDisplay 1127001] call aio_compat_efak_fnc_arsenalFocus;
  *
  * Public: No
  */

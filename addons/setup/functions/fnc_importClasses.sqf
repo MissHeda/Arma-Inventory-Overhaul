@@ -7,8 +7,8 @@
  *   - a layout (fnc_exportClasses "layout"): LAYOUT_MARKER and the values of a rule, no class. It has no class
  *     of its own, so it always goes to the class selected in the editor (the selected tree, when the edit is
  *     for one);
- *   - config lines like the ones fnc_exportClasses writes (class CfgVehicles { class X { einv_grid = ""..."";
- *     }; };, several classes at once; einv_items_fnc_parseConfigEntry reads them);
+ *   - config lines like the ones fnc_exportClasses writes (class CfgVehicles { class X { aio_grid = ""..."";
+ *     }; };, several classes at once; aio_items_fnc_parseConfigEntry reads them);
  *   - rules of single classes only (class=X > grid=..., class=X+ > ...) without a header or groups: read the
  *     same as the config lines, a class each;
  *   - else rules, as the setup's Import reads them (fnc_importText): a bare rules text or lines of a
@@ -50,7 +50,7 @@
  *      names], for "notFit" [selected class] <ARRAY>
  *
  * Example:
- * ["class CfgVehicles { class B_Carryall_blk { einv_grid = ""1x3+5x7+1x3""; }; };", "B_Carryall_blk"] call einv_setup_fnc_importClasses;
+ * ["class CfgVehicles { class B_Carryall_blk { aio_grid = ""1x3+5x7+1x3""; }; };", "B_Carryall_blk"] call aio_setup_fnc_importClasses;
  *
  * Public: No
  */
@@ -133,6 +133,7 @@ if (_from isEqualTo "") then {
     private _plain = _rules isNotEqualTo []
         && {(_ast getOrDefault ["groups", []]) isEqualTo []}
         && {(_ast getOrDefault ["categories", []]) isEqualTo []}
+        && {(toLower (_pasted select [0, 3])) isNotEqualTo "aio"}
         && {(toLower (_pasted select [0, 4])) isNotEqualTo "einv"}
         && {(toLower _pasted) find RULES_SETTING < 0}
         && {_rules findIf {

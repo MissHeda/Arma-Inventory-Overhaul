@@ -12,14 +12,14 @@
  * Key name, "" when the key is not set <STRING>
  *
  * Example:
- * call einv_gui_fnc_rotateKeyName;
+ * call aio_gui_fnc_rotateKeyName;
  *
  * Public: No
  */
 
 if (isNil "CBA_fnc_getKeybind") exitWith {""};
 
-private _entry = [CBA_SETTINGS_EINV, QGVAR(rotate)] call CBA_fnc_getKeybind;
+private _entry = [CBA_SETTINGS_AIO, QGVAR(rotate)] call CBA_fnc_getKeybind;
 
 if (isNil "_entry") exitWith {""};
 

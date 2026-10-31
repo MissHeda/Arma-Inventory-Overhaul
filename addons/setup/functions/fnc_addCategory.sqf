@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * ["Bandit loot"] call einv_setup_fnc_addCategory;
+ * ["Bandit loot"] call aio_setup_fnc_addCategory;
  *
  * Public: No
  */

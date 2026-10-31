@@ -2,11 +2,11 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Opens a kit's window on top of the others (einv_compat_efak_fnc_open, once the kit may open): beside
+ * Opens a kit's window on top of the others (aio_compat_efak_fnc_open, once the kit may open): beside
  * the tile it was opened from, fading in. Open already, it only comes to the top where it is. Only the
  * windows are drawn again (fnc_drawWindows): nothing in the columns appears, goes, moves or scrolls.
  *
- * Its key is all this window knows of the kit - what to draw comes from einv_compat_efak, which has to
+ * Its key is all this window knows of the kit - what to draw comes from aio_compat_efak, which has to
  * know the kit as open already. With no inventory open only the order is noted.
  *
  * Arguments:
@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * ["kit:efak_ifak_7", [_grid, _tile] call einv_gui_fnc_tileRect] call einv_gui_fnc_openWindow;
+ * ["kit:efak_ifak_7", [_grid, _tile] call aio_gui_fnc_tileRect] call aio_gui_fnc_openWindow;
  *
  * Public: No
  */

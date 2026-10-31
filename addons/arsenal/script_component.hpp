@@ -1,7 +1,7 @@
 #define COMPONENT arsenal
-#define COMPONENT_BEAUTIFIED EINV - Arsenal
-#include "\z\einv\addons\main\script_mod.hpp"
-#include "\z\einv\addons\main\script_macros.hpp"
+#define COMPONENT_BEAUTIFIED AIO - Arsenal
+#include "\z\aio\addons\main\script_mod.hpp"
+#include "\z\aio\addons\main\script_macros.hpp"
 
 // ACE Arsenal's own numbers. Its defines.hpp is not in this project's include folder, so they are
 // copied here, each under the name it has there (z\ace\addons\arsenal\defines.hpp, ACE 3.21.2).

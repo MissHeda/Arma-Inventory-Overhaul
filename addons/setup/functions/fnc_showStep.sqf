@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * [1] call einv_setup_fnc_showStep;
+ * [1] call aio_setup_fnc_showStep;
  *
  * Public: No
  */
@@ -81,7 +81,7 @@ if (_keep) then {
     _group ctrlSetPosition _rect;
     _group ctrlCommit 0;
 } else {
-    _group = [_display, "EINV_Group", uiNamespace getVariable [QGVAR(root), controlNull], _rect] call EFUNC(gui,uiCreate);
+    _group = [_display, "AIO_Group", uiNamespace getVariable [QGVAR(root), controlNull], _rect] call EFUNC(gui,uiCreate);
 };
 
 uiNamespace setVariable [QGVAR(content), _group];

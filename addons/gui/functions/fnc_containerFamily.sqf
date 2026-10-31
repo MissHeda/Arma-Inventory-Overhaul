@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Which family of CfgEinvSounds a container sounds like when it is opened, closed or searched:
+ * Which family of CfgAioSounds a container sounds like when it is opened, closed or searched:
  *   body     - a body or a living person, and the uniform, vest or backpack a man wears
  *   ground   - a pile on the ground
  *   vehicle  - any vehicle: its own doors
@@ -13,10 +13,10 @@
  * 0: Container <OBJECT>
  *
  * Return Value:
- * A class of CfgEinvSounds <STRING>
+ * A class of CfgAioSounds <STRING>
  *
  * Example:
- * [cursorObject] call einv_gui_fnc_containerFamily;
+ * [cursorObject] call aio_gui_fnc_containerFamily;
  *
  * Public: No
  */

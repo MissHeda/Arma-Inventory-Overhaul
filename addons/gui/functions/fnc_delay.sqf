@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * [{hint str _this}, "later", 2] call einv_gui_fnc_delay;
+ * [{hint str _this}, "later", 2] call aio_gui_fnc_delay;
  *
  * Public: No
  */

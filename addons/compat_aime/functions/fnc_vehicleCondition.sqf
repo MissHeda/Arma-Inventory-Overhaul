@@ -3,11 +3,11 @@
  * Author: Miss Heda
  * The condition of AIME's "Inventory" on a vehicle (its action UPSL_aime_inventory_open_action, patched in
  * this addon's config): what AIME asked - its setting "Show vehicle/backpack inventory action" on, the
- * vehicle alive and with a cargo space - and that the window may open on it (einv_gui_fnc_canOpenVehicle:
+ * vehicle alive and with a cargo space - and that the window may open on it (aio_gui_fnc_canOpenVehicle:
  * the player on foot within the window's reach, cells to show, not locked to him). The action itself ends in
  * the engine's Gear action, which this mod answers with its window.
  *
- * Not shown at all where the "Inventory" of ACE interaction's own addon (einv_compat_ace_interaction) is
+ * Not shown at all where the "Inventory" of ACE interaction's own addon (aio_compat_ace_interaction) is
  * loaded: it is the same entry and the same window, once is enough.
  *
  * ACE asks it while its menu is open, for the vehicle looked at.
@@ -21,7 +21,7 @@
  * Shown <BOOL>
  *
  * Example:
- * [cursorObject, ACE_player, []] call einv_compat_aime_fnc_vehicleCondition;
+ * [cursorObject, ACE_player, []] call aio_compat_aime_fnc_vehicleCondition;
  *
  * Public: No
  */

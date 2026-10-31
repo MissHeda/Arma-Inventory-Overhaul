@@ -1,8 +1,8 @@
 // Settings are ordered by topic, and within a topic numbers, then switches, then lists, then text boxes.
 //
-// What is the same for everyone (a server's or a mission's to decide) is registered with einv_main_fnc_addSetting: it
+// What is the same for everyone (a server's or a mission's to decide) is registered with aio_main_fnc_addSetting: it
 // has no row in CBA's menu but a control on the setup wizard's General page, and its value comes from the one
-// text box einv_main_settings (addons/main). The variable, its name, its kind of value and its script are as they were.
+// text box aio_main_settings (addons/main). The variable, its name, its kind of value and its script are as they were.
 
 // ----- General -----
 
@@ -13,7 +13,7 @@
     QGVAR(cellScale),
     "SLIDER",
     [LLSTRING(Setting_CellScale), LLSTRING(Setting_CellScale_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
     [CELL_SCALE_MIN, CELL_SCALE_MAX, 1.1, 1],
     0
 ] call CBA_fnc_addSetting;
@@ -25,7 +25,7 @@
     QGVAR(pageRows),
     "SLIDER",
     [LLSTRING(Setting_PageRows), LLSTRING(Setting_PageRows_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
     [0, MAX_ROWS, 10, 0],
     0
 ] call CBA_fnc_addSetting;
@@ -35,7 +35,7 @@
     QGVAR(compareTooltip),
     "CHECKBOX",
     [LLSTRING(Setting_CompareTooltip), LLSTRING(Setting_CompareTooltip_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
     true,
     0
 ] call CBA_fnc_addSetting;
@@ -46,7 +46,7 @@
     QGVAR(tileNames),
     "CHECKBOX",
     [LLSTRING(Setting_TileNames), LLSTRING(Setting_TileNames_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
     false,
     0
 ] call CBA_fnc_addSetting;
@@ -58,7 +58,7 @@
     QGVAR(lootSide),
     "LIST",
     [LLSTRING(Setting_LootSide), LLSTRING(Setting_LootSide_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
     [["left", "right"], [LLSTRING(Setting_LootSide_Left), LLSTRING(Setting_LootSide_Right)], 0],
     0
 ] call CBA_fnc_addSetting;
@@ -69,7 +69,7 @@
     QGVAR(debugTiming),
     "CHECKBOX",
     [LLSTRING(Setting_DebugTiming), LLSTRING(Setting_DebugTiming_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
     false,
     0
 ] call CBA_fnc_addSetting;
@@ -81,7 +81,7 @@
     QGVAR(paletteText),
     "EDITBOX",
     [LLSTRING(Setting_PaletteText), LLSTRING(Setting_PaletteText_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_General)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
     "",
     0,
     {
@@ -223,7 +223,7 @@
     QGVAR(moveToStop),
     "CHECKBOX",
     [LLSTRING(Setting_MoveToStop), LLSTRING(Setting_MoveToStop_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Searching)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_Searching)],
     true,
     0
 ] call CBA_fnc_addSetting;
@@ -326,7 +326,7 @@
     QGVAR(showNearby),
     "CHECKBOX",
     [LLSTRING(Setting_ShowNearby), LLSTRING(Setting_ShowNearby_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Nearby)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_Nearby)],
     true,
     0
 ] call CBA_fnc_addSetting;
@@ -338,7 +338,7 @@
     QGVAR(magazineFillBar),
     "CHECKBOX",
     [LLSTRING(Setting_MagazineFillBar), LLSTRING(Setting_MagazineFillBar_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Magazines)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_Magazines)],
     true,
     0
 ] call CBA_fnc_addSetting;
@@ -348,7 +348,7 @@
     QGVAR(magazineText),
     "CHECKBOX",
     [LLSTRING(Setting_MagazineText), LLSTRING(Setting_MagazineText_Desc)],
-    [CBA_SETTINGS_EINV_CLIENT, LLSTRING(SubCategory_Magazines)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_Magazines)],
     true,
     0
 ] call CBA_fnc_addSetting;

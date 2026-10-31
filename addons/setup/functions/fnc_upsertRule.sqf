@@ -10,9 +10,9 @@
  *
  * Arguments:
  * 0: Class, as config names it <STRING>
- * 1: Values to set: "footprint" ("2x3" or a mask), "stack" <NUMBER>, "grid" (as einv_items_fnc_formatGrid
+ * 1: Values to set: "footprint" ("2x3" or a mask), "stack" <NUMBER>, "grid" (as aio_items_fnc_formatGrid
  *    writes it), "like" (a class), "weight" (kg) <NUMBER>, "name" <STRING>, "use" (the containers it may be used from, an array of "uniform", "vest", "backpack"), "icon" ([scale, across, down]
- *    <ARRAY>, einv_items_fnc_parseIcon) <HASHMAP> (default: none)
+ *    <ARRAY>, aio_items_fnc_parseIcon) <HASHMAP> (default: none)
  * 2: Fields to take away <ARRAY of STRING> (default: [])
  * 3: For the class and every class built on it <BOOL> (default: false)
  *
@@ -20,7 +20,7 @@
  * Written - false for a class name the rules language cannot hold <BOOL>
  *
  * Example:
- * ["V_PlateCarrier1_rgr", createHashMapFromArray [["grid", "xxxx/x--x+2x3"]]] call einv_setup_fnc_upsertRule;
+ * ["V_PlateCarrier1_rgr", createHashMapFromArray [["grid", "xxxx/x--x+2x3"]]] call aio_setup_fnc_upsertRule;
  *
  * Public: No
  */

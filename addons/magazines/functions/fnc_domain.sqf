@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Whose gear a grid's magazines are, for deciding whether two of them can be repacked together: the root
- * of the grid's container (einv_storage_fnc_rootOf) - the player for the player's own uniform, vest and
+ * of the grid's container (aio_storage_fnc_rootOf) - the player for the player's own uniform, vest and
  * backpack and what lies in them, else the crate, vehicle, pile or body that holds them. Two magazines
  * are repacked together only under the same root: one transaction changes one root, at its authority.
  *
@@ -10,13 +10,13 @@
  * (a kit's) is no business of this addon: no root.
  *
  * Arguments:
- * 0: Grid, see einv_gui_fnc_createGrid <HASHMAP>
+ * 0: Grid, see aio_gui_fnc_createGrid <HASHMAP>
  *
  * Return Value:
  * The root, objNull for gear that never takes part <OBJECT>
  *
  * Example:
- * [_grid] call einv_magazines_fnc_domain;
+ * [_grid] call aio_magazines_fnc_domain;
  *
  * Public: No
  */

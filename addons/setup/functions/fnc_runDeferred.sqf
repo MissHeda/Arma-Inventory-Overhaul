@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * call einv_setup_fnc_runDeferred;
+ * call aio_setup_fnc_runDeferred;
  *
  * Public: No
  */

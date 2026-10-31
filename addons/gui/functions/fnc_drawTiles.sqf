@@ -22,7 +22,7 @@
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Grid, see fnc_createGrid and fnc_drawCompartments <HASHMAP>
- * 2: Layout, see einv_storage_fnc_getLayout <HASHMAP>
+ * 2: Layout, see aio_storage_fnc_getLayout <HASHMAP>
  * 3: Theme <HASHMAP>
  * 4: The grid's tiles before a redraw, to keep what did not change <ARRAY> (default: [])
  *
@@ -30,7 +30,7 @@
  * The tiles of argument 4 not kept - their controls are still there, for the caller to delete <ARRAY>
  *
  * Example:
- * [_display, _grid, _layout, _theme] call einv_gui_fnc_drawTiles;
+ * [_display, _grid, _layout, _theme] call aio_gui_fnc_drawTiles;
  *
  * Public: No
  */

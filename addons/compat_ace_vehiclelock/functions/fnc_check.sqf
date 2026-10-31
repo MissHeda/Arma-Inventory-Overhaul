@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * ACE's vehicle lock as one of our locks (einv_locks_fnc_addProvider): exactly the rule ACE applies to the
+ * ACE's vehicle lock as one of our locks (aio_locks_fnc_addProvider): exactly the rule ACE applies to the
  * vanilla inventory (ace_vehiclelock_fnc_onOpenInventory) - only while ACE locks vehicle inventories at all
  * (ace_vehiclelock_lockVehicleInventory), for someone on foot, a locked car, tank or helicopter (locked 2
  * or 3), and no key. The key test is ACE's own (master key, side key, custom keys).
@@ -18,7 +18,7 @@
  * Why not, "" when the unit may <STRING>
  *
  * Example:
- * [player, _vehicle] call einv_compat_ace_vehiclelock_fnc_check;
+ * [player, _vehicle] call aio_compat_ace_vehiclelock_fnc_check;
  *
  * Public: No
  */

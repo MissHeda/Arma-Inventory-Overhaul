@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * call einv_storage_fnc_tick;
+ * call aio_storage_fnc_tick;
  *
  * Public: No
  */
@@ -77,7 +77,7 @@ if (diag_frameNo % 300 == 0) then {
     } forEach _old;
 
     // Requests whose answer never came - the server dropped them, or went away: the window stopped waiting
-    // long ago (einv_gui_fnc_onFrame).
+    // long ago (aio_gui_fnc_onFrame).
     _old = [];
 
     {

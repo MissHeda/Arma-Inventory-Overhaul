@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Broadcasts the places of every own container written here and not yet sent (GVAR(dirty)). Armed
  * OWN_WRITE_DELAY seconds after the first such write, and called when the window closes
- * (einv_gui_fnc_onUnload) and when the player dies: a body's places must be public for its looters.
+ * (aio_gui_fnc_onUnload) and when the player dies: a body's places must be public for its looters.
  *
  * Each holder goes out as it is now - its places, and for a uniform, vest or backpack lying in it or
  * lying in one of the player's own the tag and the copy of nested places on the outermost container
@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * call einv_storage_fnc_flushPlaces;
+ * call aio_storage_fnc_flushPlaces;
  *
  * Public: No
  */

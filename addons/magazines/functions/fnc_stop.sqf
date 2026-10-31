@@ -8,7 +8,7 @@
  *   "Done"        - after the last step; the schedule's final state
  *   "Stopped"     - a mouse press or Escape in the window
  *   "Interrupted" - ACE's conditions failed, another window lies over this one, a magazine's tile is gone
- *   "Closed"      - the window closed (einv_gui_fnc_onUnload); the result is told the way ACE tells it
+ *   "Closed"      - the window closed (aio_gui_fnc_onUnload); the result is told the way ACE tells it
  *
  * The job is idle again before anything else happens: what follows builds the window, which must not
  * draw this job a second time.
@@ -20,7 +20,7 @@
  * None
  *
  * Example:
- * ["Stopped"] call einv_magazines_fnc_stop;
+ * ["Stopped"] call aio_magazines_fnc_stop;
  *
  * Public: No
  */

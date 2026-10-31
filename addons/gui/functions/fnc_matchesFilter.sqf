@@ -12,7 +12,7 @@
  * Matches <BOOL>
  *
  * Example:
- * ["FirstAidKit"] call einv_gui_fnc_matchesFilter;
+ * ["FirstAidKit"] call aio_gui_fnc_matchesFilter;
  *
  * Public: No
  */

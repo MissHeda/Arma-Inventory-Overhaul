@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Whether a kit still lies under a root, asked by the machine that runs a phase on it before any op
- * touches it (einv_storage_holderTypes "kit" "verify", einv_storage_fnc_verifyChain): the kit's class
+ * touches it (aio_storage_holderTypes "kit" "verify", aio_storage_fnc_verifyChain): the kit's class
  * in a container under that root, or packed in a kit that lies there - as deep as kits go. Read off
  * the real cargo there (fnc_locate with the root), never from what a window remembers: a kit picked up
  * or moved in the meantime is no longer that root's, and the op says "Moved".
@@ -15,7 +15,7 @@
  * It lies there <BOOL>
  *
  * Example:
- * ["kit:efak_ifak_7", player] call einv_compat_efak_fnc_holderVerify;
+ * ["kit:efak_ifak_7", player] call aio_compat_efak_fnc_holderVerify;
  *
  * Public: No
  */

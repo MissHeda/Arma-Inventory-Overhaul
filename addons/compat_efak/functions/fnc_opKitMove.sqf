@@ -11,9 +11,9 @@
  *
  * Arguments:
  * 0: Args, [kit holder it comes from, kit holder it goes to (each "kit:" + lowercase class), entry
- *    array (einv_storage_fnc_entryToArray), how many - -1 for the whole tile, cell [col, row,
+ *    array (aio_storage_fnc_entryToArray), how many - -1 for the whole tile, cell [col, row,
  *    compartment, w, h] in the second kit - [] for the first free one] <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -24,7 +24,7 @@
  *              target turned it down - "" when it did not]
  *
  * Example:
- * [["kit:efak_ifak_7", "kit:efak_mfak_2", _entryArray, -1, []], _context] call einv_compat_efak_fnc_opKitMove;
+ * [["kit:efak_ifak_7", "kit:efak_mfak_2", _entryArray, -1, []], _context] call aio_compat_efak_fnc_opKitMove;
  *
  * Public: No
  */

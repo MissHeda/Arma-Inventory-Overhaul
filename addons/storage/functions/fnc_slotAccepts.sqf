@@ -4,14 +4,14 @@
  * Whether an item can go into one of a unit's equipment slots (ids as in fnc_getSlot): the right kind
  * of item, and for a weapon's parts one that fits the weapon in that slot - an attachment from its
  * compatible items, a magazine its muzzle takes. Never a slot ACRE2 keeps for itself (the dummy radio in
- * the radio slot, einv_compat_acre_fnc_isFixedSlot): every way to equip asks this - drag, Alt+click, menu,
+ * the radio slot, aio_compat_acre_fnc_isFixedSlot): every way to equip asks this - drag, Alt+click, menu,
  * double click.
  *
  * A part slot is answered from the item's kind first, before the weapon in it is looked up: a helmet is
  * no magazine, so the unit's loadout is not read at all. What a weapon takes is kept per weapon and slot
  * in GVAR(compatSets), class names in lower case, read from config once (config does not change during a
  * mission). A caller that asks about many slots in a row - the drag lighting every slot that takes the
- * item (einv_gui_fnc_showTargets) - hands in the unit's equipment, read once.
+ * item (aio_gui_fnc_showTargets) - hands in the unit's equipment, read once.
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -23,7 +23,7 @@
  * Fits <BOOL>
  *
  * Example:
- * [player, "primary_optic", "optic_Aco"] call einv_storage_fnc_slotAccepts;
+ * [player, "primary_optic", "optic_Aco"] call aio_storage_fnc_slotAccepts;
  *
  * Public: No
  */
@@ -32,7 +32,7 @@ params [["_unit", objNull, [objNull]], ["_slotId", "", [""]], ["_class", "", [""
 
 if (isNull _unit || {_class isEqualTo ""}) exitWith {false};
 
-// ACRE2's radio slot (einv_compat_acre, only when that addon is loaded).
+// ACRE2's radio slot (aio_compat_acre, only when that addon is loaded).
 if (!isNil QEFUNC(compat_acre,isFixedSlot) && {[_unit, _slotId] call EFUNC(compat_acre,isFixedSlot)}) exitWith {false};
 
 (_slotId splitString "_") params [["_base", ""], ["_part", ""]];

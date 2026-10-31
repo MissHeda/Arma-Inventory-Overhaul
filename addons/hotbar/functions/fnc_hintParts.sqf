@@ -12,7 +12,7 @@
  * Parts as the hint takes them, [text, colour name] <ARRAY>
  *
  * Example:
- * [1] call einv_hotbar_fnc_hintParts;
+ * [1] call aio_hotbar_fnc_hintParts;
  *
  * Public: No
  */

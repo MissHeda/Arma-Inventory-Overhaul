@@ -1,7 +1,7 @@
 #define COMPONENT compat_efak
-#define COMPONENT_BEAUTIFIED EINV - Enhanced First Aid Kits
-#include "\z\einv\addons\main\script_mod.hpp"
-#include "\z\einv\addons\main\script_macros.hpp"
+#define COMPONENT_BEAUTIFIED AIO - Enhanced First Aid Kits
+#include "\z\aio\addons\main\script_mod.hpp"
+#include "\z\aio\addons\main\script_macros.hpp"
 
 // Enhanced First Aid Kits' variables and functions, the way that mod names them - the same with
 // Enhanced Utility Pouches, which brings its framework along.

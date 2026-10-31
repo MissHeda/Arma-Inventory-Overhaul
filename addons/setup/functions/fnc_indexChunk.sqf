@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * [1] call einv_setup_fnc_indexChunk;
+ * [1] call aio_setup_fnc_indexChunk;
  *
  * Public: No
  */
@@ -85,7 +85,7 @@ while {_rootId < count _roots && {diag_tickTime < _until}} do {
                     _name = _class;
                 };
 
-                // Only a picture that can be shown, looked at once here (einv_gui_fnc_safePicture): some
+                // Only a picture that can be shown, looked at once here (aio_gui_fnc_safePicture): some
                 // vehicles name an icon class instead of a texture, and some mod classes a placeholder word
                 // ("picturething") - the engine pops up a message over the wizard for those.
                 private _picture = [getText (_config >> "picture")] call EFUNC(gui,safePicture);

@@ -17,7 +17,7 @@
  * How many units were noted <NUMBER>
  *
  * Example:
- * [] call einv_storage_fnc_hiddenSweep;
+ * [] call aio_storage_fnc_hiddenSweep;
  *
  * Public: No
  */

@@ -11,7 +11,7 @@
  * Name <STRING>
  *
  * Example:
- * ["default"] call einv_setup_fnc_presetName;
+ * ["default"] call aio_setup_fnc_presetName;
  *
  * Public: No
  */

@@ -15,7 +15,7 @@
  * keeps the others where they were.
  *
  * Two or more come back where they lie on the canvas - the owner draws a container the way it is built
- * and the inventory shows it so, cell for cell (einv_items_fnc_formatGrid writes them as one canvas,
+ * and the inventory shows it so, cell for cell (aio_items_fnc_formatGrid writes them as one canvas,
  * aab/acc): a pos each, from the top left corner of the box around them all. One alone needs no place
  * and has none, for an item's shape as for a container of one compartment. So have painted ones that lie
  * exactly where the inventory would flow them (fnc_canvasFromBlocks, only the places): they are the
@@ -43,7 +43,7 @@
  * cell <ARRAY>
  *
  * Example:
- * private _blocks = [_canvas] call einv_setup_fnc_canvasBlocks;
+ * private _blocks = [_canvas] call aio_setup_fnc_canvasBlocks;
  *
  * Public: No
  */

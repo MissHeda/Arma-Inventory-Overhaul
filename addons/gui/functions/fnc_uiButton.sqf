@@ -42,7 +42,7 @@
  * The controls, the hit area last <ARRAY>
  *
  * Example:
- * [_display, controlNull, [0.8, 0.02, 0.1, 0.04], "close", "", "", _theme, {closeDialog 2}] call einv_gui_fnc_uiButton;
+ * [_display, controlNull, [0.8, 0.02, 0.1, 0.04], "close", "", "", _theme, {closeDialog 2}] call aio_gui_fnc_uiButton;
  *
  * Public: No
  */
@@ -75,8 +75,8 @@ if (_normal isEqualTo []) then {
 };
 
 private _controls = [_display, _parent, _rect, _normal, (_theme getOrDefault ["radius", 0]) min (_height / 2)] call FUNC(uiPanel);
-private _rects = _controls select {ctrlClassName _x isEqualTo "EINV_PanelRect"};
-private _corners = _controls select {ctrlClassName _x isEqualTo "EINV_PanelCorner"};
+private _rects = _controls select {ctrlClassName _x isEqualTo "AIO_PanelRect"};
+private _corners = _controls select {ctrlClassName _x isEqualTo "AIO_PanelCorner"};
 
 // Its surface in the gradient where the colour panel switched the buttons and chips on (GRADIENT_CHIPS): a visible surface only.
 private _graded = [];
@@ -159,7 +159,7 @@ private _padTop = pixelH * 2;
 private _padBottom = _padTop;
 
 private _hit = [
-    _display, "EINV_Hitbox", _parent,
+    _display, "AIO_Hitbox", _parent,
     [_left - _padLeft, _top - _padTop, _width + _padLeft + _padRight, _height + _padTop + _padBottom]
 ] call FUNC(uiCreate);
 

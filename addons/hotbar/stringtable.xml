@@ -1,205 +1,205 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="hotbar">
-        <Key ID="STR_einv_hotbar_Does_Bandage">
+        <Key ID="STR_aio_hotbar_Does_Bandage">
             <English>Bandages what bleeds most</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Does_Consume">
+        <Key ID="STR_aio_hotbar_Does_Consume">
             <English>Eat or drink</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Does_Kit">
+        <Key ID="STR_aio_hotbar_Does_Kit">
             <English>Opens the kit</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Does_Reload">
+        <Key ID="STR_aio_hotbar_Does_Reload">
             <English>Reloads the weapon in your hands with it</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Does_Splint">
+        <Key ID="STR_aio_hotbar_Does_Splint">
             <English>Splints a broken leg or arm</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Does_Throw">
+        <Key ID="STR_aio_hotbar_Does_Throw">
             <English>Takes it in hand to throw</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Does_ThrowVanilla">
+        <Key ID="STR_aio_hotbar_Does_ThrowVanilla">
             <English>Readies it - press again to throw</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Does_Tourniquet">
+        <Key ID="STR_aio_hotbar_Does_Tourniquet">
             <English>Tourniquet on the arm or leg that bleeds most</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Does_Treat">
+        <Key ID="STR_aio_hotbar_Does_Treat">
             <English>Used on yourself</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Footer">
+        <Key ID="STR_aio_hotbar_Footer">
             <English>Hotbar</English>
         </Key>
-        <Key ID="STR_einv_hotbar_HudMode_Always">
+        <Key ID="STR_aio_hotbar_HudMode_Always">
             <English>Always</English>
         </Key>
-        <Key ID="STR_einv_hotbar_HudMode_InUse">
+        <Key ID="STR_aio_hotbar_HudMode_InUse">
             <English>While in use</English>
         </Key>
-        <Key ID="STR_einv_hotbar_HudMode_Never">
+        <Key ID="STR_aio_hotbar_HudMode_Never">
             <English>Never</English>
         </Key>
-        <Key ID="STR_einv_hotbar_IGUI_Description">
+        <Key ID="STR_aio_hotbar_IGUI_Description">
             <English>Arma Inventory Overhaul's hotbar: what lies on the keys 4 to 0.</English>
         </Key>
-        <Key ID="STR_einv_hotbar_IGUI_Name">
+        <Key ID="STR_aio_hotbar_IGUI_Name">
             <English>Hotbar</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Keybind_Show">
+        <Key ID="STR_aio_hotbar_Keybind_Show">
             <English>Show the hotbar</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Keybind_Show_Tooltip">
+        <Key ID="STR_aio_hotbar_Keybind_Show_Tooltip">
             <English>Shows the hotbar for a few seconds</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Keybind_Slot">
+        <Key ID="STR_aio_hotbar_Keybind_Slot">
             <English>Hotbar slot %1 (%2)</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Keybind_Slot_Tooltip">
+        <Key ID="STR_aio_hotbar_Keybind_Slot_Tooltip">
             <English>Uses what lies on this slot of the hotbar</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Menu_Bind">
+        <Key ID="STR_aio_hotbar_Menu_Bind">
             <English>Put on the hotbar (%1)</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Menu_Clear">
+        <Key ID="STR_aio_hotbar_Menu_Clear">
             <English>Clear hotbar %1</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Menu_Unbind">
+        <Key ID="STR_aio_hotbar_Menu_Unbind">
             <English>Take off the hotbar (%1)</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Message_InHand">
+        <Key ID="STR_aio_hotbar_Message_InHand">
             <English>%1 in hand</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Message_Ready">
+        <Key ID="STR_aio_hotbar_Message_Ready">
             <English>%1 ready - %2 again or %3 to throw</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Message_Reload">
+        <Key ID="STR_aio_hotbar_Message_Reload">
             <English>Reloading: %1 (%2)</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Notice_SharedKeys">
+        <Key ID="STR_aio_hotbar_Notice_SharedKeys">
             <English>Hotbar keys also used elsewhere: %1. Change them in Options &gt; Controls &gt; Configure Addons.</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Part_body">
+        <Key ID="STR_aio_hotbar_Part_body">
             <English>Torso</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Part_head">
+        <Key ID="STR_aio_hotbar_Part_head">
             <English>Head</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Part_leftarm">
+        <Key ID="STR_aio_hotbar_Part_leftarm">
             <English>Left arm</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Part_leftleg">
+        <Key ID="STR_aio_hotbar_Part_leftleg">
             <English>Left leg</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Part_rightarm">
+        <Key ID="STR_aio_hotbar_Part_rightarm">
             <English>Right arm</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Part_rightleg">
+        <Key ID="STR_aio_hotbar_Part_rightleg">
             <English>Right leg</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_Busy">
+        <Key ID="STR_aio_hotbar_Reason_Busy">
             <English>Busy</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_CannotNow">
+        <Key ID="STR_aio_hotbar_Reason_CannotNow">
             <English>Cannot use this on yourself now</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_FitsNoWeapon">
+        <Key ID="STR_aio_hotbar_Reason_FitsNoWeapon">
             <English>Fits none of your weapons</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_Holster">
+        <Key ID="STR_aio_hotbar_Reason_Holster">
             <English>Holster your weapon first</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_Lower">
+        <Key ID="STR_aio_hotbar_Reason_Lower">
             <English>Lower your weapon first</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_NeedsMedic">
+        <Key ID="STR_aio_hotbar_Reason_NeedsMedic">
             <English>Needs medical training</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_NoBleeding">
+        <Key ID="STR_aio_hotbar_Reason_NoBleeding">
             <English>Nothing is bleeding</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_NoFracture">
+        <Key ID="STR_aio_hotbar_Reason_NoFracture">
             <English>Nothing to splint</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_NoTourniquet">
+        <Key ID="STR_aio_hotbar_Reason_NoTourniquet">
             <English>No bleeding arm or leg left for a tourniquet</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_NoUse">
+        <Key ID="STR_aio_hotbar_Reason_NoUse">
             <English>Has no use from the hotbar</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_NoWeapon">
+        <Key ID="STR_aio_hotbar_Reason_NoWeapon">
             <English>No weapon in your hands</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_NoneLeft">
+        <Key ID="STR_aio_hotbar_Reason_NoneLeft">
             <English>None left</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_NotCarried">
+        <Key ID="STR_aio_hotbar_Reason_NotCarried">
             <English>Only what you carry goes on the hotbar</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_NotHere">
+        <Key ID="STR_aio_hotbar_Reason_NotHere">
             <English>Not possible here</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_NotNow">
+        <Key ID="STR_aio_hotbar_Reason_NotNow">
             <English>Not now</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_NotYourself">
+        <Key ID="STR_aio_hotbar_Reason_NotYourself">
             <English>Not on yourself</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_Primed">
+        <Key ID="STR_aio_hotbar_Reason_Primed">
             <English>Throw the primed one first</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_RationsOff">
+        <Key ID="STR_aio_hotbar_Reason_RationsOff">
             <English>Eating and drinking are off in this mission</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_TakeOut">
+        <Key ID="STR_aio_hotbar_Reason_TakeOut">
             <English>Cannot be used from the %1 - take it out first</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_ThrowWait">
+        <Key ID="STR_aio_hotbar_Reason_ThrowWait">
             <English>Wait a moment before the next throw</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_UseBlocked">
+        <Key ID="STR_aio_hotbar_Reason_UseBlocked">
             <English>Cannot be used from the %1</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Reason_WrongWeapon">
+        <Key ID="STR_aio_hotbar_Reason_WrongWeapon">
             <English>Does not fit the weapon in your hands</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Setting_Enabled">
+        <Key ID="STR_aio_hotbar_Setting_Enabled">
             <English>Hotbar</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Setting_Enabled_Desc">
+        <Key ID="STR_aio_hotbar_Setting_Enabled_Desc">
             <English>Items on the keys 4 to 0: grenades, bandages, medicine, magazines, food and kits.\nOff: the keys are Arma's and ACE's again.</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Setting_HudMode">
+        <Key ID="STR_aio_hotbar_Setting_HudMode">
             <English>Hotbar on screen</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Setting_HudMode_Desc">
+        <Key ID="STR_aio_hotbar_Setting_HudMode_Desc">
             <English>Never: inventory only. While in use: after a key press or with a grenade in hand.\nAlways: whenever the game shows its HUD.</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Setting_HudTime">
+        <Key ID="STR_aio_hotbar_Setting_HudTime">
             <English>Hotbar shown for</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Setting_HudTime_Desc">
+        <Key ID="STR_aio_hotbar_Setting_HudTime_Desc">
             <English>Seconds the hotbar stays visible after a key press, in the mode "While in use".</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Setting_LeaderKeys">
+        <Key ID="STR_aio_hotbar_Setting_LeaderKeys">
             <English>Command menu first when leading</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Setting_LeaderKeys_Desc">
+        <Key ID="STR_aio_hotbar_Setting_LeaderKeys_Desc">
             <English>While you lead AI soldiers, the hotbar keys open Arma's command menu.\nOff: the hotbar keeps its keys.</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Shared_CommandMenu">
+        <Key ID="STR_aio_hotbar_Shared_CommandMenu">
             <English>Command menu</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Strip_Caption">
+        <Key ID="STR_aio_hotbar_Strip_Caption">
             <English>Hotbar %1</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Strip_Empty">
+        <Key ID="STR_aio_hotbar_Strip_Empty">
             <English>Drag an item here, or point at one and press its key</English>
         </Key>
-        <Key ID="STR_einv_hotbar_Strip_Title">
+        <Key ID="STR_aio_hotbar_Strip_Title">
             <English>Hotbar</English>
         </Key>
-        <Key ID="STR_einv_hotbar_SubCategory">
+        <Key ID="STR_aio_hotbar_SubCategory">
             <English>Hotbar</English>
         </Key>
     </Package>

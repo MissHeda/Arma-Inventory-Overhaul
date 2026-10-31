@@ -9,8 +9,8 @@
  * "overflow") counts with its height, so it gets rows of its own.
  * Run before every draw of the panel, just before its section (fnc_layout): every move into or out of the
  * staging space draws the panel anew, so the grid follows each one. It shrinks back as things leave, never
- * above the lowest row in use. The rows go on the crate as compartments given exactly (einv_grid as
- * [[cols, rows]], einv_storage_fnc_getBlocks): a text grid would be cut to MAX_ROWS, which bounds every
+ * above the lowest row in use. The rows go on the crate as compartments given exactly (aio_grid as
+ * [[cols, rows]], aio_storage_fnc_getBlocks): a text grid would be cut to MAX_ROWS, which bounds every
  * item's size too.
  * The crate is this machine's alone, so the variable is too.
  * Arguments:
@@ -19,7 +19,7 @@
  * Return Value:
  * Its grid changed <BOOL>
  * Example:
- * [einv_arsenal_staging, 12] call einv_arsenal_fnc_growStaging;
+ * [aio_arsenal_staging, 12] call aio_arsenal_fnc_growStaging;
  * Public: No
  */
 

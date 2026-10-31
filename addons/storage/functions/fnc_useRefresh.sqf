@@ -15,7 +15,7 @@
  * Whether something is limited <BOOL>
  *
  * Example:
- * [] call einv_storage_fnc_useRefresh;
+ * [] call aio_storage_fnc_useRefresh;
  *
  * Public: No
  */

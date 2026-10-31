@@ -20,7 +20,7 @@
  * [x, y, w, h] <ARRAY>
  *
  * Example:
- * [_grid, [_gridX, _gridY], _col, _row, 2, 1] call einv_gui_fnc_spanRect;
+ * [_grid, [_gridX, _gridY], _col, _row, 2, 1] call aio_gui_fnc_spanRect;
  *
  * Public: No
  */

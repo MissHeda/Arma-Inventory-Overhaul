@@ -13,7 +13,7 @@
  * The text <STRING>
  *
  * Example:
- * [localize "STR_ACE_Cargo_UnloadedItem", "Spare Wheel", "Hunter HMG"] call einv_compat_ace_cargo_fnc_aceText;
+ * [localize "STR_ACE_Cargo_UnloadedItem", "Spare Wheel", "Hunter HMG"] call aio_compat_ace_cargo_fnc_aceText;
  *
  * Public: No
  */

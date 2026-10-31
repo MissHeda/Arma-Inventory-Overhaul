@@ -13,7 +13,7 @@
  * The path to play, "" when no such file exists <STRING>
  *
  * Example:
- * ["A3\Sounds_F\arsenal\weapons\Rifles\MX\Reload_MX"] call einv_gui_fnc_soundFile;
+ * ["A3\Sounds_F\arsenal\weapons\Rifles\MX\Reload_MX"] call aio_gui_fnc_soundFile;
  *
  * Public: No
  */

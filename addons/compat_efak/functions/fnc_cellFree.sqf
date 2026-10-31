@@ -6,13 +6,13 @@
  * (fnc_kitBlocks) - its width and height, none of the tile's cells on one of the compartment's holes -,
  * or the one open compartment of a kit whose room is that mod's capacity, STORAGE_COLS wide and as long
  * as it needs. And free: no other tile of that compartment on one of its cells (a shaped item takes only
- * its own, einv_storage_fnc_overlaps).
+ * its own, aio_storage_fnc_overlaps).
  *
  * Arguments:
  * 0: Kit class <STRING>
  * 1: The kit's tiles, laid out (fnc_getEntries with "laid out") <ARRAY of HASHMAPs>
  * 2: Cell [col, row, compartment, w, h] - w and h as it would lie <ARRAY>
- * 3: The cells of its box the tile does not take, as it would lie (einv_items_fnc_footprintAs) <ARRAY>
+ * 3: The cells of its box the tile does not take, as it would lie (aio_items_fnc_footprintAs) <ARRAY>
  *    (default: [])
  * 4: Index of a tile among them that does not count - the one being moved <NUMBER> (default: -1)
  *
@@ -20,7 +20,7 @@
  * It may lie there <BOOL>
  *
  * Example:
- * ["efak_IFAK_7", _view, [2, 0, 0, 1, 1]] call einv_compat_efak_fnc_cellFree;
+ * ["efak_IFAK_7", _view, [2, 0, 0, 1, 1]] call aio_compat_efak_fnc_cellFree;
  *
  * Public: No
  */
@@ -43,7 +43,7 @@ private _compartment = ([[[STORAGE_COLS, 1e6, []]], _blocks] select !_open) para
 
 _compartment params [["_cols", 0], ["_rows", 0], ["_compartmentHoles", []]];
 
-// A single slot takes the tile whole, whatever its size (einv_storage_fnc_slotOf): the slot is what has to be free, as the
+// A single slot takes the tile whole, whatever its size (aio_storage_fnc_slotOf): the slot is what has to be free, as the
 // kit's layout will lay the tile there.
 if (_compartment param [5, false]) then {
     ([_compartment] call EFUNC(storage,slotOf)) params ["_slotCol", "_slotRow", "_slotW", "_slotH", "_slotHoles"];

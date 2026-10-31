@@ -14,7 +14,7 @@
  * May act <BOOL>
  *
  * Example:
- * [player, ["isNotInside", "isNotSitting"]] call einv_hotbar_fnc_canAct;
+ * [player, ["isNotInside", "isNotSitting"]] call aio_hotbar_fnc_canAct;
  *
  * Public: No
  */

@@ -25,7 +25,7 @@
  * button's light under the mouse (fnc_uiButton).
  *
  * Example:
- * [_display, _parent, _rect, GRADIENT_BARS, _fillParts, 1, _radius] call einv_gui_fnc_gradientSurface;
+ * [_display, _parent, _rect, GRADIENT_BARS, _fillParts, 1, _radius] call aio_gui_fnc_gradientSurface;
  *
  * Public: No
  */
@@ -92,7 +92,7 @@ private _fades = [];
 {
     _x params ["_color", "_turned"];
 
-    private _fade = [_display, "EINV_PanelCorner", _parent, [_left + _inset, _top, _width - _inset * 2, _height]] call FUNC(uiCreate);
+    private _fade = [_display, "AIO_PanelCorner", _parent, [_left + _inset, _top, _width - _inset * 2, _height]] call FUNC(uiCreate);
 
     _fade ctrlSetText UI_TEX(fade_strip_ca);
     _fade ctrlSetTextColor (_color + [_alpha]);

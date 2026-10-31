@@ -1,7 +1,7 @@
 // COMPONENT should be defined in the script_component.hpp and included BEFORE this hpp
 
 #define MAINPREFIX z
-#define PREFIX einv
+#define PREFIX aio
 
 #include "script_version.hpp"
 
@@ -17,5 +17,5 @@
 #ifdef COMPONENT_BEAUTIFIED
     #define COMPONENT_NAME QUOTE(COMPONENT_BEAUTIFIED)
 #else
-    #define COMPONENT_NAME QUOTE(EINV - COMPONENT)
+    #define COMPONENT_NAME QUOTE(AIO - COMPONENT)
 #endif

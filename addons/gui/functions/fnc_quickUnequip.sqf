@@ -16,7 +16,7 @@
  * Asked for <BOOL>
  *
  * Example:
- * [player, "headgear"] call einv_gui_fnc_quickUnequip;
+ * [player, "headgear"] call aio_gui_fnc_quickUnequip;
  *
  * Public: No
  */

@@ -33,7 +33,7 @@
  * Everything went into the container itself <BOOL>
  *
  * Example:
- * [_backpack, _snapshot, _box] call einv_storage_fnc_restore;
+ * [_backpack, _snapshot, _box] call aio_storage_fnc_restore;
  *
  * Public: No
  */

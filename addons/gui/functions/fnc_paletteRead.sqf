@@ -15,7 +15,7 @@
  * The palette, [] when it is none <ARRAY>
  *
  * Example:
- * [[[0.6, 0.7, 1], [], -1]] call einv_gui_fnc_paletteRead;
+ * [[[0.6, 0.7, 1], [], -1]] call aio_gui_fnc_paletteRead;
  *
  * Public: No
  */

@@ -18,7 +18,7 @@
  * [done, text] - "" for done, else why not <ARRAY>
  *
  * Example:
- * [player, "efak_IFAK_7", 4] call einv_hotbar_fnc_useKit;
+ * [player, "efak_IFAK_7", 4] call aio_hotbar_fnc_useKit;
  *
  * Public: No
  */

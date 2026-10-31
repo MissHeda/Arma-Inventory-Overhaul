@@ -9,8 +9,8 @@
  * nowhere (issue 20: an RHS RPG round "loaded into the RPG" or gone from both the pile and the pockets).
  *
  * Here the click is what the quick move out of a pile is: the thing is taken from the pile and put into the
- * first worn container with a free spot (einv_storage_fnc_unitTargets - a container with a slot for its
- * category first; einv_storage_fnc_hasRoom), as a transaction (einv_storage_fnc_moveEntry), with the cargo
+ * first worn container with a free spot (aio_storage_fnc_unitTargets - a container with a slot for its
+ * category first; aio_storage_fnc_hasRoom), as a transaction (aio_storage_fnc_moveEntry), with the cargo
  * commands, which ignore maximumLoad and never load a weapon. A thing no container has room for stays on
  * the ground, with this mod's hint "No container has room for that". What goes wrong on the way is
  * settled by the transaction as ever: back on the pile, never lost.
@@ -28,7 +28,7 @@
  * It was done or refused here, AIME's own pick-up is not to run <BOOL>
  *
  * Example:
- * [_pile, ACE_player] call einv_compat_aime_fnc_holderPick;
+ * [_pile, ACE_player] call aio_compat_aime_fnc_holderPick;
  *
  * Public: No
  */

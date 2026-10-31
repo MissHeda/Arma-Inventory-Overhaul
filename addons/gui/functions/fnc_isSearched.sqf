@@ -4,18 +4,18 @@
  * Author: Miss Heda
  * Whether a container's contents have to be searched before this player sees them: loot only - never
  * the player's own uniform, vest or backpack - and only the kinds the settings name: what a body
- * carries, what a living person carries (einv_gui_fnc_openPerson), crates and vehicles (the cargo of the
+ * carries, what a living person carries (aio_gui_fnc_openPerson), crates and vehicles (the cargo of the
  * one the player sits in too), loose items on the ground. A mission leaves out a single object with
- * einv_noSearch on it. A search time of 0 means no searching at all, and so does a factor of 0 for the
+ * aio_noSearch on it. A search time of 0 means no searching at all, and so does a factor of 0 for the
  * kind of box (fnc_searchTime: uniforms, vests, backpacks, crates, vehicles, the ground, bodies).
  *
  * A uniform, vest or backpack that came off a body or a living person unsearched carries that with it
- * (einv_storage_searchState, written by einv_storage_fnc_takeOff and carried to every new object the
+ * (aio_storage_searchState, written by aio_storage_fnc_takeOff and carried to every new object the
  * engine makes of it): it is searched as that body or person is, wherever it lies now - on the ground,
  * in a crate, opened from inside either. Whoever searched it before keeps it searched (fnc_searchRecord).
  *
  * An ACE arsenal box never is: it is there to hand things out, not to be looted
- * (einv_arsenal_fnc_isArsenalBox - asked only when that addon is loaded).
+ * (aio_arsenal_fnc_isArsenalBox - asked only when that addon is loaded).
  *
  * Arguments:
  * 0: Container <OBJECT>
@@ -24,7 +24,7 @@
  * Has to be searched <BOOL>
  *
  * Example:
- * [cursorObject] call einv_gui_fnc_isSearched;
+ * [cursorObject] call aio_gui_fnc_isSearched;
  *
  * Public: No
  */
@@ -38,7 +38,7 @@ private _unit = GVAR(unit);
 if (_container in [uniformContainer _unit, vestContainer _unit, backpackContainer _unit]) exitWith {false};
 
 // Taken off a body or a person unsearched: searched as they are, while the setting for them is on - not once it lies in
-// what the player carries himself (einv_storage_fnc_rootOf), which is his gear, never searched.
+// what the player carries himself (aio_storage_fnc_rootOf), which is his gear, never searched.
 private _source = (_container getVariable [QEGVAR(storage,searchState), []]) param [1, "", [""]];
 private _carried = ((_source isEqualTo "body" && {GVAR(searchBodies)}) || {_source isEqualTo "person" && {GVAR(searchPersons)}})
     && {!([_container] call FUNC(isOwnStorage))};

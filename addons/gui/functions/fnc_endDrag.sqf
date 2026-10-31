@@ -14,14 +14,14 @@
  * what lifting it previewed about weight is put back (fnc_clearWeightPreview).
  *
  * Into, out of and between kits of Enhanced First Aid Kits - the grids of their windows and their tiles -
- * it goes through that addon (einv_compat_efak_fnc_drop, when loaded): two kits' grids both have no
+ * it goes through that addon (aio_compat_efak_fnc_drop, when loaded): two kits' grids both have no
  * container, so they are told apart by their kit before anything compares containers. Where it lands is
  * only ever what lay on top under the mouse (fnc_updateDrag).
  *
- * Onto a slot of the hotbar (einv_hotbar - only when that addon is loaded) nothing moves: the item's class
+ * Onto a slot of the hotbar (aio_hotbar - only when that addon is loaded) nothing moves: the item's class
  * is put on that key.
  *
- * Where the storage keeps separate stacks (einv_storage_stackSplits), what is let go on a free cell lies
+ * Where the storage keeps separate stacks (aio_storage_stackSplits), what is let go on a free cell lies
  * there as a stack of its own: it does not join a stack of its class elsewhere in the container, and part
  * of a stack let go in the container it lies in is split off onto the cell (fnc_applyMove, "separate").
  * What is let go onto a stack of its own class that has room joins that very stack, as many as fit (the
@@ -32,8 +32,8 @@
  * the two tiles change places in one transaction (fnc_applySwap) - the dragged one onto the cell it was let
  * go on, the other onto the cell the dragged one came from.
  *
- * Onto a partly filled magazine of its kind (einv_magazines - only when that addon is loaded) nothing moves
- * either: the two are repacked in the window (einv_magazines_fnc_startPair), which says in the hint why not
+ * Onto a partly filled magazine of its kind (aio_magazines - only when that addon is loaded) nothing moves
+ * either: the two are repacked in the window (aio_magazines_fnc_startPair), which says in the hint why not
  * when it cannot be (a refusal above, with its reason, never gets here).
  *
  * A window that attached (fnc_attach) is asked first where the item was let go (the "drop" hook, told the
@@ -52,7 +52,7 @@
  * are outlined (fnc_drawPending); where it landed lights up once the answer is finished (fnc_onFrame,
  * fnc_afterAction).
  *
- * With einv_gui_debugTiming on, the RPT gets one line for the drag before anything else: "timing: drag 0.04 ms
+ * With aio_gui_debugTiming on, the RPT gets one line for the drag before anything else: "timing: drag 0.04 ms
  * avg, 1.20 ms max over 140 frames (start 2.1 ms; slowest frame: ...)" - the lift, and what its frames cost
  * (fnc_logDrag, fnc_startDrag, fnc_updateDrag).
  *
@@ -63,7 +63,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_endDrag;
+ * [_display] call aio_gui_fnc_endDrag;
  *
  * Public: No
  */
@@ -72,7 +72,7 @@ disableSerialization;
 
 params ["_display"];
 
-// For the tester's numbers (einv_gui_debugTiming): the line of this drag (fnc_logDrag - a build and the window
+// For the tester's numbers (aio_gui_debugTiming): the line of this drag (fnc_logDrag - a build and the window
 // closing write it too, as they end a drag without this).
 call FUNC(logDrag);
 
@@ -240,7 +240,7 @@ private _sent = call {
                 [_assigned, _total] call FUNC(sendPlan)
             };
             case "kit": {
-                // The kit decides tile by tile, in order, in this one frame (einv_compat_efak).
+                // The kit decides tile by tile, in order, in this one frame (aio_compat_efak).
                 if (isNil QEFUNC(compat_efak,drop)) exitWith {false};
 
                 private _kitTile = (_target getOrDefault ["tiles", []]) param [_data param [0, -1], createHashMap];
@@ -268,7 +268,7 @@ private _sent = call {
         }
     };
 
-    // Onto a magazine of its kind: the two are repacked (einv_magazines), nothing is moved here. Its tile
+    // Onto a magazine of its kind: the two are repacked (aio_magazines), nothing is moved here. Its tile
     // index travels in the column's place.
     if (_kind isEqualTo "repack") exitWith {
         private _grid = _grids param [_targetIndex, createHashMap];
@@ -281,7 +281,7 @@ private _sent = call {
         false
     };
 
-    // Onto a kit's tile: into that kit (einv_compat_efak). Its tile index travels in the column's place.
+    // Onto a kit's tile: into that kit (aio_compat_efak). Its tile index travels in the column's place.
     if (_kind isEqualTo "kitTile") exitWith {
         private _grid = _grids param [_targetIndex, createHashMap];
         private _kitTile = (_grid getOrDefault ["tiles", []]) param [_col, createHashMap];
@@ -344,7 +344,7 @@ private _sent = call {
     };
 
     // A single slot takes the tile whole, whatever its own size and turn: its cell is the slot's (the authority decides the same,
-    // einv_storage_fnc_opPlaceMany, fnc_findSpots).
+    // aio_storage_fnc_opPlaceMany, fnc_findSpots).
     if (_target getOrDefault ["single", false]) then {
         _col = 0;
         _row = 0;
@@ -363,7 +363,7 @@ private _sent = call {
         && {_w == (_entry get "w")} && {_h == (_entry get "h")} && {_rot == (parseNumber (_entry getOrDefault ["rotated", false]))}
     ) exitWith {false};
 
-    // Into, out of or between kits (einv_compat_efak) - before the slot's item and before containers are
+    // Into, out of or between kits (aio_compat_efak) - before the slot's item and before containers are
     // compared: two kits' grids both have none. Part of a stack within the kit it lies in changes nothing.
     if (_toKit isNotEqualTo "" || {_fromKit isNotEqualTo ""}) exitWith {
         if (_count > 0 && {_fromKit isEqualTo _toKit} && {_fromBox isEqualTo _to}) exitWith {false};

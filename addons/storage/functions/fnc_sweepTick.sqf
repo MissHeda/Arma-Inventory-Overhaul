@@ -21,7 +21,7 @@
  * None
  *
  * Example:
- * [] call einv_storage_fnc_sweepTick;
+ * [] call aio_storage_fnc_sweepTick;
  *
  * Public: No
  */
@@ -34,7 +34,7 @@ if !(missionNamespace getVariable [QGVAR(migrate), true]) exitWith {
     if (GVAR(sweepTrace) isNotEqualTo "off") then {
         GVAR(sweepTrace) = "off";
 
-        INFO("Overflow sweep: off (setting einv_storage_migrate).");
+        INFO("Overflow sweep: off (setting aio_storage_migrate).");
     };
 };
 

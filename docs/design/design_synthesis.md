@@ -6,21 +6,21 @@ Read-only design. No files were changed. The three research reports are merged b
 
 ## 0. Decisions in one page
 
-1. **One setting holds the whole setup:** `einv_items_rules` (EDITBOX, isGlobal 1, default `einv1 base=default`).
+1. **One setting holds the whole setup:** `aio_items_rules` (EDITBOX, isGlobal 1, default `aio1 base=default`).
    - It holds a short versioned rules text: a base preset plus your own statements.
    - The wizard only edits this text. CBA handles storage (client, mission, server, force), sync, JIP and its own import/export.
-   - The unreleased tables (`einv_items_sizeTable`, `einv_items_stackTable`, `einv_storage_containerTable`) and the sliders `einv_items_massPerCell` and `einv_items_stackSmall` are retired. They map 1:1 into the rules (section 2.8).
+   - The unreleased tables (`aio_items_sizeTable`, `aio_items_stackTable`, `aio_storage_containerTable`) and the sliders `aio_items_massPerCell` and `aio_items_stackSmall` are retired. They map 1:1 into the rules (section 2.8).
 2. **Batch editing through selectors:** kind, category, class (exact, with descendants, contains), CfgPatches addon, magazine well, the weapon a magazine fits, and mass, rounds and load comparisons. Named **groups** (`@mag_rifle`) are reusable selectors. Each row in the wizard's step 2 is a group.
-3. **Layers, highest first:** your own rules, then mod config (`einv_gridShape` / `einv_gridSize[]` / `einv_stackSize` / `einv_grids[]` / `einv_slots`), then the preset rules, then the built-in fallback.
+3. **Layers, highest first:** your own rules, then mod config (`aio_gridShape` / `aio_gridSize[]` / `aio_stackSize` / `aio_grids[]` / `aio_slots`), then the preset rules, then the built-in fallback.
    - Within a layer, a later rule wins, field by field.
    - The fields are footprint (size and shape together), stack and grid.
-4. **The shipped default (`CfgEinvRulesets >> default`, revision 1) is an exact port of today's rules:** `fnc_getSize`, the stack rules in `fnc_getInfo` and `fnc_getBlocks`. Nothing changes for anyone until they edit. There are no shapes in the default.
+4. **The shipped default (`CfgAioRulesets >> default`, revision 1) is an exact port of today's rules:** `fnc_getSize`, the stack rules in `fnc_getInfo` and `fnc_getBlocks`. Nothing changes for anyone until they edit. There are no shapes in the default.
    - Further presets: `tarkov` and `weight`.
    - Empty or unreadable text falls back to the default.
 5. **Shapes:** one shape grammar (`2x3`, `L3`, `10/11`, optional `@1..3` turns) is used everywhere: rules, mod config, export, the wizard.
    - The grid engine gets four orientations, per-cell occupancy and per-tile cell owners.
    - A rectangle runs exactly today's code path.
-6. **Wizard:** a new addon `setup` (`einv_setup`, requires `einv_gui`) with five steps: Start, Groups, Items, Containers, Review.
+6. **Wizard:** a new addon `setup` (`aio_setup`, requires `aio_gui`) with five steps: Start, Groups, Items, Containers, Review.
    - **Main entry:** a button in CBA Addon Options, in the free slot of CBA's bottom button row. It shows only while our category is selected.
    - **Fallback entries:** ESC > Options, an unbound keybind, the Eden Tools menu, a cog in the inventory header, and "Change size or shape..." on a tile.
 7. **Multiplayer:** the setting is server/mission-wide.
@@ -29,7 +29,7 @@ Read-only design. No files were changed. The three research reports are merged b
 8. **Sharing:**
    - the bare rules text;
    - "full" with the preset inlined (`base=none`);
-   - a ready CBA line `force einv_items_rules = "...";`, which works in our import, CBA's Import box and any `cba_settings.sqf`.
+   - a ready CBA line `force aio_items_rules = "...";`, which works in our import, CBA's Import box and any `cba_settings.sqf`.
 
 ---
 
@@ -37,11 +37,11 @@ Read-only design. No files were changed. The three research reports are merged b
 
 | # | Topic | cba / shapes report | wizard report | Decision and why |
 |---|---|---|---|---|
-| 1 | Data model | Keep the three class tables; the wizard writes them; shapes go into `sizeTable` | One `einv_items_rules` text with a rule language | **One rules setting.** Class tables can only batch through parent classes, so "all rifle magazines" or "all grenades" is impossible. That is exactly the batch editing the user asked for. One string means one share unit, one CBA row to force or lock, and no precedence question between two user layers. The tables are unreleased (0.1.11, no commits). If the user wants to keep them, the fallback is to compile them as own rules appended last (`class=X+ > size=…`), costing one extra function in WP1. |
+| 1 | Data model | Keep the three class tables; the wizard writes them; shapes go into `sizeTable` | One `aio_items_rules` text with a rule language | **One rules setting.** Class tables can only batch through parent classes, so "all rifle magazines" or "all grenades" is impossible. That is exactly the batch editing the user asked for. One string means one share unit, one CBA row to force or lock, and no precedence question between two user layers. The tables are unreleased (0.1.11, no commits). If the user wants to keep them, the fallback is to compile them as own rules appended last (`class=X+ > size=…`), costing one extra function in WP1. |
 | 2 | Statement separator, comments | CBA's `fnc_parse` splits on `;` without regard to strings. Never use `; " ' # \ // /*` | `;` separates, `#` comments | **`,` separates statements; no comments in the stored text.** `;`, LF and CR are still read as separators; the writer emits only `, `. Comments live only in the config presets (C++ comments). |
 | 3 | Shape notation | `size` table value: `WxH`, `PRESET`, mask, `@N` | `shape=NAME\|ROWS` plus `size=WxH` | **One footprint field**, written `size=` or `shape=` (aliases) and parsed with the shapes grammar, plus `size=mass`. The writer uses `size=` for rectangles and `mass`, and `shape=` otherwise. A later footprint replaces an earlier one completely. |
 | 4 | Seventh element of a layout record | `turns` (0..3) | mask | **`turns`**. 0° and 180° share a bounding box but occupy different cells, so the record needs the orientation. The mask comes from the class's info. |
-| 5 | Mod config key for shapes | `einv_gridShape` | `einv_shape` | **`einv_gridShape`** (STRING, shape grammar), next to `einv_gridSize[]`; it wins over it. |
+| 5 | Mod config key for shapes | `aio_gridShape` | `aio_shape` | **`aio_gridShape`** (STRING, shape grammar), next to `aio_gridSize[]`; it wins over it. |
 | 6 | CBA button | Bottom-row gap between Load (9021) and Import (9010), positioned relative to them; shown and hidden by polling; menu-mode apply through `cba_settings_fnc_import` into CBA's temp namespaces; CBA's OK commits | Button inside the combo's controls group; `ctrlActivate` CBA's OK, open the wizard elsewhere, reopen the CBA menu | **cba report**, which is verified against the CBA 3.19 source. Writing into the temp namespace makes CBA's row show our value (yellow), so there is no stale write-back. The user's other pending edits are not committed behind their back. Cancel and the discard prompt keep working. |
 | 7 | Fallback entry points | pause menu, keybind, inventory header, Eden menu | adds a chat command and a LIST-setting hack | **pause menu, unbound keybind, Eden Tools menu, inventory header cog, tile context menu "Change size or shape..."**. The LIST-setting hack is rejected (it is a fake setting that shows in exports and only fires after OK). The chat command is dropped as redundant. |
 | 8 | Who sees the inventory cog | everyone (read-only plus export) | only those allowed to save | **Everyone.** Non-admins get a read-only wizard so they can see and copy the server's setup. The tile entry "Change size or shape..." shows only to those who can save. |
@@ -52,7 +52,7 @@ Read-only design. No files were changed. The three research reports are merged b
 | 13 | Ordering of your own rules | – | auto-sort plus an "Order by hand" switch | **The engine uses plain text order (later wins).** The wizard inserts each new rule at the end of its section (group rules, then filter rules, then class rules by lineage depth, deepest last). It never reorders existing rules. Custom order is done through "Edit as text" in step 5. There is no switch. |
 | 14 | Crates and vehicles | – | Two extra kinds, `crate` and `vehicle` | **Adopted.** `getInfo` "kind" for a non-backpack CfgVehicles class becomes `vehicle` (isKindOf AllVehicles) or `crate`, instead of `unknown`. Nothing checks `"unknown"` today (grep). |
 | 15 | Mission vs server priority | mission source: always `force` (1); server: 1, or 2 with an override box | "Force toggle 1 or 2" | **Mission (Eden): always priority 1. Server: 1, or 2 with "Override the mission's setup".** With isGlobal 1, a server value of 1 ties with a mission value of 1 and the mission wins. |
-| 16 | Where the shape presets live | `GVAR(shapePresets)` in items XEH_preInit | – | **`CfgEinvShapes` config** (WP2), cached lazily inside the shape functions. This keeps WP2 out of WP1's preInit. |
+| 16 | Where the shape presets live | `GVAR(shapePresets)` in items XEH_preInit | – | **`CfgAioShapes` config** (WP2), cached lazily inside the shape functions. This keeps WP2 out of WP1's preInit. |
 
 ---
 
@@ -65,14 +65,14 @@ Read-only design. No files were changed. The three research reports are merged b
 [
     QGVAR(rules), "EDITBOX",
     [LLSTRING(Setting_Rules), LLSTRING(Setting_Rules_Desc)],
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory_Grids)],
-    "einv1 base=default",
+    [CBA_SETTINGS_AIO, LLSTRING(SubCategory_Grids)],
+    "aio1 base=default",
     1,
     {params ["_text"]; [_text] call FUNC(loadRules)}
 ] call CBA_fnc_addSetting;
 ```
 
-The `einv_items_rules` variable is the **text**. The compiled form is `einv_items_ruleset`. Do not reuse the setting's name for it.
+The `aio_items_rules` variable is the **text**. The compiled form is `aio_items_ruleset`. Do not reuse the setting's name for it.
 
 Description, wrapped about every 40 characters:
 `How big every item is, its shape, how\nmany share a tile and how containers\nare split into compartments - one text\nfor everyone.\n\nEasiest with the setup wizard: the\nInventory setup button at the bottom of\nthis page, or ESC > Options.\n\nCopy this text to share a setup. What\ncannot be read is left out and named in\nthe RPT; empty means the default.`
@@ -85,7 +85,7 @@ Description, wrapped about every 40 characters:
 text       := statement { SEP statement }
 SEP        := "," | ";" | LF | CR            read; the writer only ever emits ", "
 statement  := header | groupdef | rule | ""  blank statements are skipped silently
-header     := "einv" INT { " " hopt }        first statement only; missing = "einv1 base=default"
+header     := "aio" INT { " " hopt }        first statement only; missing = "aio1 base=default"
 hopt       := "base=" ID | "cell=" NUMBER    base=none: no preset; cell 1..50 (config mass per cell)
 groupdef   := "@" ID ":" cond { " " cond }   the same id twice in one layer = OR;
                                              an own definition replaces the preset's definition of that id
@@ -137,10 +137,10 @@ ID         := [a-z0-9_]+                     case-insensitive, stored lower case
   - `rig` → `["pattern", "rig", -1]`; `rig:16` → `["pattern", "rig", 16]`
   - `6x4+2x3` → `["blocks", [[6,4],[2,3]]]` (w ≤ STORAGE_COLS, h ≤ MAX_ROWS)
 
-### 2.5 Shipped rulesets (`items/CfgEinvRulesets.hpp`, WP1)
+### 2.5 Shipped rulesets (`items/CfgAioRulesets.hpp`, WP1)
 
 ```cpp
-class CfgEinvRulesets {
+class CfgAioRulesets {
     class default {
         name = CSTRING(Ruleset_Default);
         description = CSTRING(Ruleset_Default_Desc);
@@ -207,7 +207,7 @@ class CfgEinvRulesets {
 - **Group ids and families.** The group ids are API: own rules refer to them, so never rename one.
   - Families: weapons, ammo, attachments, items, worn, containers. The containers family is uniform, vest, the three backpacks and crate.
   - Other mods may add preset classes. A `base` chain may be at most 4 deep; cycles are rejected with a warning.
-- **Known small difference.** Today `stackSmall` keys on the final size `[1,1]`. `@item_small` keys on mass ≤ 10. An item with mass ≤ 10 whose mod sets `einv_gridSize` to something larger now stacks by 10 unless the mod also sets `einv_stackSize`. Accept this and document it.
+- **Known small difference.** Today `stackSmall` keys on the final size `[1,1]`. `@item_small` keys on mass ≤ 10. An item with mass ≤ 10 whose mod sets `aio_gridSize` to something larger now stacks by 10 unless the mod also sets `aio_stackSize`. Accept this and document it.
 
 ### 2.6 Compile, resolve and cache (items, WP1)
 
@@ -248,7 +248,7 @@ finalize: "mass" -> formula; width clamp; stack floor max 1, forced 1 for weapon
 - returns a copy of the facts plus the resolved values;
 - `shapeForms` provides forms, turns and canon; `formatShape` provides shape;
 - cached per lower-case class;
-- if `GVAR(ruleset)` is nil (getInfo runs before the settings), it compiles `einv1 base=default` lazily.
+- if `GVAR(ruleset)` is nil (getInfo runs before the settings), it compiles `aio1 base=default` lazily.
 
 **Live reload** (`fnc_loadRules [text]`, the setting script, on every machine):
 1. Compile.
@@ -268,7 +268,7 @@ finalize: "mass" -> formula; width clamp; stack floor max 1, forced 1 for weapon
 | Eden | `mission` | 1 (always force) | stored in the scenario attributes; the user must save the scenario |
 | SP, host (`isServer`) | `server` | 1, or 2 with "Override the mission's setup" | own profile; CBA broadcasts, JIP included |
 | MP client, logged-in admin or whitelisted (`cba_settings_fnc_whitelisted`) | `server` | as above | `CBA_settings_fnc_set` forwards to the server; the change returns via the setting script |
-| Other players | read-only | – | can export, and can keep personal presets in `profileNamespace "einv_setup_presets"` (`[[name, text, date]]`) |
+| Other players | read-only | – | can export, and can keep personal presets in `profileNamespace "aio_setup_presets"` (`[[name, text, date]]`) |
 | CBA menu, "client" tab selected | read-only | – | hint: "switch to the Server or Mission tab" (client values never apply to an isGlobal setting) |
 | Locked by `cba_settings.sqf` (`cba_settings_serverConfig` / `cba_settings_missionConfig` has the setting) | read-only | – | offers "Copy as cba_settings line" instead |
 
@@ -276,7 +276,7 @@ finalize: "mass" -> formula; width clamp; stack floor max 1, forced 1 for weapon
 
 ```sqf
 private _prio = ["force ", "force force "] select (_source == "server" && {_override}); // mission: always "force "
-[format ["%1einv_items_rules = %2;", _prio, str _text], _source] call cba_settings_fnc_import;
+[format ["%1aio_items_rules = %2;", _prio, str _text], _source] call cba_settings_fnc_import;
 ```
 
 - CBA's row turns yellow, and CBA's OK commits the value.
@@ -285,21 +285,21 @@ private _prio = ["force ", "force force "] select (_source == "server" && {_over
 **Direct mode** (every other entry point):
 
 ```sqf
-["einv_items_rules", _text, _prio, _source, true] call CBA_settings_fnc_set
+["aio_items_rules", _text, _prio, _source, true] call CBA_settings_fnc_set
 ```
 
 **Conflicts.** At save, compare the active text with the text the wizard opened from (`GVAR(origin)`). If they differ, offer: reload and replay my edits / overwrite / cancel.
 
 **Import** accepts:
 - a bare rules text;
-- one or more CBA lines. Run `[_text, true, _source, false] call cba_settings_fnc_parse` and keep only `einv_items_rules` (compared with `toLower`).
+- one or more CBA lines. Run `[_text, true, _source, false] call cba_settings_fnc_parse` and keep only `aio_items_rules` (compared with `toLower`).
 
 **Export variants:**
 - own: the text as stored;
 - full: the base inlined as `base=none` plus the expanded statements;
-- cba: `force einv_items_rules = "…";`
+- cba: `force aio_items_rules = "…";`
 
-Copying works through a selectable `EINV_EditArea` (Ctrl+A, Ctrl+C), which works everywhere. A "Copy" button (`copyToClipboard`) is shown only when `isServer || !isMultiplayer`. Import goes through a paste box.
+Copying works through a selectable `AIO_EditArea` (Ctrl+A, Ctrl+C), which works everywhere. A "Copy" button (`copyToClipboard`) is shown only when `isServer || !isMultiplayer`. Import goes through a paste box.
 
 ### 2.8 Old settings mapped (WP1 removes them; the wizard needs no legacy import)
 
@@ -324,7 +324,7 @@ Nearest-parent-wins becomes "class rules sorted by lineage depth, deepest last",
 - Tile backgrounds are semi-transparent. A shape must therefore be drawn as an exact partition (rects plus 1-px seams), never as overlapping rectangles.
 - `fnc_tileAt` and the overlap test in `fnc_updateDrag` are O(tiles) today. A per-grid cell → tile owner array makes shapes possible and makes both O(1) or O(cells).
 
-### 3.2 Shape grammar (WP2; used by rules, `einv_gridShape` and the wizard)
+### 3.2 Shape grammar (WP2; used by rules, `aio_gridShape` and the wizard)
 
 ```
 SHAPE := BASE [ "@" ("1"|"2"|"3") ]         quarter turns clockwise
@@ -340,7 +340,7 @@ ROW   := ("0"|"1")+                         shorter rows padded with 0
   - the mask otherwise.
   Text therefore round-trips.
 
-**Presets** (`CfgEinvShapes`, `class L3 { mask = "10/11"; };`):
+**Presets** (`CfgAioShapes`, `class L3 { mask = "10/11"; };`):
 
 | preset | mask | preset | mask |
 |---|---|---|---|
@@ -394,7 +394,7 @@ There is no mirroring, because `ctrlSetAngle` cannot flip a texture.
 
 **gui:**
 - `createGrid` adds `owner` (cols×rows array of tile index or −1).
-- `createTile` hides only the filled cells, writes their owner, and draws one `EINV_PanelRect` per `shapePieces` piece. It stores `backgrounds`, `background` (first) and `bodyRect`. The picture, "?", name and count are laid out in the body, top run and bottom run.
+- `createTile` hides only the filled cells, writes their owner, and draws one `AIO_PanelRect` per `shapePieces` piece. It stores `backgrounds`, `background` (first) and `bodyRect`. The picture, "?", name and count are laid out in the body, top run and bottom run.
 - `tileAt` becomes an O(1) owner lookup.
 - **Drag:**
   - The footprint is a pool of panel controls (the largest piece count over all forms).
@@ -424,27 +424,27 @@ There is no mirroring, because `ctrlSetAngle` cannot flip a texture.
 ### 4.1 Entry points
 
 1. **CBA Addon Options button** (WP6, `fnc_initCbaMenu`):
-   - Hooked through `Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions`. Our entry runs after CBA's (config order; `einv_main` → `cba_main` → `cba_settings`).
+   - Hooked through `Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions`. Our entry runs after CBA's (config order; `aio_main` → `cba_main` → `cba_settings`).
    - It creates an `RscButtonMenu` in the gap between Load (IDC 9021) and Import (IDC 9010), positioned relative to them.
-   - It is shown only while group 4301 is visible and `lbData` of the combo 4312 equals our category key. The category key is read as `toLower ((cba_settings_default getVariable ["einv_items_rules", []]) param [4, CBA_SETTINGS_EINV])`. The display's `MouseMoving` + `MouseHolding` handlers and `LBSelChanged` sync it.
-   - The click handler runs `[ctrlParent btn, "menu", 0, ""] call einv_setup_fnc_open`.
+   - It is shown only while group 4301 is visible and `lbData` of the combo 4312 equals our category key. The category key is read as `toLower ((cba_settings_default getVariable ["aio_items_rules", []]) param [4, CBA_SETTINGS_AIO])`. The display's `MouseMoving` + `MouseHolding` handlers and `LBSelChanged` sync it.
+   - The click handler runs `[ctrlParent btn, "menu", 0, ""] call aio_setup_fnc_open`.
    - It is null-guarded: if CBA changes, the button silently does not appear.
-   - The code is in the cba report (section 1, "fnc_initCbaMenu.sqf"); swap `einv_items_sizeTable` for `einv_items_rules`.
-2. **ESC > Options > Inventory setup:** `CBA_fnc_addPauseMenuOption` (verified in `cba_ui`) with display class `einv_setup_RscWizard`. Its onLoad defaults to direct mode, step 0.
+   - The code is in the cba report (section 1, "fnc_initCbaMenu.sqf"); swap `aio_items_sizeTable` for `aio_items_rules`.
+2. **ESC > Options > Inventory setup:** `CBA_fnc_addPauseMenuOption` (verified in `cba_ui`) with display class `aio_setup_RscWizard`. Its onLoad defaults to direct mode, step 0.
 3. **Keybind** "Open inventory setup": `CBA_fnc_addKeybind`, unbound, mission only.
 4. **Eden:** a Tools menu entry (`Display3DEN` menu strip, config only).
 5. **Inventory:**
    - a cog in the header (everyone);
    - the tile context menu "Change size or shape..." (only when `canSave`), which opens step 2 (Items) with the class focused and selected.
 6. **How they open the wizard:**
-   - Items 3 and 5 go through `einv_setup_fnc_openFromGame`, which closes the inventory and opens the wizard on display 46 on the next frame.
+   - Items 3 and 5 go through `aio_setup_fnc_openFromGame`, which closes the inventory and opens the wizard on display 46 on the next frame.
    - Item 1 opens it as a child of the CBA display.
    - Item 2 is opened by the engine as a child of the interrupt display.
    - Item 4 opens it on display 313.
 
 ### 4.2 Frame and model (WP4)
 
-- `einv_setup_RscWizard`: idd 9620, a dim layer only; everything else is created at run time with the gui UI kit in its own controls groups.
+- `aio_setup_RscWizard`: idd 9620, a dim layer only; everything else is created at run time with the gui UI kit in its own controls groups.
 - **Header:** title, step pills (1 Start, 2 Groups, 3 Items, 4 Containers, 5 Review; freely clickable; an accent dot means changed), a source chip ("Server · forced · 4 changes" or "Read-only"), and close.
 - **Footer:** Esc, Ctrl+Z, Ctrl+Y, Ctrl+F hints, then Back / Next / Save (or Apply).
 - **Draft:**
@@ -463,7 +463,7 @@ There is no mirroring, because `ctrlSetAngle` cannot flip a texture.
 
 **Step 1, Start (WP4):**
 - **Preset cards:**
-  - Default, Tarkov-like, Weight-like, Empty (`base=none`), plus every other `CfgEinvRulesets` class and every personal preset.
+  - Default, Tarkov-like, Weight-like, Empty (`base=none`), plus every other `CfgAioRulesets` class and every personal preset.
   - Each card shows name, description and a mini preview: `fnc_previewGrid` on an 8×4 grid with arifle_MX_F, 3× 30Rnd_65x39_caseless_mag, HandGrenade and FirstAidKit, under that preset compiled.
 - **Choosing a preset:** "Keep your N own rules on top" / "Start empty".
 - **Cell stepper (1..50):** "1 cell = 0.23 kg" (`cell × MASS_TO_KG`).
@@ -486,13 +486,13 @@ There is no mirroring, because `ctrlSetAngle` cannot flip a texture.
 **Step 3, Items (WP5):**
 - **Filters:** search (class or localized name, debounced 150 ms), kind, mod, group, only changed / stackable / shaped, show weapon presets.
 - **Virtual list:** a pooled list with selection (click, Shift range, Ctrl+A).
-- **Detail panel:** resolved values with source chips, the size steppers, the cell editor (W×H, cell toggles, quick shapes from `CfgEinvShapes`, rotate), and a stack toggle plus count. Only fields you touch are written.
+- **Detail panel:** resolved values with source chips, the size steppers, the cell editor (W×H, cell toggles, quick shapes from `CfgAioShapes`, rotate), and a stack toggle plus count. Only fields you touch are written.
 - **Apply scopes:**
   - **Selected** (`class=a+|b+`; "+variants" on by default);
   - **Everything matching:** the filters become conditions. If every match contains the search text in its class name, it becomes `class~text`. Otherwise it is saved as a class list with a warning about the game language;
   - **Their group** (the same as step 2).
 - **Rules drawer:** each own rule as a sentence (`describeRule`) with edit and remove.
-- **"Why?"** opens a popover from `einv_items_fnc_explain`.
+- **"Why?"** opens a popover from `aio_items_fnc_explain`.
 
 **Step 4, Containers (WP5):**
 - **Tabs:** uniforms, vests, backpacks, crates and vehicles.
@@ -541,36 +541,36 @@ There is no mirroring, because `ctrlSetAngle` cannot flip a texture.
 
 | Name | Type | Owner |
 |---|---|---|
-| CBA setting `einv_items_rules` | STRING (the text) | WP1 |
-| `einv_items_ruleset` | compiled HashMap (see 5.2), nil until the first compile | WP1 |
-| `einv_items_rulesRevision` | NUMBER, starts at 0 | WP1 |
-| `einv_items_rulesHash` | STRING, public, set by the server | WP1 |
-| `einv_items_massPerCell` | NUMBER (5); a plain variable, no longer a setting; read by `blocksFor` | WP1 |
-| `einv_items_info` / `einv_items_facts` | caches (lower-case class → HashMap) | WP1 |
-| local event `einv_items_rulesChanged` | args `[revision]` | WP1 raises; WP6 (inventory) and WP4 (wizard) listen |
-| `CfgEinvRulesets >> id` | `name`, `description`, `revision`, `base`, `cell`, `rules[]`, `class Groups { class <id> { name; family; example; } }` | WP1 |
-| `CfgEinvShapes >> NAME >> mask` | STRING | WP2 |
-| item config keys | `einv_gridShape` (STRING), `einv_gridSize[]`, `einv_stackSize`, `einv_grids[]`, `einv_slots` | read by WP1 (mod layer) |
+| CBA setting `aio_items_rules` | STRING (the text) | WP1 |
+| `aio_items_ruleset` | compiled HashMap (see 5.2), nil until the first compile | WP1 |
+| `aio_items_rulesRevision` | NUMBER, starts at 0 | WP1 |
+| `aio_items_rulesHash` | STRING, public, set by the server | WP1 |
+| `aio_items_massPerCell` | NUMBER (5); a plain variable, no longer a setting; read by `blocksFor` | WP1 |
+| `aio_items_info` / `aio_items_facts` | caches (lower-case class → HashMap) | WP1 |
+| local event `aio_items_rulesChanged` | args `[revision]` | WP1 raises; WP6 (inventory) and WP4 (wizard) listen |
+| `CfgAioRulesets >> id` | `name`, `description`, `revision`, `base`, `cell`, `rules[]`, `class Groups { class <id> { name; family; example; } }` | WP1 |
+| `CfgAioShapes >> NAME >> mask` | STRING | WP2 |
+| item config keys | `aio_gridShape` (STRING), `aio_gridSize[]`, `aio_stackSize`, `aio_grids[]`, `aio_slots` | read by WP1 (mod layer) |
 | `FORM_*` macros | `main/script_macros.hpp` | WP2 |
-| local event `einv_setup_draftChanged` | args `[draftText]` | WP4 raises; WP5 listens |
+| local event `aio_setup_draftChanged` | args `[draftText]` | WP4 raises; WP5 listens |
 
 ### 5.2 items functions
 
 | Function | Arguments | Returns | Owner |
 |---|---|---|---|
-| `einv_items_fnc_parseShape` | `[text]` | `[w, h, cells]`, where cells `[]` = full and `[[c,r],…]` is row-major; `[]` if invalid. "mass" is not handled here. | WP2 |
-| `einv_items_fnc_shapeForms` | `[w, h, cells]` | `[forms (4 × FORM array), turns ARRAY, canon ARRAY(4)]` | WP2 |
-| `einv_items_fnc_formatShape` | `[w, h, cells]` | STRING (`2x3` / `L3@1` / `10/11`) | WP2 |
-| `einv_items_fnc_parseRules` | `[text]` | AST HashMap (below) | WP1 |
-| `einv_items_fnc_writeRules` | `[ast]` | canonical STRING: header, then groups, then rules, joined with `", "`; ` > ` before the values; value order footprint, stack, grid | WP1 |
-| `einv_items_fnc_compileRules` | `[text]` | compiled HashMap (below) | WP1 |
-| `einv_items_fnc_loadRules` | `[text]` | nothing (the live reload in 2.6) | WP1 |
-| `einv_items_fnc_getFacts` | `[class]` | facts HashMap (2.6), shared, read-only | WP1 |
-| `einv_items_fnc_matches` | `[facts, conds, compiled]` | BOOL (conds = AST conditions or compiled ones) | WP1 |
-| `einv_items_fnc_resolve` | `[facts, compiled]` | HashMap `footprint [w,h,cells]`, `stack`, `grid` (spec), `src` (field → tag `own:<i>`, `preset:<id>:<i>`, `mod:<key>`, `builtin`, `forced`) | WP1 |
-| `einv_items_fnc_getInfo` (Public) | `[class, compiled (opt), cache (opt)]` | info HashMap: old keys plus `cells`, `forms`, `turns`, `canon`, `shape`, `grid`, `src`, `lineage`, `addon`. Without `compiled`: the active rules and cache. With `compiled` but no cache: uncached. | WP1 |
-| `einv_items_fnc_explain` | `[class, compiled]` | `[[layer, index, statementText, fieldsSet, fieldsWon], …]`, highest priority first | WP1 |
-| `einv_storage_fnc_blocksFor` | `[class, kind, maxLoad, gridSpec, cell]` | blocks `[[cols, rows], …]` (2.4 specs; the patterns from today's getBlocks; `[[STORAGE_COLS,0]]` when the cells are ≤ 0) | WP1 |
+| `aio_items_fnc_parseShape` | `[text]` | `[w, h, cells]`, where cells `[]` = full and `[[c,r],…]` is row-major; `[]` if invalid. "mass" is not handled here. | WP2 |
+| `aio_items_fnc_shapeForms` | `[w, h, cells]` | `[forms (4 × FORM array), turns ARRAY, canon ARRAY(4)]` | WP2 |
+| `aio_items_fnc_formatShape` | `[w, h, cells]` | STRING (`2x3` / `L3@1` / `10/11`) | WP2 |
+| `aio_items_fnc_parseRules` | `[text]` | AST HashMap (below) | WP1 |
+| `aio_items_fnc_writeRules` | `[ast]` | canonical STRING: header, then groups, then rules, joined with `", "`; ` > ` before the values; value order footprint, stack, grid | WP1 |
+| `aio_items_fnc_compileRules` | `[text]` | compiled HashMap (below) | WP1 |
+| `aio_items_fnc_loadRules` | `[text]` | nothing (the live reload in 2.6) | WP1 |
+| `aio_items_fnc_getFacts` | `[class]` | facts HashMap (2.6), shared, read-only | WP1 |
+| `aio_items_fnc_matches` | `[facts, conds, compiled]` | BOOL (conds = AST conditions or compiled ones) | WP1 |
+| `aio_items_fnc_resolve` | `[facts, compiled]` | HashMap `footprint [w,h,cells]`, `stack`, `grid` (spec), `src` (field → tag `own:<i>`, `preset:<id>:<i>`, `mod:<key>`, `builtin`, `forced`) | WP1 |
+| `aio_items_fnc_getInfo` (Public) | `[class, compiled (opt), cache (opt)]` | info HashMap: old keys plus `cells`, `forms`, `turns`, `canon`, `shape`, `grid`, `src`, `lineage`, `addon`. Without `compiled`: the active rules and cache. With `compiled` but no cache: uncached. | WP1 |
+| `aio_items_fnc_explain` | `[class, compiled]` | `[[layer, index, statementText, fieldsSet, fieldsWon], …]`, highest priority first | WP1 |
+| `aio_storage_fnc_blocksFor` | `[class, kind, maxLoad, gridSpec, cell]` | blocks `[[cols, rows], …]` (2.4 specs; the patterns from today's getBlocks; `[[STORAGE_COLS,0]]` when the cells are ≤ 0) | WP1 |
 
 **AST** (shared by WP1, WP4 and WP5):
 
@@ -595,23 +595,23 @@ HashMap "text" (canonical own text), "base", "chain" [ids], "cell", "groups" Has
 
 | Function | Change | Owner |
 |---|---|---|
-| `einv_storage_fnc_getLayout` | `[container, entries, store = true, blocks = nil]`. Entries may carry `"info"`. Sets `turns`, `rotated`, `cells`. Records gain turns. | WP2 |
-| `einv_storage_fnc_setPlace` | cell `[col, row, block, w, h, turns]` | WP2 |
-| `einv_gui_fnc_createGrid` | `[display, parent, position, rows, theme, section = "", cols = STORAGE_COLS, register = true, cell = []]`. The grid gains `owner`. | WP3 |
-| `einv_gui_fnc_createTile` | uses `_entry get "info"` when present | WP3 |
-| `einv_gui_fnc_shapePieces` | `[form, cellW, cellH]` → `[[dx, dy, w, h], …]`, rects first | WP3 |
-| `einv_gui_fnc_uiPictureTurned` | new parameter 6: angle (default 90) | WP3 |
+| `aio_storage_fnc_getLayout` | `[container, entries, store = true, blocks = nil]`. Entries may carry `"info"`. Sets `turns`, `rotated`, `cells`. Records gain turns. | WP2 |
+| `aio_storage_fnc_setPlace` | cell `[col, row, block, w, h, turns]` | WP2 |
+| `aio_gui_fnc_createGrid` | `[display, parent, position, rows, theme, section = "", cols = STORAGE_COLS, register = true, cell = []]`. The grid gains `owner`. | WP3 |
+| `aio_gui_fnc_createTile` | uses `_entry get "info"` when present | WP3 |
+| `aio_gui_fnc_shapePieces` | `[form, cellW, cellH]` → `[[dx, dy, w, h], …]`, rects first | WP3 |
+| `aio_gui_fnc_uiPictureTurned` | new parameter 6: angle (default 90) | WP3 |
 
 ### 5.4 setup functions and state
 
 **State** (WP4 creates; WP5 and WP6 read):
 - missionNamespace:
-  - `einv_setup_mode` ("menu" | "direct"), `einv_setup_target` (canEdit result), `einv_setup_readOnly`
-  - `einv_setup_origin`, `einv_setup_draft`, `einv_setup_draftText`, `einv_setup_draftRules`, `einv_setup_draftCache`
-  - `einv_setup_step` (0..4), `einv_setup_focus` (class), `einv_setup_selection` (HashMap lower-case class → true)
-  - `einv_setup_stepKey` (CODE `[key, shift, ctrl, alt, up]` → BOOL)
-  - `einv_setup_theme`
-- uiNamespace: `einv_setup_display`, `einv_setup_content`, `einv_setup_popover`, `einv_setup_openArgs`, `einv_setup_index` (WP5).
+  - `aio_setup_mode` ("menu" | "direct"), `aio_setup_target` (canEdit result), `aio_setup_readOnly`
+  - `aio_setup_origin`, `aio_setup_draft`, `aio_setup_draftText`, `aio_setup_draftRules`, `aio_setup_draftCache`
+  - `aio_setup_step` (0..4), `aio_setup_focus` (class), `aio_setup_selection` (HashMap lower-case class → true)
+  - `aio_setup_stepKey` (CODE `[key, shift, ctrl, alt, up]` → BOOL)
+  - `aio_setup_theme`
+- uiNamespace: `aio_setup_display`, `aio_setup_content`, `aio_setup_popover`, `aio_setup_openArgs`, `aio_setup_index` (WP5).
 
 | Function | Arguments | Returns | Owner |
 |---|---|---|---|
@@ -631,12 +631,12 @@ HashMap "text" (canonical own text), "base", "chain" [ids], "cell", "groups" Has
 | `fnc_uiSegmented` | `[display, parent, rect, labels, index, theme, code, args, enabled = true]` | same; `code` gets `[newIndex, args]` | WP4 |
 | `fnc_uiDropdown` | `[display, parent, rect, [[label, value], …], value, theme, code, args, enabled = true]` | same; uses `fnc_popover` | WP4 |
 | `fnc_previewGrid` | `[display, parent, [x, y], blocks ([] = [[8, 4]]), classes, theme, compiled, cache, cell = []]` | HashMap `controls`, `overflow`, `size` | WP5 |
-| `fnc_buildIndex` | `[onDone]` | nothing (async; the result goes in `einv_setup_index`) | WP5 |
+| `fnc_buildIndex` | `[onDone]` | nothing (async; the result goes in `aio_setup_index`) | WP5 |
 | `fnc_ruleStats` | `[compiled, onDone]` | token; `onDone` gets HashMap `own` → `[[matched, won], …]`, `groups` → id → `[members, footprintWins]` | WP5 |
 | `fnc_initCbaMenu` | `[display]` (DisplayLoad) | nothing | WP6 |
 | `fnc_openFromGame` | `[step, focusClass]` | nothing; closes the inventory, then opens on display 46 on the next frame | WP6 |
 
-**Textures:** WP6 adds `\z\einv\addons\gui\ui\icon_{setup,undo,redo,rotate,plus,minus,reset}_ca.paa`. WP4 and WP5 reference these paths. Until they exist, use `icon_auto` / `icon_swap` / chevrons.
+**Textures:** WP6 adds `\z\aio\addons\gui\ui\icon_{setup,undo,redo,rotate,plus,minus,reset}_ca.paa`. WP4 and WP5 reference these paths. Until they exist, use `icon_auto` / `icon_swap` / chevrons.
 
 ### 5.5 Stringtable keys owned by one package but used by another
 
@@ -648,7 +648,7 @@ HashMap "text" (canonical own text), "base", "chain" [ids], "cell", "groups" Has
   - `Warning_HashMismatch`
   - Removed: `Setting_MassPerCell*`, `Setting_StackSmall*`, `Setting_SizeTable*`, `Setting_StackTable*`.
 - **gui (WP3):** `Hint_SizeShape` = `%1×%2 · %3`, `Hint_SizeCells` = `%1×%2 · %3 cells`.
-- **setup (WP4 writes them all; WP5 and WP6 use them by these exact names, prefix `STR_einv_setup_`):**
+- **setup (WP4 writes them all; WP5 and WP6 use them by these exact names, prefix `STR_aio_setup_`):**
   - **For WP6:**
     - `OpenWizard` = "Inventory setup"
     - `OpenWizard_Tooltip` = "Sizes, shapes, stacks and container grids for everyone"
@@ -702,16 +702,16 @@ Applies to all packages:
 ### WP1: Rules engine (items + container blocks)
 
 **Creates:**
-- `addons/items/CfgEinvRulesets.hpp`
+- `addons/items/CfgAioRulesets.hpp`
 - `addons/items/functions/fnc_getFacts.sqf`, `fnc_parseRules.sqf`, `fnc_writeRules.sqf`, `fnc_compileRules.sqf`, `fnc_loadRules.sqf`, `fnc_matches.sqf`, `fnc_resolve.sqf`, `fnc_explain.sqf`
 - `addons/storage/functions/fnc_blocksFor.sqf`
 - `tools/check_default_ruleset.sqf`: a debug-console script with today's `getSize` and stack switch inlined. It compares them with `getInfo` under `base=default` for every scope-2 class and lists mismatches (expect only the documented stackSmall case).
 
 **Changes:**
-- `addons/items/config.cpp`: include `CfgEinvRulesets.hpp` and WP2's `CfgEinvShapes.hpp`.
+- `addons/items/config.cpp`: include `CfgAioRulesets.hpp` and WP2's `CfgAioShapes.hpp`.
 - `addons/items/XEH_PREP.hpp`: every items function, including WP2's `parseShape`, `shapeForms`, `formatShape`.
 - `addons/items/XEH_preInit.sqf`: `facts`, `info`, `massPerCell = 5`, `rulesRevision = 0`, and the hash PV handler on clients. Remove `sizeCorrections`, `sizeByClass`, `stackByClass`.
-- `addons/items/initSettings.inc.sqf`: only `einv_items_rules`.
+- `addons/items/initSettings.inc.sqf`: only `aio_items_rules`.
 - `addons/items/stringtable.xml`
 - `addons/items/script_component.hpp`, if it needs macros.
 - `addons/items/functions/fnc_getInfo.sqf`: facts plus resolve plus forms; crate/vehicle kinds; optional `compiled` and `cache`.
@@ -727,15 +727,15 @@ Applies to all packages:
 
 **Done when:**
 - Parse → write → parse is stable.
-- `einv1 base=default` reproduces today's sizes, stacks and blocks (the check script).
+- `aio1 base=default` reproduces today's sizes, stacks and blocks (the check script).
 - A bad statement only drops itself.
 - An unknown base falls back to default.
 
 ### WP2: Shape model and layout engine
 
 **Creates:**
-- `addons/items/CfgEinvShapes.hpp`
-- `addons/items/functions/fnc_parseShape.sqf`, `fnc_shapeForms.sqf`, `fnc_formatShape.sqf`. Presets are cached lazily in `einv_items_shapePresets` and `einv_items_shapeNames`, created inside these functions.
+- `addons/items/CfgAioShapes.hpp`
+- `addons/items/functions/fnc_parseShape.sqf`, `fnc_shapeForms.sqf`, `fnc_formatShape.sqf`. Presets are cached lazily in `aio_items_shapePresets` and `aio_items_shapeNames`, created inside these functions.
 
 **Changes:**
 - `addons/main/script_macros.hpp`: `FORM_*`.
@@ -768,17 +768,17 @@ Applies to all packages:
 ### WP4: Wizard shell, saving and sharing, steps 1 and 5, widgets
 
 **Creates** (all in `addons/setup/`):
-- `$PBOPREFIX$` (`z\einv\addons\setup`)
-- `config.cpp`: CfgPatches `einv_setup`, requires `einv_gui`; includes `CfgEventHandlers.hpp`, `RscWizard.hpp` and WP6's `Display3DEN.hpp`.
+- `$PBOPREFIX$` (`z\aio\addons\setup`)
+- `config.cpp`: CfgPatches `aio_setup`, requires `aio_gui`; includes `CfgEventHandlers.hpp`, `RscWizard.hpp` and WP6's `Display3DEN.hpp`.
 - `CfgEventHandlers.hpp`:
   - PreStart and PreInit;
-  - `Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions >> einv_setup = "_this call (uiNamespace getVariable ['einv_setup_fnc_initCbaMenu', {}])"`.
+  - `Extended_DisplayLoad_EventHandlers >> RscDisplayGameOptions >> aio_setup = "_this call (uiNamespace getVariable ['aio_setup_fnc_initCbaMenu', {}])"`.
 - `script_component.hpp`
-- `defines.hpp`: includes `\z\einv\addons\gui\defines.hpp`, then re-points `UI_TEX` to the gui textures (`QPATHTOEF(gui,ui\NAME.paa)`); IDD 9620.
+- `defines.hpp`: includes `\z\aio\addons\gui\defines.hpp`, then re-points `UI_TEX` to the gui textures (`QPATHTOEF(gui,ui\NAME.paa)`); IDD 9620.
 - `XEH_PREP.hpp`: own PREPs plus `#include "XEH_PREP_steps.hpp"` (WP5) and `#include "XEH_PREP_entry.hpp"` (WP6).
 - `XEH_preStart.sqf`: PREP, so uiNamespace has the functions in menus.
 - `XEH_preInit.sqf`: state, plus `if (hasInterface) then {#include "initEntryPoints.inc.sqf"}` (WP6).
-- `RscWizard.hpp`: `einv_setup_RscWizard` and `EINV_EditArea` (`EINV_Edit` with ST_MULTI, large `maxChars`).
+- `RscWizard.hpp`: `aio_setup_RscWizard` and `AIO_EditArea` (`AIO_Edit` with ST_MULTI, large `maxChars`).
 - `stringtable.xml`: including every WP5 and WP6 key in 5.5.
 - `functions/`: `fnc_open`, `fnc_onLoad`, `fnc_onUnload`, `fnc_onKey`, `fnc_canEdit`, `fnc_getActive`, `fnc_commit`, `fnc_undo`, `fnc_drawFrame`, `fnc_showStep`, `fnc_drawStart`, `fnc_drawReview`, `fnc_save`, `fnc_importText`, `fnc_exportText`, `fnc_describeRule`, `fnc_popover`, `fnc_closePopover`, `fnc_confirm`, `fnc_uiToggle`, `fnc_uiStepper`, `fnc_uiEdit`, `fnc_uiChip`, `fnc_uiSegmented`, `fnc_uiDropdown` (all `.sqf`)
 
@@ -806,15 +806,15 @@ Applies to all packages:
 
 **Creates:**
 - `addons/setup/XEH_PREP_entry.hpp`
-- `addons/setup/initEntryPoints.inc.sqf`: `CBA_fnc_addPauseMenuOption` with `einv_setup_RscWizard`, and an unbound `CBA_fnc_addKeybind` that calls `openFromGame [0, ""]`.
-- `addons/setup/Display3DEN.hpp`: Tools entry; `action` calls `[findDisplay 313, 'direct', 0, ''] call (uiNamespace getVariable 'einv_setup_fnc_open')`.
+- `addons/setup/initEntryPoints.inc.sqf`: `CBA_fnc_addPauseMenuOption` with `aio_setup_RscWizard`, and an unbound `CBA_fnc_addKeybind` that calls `openFromGame [0, ""]`.
+- `addons/setup/Display3DEN.hpp`: Tools entry; `action` calls `[findDisplay 313, 'direct', 0, ''] call (uiNamespace getVariable 'aio_setup_fnc_open')`.
 - `addons/setup/functions/fnc_initCbaMenu.sqf`, `fnc_openFromGame.sqf`
 - new textures `addons/gui/ui/icon_{setup,undo,redo,rotate,plus,minus,reset}_ca.paa`
 
 **Changes:**
 - `addons/gui/functions/fnc_drawHeader.sqf`: the cog, for everyone; the tooltip is `OpenWizard` or `OpenWizard_ReadOnly`.
-- `addons/gui/functions/fnc_contextMenu.sqf`: "Change size or shape..." when `(["direct"] call einv_setup_fnc_canEdit) get "canSave"`; it calls `openFromGame [2, class]`.
-- `addons/gui/XEH_postInit.sqf`: on `einv_items_rulesChanged`, if `findDisplay IDD_INVENTORY` is open, call `closeMenu` and then `fnc_build` on the next frame. The build already ends any drag. Placements that no longer fit are re-placed or shown as overflow, and nothing leaves the cargo.
+- `addons/gui/functions/fnc_contextMenu.sqf`: "Change size or shape..." when `(["direct"] call aio_setup_fnc_canEdit) get "canSave"`; it calls `openFromGame [2, class]`.
+- `addons/gui/XEH_postInit.sqf`: on `aio_items_rulesChanged`, if `findDisplay IDD_INVENTORY` is open, call `closeMenu` and then `fnc_build` on the next frame. The build already ends any drag. Placements that no longer fit are re-placed or shown as overflow, and nothing leaves the cargo.
 - `tools/generate_ui_textures.py`: the new icons.
 
 **Done when:**
@@ -838,7 +838,7 @@ Applies to all packages:
    - a new section "Setup wizard and rules (2026-10-08)" in `docs/ARCHITECTURE.md`, superseding the getSize, table and sizeCorrections parts;
    - `addons/main/script_version.hpp` to 0.2.0 (new feature);
    - add any setup stringtable keys that WP5 or WP6 reported missing;
-   - a README note on `einv_gridShape` and `CfgEinvRulesets` for other mods;
+   - a README note on `aio_gridShape` and `CfgAioRulesets` for other mods;
    - then `hemtt launch` for the in-game checks below.
 
 ---
@@ -859,4 +859,4 @@ Applies to all packages:
 6. **Default equivalence:** run `tools/check_default_ruleset.sqf` with vanilla, ACE and a large mod pack.
 7. **Multiplayer:** two clients agree on layouts after a mid-mission rules change. A client with a different preset revision gets the hash warning.
 8. **Config names:** that `30Rnd_65x39_caseless_green`, `B_Carryall_Base` and the magazine wells named in examples exist. Step 3 of the wizard is the tool to check them.
-9. **Clipboard in MP:** Ctrl+A / Ctrl+C in `EINV_EditArea` works for clients. `copyToClipboard` is shown only where it works.
+9. **Clipboard in MP:** Ctrl+A / Ctrl+C in `AIO_EditArea` works for clients. `copyToClipboard` is shown only where it works.
