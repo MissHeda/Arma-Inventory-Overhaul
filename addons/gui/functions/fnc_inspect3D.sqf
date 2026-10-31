@@ -338,8 +338,9 @@ switch (_mode) do {
         private _side = [cos _dir, -(sin _dir), 0];
         private _origin = _scene get "origin";
 
-        // Dragged right, the item goes right: the camera and its target go left. Dragged down, they go up.
-        private _target = ((_scene get "target") vectorAdd (_side vectorMultiply (-_across * _distance * INSPECT_3D_PAN)))
+        // Dragged right, the item goes right: the camera and its target go left - _side points to the camera's left (it looks
+        // along -[sin dir, cos dir]). Dragged down, they go up.
+        private _target = ((_scene get "target") vectorAdd (_side vectorMultiply (_across * _distance * INSPECT_3D_PAN)))
             vectorAdd [0, 0, _down * _distance * INSPECT_3D_PAN];
         private _offset = _target vectorDiff _origin;
         private _limit = _scene getOrDefault ["frame", INSPECT_3D_FRAME];
