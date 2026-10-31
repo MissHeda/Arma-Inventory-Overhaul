@@ -26,7 +26,8 @@
 
 params [["_text", "", [""]]];
 
-private _rules = trim _text;
+// Settings lines from before the mod's prefix was renamed (einv_items_rules = ...) read as today's.
+private _rules = trim (_text regexReplace ["einv_", "aio_"]);
 
 if (_rules isEqualTo "") exitWith {createHashMap};
 

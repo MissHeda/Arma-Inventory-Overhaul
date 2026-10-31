@@ -24,6 +24,9 @@
 
 params [["_text", "", [""]]];
 
+// Settings lines from before the mod's prefix was renamed (einv_gui_searchTime = ...) read as today's.
+_text = _text regexReplace ["einv_", "aio_"];
+
 private _values = createHashMap;
 private _warnings = [];
 
