@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.20 - beta
+
+### Fixed
+
+- Inspect card 3D view: after turning the item, the 2D/3D switch went behind the view and could not be clicked - the area that turns the item lay under the switch too, and a held control is drawn over everything. It now leaves the switch out.
+
+### Changed
+
+- Inspect card 3D view: the item fills more of the box at the start, several notches of the wheel zoom as far as they turn, and Arma's own magazines show their real model instead of the ammo box they lie on the ground as.
+- Custom tile colour: picking one also takes away an earlier "No colour" of the item, so Default goes back to its category's colour.
+
 ## 0.6.19 - beta
 
 ### Added

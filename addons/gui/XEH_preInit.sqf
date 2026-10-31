@@ -288,13 +288,13 @@ GVAR(inspectPos) = [];
 GVAR(inspectMove) = [];
 
 // Its picture box in 2D or 3D ("2d", "3d" - kept in the profile), the 3D view's scene, where the mouse was while it turns the
-// item [x, y] or [], the frame the wheel last zoomed in, and per class whether there is a model to show
-// (fnc_drawInspect, fnc_inspect3D, fnc_onFrame, fnc_hasModel).
+// item [x, y] or [], the frame the wheel last zoomed in, and per class the model to show, "" for none
+// (fnc_drawInspect, fnc_inspect3D, fnc_onFrame, fnc_itemModel).
 GVAR(inspectView) = profileNamespace getVariable [QGVAR(inspectView), "2d"];
 GVAR(scene3D) = createHashMap;
 GVAR(inspect3DTurn) = [];
 GVAR(lastWheel3D) = -1;
-GVAR(hasModel) = createHashMap;
+GVAR(itemModels) = createHashMap;
 
 // The kits and pouches open in floating windows of their own (aio_compat_efak, fnc_drawWindows), each
 // known by its key: the order they lie in, bottom first - the last one is on top -, where each was put

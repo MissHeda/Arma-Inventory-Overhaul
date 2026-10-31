@@ -260,41 +260,61 @@ _cursor = _cursor + _titleH + _gap;
 
 private _pictureInner = [_padX * 2, _cursor + _padY * 0.5, _innerW - _padX * 2, _pictureH - _padY];
 
+// Where the 2D/3D switch lies in the box's top right corner (drawn below, after the picture).
+private _toggleH = _textUnit * 0.85;
+private _inset = 2 * pixelH;
+private _segmentH = _toggleH - _inset * 2;
+private _segmentW = SQUARE(_segmentH * 1.5);
+private _trackW = _segmentW * 2 + SQUARE(_inset) * 2;
+private _trackX = _padX + _innerW - SQUARE(_textUnit * 0.3) - _trackW;
+private _toggleY = _cursor + _textUnit * 0.3;
+
 // In 3D (see the measures): held and dragged the item turns (fnc_onFrame), the wheel zooms, a double click puts it back.
 if (_show3D) then {
     ["start", [_class, _attachments]] call FUNC(inspect3D);
 
     private _viewRect = [_padX + (_innerW - _viewPixelsW * pixelW) / 2, _cursor + pixelH, _viewPixelsW * pixelW, _viewPixelsH * pixelH];
+    _viewRect params ["_viewX", "_viewY", "_viewW", "_viewH"];
 
     private _view = [_display, "AIO_PictureTurned", _group, _viewRect] call FUNC(uiCreate);
     _view ctrlSetText format ["#(argb,1024,512,1)r2t(%1,2.0)", INSPECT_3D_TARGET];
 
-    private _hit = [_display, "AIO_Hitbox", _group, _viewRect] call FUNC(uiCreate);
+    // The areas that turn it: the view but the switch. A held control is drawn over every other (the engine draws the focused
+    // one last) - one lying under the switch as well hid it after the first turn, and took its clicks.
+    private _belowY = _toggleY + _toggleH + _inset;
+    private _hitRects = [
+        [_viewX, _viewY, (_trackX - _inset - _viewX) max 0, _belowY - _viewY],
+        [_viewX, _belowY, _viewW, _viewY + _viewH - _belowY]
+    ];
 
-    _hit ctrlAddEventHandler ["MouseButtonDown", {
-        params ["", "_button"];
+    {
+        private _hit = [_display, "AIO_Hitbox", _group, _x] call FUNC(uiCreate);
 
-        if (_button == 0) then {
-            GVAR(inspect3DTurn) = getMousePosition;
-        };
-    }];
-    _hit ctrlAddEventHandler ["MouseButtonDblClick", {
-        params ["", "_button"];
+        _hit ctrlAddEventHandler ["MouseButtonDown", {
+            params ["", "_button"];
 
-        if (_button == 0) then {
-            ["reset"] call FUNC(inspect3D);
-        };
-    }];
-    // The display reports the same turn of the wheel: one per frame counts.
-    _hit ctrlAddEventHandler ["MouseZChanged", {
-        params ["", "_scroll"];
+            if (_button == 0) then {
+                GVAR(inspect3DTurn) = getMousePosition;
+            };
+        }];
+        _hit ctrlAddEventHandler ["MouseButtonDblClick", {
+            params ["", "_button"];
 
-        if (GVAR(lastWheel3D) isEqualTo diag_frameNo) exitWith {true};
+            if (_button == 0) then {
+                ["reset"] call FUNC(inspect3D);
+            };
+        }];
+        // The display reports the same turn of the wheel: one per frame counts.
+        _hit ctrlAddEventHandler ["MouseZChanged", {
+            params ["", "_scroll"];
 
-        GVAR(lastWheel3D) = diag_frameNo;
-        ["zoom", [_scroll]] call FUNC(inspect3D);
-        true
-    }];
+            if (GVAR(lastWheel3D) isEqualTo diag_frameNo) exitWith {true};
+
+            GVAR(lastWheel3D) = diag_frameNo;
+            ["zoom", [_scroll]] call FUNC(inspect3D);
+            true
+        }];
+    } forEach _hitRects;
 } else {
     ["stop"] call FUNC(inspect3D);
 
@@ -312,13 +332,6 @@ if (_show3D) then {
 // 2D or 3D, a switch in the box's corner, for an item with a model of its own: one dark track, the side shown lit on it. 3D is
 // greyed out without Picture-in-Picture. The choice is kept for the next items and games.
 if (_can3D) then {
-    private _toggleH = _textUnit * 0.85;
-    private _inset = 2 * pixelH;
-    private _segmentH = _toggleH - _inset * 2;
-    private _segmentW = SQUARE(_segmentH * 1.5);
-    private _trackW = _segmentW * 2 + SQUARE(_inset) * 2;
-    private _trackX = _padX + _innerW - SQUARE(_textUnit * 0.3) - _trackW;
-    private _toggleY = _cursor + _textUnit * 0.3;
     private _accent = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
     private _shown = ["2d", "3d"] select _show3D;
 

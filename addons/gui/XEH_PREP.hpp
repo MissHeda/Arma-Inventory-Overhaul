@@ -177,6 +177,7 @@ PREP(drawInspect);
 PREP(growSlots);
 PREP(inspect3D);
 PREP(hasModel);
+PREP(itemModel);
 PREP(closeInspect);
 PREP(toggleSection);
 PREP(toggleRows);

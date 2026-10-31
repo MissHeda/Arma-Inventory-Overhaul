@@ -539,12 +539,12 @@
 #define INSPECT_3D_FOV 0.35
 #define INSPECT_3D_PLACE [-2048, -2048]
 #define INSPECT_3D_FRAME 1.2
-#define INSPECT_3D_DISTANCE 2
+#define INSPECT_3D_DISTANCE 0.7
 
 // How far the 3D view's item turns for a drag across the whole screen, in degrees: round, and up or down.
 #define INSPECT_3D_TURN_ACROSS 200
 #define INSPECT_3D_TURN_DOWN 100
 
 // The engine's stand-in models an item without one of its own inherits (ItemCore, CA_Magazine and the dummies), in lowercase,
-// without the leading backslash and the extension (fnc_hasModel): such an item has nothing to show in 3D.
+// without the leading backslash and the extension (fnc_itemModel): such an item has nothing to show in 3D.
 #define PLACEHOLDER_MODELS ["a3\weapons_f\ammo\mag_univ", "a3\weapons_f\dummyweapon", "a3\weapons_f\dummyweapon_single", "a3\weapons_f\empty", "a3\data_f\cl_basic", "a3\weapons_f\dummyitem", "a3\weapons_f\dummyitemhorizontal"]

@@ -601,7 +601,10 @@ call {
                         params ["_hex", "_arguments"];
                         _arguments params ["_class", "_canvas"];
 
+                        // Its own colour stands instead of a category's or No colour: tint= goes, so Default later is
+                        // the first category's colour again.
                         _canvas set ["colorPick", toLowerANSI _hex];
+                        _canvas set ["tintPick", ""];
                         GVAR(itemWork) set [toLowerANSI _class, _canvas];
 
                         [] call FUNC(drawItemEditor);

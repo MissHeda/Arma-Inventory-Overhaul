@@ -137,19 +137,8 @@ switch (_mode) do {
         if (count _magazine < 2 || {(_magazine param [0, ""]) isEqualTo ""}) then {_magazine = []};
         if (count _magazine2 < 2 || {(_magazine2 param [0, ""]) isEqualTo ""}) then {_magazine2 = []};
 
-        // The model, where the class lives.
-        private _config = switch (true) do {
-            case (isClass _itemConfig): {_itemConfig};
-            case (isClass (configFile >> "CfgMagazines" >> _class)): {configFile >> "CfgMagazines" >> _class};
-            case (isClass (configFile >> "CfgVehicles" >> _class)): {configFile >> "CfgVehicles" >> _class};
-            case (isClass (configFile >> "CfgGlasses" >> _class)): {configFile >> "CfgGlasses" >> _class};
-            default {configNull};
-        };
-        private _model = getText (_config >> "model");
-
-        if (_model isEqualTo "") then {
-            _model = getText (_config >> "modelSpecial");
-        };
+        // The model, where the class lives - a magazine's real one rather than the box it lies on the ground as (fnc_itemModel).
+        private _model = [_class] call FUNC(itemModel);
 
         // The base of a weapon on the holder - the proxy every weapon of every mod is put on. Gear on the holder hangs above it,
         // by a fixed lift: its box is blown up to the whole body's (a vest's, KPBLM measured 0.25 m).
@@ -302,7 +291,8 @@ switch (_mode) do {
 
         if (_turn == 0) exitWith {};
 
-        private _distance = [(_scene get "distance") * 1.15, (_scene get "distance") / 1.15] select (_turn > 0);
+        // By how far the wheel turned: several notches in one frame come as one turn of that many.
+        private _distance = (_scene get "distance") / (1.15 ^ ((_turn max -6) min 6));
 
         _scene set ["distance", ((_distance max (_scene get "near")) min (_scene get "far"))];
 
