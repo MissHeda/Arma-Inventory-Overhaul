@@ -2,6 +2,19 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.8 - beta
+
+### Changed
+
+- Setup wizard, Items and Containers: "Edit all" is replaced by custom overrides. Type the start of a class name and a `*` (`B_Assault*`) and an entry of its own shows above the classes found: "B_Assault* - custom override", with how many classes it covers. Picked - after a question the first time -, the editor shows the first of them and what you apply is the one rule `class=B_Assault*` for all of them, the classes a mod adds later too. The overrides you have show in the list as such entries (all of them with nothing typed). The mod filter stays (issues #31, #32).
+- Setup wizard, Categories: a click on a category's colour opens a colour picker - the colour square and hue strip of the window's colour panel, the hex digits, Default and Apply. The switches in front of the rows and the row for colouring several at once are gone (issue #33).
+
+### Fixed
+
+- Turned pictures (0.6.7) no longer go blank when the tiles are drawn again - after a right click, say: a new control showing a turned texture gets it empty from the engine until the texture is drawn again, which now happens every time, and the window checks twice a second that every turned texture it shows is still there (issue #28).
+- Setup wizard, Categories: "All" of the old mass edit raised a script error (fnc_drawCategories line 214) - gone with the row.
+- A button's tip (Sort, fold a box, ...) stays while the button is clicked: the engine reports the mouse leaving a button as it is pressed.
+
 ## 0.6.7 - beta
 
 ### Fixed

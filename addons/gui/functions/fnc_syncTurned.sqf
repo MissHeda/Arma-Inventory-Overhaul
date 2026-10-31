@@ -106,6 +106,14 @@ private _fnc_space = {
 
 private _keep = [];
 private _giveX = pixelW / 2;
+
+// Twice a second the turned textures shown are looked after (fnc_turnedTexture): one the engine dropped is made again.
+private _check = diag_tickTime >= (uiNamespace getVariable [QGVAR(turnCheckAt), 0]);
+private _checked = createHashMap;
+
+if (_check) then {
+    uiNamespace setVariable [QGVAR(turnCheckAt), diag_tickTime + 0.5];
+};
 private _giveY = pixelH / 2;
 
 {
@@ -176,6 +184,13 @@ private _giveY = pixelH / 2;
 
         if (!ctrlShown _overlay) then {
             _overlay ctrlShow true;
+        };
+
+        private _source = _overlay getVariable [QGVAR(turnedSource), ""];
+
+        if (_check && {_source isNotEqualTo ""} && {!(_source in _checked)}) then {
+            _checked set [_source, true];
+            [ctrlParent _overlay, _source, false] call FUNC(turnedTexture);
         };
 
         if (_state isNotEqualTo true) then {

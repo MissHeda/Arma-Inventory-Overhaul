@@ -19,7 +19,7 @@ all") or puts everything of yours into the box beside it ("Put all in").
   is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is
   blocked, by server setting.
 
-**Status:** 0.6.7, public beta: drag and drop between containers and equipment slots, searching loot,
+**Status:** 0.6.8, public beta: drag and drop between containers and equipment slots, searching loot,
 server-checked moves in multiplayer, the grid panel in ACE Arsenal, shaped grids and items, the hotbar, the
 setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
 Bugs and wishes go to Discord or the GitHub issues.
@@ -89,7 +89,7 @@ Its three pages:
   compartment, and it looks in the inventory exactly as painted -, build it block by block in Blocks mode, or
   make a class the same as another one (Same as: follow it with `like=` or copy its cells), set an item's weight and name next to its
   size, zoom and shift its picture in the tile where an icon is too small or too large (`icon=`, with a live preview) or give it another picture altogether (`picture=`: pick one from every item's picture, or type any texture path - the container boxes follow too), change a whole family at once - the Tree button
-  shows the picked class among its relatives, and a click on one of them edits it as one rule, `class=B_Carryall_Base+` - and copy a class's config lines with Export - for a mod,
+  shows the picked class among its relatives, and a click on one of them edits it as one rule, `class=B_Carryall_Base+`; typing the start of a name and a `*` (`B_Assault*`) offers a custom override, one rule `class=B_Assault*` for every class whose name starts so - and copy a class's config lines with Export - for a mod,
   or as a layout without a class name to share - or paste some in with Import (a layout goes to the class you have selected, so does a class this game does not have).
   A small reset button beside a field takes it back to what the class would be without a rule of its own.
 

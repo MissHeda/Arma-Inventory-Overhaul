@@ -150,41 +150,12 @@ private _footY = _height - _footH;
 
 // ----- The cards -----
 
-// ----- The mod filter and the edit of everything found -----
-// A search or a mod picked, and more than one class found: "Edit all" makes the editor beside the list write for every
-// one of them in one step (fnc_upsertRule). A search that is a plain start of a name with a * (USP_AssaultBackpack*)
-// is written as one rule, class=USP_AssaultBackpack*, which also takes classes a mod adds later; anything else as one
-// rule per class. GVAR(groupEdit) holds it per step: [selector, classes], the selector "" for one rule per class.
+// ----- The mod filter -----
 
 private _barH = UNIT * 1;
-private _barGap = SQUARE(UNIT * 0.25);
-private _group = GVAR(groupEdit) getOrDefault [_mode, []];
-private _classes = _matches apply {_x select 1};
-
-// What was edited all at once is no longer what is found: the edit is for the picked class alone again.
-if (_group isNotEqualTo [] && {(_group select 1) isNotEqualTo _classes}) then {
-    GVAR(groupEdit) deleteAt _mode;
-    _group = [];
-};
-
-private _groupOn = _group isNotEqualTo [];
-private _canGroup = _total > 1 && {_needle isNotEqualTo "" || {_modPick isNotEqualTo ""}};
-private _selector = "";
-
-// One rule: a text of letters, digits and _ ending in a single *, and no mod picked.
-if (_modPick isEqualTo "" && {count _text > 3}) then {
-    private _stem = trim _text;
-    _stem = _stem select [0, count _stem - 1];
-
-    if (((trim _text) select [count (trim _text) - 1]) isEqualTo "*" && {count _stem >= 3} && {(toArray _stem) findIf {!(_x in (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"))} < 0}) then {
-        _selector = _stem + "*";
-    };
-};
-
-private _groupW = _width * 0.42;
 private _modOptions = [[LLSTRING(List_AllMods), ""]] + (_modNames apply {[_x, _x]});
 
-[_display, _box, [0, 0, _width - _groupW - _barGap, _barH], _modOptions, _modPick, _theme, {
+[_display, _box, [0, 0, _width, _barH], _modOptions, _modPick, _theme, {
     params ["_new", "_mode"];
 
     private _state = GVAR(listState) get _mode;
@@ -195,37 +166,71 @@ private _modOptions = [[LLSTRING(List_AllMods), ""]] + (_modNames apply {[_x, _x
     [] call FUNC(drawResults);
 }, _mode, count _modNames > 1] call FUNC(uiDropdown);
 
-[
-    _display, _box, [_width - _groupW, 0, _groupW, _barH],
-    format [[LLSTRING(List_EditAll), LLSTRING(List_EditingAll)] select _groupOn, _total], "", _theme, {
-        params ["_mode", "_on", "_selector", "_classes"];
-
-        if (_on) then {
-            GVAR(groupEdit) deleteAt _mode;
-            [LLSTRING(Hint_GroupOff), "text2"] call FUNC(setHint);
-        } else {
-            GVAR(groupEdit) set [_mode, [_selector, _classes]];
-
-            // The first one found shows in the editor; what is applied goes to all of them.
-            if !((toLowerANSI (GVAR(selection) getOrDefault [_mode, ""])) in (_classes apply {toLowerANSI _x})) then {
-                GVAR(selection) set [_mode, _classes select 0];
-            };
-
-            GVAR(editScope) set [_mode, "class"];
-
-            [[format [LLSTRING(Hint_GroupOn), count _classes], format [LLSTRING(Hint_GroupOnRule), _selector select [0, count _selector - 1]]] select (_selector isNotEqualTo ""), "accent"] call FUNC(setHint);
-        };
-
-        [GVAR(step)] call FUNC(showStep);
-    }, [_mode, _groupOn, _selector, _classes], _canGroup || _groupOn, ["", "accent"] select _groupOn,
-    [LLSTRING(List_EditAllTip), LLSTRING(List_EditingAllTip)] select _groupOn
-] call FUNC(uiAction);
-
 private _listTop = _barH + UNIT * 0.25;
 private _list = [_display, "AIO_ScrollGroup", _box, [0, _listTop, _width, _footY - UNIT * 0.2 - _listTop]] call EFUNC(gui,uiCreate);
 
 _list setVariable [QGVAR(scrollId), "list_" + _mode];
 
+// ----- Overrides: one rule for every class whose name starts the same (class=X*) -----
+// A search that is the start of a name and a * (B_Assault*) offers an entry of its own above the classes: "Custom override".
+// Picked - after a question the first time -, the editor beside the list shows the first class found and what it applies
+// is written as the one rule class=B_Assault* (fnc_upsertRule), which takes every class of that name, those a mod adds
+// later too. Overrides the draft has already show as such entries as well: all of them with nothing typed, else those the
+// text is part of. GVAR(groupEdit) holds the one picked per step: [selector, classes].
+
+private _group = GVAR(groupEdit) getOrDefault [_mode, []];
+private _letters = toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+private _typed = "";
+
+if (count (trim _text) > 3) then {
+    private _whole = trim _text;
+    private _stem = _whole select [0, count _whole - 1];
+
+    if ((_whole select [count _whole - 1]) isEqualTo "*" && {count _stem >= 3} && {(toArray _stem) findIf {!(_x in _letters)} < 0}) then {
+        _typed = _stem;
+    };
+};
+
+// The overrides the draft has, by their stem as written.
+private _stems = [];
+
+{
+    _x params ["_conds"];
+
+    if (count _conds == 1) then {
+        (_conds select 0) params ["_negated", "_key", "_op", "_names"];
+
+        if (!_negated && {_key isEqualTo "class"} && {_op isEqualTo "="} && {count _names == 1} && {((_names select 0) select [count (_names select 0) - 1]) isEqualTo "*"}) then {
+            private _stem = (_names select 0) select [0, count (_names select 0) - 1];
+
+            if ((_stems findIf {_x == _stem}) < 0 && {_needle isEqualTo "" || {(toLowerANSI _stem find (_needle regexReplace ["\*", ""])) >= 0}}) then {
+                _stems pushBack _stem;
+            };
+        };
+    };
+} forEach (([GVAR(draftText)] call EFUNC(items,parseRules)) getOrDefault ["rules", []]);
+
+private _drafted = +_stems;
+
+if (_typed isNotEqualTo "" && {(_stems findIf {_x == _typed}) < 0}) then {
+    _stems pushBack _typed;
+};
+
+// Each with the classes of this step whose name starts so.
+private _rows = (uiNamespace getVariable QGVAR(index)) get "rows";
+private _overrides = _stems apply {
+    private _start = toLowerANSI _x;
+    private _length = count _start;
+    private _classes = (_rows select {
+        ((_x select ROW_LC) select [0, _length]) isEqualTo _start && {
+            if (_containers) then {(_x select ROW_KIND) in CONTAINER_KINDS} else {(_x select ROW_FAMILY) isNotEqualTo "cargo"}
+        }
+    }) apply {_x select 1};
+
+    [_x, _classes]
+};
+
+_overrides = _overrides select {(_x select 1) isNotEqualTo []};
 private _rowW = _width - SCROLL_W - SQUARE(UNIT * 0.25);
 private _cardH = UNIT * 2.3;
 private _gap = UNIT * 0.2;
@@ -236,17 +241,71 @@ private _textW = _rowW - _textX - SQUARE(UNIT * 0.2);
 private _picked = toLowerANSI (GVAR(selection) getOrDefault [_mode, ""]);
 private _fill = [1, 1, 1, 0.035];
 private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]];
-private _groupSet = createHashMap;
+private _overrideH = count _overrides * (_cardH + _gap);
 
 {
-    _groupSet set [toLowerANSI _x, true];
-} forEach (_group param [1, []]);
+    _x params ["_stem", "_classes"];
+
+    private _selector = _stem + "*";
+    private _cardY = _forEachIndex * (_cardH + _gap);
+    private _active = (_group param [0, ""]) == _selector;
+    private _exists = _stem in _drafted;
+    private _cardFill = [_fill, _fillPicked] select _active;
+    private _surface = [_display, _list, [0, _cardY, _rowW, _cardH], _cardFill, _radius] call EFUNC(gui,uiPanel);
+
+    if (_active) then {
+        [_display, _list, [0, _cardY, _rowW, _cardH], _accent, _radius] call EFUNC(gui,uiRing);
+    };
+
+    [_display, _list, [SQUARE(UNIT * 0.2) + _picW * 0.2, _cardY + UNIT * 0.2 + _picH * 0.2, _picW * 0.6, _picH * 0.6], UI_TEX(icon_style_ca), _accent] call EFUNC(gui,uiIcon);
+
+    [
+        _display, _list, [_textX, _cardY + UNIT * 0.1, _textW, UNIT * 0.75],
+        [format [LLSTRING(Override_Title), _selector], _textW, _fontBold, TEXT_BODY] call EFUNC(gui,fitText), TEXT_BODY, _colorText, _fontBold, 0
+    ] call EFUNC(gui,uiLabel);
+
+    [
+        _display, _list, [_textX, _cardY + UNIT * 0.8, _textW, UNIT * 0.65],
+        [format [LLSTRING(Override_About), _stem, count _classes], _textW, _font, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL, _muted, _font, 0
+    ] call EFUNC(gui,uiLabel);
+
+    [
+        _display, _list, [_textX, _cardY + UNIT * 1.45, _textW, UNIT * 0.65],
+        [[LLSTRING(Override_New), LLSTRING(Override_Own)] select _exists, _textW, _font, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL,
+        [_colorText2, _accent] select _exists, _font, 0
+    ] call EFUNC(gui,uiLabel);
+
+    [_display, _list, [0, _cardY, _rowW, _cardH], _surface, _cardFill, [1, 1, 1, 0.085], {
+        params ["_mode", "_selector", "_classes", "_exists"];
+
+        private _pick = {
+            params ["_mode", "_selector", "_classes"];
+
+            GVAR(groupEdit) set [_mode, [_selector, _classes]];
+            GVAR(selection) set [_mode, _classes select 0];
+            GVAR(editScope) set [_mode, "class"];
+
+            [format [LLSTRING(Hint_GroupOnRule), _selector select [0, count _selector - 1]], "accent"] call FUNC(setHint);
+            [GVAR(step)] call FUNC(showStep);
+        };
+
+        if (_exists) exitWith {
+            [_mode, _selector, _classes] call _pick;
+        };
+
+        [
+            uiNamespace getVariable [QGVAR(display), displayNull],
+            format [LLSTRING(Override_Question), _selector select [0, count _selector - 1], count _classes],
+            LLSTRING(Override_Create), _pick, [_mode, _selector, _classes]
+        ] call FUNC(confirm);
+    }, [_mode, _selector, _classes, _exists], true, LLSTRING(Override_Tip)] call FUNC(uiHit);
+} forEach _overrides;
 
 {
     _x params ["_lc", "_class", "", "_name", "_kind", "_family", "_picture", "_mod"];
 
-    private _cardY = _forEachIndex * (_cardH + _gap);
-    private _isPicked = _lc isEqualTo _picked || {_lc in _groupSet};
+    private _cardY = _overrideH + _forEachIndex * (_cardH + _gap);
+    private _isPicked = _lc isEqualTo _picked && {_group isEqualTo []};
     private _cardFill = [_fill, _fillPicked] select _isPicked;
     private _surface = [_display, _list, [0, _cardY, _rowW, _cardH], _cardFill, _radius] call EFUNC(gui,uiPanel);
 

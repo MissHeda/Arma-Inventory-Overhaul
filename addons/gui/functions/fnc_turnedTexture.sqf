@@ -18,11 +18,16 @@
  * - A texture that only another texture shows is never drawn. So the inner one is also shown on the screen, by
  *   one keeper per picture and display: a single pixel in the display's corner, all but transparent.
  * - The outer one reads the inner one when it takes it as its text: once the inner one is drawn, the outer one
- *   takes it anew and is drawn again (drawn again only, it keeps showing what it read before).
+ *   takes it anew and is drawn again (drawn again only, it keeps showing what it read before). That is done on
+ *   every call, filled or not: a new control showing the texture starts blank until the display is drawn again.
+ * - fnc_syncTurned calls this again twice a second for what it shows, so a display the engine dropped and made
+ *   again empty is filled again.
  *
  * Arguments:
  * 0: The display the turned picture shows on <DISPLAY>
  * 1: The picture's texture <STRING>
+ * 2: For a control that shows it for the first time - drawn again even when nothing was empty; false only fills
+ *    what is empty (fnc_syncTurned's check) <BOOL> (default: true)
  *
  * Return Value:
  * The turned texture, for ctrlSetText <STRING>
@@ -37,7 +42,7 @@
 
 disableSerialization;
 
-params [["_display", displayNull, [displayNull]], ["_texture", "", [""]]];
+params [["_display", displayNull, [displayNull]], ["_texture", "", [""]], ["_fresh", true, [true]]];
 
 private _known = uiNamespace getVariable [QGVAR(turnedTextures), createHashMap];
 private _key = toLowerANSI _texture;
@@ -75,7 +80,7 @@ if (!isNull _display) then {
 
     !isNull (findDisplay _inner) && {!isNull (findDisplay _outer)}
 }, {
-    params ["_inner", "_outer", "_innerTexture", "_texture"];
+    params ["_inner", "_outer", "_innerTexture", "_texture", "_fresh"];
 
     private _innerDisplay = findDisplay _inner;
     private _outerDisplay = findDisplay _outer;
@@ -107,7 +112,13 @@ if (!isNull _display) then {
         _filled = true;
     };
 
-    if (!_filled) exitWith {};
+    // Filled or not: a control that shows the texture for the first time gets a texture of its own from the engine,
+    // empty until the display is drawn again (the turned pictures went blank after a right click redrew the tiles).
+    if (!_filled && {!_fresh}) exitWith {};
+
+    if (!_filled) then {
+        displayUpdate _innerDisplay;
+    };
 
     // The outer one takes the inner texture anew once that is drawn: a moment later, and once more for a slow frame.
     private _retake = {
@@ -126,6 +137,6 @@ if (!isNull _display) then {
 
     [_retake, _outerDisplay, 0.1] call CBA_fnc_waitAndExecute;
     [_retake, _outerDisplay, 0.6] call CBA_fnc_waitAndExecute;
-}, [_inner, _outer, _innerTexture, _texture], 5] call CBA_fnc_waitUntilAndExecute;
+}, [_inner, _outer, _innerTexture, _texture, _fresh], 5] call CBA_fnc_waitUntilAndExecute;
 
 format ["#(argb,%1,%1,1)ui(AIO_TurnTexture,%2)", TURN_RES, _outer]

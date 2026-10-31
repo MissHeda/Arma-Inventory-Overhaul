@@ -48,6 +48,17 @@ _ctrl ctrlAddEventHandler ["MouseEnter", {
     uiNamespace setVariable [QGVAR(hoverTip), _ctrl];
     GVAR(lastMouse) = [];
 }];
+// A press keeps the tip: the engine reports the mouse leaving a button while it is pressed, and the tip of the Sort and
+// fold buttons went away on a left click (it is the same button under the same mouse).
+{
+    _ctrl ctrlAddEventHandler [_x, {
+        params ["_ctrl"];
+
+        uiNamespace setVariable [QGVAR(hoverTip), _ctrl];
+        GVAR(lastMouse) = [];
+    }];
+} forEach ["MouseButtonDown", "MouseButtonUp", "ButtonClick"];
+
 _ctrl ctrlAddEventHandler ["MouseExit", {
     params ["_ctrl"];
 

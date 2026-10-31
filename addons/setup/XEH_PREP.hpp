@@ -92,6 +92,8 @@ PREP(pictureChunk);
 PREP(pictureCategory);
 PREP(pictureKey);
 PREP(openPicturePicker);
+PREP(openColourPicker);
+PREP(colourPickerSlide);
 PREP(drawPicturePicker);
 PREP(pickPicture);
 PREP(iconEntries);

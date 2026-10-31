@@ -112,15 +112,11 @@
         <Key ID="STR_aio_setup_Categories_BuiltIn">
             <English>Built in</English>
         </Key>
-        <Key ID="STR_aio_setup_Categories_ColourPlaceholder">
-            <English>Default colour</English>
-        </Key>
         <Key ID="STR_aio_setup_Categories_ColourShort">
             <English>Default</English>
         </Key>
         <Key ID="STR_aio_setup_Categories_ColourTip">
-            <English>The colour of this category's item tiles, six hex digits like C83232. Empty: the default colour.
-An item in several categories takes the first one's that has a colour.</English>
+            <English>The colour of this category's item tiles. Click to pick one.</English>
         </Key>
         <Key ID="STR_aio_setup_Categories_Delete">
             <English>Delete this category</English>
@@ -132,16 +128,7 @@ An item in several categories takes the first one's that has a colour.</English>
             <English>Delete</English>
         </Key>
         <Key ID="STR_aio_setup_Categories_Help">
-            <English>Categories sort items for the loot strip and compartments. Rename, pick a picture or a tile colour; select rows to colour several at once.</English>
-        </Key>
-        <Key ID="STR_aio_setup_Categories_MassApply">
-            <English>Colour selected</English>
-        </Key>
-        <Key ID="STR_aio_setup_Categories_MassApplyTip">
-            <English>Gives every selected category the colour typed beside it.</English>
-        </Key>
-        <Key ID="STR_aio_setup_Categories_MassClear">
-            <English>Clear colour</English>
+            <English>Categories sort items for the loot strip and compartments. Rename one, pick its picture, or click its colour to give its item tiles a colour of their own.</English>
         </Key>
         <Key ID="STR_aio_setup_Categories_Max">
             <English>At most %1 categories of your own</English>
@@ -166,15 +153,6 @@ An item in several categories takes the first one's that has a colour.</English>
         </Key>
         <Key ID="STR_aio_setup_Categories_ResetPicture">
             <English>Back to the default picture</English>
-        </Key>
-        <Key ID="STR_aio_setup_Categories_SelectAll">
-            <English>All</English>
-        </Key>
-        <Key ID="STR_aio_setup_Categories_SelectNone">
-            <English>None</English>
-        </Key>
-        <Key ID="STR_aio_setup_Categories_Selected">
-            <English>%1 selected</English>
         </Key>
         <Key ID="STR_aio_setup_Categories_Title">
             <English>Categories</English>
@@ -301,6 +279,15 @@ An item in several categories takes the first one's that has a colour.</English>
         </Key>
         <Key ID="STR_aio_setup_Col_Size">
             <English>Size</English>
+        </Key>
+        <Key ID="STR_aio_setup_Colour_Apply">
+            <English>Apply</English>
+        </Key>
+        <Key ID="STR_aio_setup_Colour_Default">
+            <English>Default</English>
+        </Key>
+        <Key ID="STR_aio_setup_Colour_DefaultTip">
+            <English>No colour of its own: the tiles take the look's colour.</English>
         </Key>
         <Key ID="STR_aio_setup_Cond_addon">
             <English>from addon %1</English>
@@ -713,14 +700,8 @@ An item in several categories takes the first one's that has a colour.</English>
         <Key ID="STR_aio_setup_Hint_GroupApplied">
             <English>Applied to all %1 classes found. Save puts it to use.</English>
         </Key>
-        <Key ID="STR_aio_setup_Hint_GroupOff">
-            <English>Editing the picked class alone again.</English>
-        </Key>
-        <Key ID="STR_aio_setup_Hint_GroupOn">
-            <English>Editing all %1 classes found: what you apply goes to every one of them.</English>
-        </Key>
         <Key ID="STR_aio_setup_Hint_GroupOnRule">
-            <English>Editing every class whose name starts with %1 - as one rule, classes added later included.</English>
+            <English>Custom override for every class whose name starts with %1: what you apply is one rule for all of them, classes added later included.</English>
         </Key>
         <Key ID="STR_aio_setup_Hint_Linked">
             <English>%1 now has the same cells as %2. Save puts it to use.</English>
@@ -733,6 +714,9 @@ An item in several categories takes the first one's that has a colour.</English>
         </Key>
         <Key ID="STR_aio_setup_Hint_NothingToCopy">
             <English>%1 has no cells to copy.</English>
+        </Key>
+        <Key ID="STR_aio_setup_Hint_OverrideApplied">
+            <English>Applied to every class whose name starts with %1. Save puts it to use.</English>
         </Key>
         <Key ID="STR_aio_setup_Hint_PictureApplied">
             <English>The picture of %1 is kept. Save puts it to use.</English>
@@ -894,7 +878,7 @@ An item in several categories takes the first one's that has a colour.</English>
             <English>Remove its own size, stack, weight, name, picture and picture zoom. The default decides again.</English>
         </Key>
         <Key ID="STR_aio_setup_Items_Search">
-            <English>Search name or class, e.g. USP_Assault*</English>
+            <English>Search name or class (* ?)</English>
         </Key>
         <Key ID="STR_aio_setup_Items_Title">
             <English>Items: how big each one is</English>
@@ -989,21 +973,6 @@ An item in several categories takes the first one's that has a colour.</English>
         <Key ID="STR_aio_setup_List_AllMods">
             <English>All mods</English>
         </Key>
-        <Key ID="STR_aio_setup_List_EditAll">
-            <English>Edit all %1</English>
-        </Key>
-        <Key ID="STR_aio_setup_List_EditAllTip">
-            <English>Search (USP_AssaultBackpack*) or pick a mod first.
-Then whatever you apply on the right goes to every class found.
-A search like Name* becomes one rule that also covers classes added later.</English>
-        </Key>
-        <Key ID="STR_aio_setup_List_EditingAll">
-            <English>Editing all %1 - stop</English>
-        </Key>
-        <Key ID="STR_aio_setup_List_EditingAllTip">
-            <English>What you apply goes to every class found.
-Click to edit the picked class alone again.</English>
-        </Key>
         <Key ID="STR_aio_setup_List_None">
             <English>Nothing found</English>
         </Key>
@@ -1042,6 +1011,29 @@ Click to edit the picked class alone again.</English>
         </Key>
         <Key ID="STR_aio_setup_OpenWizard_Tooltip">
             <English>The inventory rules and the server settings, for everyone</English>
+        </Key>
+        <Key ID="STR_aio_setup_Override_About">
+            <English>Every class whose name starts with %1 · %2 now</English>
+        </Key>
+        <Key ID="STR_aio_setup_Override_Create">
+            <English>Create override</English>
+        </Key>
+        <Key ID="STR_aio_setup_Override_New">
+            <English>New - click to create one rule for all of them</English>
+        </Key>
+        <Key ID="STR_aio_setup_Override_Own">
+            <English>Own override</English>
+        </Key>
+        <Key ID="STR_aio_setup_Override_Question">
+            <English>Create a custom override for every class whose name starts with %1?
+It covers the %2 classes there are now and any a mod adds later. A class with a rule of its own further down keeps it.</English>
+        </Key>
+        <Key ID="STR_aio_setup_Override_Tip">
+            <English>One rule for every class whose name starts like this, those a mod adds later too.
+What you apply on the right goes to all of them.</English>
+        </Key>
+        <Key ID="STR_aio_setup_Override_Title">
+            <English>%1 - custom override</English>
         </Key>
         <Key ID="STR_aio_setup_Paint_1">
             <English>Red</English>

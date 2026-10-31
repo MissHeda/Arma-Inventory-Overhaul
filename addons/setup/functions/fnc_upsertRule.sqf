@@ -5,9 +5,9 @@
  * class=X > ... - or, for a tree, as the one rule class=X+ > ... that covers the class and every class built
  * on it. All of it is fnc_upsertRules, with the one class; see there for what happens to the rules already
  * written and where the new one goes.
- * While "Edit all" is on for the step the class is picked in (fnc_drawResults, GVAR(groupEdit)), the edit is for
- * everything the list found: one rule class=X* when the search was the start of a name with a *, else one rule
- * per class - all in one undo step.
+ * While a custom override is picked in the step's list (fnc_drawResults, GVAR(groupEdit)), the edit is the one rule
+ * class=X* for every class whose name starts with X, whichever class the editor shows (a list of classes instead of a
+ * selector writes one rule per class, in one undo step).
  *
  * Ends in fnc_commit: an undo step, and the step drawn again.
  *
@@ -43,7 +43,10 @@ private _lc = toLowerANSI _class;
             _classes apply {[_x, _set, _remove, false]}
         };
 
-        [format [LLSTRING(Hint_GroupApplied), count _classes], "text2"] call FUNC(setHint);
+        [
+            [format [LLSTRING(Hint_GroupApplied), count _classes], format [LLSTRING(Hint_OverrideApplied), _selector select [0, count _selector - 1]]] select (_selector isNotEqualTo ""),
+            "text2"
+        ] call FUNC(setHint);
     };
 } forEach (missionNamespace getVariable [QGVAR(groupEdit), createHashMap]);
 

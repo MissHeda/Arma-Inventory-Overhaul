@@ -100,7 +100,10 @@ private _ctrl = [_display, "AIO_PictureTurned", _parent, [
     _centerX - _side * pixelW / 2, _centerY - _side * pixelH / 2, _side * pixelW, _side * pixelH
 ]] call FUNC(uiCreate);
 
-_ctrl ctrlSetText ([_display, [_texture] call FUNC(safePicture)] call FUNC(turnedTexture));
+private _source = [_texture] call FUNC(safePicture);
+
+_ctrl ctrlSetText ([_display, _source] call FUNC(turnedTexture));
+_ctrl setVariable [QGVAR(turnedSource), _source];
 _ctrl ctrlSetTextColor _color;
 _ctrl setVariable [QGVAR(angle), 0];
 _ctrl setVariable [QGVAR(shown), [_shownW, _shownH]];
