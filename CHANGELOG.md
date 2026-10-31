@@ -2,9 +2,15 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.3 - beta
+
+### Fixed
+
+- Import in the setup wizard reads `cba_settings` lines of the old name (`force einv_gui_searchTime = 0.5;`) as the new one (`aio_`), so the server settings saved before the rename can be brought over: ESC > Options > Inventory setup > Import.
+
 ## 0.6.2 - beta
 
-- The mod is now called AIO - Arma Inventory Overhaul (was Enhanced Inventory), and so is everything in it: the mod folder is @aio, the prefix of its addons, classes, functions and settings is aio (was einv). **Everything saved before starts over:** CBA settings and keybinds, the colours, the hotbar, a server's setup in the wizard. A setup exported from the wizard before (headed einv1) and old cba_settings lines (einv_...) still import: ESC > Options > Inventory setup > Import.
+- The mod is now called AIO - Arma Inventory Overhaul (was Enhanced Inventory), and so is everything in it: the mod folder is @aio, the prefix of its addons, classes, functions and settings is aio (was einv). **Everything saved before starts over:** CBA settings and keybinds, the colours, the hotbar, a server's setup in the wizard. A setup exported from the wizard before (headed einv1) still imports.
 
 ### Added
 
