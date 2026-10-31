@@ -117,7 +117,8 @@
  * fnc_formatGrid writes it), "weight" (kg <NUMBER>), "name" (the name as it shows), "icon" ([scale,
  * across, down] <ARRAY>, see fnc_parseIcon), "picture" (the texture path with backslashes <STRING>), "use" (the containers it may be used from, in the
  * order uniform, vest, backpack <ARRAY of STRING>, [] for none - see fnc_parseUse), "cats" (the categories, in the
- * order of fnc_orderGroups <ARRAY of STRING> - see fnc_parseGroups).
+ * order of fnc_orderGroups <ARRAY of STRING> - see fnc_parseGroups), "tint" (a category's id or none), "color" (six hex digits
+ * in lowercase, the item's own tile colour), "show" (a category's id, all or none).
  *
  * Example:
  * ["aio1 base=default, kind=grenade > stack=3"] call aio_items_fnc_parseRules;
@@ -171,7 +172,7 @@ private _classChars = createHashMap;
 private _shapeChars = createHashMap;
 {_shapeChars set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/@");
 
-private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon", "picture", "use", "cats", "tint", "show"];
+private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon", "picture", "use", "cats", "tint", "color", "show"];
 
 private _numberOps = ["=", "<", "<=", ">", ">="];
 private _keyOps = createHashMapFromArray [
@@ -454,6 +455,20 @@ private _fnc_tint = {
     []
 };
 
+// color=: the item's own colour for its tiles, six hex digits as a category's color= (no #) - before its categories' and tint=
+// (aio_items_fnc_tileTint).
+private _fnc_color = {
+    params ["_raw"];
+
+    private _hex = toLowerANSI (trim _raw);
+
+    if (_hex regexMatch "^[0-9a-f]{6}$") exitWith {["color", _hex]};
+
+    _notes pushBack format ["color=%1 is no colour - six hex digits like color=c83232 - left out", _raw];
+
+    []
+};
+
 // show=: what a compartment of this container that takes several categories shows - one of them (its id), all of them small
 // in its corner, or none of them (aio_gui_fnc_drawBadge); the first of them without it.
 private _fnc_show = {
@@ -499,6 +514,7 @@ private _fnc_value = {
         case "use": {[_raw] call _fnc_use};
         case "cats": {[_raw] call _fnc_cats};
         case "tint": {[_raw] call _fnc_tint};
+        case "color": {[_raw] call _fnc_color};
         case "show": {[_raw] call _fnc_show};
         default {[]};
     }

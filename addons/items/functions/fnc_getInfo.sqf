@@ -138,14 +138,17 @@ if ((_resolved get "cats") isEqualTo ["none"]) then {
     _info set ["groups", []];
 };
 
-// The tiles' colour (fnc_tileTint): of the category tint= names or the first with a colour, the look's own, or the plain tile.
+// The tiles' colour (fnc_tileTint): its own (color=), of the category tint= names or the first with a colour, the look's own,
+// or the plain tile.
 private _tint = _resolved getOrDefault ["tint", ""];
+private _ownColor = _resolved getOrDefault ["color", ""];
 
-([_info get "groups", _tint, _compiled] call FUNC(tileTint)) params ["_tileColor", "_tilePlain"];
+([_info get "groups", _tint, _compiled, _ownColor] call FUNC(tileTint)) params ["_tileColor", "_tilePlain"];
 
 _info set ["tileColor", _tileColor];
 _info set ["tilePlain", _tilePlain];
 _info set ["tint", _tint];
+_info set ["color", _ownColor];
 _info set ["show", _resolved getOrDefault ["show", ""]];
 _info set ["src", _resolved get "src"];
 

@@ -1353,6 +1353,9 @@ What you apply on the right goes to all of them.</English>
         <Key ID="STR_aio_setup_Text_OwnRead">
             <English>One rule per line. The settings are in the lines for a cba_settings.sqf.</English>
         </Key>
+        <Key ID="STR_aio_setup_Tint_Custom">
+            <English>Custom...</English>
+        </Key>
         <Key ID="STR_aio_setup_Tint_Label">
             <English>Colour</English>
         </Key>

@@ -166,6 +166,21 @@ private _gap = _textUnit * 0.45;
 private _closeH = _titleH;
 private _closeW = SQUARE(_closeH);
 
+// The item in 3D instead of its picture, for one with a model of its own (fnc_hasModel) and with 3D picked in the box's corner:
+// its scene's camera films into a texture shown in the box (fnc_inspect3D). Picture-in-Picture renders it - off in the video
+// options, there is no 3D. The box is then exactly twice as wide as high in pixels, as the texture (1024 x 512) is, so the
+// item is never squeezed; under it how to move it.
+private _can3D = [_class] call FUNC(hasModel);
+private _show3D = _can3D && {isPiPEnabled} && {GVAR(inspectView) isEqualTo "3d"};
+private _viewPixelsW = floor ((_innerW - pixelW * 2) / pixelW);
+private _viewPixelsH = floor (_viewPixelsW / 2);
+private _hint3DH = 0;
+
+if (_show3D) then {
+    _pictureH = (_viewPixelsH + 2) * pixelH;
+    _hint3DH = _textUnit * 0.75;
+};
+
 // The description, measured in a box of the card's width before anything is placed.
 private _description = _info getOrDefault ["description", ""];
 private _descText = parseText format [
@@ -180,7 +195,7 @@ if (_description isNotEqualTo "") then {
     ctrlDelete _probe;
 };
 
-private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap
+private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap + _hint3DH
     + ([0, _descH + _gap] select (_descH > 0))
     + count _rows * _rowH;
 
@@ -245,23 +260,16 @@ _cursor = _cursor + _titleH + _gap;
 
 private _pictureInner = [_padX * 2, _cursor + _padY * 0.5, _innerW - _padX * 2, _pictureH - _padY];
 
-// The item in 3D instead, for one with a model of its own (fnc_hasModel) and with 3D picked in the box's corner: its scene's
-// camera films into a texture shown over the box (fnc_inspect3D). Picture-in-Picture renders it - off in the video options,
-// there is no 3D. Held and dragged the item turns (fnc_onFrame), the wheel zooms, a double click puts it back.
-private _can3D = [_class] call FUNC(hasModel);
-private _show3D = _can3D && {isPiPEnabled} && {GVAR(inspectView) isEqualTo "3d"};
-
+// In 3D (see the measures): held and dragged the item turns (fnc_onFrame), the wheel zooms, a double click puts it back.
 if (_show3D) then {
     ["start", [_class, _attachments]] call FUNC(inspect3D);
 
-    private _viewRect = [_padX + pixelW, _cursor + pixelH, _innerW - pixelW * 2, _pictureH - pixelH * 2];
-    _viewRect params ["", "", "_viewW", "_viewH"];
+    private _viewRect = [_padX + (_innerW - _viewPixelsW * pixelW) / 2, _cursor + pixelH, _viewPixelsW * pixelW, _viewPixelsH * pixelH];
 
     private _view = [_display, "AIO_PictureTurned", _group, _viewRect] call FUNC(uiCreate);
-    _view ctrlSetText format ["#(argb,1024,512,1)r2t(%1,%2)", INSPECT_3D_TARGET, ((_viewW / pixelW) / (_viewH / pixelH)) toFixed 3];
+    _view ctrlSetText format ["#(argb,1024,512,1)r2t(%1,2.0)", INSPECT_3D_TARGET];
 
     private _hit = [_display, "AIO_Hitbox", _group, _viewRect] call FUNC(uiCreate);
-    [_hit, LLSTRING(Inspect_3DTip)] call FUNC(setTooltip);
 
     _hit ctrlAddEventHandler ["MouseButtonDown", {
         params ["", "_button"];
@@ -301,14 +309,20 @@ if (_show3D) then {
     };
 };
 
-// 2D or 3D, in the box's corner, for an item with a model of its own. The one shown is lit; 3D is greyed out without
-// Picture-in-Picture. The choice is kept for the next items and games.
+// 2D or 3D, a switch in the box's corner, for an item with a model of its own: one dark track, the side shown lit on it. 3D is
+// greyed out without Picture-in-Picture. The choice is kept for the next items and games.
 if (_can3D) then {
     private _toggleH = _textUnit * 0.85;
-    private _toggleW = SQUARE(_toggleH * 1.4);
+    private _inset = 2 * pixelH;
+    private _segmentH = _toggleH - _inset * 2;
+    private _segmentW = SQUARE(_segmentH * 1.5);
+    private _trackW = _segmentW * 2 + SQUARE(_inset) * 2;
+    private _trackX = _padX + _innerW - SQUARE(_textUnit * 0.3) - _trackW;
     private _toggleY = _cursor + _textUnit * 0.3;
     private _accent = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
     private _shown = ["2d", "3d"] select _show3D;
+
+    [_display, _group, [_trackX, _toggleY, _trackW, _toggleH], [0, 0, 0, 0.55], _toggleH / 2] call FUNC(uiPanel);
 
     {
         _x params ["_view", "_label", "_index"];
@@ -316,13 +330,14 @@ if (_can3D) then {
         private _active = _view isEqualTo _shown;
         private _buttonTheme = +_theme;
 
-        _buttonTheme set ["button", [[0, 0, 0, 0.45], _accent + [1]] select _active];
-        _buttonTheme set ["buttonHover", [[0, 0, 0, 0.65], _accent + [1]] select _active];
-        _buttonTheme set ["buttonText", [_colorText, _theme getOrDefault ["onAccent", [0, 0, 0, 1]]] select _active];
+        _buttonTheme set ["radius", _segmentH / 2];
+        _buttonTheme set ["button", [[0, 0, 0, 0], _accent + [1]] select _active];
+        _buttonTheme set ["buttonHover", [[1, 1, 1, 0.1], _accent + [1]] select _active];
+        _buttonTheme set ["buttonText", [_colorText2, _theme getOrDefault ["onAccent", [0, 0, 0, 1]]] select _active];
 
-        private _left = _padX + _innerW - SQUARE(_textUnit * 0.3) - _toggleW * (2 - _index);
+        private _left = _trackX + SQUARE(_inset) + _segmentW * _index;
         private _button = [
-            _display, _group, [_left, _toggleY, _toggleW, _toggleH], "inspectView" + _view, _label, "", _buttonTheme, {
+            _display, _group, [_left, _toggleY + _inset, _segmentW, _segmentH], "inspectView" + _view, _label, "", _buttonTheme, {
                 params ["", "_id"];
 
                 GVAR(inspectView) = ["2d", "3d"] select (_id isEqualTo "inspectView3d");
@@ -339,6 +354,13 @@ if (_can3D) then {
 };
 
 _cursor = _cursor + _pictureH + _gap;
+
+// How to move it, under the 3D view.
+if (_show3D) then {
+    [_display, _group, [_padX, _cursor - _gap * 0.5, _innerW, _hint3DH], LLSTRING(Inspect_3DTip), _textUnit * 0.55, _muted, _font, 2, "hint"] call FUNC(uiLabel);
+
+    _cursor = _cursor + _hint3DH;
+};
 
 if (_descH > 0) then {
     private _desc = [_display, "AIO_StructuredText", _group, [_padX, _cursor, _innerW, _descH]] call FUNC(uiCreate);

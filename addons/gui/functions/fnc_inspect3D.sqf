@@ -12,8 +12,8 @@
  * format), else with what its config fits on it; gear the holder shows the right way up - uniforms, vests, headgear - lies
  * on it too. What the holder will not take or shows upside down - backpacks, glasses, magazines, small items - stands as the
  * model alone, turned as KPBLM measured it. The camera aims at the weapon's base on the holder, gear a little higher. The
- * frame is the item's size, at most INSPECT_3D_FRAME. The aperture is fixed while the scene stands (bright enough by day and
- * by night) and goes back to the engine's with it.
+ * frame is the item's size, at most INSPECT_3D_FRAME. The lights shine by day too; the aperture is left to the engine - set,
+ * it lit or darkened the whole world behind the window as well.
  *
  * The state is GVAR(scene3D): the class and attachments it shows, the camera, the lights, every object made, the target
  * [ASL], the turn (dir, pitch), the distance and its limits.
@@ -21,7 +21,7 @@
  * Arguments:
  * 0: What to do <STRING>
  *    "start"   the scene for the item, unless it stands for it already - the one before goes (arguments: [class, attachments])
- *    "stop"    the scene goes: camera, lights, objects, the aperture back to the engine's
+ *    "stop"    the scene goes: camera, lights, objects
  *    "turn"    the camera goes round by how far the mouse moved, a share of the screen (arguments: [across, down])
  *    "zoom"    nearer for a turn of the wheel up, farther for one down (arguments: [turn])
  *    "reset"   the view the scene started with
@@ -238,6 +238,7 @@ switch (_mode) do {
             _light setLightAmbient _ambient;
             _light setLightColor _colour;
             _light setLightUseFlare false;
+            _light setLightDayLight true;
             _light setLightAttenuation [0, 1, 0, 0, 20, 40];
             _objects pushBack _light;
 
@@ -261,9 +262,6 @@ switch (_mode) do {
         _camera camSetFocus [-1, -1];
         _scene set ["camera", _camera];
 
-        // A fixed aperture, darker by day than by night: the scene is lit by its own lights.
-        setAperture (8 + 8 * sunOrMoon);
-
         call _fnc_camera;
     };
     case "stop": {
@@ -283,8 +281,6 @@ switch (_mode) do {
             };
         } forEach (_scene getOrDefault ["objects", []]);
 
-        setAperture -1;
-
         GVAR(scene3D) = createHashMap;
         GVAR(inspect3DTurn) = [];
     };
@@ -293,8 +289,9 @@ switch (_mode) do {
 
         _arguments params [["_across", 0, [0]], ["_down", 0, [0]]];
 
-        _scene set ["dir", (_scene get "dir") - _across * 120];
-        _scene set ["pitch", (((_scene get "pitch") + _down * 60) max -80) min 80];
+        // The item follows the mouse: dragged to the right, its front turns to the right.
+        _scene set ["dir", (_scene get "dir") + _across * INSPECT_3D_TURN_ACROSS];
+        _scene set ["pitch", (((_scene get "pitch") + _down * INSPECT_3D_TURN_DOWN) max -80) min 80];
 
         call _fnc_camera;
     };

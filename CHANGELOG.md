@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.18 - beta
+
+### Added
+
+- Custom tile colour per item (issue #41): the item editor's Colour row has "Custom...", which opens the colour picker; Apply gives the item its own tile colour, shown as a swatch beside the chip. It goes before any category's colour - picking a category or "No colour" takes it away again. In the rules text it is `color=c83232` (six hex digits, as a category's).
+
+### Changed
+
+- Inspect card 3D view: the 2D/3D buttons are one switch, the 3D box is twice as wide as high so the item is no longer squeezed, the controls are written under it instead of in a tooltip, dragging turns the item the way the mouse goes and faster, and the world behind the window no longer changes its brightness while 3D is on.
+
 ## 0.6.17 - beta
 
 ### Added

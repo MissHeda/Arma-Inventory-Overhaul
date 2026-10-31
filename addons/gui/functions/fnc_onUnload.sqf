@@ -133,7 +133,7 @@ uiNamespace setVariable [QGVAR(hoverHold), []];
 uiNamespace setVariable [QGVAR(inspectGroup), controlNull];
 uiNamespace setVariable [QGVAR(inspectRect), []];
 
-// The inspect card's 3D view: its camera, lights and objects go, the aperture is the engine's again (fnc_inspect3D).
+// The inspect card's 3D view: its camera, lights and objects go (fnc_inspect3D).
 ["stop"] call FUNC(inspect3D);
 uiNamespace setVariable [QGVAR(windows), []];
 uiNamespace setVariable [QGVAR(turnedPictures), []];

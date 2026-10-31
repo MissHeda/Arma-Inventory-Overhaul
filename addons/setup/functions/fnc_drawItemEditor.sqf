@@ -154,7 +154,7 @@ private _canvas = GVAR(itemWork) getOrDefault [_lc, createHashMap];
 
 // What it would be without its own size, stack, weight, name and use - the values the small reset buttons take a
 // field back to. Only worked out where a rule of its own (or its tree's) has any of them: else it is what it is now.
-private _resetFields = ["footprint", "stack", "weight", "name", "use", "cats", "tint"];
+private _resetFields = ["footprint", "stack", "weight", "name", "use", "cats", "tint", "color"];
 private _hasOwnField = (_resetFields findIf {_x in _own}) >= 0 || {_tree && {(_resetFields findIf {_x in (_treeRules getOrDefault [_lc, createHashMap])}) >= 0}};
 private _default = [_info, [_class, _resetFields] call FUNC(classDefault)] select _hasOwnField;
 private _defaultWeight = _default getOrDefault ["weightOverride", -1];
@@ -184,10 +184,18 @@ if !("tintStart" in _canvas) then {
 private _startTint = _canvas get "tintStart";
 private _workTint = _canvas getOrDefault ["tintPick", _startTint];
 
+// Its own colour (color=, six hex digits, "" for none), picked with the colour picker - before any category's.
+if !("colorStart" in _canvas) then {
+    _canvas set ["colorStart", _info getOrDefault ["color", ""]];
+};
+
+private _startColor = _canvas get "colorStart";
+private _workColor = _canvas getOrDefault ["colorPick", _startColor];
+
 private _dirty = _blocks isNotEqualTo (_canvas getOrDefault ["start", []]) || {_workStack != _startStack}
     || {_workWeight isNotEqualTo _startWeightText} || {_workName isNotEqualTo _startName} || {_workIcon isNotEqualTo _startIcon}
     || {_workPicture isNotEqualTo _startPicture} || {_workUse isNotEqualTo _startUse} || {_workCats isNotEqualTo _startGroups}
-    || {_workTint isNotEqualTo _startTint};
+    || {_workTint isNotEqualTo _startTint} || {_workColor isNotEqualTo _startColor};
 
 ([_canvas] call FUNC(canvasBox)) params ["", "", "_boxW", "_boxH"];
 
@@ -551,11 +559,14 @@ _cursorY = _cursorY + ([
 // A chip for each category it is in - the tile takes that one's colour (category=... color=, the Categories card) - and
 // No colour, for the look's plain tile. The one in effect is lit: tint= where it names one of them, else the first of them
 // that has a colour, else the first - as the tile takes it (aio_items_fnc_tileTint: one without a colour leaves the look's own
-// of the item's kind). No colour is lit only for tint=none, so picking it always takes the colour away.
-if (_workCats isNotEqualTo []) then {
+// of the item's kind). No colour is lit only for tint=none, so picking it always takes the colour away. Last Custom: a colour of
+// the item's own (color=), picked in the colour picker (fnc_openColourPicker), its swatch beside it - lit while it has one,
+// which goes before any category's; picking a category or No colour takes it away again.
+call {
     private _chipH = UNIT * 0.95;
-    private _firstColoured = (_workCats select {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "color") isNotEqualTo []}) param [0, _workCats select 0];
+    private _firstColoured = (_workCats select {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "color") isNotEqualTo []}) param [0, _workCats param [0, "none"]];
     private _shownTint = switch (true) do {
+        case (_workColor isNotEqualTo ""): {"custom"};
         case (_workTint isEqualTo "none"): {"none"};
         case (_workTint in _workCats): {_workTint};
         default {_firstColoured};
@@ -578,17 +589,50 @@ if (_workCats isNotEqualTo []) then {
 
         [_display, _box, [_chipX, _lineY + (_rowH - _chipH) / 2, _chipW, _chipH], _text, _value isEqualTo _shownTint, _theme, {
             params ["", "_arguments"];
-            _arguments params ["_class", "_canvas", "_value", "_first"];
+            _arguments params ["_class", "_canvas", "_value", "_first", "_name"];
 
-            // The first with a colour is what the tile takes without tint=: picked, it needs none.
+            // Custom: the colour picker, at the mouse - Apply gives the item that colour, Default takes its own away.
+            if (_value isEqualTo "custom") exitWith {
+                getMousePosition params ["_mouseX", "_mouseY"];
+
+                [
+                    uiNamespace getVariable [QGVAR(display), displayNull], [_mouseX - UNIT, _mouseY - UNIT * 0.5, UNIT * 2, UNIT], _name,
+                    _canvas getOrDefault ["colorPick", _canvas getOrDefault ["colorStart", ""]], [0.5, 0.5, 0.5], {
+                        params ["_hex", "_arguments"];
+                        _arguments params ["_class", "_canvas"];
+
+                        _canvas set ["colorPick", toLowerANSI _hex];
+                        GVAR(itemWork) set [toLowerANSI _class, _canvas];
+
+                        [] call FUNC(drawItemEditor);
+                    }, [_class, _canvas]
+                ] call FUNC(openColourPicker);
+            };
+
+            // The first with a colour is what the tile takes without tint=: picked, it needs none. Its own colour goes.
             _canvas set ["tintPick", ["", _value] select (_value isNotEqualTo _first || {(_canvas getOrDefault ["tintStart", ""]) isNotEqualTo ""})];
+            _canvas set ["colorPick", ""];
             GVAR(itemWork) set [toLowerANSI _class, _canvas];
 
             [] call FUNC(drawItemEditor);
-        }, [_class, _canvas, _value, _firstColoured]] call FUNC(uiChip);
+        }, [_class, _canvas, _value, _firstColoured, _info getOrDefault ["name", _class]]] call FUNC(uiChip);
 
         _chipX = _chipX + _chipW + _gap;
-    } forEach ((_workCats apply {[_x, ([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name"]}) + [["none", LLSTRING(Tint_None)]]);
+
+        // Its own colour as a swatch after Custom.
+        if (_value isEqualTo "custom" && {_workColor isNotEqualTo ""}) then {
+            private _swatchW = SQUARE(_chipH);
+
+            ([[], "", GVAR(draftRules), _workColor] call EFUNC(items,tileTint)) params ["_rgb"];
+            [_display, _box, [_chipX, _lineY + (_rowH - _chipH) / 2, _swatchW, _chipH], [1, 1, 1, 0.25], _chipH / 2] call EFUNC(gui,uiPanel);
+            [
+                _display, _box, [_chipX + pixelW, _lineY + (_rowH - _chipH) / 2 + pixelH, _swatchW - pixelW * 2, _chipH - pixelH * 2], _rgb + [1],
+                _chipH / 2
+            ] call EFUNC(gui,uiPanel);
+
+            _chipX = _chipX + _swatchW + _gap;
+        };
+    } forEach ((_workCats apply {[_x, ([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name"]}) + [["none", LLSTRING(Tint_None)], ["custom", LLSTRING(Tint_Custom)]]);
 
     _cursorY = _lineY + _rowH + UNIT * 0.3;
 };
@@ -633,7 +677,7 @@ private _previewW = _sideW * 0.36;
 // they are picked (the working copy, not yet the draft's - the rules in effect would show neither, issue #40).
 private _previewInfo = +_info;
 
-([_workCats, _workTint, GVAR(draftRules)] call EFUNC(items,tileTint)) params ["_previewColor", "_previewPlain"];
+([_workCats, _workTint, GVAR(draftRules), _workColor] call EFUNC(items,tileTint)) params ["_previewColor", "_previewPlain"];
 _previewInfo set ["tileColor", _previewColor];
 _previewInfo set ["tilePlain", _previewPlain];
 
@@ -830,6 +874,13 @@ private _buttonX = _innerX;
         if (_tint isEqualTo "") then {_remove pushBack "tint"} else {_set set ["tint", _tint]};
     };
 
+    // Its own colour (color=).
+    private _color = _canvas getOrDefault ["colorPick", _canvas getOrDefault ["colorStart", ""]];
+
+    if (_color isNotEqualTo (_canvas getOrDefault ["colorStart", ""])) then {
+        if (_color isEqualTo "") then {_remove pushBack "color"} else {_set set ["color", _color]};
+    };
+
     GVAR(itemWork) deleteAt _lc;
 
     if (count _set == 0 && {_remove isEqualTo []}) exitWith {
@@ -858,7 +909,7 @@ if (_dirty) then {
 };
 
 // Something of its own to take away: its own rule, or - for the tree - the tree's.
-private _ownFields = ["footprint", "stack", "weight", "name", "icon", "picture", "use", "cats", "tint"];
+private _ownFields = ["footprint", "stack", "weight", "name", "icon", "picture", "use", "cats", "tint", "color"];
 private _hasOwn = (_ownFields findIf {_x in _own}) >= 0;
 
 if (_tree) then {
