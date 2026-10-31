@@ -54,7 +54,8 @@
  *   "icon" (optional) - [scale, across, down] to draw the picture by instead of the item's own; "picture"
  *   (optional) - the texture to draw instead of the item's own (the wizard's preview of a picture being
  *   picked); "preview" (optional) - drawn outside the inventory window (the setup wizard), so nothing
- *   reports the mouse <BOOL>
+ *   reports the mouse <BOOL>; "info" (optional) - the item's info to draw by instead of aio_items_fnc_getInfo's
+ *   (the wizard's preview of categories and a colour being picked) <HASHMAP>
  * 3: Theme <HASHMAP>
  *
  * Return Value:
@@ -87,7 +88,13 @@ private _rows = _grid get "rows";
 private _cells = _grid get "cells";
 (_grid get "rel") params ["_gridX", "_gridY"];
 
-private _info = [_entry get "class"] call EFUNC(items,getInfo);
+// The setup wizard's preview hands in the info of what is being picked ("info"), not the rules in effect.
+private _info = _entry get "info";
+
+if (isNil "_info") then {
+    _info = [_entry get "class"] call EFUNC(items,getInfo);
+};
+
 private _hidden = _entry getOrDefault ["hidden", false];
 (_info getOrDefault ["size", [1, 1]]) params ["_sizeW", "_sizeH"];
 

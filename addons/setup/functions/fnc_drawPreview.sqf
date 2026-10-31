@@ -30,9 +30,10 @@
  * 3: Theme <HASHMAP>
  * 4: Compartments [[cols, rows, holes, pos, accepts, single], ...] - the last two where a compartment takes only some categories or is a single
  *    slot (its category's picture is drawn faintly in its middle); for an item its shape alone, [] for none <ARRAY>
- * 5: For an item [picture, category, class, icon]; [] for a container <ARRAY> (default: [])
+ * 5: For an item [picture, category, class, icon, info]; [] for a container <ARRAY> (default: [])
  *    With a class, the tile is drawn for it, by the icon and the picture given ([scale, across, down], the
- *    one being edited, not the draft's); without, its shape and picture only
+ *    one being edited, not the draft's) and by the info given (its colour as picked, aio_items_fnc_getInfo's
+ *    keys; an empty one for the rules in effect); without, its shape and picture only
  *
  * Return Value:
  * None
@@ -66,7 +67,7 @@ private _padX = SQUARE(_padY);
 private _areaW = _width - _padX * 2 - SCROLL_W;
 
 if (_item isNotEqualTo []) exitWith {
-    _item params [["_picture", ""], ["_category", CATEGORY_MISC], ["_class", ""], ["_icon", ICON_PLAIN]];
+    _item params [["_picture", ""], ["_category", CATEGORY_MISC], ["_class", ""], ["_icon", ICON_PLAIN], ["_itemInfo", createHashMap, [createHashMap]]];
 
     (_blocks param [0, [0, 0, []]]) params ["_w", "_h", ["_holes", []]];
 
@@ -114,6 +115,11 @@ if (_item isNotEqualTo []) exitWith {
         // The picture being picked, not the class's own yet.
         if (_picture isNotEqualTo "") then {
             _entry set ["picture", _picture];
+        };
+
+        // Its colour as picked, not the rules' in effect yet.
+        if (count _itemInfo > 0) then {
+            _entry set ["info", _itemInfo];
         };
 
         [_display, _grid, _entry, _theme] call EFUNC(gui,createTile);

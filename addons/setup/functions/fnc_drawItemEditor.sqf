@@ -550,10 +550,11 @@ _cursorY = _cursorY + ([
 // ----- Its tile's colour (tint=) -----
 // A chip for each category it is in - the tile takes that one's colour (category=... color=, the Categories card) - and
 // No colour, for the look's plain tile. The one in effect is lit: tint= where it names one of them, else the first of them
-// that has a colour, else No colour - as the tile takes it (aio_items_fnc_getInfo).
+// that has a colour, else the first - as the tile takes it (aio_items_fnc_tileTint: one without a colour leaves the look's own
+// of the item's kind). No colour is lit only for tint=none, so picking it always takes the colour away.
 if (_workCats isNotEqualTo []) then {
     private _chipH = UNIT * 0.95;
-    private _firstColoured = (_workCats select {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "color") isNotEqualTo []}) param [0, "none"];
+    private _firstColoured = (_workCats select {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "color") isNotEqualTo []}) param [0, _workCats select 0];
     private _shownTint = switch (true) do {
         case (_workTint isEqualTo "none"): {"none"};
         case (_workTint in _workCats): {_workTint};
@@ -628,10 +629,17 @@ _sideY = _sideY + UNIT * 0.8;
 private _previewH = _canvasH * 0.5;
 private _previewW = _sideW * 0.36;
 
-// The tile as the inventory draws it, with the picture as it is set below (the working copy, not yet the draft's).
+// The tile as the inventory draws it, with the picture as it is set below and its colour by the categories and the Colour row as
+// they are picked (the working copy, not yet the draft's - the rules in effect would show neither, issue #40).
+private _previewInfo = +_info;
+
+([_workCats, _workTint, GVAR(draftRules)] call EFUNC(items,tileTint)) params ["_previewColor", "_previewPlain"];
+_previewInfo set ["tileColor", _previewColor];
+_previewInfo set ["tilePlain", _previewPlain];
+
 [
     _display, _box, [_sideX, _sideY, _previewW, _previewH], _theme, [[], _blocks] select _onePiece,
-    [_workShown, _info getOrDefault ["category", CATEGORY_MISC], _class, _workIcon apply {_x / 100}]
+    [_workShown, _info getOrDefault ["category", CATEGORY_MISC], _class, _workIcon apply {_x / 100}, _previewInfo]
 ] call FUNC(drawPreview);
 
 // ----- Its picture: zoom and shift -----

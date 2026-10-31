@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.16 - beta
+
+### Fixed
+
+- Tile colours (issue #40): "No colour" and an item in no category now give the plain tile - before, they fell back to the look's hint of the item's kind, so a medical item stayed green and a magazine kept its ammo colour. "No colour" was lit already when none of the item's categories had a colour, so picking it wrote nothing. The setup wizard's tile preview follows the categories and the colour as they are picked, not the rules in effect.
+
 ## 0.6.15 - beta
 
 ### Changed

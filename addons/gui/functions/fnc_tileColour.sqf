@@ -2,7 +2,8 @@
 /*
  * Author: Miss Heda
  * The background colour of an item's tile: the colour the setup gives one of its categories (category=... color=, the item's
- * "tileColor"), else the look's own colour of its tile category (the theme's "tileBg"). Either way at the strength the theme
+ * "tileColor"), else the look's own colour of its tile category (the theme's "tileBg") - of everything else (misc) for an item
+ * with no colour at all ("tilePlain"). Either way at the strength the theme
  * gives that category's tiles, so the tile transparency of the palette counts for both.
  *
  * Arguments:
@@ -21,7 +22,9 @@
 
 params [["_theme", createHashMap, [createHashMap]], ["_info", createHashMap, [createHashMap]], ["_fallback", [1, 1, 1, 0.075], [[]]]];
 
-private _plain = +((_theme getOrDefault ["tileBg", []]) param [_info getOrDefault ["category", 0], _fallback]);
+// No colour at all (tint=none, cats=none, aio_items_fnc_tileTint): the plain tile, not the hint of the item's kind.
+private _kind = [_info getOrDefault ["category", CATEGORY_MISC], CATEGORY_MISC] select (_info getOrDefault ["tilePlain", false]);
+private _plain = +((_theme getOrDefault ["tileBg", []]) param [_kind, _fallback]);
 
 if !(_plain isEqualType []) then {
     _plain = +_fallback;

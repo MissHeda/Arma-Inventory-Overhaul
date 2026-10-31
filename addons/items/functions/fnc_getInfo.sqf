@@ -71,8 +71,9 @@
  *   "groups"            - the categories it is in: "cats" when it has some, else the built-in one (fnc_defaultGroup) - of ITEM_GROUPS and the setup's own:
  *                         weapon, ammo, grenade, gear, medical, food, tool, misc. Never empty. The strip of a loot box, the compartments
  *                         that accept only some categories and the wizard read this <ARRAY of STRING>
- *   "tileColor"         - the colour the setup gives its tiles (color= of the first of its "groups" that has one),
- *                         [r, g, b] 0 to 1, [] for the look's own colour of its category <ARRAY>
+ *   "tileColor"         - the colour the setup gives its tiles (fnc_tileTint: color= of the category tint= names, else of
+ *                         the first of its "groups" that has one), [r, g, b] 0 to 1, [] for the look's own colour <ARRAY>
+ *   "tilePlain"         - no colour at all (tint=none, cats=none): the look's plain tile, not its colour of the item's kind <BOOL>
  *   "pictureOverride"   - the rules' picture path, "" when none - also when the file is missing <STRING>
  *   "configPicture"     - config's picture <STRING>
  *   and from fnc_getFacts: "lc", "root", "rounds", "lineage", "addon", "mod"
@@ -137,24 +138,13 @@ if ((_resolved get "cats") isEqualTo ["none"]) then {
     _info set ["groups", []];
 };
 
-// The tiles' colour: the category tint= names, when it is one of its categories - with no colour of its own (category=...
-// color=) that is the look's plain tile; else the first of its categories that has a colour. tint=none keeps the plain tile.
-// The setup's Colour row lights the same one (aio_setup_fnc_drawItemEditor).
-private _categoryDefs = _compiled getOrDefault ["categoryDefs", createHashMap];
-private _coloured = (_info get "groups") select {((_categoryDefs getOrDefault [_x, []]) param [2, ""]) isNotEqualTo ""};
+// The tiles' colour (fnc_tileTint): of the category tint= names or the first with a colour, the look's own, or the plain tile.
 private _tint = _resolved getOrDefault ["tint", ""];
-private _pick = switch (true) do {
-    case (_tint isEqualTo "none"): {""};
-    case (_tint in (_info get "groups")): {_tint};
-    default {_coloured param [0, ""]};
-};
-private _tileColor = [];
 
-if (_pick isNotEqualTo "") then {
-    _tileColor = ([_pick, _compiled] call FUNC(categoryInfo)) get "color";
-};
+([_info get "groups", _tint, _compiled] call FUNC(tileTint)) params ["_tileColor", "_tilePlain"];
 
 _info set ["tileColor", _tileColor];
+_info set ["tilePlain", _tilePlain];
 _info set ["tint", _tint];
 _info set ["show", _resolved getOrDefault ["show", ""]];
 _info set ["src", _resolved get "src"];

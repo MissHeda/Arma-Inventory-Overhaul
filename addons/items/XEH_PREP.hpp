@@ -27,6 +27,7 @@ PREP(builtinGroup);
 PREP(orderGroups);
 PREP(categories);
 PREP(categoryInfo);
+PREP(tileTint);
 PREP(cleanGrid);
 PREP(encodeName);
 PREP(decodeName);
