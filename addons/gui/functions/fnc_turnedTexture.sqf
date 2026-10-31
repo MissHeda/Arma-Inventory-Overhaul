@@ -135,6 +135,9 @@ if (!isNull _display) then {
         displayUpdate _this;
     };
 
+    // The very next frames first: a tile turned with R while dragged showed blank for a tenth of a second before (it flickered).
+    [_retake, _outerDisplay] call CBA_fnc_execNextFrame;
+    [_retake, _outerDisplay, 2] call CBA_fnc_execAfterNFrames;
     [_retake, _outerDisplay, 0.1] call CBA_fnc_waitAndExecute;
     [_retake, _outerDisplay, 0.6] call CBA_fnc_waitAndExecute;
 }, [_inner, _outer, _innerTexture, _texture, _fresh], 5] call CBA_fnc_waitUntilAndExecute;

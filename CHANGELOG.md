@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.21 - beta
+
+### Fixed
+
+- A turned picture (a weapon turned with R while dragged) flickered blank for a moment before it showed: the turned texture is taken anew in the very next frames now, not only after a tenth of a second.
+
 ## 0.6.20 - beta
 
 ### Fixed
