@@ -39,7 +39,8 @@ disableSerialization;
 
 params ["_display", "_parent", "_rect", "_text", "_size", ["_color", []], ["_font", ""], ["_align", 0], ["_title", false]];
 
-private _theme = missionNamespace getVariable [QGVAR(theme), createHashMap];
+// A display with a look of its own (the setup wizard, QGVAR(plainLook)) takes nothing of the inventory's palette.
+private _theme = [missionNamespace getVariable [QGVAR(theme), createHashMap], createHashMap] select (_display getVariable [QGVAR(plainLook), false]);
 private _gradient = _theme getOrDefault ["titleGradient", []];
 
 // The colour the caller asked for, before the palette's own colours replace it: what tells ink on a lit surface (below).

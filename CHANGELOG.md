@@ -2,6 +2,22 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.11 - beta
+
+### Added
+
+- An item in several categories can say which colour its tile takes: `tint=tool` takes that category's colour, `tint=split` a stripe of each of their colours, without it the first. The setup wizard's Items step shows the choice beside the Category row as soon as two are ticked (issue #37).
+- A container's compartments that take several categories can say which picture their empty cells show: `show=food` that category's, `show=all` a small picture of each in the compartment's top left corner (the corner icons are back as an option), `show=none` none, without it the first. In the wizard's Containers step beside "One item, any size" (issue #37).
+- An item can be in no category at all: untick every category in the Items step (`cats=none`). A compartment that takes only some categories does not take it; its tile keeps the look's plain colour.
+
+### Changed
+
+- The setup wizard has a look of its own: the plain theme, whatever colours, gradients and transparency are picked for the inventory - a see-through inventory no longer makes the wizard see-through too.
+
+### Fixed
+
+- Setup wizard, Items: the picture's Zoom and place steppers sit right beside the preview again - with a small item they stood far off to the right.
+
 ## 0.6.10 - beta
 
 ### Fixed

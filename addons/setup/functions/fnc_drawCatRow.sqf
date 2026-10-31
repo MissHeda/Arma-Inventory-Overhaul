@@ -64,12 +64,11 @@ private _lineY = _top;
         params ["_on", "_arguments"];
         _arguments params ["_group", "_work", "_code", "_codeArguments"];
 
-        // In the order they are stored in, whatever order they were clicked in; the last one on cannot be switched off.
+        // In the order they are stored in, whatever order they were clicked in. None on is allowed: in no category (cats=none).
         private _list = ([_work - [_group], _work + [_group]] select _on);
 
-        if (_list isEqualTo []) exitWith {
-            [LLSTRING(Hint_CatOne), "text2"] call FUNC(setHint);
-            [_work, _codeArguments] call _code;
+        if (_list isEqualTo []) then {
+            [LLSTRING(Hint_CatNone), "text2"] call FUNC(setHint);
         };
 
         [[_list] call EFUNC(items,orderGroups), _codeArguments] call _code;

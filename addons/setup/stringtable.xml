@@ -688,8 +688,8 @@
         <Key ID="STR_aio_setup_Hint_BadWeight">
             <English>The weight is a number in kg like 0.5 - or empty, for config's own.</English>
         </Key>
-        <Key ID="STR_aio_setup_Hint_CatOne">
-            <English>An item is in at least one category</English>
+        <Key ID="STR_aio_setup_Hint_CatNone">
+            <English>In no category: a compartment that takes only some categories does not take it.</English>
         </Key>
         <Key ID="STR_aio_setup_Hint_CellsApplied">
             <English>The cells of %1 are kept. Save puts them to use.</English>
@@ -1284,6 +1284,18 @@ What you apply on the right goes to all of them.</English>
         <Key ID="STR_aio_setup_Setting_LockedServer">
             <English>Set by the server's cba_settings.sqf - change it there.</English>
         </Key>
+        <Key ID="STR_aio_setup_Show_All">
+            <English>Picture: small, all of them in the corner</English>
+        </Key>
+        <Key ID="STR_aio_setup_Show_First">
+            <English>Picture: the first</English>
+        </Key>
+        <Key ID="STR_aio_setup_Show_None">
+            <English>Picture: none</English>
+        </Key>
+        <Key ID="STR_aio_setup_Show_Of">
+            <English>Picture: %1</English>
+        </Key>
         <Key ID="STR_aio_setup_Source_client">
             <English>Client</English>
         </Key>
@@ -1340,6 +1352,15 @@ What you apply on the right goes to all of them.</English>
         </Key>
         <Key ID="STR_aio_setup_Text_OwnRead">
             <English>One rule per line. The settings are in the lines for a cba_settings.sqf.</English>
+        </Key>
+        <Key ID="STR_aio_setup_Tint_First">
+            <English>Colour: the first</English>
+        </Key>
+        <Key ID="STR_aio_setup_Tint_Of">
+            <English>Colour: %1</English>
+        </Key>
+        <Key ID="STR_aio_setup_Tint_Split">
+            <English>Colour: split, a stripe each</English>
         </Key>
         <Key ID="STR_aio_setup_Title">
             <English>Inventory setup</English>

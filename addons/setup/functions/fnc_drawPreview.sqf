@@ -80,6 +80,9 @@ if (_item isNotEqualTo []) exitWith {
     private _cellW = _cellPixels * pixelW;
     private _cells = [];
 
+    // How wide the piece of grid came out: what is beside it starts there (fnc_drawItemEditor).
+    uiNamespace setVariable [QGVAR(previewDrawnW), _padX * 2 + _gridCols * _cellW];
+
     [
         _display, _group, [0, 0, _padX * 2 + _gridCols * _cellW, _padY * 2 + _gridRows * _cellH],
         _theme getOrDefault ["panel", [0.05, 0.05, 0.05, 0.92]], (_theme getOrDefault ["radius", 0]) min (UNIT * 0.3)

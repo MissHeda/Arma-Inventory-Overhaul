@@ -75,7 +75,7 @@
 params [["_facts", createHashMap, [createHashMap]], ["_compiled", createHashMap, [createHashMap]], ["_chain", [], [[]]]];
 
 private _kind = _facts get "kind";
-private _need = ["footprint", "weight", "name", "icon", "picture", "use", "cats"];
+private _need = ["footprint", "weight", "name", "icon", "picture", "use", "cats", "tint", "show"];
 
 if !(_kind in KINDS_SINGLE) then {
     _need pushBack "stack";

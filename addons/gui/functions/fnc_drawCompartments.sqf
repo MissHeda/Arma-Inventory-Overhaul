@@ -232,6 +232,15 @@ private _fnc_compartment = {
     _grid set ["block", _index];
     _grid set ["accepts", _accepts];
     _grid set ["single", _single];
+
+    // What a compartment that takes several categories shows (show= of the container's class, fnc_drawBadge).
+    private _ownerClass = _section getOrDefault ["class", ""];
+
+    if (_ownerClass isEqualTo "" && {!isNull _container}) then {
+        _ownerClass = typeOf _container;
+    };
+
+    _grid set ["show", [([_ownerClass] call EFUNC(items,getInfo)) getOrDefault ["show", ""], ""] select (_ownerClass isEqualTo "")];
     _grid set ["pos", _pos];
     _grid set ["overflow", _isOverflow];
     _grid set ["overflowIndex", _overflowIndex];

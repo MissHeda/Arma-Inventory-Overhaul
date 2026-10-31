@@ -40,6 +40,9 @@
 params [["_text", "", [""]], ["_key", "cats", [""]]];
 
 private _words = (toLowerANSI _text) splitString (toString [32, 9, 10, 13, 43, 44, 124, 59, 47]);
+
+// cats=none: in no category at all - not even the built-in one (fnc_getInfo); a compartment that takes only some takes it not.
+if (_words isEqualTo ["none"]) exitWith {[["none"], [], true]};
 private _found = [];
 private _notes = [];
 

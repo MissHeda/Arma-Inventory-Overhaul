@@ -28,6 +28,9 @@ params ["_display", "_parent", "_rect", ["_radius", 0, [0]]];
 
 private _color = (missionNamespace getVariable [QGVAR(theme), createHashMap]) getOrDefault ["panelGradient", []];
 
+// A display with a look of its own (the setup wizard) has no panel gradient.
+if (_display getVariable [QGVAR(plainLook), false]) exitWith {controlNull};
+
 if (count _color < 3) exitWith {controlNull};
 
 _rect params ["_left", "_top", "_width", "_height"];

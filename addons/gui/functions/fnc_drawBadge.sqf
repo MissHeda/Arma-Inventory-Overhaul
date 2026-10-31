@@ -5,7 +5,9 @@
  * What says a compartment takes only some categories (grid=2x2:medical) or is a single slot (grid=1x1:grenade:one), also when
  * something lies in it: the watermark. A compartment with nothing in it shows its first category's picture, large and faint, in
  * the middle; one with something in it shows it, small and fainter, on each free cell while at most WATERMARK_CELLS_MAX are free.
- * There is no badge in the corner (the faint pictures are enough). Made again each time the cells'
+ * Which picture, where it takes several categories, is the container's show= (aio_items_fnc_getInfo): one of them by its id,
+ * "none" for no picture, "all" for a small picture of each of them in the compartment's top left corner instead, else the first.
+ * Made again each time the cells'
  * squares are (fnc_drawCells, at the end of every draw of tiles), so it lies over the tiles and follows them.
  * Hovering a tile or a free cell of such a compartment says in the footer what it takes (fnc_updateHover).
  * The controls are kept in the grid under "badge" and deleted when it is drawn again.
@@ -47,6 +49,15 @@ private _rowTo = _grid getOrDefault ["rowTo", _grid get "rows"];
 (_grid get "rel") params ["_left", "_top"];
 
 private _made = [];
+private _show = _grid getOrDefault ["show", ""];
+
+if (_show isEqualTo "none") exitWith {};
+
+// The one asked for first.
+if (_show in _accepts) then {
+    _accepts = [_show] + (_accepts - [_show]);
+};
+
 private _textures = (_accepts apply {[_x] call FUNC(groupTexture)}) select {_x isNotEqualTo ""};
 private _shown = 0;
 private _free = [];
@@ -57,6 +68,22 @@ private _free = [];
 } forEach _state;
 
 if (_shown == 0) exitWith {};
+
+// ----- Small pictures of all of them in the corner (show=all) -----
+if (_show isEqualTo "all" && {count _textures > 1}) exitWith {
+    private _side = ((_cellW / pixelW) min (_cellH / pixelH)) * 0.42;
+    private _pad = _side * 0.18;
+
+    {
+        _made pushBack ([
+            _display, _parent,
+            [_left + (_pad + _forEachIndex * (_side + _pad)) * pixelW, _top + _pad * pixelH, _side * pixelW, _side * pixelH],
+            _x, [1, 1, 1, [0.35, 0.45] select _single]
+        ] call FUNC(uiPicture));
+    } forEach _textures;
+
+    _grid set ["badge", _made];
+};
 
 // ----- The watermark -----
 // Empty: one large picture in the middle of the compartment. Something lies in it: a small one on each free cell, unless there are

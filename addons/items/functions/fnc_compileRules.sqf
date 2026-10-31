@@ -694,7 +694,7 @@ private _undefined = [];
 
 {
     private _values = _x select 1;
-    private _used = +(_values getOrDefault ["cats", []]);
+    private _used = (_values getOrDefault ["cats", []]) - ["none"];
     private _gridSpec = _values getOrDefault ["grid", []];
 
     if ((_gridSpec param [0, ""]) isEqualTo "blocks") then {

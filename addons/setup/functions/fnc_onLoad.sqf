@@ -59,7 +59,11 @@ if (is3DEN) then {
 };
 
 GVAR(mode) = _mode;
+// Its own look, the same for everyone: the plain theme, never the palette of the inventory (colours, transparency).
+missionNamespace setVariable [QEGVAR(gui,paletteOff), true];
 GVAR(theme) = call EFUNC(gui,theme);
+missionNamespace setVariable [QEGVAR(gui,paletteOff), false];
+_display setVariable [QEGVAR(gui,plainLook), true];
 GVAR(target) = [_mode] call FUNC(canEdit);
 GVAR(readOnly) = !(GVAR(target) getOrDefault ["canSave", false]);
 

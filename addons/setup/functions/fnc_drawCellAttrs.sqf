@@ -182,6 +182,26 @@ private _singleW = SQUARE(_chipH * 0.9) + (_singleText getTextWidth [_fontBold, 
     [_class, _shown, _picked, _accepts, _state] call _change;
 }, [_class, _shown, _picked, _accepts, _fnc_change]] call FUNC(uiChip);
 
+// Taking several categories: which picture its empty cells show (show= of the class, for all its compartments; aio_gui_fnc_drawBadge) -
+// one of them, a small picture of each in the corner, or none. Written at once, an undo step of its own.
+if (count _accepts > 1) then {
+    private _show = ([_class, GVAR(draftRules)] call EFUNC(items,getInfo)) getOrDefault ["show", ""];
+    private _options = [[LLSTRING(Show_First), ""]]
+        + (_accepts apply {[format [LLSTRING(Show_Of), ([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name"], _x]})
+        + [[LLSTRING(Show_All), "all"], [LLSTRING(Show_None), "none"]];
+    private _showW = SQUARE(UNIT * 9);
+
+    [_display, _parent, [_left + _labelW + _singleW + _gap * 3, _lineY, _showW, _rowH], _options, _show, _theme, {
+        params ["_value", "_class"];
+
+        if (_value isEqualTo "") then {
+            [_class, createHashMap, ["show"]] call FUNC(upsertRule);
+        } else {
+            [_class, createHashMapFromArray [["show", _value]]] call FUNC(upsertRule);
+        };
+    }, _class, true, LLSTRING(Show_First)] call FUNC(uiDropdown);
+};
+
 _lineY = _lineY + _rowH;
 
 _lineY - _top

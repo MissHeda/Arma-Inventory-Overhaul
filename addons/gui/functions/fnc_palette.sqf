@@ -33,6 +33,12 @@
  * Public: No
  */
 
+// A window that keeps its own look whatever the palette says - the setup wizard (aio_setup_fnc_onLoad) builds its theme with
+// this set: the plain colours and full panels, never the player's transparency.
+if (missionNamespace getVariable [QGVAR(paletteOff), false]) exitWith {
+    +PALETTE_DEFAULT
+};
+
 // The colours a server or mission forces (aio_gui_paletteText): everyone wears those.
 if ([] call FUNC(paletteForced)) exitWith {
     private _forced = [parseSimpleArray (missionNamespace getVariable [QGVAR(paletteText), ""])] call FUNC(paletteRead);

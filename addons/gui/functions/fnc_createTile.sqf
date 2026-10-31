@@ -167,6 +167,29 @@ private _background = _backgrounds select 0;
 
 _controls append _backgrounds;
 
+// tint=split (aio_items_fnc_getInfo "tileColors"): a stripe across for each of its categories' colours, the first being the
+// surface itself. Not on a shaped tile, nor on one not searched yet. The last stripe keeps the round corners on the right.
+private _stripes = _info getOrDefault ["tileColors", []];
+
+if (!_hidden && {!_shaped} && {count _stripes > 1}) then {
+    private _stripeW = _width / count _stripes;
+    private _alpha = _color param [3, 1];
+
+    for "_i" from 1 to (count _stripes - 1) do {
+        private _stripeCorners = [];
+
+        if (_i == count _stripes - 1 && {_corners isNotEqualTo []}) then {
+            (_corners select 1) params ["", "_topRight", "", "_bottomRight"];
+            _stripeCorners = [_corners select 0, [false, _topRight, false, _bottomRight]];
+        };
+
+        _controls append ([
+            _display, _parent, [_left + _i * _stripeW, _top, ((_width - _i * _stripeW) min _stripeW), _height],
+            ((_stripes select _i) select [0, 3]) + [_alpha], _stripeCorners
+        ] call FUNC(uiSurface));
+    };
+};
+
 if (_hidden) then {
     // Diagonal stripes over the whole footprint, a little stronger than the empty slots' (fnc_uiHatch: pieces of about a
     // cell, so a wide tile keeps the angle). A shaped one is hatched run by run - the bridges between its rows are too thin

@@ -60,6 +60,8 @@ private _fnc_values = {
     if ("picture" in _values) then {_texts pushBack ("picture=" + ([_values get "picture", true] call FUNC(encodeName)))};
     if ("use" in _values) then {_texts pushBack ("use=" + ([_values get "use"] call FUNC(formatUse)))};
     if ("cats" in _values) then {_texts pushBack ("cats=" + ([_values get "cats"] call FUNC(formatGroups)))};
+    if ("tint" in _values) then {_texts pushBack ("tint=" + (_values get "tint"))};
+    if ("show" in _values) then {_texts pushBack ("show=" + (_values get "show"))};
 
     _texts joinString " "
 };

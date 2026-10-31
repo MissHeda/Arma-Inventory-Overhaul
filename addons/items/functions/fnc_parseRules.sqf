@@ -171,7 +171,7 @@ private _classChars = createHashMap;
 private _shapeChars = createHashMap;
 {_shapeChars set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/@");
 
-private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon", "picture", "use", "cats"];
+private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon", "picture", "use", "cats", "tint", "show"];
 
 private _numberOps = ["=", "<", "<=", ">", ">="];
 private _keyOps = createHashMapFromArray [
@@ -441,6 +441,33 @@ private _fnc_use = {
     ["use", _kinds]
 };
 
+// tint=: the colour of a tile in several categories - one of them (its id), or split for a stripe of each (fnc_getInfo).
+private _fnc_tint = {
+    params ["_raw"];
+
+    private _word = toLowerANSI (trim _raw);
+
+    if (_word isEqualTo "split" || {_word regexMatch CAT_ID_PATTERN}) exitWith {["tint", _word]};
+
+    _notes pushBack format ["tint=%1: a category's id or split - left out", _raw];
+
+    []
+};
+
+// show=: what a compartment of this container that takes several categories shows - one of them (its id), all of them small
+// in its corner, or none of them (aio_gui_fnc_drawBadge); the first of them without it.
+private _fnc_show = {
+    params ["_raw"];
+
+    private _word = toLowerANSI (trim _raw);
+
+    if (_word regexMatch CAT_ID_PATTERN) exitWith {["show", _word]};
+
+    _notes pushBack format ["show=%1: a category's id, all or none - left out", _raw];
+
+    []
+};
+
 private _fnc_cats = {
     params ["_raw"];
 
@@ -471,6 +498,8 @@ private _fnc_value = {
         case "picture": {[_raw] call _fnc_picture};
         case "use": {[_raw] call _fnc_use};
         case "cats": {[_raw] call _fnc_cats};
+        case "tint": {[_raw] call _fnc_tint};
+        case "show": {[_raw] call _fnc_show};
         default {[]};
     }
 };

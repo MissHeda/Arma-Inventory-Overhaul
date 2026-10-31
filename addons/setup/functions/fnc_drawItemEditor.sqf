@@ -154,7 +154,7 @@ private _canvas = GVAR(itemWork) getOrDefault [_lc, createHashMap];
 
 // What it would be without its own size, stack, weight, name and use - the values the small reset buttons take a
 // field back to. Only worked out where a rule of its own (or its tree's) has any of them: else it is what it is now.
-private _resetFields = ["footprint", "stack", "weight", "name", "use", "cats"];
+private _resetFields = ["footprint", "stack", "weight", "name", "use", "cats", "tint"];
 private _hasOwnField = (_resetFields findIf {_x in _own}) >= 0 || {_tree && {(_resetFields findIf {_x in (_treeRules getOrDefault [_lc, createHashMap])}) >= 0}};
 private _default = [_info, [_class, _resetFields] call FUNC(classDefault)] select _hasOwnField;
 private _defaultWeight = _default getOrDefault ["weightOverride", -1];
@@ -176,9 +176,18 @@ private _workIcon = _canvas getOrDefault ["iconPercent", _startIcon];
 private _workPicture = _canvas getOrDefault ["pictureText", _startPicture];
 private _workUse = _canvas getOrDefault ["useList", _startUse];
 private _workCats = _canvas getOrDefault ["catsList", _startGroups];
+// The colour of a tile in several categories (tint=): one of them, split, or "" for the first.
+if !("tintStart" in _canvas) then {
+    _canvas set ["tintStart", _info getOrDefault ["tint", ""]];
+};
+
+private _startTint = _canvas get "tintStart";
+private _workTint = _canvas getOrDefault ["tintPick", _startTint];
+
 private _dirty = _blocks isNotEqualTo (_canvas getOrDefault ["start", []]) || {_workStack != _startStack}
     || {_workWeight isNotEqualTo _startWeightText} || {_workName isNotEqualTo _startName} || {_workIcon isNotEqualTo _startIcon}
-    || {_workPicture isNotEqualTo _startPicture} || {_workUse isNotEqualTo _startUse} || {_workCats isNotEqualTo _startGroups};
+    || {_workPicture isNotEqualTo _startPicture} || {_workUse isNotEqualTo _startUse} || {_workCats isNotEqualTo _startGroups}
+    || {_workTint isNotEqualTo _startTint};
 
 ([_canvas] call FUNC(canvasBox)) params ["", "", "_boxW", "_boxH"];
 
@@ -526,8 +535,25 @@ if (_workCats isNotEqualTo (_default getOrDefault ["groups", ["misc"]])) then {
     ] call FUNC(uiReset);
 };
 
+// In several categories: which one's colour the tile takes, or a stripe of each (tint=).
+private _tintW = [0, SQUARE(UNIT * 7)] select (count _workCats > 1);
+
+if (_tintW > 0) then {
+    private _tintOptions = [[LLSTRING(Tint_First), ""]] + (_workCats apply {[format [LLSTRING(Tint_Of), ([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name"], _x]}) + [[LLSTRING(Tint_Split), "split"]];
+
+    [_display, _box, [_innerX + _innerW - _rowH - _tintW - _gap, _cursorY, _tintW, _rowH], _tintOptions, [_workTint, ""] select !(_workTint in (_workCats + ["split"])), _theme, {
+        params ["_value", "_arguments"];
+        _arguments params ["_class", "_canvas"];
+
+        _canvas set ["tintPick", _value];
+        GVAR(itemWork) set [toLowerANSI _class, _canvas];
+
+        [] call FUNC(drawItemEditor);
+    }, [_class, _canvas]] call FUNC(uiDropdown);
+};
+
 _cursorY = _cursorY + ([
-    _display, _box, [_innerX, _cursorY, _innerW - _rowH], _theme, _labelW, _workCats, {
+    _display, _box, [_innerX, _cursorY, _innerW - _rowH - ([0, _tintW + _gap * 2] select (_tintW > 0))], _theme, _labelW, _workCats, {
         params ["_list", "_arguments"];
         _arguments params ["_class", "_canvas"];
 
@@ -584,7 +610,9 @@ private _previewW = _sideW * 0.36;
 // Beside the tile it moves: how large the picture is drawn in its tile (25 to 400 %) and how far it is shifted
 // across and down (a share of the tile, -100 to 100 %). Each click draws this side again, so the tile follows.
 
-private _pictureX = _sideX + _previewW + _gap * 2;
+// Beside the piece of grid as it came out, not the room it was given: a small item's preview is narrower, and the
+// steppers stood far off to the right of it.
+private _pictureX = _sideX + ((uiNamespace getVariable [QGVAR(previewDrawnW), _previewW]) min _previewW) + _gap * 2;
 private _pictureW = _sideX + _sideW - _pictureX;
 private _pictureY = _sideY + (((_previewH - ICON_BLOCK_H) / 2) max 0);
 
@@ -751,11 +779,19 @@ private _buttonX = _innerX;
     private _cats = _canvas getOrDefault ["catsList", _startGroups];
 
     if (_cats isNotEqualTo _startGroups) then {
-        if (_cats isEqualTo _defaultGroups) then {
-            _remove pushBack "cats";
-        } else {
-            _set set ["cats", _cats];
+        switch (true) do {
+            case (_cats isEqualTo _defaultGroups): {_remove pushBack "cats"};
+            // None ticked: in no category at all (cats=none).
+            case (_cats isEqualTo []): {_set set ["cats", ["none"]]};
+            default {_set set ["cats", _cats]};
         };
+    };
+
+    // The colour among several categories (tint=).
+    private _tint = _canvas getOrDefault ["tintPick", _canvas getOrDefault ["tintStart", ""]];
+
+    if (_tint isNotEqualTo (_canvas getOrDefault ["tintStart", ""])) then {
+        if (_tint isEqualTo "") then {_remove pushBack "tint"} else {_set set ["tint", _tint]};
     };
 
     GVAR(itemWork) deleteAt _lc;
@@ -786,7 +822,7 @@ if (_dirty) then {
 };
 
 // Something of its own to take away: its own rule, or - for the tree - the tree's.
-private _ownFields = ["footprint", "stack", "weight", "name", "icon", "picture", "use", "cats"];
+private _ownFields = ["footprint", "stack", "weight", "name", "icon", "picture", "use", "cats", "tint"];
 private _hasOwn = (_ownFields findIf {_x in _own}) >= 0;
 
 if (_tree) then {
