@@ -210,7 +210,10 @@ _categoryColor set [3, 1];
 
 [_display, _group, [_padX, _cursor + _titleH * 0.15, pixelW * 3, _titleH * 0.7], _categoryColor] call FUNC(uiPanel);
 
-private _titleW = _innerW - SQUARE(_textUnit * 0.35) - _closeW;
+// KPBLM Item Preview's showcase, beside the cross (aio_compat_itempreview, when loaded).
+private _view3D = !isNil QEFUNC(compat_itempreview,open);
+private _buttonsW = _closeW * ([1, 2] select _view3D);
+private _titleW = _innerW - SQUARE(_textUnit * 0.35) - _buttonsW;
 
 [
     _display, _group, [_padX + SQUARE(_textUnit * 0.35), _cursor, _titleW, _titleH],
@@ -218,7 +221,7 @@ private _titleW = _innerW - SQUARE(_textUnit * 0.35) - _closeW;
     _textUnit * 0.8, _colorText, _fontBold, 0, "name"
 ] call FUNC(uiLabel);
 
-private _grip = [_display, "AIO_Hitbox", _group, [0, 0, _width - _padX - _closeW, _cursor + _titleH]] call FUNC(uiCreate);
+private _grip = [_display, "AIO_Hitbox", _group, [0, 0, _width - _padX - _buttonsW, _cursor + _titleH]] call FUNC(uiCreate);
 [_grip, LLSTRING(Inspect_Move)] call FUNC(setTooltip);
 _grip ctrlAddEventHandler ["MouseButtonDown", {
     params ["_ctrl", "_button"];
@@ -234,6 +237,14 @@ _grip ctrlAddEventHandler ["MouseButtonDown", {
 [_display, _group, [_width - _padX - _closeW, _cursor, _closeW, _closeH], "inspectClose", "", UI_TEX(icon_close_ca), _theme, {
     call FUNC(closeInspect);
 }] call FUNC(uiButton);
+
+if (_view3D) then {
+    private _button = [_display, _group, [_width - _padX - _closeW * 2, _cursor, _closeW, _closeH], "inspect3D", "", UI_TEX(icon_eye_ca), _theme, {
+        [GVAR(inspect) param [0, ""]] call EFUNC(compat_itempreview,open);
+    }] call FUNC(uiButton);
+
+    [_button select -1, LELSTRING(compat_itempreview,View3D_Tip)] call FUNC(setTooltip);
+};
 
 _cursor = _cursor + _titleH + _gap;
 

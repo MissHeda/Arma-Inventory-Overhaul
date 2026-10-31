@@ -51,7 +51,7 @@ free cells instead of the engine's add. Works with Mavic 3 - Improved: a Mavic i
 ground, the drop key, Drop in the menu) is deployed as a drone, as that mod does for the engine's inventory, and a deployed drone has an ACE interaction
 "Pack up drone" that checks the grid for room. Works with WebKnight's and KJW's Two Primary Weapons: the weapon on the back never shows as loot, and with
 WebKnight's it comes into your hands when a move in the window empties them. With Better Inventory loaded, its handler for the vanilla inventory stays
-quiet.
+quiet. Works with KPBLM Item Preview: the inspect card's eye button and "View in 3D" in the context menu show the item on its 3D showcase.
 
 ## Building
 

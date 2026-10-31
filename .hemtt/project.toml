@@ -39,6 +39,7 @@ workshop = [
     "1376867375", # ACE Interaction Menu Expansion (AIME), for the compat_aime addon
     "3401580668", # Mavic 3 - Improved, for the compat_mavic addon
     "2976569274", # WebKnight's Two Primary Weapons, for the compat_wbk_twoprimary addon
+    "3822903400", # KPBLM Item Preview, for the compat_itempreview addon
 ]
 
 # A test scene for the inventory (.hemtt/missions/AIO_Test.VR): a soldier with full gear, a crate, an

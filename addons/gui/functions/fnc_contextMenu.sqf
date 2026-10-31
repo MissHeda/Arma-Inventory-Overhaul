@@ -146,6 +146,14 @@ private _fnc_addArsenal = {
     };
 };
 
+// After Inspect: the item on KPBLM Item Preview's showcase, in 3D (aio_compat_itempreview - only when that addon is
+// loaded). _class is the caller's.
+private _fnc_addView3D = {
+    if (!isNil QEFUNC(compat_itempreview,open)) then {
+        _choices pushBack [LELSTRING(compat_itempreview,Menu_View3D), [_class], {_this call EFUNC(compat_itempreview,open)}];
+    };
+};
+
 switch (GVAR(hover) param [0, ""]) do {
     case "tile": {
         GVAR(hover) params ["", "_gridIndex", "_tileIndex"];
@@ -171,6 +179,8 @@ switch (GVAR(hover) param [0, ""]) do {
             [_class, _tile getOrDefault ["count", 1], _tile getOrDefault ["ammo", -1], _tile getOrDefault ["attachments", []], _from],
             {_this call FUNC(inspect)}
         ];
+
+        call _fnc_addView3D;
 
         _settingsClass = _class;
 
@@ -320,6 +330,10 @@ switch (GVAR(hover) param [0, ""]) do {
             [_record param [1, ""], 1, _worn getOrDefault ["ammo", -1], _worn getOrDefault ["attachments", []]],
             {_this call FUNC(inspect)}
         ];
+
+        private _class = _record param [1, ""];
+
+        call _fnc_addView3D;
 
         // Waiting to be taken off (fnc_queueMoves): it can be cancelled, and nothing else is offered for it.
         private _queuedId = [_owner, _slot] call FUNC(queuedSlot);

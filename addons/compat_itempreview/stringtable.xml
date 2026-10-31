@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="aio">
+    <Package name="compat_itempreview">
+        <Key ID="STR_aio_compat_itempreview_Menu_View3D">
+            <English>View in 3D</English>
+        </Key>
+        <Key ID="STR_aio_compat_itempreview_View3D_Tip">
+            <English>View in 3D (Item Preview)</English>
+        </Key>
+    </Package>
+</Project>

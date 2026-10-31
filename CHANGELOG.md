@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.13 - beta
+
+### Added
+
+- Works with KPBLM Item Preview: the inspect card has an eye button beside its cross and the context menu a "View in 3D" entry, both open that mod's 3D showcase for the item. Closing the showcase brings the window back as it was.
+
 ## 0.6.12 - beta
 
 ### Changed
