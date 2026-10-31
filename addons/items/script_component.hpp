@@ -75,12 +75,13 @@
 
 // Limits on what a text may ask for. A rules text travels to every machine and is read on each, so
 // a pasted mistake must stay cheap: statements past the limit, longer OR lists and texts over the
-// size limit are left out, with a warning in the RPT.
-#define MAX_STATEMENTS 500
+// size limit are left out, with a warning in the RPT. A server's own setup grows past a few hundred
+// classes with drawn grids (a whole unit's gear): the limits leave room for that many times over.
+#define MAX_STATEMENTS 5000
 #define MAX_ALTERNATIVES 64
 #define MIN_SEARCH 3
-#define TEXT_WARN 8192
-#define TEXT_MAX 16384
+#define TEXT_WARN 65536
+#define TEXT_MAX 262144
 #define MAX_GROUP_DEPTH 4
 #define MAX_CHAIN 4
 #define MAX_STACK 999

@@ -30,6 +30,16 @@ params [["_ast", createHashMap, [createHashMap]], ["_redraw", true, [true]]];
 
 private _text = [_ast] call EFUNC(items,writeRules);
 
+// Too long for the rules engine, which would read it as the default - every rule would be lost: the change is
+// turned down and the draft stays as it was.
+if (count _text > TEXT_MAX) exitWith {
+    [format [LLSTRING(Warning_TooLong), count _text], "loss"] call FUNC(setHint);
+
+    if (_redraw) then {
+        [GVAR(step)] call FUNC(showStep);
+    };
+};
+
 if (_text isNotEqualTo GVAR(draftText)) then {
     GVAR(undo) pushBack [GVAR(draftText), GVAR(draftSettingsText)];
 

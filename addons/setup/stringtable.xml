@@ -1515,7 +1515,7 @@ An item in several categories takes the first one's that has a colour.</English>
             <English>Open the tree at the picked class to see its relatives.</English>
         </Key>
         <Key ID="STR_einv_setup_Warning_TooLong">
-            <English>The text is %1 characters long: more than 16,000 cannot be saved.</English>
+            <English>The text is %1 characters long: more than 262,144 cannot be saved.</English>
         </Key>
     </Package>
 </Project>

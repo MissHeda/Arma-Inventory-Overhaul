@@ -14,7 +14,8 @@
 // Undo goes back this many changes.
 #define UNDO_DEPTH 50
 
-// A rules text longer than TEXT_WARN gets a warning - CBA's text boxes and the mission file have not been
-// tried with more in the game - and one longer than TEXT_MAX is not saved at all.
-#define TEXT_WARN 8192
-#define TEXT_MAX 16384
+// A rules text longer than TEXT_WARN gets a warning, and one longer than TEXT_MAX is not saved at all - nor
+// applied: a change that would make it longer is turned down (fnc_commit), as the engine would read such a
+// text as the default and every rule of the setup would be gone. The same limits as the rules engine's.
+#define TEXT_WARN 65536
+#define TEXT_MAX 262144

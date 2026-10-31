@@ -2,7 +2,7 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## 0.6.0 - beta
+## 0.6.1 - beta
 
 - The mod is now called AIO - Arma Inventory Overhaul (was Enhanced Inventory). Class names, the einv prefix and all setting names stay, so missions and saved settings keep working.
 
@@ -180,6 +180,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Fixed
 
+- A large setup no longer loses every rule: past 16,384 characters (a few hundred classes with drawn grids) the rules engine read the whole text as the default, so the next Apply or Save in the wizard turned every vest, uniform and backpack back to built in. A setup may now be 262,144 characters and 5,000 statements long, and the wizard turns down a change that would go past that instead of dropping the rest.
 - Import in the colour panel no longer throws a script error: the field took only 40 characters, which cut every palette off. Text that is no palette just says so.
 - Export has a Copy button beside Done.
 - The tip at the mouse stays on top after a click (Sort, a page, a click into a column) - it went behind the list. It is checked every frame now, as the context menu is, and hides while a mouse button is held (the engine draws the pressed tile's group over everything then) - back on the release.

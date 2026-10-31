@@ -174,7 +174,7 @@ commas and drops quotes, `#` and backslashes as they are typed.
 
 Left out, each with a warning that names it (RPT on load, the General page's notes): a statement with any other character, an unknown
 key, a condition after a value, a header that is not first, a statement that sets nothing, statements past `MAX_STATEMENTS` 500; a
-text over `TEXT_MAX` 16384 characters reads as the default. One typo never costs the rest.
+text over `TEXT_MAX` 262144 characters reads as the default (the wizard turns down a change that would make it that long). One typo never costs the rest.
 
 ### Limits
 
@@ -190,7 +190,7 @@ text over `TEXT_MAX` 16384 characters reads as the default. One typo never costs
 | `PICTURE_MAX` | 260 | characters of a `picture=` path (`addons/main/script_macros.hpp`) |
 | `CELL_MIN`, `CELL_MAX` | 1, 50 | the header's `cell=` and the slider |
 | `PERCENT_MIN`, `PERCENT_MAX` | 10, 500 | `grid=120%` |
-| `MAX_STATEMENTS`, `TEXT_MAX` | 500, 16384 | statements and characters of a text |
+| `MAX_STATEMENTS`, `TEXT_MAX` | 5000, 262144 | statements and characters of a text |
 | `MAX_GROUP_DEPTH`, `MAX_CHAIN`, `LIKE_DEPTH` | 4, 4, 8 | groups in groups, presets on presets, `like=` after `like=` |
 
 A value past a limit is cut down to it and said so; one that cannot be read is left out. The window makes a control per cell,
