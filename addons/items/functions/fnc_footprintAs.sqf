@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * The cells an item takes as it lies: its footprint upright, or turned a quarter clockwise
  * (fnc_turnMask). Where something lies says only which way round ([key, col, row, w, h, block, rot],
- * einv_storage_fnc_readPlaces; rot 1 is turned) - so the holes of a shaped item (size=xx/x-) always come
+ * aio_storage_fnc_readPlaces; rot 1 is turned) - so the holes of a shaped item (size=xx/x-) always come
  * from its class at use time, the same on every machine, and only that one number is stored and synced.
  * Two ways round only: upright and turned, never upside down.
  *
@@ -16,7 +16,7 @@
  * change it <ARRAY>
  *
  * Example:
- * ["My_Pistol_L", 1] call einv_items_fnc_footprintAs;
+ * ["My_Pistol_L", 1] call aio_items_fnc_footprintAs;
  *
  * Public: Yes
  */

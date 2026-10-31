@@ -1,7 +1,7 @@
 # Testing 0.4.0
 
 Everything below was built and checked in code only, unless marked tested. Tick what passed, note what failed
-with the RPT lines (`%LOCALAPPDATA%\Arma 3\*.rpt`, search for `Error` and `einv`).
+with the RPT lines (`%LOCALAPPDATA%\Arma 3\*.rpt`, search for `Error` and `aio`).
 
 ## Two instances on one machine
 
@@ -16,7 +16,7 @@ HEMTT launches the dev build with file patching. Two ways:
   `hemtt launch -Q -i 2 test -- -connect=127.0.0.1 -port=2302`. Put `kickDuplicate = 0;` into `server.cfg`,
   or the second client is kicked for carrying the same Steam id.
 
-Settings the server forces (`cba_settings.sqf`): `einv_items_rules`, the presets, locks, sounds, hotbar.
+Settings the server forces (`cba_settings.sqf`): `aio_items_rules`, the presets, locks, sounds, hotbar.
 A client can see them and cannot change them.
 
 ## A. Multiplayer
@@ -68,7 +68,7 @@ A client can see them and cannot change them.
       crate, the ground and a kit window, and is greyed while a move out of that container is under way;
       none on a body's worn gear, on a living person's gear that the settings keep look-only, nor in the Arsenal; a narrow window
       drops Sort first, then Take all, before the tab is cut under three letters.
-- [ ] Text follows the tile size (issue #10): at 1920x1080 set "Tile scale" (`einv_gui_cellScale`) to 1.3 and open the window -
+- [ ] Text follows the tile size (issue #10): at 1920x1080 set "Tile scale" (`aio_gui_cellScale`) to 1.3 and open the window -
       section captions and chips (Backpack, Tactical rig, Take all, Put all in, Sort, the weight, the search chip), the column
       titles, the box's name, "+N empty rows", the page bar's words, a kit window's title row, the footer's key hints, hint and
       version and the window title are about a fifth larger than at the default 1.1 (a third over 1.0), nothing overlaps or is cut, Take all and Sort are as wide
@@ -107,7 +107,7 @@ A client can see them and cannot change them.
       cooler pane ringed in blue and blue-tinted caption tabs; the body's uniform, vest and backpack read "Pockets - <name>",
       "Tactical rig - <name>", "Backpack - <name>", yours "Pockets", "Tactical rig", "Backpack" in the plain "Your gear" column with the
       orange accent; a crate reads "Loot - <crate>", the ground "Loot - Ground", what lies around "Loot - Nearby"; the same with
-      "Where other storage opens" (`einv_gui_lootSide`) on either choice; ACE Arsenal's panel looks as before.
+      "Where other storage opens" (`aio_gui_lootSide`) on either choice; ACE Arsenal's panel looks as before.
 - [ ] Sort cycles: the button reads "Sort: Size" (or the last order used) and a click sorts by the next one - Name (A to Z), Weight
       (heaviest first), Size (largest first), Type (weapons, ammo, gear, medical, the rest) - with every Sort button of the window
       (all sections, an open kit's window) changing its words at once and the caption line not moving; the tooltip names what the next
@@ -177,7 +177,7 @@ A client can see them and cannot change them.
       only the vest's section is open, uniform and backpack folded, staging as it was, order uniform, vest, backpack, staging,
       scroll kept; the same for the backpack tab and for picking a kit (IFAK) in ACE's left list (its sections open, they fold by hand).
 - [ ] Kit grid (issue #4), once in the default (capacity) and once with a rule giving the kit cells (`class=efak_IFAK+ > grid=4x3`,
-      `einv_compat_efak_fnc_roomMode` says "cells"): pick the IFAK in the left list, drag a row of ACE's right list onto a free cell
+      `aio_compat_efak_fnc_roomMode` says "cells"): pick the IFAK in the left list, drag a row of ACE's right list onto a free cell
       and onto a taken one, drag from staging into the kit and a kit tile out to staging, move a tile inside the kit and turn it (R),
       drop one outside the panel, Delete, right-click Remove, Ctrl+wheel; a kit lying in the staging space and one in the vest.
 - [ ] Kit grid (issue #19): picking an IFAK, an AFAK and a pouch of Enhanced Utility Pouches in the left list each shows that kit's
@@ -226,7 +226,7 @@ A client can see them and cannot change them.
       Save a carried IFAK's window shows a 4x3 grid and "n / 12 cells", takes items only while a cell is free (never "not enough
       space" by mass), refuses with "No room" when full, an IFAK already fuller than 12 cells shows the rest apart and loses
       nothing; hint and inspect card say cells; Back to the preset returns the capacity and the open grid; `kind=kit > grid=12`
-      and a test addon's `einv_grid = "3x3";` on `efak_IFAK` do the same; Export and Import of the IFAK's line. ACE Arsenal: drag
+      and a test addon's `aio_grid = "3x3";` on `efak_IFAK` do the same; Export and Import of the IFAK's line. ACE Arsenal: drag
       bandages from ACE's list onto the IFAK's tile in the panel - with the grid, as many as there are cells ("Only 3 of 5 fit"),
       without it, as many as the capacity takes; a kit type set to "nothing" in its Arsenal setting says it cannot be filled there;
       EFAK's own kits tab still goes by the capacity. Multiplayer: two players packing the same kit of a crate one after the other.
@@ -238,14 +238,14 @@ A client can see them and cannot change them.
 
 ## E. Other
 
-- [ ] Config keys (a test addon with `einv_grid = "1x3+5x7+1x3"` on a vest and a backpack class, `einv_size = "xx/x-"`,
-      `einv_stack`, `einv_weight = 0.5`, `einv_name` on a few items): the window shows the compartments, the L, the stack,
-      the weight in kg and the name; a subclass that sets nothing has the same; `einv_grid = ""` on a subclass takes it back;
-      a rule for the class in the rules text beats the key; the older `einv_grids[]` still works and loses to `einv_grid`;
-      a wrong value (`einv_size = "2x"`) is one RPT line `Config of <class>:` and the other keys still count.
-- [ ] `copyToClipboard ([["B_Carryall_blk", true]] apply {_x call einv_items_fnc_configEntry} joinString endl)` after changing a
-      class in the wizard gives its lines; `[text] call einv_items_fnc_parseConfigEntry` on them gives the class and the values
-      back (`einv_grid` as the rules write it).
+- [ ] Config keys (a test addon with `aio_grid = "1x3+5x7+1x3"` on a vest and a backpack class, `aio_size = "xx/x-"`,
+      `aio_stack`, `aio_weight = 0.5`, `aio_name` on a few items): the window shows the compartments, the L, the stack,
+      the weight in kg and the name; a subclass that sets nothing has the same; `aio_grid = ""` on a subclass takes it back;
+      a rule for the class in the rules text beats the key; the older `aio_grids[]` still works and loses to `aio_grid`;
+      a wrong value (`aio_size = "2x"`) is one RPT line `Config of <class>:` and the other keys still count.
+- [ ] `copyToClipboard ([["B_Carryall_blk", true]] apply {_x call aio_items_fnc_configEntry} joinString endl)` after changing a
+      class in the wizard gives its lines; `[text] call aio_items_fnc_parseConfigEntry` on them gives the class and the values
+      back (`aio_grid` as the rules write it).
 - [ ] Medical defaults (issue #9 and #21, ACE + ACM + ACME + EFAK loaded; set the stack multiplier to 1 to see the worn stacks): in a box, `ACE_fieldDressing` and `ACM_PressureBandage` stack 5, `ACE_tourniquet` 4, `ACM_ChestSeal`, `ACM_IV_16g`, `ACM_IO_EZ` and `ACM_Syringe_10` 5, `ACM_Lozenge_Fentanyl` and `ACME_IVLine` 10, `ACM_Vial_Morphine` and `ACME_MannitolVial` 5 on 1x1, `ACM_Paracetamol`, `ACM_Syringe_10` types and `ACM_OxygenTank_425` (1x2) obey their rule although they are magazines, `ACM_BloodBag_*` and `ACE_plasmaIV_*` do not stack, `efak_IFAK_1` is 2x1 and `efak_MFAKPlus_1` 3x3; the check script reports no size or stack differences.
 - [ ] Stack multiplier (issue #21; wizard General page, Looting and searching, default 5, 1 off): a crate, a vehicle's cargo and a pile on the ground show stacks five times the worn ones (`ACM_Vial_Morphine` "25/25", `ACE_fieldDressing` "25/25"), a worn vest, uniform and backpack and a vest lying in the crate do not; a class that does not stack (a rifle, a magazine, a blood bag) is unchanged. 15 vials from the crate dropped on an empty vest cell make three tiles of 5, Quick move does the same (and moves nothing when the vest has fewer than three free cells), a drop of 3 onto a vest tile of 2 merges to 5, 30 back from the vest into the crate are one tile; the badge, the inspect card ("Stackable: up to 25") and the green/red drop highlight follow the container they are over. Change the setting to 1 with a full crate open elsewhere: the places with counts of 25 are cut to tiles of 5, nothing is lost or doubled, no RPT error. A client of a dedicated server sees the same tiles as the host.
 - [ ] Weight tiers: no sprint from Overloaded, walking from Critical, ACE fatigue follows.
@@ -269,4 +269,4 @@ A client can see them and cannot change them.
       out of reach; Open backpack on a living person only where "Living persons" allows; the click on a ground pile with a single
       item opens the window (diagonal stripes) while ground searching is on, and picks it up at once with searching off.
 - [ ] Performance: a big mod pack, a crate with 300 items, the window opens in under a second.
-- [ ] The RPT after every test: no `Error`, read every `einv` line.
+- [ ] The RPT after every test: no `Error`, read every `aio` line.

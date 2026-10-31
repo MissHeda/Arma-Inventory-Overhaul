@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Every frame while a repack runs (einv_gui_fnc_onFrame calls it, and nothing else of the window's
+ * Every frame while a repack runs (aio_gui_fnc_onFrame calls it, and nothing else of the window's
  * per-frame work). First what ACE's progress bar asks every frame - the same player, alive, free to use the
  * hands (ACE's own exceptions: inside, swimming and sitting are fine) -, else the repack is interrupted.
  * Then every step of ACE's schedule whose time has come is carried out: a round moved (or a belt link
@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * [_display, diag_tickTime] call einv_magazines_fnc_onFrame;
+ * [_display, diag_tickTime] call aio_magazines_fnc_onFrame;
  *
  * Public: No
  */

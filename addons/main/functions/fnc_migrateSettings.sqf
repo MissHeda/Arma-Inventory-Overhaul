@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Moves what the settings box of the test builds 0.4.27 to 0.5.42 still holds into the server settings of their
- * own. That box, einv_main_settings, held every server setting as one text (fnc_parseSettings reads it); it is no
+ * own. That box, aio_main_settings, held every server setting as one text (fnc_parseSettings reads it); it is no
  * CBA setting any more, but CBA still keeps what was saved for it where it was saved. Each value the text names is
  * set through CBA into the same source, at the priority the box had there - only where that source still has the
  * setting at its default, so a value set on its own since then wins:
@@ -23,7 +23,7 @@
  * How many values were set <NUMBER>
  *
  * Example:
- * [] call einv_main_fnc_migrateSettings;
+ * [] call aio_main_fnc_migrateSettings;
  *
  * Public: No
  */

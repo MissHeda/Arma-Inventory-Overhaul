@@ -12,7 +12,7 @@
  * The hotbar is on <BOOL>
  *
  * Example:
- * call einv_hotbar_fnc_isActive;
+ * call aio_hotbar_fnc_isActive;
  *
  * Public: No
  */

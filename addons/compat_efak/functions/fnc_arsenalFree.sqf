@@ -3,9 +3,9 @@
  * Author: Miss Heda
  * Gives the instance of a kit taken away in ACE Arsenal back to Enhanced First Aid Kits' pool, with what it held
  * (efak_core_fnc_freeInstance), as that mod does for a kit ACE's own "-" takes out (efak_arsenal_fnc_onCargoChanged):
- * a kit taken out of the panel (einv_arsenal_fnc_remove, fnc_removeKind), out of a kit (fnc_discard), what did not
- * fit when the window closed (einv_arsenal_fnc_dropOverflow) and what lay in the staging space as it went
- * (einv_arsenal_fnc_onClosed). Without it each such kit kept its instance - a class of a numbered pool - for the
+ * a kit taken out of the panel (aio_arsenal_fnc_remove, fnc_removeKind), out of a kit (fnc_discard), what did not
+ * fit when the window closed (aio_arsenal_fnc_dropOverflow) and what lay in the staging space as it went
+ * (aio_arsenal_fnc_onClosed). Without it each such kit kept its instance - a class of a numbered pool - for the
  * rest of the mission. Only for an instance (not a prototype, which has none yet) that lies in none of the holders
  * given any more, their cargo or what Strict mode's hidden holder keeps for them; the kits packed inside it go back
  * with it (that mod's freeInstance).
@@ -19,7 +19,7 @@
  * How many instances went back <NUMBER>
  *
  * Example:
- * [["efak_IFAK_7"], [uniformContainer player]] call einv_compat_efak_fnc_arsenalFree;
+ * [["efak_IFAK_7"], [uniformContainer player]] call aio_compat_efak_fnc_arsenalFree;
  *
  * Public: No
  */

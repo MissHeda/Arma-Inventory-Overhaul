@@ -12,7 +12,7 @@
  * The list without the crates that left their vehicle <ARRAY>
  *
  * Example:
- * [einv_gui_opened] call einv_compat_ace_cargo_fnc_pruneOpened;
+ * [aio_gui_opened] call aio_compat_ace_cargo_fnc_pruneOpened;
  *
  * Public: No
  */

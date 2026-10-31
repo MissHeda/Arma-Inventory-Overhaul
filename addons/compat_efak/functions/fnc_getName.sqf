@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * What Enhanced First Aid Kits calls a kit, for the window's names (einv_gui_fnc_itemName): the name a
+ * What Enhanced First Aid Kits calls a kit, for the window's names (aio_gui_fnc_itemName): the name a
  * player gave it, else the mission's name for its type. Players tell their kits apart by these, so
  * they come before the window's own names - the rules' name= and config's.
  *
@@ -16,7 +16,7 @@
  * Name, "" for anything that is no kit and for a kit the window names by its own means <STRING>
  *
  * Example:
- * ["efak_IFAK_7", true] call einv_compat_efak_fnc_getName;
+ * ["efak_IFAK_7", true] call aio_compat_efak_fnc_getName;
  *
  * Public: No
  */

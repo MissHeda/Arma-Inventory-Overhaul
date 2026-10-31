@@ -1,127 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="arsenal">
-        <Key ID="STR_einv_arsenal_Blocked_OK">
+        <Key ID="STR_aio_arsenal_Blocked_OK">
             <English>Understood</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Blocked_Setting">
+        <Key ID="STR_aio_arsenal_Blocked_Setting">
             <English>Server setting: Arma Inventory Overhaul &gt; Vanilla Arsenal</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Blocked_Text">
+        <Key ID="STR_aio_arsenal_Blocked_Text">
             <English>This server does not allow the vanilla Virtual Arsenal.</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Blocked_Title">
+        <Key ID="STR_aio_arsenal_Blocked_Title">
             <English>The Virtual Arsenal is not allowed here</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Collapse_Fold">
+        <Key ID="STR_aio_arsenal_Collapse_Fold">
             <English>Fold the panel to a small button</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Collapse_Unfold">
+        <Key ID="STR_aio_arsenal_Collapse_Unfold">
             <English>Unfold the panel</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Confirm_Keep">
+        <Key ID="STR_aio_arsenal_Confirm_Keep">
             <English>Keep editing</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Confirm_Remove">
+        <Key ID="STR_aio_arsenal_Confirm_Remove">
             <English>Remove and close</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Confirm_Text">
+        <Key ID="STR_aio_arsenal_Confirm_Text">
             <English>%1 items do not fit your gear and will be removed: %2</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Confirm_TextOne">
+        <Key ID="STR_aio_arsenal_Confirm_TextOne">
             <English>1 item does not fit your gear and will be removed: %1</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Confirm_Title">
+        <Key ID="STR_aio_arsenal_Confirm_Title">
             <English>Gear does not fit</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Hint_DropRemove">
+        <Key ID="STR_aio_arsenal_Hint_DropRemove">
             <English>Let go to take it out</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Hint_Idle">
+        <Key ID="STR_aio_arsenal_Hint_Idle">
             <English>Drag from the list to add - out to remove</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Hint_IntoKit">
+        <Key ID="STR_aio_arsenal_Hint_IntoKit">
             <English>Let go to pack it into %1</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Hint_KitRowNotAllowed">
+        <Key ID="STR_aio_arsenal_Hint_KitRowNotAllowed">
             <English>This kit does not take it here - its row's tooltip says why</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Hint_ListCancel">
+        <Key ID="STR_aio_arsenal_Hint_ListCancel">
             <English>Let go over a free spot of a grid to put it in</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Hint_ListUnfold">
+        <Key ID="STR_aio_arsenal_Hint_ListUnfold">
             <English>Hold it over the title bar to unfold the panel</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Hint_NotAllowed">
+        <Key ID="STR_aio_arsenal_Hint_NotAllowed">
             <English>ACE does not allow this item here</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Hint_NotInArsenal">
+        <Key ID="STR_aio_arsenal_Hint_NotInArsenal">
             <English>This arsenal does not have it</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Hint_Staged">
+        <Key ID="STR_aio_arsenal_Hint_Staged">
             <English>%1 did not fit and went to the staging space</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Hint_Wheel">
+        <Key ID="STR_aio_arsenal_Hint_Wheel">
             <English>Ctrl+wheel on an item: one more or less</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Menu_OpenArsenal">
+        <Key ID="STR_aio_arsenal_Menu_OpenArsenal">
             <English>Open Arsenal</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Menu_Remove">
+        <Key ID="STR_aio_arsenal_Menu_Remove">
             <English>Remove</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Menu_RemoveAll">
+        <Key ID="STR_aio_arsenal_Menu_RemoveAll">
             <English>Remove all %1</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Message_NoRoom">
+        <Key ID="STR_aio_arsenal_Message_NoRoom">
             <English>No room in the %1 - move things to free a %2x%3 space</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Overflow">
+        <Key ID="STR_aio_arsenal_Overflow">
             <English>Not everything fits the grid of %1</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Removed">
+        <Key ID="STR_aio_arsenal_Removed">
             <English>Removed, as they did not fit: %1</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Setting_BIArsenal">
+        <Key ID="STR_aio_arsenal_Setting_BIArsenal">
             <English>Vanilla Virtual Arsenal</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Setting_BIArsenal_Ace">
+        <Key ID="STR_aio_arsenal_Setting_BIArsenal_Ace">
             <English>Open ACE Arsenal</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Setting_BIArsenal_Block">
+        <Key ID="STR_aio_arsenal_Setting_BIArsenal_Block">
             <English>Not allowed</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Setting_BIArsenal_Desc">
+        <Key ID="STR_aio_arsenal_Setting_BIArsenal_Desc">
             <English>What the vanilla Virtual Arsenal does: open ACE Arsenal with grids,\nblock it, or leave it vanilla. Zeus is never stopped.</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Setting_BIArsenal_Vanilla">
+        <Key ID="STR_aio_arsenal_Setting_BIArsenal_Vanilla">
             <English>Leave it alone</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Setting_BIMessage">
+        <Key ID="STR_aio_arsenal_Setting_BIMessage">
             <English>Message when not allowed</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Setting_BIMessage_Desc">
+        <Key ID="STR_aio_arsenal_Setting_BIMessage_Desc">
             <English>Shown on the red "not allowed" screen, e.g. where players get their gear.\nEmpty shows nothing more.</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Staging_Note">
+        <Key ID="STR_aio_arsenal_Staging_Note">
             <English>%1 items in staging - deleted on close</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Staging_NoteOne">
+        <Key ID="STR_aio_arsenal_Staging_NoteOne">
             <English>1 item in staging - deleted on close</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Staging_Subtitle">
+        <Key ID="STR_aio_arsenal_Staging_Subtitle">
             <English>emptied when the arsenal closes</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Staging_Title">
+        <Key ID="STR_aio_arsenal_Staging_Title">
             <English>Staging</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Word_Backpack">
+        <Key ID="STR_aio_arsenal_Word_Backpack">
             <English>backpack</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Word_Uniform">
+        <Key ID="STR_aio_arsenal_Word_Uniform">
             <English>uniform</English>
         </Key>
-        <Key ID="STR_einv_arsenal_Word_Vest">
+        <Key ID="STR_aio_arsenal_Word_Vest">
             <English>vest</English>
         </Key>
     </Package>

@@ -10,7 +10,7 @@
  * Arguments:
  * 0: Args, [kit holder "kit:" + lowercase class, where the window found it [container, kit it is packed
  *    in] (default: [])] <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -19,7 +19,7 @@
  *   extra    - [removed BOOL]
  *
  * Example:
- * [["kit:efak_ifak_7", [_container, ""]], _context] call einv_compat_efak_fnc_opKitRemoveIfEmpty;
+ * [["kit:efak_ifak_7", [_container, ""]], _context] call aio_compat_efak_fnc_opKitRemoveIfEmpty;
  *
  * Public: No
  */

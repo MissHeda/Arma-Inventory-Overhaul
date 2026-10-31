@@ -14,7 +14,7 @@
  * The key, "" for no path <STRING>
  *
  * Example:
- * ["\A3\Weapons_F\Data\UI\gear_acc_rail_ca.paa"] call einv_setup_fnc_pictureKey;
+ * ["\A3\Weapons_F\Data\UI\gear_acc_rail_ca.paa"] call aio_setup_fnc_pictureKey;
  *
  * Public: No
  */

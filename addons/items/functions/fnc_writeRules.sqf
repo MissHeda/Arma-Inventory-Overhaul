@@ -13,13 +13,13 @@
  *
  * Arguments:
  * 0: The text's parts, as fnc_parseRules gives them <HASHMAP>
- * 1: Write the header (einv1 base=...) <BOOL> (default: true)
+ * 1: Write the header (aio1 base=...) <BOOL> (default: true)
  *
  * Return Value:
  * Rules text <STRING>
  *
  * Example:
- * [["einv1 base=default,kind=grenade>stack=3"] call einv_items_fnc_parseRules] call einv_items_fnc_writeRules;
+ * [["aio1 base=default,kind=grenade>stack=3"] call aio_items_fnc_parseRules] call aio_items_fnc_writeRules;
  *
  * Public: Yes
  */
@@ -60,12 +60,15 @@ private _fnc_values = {
     if ("picture" in _values) then {_texts pushBack ("picture=" + ([_values get "picture", true] call FUNC(encodeName)))};
     if ("use" in _values) then {_texts pushBack ("use=" + ([_values get "use"] call FUNC(formatUse)))};
     if ("cats" in _values) then {_texts pushBack ("cats=" + ([_values get "cats"] call FUNC(formatGroups)))};
+    if ("tint" in _values) then {_texts pushBack ("tint=" + (_values get "tint"))};
+    if ("color" in _values) then {_texts pushBack ("color=" + (_values get "color"))};
+    if ("show" in _values) then {_texts pushBack ("show=" + (_values get "show"))};
 
     _texts joinString " "
 };
 
 if (_header) then {
-    private _line = format ["einv1 base=%1", _ast getOrDefault ["base", "default"]];
+    private _line = format ["aio1 base=%1", _ast getOrDefault ["base", "default"]];
     private _cell = _ast getOrDefault ["cell", -1];
 
     if (_cell > 0) then {

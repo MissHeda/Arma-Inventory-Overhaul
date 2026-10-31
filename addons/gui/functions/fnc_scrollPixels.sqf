@@ -16,7 +16,7 @@
  * Screen height scrolled past <NUMBER>
  *
  * Example:
- * [_group] call einv_gui_fnc_scrollPixels;
+ * [_group] call aio_gui_fnc_scrollPixels;
  *
  * Public: No
  */

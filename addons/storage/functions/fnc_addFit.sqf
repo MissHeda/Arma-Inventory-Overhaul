@@ -20,7 +20,7 @@
  * [[container, how many], ...] in the order to add; empty when nothing fits <ARRAY>
  *
  * Example:
- * [player, "ACE_fieldDressing", 8] call einv_storage_fnc_addFit;
+ * [player, "ACE_fieldDressing", 8] call aio_storage_fnc_addFit;
  *
  * Public: No
  */

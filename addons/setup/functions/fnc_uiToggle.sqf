@@ -21,7 +21,7 @@
  * The controls, the hit area last <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.2, 0.03], true, _theme, {params ["_on"]; systemChat str _on}] call einv_setup_fnc_uiToggle;
+ * [_display, _group, [0, 0, 0.2, 0.03], true, _theme, {params ["_on"]; systemChat str _on}] call aio_setup_fnc_uiToggle;
  *
  * Public: No
  */

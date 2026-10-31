@@ -11,13 +11,13 @@
  * several classes or for a kind (all kind=uniform > grid=5x5 is the General step's own) belongs to General.
  *
  * Arguments:
- * 0: The rule, [conditions, values] as einv_items_fnc_parseRules lists it under "rules" <ARRAY>
+ * 0: The rule, [conditions, values] as aio_items_fnc_parseRules lists it under "rules" <ARRAY>
  *
  * Return Value:
  * [step id: "general", "items" or "containers", the class, "" for none, for the class and everything built on it] <ARRAY>
  *
  * Example:
- * [(einv_setup_draft get "rules") select 0] call einv_setup_fnc_ruleStep;
+ * [(aio_setup_draft get "rules") select 0] call aio_setup_fnc_ruleStep;
  *
  * Public: No
  */

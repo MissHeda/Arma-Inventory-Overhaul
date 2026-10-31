@@ -8,9 +8,9 @@ class CfgPatches {
         weapons[] = {};
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {
-            "einv_storage",
-            "einv_locks",
-            "einv_weight"
+            "aio_storage",
+            "aio_locks",
+            "aio_weight"
         };
         author = "Miss Heda";
         url = ECSTRING(main,URL);
@@ -19,7 +19,7 @@ class CfgPatches {
 };
 
 #include "CfgEventHandlers.hpp"
-#include "CfgEinvSounds.hpp"
+#include "CfgAioSounds.hpp"
 #include "CfgActions.hpp"
 #include "Cfg3DEN.hpp"
 #include "RscBase.hpp"

@@ -12,7 +12,7 @@
  * The value in words <STRING>
  *
  * Example:
- * ["einv_gui_searchTime", 0.8] call einv_setup_fnc_settingText;
+ * ["aio_gui_searchTime", 0.8] call aio_setup_fnc_settingText;
  *
  * Public: No
  */

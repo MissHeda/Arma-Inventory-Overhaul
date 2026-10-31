@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * [_crate] call einv_gui_fnc_stripMore;
+ * [_crate] call aio_gui_fnc_stripMore;
  *
  * Public: No
  */

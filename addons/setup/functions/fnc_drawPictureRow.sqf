@@ -25,7 +25,7 @@
  * None
  *
  * Example:
- * [_display, _box, [0, 0, 0.4, 0.03], _theme, 0.08, "", "\A3\x_ca.paa", {params ["_path"]}] call einv_setup_fnc_drawPictureRow;
+ * [_display, _box, [0, 0, 0.4, 0.03], _theme, 0.08, "", "\A3\x_ca.paa", {params ["_path"]}] call aio_setup_fnc_drawPictureRow;
  *
  * Public: No
  */

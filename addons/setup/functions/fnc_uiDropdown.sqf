@@ -22,7 +22,7 @@
  * The controls, the hit area last <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.15, 0.03], [["Auto", "auto"], ["Fixed", "fixed"]], "auto", _theme, {params ["_value"]}] call einv_setup_fnc_uiDropdown;
+ * [_display, _group, [0, 0, 0.15, 0.03], [["Auto", "auto"], ["Fixed", "fixed"]], "auto", _theme, {params ["_value"]}] call aio_setup_fnc_uiDropdown;
  *
  * Public: No
  */
@@ -96,7 +96,7 @@ _hit setVariable [QGVAR(action), [{
 
         // More than fit: the rows scroll.
         if (count _options > 10) then {
-            _list = [_display, "EINV_ScrollGroup", _inner, [0, 0, _width, _height]] call EFUNC(gui,uiCreate);
+            _list = [_display, "AIO_ScrollGroup", _inner, [0, 0, _width, _height]] call EFUNC(gui,uiCreate);
             _rowW = _width - SCROLL_W - pixelW * 2;
         };
 

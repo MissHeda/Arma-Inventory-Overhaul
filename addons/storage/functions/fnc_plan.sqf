@@ -41,7 +41,7 @@
  *   left     - the items no target had room for <ARRAY>
  *
  * Example:
- * [_items, [[backpackContainer player, player]]] call einv_storage_fnc_plan;
+ * [_items, [[backpackContainer player, player]]] call aio_storage_fnc_plan;
  *
  * Public: No
  */
@@ -79,7 +79,7 @@ private _fnc_isLifted = {
 // ---------------------------------------------------------------------------
 private _states = _targets apply {[]};
 
-// A shaped item (size=xx/x-) takes only its own cells, holes as it lies (einv_items_fnc_footprintAs).
+// A shaped item (size=xx/x-) takes only its own cells, holes as it lies (aio_items_fnc_footprintAs).
 private _fnc_mark = {
     params ["_state", "_block", "_col", "_row", "_w", "_h", ["_holes", []]];
 

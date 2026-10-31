@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Whether a phase on a root runs on this machine at once, without the hub: in single player and in Eden
  * always; in multiplayer only on this machine's own player unit - its owner never changes while the
- * player is connected -, an object made on this machine only and marked so (einv_storage_localOnly, the
+ * player is connected -, an object made on this machine only and marked so (aio_storage_localOnly, the
  * Arsenal's staging space: the hub could not even see it), and, on the server, for objNull (ground work).
  * Everything else goes through the hub, also on the hosting player's machine and for a unit remote
  * controlled with Zeus.
@@ -15,7 +15,7 @@
  * Runs here at once <BOOL>
  *
  * Example:
- * [player] call einv_storage_fnc_isLocalRoot;
+ * [player] call aio_storage_fnc_isLocalRoot;
  *
  * Public: No
  */

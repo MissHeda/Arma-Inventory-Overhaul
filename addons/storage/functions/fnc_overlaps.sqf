@@ -2,9 +2,9 @@
 /*
  * Author: Miss Heda
  * Whether two things lying on one grid share a cell. Their boxes have to meet, and where they do a cell
- * that one of them leaves open (a shaped item, size=xx/x-, einv_items_fnc_footprintAs) is no clash: a
+ * that one of them leaves open (a shaped item, size=xx/x-, aio_items_fnc_footprintAs) is no clash: a
  * small item may lie in the corner of an L. For the checks that compare tiles with each other rather
- * than with rows of taken cells (a kit's cells, einv_compat_efak; the window's drag footprint).
+ * than with rows of taken cells (a kit's cells, aio_compat_efak; the window's drag footprint).
  *
  * Arguments:
  * 0: One: [col, row, w, h, holes] as it lies, holes the indices row * w + col, may be left out <ARRAY>
@@ -14,7 +14,7 @@
  * They share a cell <BOOL>
  *
  * Example:
- * [[0, 0, 2, 2, [3]], [1, 1, 1, 1]] call einv_storage_fnc_overlaps; // false: the 1x1 lies in the L's corner
+ * [[0, 0, 2, 2, [3]], [1, 1, 1, 1]] call aio_storage_fnc_overlaps; // false: the 1x1 lies in the L's corner
  *
  * Public: No
  */

@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [] call einv_gui_fnc_updateSoundButton;
+ * [] call aio_gui_fnc_updateSoundButton;
  *
  * Public: No
  */
@@ -41,8 +41,8 @@ if (_muted && {!_open}) then {
     _ink set [3, (_ink param [3, 1]) * 0.45];
 };
 
-private _rects = _controls select {ctrlClassName _x isEqualTo "EINV_PanelRect"};
-private _corners = _controls select {ctrlClassName _x isEqualTo "EINV_PanelCorner"};
+private _rects = _controls select {ctrlClassName _x isEqualTo "AIO_PanelRect"};
+private _corners = _controls select {ctrlClassName _x isEqualTo "AIO_PanelCorner"};
 
 // A surface in the gradient (fnc_gradientSurface) keeps its pieces' colours: the fill is the same open or closed.
 if ((((_controls select -1) getVariable [QGVAR(graded), [[]]]) select 0) isEqualTo []) then {
@@ -55,4 +55,4 @@ if ((((_controls select -1) getVariable [QGVAR(graded), [[]]]) select 0) isEqual
 {
     _x ctrlSetText ([UI_TEX(icon_sound_on_ca), UI_TEX(icon_sound_off_ca)] select _muted);
     _x ctrlSetTextColor _ink;
-} forEach (_controls select {ctrlClassName _x isEqualTo "EINV_Icon"});
+} forEach (_controls select {ctrlClassName _x isEqualTo "AIO_Icon"});

@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * Draws an open kit's window - a kit of Enhanced First Aid Kits or a pouch of Enhanced Utility Pouches
- * (einv_compat_efak): a card of the inspect card's glass floating over the columns, as Tarkov opens a
+ * (aio_compat_efak): a card of the inspect card's glass floating over the columns, as Tarkov opens a
  * container in a window of its own. On top the kit's picture and name, a "Sort" button that lays its grid out anew (fnc_sortHolder - the inventory
  * only, where the player may change the kit), how full it is - "12 / 60 mass" in that mod's measure, in
  * the loss colour when over - and a cross that closes it; under a hairline the kit's grid with our tiles,
@@ -37,7 +37,7 @@
  *
  * Arguments:
  * 0: Display <DISPLAY>
- * 1: Section of the kit, see einv_compat_efak_fnc_getSections <HASHMAP>
+ * 1: Section of the kit, see aio_compat_efak_fnc_getSections <HASHMAP>
  * 2: Theme <HASHMAP>
  * 3: Opened just now: fade in <BOOL> (default: false)
  *
@@ -53,7 +53,7 @@
  *   "grids"         - the indices of its grids in the list of grids
  *
  * Example:
- * [_display, _section, GVAR(theme), true] call einv_gui_fnc_drawWindow;
+ * [_display, _section, GVAR(theme), true] call aio_gui_fnc_drawWindow;
  *
  * Public: No
  */
@@ -97,7 +97,7 @@ private _contentH = _textUnit * 0.7;
 private _blockW = STORAGE_COLS * _cellW;
 
 if (_notice isEqualTo "") then {
-    _layout = [_section getOrDefault ["layoutKey", ""], _section getOrDefault ["entries", []]] call EFUNC(storage,getLayout);
+    _layout = [[_section getOrDefault ["layoutKey", ""], _section getOrDefault ["entries", []]] call EFUNC(storage,getLayout)] call FUNC(growSlots);
 
     ([_layout] call FUNC(flowCompartments)) params ["_flowed", "_flowH", "_flowW"];
 
@@ -135,7 +135,7 @@ _top = SNAP_Y((_top min (CONTENT_B - _height)) max CONTENT_Y);
 
 GVAR(windowPos) set [_key, [_left, _top]];
 
-private _group = [_display, "EINV_Group", controlNull, [_left, _top, _width, _height]] call FUNC(uiCreate);
+private _group = [_display, "AIO_Group", controlNull, [_left, _top, _width, _height]] call FUNC(uiCreate);
 (ctrlPosition _group) params ["", "", "_groupW", "_groupH"];
 
 // Like the columns (fnc_build), the window and its body report the mouse buttons and the wheel as the
@@ -212,7 +212,7 @@ if (_load isNotEqualTo "") then {
 
 // The button, right-aligned before how full it is. Sort: the kit's grid laid out anew by the order the player has
 // chosen, each click stepping to the next one (fnc_sortHolder, fnc_sortChip), where the player may change the kit
-// (einv_compat_efak_fnc_checkTouch). Only in the inventory and while the kit shows its grid, and drawn disabled
+// (aio_compat_efak_fnc_checkTouch). Only in the inventory and while the kit shows its grid, and drawn disabled
 // while a move out of this kit is under way. A button is [id, label, icon, width, compact]; for lack of room Sort
 // gets compact first, then it goes.
 private _kitClass = _section getOrDefault ["kit", ""];
@@ -322,13 +322,13 @@ private _cross = [_display, _group, [_closeX, _chipTop, _closeW, _chipH], _key, 
 [(_cross select -1), LLSTRING(Section_Close)] call FUNC(setTooltip);
 
 // A hairline under the title, as under a column's.
-private _line = [_display, "EINV_PanelRect", _group, [_padX, _padY + _titleH + _padY * 0.4, _innerW, pixelH]] call FUNC(uiCreate);
+private _line = [_display, "AIO_PanelRect", _group, [_padX, _padY + _titleH + _padY * 0.4, _innerW, pixelH]] call FUNC(uiCreate);
 _line ctrlSetBackgroundColor (_theme getOrDefault ["line", [1, 1, 1, 0.07]]);
 
 // ----- The body -----
 
 // It reaches into the right padding like a column's group, so a scroll bar runs beside the grid.
-private _body = [_display, "EINV_ScrollGroup", _group, [_padX - pixelW, _padY * 2 + _titleH, _groupW - _padX - pixelW, _bodyH]] call FUNC(uiCreate);
+private _body = [_display, "AIO_ScrollGroup", _group, [_padX - pixelW, _padY * 2 + _titleH, _groupW - _padX - pixelW, _bodyH]] call FUNC(uiCreate);
 
 [_body] call _fnc_events;
 
@@ -347,7 +347,7 @@ if (_notice isNotEqualTo "") then {
 
 // A clear speck at the very bottom, as in a column (fnc_drawColumn): the engine scrolls as far as the
 // lowest control reaches, and this makes that exactly the height stored here.
-private _end = [_display, "EINV_PanelRect", _body, [0, _contentH - pixelH, pixelW, pixelH]] call FUNC(uiCreate);
+private _end = [_display, "AIO_PanelRect", _body, [0, _contentH - pixelH, pixelW, pixelH]] call FUNC(uiCreate);
 _end ctrlSetBackgroundColor [0, 0, 0, 0];
 
 _body setVariable [QGVAR(contentH), _contentH];

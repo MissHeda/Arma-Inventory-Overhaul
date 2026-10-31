@@ -5,11 +5,11 @@
  * Creates a text field on a film, like the inventory's search field: a placeholder while it is empty, and
  * a click anywhere on the film puts the cursor in it.
  *
- * One line (EINV_Edit) - Return hands the text in (read on the key's release: the field swallows the
- * press). Several lines (EINV_EditArea) - for rules text: in a scrolling group of its own that grows with
+ * One line (AIO_Edit) - Return hands the text in (read on the key's release: the field swallows the
+ * press). Several lines (AIO_EditArea) - for rules text: in a scrolling group of its own that grows with
  * the text (fnc_fitEditArea), Return starts a new line. Disabled, several lines can still be selected and
  * copied (Ctrl+A, Ctrl+C) - only typing is refused; one line is greyed out - unless it is "selectable": then
- * it is a read-only field (EINV_EditReadOnly) that is drawn as any other and can be selected and copied, a
+ * it is a read-only field (AIO_EditReadOnly) that is drawn as any other and can be selected and copied, a
  * texture path say. Ctrl+C or Return in it gives the cursor back to the wizard (the sink, fnc_onLoad), so the
  * wizard's own keys work again.
  *
@@ -33,7 +33,7 @@
  * The controls, the field last <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.2, 0.03], "", "Name", _theme, {params ["_text", "_submitted"]}] call einv_setup_fnc_uiEdit;
+ * [_display, _group, [0, 0, 0.2, 0.03], "", "Name", _theme, {params ["_text", "_submitted"]}] call aio_setup_fnc_uiEdit;
  *
  * Public: No
  */
@@ -70,7 +70,7 @@ _placeholderCtrl ctrlShow (_text isEqualTo "");
 _controls pushBack _placeholderCtrl;
 
 // A click anywhere on the film puts the cursor in the field.
-private _hit = [_display, "EINV_Hitbox", _parent, _rect] call EFUNC(gui,uiCreate);
+private _hit = [_display, "AIO_Hitbox", _parent, _rect] call EFUNC(gui,uiCreate);
 _controls pushBack _hit;
 
 private _edit = controlNull;
@@ -78,10 +78,10 @@ private _edit = controlNull;
 if (_multiLine) then {
     // Its own scrolling group, and the field as high as its text: the group scrolls, the field never
     // has to. The scroll bar keeps clear of the text.
-    private _group = [_display, "EINV_ScrollGroup", _parent, [_left + _padX, _top + _padY, _width - _padX - pixelW * 2, _height - _padY * 2]] call EFUNC(gui,uiCreate);
+    private _group = [_display, "AIO_ScrollGroup", _parent, [_left + _padX, _top + _padY, _width - _padX - pixelW * 2, _height - _padY * 2]] call EFUNC(gui,uiCreate);
     (ctrlPosition _group) params ["", "", "_groupW", "_groupH"];
 
-    _edit = [_display, ["EINV_EditAreaReadOnly", "EINV_EditArea"] select _enabled, _group, [0, 0, _groupW - SCROLL_W - pixelW * 2, _groupH]] call EFUNC(gui,uiCreate);
+    _edit = [_display, ["AIO_EditAreaReadOnly", "AIO_EditArea"] select _enabled, _group, [0, 0, _groupW - SCROLL_W - pixelW * 2, _groupH]] call EFUNC(gui,uiCreate);
     _edit ctrlSetFontHeight _size;
     _edit setVariable [QGVAR(lineH), _size * 1.2];
 
@@ -90,7 +90,7 @@ if (_multiLine) then {
     (uiNamespace getVariable [QGVAR(editAreas), []]) pushBack _edit;
     uiNamespace setVariable [QGVAR(editAreas), (uiNamespace getVariable [QGVAR(editAreas), []]) select {!isNull _x}];
 } else {
-    private _class = ["EINV_Edit", "EINV_EditReadOnly"] select (_selectable && {!_enabled});
+    private _class = ["AIO_Edit", "AIO_EditReadOnly"] select (_selectable && {!_enabled});
 
     _edit = [_display, _class, _parent, [_left + _padX, _top + (_height - _size * 1.4) / 2, _width - _padX * 2, _size * 1.4]] call EFUNC(gui,uiCreate);
     _edit ctrlSetFont _font;

@@ -1,76 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="locks">
-        <Key ID="STR_einv_locks_Eden_Admins">
+        <Key ID="STR_aio_locks_Eden_Admins">
             <English>Admins only</English>
         </Key>
-        <Key ID="STR_einv_locks_Eden_Callsign">
+        <Key ID="STR_aio_locks_Eden_Callsign">
             <English>Group callsign</English>
         </Key>
-        <Key ID="STR_einv_locks_Eden_Callsign_Tooltip">
+        <Key ID="STR_aio_locks_Eden_Callsign_Tooltip">
             <English>With "One group": that group's callsign (e.g. Alpha 1-1); no other group may share it.</English>
         </Key>
-        <Key ID="STR_einv_locks_Eden_Category">
+        <Key ID="STR_aio_locks_Eden_Category">
             <English>Arma Inventory Overhaul</English>
         </Key>
-        <Key ID="STR_einv_locks_Eden_Everyone">
+        <Key ID="STR_aio_locks_Eden_Everyone">
             <English>Everyone (not locked)</English>
         </Key>
-        <Key ID="STR_einv_locks_Eden_Group">
+        <Key ID="STR_aio_locks_Eden_Group">
             <English>One group (callsign below)</English>
         </Key>
-        <Key ID="STR_einv_locks_Eden_Mode">
+        <Key ID="STR_aio_locks_Eden_Mode">
             <English>Inventory locked to</English>
         </Key>
-        <Key ID="STR_einv_locks_Eden_Mode_Tooltip">
+        <Key ID="STR_aio_locks_Eden_Mode_Tooltip">
             <English>Who may open this inventory. Logged-in admins always may, Zeus while the server allows it.</English>
         </Key>
-        <Key ID="STR_einv_locks_Hint_Locked">
+        <Key ID="STR_aio_locks_Hint_Locked">
             <English>Locked</English>
         </Key>
-        <Key ID="STR_einv_locks_Mission">
+        <Key ID="STR_aio_locks_Mission">
             <English>Locked by the mission</English>
         </Key>
-        <Key ID="STR_einv_locks_Notice">
+        <Key ID="STR_aio_locks_Notice">
             <English>Locked: %1</English>
         </Key>
-        <Key ID="STR_einv_locks_Setting_ZeusOpens">
+        <Key ID="STR_aio_locks_Setting_ZeusOpens">
             <English>Zeus opens locked containers</English>
         </Key>
-        <Key ID="STR_einv_locks_Setting_ZeusOpens_Desc">
+        <Key ID="STR_aio_locks_Setting_ZeusOpens_Desc">
             <English>Game masters (Zeus) open every locked crate and vehicle, as logged-in admins do.\nOff: Zeus is kept out like any other player.</English>
         </Key>
-        <Key ID="STR_einv_locks_Side_Civilian">
+        <Key ID="STR_aio_locks_Side_Civilian">
             <English>Civilian</English>
         </Key>
-        <Key ID="STR_einv_locks_Side_East">
+        <Key ID="STR_aio_locks_Side_East">
             <English>OPFOR</English>
         </Key>
-        <Key ID="STR_einv_locks_Side_Independent">
+        <Key ID="STR_aio_locks_Side_Independent">
             <English>Independent</English>
         </Key>
-        <Key ID="STR_einv_locks_Side_West">
+        <Key ID="STR_aio_locks_Side_West">
             <English>BLUFOR</English>
         </Key>
-        <Key ID="STR_einv_locks_Tip_Admin">
+        <Key ID="STR_aio_locks_Tip_Admin">
             <English>Locked: %1 - open to you as an admin</English>
         </Key>
-        <Key ID="STR_einv_locks_Tip_Member">
+        <Key ID="STR_aio_locks_Tip_Member">
             <English>Locked: %1 - you may open it</English>
         </Key>
-        <Key ID="STR_einv_locks_Tip_Zeus">
+        <Key ID="STR_aio_locks_Tip_Zeus">
             <English>Locked: %1 - open to you as Zeus</English>
         </Key>
-        <Key ID="STR_einv_locks_Who_Admins">
+        <Key ID="STR_aio_locks_Who_Admins">
             <English>admins only</English>
         </Key>
-        <Key ID="STR_einv_locks_Who_Group">
+        <Key ID="STR_aio_locks_Who_Group">
             <English>group %1 only</English>
         </Key>
-        <Key ID="STR_einv_locks_Who_GroupGone">
+        <Key ID="STR_aio_locks_Who_GroupGone">
             <English>a disbanded group only</English>
         </Key>
-        <Key ID="STR_einv_locks_Who_Side">
+        <Key ID="STR_aio_locks_Who_Side">
             <English>%1 only</English>
         </Key>
     </Package>

@@ -16,8 +16,8 @@
  * How many were taken out <NUMBER>
  *
  * Example:
- * [3] call einv_gui_fnc_cancelQueued;
- * [0, _crate] call einv_gui_fnc_cancelQueued;
+ * [3] call aio_gui_fnc_cancelQueued;
+ * [0, _crate] call aio_gui_fnc_cancelQueued;
  *
  * Public: No
  */

@@ -14,7 +14,7 @@
  * Choices as the context menu takes them, [text, arguments, code] <ARRAY>
  *
  * Example:
- * ["ACE_elasticBandage", ["grid", _grid]] call einv_hotbar_fnc_menuChoices;
+ * ["ACE_elasticBandage", ["grid", _grid]] call aio_hotbar_fnc_menuChoices;
  *
  * Public: No
  */

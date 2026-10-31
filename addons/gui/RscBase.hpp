@@ -16,7 +16,7 @@ class RscControlsGroup {
 // Surfaces. A panel with round corners is three rectangles and four quarter circles (fnc_uiPanel), so
 // the corners stay round whatever the panel's size and the screen's shape.
 // ---------------------------------------------------------------------------
-class EINV_PanelRect: RscText {
+class AIO_PanelRect: RscText {
     idc = -1;
     style = 0;
     text = "";
@@ -26,7 +26,7 @@ class EINV_PanelRect: RscText {
 };
 
 // A corner texture stretched over its box (ST_PICTURE), tinted with the panel's colour.
-class EINV_PanelCorner: RscPicture {
+class AIO_PanelCorner: RscPicture {
     idc = -1;
     style = 48;
     shadow = 0;
@@ -35,7 +35,7 @@ class EINV_PanelCorner: RscPicture {
 };
 
 // A one pixel frame around a box (ST_FRAME), drawn in its text colour - a slot's or a tile's border.
-class EINV_Frame: RscText {
+class AIO_Frame: RscText {
     idc = -1;
     style = 64;
     text = "";
@@ -47,7 +47,7 @@ class EINV_Frame: RscText {
 // ---------------------------------------------------------------------------
 // Text
 // ---------------------------------------------------------------------------
-class EINV_Label: RscText {
+class AIO_Label: RscText {
     idc = -1;
     style = 0;
     shadow = 0;
@@ -60,16 +60,16 @@ class EINV_Label: RscText {
     tooltipColorShade[] = C_TOOLTIP_SHADE;
 };
 
-class EINV_LabelRight: EINV_Label {
+class AIO_LabelRight: AIO_Label {
     style = 1;
 };
 
-class EINV_LabelCenter: EINV_Label {
+class AIO_LabelCenter: AIO_Label {
     style = 2;
 };
 
 // Several colours in one line - the hint. Its parts bring their own colours and font (fnc_updateHover).
-class EINV_StructuredText: RscStructuredText {
+class AIO_StructuredText: RscStructuredText {
     idc = -1;
     shadow = 0;
     size = QUOTE(UNIT * 0.7);
@@ -88,7 +88,7 @@ class EINV_StructuredText: RscStructuredText {
 
 // A text field without a frame of its own (ST_NO_RECT): the search field lies on a surface drawn under
 // it (fnc_drawFilter).
-class EINV_Edit: RscEdit {
+class AIO_Edit: RscEdit {
     idc = -1;
     style = 512;
     shadow = 0;
@@ -108,7 +108,7 @@ class EINV_Edit: RscEdit {
 };
 
 // A field for a whole palette as text (the colour popover's Import and Export): 40 characters cut it off mid-array.
-class EINV_EditLong: EINV_Edit {
+class AIO_EditLong: AIO_Edit {
     maxChars = 20000;
 };
 
@@ -116,7 +116,7 @@ class EINV_EditLong: EINV_Edit {
 // 0.62 of its height), so the line reads as one.
 // Left, right after the key hints and a thin line that parts it from them: an "align" set on composed text by script does
 // not reach the line, the control's own attributes do - for every hint written into it.
-class EINV_FooterHint: EINV_StructuredText {
+class AIO_FooterHint: AIO_StructuredText {
     size = QUOTE(UNIT * 0.558);
     class Attributes: Attributes {
         align = "left";
@@ -129,7 +129,7 @@ class EINV_FooterHint: EINV_StructuredText {
 
 // A white icon, tinted at run time. It keeps its shape whatever box it is given (ST_PICTURE +
 // ST_KEEP_ASPECT_RATIO).
-class EINV_Icon: RscPicture {
+class AIO_Icon: RscPicture {
     idc = -1;
     style = 2096;
     shadow = 0;
@@ -138,16 +138,25 @@ class EINV_Icon: RscPicture {
 };
 
 // An item's own picture, in its own colours, fitted into its box without stretching. Never tinted.
-class EINV_Picture: EINV_Icon {
+class AIO_Picture: AIO_Icon {
     colorText[] = C_WHITE;
 };
 
-// An item's picture turned a quarter (issue #24, fnc_uiPictureTurned): a plain ST_PICTURE that stretches its texture
-// over the control. Keeping the shape (ST_KEEP_ASPECT_RATIO) is worked out on the turned box and squashed the picture;
-// the control is made in the texture's own shape instead, so the stretch changes nothing.
-class EINV_PictureTurned: EINV_Icon {
+// An item's picture turned a quarter (issues #24, #28, fnc_uiPictureTurned): a plain ST_PICTURE that stretches its
+// texture over the control - the turned texture of fnc_turnedTexture, square, on a control square in pixels.
+class AIO_PictureTurned: AIO_Icon {
     style = 48;
     colorText[] = C_WHITE;
+};
+
+// The display a turned picture is drawn by, into a texture of its own (fnc_turnedTexture): nothing in it but what
+// that function puts there - RscDisplayEmpty brings a vignette along.
+class AIO_TurnTexture {
+    idd = -1;
+    movingEnable = 0;
+    enableSimulation = 1;
+    class controlsBackground {};
+    class controls {};
 };
 
 // ---------------------------------------------------------------------------
@@ -155,7 +164,7 @@ class EINV_PictureTurned: EINV_Icon {
 // the controls under it. Hover and clicks are added at run time (fnc_uiButton), so every look can
 // light its buttons up in its own colours.
 // ---------------------------------------------------------------------------
-class EINV_Hitbox: RscButton {
+class AIO_Hitbox: RscButton {
     idc = -1;
     style = 2;
     text = "";
@@ -184,7 +193,7 @@ class EINV_Hitbox: RscButton {
 // ---------------------------------------------------------------------------
 
 // Holds pieces together, never scrolls.
-class EINV_Group: RscControlsGroup {
+class AIO_Group: RscControlsGroup {
     idc = -1;
     x = 0;
     y = 0;
@@ -203,7 +212,7 @@ class EINV_Group: RscControlsGroup {
 
 // A column that scrolls up and down once its content is taller than it is: a thin, quiet bar without
 // arrows, the thumb a slim bar with round ends - as in Enhanced First Aid Kits' menus. Never sideways.
-class EINV_ScrollGroup: RscControlsGroup {
+class AIO_ScrollGroup: RscControlsGroup {
     idc = -1;
     x = 0;
     y = 0;

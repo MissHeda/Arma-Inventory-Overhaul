@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * [[_crate]] call einv_compat_zen_fnc_groupDialog;
+ * [[_crate]] call aio_compat_zen_fnc_groupDialog;
  *
  * Public: No
  */

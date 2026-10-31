@@ -20,7 +20,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_drawTopLayer;
+ * [_display] call aio_gui_fnc_drawTopLayer;
  *
  * Public: No
  */

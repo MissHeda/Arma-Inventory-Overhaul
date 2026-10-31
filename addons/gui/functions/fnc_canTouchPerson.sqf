@@ -20,7 +20,7 @@
  * Allowed <BOOL>
  *
  * Example:
- * [cursorObject, "items", backpackContainer cursorObject] call einv_gui_fnc_canTouchPerson;
+ * [cursorObject, "items", backpackContainer cursorObject] call aio_gui_fnc_canTouchPerson;
  *
  * Public: No
  */

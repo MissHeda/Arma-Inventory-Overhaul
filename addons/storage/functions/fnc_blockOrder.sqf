@@ -9,14 +9,14 @@
  *
  * Arguments:
  * 0: The compartments, as fnc_getLayout lists them <ARRAY>
- * 1: The item's categories, "groups" of einv_items_fnc_getInfo <ARRAY of STRING>
+ * 1: The item's categories, "groups" of aio_items_fnc_getInfo <ARRAY of STRING>
  * 2: A compartment to try before all others (unless it refuses the item), -1 for none <NUMBER> (default: -1)
  *
  * Return Value:
  * Indices of the compartments, in the order to look <ARRAY of NUMBER>
  *
  * Example:
- * [[[6, 4], [2, 2, [], [], ["ammo"]]], ["ammo"]] call einv_storage_fnc_blockOrder; // [1, 0]
+ * [[[6, 4], [2, 2, [], [], ["ammo"]]], ["ammo"]] call aio_storage_fnc_blockOrder; // [1, 0]
  *
  * Public: No
  */

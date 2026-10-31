@@ -12,7 +12,7 @@
  * [col, row, w, h, holes], 0, 0, then the compartment's columns, rows and holes <ARRAY>
  *
  * Example:
- * [[2, 2, [3], [], ["tool"], true]] call einv_storage_fnc_slotOf; // [0, 0, 2, 2, [3]]
+ * [[2, 2, [3], [], ["tool"], true]] call aio_storage_fnc_slotOf; // [0, 0, 2, 2, [3]]
  *
  * Public: No
  */

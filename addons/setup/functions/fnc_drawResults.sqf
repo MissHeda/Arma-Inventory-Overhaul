@@ -24,7 +24,7 @@
  * None
  *
  * Example:
- * [] call einv_setup_fnc_drawResults;
+ * [] call aio_setup_fnc_drawResults;
  *
  * Public: No
  */
@@ -37,7 +37,7 @@ if (isNull _display || {isNull _parent}) exitWith {};
 
 ctrlDelete (uiNamespace getVariable [QGVAR(results), controlNull]);
 
-private _box = [_display, "EINV_Group", _parent, _rect] call EFUNC(gui,uiCreate);
+private _box = [_display, "AIO_Group", _parent, _rect] call EFUNC(gui,uiCreate);
 
 uiNamespace setVariable [QGVAR(results), _box];
 
@@ -78,7 +78,7 @@ uiNamespace setVariable [QGVAR(indexLabel), controlNull];
 
 private _containers = _mode isEqualTo "containers";
 
-(GVAR(listState) getOrDefault [_mode, ["", "all", false, 0]]) params ["_text", "_chip", "_ownOnly", "_page"];
+(GVAR(listState) getOrDefault [_mode, ["", "all", false, 0]]) params ["_text", "_chip", "_ownOnly", "_page", ["_modPick", ""]];
 private _named = ([] call FUNC(ownClassRules)) select 1;
 
 private _filter = [_text] call FUNC(searchFilter);
@@ -91,7 +91,7 @@ private _ownKeys = [["footprint", "stack"], ["grid", "like"]] select _containers
 
 private _matches = ((uiNamespace getVariable QGVAR(index)) get "rows") select {
     (if (_containers) then {
-        // A backpack is listed with no load of its own on purpose (einv_setup_fnc_indexChunk): its cells are
+        // A backpack is listed with no load of its own on purpose (aio_setup_fnc_indexChunk): its cells are
         // all there is to set, so it is not hidden with the load-0 rest.
         ((_x select ROW_LOAD) > 0 || {(_x select ROW_KIND) isEqualTo "backpack"}) && {(_x select ROW_KIND) in CONTAINER_KINDS} && {_chip isEqualTo "all" || {(_x select ROW_KIND) in _chipKinds}}
     } else {
@@ -105,6 +105,24 @@ private _matches = ((uiNamespace getVariable QGVAR(index)) get "rows") select {
             [_filter, _x select ROW_SEARCH, _x select ROW_LC, _x select ROW_NAME] call FUNC(searchHit)
         }
     }}
+};
+
+// The mods of what is found, for the filter; then only the one picked (issue #32).
+private _modNames = [];
+
+{
+    _modNames pushBackUnique (_x select ROW_MOD);
+} forEach _matches;
+
+_modNames sort true;
+
+if (_modPick isNotEqualTo "" && {!(_modPick in _modNames)}) then {
+    _modPick = "";
+    (GVAR(listState) getOrDefault [_mode, []]) set [4, ""];
+};
+
+if (_modPick isNotEqualTo "") then {
+    _matches = _matches select {(_x select ROW_MOD) isEqualTo _modPick};
 };
 
 private _total = count _matches;
@@ -132,10 +150,89 @@ private _footY = _height - _footH;
 
 // ----- The cards -----
 
-private _list = [_display, "EINV_ScrollGroup", _box, [0, 0, _width, _footY - UNIT * 0.2]] call EFUNC(gui,uiCreate);
+// ----- The mod filter -----
+
+private _barH = UNIT * 1;
+private _modOptions = [[LLSTRING(List_AllMods), ""]] + (_modNames apply {[_x, _x]});
+
+[_display, _box, [0, 0, _width, _barH], _modOptions, _modPick, _theme, {
+    params ["_new", "_mode"];
+
+    private _state = GVAR(listState) get _mode;
+
+    _state set [4, _new];
+    _state set [3, 0];
+
+    [] call FUNC(drawResults);
+}, _mode, count _modNames > 1] call FUNC(uiDropdown);
+
+private _listTop = _barH + UNIT * 0.25;
+private _list = [_display, "AIO_ScrollGroup", _box, [0, _listTop, _width, _footY - UNIT * 0.2 - _listTop]] call EFUNC(gui,uiCreate);
 
 _list setVariable [QGVAR(scrollId), "list_" + _mode];
 
+// ----- Overrides: one rule for every class whose name starts the same (class=X*) -----
+// A search that can start a class name (B_Assault, or B_Assault*) offers an entry of its own above the classes: "Custom override".
+// Picked - after a question the first time -, the editor beside the list shows the first class found and what it applies
+// is written as the one rule class=B_Assault* (fnc_upsertRule), which takes every class of that name, those a mod adds
+// later too. Overrides the draft has already show as such entries as well: all of them with nothing typed, else those the
+// text is part of. GVAR(groupEdit) holds the one picked per step: [selector, classes].
+
+private _group = GVAR(groupEdit) getOrDefault [_mode, []];
+private _letters = toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+private _typed = "";
+
+// The text typed, a * at its end or not (B_Assault and B_Assault* both offer B_Assault*): letters, digits and _ only.
+private _whole = trim _text;
+
+if ((_whole select [count _whole - 1]) isEqualTo "*") then {
+    _whole = _whole select [0, count _whole - 1];
+};
+
+if (count _whole >= 3 && {(toArray _whole) findIf {!(_x in _letters)} < 0}) then {
+    _typed = _whole;
+};
+
+// The overrides the draft has, by their stem as written.
+private _stems = [];
+
+{
+    _x params ["_conds"];
+
+    if (count _conds == 1) then {
+        (_conds select 0) params ["_negated", "_key", "_op", "_names"];
+
+        if (!_negated && {_key isEqualTo "class"} && {_op isEqualTo "="} && {count _names == 1} && {((_names select 0) select [count (_names select 0) - 1]) isEqualTo "*"}) then {
+            private _stem = (_names select 0) select [0, count (_names select 0) - 1];
+
+            if ((_stems findIf {_x == _stem}) < 0 && {_needle isEqualTo "" || {(toLowerANSI _stem find (_needle regexReplace ["\*", ""])) >= 0}}) then {
+                _stems pushBack _stem;
+            };
+        };
+    };
+} forEach (([GVAR(draftText)] call EFUNC(items,parseRules)) getOrDefault ["rules", []]);
+
+private _drafted = +_stems;
+
+if (_typed isNotEqualTo "" && {(_stems findIf {_x == _typed}) < 0}) then {
+    _stems pushBack _typed;
+};
+
+// Each with the classes of this step whose name starts so.
+private _rows = (uiNamespace getVariable QGVAR(index)) get "rows";
+private _overrides = _stems apply {
+    private _start = toLowerANSI _x;
+    private _length = count _start;
+    private _classes = (_rows select {
+        ((_x select ROW_LC) select [0, _length]) isEqualTo _start && {
+            if (_containers) then {(_x select ROW_KIND) in CONTAINER_KINDS} else {(_x select ROW_FAMILY) isNotEqualTo "cargo"}
+        }
+    }) apply {_x select 1};
+
+    [_x, _classes]
+};
+
+_overrides = _overrides select {(_x select 1) isNotEqualTo []};
 private _rowW = _width - SCROLL_W - SQUARE(UNIT * 0.25);
 private _cardH = UNIT * 2.3;
 private _gap = UNIT * 0.2;
@@ -146,12 +243,71 @@ private _textW = _rowW - _textX - SQUARE(UNIT * 0.2);
 private _picked = toLowerANSI (GVAR(selection) getOrDefault [_mode, ""]);
 private _fill = [1, 1, 1, 0.035];
 private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]];
+private _overrideH = count _overrides * (_cardH + _gap);
+
+{
+    _x params ["_stem", "_classes"];
+
+    private _selector = _stem + "*";
+    private _cardY = _forEachIndex * (_cardH + _gap);
+    private _active = (_group param [0, ""]) == _selector;
+    private _exists = _stem in _drafted;
+    private _cardFill = [_fill, _fillPicked] select _active;
+    private _surface = [_display, _list, [0, _cardY, _rowW, _cardH], _cardFill, _radius] call EFUNC(gui,uiPanel);
+
+    if (_active) then {
+        [_display, _list, [0, _cardY, _rowW, _cardH], _accent, _radius] call EFUNC(gui,uiRing);
+    };
+
+    [_display, _list, [SQUARE(UNIT * 0.2) + _picW * 0.2, _cardY + UNIT * 0.2 + _picH * 0.2, _picW * 0.6, _picH * 0.6], UI_TEX(icon_style_ca), _accent] call EFUNC(gui,uiIcon);
+
+    [
+        _display, _list, [_textX, _cardY + UNIT * 0.1, _textW, UNIT * 0.75],
+        [format [LLSTRING(Override_Title), _selector], _textW, _fontBold, TEXT_BODY] call EFUNC(gui,fitText), TEXT_BODY, _colorText, _fontBold, 0
+    ] call EFUNC(gui,uiLabel);
+
+    [
+        _display, _list, [_textX, _cardY + UNIT * 0.8, _textW, UNIT * 0.65],
+        [format [LLSTRING(Override_About), _stem, count _classes], _textW, _font, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL, _muted, _font, 0
+    ] call EFUNC(gui,uiLabel);
+
+    [
+        _display, _list, [_textX, _cardY + UNIT * 1.45, _textW, UNIT * 0.65],
+        [[LLSTRING(Override_New), LLSTRING(Override_Own)] select _exists, _textW, _font, TEXT_SMALL] call EFUNC(gui,fitText), TEXT_SMALL,
+        [_colorText2, _accent] select _exists, _font, 0
+    ] call EFUNC(gui,uiLabel);
+
+    [_display, _list, [0, _cardY, _rowW, _cardH], _surface, _cardFill, [1, 1, 1, 0.085], {
+        params ["_mode", "_selector", "_classes", "_exists"];
+
+        private _pick = {
+            params ["_mode", "_selector", "_classes"];
+
+            GVAR(groupEdit) set [_mode, [_selector, _classes]];
+            GVAR(selection) set [_mode, _classes select 0];
+            GVAR(editScope) set [_mode, "class"];
+
+            [format [LLSTRING(Hint_GroupOnRule), _selector select [0, count _selector - 1]], "accent"] call FUNC(setHint);
+            [GVAR(step)] call FUNC(showStep);
+        };
+
+        if (_exists) exitWith {
+            [_mode, _selector, _classes] call _pick;
+        };
+
+        [
+            uiNamespace getVariable [QGVAR(display), displayNull],
+            format [LLSTRING(Override_Question), _selector select [0, count _selector - 1], count _classes],
+            LLSTRING(Override_Create), _pick, [_mode, _selector, _classes]
+        ] call FUNC(confirm);
+    }, [_mode, _selector, _classes, _exists], true, LLSTRING(Override_Tip)] call FUNC(uiHit);
+} forEach _overrides;
 
 {
     _x params ["_lc", "_class", "", "_name", "_kind", "_family", "_picture", "_mod"];
 
-    private _cardY = _forEachIndex * (_cardH + _gap);
-    private _isPicked = _lc isEqualTo _picked;
+    private _cardY = _overrideH + _forEachIndex * (_cardH + _gap);
+    private _isPicked = _lc isEqualTo _picked && {_group isEqualTo []};
     private _cardFill = [_fill, _fillPicked] select _isPicked;
     private _surface = [_display, _list, [0, _cardY, _rowW, _cardH], _cardFill, _radius] call EFUNC(gui,uiPanel);
 
@@ -168,7 +324,7 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
         [_name, _textW, _fontBold, TEXT_BODY] call EFUNC(gui,fitText), TEXT_BODY, _colorText, _fontBold, 0
     ] call EFUNC(gui,uiLabel);
 
-    private _kindWord = localize format [["STR_einv_setup_Family_%1", "STR_einv_setup_Kind_%1"] select _containers, [_family, _kind] select _containers];
+    private _kindWord = localize format [["STR_aio_setup_Family_%1", "STR_aio_setup_Kind_%1"] select _containers, [_family, _kind] select _containers];
     private _about = format ["%1 · %2 · %3", _class, _kindWord, _mod];
 
     [
@@ -191,6 +347,7 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
         // Picked here, an edit is for this class alone; the tree view picks a class with everything built on it.
         GVAR(selection) set [_mode, _class];
         GVAR(editScope) set [_mode, "class"];
+        GVAR(groupEdit) deleteAt _mode;
 
         [GVAR(step)] call FUNC(showStep);
     }, [_mode, _class], true, _class] call FUNC(uiHit);

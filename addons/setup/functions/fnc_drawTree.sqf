@@ -32,7 +32,7 @@
  * None
  *
  * Example:
- * [_display, _box, 0.2, 0.5, _theme, "containers"] call einv_setup_fnc_drawTree;
+ * [_display, _box, 0.2, 0.5, _theme, "containers"] call aio_setup_fnc_drawTree;
  *
  * Public: No
  */
@@ -191,7 +191,7 @@ private _footY = _height - _footH;
 
 // ----- The rows -----
 
-private _list = [_display, "EINV_ScrollGroup", _box, [0, _cursorY, _width, _footY - UNIT * 0.2 - _cursorY]] call EFUNC(gui,uiCreate);
+private _list = [_display, "AIO_ScrollGroup", _box, [0, _cursorY, _width, _footY - UNIT * 0.2 - _cursorY]] call EFUNC(gui,uiCreate);
 
 _list setVariable [QGVAR(scrollId), "tree_" + _mode];
 
@@ -238,7 +238,7 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
         [_display, _list, [_cardX, _cardY, _cardW, TREE_ROW_H], _accent, _radius] call EFUNC(gui,uiRing);
     };
 
-    // The picture of the class itself, only when it can be shown (einv_gui_fnc_safePicture).
+    // The picture of the class itself, only when it can be shown (aio_gui_fnc_safePicture).
     private _picture = [getText (configFile >> _rootName >> _class >> "picture")] call EFUNC(gui,safePicture);
 
     if (_picture isNotEqualTo "") then {
@@ -275,6 +275,7 @@ private _fillPicked = _theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]
 
         GVAR(selection) set [_mode, _class];
         GVAR(editScope) set [_mode, "tree"];
+        GVAR(groupEdit) deleteAt _mode;
 
         [GVAR(step)] call FUNC(showStep);
     }, [_mode, _class], true, _class] call FUNC(uiHit);

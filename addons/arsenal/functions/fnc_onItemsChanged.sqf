@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [_display, 2012, _gained, _lost] call einv_arsenal_fnc_onItemsChanged;
+ * [_display, 2012, _gained, _lost] call aio_arsenal_fnc_onItemsChanged;
  *
  * Public: No
  */

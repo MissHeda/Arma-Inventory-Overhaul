@@ -29,10 +29,10 @@
  *
  * Return Value:
  * Phases of that step, [] when nothing is left for it - each [root, ops, step]: the step marks it as a
- * settlement phase (no reach, no guards; einv_storage_runPhase's 8th argument) <ARRAY>
+ * settlement phase (no reach, no guards; aio_storage_runPhase's 8th argument) <ARRAY>
  *
  * Example:
- * [_tx, _results, 1] call einv_storage_fnc_settle;
+ * [_tx, _results, 1] call aio_storage_fnc_settle;
  *
  * Public: No
  */

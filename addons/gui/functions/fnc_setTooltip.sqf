@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * [_button, "Fold this box"] call einv_gui_fnc_setTooltip;
+ * [_button, "Fold this box"] call aio_gui_fnc_setTooltip;
  *
  * Public: No
  */
@@ -48,6 +48,20 @@ _ctrl ctrlAddEventHandler ["MouseEnter", {
     uiNamespace setVariable [QGVAR(hoverTip), _ctrl];
     GVAR(lastMouse) = [];
 }];
+// A press keeps the tip: the engine reports the mouse leaving a button while it is pressed, and the tip of the Sort and
+// fold buttons went away on a left click (it is the same button under the same mouse).
+{
+    _ctrl ctrlAddEventHandler [_x, {
+        params ["_ctrl"];
+
+        uiNamespace setVariable [QGVAR(hoverTip), _ctrl];
+        GVAR(lastMouse) = [];
+
+        // A click often draws the button anew (Sort, a fold tab): its tip is asked for again once that is done.
+        [{GVAR(lastMouse) = []}, [], 4] call CBA_fnc_execAfterNFrames;
+    }];
+} forEach ["MouseButtonDown", "MouseButtonUp", "ButtonClick"];
+
 _ctrl ctrlAddEventHandler ["MouseExit", {
     params ["_ctrl"];
 

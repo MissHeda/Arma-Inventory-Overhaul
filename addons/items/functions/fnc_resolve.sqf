@@ -6,14 +6,14 @@
  * used from. Each of these is a field of its own and
  * goes to the first that has an answer, highest first:
  *
- *   own     - the rules text (later rules first), and after it the older tables (einv_items_sizeTable,
- *             einv_items_stackTable, einv_storage_containerTable), which therefore win over the text
- *   mod     - the item's own config: einv_size, einv_stack, einv_grid, einv_weight, einv_name,
- *             einv_icon, einv_picture, einv_use, einv_cat, and where one of those is not set the older einv_gridSize[], einv_stackSize, einv_grids[]
- *             or einv_slots (fnc_getFacts, fnc_readConfigKeys). A subclass has its parent's, and
+ *   own     - the rules text (later rules first), and after it the older tables (aio_items_sizeTable,
+ *             aio_items_stackTable, aio_storage_containerTable), which therefore win over the text
+ *   mod     - the item's own config: aio_size, aio_stack, aio_grid, aio_weight, aio_name,
+ *             aio_icon, aio_picture, aio_use, aio_cat, and where one of those is not set the older aio_gridSize[], aio_stackSize, aio_grids[]
+ *             or aio_slots (fnc_getFacts, fnc_readConfigKeys). A subclass has its parent's, and
  *             the rules text above still has the last word
  *   preset  - the preset chain (a derived preset after its base, later rules first), and after it
- *             einv_items_stackSmall when it is moved off its default
+ *             aio_items_stackSmall when it is moved off its default
  *   all     - the text's rules with "all", everything else (later rules first): they answer only what
  *             every layer above left open, so they fill the gaps and never override a rule, a table, a
  *             mod or the preset - but for the preset's own everything else, its rules without any
@@ -29,8 +29,8 @@
  * stack, grid and weight, never the name, icon, picture or use - to what this function makes of X, asked now through the
  * same compiled rules: a later change to X follows, and a rule like=X grid=6x4 takes X's answer with
  * its own grid on top. X's answer is X's in full: its grid as the compartments X really has
- * (einv_storage_fnc_blocksFor with X's class, kind and load - "auto" by this item's own load would be
- * another grid). Its weight only when a rule or X's own config (einv_weight) sets one on X - else -1,
+ * (aio_storage_fnc_blocksFor with X's class, kind and load - "auto" by this item's own load would be
+ * another grid). Its weight only when a rule or X's own config (aio_weight) sets one on X - else -1,
  * and this item keeps its own config's weight. Should X be no container, its grid is "auto". A class
  * no config knows, a like= that comes back round to a class on its way, or more than LIKE_DEPTH of
  * them one after the other give the built-in answer for those fields instead, named in the RPT once.
@@ -60,14 +60,14 @@
  *   "picture"   - the texture the rules give it (picture=, fnc_parsePicture), "" when none does <STRING>
  *   "use"       - the containers it may be used from where a setting limits what can be used there (use=,
  *                 fnc_parseUse), in the order uniform, vest, backpack; [] when none says <ARRAY of STRING>
- *   "cats"      - the categories the rules or the config put it in (cats=, einv_cat, fnc_parseGroups), in the
+ *   "cats"      - the categories the rules or the config put it in (cats=, aio_cat, fnc_parseGroups), in the
  *                 order of fnc_orderGroups; [] when none says: the built-in mapping then (fnc_defaultGroup) <ARRAY of STRING>
  *   "src"       - field -> where it came from: "own:<i>" (i-th rule of the text),
  *                 "legacy:<setting>:<i>", "mod:<config key>", "preset:<preset>:<i>", "all:<i>" (the
  *                 i-th rule of the text, one with "all"), "builtin", "forced" <HASHMAP>
  *
  * Example:
- * [["arifle_MX_F"] call einv_items_fnc_getFacts, call einv_items_fnc_currentRules] call einv_items_fnc_resolve;
+ * [["arifle_MX_F"] call aio_items_fnc_getFacts, call aio_items_fnc_currentRules] call aio_items_fnc_resolve;
  *
  * Public: No
  */
@@ -75,7 +75,7 @@
 params [["_facts", createHashMap, [createHashMap]], ["_compiled", createHashMap, [createHashMap]], ["_chain", [], [[]]]];
 
 private _kind = _facts get "kind";
-private _need = ["footprint", "weight", "name", "icon", "picture", "use", "cats"];
+private _need = ["footprint", "weight", "name", "icon", "picture", "use", "cats", "tint", "color", "show"];
 
 if !(_kind in KINDS_SINGLE) then {
     _need pushBack "stack";
@@ -232,7 +232,7 @@ private _fnc_walk = {
 
 [_compiled getOrDefault ["own", []], _ownIndices, _ownFields] call _fnc_walk;
 
-// What the item's own mod says, for what is still open. The keys written like the rules (einv_size and
+// What the item's own mod says, for what is still open. The keys written like the rules (aio_size and
 // the like) come first, the older ones only where those leave a field open.
 private _mod = _facts get "mod";
 

@@ -20,7 +20,7 @@
  * arsenal, which is when the holder gives everything back, and with the surplus switch off.
  *
  * Nothing in Eden; no surplus while an arsenal is open (ARSENAL_OPEN) or with the setting
- * einv_storage_migrate off. Not for use inside a running phase: it starts a transaction.
+ * aio_storage_migrate off. Not for use inside a running phase: it starts a transaction.
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -31,7 +31,7 @@
  * A request was made <BOOL>
  *
  * Example:
- * [player] call einv_storage_fnc_requestMigrate;
+ * [player] call aio_storage_fnc_requestMigrate;
  *
  * Public: No
  */

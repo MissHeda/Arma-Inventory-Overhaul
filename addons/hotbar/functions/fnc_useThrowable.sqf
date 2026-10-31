@@ -21,7 +21,7 @@
  * [done, text] - what to say: for done what happened ("" for nothing), else why not <ARRAY>
  *
  * Example:
- * [player, "HandGrenade", 2] call einv_hotbar_fnc_useThrowable;
+ * [player, "HandGrenade", 2] call aio_hotbar_fnc_useThrowable;
  *
  * Public: No
  */

@@ -12,7 +12,7 @@
  * Slot id, "" when there is none <STRING>
  *
  * Example:
- * [player, "optic_Aco"] call einv_storage_fnc_slotFor;
+ * [player, "optic_Aco"] call aio_storage_fnc_slotFor;
  *
  * Public: No
  */

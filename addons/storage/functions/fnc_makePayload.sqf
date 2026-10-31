@@ -11,7 +11,7 @@
  *                       the magazine its class might bring - an attachment is put on as an item of its own
  *   anything else     - ["item", class, count, []]; a uniform or vest has nothing in it to start with
  *
- * What an item is comes from the rules in force (einv_items_fnc_getInfo). A weapon or a backpack is one
+ * What an item is comes from the rules in force (aio_items_fnc_getInfo). A weapon or a backpack is one
  * thing: for several, make several payloads.
  *
  * Arguments:
@@ -23,7 +23,7 @@
  * Payload, [] for no class <ARRAY>
  *
  * Example:
- * ["30Rnd_65x39_caseless_mag", 3] call einv_storage_fnc_makePayload;
+ * ["30Rnd_65x39_caseless_mag", 3] call aio_storage_fnc_makePayload;
  *
  * Public: No
  */

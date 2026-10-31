@@ -20,7 +20,7 @@
  * The name as the rules write it <STRING>
  *
  * Example:
- * ["Field kit (3)"] call einv_items_fnc_encodeName;
+ * ["Field kit (3)"] call aio_items_fnc_encodeName;
  *
  * Public: Yes
  */

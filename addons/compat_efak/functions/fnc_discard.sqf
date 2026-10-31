@@ -2,10 +2,10 @@
 /*
  * Author: Miss Heda
  * Takes things out of a kit and away, in the ACE Arsenal: a tile of the kit's grid in the panel dragged out
- * onto ACE's list, Ctrl+wheel down over it, Remove in its menu (einv_arsenal_fnc_remove). The counterpart of
+ * onto ACE's list, Ctrl+wheel down over it, Remove in its menu (aio_arsenal_fnc_remove). The counterpart of
  * fnc_packNew: the kit must let things out there (fnc_arsenalEditable: the kit type's Arsenal setting allows
  * taking out - "Remove only" does -, the kit does not follow the default contents), it must lie under a root
- * whose phases run on this machine (einv_storage_fnc_isLocalRoot, fnc_holderVerify), what the kits tab still has
+ * whose phases run on this machine (aio_storage_fnc_isLocalRoot, fnc_holderVerify), what the kits tab still has
  * staged is written first (fnc_arsenalFlush), and the tile is taken out as a window's take-out does
  * (fnc_takeFromKit: all or nothing, the tile's record leaving the kit's places), outside any phase, so the one
  * writer of the kit is this machine. A kit taken out of it gives its instance back (fnc_arsenalFree). The window is
@@ -21,7 +21,7 @@
  * [how many were taken out - 0 or the count the tile held, why not - "" when it went] <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7", _tile, 1, player] call einv_compat_efak_fnc_discard;
+ * ["efak_IFAK_7", _tile, 1, player] call aio_compat_efak_fnc_discard;
  *
  * Public: No
  */

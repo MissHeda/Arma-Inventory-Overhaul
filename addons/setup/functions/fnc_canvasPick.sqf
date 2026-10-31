@@ -17,7 +17,7 @@
  * [index of the picked compartment, its places] - [-1, []] while nothing is painted <ARRAY>
  *
  * Example:
- * [_canvas, [3, 4]] call einv_setup_fnc_canvasPick; // [1, [3, 4, 5]]
+ * [_canvas, [3, 4]] call aio_setup_fnc_canvasPick; // [1, [3, 4, 5]]
  *
  * Public: No
  */

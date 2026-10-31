@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * ACE Arsenal's display opened (ace_arsenal_displayOpened): the grid panel moves in. ACE raises the event
  * before it filled its panels - in the Eden editor even before the copy of the unit it dresses exists -,
- * so the inventory's engine is attached a frame later (einv_gui_fnc_attach, with this addon's hook table
+ * so the inventory's engine is attached a frame later (aio_gui_fnc_attach, with this addon's hook table
  * and the "draw3d" frame, which runs in the Eden editor too). Whatever the panel draws is made by the
  * engine on ACE's display, on top of ACE's own controls, and goes with it.
  *
@@ -14,7 +14,7 @@
  * list and "+" looked at again by the grid a frame later (fnc_ungrey), after ACE's own look by weight -
  * ACE greys every row anew at each pick -, and a press on the list is noted, as it may become a drag of
  * the row's item into the panel (fnc_onListPress). The same for the list of Enhanced First Aid Kits' kits tab,
- * which lies over ACE's at the same place while that tab is open (einv_compat_efak_fnc_arsenalControls): its items
+ * which lies over ACE's at the same place while that tab is open (aio_compat_efak_fnc_arsenalControls): its items
  * are dragged into the kit's grid, and its rows greyed by the kit's cells (fnc_ungreyKit). Each list notes which
  * "-" and "+" lie over its row picked, as a press there is theirs.
  *
@@ -32,7 +32,7 @@
  * None
  *
  * Example:
- * [findDisplay 1127001] call einv_arsenal_fnc_onOpened;
+ * [findDisplay 1127001] call aio_arsenal_fnc_onOpened;
  *
  * Public: No
  */

@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * [_box, "FirstAidKit", 1] call einv_gui_fnc_learn;
+ * [_box, "FirstAidKit", 1] call aio_gui_fnc_learn;
  *
  * Public: No
  */

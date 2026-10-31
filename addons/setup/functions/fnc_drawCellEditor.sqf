@@ -43,7 +43,7 @@
  *   - Apply, once something changed since the cells were loaded (an untouched class is never rewritten:
  *     a mask like x-x loads as one block and would be written back as two): class=X > grid=..., painted
  *     as one canvas with a letter per compartment in reading order of its first cell
- *     (einv_items_fnc_formatGrid: abbbbbc/abbbbbc/-bbbbb-; a single compartment stays xxxx/x--x or WxH),
+ *     (aio_items_fnc_formatGrid: abbbbbc/abbbbbc/-bbbbb-; a single compartment stays xxxx/x--x or WxH),
  *     blocks as 6x4+xxx/x-x (fnc_upsertRule), and - once the picture was changed - icon=ZOOM@ACROSS:DOWN and
  *     picture=PATH, which Apply also writes alone. Discard drops the edits, Back to the default takes the
  *     class's own grid, like=, icon and picture away.
@@ -78,7 +78,7 @@
  * None
  *
  * Example:
- * [_display, _group, [0.3, 0, 0.4, 0.5], _theme] call einv_setup_fnc_drawCellEditor;
+ * [_display, _group, [0.3, 0, 0.4, 0.5], _theme] call aio_setup_fnc_drawCellEditor;
  *
  * Public: No
  */
@@ -113,7 +113,7 @@ ctrlDelete (uiNamespace getVariable [QGVAR(editor), controlNull]);
 
 _rect params ["", "", "_width", "_height"];
 
-private _box = [_display, "EINV_Group", _parent, _rect] call EFUNC(gui,uiCreate);
+private _box = [_display, "AIO_Group", _parent, _rect] call EFUNC(gui,uiCreate);
 
 uiNamespace setVariable [QGVAR(editor), _box];
 
@@ -195,7 +195,7 @@ if (_hasWork && {("blocks" in _work) isNotEqualTo _blocksMode}) then {
         private _pickedNow = ([_work, GVAR(cellPick) getOrDefault [_lc, []]] call FUNC(canvasPick)) select 0;
 
         _work = createHashMapFromArray [
-            ["blocks", _fromPaint apply {[[_x select 0, _x select 1, _x select 2], _x param [4, []], _x param [5, false]] call FUNC(cellBlock)}],
+            ["blocks", _fromPaint apply {[[_x select 0, _x select 1, _x select 2], _x param [4, []], _x param [5, false], _x param [6, false]] call FUNC(cellBlock)}],
             ["picked", _pickedNow max 0]
         ];
     } else {
@@ -220,7 +220,7 @@ private _start = [];
 private _pickedPlaces = [];
 
 if (_blocksMode) then {
-    _start = _resolved apply {[[_x select 0, _x select 1, _x param [2, []]], _x param [4, []], _x param [5, false]] call FUNC(cellBlock)};
+    _start = _resolved apply {[[_x select 0, _x select 1, _x param [2, []]], _x param [4, []], _x param [5, false], _x param [6, false]] call FUNC(cellBlock)};
     _shown = [_start, _work getOrDefault ["blocks", []]] select _hasWork;
     _picked = (_work getOrDefault ["picked", 0]) min ((count _shown - 1) max 0);
     _blocks = _shown select {(_x select 0) * (_x select 1) > count (_x select 2)};
@@ -245,7 +245,7 @@ if (_blocksMode) then {
     // What the rows of the picked compartment show: when a change leaves it as it is, the editor is not drawn again.
     private _pickedBlock = _blocks param [_picked, []];
 
-    uiNamespace setVariable [QGVAR(paintSig), [count _blocks, _picked, _pickedBlock param [4, []], _pickedBlock param [5, false]]];
+    uiNamespace setVariable [QGVAR(paintSig), [count _blocks, _picked, _pickedBlock param [4, []], _pickedBlock param [5, false], _pickedBlock param [6, false]]];
 };
 
 // Both ways give the preview (fnc_drawPreview, through fnc_cellChanged) the same kind of thing. While
@@ -274,7 +274,7 @@ private _ownPicture = "picture" in _own || {_tree && {"picture" in (_treeRules g
 
 private _picH = UNIT * 2.2;
 private _picW = SQUARE(_picH);
-// A placeholder word or a missing file in the class's config is no picture (einv_gui_fnc_safePicture).
+// A placeholder word or a missing file in the class's config is no picture (aio_gui_fnc_safePicture).
 private _picture = [_info getOrDefault ["picture", ""]] call EFUNC(gui,safePicture);
 
 if (_picture isNotEqualTo "") then {
@@ -285,7 +285,7 @@ private _textX = _innerX + _picW + SQUARE(UNIT * 0.4);
 private _textW = _innerX + _innerW - _textX;
 private _byClass = (uiNamespace getVariable [QGVAR(index), createHashMap]) getOrDefault ["byClass", createHashMap];
 private _row = _byClass getOrDefault [_lc, []];
-private _about = format ["%1 · %2 · %3", _class, localize format ["STR_einv_setup_Kind_%1", _kind], _row param [ROW_MOD, _info getOrDefault ["addon", ""]]];
+private _about = format ["%1 · %2 · %3", _class, localize format ["STR_aio_setup_Kind_%1", _kind], _row param [ROW_MOD, _info getOrDefault ["addon", ""]]];
 
 [
     _display, _box, [_textX, _cursorY, _textW, UNIT * 0.85],
@@ -357,7 +357,7 @@ private _now = if (_kitRoom isEqualTo "capacity") then {
 
 // Back to the default, beside the line: the compartments, whatever way they were drawn, as three numbers each.
 private _fnc_shapes = {
-    ((_this select {(_x select 1) > 0}) apply {[_x select 0, _x select 1, _x param [2, []], _x param [4, []], _x param [5, false]]})
+    ((_this select {(_x select 1) > 0}) apply {[_x select 0, _x select 1, _x param [2, []], _x param [4, []], _x param [5, false], _x param [6, false]]})
 };
 private _resetSize = UNIT * 1.1;
 private _canResetGrid = _kitRoom isEqualTo "" && {("like" in _own) || {(_blocks call _fnc_shapes) isNotEqualTo (_defaultBlocks call _fnc_shapes)}};
@@ -516,7 +516,7 @@ if (_blocksMode) then {
                 GVAR(cellBrush) = _value;
 
                 [] call FUNC(drawCellEditor);
-            }, [_value], true, if (_value == 0) then {LLSTRING(Paint_None)} else {localize format ["STR_einv_setup_Paint_%1", _value]}] call FUNC(uiHit);
+            }, [_value], true, if (_value == 0) then {LLSTRING(Paint_None)} else {localize format ["STR_aio_setup_Paint_%1", _value]}] call FUNC(uiHit);
 
             _toolX = _toolX + _dotW + _dotGap;
         } forEach [1, 2, 3, 4, 5, 6, 7, 8, 0];
@@ -618,7 +618,7 @@ if (_blocksMode) then {
             // the rows above the drawing are drawn again.
             private _block = _blocks param [_index max 0, []];
 
-            if ([count _blocks, _index max 0, _block param [4, []], _block param [5, false]] isNotEqualTo (uiNamespace getVariable [QGVAR(paintSig), []])) exitWith {
+            if ([count _blocks, _index max 0, _block param [4, []], _block param [5, false], _block param [6, false]] isNotEqualTo (uiNamespace getVariable [QGVAR(paintSig), []])) exitWith {
                 [] call FUNC(drawCellEditor);
             };
 
@@ -741,7 +741,7 @@ if (_editable || _pictureDirty) then {
         // The cells, when they were changed.
         if (_gridDirty) then {
             private _blocks = if ("blocks" in _work) then {
-                // A compartment left without a single cell cannot be written (einv_items_fnc_parseGrid): it goes.
+                // A compartment left without a single cell cannot be written (aio_items_fnc_parseGrid): it goes.
                 (_work get "blocks") select {(_x select 0) * (_x select 1) > count (_x select 2)}
             } else {
                 [_work] call FUNC(canvasBlocks)
@@ -761,7 +761,7 @@ if (_editable || _pictureDirty) then {
             };
 
             // Only a drawing loaded taller than MAX_ROWS can hold one this tall. Painted compartments are
-            // written as one canvas where they lie (einv_items_fnc_formatGrid), so it is the drawing that must fit.
+            // written as one canvas where they lie (aio_items_fnc_formatGrid), so it is the drawing that must fit.
             if (_blocks findIf {((_x param [3, []]) param [1, 0]) + (_x select 1) > MAX_ROWS} >= 0) exitWith {
                 [format [LLSTRING(Hint_TooTall), MAX_ROWS], "loss"] call FUNC(setHint);
             };

@@ -19,7 +19,7 @@
  * Armor, 0 where the item does not cover the hitpoint <NUMBER>
  *
  * Example:
- * ["V_PlateCarrier1_rgr", "HitChest"] call einv_items_fnc_getArmor;
+ * ["V_PlateCarrier1_rgr", "HitChest"] call aio_items_fnc_getArmor;
  *
  * Public: No
  */

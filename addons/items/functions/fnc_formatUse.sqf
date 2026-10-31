@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Writes the value of use= (a rule) or einv_use (an item's config) from the containers, the way
+ * Writes the value of use= (a rule) or aio_use (an item's config) from the containers, the way
  * fnc_parseUse reads it back: the words in the order uniform, vest, backpack joined with "+" (a comma
  * would end a statement of a rules text) or with the separator given - config uses a comma. No container is
  * "none".
@@ -14,7 +14,7 @@
  * The value <STRING>
  *
  * Example:
- * [["backpack", "vest"]] call einv_items_fnc_formatUse;
+ * [["backpack", "vest"]] call aio_items_fnc_formatUse;
  * // "vest+backpack"
  *
  * Public: No

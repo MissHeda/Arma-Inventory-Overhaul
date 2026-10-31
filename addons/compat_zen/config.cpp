@@ -13,8 +13,8 @@ class CfgPatches {
             "zen_context_menu",
             "zen_custom_modules",
             "zen_dialog",
-            "einv_main",
-            "einv_locks"
+            "aio_main",
+            "aio_locks"
         };
         skipWhenMissingDependencies = 1;
         author = "Miss Heda";

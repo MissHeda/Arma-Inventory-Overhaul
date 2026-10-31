@@ -6,7 +6,7 @@
  * or closes (fnc_openWindow, fnc_closeWindow). Only the windows: the columns under them stay as they are,
  * so opening or closing a kit moves nothing there and scrolls nothing.
  *
- * The open kits come from Enhanced First Aid Kits' addon (einv_compat_efak_fnc_getSections), found
+ * The open kits come from Enhanced First Aid Kits' addon (aio_compat_efak_fnc_getSections), found
  * anew among what the last build showed; without it there are none. Each keeps its place in the order
  * (GVAR(windowOrder), bottom first) and where it was put; one found nowhere any more - it left the
  * window's reach - goes, and a new one comes on top. Those opened just now fade in (GVAR(windowFresh)).
@@ -21,7 +21,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_drawWindows;
+ * [_display] call aio_gui_fnc_drawWindows;
  *
  * Public: No
  */

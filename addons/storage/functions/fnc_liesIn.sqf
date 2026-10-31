@@ -16,7 +16,7 @@
  * It is the container or lies in it <BOOL>
  *
  * Example:
- * [_vestInBackpack, backpackContainer player] call einv_storage_fnc_liesIn;
+ * [_vestInBackpack, backpackContainer player] call aio_storage_fnc_liesIn;
  *
  * Public: No
  */

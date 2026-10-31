@@ -20,7 +20,7 @@
  * when it is open to the unit only because of who they are - member, admin, Zeus] <ARRAY>
  *
  * Example:
- * [player, _crate] call einv_locks_fnc_canReach;
+ * [player, _crate] call aio_locks_fnc_canReach;
  *
  * Public: Yes
  */
@@ -66,7 +66,7 @@ if (
     && {!(_top getVariable [QGVAR(engineMine), false])}
 ) exitWith {[false, LLSTRING(Mission), ""]};
 
-// Other mods' locks (einv_compat_ace_vehiclelock).
+// Other mods' locks (aio_compat_ace_vehiclelock).
 private _refusal = "";
 
 {

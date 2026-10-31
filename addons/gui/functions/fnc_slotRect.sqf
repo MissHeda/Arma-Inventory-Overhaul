@@ -13,7 +13,7 @@
  * [x, y, w, h] on the screen, [] when it is scrolled out of view <ARRAY>
  *
  * Example:
- * [(uiNamespace getVariable [QGVAR(slots), []]) select 0] call einv_gui_fnc_slotRect;
+ * [(uiNamespace getVariable [QGVAR(slots), []]) select 0] call aio_gui_fnc_slotRect;
  *
  * Public: No
  */

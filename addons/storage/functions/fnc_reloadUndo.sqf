@@ -25,7 +25,7 @@
  * Whether the reload was taken back <BOOL>
  *
  * Example:
- * [player, "arifle_MX_F", "arifle_MX_F", ["30Rnd_65x39_caseless_mag", 30], [], "backpack"] call einv_storage_fnc_reloadUndo;
+ * [player, "arifle_MX_F", "arifle_MX_F", ["30Rnd_65x39_caseless_mag", 30], [], "backpack"] call aio_storage_fnc_reloadUndo;
  *
  * Public: No
  */
@@ -209,9 +209,9 @@ GVAR(undoUntil) = 0;
 private _pick = [_unit, _weapon, _muzzle] call FUNC(reloadPick);
 
 if (_pick isEqualTo []) then {
-    [format [localize "STR_einv_storage_Hint_NoReload", [_kind] call FUNC(useKindName)]] call FUNC(useHint);
+    [format [localize "STR_aio_storage_Hint_NoReload", [_kind] call FUNC(useKindName)]] call FUNC(useHint);
 } else {
-    [format [localize "STR_einv_storage_Hint_NoReloadFrom", [_kind] call FUNC(useKindName)]] call FUNC(useHint);
+    [format [localize "STR_aio_storage_Hint_NoReloadFrom", [_kind] call FUNC(useKindName)]] call FUNC(useHint);
 
     [{
         params [["_unit", objNull, [objNull]], ["_weapon", "", [""]], ["_muzzle", "", [""]]];

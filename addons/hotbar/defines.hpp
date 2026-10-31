@@ -24,7 +24,7 @@
 // ---------------------------------------------------------------------------
 // The bar on the screen: seven square boxes side by side with a line for messages above them, at the
 // bottom centre. Positions are read from the profile, where the layout editor keeps them
-// (IGUI_einv_hotbar_grid_X and _Y), and fall back to the defaults.
+// (IGUI_aio_hotbar_grid_X and _Y), and fall back to the defaults.
 // ---------------------------------------------------------------------------
 
 #define HUD_SLOT_H (2.4 * GUI_GRID_H)
@@ -36,8 +36,8 @@
 #define HUD_H (HUD_MESSAGE_H + HUD_SLOT_H)
 #define HUD_DEFAULT_X (safeZoneX + (safeZoneW - HUD_W) / 2)
 #define HUD_DEFAULT_Y (safeZoneY + safeZoneH - HUD_H - 3.2 * GUI_GRID_H)
-#define HUD_X profileNamespace getVariable [ARR_2('IGUI_einv_hotbar_grid_X',HUD_DEFAULT_X)]
-#define HUD_Y profileNamespace getVariable [ARR_2('IGUI_einv_hotbar_grid_Y',HUD_DEFAULT_Y)]
+#define HUD_X profileNamespace getVariable [ARR_2('IGUI_aio_hotbar_grid_X',HUD_DEFAULT_X)]
+#define HUD_Y profileNamespace getVariable [ARR_2('IGUI_aio_hotbar_grid_Y',HUD_DEFAULT_Y)]
 
 // The group of controls the bar is made in, inside the titles display.
 #define HUD_GROUP_IDC 9701

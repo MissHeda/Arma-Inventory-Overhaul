@@ -2,12 +2,12 @@
 /*
  * Author: Miss Heda
  * Locks a crate's or a vehicle's inventory to one side, one group or the admins - or opens it again.
- * Runs anywhere; the server keeps the list of locked objects (einv_locks_objects, public) and tells
+ * Runs anywhere; the server keeps the list of locked objects (aio_locks_objects, public) and tells
  * every machine, so each one locks the engine's own inventory where it has to (fnc_refresh) - also for
  * players who join later. A client only asks: the server event does the work.
  *
- * The lock is [mode, who] on the object (einv_locks_lock, public). Who passes: the members, logged-in
- * admins always, Zeus while einv_locks_zeusOpens is on (fnc_isAllowed). People cannot be locked -
+ * The lock is [mode, who] on the object (aio_locks_lock, public). Who passes: the members, logged-in
+ * admins always, Zeus while aio_locks_zeusOpens is on (fnc_isAllowed). People cannot be locked -
  * a living person's gear has its own switch in the window's settings.
  *
  * Arguments:
@@ -19,7 +19,7 @@
  * Accepted <BOOL>
  *
  * Example:
- * [_crate, "side", west] call einv_locks_fnc_setLock;
+ * [_crate, "side", west] call aio_locks_fnc_setLock;
  *
  * Public: Yes
  */

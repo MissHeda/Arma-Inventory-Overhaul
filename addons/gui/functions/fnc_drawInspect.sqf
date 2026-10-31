@@ -3,10 +3,11 @@
 /*
  * Author: Miss Heda
  * Draws the inspect card (GVAR(inspect), fnc_inspect): a glass window with the item's picture - what is
- * on a weapon drawn onto it -, its name in its category's colour, its description and its figures:
+ * on a weapon drawn onto it, or for an item with a model of its own the item in 3D (fnc_inspect3D), as the
+ * 2D/3D switch in the picture's corner says -, its name in its category's colour, its description and its figures:
  * weight, size, count, rounds, whether it stacks, its category, the mod it comes from
  * and its class name. A kit of Enhanced First Aid Kits also how full it is and what is in it
- * (einv_compat_efak), a radio its channel, frequency and state (einv_compat_tfar, einv_compat_acre -
+ * (aio_compat_efak), a radio its channel, frequency and state (aio_compat_tfar, aio_compat_acre -
  * whichever mod is loaded). A window that attached (fnc_attach) adds rows of its own before the mod's name (the
  * "inspectRows" hook) - a text, or a text beside a small bar. Everything lies in one controls group, so the card moves as one: by its title
  * (fnc_onFrame follows the mouse while it is held), and it closes with the cross in its corner.
@@ -23,7 +24,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_drawInspect;
+ * call aio_gui_fnc_drawInspect;
  *
  * Public: No
  */
@@ -36,7 +37,9 @@ ctrlDelete (uiNamespace getVariable [QGVAR(inspectGroup), controlNull]);
 uiNamespace setVariable [QGVAR(inspectGroup), controlNull];
 uiNamespace setVariable [QGVAR(inspectRect), []];
 
-if (isNull _display || {GVAR(inspect) isEqualTo []}) exitWith {};
+if (isNull _display || {GVAR(inspect) isEqualTo []}) exitWith {
+    ["stop"] call FUNC(inspect3D);
+};
 
 GVAR(inspect) params ["_class", "_count", "_ammo", "_attachments", ["_holder", objNull, [objNull]]];
 
@@ -69,7 +72,7 @@ private _fnc_kg = {
 
 private _rows = [];
 
-// A kit of Enhanced First Aid Kits weighs what it holds as well (einv_compat_efak, when loaded).
+// A kit of Enhanced First Aid Kits weighs what it holds as well (aio_compat_efak, when loaded).
 private _kitMass = if (isNil QEFUNC(compat_efak,getMass)) then {-1} else {[_class] call EFUNC(compat_efak,getMass)};
 private _mass = if (_kitMass >= 0) then {
     _kitMass * _count
@@ -116,7 +119,7 @@ private _attachedLabel = LLSTRING(Inspect_Attached);
     };
 } forEach (_attachments select [1]);
 
-// A kit: how full it is and what it holds (einv_compat_efak, when loaded).
+// A kit: how full it is and what it holds (aio_compat_efak, when loaded).
 if (!isNil QEFUNC(compat_efak,inspectRows)) then {
     _rows append ([_class] call EFUNC(compat_efak,inspectRows));
 };
@@ -163,6 +166,21 @@ private _gap = _textUnit * 0.45;
 private _closeH = _titleH;
 private _closeW = SQUARE(_closeH);
 
+// The item in 3D instead of its picture, for one with a model of its own (fnc_hasModel) and with 3D picked in the box's corner:
+// its scene's camera films into a texture shown in the box (fnc_inspect3D). Picture-in-Picture renders it - off in the video
+// options, there is no 3D. The box is then exactly twice as wide as high in pixels, as the texture (INSPECT_3D_RES) is, so the
+// item is never squeezed; under it how to move it.
+private _can3D = [_class] call FUNC(hasModel);
+private _show3D = _can3D && {isPiPEnabled} && {GVAR(inspectView) isEqualTo "3d"};
+private _viewPixelsW = floor ((_innerW - pixelW * 2) / pixelW);
+private _viewPixelsH = floor (_viewPixelsW / 2);
+private _hint3DH = 0;
+
+if (_show3D) then {
+    _pictureH = (_viewPixelsH + 2) * pixelH;
+    _hint3DH = _textUnit * 0.75;
+};
+
 // The description, measured in a box of the card's width before anything is placed.
 private _description = _info getOrDefault ["description", ""];
 private _descText = parseText format [
@@ -171,13 +189,13 @@ private _descText = parseText format [
 private _descH = 0;
 
 if (_description isNotEqualTo "") then {
-    private _probe = [_display, "EINV_StructuredText", controlNull, [0, 0, _innerW, UNIT]] call FUNC(uiCreate);
+    private _probe = [_display, "AIO_StructuredText", controlNull, [0, 0, _innerW, UNIT]] call FUNC(uiCreate);
     _probe ctrlSetStructuredText _descText;
     _descH = (ctrlTextHeight _probe) min (_textUnit * 6);
     ctrlDelete _probe;
 };
 
-private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap
+private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap + _hint3DH
     + ([0, _descH + _gap] select (_descH > 0))
     + count _rows * _rowH;
 
@@ -187,7 +205,7 @@ GVAR(inspectPos) params [["_left", safezoneX + (safezoneW - _width) / 2], ["_top
 _left = (_left max safezoneX) min (safezoneX + safezoneW - _width);
 _top = (_top max safezoneY) min ((safezoneY + safezoneH - _height) max safezoneY);
 
-private _group = [_display, "EINV_Group", controlNull, [_left, _top, _width, _height]] call FUNC(uiCreate);
+private _group = [_display, "AIO_Group", controlNull, [_left, _top, _width, _height]] call FUNC(uiCreate);
 
 uiNamespace setVariable [QGVAR(inspectGroup), _group];
 uiNamespace setVariable [QGVAR(inspectRect), [_left, _top, _width, _height]];
@@ -218,7 +236,7 @@ private _titleW = _innerW - SQUARE(_textUnit * 0.35) - _closeW;
     _textUnit * 0.8, _colorText, _fontBold, 0, "name"
 ] call FUNC(uiLabel);
 
-private _grip = [_display, "EINV_Hitbox", _group, [0, 0, _width - _padX - _closeW, _cursor + _titleH]] call FUNC(uiCreate);
+private _grip = [_display, "AIO_Hitbox", _group, [0, 0, _width - _padX - _closeW, _cursor + _titleH]] call FUNC(uiCreate);
 [_grip, LLSTRING(Inspect_Move)] call FUNC(setTooltip);
 _grip ctrlAddEventHandler ["MouseButtonDown", {
     params ["_ctrl", "_button"];
@@ -242,20 +260,129 @@ _cursor = _cursor + _titleH + _gap;
 
 private _pictureInner = [_padX * 2, _cursor + _padY * 0.5, _innerW - _padX * 2, _pictureH - _padY];
 
-// As the rules draw it (icon=): larger, smaller or moved, and cut to the lighter box where it would reach out.
-[
-    _display, _group, _pictureInner, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1],
-    [_padX, _cursor, _innerW, _pictureH]
-] call FUNC(uiItemPicture);
+// Where the 2D/3D switch lies in the box's top right corner (drawn below, after the picture).
+private _toggleH = _textUnit * 0.85;
+private _inset = 2 * pixelH;
+private _segmentH = _toggleH - _inset * 2;
+private _segmentW = SQUARE(_segmentH * 1.5);
+private _trackW = _segmentW * 2 + SQUARE(_inset) * 2;
+private _trackX = _padX + _innerW - SQUARE(_textUnit * 0.3) - _trackW;
+private _toggleY = _cursor + _textUnit * 0.3;
 
-if (_attachments isNotEqualTo []) then {
-    [_display, _group, _pictureInner, _attachments] call FUNC(drawAttachments);
+// In 3D (see the measures): held and dragged the item turns (fnc_onFrame), the wheel zooms, a double click puts it back.
+if (_show3D) then {
+    ["start", [_class, _attachments]] call FUNC(inspect3D);
+
+    private _viewRect = [_padX + (_innerW - _viewPixelsW * pixelW) / 2, _cursor + pixelH, _viewPixelsW * pixelW, _viewPixelsH * pixelH];
+    _viewRect params ["_viewX", "_viewY", "_viewW", "_viewH"];
+
+    private _view = [_display, "AIO_PictureTurned", _group, _viewRect] call FUNC(uiCreate);
+    _view ctrlSetText format ["#(argb,%1,%2,1)r2t(%3,2.0)", INSPECT_3D_RES select 0, INSPECT_3D_RES select 1, INSPECT_3D_TARGET];
+
+    // The areas that turn it: the view but the switch. A held control is drawn over every other (the engine draws the focused
+    // one last) - one lying under the switch as well hid it after the first turn, and took its clicks.
+    private _belowY = _toggleY + _toggleH + _inset;
+    private _hitRects = [
+        [_viewX, _viewY, (_trackX - _inset - _viewX) max 0, _belowY - _viewY],
+        [_viewX, _belowY, _viewW, _viewY + _viewH - _belowY]
+    ];
+
+    {
+        private _hit = [_display, "AIO_Hitbox", _group, _x] call FUNC(uiCreate);
+
+        // The left button turns. The middle one moves the camera: the engine reports no event of it to a control, so the frame
+        // asks the button itself, over these areas (QGVAR(inspect3DHits), fnc_onFrame).
+        _hit ctrlAddEventHandler ["MouseButtonDown", {
+            params ["", "_button"];
+
+            if (_button == 0) then {
+                GVAR(inspect3DTurn) = getMousePosition;
+            };
+        }];
+        _hit ctrlAddEventHandler ["MouseButtonDblClick", {
+            params ["", "_button"];
+
+            if (_button == 0) then {
+                ["reset"] call FUNC(inspect3D);
+            };
+        }];
+        // The display reports the same turn of the wheel: one per frame counts.
+        _hit ctrlAddEventHandler ["MouseZChanged", {
+            params ["", "_scroll"];
+
+            if (GVAR(lastWheel3D) isEqualTo diag_frameNo) exitWith {true};
+
+            GVAR(lastWheel3D) = diag_frameNo;
+            ["zoom", [_scroll]] call FUNC(inspect3D);
+            true
+        }];
+    } forEach _hitRects;
+
+    uiNamespace setVariable [QGVAR(inspect3DHits), _hitRects];
+} else {
+    uiNamespace setVariable [QGVAR(inspect3DHits), []];
+
+    ["stop"] call FUNC(inspect3D);
+
+    // As the rules draw it (icon=): larger, smaller or moved, and cut to the lighter box where it would reach out.
+    [
+        _display, _group, _pictureInner, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1],
+        [_padX, _cursor, _innerW, _pictureH]
+    ] call FUNC(uiItemPicture);
+
+    if (_attachments isNotEqualTo []) then {
+        [_display, _group, _pictureInner, _attachments] call FUNC(drawAttachments);
+    };
+};
+
+// 2D or 3D, a switch in the box's corner, for an item with a model of its own: one dark track, the side shown lit on it. 3D is
+// greyed out without Picture-in-Picture. The choice is kept for the next items and games.
+if (_can3D) then {
+    private _accent = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
+    private _shown = ["2d", "3d"] select _show3D;
+
+    [_display, _group, [_trackX, _toggleY, _trackW, _toggleH], [0, 0, 0, 0.55], _toggleH / 2] call FUNC(uiPanel);
+
+    {
+        _x params ["_view", "_label", "_index"];
+
+        private _active = _view isEqualTo _shown;
+        private _buttonTheme = +_theme;
+
+        _buttonTheme set ["radius", _segmentH / 2];
+        _buttonTheme set ["button", [[0, 0, 0, 0], _accent + [1]] select _active];
+        _buttonTheme set ["buttonHover", [[1, 1, 1, 0.1], _accent + [1]] select _active];
+        _buttonTheme set ["buttonText", [_colorText2, _theme getOrDefault ["onAccent", [0, 0, 0, 1]]] select _active];
+
+        private _left = _trackX + SQUARE(_inset) + _segmentW * _index;
+        private _button = [
+            _display, _group, [_left, _toggleY + _inset, _segmentW, _segmentH], "inspectView" + _view, _label, "", _buttonTheme, {
+                params ["", "_id"];
+
+                GVAR(inspectView) = ["2d", "3d"] select (_id isEqualTo "inspectView3d");
+                profileNamespace setVariable [QGVAR(inspectView), GVAR(inspectView)];
+
+                call FUNC(drawInspect);
+            }, _view isEqualTo "3d" && {!isPiPEnabled}, -1, true
+        ] call FUNC(uiButton);
+
+        if (_view isEqualTo "3d" && {!isPiPEnabled}) then {
+            [_button select -1, LLSTRING(Inspect_3DNoPiP)] call FUNC(setTooltip);
+        };
+    } forEach [["2d", LLSTRING(Inspect_2D), 0], ["3d", LLSTRING(Inspect_3D), 1]];
 };
 
 _cursor = _cursor + _pictureH + _gap;
 
+// How to move it, under the 3D view.
+if (_show3D) then {
+    [_display, _group, [_padX, _cursor - _gap * 0.5, _innerW, _hint3DH], LLSTRING(Inspect_3DTip), _textUnit * 0.55, _muted, _font, 2, "hint"] call FUNC(uiLabel);
+
+    _cursor = _cursor + _hint3DH;
+};
+
 if (_descH > 0) then {
-    private _desc = [_display, "EINV_StructuredText", _group, [_padX, _cursor, _innerW, _descH]] call FUNC(uiCreate);
+    private _desc = [_display, "AIO_StructuredText", _group, [_padX, _cursor, _innerW, _descH]] call FUNC(uiCreate);
     _desc ctrlSetStructuredText _descText;
 
     _cursor = _cursor + _descH + _gap;

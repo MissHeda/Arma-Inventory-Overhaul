@@ -8,7 +8,7 @@
  *
  * A kit of Enhanced First Aid Kits is always edited with its tree, however it was picked: the kits
  * players carry are the instance classes that mod makes of the type's own class ("efak_IFAK_7" of
- * "efak_IFAK", einv_items_fnc_kitOf), which no list shows, and a rule for the type's class alone would
+ * "efak_IFAK", aio_items_fnc_kitOf), which no list shows, and a rule for the type's class alone would
  * never reach one of them. How many classes are built on it is then how many instances the type has.
  *
  * Arguments:
@@ -19,7 +19,7 @@
  * [for the tree, how many listed classes are built on it] <ARRAY>
  *
  * Example:
- * ["containers", "B_Carryall_mcamo"] call einv_setup_fnc_editScope;
+ * ["containers", "B_Carryall_mcamo"] call aio_setup_fnc_editScope;
  *
  * Public: No
  */

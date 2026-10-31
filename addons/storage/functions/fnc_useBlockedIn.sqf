@@ -13,7 +13,7 @@
  * Any of "uniform", "vest", "backpack", in that order <ARRAY of STRING>
  *
  * Example:
- * [player, "HandGrenade"] call einv_storage_fnc_useBlockedIn;
+ * [player, "HandGrenade"] call aio_storage_fnc_useBlockedIn;
  *
  * Public: Yes
  */

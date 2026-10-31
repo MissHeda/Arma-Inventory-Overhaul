@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [cursorObject] call einv_gui_fnc_addPersonAction;
+ * [cursorObject] call aio_gui_fnc_addPersonAction;
  *
  * Public: No
  */

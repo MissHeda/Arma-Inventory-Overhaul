@@ -12,7 +12,7 @@
  * Entry <HASHMAP>
  *
  * Example:
- * [_array] call einv_storage_fnc_entryFromArray;
+ * [_array] call aio_storage_fnc_entryFromArray;
  *
  * Public: No
  */

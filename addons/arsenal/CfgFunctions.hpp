@@ -1,5 +1,5 @@
 // The vanilla Virtual Arsenal's function, BIS_fnc_arsenal, with "Open" asked first whether this mod takes it
-// (einv_arsenal_fnc_handleBIOpen) - see functions\fnc_biArsenal.inc.sqf. BI's library loads that file in
+// (aio_arsenal_fnc_handleBIOpen) - see functions\fnc_biArsenal.inc.sqf. BI's library loads that file in
 // place of its own. Everything but "Open" runs BI's code untouched.
 class CfgFunctions {
     class A3_Bootcamp {

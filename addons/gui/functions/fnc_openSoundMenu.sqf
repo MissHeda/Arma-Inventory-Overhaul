@@ -17,9 +17,9 @@
  * profile then (fnc_soundSettle).
  *
  * It is the context menu's layer (fnc_openMenu): one controls group over the screen, made last, with the focus
- * taken into it, kept in einv_gui_menu so that Escape (fnc_onKeyDown), a click beside it (fnc_onMouseButton), a
- * rebuild (fnc_build) and fnc_raiseMenu treat it as they treat a menu; einv_gui_menuFor says "sound", and
- * fnc_closeMenu tells fnc_soundSettle when it closes it. What lies in it is kept in einv_gui_soundRows, to be
+ * taken into it, kept in aio_gui_menu so that Escape (fnc_onKeyDown), a click beside it (fnc_onMouseButton), a
+ * rebuild (fnc_build) and fnc_raiseMenu treat it as they treat a menu; aio_gui_menuFor says "sound", and
+ * fnc_closeMenu tells fnc_soundSettle when it closes it. What lies in it is kept in aio_gui_soundRows, to be
  * shown in place (fnc_updateSoundMenu).
  *
  * Arguments:
@@ -29,7 +29,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_openSoundMenu;
+ * [_display] call aio_gui_fnc_openSoundMenu;
  *
  * Public: No
  */
@@ -105,7 +105,7 @@ private _cardY = _top - safezoneY;
 
 // ----- The layer, the hit area beside the card, the card -----
 
-private _layer = [_display, "EINV_Group", controlNull, [safezoneX, safezoneY, safezoneW, safezoneH]] call FUNC(uiCreate);
+private _layer = [_display, "AIO_Group", controlNull, [safezoneX, safezoneY, safezoneW, safezoneH]] call FUNC(uiCreate);
 
 // Settings, not the inventory: no word in it takes the gradient (fnc_uiLabel).
 _layer setVariable [QGVAR(plain), true];
@@ -116,7 +116,7 @@ _layer setVariable [QGVAR(hooked), true];
 _layer ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton); false}];
 _layer ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton); false}];
 
-private _catcher = [_display, "EINV_Hitbox", _layer, [0, 0, safezoneW, safezoneH]] call FUNC(uiCreate);
+private _catcher = [_display, "AIO_Hitbox", _layer, [0, 0, safezoneW, safezoneH]] call FUNC(uiCreate);
 _catcher ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton); false}];
 _catcher ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton); false}];
 _catcher ctrlAddEventHandler ["ButtonClick", {[{call FUNC(closeMenu)}] call FUNC(later)}];
@@ -146,7 +146,7 @@ private _fnc_slider = {
 
     [_display, _layer, [_cardX + _trackX, _trackY, _trackW, _trackH], [1, 1, 1, 0.12], _trackH / 2] call FUNC(uiPanel);
 
-    private _fill = [_display, "EINV_PanelRect", _layer, [_cardX + _trackX, _trackY, _trackW, _trackH]] call FUNC(uiCreate);
+    private _fill = [_display, "AIO_PanelRect", _layer, [_cardX + _trackX, _trackY, _trackW, _trackH]] call FUNC(uiCreate);
     private _thumbTop = _rowTop + (_rowHeight - _thumbH) / 2;
     private _thumb = [_display, _layer, [_cardX + _trackX - _thumbW / 2, _thumbTop, _thumbW, _thumbH], UI_TEX(circle_ca), _text] call FUNC(uiIcon);
 
@@ -157,7 +157,7 @@ private _fnc_slider = {
     // The hit area is the slider's whole room, a knob's width beyond the track at each end: a press near an end is that end. The
     // track's place on the screen goes with it, for the mouse's place along it (fnc_soundSlide).
     private _hit = [
-        _display, "EINV_Hitbox", _layer, [_cardX + _sliderX, _rowTop, _sliderW, _rowHeight]
+        _display, "AIO_Hitbox", _layer, [_cardX + _sliderX, _rowTop, _sliderW, _rowHeight]
     ] call FUNC(uiCreate);
 
     _hit setVariable [QGVAR(slider), [_index, safezoneX + _cardX + _trackX, _trackW]];
@@ -205,7 +205,7 @@ private _rows = [];
     ([_forEachIndex, _rowTop, _rowH] call _fnc_slider) params ["_fill", "_thumb", "_percent", "_geo"];
 
     private _toggle = [
-        _display, "EINV_Hitbox", _layer, [_cardX + _rowInset, _rowTop, _sliderX - _rowInset, _rowH]
+        _display, "AIO_Hitbox", _layer, [_cardX + _rowInset, _rowTop, _sliderX - _rowInset, _rowH]
     ] call FUNC(uiCreate);
 
     _toggle setVariable [QGVAR(surface), _surface];
@@ -219,7 +219,7 @@ private _rows = [];
 
 // The focus into the layer, so it is drawn over everything: a button no one sees, one pixel in the card's
 // padding. Return and Space press nothing on it (fnc_openMenu).
-private _focus = [_display, "EINV_Hitbox", _layer, [_cardX + _padX / 2, _cardY + _padY / 2, pixelW, pixelH]] call FUNC(uiCreate);
+private _focus = [_display, "AIO_Hitbox", _layer, [_cardX + _padX / 2, _cardY + _padY / 2, pixelW, pixelH]] call FUNC(uiCreate);
 ctrlSetFocus _focus;
 
 uiNamespace setVariable [QGVAR(menu), [_layer]];

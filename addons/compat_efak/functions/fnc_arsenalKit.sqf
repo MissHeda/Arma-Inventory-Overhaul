@@ -1,13 +1,13 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The kit section of ACE Arsenal's panel while Enhanced First Aid Kits' kits tab is open (einv_arsenal_fnc_layout):
+ * The kit section of ACE Arsenal's panel while Enhanced First Aid Kits' kits tab is open (aio_arsenal_fnc_layout):
  * the kit picked in that tab's list (fnc_arsenalFocus), as a section with its grid - filled there as a container is -
  * or, where there is no grid to show, a note in its place.
  *
  * Which kit: the very kit of the row picked (its data is the kit's instance class) where it lies in one of the
  * holders - the soldier's uniform, vest and backpack, then the staging space -, in their cargo or in what Strict
- * mode's hidden holder keeps for them (einv_storage_fnc_hiddenClasses). That mod's list follows a kit that was
+ * mode's hidden holder keeps for them (aio_storage_fnc_hiddenClasses). That mod's list follows a kit that was
  * moved, taken out or made anew (a loadout gives kits new instance classes) only at its next look; until then the
  * first kit of the same type lying there stands in. A kit packed in another kit is never shown.
  *
@@ -31,7 +31,7 @@
  * section ("note", "title", "panelTitle", "class" the type); an empty map when no holders were given <HASHMAP>
  *
  * Example:
- * ["efak_IFAK_7", false, [uniformContainer player, backpackContainer player]] call einv_compat_efak_fnc_arsenalKit;
+ * ["efak_IFAK_7", false, [uniformContainer player, backpackContainer player]] call aio_compat_efak_fnc_arsenalKit;
  *
  * Public: No
  */

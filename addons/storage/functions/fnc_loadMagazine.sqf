@@ -29,7 +29,7 @@
  * Whether the magazine is loaded or on its way (the action runs for seconds) <BOOL>
  *
  * Example:
- * [player, primaryWeapon player, primaryWeapon player, _entry] call einv_storage_fnc_loadMagazine;
+ * [player, primaryWeapon player, primaryWeapon player, _entry] call aio_storage_fnc_loadMagazine;
  *
  * Public: Yes
  */
@@ -140,7 +140,7 @@ if ((call _fnc_loaded) isEqualTo []) exitWith {
     [[]] call _fnc_action
 };
 
-// The window's reload gesture and sound (einv_gui, when it is loaded), then the notes that follow any change
+// The window's reload gesture and sound (aio_gui, when it is loaded), then the notes that follow any change
 // of the gear: where the magazines lie, and what the grid has no room for.
 if (!isNil QEFUNC(gui,playReload)) then {
     [_unit, format ["%1_%2", ["primary", "handgun", "launcher"] select _which, ["mag", "mag2"] select _second]] call EFUNC(gui,playReload);

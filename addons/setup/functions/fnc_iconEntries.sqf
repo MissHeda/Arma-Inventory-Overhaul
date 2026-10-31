@@ -14,7 +14,7 @@
  * Entries, [path, lowercase path, search text, name, "", 1, [], [name], ["icons"], key] as the catalog has them <ARRAY>
  *
  * Example:
- * ["med*"] call einv_setup_fnc_iconEntries;
+ * ["med*"] call aio_setup_fnc_iconEntries;
  *
  * Public: No
  */

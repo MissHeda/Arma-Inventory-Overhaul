@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * What fills the square box of a crate or a vehicle (fnc_drawSection, the cargo cards of ACE, the setup wizard's
- * preview of the box): the picture its rules give the class (picture=, einv_picture), else the picture the
+ * preview of the box): the picture its rules give the class (picture=, aio_picture), else the picture the
  * editor has of it (editorPreview) on its own grey (fnc_uiPictureRounded) - either one drawn by the class's
  * icon= (fnc_uiItemPicture): larger, smaller or moved, and cut to the box's rectangle.
  *
@@ -26,7 +26,7 @@
  * The controls - [] when there is nothing to draw and the caller shows its placeholder <ARRAY>
  *
  * Example:
- * [_display, _parent, _boxRect, _theme, _own, _preview, [1.4, 0, 0], UNIT * 0.4] call einv_gui_fnc_uiBoxPicture;
+ * [_display, _parent, _boxRect, _theme, _own, _preview, [1.4, 0, 0], UNIT * 0.4] call aio_gui_fnc_uiBoxPicture;
  *
  * Public: No
  */

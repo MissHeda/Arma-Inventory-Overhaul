@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * call einv_arsenal_fnc_biCountHandlers;
+ * call aio_arsenal_fnc_biCountHandlers;
  *
  * Public: No
  */

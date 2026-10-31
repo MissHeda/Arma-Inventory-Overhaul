@@ -15,7 +15,7 @@
  * The entry of magazinesAmmoFull, at least seven items long - [] for none <ARRAY>
  *
  * Example:
- * [player, primaryWeapon player, primaryWeapon player] call einv_storage_fnc_reloadPick;
+ * [player, primaryWeapon player, primaryWeapon player] call aio_storage_fnc_reloadPick;
  *
  * Public: No
  */

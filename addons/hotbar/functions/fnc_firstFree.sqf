@@ -10,7 +10,7 @@
  * Slot index, 0 to 6, -1 when every slot is taken <NUMBER>
  *
  * Example:
- * call einv_hotbar_fnc_firstFree;
+ * call aio_hotbar_fnc_firstFree;
  *
  * Public: No
  */

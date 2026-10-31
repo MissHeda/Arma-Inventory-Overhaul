@@ -16,7 +16,7 @@
  * The colour, three numbers <ARRAY>
  *
  * Example:
- * ["rgb", [0.5, 1, 1]] call einv_gui_fnc_hsv;
+ * ["rgb", [0.5, 1, 1]] call aio_gui_fnc_hsv;
  *
  * Public: No
  */

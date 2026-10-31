@@ -4,10 +4,10 @@
  * Reads config lines like the ones fnc_configEntry writes - one class or several, under their root or
  * without it - into what they set, for the setup wizard's import and for anyone checking a snippet:
  *
- *   class CfgVehicles { class B_Carryall_blk { einv_grid = "1x3+5x7+1x3"; }; };
+ *   class CfgVehicles { class B_Carryall_blk { aio_grid = "1x3+5x7+1x3"; }; };
  *
- * Only the keys of an item (CONFIG_KEYS: einv_size, einv_stack, einv_grid, einv_weight, einv_name,
- * einv_icon, einv_picture, einv_use, einv_cat) are taken, and each value is read the way an item's config is (fnc_readConfigKeys), so what
+ * Only the keys of an item (CONFIG_KEYS: aio_size, aio_stack, aio_grid, aio_weight, aio_name,
+ * aio_icon, aio_picture, aio_use, aio_cat) are taken, and each value is read the way an item's config is (fnc_readConfigKeys), so what
  * comes back is what the rules would have made of it: a grid as fnc_formatGrid writes it, a size as the
  * rules write it, the stack and the weight as numbers, an icon as [scale, across, down], a use list as an array, and nothing
  * that could not be read. A class with no key left is not in the answer.
@@ -16,10 +16,10 @@
  * so are "class X;" declarations, the parent after a colon (class X: Y), every other property and
  * every class inside an item's class (class ItemInfo, class Armory). A class under CfgWeapons,
  * CfgVehicles, CfgMagazines or CfgGlasses is an item; a class at the top that is none of those is an
- * item itself, so the line "class V_X { einv_grid = ""24""; };" without its root reads too. The same
+ * item itself, so the line "class V_X { aio_grid = ""24""; };" without its root reads too. The same
  * class twice: its keys together, the later one winning. Case does not matter in the keys.
  *
- * What cannot be read - a key that is not a text or a number, an einv_ key that is none of the eight, a
+ * What cannot be read - a key that is not a text or a number, an aio_ key that is none of the eight, a
  * value the rules would leave out - is named in the messages. Without an array for them, they go to
  * the RPT. A text over CONFIG_TEXT_MAX characters is not read at all.
  *
@@ -30,13 +30,13 @@
  * Return Value:
  * [[class, keys], ...] in the order the classes first appear <ARRAY>
  *   class - the class as written <STRING>
- *   keys  - what it sets, by config key in lowercase: "einv_size" "2x1" / "xx/x-" / "mass" <STRING>,
- *           "einv_stack" <NUMBER>, "einv_grid" <STRING>, "einv_weight" kg <NUMBER>, "einv_name"
- *           <STRING>, "einv_icon" [scale, across, down] <ARRAY>, "einv_picture" <STRING>, "einv_use" [containers] <ARRAY>, "einv_cat" [categories] <ARRAY> - only the ones set <HASHMAP>
+ *   keys  - what it sets, by config key in lowercase: "aio_size" "2x1" / "xx/x-" / "mass" <STRING>,
+ *           "aio_stack" <NUMBER>, "aio_grid" <STRING>, "aio_weight" kg <NUMBER>, "aio_name"
+ *           <STRING>, "aio_icon" [scale, across, down] <ARRAY>, "aio_picture" <STRING>, "aio_use" [containers] <ARRAY>, "aio_cat" [categories] <ARRAY> - only the ones set <HASHMAP>
  *
  * Example:
- * ["class CfgVehicles { class B_Carryall_blk { einv_grid = ""1x3+5x7+1x3""; }; };"] call einv_items_fnc_parseConfigEntry;
- * // [["B_Carryall_blk", createHashMapFromArray [["einv_grid", "1x3+5x7+1x3"]]]]
+ * ["class CfgVehicles { class B_Carryall_blk { aio_grid = ""1x3+5x7+1x3""; }; };"] call aio_items_fnc_parseConfigEntry;
+ * // [["B_Carryall_blk", createHashMapFromArray [["aio_grid", "1x3+5x7+1x3"]]]]
  *
  * Public: Yes
  */
@@ -295,7 +295,7 @@ while {_t < _total} do {
                     _notes pushBack format ["%1: %2 is a text or a number - left out", _frame select 1, _key];
                 };
             } else {
-                if (_equals > 0 && {(_key select [0, 5]) isEqualTo "einv_"}) then {
+                if (_equals > 0 && {(_key select [0, 4]) isEqualTo "aio_"}) then {
                     _notes pushBack format ["%1: %2 is none of %3 - left out", _frame select 1, _key, CONFIG_KEYS joinString ", "];
                 };
             };

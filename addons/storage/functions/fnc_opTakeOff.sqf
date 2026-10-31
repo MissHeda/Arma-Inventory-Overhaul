@@ -8,7 +8,7 @@
  *
  * Arguments:
  * 0: Args, [unit, slot id] <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -16,11 +16,11 @@
  *     "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason already
  *     in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
- *     (einv_storage_fnc_settle)
+ *     (aio_storage_fnc_settle)
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[player, "headgear"], _context] call einv_storage_fnc_opTakeOff;
+ * [[player, "headgear"], _context] call aio_storage_fnc_opTakeOff;
  *
  * Public: No
  */

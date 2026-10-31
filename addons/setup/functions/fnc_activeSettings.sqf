@@ -1,9 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The server settings the wizard starts from, as its short text of them (einv_main_fnc_writeSettings: only what
- * is off its default). Each is a CBA setting of its own (einv_main_fnc_addSetting):
- *   - direct mode: the values in effect - the variables the mod reads (einv_gui_searchTime, ...), which CBA
+ * The server settings the wizard starts from, as its short text of them (aio_main_fnc_writeSettings: only what
+ * is off its default). Each is a CBA setting of its own (aio_main_fnc_addSetting):
+ *   - direct mode: the values in effect - the variables the mod reads (aio_gui_searchTime, ...), which CBA
  *     has set from the server, the mission and their files. CBA's menu shows the same.
  *   - menu mode: what CBA's menu shows for the source picked there - a change not yet confirmed in the menu
  *     first (CBA keeps those in its temporary values until OK), else that source's own value, else the default.
@@ -15,7 +15,7 @@
  * Text <STRING>
  *
  * Example:
- * [] call einv_setup_fnc_activeSettings;
+ * [] call aio_setup_fnc_activeSettings;
  *
  * Public: No
  */

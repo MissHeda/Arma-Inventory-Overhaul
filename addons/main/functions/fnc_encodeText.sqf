@@ -13,7 +13,7 @@
  * The text as it is written <STRING>
  *
  * Example:
- * ["Not allowed here, sorry"] call einv_main_fnc_encodeText;
+ * ["Not allowed here, sorry"] call aio_main_fnc_encodeText;
  *
  * Public: No
  */

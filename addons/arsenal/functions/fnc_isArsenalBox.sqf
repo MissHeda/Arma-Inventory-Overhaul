@@ -16,7 +16,7 @@
  * An arsenal box <BOOL>
  *
  * Example:
- * [cursorObject] call einv_arsenal_fnc_isArsenalBox;
+ * [cursorObject] call aio_arsenal_fnc_isArsenalBox;
  *
  * Public: No
  */

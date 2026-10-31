@@ -9,7 +9,7 @@
  *              handlers do not
  *
  * Only one runs at a time: a driver still running is ended first. With "Log window timings (debug)"
- * (einv_gui_debugTiming) on as the window opens, the frame goes through fnc_frame, which times it.
+ * (aio_gui_debugTiming) on as the window opens, the frame goes through fnc_frame, which times it.
  *
  * Arguments:
  * 0: Driver - "pfh" or "draw3d" <STRING> (default: "pfh")
@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * ["draw3d"] call einv_gui_fnc_startFrame;
+ * ["draw3d"] call aio_gui_fnc_startFrame;
  *
  * Public: No
  */

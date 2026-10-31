@@ -1,9 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * How many seconds one cell of a container takes to search: the server's time per cell (einv_gui_searchTime) times the
- * factor of its kind (fnc_searchKind; einv_gui_searchTimeUniform, Vest, Backpack, Crate, Vehicle, Ground), and for what a
- * body carries times the body's factor as well (einv_gui_searchTimeBody). 0 - the time or a factor at 0 - means that kind
+ * How many seconds one cell of a container takes to search: the server's time per cell (aio_gui_searchTime) times the
+ * factor of its kind (fnc_searchKind; aio_gui_searchTimeUniform, Vest, Backpack, Crate, Vehicle, Ground), and for what a
+ * body carries times the body's factor as well (aio_gui_searchTimeBody). 0 - the time or a factor at 0 - means that kind
  * is not searched at all (fnc_isSearched). An item takes its cells' time, the seal SEAL_CELLS cells (fnc_animateSearch).
  *
  * Arguments:
@@ -13,7 +13,7 @@
  * Seconds per cell <NUMBER>
  *
  * Example:
- * [cursorObject] call einv_gui_fnc_searchTime;
+ * [cursorObject] call aio_gui_fnc_searchTime;
  *
  * Public: No
  */

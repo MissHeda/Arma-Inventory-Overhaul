@@ -9,9 +9,9 @@
  * The id is part of the nested container's key (fnc_entryKey), and its places and tag travel with it in
  * payloads (fnc_snapshot): a moved backpack keeps its inside arrangement and its id.
  *
- * Where it is kept: on the nested object itself (einv_storage_tag, public) and, in multiplayer, in a copy
+ * Where it is kept: on the nested object itself (aio_storage_tag, public) and, in multiplayer, in a copy
  * on the outermost container the nested ones lie under - a crate, vehicle, pile or a unit's uniform,
- * vest or backpack: einv_storage_nested = [[netId, id, item class, places], ...], sorted by netId,
+ * vest or backpack: aio_storage_nested = [[netId, id, item class, places], ...], sorted by netId,
  * covering every nested container under it, three levels deep. Whether variables on nested objects reach
  * other machines and those joining later is not known; the outermost container's always do. Readers take
  * the object's own tag first and the copy where it is missing (fnc_entryKey, fnc_readPlaces), and both
@@ -24,7 +24,7 @@
  * normalised.
  *
  * On the way it leaves the marks every machine needs on the nested objects: their item class
- * (einv_storage_itemClass, fnc_getBlocks) and where they lie (einv_storage_parent, fnc_rootOf).
+ * (aio_storage_itemClass, fnc_getBlocks) and where they lie (aio_storage_parent, fnc_rootOf).
  *
  * The player's own: set here at once and broadcast with the places (GVAR(dirty), fnc_flushPlaces).
  *
@@ -37,7 +37,7 @@
  * Something was tagged or the copy was written <BOOL>
  *
  * Example:
- * [cursorObject] call einv_storage_fnc_tagNested;
+ * [cursorObject] call aio_storage_fnc_tagNested;
  *
  * Public: No
  */

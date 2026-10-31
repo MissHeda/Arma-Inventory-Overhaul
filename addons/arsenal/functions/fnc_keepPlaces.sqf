@@ -7,9 +7,9 @@
  * containers new objects with first-fit places - the arrangement the player chose in the two that did not
  * change was lost, and separate stacks merged. So the places of each container are noted (GVAR(kept):
  * [container, class, records] per slot, read again at most every KEPT_REFRESH seconds while the object is the
- * same) and, once a slot holds a new object, its notes are written to it (einv_storage_fnc_writePlaces) -
+ * same) and, once a slot holds a new object, its notes are written to it (aio_storage_fnc_writePlaces) -
  * whatever its class: ACE carries the contents over to the container picked, so the player's arrangement stays
- * wherever it still fits. Only the records that still fit the new grid are written (einv_storage_fnc_fitRecords:
+ * wherever it still fits. Only the records that still fit the new grid are written (aio_storage_fnc_fitRecords:
  * the box inside a compartment, on no hole, overlapping no other), so a container with the exact same layout -
  * another vest of the same cut, the same uniform again after the insignia was changed - keeps everything as it
  * lay, and in a different one only what has no room where it lay gets a fresh first fit. Records that no longer
@@ -24,7 +24,7 @@
  * None
  *
  * Example:
- * [] call einv_arsenal_fnc_keepPlaces;
+ * [] call aio_arsenal_fnc_keepPlaces;
  *
  * Public: No
  */
@@ -50,7 +50,7 @@ private _next = [];
 
         if (_object isNotEqualTo _oldObject) then {
             // A new object, of the same class or another: the arrangement the player had comes back to it, as far
-            // as it fits the new grid. The compartments depend on whose it is (einv_storage_fnc_getOwner).
+            // as it fits the new grid. The compartments depend on whose it is (aio_storage_fnc_getOwner).
             if (_oldClass isNotEqualTo "" && {_oldRecords isNotEqualTo []}) then {
                 _object setVariable [QEGVAR(storage,owner), _center];
 

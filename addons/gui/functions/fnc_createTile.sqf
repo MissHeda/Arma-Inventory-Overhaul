@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * Puts an entry on a grid as a tile: a surface in its category's colour over the cells it covers, its
  * picture, and - as the style wants them - its short name in the top right corner (only while the player has
- * einv_gui_tileNames on, off by default; the setup wizard's preview always), what stacks its count
+ * aio_gui_tileNames on, off by default; the setup wizard's preview always), what stacks its count
  * of the stack ("3/10") and a magazine its rounds. An entry not searched yet is a plain surface with a "?"
  * and a faint outline, hatched in Tarkov's look.
  *
@@ -15,23 +15,23 @@
  * in the top left corner (beside the window's badge, if it has one). Never in the setup wizard's preview.
  *
  * A magazine gets its fill bar only while it is not full and the player has the bar on
- * (einv_gui_magazineFillBar); a full one shows its rounds alone. The rounds as words ("17/30") show
- * while the player has them on (einv_gui_magazineText).
+ * (aio_gui_magazineFillBar); a full one shows its rounds alone. The rounds as words ("17/30") show
+ * while the player has them on (aio_gui_magazineText).
  *
  * The picture is fitted into the tile with its own shape kept. On a tile that lies turned ("rotated",
  * fnc_getLayout) it turns along, a quarter clockwise (issue #24): the upright picture is drawn as the
  * fallback and a turned one is laid over it on the display (fnc_turnPicture, fnc_syncTurned), shown wherever
  * the tile shows whole; what is on a weapon shows only on an upright tile. An item whose rules say so (icon=, the
- * "icon" of einv_items_fnc_getInfo) has it drawn larger, smaller or moved and
+ * "icon" of aio_items_fnc_getInfo) has it drawn larger, smaller or moved and
  * never out of the tile: a picture that would reach out is cut at the tile's edge by a controls group of
  * the tile's size (fnc_uiItemPicture), the one control the picture is then.
  *
- * A shaped item (size=xx/x-, its "holes" as it lies, einv_storage_fnc_getLayout) covers only its own
+ * A shaped item (size=xx/x-, its "holes" as it lies, aio_storage_fnc_getLayout) covers only its own
  * cells: its surface, border and the outline of a hidden one are drawn on those (fnc_uiShape), and the
  * cells under its holes stay as they are - something else may lie there. Its picture, name and count
  * keep to its box, as a rectangle's do.
  *
- * A class that stacks (einv_items_fnc_getInfo "stack" over 1) shows its count of the stack, "3/10", on a
+ * A class that stacks (aio_items_fnc_getInfo "stack" over 1) shows its count of the stack, "3/10", on a
  * small flat box in the bottom right corner in the theme's raised colour (fnc_drawCountBackdrop) - also
  * one alone, so one sees at once that it stacks; one that does not stack shows nothing there.
  * How a magazine's rounds show (theme "tileCount") - in the bottom left corner instead of the right one
@@ -45,7 +45,7 @@
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Grid, see fnc_createGrid <HASHMAP>
- * 2: Entry, see einv_storage_fnc_getContents - placed by einv_storage_fnc_getLayout <HASHMAP>
+ * 2: Entry, see aio_storage_fnc_getContents - placed by aio_storage_fnc_getLayout <HASHMAP>
  *   "class", "col", "row", "w", "h" - the item, its top left cell and its size in cells
  *   "holes" (optional) - the cells of its box a shaped item does not take, as it lies
  *   "count", "ammo", "capacity" (optional) - how many, a magazine's rounds and how many it holds
@@ -54,7 +54,8 @@
  *   "icon" (optional) - [scale, across, down] to draw the picture by instead of the item's own; "picture"
  *   (optional) - the texture to draw instead of the item's own (the wizard's preview of a picture being
  *   picked); "preview" (optional) - drawn outside the inventory window (the setup wizard), so nothing
- *   reports the mouse <BOOL>
+ *   reports the mouse <BOOL>; "info" (optional) - the item's info to draw by instead of aio_items_fnc_getInfo's
+ *   (the wizard's preview of categories and a colour being picked) <HASHMAP>
  * 3: Theme <HASHMAP>
  *
  * Return Value:
@@ -63,10 +64,10 @@
  * "rect" (its box) and "corners" (the corners of its panel it touches, fnc_cornerRadii; [] for none and for a shaped tile);
  * a magazine's "bar" (its fill bar's controls) and "barRect", and "amount" (the label of its rounds) with
  * "amountShort" (written without the capacity), which a repack in progress draws over
- * (einv_magazines_fnc_drawJob) - and joins the grid's "tiles"
+ * (aio_magazines_fnc_drawJob) - and joins the grid's "tiles"
  *
  * Example:
- * [_display, _grid, _entry, _theme] call einv_gui_fnc_createTile;
+ * [_display, _grid, _entry, _theme] call aio_gui_fnc_createTile;
  *
  * Public: No
  */
@@ -87,7 +88,13 @@ private _rows = _grid get "rows";
 private _cells = _grid get "cells";
 (_grid get "rel") params ["_gridX", "_gridY"];
 
-private _info = [_entry get "class"] call EFUNC(items,getInfo);
+// The setup wizard's preview hands in the info of what is being picked ("info"), not the rules in effect.
+private _info = _entry get "info";
+
+if (isNil "_info") then {
+    _info = [_entry get "class"] call EFUNC(items,getInfo);
+};
+
 private _hidden = _entry getOrDefault ["hidden", false];
 (_info getOrDefault ["size", [1, 1]]) params ["_sizeW", "_sizeH"];
 
@@ -218,17 +225,17 @@ if (_hidden) then {
     // A tile that lies turned turns its picture along (issue #24): a turned one laid over this upright one, which
     // stays as the fallback (fnc_turnPicture, fnc_syncTurned). Not in the wizard's preview.
     if (_entry getOrDefault ["rotated", false] && {!_preview}) then {
-        [_display, _grid, _pictureBox, _texture, _icon, [_left, _top, _width, _height], _picture] call FUNC(turnPicture);
+        [_display, _grid, _pictureBox, _texture, _icon, [_left, _top, _width, _height], _picture, _entry getOrDefault ["attachments", []]] call FUNC(turnPicture);
     };
 
-    // A weapon shows what is on it (fnc_drawAttachments).
+    // A weapon shows what is on it (fnc_drawAttachments) - a turned one on its turned picture (fnc_turnedTexture).
     private _attachments = _entry getOrDefault ["attachments", []];
 
     if (_attachments isNotEqualTo [] && {!(_entry getOrDefault ["rotated", false])}) then {
         _controls append ([_display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _attachments] call FUNC(drawAttachments));
     };
 
-    // The name in the top corner: when the look has it and the player wants it (einv_gui_tileNames, off by
+    // The name in the top corner: when the look has it and the player wants it (aio_gui_tileNames, off by
     // default; a setting read from the mission namespace, as the magazine ones below) - the preview of the
     // setup wizard always shows it, being a picture of what the rules make of the item.
     if (
@@ -258,9 +265,9 @@ if (_hidden) then {
     };
 
     // The marks of the settings "Use items from ...", in a row after the badge: the padlock of an item that
-    // cannot be used from here (einv_storage_fnc_useState) - only the player's own gear is ever used from, and
+    // cannot be used from here (aio_storage_fnc_useState) - only the player's own gear is ever used from, and
     // only while a setting limits something (one variable read) -, and the crossed eye of one that Strict mode
-    // keeps out of the container, in the unit's hidden holder (the entry's "hidden", einv_storage_fnc_opStrict).
+    // keeps out of the container, in the unit's hidden holder (the entry's "hidden", aio_storage_fnc_opStrict).
     private _markSize = TEXT_UNIT * 0.4;
     private _markX = _left + _padX * 0.5 + ([0, SQUARE(TEXT_UNIT * 0.42) + _padX * 0.5] select (_badge isEqualType "" && {_badge isNotEqualTo ""}));
     private _markColor = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
@@ -294,7 +301,7 @@ if (_hidden) then {
     private _bottom = _top + _height;
 
     // A magazine that is not full: how full it is, as a thin bar along the bottom edge - unless the player
-    // switched it off (einv_gui_magazineFillBar). A full one needs none: its rounds say it. A setting read
+    // switched it off (aio_gui_magazineFillBar). A full one needs none: its rounds say it. A setting read
     // from the mission namespace, not GVAR: tiles are drawn in Eden as well, where CBA runs no settings.
     if (
         _capacity > 1 && {_ammo < _capacity}
@@ -311,7 +318,7 @@ if (_hidden) then {
 
         _controls append _bar;
 
-        // Kept for a repack in progress, which draws its own bar over it (einv_magazines_fnc_drawJob).
+        // Kept for a repack in progress, which draws its own bar over it (aio_magazines_fnc_drawJob).
         _entry set ["bar", _bar];
         _entry set ["barRect", _barRect];
 
@@ -386,8 +393,8 @@ if (_hidden) then {
 
     // A magazine's rounds where they always were, in the bottom right corner - unless the stack's box has
     // that corner: then in the bottom left one, in what the box leaves. Not when the player keeps them off
-    // the tiles (einv_gui_magazineText): the fill bar alone tells how full it is, and a repack has no
-    // label to write into (einv_magazines_fnc_drawJob takes none).
+    // the tiles (aio_gui_magazineText): the fill bar alone tells how full it is, and a repack has no
+    // label to write into (aio_magazines_fnc_drawJob takes none).
     if (_capacity <= 1 || {!(missionNamespace getVariable [QGVAR(magazineText), true])}) exitWith {};
 
     private _amount = format ["%1/%2", _ammo, _capacity];
@@ -447,7 +454,7 @@ if (_hidden) then {
             // The words stand on a dark pill of their own (fnc_drawCountBackdrop): on a white picture - a vial,
             // a bandage - white text vanishes. It ends where the text did, in its corner, and is sized for the
             // widest the text gets: a repack of magazines writes the rounds live into the same label
-            // (einv_magazines_fnc_drawJob), up to the capacity.
+            // (aio_magazines_fnc_drawJob), up to the capacity.
             private _widest = [format ["%1/%1", _capacity], str _capacity] select _shortened;
 
             if ((_widest getTextWidth [_amountFont, _textH]) < (_amount getTextWidth [_amountFont, _textH])) then {

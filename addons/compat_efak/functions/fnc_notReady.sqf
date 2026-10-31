@@ -7,7 +7,7 @@
  *
  * Whether the server takes what leaves the player's gear is no longer asked here: every move goes
  * through the storage's transactions, and the window hands nothing to the server's hub before the
- * server answered with this very version (einv_storage_fnc_hubReady, einv_gui_fnc_sendMoves).
+ * server answered with this very version (aio_storage_fnc_hubReady, aio_gui_fnc_sendMoves).
  *
  * Arguments:
  * None
@@ -16,7 +16,7 @@
  * "" when kits may change, else why not, in words <STRING>
  *
  * Example:
- * call einv_compat_efak_fnc_notReady;
+ * call aio_compat_efak_fnc_notReady;
  *
  * Public: No
  */

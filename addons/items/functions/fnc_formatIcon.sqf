@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Writes the value of icon= (a rule) or einv_icon (an item's config) from [scale, across, down], the way
+ * Writes the value of icon= (a rule) or aio_icon (an item's config) from [scale, across, down], the way
  * fnc_parseIcon reads it back: the scale alone when the picture is not moved, else the scale, an "@", and
  * the two offsets split by a colon - or by a comma, which is how config writes it. To two decimals, the
  * shortest way: [1.4, 0, 0] is "1.4", [1, 0.1, -0.05] is "1@0.1:-0.05".
@@ -16,7 +16,7 @@
  * The value <STRING>
  *
  * Example:
- * [[1.4, 0.1, -0.05]] call einv_items_fnc_formatIcon;
+ * [[1.4, 0.1, -0.05]] call aio_items_fnc_formatIcon;
  * // "1.4@0.1:-0.05"
  *
  * Public: No

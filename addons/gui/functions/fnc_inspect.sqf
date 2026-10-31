@@ -14,13 +14,13 @@
  * 2: A magazine's rounds, -1 for full <NUMBER> (default: -1)
  * 3: A weapon's attachments, as fnc_getContents gives them <ARRAY> (default: [])
  * 4: The container it lies in, for how many may share a tile there (a crate stacks higher than a vest,
- *    einv_storage_fnc_stackFor) <OBJECT> (default: objNull)
+ *    aio_storage_fnc_stackFor) <OBJECT> (default: objNull)
  *
  * Return Value:
  * None
  *
  * Example:
- * ["arifle_MX_F"] call einv_gui_fnc_inspect;
+ * ["arifle_MX_F"] call aio_gui_fnc_inspect;
  *
  * Public: No
  */

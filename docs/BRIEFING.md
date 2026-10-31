@@ -30,7 +30,7 @@ inventory (RscDisplayInventory, IDD 602) with a Tarkov-style grid inventory, in 
 of the kit window of my mod Enhanced First Aid Kits (EFAK). I attached EFAK's GUI files - treat
 them as the design system.
 
-Name: Arma Inventory Overhaul, prefix einv. Repo: C:\Users\Heda\GitHub Repos\Arma-Inventory-Redesign.
+Name: Arma Inventory Overhaul, prefix aio. Repo: C:\Users\Heda\GitHub Repos\Arma-Inventory-Redesign.
 Phase 1 is built - read the repo before changing anything.
 
 ## What this is - and what it is not
@@ -96,7 +96,7 @@ Phase 1 is built - read the repo before changing anything.
 ## Grid model
 - Every item has a size in cells (w x h), every container a grid (columns x rows).
 - Item size, first match wins:
-  1. a config property on the item class that other mods can set: einv_gridSize[] = {w, h};
+  1. a config property on the item class that other mods can set: aio_gridSize[] = {w, h};
   2. our own compat table for vanilla/ACE items that come out wrong;
   3. rules by kind and mass. Starting values, to tune in game: handgun 2x1, rifle 4x2 to 6x2 by
      mass, launcher 6x2, magazine 1x1 / 1x2 / 2x2 by mass, small item 1x1, heavy item 2x2, loose
@@ -130,7 +130,7 @@ Phase 1 is built - read the repo before changing anything.
   hidden again; whatever this player puts in is known at once. Own gear is never hidden.
 - CBA settings (server): search bodies / crates and vehicles / loose ground items as separate
   switches, time per cell. Mission makers exempt an object with
-  _box setVariable ["einv_noSearch", true, true] - arsenal boxes, base supply.
+  _box setVariable ["aio_noSearch", true, true] - arsenal boxes, base supply.
 - Optional, setting default off: unknown item classes must be examined once (context menu, short
   timer) before their name and picture show. Known classes are kept per player in
   profileNamespace.

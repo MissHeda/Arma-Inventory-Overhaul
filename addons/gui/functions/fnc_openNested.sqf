@@ -14,7 +14,7 @@
  * listed in that container - put on, taken into a crate, dropped elsewhere - drops out at the next build
  * (fnc_build), one the engine made anew is found again by its key. Its box stands for its tile there: it
  * is dragged and hinted like the tile (fnc_boxTile). Opening tags the container object with the item's
- * class (einv_storage_itemClass), for its compartments.
+ * class (aio_storage_itemClass), for its compartments.
  *
  * Arguments:
  * 0: Grid index <NUMBER>
@@ -24,7 +24,7 @@
  * Opened or closed <BOOL>
  *
  * Example:
- * [1, 4] call einv_gui_fnc_openNested;
+ * [1, 4] call aio_gui_fnc_openNested;
  *
  * Public: No
  */
@@ -48,7 +48,7 @@ if (_index >= 0) then {
 } else {
     // The container object of a uniform or vest is only its Supply class, and lying in a container it
     // is nobody's - which uniform or vest it is, only its tile knows. Its compartments go by that
-    // class (einv_storage_fnc_getBlocks), so it is tagged with it. On this machine only, like the
+    // class (aio_storage_fnc_getBlocks), so it is tagged with it. On this machine only, like the
     // layouts; a moved one is a new object and gets tagged anew when it is opened again.
     _object setVariable [QEGVAR(storage,itemClass), _class];
     GVAR(opened) pushBack [_class, _object, _from];

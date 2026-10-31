@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Locks the objects the Zeus menu or the module chose - or opens them again - and tells the game master
  * what was done. Mode "pick" asks which group first (fnc_groupDialog). The lock itself is
- * einv_locks_fnc_setLock, which from a client goes to the server.
+ * aio_locks_fnc_setLock, which from a client goes to the server.
  *
  * Arguments:
  * 0: Objects <ARRAY of OBJECTs>
@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * [[_crate], "side", east] call einv_compat_zen_fnc_apply;
+ * [[_crate], "side", east] call aio_compat_zen_fnc_apply;
  *
  * Public: No
  */

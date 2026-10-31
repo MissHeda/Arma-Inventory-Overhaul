@@ -4,9 +4,9 @@
  * What an item is in config, before any rule: its kind, category, mass, rounds and load, the classes
  * it is built on and the addon that brought it in - everything the rules ask about - plus its names,
  * description and picture, and what its own mod says about its size, stack, grid, weight, name and how
- * its picture is drawn: einv_size, einv_stack, einv_grid, einv_weight, einv_name, einv_icon,
- * einv_picture, einv_use, einv_cat (fnc_readConfigKeys), and the older
- * einv_gridSize[], einv_stackSize, einv_grids[], einv_slots, which still work. A subclass has what
+ * its picture is drawn: aio_size, aio_stack, aio_grid, aio_weight, aio_name, aio_icon,
+ * aio_picture, aio_use, aio_cat (fnc_readConfigKeys), and the older
+ * aio_gridSize[], aio_stackSize, aio_grids[], aio_slots, which still work. A subclass has what
  * its parent has, as everything in config does. fnc_getInfo puts the rules on top of this.
  *
  * Config does not change while the game runs, so this is read once per class and kept in uiNamespace:
@@ -26,7 +26,7 @@
  * instance classes that mod makes of it, "efak_IFAK_1" up to as many as the type has. The same list
  * that mod reads for its own efak_core_fnc_isKit, read here from config, so the kind is known in the
  * editor and the main menu too, where none of that mod's functions run. Its load is the capacity that
- * config gives the type - a mission's setting for it is that mod's business (einv_compat_efak). To the
+ * config gives the type - a mission's setting for it is that mod's business (aio_compat_efak). To the
  * rules' kind= it is an item as well (KINDS_AS_ITEM): kind=item sizes and stacks it as before, kind=kit
  * reaches only kits.
  *
@@ -49,7 +49,7 @@
  *   "addon"       - the CfgPatches class that defined it, lowercase, "" if none <STRING>
  *   "mod"         - what its own config says, only the keys it sets and that can be used: "size"
  *                   [w, h, holes] or "mass", "stack" NUMBER, "grid" spec (fnc_parseGrid), "weight"
- *                   kg NUMBER, "name" STRING and "icon" [scale, across, down] "picture" STRING and "use" [containers] and "cats" [categories] (einv_size ... einv_cat),
+ *                   kg NUMBER, "name" STRING and "icon" [scale, across, down] "picture" STRING and "use" [containers] and "cats" [categories] (aio_size ... aio_cat),
  *                   and the older "gridSize"
  *                   [w, h], "stackSize" NUMBER, "grids" [[cols, rows], ...], "slots" NUMBER
  *                   <HASHMAP>
@@ -59,7 +59,7 @@
  *   "picture"     - "" if none <STRING>
  *
  * Example:
- * ["arifle_MX_F"] call einv_items_fnc_getFacts;
+ * ["arifle_MX_F"] call aio_items_fnc_getFacts;
  *
  * Public: Yes
  */

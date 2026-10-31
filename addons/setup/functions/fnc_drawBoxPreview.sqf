@@ -2,10 +2,10 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The box of a container as the inventory window draws it (einv_gui_fnc_drawSection): a square with the picture of
+ * The box of a container as the inventory window draws it (aio_gui_fnc_drawSection): a square with the picture of
  * the class - a crate or vehicle with the picture the rules give it, else the one the editor has of it
  * (editorPreview), a uniform, vest or backpack with its picture as a slot shows it - drawn by the class's icon=,
- * larger, smaller or moved, and cut to the box (einv_gui_fnc_uiBoxPicture). For the Containers step, which shows
+ * larger, smaller or moved, and cut to the box (aio_gui_fnc_uiBoxPicture). For the Containers step, which shows
  * the box with the picture as it would be once Apply wrote it.
  *
  * Arguments:
@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * [_display, _box, [0.1, 0.1, 0.1, 0.1], _theme, "B_CargoNet_01_ammo_F", "", [1.4, 0, 0]] call einv_setup_fnc_drawBoxPreview;
+ * [_display, _box, [0.1, 0.1, 0.1, 0.1], _theme, "B_CargoNet_01_ammo_F", "", [1.4, 0, 0]] call aio_setup_fnc_drawBoxPreview;
  *
  * Public: No
  */

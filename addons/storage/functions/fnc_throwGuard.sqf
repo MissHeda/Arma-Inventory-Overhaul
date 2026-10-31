@@ -30,7 +30,7 @@
  * Whether the key is swallowed <BOOL>
  *
  * Example:
- * [_display, 34, false, false, false] call einv_storage_fnc_throwGuard;
+ * [_display, 34, false, false, false] call aio_storage_fnc_throwGuard;
  *
  * Public: No
  */
@@ -96,7 +96,7 @@ if (_where isEqualTo []) then {
     _where = USE_KINDS select {([_x] call FUNC(useMode)) isNotEqualTo USE_ALL};
 };
 
-[format [localize "STR_einv_storage_Hint_NoThrow", [USE_KINDS select {_x in _where}] call FUNC(useKindName)]] call FUNC(useHint);
+[format [localize "STR_aio_storage_Hint_NoThrow", [USE_KINDS select {_x in _where}] call FUNC(useKindName)]] call FUNC(useHint);
 
 // ACE's key is not held back here; the status effect does it.
 _vanilla

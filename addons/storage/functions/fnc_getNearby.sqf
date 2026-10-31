@@ -2,12 +2,13 @@
 /*
  * Author: Miss Heda
  * What lies around a unit that is worth a box of its own in the loot column: every pile on the ground that
- * holds something and every crate, within the reach (einv_storage_nearbyRange), on the same floor and in
+ * holds something and every crate, within the reach (aio_storage_nearbyRange), on the same floor and in
  * sight from the eyes - nothing through walls or floors (fnc_isNear). Nearest first, at most `max`.
  *
  * Not vehicles and bodies - they show when they are opened, a convoy would flood the column with big grids
- * and dolls -, nor living persons (their own action opens them). Not what a mission marks with the public
- * variable einv_nearby = false, what is locked (lockInventory), hidden, carried (ACE) or loaded somewhere.
+ * and dolls -, nor living persons (their own action opens them), nor another mod's holder that is no loot
+ * (Helmet on Ass's slung helmet, fnc_isForeignHolder). Not what a mission marks with the public
+ * variable aio_nearby = false, what is locked (lockInventory), hidden, carried (ACE) or loaded somewhere.
  * An empty crate shows - it is a place to put things -, an empty pile does not: the engine deletes it.
  *
  * Seated in a vehicle nothing lies "around" the seat: the engine shows the vehicle's cargo.
@@ -21,7 +22,7 @@
  * Piles and crates, nearest first <ARRAY of OBJECTs>
  *
  * Example:
- * [player, 3] call einv_storage_fnc_getNearby;
+ * [player, 3] call aio_storage_fnc_getNearby;
  *
  * Public: Yes
  */
@@ -39,12 +40,13 @@ private _feet = getPosASL _unit;
 // second is not a ReammoBox_F.
 private _found = (nearestObjects [_unit, ["WeaponHolder", "WeaponHolderSimulated", "ReammoBox_F"], _range + 1, true]) select {
     !(_x isKindOf "ContainerSupply")
+    && {!([_x] call FUNC(isForeignHolder))}
     && {alive _x}
     && {!isObjectHidden _x}
     && {isNull attachedTo _x}
     && {isNull objectParent _x}
     && {!lockedInventory _x}
-    && {(_x getVariable ["einv_nearby", true]) isNotEqualTo false}
+    && {(_x getVariable ["aio_nearby", true]) isNotEqualTo false}
     && {
         // A pile holds something when any of its cargo lists does - asked of the engine's lists rather than of
         // fnc_getContents, which would make every entry of a full pile only to see that there is one (the

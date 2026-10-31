@@ -2,10 +2,10 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * A section of the panel that shows a note in place of a grid (its "drawer", einv_gui_fnc_drawSection): the kit's
+ * A section of the panel that shows a note in place of a grid (its "drawer", aio_gui_fnc_drawSection): the kit's
  * section while Enhanced First Aid Kits' kits tab is open and the kit picked there has no grid to show - it lies in
  * none of the soldier's containers nor the staging space ("Take the kit first"), it is still being made ready, or its
- * contents have not reached this machine yet (einv_compat_efak_fnc_arsenalKit). The caption as a section draws it - a
+ * contents have not reached this machine yet (aio_compat_efak_fnc_arsenalKit). The caption as a section draws it - a
  * pill in the caption line's size and colours, a hairline under the line, at the left edge as the panel's sections
  * have no box - and the note under it in one muted line, cut to the width. Nothing to fold, nothing to drop on.
  *
@@ -21,7 +21,7 @@
  * Height used <NUMBER>
  *
  * Example:
- * [_display, _group, 0, 0.3, _section, _theme] call einv_arsenal_fnc_drawNote;
+ * [_display, _group, 0, 0.3, _section, _theme] call aio_arsenal_fnc_drawNote;
  *
  * Public: No
  */
@@ -30,7 +30,7 @@ disableSerialization;
 
 params ["_display", "_parent", "_top", "_width", "_section", "_theme"];
 
-// The measures of a section's caption line (einv_gui_fnc_drawSection), which grow with the tile scale (TEXT_UNIT).
+// The measures of a section's caption line (aio_gui_fnc_drawSection), which grow with the tile scale (TEXT_UNIT).
 private _textUnit = TEXT_UNIT;
 private _lineH = _textUnit * CAPTION_LINE;
 private _lineSize = _textUnit * 0.46;

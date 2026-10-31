@@ -9,13 +9,13 @@
  *     "Picture..." - the picture picker (fnc_openPicturePicker) on its chip of this mod's icons -, a button back to the shipped
  *     name and picture (built-in ones) or to the star (the setup's own), and for the setup's own a cross that deletes it after
  *     a question (fnc_deleteCategory takes it out of every item and compartment that names it).
- *   - before all that a switch that selects the row for the mass edit, and after the name the colour of its items' tiles: a
- *     swatch and a field for six hex digits (color=, fnc_setCategoryColours; empty is the look's own colour of the tile).
- *   - the mass edit: how many rows are selected, All / None, a colour field and "Colour selected" / "Clear colour", which give
- *     every selected category that colour (or none) in one step. The selection is the wizard's own (einv_setup_catSelected).
+ *   - after the name the colour of its items' tiles (color=, fnc_setCategoryColours): its swatch and hex digits, or "Default"
+ *     for the look's own colour. A click opens the colour picker (fnc_openColourPicker) - the square and the hue strip of the
+ *     window's colour panel -, Apply writes the colour, Default takes it away (issue #33; the switches and the mass edit row
+ *     of 0.6.x are gone).
  *   - the row to add one: a name field and Add (fnc_addCategory). The eight built-in ones can be renamed and given another
  *     picture, not removed; at most MAX_CUSTOM_CATEGORIES of the setup's own.
- * All of it is the statements category=ID > name=... picture=... of the rules text (einv_items_fnc_parseRules), so it saves,
+ * All of it is the statements category=ID > name=... picture=... of the rules text (aio_items_fnc_parseRules), so it saves,
  * exports and imports with the rules, and the list of changes words it (fnc_describeRule).
  *
  * Arguments:
@@ -29,7 +29,7 @@
  * The height the card took <NUMBER>
  *
  * Example:
- * [_display, _page, [_padX, _cursorY, _innerW], _theme, _probe] call einv_setup_fnc_drawCategories;
+ * [_display, _page, [_padX, _cursorY, _innerW], _theme, _probe] call aio_setup_fnc_drawCategories;
  *
  * Public: No
  */
@@ -56,12 +56,8 @@ private _canAdd = ({!(_x in ITEM_GROUPS)} count _ids) < MAX_CUSTOM_CATEGORIES;
 
 private _help = LLSTRING(Categories_Help);
 private _helpH = [_display, _probe, [0, 0, _cardW], _help, TEXT_SMALL, _colorText2, _font] call FUNC(uiText);
-private _height = _cardTop + _helpH + UNIT * 0.3 + (count _ids + 2) * (_rowH + _rowGap) - _rowGap + CARD_PAD_Y;
+private _height = _cardTop + _helpH + UNIT * 0.3 + (count _ids + 1) * (_rowH + _rowGap) - _rowGap + CARD_PAD_Y;
 
-// The rows selected for the mass edit: only ids there still are.
-private _selected = (missionNamespace getVariable [QGVAR(catSelected), []]) select {_x in _ids};
-
-missionNamespace setVariable [QGVAR(catSelected), _selected];
 private _contentY = [_display, _page, [_padX, _top, _innerW, _height], LLSTRING(Categories_Title), _theme] call FUNC(uiCard);
 
 [_display, _page, [_cardX, _contentY, _cardW], _help, TEXT_SMALL, _colorText2, _font] call FUNC(uiText);
@@ -71,9 +67,8 @@ private _pictureLabel = LLSTRING(Categories_Picture);
 private _pictureW = (ACTION_W(_pictureLabel,_rowH,true,_font)) max SQUARE(UNIT * 3.8);
 private _idW = SQUARE(UNIT * 6.5);
 private _squareW = SQUARE(_rowH);
-private _checkW = SQUARE(_rowH * 1.7);
 private _colourW = SQUARE(UNIT * 6.4);
-private _nameW = _cardW - _checkW - _squareW - _idW - _colourW - _pictureW - _squareW * 2 - _gap * 7;
+private _nameW = _cardW - _squareW - _idW - _colourW - _pictureW - _squareW * 2 - _gap * 6;
 
 // The tiles' colour as a swatch: the setup's colour, else the look's own of the category's tiles (a plain grey for one of the
 // setup's own, whose items take their built-in category's).
@@ -88,20 +83,6 @@ private _builtinTile = createHashMapFromArray [
     private _info = [_id, GVAR(draftRules)] call EFUNC(items,categoryInfo);
     private _builtin = _info get "builtin";
     private _rowX = _cardX;
-
-    // Selected for the mass edit.
-    [_display, _page, [_rowX, _rowY, _checkW, _rowH], _id in _selected, _theme, {
-        params ["_on", "_id"];
-
-        private _list = missionNamespace getVariable [QGVAR(catSelected), []];
-
-        if (_on) then {_list pushBackUnique _id} else {_list = _list - [_id]};
-
-        missionNamespace setVariable [QGVAR(catSelected), _list];
-
-        [GVAR(step)] call FUNC(showStep);
-    }, _id] call FUNC(uiToggle);
-    _rowX = _rowX + _checkW + _gap;
 
     // Its picture, as the window draws it.
     [_display, _page, [_rowX, _rowY, _squareW, _rowH], [1, 1, 1, 0.06], _radius] call EFUNC(gui,uiPanel);
@@ -118,25 +99,42 @@ private _builtinTile = createHashMapFromArray [
     }, _id, LLSTRING(Categories_NameTip)] call FUNC(uiField);
     _rowX = _rowX + _nameW + _gap;
 
-    // The tiles' colour: a swatch, and the field for its six hex digits.
+    // The tiles' colour: its swatch and hex digits ("Default" for none), one button that opens the colour picker.
     private _own = _info get "color";
-    private _swatch = if (count _own >= 3) then {_own + [1]} else {
-        ((_plainTiles param [_builtinTile getOrDefault [_id, CATEGORY_MISC], [0.15, 0.15, 0.15, 0.92]]) select [0, 3]) + [1]
-    };
-    private _swatchW = SQUARE(_rowH * 0.7);
+    private _plain = ((_plainTiles param [_builtinTile getOrDefault [_id, CATEGORY_MISC], [0.15, 0.15, 0.15, 0.92]]) select [0, 3]);
+    private _swatch = if (count _own >= 3) then {_own + [1]} else {_plain + [1]};
+    private _swatchW = SQUARE(_rowH * 0.62);
+    private _colourFill = [1, 1, 1, 0.06];
+    private _colourSurface = [_display, _page, [_rowX, _rowY, _colourW, _rowH], _colourFill, _radius] call EFUNC(gui,uiPanel);
+    private _swatchX = _rowX + SQUARE(_rowH * 0.19);
 
-    [_display, _page, [_rowX, _rowY + _rowH * 0.15, _swatchW, _rowH * 0.7], [1, 1, 1, 0.25], _radius] call EFUNC(gui,uiPanel);
+    [_display, _page, [_swatchX, _rowY + _rowH * 0.19, _swatchW, _rowH * 0.62], [1, 1, 1, 0.25], _radius] call EFUNC(gui,uiPanel);
     [
-        _display, _page, [_rowX + pixelW, _rowY + _rowH * 0.15 + pixelH, _swatchW - pixelW * 2, _rowH * 0.7 - pixelH * 2], _swatch, _radius
+        _display, _page, [_swatchX + pixelW, _rowY + _rowH * 0.19 + pixelH, _swatchW - pixelW * 2, _rowH * 0.62 - pixelH * 2], _swatch, _radius
     ] call EFUNC(gui,uiPanel);
 
-    [_display, _page, [_rowX + _swatchW + _gap, _rowY, _colourW - _swatchW - _gap, _rowH], _info get "colorSet", LLSTRING(Categories_ColourShort), _theme, {
-        params ["_text", "_id"];
+    private _colourText = [LLSTRING(Colour_Default), toUpper (_info get "colorSet")] select ((_info get "colorSet") isNotEqualTo "");
+    private _colourTextX = _swatchX + _swatchW + SQUARE(UNIT * 0.3);
 
-        if !([[_id], _text] call FUNC(setCategoryColours)) then {
-            [LLSTRING(Categories_BadColour), "loss"] call FUNC(setHint);
-        };
-    }, _id, LLSTRING(Categories_ColourTip)] call FUNC(uiField);
+    [
+        _display, _page, [_colourTextX, _rowY, _rowX + _colourW - _colourTextX, _rowH], _colourText, TEXT_SMALL,
+        [_muted, _colorText2] select ((_info get "colorSet") isNotEqualTo ""), _font, 0
+    ] call EFUNC(gui,uiLabel);
+
+    [_display, _page, [_rowX, _rowY, _colourW, _rowH], _colourSurface, _colourFill, [1, 1, 1, 0.12], {
+        params ["_id", "_plain"];
+
+        private _info = [_id, GVAR(draftRules)] call EFUNC(items,categoryInfo);
+
+        // The picker opens at the mouse: the button lies in a scrolled page, the mouse is on the screen already.
+        getMousePosition params ["_mouseX", "_mouseY"];
+
+        [uiNamespace getVariable [QGVAR(display), displayNull], [_mouseX - UNIT, _mouseY - UNIT * 0.5, UNIT * 2, UNIT], _info get "name", _info get "colorSet", _plain, {
+            params ["_hex", "_id"];
+
+            [[_id], _hex] call FUNC(setCategoryColours);
+        }, _id] call FUNC(openColourPicker);
+    }, [_id, _plain], true, LLSTRING(Categories_ColourTip)] call FUNC(uiHit);
     _rowX = _rowX + _colourW + _gap;
 
     [
@@ -187,67 +185,6 @@ private _builtinTile = createHashMapFromArray [
 
     _rowY = _rowY + _rowH + _rowGap;
 } forEach _ids;
-
-// The mass edit: the rows selected above get one colour (or none) in one step.
-private _countW = SQUARE(UNIT * 4.4);
-private _allLabel = LLSTRING(Categories_SelectAll);
-private _noneLabel = LLSTRING(Categories_SelectNone);
-private _applyLabel = LLSTRING(Categories_MassApply);
-private _clearLabel = LLSTRING(Categories_MassClear);
-private _allW = ACTION_W(_allLabel,_rowH,false,_font);
-private _noneW = ACTION_W(_noneLabel,_rowH,false,_font);
-private _applyW = ACTION_W(_applyLabel,_rowH,true,_font);
-private _clearW = ACTION_W(_clearLabel,_rowH,false,_font);
-private _massW = _cardW - _countW - _allW - _noneW - _applyW - _clearW - _gap * 5;
-private _any = _selected isNotEqualTo [];
-private _massX = _cardX;
-
-[
-    _display, _page, [_massX, _rowY, _countW, _rowH], format [LLSTRING(Categories_Selected), count _selected], TEXT_SMALL,
-    [_muted, _colorText2] select _any, _font, 0
-] call EFUNC(gui,uiLabel);
-_massX = _massX + _countW + _gap;
-
-[_display, _page, [_massX, _rowY, _allW, _rowH], _allLabel, "", _theme, {
-    params ["_ids"];
-
-    missionNamespace setVariable [QGVAR(catSelected), +_ids];
-    [GVAR(step)] call FUNC(showStep);
-}, _ids, true, "ghost"] call FUNC(uiAction);
-_massX = _massX + _allW + _gap;
-
-[_display, _page, [_massX, _rowY, _noneW, _rowH], _noneLabel, "", _theme, {
-    missionNamespace setVariable [QGVAR(catSelected), []];
-    [GVAR(step)] call FUNC(showStep);
-}, [], _any, "ghost"] call FUNC(uiAction);
-_massX = _massX + _noneW + _gap;
-
-[
-    _display, _page, [_massX, _rowY, _massW, _rowH], missionNamespace getVariable [QGVAR(catMassColour), ""],
-    LLSTRING(Categories_ColourPlaceholder), _theme, {
-        params ["_text", "_submitted"];
-
-        missionNamespace setVariable [QGVAR(catMassColour), _text];
-
-        if (_submitted && {!([missionNamespace getVariable [QGVAR(catSelected), []], _text] call FUNC(setCategoryColours))}) then {
-            [LLSTRING(Categories_BadColour), "loss"] call FUNC(setHint);
-        };
-    }, [], false, _any
-] call FUNC(uiEdit);
-_massX = _massX + _massW + _gap;
-
-[_display, _page, [_massX, _rowY, _applyW, _rowH], _applyLabel, UI_TEX(icon_style_ca), _theme, {
-    if !([missionNamespace getVariable [QGVAR(catSelected), []], missionNamespace getVariable [QGVAR(catMassColour), ""]] call FUNC(setCategoryColours)) then {
-        [LLSTRING(Categories_BadColour), "loss"] call FUNC(setHint);
-    };
-}, [], _any, "accent", LLSTRING(Categories_MassApplyTip)] call FUNC(uiAction);
-_massX = _massX + _applyW + _gap;
-
-[_display, _page, [_massX, _rowY, _clearW, _rowH], _clearLabel, "", _theme, {
-    [missionNamespace getVariable [QGVAR(catSelected), []], ""] call FUNC(setCategoryColours);
-}, [], _any, "ghost"] call FUNC(uiAction);
-
-_rowY = _rowY + _rowH + _rowGap;
 
 // The row to add one.
 private _addLabel = LLSTRING(Categories_Add);

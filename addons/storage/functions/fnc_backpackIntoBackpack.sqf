@@ -14,7 +14,7 @@
  * It would be a backpack in a backpack <BOOL>
  *
  * Example:
- * [backpackContainer player, _entry] call einv_storage_fnc_backpackIntoBackpack;
+ * [backpackContainer player, _entry] call aio_storage_fnc_backpackIntoBackpack;
  *
  * Public: No
  */

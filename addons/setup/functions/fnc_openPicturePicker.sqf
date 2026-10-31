@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * ["", {params ["_path"]; systemChat _path}] call einv_setup_fnc_openPicturePicker;
+ * ["", {params ["_path"]; systemChat _path}] call aio_setup_fnc_openPicturePicker;
  *
  * Public: No
  */

@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Whether the cells an item would take are free: every cell of its box but its own holes (a shaped
- * item, size=xx/x-, einv_items_fnc_footprintAs) - so an L can lie with something small in the corner
+ * item, size=xx/x-, aio_items_fnc_footprintAs) - so an L can lie with something small in the corner
  * it leaves open. Every layout that looks for free cells asks this (fnc_getLayout, fnc_plan, fnc_opPut,
  * fnc_opPlaceMany), on rows of booleans as fnc_seedTaken starts them, so all of them agree on what
  * fits. Whether the box lies inside its compartment at all is for the caller to say.
@@ -19,7 +19,7 @@
  * Every cell it takes is free <BOOL>
  *
  * Example:
- * [_taken select 0, 2, 1, 2, 2, [3]] call einv_storage_fnc_cellsFree;
+ * [_taken select 0, 2, 1, 2, 2, [3]] call aio_storage_fnc_cellsFree;
  *
  * Public: No
  */

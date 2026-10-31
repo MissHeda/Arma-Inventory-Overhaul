@@ -13,7 +13,7 @@
  * Ready <BOOL>
  *
  * Example:
- * call einv_storage_fnc_hubReady;
+ * call aio_storage_fnc_hubReady;
  *
  * Public: No
  */

@@ -9,10 +9,10 @@
  * someone else was quicker ("Gone"), the cell was just taken ("Taken"), the holder moved meanwhile
  * ("Moved"), out of reach ("OutOfReach"), not into itself ("IntoItself"), several items cannot go into
  * one slot ("GroupNoSlot"), nothing to put it on here ("NoGround"), put elsewhere ("PlacedElsewhere"),
- * the server not ready yet ("NotReady"), locked to the player ("Locked", einv_locks), a backpack into a
+ * the server not ready yet ("NotReady"), locked to the player ("Locked", aio_locks), a backpack into a
  * backpack ("NoBackpack"). A put that bounced never shows by itself - what went back or onto the ground
  * does ("Returned", "Grounded", "MovedSome", each with its counts). Any other text is a reason someone
- * else already put into words - Enhanced First Aid Kits', through einv_compat_efak - and shows as it is;
+ * else already put into words - Enhanced First Aid Kits', through aio_compat_efak - and shows as it is;
  * "" says nothing.
  *
  * Arguments:
@@ -27,8 +27,8 @@
  * None
  *
  * Example:
- * ["NoRoom"] call einv_gui_fnc_flashHint;
- * ["MovedSome", [3, 5]] call einv_gui_fnc_flashHint;
+ * ["NoRoom"] call aio_gui_fnc_flashHint;
+ * ["MovedSome", [3, 5]] call aio_gui_fnc_flashHint;
  *
  * Public: No
  */

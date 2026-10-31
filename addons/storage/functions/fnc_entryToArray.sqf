@@ -12,7 +12,7 @@
  * [class, count, ammo, capacity, attachments, container, col, row, w, h, block, key] <ARRAY>
  *
  * Example:
- * [_entry] call einv_storage_fnc_entryToArray;
+ * [_entry] call aio_storage_fnc_entryToArray;
  *
  * Public: No
  */

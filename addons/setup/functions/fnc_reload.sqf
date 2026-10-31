@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * call einv_setup_fnc_reload;
+ * call aio_setup_fnc_reload;
  *
  * Public: No
  */

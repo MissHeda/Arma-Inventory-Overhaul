@@ -12,7 +12,7 @@
  * Something to undo or redo was there <BOOL>
  *
  * Example:
- * [1] call einv_setup_fnc_undo;
+ * [1] call aio_setup_fnc_undo;
  *
  * Public: No
  */

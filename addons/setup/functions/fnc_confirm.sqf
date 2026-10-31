@@ -9,7 +9,7 @@
  * colour unless it says otherwise. The card is as wide as the answers need, at least as wide as the question
  * reads well, so the row fills it and the padding is the same on both sides. Any other answer than the one
  * that does nothing (first on the left) can be added; Escape, or a click beside the card, is that first one.
- * The card has no title bar: it is moved by its words and the padding round them (einv_gui_fnc_dragHandle),
+ * The card has no title bar: it is moved by its words and the padding round them (aio_gui_fnc_dragHandle),
  * the answers staying buttons.
  *
  * Arguments:
@@ -28,7 +28,7 @@
  * None
  *
  * Example:
- * [_display, "Close without saving?", "Close", {closeDialog 2}] call einv_setup_fnc_confirm;
+ * [_display, "Close without saving?", "Close", {closeDialog 2}] call aio_setup_fnc_confirm;
  *
  * Public: No
  */
@@ -75,7 +75,7 @@ if (_title isNotEqualTo "") then {
 };
 
 // Measured in a box of that width before the card is made, so the card is as high as the words.
-private _probe = _display ctrlCreate ["EINV_StructuredText", -1];
+private _probe = _display ctrlCreate ["AIO_StructuredText", -1];
 _probe ctrlSetPosition [safezoneX, safezoneY, _width, UNIT * 10];
 _probe ctrlCommit 0;
 _probe ctrlSetStructuredText parseText _markup;
@@ -88,7 +88,7 @@ ctrlDelete _probe;
 
     (ctrlPosition _inner) params ["", "", "_width", "_height"];
 
-    private _words = [_display, "EINV_StructuredText", _inner, [0, 0, _width, _textH]] call EFUNC(gui,uiCreate);
+    private _words = [_display, "AIO_StructuredText", _inner, [0, 0, _width, _textH]] call EFUNC(gui,uiCreate);
 
     _words ctrlSetStructuredText parseText _markup;
 

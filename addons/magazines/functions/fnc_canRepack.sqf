@@ -21,7 +21,7 @@
  * [fits, reason] - reason a localized text or "" <ARRAY>
  *
  * Example:
- * [_sourceGrid, _entry, _targetGrid, _under] call einv_magazines_fnc_canRepack;
+ * [_sourceGrid, _entry, _targetGrid, _under] call aio_magazines_fnc_canRepack;
  *
  * Public: No
  */

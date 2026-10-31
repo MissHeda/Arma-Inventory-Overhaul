@@ -12,7 +12,7 @@
  * A popover was open <BOOL>
  *
  * Example:
- * call einv_setup_fnc_closePopover;
+ * call aio_setup_fnc_closePopover;
  *
  * Public: No
  */

@@ -11,7 +11,7 @@
  * Something was selected <BOOL>
  *
  * Example:
- * call einv_gui_fnc_clearSelection;
+ * call aio_gui_fnc_clearSelection;
  *
  * Public: No
  */

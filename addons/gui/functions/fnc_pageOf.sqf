@@ -14,8 +14,8 @@
  * The page it was or is now <NUMBER>
  *
  * Example:
- * [_crate, 0] call einv_gui_fnc_pageOf;
- * [_crate, 0, 2] call einv_gui_fnc_pageOf;
+ * [_crate, 0] call aio_gui_fnc_pageOf;
+ * [_crate, 0, 2] call aio_gui_fnc_pageOf;
  *
  * Public: No
  */

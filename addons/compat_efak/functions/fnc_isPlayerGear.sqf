@@ -15,7 +15,7 @@
  * Worn by a living player <BOOL>
  *
  * Example:
- * [backpackContainer player] call einv_compat_efak_fnc_isPlayerGear;
+ * [backpackContainer player] call aio_compat_efak_fnc_isPlayerGear;
  *
  * Public: No
  */

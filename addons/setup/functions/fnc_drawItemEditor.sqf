@@ -19,31 +19,31 @@
  *     while the value differs from what the draft would make of the class without its own rule for it
  *     (fnc_classDefault): a click takes that field back at once (fnc_resetField).
  *   - Under the picture a Use from row (fnc_drawUseRow): a chip each for the uniform, vest and backpack, on for the
- *     containers the item is whitelisted for (use=, einv_use) - it may be used from them even where the settings
- *     "Use items from ..." (einv_storage) close them - and a line of what those settings limit now. The working
+ *     containers the item is whitelisted for (use=, aio_use) - it may be used from them even where the settings
+ *     "Use items from ..." (aio_storage) close them - and a line of what those settings limit now. The working
  *     copy keeps the list as "useList"; Apply writes use=uniform+backpack (use=none for an emptied one).
  *   - Under it a Category row (fnc_drawCatRow): a chip each for the categories (the eight of ITEM_GROUPS and the draft's own), on for the ones the item is in
- *     (cats=, einv_cat, else the built-in one), at least one on; a reset button back to the built-in one. The working copy keeps
+ *     (cats=, aio_cat, else the built-in one), at least one on; a reset button back to the built-in one. The working copy keeps
  *     the list as "catsList"; Apply writes cats=medical+misc, and takes the class's own cats away when it is the built-in one again.
  *   - Under them the canvas (fnc_uiCanvas), SHAPE_MAX cells each way, always shown: a click makes a place
  *     one of the item's cells or takes it away, so an L or a T is drawn cell by cell. The steppers and the
  *     canvas are one: a stepper lays a rectangle of its size where the cells are - the places that were
  *     in their box keep what they were, the new ones become cells, the rest goes -, and the steppers say
  *     the box of what is drawn. Beside it how it looks as a tile (fnc_drawPreview, which draws the tile with
- *     the inventory's own routine, einv_gui_fnc_createTile, at the inventory's cell size where there is room),
+ *     the inventory's own routine, aio_gui_fnc_createTile, at the inventory's cell size where there is room),
  *     its size in words, and a warning while its cells are not one piece (fnc_canvasBlocks) - then Apply
  *     cannot be pressed.
  *   - Beside that tile its picture (fnc_drawIconBlock): a zoom stepper (25 to 400 %, 1 per click, 10 with
  *     Shift, with 50, 100, 150 and 200 % at one click) and two shift steppers, across and down (-100 to 100 % of
  *     the tile, the same steps), each with a small box to type the number in, with Reset back to the plain picture. The tile follows every click: it is drawn by the working copy, so what is
- *     seen is what Apply writes (icon=, einv_items_fnc_parseIcon). The inventory cuts a picture that would
+ *     seen is what Apply writes (icon=, aio_items_fnc_parseIcon). The inventory cuts a picture that would
  *     reach out of its tile at the tile's edge.
  *   - Apply writes what differs from now as class=X > size=WxH, or size=xx/x- for a shape
- *     (einv_items_fnc_formatMask), stack=N, weight=KG, name=..., picture=PATH, use=LIST and icon=ZOOM@ACROSS:DOWN (fnc_upsertRule) - the
+ *     (aio_items_fnc_formatMask), stack=N, weight=KG, name=..., picture=PATH, use=LIST and icon=ZOOM@ACROSS:DOWN (fnc_upsertRule) - the
  *     rest of that rule stays -, Discard drops the edits, Back to the default takes the class's own size, stack,
  *     weight, name, picture, use and icon away. A field emptied takes its own value away; Reset and Apply take a class's own
  *     icon away, or write the plain picture where the item's config draws it otherwise, and a class's own
- *     picture away, or write config's own picture path where the item's config (einv_picture) sets another.
+ *     picture away, or write config's own picture path where the item's config (aio_picture) sets another.
  *   - Picked in the tree view (fnc_editScope), the edit is for the class and every class built on it: a
  *     line says so, with how many, and Apply, Back to the default and Export work on the whole tree - one
  *     rule class=X+ instead of one per class. A chip returns to the class alone.
@@ -65,7 +65,7 @@
  * None
  *
  * Example:
- * [_display, _group, [0.3, 0, 0.4, 0.5], _theme] call einv_setup_fnc_drawItemEditor;
+ * [_display, _group, [0.3, 0, 0.4, 0.5], _theme] call aio_setup_fnc_drawItemEditor;
  *
  * Public: No
  */
@@ -87,7 +87,7 @@ ctrlDelete (uiNamespace getVariable [QGVAR(editor), controlNull]);
 
 _rect params ["", "", "_width", "_height"];
 
-private _box = [_display, "EINV_Group", _parent, _rect] call EFUNC(gui,uiCreate);
+private _box = [_display, "AIO_Group", _parent, _rect] call EFUNC(gui,uiCreate);
 
 uiNamespace setVariable [QGVAR(editor), _box];
 
@@ -140,21 +140,21 @@ private _startIcon = (_info getOrDefault ["icon", ICON_PLAIN]) apply {round (_x 
 // Whether a rule of the class's own (or the tree's) draws it, which Apply may then take away.
 private _ownIcon = "icon" in _own || {_tree && {"icon" in (_treeRules getOrDefault [_lc, createHashMap])}};
 
-// The picture it shows instead of config's (picture=, or the item's own einv_picture): the path, "" for none.
+// The picture it shows instead of config's (picture=, or the item's own aio_picture): the path, "" for none.
 private _startPicture = _info getOrDefault ["pictureOverride", ""];
 private _configPicture = _info getOrDefault ["configPicture", ""];
 private _ownPicture = "picture" in _own || {_tree && {"picture" in (_treeRules getOrDefault [_lc, createHashMap])}};
 
-// The containers it may be used from where a setting closes them (use=, einv_use): any of uniform, vest, backpack.
+// The containers it may be used from where a setting closes them (use=, aio_use): any of uniform, vest, backpack.
 private _startUse = _info getOrDefault ["use", []];
 
-// The categories it is in now (cats=, einv_cat, else the built-in one): any category of the draft.
+// The categories it is in now (cats=, aio_cat, else the built-in one): any category of the draft.
 private _startGroups = _info getOrDefault ["groups", ["misc"]];
 private _canvas = GVAR(itemWork) getOrDefault [_lc, createHashMap];
 
 // What it would be without its own size, stack, weight, name and use - the values the small reset buttons take a
 // field back to. Only worked out where a rule of its own (or its tree's) has any of them: else it is what it is now.
-private _resetFields = ["footprint", "stack", "weight", "name", "use", "cats"];
+private _resetFields = ["footprint", "stack", "weight", "name", "use", "cats", "tint", "color"];
 private _hasOwnField = (_resetFields findIf {_x in _own}) >= 0 || {_tree && {(_resetFields findIf {_x in (_treeRules getOrDefault [_lc, createHashMap])}) >= 0}};
 private _default = [_info, [_class, _resetFields] call FUNC(classDefault)] select _hasOwnField;
 private _defaultWeight = _default getOrDefault ["weightOverride", -1];
@@ -176,9 +176,26 @@ private _workIcon = _canvas getOrDefault ["iconPercent", _startIcon];
 private _workPicture = _canvas getOrDefault ["pictureText", _startPicture];
 private _workUse = _canvas getOrDefault ["useList", _startUse];
 private _workCats = _canvas getOrDefault ["catsList", _startGroups];
+// The colour of a tile in several categories (tint=): one of them, none, or "" for the first that has a colour.
+if !("tintStart" in _canvas) then {
+    _canvas set ["tintStart", _info getOrDefault ["tint", ""]];
+};
+
+private _startTint = _canvas get "tintStart";
+private _workTint = _canvas getOrDefault ["tintPick", _startTint];
+
+// Its own colour (color=, six hex digits, "" for none), picked with the colour picker - before any category's.
+if !("colorStart" in _canvas) then {
+    _canvas set ["colorStart", _info getOrDefault ["color", ""]];
+};
+
+private _startColor = _canvas get "colorStart";
+private _workColor = _canvas getOrDefault ["colorPick", _startColor];
+
 private _dirty = _blocks isNotEqualTo (_canvas getOrDefault ["start", []]) || {_workStack != _startStack}
     || {_workWeight isNotEqualTo _startWeightText} || {_workName isNotEqualTo _startName} || {_workIcon isNotEqualTo _startIcon}
-    || {_workPicture isNotEqualTo _startPicture} || {_workUse isNotEqualTo _startUse} || {_workCats isNotEqualTo _startGroups};
+    || {_workPicture isNotEqualTo _startPicture} || {_workUse isNotEqualTo _startUse} || {_workCats isNotEqualTo _startGroups}
+    || {_workTint isNotEqualTo _startTint} || {_workColor isNotEqualTo _startColor};
 
 ([_canvas] call FUNC(canvasBox)) params ["", "", "_boxW", "_boxH"];
 
@@ -186,7 +203,7 @@ private _dirty = _blocks isNotEqualTo (_canvas getOrDefault ["start", []]) || {_
 
 private _picH = UNIT * 2.2;
 private _picW = SQUARE(_picH * 2);
-// A placeholder word or a missing file in the class's config is no picture (einv_gui_fnc_safePicture).
+// A placeholder word or a missing file in the class's config is no picture (aio_gui_fnc_safePicture).
 private _picture = [_info getOrDefault ["picture", ""]] call EFUNC(gui,safePicture);
 
 if (_picture isNotEqualTo "") then {
@@ -212,7 +229,7 @@ private _family = _row param [ROW_FAMILY, ""];
 private _about = format ["%1 · %2", _class, _row param [ROW_MOD, _info getOrDefault ["addon", ""]]];
 
 if (_family isNotEqualTo "") then {
-    _about = format ["%1 · %2 · %3", _class, localize format ["STR_einv_setup_Family_%1", _family], _row select ROW_MOD];
+    _about = format ["%1 · %2 · %3", _class, localize format ["STR_aio_setup_Family_%1", _family], _row select ROW_MOD];
 };
 
 [
@@ -538,6 +555,91 @@ _cursorY = _cursorY + ([
     }, [_class, _canvas]
 ] call FUNC(drawCatRow)) + UNIT * 0.3;
 
+// ----- Its tile's colour (tint=) -----
+// A chip for each category it is in - the tile takes that one's colour (category=... color=, the Categories card) - and
+// No colour, for the look's plain tile. The one in effect is lit: tint= where it names one of them, else the first of them
+// that has a colour, else the first - as the tile takes it (aio_items_fnc_tileTint: one without a colour leaves the look's own
+// of the item's kind). No colour is lit only for tint=none, so picking it always takes the colour away. Last Custom: a colour of
+// the item's own (color=), picked in the colour picker (fnc_openColourPicker), its swatch beside it - lit while it has one,
+// which goes before any category's; picking a category or No colour takes it away again.
+call {
+    private _chipH = UNIT * 0.95;
+    private _firstColoured = (_workCats select {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "color") isNotEqualTo []}) param [0, _workCats param [0, "none"]];
+    private _shownTint = switch (true) do {
+        case (_workColor isNotEqualTo ""): {"custom"};
+        case (_workTint isEqualTo "none"): {"none"};
+        case (_workTint in _workCats): {_workTint};
+        default {_firstColoured};
+    };
+
+    [_display, _box, [_innerX, _cursorY, _labelW, _rowH], LLSTRING(Tint_Label), TEXT_SMALL, _colorText2, _fontBold, 0] call EFUNC(gui,uiLabel);
+
+    private _chipX = _innerX + _labelW;
+    private _lineY = _cursorY;
+
+    {
+        _x params ["_value", "_text"];
+
+        private _chipW = SQUARE(_chipH * 0.9) + (_text getTextWidth [_fontBold, _chipH * 0.52]) * TEXT_SLACK;
+
+        if (_chipX + _chipW > _innerX + _innerW && {_chipX > _innerX + _labelW}) then {
+            _chipX = _innerX + _labelW;
+            _lineY = _lineY + _rowH;
+        };
+
+        [_display, _box, [_chipX, _lineY + (_rowH - _chipH) / 2, _chipW, _chipH], _text, _value isEqualTo _shownTint, _theme, {
+            params ["", "_arguments"];
+            _arguments params ["_class", "_canvas", "_value", "_first", "_name"];
+
+            // Custom: the colour picker, at the mouse - Apply gives the item that colour, Default takes its own away.
+            if (_value isEqualTo "custom") exitWith {
+                getMousePosition params ["_mouseX", "_mouseY"];
+
+                [
+                    uiNamespace getVariable [QGVAR(display), displayNull], [_mouseX - UNIT, _mouseY - UNIT * 0.5, UNIT * 2, UNIT], _name,
+                    _canvas getOrDefault ["colorPick", _canvas getOrDefault ["colorStart", ""]], [0.5, 0.5, 0.5], {
+                        params ["_hex", "_arguments"];
+                        _arguments params ["_class", "_canvas"];
+
+                        // Its own colour stands instead of a category's or No colour: tint= goes, so Default later is
+                        // the first category's colour again.
+                        _canvas set ["colorPick", toLowerANSI _hex];
+                        _canvas set ["tintPick", ""];
+                        GVAR(itemWork) set [toLowerANSI _class, _canvas];
+
+                        [] call FUNC(drawItemEditor);
+                    }, [_class, _canvas]
+                ] call FUNC(openColourPicker);
+            };
+
+            // The first with a colour is what the tile takes without tint=: picked, it needs none. Its own colour goes.
+            _canvas set ["tintPick", ["", _value] select (_value isNotEqualTo _first || {(_canvas getOrDefault ["tintStart", ""]) isNotEqualTo ""})];
+            _canvas set ["colorPick", ""];
+            GVAR(itemWork) set [toLowerANSI _class, _canvas];
+
+            [] call FUNC(drawItemEditor);
+        }, [_class, _canvas, _value, _firstColoured, _info getOrDefault ["name", _class]]] call FUNC(uiChip);
+
+        _chipX = _chipX + _chipW + _gap;
+
+        // Its own colour as a swatch after Custom.
+        if (_value isEqualTo "custom" && {_workColor isNotEqualTo ""}) then {
+            private _swatchW = SQUARE(_chipH);
+
+            ([[], "", GVAR(draftRules), _workColor] call EFUNC(items,tileTint)) params ["_rgb"];
+            [_display, _box, [_chipX, _lineY + (_rowH - _chipH) / 2, _swatchW, _chipH], [1, 1, 1, 0.25], _chipH / 2] call EFUNC(gui,uiPanel);
+            [
+                _display, _box, [_chipX + pixelW, _lineY + (_rowH - _chipH) / 2 + pixelH, _swatchW - pixelW * 2, _chipH - pixelH * 2], _rgb + [1],
+                _chipH / 2
+            ] call EFUNC(gui,uiPanel);
+
+            _chipX = _chipX + _swatchW + _gap;
+        };
+    } forEach ((_workCats apply {[_x, ([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name"]}) + [["none", LLSTRING(Tint_None)], ["custom", LLSTRING(Tint_Custom)]]);
+
+    _cursorY = _lineY + _rowH + UNIT * 0.3;
+};
+
 // ----- The canvas, and beside it how it looks -----
 
 private _buttonH = UNIT * 1.15;
@@ -574,17 +676,26 @@ _sideY = _sideY + UNIT * 0.8;
 private _previewH = _canvasH * 0.5;
 private _previewW = _sideW * 0.36;
 
-// The tile as the inventory draws it, with the picture as it is set below (the working copy, not yet the draft's).
+// The tile as the inventory draws it, with the picture as it is set below and its colour by the categories and the Colour row as
+// they are picked (the working copy, not yet the draft's - the rules in effect would show neither, issue #40).
+private _previewInfo = +_info;
+
+([_workCats, _workTint, GVAR(draftRules), _workColor] call EFUNC(items,tileTint)) params ["_previewColor", "_previewPlain"];
+_previewInfo set ["tileColor", _previewColor];
+_previewInfo set ["tilePlain", _previewPlain];
+
 [
     _display, _box, [_sideX, _sideY, _previewW, _previewH], _theme, [[], _blocks] select _onePiece,
-    [_workShown, _info getOrDefault ["category", CATEGORY_MISC], _class, _workIcon apply {_x / 100}]
+    [_workShown, _info getOrDefault ["category", CATEGORY_MISC], _class, _workIcon apply {_x / 100}, _previewInfo]
 ] call FUNC(drawPreview);
 
 // ----- Its picture: zoom and shift -----
 // Beside the tile it moves: how large the picture is drawn in its tile (25 to 400 %) and how far it is shifted
 // across and down (a share of the tile, -100 to 100 %). Each click draws this side again, so the tile follows.
 
-private _pictureX = _sideX + _previewW + _gap * 2;
+// Beside the piece of grid as it came out, not the room it was given: a small item's preview is narrower, and the
+// steppers stood far off to the right of it.
+private _pictureX = _sideX + ((uiNamespace getVariable [QGVAR(previewDrawnW), _previewW]) min _previewW) + _gap * 2;
 private _pictureW = _sideX + _sideW - _pictureX;
 private _pictureY = _sideY + (((_previewH - ICON_BLOCK_H) / 2) max 0);
 
@@ -703,7 +814,7 @@ private _buttonX = _innerX;
     };
 
     // The picture (icon=), in per cent: only what differs from now. Back to the plain one takes the class's own
-    // icon away when nothing below it draws the picture otherwise (the item's own config, einv_icon); else the
+    // icon away when nothing below it draws the picture otherwise (the item's own config, aio_icon); else the
     // plain picture is written, to win over that.
     private _icon = _canvas getOrDefault ["iconPercent", _startIcon];
 
@@ -718,7 +829,7 @@ private _buttonX = _innerX;
     };
 
     // The picture (picture=): only what differs from now. Reset takes the class's own away; where the item's config
-    // sets another (einv_picture) that would win again, config's own picture path is written to win over it.
+    // sets another (aio_picture) that would win again, config's own picture path is written to win over it.
     private _picture = _canvas getOrDefault ["pictureText", _startPicture];
 
     if (_picture isNotEqualTo _startPicture) then {
@@ -751,11 +862,26 @@ private _buttonX = _innerX;
     private _cats = _canvas getOrDefault ["catsList", _startGroups];
 
     if (_cats isNotEqualTo _startGroups) then {
-        if (_cats isEqualTo _defaultGroups) then {
-            _remove pushBack "cats";
-        } else {
-            _set set ["cats", _cats];
+        switch (true) do {
+            case (_cats isEqualTo _defaultGroups): {_remove pushBack "cats"};
+            // None ticked: in no category at all (cats=none).
+            case (_cats isEqualTo []): {_set set ["cats", ["none"]]};
+            default {_set set ["cats", _cats]};
         };
+    };
+
+    // The colour among several categories (tint=).
+    private _tint = _canvas getOrDefault ["tintPick", _canvas getOrDefault ["tintStart", ""]];
+
+    if (_tint isNotEqualTo (_canvas getOrDefault ["tintStart", ""])) then {
+        if (_tint isEqualTo "") then {_remove pushBack "tint"} else {_set set ["tint", _tint]};
+    };
+
+    // Its own colour (color=).
+    private _color = _canvas getOrDefault ["colorPick", _canvas getOrDefault ["colorStart", ""]];
+
+    if (_color isNotEqualTo (_canvas getOrDefault ["colorStart", ""])) then {
+        if (_color isEqualTo "") then {_remove pushBack "color"} else {_set set ["color", _color]};
     };
 
     GVAR(itemWork) deleteAt _lc;
@@ -786,7 +912,7 @@ if (_dirty) then {
 };
 
 // Something of its own to take away: its own rule, or - for the tree - the tree's.
-private _ownFields = ["footprint", "stack", "weight", "name", "icon", "picture", "use", "cats"];
+private _ownFields = ["footprint", "stack", "weight", "name", "icon", "picture", "use", "cats", "tint", "color"];
 private _hasOwn = (_ownFields findIf {_x in _own}) >= 0;
 
 if (_tree) then {

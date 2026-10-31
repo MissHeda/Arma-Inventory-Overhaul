@@ -15,7 +15,7 @@
  * "move", "stay" or "remove" <STRING>
  *
  * Example:
- * [2, getMousePosition] call einv_gui_fnc_stripTarget;
+ * [2, getMousePosition] call aio_gui_fnc_stripTarget;
  *
  * Public: No
  */

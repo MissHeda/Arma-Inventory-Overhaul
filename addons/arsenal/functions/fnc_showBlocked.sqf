@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * call einv_arsenal_fnc_showBlocked;
+ * call aio_arsenal_fnc_showBlocked;
  *
  * Public: No
  */
@@ -25,6 +25,6 @@ private _parent = [] call BIS_fnc_displayMission;
 // the mission's own.
 if (isNull _parent) exitWith {};
 
-_parent createDisplay "EINV_ArsenalBlocked";
+_parent createDisplay "AIO_ArsenalBlocked";
 
 ["addItemFailed", "warn"] call EFUNC(gui,playClass);

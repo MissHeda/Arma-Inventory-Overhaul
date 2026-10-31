@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [backpackContainer player] call einv_gui_fnc_toggleSection;
+ * [backpackContainer player] call aio_gui_fnc_toggleSection;
  *
  * Public: No
  */

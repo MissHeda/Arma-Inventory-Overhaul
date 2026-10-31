@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [1] call einv_setup_fnc_pictureChunk;
+ * [1] call aio_setup_fnc_pictureChunk;
  *
  * Public: No
  */
@@ -43,7 +43,7 @@ private _until = diag_tickTime + INDEX_BUDGET;
 private _fnc_add = {
     params ["_path", "_row", "_category"];
 
-    // Only a picture that can be shown (the index has asked einv_gui_fnc_safePicture), no procedural texture.
+    // Only a picture that can be shown (the index has asked aio_gui_fnc_safePicture), no procedural texture.
     if (_path isEqualTo "" || {(_path select [0, 2]) isEqualTo "#("}) exitWith {};
 
     // One entry per file, however its owners write the path (fnc_pictureKey).

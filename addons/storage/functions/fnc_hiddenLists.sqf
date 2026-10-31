@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * The hidden holder of a unit, read and made well-formed: what the Strict setting keeps out of its uniform,
- * vest and backpack (fnc_opStrict). The holder is no object - it is the public variable einv_storage_hidden
+ * vest and backpack (fnc_opStrict). The holder is no object - it is the public variable aio_storage_hidden
  * on the unit, [[uniform list, vest list, backpack list], [uniform container, vest container, backpack
  * container]]: each list [[class, count, rounds], ...] with -1 rounds for an item that is no magazine, and
  * for each list the container object its things were taken out of (fnc_hiddenPut), so a container that was
@@ -17,7 +17,7 @@
  * [[uniform, vest, backpack] lists, [uniform, vest, backpack] containers] <ARRAY>
  *
  * Example:
- * [player] call einv_storage_fnc_hiddenLists;
+ * [player] call aio_storage_fnc_hiddenLists;
  *
  * Public: No
  */

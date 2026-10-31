@@ -22,7 +22,7 @@
  * Theme <HASHMAP>
  *
  * Example:
- * private _theme = call einv_gui_fnc_themeBase;
+ * private _theme = call aio_gui_fnc_themeBase;
  *
  * Public: No
  */

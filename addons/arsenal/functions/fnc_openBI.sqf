@@ -17,7 +17,7 @@
  * Opening <BOOL>
  *
  * Example:
- * [_box, player, false, _classes] call einv_arsenal_fnc_openBI;
+ * [_box, player, false, _classes] call aio_arsenal_fnc_openBI;
  *
  * Public: No
  */

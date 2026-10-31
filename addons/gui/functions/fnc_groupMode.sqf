@@ -8,8 +8,8 @@
  *            inside the hovered compartment on cells that are free or lifted by this drag; into another
  *            holder none of them may be a backpack for a backpack
  *   "pack" - otherwise, over a grid: they are packed into the hovered container, largest first, the
- *            hovered compartment first, those that fit moving and the rest staying (einv_storage_fnc_plan)
- *   "kit"  - over an open kit's window or a kit's tile: the kit takes each one or not (einv_compat_efak)
+ *            hovered compartment first, those that fit moving and the rest staying (aio_storage_fnc_plan)
+ *   "kit"  - over an open kit's window or a kit's tile: the kit takes each one or not (aio_compat_efak)
  *   "none" - into a dragged container or one that lies in it, or into a living person's container the
  *            player may not put into: nothing moves, the reason says why
  *
@@ -24,14 +24,14 @@
  * [mode, data, fitting, total, reason] <ARRAY>
  *   mode    - "keep", "pack", "kit" or "none"
  *   data    - keep: [[grid index, tile index, col, row], ...] where each goes; pack: [assigned, left] as
- *             einv_storage_fnc_plan answers; kit: [index of the kit's tile in the grid, -1 for the grid
+ *             aio_storage_fnc_plan answers; kit: [index of the kit's tile in the grid, -1 for the grid
  *             itself]; none: []
  *   fitting - how many go
  *   total   - how many are dragged
  *   reason  - why not, as fnc_flashHint reads it, "" when some go
  *
  * Example:
- * [3, [2, 1]] call einv_gui_fnc_groupMode;
+ * [3, [2, 1]] call aio_gui_fnc_groupMode;
  *
  * Public: No
  */
@@ -164,7 +164,7 @@ private _grabbed = ((_grids param [_sourceIndex, createHashMap]) getOrDefault ["
 private _keepCells = [];
 private _keepOk = count _sources == 1 && {count _grabbed > 0};
 
-// A compartment that takes only some categories or is a single slot (einv_storage_fnc_blockMode) is not a place to keep an arrangement in:
+// A compartment that takes only some categories or is a single slot (aio_storage_fnc_blockMode) is not a place to keep an arrangement in:
 // the tiles are packed by the plan, which asks every compartment what it takes.
 if (_keepOk && {(_target getOrDefault ["accepts", []]) isNotEqualTo [] || {_target getOrDefault ["single", false]}}) then {
     _keepOk = false;
@@ -203,7 +203,7 @@ if (_keepOk) then {
         private _w = _tile get "w";
         private _h = _tile get "h";
 
-        // A shaped item (size=xx/x-) takes only its own cells, as it lies (einv_storage_fnc_overlaps).
+        // A shaped item (size=xx/x-) takes only its own cells, as it lies (aio_storage_fnc_overlaps).
         private _mask = [_col, _row, _w, _h, _tile getOrDefault ["holes", []]];
 
         // Inside the compartment, and none of its cells on a shaped compartment's holes.

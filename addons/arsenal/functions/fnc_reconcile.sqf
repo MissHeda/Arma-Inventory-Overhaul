@@ -3,8 +3,8 @@
  * Author: Miss Heda
  * Follows up an add of ACE to the open uniform, vest or backpack: what the container holds now against
  * what it held at the last look (GVAR(snapshot)). The storage lays the new things out first-fit, as any
- * change from outside (einv_storage_fnc_getLayout); what finds no free cells is "overflow" - of that,
- * exactly as many as were just added of its class are taken back out (einv_storage_fnc_removeEntry, a
+ * change from outside (aio_storage_fnc_getLayout); what finds no free cells is "overflow" - of that,
+ * exactly as many as were just added of its class are taken back out (aio_storage_fnc_removeEntry, a
  * magazine by its rounds), ACE's list is put right (fnc_syncAce), the message says what room to make
  * (fnc_sayNoRoom), and ACE is told (fnc_tellAce). Nothing else is ever taken out: what lay there before keeps its place, as its records
  * were written down at the last look (fnc_snapshot).
@@ -19,7 +19,7 @@
  * Something was taken back out <BOOL>
  *
  * Example:
- * [_display] call einv_arsenal_fnc_reconcile;
+ * [_display] call aio_arsenal_fnc_reconcile;
  *
  * Public: No
  */

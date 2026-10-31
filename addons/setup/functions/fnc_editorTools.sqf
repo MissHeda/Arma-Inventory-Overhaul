@@ -21,7 +21,7 @@
  * How much room the two buttons take, with the space between them <NUMBER>
  *
  * Example:
- * private _taken = [_display, _box, [0.5, 0.02, 0.03], _theme, "containers", "B_Carryall_blk", false] call einv_setup_fnc_editorTools;
+ * private _taken = [_display, _box, [0.5, 0.02, 0.03], _theme, "containers", "B_Carryall_blk", false] call aio_setup_fnc_editorTools;
  *
  * Public: No
  */

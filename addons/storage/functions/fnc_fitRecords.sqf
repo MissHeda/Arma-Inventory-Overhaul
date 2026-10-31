@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * The place records that still fit a container's grid - for records noted on another object (ACE Arsenal makes
- * all three worn containers new objects whenever one is picked, einv_arsenal_fnc_keepPlaces), which may be of
+ * all three worn containers new objects whenever one is picked, aio_arsenal_fnc_keepPlaces), which may be of
  * another class with other compartments. A record fits when its compartment exists, its box lies inside it, none
  * of its cells is a hole of the compartment, and it takes no cell an earlier record that fits already took. Those
  * are kept as they are, in their order; the rest drop out, and their items get a fresh first fit at the next layout
@@ -11,7 +11,7 @@
  *
  * A single slot (a sixth element of its compartment, fnc_slotOf) takes its tile whole: a record there fits when its
  * first cell lies in the slot and the slot is still empty. A shaped item is asked with its own holes as it lies
- * (einv_items_fnc_footprintAs), when the record's size is the item's; otherwise as a full box. Which item a record
+ * (aio_items_fnc_footprintAs), when the record's size is the item's; otherwise as a full box. Which item a record
  * belongs to, its size and its compartment's categories are the layout's to decide, as for any record.
  *
  * A container without compartments of its own (the ground, fnc_getBlocks) has no edge: every well-formed record is
@@ -25,7 +25,7 @@
  * The records that fit, in their order <ARRAY>
  *
  * Example:
- * [vestContainer player, _oldRecords] call einv_storage_fnc_fitRecords;
+ * [vestContainer player, _oldRecords] call aio_storage_fnc_fitRecords;
  *
  * Public: No
  */

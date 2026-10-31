@@ -1,5 +1,5 @@
 // The bar can be moved in Arma's layout editor (Options > Game > Layout). The editor keeps the place in
-// the profile as IGUI_einv_hotbar_grid_X and _Y, which the bar reads (HUD_X, HUD_Y). Only the position
+// the profile as IGUI_aio_hotbar_grid_X and _Y, which the bar reads (HUD_X, HUD_Y). Only the position
 // is saved - the size follows the interface size.
 class CfgUIGrids {
     class IGUI {

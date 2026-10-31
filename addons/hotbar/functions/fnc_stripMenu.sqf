@@ -11,7 +11,7 @@
  * Choices as the context menu takes them, [text, arguments, code] <ARRAY>
  *
  * Example:
- * [2] call einv_hotbar_fnc_stripMenu;
+ * [2] call aio_hotbar_fnc_stripMenu;
  *
  * Public: No
  */

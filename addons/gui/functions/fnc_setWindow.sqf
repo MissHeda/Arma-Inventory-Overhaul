@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [_grid, 10, 20] call einv_gui_fnc_setWindow;
+ * [_grid, 10, 20] call aio_gui_fnc_setWindow;
  *
  * Public: No
  */

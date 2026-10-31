@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * Alt+click on a tile: puts the item on the player - into the slot it belongs to, an attachment or
- * magazine onto the first weapon that takes it (einv_storage_fnc_slotFor). What was in the slot goes
+ * magazine onto the first weapon that takes it (aio_storage_fnc_slotFor). What was in the slot goes
  * where the new item came from - out of an open kit, into the kit where it may go (fnc_doEquip). A tile
  * not searched yet, or one a move is under way for, stays.
  *
@@ -15,7 +15,7 @@
  * Asked for <BOOL>
  *
  * Example:
- * [0, 3] call einv_gui_fnc_quickEquip;
+ * [0, 3] call aio_gui_fnc_quickEquip;
  *
  * Public: No
  */

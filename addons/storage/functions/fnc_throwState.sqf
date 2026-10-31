@@ -15,7 +15,7 @@
  * [classes that may be thrown, classes that may not - only blocked copies] <ARRAY of ARRAY of STRING>
  *
  * Example:
- * [player] call einv_storage_fnc_throwState;
+ * [player] call aio_storage_fnc_throwState;
  *
  * Public: No
  */

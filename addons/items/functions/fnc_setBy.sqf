@@ -4,9 +4,9 @@
  * Who set a field of an item, in four words, read off the source tags fnc_resolve leaves in "src":
  *   "rule"    - the rules text: a rule for the class, its tree (class=X+), a group, a kind, everything
  *               else (all), or one of the older tables, which count as rules of the text
- *   "config"  - the item's own mod, its config keys (einv_grid and the others, the older ones too)
+ *   "config"  - the item's own mod, its config keys (aio_grid and the others, the older ones too)
  *   "preset"  - the preset the rules build on, and the small items' stack slider, which has its say in
- *               the preset's layer (einv_items_stackSmall)
+ *               the preset's layer (aio_items_stackSmall)
  *   "default" - nobody: the built-in answer, or one that is always the same (a weapon's stack)
  * A like= rule counts as the rule it is: the field was set by whoever wrote it.
  *
@@ -18,7 +18,7 @@
  * "rule", "config", "preset" or "default" <STRING>
  *
  * Example:
- * [["efak_IFAK_7"] call einv_items_fnc_getInfo, "grid"] call einv_items_fnc_setBy;
+ * [["efak_IFAK_7"] call aio_items_fnc_getInfo, "grid"] call aio_items_fnc_setBy;
  *
  * Public: Yes
  */

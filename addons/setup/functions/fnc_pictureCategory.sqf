@@ -15,7 +15,7 @@
  * "items", "gear" or "vehicles" <STRING>
  *
  * Example:
- * ["uniform"] call einv_setup_fnc_pictureCategory;
+ * ["uniform"] call aio_setup_fnc_pictureCategory;
  *
  * Public: No
  */

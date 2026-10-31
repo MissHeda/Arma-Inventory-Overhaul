@@ -22,7 +22,7 @@
  * Colour [r, g, b] <ARRAY>
  *
  * Example:
- * private _rgb = [] call einv_gui_fnc_panelColour;
+ * private _rgb = [] call aio_gui_fnc_panelColour;
  *
  * Public: No
  */

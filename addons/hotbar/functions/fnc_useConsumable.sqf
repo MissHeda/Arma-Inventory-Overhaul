@@ -15,7 +15,7 @@
  * [done, text] - for done "" (ACE's bar names it), else why not <ARRAY>
  *
  * Example:
- * [player, "ACE_WaterBottle", 3] call einv_hotbar_fnc_useConsumable;
+ * [player, "ACE_WaterBottle", 3] call aio_hotbar_fnc_useConsumable;
  *
  * Public: No
  */

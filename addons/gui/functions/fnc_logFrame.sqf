@@ -26,7 +26,7 @@
  * None
  *
  * Example:
- * ["idle", 0.06] call einv_gui_fnc_logFrame;
+ * ["idle", 0.06] call aio_gui_fnc_logFrame;
  *
  * Public: No
  */

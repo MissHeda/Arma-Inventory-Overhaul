@@ -11,7 +11,7 @@
  * it: what it shows is read every frame (fnc_focusedKit - two variables and the pick of its list) and set against
  * what the last build showed (GVAR(focusSeen), fnc_layout). Opened or closed, the whole frame-later pass follows
  * (fnc_settle), as after ACE's own events; another kit picked, the panel is built through the engine's gate
- * (einv_gui_fnc_buildSoon), so a run of picks with the arrow keys is one build more, not one a pick. While the tab
+ * (aio_gui_fnc_buildSoon), so a run of picks with the arrow keys is one build more, not one a pick. While the tab
  * is open its rows are greyed again by the kit's cells every KIT_UNGREY_EVERY seconds (fnc_ungreyKit): that mod
  * writes its own greying whenever it fills or counts its list.
  *
@@ -56,7 +56,7 @@
  * None
  *
  * Example:
- * [_display, getMousePosition, diag_tickTime] call einv_arsenal_fnc_onFrame;
+ * [_display, getMousePosition, diag_tickTime] call aio_arsenal_fnc_onFrame;
  *
  * Public: No
  */

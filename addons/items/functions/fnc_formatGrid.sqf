@@ -26,8 +26,8 @@
  * <STRING>
  *
  * Example:
- * [["blocks", [[6, 4, []], [3, 2, [4]]]]] call einv_items_fnc_formatGrid; // "6x4+xxx/x-x"
- * [["blocks", [[3, 3, [4], [0, 0]], [1, 1, [], [1, 1]]]]] call einv_items_fnc_formatGrid; // "aaa/aba/aaa"
+ * [["blocks", [[6, 4, []], [3, 2, [4]]]]] call aio_items_fnc_formatGrid; // "6x4+xxx/x-x"
+ * [["blocks", [[3, 3, [4], [0, 0]], [1, 1, [], [1, 1]]]]] call aio_items_fnc_formatGrid; // "aaa/aba/aaa"
  *
  * Public: No
  */
@@ -110,14 +110,15 @@ switch (_mode) do {
         private _parts = [];
         private _written = false;
 
-        // The attributes of a block, after a colon: its categories joined with |, and "one" for a single slot.
+        // The attributes of a block, after a colon: its categories joined with |, and "one" for a single slot - "grow" for one
+        // that takes the size of the item in it.
         private _fnc_attrs = {
             params ["_block"];
 
             private _words = [_block param [4, []]] call FUNC(orderGroups);
 
             if (_block param [5, false]) then {
-                _words pushBack "one";
+                _words pushBack (["one", "grow"] select (_block param [6, false]));
             };
 
             _words joinString "|"

@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="magazines">
-        <Key ID="STR_einv_magazines_Hint_NoRepack">
+        <Key ID="STR_aio_magazines_Hint_NoRepack">
             <English>This magazine cannot be repacked</English>
         </Key>
-        <Key ID="STR_einv_magazines_Hint_NotPartial">
+        <Key ID="STR_aio_magazines_Hint_NotPartial">
             <English>Only partly filled magazines can be repacked</English>
         </Key>
-        <Key ID="STR_einv_magazines_Hint_RepackApart">
+        <Key ID="STR_aio_magazines_Hint_RepackApart">
             <English>Take it into your own gear first, then repack</English>
         </Key>
-        <Key ID="STR_einv_magazines_Hint_RepackChanged">
+        <Key ID="STR_aio_magazines_Hint_RepackChanged">
             <English>The magazines changed - nothing was repacked</English>
         </Key>
-        <Key ID="STR_einv_magazines_Hint_RepackNothing">
+        <Key ID="STR_aio_magazines_Hint_RepackNothing">
             <English>Repack stopped before a round was moved</English>
         </Key>
-        <Key ID="STR_einv_magazines_Hint_RepackStopped">
+        <Key ID="STR_aio_magazines_Hint_RepackStopped">
             <English>Repack stopped: %1 full and %2 rounds left over</English>
         </Key>
-        <Key ID="STR_einv_magazines_Hint_Repacked">
+        <Key ID="STR_aio_magazines_Hint_Repacked">
             <English>Repacked: %1 full and %2 rounds left over</English>
         </Key>
-        <Key ID="STR_einv_magazines_Hint_Repacking">
+        <Key ID="STR_aio_magazines_Hint_Repacking">
             <English>Repacking %1 (%2 s) - click or Esc to stop</English>
         </Key>
-        <Key ID="STR_einv_magazines_Menu_RepackAll">
+        <Key ID="STR_aio_magazines_Menu_RepackAll">
             <English>Repack all %1</English>
         </Key>
-        <Key ID="STR_einv_magazines_Setting_Repack">
+        <Key ID="STR_aio_magazines_Setting_Repack">
             <English>Repack magazines</English>
         </Key>
-        <Key ID="STR_einv_magazines_Setting_Repack_Desc">
+        <Key ID="STR_aio_magazines_Setting_Repack_Desc">
             <English>Drop a magazine onto another of its kind to repack them.\nOff: use ACE's Repack Magazines.</English>
         </Key>
     </Package>

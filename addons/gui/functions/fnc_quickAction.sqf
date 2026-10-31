@@ -5,7 +5,7 @@
  * What a double click on a tile does, and what the quick move key does (fnc_onKeyDown): on a tile of a selection
  * of several all of them move over (fnc_quickMoveGroup); on the ground what can be worn is put on
  * (fnc_quickEquip); a kit of Enhanced First Aid Kits or Enhanced Utility Pouches opens in a window of its own
- * or closes (einv_compat_efak_fnc_toggle - only when that addon is loaded, and only while that mod's double
+ * or closes (aio_compat_efak_fnc_toggle - only when that addon is loaded, and only while that mod's double
  * click setting is on), so does a uniform, vest or backpack lying in a container (fnc_openNested) - anything
  * else moves over (fnc_quickMove). Never other mods' context menu, which the vanilla inventory opens on a
  * double click.
@@ -19,7 +19,7 @@
  * Done <BOOL>
  *
  * Example:
- * [2, 5] call einv_gui_fnc_quickAction;
+ * [2, 5] call aio_gui_fnc_quickAction;
  *
  * Public: No
  */

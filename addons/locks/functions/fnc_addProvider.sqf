@@ -6,7 +6,7 @@
  * container at the top of the chain (the crate or vehicle, never a backpack opened inside it) and answers
  * the text that names the reason, or "" when the unit may. Everything it reads must be the same on
  * every machine: the guard asks it where the op runs.
- * (einv_compat_ace_vehiclelock adds ACE's vehicle lock this way.)
+ * (aio_compat_ace_vehiclelock adds ACE's vehicle lock this way.)
  *
  * Arguments:
  * 0: Provider, given [unit, container] <CODE>
@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * [{params ["_unit", "_container"]; ["", "No key"] select (locked _container == 2)}] call einv_locks_fnc_addProvider;
+ * [{params ["_unit", "_container"]; ["", "No key"] select (locked _container == 2)}] call aio_locks_fnc_addProvider;
  *
  * Public: Yes
  */

@@ -23,7 +23,7 @@
  * matters (load factor 0, or not even HEAVY_GEAR_MAX kg of gear tires a jog) <NUMBER>
  *
  * Example:
- * [1, 1] call einv_weight_fnc_heavyFromAce; // 26.7
+ * [1, 1] call aio_weight_fnc_heavyFromAce; // 26.7
  *
  * Public: No
  */

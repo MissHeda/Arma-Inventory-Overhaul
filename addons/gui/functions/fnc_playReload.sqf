@@ -18,7 +18,7 @@
  * Its own sound played <BOOL>
  *
  * Example:
- * [player, "primary_mag"] call einv_gui_fnc_playReload;
+ * [player, "primary_mag"] call aio_gui_fnc_playReload;
  *
  * Public: No
  */

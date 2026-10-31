@@ -21,7 +21,7 @@
  * May see the wizard <BOOL>
  *
  * Example:
- * call einv_setup_fnc_canOpen;
+ * call aio_setup_fnc_canOpen;
  *
  * Public: Yes
  */

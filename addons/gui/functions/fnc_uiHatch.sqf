@@ -24,7 +24,7 @@
  * The controls <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.1, 0.05], [1, 1, 1, 0.07]] call einv_gui_fnc_uiHatch;
+ * [_display, _group, [0, 0, 0.1, 0.05], [1, 1, 1, 0.07]] call aio_gui_fnc_uiHatch;
  *
  * Public: No
  */
@@ -61,12 +61,12 @@ for "_row" from 0 to (_rows - 1) do {
     };
 };
 
-// A stretched picture (EINV_PanelCorner): the piece is filled edge to edge, where an icon
+// A stretched picture (AIO_PanelCorner): the piece is filled edge to edge, where an icon
 // keeping its aspect would leave thin gaps between nearly square pieces.
 private _fnc_piece = {
     params ["_in", "_left", "_top", "_width", "_height"];
 
-    private _ctrl = [_display, "EINV_PanelCorner", _in, [_left, _top, _width, _height]] call FUNC(uiCreate);
+    private _ctrl = [_display, "AIO_PanelCorner", _in, [_left, _top, _width, _height]] call FUNC(uiCreate);
 
     _ctrl ctrlSetText UI_TEX(hatch_ca);
     _ctrl ctrlSetTextColor _color;
@@ -95,7 +95,7 @@ if (_clips isEqualTo []) exitWith {
 
     // A group that cuts the pieces off at its edges. It hands the wheel and the clicks on, as a picture's clip group does
     // (fnc_uiItemPicture), so the column scrolls and the box takes a drop over it as over the rest of the block.
-    private _group = [_display, "EINV_Group", _parent, [
+    private _group = [_display, "AIO_Group", _parent, [
         _originX + _cx0 * pixelW, _originY + _cy0 * pixelH, (_cx1 - _cx0) * pixelW, (_cy1 - _cy0) * pixelH
     ]] call FUNC(uiCreate);
 

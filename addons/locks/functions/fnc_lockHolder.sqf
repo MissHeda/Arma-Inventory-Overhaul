@@ -12,7 +12,7 @@
  * The locked object, objNull when none <OBJECT>
  *
  * Example:
- * [_backpackContainer] call einv_locks_fnc_lockHolder;
+ * [_backpackContainer] call aio_locks_fnc_lockHolder;
  *
  * Public: No
  */

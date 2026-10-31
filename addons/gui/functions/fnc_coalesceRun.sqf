@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * ["build"] call einv_gui_fnc_coalesceRun;
+ * ["build"] call aio_gui_fnc_coalesceRun;
  *
  * Public: No
  */

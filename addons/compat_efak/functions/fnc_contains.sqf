@@ -15,7 +15,7 @@
  * It is or holds it <BOOL>
  *
  * Example:
- * ["efak_IFAK_3", "efak_IFAK_7"] call einv_compat_efak_fnc_contains;
+ * ["efak_IFAK_3", "efak_IFAK_7"] call aio_compat_efak_fnc_contains;
  *
  * Public: No
  */

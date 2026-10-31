@@ -13,7 +13,7 @@
  * Parts, [[text, theme colour key], ...] <ARRAY>
  *
  * Example:
- * ["ACRE_PRC152_ID_1", objNull] call einv_compat_acre_fnc_hintParts;
+ * ["ACRE_PRC152_ID_1", objNull] call aio_compat_acre_fnc_hintParts;
  *
  * Public: No
  */

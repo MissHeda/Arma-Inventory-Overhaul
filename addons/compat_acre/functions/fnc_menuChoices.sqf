@@ -12,10 +12,10 @@
  * 3: It is asked from a slot, not a tile <BOOL> (default: false)
  *
  * Return Value:
- * Choices for einv_gui_fnc_openMenu, [text, arguments, code] each <ARRAY>
+ * Choices for aio_gui_fnc_openMenu, [text, arguments, code] each <ARRAY>
  *
  * Example:
- * ["ACRE_PRC152_ID_1", objNull, true, false] call einv_compat_acre_fnc_menuChoices;
+ * ["ACRE_PRC152_ID_1", objNull, true, false] call aio_compat_acre_fnc_menuChoices;
  *
  * Public: No
  */

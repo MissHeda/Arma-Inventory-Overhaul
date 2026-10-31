@@ -32,18 +32,18 @@
  *
  * Arguments:
  * 0: Args, [unit] <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
  *   status - "" done (also with nothing to do), else why not ("Moved" the unit is gone, "Skipped" in Eden,
  *     "Bounced" something is produced)
  *   produced - the payloads it handed on, each consumed by a later op or settled
- *     (einv_storage_fnc_settle)
+ *     (aio_storage_fnc_settle)
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[player], _context] call einv_storage_fnc_opStrict;
+ * [[player], _context] call aio_storage_fnc_opStrict;
  *
  * Public: No
  */

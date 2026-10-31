@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * Draws the weight card at the top of the equipment column (fnc_drawEquipmentCards): what the unit carries,
  * and how hard that is on it. Counted the way ACE counts it: what the engine weighs, plus ACE's virtual load
- * on the unit and its uniform, vest and backpack (einv_weight_fnc_getLoad). That holds the weight overrides
+ * on the unit and its uniform, vest and backpack (aio_weight_fnc_getLoad). That holds the weight overrides
  * of the rules (weight=, handed to ACE by the weight addon), which the storage sections weigh by too, and
  * what Enhanced First Aid Kits' kits hold - so the total here is the one ACE shows and tires the unit by.
  *
@@ -12,7 +12,7 @@
  * looked bad on a bar that is mostly empty. The tier shows in the fill's colour (fnc_weightColor, blending
  * into the next one just before a limit), in the word on the right with what the tier does to the soldier,
  * and in the kilograms on the left after the load: where the next tier starts. Where the limits are comes
- * from the weight addon (einv_weight_fnc_getLimits); this card only draws it. While something from outside
+ * from the weight addon (aio_weight_fnc_getLimits); this card only draws it. While something from outside
  * the soldier's own gear is dragged, a preview of its weight lies on the bar (fnc_previewWeight), found
  * through uiNamespace weightBar; the hint over the card is registered in uiNamespace infoAreas.
  *
@@ -31,7 +31,7 @@
  * None
  *
  * Example:
- * [_display, _group, [0, 0, 0.3, 0.06], player, _theme] call einv_gui_fnc_drawWeightCard;
+ * [_display, _group, [0, 0, 0.3, 0.06], player, _theme] call aio_gui_fnc_drawWeightCard;
  *
  * Public: No
  */

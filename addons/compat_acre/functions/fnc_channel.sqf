@@ -14,7 +14,7 @@
  * [channel text, frequency text, switched on], [] while the radio has no data <ARRAY>
  *
  * Example:
- * ["ACRE_PRC152_ID_1"] call einv_compat_acre_fnc_channel;
+ * ["ACRE_PRC152_ID_1"] call aio_compat_acre_fnc_channel;
  *
  * Public: No
  */

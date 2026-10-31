@@ -2,10 +2,10 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Someone near loots (the CBA event einv_gui_noise, fnc_sendNoise): the resolved layers play where his
+ * Someone near loots (the CBA event aio_gui_noise, fnc_sendNoise): the resolved layers play where his
  * hands are, on this machine only. Heard where the camera is - a Zeus far away or a spectator does not get a
  * sound from the other end of the map -, never one's own (but for the single player test,
- * einv_gui_noiseSelf = true in the debug console).
+ * aio_gui_noiseSelf = true in the debug console).
  *
  * Arguments:
  * 0: The looter <OBJECT>
@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [_looter, _layers, 12, false] call einv_gui_fnc_onNoise;
+ * [_looter, _layers, 12, false] call aio_gui_fnc_onNoise;
  *
  * Public: No
  */

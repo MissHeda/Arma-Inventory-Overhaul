@@ -11,9 +11,9 @@ class CfgPatches {
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {
             "cba_main",
-            "einv_main",
-            "einv_storage",
-            "einv_gui",
+            "aio_main",
+            "aio_storage",
+            "aio_gui",
             "efak_core",
             "efak_gui"
         };

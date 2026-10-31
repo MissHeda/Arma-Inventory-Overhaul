@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Whether a server or a mission forces the colours (the CBA setting einv_gui_paletteText, set with a priority of 1 or more on
+ * Whether a server or a mission forces the colours (the CBA setting aio_gui_paletteText, set with a priority of 1 or more on
  * "server" or "mission"): then everyone wears those, and the palette button is not drawn (fnc_paletteAllowed).
  *
  * Arguments:
@@ -11,7 +11,7 @@
  * Forced <BOOL>
  *
  * Example:
- * call einv_gui_fnc_paletteForced;
+ * call aio_gui_fnc_paletteForced;
  *
  * Public: No
  */

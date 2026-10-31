@@ -6,7 +6,7 @@ Three reports, all read-only (nothing is changed or deleted):
 
   1. Functions - every addons/*/functions/fnc_*.sqf whose name is used nowhere but in its own file and in
      the XEH_PREP line that compiles it. "Used" means FUNC(name), EFUNC(addon,name), QFUNC / QEFUNC /
-     QQFUNC / DFUNC / DEFUNC, or the literal einv_<addon>_fnc_<name>, in code with the comments left out
+     QQFUNC / DFUNC / DEFUNC, or the literal aio_<addon>_fnc_<name>, in code with the comments left out
      (a name that only a comment or a document mentions is not used). Functions marked "Public: Yes" in
      their header are listed apart: other mods or missions may call them. Also: PREP lines without a file,
      and files no PREP line compiles.
@@ -15,7 +15,7 @@ Three reports, all read-only (nothing is changed or deleted):
   3. Defines - every #define in the addons that nothing uses (looked at again after the unused ones are
      taken away, since one may be used by another unused define only).
 
-The search is by text, so a name put together at run time ("einv_" + _x) would escape it: look at the
+The search is by text, so a name put together at run time ("aio_" + _x) would escape it: look at the
 list before deleting.
 """
 
@@ -100,7 +100,7 @@ docs = {path: read(path) for path in DOC_FILES if path.exists()}
 
 addon_alt = "|".join(sorted(addons, key=len, reverse=True))
 FUNC_RE = re.compile(r"(?<![A-Za-z0-9_])(?:QQ|Q)?D?(E)?FUNC\(([^()]*)\)")
-LIT_FUNC_RE = re.compile(r"(?<![A-Za-z0-9_])einv_(%s)_fnc_([A-Za-z0-9_]+)" % addon_alt, re.I)
+LIT_FUNC_RE = re.compile(r"(?<![A-Za-z0-9_])aio_(%s)_fnc_([A-Za-z0-9_]+)" % addon_alt, re.I)
 PREP_RE = re.compile(r"^\s*PREP\((\w+)\)\s*;", re.M)
 
 
@@ -159,7 +159,7 @@ doc_refs = {key: [] for key in functions}
 for path, text in docs.items():
     for key in functions:
         name = key[1]
-        if re.search(r"(?<![A-Za-z0-9_])(einv_%s_)?fnc_%s(?![A-Za-z0-9_])" % (re.escape(key[0]), re.escape(name)), text, re.I):
+        if re.search(r"(?<![A-Za-z0-9_])(aio_%s_)?fnc_%s(?![A-Za-z0-9_])" % (re.escape(key[0]), re.escape(name)), text, re.I):
             doc_refs[key].append(path.relative_to(ROOT).as_posix())
 
 
@@ -176,11 +176,11 @@ print()
 print("Dead, Public: No (%d):" % len(dead_private))
 for key in dead_private:
     docs_in = ", ".join(doc_refs[key]) or "-"
-    print("  einv_%s_fnc_%s    %s    docs: %s" % (key[0], functions[key].stem[4:], rel(functions[key]), docs_in))
+    print("  aio_%s_fnc_%s    %s    docs: %s" % (key[0], functions[key].stem[4:], rel(functions[key]), docs_in))
 print()
 print("Dead, Public: Yes - kept, other mods may call them (%d):" % len(dead_public))
 for key in dead_public:
-    print("  einv_%s_fnc_%s    %s" % (key[0], functions[key].stem[4:], rel(functions[key])))
+    print("  aio_%s_fnc_%s    %s" % (key[0], functions[key].stem[4:], rel(functions[key])))
 print()
 print("PREP lines without a file:")
 for key in sorted(set(prepped) - set(functions)):
@@ -194,7 +194,7 @@ for key in sorted(set(functions) - set(prepped)):
 # ---------------------------------------------------------------------------
 
 GVAR_RE = re.compile(r"(?<![A-Za-z0-9_])(?:QQ|Q)?(E)?GVAR\(([^()]*)\)")
-LIT_GVAR_RE = re.compile(r"(?<![A-Za-z0-9_])einv_(%s)_([A-Za-z0-9_]+)" % addon_alt, re.I)
+LIT_GVAR_RE = re.compile(r"(?<![A-Za-z0-9_])aio_(%s)_([A-Za-z0-9_]+)" % addon_alt, re.I)
 ASSIGN_AFTER = re.compile(r"\s*=(?!=)")
 SET_BEFORE = re.compile(r"(?:missionNamespace|uiNamespace|profileNamespace|parsingNamespace)\s+setVariable\s*\[\s*$", re.I)
 
@@ -247,11 +247,11 @@ for key in sorted(defined):
         write_only.append(key)
 print("Mentioned only where it is defined (%d):" % len(unread))
 for key in unread:
-    print("  einv_%s_%s    %s" % (key[0], key[1], rel(defined[key])))
+    print("  aio_%s_%s    %s" % (key[0], key[1], rel(defined[key])))
 print("Only ever assigned, never read (%d):" % len(write_only))
 for key in write_only:
     where = sorted({rel(p) for p, _ in mentions[key]})
-    print("  einv_%s_%s    %s" % (key[0], key[1], ", ".join(where)))
+    print("  aio_%s_%s    %s" % (key[0], key[1], ", ".join(where)))
 
 # ---------------------------------------------------------------------------
 # 3. Defines

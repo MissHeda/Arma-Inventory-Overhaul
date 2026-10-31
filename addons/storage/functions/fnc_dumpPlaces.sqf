@@ -16,7 +16,7 @@
  * What was written, "" for no holder <STRING>
  *
  * Example:
- * [cursorObject] call einv_storage_fnc_dumpPlaces;
+ * [cursorObject] call aio_storage_fnc_dumpPlaces;
  *
  * Public: Yes
  */

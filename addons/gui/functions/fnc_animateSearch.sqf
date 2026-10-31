@@ -35,7 +35,7 @@
  * None
  *
  * Example:
- * [_display, diag_tickTime] call einv_gui_fnc_animateSearch;
+ * [_display, diag_tickTime] call aio_gui_fnc_animateSearch;
  *
  * Public: No
  */
@@ -151,7 +151,7 @@ if (_done isNotEqualTo []) then {
         [_display, _x] call FUNC(revealFx);
     } forEach _found;
 
-    // For the tester's numbers (einv_gui_debugTiming): what finding it cost - a stutter while searching is this.
+    // For the tester's numbers (aio_gui_debugTiming): what finding it cost - a stutter while searching is this.
     if (missionNamespace getVariable [QGVAR(debugTiming), false]) then {
         private _revealTook = ((diag_tickTime - _revealFrom) * 1000) toFixed 1;
         private _revealHow = ["its tile drawn anew in place", "the window built anew, as a box opened"] select _build;

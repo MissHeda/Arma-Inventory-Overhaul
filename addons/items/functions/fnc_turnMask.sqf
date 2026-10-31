@@ -15,7 +15,7 @@
  * [cols, rows, holes] turned: the columns are the rows before, the holes ascending <ARRAY>
  *
  * Example:
- * [3, 2, [4, 5]] call einv_items_fnc_turnMask; // xxx/x-- turned: [2, 3, [2, 4]], xx/-x/-x
+ * [3, 2, [4, 5]] call aio_items_fnc_turnMask; // xxx/x-- turned: [2, 3, [2, 4]], xx/-x/-x
  *
  * Public: No
  */

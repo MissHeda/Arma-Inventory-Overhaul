@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * [_tile get "backgrounds", [1, 1, 1, 0.2]] call einv_gui_fnc_paintSurface;
+ * [_tile get "backgrounds", [1, 1, 1, 0.2]] call aio_gui_fnc_paintSurface;
  *
  * Public: No
  */
@@ -20,7 +20,7 @@
 params [["_controls", [], [[]]], ["_color", [], [[]]]];
 
 {
-    if (ctrlClassName _x isEqualTo "EINV_PanelCorner") then {
+    if (ctrlClassName _x isEqualTo "AIO_PanelCorner") then {
         _x ctrlSetTextColor _color;
     } else {
         _x ctrlSetBackgroundColor _color;

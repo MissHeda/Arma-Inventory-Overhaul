@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Makes a text of server settings the draft: read by the settings registry (einv_main_fnc_parseSettings),
+ * Makes a text of server settings the draft: read by the settings registry (aio_main_fnc_parseSettings),
  * written out again in its own words - the way the wizard compares and counts it - and kept as what it names,
  * setting by setting. The game is not touched: what is in use changes only with Save.
  *
@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * ["einv1, gui_searchTime=0.8"] call einv_setup_fnc_setSettingsDraft;
+ * ["aio1, gui_searchTime=0.8"] call aio_setup_fnc_setSettingsDraft;
  *
  * Public: No
  */

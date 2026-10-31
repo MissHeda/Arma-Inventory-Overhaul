@@ -1,4 +1,4 @@
-// Sounds of the inventory, by family and action (einv_gui_fnc_playSound). Every file is Arma 3's own, from the
+// Sounds of the inventory, by family and action (aio_gui_fnc_playSound). Every file is Arma 3's own, from the
 // base game's always-loaded PBOs, used by its path - nothing is shipped with this mod.
 //
 // A family is a class, its actions are classes inside it. An action sounds as one of its variants[], picked at
@@ -11,9 +11,9 @@
 // use = "x": sounds as this family's x, times volume and pitch. world = 1: players up to range metres away hear
 // it as well, at most one such sound every worldGap seconds (fnc_sendNoise).
 // Volumes are levelled by the files' measured loudness: a main layer at its volume is as loud as 0.1.15's rustle.
-// Mods and missions add families or replace actions here; an item picks its family with einv_sound = "name".
+// Mods and missions add families or replace actions here; an item picks its family with aio_sound = "name".
 
-class CfgEinvSounds {
+class CfgAioSounds {
     class Surfaces {
         // A hand on the ground: {file, volume, offset, length}
         class crawl {

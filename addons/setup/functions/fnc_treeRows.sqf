@@ -21,7 +21,7 @@
  *            ...] <ARRAY>
  *
  * Example:
- * ["B_Carryall_Base", "containers"] call einv_setup_fnc_treeRows;
+ * ["B_Carryall_Base", "containers"] call aio_setup_fnc_treeRows;
  *
  * Public: No
  */

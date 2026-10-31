@@ -12,7 +12,7 @@
  * The ids - not to be changed <ARRAY of STRING>
  *
  * Example:
- * [] call einv_items_fnc_categories; // ["weapon", "ammo", "grenade", "gear", "medical", "food", "tool", "misc", "bandit"]
+ * [] call aio_items_fnc_categories; // ["weapon", "ammo", "grenade", "gear", "medical", "food", "tool", "misc", "bandit"]
  *
  * Public: Yes
  */

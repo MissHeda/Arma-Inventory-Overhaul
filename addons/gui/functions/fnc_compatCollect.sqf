@@ -5,7 +5,7 @@
  * list that exists - the addon of a mod that is loaded - is called with the same arguments and what it
  * returns, when it is an array, is added to the result. The window never names another mod's function
  * itself: this is the one guarded call, in a loop. Used for the radios of TFAR and ACRE2, which never load
- * together (einv_compat_tfar, einv_compat_acre).
+ * together (aio_compat_tfar, aio_compat_acre).
  *
  * Arguments:
  * 0: Names of the functions, e.g. [QEFUNC(compat_tfar,tooltip), QEFUNC(compat_acre,tooltip)] <ARRAY of STRINGs>
@@ -15,7 +15,7 @@
  * What they returned, joined <ARRAY>
  *
  * Example:
- * [[QEFUNC(compat_tfar,tooltip), QEFUNC(compat_acre,tooltip)], [_class, objNull]] call einv_gui_fnc_compatCollect;
+ * [[QEFUNC(compat_tfar,tooltip), QEFUNC(compat_acre,tooltip)], [_class, objNull]] call aio_gui_fnc_compatCollect;
  *
  * Public: No
  */

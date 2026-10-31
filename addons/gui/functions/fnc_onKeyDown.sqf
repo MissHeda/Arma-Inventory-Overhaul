@@ -7,17 +7,17 @@
  * (fnc_selectSection). The drop key (fnc_isDropKey, set in Configure Addons; G) drops the selected tiles, else
  * the item under the mouse - Delete does so only if the player bound it; the Gear key closes the window again,
  * as it closes the vanilla inventory. A key the hotbar has a use for goes to it first
- * (einv_hotbar_fnc_onWindowKey - only when that addon is loaded), then the quick move key (fnc_isQuickKey; its repeats while it is held
+ * (aio_hotbar_fnc_onWindowKey - only when that addon is loaded), then the quick move key (fnc_isQuickKey; its repeats while it is held
  * only queue, see there). A window that attached (fnc_attach) is
  * offered the keys after those (the "key" hook) and before the drop and Gear keys, and hears Return in
  * any field of its own ("submit").
  *
- * A movement key pressed while looting or searching closes the window (einv_gui_moveToStop): the search
+ * A movement key pressed while looting or searching closes the window (aio_gui_moveToStop): the search
  * stops and the soldier walks off. Keys already held as the window opened count only once they were let
  * go, keys pressed with Ctrl or Alt never (Ctrl+A is the selection's). Only on foot: a soldier in a seat
  * walks off nowhere, and there the same keys are the vehicle's - the window stays, as the vanilla
  * inventory stays in a vehicle. While magazines are repacked
- * (einv_magazines) Escape stops the repack and the window stays, and the drop key waits.
+ * (aio_magazines) Escape stops the repack and the window stays, and the drop key waits.
  *
  * Not the press that opened the window, which can still be held down or repeating when it arrives here.
  *
@@ -32,14 +32,14 @@
  * Key handled <BOOL>
  *
  * Example:
- * [_display, 23, false, false, false] call einv_gui_fnc_onKeyDown;
+ * [_display, 23, false, false, false] call aio_gui_fnc_onKeyDown;
  *
  * Public: No
  */
 
 params ["_display", "_key", ["_shift", false], ["_ctrl", false], ["_alt", false]];
 
-// Repacking magazines (einv_magazines): Escape stops it and the window stays; the drop key waits. Every other
+// Repacking magazines (aio_magazines): Escape stops it and the window stays; the drop key waits. Every other
 // key does what it always does - the Gear key closes the window, which stops the repack too.
 private _handled = false;
 
@@ -152,7 +152,7 @@ if (_key in [DIK_PRIOR, DIK_NEXT]) exitWith {
     true
 };
 
-// Moving while looting or searching: the soldier stops and walks off (einv_gui_moveToStop). A key that was
+// Moving while looting or searching: the soldier stops and walks off (aio_gui_moveToStop). A key that was
 // held already when the window opened counts once it was let go and pressed again (KeyUp in fnc_open), and
 // nothing counts in the first moment, while the press that opened the window may still be repeating. A
 // movement key pressed with Ctrl or Alt is something else (Ctrl+A selects the section, and A is MoveLeft).
@@ -184,7 +184,7 @@ if (
     true
 };
 
-// The hotbar's keys inside this window (einv_hotbar): a key bound to a slot puts what the mouse is on there,
+// The hotbar's keys inside this window (aio_hotbar): a key bound to a slot puts what the mouse is on there,
 // the drop key on a slot of the bar empties it.
 if (
     !GVAR(dragging) && {call FUNC(isInventoryMode)} && {!isNil QEFUNC(hotbar,onWindowKey)}

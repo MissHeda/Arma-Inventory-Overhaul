@@ -4,9 +4,9 @@
  * The words for a tier: its name, and what it does to the soldier - "jogging tires you", "no sprinting,
  * tiring faster", "walking only". The effect is "" where it does not apply: Heavy does nothing of its own
  * unless it follows ACE's fatigue (the yellow mark is then where ACE's jog starts to tire), and Overloaded
- * and Critical do nothing while einv_weight_effects is off - the bar still shows them.
+ * and Critical do nothing while aio_weight_effects is off - the bar still shows them.
  *
- * With the tiers switched off (einv_weight_enabled, read from the limits) there are no words at all: every
+ * With the tiers switched off (aio_weight_enabled, read from the limits) there are no words at all: every
  * load is Light then (fnc_getTier), and a "Light" beside the kilograms would suggest a scale that is not
  * there.
  *
@@ -18,7 +18,7 @@
  * [name, effect] <ARRAY>
  *
  * Example:
- * [TIER_HEAVY, _limits] call einv_weight_fnc_tierText;
+ * [TIER_HEAVY, _limits] call aio_weight_fnc_tierText;
  *
  * Public: Yes
  */

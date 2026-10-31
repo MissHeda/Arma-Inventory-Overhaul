@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Whether a unit passes a lock. Members pass (the unit's group's side, or its group, or the callsign
- * of its group), logged-in admins always (fnc_isAdmin), and a game master while einv_locks_zeusOpens is
+ * of its group), logged-in admins always (fnc_isAdmin), and a game master while aio_locks_zeusOpens is
  * on - also when remote controlling a unit.
  *
  * The side is the group's, not the unit's: ACE's captives are civilians to the engine while handcuffed.
@@ -15,7 +15,7 @@
  * [allowed, how] - how is "" when not locked or refused, "member", "admin" or "zeus" <ARRAY>
  *
  * Example:
- * [player, [_crate] call einv_locks_fnc_getLock] call einv_locks_fnc_isAllowed;
+ * [player, [_crate] call aio_locks_fnc_getLock] call aio_locks_fnc_isAllowed;
  *
  * Public: No
  */

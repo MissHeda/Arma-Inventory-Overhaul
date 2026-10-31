@@ -21,7 +21,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_makeGhost;
+ * [_display] call aio_gui_fnc_makeGhost;
  *
  * Public: No
  */
@@ -118,7 +118,7 @@ if ((_entry getOrDefault ["count", 1]) > 1 || {GVAR(dragGroup) isNotEqualTo []})
     private _theme = GVAR(theme);
     private _radius = [(_theme getOrDefault ["radius", 0]) min (_counterH * 0.3), _counterH / 2] select (_theme getOrDefault ["keyRound", false]);
 
-    private _counter = [_display, "EINV_Group", controlNull, [0, 0, _counterW, _counterH]] call FUNC(uiCreate);
+    private _counter = [_display, "AIO_Group", controlNull, [0, 0, _counterW, _counterH]] call FUNC(uiCreate);
 
     [_display, _counter, [0, 0, _counterW, _counterH], [0.05, 0.05, 0.05, 0.95], _radius] call FUNC(uiPanel);
 

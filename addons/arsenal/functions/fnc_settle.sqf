@@ -21,7 +21,7 @@
  * None
  *
  * Example:
- * [] call einv_arsenal_fnc_settle;
+ * [] call aio_arsenal_fnc_settle;
  *
  * Public: No
  */

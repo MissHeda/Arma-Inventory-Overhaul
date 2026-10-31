@@ -32,7 +32,7 @@
  * The compartments' scrolling group <CONTROL>
  *
  * Example:
- * [_display, _box, [0, 0.2, 0.4, 0.03], [0, 0.25, 0.2, 0.3], _theme, "B_Carryall_khk", [[4, 3, []]], 0, true] call einv_setup_fnc_drawCellBlocks;
+ * [_display, _box, [0, 0.2, 0.4, 0.03], [0, 0.25, 0.2, 0.3], _theme, "B_Carryall_khk", [[4, 3, []]], 0, true] call aio_setup_fnc_drawCellBlocks;
  *
  * Public: No
  */
@@ -182,7 +182,7 @@ if (_editable) then {
 
 // ----- The compartments -----
 
-private _area = [_display, "EINV_ScrollGroup", _box, _areaRect] call EFUNC(gui,uiCreate);
+private _area = [_display, "AIO_ScrollGroup", _box, _areaRect] call EFUNC(gui,uiCreate);
 
 _area setVariable [QGVAR(scrollId), "cellCanvas"];
 
@@ -283,7 +283,8 @@ private _toggle = {
     private _attrs = ((_x param [4, []]) apply {(([_x, GVAR(draftRules)] call EFUNC(items,categoryInfo)) get "name")}) joinString "/";
 
     if (_x param [5, false]) then {
-        _attrs = [_attrs + " · " + LLSTRING(Cont_SingleShort), LLSTRING(Cont_SingleShort)] select (_attrs isEqualTo "");
+        private _short = [LLSTRING(Cont_SingleShort), LLSTRING(Cont_GrowShort)] select (_x param [6, false]);
+        _attrs = [_attrs + " · " + _short, _short] select (_attrs isEqualTo "");
     };
 
     if (_attrs isNotEqualTo "") then {

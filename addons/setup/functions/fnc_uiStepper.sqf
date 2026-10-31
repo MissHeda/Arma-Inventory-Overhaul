@@ -24,7 +24,7 @@
  * The controls, the plus's hit area last <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.1, 0.03], 5, [1, 50, 1], _theme, {params ["_cell"]; systemChat str _cell}] call einv_setup_fnc_uiStepper;
+ * [_display, _group, [0, 0, 0.1, 0.03], 5, [1, 50, 1], _theme, {params ["_cell"]; systemChat str _cell}] call aio_setup_fnc_uiStepper;
  *
  * Public: No
  */

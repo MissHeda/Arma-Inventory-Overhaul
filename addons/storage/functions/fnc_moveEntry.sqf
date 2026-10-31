@@ -3,8 +3,8 @@
  * Author: Miss Heda
  * For missions: moves what a tile stands for, as a transaction (fnc_request) - within one holder to
  * another cell (op "place"), within one root into another container ("move"), else out of the one and
- * into the other ("take", then "put", each at its own root's authority). Kits (einv_compat_efak) move
- * with their own ops (einv_storage_holderTypes). The window no longer calls this.
+ * into the other ("take", then "put", each at its own root's authority). Kits (aio_compat_efak) move
+ * with their own ops (aio_storage_holderTypes). The window no longer calls this.
  *
  * A backpack into a backpack (fnc_backpackIntoBackpack) and, with no cell given, a free spot
  * (fnc_hasSpace) are asked here first; the machine that runs it asks again and decides.
@@ -25,7 +25,7 @@
  * "Bounced" - it went back where it was -, "Failed") <STRING>
  *
  * Example:
- * [uniformContainer player, backpackContainer player, _entry] call einv_storage_fnc_moveEntry;
+ * [uniformContainer player, backpackContainer player, _entry] call aio_storage_fnc_moveEntry;
  *
  * Public: Yes
  */

@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * [true] call einv_gui_fnc_filterSoon;
+ * [true] call aio_gui_fnc_filterSoon;
  *
  * Public: No
  */

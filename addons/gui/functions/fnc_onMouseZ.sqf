@@ -19,7 +19,7 @@
  * Handled <BOOL>
  *
  * Example:
- * [_this] call einv_gui_fnc_onMouseZ;
+ * [_this] call aio_gui_fnc_onMouseZ;
  *
  * Public: No
  */

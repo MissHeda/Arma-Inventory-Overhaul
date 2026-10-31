@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * [_display, [0.5, 0.01, 0.2, 0.04], _theme] call einv_gui_fnc_drawFilter;
+ * [_display, [0.5, 0.01, 0.2, 0.04], _theme] call aio_gui_fnc_drawFilter;
  *
  * Public: No
  */
@@ -54,10 +54,10 @@ private _placeholder = [_display, controlNull, [_textX, _top, _textW, _height], 
 _placeholder ctrlShow (GVAR(filter) isEqualTo "");
 
 // A click anywhere on the box puts the cursor in the field.
-private _hit = [_display, "EINV_Hitbox", controlNull, _rect] call FUNC(uiCreate);
+private _hit = [_display, "AIO_Hitbox", controlNull, _rect] call FUNC(uiCreate);
 _hit ctrlAddEventHandler ["ButtonClick", {ctrlSetFocus (uiNamespace getVariable [QGVAR(filterEdit), controlNull])}];
 
-private _edit = [_display, "EINV_Edit", controlNull, [_textX, _top + (_height - _size * 1.4) / 2, _textW, _size * 1.4]] call FUNC(uiCreate);
+private _edit = [_display, "AIO_Edit", controlNull, [_textX, _top + (_height - _size * 1.4) / 2, _textW, _size * 1.4]] call FUNC(uiCreate);
 _edit ctrlSetFont _font;
 _edit ctrlSetFontHeight _size;
 _edit ctrlSetTextColor (_theme getOrDefault ["text", [1, 1, 1, 1]]);
@@ -77,7 +77,7 @@ _edit ctrlAddEventHandler ["EditChanged", {
 
 // Somewhere for the cursor to go when typing is done (Return, or a click elsewhere): a button no one
 // sees, which does nothing when pressed.
-private _sink = [_display, "EINV_Hitbox", controlNull, [safezoneX, safezoneY, 0, 0]] call FUNC(uiCreate);
+private _sink = [_display, "AIO_Hitbox", controlNull, [safezoneX, safezoneY, 0, 0]] call FUNC(uiCreate);
 
 uiNamespace setVariable [QGVAR(filterEdit), _edit];
 uiNamespace setVariable [QGVAR(filterSink), _sink];

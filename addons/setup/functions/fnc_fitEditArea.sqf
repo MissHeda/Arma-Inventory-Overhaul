@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * [_edit] call einv_setup_fnc_fitEditArea;
+ * [_edit] call aio_setup_fnc_fitEditArea;
  *
  * Public: No
  */

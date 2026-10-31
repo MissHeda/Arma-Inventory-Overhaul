@@ -7,13 +7,13 @@
  *
  * Arguments:
  * 0: Whose slot it is <OBJECT>
- * 1: Slot id, see einv_storage_fnc_getSlot <STRING>
+ * 1: Slot id, see aio_storage_fnc_getSlot <STRING>
  *
  * Return Value:
  * [CBA slot, container], ["", objNull] for none <ARRAY>
  *
  * Example:
- * [player, "primary_optic"] call einv_gui_fnc_cbaSlotTarget;
+ * [player, "primary_optic"] call aio_gui_fnc_cbaSlotTarget;
  *
  * Public: No
  */

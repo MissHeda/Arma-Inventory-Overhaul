@@ -3,12 +3,12 @@
 /*
  * Author: Miss Heda
  * A canvas to draw on (fnc_uiCanvas), holding compartments where the inventory puts them
- * (einv_gui_fnc_flowCompartments): side by side as far as STORAGE_COLS cells reach, then on the next line.
+ * (aio_gui_fnc_flowCompartments): side by side as far as STORAGE_COLS cells reach, then on the next line.
  * The inventory leaves a gap between two compartments; the canvas has none, so a line breaks where the
  * inventory's does - the gap counted. A compartment's holes are places without a cell. An item's
  * footprint is one compartment: it lies in the top left corner. Compartments drawn on a canvas before (a
  * pos each, grid=aab/acc) lie where they were drawn, their canvas one piece of the flow and what follows
- * under it, as the inventory has them (einv_gui_fnc_flowCompartments).
+ * under it, as the inventory has them (aio_gui_fnc_flowCompartments).
  *
  * Painted (the Containers step), every compartment gets a colour, and two that touch never the same
  * one: cells of one colour that touch are one compartment (fnc_canvasBlocks), so two neighbours of one
@@ -39,7 +39,7 @@
  *             on the canvas; fnc_canvasBlocks hands them to the compartments again whatever is painted over them <ARRAY>
  *
  * Example:
- * private _canvas = [[[4, 2, [5, 6]], [2, 3, []]], 1, CANVAS_ROWS_LOADED, STORAGE_COLS, true] call einv_setup_fnc_canvasFromBlocks;
+ * private _canvas = [[[4, 2, [5, 6]], [2, 3, []]], 1, CANVAS_ROWS_LOADED, STORAGE_COLS, true] call aio_setup_fnc_canvasFromBlocks;
  *
  * Public: No
  */
@@ -205,6 +205,7 @@ private _attrs = [];
 {
     private _accepts = _x param [4, []];
     private _single = _x param [5, false];
+    private _grow = _x param [6, false];
 
     if (_accepts isEqualTo [] && {!_single}) then {continue};
 
@@ -218,7 +219,7 @@ private _attrs = [];
     } forEach _owners;
 
     if (_places isNotEqualTo []) then {
-        _attrs pushBack [_places, +_accepts, _single];
+        _attrs pushBack [_places, +_accepts, _single, _grow];
     };
 } forEach _blocks;
 

@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [_drone, player] call einv_compat_mavic_fnc_packStatement;
+ * [_drone, player] call aio_compat_mavic_fnc_packStatement;
  *
  * Public: No
  */

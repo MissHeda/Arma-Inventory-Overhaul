@@ -1,8 +1,8 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Writes the repack's result in one transaction (einv_storage_fnc_request): one phase at the root's
- * authority with the op "repack" (einv_storage_fnc_opRepack) - the magazines whose rounds changed leave their
+ * Writes the repack's result in one transaction (aio_storage_fnc_request): one phase at the root's
+ * authority with the op "repack" (aio_storage_fnc_opRepack) - the magazines whose rounds changed leave their
  * containers by their old rounds, checked before and after, and come back with the new ones, their places
  * kept. A magazine taken meanwhile turns the whole repack down ("Gone"), nothing half-done. Where the
  * root is this player (own gear, and anything in single player) it runs at once; otherwise the server's
@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_job, [0, 2, 30], "Stopped"] call einv_magazines_fnc_commit;
+ * [_job, [0, 2, 30], "Stopped"] call aio_magazines_fnc_commit;
  *
  * Public: No
  */
@@ -27,7 +27,7 @@
 params ["_job", "_counts", "_why"];
 
 private _class = _job get "class";
-private _parts = [];    // einv_storage_fnc_opRepack: [container, class, before, after, cell]
+private _parts = [];    // aio_storage_fnc_opRepack: [container, class, before, after, cell]
 private _changed = [];  // for the window's search knowledge: [container, class, before, after]
 
 // Only the magazines whose rounds changed - the others keep their place and their record.

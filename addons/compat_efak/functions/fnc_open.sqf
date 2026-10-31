@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Opens a kit in a floating window of its own over the inventory's columns, beside the tile it was
- * opened from (einv_gui_fnc_openWindow) - or says in the hint why it may not (fnc_canOpen). Nothing in
+ * opened from (aio_gui_fnc_openWindow) - or says in the hint why it may not (fnc_canOpen). Nothing in
  * the columns changes for it: the window is all that is drawn. Open already, its window comes to the
  * top where it is.
  *
@@ -17,13 +17,13 @@
  * 0: Kit class <STRING>
  * 1: Container its tile lies in, objNull inside another kit <OBJECT>
  * 2: Kit its tile lies in, "" in a container <STRING>
- * 3: Its tile on the screen [x, y, w, h] (einv_gui_fnc_tileRect), [] for none <ARRAY> (default: [])
+ * 3: Its tile on the screen [x, y, w, h] (aio_gui_fnc_tileRect), [] for none <ARRAY> (default: [])
  *
  * Return Value:
  * Opened <BOOL>
  *
  * Example:
- * ["efak_IFAK_7", backpackContainer player, ""] call einv_compat_efak_fnc_open;
+ * ["efak_IFAK_7", backpackContainer player, ""] call aio_compat_efak_fnc_open;
  *
  * Public: No
  */
@@ -44,7 +44,7 @@ if ((GVAR(opened) findIf {_x == _class}) < 0) then {
 GVAR(holders) set [toLowerANSI _class, [_container, _parent]];
 
 [_class] call FUNC(snapshot);
-// A kit sounds as the medical item it is: the medic bag ripped open (einv_gui_fnc_playSound).
+// A kit sounds as the medical item it is: the medic bag ripped open (aio_gui_fnc_playSound).
 ["open", _class] call EFUNC(gui,playSound);
 
 ["kit:" + toLowerANSI _class, _anchor] call EFUNC(gui,openWindow);

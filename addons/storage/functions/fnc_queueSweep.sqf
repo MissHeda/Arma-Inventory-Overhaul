@@ -25,7 +25,7 @@
  * None
  *
  * Example:
- * [] call einv_storage_fnc_queueSweep;
+ * [] call aio_storage_fnc_queueSweep;
  *
  * Public: No
  */

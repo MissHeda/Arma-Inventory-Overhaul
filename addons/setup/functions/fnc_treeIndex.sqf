@@ -19,7 +19,7 @@
  *   "children" - the classes built directly on it, sorted
  *
  * Example:
- * ["CfgVehicles"] call einv_setup_fnc_treeIndex;
+ * ["CfgVehicles"] call aio_setup_fnc_treeIndex;
  *
  * Public: No
  */

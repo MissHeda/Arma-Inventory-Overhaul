@@ -16,8 +16,8 @@ GVAR(steps) = [
     ["containers", LSTRING(Step_Containers), QFUNC(drawContainers)]
 ];
 
-// The server settings the General step shows, and the topics they are under, are main's: einv_main_serverSettings
-// and einv_main_topics, which CBA's menu uses for its sub-categories as well.
+// The server settings the General step shows, and the topics they are under, are main's: aio_main_serverSettings
+// and aio_main_topics, which CBA's menu uses for its sub-categories as well.
 
 // How the open wizard was opened and where it may save (fnc_onLoad, fnc_canEdit):
 //   mode      - "menu" from CBA's Addon Options, "direct" from everywhere else
@@ -34,13 +34,13 @@ GVAR(cleanOverride) = false;
 //   origin        - the rules text in use when the wizard opened; originSource what the source it saves to
 //                   held then for the rules, name -> [value, priority] - someone else saving meanwhile
 //                   changes that (fnc_save)
-//   draft         - the text as the rules engine reads it (einv_items_fnc_parseRules), draftText the
+//   draft         - the text as the rules engine reads it (aio_items_fnc_parseRules), draftText the
 //                   same written out again, draftRules compiled, draftCache item answers under it
 //   parseWarnings - what the engine left out of the text the draft came from
 //   clean         - the draft as it was last saved or loaded; anything else is a change
 //   draftSettings, draftSettingsText, cleanSettings - the same for the server settings, as one short text of the
 //                   ones off their defaults (fnc_activeSettings): draftSettings holds what the text names, setting's
-//                   name -> value (einv_main_fnc_parseSettings), draftSettingsText the text written out again. Clean
+//                   name -> value (aio_main_fnc_parseSettings), draftSettingsText the text written out again. Clean
 //                   follows every change made elsewhere at once, setting by setting (fnc_onSettingChanged); Save
 //                   writes each setting whose draft differs from it
 //   sourceEmpty   - the source it saves to holds no rules of its own yet, while clean is not the

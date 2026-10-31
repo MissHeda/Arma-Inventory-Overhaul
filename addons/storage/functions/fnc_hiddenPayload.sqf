@@ -14,7 +14,7 @@
  * Payload <ARRAY>
  *
  * Example:
- * ["HandGrenade", 2, 1] call einv_storage_fnc_hiddenPayload;
+ * ["HandGrenade", 2, 1] call aio_storage_fnc_hiddenPayload;
  *
  * Public: No
  */

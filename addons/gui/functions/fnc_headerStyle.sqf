@@ -16,7 +16,7 @@
  * [surface, surface under the mouse, ink] <ARRAY>
  *
  * Example:
- * ([_theme, true] call einv_gui_fnc_headerStyle) params ["_fill", "_hover", "_ink"];
+ * ([_theme, true] call aio_gui_fnc_headerStyle) params ["_fill", "_hover", "_ink"];
  *
  * Public: No
  */

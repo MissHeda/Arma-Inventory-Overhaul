@@ -6,17 +6,17 @@
  * (CfgWeapons), the backpack's class or the crate's or vehicle's own (CfgVehicles).
  *
  * Where the grid comes from, first answer wins:
- *   1. einv_grid on the object itself - a mission's word for this one crate, vehicle or unit's
- *      uniform, vest or backpack container: _crate setVariable ["einv_grid", "6x4+2x3", true]. Any
- *      grid the rules know (einv_items_fnc_parseGrid), shapes like "xxx/x-x" too; one that cannot be
+ *   1. aio_grid on the object itself - a mission's word for this one crate, vehicle or unit's
+ *      uniform, vest or backpack container: _crate setVariable ["aio_grid", "6x4+2x3", true]. Any
+ *      grid the rules know (aio_items_fnc_parseGrid), shapes like "xxx/x-x" too; one that cannot be
  *      read is named in the RPT once and the rules count instead. A script of this mod may give the
  *      compartments as they are instead, [[cols, rows], ...]: taken exactly, never cut to MAX_ROWS - the
- *      Arsenal's staging space grows with what lies in it, up to its own cap (einv_arsenal_fnc_growStaging).
- *   2. the rules for its class (einv_items_fnc_getInfo "grid"): the older container table, the rules
- *      text, the class's own config - einv_grid = "1x3+5x7+1x3"; (written as grid= is, and inherited
- *      by a subclass), else the older einv_grids[] / einv_slots - then the preset: "auto", by its
+ *      Arsenal's staging space grows with what lies in it, up to its own cap (aio_arsenal_fnc_growStaging).
+ *   2. the rules for its class (aio_items_fnc_getInfo "grid"): the older container table, the rules
+ *      text, the class's own config - aio_grid = "1x3+5x7+1x3"; (written as grid= is, and inherited
+ *      by a subclass), else the older aio_grids[] / aio_slots - then the preset: "auto", by its
  *      load, when none says. The config's grid is the item class's (the uniform, vest or backpack, or
- *      the crate's or vehicle's own class); the object's einv_grid variable above is one object's.
+ *      the crate's or vehicle's own class); the object's aio_grid variable above is one object's.
  * The load is the object's own maximumLoad (fnc_getMaxLoad), the mass per cell the rules'.
  *
  * The ground has no compartments and no limit: [].
@@ -24,7 +24,7 @@
  * A holder that is no object, the key of a grid with no object of its own ("kit:" + lowercase class),
  * has the compartments its type gives (GVAR(holderTypes) "blocks"): a kit of Enhanced First Aid Kits
  * those a rule or its config gives it, else none - that mod's capacity is its room, and its grid an
- * open one that grows (einv_compat_efak_fnc_kitBlocks). A type that says nothing has none.
+ * open one that grows (aio_compat_efak_fnc_kitBlocks). A type that says nothing has none.
  *
  * Arguments:
  * 0: Container, or the key of a grid with no object <OBJECT or STRING>
@@ -34,8 +34,8 @@
  * <ARRAY>
  *
  * Example:
- * [vestContainer player] call einv_storage_fnc_getBlocks;
- * ["kit:efak_ifak_7"] call einv_storage_fnc_getBlocks;
+ * [vestContainer player] call aio_storage_fnc_getBlocks;
+ * ["kit:efak_ifak_7"] call aio_storage_fnc_getBlocks;
  *
  * Public: No
  */
@@ -69,7 +69,7 @@ switch (_slot) do {
         // Nobody's: a crate or vehicle - or a uniform, vest or backpack lying in one. The container
         // object of a uniform or vest is only its Supply class, which does not say which uniform or
         // vest it is. Its tag says (fnc_tagNested, public), else the mark every read of the container it
-        // lies in leaves here (fnc_getContents, fnc_verifyChain, einv_gui_fnc_openNested), else - in
+        // lies in leaves here (fnc_getContents, fnc_verifyChain, aio_gui_fnc_openNested), else - in
         // multiplayer, where the tag on the object may not arrive - the copy on the outermost container.
         // The same class either way. Known by none, it is laid out like a crate.
         private _tag = _container getVariable [QGVAR(tag), []];
@@ -129,7 +129,7 @@ if (_objectGrid isEqualType "" && {_objectGrid isNotEqualTo ""}) then {
         ([_objectGrid] call EFUNC(items,parseGrid)) params ["_parsed", "_messages"];
 
         {
-            WARNING_2("einv_grid on %1: %2",typeOf _container,_x);
+            WARNING_2("aio_grid on %1: %2",typeOf _container,_x);
         } forEach _messages;
 
         _spec = _parsed;

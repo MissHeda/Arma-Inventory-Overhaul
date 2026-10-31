@@ -22,7 +22,7 @@
  * Entry - or the view -, an empty HashMap when it is not there <HASHMAP>
  *
  * Example:
- * [cursorObject, _entryArray, true] call einv_storage_fnc_findEntry;
+ * [cursorObject, _entryArray, true] call aio_storage_fnc_findEntry;
  *
  * Public: No
  */

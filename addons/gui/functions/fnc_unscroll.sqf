@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [_group] call einv_gui_fnc_unscroll;
+ * [_group] call aio_gui_fnc_unscroll;
  *
  * Public: No
  */

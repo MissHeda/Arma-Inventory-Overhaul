@@ -8,7 +8,7 @@
  * hover - stays as it is. Sections of the loot column, and in the inventory those of the unit's own storage
  * column (a window that attached draws that column its own way).
  *
- * Per section the layout is worked out again (einv_storage_fnc_getLayout), only the tiles that changed
+ * Per section the layout is worked out again (aio_storage_fnc_getLayout), only the tiles that changed
  * are drawn again - a tile that looks as it did is kept with its controls, the others' controls are deleted
  * (fnc_drawTiles) - and the cells' squares follow (fnc_drawCells), the caption's weight text is updated, and what is searched is queued anew (fnc_markHidden); then the moves under way
  * (fnc_drawPending), the selection (fnc_drawSelection) and the search field's fading come back, and an
@@ -31,8 +31,8 @@
  * Done - false: the window has to be built anew <BOOL>
  *
  * Example:
- * [[1, 3]] call einv_gui_fnc_redrawTiles;
- * [[0], [2]] call einv_gui_fnc_redrawTiles;
+ * [[1, 3]] call aio_gui_fnc_redrawTiles;
+ * [[0], [2]] call aio_gui_fnc_redrawTiles;
  *
  * Public: No
  */
@@ -100,7 +100,7 @@ private _loadSize = TEXT_UNIT * 0.46;
 
     if (!_ok) exitWith {};
 
-    private _layout = [_section getOrDefault ["layoutKey", _holder], _entries] call EFUNC(storage,getLayout);
+    private _layout = [[_section getOrDefault ["layoutKey", _holder], _entries] call EFUNC(storage,getLayout)] call FUNC(growSlots);
     private _placed = _layout get "entries";
 
     [_holder, _placed, false] call FUNC(markHidden);
@@ -321,7 +321,7 @@ GVAR(hover) = [];
 GVAR(lastClick) = [[], -1];
 GVAR(lastMouse) = [];
 
-// For the timing line of the redraw (fnc_refresh, einv_gui_debugTiming): how many tiles stayed, how many were made.
+// For the timing line of the redraw (fnc_refresh, aio_gui_debugTiming): how many tiles stayed, how many were made.
 GVAR(redrawCounts) = [_keptCount, _madeCount, (diag_tickTime - _start) * 1000];
 
 true

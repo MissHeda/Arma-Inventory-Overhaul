@@ -24,7 +24,7 @@
  * Payload, [] when the slot was empty or nothing came off <ARRAY>
  *
  * Example:
- * [player, "headgear"] call einv_storage_fnc_takeOff;
+ * [player, "headgear"] call aio_storage_fnc_takeOff;
  *
  * Public: No
  */
@@ -68,7 +68,7 @@ private _payload = switch (true) do {
 
         // Its search state goes with it (GVAR(searchState), carried by the snapshot to the object the engine makes of
         // it where it lands): off a body or a living person who is no player here - an AI, a captive -, it stays to be
-        // searched as they are, wherever it lies now (einv_gui_fnc_isSearched); a player's own gear is his and carries
+        // searched as they are, wherever it lies now (aio_gui_fnc_isSearched); a player's own gear is his and carries
         // no source. The id the players' knowledge of it is kept under stays the same, or is made now.
         private _worn = _entry get "container";
         private _state = _worn getVariable [QGVAR(searchState), []];

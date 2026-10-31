@@ -15,7 +15,7 @@
  * How many may go back <NUMBER>
  *
  * Example:
- * ["efak_IFAK_7", "ACE_painkillers", 7] call einv_compat_efak_fnc_repackable;
+ * ["efak_IFAK_7", "ACE_painkillers", 7] call aio_compat_efak_fnc_repackable;
  *
  * Public: No
  */

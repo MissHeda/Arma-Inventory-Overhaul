@@ -13,7 +13,7 @@
  * It turned <BOOL>
  *
  * Example:
- * [_grid, 1] call einv_gui_fnc_turnPage;
+ * [_grid, 1] call aio_gui_fnc_turnPage;
  *
  * Public: No
  */

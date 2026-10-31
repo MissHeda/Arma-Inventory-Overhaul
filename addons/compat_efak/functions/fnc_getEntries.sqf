@@ -1,13 +1,13 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * What a kit holds, as the window's entries - the same keys einv_storage_fnc_getContents gives, so the
+ * What a kit holds, as the window's entries - the same keys aio_storage_fnc_getContents gives, so the
  * tiles, their layout, dragging and counting work as in any container. Piled by the window's rules
- * (einv_items_fnc_getInfo "stack"), not by that mod's rows: a magazine of several rounds lies full with
+ * (aio_items_fnc_getInfo "stack"), not by that mod's rows: a magazine of several rounds lies full with
  * the full ones and opened with those of the same fill, as their rounds are kept in the kit
  * (efak_core_fnc_getCharges); one of a single round - a grenade - carries that round, as cargo shows it.
  *
- * Laid out, they lie where the kit's places say (einv_storage_fnc_getLayout on "kit:" + the lowercase
+ * Laid out, they lie where the kit's places say (aio_storage_fnc_getLayout on "kit:" + the lowercase
  * class), each with its key, compartment, cell and size - the kit ops find a tile and a free cell that
  * way, on the machine that runs them, as every window draws the kit.
  *
@@ -19,8 +19,8 @@
  * Entries, in the order the kit lists its contents <ARRAY of HASHMAPs>
  *
  * Example:
- * ["efak_IFAK_7"] call einv_compat_efak_fnc_getEntries;
- * ["efak_IFAK_7", true] call einv_compat_efak_fnc_getEntries;
+ * ["efak_IFAK_7"] call aio_compat_efak_fnc_getEntries;
+ * ["efak_IFAK_7", true] call aio_compat_efak_fnc_getEntries;
  *
  * Public: No
  */

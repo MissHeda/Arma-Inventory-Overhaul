@@ -8,10 +8,10 @@
  *     on, then the own ones, with the cell size in effect - so it stays exactly the same whatever later
  *     versions of the mod do to the preset. A group redefined on the way keeps its meaning (see below).
  *     One thing does change: the preset's rules become own rules, which win over sizes a mod sets in its
- *     config (einv_gridSize and the like) where the preset's did not. The older table settings
- *     (einv_items_sizeTable and the like) are settings of their own and not part of either text.
- *   - "cba": the lines for a cba_settings.sqf, or CBA's Import box: force einv_items_rules = "...";
- *     and one line for each server setting off its default (force einv_gui_searchTime = 0.6;) - forced over
+ *     config (aio_gridSize and the like) where the preset's did not. The older table settings
+ *     (aio_items_sizeTable and the like) are settings of their own and not part of either text.
+ *   - "cba": the lines for a cba_settings.sqf, or CBA's Import box: force aio_items_rules = "...";
+ *     and one line for each server setting off its default (force aio_gui_searchTime = 0.6;) - forced over
  *     the mission when the wizard would save it so. The same lines CBA's own Export writes for them.
  * "own" and "full" one statement per line, with a comma at its end - the line breaks are read as commas
  * again - so a long setup stays readable. "cba" one line for each setting, as CBA's files want them. The
@@ -24,7 +24,7 @@
  * Text <STRING>
  *
  * Example:
- * ["cba"] call einv_setup_fnc_exportText;
+ * ["cba"] call aio_setup_fnc_exportText;
  *
  * Public: No
  */
@@ -53,17 +53,17 @@ switch (_variant) do {
         _lines joinString toString [10]
     };
     case "full": {
-        // The layers, as the rules engine stacks them (einv_items_fnc_compileRules): the presets it builds
+        // The layers, as the rules engine stacks them (aio_items_fnc_compileRules): the presets it builds
         // on, the first base first, then the own statements. One text has a single layer, so their order
         // is kept - a later rule wins - and each group is given the meaning it has in the stack.
-        private _presets = configFile >> "CfgEinvRulesets";
+        private _presets = configFile >> "CfgAioRulesets";
         private _layers = [];
 
         {
             private _preset = _x;
             private _statements = (getArray (_presets >> _preset >> "rules")) select {_x isEqualType ""};
 
-            _layers pushBack [_preset, [(["einv1 base=none"] + _statements) joinString ", "] call EFUNC(items,parseRules)];
+            _layers pushBack [_preset, [(["aio1 base=none"] + _statements) joinString ", "] call EFUNC(items,parseRules)];
         } forEach ((GVAR(draftRules) getOrDefault ["chain", []]) select {isClass (_presets >> _x)});
 
         _layers pushBack ["own", GVAR(draft)];

@@ -6,7 +6,7 @@
  * as under it. The game is not touched: what is in use changes only with Save.
  *
  * What the engine left out of the text is kept to show on the General step (GVAR(parseWarnings)). Raises
- * einv_setup_draftChanged with the new text, for the steps listening to it.
+ * aio_setup_draftChanged with the new text, for the steps listening to it.
  *
  * Arguments:
  * 0: Rules text <STRING>
@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * ["einv1 base=default cell=4"] call einv_setup_fnc_setDraft;
+ * ["aio1 base=default cell=4"] call aio_setup_fnc_setDraft;
  *
  * Public: No
  */

@@ -11,7 +11,7 @@
  * Something is selected now <BOOL>
  *
  * Example:
- * [cursorObject] call einv_gui_fnc_selectSection;
+ * [cursorObject] call aio_gui_fnc_selectSection;
  *
  * Public: No
  */

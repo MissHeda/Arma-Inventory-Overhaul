@@ -11,7 +11,7 @@
  * Something to save <BOOL>
  *
  * Example:
- * call einv_setup_fnc_isDirty;
+ * call aio_setup_fnc_isDirty;
  *
  * Public: No
  */

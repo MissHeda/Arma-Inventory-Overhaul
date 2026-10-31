@@ -18,8 +18,8 @@
  * None
  *
  * Example:
- * [_grid, 1] call einv_gui_fnc_pageSoon;
- * [_grid, 0, false] call einv_gui_fnc_pageSoon;
+ * [_grid, 1] call aio_gui_fnc_pageSoon;
+ * [_grid, 0, false] call aio_gui_fnc_pageSoon;
  *
  * Public: No
  */

@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * [] call einv_gui_fnc_updateSoundMenu;
+ * [] call aio_gui_fnc_updateSoundMenu;
  *
  * Public: No
  */
@@ -43,7 +43,7 @@ private _fillOn = [0.72, 0.72, 0.72, 1];
     private _color = [_boxOff, _boxOn] select _on;
 
     {
-        if (ctrlClassName _x isEqualTo "EINV_PanelRect") then {
+        if (ctrlClassName _x isEqualTo "AIO_PanelRect") then {
             _x ctrlSetBackgroundColor _color;
         } else {
             _x ctrlSetTextColor _color;

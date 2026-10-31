@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * call einv_weight_fnc_queueVirtualLoad;
+ * call aio_weight_fnc_queueVirtualLoad;
  *
  * Public: No
  */

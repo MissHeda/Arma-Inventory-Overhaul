@@ -30,7 +30,7 @@
  * Request id, "<machine id>:<session>-<n>" - "" when there was nothing to ask for <STRING>
  *
  * Example:
- * [[[player, [["sort", [backpackContainer player]]]]], {hint str _this}] call einv_storage_fnc_request;
+ * [[[player, [["sort", [backpackContainer player]]]]], {hint str _this}] call aio_storage_fnc_request;
  *
  * Public: Yes
  */

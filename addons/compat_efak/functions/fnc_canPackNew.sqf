@@ -2,8 +2,8 @@
 /*
  * Author: Miss Heda
  * How many new items of a class a kit takes in the ACE Arsenal - dragged out of ACE's list or the kits tab's
- * list onto the kit's grid or tile in the panel, Ctrl and the wheel over its tile (einv_arsenal_fnc_listToKit,
- * fnc_packNew), and the greying of the kits tab's rows (einv_arsenal_fnc_ungreyKit). In this order:
+ * list onto the kit's grid or tile in the panel, Ctrl and the wheel over its tile (aio_arsenal_fnc_listToKit,
+ * fnc_packNew), and the greying of the kits tab's rows (aio_arsenal_fnc_ungreyKit). In this order:
  *   whether the kit may be filled there (fnc_arsenalEditable): its contents have reached this machine, the kit
  *   type's Arsenal setting lets things in (Eden always), the kit does not follow the default contents
  *   the kit (fnc_canPack): that mod's rules for it - kits in kits, its list, its types, medical only,
@@ -20,7 +20,7 @@
  * [how many it takes, why not all - "" when it takes them all] <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7", "ACE_fieldDressing", 5] call einv_compat_efak_fnc_canPackNew;
+ * ["efak_IFAK_7", "ACE_fieldDressing", 5] call aio_compat_efak_fnc_canPackNew;
  *
  * Public: No
  */

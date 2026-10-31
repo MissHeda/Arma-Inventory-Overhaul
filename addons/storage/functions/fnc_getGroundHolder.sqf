@@ -29,7 +29,7 @@
  * Weapon holder, objNull when there is no point to put it at <OBJECT>
  *
  * Example:
- * [_where, player] call einv_storage_fnc_getGroundHolder;
+ * [_where, player] call aio_storage_fnc_getGroundHolder;
  *
  * Public: No
  */
@@ -72,6 +72,7 @@ if (!_fresh) then {
     _pile = ((nearestObjects [ASLToAGL _point, ["GroundWeaponHolder"], GROUND_RANGE, true]) select {
         local _x
         && {!isObjectHidden _x}
+        && {!([_x] call FUNC(isForeignHolder))}
         && {isNull attachedTo _x}
         && {!_ownOnly || {typeOf _x == "GroundWeaponHolder_Scripted"}}
         && {(everyBackpack _x) findIf {_x getVariable [QGVAR(takenOff), false]} < 0}

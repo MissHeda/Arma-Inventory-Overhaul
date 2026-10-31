@@ -18,7 +18,7 @@
  * Where the step goes, [x, y, w, h] in the pane <ARRAY>
  *
  * Example:
- * private _rect = [_display] call einv_setup_fnc_drawFrame;
+ * private _rect = [_display] call aio_setup_fnc_drawFrame;
  *
  * Public: No
  */
@@ -52,7 +52,7 @@ private _headerH = _lineY + UNIT * 0.05 + ([0, WIZ_BANNER_H + UNIT * 0.3] select
 
 // ----- Header -----
 
-private _header = [_display, "EINV_Group", _root, [0, 0, _width, _headerH]] call EFUNC(gui,uiCreate);
+private _header = [_display, "AIO_Group", _root, [0, 0, _width, _headerH]] call EFUNC(gui,uiCreate);
 private _iconH = UNIT * 1.05;
 
 [_display, _header, [_padX, _padY + (WIZ_TITLE_H - _iconH) / 2, SQUARE(_iconH), _iconH], ICON(icon_setup_ca,icon_inventory_ca), _accent] call EFUNC(gui,uiIcon);
@@ -105,7 +105,7 @@ private _chipText = if (GVAR(readOnly)) then {
     format ["%1 · %2", LLSTRING(Chip_ReadOnly), _changesText]
 } else {
     private _source = GVAR(target) getOrDefault ["source", ""];
-    private _sourceName = localize format ["STR_einv_setup_Source_%1", _source];
+    private _sourceName = localize format ["STR_aio_setup_Source_%1", _source];
     private _forced = [LLSTRING(Chip_Forced), LLSTRING(Chip_Override)] select (GVAR(override) && {GVAR(target) getOrDefault ["override", false]});
 
     if (GVAR(mode) isEqualTo "menu") then {
@@ -216,7 +216,7 @@ if (GVAR(banner)) then {
 
 // ----- Footer -----
 
-private _footer = [_display, "EINV_Group", _root, [0, _height - WIZ_FOOT_H, _width, WIZ_FOOT_H]] call EFUNC(gui,uiCreate);
+private _footer = [_display, "AIO_Group", _root, [0, _height - WIZ_FOOT_H, _width, WIZ_FOOT_H]] call EFUNC(gui,uiCreate);
 private _rowH = UNIT * 1.25;
 private _rowY = (WIZ_FOOT_H - _rowH) / 2;
 private _keyH = UNIT * 0.9;

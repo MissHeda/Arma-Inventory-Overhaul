@@ -1,8 +1,8 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Whether an item is of the category a loot box shows (fnc_boxGroup). An item in several categories (cats=, einv_cat,
- * einv_items_fnc_getInfo "groups") matches each of them. No category matches everything. Whether the item was searched is not
+ * Whether an item is of the category a loot box shows (fnc_boxGroup). An item in several categories (cats=, aio_cat,
+ * aio_items_fnc_getInfo "groups") matches each of them. No category matches everything. Whether the item was searched is not
  * asked here.
  *
  * Arguments:
@@ -13,7 +13,7 @@
  * Matches <BOOL>
  *
  * Example:
- * ["FirstAidKit", "medical"] call einv_gui_fnc_matchesGroup;
+ * ["FirstAidKit", "medical"] call aio_gui_fnc_matchesGroup;
  *
  * Public: No
  */

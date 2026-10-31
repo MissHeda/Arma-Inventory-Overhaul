@@ -16,7 +16,7 @@
  * [the kit holds them all, rounds of each] <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7", "ACE_painkillers", 1, 7] call einv_compat_efak_fnc_takeRounds;
+ * ["efak_IFAK_7", "ACE_painkillers", 1, 7] call aio_compat_efak_fnc_takeRounds;
  *
  * Public: No
  */

@@ -16,7 +16,7 @@
  *   across, down - the size of a fixed one, 0 for the rest
  *
  * Example:
- * ["uniform"] call einv_setup_fnc_kindRule;
+ * ["uniform"] call aio_setup_fnc_kindRule;
  *
  * Public: No
  */

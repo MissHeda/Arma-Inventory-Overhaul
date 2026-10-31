@@ -21,7 +21,7 @@
  * The controls, the middle rectangle first, then the strips, then the quarter circles <ARRAY>
  *
  * Example:
- * [_display, _group, _rect, _color, [_grid, _rect] call einv_gui_fnc_cornerRadii] call einv_gui_fnc_uiSurface;
+ * [_display, _group, _rect, _color, [_grid, _rect] call aio_gui_fnc_cornerRadii] call aio_gui_fnc_uiSurface;
  *
  * Public: No
  */
@@ -32,7 +32,7 @@ params ["_display", "_parent", "_rect", "_color", ["_corners", []]];
 _rect params ["_left", "_top", "_width", "_height"];
 
 if (_corners isEqualTo []) exitWith {
-    private _ctrl = [_display, "EINV_PanelRect", _parent, _rect] call FUNC(uiCreate);
+    private _ctrl = [_display, "AIO_PanelRect", _parent, _rect] call FUNC(uiCreate);
 
     _ctrl ctrlSetBackgroundColor _color;
 
@@ -53,7 +53,7 @@ private _y1 = _originY + round ((_top + _height - _originY) / pixelH) * pixelH;
 private _corner = (floor _radius) min floor (round ((_x1 - _x0) / pixelW) / 2) min floor (round ((_y1 - _y0) / pixelH) / 2);
 
 if (_corner < 1) exitWith {
-    private _ctrl = [_display, "EINV_PanelRect", _parent, [_x0, _y0, _x1 - _x0, _y1 - _y0]] call FUNC(uiCreate);
+    private _ctrl = [_display, "AIO_PanelRect", _parent, [_x0, _y0, _x1 - _x0, _y1 - _y0]] call FUNC(uiCreate);
 
     _ctrl ctrlSetBackgroundColor _color;
 
@@ -70,7 +70,7 @@ private _controls = [];
     // Nothing is left of a strip between two corners of a short box.
     if ((_x select 2) <= 0 || {(_x select 3) <= 0}) then {continue};
 
-    private _ctrl = [_display, "EINV_PanelRect", _parent, _x] call FUNC(uiCreate);
+    private _ctrl = [_display, "AIO_PanelRect", _parent, _x] call FUNC(uiCreate);
 
     _ctrl ctrlSetBackgroundColor _color;
     _controls pushBack _ctrl;
@@ -85,7 +85,7 @@ private _controls = [];
 
     if (!_on) then {continue};
 
-    private _ctrl = [_display, "EINV_PanelCorner", _parent, _cornerRect] call FUNC(uiCreate);
+    private _ctrl = [_display, "AIO_PanelCorner", _parent, _cornerRect] call FUNC(uiCreate);
 
     _ctrl ctrlSetText _texture;
     _ctrl ctrlSetTextColor _color;

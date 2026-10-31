@@ -11,7 +11,7 @@
  * Id, "<machine id>-<n>" <STRING>
  *
  * Example:
- * call einv_storage_fnc_newUid;
+ * call aio_storage_fnc_newUid;
  *
  * Public: No
  */

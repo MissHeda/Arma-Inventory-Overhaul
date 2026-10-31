@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Where a shaped item's tile (size=xx/x-, einv_items_fnc_footprintAs) is drawn: the rectangles of its
+ * Where a shaped item's tile (size=xx/x-, aio_items_fnc_footprintAs) is drawn: the rectangles of its
  * surface, or of the one-pixel border around it, on its cells only - so whatever lies in the corner an L
  * leaves open shows, and so does an empty cell there. fnc_uiShape makes controls of them; a drag's
  * footprint moves controls it made beforehand onto them (fnc_updateDrag), as it does for a rectangle.
@@ -42,8 +42,8 @@
  * Rectangles [x, y, w, h]; for a surface the first is the top row's first run <ARRAY>
  *
  * Example:
- * [[_left, _top], _cellW, _cellH, [2, 2, [3]]] call einv_gui_fnc_shapeRects;
- * [[_left, _top], _cellW, _cellH, [2, 2, [3]], "surface", 0, [_grid, _col, _row]] call einv_gui_fnc_shapeRects;
+ * [[_left, _top], _cellW, _cellH, [2, 2, [3]]] call aio_gui_fnc_shapeRects;
+ * [[_left, _top], _cellW, _cellH, [2, 2, [3]], "surface", 0, [_grid, _col, _row]] call aio_gui_fnc_shapeRects;
  *
  * Public: No
  */

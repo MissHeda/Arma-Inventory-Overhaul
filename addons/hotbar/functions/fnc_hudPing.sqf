@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * call einv_hotbar_fnc_hudPing;
+ * call aio_hotbar_fnc_hudPing;
  *
  * Public: No
  */

@@ -8,7 +8,7 @@
  * screen, under the card), as does Escape. Only one at a time: opening one closes the last.
  *
  * A card with a title is a window to move: the title bar, up to the cross, is the handle of
- * einv_gui_fnc_dragHandle - press on it and the card follows the mouse, the dimming and the hit area stay
+ * aio_gui_fnc_dragHandle - press on it and the card follows the mouse, the dimming and the hit area stay
  * where they are. With a kind, the place it is let go at is kept for the next card of that kind this
  * session. A card without a title (a dropdown's list, a question) is not moved by this; the caller can
  * make a handle of its own on the returned group's card (the card is the content group's parent).
@@ -34,7 +34,7 @@
  * The content group <CONTROL>
  *
  * Example:
- * [_display, [], [0.3, 0.1], "Import", {params ["_display", "_inner", "_theme"]}] call einv_setup_fnc_popover;
+ * [_display, [], [0.3, 0.1], "Import", {params ["_display", "_inner", "_theme"]}] call aio_setup_fnc_popover;
  *
  * Public: No
  */
@@ -90,14 +90,14 @@ _layer ctrlShow true;
 
 // A question in the middle dims the wizard under it: it is to be answered before anything else.
 if (_anchor isEqualTo []) then {
-    private _dim = [_display, "EINV_PanelRect", _layer, [0, 0, safezoneW, safezoneH]] call EFUNC(gui,uiCreate);
+    private _dim = [_display, "AIO_PanelRect", _layer, [0, 0, safezoneW, safezoneH]] call EFUNC(gui,uiCreate);
     _dim ctrlSetBackgroundColor [0, 0, 0, 0.35];
     _controls pushBack _dim;
 };
 
 // Under the card, over everything else: a click beside the card closes it, and nothing behind it is hit
 // through it. A moment later - it is this control's own click.
-private _catcher = [_display, "EINV_Hitbox", _layer, [0, 0, safezoneW, safezoneH]] call EFUNC(gui,uiCreate);
+private _catcher = [_display, "AIO_Hitbox", _layer, [0, 0, safezoneW, safezoneH]] call EFUNC(gui,uiCreate);
 _catcher ctrlAddEventHandler ["ButtonClick", {
     [{
         // The release that ended a drag of the card is not a click beside it.
@@ -116,7 +116,7 @@ _catcher ctrlAddEventHandler ["MouseButtonUp", {
 _controls pushBack _catcher;
 
 // In the layer, whose corner is the screen's: its place there is the snapped screen position less that.
-private _card = [_display, "EINV_Group", _layer, [SNAP_X(_left) - safezoneX, SNAP_Y(_top) - safezoneY, SNAP_W(_cardW), SNAP_H(_cardH)]] call EFUNC(gui,uiCreate);
+private _card = [_display, "AIO_Group", _layer, [SNAP_X(_left) - safezoneX, SNAP_Y(_top) - safezoneY, SNAP_W(_cardW), SNAP_H(_cardH)]] call EFUNC(gui,uiCreate);
 _controls pushBack _card;
 
 (ctrlPosition _card) params ["", "", "_cardWidth", "_cardHeight"];
@@ -152,7 +152,7 @@ if (_title isNotEqualTo "") then {
     ] call FUNC(uiAction);
 };
 
-private _inner = [_display, "EINV_Group", _card, [_padX, _padY + _titleH, _width, _height]] call EFUNC(gui,uiCreate);
+private _inner = [_display, "AIO_Group", _card, [_padX, _padY + _titleH, _width, _height]] call EFUNC(gui,uiCreate);
 
 uiNamespace setVariable [QGVAR(popover), _controls];
 
@@ -160,7 +160,7 @@ uiNamespace setVariable [QGVAR(popover), _controls];
 // nothing. One pixel in the card's padding, not nothing at all - the engine may refuse the focus to a
 // control with no size, and the pane would draw over the popover again. Before the content is drawn - a
 // text field there takes it from here (the import box, the Same as search).
-private _focus = [_display, "EINV_Hitbox", _card, [_padX / 2, _padY / 2, pixelW, pixelH]] call EFUNC(gui,uiCreate);
+private _focus = [_display, "AIO_Hitbox", _card, [_padX / 2, _padY / 2, pixelW, pixelH]] call EFUNC(gui,uiCreate);
 ctrlSetFocus _focus;
 
 [_display, _inner, _theme, _arguments] call _draw;

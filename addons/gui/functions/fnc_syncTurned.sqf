@@ -24,7 +24,7 @@
  * None
  *
  * Example:
- * [] call einv_gui_fnc_syncTurned;
+ * [] call aio_gui_fnc_syncTurned;
  *
  * Public: No
  */
@@ -106,6 +106,14 @@ private _fnc_space = {
 
 private _keep = [];
 private _giveX = pixelW / 2;
+
+// Twice a second the turned textures shown are looked after (fnc_turnedTexture): one the engine dropped is made again.
+private _check = diag_tickTime >= (uiNamespace getVariable [QGVAR(turnCheckAt), 0]);
+private _checked = createHashMap;
+
+if (_check) then {
+    uiNamespace setVariable [QGVAR(turnCheckAt), diag_tickTime + 0.5];
+};
 private _giveY = pixelH / 2;
 
 {
@@ -171,12 +179,20 @@ private _giveY = pixelH / 2;
             _overlay ctrlSetFade _fade;
             _overlay ctrlCommit 0;
 
-            // A commit may reset what the control draws; the turn goes on again.
-            _overlay ctrlSetAngle [_overlay getVariable [QGVAR(angle), 90], 0.5, 0.5, true];
+            // The picture is turned in its texture (fnc_turnedTexture), the control is not: nothing to turn again.
         };
 
         if (!ctrlShown _overlay) then {
             _overlay ctrlShow true;
+        };
+
+        private _source = _overlay getVariable [QGVAR(turnedSource), ""];
+        private _attachments = _overlay getVariable [QGVAR(turnedAttachments), []];
+        private _checkKey = _source + "|" + str _attachments;
+
+        if (_check && {_source isNotEqualTo ""} && {!(_checkKey in _checked)}) then {
+            _checked set [_checkKey, true];
+            [ctrlParent _overlay, _source, false, _attachments] call FUNC(turnedTexture);
         };
 
         if (_state isNotEqualTo true) then {

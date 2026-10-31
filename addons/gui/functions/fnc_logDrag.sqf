@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Writes the RPT line of a drag's timings (einv_gui_debugTiming) and forgets them: the lift, how many frames the
+ * Writes the RPT line of a drag's timings (aio_gui_debugTiming) and forgets them: the lift, how many frames the
  * drag lasted, what a frame cost on average and at most, which parts the slowest one went to, and in how many the
  * target was worked out anew (fnc_startDrag, fnc_updateDrag). Nothing when the setting was off at the lift or the
  * line is written already.
@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_logDrag;
+ * call aio_gui_fnc_logDrag;
  *
  * Public: No
  */

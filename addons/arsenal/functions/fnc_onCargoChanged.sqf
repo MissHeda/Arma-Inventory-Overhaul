@@ -6,7 +6,7 @@
  *
  * ACE adds with the engine's own commands, which refuse by the container's weight (maximumLoad). Cells are
  * the only limit here, so whatever of the request did not land is put in past it while the grid has a free
- * spot (einv_storage_fnc_addNew), ACE's list is put right (fnc_syncAce) and ACE is told (fnc_tellAce);
+ * spot (aio_storage_fnc_addNew), ACE's list is put right (fnc_syncAce) and ACE is told (fnc_tellAce);
  * with no spot for it, the message says what room to make (fnc_sayNoRoom). What did land but has no cell is taken back out by the follow-up of
  * itemsChanged (fnc_reconcile).
  *
@@ -23,7 +23,7 @@
  * None
  *
  * Example:
- * [_display, "ACE_fieldDressing", 1, false] call einv_arsenal_fnc_onCargoChanged;
+ * [_display, "ACE_fieldDressing", 1, false] call aio_arsenal_fnc_onCargoChanged;
  *
  * Public: No
  */

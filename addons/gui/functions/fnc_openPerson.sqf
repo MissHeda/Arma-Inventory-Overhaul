@@ -14,7 +14,7 @@
  * Opened <BOOL>
  *
  * Example:
- * [cursorObject] call einv_gui_fnc_openPerson;
+ * [cursorObject] call aio_gui_fnc_openPerson;
  *
  * Public: Yes
  */

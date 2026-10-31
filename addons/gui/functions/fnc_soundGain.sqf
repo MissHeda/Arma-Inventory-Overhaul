@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * How loud the looter hears an action: the volume of its kind (fnc_soundGroup), from the dropdown under the
  * speaker in the header (fnc_openSoundMenu). 0 when the kind is off. Only the
- * looter's own ears: what the others hear of his looting is the world's setting (einv_gui_soundsWorld) and is
+ * looter's own ears: what the others hear of his looting is the world's setting (aio_gui_soundsWorld) and is
  * not scaled by it.
  *
  * Arguments:
@@ -13,7 +13,7 @@
  * The volume, 0 to 1 <NUMBER>
  *
  * Example:
- * private _scale = ["lift"] call einv_gui_fnc_soundGain;
+ * private _scale = ["lift"] call aio_gui_fnc_soundGain;
  *
  * Public: No
  */

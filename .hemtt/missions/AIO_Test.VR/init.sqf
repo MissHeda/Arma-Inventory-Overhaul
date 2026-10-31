@@ -4,8 +4,8 @@
 // the crate (TFAR or ACRE2 when that mod is loaded; a class a mod does not have only logs a line).
 //
 // Driven from outside through the clipboard, like the screenshot missions: every new
-// "EINVCMD:<id>|<code>" on the clipboard is run once, spawned; what the code returns comes back on the
-// clipboard as "EINVRES:<id>|<result>". Only works in singleplayer (Eden "Play Scenario").
+// "AIOCMD:<id>|<code>" on the clipboard is run once, spawned; what the code returns comes back on the
+// clipboard as "AIORES:<id>|<result>". Only works in singleplayer (Eden "Play Scenario").
 if (!hasInterface) exitWith {};
 
 [] spawn {
@@ -76,9 +76,9 @@ if (!hasInterface) exitWith {};
     private _redCrate = "Box_East_Ammo_F" createVehicle (_center vectorAdd [5, -2, 0]);
     private _blueCrate = "Box_NATO_Support_F" createVehicle (_center vectorAdd [6, 1, 0]);
 
-    if (!isNil "einv_locks_fnc_setLock") then {
-        [_redCrate, "side", east] call einv_locks_fnc_setLock;
-        [_blueCrate, "side", west] call einv_locks_fnc_setLock;
+    if (!isNil "aio_locks_fnc_setLock") then {
+        [_redCrate, "side", east] call aio_locks_fnc_setLock;
+        [_blueCrate, "side", west] call aio_locks_fnc_setLock;
     };
 
     // Radios: a long-range backpack in the crate (TFAR), an ACRE2 radio (the ACRE2 profile).
@@ -102,16 +102,16 @@ if (!hasInterface) exitWith {};
         (_vest select 1) addMagazineCargoGlobal ["30Rnd_65x39_caseless_mag", 2];
     };
 
-    EINVCMD_last = "";
+    AIOCMD_last = "";
 
     while {true} do {
         private _clip = copyFromClipboard;
 
-        if ((_clip select [0, 8]) == "EINVCMD:" && {_clip != EINVCMD_last}) then {
-            EINVCMD_last = _clip;
+        if ((_clip select [0, 7]) == "AIOCMD:" && {_clip != AIOCMD_last}) then {
+            AIOCMD_last = _clip;
 
             private _bar = _clip find "|";
-            private _id = _clip select [8, _bar - 8];
+            private _id = _clip select [7, _bar - 7];
             private _code = compile (_clip select [_bar + 1]);
 
             [_id, _code] spawn {
@@ -121,8 +121,8 @@ if (!hasInterface) exitWith {};
 
                 if (isNil "_result") then {_result = "nil"};
 
-                copyToClipboard format ["EINVRES:%1|%2", _id, _result];
-                EINVCMD_last = copyFromClipboard;
+                copyToClipboard format ["AIORES:%1|%2", _id, _result];
+                AIOCMD_last = copyFromClipboard;
             };
         };
 

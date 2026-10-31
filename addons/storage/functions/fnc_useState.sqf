@@ -7,7 +7,7 @@
  *   ""         nothing limits it: the container is on Everything, or the item is no kind that is used from
  *              where it lies (a rifle, an attachment, clothing)
  *   "allowed"  the container is on Only whitelisted or Strict and the item is whitelisted for it (use=,
- *              einv_use)
+ *              aio_use)
  *   "blocked"  it cannot be used from there: Only whitelisted or Strict and not whitelisted, or Nothing. On
  *              Strict a blocked item is also kept out of the container's cargo, in the unit's hidden holder
  *              (fnc_opStrict) - the answer is the same.
@@ -20,7 +20,7 @@
  * "", "allowed" or "blocked" <STRING>
  *
  * Example:
- * ["HandGrenade", "backpack"] call einv_storage_fnc_useState;
+ * ["HandGrenade", "backpack"] call aio_storage_fnc_useState;
  *
  * Public: Yes
  */

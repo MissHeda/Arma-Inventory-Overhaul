@@ -9,19 +9,19 @@ class RscProgress;
 class RscStructuredText;
 class RscControlsGroupNoScrollbars;
 
-class EINV_HotbarBox: RscText {
+class AIO_HotbarBox: RscText {
     idc = -1;
     text = "";
     colorBackground[] = {0, 0, 0, 0.5};
 };
 
-class EINV_HotbarPicture: RscPictureKeepAspect {
+class AIO_HotbarPicture: RscPictureKeepAspect {
     idc = -1;
 };
 
 // Cuts the picture of an item whose rules draw it larger or moved (icon=) to the place of the picture in its
 // box (fnc_hudCreate, fnc_hudDraw). No scroll bars: the picture in it is larger than it.
-class EINV_HotbarClip: RscControlsGroupNoScrollbars {
+class AIO_HotbarClip: RscControlsGroupNoScrollbars {
     idc = -1;
     x = 0;
     y = 0;
@@ -31,7 +31,7 @@ class EINV_HotbarClip: RscControlsGroupNoScrollbars {
     class controls {};
 };
 
-class EINV_HotbarKey: RscText {
+class AIO_HotbarKey: RscText {
     idc = -1;
     font = "PuristaSemibold";
     sizeEx = QUOTE(0.7 * GUI_GRID_H);
@@ -39,21 +39,21 @@ class EINV_HotbarKey: RscText {
 };
 
 // The number of items, bottom right.
-class EINV_HotbarCount: EINV_HotbarKey {
+class AIO_HotbarCount: AIO_HotbarKey {
     font = "PuristaMedium";
     style = 1;
 };
 
 // A thin bar along the bottom of a box: the progress of a treatment, a throwable's cooldown. Its
 // colour is set when it is made (ctrlSetTextColor).
-class EINV_HotbarBar: RscProgress {
+class AIO_HotbarBar: RscProgress {
     idc = -1;
     colorFrame[] = {0, 0, 0, 0};
     texture = "#(argb,8,8,3)color(1,1,1,1)";
 };
 
 // A line over the boxes: what was done, or why not.
-class EINV_HotbarMessage: RscStructuredText {
+class AIO_HotbarMessage: RscStructuredText {
     idc = -1;
     size = QUOTE(0.8 * GUI_GRID_H);
     shadow = 1;

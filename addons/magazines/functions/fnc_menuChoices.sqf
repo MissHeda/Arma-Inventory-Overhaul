@@ -13,10 +13,10 @@
  * 2: A tile's rounds, -1 for a slot <NUMBER> (default: -1)
  *
  * Return Value:
- * Choices for einv_gui_fnc_openMenu, [text, arguments, code] each <ARRAY>
+ * Choices for aio_gui_fnc_openMenu, [text, arguments, code] each <ARRAY>
  *
  * Example:
- * ["30Rnd_65x39_caseless_mag", vestContainer player, 12] call einv_magazines_fnc_menuChoices;
+ * ["30Rnd_65x39_caseless_mag", vestContainer player, 12] call aio_magazines_fnc_menuChoices;
  *
  * Public: No
  */

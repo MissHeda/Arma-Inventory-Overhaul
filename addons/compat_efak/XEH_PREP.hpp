@@ -59,7 +59,7 @@ PREP(payloadFor);
 PREP(ownTargets);
 
 // Kits in the storage's transactions: where a kit's root is, and its ops, run by that root's authority
-// (einv_storage_ops, einv_storage_holderTypes "kit")
+// (aio_storage_ops, aio_storage_holderTypes "kit")
 PREP(holderRoot);
 PREP(holderVerify);
 PREP(opKitTake);
@@ -76,6 +76,6 @@ PREP(putIntoKit);
 PREP(notReady);
 
 // A living person's gear: kits in it and their containers change as the window's settings for them say,
-// on the machine where the person is local (einv_gui_fnc_personGuard)
+// on the machine where the person is local (aio_gui_fnc_personGuard)
 PREP(checkTouch);
 PREP(checkTile);

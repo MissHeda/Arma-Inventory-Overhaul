@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * [_display, _grid] call einv_gui_fnc_drawCells;
+ * [_display, _grid] call aio_gui_fnc_drawCells;
  *
  * Public: No
  */

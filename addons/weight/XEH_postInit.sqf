@@ -63,7 +63,7 @@ if (!hasInterface) exitWith {};
 // ACE's fatigue multiplies the cost of every movement by its duty factors, asked of the player every second:
 // ours climbs from 1 at the Overloaded mark to OVERLOAD_DUTY_MAX at Critical (fnc_updateTier). Without
 // ACE's fatigue there is nothing to register with; the status effects still work. With the tiers switched
-// off (einv_weight_enabled) it is 1 at once, not only after the next tier check: ACE's own fatigue alone.
+// off (aio_weight_enabled) it is 1 at once, not only after the next tier check: ACE's own fatigue alone.
 if (!isNil QACEFUNC(advanced_fatigue,addDutyFactor)) then {
     [QUOTE(ADDON), {
         [1, _this getVariable [QGVAR(duty), 1]] select (missionNamespace getVariable [QGVAR(enabled), true])
@@ -79,7 +79,7 @@ if (!isNil QACEFUNC(advanced_fatigue,addDutyFactor)) then {
 
     if (isNull _unit) exitWith {};
 
-    // Strict mode's hidden holder changed (einv_storage_hidden): a tile moved out of a crate into the backpack
+    // Strict mode's hidden holder changed (aio_storage_hidden): a tile moved out of a crate into the backpack
     // lands in the holder and raises no loadout event, yet it weighs (fnc_getExtraLoad).
     private _hidden = _unit getVariable [QEGVAR(storage,hidden), []];
 

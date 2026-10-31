@@ -20,7 +20,7 @@
  *   "set"      - the same classes as a set: class in lowercase -> true
  *
  * Example:
- * ["B_Carryall_Base"] call einv_setup_fnc_classTree;
+ * ["B_Carryall_Base"] call aio_setup_fnc_classTree;
  *
  * Public: No
  */

@@ -25,7 +25,7 @@
  * The pictures, or the groups that cut them <ARRAY>
  *
  * Example:
- * [_display, _group, _pictureBox, _picture, [1.4, 0, 0], _boxRect, UNIT * 0.4] call einv_gui_fnc_uiPictureCut;
+ * [_display, _group, _pictureBox, _picture, [1.4, 0, 0], _boxRect, UNIT * 0.4] call aio_gui_fnc_uiPictureCut;
  *
  * Public: No
  */

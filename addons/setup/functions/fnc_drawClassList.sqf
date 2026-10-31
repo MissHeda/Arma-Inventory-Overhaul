@@ -26,7 +26,7 @@
  * None
  *
  * Example:
- * [_display, _group, [0, 0, 0.3, 0.5], _theme, "containers"] call einv_setup_fnc_drawClassList;
+ * [_display, _group, [0, 0, 0.3, 0.5], _theme, "containers"] call aio_setup_fnc_drawClassList;
  *
  * Public: No
  */
@@ -113,7 +113,7 @@ _cursorY = _cursorY + _searchH + UNIT * 0.35;
 if (!_treeView) then {
     private _chips = if (_mode isEqualTo "containers") then {
         // Kits only where Enhanced First Aid Kits or Enhanced Utility Pouches brought some
-        // (einv_items_fnc_kitTypes).
+        // (aio_items_fnc_kitTypes).
         [
             ["all", LLSTRING(Groups_All)],
             ["uniform", LLSTRING(Tab_Uniforms)],

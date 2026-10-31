@@ -29,7 +29,7 @@
  * <BOOL>
  *
  * Example:
- * ["efak_IFAK_7", "ACE_painkillers", -1, [7]] call einv_compat_efak_fnc_changeKit;
+ * ["efak_IFAK_7", "ACE_painkillers", -1, [7]] call aio_compat_efak_fnc_changeKit;
  *
  * Public: No
  */

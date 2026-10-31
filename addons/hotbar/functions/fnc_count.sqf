@@ -12,7 +12,7 @@
  *   kit      - the kits of that type
  *
  * What lies in a uniform, vest or backpack that the settings "Use items from ..." close to it does not
- * count (einv_storage_fnc_useCarried): the slot shows what can be used.
+ * count (aio_storage_fnc_useCarried): the slot shows what can be used.
  *
  * Arguments:
  * 0: Class <STRING>
@@ -25,7 +25,7 @@
  * Count <NUMBER>
  *
  * Example:
- * ["ACE_elasticBandage"] call einv_hotbar_fnc_count;
+ * ["ACE_elasticBandage"] call aio_hotbar_fnc_count;
  *
  * Public: No
  */

@@ -2,7 +2,7 @@
 
 // Loads only with ACE Interaction Menu Expansion (AIME), whose actions it brings under this mod's rules: an
 // addon whose required addons are missing is skipped, quietly - the rest of the mod works the same without
-// it. It loads after the window (einv_gui, whose opening and checks it calls), after the storage (the use
+// it. It loads after the window (aio_gui, whose opening and checks it calls), after the storage (the use
 // limits and the loading of a magazine) and after the two AIME addons whose actions it patches.
 class CfgPatches {
     class ADDON {
@@ -13,9 +13,9 @@ class CfgPatches {
         requiredAddons[] = {
             "cba_main",
             "ace_interact_menu",
-            "einv_main",
-            "einv_storage",
-            "einv_gui",
+            "aio_main",
+            "aio_storage",
+            "aio_gui",
             "UPSL_aime_change_ammo",
             "UPSL_aime_inventory"
         };

@@ -21,7 +21,7 @@
  * [label, icon, width] <ARRAY>
  *
  * Example:
- * [0.017, 0.0125, _theme] call einv_gui_fnc_sortChip;
+ * [0.017, 0.0125, _theme] call aio_gui_fnc_sortChip;
  *
  * Public: No
  */

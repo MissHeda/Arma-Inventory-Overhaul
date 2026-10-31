@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_feels, 1] call einv_gui_fnc_feelAnswer;
+ * [_feels, 1] call aio_gui_fnc_feelAnswer;
  *
  * Public: No
  */

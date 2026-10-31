@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Draws a cargo section in the loot column (einv_gui_fnc_drawSection hands it over by the section's
+ * Draws a cargo section in the loot column (aio_gui_fnc_drawSection hands it over by the section's
  * "drawer"): under the vehicle or crate it belongs to, a caption "CARGO" with the space used and in all,
  * and a card for every loaded thing, in the order ACE keeps them - its picture, its name as ACE has it
  * (the custom name too), its size and damage, and two buttons: Open (or Close) for a crate that has an
@@ -9,7 +9,7 @@
  *
  * Laid out beside the blocks of the sections above it: the same cell, the same width, the same left edge.
  * Its texts and the rows that hold them (caption line, names, details, buttons) grow with the tile scale as
- * the sections' do (TEXT_UNIT, einv_gui_fnc_textScale), and its tab and hairline take the theme's loot colours.
+ * the sections' do (TEXT_UNIT, aio_gui_fnc_textScale), and its tab and hairline take the theme's loot colours.
  * The cards hold no grid - nothing to hover, drag onto or right-click. A button that may not act now is
  * drawn muted and says why in its tooltip and in the hint when pressed (fnc_rowState). While a thing
  * unloads (fnc_startUnload) its Unload button is a bar of the time ACE takes, and a click on it stops it.
@@ -29,7 +29,7 @@
  * Height used <NUMBER>
  *
  * Example:
- * [_display, _group, 0, 0.3, _section, _theme] call einv_compat_ace_cargo_fnc_drawSection;
+ * [_display, _group, 0, 0.3, _section, _theme] call aio_compat_ace_cargo_fnc_drawSection;
  *
  * Public: No
  */
@@ -52,7 +52,7 @@ private _colorLoss = _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];
 private _colorLine = _theme getOrDefault ["line", [1, 1, 1, 0.07]];
 
 // ---------------------------------------------------------------------------
-// The block: as wide and where the blocks of the sections above it are (einv_gui_fnc_drawSection).
+// The block: as wide and where the blocks of the sections above it are (aio_gui_fnc_drawSection).
 // ---------------------------------------------------------------------------
 ([] call EFUNC(gui,getCell)) params ["_cellW", "_cellH"];
 
@@ -66,12 +66,12 @@ private _blockX = ((_width - _blockW) / 2) max 0;
 // ---------------------------------------------------------------------------
 // Caption line: the tab on the left, space used and in all on the right, a hairline under both.
 // ---------------------------------------------------------------------------
-// The caption line and every text of the cards grow with the tile scale (TEXT_UNIT), as einv_gui_fnc_drawSection's do.
+// The caption line and every text of the cards grow with the tile scale (TEXT_UNIT), as aio_gui_fnc_drawSection's do.
 private _textUnit = TEXT_UNIT;
 private _lineH = _textUnit * CAPTION_LINE;
 private _lineSize = _textUnit * 0.46;
 
-// The tab is a pill on the line as the sections' tabs above are (einv_gui_fnc_drawSection): lower than the line and in its middle,
+// The tab is a pill on the line as the sections' tabs above are (aio_gui_fnc_drawSection): lower than the line and in its middle,
 // the same height, text size and round ends.
 private _buttonH = _textUnit * 0.6;
 private _buttonTop = _top + (_lineH - _buttonH) / 2;
@@ -117,7 +117,7 @@ if (_shown isNotEqualTo "") then {
 
 [_display, _parent, [_blockX + _blockW - _spaceW, _top, _spaceW, _lineH], _space, _lineSize, _colorText2, _font, 1, "value"] call EFUNC(gui,uiLabel);
 
-private _spaceTip = [_display, "EINV_Hitbox", _parent, [_blockX + _blockW - _spaceW, _top, _spaceW, _lineH]] call EFUNC(gui,uiCreate);
+private _spaceTip = [_display, "AIO_Hitbox", _parent, [_blockX + _blockW - _spaceW, _top, _spaceW, _lineH]] call EFUNC(gui,uiCreate);
 [_spaceTip, LLSTRING(Tip_Space)] call EFUNC(gui,setTooltip);
 
 [_display, _parent, [_blockX, _top + _lineH, _blockW, pixelH], _colorLine] call EFUNC(gui,uiPanel);
@@ -185,7 +185,7 @@ private _fnc_button = {
 
     if (!_enabled) then {
         {
-            if (ctrlClassName _x in ["EINV_Icon", "EINV_Label"]) then {
+            if (ctrlClassName _x in ["AIO_Icon", "AIO_Label"]) then {
                 _x ctrlSetTextColor _colorMuted;
             };
         } forEach _controls;
@@ -286,7 +286,7 @@ private _fnc_button = {
 
         [_display, _parent, _unloadRect, _theme getOrDefault ["barTrack", [1, 1, 1, 0.08]], (_theme getOrDefault ["radius", 0]) min (_buttonH / 2)] call EFUNC(gui,uiPanel);
 
-        private _fill = [_display, "EINV_PanelRect", _parent, _unloadRect] call EFUNC(gui,uiCreate);
+        private _fill = [_display, "AIO_PanelRect", _parent, _unloadRect] call EFUNC(gui,uiCreate);
         _fill ctrlSetBackgroundColor (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]);
         _fill ctrlSetPosition [_unloadX, _buttonTop, (_unloadW * _fraction) max pixelW, _buttonH];
         _fill ctrlCommit 0;
@@ -296,7 +296,7 @@ private _fnc_button = {
             _lineSize, _theme getOrDefault ["buttonText", _colorText], _font, 2, "never"
         ] call EFUNC(gui,uiLabel);
 
-        private _stop = [_display, "EINV_Hitbox", _parent, _unloadRect] call EFUNC(gui,uiCreate);
+        private _stop = [_display, "AIO_Hitbox", _parent, _unloadRect] call EFUNC(gui,uiCreate);
         [_stop, LLSTRING(Tip_Stop)] call EFUNC(gui,setTooltip);
         _stop ctrlAddEventHandler ["ButtonClick", {
             [{["", true] call FUNC(stopUnload)}, []] call EFUNC(gui,later);

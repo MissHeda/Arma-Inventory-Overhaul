@@ -24,7 +24,7 @@
  * None
  *
  * Example:
- * [player, _savedLoadout] call einv_storage_fnc_setUnitLoadout;
+ * [player, _savedLoadout] call aio_storage_fnc_setUnitLoadout;
  *
  * Public: Yes
  */

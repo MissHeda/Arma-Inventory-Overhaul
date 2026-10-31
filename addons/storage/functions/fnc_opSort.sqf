@@ -7,14 +7,14 @@
  *
  * Every record of the view's tiles comes out, and the first-fit picture of fnc_getLayout without any
  * records goes in instead; what no tile matches any more stays unused (fnc_getLayout places every tile
- * by its own record first). The end of the phase writes it once (einv_storage_fnc_execute). The order
+ * by its own record first). The end of the phase writes it once (aio_storage_fnc_execute). The order
  * travels in the op's arguments: the player who asked chose it, and it is laid out where the container's
  * root is local, so the places that everyone reads are the same.
  *
  * Arguments:
  * 0: Args, [holder, order] - the order one of SORT_MODES, "size" for none or anything else (fnc_getLayout)
  *    <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -22,11 +22,11 @@
  *     "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason already
  *     in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
- *     (einv_storage_fnc_settle)
+ *     (aio_storage_fnc_settle)
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[cursorObject, "name"], _context] call einv_storage_fnc_opSort;
+ * [[cursorObject, "name"], _context] call aio_storage_fnc_opSort;
  *
  * Public: No
  */

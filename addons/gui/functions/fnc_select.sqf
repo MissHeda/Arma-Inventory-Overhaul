@@ -21,7 +21,7 @@
  * Something is selected now <BOOL>
  *
  * Example:
- * [1, 4, "toggle"] call einv_gui_fnc_select;
+ * [1, 4, "toggle"] call aio_gui_fnc_select;
  *
  * Public: No
  */

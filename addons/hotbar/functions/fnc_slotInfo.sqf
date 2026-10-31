@@ -15,7 +15,7 @@
  *   plain picture when none), "does" <STRING>, "key" <STRING> ("" for no key)
  *
  * Example:
- * [2] call einv_hotbar_fnc_slotInfo;
+ * [2] call aio_hotbar_fnc_slotInfo;
  *
  * Public: No
  */

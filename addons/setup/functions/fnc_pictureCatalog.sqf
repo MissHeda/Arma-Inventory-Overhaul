@@ -21,7 +21,7 @@
  * The catalog is complete <BOOL>
  *
  * Example:
- * call einv_setup_fnc_pictureCatalog;
+ * call aio_setup_fnc_pictureCatalog;
  *
  * Public: No
  */

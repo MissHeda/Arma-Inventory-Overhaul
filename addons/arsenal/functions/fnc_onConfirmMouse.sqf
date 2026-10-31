@@ -8,7 +8,7 @@
  * answer gives it (fnc_closeConfirm, fnc_answerConfirm) a frame later - the card's controls are deleted by
  * it, and not inside the event of the display they are on. A press that is let go elsewhere answers nothing.
  * A left press on the card's top strip (the title) that is on no answer starts moving the card
- * (einv_gui_fnc_dragHandle, "begin"): its controls are moved one by one, the answers' hit areas too - they
+ * (aio_gui_fnc_dragHandle, "begin"): its controls are moved one by one, the answers' hit areas too - they
  * are found by their live positions here and in fnc_hoverConfirm - and the dimming stays.
  * Every press and release is taken (true) while the question is up: ACE's note of the press, which would pan
  * or turn its camera, is emptied. With no question up it does nothing and takes nothing.
@@ -24,7 +24,7 @@
  * Taken <BOOL>
  *
  * Example:
- * [true, findDisplay 1127001, 0, 0.5, 0.5] call einv_arsenal_fnc_onConfirmMouse;
+ * [true, findDisplay 1127001, 0, 0.5, 0.5] call aio_arsenal_fnc_onConfirmMouse;
  *
  * Public: No
  */

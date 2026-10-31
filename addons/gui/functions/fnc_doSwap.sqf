@@ -21,7 +21,7 @@
  * Asked for <BOOL>
  *
  * Example:
- * [[player, "backpack"], _body, "backpack"] call einv_gui_fnc_doSwap;
+ * [[player, "backpack"], _body, "backpack"] call aio_gui_fnc_doSwap;
  *
  * Public: No
  */

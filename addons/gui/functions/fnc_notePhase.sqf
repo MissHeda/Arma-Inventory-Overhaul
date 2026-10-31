@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Where a timed frame's time goes, for "Log window timings (debug)" (einv_gui_debugTiming): the part of the
+ * Where a timed frame's time goes, for "Log window timings (debug)" (aio_gui_debugTiming): the part of the
  * frame that ran until now is given what it took, and the next part begins. fnc_frame starts a frame with
  * the part "start" and ends it with ""; fnc_onFrame names each part where it begins (NOTE_PHASE: hover,
  * drag, search, queue, answers, the checks, the contents check and its redraws). Never called while the
@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * ["hover"] call einv_gui_fnc_notePhase;
+ * ["hover"] call aio_gui_fnc_notePhase;
  *
  * Public: No
  */

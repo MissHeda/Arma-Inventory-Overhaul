@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Sends what einv_storage_fnc_plan worked out for several tiles moved together - a
+ * Sends what aio_storage_fnc_plan worked out for several tiles moved together - a
  * group quick move, a group dragged over a container (fnc_quickMoveGroup,
  * fnc_endDrag) - as moves (fnc_sendMoves): every tile to the cell planned for it, the ones that stay in
  * their own holder laid down at once (kind "placeMany"), so two of them never wait for each other's cells.
@@ -11,7 +11,7 @@
  * With nothing planned there is nothing to send and the hint says that there is nowhere to go.
  *
  * Arguments:
- * 0: What was planned, [[item, holder, root, cell], ...] - as einv_storage_fnc_plan answers, each item
+ * 0: What was planned, [[item, holder, root, cell], ...] - as aio_storage_fnc_plan answers, each item
  *    with "holder" and "root" of where it lies <ARRAY>
  * 1: How many tiles were meant to move, those left behind included <NUMBER>
  * 2: Not searched yet, and so left out <NUMBER> (default: 0)
@@ -21,7 +21,7 @@
  * Something was sent <BOOL>
  *
  * Example:
- * [_assigned, count _items] call einv_gui_fnc_sendPlan;
+ * [_assigned, count _items] call aio_gui_fnc_sendPlan;
  *
  * Public: No
  */
@@ -87,7 +87,7 @@ private _laid = [];
 } forEach _assigned;
 
 // The ones laid down within their holder go first: the cells the plan gave the others may be the ones
-// they leave ("lifted", einv_storage_fnc_plan), and a put that found them still taken would land elsewhere.
+// they leave ("lifted", aio_storage_fnc_plan), and a put that found them still taken would land elsewhere.
 _moves = (_laid apply {
     _x params ["_from", "_fromRoot", "_tiles"];
 

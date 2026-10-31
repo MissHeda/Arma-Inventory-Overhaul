@@ -12,7 +12,7 @@
  * Rows, [[label, value], ...] <ARRAY>
  *
  * Example:
- * ["ACRE_PRC152_ID_1", objNull] call einv_compat_acre_fnc_inspectRows;
+ * ["ACRE_PRC152_ID_1", objNull] call aio_compat_acre_fnc_inspectRows;
  *
  * Public: No
  */

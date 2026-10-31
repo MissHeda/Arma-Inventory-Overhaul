@@ -21,7 +21,7 @@
  * The card <CONTROL>
  *
  * Example:
- * [_display, [player, "V_PlateCarrier2_rgr"] call einv_gui_fnc_compareRows] call einv_gui_fnc_drawCompare;
+ * [_display, [player, "V_PlateCarrier2_rgr"] call aio_gui_fnc_compareRows] call aio_gui_fnc_drawCompare;
  *
  * Public: No
  */
@@ -68,7 +68,7 @@ private _height = _padY * 2 + _nameH + _versusH;
     _height = _height + _x;
 } forEach _heights;
 
-private _group = [_display, "EINV_Group", controlNull, [-10, -10, _width + pixelW * 2, _height + pixelH * 2]] call FUNC(uiCreate);
+private _group = [_display, "AIO_Group", controlNull, [-10, -10, _width + pixelW * 2, _height + pixelH * 2]] call FUNC(uiCreate);
 
 // The glass of the tooltip.
 [_display, _group, [0, 0, _width, _height], _theme getOrDefault ["tooltipBg", [0.03, 0.03, 0.03, 0.96]], (_theme getOrDefault ["radius", 0]) * 0.5] call FUNC(uiPanel);
@@ -90,7 +90,7 @@ _cursor = _cursor + _versusH;
 
     if (_structured) then {
         // Structured text sizes itself against its control's own: the card's rows are 0.5 where the class says 0.7.
-        private _text = [_display, "EINV_StructuredText", _group, [_valueX, _cursor, _valueW, _rowH]] call FUNC(uiCreate);
+        private _text = [_display, "AIO_StructuredText", _group, [_valueX, _cursor, _valueW, _rowH]] call FUNC(uiCreate);
 
         _text ctrlSetStructuredText (_value setAttributes ["size", str (_smallSize / (UNIT * 0.7)), "font", _font]);
     } else {

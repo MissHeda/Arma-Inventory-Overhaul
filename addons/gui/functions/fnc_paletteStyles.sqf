@@ -18,7 +18,7 @@
  * The styles, [id, name, palette] each, in the dropdown's order <ARRAY>
  *
  * Example:
- * [] call einv_gui_fnc_paletteStyles;
+ * [] call aio_gui_fnc_paletteStyles;
  *
  * Public: No
  */

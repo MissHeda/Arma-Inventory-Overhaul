@@ -8,7 +8,7 @@
  * the content. The key hints name G to drop, the selection on Ctrl+click and the menu on the right mouse button - in the order Esc, quick move
  * (its key, F by default, or the double click while it has none), drop, hotbar, select, menu; the mouse buttons are ACE's pictures,
  * not words (fnc_uiKeyHint). The hotbar's entry has its place between drop and select
- * (einv_hotbar_fnc_footerHint - only when that addon is loaded, and only in the
+ * (aio_hotbar_fnc_footerHint - only when that addon is loaded, and only in the
  * inventory). A window that attached names its own keys (the "footerKeys"
  * hook, [[key, text], ...]).
  *
@@ -28,7 +28,7 @@
  * None
  *
  * Example:
- * [_display, _theme] call einv_gui_fnc_drawFooter;
+ * [_display, _theme] call aio_gui_fnc_drawFooter;
  *
  * Public: No
  */
@@ -136,7 +136,7 @@ _keys = _keys select [0, _fits];
     _display,
     controlNull,
     [_left + _width - _versionW, FOOT_Y, _versionW, FOOT_H],
-    format ["v%1", getText (configFile >> "CfgPatches" >> "einv_main" >> "versionStr")],
+    format ["v%1", getText (configFile >> "CfgPatches" >> "aio_main" >> "versionStr")],
     _textUnit * 0.62,
     _theme get "muted",
     _theme get "font",
@@ -153,7 +153,7 @@ private _hintGap = SQUARE(UNIT * 0.45);
 private _hintX = _keyX + _hintGap * 2;
 private _hintSize = _textUnit * 0.558;
 private _hintW = (_left + _width - _versionW - SQUARE(UNIT * 0.5)) - _hintX;
-private _hintCtrl = [_display, "EINV_FooterHint", controlNull, [_hintX, FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
+private _hintCtrl = [_display, "AIO_FooterHint", controlNull, [_hintX, FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
 
 // Too narrow for words: the line is hidden rather than wrapped over the key hints.
 if (_hintW < SQUARE(UNIT * 6)) then {

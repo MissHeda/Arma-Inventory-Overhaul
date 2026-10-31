@@ -7,15 +7,15 @@ ADDON = false;
 // Where things lie is kept on each container for everyone, by its authority - the machine where the
 // container's root is local (fnc_writePlaces) - so it goes away with the container. What an item is lives
 // in the items addon's cache, and how containers are split up comes from the rules
-// (einv_items_fnc_getInfo, "grid").
+// (aio_items_fnc_getInfo, "grid").
 
-// The grids missions give single objects (einv_grid, see fnc_getBlocks), as read: text -> spec, []
+// The grids missions give single objects (aio_grid, see fnc_getBlocks), as read: text -> spec, []
 // for one that cannot be read. Read once per text, so a broken one is named in the RPT once.
 GVAR(objectGrids) = createHashMap;
 
 // The ops a transaction may name, op -> function name. Other addons add theirs in their preInit
-// (einv_compat_efak: kitTake, kitPut, kitPlace, kitMove, kitRemoveIfEmpty). "repack" is the
-// storage's own, asked for by einv_magazines.
+// (aio_compat_efak: kitTake, kitPut, kitPlace, kitMove, kitRemoveIfEmpty). "repack" is the
+// storage's own, asked for by aio_magazines.
 GVAR(ops) = createHashMapFromArray [
     ["place", QFUNC(opPlace)], ["placeMany", QFUNC(opPlaceMany)], ["sort", QFUNC(opSort)],
     ["normalize", QFUNC(opNormalize)], ["move", QFUNC(opMove)], ["take", QFUNC(opTake)],
@@ -25,28 +25,28 @@ GVAR(ops) = createHashMapFromArray [
 ];
 
 // Checks every op passes on the machine that runs it: CODE [op, args, requester, root] -> "" or a reason.
-// The window's living-person rules go here (einv_gui_fnc_personGuard), the locks (einv_locks_fnc_guard) and
-// ACRE2's radio slot (einv_compat_acre_fnc_guard). Settlement skips them: the system puts things back.
+// The window's living-person rules go here (aio_gui_fnc_personGuard), the locks (aio_locks_fnc_guard) and
+// ACRE2's radio slot (aio_compat_acre_fnc_guard). Settlement skips them: the system puts things back.
 GVAR(guards) = [];
 
 // Variables a uniform, vest or backpack carries on its own container object that must survive a move: the
 // window takes things out and puts them in anew, which makes a new object (a TFAR long-range radio keeps
 // its frequencies in "radio_settings"). Compat addons add names here in their preInit
-// (einv_compat_tfar); fnc_snapshot reads them, fnc_restore sets them.
+// (aio_compat_tfar); fnc_snapshot reads them, fnc_restore sets them.
 //
 // The first is the container's search state (issue 17), [id, source], public: the id every player's knowledge
-// of it is kept under (einv_gui_fnc_searchRecord, which gives it one the first time anything is known of it),
+// of it is kept under (aio_gui_fnc_searchRecord, which gives it one the first time anything is known of it),
 // and where it came from - "body" or "person" when it was taken off one (fnc_takeOff), "" when not. A body's
 // backpack dropped on the ground is searched as the body is, and whoever searched it keeps it searched.
 GVAR(carryVariables) = [QGVAR(searchState)];
 
-// Holders that are no object, by the part of their key before ":" - "kit" from einv_compat_efak:
+// Holders that are no object, by the part of their key before ":" - "kit" from aio_compat_efak:
 // HashMap "entries" CODE [holder] -> entries, "root" CODE [holder, hint] -> root (fnc_rootOf hands on
 // its second argument as the hint), "verify" CODE [holder, root] -> BOOL, "blocks" CODE [holder] ->
 // compartments as fnc_blocksFor gives them, [] for an open grid that grows (fnc_getBlocks; left out, the
 // grid is open), and the names of its ops for "take", "put", "place" and "move" - settlement puts a
 // payload back into such a holder with its "put" op (fnc_settle), and the window builds its phases from
-// them (einv_gui_fnc_sendMoves).
+// them (aio_gui_fnc_sendMoves).
 GVAR(holderTypes) = createHashMap;
 
 // Same kind of item, class -> canonical key (fnc_layoutKey).
@@ -126,7 +126,7 @@ GVAR(nextUid) = 0;
 GVAR(session) = format ["%1%2", floor random 100000, floor random 100000];
 
 // The player's own containers written locally and not yet broadcast (fnc_flushPlaces), and nested objects
-// or outermost containers carrying their tags or copies (einv_storage_nested) that may still have to go
+// or outermost containers carrying their tags or copies (aio_storage_nested) that may still have to go
 // out; latest writes for kits, kit key -> [stamp, places] (the heal - objects keep theirs on themselves);
 // when a kit was last normalised and last re-written for a stale copy, kit key -> [time, time]
 // (fnc_opNormalize - objects keep theirs on themselves as well).

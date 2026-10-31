@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [] call einv_gui_fnc_buildSoon;
+ * [] call aio_gui_fnc_buildSoon;
  *
  * Public: No
  */

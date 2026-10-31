@@ -14,7 +14,7 @@
  * A vanilla box <BOOL>
  *
  * Example:
- * [cursorObject] call einv_arsenal_fnc_isBIBox;
+ * [cursorObject] call aio_arsenal_fnc_isBIBox;
  *
  * Public: No
  */

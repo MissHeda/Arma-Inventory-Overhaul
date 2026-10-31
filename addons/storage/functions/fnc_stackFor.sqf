@@ -2,9 +2,9 @@
 /*
  * Author: Miss Heda
  * How many of a class share one tile in a holder. This is the one place a stack size is read for a place
- * where tiles lie: a class's stack (einv_items_fnc_getInfo "stack") in a uniform, vest, backpack or kit, and
+ * where tiles lie: a class's stack (aio_items_fnc_getInfo "stack") in a uniform, vest, backpack or kit, and
  * that stack times the server setting "Stack multiplier for crates and vehicles"
- * (einv_storage_stackMultiplier) in a crate, a vehicle or a pile on the ground - the holders nobody wears.
+ * (aio_storage_stackMultiplier) in a crate, a vehicle or a pile on the ground - the holders nobody wears.
  * A crate full of vials is then a few tiles of twenty-five instead of a mass of tiles of five.
  *
  * Only a class that stacks is multiplied: a stack of 1 (rifles, magazines, kits, bulky things) stays 1 in
@@ -17,7 +17,7 @@
  *
  * Whoever lays tiles out reads the stack through this: fnc_getContents, fnc_hasSpace, fnc_plan, the ops
  * that put and place, the badge on a tile and the merge of a drop. The setting is the same on every machine
- * (a server setting, einv_main_fnc_addSetting), so the machine that owns a holder and the ones that only read
+ * (a server setting, aio_main_fnc_addSetting), so the machine that owns a holder and the ones that only read
  * it cut the same tiles. A count above this stack - the setting went down, or a pile was moved here from a
  * crate - is not an error: fnc_stackCounts reconciles the places with the cargo, the surplus opens new tiles
  * of full stacks and a remainder.
@@ -31,7 +31,7 @@
  * How many may share a tile there, at least 1 <NUMBER>
  *
  * Example:
- * [_crate, "ACM_Vial_Morphine"] call einv_storage_fnc_stackFor;
+ * [_crate, "ACM_Vial_Morphine"] call aio_storage_fnc_stackFor;
  *
  * Public: No
  */

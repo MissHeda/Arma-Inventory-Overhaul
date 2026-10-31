@@ -4,7 +4,7 @@
  * Takes a request of this machine on as far as this machine may: the next phase whose root is local here
  * (fnc_isLocalRoot) runs at once (fnc_execute, journal key "id|phase|0", refs filled in from the results
  * so far) and comes back here; the first one that is not goes to the server's hub with the results so
- * far (einv_storage_hubStart). Once every phase ran, what is left is settled here (fnc_settle) - a step
+ * far (aio_storage_hubStart). Once every phase ran, what is left is settled here (fnc_settle) - a step
  * that cannot run here goes to the hub as a silent transaction of its own, sent in the same frame - and
  * the request is answered (fnc_onAnswer).
  *
@@ -29,7 +29,7 @@
  * None
  *
  * Example:
- * ["2:14"] call einv_storage_fnc_requestNext;
+ * ["2:14"] call aio_storage_fnc_requestNext;
  *
  * Public: No
  */

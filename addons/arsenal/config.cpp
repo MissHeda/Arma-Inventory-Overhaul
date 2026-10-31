@@ -17,11 +17,11 @@ class CfgPatches {
             "ace_common",
             "ace_arsenal",
             "A3_Functions_F_Bootcamp",
-            "einv_main",
-            "einv_items",
-            "einv_storage",
-            "einv_gui",
-            "einv_setup"
+            "aio_main",
+            "aio_items",
+            "aio_storage",
+            "aio_gui",
+            "aio_setup"
         };
         author = "Miss Heda";
         url = ECSTRING(main,URL);

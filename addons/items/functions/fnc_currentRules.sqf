@@ -14,7 +14,7 @@
  * Compiled rules, shared - do not change them <HASHMAP>
  *
  * Example:
- * (call einv_items_fnc_currentRules) get "cell";
+ * (call aio_items_fnc_currentRules) get "cell";
  *
  * Public: Yes
  */

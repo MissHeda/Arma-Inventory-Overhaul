@@ -6,8 +6,8 @@
  * that an item never lands in a compartment that refuses it, on any machine.
  *
  * A compartment is [cols, rows, holes, pos] and, when it has attributes (grid=2x2:ammo|grenade, grid=1x1:grenade:one,
- * einv_items_fnc_parseGrid), a fifth element, the categories it accepts - [] takes everything - and a sixth, true for a
- * single slot. The item's categories are the "groups" of einv_items_fnc_getInfo: it is accepted when any of them is one
+ * aio_items_fnc_parseGrid), a fifth element, the categories it accepts - [] takes everything - and a sixth, true for a
+ * single slot. The item's categories are the "groups" of aio_items_fnc_getInfo: it is accepted when any of them is one
  * the compartment accepts.
  *
  * A single slot holds one tile, whatever its size, and the tile takes the whole slot: its box is the compartment's
@@ -15,13 +15,13 @@
  *
  * Arguments:
  * 0: The compartment <ARRAY>
- * 1: The item's categories, "groups" of einv_items_fnc_getInfo <ARRAY of STRING>
+ * 1: The item's categories, "groups" of aio_items_fnc_getInfo <ARRAY of STRING>
  *
  * Return Value:
  * -1 it is refused, 0 it is taken like by any compartment, 1 it is taken as a single slot <NUMBER>
  *
  * Example:
- * [[1, 1, [], [], ["grenade"], true], ["grenade"]] call einv_storage_fnc_blockMode; // 1
+ * [[1, 1, [], [], ["grenade"], true], ["grenade"]] call aio_storage_fnc_blockMode; // 1
  *
  * Public: No
  */

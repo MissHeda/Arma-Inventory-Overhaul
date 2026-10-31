@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * [1] call einv_hotbar_fnc_unbind;
+ * [1] call aio_hotbar_fnc_unbind;
  *
  * Public: Yes
  */

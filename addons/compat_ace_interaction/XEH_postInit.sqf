@@ -4,7 +4,7 @@
 if (!hasInterface) exitWith {};
 
 // ACE interaction on a person > Inventory: the same as the action menu's "Inventory" on them
-// (einv_gui_fnc_addPersonAction), for players who reach for ACE's menu first. That entry stays. On the
+// (aio_gui_fnc_addPersonAction), for players who reach for ACE's menu first. That entry stays. On the
 // person's class with inheritance, so every soldier, civilian and agent has it without being touched one
 // by one, respawned ones included. Under the main actions ("Interactions"), where ACE puts what is done
 // to the person in front of you.
@@ -31,7 +31,7 @@ private _action = [
 // ACE interaction on a vehicle > Inventory: the window on its cargo, as the engine's own Gear action opens it,
 // for players who reach for ACE's menu first. Cars, tanks, static weapons, helicopters, planes and boats, by
 // their base classes with inheritance, under the main actions ACE gives each of them. Shown exactly when the
-// window may open on it (einv_gui_fnc_canOpenVehicle: alive, cells to show, the player on foot within the
+// window may open on it (aio_gui_fnc_canOpenVehicle: alive, cells to show, the player on foot within the
 // window's reach, not locked to him).
 private _vehicleAction = [
     QGVAR(vehicleInventory),

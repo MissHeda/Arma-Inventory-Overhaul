@@ -6,7 +6,7 @@
  *
  * Weapons and backpacks are each a tile of their own - every one may carry different attachments or
  * contents. So is every magazine, as each has its own rounds; only the ones that stack (grenades and
- * the like, einv_items_fnc_getInfo's "stack") share a tile, and only with the same rounds. Items are
+ * the like, aio_items_fnc_getInfo's "stack") share a tile, and only with the same rounds. Items are
  * counted together by class and split into tiles at their stack size in this container (fnc_stackFor: larger
  * in a crate, a vehicle or a pile than in what is worn) - along the places' records of the
  * key when they carry counts: the n-th record of a key is the n-th tile of that key and holds as many as
@@ -16,14 +16,14 @@
  * into full stacks and a remainder, as it always was.
  *
  * Every entry gets the key of its record (fnc_entryKey). Every uniform, vest and backpack lying in the
- * container gets two marks on this machine: its item class (einv_storage_itemClass) - its container
+ * container gets two marks on this machine: its item class (aio_storage_itemClass) - its container
  * object is only a Supply class, and its compartments go by the item (fnc_getBlocks) - and the
- * container it lies in (einv_storage_parent), so its root and the copy of its tag and places are found
+ * container it lies in (aio_storage_parent), so its root and the copy of its tag and places are found
  * from it (fnc_rootOf, fnc_readPlaces). Every machine that shows a nested container has read the one it
  * lies in first.
  *
  * A unit's uniform, vest or backpack under a Strict setting (fnc_opStrict) has a second source: the unit's
- * hidden holder (einv_storage_hidden, fnc_hiddenLists) keeps what the setting keeps out of the cargo. Its
+ * hidden holder (aio_storage_hidden, fnc_hiddenLists) keeps what the setting keeps out of the cargo. Its
  * things come after the cargo's, as tiles like any other, marked "strict" - so the window, the layout, the
  * room checks, the weight and the Arsenal panel see one container, and every machine the same one (the
  * holder is public). Taking such a tile out takes it out of the holder (fnc_removeEntry).
@@ -43,7 +43,7 @@
  *   "strict"      - it lies in the unit's hidden holder, not in the cargo (Strict mode) <BOOL>
  *
  * Example:
- * [backpackContainer player] call einv_storage_fnc_getContents;
+ * [backpackContainer player] call aio_storage_fnc_getContents;
  *
  * Public: No
  */

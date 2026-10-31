@@ -11,17 +11,17 @@
  *           backpack, a radio pack - which only an own grid gives cells;
  *           "capacity 35" "EFAK" for a kit of Enhanced First Aid Kits that no rule and no config key of
  *           its own gives a grid: that mod's capacity is its room then (fnc_kitRoom), the mission's
- *           setting for its type included (einv_compat_efak_fnc_capacity)
+ *           setting for its type included (aio_compat_efak_fnc_capacity)
  *   size  - "2x3" "preset"
  *   stack - "5 per tile" "your rule"
  * Where it comes from is "your rule" for a rule of the draft that is for the class itself, "inherited from X"
  * for a tree rule (class=X+) of a class above it, "same as Y" for like=Y, "preset", "its mod" and so on.
- * The lists and editors show the two as one line, "6x4 (your rule)" (STR_einv_setup_Answer_Line).
+ * The lists and editors show the two as one line, "6x4 (your rule)" (STR_aio_setup_Answer_Line).
  *
  * Compartments that follow each other with the same size and holes are counted rather than listed again.
  *
  * Arguments:
- * 0: The class, as einv_items_fnc_getInfo gives it <HASHMAP>
+ * 0: The class, as aio_items_fnc_getInfo gives it <HASHMAP>
  * 1: Field: "grid", "size" or "stack" <STRING>
  * 2: The values of the class's own rule (fnc_ownClassRules) <HASHMAP> (default: none)
  *
@@ -29,7 +29,7 @@
  * [words, where it comes from] <ARRAY of STRING>
  *
  * Example:
- * [["V_PlateCarrier1_rgr", einv_setup_draftRules, einv_setup_draftCache] call einv_items_fnc_getInfo, "grid"] call einv_setup_fnc_answerText;
+ * [["V_PlateCarrier1_rgr", aio_setup_draftRules, aio_setup_draftCache] call aio_items_fnc_getInfo, "grid"] call aio_setup_fnc_answerText;
  *
  * Public: No
  */
@@ -124,7 +124,7 @@ private _words = switch (_field) do {
                     // Its name as the wizard says it ("Magazine rig"), not as the rules write it (rig:16).
                     _spec params ["", "_name", ["_count", -1]];
 
-                    private _key = format ["STR_einv_setup_Pattern_%1", _name];
+                    private _key = format ["STR_aio_setup_Pattern_%1", _name];
                     private _word = if (isLocalized _key) then {localize _key} else {_name};
 
                     [_word, format ["%1, %2", _word, format [LLSTRING(Cont_Cells), _count]]] select (_count > 0)
@@ -135,7 +135,7 @@ private _words = switch (_field) do {
     };
 };
 
-// Where it comes from: the source tags of einv_items_fnc_resolve.
+// Where it comes from: the source tags of aio_items_fnc_resolve.
 private _src = (_info getOrDefault ["src", createHashMap]) getOrDefault [_key, "builtin"];
 private _like = _own getOrDefault ["like", ""];
 

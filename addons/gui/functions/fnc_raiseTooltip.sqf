@@ -23,7 +23,7 @@
  * Made again <BOOL>
  *
  * Example:
- * [] call einv_gui_fnc_raiseTooltip;
+ * [] call aio_gui_fnc_raiseTooltip;
  *
  * Public: No
  */

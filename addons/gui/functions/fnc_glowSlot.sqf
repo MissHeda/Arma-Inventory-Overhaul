@@ -18,7 +18,7 @@
  * The controls - as they were kept, a new one shown - or [] for a slot with no place <ARRAY>
  *
  * Example:
- * [_display, 3] call einv_gui_fnc_glowSlot;
+ * [_display, 3] call aio_gui_fnc_glowSlot;
  *
  * Public: No
  */

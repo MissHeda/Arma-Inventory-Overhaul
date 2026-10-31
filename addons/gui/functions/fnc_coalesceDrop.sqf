@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * ["build"] call einv_gui_fnc_coalesceDrop;
+ * ["build"] call aio_gui_fnc_coalesceDrop;
  *
  * Public: No
  */

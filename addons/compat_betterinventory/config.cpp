@@ -16,7 +16,7 @@ class CfgPatches {
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {
             "cba_main",
-            "einv_main",
+            "aio_main",
             "bettinv_main"
         };
         skipWhenMissingDependencies = 1;

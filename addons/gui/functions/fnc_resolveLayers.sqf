@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Turns the layers of a chosen variant (CfgEinvSounds) into what is played: each layer's pitch picked
+ * Turns the layers of a chosen variant (CfgAioSounds) into what is played: each layer's pitch picked
  * between its lowest and highest and times the action's, its volume times the action's, the file a path
  * the game can play. A file of "@crawl", "@crawl2" or "@grenade" is looked up in Surfaces for the ground
  * the player stands on (fnc_groundSurface) - the entry brings its own file, volume, offset and length, the
@@ -21,7 +21,7 @@
  * Layers, [[file, volume, pitch, offset, length, delay], ...] <ARRAY>
  *
  * Example:
- * [[["a3\sounds_f\characters\stances\adjust_short1.wss", 0.48, 1.08, 1.2, 0, 0, 0]], 1, 0.85] call einv_gui_fnc_resolveLayers;
+ * [[["a3\sounds_f\characters\stances\adjust_short1.wss", 0.48, 1.08, 1.2, 0, 0, 0]], 1, 0.85] call aio_gui_fnc_resolveLayers;
  *
  * Public: No
  */
@@ -43,7 +43,7 @@ private _resolved = [];
     switch (true) do {
         // The ground under the player's feet.
         case ((_file select [0, 1]) isEqualTo "@" && {!(_file in ["@getIn", "@getOut"])}): {
-            private _table = configFile >> "CfgEinvSounds" >> "Surfaces" >> (_file select [1]);
+            private _table = configFile >> "CfgAioSounds" >> "Surfaces" >> (_file select [1]);
             private _entry = _table >> ([GVAR(unit)] call FUNC(groundSurface));
 
             if (!isArray _entry) then {

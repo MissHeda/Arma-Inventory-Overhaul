@@ -16,7 +16,7 @@
  * [the left half's controls, the right half's controls] <ARRAY>
  *
  * Example:
- * [_display, _layer, [0.1, 0.1, 0.04, 0.02], UNIT * 0.2] call einv_gui_fnc_uiSplitSwatch;
+ * [_display, _layer, [0.1, 0.1, 0.04, 0.02], UNIT * 0.2] call aio_gui_fnc_uiSplitSwatch;
  *
  * Public: No
  */

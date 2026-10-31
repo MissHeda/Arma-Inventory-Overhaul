@@ -15,7 +15,7 @@
  * Shown <BOOL>
  *
  * Example:
- * [ACE_player, ACE_player] call einv_compat_aime_fnc_ammoCondition;
+ * [ACE_player, ACE_player] call aio_compat_aime_fnc_ammoCondition;
  *
  * Public: No
  */

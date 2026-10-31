@@ -7,11 +7,11 @@
  * itself, unlike Enhanced First Aid Kits' own kit window.
  *
  * Planned here against the player's gear as it is, each tile counted against the room the ones before
- * it take (a free spot by einv_storage_fnc_getLayout; weight limits nothing) - then sent as
- * moves of the window's transactions (einv_gui_fnc_sendMoves), out of the kit at its root's authority
+ * it take (a free spot by aio_storage_fnc_getLayout; weight limits nothing) - then sent as
+ * moves of the window's transactions (aio_gui_fnc_sendMoves), out of the kit at its root's authority
  * and into the player's gear. Whatever does not fit there by then goes back into the kit
- * (einv_storage_fnc_settle). An emptied kit goes when its type says so (fnc_opKitTake). Out of a kit in
- * a living person's gear only as the window's settings for it say (einv_gui_fnc_checkTouch).
+ * (aio_storage_fnc_settle). An emptied kit goes when its type says so (fnc_opKitTake). Out of a kit in
+ * a living person's gear only as the window's settings for it say (aio_gui_fnc_checkTouch).
  *
  * Arguments:
  * 0: Kit class <STRING>
@@ -21,7 +21,7 @@
  * Something was sent <BOOL>
  *
  * Example:
- * ["efak_IFAK_7", [backpackContainer player, ""]] call einv_compat_efak_fnc_unpackAll;
+ * ["efak_IFAK_7", [backpackContainer player, ""]] call aio_compat_efak_fnc_unpackAll;
  *
  * Public: No
  */
@@ -53,7 +53,7 @@ if (isNull _where) exitWith {["Failed"] call _fnc_refuse};
 // Only while the player may still reach it where it lies now (fnc_mayReach).
 if !([_where] call FUNC(mayReach)) exitWith {[LLSTRING(NotYours)] call _fnc_refuse};
 
-// In a living person's gear only as the settings for it say (einv_gui_fnc_checkTouch).
+// In a living person's gear only as the settings for it say (aio_gui_fnc_checkTouch).
 private _touch = [_where, "items"] call EFUNC(gui,checkTouch);
 
 if (_touch isNotEqualTo "") exitWith {[_touch] call _fnc_refuse};
@@ -82,7 +82,7 @@ private _left = false;
 
         // Never a backpack into a backpack
         !([_container, _entry] call EFUNC(storage,backpackIntoBackpack))
-        // A free spot - as einv_storage_fnc_hasSpace asks it, with what goes in before this one.
+        // A free spot - as aio_storage_fnc_hasSpace asks it, with what goes in before this one.
         && {
             (([_container] call EFUNC(storage,getBlocks)) isEqualTo [])
             || {

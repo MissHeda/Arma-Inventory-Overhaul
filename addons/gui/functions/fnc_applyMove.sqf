@@ -4,19 +4,19 @@
  * Author: Miss Heda
  * Moves an item for the window: checked here first, so the hint says at once what this machine can
  * already tell - a living person's gear the player may not change or is out of reach of
- * (fnc_checkTouch), another living player's kit (einv_compat_efak_fnc_checkTile), a backpack into a
- * backpack (einv_storage_fnc_backpackIntoBackpack), no free spot when nobody said where - then sent as
+ * (fnc_checkTouch), another living player's kit (aio_compat_efak_fnc_checkTile), a backpack into a
+ * backpack (aio_storage_fnc_backpackIntoBackpack), no free spot when nobody said where - then sent as
  * a transaction (fnc_sendMoves). With the option "separate" (and only where the storage keeps separate
- * stacks, einv_storage_stackSplits) what goes to a cell lies there as a stack of its own and does not join
+ * stacks, aio_storage_stackSplits) what goes to a cell lies there as a stack of its own and does not join
  * a stack of its class elsewhere in the container; part of a stack moved within its container is split off
- * onto the cell (einv_storage_fnc_opSplit). With "mergeInto" - the [col, row, compartment] of a stack of
- * the same class - what goes joins that very stack (einv_storage_fnc_opPut); it needs no free spot, the
+ * onto the cell (aio_storage_fnc_opSplit). With "mergeInto" - the [col, row, compartment] of a stack of
+ * the same class - what goes joins that very stack (aio_storage_fnc_opPut); it needs no free spot, the
  * count being what fits. Every change happens where the holder's root is local, checked there again;
  * places, search knowledge and the window follow the answer (fnc_afterAction).
  *
  * Within one container it is a rearrangement onto the cell; the ground ("ground") is the surface under
  * the feet, or the vehicle's cargo while seated. A ground pile the window does not show, or none at
- * all, stands for the ground as well (einv_storage_fnc_getGroundHolder, as callers used to ask it).
+ * all, stands for the ground as well (aio_storage_fnc_getGroundHolder, as callers used to ask it).
  *
  * Arguments:
  * 0: Holder it lies in - a container, or a key like "kit:..." <OBJECT or STRING>
@@ -33,7 +33,7 @@
  * Asked for <BOOL>
  *
  * Example:
- * [_from, _to, _entry, -1, [0, 0, 0]] call einv_gui_fnc_applyMove;
+ * [_from, _to, _entry, -1, [0, 0, 0]] call aio_gui_fnc_applyMove;
  *
  * Public: No
  */

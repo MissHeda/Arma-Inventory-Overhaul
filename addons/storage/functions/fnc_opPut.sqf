@@ -32,7 +32,7 @@
  * 0: Args, [to, payload or ref, cell (default: []), forced (default: false), checking only (default:
  *    false), separate (default: false), merge into (default: [])] <ARRAY>
  *    merge into is the [col, row, compartment] of the tile to fill first
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -40,11 +40,11 @@
  *     "Moved", "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason
  *     already in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
- *     (einv_storage_fnc_settle)
+ *     (aio_storage_fnc_settle)
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[backpackContainer player, _payload, []], _context] call einv_storage_fnc_opPut;
+ * [[backpackContainer player, _payload, []], _context] call aio_storage_fnc_opPut;
  *
  * Public: No
  */

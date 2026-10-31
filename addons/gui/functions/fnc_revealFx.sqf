@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * [_display, _head] call einv_gui_fnc_revealFx;
+ * [_display, _head] call aio_gui_fnc_revealFx;
  *
  * Public: No
  */

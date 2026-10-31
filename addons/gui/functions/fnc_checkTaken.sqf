@@ -8,7 +8,7 @@
  * window opened. The window closes then (GVAR(closeReason) "taken", so no sound of a container closing and no end
  * move). Seated, the vehicle moves him and the leash is not asked: the vehicle he sits in (and the crates of its
  * ACE cargo) goes along, and anything else he opened from the seat is held to the window's reach from where he
- * sits now (einv_storage_fnc_inReach).
+ * sits now (aio_storage_fnc_inReach).
  *
  * Only for a window that was opened on something to loot (GVAR(openedOn)); the Arsenal and later windows have no
  * loot to be taken from.
@@ -20,7 +20,7 @@
  * It closed the window <BOOL>
  *
  * Example:
- * [_display] call einv_gui_fnc_checkTaken;
+ * [_display] call aio_gui_fnc_checkTaken;
  *
  * Public: No
  */

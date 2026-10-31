@@ -3,27 +3,27 @@
  * Author: Miss Heda
  * Tells how the repack ended and shows the result. What a stop that moved nothing, a commit that was
  * turned down or one that was done have in common: the hint. The window is built again with the magazines
- * in their cells (einv_gui_fnc_build) and the text written over the hint it ends with - "Repacked: 1 full
+ * in their cells (aio_gui_fnc_build) and the text written over the hint it ends with - "Repacked: 1 full
  * and 2 rounds left over" in the gain colour when it ran to its end, "Repack stopped: ..." when it did not,
  * the loss colour for "The magazines changed - nothing was repacked" (a magazine was taken meanwhile) and
- * for any other reason a transaction gives (einv_gui_fnc_flashHint).
+ * for any other reason a transaction gives (aio_gui_fnc_flashHint).
  *
  * An emptied magazine is gone: one fewer of its kind known in a container that was searched
- * (einv_gui_fnc_learn).
+ * (aio_gui_fnc_learn).
  *
  * The window closed meanwhile: the result is told the way ACE tells it after its own repack, with the
  * magazine's picture (ace_common_fnc_displayTextPicture).
  *
  * Arguments:
  * 0: Result - "" done, "Nothing" nothing was moved, "Gone" or "Moved" a magazine was taken meanwhile,
- *    else a reason (einv_gui_fnc_flashHint) <STRING>
+ *    else a reason (aio_gui_fnc_flashHint) <STRING>
  * 1: Record, see fnc_commit and fnc_stop <HASHMAP>
  *
  * Return Value:
  * None
  *
  * Example:
- * ["", _record] call einv_magazines_fnc_finish;
+ * ["", _record] call aio_magazines_fnc_finish;
  *
  * Public: No
  */

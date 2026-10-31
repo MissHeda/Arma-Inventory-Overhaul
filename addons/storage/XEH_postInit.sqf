@@ -20,10 +20,10 @@
     [{_this call FUNC(topUpLoadout)}, [_unit, _loadout]] call FUNC(nextFrame);
 }] call CBA_fnc_addEventHandler;
 
-// A loadout set for a unit that lives on another machine (einv_storage_fnc_setUnitLoadout), set where it is local.
+// A loadout set for a unit that lives on another machine (aio_storage_fnc_setUnitLoadout), set where it is local.
 [QGVAR(setUnitLoadout), {_this call FUNC(setUnitLoadout)}] call CBA_fnc_addEventHandler;
 
-// New things for a unit that lives on another machine than the one that asked (einv_storage_fnc_addToUnit),
+// New things for a unit that lives on another machine than the one that asked (aio_storage_fnc_addToUnit),
 // added here where the unit is local; the call comes back to the function, which passes it on again should the
 // unit have moved on meanwhile.
 [QGVAR(addToUnit), {_this call FUNC(addToUnit)}] call CBA_fnc_addEventHandler;
@@ -163,7 +163,7 @@ if (hasInterface) then {
     // ACE Arsenal opening here on this machine's own unit: the hidden holder gives everything back to the
     // containers at once, so the arsenal, its panel and the loadouts saved there see the real gear
     // (fnc_hiddenReturn; fnc_hiddenActive keeps it so while it is open). Taken again once it closed
-    // (einv_arsenal_fnc_onClosed asks fnc_requestMigrate). The vanilla arsenal is caught by the sweep.
+    // (aio_arsenal_fnc_onClosed asks fnc_requestMigrate). The vanilla arsenal is caught by the sweep.
     [QACEGVAR(arsenal,displayOpened), {
         private _unit = missionNamespace getVariable ["ACE_player", player];
 
@@ -223,7 +223,7 @@ if (hasInterface) then {
     // the grid and fits no other worn container goes onto the ground. Nothing raises an event for a script's
     // addItem (ACE's pick-up, another mod's action), so the triggers are CBA's polled loadout event above, the
     // engine's own Take and InventoryClosed here, a loadout set (fnc_onLoadoutSet), the unit event above, the
-    // open window that shows an overflow tile (einv_gui_fnc_requestNormalize) and this tick, which also compares
+    // open window that shows an overflow tile (aio_gui_fnc_requestNormalize) and this tick, which also compares
     // a cheap signature of the load once a second: the net under all of them (fnc_sweepTick).
     [{[] call FUNC(sweepTick)}, SWEEP_TICK] call CBA_fnc_addPerFrameHandler;
 

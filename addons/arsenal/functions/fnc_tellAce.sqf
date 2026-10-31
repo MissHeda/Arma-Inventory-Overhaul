@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * ["ACE_fieldDressing", 4, 3] call einv_arsenal_fnc_tellAce;
+ * ["ACE_fieldDressing", 4, 3] call aio_arsenal_fnc_tellAce;
  *
  * Public: No
  */

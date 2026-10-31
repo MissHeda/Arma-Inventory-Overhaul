@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_sortSearch;
+ * call aio_gui_fnc_sortSearch;
  *
  * Public: No
  */

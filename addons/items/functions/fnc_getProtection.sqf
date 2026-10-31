@@ -21,7 +21,7 @@
  *   "main"     - its armor <NUMBER>
  *
  * Example:
- * ["V_PlateCarrier1_rgr"] call einv_items_fnc_getProtection;
+ * ["V_PlateCarrier1_rgr"] call aio_items_fnc_getProtection;
  *
  * Public: Yes
  */

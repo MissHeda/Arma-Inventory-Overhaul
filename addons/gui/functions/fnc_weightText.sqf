@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * The words for what a pick-up would make of the soldier: "+2.4 kg: you will be Overloaded (46.9 kg)".
  * Kilograms with one decimal, two under one kilogram, as the hint's weights are. It is a forecast for the
- * soldier's own weight bar (einv_weight) and refuses nothing - weight limits no container.
+ * soldier's own weight bar (aio_weight) and refuses nothing - weight limits no container.
  *
  * Arguments:
  * 0: What it adds, config mass <NUMBER>
@@ -14,7 +14,7 @@
  * The text <STRING>
  *
  * Example:
- * [24, TIER_OVERLOADED, 1034] call einv_gui_fnc_weightText;
+ * [24, TIER_OVERLOADED, 1034] call aio_gui_fnc_weightText;
  *
  * Public: No
  */

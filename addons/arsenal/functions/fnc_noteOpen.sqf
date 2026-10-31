@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * One line of the RPT for what a part of ACE Arsenal's opening and settling cost, for "Log window timings
- * (debug)" (einv_gui_debugTiming): "timing: arsenal open - settle/stageOverflow 3.2 ms (+412 ms since the
+ * (debug)" (aio_gui_debugTiming): "timing: arsenal open - settle/stageOverflow 3.2 ms (+412 ms since the
  * display opened)". Nothing is written while the setting is off, nor for a part under 0.5 ms unless it is
  * a total (the passes that run a few ms a frame say what they spent in all). The first lines after the
  * display opened say where the seconds of opening go: the lines of this addon sum up what is ours, the
@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * ["settle/ungrey", _begin] call einv_arsenal_fnc_noteOpen;
+ * ["settle/ungrey", _begin] call aio_arsenal_fnc_noteOpen;
  *
  * Public: No
  */

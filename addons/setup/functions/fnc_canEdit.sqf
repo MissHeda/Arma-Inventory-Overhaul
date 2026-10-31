@@ -33,7 +33,7 @@
  *                    priority 1 <BOOL>
  *
  * Example:
- * (["direct"] call einv_setup_fnc_canEdit) get "canSave";
+ * (["direct"] call aio_setup_fnc_canEdit) get "canSave";
  *
  * Public: Yes
  */

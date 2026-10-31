@@ -14,7 +14,7 @@
  * Names of the uniform, vest and backpack with too much in them, [] when everything fits <ARRAY>
  *
  * Example:
- * [player] call einv_arsenal_fnc_checkOverflow;
+ * [player] call aio_arsenal_fnc_checkOverflow;
  *
  * Public: No
  */

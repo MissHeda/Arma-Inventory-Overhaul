@@ -15,7 +15,7 @@
  * Queued first <BOOL>
  *
  * Example:
- * [_grid, _tile] call einv_gui_fnc_searchFirst;
+ * [_grid, _tile] call aio_gui_fnc_searchFirst;
  *
  * Public: No
  */

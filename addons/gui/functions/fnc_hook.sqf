@@ -18,7 +18,7 @@
  * The hook's answer, the flag's value, or the default <ANY>
  *
  * Example:
- * ["key", [_display, 14, false, false, false], false] call einv_gui_fnc_hook;
+ * ["key", [_display, 14, false, false, false], false] call aio_gui_fnc_hook;
  *
  * Public: No
  */

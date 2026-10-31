@@ -15,7 +15,7 @@
  * wide as the text asks for, never wider than the room the caller has - it neither grows the tile nor
  * reaches into the next. The caller draws the number centred in the rectangle it gets back, in the theme's
  * tileCountColor. A label cannot resize its backdrop, so the caller passes the widest text the number can
- * become (a repack of magazines changes the rounds live, einv_magazines_fnc_drawJob).
+ * become (a repack of magazines changes the rounds live, aio_magazines_fnc_drawJob).
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -38,7 +38,7 @@
  * backdrop; no controls when only measured <ARRAY>
  *
  * Example:
- * [_display, _parent, "30/30", "PuristaSemibold", 0.012, 0.5, 0.4, 0.05, _theme] call einv_gui_fnc_drawCountBackdrop;
+ * [_display, _parent, "30/30", "PuristaSemibold", 0.012, 0.5, 0.4, 0.05, _theme] call aio_gui_fnc_drawCountBackdrop;
  *
  * Public: No
  */

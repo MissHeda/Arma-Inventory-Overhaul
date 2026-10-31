@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The lock on every op of a transaction (einv_storage_guards), checked on the machine that runs the op -
+ * The lock on every op of a transaction (aio_storage_guards), checked on the machine that runs the op -
  * the root's authority -, whoever sent it and whatever the requester's window showed: a lock set a moment
  * ago, a script, a client without this window. Refuses an op that reaches into a container the
  * requester may not open (fnc_canReach: a lock of ours, a lock the mission set, another mod's lock such
@@ -29,7 +29,7 @@
  * "" when allowed, "Locked" when not <STRING>
  *
  * Example:
- * ["take", [_crate, _entryArray, 1], player, _crate] call einv_locks_fnc_guard;
+ * ["take", [_crate, _entryArray, 1], player, _crate] call aio_locks_fnc_guard;
  *
  * Public: No
  */
@@ -49,7 +49,7 @@ switch (_op) do {
     case "move": {
         _holders = [_args param [0, objNull], _args param [1, objNull]];
     };
-    // einv_magazines: every container of the repack.
+    // aio_magazines: every container of the repack.
     case "repack": {
         _holders = ((_args param [0, []]) select {_x isEqualType []}) apply {_x param [0, objNull]};
     };

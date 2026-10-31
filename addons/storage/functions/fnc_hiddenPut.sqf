@@ -18,7 +18,7 @@
  * What did not go in - [] when all of it did, the payload itself when it cannot live here <ARRAY>
  *
  * Example:
- * [backpackContainer player, ["item", "ACE_fieldDressing", 3, []]] call einv_storage_fnc_hiddenPut;
+ * [backpackContainer player, ["item", "ACE_fieldDressing", 3, []]] call aio_storage_fnc_hiddenPut;
  *
  * Public: No
  */

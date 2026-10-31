@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * [_hint] call einv_gui_fnc_fitHint;
+ * [_hint] call aio_gui_fnc_fitHint;
  *
  * Public: No
  */

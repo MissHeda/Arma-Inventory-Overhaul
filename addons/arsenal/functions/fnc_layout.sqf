@@ -3,7 +3,7 @@
 /*
  * Author: Miss Heda
  * The layout of the panel (the "layout" hook): the uniform, vest or backpack whose tab is open in ACE's
- * left bar, as one section of the inventory's own (einv_gui_fnc_drawColumn with einv_gui_fnc_drawSection) -
+ * left bar, as one section of the inventory's own (aio_gui_fnc_drawColumn with aio_gui_fnc_drawSection) -
  * its caption with what it holds weighs, its compartments and tiles -, under it the staging space
  * (fnc_staging) as a second section, and at the bottom the line for the hints (fnc_footer). Nothing while
  * another tab is open, that slot is empty, or ACE's panels are hidden (Backspace).
@@ -18,7 +18,7 @@
  * sections' tabs and grids start on one left edge, the load texts end on one right edge; the sections draw
  * no picture box of their own ("box" false), and the column draws no background over the block.
  *
- * A section's caption folds it (einv_gui_fnc_toggleSection), kept per container class - the staging
+ * A section's caption folds it (aio_gui_fnc_toggleSection), kept per container class - the staging
  * space as "staging" - while ACE's window is open (the "fold" hook, GVAR(folded)), whatever the inventory
  * did with its own captions. The staging section has a crate before its caption and says beside its tab
  * that it is emptied when the arsenal closes, in the caption's size and colour of the muted texts; its
@@ -39,10 +39,10 @@
  * Enhanced First Aid Kits' kits tab - its button in ACE's left bar, under the backpack's - lies over ACE's panels
  * (fnc_focusedKit). While it is open the panel shows the uniform, vest and backpack folded to their captions, in
  * that order, then the kit picked in the tab's list, unfolded - "Kit: <name> (<used>/<room>)", the kit carried
- * (einv_compat_efak_fnc_arsenalKit) -, then the staging space; the title row names and pictures the kit. Things are
+ * (aio_compat_efak_fnc_arsenalKit) -, then the staging space; the title row names and pictures the kit. Things are
  * dragged out of the tab's list into the kit's grid (fnc_listDrag, fnc_listToKit), out of it onto the list to take
  * them away, and between the kit, the containers and the staging space - the kit's grid is a kit holder of the
- * storage, its moves the engine's kit ops (einv_compat_efak_fnc_drop). Another kit picked there shows that one in
+ * storage, its moves the engine's kit ops (aio_compat_efak_fnc_drop). Another kit picked there shows that one in
  * the same place, its section open again, the containers' folds and the column's scroll kept. Where the kit has no
  * grid to show - it lies in none of the soldier's containers nor the staging space, it is still being made ready -,
  * a note stands in its place (fnc_drawNote). No kit is shown in any other tab.
@@ -62,7 +62,7 @@
  * Where the soldier stands - nothing: the camera is ACE's <ARRAY>
  *
  * Example:
- * [_display, _theme, _context] call einv_arsenal_fnc_layout;
+ * [_display, _theme, _context] call aio_arsenal_fnc_layout;
  *
  * Public: No
  */
@@ -101,7 +101,7 @@ private _worn = [uniformContainer _center, vestContainer _center, backpackContai
 GVAR(foldKeys) = [];
 
 // The kits tab: the kit's section - its grid, or a note in its place - and where the kit lies, for the moves into and
-// out of it (einv_compat_efak_fnc_arsenalKit). Any other tab: where a kit lay is forgotten.
+// out of it (aio_compat_efak_fnc_arsenalKit). Any other tab: where a kit lay is forgotten.
 private _kitSection = createHashMap;
 
 if (_kitTab) then {
@@ -167,7 +167,7 @@ _rect params ["_left", "_top", "_width", "_height"];
 private _sink = uiNamespace getVariable [QGVAR(focusSink), controlNull];
 
 if (isNull _sink) then {
-    _sink = _display ctrlCreate ["EINV_Hitbox", -1];
+    _sink = _display ctrlCreate ["AIO_Hitbox", -1];
     _sink ctrlSetPosition [safezoneX, safezoneY, 0, 0];
     _sink ctrlCommit 0;
 
@@ -175,7 +175,7 @@ if (isNull _sink) then {
 };
 
 // Folded is what a section starts as, turned round by the inventory's clicks on its caption
-// (einv_gui_collapsed). Here the panel's own folds count (the "fold" hook): started against that list, a
+// (aio_gui_collapsed). Here the panel's own folds count (the "fold" hook): started against that list, a
 // section is folded exactly when its key - the container's class, or "staging" - is in GVAR(folded).
 // The other worn containers start folded (a closed section is open once its key is in the list).
 private _fnc_fold = {
@@ -268,7 +268,7 @@ if (!isNull _holder) then {
     } forEach ([_holder] call FUNC(countAll));
 };
 
-// The padding of the block, as the inventory's columns have it (einv_gui_fnc_drawColumn): the title row
+// The padding of the block, as the inventory's columns have it (aio_gui_fnc_drawColumn): the title row
 // starts a padding under the block's top and the column a padding under the title row, the column's own
 // padding being the one between them - so the title band reaches down to the end of the title row.
 private _list = _display displayCtrl ARSENAL_IDC_LIST;
@@ -386,9 +386,9 @@ private _title = [
     _theme getOrDefault ["text", [1, 1, 1, 1]], _headFont, 0
 ] call EFUNC(gui,uiLabel);
 
-// The fold button, drawn as the header's buttons are (einv_gui_fnc_drawHeader): the dark surface one step lighter,
+// The fold button, drawn as the header's buttons are (aio_gui_fnc_drawHeader): the dark surface one step lighter,
 // lighter again under the mouse, a round shape as high as the row. The chevron is the sections': down while the
-// panel is open, to the right once it is folded. The hit area is the button and 2 px (einv_gui_fnc_uiButton).
+// panel is open, to the right once it is folded. The hit area is the button and 2 px (aio_gui_fnc_uiButton).
 ([_theme, false] call EFUNC(gui,headerStyle)) params ["_buttonFill", "_buttonHover", "_buttonInk"];
 
 private _buttonTheme = createHashMap;
@@ -411,7 +411,7 @@ private _button = [
 ] call EFUNC(gui,uiPanel);
 
 // Unfolded again: the column is scrolled to where it stood when the panel was folded, for the same container class
-// (the engine hands the pixels on to the column it draws, einv_gui_fnc_drawColumn, fnc_build).
+// (the engine hands the pixels on to the column it draws, aio_gui_fnc_drawColumn, fnc_build).
 GVAR(collapsedScroll) params ["_scrollClass", "_scrollPixels"];
 
 if (_scrollClass isEqualTo (_section getOrDefault ["scrollClass", _section getOrDefault ["class", ""]]) && {_scrollPixels > 0}) then {
@@ -431,12 +431,12 @@ private _fnc_draw = {
     params ["_display", "_group", "_top", "_width", "_section", "_theme"];
 
     // The staging space reaches down to the hint line: at least the rows that fill what the sections above
-    // leave of the column - under its caption line and the gap below it, as einv_gui_fnc_drawSection draws
+    // leave of the column - under its caption line and the gap below it, as aio_gui_fnc_drawSection draws
     // them -, more as what lies in it needs (fnc_growStaging), and those scroll. Sized before it is drawn.
     if ((_section getOrDefault ["id", ""]) isEqualTo "staging") then {
         (call EFUNC(gui,getCell)) params ["", "_cellH"];
 
-        // The caption line grows with the tile scale (TEXT_UNIT, einv_gui_fnc_textScale), the gap under it does not.
+        // The caption line grows with the tile scale (TEXT_UNIT, aio_gui_fnc_textScale), the gap under it does not.
         private _free = ((ctrlPosition _group) select 3) - _top - TEXT_UNIT * CAPTION_LINE - UNIT * 0.25 - pixelH * 2;
 
         [_section get "container", floor (_free / _cellH)] call FUNC(growStaging);
@@ -472,7 +472,7 @@ private _fnc_draw = {
         private _textW = _end - _gapX - _textX;
         private _font = _theme getOrDefault ["font", "PuristaMedium"];
 
-        // The tab is a pill as high as the section buttons now, its words set in the middle of its height (einv_gui_fnc_drawSection):
+        // The tab is a pill as high as the section buttons now, its words set in the middle of its height (aio_gui_fnc_drawSection):
         // the subtitle is set the same way, in the same size, so that the one line of capitals runs on.
         private _size = TEXT_UNIT * TEXT_REF;
 
@@ -488,7 +488,7 @@ private _fnc_draw = {
     _used
 };
 
-// The scroll position is kept across every rebuild (einv_gui_fnc_build deleted the old group already, it kept the
+// The scroll position is kept across every rebuild (aio_gui_fnc_build deleted the old group already, it kept the
 // pixels): only another set of shown containers starts at the top - another kit picked in the kits tab is the same
 // set ("scrollClass"). Set at once and a frame later, as a new group does not know its height before.
 private _setKey = (_sections apply {_x getOrDefault ["scrollClass", _x getOrDefault ["class", ""]]}) joinString "|";

@@ -14,7 +14,7 @@
  * the type has, its capacity], [] for anything that is no kit <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7"] call einv_items_fnc_kitOf;
+ * ["efak_IFAK_7"] call aio_items_fnc_kitOf;
  *
  * Public: Yes
  */

@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The rules in use changed while the wizard is open (einv_items_rulesChanged): saved from here, by an admin, by a
+ * The rules in use changed while the wizard is open (aio_items_rulesChanged): saved from here, by an admin, by a
  * mission script. The server settings follow changes of their own, setting by setting (fnc_onSettingChanged).
  *
  * With the rules unchanged in the draft, the wizard simply shows the new ones - the draft's server settings stay
@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * call einv_setup_fnc_onRulesChanged;
+ * call aio_setup_fnc_onRulesChanged;
  *
  * Public: No
  */

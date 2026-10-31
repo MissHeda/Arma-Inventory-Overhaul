@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [_crate, "medical"] call einv_gui_fnc_setGroup;
+ * [_crate, "medical"] call aio_gui_fnc_setGroup;
  *
  * Public: No
  */

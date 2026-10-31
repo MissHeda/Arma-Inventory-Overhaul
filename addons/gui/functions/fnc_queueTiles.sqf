@@ -25,7 +25,7 @@
  * [[grid, tile], ...] - the grids' own HashMaps, not copies (an empty one for a tile found by its hint) <ARRAY>
  *
  * Example:
- * [GVAR(handQueue) select 0] call einv_gui_fnc_queueTiles;
+ * [GVAR(handQueue) select 0] call aio_gui_fnc_queueTiles;
  *
  * Public: No
  */

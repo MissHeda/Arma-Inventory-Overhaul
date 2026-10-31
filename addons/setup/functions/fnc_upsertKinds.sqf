@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * Writes the General step's size for a kind of container into the draft: the rule all kind=uniform >
  * grid=WxH - a rule the engine asks after everything that is about a class, so it fills only the containers of
- * that kind that no class rule, mod or older table answers (einv_items_fnc_resolve). Each is found by its
+ * that kind that no class rule, mod or older table answers (aio_items_fnc_resolve). Each is found by its
  * selector, not by a class as the Items and Containers steps find theirs (fnc_allRule): wherever it stands in
  * the text, and edited in its place - a later rule with "all" still wins over an earlier one, so it keeps its
  * rank -, a new one goes last. Whatever else the rule sets (typed in by hand) stays; the values given are set
@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * [[["uniform", createHashMapFromArray [["grid", "5x5"]], []]]] call einv_setup_fnc_upsertKinds;
+ * [[["uniform", createHashMapFromArray [["grid", "5x5"]], []]]] call aio_setup_fnc_upsertKinds;
  *
  * Public: No
  */

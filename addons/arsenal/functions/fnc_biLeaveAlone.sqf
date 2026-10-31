@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * ["open", player] call einv_arsenal_fnc_biLeaveAlone;
+ * ["open", player] call aio_arsenal_fnc_biLeaveAlone;
  *
  * Public: No
  */
@@ -39,7 +39,7 @@ GVAR(biLeave) = [];
 if (isNull _center) exitWith {};
 
 // A frame later: the vanilla arsenal is gone, the unit's gear is as it left it. What it holds beyond the grid
-// moves on to the next container with room first (einv_storage op "migrate", nothing moves under an open
+// moves on to the next container with room first (aio_storage op "migrate", nothing moves under an open
 // arsenal), then what has nowhere to go is reported.
 [{
     params ["_center"];

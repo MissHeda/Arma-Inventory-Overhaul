@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * [_tile] call einv_gui_fnc_unmarkQueued;
+ * [_tile] call aio_gui_fnc_unmarkQueued;
  *
  * Public: No
  */

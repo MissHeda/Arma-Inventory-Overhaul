@@ -13,7 +13,7 @@
  * [file, volume, pitch, range], [] for none <ARRAY>
  *
  * Example:
- * [configFile >> "CfgWeapons" >> "arifle_MX_F"] call einv_gui_fnc_reloadSound;
+ * [configFile >> "CfgWeapons" >> "arifle_MX_F"] call aio_gui_fnc_reloadSound;
  *
  * Public: No
  */

@@ -19,7 +19,7 @@
  * The source holds none of its own <BOOL>
  *
  * Example:
- * GVAR(sourceEmpty) = call einv_setup_fnc_sourceEmpty;
+ * GVAR(sourceEmpty) = call aio_setup_fnc_sourceEmpty;
  *
  * Public: No
  */

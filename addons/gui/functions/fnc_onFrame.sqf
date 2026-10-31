@@ -33,8 +33,8 @@
  * (fnc_requestNormalize) and stops waiting for moves with no answer after PENDING_TIMEOUT; while its own
  * moves are under way it does not draw for a change of contents - their answers do.
  *
- * While magazines are repacked (einv_magazines - only when that addon is loaded) the hands are busy: the
- * repack is followed every frame (einv_magazines_fnc_onFrame) and nothing else is - no hover, no drag, no
+ * While magazines are repacked (aio_magazines - only when that addon is loaded) the hands are busy: the
+ * repack is followed every frame (aio_magazines_fnc_onFrame) and nothing else is - no hover, no drag, no
  * searching, no answers finished - but the checks whether the window should still be open and whether
  * what it shows is what the containers hold. Another window over this one stops the repack.
  *
@@ -68,7 +68,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_onFrame;
+ * call aio_gui_fnc_onFrame;
  *
  * Public: No
  */
@@ -222,7 +222,7 @@ if (_covered isNotEqualTo GVAR(covered)) then {
         uiNamespace setVariable [QGVAR(compare), controlNull];
         uiNamespace setVariable [QGVAR(tipShown), controlNull];
 
-        // Repacking magazines goes no further under another window (einv_magazines).
+        // Repacking magazines goes no further under another window (aio_magazines).
         if (!isNil QEFUNC(magazines,stop)) then {
             ["Interrupted"] call EFUNC(magazines,stop);
         };
@@ -278,6 +278,38 @@ if (GVAR(dragging) || {GVAR(stripDrag) isNotEqualTo []}) then {
 
 private _focus = focusedCtrl _display;
 
+// A button of the window's own in a column, pressed and held: its column was drawn over the turned pictures and the name
+// at the mouse for as long as the button was held (issue #28, the tips of Sort and the fold tab). The focus goes back at
+// once; the click the engine would no longer give it is given at the release by fnc_onMouseButton (ctrlActivate, when the
+// mouse is still on it).
+if (
+    !isNull _focus && {ctrlType _focus in [1, 16]} && {inputMouse 0 != 0 || {inputMouse 1 != 0}}
+    && {!isNull ctrlParentControlsGroup _focus}
+    && {!(["focusAll", [], false] call FUNC(hook))}
+    && {
+        private _group = ctrlParentControlsGroup _focus;
+        private _outer = _group;
+
+        while {!isNull _group} do {
+            _outer = _group;
+            _group = ctrlParentControlsGroup _group;
+        };
+
+        _outer in (uiNamespace getVariable [QGVAR(created), []])
+        && {!(_outer in (uiNamespace getVariable [QGVAR(menu), []]))}
+    }
+) then {
+    private _sink = uiNamespace getVariable [QGVAR(filterSink), controlNull];
+
+    if (!isNull _sink) then {
+        GVAR(pressedButton) = [_focus, inputMouse 0 != 0];
+        ctrlSetFocus _sink;
+        uiNamespace setVariable [QGVAR(tipStale), true];
+        [] call FUNC(raiseTooltip);
+        _focus = _sink;
+    };
+};
+
 if (!isNull _focus) then {
     private _sink = uiNamespace getVariable [QGVAR(filterSink), controlNull];
 
@@ -313,7 +345,7 @@ if (!isNull _focus) then {
     };
 };
 
-// Repacking magazines (einv_magazines): the hands are busy - nothing is picked up, lit up or searched
+// Repacking magazines (aio_magazines): the hands are busy - nothing is picked up, lit up or searched
 // meanwhile. The repack runs its course; the window still closes and shows changes as always.
 if (!isNil QEFUNC(magazines,isBusy) && {[] call EFUNC(magazines,isBusy)}) exitWith {
     [_display, _now] call EFUNC(magazines,onFrame);
@@ -355,6 +387,53 @@ if (GVAR(inspectMove) isNotEqualTo []) then {
 
         GVAR(inspectPos) = [_cardX, _cardY];
         uiNamespace setVariable [QGVAR(inspectRect), [_cardX, _cardY, _cardW, _cardH]];
+    };
+};
+
+// The inspect card's 3D view turns the item while it is held (fnc_drawInspect, fnc_inspect3D).
+if (GVAR(inspect3DTurn) isNotEqualTo []) then {
+    if (inputMouse 0 == 0) then {
+        GVAR(inspect3DTurn) = [];
+    } else {
+        GVAR(inspect3DTurn) params ["_fromX", "_fromY"];
+        _mouse params ["_toX", "_toY"];
+
+        if (_toX != _fromX || {_toY != _fromY}) then {
+            ["turn", [_toX - _fromX, _toY - _fromY]] call FUNC(inspect3D);
+            GVAR(inspect3DTurn) = [_toX, _toY];
+        };
+    };
+};
+
+// ... and moves the camera while the middle button holds it - pressed over the view (fnc_drawInspect's areas, in the card's
+// space), as the engine reports the middle button to no control.
+private _middle = inputMouse 2 != 0;
+
+if (_middle && {!GVAR(middleWas)} && {GVAR(inspect3DPan) isEqualTo []} && {count GVAR(scene3D) > 0}) then {
+    (ctrlPosition (uiNamespace getVariable [QGVAR(inspectGroup), controlNull])) params [["_cardX", 0], ["_cardY", 0]];
+    _mouse params ["_atX", "_atY"];
+
+    if ((uiNamespace getVariable [QGVAR(inspect3DHits), []]) findIf {
+        _x params ["_hitX", "_hitY", "_hitW", "_hitH"];
+        _atX >= _cardX + _hitX && {_atX < _cardX + _hitX + _hitW} && {_atY >= _cardY + _hitY} && {_atY < _cardY + _hitY + _hitH}
+    } >= 0) then {
+        GVAR(inspect3DPan) = +_mouse;
+    };
+};
+
+GVAR(middleWas) = _middle;
+
+if (GVAR(inspect3DPan) isNotEqualTo []) then {
+    if (inputMouse 2 == 0) then {
+        GVAR(inspect3DPan) = [];
+    } else {
+        GVAR(inspect3DPan) params ["_fromX", "_fromY"];
+        _mouse params ["_toX", "_toY"];
+
+        if (_toX != _fromX || {_toY != _fromY}) then {
+            ["pan", [_toX - _fromX, _toY - _fromY]] call FUNC(inspect3D);
+            GVAR(inspect3DPan) = [_toX, _toY];
+        };
     };
 };
 
@@ -533,10 +612,13 @@ if (GVAR(menuState) isNotEqualTo []) then {
 // The name at the mouse - a button's tip too - over whatever a click drew since or gave the focus (a column refreshed after Sort,
 // a part drawn again): every frame, as the menu. It does nothing while it is the last control made and nothing marked it stale.
 // While a mouse button is held the engine draws the group pressed on over everything, whatever was made after it - the name went
-// behind the tile it belongs to. It hides for the press, as a tooltip does, and comes back fresh on the release.
+// behind the tile it belongs to. A button of the window's own gives the focus back at once now (above, GVAR(pressedButton)), so the
+// name stays; only where something else still holds the focus it hides for the press, as a tooltip does, and comes back fresh
+// on the release.
 private _tipShown = uiNamespace getVariable [QGVAR(tipShown), controlNull];
+private _held = focusedCtrl _display;
 
-if (inputMouse 0 != 0 || {inputMouse 1 != 0}) then {
+if ((inputMouse 0 != 0 || {inputMouse 1 != 0}) && {!isNull _held} && {_held isNotEqualTo (uiNamespace getVariable [QGVAR(filterSink), controlNull])}) then {
     if (!isNull _tipShown && {ctrlShown _tipShown}) then {
         _tipShown ctrlShow false;
         GVAR(tipHeld) = true;

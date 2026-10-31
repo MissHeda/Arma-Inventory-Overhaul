@@ -30,7 +30,7 @@
  * Whether it is being undone <BOOL>
  *
  * Example:
- * [player, "arifle_MX_F", "arifle_MX_F", ["30Rnd_65x39_caseless_mag", 30, 1, 0], []] call einv_storage_fnc_onReloaded;
+ * [player, "arifle_MX_F", "arifle_MX_F", ["30Rnd_65x39_caseless_mag", 30, 1, 0], []] call aio_storage_fnc_onReloaded;
  *
  * Public: No
  */

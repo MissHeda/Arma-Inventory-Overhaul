@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Reads a rules text - the setting einv_items_rules, a preset's statements or a pasted setup - into
+ * Reads a rules text - the setting aio_items_rules, a preset's statements or a pasted setup - into
  * its parts. What they mean (which groups exist, which preset is there) is fnc_compileRules' job; this
  * only reads, and leaves out what it cannot read with a warning that names it, so one typo never costs
  * the rest.
@@ -9,9 +9,9 @@
  * Statements are separated by commas; line breaks count as commas too. The writer (fnc_writeRules)
  * only ever uses ", ".
  *
- *   einv1 base=default cell=5             the header, read only as the first statement: the preset to
+ *   aio1 base=default cell=5             the header, read only as the first statement: the preset to
  *                                         build on (base=none for none) and the config mass per grid
- *                                         cell. Without one, the text reads as einv1 base=default.
+ *                                         cell. Without one, the text reads as aio1 base=default.
  *                                         A renamed preset's old id reads as the new one
  *                                         (PRESET_ALIASES: base=tarkov, realism and weight are base=default).
  *   category=bandit > name=Bandit_loot picture=/a3/ui_f/data/gui/cfg/hints/gear_ca.paa
@@ -48,6 +48,7 @@
  *   cat=medical                    its tile's category: misc, gear, weapon, ammo, medical
  *   class=X  class=X+  class~abc   that class; X and every class built on it; a class name holding
  *                                  the text (MIN_SEARCH letters at least)
+ *   class=X*                       every class whose name starts with X (MIN_SEARCH letters at least)
  *   addon=x  addon~abc             the CfgPatches class that brought it in
  *   well=X                         a magazine of that magazine well
  *   for=X                          a magazine the weapon X loads
@@ -101,7 +102,7 @@
  * Return Value:
  * The text's parts <HASHMAP>
  *   "version"  - the header's number <NUMBER>
- *   "base"     - the preset it builds on: "default", "none" or a CfgEinvRulesets class, lowercase
+ *   "base"     - the preset it builds on: "default", "none" or a CfgAioRulesets class, lowercase
  *                <STRING>
  *   "cell"     - config mass per grid cell, -1 when the header sets none <NUMBER>
  *   "categories" - [[id, name, picture], ...] in text order, ids lowercase; name and picture "" where the text sets none <ARRAY>
@@ -116,10 +117,11 @@
  * fnc_formatGrid writes it), "weight" (kg <NUMBER>), "name" (the name as it shows), "icon" ([scale,
  * across, down] <ARRAY>, see fnc_parseIcon), "picture" (the texture path with backslashes <STRING>), "use" (the containers it may be used from, in the
  * order uniform, vest, backpack <ARRAY of STRING>, [] for none - see fnc_parseUse), "cats" (the categories, in the
- * order of fnc_orderGroups <ARRAY of STRING> - see fnc_parseGroups).
+ * order of fnc_orderGroups <ARRAY of STRING> - see fnc_parseGroups), "tint" (a category's id or none), "color" (six hex digits
+ * in lowercase, the item's own tile colour), "show" (a category's id, all or none).
  *
  * Example:
- * ["einv1 base=default, kind=grenade > stack=3"] call einv_items_fnc_parseRules;
+ * ["aio1 base=default, kind=grenade > stack=3"] call aio_items_fnc_parseRules;
  *
  * Public: Yes
  */
@@ -157,7 +159,7 @@ if (count _text > TEXT_WARN) then {
 // ----- What may stand where -----
 
 private _allowed = createHashMap;
-{_allowed set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _+./%:|@!<>=~-");
+{_allowed set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _+*./%:|@!<>=~-");
 _allowed set [9, true];
 
 private _idChars = createHashMap;
@@ -170,7 +172,7 @@ private _classChars = createHashMap;
 private _shapeChars = createHashMap;
 {_shapeChars set [_x, true]} forEach (toArray "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/@");
 
-private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon", "picture", "use", "cats"];
+private _valueKeys = ["like", "size", "shape", "stack", "grid", "weight", "name", "icon", "picture", "use", "cats", "tint", "color", "show"];
 
 private _numberOps = ["=", "<", "<=", ">", ">="];
 private _keyOps = createHashMapFromArray [
@@ -440,6 +442,47 @@ private _fnc_use = {
     ["use", _kinds]
 };
 
+// tint=: the colour of a tile in several categories - one of them (its id), or none for the look's plain tile (fnc_getInfo).
+private _fnc_tint = {
+    params ["_raw"];
+
+    private _word = toLowerANSI (trim _raw);
+
+    if (_word regexMatch CAT_ID_PATTERN) exitWith {["tint", _word]};
+
+    _notes pushBack format ["tint=%1: a category's id or none - left out", _raw];
+
+    []
+};
+
+// color=: the item's own colour for its tiles, six hex digits as a category's color= (no #) - before its categories' and tint=
+// (aio_items_fnc_tileTint).
+private _fnc_color = {
+    params ["_raw"];
+
+    private _hex = toLowerANSI (trim _raw);
+
+    if (_hex regexMatch "^[0-9a-f]{6}$") exitWith {["color", _hex]};
+
+    _notes pushBack format ["color=%1 is no colour - six hex digits like color=c83232 - left out", _raw];
+
+    []
+};
+
+// show=: what a compartment of this container that takes several categories shows - one of them (its id), all of them small
+// in its corner, or none of them (aio_gui_fnc_drawBadge); the first of them without it.
+private _fnc_show = {
+    params ["_raw"];
+
+    private _word = toLowerANSI (trim _raw);
+
+    if (_word regexMatch CAT_ID_PATTERN) exitWith {["show", _word]};
+
+    _notes pushBack format ["show=%1: a category's id, all or none - left out", _raw];
+
+    []
+};
+
 private _fnc_cats = {
     params ["_raw"];
 
@@ -470,6 +513,9 @@ private _fnc_value = {
         case "picture": {[_raw] call _fnc_picture};
         case "use": {[_raw] call _fnc_use};
         case "cats": {[_raw] call _fnc_cats};
+        case "tint": {[_raw] call _fnc_tint};
+        case "color": {[_raw] call _fnc_color};
+        case "show": {[_raw] call _fnc_show};
         default {[]};
     }
 };
@@ -525,19 +571,20 @@ private _fnc_checkValues = {
                     _error = format ["'%1': class~ looks for a part of a class name, %2 letters at least", _token, MIN_SEARCH];
                 };
             } else {
-                // X, or X+ for X and every class built on it.
+                // X, X+ for X and every class built on it, or X* for every class whose name starts with X.
                 private _bad = _values findIf {
                     private _name = _x;
+                    private _last = _name select [count _name - 1];
 
-                    if ((_name select [count _name - 1]) isEqualTo "+") then {
+                    if (_last in ["+", "*"]) then {
                         _name = _name select [0, count _name - 1];
                     };
 
-                    !([_name] call _fnc_isClass)
+                    !([_name] call _fnc_isClass) || {_last isEqualTo "*" && {count _name < MIN_SEARCH}}
                 };
 
                 if (_bad >= 0) then {
-                    _error = format ["'%1': '%2' is no class name", _token, _values select _bad];
+                    _error = format ["'%1': '%2' is no class name - X* needs %3 letters at least before the *", _token, _values select _bad, MIN_SEARCH];
                 };
             };
         };
@@ -635,10 +682,13 @@ private _fnc_cond = {
 private _fnc_header = {
     params ["_tokens"];
 
-    _version = (parseNumber ((toLowerANSI (_tokens select 0)) select [4])) max 1;
+    // aio1, or einv1 as texts were headed before the mod's prefix was renamed.
+    private _word = toLowerANSI (_tokens select 0);
+
+    _version = (parseNumber (_word select [[3, 4] select ((_word select [0, 4]) isEqualTo "einv")])) max 1;
 
     if (_version > 1) then {
-        _warnings pushBack format ["The text was written for a newer version (einv%1) - read as far as this one understands it.", _version];
+        _warnings pushBack format ["The text was written for a newer version (aio%1) - read as far as this one understands it.", _version];
     };
 
     {
@@ -659,7 +709,7 @@ private _fnc_header = {
                     // A preset renamed since the text was written: built on the new one, said once in
                     // the RPT - the wizard writes the new id the next time it saves.
                     // Not when a preset of that name exists: a third party's own is not shadowed by the alias.
-                    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _value && {!isClass (configFile >> "CfgEinvRulesets" >> _value)}};
+                    private _alias = PRESET_ALIASES findIf {(_x select 0) isEqualTo _value && {!isClass (configFile >> "CfgAioRulesets" >> _value)}};
 
                     if (_alias >= 0) then {
                         _base = (PRESET_ALIASES select _alias) select 1;
@@ -987,11 +1037,15 @@ private _count = 0;
     private _tokens = _statement splitString (toString [32, 9]);
     private _first = toLowerANSI (_tokens select 0);
 
-    if ((_first select [0, 4]) isEqualTo "einv" && {[_first select [4]] call _fnc_isWhole}) then {
+    // aio and a number - or einv and a number, the header before the mod's prefix was renamed.
+    if (
+        ((_first select [0, 3]) isEqualTo "aio" && {[_first select [3]] call _fnc_isWhole})
+        || {(_first select [0, 4]) isEqualTo "einv" && {[_first select [4]] call _fnc_isWhole}}
+    ) then {
         if (_count == 1) then {
             [_tokens] call _fnc_header;
         } else {
-            _warnings pushBack format ["'%1': the header (einv1 ...) is only read as the first statement - left out.", _short];
+            _warnings pushBack format ["'%1': the header (aio1 ...) is only read as the first statement - left out.", _short];
         };
 
         continue;

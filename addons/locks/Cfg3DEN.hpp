@@ -4,7 +4,7 @@
 class Cfg3DEN {
     class Object {
         class AttributeCategories {
-            class EINV_Attributes {
+            class AIO_Attributes {
                 displayName = CSTRING(Eden_Category);
                 collapsed = 1;
 

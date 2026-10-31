@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [player] call einv_gui_fnc_addAgentAction;
+ * [player] call aio_gui_fnc_addAgentAction;
  *
  * Public: No
  */

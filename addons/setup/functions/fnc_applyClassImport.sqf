@@ -25,7 +25,7 @@
  * None
  *
  * Example:
- * ["class CfgVehicles { class X { einv_grid = ""6x4""; }; };", "B_Carryall_blk", false, ""] call einv_setup_fnc_applyClassImport;
+ * ["class CfgVehicles { class X { aio_grid = ""6x4""; }; };", "B_Carryall_blk", false, ""] call aio_setup_fnc_applyClassImport;
  *
  * Public: No
  */

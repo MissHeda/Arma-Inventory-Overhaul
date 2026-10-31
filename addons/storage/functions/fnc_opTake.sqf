@@ -17,7 +17,7 @@
  * Arguments:
  * 0: Args, [from, entry array, how many (-1 all)] <ARRAY>
  * 1: Context - "requester", "where", "txId", "root", "settlement", "ops", "opIndex", "batch"
- *    (einv_storage_fnc_execute) <HASHMAP>
+ *    (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -25,11 +25,11 @@
  *     "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason already
  *     in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
- *     (einv_storage_fnc_settle)
+ *     (aio_storage_fnc_settle)
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[cursorObject, _entryArray, 1], _context] call einv_storage_fnc_opTake;
+ * [[cursorObject, _entryArray, 1], _context] call aio_storage_fnc_opTake;
  *
  * Public: No
  */

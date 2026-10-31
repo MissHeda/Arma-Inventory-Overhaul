@@ -7,7 +7,7 @@
  * in words and marked new, changed or removed, with a cross that takes that one change back, and a click that opens
  * it where it is set. A box below what opened it - the header's "4 changes" -, so the page the player is on stays.
  * It has no title bar of its own: the strip over its caption is the handle to move it by
- * (einv_gui_fnc_dragHandle), made last so it lies over what the list drew there.
+ * (aio_gui_fnc_dragHandle), made last so it lies over what the list drew there.
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [_display, [0.5, 0.05, 0.2, 0.03]] call einv_setup_fnc_openChanges;
+ * [_display, [0.5, 0.05, 0.2, 0.03]] call aio_setup_fnc_openChanges;
  *
  * Public: No
  */

@@ -5,7 +5,7 @@
  * again - the Open / Close button of its cargo card. A loaded object keeps its own cargo, so it can be
  * looked into and changed while it hangs in the vehicle: it shows like any crate, under the cargo, and
  * things move in and out of it through the transactions like with any other. It is searched the way its
- * vehicle is (einv_gui_fnc_isSearched follows the chain up), and it sounds like a crate being opened.
+ * vehicle is (aio_gui_fnc_isSearched follows the chain up), and it sounds like a crate being opened.
  *
  * It is kept in the window's list of what was opened from inside a container, with the vehicle as the
  * container it lies in; the vehicle is also noted on the crate, so the window lets go of it once it is
@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_vehicle, _crate] call einv_compat_ace_cargo_fnc_toggleOpen;
+ * [_vehicle, _crate] call aio_compat_ace_cargo_fnc_toggleOpen;
  *
  * Public: No
  */
@@ -28,7 +28,7 @@ params [["_holder", objNull, [objNull]], ["_item", objNull, [objNull]]];
 
 if (isNull _holder || {isNull _item}) exitWith {};
 
-// Open: close it, with the sound of the crate it is (einv_gui_fnc_closeNested builds the window again).
+// Open: close it, with the sound of the crate it is (aio_gui_fnc_closeNested builds the window again).
 if (EGVAR(gui,opened) findIf {(_x select 1) isEqualTo _item} >= 0) exitWith {
     [_item] call EFUNC(gui,closeNested);
 };
@@ -45,5 +45,5 @@ EGVAR(gui,opened) pushBack [typeOf _item, _item, _holder];
 
 ["open", "", _item] call EFUNC(gui,playSound);
 
-// The window is built once for a run of clicks (einv_gui_fnc_buildSoon).
+// The window is built once for a run of clicks (aio_gui_fnc_buildSoon).
 [] call EFUNC(gui,buildSoon);

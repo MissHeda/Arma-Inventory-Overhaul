@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Writes a unit's hidden holder (fnc_hiddenLists) to the unit, public: einv_storage_hidden travels with the
+ * Writes a unit's hidden holder (fnc_hiddenLists) to the unit, public: aio_storage_hidden travels with the
  * unit to every machine - a looter's window, a Zeus taking it over, the server once its player left - and
  * to whoever joins later. Only the unit's owner writes it (the ops run there, fnc_execute). Empty, the
  * variable goes away.
@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * [player, _data] call einv_storage_fnc_hiddenWrite;
+ * [player, _data] call aio_storage_fnc_hiddenWrite;
  *
  * Public: No
  */

@@ -5,7 +5,7 @@
  * sets for themselves - in two places at once, which share one value:
  *   - CBA: a setting of its own (CBA_fnc_addSetting with isGlobal 1), a row in CBA's Addon Options, category
  *     "Arma Inventory Overhaul - Server", sub-category its topic's (GVAR(topics)). CBA reads its value from the
- *     server, the mission and a cba_settings.sqf, sets the variable (einv_gui_searchTime) at once, runs the
+ *     server, the mission and a cba_settings.sqf, sets the variable (aio_gui_searchTime) at once, runs the
  *     script once the settings are ready and again on every change, on every machine, and raises its
  *     setting-changed event - exactly as for any other CBA setting, so nothing that reads it knows the difference.
  *   - The setup wizard's General page: a control by its type - a switch, a stepper, a drop-down, a text field.
@@ -28,7 +28,7 @@
  * Registered <BOOL>
  *
  * Example:
- * [QGVAR(searchBodies), "CHECKBOX", [LLSTRING(Setting_SearchBodies), LLSTRING(Setting_SearchBodies_Desc)], true] call einv_main_fnc_addSetting;
+ * [QGVAR(searchBodies), "CHECKBOX", [LLSTRING(Setting_SearchBodies), LLSTRING(Setting_SearchBodies_Desc)], true] call aio_main_fnc_addSetting;
  *
  * Public: Yes
  */
@@ -113,7 +113,7 @@ if (_type isEqualTo "EDITBOX" && {_valueInfo isEqualType []}) then {
 
 _entry set ["default", _default];
 
-// The key in the wizard's text: the name without the mod's prefix, "einv_".
+// The key in the wizard's text: the name without the mod's prefix, "aio_".
 private _key = toLowerANSI (_name select [5]);
 
 _entry set ["key", _key];
@@ -128,7 +128,7 @@ GVAR(serverOrder) pushBack _name;
 
 // The CBA setting itself: global, the same for everyone, the server or the mission decides.
 [
-    _name, _type, [_entry get "label", _entry get "tip"], [CBA_SETTINGS_EINV_SERVER, _entry get "subCategory"], _valueInfo, 1, _script
+    _name, _type, [_entry get "label", _entry get "tip"], [CBA_SETTINGS_AIO_SERVER, _entry get "subCategory"], _valueInfo, 1, _script
 ] call CBA_fnc_addSetting;
 
 // CBA has set the variable by now. Should its settings not be loaded yet, the default stands in until they are.

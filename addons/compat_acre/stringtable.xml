@@ -1,46 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="compat_acre">
-        <Key ID="STR_einv_compat_acre_Active">
+        <Key ID="STR_aio_compat_acre_Active">
             <English>Active radio</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_Block">
+        <Key ID="STR_aio_compat_acre_Block">
             <English>Block %1 · Ch %2</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_Channel">
+        <Key ID="STR_aio_compat_acre_Channel">
             <English>Ch %1</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_Frequency">
+        <Key ID="STR_aio_compat_acre_Frequency">
             <English>%1 MHz</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_Inspect_Channel">
+        <Key ID="STR_aio_compat_acre_Inspect_Channel">
             <English>Channel</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_Inspect_Frequency">
+        <Key ID="STR_aio_compat_acre_Inspect_Frequency">
             <English>Frequency</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_Inspect_State">
+        <Key ID="STR_aio_compat_acre_Inspect_State">
             <English>State</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_Menu_MakeActive">
+        <Key ID="STR_aio_compat_acre_Menu_MakeActive">
             <English>Use as active radio</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_Menu_Open">
+        <Key ID="STR_aio_compat_acre_Menu_Open">
             <English>Open radio</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_Net">
+        <Key ID="STR_aio_compat_acre_Net">
             <English>Net %1</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_NotSetUp">
+        <Key ID="STR_aio_compat_acre_NotSetUp">
             <English>Set up once someone carries it</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_Off">
+        <Key ID="STR_aio_compat_acre_Off">
             <English>Switched off</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_On">
+        <Key ID="STR_aio_compat_acre_On">
             <English>Switched on</English>
         </Key>
-        <Key ID="STR_einv_compat_acre_SlotKept">
+        <Key ID="STR_aio_compat_acre_SlotKept">
             <English>ACRE2 keeps this slot - radios go in your storage</English>
         </Key>
     </Package>

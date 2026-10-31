@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * [player] call einv_storage_fnc_queueMigrate;
+ * [player] call aio_storage_fnc_queueMigrate;
  *
  * Public: No
  */

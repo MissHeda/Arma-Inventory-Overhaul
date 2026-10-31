@@ -23,7 +23,7 @@
  * None
  *
  * Example:
- * [[], _handlerId] call einv_hotbar_fnc_hudFrame;
+ * [[], _handlerId] call aio_hotbar_fnc_hudFrame;
  *
  * Public: No
  */

@@ -15,7 +15,7 @@
  *       "nvg" - class name, "" when the slot is empty <STRING>
  *
  * Example:
- * [player] call einv_storage_fnc_getEquipment;
+ * [player] call aio_storage_fnc_getEquipment;
  *
  * Public: Yes
  */

@@ -15,7 +15,7 @@
  * Covered <BOOL>
  *
  * Example:
- * [_display] call einv_gui_fnc_isCovered;
+ * [_display] call aio_gui_fnc_isCovered;
  *
  * Public: No
  */

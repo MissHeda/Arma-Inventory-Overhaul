@@ -18,7 +18,7 @@
  * It was played <BOOL>
  *
  * Example:
- * [player, "GestureReloadMX"] call einv_gui_fnc_reloadGesture;
+ * [player, "GestureReloadMX"] call aio_gui_fnc_reloadGesture;
  *
  * Public: No
  */

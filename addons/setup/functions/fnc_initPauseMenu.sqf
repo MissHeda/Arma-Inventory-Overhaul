@@ -20,7 +20,7 @@
  * None
  *
  * Example:
- * [_display] call einv_setup_fnc_initPauseMenu;
+ * [_display] call aio_setup_fnc_initPauseMenu;
  *
  * Public: No
  */

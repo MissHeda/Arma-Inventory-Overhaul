@@ -9,11 +9,11 @@
  * Checked here first, so the hint says at once what this machine can tell: a living person's gear as
  * the settings say and while in reach (fnc_checkTouch) - their machine asks again -, a uniform, vest or
  * backpack never into itself or into anything lying in it, a backpack never into a backpack
- * (einv_storage_fnc_backpackIntoBackpack), a free spot when no cell is given. The radio slot ACRE2 keeps for itself comes off never
- * (einv_compat_acre_fnc_isFixedSlot - only when that addon is loaded).
+ * (aio_storage_fnc_backpackIntoBackpack), a free spot when no cell is given. The radio slot ACRE2 keeps for itself comes off never
+ * (aio_compat_acre_fnc_isFixedSlot - only when that addon is loaded).
  *
  * "ground" is the surface under the feet, or the vehicle's cargo while seated. A ground pile the window
- * does not show, or none at all, stands for the ground as well (einv_storage_fnc_getGroundHolder, as
+ * does not show, or none at all, stands for the ground as well (aio_storage_fnc_getGroundHolder, as
  * callers used to ask it).
  *
  * Arguments:
@@ -27,7 +27,7 @@
  * Asked for <BOOL>
  *
  * Example:
- * [player, "headgear", backpackContainer player, []] call einv_gui_fnc_doUnequip;
+ * [player, "headgear", backpackContainer player, []] call aio_gui_fnc_doUnequip;
  *
  * Public: No
  */

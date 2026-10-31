@@ -14,7 +14,7 @@
  * The width <NUMBER>
  *
  * Example:
- * [localize "STR_einv_setup_Save", "PuristaMedium"] call einv_setup_fnc_footerButtonW;
+ * [localize "STR_aio_setup_Save", "PuristaMedium"] call aio_setup_fnc_footerButtonW;
  *
  * Public: No
  */

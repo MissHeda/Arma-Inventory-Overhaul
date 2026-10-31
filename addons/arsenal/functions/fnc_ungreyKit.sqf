@@ -4,8 +4,8 @@
  * Author: Miss Heda
  * The rows of Enhanced First Aid Kits' kits tab - its list of what the picked kit may hold, in ACE's right column
  * while that tab is open - greyed or lit by whether the kit in the panel takes one more of the row's item
- * (einv_compat_efak_fnc_canPackNew: the kit may be filled there, that mod's rules for it, and its room). Only
- * while the kit's room is the cells of a grid of its own (einv_compat_efak_fnc_roomMode "cells"): that mod greys
+ * (aio_compat_efak_fnc_canPackNew: the kit may be filled there, that mod's rules for it, and its room). Only
+ * while the kit's room is the cells of a grid of its own (aio_compat_efak_fnc_roomMode "cells"): that mod greys
  * its list by its capacity, which is the kit's room otherwise, and is left alone then. With cells, a row that mod
  * greyed for the capacity is lit where a cell is free - the item is dragged in, as the "+" of that list still goes
  * by the capacity -, and a row it left lit is greyed where no cell is free; the "+" over the row picked is turned
@@ -15,7 +15,7 @@
  * That mod writes its own greying whenever it fills or counts its list (a pick, a click, a change of the kit), so
  * this runs again every KIT_UNGREY_EVERY seconds while the tab is open (fnc_onFrame), and a frame after a row is
  * picked (fnc_onOpened, fnc_ungrey). The kit's answers are kept per class while everything they depend on stays
- * the same (GVAR(kitVerdicts), einv_compat_efak_fnc_arsenalState: its contents, its places, the rules, its lock),
+ * the same (GVAR(kitVerdicts), aio_compat_efak_fnc_arsenalState: its contents, its places, the rules, its lock),
  * so a look again costs a comparison per row, and only a row whose alpha differs is written. New answers are asked
  * in turns of UNGREY_BUDGET seconds a frame, as fnc_ungrey asks ACE's list; a newer pass takes over.
  *
@@ -28,7 +28,7 @@
  * None
  *
  * Example:
- * [_display] call einv_arsenal_fnc_ungreyKit;
+ * [_display] call aio_arsenal_fnc_ungreyKit;
  *
  * Public: No
  */

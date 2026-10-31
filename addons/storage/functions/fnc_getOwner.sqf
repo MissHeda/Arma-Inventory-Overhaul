@@ -18,7 +18,7 @@
  * [unit, "uniform" / "vest" / "backpack"], [objNull, ""] for a container of no unit <ARRAY>
  *
  * Example:
- * [uniformContainer player] call einv_storage_fnc_getOwner;
+ * [uniformContainer player] call aio_storage_fnc_getOwner;
  *
  * Public: No
  */

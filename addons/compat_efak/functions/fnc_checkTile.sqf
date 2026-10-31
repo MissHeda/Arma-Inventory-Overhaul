@@ -2,11 +2,11 @@
 /*
  * Author: Miss Heda
  * Whether the player may move a kit's tile away from where it lies, and if not, why - for the window's
- * moves out of a living person's gear (einv_gui_fnc_startDrag, einv_gui_fnc_contextMenu,
- * einv_gui_fnc_doEquip). A kit in the uniform, vest or backpack another living player wears
+ * moves out of a living person's gear (aio_gui_fnc_startDrag, aio_gui_fnc_contextMenu,
+ * aio_gui_fnc_doEquip). A kit in the uniform, vest or backpack another living player wears
  * (fnc_isPlayerGear) is shown, but neither opened (fnc_canOpen) nor moved, by Mia's rule: the kits of
  * others are off limits here. Any other tile, and a kit anywhere else, is never refused here - the
- * window's own rules for a person's gear still apply (einv_gui_fnc_checkTouch).
+ * window's own rules for a person's gear still apply (aio_gui_fnc_checkTouch).
  *
  * A kit in a container lying in his gear - a vest in his backpack - moves like his other items.
  *
@@ -18,7 +18,7 @@
  * "" when it may move, else the reason the hint shows <STRING>
  *
  * Example:
- * ["efak_IFAK_7", backpackContainer cursorObject] call einv_compat_efak_fnc_checkTile;
+ * ["efak_IFAK_7", backpackContainer cursorObject] call aio_compat_efak_fnc_checkTile;
  *
  * Public: No
  */

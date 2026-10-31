@@ -12,10 +12,10 @@
  * 1: The fields to leave out of its own rules, as the rules write them ("footprint", "stack", "grid", ...) <ARRAY>
  *
  * Return Value:
- * The class as einv_items_fnc_getInfo gives it under those rules <HASHMAP>
+ * The class as aio_items_fnc_getInfo gives it under those rules <HASHMAP>
  *
  * Example:
- * ["B_Carryall_blk", ["grid", "like"]] call einv_setup_fnc_classDefault;
+ * ["B_Carryall_blk", ["grid", "like"]] call aio_setup_fnc_classDefault;
  *
  * Public: No
  */

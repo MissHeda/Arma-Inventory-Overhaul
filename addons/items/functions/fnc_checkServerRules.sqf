@@ -11,13 +11,13 @@
  * every compile and when the server publishes anew.
  *
  * Arguments:
- * 0: What the server published, [settings key, hash, version] <ARRAY> (default: einv_items_rulesHash)
+ * 0: What the server published, [settings key, hash, version] <ARRAY> (default: aio_items_rulesHash)
  *
  * Return Value:
  * None
  *
  * Example:
- * [] call einv_items_fnc_checkServerRules;
+ * [] call aio_items_fnc_checkServerRules;
  *
  * Public: No
  */

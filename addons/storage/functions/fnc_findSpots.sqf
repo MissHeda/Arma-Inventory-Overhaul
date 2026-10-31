@@ -7,7 +7,7 @@
  * upright before turned). Each spot found is taken at once, so several tiles never share a cell. The cells
  * taken are those of every tile of the view that has a count and is no overflow; a shaped item (size=xx/x-)
  * takes only its own cells, holes as it lies, and one in a square box is tried turned too when that takes
- * other cells (einv_items_fnc_footprintAs). A compartment that refuses the item (it accepts only other categories, fnc_blockMode) is
+ * other cells (aio_items_fnc_footprintAs). A compartment that refuses the item (it accepts only other categories, fnc_blockMode) is
  * passed over - a cell asked for in one is not free, the item goes elsewhere -, and a single slot is one spot that takes the item
  * whole: the compartment's box and holes, whatever cell and size were asked for.
  *
@@ -26,7 +26,7 @@
  *   elsewhere - a cell was asked for and the first spot lies on another
  *
  * Example:
- * [_view, "ACE_fieldDressing", [], 1, [2, 0, 0]] call einv_storage_fnc_findSpots;
+ * [_view, "ACE_fieldDressing", [], 1, [2, 0, 0]] call aio_storage_fnc_findSpots;
  *
  * Public: No
  */

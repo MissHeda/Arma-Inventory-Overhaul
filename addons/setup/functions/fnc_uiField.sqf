@@ -22,7 +22,7 @@
  * The controls, the field last <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.2, 0.03], "Closed", "Message", _theme, {params ["_text"]}] call einv_setup_fnc_uiField;
+ * [_display, _group, [0, 0, 0.2, 0.03], "Closed", "Message", _theme, {params ["_text"]}] call aio_setup_fnc_uiField;
  *
  * Public: No
  */

@@ -1,12 +1,12 @@
 /*
  * Author: Miss Heda
- * Checks that the shipped default ruleset (CfgEinvRulesets >> default, the one preset there is) gives every
+ * Checks that the shipped default ruleset (CfgAioRulesets >> default, the one preset there is) gives every
  * item the size and stack, and every container the compartments, it is meant to: the sizes of "expected" below
  * (rifles from 4x2 to 7x2, backpack tiles 4x4, 5x5 and 5x6, the rest as they always were), nothing stacking
  * but the classes of the @stack_* groups with the number of their group and the medical items of the rules that follow
  * them (class=..., ACE, ACM, ACME, EFAK; checked against those rules compiled alone, and a few of them by the stack
  * the play settings of issue #21 give: dressings, vials, cannulas and syringes 5, tourniquets and injectors 4, lozenges and
- * IV lines 10, bags and devices 1; einv_storage_fnc_stackFor multiplies those in a crate), and containers laid out from
+ * IV lines 10, bags and devices 1; aio_storage_fnc_stackFor multiplies those in a crate), and containers laid out from
  * 120 % of their load - a uniform one block 6 wide and 2 to 5 rows high, a vest pouches of 1x2 and 2x2, a backpack one
  * near-square block, crates and vehicles as wide as the columns - with nothing set in the older tables and both
  * sliders on their defaults. Also checks that the default's groups are a partition (an item in two of them
@@ -22,22 +22,22 @@
  * and, with the summary, to the clipboard.
  *
  * Expected: no size, stack, compartment or round-trip differences and no overlaps. Compartment differences
- * marked "caps" come from the limits on what a mod's einv_grids[] may ask for (24 compartments, 400 cells). Also
+ * marked "caps" come from the limits on what a mod's aio_grids[] may ask for (24 compartments, 400 cells). Also
  * checked: a text that names a preset that is gone (base=tarkov, realism, weight) builds on the default, and
  * canvases (grid=aaa/aba/aaa) read and write the same, as does everything else (all > ..., "all" written first
  * wherever it was typed), and categories of the setup's own (category=bandit > name=... picture=...) are registered, merged
  * and refused as the rules say.
  */
 
-private _compiled = ["einv1 base=default", false] call einv_items_fnc_compileRules;
+private _compiled = ["aio1 base=default", false] call aio_items_fnc_compileRules;
 
 // The medical items of ACE, ACM, ACME and Enhanced First Aid Kits (issue #9): the default's rules that name a class
 // (they follow the @stack_* groups) give them sizes and stacks of their own, not the old ones below. Compiled alone,
 // they say what such a class has to come out as; every other class is still checked against the old answers.
-private _medicalRules = (getArray (configFile >> "CfgEinvRulesets" >> "default" >> "rules")) select {
+private _medicalRules = (getArray (configFile >> "CfgAioRulesets" >> "default" >> "rules")) select {
     (_x select [0, 6]) in ["class=", "class~"]
 };
-private _medical = ["einv1 base=none, " + (_medicalRules joinString ", "), false] call einv_items_fnc_compileRules;
+private _medical = ["aio1 base=none, " + (_medicalRules joinString ", "), false] call aio_items_fnc_compileRules;
 private _medicalCache = createHashMap;
 private _cache = createHashMap;
 private _cell = _compiled get "cell";
@@ -62,11 +62,11 @@ private _fnc_count = {
 private _storageCols = 10;
 private _maxCells = 400;
 
-// The sizes the default ships: einv_gridSize[] in config, else by kind and mass.
+// The sizes the default ships: aio_gridSize[] in config, else by kind and mass.
 private _fnc_oldSize = {
     params ["_config", "_kind", "_mass", "_maxLoad", "_count"];
 
-    private _size = getArray (_config >> "einv_gridSize");
+    private _size = getArray (_config >> "aio_gridSize");
 
     if (_size isEqualTypeArray [0, 0] && {(_size select 0) >= 1} && {(_size select 1) >= 1}) then {
         _size = _size apply {floor _x};
@@ -131,19 +131,19 @@ private _fnc_oldSize = {
     [(_size select 0) min _storageCols, _size select 1]
 };
 
-// The stacks the default ships: einv_stackSize in config, else the number of the @stack_* group the class is in,
+// The stacks the default ships: aio_stackSize in config, else the number of the @stack_* group the class is in,
 // else 1.
 private _fnc_oldStack = {
     params ["_config", "_kind", "_size", "_facts"];
 
     private _stack = switch (true) do {
-        case (isNumber (_config >> "einv_stackSize")): {getNumber (_config >> "einv_stackSize")};
+        case (isNumber (_config >> "aio_stackSize")): {getNumber (_config >> "aio_stackSize")};
         default {
             private _number = 1;
             private _memo = createHashMap;
 
             {
-                if ([_facts, [[false, "@", "=", [format ["stack_%1", _x]]]], _compiled, _memo] call einv_items_fnc_matches) exitWith {
+                if ([_facts, [[false, "@", "=", [format ["stack_%1", _x]]]], _compiled, _memo] call aio_items_fnc_matches) exitWith {
                     _number = _x;
                 };
             } forEach [20, 10, 5, 2];
@@ -159,17 +159,17 @@ private _fnc_oldStack = {
     (floor _stack) max 1
 };
 
-// The compartments the default ships: einv_grids[] in config, else einv_slots, else the load.
+// The compartments the default ships: aio_grids[] in config, else aio_slots, else the load.
 private _fnc_oldBlocks = {
     params ["_class", "_kind", "_config", "_maxLoad"];
 
-    private _override = getArray (_config >> "einv_grids");
+    private _override = getArray (_config >> "aio_grids");
 
     if (_override isNotEqualTo [] && {_override findIf {!(_x isEqualTypeArray [0, 0])} < 0}) exitWith {
         _override apply {[((floor (_x select 0)) max 1) min _storageCols, ((floor (_x select 1)) max 1) min 40]}
     };
 
-    private _cells = floor (getNumber (_config >> "einv_slots"));
+    private _cells = floor (getNumber (_config >> "aio_slots"));
     private _given = _cells > 0;
 
     // A fifth more than the load for uniforms, vests and backpacks (the built-in answer), as fnc_blocksFor works out a share.
@@ -262,8 +262,8 @@ private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stac
 
 {
     private _class = _y;
-    private _facts = [_class] call einv_items_fnc_getFacts;
-    private _info = [_class, _compiled, _cache] call einv_items_fnc_getInfo;
+    private _facts = [_class] call aio_items_fnc_getFacts;
+    private _info = [_class, _compiled, _cache] call aio_items_fnc_getInfo;
     private _config = configFile >> (_facts get "root") >> _class;
     private _kind = _facts get "kind";
     private _mass = _facts get "mass";
@@ -271,7 +271,7 @@ private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stac
     _counts set ["classes", (_counts get "classes") + 1];
 
     // The medical list's answer, where one of its rules reaches the class.
-    private _medicalInfo = [_class, _medical, _medicalCache] call einv_items_fnc_getInfo;
+    private _medicalInfo = [_class, _medical, _medicalCache] call aio_items_fnc_getInfo;
     private _medicalSize = (((_medicalInfo get "src") get "footprint") select [0, 4]) isEqualTo "own:";
     private _medicalStack = (((_medicalInfo get "src") get "stack") select [0, 4]) isEqualTo "own:";
 
@@ -303,7 +303,7 @@ private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stac
         // The old compartments in the shape fnc_blocksFor gives now: [cols, rows, holes, pos], none of them
         // shaped or placed.
         private _oldBlocks = ([_class, _blockKind, _config, _facts get "maxLoad"] call _fnc_oldBlocks) apply {[_x select 0, _x select 1, [], []]};
-        private _newBlocks = [_class, _blockKind, _facts get "maxLoad", _info get "grid", _cell] call einv_storage_fnc_blocksFor;
+        private _newBlocks = [_class, _blockKind, _facts get "maxLoad", _info get "grid", _cell] call aio_storage_fnc_blocksFor;
 
         if (_oldBlocks isNotEqualTo _newBlocks) then {
             // Past the new limits, the old compartments could not come out the same.
@@ -321,7 +321,7 @@ private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stac
 
     // Partition
     private _memo = createHashMap;
-    private _in = _groupIds select {[_facts, [[false, "@", "=", [_x]]], _compiled, _memo] call einv_items_fnc_matches};
+    private _in = _groupIds select {[_facts, [[false, "@", "=", [_x]]], _compiled, _memo] call aio_items_fnc_matches};
 
     if (count _in > 1) then {
         ["overlap", format ["OVERLAP %1 (%2, mass %3, rounds %4) is in %5", _class, _kind, _mass, _facts get "rounds", _in]] call _fnc_count;
@@ -337,7 +337,7 @@ private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stac
 
     {
         if (isClass (configFile >> "CfgWeapons" >> _x) || {isClass (configFile >> "CfgMagazines" >> _x)}) then {
-            private _got = ([_x, _compiled, _cache] call einv_items_fnc_getInfo) get "stack";
+            private _got = ([_x, _compiled, _cache] call aio_items_fnc_getInfo) get "stack";
 
             if (_got != _stackWanted) then {
                 ["stack", format ["STACK %1: the stacks for play say %2, now %3", _x, _stackWanted, _got]] call _fnc_count;
@@ -355,19 +355,19 @@ private _groupIds = (_compiled get "groupOrder") - ["medical", "stack_20", "stac
     [10, ["ACM_Lozenge_Fentanyl", "ACME_IVLine", "ACME_YTubing"]]
 ];
 
-// einv_storage_fnc_stackFor: a crate multiplies a class that stacks (FirstAidKit stacks 5 in the default), a worn container,
+// aio_storage_fnc_stackFor: a crate multiplies a class that stacks (FirstAidKit stacks 5 in the default), a worn container,
 // a kit and a class that does not stack (a rifle, a magazine) are not multiplied, and 1 turns it off. The setting is put
 // back afterwards.
-private _stackSaved = missionNamespace getVariable ["einv_storage_stackMultiplier", 1];
+private _stackSaved = missionNamespace getVariable ["aio_storage_stackMultiplier", 1];
 private _crate = createVehicle ["Box_NATO_Ammo_F", [0, 0, 0], [], 0, "CAN_COLLIDE"];
 private _worn = [vestContainer player, backpackContainer player, uniformContainer player] select {!isNull _x};
 
 {
     _x params ["_multiplier", "_holder", "_class", "_wantedStack"];
 
-    missionNamespace setVariable ["einv_storage_stackMultiplier", _multiplier];
+    missionNamespace setVariable ["aio_storage_stackMultiplier", _multiplier];
 
-    private _gotStack = [_holder, _class] call einv_storage_fnc_stackFor;
+    private _gotStack = [_holder, _class] call aio_storage_fnc_stackFor;
 
     if (_gotStack != _wantedStack) then {
         ["stack", format ["STACKFOR x%1 %2 in %3: expected %4, now %5", _multiplier, _class, str _holder, _wantedStack, _gotStack]] call _fnc_count;
@@ -381,39 +381,39 @@ private _worn = [vestContainer player, backpackContainer player, uniformContaine
     [5, objNull, "FirstAidKit", 5]
 ] + (_worn apply {[5, _x, "FirstAidKit", 5]}));
 
-missionNamespace setVariable ["einv_storage_stackMultiplier", _stackSaved];
+missionNamespace setVariable ["aio_storage_stackMultiplier", _stackSaved];
 deleteVehicle _crate;
 
 // ----- Texts read and written again stay the same -----
 
 {
-    private _first = [[_x] call einv_items_fnc_parseRules] call einv_items_fnc_writeRules;
-    private _second = [[_first] call einv_items_fnc_parseRules] call einv_items_fnc_writeRules;
+    private _first = [[_x] call aio_items_fnc_parseRules] call aio_items_fnc_writeRules;
+    private _second = [[_first] call aio_items_fnc_parseRules] call aio_items_fnc_writeRules;
 
     if (_first isNotEqualTo _second) then {
         ["roundTrip", format ["ROUND TRIP %1 -> %2 -> %3", _x, _first, _second]] call _fnc_count;
     };
 } forEach [
     "",
-    "einv1 base=default",
-    "einv1 base=default cell=4, @ak: kind=magazine class~545x39|762x39, @ak > size=1x2, class=ACE_fieldDressing+|ACE_packingBandage+ > stack=20",
+    "aio1 base=default",
+    "aio1 base=default cell=4, @ak: kind=magazine class~545x39|762x39, @ak > size=1x2, class=ACE_fieldDressing+|ACE_packingBandage+ > stack=20",
     "kind=grenade > stack=3 weight=0.4 name=Frag_%28M67%29, kind=vest class~platecarrier > grid=plate:20, kind=backpack load>280 > grid=120%",
-    "einv1 base=none, @mag_rifle: @mag_rifle, @mag_rifle: class=30Rnd_65x39_caseless_green+, !addon~ace_ cat=medical > stack=1, class=B_Carryall_Base+ > grid=6x5+2x3+2x3, size=mass",
+    "aio1 base=none, @mag_rifle: @mag_rifle, @mag_rifle: class=30Rnd_65x39_caseless_green+, !addon~ace_ cat=medical > stack=1, class=B_Carryall_Base+ > grid=6x5+2x3+2x3, size=mass",
     "for=arifle_MX_F > size=1x2, well=CBA_556x45_STANAG > size=1x2, rounds>=100 mass>20 > size=2x3 grid=auto",
     "class=My_Rifle_L > size=xxxx/x---, class=My_Launcher > size=-x-/xxx/---, class=My_Box > shape=xx/xx",
     "class=My_Pack > grid=abbbbbc/abbbbbc/abbbbbc/-bbbbb-/-bbbbb-/-bbbbb-/-bbbbb-, class=My_Ring > grid=2x3+aaa/aba/aaa+1x1, class=My_Row > grid=aaabb",
-    "einv1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4",
+    "aio1 base=none, all > size=1x1 stack=10, kind=uniform|vest|backpack all > grid=6x4",
     "class=My_Kit > icon=1.4, class=My_Bandage+ > icon=1.4@0.1:-0.05 stack=3, kind=grenade > icon=0.5@-0.2:0.2, class=My_Plain > icon=1",
     "class=My_Kit > icon=1.4@0.1,-0.05, stack=3",
     "class=My_Kit > icon=1.4 picture=/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa, class=My_Mag > picture=/my_mod/ui/kit%201_ca.paa",
     "category=bandit > name=Bandit_loot picture=/a3/ui_f/data/gui/cfg/hints/gear_ca.paa, category=weapon > name=Arms, category=zeta, class=My_Pack > cats=zeta+bandit+medical grid=2x2:bandit|medical+1x1:zeta:one"
-] +((getArray (configFile >> "CfgEinvRulesets" >> "default" >> "rules")) apply {"einv1 base=none, " + _x});
+] +((getArray (configFile >> "CfgAioRulesets" >> "default" >> "rules")) apply {"aio1 base=none, " + _x});
 
 {
-    private _back = [[_x] call einv_items_fnc_encodeName] call einv_items_fnc_decodeName;
+    private _back = [[_x] call aio_items_fnc_encodeName] call aio_items_fnc_decodeName;
 
     if (_back isNotEqualTo _x) then {
-        ["roundTrip", format ["NAME %1 -> %2 -> %3", _x, [_x] call einv_items_fnc_encodeName, _back]] call _fnc_count;
+        ["roundTrip", format ["NAME %1 -> %2 -> %3", _x, [_x] call aio_items_fnc_encodeName, _back]] call _fnc_count;
     };
 } forEach ["Field kit", "Frag (M67), 3 pieces", "Verbandpäckchen", "a_b-c.d 100%", "Gerät; ""quoted"""];
 
@@ -422,7 +422,7 @@ deleteVehicle _crate;
 {
     _x params ["_text", "_want"];
 
-    private _rules = ([_text] call einv_items_fnc_parseRules) get "rules";
+    private _rules = ([_text] call aio_items_fnc_parseRules) get "rules";
     private _got = if (_rules isEqualTo []) then {[]} else {((_rules select 0) select 1) getOrDefault ["icon", []]};
 
     if (_got isNotEqualTo _want) then {
@@ -441,7 +441,7 @@ deleteVehicle _crate;
 {
     _x params ["_text", "_want"];
 
-    private _rules = ([_text] call einv_items_fnc_parseRules) get "rules";
+    private _rules = ([_text] call aio_items_fnc_parseRules) get "rules";
     private _got = if (_rules isEqualTo []) then {""} else {((_rules select 0) select 1) getOrDefault ["picture", ""]};
 
     if (_got isNotEqualTo _want) then {
@@ -458,7 +458,7 @@ deleteVehicle _crate;
 // adds to the first, a word cats= would read as a built-in one (tools) and a built-in id with nothing to change are left out, and a
 // category named but never defined is a warning.
 private _categoryText = "category=bandit > name=Bandit_loot, category=tools > name=X, category=medical, category=weapon > name=Arms, category=bandit > picture=/my_mod/ui/bandit_ca.paa, class=My_Item > cats=bandit+ghost";
-private _categoryRules = [_categoryText, false] call einv_items_fnc_compileRules;
+private _categoryRules = [_categoryText, false] call aio_items_fnc_compileRules;
 private _wantIds = ["weapon", "ammo", "grenade", "gear", "medical", "food", "tool", "misc", "bandit"];
 private _banditDef = (_categoryRules get "categoryDefs") getOrDefault ["bandit", []];
 private _weaponDef = (_categoryRules get "categoryDefs") getOrDefault ["weapon", []];
@@ -478,7 +478,7 @@ if (count ((_categoryRules get "warnings") select {(_x find "tools") >= 0 || {(_
 
 // A text that names a preset that is gone still loads, on the default.
 {
-    private _renamed = (["einv1 base=" + _x] call einv_items_fnc_parseRules) get "base";
+    private _renamed = (["aio1 base=" + _x] call aio_items_fnc_parseRules) get "base";
 
     if (_renamed isNotEqualTo "default") then {
         ["roundTrip", format ["ALIAS base=%1 reads as base=%2, not default", _x, _renamed]] call _fnc_count;

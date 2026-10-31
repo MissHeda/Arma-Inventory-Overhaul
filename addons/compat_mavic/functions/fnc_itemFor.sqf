@@ -11,7 +11,7 @@
  * Item class <STRING>
  *
  * Example:
- * [_drone] call einv_compat_mavic_fnc_itemFor;
+ * [_drone] call aio_compat_mavic_fnc_itemFor;
  *
  * Public: No
  */

@@ -15,7 +15,7 @@
  * Arguments:
  * 0: Args, [from, to, entry array, how many (-1 all), cell, separate (default: false), merge into
  *    (default: [])] <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -23,11 +23,11 @@
  *     "Moved", "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason
  *     already in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
- *     (einv_storage_fnc_settle)
+ *     (aio_storage_fnc_settle)
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[_from, _to, _entryArray, -1, []], _context] call einv_storage_fnc_opMove;
+ * [[_from, _to, _entryArray, -1, []], _context] call aio_storage_fnc_opMove;
  *
  * Public: No
  */

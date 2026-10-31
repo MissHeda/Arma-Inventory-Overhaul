@@ -30,7 +30,7 @@
  * None
  *
  * Example:
- * [_display, _group, [0, 0, 0.02, 0.3], _crate, _info, _theme] call einv_gui_fnc_drawGroupStrip;
+ * [_display, _group, [0, 0, 0.02, 0.3], _crate, _info, _theme] call aio_gui_fnc_drawGroupStrip;
  *
  * Public: No
  */
@@ -82,7 +82,7 @@ private _cornerPx = floor (_radius / pixelH);
     ] call FUNC(uiIcon);
 
     // What catches the mouse: the field, and two pixels either side (above and below it lie the neighbours' own).
-    private _hit = [_display, "EINV_Hitbox", _parent, [_left - pixelW * 2, _fieldTop, _width + pixelW * 4, _fieldBottom - _fieldTop]] call FUNC(uiCreate);
+    private _hit = [_display, "AIO_Hitbox", _parent, [_left - pixelW * 2, _fieldTop, _width + pixelW * 4, _fieldBottom - _fieldTop]] call FUNC(uiCreate);
 
     _hit setVariable [QGVAR(key), _holder];
     _hit setVariable [QGVAR(kind), _id];

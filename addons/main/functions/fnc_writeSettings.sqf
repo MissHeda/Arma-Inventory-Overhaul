@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Writes server settings as the setup wizard's short text of them (fnc_parseSettings reads it): the header einv1,
+ * Writes server settings as the setup wizard's short text of them (fnc_parseSettings reads it): the header aio1,
  * then every setting that is not at its default as key=value, in the order they were registered, one canonical
  * way - so two setups that mean the same compare as texts. Nothing at its default is written, and no setting
  * at all gives an empty text. The settings themselves are CBA settings of their own; this text is the wizard's
@@ -14,7 +14,7 @@
  * The text <STRING>
  *
  * Example:
- * [createHashMapFromArray [["einv_gui_searchTime", 0.6]]] call einv_main_fnc_writeSettings;
+ * [createHashMapFromArray [["aio_gui_searchTime", 0.6]]] call aio_main_fnc_writeSettings;
  *
  * Public: Yes
  */
@@ -46,4 +46,4 @@ private _statements = [];
 
 if (_statements isEqualTo []) exitWith {""};
 
-(["einv1"] + _statements) joinString ", "
+(["aio1"] + _statements) joinString ", "

@@ -15,7 +15,7 @@
  * The icon <CONTROL>
  *
  * Example:
- * [_display, controlNull, [0.1, 0.1, 0.02, 0.03], "\z\einv\addons\gui\ui\icon_close_ca.paa", [1, 1, 1, 1]] call einv_gui_fnc_uiIcon;
+ * [_display, controlNull, [0.1, 0.1, 0.02, 0.03], "\z\aio\addons\gui\ui\icon_close_ca.paa", [1, 1, 1, 1]] call aio_gui_fnc_uiIcon;
  *
  * Public: No
  */
@@ -24,7 +24,7 @@ disableSerialization;
 
 params ["_display", "_parent", "_rect", "_texture", ["_color", []]];
 
-private _ctrl = [_display, "EINV_Icon", _parent, _rect] call FUNC(uiCreate);
+private _ctrl = [_display, "AIO_Icon", _parent, _rect] call FUNC(uiCreate);
 _ctrl ctrlSetText _texture;
 
 if (_color isNotEqualTo []) then {

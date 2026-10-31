@@ -1,67 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="compat_efak">
-        <Key ID="STR_einv_compat_efak_ArsenalKit">
+        <Key ID="STR_aio_compat_efak_ArsenalKit">
             <English>Kit</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_ArsenalKitName">
+        <Key ID="STR_aio_compat_efak_ArsenalKitName">
             <English>Kit: %1</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_ArsenalKitTitle">
+        <Key ID="STR_aio_compat_efak_ArsenalKitTitle">
             <English>Kit: %1 (%2/%3)</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_ArsenalLocked">
+        <Key ID="STR_aio_compat_efak_ArsenalLocked">
             <English>Locked: untick "Use CBA default" to change this kit</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_ArsenalReadOnly">
+        <Key ID="STR_aio_compat_efak_ArsenalReadOnly">
             <English>This kit cannot be filled in the arsenal</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_ArsenalRemoveOnly">
+        <Key ID="STR_aio_compat_efak_ArsenalRemoveOnly">
             <English>Items can only be taken out of this kit in the arsenal</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_ArsenalTakeKit">
+        <Key ID="STR_aio_compat_efak_ArsenalTakeKit">
             <English>Take the kit first</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_EmptyFirst">
+        <Key ID="STR_aio_compat_efak_EmptyFirst">
             <English>Empty it first</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_EmptyMagazine">
+        <Key ID="STR_aio_compat_efak_EmptyMagazine">
             <English>An empty magazine stays out of the kit</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_FillCells">
+        <Key ID="STR_aio_compat_efak_FillCells">
             <English>%1 / %2 cells</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_Inspect_Contents">
+        <Key ID="STR_aio_compat_efak_Inspect_Contents">
             <English>Contents</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_Inspect_Empty">
+        <Key ID="STR_aio_compat_efak_Inspect_Empty">
             <English>Empty</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_Inspect_Filled">
+        <Key ID="STR_aio_compat_efak_Inspect_Filled">
             <English>Filled</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_Inspect_More">
+        <Key ID="STR_aio_compat_efak_Inspect_More">
             <English>+%1 more</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_Loading">
+        <Key ID="STR_aio_compat_efak_Loading">
             <English>Loading the kit's contents...</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_NotIntoItself">
+        <Key ID="STR_aio_compat_efak_NotIntoItself">
             <English>A kit cannot go into itself</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_NotYours">
+        <Key ID="STR_aio_compat_efak_NotYours">
             <English>The kits of others are off limits here</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_OwnGearOnly">
+        <Key ID="STR_aio_compat_efak_OwnGearOnly">
             <English>Only your own gear goes straight into a kit</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_Preparing">
+        <Key ID="STR_aio_compat_efak_Preparing">
             <English>The kit is being made ready - try again in a moment</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_RestStays">
+        <Key ID="STR_aio_compat_efak_RestStays">
             <English>Not everything fit - the rest stays in the kit</English>
         </Key>
-        <Key ID="STR_einv_compat_efak_SomeFit">
+        <Key ID="STR_aio_compat_efak_SomeFit">
             <English>Only %1 of %2 fit into the kit</English>
         </Key>
     </Package>

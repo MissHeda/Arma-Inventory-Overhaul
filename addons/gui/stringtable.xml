@@ -1,1347 +1,1359 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="gui">
-        <Key ID="STR_einv_gui_Category_Ammo">
+        <Key ID="STR_aio_gui_Category_Ammo">
             <English>Ammunition</English>
         </Key>
-        <Key ID="STR_einv_gui_Category_Gear">
+        <Key ID="STR_aio_gui_Category_Gear">
             <English>Gear</English>
         </Key>
-        <Key ID="STR_einv_gui_Category_Medical">
+        <Key ID="STR_aio_gui_Category_Medical">
             <English>Medical</English>
         </Key>
-        <Key ID="STR_einv_gui_Category_Misc">
+        <Key ID="STR_aio_gui_Category_Misc">
             <English>Miscellaneous</English>
         </Key>
-        <Key ID="STR_einv_gui_Category_Weapon">
+        <Key ID="STR_aio_gui_Category_Weapon">
             <English>Weapon</English>
         </Key>
-        <Key ID="STR_einv_gui_Close">
+        <Key ID="STR_aio_gui_Close">
             <English>Close</English>
         </Key>
-        <Key ID="STR_einv_gui_Column_Equipment">
+        <Key ID="STR_aio_gui_Column_Equipment">
             <English>Equipment</English>
         </Key>
-        <Key ID="STR_einv_gui_Column_Gear">
+        <Key ID="STR_aio_gui_Column_Gear">
             <English>Gear</English>
         </Key>
-        <Key ID="STR_einv_gui_Column_Loot">
+        <Key ID="STR_aio_gui_Column_Loot">
             <English>Loot</English>
         </Key>
-        <Key ID="STR_einv_gui_Column_LootOf">
+        <Key ID="STR_aio_gui_Column_LootOf">
             <English>Loot - %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Column_Nearby">
+        <Key ID="STR_aio_gui_Column_Nearby">
             <English>Nearby</English>
         </Key>
-        <Key ID="STR_einv_gui_Column_Storage">
+        <Key ID="STR_aio_gui_Column_Storage">
             <English>Your gear</English>
         </Key>
-        <Key ID="STR_einv_gui_Compare_Armor">
+        <Key ID="STR_aio_gui_Compare_Armor">
             <English>Armor (%1)</English>
         </Key>
-        <Key ID="STR_einv_gui_Compare_Cells">
+        <Key ID="STR_aio_gui_Compare_Cells">
             <English>%1 cells</English>
         </Key>
-        <Key ID="STR_einv_gui_Compare_Covers">
+        <Key ID="STR_aio_gui_Compare_Covers">
             <English>Covers</English>
         </Key>
-        <Key ID="STR_einv_gui_Compare_NoArmor">
+        <Key ID="STR_aio_gui_Compare_NoArmor">
             <English>none</English>
         </Key>
-        <Key ID="STR_einv_gui_Compare_Nothing">
+        <Key ID="STR_aio_gui_Compare_Nothing">
             <English>vs. nothing worn</English>
         </Key>
-        <Key ID="STR_einv_gui_Compare_Same">
+        <Key ID="STR_aio_gui_Compare_Same">
             <English>the same as yours</English>
         </Key>
-        <Key ID="STR_einv_gui_Compare_Space">
+        <Key ID="STR_aio_gui_Compare_Space">
             <English>Space</English>
         </Key>
-        <Key ID="STR_einv_gui_Compare_Versus">
+        <Key ID="STR_aio_gui_Compare_Versus">
             <English>vs. %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Compare_Weight">
+        <Key ID="STR_aio_gui_Compare_Weight">
             <English>Weight</English>
         </Key>
-        <Key ID="STR_einv_gui_Drop">
+        <Key ID="STR_aio_gui_Drop">
             <English>Drop</English>
         </Key>
-        <Key ID="STR_einv_gui_Eden_NoSearch">
+        <Key ID="STR_aio_gui_Eden_NoSearch">
             <English>Skip searching</English>
         </Key>
-        <Key ID="STR_einv_gui_Eden_NoSearch_Tooltip">
+        <Key ID="STR_aio_gui_Eden_NoSearch_Tooltip">
             <English>Shows what this object holds at once, without a search. Overrides the server's search settings.</English>
         </Key>
-        <Key ID="STR_einv_gui_Equip">
+        <Key ID="STR_aio_gui_Equip">
             <English>Equip</English>
         </Key>
-        <Key ID="STR_einv_gui_Filter_Placeholder">
+        <Key ID="STR_aio_gui_Filter_Placeholder">
             <English>Search items</English>
         </Key>
-        <Key ID="STR_einv_gui_Filter_Tooltip">
+        <Key ID="STR_aio_gui_Filter_Tooltip">
             <English>Fades everything whose name does not match. Escape empties it.</English>
         </Key>
-        <Key ID="STR_einv_gui_Ground_With">
+        <Key ID="STR_aio_gui_Ground_With">
             <English>Ground - %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Group_All">
+        <Key ID="STR_aio_gui_Group_All">
             <English>All</English>
         </Key>
-        <Key ID="STR_einv_gui_Group_Ammo">
+        <Key ID="STR_aio_gui_Group_Ammo">
             <English>Ammunition</English>
         </Key>
-        <Key ID="STR_einv_gui_Group_Food">
+        <Key ID="STR_aio_gui_Group_Food">
             <English>Food and drink</English>
         </Key>
-        <Key ID="STR_einv_gui_Group_Gear">
+        <Key ID="STR_aio_gui_Group_Gear">
             <English>Gear and clothing</English>
         </Key>
-        <Key ID="STR_einv_gui_Group_Grenade">
+        <Key ID="STR_aio_gui_Group_Grenade">
             <English>Grenades</English>
         </Key>
-        <Key ID="STR_einv_gui_Group_Medical">
+        <Key ID="STR_aio_gui_Group_Medical">
             <English>Medical</English>
         </Key>
-        <Key ID="STR_einv_gui_Group_Misc">
+        <Key ID="STR_aio_gui_Group_Misc">
             <English>Other</English>
         </Key>
-        <Key ID="STR_einv_gui_Group_More">
+        <Key ID="STR_aio_gui_Group_More">
             <English>More categories (%1 of %2)</English>
         </Key>
-        <Key ID="STR_einv_gui_Group_Tool">
+        <Key ID="STR_aio_gui_Group_Tool">
             <English>Tools and electronics</English>
         </Key>
-        <Key ID="STR_einv_gui_Group_Weapon">
+        <Key ID="STR_aio_gui_Group_Weapon">
             <English>Weapons</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_All">
+        <Key ID="STR_aio_gui_Hint_All">
             <English>Middle click: all</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Amount">
+        <Key ID="STR_aio_gui_Hint_Amount">
             <English>Mouse wheel: how many</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_BodyTier">
+        <Key ID="STR_aio_gui_Hint_BodyTier">
             <English>+%1 kg: you will be %2 (%3 kg)</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Empty">
+        <Key ID="STR_aio_gui_Hint_Empty">
             <English>Empty</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Failed">
+        <Key ID="STR_aio_gui_Hint_Failed">
             <English>That could not be moved</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_FoldedFit">
+        <Key ID="STR_aio_gui_Hint_FoldedFit">
             <English>Goes to the first free spot - the folded rows too</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Gone">
+        <Key ID="STR_aio_gui_Hint_Gone">
             <English>Someone else was quicker</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_GroundOpen">
+        <Key ID="STR_aio_gui_Hint_GroundOpen">
             <English>Ctrl+click: open</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_GroundWear">
+        <Key ID="STR_aio_gui_Hint_GroundWear">
             <English>Double click: put on</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Grounded">
+        <Key ID="STR_aio_gui_Hint_Grounded">
             <English>%1 put on the ground - no room any more</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_GroupDrag">
+        <Key ID="STR_aio_gui_Hint_GroupDrag">
             <English>Several items: no turning, whole stacks</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_GroupFits">
+        <Key ID="STR_aio_gui_Hint_GroupFits">
             <English>%1 of %2 fit here</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_GroupNoSlot">
+        <Key ID="STR_aio_gui_Hint_GroupNoSlot">
             <English>Several items cannot go into one slot</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Hidden">
+        <Key ID="STR_aio_gui_Hint_Hidden">
             <English>Not searched yet</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_HiddenFit">
+        <Key ID="STR_aio_gui_Hint_HiddenFit">
             <English>Goes to the first free spot of this box - not onto a hidden item</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Idle">
+        <Key ID="STR_aio_gui_Hint_Idle">
             <English>Point at an item to see what it is</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_IntoItself">
+        <Key ID="STR_aio_gui_Hint_IntoItself">
             <English>It cannot go into itself</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_LookOnly">
+        <Key ID="STR_aio_gui_Hint_LookOnly">
             <English>You may only look at this person's gear</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Merge">
+        <Key ID="STR_aio_gui_Hint_Merge">
             <English>Add to the stack of %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Moved">
+        <Key ID="STR_aio_gui_Hint_Moved">
             <English>It moved meanwhile - try again</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_MovedSome">
+        <Key ID="STR_aio_gui_Hint_MovedSome">
             <English>Moved %1 of %2 - no room for the rest</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_NoAccess">
+        <Key ID="STR_aio_gui_Hint_NoAccess">
             <English>This person cannot be searched</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_NoBackpack">
+        <Key ID="STR_aio_gui_Hint_NoBackpack">
             <English>A backpack does not go into a backpack</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_NoFit">
+        <Key ID="STR_aio_gui_Hint_NoFit">
             <English>That does not go there</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_NoGround">
+        <Key ID="STR_aio_gui_Hint_NoGround">
             <English>Nothing to put it on here</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_NoRoom">
+        <Key ID="STR_aio_gui_Hint_NoRoom">
             <English>No room there</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_NotReady">
+        <Key ID="STR_aio_gui_Hint_NotReady">
             <English>Waiting for the server - try again in a moment</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_NotSearched">
+        <Key ID="STR_aio_gui_Hint_NotSearched">
             <English>%1 not searched yet</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_NowhereToGo">
+        <Key ID="STR_aio_gui_Hint_NowhereToGo">
             <English>No container has room for that</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Only">
+        <Key ID="STR_aio_gui_Hint_Only">
             <English>Only %1 here</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_OutOfReach">
+        <Key ID="STR_aio_gui_Hint_OutOfReach">
             <English>Out of reach</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Overflow">
+        <Key ID="STR_aio_gui_Hint_Overflow">
             <English>Too wide for this grid</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Pages">
+        <Key ID="STR_aio_gui_Hint_Pages">
             <English>PgUp/PgDn: page</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_PlacedElsewhere">
+        <Key ID="STR_aio_gui_Hint_PlacedElsewhere">
             <English>Put elsewhere - that place was just taken</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Queued">
+        <Key ID="STR_aio_gui_Hint_Queued">
             <English>Waiting for your hands - click to cancel</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Returned">
+        <Key ID="STR_aio_gui_Hint_Returned">
             <English>%1 went back - no room any more</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Rotate">
+        <Key ID="STR_aio_gui_Hint_Rotate">
             <English>%1: rotate</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_SearchFirst">
+        <Key ID="STR_aio_gui_Hint_SearchFirst">
             <English>Click: search this first</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Selected">
+        <Key ID="STR_aio_gui_Hint_Selected">
             <English>%1 selected - drag them together, double click to move them over, the drop key drops them</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_SingleSlot">
+        <Key ID="STR_aio_gui_Hint_SingleSlot">
             <English>holds one item, whatever its size</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_StripMove">
+        <Key ID="STR_aio_gui_Hint_StripMove">
             <English>Let go to move it to this hotbar slot</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_StripRemove">
+        <Key ID="STR_aio_gui_Hint_StripRemove">
             <English>Let go here to take it off the hotbar</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_StripStay">
+        <Key ID="STR_aio_gui_Hint_StripStay">
             <English>Let go to leave it where it is</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Swap">
+        <Key ID="STR_aio_gui_Hint_Swap">
             <English>Swap places with %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Taken">
+        <Key ID="STR_aio_gui_Hint_Taken">
             <English>That place was just taken</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_UseAllowed">
+        <Key ID="STR_aio_gui_Hint_UseAllowed">
             <English>Whitelisted: can be used from the %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_UseBlocked">
+        <Key ID="STR_aio_gui_Hint_UseBlocked">
             <English>Cannot be used from the %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_UseHidden">
+        <Key ID="STR_aio_gui_Hint_UseHidden">
             <English>Hidden: kept out of the %1, so nothing else can use it</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_Waiting">
+        <Key ID="STR_aio_gui_Hint_Waiting">
             <English>Still waiting for an answer - showing what is there</English>
         </Key>
-        <Key ID="STR_einv_gui_Hint_WrongKind">
+        <Key ID="STR_aio_gui_Hint_WrongKind">
             <English>This compartment takes other things</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_Attached">
+        <Key ID="STR_aio_gui_Inspect_2D">
+            <English>2D</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_3D">
+            <English>3D</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_3DNoPiP">
+            <English>3D needs Picture-in-Picture - turn it on in the video options</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_3DTip">
+            <English>Drag to turn, middle button to move, wheel to zoom, double click to reset</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_Attached">
             <English>Attached</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_Category">
+        <Key ID="STR_aio_gui_Inspect_Category">
             <English>Category</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_Class">
+        <Key ID="STR_aio_gui_Inspect_Class">
             <English>Class</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_Count">
+        <Key ID="STR_aio_gui_Inspect_Count">
             <English>Count</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_Mod">
+        <Key ID="STR_aio_gui_Inspect_Mod">
             <English>Mod</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_Move">
+        <Key ID="STR_aio_gui_Inspect_Move">
             <English>Hold to move</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_No">
+        <Key ID="STR_aio_gui_Inspect_No">
             <English>No</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_Rounds">
+        <Key ID="STR_aio_gui_Inspect_Rounds">
             <English>Rounds</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_Size">
+        <Key ID="STR_aio_gui_Inspect_Size">
             <English>Size</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_Stackable">
+        <Key ID="STR_aio_gui_Inspect_Stackable">
             <English>Stackable</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_Weight">
+        <Key ID="STR_aio_gui_Inspect_Weight">
             <English>Weight</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_WeightEach">
+        <Key ID="STR_aio_gui_Inspect_WeightEach">
             <English>Weight each</English>
         </Key>
-        <Key ID="STR_einv_gui_Inspect_YesUpTo">
+        <Key ID="STR_aio_gui_Inspect_YesUpTo">
             <English>Yes, up to %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Key_DoubleClick">
+        <Key ID="STR_aio_gui_Key_DoubleClick">
             <English>Double click</English>
         </Key>
-        <Key ID="STR_einv_gui_Key_Escape">
+        <Key ID="STR_aio_gui_Key_Escape">
             <English>Esc</English>
         </Key>
-        <Key ID="STR_einv_gui_Key_LeftClick">
+        <Key ID="STR_aio_gui_Key_LeftClick">
             <English>Left click</English>
         </Key>
-        <Key ID="STR_einv_gui_Key_RightClick">
+        <Key ID="STR_aio_gui_Key_RightClick">
             <English>Right click</English>
         </Key>
-        <Key ID="STR_einv_gui_Key_Scroll">
+        <Key ID="STR_aio_gui_Key_Scroll">
             <English>Scroll</English>
         </Key>
-        <Key ID="STR_einv_gui_Keybind_Drop">
+        <Key ID="STR_aio_gui_Keybind_Drop">
             <English>Drop (inventory window)</English>
         </Key>
-        <Key ID="STR_einv_gui_Keybind_Drop_Tooltip">
+        <Key ID="STR_aio_gui_Keybind_Drop_Tooltip">
             <English>Drops the item under the mouse or the whole selection onto the ground.\nOver a worn slot it takes the item off; on a hotbar slot or ACE Arsenal's panel it empties/takes it out.</English>
         </Key>
-        <Key ID="STR_einv_gui_Keybind_QuickMove">
+        <Key ID="STR_aio_gui_Keybind_QuickMove">
             <English>Quick move (inventory window)</English>
         </Key>
-        <Key ID="STR_einv_gui_Keybind_QuickMove_Tooltip">
+        <Key ID="STR_aio_gui_Keybind_QuickMove_Tooltip">
             <English>Moves the item under the mouse over, as a double click does; selected items move together.\nOpens a uniform, vest or backpack lying in a container.</English>
         </Key>
-        <Key ID="STR_einv_gui_Keybind_Rotate">
+        <Key ID="STR_aio_gui_Keybind_Rotate">
             <English>Rotate (inventory window)</English>
         </Key>
-        <Key ID="STR_einv_gui_Keybind_Rotate_Tooltip">
+        <Key ID="STR_aio_gui_Keybind_Rotate_Tooltip">
             <English>Turns the item you are dragging a quarter round.</English>
         </Key>
-        <Key ID="STR_einv_gui_Load_Next">
+        <Key ID="STR_aio_gui_Load_Next">
             <English>· %1 at %2 kg</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu">
+        <Key ID="STR_aio_gui_Menu">
             <English>Options</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_AttachTo">
+        <Key ID="STR_aio_gui_Menu_AttachTo">
             <English>Attach to %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_CancelQueued">
+        <Key ID="STR_aio_gui_Menu_CancelQueued">
             <English>Cancel</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_CloseContainer">
+        <Key ID="STR_aio_gui_Menu_CloseContainer">
             <English>Close %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_Deselect">
+        <Key ID="STR_aio_gui_Menu_Deselect">
             <English>Deselect</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_Detach">
+        <Key ID="STR_aio_gui_Menu_Detach">
             <English>Take off %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_Inspect">
+        <Key ID="STR_aio_gui_Menu_Inspect">
             <English>Inspect</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_LoadInto">
+        <Key ID="STR_aio_gui_Menu_LoadInto">
             <English>Load into %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_OpenContainer">
+        <Key ID="STR_aio_gui_Menu_OpenContainer">
             <English>Open %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_SelectAll">
+        <Key ID="STR_aio_gui_Menu_SelectAll">
             <English>Select all in %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Menu_Settings">
+        <Key ID="STR_aio_gui_Menu_Settings">
             <English>Settings for %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Notify_Searched">
+        <Key ID="STR_aio_gui_Notify_Searched">
             <English>%1 is going through your gear</English>
         </Key>
-        <Key ID="STR_einv_gui_Only_ammo">
+        <Key ID="STR_aio_gui_Only_ammo">
             <English>magazines</English>
         </Key>
-        <Key ID="STR_einv_gui_Only_food">
+        <Key ID="STR_aio_gui_Only_food">
             <English>food and drink</English>
         </Key>
-        <Key ID="STR_einv_gui_Only_gear">
+        <Key ID="STR_aio_gui_Only_gear">
             <English>gear</English>
         </Key>
-        <Key ID="STR_einv_gui_Only_grenade">
+        <Key ID="STR_aio_gui_Only_grenade">
             <English>grenades and explosives</English>
         </Key>
-        <Key ID="STR_einv_gui_Only_medical">
+        <Key ID="STR_aio_gui_Only_medical">
             <English>medical items</English>
         </Key>
-        <Key ID="STR_einv_gui_Only_misc">
+        <Key ID="STR_aio_gui_Only_misc">
             <English>other items</English>
         </Key>
-        <Key ID="STR_einv_gui_Only_tool">
+        <Key ID="STR_aio_gui_Only_tool">
             <English>tools</English>
         </Key>
-        <Key ID="STR_einv_gui_Only_weapon">
+        <Key ID="STR_aio_gui_Only_weapon">
             <English>weapons and attachments</English>
         </Key>
-        <Key ID="STR_einv_gui_Option_Everyone">
+        <Key ID="STR_aio_gui_Option_Everyone">
             <English>Everyone</English>
         </Key>
-        <Key ID="STR_einv_gui_Option_Helpless">
+        <Key ID="STR_aio_gui_Option_Helpless">
             <English>Unconscious and captives</English>
         </Key>
-        <Key ID="STR_einv_gui_Option_LookOnly">
+        <Key ID="STR_aio_gui_Option_LookOnly">
             <English>Nobody - look only</English>
         </Key>
-        <Key ID="STR_einv_gui_Option_Nobody">
+        <Key ID="STR_aio_gui_Option_Nobody">
             <English>Nobody</English>
         </Key>
-        <Key ID="STR_einv_gui_Option_Unconscious">
+        <Key ID="STR_aio_gui_Option_Unconscious">
             <English>Only the unconscious</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Earlier">
+        <Key ID="STR_aio_gui_Page_Earlier">
             <English>%1 items on earlier pages</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Earlier_One">
+        <Key ID="STR_aio_gui_Page_Earlier_One">
             <English>%1 item on an earlier page</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_First">
+        <Key ID="STR_aio_gui_Page_First">
             <English>First page</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Hits">
+        <Key ID="STR_aio_gui_Page_Hits">
             <English>%1 matches on other pages</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Hits_One">
+        <Key ID="STR_aio_gui_Page_Hits_One">
             <English>%1 match on another page</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Label">
+        <Key ID="STR_aio_gui_Page_Label">
             <English>Page %1 / %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Last_None">
+        <Key ID="STR_aio_gui_Page_Last_None">
             <English>Last page</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Next">
+        <Key ID="STR_aio_gui_Page_Next">
             <English>Next page</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_None">
+        <Key ID="STR_aio_gui_Page_None">
             <English>Nothing of this kind here</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Other">
+        <Key ID="STR_aio_gui_Page_Other">
             <English>+%1 items on other pages</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Other_One">
+        <Key ID="STR_aio_gui_Page_Other_One">
             <English>+%1 item on another page</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Prev">
+        <Key ID="STR_aio_gui_Page_Prev">
             <English>Previous page</English>
         </Key>
-        <Key ID="STR_einv_gui_Page_Queued">
+        <Key ID="STR_aio_gui_Page_Queued">
             <English>%1 queued</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Accent">
+        <Key ID="STR_aio_gui_Palette_Accent">
             <English>Accent</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Accent_Tip">
+        <Key ID="STR_aio_gui_Palette_Accent_Tip">
             <English>Highlights, switches, bars and the icons that are on.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Apply">
+        <Key ID="STR_aio_gui_Palette_Apply">
             <English>Apply</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Blue">
+        <Key ID="STR_aio_gui_Palette_Blue">
             <English>B</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Cells">
+        <Key ID="STR_aio_gui_Palette_Cells">
             <English>Empty cells</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Cells_Tip">
+        <Key ID="STR_aio_gui_Palette_Cells_Tip">
             <English>The empty grid cells and the slot boxes, and how see-through they are. Kept dark enough for what lies on them to stay readable.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Channel_Tip">
+        <Key ID="STR_aio_gui_Palette_Channel_Tip">
             <English>0 to 255. Press Return to apply.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Copied">
+        <Key ID="STR_aio_gui_Palette_Copied">
             <English>Copied to the clipboard</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Copy">
+        <Key ID="STR_aio_gui_Palette_Copy">
             <English>Copy</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Default">
+        <Key ID="STR_aio_gui_Palette_Default">
             <English>Default</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Done">
+        <Key ID="STR_aio_gui_Palette_Done">
             <English>Done</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_End">
+        <Key ID="STR_aio_gui_Palette_End">
             <English>End</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Export">
+        <Key ID="STR_aio_gui_Palette_Export">
             <English>Export</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Export_Tip">
+        <Key ID="STR_aio_gui_Palette_Export_Tip">
             <English>Your colours as text, copied to the clipboard - paste them anywhere to share your look.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Gradient">
+        <Key ID="STR_aio_gui_Palette_Gradient">
             <English>Gradient</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Gradient_Tip">
+        <Key ID="STR_aio_gui_Palette_Gradient_Tip">
             <English>Runs from the Start colour into the End colour, left to right. Click a box to pick its colour.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Green">
+        <Key ID="STR_aio_gui_Palette_Green">
             <English>G</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Group_Controls">
+        <Key ID="STR_aio_gui_Palette_Group_Controls">
             <English>Controls</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Group_Info">
+        <Key ID="STR_aio_gui_Palette_Group_Info">
             <English>Info</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Group_Items">
+        <Key ID="STR_aio_gui_Palette_Group_Items">
             <English>Items</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Group_Surfaces">
+        <Key ID="STR_aio_gui_Palette_Group_Surfaces">
             <English>Surfaces</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Group_Window">
+        <Key ID="STR_aio_gui_Palette_Group_Window">
             <English>Window</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Hex">
+        <Key ID="STR_aio_gui_Palette_Hex">
             <English>Hex</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Hex_Tip">
+        <Key ID="STR_aio_gui_Palette_Hex_Tip">
             <English>A colour code such as #FF8800 or #F80. Press Return to apply.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Import">
+        <Key ID="STR_aio_gui_Palette_Import">
             <English>Import</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_ImportBad">
+        <Key ID="STR_aio_gui_Palette_ImportBad">
             <English>That text holds no colours</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Import_Tip">
+        <Key ID="STR_aio_gui_Palette_Import_Tip">
             <English>Paste colours someone exported (Ctrl+V) and press Apply.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Lines">
+        <Key ID="STR_aio_gui_Palette_Lines">
             <English>Lines</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Lines_Tip">
+        <Key ID="STR_aio_gui_Palette_Lines_Tip">
             <English>The hairlines, and a frame round the panels, the slot boxes and the item tiles.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_MatchAccent">
+        <Key ID="STR_aio_gui_Palette_MatchAccent">
             <English>Match accent</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Off">
+        <Key ID="STR_aio_gui_Palette_Off">
             <English>Off</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_On">
+        <Key ID="STR_aio_gui_Palette_On">
             <English>On</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Panels">
+        <Key ID="STR_aio_gui_Palette_Panels">
             <English>Panels</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Panels_Tip">
+        <Key ID="STR_aio_gui_Palette_Panels_Tip">
             <English>The window's background and how see-through it is. Kept dark so text stays readable.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_PartColour">
+        <Key ID="STR_aio_gui_Palette_PartColour">
             <English>Colour</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_PartColours_Tip">
+        <Key ID="STR_aio_gui_Palette_PartColours_Tip">
             <English>The colours this part's gradient runs between. Unset, it takes the main gradient's start and end.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_PartGradient_Tip">
+        <Key ID="STR_aio_gui_Palette_PartGradient_Tip">
             <English>Whether this part runs in a gradient - the same as its checkbox. Off, it shows in its own colour, where you set one, or as before.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_PartMain">
+        <Key ID="STR_aio_gui_Palette_PartMain">
             <English>Main</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_PartMain_Tip">
+        <Key ID="STR_aio_gui_Palette_PartMain_Tip">
             <English>Back to the main gradient's colours for this part.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_PartPick">
+        <Key ID="STR_aio_gui_Palette_PartPick">
             <English>This part's own colours: the left half its start, the right its end. Click to set it below</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Ammo">
+        <Key ID="STR_aio_gui_Palette_Part_Ammo">
             <English>Ammo counts</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Ammo_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Ammo_Tip">
             <English>Rounds like 30/30 on the magazines' tiles.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Bars">
+        <Key ID="STR_aio_gui_Palette_Part_Bars">
             <English>Bars</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Bars_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Bars_Tip">
             <English>The weight bar, the ammo bars on magazines and the bars on the cards.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Buttons">
+        <Key ID="STR_aio_gui_Palette_Part_Buttons">
             <English>Buttons</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Buttons_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Buttons_Tip">
             <English>The window's buttons: Take all, Sort, the tabs' chips. Never those of the colour and sound panels.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Captions">
+        <Key ID="STR_aio_gui_Palette_Part_Captions">
             <English>Slot captions</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Captions_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Captions_Tip">
             <English>Primary, Headgear, Uniform and the other captions over or in the slots.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Chips">
+        <Key ID="STR_aio_gui_Palette_Part_Chips">
             <English>Buttons and chips</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Chips_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Chips_Tip">
             <English>The surfaces of buttons and chips: Open, Unload, Sort, the caption chips.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Columns">
+        <Key ID="STR_aio_gui_Palette_Part_Columns">
             <English>Column titles</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Columns_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Columns_Tip">
             <English>Your gear, Loot and the names of the boxes at the top of a column.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Hover">
+        <Key ID="STR_aio_gui_Palette_Part_Hover">
             <English>Tooltips</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Hover_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Hover_Tip">
             <English>The name of what you point at, the comparison card and the tips of the buttons.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_KeyHints">
+        <Key ID="STR_aio_gui_Palette_Part_KeyHints">
             <English>Key hints</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_KeyHints_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_KeyHints_Tip">
             <English>The keys and words in the bar at the bottom: Esc Close, F Quick move.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Keys">
+        <Key ID="STR_aio_gui_Palette_Part_Keys">
             <English>Keys</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Keys_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Keys_Tip">
             <English>The weapons' 1, 2, 3, the hotbar's 4 to 0 and the page marks.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Lines">
+        <Key ID="STR_aio_gui_Palette_Part_Lines">
             <English>Header lines</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Lines_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Lines_Tip">
             <English>The line under a header button that is on (the palette, the speaker).</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Menus">
+        <Key ID="STR_aio_gui_Palette_Part_Menus">
             <English>Right-click menu</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Menus_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Menus_Tip">
             <English>The rows of the menu a right click opens.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Names">
+        <Key ID="STR_aio_gui_Palette_Part_Names">
             <English>Item names</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Names_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Names_Tip">
             <English>The names on the tiles, on the inspect card and in a vehicle's cargo.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Notes">
+        <Key ID="STR_aio_gui_Palette_Part_Notes">
             <English>Notes</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Notes_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Notes_Tip">
             <English>The quiet lines: notes, the search field's placeholder, labels on the cards and the version.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Sections">
+        <Key ID="STR_aio_gui_Palette_Part_Sections">
             <English>Sections</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Sections_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Sections_Tip">
             <English>Equipment, Gear and Hotbar.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Stacks">
+        <Key ID="STR_aio_gui_Palette_Part_Stacks">
             <English>Stack counts</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Stacks_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Stacks_Tip">
             <English>How many lie in a stack, and a hotbar slot's count.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Tabs">
+        <Key ID="STR_aio_gui_Palette_Part_Tabs">
             <English>Box tabs</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Tabs_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Tabs_Tip">
             <English>The tabs of the boxes: Uniform, Vest, Backpack, a vehicle's cargo.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Values">
+        <Key ID="STR_aio_gui_Palette_Part_Values">
             <English>Values</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Values_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Values_Tip">
             <English>Loads, free space and the values on the inspect and comparison cards.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_WeaponAmmo">
+        <Key ID="STR_aio_gui_Palette_Part_WeaponAmmo">
             <English>Weapon ammo</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_WeaponAmmo_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_WeaponAmmo_Tip">
             <English>The rounds on the weapons' cards and in their magazine slots: 30/30, 17/17.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Weapons">
+        <Key ID="STR_aio_gui_Palette_Part_Weapons">
             <English>Weapon names</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Weapons_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Weapons_Tip">
             <English>The weapons' names on their cards: MX, P99.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Weight">
+        <Key ID="STR_aio_gui_Palette_Part_Weight">
             <English>Weight</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Weight_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Weight_Tip">
             <English>The weight card: the kilograms, Light or Heavy and the next step.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Window">
+        <Key ID="STR_aio_gui_Palette_Part_Window">
             <English>Window title</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Part_Window_Tip">
+        <Key ID="STR_aio_gui_Palette_Part_Window_Tip">
             <English>The word Inventory at the top left.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Red">
+        <Key ID="STR_aio_gui_Palette_Red">
             <English>R</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_ResetAll">
+        <Key ID="STR_aio_gui_Palette_ResetAll">
             <English>Reset all</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Secondary">
+        <Key ID="STR_aio_gui_Palette_Secondary">
             <English>Secondary</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Secondary_Tip">
+        <Key ID="STR_aio_gui_Palette_Secondary_Tip">
             <English>Tints the caption tabs, chips, buttons, what lights under the mouse, bar tracks and picked rows.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Section_Colours">
+        <Key ID="STR_aio_gui_Palette_Section_Colours">
             <English>Colours</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Section_Surfaces">
+        <Key ID="STR_aio_gui_Palette_Section_Surfaces">
             <English>Surfaces</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Section_Text">
+        <Key ID="STR_aio_gui_Palette_Section_Text">
             <English>Text and gradient</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Start">
+        <Key ID="STR_aio_gui_Palette_Start">
             <English>Start</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Style">
+        <Key ID="STR_aio_gui_Palette_Style">
             <English>Style</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Style_Tip">
+        <Key ID="STR_aio_gui_Palette_Style_Tip">
             <English>Ready-made looks to start from. Changing a row afterwards makes it Custom.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Text">
+        <Key ID="STR_aio_gui_Palette_Text">
             <English>Text</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Text_Tip">
+        <Key ID="STR_aio_gui_Palette_Text_Tip">
             <English>Captions, names and labels, with their dimmer shades. Lightened where it would be hard to read.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Tiles">
+        <Key ID="STR_aio_gui_Palette_Tiles">
             <English>Item tiles</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_TilesNote">
+        <Key ID="STR_aio_gui_Palette_TilesNote">
             <English>Item colours are set per category in the setup (Categories).</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Tiles_Tip">
+        <Key ID="STR_aio_gui_Palette_Tiles_Tip">
             <English>How see-through the item tiles are. Their colours come from the setup, per category.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Title">
+        <Key ID="STR_aio_gui_Palette_Title">
             <English>Colours</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Titles">
+        <Key ID="STR_aio_gui_Palette_Titles">
             <English>Titles</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Titles_Tip">
+        <Key ID="STR_aio_gui_Palette_Titles_Tip">
             <English>The window's title, the column titles, the headings, the name at the mouse and the cards' names. Can run as a gradient.</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Tooltip">
+        <Key ID="STR_aio_gui_Palette_Tooltip">
             <English>Colours and transparency</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_Transparency">
+        <Key ID="STR_aio_gui_Palette_Transparency">
             <English>Transparency</English>
         </Key>
-        <Key ID="STR_einv_gui_Palette_UseArma">
+        <Key ID="STR_aio_gui_Palette_UseArma">
             <English>Use my Arma colour</English>
         </Key>
-        <Key ID="STR_einv_gui_QuickMove">
+        <Key ID="STR_aio_gui_QuickMove">
             <English>Quick move</English>
         </Key>
-        <Key ID="STR_einv_gui_Rows_Hide">
+        <Key ID="STR_aio_gui_Rows_Hide">
             <English>Fold the empty rows away</English>
         </Key>
-        <Key ID="STR_einv_gui_Rows_Show">
+        <Key ID="STR_aio_gui_Rows_Show">
             <English>+%1 empty rows (%2 cells)</English>
         </Key>
-        <Key ID="STR_einv_gui_Rows_Tooltip">
+        <Key ID="STR_aio_gui_Rows_Tooltip">
             <English>The rest of the room - click to show it or to fold it away again</English>
         </Key>
-        <Key ID="STR_einv_gui_Seal_Click">
+        <Key ID="STR_aio_gui_Seal_Click">
             <English>Click to search</English>
         </Key>
-        <Key ID="STR_einv_gui_Seal_Refused">
+        <Key ID="STR_aio_gui_Seal_Refused">
             <English>Search it first</English>
         </Key>
-        <Key ID="STR_einv_gui_Seal_Searching">
+        <Key ID="STR_aio_gui_Seal_Searching">
             <English>Searching...</English>
         </Key>
-        <Key ID="STR_einv_gui_Seal_Stopped">
+        <Key ID="STR_aio_gui_Seal_Stopped">
             <English>Stopped</English>
         </Key>
-        <Key ID="STR_einv_gui_Seal_StoppedClick">
+        <Key ID="STR_aio_gui_Seal_StoppedClick">
             <English>Stopped - click to go on</English>
         </Key>
-        <Key ID="STR_einv_gui_Seal_Unsearched">
+        <Key ID="STR_aio_gui_Seal_Unsearched">
             <English>Unsearched</English>
         </Key>
-        <Key ID="STR_einv_gui_Seal_Waiting">
+        <Key ID="STR_aio_gui_Seal_Waiting">
             <English>Waiting to be searched</English>
         </Key>
-        <Key ID="STR_einv_gui_Section_Close">
+        <Key ID="STR_aio_gui_Section_Close">
             <English>Close</English>
         </Key>
-        <Key ID="STR_einv_gui_Section_OwnedBy">
+        <Key ID="STR_aio_gui_Section_OwnedBy">
             <English>%1 - %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Section_Sort">
+        <Key ID="STR_aio_gui_Section_Sort">
             <English>Sort</English>
         </Key>
-        <Key ID="STR_einv_gui_Section_SortBy">
+        <Key ID="STR_aio_gui_Section_SortBy">
             <English>Sort: %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Section_Toggle">
+        <Key ID="STR_aio_gui_Section_Toggle">
             <English>Fold away or open</English>
         </Key>
-        <Key ID="STR_einv_gui_Select">
+        <Key ID="STR_aio_gui_Select">
             <English>Select</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_CellScale">
+        <Key ID="STR_aio_gui_Setting_CellScale">
             <English>Tile scale</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_CellScale_Desc">
+        <Key ID="STR_aio_gui_Setting_CellScale_Desc">
             <English>Size of cells, pictures and text (default 1.1).\nApplies on the next opening.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_CompareTooltip">
+        <Key ID="STR_aio_gui_Setting_CompareTooltip">
             <English>Compare gear at the mouse</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_CompareTooltip_Desc">
+        <Key ID="STR_aio_gui_Setting_CompareTooltip_Desc">
             <English>A vest, uniform, helmet or backpack at the mouse shows how it differs from the one you wear.\nGreen is better, red worse.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_DebugTiming">
+        <Key ID="STR_aio_gui_Setting_DebugTiming">
             <English>Log window timings (debug)</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_DebugTiming_Desc">
+        <Key ID="STR_aio_gui_Setting_DebugTiming_Desc">
             <English>Writes build, redraw and frame timings and search and drag costs to the RPT, for FPS reports.\nOff in play.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_HandDrop">
+        <Key ID="STR_aio_gui_Setting_HandDrop">
             <English>Time to drop an item</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_HandDrop_Desc">
+        <Key ID="STR_aio_gui_Setting_HandDrop_Desc">
             <English>Seconds the hands are busy dropping one item (drop key, Drop in the menu), one after another.
 0 drops at once.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_HandEquip">
+        <Key ID="STR_aio_gui_Setting_HandEquip">
             <English>Time to put on or take off</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_HandEquip_Desc">
+        <Key ID="STR_aio_gui_Setting_HandEquip_Desc">
             <English>Seconds the hands need to put an item on or take it off.\n0 is instant; dragging never waits.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_HandMove">
+        <Key ID="STR_aio_gui_Setting_HandMove">
             <English>Time to move to another container</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_HandMove_Desc">
+        <Key ID="STR_aio_gui_Setting_HandMove_Desc">
             <English>Seconds the hands are busy moving one item to another container (quick move, group moves).
 0 moves at once; a drag never waits.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_LootSide">
+        <Key ID="STR_aio_gui_Setting_LootSide">
             <English>Where other storage opens</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_LootSide_Desc">
+        <Key ID="STR_aio_gui_Setting_LootSide_Desc">
             <English>Where the loot column opens: beside your storage,\nor at the right edge with your storage moving aside.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_LootSide_Left">
+        <Key ID="STR_aio_gui_Setting_LootSide_Left">
             <English>Left of my storage - my storage stays put</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_LootSide_Right">
+        <Key ID="STR_aio_gui_Setting_LootSide_Right">
             <English>Right of my storage - my storage moves aside</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_MagazineFillBar">
+        <Key ID="STR_aio_gui_Setting_MagazineFillBar">
             <English>Fill bar on magazines</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_MagazineFillBar_Desc">
+        <Key ID="STR_aio_gui_Setting_MagazineFillBar_Desc">
             <English>A thin fill bar on magazines that are not full.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_MagazineText">
+        <Key ID="STR_aio_gui_Setting_MagazineText">
             <English>Rounds on magazines</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_MagazineText_Desc">
+        <Key ID="STR_aio_gui_Setting_MagazineText_Desc">
             <English>Rounds left as text ("17/30") on magazine tiles.\nOff: the fill bar alone.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_MoveToStop">
+        <Key ID="STR_aio_gui_Setting_MoveToStop">
             <English>Moving stops looting</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_MoveToStop_Desc">
+        <Key ID="STR_aio_gui_Setting_MoveToStop_Desc">
             <English>A movement key pressed while looting or searching closes the window and stops the search.\nOff: movement keys do nothing in the window.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PageRows">
+        <Key ID="STR_aio_gui_Setting_PageRows">
             <English>Rows per page of a container</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PageRows_Desc">
+        <Key ID="STR_aio_gui_Setting_PageRows_Desc">
             <English>Rows shown at a time for tall crates and vehicles (default 10).\n0 or 40 shows everything. Loot only.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PaletteText">
+        <Key ID="STR_aio_gui_Setting_PaletteText">
             <English>Colours (text)</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PaletteText_Desc">
+        <Key ID="STR_aio_gui_Setting_PaletteText_Desc">
             <English>Your colours as text. Copy to share,\npaste to wear someone else's.\nForced by the server: everyone gets them.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PersonItems">
+        <Key ID="STR_aio_gui_Setting_PersonItems">
             <English>Take and put items</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PersonItems_Desc">
+        <Key ID="STR_aio_gui_Setting_PersonItems_Desc">
             <English>Who may take items out of a living person's uniform, vest and backpack, and put items in.\nNobody: the gear can only be looked at.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PersonNotify">
+        <Key ID="STR_aio_gui_Setting_PersonNotify">
             <English>Tell the searched player</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PersonNotify_Desc">
+        <Key ID="STR_aio_gui_Setting_PersonNotify_Desc">
             <English>Tell a player who goes through their gear;\nnearby players hear ACE's zipper.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PersonOpen">
+        <Key ID="STR_aio_gui_Setting_PersonOpen">
             <English>Open the whole person</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PersonOpen_Desc">
+        <Key ID="STR_aio_gui_Setting_PersonOpen_Desc">
             <English>Whose gear opens fully while alive; others only by the backpack.\nUnconscious players always open fully.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PersonWorn">
+        <Key ID="STR_aio_gui_Setting_PersonWorn">
             <English>Take off worn gear</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PersonWorn_Desc">
+        <Key ID="STR_aio_gui_Setting_PersonWorn_Desc">
             <English>Who may take off what a living person wears.\nBodies can always be stripped.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PlayerColours">
+        <Key ID="STR_aio_gui_Setting_PlayerColours">
             <English>Players may pick their colours</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_PlayerColours_Desc">
+        <Key ID="STR_aio_gui_Setting_PlayerColours_Desc">
             <English>Players get the colour panel in the header.\nOff: everyone sees the default look.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchBodies">
+        <Key ID="STR_aio_gui_Setting_SearchBodies">
             <English>Search bodies</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchBodies_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchBodies_Desc">
             <English>What a body carries stays a sealed "Unsearched" box until it has been searched - also once dropped.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchContainers">
+        <Key ID="STR_aio_gui_Setting_SearchContainers">
             <English>Search crates and vehicles</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchContainers_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchContainers_Desc">
             <English>Crates and vehicles stay "Unsearched" until searched.\nSkip one in Eden or with Zeus.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchGround">
+        <Key ID="STR_aio_gui_Setting_SearchGround">
             <English>Search the ground</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchGround_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchGround_Desc">
             <English>A pile on the ground stays a sealed "Unsearched" box until it has been searched.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchOnClick">
+        <Key ID="STR_aio_gui_Setting_SearchOnClick">
             <English>Search starts on click</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchOnClick_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchOnClick_Desc">
             <English>A box is searched once its Search button is clicked; several boxes can search at the same time.\nOff: every box starts searching by itself.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchPersons">
+        <Key ID="STR_aio_gui_Setting_SearchPersons">
             <English>Search living persons</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchPersons_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchPersons_Desc">
             <English>What a living person carries stays sealed until searched, awake, unconscious or captive.\nBodies follow "Search bodies".</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTime">
+        <Key ID="STR_aio_gui_Setting_SearchTime">
             <English>Search time per cell</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeBackpack">
+        <Key ID="STR_aio_gui_Setting_SearchTimeBackpack">
             <English>Search time: backpacks</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeBackpack_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchTimeBackpack_Desc">
             <English>Times the search time per cell for a backpack, worn or lying anywhere: 1 the same, 2 twice as long.\n0 shows a backpack's contents at once.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeBody">
+        <Key ID="STR_aio_gui_Setting_SearchTimeBody">
             <English>Search time: bodies</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeBody_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchTimeBody_Desc">
             <English>Search time factor for bodies (1 normal, 2 double, 0 instant).</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeCrate">
+        <Key ID="STR_aio_gui_Setting_SearchTimeCrate">
             <English>Search time: crates</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeCrate_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchTimeCrate_Desc">
             <English>Times the search time per cell for a crate or box: 1 the same, 2 twice as long.\n0 shows a crate's contents at once.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeGround">
+        <Key ID="STR_aio_gui_Setting_SearchTimeGround">
             <English>Search time: ground</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeGround_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchTimeGround_Desc">
             <English>Times the search time per cell for a pile on the ground (needs "Search the ground"): 1 the same.\n0 shows the ground at once.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeUniform">
+        <Key ID="STR_aio_gui_Setting_SearchTimeUniform">
             <English>Search time: uniforms</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeUniform_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchTimeUniform_Desc">
             <English>Search time factor for uniforms (1 normal, 2 double, 0 instant).</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeVehicle">
+        <Key ID="STR_aio_gui_Setting_SearchTimeVehicle">
             <English>Search time: vehicles</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeVehicle_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchTimeVehicle_Desc">
             <English>Search time factor for vehicles (1 normal, 2 double, 0 instant).</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeVest">
+        <Key ID="STR_aio_gui_Setting_SearchTimeVest">
             <English>Search time: vests</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTimeVest_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchTimeVest_Desc">
             <English>Times the search time per cell for a vest, worn or lying anywhere: 1 the same, 2 twice as long.\n0 shows a vest's contents at once.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchTime_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchTime_Desc">
             <English>Seconds to search one cell of loot; bigger items take longer.\n0 shows everything at once.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchZeus">
+        <Key ID="STR_aio_gui_Setting_SearchZeus">
             <English>Search Zeus-placed crates and vehicles</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SearchZeus_Desc">
+        <Key ID="STR_aio_gui_Setting_SearchZeus_Desc">
             <English>Crates and vehicles placed with Zeus are searched like any other.\nOff: they show their loot at once. Needs "Search crates and vehicles" on.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_ShowNearby">
+        <Key ID="STR_aio_gui_Setting_ShowNearby">
             <English>Show everything nearby</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_ShowNearby_Desc">
+        <Key ID="STR_aio_gui_Setting_ShowNearby_Desc">
             <English>Show piles and crates within reach in the loot column.\nOff: only what you opened.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SoundsWorld">
+        <Key ID="STR_aio_gui_Setting_SoundsWorld">
             <English>Others hear looting</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_SoundsWorld_Desc">
+        <Key ID="STR_aio_gui_Setting_SoundsWorld_Desc">
             <English>Players nearby hear looting (10 to 20 m).\nOff: only the looter hears it.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_TileNames">
+        <Key ID="STR_aio_gui_Setting_TileNames">
             <English>Item names on tiles</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_TileNames_Desc">
+        <Key ID="STR_aio_gui_Setting_TileNames_Desc">
             <English>Short item names on tiles.\nOff: picture only, the name shows on hover.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_WaitDrop">
+        <Key ID="STR_aio_gui_Setting_WaitDrop">
             <English>Dropping waits</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_WaitDrop_Desc">
+        <Key ID="STR_aio_gui_Setting_WaitDrop_Desc">
             <English>Whether the drop key and Drop in the menu take the hands' time (time to drop an item).
 Off drops at once; a drag never waits.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_WaitEquip">
+        <Key ID="STR_aio_gui_Setting_WaitEquip">
             <English>Equipping other items waits</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_WaitEquip_Desc">
+        <Key ID="STR_aio_gui_Setting_WaitEquip_Desc">
             <English>Goggles, NVGs, binoculars and weapon parts take the hands' time too.\nOff: instant.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_WaitMove">
+        <Key ID="STR_aio_gui_Setting_WaitMove">
             <English>Quick move waits</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_WaitMove_Desc">
+        <Key ID="STR_aio_gui_Setting_WaitMove_Desc">
             <English>Whether the quick move, a double click and a group quick move take the hands' time.
 Off moves them at once; a drag never waits.</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_WaitWorn">
+        <Key ID="STR_aio_gui_Setting_WaitWorn">
             <English>Uniform, vest, backpack and helmet wait</English>
         </Key>
-        <Key ID="STR_einv_gui_Setting_WaitWorn_Desc">
+        <Key ID="STR_aio_gui_Setting_WaitWorn_Desc">
             <English>Whether putting on and taking off a uniform, vest, backpack or headgear takes the hands' time.
 Off does it at once; a drag never waits.</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Backpack">
+        <Key ID="STR_aio_gui_Slot_Backpack">
             <English>Backpack</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Binocular">
+        <Key ID="STR_aio_gui_Slot_Binocular">
             <English>Binocular</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Bipod">
+        <Key ID="STR_aio_gui_Slot_Bipod">
             <English>Bipod</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Compass">
+        <Key ID="STR_aio_gui_Slot_Compass">
             <English>Compass</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_GPS">
+        <Key ID="STR_aio_gui_Slot_GPS">
             <English>GPS</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Goggles">
+        <Key ID="STR_aio_gui_Slot_Goggles">
             <English>Goggles</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Handgun">
+        <Key ID="STR_aio_gui_Slot_Handgun">
             <English>Handgun</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Headgear">
+        <Key ID="STR_aio_gui_Slot_Headgear">
             <English>Headgear</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Launcher">
+        <Key ID="STR_aio_gui_Slot_Launcher">
             <English>Launcher</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Magazine">
+        <Key ID="STR_aio_gui_Slot_Magazine">
             <English>Magazine</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Magazine2">
+        <Key ID="STR_aio_gui_Slot_Magazine2">
             <English>Second magazine</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Map">
+        <Key ID="STR_aio_gui_Slot_Map">
             <English>Map</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Muzzle">
+        <Key ID="STR_aio_gui_Slot_Muzzle">
             <English>Muzzle</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_NVG">
+        <Key ID="STR_aio_gui_Slot_NVG">
             <English>Night vision</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Optic">
+        <Key ID="STR_aio_gui_Slot_Optic">
             <English>Optic</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Primary">
+        <Key ID="STR_aio_gui_Slot_Primary">
             <English>Primary</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Radio">
+        <Key ID="STR_aio_gui_Slot_Radio">
             <English>Radio</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Rail">
+        <Key ID="STR_aio_gui_Slot_Rail">
             <English>Rail</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Uniform">
+        <Key ID="STR_aio_gui_Slot_Uniform">
             <English>Uniform</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Vest">
+        <Key ID="STR_aio_gui_Slot_Vest">
             <English>Vest</English>
         </Key>
-        <Key ID="STR_einv_gui_Slot_Watch">
+        <Key ID="STR_aio_gui_Slot_Watch">
             <English>Watch</English>
         </Key>
-        <Key ID="STR_einv_gui_Sort_Compact_Tooltip">
+        <Key ID="STR_aio_gui_Sort_Compact_Tooltip">
             <English>%1 - click for %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Sort_Name">
+        <Key ID="STR_aio_gui_Sort_Name">
             <English>Name</English>
         </Key>
-        <Key ID="STR_einv_gui_Sort_Name_Next">
+        <Key ID="STR_aio_gui_Sort_Name_Next">
             <English>Next click: sorts everything in here by name</English>
         </Key>
-        <Key ID="STR_einv_gui_Sort_Size">
+        <Key ID="STR_aio_gui_Sort_Size">
             <English>Size</English>
         </Key>
-        <Key ID="STR_einv_gui_Sort_Size_Next">
+        <Key ID="STR_aio_gui_Sort_Size_Next">
             <English>Next click: sorts everything in here by size, largest first</English>
         </Key>
-        <Key ID="STR_einv_gui_Sort_Type">
+        <Key ID="STR_aio_gui_Sort_Type">
             <English>Type</English>
         </Key>
-        <Key ID="STR_einv_gui_Sort_Type_Next">
+        <Key ID="STR_aio_gui_Sort_Type_Next">
             <English>Next click: sorts everything in here by kind - weapons, ammo, gear, medical, the rest</English>
         </Key>
-        <Key ID="STR_einv_gui_Sort_Weight">
+        <Key ID="STR_aio_gui_Sort_Weight">
             <English>Weight</English>
         </Key>
-        <Key ID="STR_einv_gui_Sort_Weight_Next">
+        <Key ID="STR_aio_gui_Sort_Weight_Next">
             <English>Next click: sorts everything in here by weight, heaviest first</English>
         </Key>
-        <Key ID="STR_einv_gui_Sound_Containers">
+        <Key ID="STR_aio_gui_Sound_Containers">
             <English>Opening containers</English>
         </Key>
-        <Key ID="STR_einv_gui_Sound_Magazines">
+        <Key ID="STR_aio_gui_Sound_Magazines">
             <English>Magazines</English>
         </Key>
-        <Key ID="STR_einv_gui_Sound_Moves">
+        <Key ID="STR_aio_gui_Sound_Moves">
             <English>Moving items</English>
         </Key>
-        <Key ID="STR_einv_gui_Sound_Other">
+        <Key ID="STR_aio_gui_Sound_Other">
             <English>Other</English>
         </Key>
-        <Key ID="STR_einv_gui_Sound_Search">
+        <Key ID="STR_aio_gui_Sound_Search">
             <English>Searching</English>
         </Key>
-        <Key ID="STR_einv_gui_Sound_Title">
+        <Key ID="STR_aio_gui_Sound_Title">
             <English>Sounds</English>
         </Key>
-        <Key ID="STR_einv_gui_Sound_Tooltip">
+        <Key ID="STR_aio_gui_Sound_Tooltip">
             <English>Sound volumes (right click: mute or unmute all)</English>
         </Key>
-        <Key ID="STR_einv_gui_Stat_Weight">
+        <Key ID="STR_aio_gui_Stat_Weight">
             <English>Weight</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_Drop">
+        <Key ID="STR_aio_gui_Status_Drop">
             <English>Dropping items %1 / %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_Gear">
+        <Key ID="STR_aio_gui_Status_Gear">
             <English>Changing gear %1 / %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_Grab">
+        <Key ID="STR_aio_gui_Status_Grab">
             <English>Grabbing items %1 / %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_Idle">
+        <Key ID="STR_aio_gui_Status_Idle">
             <English>Unsearched %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_Move">
+        <Key ID="STR_aio_gui_Status_Move">
             <English>Moving items %1 / %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_Put">
+        <Key ID="STR_aio_gui_Status_Put">
             <English>Putting items away %1 / %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_Resume">
+        <Key ID="STR_aio_gui_Status_Resume">
             <English>Search</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_ResumeSearch">
+        <Key ID="STR_aio_gui_Status_ResumeSearch">
             <English>Search this box again</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_Search">
+        <Key ID="STR_aio_gui_Status_Search">
             <English>Searching %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_StartSearch">
+        <Key ID="STR_aio_gui_Status_StartSearch">
             <English>Search this box</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_StopHands">
+        <Key ID="STR_aio_gui_Status_StopHands">
             <English>Cancel what still waits</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_StopSearch">
+        <Key ID="STR_aio_gui_Status_StopSearch">
             <English>Stop searching this box</English>
         </Key>
-        <Key ID="STR_einv_gui_Status_Stopped">
+        <Key ID="STR_aio_gui_Status_Stopped">
             <English>Stopped %1</English>
         </Key>
-        <Key ID="STR_einv_gui_Storage_Empty">
+        <Key ID="STR_aio_gui_Storage_Empty">
             <English>No uniform, vest or backpack</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_Apex">
+        <Key ID="STR_aio_gui_Style_Apex">
             <English>Apex</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_Arma">
+        <Key ID="STR_aio_gui_Style_Arma">
             <English>Arma 3</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_Classic">
+        <Key ID="STR_aio_gui_Style_Classic">
             <English>Classic (default)</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_Contact">
+        <Key ID="STR_aio_gui_Style_Contact">
             <English>Contact</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_Custom">
+        <Key ID="STR_aio_gui_Style_Custom">
             <English>Custom</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_Jets">
+        <Key ID="STR_aio_gui_Style_Jets">
             <English>Jets</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_LawsOfWar">
+        <Key ID="STR_aio_gui_Style_LawsOfWar">
             <English>Laws of War</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_Modern">
+        <Key ID="STR_aio_gui_Style_Modern">
             <English>Modern</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_ModernGradient">
+        <Key ID="STR_aio_gui_Style_ModernGradient">
             <English>Modern gradient</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_Stealth">
+        <Key ID="STR_aio_gui_Style_Stealth">
             <English>Night vision</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_Tactical">
+        <Key ID="STR_aio_gui_Style_Tactical">
             <English>Tactical</English>
         </Key>
-        <Key ID="STR_einv_gui_Style_Tanks">
+        <Key ID="STR_aio_gui_Style_Tanks">
             <English>Tanks</English>
         </Key>
-        <Key ID="STR_einv_gui_SubCategory_General">
+        <Key ID="STR_aio_gui_SubCategory_General">
             <English>General</English>
         </Key>
-        <Key ID="STR_einv_gui_SubCategory_Magazines">
+        <Key ID="STR_aio_gui_SubCategory_Magazines">
             <English>Magazines</English>
         </Key>
-        <Key ID="STR_einv_gui_SubCategory_Nearby">
+        <Key ID="STR_aio_gui_SubCategory_Nearby">
             <English>Nearby</English>
         </Key>
-        <Key ID="STR_einv_gui_SubCategory_Searching">
+        <Key ID="STR_aio_gui_SubCategory_Searching">
             <English>Searching</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_Backpack">
+        <Key ID="STR_aio_gui_Tarkov_Backpack">
             <English>Backpack</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_Binocular">
+        <Key ID="STR_aio_gui_Tarkov_Binocular">
             <English>Binocular</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_BodyArmor">
+        <Key ID="STR_aio_gui_Tarkov_BodyArmor">
             <English>Body armor</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_Compass">
+        <Key ID="STR_aio_gui_Tarkov_Compass">
             <English>Compass</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_Earpiece">
+        <Key ID="STR_aio_gui_Tarkov_Earpiece">
             <English>Radio</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_FaceCover">
+        <Key ID="STR_aio_gui_Tarkov_FaceCover">
             <English>Face cover</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_Gps">
+        <Key ID="STR_aio_gui_Tarkov_Gps">
             <English>GPS</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_Headwear">
+        <Key ID="STR_aio_gui_Tarkov_Headwear">
             <English>Headwear</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_Holster">
+        <Key ID="STR_aio_gui_Tarkov_Holster">
             <English>Holster</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_Map">
+        <Key ID="STR_aio_gui_Tarkov_Map">
             <English>Map</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_OnBack">
+        <Key ID="STR_aio_gui_Tarkov_OnBack">
             <English>On back</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_OnSling">
+        <Key ID="STR_aio_gui_Tarkov_OnSling">
             <English>On sling</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_Pockets">
+        <Key ID="STR_aio_gui_Tarkov_Pockets">
             <English>Uniform</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_TacticalRig">
+        <Key ID="STR_aio_gui_Tarkov_TacticalRig">
             <English>Vest</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_Uniform">
+        <Key ID="STR_aio_gui_Tarkov_Uniform">
             <English>Uniform</English>
         </Key>
-        <Key ID="STR_einv_gui_Tarkov_Watch">
+        <Key ID="STR_aio_gui_Tarkov_Watch">
             <English>Watch</English>
         </Key>
-        <Key ID="STR_einv_gui_Tier_Effect">
+        <Key ID="STR_aio_gui_Tier_Effect">
             <English>%1 · %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Tier_From">
+        <Key ID="STR_aio_gui_Tier_From">
             <English>%1 from %2 kg</English>
         </Key>
-        <Key ID="STR_einv_gui_Tier_Now">
+        <Key ID="STR_aio_gui_Tier_Now">
             <English>%1 kg - %2</English>
         </Key>
-        <Key ID="STR_einv_gui_Tier_NowDesc">
+        <Key ID="STR_aio_gui_Tier_NowDesc">
             <English>%1 kg - %2: %3</English>
         </Key>
-        <Key ID="STR_einv_gui_Title">
+        <Key ID="STR_aio_gui_Title">
             <English>Inventory</English>
         </Key>
-        <Key ID="STR_einv_gui_Zone_Arms">
+        <Key ID="STR_aio_gui_Zone_Arms">
             <English>arms</English>
         </Key>
-        <Key ID="STR_einv_gui_Zone_Chest">
+        <Key ID="STR_aio_gui_Zone_Chest">
             <English>chest</English>
         </Key>
-        <Key ID="STR_einv_gui_Zone_Face">
+        <Key ID="STR_aio_gui_Zone_Face">
             <English>face</English>
         </Key>
-        <Key ID="STR_einv_gui_Zone_Head">
+        <Key ID="STR_aio_gui_Zone_Head">
             <English>head</English>
         </Key>
-        <Key ID="STR_einv_gui_Zone_Legs">
+        <Key ID="STR_aio_gui_Zone_Legs">
             <English>legs</English>
         </Key>
-        <Key ID="STR_einv_gui_Zone_Neck">
+        <Key ID="STR_aio_gui_Zone_Neck">
             <English>neck</English>
         </Key>
-        <Key ID="STR_einv_gui_Zone_Pelvis">
+        <Key ID="STR_aio_gui_Zone_Pelvis">
             <English>pelvis</English>
         </Key>
-        <Key ID="STR_einv_gui_Zone_Stomach">
+        <Key ID="STR_aio_gui_Zone_Stomach">
             <English>stomach</English>
         </Key>
     </Package>

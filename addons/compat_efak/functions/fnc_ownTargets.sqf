@@ -12,7 +12,7 @@
  * Container objects <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7"] call einv_compat_efak_fnc_ownTargets;
+ * ["efak_IFAK_7"] call aio_compat_efak_fnc_ownTargets;
  *
  * Public: No
  */

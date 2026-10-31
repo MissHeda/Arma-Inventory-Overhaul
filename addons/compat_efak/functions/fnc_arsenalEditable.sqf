@@ -21,7 +21,7 @@
  * Why not, "" when it may <STRING>
  *
  * Example:
- * ["efak_IFAK_7", false] call einv_compat_efak_fnc_arsenalEditable;
+ * ["efak_IFAK_7", false] call aio_compat_efak_fnc_arsenalEditable;
  *
  * Public: No
  */

@@ -13,7 +13,7 @@
  * Rows [[label, value], ...] - a label of "" continues the one above <ARRAY>
  *
  * Example:
- * ["efak_IFAK_7"] call einv_compat_efak_fnc_inspectRows;
+ * ["efak_IFAK_7"] call aio_compat_efak_fnc_inspectRows;
  *
  * Public: No
  */

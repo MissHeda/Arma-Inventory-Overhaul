@@ -19,7 +19,7 @@
  * Put on the slot <BOOL>
  *
  * Example:
- * [1, "ACE_elasticBandage"] call einv_hotbar_fnc_bind;
+ * [1, "ACE_elasticBandage"] call aio_hotbar_fnc_bind;
  *
  * Public: Yes
  */

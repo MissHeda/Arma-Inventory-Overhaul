@@ -19,7 +19,7 @@
  * Payload (fnc_hiddenPayload), [] when the holder has none <ARRAY>
  *
  * Example:
- * [backpackContainer player, "HandGrenade", 1, 1] call einv_storage_fnc_hiddenTake;
+ * [backpackContainer player, "HandGrenade", 1, 1] call aio_storage_fnc_hiddenTake;
  *
  * Public: No
  */

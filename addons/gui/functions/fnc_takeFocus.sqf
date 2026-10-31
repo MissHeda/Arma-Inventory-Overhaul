@@ -16,7 +16,7 @@
  * The focus was moved <BOOL>
  *
  * Example:
- * [_display] call einv_gui_fnc_takeFocus;
+ * [_display] call aio_gui_fnc_takeFocus;
  *
  * Public: No
  */

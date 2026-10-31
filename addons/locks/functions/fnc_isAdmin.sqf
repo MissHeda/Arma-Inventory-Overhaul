@@ -14,7 +14,7 @@
  * Admin <BOOL>
  *
  * Example:
- * [player] call einv_locks_fnc_isAdmin;
+ * [player] call aio_locks_fnc_isAdmin;
  *
  * Public: No
  */

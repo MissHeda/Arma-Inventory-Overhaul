@@ -14,7 +14,7 @@
  * Whether the selection was moved <BOOL>
  *
  * Example:
- * [player, ["HandGrenade"], ["SmokeShell"]] call einv_storage_fnc_throwSelect;
+ * [player, ["HandGrenade"], ["SmokeShell"]] call aio_storage_fnc_throwSelect;
  *
  * Public: No
  */

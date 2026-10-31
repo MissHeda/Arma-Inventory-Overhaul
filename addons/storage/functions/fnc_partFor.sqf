@@ -17,7 +17,7 @@
  * Slot id as in fnc_getSlot - e.g. "primary_mag" - or "" when it goes on no part of that weapon <STRING>
  *
  * Example:
- * [player, "primary", "30Rnd_65x39_caseless_mag"] call einv_storage_fnc_partFor;
+ * [player, "primary", "30Rnd_65x39_caseless_mag"] call aio_storage_fnc_partFor;
  *
  * Public: No
  */

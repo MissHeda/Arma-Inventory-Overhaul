@@ -2,12 +2,12 @@
 /*
  * Author: Miss Heda
  * Puts what a tier does onto a unit, through ACE: no sprinting from Overloaded on (ACE's status effect
- * "blockSprint") and walking only at Critical ("forceWalk"), each under the reason einv_weight. ACE's
+ * "blockSprint") and walking only at Critical ("forceWalk"), each under the reason aio_weight. ACE's
  * status effects add up with every other reason and ACE sends them to the other machines itself; setting a
  * reason again that is set already changes nothing. Nothing is done with the animation speed - ACE's fatigue
  * takes that over once a second and would fight us.
  *
- * With einv_weight_effects or the tiers as a whole (einv_weight_enabled) off none of it is set and what was
+ * With aio_weight_effects or the tiers as a whole (aio_weight_enabled) off none of it is set and what was
  * is taken off again.
  *
  * Arguments:
@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * [player, TIER_OVERLOADED] call einv_weight_fnc_applyEffects;
+ * [player, TIER_OVERLOADED] call aio_weight_fnc_applyEffects;
  *
  * Public: No
  */

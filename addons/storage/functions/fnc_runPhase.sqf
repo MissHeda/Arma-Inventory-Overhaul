@@ -1,9 +1,9 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * A phase the hub sent to this machine (event einv_storage_runPhase - on every machine, a headless
+ * A phase the hub sent to this machine (event aio_storage_runPhase - on every machine, a headless
  * client holds its AI's gear): journaled as queued and run whole in its turn (GVAR(queue), fnc_tick),
- * its answer sent to the server (einv_storage_phaseDone). One seen before - the hub sent it again
+ * its answer sent to the server (aio_storage_phaseDone). One seen before - the hub sent it again
  * because the answer was slow or lost - is answered from the journal and never run twice; one still
  * waiting in the queue is answered when it runs.
  *
@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * ["2:14", 1, 0, cursorObject, _ops, player, _where] call einv_storage_fnc_runPhase;
+ * ["2:14", 1, 0, cursorObject, _ops, player, _where] call aio_storage_fnc_runPhase;
  *
  * Public: No
  */

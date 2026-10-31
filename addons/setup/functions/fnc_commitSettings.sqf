@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * [createHashMapFromArray [["einv_gui_searchTime", 0.8]]] call einv_setup_fnc_commitSettings;
+ * [createHashMapFromArray [["aio_gui_searchTime", 0.8]]] call aio_setup_fnc_commitSettings;
  *
  * Public: No
  */

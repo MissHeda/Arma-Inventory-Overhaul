@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * [_grid] call einv_gui_fnc_clearCells;
+ * [_grid] call aio_gui_fnc_clearCells;
  *
  * Public: No
  */

@@ -20,7 +20,7 @@
  * The sound's id, -1 when none was played now <NUMBER>
  *
  * Example:
- * [["a3\sounds_f\characters\stances\adjust_short1.wss", 0.48, 1.1, 0, 0, 0]] call einv_gui_fnc_playLayer;
+ * [["a3\sounds_f\characters\stances\adjust_short1.wss", 0.48, 1.1, 0, 0, 0]] call aio_gui_fnc_playLayer;
  *
  * Public: No
  */

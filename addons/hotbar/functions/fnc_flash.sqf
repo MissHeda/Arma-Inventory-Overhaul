@@ -15,7 +15,7 @@
  * None
  *
  * Example:
- * [2, "Nothing is bleeding", "warning"] call einv_hotbar_fnc_flash;
+ * [2, "Nothing is bleeding", "warning"] call aio_hotbar_fnc_flash;
  *
  * Public: No
  */

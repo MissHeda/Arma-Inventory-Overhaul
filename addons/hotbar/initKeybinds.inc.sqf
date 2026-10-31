@@ -6,7 +6,7 @@
     private _index = _forEachIndex;
 
     [
-        [CBA_SETTINGS_EINV, LLSTRING(SubCategory)],
+        [CBA_SETTINGS_AIO, LLSTRING(SubCategory)],
         format [QGVAR(slot%1), _index + 1],
         [format [LLSTRING(Keybind_Slot), _index + 1, _x select 1], LLSTRING(Keybind_Slot_Tooltip)],
         compile format ["[%1] call %2", _index, QFUNC(onKey)],
@@ -17,7 +17,7 @@
 
 // Shows the bar for a few seconds. Not bound to a key unless the player wants one.
 [
-    [CBA_SETTINGS_EINV, LLSTRING(SubCategory)],
+    [CBA_SETTINGS_AIO, LLSTRING(SubCategory)],
     QGVAR(show),
     [LLSTRING(Keybind_Show), LLSTRING(Keybind_Show_Tooltip)],
     {call FUNC(hudPing); false},

@@ -19,7 +19,7 @@
  * "splint" or "any" <HASHMAP>
  *
  * Example:
- * call einv_hotbar_fnc_treatmentIndex;
+ * call aio_hotbar_fnc_treatmentIndex;
  *
  * Public: No
  */

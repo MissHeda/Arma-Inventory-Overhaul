@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [[[3, 2, []], [2, 2, [3]]]] call einv_setup_fnc_cellChanged;
+ * [[[3, 2, []], [2, 2, [3]]]] call aio_setup_fnc_cellChanged;
  *
  * Public: No
  */

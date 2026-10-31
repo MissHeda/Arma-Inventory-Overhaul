@@ -2,12 +2,12 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Lifts the binding of a hotbar slot (einv_hotbar): a press on a filled slot of the strip that moved
+ * Lifts the binding of a hotbar slot (aio_hotbar): a press on a filled slot of the strip that moved
  * (fnc_onFrame, fnc_onMouseButton - the slot's number is the tenth element of GVAR(press)). Not an item and
  * nothing moves in the gear: the item's picture follows the mouse as a ghost the size of the slot, and
  * what the drop does is told in the hint (fnc_updateStripDrag). Let go on another slot of the strip it moves
- * there (the two swap, einv_hotbar_fnc_moveSlot); let go anywhere outside the strip it is removed
- * (einv_hotbar_fnc_unbind); let go on the strip between its slots it stays (fnc_endStripDrag).
+ * there (the two swap, aio_hotbar_fnc_moveSlot); let go anywhere outside the strip it is removed
+ * (aio_hotbar_fnc_unbind); let go on the strip between its slots it stays (fnc_endStripDrag).
  *
  * The press stays in GVAR(press) while the binding is held, so that nothing is built meanwhile
  * (fnc_onFrame). The name at the mouse is gone while it is held (fnc_updateHover).
@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_startStripDrag;
+ * [_display] call aio_gui_fnc_startStripDrag;
  *
  * Public: No
  */

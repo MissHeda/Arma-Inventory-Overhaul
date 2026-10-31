@@ -8,7 +8,7 @@
  * fnc_getBlocks finds what to ask for a real one. What a container gets is worked out from the load
  * alone, never from its name: two containers with the same load look the same.
  *
- * The grid spec (einv_items_fnc_parseGrid, as the rules or einv_grid give it):
+ * The grid spec (aio_items_fnc_parseGrid, as the rules or aio_grid give it):
  *   ["auto"]                 - maximum load / mass per cell cells, laid out by the kind's pattern
  *   ["cells", N]             - N cells, the same way
  *   ["percent", P]           - P % of what the load gives
@@ -27,7 +27,7 @@
  * Named by a rule they are also pockets [1x2] or pockets_mixed [1x1, 1x2], at most six from the load, and for a
  * vest rig [1x2], mixed [1x2, 1x2, 1x1, 1x1], plate [2x2, 1x2, 1x2] or long [1x3, 1x2, 1x1], at most sixteen.
  *
- * A number that was given (N cells, einv_grid = "24", einv_slots) is met exactly: as many pockets or
+ * A number that was given (N cells, aio_grid = "24", aio_slots) is met exactly: as many pockets or
  * pouches as it takes, and the last pouch or the last, unfilled row cut down to what is left. One from
  * the load is only a rough measure, so there the limits hold and the last pouch or row may be bigger
  * than needed.
@@ -43,7 +43,7 @@
  *
  * Return Value:
  * Compartments [[cols, rows, holes, pos], ...] - holes the indices row * cols + col of the cells a
- * shaped compartment does not have (einv_items_fnc_parseGrid), [] for a full rectangle, which every
+ * shaped compartment does not have (aio_items_fnc_parseGrid), [] for a full rectangle, which every
  * pattern gives; pos [x, y] the cell its top left corner lies on, on the canvas it was drawn on (grid=
  * aab/acc), [] for one the window flows - every pattern's. In the order the place records count them:
  * the canvas's in reading order of each one's first cell. Every compartment keeps cells of its own,
@@ -51,7 +51,7 @@
  * are no cells <ARRAY>
  *
  * Example:
- * ["V_PlateCarrier1_rgr", "vest", 80, ["pattern", "rig", 20]] call einv_storage_fnc_blocksFor;
+ * ["V_PlateCarrier1_rgr", "vest", 80, ["pattern", "rig", 20]] call aio_storage_fnc_blocksFor;
  *
  * Public: No
  */
@@ -66,16 +66,21 @@ params [
 
 _spec params [["_mode", "auto", [""]]];
 
-// Compartments given exactly - a copy, the spec is shared. The older table and einv_grids[] give
+// Compartments given exactly - a copy, the spec is shared. The older table and aio_grids[] give
 // rectangles as [cols, rows]: everyone reads four, and whoever only wants three still finds them first. A
 // compartment that accepts only some categories or is a single slot (grid=1x1:grenade:one) has two more, its
-// accepts and single: they are carried on as they are, and only on those.
+// accepts and single, and a single slot that grows a seventh, true: they are carried on as they are, and only on those.
 if (_mode isEqualTo "blocks") exitWith {
     (_spec select 1) apply {
         private _block = [_x select 0, _x select 1, +(_x param [2, []]), +(_x param [3, []])];
 
         if (count _x > 4) then {
             _block append [+(_x param [4, []]), _x param [5, false]];
+
+            // A single slot that takes the size of the item in it (grid=1x1:grow, aio_gui_fnc_growSlots).
+            if (_x param [6, false]) then {
+                _block pushBack true;
+            };
         };
 
         _block

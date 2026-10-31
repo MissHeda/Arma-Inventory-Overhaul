@@ -15,7 +15,7 @@
  * "2x3" or "xx/x-" <STRING>
  *
  * Example:
- * [2, 2, [3]] call einv_items_fnc_formatMask; // "xx/x-"
+ * [2, 2, [3]] call aio_items_fnc_formatMask; // "xx/x-"
  *
  * Public: No
  */

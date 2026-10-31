@@ -10,7 +10,7 @@
  *   - in two containers: a move of the kind "exchange" - take the first, take the second, put the first
  *     where the second lay, put the second where the first lay, each at its own root's authority (one
  *     phase when both roots are the same, else the first's take, the second's take and put, the first
- *     root's put). Whatever an op did not consume settles back where it came from (einv_storage_fnc_settle).
+ *     root's put). Whatever an op did not consume settles back where it came from (aio_storage_fnc_settle).
  * The looks at a living person's gear are asked once more here, the machines that run the ops ask their
  * guards again.
  *
@@ -26,7 +26,7 @@
  * Asked for <BOOL>
  *
  * Example:
- * [_fromGrid, _toGrid, _entry, _tile, [2, 0, 0, 1, 1, 0], [0, 0, 0, 1, 1, 0]] call einv_gui_fnc_applySwap;
+ * [_fromGrid, _toGrid, _entry, _tile, [2, 0, 0, 1, 1, 0], [0, 0, 0, 1, 1, 0]] call aio_gui_fnc_applySwap;
  *
  * Public: No
  */

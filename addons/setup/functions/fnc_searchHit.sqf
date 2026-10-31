@@ -14,7 +14,7 @@
  * Found <BOOL>
  *
  * Example:
- * [["b_bergen*", "^b_bergen.*$", "b_bergen"], "b_bergen_mcamo_f bergen", "b_bergen_mcamo_f", "Bergen"] call einv_setup_fnc_searchHit;
+ * [["b_bergen*", "^b_bergen.*$", "b_bergen"], "b_bergen_mcamo_f bergen", "b_bergen_mcamo_f", "Bergen"] call aio_setup_fnc_searchHit;
  *
  * Public: No
  */

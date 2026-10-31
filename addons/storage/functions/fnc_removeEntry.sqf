@@ -39,7 +39,7 @@
  *   ["item", class, count, inner snapshot or []]
  *
  * Example:
- * [uniformContainer player, _entry] call einv_storage_fnc_removeEntry;
+ * [uniformContainer player, _entry] call aio_storage_fnc_removeEntry;
  *
  * Public: No
  */

@@ -9,7 +9,7 @@
  *   a crate, a vehicle, a pile on the ground - on the object, on this machine (QGVAR(searchRecord))
  *   a uniform, vest or backpack - the engine makes a new object every time one is moved (taken off a body, dropped,
  *     put into a crate), so it is kept in GVAR(searchMemory) by the id the container carries in its search state
- *     (einv_storage_searchState, [id, source]; einv_storage_fnc_snapshot and fnc_restore carry it to the new object,
+ *     (aio_storage_searchState, [id, source]; aio_storage_fnc_snapshot and fnc_restore carry it to the new object,
  *     fnc_takeOff writes where it came from). The first time anything is known of one that has no id yet, this
  *     machine gives it one and broadcasts it, so every player's knowledge goes with the container from then on. Should
  *     another machine have given it another id at the same moment and its broadcast won, what this machine knew under
@@ -23,7 +23,7 @@
  * The record <HASHMAP>
  *
  * Example:
- * [_box, true] call einv_gui_fnc_searchRecord;
+ * [_box, true] call aio_gui_fnc_searchRecord;
  *
  * Public: No
  */

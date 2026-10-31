@@ -7,9 +7,9 @@
  * of it goes into the same container where there is room (fnc_addTo), turned down one comes out of that
  * tile (fnc_remove). One more only of what the arsenal has (ace_arsenal_virtualItemsFlat, as ACE's own
  * "+" asks), and only into the open container, another worn one or the staging space. Over a tile of the kit's
- * grid (the kits tab, fnc_layout) one more of its class is packed into the kit (einv_compat_efak_fnc_packNew: the
+ * grid (the kits tab, fnc_layout) one more of its class is packed into the kit (aio_compat_efak_fnc_packNew: the
  * kit's rules and room) or one taken out of it and away (fnc_remove). While a drag out of a list is on,
- * the engine's own wheel sets how many (einv_gui_fnc_onMouseZ) and this is not asked.
+ * the engine's own wheel sets how many (aio_gui_fnc_onMouseZ) and this is not asked.
  *
  * The column under the mouse scrolls with every turn of the wheel whatever is answered here: where it
  * stood is held for the next frames (fnc_onFrame), so the tile stays under the mouse.
@@ -22,7 +22,7 @@
  * Taken <BOOL>
  *
  * Example:
- * [1, getMousePosition] call einv_arsenal_fnc_onWheel;
+ * [1, getMousePosition] call aio_arsenal_fnc_onWheel;
  *
  * Public: No
  */

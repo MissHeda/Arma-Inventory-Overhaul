@@ -24,19 +24,20 @@
  * 4: The icon, [scale, across, down] <ARRAY>
  * 5: The rectangle it must stay in (the tile's), [x, y, w, h], in the same space <ARRAY>
  * 6: The fallback, what fnc_uiItemPicture returned (the picture, or the group that clips it) <CONTROL>
+ * 7: A weapon's attachments, drawn onto it and turned along <ARRAY> (default: [])
  *
  * Return Value:
  * The turned picture, or controlNull where none is made <CONTROL>
  *
  * Example:
- * [_display, _grid, _box, _picture, ICON_PLAIN, _tileRect, _fallback] call einv_gui_fnc_turnPicture;
+ * [_display, _grid, _box, _picture, ICON_PLAIN, _tileRect, _fallback] call aio_gui_fnc_turnPicture;
  *
  * Public: No
  */
 
 disableSerialization;
 
-params ["_display", "_grid", "_box", "_texture", ["_icon", ICON_PLAIN, [[]]], "_clip", "_fallback"];
+params ["_display", "_grid", "_box", "_texture", ["_icon", ICON_PLAIN, [[]]], "_clip", "_fallback", ["_attachments", [], [[]]]];
 
 if (
     isNull _fallback || {_display isNotEqualTo (uiNamespace getVariable [QGVAR(display), displayNull])}
@@ -53,7 +54,7 @@ _clip params ["_clipX", "_clipY", "_clipW", "_clipH"];
 
 private _overlay = [
     _display, controlNull, [_boxX + _originX, _boxY + _originY, _boxW, _boxH], _texture, [1, 1, 1, 1], _icon,
-    [_clipX + _originX, _clipY + _originY, _clipW, _clipH]
+    [_clipX + _originX, _clipY + _originY, _clipW, _clipH], [], _attachments
 ] call FUNC(uiPictureTurned);
 
 _overlay ctrlShow false;

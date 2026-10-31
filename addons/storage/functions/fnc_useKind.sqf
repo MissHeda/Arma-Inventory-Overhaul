@@ -13,7 +13,7 @@
  * "uniform", "vest", "backpack" or "" <STRING>
  *
  * Example:
- * [backpackContainer player] call einv_storage_fnc_useKind;
+ * [backpackContainer player] call aio_storage_fnc_useKind;
  *
  * Public: Yes
  */

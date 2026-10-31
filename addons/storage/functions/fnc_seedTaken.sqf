@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * The cells of each compartment that are taken before anything lies there: the holes of a shaped one
- * (einv_items_fnc_parseGrid, "xxx/x-x"). Every layout that looks for free cells - fnc_getLayout,
+ * (aio_items_fnc_parseGrid, "xxx/x-x"). Every layout that looks for free cells - fnc_getLayout,
  * fnc_plan, fnc_opPut, fnc_opPlaceMany - starts from this, so a hole is never free and nothing has
  * to ask for holes again: an item can neither lie on one nor reach over one.
  *
@@ -16,7 +16,7 @@
  * Per compartment, rows of booleans <ARRAY>
  *
  * Example:
- * [[[3, 2, [4]]]] call einv_storage_fnc_seedTaken;
+ * [[[3, 2, [4]]]] call aio_storage_fnc_seedTaken;
  *
  * Public: No
  */

@@ -18,7 +18,7 @@
  * Drawn - false when this build has no such part <BOOL>
  *
  * Example:
- * ["weight"] call einv_gui_fnc_redrawPart;
+ * ["weight"] call aio_gui_fnc_redrawPart;
  *
  * Public: No
  */
@@ -85,7 +85,7 @@ GVAR(lastMouse) = [];
 
 (ctrlPosition _outer) params ["_outerX", "_outerY", "_outerW", "_outerH"];
 
-_inner = [_display, "EINV_Group", _outer, [0, 0, _outerW, _outerH]] call FUNC(uiCreate);
+_inner = [_display, "AIO_Group", _outer, [0, 0, _outerW, _outerH]] call FUNC(uiCreate);
 _inner setVariable [QGVAR(hooked), true];
 _inner ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton)}];
 _inner ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton)}];

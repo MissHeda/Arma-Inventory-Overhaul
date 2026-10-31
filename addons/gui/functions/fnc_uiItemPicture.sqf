@@ -2,8 +2,8 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * An item's picture the way its rules ask for it (icon= / einv_icon, "icon" of einv_items_fnc_getInfo, see
- * einv_items_fnc_parseIcon): fitted into its box as fnc_uiPicture fits it, then drawn [scale] times as large
+ * An item's picture the way its rules ask for it (icon= / aio_icon, "icon" of aio_items_fnc_getInfo, see
+ * aio_items_fnc_parseIcon): fitted into its box as fnc_uiPicture fits it, then drawn [scale] times as large
  * about the box's middle and moved by the offsets, which are a share of the tile's width and height. Every
  * tile, slot, card and the dragged ghost draw an item's picture through here. The picture is upright: a tile
  * that lies turned (R) is given its turned footprint as the box and gets this as its fallback, with the turned
@@ -41,7 +41,7 @@
  * The picture, or the group that clips it <CONTROL>
  *
  * Example:
- * [_display, _group, [0, 0, 0.1, 0.05], _picture, [1.4, 0.1, -0.05], [1, 1, 1, 1], [0, 0, 0.1, 0.05]] call einv_gui_fnc_uiItemPicture;
+ * [_display, _group, [0, 0, 0.1, 0.05], _picture, [1.4, 0.1, -0.05], [1, 1, 1, 1], [0, 0, 0.1, 0.05]] call aio_gui_fnc_uiItemPicture;
  *
  * Public: No
  */
@@ -133,7 +133,7 @@ private _originX = 0;
 private _originY = 0;
 
 if (!_inside) then {
-    _group = [_display, "EINV_Group", _parent, _clip] call FUNC(uiCreate);
+    _group = [_display, "AIO_Group", _parent, _clip] call FUNC(uiCreate);
     _target = _group;
 
     // The group's corner sits on a pixel, a little off where it was asked for; its picture counts from it.

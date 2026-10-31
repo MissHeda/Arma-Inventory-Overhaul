@@ -21,7 +21,7 @@
  * The controls, the last part's hit area last <ARRAY>
  *
  * Example:
- * [_display, _group, [0, 0, 0.2, 0.025], ["Own", "Full", "CBA line"], 0, _theme, {params ["_index"]}] call einv_setup_fnc_uiSegmented;
+ * [_display, _group, [0, 0, 0.2, 0.025], ["Own", "Full", "CBA line"], 0, _theme, {params ["_index"]}] call aio_setup_fnc_uiSegmented;
  *
  * Public: No
  */

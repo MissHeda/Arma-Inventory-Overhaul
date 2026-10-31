@@ -10,7 +10,7 @@
  * master volume over them: each kind's volume is the whole of it.
  *
  * Modes:
- *   "volume" - the kind (an index of einv_gui_soundGroups) is set to the volume, 0 to 1
+ *   "volume" - the kind (an index of aio_gui_soundGroups) is set to the volume, 0 to 1
  *   "toggle" - the kind's switch: off sets the volume to 0, on brings it back
  *   "all"    - mutes every kind, or when everything is silent already, brings them all back
  *
@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * ["volume", [1, 0.5]] call einv_gui_fnc_soundSet;
+ * ["volume", [1, 0.5]] call aio_gui_fnc_soundSet;
  *
  * Public: No
  */

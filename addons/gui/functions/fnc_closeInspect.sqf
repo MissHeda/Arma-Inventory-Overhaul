@@ -12,7 +12,7 @@
  * A card was open <BOOL>
  *
  * Example:
- * call einv_gui_fnc_closeInspect;
+ * call aio_gui_fnc_closeInspect;
  *
  * Public: No
  */
@@ -23,6 +23,9 @@ private _open = GVAR(inspect) isNotEqualTo [];
 
 GVAR(inspect) = [];
 GVAR(inspectMove) = [];
+
+// Its 3D view's scene goes with it (fnc_inspect3D).
+["stop"] call FUNC(inspect3D);
 
 ctrlDelete (uiNamespace getVariable [QGVAR(inspectGroup), controlNull]);
 uiNamespace setVariable [QGVAR(inspectGroup), controlNull];

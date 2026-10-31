@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * [_display, "vest", "30Rnd_65x39_caseless_mag"] call einv_arsenal_fnc_sayNoRoom;
+ * [_display, "vest", "30Rnd_65x39_caseless_mag"] call aio_arsenal_fnc_sayNoRoom;
  *
  * Public: No
  */

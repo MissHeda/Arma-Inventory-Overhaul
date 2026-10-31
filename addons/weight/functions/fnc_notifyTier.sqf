@@ -4,7 +4,7 @@
  * Tells the player in one line that the load changed tier - while the inventory is closed. Things are
  * picked up outside the window too (other mods, scripts, a looter filling a searched person's backpack), and
  * the player would otherwise only find out by not being able to sprint. With the window open its weight bar
- * shows it, so nothing is said then. Nor with the tiers switched off (einv_weight_enabled): there is no
+ * shows it, so nothing is said then. Nor with the tiers switched off (aio_weight_enabled): there is no
  * tier to tell about.
  *
  * ACE's own message, with the weight icon in the tier's colour: white, yellow or red.
@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * [TIER_HEAVY, TIER_LIGHT, _limits] call einv_weight_fnc_notifyTier;
+ * [TIER_HEAVY, TIER_LIGHT, _limits] call aio_weight_fnc_notifyTier;
  *
  * Public: No
  */

@@ -4,7 +4,7 @@
  * Whether a requester can still reach a root, asked by the machine that executes (fnc_execute): always
  * for a requester who left (null), for the requester's own unit and for work of the server's own
  * (objNull); else the distance to the root - to what it hangs under when attached, as ACE cargo hangs
- * loaded objects under their vehicle - within the reach (einv_storage_nearbyRange, 3 m where it is not
+ * loaded objects under their vehicle - within the reach (aio_storage_nearbyRange, 3 m where it is not
  * set) plus REACH_SLACK plus half the root's size. A requester seated in it - or in what it hangs under -
  * is always in reach, however fast the vehicle goes and however late its position arrives here.
  *
@@ -16,7 +16,7 @@
  * In reach <BOOL>
  *
  * Example:
- * [player, cursorObject] call einv_storage_fnc_inReach;
+ * [player, cursorObject] call aio_storage_fnc_inReach;
  *
  * Public: No
  */

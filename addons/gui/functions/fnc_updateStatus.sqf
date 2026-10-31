@@ -39,7 +39,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_updateStatus;
+ * [_display] call aio_gui_fnc_updateStatus;
  *
  * Public: No
  */
@@ -235,7 +235,7 @@ private _now = diag_tickTime;
     };
 
     // Two pixels more than it is drawn, each side.
-    private _hit = [_display, "EINV_Hitbox", _parent, [
+    private _hit = [_display, "AIO_Hitbox", _parent, [
         _buttonX - pixelW * 2, _top + _inset - pixelH * 2, _drawnW + pixelW * 4, _drawnH + pixelH * 4
     ]] call FUNC(uiCreate);
 

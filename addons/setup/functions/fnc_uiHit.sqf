@@ -5,7 +5,7 @@
  * surface lights up while the mouse is on it, and a click hands the code to fnc_defer, which runs it a
  * moment later - it may redraw the wizard, and with it delete this very control.
  *
- * Unlike the inventory's buttons (einv_gui_fnc_uiButton) nothing here waits for CBA's next frame: that
+ * Unlike the inventory's buttons (aio_gui_fnc_uiButton) nothing here waits for CBA's next frame: that
  * never comes in Eden.
  *
  * A disabled one still shows its tooltip - a disabled control would not - but does nothing.
@@ -27,7 +27,7 @@
  * The hit area <CONTROL>
  *
  * Example:
- * [_display, _group, [0, 0, 0.1, 0.03], _surface, [1, 1, 1, 0.08], [1, 1, 1, 0.12], {systemChat "Hello"}] call einv_setup_fnc_uiHit;
+ * [_display, _group, [0, 0, 0.1, 0.03], _surface, [1, 1, 1, 0.08], [1, 1, 1, 0.12], {systemChat "Hello"}] call aio_setup_fnc_uiHit;
  *
  * Public: No
  */
@@ -40,7 +40,7 @@ params [
     ["_code", {}, [{}]], ["_arguments", []], ["_enabled", true, [true]], ["_tooltip", "", [""]]
 ];
 
-private _hit = [_display, "EINV_Hitbox", _parent, _rect] call EFUNC(gui,uiCreate);
+private _hit = [_display, "AIO_Hitbox", _parent, _rect] call EFUNC(gui,uiCreate);
 _hit setVariable [QGVAR(surface), [_surface, _normal, _hover]];
 _hit setVariable [QGVAR(action), [_code, _arguments]];
 
@@ -59,7 +59,7 @@ _hit ctrlAddEventHandler ["MouseEnter", {
     if (_color isEqualTo []) exitWith {};
 
     {
-        if (ctrlClassName _x isEqualTo "EINV_PanelCorner") then {
+        if (ctrlClassName _x isEqualTo "AIO_PanelCorner") then {
             _x ctrlSetTextColor _color;
         } else {
             _x ctrlSetBackgroundColor _color;
@@ -75,7 +75,7 @@ _hit ctrlAddEventHandler ["MouseExit", {
     if (_color isEqualTo []) exitWith {};
 
     {
-        if (ctrlClassName _x isEqualTo "EINV_PanelCorner") then {
+        if (ctrlClassName _x isEqualTo "AIO_PanelCorner") then {
             _x ctrlSetTextColor _color;
         } else {
             _x ctrlSetBackgroundColor _color;

@@ -29,7 +29,7 @@ The onLoad hook works because the display's onLoad calls `BIS_fnc_initDisplay`. 
 { _args call compile getText _x } forEach configProperties [configFile >> "Extended_DisplayLoad_EventHandlers" >> _className, "isText _x"]
 ```
 
-So `_this = [display]`, and the entries run **in config order**. Our `einv_main` requires `cba_main`, and `cba_main` requires `cba_settings`, so our entry always runs **after** `cba_settings_fnc_initDisplayGameOptions`.
+So `_this = [display]`, and the entries run **in config order**. Our `aio_main` requires `cba_main`, and `cba_main` requires `cba_settings`, so our entry always runs **after** `cba_settings_fnc_initDisplayGameOptions`.
 
 ### Controls and IDCs (from `script_component.hpp`, `gui.hpp`, `fnc_initDisplayGameOptions.sqf`)
 
@@ -137,7 +137,7 @@ _display setVariable [QGVAR(cbaButton), _button];
 
 // Category key exactly as CBA computes it: lower case of the category *after* localize.
 // Read it from the registered setting so a stringtable category keeps working.
-_display setVariable [QGVAR(cbaCategory), toLower ((cba_settings_default getVariable ["einv_items_sizeTable", []]) param [4, "Enhanced Inventory"])];
+_display setVariable [QGVAR(cbaCategory), toLower ((cba_settings_default getVariable ["aio_items_sizeTable", []]) param [4, "Enhanced Inventory"])];
 
 private _sync = {
     params ["_display"];
@@ -186,9 +186,9 @@ CBA disables those rows and refuses to store them.
 ```sqf
 private _prio = ["force ", "force force "] select (_source == "server" && {_overrideMission});
 private _text = [
-    format ["%1einv_items_sizeTable = %2;", _prio, str _sizeTable],
-    format ["%1einv_items_stackTable = %2;", _prio, str _stackTable],
-    format ["%1einv_storage_containerTable = %2;", _prio, str _containerTable]
+    format ["%1aio_items_sizeTable = %2;", _prio, str _sizeTable],
+    format ["%1aio_items_stackTable = %2;", _prio, str _stackTable],
+    format ["%1aio_storage_containerTable = %2;", _prio, str _containerTable]
 ] joinString endl;
 [_text, _source] call cba_settings_fnc_import;
 ```
@@ -208,12 +208,12 @@ For the mission source, always write `force` (priority 1). Otherwise the server'
 [[LLSTRING(OpenWizard), LLSTRING(OpenWizard_Tooltip)], QGVAR(RscWizard)] call CBA_fnc_addPauseMenuOption;
 ```
 
-This adds an entry under ESC > Options in both `RscDisplayInterrupt` and `RscDisplayMPInterrupt`. The engine runs `findDisplay <interrupt idd> createDisplay "einv_setup_RscWizard"`, so the wizard's onLoad has to cope with that parent. You can also use CBA's helper trick: an `RscDisplayEmpty` subclass whose onLoad opens the wizard and then closes itself (`cba_settings_MainMenuHelper`).
+This adds an entry under ESC > Options in both `RscDisplayInterrupt` and `RscDisplayMPInterrupt`. The engine runs `findDisplay <interrupt idd> createDisplay "aio_setup_RscWizard"`, so the wizard's onLoad has to cope with that parent. You can also use CBA's helper trick: an `RscDisplayEmpty` subclass whose onLoad opens the wizard and then closes itself (`cba_settings_MainMenuHelper`).
 
 **b) CBA keybind:**
 
 ```sqf
-[CBA_SETTINGS_EINV, QGVAR(openWizard), [LLSTRING(OpenWizard), LLSTRING(OpenWizard_Tooltip)], {[findDisplay 46] call FUNC(openWizard); true}] call CBA_fnc_addKeybind;
+[CBA_SETTINGS_AIO, QGVAR(openWizard), [LLSTRING(OpenWizard), LLSTRING(OpenWizard_Tooltip)], {[findDisplay 46] call FUNC(openWizard); true}] call CBA_fnc_addKeybind;
 ```
 
 Leave it unbound by default (`KEYBIND_NULL`). It works only in a running mission (display 46), not in Eden or the main menu.
@@ -292,7 +292,7 @@ private _prio = [[1, 2] select _overrideMission, 1] select is3DEN;
 
 **Export.** `[_source, _exportDefault] call cba_settings_fnc_export` (`fnc_export.sqf`):
 - Despite its header saying otherwise, `_exportDefault` defaults to `true` in code.
-- It covers all settings of all mods, sorted by `[category, setting]`, with lines like `// Enhanced Inventory` and `force einv_items_sizeTable = "…";`.
+- It covers all settings of all mods, sorted by `[category, setting]`, with lines like `// Enhanced Inventory` and `force aio_items_sizeTable = "…";`.
 - The prefix is `""`, `"force "` or `"force force "` for priority 0, 1 or 2. Values are written with `str`, which doubles inner quotes.
 - When the menu is open it reads pending temp values; it also works without the menu.
 
@@ -308,10 +308,10 @@ private _prio = [[1, 2] select _overrideMission, 1] select is3DEN;
 
 **Consequences:**
 - **Our table grammar must never contain `;`.** Also avoid `"`, `'`, `//`, `/*`, `#` and `\`, because server and mission files go through `preprocessFile`. `class:WxH,…`, `:N` and `+` are fine; `=` inside a value is fine too.
-- For the wizard's share string, use exactly the CBA line format restricted to our settings, e.g. `force einv_items_sizeTable = "…";` per line. That one string can be pasted into the wizard, into CBA's own Import box, into a server's `cba_settings.sqf` or into a mission's `cba_settings.sqf`. The shipped default is simply the setting's default value, and CBA's per-row "reset to default" still works.
+- For the wizard's share string, use exactly the CBA line format restricted to our settings, e.g. `force aio_items_sizeTable = "…";` per line. That one string can be pasted into the wizard, into CBA's own Import box, into a server's `cba_settings.sqf` or into a mission's `cba_settings.sqf`. The shipped default is simply the setting's default value, and CBA's per-row "reset to default" still works.
 - Wizard Import: run `fnc_parse` with validation and keep only our setting names (compare with `toLower`). Then call `cba_settings_fnc_import` in menu mode, or `CBA_settings_fnc_set` in direct mode.
 - Clipboard: CBA shows "Copy to clipboard" only when `isServer` and never reads the clipboard. Its Import is a paste box (a multi-line `RscEdit`). Do the same on MP clients: a selectable edit box for Ctrl+A / Ctrl+C, and a paste box for import.
-- Wizard presets: keep them in our own `profileNamespace` variable (name → line string). Putting them into `cba_settings_presetsHash` is possible, since loading an einv-only preset would import only our lines, but that touches a CBA internal.
+- Wizard presets: keep them in our own `profileNamespace` variable (name → line string). Putting them into `cba_settings_presetsHash` is possible, since loading an aio-only preset would import only our lines, but that touches a CBA internal.
 
 ## Fragility to know about
 

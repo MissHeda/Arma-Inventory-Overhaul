@@ -4,7 +4,7 @@ I changed no files. Below is the plan for shaped items in the Enhanced Inventory
 
 ### 1. Engine facts that shape the design
 
-- **Layouts are local to each client.** `fnc_getLayout` keeps its records with a non-broadcast `setVariable`. The server's `move` handler (`addons/storage/XEH_postInit.sqf:11-18`) calls `moveEntry` with `[]` and `false`, so it only moves cargo and never checks grid space. Shapes are therefore enforced on each client only. "Every machine agrees" just means the definitions must be server-forced settings, which `einv_items_sizeTable` already is (isGlobal 1). Layout records never cross the network, so changing the record format has no multiplayer compatibility risk.
+- **Layouts are local to each client.** `fnc_getLayout` keeps its records with a non-broadcast `setVariable`. The server's `move` handler (`addons/storage/XEH_postInit.sqf:11-18`) calls `moveEntry` with `[]` and `false`, so it only moves cargo and never checks grid space. Shapes are therefore enforced on each client only. "Every machine agrees" just means the definitions must be server-forced settings, which `aio_items_sizeTable` already is (isGlobal 1). Layout records never cross the network, so changing the record format has no multiplayer compatibility risk.
 - **Rotation today is a single toggle.** `"rotated"` is a boolean, R swaps `GVAR(dragSize)`, pictures only turn 90°, and records store only `w,h` (turned = swapped). That is not enough for L, T or S shapes, which need four orientations. The 0° and 180° positions have the same `w,h` but different occupancy.
 - **Tile backgrounds are semi-transparent** (`tileBg` alpha 0.095–0.19 in `fnc_theme.sqf`). If a shape is drawn from overlapping rectangles, the overlaps show brighter. A shape must be drawn as an exact partition of its area.
 - **Two hot paths are linear in the number of tiles.** `fnc_tileAt` runs a findIf over all tiles, and `fnc_updateDrag` checks rectangle overlap against every tile on every frame. A per-grid cell→tile owner map fixes shapes and makes both faster.
@@ -43,7 +43,7 @@ A mask is always trimmed (no empty border rows or columns) and 4-connected, and 
 Shapes go into the existing size table. A shape implies its bounding box, so there is no second table where a size and a shape could contradict each other.
 
 ```
-einv_items_sizeTable := entry (("," | ";" | newline) entry)*
+aio_items_sizeTable := entry (("," | ";" | newline) entry)*
 entry  := class ":" shape                      (exact class or nearest parent, fnc_findInTable)
 shape  := base ["@" ("1"|"2"|"3")]             optional quarter turns clockwise
 base   := INT "x" INT                          full rectangle, W across, H down   e.g. 2x3
@@ -72,7 +72,7 @@ Presets live in `GVAR(shapePresets)` in `items/XEH_preInit.sqf` (name → mask),
 - An entry is rejected with a warning in the RPT naming it when it is empty, disconnected, wider than `STORAGE_COLS`, uses characters other than 0/1, or has a bad `@` value.
 - Parse order: preset name first, then `WxH` (contains `x` between digits), then mask.
 - `fnc_formatShape` writes `WxH` for a full rectangle, the preset name when the upright mask equals a preset exactly, and the mask otherwise. Export and import therefore round-trip.
-- New config key for other mods: `einv_gridShape = "L3";` (a string, same grammar). It goes before `einv_gridSize[]` in precedence.
+- New config key for other mods: `aio_gridShape = "L3";` (a string, same grammar). It goes before `aio_gridSize[]` in precedence.
 
 Shipped default: no shapes, everything stays rectangular as in Tarkov. The presets are there for users to pick.
 
@@ -108,7 +108,7 @@ Shipped default: no shapes, everything stays rectangular as in Tarkov. The prese
 - **`fnc_parseTable`, size branch (lines 54-63):** replace the WxH-only parse with `[_value] call FUNC(parseShape)`. Store `[w,h,cells]` and widen the warning text. The stack branch is unchanged.
 - **`fnc_getSize`:** return `[w,h,cells]`.
   - `_fnc_valid` (lines 29-33): `count _s >= 2 && {(_s select [0,2]) isEqualTypeArray [0,0]} && {w>=1} && {h>=1}`.
-  - Precedence: table → `isText (_config >> QGVARMAIN(gridShape))` through `parseShape` → `einv_gridSize[]` → corrections (may hold shapes) → rules (`[w,h,[]]`).
+  - Precedence: table → `isText (_config >> QGVARMAIN(gridShape))` through `parseShape` → `aio_gridSize[]` → corrections (may hold shapes) → rules (`[w,h,[]]`).
   - Line 114: cap only full shapes (masks were already checked in `parseShape`).
 - **`fnc_getInfo`** (lines 178, 189, 197):
   - `(... getSize) params ["_w","_h","_cells"]`
@@ -170,7 +170,7 @@ Shipped default: no shapes, everything stays rectangular as in Tarkov. The prese
 - **`fnc_createTile`:**
   - `_turns = (_info get "canon") select ((_entry getOrDefault ["turns", [0,1] select rotated]) mod 4)`, `_form = forms select _turns`.
   - Cell loop (replaces lines 61-67): for each `FORM_CELLS` entry inside the grid, `ctrlShow false` on that cell and `_owner set [_i, count (_grid get "tiles")]`. Only filled cells give way, so other tiles can sit in the empty cells of the box.
-  - Backgrounds: full → `[[0,0,_width,_height]]` (keeps the current overflow clip); shape → `shapePieces`. One `EINV_PanelRect` per piece with `_color`.
+  - Backgrounds: full → `[[0,0,_width,_height]]` (keeps the current overflow clip); shape → `shapePieces`. One `AIO_PanelRect` per piece with `_color`.
   - Store `"backgrounds"` (all pieces), `"background"` (the first), and `"bodyRect"` (screen rect of `FORM_BODY`, in the parent's coordinates).
   - Picture and attachments: in the padded body rect. Turns 0 → `uiPicture`; 1/2/3 → `uiPictureTurned` with angle `90*turns` and aspect = form 0 body w/h (today `_sizeW/_sizeH`, the same for rectangles). Attachments only at turns 0, as now.
   - Name: in the top run (`(runs select 0)`, last run), right-aligned in its width.
@@ -181,7 +181,7 @@ Shipped default: no shapes, everything stays rectangular as in Tarkov. The prese
 - **`fnc_onMouseButton`:** no change. The grab offset at line 110 is relative to the box, and `tileAt` guarantees the grabbed cell is a filled one.
 - **`fnc_startDrag`:**
   - `GVAR(dragTurns) = canon select entry turns`; `GVAR(dragSize)` from that form.
-  - Footprint becomes a **pool**: as many `EINV_PanelRect` controls as the largest piece count over all forms of the item (1 for rectangles). Created before the ghost to keep z-order, stored as an array in `dragFootprint`.
+  - Footprint becomes a **pool**: as many `AIO_PanelRect` controls as the largest piece count over all forms of the item (1 for rectangles). Created before the ghost to keep z-order, stored as an array in `dragFootprint`.
   - Add `GVAR(dragTurns) = 0` to `XEH_preInit`.
 - **`fnc_makeGhost`:**
   - The ghost rect is the form's body: `[bc*cellW, br*cellH, bw*cellW, bh*cellH]`. Offsets come from `ctrlPosition` as now.

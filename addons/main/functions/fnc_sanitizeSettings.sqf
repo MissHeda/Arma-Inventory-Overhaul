@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Cleans a text of server settings that came from outside - the line of the settings box of the test builds
- * (einv_main_settings) pasted into the setup wizard's Import (einv_setup_fnc_importSettings). CBA's own export,
+ * (aio_main_settings) pasted into the setup wizard's Import (aio_setup_fnc_importSettings). CBA's own export,
  * its import and every cba_settings.sqf split their lines at ";" without minding
  * quotes, so one ";" in a value would break all of them: semicolons and line breaks become commas, which part
  * the statements just as well, and quotes, "#" and backslashes go - a cba_settings.sqf is run through the
@@ -15,7 +15,7 @@
  * The cleaned text <STRING>
  *
  * Example:
- * "einv1; gui_searchTime=1" call einv_main_fnc_sanitizeSettings;
+ * "aio1; gui_searchTime=1" call aio_main_fnc_sanitizeSettings;
  *
  * Public: No
  */

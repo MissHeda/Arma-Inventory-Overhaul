@@ -19,7 +19,7 @@
  * Ready <BOOL>
  *
  * Example:
- * call einv_arsenal_fnc_compatCheck;
+ * call aio_arsenal_fnc_compatCheck;
  *
  * Public: No
  */

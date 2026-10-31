@@ -17,11 +17,11 @@
  * carries a line above it, setting these choices apart from the window's own.
  *
  * An option a loaded compat addon replaces with a choice of its own is left out - Enhanced First Aid
- * Kits' "Open" (einv_compat_efak_fnc_hideCbaOption), ACRE2's "Open" on its radios (the window's own "Open
- * radio" steps aside first, einv_compat_acre_fnc_hideCbaOption) - and ACE's "Repack Magazines" while this
- * mod repacks magazines itself (einv_magazines_fnc_hideCbaOption). An option that uses the item up (field
+ * Kits' "Open" (aio_compat_efak_fnc_hideCbaOption), ACRE2's "Open" on its radios (the window's own "Open
+ * radio" steps aside first, aio_compat_acre_fnc_hideCbaOption) - and ACE's "Repack Magazines" while this
+ * mod repacks magazines itself (aio_magazines_fnc_hideCbaOption). An option that uses the item up (field
  * rations, medical items, ...) is left out for an item lying in the unit's uniform, vest or backpack where the
- * settings "Use items from ..." do not let it be used (einv_storage_fnc_useState).
+ * settings "Use items from ..." do not let it be used (aio_storage_fnc_useState).
  *
  * Arguments:
  * 0: Unit - the player, as CBA_fnc_currentUnit gives it <OBJECT>
@@ -33,7 +33,7 @@
  * Choices for fnc_openMenu, [text, [condition, statement, consume, arguments], code, options] each <ARRAY>
  *
  * Example:
- * [player, vestContainer player, "30Rnd_65x39_caseless_mag", "VEST_CONTAINER"] call einv_gui_fnc_cbaOptions;
+ * [player, vestContainer player, "30Rnd_65x39_caseless_mag", "VEST_CONTAINER"] call aio_gui_fnc_cbaOptions;
  *
  * Public: No
  */

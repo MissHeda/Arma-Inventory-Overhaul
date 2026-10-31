@@ -29,12 +29,12 @@
  *   "name"    - show the item's name in the bottom left corner <BOOL>
  *   "accent"  - a bar in the accent colour along the left edge <BOOL>
  *   "weapon"  - a weapon slot's [class, muzzle, rail, optic, magazine, magazine, bipod], for the hint <ARRAY>
- *   "slot"    - the equipment slot it shows, e.g. "primary_optic" (einv_storage_fnc_getSlot) <STRING>
+ *   "slot"    - the equipment slot it shows, e.g. "primary_optic" (aio_storage_fnc_getSlot) <STRING>
  *   "unit"    - whose slot it is, for putting things on and taking them off <OBJECT>
  *   "count"   - a number in the bottom right corner, e.g. how many of the item there are; in the loss
  *               colour when it is "0" <STRING>
  *   "faded"   - show the item's picture dimmed, as when none is left <BOOL>
- *   "hotbar"  - the number of the hotbar's slot this is (einv_hotbar), -1 for a slot of the gear: kept
+ *   "hotbar"  - the number of the hotbar's slot this is (aio_hotbar), -1 for a slot of the gear: kept
  *               as the eighth element of the slot's record, which tells the mouse handling that it takes
  *               a class and holds no item <NUMBER>
  *   "container" - the box of a uniform, vest or backpack opened from inside a container (fnc_openNested):
@@ -46,7 +46,7 @@
  * The controls <ARRAY>
  *
  * Example:
- * [_display, controlNull, [0.1, 0.2, 0.25, 0.1], primaryWeapon player, createHashMapFromArray [["caption", "Primary"], ["icon", "\z\einv\addons\gui\ui\slot_rifle_ca.paa"], ["number", "1"]], _theme] call einv_gui_fnc_drawSlot;
+ * [_display, controlNull, [0.1, 0.2, 0.25, 0.1], primaryWeapon player, createHashMapFromArray [["caption", "Primary"], ["icon", "\z\aio\addons\gui\ui\slot_rifle_ca.paa"], ["number", "1"]], _theme] call aio_gui_fnc_drawSlot;
  *
  * Public: No
  */
@@ -89,7 +89,7 @@ if (_empty && {_theme getOrDefault ["hatch", false]}) then {
 
 // A square look marks the weapon in hand with a bar along the left edge, between the round corners.
 if (_options getOrDefault ["accent", false]) then {
-    private _accent = [_display, "EINV_PanelRect", _parent, [_left, _top + _radius, pixelW * 3, _height - _radius * 2]] call FUNC(uiCreate);
+    private _accent = [_display, "AIO_PanelRect", _parent, [_left, _top + _radius, pixelW * 3, _height - _radius * 2]] call FUNC(uiCreate);
     _accent ctrlSetBackgroundColor (_theme getOrDefault ["slotAccent", [0.84, 0.54, 0.1, 1]]);
     _controls pushBack _accent;
 };
@@ -156,7 +156,7 @@ if (_ammo isNotEqualTo [] || _showName) then {
     if (_ammo isNotEqualTo []) then {
         _ammo params ["_rounds", "_capacity"];
 
-        // And under them how full a magazine that is not full is (einv_gui_magazineFillBar) - a full one
+        // And under them how full a magazine that is not full is (aio_gui_magazineFillBar) - a full one
         // shows its rounds alone, a one-round magazine (launcher, grenade launcher) has nothing to fill.
         if (
             _capacity > 1 && {_rounds < _capacity}

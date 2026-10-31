@@ -24,7 +24,7 @@
  * None
  *
  * Example:
- * [_display, _text, "B_Carryall_blk", false, 1, ["B_Kitbag_cbr", 1]] call einv_setup_fnc_openImportChoice;
+ * [_display, _text, "B_Carryall_blk", false, 1, ["B_Kitbag_cbr", 1]] call aio_setup_fnc_openImportChoice;
  *
  * Public: No
  */

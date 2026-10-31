@@ -15,7 +15,7 @@
  * which the hint line says once.
  *
  * A tile of the kit's grid that leaves the kit - onto another grid or kit, or out of the panel to be taken away -
- * goes only where the kit lets things out in the arsenal (einv_compat_efak_fnc_arsenalEditable: the kit type's
+ * goes only where the kit lets things out in the arsenal (aio_compat_efak_fnc_arsenalEditable: the kit type's
  * Arsenal setting, a kit that follows the default contents): red at once, with why. Within its own grid it only
  * changes its place, which is always allowed.
  *
@@ -29,7 +29,7 @@
  * The target as it is to stand, nil to leave the engine's <ARRAY or NIL>
  *
  * Example:
- * [["ground", -1, 0, 0, true, ""], _entry, _grid, []] call einv_arsenal_fnc_dragCheck;
+ * [["ground", -1, 0, 0, true, ""], _entry, _grid, []] call aio_arsenal_fnc_dragCheck;
  *
  * Public: No
  */

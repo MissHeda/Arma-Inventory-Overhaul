@@ -22,7 +22,7 @@
  * The key was used here, the window does nothing more with it <BOOL>
  *
  * Example:
- * [_display, 6, false, false, false] call einv_hotbar_fnc_onWindowKey;
+ * [_display, 6, false, false, false] call aio_hotbar_fnc_onWindowKey;
  *
  * Public: No
  */
@@ -43,7 +43,7 @@ if ((_hover param [0, ""]) isEqualTo "slot" && {(_hover param [1, -1]) >= 0}) th
 
 private _onStrip = _record isNotEqualTo [] && {(_record param [7, -1]) >= 0};
 
-// The drop key (einv_gui_fnc_isDropKey, set in Configure Addons) empties a slot of the bar.
+// The drop key (aio_gui_fnc_isDropKey, set in Configure Addons) empties a slot of the bar.
 if (_onStrip && {[_key, [_shift, _ctrl, _alt]] call EFUNC(gui,isDropKey)}) exitWith {
     [_record select 7] call FUNC(unbind);
 

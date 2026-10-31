@@ -7,12 +7,12 @@
  *   Move over - from the unit's own storage to the containers of the loot column in the order it shows
  *               them (a pile on the ground too, like a single quick move; with nothing looted shown, the
  *               ground at the feet - seated, the vehicle), from the loot into the unit's uniform, vest
- *               and backpack. Worked out together (einv_storage_fnc_plan): the largest first, each into
+ *               and backpack. Worked out together (aio_storage_fnc_plan): the largest first, each into
  *               the first container with room, and what finds none stays ("Moved 4 of 6").
  *   Drop      - every selected tile not on the ground yet onto the ground: the surface under the feet,
  *               or the vehicle's cargo while seated.
  *
- * Kits are no targets of a group (a kit decides tile by tile, einv_compat_efak). A tile not searched yet,
+ * Kits are no targets of a group (a kit decides tile by tile, aio_compat_efak). A tile not searched yet,
  * one a move is under way for and one on a body's doll stay; a living person's gear only as the settings
  * say (fnc_checkTouch).
  *
@@ -24,7 +24,7 @@
  * Something was sent <BOOL>
  *
  * Example:
- * [call einv_gui_fnc_selectionTiles] call einv_gui_fnc_quickMoveGroup;
+ * [call aio_gui_fnc_selectionTiles] call aio_gui_fnc_quickMoveGroup;
  *
  * Public: No
  */
@@ -55,7 +55,7 @@ private _refused = "";
 
     private _why = [_grid get "container", "items"] call FUNC(checkTouch);
 
-    // Another living player's kit stays where it is, as for a single tile (einv_compat_efak).
+    // Another living player's kit stays where it is, as for a single tile (aio_compat_efak).
     if (_why isEqualTo "" && {!isNil QEFUNC(compat_efak,checkTile)}) then {
         _why = [_tile getOrDefault ["class", ""], _grid get "container"] call EFUNC(compat_efak,checkTile);
     };

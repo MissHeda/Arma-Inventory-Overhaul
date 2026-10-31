@@ -18,7 +18,7 @@
  * Shown <BOOL>
  *
  * Example:
- * [player, 4] call einv_gui_fnc_agentActionCondition;
+ * [player, 4] call aio_gui_fnc_agentActionCondition;
  *
  * Public: No
  */

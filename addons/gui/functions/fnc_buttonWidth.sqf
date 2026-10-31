@@ -20,7 +20,7 @@
  * Width, in screen units <NUMBER>
  *
  * Example:
- * ["Sort", "", 0.017, 0.0125, _theme] call einv_gui_fnc_buttonWidth;
+ * ["Sort", "", 0.017, 0.0125, _theme] call aio_gui_fnc_buttonWidth;
  *
  * Public: No
  */

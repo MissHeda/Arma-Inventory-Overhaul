@@ -5,7 +5,7 @@
  * XEH_postInit):
  *
  *   - the unit carries throwables that lie only where they are closed: ACE's "blockThrow" status effect is set
- *     for the unit (reason "einv_storage"), which ACE's advanced throwing asks before it prepares a throw, and
+ *     for the unit (reason "aio_storage"), which ACE's advanced throwing asks before it prepares a throw, and
  *     a throwable in the hands is put away for the weapon
  *   - some may be thrown but the selected one may not: the selection moves to one that may (fnc_throwSelect)
  *   - nothing is carried that lies where it is closed, or nothing is limited: the status effect is taken away
@@ -20,7 +20,7 @@
  * None
  *
  * Example:
- * [] call einv_storage_fnc_throwTick;
+ * [] call aio_storage_fnc_throwTick;
  *
  * Public: No
  */

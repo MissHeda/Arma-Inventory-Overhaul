@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Splits a rules text written by the rules engine (einv_items_fnc_writeRules) into its header and its
+ * Splits a rules text written by the rules engine (aio_items_fnc_writeRules) into its header and its
  * statements, one string each - what the wizard compares statement by statement: changes counted, edits
  * replayed onto someone else's save, an import added to the own rules.
  *
@@ -9,13 +9,13 @@
  * %2C - so the commas between them are where to cut.
  *
  * Arguments:
- * 0: Rules text, as einv_items_fnc_writeRules writes it <STRING>
+ * 0: Rules text, as aio_items_fnc_writeRules writes it <STRING>
  *
  * Return Value:
  * [header, [statement, ...]] <ARRAY>
  *
  * Example:
- * ["einv1 base=default, @grenade > stack=3"] call einv_setup_fnc_statements;
+ * ["aio1 base=default, @grenade > stack=3"] call aio_setup_fnc_statements;
  *
  * Public: No
  */

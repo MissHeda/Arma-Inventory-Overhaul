@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * One kit as a section of the window's kind (see fnc_getSections): the kit's picture and name, how full
  * it is, and what it holds - for a kit window (fnc_getSections) and for a kit unfolded in the ACE Arsenal's
- * panel (einv_arsenal_fnc_layout, fnc_arsenalKit).
+ * panel (aio_arsenal_fnc_layout, fnc_arsenalKit).
  *
  * Arguments:
  * 0: Kit class <STRING>
@@ -15,7 +15,7 @@
  * The section, with the keys fnc_getSections lists <HASHMAP>
  *
  * Example:
- * ["efak_IFAK_7", backpackContainer player, "", backpackContainer player] call einv_compat_efak_fnc_kitSection;
+ * ["efak_IFAK_7", backpackContainer player, "", backpackContainer player] call aio_compat_efak_fnc_kitSection;
  *
  * Public: No
  */

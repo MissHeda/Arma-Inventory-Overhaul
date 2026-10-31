@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * call einv_setup_fnc_onSettingChanged;
+ * call aio_setup_fnc_onSettingChanged;
  *
  * Public: No
  */

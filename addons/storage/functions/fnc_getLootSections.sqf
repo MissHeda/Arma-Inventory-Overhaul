@@ -7,7 +7,7 @@
  * unit (fnc_getNearby) - in the order fnc_orderSections gives.
  *
  *   a body        - what it wears, then its uniform, vest and backpack (fnc_getSections)
- *   a living person (einv_gui_fnc_openPerson) - the same, less a container the mission locked
+ *   a living person (aio_gui_fnc_openPerson) - the same, less a container the mission locked
  *   the ground    - one section, left out when nothing lies there; titled "Ground" when it is the only
  *                   pile in the column, else "Ground - <its largest item>"
  *   anything else - one section titled with the crate's or vehicle's name
@@ -39,7 +39,7 @@
  *   "entries" - only for "worn": the entries to show, as fnc_getContents, each with its "slot" <ARRAY>
  *
  * Example:
- * [cursorObject, objNull] call einv_storage_fnc_getLootSections;
+ * [cursorObject, objNull] call aio_storage_fnc_getLootSections;
  *
  * Public: No
  */
@@ -140,7 +140,7 @@ private _fnc_add = {
 
     if (isNull _object) exitWith {};
 
-    // A body or a living person (einv_gui_fnc_openPerson): what they wear, then what they carry.
+    // A body or a living person (aio_gui_fnc_openPerson): what they wear, then what they carry.
     if (_object isKindOf "CAManBase") exitWith {
         [_object] call _fnc_addWorn;
 

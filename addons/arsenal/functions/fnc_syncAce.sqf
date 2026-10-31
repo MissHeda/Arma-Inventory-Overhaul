@@ -23,7 +23,7 @@
  * None
  *
  * Example:
- * [_display] call einv_arsenal_fnc_syncAce;
+ * [_display] call aio_arsenal_fnc_syncAce;
  *
  * Public: No
  */

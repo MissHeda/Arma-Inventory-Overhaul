@@ -4,16 +4,16 @@
  * Adds the cargo sections to the loot column's list as the window builds it: under every crate or vehicle
  * the player may look into that has things loaded by ACE cargo, a section "CARGO" with a card for each
  * loaded thing (fnc_drawSection). It sits right under its vehicle, before the crates opened from it
- * (their sections name the vehicle as their parent too; einv_storage_fnc_orderSections keeps the order).
+ * (their sections name the vehicle as their parent too; aio_storage_fnc_orderSections keeps the order).
  *
- * A locked section has no container any more (einv_locks_fnc_decorate), so what lies in a vehicle that is
+ * A locked section has no container any more (aio_locks_fnc_decorate), so what lies in a vehicle that is
  * locked to the player is not listed at all. Nothing is added while ACE cargo is switched off
  * (ace_cargo_enable) or nothing is loaded. A crate opened from the cargo (fnc_toggleOpen) is shown as a
  * crate - its picture and ACE's name for it, custom name included - not as an item.
  *
  * The section carries no container, no grid and no places: "vehicle" is the holder whose cargo it shows,
  * "items" the loaded things (objects and class names, as ACE keeps them), and "drawer" the function that
- * draws it, which einv_gui_fnc_drawSection calls instead of drawing a block of its own.
+ * draws it, which aio_gui_fnc_drawSection calls instead of drawing a block of its own.
  *
  * Arguments:
  * 0: Sections of the loot column <ARRAY of HASHMAPs>
@@ -22,7 +22,7 @@
  * The sections, the cargo ones added <ARRAY of HASHMAPs>
  *
  * Example:
- * [_lootSections] call einv_compat_ace_cargo_fnc_getSections;
+ * [_lootSections] call aio_compat_ace_cargo_fnc_getSections;
  *
  * Public: No
  */

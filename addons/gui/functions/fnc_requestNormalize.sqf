@@ -6,8 +6,8 @@
  *
  * Surplus: a person (the player's own unit, a body, someone looted) whose uniform, vest or backpack shows an
  * overflow tile is asked to pass what it can on to its next container with room
- * (einv_storage_fnc_requestMigrate, op "migrate"), once per DRIFT_REPEAT seconds per person. The player's own
- * unit is also noted for the overflow sweep (einv_storage_fnc_queueSweep), which puts what fits no worn container
+ * (aio_storage_fnc_requestMigrate, op "migrate"), once per DRIFT_REPEAT seconds per person. The player's own
+ * unit is also noted for the overflow sweep (aio_storage_fnc_queueSweep), which puts what fits no worn container
  * onto the ground.
  *
  * Drift: a holder whose places and cargo have disagreed for DRIFT_WAIT seconds (GVAR(drift)) and was not
@@ -17,7 +17,7 @@
  *
  * Neither is asked for a holder a move of this window is under way in (GVAR(inFlight)) - its places come
  * with the answer -, nor while the server's hub has not answered this client's greeting for a holder only
- * the hub reaches (einv_storage_fnc_hubReady): it is asked again at a later check. A holder gone null drops
+ * the hub reaches (aio_storage_fnc_hubReady): it is asked again at a later check. A holder gone null drops
  * out of the drift list.
  *
  * Arguments:
@@ -27,7 +27,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_requestNormalize;
+ * call aio_gui_fnc_requestNormalize;
  *
  * Public: No
  */
@@ -47,7 +47,7 @@ private _busy = [];
 
 // Surplus: a person's uniform, vest or backpack that shows an overflow tile - something a script, a loadout or
 // the engine put in beyond the grid - is asked to pass it on to the person's next container with room (op
-// "migrate", einv_storage_fnc_requestMigrate, which looks first and asks for nothing when nothing could move).
+// "migrate", aio_storage_fnc_requestMigrate, which looks first and asks for nothing when nothing could move).
 // The player's own unit is looked after when its loadout changes, with the window shut as well; this is for
 // what lies around - a body, a person - and the safety net for the own gear. Only for what is drawn, at most
 // every DRIFT_REPEAT seconds per person, and not while a move of this window is under way in it.
@@ -70,7 +70,7 @@ private _persons = [];
     private _person = _x;
     private _worn = [uniformContainer _person, vestContainer _person, backpackContainer _person];
 
-    // The player's own overflow tile is swept as well (einv_storage_fnc_requestSweep): to another worn container
+    // The player's own overflow tile is swept as well (aio_storage_fnc_requestSweep): to another worn container
     // with room, else onto the ground. A call that only notes a due time, so every check may make it.
     if (_person isEqualTo player) then {
         [] call EFUNC(storage,queueSweep);

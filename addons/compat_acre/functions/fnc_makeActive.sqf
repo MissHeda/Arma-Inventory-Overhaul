@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Makes a radio the one in use - ACRE2's own call for it (acre_api_fnc_setCurrentRadio, which only takes
  * a radio the player carries). The window shows it as soon as it looks again
- * (einv_gui_fnc_requestRebuild).
+ * (aio_gui_fnc_requestRebuild).
  *
  * Arguments:
  * 0: ACRE radio id, e.g. "ACRE_PRC152_ID_1" <STRING>
@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * ["ACRE_PRC152_ID_1"] call einv_compat_acre_fnc_makeActive;
+ * ["ACRE_PRC152_ID_1"] call aio_compat_acre_fnc_makeActive;
  *
  * Public: No
  */

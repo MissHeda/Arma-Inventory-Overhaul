@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [_display, 2] call einv_setup_fnc_onUnload;
+ * [_display, 2] call aio_setup_fnc_onUnload;
  *
  * Public: No
  */

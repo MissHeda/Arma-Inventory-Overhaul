@@ -22,7 +22,7 @@
  * How many things were added <NUMBER>
  *
  * Example:
- * [player, _loadout] call einv_storage_fnc_topUpLoadout;
+ * [player, _loadout] call aio_storage_fnc_topUpLoadout;
  *
  * Public: No
  */
@@ -109,7 +109,7 @@ private _readList = {
                 _class = _what param [0, ""];
             };
 
-            private _isKit = (([_class] call (missionNamespace getVariable ["einv_items_fnc_kitOf", {[]}])) isNotEqualTo []);
+            private _isKit = (([_class] call (missionNamespace getVariable ["aio_items_fnc_kitOf", {[]}])) isNotEqualTo []);
 
             if (_missing > 0 && {_full} && {!_isKit}) then {
                 switch (_kind) do {

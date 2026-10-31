@@ -13,9 +13,9 @@ class CfgPatches {
             "cba_main",
             "ace_common",
             "ace_magazinerepack",
-            "einv_main",
-            "einv_storage",
-            "einv_gui"
+            "aio_main",
+            "aio_storage",
+            "aio_gui"
         };
         skipWhenMissingDependencies = 1;
         author = "Miss Heda";

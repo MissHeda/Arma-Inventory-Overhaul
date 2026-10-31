@@ -30,7 +30,7 @@
  *  carried variables [[name, value], ...]] <ARRAY>
  *
  * Example:
- * [backpackContainer player] call einv_storage_fnc_snapshot;
+ * [backpackContainer player] call aio_storage_fnc_snapshot;
  *
  * Public: No
  */

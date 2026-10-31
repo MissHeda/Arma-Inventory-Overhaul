@@ -18,7 +18,7 @@
  * [action, item class, the holder it went to or objNull, slot, unit] <ARRAY>
  *
  * Example:
- * [createHashMapFromArray [["kind", "move"], ["entry", _tile], ["to", _crate]]] call einv_gui_fnc_feelFor;
+ * [createHashMapFromArray [["kind", "move"], ["entry", _tile], ["to", _crate]]] call aio_gui_fnc_feelFor;
  *
  * Public: No
  */

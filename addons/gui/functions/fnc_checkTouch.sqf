@@ -14,7 +14,7 @@
  * "" when allowed, else "LookOnly" or "Failed" <STRING>
  *
  * Example:
- * [backpackContainer cursorObject, "items"] call einv_gui_fnc_checkTouch;
+ * [backpackContainer cursorObject, "items"] call aio_gui_fnc_checkTouch;
  *
  * Public: No
  */

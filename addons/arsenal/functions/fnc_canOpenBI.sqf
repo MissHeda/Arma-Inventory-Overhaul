@@ -16,7 +16,7 @@
  * May open it <BOOL>
  *
  * Example:
- * [_box, player] call einv_arsenal_fnc_canOpenBI;
+ * [_box, player] call aio_arsenal_fnc_canOpenBI;
  *
  * Public: No
  */

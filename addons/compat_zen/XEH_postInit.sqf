@@ -41,7 +41,7 @@ private _choices = [
 } forEach _choices;
 
 // Searching on a crate or a vehicle: the server's settings decide for every object that has no mark of its own, and this
-// is the mark (einv_gui_fnc_setSearchable). Two choices that say what they will do, each shown while some target would
+// is the mark (aio_gui_fnc_setSearchable). Two choices that say what they will do, each shown while some target would
 // change (fnc_canSetSearch). The conditions are written out, not given arguments: they do not depend on what the menu hands on.
 private _off = [
     QGVAR(searchOff), LLSTRING(Action_SearchOff), GUI_TEX(icon_eye_off_ca), {

@@ -10,7 +10,7 @@
     QGVAR(settingsInfo),
     "LIST",
     [LLSTRING(Setting_Info), LLSTRING(Setting_Info_Desc)],
-    CBA_SETTINGS_EINV_SERVER,
+    CBA_SETTINGS_AIO_SERVER,
     [[0], [LLSTRING(Setting_Info_Value)], 0],
     1
 ] call CBA_fnc_addSetting;

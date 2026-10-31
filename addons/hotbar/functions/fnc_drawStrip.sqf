@@ -5,7 +5,7 @@
  * Draws the hotbar's row in the inventory window: seven slots the size of the small gear slots, spread
  * over the width of the equipment column, each with the key on its key cap, the item's picture and the
  * number carried bottom right (red and the picture faded at none). They are slots like any other
- * (einv_gui_fnc_drawSlot) with the number of the hotbar slot in the record's eighth element, which is
+ * (aio_gui_fnc_drawSlot) with the number of the hotbar slot in the record's eighth element, which is
  * what tells the window's mouse handling they take a class and do not hold an item.
  *
  * Arguments:
@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_display, controlNull, [0.1, 0.8, 0.5, 0.05], 0.05, _theme] call einv_hotbar_fnc_drawStrip;
+ * [_display, controlNull, [0.1, 0.8, 0.5, 0.05], 0.05, _theme] call aio_hotbar_fnc_drawStrip;
  *
  * Public: No
  */

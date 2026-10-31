@@ -49,7 +49,7 @@
  * Its group <CONTROL>
  *
  * Example:
- * [_display, _box, [0, 0.1, 0.2, 0.3], _canvas, _theme, createHashMapFromArray [["palette", true]]] call einv_setup_fnc_uiCanvas;
+ * [_display, _box, [0, 0.1, 0.2, 0.3], _canvas, _theme, createHashMapFromArray [["palette", true]]] call aio_setup_fnc_uiCanvas;
  *
  * Public: No
  */
@@ -74,7 +74,7 @@ private _cellW = SQUARE(_cellH);
 private _editable = _options getOrDefault ["editable", true];
 private _picture = _options getOrDefault ["picture", ""];
 
-private _group = [_display, "EINV_ScrollGroup", _parent, _rect] call EFUNC(gui,uiCreate);
+private _group = [_display, "AIO_ScrollGroup", _parent, _rect] call EFUNC(gui,uiCreate);
 
 _group setVariable [QGVAR(scrollId), _options getOrDefault ["scrollId", ""]];
 _group setVariable [QGVAR(canvas), _canvas];
@@ -93,7 +93,7 @@ if (_palette) then {
 
     private _cellHover = +_cell;
 
-    // A solid cell (the palette's, einv_gui_fnc_theme) lights towards white instead: more alpha would change nothing.
+    // A solid cell (the palette's, aio_gui_fnc_theme) lights towards white instead: more alpha would change nothing.
     if ((_cell select 3) >= 1) then {
         _cellHover = ((_cell select [0, 3]) apply {_x + (1 - _x) * 0.12}) + [1];
     } else {
@@ -227,7 +227,7 @@ _group setVariable [QGVAR(canvasPickSet), {
 }];
 
 if (_palette) then {
-    _group setVariable [QGVAR(canvasLayer), [_display, "EINV_Group", _group, [0, 0, _cols * _cellW, _rows * _cellH]] call EFUNC(gui,uiCreate)];
+    _group setVariable [QGVAR(canvasLayer), [_display, "AIO_Group", _group, [0, 0, _cols * _cellW, _rows * _cellH]] call EFUNC(gui,uiCreate)];
     _group setVariable [QGVAR(canvasEdges), _values apply {[]}];
 
     {
@@ -363,6 +363,23 @@ _group setVariable [QGVAR(canvasTarget), _fnc_target];
     // The press: the stroke takes this place's change along.
     _hit ctrlAddEventHandler ["MouseButtonDown", {
         params ["_hit", "_button"];
+
+        // A right click on a painted canvas picks the compartment the place is in, whatever the brush (issue #38).
+        if (_button == 1) exitWith {
+            (_hit getVariable [QGVAR(canvasPlace), []]) params [["_group", controlNull], ["_index", -1]];
+
+            if (isNull _group) exitWith {};
+
+            private _options = _group getVariable [QGVAR(canvasOptions), createHashMap];
+
+            if (_options getOrDefault ["palette", false]) then {
+                [{
+                    params ["_index", "_options"];
+
+                    [_index, _options getOrDefault ["arguments", []]] call (_options getOrDefault ["onPick", {}]);
+                }, [_index, _options]] call FUNC(defer);
+            };
+        };
 
         if (_button != 0) exitWith {};
 

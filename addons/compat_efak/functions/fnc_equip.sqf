@@ -2,8 +2,8 @@
 /*
  * Author: Miss Heda
  * Puts an item out of an open kit on the player - dragged onto a slot, Alt+click, Equip / Attach to /
- * Load into in the context menu (einv_gui_fnc_doEquip): a magazine with the rounds the kit kept for it,
- * a CBRN bag's mask on the face. One move of the window's transactions (einv_gui_fnc_sendMoves): out
+ * Load into in the context menu (aio_gui_fnc_doEquip): a magazine with the rounds the kit kept for it,
+ * a CBRN bag's mask on the face. One move of the window's transactions (aio_gui_fnc_sendMoves): out
  * of the kit at its root's authority ("kitTake"), on where the player's unit is local ("putOn").
  *
  * What comes off the slot goes into the kit when the kit takes it - empty, a magazine with rounds left,
@@ -13,10 +13,10 @@
  * back into the kit the same way.
  *
  * Out of a kit in a living person's gear only as the window's settings for it say
- * (einv_gui_fnc_checkTouch), and never out of another living player's (fnc_mayReach).
+ * (aio_gui_fnc_checkTouch), and never out of another living player's (fnc_mayReach).
  *
  * Arguments:
- * 0: Slot id, see einv_storage_fnc_getSlot <STRING>
+ * 0: Slot id, see aio_storage_fnc_getSlot <STRING>
  * 1: Kit class <STRING>
  * 2: Entry - a tile of the kit (fnc_getEntries) <HASHMAP>
  *
@@ -24,7 +24,7 @@
  * Sent <BOOL>
  *
  * Example:
- * ["goggles", "eup_CBRNBag_3", _entry] call einv_compat_efak_fnc_equip;
+ * ["goggles", "eup_CBRNBag_3", _entry] call aio_compat_efak_fnc_equip;
  *
  * Public: No
  */
@@ -56,7 +56,7 @@ if (isNull _where) exitWith {["Failed"] call _fnc_refuse};
 // Only while the player may still reach it where it lies now (fnc_mayReach).
 if !([_where] call FUNC(mayReach)) exitWith {[LLSTRING(NotYours)] call _fnc_refuse};
 
-// In a living person's gear only as the settings for it say (einv_gui_fnc_checkTouch).
+// In a living person's gear only as the settings for it say (aio_gui_fnc_checkTouch).
 private _touch = [_where, "items"] call EFUNC(gui,checkTouch);
 
 if (_touch isNotEqualTo "") exitWith {[_touch] call _fnc_refuse};

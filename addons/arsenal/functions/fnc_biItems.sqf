@@ -24,7 +24,7 @@
  * [full, classes] <ARRAY>
  *
  * Example:
- * [_box, false, player] call einv_arsenal_fnc_biItems;
+ * [_box, false, player] call aio_arsenal_fnc_biItems;
  *
  * Public: No
  */

@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [] call einv_storage_fnc_tickMigrate;
+ * [] call aio_storage_fnc_tickMigrate;
  *
  * Public: No
  */

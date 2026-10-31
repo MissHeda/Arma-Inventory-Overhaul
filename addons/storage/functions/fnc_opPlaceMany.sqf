@@ -15,7 +15,7 @@
  *
  * Arguments:
  * 0: Args, [holder, [[entry array, cell], ...]] <ARRAY>
- * 1: Context - "requester", "where", "txId", "root", "settlement" (einv_storage_fnc_execute) <HASHMAP>
+ * 1: Context - "requester", "where", "txId", "root", "settlement" (aio_storage_fnc_execute) <HASHMAP>
  *
  * Return Value:
  * [status, produced, extra] <ARRAY>
@@ -23,11 +23,11 @@
  *     "IntoItself", "OutOfReach", "Bounced", "Skipped", "Failed", a guard's reason or a reason already
  *     in words)
  *   produced - the payloads it handed on, each consumed by a later op or settled
- *     (einv_storage_fnc_settle)
+ *     (aio_storage_fnc_settle)
  *   extra - what else it tells, [] for nothing
  *
  * Example:
- * [[cursorObject, _moves], _context] call einv_storage_fnc_opPlaceMany;
+ * [[cursorObject, _moves], _context] call aio_storage_fnc_opPlaceMany;
  *
  * Public: No
  */
@@ -135,7 +135,7 @@ private _blocks = _view getOrDefault ["blocks", []];
 private _open = _view getOrDefault ["open", false];
 private _taken = [_blocks] call FUNC(seedTaken);
 
-// A shaped item (size=xx/x-) takes only its own cells, holes as it lies (einv_items_fnc_footprintAs).
+// A shaped item (size=xx/x-) takes only its own cells, holes as it lies (aio_items_fnc_footprintAs).
 private _fnc_mark = {
     params ["_block", "_col", "_row", "_w", "_h", ["_holes", []]];
 

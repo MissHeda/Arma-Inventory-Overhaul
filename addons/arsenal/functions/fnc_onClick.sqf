@@ -8,7 +8,7 @@
  *
  * Arguments:
  * 0: Kind, "single" or "double" <STRING>
- * 1: What was clicked (see einv_gui_fnc_onMouseButton) <HASHMAP>
+ * 1: What was clicked (see aio_gui_fnc_onMouseButton) <HASHMAP>
  * 2: Shift <BOOL>
  * 3: Ctrl <BOOL>
  * 4: Alt <BOOL>
@@ -17,7 +17,7 @@
  * Handled - the engine does nothing more with it <BOOL>
  *
  * Example:
- * ["double", _target, false, false, false] call einv_arsenal_fnc_onClick;
+ * ["double", _target, false, false, false] call aio_arsenal_fnc_onClick;
  *
  * Public: No
  */

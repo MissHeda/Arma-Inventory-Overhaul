@@ -17,7 +17,7 @@
  * The picture <CONTROL>
  *
  * Example:
- * [_display, _group, [0, 0, 0.1, 0.05], getText (configFile >> "CfgWeapons" >> "arifle_MX_F" >> "picture")] call einv_gui_fnc_uiPicture;
+ * [_display, _group, [0, 0, 0.1, 0.05], getText (configFile >> "CfgWeapons" >> "arifle_MX_F" >> "picture")] call aio_gui_fnc_uiPicture;
  *
  * Public: No
  */
@@ -26,7 +26,7 @@ disableSerialization;
 
 params ["_display", "_parent", "_rect", "_texture", ["_color", [1, 1, 1, 1]]];
 
-private _ctrl = [_display, "EINV_Picture", _parent, _rect] call FUNC(uiCreate);
+private _ctrl = [_display, "AIO_Picture", _parent, _rect] call FUNC(uiCreate);
 _ctrl ctrlSetText ([_texture] call FUNC(safePicture));
 _ctrl ctrlSetTextColor _color;
 

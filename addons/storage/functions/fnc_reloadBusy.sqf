@@ -17,7 +17,7 @@
  * A reload is under way <BOOL>
  *
  * Example:
- * if (call einv_storage_fnc_reloadBusy) exitWith {};
+ * if (call aio_storage_fnc_reloadBusy) exitWith {};
  *
  * Public: Yes
  */

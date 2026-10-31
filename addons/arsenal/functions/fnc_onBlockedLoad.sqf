@@ -4,7 +4,7 @@
  * Author: Miss Heda
  * The red screen's display was created: builds its card inside a controls group of its own - the title, the
  * reason, the server's own message and the button. The card is a group inside that one, so the strip over its
- * sign and title can move it (einv_gui_fnc_dragHandle) with the red glass staying where it is.
+ * sign and title can move it (aio_gui_fnc_dragHandle) with the red glass staying where it is.
  *
  * Red glass: the screen is dimmed and tinted with the theme's loss colour, with a card of the window's glass
  * in the middle, a ring in the same colour round it and the blocked sign over the words. The group is made
@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_display] call einv_arsenal_fnc_onBlockedLoad;
+ * [_display] call aio_arsenal_fnc_onBlockedLoad;
  *
  * Public: No
  */
@@ -36,7 +36,7 @@ private _fontBold = _theme getOrDefault ["fontBold", "RobotoCondensedBold"];
 private _loss = _theme getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];
 
 // The whole screen, in one group; what is in it counts from its corner.
-private _group = _display ctrlCreate ["EINV_Group", -1];
+private _group = _display ctrlCreate ["AIO_Group", -1];
 _group ctrlSetPosition [safezoneX, safezoneY, safezoneW, safezoneH];
 _group ctrlCommit 0;
 
@@ -50,7 +50,7 @@ private _cardH = UNIT * 17;
 private _radius = _theme getOrDefault ["radius", UNIT * 0.45];
 private _pad = SQUARE(UNIT * 1.2);
 private _innerW = _cardW - _pad * 2;
-private _card = [_display, "EINV_Group", _group, [(safezoneW - _cardW) / 2, (safezoneH - _cardH) / 2, _cardW, _cardH]] call EFUNC(gui,uiCreate);
+private _card = [_display, "AIO_Group", _group, [(safezoneW - _cardW) / 2, (safezoneH - _cardH) / 2, _cardW, _cardH]] call EFUNC(gui,uiCreate);
 
 [_display, _card, [0, 0, _cardW, _cardH], _theme getOrDefault ["panel", [0.05, 0.05, 0.05, 0.92]], _radius] call EFUNC(gui,uiPanel);
 [_display, _card, [0, 0, _cardW, _cardH], _loss, _radius] call EFUNC(gui,uiRing);
@@ -93,7 +93,7 @@ private _fnc_text = {
     params ["_text", "_color", "_lines"];
 
     private _height = UNIT * 0.7 * 1.3 * _lines;
-    private _box = [_display, "EINV_StructuredText", _card, [_pad, _y, _innerW, _height]] call EFUNC(gui,uiCreate);
+    private _box = [_display, "AIO_StructuredText", _card, [_pad, _y, _innerW, _height]] call EFUNC(gui,uiCreate);
 
     _box ctrlSetStructuredText (text _text setAttributes ["align", "center", "valign", "top", "font", _font, "color", [_color] call _fnc_hex]);
     _y = _y + _height;

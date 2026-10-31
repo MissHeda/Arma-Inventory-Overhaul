@@ -32,8 +32,8 @@
  * How many were put in <NUMBER>
  *
  * Example:
- * [player, "ACE_fieldDressing", 8] call einv_storage_fnc_addToUnit;
- * [player, "30Rnd_65x39_caseless_mag", 3, 12] call einv_storage_fnc_addToUnit;
+ * [player, "ACE_fieldDressing", 8] call aio_storage_fnc_addToUnit;
+ * [player, "30Rnd_65x39_caseless_mag", 3, 12] call aio_storage_fnc_addToUnit;
  *
  * Public: Yes
  */

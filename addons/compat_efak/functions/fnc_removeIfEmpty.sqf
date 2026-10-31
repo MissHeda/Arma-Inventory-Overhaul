@@ -4,16 +4,16 @@
  * Enhanced First Aid Kits' "remove when empty": a kit emptied through the window goes, where its type's
  * setting says so (off unless the mission sets it), and its id is handed back to that mod
  * (efak_core_fnc_freeInstance). Its window closes when the kit windows are next drawn - the kit is found
- * nowhere (fnc_getSections, einv_gui_fnc_drawWindows).
+ * nowhere (fnc_getSections, aio_gui_fnc_drawWindows).
  *
  * Only inside a kit op, on the machine where the kit's root is local - the op that emptied it
  * (fnc_opKitTake, fnc_opKitMove) or "kitRemoveIfEmpty" (fnc_opKitRemoveIfEmpty): where it lies is read
  * off the real cargo under that root (fnc_locate), never from a window. Out of exactly the container it
- * lies in - nested ones too - with the storage's verified removal (einv_storage_fnc_removeEntry), its
+ * lies in - nested ones too - with the storage's verified removal (aio_storage_fnc_removeEntry), its
  * record with it; a kit packed in another kit leaves that one's contents, a write of that kit. Done
  * here rather than by that mod's removeKit, which only knows its holder's top-level cargo.
  *
- * Its places go as well (einv_storage_fnc_dropPlaces) - first, while it still lies under the root, as
+ * Its places go as well (aio_storage_fnc_dropPlaces) - first, while it still lies under the root, as
  * an empty kit has nothing on them to keep: that mod hands its class to the next kit of the type, which
  * must start unsorted instead of inheriting the arrangement.
  *
@@ -25,7 +25,7 @@
  * Removed <BOOL>
  *
  * Example:
- * ["efak_ifak_7", player] call einv_compat_efak_fnc_removeIfEmpty;
+ * ["efak_ifak_7", player] call aio_compat_efak_fnc_removeIfEmpty;
  *
  * Public: No
  */

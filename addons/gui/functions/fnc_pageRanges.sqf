@@ -12,7 +12,7 @@
  * time the compartment is drawn: the pages follow what lies there.
  *
  * Arguments:
- * 0: The layout's entries (einv_storage_fnc_getLayout) <ARRAY>
+ * 0: The layout's entries (aio_storage_fnc_getLayout) <ARRAY>
  * 1: The compartment <NUMBER>
  * 2: How many rows are paged - the rows the compartment shows (fnc_viewBlocks) <NUMBER>
  * 3: Rows to a page <NUMBER>
@@ -21,7 +21,7 @@
  * [[from, to, shownTo], ...] one per page; a single page when nothing needs cutting <ARRAY>
  *
  * Example:
- * [_entries, 0, 27, 10] call einv_gui_fnc_pageRanges;
+ * [_entries, 0, 27, 10] call aio_gui_fnc_pageRanges;
  *
  * Public: No
  */

@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Reads the value of picture= (a rule) or einv_picture (an item's config): the texture an item shows in
+ * Reads the value of picture= (a rule) or aio_picture (an item's config): the texture an item shows in
  * place of the one its config names. The one reader of that value, as fnc_parseIcon is of icon=.
  *
  *   \A3\Weapons_F\Data\UI\gear_acc_rail_ca.paa      a path as the engine writes it
@@ -26,7 +26,7 @@
  *   notes - what was left out, naming the value <ARRAY of STRING>
  *
  * Example:
- * ["/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa"] call einv_items_fnc_parsePicture;
+ * ["/A3/Weapons_F/Data/UI/gear_acc_rail_ca.paa"] call aio_items_fnc_parsePicture;
  * // ["\A3\Weapons_F\Data\UI\gear_acc_rail_ca.paa", []]
  *
  * Public: No

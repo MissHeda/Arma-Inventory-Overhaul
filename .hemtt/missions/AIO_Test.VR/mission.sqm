@@ -18,7 +18,7 @@ class EditorData
 	};
 };
 binarizationWanted=0;
-sourceName="einv_test";
+sourceName="aio_test";
 class AddonsMetaData
 {
 };

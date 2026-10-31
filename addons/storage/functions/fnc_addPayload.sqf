@@ -28,7 +28,7 @@
  * What did not arrive, a payload of the same kind - [] when all of it did <ARRAY>
  *
  * Example:
- * [_box, ["magazine", "30Rnd_65x39_caseless_mag", [30, 17]]] call einv_storage_fnc_addPayload;
+ * [_box, ["magazine", "30Rnd_65x39_caseless_mag", [30, 17]]] call aio_storage_fnc_addPayload;
  *
  * Public: No
  */

@@ -12,7 +12,7 @@
  * A repack started <BOOL>
  *
  * Example:
- * ["30Rnd_65x39_caseless_mag"] call einv_magazines_fnc_startAll;
+ * ["30Rnd_65x39_caseless_mag"] call aio_magazines_fnc_startAll;
  *
  * Public: No
  */

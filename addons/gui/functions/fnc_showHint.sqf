@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * ["Loaded Rifleman"] call einv_gui_fnc_showHint;
+ * ["Loaded Rifleman"] call aio_gui_fnc_showHint;
  *
  * Public: No
  */

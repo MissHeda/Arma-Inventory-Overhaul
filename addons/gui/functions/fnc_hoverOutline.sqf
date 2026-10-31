@@ -19,7 +19,7 @@
  * The controls <ARRAY>
  *
  * Example:
- * [_display, controlNull, [0.1, 0.1, 0.05, 0.05]] call einv_gui_fnc_hoverOutline;
+ * [_display, controlNull, [0.1, 0.1, 0.05, 0.05]] call aio_gui_fnc_hoverOutline;
  *
  * Public: No
  */

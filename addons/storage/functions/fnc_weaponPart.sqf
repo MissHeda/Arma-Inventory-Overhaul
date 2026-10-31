@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [player, "primary", true, "optic_Aco"] call einv_storage_fnc_weaponPart;
+ * [player, "primary", true, "optic_Aco"] call aio_storage_fnc_weaponPart;
  *
  * Public: No
  */

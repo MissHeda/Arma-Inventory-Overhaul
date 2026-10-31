@@ -15,7 +15,7 @@
  * Tiles, [[grid index, tile index], ...], in the order they were selected <ARRAY>
  *
  * Example:
- * call einv_gui_fnc_selectionTiles;
+ * call aio_gui_fnc_selectionTiles;
  *
  * Public: No
  */

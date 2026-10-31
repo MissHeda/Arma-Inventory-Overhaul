@@ -11,13 +11,13 @@
  * that cell, else the first with that key - identical items are the same item. It has to hold as many
  * as are asked for, and the kit as many with those rounds, else "Gone": all or nothing. Read and
  * written in the same frame. A whole tile's record leaves the kit's places, so nothing else in the kit
- * moves up into its cell (einv_storage_fnc_setPlace); the payload is noted in the phase's journal the
- * moment it left (einv_storage_fnc_journalNote). Whether an emptied kit goes is the op's business
+ * moves up into its cell (aio_storage_fnc_setPlace); the payload is noted in the phase's journal the
+ * moment it left (aio_storage_fnc_journalNote). Whether an emptied kit goes is the op's business
  * (fnc_removeIfEmpty).
  *
  * Arguments:
  * 0: Kit class <STRING>
- * 1: Entry - the tile as the window saw it (einv_storage_fnc_entryFromArray) <HASHMAP>
+ * 1: Entry - the tile as the window saw it (aio_storage_fnc_entryFromArray) <HASHMAP>
  * 2: How many of it, -1 for the whole tile as it lies now <NUMBER> (default: -1)
  *
  * Return Value:
@@ -25,7 +25,7 @@
  *  journal] <ARRAY>
  *
  * Example:
- * ["efak_ifak_7", _entry, 1] call einv_compat_efak_fnc_takeFromKit;
+ * ["efak_ifak_7", _entry, 1] call aio_compat_efak_fnc_takeFromKit;
  *
  * Public: No
  */
@@ -78,7 +78,7 @@ private _payload = [_class, _n, _rounds] call FUNC(payloadFor);
 if !([_kit, _class, -_n, _rounds] call FUNC(changeKit)) exitWith {["Gone", [], -1]};
 
 // Noted the moment it left: should anything after this stop the phase, the journal still hands it on
-// (einv_storage_fnc_phaseFinalize).
+// (aio_storage_fnc_phaseFinalize).
 private _note = ["out", +_payload] call EFUNC(storage,journalNote);
 
 // Found by where the tile lies - which is where it lay until now.
@@ -86,7 +86,7 @@ if (_n >= _have) then {
     [_kitKey, _tile, []] call EFUNC(storage,setPlace);
 };
 
-// What this execution read of the kit is out of date now (einv_storage_fnc_findEntry).
+// What this execution read of the kit is out of date now (aio_storage_fnc_findEntry).
 EGVAR(storage,cache) deleteAt _kitKey;
 
 ["", _payload, _note]

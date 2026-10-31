@@ -2,7 +2,7 @@
 
 // Loads only when ACRE2 is there: an addon whose required addons are missing is skipped, quietly - the
 // rest of the mod works the same without it. ACRE2 and TFAR never load together; each has an addon of its
-// own that answers the same questions about a radio (einv_gui_fnc_compatCollect asks both).
+// own that answers the same questions about a radio (aio_gui_fnc_compatCollect asks both).
 class CfgPatches {
     class ADDON {
         name = COMPONENT_NAME;
@@ -17,9 +17,9 @@ class CfgPatches {
             "acre_sys_data",
             "acre_sys_radio",
             "acre_sys_gui",
-            "einv_main",
-            "einv_storage",
-            "einv_gui"
+            "aio_main",
+            "aio_storage",
+            "aio_gui"
         };
         skipWhenMissingDependencies = 1;
         author = "Miss Heda";

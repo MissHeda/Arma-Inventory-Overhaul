@@ -17,7 +17,7 @@
  * The fade, or controlNull <CONTROL>
  *
  * Example:
- * [_display, controlNull, _rect, UNIT * 0.45] call einv_gui_fnc_panelGradient;
+ * [_display, controlNull, _rect, UNIT * 0.45] call aio_gui_fnc_panelGradient;
  *
  * Public: No
  */
@@ -28,12 +28,15 @@ params ["_display", "_parent", "_rect", ["_radius", 0, [0]]];
 
 private _color = (missionNamespace getVariable [QGVAR(theme), createHashMap]) getOrDefault ["panelGradient", []];
 
+// A display with a look of its own (the setup wizard) has no panel gradient.
+if (_display getVariable [QGVAR(plainLook), false]) exitWith {controlNull};
+
 if (count _color < 3) exitWith {controlNull};
 
 _rect params ["_left", "_top", "_width", "_height"];
 
 private _inset = SQUARE(_radius);
-private _fade = [_display, "EINV_PanelCorner", _parent, [_left + _inset, _top, (_width - _inset * 2) max 0, _height]] call FUNC(uiCreate);
+private _fade = [_display, "AIO_PanelCorner", _parent, [_left + _inset, _top, (_width - _inset * 2) max 0, _height]] call FUNC(uiCreate);
 
 _fade ctrlSetText UI_TEX(fade_strip_ca);
 _fade ctrlSetTextColor ((_color select [0, 3]) + [_color param [3, 1]]);

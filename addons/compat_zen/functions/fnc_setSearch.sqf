@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Turns the search off for the objects the Zeus menu chose - what they hold shows at once - or on again, as the server's
- * settings have it, and tells the game master what was done. The mark is public (einv_gui_fnc_setSearchable), so every
+ * settings have it, and tells the game master what was done. The mark is public (aio_gui_fnc_setSearchable), so every
  * player and a later joiner see it.
  *
  * Arguments:
@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * [[_crate], false] call einv_compat_zen_fnc_setSearch;
+ * [[_crate], false] call aio_compat_zen_fnc_setSearch;
  *
  * Public: No
  */

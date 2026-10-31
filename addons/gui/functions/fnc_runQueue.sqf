@@ -16,7 +16,7 @@
  * Sent <BOOL>
  *
  * Example:
- * [_display] call einv_gui_fnc_runQueue;
+ * [_display] call aio_gui_fnc_runQueue;
  *
  * Public: No
  */

@@ -10,20 +10,20 @@
  * machines can map the same records to different items.
  *
  * A nested container's id is its tag. In multiplayer, where a tag on the nested object does not reach
- * this machine, the copy on the outermost container it lies under is read (einv_storage_nested,
+ * this machine, the copy on the outermost container it lies under is read (aio_storage_nested,
  * fnc_tagNested) - the same id either way. Untagged, the id is "" (class|c): all untagged ones of a class
  * are alike until their authority tags them.
  *
  * Arguments:
  * 0: Entry (fnc_getContents) <HASHMAP>
  * 1: The copies of nested tags the entry's container lies under, when the caller has them at hand
- *    (einv_storage_nested of the outermost container) <ARRAY> (default: read when needed)
+ *    (aio_storage_nested of the outermost container) <ARRAY> (default: read when needed)
  *
  * Return Value:
  * Key, "" for an entry without a class <STRING>
  *
  * Example:
- * [_entry] call einv_storage_fnc_entryKey;
+ * [_entry] call aio_storage_fnc_entryKey;
  *
  * Public: No
  */

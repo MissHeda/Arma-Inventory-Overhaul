@@ -20,7 +20,7 @@
  * None
  *
  * Example:
- * [findDisplay 1127001] call einv_arsenal_fnc_interceptClose;
+ * [findDisplay 1127001] call aio_arsenal_fnc_interceptClose;
  *
  * Public: No
  */

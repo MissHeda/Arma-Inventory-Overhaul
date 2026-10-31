@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * [] call einv_gui_fnc_coalesceTick;
+ * [] call aio_gui_fnc_coalesceTick;
  *
  * Public: No
  */

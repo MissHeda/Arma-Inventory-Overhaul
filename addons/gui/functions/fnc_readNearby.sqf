@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Reads what lies around the unit anew (einv_storage_fnc_getNearby) into GVAR(nearby): when the window
+ * Reads what lies around the unit anew (aio_storage_fnc_getNearby) into GVAR(nearby): when the window
  * opens, at each contents check (fnc_onFrame) and before the window is built again for a move's answer,
  * so a pile the move made shows at once. Left empty with the player's switch off, and in any window but
  * the plain inventory (fnc_isInventoryMode) - the Arsenal's storage column is not a place to loot.
@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_readNearby;
+ * call aio_gui_fnc_readNearby;
  *
  * Public: No
  */

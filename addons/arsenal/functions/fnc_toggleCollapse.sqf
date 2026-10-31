@@ -21,7 +21,7 @@
  * The state changed <BOOL>
  *
  * Example:
- * [] call einv_arsenal_fnc_toggleCollapse;
+ * [] call aio_arsenal_fnc_toggleCollapse;
  *
  * Public: No
  */

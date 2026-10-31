@@ -25,7 +25,7 @@
  * [x, y] on the screen <ARRAY>
  *
  * Example:
- * [_grid] call einv_gui_fnc_gridOrigin;
+ * [_grid] call aio_gui_fnc_gridOrigin;
  *
  * Public: No
  */

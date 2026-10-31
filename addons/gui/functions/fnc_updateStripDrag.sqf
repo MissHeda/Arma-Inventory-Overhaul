@@ -15,7 +15,7 @@
  * What letting go does here: "move", "stay" or "remove" <STRING>
  *
  * Example:
- * [_display, getMousePosition] call einv_gui_fnc_updateStripDrag;
+ * [_display, getMousePosition] call aio_gui_fnc_updateStripDrag;
  *
  * Public: No
  */

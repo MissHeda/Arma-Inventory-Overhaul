@@ -1,7 +1,7 @@
 #define COMPONENT weight
-#define COMPONENT_BEAUTIFIED EINV - Weight
-#include "\z\einv\addons\main\script_mod.hpp"
-#include "\z\einv\addons\main\script_macros.hpp"
+#define COMPONENT_BEAUTIFIED AIO - Weight
+#include "\z\aio\addons\main\script_mod.hpp"
+#include "\z\aio\addons\main\script_macros.hpp"
 
 // How often, in seconds, the player's load is worked out again while they carry a uniform, vest or
 // backpack inside their own storage (XEH_postInit). What lies in those is not part of the loadout, so

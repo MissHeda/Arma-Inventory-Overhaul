@@ -51,7 +51,7 @@
 
 // The palette's colours by number - 0 accent, 1 secondary, 2 panels, 3 cells, 4 tiles, 5 text, 6 lines (fnc_paletteSet,
 // fnc_paletteSlide, fnc_openPaletteMenu): PALETTE_COLOURS of them, each one's id (what its button takes away, fnc_paletteSet
-// "reset"), where it lies in einv_gui_palette (the transparencies, at 2 and 8, are no colour) and how light it may be - the surfaces under
+// "reset"), where it lies in aio_gui_palette (the transparencies, at 2 and 8, are no colour) and how light it may be - the surfaces under
 // the text (panels, cells, tiles) at most PALETTE_PANEL_VALUE_MAX. PALETTE_UNSET is the palette with nothing chosen.
 #define PALETTE_COLOURS 10
 #define PALETTE_IDS ["accent", "secondary", "panel", "cells", "tiles", "text", "lines", "titleEnd", "title", "panelEnd"]
@@ -197,7 +197,7 @@
 // (fnc_personActionCondition): about 1.2 m to someone lying on level ground.
 #define ACE_INVENTORY_REACH 2
 
-// Whom a setting for living persons covers (einv_gui_personOpen, personItems, personWorn).
+// Whom a setting for living persons covers (aio_gui_personOpen, personItems, personWorn).
 #define ACCESS_EVERYONE 2
 #define ACCESS_HELPLESS 1
 #define ACCESS_NONE 0
@@ -218,7 +218,7 @@
 // Searching (fnc_updateStatus, fnc_animateSearch, fnc_revealFx): what is not searched yet shows as hatched tiles, and the
 // search itself only in the caption line of its box. The ring pictures (search_ring_01_ca to _32_ca, drawn by
 // tools/generate_ui_textures.py) are the spinner there - STATUS_ARC is the step that is its arc - and the repack's
-// progress ring (einv_magazines), as big as SEARCH_RING_SIZE of the tile's shorter side. A rustle every
+// progress ring (aio_magazines), as big as SEARCH_RING_SIZE of the tile's shorter side. A rustle every
 // SEARCH_SOUND_GAP seconds, plus up to as much again.
 #define SEARCH_FRAMES 32
 #define SEARCH_RING(N) format ["%1\search_ring_%2_ca.paa", QPATHTOF(ui), [str (N), "0" + str (N)] select ((N) < 10)]
@@ -339,7 +339,7 @@
 #define COLLAPSE_MIN_ROWS 4
 #define COLLAPSE_HIDE_MIN 4
 
-// A tall compartment of what is looted shows PAGE_ROWS (the client setting einv_gui_pageRows) rows at a time with a bar
+// A tall compartment of what is looted shows PAGE_ROWS (the client setting aio_gui_pageRows) rows at a time with a bar
 // under it to turn the pages (fnc_pageRanges, fnc_drawPageBar). At least PAGE_MIN_ROWS rows to a page; the setting 0
 // or MAX_ROWS (or more) turns the pages off. A dragged item held over an arrow of the bar turns the page after
 // PAGE_HOVER_TIME seconds, and again every PAGE_HOVER_TIME while it stays. The bar is PAGE_BAR_H of a UNIT tall and is the
@@ -376,7 +376,7 @@
 #define COMPARE_DIFF_W SQUARE(UNIT * 1.6)
 #define COMPARE_ROW_H (UNIT * 0.62)
 
-// The body zones of an item's protection from head to legs (einv_items_fnc_getProtection), the order the
+// The body zones of an item's protection from head to legs (aio_items_fnc_getProtection), the order the
 // card lists them in.
 #define ZONE_ORDER ["head", "face", "neck", "arms", "chest", "stomach", "pelvis", "legs"]
 
@@ -473,7 +473,7 @@
 #define FOOT_Y (safezoneY + safezoneH - UNIT * 2)
 #define FOOT_H (UNIT * 1.4)
 
-// The scroll bar of a scrolling column (EINV_ScrollGroup). A plain number: the engine reads it from
+// The scroll bar of a scrolling column (AIO_ScrollGroup). A plain number: the engine reads it from
 // config as it is.
 #define SCROLL_W 0.006
 
@@ -488,7 +488,7 @@
 // columns (fnc_getCell) - about what it gets at 4:3 with the scale at 1.
 #define CELL_FIT_LEFT 16
 
-// The tile scale's limits (einv_gui_cellScale), a share of the cell fnc_getCell works out.
+// The tile scale's limits (aio_gui_cellScale), a share of the cell fnc_getCell works out.
 #define CELL_SCALE_MIN 0.8
 #define CELL_SCALE_MAX 1.3
 
@@ -507,7 +507,7 @@
 #define TEXT_SCALE_MAX CELL_SCALE_MAX
 #define TEXT_REF 0.42
 #define TEXT_MIN_PX 12
-#define TEXT_SCALE (call einv_gui_fnc_textScale)
+#define TEXT_SCALE (call aio_gui_fnc_textScale)
 #define TEXT_UNIT (UNIT * TEXT_SCALE)
 
 // The room between two compartments of a container, a share of a cell rounded to whole pixels: between
@@ -521,7 +521,7 @@
 // compartments keep where they were painted relative to each other and every cell keeps its size and the
 // plain gap to the next; a boundary where a compartment meets an empty place gets none (fnc_flowCompartments).
 // The same room as between two flowed blocks: the wizard writes a painted drawing the flow can make as
-// flowed blocks (einv_setup_fnc_canvasBlocks), and it must look like one it cannot.
+// flowed blocks (aio_setup_fnc_canvasBlocks), and it must look like one it cannot.
 #define SEAM_GAP COMPARTMENT_GAP
 
 // The panel behind each compartment's cells (fnc_drawCompartments): how far it reaches past them, a share of
@@ -530,3 +530,29 @@
 #define COMPARTMENT_PAD 0.06
 #define COMPARTMENT_PAD_PX(CELLW) ((round ((CELLW) * COMPARTMENT_PAD / pixelW)) max 1)
 
+
+// The inspect card's 3D view (fnc_inspect3D): the render target its camera films into, shown in the card's picture box as
+// #(argb,W,H,1)r2t(INSPECT_3D_TARGET,2.0) at INSPECT_3D_RES - twice the pixels the box has on a 4K screen, so the
+// item is drawn smooth, its edges sampled down; the camera's field of view; where the scene stands, far off any map, high
+// above the sea (its dark sphere would show in the sky of anyone near); the size every item is framed by at most, in metres -
+// the boxes of many mods' models are blown up by their hit geometry - and the distance per metre of it.
+#define INSPECT_3D_TARGET "aio_inspect3d"
+#define INSPECT_3D_RES [2048, 1024]
+#define INSPECT_3D_FOV 0.35
+#define INSPECT_3D_PLACE [-2048, -2048]
+#define INSPECT_3D_FRAME 1.2
+#define INSPECT_3D_DISTANCE 0.7
+
+// A worn uniform stands as tall as a soldier: its frame is its height times this, so all of it fits the box's height.
+#define INSPECT_3D_TALL 2.3
+
+// How far the 3D view's item turns for a drag across the whole screen, in degrees: round, and up or down.
+#define INSPECT_3D_TURN_ACROSS 200
+#define INSPECT_3D_TURN_DOWN 100
+
+// How far the 3D view's camera moves for a middle-button drag across the whole screen, in its distances to the item.
+#define INSPECT_3D_PAN 1.5
+
+// The engine's stand-in models an item without one of its own inherits (ItemCore, CA_Magazine and the dummies), in lowercase,
+// without the leading backslash and the extension (fnc_itemModel): such an item has nothing to show in 3D.
+#define PLACEHOLDER_MODELS ["a3\weapons_f\ammo\mag_univ", "a3\weapons_f\dummyweapon", "a3\weapons_f\dummyweapon_single", "a3\weapons_f\empty", "a3\data_f\cl_basic", "a3\weapons_f\dummyitem", "a3\weapons_f\dummyitemhorizontal"]

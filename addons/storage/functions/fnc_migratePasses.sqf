@@ -15,7 +15,7 @@
  * Passes in the order they run, [from index, [target indices in the order they are tried]] each <ARRAY>
  *
  * Example:
- * [3, true] call einv_storage_fnc_migratePasses;
+ * [3, true] call aio_storage_fnc_migratePasses;
  *
  * Public: No
  */

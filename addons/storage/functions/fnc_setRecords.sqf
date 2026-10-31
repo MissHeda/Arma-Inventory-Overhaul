@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * [_crate, _records] call einv_storage_fnc_setRecords;
+ * [_crate, _records] call aio_storage_fnc_setRecords;
  *
  * Public: No
  */

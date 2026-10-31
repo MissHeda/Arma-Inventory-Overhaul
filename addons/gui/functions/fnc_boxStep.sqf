@@ -14,7 +14,7 @@
  * None
  *
  * Example:
- * [_head, true] call einv_gui_fnc_boxStep;
+ * [_head, true] call aio_gui_fnc_boxStep;
  *
  * Public: No
  */

@@ -18,7 +18,7 @@
  * In force <BOOL>
  *
  * Example:
- * [player] call einv_storage_fnc_hiddenActive;
+ * [player] call aio_storage_fnc_hiddenActive;
  *
  * Public: No
  */

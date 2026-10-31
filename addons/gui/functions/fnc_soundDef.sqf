@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * What an action of a family sounds like, read from CfgEinvSounds once and kept: a HashMap with
+ * What an action of a family sounds like, read from CfgAioSounds once and kept: a HashMap with
  *   "variants" - the variants, each a list of layers [file, volume, lowest pitch, highest pitch, offset,
  *                length, delay] <ARRAY>
  *   "fallback" - the same, played when no layer of the variant could be found <ARRAY>
@@ -16,7 +16,7 @@
  * worldGap replaced where it names them; no deeper than three steps.
  *
  * Arguments:
- * 0: Family, a class of CfgEinvSounds <STRING>
+ * 0: Family, a class of CfgAioSounds <STRING>
  * 1: Action <STRING>
  * 2: How deep the "use" chain went <NUMBER> (default: 0)
  *
@@ -24,7 +24,7 @@
  * The definition <HASHMAP>
  *
  * Example:
- * ["rifle", "lift"] call einv_gui_fnc_soundDef;
+ * ["rifle", "lift"] call aio_gui_fnc_soundDef;
  *
  * Public: No
  */
@@ -36,7 +36,7 @@ private _cached = GVAR(soundDefs) get _key;
 
 if (!isNil "_cached") exitWith {_cached};
 
-private _root = configFile >> "CfgEinvSounds";
+private _root = configFile >> "CfgAioSounds";
 private _config = _root >> _family >> _action;
 
 // An unknown family sounds like Default.

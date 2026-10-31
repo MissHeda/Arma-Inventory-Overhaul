@@ -30,7 +30,7 @@
  * The label <CONTROL>
  *
  * Example:
- * [_display, controlNull, [0.1, 0.1, 0.2, 0.03], "Vest", 0.025, [1, 1, 1, 1], "PuristaSemibold", 0] call einv_gui_fnc_uiLabel;
+ * [_display, controlNull, [0.1, 0.1, 0.2, 0.03], "Vest", 0.025, [1, 1, 1, 1], "PuristaSemibold", 0] call aio_gui_fnc_uiLabel;
  *
  * Public: No
  */
@@ -39,7 +39,8 @@ disableSerialization;
 
 params ["_display", "_parent", "_rect", "_text", "_size", ["_color", []], ["_font", ""], ["_align", 0], ["_title", false]];
 
-private _theme = missionNamespace getVariable [QGVAR(theme), createHashMap];
+// A display with a look of its own (the setup wizard, QGVAR(plainLook)) takes nothing of the inventory's palette.
+private _theme = [missionNamespace getVariable [QGVAR(theme), createHashMap], createHashMap] select (_display getVariable [QGVAR(plainLook), false]);
 private _gradient = _theme getOrDefault ["titleGradient", []];
 
 // The colour the caller asked for, before the palette's own colours replace it: what tells ink on a lit surface (below).
@@ -168,7 +169,7 @@ if (_graded && {_text isEqualType ""} && {_text isNotEqualTo ""}) exitWith {
 
     private _extra = _width * 0.25;
     private _boxLeft = [_left, _left - _extra, _left - _extra / 2] select ((_align max 0) min 2);
-    private _ctrl = [_display, "EINV_StructuredText", _parent, [_boxLeft, _top + (_height - _size) / 2, _width + _extra, _size * 1.3]] call FUNC(uiCreate);
+    private _ctrl = [_display, "AIO_StructuredText", _parent, [_boxLeft, _top + (_height - _size) / 2, _width + _extra, _size * 1.3]] call FUNC(uiCreate);
 
     _ctrl ctrlSetStructuredText ([_text, _font, _size, _align, _color, _gradient, true] call FUNC(gradientText));
 
@@ -179,7 +180,7 @@ if (_graded && {_text isEqualType ""} && {_text isNotEqualTo ""}) exitWith {
     _ctrl
 };
 
-private _class = ["EINV_Label", "EINV_LabelRight", "EINV_LabelCenter"] select ((_align max 0) min 2);
+private _class = ["AIO_Label", "AIO_LabelRight", "AIO_LabelCenter"] select ((_align max 0) min 2);
 private _ctrl = [_display, _class, _parent, _rect] call FUNC(uiCreate);
 
 if (_font isNotEqualTo "") then {

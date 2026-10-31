@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * ["V_PlateCarrier1_rgr", "containers", ["grid", "like"]] call einv_setup_fnc_resetField;
+ * ["V_PlateCarrier1_rgr", "containers", ["grid", "like"]] call aio_setup_fnc_resetField;
  *
  * Public: No
  */

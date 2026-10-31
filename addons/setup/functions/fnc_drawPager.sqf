@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * [_display, _box, [0, 0.4, 0.3, 0.03], _theme, 0, 3, 80, 30, 30, {params ["_arguments", "_step"]}] call einv_setup_fnc_drawPager;
+ * [_display, _box, [0, 0.4, 0.3, 0.03], _theme, 0, 3, 80, 30, 30, {params ["_arguments", "_step"]}] call aio_setup_fnc_drawPager;
  *
  * Public: No
  */

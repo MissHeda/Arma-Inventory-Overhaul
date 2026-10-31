@@ -11,14 +11,14 @@
  * Key name, "" when the slot has no key <STRING>
  *
  * Example:
- * [0] call einv_hotbar_fnc_keyName;
+ * [0] call aio_hotbar_fnc_keyName;
  *
  * Public: No
  */
 
 params [["_index", 0, [0]]];
 
-private _entry = [CBA_SETTINGS_EINV, format [QGVAR(slot%1), _index + 1]] call CBA_fnc_getKeybind;
+private _entry = [CBA_SETTINGS_AIO, format [QGVAR(slot%1), _index + 1]] call CBA_fnc_getKeybind;
 
 if (isNil "_entry") exitWith {""};
 

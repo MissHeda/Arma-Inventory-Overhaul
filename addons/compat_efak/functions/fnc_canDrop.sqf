@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Whether what is dragged may go into a kit, and if not why - for the footprint while dragging
- * (einv_gui_fnc_updateDrag), Ctrl+click (einv_gui_fnc_quickMove) and the move itself (fnc_drop). Asked
+ * (aio_gui_fnc_updateDrag), Ctrl+click (aio_gui_fnc_quickMove) and the move itself (fnc_drop). Asked
  * in this order, the first answer wins:
  *   from that kit itself      - yes within its open grid, a rearrange; no onto its own tile, where
  *                               it lies already ("NoRoom")
@@ -10,7 +10,7 @@
  *   from a body's slot        - no: only the player's own gear goes straight into a kit
  *   a living person's gear    - out of their container, or into a kit lying in their gear, only as
  *                               the window's settings for them say and while they are in reach
- *                               (einv_gui_fnc_checkTouch, fnc_checkTouch)
+ *                               (aio_gui_fnc_checkTouch, fnc_checkTouch)
  *   a uniform, vest or
  *   backpack with contents    - no: their contents would be lost, the kit keeps only the class
  *   an empty magazine         - no: the kit would hand it back full (fnc_changeKit)
@@ -26,7 +26,7 @@
  * Arguments:
  * 0: Where it comes from, [container, kit] - [objNull, ""] for a slot <ARRAY>
  * 1: Kit it would go into <STRING>
- * 2: Entry - a tile's, or a slot's (einv_storage_fnc_getSlot) <HASHMAP>
+ * 2: Entry - a tile's, or a slot's (aio_storage_fnc_getSlot) <HASHMAP>
  * 3: How many of a stack, -1 for all of it <NUMBER> (default: -1)
  * 4: The slot it comes from, [unit, slot id] - [] for a tile <ARRAY> (default: [])
  * 5: Where the kit lies, [container, kit] - [] for where it was found as an open kit (GVAR(holders)) or
@@ -37,7 +37,7 @@
  * [fits, reason - "" when it fits] <ARRAY>
  *
  * Example:
- * [[backpackContainer player, ""], "efak_IFAK_7", _entry] call einv_compat_efak_fnc_canDrop;
+ * [[backpackContainer player, ""], "efak_IFAK_7", _entry] call aio_compat_efak_fnc_canDrop;
  *
  * Public: No
  */

@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * [player] call einv_compat_wbk_twoprimary_fnc_onLoadout;
+ * [player] call aio_compat_wbk_twoprimary_fnc_onLoadout;
  *
  * Public: No
  */

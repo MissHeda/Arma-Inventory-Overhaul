@@ -3,17 +3,17 @@
  * Author: Miss Heda
  * What a kit's room is by the draft, for the Containers step and the class lists: Enhanced First Aid
  * Kits' capacity while no rule and no config key of its own gives it a grid, else the cells of that grid
- * (einv_compat_efak_fnc_roomMode, asked with the draft). Where that addon is not loaded the same test is
- * made here on who set the grid (einv_items_fnc_setBy) - there are no kits then anyway.
+ * (aio_compat_efak_fnc_roomMode, asked with the draft). Where that addon is not loaded the same test is
+ * made here on who set the grid (aio_items_fnc_setBy) - there are no kits then anyway.
  *
  * Arguments:
- * 0: The class, as einv_items_fnc_getInfo gives it with the draft <HASHMAP>
+ * 0: The class, as aio_items_fnc_getInfo gives it with the draft <HASHMAP>
  *
  * Return Value:
  * "capacity" or "cells" for a kit, "" for anything else <STRING>
  *
  * Example:
- * [[_class, einv_setup_draftRules, einv_setup_draftCache] call einv_items_fnc_getInfo] call einv_setup_fnc_kitRoom;
+ * [[_class, aio_setup_draftRules, aio_setup_draftCache] call aio_items_fnc_getInfo] call aio_setup_fnc_kitRoom;
  *
  * Public: No
  */

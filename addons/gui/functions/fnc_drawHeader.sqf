@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * [_display, _theme] call einv_gui_fnc_drawHeader;
+ * [_display, _theme] call aio_gui_fnc_drawHeader;
  *
  * Public: No
  */
@@ -201,10 +201,10 @@ private _searchRect = [SQUARE(UNIT * 11)] call _fnc_place;
 
 [_display, _searchRect, _theme, LLSTRING(Filter_Placeholder), _searchFill] call FUNC(drawFilter);
 
-// The cog: the setup wizard (einv_setup) - how big items are, how many share a tile, how containers are
-// split, the same for everyone. Drawn only for whoever may open it (einv_setup_fnc_canOpen: who runs the
+// The cog: the setup wizard (aio_setup) - how big items are, how many share a tile, how containers are
+// split, the same for everyone. Drawn only for whoever may open it (aio_setup_fnc_canOpen: who runs the
 // server or is logged in as admin), asked at every draw so a login shows at once. This window closes for it
-// and comes back when the wizard closes (einv_setup_fnc_openFromGame).
+// and comes back when the wizard closes (aio_setup_fnc_openFromGame).
 if (!isNil QEFUNC(setup,openFromGame) && {call (missionNamespace getVariable [QEFUNC(setup,canOpen), {false}])}) then {
     private _target = ["direct"] call (missionNamespace getVariable [QEFUNC(setup,canEdit), {createHashMap}]);
     private _canSave = !isNil "_target" && {_target isEqualType createHashMap} && {_target getOrDefault ["canSave", false]};

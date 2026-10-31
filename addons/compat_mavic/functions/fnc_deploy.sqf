@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [player, getPosATL player, "Item_Mavic3", 100] call einv_compat_mavic_fnc_deploy;
+ * [player, getPosATL player, "Item_Mavic3", 100] call aio_compat_mavic_fnc_deploy;
  *
  * Public: No
  */

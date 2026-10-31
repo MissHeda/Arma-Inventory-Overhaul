@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_display, [0.5, 0.5, 0.1, 0.03]] call einv_setup_fnc_openImport;
+ * [_display, [0.5, 0.5, 0.1, 0.03]] call aio_setup_fnc_openImport;
  *
  * Public: No
  */

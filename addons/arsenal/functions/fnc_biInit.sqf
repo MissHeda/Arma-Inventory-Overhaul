@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * call einv_arsenal_fnc_biInit;
+ * call aio_arsenal_fnc_biInit;
  *
  * Public: No
  */

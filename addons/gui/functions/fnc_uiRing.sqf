@@ -21,7 +21,7 @@
  * The controls <ARRAY>
  *
  * Example:
- * [_display, controlNull, [0.1, 0.1, 0.3, 0.2], [1, 0.65, 0.14, 1], 0.01] call einv_gui_fnc_uiRing;
+ * [_display, controlNull, [0.1, 0.1, 0.3, 0.2], [1, 0.65, 0.14, 1], 0.01] call aio_gui_fnc_uiRing;
  *
  * Public: No
  */
@@ -56,7 +56,7 @@ private _controls = [];
     // A pill has no straight edge left between its corners.
     if ((_x select 2) <= 0 || {(_x select 3) <= 0}) then {continue};
 
-    private _ctrl = [_display, "EINV_PanelRect", _parent, _x] call FUNC(uiCreate);
+    private _ctrl = [_display, "AIO_PanelRect", _parent, _x] call FUNC(uiCreate);
     _ctrl ctrlSetBackgroundColor _color;
     _controls pushBack _ctrl;
 } forEach [
@@ -71,7 +71,7 @@ private _controls = [];
 
     if (!_on) then {continue};
 
-    private _ctrl = [_display, "EINV_PanelCorner", _parent, _cornerRect] call FUNC(uiCreate);
+    private _ctrl = [_display, "AIO_PanelCorner", _parent, _cornerRect] call FUNC(uiCreate);
     _ctrl ctrlSetText _texture;
     _ctrl ctrlSetTextColor _color;
     _controls pushBack _ctrl;

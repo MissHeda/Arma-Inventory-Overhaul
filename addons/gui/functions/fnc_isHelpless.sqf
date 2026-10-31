@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Whether a soldier cannot keep anyone out of their gear: unconscious, or a captive - surrendered or
  * handcuffed with ACE. The settings for living persons let "Unconscious and captives" do more to them
- * (einv_gui_personOpen, personItems, personWorn).
+ * (aio_gui_personOpen, personItems, personWorn).
  *
  * Arguments:
  * 0: Unit <OBJECT>
@@ -12,7 +12,7 @@
  * Helpless <BOOL>
  *
  * Example:
- * [cursorObject] call einv_gui_fnc_isHelpless;
+ * [cursorObject] call aio_gui_fnc_isHelpless;
  *
  * Public: No
  */

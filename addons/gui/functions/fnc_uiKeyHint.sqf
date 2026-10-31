@@ -30,7 +30,7 @@
  * Width taken, including the space before the next hint - the next one starts at x plus this <NUMBER>
  *
  * Example:
- * [_display, controlNull, [0.1, 0.9], "ESC", "Close", _theme] call einv_gui_fnc_uiKeyHint;
+ * [_display, controlNull, [0.1, 0.9], "ESC", "Close", _theme] call aio_gui_fnc_uiKeyHint;
  *
  * Public: No
  */

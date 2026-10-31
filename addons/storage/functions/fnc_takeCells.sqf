@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Marks the cells an item takes as taken: every cell of its box but its own holes (a shaped item,
- * size=xx/x-, einv_items_fnc_footprintAs), so the corner an L leaves open stays free for something
+ * size=xx/x-, aio_items_fnc_footprintAs), so the corner an L leaves open stays free for something
  * else. The way back of fnc_cellsFree, on the same rows of booleans; rows are added as needed, and
  * cells past the compartment's side are left alone.
  *
@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_taken select 0, 8, 2, 1, 2, 2, [3]] call einv_storage_fnc_takeCells;
+ * [_taken select 0, 8, 2, 1, 2, 2, [3]] call aio_storage_fnc_takeCells;
  *
  * Public: No
  */

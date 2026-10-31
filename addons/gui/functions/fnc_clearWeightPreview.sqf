@@ -12,7 +12,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_clearWeightPreview;
+ * call aio_gui_fnc_clearWeightPreview;
  *
  * Public: No
  */

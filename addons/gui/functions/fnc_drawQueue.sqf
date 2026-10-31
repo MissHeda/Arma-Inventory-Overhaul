@@ -29,7 +29,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_drawQueue;
+ * [_display] call aio_gui_fnc_drawQueue;
  *
  * Public: No
  */

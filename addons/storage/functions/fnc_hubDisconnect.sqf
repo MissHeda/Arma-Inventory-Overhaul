@@ -27,7 +27,7 @@
  * None
  *
  * Example:
- * [_id, _uid, _name, _jip, _owner, _idstr] call einv_storage_fnc_hubDisconnect;
+ * [_id, _uid, _name, _jip, _owner, _idstr] call aio_storage_fnc_hubDisconnect;
  *
  * Public: No
  */

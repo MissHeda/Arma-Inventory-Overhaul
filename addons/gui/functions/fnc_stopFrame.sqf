@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * call einv_gui_fnc_stopFrame;
+ * call aio_gui_fnc_stopFrame;
  *
  * Public: No
  */

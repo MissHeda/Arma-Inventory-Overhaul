@@ -1,8 +1,8 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Which family of CfgEinvSounds an item sounds like, kept per class. The first that applies:
- *   1. the item's config entry einv_sound, naming a class of CfgEinvSounds (a mod's own choice)
+ * Which family of CfgAioSounds an item sounds like, kept per class. The first that applies:
+ *   1. the item's config entry aio_sound, naming a class of CfgAioSounds (a mod's own choice)
  *   2. an ACRE or TFAR radio that is no backpack: "device"
  *   3. a medical item (the category of fnc_getInfo): "medic"
  *   4. a kit of Enhanced First Aid Kits or Enhanced Utility Pouches: "medic"
@@ -14,10 +14,10 @@
  * 0: Item class <STRING>
  *
  * Return Value:
- * A class of CfgEinvSounds <STRING>
+ * A class of CfgAioSounds <STRING>
  *
  * Example:
- * ["arifle_MX_F"] call einv_gui_fnc_soundFamily;
+ * ["arifle_MX_F"] call aio_gui_fnc_soundFamily;
  *
  * Public: No
  */
@@ -38,9 +38,9 @@ private _family = "Default";
 
 call {
     // The item's own mod says how it sounds.
-    private _own = getText (_config >> "einv_sound");
+    private _own = getText (_config >> "aio_sound");
 
-    if (_own isNotEqualTo "" && {isClass (configFile >> "CfgEinvSounds" >> _own)}) exitWith {
+    if (_own isNotEqualTo "" && {isClass (configFile >> "CfgAioSounds" >> _own)}) exitWith {
         _family = _own;
     };
 

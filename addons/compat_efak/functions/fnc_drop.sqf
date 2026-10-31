@@ -1,16 +1,16 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * A move into, out of or between kits, for the window - a drag let go (einv_gui_fnc_endDrag), Ctrl+click
- * (einv_gui_fnc_quickMove, fnc_takeOut), the drop key and Drop (einv_gui_fnc_dropToGround). As many of a
+ * A move into, out of or between kits, for the window - a drag let go (aio_gui_fnc_endDrag), Ctrl+click
+ * (aio_gui_fnc_quickMove, fnc_takeOut), the drop key and Drop (aio_gui_fnc_dropToGround). As many of a
  * stack as the drag counted, all of them or none.
  *
  * Checked here against what this machine sees, so a refusal says why at once and nothing is sent: what
  * the kit takes and has room for (fnc_canDrop), room in a container, the kits of others
- * (fnc_mayReach) and the window's rules for a living person's gear (einv_gui_fnc_checkTouch). Then it
- * becomes one move of the window's transactions (einv_gui_fnc_sendMoves): a kit is a holder of the
+ * (fnc_mayReach) and the window's rules for a living person's gear (aio_gui_fnc_checkTouch). Then it
+ * becomes one move of the window's transactions (aio_gui_fnc_sendMoves): a kit is a holder of the
  * storage, "kit:" + its lowercase class, whose root is the root of the container it lies in
- * (fnc_holderRoot); its ops run at that root's authority (einv_storage_holderTypes "kit"), which checks
+ * (fnc_holderRoot); its ops run at that root's authority (aio_storage_holderTypes "kit"), which checks
  * everything again against the kit as it is then:
  *   within one kit       - only where it lies changes, a whole tile onto a cell ("kitPlace")
  *   a slot into a kit    - taken off, then into the kit ("unequip")
@@ -18,7 +18,7 @@
  *   container into a kit - out of the container, into the kit ("kitPut")
  *   kit into a container - out of the kit ("kitTake"), into the container - or onto the ground
  * What a kit or a container turns away by then goes back where it came from, else into the vehicle or
- * onto the ground (einv_storage_fnc_settle) - never lost, never doubled. The window shows the tiles
+ * onto the ground (aio_storage_fnc_settle) - never lost, never doubled. The window shows the tiles
  * waiting until the answer and the new places arrived.
  *
  * Arguments:
@@ -26,7 +26,7 @@
  * 1: Where it goes, [container, kit]: a kit's open grid [objNull, kit], a kit's tile [the container its
  *    tile lies in, kit], a container [container, ""], or the ground at the player's feet ["ground", ""]
  *    - seated, the vehicle's cargo <ARRAY>
- * 2: Entry - a tile's, or a slot's (einv_storage_fnc_getSlot) <HASHMAP>
+ * 2: Entry - a tile's, or a slot's (aio_storage_fnc_getSlot) <HASHMAP>
  * 3: How many of a stack, -1 for all of it <NUMBER> (default: -1)
  * 4: Cell [col, row, compartment, w, h] it was dropped on, [] to let the layout find one <ARRAY>
  *    (default: [])
@@ -36,7 +36,7 @@
  * Sent <BOOL>
  *
  * Example:
- * [[backpackContainer player, ""], [objNull, "efak_IFAK_7"], _entry] call einv_compat_efak_fnc_drop;
+ * [[backpackContainer player, ""], [objNull, "efak_IFAK_7"], _entry] call aio_compat_efak_fnc_drop;
  *
  * Public: No
  */
@@ -53,7 +53,7 @@ params [
 _source params [["_from", objNull, [objNull]], ["_fromKit", "", [""]]];
 _target params [["_to", objNull, [objNull, ""]], ["_toKit", "", [""]]];
 
-// "ground": at the player's feet, or - seated - into the vehicle (einv_gui_fnc_sendMoves decides).
+// "ground": at the player's feet, or - seated - into the vehicle (aio_gui_fnc_sendMoves decides).
 private _ground = "";
 
 if (_to isEqualType "") then {
@@ -177,7 +177,7 @@ if (_toKit isNotEqualTo "") exitWith {
     };
 
     // Out of a container - also a living person's, whose machine takes it out by the settings for
-    // their gear (einv_gui_fnc_personGuard).
+    // their gear (aio_gui_fnc_personGuard).
     if (isNull _from) exitWith {false};
 
     private _fromBase = [_from] call EFUNC(storage,rootOf);

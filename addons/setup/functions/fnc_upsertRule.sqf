@@ -5,14 +5,17 @@
  * class=X > ... - or, for a tree, as the one rule class=X+ > ... that covers the class and every class built
  * on it. All of it is fnc_upsertRules, with the one class; see there for what happens to the rules already
  * written and where the new one goes.
+ * While a custom override is picked in the step's list (fnc_drawResults, GVAR(groupEdit)), the edit is the one rule
+ * class=X* for every class whose name starts with X, whichever class the editor shows (a list of classes instead of a
+ * selector writes one rule per class, in one undo step).
  *
  * Ends in fnc_commit: an undo step, and the step drawn again.
  *
  * Arguments:
  * 0: Class, as config names it <STRING>
- * 1: Values to set: "footprint" ("2x3" or a mask), "stack" <NUMBER>, "grid" (as einv_items_fnc_formatGrid
+ * 1: Values to set: "footprint" ("2x3" or a mask), "stack" <NUMBER>, "grid" (as aio_items_fnc_formatGrid
  *    writes it), "like" (a class), "weight" (kg) <NUMBER>, "name" <STRING>, "use" (the containers it may be used from, an array of "uniform", "vest", "backpack"), "icon" ([scale, across, down]
- *    <ARRAY>, einv_items_fnc_parseIcon) <HASHMAP> (default: none)
+ *    <ARRAY>, aio_items_fnc_parseIcon) <HASHMAP> (default: none)
  * 2: Fields to take away <ARRAY of STRING> (default: [])
  * 3: For the class and every class built on it <BOOL> (default: false)
  *
@@ -20,11 +23,31 @@
  * Written - false for a class name the rules language cannot hold <BOOL>
  *
  * Example:
- * ["V_PlateCarrier1_rgr", createHashMapFromArray [["grid", "xxxx/x--x+2x3"]]] call einv_setup_fnc_upsertRule;
+ * ["V_PlateCarrier1_rgr", createHashMapFromArray [["grid", "xxxx/x--x+2x3"]]] call aio_setup_fnc_upsertRule;
  *
  * Public: No
  */
 
 params [["_class", "", [""]], ["_set", createHashMap, [createHashMap]], ["_remove", [], [[]]], ["_tree", false, [false]]];
 
-[[[_class, _set, _remove, _tree]]] call FUNC(upsertRules)
+private _entries = [[_class, _set, _remove, _tree]];
+private _lc = toLowerANSI _class;
+
+{
+    _y params ["_selector", "_classes"];
+
+    if ((toLowerANSI (GVAR(selection) getOrDefault [_x, ""])) isEqualTo _lc) exitWith {
+        _entries = if (_selector isNotEqualTo "") then {
+            [[_selector, _set, _remove, false]]
+        } else {
+            _classes apply {[_x, _set, _remove, false]}
+        };
+
+        [
+            [format [LLSTRING(Hint_GroupApplied), count _classes], format [LLSTRING(Hint_OverrideApplied), _selector select [0, count _selector - 1]]] select (_selector isNotEqualTo ""),
+            "text2"
+        ] call FUNC(setHint);
+    };
+} forEach (missionNamespace getVariable [QGVAR(groupEdit), createHashMap]);
+
+[_entries] call FUNC(upsertRules)

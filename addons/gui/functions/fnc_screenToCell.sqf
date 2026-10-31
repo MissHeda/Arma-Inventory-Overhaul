@@ -26,7 +26,7 @@
  * [column, row], or [] when the point is not on the grid <ARRAY>
  *
  * Example:
- * [_grid, getMousePosition] call einv_gui_fnc_screenToCell;
+ * [_grid, getMousePosition] call aio_gui_fnc_screenToCell;
  *
  * Public: No
  */

@@ -18,7 +18,7 @@
  * [done, text] - what is being done and to which part, or why not <ARRAY>
  *
  * Example:
- * [player, "ACE_elasticBandage", 1] call einv_hotbar_fnc_useMedical;
+ * [player, "ACE_elasticBandage", 1] call aio_hotbar_fnc_useMedical;
  *
  * Public: No
  */

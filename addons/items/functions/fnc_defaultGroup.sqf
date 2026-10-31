@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Which category an item is in when no rule and no config key says otherwise (cats=, einv_cat): the built-in
+ * Which category an item is in when no rule and no config key says otherwise (cats=, aio_cat): the built-in
  * mapping. It lives here so that the window's strip, the compartments that accept only some categories and the
  * setup wizard all read one answer (fnc_getInfo "groups"). Kept per class in the item's facts. The first that
  * applies, in this order:
@@ -28,7 +28,7 @@
  * "weapon", "ammo", "grenade", "gear", "medical", "food", "tool" or "misc" <STRING>
  *
  * Example:
- * [["arifle_MX_F"] call einv_items_fnc_getFacts] call einv_items_fnc_defaultGroup;
+ * [["arifle_MX_F"] call aio_items_fnc_getFacts] call aio_items_fnc_defaultGroup;
  *
  * Public: No
  */
@@ -85,7 +85,7 @@ call {
         || {getText (_config >> "tf_radio") isNotEqualTo ""}
         || {getNumber (_config >> "tf_prototype") == 1}
         || {getText (_config >> "tf_parent") isNotEqualTo ""}
-        || {getText (_config >> "einv_sound") isEqualTo "device"}
+        || {getText (_config >> "aio_sound") isEqualTo "device"}
         || {["wirecutter", "clacker", "defusal", "cabletie", "flashlight", "altimeter", "kestrel", "microdagr", "rangecard", "spottingscope", "maptools", "toolkit", "minedetector", "entrenching", "tacticalladder"] findIf {_x in _key} >= 0}
     ) exitWith {
         _group = "tool";

@@ -19,7 +19,7 @@
  * How many items were moved <NUMBER>
  *
  * Example:
- * [player] call einv_arsenal_fnc_stageOverflow;
+ * [player] call aio_arsenal_fnc_stageOverflow;
  *
  * Public: No
  */

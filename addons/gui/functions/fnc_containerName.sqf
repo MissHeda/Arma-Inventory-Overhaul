@@ -11,7 +11,7 @@
  * Name <STRING>
  *
  * Example:
- * [vestContainer player] call einv_gui_fnc_containerName;
+ * [vestContainer player] call aio_gui_fnc_containerName;
  *
  * Public: No
  */

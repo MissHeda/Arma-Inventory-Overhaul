@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The context menu's choices for a kit's tile (einv_gui_fnc_contextMenu), wherever it lies - in a
+ * The context menu's choices for a kit's tile (aio_gui_fnc_contextMenu), wherever it lies - in a
  * container or inside another kit's window:
  *   Open <name> / Close <name> - in a window of its own (fnc_toggle). A kit that may not open is
  *                                greyed out, with the reason as its tooltip (fnc_canOpen).
@@ -14,10 +14,10 @@
  * 1: Tile index <NUMBER>
  *
  * Return Value:
- * Choices for einv_gui_fnc_openMenu, [] for a tile that is no kit <ARRAY>
+ * Choices for aio_gui_fnc_openMenu, [] for a tile that is no kit <ARRAY>
  *
  * Example:
- * [1, 4] call einv_compat_efak_fnc_menuChoices;
+ * [1, 4] call aio_compat_efak_fnc_menuChoices;
  *
  * Public: No
  */

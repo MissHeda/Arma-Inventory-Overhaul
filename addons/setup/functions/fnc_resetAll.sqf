@@ -11,7 +11,7 @@
  * None
  *
  * Example:
- * call einv_setup_fnc_resetAll;
+ * call aio_setup_fnc_resetAll;
  *
  * Public: No
  */

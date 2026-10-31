@@ -23,7 +23,7 @@
  * None
  *
  * Example:
- * [_button] call einv_gui_fnc_sortButtons;
+ * [_button] call aio_gui_fnc_sortButtons;
  *
  * Public: No
  */
@@ -39,7 +39,7 @@ private _buttons = (uiNamespace getVariable [QGVAR(sortButtons), []]) select {!i
 if (_button isNotEqualTo []) then {
     private _labelControl = _button param [count _button - 2, controlNull];
 
-    if !((ctrlClassName _labelControl) in ["EINV_Label", "EINV_LabelRight", "EINV_LabelCenter"]) then {
+    if !((ctrlClassName _labelControl) in ["AIO_Label", "AIO_LabelRight", "AIO_LabelCenter"]) then {
         _labelControl = controlNull;
     };
 

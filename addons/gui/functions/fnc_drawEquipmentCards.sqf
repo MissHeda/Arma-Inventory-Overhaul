@@ -17,7 +17,7 @@
  *   | headgear |  | uniform |  | vest |  | backpack |
  *   | gog | nvg | bin | map | gps | radio | compass | watch |
  *   HOTBAR
- *   | 4 | 5 | 6 | 7 | 8 | 9 | 0 |                           the keys' items (einv_hotbar), when it is loaded
+ *   | 4 | 5 | 6 | 7 | 8 | 9 | 0 |                           the keys' items (aio_hotbar), when it is loaded
  *                                                              and on, in the inventory window only
  *
  * The three weapon cards are as wide and as tall as each other, so their attachments start on one
@@ -42,7 +42,7 @@
  * None
  *
  * Example:
- * [_display, controlNull, [0.1, 0.1, 0.5, 0.8], _context, _theme] call einv_gui_fnc_drawEquipmentCards;
+ * [_display, controlNull, [0.1, 0.1, 0.5, 0.8], _context, _theme] call aio_gui_fnc_drawEquipmentCards;
  *
  * Public: No
  */
@@ -98,7 +98,7 @@ private _smallH = UNSQUARE(_smallW);
 private _gearW = ((_width - _gapW * 3) / 4) min SQUARE(UNIT * 4.6);
 private _gearH = UNSQUARE(_gearW);
 
-// The hotbar's row under the gear (einv_hotbar - only when that addon is loaded and on, and only in the
+// The hotbar's row under the gear (aio_hotbar - only when that addon is loaded and on, and only in the
 // inventory, not in the Arsenal): a caption over seven small slots.
 private _hotbar = call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,drawStrip)} && {call EFUNC(hotbar,isActive)};
 private _hotbarH = [0, _labelH + _smallH + _groupGap] select _hotbar;
@@ -164,7 +164,7 @@ private _fnc_weaponCard = {
 
         // And a bar down the left edge between the round corners, as fnc_drawSlot's accent.
         if (_inHand) then {
-            private _bar = [_display, "EINV_PanelRect", _parent, [_cardX, _cardY + _cardRadius, pixelW * 3, _cardH - _cardRadius * 2]] call FUNC(uiCreate);
+            private _bar = [_display, "AIO_PanelRect", _parent, [_cardX, _cardY + _cardRadius, pixelW * 3, _cardH - _cardRadius * 2]] call FUNC(uiCreate);
             _bar ctrlSetBackgroundColor _colorAccent;
         };
     };

@@ -5,7 +5,7 @@
  * Draws a container's compartments where fnc_flowCompartments put them, each a grid (fnc_createGrid)
  * with a tile for every entry lying in it, and what has no room on grids of its own in the loss colour.
  * A column's section (fnc_drawSection) and a kit's window (fnc_drawWindow) both draw their grids here.
- * A shaped compartment's holes (einv_storage_fnc_blocksFor) are drawn as no cell at all: no surface,
+ * A shaped compartment's holes (aio_storage_fnc_blocksFor) are drawn as no cell at all: no surface,
  * no line, nothing to hover (fnc_createGrid).
  *
  * Every compartment lies on a panel of its own: a faint card (the theme's "card") behind its cells that
@@ -25,14 +25,14 @@
  * Each grid gets what moving items in and out of it needs (fnc_onMouseButton, fnc_endDrag):
  *   "container" - the section's container, objNull for a kit's
  *   "virtual"   - true: nothing moves in or out - a body's worn gear has no container to take from
- *   "kit"       - the kit class its grid stands for (einv_compat_efak), "" for a container
- *   "layoutKey" - where its layout is kept, for a grid with no container (einv_storage_fnc_getLayout)
+ *   "kit"       - the kit class its grid stands for (aio_compat_efak), "" for a container
+ *   "layoutKey" - where its layout is kept, for a grid with no container (aio_storage_fnc_getLayout)
  *   "unit", "block", "overflow"
  *   "window"    - the key of the kit window it lies in, "" in a column: the mouse finds a grid only
  *                 while nothing lies over it (fnc_topAt)
- *   "holder"    - what its places are kept on (einv_storage_fnc_readPlaces): the container, or for a
+ *   "holder"    - what its places are kept on (aio_storage_fnc_readPlaces): the container, or for a
  *                 grid with none its layoutKey; objNull for neither
- *   "root"      - whose locality decides who may change it (einv_storage_fnc_rootOf) - for a uniform,
+ *   "root"      - whose locality decides who may change it (aio_storage_fnc_rootOf) - for a uniform,
  *                 vest or backpack opened from inside a container through the one it lies in
  *                 (GVAR(opened))
  *   "side"      - "own" for the unit's storage column, "loot" for the loot column, "" in a kit's window:
@@ -48,8 +48,8 @@
  * 0: Display <DISPLAY>
  * 1: Controls group to draw in <CONTROL>
  * 2: Top left corner of the block [x, y] in the group <ARRAY>
- * 3: Section, see einv_storage_fnc_getSections <HASHMAP>
- * 4: Layout, see einv_storage_fnc_getLayout <HASHMAP>
+ * 3: Section, see aio_storage_fnc_getSections <HASHMAP>
+ * 4: Layout, see aio_storage_fnc_getLayout <HASHMAP>
  * 5: Places, see fnc_flowCompartments <ARRAY>
  * 6: Theme <HASHMAP>
  * 7: Key of the kit window it is drawn in <STRING> (default: "")
@@ -58,7 +58,7 @@
  * None
  *
  * Example:
- * [_display, _group, [_gridX, _top], _section, _layout, _places, _theme] call einv_gui_fnc_drawCompartments;
+ * [_display, _group, [_gridX, _top], _section, _layout, _places, _theme] call aio_gui_fnc_drawCompartments;
  *
  * Public: No
  */
@@ -206,7 +206,7 @@ private _fnc_compartment = {
         _pageWindow = (_paged select 1) select (_paged select 0);
     };
 
-    // A compartment that takes only some categories, and a single slot (one tile whatever its size, einv_storage_fnc_blockMode),
+    // A compartment that takes only some categories, and a single slot (one tile whatever its size, aio_storage_fnc_blockMode),
     // says so with a faint picture on its free cells: made over the tiles, after them (fnc_drawBadge, from fnc_drawCells).
 
     private _grid = [_display, _parent, [_x0, _y0], _rows, _theme, _id, _cols, _holes, [_colX, _rowY], _pageWindow] call FUNC(createGrid);
@@ -221,7 +221,7 @@ private _fnc_compartment = {
     // What the grid shows, for moving items in and out of it (fnc_onMouseButton, fnc_endDrag): a
     // virtual section - a body's worn gear - has no container to take from; nothing can be put into
     // the overflow. An open kit has no container either, but its grid takes and gives like one
-    // (einv_compat_efak): it says so, and which kit it is.
+    // (aio_compat_efak): it says so, and which kit it is.
     _grid set ["container", _container];
     _grid set ["virtual", _section getOrDefault ["virtual", "entries" in _section]];
     _grid set ["kit", _section getOrDefault ["kit", ""]];
@@ -232,6 +232,15 @@ private _fnc_compartment = {
     _grid set ["block", _index];
     _grid set ["accepts", _accepts];
     _grid set ["single", _single];
+
+    // What a compartment that takes several categories shows (show= of the container's class, fnc_drawBadge).
+    private _ownerClass = _section getOrDefault ["class", ""];
+
+    if (_ownerClass isEqualTo "" && {!isNull _container}) then {
+        _ownerClass = typeOf _container;
+    };
+
+    _grid set ["show", [([_ownerClass] call EFUNC(items,getInfo)) getOrDefault ["show", ""], ""] select (_ownerClass isEqualTo "")];
     _grid set ["pos", _pos];
     _grid set ["overflow", _isOverflow];
     _grid set ["overflowIndex", _overflowIndex];

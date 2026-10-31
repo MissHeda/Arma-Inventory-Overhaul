@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The server takes on a transaction a machine could not run by itself (event einv_storage_hubStart): it
+ * The server takes on a transaction a machine could not run by itself (event aio_storage_hubStart): it
  * is carried in GVAR(hub) and driven on from the first phase the requester did not run (fnc_hubNext).
  *
  * In multiplayer the requester must be the unit of the machine that sent it - the guards trust the
@@ -26,7 +26,7 @@
  * None
  *
  * Example:
- * [_tx, _results] call einv_storage_fnc_hubStart;
+ * [_tx, _results] call aio_storage_fnc_hubStart;
  *
  * Public: No
  */

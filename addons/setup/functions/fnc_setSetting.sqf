@@ -5,15 +5,15 @@
  * of the General step does with a click, and what the small reset button beside it does.
  *
  * Arguments:
- * 0: The setting's name, the variable it sets (einv_gui_searchTime) <STRING>
+ * 0: The setting's name, the variable it sets (aio_gui_searchTime) <STRING>
  * 1: Its new value, as the variable holds it; nothing for the default <ANY>
  *
  * Return Value:
  * None
  *
  * Example:
- * ["einv_gui_searchTime", 0.8] call einv_setup_fnc_setSetting;
- * ["einv_gui_searchTime"] call einv_setup_fnc_setSetting;
+ * ["aio_gui_searchTime", 0.8] call aio_setup_fnc_setSetting;
+ * ["aio_gui_searchTime"] call aio_setup_fnc_setSetting;
  *
  * Public: No
  */

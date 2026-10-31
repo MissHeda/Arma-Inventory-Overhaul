@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * [_crate] call einv_gui_fnc_toggleRows;
+ * [_crate] call aio_gui_fnc_toggleRows;
  *
  * Public: No
  */

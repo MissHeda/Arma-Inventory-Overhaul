@@ -9,11 +9,11 @@
  * Opened from the inventory, the inventory comes back when the wizard closes, however it closes - the
  * player was busy with their gear and should not be left on the bare game. It comes back the way the
  * Gear key opens it, so the engine checks again what the player can still reach - or, for a living
- * person the player was looking into, the way the person action opens them (einv_gui_fnc_openPerson,
+ * person the player was looking into, the way the person action opens them (aio_gui_fnc_openPerson,
  * quiet: they were told already), which checks reach and permission again.
  *
  * Arguments:
- * 0: Step to open at, 0 (General), 1 (Items) or 2 (Containers) - by the step's place in einv_setup_steps, which is where
+ * 0: Step to open at, 0 (General), 1 (Items) or 2 (Containers) - by the step's place in aio_setup_steps, which is where
  *    the ids are looked up: the inventory's "Settings for ..." row finds "items" and "containers" there <NUMBER> (default: 0)
  * 1: Class to look at in that step, "" for none <STRING> (default: "")
  *
@@ -21,7 +21,7 @@
  * None
  *
  * Example:
- * [0, ""] call einv_setup_fnc_openFromGame;
+ * [0, ""] call aio_setup_fnc_openFromGame;
  *
  * Public: No
  */
@@ -39,7 +39,7 @@ if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {}
 if !(call FUNC(canOpen)) exitWith {};
 
 // What the inventory showed, to open it again afterwards: whose it was and what it looked into. Read
-// before it closes - its unload forgets the person (einv_gui_fnc_onUnload).
+// before it closes - its unload forgets the person (aio_gui_fnc_onUnload).
 private _inventory = uiNamespace getVariable [QEGVAR(gui,display), displayNull];
 private _return = [];
 
@@ -89,7 +89,7 @@ if (!isNull _inventory) then {
         GVAR(reopenInventory) = [];
 
         // A frame later again: the wizard is still on the screen while its unload handlers run. The
-        // engine's own way to the inventory then, as the Gear key takes it - einv_gui takes over from
+        // engine's own way to the inventory then, as the Gear key takes it - aio_gui takes over from
         // there. Not for a player who is someone else by now or dead, nor over an inventory already open.
         [{
             params [["_unit", objNull], ["_container", objNull], ["_person", objNull]];

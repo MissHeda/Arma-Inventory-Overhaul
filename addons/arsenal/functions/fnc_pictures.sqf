@@ -2,8 +2,8 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Puts the pictures the rules give to items (picture=, einv_picture; "pictureOverride" of
- * einv_items_fnc_getInfo) on ACE's own lists, so an item looks the same in ACE Arsenal as in the grid: the
+ * Puts the pictures the rules give to items (picture=, aio_picture; "pictureOverride" of
+ * aio_items_fnc_getInfo) on ACE's own lists, so an item looks the same in ACE Arsenal as in the grid: the
  * rows of its left list (IDC 13), of the right list that holds items for the weapon tabs (IDC 14) and of the
  * right list of the container tabs (IDC 15, a listnbox). ACE fills every row with the picture its config
  * names (ace_arsenal_fnc_addListBoxItem, fnc_fillRightPanel); a row whose class has a picture of its own in
@@ -26,7 +26,7 @@
  * None
  *
  * Example:
- * [_display] call einv_arsenal_fnc_pictures;
+ * [_display] call aio_arsenal_fnc_pictures;
  *
  * Public: No
  */
@@ -108,7 +108,7 @@ private _fresh = 0;
     };
 } forEach _jobs;
 
-// For the tester's numbers (einv_gui_debugTiming): what the whole pass spent, over all its frames, and how many
+// For the tester's numbers (aio_gui_debugTiming): what the whole pass spent, over all its frames, and how many
 // classes it had to work out the rules' info of for the first time (the cost of a first look).
 GVAR(pictureStat) params ["_passBegin", "_slices", "_spent", "_made"];
 GVAR(pictureStat) = [_passBegin, _slices + 1, _spent + (diag_tickTime - _sliceBegin), _made + _fresh];

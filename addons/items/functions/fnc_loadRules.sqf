@@ -4,23 +4,23 @@
  * Puts the rules the settings say into effect, on this machine: compiles them (fnc_compileRules) with
  * the older tables and sliders, names in the RPT what could not be read, forgets every item worked out
  * under the old rules (what config says stays, fnc_getFacts) and tells everyone who keeps something
- * worked out from them: the local CBA event einv_items_rulesChanged, with the new revision.
+ * worked out from them: the local CBA event aio_items_rulesChanged, with the new revision.
  *
  * Every setting that feeds the rules runs this when it changes, on every machine - CBA hands a
  * changed setting to all of them. Nothing happens when what it reads is what was compiled last: when
  * CBA reads all settings at the start, the first script compiles and the others have nothing to do.
  *
- * The server then publishes what it compiled (einv_items_rulesHash: a key of its settings, the hash of
+ * The server then publishes what it compiled (aio_items_rulesHash: a key of its settings, the hash of
  * its compiled rules and its version). A client that compiled the same settings into another hash
  * reads them differently - another version of the mod or of a preset - and says so once
  * (fnc_checkServerRules). Only the same settings are compared: the published hash and CBA's
- * settings reach a client in either order. Another mod setting einv_grid and the like in its config
+ * settings reach a client in either order. Another mod setting aio_grid and the like in its config
  * does not show in the hash.
  *
  * A rules text given here stands in for the setting's, for testing, in single player or on the server only: it is kept
- * (einv_items_rulesOverride) and read in the setting's place (fnc_rulesInputs), so fnc_currentRules
+ * (aio_items_rulesOverride) and read in the setting's place (fnc_rulesInputs), so fnc_currentRules
  * does not compile the setting's text again behind its back and everything that asks for the rules
- * gets the test text. It holds until an empty text is given - a change to einv_items_rules shows
+ * gets the test text. It holds until an empty text is given - a change to aio_items_rules shows
  * only after that.
  *
  * Arguments:
@@ -31,9 +31,9 @@
  * The rules were compiled again <BOOL>
  *
  * Example:
- * [] call einv_items_fnc_loadRules;
- * ["einv1 base=default cell=4"] call einv_items_fnc_loadRules;
- * [""] call einv_items_fnc_loadRules;
+ * [] call aio_items_fnc_loadRules;
+ * ["aio1 base=default cell=4"] call aio_items_fnc_loadRules;
+ * [""] call aio_items_fnc_loadRules;
  *
  * Public: No
  */
@@ -43,7 +43,7 @@ params [["_text", nil, [""]]];
 // The rules are the server's, the same for everyone: a client in multiplayer may not put a text of
 // its own into effect, not even from the debug console. The hook stays for single player and the server.
 if (!isNil "_text" && {isMultiplayer && {!isServer}}) then {
-    diag_log text "einv: rules override ignored on a client - the rules are the server's";
+    diag_log text "aio: rules override ignored on a client - the rules are the server's";
     _text = nil;
 };
 

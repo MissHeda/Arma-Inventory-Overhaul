@@ -29,7 +29,7 @@
  * None
  *
  * Example:
- * [_display, _group, [0.5, 0.2, 0.3, 0.3], _theme, "saved"] call einv_setup_fnc_drawChanges;
+ * [_display, _group, [0.5, 0.2, 0.3, 0.3], _theme, "saved"] call aio_setup_fnc_drawChanges;
  *
  * Public: No
  */
@@ -81,7 +81,7 @@ if (_count == 0) exitWith {};
 
 _cursorY = _cursorY + ([_display, _group, [_innerX, _cursorY, _innerW], LLSTRING(Changes_Help), TEXT_SMALL, _muted, _font] call FUNC(uiText)) + UNIT * 0.3;
 
-private _list = [_display, "EINV_ScrollGroup", _group, [_innerX, _cursorY, _innerW, (_bottom - _cursorY) max (UNIT * 1.2)]] call EFUNC(gui,uiCreate);
+private _list = [_display, "AIO_ScrollGroup", _group, [_innerX, _cursorY, _innerW, (_bottom - _cursorY) max (UNIT * 1.2)]] call EFUNC(gui,uiCreate);
 
 _list setVariable [QGVAR(scrollId), ["generalChanges", "savedChanges"] select _saved];
 
@@ -160,8 +160,9 @@ private _cursor = 0;
         [_display, _list, [_tagX, _cursor, _tagW, _rowH], _tag select 1, TEXT_SMALL, _theme getOrDefault [_tag select 2, _muted], _font, 1] call EFUNC(gui,uiLabel);
     };
 
-    // The line opens it; the cross on top of it takes the change back.
-    [_display, _list, _rowRect, _surface, _rowFill, _rowHover, _open, [_kind, _statement], true, _tooltip] call FUNC(uiHit);
+    // The line opens it; the cross at its end takes the change back. The line's hit area stops short of the cross:
+    // laid under it, it took the cross's clicks and opened the class instead (issue #29).
+    [_display, _list, [0, _cursor, _rowW - _removeW - SQUARE(UNIT * 0.2), _rowH], _surface, _rowFill, _rowHover, _open, [_kind, _statement], true, _tooltip] call FUNC(uiHit);
 
     [
         _display, _list, [_rowW - _removeW - SQUARE(UNIT * 0.1), _cursor + (_rowH - _removeH) / 2, _removeW, _removeH], "", UI_TEX(icon_close_ca), _theme, {

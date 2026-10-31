@@ -7,7 +7,7 @@
  * the screen with its header, the steps, the step itself and the footer (fnc_showStep).
  *
  * Everything is made inside the wizard's own controls group, never on the display itself: the inventory's
- * kit keeps what it makes on a display in a list its next build deletes (einv_gui_fnc_uiCreate).
+ * kit keeps what it makes on a display in a list its next build deletes (aio_gui_fnc_uiCreate).
  *
  * Opened by the pause menu's entry, nobody said how (fnc_open does): direct mode, at the first step, General.
  *
@@ -18,7 +18,7 @@
  * None
  *
  * Example:
- * [_display] call einv_setup_fnc_onLoad;
+ * [_display] call aio_setup_fnc_onLoad;
  *
  * Public: No
  */
@@ -41,7 +41,7 @@ uiNamespace setVariable [QGVAR(editAreas), []];
 // The rules engine comes from the items addon, the window's kit from the gui addon. Without them there is
 // nothing to show: closed again a moment later, not inside its own onLoad.
 if (isNil QEFUNC(items,parseRules) || {isNil QEFUNC(items,writeRules)} || {isNil QEFUNC(items,compileRules)} || {isNil QEFUNC(gui,uiPanel)}) exitWith {
-    ERROR("The setup wizard needs the rules engine (einv_items) and the window's kit (einv_gui) - closed again.");
+    ERROR("The setup wizard needs the rules engine (aio_items) and the window's kit (aio_gui) - closed again.");
 
     [{(uiNamespace getVariable [QGVAR(display), displayNull]) closeDisplay 2}] call FUNC(defer);
 };
@@ -53,13 +53,17 @@ if !(call FUNC(canOpen)) exitWith {
 };
 
 // In Eden, what the scenario still keeps in the settings box of the test builds goes into the server settings of
-// their own first, so the draft starts from it (einv_main_fnc_migrateSettings).
+// their own first, so the draft starts from it (aio_main_fnc_migrateSettings).
 if (is3DEN) then {
     [] call (missionNamespace getVariable [QEFUNC(main,migrateSettings), {}]);
 };
 
 GVAR(mode) = _mode;
+// Its own look, the same for everyone: the plain theme, never the palette of the inventory (colours, transparency).
+missionNamespace setVariable [QEGVAR(gui,paletteOff), true];
 GVAR(theme) = call EFUNC(gui,theme);
+missionNamespace setVariable [QEGVAR(gui,paletteOff), false];
+_display setVariable [QEGVAR(gui,plainLook), true];
 GVAR(target) = [_mode] call FUNC(canEdit);
 GVAR(readOnly) = !(GVAR(target) getOrDefault ["canSave", false]);
 
@@ -88,6 +92,7 @@ GVAR(boxWork) = createHashMap;
 GVAR(picker) = createHashMap;
 GVAR(treeState) = createHashMap;
 GVAR(editScope) = createHashMap;
+GVAR(groupEdit) = createHashMap;
 GVAR(classImportText) = "";
 
 // The draft starts as what is in use there: the rules (fnc_getActive) and the server settings (fnc_activeSettings).
@@ -110,7 +115,7 @@ GVAR(cleanSettings) = GVAR(draftSettingsText);
 GVAR(sourceEmpty) = [] call FUNC(sourceEmpty);
 
 // The pane, on whole pixels: every surface on it is see-through and must meet its neighbours exactly.
-private _root = _display ctrlCreate ["EINV_Group", -1];
+private _root = _display ctrlCreate ["AIO_Group", -1];
 _root ctrlSetPosition [SNAP_X(WIZ_X), SNAP_Y(WIZ_Y), SNAP_W(WIZ_W), SNAP_H(WIZ_H)];
 _root ctrlCommit 0;
 
@@ -125,7 +130,7 @@ uiNamespace setVariable [QGVAR(root), _root];
 
 // Somewhere for the cursor to go after every redraw: a button no one sees. Otherwise a control that had
 // it and went with the redraw hands it on - perhaps to a text field, and the keys type into it.
-uiNamespace setVariable [QGVAR(sink), [_display, "EINV_Hitbox", _root, [0, 0, 0, 0]] call EFUNC(gui,uiCreate)];
+uiNamespace setVariable [QGVAR(sink), [_display, "AIO_Hitbox", _root, [0, 0, 0, 0]] call EFUNC(gui,uiCreate)];
 
 _display displayAddEventHandler ["KeyDown", {_this call FUNC(onKeyDown)}];
 _display displayAddEventHandler ["KeyUp", {_this call FUNC(onKeyUp)}];

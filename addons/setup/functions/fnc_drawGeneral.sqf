@@ -16,9 +16,9 @@
  *   - Categories (fnc_drawCategories): the eight built-in categories - names and pictures can be changed - and the ones the setup
  *     defines itself, which items are put in, compartments accept and the strip at the side of a loot box lists. Add, rename,
  *     pick a picture, delete; the statements category=... of the rules text.
- *   - The server settings, by topic (einv_main_topics): everything of this mod that is the same for everyone, each a
+ *   - The server settings, by topic (aio_main_topics): everything of this mod that is the same for everyone, each a
  *     control of its own kind - a switch, a stepper, a drop-down, a text box - with a small reset button while it is
- *     off its default. They are registered by their addons (einv_main_fnc_addSetting), each a CBA setting of its own
+ *     off its default. They are registered by their addons (aio_main_fnc_addSetting), each a CBA setting of its own
  *     as well, and show the values in effect; Save writes each one changed through CBA (fnc_setSetting,
  *     fnc_commitSettings, fnc_save). One the source's cba_settings.sqf sets is greyed, with why in its tooltip.
  *     What a player sets for themselves stays in CBA's menu.
@@ -38,7 +38,7 @@
  * None
  *
  * Example:
- * [_display, _group, _theme, []] call einv_setup_fnc_drawGeneral;
+ * [_display, _group, _theme, []] call aio_setup_fnc_drawGeneral;
  *
  * Public: No
  */
@@ -66,7 +66,7 @@ private _page = _group getVariable [QGVAR(page), controlNull];
 private _oldControls = [];
 
 if (isNull _page) then {
-    _page = [_display, "EINV_ScrollGroup", _group, [0, 0, _width, _height]] call EFUNC(gui,uiCreate);
+    _page = [_display, "AIO_ScrollGroup", _group, [0, 0, _width, _height]] call EFUNC(gui,uiCreate);
 
     _group setVariable [QGVAR(page), _page];
     _page setVariable [QGVAR(scrollId), "general"];
@@ -78,7 +78,7 @@ if (isNull _page) then {
 };
 
 private _pageW = _width - SCROLL_W - pixelW * 2;
-private _probe = [_display, "EINV_Group", _group, [0, 0, _pageW, UNIT * 10]] call EFUNC(gui,uiCreate);
+private _probe = [_display, "AIO_Group", _group, [0, 0, _pageW, UNIT * 10]] call EFUNC(gui,uiCreate);
 
 private _padX = WIZ_PAD_X;
 private _innerW = _pageW - _padX * 2;
@@ -171,7 +171,7 @@ if (GVAR(readOnly)) then {
     private _source = _target getOrDefault ["source", ""];
 
     _saveLine = switch (true) do {
-        case (GVAR(mode) isEqualTo "menu"): {format [LLSTRING(Save_ToMenu), localize format ["STR_einv_setup_Source_%1", _source]]};
+        case (GVAR(mode) isEqualTo "menu"): {format [LLSTRING(Save_ToMenu), localize format ["STR_aio_setup_Source_%1", _source]]};
         case (_source isEqualTo "mission"): {LLSTRING(Save_ToMission)};
         default {LLSTRING(Save_ToServer)};
     };
@@ -202,7 +202,7 @@ if (GVAR(readOnly)) then {
 
 // The same settings are rows of CBA's Addon Options: say so, and which place is the better one.
 _cursorY = _cursorY + ([
-    _display, _page, [_padX, _cursorY, _innerW], format [LLSTRING(General_CbaNote), CBA_SETTINGS_EINV_SERVER], TEXT_SMALL, _muted, _font
+    _display, _page, [_padX, _cursorY, _innerW], format [LLSTRING(General_CbaNote), CBA_SETTINGS_AIO_SERVER], TEXT_SMALL, _muted, _font
 ] call FUNC(uiText)) + UNIT * 0.1;
 
 _cursorY = _cursorY + _gapY;
@@ -234,7 +234,7 @@ if (_warnings isNotEqualTo []) then {
 
     private _cardH = _cardTop + _listH + CARD_PAD_Y;
     private _contentY = [_display, _page, [_padX, _cursorY, _innerW, _cardH], format [LLSTRING(Review_Warnings), count _warnings], _theme] call FUNC(uiCard);
-    private _list = [_display, "EINV_ScrollGroup", _page, [_cardX, _contentY, _cardW + CARD_PAD_X - pixelW * 2, _listH]] call EFUNC(gui,uiCreate);
+    private _list = [_display, "AIO_ScrollGroup", _page, [_cardX, _contentY, _cardW + CARD_PAD_X - pixelW * 2, _listH]] call EFUNC(gui,uiCreate);
     private _lineY = 0;
 
     _list setVariable [QGVAR(scrollId), "generalWarnings"];
@@ -350,7 +350,7 @@ private _timesW = SQUARE(UNIT * 0.6);
             format [LLSTRING(Kind_Other), (((_rules select _index) select 1) getOrDefault ["grid", ""])]
         };
         case "fixed": {LLSTRING(Kind_Fixed)};
-        default {localize format ["STR_einv_setup_Kind_Auto_%1", _kind]};
+        default {localize format ["STR_aio_setup_Kind_Auto_%1", _kind]};
     };
 
     if (_noteW > UNIT * 3) then {
@@ -626,7 +626,7 @@ private _fnc_setting = {
 
     private _topicH = _cardTop + (count _lines) * (_rowH + _rowGap) + CARD_PAD_Y - _rowGap;
 
-    _contentY = [_display, _page, [_padX, _cursorY, _innerW, _topicH], localize format ["STR_einv_setup_Topic_%1", _topic], _theme] call FUNC(uiCard);
+    _contentY = [_display, _page, [_padX, _cursorY, _innerW, _topicH], localize format ["STR_aio_setup_Topic_%1", _topic], _theme] call FUNC(uiCard);
 
     {
         private _lineY = _contentY + _forEachIndex * (_rowH + _rowGap);
@@ -655,7 +655,7 @@ _cursorY = _cursorY + UNIT * 11 + UNIT * 0.6;
 // The end of the page: the scroll group is as long as its last control. Its length is kept on the group, for where it
 // is scrolled to be put back after a redraw (fnc_restoreScroll) and for a box that opens at a control on it
 // (fnc_screenRect).
-[_display, "EINV_Hitbox", _page, [0, _cursorY, pixelW, pixelH]] call EFUNC(gui,uiCreate);
+[_display, "AIO_Hitbox", _page, [0, _cursorY, pixelW, pixelH]] call EFUNC(gui,uiCreate);
 
 _page setVariable [QGVAR(contentH), _cursorY + pixelH];
 

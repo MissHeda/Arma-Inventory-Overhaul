@@ -1,46 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project name="einv">
+<Project name="aio">
     <Package name="compat_tfar">
-        <Key ID="STR_einv_compat_tfar_Active">
+        <Key ID="STR_aio_compat_tfar_Active">
             <English>Active radio</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_ActiveLr">
+        <Key ID="STR_aio_compat_tfar_ActiveLr">
             <English>Active long range radio</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_Alternate">
+        <Key ID="STR_aio_compat_tfar_Alternate">
             <English>Alt. ch %1</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_Channel">
+        <Key ID="STR_aio_compat_tfar_Channel">
             <English>Ch %1</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_Frequency">
+        <Key ID="STR_aio_compat_tfar_Frequency">
             <English>%1 MHz</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_Inspect_Alternate">
+        <Key ID="STR_aio_compat_tfar_Inspect_Alternate">
             <English>Alternate</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_Inspect_Channel">
+        <Key ID="STR_aio_compat_tfar_Inspect_Channel">
             <English>Channel</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_Inspect_Frequency">
+        <Key ID="STR_aio_compat_tfar_Inspect_Frequency">
             <English>Frequency</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_Inspect_State">
+        <Key ID="STR_aio_compat_tfar_Inspect_State">
             <English>State</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_Menu_MakeActive">
+        <Key ID="STR_aio_compat_tfar_Menu_MakeActive">
             <English>Use as active radio</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_Menu_Open">
+        <Key ID="STR_aio_compat_tfar_Menu_Open">
             <English>Open radio</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_NotSetUp">
+        <Key ID="STR_aio_compat_tfar_NotSetUp">
             <English>Set up once someone carries it</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_Off">
+        <Key ID="STR_aio_compat_tfar_Off">
             <English>Switched off</English>
         </Key>
-        <Key ID="STR_einv_compat_tfar_On">
+        <Key ID="STR_aio_compat_tfar_On">
             <English>Switched on</English>
         </Key>
     </Package>

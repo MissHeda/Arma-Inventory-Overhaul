@@ -15,7 +15,7 @@
  * [tiles per page, matches per page] <ARRAY>
  *
  * Example:
- * ([_grid] call einv_gui_fnc_pageCounts) params ["_tiles", "_matches"];
+ * ([_grid] call aio_gui_fnc_pageCounts) params ["_tiles", "_matches"];
  *
  * Public: No
  */

@@ -10,10 +10,10 @@
  * None
  *
  * Example:
- * call einv_hotbar_fnc_saveSlots;
+ * call aio_hotbar_fnc_saveSlots;
  *
  * Public: No
  */
 
-profileNamespace setVariable ["einv_hotbar_slots", +GVAR(slots)];
+profileNamespace setVariable ["aio_hotbar_slots", +GVAR(slots)];
 saveProfileNamespace;

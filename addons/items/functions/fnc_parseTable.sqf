@@ -2,11 +2,11 @@
 /*
  * Author: Miss Heda
  * Reads one of the older text settings that give sizes, stacks or container grids by class:
- *   sizes  - einv_items_sizeTable, "class:WxH, class:WxH", W across and H down,
+ *   sizes  - aio_items_sizeTable, "class:WxH, class:WxH", W across and H down,
  *            e.g. "rhs_mag_30Rnd_556x45_M855A1_Stanag:1x2, rhsusf_100Rnd_762x51:1x3"
- *   stacks - einv_items_stackTable, "class:N, class:N",
+ *   stacks - aio_items_stackTable, "class:N, class:N",
  *            e.g. "ACE_fieldDressing:20, ACE_morphine:5"
- *   grids  - einv_storage_containerTable, "class:N" for that many cells, laid out the way the
+ *   grids  - aio_storage_containerTable, "class:N" for that many cells, laid out the way the
  *            container's kind lays out its load, or "class:WxH+WxH" for the compartments exactly,
  *            e.g. "B_AssaultPack_rgr:30, V_PlateCarrier1_rgr:4x2+2x2"
  * fnc_compileRules turns what this reads into rules of their own, after the rules text - so the
@@ -32,7 +32,7 @@
  * ["blocks", [[cols, rows], ...]] for grids <HASHMAP>
  *
  * Example:
- * ["ACE_fieldDressing:20, ACE_morphine:5", "stack"] call einv_items_fnc_parseTable;
+ * ["ACE_fieldDressing:20, ACE_morphine:5", "stack"] call aio_items_fnc_parseTable;
  *
  * Public: No
  */

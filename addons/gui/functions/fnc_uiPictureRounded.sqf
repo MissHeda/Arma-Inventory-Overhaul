@@ -33,7 +33,7 @@
  * The controls <ARRAY>
  *
  * Example:
- * [_display, controlNull, [0.1, 0.1, 0.2, 0.2], _preview, UNIT * 0.45, [0, 0, 0, 0.4]] call einv_gui_fnc_uiPictureRounded;
+ * [_display, controlNull, [0.1, 0.1, 0.2, 0.2], _preview, UNIT * 0.45, [0, 0, 0, 0.4]] call aio_gui_fnc_uiPictureRounded;
  *
  * Public: No
  */

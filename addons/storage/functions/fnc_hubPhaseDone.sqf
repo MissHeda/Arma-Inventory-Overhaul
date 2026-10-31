@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * An answered phase (event einv_storage_phaseDone, in-process for the server's own). Ignored unless the
+ * An answered phase (event aio_storage_phaseDone, in-process for the server's own). Ignored unless the
  * hub waits for that very attempt - a late copy of an answer, or one for an attempt it gave up on.
  *
  * "NotLocal" for every op - the root was not local where it arrived, nothing ran there - is tried again
@@ -22,7 +22,7 @@
  * None
  *
  * Example:
- * ["2:14", 1, 0, _results, _revisions] call einv_storage_fnc_hubPhaseDone;
+ * ["2:14", 1, 0, _results, _revisions] call aio_storage_fnc_hubPhaseDone;
  *
  * Public: No
  */

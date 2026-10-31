@@ -10,7 +10,7 @@
  *
  * Asked while dragging (fnc_updateDrag, fnc_showTargets) and once more before anything is sent; the
  * machines that take the gear off and put it on ask their own guards again (a living person's settings,
- * einv_gui_fnc_personGuard).
+ * aio_gui_fnc_personGuard).
  *
  * Arguments:
  * 0: Where it comes from, [unit, slot id] <ARRAY>
@@ -21,7 +21,7 @@
  * "" when it may, else the reason (fnc_flashHint) <STRING>
  *
  * Example:
- * [[player, "backpack"], _body, "backpack"] call einv_gui_fnc_canSwap;
+ * [[player, "backpack"], _body, "backpack"] call aio_gui_fnc_canSwap;
  *
  * Public: No
  */

@@ -12,7 +12,7 @@
  * Machine id <NUMBER>
  *
  * Example:
- * call einv_storage_fnc_machineId;
+ * call aio_storage_fnc_machineId;
  *
  * Public: No
  */

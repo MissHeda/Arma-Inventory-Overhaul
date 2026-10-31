@@ -3,7 +3,7 @@
  * Author: Miss Heda
  * Whether the Zeus menu's searching choice has something to do: some of the objects is not in the state it would make.
  * Turning searching off is offered while one of them is still searched as the settings say, turning it on again while
- * one has the mark that leaves it out (einv_gui_fnc_setSearchable).
+ * one has the mark that leaves it out (aio_gui_fnc_setSearchable).
  *
  * Arguments:
  * 0: Objects <ARRAY of OBJECTs>
@@ -13,7 +13,7 @@
  * Something would change <BOOL>
  *
  * Example:
- * [[_crate], false] call einv_compat_zen_fnc_canSetSearch;
+ * [[_crate], false] call aio_compat_zen_fnc_canSetSearch;
  *
  * Public: No
  */

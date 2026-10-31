@@ -1,10 +1,10 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * This addon's part of the window's signature (einv_gui_fnc_getSignature): a count of changes to the
+ * This addon's part of the window's signature (aio_gui_fnc_getSignature): a count of changes to the
  * kits it shows, and the revision of each open kit's places. A kit's contents and name change without
  * any cargo changing, and another player rearranging an open kit changes only its places - written by
- * the kit's authority as a public variable (einv_storage_fnc_writePlaces), which raises no event here -
+ * the kit's authority as a public variable (aio_storage_fnc_writePlaces), which raises no event here -
  * so the window would not see either otherwise. The kits the ACE Arsenal's panel shows as sections
  * (GVAR(arsenalHolders)) count as open ones: a tile moved within one changes only its places too.
  *
@@ -16,7 +16,7 @@
  * kit section's places in the Arsenal's panel, by class]] <ARRAY>
  *
  * Example:
- * call einv_compat_efak_fnc_signature;
+ * call aio_compat_efak_fnc_signature;
  *
  * Public: No
  */

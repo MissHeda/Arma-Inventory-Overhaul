@@ -1,7 +1,7 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * A loadout was set (CBA_fnc_setLoadout, event CBA_loadoutSet): when it carries "einv_layout"
+ * A loadout was set (CBA_fnc_setLoadout, event CBA_loadoutSet): when it carries "aio_layout"
  * (fnc_onLoadoutGet), the places it names are written to the unit's uniform, vest and backpack, so
  * everything lies on the cell it was saved on. A record matches a plain item by its key at once, and an
  * instance of a radio or kit, a magazine with other rounds, a backpack with an id of its own, in the second
@@ -10,7 +10,7 @@
  *
  * The event runs where the loadout was set, which is not necessarily where the unit is local. Local: the
  * places are written here (fnc_writePlaces). Otherwise they go to the unit's machine in an event
- * (einv_storage_loadoutPlaces, fnc_onLoadoutPlaces), which writes them a frame later, when the loadout's
+ * (aio_storage_loadoutPlaces, fnc_onLoadoutPlaces), which writes them a frame later, when the loadout's
  * containers have arrived there.
  *
  * What came over the network or from a profile is not trusted: only well-formed records are kept. A
@@ -30,7 +30,7 @@
  * None
  *
  * Example:
- * [player, getUnitLoadout player, _extended] call einv_storage_fnc_onLoadoutSet;
+ * [player, getUnitLoadout player, _extended] call aio_storage_fnc_onLoadoutSet;
  *
  * Public: No
  */
@@ -77,7 +77,7 @@ if (local _unit) then {
     [QGVAR(topUpLoadout), [_unit, _loadout], _unit] call CBA_fnc_targetEvent;
 };
 
-private _layout = _extended getOrDefault ["einv_layout", []];
+private _layout = _extended getOrDefault ["aio_layout", []];
 
 if !(_layout isEqualType [] && {(_layout param [0, 0]) isEqualTo 1} && {(_layout param [1, []]) isEqualType []}) exitWith {};
 

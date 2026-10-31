@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [player, primaryWeapon player, "30Rnd_65x39_caseless_mag"] call einv_storage_fnc_noteHandLoad;
+ * [player, primaryWeapon player, "30Rnd_65x39_caseless_mag"] call aio_storage_fnc_noteHandLoad;
  *
  * Public: No
  */

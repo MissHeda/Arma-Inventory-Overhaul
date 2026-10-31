@@ -13,7 +13,7 @@
  * None
  *
  * Example:
- * call einv_setup_fnc_onMouse;
+ * call aio_setup_fnc_onMouse;
  *
  * Public: No
  */

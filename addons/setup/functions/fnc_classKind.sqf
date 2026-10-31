@@ -8,7 +8,7 @@
  *
  *   CfgWeapons   - rifles, handguns, launchers, binoculars and NVGs (weapon types 1, 2, 4, 4096) and
  *                  items (131072): uniforms, vests, headgear, attachments, kits of Enhanced First Aid
- *                  Kits (the type's own class, einv_items_fnc_kitOf - an item and a container both, its
+ *                  Kits (the type's own class, aio_items_fnc_kitOf - an item and a container both, its
  *                  load the capacity), the rest. Vehicle weapons have other types and are left out (""),
  *                  and so are the instance classes that mod makes of a kit: the kit's own class covers
  *                  them (class=X+, fnc_editScope).
@@ -30,7 +30,7 @@
  *            container class it brings along holds, a kit its capacity
  *
  * Example:
- * [configFile >> "CfgVehicles" >> "B_Carryall_blk", "CfgVehicles"] call einv_setup_fnc_classKind;
+ * [configFile >> "CfgVehicles" >> "B_Carryall_blk", "CfgVehicles"] call aio_setup_fnc_classKind;
  *
  * Public: No
  */

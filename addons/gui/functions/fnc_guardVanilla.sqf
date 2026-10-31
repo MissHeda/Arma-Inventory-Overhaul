@@ -58,7 +58,7 @@
  * Closed <BOOL>
  *
  * Example:
- * [findDisplay 602] call einv_gui_fnc_guardVanilla;
+ * [findDisplay 602] call aio_gui_fnc_guardVanilla;
  *
  * Public: No
  */

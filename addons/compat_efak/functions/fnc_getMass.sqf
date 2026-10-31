@@ -16,7 +16,7 @@
  * Mass in tenths of a pound, -1 for anything that is no kit <NUMBER>
  *
  * Example:
- * ["efak_IFAK_7"] call einv_compat_efak_fnc_getMass;
+ * ["efak_IFAK_7"] call aio_compat_efak_fnc_getMass;
  *
  * Public: No
  */

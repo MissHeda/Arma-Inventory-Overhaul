@@ -5,8 +5,8 @@
  * The panel's hint line (the "footer" hook), in place of the inventory's footer, which would lie over ACE's
  * menu bar: the panel's last band (fnc_layout), on the panel's own glass like the rest of it, under a
  * hairline as the one under the title row, with the engine's hint in it at the panel's hint size, in ACE's
- * grid (EINV_ArsenalHint, HINT_SIZE) - what the mouse is on, what a drag would do, why something did not
- * go (einv_gui_fnc_updateHover, einv_gui_fnc_flashHint). The hairline and the text keep the padding of
+ * grid (AIO_ArsenalHint, HINT_SIZE) - what the mouse is on, what a drag would do, why something did not
+ * go (aio_gui_fnc_updateHover, aio_gui_fnc_flashHint). The hairline and the text keep the padding of
  * the block's other bands on both sides. With no panel drawn there is no hint either.
  *
  * Arguments:
@@ -17,7 +17,7 @@
  * None
  *
  * Example:
- * [_display, _theme] call einv_arsenal_fnc_footer;
+ * [_display, _theme] call aio_arsenal_fnc_footer;
  *
  * Public: No
  */
@@ -43,6 +43,6 @@ private _padX = SQUARE(UNIT * PANEL_PAD);
 private _padY = HINT_PAD;
 
 uiNamespace setVariable [QEGVAR(gui,hint), [
-    _display, "EINV_ArsenalHint", controlNull,
+    _display, "AIO_ArsenalHint", controlNull,
     [_left + _padX, _top + _padY, _width - _padX * 2, _height - _padY * 2]
 ] call EFUNC(gui,uiCreate)];

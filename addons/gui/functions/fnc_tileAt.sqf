@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Which tile of a grid covers a cell. A shaped item (size=xx/x-) covers only its own cells: over one of
- * its holes ("holes" as it lies, einv_storage_fnc_getLayout) it is not found - the tile that lies there
+ * its holes ("holes" as it lies, aio_storage_fnc_getLayout) it is not found - the tile that lies there
  * is, or none.
  *
  * Arguments:
@@ -13,7 +13,7 @@
  * Index into the grid's tiles, -1 for an empty cell <NUMBER>
  *
  * Example:
- * [_grid, [3, 1]] call einv_gui_fnc_tileAt;
+ * [_grid, [3, 1]] call aio_gui_fnc_tileAt;
  *
  * Public: No
  */

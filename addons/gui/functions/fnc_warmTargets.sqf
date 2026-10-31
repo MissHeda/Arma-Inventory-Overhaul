@@ -16,7 +16,7 @@
  * None
  *
  * Example:
- * [_display] call einv_gui_fnc_warmTargets;
+ * [_display] call aio_gui_fnc_warmTargets;
  *
  * Public: No
  */

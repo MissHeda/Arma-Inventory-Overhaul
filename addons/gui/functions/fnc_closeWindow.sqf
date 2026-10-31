@@ -3,8 +3,8 @@
 /*
  * Author: Miss Heda
  * Closes a kit's window - its cross, Escape on the topmost one (fnc_onKeyDown), a double click on the
- * kit's tile or Close in its context menu (einv_compat_efak_fnc_toggle). The kit is closed in
- * einv_compat_efak (fnc_close there, which plays the sound of the medic bag closing); where its window stood is forgotten, so opened again it comes up
+ * kit's tile or Close in its context menu (aio_compat_efak_fnc_toggle). The kit is closed in
+ * aio_compat_efak (fnc_close there, which plays the sound of the medic bag closing); where its window stood is forgotten, so opened again it comes up
  * beside its tile. Only the windows are drawn again (fnc_drawWindows) - kits open inside it, found only
  * through it, close with it - and nothing in the columns moves.
  *
@@ -15,7 +15,7 @@
  * Its window was open <BOOL>
  *
  * Example:
- * ["kit:efak_ifak_7"] call einv_gui_fnc_closeWindow;
+ * ["kit:efak_ifak_7"] call aio_gui_fnc_closeWindow;
  *
  * Public: No
  */

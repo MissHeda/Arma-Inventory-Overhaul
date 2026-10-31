@@ -2,9 +2,9 @@
 /*
  * Author: Miss Heda
  * Opens a kit's tile in a floating window of its own, beside the tile, or closes that window - a double
- * click on the tile (einv_gui_fnc_onMouseButton) or Open / Close in its context menu (fnc_menuChoices).
+ * click on the tile (aio_gui_fnc_onMouseButton) or Open / Close in its context menu (fnc_menuChoices).
  * Works for a kit in any grid the window shows, inside another kit's window as well. Only the kit
- * windows are drawn again (einv_gui_fnc_openWindow, einv_gui_fnc_closeWindow): nothing in the columns
+ * windows are drawn again (aio_gui_fnc_openWindow, aio_gui_fnc_closeWindow): nothing in the columns
  * moves.
  *
  * A double click only while Enhanced First Aid Kits' own setting for it is on, as in the vanilla
@@ -20,7 +20,7 @@
  * Handled - false for anything that is no kit, which the caller handles its own way <BOOL>
  *
  * Example:
- * [1, 4, true] call einv_compat_efak_fnc_toggle;
+ * [1, 4, true] call aio_compat_efak_fnc_toggle;
  *
  * Public: No
  */

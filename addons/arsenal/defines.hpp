@@ -3,7 +3,7 @@
 // engine with the inventory's measures, and takes its colours, fonts and corner radius from the inventory's
 // theme.
 
-#include "\z\einv\addons\gui\defines.hpp"
+#include "\z\aio\addons\gui\defines.hpp"
 
 // The textures are the inventory's own, drawn by tools/generate_ui_textures.py into the gui addon.
 #undef UI_TEX
@@ -28,12 +28,12 @@
 #define ACE_GRID_H (pixelH * pixelGridNoUIScale * 0.25)
 #define ACE_ROW_SIZE (7 * ACE_GRID_H)
 
-// The panel is laid out the way the inventory's columns are (einv_gui_fnc_drawColumn), so a container reads
+// The panel is laid out the way the inventory's columns are (aio_gui_fnc_drawColumn), so a container reads
 // here as it does there: a title row on top, the sections under it, the hint line last, a hairline under
 // the title and one over the hint. PANEL_PAD, in UNITs, is the room round the block's content and between
 // its bands, high as it is - and as many pixels wide (SQUARE) -, so the picture, the section captions and
 // the grids all start on one left edge and the texts on the right end on one right edge. It stays on the
-// window engine's UNIT with the grids and the section captions the engine draws (einv_gui_fnc_drawSection).
+// window engine's UNIT with the grids and the section captions the engine draws (aio_gui_fnc_drawSection).
 #define PANEL_PAD 0.4
 
 // The panel's own texts - the title row and the hint line - are in ACE's grid, as the rows of ACE's list
@@ -48,7 +48,7 @@
 #define TITLE_SIZE (4.5 * ACE_GRID_H)
 
 // The hint line, the panel's last band (fnc_layout, fnc_footer): lines HINT_LINE_H high (22 px) of
-// HINT_SIZE text (15 px, the class EINV_ArsenalHint's), HINT_PAD room above and below them (8 px) - 38 px
+// HINT_SIZE text (15 px, the class AIO_ArsenalHint's), HINT_PAD room above and below them (8 px) - 38 px
 // for one line, the inventory footer's height. One line; a second only while the staging space holds
 // something, for the note that it goes when the window closes.
 #define HINT_LINE_H (5.5 * ACE_GRID_H)
@@ -57,7 +57,7 @@
 
 // The staging space under the container's grid (fnc_staging): a crate of the game's own, made on this
 // machine only and hidden at the soldier's feet, with a grid of its own. A crate rather than a ground
-// holder: the ground has no grid and no limit (einv_storage_fnc_getBlocks). Its grid is STORAGE_COLS wide
+// holder: the ground has no grid and no limit (aio_storage_fnc_getBlocks). Its grid is STORAGE_COLS wide
 // and grows with what lies in it (fnc_growStaging): always STAGING_FREE_ROWS free rows under the lowest
 // one in use, never fewer than STAGING_MIN_ROWS rows nor than fill the panel down to its hint line, never
 // more than STAGING_MAX_ROWS - a cap of its own, as MAX_ROWS also bounds every item's and compartment's

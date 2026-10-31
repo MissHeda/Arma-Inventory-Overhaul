@@ -15,7 +15,7 @@
  * 0: "begin" <STRING>
  * 1: Array of:
  *    0: Display <DISPLAY>
- *    1: Which volume: an index of einv_gui_soundGroups <NUMBER>
+ *    1: Which volume: an index of aio_gui_soundGroups <NUMBER>
  *    2: The slider's left end on the screen <NUMBER>
  *    3: Its width <NUMBER>
  *    4: The mouse's x, only the press's own - the mouse is read again here <NUMBER> (default: 0)
@@ -28,7 +28,7 @@
  * None
  *
  * Example:
- * ["begin", [_display, 2, 0.4, 0.2, 0.45]] call einv_gui_fnc_soundSlide;
+ * ["begin", [_display, 2, 0.4, 0.2, 0.45]] call aio_gui_fnc_soundSlide;
  *
  * Public: No
  */

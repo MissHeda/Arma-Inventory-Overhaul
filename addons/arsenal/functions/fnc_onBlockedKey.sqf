@@ -16,7 +16,7 @@
  * Handled <BOOL>
  *
  * Example:
- * [_display, 1, false, false, false] call einv_arsenal_fnc_onBlockedKey;
+ * [_display, 1, false, false, false] call aio_arsenal_fnc_onBlockedKey;
  *
  * Public: No
  */

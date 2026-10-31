@@ -2,7 +2,7 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Draws the repack in progress on the window that was just built (the end of einv_gui_fnc_build): its
+ * Draws the repack in progress on the window that was just built (the end of aio_gui_fnc_build): its
  * tiles are found again by where each magazine lies (container, cell, class and rounds), and each one gets
  * a film in the accent colour, a bar of its own over the tile's fill bar that grows and shrinks with every
  * round (where the tile has a fill bar), and its rounds text counts live. The ring that fills on the
@@ -19,7 +19,7 @@
  * None
  *
  * Example:
- * [_display] call einv_magazines_fnc_drawJob;
+ * [_display] call aio_magazines_fnc_drawJob;
  *
  * Public: No
  */
@@ -143,13 +143,13 @@ private _drawn = createHashMap;
     };
 
     private _parent = ctrlParentControlsGroup _background;
-    // Its box: a shaped tile's first surface is only its top row's first run (einv_gui_fnc_createTile).
+    // Its box: a shaped tile's first surface is only its top row's first run (aio_gui_fnc_createTile).
     private _rect = _tile getOrDefault ["rect", ctrlPosition _background];
 
     _drawn set [_at, [_parent, _rect]];
 
     // The film: the tile in the accent colour.
-    private _film = [_display, "EINV_PanelRect", _parent, _rect] call EFUNC(gui,uiCreate);
+    private _film = [_display, "AIO_PanelRect", _parent, _rect] call EFUNC(gui,uiCreate);
     _film ctrlSetBackgroundColor (_theme getOrDefault ["accentSoft", [0.84, 0.54, 0.1, 0.2]]);
     _controls pushBack _film;
 

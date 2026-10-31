@@ -13,7 +13,7 @@
  * Lockable objects <ARRAY of OBJECTs>
  *
  * Example:
- * [_selected, _hovered] call einv_compat_zen_fnc_targets;
+ * [_selected, _hovered] call aio_compat_zen_fnc_targets;
  *
  * Public: No
  */
