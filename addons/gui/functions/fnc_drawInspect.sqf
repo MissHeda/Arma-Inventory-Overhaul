@@ -45,9 +45,6 @@ uiNamespace setVariable [QGVAR(inspectGroup), controlNull];
 uiNamespace setVariable [QGVAR(inspectRect), []];
 uiNamespace setVariable [QGVAR(hotspots), []];
 
-// The window shows whole again; Modify cuts its hole anew below.
-[_display] call FUNC(cutHole);
-
 if (isNull _display || {GVAR(inspect) isEqualTo []}) exitWith {
     ["stop"] call FUNC(inspect3D);
 };
@@ -395,6 +392,16 @@ if (_show3D) then {
         _hit ctrlAddEventHandler ["MouseButtonDown", {
             params ["", "_button"];
 
+            // On a point of the modding view (fnc_drawHotspots), lying over this area: the press is the point's - its click
+            // comes with the release (below, fnc_hotspotClick).
+            private _spot = [getMousePosition] call FUNC(hotspotAt);
+
+            if (_spot getOrDefault ["floating", false]) exitWith {
+                GVAR(spotPress) = [_spot get "slot", _button];
+            };
+
+            GVAR(spotPress) = [];
+
             if (_button == 0) then {
                 GVAR(inspect3DTurn) = getMousePosition;
             };
@@ -403,6 +410,16 @@ if (_show3D) then {
             // take their clicks - the focus goes on at once, the turn follows the button all the same.
             if ((uiNamespace getVariable [QGVAR(hotspots), []]) isNotEqualTo []) then {
                 [{ctrlSetFocus (uiNamespace getVariable [QGVAR(filterSink), controlNull])}] call FUNC(later);
+            };
+        }];
+        _hit ctrlAddEventHandler ["MouseButtonUp", {
+            params ["", "_button"];
+
+            GVAR(spotPress) params [["_slot", ""], ["_pressed", -1]];
+            GVAR(spotPress) = [];
+
+            if (_slot isNotEqualTo "" && {_pressed == _button} && {(([getMousePosition] call FUNC(hotspotAt)) getOrDefault ["slot", ""]) isEqualTo _slot}) then {
+                [_slot, _button] call FUNC(hotspotClick);
             };
         }];
         _hit ctrlAddEventHandler ["MouseButtonDblClick", {
@@ -543,6 +560,11 @@ if (_descH > 0) then {
 
 // The main view shows through the card: what of the window lies in the card's band of the content, top to bottom, is hidden
 // while it is open (fnc_cutHole) - the loot column whole, not only the part under the hole.
+// The dim layer leaves out the hole. Any other card shows the window whole.
 if (_mainView) then {
-    [_display, [_left, CONTENT_Y, _width, CONTENT_H]] call FUNC(cutHole);
+    _viewRect params ["_viewX", "_viewY", "_viewW", "_viewH"];
+
+    [_display, [_left, CONTENT_Y, _width, CONTENT_H], [_left + _viewX, _top + _viewY, _viewW, _viewH]] call FUNC(cutHole);
+} else {
+    [_display, [], []] call FUNC(cutHole);
 };

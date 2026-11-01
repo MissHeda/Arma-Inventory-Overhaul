@@ -398,8 +398,8 @@ GVAR(context) = _context;
 
 if (_timed) then {_marks pushBack ["contents", diag_tickTime]};
 
-private _dim = _display displayCtrl IDC_DIM;
-_dim ctrlSetBackgroundColor (_theme getOrDefault ["dim", [0, 0, 0, 0.35]]);
+// The dim layer, round the modding view's hole while Modify is open (fnc_dimAround) - first, under everything.
+[_display, _theme] call FUNC(dimAround);
 
 // The header and the layout are the look's, unless the window that attached draws its own.
 if ("header" in GVAR(hooks)) then {

@@ -400,6 +400,9 @@
         <Key ID="STR_aio_gui_Modify_NoParts">
             <English>Nothing in your gear or the loot fits here</English>
         </Key>
+        <Key ID="STR_aio_gui_Modify_None">
+            <English>None</English>
+        </Key>
         <Key ID="STR_aio_gui_Modify_SpotEmpty">
             <English>%1 - click to choose a part, or drop one here</English>
         </Key>

@@ -103,21 +103,14 @@ private _fnc_hit = {
     [_hit, _tip] call FUNC(setTooltip);
     _hit setVariable [QGVAR(id), _slot];
     _hit ctrlAddEventHandler ["ButtonClick", {
-        [{[_this] call FUNC(partChoices)}, (_this select 0) getVariable [QGVAR(id), ""]] call FUNC(later);
+        [(_this select 0) getVariable [QGVAR(id), ""], 0] call FUNC(hotspotClick);
     }];
     _hit ctrlAddEventHandler ["MouseButtonUp", {
         params ["_hit", "_button"];
 
-        if (_button != 1) exitWith {};
-
-        [{
-            private _slot = _this;
-            private _worn = [GVAR(unit), _slot] call EFUNC(storage,getSlot);
-
-            if ((_worn getOrDefault ["class", ""]) isNotEqualTo "") then {
-                [GVAR(unit), _slot] call FUNC(quickUnequip);
-            };
-        }, _hit getVariable [QGVAR(id), ""]] call FUNC(later);
+        if (_button == 1) then {
+            [_hit getVariable [QGVAR(id), ""], 1] call FUNC(hotspotClick);
+        };
     }];
 };
 

@@ -60,7 +60,9 @@ if (_exact) then {
     _h = _height;
 };
 
-private _slots = ("isClass _x" configClasses _slotsConfig) select {getText (_x >> "iconPicture") isNotEqualTo ""};
+// With the slots the weapon inherits: configClasses leaves those out, and the MX's muzzle and side rail come from its base -
+// only the optic showed (Mia, #56).
+private _slots = (configProperties [_slotsConfig, "isClass _x", true]) select {getText (_x >> "iconPicture") isNotEqualTo ""};
 
 private _fnc_takes = {
     params ["_slot", "_item"];

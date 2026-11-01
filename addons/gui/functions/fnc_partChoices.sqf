@@ -5,7 +5,8 @@
  * A click on a point of the modding view (fnc_drawHotspots): a menu at the mouse (fnc_openMenu) of what fits that part
  * of the player's weapon - from the player's own gear and the loot open beside it, each with its picture and where it
  * lies, a magazine with its rounds. A click on one puts it on (fnc_doEquip: taken out where it lies, what was on the part
- * put back there - the server checks it). What is on the part now can be taken off into the gear (fnc_quickUnequip).
+ * put back there - the server checks it). None, at the top, takes what is on the part now off into the gear
+ * (fnc_quickUnequip). No title row: the point says what it is.
  *
  * Only what may be touched (fnc_checkTouch, a kit as Enhanced First Aid Kits says), and what the slot takes
  * (aio_storage_fnc_slotAccepts). The same part in the same place is one row, with how many there are.
@@ -33,15 +34,8 @@ if (isNull _display || {isNull _unit} || {_slot isEqualTo ""}) exitWith {};
 
 private _part = (_slot splitString "_") select -1;
 private _kinds = [[_part], ["magazine", "grenade"]] select (_part in ["mag", "mag2"]);
-private _captions = createHashMapFromArray [
-    ["muzzle", LLSTRING(Slot_Muzzle)], ["optic", LLSTRING(Slot_Optic)], ["rail", LLSTRING(Slot_Rail)],
-    ["bipod", LLSTRING(Slot_Bipod)], ["mag", LLSTRING(Slot_Magazine)], ["mag2", LLSTRING(Slot_Magazine2)]
-];
 private _choices = [];
 private _rows = createHashMap;
-
-// The part's name over the menu, as a row that does nothing.
-_choices pushBack [_captions getOrDefault [_part, _slot], [], {}, createHashMapFromArray [["enabled", false]]];
 
 {
     private _grid = _x;
@@ -91,7 +85,7 @@ _choices pushBack [_captions getOrDefault [_part, _slot], [], {}, createHashMapF
 } forEach (uiNamespace getVariable [QGVAR(grids), []]);
 
 // The rows' words: the part's name, how many, where - a magazine's rounds after its name.
-private _found = count _choices > 1;
+private _found = _choices isNotEqualTo [];
 
 _choices = _choices apply {
     _x params ["_text", "_arguments", "_code", "_options", ["_count", 0], ["_where", ""], ["_ammo", -1]];
@@ -119,18 +113,15 @@ if (count _choices > 15) then {
     _choices resize 15;
 };
 
-if (!_found) then {
-    _choices pushBack [LLSTRING(Modify_NoParts), [], {}, createHashMapFromArray [["enabled", false]]];
-};
-
-// What is on it now comes off into the gear - also a right click on the point.
+// None first, while something is on it: it comes off into the gear - also a right click on the point.
 private _on = ([_unit, _slot] call EFUNC(storage,getSlot)) getOrDefault ["class", ""];
 
 if (_on isNotEqualTo "") then {
-    _choices pushBack [
-        format [LLSTRING(Menu_Detach), [_on] call FUNC(itemName)], [_unit, _slot], {_this call FUNC(quickUnequip)},
-        createHashMapFromArray [["separator", true]]
-    ];
+    _choices insert [0, [[LLSTRING(Modify_None), [_unit, _slot], {_this call FUNC(quickUnequip)}]]];
+};
+
+if (!_found && {_on isEqualTo ""}) then {
+    _choices pushBack [LLSTRING(Modify_NoParts), [], {}, createHashMapFromArray [["enabled", false]]];
 };
 
 [_display, _choices] call FUNC(openMenu);

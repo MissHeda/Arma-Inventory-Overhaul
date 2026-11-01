@@ -2,6 +2,19 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.43 - beta
+
+### Changed
+
+- Modify leaves the world around the window as it was: the weapon with its parts is placed, small, right in front of your eye and shows in the card's picture on a dark plate, at full game quality. While the card is open your own figure is hidden for you (it would stand in the way). In a vehicle, or where a wall stands too close, it falls back to the view of 0.6.42.
+- The weapon cards' headers lie closer together.
+- A point's list shows only the parts that fit, with **None** at the top to take the part off - no title row.
+
+### Fixed
+
+- After turning the weapon, its points could not be clicked any more.
+- The weapon cards (and tiles) showed only the optic on the weapon's picture: muzzle devices, lasers and lights show again.
+
 ## 0.6.42 - beta
 
 ### Changed

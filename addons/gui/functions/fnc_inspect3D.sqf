@@ -15,7 +15,18 @@
  * frame is the item's size, at most INSPECT_3D_FRAME. The lights shine by day too; the aperture is left to the engine - set,
  * it lit or darkened the whole world behind the window as well.
  *
- * The modding view (Modify, #56) films with the game's own camera instead: the main view itself goes to the scene, at the
+ * The modding view (Modify, #56) leaves the player's own view where it is, the world round the window as it was (Mia: "is
+ * there really no way that we don't have to hide Arma in the background?"): the weapon and its parts are put right in
+ * front of the player's camera on a weapon holder of this machine's own, where they show through the card's hole (fnc_drawInspect) - with
+ * a small light of their own and a dark plate behind them that fills the hole. The view is a camera of its own right where
+ * the player's eye is, looking the same way with the same field of view - the world looks as it did, but the first person
+ * weapon, which the game draws over everything however close anything is, is not drawn. The weapon is made small and put
+ * as much closer (INSPECT_3D_NEAR_SCALE): nothing of the world gets between. The objects follow the camera every frame
+ * ("follow", fnc_onFrame), turned, moved and zoomed as the scene far off would be: a camera going round the weapon, its
+ * view mapped onto the line from the player's eye through the hole's middle, the weapon as far off along it as makes it as
+ * large as the texture showed it. The places come from the weapon's model: its parts on its proxies (fnc_weaponPoints).
+ * Where something stands in the way - a wall closer than the weapon would be - and in a vehicle, it falls back to the
+ * scene far off, filmed with the game's own camera: the main view itself goes to the scene, at the
  * game's full quality - a texture of Picture-in-Picture is far coarser (Mia: "make it render exactly like a normal weapon"). The
  * window lets it show through a hole in the card where the picture would be (fnc_drawInspect). The camera then aims so the
  * item sits in the middle of that hole, as large as it would be in the texture: its field of view is the texture's, grown by
@@ -36,6 +47,7 @@
  *    "zoom"    nearer for a turn of the wheel up, farther for one down (arguments: [turn])
  *    "pan"     the camera and what it looks at move across and up or down, as the middle mouse button drags them - the item
  *              moves with the mouse, at most its frame away from where it was (arguments: [across, down])
+ *    "follow"  the near view after the player's camera, every frame (fnc_onFrame)
  *    "reset"   the view the scene started with
  * 1: Arguments <ARRAY> (default: [])
  *
@@ -52,8 +64,127 @@ params [["_mode", "", [""]], ["_arguments", [], [[]]]];
 
 private _scene = GVAR(scene3D);
 
-// The camera where the turn and the distance put it, looking at the item, and the lights round it with it.
+// The player's camera and the line from it through the hole's middle - [camera ASL, the line, the camera's up, how far along it
+// the weapon is as large as the texture showed it at the distance given, the tangent of half the hole's height], [] where the
+// screen cannot say. The screen's measure comes from the game itself: where points a tenth off the camera's axis land.
+private _fnc_nearFrame = {
+    params ["_hole", "_distance"];
+    _hole params ["_holeX", "_holeY", "_holeW", "_holeH"];
+
+    private _camera = AGLToASL (positionCameraToWorld [0, 0, 0]);
+    private _forward = (AGLToASL (positionCameraToWorld [0, 0, 1])) vectorDiff _camera;
+    private _right = (AGLToASL (positionCameraToWorld [1, 0, 0])) vectorDiff _camera;
+    private _up = (AGLToASL (positionCameraToWorld [0, 1, 0])) vectorDiff _camera;
+    private _middle = worldToScreen (positionCameraToWorld [0, 0, 1]);
+    private _across = worldToScreen (positionCameraToWorld [0.1, 0, 1]);
+    private _upward = worldToScreen (positionCameraToWorld [0, 0.1, 1]);
+
+    if (_middle isEqualTo [] || {_across isEqualTo []} || {_upward isEqualTo []}) exitWith {[]};
+
+    private _perX = ((_across select 0) - (_middle select 0)) / 0.1;
+    private _perY = ((_middle select 1) - (_upward select 1)) / 0.1;
+
+    if (_perX <= 0 || {_perY <= 0}) exitWith {[]};
+
+    private _rayX = ((_holeX + _holeW / 2) - (_middle select 0)) / _perX;
+    private _rayY = ((_middle select 1) - (_holeY + _holeH / 2)) / _perY;
+    private _ray = vectorNormalized ((_forward vectorAdd (_right vectorMultiply _rayX)) vectorAdd (_up vectorMultiply _rayY));
+    private _tanHole = (_holeH / 2) / _perY;
+
+    [_camera, _ray, vectorNormalized _up, (_distance * INSPECT_3D_FOV / _tanHole) max 0.2, _tanHole]
+};
+
+// The near view in place: the weapon, its parts, the plate and the light where the camera, the turn and the distance put them,
+// and the parts' points in the world (fnc_placeHotspots). Seen along the line through the hole as a camera going round the
+// weapon (dir, pitch from the weapon's side) would see it: the model's axes taken from that camera's frame into the line's.
+private _fnc_near = {
+    private _frame = [_scene get "main", _scene get "distance"] call _fnc_nearFrame;
+
+    if (_frame isEqualTo []) exitWith {};
+
+    _frame params ["_camera", "_forward", "_cameraUp", "_away", "_tanHole"];
+
+    private _right = vectorNormalized (_forward vectorCrossProduct _cameraUp);
+    private _up = _right vectorCrossProduct _forward;
+    private _dir = _scene get "dir";
+    private _pitch = _scene get "pitch";
+    private _seenFrom = [(sin _dir) * (cos _pitch), (cos _dir) * (cos _pitch), sin _pitch];
+    private _lookV = _seenFrom vectorMultiply -1;
+    private _rightV = vectorNormalized (_lookV vectorCrossProduct [0, 0, 1]);
+    private _upV = _rightV vectorCrossProduct _lookV;
+
+    private _fnc_map = {
+        params ["_vector"];
+
+        ((_right vectorMultiply (_vector vectorDotProduct _rightV)) vectorAdd (_up vectorMultiply (_vector vectorDotProduct _upV)))
+            vectorAdd (_forward vectorMultiply (_vector vectorDotProduct _lookV))
+    };
+
+    // Small and as much closer: every place in the model shrinks with it (setObjectScale scales round the object's origin).
+    private _scale = INSPECT_3D_NEAR_SCALE;
+    private _origin = (_camera vectorAdd (_forward vectorMultiply (_away * _scale))) vectorDiff (([_scene get "target"] call _fnc_map) vectorMultiply _scale);
+
+    // The weapon lies on a holder of its own, with its parts - as on the ground, where the game shows no muzzle flash, which a
+    // muzzle device made a simple object of its own shows. The holder turned and put so its weapon proxy brings the weapon's model
+    // where it goes: each of the holder's axes is the weapon's axes weighed by how the proxy lies on the holder.
+    (_scene get "proxy") params ["_base", "_proxyDir", "_proxyUp"];
+
+    private _proxyRight = _proxyDir vectorCrossProduct _proxyUp;
+    private _weaponRight = [[1, 0, 0]] call _fnc_map;
+    private _weaponDir = [[0, 1, 0]] call _fnc_map;
+    private _weaponUp = [[0, 0, 1]] call _fnc_map;
+    private _fnc_holderAxis = {
+        params ["_index"];
+
+        ((_weaponRight vectorMultiply (_proxyRight select _index)) vectorAdd (_weaponDir vectorMultiply (_proxyDir select _index)))
+            vectorAdd (_weaponUp vectorMultiply (_proxyUp select _index))
+    };
+    private _holderX = [0] call _fnc_holderAxis;
+    private _holderY = [1] call _fnc_holderAxis;
+    private _holderZ = [2] call _fnc_holderAxis;
+    private _holder = _scene get "holder";
+
+    // Turned first: a turn sets the scale back.
+    _holder setVectorDirAndUp [_holderY, _holderZ];
+    _holder setPosWorld (_origin vectorDiff (
+        (((_holderX vectorMultiply (_base select 0)) vectorAdd (_holderY vectorMultiply (_base select 1))) vectorAdd (_holderZ vectorMultiply (_base select 2)))
+        vectorMultiply _scale
+    ));
+    _holder setObjectScale _scale;
+
+    // Two squares side by side, as high as the hole where they stand, behind the weapon: the hole is twice as wide as high.
+    private _behind = (_away + (_scene get "frame") * 0.6) * _scale;
+    private _side = 2.2 * _behind * _tanHole;
+
+    {
+        _x params ["_plate", "_shift"];
+
+        _plate setVectorDirAndUp [_forward, _up];
+        _plate setPosWorld ((_camera vectorAdd (_forward vectorMultiply _behind)) vectorAdd (_right vectorMultiply (_shift * _side)));
+        _plate setObjectScale _side;
+    } forEach (_scene get "plates");
+
+    private _lightAway = _away * _scale;
+
+    (_scene get "light") setPosASL (
+        ((_camera vectorAdd (_forward vectorMultiply (_lightAway * 0.4))) vectorAdd (_up vectorMultiply (_lightAway * 0.5))) vectorAdd (_right vectorMultiply (_lightAway * -0.4))
+    );
+
+    private _points = createHashMap;
+
+    {
+        _points set [_x, _origin vectorAdd (([_y] call _fnc_map) vectorMultiply _scale)];
+    } forEach ([_scene, true] call FUNC(weaponPoints));
+
+    _scene set ["points", _points];
+    _scene set ["cameraPos", _camera];
+};
+
+// The camera where the turn and the distance put it, looking at the item, and the lights round it with it - in the near view,
+// the weapon where they put it.
 private _fnc_camera = {
+    if (_scene getOrDefault ["close", false]) exitWith {call _fnc_near};
+
     private _camera = _scene getOrDefault ["camera", objNull];
 
     if (isNull _camera) exitWith {};
@@ -151,6 +282,150 @@ switch (_mode) do {
         _arguments params [["_class", "", [""]], ["_attachments", [], [[]]], ["_hole", [], [[]]]];
 
         if (_class isEqualTo "") exitWith {};
+
+        // The near view of the same weapon: into another hole it only moves, with other parts only those are made anew - the
+        // view stays as it was turned.
+        if ((_scene getOrDefault ["class", ""]) isEqualTo _class && {_scene getOrDefault ["close", false]} && {_hole isNotEqualTo []}) exitWith {
+            _scene set ["main", +_hole];
+
+            if ((_scene getOrDefault ["attachments", []]) isNotEqualTo _attachments) then {
+                private _holder = _scene get "holder";
+
+                clearWeaponCargo _holder;
+                clearMagazineCargo _holder;
+                _holder addWeaponWithAttachmentsCargo [[_class, _attachments] call _fnc_fitOut, 1];
+                _scene set ["attachments", +_attachments];
+            };
+
+            call _fnc_near;
+        };
+
+        // A weapon in the near view, where nothing stands closer to the camera than it would - else the scene far off below.
+        private _weaponModel = [_class] call FUNC(itemModel);
+        private _isWeapon = (["Rifle", "Pistol", "Launcher"] findIf {_class isKindOf [_x, configFile >> "CfgWeapons"]}) >= 0;
+        // On foot: in a vehicle the eye sits among its insides.
+        private _nearFrame = if (_hole isNotEqualTo [] && {_isWeapon} && {_weaponModel isNotEqualTo ""} && {vehicle player isEqualTo player}) then {
+            [_hole, (INSPECT_3D_FRAME * INSPECT_3D_DISTANCE) max 0.25] call _fnc_nearFrame
+        } else {
+            []
+        };
+
+        if (_nearFrame isNotEqualTo []) then {
+            _nearFrame params ["_camera", "_ray", "", "_away"];
+
+            private _blocked = lineIntersectsSurfaces [
+                _camera, _camera vectorAdd (_ray vectorMultiply ((_away + INSPECT_3D_FRAME) * INSPECT_3D_NEAR_SCALE)), player, vehicle player, true, 1, "VIEW", "FIRE"
+            ];
+
+            if (_blocked isNotEqualTo []) then {
+                _nearFrame = [];
+            };
+        };
+
+        if (_nearFrame isNotEqualTo []) exitWith {
+            ["stop"] call FUNC(inspect3D);
+
+            _scene = createHashMapFromArray [["class", _class], ["attachments", +_attachments], ["main", +_hole], ["close", true]];
+            GVAR(scene3D) = _scene;
+
+            private _objects = [];
+            _scene set ["objects", _objects];
+
+            // A camera where the player's eye is, the same way, the same field of view - taken as the screen shows it.
+            private _eye = positionCameraToWorld [0, 0, 0];
+            private _ahead = positionCameraToWorld [0, 0, 10];
+            private _middle = worldToScreen (positionCameraToWorld [0, 0, 1]);
+            private _upward = worldToScreen (positionCameraToWorld [0, 0.1, 1]);
+            private _camera = "camera" camCreate _eye;
+
+            _scene set ["before", [cameraOn, cameraView]];
+            _camera camSetPos _eye;
+            _camera camSetTarget _ahead;
+            _camera camSetFov ((safezoneH / 2) / ((((_middle select 1) - (_upward select 1)) / 0.1) max 0.01));
+            _camera camCommit 0;
+            _camera cameraEffect ["Internal", "Back"];
+            _scene set ["camera", _camera];
+
+            // Seen from the eye, the player's own head and weapon would stand in the way: hidden for this machine while it is open.
+            private _self = !isObjectHidden player;
+
+            if (_self) then {
+                player hideObject true;
+            };
+
+            _scene set ["hidSelf", _self];
+
+            // The weapon's size from its model; a suppressor or a bipod reaches out of that box (the distance below).
+            private _probe = createSimpleObject [_weaponModel, [0, 0, 0], true];
+
+            (0 boundingBoxReal _probe) params ["_boxMin", "_boxMax"];
+            deleteVehicle _probe;
+
+            private _centre = (_boxMin vectorAdd _boxMax) vectorMultiply 0.5;
+            private _frame = ((vectorMagnitude (_boxMax vectorDiff _boxMin)) max 0.1) min INSPECT_3D_FRAME;
+
+            _scene set ["target", _centre];
+            _scene set ["origin", +_centre];
+            _scene set ["frame", _frame];
+
+            // The weapon with its parts on a holder of this machine's own, never loot (aio_nearby, aio_storage_fnc_getNearby). Where
+            // the weapon lies on it: read from the holder once its model is there, else as every holder has it.
+            private _holder = "GroundWeaponHolder_Scripted" createVehicleLocal [0, 0, 0];
+            _holder setVariable ["aio_nearby", false];
+            _holder addWeaponWithAttachmentsCargo [[_class, _attachments] call _fnc_fitOut, 1];
+            _objects pushBack _holder;
+            _scene set ["holder", _holder];
+
+            private _proxy = "proxy:\a3\characters_f\proxies\weapon.001";
+            private _base = _holder selectionPosition [_proxy, 0.5];
+
+            _scene set ["proxy", if (_base isEqualTo [0, 0, 0]) then {
+                [[0.103135, -0.0114412, -0.617881], [0, -0.003016, 0.999996], [0, 0.999995, 0.003016]]
+            } else {
+                [_base] + (_holder selectionVectorDirAndUp [_proxy, 0.5])
+            }];
+
+            private _plates = [-0.5, 0.5] apply {
+                private _plate = createSimpleObject ["UserTexture1m_F", [0, 0, 0], true];
+                _plate setObjectTexture [0, "#(argb,8,8,3)color(0.05,0.055,0.065,1)"];
+                _objects pushBack _plate;
+
+                [_plate, _x]
+            };
+
+            _scene set ["plates", _plates];
+
+            private _light = "#lightpoint" createVehicleLocal [0, 0, 0];
+            _light setLightBrightness 1.2;
+            _light setLightAmbient [0.9, 0.9, 0.9];
+            _light setLightColor [1, 0.97, 0.92];
+            _light setLightUseFlare false;
+            _light setLightDayLight true;
+            _light setLightAttenuation [0, 0, 1, 0.5, 2, 4];
+            _objects pushBack _light;
+            _scene set ["light", _light];
+
+            // A muzzle device makes the weapon longer at its muzzle: aimed a little that way.
+            private _muzzleAt = ([_scene, true] call FUNC(weaponPoints)) getOrDefault ["muzzle", []];
+
+            if ((([_class, _attachments] call _fnc_fitOut) select 1) isNotEqualTo "" && {count _muzzleAt == 3}) then {
+                _centre = _centre vectorAdd ((_muzzleAt vectorDiff _centre) vectorMultiply 0.3);
+                _scene set ["target", _centre];
+                _scene set ["origin", +_centre];
+            };
+
+            // The weapon's side, a little from the front and above - a little farther than the model's box asks, for the parts.
+            private _distance = ((_frame * INSPECT_3D_DISTANCE * 1.25) max 0.25) min 6;
+
+            _scene set ["dir", INSPECT_3D_NEAR_DIR];
+            _scene set ["pitch", 15];
+            _scene set ["distance", _distance];
+            _scene set ["start", _distance];
+            _scene set ["near", _distance * 0.3];
+            _scene set ["far", _distance * 3];
+
+            call _fnc_near;
+        };
 
         // The same item filmed the other way - into the texture or the main view - is a scene of its own; into a hole elsewhere on
         // the screen only aims anew.
@@ -381,6 +656,10 @@ switch (_mode) do {
             camDestroy _camera;
         };
 
+        if (_scene getOrDefault ["hidSelf", false]) then {
+            player hideObject false;
+        };
+
         (_scene getOrDefault ["before", []]) params [["_on", objNull], ["_view", ""]];
 
         if (!isNull _on && {_view isNotEqualTo ""} && {cameraOn isNotEqualTo _on || {cameraView isNotEqualTo _view}}) then {
@@ -447,11 +726,16 @@ switch (_mode) do {
 
         call _fnc_camera;
     };
+    case "follow": {
+        if (_scene getOrDefault ["close", false]) then {
+            call _fnc_near;
+        };
+    };
     case "reset": {
         if (count _scene == 0) exitWith {};
 
         _scene set ["target", +(_scene get "origin")];
-        _scene set ["dir", 45];
+        _scene set ["dir", [45, INSPECT_3D_NEAR_DIR] select (_scene getOrDefault ["close", false])];
         _scene set ["pitch", 15];
         _scene set ["distance", _scene get "start"];
 

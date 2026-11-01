@@ -100,7 +100,7 @@ _quiet set ["slotCaption", "none"];
 private _gapH = UNIT * 0.25;
 private _gapW = SQUARE(_gapH);
 private _groupGap = UNIT * 0.5;
-private _rowGap = UNIT * 0.4;
+private _rowGap = UNIT * 0.2;
 private _statH = _textUnit * 2.2;
 private _labelH = _textUnit * 0.8;
 private _gearGap = UNIT * 0.3;
@@ -146,7 +146,7 @@ private _cardH = (((_height - _fixed) / (_open max 1)) min (UNIT * 5.65) min UNS
 private _cardW = _width;
 
 // Left over height loosens the gaps between the weapons a little; the rest stays above the gear.
-private _extra = (((_height - _fixed - _cardH * _open) / (_cards + 1)) max 0) min (UNIT * 0.6);
+private _extra = (((_height - _fixed - _cardH * _open) / (_cards + 1)) max 0) min (UNIT * 0.15);
 _rowGap = _rowGap + _extra;
 
 // The area of a hit box, kept for its presses (fnc_onMouseButton): where it lies in its group, as fnc_gridOrigin

@@ -295,6 +295,9 @@ GVAR(inspectView) = profileNamespace getVariable [QGVAR(inspectView), "2d"];
 GVAR(scene3D) = createHashMap;
 GVAR(inspect3DTurn) = [];
 GVAR(inspect3DPan) = [];
+
+// A press on a point of the modding view that one of the 3D view's turning areas took, [slot, button] or [] (fnc_drawInspect).
+GVAR(spotPress) = [];
 GVAR(middleWas) = false;
 GVAR(lastWheel3D) = -1;
 GVAR(itemModels) = createHashMap;
