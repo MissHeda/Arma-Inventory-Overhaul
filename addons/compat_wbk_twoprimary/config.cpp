@@ -1,9 +1,8 @@
 #include "script_component.hpp"
 
 // Loads only with WebKnight's Two Primary Weapons (Workshop 2976569274): an addon whose required addons are missing
-// is skipped, quietly - the rest of the mod works the same without it. That mod brings the weapon on the back into
-// the hands from the player's engine "Put" event once the hands are empty, an event this window never raises (see
-// XEH_postInit).
+// is skipped, quietly - the rest of the mod works the same without it. The weapon that mod keeps on the back is a
+// slot of the window then, next to the primary (see XEH_preInit).
 class CfgPatches {
     class ADDON {
         name = COMPONENT_NAME;
@@ -13,6 +12,7 @@ class CfgPatches {
         requiredAddons[] = {
             "cba_main",
             "aio_main",
+            "aio_storage",
             "aio_gui",
             "WBK_TwoWeaponsOnBack"
         };

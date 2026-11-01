@@ -40,7 +40,7 @@ if (isNull _unit || {_payload isEqualTo []}) exitWith {["Failed", []]};
 
 (_slotId splitString "_") params [["_base", ""], ["_part", ""]];
 
-private _wholeWeapon = _part isEqualTo "" && {_base in ["primary", "handgun", "launcher", "binocular"]};
+private _wholeWeapon = _part isEqualTo "" && {_base in ["primary", "handgun", "launcher", "binocular", "primary2"]};
 
 // The class and, for a magazine, the rounds a payload puts on.
 private _fnc_classOf = {
@@ -87,6 +87,13 @@ private _fnc_on = {
     private _class = [_put] call _fnc_classOf;
 
     switch (true) do {
+        // The second primary on the back, the way the two-primary mod keeps it (fnc_setSecondPrimary). Its
+        // parts go on below like any weapon's (fnc_weaponPart).
+        case (_slotId isEqualTo "primary2"): {
+            private _weapon = if ((_put select 0) isEqualTo "weapon") then {_put select 1} else {[_class]};
+
+            [_unit, [_weapon] call FUNC(normalizeWeapon)] call FUNC(setSecondPrimary);
+        };
         case (_part isEqualTo "" && {_base in ["primary", "handgun", "launcher"]}): {
             private _weapon = if ((_put select 0) isEqualTo "weapon") then {_put select 1} else {[_class]};
 

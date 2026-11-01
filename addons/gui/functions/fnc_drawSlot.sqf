@@ -71,12 +71,15 @@ private _colorText2 = _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]];
 private _colorMuted = _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]];
 private _radius = (_theme getOrDefault ["radius", 0]) min (_height / 4);
 
-// Every word on the slot and the rows that hold them grow with the tiles (TEXT_UNIT, fnc_textScale).
+// Every word on the slot and the rows that hold them grow with the tiles (TEXT_UNIT, fnc_textScale) - but never past what the
+// slot holds: a small box beside a weapon (a part, its magazine) does not grow as the words do where the columns take the room
+// larger tiles need (Mia, 0.6.35: "0/30" cut off at 130 %). A line is at most SLOT_LINE_MAX of the slot's height, so a caption
+// at the top and the rounds at the bottom never meet; what is wider than the slot is set smaller below.
 private _textUnit = TEXT_UNIT;
 private _padY = (_height * 0.08) min (_textUnit * 0.25);
 private _padX = SQUARE(_padY);
-private _lineH = _textUnit * 0.62;
-private _lineSize = _textUnit * 0.46;
+private _lineH = (_textUnit * 0.62) min (_height * SLOT_LINE_MAX);
+private _lineSize = _lineH * (0.46 / 0.62);
 
 private _controls = [
     _display, _parent, _rect, _theme getOrDefault [["slot", "slotEmpty"] select _empty, [1, 1, 1, 0.035]],
@@ -174,9 +177,13 @@ if (_ammo isNotEqualTo [] || _showName) then {
             _lineTop = _barY - _lineH;
         };
 
+        // The rounds set smaller where they are wider than the slot - never cut.
         private _text = format ["%1/%2", _rounds, _capacity];
-        _ammoW = (_text getTextWidth [_font, _lineSize]) * TEXT_SLACK;
-        _controls pushBack ([_display, _parent, [_left + _padX, _lineTop, _width - _padX * 2, _lineH], _text, _lineSize, _colorText, _font, 1, "weaponammo"] call FUNC(uiLabel));
+        private _ammoSize = [_text, _width - _padX * 2, _font, _lineSize] call FUNC(fitSize);
+        _ammoW = (_text getTextWidth [_font, _ammoSize]) * TEXT_SLACK;
+        _controls pushBack ([
+            _display, _parent, [_left + _padX, _lineTop + _lineSize - _ammoSize, _width - _padX * 2, _lineH], _text, _ammoSize, _colorText, _font, 1, "weaponammo"
+        ] call FUNC(uiLabel));
     };
 
     if (_showName) then {
