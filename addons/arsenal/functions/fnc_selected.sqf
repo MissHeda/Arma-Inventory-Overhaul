@@ -20,7 +20,25 @@
  */
 
 private _none = ["", objNull, -1, -1, -1];
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+
+// The vanilla arsenal: the tab whose list is enabled of its uniform, vest and backpack ones.
+if (GVAR(kind) isEqualTo "bi") exitWith {
+    private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+    private _center = call FUNC(center);
+
+    if (isNull _display || {isNull _center}) exitWith {_none};
+
+    private _tab = ([BI_TAB_UNIFORM, BI_TAB_VEST, BI_TAB_BACKPACK] select {ctrlEnabled (_display displayCtrl (BI_IDC_LIST + _x))}) param [0, -1];
+    private _selected = switch (_tab) do {
+        case BI_TAB_UNIFORM: {["uniform", uniformContainer _center, _tab, -1, LOADOUT_UNIFORM]};
+        case BI_TAB_VEST: {["vest", vestContainer _center, _tab, -1, LOADOUT_VEST]};
+        case BI_TAB_BACKPACK: {["backpack", backpackContainer _center, _tab, -1, LOADOUT_BACKPACK]};
+        default {_none};
+    };
+
+    [_selected, _none] select (isNull (_selected select 1))
+};
+private _center = (call FUNC(center));
 private _panel = missionNamespace getVariable [QACEGVAR(arsenal,currentLeftPanel), -1];
 
 if (isNull _center || {!(_panel isEqualType 0)}) exitWith {_none};

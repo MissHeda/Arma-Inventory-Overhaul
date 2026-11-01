@@ -50,6 +50,16 @@ if (!_down) exitWith {
 
 if (!_over) exitWith {true};
 
+if (GVAR(kind) isEqualTo "bi" && {!isNil "BIS_fnc_arsenal_buttons"}) then {
+    BIS_fnc_arsenal_buttons = [[], []];
+
+    [{
+        if (!isNil "BIS_fnc_arsenal_buttons") then {
+            BIS_fnc_arsenal_buttons = [[], []];
+        };
+    }] call EFUNC(gui,later);
+};
+
 if (!isNil QACEGVAR(arsenal,mouseButtonState)) then {
     ACEGVAR(arsenal,mouseButtonState) = [[], []];
 

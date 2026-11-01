@@ -31,7 +31,7 @@ if (_staged) then {
     _container = _from;
 };
 
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 
 if (_class isEqualTo "" || {isNull _container} || {!local _center}) exitWith {false};
 

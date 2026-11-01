@@ -6,9 +6,11 @@
 
 // ----- Vanilla Arsenal -----
 
-// For everyone alike: the mission decides which arsenals it allows.
-private _modes = ["ace", "block", "vanilla"];
-private _labels = [LLSTRING(Setting_BIArsenal_Ace), LLSTRING(Setting_BIArsenal_Block), LLSTRING(Setting_BIArsenal_Vanilla)];
+// For everyone alike: the mission decides which arsenals it allows. Without ACE, "Open ACE Arsenal" is the vanilla one with grids.
+private _modes = ["ace", "grid", "block", "vanilla"];
+private _labels = [
+    LLSTRING(Setting_BIArsenal_Ace), LLSTRING(Setting_BIArsenal_Grid), LLSTRING(Setting_BIArsenal_Block), LLSTRING(Setting_BIArsenal_Vanilla)
+];
 
 [
     QGVAR(biArsenal),

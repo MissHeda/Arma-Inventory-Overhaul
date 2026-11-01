@@ -62,9 +62,21 @@ if (_scroll < 0) exitWith {
 // By name as ACE keeps it, else in any case of letters - the cargo may spell a class differently. An ACE
 // without the list is not second-guessed.
 private _flat = missionNamespace getVariable QACEGVAR(arsenal,virtualItemsFlat);
-private _known = isNil "_flat" || {_class in _flat} || {
-    private _names = if (_flat isEqualType createHashMap) then {keys _flat} else {_flat};
-    (_names findIf {_x isEqualType "" && {_x == _class}}) >= 0
+private _known = if (GVAR(kind) isEqualTo "bi") then {
+    // The vanilla arsenal: a row of its open cargo list.
+    private _list = [uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(rightList);
+    private _found = false;
+
+    for "_row" from 0 to ((lnbSize _list) select 0) - 1 do {
+        if ((_list lnbData [_row, 0]) == _class) exitWith {_found = true};
+    };
+
+    _found
+} else {
+    isNil "_flat" || {_class in _flat} || {
+        private _names = if (_flat isEqualType createHashMap) then {keys _flat} else {_flat};
+        (_names findIf {_x isEqualType "" && {_x == _class}}) >= 0
+    }
 };
 
 if (!_known) exitWith {

@@ -31,7 +31,7 @@ params [["_display", displayNull, [displayNull]]];
 (call FUNC(selected)) params ["_id", "_container"];
 GVAR(snapshot) params ["_known", "_before"];
 
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 private _undone = createHashMap;
 private _refused = "";
 

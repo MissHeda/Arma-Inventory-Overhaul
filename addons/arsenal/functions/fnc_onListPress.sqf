@@ -89,7 +89,8 @@ if (_onArrow) exitWith {};
 private _rowH = _list getVariable [QGVAR(rowHeight), -1];
 
 if (_rowH <= 0) then {
-    private _config = (format ["getNumber (_x >> 'idc') == %1", ctrlIDC _list] configClasses (configFile >> "ace_arsenal_display" >> "controls")) param [0, configNull];
+    private _root = [configFile >> "ace_arsenal_display" >> "controls", configFile >> "RscDisplayArsenal" >> "controls"] select (GVAR(kind) isEqualTo "bi");
+    private _config = (format ["getNumber (_x >> 'idc') == %1", ctrlIDC _list] configClasses _root) param [0, configNull];
 
     private _fnc_read = {
         if (isText _this) exitWith {[call compile getText _this] param [0, 0, [0]]};

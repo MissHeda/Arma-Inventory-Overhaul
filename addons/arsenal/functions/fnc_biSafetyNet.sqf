@@ -29,17 +29,24 @@
 
 // The vanilla arsenal opened.
 [missionNamespace, "arsenalOpened", {
+    params [["_opened", displayNull, [displayNull]]];
+
     if (!hasInterface || {is3DEN}) exitWith {};
 
     private _mode = missionNamespace getVariable [QGVAR(biArsenal), "vanilla"];
     private _passThrough = missionNamespace getVariable "aio_arsenal_biPassThrough";
 
     if (
-        _mode isEqualTo "vanilla" || {GVAR(biLetThrough)} || {!GVAR(ready)} || {_passThrough isEqualTo true}
+        _mode in ["vanilla", "grid"] || {GVAR(biLetThrough)} || {!GVAR(ready)} || {_passThrough isEqualTo true}
         || {missionName isEqualTo "Arsenal" && {!isNil "arsenal_fnc_opened"}}
         || {!isNil "BIS_WL_arsenalEnabled"}
         || {_mode isEqualTo "ace" && {isNil "_passThrough"} && {call FUNC(biMissionHooks)}}
-    ) exitWith {};
+    ) exitWith {
+        // It stays: with the grid panel beside its list (fnc_biOpened), unless it is to be left alone.
+        if (_mode isNotEqualTo "vanilla") then {
+            [{_this call FUNC(biOpened)}, [_opened]] call EFUNC(gui,later);
+        };
+    };
 
     // What the vanilla arsenal was opened for, before it forgets.
     private _center = missionNamespace getVariable ["BIS_fnc_arsenal_center", player];
@@ -73,7 +80,9 @@
 [missionNamespace, "arsenalPreOpen", {
     params [["_display", displayNull], ["_center", objNull, [objNull]]];
 
-    if ((missionNamespace getVariable [QGVAR(biArsenal), "vanilla"]) isEqualTo "vanilla") then {
+    private _mode = missionNamespace getVariable [QGVAR(biArsenal), "vanilla"];
+
+    if (_mode in ["vanilla", "grid"] || {!GVAR(ready)}) then {
         ["open", _center] call FUNC(biLeaveAlone);
     };
 }] call BIS_fnc_addScriptedEventHandler;

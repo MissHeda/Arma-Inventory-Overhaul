@@ -51,6 +51,9 @@ params [
 
 if (!GVAR(attached) || {isNull _display}) exitWith {};
 
+// The vanilla arsenal greys its rows by weight itself (fnc_syncAce); the grid's own verdict is for ACE's list.
+if (GVAR(kind) isEqualTo "bi") exitWith {};
+
 if (_pass >= 0 && {_pass != GVAR(ungreyPass)}) exitWith {};
 
 if ((([_display] call FUNC(focusedKit)) select 0)) exitWith {

@@ -68,6 +68,11 @@ params [["_display", displayNull, [displayNull]], ["_mouse", getMousePosition, [
 // ----- The arrangement of the three containers, put back after ACE made them new -----
 [] call FUNC(keepPlaces);
 
+// ----- The vanilla arsenal's changes, which it raises no event for (fnc_biWatch) -----
+if (GVAR(kind) isEqualTo "bi") then {
+    [_display] call FUNC(biWatch);
+};
+
 // ----- Enhanced First Aid Kits' kits tab: opened, closed, another kit picked -----
 private _focus = [_display] call FUNC(focusedKit);
 
@@ -125,6 +130,11 @@ private _holding = EGVAR(gui,dragging) || {EGVAR(gui,press) isNotEqualTo []} || 
 if (_holding) then {
     if (!isNil QACEGVAR(arsenal,mouseButtonState)) then {
         ACEGVAR(arsenal,mouseButtonState) = [[], []];
+    };
+
+    // The vanilla arsenal's camera turns by the buttons it noted on its display (BIS_fnc_arsenal "MouseButtonDown").
+    if (GVAR(kind) isEqualTo "bi" && {!isNil "BIS_fnc_arsenal_buttons"}) then {
+        BIS_fnc_arsenal_buttons = [[], []];
     };
 
     // Not in the frame the button went down in, nor the next: the press event may come before the button

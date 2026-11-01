@@ -27,14 +27,15 @@ params [["_args", [], [[], true]]];
 
 private _mode = missionNamespace getVariable [QGVAR(biArsenal), "vanilla"];
 
-// 1. Left alone: the vanilla arsenal as it always was (what does not fit is reported after it, fnc_biLeaveAlone).
-if (_mode isEqualTo "vanilla") exitWith {false};
+// 1. Left alone, or kept with the grid panel beside its list (fnc_biOpened, from fnc_biSafetyNet): the vanilla arsenal opens (what
+// does not fit is passed on and reported after it, fnc_biLeaveAlone). ACE Arsenal asked for where there is none: the same.
+if (_mode in ["vanilla", "grid"] || {_mode isEqualTo "ace" && {!GVAR(ready)}}) exitWith {false};
 
 // 2. What always keeps the vanilla arsenal.
 private _passThrough = missionNamespace getVariable "aio_arsenal_biPassThrough";
 
 if (
-    !hasInterface || {!GVAR(ready)} || {_passThrough isEqualTo true}
+    !hasInterface || {_passThrough isEqualTo true}
     || {missionName isEqualTo "Arsenal" && {!isNil "arsenal_fnc_opened"}}
     || {!isNil "BIS_WL_arsenalEnabled"}
 ) exitWith {
