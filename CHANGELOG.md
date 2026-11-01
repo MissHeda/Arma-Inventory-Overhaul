@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.34 - beta
+
+### Added
+
+- BackpackOnChest (original and Redux): the right-click menu of your backpack slot puts the backpack on your chest, back onto your back, or swaps the two - that mod's own actions (issue #34).
+- Antistasi Ultimate: "Loot around" of a loot truck or crate now takes what lies in this mod's piles on the ground as well - it looted only the engine's own piles by their class and passed over everything dropped or moved out of a body or a box through the window (issue #35).
+
 ## 0.6.33 - beta
 
 ### Added

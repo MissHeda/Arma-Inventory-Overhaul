@@ -311,6 +311,12 @@ switch (GVAR(hover) param [0, ""]) do {
             _settingsClass = _record param [1, ""];
         };
 
+        // The player's own backpack slot with BackpackOnChest loaded (aio_compat_boc): to the chest, back onto the
+        // back or swapped with the pack on the chest - also on the empty slot, where the pack on the chest goes.
+        if (_slot isEqualTo "backpack" && {_owner isEqualTo _unit} && {!isNil QEFUNC(compat_boc,menuChoices)}) then {
+            _choices append ([_owner] call EFUNC(compat_boc,menuChoices));
+        };
+
         if (_slot isEqualTo "" || {isNull _owner} || {(_record param [1, ""]) isEqualTo ""}) exitWith {};
 
         private _worn = [_owner, _slot] call EFUNC(storage,getSlot);
