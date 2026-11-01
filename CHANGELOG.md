@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.36 - beta
+
+### Fixed
+
+- Size popover (issue #51): the tips of its rows lay behind the card. They show on a hint line inside it now, as in the colour popover.
+- Size popover: "Rows per page" seemed to do nothing. It only cuts a crate or vehicle of the loot that is filled with more rows than a page; where nothing looted is, its name is dimmed and its tip - and a press on its slider - say so.
+- With large tiles, the rounds of a loaded magazine ("0/30") in the small boxes beside a weapon were cut off or ran into the box's caption. A slot's words now never take more than its height allows, and the rounds are set smaller where the box is too narrow - at every tile and text size.
+
 ## 0.6.35 - beta
 
 ### Fixed

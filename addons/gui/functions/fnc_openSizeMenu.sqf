@@ -8,8 +8,11 @@
  *   Tiles          the cells, the item pictures and the words with them (aio_gui_cellScale), in per cent
  *   Text           the window's words on top of that (aio_gui_textSize), in per cent - larger words on small tiles, or smaller ones
  *   Rows per page  how many rows of a tall crate or vehicle show at a time (aio_gui_pageRows); "All" at the right end
- * "Default" in the title row takes every size back to its default; it shows only while one differs from it. A note at the bottom
- * says where else they are set.
+ * "Default" in the title row takes every size back to its default; it shows only while one differs from it. The hint line at the
+ * bottom shows the tip of what the mouse is on - inside the card, as the palette popover's (fnc_updateHover, fnc_setMenuHint): the
+ * card holds the focus and is drawn over everything, a floating tip included - and says where else the sizes are set while the
+ * mouse was on nothing yet. Rows per page cuts only a compartment of the loot taller than a page: where nothing that is looted is
+ * (aio_gui_tallestLoot, the last build's, fnc_viewBlocks), its name is dimmed and a press on its slider says so on the hint line.
  *
  * The sizes are the player's CBA client settings, both ways: a slider sets the size at once for the window (fnc_sizeSet,
  * fnc_sizeSlide) and writes it to CBA when it is let go, and a change made in CBA's options shows here and in the window at once
@@ -85,12 +88,11 @@ private _count = count _defs;
 private _size = UNIT * 0.55;
 private _rowH = UNIT * 1.1;
 private _headH = UNIT * 1.1;
-private _noteH = UNIT * 0.9;
 private _padX = SQUARE(UNIT * 0.6);
 private _padY = UNIT * 0.35;
 private _gapX = SQUARE(UNIT * 0.45);
 private _width = SQUARE(UNIT * 15);
-private _height = _padY * 2 + _headH + _count * _rowH + _noteH;
+private _height = _padY * 2 + _headH + _count * _rowH;
 private _chipH = UNIT * 0.8;
 private _chipSize = UNIT * 0.44;
 
@@ -107,6 +109,43 @@ private _thumbW = SQUARE(_thumbH);
 // The track runs between the knob's middle at the least and at the most: the knob stays inside the slider's room at both ends.
 private _trackX = _sliderX + _thumbW / 2;
 private _trackW = _sliderW - _thumbW;
+
+// Nothing that is looted is tall enough for a page: the rows per page change nothing now.
+private _noPages = GVAR(tallestLoot) <= PAGE_MIN_ROWS;
+
+// Each row's tip: what it sets, that the server set it where it did, and for the rows per page that nothing is paged now.
+private _tips = _defs apply {
+    _x params ["_setting", "", "_tip"];
+
+    if ([_setting] call FUNC(settingForced)) then {
+        _tip = _tip + " " + LLSTRING(Size_Forced);
+    };
+
+    if (_setting isEqualTo QGVAR(pageRows) && {_noPages}) then {
+        _tip = _tip + " " + LLSTRING(Size_PageRows_None);
+    };
+
+    _tip
+};
+
+// The hint line at the bottom: as many lines as the longest tip wraps to, at least two.
+private _hintSize = _size * 0.8;
+private _hintW = _width - _padX * 2;
+private _hintLines = 2;
+
+{
+    private _lines = 0;
+
+    {
+        _lines = _lines + ((ceil (((_x getTextWidth [_font, _hintSize]) * TEXT_SLACK) / (_hintW max pixelW))) max 1);
+    } forEach (_x splitString toString [10]);
+
+    _hintLines = _hintLines max _lines;
+} forEach (_tips + [LLSTRING(Size_Default_Tip), LLSTRING(Size_Note), LLSTRING(Size_PageRows_None)]);
+
+private _hintH = _hintSize * 1.3 * (_hintLines min 5) + _hintSize * 0.4;
+
+_height = _height + _padY + _hintH;
 
 // The right edge of the window - the header's, where the Close button ends - and a small gap under the header's line, kept on the screen.
 private _left = ((CONTENT_X + CONTENT_W - _width) min (safezoneX + safezoneW - _width)) max safezoneX;
@@ -184,8 +223,10 @@ private _reset = [
 private _rows = [];
 
 {
-    _x params ["_setting", "_name", "_tip"];
+    _x params ["_setting", "_name"];
 
+    private _tip = _tips select _forEachIndex;
+    private _idle = _setting isEqualTo QGVAR(pageRows) && {_noPages};
     private _rowTop = _headTop + _headH + _forEachIndex * _rowH;
     private _forced = [_setting] call FUNC(settingForced);
 
@@ -196,7 +237,7 @@ private _rows = [];
     // The name's tip says what the size is - and that the server set it, where it did. Its hit area ends where the slider's begins.
     private _nameHit = [_display, "AIO_Hitbox", _layer, [_cardX + _labelX, _rowTop, _labelW, _rowH]] call FUNC(uiCreate);
 
-    [_nameHit, [_tip, _tip + " " + LLSTRING(Size_Forced)] select _forced] call FUNC(setTooltip);
+    [_nameHit, _tip] call FUNC(setTooltip);
 
     private _trackY = _rowTop + (_rowH - _trackH) / 2;
 
@@ -215,37 +256,54 @@ private _rows = [];
     if (!_forced) then {
         private _hit = [_display, "AIO_Hitbox", _layer, [_cardX + _sliderX, _rowTop, _sliderW, _rowH]] call FUNC(uiCreate);
 
-        _hit setVariable [QGVAR(slider), [_forEachIndex, safezoneX + _cardX + _trackX, _trackW]];
+        _hit setVariable [QGVAR(slider), [_forEachIndex, safezoneX + _cardX + _trackX, _trackW, _idle]];
+        [_hit, _tip] call FUNC(setTooltip);
 
         _hit ctrlAddEventHandler ["MouseButtonDown", {
             params ["_ctrl", "_button"];
 
             if (_button != 0) exitWith {};
 
-            (_ctrl getVariable [QGVAR(slider), []]) params ["_index", "_left", "_width"];
+            (_ctrl getVariable [QGVAR(slider), []]) params ["_index", "_left", "_width", ["_idle", false]];
+
+            // The rows per page with nothing tall enough looted: why the window does not change, on the hint line.
+            if (_idle) then {
+                uiNamespace setVariable [QGVAR(menuHintText), LLSTRING(Size_PageRows_None)];
+                [uiNamespace getVariable [QGVAR(menuHint), controlNull], LLSTRING(Size_PageRows_None)] call FUNC(setMenuHint);
+            };
 
             ["begin", [ctrlParent _ctrl, _index, _left, _width]] call FUNC(sizeSlide);
         }];
     };
 
     // The track's place relative to the layer, and the knob's, for fnc_updateSizeMenu.
-    _rows pushBack [_forEachIndex, _forced, _label, _fill, _thumb, _value, [_cardX + _trackX, _trackY, _trackW, _trackH, _thumbW, _thumbH, _thumbTop]];
+    _rows pushBack [_forEachIndex, _forced, _label, _fill, _thumb, _value, [_cardX + _trackX, _trackY, _trackW, _trackH, _thumbW, _thumbH, _thumbTop], _idle];
 } forEach _defs;
 
-// ----- The note: where else the sizes are -----
+// ----- The hint line: the tip of what the mouse is on, or where else the sizes are -----
 
-private _noteTop = _headTop + _headH + _count * _rowH;
+private _hintTop = _headTop + _headH + _count * _rowH + _padY / 2;
 
-[_display, _layer, [_cardX + _padX, _noteTop, _width - _padX * 2, pixelH], _line] call FUNC(uiPanel);
-[
-    _display, _layer, [_cardX + _padX, _noteTop, _width - _padX * 2, _noteH],
-    [LLSTRING(Size_Note), _width - _padX * 2, _font, _size * 0.8] call FUNC(fitText), _size * 0.8, _muted, _font, 0, "never"
-] call FUNC(uiLabel);
+[_display, _layer, [_cardX + _padX, _hintTop - _padY / 4, _hintW, pixelH], _line] call FUNC(uiPanel);
+
+private _hintLine = [_display, "AIO_StructuredText", _layer, [_cardX + _padX, _hintTop, _hintW, _hintH]] call FUNC(uiCreate);
+
+_hintLine ctrlEnable false;
+_hintLine setVariable [QGVAR(hintSize), _hintSize];
+uiNamespace setVariable [QGVAR(menuHint), _hintLine];
+
+// Made again over a build: the tip shown before stays; at first, the note.
+private _hintText = uiNamespace getVariable [QGVAR(menuHintText), ""];
+
+[_hintLine, [_hintText, LLSTRING(Size_Note)] select (_hintText isEqualTo "")] call FUNC(setMenuHint);
 
 // The focus into the layer, so it is drawn over everything: a button no one sees, one pixel in the card's
 // padding. Return and Space press nothing on it (fnc_openMenu).
 private _focus = [_display, "AIO_Hitbox", _layer, [_cardX + _padX / 2, _cardY + _padY / 2, pixelW, pixelH]] call FUNC(uiCreate);
 ctrlSetFocus _focus;
+
+// What fnc_updateHover asks to put a tip of the card onto its hint line.
+uiNamespace setVariable [QGVAR(menuFocus), [_layer, _focus]];
 
 uiNamespace setVariable [QGVAR(menu), [_layer]];
 uiNamespace setVariable [QGVAR(menuFocusBack), _back];

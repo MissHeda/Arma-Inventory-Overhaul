@@ -24,7 +24,7 @@
  * 2: Cut tall compartments into pages (aio_gui_pageRows) - false for a section that is never paged (default: true) <BOOL>
  *
  * Return Value:
- * [blocks, hidden, foldable, cells, paging] <ARRAY>
+ * [blocks, hidden, foldable, cells, paging, tallest] <ARRAY>
  *   blocks   - [cols, rows, holes, pos] per compartment as the column shows it - a shaped one's
  *              holes in the rows folded away go with them
  *   hidden   - how many rows are folded away, all compartments together <NUMBER>
@@ -33,6 +33,8 @@
  *   paging   - per compartment, [page, [[from, to], ...]] when it is cut into pages (aio_gui_pageRows, fnc_pageRanges:
  *              its blocks entry then holds all the rows the pages cover, and it neither folds nor counts in hidden,
  *              foldable and cells), [] when it is not <ARRAY>
+ *   tallest  - the most rows a compartment that may be paged shows unpaged: only one taller than a page is cut, so the
+ *              size popover says when no page size would cut anything here (fnc_openSizeMenu) <NUMBER>
  *
  * Example:
  * ([_layout, _crate] call aio_gui_fnc_viewBlocks) params ["_blocks", "_hidden", "_foldable", "_cells"];
@@ -76,6 +78,7 @@ private _foldable = false;
 
 private _shown = [];
 private _paging = [];
+private _tallest = 0;
 private _perPage = [0, call FUNC(pageRows)] select _pages;
 
 {
@@ -94,6 +97,10 @@ private _perPage = [0, call FUNC(pageRows)] select _pages;
     // Taller than a page: cut into pages over exactly those rows. The pages replace the fold - there is no line to open
     // the empty rows below, the pages end with the spare rows after the last in use - and the player's opening of the rows
     // does not apply (fnc_toggleRows is a line's only).
+    if (_pages && {_pos isEqualTo []}) then {
+        _tallest = _tallest max _domain;
+    };
+
     if (_perPage > 0 && {_pos isEqualTo []} && {_domain > _perPage}) then {
         private _ranges = [_entries, _forEachIndex, _domain, _perPage] call FUNC(pageRanges);
 
@@ -129,4 +136,4 @@ private _perPage = [0, call FUNC(pageRows)] select _pages;
     };
 } forEach _blocks;
 
-[_shown, _hidden, _foldable, _cells, _paging]
+[_shown, _hidden, _foldable, _cells, _paging, _tallest]

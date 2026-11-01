@@ -34,7 +34,7 @@ private _fillOn = [0.72, 0.72, 0.72, 1];
 private _changed = false;
 
 {
-    _x params ["_index", "_forced", "_label", "_fill", "_thumb", "_valueCtrl", "_geo"];
+    _x params ["_index", "_forced", "_label", "_fill", "_thumb", "_valueCtrl", "_geo", ["_idle", false]];
     _geo params ["_left", "_top", "_width", "_height", "_thumbW", "_thumbH", "_thumbTop"];
     (_defs select _index) params ["_setting", "", "", "_least", "_most", "", "_default"];
 
@@ -45,7 +45,8 @@ private _changed = false;
         _changed = true;
     };
 
-    _label ctrlSetTextColor ([_text, _muted] select _forced);
+    // A size the server set, or the rows per page with nothing tall enough looted, has a dim name.
+    _label ctrlSetTextColor ([_text, _muted] select (_forced || _idle));
 
     _fill ctrlSetBackgroundColor ([_fillOn, _muted] select _forced);
     _fill ctrlSetPosition [_left, _top, _width * _place, _height];

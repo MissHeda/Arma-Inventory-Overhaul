@@ -294,6 +294,7 @@ PREP(uiKeyHint);
 PREP(uiHatch);
 PREP(caption);
 PREP(fitText);
+PREP(fitSize);
 PREP(textScale);
 PREP(ownerName);
 

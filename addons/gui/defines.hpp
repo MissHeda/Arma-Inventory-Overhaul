@@ -518,6 +518,9 @@
 // smaller tiles with words still easy to read, or the other way round (a Steam user, 0.6.32: the words nearly unreadable,
 // the window too big). TEXT_MIN_PX stays the floor whatever it says.
 #define TEXT_SIZE_MIN 0.8
+// The most of a slot's height one line of its words takes (fnc_drawSlot): a small box keeps its words inside however large
+// the tile and text sizes make them.
+#define SLOT_LINE_MAX 0.3
 #define TEXT_SIZE_MAX 1.4
 
 // The defaults of the three sizes the size popover sets (fnc_openSizeMenu) - the CBA settings' own (initSettings.inc.sqf), and

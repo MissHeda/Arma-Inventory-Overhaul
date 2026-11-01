@@ -535,6 +535,10 @@ GVAR(menuRemake) = false;
 // The sizes the size popover changed while a slider was dragged, still to be written to CBA when it is let go (fnc_sizeSet).
 GVAR(sizeDirty) = [];
 
+// The most rows a compartment of the loot shows that pages could cut, as the last build drew it (fnc_viewBlocks, fnc_drawSection):
+// the size popover tells where no page size would change anything (fnc_openSizeMenu).
+GVAR(tallestLoot) = 0;
+
 // What the profile holds, read as fnc_paletteRead reads any palette: nothing usable keeps the window as it ships.
 private _savedPalette = [profileNamespace getVariable [QGVAR(palette), []]] call FUNC(paletteRead);
 

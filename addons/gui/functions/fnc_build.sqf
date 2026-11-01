@@ -104,6 +104,9 @@ if ((uiNamespace getVariable [QGVAR(sizeBuilt), _sizes]) isNotEqualTo _sizes) th
 
 uiNamespace setVariable [QGVAR(sizeBuilt), _sizes];
 
+// The tallest compartment of the loot pages could cut, counted again as the sections are drawn (fnc_drawSection).
+GVAR(tallestLoot) = 0;
+
 // The style, by its id - an unknown one falls back to the first.
 private _index = (GVAR(styles) findIf {(_x select 0) isEqualTo GVAR(style)}) max 0;
 (GVAR(styles) select _index) params ["_id", "_nameKey", "_themeName", "_layoutName"];

@@ -1093,13 +1093,16 @@ Off does it at once; a drag never waits.</English>
             <English>Set by the server.</English>
         </Key>
         <Key ID="STR_aio_gui_Size_Note">
-            <English>Saved in your CBA addon options</English>
+            <English>Saved in your CBA addon options. Point at a size to see what it does.</English>
         </Key>
         <Key ID="STR_aio_gui_Size_PageRows">
             <English>Rows per page</English>
         </Key>
+        <Key ID="STR_aio_gui_Size_PageRows_None">
+            <English>Nothing you loot right now is full enough for pages - open a well-filled crate or vehicle to see it.</English>
+        </Key>
         <Key ID="STR_aio_gui_Size_PageRows_Tip">
-            <English>How many rows of a tall crate or vehicle show at a time. All: no pages.</English>
+            <English>Loot only: a crate or vehicle filled with more rows than this shows them in pages. All: no pages.</English>
         </Key>
         <Key ID="STR_aio_gui_Size_Text">
             <English>Text</English>

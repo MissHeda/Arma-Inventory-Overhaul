@@ -22,5 +22,6 @@
 ["commit"] call FUNC(sizeSet);
 
 uiNamespace setVariable [QGVAR(sizeMenuRows), []];
+uiNamespace setVariable [QGVAR(menuHintText), ""];
 
 [] call FUNC(updateSizeButton);
