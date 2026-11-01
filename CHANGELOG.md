@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.40 - beta
+
+### Changed
+
+- A weapon card's attachment boxes are in the same places on every card: muzzle, optic and rail on top; bipod, magazine and second magazine below. The handgun and the launcher leave the places of what they cannot take empty.
+- The grip's two chevrons sit closer together, with a longer dash between them.
+
+### Fixed
+
+- The tip of a fold caption or grip in the equipment column still went away on a click. Those buttons now take the click the way the fold tabs of the gear columns do, and keep their tip.
+
 ## 0.6.39 - beta
 
 ### Added

@@ -177,11 +177,22 @@ private _fnc_register = {
     };
 };
 
+// A hit box in a group of its own, as the columns' buttons lie (a section's fold tab, Sort): a press on it gives the
+// focus back at once and its click comes at the release (fnc_onFrame, fnc_onMouseButton), so the tip at the mouse
+// stays as on those. Lying on the display itself it kept the focus, and its tip went with the click.
+private _fnc_hitBox = {
+    params ["_area"];
+
+    private _group = [_display, "AIO_Group", _parent, _area] call FUNC(uiCreate);
+
+    [_display, "AIO_Hitbox", _group, [0, 0, _area select 2, _area select 3]] call FUNC(uiCreate)
+};
+
 // A hit box that folds or opens what it heads (fnc_toggleWeaponFold): the key it is kept under, folded now.
 private _fnc_foldHit = {
     params ["_area", "_key", "_isFolded"];
 
-    private _hit = [_display, "AIO_Hitbox", _parent, _area] call FUNC(uiCreate);
+    private _hit = [_area] call _fnc_hitBox;
     [_hit, [LLSTRING(WeaponCard_Fold), LLSTRING(WeaponCard_Unfold)] select _isFolded] call FUNC(setTooltip);
     _hit setVariable [QGVAR(id), [_key, _isFolded]];
     _hit ctrlAddEventHandler ["ButtonClick", {
@@ -248,10 +259,12 @@ private _fnc_weaponHeader = {
         [_colorText2, _colorText] select _named, _font, 0, "caption"
     ] call FUNC(uiLabel);
 
-    // The grip: a chevron up over a chevron down, a short dash between them - it moves the card up or down.
-    private _chevronH = _lineH * 0.34;
+    // The grip: a chevron up over a chevron down, close together, a dash between them - it moves the card up or down.
+    // The chevron's picture has room round its stroke: the two overlap by that.
+    private _chevronH = _lineH * 0.5;
     private _chevronW = SQUARE(_chevronH);
     private _chevronX = _gripX + (_gripW - _chevronW) / 2;
+    private _middle = _headY + _lineH / 2;
 
     {
         _x params ["_chevronY", "_angle"];
@@ -261,15 +274,15 @@ private _fnc_weaponHeader = {
         if (_angle != 0) then {
             _chevron ctrlSetAngle [_angle, 0.5, 0.5, true];
         };
-    } forEach [[_headY, 180], [_headY + _lineH - _chevronH, 0]];
+    } forEach [[_middle - _chevronH * 0.82, 180], [_middle - _chevronH * 0.18, 0]];
 
-    private _dashW = _chevronW * 0.55;
+    private _dashW = _chevronW * 0.85;
     [_display, _parent, [_gripX + (_gripW - _dashW) / 2, _headY + _lineH / 2 - pixelH, _dashW, pixelH * 2], _colorText2] call FUNC(uiPanel);
 
     [[_left, _headY - pixelH * 2, _gripX - _left, _lineH + pixelH * 4], _slot, _isFolded] call _fnc_foldHit;
 
     private _gripArea = [_gripX, _headY - pixelH * 2, _gripW, _lineH + pixelH * 4];
-    private _grip = [_display, "AIO_Hitbox", _parent, _gripArea] call FUNC(uiCreate);
+    private _grip = [_gripArea] call _fnc_hitBox;
     [_grip, LLSTRING(WeaponCard_Grip)] call FUNC(setTooltip);
     _grip setVariable [QGVAR(id), [_slot, _colorAccent]];
     _grip ctrlAddEventHandler ["MouseButtonDown", {
@@ -398,6 +411,8 @@ private _fnc_weaponRow = {
     [[_left, _cardY, _cardW, _cardH], _class, _caption, _icon, _number, _inHand] call _fnc_weaponCard;
 
     {
+        if (_x isEqualTo []) then {continue};
+
         _x params ["_index", "_partCaption", "_partIcon"];
 
         private _value = _weapon param [_index, ""];
@@ -477,15 +492,16 @@ _cursor = _cursor + _statH + _groupGap;
 [_cursor, LLSTRING(Column_Equipment), "equipment", _equipFolded] call _fnc_label;
 _cursor = _cursor + _labelH;
 
-// Each card's caption, silhouette, key, attachment columns and attachments: [index in the weapon, caption, silhouette].
-private _rifleParts = [
-    [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)],
-    [3, LLSTRING(Slot_Optic), GEAR_ICON(ui_gear_top_gs)],
-    [2, LLSTRING(Slot_Rail), GEAR_ICON(ui_gear_side_gs)],
-    [1, LLSTRING(Slot_Muzzle), GEAR_ICON(ui_gear_muzzle_gs)],
-    [6, LLSTRING(Slot_Bipod), GEAR_ICON(ui_gear_bipod_gs)],
-    [5, LLSTRING(Slot_Magazine2), GEAR_ICON(ui_gear_magazineGL_gs)]
-];
+// Each card's caption, silhouette, key, attachment columns and attachments: [index in the weapon, caption, silhouette],
+// three across, in the same places on every card - muzzle, optic, rail over bipod, magazine, second magazine; [] keeps
+// the place of one the weapon has not.
+private _muzzle = [1, LLSTRING(Slot_Muzzle), GEAR_ICON(ui_gear_muzzle_gs)];
+private _optic = [3, LLSTRING(Slot_Optic), GEAR_ICON(ui_gear_top_gs)];
+private _rail = [2, LLSTRING(Slot_Rail), GEAR_ICON(ui_gear_side_gs)];
+private _bipod = [6, LLSTRING(Slot_Bipod), GEAR_ICON(ui_gear_bipod_gs)];
+private _magazine = [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)];
+private _magazine2 = [5, LLSTRING(Slot_Magazine2), GEAR_ICON(ui_gear_magazineGL_gs)];
+private _rifleParts = [_muzzle, _optic, _rail, _bipod, _magazine, _magazine2];
 
 // The second primary's corner names the two-primary mod's own key that switches to it - when that key is short
 // enough for the cap (a key with modifiers is left off).
@@ -514,16 +530,8 @@ if (_hasSecond) then {
 private _rows = createHashMapFromArray [
     ["primary", [LLSTRING(Slot_Primary), GEAR_ICON(ui_gear_primary_gs), "1", 3, _rifleParts]],
     ["primary2", [LLSTRING(Slot_SecondPrimary), GEAR_ICON(ui_gear_primary_gs), _keyName, 3, _rifleParts]],
-    ["handgun", [LLSTRING(Slot_Handgun), GEAR_ICON(ui_gear_hgun_gs), "2", 2, [
-        [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)],
-        [3, LLSTRING(Slot_Optic), GEAR_ICON(ui_gear_top_gs)],
-        [2, LLSTRING(Slot_Rail), GEAR_ICON(ui_gear_side_gs)],
-        [1, LLSTRING(Slot_Muzzle), GEAR_ICON(ui_gear_muzzle_gs)]
-    ]]],
-    ["launcher", [LLSTRING(Slot_Launcher), GEAR_ICON(ui_gear_secondary_gs), "3", 2, [
-        [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)],
-        [3, LLSTRING(Slot_Optic), GEAR_ICON(ui_gear_top_gs)]
-    ]]]
+    ["handgun", [LLSTRING(Slot_Handgun), GEAR_ICON(ui_gear_hgun_gs), "2", 3, [_muzzle, _optic, _rail, [], _magazine, []]]],
+    ["launcher", [LLSTRING(Slot_Launcher), GEAR_ICON(ui_gear_secondary_gs), "3", 3, [[], _optic, [], [], _magazine, []]]]
 ];
 
 // In the player's order (see above) - none while the section is folded.
