@@ -118,7 +118,7 @@ if (_display isNotEqualTo (uiNamespace getVariable [QGVAR(guardLast), displayNul
 
         INFO("The unit handler goes behind the other handlers of the event again.");
 
-        [ACE_player, true] call FUNC(initUnit);
+        [PLAYER_UNIT, true] call FUNC(initUnit);
     };
 
     // Nobody asked for the window, so nothing is opening it: it opens in the vanilla inventory's place - on
@@ -141,7 +141,7 @@ if (_display isNotEqualTo (uiNamespace getVariable [QGVAR(guardLast), displayNul
         [{
             params ["_cameUp"];
 
-            private _unit = ACE_player;
+            private _unit = PLAYER_UNIT;
 
             if ((GVAR(askedFrame) max GVAR(openWaiting)) >= _cameUp) exitWith {
                 INFO("The unit's handler was asked after the vanilla inventory came up, or an opening waits for it to go - that opening goes ahead, nothing is guessed.");
@@ -184,7 +184,7 @@ if (_under) then {
         [{
             params ["_unit", "_container", "_secondary"];
 
-            if (alive _unit && {_unit isEqualTo ACE_player} && {isNull (uiNamespace getVariable [QGVAR(display), displayNull])}) then {
+            if (alive _unit && {_unit isEqualTo PLAYER_UNIT} && {isNull (uiNamespace getVariable [QGVAR(display), displayNull])}) then {
                 [_unit, _container, _secondary] call FUNC(open);
             };
         }, _back] call CBA_fnc_execNextFrame;

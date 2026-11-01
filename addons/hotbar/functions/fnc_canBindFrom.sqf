@@ -42,18 +42,18 @@ private _carried = switch (_from param [0, ""]) do {
         // What lies in a kit is carried when the kit is.
         if (_kit isNotEqualTo "") exitWith {
             !isNil "efak_core_fnc_getCarriedKits"
-            && {(([ACE_player] call efak_core_fnc_getCarriedKits) findIf {_x == _kit}) >= 0}
+            && {(([PLAYER_UNIT] call efak_core_fnc_getCarriedKits) findIf {_x == _kit}) >= 0}
         };
 
         private _container = _grid getOrDefault ["container", objNull];
-        private _kind = [_container, ACE_player] call EFUNC(storage,useKind);
+        private _kind = [_container, PLAYER_UNIT] call EFUNC(storage,useKind);
 
         if (([_class, _kind] call EFUNC(storage,useState)) isEqualTo "blocked") then {
             _blockedIn = _kind;
         };
 
         !isNull _container
-        && {_unit isEqualTo ACE_player}
+        && {_unit isEqualTo PLAYER_UNIT}
         && {(([_container] call EFUNC(storage,getOwner)) select 0) isEqualTo _unit}
     };
     case "slot": {
@@ -61,7 +61,7 @@ private _carried = switch (_from param [0, ""]) do {
         private _ref = _from param [1, []];
         private _owner = if ((_ref param [0, objNull]) isEqualType objNull) then {_ref param [0, objNull]} else {_ref param [6, objNull]};
 
-        !isNull _owner && {_owner isEqualTo ACE_player}
+        !isNull _owner && {_owner isEqualTo PLAYER_UNIT}
     };
     default {true};
 };

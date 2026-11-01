@@ -21,7 +21,7 @@
 
 params [["_person", objNull, [objNull]], ["_quiet", false, [false]]];
 
-private _player = ACE_player;
+private _player = PLAYER_UNIT;
 
 if (!hasInterface || {!alive _player} || {_person isEqualTo _player}) exitWith {false};
 if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {false};

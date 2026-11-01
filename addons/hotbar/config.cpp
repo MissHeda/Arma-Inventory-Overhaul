@@ -9,7 +9,6 @@ class CfgPatches {
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {
             "cba_main",
-            "ace_common",
             "A3_Ui_F",
             "aio_main",
             "aio_items",

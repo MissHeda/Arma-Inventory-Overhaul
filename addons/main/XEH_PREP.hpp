@@ -8,3 +8,11 @@ PREP(migrateSettings);
 PREP(sanitizeSettings);
 PREP(encodeText);
 PREP(decodeText);
+
+// A message to the player, ACE's way when ACE is loaded
+PREP(showText);
+
+// ACE's answers where ACE is loaded, the engine's where it is not
+PREP(isAwake);
+PREP(canInteract);
+PREP(unitName);

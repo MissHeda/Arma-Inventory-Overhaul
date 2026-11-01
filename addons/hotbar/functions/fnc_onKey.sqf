@@ -37,7 +37,7 @@ if (_class isEqualTo "") exitWith {false};
 if (commandingMenu isNotEqualTo "") exitWith {false};
 if (!isNull curatorCamera || {(call CBA_fnc_getActiveFeatureCamera) isNotEqualTo ""}) exitWith {false};
 
-private _unit = ACE_player;
+private _unit = PLAYER_UNIT;
 
 if (GVAR(leaderKeys) && {[_unit] call FUNC(isLeading)}) exitWith {false};
 

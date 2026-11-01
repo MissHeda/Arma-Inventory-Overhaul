@@ -26,7 +26,7 @@ switch (_kind) do {
     case "": {[false, LLSTRING(Reason_NoUse)]};
     case "reload": {
         // A magazine goes where the weapons take it: the magazine slot or the grenade launcher's.
-        private _unit = ACE_player;
+        private _unit = PLAYER_UNIT;
         private _fits = (["primary", "handgun", "launcher"] findIf {([_unit, _x, _class] call EFUNC(storage,partFor)) isNotEqualTo ""}) >= 0;
 
         [_fits, ["", LLSTRING(Reason_FitsNoWeapon)] select !_fits]

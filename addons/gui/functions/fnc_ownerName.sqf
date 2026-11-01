@@ -21,7 +21,7 @@ params [["_unit", objNull, [objNull]]];
 
 if (isNull _unit) exitWith {""};
 
-private _name = [_unit, false, true] call ACEFUNC(common,getName);
+private _name = [_unit] call EFUNC(main,unitName);
 
 if (_name isEqualTo "" || {_name isEqualTo localize "STR_ACE_Common_Unknown"}) then {
     _name = getText (configOf _unit >> "displayName");

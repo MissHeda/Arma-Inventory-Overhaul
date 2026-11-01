@@ -4,7 +4,8 @@
 // eyes - it keeps weighing every item by its config. This addon makes them count where players feel
 // them: ACE's weight and fatigue, through ACE movement's virtual load. It also keeps the weight tiers
 // - Light, Heavy, Overloaded, Critical - and what the red ones do to the player, through ACE's status
-// effects and its fatigue.
+// effects and its fatigue. ACE is optional: without it the tiers still slow the player through the
+// engine's own sprint and walk switches, and the overrides count in the window only.
 class CfgPatches {
     class ADDON {
         name = COMPONENT_NAME;
@@ -13,8 +14,6 @@ class CfgPatches {
         requiredVersion = REQUIRED_VERSION;
         requiredAddons[] = {
             "cba_main",
-            "ace_common",
-            "ace_movement",
             "aio_main",
             "aio_items"
         };

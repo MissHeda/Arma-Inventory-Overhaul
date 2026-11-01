@@ -21,4 +21,4 @@
 
 params [["_unit", objNull, [objNull]], ["_exceptions", [], [[]]]];
 
-[_unit, objNull, _exceptions] call ace_common_fnc_canInteractWith
+[_unit, objNull, _exceptions] call EFUNC(main,canInteract)

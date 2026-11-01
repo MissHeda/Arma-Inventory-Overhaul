@@ -26,7 +26,7 @@
 params ["_holder", "_actionId"];
 
 // The action stays on a unit the player left - only the one the player is now offers it.
-if (_holder isNotEqualTo ACE_player) exitWith {false};
+if (_holder isNotEqualTo PLAYER_UNIT) exitWith {false};
 
 private _agent = cursorObject;
 

@@ -47,7 +47,7 @@ if (!hasInterface) exitWith {};
 // and only while the player carries one; the update itself sends nothing when the weight stayed the
 // same.
 [{
-    private _unit = ACE_player;
+    private _unit = PLAYER_UNIT;
 
     if (isNull _unit) exitWith {};
 
@@ -75,7 +75,7 @@ if (!isNil QACEFUNC(advanced_fatigue,addDutyFactor)) then {
 // is found by looking once a second: the tier is worked out again when the load, the limits or the effects
 // switch differ from the last look. The cached limits make that cheap.
 [{
-    private _unit = ACE_player;
+    private _unit = PLAYER_UNIT;
 
     if (isNull _unit) exitWith {};
 

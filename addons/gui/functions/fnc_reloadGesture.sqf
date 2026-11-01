@@ -26,8 +26,8 @@
 params [["_unit", objNull, [objNull]], ["_action", "", [""]]];
 
 if (_action isEqualTo "" || {!([] call FUNC(isInventoryMode))}) exitWith {false};
-if (isNull _unit || {_unit isNotEqualTo ACE_player} || {!local _unit} || {!alive _unit} || {!isNull objectParent _unit}) exitWith {false};
-if !([_unit] call ACEFUNC(common,isAwake)) exitWith {false};
+if (isNull _unit || {_unit isNotEqualTo PLAYER_UNIT} || {!local _unit} || {!alive _unit} || {!isNull objectParent _unit}) exitWith {false};
+if !([_unit] call EFUNC(main,isAwake)) exitWith {false};
 
 // ACE's own reload runs: its action stays. ACE's own states keep the animation ACE gave him.
 if (

@@ -73,3 +73,14 @@ workshop = [
     # "2129532219", # SFX Project: Remastered, adds an InventoryOpened handler of its own (the window must still open)
 ]
 mission = "AIO_Test.VR"
+
+# The same scene with CBA alone - AIO without ACE (issue #43): no ACE Arsenal grid, no repacking, no treating from the
+# hotbar; everything else has to work. The test mission gives the vanilla kit then.
+#
+#   hemtt launch noace
+[hemtt.launch.noace]
+workshop = [
+    "450814997",  # CBA_A3
+    "3499977893", # Advanced Developer Tools
+]
+mission = "AIO_Test.VR"

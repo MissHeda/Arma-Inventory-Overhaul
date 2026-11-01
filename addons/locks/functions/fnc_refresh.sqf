@@ -24,7 +24,7 @@
 
 params [["_object", objNull, [objNull]]];
 
-private _player = missionNamespace getVariable ["ACE_player", objNull];
+private _player = PLAYER_UNIT;
 
 if (isNull _object || {isNull _player}) exitWith {};
 

@@ -15,7 +15,7 @@
  * Public: No
  */
 
-private _unit = ACE_player;
+private _unit = PLAYER_UNIT;
 
 if (isNull _unit) exitWith {GVAR(slots) apply {0}};
 

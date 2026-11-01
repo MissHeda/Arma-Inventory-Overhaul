@@ -19,7 +19,7 @@ all") or puts everything of yours into the box beside it ("Put all in").
   is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is
   blocked, by server setting.
 
-**Status:** 0.6.27, public beta: drag and drop between containers and equipment slots, searching loot,
+**Status:** 0.6.28, public beta: drag and drop between containers and equipment slots, searching loot,
 server-checked moves in multiplayer, the grid panel in ACE Arsenal, shaped grids and items, the hotbar, the
 setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
 Bugs and wishes go to Discord or the GitHub issues.
@@ -27,8 +27,12 @@ The plan is in [docs/BRIEFING.md](docs/BRIEFING.md), the design in [docs/ARCHITE
 
 ## Requirements
 
-- [CBA_A3](https://steamcommunity.com/workshop/filedetails/?id=450814997)
-- [ACE3](https://steamcommunity.com/workshop/filedetails/?id=463939057)
+- [CBA_A3](https://steamcommunity.com/workshop/filedetails/?id=450814997) - the only requirement.
+- [ACE3](https://steamcommunity.com/workshop/filedetails/?id=463939057) is optional. With it come the grid in ACE Arsenal (and the
+  Virtual Arsenal opened as ACE Arsenal), magazine repacking, treating yourself from the hotbar, ACE's advanced throwing from
+  it, field rations, ACE cargo, vehicle locks and interaction menu entries, and the weight tiers feed ACE's fatigue. Without
+  ACE the inventory, looting, the hotbar for grenades, magazines and food, the weight tiers (through the engine's sprint and
+  walk switches) and the setup wizard work the same; the Virtual Arsenal stays Arma's own.
 
 Works with [Enhanced First Aid Kits](https://steamcommunity.com/workshop/filedetails/?id=3809430149) and
 Enhanced Utility Pouches: kits and pouches open in windows of their own inside the inventory, things are
