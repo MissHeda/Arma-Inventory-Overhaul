@@ -494,9 +494,10 @@ private _lockedSettings = _target getOrDefault ["lockedSettings", []];
 private _lockedWhy = [LLSTRING(Setting_LockedServer), LLSTRING(Setting_LockedMission)] select ((_target getOrDefault ["source", ""]) isEqualTo "mission");
 
 // One setting's row: its label (the tooltip is its description), its control by its kind, and its reset button
-// while it is off its default - all in the room of _w, a column or a whole line.
+// while it is off its default - all in the room of _w, a column or a whole line. Its control starts where a
+// column's does (_column), so a text box that takes the whole line lines up with the controls above and below it.
 private _fnc_setting = {
-    params ["_name", "_left", "_y", "_w"];
+    params ["_name", "_left", "_y", "_w", ["_column", -1]];
 
     private _entry = _registry get _name;
     private _type = _entry get "type";
@@ -505,7 +506,7 @@ private _fnc_setting = {
     private _locked = _name in _lockedSettings;
     private _value = GVAR(draftSettings) getOrDefault [_name, _default];
     private _tip = _entry get "tip";
-    private _labelW = _w * 0.46;
+    private _labelW = ([_column, _w] select (_column < 0)) * 0.46;
     private _controlX = _left + _labelW + _gap;
     private _controlW = _w - _labelW - _gap - _rowH - _gap;
 
@@ -633,7 +634,7 @@ private _fnc_setting = {
 
         // A text box takes the whole line, the others a column each.
         if (count _x == 1 && {((_registry get (_x select 0)) get "type") isEqualTo "EDITBOX"}) then {
-            [_x select 0, _cardX, _lineY, _cardW] call _fnc_setting;
+            [_x select 0, _cardX, _lineY, _cardW, _columnW] call _fnc_setting;
         } else {
             [_x select 0, _cardX, _lineY, _columnW] call _fnc_setting;
 

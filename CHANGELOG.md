@@ -2,12 +2,19 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## 0.6.37 - beta
+## 0.6.38 - beta
 
 ### Added
 
-- The weapon cards can be put in any order: the arrows in each card's corner move it up or down - the handgun on top and the primaries at the bottom, say. Your order is kept in your profile.
-- With WebKnight's or KJW's Two Primary Weapons, the second primary's card folds to a single line (the minus in its corner) and opens again (the plus). Until you choose, it is folded while nothing is on your back. A weapon can still be dragged onto the folded line.
+- Each weapon card has a header line now: click its caption to fold the card away to that line and again to open it; the folded line names the weapon and still takes one dragged onto it. The second primary's card starts folded while nothing is on your back. What you fold is kept in your profile.
+- Drag a weapon card by the grip (the six dots at the right end of its header) to put it anywhere in the column - the handgun on top and the primaries at the bottom, say. A line shows where it goes; your order is kept in your profile.
+
+### Fixed
+
+- With a larger text size the handgun's picture vanished from its card and the cards got cramped: the key moved into the header, and a weapon's picture always keeps at least half its card.
+- Setup wizard: the text box of "Message when not allowed" (Vanilla Arsenal) started far right of the other controls; it lines up with them now.
+
+## 0.6.37 - beta
 
 ### Changed
 

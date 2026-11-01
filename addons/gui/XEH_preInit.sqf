@@ -383,7 +383,7 @@ if !(GVAR(sortMode) isEqualType "" && {GVAR(sortMode) in SORT_MODES}) then {
 uiNamespace setVariable [QGVAR(sortButtons), []];
 
 // The order of the weapon cards in the equipment column, top down (fnc_drawEquipmentCards): each player's own,
-// kept in the profile, changed with the arrows on the cards (fnc_moveWeaponCard). An order that does not name
+// kept in the profile, changed by dragging a card by its grip (fnc_cardGrip). An order that does not name
 // each of the four once - an older or a broken one - is the default again.
 GVAR(weaponOrder) = profileNamespace getVariable [QGVAR(weaponOrder), []];
 
@@ -395,14 +395,18 @@ if !(GVAR(weaponOrder) isEqualType [] && {
     GVAR(weaponOrder) = ["primary", "primary2", "handgun", "launcher"];
 };
 
-// Whether the second primary's card is folded to a single line (fnc_toggleSecondFold): "folded" or "open" once
-// the player chose, kept in the profile; "" until then - folded while nothing is on the back, open while
-// something is.
-GVAR(secondFold) = profileNamespace getVariable [QGVAR(secondFold), ""];
+// Which weapon cards the player folded to their header line, slot -> folded (fnc_toggleWeaponFold), kept in the
+// profile as [slot, folded] pairs. A card the player never folded or opened is open - but the second primary's,
+// folded while nothing is on the back (fnc_drawEquipmentCards).
+GVAR(weaponFolds) = createHashMap;
 
-if !(GVAR(secondFold) in ["", "folded", "open"]) then {
-    GVAR(secondFold) = "";
-};
+{
+    _x params [["_foldSlot", "", [""]], ["_foldOn", false, [false]]];
+
+    if (_foldSlot isNotEqualTo "" && {(_x param [1, -1]) isEqualType false}) then {
+        GVAR(weaponFolds) set [_foldSlot, _foldOn];
+    };
+} forEach (([profileNamespace getVariable [QGVAR(weaponFolds), []]] param [0, [], [[]]]) select {_x isEqualType []});
 
 // The window's moves under way, request id (aio_storage_fnc_request) -> [sources, targets, time, feels,
 // details] (fnc_sendMoves): sources [[holder, key, block, col, row], ...] are faded and cannot be lifted,

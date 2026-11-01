@@ -100,6 +100,12 @@ if (_trash isNotEqualTo []) then {
     uiNamespace setVariable [QGVAR(windowTrash), []];
 };
 
+// A weapon card held by its grip (fnc_cardGrip): its drop line follows the mouse, and the release - over whatever
+// control it happens - puts it there.
+if ((uiNamespace getVariable [QGVAR(cardDrag), []]) isNotEqualTo []) then {
+    [["move", "end"] select (inputMouse 0 == 0)] call FUNC(cardGrip);
+};
+
 // Clip groups of pictures the wheel turned over: the engine scrolled them after the handler put them back, so
 // they go back to the top again before this frame is drawn, for UNSCROLL_FRAMES frames (fnc_unscroll).
 private _unscroll = uiNamespace getVariable [QGVAR(unscroll), []];

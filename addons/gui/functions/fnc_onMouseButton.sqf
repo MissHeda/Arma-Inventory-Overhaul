@@ -190,9 +190,9 @@ if (_menuOpen && {_down} && {_button == 1}) then {
 
 if (_menuOpen) exitWith {false};
 
-// The arrows and the fold chevron in the corner of a weapon card (fnc_drawEquipmentCards) are buttons of their own:
-// a press on one is theirs, not a press on the card under them - it neither lifts the weapon nor opens its menu.
-// A drag let go there is still let go on the card.
+// The header line of a weapon card - its fold toggle and its grip (fnc_drawEquipmentCards) - has buttons of its own:
+// a press there is theirs, not a press on a slot - it neither lifts the weapon nor opens its menu. A drag let go
+// there is still let go on the folded card's slot.
 if (_down && {!GVAR(dragging)} && {
     (uiNamespace getVariable [QGVAR(cardButtons), []]) findIf {
         ([_x] call FUNC(gridOrigin)) params ["_areaX", "_areaY"];
