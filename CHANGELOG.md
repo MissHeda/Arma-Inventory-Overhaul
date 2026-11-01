@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.44 - beta
+
+### Changed
+
+- Modify's parts look like Tarkov's weapon builds: square glass boxes with rounded corners above and below the weapon, each with the part's picture and short name (NONE when empty), and a thin line to a dot on the part's place. A click on a box opens the parts as picture tiles right under it - NONE first, then what fits from your gear and the loot.
+
 ## 0.6.43 - beta
 
 ### Changed

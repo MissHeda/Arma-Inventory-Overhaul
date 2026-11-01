@@ -71,8 +71,8 @@ if ((GVAR(menuFor) param [0, ""]) isEqualTo "size") exitWith {
     true
 };
 
-GVAR(menuState) params ["_choices", "_at"];
+GVAR(menuState) params ["_choices", "_at", ["_across", 0]];
 
-[_display, _choices, _at] call FUNC(openMenu);
+[_display, _choices, _at, _across] call FUNC(openMenu);
 
 true

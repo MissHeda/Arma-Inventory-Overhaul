@@ -5,9 +5,9 @@
  * The inspect card's modding view for one of the player's own weapons (Inspect or Modify in its menu, fnc_drawInspect),
  * as in Tarkov (#56): where each of its parts goes, two ways -
  *
- *   - over the 3D picture, a round point on each part's place on the model (fnc_weaponPoints), following the weapon as
- *     it is turned, moved and zoomed (fnc_placeHotspots) - hidden where the model names no place for it, where it
- *     turns away behind the camera or out of the picture, and where it would lie on the 2D/3D switch;
+ *   - over the 3D picture, as in Tarkov's weapon builds, a box per part off the weapon with a line to a dot on the
+ *     part's place on the model (fnc_weaponPoints), following the weapon as it is turned, moved and zoomed
+ *     (fnc_placeHotspots) - hidden where the model names no place for it, or where it turns away behind the camera;
  *   - under the picture, the same parts as a fixed row - what the model names no place for, and every part in 2D or
  *     without Picture-in-Picture, is there all the same.
  *
@@ -119,6 +119,8 @@ private _fnc_face = {
     params ["_parent", "_rect", "_on", "_icon"];
 
     if (_on isEqualTo "") then {
+        if (_icon isEqualTo "") exitWith {};
+
         [_display, _parent, _rect, _icon, _colorText2] call FUNC(uiIcon);
     } else {
         private _info = [_on] call EFUNC(items,getInfo);
@@ -170,12 +172,38 @@ private _size = _textUnit * 0.5;
 } forEach _parts;
 
 // ---------------------------------------------------------------------------
-// The points over the 3D picture: made hidden, placed and shown every frame the view changes (fnc_placeHotspots).
+// The parts over the 3D picture, as in Tarkov's weapon builds (Mia, #56: "maybe square with rounded corners"): a box per part, off
+// the weapon - the sights, the muzzle and the rail above it, the bipod and the magazines below -, the part's picture and short name
+// in it, NONE while it is empty, and a thin line from the box to a dot on the part's place, bent at right angles. Made hidden; placed and shown every
+// frame (fnc_placeHotspots): the lines and dots first, so the boxes lie over them.
 // ---------------------------------------------------------------------------
 if (_viewRect isEqualTo []) exitWith {};
 
-private _spotH = _textUnit * 1.15;
-private _spotW = SQUARE(_spotH);
+private _boxH = _textUnit * 2.3;
+private _boxW = SQUARE(_boxH);
+private _dotH = _textUnit * 0.22;
+private _lineColor = [1, 1, 1, 0.55];
+private _nameSize = _textUnit * 0.42;
+private _radius = ((_theme getOrDefault ["radius", 0]) * 0.6) min (_boxH / 5);
+
+// The line in three straight pieces - down from the box, across, down to the dot: a turned control is cut to its own box, so a
+// slanted line cannot be drawn.
+private _marks = _parts apply {
+    private _line = [0, 1, 2] apply {
+        private _piece = [_display, "AIO_PictureTurned", _group, [0, 0, pixelW, pixelH]] call FUNC(uiCreate);
+        _piece ctrlSetText "#(argb,8,8,3)color(1,1,1,1)";
+        _piece ctrlSetTextColor _lineColor;
+        _piece ctrlShow false;
+
+        _piece
+    };
+
+    private _dot = [_display, "AIO_Group", _group, [0, 0, SQUARE(_dotH), _dotH]] call FUNC(uiCreate);
+    [_display, _dot, [0, 0, SQUARE(_dotH), _dotH], [1, 1, 1, 0.9], _dotH / 2] call FUNC(uiPanel);
+    _dot ctrlShow false;
+
+    [_line, _dot]
+};
 
 {
     _x params ["_part", "_index", "_caption", "_icon"];
@@ -183,23 +211,36 @@ private _spotW = SQUARE(_spotH);
     private _value = _weapon param [_index, ""];
     private _on = if (_value isEqualType []) then {_value param [0, "", [""]]} else {[_value, ""] select !(_value isEqualType "")};
     private _slot = format ["%1_%2", _base, _part];
-    private _rel = [_viewRect select 0, _viewRect select 1, _spotW, _spotH];
-    private _spot = [_display, "AIO_Group", _group, _rel] call FUNC(uiCreate);
+    private _rel = [_viewRect select 0, _viewRect select 1, _boxW, _boxH];
+    private _box = [_display, "AIO_Group", _group, _rel] call FUNC(uiCreate);
 
-    // A dark glass disc, ringed in the accent colour while a part is on it.
-    [_display, _spot, [0, 0, _spotW, _spotH], [[0, 0, 0, 0.6], [0.08, 0.08, 0.09, 0.8]] select (_on isNotEqualTo ""), _spotH / 2] call FUNC(uiPanel);
-    [_display, _spot, [0, 0, _spotW, _spotH], [[1, 1, 1, 0.45], _accent + [1]] select (_on isNotEqualTo ""), _spotH / 2] call FUNC(uiRing);
+    // Glass, framed thinly - in the accent colour while a part is on it.
+    [_display, _box, [0, 0, _boxW, _boxH], [[0, 0, 0, 0.55], [0.1, 0.1, 0.11, 0.85]] select (_on isNotEqualTo ""), _radius] call FUNC(uiPanel);
+    [_display, _box, [0, 0, _boxW, _boxH], [[1, 1, 1, 0.3], _accent + [0.9]] select (_on isNotEqualTo ""), _radius] call FUNC(uiRing);
 
-    private _faceH = _spotH * 0.68;
+    private _faceH = _boxH * 0.62;
     private _faceW = SQUARE(_faceH);
 
-    [_spot, [(_spotW - _faceW) / 2, (_spotH - _faceH) / 2, _faceW, _faceH], _on, _icon] call _fnc_face;
-    [_spot, [0, 0, _spotW, _spotH], _slot, _caption, _on] call _fnc_hit;
+    [_box, [(_boxW - _faceW) / 2, _boxH - _faceH - _boxH * 0.06, _faceW, _faceH], _on, [_icon, ""] select (_on isEqualTo "")] call _fnc_face;
 
-    _spot ctrlShow false;
+    // Its short name in the top left corner, NONE while it is empty.
+    private _nameW = _boxW - SQUARE(_boxH * 0.08) * 2;
+    private _name = [[toUpperANSI LLSTRING(Modify_None), [_on] call FUNC(itemName)] select (_on isNotEqualTo ""), _nameW, _font, _nameSize] call FUNC(fitText);
+
+    [
+        _display, _box, [SQUARE(_boxH * 0.08), _boxH * 0.04, _nameW, _nameSize * 1.3], _name, _nameSize,
+        [_colorMuted, _colorText] select (_on isNotEqualTo ""), _font, 0, "value"
+    ] call FUNC(uiLabel);
+
+    [_box, [0, 0, _boxW, _boxH], _slot, _caption, _on] call _fnc_hit;
+
+    _box ctrlShow false;
+
+    (_marks select _forEachIndex) params ["_line", "_dot"];
 
     _spots pushBack createHashMapFromArray [
-        ["part", _part], ["slot", _slot], ["class", _on], ["ctrl", _spot], ["rel", _rel], ["floating", true]
+        ["part", _part], ["slot", _slot], ["class", _on], ["ctrl", _box], ["rel", _rel], ["floating", true],
+        ["line", _line], ["dot", _dot], ["below", _part in ["bipod", "mag", "mag2"]]
     ];
 } forEach _parts;
 
