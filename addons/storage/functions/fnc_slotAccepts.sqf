@@ -39,6 +39,14 @@ if (!isNil QEFUNC(compat_acre,isFixedSlot) && {[_unit, _slotId] call EFUNC(compa
 
 private _kind = ([_class] call EFUNC(items,getInfo)) get "kind";
 
+// The second primary on the back (fnc_secondPrimary): a rifle, on a unit that has the slot, and one the mod
+// lets go there - KJW's keeps lists of the weapons it allows.
+if (_slotId isEqualTo "primary2") exitWith {
+    _kind isEqualTo "rifle"
+    && {(_equipment getOrDefault ["primary2", -1]) isEqualType [] || {([_unit] call FUNC(secondPrimary)) select 0}}
+    && {[_unit, _class] call (GVAR(secondPrimaryMod) getOrDefault ["accepts", {true}])}
+};
+
 if (_part isEqualTo "") exitWith {
     _kind isEqualTo (switch (_base) do {
         case "primary": {"rifle"};

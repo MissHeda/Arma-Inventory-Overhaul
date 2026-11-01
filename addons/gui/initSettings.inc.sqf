@@ -6,16 +6,33 @@
 
 // ----- General -----
 
+// The three sizes below are also set in the window, in the size popover under its button in the header (fnc_openSizeMenu),
+// which writes them here: each one's script shows a change made here in an open window and in the popover at once
+// (fnc_sizeChanged), and the popover shows what CBA has.
+
 // Each player's own eyes and screen: some find the pictures too small to make out. Read when a window
-// opens (fnc_getCell), so a change shows at the next one; capped where the columns would not fit. A tenth
-// above the plain size by default: at 1 a one-cell tile shows two or three letters of an item's name.
+// opens (fnc_getCell); capped where the columns would not fit. A tenth above the plain size by default: at 1
+// a one-cell tile shows two or three letters of an item's name.
 [
     QGVAR(cellScale),
     "SLIDER",
     [LLSTRING(Setting_CellScale), LLSTRING(Setting_CellScale_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    [CELL_SCALE_MIN, CELL_SCALE_MAX, 1.1, 1],
-    0
+    [CELL_SCALE_MIN, CELL_SCALE_MAX, CELL_SCALE_DEFAULT, 2],
+    0,
+    {[] call FUNC(sizeChanged)}
+] call CBA_fnc_addSetting;
+
+// Each player's own eyes: the window's words grow and shrink with the tiles, and this on top of that (fnc_textScale) - larger
+// words on small tiles for a player who found them hard to read, smaller ones for a window that felt too big.
+[
+    QGVAR(textSize),
+    "SLIDER",
+    [LLSTRING(Setting_TextSize), LLSTRING(Setting_TextSize_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [TEXT_SIZE_MIN, TEXT_SIZE_MAX, TEXT_SIZE_DEFAULT, 2],
+    0,
+    {[] call FUNC(sizeChanged)}
 ] call CBA_fnc_addSetting;
 
 // Each player's own eyes: a tall crate or vehicle of what is looted shows this many rows at a time, with a bar that turns
@@ -26,8 +43,9 @@
     "SLIDER",
     [LLSTRING(Setting_PageRows), LLSTRING(Setting_PageRows_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    [0, MAX_ROWS, 10, 0],
-    0
+    [0, MAX_ROWS, PAGE_ROWS_DEFAULT, 0],
+    0,
+    {[] call FUNC(sizeChanged)}
 ] call CBA_fnc_addSetting;
 
 // Each player's own eyes.

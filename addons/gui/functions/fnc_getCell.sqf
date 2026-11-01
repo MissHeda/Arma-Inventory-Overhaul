@@ -20,8 +20,9 @@
  * The window's words grow with the cell this gives (fnc_textScale, TEXT_UNIT).
  *
  * Worked out at the first ask after a window attached (fnc_attach) and kept until it closes
- * (uiNamespace aio_gui_cell): a changed setting takes effect at the next opening, and nothing drawn
- * meanwhile - a tile drawn again, the dragged ghost - can differ by a pixel from the grid it lies on.
+ * (uiNamespace aio_gui_cell): nothing drawn meanwhile - a tile drawn again, the dragged ghost - can differ by a
+ * pixel from the grid it lies on. A changed tile scale - in the size popover or in CBA's options - forgets it and
+ * builds the open window again (fnc_sizeChanged), so the change shows at once.
  *
  * Arguments:
  * None

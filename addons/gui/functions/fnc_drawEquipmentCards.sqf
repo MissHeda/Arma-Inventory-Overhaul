@@ -10,6 +10,8 @@
  *   EQUIPMENT
  *   [1] primary ............ | mag | optic | rail  |   each weapon a big card, its attachments and
  *                            | muz | bipod | 2nd   |   loaded magazines as small slots beside it
+ *   [4] second primary ..... | mag | optic | rail  |   on the back - only with WebKnight's or KJW's Two
+ *                            | muz | bipod | 2nd   |   Primary Weapons (aio_storage_fnc_secondPrimary)
  *   [2] handgun ............ | mag | optic |
  *                            | rail| muzzle|
  *   [3] launcher ........... | mag | optic |
@@ -20,8 +22,9 @@
  *   | 4 | 5 | 6 | 7 | 8 | 9 | 0 |                           the keys' items (aio_hotbar), when it is loaded
  *                                                              and on, in the inventory window only
  *
- * The three weapon cards are as wide and as tall as each other, so their attachments start on one
- * line. The weapon in hand is marked in the accent colour. The attachments grow with the height the
+ * The weapon cards are as wide and as tall as each other, so their attachments start on one
+ * line. The second primary's card stands under the primary's, in the place EVEN Better Inventory gives it: its
+ * corner names that mod's own switch key, and it is never the weapon in hand. The weapon in hand is marked in the accent colour. The attachments grow with the height the
  * column has, but never take more than about 40 % of its width, so a weapon keeps room for its picture
  * on a narrow (4:3) screen. The weapons stay at the top and the gear and the hotbar at the bottom;
  * whatever height is left over lies between them.
@@ -103,17 +106,22 @@ private _gearH = UNSQUARE(_gearW);
 private _hotbar = call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,drawStrip)} && {call EFUNC(hotbar,isActive)};
 private _hotbarH = [0, _labelH + _smallH + _groupGap] select _hotbar;
 
+// A fourth card for the second primary on the back, when a two-primary mod gives the unit that slot.
+private _second = _equipment getOrDefault ["primary2", -1];
+private _hasSecond = _second isEqualType [];
+private _cards = [3, 4] select _hasSecond;
+
 // Each weapon card is two attachment rows high. The primary's three attachments across may take about
 // 40 % of the width.
-private _fixed = _statH + _groupGap * 2 + _labelH * 2 + _rowGap * 2 + _gapH * 3 + _capH * 4 + _gearH + _gearGap + _smallH + _hotbarH;
+private _fixed = _statH + _groupGap * 2 + _labelH * 2 + _rowGap * (_cards - 1) + _gapH * _cards + _capH * (_cards + 1) + _gearH + _gearGap + _smallH + _hotbarH;
 private _slotWMax = ((_width * 0.42 - _gapW * 3) / 3) max (pixelW * 8);
-private _slotH = (((_height - _fixed) / 6) min (UNIT * 2.7) min UNSQUARE(_slotWMax)) max (UNIT * 1.2);
+private _slotH = (((_height - _fixed) / (_cards * 2)) min (UNIT * 2.7) min UNSQUARE(_slotWMax)) max (UNIT * 1.2);
 private _slotW = SQUARE(_slotH);
 private _cardH = _slotH * 2 + _gapH;
 private _cardW = _width - (_slotW + _gapW) * 3;
 
 // Left over height loosens the gaps between the weapons a little; the rest stays above the gear.
-private _extra = (((_height - _fixed - _slotH * 6) / 4) max 0) min (UNIT * 0.6);
+private _extra = (((_height - _fixed - _slotH * _cards * 2) / (_cards + 1)) max 0) min (UNIT * 0.6);
 _rowGap = _rowGap + _extra;
 
 // ---------------------------------------------------------------------------
@@ -144,21 +152,27 @@ private _fnc_weaponCard = {
         private _stripW = SQUARE(_textUnit * 1.05);
 
         [_display, _parent, [_cardX, _cardY, _stripW, _cardH], [_colorStrip, _colorAccent] select _inHand] call FUNC(uiPanel);
-        [
-            _display, _parent, [_cardX, _cardY + _padY * 0.5, _stripW, _lineH], format ["[%1]", _number], _lineSize,
-            [_colorMuted, _colorOnAccent] select _inHand, _fontBold, 2, "key"
-        ] call FUNC(uiLabel);
+
+        // A card with no key to name (the second primary, its mod's key unbound or with modifiers) keeps its strip.
+        if (_number isNotEqualTo "") then {
+            [
+                _display, _parent, [_cardX, _cardY + _padY * 0.5, _stripW, _lineH], format ["[%1]", _number], _lineSize,
+                [_colorMuted, _colorOnAccent] select _inHand, _fontBold, 2, "key"
+            ] call FUNC(uiLabel);
+        };
 
         _innerX = _cardX + _stripW;
     } else {
         // A key cap in the corner, like the footer's key hints, in the accent colour while in hand.
         private _key = [_cardX + _padX * 1.5, _cardY + _padY * 1.5, SQUARE(_lineH), _lineH];
 
-        [_display, _parent, _key, [_theme getOrDefault ["keyBg", [1, 1, 1, 0.1]], _colorAccent] select _inHand, _lineH * 0.3] call FUNC(uiPanel);
-        [
-            _display, _parent, _key, _number, _lineSize * 0.9,
-            [_theme getOrDefault ["keyText", _colorText], _colorOnAccent] select _inHand, _fontBold, 2, "key"
-        ] call FUNC(uiLabel);
+        if (_number isNotEqualTo "") then {
+            [_display, _parent, _key, [_theme getOrDefault ["keyBg", [1, 1, 1, 0.1]], _colorAccent] select _inHand, _lineH * 0.3] call FUNC(uiPanel);
+            [
+                _display, _parent, _key, _number, _lineSize * 0.9,
+                [_theme getOrDefault ["keyText", _colorText], _colorOnAccent] select _inHand, _fontBold, 2, "key"
+            ] call FUNC(uiLabel);
+        };
 
         _innerTop = _cardY + _padY * 1.5 + _lineH;
 
@@ -224,7 +238,9 @@ private _fnc_weaponRow = {
     private _weapon = _equipment getOrDefault [_slot, []];
     private _class = _weapon param [0, "", [""]];
     private _cardY = _rowTop + _capH;
-    private _inHand = _class isNotEqualTo "" && {!isNull _unit} && {currentWeapon _unit == _class};
+
+    // The second primary hangs on the back: never in hand, even of the same class as the one that is.
+    private _inHand = _class isNotEqualTo "" && {_slot isNotEqualTo "primary2"} && {!isNull _unit} && {currentWeapon _unit == _class};
 
     [[_left, _cardY, _cardW, _cardH], _class, _caption, _icon, _number, _inHand] call _fnc_weaponCard;
 
@@ -306,6 +322,38 @@ _cursor = _cursor + _rowGap + ([_cursor, "primary", LLSTRING(Slot_Primary), GEAR
     [6, LLSTRING(Slot_Bipod), GEAR_ICON(ui_gear_bipod_gs)],
     [5, LLSTRING(Slot_Magazine2), GEAR_ICON(ui_gear_magazineGL_gs)]
 ]] call _fnc_weaponRow);
+
+// The second primary, under the first: its corner names the two-primary mod's own key that switches to it - when
+// that key is short enough for the cap (a key with modifiers is left off).
+if (_hasSecond) then {
+    private _keyName = "";
+    private _keybind = EGVAR(storage,secondPrimaryMod) getOrDefault ["keybind", []];
+
+    if (_keybind isNotEqualTo [] && {!isNil "CBA_fnc_getKeybind"}) then {
+        private _entry = _keybind call CBA_fnc_getKeybind;
+
+        if (isNil "_entry") exitWith {};
+
+        ((_entry param [8, []]) param [0, []]) params [["_key", 0, [0]], ["_modifiers", [], [[]]]];
+
+        if (_key > 0 && {!(true in _modifiers)}) then {
+            _keyName = [_key, _modifiers] call CBA_fnc_localizeKey;
+        };
+    };
+
+    if (count _keyName > 2) then {
+        _keyName = "";
+    };
+
+    _cursor = _cursor + _rowGap + ([_cursor, "primary2", LLSTRING(Slot_SecondPrimary), GEAR_ICON(ui_gear_primary_gs), _keyName, 3, [
+        [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)],
+        [3, LLSTRING(Slot_Optic), GEAR_ICON(ui_gear_top_gs)],
+        [2, LLSTRING(Slot_Rail), GEAR_ICON(ui_gear_side_gs)],
+        [1, LLSTRING(Slot_Muzzle), GEAR_ICON(ui_gear_muzzle_gs)],
+        [6, LLSTRING(Slot_Bipod), GEAR_ICON(ui_gear_bipod_gs)],
+        [5, LLSTRING(Slot_Magazine2), GEAR_ICON(ui_gear_magazineGL_gs)]
+    ]] call _fnc_weaponRow);
+};
 
 _cursor = _cursor + _rowGap + ([_cursor, "handgun", LLSTRING(Slot_Handgun), GEAR_ICON(ui_gear_hgun_gs), "2", 2, [
     [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)],
