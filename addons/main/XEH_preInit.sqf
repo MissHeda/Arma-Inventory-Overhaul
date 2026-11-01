@@ -4,6 +4,9 @@ ADDON = false;
 
 #include "XEH_PREP.hpp"
 
+// A message sent to the machine of another player (fnc_showText) - without ACE, which would carry it otherwise.
+[QGVAR(showText), {_this call FUNC(showText)}] call CBA_fnc_addEventHandler;
+
 // The settings of the mod that are the same for everyone - the server's or the mission's to decide. Each one is a
 // CBA setting of its own, a row in the category "Arma Inventory Overhaul - Server" of CBA's Addon Options, and at
 // the same time a control on the setup wizard's General page. Both edit the very same CBA value, so they never

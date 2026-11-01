@@ -16,19 +16,23 @@ all") or puts everything of yours into the box beside it ("Put all in").
   add is taken back and the message says how much room to make. Drag a row out of ACE's list onto a free spot of
   the grid to put it in there (the wheel sets how many, Ctrl+wheel over a tile adds or takes out one). Under the
   grid a staging space holds things while you rearrange a full container - it grows as you fill it -; whatever
-  is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal opens ACE Arsenal too, or is
-  blocked, by server setting.
+  is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal gets the same grid beside its
+  own list, opens ACE Arsenal instead, or is blocked, by server setting.
 
-**Status:** 0.6.27, public beta: drag and drop between containers and equipment slots, searching loot,
-server-checked moves in multiplayer, the grid panel in ACE Arsenal, shaped grids and items, the hotbar, the
+**Status:** 0.6.29, public beta: drag and drop between containers and equipment slots, searching loot,
+server-checked moves in multiplayer, the grid panel in ACE Arsenal and the vanilla Virtual Arsenal, shaped grids and items, the hotbar, the
 setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
 Bugs and wishes go to Discord or the GitHub issues.
 The plan is in [docs/BRIEFING.md](docs/BRIEFING.md), the design in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Requirements
 
-- [CBA_A3](https://steamcommunity.com/workshop/filedetails/?id=450814997)
-- [ACE3](https://steamcommunity.com/workshop/filedetails/?id=463939057)
+- [CBA_A3](https://steamcommunity.com/workshop/filedetails/?id=450814997) - the only requirement.
+- [ACE3](https://steamcommunity.com/workshop/filedetails/?id=463939057) is optional. With it come the grid in ACE Arsenal (and the
+  Virtual Arsenal opened as ACE Arsenal), magazine repacking, treating yourself from the hotbar, ACE's advanced throwing from
+  it, field rations, ACE cargo, vehicle locks and interaction menu entries, and the weight tiers feed ACE's fatigue. Without
+  ACE the inventory, looting, the hotbar for grenades, magazines and food, the weight tiers (through the engine's sprint and
+  walk switches), the setup wizard and the grid panel in the vanilla Virtual Arsenal work the same.
 
 Works with [Enhanced First Aid Kits](https://steamcommunity.com/workshop/filedetails/?id=3809430149) and
 Enhanced Utility Pouches: kits and pouches open in windows of their own inside the inventory, things are
@@ -277,8 +281,10 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   loadouts and Zeus arsenal work as always; the grid panel hooks into its window (also in the Eden editor), and
   free cells are the only limit on what goes in. The vanilla Virtual Arsenal is a server setting,
   `aio_arsenal_biArsenal`: `"ace"` (default - BI boxes, Eden's "Virtual" storage and Zeus open ACE Arsenal with
-  the same items), `"block"` (a red screen says it is not allowed, with the text of `aio_arsenal_biMessage`;
-  Zeus is never blocked) or `"vanilla"`. A mission can decide per mission with `aio_arsenal_biPassThrough`:
+  the same items), `"grid"` (BI's window stays, with the grid panel beside its list for the uniform, vest and
+  backpack - the same drag and drop, wheel and staging space), `"block"` (a red screen says it is not allowed, with
+  the text of `aio_arsenal_biMessage`; Zeus is never blocked) or `"vanilla"`. Without ACE, `"ace"` keeps BI's window
+  with the grid panel as well. A mission can decide per mission with `aio_arsenal_biPassThrough`:
   `true` - always BI's window, `false` - always ACE's, unset - BI's only for missions with their own
   `arsenalOpened` / `arsenalPreOpen` handlers. It is read on each client, so set it with the public flag
   (`missionNamespace setVariable ["aio_arsenal_biPassThrough", true, true]`) or in `initPlayerLocal.sqf`.

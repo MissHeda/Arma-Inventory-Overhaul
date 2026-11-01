@@ -118,7 +118,7 @@ private _fnc_addWorn = {
         "map", "gps", "radio", "compass", "watch"
     ];
 
-    private _title = [_body, false, true] call ACEFUNC(common,getName);
+    private _title = [_body] call EFUNC(main,unitName);
 
     // A body ACE knows no name for is called by what it was - "Rifleman" rather than "Unknown".
     if (_title isEqualTo "" || {_title isEqualTo localize "STR_ACE_Common_Unknown"}) then {

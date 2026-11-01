@@ -24,14 +24,24 @@ if (!hasInterface) exitWith {};
     player setDir 0;
 
     // The player: a rifle with optic, pistol, launcher, vest full of magazines, a backpack of medical
-    // things - enough to fill every column.
+    // things - enough to fill every column. ACE's medical things with ACE, Arma's own without it (hemtt launch noace).
+    private _ace = isClass (configFile >> "CfgPatches" >> "ace_main");
+    private _uniformMedical = [
+        [["FirstAidKit", 4]],
+        [["ACE_fieldDressing", 6], ["ACE_morphine", 2], ["ACE_tourniquet", 2]]
+    ] select _ace;
+    private _backpackMedical = [
+        [["FirstAidKit", 6], ["Medikit", 1]],
+        [["ACE_elasticBandage", 10], ["ACE_packingBandage", 10], ["ACE_quikclot", 10], ["ACE_epinephrine", 4], ["ACE_salineIV_500", 2], ["ACE_splint", 2]]
+    ] select _ace;
+
     player setUnitLoadout [
         ["arifle_MX_F", "muzzle_snds_H", "acc_pointer_IR", "optic_Hamr", ["30Rnd_65x39_caseless_mag", 30], [], "bipod_01_F_snd"],
         [],
         ["hgun_P07_F", "", "", "", ["16Rnd_9x21_Mag", 16], [], ""],
-        ["U_B_CombatUniform_mcam", [["ACE_fieldDressing", 6], ["ACE_morphine", 2], ["ACE_tourniquet", 2], ["16Rnd_9x21_Mag", 2, 16]]],
+        ["U_B_CombatUniform_mcam", _uniformMedical + [["16Rnd_9x21_Mag", 2, 16]]],
         ["V_PlateCarrier1_rgr", [["30Rnd_65x39_caseless_mag", 6, 30], ["HandGrenade", 2, 1], ["SmokeShell", 2, 1]]],
-        ["B_Kitbag_rgr", [["ACE_elasticBandage", 10], ["ACE_packingBandage", 10], ["ACE_quikclot", 10], ["ACE_epinephrine", 4], ["ACE_salineIV_500", 2], ["ACE_splint", 2], ["optic_Aco", 1]]],
+        ["B_Kitbag_rgr", _backpackMedical + [["optic_Aco", 1]]],
         "H_HelmetB", "G_Combat",
         ["Binocular", "", "", "", [], [], ""],
         ["ItemMap", "ItemGPS", "ItemRadio", "ItemCompass", "ItemWatch", "NVGoggles"]

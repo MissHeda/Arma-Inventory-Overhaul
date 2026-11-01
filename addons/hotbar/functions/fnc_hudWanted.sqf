@@ -21,7 +21,7 @@
 
 if (!(call FUNC(isActive)) || {GVAR(hudMode) == 0} || {(GVAR(slots) findIf {_x isNotEqualTo ""}) < 0}) exitWith {false};
 
-private _unit = ACE_player;
+private _unit = PLAYER_UNIT;
 
 if (
     isNull _unit || {!alive _unit} || {!local _unit} || {_unit getVariable ["ACE_isUnconscious", false]}

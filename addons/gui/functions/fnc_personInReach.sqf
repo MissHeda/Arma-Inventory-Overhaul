@@ -27,4 +27,4 @@ params [["_player", objNull, [objNull]], ["_person", objNull, [objNull]], ["_her
 !isNull _person && {alive _player}
 && {isNull objectParent _person} && {isNull objectParent _player}
 && {_player distance _person <= ([PERSON_KEEP_REMOTE, PERSON_KEEP] select _here)}
-&& {!_here || {[_player, _person, ["isNotSwimming"]] call ACEFUNC(common,canInteractWith)}}
+&& {!_here || {[_player, _person, ["isNotSwimming"]] call EFUNC(main,canInteract)}}

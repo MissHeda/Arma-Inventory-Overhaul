@@ -33,7 +33,11 @@ if (!_zipped && {!isNull _backpack} && {!isNil QACEFUNC(backpacks,isBackpack)} &
 };
 
 // Shown only where the person is the player (ace_common_fnc_displayTextStructured), in their own
-// language: ACE localizes the key there. Nothing to send for AI.
-if ([_person] call ACEFUNC(common,isPlayer)) then {
-    [QACEGVAR(common,displayTextStructured), [[LSTRING(Notify_Searched), [_looter] call ACEFUNC(common,getName)], 1.5, _person], _person] call CBA_fnc_targetEvent;
+// language: ACE localizes the key there. Nothing to send for AI. Without ACE, as a hint there (aio_main_fnc_showText).
+if (isPlayer _person) then {
+    if (HAS_ACE) then {
+        [QACEGVAR(common,displayTextStructured), [[LSTRING(Notify_Searched), [_looter] call EFUNC(main,unitName)], 1.5, _person], _person] call CBA_fnc_targetEvent;
+    } else {
+        [QEGVAR(main,showText), [format [LLSTRING(Notify_Searched), [_looter] call EFUNC(main,unitName)]], _person] call CBA_fnc_targetEvent;
+    };
 };

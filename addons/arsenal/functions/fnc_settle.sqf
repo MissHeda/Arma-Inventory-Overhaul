@@ -55,7 +55,7 @@ GVAR(cargoPending) = false;
 private _begin = diag_tickTime;
 private _first = _begin;
 
-[missionNamespace getVariable [QACEGVAR(arsenal,center), objNull]] call FUNC(stageOverflow);
+[(call FUNC(center))] call FUNC(stageOverflow);
 ["settle/stageOverflow", _begin] call FUNC(noteOpen);
 
 _begin = diag_tickTime;
@@ -75,7 +75,7 @@ _begin = diag_tickTime;
 ["settle/pictures (first turn)", _begin] call FUNC(noteOpen);
 
 // The engine's unit is ACE's: in the Eden editor a copy ACE made after its display opened.
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 
 if (!isNull _center) then {
     EGVAR(gui,unit) = _center;

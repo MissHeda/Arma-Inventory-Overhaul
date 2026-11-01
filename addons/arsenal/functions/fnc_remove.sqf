@@ -43,7 +43,7 @@ if (!(_gridIndex isEqualType 0) || {!(_tileIndex isEqualType 0)}) exitWith {fals
 private _grid = (uiNamespace getVariable [QEGVAR(gui,grids), []]) param [_gridIndex, createHashMap];
 private _entry = (_grid getOrDefault ["tiles", []]) param [_tileIndex, createHashMap];
 private _container = _grid getOrDefault ["container", objNull];
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 
 (call FUNC(selected)) params ["", "_open"];
 

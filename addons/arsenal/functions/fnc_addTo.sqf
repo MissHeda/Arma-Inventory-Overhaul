@@ -34,7 +34,7 @@ disableSerialization;
 params [["_to", objNull, [objNull]], ["_class", "", [""]], ["_count", 1, [0]], ["_cell", [], [[]]]];
 
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 
 (call FUNC(selected)) params ["_id", "_open"];
 

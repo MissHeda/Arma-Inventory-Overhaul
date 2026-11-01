@@ -94,7 +94,7 @@ if (!isNull _inventory) then {
         [{
             params [["_unit", objNull], ["_container", objNull], ["_person", objNull]];
 
-            if (!alive _unit || {_unit isNotEqualTo ACE_player} || {isNull findDisplay 46}) exitWith {};
+            if (!alive _unit || {_unit isNotEqualTo PLAYER_UNIT} || {isNull findDisplay 46}) exitWith {};
             if (!isNull (uiNamespace getVariable [QEGVAR(gui,display), displayNull])) exitWith {};
 
             // A living person: as the person action opens them, quietly - they were told already. Out of

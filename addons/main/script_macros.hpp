@@ -17,6 +17,11 @@
 #define ACEFUNC(module,function)    TRIPLES(DOUBLES(ACE_PREFIX,module),fnc,function)
 #define QACEFUNC(module,function)   QUOTE(ACEFUNC(module,function))
 
+// ACE is optional. The unit the player controls: ACE's (a unit taken over in Zeus included) when ACE is loaded, else the
+// player. Whether ACE is there at all, by its common addon.
+#define PLAYER_UNIT (missionNamespace getVariable ["ACE_player", player])
+#define HAS_ACE (isClass (configFile >> "CfgPatches" >> "ace_common"))
+
 // Category every keybind of the mod lives under (CBA's Controls menu), shared by all addons. The settings are in two
 // categories of CBA's Addon Options: what each player sets for himself (scope 0), and what the server or the mission
 // decides - every server setting (aio_main_fnc_addSetting), the rules and the older tables (scope 1). A setting's

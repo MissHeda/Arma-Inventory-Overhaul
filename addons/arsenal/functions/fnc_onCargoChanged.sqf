@@ -44,7 +44,7 @@ if (_addOrRemove <= 0 || {_item isEqualTo ""}) exitWith {};
 
 (call FUNC(selected)) params ["_id", "_container"];
 
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 
 if (isNull _container || {!local _center}) exitWith {};
 

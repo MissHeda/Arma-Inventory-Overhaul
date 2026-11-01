@@ -37,7 +37,7 @@ if (isNull _display) exitWith {};
 // Asked already: a second click on the button, a key.
 if !(isNull (uiNamespace getVariable [QGVAR(confirm), controlNull])) exitWith {};
 
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 private _found = [];
 
 if (GVAR(ready) && {!is3DEN} && {!isNull _center} && {local _center}) then {

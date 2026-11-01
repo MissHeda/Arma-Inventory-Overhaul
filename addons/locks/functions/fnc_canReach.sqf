@@ -56,7 +56,7 @@ if (!isNull _root) then {
 // the player sitting here: on a hosting server it would answer for the host, not for a client asking.
 // People are left out: lockInventory on a unit locks the backpack they wear, which is the window's own
 // rule for persons.
-private _player = missionNamespace getVariable ["ACE_player", objNull];
+private _player = PLAYER_UNIT;
 
 if (
     hasInterface

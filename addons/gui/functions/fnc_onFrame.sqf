@@ -170,7 +170,7 @@ private _fnc_mustClose = {
     };
 
     if (!alive GVAR(unit)) exitWith {"the unit died"};
-    if (GVAR(unit) isNotEqualTo ACE_player) exitWith {"the player is no longer this unit (ACE_player changed)"};
+    if (GVAR(unit) isNotEqualTo PLAYER_UNIT) exitWith {"the player is no longer this unit (ACE_player changed)"};
     if (GVAR(unit) getVariable ["ACE_isUnconscious", false]) exitWith {"the unit is unconscious"};
     if (GVAR(personMode) isEqualTo "") exitWith {""};
 

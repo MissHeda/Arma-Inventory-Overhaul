@@ -1,5 +1,7 @@
 // ACE Arsenal's grid panel: ACE's display opened and closed, the open container and the panel's place
 PREP(onOpened);
+PREP(initState);
+PREP(center);
 PREP(onClosed);
 PREP(selected);
 PREP(panelRect);
@@ -88,6 +90,8 @@ PREP(compatCheck);
 PREP(handleBIOpen);
 PREP(biItems);
 PREP(biInit);
+PREP(biOpened);
+PREP(biWatch);
 PREP(biSafetyNet);
 PREP(biCountHandlers);
 PREP(biMissionHooks);

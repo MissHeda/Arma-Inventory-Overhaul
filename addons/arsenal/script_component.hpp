@@ -46,3 +46,22 @@
 #define LOADOUT_UNIFORM 3
 #define LOADOUT_VEST 4
 #define LOADOUT_BACKPACK 5
+
+// The vanilla Virtual Arsenal (BIS_fnc_arsenal; \a3\ui_f\hpp\defineResinclDesign.inc). Its display is RscDisplayArsenal, kept in
+// the uiNamespace under that name. Each tab has a list of its own, IDC_RSCDISPLAYARSENAL_LIST plus the tab's index, the one of
+// the open tab enabled; the sort bar over it IDC_RSCDISPLAYARSENAL_SORT plus that index; the "-" and "+" over the picked row
+// of a cargo list (IDC_RSCDISPLAYARSENAL_ARROWLEFT, _ARROWRIGHT); the load bar under it (IDC_RSCDISPLAYARSENAL_LOADCARGO).
+// The tabs of uniform, vest and backpack on the left (IDC_RSCDISPLAYARSENAL_TAB_UNIFORM, _VEST, _BACKPACK), and the cargo tabs
+// on the right while one of them is open (_TAB_CARGOMAG, _CARGOTHROW, _CARGOPUT, _CARGOMISC, _CARGOMAGALL).
+#define BI_IDC_LIST 960
+#define BI_IDC_SORT 800
+#define BI_IDC_MINUS 992
+#define BI_IDC_PLUS 993
+#define BI_IDC_LOAD 991
+#define BI_TAB_UNIFORM 3
+#define BI_TAB_VEST 4
+#define BI_TAB_BACKPACK 5
+#define BI_CARGO_TABS [21, 22, 23, 24, 26]
+
+// How often the panel looks for what the vanilla arsenal changed, in frames (fnc_biWatch).
+#define BI_WATCH_FRAMES 3

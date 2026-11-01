@@ -32,7 +32,7 @@ disableSerialization;
 
 params [["_display", displayNull, [displayNull]]];
 
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 
 if ((([_display] call FUNC(focusedKit)) select 0)) exitWith {
     if (isNull _center) exitWith {};
@@ -71,7 +71,8 @@ if ((([_display] call FUNC(focusedKit)) select 0)) exitWith {
 
 (call FUNC(selected)) params ["_id", "_container", "", "_itemsIndex", "_loadoutIndex"];
 
-private _list = _display displayCtrl ARSENAL_IDC_LIST;
+private _list = [_display] call FUNC(rightList);
+private _bi = GVAR(kind) isEqualTo "bi";
 
 if (isNull _container || {isNull _list}) exitWith {};
 
@@ -102,7 +103,17 @@ private _load = switch (_id) do {
     default {loadBackpack _center};
 };
 
-(_display displayCtrl ARSENAL_IDC_LOAD) progressSetPosition _load;
+(_display displayCtrl ([ARSENAL_IDC_LOAD, BI_IDC_LOAD] select _bi)) progressSetPosition _load;
+
+// The vanilla arsenal keeps no record of its own: its rows are greyed again by weight, as its own "+" does it.
+if (_bi) exitWith {
+    // In the namespace BI's own display calls it from.
+    private _args = ["SelectItemRight", [_display, _list, ctrlIDC _list - BI_IDC_LIST]];
+
+    with uiNamespace do {
+        _args call (missionNamespace getVariable ["BIS_fnc_arsenal", {}]);
+    };
+};
 
 private _current = missionNamespace getVariable [QACEGVAR(arsenal,currentItems), []];
 

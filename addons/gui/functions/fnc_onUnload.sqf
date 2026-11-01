@@ -69,7 +69,7 @@ if (!isNil QEFUNC(magazines,stop)) then {
 // The container that was looted closes with a sound - unless the soldier was taken from it, is out cold or
 // sits in it.
 if (
-    !isNull GVAR(openedOn) && {alive GVAR(unit)} && {[GVAR(unit)] call ACEFUNC(common,isAwake)}
+    !isNull GVAR(openedOn) && {alive GVAR(unit)} && {[GVAR(unit)] call EFUNC(main,isAwake)}
     && {objectParent GVAR(unit) isNotEqualTo GVAR(openedOn)} && {GVAR(closeReason) isNotEqualTo "taken"}
 ) then {
     ["close", "", GVAR(openedOn)] call FUNC(playSound);

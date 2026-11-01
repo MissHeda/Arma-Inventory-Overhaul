@@ -2,6 +2,22 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.29 - beta
+
+### Added
+
+- Grid panel in the vanilla Virtual Arsenal (issue #45): with the uniform, vest or backpack picked, the same grid as in ACE Arsenal opens beside BI's list - drag rows from the list onto a free spot, sort and turn tiles, drag them out or right click to take them out, the wheel and Ctrl+wheel, the staging space. BI's own "+" and "-" are followed, and the counts and load bar in BI's list follow the grid. The server setting "Vanilla Virtual Arsenal" has a new choice, "Vanilla with grids" (`"grid"`); without ACE the default keeps the vanilla arsenal with the grid panel.
+
+### Fixed
+
+- With "Open ACE Arsenal", every vanilla arsenal opened wrote a script error to the log when the mission did not set `aio_arsenal_biPassThrough`.
+
+## 0.6.28 - beta
+
+### Changed
+
+- ACE is optional (issue #43): CBA is the only requirement. Without ACE, the inventory, looting, the hotbar for grenades, magazines and food, the weight tiers and the setup wizard work as before; the grid in ACE Arsenal, magazine repacking and treating from the hotbar need ACE and are simply not there. Where ACE gave the answer - the player's unit, whether a unit is awake or may handle something, a unit's name, a short message at the bottom of the screen (CBA's notification without ACE) - the engine's own is used without it (`aio_main_fnc_isAwake`, `fnc_canInteract`, `fnc_unitName`, `fnc_showText`, the `PLAYER_UNIT` macro). Without ACE the weight tiers slow the player through the engine's own sprint and walk switches. `hemtt launch noace` starts the test scene with CBA alone.
+
 ## 0.6.27 - beta
 
 ### Fixed

@@ -26,7 +26,7 @@ if (_text isEqualTo "") exitWith {};
 
 if (GVAR(hudMode) == 0) exitWith {
     if (_colour isEqualTo "warning") then {
-        [_text] call ace_common_fnc_displayTextStructured;
+        [_text] call EFUNC(main,showText);
     };
 };
 

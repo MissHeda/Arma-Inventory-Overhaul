@@ -41,7 +41,7 @@ if (_holders isEqualType objNull) then {
     _holders = [_holders];
 };
 
-private _list = _display displayCtrl ARSENAL_IDC_LIST;
+private _list = [_display] call FUNC(rightList);
 
 if (isNull _list) exitWith {[]};
 
@@ -49,7 +49,9 @@ if (isNull _list) exitWith {[]};
 
 private _top = _listY;
 private _bottom = _listY + _listH;
-private _sorts = [_display displayCtrl ARSENAL_IDC_SORT];
+private _sorts = [
+    [_display displayCtrl ARSENAL_IDC_SORT], [_display displayCtrl (ctrlIDC _list - BI_IDC_LIST + BI_IDC_SORT)]
+] select (GVAR(kind) isEqualTo "bi");
 
 if (!isNil QEFUNC(compat_efak,arsenalControls)) then {
     _sorts pushBack (([_display] call EFUNC(compat_efak,arsenalControls)) select 1);

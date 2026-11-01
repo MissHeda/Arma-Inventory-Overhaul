@@ -29,7 +29,6 @@ if (
     !hasInterface || {_tier == _old} || {!(missionNamespace getVariable [QGVAR(notify), true])}
     || {!(_limits getOrDefault ["enabled", missionNamespace getVariable [QGVAR(enabled), true]])}
     || {!isNull (uiNamespace getVariable [QEGVAR(gui,display), displayNull])}
-    || {isNil QACEFUNC(common,displayTextPicture)}
 ) exitWith {};
 
 ([_tier, _limits] call FUNC(tierText)) params ["_word", "_effect"];
@@ -44,4 +43,4 @@ private _color = switch (_tier) do {
     default {[1, 1, 1]};
 };
 
-[_text, QPATHTOEF(gui,ui\icon_weight_ca.paa), _color, ACE_player, 2] call ACEFUNC(common,displayTextPicture);
+[_text, QPATHTOEF(gui,ui\icon_weight_ca.paa), _color] call EFUNC(main,showText);

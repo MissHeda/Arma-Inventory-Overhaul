@@ -25,9 +25,26 @@
 
 params [["_unit", objNull, [objNull]], ["_tier", TIER_LIGHT, [0]]];
 
-if (isNull _unit || {isNil QACEFUNC(common,statusEffect_set)}) exitWith {};
+if (isNull _unit) exitWith {};
 
 private _on = (missionNamespace getVariable [QGVAR(enabled), true]) && {missionNamespace getVariable [QGVAR(effects), true]};
+private _noSprint = _on && {_tier >= TIER_OVERLOADED};
+private _walk = _on && {_tier >= TIER_CRITICAL};
 
-[_unit, "blockSprint", QUOTE(ADDON), _on && {_tier >= TIER_OVERLOADED}] call ACEFUNC(common,statusEffect_set);
-[_unit, "forceWalk", QUOTE(ADDON), _on && {_tier >= TIER_CRITICAL}] call ACEFUNC(common,statusEffect_set);
+// Without ACE, the engine's own switches - set only when this changes them, so a mission's or another mod's stay alone.
+if (isNil QACEFUNC(common,statusEffect_set)) exitWith {
+    (_unit getVariable [QGVAR(effectsSet), [false, false]]) params ["_hadNoSprint", "_hadWalk"];
+
+    if (_noSprint isNotEqualTo _hadNoSprint) then {
+        _unit allowSprint !_noSprint;
+    };
+
+    if (_walk isNotEqualTo _hadWalk) then {
+        _unit forceWalk _walk;
+    };
+
+    _unit setVariable [QGVAR(effectsSet), [_noSprint, _walk]];
+};
+
+[_unit, "blockSprint", QUOTE(ADDON), _noSprint] call ACEFUNC(common,statusEffect_set);
+[_unit, "forceWalk", QUOTE(ADDON), _walk] call ACEFUNC(common,statusEffect_set);

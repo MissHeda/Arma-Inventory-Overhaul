@@ -34,4 +34,4 @@ if (isNil {_box getVariable QACEGVAR(arsenal,virtualItems)}) exitWith {
     [_box, _unit] call FUNC(canOpenBI)
 };
 
-[_unit, _box] call ACEFUNC(common,canInteractWith)
+[_unit, _box] call EFUNC(main,canInteract)

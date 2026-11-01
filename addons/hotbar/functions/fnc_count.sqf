@@ -32,7 +32,7 @@
 
 params [["_class", "", [""]], ["_carried", [], [[]]], ["_usable", [], [[]]]];
 
-private _unit = ACE_player;
+private _unit = PLAYER_UNIT;
 
 if (_class isEqualTo "" || {isNull _unit}) exitWith {0};
 

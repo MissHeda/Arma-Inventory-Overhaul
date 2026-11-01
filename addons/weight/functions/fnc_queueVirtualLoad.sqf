@@ -26,6 +26,6 @@ GVAR(queued) = true;
 
 [{
     GVAR(queued) = false;
-    [ACE_player] call FUNC(updateVirtualLoad);
-    [ACE_player] call FUNC(updateTier);
+    [PLAYER_UNIT] call FUNC(updateVirtualLoad);
+    [PLAYER_UNIT] call FUNC(updateTier);
 }] call CBA_fnc_execNextFrame;

@@ -128,7 +128,7 @@ if (_moves isEqualTo []) exitWith {false};
 private _unit = GVAR(unit);
 
 if (isNull _unit) then {
-    _unit = missionNamespace getVariable ["ACE_player", objNull];
+    _unit = PLAYER_UNIT;
 };
 
 private _vehicle = objectParent _unit;

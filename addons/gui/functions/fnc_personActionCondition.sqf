@@ -31,7 +31,7 @@ if (isNull _holder) then {
     _holder = _target;
 };
 
-private _player = ACE_player;
+private _player = PLAYER_UNIT;
 
 if (
     _target isEqualTo _player
@@ -51,7 +51,7 @@ private _mode = [_target] call FUNC(canOpenPerson);
 // ACE's own conditions: the person not claimed by someone else (dragged, carried, escorted), the player
 // free to reach out - not handcuffed, surrendering, dragging, carrying, on a ladder, on the map or in
 // Zeus. Swimming is no obstacle, as for ACE's backpack interaction.
-if (_mode isEqualTo "" || {!([_player, _target, ["isNotSwimming"]] call ACEFUNC(common,canInteractWith))}) exitWith {false};
+if (_mode isEqualTo "" || {!([_player, _target, ["isNotSwimming"]] call EFUNC(main,canInteract))}) exitWith {false};
 
 // It reads as the engine's own entry. Written only when that changes - kept by action id, as the
 // player's soldier carries both its own person action and the one for agents.

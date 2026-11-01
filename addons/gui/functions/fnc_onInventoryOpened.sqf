@@ -66,7 +66,7 @@ INFO_3("asked: %1 - beside it %2 - the player %3.",_named select 0,_named select
 
 // A soldier the player no longer is - the body a team switch left behind, a unit a script ran the action on:
 // there is no window for it.
-if (_unit isNotEqualTo ACE_player) exitWith {
+if (_unit isNotEqualTo PLAYER_UNIT) exitWith {
     INFO_1("refused: %1 is not the player's unit (ACE_player) - nothing opens.",typeOf _unit);
 };
 
@@ -212,7 +212,7 @@ private _mode = if (isNull _person) then {""} else {[_person] call FUNC(canOpenP
 // An ACE dragging clone (a copy of a body's gear) or a person the mission closed: nothing opens.
 if (!isNull _person && {_mode isEqualTo ""}) exitWith {
     INFO_1("refused: %1 may not be opened (a dragging clone or aio_noAccess) - nothing opens.",typeOf _person);
-    [LLSTRING(Hint_NoAccess)] call ACEFUNC(common,displayTextStructured);
+    [LLSTRING(Hint_NoAccess)] call EFUNC(main,showText);
 };
 
 // Out of reach by the window's own rule (fnc_personInReach): claimed by someone else - dragged, carried,
@@ -220,7 +220,7 @@ if (!isNull _person && {_mode isEqualTo ""}) exitWith {
 // the window would close again at its first check, the person told for nothing.
 if (!isNull _person && {!([_unit, _person, true] call FUNC(personInReach))}) exitWith {
     INFO_1("refused: %1 is out of reach - nothing opens.",typeOf _person);
-    [LLSTRING(Hint_OutOfReach)] call ACEFUNC(common,displayTextStructured);
+    [LLSTRING(Hint_OutOfReach)] call EFUNC(main,showText);
 };
 
 if (!isNull _person) then {

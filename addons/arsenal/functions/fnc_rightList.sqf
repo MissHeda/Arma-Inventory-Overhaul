@@ -26,4 +26,11 @@ if ((([_display] call FUNC(focusedKit)) select 0) && {!isNil QEFUNC(compat_efak,
     ([_display] call EFUNC(compat_efak,arsenalControls)) select 0
 };
 
+// The vanilla arsenal: the cargo list of the open tab of its right side, the one enabled.
+if (GVAR(kind) isEqualTo "bi") exitWith {
+    private _tab = (BI_CARGO_TABS select {ctrlEnabled (_display displayCtrl (BI_IDC_LIST + _x))}) param [0, -1];
+
+    [controlNull, _display displayCtrl (BI_IDC_LIST + _tab)] select (_tab >= 0)
+};
+
 _display displayCtrl ARSENAL_IDC_LIST

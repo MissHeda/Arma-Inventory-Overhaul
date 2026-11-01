@@ -27,14 +27,16 @@ params [["_args", [], [[], true]]];
 
 private _mode = missionNamespace getVariable [QGVAR(biArsenal), "vanilla"];
 
-// 1. Left alone: the vanilla arsenal as it always was (what does not fit is reported after it, fnc_biLeaveAlone).
-if (_mode isEqualTo "vanilla") exitWith {false};
+// 1. Left alone, or kept with the grid panel beside its list (fnc_biOpened, from fnc_biSafetyNet): the vanilla arsenal opens (what
+// does not fit is passed on and reported after it, fnc_biLeaveAlone). ACE Arsenal asked for where there is none: the same.
+if (_mode in ["vanilla", "grid"] || {_mode isEqualTo "ace" && {!GVAR(ready)}}) exitWith {false};
 
-// 2. What always keeps the vanilla arsenal.
-private _passThrough = missionNamespace getVariable "aio_arsenal_biPassThrough";
+// 2. What always keeps the vanilla arsenal. A mission's aio_arsenal_biPassThrough is true, false or not set (-1):
+// never a nil local, which the checks below would fail on.
+private _passThrough = missionNamespace getVariable ["aio_arsenal_biPassThrough", -1];
 
 if (
-    !hasInterface || {!GVAR(ready)} || {_passThrough isEqualTo true}
+    !hasInterface || {_passThrough isEqualTo true}
     || {missionName isEqualTo "Arsenal" && {!isNil "arsenal_fnc_opened"}}
     || {!isNil "BIS_WL_arsenalEnabled"}
 ) exitWith {
@@ -46,7 +48,7 @@ if (
 // A mission that hooks the vanilla arsenal itself restricts it there: it keeps the one it was written for,
 // unless it says ours is fine (aio_arsenal_biPassThrough set to false). Not under "not allowed": a server
 // that forbids the vanilla arsenal forbids it for those missions too.
-if (_mode isEqualTo "ace" && {isNil "_passThrough"} && {call FUNC(biMissionHooks)}) exitWith {
+if (_mode isEqualTo "ace" && {_passThrough isEqualTo -1} && {call FUNC(biMissionHooks)}) exitWith {
     GVAR(biLetThrough) = true;
 
     false

@@ -44,6 +44,13 @@ if (isNil {uiNamespace getVariable QACEGVAR(arsenal,configItems)}) then {
 
 private _ready = _missing isEqualTo [];
 
+// No ACE at all: nothing is wrong - the vanilla arsenal gets the grid (fnc_biOpened).
+if (!isClass (configFile >> "CfgPatches" >> "ace_arsenal")) exitWith {
+    INFO("No ACE Arsenal - the vanilla Virtual Arsenal gets the grid panel.");
+    GVAR(ready) = false;
+    false
+};
+
 if (!_ready) then {
     private _list = _missing joinString " ";
 

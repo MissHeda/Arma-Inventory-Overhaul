@@ -27,7 +27,7 @@ params [["_index", -1, [0]]];
 
 if (_index < 0 || {_index >= SLOT_COUNT} || {!(call FUNC(isActive))}) exitWith {};
 
-private _unit = ACE_player;
+private _unit = PLAYER_UNIT;
 private _class = GVAR(slots) param [_index, ""];
 
 if (_class isEqualTo "" || {!alive _unit}) exitWith {};

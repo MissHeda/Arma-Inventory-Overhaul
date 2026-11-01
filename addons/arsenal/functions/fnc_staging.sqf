@@ -35,7 +35,7 @@ params [["_make", true, [true]]];
 
 if (!isNull GVAR(staging) || {!_make}) exitWith {GVAR(staging)};
 
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 
 // Its moves run on this machine, without the hub (which cannot see a crate made here): so must the
 // soldier's. A unit that is local here but that the hub works on - a Zeus or ZEN loadout edit of an AI -

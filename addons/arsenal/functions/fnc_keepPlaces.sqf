@@ -29,7 +29,7 @@
  * Public: No
  */
 
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 
 if (isNull _center || {!local _center}) exitWith {};
 

@@ -42,7 +42,7 @@ if (!_allowed) then {
         if (_window) then {
             [_why] call EFUNC(gui,flashHint);
         } else {
-            [_why] call ace_common_fnc_displayTextStructured;
+            [_why] call EFUNC(main,showText);
         };
     };
 };

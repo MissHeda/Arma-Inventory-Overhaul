@@ -35,7 +35,7 @@ disableSerialization;
 
 params [["_display", displayNull, [displayNull]], ["_jobs", [], [[]]], ["_pass", -1, [0]]];
 
-if (isNull _display) exitWith {};
+if (isNull _display || {GVAR(kind) isEqualTo "bi"}) exitWith {};
 
 if (_pass < 0) then {
     GVAR(picturePass) = GVAR(picturePass) + 1;

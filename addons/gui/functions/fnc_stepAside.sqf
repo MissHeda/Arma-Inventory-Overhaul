@@ -41,7 +41,7 @@ private _fnc_run = {
         params ["_unit", "_container", "_secondary"];
 
         // Only for the same player, alive, with no window open meanwhile.
-        if (alive _unit && {_unit isEqualTo ACE_player} && {isNull (uiNamespace getVariable [QGVAR(display), displayNull])}) then {
+        if (alive _unit && {_unit isEqualTo PLAYER_UNIT} && {isNull (uiNamespace getVariable [QGVAR(display), displayNull])}) then {
             [_unit, _container, _secondary] call FUNC(open);
         };
     };

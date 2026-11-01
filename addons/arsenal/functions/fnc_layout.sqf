@@ -94,7 +94,7 @@ GVAR(focusBuilt) = _focus;
 
 // Folded, no staging space is looked at: the crate is made when the panel unfolds.
 private _holder = if (_collapsed) then {objNull} else {[] call FUNC(staging)};
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 private _worn = [uniformContainer _center, vestContainer _center, backpackContainer _center];
 
 // Which class or key each section of this build folds by (the "fold" hook).
@@ -271,7 +271,7 @@ if (!isNull _holder) then {
 // The padding of the block, as the inventory's columns have it (aio_gui_fnc_drawColumn): the title row
 // starts a padding under the block's top and the column a padding under the title row, the column's own
 // padding being the one between them - so the title band reaches down to the end of the title row.
-private _list = _display displayCtrl ARSENAL_IDC_LIST;
+private _list = [_display] call FUNC(rightList);
 private _padY = UNIT * PANEL_PAD;
 private _padX = SQUARE(_padY);
 private _titleH = TITLE_H;
@@ -317,7 +317,7 @@ if (_collapsed) exitWith {
     // The button takes no keyboard focus: a focused button draws the engine's frame round itself.
     (_unfold select -1) ctrlAddEventHandler ["SetFocus", {
         params ["_ctrl"];
-        private _list = (ctrlParent _ctrl) displayCtrl ARSENAL_IDC_LIST;
+        private _list = [ctrlParent _ctrl] call FUNC(rightList);
 
         if (!isNull _list) then {
             ctrlSetFocus _list;

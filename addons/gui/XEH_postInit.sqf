@@ -40,7 +40,7 @@ if (!hasInterface) exitWith {};
 // them (fnc_initUnit); a handler added later still is found by the guard (fnc_guardVanilla).
 [{!isNull findDisplay 46}, {
     [{
-        [ACE_player, true] call FUNC(initUnit);
+        [PLAYER_UNIT, true] call FUNC(initUnit);
     }, [], HANDLER_RECHECK] call CBA_fnc_waitAndExecute;
 }] call CBA_fnc_waitUntilAndExecute;
 

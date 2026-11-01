@@ -92,7 +92,10 @@
             <English>Not allowed</English>
         </Key>
         <Key ID="STR_aio_arsenal_Setting_BIArsenal_Desc">
-            <English>What the vanilla Virtual Arsenal does: open ACE Arsenal with grids,\nblock it, or leave it vanilla. Zeus is never stopped.</English>
+            <English>What the vanilla Virtual Arsenal does: open ACE Arsenal with grids,\nkeep it with grids beside its list, block it, or leave it\nvanilla. Without ACE it keeps the grids. Zeus is never stopped.</English>
+        </Key>
+        <Key ID="STR_aio_arsenal_Setting_BIArsenal_Grid">
+            <English>Vanilla with grids</English>
         </Key>
         <Key ID="STR_aio_arsenal_Setting_BIArsenal_Vanilla">
             <English>Leave it alone</English>

@@ -30,7 +30,7 @@ private _code = uiNamespace getVariable [QGVAR(confirmCode), 1];
 
 if (isNull _display) exitWith {};
 
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _center = (call FUNC(center));
 private _gone = [_center] call FUNC(dropOverflow);
 
 if (count _gone > 0) then {

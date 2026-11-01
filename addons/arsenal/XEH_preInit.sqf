@@ -134,6 +134,11 @@ GVAR(greyAlpha) = 0.25;
 // helper that carries a vanilla box's items into ACE Arsenal (fnc_openBI).
 GVAR(biLetThrough) = false;
 GVAR(biLeave) = [];
+
+// Which arsenal the grid panel lies on: "ace" for ACE Arsenal, "bi" for the vanilla one (fnc_biOpened), and what the vanilla
+// one showed at the last look (fnc_biWatch).
+GVAR(kind) = "ace";
+GVAR(biSeen) = [];
 GVAR(biCatalogBase) = [];
 GVAR(biModHandlers) = [0, 0];
 GVAR(biHelper) = objNull;

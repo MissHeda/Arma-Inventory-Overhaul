@@ -24,7 +24,7 @@
 
 params [["_unit", objNull, [objNull]], ["_layers", [], [[]]], ["_range", 10, [0]], ["_inside", false, [false]]];
 
-if (isNull _unit || {_unit isEqualTo ACE_player && {!(missionNamespace getVariable [QGVAR(noiseSelf), false])}}) exitWith {};
+if (isNull _unit || {_unit isEqualTo PLAYER_UNIT && {!(missionNamespace getVariable [QGVAR(noiseSelf), false])}}) exitWith {};
 
 // Heard where the camera is.
 if ((positionCameraToWorld [0, 0, 0]) distance _unit > _range + NOISE_MARGIN) exitWith {};

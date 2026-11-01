@@ -78,7 +78,7 @@ if (!isNil QEFUNC(compat_efak,arsenalKit)) then {
 
 // Kits of Enhanced First Aid Kits that lie in the staging space go with it: their instances back to that mod's pool,
 // unless one of the class lies on the soldier (aio_compat_efak_fnc_arsenalFree).
-private _soldier = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+private _soldier = (call FUNC(center));
 
 if (!isNull GVAR(staging) && {!isNull _soldier} && {!isNil QEFUNC(compat_efak,arsenalFree)}) then {
     [
@@ -95,8 +95,14 @@ if (!isNull GVAR(staging) && {!isNull _soldier} && {!isNil QEFUNC(compat_efak,ar
 
 GVAR(biHelper) = objNull;
 GVAR(staging) = objNull;
+GVAR(biSeen) = [];
 
-private _center = missionNamespace getVariable [QACEGVAR(arsenal,center), objNull];
+// The vanilla arsenal: what does not fit goes on to the next container with room, or is named (fnc_biLeaveAlone).
+if (GVAR(kind) isEqualTo "bi") exitWith {
+    GVAR(kind) = "ace";
+};
+
+private _center = (call FUNC(center));
 
 if (isNull _center || {is3DEN} || {!GVAR(ready)}) exitWith {};
 

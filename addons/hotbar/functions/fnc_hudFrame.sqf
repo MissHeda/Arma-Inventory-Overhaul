@@ -125,12 +125,12 @@ if (GVAR(busy) isNotEqualTo []) then {
 
 private _held = "";
 
-if (ACE_player getVariable ["ace_advanced_throwing_inHand", false]) then {
-    _held = (currentThrowable ACE_player) param [0, ""];
+if (PLAYER_UNIT getVariable ["ace_advanced_throwing_inHand", false]) then {
+    _held = (currentThrowable PLAYER_UNIT) param [0, ""];
 };
 
 private _cooling = missionNamespace getVariable ["ace_advanced_throwing_enabled", false];
-private _lastThrown = ACE_player getVariable ["ace_advanced_throwing_lastThrownTime", -10];
+private _lastThrown = PLAYER_UNIT getVariable ["ace_advanced_throwing_lastThrownTime", -10];
 
 // ----- A refused press -----
 
