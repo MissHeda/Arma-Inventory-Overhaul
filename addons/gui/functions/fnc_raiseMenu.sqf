@@ -64,8 +64,15 @@ if ((GVAR(menuFor) param [0, ""]) isEqualTo "palette") exitWith {
     true
 };
 
-GVAR(menuState) params ["_choices", "_at"];
+// And the size popover (fnc_openSizeMenu), with the sizes as they are.
+if ((GVAR(menuFor) param [0, ""]) isEqualTo "size") exitWith {
+    [_display] call FUNC(openSizeMenu);
 
-[_display, _choices, _at] call FUNC(openMenu);
+    true
+};
+
+GVAR(menuState) params ["_choices", "_at", ["_across", 0], ["_note", ""]];
+
+[_display, _choices, _at, _across, _note] call FUNC(openMenu);
 
 true

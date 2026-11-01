@@ -6,10 +6,11 @@
  * beside the pointer. Its glass and its words are drawn into it by fnc_setTipText, which knows the size: round corners as the
  * comparison card has them (fnc_drawCompare), the words in the middle. Made after every build (fnc_drawTopLayer) and again
  * whenever it has to lie over something made after it (fnc_raiseTooltip). It is not kept anywhere here: the caller says where
- * (uiNamespace tooltip).
+ * (uiNamespace tooltip). While a popup is open it is made in the popup's own layer instead, as its last control (fnc_raiseTooltip).
  *
  * Arguments:
  * 0: Display <DISPLAY>
+ * 1: The group to make it in, controlNull for the display <CONTROL> (default: controlNull)
  *
  * Return Value:
  * The group <CONTROL>
@@ -22,9 +23,9 @@
 
 disableSerialization;
 
-params ["_display"];
+params ["_display", ["_parent", controlNull, [controlNull]]];
 
-private _tip = [_display, "AIO_Group", controlNull, [-10, -10, 0, TEXT_UNIT * 0.85]] call FUNC(uiCreate);
+private _tip = [_display, "AIO_Group", _parent, [-10, -10, 0, TEXT_UNIT * 0.85]] call FUNC(uiCreate);
 
 // With the titles' gradient on, its words are structured text: their letters take the gradient (fnc_setTipText).
 _tip setVariable [QGVAR(gradient), (

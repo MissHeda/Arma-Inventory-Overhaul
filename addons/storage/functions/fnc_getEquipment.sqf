@@ -13,6 +13,8 @@
  *       [second magazine, rounds] or [], bipod], [] when the slot is empty <ARRAY>
  *   "uniform", "vest", "backpack", "headgear", "goggles", "map", "gps", "radio", "compass", "watch",
  *       "nvg" - class name, "" when the slot is empty <STRING>
+ *   "primary2" - the second primary on the back, as the weapons, [] when empty - only on a unit that has
+ *       that slot: with WebKnight's or KJW's Two Primary Weapons loaded (fnc_secondPrimary) <ARRAY>
  *
  * Example:
  * [player] call aio_storage_fnc_getEquipment;
@@ -53,7 +55,7 @@ _assigned params [
     ["_nvg", "", [""]]
 ];
 
-createHashMapFromArray [
+private _equipment = createHashMapFromArray [
     ["primary", _primary],
     ["launcher", _launcher],
     ["handgun", _handgun],
@@ -69,4 +71,13 @@ createHashMapFromArray [
     ["compass", _compass],
     ["watch", _watch],
     ["nvg", _nvg]
-]
+];
+
+// The weapon on the back that one of the two-primary mods keeps outside the loadout - a slot of its own.
+([_unit] call FUNC(secondPrimary)) params ["_hasSecond", "_second"];
+
+if (_hasSecond) then {
+    _equipment set ["primary2", _second];
+};
+
+_equipment

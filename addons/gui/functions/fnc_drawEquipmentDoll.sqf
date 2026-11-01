@@ -220,12 +220,14 @@ private _slots = [
 
         // A single rocket or grenade is no count worth showing.
         if (_capacity > 1) then {
-            private _size = _textUnit * ([0.8, 0.62] select _compact);
+            // Set smaller where the slot is too narrow or too low for it (fnc_fitSize) - never cut.
+            private _text = format ["%1/%2", _rounds, _capacity];
+            private _size = [_text, _slotW - _padX * 2, _fontBold, (_textUnit * ([0.8, 0.62] select _compact)) min (_slotH * SLOT_LINE_MAX)] call FUNC(fitSize);
             private _boxH = _size * 1.15;
 
             [
                 _display, _parent, [_slotX + _padX, _slotY + _slotH - _padY * 0.5 - _boxH, _slotW - _padX * 2, _boxH],
-                format ["%1/%2", _rounds, _capacity], _size, _colorText, _fontBold, 1, "weaponammo"
+                _text, _size, _colorText, _fontBold, 1, "weaponammo"
             ] call FUNC(uiLabel);
         };
     };

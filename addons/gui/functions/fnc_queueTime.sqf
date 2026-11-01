@@ -51,6 +51,9 @@ switch (_move getOrDefault ["kind", "move"]) do {
     case "exchange": {
         _hand = "move";
     };
+    case "fit": {
+        _hand = "equip";
+    };
     case "equip";
     case "unequip";
     case "swap": {

@@ -77,6 +77,8 @@ PREP(opPut);
 PREP(opPutGround);
 PREP(opTakeOff);
 PREP(opPutOn);
+PREP(opFit);
+PREP(partFits);
 PREP(opRepack);
 PREP(opMigrate);
 
@@ -101,6 +103,8 @@ PREP(plan);
 PREP(getSlot);
 PREP(slotAccepts);
 PREP(slotFor);
+PREP(secondPrimary);
+PREP(setSecondPrimary);
 PREP(partFor);
 PREP(weaponPart);
 PREP(addWeapon);

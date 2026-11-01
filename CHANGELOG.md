@@ -2,6 +2,189 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.49 - beta
+
+### Fixed
+
+- Attachments: a click on the row of parts under the picture opens the parts right there, not at the box over the weapon.
+- Attachments of a weapon lying in a container: its parts can be dragged out too - onto a grid or the ground.
+- A part dragged onto a weapon showed red although it went on: every way of putting a part on - the weapon card, a weapon's tile, the Attachments boxes and row - now asks the very same check for the colour and for the drop.
+
+## 0.6.48 - beta
+
+### Added
+
+- Weapons lying in a container show small pictures of their parts in the bottom right corner of their tile, and their right-click menu has **Attachments**: change their parts as on a weapon you carry. A part dropped straight onto a weapon's tile goes on it where it fits (what was on that part goes where the new one lay), else it shows red.
+- Attached parts of a weapon you carry can be dragged out of the Attachments view's boxes and row - onto a grid or the ground.
+
+### Changed
+
+- **Modify** is now **Attachments**, and its card is as large as Inspect's. **Inspect** only looks again - no part boxes, no row of parts.
+- A part box's tiles start with the part that is on now, framed in the accent colour, then NONE, then what else fits.
+- The drop highlight on the Attachments view's boxes and row has round corners like every other one.
+
+### Fixed
+
+- The marks of the attachments on a weapon's picture were gone in 0.6.46: they show again, as the weapon's own shapes, but never larger than a fixed share of the picture.
+
+## 0.6.47 - beta
+
+### Fixed
+
+- The hint at the mouse lay behind an open popup - the part tiles of the modding view, a context menu, the colour, size and sound popovers. A popup holds the focus and the game draws it after everything else; the hint now moves into the open popup and lies over it, and back once it closes.
+- The part tiles no longer show "Nothing fits" as if it were a part: NONE (only while a part is on) and the parts that fit are the only tiles, and that nothing fits is a line of text under them - or, with nothing on the part either, just the hint.
+
+## 0.6.46 - beta
+
+### Changed
+
+- The white marks of the attachments on a weapon's picture (the weapon cards and tiles) are clean silhouettes of the slot - muzzle, optic, rail, bipod - all of one size that grows and shrinks with the picture, instead of the weapon's own glowing shapes, of which the laser's was far too big.
+
+## 0.6.45 - beta
+
+### Changed
+
+- Modify shows the weapon in the inspect card's own 3D picture again (Picture-in-Picture, as in 0.6.41): the attempts with the game's own camera are gone, the world behind the window stays untouched. The card can be moved again.
+- The part boxes around the weapon are smaller.
+
+## 0.6.44 - beta
+
+### Changed
+
+- Modify's parts look like Tarkov's weapon builds: square glass boxes with rounded corners above and below the weapon, each with the part's picture and short name (NONE when empty), and a thin line to a dot on the part's place. A click on a box opens the parts as picture tiles right under it - NONE first, then what fits from your gear and the loot.
+
+## 0.6.43 - beta
+
+### Changed
+
+- Modify leaves the world around the window as it was: the weapon with its parts is placed, small, right in front of your eye and shows in the card's picture on a dark plate, at full game quality. While the card is open your own figure is hidden for you (it would stand in the way). In a vehicle, or where a wall stands too close, it falls back to the view of 0.6.42.
+- The weapon cards' headers lie closer together.
+- A point's list shows only the parts that fit, with **None** at the top to take the part off - no title row.
+
+### Fixed
+
+- After turning the weapon, its points could not be clicked any more.
+- The weapon cards (and tiles) showed only the optic on the weapon's picture: muzzle devices, lasers and lights show again.
+
+## 0.6.42 - beta
+
+### Changed
+
+- Modify shows the weapon with the game's own camera, at full quality like any weapon in the world, instead of the coarse Picture-in-Picture texture. Its card sits between the equipment column and your gear, over the loot column, which hides while it is open; it also works with Picture-in-Picture switched off. The small Inspect card keeps its 3D picture as before.
+
+## 0.6.41 - beta
+
+### Added
+
+- Weapon modding as in Tarkov (#56): right-click one of your weapons and pick **Modify** - a wide inspect card shows it in 3D with a point on each part (muzzle, optic, rail, bipod, magazine, second magazine), following the weapon as you turn, move and zoom it. Click a point for the parts from your gear and the open loot that fit there, right-click it to take the part off into your gear, or drag a part from any grid onto it. A row under the picture lists the same parts, also for weapons whose model names no place for one, and in 2D. **Inspect** on your own weapon has the points and the row too, on the usual card.
+
+### Changed
+
+- The weapon cards have no attachment and magazine boxes any more - half of them stood empty. A card shows the weapon's picture and name and small pictures of what is on it, the loaded magazines with their rounds. Dropping an attachment or a magazine on the card still puts it on.
+
+## 0.6.40 - beta
+
+### Changed
+
+- A weapon card's attachment boxes are in the same places on every card: muzzle, optic and rail on top; bipod, magazine and second magazine below. The handgun and the launcher leave the places of what they cannot take empty.
+- The grip's two chevrons sit closer together, with a longer dash between them.
+
+### Fixed
+
+- The tip of a fold caption or grip in the equipment column still went away on a click. Those buttons now take the click the way the fold tabs of the gear columns do, and keep their tip.
+
+## 0.6.39 - beta
+
+### Added
+
+- The sections of the equipment column - Equipment, Gear and Hotbar - fold away with a click on their caption, like the weapon cards: hide the hotbar if you never use it. Kept in your profile.
+
+### Changed
+
+- A weapon card's grip shows a chevron up and one down with a dash between them.
+
+### Fixed
+
+- After a click on a fold caption the tip at the mouse went away until the mouse moved; it shows again at once now, for every button that builds the window anew.
+
+## 0.6.38 - beta
+
+### Added
+
+- Each weapon card has a header line now: click its caption to fold the card away to that line and again to open it; the folded line names the weapon and still takes one dragged onto it. The second primary's card starts folded while nothing is on your back. What you fold is kept in your profile.
+- Drag a weapon card by the grip (the six dots at the right end of its header) to put it anywhere in the column - the handgun on top and the primaries at the bottom, say. A line shows where it goes; your order is kept in your profile.
+
+### Fixed
+
+- With a larger text size the handgun's picture vanished from its card and the cards got cramped: the key moved into the header, and a weapon's picture always keeps at least half its card.
+- Setup wizard: the text box of "Message when not allowed" (Vanilla Arsenal) started far right of the other controls; it lines up with them now.
+
+## 0.6.37 - beta
+
+### Changed
+
+- BackpackOnChest Redux: the backpack slot's menu offers its moves only where that mod allows them (not while its setting turns them off, not under a parachute).
+
+## 0.6.36 - beta
+
+### Fixed
+
+- Size popover (issue #51): the tips of its rows lay behind the card. They show on a hint line inside it now, as in the colour popover.
+- Size popover: "Rows per page" seemed to do nothing. It only cuts a crate or vehicle of the loot that is filled with more rows than a page; where nothing looted is, its name is dimmed and its tip - and a press on its slider - say so.
+- With large tiles, the rounds of a loaded magazine ("0/30") in the small boxes beside a weapon were cut off or ran into the box's caption. A slot's words now never take more than its height allows, and the rounds are set smaller where the box is too narrow - at every tile and text size.
+
+## 0.6.35 - beta
+
+### Fixed
+
+- After the first inventory opening the soldier could not walk until V was pressed: the engine left him in its inventory pose, which only its own inventory ends. The window and the closed vanilla inventory now take him out of it (issue #49).
+- Quick move no longer puts things on a pile at your feet that the loot column shows - dropping is G's; with nothing else looted it moves within your own gear (issue #50).
+- A soldier you lead, told to open his inventory, walked back into formation and the window closed at once: he stays put while it is open and follows again when it closes (issue #48).
+
+## 0.6.34 - beta
+
+### Added
+
+- BackpackOnChest (original and Redux): the right-click menu of your backpack slot puts the backpack on your chest, back onto your back, or swaps the two - that mod's own actions (issue #34).
+- Antistasi Ultimate: "Loot around" of a loot truck or crate now takes what lies in this mod's piles on the ground as well - it looted only the engine's own piles by their class and passed over everything dropped or moved out of a body or a box through the window (issue #35).
+
+## 0.6.33 - beta
+
+### Added
+
+- Second primary weapon as a slot of its own (issue #52), with WebKnight's or KJW's Two Primary Weapons loaded: the rifle on your back gets a card under your primary, with its magazine and attachments beside it, as on the primary. Drag a rifle onto it or off it, drop it, Ctrl+click it into your gear, change its optic, magazine and other parts like on any weapon. Drag the primary and the second primary onto each other, or pick "Swap with primary" / "Swap with second primary" in the right-click menu, and they trade places. A double click on a rifle with your hands full puts it on your back when that is free. The card's corner shows that mod's own switch key. Everything goes through that mod's own way of keeping the weapon (its variables, the weapon hanging on your back, with KJW's its weight in ACE), so its key switches to a rifle put there in the window as to one it put there itself; KJW's blacklist and whitelist decide what may go on the back. KJW's mod keeps the back weapon of the player only, WebKnight's of any soldier - your subordinates' too.
+
+### Changed
+
+- With WebKnight's Two Primary Weapons, a move in the window that empties your hands no longer brings the weapon on your back into them: it now has a slot you see and move yourself.
+
+## 0.6.32 - beta
+
+### Added
+
+- Size menu in the window (issue #51): a new button in the header, beside the palette, opens a popover with a slider for **Tiles** (the tile scale), **Text** and **Rows per page**. The window grows and shrinks behind it while you drag - no reopening. "Default" takes all three back. They are your CBA client settings, both ways: what you set here is saved there, and a change in CBA's Addon Options shows at once in an open window and in the popover. A size the server forces is greyed out.
+- Text size (`aio_gui_textSize`, client, 0.8 to 1.4, default 1): the window's words on top of what the tile scale gives them - larger words on small tiles, or smaller ones. The 12-pixel floor that keeps them readable stays.
+
+### Changed
+
+- The tile scale (`aio_gui_cellScale`) and the rows per page (`aio_gui_pageRows`) take effect at once in an open window instead of at the next opening; the tile scale moves in steps of 0.05.
+
+## 0.6.31 - beta
+
+### Changed
+
+- Quick move (double click, F) with nothing being looted no longer drops the item at your feet: it moves it within your own gear - out of the backpack into the vest, then the uniform; out of the vest or the uniform into the backpack, then the other one (issue #50). Dropping stays on G. Seated, it still goes into the vehicle.
+
+### Fixed
+
+- Telling a soldier you lead to open his inventory (command menu) opened your own gear instead: the window now shows your gear with his beside it, whole, as for any person - he has to stand next to you (issue #48).
+
+## 0.6.30 - beta
+
+### Fixed
+
+- Without ACE, the line that says why a reload or a throw was held back ("Use items from ..." set to Nothing or Only whitelisted) and the arsenal's "removed, as they did not fit" came as the game's hint box in the corner of the screen, which stays there; they are CBA notifications now, as every other short message without ACE.
+
 ## 0.6.29 - beta
 
 ### Added

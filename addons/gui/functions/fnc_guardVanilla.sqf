@@ -197,6 +197,10 @@ if (_under) then {
 
 _display closeDisplay 2;
 
+// Closed this way, the engine leaves the soldier in its inventory pose (fnc_leaveGearPose) - a frame on, once it
+// has taken the display's close.
+[{[PLAYER_UNIT] call FUNC(leaveGearPose)}] call CBA_fnc_execNextFrame;
+
 // Held until it is gone: the engine may no longer list a display that is closing (findDisplay) and still
 // have it, and a window made then is its child and goes with it (fnc_open).
 private _closing = (uiNamespace getVariable [QGVAR(closing), []]) select {!isNull _x};

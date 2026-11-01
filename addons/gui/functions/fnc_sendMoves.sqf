@@ -50,7 +50,7 @@
  *
  * Arguments:
  * 0: Moves, each a HashMap <ARRAY>
- *    "kind"     - "move" (default), "equip", "unequip", "swap", "sort", "placeMany" or "exchange"
+ *    "kind"     - "move" (default), "equip", "unequip", "swap", "sort", "placeMany", "exchange" or "fit"
  *    "from"     - holder it lies in: a container, or a key like "kit:..." (aio_storage_holderTypes);
  *                 for "sort" the holder to sort
  *    "fromRoot" - its root, objNull to look it up (aio_storage_fnc_rootOf)
@@ -74,7 +74,8 @@
  *    "unit", "slot" - whose slot and which (equip: the player's, unequip: anybody's, swap: where it
  *                 comes off)
  *    "toUnit", "toSlot" - for "swap": the unit it goes onto and the slot there; what that unit wore
- *                 there comes back onto "unit" (fnc_doSwap)
+ *                 there comes back onto "unit" (fnc_doSwap). The same unit for its primary and the second
+ *                 primary on its back, either of them maybe empty
  *    "tiles"    - for "placeMany": [[entry, cell], ...] in the holder "from"; a cell is [col, row,
  *                 compartment] or, turned, [col, row, compartment, width, height]
  *    "otherEntry", "otherCell" - for "exchange": the tile that lies in "to" and the cell in "from" it
@@ -82,6 +83,9 @@
  *                 width, height, rot])
  *    "kit"      - the kit class an equip comes out of, for where its old item may go (default "")
  *    "order"    - for "sort": one of SORT_MODES, what the holder is laid out by (default "size", largest first)
+ *    "part", "partFrom", "partEntry" - for "fit": a part put on (or, with no partEntry, taken off) the weapon tile "entry" in
+ *                 "from" - "muzzle", "optic", "rail", "bipod", "mag" or "mag2" -, the tile of the part and the container it lies
+ *                 in; what was on the part goes back where the new one lay, or, taken off, into "to" (fnc_doFit)
  * 1: Options <HASHMAP> (default: empty)
  *    "flash" - light up where the moves landed once they did <BOOL> (default: true)
  *    "label" - a text the hint shows once everything went as asked <STRING> (default: "")
@@ -404,6 +408,84 @@ private _fnc_equipSteps = {
     ["", _steps, objNull, _old getOrDefault ["class", ""], _oldTo]
 };
 
+// A part onto a weapon that lies in a container, or off it: the part taken, the weapon taken, op "fit" between them, the weapon
+// put back onto its cell and what came off where the part came from - or, taken off, into "to".
+private _fnc_fitSteps = {
+    params ["_move"];
+
+    private _from = _move getOrDefault ["from", objNull];
+    private _entry = _move getOrDefault ["entry", createHashMap];
+    private _part = _move getOrDefault ["part", ""];
+    private _partFrom = _move getOrDefault ["partFrom", objNull];
+    private _partEntry = _move getOrDefault ["partEntry", createHashMap];
+    private _detach = count _partEntry == 0;
+
+    if !(_from isEqualType objNull) exitWith {["Failed", []]};
+    if (isNull _from || {count _entry == 0} || {_part isEqualTo ""}) exitWith {["Failed", []]};
+
+    private _root = [_from, objNull] call _fnc_rootOf;
+
+    if (isNull _root) exitWith {["Moved", []]};
+
+    private _cell = [_entry getOrDefault ["col", 0], _entry getOrDefault ["row", 0], _entry getOrDefault ["block", 0]];
+    private _weaponArray = [_entry] call EFUNC(storage,entryToArray);
+    private _old = (_entry getOrDefault ["attachments", []]) param [["", "muzzle", "rail", "optic", "mag", "mag2", "bipod"] find _part, ""];
+    private _hasOld = (_old isEqualType "" && {_old isNotEqualTo ""}) || {_old isEqualType [] && {(_old param [0, ""]) isNotEqualTo ""}};
+
+    if (_detach) exitWith {
+        private _to = _move getOrDefault ["to", _from];
+
+        if (!_hasOld) exitWith {["", []]};
+
+        private _steps = [
+            [_root, "take", [_from, _weaponArray, 1], "take"],
+            [_root, "fit", [["#step", 0, 0], [], _part], "fit"],
+            [_root, "put", [_from, ["#step", 1, 0], _cell], "land"]
+        ];
+
+        // Onto the ground at the feet, or the vehicle's cargo while seated.
+        if (_to isEqualType "" && {_to in ["ground", "vehicle"]}) exitWith {
+            private _ground = call _fnc_ground;
+
+            if (_ground isEqualTo "") exitWith {["NoGround", []]};
+
+            _steps pushBack ([[objNull, "putGround", [["#step", 1, 1]], "old"], [_ground, "put", [_ground, ["#step", 1, 1], []], "old"]] select (_ground isEqualType objNull));
+
+            ["", _steps, _from, [_old, _old param [0, ""]] select (_old isEqualType []), _to]
+        };
+
+        private _toRoot = [_to, objNull] call _fnc_rootOf;
+
+        if (isNull _toRoot) exitWith {["Moved", []]};
+
+        _steps pushBack [_toRoot, "put", [_to, ["#step", 1, 1], _move getOrDefault ["cell", []]], "old"];
+
+        ["", _steps, _from, [_old, _old param [0, ""]] select (_old isEqualType []), _to]
+    };
+
+    if !(_partFrom isEqualType objNull) exitWith {["Failed", []]};
+    if (isNull _partFrom) exitWith {["Failed", []]};
+
+    private _partRoot = [_partFrom, objNull] call _fnc_rootOf;
+
+    if (isNull _partRoot) exitWith {["Moved", []]};
+
+    // What came off goes onto the new part's cell - unless a stack of it still lies there.
+    private _back = [[], [_partEntry getOrDefault ["col", 0], _partEntry getOrDefault ["row", 0], _partEntry getOrDefault ["block", 0]]] select ((_partEntry getOrDefault ["count", 1]) <= 1);
+    private _steps = [
+        [_partRoot, "take", [_partFrom, [_partEntry] call EFUNC(storage,entryToArray), 1], "take"],
+        [_root, "take", [_from, _weaponArray, 1], "takeWeapon"],
+        [_root, "fit", [["#step", 1, 0], ["#step", 0, 0], _part], "fit"],
+        [_root, "put", [_from, ["#step", 2, 0], _cell], "land"]
+    ];
+
+    if (_hasOld) then {
+        _steps pushBack [_partRoot, "put", [_partFrom, ["#step", 2, 1], _back], "old"];
+    };
+
+    ["", _steps, _from, [_old, _old param [0, ""]] select (_old isEqualType []), [objNull, _partFrom] select _hasOld]
+};
+
 private _fnc_unequipSteps = {
     params ["_move"];
 
@@ -450,6 +532,9 @@ private _fnc_unequipSteps = {
 // wore there -, that onto the first. Only takeOff and putOn, each where its unit is local; nothing that
 // does not go on is lost: it came off a slot, so settlement puts it back on there while that is empty,
 // else into the vehicle or onto the ground.
+//
+// One unit's primary and the second primary on its back (aio_storage_fnc_secondPrimary) swap the same way, all of
+// it where the unit is local; with the first slot empty, the other one's weapon only moves over.
 private _fnc_swapSteps = {
     params ["_move"];
 
@@ -458,9 +543,19 @@ private _fnc_swapSteps = {
     private _toUnit = _move getOrDefault ["toUnit", objNull];
     private _toSlot = _move getOrDefault ["toSlot", _slot];
 
-    if (isNull _fromUnit || {isNull _toUnit} || {_fromUnit isEqualTo _toUnit} || {_slot isEqualTo ""} || {_toSlot isEqualTo ""}) exitWith {["Failed", []]};
+    if (isNull _fromUnit || {isNull _toUnit} || {_slot isEqualTo ""} || {_toSlot isEqualTo ""}) exitWith {["Failed", []]};
+    if (_fromUnit isEqualTo _toUnit && {_slot isEqualTo _toSlot}) exitWith {["Failed", []]};
 
     private _worn = [_fromUnit, _slot] call EFUNC(storage,getSlot);
+
+    if (count _worn == 0 && {_fromUnit isEqualTo _toUnit}) exitWith {
+        if (count ([_toUnit, _toSlot] call EFUNC(storage,getSlot)) == 0) exitWith {["Failed", []]};
+
+        ["", [
+            [_toUnit, "takeOff", [_toUnit, _toSlot], "take"],
+            [_fromUnit, "putOn", [_fromUnit, _slot, ["#step", 0, 0]], "land"]
+        ], _fromUnit, "", objNull]
+    };
 
     if (count _worn == 0) exitWith {["Failed", []]};
 
@@ -767,6 +862,7 @@ if (_moves isEqualTo []) exitWith {
 
     private _built = switch (_kind) do {
         case "equip": {[_move] call _fnc_equipSteps};
+        case "fit": {[_move] call _fnc_fitSteps};
         case "unequip": {[_move] call _fnc_unequipSteps};
         case "swap": {[_move] call _fnc_swapSteps};
         case "sort": {[_move] call _fnc_sortSteps};

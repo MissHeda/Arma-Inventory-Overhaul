@@ -610,7 +610,10 @@ private _view = if (isNull _sectionContainer || {_placeholder} || {_sealed} || {
 } else {
     [_layout, _sectionContainer] call FUNC(viewBlocks)
 };
-_view params ["_viewBlocks", "_hiddenRows", "_rowsFoldable", "_hiddenCells", ["_paging", []]];
+_view params ["_viewBlocks", "_hiddenRows", "_rowsFoldable", "_hiddenCells", ["_paging", []], ["_tallest", 0]];
+
+// The tallest compartment of the loot that pages could cut, for the size popover (fnc_openSizeMenu; fnc_build starts it at 0).
+GVAR(tallestLoot) = GVAR(tallestLoot) max _tallest;
 
 // A compartment taller than a page (aio_gui_pageRows) is cut into pages with a bar under it (fnc_drawPageBar); the
 // bar takes room in the flow, below the page's rows. Its page is as tall as the tallest of its pages, so turning one

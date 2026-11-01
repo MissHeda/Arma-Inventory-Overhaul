@@ -235,6 +235,32 @@ if (_hidden) then {
         _controls append ([_display, _parent, [_left + _padX, _top + _padY, _innerW, _height - _padY * 2], _attachments] call FUNC(drawAttachments));
     };
 
+    // And small pictures of its parts in the bottom right corner, as the weapon cards have them (#56) - from the right: magazines,
+    // bipod, rail, optic, muzzle; none for a part it has not, none where the tile is too small for them.
+    if (_attachments isNotEqualTo [] && {!_preview}) then {
+        private _partH = ((_height - _padY * 2) * 0.3) min (TEXT_UNIT * 0.7);
+        private _partW = SQUARE(_partH);
+        private _partX = _left + _width - _padX - _partW;
+        private _partY = _top + _height - _padY - _partH;
+
+        if (_partH < pixelH * 10) exitWith {};
+
+        {
+            private _value = _attachments param [_x, ""];
+            private _part = if (_value isEqualType []) then {_value param [0, ""]} else {_value};
+
+            if !(_part isEqualType "" && {_part isNotEqualTo ""}) then {continue};
+            if (_partX < _left + _padX) exitWith {};
+
+            private _rect = [_partX, _partY, _partW, _partH];
+
+            _controls append ([_display, _parent, _rect, [0, 0, 0, 0.35], _partH * 0.2] call FUNC(uiPanel));
+            _controls pushBack ([_display, _parent, _rect, ([_part] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]] call FUNC(uiPicture));
+
+            _partX = _partX - _partW - SQUARE(pixelH * 2);
+        } forEach [5, 4, 6, 2, 3, 1];
+    };
+
     // The name in the top corner: when the look has it and the player wants it (aio_gui_tileNames, off by
     // default; a setting read from the mission namespace, as the magazine ones below) - the preview of the
     // setup wizard always shows it, being a picture of what the rules make of the item.

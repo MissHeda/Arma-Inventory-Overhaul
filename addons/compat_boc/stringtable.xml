@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="aio">
+    <Package name="compat_boc">
+        <Key ID="STR_aio_compat_boc_Menu_OnBack">
+            <English>Put %1 on your back</English>
+        </Key>
+        <Key ID="STR_aio_compat_boc_Menu_OnChest">
+            <English>Carry on your chest</English>
+        </Key>
+        <Key ID="STR_aio_compat_boc_Menu_Swap">
+            <English>Swap with %1 on your chest</English>
+        </Key>
+    </Package>
+</Project>
