@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.46 - beta
+
+### Changed
+
+- The white marks of the attachments on a weapon's picture (the weapon cards and tiles) are clean silhouettes of the slot - muzzle, optic, rail, bipod - all of one size that grows and shrinks with the picture, instead of the weapon's own glowing shapes, of which the laser's was far too big.
+
 ## 0.6.45 - beta
 
 ### Changed

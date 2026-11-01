@@ -2,12 +2,15 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Draws a weapon's attachments onto its picture the way Arma's own inventory does: every slot of the
- * weapon's WeaponSlotsInfo that holds an attachment and has a positive iconScale lays its iconPicture
- * over the weapon picture - at iconPosition (fractions of the picture, from its top left), iconScale
- * of the picture's size, the iconPinpoint of the icon ("Center", "Bottom", "Top", "Left", "Right")
- * on that point. The pictures are the weapon's, not the attachments': the Spectrum Device has one per
- * antenna slot, rifles the generic shapes of their slot classes (attachment_top.paa and the like).
+ * Draws a weapon's attachments onto its picture where Arma's own inventory puts them: every slot of the
+ * weapon's WeaponSlotsInfo that holds an attachment and has a positive iconScale marks it on the weapon
+ * picture - at iconPosition (fractions of the picture, from its top left), the iconPinpoint of the mark
+ * ("Center", "Bottom", "Top", "Left", "Right") on that point.
+ *
+ * The mark is the slot's clean silhouette (the gear silhouettes of muzzle, optic, rail and bipod), all of one size - a share of
+ * the picture's height (ATTACHMENT_MARK), so it grows and shrinks with the picture -, in white. The weapon's own iconPicture at
+ * its iconScale glowed and was far too large for some (Mia, #56: "The IR icon is far too big"); a slot of another kind (the
+ * Spectrum Device's antennas) keeps its iconPicture, at the same size.
  *
  * The slot an attachment sits in is the one whose compatibleItems name it (an array, or a class of
  * item = 1 entries as CBA's joint rails write them); failing that, the slot of the attachment's kind.
@@ -62,6 +65,14 @@ if (_exact) then {
 
 // With the slots the weapon inherits: configClasses leaves those out, and the MX's muzzle and side rail come from its base -
 // only the optic showed (Mia, #56).
+// The clean silhouette of each slot of the usual kinds.
+private _silhouette = createHashMapFromArray [
+    ["MuzzleSlot", GEAR_ICON(ui_gear_muzzle_gs)],
+    ["PointerSlot", GEAR_ICON(ui_gear_side_gs)],
+    ["CowsSlot", GEAR_ICON(ui_gear_top_gs)],
+    ["UnderBarrelSlot", GEAR_ICON(ui_gear_bipod_gs)]
+];
+
 private _slots = (configProperties [_slotsConfig, "isClass _x", true]) select {getText (_x >> "iconPicture") isNotEqualTo ""};
 
 private _fnc_takes = {
@@ -90,14 +101,15 @@ private _fnc_takes = {
     if (_index < 0) then {continue};
 
     private _slot = _slots select _index;
-    private _scale = getNumber (_slot >> "iconScale");
 
-    if (_scale <= 0) then {continue};
+    if (getNumber (_slot >> "iconScale") <= 0) then {continue};
 
     (getArray (_slot >> "iconPosition")) params [["_fx", 0.5], ["_fy", 0.5]];
 
-    private _iconW = _w * _scale;
-    private _iconH = _h * _scale;
+    // Square on the screen: the picture's area is twice as wide as high in pixels.
+    private _iconH = _h * ATTACHMENT_MARK;
+    private _iconW = _iconH * (_w / _h) / 2;
+    private _texture = _silhouette getOrDefault [configName _slot, getText (_slot >> "iconPicture")];
     private _iconX = _x0 + _fx * _w;
     private _iconY = _y0 + _fy * _h;
 
@@ -115,11 +127,12 @@ private _fnc_takes = {
     if (_exact) then {
         private _icon = _display ctrlCreate ["AIO_Picture", -1];
         _icon ctrlSetPosition [_iconX, _iconY, _iconW, _iconH];
-        _icon ctrlSetText ([getText (_slot >> "iconPicture")] call FUNC(safePicture));
+        _icon ctrlSetText ([_texture] call FUNC(safePicture));
+        _icon ctrlSetTextColor ATTACHMENT_MARK_COLOR;
         _icon ctrlCommit 0;
         _controls pushBack _icon;
     } else {
-        _controls pushBack ([_display, _parent, [_iconX, _iconY, _iconW, _iconH], getText (_slot >> "iconPicture")] call FUNC(uiPicture));
+        _controls pushBack ([_display, _parent, [_iconX, _iconY, _iconW, _iconH], _texture, ATTACHMENT_MARK_COLOR] call FUNC(uiPicture));
     };
 } forEach [
     [_muzzle, "MuzzleSlot"],
