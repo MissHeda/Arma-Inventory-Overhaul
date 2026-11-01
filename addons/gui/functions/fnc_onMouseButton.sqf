@@ -190,6 +190,18 @@ if (_menuOpen && {_down} && {_button == 1}) then {
 
 if (_menuOpen) exitWith {false};
 
+// The arrows and the fold chevron in the corner of a weapon card (fnc_drawEquipmentCards) are buttons of their own:
+// a press on one is theirs, not a press on the card under them - it neither lifts the weapon nor opens its menu.
+// A drag let go there is still let go on the card.
+if (_down && {!GVAR(dragging)} && {
+    (uiNamespace getVariable [QGVAR(cardButtons), []]) findIf {
+        ([_x] call FUNC(gridOrigin)) params ["_areaX", "_areaY"];
+        (_x get "size") params ["_areaW", "_areaH"];
+
+        _clickX >= _areaX && {_clickX < _areaX + _areaW} && {_clickY >= _areaY} && {_clickY < _areaY + _areaH}
+    } >= 0
+}) exitWith {false};
+
 // A window that attached may take the button first - the Arsenal panel takes every press outside its own, so the
 // engine ignores it.
 private _taken = if (_down) then {

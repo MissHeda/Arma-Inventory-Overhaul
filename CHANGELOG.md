@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.37 - beta
+
+### Added
+
+- The weapon cards can be put in any order: the arrows in each card's corner move it up or down - the handgun on top and the primaries at the bottom, say. Your order is kept in your profile.
+- With WebKnight's or KJW's Two Primary Weapons, the second primary's card folds to a single line (the minus in its corner) and opens again (the plus). Until you choose, it is folded while nothing is on your back. A weapon can still be dragged onto the folded line.
+
+### Changed
+
+- BackpackOnChest Redux: the backpack slot's menu offers its moves only where that mod allows them (not while its setting turns them off, not under a parachute).
+
 ## 0.6.36 - beta
 
 ### Fixed

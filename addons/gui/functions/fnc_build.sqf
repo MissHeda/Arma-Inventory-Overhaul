@@ -191,6 +191,7 @@ uiNamespace setVariable [QGVAR(foldAreas), []];
 uiNamespace setVariable [QGVAR(pageAreas), []];
 uiNamespace setVariable [QGVAR(zones), []];
 uiNamespace setVariable [QGVAR(slots), []];
+uiNamespace setVariable [QGVAR(cardButtons), []];
 
 // The slots' drag highlights (fnc_glowSlot) went with the sweep above - but for a control a window that
 // attached keeps its group across builds: those are deleted here. They are made again, ahead of time, by

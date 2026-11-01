@@ -25,6 +25,10 @@ private _prefix = call FUNC(api);
 
 if (_prefix isEqualTo "" || {isNull _unit} || {!local _unit} || {!isNull objectParent _unit}) exitWith {[]};
 
+// What that mod itself asks before it moves a pack, where it has the question (Redux: not while its setting turns it
+// off, not under a parachute).
+if !([_unit] call (missionNamespace getVariable [_prefix + "_fnc_canMovePack", {true}])) exitWith {[]};
+
 private _chest = [_unit] call (missionNamespace getVariable [_prefix + "_fnc_chestpack", {""}]);
 private _back = backpack _unit;
 

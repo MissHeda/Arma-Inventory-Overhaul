@@ -182,6 +182,8 @@ PREP(hasModel);
 PREP(itemModel);
 PREP(closeInspect);
 PREP(toggleSection);
+PREP(moveWeaponCard);
+PREP(toggleSecondFold);
 PREP(toggleRows);
 PREP(closeNested);
 

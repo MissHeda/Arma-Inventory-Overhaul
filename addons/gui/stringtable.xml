@@ -1392,6 +1392,18 @@ Off does it at once; a drag never waits.</English>
         <Key ID="STR_aio_gui_Title">
             <English>Inventory</English>
         </Key>
+        <Key ID="STR_aio_gui_WeaponCard_Fold">
+            <English>Fold to a line</English>
+        </Key>
+        <Key ID="STR_aio_gui_WeaponCard_MoveDown">
+            <English>Move down</English>
+        </Key>
+        <Key ID="STR_aio_gui_WeaponCard_MoveUp">
+            <English>Move up</English>
+        </Key>
+        <Key ID="STR_aio_gui_WeaponCard_Unfold">
+            <English>Open</English>
+        </Key>
         <Key ID="STR_aio_gui_Zone_Arms">
             <English>arms</English>
         </Key>

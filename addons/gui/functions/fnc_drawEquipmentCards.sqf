@@ -22,6 +22,11 @@
  *   | 4 | 5 | 6 | 7 | 8 | 9 | 0 |                           the keys' items (aio_hotbar), when it is loaded
  *                                                              and on, in the inventory window only
  *
+ * The weapon cards come in the order the player gave them (GVAR(weaponOrder), the arrows in each card's corner,
+ * fnc_moveWeaponCard) - the order above is the default. The second primary's card folds to a single line with
+ * the button beside those arrows (GVAR(secondFold), fnc_toggleSecondFold), and starts folded while the back is
+ * empty. The corner's buttons keep their presses to themselves (GVAR(cardButtons), fnc_onMouseButton).
+ *
  * The weapon cards are as wide and as tall as each other, so their attachments start on one
  * line. The second primary's card stands under the primary's, in the place EVEN Better Inventory gives it: its
  * corner names that mod's own switch key, and it is never the weapon in hand. The weapon in hand is marked in the accent colour. The attachments grow with the height the
@@ -111,24 +116,87 @@ private _second = _equipment getOrDefault ["primary2", -1];
 private _hasSecond = _second isEqualType [];
 private _cards = [3, 4] select _hasSecond;
 
+// Folded, the second primary's card is a single line: as the player chose it, or until then while the back is empty.
+private _folded = _hasSecond && {
+    GVAR(secondFold) isEqualTo "folded" || {GVAR(secondFold) isEqualTo "" && {_second isEqualTo []}}
+};
+private _open = _cards - ([0, 1] select _folded);
+private _foldH = _lineH + _textUnit * 0.66;
+
 // Each weapon card is two attachment rows high. The primary's three attachments across may take about
 // 40 % of the width.
-private _fixed = _statH + _groupGap * 2 + _labelH * 2 + _rowGap * (_cards - 1) + _gapH * _cards + _capH * (_cards + 1) + _gearH + _gearGap + _smallH + _hotbarH;
+private _fixed = _statH + _groupGap * 2 + _labelH * 2 + _rowGap * (_cards - 1) + _gapH * _open + _capH * (_cards + 1) + _foldH * (_cards - _open) + _gearH + _gearGap + _smallH + _hotbarH;
 private _slotWMax = ((_width * 0.42 - _gapW * 3) / 3) max (pixelW * 8);
-private _slotH = (((_height - _fixed) / (_cards * 2)) min (UNIT * 2.7) min UNSQUARE(_slotWMax)) max (UNIT * 1.2);
+private _slotH = (((_height - _fixed) / (_open * 2)) min (UNIT * 2.7) min UNSQUARE(_slotWMax)) max (UNIT * 1.2);
 private _slotW = SQUARE(_slotH);
 private _cardH = _slotH * 2 + _gapH;
 private _cardW = _width - (_slotW + _gapW) * 3;
 
 // Left over height loosens the gaps between the weapons a little; the rest stays above the gear.
-private _extra = (((_height - _fixed - _slotH * _cards * 2) / (_cards + 1)) max 0) min (UNIT * 0.6);
+private _extra = (((_height - _fixed - _slotH * _open * 2) / (_cards + 1)) max 0) min (UNIT * 0.6);
 _rowGap = _rowGap + _extra;
 
 // ---------------------------------------------------------------------------
-// A weapon's card: its number, its picture or silhouette, its name, and the mark of the weapon in hand.
+// The buttons in a card's top right corner, side by side, the last at the right edge: [id, texture, angle,
+// tooltip] each, [] for a place left free - so an arrow stays where it is on every card, whether its neighbour
+// is drawn or not. A button is its icon, and over it a hit area as wide as its place and two pixels higher and
+// lower; the presses there are the buttons' (GVAR(cardButtons), fnc_onMouseButton). The click runs a frame later
+// (fnc_later), as the window may be built again meanwhile.
+// ---------------------------------------------------------------------------
+private _fnc_cornerButtons = {
+    params ["_buttonY", "_rightX", "_buttons"];
+
+    private _buttonW = SQUARE(_lineH);
+    private _iconH = _lineH * 0.7;
+    private _firstX = _rightX - _buttonW * count _buttons;
+
+    {
+        if (_x isEqualTo []) then {continue};
+
+        _x params ["_id", "_texture", "_angle", "_tip"];
+
+        private _buttonX = _firstX + _forEachIndex * _buttonW;
+        private _iconCtrl = [
+            _display, _parent, [_buttonX + (_buttonW - SQUARE(_iconH)) / 2, _buttonY + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
+            _texture, _colorText2
+        ] call FUNC(uiIcon);
+
+        if (_angle != 0) then {
+            _iconCtrl ctrlSetAngle [_angle, 0.5, 0.5, true];
+        };
+
+        private _hit = [_display, "AIO_Hitbox", _parent, [_buttonX, _buttonY - pixelH * 2, _buttonW, _lineH + pixelH * 4]] call FUNC(uiCreate);
+        [_hit, _tip] call FUNC(setTooltip);
+        _hit setVariable [QGVAR(id), _id];
+        _hit ctrlAddEventHandler ["ButtonClick", {
+            [{
+                params ["_id"];
+
+                (_id splitString "|") params ["_kind", "_slot"];
+
+                switch (_kind) do {
+                    case "up": {[_slot, -1] call FUNC(moveWeaponCard)};
+                    case "down": {[_slot, 1] call FUNC(moveWeaponCard)};
+                    case "fold": {[false] call FUNC(toggleSecondFold)};
+                    case "open": {[true] call FUNC(toggleSecondFold)};
+                };
+            }, [(_this select 0) getVariable [QGVAR(id), ""]]] call FUNC(later);
+        }];
+    } forEach _buttons;
+
+    if (_buttons isNotEqualTo []) then {
+        (uiNamespace getVariable [QGVAR(cardButtons), []]) pushBack createHashMapFromArray [
+            ["rel", [_firstX, _buttonY - pixelH * 2]], ["parent", _parent], ["size", [_buttonW * count _buttons, _lineH + pixelH * 4]]
+        ];
+    };
+};
+
+// ---------------------------------------------------------------------------
+// A weapon's card: its number, its picture or silhouette, its name, and the mark of the weapon in hand. Folded, a
+// single line: its number, and its caption with the weapon's name - no picture.
 // ---------------------------------------------------------------------------
 private _fnc_weaponCard = {
-    params ["_cardRect", "_class", "_caption", "_icon", "_number", "_inHand"];
+    params ["_cardRect", "_class", "_caption", "_icon", "_number", "_inHand", ["_buttons", []], ["_cardFolded", false]];
     _cardRect params ["_cardX", "_cardY", "_cardW", "_cardH"];
 
     private _empty = _class isEqualTo "";
@@ -136,6 +204,9 @@ private _fnc_weaponCard = {
     private _cardRadius = _radius min (_cardH / 4);
     private _padY = _textUnit * 0.22;
     private _padX = SQUARE(_padY);
+
+    // The line of the key and the corner's buttons: the top of the card, the middle of a folded one.
+    private _keyY = if (_cardFolded) then {_cardY + (_cardH - _lineH) / 2} else {_cardY + _padY * ([1.5, 0.5] select _flat)};
 
     [_display, _parent, _cardRect, _theme getOrDefault [["slot", "slotEmpty"] select _empty, [1, 1, 1, 0.035]], _cardRadius] call FUNC(uiPanel);
 
@@ -156,7 +227,7 @@ private _fnc_weaponCard = {
         // A card with no key to name (the second primary, its mod's key unbound or with modifiers) keeps its strip.
         if (_number isNotEqualTo "") then {
             [
-                _display, _parent, [_cardX, _cardY + _padY * 0.5, _stripW, _lineH], format ["[%1]", _number], _lineSize,
+                _display, _parent, [_cardX, _keyY, _stripW, _lineH], format ["[%1]", _number], _lineSize,
                 [_colorMuted, _colorOnAccent] select _inHand, _fontBold, 2, "key"
             ] call FUNC(uiLabel);
         };
@@ -164,7 +235,7 @@ private _fnc_weaponCard = {
         _innerX = _cardX + _stripW;
     } else {
         // A key cap in the corner, like the footer's key hints, in the accent colour while in hand.
-        private _key = [_cardX + _padX * 1.5, _cardY + _padY * 1.5, SQUARE(_lineH), _lineH];
+        private _key = [_cardX + _padX * 1.5, _keyY, SQUARE(_lineH), _lineH];
 
         if (_number isNotEqualTo "") then {
             [_display, _parent, _key, [_theme getOrDefault ["keyBg", [1, 1, 1, 0.1]], _colorAccent] select _inHand, _lineH * 0.3] call FUNC(uiPanel);
@@ -176,6 +247,11 @@ private _fnc_weaponCard = {
 
         _innerTop = _cardY + _padY * 1.5 + _lineH;
 
+        // A folded card's caption starts right of the key cap.
+        if (_cardFolded) then {
+            _innerX = _cardX + _padX * 1.5 + SQUARE(_lineH);
+        };
+
         // And a bar down the left edge between the round corners, as fnc_drawSlot's accent.
         if (_inHand) then {
             private _bar = [_display, "AIO_PanelRect", _parent, [_cardX, _cardY + _cardRadius, pixelW * 3, _cardH - _cardRadius * 2]] call FUNC(uiCreate);
@@ -183,28 +259,50 @@ private _fnc_weaponCard = {
         };
     };
 
+    // The picture keeps clear of the corner's buttons.
+    if (_buttons isNotEqualTo []) then {
+        _innerTop = _innerTop max (_keyY + _lineH);
+    };
+
+    [_keyY, _cardX + _cardW - _padX, _buttons] call _fnc_cornerButtons;
+
     private _contentX = _innerX + _padX;
     private _contentW = _cardX + _cardW - _padX - _contentX;
 
-    if (_empty) then {
-        // A silhouette is a hint, not the item: smaller than a picture would be, centred.
-        private _iconH = (_cardH - _padY * 2) * 0.6;
+    if (_cardFolded) then {
+        // The caption, and after it what is on the back.
+        private _textW = (_contentW - SQUARE(_lineH) * count _buttons - _padX) max pixelW;
+        private _text = [_caption, _theme] call FUNC(caption);
 
-        [_display, _parent, [_contentX, _cardY + (_cardH - _iconH) / 2, _contentW, _iconH], _icon, _theme getOrDefault ["slotIcon", [1, 1, 1, 0.15]]] call FUNC(uiIcon);
-    } else {
-        private _nameTop = _cardY + _cardH - _padY * 0.5 - _lineH;
-        private _nameSize = _textUnit * 0.5;
-        private _name = [[_info getOrDefault ["name", _class], _theme] call FUNC(caption), _contentW, _font, _nameSize] call FUNC(fitText);
+        if (!_empty) then {
+            _text = format ["%1: %2", _text, _info getOrDefault ["name", _class]];
+        };
 
-        // As the rules draw it (icon=): larger, smaller or moved, and cut to the card where it would reach out.
         [
-            _display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _info getOrDefault ["picture", ""],
-            _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _cardRect
-        ] call FUNC(uiItemPicture);
+            _display, _parent, [_contentX, _keyY, _textW, _lineH], [_text, _textW, _font, _lineSize] call FUNC(fitText),
+            _lineSize, [_colorText2, _colorText] select !_empty, _font, 0, "weapon"
+        ] call FUNC(uiLabel);
+    } else {
+        if (_empty) then {
+            // A silhouette is a hint, not the item: smaller than a picture would be, centred.
+            private _iconH = (_cardH - _padY * 2) * 0.6;
 
-        // What is on the weapon shows on its picture, the way Arma's own inventory draws it.
-        [_display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _weapon] call FUNC(drawAttachments);
-        [_display, _parent, [_contentX, _nameTop, _contentW, _lineH], _name, _nameSize, _colorText, _font, 0, "weapon"] call FUNC(uiLabel);
+            [_display, _parent, [_contentX, _cardY + (_cardH - _iconH) / 2, _contentW, _iconH], _icon, _theme getOrDefault ["slotIcon", [1, 1, 1, 0.15]]] call FUNC(uiIcon);
+        } else {
+            private _nameTop = _cardY + _cardH - _padY * 0.5 - _lineH;
+            private _nameSize = _textUnit * 0.5;
+            private _name = [[_info getOrDefault ["name", _class], _theme] call FUNC(caption), _contentW, _font, _nameSize] call FUNC(fitText);
+
+            // As the rules draw it (icon=): larger, smaller or moved, and cut to the card where it would reach out.
+            [
+                _display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _info getOrDefault ["picture", ""],
+                _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _cardRect
+            ] call FUNC(uiItemPicture);
+
+            // What is on the weapon shows on its picture, the way Arma's own inventory draws it.
+            [_display, _parent, [_contentX, _innerTop, _contentW, (_nameTop - _innerTop) max pixelH], _weapon] call FUNC(drawAttachments);
+            [_display, _parent, [_contentX, _nameTop, _contentW, _lineH], _name, _nameSize, _colorText, _font, 0, "weapon"] call FUNC(uiLabel);
+        };
     };
 
     // The weapon in hand is framed in the accent colour, over everything else on the card.
@@ -232,7 +330,7 @@ private _fnc_weaponCard = {
 // A weapon's row: its card, and its attachments beside it, row by row. Returns the row's height.
 // ---------------------------------------------------------------------------
 private _fnc_weaponRow = {
-    params ["_rowTop", "_slot", "_caption", "_icon", "_number", "_cols", "_parts"];
+    params ["_rowTop", "_slot", "_caption", "_icon", "_number", "_cols", "_parts", ["_buttons", []], ["_rowFolded", false]];
 
     // [class, muzzle, rail, optic, [magazine, rounds] or [], [second magazine, rounds] or [], bipod]
     private _weapon = _equipment getOrDefault [_slot, []];
@@ -242,7 +340,14 @@ private _fnc_weaponRow = {
     // The second primary hangs on the back: never in hand, even of the same class as the one that is.
     private _inHand = _class isNotEqualTo "" && {_slot isNotEqualTo "primary2"} && {!isNull _unit} && {currentWeapon _unit == _class};
 
-    [[_left, _cardY, _cardW, _cardH], _class, _caption, _icon, _number, _inHand] call _fnc_weaponCard;
+    // Folded, the card is a line over the whole width, with no attachments beside it.
+    if (_rowFolded) exitWith {
+        [[_left, _cardY, _width, _foldH], _class, _caption, _icon, _number, false, _buttons, true] call _fnc_weaponCard;
+
+        _capH + _foldH
+    };
+
+    [[_left, _cardY, _cardW, _cardH], _class, _caption, _icon, _number, _inHand, _buttons] call _fnc_weaponCard;
 
     {
         _x params ["_index", "_partCaption", "_partIcon"];
@@ -314,19 +419,21 @@ _cursor = _cursor + _statH + _groupGap;
 [_cursor, LLSTRING(Column_Equipment)] call _fnc_label;
 _cursor = _cursor + _labelH;
 
-_cursor = _cursor + _rowGap + ([_cursor, "primary", LLSTRING(Slot_Primary), GEAR_ICON(ui_gear_primary_gs), "1", 3, [
+// Each card's caption, silhouette, key, attachment columns and attachments: [index in the weapon, caption, silhouette].
+private _rifleParts = [
     [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)],
     [3, LLSTRING(Slot_Optic), GEAR_ICON(ui_gear_top_gs)],
     [2, LLSTRING(Slot_Rail), GEAR_ICON(ui_gear_side_gs)],
     [1, LLSTRING(Slot_Muzzle), GEAR_ICON(ui_gear_muzzle_gs)],
     [6, LLSTRING(Slot_Bipod), GEAR_ICON(ui_gear_bipod_gs)],
     [5, LLSTRING(Slot_Magazine2), GEAR_ICON(ui_gear_magazineGL_gs)]
-]] call _fnc_weaponRow);
+];
 
-// The second primary, under the first: its corner names the two-primary mod's own key that switches to it - when
-// that key is short enough for the cap (a key with modifiers is left off).
+// The second primary's corner names the two-primary mod's own key that switches to it - when that key is short
+// enough for the cap (a key with modifiers is left off).
+private _keyName = "";
+
 if (_hasSecond) then {
-    private _keyName = "";
     private _keybind = EGVAR(storage,secondPrimaryMod) getOrDefault ["keybind", []];
 
     if (_keybind isNotEqualTo [] && {!isNil "CBA_fnc_getKeybind"}) then {
@@ -344,28 +451,48 @@ if (_hasSecond) then {
     if (count _keyName > 2) then {
         _keyName = "";
     };
+};
 
-    _cursor = _cursor + _rowGap + ([_cursor, "primary2", LLSTRING(Slot_SecondPrimary), GEAR_ICON(ui_gear_primary_gs), _keyName, 3, [
+private _rows = createHashMapFromArray [
+    ["primary", [LLSTRING(Slot_Primary), GEAR_ICON(ui_gear_primary_gs), "1", 3, _rifleParts]],
+    ["primary2", [LLSTRING(Slot_SecondPrimary), GEAR_ICON(ui_gear_primary_gs), _keyName, 3, _rifleParts]],
+    ["handgun", [LLSTRING(Slot_Handgun), GEAR_ICON(ui_gear_hgun_gs), "2", 2, [
         [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)],
         [3, LLSTRING(Slot_Optic), GEAR_ICON(ui_gear_top_gs)],
         [2, LLSTRING(Slot_Rail), GEAR_ICON(ui_gear_side_gs)],
-        [1, LLSTRING(Slot_Muzzle), GEAR_ICON(ui_gear_muzzle_gs)],
-        [6, LLSTRING(Slot_Bipod), GEAR_ICON(ui_gear_bipod_gs)],
-        [5, LLSTRING(Slot_Magazine2), GEAR_ICON(ui_gear_magazineGL_gs)]
-    ]] call _fnc_weaponRow);
-};
+        [1, LLSTRING(Slot_Muzzle), GEAR_ICON(ui_gear_muzzle_gs)]
+    ]]],
+    ["launcher", [LLSTRING(Slot_Launcher), GEAR_ICON(ui_gear_secondary_gs), "3", 2, [
+        [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)],
+        [3, LLSTRING(Slot_Optic), GEAR_ICON(ui_gear_top_gs)]
+    ]]]
+];
 
-_cursor = _cursor + _rowGap + ([_cursor, "handgun", LLSTRING(Slot_Handgun), GEAR_ICON(ui_gear_hgun_gs), "2", 2, [
-    [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)],
-    [3, LLSTRING(Slot_Optic), GEAR_ICON(ui_gear_top_gs)],
-    [2, LLSTRING(Slot_Rail), GEAR_ICON(ui_gear_side_gs)],
-    [1, LLSTRING(Slot_Muzzle), GEAR_ICON(ui_gear_muzzle_gs)]
-]] call _fnc_weaponRow);
+// In the player's order, the second primary only where a two-primary mod gives the unit that slot. Each card's
+// corner: the fold button on the second primary's, then the arrows up and down - none up on the first card, none
+// down on the last.
+private _shownOrder = GVAR(weaponOrder) select {_x isNotEqualTo "primary2" || _hasSecond};
 
-[_cursor, "launcher", LLSTRING(Slot_Launcher), GEAR_ICON(ui_gear_secondary_gs), "3", 2, [
-    [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)],
-    [3, LLSTRING(Slot_Optic), GEAR_ICON(ui_gear_top_gs)]
-]] call _fnc_weaponRow;
+{
+    private _isSecond = _x isEqualTo "primary2";
+    private _buttons = [];
+
+    if (_isSecond) then {
+        _buttons pushBack ([
+            ["fold|primary2", UI_TEX(icon_minus_ca), 0, LLSTRING(WeaponCard_Fold)],
+            ["open|primary2", UI_TEX(icon_plus_ca), 0, LLSTRING(WeaponCard_Unfold)]
+        ] select _folded);
+    };
+
+    _buttons pushBack ([[], [format ["up|%1", _x], UI_TEX(icon_chevron_down_ca), 180, LLSTRING(WeaponCard_MoveUp)]] select (_forEachIndex > 0));
+    _buttons pushBack ([[], [format ["down|%1", _x], UI_TEX(icon_chevron_down_ca), 0, LLSTRING(WeaponCard_MoveDown)]] select (_forEachIndex < count _shownOrder - 1));
+
+    (_rows get _x) params ["_rowCaption", "_rowIcon", "_rowNumber", "_rowCols", "_rowParts"];
+
+    _cursor = _cursor + _rowGap + ([
+        _cursor, _x, _rowCaption, _rowIcon, _rowNumber, _rowCols, _rowParts, _buttons, _isSecond && _folded
+    ] call _fnc_weaponRow);
+} forEach _shownOrder;
 
 // ---------------------------------------------------------------------------
 // Gear, from the bottom of the column up. Both rows spread over the full width.

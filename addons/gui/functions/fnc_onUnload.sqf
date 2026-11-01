@@ -135,6 +135,7 @@ GVAR(personMode) = "";
 uiNamespace setVariable [QGVAR(created), []];
 uiNamespace setVariable [QGVAR(grids), []];
 uiNamespace setVariable [QGVAR(slots), []];
+uiNamespace setVariable [QGVAR(cardButtons), []];
 uiNamespace setVariable [QGVAR(glowCache), createHashMap];
 uiNamespace setVariable [QGVAR(glowNext), 0];
 uiNamespace setVariable [QGVAR(dragGlow), []];

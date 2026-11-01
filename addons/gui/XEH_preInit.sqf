@@ -382,6 +382,28 @@ if !(GVAR(sortMode) isEqualType "" && {GVAR(sortMode) in SORT_MODES}) then {
 
 uiNamespace setVariable [QGVAR(sortButtons), []];
 
+// The order of the weapon cards in the equipment column, top down (fnc_drawEquipmentCards): each player's own,
+// kept in the profile, changed with the arrows on the cards (fnc_moveWeaponCard). An order that does not name
+// each of the four once - an older or a broken one - is the default again.
+GVAR(weaponOrder) = profileNamespace getVariable [QGVAR(weaponOrder), []];
+
+if !(GVAR(weaponOrder) isEqualType [] && {
+    private _sorted = +GVAR(weaponOrder);
+    _sorted sort true;
+    _sorted isEqualTo ["handgun", "launcher", "primary", "primary2"]
+}) then {
+    GVAR(weaponOrder) = ["primary", "primary2", "handgun", "launcher"];
+};
+
+// Whether the second primary's card is folded to a single line (fnc_toggleSecondFold): "folded" or "open" once
+// the player chose, kept in the profile; "" until then - folded while nothing is on the back, open while
+// something is.
+GVAR(secondFold) = profileNamespace getVariable [QGVAR(secondFold), ""];
+
+if !(GVAR(secondFold) in ["", "folded", "open"]) then {
+    GVAR(secondFold) = "";
+};
+
 // The window's moves under way, request id (aio_storage_fnc_request) -> [sources, targets, time, feels,
 // details] (fnc_sendMoves): sources [[holder, key, block, col, row], ...] are faded and cannot be lifted,
 // targets [[holder, block, col, row, w, h], ...] outlined (fnc_drawPending) until the answer is finished;
