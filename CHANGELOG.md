@@ -6,7 +6,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Changed
 
-- ACE is optional (issue #43): CBA is the only requirement. Without ACE, the inventory, looting, the hotbar for grenades, magazines and food, the weight tiers and the setup wizard work as before; the grid in ACE Arsenal, magazine repacking and treating from the hotbar need ACE and are simply not there. Where ACE gave the answer - the player's unit, whether a unit is awake or may handle something, a unit's name, a short message at the bottom of the screen - the engine's own is used without it (`aio_main_fnc_isAwake`, `fnc_canInteract`, `fnc_unitName`, `fnc_showText`, the `PLAYER_UNIT` macro). Without ACE the weight tiers slow the player through the engine's own sprint and walk switches. `hemtt launch noace` starts the test scene with CBA alone.
+- ACE is optional (issue #43): CBA is the only requirement. Without ACE, the inventory, looting, the hotbar for grenades, magazines and food, the weight tiers and the setup wizard work as before; the grid in ACE Arsenal, magazine repacking and treating from the hotbar need ACE and are simply not there. Where ACE gave the answer - the player's unit, whether a unit is awake or may handle something, a unit's name, a short message at the bottom of the screen (CBA's notification without ACE) - the engine's own is used without it (`aio_main_fnc_isAwake`, `fnc_canInteract`, `fnc_unitName`, `fnc_showText`, the `PLAYER_UNIT` macro). Without ACE the weight tiers slow the player through the engine's own sprint and walk switches. `hemtt launch noace` starts the test scene with CBA alone.
 
 ## 0.6.27 - beta
 

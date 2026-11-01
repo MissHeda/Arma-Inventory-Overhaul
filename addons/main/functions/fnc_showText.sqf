@@ -2,7 +2,8 @@
 /*
  * Author: Miss Heda
  * A short message to the player at the bottom of the screen: ACE's own (ace_common_fnc_displayTextPicture with a picture,
- * ace_common_fnc_displayTextStructured without) when ACE is loaded, else a silent hint - ACE is no requirement of the mod.
+ * ace_common_fnc_displayTextStructured without) when ACE is loaded, else CBA's notification (CBA_fnc_notify) - ACE is no
+ * requirement of the mod.
  *
  * Arguments:
  * 0: The text, plain or structured <STRING, TEXT>
@@ -30,4 +31,5 @@ if (!isNil QACEFUNC(common,displayTextStructured)) exitWith {
     [_text] call ACEFUNC(common,displayTextStructured);
 };
 
-hintSilent ([_text, parseText _text] select (_text isEqualType ""));
+// CBA's notification: it goes again by itself, where a hint would stay over the window's corner.
+[[_text, 1.1, (_colour select [0, 3]) + [_colour param [3, 1]]]] call CBA_fnc_notify;
