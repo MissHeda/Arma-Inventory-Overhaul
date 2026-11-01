@@ -878,7 +878,7 @@ switch (_shown param [0, ""]) do {
                 if (_worn isNotEqualTo [] && {(_worn select 0) == _class}) exitWith {
                     _weapon = _worn;
                 };
-            } forEach ["primary", "handgun", "launcher", "binocular"];
+            } forEach ["primary", "handgun", "launcher", "primary2", "binocular"];
         };
 
         if (_weapon isNotEqualTo []) then {

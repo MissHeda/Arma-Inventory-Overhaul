@@ -388,6 +388,12 @@
         <Key ID="STR_aio_gui_Menu_Settings">
             <English>Settings for %1</English>
         </Key>
+        <Key ID="STR_aio_gui_Menu_SwapPrimary">
+            <English>Swap with primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Menu_SwapSecondPrimary">
+            <English>Swap with second primary</English>
+        </Key>
         <Key ID="STR_aio_gui_Notify_Searched">
             <English>%1 is going through your gear</English>
         </Key>
@@ -1166,6 +1172,9 @@ Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_aio_gui_Slot_Rail">
             <English>Rail</English>
+        </Key>
+        <Key ID="STR_aio_gui_Slot_SecondPrimary">
+            <English>Second primary</English>
         </Key>
         <Key ID="STR_aio_gui_Slot_Uniform">
             <English>Uniform</English>

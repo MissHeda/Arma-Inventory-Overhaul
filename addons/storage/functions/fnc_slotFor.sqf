@@ -22,11 +22,20 @@ params [["_unit", objNull, [objNull]], ["_class", "", [""]]];
 private _kind = ([_class] call EFUNC(items,getInfo)) get "kind";
 
 if (_kind in ["handgun", "launcher", "binocular", "headgear", "goggles", "nvg", "uniform", "vest", "backpack", "map", "gps", "radio", "compass", "watch"]) exitWith {_kind};
-if (_kind isEqualTo "rifle") exitWith {"primary"};
+// A rifle into the hands - or, with them full and a two-primary mod's back empty, onto the back as the
+// second primary (fnc_secondPrimary), as EVEN Better Inventory does: a double click on a second rifle keeps
+// the one in hand.
+if (_kind isEqualTo "rifle") exitWith {
+    ([_unit] call FUNC(secondPrimary)) params ["_hasSecond", "_second"];
+
+    if (primaryWeapon _unit isNotEqualTo "" && {_hasSecond} && {_second isEqualTo []} && {[_unit, "primary2", _class] call FUNC(slotAccepts)}) exitWith {"primary2"};
+
+    "primary"
+};
 
 private _slot = "";
 
-// Read once for the three weapons, and only for an item that may go on a part of one.
+// Read once for the weapons, and only for an item that may go on a part of one.
 private _equipment = createHashMap;
 
 if (_kind in ["muzzle", "optic", "rail", "bipod", "magazine", "grenade"]) then {
@@ -37,6 +46,6 @@ if (_kind in ["muzzle", "optic", "rail", "bipod", "magazine", "grenade"]) then {
     _slot = [_unit, _x, _class, _equipment] call FUNC(partFor);
 
     if (_slot isNotEqualTo "") exitWith {};
-} forEach ["primary", "handgun", "launcher"];
+} forEach ["primary", "handgun", "launcher", "primary2"];
 
 _slot

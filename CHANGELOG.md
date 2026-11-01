@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.33 - beta
+
+### Added
+
+- Second primary weapon as a slot of its own (issue #52), with WebKnight's or KJW's Two Primary Weapons loaded: the rifle on your back gets a card under your primary, with its magazine and attachments beside it, as on the primary. Drag a rifle onto it or off it, drop it, Ctrl+click it into your gear, change its optic, magazine and other parts like on any weapon. Drag the primary and the second primary onto each other, or pick "Swap with primary" / "Swap with second primary" in the right-click menu, and they trade places. A double click on a rifle with your hands full puts it on your back when that is free. The card's corner shows that mod's own switch key. Everything goes through that mod's own way of keeping the weapon (its variables, the weapon hanging on your back, with KJW's its weight in ACE), so its key switches to a rifle put there in the window as to one it put there itself; KJW's blacklist and whitelist decide what may go on the back. KJW's mod keeps the back weapon of the player only, WebKnight's of any soldier - your subordinates' too.
+
+### Changed
+
+- With WebKnight's Two Primary Weapons, a move in the window that empties your hands no longer brings the weapon on your back into them: it now has a slot you see and move yourself.
+
 ## 0.6.32 - beta
 
 ### Added

@@ -53,9 +53,10 @@ inventory entries show only where the window opens, and its one-click pick-up fr
 the ground has to be searched, else puts a magazine (or a weapon you cannot wield at once) into the first container with
 free cells instead of the engine's add. Works with Mavic 3 - Improved: a Mavic item dropped through the window (drag to the
 ground, the drop key, Drop in the menu) is deployed as a drone, as that mod does for the engine's inventory, and a deployed drone has an ACE interaction
-"Pack up drone" that checks the grid for room. Works with WebKnight's and KJW's Two Primary Weapons: the weapon on the back never shows as loot, and with
-WebKnight's it comes into your hands when a move in the window empties them. With Better Inventory loaded, its handler for the vanilla inventory stays
-quiet.
+"Pack up drone" that checks the grid for room. Works with WebKnight's and KJW's Two Primary Weapons: the weapon on the back is a slot of
+its own under the primary, with its magazine and attachments - drag rifles on and off it, swap it with the primary by dragging one onto the other or
+with "Swap with primary" in the right-click menu, and that mod's own key switches to whatever you put there; it never shows as loot. With Better
+Inventory loaded, its handler for the vanilla inventory stays quiet.
 
 ## Building
 

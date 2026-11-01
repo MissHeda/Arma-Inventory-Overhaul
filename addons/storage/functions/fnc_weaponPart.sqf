@@ -4,9 +4,13 @@
  * Puts an attachment or magazine on one of a unit's weapons, or takes it off - each weapon slot has
  * its own pair of commands. A magazine goes on with its own rounds, into the muzzle it belongs to.
  *
+ * The second primary on the back (fnc_secondPrimary) is no weapon the engine knows on the unit: its parts are
+ * changed in the weapon the two-primary mod keeps, and the weapon put back on the back with them
+ * (fnc_setSecondPrimary).
+ *
  * Arguments:
  * 0: Unit <OBJECT>
- * 1: Weapon slot - "primary", "handgun" or "launcher" <STRING>
+ * 1: Weapon slot - "primary", "handgun", "launcher" or "primary2" <STRING>
  * 2: Put on (true) or take off (false) <BOOL>
  * 3: Class <STRING>
  * 4: Rounds, for a magazine put on <NUMBER> (default: -1)
@@ -28,6 +32,41 @@ if (_class isEqualTo "") exitWith {};
 private _weapon = (([_unit] call FUNC(getEquipment)) getOrDefault [_base, []]) param [0, ""];
 
 if (_weapon isEqualTo "") exitWith {};
+
+if (_base isEqualTo "primary2") exitWith {
+    private _back = +(([_unit] call FUNC(secondPrimary)) select 1);
+
+    if (_back isEqualTo []) exitWith {};
+
+    private _kind = ([_class] call EFUNC(items,getInfo)) get "kind";
+
+    if (_on) then {
+        if (_kind in ["magazine", "grenade"]) then {
+            if (_ammo < 0) then {
+                _ammo = getNumber (configFile >> "CfgMagazines" >> _class >> "count");
+            };
+
+            _back set [[4, 5] select _second, [_class, _ammo]];
+        } else {
+            private _index = ["muzzle", "rail", "optic", "bipod"] find _kind;
+
+            if (_index >= 0) then {
+                _back set [[1, 2, 3, 6] select _index, _class];
+            };
+        };
+    } else {
+        // Off: the part of that class, wherever it sits.
+        private _index = _back findIf {
+            (_x isEqualType "" && {_x == _class}) || {_x isEqualType [] && {(_x param [0, ""]) == _class}}
+        };
+
+        if (_index > 0) then {
+            _back set [_index, ["", []] select (_index in [4, 5])];
+        };
+    };
+
+    [_unit, _back] call FUNC(setSecondPrimary);
+};
 
 if (!_on) exitWith {
     switch (_base) do {

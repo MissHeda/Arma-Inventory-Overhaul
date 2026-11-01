@@ -4,7 +4,7 @@
  * What a unit has in one of its equipment slots, as an entry like those of fnc_getContents - so a
  * slot's item can be weighed (fnc_getMass) and laid on a grid like any tile.
  *
- * Slot ids: primary, handgun, launcher, binocular, headgear, goggles, nvg, uniform, vest, backpack,
+ * Slot ids: primary, handgun, launcher, primary2 (the second primary on the back, fnc_secondPrimary), binocular, headgear, goggles, nvg, uniform, vest, backpack,
  * map, gps, radio, compass, watch - and a weapon's parts as <weapon>_<part>, part being muzzle, rail,
  * optic, bipod, mag (the loaded magazine) or mag2 (the second muzzle's, e.g. a grenade launcher's).
  *
@@ -33,7 +33,7 @@ private _ammo = 0;
 private _attachments = [];
 private _inside = objNull;
 
-if (_base in ["primary", "handgun", "launcher"]) then {
+if (_base in ["primary", "handgun", "launcher", "primary2"]) then {
     if (_value isEqualTo []) exitWith {};
 
     if (_part isEqualTo "") exitWith {
