@@ -514,6 +514,21 @@
 #define TEXT_SCALE (call aio_gui_fnc_textScale)
 #define TEXT_UNIT (UNIT * TEXT_SCALE)
 
+// The player's text size (aio_gui_textSize) on top of that: a share of the words the tiles give, for a player who wants
+// smaller tiles with words still easy to read, or the other way round (a Steam user, 0.6.32: the words nearly unreadable,
+// the window too big). TEXT_MIN_PX stays the floor whatever it says.
+#define TEXT_SIZE_MIN 0.8
+#define TEXT_SIZE_MAX 1.4
+
+// The defaults of the three sizes the size popover sets (fnc_openSizeMenu) - the CBA settings' own (initSettings.inc.sqf), and
+// what its Default button takes them back to.
+#define CELL_SCALE_DEFAULT 1.1
+#define TEXT_SIZE_DEFAULT 1
+#define PAGE_ROWS_DEFAULT 10
+
+// The tile and text sliders of the size popover (fnc_sizeSlide) move in steps of SIZE_STEP; the rows per page in whole rows.
+#define SIZE_STEP 0.05
+
 // The room between two compartments of a container, a share of a cell rounded to whole pixels: between
 // blocks that flow side by side or one under another (fnc_flowCompartments).
 #define COMPARTMENT_GAP 0.22

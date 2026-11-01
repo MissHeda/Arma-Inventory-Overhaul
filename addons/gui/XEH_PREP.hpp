@@ -197,6 +197,18 @@ PREP(updateSoundMenu);
 PREP(updateSoundButton);
 PREP(headerStyle);
 
+// The size popover under its button in the header: the tile scale, the text size and the rows per page, live, as CBA client settings
+PREP(settingForced);
+PREP(sizeDefs);
+PREP(sizeValue);
+PREP(sizeSet);
+PREP(sizeSlide);
+PREP(sizeSettle);
+PREP(sizeChanged);
+PREP(openSizeMenu);
+PREP(updateSizeMenu);
+PREP(updateSizeButton);
+
 // The feel: every kind of gear sounds like itself, others hear the looting, and the soldier looks into his gear
 PREP(soundFamily);
 PREP(containerFamily);
