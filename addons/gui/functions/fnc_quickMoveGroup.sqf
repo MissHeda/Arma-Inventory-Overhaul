@@ -5,7 +5,7 @@
  * whole selection moves at once.
  *
  *   Move over - from the unit's own storage to the containers of the loot column in the order it shows
- *               them (a pile on the ground too, like a single quick move; with nothing looted shown, the
+ *               them (not a pile on the ground - dropping is the drop key's; with nothing else looted shown, the
  *               unit's other containers as fnc_quickMove takes them - seated, the vehicle), from the loot into
  *               the unit's uniform, vest
  *               and backpack. Worked out together (aio_storage_fnc_plan): the largest first, each into
@@ -108,6 +108,7 @@ if (_side isEqualTo "own") then {
         if (
             (_x getOrDefault ["side", ""]) isEqualTo "loot" && {!(_x getOrDefault ["virtual", true])} && {!(_x getOrDefault ["overflow", false])}
             && {(_x getOrDefault ["window", ""]) isEqualTo ""} && {!isNull _container} && {!(_container in _seen)}
+            && {!([_container] call EFUNC(storage,isGroundHolder))}
         ) then {
             _seen pushBack _container;
 

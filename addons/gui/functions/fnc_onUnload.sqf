@@ -50,6 +50,18 @@ _reason = (createHashMapFromArray [
 
 INFO_1("window closed: %1",_reason);
 
+// Out of the engine's inventory pose, which its own inventory would have ended (fnc_leaveGearPose).
+[GVAR(unit)] call FUNC(leaveGearPose);
+
+// A soldier the player leads, held for his inventory (fnc_onInventoryOpened): back into formation.
+if (!isNil QGVAR(heldSoldier)) then {
+    if (alive GVAR(heldSoldier)) then {
+        GVAR(heldSoldier) doFollow leader group GVAR(heldSoldier);
+    };
+
+    GVAR(heldSoldier) = nil;
+};
+
 // The volumes set in the sound dropdown are kept, should the window close with it open - and the colours set in the palette, and
 // the sizes set in the size popover.
 [] call FUNC(soundSettle);

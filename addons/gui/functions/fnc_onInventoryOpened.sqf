@@ -86,6 +86,11 @@ if ([_unit] call FUNC(isSubordinate)) exitWith {
 
     INFO_1("opened: the player's soldier %1 - his gear beside the player's.",typeOf _unit);
 
+    // He stays where he is while the window is open, as for the vanilla inventory - else he walks back into formation and
+    // out of reach at once; he follows again when it closes (fnc_onUnload).
+    doStop _unit;
+    GVAR(heldSoldier) = _unit;
+
     [{_this call FUNC(open)}, [_player, _unit, _beside]] call CBA_fnc_execNextFrame;
 };
 

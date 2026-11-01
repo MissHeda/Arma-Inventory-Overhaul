@@ -141,7 +141,11 @@ reverse _order;
         continue;
     };
 
-    if (!isNull _container && {!(_container in _own)} && {!(_container in _loot)}) then {
+    // The ground is no target: putting down is the drop key's (Steam, issue #50) - a pile at the feet is shown as loot.
+    if (
+        !isNull _container && {!(_container in _own)} && {!(_container in _loot)}
+        && {!([_container] call EFUNC(storage,isGroundHolder))}
+    ) then {
         _loot pushBack _container;
     };
 } forEach _grids;

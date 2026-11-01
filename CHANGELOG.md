@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.35 - beta
+
+### Fixed
+
+- After the first inventory opening the soldier could not walk until V was pressed: the engine left him in its inventory pose, which only its own inventory ends. The window and the closed vanilla inventory now take him out of it (issue #49).
+- Quick move no longer puts things on a pile at your feet that the loot column shows - dropping is G's; with nothing else looted it moves within your own gear (issue #50).
+- A soldier you lead, told to open his inventory, walked back into formation and the window closed at once: he stays put while it is open and follows again when it closes (issue #48).
+
 ## 0.6.34 - beta
 
 ### Added

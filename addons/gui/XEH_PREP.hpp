@@ -116,6 +116,7 @@ PREP(cbaRun);
 PREP(isSearched);
 PREP(isSealed);
 PREP(isSubordinate);
+PREP(leaveGearPose);
 PREP(searchKind);
 PREP(searchTime);
 PREP(sortSearch);
