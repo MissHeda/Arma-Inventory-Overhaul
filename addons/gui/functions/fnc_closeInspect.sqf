@@ -24,9 +24,8 @@ private _open = GVAR(inspect) isNotEqualTo [];
 GVAR(inspect) = [];
 GVAR(inspectMove) = [];
 
-// Its 3D view's scene goes with it (fnc_inspect3D), and the window shows whole again where Modify had its hole (fnc_cutHole).
+// Its 3D view's scene goes with it (fnc_inspect3D).
 ["stop"] call FUNC(inspect3D);
-[uiNamespace getVariable [QGVAR(display), displayNull], [], []] call FUNC(cutHole);
 
 ctrlDelete (uiNamespace getVariable [QGVAR(inspectGroup), controlNull]);
 uiNamespace setVariable [QGVAR(inspectGroup), controlNull];

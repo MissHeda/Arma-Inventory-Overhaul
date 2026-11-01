@@ -179,11 +179,11 @@ private _size = _textUnit * 0.5;
 // ---------------------------------------------------------------------------
 if (_viewRect isEqualTo []) exitWith {};
 
-private _boxH = _textUnit * 2.3;
+private _boxH = _textUnit * 1.6;
 private _boxW = SQUARE(_boxH);
 private _dotH = _textUnit * 0.22;
 private _lineColor = [1, 1, 1, 0.55];
-private _nameSize = _textUnit * 0.42;
+private _nameSize = _textUnit * 0.34;
 private _radius = ((_theme getOrDefault ["radius", 0]) * 0.6) min (_boxH / 5);
 
 // The line in three straight pieces - down from the box, across, down to the dot: a turned control is cut to its own box, so a

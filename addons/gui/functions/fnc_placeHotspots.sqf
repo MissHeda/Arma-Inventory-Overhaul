@@ -3,8 +3,7 @@
 /*
  * Author: Miss Heda
  * Puts the modding view's points onto the 3D picture (fnc_drawHotspots): each part's place in the scene
- * (fnc_weaponPoints) seen from the camera. Filmed with the main view (Modify, fnc_inspect3D), the game says where:
- * worldToScreen, into the card's space. Into Picture-in-Picture's texture by hand, as it has no worldToScreen. The camera's
+ * (fnc_weaponPoints) seen from the camera - by hand, as a Picture-in-Picture camera has no worldToScreen. The camera's
  * frame: forward to what it aims at, right level with the ground, up square to both; a point's place across and up
  * divided by how far ahead it is, against the field of view - INSPECT_3D_FOV the tangent of half the view's height,
  * twice that across, as the texture is twice as wide as high (INSPECT_3D_RES). Then into the picture's area.
@@ -58,9 +57,6 @@ private _right = vectorNormalized (_forward vectorCrossProduct [0, 0, 1]);
 private _up = _right vectorCrossProduct _forward;
 private _tanV = INSPECT_3D_FOV;
 private _tanH = INSPECT_3D_FOV * ((INSPECT_3D_RES select 0) / (INSPECT_3D_RES select 1));
-private _main = (_scene getOrDefault ["main", []]) isNotEqualTo [];
-(ctrlPosition (uiNamespace getVariable [QGVAR(inspectGroup), controlNull])) params [["_cardX", 0], ["_cardY", 0]];
-
 // ----- Each part's place in the card, the middle of its dot -----
 private _onCard = [];
 
@@ -69,23 +65,15 @@ private _onCard = [];
     private _at = [];
 
     if (count _point == 3) then {
-        if (_main) then {
-            private _onScreen = worldToScreen (ASLToAGL _point);
+        private _offset = _point vectorDiff _cameraPos;
+        private _ahead = _offset vectorDotProduct _forward;
 
-            if (_onScreen isEqualTo []) exitWith {};
+        if (_ahead <= 0.01) exitWith {};
 
-            _at = [(_onScreen select 0) - _cardX, (_onScreen select 1) - _cardY];
-        } else {
-            private _offset = _point vectorDiff _cameraPos;
-            private _ahead = _offset vectorDotProduct _forward;
-
-            if (_ahead <= 0.01) exitWith {};
-
-            _at = [
-                _viewX + _viewW * (0.5 + ((_offset vectorDotProduct _right) / (_ahead * _tanH)) / 2),
-                _viewY + _viewH * (0.5 - ((_offset vectorDotProduct _up) / (_ahead * _tanV)) / 2)
-            ];
-        };
+        _at = [
+            _viewX + _viewW * (0.5 + ((_offset vectorDotProduct _right) / (_ahead * _tanH)) / 2),
+            _viewY + _viewH * (0.5 - ((_offset vectorDotProduct _up) / (_ahead * _tanV)) / 2)
+        ];
     };
 
     // Outside the picture it is no place to point at.
@@ -104,7 +92,7 @@ private _known = _onCard select {_x isNotEqualTo []};
 private _boxW = ((_spots select 0) get "rel") select 2;
 private _boxH = ((_spots select 0) get "rel") select 3;
 private _gapX = SQUARE(TEXT_UNIT * 0.25);
-private _lift = TEXT_UNIT * 2.2;
+private _lift = TEXT_UNIT * 1.4;
 private _highest = _viewY + _viewH;
 private _lowest = _viewY;
 

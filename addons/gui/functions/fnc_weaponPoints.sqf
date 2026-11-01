@@ -20,8 +20,7 @@
  * The weapon lies on the holder's weapon proxy, turned as that proxy is: a point of the model goes onto the holder
  * by the proxy's place and its direction and up, then into the world by the holder.
  *
- * The places in the weapon's own model are kept as well ("modelPoints"): the near view puts them into the world itself, as it
- * moves the weapon every frame (fnc_inspect3D - its "points" are its own, fresh each frame).
+ * The places in the weapon's own model are kept as well ("modelPoints").
  *
  * Arguments:
  * 0: The scene, GVAR(scene3D) <HASHMAP>
@@ -38,9 +37,7 @@
 
 params [["_scene", createHashMap, [createHashMap]], ["_inModel", false, [false]]];
 
-private _close = _scene getOrDefault ["close", false];
-
-if (!_inModel && {!_close} && {"points" in _scene}) exitWith {_scene get "points"};
+if (!_inModel && {"points" in _scene}) exitWith {_scene get "points"};
 
 private _class = _scene getOrDefault ["class", ""];
 private _config = configFile >> "CfgWeapons" >> _class;
@@ -123,9 +120,6 @@ if !("modelPoints" in _scene) then {
 };
 
 if (_inModel) exitWith {_scene get "modelPoints"};
-
-// The near view's own, placed this frame.
-if (_close) exitWith {_scene getOrDefault ["points", createHashMap]};
 
 // ----- On the holder of the scene far off -----
 private _holder = (_scene getOrDefault ["objects", []]) param [1, objNull];

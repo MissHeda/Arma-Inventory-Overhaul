@@ -429,12 +429,7 @@ if (_middle && {!GVAR(middleWas)} && {GVAR(inspect3DPan) isEqualTo []} && {count
 
 GVAR(middleWas) = _middle;
 
-// The near view's weapon follows the player's camera (fnc_inspect3D), and the modding view's points the weapon as it is turned,
-// moved and zoomed (fnc_drawHotspots).
-if (GVAR(scene3D) getOrDefault ["close", false]) then {
-    ["follow"] call FUNC(inspect3D);
-};
-
+// The modding view's points follow the weapon as it is turned, moved and zoomed (fnc_drawHotspots).
 if ((uiNamespace getVariable [QGVAR(hotspots), []]) isNotEqualTo []) then {
     call FUNC(placeHotspots);
 };

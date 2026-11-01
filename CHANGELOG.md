@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.45 - beta
+
+### Changed
+
+- Modify shows the weapon in the inspect card's own 3D picture again (Picture-in-Picture, as in 0.6.41): the attempts with the game's own camera are gone, the world behind the window stays untouched. The card can be moved again.
+- The part boxes around the weapon are smaller.
+
 ## 0.6.44 - beta
 
 ### Changed

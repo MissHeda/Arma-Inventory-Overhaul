@@ -564,10 +564,6 @@
 #define INSPECT_3D_PLACE [-2048, -2048]
 #define INSPECT_3D_FRAME 1.2
 #define INSPECT_3D_DISTANCE 0.7
-// The near view (Modify, fnc_inspect3D): the turn it starts with, from the weapon's right side a little from the front.
-#define INSPECT_3D_NEAR_DIR -35
-// ... and how small it is made, as much closer to the camera: nothing of the world comes between it and the eye.
-#define INSPECT_3D_NEAR_SCALE 0.2
 
 // A worn uniform stands as tall as a soldier: its frame is its height times this, so all of it fits the box's height.
 #define INSPECT_3D_TALL 2.3
