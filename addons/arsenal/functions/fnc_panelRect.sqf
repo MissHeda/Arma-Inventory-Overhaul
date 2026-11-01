@@ -50,7 +50,7 @@ if (isNull _list) exitWith {[]};
 private _top = _listY;
 private _bottom = _listY + _listH;
 private _sorts = [
-    _display displayCtrl ARSENAL_IDC_SORT, _display displayCtrl (ctrlIDC _list - BI_IDC_LIST + BI_IDC_SORT)
+    [_display displayCtrl ARSENAL_IDC_SORT], [_display displayCtrl (ctrlIDC _list - BI_IDC_LIST + BI_IDC_SORT)]
 ] select (GVAR(kind) isEqualTo "bi");
 
 if (!isNil QEFUNC(compat_efak,arsenalControls)) then {

@@ -107,7 +107,12 @@ private _load = switch (_id) do {
 
 // The vanilla arsenal keeps no record of its own: its rows are greyed again by weight, as its own "+" does it.
 if (_bi) exitWith {
-    ["SelectItemRight", [_display, _list, ctrlIDC _list - BI_IDC_LIST]] call BIS_fnc_arsenal;
+    // In the namespace BI's own display calls it from.
+    private _args = ["SelectItemRight", [_display, _list, ctrlIDC _list - BI_IDC_LIST]];
+
+    with uiNamespace do {
+        _args call (missionNamespace getVariable ["BIS_fnc_arsenal", {}]);
+    };
 };
 
 private _current = missionNamespace getVariable [QACEGVAR(arsenal,currentItems), []];
