@@ -32,6 +32,8 @@
  * 3: Tiles across instead of rows, 0 for rows - the modding view's parts (fnc_partChoices), as Tarkov's weapon builds list them:
  *    a square tile per choice, its picture (the "icon" option) and its short text in the top left corner, the whole text as its
  *    tip <NUMBER> (default: 0)
+ * 4: A note under the choices, a line of plain muted text - what the choices leave out, never a choice of its own
+ *    <STRING> (default: "")
  *
  * Return Value:
  * None
@@ -44,7 +46,7 @@
 
 disableSerialization;
 
-params ["_display", "_choices", ["_at", [], [[]]], ["_across", 0, [0]]];
+params ["_display", "_choices", ["_at", [], [[]]], ["_across", 0, [0]], ["_note", "", [""]]];
 
 // A field that had the cursor before the menu took the focus, to have it back when the menu goes - the
 // first menu's, when this one replaces another or is the same made again on top (fnc_raiseMenu). Nothing
@@ -103,6 +105,15 @@ private _columns = (count _choices) min _across;
 if (_across > 0) then {
     _width = _columns * _tileW + (_columns - 1) * SQUARE(_tileGap) + _padX * 0.6;
     _height = (ceil (count _choices / _columns)) * (_tileH + _tileGap) - _tileGap + _padY * 2;
+};
+
+// The note's line under the choices, as wide as its words need.
+private _noteSize = _textUnit * 0.5;
+private _noteH = [0, _textUnit * 0.8] select (_note isNotEqualTo "");
+
+if (_note isNotEqualTo "") then {
+    _width = _width max ((_note getTextWidth [_font, _noteSize]) * TEXT_SLACK + _padX * 2);
+    _height = _height + _noteH;
 };
 
 ([_at, getMousePosition] select (_at isEqualTo [])) params ["_mouseX", "_mouseY"];
@@ -266,6 +277,13 @@ private _rowRadius = (_radius * 0.6) min (_rowH / 2);
     };
 } forEach _choices;
 
+if (_note isNotEqualTo "") then {
+    [
+        _display, _layer, [_cardX + _padX, _cardY + _height - _padY - _noteH, _width - _padX * 2, _noteH], _note, _noteSize,
+        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 0, "hint"
+    ] call FUNC(uiLabel);
+};
+
 // The focus into the layer, so it is drawn over everything: a button no one sees, one pixel in the card's
 // padding - the engine may refuse the focus to a control of no size. Return and Space press nothing on it.
 private _focus = [_display, "AIO_Hitbox", _layer, [_cardX + _padX / 2, _cardY + _padY / 2, pixelW, pixelH]] call FUNC(uiCreate);
@@ -278,4 +296,4 @@ uiNamespace setVariable [QGVAR(menuFocusBack), _back];
 uiNamespace setVariable [QGVAR(menuRect), [_left, _top, _width, _height]];
 
 // What it shows, to make it again on top (fnc_raiseMenu).
-GVAR(menuState) = [_choices, [_left, _top], _across];
+GVAR(menuState) = [_choices, [_left, _top], _across, _note];

@@ -16,8 +16,14 @@
  * and size; the card is drawn again from the rows it was made from (fnc_drawCompare). Controls in a group -
  * the tiles' hover, selection and flash - lie under it anyway: their group was made before it.
  *
+ * A popup - a context menu, the part tiles of the modding view, the colour, size and sound popovers - holds the focus to lie over
+ * the columns, and the engine draws the focused control's group after everything else, whenever anything was made: the name
+ * made after it on the display still lay under it (Mia, #56: "WHY is the hint behind?"). So while a popup is open the name is
+ * made in the popup's own layer, as its last control, and back on the display once the popup is gone - its home is always the
+ * layer that is drawn last. Asked with force (fnc_closeMenu), it moves home even while it does not show.
+ *
  * Arguments:
- * None
+ * 0: Move it home even while it does not show <BOOL> (default: false)
  *
  * Return Value:
  * Made again <BOOL>
@@ -30,10 +36,54 @@
 
 disableSerialization;
 
+params [["_force", false, [false]]];
+
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+if (isNull _display) exitWith {false};
+
+// ----- The name in the layer drawn last: an open popup's, else the display -----
+private _name = uiNamespace getVariable [QGVAR(tooltip), controlNull];
+private _home = (uiNamespace getVariable [QGVAR(menu), []]) param [0, controlNull];
+
+if (!isNull _name && {ctrlParentControlsGroup _name isNotEqualTo _home} && {_force || {ctrlShown _name}}) exitWith {
+    // Where it stands on the screen, into the new home's space.
+    private _oldHome = ctrlParentControlsGroup _name;
+    (ctrlPosition _name) params ["_relX", "_relY", "_width", "_height"];
+    (if (isNull _oldHome) then {[0, 0]} else {ctrlPosition _oldHome}) params ["_oldX", "_oldY"];
+    (if (isNull _home) then {[0, 0]} else {ctrlPosition _home}) params ["_homeX", "_homeY"];
+
+    private _shown = ctrlShown _name && {!_force || {isNull _home}};
+    private _text = _name getVariable [QGVAR(tipText), ""];
+    private _tipW = _name getVariable [QGVAR(width), 0];
+    private _tipH = _name getVariable [QGVAR(height), UNIT * 0.85];
+    private _new = [_display, _home] call FUNC(makeTooltip);
+
+    ctrlDelete _name;
+
+    _new ctrlSetPosition [_relX + _oldX - _homeX, _relY + _oldY - _homeY, _width, _height];
+    _new ctrlCommit 0;
+
+    if (_text isNotEqualTo "") then {
+        [_new, _text, _tipW, _tipH] call FUNC(setTipText);
+    };
+
+    _new ctrlShow _shown;
+
+    uiNamespace setVariable [QGVAR(tooltip), _new];
+
+    if ((uiNamespace getVariable [QGVAR(tipShown), controlNull]) isEqualTo _name || {_shown}) then {
+        uiNamespace setVariable [QGVAR(tipShown), [controlNull, _new] select _shown];
+    };
+
+    GVAR(tooltipAt) = [];
+
+    true
+};
+
 private _tip = uiNamespace getVariable [QGVAR(tipShown), controlNull];
 
-if (isNull _display || {isNull _tip} || {!ctrlShown _tip}) exitWith {false};
+if (isNull _tip || {!ctrlShown _tip}) exitWith {false};
 // With a menu or the colour popover open no item's name shows (fnc_updateHover): what shows is the tip of one of its buttons, and
 // it has to go over the popover too.
 if (GVAR(dragging)) exitWith {false};

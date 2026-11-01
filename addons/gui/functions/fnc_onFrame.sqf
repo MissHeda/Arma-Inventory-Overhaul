@@ -580,6 +580,16 @@ if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
         _tipY = (_mouseY - UNIT * 0.3 - _height) max safezoneY;
     };
 
+    // In a popup's layer (fnc_raiseTooltip) its place counts from the layer's corner.
+    private _home = ctrlParentControlsGroup _tip;
+
+    if (!isNull _home) then {
+        (ctrlPosition _home) params ["_homeX", "_homeY"];
+
+        _tipX = _tipX - _homeX;
+        _tipY = _tipY - _homeY;
+    };
+
     _tip ctrlSetPosition [_tipX, _tipY];
     _tip ctrlCommit 0;
 };

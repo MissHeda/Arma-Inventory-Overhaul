@@ -5,8 +5,8 @@
  * A click on a box of the modding view (fnc_drawHotspots): tiles under the box (fnc_openMenu), as Tarkov's weapon builds list them, of what fits that part
  * of the player's weapon - from the player's own gear and the loot open beside it, each with its picture and where it
  * lies, a magazine with its rounds. A click on one puts it on (fnc_doEquip: taken out where it lies, what was on the part
- * put back there - the server checks it). NONE, the first tile, takes what is on the part now off into the gear
- * (fnc_quickUnequip). No title: the box says what it is.
+ * put back there - the server checks it). NONE, the first tile while a part is on it, takes it off into the gear
+ * (fnc_quickUnequip). No title: the box says what it is. That nothing fits is a note under the tiles, never a tile.
  *
  * Only what may be touched (fnc_checkTouch, a kit as Enhanced First Aid Kits says), and what the slot takes
  * (aio_storage_fnc_slotAccepts). The same part in the same place is one row, with how many there are.
@@ -113,16 +113,17 @@ if (count _choices > 17) then {
     _choices resize 17;
 };
 
-// NONE first, as in Tarkov - it takes what is on the part off into the gear (also a right click on the box); greyed while the
-// part is free. Nothing that fits: one greyed tile more saying so.
+// NONE first while a part is on it, as in Tarkov - it takes the part off into the gear (also a right click on the box). Only real
+// choices are tiles (Mia: "why is there still a choice 'Nothing fits'?"): that nothing fits is a line of text under them - and
+// with nothing on the part and nothing that fits there is no grid at all, only the hint says so.
 private _on = ([_unit, _slot] call EFUNC(storage,getSlot)) getOrDefault ["class", ""];
 
-_choices insert [0, [[
-    toUpperANSI LLSTRING(Modify_None), [_unit, _slot], {_this call FUNC(quickUnequip)}, createHashMapFromArray [["enabled", _on isNotEqualTo ""]]
-]]];
+if (_on isNotEqualTo "") then {
+    _choices insert [0, [[toUpperANSI LLSTRING(Modify_None), [_unit, _slot], {_this call FUNC(quickUnequip)}, createHashMap]]];
+};
 
-if (!_found) then {
-    _choices pushBack [LLSTRING(Modify_NoParts), [], {}, createHashMapFromArray [["enabled", false], ["tooltip", LLSTRING(Modify_NoParts)]]];
+if (_choices isEqualTo []) exitWith {
+    [LLSTRING(Modify_NoParts)] call FUNC(flashHint);
 };
 
 // Right under the box that was clicked - over it where the screen ends below (fnc_openMenu keeps it on the screen).
@@ -137,4 +138,4 @@ if (_spot isNotEqualTo [] && {!isNull _group}) then {
     _at = [_cardX + _boxX, _cardY + _boxY + _boxH + pixelH * 4];
 };
 
-[_display, _choices, _at, 3] call FUNC(openMenu);
+[_display, _choices, _at, 3, ["", LLSTRING(Modify_NoParts)] select !_found] call FUNC(openMenu);

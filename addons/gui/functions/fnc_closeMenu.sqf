@@ -61,6 +61,11 @@ uiNamespace setVariable [QGVAR(menuFocus), []];
 uiNamespace setVariable [QGVAR(menuHint), controlNull];
 GVAR(menuState) = [];
 
+// The name at the mouse lived in the popup's layer while it was open (fnc_raiseTooltip): back on the display with it gone.
+if (!isNull ctrlParentControlsGroup (uiNamespace getVariable [QGVAR(tooltip), controlNull])) then {
+    [true] call FUNC(raiseTooltip);
+};
+
 if (_hadFocus) then {
     private _back = uiNamespace getVariable [QGVAR(menuFocusBack), controlNull];
 

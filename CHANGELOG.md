@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.47 - beta
+
+### Fixed
+
+- The hint at the mouse lay behind an open popup - the part tiles of the modding view, a context menu, the colour, size and sound popovers. A popup holds the focus and the game draws it after everything else; the hint now moves into the open popup and lies over it, and back once it closes.
+- The part tiles no longer show "Nothing fits" as if it were a part: NONE (only while a part is on) and the parts that fit are the only tiles, and that nothing fits is a line of text under them - or, with nothing on the part either, just the hint.
+
 ## 0.6.46 - beta
 
 ### Changed
