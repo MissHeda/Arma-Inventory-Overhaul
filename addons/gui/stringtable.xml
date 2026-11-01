@@ -244,6 +244,9 @@
         <Key ID="STR_aio_gui_Hint_StripStay">
             <English>Let go to leave it where it is</English>
         </Key>
+        <Key ID="STR_aio_gui_Hint_SubordinateFar">
+            <English>%1 is too far away - he has to stand next to you</English>
+        </Key>
         <Key ID="STR_aio_gui_Hint_Swap">
             <English>Swap places with %1</English>
         </Key>
@@ -830,7 +833,7 @@
             <English>Tile scale</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_CellScale_Desc">
-            <English>Size of cells, pictures and text (default 1.1).\nApplies on the next opening.</English>
+            <English>Size of cells, pictures and text (default 1.1).\nAlso set live in the window:\nthe size button in the header.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_CompareTooltip">
             <English>Compare gear at the mouse</English>
@@ -898,7 +901,7 @@
             <English>Rows per page of a container</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_PageRows_Desc">
-            <English>Rows shown at a time for tall crates and vehicles (default 10).\n0 or 40 shows everything. Loot only.</English>
+            <English>Rows shown at a time for tall crates and vehicles (default 10).\n0 or 40 shows everything. Loot only.\nAlso set live in the window:\nthe size button in the header.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_PaletteText">
             <English>Colours (text)</English>
@@ -1032,6 +1035,12 @@
         <Key ID="STR_aio_gui_Setting_SoundsWorld_Desc">
             <English>Players nearby hear looting (10 to 20 m).\nOff: only the looter hears it.</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_TextSize">
+            <English>Text size</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_TextSize_Desc">
+            <English>Size of the window's words, on top of\nthe tile scale (default 1).\nAlso set live in the window:\nthe size button in the header.</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_TileNames">
             <English>Item names on tiles</English>
         </Key>
@@ -1064,6 +1073,45 @@ Off moves them at once; a drag never waits.</English>
         <Key ID="STR_aio_gui_Setting_WaitWorn_Desc">
             <English>Whether putting on and taking off a uniform, vest, backpack or headgear takes the hands' time.
 Off does it at once; a drag never waits.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_All">
+            <English>All</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Default">
+            <English>Default</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Default_Tip">
+            <English>Every size back to its default</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Forced">
+            <English>Set by the server.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Note">
+            <English>Saved in your CBA addon options</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_PageRows">
+            <English>Rows per page</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_PageRows_Tip">
+            <English>How many rows of a tall crate or vehicle show at a time. All: no pages.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Text">
+            <English>Text</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Text_Tip">
+            <English>The window's words, on top of the tiles: larger words on small tiles, or smaller ones.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Tiles">
+            <English>Tiles</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Tiles_Tip">
+            <English>The cells and item pictures, and the words with them. Capped where the columns would not fit.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Title">
+            <English>Size</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Tooltip">
+            <English>Size of tiles and text</English>
         </Key>
         <Key ID="STR_aio_gui_Slot_Backpack">
             <English>Backpack</English>

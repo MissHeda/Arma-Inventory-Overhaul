@@ -532,6 +532,9 @@ GVAR(palette) = +PALETTE_DEFAULT;
 GVAR(paletteDirty) = false;
 GVAR(menuRemake) = false;
 
+// The sizes the size popover changed while a slider was dragged, still to be written to CBA when it is let go (fnc_sizeSet).
+GVAR(sizeDirty) = [];
+
 // What the profile holds, read as fnc_paletteRead reads any palette: nothing usable keeps the window as it ships.
 private _savedPalette = [profileNamespace getVariable [QGVAR(palette), []]] call FUNC(paletteRead);
 

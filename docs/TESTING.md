@@ -68,6 +68,11 @@ A client can see them and cannot change them.
       crate, the ground and a kit window, and is greyed while a move out of that container is under way;
       none on a body's worn gear, on a living person's gear that the settings keep look-only, nor in the Arsenal; a narrow window
       drops Sort first, then Take all, before the tab is cut under three letters.
+- [ ] Size popover (issue #51): the size button in the header (between the palette and the speaker) opens a card under the header with
+      Tiles, Text and Rows per page. Dragging a slider grows and shrinks the window behind it while the card stays open and the knob
+      keeps following the mouse; "Default" shows only when a size differs and takes all three back. Close it and open CBA's Addon
+      Options: the values are there. Change one there (if the window is open behind it) or reopen the window: the popover shows it.
+      Forced on the server, a row is grey and does not move. Text at 0.8 on 1280x720 stays readable (12 px floor).
 - [ ] Text follows the tile size (issue #10): at 1920x1080 set "Tile scale" (`aio_gui_cellScale`) to 1.3 and open the window -
       section captions and chips (Backpack, Tactical rig, Take all, Put all in, Sort, the weight, the search chip), the column
       titles, the box's name, "+N empty rows", the page bar's words, a kit window's title row, the footer's key hints, hint and

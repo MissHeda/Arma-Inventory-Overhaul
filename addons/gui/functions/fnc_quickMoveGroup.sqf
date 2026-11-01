@@ -6,7 +6,8 @@
  *
  *   Move over - from the unit's own storage to the containers of the loot column in the order it shows
  *               them (a pile on the ground too, like a single quick move; with nothing looted shown, the
- *               ground at the feet - seated, the vehicle), from the loot into the unit's uniform, vest
+ *               unit's other containers as fnc_quickMove takes them - seated, the vehicle), from the loot into
+ *               the unit's uniform, vest
  *               and backpack. Worked out together (aio_storage_fnc_plan): the largest first, each into
  *               the first container with room, and what finds none stays ("Moved 4 of 6").
  *   Drop      - every selected tile not on the ground yet onto the ground: the surface under the feet,
@@ -37,6 +38,7 @@ if (_tiles isEqualTo [] || {!(call FUNC(isInventoryMode))}) exitWith {false};
 
 private _grids = uiNamespace getVariable [QGVAR(grids), []];
 private _items = [];
+private _sources = [];
 private _side = "";
 private _refused = "";
 
@@ -76,6 +78,7 @@ private _refused = "";
     };
 
     _items pushBack _tile;
+    _sources pushBackUnique (_grid get "container");
 } forEach _tiles;
 
 if (_items isEqualTo []) exitWith {
@@ -114,9 +117,20 @@ if (_side isEqualTo "own") then {
         };
     } forEach _grids;
 
-    // Nothing looted shown: the ground at the feet, or the vehicle while seated (fnc_sendMoves).
+    // Nothing looted shown: seated the vehicle (fnc_sendMoves), on foot the unit's other containers, as a single
+    // quick move takes them (fnc_quickMove) - by where the first of them lies, none they come from. Dropping is G's.
     if (_targets isEqualTo []) then {
-        _targets = [["ground", objNull]];
+        if (!isNull objectParent _unit) exitWith {
+            _targets = [["ground", objNull]];
+        };
+
+        private _next = switch (_sources select 0) do {
+            case (backpackContainer _unit): {[vestContainer _unit, uniformContainer _unit]};
+            case (vestContainer _unit): {[backpackContainer _unit, uniformContainer _unit]};
+            default {[backpackContainer _unit, vestContainer _unit]};
+        };
+
+        _targets = (_next select {!isNull _x && {!(_x in _sources)}}) apply {[_x, _unit]};
     };
 } else {
     _targets = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit] select {!isNull _x} apply {[_x, _unit]};

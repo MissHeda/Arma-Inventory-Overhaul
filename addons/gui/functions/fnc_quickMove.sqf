@@ -5,8 +5,9 @@
  * A double click: moves an item to the other side without dragging (Ctrl+click
  * selects since 0.2.1; several selected tiles move together, fnc_quickMoveGroup). From the unit's own uniform, vest or
  * backpack it goes to what is being looted - the first container shown there with room - then into a
- * kit open in a window, the topmost window first, and to the ground only when neither is shown: the
- * surface under the feet, or the vehicle's cargo while seated. From the loot it goes into the unit's
+ * kit open in a window, the topmost window first. With neither shown it moves within the unit's own gear: out of
+ * the backpack into the vest, then the uniform, out of the vest or the uniform into the backpack, then the other
+ * one - dropping is the drop key's; seated, it goes into the vehicle's cargo. From the loot it goes into the unit's
  * uniform, vest or backpack, the first of them with room. The layout finds it a cell - the authority's,
  * once the move arrives there (fnc_applyMove, fnc_sendMoves).
  *
@@ -145,7 +146,10 @@ reverse _order;
     };
 } forEach _grids;
 
-// Nothing looted and no kit open: the ground - the server finds the pile at the feet or makes one.
+// Nothing looted and no kit open: on foot into another of the player's own containers - what lies in the backpack
+// comes forward into the vest, then the uniform; what is at hand in the vest or the uniform goes back into the
+// backpack, then the other one. Dropping is G's. Seated, the vehicle's cargo, which the server finds for a seated
+// unit. (Steam, 2026-11-01: a double click with nothing open dropped the item at the feet, as G does.)
 if (_loot isEqualTo [] && {_kits isEqualTo []}) exitWith {
     // Something is being looted, all of it locked to the player (aio_locks): not the ground then either.
     if ((GVAR(context) getOrDefault ["lootSections", []]) findIf {_x getOrDefault ["locked", false]} >= 0) exitWith {
@@ -156,7 +160,24 @@ if (_loot isEqualTo [] && {_kits isEqualTo []}) exitWith {
     // A window that attached takes it itself (the "ground" hook: the Arsenal takes it out).
     if ((["ground", [[_gridIndex, _tileIndex], -1], false] call FUNC(hook)) isEqualTo true) exitWith {true};
 
-    [_from, "ground", _tile, -1, []] call FUNC(applyMove)
+    if (!isNull objectParent _unit) exitWith {
+        [_from, "ground", _tile, -1, []] call FUNC(applyMove)
+    };
+
+    private _next = switch (_from) do {
+        case (backpackContainer _unit): {[vestContainer _unit, uniformContainer _unit]};
+        case (vestContainer _unit): {[backpackContainer _unit, uniformContainer _unit]};
+        default {[backpackContainer _unit, vestContainer _unit]};
+    };
+
+    ([_next select {!isNull _x}] call _fnc_pick) params ["_target", "_why"];
+
+    if (isNull _target) exitWith {
+        [["NowhereToGo", _why] select (_why isNotEqualTo "")] call FUNC(flashHint);
+        false
+    };
+
+    [_from, _target, _tile, -1, [], createHashMapFromArray [["roomChecked", true]]] call FUNC(applyMove)
 };
 
 // Only what the player may put into - a living person's container as the settings say. Refused there,

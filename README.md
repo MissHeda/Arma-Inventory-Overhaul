@@ -19,7 +19,7 @@ all") or puts everything of yours into the box beside it ("Put all in").
   is left in it is deleted when the arsenal closes. The vanilla Virtual Arsenal gets the same grid beside its
   own list, opens ACE Arsenal instead, or is blocked, by server setting.
 
-**Status:** 0.6.29, public beta: drag and drop between containers and equipment slots, searching loot,
+**Status:** 0.6.31, public beta: drag and drop between containers and equipment slots, searching loot,
 server-checked moves in multiplayer, the grid panel in ACE Arsenal and the vanilla Virtual Arsenal, shaped grids and items, the hotbar, the
 setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
 Bugs and wishes go to Discord or the GitHub issues.
@@ -341,6 +341,11 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   in your profile (`aio_gui_palette`); the setup wizard and the ACE Arsenal panel use them the next time they
   open. A server can switch the palette off with "Players may pick their colours" (`aio_gui_playerColours`, on the wizard's General page): there is
   no button then, and everyone sees the Arma colour of their profile and the standard look.
+- **Sizes:** the size button in the window's header, beside the palette, opens a popover with three sliders, and the window grows and shrinks
+  behind it while you drag: **Tiles** (the cells, item pictures and the words with them, `aio_gui_cellScale`), **Text** (the window's words on top
+  of that, `aio_gui_textSize` - larger words on small tiles, or smaller ones) and **Rows per page** (`aio_gui_pageRows`; "All" at the right end).
+  "Default" takes them back. They are your CBA client settings ("Arma Inventory Overhaul - Client", General): what you set in the popover is
+  saved there, and a change made there shows at once in an open window. A size a server forces is greyed out in the popover.
 
 ## The vanilla inventory
 
