@@ -429,6 +429,11 @@ if (_middle && {!GVAR(middleWas)} && {GVAR(inspect3DPan) isEqualTo []} && {count
 
 GVAR(middleWas) = _middle;
 
+// The modding view's points follow the weapon as it is turned, moved and zoomed (fnc_drawHotspots).
+if ((uiNamespace getVariable [QGVAR(hotspots), []]) isNotEqualTo []) then {
+    call FUNC(placeHotspots);
+};
+
 if (GVAR(inspect3DPan) isNotEqualTo []) then {
     if (inputMouse 2 == 0) then {
         GVAR(inspect3DPan) = [];

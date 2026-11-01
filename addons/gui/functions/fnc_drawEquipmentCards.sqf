@@ -9,13 +9,13 @@
  *                                                 that fills towards the Critical limit (see below)
  *   EQUIPMENT
  *   v [1] Primary .............................. ::   each weapon a header line - fold chevron, key,
- *   | picture ............... | mag | optic | rail  |   caption, grip - over a big card, its attachments
- *   |                         | muz | bipod | 2nd   |   and loaded magazines as small slots beside it
- *   v [4] Second primary ....................... ::   on the back - only with WebKnight's or KJW's Two
- *   | ...                                             Primary Weapons (aio_storage_fnc_secondPrimary)
- *   > [2] Handgun - P99 ........................ ::   folded: the header alone, naming the weapon
- *   v [3] Launcher ............................. ::
- *   | picture ............... | mag | optic |
+ *   | picture ................................... |   caption, grip - over a card as wide as the column:
+ *   | MX 6.5 mm ............ [o][=] [▮ 27/30]     |   its picture, its name, and small pictures of what is
+ *   v [4] Second primary ....................... ::   on it and its loaded magazines with their rounds -
+ *   | ...                                             nothing for a part it has not. The second primary on
+ *   > [2] Handgun - P99 ........................ ::   the back only with WebKnight's or KJW's Two Primary
+ *   v [3] Launcher ............................. ::   Weapons (aio_storage_fnc_secondPrimary); folded: the
+ *   | picture ................................... |   header alone, naming the weapon
  *   GEAR
  *   | headgear |  | uniform |  | vest |  | backpack |
  *   | gog | nvg | bin | map | gps | radio | compass | watch |
@@ -32,17 +32,18 @@
  * way, a click on it (GVAR(weaponFolds) under "equipment", "gear", "hotbar"). The headers keep their presses to
  * themselves (GVAR(cardButtons), fnc_onMouseButton).
  *
- * The weapon cards are as wide and as tall as each other, so their attachments start on one
- * line. The second primary's key names that mod's own switch key, and it is never the weapon in hand. The weapon in
- * hand is marked in the accent colour. The cards' pictures keep at least half the card's height, whatever the
- * text size: the name goes over the picture's foot where the card is too low for both. The attachments grow with the height the
- * column has, but never take more than about 40 % of its width, so a weapon keeps room for its picture
- * on a narrow (4:3) screen. The weapons stay at the top and the gear and the hotbar at the bottom;
+ * The weapon cards are as wide and as tall as each other. The parts have no boxes of their own any more (Mia, #56: half of
+ * them stood empty): an attachment or a magazine let go on a card goes on the part of the weapon that takes it
+ * (aio_storage_fnc_partFor, fnc_updateDrag), and the parts are changed, put on and taken off in the inspect card's modding
+ * view (Modify in the weapon's menu, fnc_drawInspect). The second primary's key names that mod's own switch key, and it is
+ * never the weapon in hand. The weapon in hand is marked in the accent colour. The cards' pictures keep at least half the
+ * card's height, whatever the text size: the name goes over the picture's foot where the card is too low for both. The
+ * cards grow with the height the column has. The weapons stay at the top and the gear and the hotbar at the bottom;
  * whatever height is left over lies between them.
  *
  * A square theme gives each weapon card a strip down its left edge holding its number, and
  * frames the card; a round one (Glass) puts a small key cap in the header instead, as neither a strip
- * nor a frame can follow round corners. The attachments and the small slots never show a caption on
+ * nor a frame can follow round corners. The small slots never show a caption on
  * the slot - their silhouettes say what they are for, and the hint names it.
  *
  * Arguments:
@@ -88,7 +89,7 @@ private _lineH = _textUnit * 0.62;
 private _lineSize = _textUnit * 0.46;
 private _capH = [0, _lineH] select ((_theme getOrDefault ["slotCaption", "none"]) isEqualTo "above");
 
-// The same theme with no captions on the slots, for the attachments and the small slots.
+// The same theme with no captions on the slots, for the small slots.
 private _quiet = createHashMap;
 _quiet merge _theme;
 _quiet set ["slotCaption", "none"];
@@ -138,17 +139,14 @@ private _open = _cards - count _foldedSlots;
 // Each card has its header line above it, whatever the theme's captions - with a little air under it.
 private _headH = _lineH + _textUnit * 0.12;
 
-// Each open weapon card is two attachment rows high. The primary's three attachments across may take about
-// 40 % of the width.
-private _fixed = _statH + _groupGap * 2 + _labelH * 2 + _rowGap * (_cards - 1) + _gapH * _open + _headH * _cards + _gearBlockH + _hotbarH;
-private _slotWMax = ((_width * 0.42 - _gapW * 3) / 3) max (pixelW * 8);
-private _slotH = (((_height - _fixed) / ((_open * 2) max 1)) min (UNIT * 2.7) min UNSQUARE(_slotWMax)) max (UNIT * 1.2);
-private _slotW = SQUARE(_slotH);
-private _cardH = _slotH * 2 + _gapH;
-private _cardW = _width - (_slotW + _gapW) * 3;
+// Each open weapon card shares the height that is left - as high as the two rows of parts beside it were at most, and never
+// higher than half its width, as a weapon's picture is twice as wide as high.
+private _fixed = _statH + _groupGap * 2 + _labelH * 2 + _rowGap * (_cards - 1) + _headH * _cards + _gearBlockH + _hotbarH;
+private _cardH = (((_height - _fixed) / (_open max 1)) min (UNIT * 5.65) min UNSQUARE(_width * 0.5)) max (UNIT * 2.6);
+private _cardW = _width;
 
 // Left over height loosens the gaps between the weapons a little; the rest stays above the gear.
-private _extra = (((_height - _fixed - _slotH * _open * 2) / (_cards + 1)) max 0) min (UNIT * 0.6);
+private _extra = (((_height - _fixed - _cardH * _open) / (_cards + 1)) max 0) min (UNIT * 0.6);
 _rowGap = _rowGap + _extra;
 
 // The area of a hit box, kept for its presses (fnc_onMouseButton): where it lies in its group, as fnc_gridOrigin
@@ -350,7 +348,55 @@ private _fnc_weaponCard = {
     } else {
         private _nameSize = _textUnit * 0.5;
         private _nameTop = _cardY + _cardH - _padY * 0.5 - _lineH;
-        private _name = [[_info getOrDefault ["name", _class], _theme] call FUNC(caption), _contentW, _font, _nameSize] call FUNC(fitText);
+
+        // What is on it, at the right end of the name's line: a small picture of each attachment, each loaded magazine with its
+        // rounds where it holds more than one - muzzle, optic, rail, bipod, magazine, second magazine from the left, drawn from the
+        // right; nothing for a part it has not.
+        // [class, muzzle, rail, optic, [magazine, rounds] or [], [second magazine, rounds] or [], bipod]
+        private _partH = _lineH * 1.15;
+        private _partW = SQUARE(_partH);
+        private _partsRight = _contentX + _contentW;
+        private _partsTop = _nameTop + _lineH - _partH;
+        private _ammoSize = _textUnit * 0.42;
+
+        {
+            private _value = _weapon param [_x, ""];
+            private _partClass = if (_value isEqualType []) then {_value param [0, "", [""]]} else {_value};
+
+            if !(_partClass isEqualType "" && {_partClass isNotEqualTo ""}) then {continue};
+
+            private _partInfo = [_partClass] call EFUNC(items,getInfo);
+            private _capacity = _partInfo getOrDefault ["capacity", 0];
+
+            // Rounds right of the magazine's picture, as "27/30" - the loss colour when it is empty.
+            if (_value isEqualType [] && {_capacity > 1}) then {
+                private _rounds = _value param [1, 0, [0]];
+                private _text = format ["%1/%2", _rounds, _capacity];
+                private _textW = (_text getTextWidth [_font, _ammoSize]) * TEXT_SLACK;
+
+                _partsRight = _partsRight - _textW;
+
+                [
+                    _display, _parent, [_partsRight, _partsTop, _textW, _partH], _text, _ammoSize,
+                    [_colorText2, _theme getOrDefault ["loss", [0.9, 0.3, 0.25, 1]]] select (_rounds <= 0), _font, 1, "ammo"
+                ] call FUNC(uiLabel);
+            };
+
+            _partsRight = _partsRight - _partW;
+
+            private _partRect = [_partsRight, _partsTop, _partW, _partH];
+
+            [_display, _parent, _partRect, _theme getOrDefault ["slotEmpty", [1, 1, 1, 0.05]], _partH * 0.25] call FUNC(uiPanel);
+            [
+                _display, _parent, _partRect, _partInfo getOrDefault ["picture", ""], _partInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _partRect
+            ] call FUNC(uiItemPicture);
+
+            _partsRight = _partsRight - SQUARE(_textUnit * 0.12);
+        } forEach [5, 4, 6, 2, 3, 1];
+
+        private _name = [
+            [_info getOrDefault ["name", _class], _theme] call FUNC(caption), (_partsRight - _contentX - SQUARE(_textUnit * 0.2)) max pixelW, _font, _nameSize
+        ] call FUNC(fitText);
 
         // The picture keeps at least half the card: where the name's line would leave it less, it reaches to the
         // card's foot and the name goes over it.
@@ -362,7 +408,7 @@ private _fnc_weaponCard = {
 
         // What is on the weapon shows on its picture, the way Arma's own inventory draws it.
         [_display, _parent, _pictureRect, _weapon] call FUNC(drawAttachments);
-        [_display, _parent, [_contentX, _nameTop, _contentW, _lineH], _name, _nameSize, _colorText, _font, 0, "weapon"] call FUNC(uiLabel);
+        [_display, _parent, [_contentX, _nameTop, (_partsRight - _contentX) max pixelW, _lineH], _name, _nameSize, _colorText, _font, 0, "weapon"] call FUNC(uiLabel);
     };
 
     // The weapon in hand is framed in the accent colour, over everything else on the card.
@@ -378,11 +424,11 @@ private _fnc_weaponCard = {
 };
 
 // ---------------------------------------------------------------------------
-// A weapon's row: its header, its card, and its attachments beside it, row by row - or folded, the header alone.
+// A weapon's row: its header and its card - or folded, the header alone.
 // Returns the row's height.
 // ---------------------------------------------------------------------------
 private _fnc_weaponRow = {
-    params ["_rowTop", "_slot", "_caption", "_icon", "_number", "_cols", "_parts", "_rowFolded"];
+    params ["_rowTop", "_slot", "_caption", "_icon", "_number", "_rowFolded"];
 
     // [class, muzzle, rail, optic, [magazine, rounds] or [], [second magazine, rounds] or [], bipod]
     private _weapon = _equipment getOrDefault [_slot, []];
@@ -409,47 +455,6 @@ private _fnc_weaponRow = {
     };
 
     [[_left, _cardY, _cardW, _cardH], _class, _caption, _icon, _number, _inHand] call _fnc_weaponCard;
-
-    {
-        if (_x isEqualTo []) then {continue};
-
-        _x params ["_index", "_partCaption", "_partIcon"];
-
-        private _value = _weapon param [_index, ""];
-        private _partClass = "";
-        private _ammo = [];
-
-        // A loaded magazine comes with its rounds; they show only where it holds more than one.
-        if (_value isEqualType []) then {
-            _partClass = _value param [0, "", [""]];
-
-            if (_partClass isNotEqualTo "") then {
-                private _capacity = ([_partClass] call EFUNC(items,getInfo)) getOrDefault ["capacity", 0];
-
-                if (_capacity > 1) then {
-                    _ammo = [_value param [1, 0, [0]], _capacity];
-                };
-            };
-        } else {
-            if (_value isEqualType "") then {
-                _partClass = _value;
-            };
-        };
-
-        private _col = _forEachIndex mod _cols;
-        private _row = floor (_forEachIndex / _cols);
-
-        [
-            _display, _parent,
-            [_left + _cardW + _gapW + _col * (_slotW + _gapW), _cardY + _row * (_slotH + _gapH), _slotW, _slotH],
-            _partClass,
-            createHashMapFromArray [
-                ["caption", _partCaption], ["icon", _partIcon], ["ammo", _ammo], ["unit", _unit],
-                ["slot", format ["%1_%2", _slot, ["", "muzzle", "rail", "optic", "mag", "mag2", "bipod"] select _index]]
-            ],
-            _quiet
-        ] call FUNC(drawSlot);
-    } forEach _parts;
 
     _headH + _cardH
 };
@@ -492,17 +497,6 @@ _cursor = _cursor + _statH + _groupGap;
 [_cursor, LLSTRING(Column_Equipment), "equipment", _equipFolded] call _fnc_label;
 _cursor = _cursor + _labelH;
 
-// Each card's caption, silhouette, key, attachment columns and attachments: [index in the weapon, caption, silhouette],
-// three across, in the same places on every card - muzzle, optic, rail over bipod, magazine, second magazine; [] keeps
-// the place of one the weapon has not.
-private _muzzle = [1, LLSTRING(Slot_Muzzle), GEAR_ICON(ui_gear_muzzle_gs)];
-private _optic = [3, LLSTRING(Slot_Optic), GEAR_ICON(ui_gear_top_gs)];
-private _rail = [2, LLSTRING(Slot_Rail), GEAR_ICON(ui_gear_side_gs)];
-private _bipod = [6, LLSTRING(Slot_Bipod), GEAR_ICON(ui_gear_bipod_gs)];
-private _magazine = [4, LLSTRING(Slot_Magazine), GEAR_ICON(ui_gear_magazine_gs)];
-private _magazine2 = [5, LLSTRING(Slot_Magazine2), GEAR_ICON(ui_gear_magazineGL_gs)];
-private _rifleParts = [_muzzle, _optic, _rail, _bipod, _magazine, _magazine2];
-
 // The second primary's corner names the two-primary mod's own key that switches to it - when that key is short
 // enough for the cap (a key with modifiers is left off).
 private _keyName = "";
@@ -528,19 +522,19 @@ if (_hasSecond) then {
 };
 
 private _rows = createHashMapFromArray [
-    ["primary", [LLSTRING(Slot_Primary), GEAR_ICON(ui_gear_primary_gs), "1", 3, _rifleParts]],
-    ["primary2", [LLSTRING(Slot_SecondPrimary), GEAR_ICON(ui_gear_primary_gs), _keyName, 3, _rifleParts]],
-    ["handgun", [LLSTRING(Slot_Handgun), GEAR_ICON(ui_gear_hgun_gs), "2", 3, [_muzzle, _optic, _rail, [], _magazine, []]]],
-    ["launcher", [LLSTRING(Slot_Launcher), GEAR_ICON(ui_gear_secondary_gs), "3", 3, [[], _optic, [], [], _magazine, []]]]
+    ["primary", [LLSTRING(Slot_Primary), GEAR_ICON(ui_gear_primary_gs), "1"]],
+    ["primary2", [LLSTRING(Slot_SecondPrimary), GEAR_ICON(ui_gear_primary_gs), _keyName]],
+    ["handgun", [LLSTRING(Slot_Handgun), GEAR_ICON(ui_gear_hgun_gs), "2"]],
+    ["launcher", [LLSTRING(Slot_Launcher), GEAR_ICON(ui_gear_secondary_gs), "3"]]
 ];
 
 // In the player's order (see above) - none while the section is folded.
 if (!_equipFolded) then {
     {
-        (_rows get _x) params ["_rowCaption", "_rowIcon", "_rowNumber", "_rowCols", "_rowParts"];
+        (_rows get _x) params ["_rowCaption", "_rowIcon", "_rowNumber"];
 
         _cursor = _cursor + _rowGap + ([
-            _cursor, _x, _rowCaption, _rowIcon, _rowNumber, _rowCols, _rowParts, _x in _foldedSlots
+            _cursor, _x, _rowCaption, _rowIcon, _rowNumber, _x in _foldedSlots
         ] call _fnc_weaponRow);
     } forEach _shownOrder;
 };

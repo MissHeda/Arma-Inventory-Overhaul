@@ -321,11 +321,23 @@ switch (GVAR(hover) param [0, ""]) do {
 
         private _worn = [_owner, _slot] call EFUNC(storage,getSlot);
 
+        // One of the player's own weapons opens with its parts to change on the card (#56, fnc_drawHotspots) - Modify on the wide
+        // card, in 3D.
+        private _ownWeapon = _owner isEqualTo _unit && {_slot in ["primary", "handgun", "launcher", "primary2"]};
+
         _choices pushBack [
             LLSTRING(Menu_Inspect),
-            [_record param [1, ""], 1, _worn getOrDefault ["ammo", -1], _worn getOrDefault ["attachments", []]],
+            [_record param [1, ""], 1, _worn getOrDefault ["ammo", -1], _worn getOrDefault ["attachments", []], objNull, ["", _slot] select _ownWeapon],
             {_this call FUNC(inspect)}
         ];
+
+        if (_ownWeapon) then {
+            _choices pushBack [
+                LLSTRING(Menu_Modify),
+                [_record param [1, ""], 1, -1, _worn getOrDefault ["attachments", []], objNull, _slot, true],
+                {_this call FUNC(inspect)}
+            ];
+        };
 
         // Waiting to be taken off (fnc_queueMoves): it can be cancelled, and nothing else is offered for it.
         private _queuedId = [_owner, _slot] call FUNC(queuedSlot);

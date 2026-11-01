@@ -17,6 +17,11 @@
  * (fnc_drawTopLayer). Clicks on it reach neither the inventory nor a kit window under it: fnc_topAt
  * finds the card first by QGVAR(inspectRect) (fnc_onMouseButton, fnc_updateHover, fnc_updateDrag).
  *
+ * One of the player's own weapons, opened from its slot (Inspect or Modify, fnc_contextMenu), is shown as it is on the
+ * player now, with its parts to change (#56, fnc_drawHotspots): points on the 3D picture, a row of the parts under it.
+ * Modify opens the card twice as wide, in 3D whatever the switch says (where Picture-in-Picture is on), with the
+ * picture, the parts and how to use them only - no switch, no figures.
+ *
  * Arguments:
  * None
  *
@@ -36,12 +41,28 @@ private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 ctrlDelete (uiNamespace getVariable [QGVAR(inspectGroup), controlNull]);
 uiNamespace setVariable [QGVAR(inspectGroup), controlNull];
 uiNamespace setVariable [QGVAR(inspectRect), []];
+uiNamespace setVariable [QGVAR(hotspots), []];
 
 if (isNull _display || {GVAR(inspect) isEqualTo []}) exitWith {
     ["stop"] call FUNC(inspect3D);
 };
 
-GVAR(inspect) params ["_class", "_count", "_ammo", "_attachments", ["_holder", objNull, [objNull]]];
+GVAR(inspect) params ["_class", "_count", "_ammo", "_attachments", ["_holder", objNull, [objNull]], ["_modify", "", [""]], ["_large", false, [false]]];
+
+// One of the player's weapons to modify: as it is on the player now - its parts change while the card is open. Gone from the
+// slot, or another one there, it is the weapon it was, to look at only.
+if (_modify isNotEqualTo "") then {
+    private _weapon = ([GVAR(unit)] call EFUNC(storage,getEquipment)) getOrDefault [_modify, []];
+
+    if !(_weapon isEqualType [] && {(_weapon param [0, ""]) isEqualTo _class}) exitWith {
+        _modify = "";
+    };
+
+    _attachments = +_weapon;
+    GVAR(inspect) set [3, +_weapon];
+};
+
+_large = _large && {_modify isNotEqualTo ""};
 
 private _info = [_class] call EFUNC(items,getInfo);
 private _theme = GVAR(theme);
@@ -151,16 +172,22 @@ if (_modName isEqualTo "") then {_modName = _mod};
 _rows pushBack [LLSTRING(Inspect_Mod), _modName];
 _rows pushBack [LLSTRING(Inspect_Class), _info getOrDefault ["class", _class]];
 
+// Modify shows the weapon and its parts alone.
+if (_large) then {
+    _rows = [];
+};
+
 // ----- Measures -----
 
 // The card and its words grow with the tiles (TEXT_UNIT, fnc_textScale).
 private _textUnit = TEXT_UNIT;
-private _width = SQUARE(_textUnit * 17);
+private _cardUnits = [17, 34] select _large;
+private _width = SQUARE(_textUnit * _cardUnits);
 private _padY = _textUnit * 0.7;
 private _padX = SQUARE(_padY);
 private _innerW = _width - _padX * 2;
 private _titleH = _textUnit * 1.1;
-private _pictureH = _textUnit * 6.5;
+private _pictureH = _textUnit * ([6.5, 13] select _large);
 private _rowH = _textUnit * 0.8;
 private _gap = _textUnit * 0.45;
 private _closeH = _titleH;
@@ -171,7 +198,7 @@ private _closeW = SQUARE(_closeH);
 // options, there is no 3D. The box is then exactly twice as wide as high in pixels, as the texture (INSPECT_3D_RES) is, so the
 // item is never squeezed; under it how to move it.
 private _can3D = [_class] call FUNC(hasModel);
-private _show3D = _can3D && {isPiPEnabled} && {GVAR(inspectView) isEqualTo "3d"};
+private _show3D = _can3D && {isPiPEnabled} && {GVAR(inspectView) isEqualTo "3d" || _large};
 private _viewPixelsW = floor ((_innerW - pixelW * 2) / pixelW);
 private _viewPixelsH = floor (_viewPixelsW / 2);
 private _hint3DH = 0;
@@ -181,6 +208,10 @@ if (_show3D) then {
     _hint3DH = _textUnit * 0.75;
 };
 
+// The weapon's parts in a row under the picture, and how to change them under that (fnc_drawHotspots).
+private _partsH = [0, _textUnit * ([1.15, 1.35] select _large)] select (_modify isNotEqualTo "");
+private _hintModifyH = [0, _textUnit * 0.75] select (_modify isNotEqualTo "");
+
 // The description, measured in a box of the card's width before anything is placed.
 private _description = _info getOrDefault ["description", ""];
 private _descText = parseText format [
@@ -188,7 +219,7 @@ private _descText = parseText format [
 ];
 private _descH = 0;
 
-if (_description isNotEqualTo "") then {
+if (_description isNotEqualTo "" && {!_large}) then {
     private _probe = [_display, "AIO_StructuredText", controlNull, [0, 0, _innerW, UNIT]] call FUNC(uiCreate);
     _probe ctrlSetStructuredText _descText;
     _descH = (ctrlTextHeight _probe) min (_textUnit * 6);
@@ -196,6 +227,7 @@ if (_description isNotEqualTo "") then {
 };
 
 private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap + _hint3DH
+    + ([0, _partsH + _gap + _hintModifyH] select (_partsH > 0))
     + ([0, _descH + _gap] select (_descH > 0))
     + count _rows * _rowH;
 
@@ -270,10 +302,13 @@ private _trackX = _padX + _innerW - SQUARE(_textUnit * 0.3) - _trackW;
 private _toggleY = _cursor + _textUnit * 0.3;
 
 // In 3D (see the measures): held and dragged the item turns (fnc_onFrame), the wheel zooms, a double click puts it back.
+private _viewRect = [];
+private _showToggle = _can3D && {!_large};
+
 if (_show3D) then {
     ["start", [_class, _attachments]] call FUNC(inspect3D);
 
-    private _viewRect = [_padX + (_innerW - _viewPixelsW * pixelW) / 2, _cursor + pixelH, _viewPixelsW * pixelW, _viewPixelsH * pixelH];
+    _viewRect = [_padX + (_innerW - _viewPixelsW * pixelW) / 2, _cursor + pixelH, _viewPixelsW * pixelW, _viewPixelsH * pixelH];
     _viewRect params ["_viewX", "_viewY", "_viewW", "_viewH"];
 
     private _view = [_display, "AIO_PictureTurned", _group, _viewRect] call FUNC(uiCreate);
@@ -282,10 +317,14 @@ if (_show3D) then {
     // The areas that turn it: the view but the switch. A held control is drawn over every other (the engine draws the focused
     // one last) - one lying under the switch as well hid it after the first turn, and took its clicks.
     private _belowY = _toggleY + _toggleH + _inset;
-    private _hitRects = [
-        [_viewX, _viewY, (_trackX - _inset - _viewX) max 0, _belowY - _viewY],
-        [_viewX, _belowY, _viewW, _viewY + _viewH - _belowY]
-    ];
+    private _hitRects = if (_showToggle) then {
+        [
+            [_viewX, _viewY, (_trackX - _inset - _viewX) max 0, _belowY - _viewY],
+            [_viewX, _belowY, _viewW, _viewY + _viewH - _belowY]
+        ]
+    } else {
+        [+_viewRect]
+    };
 
     {
         private _hit = [_display, "AIO_Hitbox", _group, _x] call FUNC(uiCreate);
@@ -297,6 +336,12 @@ if (_show3D) then {
 
             if (_button == 0) then {
                 GVAR(inspect3DTurn) = getMousePosition;
+            };
+
+            // The modding view's points lie over these areas (fnc_drawHotspots): held, an area would be drawn over them and
+            // take their clicks - the focus goes on at once, the turn follows the button all the same.
+            if ((uiNamespace getVariable [QGVAR(hotspots), []]) isNotEqualTo []) then {
+                [{ctrlSetFocus (uiNamespace getVariable [QGVAR(filterSink), controlNull])}] call FUNC(later);
             };
         }];
         _hit ctrlAddEventHandler ["MouseButtonDblClick", {
@@ -337,7 +382,7 @@ if (_show3D) then {
 
 // 2D or 3D, a switch in the box's corner, for an item with a model of its own: one dark track, the side shown lit on it. 3D is
 // greyed out without Picture-in-Picture. The choice is kept for the next items and games.
-if (_can3D) then {
+if (_showToggle) then {
     private _accent = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
     private _shown = ["2d", "3d"] select _show3D;
 
@@ -374,11 +419,29 @@ if (_can3D) then {
 
 _cursor = _cursor + _pictureH + _gap;
 
+// The weapon's parts: on the 3D picture and in a row under it (fnc_drawHotspots). No point on the switch.
+if (_partsH > 0) then {
+    [
+        _display, _group, _viewRect, [_padX, _cursor, _innerW, _partsH],
+        [[], [[_trackX - _inset, _toggleY - _inset, _trackW + _inset * 2, _toggleH + _inset * 2]]] select _showToggle,
+        _modify, _attachments, _theme
+    ] call FUNC(drawHotspots);
+
+    _cursor = _cursor + _partsH + _gap;
+};
+
 // How to move it, under the 3D view.
 if (_show3D) then {
     [_display, _group, [_padX, _cursor - _gap * 0.5, _innerW, _hint3DH], LLSTRING(Inspect_3DTip), _textUnit * 0.55, _muted, _font, 2, "hint"] call FUNC(uiLabel);
 
     _cursor = _cursor + _hint3DH;
+};
+
+// How to change the parts.
+if (_hintModifyH > 0) then {
+    [_display, _group, [_padX, _cursor - _gap * 0.5, _innerW, _hintModifyH], LLSTRING(Modify_Tip), _textUnit * 0.55, _muted, _font, 2, "hint"] call FUNC(uiLabel);
+
+    _cursor = _cursor + _hintModifyH;
 };
 
 if (_descH > 0) then {

@@ -22,6 +22,8 @@ all") or puts everything of yours into the box beside it ("Put all in").
 **Status:** 0.6.35, public beta: drag and drop between containers and equipment slots, searching loot,
 server-checked moves in multiplayer, the grid panel in ACE Arsenal and the vanilla Virtual Arsenal, shaped grids and items, the hotbar, the
 setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
+Weapons are modded as in Tarkov: Modify in a weapon's right-click menu shows it in 3D with a point on each part - click
+one for what fits from your gear and the loot, right-click it to take the part off, or drop a part on it.
 Bugs and wishes go to Discord or the GitHub issues.
 The plan is in [docs/BRIEFING.md](docs/BRIEFING.md), the design in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 

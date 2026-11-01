@@ -154,7 +154,8 @@ if (_down) then {
 
 // The inspect card takes the clicks on it (fnc_drawInspect) - the inventory and the kit windows under it
 // get none. A drag let go over it still ends, and what was held goes back (fnc_updateDrag finds no
-// target there); a press let go there is no click.
+// target there) - but on a point of the modding view, where it goes on that part of the weapon (fnc_hotspotAt);
+// a press let go there is no click.
 getMousePosition params ["_clickX", "_clickY"];
 
 private _layer = [[_clickX, _clickY]] call FUNC(topAt);
@@ -162,7 +163,10 @@ private _layer = [[_clickX, _clickY]] call FUNC(topAt);
 if (_layer isEqualTo "inspect") exitWith {
     if (!_down && {_button == 0}) then {
         if (GVAR(dragging)) then {
-            GVAR(dragTarget) = [];
+            if (count ([[_clickX, _clickY]] call FUNC(hotspotAt)) == 0) then {
+                GVAR(dragTarget) = [];
+            };
+
             [_display] call FUNC(endDrag);
         } else {
             GVAR(press) = [];

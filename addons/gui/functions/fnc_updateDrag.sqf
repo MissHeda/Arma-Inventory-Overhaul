@@ -859,8 +859,29 @@ private _fnc_show = {
     _footprint ctrlShow true;
 };
 
-// Over the inspect card nothing under it is a target (fnc_drawInspect): let go there, it goes back.
+// Over the inspect card nothing under it is a target (fnc_drawInspect): let go there, it goes back - but on a point of the
+// modding view (fnc_drawHotspots), where it goes on that part of the weapon as on the part's slot, a part of another weapon
+// exchanged (fnc_canSwap). The footprint covers the point.
 if (_onTop isEqualTo "inspect") exitWith {
+    private _spot = [_mouse] call FUNC(hotspotAt);
+
+    if (count _spot > 0) exitWith {
+        private _slot = _spot get "slot";
+        private _player = GVAR(unit);
+        private _why = switch (true) do {
+            case (_dragGroup isNotEqualTo []): {"GroupNoSlot"};
+            case !([_player, _slot, _entry getOrDefault ["class", ""]] call EFUNC(storage,slotAccepts)): {"NoFit"};
+            case (_slotSource isNotEqualTo []): {[_slotSource, _player, _slot] call FUNC(canSwap)};
+            default {""};
+        };
+
+        (ctrlPosition (uiNamespace getVariable [QGVAR(inspectGroup), controlNull])) params [["_cardX", 0], ["_cardY", 0]];
+        (_spot get "rel") params ["_relX", "_relY", "_relW", "_relH"];
+
+        GVAR(dragTarget) = ["slot", -1, 0, 0, _why isEqualTo "", _why, _slot, true, [objNull, _player] select (_slotSource isNotEqualTo [])];
+        [[_cardX + _relX, _cardY + _relY, _relW, _relH], _why isEqualTo ""] call _fnc_show;
+    };
+
     _footprint ctrlShow false;
     GVAR(dragTarget) = [];
 

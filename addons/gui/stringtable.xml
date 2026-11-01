@@ -379,6 +379,9 @@
         <Key ID="STR_aio_gui_Menu_LoadInto">
             <English>Load into %1</English>
         </Key>
+        <Key ID="STR_aio_gui_Menu_Modify">
+            <English>Modify</English>
+        </Key>
         <Key ID="STR_aio_gui_Menu_OpenContainer">
             <English>Open %1</English>
         </Key>
@@ -393,6 +396,18 @@
         </Key>
         <Key ID="STR_aio_gui_Menu_SwapSecondPrimary">
             <English>Swap with second primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Modify_NoParts">
+            <English>Nothing in your gear or the loot fits here</English>
+        </Key>
+        <Key ID="STR_aio_gui_Modify_SpotEmpty">
+            <English>%1 - click to choose a part, or drop one here</English>
+        </Key>
+        <Key ID="STR_aio_gui_Modify_SpotFilled">
+            <English>%1: %2 - click to change it, right click to take it off</English>
+        </Key>
+        <Key ID="STR_aio_gui_Modify_Tip">
+            <English>Click a part to change it, right click to take it off, or drop a part on it</English>
         </Key>
         <Key ID="STR_aio_gui_Notify_Searched">
             <English>%1 is going through your gear</English>

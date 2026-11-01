@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.41 - beta
+
+### Added
+
+- Weapon modding as in Tarkov (#56): right-click one of your weapons and pick **Modify** - a wide inspect card shows it in 3D with a point on each part (muzzle, optic, rail, bipod, magazine, second magazine), following the weapon as you turn, move and zoom it. Click a point for the parts from your gear and the open loot that fit there, right-click it to take the part off into your gear, or drag a part from any grid onto it. A row under the picture lists the same parts, also for weapons whose model names no place for one, and in 2D. **Inspect** on your own weapon has the points and the row too, on the usual card.
+
+### Changed
+
+- The weapon cards have no attachment and magazine boxes any more - half of them stood empty. A card shows the weapon's picture and name and small pictures of what is on it, the loaded magazines with their rounds. Dropping an attachment or a magazine on the card still puts it on.
+
 ## 0.6.40 - beta
 
 ### Changed

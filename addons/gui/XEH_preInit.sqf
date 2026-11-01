@@ -281,7 +281,8 @@ GVAR(statusSecond) = -1;
 // Where the mouse was when the name beside it was last placed (fnc_onFrame).
 GVAR(tooltipAt) = [];
 
-// The inspect card: [class, count, rounds, attachments] or [], where it was last put [x, y] or [], and
+// The inspect card: [class, count, rounds, attachments, container, weapon slot to modify or "", Modify's wide card] or [],
+// where it was last put [x, y] or [], and
 // while its title is held, where the mouse holds it [dx, dy] (fnc_inspect, fnc_drawInspect, fnc_onFrame).
 GVAR(inspect) = [];
 GVAR(inspectPos) = [];
