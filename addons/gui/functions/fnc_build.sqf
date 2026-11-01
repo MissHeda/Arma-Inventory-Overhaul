@@ -218,6 +218,10 @@ uiNamespace setVariable [QGVAR(compare), controlNull];
 uiNamespace setVariable [QGVAR(tipShown), controlNull];
 GVAR(buildCount) = GVAR(buildCount) + 1;
 GVAR(hover) = [];
+
+// What is under the mouse is looked at again in the next frame, though it did not move: a click that built the window
+// anew (a fold, a sort) left it on a new button whose tip is shown then - not only once the mouse moves on.
+GVAR(lastMouse) = [];
 uiNamespace setVariable [QGVAR(hint), controlNull];
 uiNamespace setVariable [QGVAR(hoverRing), []];
 

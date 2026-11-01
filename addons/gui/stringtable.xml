@@ -1393,13 +1393,13 @@ Off does it at once; a drag never waits.</English>
             <English>Inventory</English>
         </Key>
         <Key ID="STR_aio_gui_WeaponCard_Fold">
-            <English>Fold the card away</English>
+            <English>Fold away</English>
         </Key>
         <Key ID="STR_aio_gui_WeaponCard_Grip">
             <English>Drag to move the card</English>
         </Key>
         <Key ID="STR_aio_gui_WeaponCard_Unfold">
-            <English>Open the card</English>
+            <English>Open</English>
         </Key>
         <Key ID="STR_aio_gui_Zone_Arms">
             <English>arms</English>

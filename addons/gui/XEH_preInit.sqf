@@ -396,7 +396,8 @@ if !(GVAR(weaponOrder) isEqualType [] && {
 };
 
 // Which weapon cards the player folded to their header line, slot -> folded (fnc_toggleWeaponFold), kept in the
-// profile as [slot, folded] pairs. A card the player never folded or opened is open - but the second primary's,
+// profile as [slot, folded] pairs - and which sections of the equipment column, under "equipment", "gear" and
+// "hotbar". A card the player never folded or opened is open - but the second primary's,
 // folded while nothing is on the back (fnc_drawEquipmentCards).
 GVAR(weaponFolds) = createHashMap;
 

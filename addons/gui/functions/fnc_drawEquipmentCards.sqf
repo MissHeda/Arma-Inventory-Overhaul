@@ -24,11 +24,13 @@
  *                                                              and on, in the inventory window only
  *
  * The weapon cards come in the order the player gave them, primary, second primary, handgun, launcher at first: a
- * card is dragged to another place by the grip at the right end of its header (GVAR(weaponOrder), fnc_cardGrip).
+ * card is dragged to another place by the grip at the right end of its header - a chevron up, a dash, a chevron down
+ * (GVAR(weaponOrder), fnc_cardGrip).
  * A click on the header's chevron or caption folds the card to that line, and opens it again (GVAR(weaponFolds),
  * fnc_toggleWeaponFold) - a folded one still takes a weapon dragged onto its line. The second primary's card starts
- * folded while the back is empty. The headers keep their presses to themselves (GVAR(cardButtons),
- * fnc_onMouseButton).
+ * folded while the back is empty. The column's sections - Equipment, Gear, Hotbar - fold to their caption the same
+ * way, a click on it (GVAR(weaponFolds) under "equipment", "gear", "hotbar"). The headers keep their presses to
+ * themselves (GVAR(cardButtons), fnc_onMouseButton).
  *
  * The weapon cards are as wide and as tall as each other, so their attachments start on one
  * line. The second primary's key names that mod's own switch key, and it is never the weapon in hand. The weapon in
@@ -113,7 +115,14 @@ private _gearH = UNSQUARE(_gearW);
 // The hotbar's row under the gear (aio_hotbar - only when that addon is loaded and on, and only in the
 // inventory, not in the Arsenal): a caption over seven small slots.
 private _hotbar = call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,drawStrip)} && {call EFUNC(hotbar,isActive)};
-private _hotbarH = [0, _labelH + _smallH + _groupGap] select _hotbar;
+
+// The column's sections fold to their caption as the weapon cards do (fnc_toggleWeaponFold): what they hold is not
+// drawn, and the weapons get the height it leaves.
+private _equipFolded = GVAR(weaponFolds) getOrDefault ["equipment", false];
+private _gearFolded = GVAR(weaponFolds) getOrDefault ["gear", false];
+private _hotbarFolded = GVAR(weaponFolds) getOrDefault ["hotbar", false];
+private _hotbarH = [0, _labelH + ([_smallH, 0] select _hotbarFolded) + _groupGap] select _hotbar;
+private _gearBlockH = [_capH + _gearH + _gearGap + _smallH, 0] select _gearFolded;
 
 // A fourth card for the second primary on the back, when a two-primary mod gives the unit that slot.
 private _second = _equipment getOrDefault ["primary2", -1];
@@ -131,7 +140,7 @@ private _headH = _lineH + _textUnit * 0.12;
 
 // Each open weapon card is two attachment rows high. The primary's three attachments across may take about
 // 40 % of the width.
-private _fixed = _statH + _groupGap * 2 + _labelH * 2 + _rowGap * (_cards - 1) + _gapH * _open + _headH * _cards + _capH + _gearH + _gearGap + _smallH + _hotbarH;
+private _fixed = _statH + _groupGap * 2 + _labelH * 2 + _rowGap * (_cards - 1) + _gapH * _open + _headH * _cards + _gearBlockH + _hotbarH;
 private _slotWMax = ((_width * 0.42 - _gapW * 3) / 3) max (pixelW * 8);
 private _slotH = (((_height - _fixed) / ((_open * 2) max 1)) min (UNIT * 2.7) min UNSQUARE(_slotWMax)) max (UNIT * 1.2);
 private _slotW = SQUARE(_slotH);
@@ -168,6 +177,32 @@ private _fnc_register = {
     };
 };
 
+// A hit box that folds or opens what it heads (fnc_toggleWeaponFold): the key it is kept under, folded now.
+private _fnc_foldHit = {
+    params ["_area", "_key", "_isFolded"];
+
+    private _hit = [_display, "AIO_Hitbox", _parent, _area] call FUNC(uiCreate);
+    [_hit, [LLSTRING(WeaponCard_Fold), LLSTRING(WeaponCard_Unfold)] select _isFolded] call FUNC(setTooltip);
+    _hit setVariable [QGVAR(id), [_key, _isFolded]];
+    _hit ctrlAddEventHandler ["ButtonClick", {
+        [{_this call FUNC(toggleWeaponFold)}, (_this select 0) getVariable [QGVAR(id), ["", false]]] call FUNC(later);
+    }];
+
+    [_area] call _fnc_keepPresses;
+};
+
+// The fold chevron at the start of a line: pointing down while open, right while folded.
+private _fnc_chevron = {
+    params ["_lineY", "_lineH", "_isFolded"];
+
+    private _iconH = _lineH * 0.6;
+
+    [
+        _display, _parent, [_left + (SQUARE(_lineH) - SQUARE(_iconH)) / 2, _lineY + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
+        [UI_TEX(icon_chevron_down_ca), UI_TEX(icon_chevron_right_ca)] select _isFolded, _colorText2
+    ] call FUNC(uiIcon);
+};
+
 // ---------------------------------------------------------------------------
 // A weapon's header line: the fold chevron, the key (on a round theme - a square one names it on the card's strip),
 // the caption - and the weapon's name after it while folded - and at the right end the grip that moves the card.
@@ -177,16 +212,11 @@ private _fnc_register = {
 private _fnc_weaponHeader = {
     params ["_headY", "_slot", "_caption", "_number", "_inHand", "_isFolded", "_class"];
 
-    private _box = SQUARE(_lineH);
-    private _iconH = _lineH * 0.6;
     private _space = SQUARE(_textUnit * 0.15);
 
-    [
-        _display, _parent, [_left + (_box - SQUARE(_iconH)) / 2, _headY + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
-        [UI_TEX(icon_chevron_down_ca), UI_TEX(icon_chevron_right_ca)] select _isFolded, _colorText2
-    ] call FUNC(uiIcon);
+    [_headY, _lineH, _isFolded] call _fnc_chevron;
 
-    private _textX = _left + _box;
+    private _textX = _left + SQUARE(_lineH);
 
     // A key cap like the footer's key hints, in the accent colour while in hand.
     if (!_flat && {_number isNotEqualTo ""}) then {
@@ -218,27 +248,25 @@ private _fnc_weaponHeader = {
         [_colorText2, _colorText] select _named, _font, 0, "caption"
     ] call FUNC(uiLabel);
 
-    // The grip: six dots, two across and three down.
-    private _dotH = _lineH * 0.11;
-    private _dotW = SQUARE(_dotH);
+    // The grip: a chevron up over a chevron down, a short dash between them - it moves the card up or down.
+    private _chevronH = _lineH * 0.34;
+    private _chevronW = SQUARE(_chevronH);
+    private _chevronX = _gripX + (_gripW - _chevronW) / 2;
 
-    for "_col" from 0 to 1 do {
-        for "_row" from 0 to 2 do {
-            [
-                _display, _parent,
-                [_gripX + _gripW / 2 + (_col - 1) * _dotW * 2 + _dotW / 2, _headY + _lineH / 2 + (_row - 1.5) * _dotH * 2 + _dotH / 2, _dotW, _dotH],
-                _colorText2
-            ] call FUNC(uiPanel);
+    {
+        _x params ["_chevronY", "_angle"];
+
+        private _chevron = [_display, _parent, [_chevronX, _chevronY, _chevronW, _chevronH], UI_TEX(icon_chevron_down_ca), _colorText2] call FUNC(uiIcon);
+
+        if (_angle != 0) then {
+            _chevron ctrlSetAngle [_angle, 0.5, 0.5, true];
         };
-    };
+    } forEach [[_headY, 180], [_headY + _lineH - _chevronH, 0]];
 
-    private _foldArea = [_left, _headY - pixelH * 2, _gripX - _left, _lineH + pixelH * 4];
-    private _foldHit = [_display, "AIO_Hitbox", _parent, _foldArea] call FUNC(uiCreate);
-    [_foldHit, [LLSTRING(WeaponCard_Fold), LLSTRING(WeaponCard_Unfold)] select _isFolded] call FUNC(setTooltip);
-    _foldHit setVariable [QGVAR(id), [_slot, _isFolded]];
-    _foldHit ctrlAddEventHandler ["ButtonClick", {
-        [{_this call FUNC(toggleWeaponFold)}, (_this select 0) getVariable [QGVAR(id), ["", false]]] call FUNC(later);
-    }];
+    private _dashW = _chevronW * 0.55;
+    [_display, _parent, [_gripX + (_gripW - _dashW) / 2, _headY + _lineH / 2 - pixelH, _dashW, pixelH * 2], _colorText2] call FUNC(uiPanel);
+
+    [[_left, _headY - pixelH * 2, _gripX - _left, _lineH + pixelH * 4], _slot, _isFolded] call _fnc_foldHit;
 
     private _gripArea = [_gripX, _headY - pixelH * 2, _gripW, _lineH + pixelH * 4];
     private _grip = [_display, "AIO_Hitbox", _parent, _gripArea] call FUNC(uiCreate);
@@ -254,7 +282,6 @@ private _fnc_weaponHeader = {
         ["begin", _slot, _color] call FUNC(cardGrip);
     }];
 
-    [_foldArea] call _fnc_keepPresses;
     [_gripArea] call _fnc_keepPresses;
 };
 
@@ -412,10 +439,20 @@ private _fnc_weaponRow = {
     _headH + _cardH
 };
 
+// A section's caption: its fold chevron, its words, and over both the hit box that folds or opens the section.
 private _fnc_label = {
-    params ["_labelTop", "_text"];
+    params ["_labelTop", "_text", "_key", "_isFolded"];
 
-    [_display, _parent, [_left, _labelTop, _width, _labelH], [_text, _theme] call FUNC(caption), _textUnit * 0.55, _colorText2, _font, 0, "section"] call FUNC(uiLabel);
+    [_labelTop, _labelH, _isFolded] call _fnc_chevron;
+    [
+        _display, _parent, [_left + SQUARE(_labelH), _labelTop, _width - SQUARE(_labelH), _labelH], [_text, _theme] call FUNC(caption),
+        _textUnit * 0.55, _colorText2, _font, 0, "section"
+    ] call FUNC(uiLabel);
+
+    // Over the words only, not the whole width: the room right of them is the column's.
+    private _textW = (([_text, _theme] call FUNC(caption)) getTextWidth [_font, _textUnit * 0.55]) * TEXT_SLACK;
+
+    [[_left, _labelTop, SQUARE(_labelH) + _textW + SQUARE(_textUnit * 0.3), _labelH], _key, _isFolded] call _fnc_foldHit;
 };
 
 // ---------------------------------------------------------------------------
@@ -437,7 +474,7 @@ _cursor = _cursor + _statH + _groupGap;
 // ---------------------------------------------------------------------------
 // Weapons, from the top down
 // ---------------------------------------------------------------------------
-[_cursor, LLSTRING(Column_Equipment)] call _fnc_label;
+[_cursor, LLSTRING(Column_Equipment), "equipment", _equipFolded] call _fnc_label;
 _cursor = _cursor + _labelH;
 
 // Each card's caption, silhouette, key, attachment columns and attachments: [index in the weapon, caption, silhouette].
@@ -489,14 +526,16 @@ private _rows = createHashMapFromArray [
     ]]]
 ];
 
-// In the player's order (see above).
-{
-    (_rows get _x) params ["_rowCaption", "_rowIcon", "_rowNumber", "_rowCols", "_rowParts"];
+// In the player's order (see above) - none while the section is folded.
+if (!_equipFolded) then {
+    {
+        (_rows get _x) params ["_rowCaption", "_rowIcon", "_rowNumber", "_rowCols", "_rowParts"];
 
-    _cursor = _cursor + _rowGap + ([
-        _cursor, _x, _rowCaption, _rowIcon, _rowNumber, _rowCols, _rowParts, _x in _foldedSlots
-    ] call _fnc_weaponRow);
-} forEach _shownOrder;
+        _cursor = _cursor + _rowGap + ([
+            _cursor, _x, _rowCaption, _rowIcon, _rowNumber, _rowCols, _rowParts, _x in _foldedSlots
+        ] call _fnc_weaponRow);
+    } forEach _shownOrder;
+};
 
 // ---------------------------------------------------------------------------
 // Gear, from the bottom of the column up. Both rows spread over the full width.
@@ -504,50 +543,52 @@ private _rows = createHashMapFromArray [
 private _smallY = _top + _height - _hotbarH - _smallH;
 private _gearY = _smallY - _gearGap - _gearH;
 
-[_gearY - _capH - _labelH, LLSTRING(Column_Gear)] call _fnc_label;
+[_top + _height - _hotbarH - _gearBlockH - _labelH, LLSTRING(Column_Gear), "gear", _gearFolded] call _fnc_label;
 
-{
-    _x params ["_slot", "_slotCaption", "_slotIcon"];
+if (!_gearFolded) then {
+    {
+        _x params ["_slot", "_slotCaption", "_slotIcon"];
 
-    [
-        _display, _parent, [_left + _forEachIndex * (_width - _gearW) / 3, _gearY, _gearW, _gearH],
-        _equipment getOrDefault [_slot, ""],
-        createHashMapFromArray [["caption", _slotCaption], ["icon", _slotIcon], ["slot", _slot], ["unit", _unit]],
-        _theme
-    ] call FUNC(drawSlot);
-} forEach [
-    ["headgear", LLSTRING(Slot_Headgear), GEAR_ICON(ui_gear_helmet_gs)],
-    ["uniform", LLSTRING(Slot_Uniform), GEAR_ICON(ui_gear_uniform_gs)],
-    ["vest", LLSTRING(Slot_Vest), GEAR_ICON(ui_gear_vest_gs)],
-    ["backpack", LLSTRING(Slot_Backpack), GEAR_ICON(ui_gear_backpack_gs)]
-];
+        [
+            _display, _parent, [_left + _forEachIndex * (_width - _gearW) / 3, _gearY, _gearW, _gearH],
+            _equipment getOrDefault [_slot, ""],
+            createHashMapFromArray [["caption", _slotCaption], ["icon", _slotIcon], ["slot", _slot], ["unit", _unit]],
+            _theme
+        ] call FUNC(drawSlot);
+    } forEach [
+        ["headgear", LLSTRING(Slot_Headgear), GEAR_ICON(ui_gear_helmet_gs)],
+        ["uniform", LLSTRING(Slot_Uniform), GEAR_ICON(ui_gear_uniform_gs)],
+        ["vest", LLSTRING(Slot_Vest), GEAR_ICON(ui_gear_vest_gs)],
+        ["backpack", LLSTRING(Slot_Backpack), GEAR_ICON(ui_gear_backpack_gs)]
+    ];
 
-{
-    _x params ["_slot", "_slotCaption", "_slotIcon"];
+    {
+        _x params ["_slot", "_slotCaption", "_slotIcon"];
 
-    // The binocular comes as a weapon, with its battery - only its class goes on the slot.
-    private _value = _equipment getOrDefault [_slot, ""];
+        // The binocular comes as a weapon, with its battery - only its class goes on the slot.
+        private _value = _equipment getOrDefault [_slot, ""];
 
-    if (_value isEqualType []) then {
-        _value = _value param [0, "", [""]];
-    };
+        if (_value isEqualType []) then {
+            _value = _value param [0, "", [""]];
+        };
 
-    [
-        _display, _parent, [_left + _forEachIndex * (_width - _smallW) / 7, _smallY, _smallW, _smallH],
-        _value,
-        createHashMapFromArray [["caption", _slotCaption], ["icon", _slotIcon], ["slot", _slot], ["unit", _unit]],
-        _quiet
-    ] call FUNC(drawSlot);
-} forEach [
-    ["goggles", LLSTRING(Slot_Goggles), GEAR_ICON(ui_gear_glasses_gs)],
-    ["nvg", LLSTRING(Slot_NVG), GEAR_ICON(ui_gear_nvg_gs)],
-    ["binocular", LLSTRING(Slot_Binocular), GEAR_ICON(ui_gear_binocular_gs)],
-    ["map", LLSTRING(Slot_Map), GEAR_ICON(ui_gear_map_gs)],
-    ["gps", LLSTRING(Slot_GPS), GEAR_ICON(ui_gear_gps_gs)],
-    ["radio", LLSTRING(Slot_Radio), GEAR_ICON(ui_gear_radio_gs)],
-    ["compass", LLSTRING(Slot_Compass), GEAR_ICON(ui_gear_compass_gs)],
-    ["watch", LLSTRING(Slot_Watch), GEAR_ICON(ui_gear_watch_gs)]
-];
+        [
+            _display, _parent, [_left + _forEachIndex * (_width - _smallW) / 7, _smallY, _smallW, _smallH],
+            _value,
+            createHashMapFromArray [["caption", _slotCaption], ["icon", _slotIcon], ["slot", _slot], ["unit", _unit]],
+            _quiet
+        ] call FUNC(drawSlot);
+    } forEach [
+        ["goggles", LLSTRING(Slot_Goggles), GEAR_ICON(ui_gear_glasses_gs)],
+        ["nvg", LLSTRING(Slot_NVG), GEAR_ICON(ui_gear_nvg_gs)],
+        ["binocular", LLSTRING(Slot_Binocular), GEAR_ICON(ui_gear_binocular_gs)],
+        ["map", LLSTRING(Slot_Map), GEAR_ICON(ui_gear_map_gs)],
+        ["gps", LLSTRING(Slot_GPS), GEAR_ICON(ui_gear_gps_gs)],
+        ["radio", LLSTRING(Slot_Radio), GEAR_ICON(ui_gear_radio_gs)],
+        ["compass", LLSTRING(Slot_Compass), GEAR_ICON(ui_gear_compass_gs)],
+        ["watch", LLSTRING(Slot_Watch), GEAR_ICON(ui_gear_watch_gs)]
+    ];
+};
 
 // ---------------------------------------------------------------------------
 // The hotbar, at the very bottom
@@ -555,7 +596,9 @@ private _gearY = _smallY - _gearGap - _gearH;
 // Its counts follow what the unit carries: on the inventory's own display a part of its own as well, drawn
 // again with the weight card (fnc_drawPart, fnc_refresh).
 if (_hotbar) then {
-    [_top + _height - _smallH - _labelH, LELSTRING(hotbar,Strip_Title)] call _fnc_label;
+    [_top + _height - ([_smallH, 0] select _hotbarFolded) - _labelH, LELSTRING(hotbar,Strip_Title), "hotbar", _hotbarFolded] call _fnc_label;
+
+    if (_hotbarFolded) exitWith {};
 
     private _stripRect = [_left, _top + _height - _smallH, _width, _smallH];
 

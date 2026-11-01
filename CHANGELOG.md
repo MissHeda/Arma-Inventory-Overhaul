@@ -2,6 +2,20 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.39 - beta
+
+### Added
+
+- The sections of the equipment column - Equipment, Gear and Hotbar - fold away with a click on their caption, like the weapon cards: hide the hotbar if you never use it. Kept in your profile.
+
+### Changed
+
+- A weapon card's grip shows a chevron up and one down with a dash between them.
+
+### Fixed
+
+- After a click on a fold caption the tip at the mouse went away until the mouse moved; it shows again at once now, for every button that builds the window anew.
+
 ## 0.6.38 - beta
 
 ### Added
