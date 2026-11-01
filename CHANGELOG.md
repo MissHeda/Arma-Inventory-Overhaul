@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.42 - beta
+
+### Changed
+
+- Modify shows the weapon with the game's own camera, at full quality like any weapon in the world, instead of the coarse Picture-in-Picture texture. Its card sits between the equipment column and your gear, over the loot column, which hides while it is open; it also works with Picture-in-Picture switched off. The small Inspect card keeps its 3D picture as before.
+
 ## 0.6.41 - beta
 
 ### Added

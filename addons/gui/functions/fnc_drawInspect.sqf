@@ -19,8 +19,10 @@
  *
  * One of the player's own weapons, opened from its slot (Inspect or Modify, fnc_contextMenu), is shown as it is on the
  * player now, with its parts to change (#56, fnc_drawHotspots): points on the 3D picture, a row of the parts under it.
- * Modify opens the card twice as wide, in 3D whatever the switch says (where Picture-in-Picture is on), with the
- * picture, the parts and how to use them only - no switch, no figures.
+ * Modify opens the card wide, between the equipment column and the player's gear, in 3D whatever the switch says, with
+ * the picture, the parts and how to use them only - no switch, no figures, not to be moved. Its 3D is the game's own view,
+ * at full quality, not Picture-in-Picture's texture (fnc_inspect3D): the card has a hole where the picture goes, and what
+ * of the window lies under it is hidden while the card is open (fnc_cutHole).
  *
  * Arguments:
  * None
@@ -42,6 +44,9 @@ ctrlDelete (uiNamespace getVariable [QGVAR(inspectGroup), controlNull]);
 uiNamespace setVariable [QGVAR(inspectGroup), controlNull];
 uiNamespace setVariable [QGVAR(inspectRect), []];
 uiNamespace setVariable [QGVAR(hotspots), []];
+
+// The window shows whole again; Modify cuts its hole anew below.
+[_display] call FUNC(cutHole);
 
 if (isNull _display || {GVAR(inspect) isEqualTo []}) exitWith {
     ["stop"] call FUNC(inspect3D);
@@ -183,6 +188,21 @@ if (_large) then {
 private _textUnit = TEXT_UNIT;
 private _cardUnits = [17, 34] select _large;
 private _width = SQUARE(_textUnit * _cardUnits);
+
+// Modify lies in the room between the equipment column and the player's gear - over the loot column -, as wide as that
+// room allows; where there is no such room, in the middle of the screen.
+private _dockX = -1;
+
+if (_large) then {
+    GVAR(equipmentRect) params [["_equipX", safezoneX], "", ["_equipW", 0]];
+    GVAR(storageRect) params [["_storageX", safezoneX]];
+
+    private _from = _equipX + _equipW + COLUMN_GAP;
+    private _to = [safezoneX + safezoneW - COLUMN_GAP, _storageX - COLUMN_GAP] select (_storageX > _from + SQUARE(_textUnit * 20));
+
+    _width = _width min (_to - _from);
+    _dockX = _from + ((_to - _from) - _width) / 2;
+};
 private _padY = _textUnit * 0.7;
 private _padX = SQUARE(_padY);
 private _innerW = _width - _padX * 2;
@@ -198,7 +218,8 @@ private _closeW = SQUARE(_closeH);
 // options, there is no 3D. The box is then exactly twice as wide as high in pixels, as the texture (INSPECT_3D_RES) is, so the
 // item is never squeezed; under it how to move it.
 private _can3D = [_class] call FUNC(hasModel);
-private _show3D = _can3D && {isPiPEnabled} && {GVAR(inspectView) isEqualTo "3d" || _large};
+private _mainView = _large && {_can3D};
+private _show3D = _mainView || {_can3D && {isPiPEnabled} && {GVAR(inspectView) isEqualTo "3d"}};
 private _viewPixelsW = floor ((_innerW - pixelW * 2) / pixelW);
 private _viewPixelsH = floor (_viewPixelsW / 2);
 private _hint3DH = 0;
@@ -231,8 +252,13 @@ private _height = _padY * 2 + _titleH + _gap + _pictureH + _gap + _hint3DH
     + ([0, _descH + _gap] select (_descH > 0))
     + count _rows * _rowH;
 
-// Where it was put, or the middle of the screen - always whole on it.
+// Where it was put, or the middle of the screen - always whole on it. Modify in its room, in the middle of the screen's height.
 GVAR(inspectPos) params [["_left", safezoneX + (safezoneW - _width) / 2], ["_top", safezoneY + (((safezoneH - _height) / 2) max (_textUnit * 2))]];
+
+if (_large) then {
+    _left = _dockX;
+    _top = safezoneY + (((safezoneH - _height) / 2) max (_textUnit * 2));
+};
 
 _left = (_left max safezoneX) min (safezoneX + safezoneW - _width);
 _top = (_top max safezoneY) min ((safezoneY + safezoneH - _height) max safezoneY);
@@ -247,10 +273,37 @@ uiNamespace setVariable [QGVAR(inspectRect), [_left, _top, _width, _height]];
 _group ctrlAddEventHandler ["MouseButtonDown", {[true, _this] call FUNC(onMouseButton)}];
 _group ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseButton)}];
 
-[
-    _display, _group, [0, 0, _width, _height],
-    _theme getOrDefault ["inspectBg", [0.06, 0.06, 0.06, 0.98]], _theme getOrDefault ["radius", 0]
-] call FUNC(uiPanel);
+// The 3D picture's place, worked out before anything is drawn: the main view shows through a hole there.
+private _viewRect = [];
+
+if (_show3D) then {
+    _viewRect = [_padX + (_innerW - _viewPixelsW * pixelW) / 2, _padY + _titleH + _gap + pixelH, _viewPixelsW * pixelW, _viewPixelsH * pixelH];
+};
+
+private _cardBg = _theme getOrDefault ["inspectBg", [0.06, 0.06, 0.06, 0.98]];
+private _cardRadius = _theme getOrDefault ["radius", 0];
+
+if (_mainView) then {
+    // Round above and below the hole: the whole card's surface, cut by a group of the part's size. Square beside it.
+    _viewRect params ["_holeX", "_holeY", "_holeW", "_holeH"];
+
+    {
+        _x params ["_part", "_shift"];
+
+        private _clip = [_display, "AIO_Group", _group, _part] call FUNC(uiCreate);
+        _clip ctrlEnable false;
+
+        [_display, _clip, [0, _shift, _width, _height], _cardBg, _cardRadius] call FUNC(uiPanel);
+    } forEach [
+        [[0, 0, _width, _holeY], 0],
+        [[0, _holeY + _holeH, _width, _height - _holeY - _holeH], -(_holeY + _holeH)]
+    ];
+
+    [_display, _group, [0, _holeY, _holeX, _holeH], _cardBg] call FUNC(uiPanel);
+    [_display, _group, [_holeX + _holeW, _holeY, _width - _holeX - _holeW, _holeH], _cardBg] call FUNC(uiPanel);
+} else {
+    [_display, _group, [0, 0, _width, _height], _cardBg, _cardRadius] call FUNC(uiPanel);
+};
 
 private _cursor = _padY;
 
@@ -268,8 +321,9 @@ private _titleW = _innerW - SQUARE(_textUnit * 0.35) - _closeW;
     _textUnit * 0.8, _colorText, _fontBold, 0, "name"
 ] call FUNC(uiLabel);
 
-private _grip = [_display, "AIO_Hitbox", _group, [0, 0, _width - _padX - _closeW, _cursor + _titleH]] call FUNC(uiCreate);
-[_grip, LLSTRING(Inspect_Move)] call FUNC(setTooltip);
+// Modify keeps its place over the loot column.
+private _grip = [_display, "AIO_Hitbox", _group, [0, 0, [_width - _padX - _closeW, 0] select _large, _cursor + _titleH]] call FUNC(uiCreate);
+[_grip, [LLSTRING(Inspect_Move), ""] select _large] call FUNC(setTooltip);
 _grip ctrlAddEventHandler ["MouseButtonDown", {
     params ["_ctrl", "_button"];
 
@@ -287,8 +341,12 @@ _grip ctrlAddEventHandler ["MouseButtonDown", {
 
 _cursor = _cursor + _titleH + _gap;
 
-// The picture on a lighter box, with what is on a weapon drawn onto it.
-[_display, _group, [_padX, _cursor, _innerW, _pictureH], _theme getOrDefault ["slot", [1, 1, 1, 0.05]], (_theme getOrDefault ["radius", 0]) min (_pictureH / 4)] call FUNC(uiPanel);
+// The picture on a lighter box, with what is on a weapon drawn onto it - the main view's hole only framed.
+if (_mainView) then {
+    [_display, _group, _viewRect, [1, 1, 1, 0.12]] call FUNC(uiRing);
+} else {
+    [_display, _group, [_padX, _cursor, _innerW, _pictureH], _theme getOrDefault ["slot", [1, 1, 1, 0.05]], (_theme getOrDefault ["radius", 0]) min (_pictureH / 4)] call FUNC(uiPanel);
+};
 
 private _pictureInner = [_padX * 2, _cursor + _padY * 0.5, _innerW - _padX * 2, _pictureH - _padY];
 
@@ -302,17 +360,20 @@ private _trackX = _padX + _innerW - SQUARE(_textUnit * 0.3) - _trackW;
 private _toggleY = _cursor + _textUnit * 0.3;
 
 // In 3D (see the measures): held and dragged the item turns (fnc_onFrame), the wheel zooms, a double click puts it back.
-private _viewRect = [];
 private _showToggle = _can3D && {!_large};
 
 if (_show3D) then {
-    ["start", [_class, _attachments]] call FUNC(inspect3D);
-
-    _viewRect = [_padX + (_innerW - _viewPixelsW * pixelW) / 2, _cursor + pixelH, _viewPixelsW * pixelW, _viewPixelsH * pixelH];
     _viewRect params ["_viewX", "_viewY", "_viewW", "_viewH"];
 
-    private _view = [_display, "AIO_PictureTurned", _group, _viewRect] call FUNC(uiCreate);
-    _view ctrlSetText format ["#(argb,%1,%2,1)r2t(%3,2.0)", INSPECT_3D_RES select 0, INSPECT_3D_RES select 1, INSPECT_3D_TARGET];
+    // The main view through the hole, or the texture in the box.
+    if (_mainView) then {
+        ["start", [_class, _attachments, [_left + _viewX, _top + _viewY, _viewW, _viewH]]] call FUNC(inspect3D);
+    } else {
+        ["start", [_class, _attachments]] call FUNC(inspect3D);
+
+        private _view = [_display, "AIO_PictureTurned", _group, _viewRect] call FUNC(uiCreate);
+        _view ctrlSetText format ["#(argb,%1,%2,1)r2t(%3,2.0)", INSPECT_3D_RES select 0, INSPECT_3D_RES select 1, INSPECT_3D_TARGET];
+    };
 
     // The areas that turn it: the view but the switch. A held control is drawn over every other (the engine draws the focused
     // one last) - one lying under the switch as well hid it after the first turn, and took its clicks.
@@ -479,3 +540,9 @@ if (_descH > 0) then {
         ] call FUNC(uiLabel);
     };
 } forEach _rows;
+
+// The main view shows through the card: what of the window lies in the card's band of the content, top to bottom, is hidden
+// while it is open (fnc_cutHole) - the loot column whole, not only the part under the hole.
+if (_mainView) then {
+    [_display, [_left, CONTENT_Y, _width, CONTENT_H]] call FUNC(cutHole);
+};

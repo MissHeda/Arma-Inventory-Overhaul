@@ -183,6 +183,7 @@ PREP(drawHotspots);
 PREP(placeHotspots);
 PREP(hotspotAt);
 PREP(partChoices);
+PREP(cutHole);
 PREP(hasModel);
 PREP(itemModel);
 PREP(closeInspect);

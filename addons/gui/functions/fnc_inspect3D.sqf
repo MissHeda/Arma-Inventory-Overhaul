@@ -15,14 +15,22 @@
  * frame is the item's size, at most INSPECT_3D_FRAME. The lights shine by day too; the aperture is left to the engine - set,
  * it lit or darkened the whole world behind the window as well.
  *
+ * The modding view (Modify, #56) films with the game's own camera instead: the main view itself goes to the scene, at the
+ * game's full quality - a texture of Picture-in-Picture is far coarser (Mia: "make it render exactly like a normal weapon"). The
+ * window lets it show through a hole in the card where the picture would be (fnc_drawInspect). The camera then aims so the
+ * item sits in the middle of that hole, as large as it would be in the texture: its field of view is the texture's, grown by
+ * how much higher the screen is than the hole, and it is turned off the item by where the hole lies on the screen. What the
+ * player's view was on - their own unit, a vehicle, a remote unit, and in which view - comes back when the scene goes.
+ *
  * The state is GVAR(scene3D): the class and attachments it shows, the camera and where it stands, the lights, every object
- * made, the target [ASL], the turn (dir, pitch), the distance and its limits - and for the modding view where the weapon's
- * parts sit (fnc_weaponPoints). Started again for the same weapon with other parts, only the holder is fitted out anew: the
- * view stays as it was turned.
+ * made, the target [ASL], the turn (dir, pitch), the distance and its limits, the hole on the screen for the main view - and
+ * for the modding view where the weapon's parts sit (fnc_weaponPoints). Started again for the same weapon with other parts,
+ * only the holder is fitted out anew: the view stays as it was turned.
  *
  * Arguments:
  * 0: What to do <STRING>
- *    "start"   the scene for the item, unless it stands for it already - the one before goes (arguments: [class, attachments])
+ *    "start"   the scene for the item, unless it stands for it already - the one before goes (arguments: [class, attachments,
+ *              the hole [x, y, w, h] on the screen to film into with the main view, [] for the texture])
  *    "stop"    the scene goes: camera, lights, objects
  *    "turn"    the camera goes round by how far the mouse moved, a share of the screen (arguments: [across, down])
  *    "zoom"    nearer for a turn of the wheel up, farther for one down (arguments: [turn])
@@ -57,10 +65,41 @@ private _fnc_camera = {
     private _across = (cos _pitch) * _distance;
     private _cameraPos = _target vectorAdd [(sin _dir) * _across, (cos _dir) * _across, (sin _pitch) * _distance];
 
+    private _aim = _target;
+    private _fov = INSPECT_3D_FOV;
+    private _hole = _scene getOrDefault ["main", []];
+
+    // The main view: the item in the middle of the hole. Seen from the camera, the item lies that far off the middle of the
+    // screen - across by the screen's width times the field of view, up by its height -, so the camera looks past it by as
+    // much. Worked out in a few steps, as the frame turns with where it looks.
+    if (count _hole == 4) then {
+        _hole params ["_holeX", "_holeY", "_holeW", "_holeH"];
+
+        _fov = INSPECT_3D_FOV * safezoneH / (_holeH max pixelH);
+
+        private _tanH = _fov * (getResolution select 4);
+        private _offX = ((_holeX + _holeW / 2) - (safezoneX + safezoneW / 2)) / (safezoneW / 2);
+        private _offY = ((safezoneY + safezoneH / 2) - (_holeY + _holeH / 2)) / (safezoneH / 2);
+        private _toItem = vectorNormalized (_target vectorDiff _cameraPos);
+        private _forward = _toItem;
+
+        for "_i" from 1 to 4 do {
+            private _right = vectorNormalized (_forward vectorCrossProduct [0, 0, 1]);
+            private _up = _right vectorCrossProduct _forward;
+
+            _forward = vectorNormalized (
+                (_toItem vectorMultiply (1 / ((_toItem vectorDotProduct _forward) max 0.1)))
+                vectorDiff (_right vectorMultiply (_offX * _tanH)) vectorDiff (_up vectorMultiply (_offY * _fov))
+            );
+        };
+
+        _aim = _cameraPos vectorAdd (_forward vectorMultiply _distance);
+    };
+
     // The scene is in ASL, the camera takes AGL.
     _camera camSetPos (ASLToAGL _cameraPos);
-    _camera camSetTarget (ASLToAGL _target);
-    _camera camSetFov INSPECT_3D_FOV;
+    _camera camSetTarget (ASLToAGL _aim);
+    _camera camSetFov _fov;
     _camera camCommit 0;
 
     // Where it films from, for the modding view's points (fnc_placeHotspots).
@@ -109,11 +148,19 @@ private _fnc_fitOut = {
 
 switch (_mode) do {
     case "start": {
-        _arguments params [["_class", "", [""]], ["_attachments", [], [[]]]];
+        _arguments params [["_class", "", [""]], ["_attachments", [], [[]]], ["_hole", [], [[]]]];
 
         if (_class isEqualTo "") exitWith {};
 
-        private _running = (_scene getOrDefault ["class", ""]) isEqualTo _class && {!isNull (_scene getOrDefault ["camera", objNull])};
+        // The same item filmed the other way - into the texture or the main view - is a scene of its own; into a hole elsewhere on
+        // the screen only aims anew.
+        private _running = (_scene getOrDefault ["class", ""]) isEqualTo _class && {!isNull (_scene getOrDefault ["camera", objNull])}
+            && {((_scene getOrDefault ["main", []]) isEqualTo []) isEqualTo (_hole isEqualTo [])};
+
+        if (_running && {(_scene getOrDefault ["main", []]) isNotEqualTo _hole}) then {
+            _scene set ["main", +_hole];
+            call _fnc_camera;
+        };
 
         if (_running && {(_scene getOrDefault ["attachments", []]) isEqualTo _attachments}) exitWith {};
 
@@ -130,7 +177,7 @@ switch (_mode) do {
 
         ["stop"] call FUNC(inspect3D);
 
-        _scene = createHashMapFromArray [["class", _class], ["attachments", +_attachments]];
+        _scene = createHashMapFromArray [["class", _class], ["attachments", +_attachments], ["main", +_hole]];
         GVAR(scene3D) = _scene;
 
         private _objects = [];
@@ -303,7 +350,15 @@ switch (_mode) do {
         _scene set ["far", _distance * 3];
 
         private _camera = "camera" camCreate (ASLToAGL _target);
-        _camera cameraEffect ["Internal", "Back", INSPECT_3D_TARGET];
+
+        // Into the main view: what it was on before, to give it back (see "stop").
+        if (_hole isEqualTo []) then {
+            _camera cameraEffect ["Internal", "Back", INSPECT_3D_TARGET];
+        } else {
+            _scene set ["before", [cameraOn, cameraView]];
+            _camera cameraEffect ["Internal", "Back"];
+        };
+
         _camera camSetFocus [-1, -1];
         _scene set ["camera", _camera];
 
@@ -314,10 +369,22 @@ switch (_mode) do {
 
         private _camera = _scene getOrDefault ["camera", objNull];
 
-        // Destroying a camera does not end what it films into.
+        // Destroying a camera does not end what it films into. The main view goes back to the player - and to what it was on, a
+        // vehicle or a remote unit, in the view it had.
         if (!isNull _camera) then {
-            _camera cameraEffect ["Terminate", "Back", INSPECT_3D_TARGET];
+            if ((_scene getOrDefault ["main", []]) isEqualTo []) then {
+                _camera cameraEffect ["Terminate", "Back", INSPECT_3D_TARGET];
+            } else {
+                _camera cameraEffect ["Terminate", "Back"];
+            };
+
             camDestroy _camera;
+        };
+
+        (_scene getOrDefault ["before", []]) params [["_on", objNull], ["_view", ""]];
+
+        if (!isNull _on && {_view isNotEqualTo ""} && {cameraOn isNotEqualTo _on || {cameraView isNotEqualTo _view}}) then {
+            _on switchCamera _view;
         };
 
         {

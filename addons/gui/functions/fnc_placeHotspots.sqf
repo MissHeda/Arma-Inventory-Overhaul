@@ -3,7 +3,8 @@
 /*
  * Author: Miss Heda
  * Puts the modding view's points onto the 3D picture (fnc_drawHotspots): each part's place in the scene
- * (fnc_weaponPoints) seen from the camera, by hand - a picture-in-picture camera has no worldToScreen. The camera's
+ * (fnc_weaponPoints) seen from the camera. Filmed with the main view (Modify, fnc_inspect3D), the game says where:
+ * worldToScreen, into the card's space. Into Picture-in-Picture's texture by hand, as it has no worldToScreen. The camera's
  * frame: forward to what it aims at, right level with the ground, up square to both; a point's place across and up
  * divided by how far ahead it is, against the field of view - INSPECT_3D_FOV the tangent of half the view's height,
  * twice that across, as the texture is twice as wide as high (INSPECT_3D_RES). Then into the picture's area.
@@ -55,6 +56,8 @@ private _up = _right vectorCrossProduct _forward;
 private _tanV = INSPECT_3D_FOV;
 private _tanH = INSPECT_3D_FOV * ((INSPECT_3D_RES select 0) / (INSPECT_3D_RES select 1));
 private _placed = [];
+private _main = (_scene getOrDefault ["main", []]) isNotEqualTo [];
+(ctrlPosition (uiNamespace getVariable [QGVAR(inspectGroup), controlNull])) params [["_cardX", 0], ["_cardY", 0]];
 
 private _fnc_overlaps = {
     params ["_a", "_b"];
@@ -73,18 +76,31 @@ private _fnc_overlaps = {
     private _show = false;
 
     if (count _point == 3) then {
-        private _offset = _point vectorDiff _cameraPos;
-        private _ahead = _offset vectorDotProduct _forward;
+        private _rect = [];
 
-        if (_ahead <= 0.01) exitWith {};
+        if (_main) then {
+            private _onScreen = worldToScreen (ASLToAGL _point);
 
-        private _across = (_offset vectorDotProduct _right) / (_ahead * _tanH);
-        private _upward = (_offset vectorDotProduct _up) / (_ahead * _tanV);
-        private _rect = [
-            _viewX + _viewW * (0.5 + _across / 2) - _spotW / 2,
-            _viewY + _viewH * (0.5 - _upward / 2) - _spotH / 2,
-            _spotW, _spotH
-        ];
+            if (_onScreen isEqualTo []) exitWith {};
+
+            _rect = [(_onScreen select 0) - _cardX - _spotW / 2, (_onScreen select 1) - _cardY - _spotH / 2, _spotW, _spotH];
+        } else {
+            private _offset = _point vectorDiff _cameraPos;
+            private _ahead = _offset vectorDotProduct _forward;
+
+            if (_ahead <= 0.01) exitWith {};
+
+            private _across = (_offset vectorDotProduct _right) / (_ahead * _tanH);
+            private _upward = (_offset vectorDotProduct _up) / (_ahead * _tanV);
+
+            _rect = [
+                _viewX + _viewW * (0.5 + _across / 2) - _spotW / 2,
+                _viewY + _viewH * (0.5 - _upward / 2) - _spotH / 2,
+                _spotW, _spotH
+            ];
+        };
+
+        if (_rect isEqualTo []) exitWith {};
 
         // Apart from the ones placed before it: below the one it falls on.
         {
