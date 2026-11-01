@@ -10,8 +10,8 @@
  *
  * A point that turns away behind the camera or out of the picture is hidden, as is one that would lie on the 2D/3D
  * switch - a focused button is drawn over everything, and a point lying there took its clicks. Points that fall on
- * each other are moved apart, the later one down. Run every frame the inspect card is open (fnc_onFrame): nothing is
- * done while the view stands as it stood, the points are known (or no longer looked for) and the card did not move.
+ * each other are moved apart, the later one down. Run every frame the inspect card is open (fnc_onFrame), whether the view
+ * changed or not: placed only when it changed, points made in the same frame stayed hidden now and then.
  *
  * Arguments:
  * None
@@ -42,11 +42,6 @@ if (isNil "_points") exitWith {};
 
 private _cameraPos = _scene get "cameraPos";
 private _target = _scene get "target";
-private _signature = [_cameraPos, _target, count _points];
-
-if (_signature isEqualTo (uiNamespace getVariable [QGVAR(hotspotLast), []])) exitWith {};
-
-uiNamespace setVariable [QGVAR(hotspotLast), _signature];
 
 (uiNamespace getVariable [QGVAR(hotspotView), [[], []]]) params [["_view", []], ["_blocked", []]];
 

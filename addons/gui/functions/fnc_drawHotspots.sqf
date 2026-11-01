@@ -53,7 +53,6 @@ private _spots = [];
 
 uiNamespace setVariable [QGVAR(hotspots), _spots];
 uiNamespace setVariable [QGVAR(hotspotView), [_viewRect, _blocked]];
-uiNamespace setVariable [QGVAR(hotspotLast), []];
 
 if (_class isEqualTo "") exitWith {};
 

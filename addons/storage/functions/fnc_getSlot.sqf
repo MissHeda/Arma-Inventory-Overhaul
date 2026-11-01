@@ -34,7 +34,8 @@ private _attachments = [];
 private _inside = objNull;
 
 if (_base in ["primary", "handgun", "launcher", "primary2"]) then {
-    if (_value isEqualTo []) exitWith {};
+    // Empty - or the second primary without a two-primary mod, which the equipment has as -1.
+    if !(_value isEqualType [] && {_value isNotEqualTo []}) exitWith {};
 
     if (_part isEqualTo "") exitWith {
         _class = _value select 0;

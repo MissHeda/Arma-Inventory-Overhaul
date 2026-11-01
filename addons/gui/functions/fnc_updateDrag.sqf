@@ -651,7 +651,10 @@ if (_hitGrid >= 0 && {_dragGroup isEqualTo []} && {(_w mod 2) == 0 || {(_h mod 2
     _halves = [_acrossX >= 0.5, _acrossY >= 0.5];
 };
 
-private _spot = [_onTop, _slotHits, _hitGrid, _hitCell, _inArea, _inStorage, _hitZone, _outside, _foldHit, _halves, _inLoot];
+// Over the inspect card: the modding view's point under the mouse (fnc_hotspotAt) - the card is one place for everything else.
+private _hotspot = if (_onTop isEqualTo "inspect") then {([_mouse] call FUNC(hotspotAt)) getOrDefault ["slot", ""]} else {""};
+
+private _spot = [_onTop, _slotHits, _hitGrid, _hitCell, _inArea, _inStorage, _hitZone, _outside, _foldHit, _halves, _inLoot, _hotspot];
 
 if (!_changed && {_spot isEqualTo (GVAR(dragRoom) getOrDefault ["spot", []])}) exitWith {
     if (_timed) then {call _fnc_noteTime};
