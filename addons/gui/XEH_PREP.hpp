@@ -115,6 +115,7 @@ PREP(cbaRun);
 // Searching loot
 PREP(isSearched);
 PREP(isSealed);
+PREP(isSubordinate);
 PREP(searchKind);
 PREP(searchTime);
 PREP(sortSearch);

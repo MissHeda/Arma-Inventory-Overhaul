@@ -107,6 +107,10 @@
 // in seconds (XEH_postInit, fnc_guardVanilla).
 #define GUARD_INTERVAL 0.25
 
+// How often the soldiers the player leads are given the inventory handler, in seconds (XEH_postInit,
+// fnc_isSubordinate): one who joined the group since gets it at the next look.
+#define SUBORDINATE_INTERVAL 2
+
 // How many frames fnc_open waits for a vanilla inventory to go before it makes the window: made while
 // one is open, the window would be its child dialog and close with it (fnc_guardVanilla).
 #define OPEN_TRIES 10

@@ -6,7 +6,8 @@
  * The vanilla inventory never opens: the handler fnc_initUnit puts on the unit answers the engine with
  * true whatever happens here, which keeps the display away, and a display that comes up anyway is closed
  * (fnc_guardVanilla). Where this window cannot open - the unit is not the player's, the player is not
- * allowed in - nothing opens at all. The window itself opens a frame later - the engine is still in the
+ * allowed in - nothing opens at all. A soldier the player leads, told from the command menu to open his inventory,
+ * gets the window as well: the player's gear with his beside it (fnc_isSubordinate). The window itself opens a frame later - the engine is still in the
  * middle of handling the key or the action that asked for the inventory.
  *
  * A living person opened by the engine looks into the whole person, as far as the settings allow
@@ -63,6 +64,30 @@ private _named = [_container, _secondary] apply {["nothing", typeOf _x] select !
 private _seat = ["on foot", "seated in " + typeOf objectParent _unit] select !isNull objectParent _unit;
 
 INFO_3("asked: %1 - beside it %2 - the player %3.",_named select 0,_named select 1,_seat);
+
+// A soldier the player leads, told to open his inventory from the command menu (fnc_isSubordinate): the window,
+// as for every other inventory - on the player's gear, with the soldier whole beside it and what the engine named
+// for him (the ground at his feet, the crate he stands at). He has to be in reach as any person (fnc_personInReach).
+if ([_unit] call FUNC(isSubordinate)) exitWith {
+    private _player = PLAYER_UNIT;
+
+    if !([_player, _unit, true] call FUNC(personInReach)) exitWith {
+        INFO_1("refused: the player's soldier %1 is out of reach - nothing opens.",typeOf _unit);
+        [format [LLSTRING(Hint_SubordinateFar), [_unit] call EFUNC(main,unitName)]] call EFUNC(main,showText);
+    };
+
+    if (!isNull (uiNamespace getVariable [QGVAR(display), displayNull])) exitWith {
+        INFO("refused: the window is open already - nothing more opens.");
+    };
+
+    private _beside = ([_container, _secondary] select {
+        !isNull _x && {!(_x in [_unit, _player, uniformContainer _unit, vestContainer _unit, backpackContainer _unit])}
+    }) param [0, objNull];
+
+    INFO_1("opened: the player's soldier %1 - his gear beside the player's.",typeOf _unit);
+
+    [{_this call FUNC(open)}, [_player, _unit, _beside]] call CBA_fnc_execNextFrame;
+};
 
 // A soldier the player no longer is - the body a team switch left behind, a unit a script ran the action on:
 // there is no window for it.

@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.31 - beta
+
+### Changed
+
+- Quick move (double click, F) with nothing being looted no longer drops the item at your feet: it moves it within your own gear - out of the backpack into the vest, then the uniform; out of the vest or the uniform into the backpack, then the other one (issue #50). Dropping stays on G. Seated, it still goes into the vehicle.
+
+### Fixed
+
+- Telling a soldier you lead to open his inventory (command menu) opened your own gear instead: the window now shows your gear with his beside it, whole, as for any person - he has to stand next to you (issue #48).
+
 ## 0.6.30 - beta
 
 ### Fixed

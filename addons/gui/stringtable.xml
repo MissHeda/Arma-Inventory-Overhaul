@@ -244,6 +244,9 @@
         <Key ID="STR_aio_gui_Hint_StripStay">
             <English>Let go to leave it where it is</English>
         </Key>
+        <Key ID="STR_aio_gui_Hint_SubordinateFar">
+            <English>%1 is too far away - he has to stand next to you</English>
+        </Key>
         <Key ID="STR_aio_gui_Hint_Swap">
             <English>Swap places with %1</English>
         </Key>
