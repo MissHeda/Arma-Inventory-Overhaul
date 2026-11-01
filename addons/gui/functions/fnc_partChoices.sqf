@@ -5,8 +5,9 @@
  * A click on a box of the modding view (fnc_drawHotspots): tiles under the box (fnc_openMenu), as Tarkov's weapon builds list them, of what fits that part
  * of the player's weapon - from the player's own gear and the loot open beside it, each with its picture and where it
  * lies, a magazine with its rounds. A click on one puts it on (fnc_doEquip: taken out where it lies, what was on the part
- * put back there - the server checks it). NONE, the first tile while a part is on it, takes it off into the gear
- * (fnc_quickUnequip). No title: the box says what it is. That nothing fits is a note under the tiles, never a tile.
+ * put back there - the server checks it). While a part is on it, that part comes first, framed in the accent colour, and NONE
+ * next to it takes it off into the gear (fnc_quickUnequip). No title: the box says what it is. That nothing fits is a note
+ * under the tiles, never a tile. For a weapon lying in a container (fnc_weaponTile) the same, through op "fit" (fnc_doFit).
  *
  * Only what may be touched (fnc_checkTouch, a kit as Enhanced First Aid Kits says), and what the slot takes
  * (aio_storage_fnc_slotAccepts). The same part in the same place is one row, with how many there are.
@@ -37,6 +38,17 @@ private _kinds = [[_part], ["magazine", "grenade"]] select (_part in ["mag", "ma
 private _choices = [];
 private _rows = createHashMap;
 
+// A weapon lying in a container (Attachments in its tile's menu): the card's target names it, its tile is found again by its
+// cell (fnc_weaponTile) - its parts change through op "fit" (fnc_doFit), checked by the weapon alone (aio_storage_fnc_partFits).
+private _inGrid = (_slot select [0, 5]) isEqualTo "tile_";
+private _target = GVAR(inspect) param [5, ""];
+private _weaponTile = if (_inGrid && {_target isEqualType createHashMap}) then {[_target] call FUNC(weaponTile)} else {createHashMap};
+
+if (_inGrid && {count _weaponTile == 0}) exitWith {};
+
+private _weaponClass = _weaponTile getOrDefault ["class", ""];
+private _weaponFrom = if (_target isEqualType createHashMap) then {_target getOrDefault ["container", objNull]} else {objNull};
+
 {
     private _grid = _x;
     private _from = _grid getOrDefault ["container", objNull];
@@ -65,7 +77,11 @@ private _rows = createHashMap;
         if (_tile getOrDefault ["hidden", false] || {_tile getOrDefault ["pending", false]}) then {continue};
         if !((([_class] call EFUNC(items,getInfo)) getOrDefault ["kind", ""]) in _kinds) then {continue};
         if (_kit isEqualTo "" && {!isNil QEFUNC(compat_efak,checkTile)} && {([_class, _from] call EFUNC(compat_efak,checkTile)) isNotEqualTo ""}) then {continue};
-        if !([_unit, _slot, _class] call EFUNC(storage,slotAccepts)) then {continue};
+        if (_inGrid) then {
+            if (_kit isNotEqualTo "" || {!([_weaponClass, _part, _class] call EFUNC(storage,partFits))}) then {continue};
+        } else {
+            if !([_unit, _slot, _class] call EFUNC(storage,slotAccepts)) then {continue};
+        };
 
         private _ammo = _tile getOrDefault ["ammo", -1];
         private _key = format ["%1|%2|%3|%4", _class, _where, _kit, _ammo];
@@ -78,7 +94,7 @@ private _rows = createHashMap;
         };
 
         _rows set [_key, count _choices];
-        _choices pushBack [_class, [_slot, _from, _tile, _kit], {_this call FUNC(doEquip)}, createHashMapFromArray [
+        _choices pushBack [_class, [[_slot, _from, _tile, _kit], [_part, _weaponFrom, _weaponTile, _from, _tile]] select _inGrid, [{_this call FUNC(doEquip)}, {_this call FUNC(doFit)}] select _inGrid, createHashMapFromArray [
             ["icon", ([_class] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]]
         ], _tile getOrDefault ["count", 1], _where, _ammo];
     } forEach (_grid getOrDefault ["tiles", []]);
@@ -113,13 +129,33 @@ if (count _choices > 17) then {
     _choices resize 17;
 };
 
-// NONE first while a part is on it, as in Tarkov - it takes the part off into the gear (also a right click on the box). Only real
-// choices are tiles (Mia: "why is there still a choice 'Nothing fits'?"): that nothing fits is a line of text under them - and
-// with nothing on the part and nothing that fits there is no grid at all, only the hint says so.
-private _on = ([_unit, _slot] call EFUNC(storage,getSlot)) getOrDefault ["class", ""];
+// What is on the part now first, framed in the accent colour (a click on it changes nothing), then NONE, which takes it off into
+// the gear (also a right click on the box) - as Mia asked. Only real choices are tiles (Mia: "why is there still a choice
+// 'Nothing fits'?"): that nothing fits is a line of text under them - and with nothing on the part and nothing that fits there
+// is no grid at all, only the hint says so.
+private _on = if (_inGrid) then {
+    private _value = (_weaponTile getOrDefault ["attachments", []]) param [["", "muzzle", "rail", "optic", "mag", "mag2", "bipod"] find _part, ""];
+
+    if (_value isEqualType []) then {_value param [0, ""]} else {_value}
+} else {
+    ([_unit, _slot] call EFUNC(storage,getSlot)) getOrDefault ["class", ""]
+};
 
 if (_on isNotEqualTo "") then {
-    _choices insert [0, [[toUpperANSI LLSTRING(Modify_None), [_unit, _slot], {_this call FUNC(quickUnequip)}, createHashMap]]];
+    _choices insert [0, [
+        [
+            [_on] call FUNC(itemName), [], {}, createHashMapFromArray [
+                ["icon", ([_on] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]], ["outline", true],
+                ["tooltip", [_on] call FUNC(itemName)]
+            ]
+        ],
+        [
+            toUpperANSI LLSTRING(Modify_None),
+            [[_unit, _slot], [_part, _weaponFrom, _weaponTile]] select _inGrid,
+            [{_this call FUNC(quickUnequip)}, {_this call FUNC(doFit)}] select _inGrid,
+            createHashMap
+        ]
+    ]];
 };
 
 if (_choices isEqualTo []) exitWith {

@@ -209,6 +209,23 @@ switch (GVAR(hover) param [0, ""]) do {
             // Put on: the slot it belongs to - attachments and magazines on each weapon that takes them.
             private _kind = ([_class] call EFUNC(items,getInfo)) get "kind";
 
+            // A weapon lying here: its parts changed as on a worn one, in the attachments view (#56, fnc_drawInspect) - found again
+            // by its cell (fnc_weaponTile).
+            if (_kind in ["rifle", "handgun", "launcher"] && {_kit isEqualTo ""} && {!isNull _from}) then {
+                _choices pushBack [
+                    LLSTRING(Menu_Modify),
+                    [
+                        _class, 1, -1, _tile getOrDefault ["attachments", []], _from,
+                        createHashMapFromArray [
+                            ["container", _from],
+                            ["cell", [_tile getOrDefault ["col", 0], _tile getOrDefault ["row", 0], _tile getOrDefault ["block", 0]]]
+                        ],
+                        true
+                    ],
+                    {_this call FUNC(inspect)}
+                ];
+            };
+
             if (_kind in ["muzzle", "optic", "rail", "bipod", "magazine", "grenade"]) then {
                 private _parts = [[_kind], ["mag", "mag2"]] select (_kind in ["magazine", "grenade"]);
 
@@ -321,13 +338,12 @@ switch (GVAR(hover) param [0, ""]) do {
 
         private _worn = [_owner, _slot] call EFUNC(storage,getSlot);
 
-        // One of the player's own weapons opens with its parts to change on the card (#56, fnc_drawHotspots) - Modify on the wide
-        // card, in 3D.
+        // One of the player's own weapons: Attachments opens it with its parts to change (#56, fnc_drawHotspots); Inspect only looks.
         private _ownWeapon = _owner isEqualTo _unit && {_slot in ["primary", "handgun", "launcher", "primary2"]};
 
         _choices pushBack [
             LLSTRING(Menu_Inspect),
-            [_record param [1, ""], 1, _worn getOrDefault ["ammo", -1], _worn getOrDefault ["attachments", []], objNull, ["", _slot] select _ownWeapon],
+            [_record param [1, ""], 1, _worn getOrDefault ["ammo", -1], _worn getOrDefault ["attachments", []]],
             {_this call FUNC(inspect)}
         ];
 

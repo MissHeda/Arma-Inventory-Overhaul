@@ -17,10 +17,10 @@
  * (fnc_drawTopLayer). Clicks on it reach neither the inventory nor a kit window under it: fnc_topAt
  * finds the card first by QGVAR(inspectRect) (fnc_onMouseButton, fnc_updateHover, fnc_updateDrag).
  *
- * One of the player's own weapons, opened from its slot (Inspect or Modify, fnc_contextMenu), is shown as it is on the
- * player now, with its parts to change (#56, fnc_drawHotspots): boxes round the 3D picture, a row of the parts under it.
- * Modify opens the card twice as wide, in 3D whatever the switch says (where Picture-in-Picture is on), with the
- * picture, the parts and how to use them only - no switch, no figures.
+ * Attachments (fnc_contextMenu) shows one of the player's own weapons as it is on the player now - or a weapon lying in a
+ * container as its tile is now -, with its parts to change (#56, fnc_drawHotspots): boxes round the 3D picture, a row of the
+ * parts under it. The card is as large as Inspect's, in 3D whatever the switch says (where Picture-in-Picture is on), with
+ * the picture, the parts and how to use them only - no switch, no figures. Inspect only looks.
  *
  * Arguments:
  * None
@@ -47,19 +47,39 @@ if (isNull _display || {GVAR(inspect) isEqualTo []}) exitWith {
     ["stop"] call FUNC(inspect3D);
 };
 
-GVAR(inspect) params ["_class", "_count", "_ammo", "_attachments", ["_holder", objNull, [objNull]], ["_modify", "", [""]], ["_large", false, [false]]];
+GVAR(inspect) params ["_class", "_count", "_ammo", "_attachments", ["_holder", objNull, [objNull]], ["_modify", "", ["", createHashMap]], ["_large", false, [false]]];
 
 // One of the player's weapons to modify: as it is on the player now - its parts change while the card is open. Gone from the
-// slot, or another one there, it is the weapon it was, to look at only.
-if (_modify isNotEqualTo "") then {
+// slot, or another one there, it is the weapon it was, to look at only. A weapon lying in a container ("container", "cell") as
+// its tile is now (fnc_weaponTile) - its boxes then name their parts "tile_..." (fnc_drawHotspots, fnc_partChoices).
+private _base = "";
+
+if (_modify isEqualType createHashMap) then {
+    private _tile = [_modify] call FUNC(weaponTile);
+
+    if ((_tile getOrDefault ["class", ""]) isNotEqualTo _class) exitWith {
+        _modify = "";
+    };
+
+    _base = "tile";
+    _attachments = +(_tile getOrDefault ["attachments", []]);
+    GVAR(inspect) set [3, +_attachments];
+} else {
+    if (_modify isEqualTo "") exitWith {};
+
     private _weapon = ([GVAR(unit)] call EFUNC(storage,getEquipment)) getOrDefault [_modify, []];
 
     if !(_weapon isEqualType [] && {(_weapon param [0, ""]) isEqualTo _class}) exitWith {
         _modify = "";
     };
 
+    _base = _modify;
     _attachments = +_weapon;
     GVAR(inspect) set [3, +_weapon];
+};
+
+if (_base isEqualTo "") then {
+    _modify = "";
 };
 
 _large = _large && {_modify isNotEqualTo ""};
@@ -181,13 +201,13 @@ if (_large) then {
 
 // The card and its words grow with the tiles (TEXT_UNIT, fnc_textScale).
 private _textUnit = TEXT_UNIT;
-private _cardUnits = [17, 34] select _large;
-private _width = SQUARE(_textUnit * _cardUnits);
+// Attachments is as large as Inspect: larger, the texture's coarseness only shows the more (Mia, #56).
+private _width = SQUARE(_textUnit * 17);
 private _padY = _textUnit * 0.7;
 private _padX = SQUARE(_padY);
 private _innerW = _width - _padX * 2;
 private _titleH = _textUnit * 1.1;
-private _pictureH = _textUnit * ([6.5, 13] select _large);
+private _pictureH = _textUnit * 6.5;
 private _rowH = _textUnit * 0.8;
 private _gap = _textUnit * 0.45;
 private _closeH = _titleH;
@@ -340,6 +360,10 @@ if (_show3D) then {
 
             if (_spot getOrDefault ["floating", false]) exitWith {
                 GVAR(spotPress) = [_spot get "slot", _button];
+
+                if (_button == 0) then {
+                    [_spot get "slot"] call FUNC(hotspotPress);
+                };
             };
 
             GVAR(spotPress) = [];
@@ -444,7 +468,7 @@ if (_partsH > 0) then {
     [
         _display, _group, _viewRect, [_padX, _cursor, _innerW, _partsH],
         [[], [[_trackX - _inset, _toggleY - _inset, _trackW + _inset * 2, _toggleH + _inset * 2]]] select _showToggle,
-        _modify, _attachments, _theme
+        _base, _attachments, _theme
     ] call FUNC(drawHotspots);
 
     _cursor = _cursor + _partsH + _gap;

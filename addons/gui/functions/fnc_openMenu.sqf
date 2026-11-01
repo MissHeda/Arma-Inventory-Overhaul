@@ -24,6 +24,7 @@
  *   "tooltip"   - shown while the mouse rests on the row
  *   "enabled"   - false: greyed out, and a click on it does nothing - the menu stays open
  *   "separator" - true: a line above the row, setting it apart from the rows before
+ *   "outline"   - true: a tile framed in the accent colour - what is on the part now (fnc_partChoices)
  *
  * Arguments:
  * 0: Display <DISPLAY>
@@ -174,6 +175,10 @@ private _rowRadius = (_radius * 0.6) min (_rowH / 2);
         _rowTop = _tileY;
 
         private _surfaceTile = [_display, _layer, [_tileX, _tileY, _tileW, _tileH], [0, 0, 0, 0], _tileRadius] call FUNC(uiPanel);
+
+        if (_options getOrDefault ["outline", false]) then {
+            [_display, _layer, [_tileX, _tileY, _tileW, _tileH], _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]], _tileRadius] call FUNC(uiRing);
+        };
         private _icon = _options getOrDefault ["icon", ""];
         private _faceH = _tileH * 0.6;
 

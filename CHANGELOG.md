@@ -2,6 +2,23 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.48 - beta
+
+### Added
+
+- Weapons lying in a container show small pictures of their parts in the bottom right corner of their tile, and their right-click menu has **Attachments**: change their parts as on a weapon you carry. A part dropped straight onto a weapon's tile goes on it where it fits (what was on that part goes where the new one lay), else it shows red.
+- Attached parts of a weapon you carry can be dragged out of the Attachments view's boxes and row - onto a grid or the ground.
+
+### Changed
+
+- **Modify** is now **Attachments**, and its card is as large as Inspect's. **Inspect** only looks again - no part boxes, no row of parts.
+- A part box's tiles start with the part that is on now, framed in the accent colour, then NONE, then what else fits.
+- The drop highlight on the Attachments view's boxes and row has round corners like every other one.
+
+### Fixed
+
+- The marks of the attachments on a weapon's picture were gone in 0.6.46: they show again, as the weapon's own shapes, but never larger than a fixed share of the picture.
+
 ## 0.6.47 - beta
 
 ### Fixed

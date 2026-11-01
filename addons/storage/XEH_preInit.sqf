@@ -21,7 +21,9 @@ GVAR(ops) = createHashMapFromArray [
     ["normalize", QFUNC(opNormalize)], ["move", QFUNC(opMove)], ["take", QFUNC(opTake)],
     ["put", QFUNC(opPut)], ["putGround", QFUNC(opPutGround)], ["takeOff", QFUNC(opTakeOff)],
     ["putOn", QFUNC(opPutOn)], ["repack", QFUNC(opRepack)], ["migrate", QFUNC(opMigrate)],
-    ["strict", QFUNC(opStrict)], ["split", QFUNC(opSplit)]
+    ["strict", QFUNC(opStrict)], ["split", QFUNC(opSplit)],
+    // A part put on or taken off a weapon that lies in a container, between its take and its put (aio_gui_fnc_doFit).
+    ["fit", QFUNC(opFit)]
 ];
 
 // Checks every op passes on the machine that runs it: CODE [op, args, requester, root] -> "" or a reason.

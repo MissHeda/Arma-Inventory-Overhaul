@@ -432,9 +432,9 @@
 // them, and they match the game's items better than anything drawn for this mod.
 #define GEAR_ICON(NAME) QUOTE(\A3\ui_f\data\GUI\Rsc\RscDisplayGear\NAME.paa)
 
-// An attachment's mark on a weapon's picture (fnc_drawAttachments): its slot's silhouette, this share of the picture's height,
-// in this colour.
-#define ATTACHMENT_MARK 0.26
+// An attachment's mark on a weapon's picture (fnc_drawAttachments): the weapon's own shape for the slot, at most this share of the
+// picture's size, in this colour.
+#define ATTACHMENT_MARK 0.18
 #define ATTACHMENT_MARK_COLOR [1, 1, 1, 0.9]
 
 // What the config classes start with. Every control gets its real colours from the theme.

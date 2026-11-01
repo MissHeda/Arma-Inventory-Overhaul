@@ -7,10 +7,10 @@
  * picture - at iconPosition (fractions of the picture, from its top left), the iconPinpoint of the mark
  * ("Center", "Bottom", "Top", "Left", "Right") on that point.
  *
- * The mark is the slot's clean silhouette (the gear silhouettes of muzzle, optic, rail and bipod), all of one size - a share of
- * the picture's height (ATTACHMENT_MARK), so it grows and shrinks with the picture -, in white. The weapon's own iconPicture at
- * its iconScale glowed and was far too large for some (Mia, #56: "The IR icon is far too big"); a slot of another kind (the
- * Spectrum Device's antennas) keeps its iconPicture, at the same size.
+ * The mark is the weapon's own shape for the slot (iconPicture: attachment_top.paa and the like, the Spectrum Device's antennas)
+ * at its iconScale of the picture - but never more than ATTACHMENT_MARK of it, so it grows and shrinks with the picture and none
+ * covers half the weapon (Mia, #56: "The IR icon is far too big"), in white. The gear silhouettes tried in 0.6.46 are dark
+ * grey: on the weapon's picture they did not show at all.
  *
  * The slot an attachment sits in is the one whose compatibleItems name it (an array, or a class of
  * item = 1 entries as CBA's joint rails write them); failing that, the slot of the attachment's kind.
@@ -65,14 +65,6 @@ if (_exact) then {
 
 // With the slots the weapon inherits: configClasses leaves those out, and the MX's muzzle and side rail come from its base -
 // only the optic showed (Mia, #56).
-// The clean silhouette of each slot of the usual kinds.
-private _silhouette = createHashMapFromArray [
-    ["MuzzleSlot", GEAR_ICON(ui_gear_muzzle_gs)],
-    ["PointerSlot", GEAR_ICON(ui_gear_side_gs)],
-    ["CowsSlot", GEAR_ICON(ui_gear_top_gs)],
-    ["UnderBarrelSlot", GEAR_ICON(ui_gear_bipod_gs)]
-];
-
 private _slots = (configProperties [_slotsConfig, "isClass _x", true]) select {getText (_x >> "iconPicture") isNotEqualTo ""};
 
 private _fnc_takes = {
@@ -102,14 +94,18 @@ private _fnc_takes = {
 
     private _slot = _slots select _index;
 
-    if (getNumber (_slot >> "iconScale") <= 0) then {continue};
+    private _scale = getNumber (_slot >> "iconScale");
+
+    if (_scale <= 0) then {continue};
 
     (getArray (_slot >> "iconPosition")) params [["_fx", 0.5], ["_fy", 0.5]];
 
-    // Square on the screen: the picture's area is twice as wide as high in pixels.
-    private _iconH = _h * ATTACHMENT_MARK;
-    private _iconW = _iconH * (_w / _h) / 2;
-    private _texture = _silhouette getOrDefault [configName _slot, getText (_slot >> "iconPicture")];
+    // As the weapon's own picture draws it, a share of the picture's size - never more than ATTACHMENT_MARK.
+    _scale = _scale min ATTACHMENT_MARK;
+
+    private _iconW = _w * _scale;
+    private _iconH = _h * _scale;
+    private _texture = getText (_slot >> "iconPicture");
     private _iconX = _x0 + _fx * _w;
     private _iconY = _y0 + _fy * _h;
 

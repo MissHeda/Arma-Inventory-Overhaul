@@ -871,8 +871,21 @@ if (_onTop isEqualTo "inspect") exitWith {
     if (count _spot > 0) exitWith {
         private _slot = _spot get "slot";
         private _player = GVAR(unit);
+
+        // A weapon lying in a container (fnc_weaponTile): what fits the weapon itself, out of a container (op "fit", fnc_doFit).
+        private _inGrid = (_slot select [0, 5]) isEqualTo "tile_";
+        private _weaponTile = if (_inGrid) then {[GVAR(inspect) param [5, createHashMap]] call FUNC(weaponTile)} else {createHashMap};
+
         private _why = switch (true) do {
             case (_dragGroup isNotEqualTo []): {"GroupNoSlot"};
+            case (_inGrid): {
+                [
+                    "NoFit", ""
+                ] select (
+                    _slotSource isEqualTo [] && {_sourceIndex >= 0} && {((_grids param [_sourceIndex, createHashMap]) getOrDefault ["kit", ""]) isEqualTo ""}
+                    && {[_weaponTile getOrDefault ["class", ""], _spot get "part", _entry getOrDefault ["class", ""]] call EFUNC(storage,partFits)}
+                )
+            };
             case !([_player, _slot, _entry getOrDefault ["class", ""]] call EFUNC(storage,slotAccepts)): {"NoFit"};
             case (_slotSource isNotEqualTo []): {[_slotSource, _player, _slot] call FUNC(canSwap)};
             default {""};
@@ -881,8 +894,12 @@ if (_onTop isEqualTo "inspect") exitWith {
         (ctrlPosition (uiNamespace getVariable [QGVAR(inspectGroup), controlNull])) params [["_cardX", 0], ["_cardY", 0]];
         (_spot get "rel") params ["_relX", "_relY", "_relW", "_relH"];
 
+        private _rect = [_cardX + _relX, _cardY + _relY, _relW, _relH];
+
         GVAR(dragTarget) = ["slot", -1, 0, 0, _why isEqualTo "", _why, _slot, true, [objNull, _player] select (_slotSource isNotEqualTo [])];
-        [[_cardX + _relX, _cardY + _relY, _relW, _relH], _why isEqualTo ""] call _fnc_show;
+
+        // Round as the box, as every slot's footprint is.
+        [_rect, _why isEqualTo "", DRAG_FOOTPRINT_ALPHA, "", [_rect] call _fnc_slotCorners] call _fnc_show;
     };
 
     _footprint ctrlShow false;
@@ -1565,6 +1582,61 @@ call {
         [
             _repackRect, _fits, DRAG_FOOTPRINT_ALPHA, ["", "accent"] select _fits,
             [_target, _repackRect, [_originX, _originY]] call FUNC(cornerRadii)
+        ] call _fnc_show;
+    };
+
+    // ----- On a weapon: an attachment or a magazine put on it (op "fit", fnc_doFit, #56) -----
+    // A part let go on a weapon's tile goes on the weapon where it fits - in the accent colour; one that does not fit is red, with
+    // the reason. Between containers only, one tile, not a slot's item.
+    private _fitTile = -1;
+    private _fitAnswer = [false, "NoFit", ""];
+
+    if (
+        !_viaFold && {_slotSource isEqualTo []} && {_dragGroup isEqualTo []}
+        && {(_target getOrDefault ["kit", ""]) isEqualTo ""} && {!isNull (_target getOrDefault ["container", objNull])}
+        && {(_sourceGrid getOrDefault ["kit", ""]) isEqualTo ""} && {!isNull (_sourceGrid getOrDefault ["container", objNull])}
+    ) then {
+        private _underIndex = [_targetIndex, _cell] call _fnc_tileUnder;
+
+        if (_underIndex < 0 || {_targetIndex == _sourceIndex && {_underIndex == _tileIndex}}) exitWith {};
+
+        private _under = (_target get "tiles") select _underIndex;
+        private _partKind = ([_entry getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["kind", ""];
+
+        if !(_partKind in ["muzzle", "optic", "rail", "bipod", "magazine", "grenade"]) exitWith {};
+        if !((([_under getOrDefault ["class", ""]] call EFUNC(items,getInfo)) getOrDefault ["kind", ""]) in ["rifle", "handgun", "launcher"]) exitWith {};
+
+        private _key = format ["fit|%1|%2", _targetIndex, _underIndex];
+        private _answer = GVAR(dragRoom) get _key;
+
+        if (isNil "_answer") then {
+            private _weaponClass = _under getOrDefault ["class", ""];
+            private _class = _entry getOrDefault ["class", ""];
+            private _parts = [[_partKind], ["mag", "mag2"]] select (_partKind in ["magazine", "grenade"]);
+            private _part = _parts param [_parts findIf {[_weaponClass, _x, _class] call EFUNC(storage,partFits)}, ""];
+
+            _answer = [_part isNotEqualTo "", ["NoFit", ""] select (_part isNotEqualTo ""), _part];
+            GVAR(dragRoom) set [_key, _answer];
+        };
+
+        _fitTile = _underIndex;
+        _fitAnswer = _answer;
+    };
+
+    if (_fitTile >= 0) exitWith {
+        _fitAnswer params ["_fits", "_why", "_part"];
+
+        private _under = (_target get "tiles") select _fitTile;
+
+        GVAR(dragTarget) = ["fitTile", _targetIndex, _fitTile, 0, _fits, _why, _part];
+
+        (_gridBoxes select _targetIndex) params ["", "_originX", "_originY"];
+
+        private _fitRect = [_target, [_originX, _originY], _under get "col", _under get "row", _under get "w", _under get "h"] call FUNC(spanRect);
+
+        [
+            _fitRect, _fits, DRAG_FOOTPRINT_ALPHA, ["", "accent"] select _fits,
+            [_target, _fitRect, [_originX, _originY]] call FUNC(cornerRadii)
         ] call _fnc_show;
     };
 

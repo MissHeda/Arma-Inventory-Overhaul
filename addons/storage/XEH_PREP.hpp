@@ -77,6 +77,8 @@ PREP(opPut);
 PREP(opPutGround);
 PREP(opTakeOff);
 PREP(opPutOn);
+PREP(opFit);
+PREP(partFits);
 PREP(opRepack);
 PREP(opMigrate);
 

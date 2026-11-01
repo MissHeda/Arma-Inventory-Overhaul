@@ -105,6 +105,14 @@ private _fnc_hit = {
     _hit ctrlAddEventHandler ["ButtonClick", {
         [(_this select 0) getVariable [QGVAR(id), ""], 0] call FUNC(hotspotClick);
     }];
+    // Held and moved, the part is dragged out (fnc_hotspotPress).
+    _hit ctrlAddEventHandler ["MouseButtonDown", {
+        params ["_hit", "_button"];
+
+        if (_button == 0) then {
+            [_hit getVariable [QGVAR(id), ""]] call FUNC(hotspotPress);
+        };
+    }];
     _hit ctrlAddEventHandler ["MouseButtonUp", {
         params ["_hit", "_button"];
 

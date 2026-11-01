@@ -33,6 +33,15 @@ if (_button == 0) exitWith {
 
 if (_button == 1) then {
     [{
+        // A weapon lying in a container (fnc_weaponTile): taken off by op "fit" (fnc_doFit).
+        if ((_this select [0, 5]) isEqualTo "tile_") exitWith {
+            private _target = GVAR(inspect) param [5, createHashMap];
+
+            if !(_target isEqualType createHashMap) exitWith {};
+
+            [(_this splitString "_") select -1, _target getOrDefault ["container", objNull], [_target] call FUNC(weaponTile)] call FUNC(doFit);
+        };
+
         if ((([GVAR(unit), _this] call EFUNC(storage,getSlot)) getOrDefault ["class", ""]) isNotEqualTo "") then {
             [GVAR(unit), _this] call FUNC(quickUnequip);
         };
