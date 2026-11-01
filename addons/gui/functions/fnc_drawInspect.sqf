@@ -385,7 +385,7 @@ if (_show3D) then {
             GVAR(spotPress) = [];
 
             if (_slot isNotEqualTo "" && {_pressed == _button} && {(([getMousePosition] call FUNC(hotspotAt)) getOrDefault ["slot", ""]) isEqualTo _slot}) then {
-                [_slot, _button] call FUNC(hotspotClick);
+                [_slot, _button, true] call FUNC(hotspotClick);
             };
         }];
         _hit ctrlAddEventHandler ["MouseButtonDblClick", {

@@ -187,6 +187,7 @@ PREP(hotspotClick);
 PREP(doFit);
 PREP(weaponTile);
 PREP(hotspotPress);
+PREP(tilePart);
 PREP(hasModel);
 PREP(itemModel);
 PREP(closeInspect);

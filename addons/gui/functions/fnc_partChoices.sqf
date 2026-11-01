@@ -14,6 +14,7 @@
  *
  * Arguments:
  * 0: The part's slot, e.g. "primary_optic" <STRING>
+ * 1: Clicked on its box over the 3D picture (true) or in the row under it <BOOL> (default: true)
  *
  * Return Value:
  * None
@@ -26,7 +27,7 @@
 
 disableSerialization;
 
-params [["_slot", "", [""]]];
+params [["_slot", "", [""]], ["_floating", true, [true]]];
 
 private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 private _unit = GVAR(unit);
@@ -162,14 +163,15 @@ if (_choices isEqualTo []) exitWith {
     [LLSTRING(Modify_NoParts)] call FUNC(flashHint);
 };
 
-// Right under the box that was clicked - over it where the screen ends below (fnc_openMenu keeps it on the screen).
-private _spot = (uiNamespace getVariable [QGVAR(hotspots), []]) select {(_x get "slot") isEqualTo _slot};
+// Right under the box that was clicked - the one over the 3D picture or the row's under it (Mia: "the parts menu should open
+// THERE") -, over it where the screen ends below (fnc_openMenu keeps it on the screen).
+private _spot = (uiNamespace getVariable [QGVAR(hotspots), []]) select {(_x get "slot") isEqualTo _slot && {(_x get "floating") isEqualTo _floating}};
 private _group = uiNamespace getVariable [QGVAR(inspectGroup), controlNull];
 private _at = [];
 
 if (_spot isNotEqualTo [] && {!isNull _group}) then {
     (ctrlPosition _group) params ["_cardX", "_cardY"];
-    (_spot select ((_spot findIf {(_x get "floating") && {ctrlShown (_x get "ctrl")}}) max 0) get "rel") params ["_boxX", "_boxY", "", "_boxH"];
+    ((_spot select 0) get "rel") params ["_boxX", "_boxY", "", "_boxH"];
 
     _at = [_cardX + _boxX, _cardY + _boxY + _boxH + pixelH * 4];
 };

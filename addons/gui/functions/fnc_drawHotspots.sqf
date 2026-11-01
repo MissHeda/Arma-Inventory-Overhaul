@@ -91,7 +91,7 @@ if (_parts isEqualTo []) exitWith {};
 // What a point or a box of the row does under the mouse: its tip, its click and its right click. A frame later
 // (fnc_later): the card may be drawn anew meanwhile.
 private _fnc_hit = {
-    params ["_parent", "_rect", "_slot", "_caption", "_on"];
+    params ["_parent", "_rect", "_slot", "_caption", "_on", ["_floating", false]];
 
     private _hit = [_display, "AIO_Hitbox", _parent, _rect] call FUNC(uiCreate);
     private _tip = if (_on isEqualTo "") then {
@@ -102,8 +102,9 @@ private _fnc_hit = {
 
     [_hit, _tip] call FUNC(setTooltip);
     _hit setVariable [QGVAR(id), _slot];
+    _hit setVariable [QGVAR(floating), _floating];
     _hit ctrlAddEventHandler ["ButtonClick", {
-        [(_this select 0) getVariable [QGVAR(id), ""], 0] call FUNC(hotspotClick);
+        [(_this select 0) getVariable [QGVAR(id), ""], 0, (_this select 0) getVariable [QGVAR(floating), false]] call FUNC(hotspotClick);
     }];
     // Held and moved, the part is dragged out (fnc_hotspotPress).
     _hit ctrlAddEventHandler ["MouseButtonDown", {
@@ -240,7 +241,7 @@ private _marks = _parts apply {
         [_colorMuted, _colorText] select (_on isNotEqualTo ""), _font, 0, "value"
     ] call FUNC(uiLabel);
 
-    [_box, [0, 0, _boxW, _boxH], _slot, _caption, _on] call _fnc_hit;
+    [_box, [0, 0, _boxW, _boxH], _slot, _caption, _on, true] call _fnc_hit;
 
     _box ctrlShow false;
 

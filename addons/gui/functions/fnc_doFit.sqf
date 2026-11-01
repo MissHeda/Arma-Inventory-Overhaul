@@ -17,6 +17,9 @@
  * 2: The weapon's tile <HASHMAP>
  * 3: The part's container, objNull to take the part off <OBJECT> (default: objNull)
  * 4: The part's tile <HASHMAP> (default: empty)
+ * 5: Taken off: where it goes - a container or "ground" -, objNull to let it go into the player's gear <OBJECT, STRING>
+ *    (default: objNull)
+ * 6: Taken off into a container: the cell, [] for the first free one <ARRAY> (default: [])
  *
  * Return Value:
  * Asked for <BOOL>
@@ -29,7 +32,8 @@
 
 params [
     ["_part", "", [""]], ["_from", objNull, [objNull]], ["_entry", createHashMap, [createHashMap]],
-    ["_partFrom", objNull, [objNull]], ["_partEntry", createHashMap, [createHashMap]]
+    ["_partFrom", objNull, [objNull]], ["_partEntry", createHashMap, [createHashMap]],
+    ["_offTo", objNull, [objNull, ""]], ["_offCell", [], [[]]]
 ];
 
 if (_part isEqualTo "" || {isNull _from} || {count _entry == 0}) exitWith {false};
@@ -65,6 +69,18 @@ private _old = (_entry getOrDefault ["attachments", []]) param [["", "muzzle", "
 private _oldClass = if (_old isEqualType []) then {_old param [0, ""]} else {_old};
 
 if (_oldClass isEqualTo "") exitWith {false};
+
+// Dragged out to a place of its own (fnc_doUnequip): there.
+if (_offTo isEqualType "" || {!isNull _offTo}) exitWith {
+    if (_offTo isEqualType objNull && {([_offTo, "items"] call FUNC(checkTouch)) isNotEqualTo ""}) exitWith {
+        [([_offTo, "items"] call FUNC(checkTouch))] call FUNC(flashHint);
+        false
+    };
+
+    [[createHashMapFromArray [
+        ["kind", "fit"], ["from", _from], ["entry", _entry], ["part", _part], ["to", _offTo], ["cell", _offCell]
+    ]]] call FUNC(sendMoves)
+};
 
 private _unit = GVAR(unit);
 private _probe = createHashMapFromArray [["class", _oldClass], ["count", 1]];

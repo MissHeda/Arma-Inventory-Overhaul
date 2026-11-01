@@ -13,6 +13,8 @@
  * Arguments:
  * 0: The part's slot, e.g. "primary_optic" <STRING>
  * 1: Mouse button, 0 left, 1 right <NUMBER>
+ * 2: The box over the 3D picture (true) or the row's under it - where the parts' tiles open (fnc_partChoices) <BOOL>
+ *    (default: true)
  *
  * Return Value:
  * None
@@ -23,12 +25,12 @@
  * Public: No
  */
 
-params [["_slot", "", [""]], ["_button", 0, [0]]];
+params [["_slot", "", [""]], ["_button", 0, [0]], ["_floating", true, [true]]];
 
 if (_slot isEqualTo "") exitWith {};
 
 if (_button == 0) exitWith {
-    [{[_this] call FUNC(partChoices)}, _slot] call FUNC(later);
+    [{_this call FUNC(partChoices)}, [_slot, _floating]] call FUNC(later);
 };
 
 if (_button == 1) then {

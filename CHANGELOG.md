@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.49 - beta
+
+### Fixed
+
+- Attachments: a click on the row of parts under the picture opens the parts right there, not at the box over the weapon.
+- Attachments of a weapon lying in a container: its parts can be dragged out too - onto a grid or the ground.
+- A part dragged onto a weapon showed red although it went on: every way of putting a part on - the weapon card, a weapon's tile, the Attachments boxes and row - now asks the very same check for the colour and for the drop.
+
 ## 0.6.48 - beta
 
 ### Added

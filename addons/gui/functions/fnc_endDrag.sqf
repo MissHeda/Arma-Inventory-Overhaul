@@ -332,6 +332,12 @@ private _sent = call {
             ) isEqualTo true
         };
 
+        // A part of a weapon lying in a container goes onto grids and the ground only (fnc_tilePart).
+        if (((_slotSource param [1, ""]) select [0, 5]) isEqualTo "tile_") exitWith {
+            ["NoFit"] call FUNC(flashHint);
+            false
+        };
+
         // Worn gear onto another unit's slot: the two exchange it (fnc_doSwap).
         if (_slotSource isNotEqualTo []) exitWith {
             ([_slotSource, _targetUnit, _targetSlot] call FUNC(doSwap)) isEqualTo true

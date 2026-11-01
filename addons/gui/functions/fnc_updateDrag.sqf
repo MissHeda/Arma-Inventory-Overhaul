@@ -145,6 +145,10 @@ private _fnc_noteTime = {
 };
 
 GVAR(press) params ["_sourceIndex", "_tileIndex", "", "_grab", "", "_slotSource"];
+
+// A part dragged out of the attachments view of a weapon lying in a container (fnc_tilePart): it goes onto grids and the ground
+// only, never onto a slot.
+private _tilePart = _slotSource isNotEqualTo [] && {((_slotSource param [1, ""]) select [0, 5]) isEqualTo "tile_"};
 _grab params ["_grabCol", "_grabRow"];
 
 // As it is held - turned with R (fnc_rotateDrag).
@@ -1082,13 +1086,13 @@ call {
             private _slot = _record select 5;
             private _fits = [GVAR(unit), _slot, _entry get "class"] call EFUNC(storage,slotAccepts);
 
-            // Several items cannot go into one slot.
-            if (_dragGroup isNotEqualTo []) then {
+            // Several items cannot go into one slot - nor a part of a weapon lying in a container.
+            if (_dragGroup isNotEqualTo [] || {_tilePart}) then {
                 _fits = false;
             };
 
             // A magazine or attachment on the weapon itself goes on the part that takes it - loaded at once.
-            if (!_fits && {_dragGroup isEqualTo []} && {_slot in ["primary", "handgun", "launcher", "primary2"]}) then {
+            if (!_fits && {!_tilePart} && {_dragGroup isEqualTo []} && {_slot in ["primary", "handgun", "launcher", "primary2"]}) then {
                 private _part = [GVAR(unit), _slot, _entry get "class"] call EFUNC(storage,partFor);
 
                 if (_part isNotEqualTo "") then {

@@ -434,17 +434,33 @@ private _fnc_fitSteps = {
 
     if (_detach) exitWith {
         private _to = _move getOrDefault ["to", _from];
-        private _toRoot = [_to, objNull] call _fnc_rootOf;
 
         if (!_hasOld) exitWith {["", []]};
-        if (isNull _toRoot) exitWith {["Moved", []]};
 
-        ["", [
+        private _steps = [
             [_root, "take", [_from, _weaponArray, 1], "take"],
             [_root, "fit", [["#step", 0, 0], [], _part], "fit"],
-            [_root, "put", [_from, ["#step", 1, 0], _cell], "land"],
-            [_toRoot, "put", [_to, ["#step", 1, 1], []], "old"]
-        ], _from, [_old, _old param [0, ""]] select (_old isEqualType []), _to]
+            [_root, "put", [_from, ["#step", 1, 0], _cell], "land"]
+        ];
+
+        // Onto the ground at the feet, or the vehicle's cargo while seated.
+        if (_to isEqualType "" && {_to in ["ground", "vehicle"]}) exitWith {
+            private _ground = call _fnc_ground;
+
+            if (_ground isEqualTo "") exitWith {["NoGround", []]};
+
+            _steps pushBack ([[objNull, "putGround", [["#step", 1, 1]], "old"], [_ground, "put", [_ground, ["#step", 1, 1], []], "old"]] select (_ground isEqualType objNull));
+
+            ["", _steps, _from, [_old, _old param [0, ""]] select (_old isEqualType []), _to]
+        };
+
+        private _toRoot = [_to, objNull] call _fnc_rootOf;
+
+        if (isNull _toRoot) exitWith {["Moved", []]};
+
+        _steps pushBack [_toRoot, "put", [_to, ["#step", 1, 1], _move getOrDefault ["cell", []]], "old"];
+
+        ["", _steps, _from, [_old, _old param [0, ""]] select (_old isEqualType []), _to]
     };
 
     if !(_partFrom isEqualType objNull) exitWith {["Failed", []]};
