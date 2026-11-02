@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.53 - beta
+
+### Added
+
+- Ukraine FPV Drone (Workshop 3475006113) works with the window, new optional addon `compat_fpv` (loads only with that mod): an FPV item dropped on the ground - drag out of the window, the drop key, Drop in the menu - deploys the drone, by the mod's own function. The mod listened for the engine's "Put" event, which a drop through this window never raises, so the item just lay there. Where the mod's own pack-up says there is no room although the grid has a free spot, ACE interaction > Pack up drone packs it into that spot (#59).
+
 ## 0.6.52 - beta
 
 ### Changed

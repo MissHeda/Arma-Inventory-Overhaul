@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="aio">
+    <Package name="compat_fpv">
+        <Key ID="STR_aio_compat_fpv_Action_PackUp">
+            <English>Pack up drone</English>
+        </Key>
+    </Package>
+</Project>
