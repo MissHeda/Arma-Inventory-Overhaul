@@ -3172,9 +3172,10 @@ in the 3D view instead of the low-poly look. Researched 2026-11-02 (EFT 1.3.0.0,
 - **Why the 3D view looked coarse - what is documented:** the r2t aspect is ignored (the picture has the screen's shape; our
   2:1 texture stretched it); a 2048 texture without mipmaps drawn 3-4 times smaller skips texels (steps, shimmer); the video
   options' PiP quality sets the PiP resolution since 2.06; LODs come from a global budget and cannot be forced by script.
-  Fixed: texture of the screen's shape covering the box (wider screens too), twice the picture's pixels on whole pixels,
-  the box showing its middle; a hint when PiP quality is
-  low; PiP view distance 300 m while open.
+  Fixed: picture of the screen's shape covering the box (wider screens too), the box showing its middle; a hint when PiP
+  quality is low; PiP view distance 300 m while open. 0.6.51 also gave the texture the screen's shape and exactly twice the
+  picture's pixels, for even sampling: the RPT said "Cannot load texture #(argb,1840,1034,1)r2t(...)" and the view stayed
+  empty. r2t sizes must be powers of two, so since 0.6.52 it is 2048x1024 on most screens, and even sampling is gone again.
 - **Not confirmed:** that PiP picks LODs or texture mips by the distance to the player's camera (the scene stands kilometres
   away). No source says so; an A/B test (the scene under the ground right below the player) would settle it.
 - **Full quality for real:** only the main camera gives it for sure (BI's Arsenal, ACE Arsenal) - tried in 0.6.42/0.6.43 and

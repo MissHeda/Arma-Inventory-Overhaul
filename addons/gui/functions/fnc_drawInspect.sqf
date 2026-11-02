@@ -215,8 +215,8 @@ private _closeW = SQUARE(_closeH);
 
 // The item in 3D instead of its picture, for one with a model of its own (fnc_hasModel) and with 3D picked in the box's corner:
 // its scene's camera films into a texture shown in the box (fnc_inspect3D). Picture-in-Picture renders it - off in the video
-// options, there is no 3D. The box is then exactly twice as wide as high in pixels; the texture has the screen's shape and
-// INSPECT_3D_SUPER times the box's pixels across, and the box shows its middle (see INSPECT_3D_ASPECT) - the item is never
+// options, there is no 3D. The box is then exactly twice as wide as high in pixels; the picture has the screen's shape on a
+// texture of power-of-two sides, and the box shows its middle (see INSPECT_3D_ASPECT) - the item is never
 // squeezed nor stretched. Under it how to move it, or that the video options' Picture-in-Picture quality holds it back.
 private _can3D = [_class] call FUNC(hasModel);
 private _show3D = _can3D && {isPiPEnabled} && {GVAR(inspectView) isEqualTo "3d" || _large};
@@ -330,12 +330,12 @@ private _showToggle = _can3D && {!_large};
 if (_show3D) then {
     // The whole picture has the screen's shape and covers the box, in whole pixels: as wide as the box and taller on a screen up
     // to 2:1, as high and wider on a wider one (21:9, three screens) - the box shows its middle (see INSPECT_3D_ASPECT). The
-    // texture has INSPECT_3D_SUPER times its pixels, a target of its own name for its size.
+    // texture's sides are powers of two, or the engine does not load it; a target of its own name for its size.
     private _aspect = INSPECT_3D_ASPECT;
     private _imagePixelsH = _viewPixelsH max (round (_viewPixelsW / _aspect));
     private _imagePixelsW = _viewPixelsW max (round (_imagePixelsH * _aspect));
-    private _textureW = ((_imagePixelsW * INSPECT_3D_SUPER) min INSPECT_3D_MAX_RES) max 64;
-    private _textureH = round (_textureW / _aspect);
+    private _textureW = (round (2 ^ ceil ((ln ((_imagePixelsW * INSPECT_3D_SUPER) max 64)) / (ln 2)))) min INSPECT_3D_MAX_RES;
+    private _textureH = round (2 ^ round ((ln (_textureW / _aspect)) / (ln 2)));
     private _target = format ["%1_%2x%3", INSPECT_3D_TARGET, _textureW, _textureH];
 
     // The Attachments view starts side on (INSPECT_3D_SIDE_PITCH).

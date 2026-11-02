@@ -333,9 +333,11 @@
 #define DRAG_THRESHOLD 0.008
 
 // A weapon card's header held this long, in seconds, lifts the card to move it (fnc_cardGrip); let go sooner, the press
-// is a click that folds or opens the card. The mouse may wander CARD_HOLD_SLACK meanwhile - a hand holding still is not
-// quite still - and the lifted header grows to its lifted size in CARD_POP_TIME.
-#define CARD_HOLD_TIME 3
+// is a click that folds or opens the card. Its bar shows only after CARD_HOLD_DELAY, so a plain click never flashes it, and
+// fills from there to CARD_HOLD_TIME. The mouse may wander CARD_HOLD_SLACK meanwhile - a hand holding still is not quite
+// still - and the lifted header grows to its lifted size in CARD_POP_TIME.
+#define CARD_HOLD_TIME 2
+#define CARD_HOLD_DELAY 1
 #define CARD_HOLD_SLACK (DRAG_THRESHOLD * 2)
 #define CARD_POP_TIME 0.08
 
@@ -570,17 +572,17 @@
 // of anyone near); the size every item is framed by at most, in metres - the boxes of many mods' models are blown up by their
 // hit geometry - and the distance per metre of it.
 //
-// The texture's shape and size (0.6.51). The engine films a render target with the screen's shape whatever the texture
-// string asks (its aspect is ignored): a 2:1 texture got a 16:9 picture stretched across it. So the texture has the screen's
-// shape (INSPECT_3D_ASPECT), covers the box - taller on a screen up to 2:1, wider on a wider one - and the box shows its
-// middle, cut to the box by a group: nothing stretched. It has INSPECT_3D_SUPER times the picture's pixels, the picture on
-// whole pixels: drawn smaller by a whole factor, the texture's pixels are sampled down evenly and edges come out smooth. The 2048 of before, drawn into a box of some 600 pixels without mipmaps,
-// skipped texels instead, and edges stepped and shimmered. At most INSPECT_3D_MAX_RES across. Each size films into a target
-// of its own name, INSPECT_3D_TARGET and the size, so a target made at one size never shows in a box of another.
+// The texture's shape and size. The engine films a render target with the screen's shape whatever the texture string asks
+// (its aspect is ignored). So the picture control has the screen's shape (INSPECT_3D_ASPECT), covers the box - taller on a
+// screen up to 2:1, wider on a wider one - and the box shows its middle, cut to the box by a group: nothing stretched. The
+// texture's sides must be powers of two: the engine refuses any other size ("Cannot load texture", 0.6.51's 1840x1034 left
+// the view empty). Its width is the next power of two over INSPECT_3D_SUPER times the picture's pixels, at most
+// INSPECT_3D_MAX_RES; its height the power of two nearest the screen's shape - 2048x1024 on most screens. Each size films
+// into a target of its own name, INSPECT_3D_TARGET and the size, so a target made at one size never shows in a box of another.
 #define INSPECT_3D_TARGET "aio_inspect3d"
 #define INSPECT_3D_ASPECT (getResolution select 4)
 #define INSPECT_3D_SUPER 2
-#define INSPECT_3D_MAX_RES 4096
+#define INSPECT_3D_MAX_RES 2048
 #define INSPECT_3D_FOV 0.35
 
 // While a 3D view is open the Picture-in-Picture view distance is this (setPiPViewDistance, the engine takes 100 at least): the

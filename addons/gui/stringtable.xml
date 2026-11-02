@@ -1417,7 +1417,7 @@ Off does it at once; a drag never waits.</English>
             <English>Fold away</English>
         </Key>
         <Key ID="STR_aio_gui_WeaponCard_HoldToMove">
-            <English>hold %1 s to move the card</English>
+            <English>Hold to move</English>
         </Key>
         <Key ID="STR_aio_gui_WeaponCard_Unfold">
             <English>Open</English>

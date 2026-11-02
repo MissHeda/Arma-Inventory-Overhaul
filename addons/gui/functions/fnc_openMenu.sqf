@@ -24,7 +24,7 @@
  *   "tooltip"   - shown while the mouse rests on the row
  *   "enabled"   - false: greyed out, and a click on it does nothing - the menu stays open
  *   "separator" - true: a line above the row, setting it apart from the rows before
- *   "outline"   - true: a tile framed in the accent colour - what is on the part now (fnc_partChoices)
+ *   "outline"   - true: a tile framed in the accent colour - what is on the part now, NONE with nothing on it (fnc_partChoices)
  *
  * Arguments:
  * 0: Display <DISPLAY>

@@ -195,7 +195,7 @@ private _fnc_foldHit = {
     private _tip = [LLSTRING(WeaponCard_Fold), LLSTRING(WeaponCard_Unfold)] select _isFolded;
 
     if (_hold) then {
-        _tip = format ["%1 - %2", _tip, format [LLSTRING(WeaponCard_HoldToMove), CARD_HOLD_TIME]];
+        _tip = format ["%1 | %2", _tip, LLSTRING(WeaponCard_HoldToMove)];
     };
 
     private _hit = [_area] call _fnc_hitBox;

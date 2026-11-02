@@ -5,8 +5,8 @@
  * A click on a box of the modding view (fnc_drawHotspots): tiles under the box (fnc_openMenu), as Tarkov's weapon builds list them, of what fits that part
  * of the player's weapon - from the player's own gear and the loot open beside it, each with its picture and where it
  * lies, a magazine with its rounds. A click on one puts it on (fnc_doEquip: taken out where it lies, what was on the part
- * put back there - the server checks it). While a part is on it, that part comes first, framed in the accent colour, and NONE
- * next to it takes it off into the gear (fnc_quickUnequip). No title: the box says what it is. That nothing fits is a note
+ * put back there - the server checks it). NONE is always the first tile and takes a part off into the gear (fnc_quickUnequip);
+ * the part on it comes second, framed in the accent colour - with none on it, NONE is framed. No title: the box says what it is. That nothing fits is a note
  * under the tiles, never a tile. For a weapon lying in a container (fnc_weaponTile) the same, through op "fit" (fnc_doFit).
  *
  * Only what may be touched (fnc_checkTouch, a kit as Enhanced First Aid Kits says), and what the slot takes
@@ -150,10 +150,10 @@ if (count _choices > 17) then {
     _choices resize 17;
 };
 
-// What is on the part now first, framed in the accent colour (a click on it changes nothing), then NONE, which takes it off into
-// the gear (also a right click on the box) - as Mia asked. Only real choices are tiles (Mia: "why is there still a choice
-// 'Nothing fits'?"): that nothing fits is a line of text under them - and with nothing on the part and nothing that fits there
-// is no grid at all, only the hint says so.
+// NONE always first, which takes the part off into the gear (also a right click on the box), then what is on the part now, framed
+// in the accent colour - a click on what is there already changes nothing, and with nothing on the part NONE is what is framed - as
+// Mia asked. Only real choices are tiles (Mia: "why is there still a choice 'Nothing fits'?"): that nothing fits is a line of text
+// under them.
 private _on = if (_inGrid) then {
     private _value = (_weaponTile getOrDefault ["attachments", []]) param [["", "muzzle", "rail", "optic", "mag", "mag2", "bipod"] find _part, ""];
 
@@ -162,25 +162,23 @@ private _on = if (_inGrid) then {
     ([_unit, _slot] call EFUNC(storage,getSlot)) getOrDefault ["class", ""]
 };
 
-if (_on isNotEqualTo "") then {
+if (_on isEqualTo "") then {
+    _choices insert [0, [[toUpperANSI LLSTRING(Modify_None), [], {}, createHashMapFromArray [["outline", true]]]]];
+} else {
     _choices insert [0, [
-        [
-            [_on] call FUNC(itemName), [], {}, createHashMapFromArray [
-                ["icon", ([_on] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]], ["outline", true],
-                ["tooltip", [_on] call FUNC(itemName)]
-            ]
-        ],
         [
             toUpperANSI LLSTRING(Modify_None),
             [[_unit, _slot], [_part, _weaponFrom, _weaponTile]] select _inGrid,
             [{_this call FUNC(quickUnequip)}, {_this call FUNC(doFit)}] select _inGrid,
             createHashMapFromArray [["preview", [""] call _fnc_preview]]
+        ],
+        [
+            [_on] call FUNC(itemName), [], {}, createHashMapFromArray [
+                ["icon", ([_on] call EFUNC(items,getInfo)) getOrDefault ["picture", ""]], ["outline", true],
+                ["tooltip", [_on] call FUNC(itemName)]
+            ]
         ]
     ]];
-};
-
-if (_choices isEqualTo []) exitWith {
-    [LLSTRING(Modify_NoParts)] call FUNC(flashHint);
 };
 
 // Right under the box that was clicked - the one over the 3D picture or the row's under it (Mia: "the parts menu should open

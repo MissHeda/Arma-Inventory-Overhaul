@@ -3,8 +3,9 @@
 /*
  * Author: Miss Heda
  * Moves a weapon card of the equipment column to another place by its header (fnc_drawEquipmentCards). Press on the
- * header and hold it CARD_HOLD_TIME seconds - a bar in the accent colour fills along its foot meanwhile, so the player
- * sees the hold is going somewhere - and the card pops out: its header, a little larger, as a plate in the accent colour,
+ * header and hold it CARD_HOLD_TIME seconds - after CARD_HOLD_DELAY a bar in the accent colour fills under its words, inside
+ * the header's line and clear of the card below it, so the player sees the hold is going somewhere; a plain click never
+ * shows it - and the card pops out: its header, a little larger, as a plate in the accent colour,
  * follows the mouse up or down, and a line in the accent colour shows between which cards it will go. Let go, it goes
  * there; let go where it already is and nothing changes.
  *
@@ -75,6 +76,7 @@ switch (_step) do {
 
         private _bar = [_display, "AIO_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
         _bar ctrlSetBackgroundColor (_hold select 1);
+        _bar ctrlShow false;
 
         // Real time, not the mission's: a hold is the player's hand, and the mission's clock may stand still. The frame
         // of the press, too: the press event may come before the button reads as held (as the Arsenal's list press).
@@ -110,11 +112,16 @@ switch (_step) do {
             ["cancel"] call FUNC(cardGrip);
         };
 
-        private _share = ((diag_tickTime - _start) / CARD_HOLD_TIME) min 1;
+        private _share = ((diag_tickTime - _start - CARD_HOLD_DELAY) / (CARD_HOLD_TIME - CARD_HOLD_DELAY)) min 1;
 
-        if (!isNull _bar) then {
-            _bar ctrlSetPosition [_rectX, _rectY + _rectH - pixelH * 3, (_rectW * _share) max pixelW, pixelH * 3];
+        // Nothing to see until the delay has passed. Then from the words on - the chevron and the key stay free - and ending
+        // where the header's line ends: the hit box reaches two pixels past it, towards the card.
+        if (!isNull _bar && {_share > 0}) then {
+            private _barX = _rectX + (_hold param [9, 0]);
+
+            _bar ctrlSetPosition [_barX, _rectY + _rectH - pixelH * 4, ((_rectX + _rectW - _barX) * _share) max pixelW, pixelH * 2];
             _bar ctrlCommit 0;
+            _bar ctrlShow true;
         };
 
         if (_share < 1) exitWith {};

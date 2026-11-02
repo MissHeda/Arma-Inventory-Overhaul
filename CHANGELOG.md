@@ -2,6 +2,18 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.52 - beta
+
+### Changed
+
+- Weapon cards: the bar along the header shows only after you held it for 1 second, and the card lifts at 2 seconds. The bar stays inside the header's line, under its words, and no longer runs into the card below.
+- Weapon cards: the header's tip is now just **Fold away | Hold to move**.
+- Attachments: **NONE** is always the first tile of a box's list, what is on the part comes second, framed. With nothing on the part, NONE is framed - and it is there even when nothing fits.
+
+### Fixed
+
+- 3D view (Inspect and Attachments): models did not load at all since 0.6.51. The texture's size was refused by the engine.
+
 ## 0.6.51 - beta
 
 ### Added
