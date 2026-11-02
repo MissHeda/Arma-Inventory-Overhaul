@@ -189,6 +189,15 @@ private _fnc_overlaps = {
 
     if (!_show) then {continue};
 
+    // A group shown shows all that is in it: the box's light goes off again, unless a dragged part lit it (fnc_showTargets).
+    private _lit = uiNamespace getVariable [QGVAR(dragGlow), []];
+
+    {
+        if !(_x in _lit) then {
+            _x ctrlShow false;
+        };
+    } forEach (_spot getOrDefault ["glow", []]);
+
     (_spot get "rel") params ["_boxX", "_boxY", "_width", "_height"];
     _at params ["_atX", "_atY"];
 

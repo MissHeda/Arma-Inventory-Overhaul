@@ -5,7 +5,7 @@
  * Moves a weapon card of the equipment column to another place by its header (fnc_drawEquipmentCards). Press on the
  * header and hold it CARD_HOLD_TIME seconds - after CARD_HOLD_DELAY a bar in the accent colour fills under its words, inside
  * the header's line and clear of the card below it, so the player sees the hold is going somewhere; a plain click never
- * shows it - and the card pops out: its header, a little larger, as a plate in the accent colour,
+ * shows it - and the card pops out: its header, a little larger, as a plate in the accent colour with the theme's round corners,
  * follows the mouse up or down, and a line in the accent colour shows between which cards it will go. Let go, it goes
  * there; let go where it already is and nothing changes.
  *
@@ -154,10 +154,20 @@ switch (_step) do {
 
         private _rect = [_anchor, _size] call _fnc_headerRect;
 
-        // The lifted card: its header as a plate in the accent colour, its words on it, laid over the column where the
-        // header lies - "move" lifts it off from there.
-        private _plate = [_display, "AIO_PanelRect", controlNull, _rect] call FUNC(uiCreate);
-        _plate ctrlSetBackgroundColor _color;
+        // The lifted card: its header as a plate in the accent colour, a little larger than it lay, its words on it. A round
+        // panel is several pieces, so a group of the plate's size carries them; it takes no clicks - the release is seen in the
+        // frame (fnc_onFrame).
+        private _liftW = pixelW * 3;
+        private _liftH = pixelH * 3;
+        private _plateW = (_rect select 2) + _liftW * 2;
+        private _plateH = (_rect select 3) + _liftH * 2;
+        private _plate = [
+            _display, "AIO_Group", controlNull, [(_rect select 0) - _liftW, (_rect select 1) - _liftH, _plateW, _plateH]
+        ] call FUNC(uiCreate);
+
+        _plate ctrlEnable false;
+
+        [_display, _plate, [0, 0, _plateW, _plateH], _color, (GVAR(theme) getOrDefault ["radius", 0]) * 0.7] call FUNC(uiPanel);
 
         // Its words where the header's stand, in the colour that reads on the accent - "never", so no palette colour of the
         // hints takes their place.
@@ -221,8 +231,7 @@ switch (_step) do {
         _line ctrlSetPosition [_first select 1, _lineY, _first select 3, pixelH * 2];
         _line ctrlCommit 0;
 
-        // The header pops out: a little larger than it lay, it grows to that in CARD_POP_TIME, and then follows the mouse
-        // up and down on the column without lagging behind it.
+        // The header follows the mouse up and down on the column without lagging behind it.
         if (_rect isNotEqualTo []) then {
             _rect params ["_rectX", "", "_rectW", "_rectH"];
             _ghost params [["_plate", controlNull], ["_label", controlNull]];
@@ -230,13 +239,12 @@ switch (_step) do {
             private _liftH = pixelH * 3;
             private _liftW = pixelW * 3;
             private _ghostY = _mouseY - _grab;
-            private _commit = [0, CARD_POP_TIME] select (diag_tickTime - _began < CARD_POP_TIME);
             private _textX = _rectX + _textOffset;
 
             _plate ctrlSetPosition [_rectX - _liftW, _ghostY - _liftH, _rectW + _liftW * 2, _rectH + _liftH * 2];
-            _plate ctrlCommit _commit;
+            _plate ctrlCommit 0;
             _label ctrlSetPosition [_textX, _ghostY + pixelH * 2, (_rectX + _rectW - _textX) max pixelW, _rectH - pixelH * 4];
-            _label ctrlCommit _commit;
+            _label ctrlCommit 0;
         };
 
         uiNamespace setVariable [QGVAR(cardDrag), [_held, _line, _target, _ghost, _grab, _rect, _began, _textOffset]];

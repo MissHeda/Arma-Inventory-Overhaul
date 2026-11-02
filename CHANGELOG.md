@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.55 - beta
+
+### Changed
+
+- A weapon card lifted by its header is a plate with round corners, as the theme has them; a square theme stays square.
+
+### Fixed
+
+- Attachments: the boxes over the weapon were framed green all the time, NONE too. They are framed in the accent colour again while a part is on them, and light up green only while a part they take is dragged.
+
 ## 0.6.54 - beta
 
 ### Added
