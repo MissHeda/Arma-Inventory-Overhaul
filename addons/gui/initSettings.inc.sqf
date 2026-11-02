@@ -81,6 +81,18 @@
     0
 ] call CBA_fnc_addSetting;
 
+// Each player's own hands: what a double click on a tile does (fnc_onMouseButton) - the quick move, the right-click menu with
+// what other mods add to CBA's item context menu (the vanilla inventory opens that on a double click), or nothing, for a
+// player who clicks twice by habit. Read at each click; the quick move key stays as it is.
+[
+    QGVAR(doubleClick),
+    "LIST",
+    [LLSTRING(Setting_DoubleClick), LLSTRING(Setting_DoubleClick_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [["move", "menu", "none"], [LLSTRING(Setting_DoubleClick_Move), LLSTRING(Setting_DoubleClick_Menu), LLSTRING(Setting_DoubleClick_None)], 0],
+    0
+] call CBA_fnc_addSetting;
+
 // Each player's own: how long the window takes to draw, written to the RPT for a report of stutters
 // (fnc_build, fnc_refresh). Read at every build and redraw.
 [

@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.54 - beta
+
+### Added
+
+- Setting **Double click on an item** (client, General): quick move as before, open the right-click menu - which also has what other mods add to CBA's item menu, as a double click does in the vanilla inventory - or nothing. The quick move key keeps working either way (#60).
+
 ## 0.6.53 - beta
 
 ### Added

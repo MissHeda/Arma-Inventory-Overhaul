@@ -570,9 +570,19 @@ private _fnc_groundOpen = {
     count _tile > 0 && {!isNull (_tile getOrDefault ["container", objNull])}
 };
 
-// A double click does what the quick move key does (fnc_quickAction).
+// Set to do nothing (aio_gui_doubleClick), a double click is two clicks.
+if (GVAR(doubleClick) isEqualTo "none") then {
+    _double = false;
+};
+
+// A double click does what the quick move key does (fnc_quickAction) - or, set so, opens the menu a right click opens, where
+// the vanilla inventory has CBA's item context menu on a double click (fnc_contextMenu, fnc_cbaOptions).
 if (_double) exitWith {
-    [_gridIndex, _tileIndex] call FUNC(quickAction);
+    if (GVAR(doubleClick) isEqualTo "menu") then {
+        [{[_this] call FUNC(contextMenu)}, _display] call FUNC(later);
+    } else {
+        [_gridIndex, _tileIndex] call FUNC(quickAction);
+    };
 
     true
 };

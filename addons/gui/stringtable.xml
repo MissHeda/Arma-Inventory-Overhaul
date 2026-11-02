@@ -874,6 +874,21 @@
         <Key ID="STR_aio_gui_Setting_DebugTiming_Desc">
             <English>Writes build, redraw and frame timings and search and drag costs to the RPT, for FPS reports.\nOff in play.</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClick">
+            <English>Double click on an item</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClick_Desc">
+            <English>What a double click on an item does.\nThe quick move key keeps working either way.\n\nThe menu also has what other mods\nadd to CBA's item menu.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClick_Menu">
+            <English>Open the right-click menu</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClick_Move">
+            <English>Quick move</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClick_None">
+            <English>Nothing</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_HandDrop">
             <English>Time to drop an item</English>
         </Key>

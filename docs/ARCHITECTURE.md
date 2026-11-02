@@ -2258,7 +2258,7 @@ first, then the equipment column. Every panel goes into `aio_gui_panels`: an ite
   container, item, cbaSlot]` reads them exactly as `cba_ui_fnc_openItemContextMenu` does (the first option of an id wins; shown
   when the slot matches and the show condition agrees, greyed when the enable condition says no); `fnc_cbaRun [condition,
   statement, consume, args]` runs one (`true` reopens the menu where it was, anything else asks `fnc_requestRebuild`). Compat
-  addons hide theirs, one guarded line each. A double click never opens the CBA menu.
+  addons hide theirs, one guarded line each. A double click opens the menu only with `aio_gui_doubleClick` set to `menu`.
 - **Compat helpers.** `fnc_compatCollect [names, args]` calls every function of a list that exists and joins what they return; the
   window never names another mod's function, it asks `[QEFUNC(compat_tfar,x), QEFUNC(compat_acre,x)]`. `fnc_stepAside [code,
   args]` is for a dialog that does not open over another (TFAR, ACRE2): the window closes, the code runs `STEP_ASIDE_DELAY` 0.2 s
@@ -3290,6 +3290,7 @@ out of them (kept once the scenario is saved). The wizard's Import still reads a
 | `aio_gui_pageRows` | SLIDER 0 to 40 | client | 10 | rows per page of a tall compartment of what is looted (section 4, "Tall compartments"); 0 or 40 no pages, at least 4 |
 | `aio_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
 | `aio_gui_tileNames` | CHECKBOX | client | off | the item's short name in the top corner of every tile (`fnc_createTile`, a name that does not fit set a fifth smaller before it is cut; the setup wizard's preview always has it); the name at the mouse stays; ACE Arsenal's panel follows |
+| `aio_gui_doubleClick` | LIST | client | `move` | what a double click on a tile does (`fnc_onMouseButton`): `move` the quick move (`fnc_quickAction`), `menu` the right-click menu with other mods' CBA options (`fnc_contextMenu`), `none` nothing, two clicks. The quick move key stays. |
 | `aio_gui_lootSide` | LIST | client | `left` | where the loot column opens: `left` of the storage column, which never moves (default), or `right`, at the right edge with the storage column moving in (`fnc_layoutGlass`); read at every build |
 | `aio_gui_showNearby` | CHECKBOX | client | on | nearby piles and crates as boxes in the loot column |
 | `aio_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |
