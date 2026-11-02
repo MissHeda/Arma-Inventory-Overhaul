@@ -69,6 +69,13 @@ disableSerialization;
 
 params ["_display", "_mouse", ["_force", false]];
 
+// On an open menu the mouse is on nothing of what lies under it: only the menu's own rows light up.
+(uiNamespace getVariable [QGVAR(menuRect), []]) params [["_menuX", 0], ["_menuY", 0], ["_menuW", 0], ["_menuH", 0]];
+
+if (count _mouse >= 2 && {(_mouse select 0) >= _menuX} && {(_mouse select 0) < _menuX + _menuW} && {(_mouse select 1) >= _menuY} && {(_mouse select 1) < _menuY + _menuH}) then {
+    _mouse = [];
+};
+
 private _found = [];
 
 // What this call did, for the tally of the timing line (fnc_logFrame): "new" unless it ends sooner.

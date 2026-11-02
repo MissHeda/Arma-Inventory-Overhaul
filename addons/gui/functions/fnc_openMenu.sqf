@@ -20,6 +20,7 @@
  * A choice may bring options as a fourth element, a HashMap - the options of other mods' context menus
  * (fnc_cbaOptions) use them:
  *   "icon"      - a picture before the text; every row's text moves over for it when any row has one
+ *   "iconColor" - the picture's colour, [] for white
  *   "color"     - the text's colour, [] for the usual
  *   "tooltip"   - shown while the mouse rests on the row
  *   "enabled"   - false: greyed out, and a click on it does nothing - the menu stays open
@@ -252,7 +253,7 @@ private _rowRadius = (_radius * 0.6) min (_rowH / 2);
     if (_icon isNotEqualTo "") then {
         [
             _display, _layer, [_cardX + _padX, _rowTop + (_rowH - _iconH) / 2, SQUARE(_iconH), _iconH], _icon,
-            [[1, 1, 1, 0.4], [1, 1, 1, 1]] select _enabled
+            [[1, 1, 1, 0.4], ([_options getOrDefault ["iconColor", []], [1, 1, 1, 1]] select ((_options getOrDefault ["iconColor", []]) isEqualTo []))] select _enabled
         ] call FUNC(uiPicture);
     };
 

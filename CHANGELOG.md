@@ -2,6 +2,22 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.56 - beta
+
+### Added
+
+- A double click on a weapon you carry opens its Attachments.
+- The right-click menu has pictures on its main rows: Inspect, Attachments (in the accent colour), Drop, Swap and Settings.
+
+### Changed
+
+- Weapon cards: a magazine's rounds are on the same plate as its picture, so it is plain which count belongs to which magazine.
+- The right-click menu of a weapon you carry no longer lists Take off for each part: Attachments has them all. A weapon on a body keeps those rows.
+
+### Fixed
+
+- With a menu open, what lies under it no longer lights up or fills the hint while the mouse is on the menu.
+
 ## 0.6.55 - beta
 
 ### Changed

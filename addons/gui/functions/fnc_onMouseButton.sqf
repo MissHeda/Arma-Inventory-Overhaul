@@ -525,6 +525,18 @@ private _listening = "click" in GVAR(hooks);
 private _plain = _slotSource isEqualTo [] && {!_ctrl} && {!_ctrlAtPress} && {!_alt} && {!_altAtPress} && {_listening || {!_shift}};
 private _clickKey = [_gridIndex, _tileIndex];
 
+// One of the player's own weapons counts as well, in the inventory: its double click opens its Attachments (below).
+private _ownWeapon = !_listening && {!_ctrl} && {!_ctrlAtPress} && {!_alt} && {!_altAtPress} && {!_shift} && {
+    _slotSource params [["_slotOwner", objNull], ["_slotName", ""]];
+
+    _slotOwner isEqualTo GVAR(unit) && {_slotName in ["primary", "handgun", "launcher", "primary2"]}
+};
+
+if (_ownWeapon) then {
+    _clickKey = +_slotSource;
+    _plain = true;
+};
+
 if (_tileIndex < 0 && {_listening}) then {
     _clickKey append [_target getOrDefault ["type", ""], _target getOrDefault ["slot", -1], _target getOrDefault ["cell", []]];
 };
@@ -576,12 +588,26 @@ if (GVAR(doubleClick) isEqualTo "none") then {
 };
 
 // A double click does what the quick move key does (fnc_quickAction) - or, set so, opens the menu a right click opens, where
-// the vanilla inventory has CBA's item context menu on a double click (fnc_contextMenu, fnc_cbaOptions).
+// the vanilla inventory has CBA's item context menu on a double click (fnc_contextMenu, fnc_cbaOptions). On one of the player's
+// own weapons it opens Attachments instead of a quick move (fnc_inspect, as the menu's row does).
 if (_double) exitWith {
-    if (GVAR(doubleClick) isEqualTo "menu") then {
-        [{[_this] call FUNC(contextMenu)}, _display] call FUNC(later);
-    } else {
-        [_gridIndex, _tileIndex] call FUNC(quickAction);
+    switch (true) do {
+        case (GVAR(doubleClick) isEqualTo "menu"): {
+            [{[_this] call FUNC(contextMenu)}, _display] call FUNC(later);
+        };
+        case (_ownWeapon): {
+            _slotSource params ["_slotOwner", "_slotName"];
+
+            private _worn = [_slotOwner, _slotName] call EFUNC(storage,getSlot);
+            private _class = _worn getOrDefault ["class", ""];
+
+            if (_class isNotEqualTo "") then {
+                [{_this call FUNC(inspect)}, [_class, 1, -1, _worn getOrDefault ["attachments", []], objNull, _slotName, true]] call FUNC(later);
+            };
+        };
+        default {
+            [_gridIndex, _tileIndex] call FUNC(quickAction);
+        };
     };
 
     true

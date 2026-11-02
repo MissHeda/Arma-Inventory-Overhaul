@@ -2258,7 +2258,7 @@ first, then the equipment column. Every panel goes into `aio_gui_panels`: an ite
   container, item, cbaSlot]` reads them exactly as `cba_ui_fnc_openItemContextMenu` does (the first option of an id wins; shown
   when the slot matches and the show condition agrees, greyed when the enable condition says no); `fnc_cbaRun [condition,
   statement, consume, args]` runs one (`true` reopens the menu where it was, anything else asks `fnc_requestRebuild`). Compat
-  addons hide theirs, one guarded line each. A double click opens the menu only with `aio_gui_doubleClick` set to `menu`.
+  addons hide theirs, one guarded line each. A double click opens the menu only with `aio_gui_doubleClick` set to `menu`. A double click on one of the player's own weapons opens its Attachments; that weapon's menu has no Take off rows, since Attachments has every part (a weapon on a body keeps them).
 - **Compat helpers.** `fnc_compatCollect [names, args]` calls every function of a list that exists and joins what they return; the
   window never names another mod's function, it asks `[QEFUNC(compat_tfar,x), QEFUNC(compat_acre,x)]`. `fnc_stepAside [code,
   args]` is for a dialog that does not open over another (TFAR, ACRE2): the window closes, the code runs `STEP_ASIDE_DELAY` 0.2 s

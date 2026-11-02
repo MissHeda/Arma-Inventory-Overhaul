@@ -17,8 +17,9 @@
  * magazine has the row too), put it on the hotbar or take it off (aio_hotbar_fnc_menuChoices - only when that
  * addon is loaded), drop it, open it (a uniform, vest or backpack lying there in the loot column), select
  * everything in its container (fnc_selectSection). A slot: inspect it, drop it (to the ground - it does
- * not go into the player's own gear first, as Ctrl+click's take off does), and for a weapon take off each
- * of its attachments and its magazines on their own; a slot of the hotbar: clear it
+ * not go into the player's own gear first, as Ctrl+click's take off does); one of the player's own weapons: its
+ * Attachments, which has every part of it (also its double click, fnc_onMouseButton); a weapon of someone else's: take off
+ * each of its attachments and its magazines on their own; a slot of the hotbar: clear it
  * (aio_hotbar_fnc_stripMenu). Free cells: select all in the container.
  *
  * On a tile of a selection of several nothing but deselect (fnc_clearSelection): what can be done with
@@ -118,6 +119,17 @@ private _fnc_name = {
     [_class] call FUNC(itemName)
 };
 
+// The rows' pictures, the window's main ways at a glance. Attachments in the accent colour: the way to a weapon's parts.
+private _fnc_icon = {
+    params ["_icon", ["_color", []]];
+
+    createHashMapFromArray [["icon", _icon], ["iconColor", _color]]
+};
+
+private _iconInspect = [UI_TEX(icon_eye_ca)] call _fnc_icon;
+private _iconAttachments = [GEAR_ICON(ui_gear_top_gs), GVAR(theme) getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]] call _fnc_icon;
+private _iconDrop = [UI_TEX(icon_ground_ca)] call _fnc_icon;
+
 // Everything in a section selected - in the inventory only, for the grids of the columns. Set apart by a
 // line from what other mods' options put above it.
 private _fnc_addSelectAll = {
@@ -169,7 +181,8 @@ switch (GVAR(hover) param [0, ""]) do {
         _choices pushBack [
             LLSTRING(Menu_Inspect),
             [_class, _tile getOrDefault ["count", 1], _tile getOrDefault ["ammo", -1], _tile getOrDefault ["attachments", []], _from],
-            {_this call FUNC(inspect)}
+            {_this call FUNC(inspect)},
+            _iconInspect
         ];
 
         _settingsClass = _class;
@@ -222,7 +235,8 @@ switch (GVAR(hover) param [0, ""]) do {
                         ],
                         true
                     ],
-                    {_this call FUNC(inspect)}
+                    {_this call FUNC(inspect)},
+                    _iconAttachments
                 ];
             };
 
@@ -266,7 +280,7 @@ switch (GVAR(hover) param [0, ""]) do {
 
             // Moving it over is a double click (fnc_quickMove) or a drag: no row for it here.
             if (_kit isNotEqualTo "" || {!([_from] call EFUNC(storage,isGroundHolder))}) then {
-                _choices pushBack [LLSTRING(Drop), [_gridIndex, _tileIndex], {_this call FUNC(dropToGround)}];
+                _choices pushBack [LLSTRING(Drop), [_gridIndex, _tileIndex], {_this call FUNC(dropToGround)}, _iconDrop];
             };
         };
 
@@ -344,14 +358,16 @@ switch (GVAR(hover) param [0, ""]) do {
         _choices pushBack [
             LLSTRING(Menu_Inspect),
             [_record param [1, ""], 1, _worn getOrDefault ["ammo", -1], _worn getOrDefault ["attachments", []]],
-            {_this call FUNC(inspect)}
+            {_this call FUNC(inspect)},
+            _iconInspect
         ];
 
         if (_ownWeapon) then {
             _choices pushBack [
                 LLSTRING(Menu_Modify),
                 [_record param [1, ""], 1, -1, _worn getOrDefault ["attachments", []], objNull, _slot, true],
-                {_this call FUNC(inspect)}
+                {_this call FUNC(inspect)},
+                _iconAttachments
             ];
         };
 
@@ -381,7 +397,7 @@ switch (GVAR(hover) param [0, ""]) do {
         _choices pushBack [LLSTRING(Drop), [_owner, _slot], {
             params ["_owner", "_slot"];
             [_owner, _slot, "ground", []] call FUNC(doUnequip);
-        }];
+        }, _iconDrop];
 
         // The primary and the second primary on the back (a two-primary mod, aio_storage_fnc_secondPrimary) trade
         // places - what that mod's own key does, without the hands having to be free of anything else.
@@ -392,7 +408,8 @@ switch (GVAR(hover) param [0, ""]) do {
                 _choices pushBack [
                     [LLSTRING(Menu_SwapSecondPrimary), LLSTRING(Menu_SwapPrimary)] select (_slot isEqualTo "primary2"),
                     [[_owner, _slot], _owner, _other],
-                    {_this call FUNC(doSwap)}
+                    {_this call FUNC(doSwap)},
+                    [UI_TEX(icon_swap_ca)] call _fnc_icon
                 ];
             };
         };
@@ -403,8 +420,8 @@ switch (GVAR(hover) param [0, ""]) do {
             _choices append ([_record param [1, ""], _owner] call EFUNC(magazines,menuChoices));
         };
 
-        // A weapon: each of its parts on its own.
-        if (_slot in ["primary", "handgun", "launcher", "primary2"]) then {
+        // A weapon of someone else's: each of its parts on its own. The player's own have them all in Attachments.
+        if (_slot in ["primary", "handgun", "launcher", "primary2"] && {!_ownWeapon}) then {
             private _weapon = ([_owner] call EFUNC(storage,getEquipment)) getOrDefault [_slot, []];
 
             {
@@ -474,7 +491,7 @@ if (
     if (_step >= 0) then {
         _choices pushBack [
             format [LLSTRING(Menu_Settings), _settingsName], [_step, _settingsClass], {_this call EFUNC(setup,openFromGame)},
-            createHashMapFromArray [["separator", _choices isNotEqualTo []]]
+            createHashMapFromArray [["separator", _choices isNotEqualTo []], ["icon", UI_TEX(icon_setup_ca)]]
         ];
     };
 };

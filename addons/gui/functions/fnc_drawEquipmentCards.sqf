@@ -343,9 +343,9 @@ private _fnc_weaponCard = {
         private _nameSize = _textUnit * 0.5;
         private _nameTop = _cardY + _cardH - _padY * 0.5 - _lineH;
 
-        // What is on it, at the right end of the name's line: a small picture of each attachment, each loaded magazine with its
-        // rounds where it holds more than one - muzzle, optic, rail, bipod, magazine, second magazine from the left, drawn from the
-        // right; nothing for a part it has not.
+        // What is on it, at the right end of the name's line: a small plate with the picture of each attachment, a loaded magazine's
+        // with its rounds on the same plate where it holds more than one, so each count plainly belongs to its magazine - muzzle,
+        // optic, rail, bipod, magazine, second magazine from the left, drawn from the right; nothing for a part it has not.
         // [class, muzzle, rail, optic, [magazine, rounds] or [], [second magazine, rounds] or [], bipod]
         private _partH = _lineH * 1.15;
         private _partW = SQUARE(_partH);
@@ -362,28 +362,27 @@ private _fnc_weaponCard = {
             private _partInfo = [_partClass] call EFUNC(items,getInfo);
             private _capacity = _partInfo getOrDefault ["capacity", 0];
 
-            // Rounds right of the magazine's picture, as "27/30" - the loss colour when it is empty.
-            if (_value isEqualType [] && {_capacity > 1}) then {
-                private _rounds = _value param [1, 0, [0]];
-                private _text = format ["%1/%2", _rounds, _capacity];
-                private _textW = (_text getTextWidth [_font, _ammoSize]) * TEXT_SLACK;
+            // Rounds beside the magazine's picture, as "27/30" - the loss colour when it is empty.
+            private _hasRounds = _value isEqualType [] && {_capacity > 1};
+            private _rounds = if (_hasRounds) then {_value param [1, 0, [0]]} else {0};
+            private _text = if (_hasRounds) then {format ["%1/%2", _rounds, _capacity]} else {""};
+            private _textW = if (_hasRounds) then {(_text getTextWidth [_font, _ammoSize]) * TEXT_SLACK + SQUARE(_textUnit * 0.1)} else {0};
 
-                _partsRight = _partsRight - _textW;
-
-                [
-                    _display, _parent, [_partsRight, _partsTop, _textW, _partH], _text, _ammoSize,
-                    [_colorText2, _theme getOrDefault ["loss", [0.9, 0.3, 0.25, 1]]] select (_rounds <= 0), _font, 1, "ammo"
-                ] call FUNC(uiLabel);
-            };
-
-            _partsRight = _partsRight - _partW;
+            _partsRight = _partsRight - _partW - _textW;
 
             private _partRect = [_partsRight, _partsTop, _partW, _partH];
 
-            [_display, _parent, _partRect, _theme getOrDefault ["slotEmpty", [1, 1, 1, 0.05]], _partH * 0.25] call FUNC(uiPanel);
+            [_display, _parent, [_partsRight, _partsTop, _partW + _textW, _partH], _theme getOrDefault ["slotEmpty", [1, 1, 1, 0.05]], _partH * 0.25] call FUNC(uiPanel);
             [
                 _display, _parent, _partRect, _partInfo getOrDefault ["picture", ""], _partInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _partRect
             ] call FUNC(uiItemPicture);
+
+            if (_hasRounds) then {
+                [
+                    _display, _parent, [_partsRight + _partW, _partsTop, _textW, _partH], _text, _ammoSize,
+                    [_colorText2, _theme getOrDefault ["loss", [0.9, 0.3, 0.25, 1]]] select (_rounds <= 0), _font, 0, "ammo"
+                ] call FUNC(uiLabel);
+            };
 
             _partsRight = _partsRight - SQUARE(_textUnit * 0.12);
         } forEach [5, 4, 6, 2, 3, 1];
