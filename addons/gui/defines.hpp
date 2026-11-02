@@ -332,6 +332,13 @@
 // faint the tile it was lifted from stays while it is dragged.
 #define DRAG_THRESHOLD 0.008
 
+// A weapon card's header held this long, in seconds, lifts the card to move it (fnc_cardGrip); let go sooner, the press
+// is a click that folds or opens the card. The mouse may wander CARD_HOLD_SLACK meanwhile - a hand holding still is not
+// quite still - and the lifted header grows to its lifted size in CARD_POP_TIME.
+#define CARD_HOLD_TIME 3
+#define CARD_HOLD_SLACK (DRAG_THRESHOLD * 2)
+#define CARD_POP_TIME 0.08
+
 // The slots whose gear may be exchanged with a body or a person (fnc_canSwap, fnc_doSwap): what one wears,
 // never a weapon - the engine does not hand a body one.
 #define SWAP_SLOTS ["headgear", "goggles", "nvg", "uniform", "vest", "backpack", "map", "gps", "radio", "compass", "watch"]

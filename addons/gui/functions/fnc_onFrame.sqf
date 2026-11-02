@@ -100,8 +100,13 @@ if (_trash isNotEqualTo []) then {
     uiNamespace setVariable [QGVAR(windowTrash), []];
 };
 
-// A weapon card held by its grip (fnc_cardGrip): its drop line follows the mouse, and the release - over whatever
-// control it happens - puts it there.
+// A weapon card's header held (fnc_cardGrip): its bar fills until the card lifts off, or the hold is let go or given up.
+if ((uiNamespace getVariable [QGVAR(cardHold), []]) isNotEqualTo []) then {
+    ["wait"] call FUNC(cardGrip);
+};
+
+// A weapon card lifted off by its header (fnc_cardGrip): it and its drop line follow the mouse, and the release - over
+// whatever control it happens - puts it there.
 if ((uiNamespace getVariable [QGVAR(cardDrag), []]) isNotEqualTo []) then {
     [["move", "end"] select (inputMouse 0 == 0)] call FUNC(cardGrip);
 };

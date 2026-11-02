@@ -166,6 +166,15 @@ A client can see them and cannot change them.
       colours" off: no button, the standard look.
 - [ ] Pages: a crate with more than 10 rows of loot shows a bar; arrows turn the page; a dragged item held over an arrow turns it; the search finds an item on another page; holding F over a crate stays smooth.
 - [ ] Hotbar 4 to 0: bind by drag, use, the HUD strip.
+- [ ] Weapon card order by holding its header (0.6.50): no grip at the right end of a weapon card's header any more, the caption
+      runs to the end. A short click on the header folds or opens the card as before. Hold the header still: a bar in the accent
+      colour fills along its foot for 3 s, then the header pops out as an accent plate a little larger than the line and follows
+      the mouse up and down, with the drop line between the cards; let go - the card moves there, the order survives closing the
+      window and a restart, and the card does NOT fold or open on that release. Let go before 3 s: the card folds, no move. Move
+      the mouse a little while holding: the bar goes away and nothing lifts; let go on the header - it folds. Hold on a folded
+      card's header: it moves too. The section captions (Equipment, Gear, Hotbar) still fold with a click and never lift. The
+      tip on a header reads "Fold away - hold 3 s to move the card". A weapon picked up or dropped by another player while
+      holding (the window builds again): the bar goes, nothing lifts, no script error.
 - [ ] No vanilla inventory: the Gear key, ACE's "Inventory" on an unconscious soldier, ACE's "Open backpack", a crate and a
       vehicle all open ours; after a respawn, a team switch and in Zeus remote control as well; with Better Inventory
       loaded `findDisplay 602` stays null; the setting "Replace the vanilla inventory" is gone from the CBA menu.

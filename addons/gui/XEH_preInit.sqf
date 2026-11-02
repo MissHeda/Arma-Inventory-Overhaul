@@ -387,7 +387,7 @@ if !(GVAR(sortMode) isEqualType "" && {GVAR(sortMode) in SORT_MODES}) then {
 uiNamespace setVariable [QGVAR(sortButtons), []];
 
 // The order of the weapon cards in the equipment column, top down (fnc_drawEquipmentCards): each player's own,
-// kept in the profile, changed by dragging a card by its grip (fnc_cardGrip). An order that does not name
+// kept in the profile, changed by holding a card's header and moving it (fnc_cardGrip). An order that does not name
 // each of the four once - an older or a broken one - is the default again.
 GVAR(weaponOrder) = profileNamespace getVariable [QGVAR(weaponOrder), []];
 
@@ -398,6 +398,10 @@ if !(GVAR(weaponOrder) isEqualType [] && {
 }) then {
     GVAR(weaponOrder) = ["primary", "primary2", "handgun", "launcher"];
 };
+
+// A hold on a weapon card's header that lifted the card took its release's click (fnc_cardGrip): the slot of that
+// header, whose next click is not a fold - "" for none.
+GVAR(cardHoldTaken) = "";
 
 // Which weapon cards the player folded to their header line, slot -> folded (fnc_toggleWeaponFold), kept in the
 // profile as [slot, folded] pairs - and which sections of the equipment column, under "equipment", "gear" and

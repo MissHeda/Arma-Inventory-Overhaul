@@ -8,13 +8,13 @@
  *                                                 how much it carries and what that does to it, over a bar
  *                                                 that fills towards the Critical limit (see below)
  *   EQUIPMENT
- *   v [1] Primary .............................. ::   each weapon a header line - fold chevron, key,
- *   | picture ................................... |   caption, grip - over a card as wide as the column:
+ *   v [1] Primary ...............................   each weapon a header line - fold chevron, key,
+ *   | picture ................................... |   caption - over a card as wide as the column:
  *   | MX 6.5 mm ............ [o][=] [▮ 27/30]     |   its picture, its name, and small pictures of what is
  *   v [4] Second primary ....................... ::   on it and its loaded magazines with their rounds -
  *   | ...                                             nothing for a part it has not. The second primary on
  *   > [2] Handgun - P99 ........................ ::   the back only with WebKnight's or KJW's Two Primary
- *   v [3] Launcher ............................. ::   Weapons (aio_storage_fnc_secondPrimary); folded: the
+ *   v [3] Launcher ..............................   Weapons (aio_storage_fnc_secondPrimary); folded: the
  *   | picture ................................... |   header alone, naming the weapon
  *   GEAR
  *   | headgear |  | uniform |  | vest |  | backpack |
@@ -24,10 +24,10 @@
  *                                                              and on, in the inventory window only
  *
  * The weapon cards come in the order the player gave them, primary, second primary, handgun, launcher at first: a
- * card is dragged to another place by the grip at the right end of its header - a chevron up, a dash, a chevron down
- * (GVAR(weaponOrder), fnc_cardGrip).
- * A click on the header's chevron or caption folds the card to that line, and opens it again (GVAR(weaponFolds),
- * fnc_toggleWeaponFold) - a folded one still takes a weapon dragged onto its line. The second primary's card starts
+ * card is moved to another place by its header: held CARD_HOLD_TIME seconds, the card lifts off and follows the mouse
+ * up or down (GVAR(weaponOrder), fnc_cardGrip).
+ * A click on the header folds the card to that line, and opens it again (GVAR(weaponFolds), fnc_toggleWeaponFold) - a
+ * folded one still takes a weapon dragged onto its line. The second primary's card starts
  * folded while the back is empty. The column's sections - Equipment, Gear, Hotbar - fold to their caption the same
  * way, a click on it (GVAR(weaponFolds) under "equipment", "gear", "hotbar"). The headers keep their presses to
  * themselves (GVAR(cardButtons), fnc_onMouseButton).
@@ -186,16 +186,44 @@ private _fnc_hitBox = {
     [_display, "AIO_Hitbox", _group, [0, 0, _area select 2, _area select 3]] call FUNC(uiCreate)
 };
 
-// A hit box that folds or opens what it heads (fnc_toggleWeaponFold): the key it is kept under, folded now.
+// A hit box that folds or opens what it heads (fnc_toggleWeaponFold): the key it is kept under, folded now - and for a
+// weapon's header what its hold needs to lift the card (fnc_cardGrip "press"): the header's words, as the lifted card
+// shows them. A click that ended a hold which lifted the card is not a click: the card was moved, not folded.
 private _fnc_foldHit = {
-    params ["_area", "_key", "_isFolded"];
+    params ["_area", "_key", "_isFolded", ["_hold", false], ["_holdText", ""]];
+
+    private _tip = [LLSTRING(WeaponCard_Fold), LLSTRING(WeaponCard_Unfold)] select _isFolded;
+
+    if (_hold) then {
+        _tip = format ["%1 - %2", _tip, format [LLSTRING(WeaponCard_HoldToMove), CARD_HOLD_TIME]];
+    };
 
     private _hit = [_area] call _fnc_hitBox;
-    [_hit, [LLSTRING(WeaponCard_Fold), LLSTRING(WeaponCard_Unfold)] select _isFolded] call FUNC(setTooltip);
+    [_hit, _tip] call FUNC(setTooltip);
     _hit setVariable [QGVAR(id), [_key, _isFolded]];
     _hit ctrlAddEventHandler ["ButtonClick", {
-        [{_this call FUNC(toggleWeaponFold)}, (_this select 0) getVariable [QGVAR(id), ["", false]]] call FUNC(later);
+        private _id = (_this select 0) getVariable [QGVAR(id), ["", false]];
+
+        if (GVAR(cardHoldTaken) isNotEqualTo "" && {GVAR(cardHoldTaken) isEqualTo (_id select 0)}) exitWith {
+            GVAR(cardHoldTaken) = "";
+        };
+
+        [{_this call FUNC(toggleWeaponFold)}, _id] call FUNC(later);
     }];
+
+    if (_hold) then {
+        _hit setVariable [QGVAR(hold), [
+            _key, _colorAccent, createHashMapFromArray [["rel", [_area select 0, _area select 1]], ["parent", _parent]],
+            [_area select 2, _area select 3], _holdText, _font, _lineSize, _colorText, _colorOnAccent
+        ]];
+        _hit ctrlAddEventHandler ["MouseButtonDown", {
+            params ["_hit", "_button"];
+
+            if (_button != 0) exitWith {};
+
+            ["press", _hit] call FUNC(cardGrip);
+        }];
+    };
 
     [_area] call _fnc_keepPresses;
 };
@@ -214,9 +242,9 @@ private _fnc_chevron = {
 
 // ---------------------------------------------------------------------------
 // A weapon's header line: the fold chevron, the key (on a round theme - a square one names it on the card's strip),
-// the caption - and the weapon's name after it while folded - and at the right end the grip that moves the card.
-// The chevron and the caption are one hit box that folds or opens the card, the grip another; they lie side by
-// side, neither under the other. A click runs a frame later (fnc_later), as the window may be built again meanwhile.
+// the caption - and the weapon's name after it while folded. The whole line is one hit box: a click folds or opens the
+// card, held CARD_HOLD_TIME seconds it lifts the card to move it (fnc_cardGrip) - one place for both, no grip of its
+// own. A click runs a frame later (fnc_later), as the window may be built again meanwhile.
 // ---------------------------------------------------------------------------
 private _fnc_weaponHeader = {
     params ["_headY", "_slot", "_caption", "_number", "_inHand", "_isFolded", "_class"];
@@ -241,8 +269,6 @@ private _fnc_weaponHeader = {
         _textX = _textX + SQUARE(_keyH) + _space;
     };
 
-    private _gripW = SQUARE(_lineH);
-    private _gripX = _left + _width - _gripW;
     private _text = [_caption, _theme] call FUNC(caption);
     private _named = _isFolded && {_class isNotEqualTo ""};
 
@@ -250,50 +276,15 @@ private _fnc_weaponHeader = {
         _text = format ["%1 - %2", _text, ([_class] call EFUNC(items,getInfo)) getOrDefault ["name", _class]];
     };
 
-    private _textW = (_gripX - _textX - _space) max pixelW;
+    private _textW = (_left + _width - _textX - _space) max pixelW;
+    private _fitted = [_text, _textW, _font, _lineSize] call FUNC(fitText);
 
     [
-        _display, _parent, [_textX, _headY, _textW, _lineH], [_text, _textW, _font, _lineSize] call FUNC(fitText), _lineSize,
+        _display, _parent, [_textX, _headY, _textW, _lineH], _fitted, _lineSize,
         [_colorText2, _colorText] select _named, _font, 0, "caption"
     ] call FUNC(uiLabel);
 
-    // The grip: a chevron up over a chevron down, close together, a dash between them - it moves the card up or down.
-    // The chevron's picture has room round its stroke: the two overlap by that.
-    private _chevronH = _lineH * 0.5;
-    private _chevronW = SQUARE(_chevronH);
-    private _chevronX = _gripX + (_gripW - _chevronW) / 2;
-    private _middle = _headY + _lineH / 2;
-
-    {
-        _x params ["_chevronY", "_angle"];
-
-        private _chevron = [_display, _parent, [_chevronX, _chevronY, _chevronW, _chevronH], UI_TEX(icon_chevron_down_ca), _colorText2] call FUNC(uiIcon);
-
-        if (_angle != 0) then {
-            _chevron ctrlSetAngle [_angle, 0.5, 0.5, true];
-        };
-    } forEach [[_middle - _chevronH * 0.82, 180], [_middle - _chevronH * 0.18, 0]];
-
-    private _dashW = _chevronW * 0.85;
-    [_display, _parent, [_gripX + (_gripW - _dashW) / 2, _headY + _lineH / 2 - pixelH, _dashW, pixelH * 2], _colorText2] call FUNC(uiPanel);
-
-    [[_left, _headY - pixelH * 2, _gripX - _left, _lineH + pixelH * 4], _slot, _isFolded] call _fnc_foldHit;
-
-    private _gripArea = [_gripX, _headY - pixelH * 2, _gripW, _lineH + pixelH * 4];
-    private _grip = [_gripArea] call _fnc_hitBox;
-    [_grip, LLSTRING(WeaponCard_Grip)] call FUNC(setTooltip);
-    _grip setVariable [QGVAR(id), [_slot, _colorAccent]];
-    _grip ctrlAddEventHandler ["MouseButtonDown", {
-        params ["_grip", "_button"];
-
-        if (_button != 0) exitWith {};
-
-        (_grip getVariable [QGVAR(id), ["", []]]) params ["_slot", "_color"];
-
-        ["begin", _slot, _color] call FUNC(cardGrip);
-    }];
-
-    [_gripArea] call _fnc_keepPresses;
+    [[_left, _headY - pixelH * 2, _width, _lineH + pixelH * 4], _slot, _isFolded, true, _fitted] call _fnc_foldHit;
 };
 
 // ---------------------------------------------------------------------------
@@ -440,7 +431,7 @@ private _fnc_weaponRow = {
 
     [_rowTop, _slot, _caption, _number, _inHand, _rowFolded, _class] call _fnc_weaponHeader;
 
-    // Where the grip finds the card (fnc_cardGrip): its header and its card.
+    // Where a lifted card finds the cards (fnc_cardGrip): its header and its card.
     private _rowH = [_headH + _cardH, _lineH] select _rowFolded;
 
     (uiNamespace getVariable [QGVAR(cardSpans), []]) pushBack [
