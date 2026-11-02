@@ -34,6 +34,23 @@
 
 params ["_unit", "_slot", "_to", ["_cell", []]];
 
+// A part of a weapon lying in a container, dragged out of its attachments view (fnc_hotspotPress): off by op "fit" (fnc_doFit),
+// to where it was let go.
+if ((_slot select [0, 5]) isEqualTo "tile_") exitWith {
+    private _target = GVAR(inspect) param [5, ""];
+
+    if !(_target isEqualType createHashMap) exitWith {false};
+
+    if (_to isEqualType objNull && {isNull _to}) then {
+        _to = "ground";
+    };
+
+    (
+        [(_slot splitString "_") select -1, _target getOrDefault ["container", objNull], [_target] call FUNC(weaponTile), objNull, createHashMap, _to, _cell]
+        call FUNC(doFit)
+    ) isEqualTo true
+};
+
 // ACRE2's dummy radio stays where it is.
 if (!isNil QEFUNC(compat_acre,isFixedSlot) && {[_unit, _slot] call EFUNC(compat_acre,isFixedSlot)}) exitWith {false};
 

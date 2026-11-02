@@ -15,6 +15,10 @@
  * 3: A weapon's attachments, as fnc_getContents gives them <ARRAY> (default: [])
  * 4: The container it lies in, for how many may share a tile there (a crate stacks higher than a vest,
  *    aio_storage_fnc_stackFor) <OBJECT> (default: objNull)
+ * 5: What to change the parts of (fnc_drawHotspots): one of the player's weapon slots - "primary", "primary2", "handgun",
+ *    "launcher" -, or a weapon lying in a container, "container" and "cell" [col, row, compartment] (fnc_weaponTile); "" to look
+ *    only <STRING, HASHMAP> (default: "")
+ * 6: Attachments: in 3D, the weapon and its parts alone <BOOL> (default: false)
  *
  * Return Value:
  * None
@@ -25,13 +29,16 @@
  * Public: No
  */
 
-params [["_class", "", [""]], ["_count", 1, [0]], ["_ammo", -1, [0]], ["_attachments", [], [[]]], ["_holder", objNull, [objNull]]];
+params [
+    ["_class", "", [""]], ["_count", 1, [0]], ["_ammo", -1, [0]], ["_attachments", [], [[]]], ["_holder", objNull, [objNull]],
+    ["_modify", "", ["", createHashMap]], ["_large", false, [false]]
+];
 
 if (_class isEqualTo "") exitWith {};
 
 call FUNC(closeMenu);
 
-GVAR(inspect) = [_class, _count, _ammo, _attachments, _holder];
+GVAR(inspect) = [_class, _count, _ammo, _attachments, _holder, _modify, _large];
 
 call FUNC(drawInspect);
 

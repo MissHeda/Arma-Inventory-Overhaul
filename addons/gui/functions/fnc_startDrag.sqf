@@ -69,7 +69,12 @@ private _pressed = if (_slotSource isEqualTo []) then {(_sourceGrid getOrDefault
 private _entry = if (_slotSource isEqualTo []) then {
     if (_fromSource) then {_pressed getOrDefault ["dragEntry", _pressed]} else {_pressed}
 } else {
-    _slotSource call EFUNC(storage,getSlot)
+    // A part of a weapon lying in a container, out of its attachments view (fnc_hotspotPress, fnc_tilePart).
+    if (((_slotSource select 1) select [0, 5]) isEqualTo "tile_") then {
+        [_slotSource select 1] call FUNC(tilePart)
+    } else {
+        _slotSource call EFUNC(storage,getSlot)
+    }
 };
 
 // ACRE2's dummy radio stays in its slot (aio_compat_acre): not lifted at all.

@@ -7,7 +7,8 @@
  * weapons a magazine or attachment fits (on the weapon's card as on the part's own slot).
  *
  * A worn item dragged off a slot lights up the same slot of the other units it may be exchanged with
- * (fnc_canSwap) - a body's for the player's own, the player's for a body's -, in the inventory only.
+ * (fnc_canSwap) - a body's for the player's own, the player's for a body's -, in the inventory only; the
+ * primary lights up the second primary on the back (a two-primary mod), and that one the primary.
  *
  * Lighting up makes no controls: each slot's highlight is made once per build (fnc_glowSlot, ahead of
  * time by fnc_warmTargets) and is shown here, hidden again by fnc_endDrag. What the unit wears is read
@@ -59,11 +60,15 @@ private _controls = [];
     private _fits = if (_slotSource isEqualTo []) then {
         _owner isEqualTo _unit && {
             [_unit, _slot, _class, _equipment] call EFUNC(storage,slotAccepts) || {
-                _slot in ["primary", "handgun", "launcher"] && {([_unit, _slot, _class, _equipment] call EFUNC(storage,partFor)) isNotEqualTo ""}
+                _slot in ["primary", "handgun", "launcher", "primary2"] && {([_unit, _slot, _class, _equipment] call EFUNC(storage,partFor)) isNotEqualTo ""}
             }
         }
     } else {
-        !isNull _owner && {_owner isNotEqualTo (_slotSource select 0)} && {_slot isEqualTo (_slotSource select 1)}
+        !isNull _owner
+        && {
+            (_owner isNotEqualTo (_slotSource select 0) && {_slot isEqualTo (_slotSource select 1)})
+            || {_owner isEqualTo (_slotSource select 0) && {[_slotSource select 1, _slot] in [["primary", "primary2"], ["primary2", "primary"]]}}
+        }
         && {[] call FUNC(isInventoryMode)} && {([_slotSource, _owner, _slot] call FUNC(canSwap)) isEqualTo ""}
     };
 

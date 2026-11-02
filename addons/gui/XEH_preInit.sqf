@@ -281,7 +281,8 @@ GVAR(statusSecond) = -1;
 // Where the mouse was when the name beside it was last placed (fnc_onFrame).
 GVAR(tooltipAt) = [];
 
-// The inspect card: [class, count, rounds, attachments] or [], where it was last put [x, y] or [], and
+// The inspect card: [class, count, rounds, attachments, container, weapon slot to modify or "", Modify's wide card] or [],
+// where it was last put [x, y] or [], and
 // while its title is held, where the mouse holds it [dx, dy] (fnc_inspect, fnc_drawInspect, fnc_onFrame).
 GVAR(inspect) = [];
 GVAR(inspectPos) = [];
@@ -294,6 +295,9 @@ GVAR(inspectView) = profileNamespace getVariable [QGVAR(inspectView), "2d"];
 GVAR(scene3D) = createHashMap;
 GVAR(inspect3DTurn) = [];
 GVAR(inspect3DPan) = [];
+
+// A press on a point of the modding view that one of the 3D view's turning areas took, [slot, button] or [] (fnc_drawInspect).
+GVAR(spotPress) = [];
 GVAR(middleWas) = false;
 GVAR(lastWheel3D) = -1;
 GVAR(itemModels) = createHashMap;
@@ -381,6 +385,33 @@ if !(GVAR(sortMode) isEqualType "" && {GVAR(sortMode) in SORT_MODES}) then {
 };
 
 uiNamespace setVariable [QGVAR(sortButtons), []];
+
+// The order of the weapon cards in the equipment column, top down (fnc_drawEquipmentCards): each player's own,
+// kept in the profile, changed by dragging a card by its grip (fnc_cardGrip). An order that does not name
+// each of the four once - an older or a broken one - is the default again.
+GVAR(weaponOrder) = profileNamespace getVariable [QGVAR(weaponOrder), []];
+
+if !(GVAR(weaponOrder) isEqualType [] && {
+    private _sorted = +GVAR(weaponOrder);
+    _sorted sort true;
+    _sorted isEqualTo ["handgun", "launcher", "primary", "primary2"]
+}) then {
+    GVAR(weaponOrder) = ["primary", "primary2", "handgun", "launcher"];
+};
+
+// Which weapon cards the player folded to their header line, slot -> folded (fnc_toggleWeaponFold), kept in the
+// profile as [slot, folded] pairs - and which sections of the equipment column, under "equipment", "gear" and
+// "hotbar". A card the player never folded or opened is open - but the second primary's,
+// folded while nothing is on the back (fnc_drawEquipmentCards).
+GVAR(weaponFolds) = createHashMap;
+
+{
+    _x params [["_foldSlot", "", [""]], ["_foldOn", false, [false]]];
+
+    if (_foldSlot isNotEqualTo "" && {(_x param [1, -1]) isEqualType false}) then {
+        GVAR(weaponFolds) set [_foldSlot, _foldOn];
+    };
+} forEach (([profileNamespace getVariable [QGVAR(weaponFolds), []]] param [0, [], [[]]]) select {_x isEqualType []});
 
 // The window's moves under way, request id (aio_storage_fnc_request) -> [sources, targets, time, feels,
 // details] (fnc_sendMoves): sources [[holder, key, block, col, row], ...] are faded and cannot be lifted,
@@ -531,6 +562,13 @@ GVAR(style) = "main";
 GVAR(palette) = +PALETTE_DEFAULT;
 GVAR(paletteDirty) = false;
 GVAR(menuRemake) = false;
+
+// The sizes the size popover changed while a slider was dragged, still to be written to CBA when it is let go (fnc_sizeSet).
+GVAR(sizeDirty) = [];
+
+// The most rows a compartment of the loot shows that pages could cut, as the last build drew it (fnc_viewBlocks, fnc_drawSection):
+// the size popover tells where no page size would change anything (fnc_openSizeMenu).
+GVAR(tallestLoot) = 0;
 
 // What the profile holds, read as fnc_paletteRead reads any palette: nothing usable keeps the window as it ships.
 private _savedPalette = [profileNamespace getVariable [QGVAR(palette), []]] call FUNC(paletteRead);

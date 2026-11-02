@@ -1,1 +1,2 @@
-PREP(onLoadout);
+PREP(get);
+PREP(set);
