@@ -5,8 +5,9 @@
  * Puts the modding view's points onto the 3D picture (fnc_drawHotspots): each part's place in the scene
  * (fnc_weaponPoints) seen from the camera - by hand, as a Picture-in-Picture camera has no worldToScreen. The camera's
  * frame: forward to what it aims at, right level with the ground, up square to both; a point's place across and up
- * divided by how far ahead it is, against the field of view - INSPECT_3D_FOV the tangent of half the view's height,
- * twice that across, as the texture is twice as wide as high (INSPECT_3D_RES). Then into the picture's area.
+ * divided by how far ahead it is, against the field of view - INSPECT_3D_FOV the tangent of half the picture's height,
+ * that times the screen's shape across (the texture has the screen's shape, INSPECT_3D_ASPECT); the box shows the middle of
+ * the picture's height (aio_gui_inspect3DShown). Then into the box's area.
  *
  * The boxes lie in two rows off the weapon, as in Tarkov's weapon builds: the parts above it - sights, muzzle, rail - in a
  * row over the highest of the places, the bipod and the magazines in one under the lowest; along its row each box sits
@@ -43,6 +44,11 @@ private _points = [_scene] call FUNC(weaponPoints);
 // The holder's model is still loading: the points are asked for again next frame.
 if (isNil "_points") exitWith {};
 
+// The Attachments view turns side on once it knows where the muzzle is (fnc_inspect3D "face"); placed from the next frame.
+if (_scene getOrDefault ["facing", false]) exitWith {
+    ["face", [_points getOrDefault ["muzzle", []]]] call FUNC(inspect3D);
+};
+
 private _cameraPos = _scene get "cameraPos";
 private _target = _scene get "target";
 
@@ -55,8 +61,10 @@ _view params ["_viewX", "_viewY", "_viewW", "_viewH"];
 private _forward = vectorNormalized (_target vectorDiff _cameraPos);
 private _right = vectorNormalized (_forward vectorCrossProduct [0, 0, 1]);
 private _up = _right vectorCrossProduct _forward;
-private _tanV = INSPECT_3D_FOV;
-private _tanH = INSPECT_3D_FOV * ((INSPECT_3D_RES select 0) / (INSPECT_3D_RES select 1));
+// The picture has the screen's shape, the box shows the middle of its height (fnc_drawInspect): across the box the whole
+// width the camera sees, up and down the share of its height the box shows.
+private _tanH = INSPECT_3D_FOV * INSPECT_3D_ASPECT;
+private _tanV = INSPECT_3D_FOV * (uiNamespace getVariable [QGVAR(inspect3DShown), 1]);
 // ----- Each part's place in the card, the middle of its dot -----
 private _onCard = [];
 

@@ -47,6 +47,10 @@ if (GVAR(menuRemake) && {_controls isNotEqualTo []} && {(GVAR(menuFor) param [0,
     ];
 };
 
+// A part shown on the 3D weapon while the mouse was on its tile (fnc_partChoices, fnc_inspect3D "preview"): the weapon as it is
+// again - the hidden tiles hear of no mouse leaving them.
+["preview", [[]]] call FUNC(inspect3D);
+
 private _trash = uiNamespace getVariable [QGVAR(windowTrash), []];
 
 {

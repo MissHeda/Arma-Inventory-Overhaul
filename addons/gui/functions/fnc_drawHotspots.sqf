@@ -123,6 +123,23 @@ private _fnc_hit = {
     }];
 };
 
+// The light a box shows while a part it takes is dragged (fnc_showTargets), as Tarkov and Reforger light the slots a dragged part
+// fits: the slots' green ring and faint fill, made hidden over the box's face.
+private _gain = _theme getOrDefault ["gain", [0.298, 0.765, 0.541, 1]];
+private _gainFill = +_gain;
+_gainFill set [3, TARGET_FILL_ALPHA];
+
+private _fnc_glow = {
+    params ["_parent", "_rect", "_corner"];
+
+    private _glow = [_display, _parent, _rect, _gainFill, _corner] call FUNC(uiPanel);
+    _glow append ([_display, _parent, _rect, _gain, _corner] call FUNC(uiRing));
+
+    {_x ctrlShow false} forEach _glow;
+
+    _glow
+};
+
 // A part's picture, or the silhouette of its slot, inside a box.
 private _fnc_face = {
     params ["_parent", "_rect", "_on", "_icon"];
@@ -173,10 +190,12 @@ private _size = _textUnit * 0.5;
         [_display, _box, [_textX, 0, _textW, _rowH], _text, _size, [_colorText, _colorMuted] select (_on isEqualTo ""), _font, 0, "value"] call FUNC(uiLabel);
     };
 
+    private _glow = [_box, [0, 0, _boxW, _rowH], _rowH * 0.3] call _fnc_glow;
+
     [_box, [0, 0, _boxW, _rowH], _slot, _caption, _on] call _fnc_hit;
 
     _spots pushBack createHashMapFromArray [
-        ["part", _part], ["slot", _slot], ["class", _on], ["ctrl", _box], ["rel", _rel], ["floating", false]
+        ["part", _part], ["slot", _slot], ["class", _on], ["ctrl", _box], ["rel", _rel], ["floating", false], ["glow", _glow]
     ];
 } forEach _parts;
 
@@ -241,6 +260,8 @@ private _marks = _parts apply {
         [_colorMuted, _colorText] select (_on isNotEqualTo ""), _font, 0, "value"
     ] call FUNC(uiLabel);
 
+    private _glow = [_box, [0, 0, _boxW, _boxH], _radius] call _fnc_glow;
+
     [_box, [0, 0, _boxW, _boxH], _slot, _caption, _on, true] call _fnc_hit;
 
     _box ctrlShow false;
@@ -249,7 +270,7 @@ private _marks = _parts apply {
 
     _spots pushBack createHashMapFromArray [
         ["part", _part], ["slot", _slot], ["class", _on], ["ctrl", _box], ["rel", _rel], ["floating", true],
-        ["line", _line], ["dot", _dot], ["below", _part in ["bipod", "mag", "mag2"]]
+        ["line", _line], ["dot", _dot], ["below", _part in ["bipod", "mag", "mag2"]], ["glow", _glow]
     ];
 } forEach _parts;
 

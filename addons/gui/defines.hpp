@@ -565,14 +565,35 @@
 #define COMPARTMENT_PAD_PX(CELLW) ((round ((CELLW) * COMPARTMENT_PAD / pixelW)) max 1)
 
 
-// The inspect card's 3D view (fnc_inspect3D): the render target its camera films into, shown in the card's picture box as
-// #(argb,W,H,1)r2t(INSPECT_3D_TARGET,2.0) at INSPECT_3D_RES - twice the pixels the box has on a 4K screen, so the
-// item is drawn smooth, its edges sampled down; the camera's field of view; where the scene stands, far off any map, high
-// above the sea (its dark sphere would show in the sky of anyone near); the size every item is framed by at most, in metres -
-// the boxes of many mods' models are blown up by their hit geometry - and the distance per metre of it.
+// The inspect card's 3D view (fnc_inspect3D): the render target its camera films into, shown in the card's picture box; the
+// camera's field of view; where the scene stands, far off any map, high above the sea (its dark sphere would show in the sky
+// of anyone near); the size every item is framed by at most, in metres - the boxes of many mods' models are blown up by their
+// hit geometry - and the distance per metre of it.
+//
+// The texture's shape and size (0.6.51). The engine films a render target with the screen's shape whatever the texture
+// string asks (its aspect is ignored): a 2:1 texture got a 16:9 picture stretched across it. So the texture has the screen's
+// shape (INSPECT_3D_ASPECT) and the box shows its middle band, cut to the box by a group - nothing stretched. Across it has
+// exactly INSPECT_3D_SUPER times the box's pixels: drawn smaller by a whole factor, each pixel of the box is the mean of a
+// square of the texture's, so edges come out smooth. The 2048 of before, drawn into a box of some 600 pixels without mipmaps,
+// skipped texels instead, and edges stepped and shimmered. At most INSPECT_3D_MAX_RES across. Each size films into a target
+// of its own name, INSPECT_3D_TARGET and the size, so a target made at one size never shows in a box of another.
 #define INSPECT_3D_TARGET "aio_inspect3d"
-#define INSPECT_3D_RES [2048, 1024]
+#define INSPECT_3D_ASPECT (getResolution select 4)
+#define INSPECT_3D_SUPER 2
+#define INSPECT_3D_MAX_RES 4096
 #define INSPECT_3D_FOV 0.35
+
+// While a 3D view is open the Picture-in-Picture view distance is this (setPiPViewDistance, the engine takes 100 at least): the
+// scene stands in its sphere, and the world round it costs only frames. Far enough for the sphere's far wall - some 225 m from
+// the holder, which stands 100 m off its middle - so the dark round stays and no fog shows through; the ground lies 400 m
+// below. Given back when it closes.
+#define INSPECT_3D_PIP_DISTANCE 300
+
+// The Attachments view starts side on, as Tarkov's weapon builds and Reforger's inspection show a weapon: the muzzle to the
+// right, a little from above (INSPECT_3D_SIDE_PITCH, degrees), and it tilts up or down at most INSPECT_3D_SIDE_TILT - so the
+// parts round it stay readable.
+#define INSPECT_3D_SIDE_PITCH 8
+#define INSPECT_3D_SIDE_TILT 30
 #define INSPECT_3D_PLACE [-2048, -2048]
 #define INSPECT_3D_FRAME 1.2
 #define INSPECT_3D_DISTANCE 0.7

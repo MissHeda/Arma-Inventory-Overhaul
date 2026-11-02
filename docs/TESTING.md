@@ -166,6 +166,17 @@ A client can see them and cannot change them.
       colours" off: no button, the standard look.
 - [ ] Pages: a crate with more than 10 rows of loot shows a bar; arrows turn the page; a dragged item held over an arrow turns it; the search finds an item on another page; holding F over a crate stays smooth.
 - [ ] Hotbar 4 to 0: bind by drag, use, the HUD strip.
+- [ ] Attachments 3D view (0.6.51): open Attachments on the MX (with suppressor, laser, optic, bipod): the weapon starts side on,
+      muzzle to the right, a little from above - not end on. Turn up and down: it stops at about 30 degrees; double click: back
+      to the side view. The picture is not stretched (a round optic tube is round, compare the 0.6.49 screenshot) and its edges
+      are smoother than before; the boxes' dots still sit on the parts, also near the left and right ends of the picture. Open a
+      box's tiles and move the mouse over a part: the weapon shows that part on, off the tile it goes back; NONE shows the part
+      off; close the tiles (click beside them, Escape) - the weapon is as it was. Click a tile: it goes on as before. Drag a
+      suppressor from the backpack: the muzzle box over the weapon and the muzzle box in the row light up green, the optic box
+      does not; the same with a weapon lying in a crate (Attachments from its tile's menu). PiP quality Low or Normal in the video
+      options: the line under the view names it and asks for Very High or Ultra. Inspect (look only): the 3D view is sharper
+      too, starts front left as before. Look through a PiP scope right after closing the window: its view distance is as
+      before. Compare a screenshot of the same weapon with 0.6.49 for the quality.
 - [ ] Weapon card order by holding its header (0.6.50): no grip at the right end of a weapon card's header any more, the caption
       runs to the end. A short click on the header folds or opens the card as before. Hold the header still: a bar in the accent
       colour fills along its foot for 3 s, then the header pops out as an accent plate a little larger than the line and follows

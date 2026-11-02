@@ -3153,3 +3153,33 @@ Mia: the "Take all" pill is not centred and Sort should be a button, not only a 
   RobotoCondensed, top-aligned. ACE's own controls are untouched; `ACE_GRID_H` and `ACE_ROW_SIZE` stay for `fnc_listDrag`.
 - Built and checked in code only (`hemtt check`): nothing of this has run in the game yet - the middle of the labels rests on `TEXT_MID`,
   taken from a 0.2.3 screenshot (capitals 5 px under the top of an 18 px pill), and wants one look in the game.
+
+## 3D view quality and the Attachments view (0.6.51) - research round
+
+Mia: look at how Tarkov and Arma Reforger do weapon modding today and build it that way, and find a workaround for full quality
+in the 3D view instead of the low-poly look. Researched 2026-11-02 (EFT 1.3.0.0, Reforger 1.8.0.13 / 1.9 experimental, Arma 3
+2.22); BI's wiki, forums and feedback tracker were not reachable from the session, BIKI text came from a GitHub mirror.
+
+- **Tarkov:** Inspect window with a turnable 3D preview and a grid of slot cells; full-screen Modding / Edit build: one box per
+  slot (nested parts too) on an ellipse round the weapon, a line to a dot on the mount, NONE when empty, a list per box; slots a
+  dragged part fits light up green; pointing at a part in a list puts it on the weapon for a look; the weapon side on, tilt
+  clamped to 30 degrees.
+- **Reforger:** Inspect in the inventory turns the character preview into the weapon, side on, yaw only; markers on the slots
+  (from per-slot 3D offsets), a click opens a strip of fitting parts from the inventory, drop on a marker attaches, drag out
+  detaches; cards a part does not fit show "Incompatible".
+- **Taken over in 0.6.51:** side-on start with a 30 degree tilt limit, the green light on boxes a dragged part fits, the part
+  shown on the weapon while pointed at. Already there: boxes with lines, NONE, lists per box, drop on a box.
+- **Why the 3D view looked coarse - what is documented:** the r2t aspect is ignored (the picture has the screen's shape; our
+  2:1 texture stretched it); a 2048 texture without mipmaps drawn 3-4 times smaller skips texels (steps, shimmer); the video
+  options' PiP quality sets the PiP resolution since 2.06; LODs come from a global budget and cannot be forced by script.
+  Fixed: texture of the screen's shape, exactly twice the box's pixels, the box showing its middle; a hint when PiP quality is
+  low; PiP view distance 300 m while open.
+- **Not confirmed:** that PiP picks LODs or texture mips by the distance to the player's camera (the scene stands kilometres
+  away). No source says so; an A/B test (the scene under the ground right below the player) would settle it.
+- **Full quality for real:** only the main camera gives it for sure (BI's Arsenal, ACE Arsenal) - tried in 0.6.42/0.6.43 and
+  dropped because the world behind the window goes (Mia: "is there really no way that we don't have to hide Arma in the
+  background?"). The untried candidate that keeps the world: CT_OBJECT 3D controls (`ctrlSetModel`) in a child display's
+  `class objects`, one per part at the proxies - no camo textures (no retexturing), unknown lighting and LOD, cannot be made with
+  ctrlCreate. Needs a quick in-game prototype before any build (ACE's `ace_explosives_virtualAmmo` layer can show an MX that way
+  without new config).
+- Built and checked in code only: nothing of 0.6.51 has run in the game yet.

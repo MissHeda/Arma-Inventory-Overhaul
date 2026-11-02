@@ -104,6 +104,29 @@ private _weaponFrom = if (_target isEqualType createHashMap) then {_target getOr
 // The rows' words: the part's name, how many, where - a magazine's rounds after its name.
 private _found = _choices isNotEqualTo [];
 
+// The weapon as the 3D view shows it (fnc_inspect3D) with a part in this one's place, for the tile's "preview" - the part on the
+// weapon while the mouse is on its tile, as Tarkov shows it. The card's view stands for this weapon; [] while its parts are not
+// known (the view then shows what its config fits), and the view does nothing with it without a 3D scene.
+private _partIndex = ["", "muzzle", "rail", "optic", "mag", "mag2", "bipod"] find _part;
+private _sceneParts = GVAR(scene3D) getOrDefault ["attachments", []];
+
+private _fnc_preview = {
+    params ["_with", ["_rounds", -1]];
+
+    if (count _sceneParts < 7 || {_partIndex < 1}) exitWith {[]};
+
+    private _parts = +_sceneParts;
+    private _value = _with;
+
+    if (_part in ["mag", "mag2"]) then {
+        _value = [[], [_with, _rounds max 1]] select (_with isNotEqualTo "");
+    };
+
+    _parts set [_partIndex, _value];
+
+    _parts
+};
+
 // A tile each: the part's short name on it, the whole of it as its tip - how many, where, a magazine's rounds.
 _choices = _choices apply {
     _x params ["_class", "_arguments", "_code", "_options", ["_count", 1], ["_where", ""], ["_ammo", -1]];
@@ -121,6 +144,7 @@ _choices = _choices apply {
     };
 
     _options set ["tooltip", format ["%1 - %2", _tip, _where]];
+    _options set ["preview", [_class, [_ammo, _capacity] select (_ammo < 0)] call _fnc_preview];
 
     [_name, _arguments, _code, _options]
 };
@@ -154,7 +178,7 @@ if (_on isNotEqualTo "") then {
             toUpperANSI LLSTRING(Modify_None),
             [[_unit, _slot], [_part, _weaponFrom, _weaponTile]] select _inGrid,
             [{_this call FUNC(quickUnequip)}, {_this call FUNC(doFit)}] select _inGrid,
-            createHashMap
+            createHashMapFromArray [["preview", [""] call _fnc_preview]]
         ]
     ]];
 };

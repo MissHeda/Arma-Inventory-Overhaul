@@ -215,13 +215,15 @@ private _closeW = SQUARE(_closeH);
 
 // The item in 3D instead of its picture, for one with a model of its own (fnc_hasModel) and with 3D picked in the box's corner:
 // its scene's camera films into a texture shown in the box (fnc_inspect3D). Picture-in-Picture renders it - off in the video
-// options, there is no 3D. The box is then exactly twice as wide as high in pixels, as the texture (INSPECT_3D_RES) is, so the
-// item is never squeezed; under it how to move it.
+// options, there is no 3D. The box is then exactly twice as wide as high in pixels; the texture has the screen's shape and
+// INSPECT_3D_SUPER times the box's pixels across, and the box shows its middle (see INSPECT_3D_ASPECT) - the item is never
+// squeezed nor stretched. Under it how to move it, or that the video options' Picture-in-Picture quality holds it back.
 private _can3D = [_class] call FUNC(hasModel);
 private _show3D = _can3D && {isPiPEnabled} && {GVAR(inspectView) isEqualTo "3d" || _large};
 private _viewPixelsW = floor ((_innerW - pixelW * 2) / pixelW);
 private _viewPixelsH = floor (_viewPixelsW / 2);
 private _hint3DH = 0;
+private _hint3D = LLSTRING(Inspect_3DTip);
 
 if (_show3D) then {
     _pictureH = (_viewPixelsH + 2) * pixelH;
@@ -326,13 +328,36 @@ private _viewRect = [];
 private _showToggle = _can3D && {!_large};
 
 if (_show3D) then {
-    ["start", [_class, _attachments]] call FUNC(inspect3D);
+    // The texture: the screen's shape, INSPECT_3D_SUPER times the box's pixels across - and as high as that shape makes it,
+    // more than the box shows (see INSPECT_3D_ASPECT). A target of its own name for its size.
+    private _aspect = INSPECT_3D_ASPECT;
+    private _textureW = ((_viewPixelsW * INSPECT_3D_SUPER) min INSPECT_3D_MAX_RES) max 64;
+    private _textureH = round (_textureW / _aspect);
+    private _target = format ["%1_%2x%3", INSPECT_3D_TARGET, _textureW, _textureH];
+
+    // The Attachments view starts side on (INSPECT_3D_SIDE_PITCH).
+    ["start", [_class, _attachments, _target, _modify isNotEqualTo ""]] call FUNC(inspect3D);
 
     _viewRect = [_padX + (_innerW - _viewPixelsW * pixelW) / 2, _cursor + pixelH, _viewPixelsW * pixelW, _viewPixelsH * pixelH];
     _viewRect params ["_viewX", "_viewY", "_viewW", "_viewH"];
 
-    private _view = [_display, "AIO_PictureTurned", _group, _viewRect] call FUNC(uiCreate);
-    _view ctrlSetText format ["#(argb,%1,%2,1)r2t(%3,2.0)", INSPECT_3D_RES select 0, INSPECT_3D_RES select 1, INSPECT_3D_TARGET];
+    // The whole picture is as wide as the box and taller, its middle in the box's: the group cuts off what lies above and below.
+    private _imageH = (_viewPixelsW / _aspect) * pixelH;
+
+    private _clip = [_display, "AIO_Group", _group, _viewRect] call FUNC(uiCreate);
+    private _view = [_display, "AIO_PictureTurned", _clip, [0, (_viewH - _imageH) / 2, _viewW, _imageH]] call FUNC(uiCreate);
+    _view ctrlSetText format ["#(argb,%1,%2,1)r2t(%3,1.0)", _textureW, _textureH, _target];
+
+    // How much of the picture's height the box shows, for the parts' places on it (fnc_placeHotspots).
+    uiNamespace setVariable [QGVAR(inspect3DShown), _viewH / _imageH];
+
+    // The video options' Picture-in-Picture quality caps what the engine draws into the texture: lower than the texture is
+    // wide, the picture is soft whatever it is given - the line under the view says so instead of how to turn it.
+    private _pipQuality = getVideoOptions getOrDefault ["pipQuality", 1e6];
+
+    if (_pipQuality isEqualType 0 && {_pipQuality < (_textureW min 2048)}) then {
+        _hint3D = format [LLSTRING(Inspect_3DLowPiP), getVideoOptions getOrDefault ["pipQualityName", _pipQuality]];
+    };
 
     // The areas that turn it: the view but the switch. A held control is drawn over every other (the engine draws the focused
     // one last) - one lying under the switch as well hid it after the first turn, and took its clicks.
@@ -476,7 +501,7 @@ if (_partsH > 0) then {
 
 // How to move it, under the 3D view.
 if (_show3D) then {
-    [_display, _group, [_padX, _cursor - _gap * 0.5, _innerW, _hint3DH], LLSTRING(Inspect_3DTip), _textUnit * 0.55, _muted, _font, 2, "hint"] call FUNC(uiLabel);
+    [_display, _group, [_padX, _cursor - _gap * 0.5, _innerW, _hint3DH], _hint3D, _textUnit * 0.55, _muted, _font, 2, "hint"] call FUNC(uiLabel);
 
     _cursor = _cursor + _hint3DH;
 };

@@ -214,6 +214,16 @@ private _rowRadius = (_radius * 0.6) min (_rowH / 2);
                     (_this select 0) call (_this select 1);
                 }, (_this select 0) getVariable [QGVAR(choice), [[], {}]]] call FUNC(later);
             }];
+
+            // The "preview" option: the weapon in the 3D view shows the part for as long as the mouse is on its tile, as Tarkov's
+            // weapon builds do (fnc_partChoices, fnc_inspect3D) - only for a look, nothing is moved.
+            private _preview = _options getOrDefault ["preview", []];
+
+            if (_preview isNotEqualTo []) then {
+                _hit setVariable [QGVAR(preview), _preview];
+                _hit ctrlAddEventHandler ["MouseEnter", {["preview", [(_this select 0) getVariable [QGVAR(preview), []]]] call FUNC(inspect3D)}];
+                _hit ctrlAddEventHandler ["MouseExit", {["preview", [[]]] call FUNC(inspect3D)}];
+            };
         };
 
         continue;

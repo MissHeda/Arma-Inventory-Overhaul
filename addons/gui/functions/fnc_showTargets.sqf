@@ -42,11 +42,9 @@ private _unit = GVAR(unit);
 
 // What the unit wears, read once: only an attachment or a magazine is asked about a weapon's parts (fnc_slotAccepts).
 private _equipment = createHashMap;
+private _isPart = (([_class] call EFUNC(items,getInfo)) getOrDefault ["kind", ""]) in ["muzzle", "optic", "rail", "bipod", "magazine", "grenade"];
 
-if (
-    _slotSource isEqualTo []
-    && {(([_class] call EFUNC(items,getInfo)) get "kind") in ["muzzle", "optic", "rail", "bipod", "magazine", "grenade"]}
-) then {
+if (_slotSource isEqualTo [] && {_isPart}) then {
     _equipment = [_unit] call EFUNC(storage,getEquipment);
 };
 
@@ -79,5 +77,36 @@ private _controls = [];
     {_x ctrlShow true} forEach _glow;
     _controls append _glow;
 } forEach (uiNamespace getVariable [QGVAR(slots), []]);
+
+// The Attachments card's boxes - over the 3D picture and in the row under it (fnc_drawHotspots) - light up for a part they
+// take, as Tarkov and Reforger light the slots a dragged part fits: a worn weapon's by the same check as its slot, one lying in
+// a container's by the weapon alone (aio_storage_fnc_partFits), as a drop there asks (fnc_updateDrag).
+if (_slotSource isEqualTo [] && {_isPart}) then {
+    private _weaponTile = createHashMap;
+
+    {
+        private _spotSlot = _x getOrDefault ["slot", ""];
+        private _glow = _x getOrDefault ["glow", []];
+
+        if (_glow isEqualTo []) then {continue};
+
+        private _fits = if ((_spotSlot select [0, 5]) isEqualTo "tile_") then {
+            private _target = GVAR(inspect) param [5, ""];
+
+            if (count _weaponTile == 0 && {_target isEqualType createHashMap}) then {
+                _weaponTile = [_target] call FUNC(weaponTile);
+            };
+
+            [_weaponTile getOrDefault ["class", ""], _x getOrDefault ["part", ""], _class] call EFUNC(storage,partFits)
+        } else {
+            [_unit, _spotSlot, _class, _equipment] call EFUNC(storage,slotAccepts)
+        };
+
+        if (!_fits) then {continue};
+
+        {_x ctrlShow true} forEach _glow;
+        _controls append _glow;
+    } forEach (uiNamespace getVariable [QGVAR(hotspots), []]);
+};
 
 uiNamespace setVariable [QGVAR(dragGlow), _controls];
