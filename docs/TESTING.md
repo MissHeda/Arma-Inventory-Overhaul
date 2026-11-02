@@ -174,7 +174,10 @@ A client can see them and cannot change them.
       off; close the tiles (click beside them, Escape) - the weapon is as it was. Click a tile: it goes on as before. Drag a
       suppressor from the backpack: the muzzle box over the weapon and the muzzle box in the row light up green, the optic box
       does not; the same with a weapon lying in a crate (Attachments from its tile's menu). PiP quality Low or Normal in the video
-      options: the line under the view names it and asks for Very High or Ultra. Inspect (look only): the 3D view is sharper
+      options: the line under the view names it and asks for Very High or Ultra (and does NOT show at Very High / Ultra - if it
+      does, `diag_log getVideoOptions` and send the pipQuality line). A 21:9 or 32:9 screen: the picture fills the box, no
+      bars. Inspect the MX, then Attachments of the same MX with Inspect still open: Attachments starts side on; the other way
+      round Inspect starts front left. Sweep the mouse quickly across the tiles: the weapon always shows the tile under the mouse. Inspect (look only): the 3D view is sharper
       too, starts front left as before. Look through a PiP scope right after closing the window: its view distance is as
       before. Compare a screenshot of the same weapon with 0.6.49 for the quality.
 - [ ] Weapon card order by holding its header (0.6.50): no grip at the right end of a weapon card's header any more, the caption

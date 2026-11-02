@@ -7,7 +7,7 @@
  * frame: forward to what it aims at, right level with the ground, up square to both; a point's place across and up
  * divided by how far ahead it is, against the field of view - INSPECT_3D_FOV the tangent of half the picture's height,
  * that times the screen's shape across (the texture has the screen's shape, INSPECT_3D_ASPECT); the box shows the middle of
- * the picture's height (aio_gui_inspect3DShown). Then into the box's area.
+ * the picture (aio_gui_inspect3DShown, the shares across and up and down). Then into the box's area.
  *
  * The boxes lie in two rows off the weapon, as in Tarkov's weapon builds: the parts above it - sights, muzzle, rail - in a
  * row over the highest of the places, the bipod and the magazines in one under the lowest; along its row each box sits
@@ -61,10 +61,12 @@ _view params ["_viewX", "_viewY", "_viewW", "_viewH"];
 private _forward = vectorNormalized (_target vectorDiff _cameraPos);
 private _right = vectorNormalized (_forward vectorCrossProduct [0, 0, 1]);
 private _up = _right vectorCrossProduct _forward;
-// The picture has the screen's shape, the box shows the middle of its height (fnc_drawInspect): across the box the whole
-// width the camera sees, up and down the share of its height the box shows.
-private _tanH = INSPECT_3D_FOV * INSPECT_3D_ASPECT;
-private _tanV = INSPECT_3D_FOV * (uiNamespace getVariable [QGVAR(inspect3DShown), 1]);
+// The picture has the screen's shape, the box shows its middle (fnc_drawInspect): across and up and down the share of the
+// camera's view the box shows.
+(uiNamespace getVariable [QGVAR(inspect3DShown), [1, 1]]) params [["_shownX", 1], ["_shownY", 1]];
+
+private _tanH = INSPECT_3D_FOV * INSPECT_3D_ASPECT * _shownX;
+private _tanV = INSPECT_3D_FOV * _shownY;
 // ----- Each part's place in the card, the middle of its dot -----
 private _onCard = [];
 

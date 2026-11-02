@@ -572,9 +572,9 @@
 //
 // The texture's shape and size (0.6.51). The engine films a render target with the screen's shape whatever the texture
 // string asks (its aspect is ignored): a 2:1 texture got a 16:9 picture stretched across it. So the texture has the screen's
-// shape (INSPECT_3D_ASPECT) and the box shows its middle band, cut to the box by a group - nothing stretched. Across it has
-// exactly INSPECT_3D_SUPER times the box's pixels: drawn smaller by a whole factor, each pixel of the box is the mean of a
-// square of the texture's, so edges come out smooth. The 2048 of before, drawn into a box of some 600 pixels without mipmaps,
+// shape (INSPECT_3D_ASPECT), covers the box - taller on a screen up to 2:1, wider on a wider one - and the box shows its
+// middle, cut to the box by a group: nothing stretched. It has INSPECT_3D_SUPER times the picture's pixels, the picture on
+// whole pixels: drawn smaller by a whole factor, the texture's pixels are sampled down evenly and edges come out smooth. The 2048 of before, drawn into a box of some 600 pixels without mipmaps,
 // skipped texels instead, and edges stepped and shimmered. At most INSPECT_3D_MAX_RES across. Each size films into a target
 // of its own name, INSPECT_3D_TARGET and the size, so a target made at one size never shows in a box of another.
 #define INSPECT_3D_TARGET "aio_inspect3d"
@@ -599,7 +599,7 @@
 #define INSPECT_3D_DISTANCE 0.7
 
 // A worn uniform stands as tall as a soldier: its frame is its height times this, so all of it fits the box's height.
-#define INSPECT_3D_TALL 2.3
+#define INSPECT_3D_TALL 2.6
 
 // How far the 3D view's item turns for a drag across the whole screen, in degrees: round, and up or down.
 #define INSPECT_3D_TURN_ACROSS 200

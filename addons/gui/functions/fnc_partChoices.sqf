@@ -105,26 +105,22 @@ private _weaponFrom = if (_target isEqualType createHashMap) then {_target getOr
 private _found = _choices isNotEqualTo [];
 
 // The weapon as the 3D view shows it (fnc_inspect3D) with a part in this one's place, for the tile's "preview" - the part on the
-// weapon while the mouse is on its tile, as Tarkov shows it. The card's view stands for this weapon; [] while its parts are not
-// known (the view then shows what its config fits), and the view does nothing with it without a 3D scene.
+// weapon while the mouse is on its tile, as Tarkov shows it: [index in the attachments, value] - fnc_inspect3D puts it into what
+// the scene shows at that moment. The view does nothing with it without a 3D scene, or while the weapon's parts are not known.
 private _partIndex = ["", "muzzle", "rail", "optic", "mag", "mag2", "bipod"] find _part;
-private _sceneParts = GVAR(scene3D) getOrDefault ["attachments", []];
 
 private _fnc_preview = {
     params ["_with", ["_rounds", -1]];
 
-    if (count _sceneParts < 7 || {_partIndex < 1}) exitWith {[]};
+    if (_partIndex < 1) exitWith {[]};
 
-    private _parts = +_sceneParts;
     private _value = _with;
 
     if (_part in ["mag", "mag2"]) then {
         _value = [[], [_with, _rounds max 1]] select (_with isNotEqualTo "");
     };
 
-    _parts set [_partIndex, _value];
-
-    _parts
+    [_partIndex, _value]
 };
 
 // A tile each: the part's short name on it, the whole of it as its tip - how many, where, a magazine's rounds.

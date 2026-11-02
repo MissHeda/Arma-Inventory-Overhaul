@@ -328,10 +328,13 @@ private _viewRect = [];
 private _showToggle = _can3D && {!_large};
 
 if (_show3D) then {
-    // The texture: the screen's shape, INSPECT_3D_SUPER times the box's pixels across - and as high as that shape makes it,
-    // more than the box shows (see INSPECT_3D_ASPECT). A target of its own name for its size.
+    // The whole picture has the screen's shape and covers the box, in whole pixels: as wide as the box and taller on a screen up
+    // to 2:1, as high and wider on a wider one (21:9, three screens) - the box shows its middle (see INSPECT_3D_ASPECT). The
+    // texture has INSPECT_3D_SUPER times its pixels, a target of its own name for its size.
     private _aspect = INSPECT_3D_ASPECT;
-    private _textureW = ((_viewPixelsW * INSPECT_3D_SUPER) min INSPECT_3D_MAX_RES) max 64;
+    private _imagePixelsH = _viewPixelsH max (round (_viewPixelsW / _aspect));
+    private _imagePixelsW = _viewPixelsW max (round (_imagePixelsH * _aspect));
+    private _textureW = ((_imagePixelsW * INSPECT_3D_SUPER) min INSPECT_3D_MAX_RES) max 64;
     private _textureH = round (_textureW / _aspect);
     private _target = format ["%1_%2x%3", INSPECT_3D_TARGET, _textureW, _textureH];
 
@@ -341,15 +344,19 @@ if (_show3D) then {
     _viewRect = [_padX + (_innerW - _viewPixelsW * pixelW) / 2, _cursor + pixelH, _viewPixelsW * pixelW, _viewPixelsH * pixelH];
     _viewRect params ["_viewX", "_viewY", "_viewW", "_viewH"];
 
-    // The whole picture is as wide as the box and taller, its middle in the box's: the group cuts off what lies above and below.
-    private _imageH = (_viewPixelsW / _aspect) * pixelH;
+    // Its middle in the box's, on whole pixels: the group cuts off what lies outside. The aspect goes into the texture too - the
+    // engine is said to ignore it; should it not, it is the right one.
+    private _offsetX = floor ((_viewPixelsW - _imagePixelsW) / 2);
+    private _offsetY = floor ((_viewPixelsH - _imagePixelsH) / 2);
 
     private _clip = [_display, "AIO_Group", _group, _viewRect] call FUNC(uiCreate);
-    private _view = [_display, "AIO_PictureTurned", _clip, [0, (_viewH - _imageH) / 2, _viewW, _imageH]] call FUNC(uiCreate);
-    _view ctrlSetText format ["#(argb,%1,%2,1)r2t(%3,1.0)", _textureW, _textureH, _target];
+    private _view = [
+        _display, "AIO_PictureTurned", _clip, [_offsetX * pixelW, _offsetY * pixelH, _imagePixelsW * pixelW, _imagePixelsH * pixelH]
+    ] call FUNC(uiCreate);
+    _view ctrlSetText format ["#(argb,%1,%2,1)r2t(%3,%4)", _textureW, _textureH, _target, _aspect toFixed 4];
 
-    // How much of the picture's height the box shows, for the parts' places on it (fnc_placeHotspots).
-    uiNamespace setVariable [QGVAR(inspect3DShown), _viewH / _imageH];
+    // How much of the picture's width and height the box shows, for the parts' places on it (fnc_placeHotspots).
+    uiNamespace setVariable [QGVAR(inspect3DShown), [_viewPixelsW / _imagePixelsW, _viewPixelsH / _imagePixelsH]];
 
     // The video options' Picture-in-Picture quality caps what the engine draws into the texture: lower than the texture is
     // wide, the picture is soft whatever it is given - the line under the view says so instead of how to turn it.

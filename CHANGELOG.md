@@ -12,7 +12,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 ### Changed
 
 - Attachments: the weapon starts side on, the muzzle to the right and a little from above, as Tarkov and Reforger show it, and tilts up or down at most 30 degrees so the parts round it stay readable. A double click goes back to that view.
-- 3D view (Inspect and Attachments): sharper. The picture had the shape of the screen stretched into a 2:1 texture, and a 2048 texture drawn into a box of some 600 pixels skipped pixels, so edges stepped and shimmered. The texture now has the screen's shape (the box shows its middle) and exactly twice the box's pixels, so each pixel is the mean of four. While it is open, the Picture-in-Picture view distance is 300 m (yours comes back on close).
+- 3D view (Inspect and Attachments): sharper. The picture had the shape of the screen stretched into a 2:1 texture, and a 2048 texture drawn into a box of some 600 pixels skipped pixels, so edges stepped and shimmered. The texture now has the screen's shape (the box shows its middle, also on screens wider than 2:1) and twice the box's pixels, placed on whole pixels, so edges are sampled down evenly. While it is open, the Picture-in-Picture view distance is 300 m (yours comes back on close).
 - 3D view: when the Picture-in-Picture quality in the video options is lower than the view needs, the line under it says so instead of how to turn the item.
 
 ## 0.6.50 - beta

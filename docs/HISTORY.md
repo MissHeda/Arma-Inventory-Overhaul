@@ -3172,7 +3172,8 @@ in the 3D view instead of the low-poly look. Researched 2026-11-02 (EFT 1.3.0.0,
 - **Why the 3D view looked coarse - what is documented:** the r2t aspect is ignored (the picture has the screen's shape; our
   2:1 texture stretched it); a 2048 texture without mipmaps drawn 3-4 times smaller skips texels (steps, shimmer); the video
   options' PiP quality sets the PiP resolution since 2.06; LODs come from a global budget and cannot be forced by script.
-  Fixed: texture of the screen's shape, exactly twice the box's pixels, the box showing its middle; a hint when PiP quality is
+  Fixed: texture of the screen's shape covering the box (wider screens too), twice the picture's pixels on whole pixels,
+  the box showing its middle; a hint when PiP quality is
   low; PiP view distance 300 m while open.
 - **Not confirmed:** that PiP picks LODs or texture mips by the distance to the player's camera (the scene stands kilometres
   away). No source says so; an A/B test (the scene under the ground right below the player) would settle it.

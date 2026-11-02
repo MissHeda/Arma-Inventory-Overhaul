@@ -93,6 +93,14 @@ if (_slotSource isEqualTo [] && {_isPart}) then {
         private _fits = if ((_spotSlot select [0, 5]) isEqualTo "tile_") then {
             private _target = GVAR(inspect) param [5, ""];
 
+            // Only a tile out of a grid that is no kit goes onto a weapon lying in a container, as a drop there asks (fnc_updateDrag).
+            private _sourceIndex = GVAR(press) param [0, -1];
+
+            if (
+                !(_sourceIndex isEqualType 0) || {_sourceIndex < 0}
+                || {(((uiNamespace getVariable [QGVAR(grids), []]) param [_sourceIndex, createHashMap]) getOrDefault ["kit", ""]) isNotEqualTo ""}
+            ) exitWith {false};
+
             if (count _weaponTile == 0 && {_target isEqualType createHashMap}) then {
                 _weaponTile = [_target] call FUNC(weaponTile);
             };

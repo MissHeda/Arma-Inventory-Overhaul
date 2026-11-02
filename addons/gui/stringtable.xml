@@ -275,7 +275,7 @@
             <English>3D</English>
         </Key>
         <Key ID="STR_aio_gui_Inspect_3DLowPiP">
-            <English>Picture-in-Picture quality is %1 in the video options - set it to Very High or Ultra for a sharp 3D view</English>
+            <English>PiP quality %1 - Very High or Ultra in the video options is sharper</English>
         </Key>
         <Key ID="STR_aio_gui_Inspect_3DNoPiP">
             <English>3D needs Picture-in-Picture - turn it on in the video options</English>

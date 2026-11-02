@@ -39,7 +39,8 @@
  *              moves with the mouse, at most its frame away from where it was (arguments: [across, down])
  *    "reset"   the view the scene started with
  *    "face"    side on to the barrel, the muzzle to the right - the start of the Attachments view (arguments: [muzzle ASL])
- *    "preview" the holder with these parts instead, for a look; [] puts back what the scene shows (arguments: [attachments])
+ *    "preview" the holder with one part changed, for a look; [] puts back what the scene shows (arguments: [[index in the
+ *              attachments, value] or [], the tile that asks - a put back from another tile is ignored])
  * 1: Arguments <ARRAY> (default: [])
  *
  * Return Value:
@@ -146,6 +147,20 @@ switch (_mode) do {
             _camera cameraEffect ["Terminate", "Back", _scene get "target3D"];
             _camera cameraEffect ["Internal", "Back", _target3D];
             _scene set ["target3D", _target3D];
+        };
+
+        // Inspect and Attachments of the same weapon share the scene: from one to the other, the view starts as that card's does.
+        if (_running && {(_scene getOrDefault ["side", false]) isNotEqualTo _side}) then {
+            private _pitch = [15, INSPECT_3D_SIDE_PITCH] select _side;
+
+            _scene set ["side", _side];
+            _scene set ["facing", _side];
+            _scene set ["dir", 45];
+            _scene set ["pitch", _pitch];
+            _scene set ["startDir", 45];
+            _scene set ["startPitch", _pitch];
+
+            call _fnc_camera;
         };
 
         if (_running && {(_scene getOrDefault ["attachments", []]) isEqualTo _attachments}) exitWith {};
@@ -472,17 +487,28 @@ switch (_mode) do {
     case "preview": {
         if (count _scene == 0 || {!(_scene getOrDefault ["onHolder", false])}) exitWith {};
 
-        _arguments params [["_parts", [], [[]]]];
+        _arguments params [["_change", [], [[]]], ["_from", controlNull, [controlNull]]];
 
-        // Put back: only when something else was shown.
-        if (_parts isEqualTo []) exitWith {
-            if (_scene getOrDefault ["previewing", false]) then {
-                _scene set ["previewing", false];
-                [_scene get "attachments"] call _fnc_refit;
-            };
+        // Put back: only when something else was shown, and only by the tile that showed it - the mouse may come onto the next
+        // tile before it is heard leaving this one.
+        if (_change isEqualTo []) exitWith {
+            if (!(_scene getOrDefault ["previewing", false])) exitWith {};
+            if (!isNull _from && {_from isNotEqualTo (_scene getOrDefault ["previewBy", controlNull])}) exitWith {};
+
+            _scene set ["previewing", false];
+            [_scene get "attachments"] call _fnc_refit;
         };
 
+        // [index, value]: the part put into what the scene shows now, not into what it showed when the tiles were made.
+        _change params [["_index", -1, [0]], ["_value", ""]];
+
+        private _parts = +(_scene getOrDefault ["attachments", []]);
+
+        if (count _parts < 7 || {_index < 1}) exitWith {};
+
+        _parts set [_index, _value];
         _scene set ["previewing", true];
+        _scene set ["previewBy", _from];
         [_parts] call _fnc_refit;
     };
 };

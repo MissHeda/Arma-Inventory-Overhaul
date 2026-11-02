@@ -221,8 +221,10 @@ private _rowRadius = (_radius * 0.6) min (_rowH / 2);
 
             if (_preview isNotEqualTo []) then {
                 _hit setVariable [QGVAR(preview), _preview];
-                _hit ctrlAddEventHandler ["MouseEnter", {["preview", [(_this select 0) getVariable [QGVAR(preview), []]]] call FUNC(inspect3D)}];
-                _hit ctrlAddEventHandler ["MouseExit", {["preview", [[]]] call FUNC(inspect3D)}];
+                _hit ctrlAddEventHandler ["MouseEnter", {
+                    ["preview", [(_this select 0) getVariable [QGVAR(preview), []], _this select 0]] call FUNC(inspect3D);
+                }];
+                _hit ctrlAddEventHandler ["MouseExit", {["preview", [[], _this select 0]] call FUNC(inspect3D)}];
             };
         };
 
