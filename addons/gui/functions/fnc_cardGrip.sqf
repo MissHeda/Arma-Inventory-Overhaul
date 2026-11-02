@@ -9,8 +9,8 @@
  * there; let go where it already is and nothing changes.
  *
  * Let go before the bar is full, the press was a click, which the header's own button turns into a fold (its release
- * is its click, fnc_onMouseButton). Moved off by more than CARD_HOLD_SLACK meanwhile, the hold is given up: the player
- * is not holding still on it. A hold that lifted the card takes the click its release would give (GVAR(cardHoldTaken),
+ * is its click, fnc_onMouseButton). Moved off the header, or along it by more than CARD_HOLD_SLACK, meanwhile, the hold
+ * is given up: the player is not holding still on it. A hold that lifted the card takes the click its release would give (GVAR(cardHoldTaken),
  * GVAR(pressedButton)): the card was moved, not folded.
  *
  * The order is each player's own, kept in the profile (GVAR(weaponOrder)). The second primary's card, where no
@@ -21,8 +21,10 @@
  * release is seen there whichever control it happens over. What the cards drew this build is in GVAR(cardSpans):
  * [slot, anchor as fnc_gridOrigin takes it, width, height] each, top down.
  *
+ * "abort" drops a lifted card where it was, as "cancel" drops a hold - another window came over this one (fnc_onFrame).
+ *
  * Arguments:
- * 0: Step, "press", "wait", "cancel", "begin", "move" or "end" <STRING>
+ * 0: Step, "press", "wait", "cancel", "begin", "move", "end" or "abort" <STRING>
  * 1: For "press": the header's hit box, with what the hold needs in its variable aio_gui_hold (fnc_drawEquipmentCards)
  *    <CONTROL>; for "begin": that variable <ARRAY>
  *
@@ -74,33 +76,39 @@ switch (_step) do {
         private _bar = [_display, "AIO_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
         _bar ctrlSetBackgroundColor (_hold select 1);
 
-        // Real time, not the mission's: a hold is the player's hand, and the mission's clock may stand still.
-        uiNamespace setVariable [QGVAR(cardHold), [_argument, _hold, diag_tickTime, getMousePosition, _bar]];
+        // Real time, not the mission's: a hold is the player's hand, and the mission's clock may stand still. The frame
+        // of the press, too: the press event may come before the button reads as held (as the Arsenal's list press).
+        uiNamespace setVariable [QGVAR(cardHold), [_argument, _hold, diag_tickTime, getMousePosition, _bar, diag_frameNo]];
 
         ["wait"] call FUNC(cardGrip);
     };
 
     case "wait": {
         (uiNamespace getVariable [QGVAR(cardHold), []]) params [
-            ["_hit", controlNull], ["_hold", []], ["_start", 0], ["_mouseStart", [0, 0]], ["_bar", controlNull]
+            ["_hit", controlNull], ["_hold", []], ["_start", 0], ["_mouseStart", [0, 0]], ["_bar", controlNull], ["_frame", -1]
         ];
 
         if (_hold isEqualTo []) exitWith {};
 
-        // Let go before the bar was full: a click, which the header's button gives. Built again meanwhile, the window
-        // took the header with it.
-        if (inputMouse 0 == 0 || {isNull _hit}) exitWith {
+        // Let go before the bar was full: a click, which the header's button gives - but not in the frame of the press
+        // nor the next, where the button may not read as held yet. Built again meanwhile, the window took the header with
+        // it.
+        if ((inputMouse 0 == 0 && {diag_frameNo > _frame + 1}) || {isNull _hit}) exitWith {
             ["cancel"] call FUNC(cardGrip);
         };
 
         getMousePosition params ["_mouseX", "_mouseY"];
         _mouseStart params ["_startX", "_startY"];
 
-        if (abs (_mouseX - _startX) > CARD_HOLD_SLACK || {abs (_mouseY - _startY) > CARD_HOLD_SLACK}) exitWith {
+        ([_hold select 2, _hold select 3] call _fnc_headerRect) params ["_rectX", "_rectY", "_rectW", "_rectH"];
+
+        // Off the header, or moved along it: the player is not holding still on it.
+        if (
+            _mouseX < _rectX || {_mouseX >= _rectX + _rectW} || {_mouseY < _rectY} || {_mouseY >= _rectY + _rectH}
+            || {abs (_mouseX - _startX) > CARD_HOLD_SLACK} || {abs (_mouseY - _startY) > CARD_HOLD_SLACK}
+        ) exitWith {
             ["cancel"] call FUNC(cardGrip);
         };
-
-        ([_hold select 2, _hold select 3] call _fnc_headerRect) params ["_rectX", "_rectY", "_rectW", "_rectH"];
 
         private _share = ((diag_tickTime - _start) / CARD_HOLD_TIME) min 1;
 
@@ -133,7 +141,7 @@ switch (_step) do {
 
         if !(_argument isEqualType []) exitWith {};
 
-        _argument params ["_slot", "_color", "_anchor", "_size", "_text", "_font", "_textSize", "", "_onAccent"];
+        _argument params ["_slot", "_color", "_anchor", "_size", "_text", "_font", "_textSize", "", "_onAccent", ["_textOffset", 0]];
 
         if (isNull _display || {((call _fnc_spans) findIf {(_x select 0) isEqualTo _slot}) < 0}) exitWith {};
 
@@ -144,7 +152,15 @@ switch (_step) do {
         private _plate = [_display, "AIO_PanelRect", controlNull, _rect] call FUNC(uiCreate);
         _plate ctrlSetBackgroundColor _color;
 
-        private _label = [_display, controlNull, _rect, _text, _textSize, _onAccent, _font, 0, false] call FUNC(uiLabel);
+        // Its words where the header's stand, in the colour that reads on the accent - "never", so no palette colour of the
+        // hints takes their place.
+        private _labelRect = +_rect;
+        _labelRect set [0, (_rect select 0) + _textOffset];
+        _labelRect set [1, (_rect select 1) + pixelH * 2];
+        _labelRect set [2, ((_rect select 2) - _textOffset) max pixelW];
+        _labelRect set [3, (_rect select 3) - pixelH * 4];
+
+        private _label = [_display, controlNull, _labelRect, _text, _textSize, _onAccent, _font, 0, "never"] call FUNC(uiLabel);
 
         private _line = [_display, "AIO_PanelRect", controlNull, [0, 0, 0, 0]] call FUNC(uiCreate);
         _line ctrlSetBackgroundColor _color;
@@ -154,14 +170,20 @@ switch (_step) do {
         // Where on the header it was taken: the header keeps that spot under the mouse.
         private _grab = _mouseY - (_rect select 1);
 
-        uiNamespace setVariable [QGVAR(cardDrag), [_slot, _line, -1, [_plate, _label], _grab, _rect, diag_tickTime]];
+        // The name at the mouse goes while the card is held (fnc_onFrame leaves the hover alone meanwhile): it would lie
+        // over the plate and name the slots under it.
+        (uiNamespace getVariable [QGVAR(tooltip), controlNull]) ctrlShow false;
+        uiNamespace setVariable [QGVAR(tipShown), controlNull];
+
+        uiNamespace setVariable [QGVAR(cardDrag), [_slot, _line, -1, [_plate, _label], _grab, _rect, diag_tickTime, _textOffset]];
 
         ["move"] call FUNC(cardGrip);
     };
 
     case "move": {
         (uiNamespace getVariable [QGVAR(cardDrag), []]) params [
-            ["_held", ""], ["_line", controlNull], ["_target", -1], ["_ghost", []], ["_grab", 0], ["_rect", []], ["_began", 0]
+            ["_held", ""], ["_line", controlNull], ["_target", -1], ["_ghost", []], ["_grab", 0], ["_rect", []], ["_began", 0],
+            ["_textOffset", 0]
         ];
 
         private _spans = call _fnc_spans;
@@ -202,24 +224,28 @@ switch (_step) do {
             private _liftW = pixelW * 3;
             private _ghostY = _mouseY - _grab;
             private _commit = [0, CARD_POP_TIME] select (diag_tickTime - _began < CARD_POP_TIME);
-            private _textX = _rectX + SQUARE(_rectH);
+            private _textX = _rectX + _textOffset;
 
             _plate ctrlSetPosition [_rectX - _liftW, _ghostY - _liftH, _rectW + _liftW * 2, _rectH + _liftH * 2];
             _plate ctrlCommit _commit;
-            _label ctrlSetPosition [_textX, _ghostY, (_rectX + _rectW - _textX) max pixelW, _rectH];
+            _label ctrlSetPosition [_textX, _ghostY + pixelH * 2, (_rectX + _rectW - _textX) max pixelW, _rectH - pixelH * 4];
             _label ctrlCommit _commit;
         };
 
-        uiNamespace setVariable [QGVAR(cardDrag), [_held, _line, _target, _ghost, _grab, _rect, _began]];
+        uiNamespace setVariable [QGVAR(cardDrag), [_held, _line, _target, _ghost, _grab, _rect, _began, _textOffset]];
     };
 
-    case "end": {
+    case "end";
+    case "abort": {
         (uiNamespace getVariable [QGVAR(cardDrag), []]) params [["_held", ""], ["_line", controlNull], ["_target", -1], ["_ghost", []]];
 
         uiNamespace setVariable [QGVAR(cardDrag), []];
         ctrlDelete _line;
 
         {ctrlDelete _x} forEach _ghost;
+
+        // Given up - another window came over this one: the card stays where it was.
+        if (_step isEqualTo "abort") exitWith {};
 
         private _shown = (uiNamespace getVariable [QGVAR(cardSpans), []]) apply {_x select 0};
         private _from = _shown find _held;

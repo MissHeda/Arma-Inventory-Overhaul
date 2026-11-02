@@ -6,7 +6,7 @@ All notable changes to Enhanced Inventory. The format follows [Keep a Changelog]
 
 ### Changed
 
-- Weapon cards move by their header now, not by a grip: hold the header for 3 seconds - a bar fills along it meanwhile - and the card pops out and follows the mouse; let go where it should go. A short click still folds or opens the card. The grip icon at the right end of the header is gone, so the caption has that room.
+- Weapon cards move by their header now, not by a grip: hold the header still for 3 seconds - a bar fills along it meanwhile - and the header pops out and follows the mouse up or down; let go where the card should go. A short click still folds or opens the card. The grip icon at the right end of the header is gone, so the caption has that room.
 
 ## 0.6.49 - beta
 

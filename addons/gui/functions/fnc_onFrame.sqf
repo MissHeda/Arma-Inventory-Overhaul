@@ -225,6 +225,11 @@ if (_covered isNotEqualTo GVAR(covered)) then {
 
         GVAR(press) = [];
         GVAR(windowMove) = [];
+
+        // A weapon card's header held, or the card lifted by it: given up, the card stays where it was (fnc_cardGrip).
+        ["cancel"] call FUNC(cardGrip);
+        ["abort"] call FUNC(cardGrip);
+
         call FUNC(closeMenu);
         (uiNamespace getVariable [QGVAR(tooltip), controlNull]) ctrlShow false;
 
@@ -541,7 +546,8 @@ NOTE_PHASE("hover");
 
 // Scrolling a column moves the tiles under a mouse that stands still, so the hover is looked at again
 // on every check as well.
-if (_check || {_mouse isNotEqualTo GVAR(lastMouse)}) then {
+// Not while a weapon card is lifted by its header (fnc_cardGrip): the plate under the mouse names no slot.
+if ((_check || {_mouse isNotEqualTo GVAR(lastMouse)}) && {(uiNamespace getVariable [QGVAR(cardDrag), []]) isEqualTo []}) then {
     GVAR(lastMouse) = _mouse;
     [_display, _mouse] call FUNC(updateHover);
 };
@@ -716,8 +722,13 @@ if (_why isNotEqualTo "") exitWith {
 // The soldier taken away from the loot closes the window (fnc_checkTaken).
 if ([_display] call FUNC(checkTaken)) exitWith {};
 
-// Not while a tile is held: a rebuild would pull it from under the mouse.
-if (_now < GVAR(nextSignature) || {GVAR(press) isNotEqualTo []}) exitWith {};
+// Not while a tile is held, nor a weapon card's header or the card it lifted (fnc_cardGrip): a rebuild would pull it
+// from under the mouse.
+if (
+    _now < GVAR(nextSignature) || {GVAR(press) isNotEqualTo []}
+    || {(uiNamespace getVariable [QGVAR(cardHold), []]) isNotEqualTo []}
+    || {(uiNamespace getVariable [QGVAR(cardDrag), []]) isNotEqualTo []}
+) exitWith {};
 
 GVAR(nextSignature) = _now + SIGNATURE_INTERVAL;
 

@@ -11,9 +11,9 @@
  *   v [1] Primary ...............................   each weapon a header line - fold chevron, key,
  *   | picture ................................... |   caption - over a card as wide as the column:
  *   | MX 6.5 mm ............ [o][=] [▮ 27/30]     |   its picture, its name, and small pictures of what is
- *   v [4] Second primary ....................... ::   on it and its loaded magazines with their rounds -
+ *   v [4] Second primary ........................   on it and its loaded magazines with their rounds -
  *   | ...                                             nothing for a part it has not. The second primary on
- *   > [2] Handgun - P99 ........................ ::   the back only with WebKnight's or KJW's Two Primary
+ *   > [2] Handgun - P99 .........................   the back only with WebKnight's or KJW's Two Primary
  *   v [3] Launcher ..............................   Weapons (aio_storage_fnc_secondPrimary); folded: the
  *   | picture ................................... |   header alone, naming the weapon
  *   GEAR
@@ -190,7 +190,7 @@ private _fnc_hitBox = {
 // weapon's header what its hold needs to lift the card (fnc_cardGrip "press"): the header's words, as the lifted card
 // shows them. A click that ended a hold which lifted the card is not a click: the card was moved, not folded.
 private _fnc_foldHit = {
-    params ["_area", "_key", "_isFolded", ["_hold", false], ["_holdText", ""]];
+    params ["_area", "_key", "_isFolded", ["_hold", false], ["_holdText", ""], ["_textOffset", 0]];
 
     private _tip = [LLSTRING(WeaponCard_Fold), LLSTRING(WeaponCard_Unfold)] select _isFolded;
 
@@ -214,7 +214,7 @@ private _fnc_foldHit = {
     if (_hold) then {
         _hit setVariable [QGVAR(hold), [
             _key, _colorAccent, createHashMapFromArray [["rel", [_area select 0, _area select 1]], ["parent", _parent]],
-            [_area select 2, _area select 3], _holdText, _font, _lineSize, _colorText, _colorOnAccent
+            [_area select 2, _area select 3], _holdText, _font, _lineSize, _colorText, _colorOnAccent, _textOffset
         ]];
         _hit ctrlAddEventHandler ["MouseButtonDown", {
             params ["_hit", "_button"];
@@ -222,6 +222,9 @@ private _fnc_foldHit = {
             if (_button != 0) exitWith {};
 
             ["press", _hit] call FUNC(cardGrip);
+
+            // Not taken: the button still gets its press, and its click at the release.
+            false
         }];
     };
 
@@ -284,7 +287,7 @@ private _fnc_weaponHeader = {
         [_colorText2, _colorText] select _named, _font, 0, "caption"
     ] call FUNC(uiLabel);
 
-    [[_left, _headY - pixelH * 2, _width, _lineH + pixelH * 4], _slot, _isFolded, true, _fitted] call _fnc_foldHit;
+    [[_left, _headY - pixelH * 2, _width, _lineH + pixelH * 4], _slot, _isFolded, true, _fitted, _textX - _left] call _fnc_foldHit;
 };
 
 // ---------------------------------------------------------------------------

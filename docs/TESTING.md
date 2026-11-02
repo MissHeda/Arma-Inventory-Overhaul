@@ -170,11 +170,14 @@ A client can see them and cannot change them.
       runs to the end. A short click on the header folds or opens the card as before. Hold the header still: a bar in the accent
       colour fills along its foot for 3 s, then the header pops out as an accent plate a little larger than the line and follows
       the mouse up and down, with the drop line between the cards; let go - the card moves there, the order survives closing the
-      window and a restart, and the card does NOT fold or open on that release. Let go before 3 s: the card folds, no move. Move
-      the mouse a little while holding: the bar goes away and nothing lifts; let go on the header - it folds. Hold on a folded
-      card's header: it moves too. The section captions (Equipment, Gear, Hotbar) still fold with a click and never lift. The
-      tip on a header reads "Fold away - hold 3 s to move the card". A weapon picked up or dropped by another player while
-      holding (the window builds again): the bar goes, nothing lifts, no script error.
+      window and a restart, and the card does NOT fold or open on that release. Let go before 3 s: the card folds, no move. Hold
+      without moving at all: the bar fills every time (not only now and then). Move the mouse sideways along the header by
+      more than its height, or off it, while holding: the bar goes away and nothing lifts; let go on the header - it folds.
+      Hold on a folded card's header: it moves too. The section captions (Equipment, Gear, Hotbar) still fold with a click and
+      never lift. The tip on a header reads "Fold away - hold 3 s to move the card"; while a card is lifted no tip or hover
+      ring shows over the plate. Round theme (Glass): the words on the plate stand where the header's stood. While holding or
+      lifted, a new pile appearing nearby (another player drops something) does not rebuild the window until you let go; an
+      Escape or another window opening over it drops the card where it was, no script error.
 - [ ] No vanilla inventory: the Gear key, ACE's "Inventory" on an unconscious soldier, ACE's "Open backpack", a crate and a
       vehicle all open ours; after a respawn, a team switch and in Zeus remote control as well; with Better Inventory
       loaded `findDisplay 602` stays null; the setting "Replace the vanilla inventory" is gone from the CBA menu.

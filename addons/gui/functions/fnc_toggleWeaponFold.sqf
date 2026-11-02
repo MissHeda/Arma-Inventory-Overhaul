@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * Folds a weapon card of the equipment column to its header line, or opens it again (fnc_drawEquipmentCards) - a
- * click on the header's chevron or caption. The column's sections fold the same way, under "equipment", "gear" and
+ * click on the header (held, it moves the card instead, fnc_cardGrip). The column's sections fold the same way, under "equipment", "gear" and
  * "hotbar". Folded, the header names the weapon and still takes a weapon dragged
  * onto it, but the card and its attachments are gone, so the column does not keep the room of a weapon that is not
  * used. The choice is each player's own, kept in the profile (GVAR(weaponFolds)); until the first click every card
