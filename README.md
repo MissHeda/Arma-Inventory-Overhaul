@@ -342,6 +342,40 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   open. A server can switch the palette off with "Players may pick their colours" (`aio_gui_playerColours`, on the wizard's General page): there is
   no button then, and everyone sees the Arma colour of their profile and the standard look.
 
+## Right-click menu and double click, for modders and mission makers
+
+Rows of the inventory's right-click menu are options of CBA's item context menu, so anything registered with
+`CBA_fnc_addItemContextMenuOption` already shows there (and in the vanilla inventory). On top of that, without script:
+
+```cpp
+class CfgAioMenu {
+    class Entries {                              // new rows; the class name is the row's id
+        class myMod_drink {
+            displayName = "Drink";
+            items[] = {"myMod_Canteen"};         // classes (child classes too), "##" + subtype, "#" + type, "#All"
+            statement = "systemChat 'Gulp'";    // _this = [unit, container, item, slot, params, id]
+            condition = "true";                  // shown at all (optional)
+            enabled = "true";                    // greyed out while false (optional)
+            consume = 0;                         // 1: the item is used up first (optional)
+            doubleClick = 1;                     // a double click on these items runs it (optional)
+        };
+    };
+    class Hide {                                 // rows hidden by id
+        class myMod_noDrop { entries[] = {"drop", "hotbar"}; items[] = {"myMod_Canteen"}; };
+    };
+    class DoubleClick {                          // "move", "menu", or the id (or name) of a row
+        class myMod_canteen { items[] = {"myMod_Canteen"}; action = "menu"; };
+    };
+};
+```
+
+The same from script, on every machine with a player: `aio_gui_fnc_addMenuEntry`, `aio_gui_fnc_hideMenuEntry`,
+`aio_gui_fnc_setDoubleClick` (see their headers). Ids of the window's own rows: `inspect`, `equip`, `attach`, `load`,
+`detach`, `drop`, `open`, `repack`, `hotbar`, `kit`, `radio`, `selectAll`, `arsenal`, `settings`, `cancel`, `deselect`;
+an option of another mod is hidden by its CBA id. The server setting "Hidden menu entries" hides rows for everyone, and
+each player picks what a double click does on items with options of other mods: move them over (default) or open
+their menu, as the vanilla inventory with CBA does.
+
 ## The vanilla inventory
 
 Gone while this mod is loaded. The Gear key, ACE's "Inventory" and "Open backpack", crates, vehicles and

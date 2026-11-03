@@ -285,6 +285,30 @@
     false
 ] call EFUNC(main,addSetting);
 
+// ----- Right-click menu and double click -----
+
+// Each player's own habit: a double click on an item that other mods add options to (CBA's item context menu)
+// moves it over, as everywhere in this window, or opens its menu, as the vanilla inventory with CBA does. An item
+// a mod or the mission set a double click for (CfgAioMenu, aio_gui_fnc_setDoubleClick) does what that says.
+// Read at the double click (fnc_doubleClickRule).
+[
+    QGVAR(doubleClickOptions),
+    "LIST",
+    [LLSTRING(Setting_DoubleClickOptions), LLSTRING(Setting_DoubleClickOptions_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [["move", "menu"], [LLSTRING(Setting_DoubleClickOptions_Move), LLSTRING(Setting_DoubleClickOptions_Menu)], 0],
+    0
+] call CBA_fnc_addSetting;
+
+// For everyone alike: rows of the right-click menu the server does not want, by id, separated by commas
+// (fnc_menuFilter). Read as a menu opens.
+[
+    QGVAR(menuHidden),
+    "EDITBOX",
+    [LLSTRING(Setting_MenuHidden), LLSTRING(Setting_MenuHidden_Desc)],
+    ""
+] call EFUNC(main,addSetting);
+
 // ----- Living persons -----
 
 // For everyone alike: who may open whom and what they may change there is the mission's rule - asked by

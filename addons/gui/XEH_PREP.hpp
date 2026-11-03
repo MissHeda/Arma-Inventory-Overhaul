@@ -112,6 +112,15 @@ PREP(cbaSlotTarget);
 PREP(cbaOptions);
 PREP(cbaRun);
 
+// The menu and the double click, as mods and missions set them (CfgAioMenu)
+PREP(menuInit);
+PREP(menuRules);
+PREP(menuFilter);
+PREP(doubleClickRule);
+PREP(addMenuEntry);
+PREP(hideMenuEntry);
+PREP(setDoubleClick);
+
 // Searching loot
 PREP(isSearched);
 PREP(isSealed);

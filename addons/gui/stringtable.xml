@@ -1356,5 +1356,28 @@ Off does it at once; a drag never waits.</English>
         <Key ID="STR_aio_gui_Zone_Stomach">
             <English>stomach</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClickOptions">
+            <English>Double click on items with options of other mods</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClickOptions_Desc">
+            <English>What a double click does with an item another mod adds right-click options to
+(CBA's item context menu). Items a mod or the mission set a double click for
+do what that says.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClickOptions_Move">
+            <English>Move it over (as every other item)</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClickOptions_Menu">
+            <English>Open its menu (as the vanilla inventory)</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_MenuHidden">
+            <English>Hidden menu entries</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_MenuHidden_Desc">
+            <English>Rows of the right-click menu nobody sees, by id, separated by commas,
+e.g. "hotbar, settings". The window's own: inspect, equip, attach, load, detach,
+drop, open, repack, hotbar, kit, radio, selectAll, arsenal, settings.
+Options of other mods (CBA) by their id.</English>
+        </Key>
     </Package>
 </Project>
