@@ -1379,5 +1379,22 @@ e.g. "hotbar, settings". The window's own: inspect, equip, attach, load, detach,
 drop, open, repack, hotbar, kit, radio, selectAll, arsenal, settings.
 Options of other mods (CBA) by their id.</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_EnginePut">
+            <English>Drop on the ground by the engine</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_EnginePut_Desc">
+            <English>A magazine or item dropped from your own uniform, vest or backpack goes down by the
+game's own action, so other mods see it as in the vanilla inventory (drone mods
+deploy their drone this way). Automatic: only while such a mod is listening.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_EnginePut_Auto">
+            <English>Automatic</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_EnginePut_Always">
+            <English>Always</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_EnginePut_Never">
+            <English>Never (through the inventory's own piles)</English>
+        </Key>
     </Package>
 </Project>

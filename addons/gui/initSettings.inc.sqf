@@ -309,6 +309,16 @@
     ""
 ] call EFUNC(main,addSetting);
 
+// For everyone alike: whether a drop on the ground goes by the engine's own action, so that the engine's "Put"
+// event comes for other mods that answer it - drone mods deploy their drone from the item that way. "auto": only
+// while another mod listens to it on the player (fnc_hasForeignPut). Read at each drop (fnc_engineDrop).
+[
+    QGVAR(enginePut),
+    "LIST",
+    [LLSTRING(Setting_EnginePut), LLSTRING(Setting_EnginePut_Desc)],
+    [["auto", "always", "never"], [LLSTRING(Setting_EnginePut_Auto), LLSTRING(Setting_EnginePut_Always), LLSTRING(Setting_EnginePut_Never)], 0]
+] call EFUNC(main,addSetting);
+
 // ----- Living persons -----
 
 // For everyone alike: who may open whom and what they may change there is the mission's rule - asked by

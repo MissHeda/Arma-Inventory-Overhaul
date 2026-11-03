@@ -121,6 +121,10 @@ PREP(addMenuEntry);
 PREP(hideMenuEntry);
 PREP(setDoubleClick);
 
+// Drops by the engine, for mods that answer its "Put" event
+PREP(hasForeignPut);
+PREP(engineDrop);
+
 // Searching loot
 PREP(isSearched);
 PREP(isSealed);

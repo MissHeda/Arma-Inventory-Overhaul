@@ -12,6 +12,9 @@
  * window's settings for it say (aio_compat_efak_fnc_checkTouch). Something already on the ground, not
  * searched yet or under way stays.
  *
+ * An item of the player's own uniform, vest or backpack goes down by the engine's own action instead when the
+ * server setting says so, so that the engine's "Put" event comes for other mods (fnc_engineDrop).
+ *
  * Arguments:
  * 0: Grid index <NUMBER>
  * 1: Tile index <NUMBER>
@@ -65,5 +68,9 @@ if (_kit isNotEqualTo "") exitWith {
 
 // Already on the ground.
 if ([_from] call EFUNC(storage,isGroundHolder)) exitWith {false};
+
+// Another mod answers the engine's "Put" event (a drone deployed from its item): the engine puts it down, so
+// that the event comes (fnc_engineDrop - as the server setting says).
+if ([_from, _tile, _count] call FUNC(engineDrop)) exitWith {true};
 
 [_from, "ground", _tile, _count, []] call FUNC(applyMove)

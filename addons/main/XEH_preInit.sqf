@@ -38,7 +38,7 @@ GVAR(topics) = [
         "aio_storage_nearbyRange", "aio_storage_stackMultiplier", "aio_gui_handDrop", "aio_gui_handMove", "aio_gui_handEquip",
         "aio_gui_waitMove", "aio_gui_waitDrop", "aio_gui_waitWorn", "aio_gui_waitEquip",
         "aio_gui_searchBodies", "aio_gui_searchPersons",
-        "aio_gui_searchContainers", "aio_gui_searchZeus", "aio_gui_searchGround", "aio_gui_searchOnClick", "aio_gui_soundsWorld"
+        "aio_gui_searchContainers", "aio_gui_searchZeus", "aio_gui_searchGround", "aio_gui_searchOnClick", "aio_gui_soundsWorld", "aio_gui_enginePut"
     ]],
     ["persons", ELSTRING(setup,Topic_persons), ["aio_gui_personNotify", "aio_gui_personOpen", "aio_gui_personItems", "aio_gui_personWorn"]],
     ["containers", ELSTRING(storage,SubCategory_Containers), ["aio_storage_migrate", "aio_storage_useUniform", "aio_storage_useVest", "aio_storage_useBackpack"]],
