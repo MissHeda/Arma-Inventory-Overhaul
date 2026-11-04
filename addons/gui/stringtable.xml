@@ -1081,7 +1081,7 @@
             <English>Text size</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_TextSize_Desc">
-            <English>Size of the window's words, on top of\nthe tile scale (default 1).\nAlso set live in the window:\nthe size button in the header.</English>
+            <English>Size of the window's words and of the\nnames and counts on the tiles, on top of\nthe tile scale (default 1).\nAlso set live in the window:\nthe size button in the header.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_TileNames">
             <English>Item names on tiles</English>
@@ -1144,7 +1144,7 @@ Off does it at once; a drag never waits.</English>
             <English>Text</English>
         </Key>
         <Key ID="STR_aio_gui_Size_Text_Tip">
-            <English>The window's words, on top of the tiles: larger words on small tiles, or smaller ones.</English>
+            <English>The window's words and the names and counts on the tiles: larger words on small tiles, or smaller ones.</English>
         </Key>
         <Key ID="STR_aio_gui_Size_Tiles">
             <English>Tiles</English>

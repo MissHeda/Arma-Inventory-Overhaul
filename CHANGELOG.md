@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.57 - beta
+
+### Changed
+
+- Text size also sets the names and counts on the tiles, so they can be made larger without larger tiles. Larger words have less room on a small tile: a name is cut sooner, and a magazine's rounds may show without the capacity (#62).
+
 ## 0.6.56 - beta
 
 ### Added

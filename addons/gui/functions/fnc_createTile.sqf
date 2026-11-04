@@ -143,7 +143,17 @@ private _corners = if (_shaped) then {[]} else {[_grid, [_left, _top, _width, _h
 private _padY = _cellH * 0.07;
 private _padX = SQUARE(_padY);
 private _innerW = _width - _padX * 2;
-private _textH = _cellH * 0.28;
+
+// The name and the counts: a share of the cell, and the player's text size on top (aio_gui_textSize, read and bounded as in
+// fnc_textScale), so they can grow without the tiles growing.
+private _textSize = missionNamespace getVariable [QGVAR(textSize), 1];
+
+if !(_textSize isEqualType 0) then {
+    _textSize = 1;
+};
+
+private _cellText = _cellH * 0.28;
+private _textH = _cellText * ((_textSize max TEXT_SIZE_MIN) min TEXT_SIZE_MAX);
 private _font = _theme getOrDefault ["font", "PuristaMedium"];
 private _fontBold = _theme getOrDefault ["fontBold", "PuristaSemibold"];
 private _controls = [];
@@ -387,10 +397,15 @@ if (_hidden) then {
         private _stackText = format ["%1/%2", _count, _stack];
         private _stackColor = _theme getOrDefault ["tileCountColor", [1, 1, 1, 1]];
 
+        // A stack has no shorter form, as a magazine's rounds have: where the text size would take it out of the box's room it is
+        // set only as large as fits - never under the size the cell gives.
+        private _stackNeed = (_stackText getTextWidth [_fontBold, _textH]) * TEXT_SLACK + SQUARE(_textH * 1.15 * 0.35);
+        private _stackH = (_textH * (1 min (_innerW / _stackNeed))) max (_textH min _cellText);
+
         // Only measured: the label lies on exactly the box and draws it as its own background - one control
         // for the box and its words instead of two, on every stack of the window.
         ([
-            _display, _parent, _stackText, _fontBold, _textH, _left + _width - _padX - _stackX, _countBottom - _stackY, _innerW, _theme, true, false, true
+            _display, _parent, _stackText, _fontBold, _stackH, _left + _width - _padX - _stackX, _countBottom - _stackY, _innerW, _theme, true, false, true
         ] call FUNC(drawCountBackdrop)) params ["_boxControls", "_boxRect", ["_boxColor", []]];
 
         _controls append _boxControls;
@@ -400,14 +415,14 @@ if (_hidden) then {
         private _noBox = _boxRect isEqualTo [];
 
         if (_noBox) then {
-            _boxRect = [_left + _padX, _countBottom - _textH * 1.15, _innerW, _textH * 1.15];
-            _stackW = (_stackText getTextWidth [_fontBold, _textH]) * TEXT_SLACK;
+            _boxRect = [_left + _padX, _countBottom - _stackH * 1.15, _innerW, _stackH * 1.15];
+            _stackW = (_stackText getTextWidth [_fontBold, _stackH]) * TEXT_SLACK;
         } else {
             _stackW = _boxRect select 2;
         };
 
         private _stackLabel = [
-            _display, _parent, _boxRect, _stackText, _textH, _stackColor, _fontBold, [2, 1] select _noBox, "stack"
+            _display, _parent, _boxRect, _stackText, _stackH, _stackColor, _fontBold, [2, 1] select _noBox, "stack"
         ] call FUNC(uiLabel);
 
         if (_boxControls isEqualTo [] && {_boxColor isNotEqualTo []}) then {

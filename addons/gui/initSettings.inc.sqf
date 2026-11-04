@@ -23,8 +23,9 @@
     {[] call FUNC(sizeChanged)}
 ] call CBA_fnc_addSetting;
 
-// Each player's own eyes: the window's words grow and shrink with the tiles, and this on top of that (fnc_textScale) - larger
-// words on small tiles for a player who found them hard to read, smaller ones for a window that felt too big.
+// Each player's own eyes: the window's words grow and shrink with the tiles, and this on top of that (fnc_textScale), the names
+// and counts on the tiles too (fnc_createTile) - larger words on small tiles for a player who found them hard to read, smaller
+// ones for a window that felt too big.
 [
     QGVAR(textSize),
     "SLIDER",
