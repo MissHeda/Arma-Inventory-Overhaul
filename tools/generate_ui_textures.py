@@ -279,6 +279,14 @@ def icon_palette(d, s, w):
         d.ellipse([s * x - dab, s * y - dab, s * x + dab, s * y + dab], fill=WHITE)
 
 
+def icon_size(d, s, w):
+    # Bigger and smaller: a double-headed arrow from corner to corner, each head an open corner as on a frame's
+    # handle. The size button in the header, next to the palette.
+    line(d, [(s * 0.28, s * 0.72), (s * 0.72, s * 0.28)], w)
+    line(d, [(s * 0.46, s * 0.24), (s * 0.76, s * 0.24), (s * 0.76, s * 0.54)], w)
+    line(d, [(s * 0.24, s * 0.46), (s * 0.24, s * 0.76), (s * 0.54, s * 0.76)], w)
+
+
 def icon_weight(d, s, w):
     # A kettlebell: a round body with a flat foot, and its handle.
     r = s * 0.23
@@ -1093,6 +1101,7 @@ def build_images():
         "icon_sound_off_ca": stroke_icon(icon_sound_off),
         "icon_style_ca": stroke_icon(icon_style),
         "icon_palette_ca": stroke_icon(icon_palette),
+        "icon_size_ca": stroke_icon(icon_size),
         "icon_weight_ca": stroke_icon(icon_weight),
         # The setup wizard: its cog in the inventory's header and in Eden's Tools menu, and its controls.
         "icon_setup_ca": stroke_icon(icon_setup),

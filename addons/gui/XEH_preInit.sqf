@@ -382,6 +382,33 @@ if !(GVAR(sortMode) isEqualType "" && {GVAR(sortMode) in SORT_MODES}) then {
 
 uiNamespace setVariable [QGVAR(sortButtons), []];
 
+// The order of the weapon cards in the equipment column, top down (fnc_drawEquipmentCards): each player's own,
+// kept in the profile, changed by dragging a card by its grip (fnc_cardGrip). An order that does not name
+// each of the four once - an older or a broken one - is the default again.
+GVAR(weaponOrder) = profileNamespace getVariable [QGVAR(weaponOrder), []];
+
+if !(GVAR(weaponOrder) isEqualType [] && {
+    private _sorted = +GVAR(weaponOrder);
+    _sorted sort true;
+    _sorted isEqualTo ["handgun", "launcher", "primary", "primary2"]
+}) then {
+    GVAR(weaponOrder) = ["primary", "primary2", "handgun", "launcher"];
+};
+
+// Which weapon cards the player folded to their header line, slot -> folded (fnc_toggleWeaponFold), kept in the
+// profile as [slot, folded] pairs - and which sections of the equipment column, under "equipment", "gear" and
+// "hotbar". A card the player never folded or opened is open - but the second primary's,
+// folded while nothing is on the back (fnc_drawEquipmentCards).
+GVAR(weaponFolds) = createHashMap;
+
+{
+    _x params [["_foldSlot", "", [""]], ["_foldOn", false, [false]]];
+
+    if (_foldSlot isNotEqualTo "" && {(_x param [1, -1]) isEqualType false}) then {
+        GVAR(weaponFolds) set [_foldSlot, _foldOn];
+    };
+} forEach (([profileNamespace getVariable [QGVAR(weaponFolds), []]] param [0, [], [[]]]) select {_x isEqualType []});
+
 // The window's moves under way, request id (aio_storage_fnc_request) -> [sources, targets, time, feels,
 // details] (fnc_sendMoves): sources [[holder, key, block, col, row], ...] are faded and cannot be lifted,
 // targets [[holder, block, col, row, w, h], ...] outlined (fnc_drawPending) until the answer is finished;
@@ -531,6 +558,13 @@ GVAR(style) = "main";
 GVAR(palette) = +PALETTE_DEFAULT;
 GVAR(paletteDirty) = false;
 GVAR(menuRemake) = false;
+
+// The sizes the size popover changed while a slider was dragged, still to be written to CBA when it is let go (fnc_sizeSet).
+GVAR(sizeDirty) = [];
+
+// The most rows a compartment of the loot shows that pages could cut, as the last build drew it (fnc_viewBlocks, fnc_drawSection):
+// the size popover tells where no page size would change anything (fnc_openSizeMenu).
+GVAR(tallestLoot) = 0;
 
 // What the profile holds, read as fnc_paletteRead reads any palette: nothing usable keeps the window as it ships.
 private _savedPalette = [profileNamespace getVariable [QGVAR(palette), []]] call FUNC(paletteRead);

@@ -107,6 +107,10 @@
 // in seconds (XEH_postInit, fnc_guardVanilla).
 #define GUARD_INTERVAL 0.25
 
+// How often the soldiers the player leads are given the inventory handler, in seconds (XEH_postInit,
+// fnc_isSubordinate): one who joined the group since gets it at the next look.
+#define SUBORDINATE_INTERVAL 2
+
 // How many frames fnc_open waits for a vanilla inventory to go before it makes the window: made while
 // one is open, the window would be its child dialog and close with it (fnc_guardVanilla).
 #define OPEN_TRIES 10
@@ -509,6 +513,24 @@
 #define TEXT_MIN_PX 12
 #define TEXT_SCALE (call aio_gui_fnc_textScale)
 #define TEXT_UNIT (UNIT * TEXT_SCALE)
+
+// The player's text size (aio_gui_textSize) on top of that: a share of the words the tiles give, for a player who wants
+// smaller tiles with words still easy to read, or the other way round (a Steam user, 0.6.32: the words nearly unreadable,
+// the window too big). TEXT_MIN_PX stays the floor whatever it says.
+#define TEXT_SIZE_MIN 0.8
+// The most of a slot's height one line of its words takes (fnc_drawSlot): a small box keeps its words inside however large
+// the tile and text sizes make them.
+#define SLOT_LINE_MAX 0.3
+#define TEXT_SIZE_MAX 1.4
+
+// The defaults of the three sizes the size popover sets (fnc_openSizeMenu) - the CBA settings' own (initSettings.inc.sqf), and
+// what its Default button takes them back to.
+#define CELL_SCALE_DEFAULT 1.1
+#define TEXT_SIZE_DEFAULT 1
+#define PAGE_ROWS_DEFAULT 10
+
+// The tile and text sliders of the size popover (fnc_sizeSlide) move in steps of SIZE_STEP; the rows per page in whole rows.
+#define SIZE_STEP 0.05
 
 // The room between two compartments of a container, a share of a cell rounded to whole pixels: between
 // blocks that flow side by side or one under another (fnc_flowCompartments).

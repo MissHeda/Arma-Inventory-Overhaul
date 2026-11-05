@@ -2,6 +2,109 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.40 - beta
+
+### Changed
+
+- A weapon card's attachment boxes are in the same places on every card: muzzle, optic and rail on top; bipod, magazine and second magazine below. The handgun and the launcher leave the places of what they cannot take empty.
+- The grip's two chevrons sit closer together, with a longer dash between them.
+
+### Fixed
+
+- The tip of a fold caption or grip in the equipment column still went away on a click. Those buttons now take the click the way the fold tabs of the gear columns do, and keep their tip.
+
+## 0.6.39 - beta
+
+### Added
+
+- The sections of the equipment column - Equipment, Gear and Hotbar - fold away with a click on their caption, like the weapon cards: hide the hotbar if you never use it. Kept in your profile.
+
+### Changed
+
+- A weapon card's grip shows a chevron up and one down with a dash between them.
+
+### Fixed
+
+- After a click on a fold caption the tip at the mouse went away until the mouse moved; it shows again at once now, for every button that builds the window anew.
+
+## 0.6.38 - beta
+
+### Added
+
+- Each weapon card has a header line now: click its caption to fold the card away to that line and again to open it; the folded line names the weapon and still takes one dragged onto it. The second primary's card starts folded while nothing is on your back. What you fold is kept in your profile.
+- Drag a weapon card by the grip (the six dots at the right end of its header) to put it anywhere in the column - the handgun on top and the primaries at the bottom, say. A line shows where it goes; your order is kept in your profile.
+
+### Fixed
+
+- With a larger text size the handgun's picture vanished from its card and the cards got cramped: the key moved into the header, and a weapon's picture always keeps at least half its card.
+- Setup wizard: the text box of "Message when not allowed" (Vanilla Arsenal) started far right of the other controls; it lines up with them now.
+
+## 0.6.37 - beta
+
+### Changed
+
+- BackpackOnChest Redux: the backpack slot's menu offers its moves only where that mod allows them (not while its setting turns them off, not under a parachute).
+
+## 0.6.36 - beta
+
+### Fixed
+
+- Size popover (issue #51): the tips of its rows lay behind the card. They show on a hint line inside it now, as in the colour popover.
+- Size popover: "Rows per page" seemed to do nothing. It only cuts a crate or vehicle of the loot that is filled with more rows than a page; where nothing looted is, its name is dimmed and its tip - and a press on its slider - say so.
+- With large tiles, the rounds of a loaded magazine ("0/30") in the small boxes beside a weapon were cut off or ran into the box's caption. A slot's words now never take more than its height allows, and the rounds are set smaller where the box is too narrow - at every tile and text size.
+
+## 0.6.35 - beta
+
+### Fixed
+
+- After the first inventory opening the soldier could not walk until V was pressed: the engine left him in its inventory pose, which only its own inventory ends. The window and the closed vanilla inventory now take him out of it (issue #49).
+- Quick move no longer puts things on a pile at your feet that the loot column shows - dropping is G's; with nothing else looted it moves within your own gear (issue #50).
+- A soldier you lead, told to open his inventory, walked back into formation and the window closed at once: he stays put while it is open and follows again when it closes (issue #48).
+
+## 0.6.34 - beta
+
+### Added
+
+- BackpackOnChest (original and Redux): the right-click menu of your backpack slot puts the backpack on your chest, back onto your back, or swaps the two - that mod's own actions (issue #34).
+- Antistasi Ultimate: "Loot around" of a loot truck or crate now takes what lies in this mod's piles on the ground as well - it looted only the engine's own piles by their class and passed over everything dropped or moved out of a body or a box through the window (issue #35).
+
+## 0.6.33 - beta
+
+### Added
+
+- Second primary weapon as a slot of its own (issue #52), with WebKnight's or KJW's Two Primary Weapons loaded: the rifle on your back gets a card under your primary, with its magazine and attachments beside it, as on the primary. Drag a rifle onto it or off it, drop it, Ctrl+click it into your gear, change its optic, magazine and other parts like on any weapon. Drag the primary and the second primary onto each other, or pick "Swap with primary" / "Swap with second primary" in the right-click menu, and they trade places. A double click on a rifle with your hands full puts it on your back when that is free. The card's corner shows that mod's own switch key. Everything goes through that mod's own way of keeping the weapon (its variables, the weapon hanging on your back, with KJW's its weight in ACE), so its key switches to a rifle put there in the window as to one it put there itself; KJW's blacklist and whitelist decide what may go on the back. KJW's mod keeps the back weapon of the player only, WebKnight's of any soldier - your subordinates' too.
+
+### Changed
+
+- With WebKnight's Two Primary Weapons, a move in the window that empties your hands no longer brings the weapon on your back into them: it now has a slot you see and move yourself.
+
+## 0.6.32 - beta
+
+### Added
+
+- Size menu in the window (issue #51): a new button in the header, beside the palette, opens a popover with a slider for **Tiles** (the tile scale), **Text** and **Rows per page**. The window grows and shrinks behind it while you drag - no reopening. "Default" takes all three back. They are your CBA client settings, both ways: what you set here is saved there, and a change in CBA's Addon Options shows at once in an open window and in the popover. A size the server forces is greyed out.
+- Text size (`aio_gui_textSize`, client, 0.8 to 1.4, default 1): the window's words on top of what the tile scale gives them - larger words on small tiles, or smaller ones. The 12-pixel floor that keeps them readable stays.
+
+### Changed
+
+- The tile scale (`aio_gui_cellScale`) and the rows per page (`aio_gui_pageRows`) take effect at once in an open window instead of at the next opening; the tile scale moves in steps of 0.05.
+
+## 0.6.31 - beta
+
+### Changed
+
+- Quick move (double click, F) with nothing being looted no longer drops the item at your feet: it moves it within your own gear - out of the backpack into the vest, then the uniform; out of the vest or the uniform into the backpack, then the other one (issue #50). Dropping stays on G. Seated, it still goes into the vehicle.
+
+### Fixed
+
+- Telling a soldier you lead to open his inventory (command menu) opened your own gear instead: the window now shows your gear with his beside it, whole, as for any person - he has to stand next to you (issue #48).
+
+## 0.6.30 - beta
+
+### Fixed
+
+- Without ACE, the line that says why a reload or a throw was held back ("Use items from ..." set to Nothing or Only whitelisted) and the arsenal's "removed, as they did not fit" came as the game's hint box in the corner of the screen, which stays there; they are CBA notifications now, as every other short message without ACE.
+
 ## 0.6.29 - beta
 
 ### Added

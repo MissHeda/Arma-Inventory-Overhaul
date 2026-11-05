@@ -74,7 +74,8 @@
  *    "unit", "slot" - whose slot and which (equip: the player's, unequip: anybody's, swap: where it
  *                 comes off)
  *    "toUnit", "toSlot" - for "swap": the unit it goes onto and the slot there; what that unit wore
- *                 there comes back onto "unit" (fnc_doSwap)
+ *                 there comes back onto "unit" (fnc_doSwap). The same unit for its primary and the second
+ *                 primary on its back, either of them maybe empty
  *    "tiles"    - for "placeMany": [[entry, cell], ...] in the holder "from"; a cell is [col, row,
  *                 compartment] or, turned, [col, row, compartment, width, height]
  *    "otherEntry", "otherCell" - for "exchange": the tile that lies in "to" and the cell in "from" it
@@ -450,6 +451,9 @@ private _fnc_unequipSteps = {
 // wore there -, that onto the first. Only takeOff and putOn, each where its unit is local; nothing that
 // does not go on is lost: it came off a slot, so settlement puts it back on there while that is empty,
 // else into the vehicle or onto the ground.
+//
+// One unit's primary and the second primary on its back (aio_storage_fnc_secondPrimary) swap the same way, all of
+// it where the unit is local; with the first slot empty, the other one's weapon only moves over.
 private _fnc_swapSteps = {
     params ["_move"];
 
@@ -458,9 +462,19 @@ private _fnc_swapSteps = {
     private _toUnit = _move getOrDefault ["toUnit", objNull];
     private _toSlot = _move getOrDefault ["toSlot", _slot];
 
-    if (isNull _fromUnit || {isNull _toUnit} || {_fromUnit isEqualTo _toUnit} || {_slot isEqualTo ""} || {_toSlot isEqualTo ""}) exitWith {["Failed", []]};
+    if (isNull _fromUnit || {isNull _toUnit} || {_slot isEqualTo ""} || {_toSlot isEqualTo ""}) exitWith {["Failed", []]};
+    if (_fromUnit isEqualTo _toUnit && {_slot isEqualTo _toSlot}) exitWith {["Failed", []]};
 
     private _worn = [_fromUnit, _slot] call EFUNC(storage,getSlot);
+
+    if (count _worn == 0 && {_fromUnit isEqualTo _toUnit}) exitWith {
+        if (count ([_toUnit, _toSlot] call EFUNC(storage,getSlot)) == 0) exitWith {["Failed", []]};
+
+        ["", [
+            [_toUnit, "takeOff", [_toUnit, _toSlot], "take"],
+            [_fromUnit, "putOn", [_fromUnit, _slot, ["#step", 0, 0]], "land"]
+        ], _fromUnit, "", objNull]
+    };
 
     if (count _worn == 0) exitWith {["Failed", []]};
 

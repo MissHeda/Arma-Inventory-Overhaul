@@ -128,7 +128,7 @@ if (isNull _center || {is3DEN} || {!GVAR(ready)}) exitWith {};
             private _text = format [LLSTRING(Removed), _names];
 
             if (isNil QACEFUNC(common,displayText)) then {
-                hint _text;
+                [_text] call EFUNC(main,showText);
             } else {
                 [_text, false, 5, 1] call ACEFUNC(common,displayText);
             };

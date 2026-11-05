@@ -1047,7 +1047,7 @@ call {
             };
 
             // A magazine or attachment on the weapon itself goes on the part that takes it - loaded at once.
-            if (!_fits && {_dragGroup isEqualTo []} && {_slot in ["primary", "handgun", "launcher"]}) then {
+            if (!_fits && {_dragGroup isEqualTo []} && {_slot in ["primary", "handgun", "launcher", "primary2"]}) then {
                 private _part = [GVAR(unit), _slot, _entry get "class"] call EFUNC(storage,partFor);
 
                 if (_part isNotEqualTo "") then {
@@ -1077,13 +1077,18 @@ call {
 
     // ----- Worn gear onto another unit's slot: exchanged (fnc_canSwap, fnc_doSwap) -----
     // A slot's item - the player's own or a body's - over the same slot of the other: the player's
-    // backpack onto a body's backpack slot, a body's vest onto the player's vest box.
+    // backpack onto a body's backpack slot, a body's vest onto the player's vest box. And on one unit its
+    // primary and the second primary on its back (a two-primary mod), over each other's card.
     if (_slotSource isNotEqualTo [] && {_onTop isEqualTo ""} && {_dragGroup isEqualTo []} && {[] call FUNC(isInventoryMode)}) then {
         private _hit = _slotHits findIf {
             private _record = _slots select _x;
+            private _owner = _record param [6, objNull];
 
-            (_record param [5, ""]) isNotEqualTo "" && {(_record param [7, -1]) < 0}
-            && {!isNull (_record param [6, objNull])} && {(_record param [6, objNull]) isNotEqualTo (_slotSource select 0)}
+            (_record param [5, ""]) isNotEqualTo "" && {(_record param [7, -1]) < 0} && {!isNull _owner}
+            && {
+                _owner isNotEqualTo (_slotSource select 0)
+                || {[_slotSource select 1, _record param [5, ""]] in [["primary", "primary2"], ["primary2", "primary"]]}
+            }
         };
 
         if (_hit < 0) exitWith {};

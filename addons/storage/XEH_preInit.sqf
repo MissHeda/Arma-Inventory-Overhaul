@@ -61,6 +61,15 @@ GVAR(stackRoomy) = createHashMap;
 // during a mission, and asking the engine for the compatible magazines of every slot at every lift is not cheap.
 GVAR(compatSets) = createHashMap;
 
+// The second primary weapon on the back that WebKnight's or KJW's Two Primary Weapons keeps outside the
+// loadout, as a slot of its own ("primary2", fnc_secondPrimary, fnc_setSecondPrimary). Empty unless one of
+// those mods is loaded: its compat addon fills it in its preInit - "name" STRING, the mod's name for the log;
+// "get" CODE [unit] -> [has the slot <BOOL>, weapon as weaponsItems gives it or [] <ARRAY>]; "set" CODE
+// [unit, weapon or []] -> nothing, done the mod's own way (its holder on the back, its variables); "accepts"
+// CODE [unit, class] -> BOOL, what the mod lets go there (left out, every rifle); "keybind" [CBA category,
+// action] of the mod's own switch key, which the weapon card names (aio_gui_fnc_drawEquipmentCards).
+GVAR(secondPrimaryMod) = createHashMap;
+
 // Where a unit's uniform, vest and backpack keep their things travels inside its loadouts, in the extended
 // info CBA keeps with them: written when a loadout is read, read back when one is set (fnc_onLoadoutGet,
 // fnc_onLoadoutSet). On every machine - a loadout is set where the code that sets it runs, and the Eden
