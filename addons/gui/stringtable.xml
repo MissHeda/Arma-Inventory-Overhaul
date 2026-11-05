@@ -1176,6 +1176,39 @@ Off moves them at once; a drag never waits.</English>
             <English>Whether putting on and taking off a uniform, vest, backpack or headgear takes the hands' time.
 Off does it at once; a drag never waits.</English>
         </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_Behaviour">
+            <English>How it behaves</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PartGear">
+            <English>Gear</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PartHotbar">
+            <English>Hotbar</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PartSmall">
+            <English>Small slots</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PartWeapons">
+            <English>Weapons</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PartWeight">
+            <English>Weight</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_Place">
+            <English>Where things stand</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_Preview">
+            <English>Preview</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PreviewNote">
+            <English>The window behind this card changes with each row. Right click goes back through a list.</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_Shown">
+            <English>What the window shows</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_Tiles">
+            <English>On the tiles</English>
+        </Key>
         <Key ID="STR_aio_gui_Size_All">
             <English>All</English>
         </Key>
@@ -1189,7 +1222,7 @@ Off does it at once; a drag never waits.</English>
             <English>Set by the server.</English>
         </Key>
         <Key ID="STR_aio_gui_Size_Note">
-            <English>Saved in your CBA addon options. Point at a size to see what it does.</English>
+            <English>The same settings as in CBA's Addon Options, always in sync.</English>
         </Key>
         <Key ID="STR_aio_gui_Size_PageRows">
             <English>Rows per page</English>
@@ -1213,10 +1246,10 @@ Off does it at once; a drag never waits.</English>
             <English>The cells and item pictures, and the words with them. Capped where the columns would not fit.</English>
         </Key>
         <Key ID="STR_aio_gui_Size_Title">
-            <English>Size</English>
+            <English>Your settings</English>
         </Key>
         <Key ID="STR_aio_gui_Size_Tooltip">
-            <English>Size of tiles and text</English>
+            <English>Your settings: sizes, what the window shows and where</English>
         </Key>
         <Key ID="STR_aio_gui_Slot_Backpack">
             <English>Backpack</English>

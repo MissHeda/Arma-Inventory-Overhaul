@@ -168,14 +168,14 @@ if ([] call FUNC(paletteAllowed)) then {
     uiNamespace setVariable [QGVAR(paletteLine), _paletteLine];
 };
 
-// The size: a click opens the popover of the window's sizes under it (fnc_openSizeMenu) - tiles, text, rows per page -, where the
+// The player's settings: a click opens their card under it (fnc_openSizeMenu) - tiles, text, rows per page and the rest -, where the
 // window grows and shrinks behind it while a slider moves. Always drawn: they are each player's own CBA settings. Like the palette
 // it shows an accent icon and line while its popover is open (fnc_updateSizeButton).
 private _sizeRect = [_square] call _fnc_place;
 private _sizeLine = [_sizeRect, false] call _fnc_underline;
 
 private _sizeButton = [
-    _display, controlNull, _sizeRect, "size", "", UI_TEX(icon_size_ca), [false] call _fnc_buttonTheme, {
+    _display, controlNull, _sizeRect, "size", "", UI_TEX(icon_setup_ca), [false] call _fnc_buttonTheme, {
         // A left click only.
         if ((_this select 0) < 0) exitWith {};
 
@@ -221,7 +221,7 @@ private _searchRect = [SQUARE(UNIT * 11)] call _fnc_place;
 
 [_display, _searchRect, _theme, LLSTRING(Filter_Placeholder), _searchFill] call FUNC(drawFilter);
 
-// The cog: the setup wizard (aio_setup) - how big items are, how many share a tile, how containers are
+// The server: the setup wizard (aio_setup) - how big items are, how many share a tile, how containers are
 // split, the same for everyone. Drawn only for whoever may open it (aio_setup_fnc_canOpen: who runs the
 // server or is logged in as admin), asked at every draw so a login shows at once. This window closes for it
 // and comes back when the wizard closes (aio_setup_fnc_openFromGame).
@@ -229,7 +229,7 @@ if (!isNil QEFUNC(setup,openFromGame) && {call (missionNamespace getVariable [QE
     private _target = ["direct"] call (missionNamespace getVariable [QEFUNC(setup,canEdit), {createHashMap}]);
     private _canSave = !isNil "_target" && {_target isEqualType createHashMap} && {_target getOrDefault ["canSave", false]};
 
-    private _setup = [_display, controlNull, [_square] call _fnc_place, "setup", "", UI_TEX(icon_setup_ca), [] call _fnc_buttonTheme, {
+    private _setup = [_display, controlNull, [_square] call _fnc_place, "setup", "", UI_TEX(icon_server_ca), [] call _fnc_buttonTheme, {
         [0, ""] call EFUNC(setup,openFromGame);
     }] call FUNC(uiButton);
     [_setup, [LELSTRING(setup,OpenWizard_ReadOnly), LELSTRING(setup,OpenWizard)] select _canSave] call _fnc_tooltip;

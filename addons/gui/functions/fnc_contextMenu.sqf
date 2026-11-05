@@ -556,7 +556,7 @@ if (
     if (_step >= 0) then {
         _choices pushBack [
             format [LLSTRING(Menu_Settings), _settingsName], [_step, _settingsClass], {_this call EFUNC(setup,openFromGame)},
-            createHashMapFromArray [["separator", _choices isNotEqualTo []], ["icon", UI_TEX(icon_setup_ca)], ["id", "settings"]]
+            createHashMapFromArray [["separator", _choices isNotEqualTo []], ["icon", UI_TEX(icon_server_ca)], ["id", "settings"]]
         ];
     };
 };

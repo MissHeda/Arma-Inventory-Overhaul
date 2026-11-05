@@ -77,6 +77,29 @@ switch (_mode) do {
         };
 
         ["commit"] call FUNC(sizeSet);
+
+        // And the settings' rows of the card (fnc_settingsDefs), to CBA at once.
+        private _rowChanged = false;
+
+        {
+            _x params ["_setting", "", "", "", "_default"];
+
+            if (
+                _setting isNotEqualTo "" && {!([_setting] call FUNC(settingForced))}
+                && {(missionNamespace getVariable [_setting, _default]) isNotEqualTo _default}
+            ) then {
+                missionNamespace setVariable [_setting, _default];
+                _rowChanged = true;
+
+                if (!isNil "CBA_settings_fnc_set") then {
+                    [_setting, _default, 0, "client"] call CBA_settings_fnc_set;
+                };
+            };
+        } forEach (call FUNC(settingsDefs));
+
+        if (_rowChanged) then {
+            [] call FUNC(elementsChanged);
+        };
     };
 
     case "commit": {

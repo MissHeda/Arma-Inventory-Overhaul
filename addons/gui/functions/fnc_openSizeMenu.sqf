@@ -2,9 +2,13 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Opens the size popover under the size button in the header: a small card with a slider for each size of the window
- * (fnc_sizeDefs) - its name, the slider and its value - and the window grows and shrinks behind it while a slider moves, live
- * (Mia, #51: "ahh, that gets bigger and smaller"). Top to bottom:
+ * Opens the settings card under the settings button in the header: each player's own settings in one place (#66). Under the sizes the
+ * rows of fnc_settingsDefs - what the window shows, where its columns stand, the tiles, how it behaves -, a press on one changes it
+ * and the window is built again behind the card (fnc_settingsRow). Beside them a small picture of the window as these rows set it,
+ * the columns in their order and only the parts that are on. All of it is CBA's client settings, both ways.
+ *
+ * On top a slider for each size of the window (fnc_sizeDefs) - its name, the slider and its value - and the window grows and shrinks
+ * behind it while a slider moves, live (Mia, #51: "ahh, that gets bigger and smaller"). Top to bottom:
  *   Tiles          the cells, the item pictures and the words with them (aio_gui_cellScale), in per cent
  *   Text           the window's words on top of that (aio_gui_textSize), in per cent - larger words on small tiles, or smaller ones
  *   Rows per page  how many rows of a tall crate or vehicle show at a time (aio_gui_pageRows); "All" at the right end
@@ -91,8 +95,13 @@ private _headH = UNIT * 1.1;
 private _padX = SQUARE(UNIT * 0.6);
 private _padY = UNIT * 0.35;
 private _gapX = SQUARE(UNIT * 0.45);
-private _width = SQUARE(UNIT * 15);
-private _height = _padY * 2 + _headH + _count * _rowH;
+private _extras = call FUNC(settingsDefs);
+private _extraRowH = UNIT * 0.92;
+private _extraH = _extraRowH * count _extras;
+private _listW = SQUARE(UNIT * 17);
+private _previewW = SQUARE(UNIT * 12);
+private _width = _listW + _previewW;
+private _height = _padY * 2 + _headH + _count * _rowH + _extraH;
 private _chipH = UNIT * 0.8;
 private _chipSize = UNIT * 0.44;
 
@@ -101,7 +110,7 @@ private _labelX = _padX;
 private _labelW = SQUARE(UNIT * 4.8);
 private _sliderX = _labelX + _labelW + _gapX;
 private _valueW = SQUARE(UNIT * 1.8);
-private _sliderW = _width - _padX - _valueW - _gapX - _sliderX;
+private _sliderW = _listW - _padX - _valueW - _gapX - _sliderX;
 private _trackH = UNIT * 0.2;
 private _thumbH = UNIT * 0.55;
 private _thumbW = SQUARE(_thumbH);
@@ -114,6 +123,8 @@ private _trackW = _sliderW - _thumbW;
 private _noPages = GVAR(tallestLoot) <= PAGE_MIN_ROWS;
 
 // Each row's tip: what it sets, that the server set it where it did, and for the rows per page that nothing is paged now.
+// The settings' descriptions break their lines with a written \n for CBA's tooltip: here they run on and the hint line breaks them.
+private _extraTips = _extras apply {(_x param [2, ""]) regexReplace ["\\n+", " "]};
 private _tips = _defs apply {
     _x params ["_setting", "", "_tip"];
 
@@ -130,7 +141,7 @@ private _tips = _defs apply {
 
 // The hint line at the bottom: as many lines as the longest tip wraps to, at least two.
 private _hintSize = _size * 0.8;
-private _hintW = _width - _padX * 2;
+private _hintW = _listW - _padX * 2;
 private _hintLines = 2;
 
 {
@@ -141,7 +152,7 @@ private _hintLines = 2;
     } forEach (_x splitString toString [10]);
 
     _hintLines = _hintLines max _lines;
-} forEach (_tips + [LLSTRING(Size_Default_Tip), LLSTRING(Size_Note), LLSTRING(Size_PageRows_None)]);
+} forEach (_tips + _extraTips + [LLSTRING(Size_Default_Tip), LLSTRING(Size_Note), LLSTRING(Size_PageRows_None)]);
 
 private _hintH = _hintSize * 1.3 * (_hintLines min 5) + _hintSize * 0.4;
 
@@ -187,7 +198,7 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{[] call FUNC(closeMenu)}] call F
 
 private _headTop = _cardY + _padY;
 
-[_display, _layer, [_cardX + _padX, _headTop, _width - _padX * 2, _headH], LLSTRING(Size_Title), _size, _text2, _fontBold, 0, "menu"] call FUNC(uiLabel);
+[_display, _layer, [_cardX + _padX, _headTop, _listW - _padX * 2, _headH], LLSTRING(Size_Title), _size, _text2, _fontBold, 0, "menu"] call FUNC(uiLabel);
 
 // What the small button is drawn with: neutral films, the light ink of the card - the palette popover's.
 private _buttonTheme = createHashMapFromArray [
@@ -203,7 +214,7 @@ private _buttonTheme = createHashMapFromArray [
 private _chipW = [LLSTRING(Size_Default), "", _chipH, _chipSize, _buttonTheme] call FUNC(buttonWidth);
 
 private _reset = [
-    _display, _layer, [_cardX + _width - _padX - _chipW, _headTop + (_headH - _chipH) / 2, _chipW, _chipH], "default", LLSTRING(Size_Default), "",
+    _display, _layer, [_cardX + _listW - _padX - _chipW, _headTop + (_headH - _chipH) / 2, _chipW, _chipH], "default", LLSTRING(Size_Default), "",
     _buttonTheme, {
         params ["_button"];
 
@@ -216,7 +227,7 @@ private _reset = [
 
 [(_reset param [count _reset - 1, controlNull]), LLSTRING(Size_Default_Tip)] call FUNC(setTooltip);
 
-[_display, _layer, [_cardX + _padX, _headTop + _headH - pixelH, _width - _padX * 2, pixelH], _line] call FUNC(uiPanel);
+[_display, _layer, [_cardX + _padX, _headTop + _headH - pixelH, _listW - _padX * 2, pixelH], _line] call FUNC(uiPanel);
 
 // ----- A row for each size -----
 
@@ -248,7 +259,7 @@ private _rows = [];
     private _thumb = [_display, _layer, [_cardX + _trackX - _thumbW / 2, _thumbTop, _thumbW, _thumbH], UI_TEX(circle_ca), _text] call FUNC(uiIcon);
 
     private _value = [
-        _display, _layer, [_cardX + _width - _padX - _valueW, _rowTop, _valueW, _rowH], "", _size * 0.9, _text2, _font, 1, "menu"
+        _display, _layer, [_cardX + _listW - _padX - _valueW, _rowTop, _valueW, _rowH], "", _size * 0.9, _text2, _font, 1, "menu"
     ] call FUNC(uiLabel);
 
     // The hit area is the slider's whole room, a knob's width beyond the track at each end: a press near an end is that end. The
@@ -282,7 +293,167 @@ private _rows = [];
 
 // ----- The hint line: the tip of what the mouse is on, or where else the sizes are -----
 
-private _hintTop = _headTop + _headH + _count * _rowH + _padY / 2;
+// ----- The rows of the player's other settings -----
+
+private _extraTop = _headTop + _headH + _count * _rowH;
+private _boxH = UNIT * 0.5;
+private _boxW = SQUARE(_boxH);
+private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
+private _extraNameW = SQUARE(UNIT * 7.6);
+
+{
+    _x params ["_setting", "_name", "", ["_kind", ""], "_default", ["_data", []]];
+
+    private _rowTop = _extraTop + _forEachIndex * _extraRowH;
+
+    if (_setting isEqualTo "") then {
+        [_display, _layer, [_cardX + _padX, _rowTop, _listW - _padX * 2, _extraRowH], _name, _size * 0.82, _muted, _fontBold, 0, "menu"] call FUNC(uiLabel);
+        [_display, _layer, [_cardX + _padX, _rowTop + _extraRowH - pixelH, _listW - _padX * 2, pixelH], _line] call FUNC(uiPanel);
+        continue;
+    };
+
+    private _forced = [_setting] call FUNC(settingForced);
+    private _value = missionNamespace getVariable [_setting, _default];
+    private _ink = [_text, _muted] select _forced;
+    private _tip = _extraTips select _forEachIndex;
+
+    if (_forced) then {
+        _tip = _tip + " " + LLSTRING(Size_Forced);
+    };
+
+    [
+        _display, _layer, [_cardX + _padX, _rowTop, _extraNameW, _extraRowH], [_name, _extraNameW, _font, _size * 0.9] call FUNC(fitText), _size * 0.9, _ink, _font, 0, "never"
+    ] call FUNC(uiLabel);
+
+    private _valueX = _cardX + _padX + _extraNameW + _gapX;
+    private _valueRoom = _listW - _padX * 2 - _extraNameW - _gapX;
+
+    if (_kind isEqualTo "check") then {
+        private _boxX = _cardX + _listW - _padX - _boxW;
+        private _boxY = _rowTop + (_extraRowH - _boxH) / 2;
+
+        [_display, _layer, [_boxX, _boxY, _boxW, _boxH], [[1, 1, 1, 0.1], _accent] select (_value && !_forced), _boxH * 0.2] call FUNC(uiPanel);
+
+        if (_value) then {
+            [_display, _layer, [_boxX, _boxY, _boxW, _boxH], UI_TEX(icon_check_ca), [1, 1, 1, 1]] call FUNC(uiIcon);
+        };
+    } else {
+        private _shown = if (_kind isEqualTo "list") then {
+            (_data select 1) param [((_data select 0) find _value) max 0, ""]
+        } else {
+            str _value
+        };
+
+        [
+            _display, _layer, [_valueX, _rowTop, _valueRoom, _extraRowH], [_shown, _valueRoom, _font, _size * 0.82] call FUNC(fitText), _size * 0.82, [_text2, _muted] select _forced, _font, 1, "menu"
+        ] call FUNC(uiLabel);
+    };
+
+    // The whole row takes the press; its tip goes on the hint line. Nothing to press where the server set it.
+    private _hit = [_display, "AIO_Hitbox", _layer, [_cardX + _padX, _rowTop, _listW - _padX * 2, _extraRowH]] call FUNC(uiCreate);
+
+    [_hit, _tip] call FUNC(setTooltip);
+
+    if (!_forced) then {
+        _hit setVariable [QGVAR(settingsRow), _forEachIndex];
+        _hit ctrlAddEventHandler ["MouseButtonDown", {
+            params ["_ctrl", "_button"];
+
+            if !(_button in [0, 1]) exitWith {};
+
+            // On the next frame: the window is built again, and this press must not delete what it was pressed on.
+            [{_this call FUNC(settingsRow)}, [_ctrl getVariable [QGVAR(settingsRow), -1], _button]] call FUNC(later);
+        }];
+    };
+} forEach _extras;
+
+// ----- The picture of the window, as the rows set it -----
+
+private _shotX = _cardX + _listW + _padX / 2;
+private _shotW = _previewW - _padX * 1.5;
+private _shotH = UNSQUARE(_shotW) * 0.62;
+private _shotY = _headTop + _headH + _padY;
+private _small = _size * 0.62;
+private _band = [1, 1, 1, 0.12];
+private _fnc_shown = {missionNamespace getVariable [_this, true]};
+
+[_display, _layer, [_cardX + _listW, _headTop, _previewW - _padX, _headH], LLSTRING(SettingsMenu_Preview), _size, _text2, _fontBold, 0, "menu"] call FUNC(uiLabel);
+[_display, _layer, [_shotX, _shotY, _shotW, _shotH], [1, 1, 1, 0.04], _radius] call FUNC(uiPanel);
+
+private _shotGap = _shotW * 0.012;
+private _headerH = _shotH * 0.07;
+private _footerH = [0, _shotH * 0.07] select (QGVAR(showFooter) call _fnc_shown);
+
+[_display, _layer, [_shotX + _shotGap, _shotY + _shotGap, _shotW - _shotGap * 2, _headerH], _band, 0] call FUNC(uiPanel);
+
+if (_footerH > 0) then {
+    [_display, _layer, [_shotX + _shotGap, _shotY + _shotH - _footerH - _shotGap, _shotW - _shotGap * 2, _footerH], _band, 0] call FUNC(uiPanel);
+};
+
+private _order = (missionNamespace getVariable [QGVAR(columnOrder), COLUMN_ORDER_DEFAULT]) splitString ",";
+
+if ((missionNamespace getVariable [QGVAR(lootSide), "left"]) isEqualTo "right") then {
+    private _lootAt = _order find "loot";
+
+    _order set [_order find "storage", "loot"];
+    _order set [_lootAt, "storage"];
+};
+
+private _colTop = _shotY + _shotGap * 2 + _headerH;
+private _colH = _shotY + _shotH - _footerH - _shotGap * ([1, 2] select (_footerH > 0)) - _colTop;
+private _colX = _shotX + _shotGap;
+private _shares = createHashMapFromArray [["equipment", 0.3], ["loot", 0.23], ["storage", 0.23], ["free", 0.24]];
+
+{
+    private _colW = (_shotW - _shotGap * 5) * (_shares getOrDefault [_x, 0.2]);
+
+    if (_x isNotEqualTo "free") then {
+        private _word = createHashMapFromArray [
+            ["equipment", LLSTRING(Column_Equipment)], ["loot", LLSTRING(Column_Loot)], ["storage", LLSTRING(Column_Storage)]
+        ] get _x;
+
+        [_display, _layer, [_colX, _colTop, _colW, _colH], [[1, 1, 1, 0.1], [_accent select 0, _accent select 1, _accent select 2, 0.18]] select (_x isEqualTo "equipment"), 0] call FUNC(uiPanel);
+        [_display, _layer, [_colX, _colTop, _colW, _small * 1.2], [_word, _colW, _font, _small] call FUNC(fitText), _small, _text2, _font, 2, "never"] call FUNC(uiLabel);
+
+        // The equipment column's parts, those that are on: the weapons take the room the others leave.
+        if (_x isEqualTo "equipment") then {
+            private _parts = [
+                [QGVAR(showWeight), 0.09, LLSTRING(SettingsMenu_PartWeight)], ["", -1, LLSTRING(SettingsMenu_PartWeapons)], [QGVAR(showGear), 0.2, LLSTRING(SettingsMenu_PartGear)],
+                [QGVAR(showSmallSlots), 0.09, LLSTRING(SettingsMenu_PartSmall)], [QEGVAR(gui,showHotbar), 0.09, LLSTRING(SettingsMenu_PartHotbar)]
+            ] select {(_x select 0) isEqualTo "" || {(_x select 0) call _fnc_shown}};
+
+            private _partTop = _colTop + _small * 1.3;
+            private _partRoom = _colTop + _colH - _partTop;
+            private _fixedShare = 0;
+
+            {_fixedShare = _fixedShare + ((_x select 1) max 0)} forEach _parts;
+
+            {
+                _x params ["", "_share", "_partWord"];
+
+                private _partH = _partRoom * ([_share, 1 - _fixedShare] select (_share < 0));
+
+                [_display, _layer, [_colX + _shotGap, _partTop, _colW - _shotGap * 2, _partH - pixelH * 2], _band, 0] call FUNC(uiPanel);
+                [
+                    _display, _layer, [_colX + _shotGap, _partTop, _colW - _shotGap * 2, (_partH - pixelH * 2) min (_small * 1.2)],
+                    [_partWord, _colW - _shotGap * 2, _font, _small * 0.85] call FUNC(fitText), _small * 0.85, _muted, _font, 2, "never"
+                ] call FUNC(uiLabel);
+
+                _partTop = _partTop + _partH;
+            } forEach _parts;
+        };
+    };
+
+    _colX = _colX + _colW + _shotGap;
+} forEach _order;
+
+private _shotNote = [_display, "AIO_StructuredText", _layer, [_shotX, _shotY + _shotH + _padY / 2, _shotW, _small * 6]] call FUNC(uiCreate);
+
+_shotNote ctrlEnable false;
+_shotNote setVariable [QGVAR(hintSize), _small];
+[_shotNote, LLSTRING(SettingsMenu_PreviewNote)] call FUNC(setMenuHint);
+
+private _hintTop = _extraTop + _extraH + _padY / 2;
 
 [_display, _layer, [_cardX + _padX, _hintTop - _padY / 4, _hintW, pixelH], _line] call FUNC(uiPanel);
 

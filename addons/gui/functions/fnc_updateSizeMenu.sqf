@@ -64,5 +64,14 @@ private _changed = false;
     _valueCtrl ctrlSetTextColor ([_text2, _muted] select _forced);
 } forEach _rows;
 
+// The settings' rows count as well.
+{
+    _x params ["_setting", "", "", "", "_default"];
+
+    if (_setting isNotEqualTo "" && {!([_setting] call FUNC(settingForced))} && {(missionNamespace getVariable [_setting, _default]) isNotEqualTo _default}) then {
+        _changed = true;
+    };
+} forEach (call FUNC(settingsDefs));
+
 // Default only where there is something to take back.
 {_x ctrlShow _changed} forEach _reset;

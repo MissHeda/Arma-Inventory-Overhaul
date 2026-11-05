@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.61 - beta
+
+### Added
+
+- **Your settings**: the size button in the header is now a cog and opens a card with your own settings in one place: sizes, what the window shows, where the columns stand, the tiles and how it behaves. A small picture shows the layout, the window behind changes with each row, and everything stays in sync with CBA's Addon Options (#66).
+
+### Changed
+
+- The setup wizard's button in the header and its row in the right-click menu have a server icon.
+
 ## 0.6.60 - beta
 
 ### Added

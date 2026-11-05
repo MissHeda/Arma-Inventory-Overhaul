@@ -287,6 +287,13 @@ def icon_size(d, s, w):
     line(d, [(s * 0.24, s * 0.46), (s * 0.24, s * 0.76), (s * 0.54, s * 0.76)], w)
 
 
+def icon_server(d, s, w):
+    # A rack of two servers, each with its light: the server's setup wizard in the header, beside the player's own cog.
+    for top in (0.2, 0.55):
+        line(d, [(s * 0.2, s * top), (s * 0.8, s * top), (s * 0.8, s * (top + 0.25)), (s * 0.2, s * (top + 0.25)), (s * 0.2, s * top)], w)
+        line(d, [(s * 0.32, s * (top + 0.125)), (s * 0.4, s * (top + 0.125))], w)
+
+
 def icon_weight(d, s, w):
     # A kettlebell: a round body with a flat foot, and its handle.
     r = s * 0.23
@@ -1102,6 +1109,7 @@ def build_images():
         "icon_style_ca": stroke_icon(icon_style),
         "icon_palette_ca": stroke_icon(icon_palette),
         "icon_size_ca": stroke_icon(icon_size),
+        "icon_server_ca": stroke_icon(icon_server),
         "icon_weight_ca": stroke_icon(icon_weight),
         # The setup wizard: its cog in the inventory's header and in Eden's Tools menu, and its controls.
         "icon_setup_ca": stroke_icon(icon_setup),
