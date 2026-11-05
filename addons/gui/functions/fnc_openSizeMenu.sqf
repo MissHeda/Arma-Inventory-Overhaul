@@ -341,7 +341,8 @@ private _extraNameW = SQUARE(UNIT * 13);
         private _shown = if (_kind isEqualTo "list") then {
             (_data select 1) param [((_data select 0) find _value) max 0, ""]
         } else {
-            str _value
+            // A number, with its unit where it has one (the hotbar's seconds).
+            ([str _value, (_data param [3, ""])] select {_x isNotEqualTo ""}) joinString " "
         };
 
         [

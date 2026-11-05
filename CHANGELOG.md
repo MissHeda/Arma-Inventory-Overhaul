@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.64 - beta
+
+### Fixed
+
+- Your settings: "Hotbar shown for" says its unit, seconds.
+
 ## 0.6.63 - beta
 
 ### Added

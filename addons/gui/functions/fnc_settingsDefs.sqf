@@ -9,7 +9,7 @@
  *
  * Return Value:
  * The rows, in their order <ARRAY>: a caption [""," name"], or
- *   [setting, name, tip, kind, default, data] - kind "check" (no data), "list" (data [values, names]) or "step" (data [least, most, step])
+ *   [setting, name, tip, kind, default, data] - kind "check" (no data), "list" (data [values, names]) or "step" (data [least, most, step, unit])
  *
  * Example:
  * private _rows = call aio_gui_fnc_settingsDefs;
@@ -53,7 +53,7 @@ private _rows = [
         QEGVAR(hotbar,hudMode), LELSTRING(hotbar,Setting_HudMode), LELSTRING(hotbar,Setting_HudMode_Desc), "list", 1,
         [[0, 1, 2], [LELSTRING(hotbar,HudMode_Never), LELSTRING(hotbar,HudMode_InUse), LELSTRING(hotbar,HudMode_Always)]]
     ],
-    [QEGVAR(hotbar,hudTime), LELSTRING(hotbar,Setting_HudTime), LELSTRING(hotbar,Setting_HudTime_Desc), "step", 4, [1, 15, 1]],
+    [QEGVAR(hotbar,hudTime), LELSTRING(hotbar,Setting_HudTime), LELSTRING(hotbar,Setting_HudTime_Desc), "step", 4, [1, 15, 1, "s"]],
     [QEGVAR(hotbar,leaderKeys), LELSTRING(hotbar,Setting_LeaderKeys), LELSTRING(hotbar,Setting_LeaderKeys_Desc), "check", true]
 ];
 
