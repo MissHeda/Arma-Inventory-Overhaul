@@ -4,9 +4,10 @@
  * A unit reloaded. Two cases, while a "Use items from ..." setting limits something:
  *
  *   - the reload this mod asked for (fnc_loadMagazine wrote GVAR(reloadToken) before the game's action): the
- *     token is spent by the first event of that unit, whatever it shows - so nothing here can run twice for
- *     one reload. When the magazine now loaded is the one asked for, the reload stands, and a frame later the
- *     magazine the game put away is moved once out of a container the settings close (fnc_reloadTidy). When
+ *     token is spent by the first event of that unit, whatever it shows (an empty magazine loaded is no
+ *     reload and leaves it) - so nothing here can run twice for one reload. When the magazine now loaded is
+ *     the one asked for, the reload stands, and a frame later the magazine the game put away is moved once
+ *     out of a container the settings close (fnc_reloadTidy). When
  *     it is another one (the game did a reload of its own), an RPT line says so and the case below decides.
  *   - any other reload - the scroll menu's entry, a gamepad button, a script, the game's own reload when a
  *     magazine ran dry: if the loaded magazine came out of a container the settings close to it (noted
@@ -43,6 +44,12 @@ params [
     ["_old", [], [[]]]
 ];
 
+_new params [["_class", "", [""]], ["_rounds", 0, [0]]];
+
+// An empty magazine loaded is no reload: what fnc_loadMagazine puts into an empty muzzle before it asks for
+// one, should that raise the event. It leaves the token for the reload that follows.
+if (_class isEqualTo "" || {_rounds <= 0}) exitWith {false};
+
 // The reload this mod asked for: spent by the first event of its unit, one that ran out by any.
 private _token = GVAR(reloadToken);
 
@@ -61,10 +68,6 @@ if (!(missionNamespace getVariable [QGVAR(useActive), false]) || {diag_tickTime 
 if (isNull _unit || {!local _unit} || {_unit isNotEqualTo (missionNamespace getVariable ["ACE_player", player])}) exitWith {false};
 
 if (!alive _unit || {!isNull objectParent _unit} || {([primaryWeapon _unit, handgunWeapon _unit, secondaryWeapon _unit] find _weapon) < 0}) exitWith {false};
-
-_new params [["_class", "", [""]], ["_rounds", 0, [0]]];
-
-if (_class isEqualTo "" || {_rounds <= 0}) exitWith {false};
 
 // A magazine the window put into the weapon by hand (a drag onto the weapon, "Load into", fnc_noteHandLoad) was
 // chosen on purpose from wherever it lay: the settings are about using items in the field, not about handling
