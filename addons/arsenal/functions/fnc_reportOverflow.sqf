@@ -40,7 +40,7 @@ if (!isNull _display && {!isNil QACEFUNC(arsenal,message)}) exitWith {
 };
 
 if (isNil QACEFUNC(common,displayText)) then {
-    hint _text;
+    [_text] call EFUNC(main,showText);
 } else {
     [_text, false, 5, 1] call ACEFUNC(common,displayText);
 };

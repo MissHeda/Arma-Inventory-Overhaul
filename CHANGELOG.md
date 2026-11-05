@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.30 - beta
+
+### Fixed
+
+- Without ACE, the line that says why a reload or a throw was held back ("Use items from ..." set to Nothing or Only whitelisted) and the arsenal's "removed, as they did not fit" came as the game's hint box in the corner of the screen, which stays there; they are CBA notifications now, as every other short message without ACE.
+
 ## 0.6.29 - beta
 
 ### Added
