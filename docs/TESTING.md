@@ -196,6 +196,7 @@ A client can see them and cannot change them.
 - [ ] Elements off (#66): weight, gear, small slots, hotbar, footer each go and their room goes to the rest, with no gap and no script error; with the hotbar off its menu rows and footer hint are gone and its keys still work; with the footer off the hint line causes no error.
 - [ ] Column order (#66): all five orders, with nothing looted and while looting, with Where other storage opens on both: dragging to every column and to the ground, an open kit's window, Inspect and Attachments, and the orders without a free middle on a narrow window.
 - [ ] Modders (#65): a test addon with `CfgAioMenu` Entries (own name, `$STR_` key, picture), Hide, Change (a window row's name and picture), DoubleClick.
+- [ ] Edit mode (#67): Your settings > Edit layout: each column a frame; drag one, resize at each corner, the window follows at the release and the picture on the card shows it; tile and text buttons take effect at once; a column stays on the screen and no smaller than its grid; Reset and Done; Escape mid-drag; while looting and not; dragging items, kit windows and Inspect with columns overlapping; another resolution keeps the places.
 - [ ] No vanilla inventory: the Gear key, ACE's "Inventory" on an unconscious soldier, ACE's "Open backpack", a crate and a
       vehicle all open ours; after a respawn, a team switch and in Zeus remote control as well; with Better Inventory
       loaded `findDisplay 602` stays null; the setting "Replace the vanilla inventory" is gone from the CBA menu.

@@ -71,6 +71,13 @@ if ((GVAR(menuFor) param [0, ""]) isEqualTo "size") exitWith {
     true
 };
 
+// And the edit mode (fnc_openLayoutEditor), with the columns as they are.
+if ((GVAR(menuFor) param [0, ""]) isEqualTo "layout") exitWith {
+    [_display] call FUNC(openLayoutEditor);
+
+    true
+};
+
 GVAR(menuState) params ["_choices", "_at", ["_across", 0], ["_note", ""]];
 
 [_display, _choices, _at, _across, _note] call FUNC(openMenu);

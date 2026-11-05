@@ -102,6 +102,15 @@ if (_controls isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) isEqualTo "palet
     };
 };
 
+// The edit mode (fnc_openLayoutEditor): a frame held goes with it, nothing written.
+if (_controls isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) isEqualTo "layout"}) then {
+    GVAR(menuFor) = [];
+
+    if (!GVAR(menuRemake)) then {
+        ["end"] call FUNC(layoutDrag);
+    };
+};
+
 // And the size popover (fnc_openSizeMenu): what was changed is written to CBA, unless it is only made again.
 if (_controls isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) isEqualTo "size"}) then {
     GVAR(menuFor) = [];

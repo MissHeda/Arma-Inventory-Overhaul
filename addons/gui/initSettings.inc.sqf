@@ -172,6 +172,18 @@
     0
 ] call CBA_fnc_addSetting;
 
+// Each player's own window: the columns he placed himself in the edit mode (fnc_openLayoutEditor), as shares of the content area
+// (fnc_columnRects). Written there; a text box here so that CBA keeps it with his other settings.
+[
+    QGVAR(layoutRects),
+    "EDITBOX",
+    [LLSTRING(Setting_LayoutRects), LLSTRING(Setting_LayoutRects_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    "",
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
 // Each player's colours as text - the colour popover's own, written here whenever it closes (fnc_paletteSettle), so they can
 // be copied or pasted in Configure Addons. Pasted here, they are taken (fnc_paletteImport). A server or mission that forces it
 // gives everyone these colours, and the palette button goes (fnc_paletteForced, fnc_palette).

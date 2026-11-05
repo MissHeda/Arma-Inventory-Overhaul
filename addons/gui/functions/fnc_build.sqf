@@ -88,7 +88,7 @@ GVAR(lootRect) = [];
 // CBA (aio_gui_menuRemake, fnc_closeMenu).
 private _keptMenu = [
     "", GVAR(menuFor) param [0, ""]
-] select (!isNull ((uiNamespace getVariable [QGVAR(menu), []]) param [0, controlNull]) && {(GVAR(menuFor) param [0, ""]) in ["palette", "size"]});
+] select (!isNull ((uiNamespace getVariable [QGVAR(menu), []]) param [0, controlNull]) && {(GVAR(menuFor) param [0, ""]) in ["palette", "size", "layout"]});
 
 GVAR(menuRemake) = _keptMenu isNotEqualTo "";
 [] call FUNC(closeMenu);
@@ -526,6 +526,10 @@ if (_keptMenu isEqualTo "palette") then {
 
 if (_keptMenu isEqualTo "size") then {
     [_display] call FUNC(openSizeMenu);
+};
+
+if (_keptMenu isEqualTo "layout") then {
+    [_display] call FUNC(openLayoutEditor);
 };
 
 // For the tester's numbers (aio_gui_debugTiming).

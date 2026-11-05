@@ -97,6 +97,11 @@ switch (_mode) do {
             };
         } forEach (call FUNC(settingsDefs));
 
+        // And the columns placed by hand (fnc_openLayoutEditor).
+        if ((missionNamespace getVariable [QGVAR(layoutRects), ""]) isNotEqualTo "") then {
+            ["reset"] call FUNC(layoutDrag);
+        };
+
         if (_rowChanged) then {
             [] call FUNC(elementsChanged);
         };

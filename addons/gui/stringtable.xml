@@ -370,6 +370,18 @@
         <Key ID="STR_aio_gui_Keybind_Rotate_Tooltip">
             <English>Turns the item you are dragging a quarter round.</English>
         </Key>
+        <Key ID="STR_aio_gui_Layout_Done">
+            <English>Done</English>
+        </Key>
+        <Key ID="STR_aio_gui_Layout_Drag">
+            <English>Drag to move, corners to resize</English>
+        </Key>
+        <Key ID="STR_aio_gui_Layout_Edit">
+            <English>Edit layout</English>
+        </Key>
+        <Key ID="STR_aio_gui_Layout_Reset">
+            <English>Reset</English>
+        </Key>
         <Key ID="STR_aio_gui_Load_Next">
             <English>· %1 at %2 kg</English>
         </Key>
@@ -929,6 +941,12 @@
         <Key ID="STR_aio_gui_Setting_HandMove_Desc">
             <English>Seconds the hands are busy moving one item to another container (quick move, group moves).
 0 moves at once; a drag never waits.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_LayoutRects">
+            <English>Columns placed by hand</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_LayoutRects_Desc">
+            <English>Where the edit mode put your columns.\nSet there: your settings, Edit layout.\n\nEmpty, they follow the column order.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_LootSide">
             <English>Where other storage opens</English>

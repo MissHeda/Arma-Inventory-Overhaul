@@ -390,64 +390,71 @@ if (_footerH > 0) then {
     [_display, _layer, [_shotX + _shotGap, _shotY + _shotH - _footerH - _shotGap, _shotW - _shotGap * 2, _footerH], _band, 0] call FUNC(uiPanel);
 };
 
-private _order = (missionNamespace getVariable [QGVAR(columnOrder), COLUMN_ORDER_DEFAULT]) splitString ",";
-
-if ((missionNamespace getVariable [QGVAR(lootSide), "left"]) isEqualTo "right") then {
-    private _lootAt = _order find "loot";
-
-    _order set [_order find "storage", "loot"];
-    _order set [_lootAt, "storage"];
-};
-
+// The columns where they really stand, at the size they really are (fnc_columnRects): a larger tile scale shows as wider columns.
 private _colTop = _shotY + _shotGap * 2 + _headerH;
 private _colH = _shotY + _shotH - _footerH - _shotGap * ([1, 2] select (_footerH > 0)) - _colTop;
 private _colX = _shotX + _shotGap;
-private _shares = createHashMapFromArray [["equipment", 0.3], ["loot", 0.23], ["storage", 0.23], ["free", 0.24]];
+private _colRoom = _shotW - _shotGap * 2;
+private _columns = [true] call FUNC(columnRects);
 
 {
-    private _colW = (_shotW - _shotGap * 5) * (_shares getOrDefault [_x, 0.2]);
+    (_columns get _x) params ["_realX", "_realY", "_realW", "_realH"];
 
-    if (_x isNotEqualTo "free") then {
-        private _word = createHashMapFromArray [
-            ["equipment", LLSTRING(Column_Equipment)], ["loot", LLSTRING(Column_Loot)], ["storage", LLSTRING(Column_Storage)]
-        ] get _x;
+    private _colW = _colRoom * _realW / CONTENT_W;
+    private _left = _colX + _colRoom * (_realX - CONTENT_X) / CONTENT_W;
+    private _upper = _colTop + _colH * (_realY - CONTENT_Y) / CONTENT_H;
+    private _high = _colH * _realH / CONTENT_H;
+    private _word = createHashMapFromArray [
+        ["equipment", LLSTRING(Column_Equipment)], ["loot", LLSTRING(Column_Loot)], ["storage", LLSTRING(Column_Storage)]
+    ] get _x;
 
-        [_display, _layer, [_colX, _colTop, _colW, _colH], [[1, 1, 1, 0.1], [_accent select 0, _accent select 1, _accent select 2, 0.18]] select (_x isEqualTo "equipment"), 0] call FUNC(uiPanel);
-        [_display, _layer, [_colX, _colTop, _colW, _small * 1.2], [_word, _colW, _font, _small] call FUNC(fitText), _small, _text2, _font, 2, "never"] call FUNC(uiLabel);
+    [_display, _layer, [_left, _upper, _colW, _high], [[1, 1, 1, 0.1], [_accent select 0, _accent select 1, _accent select 2, 0.18]] select (_x isEqualTo "equipment"), 0] call FUNC(uiPanel);
+    [_display, _layer, [_left, _upper, _colW, _small * 1.2], [_word, _colW, _font, _small] call FUNC(fitText), _small, _text2, _font, 2, "never"] call FUNC(uiLabel);
 
-        // The equipment column's parts, those that are on: the weapons take the room the others leave.
-        if (_x isEqualTo "equipment") then {
-            private _parts = [
-                [QGVAR(showWeight), 0.09, LLSTRING(SettingsMenu_PartWeight)], ["", -1, LLSTRING(SettingsMenu_PartWeapons)], [QGVAR(showGear), 0.2, LLSTRING(SettingsMenu_PartGear)],
-                [QGVAR(showSmallSlots), 0.09, LLSTRING(SettingsMenu_PartSmall)], [QEGVAR(gui,showHotbar), 0.09, LLSTRING(SettingsMenu_PartHotbar)]
-            ] select {(_x select 0) isEqualTo "" || {(_x select 0) call _fnc_shown}};
+    // The equipment column's parts, those that are on: the weapons take the room the others leave.
+    if (_x isEqualTo "equipment") then {
+        private _parts = [
+            [QGVAR(showWeight), 0.09, LLSTRING(SettingsMenu_PartWeight)], ["", -1, LLSTRING(SettingsMenu_PartWeapons)], [QGVAR(showGear), 0.2, LLSTRING(SettingsMenu_PartGear)],
+            [QGVAR(showSmallSlots), 0.09, LLSTRING(SettingsMenu_PartSmall)], [QGVAR(showHotbar), 0.09, LLSTRING(SettingsMenu_PartHotbar)]
+        ] select {(_x select 0) isEqualTo "" || {(_x select 0) call _fnc_shown}};
 
-            private _partTop = _colTop + _small * 1.3;
-            private _partRoom = _colTop + _colH - _partTop;
-            private _fixedShare = 0;
+        private _partTop = _upper + _small * 1.3;
+        private _partRoom = _upper + _high - _partTop;
+        private _fixedShare = 0;
 
-            {_fixedShare = _fixedShare + ((_x select 1) max 0)} forEach _parts;
+        {_fixedShare = _fixedShare + ((_x select 1) max 0)} forEach _parts;
 
-            {
-                _x params ["", "_share", "_partWord"];
+        {
+            _x params ["", "_share", "_partWord"];
 
-                private _partH = _partRoom * ([_share, 1 - _fixedShare] select (_share < 0));
+            private _partH = _partRoom * ([_share, 1 - _fixedShare] select (_share < 0));
 
-                [_display, _layer, [_colX + _shotGap, _partTop, _colW - _shotGap * 2, _partH - pixelH * 2], _band, 0] call FUNC(uiPanel);
-                [
-                    _display, _layer, [_colX + _shotGap, _partTop, _colW - _shotGap * 2, (_partH - pixelH * 2) min (_small * 1.2)],
-                    [_partWord, _colW - _shotGap * 2, _font, _small * 0.85] call FUNC(fitText), _small * 0.85, _muted, _font, 2, "never"
-                ] call FUNC(uiLabel);
+            [_display, _layer, [_left + _shotGap, _partTop, _colW - _shotGap * 2, _partH - pixelH * 2], _band, 0] call FUNC(uiPanel);
+            [
+                _display, _layer, [_left + _shotGap, _partTop, _colW - _shotGap * 2, (_partH - pixelH * 2) min (_small * 1.2)],
+                [_partWord, _colW - _shotGap * 2, _font, _small * 0.85] call FUNC(fitText), _small * 0.85, _muted, _font, 2, "never"
+            ] call FUNC(uiLabel);
 
-                _partTop = _partTop + _partH;
-            } forEach _parts;
-        };
+            _partTop = _partTop + _partH;
+        } forEach _parts;
     };
+} forEach ["equipment", "storage", "loot"];
 
-    _colX = _colX + _colW + _shotGap;
-} forEach _order;
+// The way into the edit mode: the columns moved and resized by hand.
+private _editY = _shotY + _shotH + _padY;
+private _editH = UNIT * 1;
 
-private _shotNote = [_display, "AIO_StructuredText", _layer, [_shotX, _shotY + _shotH + _padY / 2, _shotW, _small * 6]] call FUNC(uiCreate);
+[
+    _display, _layer, [_shotX, _editY, _shotW, _editH], "layoutedit", LLSTRING(Layout_Edit), "", _buttonTheme, {
+        params ["_button"];
+
+        if (_button < 0) exitWith {};
+
+        [{[uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openLayoutEditor)}] call FUNC(later);
+    }, false, _size * 0.85, true
+] call FUNC(uiButton);
+
+private _shotNote = [_display, "AIO_StructuredText", _layer, [_shotX, _editY + _editH + _padY / 2, _shotW, _small * 6]] call FUNC(uiCreate);
 
 _shotNote ctrlEnable false;
 _shotNote setVariable [QGVAR(hintSize), _small * 0.8];

@@ -73,5 +73,9 @@ private _changed = false;
     };
 } forEach (call FUNC(settingsDefs));
 
+if ((missionNamespace getVariable [QGVAR(layoutRects), ""]) isNotEqualTo "") then {
+    _changed = true;
+};
+
 // Default only where there is something to take back.
 {_x ctrlShow _changed} forEach _reset;

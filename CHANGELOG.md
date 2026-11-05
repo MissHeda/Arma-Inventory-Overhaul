@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.63 - beta
+
+### Added
+
+- **Edit layout** (Your settings), like Arma's own layout editor: drag the equipment, your gear and the loot column anywhere and resize them at their corners, with the tile and text size at hand. A grid column cannot get narrower than its grid; the tile size makes it narrower (#67).
+
+### Changed
+
+- The picture on Your settings shows the columns at their real places and sizes, so a change of the tile size shows there too (#67).
+
 ## 0.6.62 - beta
 
 ### Changed

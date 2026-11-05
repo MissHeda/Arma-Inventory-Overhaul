@@ -6,7 +6,7 @@
  *
  *   | equipment |        free        | loot | storage |
  *
- * That is the order by default; each player can have another (aio_gui_columnOrder, below).
+ * That is the order by default; each player can have another or place the columns himself (fnc_columnRects).
  *
  * On the left what the unit wears, as cards (fnc_drawEquipmentCards). On the right its uniform, vest
  * and backpack stacked in one scrolling column titled "Your gear", and while it loots a second column for
@@ -86,72 +86,37 @@ if (_reserved) then {
     _rightW = _columnW + (_grow min (_growBy * _columnW));
 };
 
-// The columns from left to right are each player's own (the setting aio_gui_columnOrder), the free middle one of them: it takes
-// what the others leave. Where the loot column goes beside the storage column is the setting aio_gui_lootSide: right swaps the
-// two. A window that kept the right edge for itself ("rightColumn") has no say in it: the usual order, its column at that edge.
-// The middle gives way first where the screen is too narrow, then the equipment column - nothing overlaps.
-private _keepRight = _context getOrDefault ["rightColumn", false];
-private _order = (missionNamespace getVariable [QGVAR(columnOrder), COLUMN_ORDER_DEFAULT]) splitString ",";
+// Where they stand: the player's order or his own places (fnc_columnRects), so the settings card's picture and the edit mode show the
+// same. A window that kept the right edge for itself has no say in it.
+private _rects = [_reserved, _rightW, _context getOrDefault ["rightColumn", false]] call FUNC(columnRects);
 
-if (_keepRight || {count _order != 4}) then {
-    _order = COLUMN_ORDER_DEFAULT splitString ",";
-};
+(_rects get "equipment") params ["_equipX", "_equipY", "_leftW", "_equipH"];
 
-if (_keepRight || {(missionNamespace getVariable [QGVAR(lootSide), "left"]) isEqualTo "right"}) then {
-    private _lootAt = _order find "loot";
-
-    _order set [_order find "storage", "loot"];
-    _order set [_lootAt, "storage"];
-};
-
-if (!_reserved) then {
-    _order = _order - ["loot"];
-};
-
-private _freeW = CONTENT_W - _leftW - _columnW - ([0, _rightW] select _reserved) - _gap * (count _order - 1);
-
-if (_freeW < 0) then {
-    _leftW = (_leftW + _freeW) max 0;
-    _freeW = 0;
-};
-
-private _cursorX = CONTENT_X;
-private _equipX = CONTENT_X;
-private _lootX = CONTENT_X;
-private _storageX = CONTENT_X;
-private _middleX = CONTENT_X;
-
-{
-    switch (_x) do {
-        case "equipment": {_equipX = _cursorX; _cursorX = _cursorX + _leftW + _gap};
-        case "loot": {_lootX = _cursorX; _cursorX = _cursorX + _rightW + _gap};
-        case "storage": {_storageX = _cursorX; _cursorX = _cursorX + _columnW + _gap};
-        default {_middleX = _cursorX; _cursorX = _cursorX + _freeW + _gap};
-    };
-} forEach _order;
+private _storageRect = _rects get "storage";
+private _lootRect = _rects get "loot";
 
 if (_reserved) then {
-    _context set ["rightRect", [_lootX, CONTENT_Y, _rightW, CONTENT_H]];
+    _context set ["rightRect", _lootRect];
 };
 
 // ----- Equipment -----
 
-GVAR(panels) pushBack [_equipX, CONTENT_Y, _leftW, CONTENT_H];
+GVAR(panels) pushBack [_equipX, _equipY, _leftW, _equipH];
 
 // Anything let go over it goes into the slot that takes it (fnc_updateDrag).
-GVAR(equipmentRect) = [_equipX, CONTENT_Y, _leftW, CONTENT_H];
+GVAR(equipmentRect) = [_equipX, _equipY, _leftW, _equipH];
 
 private _cardsRect = if (_theme getOrDefault ["equipmentPanel", true]) then {
     [
-        _display, controlNull, [_equipX, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["panel", []],
+        _display, controlNull, [_equipX, _equipY, _leftW, _equipH], _theme getOrDefault ["panel", []],
         _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
     ] call FUNC(uiPanel);
 
-    [_display, controlNull, [_equipX, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
+    [_display, controlNull, [_equipX, _equipY, _leftW, _equipH], _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
 
-    [_equipX + _padX, CONTENT_Y + _padY, _leftW - _padX * 2, CONTENT_H - _padY * 2]
+    [_equipX + _padX, _equipY + _padY, _leftW - _padX * 2, _equipH - _padY * 2]
 } else {
-    [_equipX, CONTENT_Y + _padY, _leftW, CONTENT_H - _padY * 2]
+    [_equipX, _equipY + _padY, _leftW, _equipH - _padY * 2]
 };
 
 [_display, controlNull, _cardsRect, _context, _theme] call FUNC(drawEquipmentCards);
@@ -161,7 +126,7 @@ private _cardsRect = if (_theme getOrDefault ["equipmentPanel", true]) then {
 private _ownSections = _context getOrDefault ["storageSections", _context getOrDefault ["ownSections", []]];
 
 [
-    _display, [_storageX, CONTENT_Y, _columnW, CONTENT_H], _ownSections, _theme,
+    _display, _storageRect, _ownSections, _theme,
     LLSTRING(Column_Storage), ["", UI_TEX(icon_inventory_ca)] select _titleIcons, QFUNC(drawSection), "storage"
 ] call FUNC(drawColumn);
 
@@ -172,7 +137,7 @@ if (_ownSections isEqualTo []) then {
     private _textW = _columnW - _padX * 4;
 
     [
-        _display, controlNull, [_storageX + _padX * 2, CONTENT_Y + UNIT * 2.4, _textW, UNIT],
+        _display, controlNull, [(_storageRect select 0) + _padX * 2, (_storageRect select 1) + UNIT * 2.4, _textW, UNIT],
         [LLSTRING(Storage_Empty), _textW, _font, _size] call FUNC(fitText), _size,
         _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2, "hint"
     ] call FUNC(uiLabel);
@@ -210,13 +175,15 @@ if (_looting) then {
     _title = if (_title isEqualTo "") then {LLSTRING(Column_Loot)} else {format [LLSTRING(Column_LootOf), _title]};
 
     [
-        _display, [_lootX, CONTENT_Y, _rightW, CONTENT_H], _lootSections, _theme, _title, ["", _icon] select _titleIcons,
+        _display, _lootRect, _lootSections, _theme, _title, ["", _icon] select _titleIcons,
         QFUNC(drawSection), "loot"
     ] call FUNC(drawColumn);
 };
 
 // ----- The free middle -----
 
-if (_freeW < SQUARE(UNIT * 5)) exitWith {[]};
+private _middle = _rects get "middle";
 
-[_middleX, CONTENT_Y, _freeW, CONTENT_H]
+if ((_middle select 2) < SQUARE(UNIT * 5)) exitWith {[]};
+
+_middle

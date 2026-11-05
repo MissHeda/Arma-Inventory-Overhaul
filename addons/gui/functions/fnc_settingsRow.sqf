@@ -51,4 +51,9 @@ if (!isNil "CBA_settings_fnc_set") then {
     [_setting, _value, 0, "client"] call CBA_settings_fnc_set;
 };
 
+// An order picked means the columns in that order: what was placed by hand goes.
+if (_setting isEqualTo QGVAR(columnOrder) && {(missionNamespace getVariable [QGVAR(layoutRects), ""]) isNotEqualTo ""}) then {
+    ["reset"] call FUNC(layoutDrag);
+};
+
 [] call FUNC(elementsChanged);
