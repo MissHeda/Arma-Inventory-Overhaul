@@ -109,6 +109,13 @@ GVAR(dragCount) = 1;
 GVAR(middleHeld) = false;
 GVAR(lastWheel) = -1;
 
+// Rows of the right-click menu hidden by id, and what a double click does, by item key (fnc_menuRules): filled
+// from CfgAioMenu (fnc_menuInit) and by aio_gui_fnc_hideMenuEntry / aio_gui_fnc_setDoubleClick, which other
+// mods may call before this preInit ran - so what they put in stays.
+if (isNil QGVAR(menuHideRules)) then {GVAR(menuHideRules) = createHashMap};
+if (isNil QGVAR(menuChangeRules)) then {GVAR(menuChangeRules) = createHashMap};
+if (isNil QGVAR(doubleClickRules)) then {GVAR(doubleClickRules) = createHashMap};
+
 // The last plain click on a tile, [[grid index, tile index], time], to tell a double click.
 GVAR(lastClick) = [[], -1];
 

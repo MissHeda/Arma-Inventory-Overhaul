@@ -316,6 +316,17 @@
     false
 ] call EFUNC(main,addSetting);
 
+// ----- Right-click menu and double click -----
+
+// For everyone alike: rows of the right-click menu the server does not want, by id, separated by commas
+// (fnc_menuFilter). Read as a menu opens.
+[
+    QGVAR(menuHidden),
+    "EDITBOX",
+    [LLSTRING(Setting_MenuHidden), LLSTRING(Setting_MenuHidden_Desc)],
+    ""
+] call EFUNC(main,addSetting);
+
 // ----- Living persons -----
 
 // For everyone alike: who may open whom and what they may change there is the mission's rule - asked by

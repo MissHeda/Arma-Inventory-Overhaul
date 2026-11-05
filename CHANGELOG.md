@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.59 - beta
+
+### Added
+
+- For modders and mission makers (#65): `CfgAioMenu` in a mod's config adds rows to the right-click menu with their own names (`$STR_` keys work) and pictures, hides rows by id, changes the name or picture of the window's own rows and sets what a double click does on their items. The same from script: `aio_gui_fnc_addMenuEntry`, `aio_gui_fnc_hideMenuEntry`, `aio_gui_fnc_changeMenuEntry`, `aio_gui_fnc_setDoubleClick`.
+- Server setting **Hidden menu entries**: rows of the right-click menu nobody should see, by id.
+
 ## 0.6.58 - beta
 
 ### Changed

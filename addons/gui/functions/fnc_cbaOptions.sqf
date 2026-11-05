@@ -14,7 +14,8 @@
  * [unit, container, item, slot, its own arguments, id].
  *
  * Ordered by where it was found, then by name: CBA gives its rows no order of its own. The first row
- * carries a line above it, setting these choices apart from the window's own.
+ * carries a line above it, setting these choices apart from the window's own. Each row's options carry its CBA
+ * id ("id") - for hiding it (fnc_menuFilter) and a double click (fnc_doubleClickRule) - and "cba" true.
  *
  * An option a loaded compat addon replaces with a choice of its own is left out - Enhanced First Aid
  * Kits' "Open" (aio_compat_efak_fnc_hideCbaOption), ACRE2's "Open" on its radios (the window's own "Open
@@ -112,7 +113,9 @@ private _rows = [];
         private _options = createHashMapFromArray [
             ["enabled", [_args call _conditionEnable] param [0, false]],
             ["tooltip", _tooltip],
-            ["color", _color]
+            ["color", _color],
+            ["id", _id],
+            ["cba", true]
         ];
 
         if (_icon isNotEqualTo "" && {_icon isNotEqualTo _noIcon}) then {

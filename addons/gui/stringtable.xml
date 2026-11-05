@@ -933,6 +933,15 @@
         <Key ID="STR_aio_gui_Setting_MagazineText_Desc">
             <English>Rounds left as text ("17/30") on magazine tiles.\nOff: the fill bar alone.</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_MenuHidden">
+            <English>Hidden menu entries</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_MenuHidden_Desc">
+            <English>Rows of the right-click menu nobody sees, by id, separated by commas,
+e.g. "hotbar, settings". The window's own: inspect, equip, attach, load, detach,
+drop, open, repack, hotbar, kit, radio, selectAll, arsenal, settings.
+Options of other mods (CBA) by their id.</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_MoveToStop">
             <English>Moving stops looting</English>
         </Key>

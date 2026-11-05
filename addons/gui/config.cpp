@@ -20,6 +20,7 @@ class CfgPatches {
 
 #include "CfgEventHandlers.hpp"
 #include "CfgAioSounds.hpp"
+#include "CfgAioMenu.hpp"
 #include "CfgActions.hpp"
 #include "Cfg3DEN.hpp"
 #include "RscBase.hpp"

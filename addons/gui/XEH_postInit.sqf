@@ -20,6 +20,9 @@ if (!hasInterface) exitWith {};
 
 #include "initKeybinds.inc.sqf"
 
+// What mods set for the right-click menu and the double click in their config (CfgAioMenu).
+call FUNC(menuInit);
+
 // Someone near loots: the sounds they make reach this machine as resolved layers and play where their hands
 // are (fnc_sendNoise sends them only to players within earshot).
 [QGVAR(noise), {_this call FUNC(onNoise)}] call CBA_fnc_addEventHandler;
