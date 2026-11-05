@@ -7,8 +7,8 @@
  * (fnc_quickEquip); a kit of Enhanced First Aid Kits or Enhanced Utility Pouches opens in a window of its own
  * or closes (aio_compat_efak_fnc_toggle - only when that addon is loaded, and only while that mod's double
  * click setting is on), so does a uniform, vest or backpack lying in a container (fnc_openNested) - anything
- * else moves over (fnc_quickMove). Never other mods' context menu, which the vanilla inventory opens on a
- * double click.
+ * else moves over (fnc_quickMove). First, though, what mods, the mission or the player set for the item
+ * (fnc_doubleClickRule): a row of its right-click menu run, or the menu opened as the vanilla inventory does.
  *
  * Arguments:
  * 0: Index of the grid the tile lies on <NUMBER>
@@ -32,6 +32,10 @@ if (count _selected >= 2 && {[_gridIndex, _tileIndex] in _selected}) exitWith {
     [_selected] call FUNC(quickMoveGroup);
     true
 };
+
+// What a mod, the mission or the player set for a double click on this item (CfgAioMenu, aio_gui_fnc_setDoubleClick,
+// the setting "Double click on items with options of other mods"): a row of its menu, or the menu itself.
+if ([_gridIndex, _tileIndex, _repeat] call FUNC(doubleClickRule)) exitWith {true};
 
 // A repeat of a held key only moves: a container or a kit that opens, or a thing on the ground that is put on, is the
 // first press's, not every repeat's.

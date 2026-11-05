@@ -64,13 +64,20 @@
  * A window that attached (fnc_attach) gives its choices through the "menu" hook: they replace everything
  * above, an empty list means no menu at all.
  *
+ * Every row of the window's own carries an id in its options ("id"): inspect, deselect, cancel, equip, attach,
+ * load, detach, drop, open, repack, hotbar, kit, radio, selectAll, arsenal, settings - other mods' options their
+ * CBA id. Rows are hidden by id for the item the menu is for (fnc_menuFilter: the server setting, CfgAioMenu
+ * >> Hide, aio_gui_fnc_hideMenuEntry). A double click finds the row it runs by its id (fnc_doubleClickRule),
+ * through this function with "collect" set: then nothing opens and the choices come back.
+ *
  * Arguments:
  * 0: Display <DISPLAY>
  * 1: Where to open it [x, y] - the tile or slot there is the one it is for - [] for the mouse <ARRAY>
  *    (default: [])
+ * 2: Collect only: build the choices and give them back, open nothing <BOOL> (default: false)
  *
  * Return Value:
- * A menu opened <BOOL>
+ * A menu opened <BOOL> - collecting, the choices <ARRAY>
  *
  * Example:
  * [_display] call aio_gui_fnc_contextMenu;
@@ -80,7 +87,7 @@
 
 disableSerialization;
 
-params ["_display", ["_at", [], [[]]]];
+params ["_display", ["_at", [], [[]]], ["_collect", false, [false]]];
 
 private _mouse = [_at, getMousePosition] select (_at isEqualTo []);
 
@@ -97,6 +104,7 @@ GVAR(menuFor) = +GVAR(hover);
 private _hooked = ["menu", [_display]] call FUNC(hook);
 
 if (!isNil "_hooked" && {_hooked isEqualType []}) exitWith {
+    if (_collect) exitWith {_hooked};
     if (_hooked isEqualTo []) exitWith {false};
 
     [_display, _hooked, _mouse] call FUNC(openMenu);
@@ -112,6 +120,26 @@ private _choices = [];
 private _settingsClass = "";
 private _settingsName = "";
 private _settingsPage = "";
+
+// The class the rows are hidden for (fnc_menuFilter).
+private _menuClass = "";
+
+// Gives the rows from _from on that have no id yet the id _id (see the header).
+private _fnc_tag = {
+    params ["_from", "_id"];
+
+    for "_i" from _from to (count _choices - 1) do {
+        private _choice = _choices select _i;
+
+        if (count _choice < 4 || {!((_choice select 3) isEqualType createHashMap)}) then {
+            _choice set [3, createHashMap];
+        };
+
+        if !("id" in (_choice select 3)) then {
+            (_choice select 3) set ["id", _id];
+        };
+    };
+};
 
 private _fnc_name = {
     params ["_class"];
@@ -132,7 +160,7 @@ private _fnc_addSelectAll = {
 
     _choices pushBack [
         format [LLSTRING(Menu_SelectAll), [_grid get "container"] call FUNC(containerName)], [_holder], {_this call FUNC(selectSection)},
-        createHashMapFromArray [["separator", _separator]]
+        createHashMapFromArray [["separator", _separator], ["id", "selectAll"]]
     ];
 };
 
@@ -142,7 +170,7 @@ private _fnc_addArsenal = {
     params ["_container"];
 
     if (!isNil QEFUNC(arsenal,canOpen) && {[_unit, _container] call EFUNC(arsenal,canOpen)}) then {
-        _choices pushBack [LELSTRING(arsenal,Menu_OpenArsenal), [_unit, _container], {_this call EFUNC(arsenal,open)}];
+        _choices pushBack [LELSTRING(arsenal,Menu_OpenArsenal), [_unit, _container], {_this call EFUNC(arsenal,open)}, createHashMapFromArray [["id", "arsenal"]]];
     };
 };
 
@@ -156,6 +184,8 @@ switch (GVAR(hover) param [0, ""]) do {
         private _kit = _grid getOrDefault ["kit", ""];
         private _class = _tile getOrDefault ["class", ""];
 
+        _menuClass = _class;
+
         if (_tile getOrDefault ["hidden", false] || {isNull _from && {_kit isEqualTo ""}} || {_grid getOrDefault ["virtual", true]}) exitWith {};
 
         // On one of several selected tiles: nothing but letting go of the selection. Moving and dropping
@@ -163,13 +193,14 @@ switch (GVAR(hover) param [0, ""]) do {
         private _selected = if (call FUNC(isInventoryMode)) then {call FUNC(selectionTiles)} else {[]};
 
         if (count _selected >= 2 && {[_gridIndex, _tileIndex] in _selected}) exitWith {
-            _choices pushBack [LLSTRING(Menu_Deselect), [], {call FUNC(clearSelection)}];
+            _choices pushBack [LLSTRING(Menu_Deselect), [], {call FUNC(clearSelection)}, createHashMapFromArray [["id", "deselect"]]];
         };
 
         _choices pushBack [
             LLSTRING(Menu_Inspect),
             [_class, _tile getOrDefault ["count", 1], _tile getOrDefault ["ammo", -1], _tile getOrDefault ["attachments", []], _from],
-            {_this call FUNC(inspect)}
+            {_this call FUNC(inspect)},
+            createHashMapFromArray [["id", "inspect"]]
         ];
 
         _settingsClass = _class;
@@ -181,7 +212,7 @@ switch (GVAR(hover) param [0, ""]) do {
         if (_tile getOrDefault ["pending", false]) exitWith {
             // Waiting for the hands (fnc_queueMoves): it can be cancelled.
             if ((_tile getOrDefault ["queued", 0]) > 0) then {
-                _choices pushBack [LLSTRING(Menu_CancelQueued), [_tile get "queued"], {_this call FUNC(cancelQueued)}];
+                _choices pushBack [LLSTRING(Menu_CancelQueued), [_tile get "queued"], {_this call FUNC(cancelQueued)}, createHashMapFromArray [["id", "cancel"]]];
             };
 
             if (!isNull _inside) then {
@@ -190,7 +221,8 @@ switch (GVAR(hover) param [0, ""]) do {
                 _choices pushBack [
                     format [[LLSTRING(Menu_OpenContainer), LLSTRING(Menu_CloseContainer)] select _isOpen, [_class] call _fnc_name],
                     [_gridIndex, _tileIndex],
-                    {_this call FUNC(openNested)}
+                    {_this call FUNC(openNested)},
+                    createHashMapFromArray [["id", "open"]]
                 ];
             };
         };
@@ -223,7 +255,8 @@ switch (GVAR(hover) param [0, ""]) do {
                             _choices pushBack [
                                 format [[LLSTRING(Menu_AttachTo), LLSTRING(Menu_LoadInto)] select (_x in ["mag", "mag2"]), [_weapon] call _fnc_name],
                                 [_slot, _from, _tile, _kit],
-                                {_this call FUNC(doEquip)}
+                                {_this call FUNC(doEquip)},
+                                createHashMapFromArray [["id", ["attach", "load"] select (_x in ["mag", "mag2"])]]
                             ];
                         };
                     } forEach _parts;
@@ -232,30 +265,36 @@ switch (GVAR(hover) param [0, ""]) do {
                 private _slot = [_unit, _class] call EFUNC(storage,slotFor);
 
                 if (_slot isNotEqualTo "") then {
-                    _choices pushBack [LLSTRING(Equip), [_slot, _from, _tile, _kit], {_this call FUNC(doEquip)}];
+                    _choices pushBack [LLSTRING(Equip), [_slot, _from, _tile, _kit], {_this call FUNC(doEquip)}, createHashMapFromArray [["id", "equip"]]];
                 };
             };
 
             // A magazine that is not full, in the player's own gear: all of its kind there repacked
             // (aio_magazines, when loaded).
             if (!isNil QEFUNC(magazines,menuChoices) && {_kit isEqualTo ""}) then {
+                private _n = count _choices;
                 _choices append ([_class, _from, _tile getOrDefault ["ammo", 0]] call EFUNC(magazines,menuChoices));
+                [_n, "repack"] call _fnc_tag;
             };
 
             // The hotbar: put it on a key, or take it off (aio_hotbar - only when that addon is loaded).
             if (call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,menuChoices)}) then {
+                private _n = count _choices;
                 _choices append ([_class, ["grid", _grid]] call EFUNC(hotbar,menuChoices));
+                [_n, "hotbar"] call _fnc_tag;
             };
 
             // Moving it over is a double click (fnc_quickMove) or a drag: no row for it here.
             if (_kit isNotEqualTo "" || {!([_from] call EFUNC(storage,isGroundHolder))}) then {
-                _choices pushBack [LLSTRING(Drop), [_gridIndex, _tileIndex], {_this call FUNC(dropToGround)}];
+                _choices pushBack [LLSTRING(Drop), [_gridIndex, _tileIndex], {_this call FUNC(dropToGround)}, createHashMapFromArray [["id", "drop"]]];
             };
         };
 
         // A kit of Enhanced First Aid Kits or its pouches: open it in a window of its own, unpack it.
         if (!isNil QEFUNC(compat_efak,menuChoices)) then {
+            private _n = count _choices;
             _choices append ([_gridIndex, _tileIndex] call EFUNC(compat_efak,menuChoices));
+            [_n, "kit"] call _fnc_tag;
         };
 
         // A uniform, vest or backpack lying here: open it in the loot column, or close it.
@@ -265,7 +304,8 @@ switch (GVAR(hover) param [0, ""]) do {
             _choices pushBack [
                 format [[LLSTRING(Menu_OpenContainer), LLSTRING(Menu_CloseContainer)] select _isOpen, [_class] call _fnc_name],
                 [_gridIndex, _tileIndex],
-                {_this call FUNC(openNested)}
+                {_this call FUNC(openNested)},
+                createHashMapFromArray [["id", "open"]]
             ];
         };
 
@@ -273,11 +313,14 @@ switch (GVAR(hover) param [0, ""]) do {
         // "Use items from ..." are about using things up: a radio in the backpack is opened as TFAR and ACRE2 open it.
         if (_kit isEqualTo "") then {
             private _carried = _from in [uniformContainer _unit, vestContainer _unit, backpackContainer _unit];
+            private _n = count _choices;
 
             _choices append ([
                 [QEFUNC(compat_tfar,menuChoices), QEFUNC(compat_acre,menuChoices)],
                 [_class, _tile getOrDefault ["container", objNull], _carried, false]
             ] call FUNC(compatCollect));
+
+            [_n, "radio"] call _fnc_tag;
         };
 
         // Inside a kit: the kit has no container for other mods' options, no selection and no arsenal.
@@ -300,9 +343,12 @@ switch (GVAR(hover) param [0, ""]) do {
         private _slot = _record param [5, ""];
         private _owner = _record param [6, objNull];
 
+        _menuClass = _record param [1, ""];
+
         // A slot of the hotbar (aio_hotbar - only when that addon is loaded): clear it.
         if (call FUNC(isInventoryMode) && {(_record param [7, -1]) >= 0} && {!isNil QEFUNC(hotbar,stripMenu)}) then {
             _choices append ([_record select 7] call EFUNC(hotbar,stripMenu));
+            [0, "hotbar"] call _fnc_tag;
         };
 
         // The box of a uniform, vest or backpack opened from inside a container, and a worn slot: the setup
@@ -318,14 +364,15 @@ switch (GVAR(hover) param [0, ""]) do {
         _choices pushBack [
             LLSTRING(Menu_Inspect),
             [_record param [1, ""], 1, _worn getOrDefault ["ammo", -1], _worn getOrDefault ["attachments", []]],
-            {_this call FUNC(inspect)}
+            {_this call FUNC(inspect)},
+            createHashMapFromArray [["id", "inspect"]]
         ];
 
         // Waiting to be taken off (fnc_queueMoves): it can be cancelled, and nothing else is offered for it.
         private _queuedId = [_owner, _slot] call FUNC(queuedSlot);
 
         if (_queuedId > 0) exitWith {
-            _choices pushBack [LLSTRING(Menu_CancelQueued), [_queuedId], {_this call FUNC(cancelQueued)}];
+            _choices pushBack [LLSTRING(Menu_CancelQueued), [_queuedId], {_this call FUNC(cancelQueued)}, createHashMapFromArray [["id", "cancel"]]];
         };
 
         // The radio slot ACRE2 keeps for itself: nothing to do with it but look (aio_compat_acre).
@@ -333,11 +380,14 @@ switch (GVAR(hover) param [0, ""]) do {
 
         // A radio of the player's own in a slot, or the long-range radio on their back: open it, use it.
         private _holder = [objNull, backpackContainer _owner] select (_slot isEqualTo "backpack");
+        private _n = count _choices;
 
         _choices append ([
             [QEFUNC(compat_tfar,menuChoices), QEFUNC(compat_acre,menuChoices)],
             [_record param [1, ""], _holder, _owner isEqualTo _unit, true]
         ] call FUNC(compatCollect));
+
+        [_n, "radio"] call _fnc_tag;
 
         // What a living person wears comes off only as the settings say (fnc_checkTouch) - else inspect only.
         if (([_owner, "worn"] call FUNC(checkTouch)) isNotEqualTo "") exitWith {};
@@ -347,12 +397,14 @@ switch (GVAR(hover) param [0, ""]) do {
         _choices pushBack [LLSTRING(Drop), [_owner, _slot], {
             params ["_owner", "_slot"];
             [_owner, _slot, "ground", []] call FUNC(doUnequip);
-        }];
+        }, createHashMapFromArray [["id", "drop"]]];
 
         // A magazine loaded in one of the player's weapons: all of its kind in the gear repacked, the loaded
         // one stays as it is (aio_magazines, when loaded).
         if (!isNil QEFUNC(magazines,menuChoices) && {_owner isEqualTo _unit} && {_slot in ["primary_mag", "primary_mag2", "handgun_mag", "launcher_mag"]}) then {
+            private _n = count _choices;
             _choices append ([_record param [1, ""], _owner] call EFUNC(magazines,menuChoices));
+            [_n, "repack"] call _fnc_tag;
         };
 
         // A weapon: each of its parts on its own.
@@ -367,7 +419,8 @@ switch (GVAR(hover) param [0, ""]) do {
                     _choices pushBack [
                         format [LLSTRING(Menu_Detach), [_class] call _fnc_name],
                         [_owner, format ["%1_%2", _slot, _x]],
-                        {_this call FUNC(quickUnequip)}
+                        {_this call FUNC(quickUnequip)},
+                        createHashMapFromArray [["id", "detach"]]
                     ];
                 };
             } forEach ["muzzle", "rail", "optic", "mag", "mag2", "bipod"];
@@ -390,6 +443,8 @@ switch (GVAR(hover) param [0, ""]) do {
         if (_grid getOrDefault ["virtual", true]) exitWith {};
         if ((_grid getOrDefault ["kit", ""]) isNotEqualTo "") exitWith {};
         if (isNull _container) exitWith {};
+
+        _menuClass = typeOf _container;
 
         [_grid] call _fnc_addSelectAll;
 
@@ -426,10 +481,15 @@ if (
     if (_step >= 0) then {
         _choices pushBack [
             format [LLSTRING(Menu_Settings), _settingsName], [_step, _settingsClass], {_this call EFUNC(setup,openFromGame)},
-            createHashMapFromArray [["separator", _choices isNotEqualTo []]]
+            createHashMapFromArray [["separator", _choices isNotEqualTo []], ["id", "settings"]]
         ];
     };
 };
+
+// Rows hidden for this item by the server, a mod or the mission (fnc_menuFilter).
+_choices = [_choices, _menuClass] call FUNC(menuFilter);
+
+if (_collect) exitWith {_choices};
 
 if (_choices isEqualTo []) exitWith {false};
 
