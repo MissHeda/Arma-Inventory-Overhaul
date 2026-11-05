@@ -1,11 +1,9 @@
 # Arma Inventory Overhaul - architecture
 
 This is the contract every file of the mod is written against, as the mod is on this branch (the 0.4 line). Function names,
-arguments, HashMap keys and settings named here are binding: several people (and agents) write different files at the same time
+arguments, HashMap keys and settings named here are binding: several people write different files at the same time
 and only meet through these interfaces. If something turns out wrong, fix it here and in the code together. How the mod got here
-is the dated build log `docs/HISTORY.md`; this file describes only what is true now. `docs/BRIEFING.md` has the goal and the first
-plan; the plan behind the rules engine and the wizard is `docs/design/design_synthesis.md` with the corrections in
-`docs/design/design_critic.md`.
+is the dated build log `docs/HISTORY.md`; this file describes only what is true now.
 
 ## 1. Overview
 
@@ -38,7 +36,7 @@ vehicle lock, ACE magazine repack, TFAR, ACRE2, Zeus Enhanced, ACE Interaction M
 
 ### Toolchain and conventions
 
-The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
+The short version:
 
 - HEMTT 1.11.2 (`hemtt check`, `build`, `launch`), run by `.github/workflows/check.yml` on every push. Minimum game version 2.16:
   no SQF command newer than that. CBA macros (`GVAR`, `QGVAR`, `FUNC`, `QFUNC`, `EFUNC`, `LLSTRING`, `CSTRING`, `ARR_N`), `PREP`
@@ -3233,7 +3231,7 @@ Every CBA setting of the mod (`initSettings.inc.sqf` of each addon) is in one of
 "Arma Inventory Overhaul" (CBA's Controls, `CBA_fnc_getKeybind` asks for it). A setting's name does not carry its category, so a `cba_settings.sqf` and
 saved values are the same under either; `fnc_initCbaMenu` takes its page from the category of `aio_items_rules` (the Server page). Scope **client** is
 `0` (each player's own value), **global** is `1` (the same for everyone; the server or mission decides). Descriptions in the
-stringtables are wrapped as BRIEFING asks.
+stringtables are wrapped about every 40 characters.
 
 **Server settings** - the ones of scope 1 - are CBA settings of their own and, at the same time, controls of the setup wizard's General page
 (section 6). Both edit the very same CBA value, so they never disagree: what is set in CBA's menu shows in the wizard, what the wizard saves

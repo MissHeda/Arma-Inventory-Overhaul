@@ -7,10 +7,9 @@ keys here are binding: several people (and agents) write different files at the 
 meet through these interfaces. If something here turns out wrong, fix it here first.
 
 The sections marked "Phase A" (the rules engine in items, setup, weight) are the newest and win over
-the dated sections at the end wherever they disagree; the plan behind them is `docs/design/design_synthesis.md`
-with the corrections in `docs/design/design_critic.md`.
+the dated sections at the end wherever they disagree.
 
-Read `docs/BRIEFING.md` for the goal and the conventions. The short version of the conventions:
+The conventions in short:
 
 - HEMTT 1.11.2, CBA macros (GVAR, QGVAR, FUNC, QFUNC, EFUNC, LLSTRING, CSTRING, ECSTRING, ARR_N,
   PREP via XEH_PREP.hpp). Prefix `aio`, addons `main` + one addon per feature, named by what it does.
@@ -280,7 +279,7 @@ All global (1). Each one that feeds the rules runs `fnc_loadRules` when it chang
 | `aio_items_stackTable` | EDITBOX | `class:N, ...` - older table, wins over the text |
 | `aio_storage_containerTable` | EDITBOX | `class:N` or `class:WxH+WxH` - older table, wins over the text |
 
-#### Where the build knowingly differs from the design's contract (design_synthesis 5.1/5.2)
+#### Where the build knowingly differs from the design's contract
 
 - `aio_items_rulesHash` is the ARRAY above, not a STRING.
 - `aio_items_massPerCell` is still a setting (the fallback), not a plain variable.

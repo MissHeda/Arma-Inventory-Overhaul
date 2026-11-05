@@ -23,7 +23,7 @@ all") or puts everything of yours into the box beside it ("Put all in").
 server-checked moves in multiplayer, the grid panel in ACE Arsenal and the vanilla Virtual Arsenal, shaped grids and items, the hotbar, the
 setup wizard where you paint the compartments, your own colours and compatibility with popular mods are in.
 Bugs and wishes go to Discord or the GitHub issues.
-The plan is in [docs/BRIEFING.md](docs/BRIEFING.md), the design in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+The design is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Requirements
 

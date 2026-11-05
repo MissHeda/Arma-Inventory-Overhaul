@@ -12,3 +12,6 @@ hemtt.exe
 __pycache__/
 ## Eden backups of the test missions
 .hemtt/missions/~*/
+## Private working notes
+docs/BRIEFING.md
+docs/design/
