@@ -119,7 +119,7 @@ private _fnc_name = {
     [_class] call FUNC(itemName)
 };
 
-// The rows' pictures, the window's main ways at a glance. Attachments in the accent colour: the way to a weapon's parts.
+// The rows' pictures, the window's main ways at a glance.
 private _fnc_icon = {
     params ["_icon", ["_color", []]];
 
@@ -127,7 +127,7 @@ private _fnc_icon = {
 };
 
 private _iconInspect = [UI_TEX(icon_eye_ca)] call _fnc_icon;
-private _iconAttachments = [GEAR_ICON(ui_gear_top_gs), GVAR(theme) getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]] call _fnc_icon;
+private _iconAttachments = [GEAR_ICON(ui_gear_top_gs)] call _fnc_icon;
 private _iconDrop = [UI_TEX(icon_ground_ca)] call _fnc_icon;
 
 // Everything in a section selected - in the inventory only, for the grids of the columns. Set apart by a
@@ -144,7 +144,7 @@ private _fnc_addSelectAll = {
 
     _choices pushBack [
         format [LLSTRING(Menu_SelectAll), [_grid get "container"] call FUNC(containerName)], [_holder], {_this call FUNC(selectSection)},
-        createHashMapFromArray [["separator", _separator]]
+        createHashMapFromArray [["separator", _separator], ["icon", UI_TEX(icon_check_ca)]]
     ];
 };
 
@@ -243,6 +243,14 @@ switch (GVAR(hover) param [0, ""]) do {
             if (_kind in ["muzzle", "optic", "rail", "bipod", "magazine", "grenade"]) then {
                 private _parts = [[_kind], ["mag", "mag2"]] select (_kind in ["magazine", "grenade"]);
 
+                // The row's picture: a magazine to load, the shape of the part to attach.
+                private _partIcon = [[
+                    createHashMapFromArray [
+                        ["muzzle", GEAR_ICON(ui_gear_muzzle_gs)], ["optic", GEAR_ICON(ui_gear_top_gs)],
+                        ["rail", GEAR_ICON(ui_gear_side_gs)], ["bipod", GEAR_ICON(ui_gear_bipod_gs)]
+                    ] getOrDefault [_kind, GEAR_ICON(ui_gear_magazine_gs)]
+                ]] call _fnc_icon;
+
                 {
                     private _base = _x;
                     private _weapon = (([_unit] call EFUNC(storage,getEquipment)) getOrDefault [_base, []]) param [0, ""];
@@ -254,7 +262,8 @@ switch (GVAR(hover) param [0, ""]) do {
                             _choices pushBack [
                                 format [[LLSTRING(Menu_AttachTo), LLSTRING(Menu_LoadInto)] select (_x in ["mag", "mag2"]), [_weapon] call _fnc_name],
                                 [_slot, _from, _tile, _kit],
-                                {_this call FUNC(doEquip)}
+                                {_this call FUNC(doEquip)},
+                                _partIcon
                             ];
                         };
                     } forEach _parts;

@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.58 - beta
+
+### Changed
+
+- The right-click menu has pictures on Load into, Attach to and Select all, and the one on Attachments is white (#64).
+- The Inspect and Attachments cards have a line in the accent colour round them, so they stand out from what is behind (#64).
+
+### Fixed
+
+- The hint at the mouse: a text that fits one line got a box for two and sat above its middle; the words now lie in the middle of a box of their height (#64).
+
 ## 0.6.57 - beta
 
 ### Changed

@@ -582,7 +582,9 @@ if (!isNull _tooltip) then {
 
             // A long tip breaks into lines rather than running across the screen.
             private _maxW = SQUARE(_textUnit * 15);
-            private _lines = ceil (_width / _maxW);
+            // Counted on the words and the room they have (fnc_setTipText's margin), not on the glass with its margin: a line that
+            // fits stays one line on a glass of one line's height.
+            private _lines = ceil (((_width - SQUARE(_textUnit * 0.8)) / (_maxW - SQUARE(_textUnit * 0.6))) max 0.01);
             private _height = _textUnit * 0.85 + (_lines - 1) * _textUnit * 0.62;
 
             _width = _width min _maxW;
