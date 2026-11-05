@@ -2,6 +2,43 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.33 - beta
+
+### Added
+
+- Second primary weapon as a slot of its own (issue #52), with WebKnight's or KJW's Two Primary Weapons loaded: the rifle on your back gets a card under your primary, with its magazine and attachments beside it, as on the primary. Drag a rifle onto it or off it, drop it, Ctrl+click it into your gear, change its optic, magazine and other parts like on any weapon. Drag the primary and the second primary onto each other, or pick "Swap with primary" / "Swap with second primary" in the right-click menu, and they trade places. A double click on a rifle with your hands full puts it on your back when that is free. The card's corner shows that mod's own switch key. Everything goes through that mod's own way of keeping the weapon (its variables, the weapon hanging on your back, with KJW's its weight in ACE), so its key switches to a rifle put there in the window as to one it put there itself; KJW's blacklist and whitelist decide what may go on the back. KJW's mod keeps the back weapon of the player only, WebKnight's of any soldier - your subordinates' too.
+
+### Changed
+
+- With WebKnight's Two Primary Weapons, a move in the window that empties your hands no longer brings the weapon on your back into them: it now has a slot you see and move yourself.
+
+## 0.6.32 - beta
+
+### Added
+
+- Size menu in the window (issue #51): a new button in the header, beside the palette, opens a popover with a slider for **Tiles** (the tile scale), **Text** and **Rows per page**. The window grows and shrinks behind it while you drag - no reopening. "Default" takes all three back. They are your CBA client settings, both ways: what you set here is saved there, and a change in CBA's Addon Options shows at once in an open window and in the popover. A size the server forces is greyed out.
+- Text size (`aio_gui_textSize`, client, 0.8 to 1.4, default 1): the window's words on top of what the tile scale gives them - larger words on small tiles, or smaller ones. The 12-pixel floor that keeps them readable stays.
+
+### Changed
+
+- The tile scale (`aio_gui_cellScale`) and the rows per page (`aio_gui_pageRows`) take effect at once in an open window instead of at the next opening; the tile scale moves in steps of 0.05.
+
+## 0.6.31 - beta
+
+### Changed
+
+- Quick move (double click, F) with nothing being looted no longer drops the item at your feet: it moves it within your own gear - out of the backpack into the vest, then the uniform; out of the vest or the uniform into the backpack, then the other one (issue #50). Dropping stays on G. Seated, it still goes into the vehicle.
+
+### Fixed
+
+- Telling a soldier you lead to open his inventory (command menu) opened your own gear instead: the window now shows your gear with his beside it, whole, as for any person - he has to stand next to you (issue #48).
+
+## 0.6.30 - beta
+
+### Fixed
+
+- Without ACE, the line that says why a reload or a throw was held back ("Use items from ..." set to Nothing or Only whitelisted) and the arsenal's "removed, as they did not fit" came as the game's hint box in the corner of the screen, which stays there; they are CBA notifications now, as every other short message without ACE.
+
 ## 0.6.29 - beta
 
 ### Added

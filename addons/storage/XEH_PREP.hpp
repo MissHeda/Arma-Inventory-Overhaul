@@ -101,6 +101,8 @@ PREP(plan);
 PREP(getSlot);
 PREP(slotAccepts);
 PREP(slotFor);
+PREP(secondPrimary);
+PREP(setSecondPrimary);
 PREP(partFor);
 PREP(weaponPart);
 PREP(addWeapon);

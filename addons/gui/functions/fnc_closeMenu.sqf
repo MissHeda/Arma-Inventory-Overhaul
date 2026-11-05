@@ -1,8 +1,8 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * Closes the context menu (fnc_openMenu), the sound dropdown (fnc_openSoundMenu) or the palette popover
- * (fnc_openPaletteMenu), if one is open. Its layer goes with everything in it, and the
+ * Closes the context menu (fnc_openMenu), the sound dropdown (fnc_openSoundMenu), the palette popover
+ * (fnc_openPaletteMenu) or the size popover (fnc_openSizeMenu), if one is open. Its layer goes with everything in it, and the
  * focus it took goes back to what had it before - or the search field's sink when that is gone - so a field
  * being typed in has the keys again. A palette popover that is only made again keeps the text of the field being typed in
  * (aio_gui_paletteTyping).
@@ -90,6 +90,15 @@ if (_controls isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) isEqualTo "palet
 
     if (!GVAR(menuRemake)) then {
         [] call FUNC(paletteSettle);
+    };
+};
+
+// And the size popover (fnc_openSizeMenu): what was changed is written to CBA, unless it is only made again.
+if (_controls isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) isEqualTo "size"}) then {
+    GVAR(menuFor) = [];
+
+    if (!GVAR(menuRemake)) then {
+        [] call FUNC(sizeSettle);
     };
 };
 

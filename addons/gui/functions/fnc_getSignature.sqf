@@ -7,7 +7,8 @@
  * the window's own moves:
  *
  *   own     - the unit's loadout as the equipment column shows it: what it wears and holds, less what its
- *             uniform, vest and backpack carry (storage, below). A change here builds the window anew.
+ *             uniform, vest and backpack carry (storage, below), and the second primary a two-primary mod keeps
+ *             on its back. A change here builds the window anew.
  *   list    - which sections the columns show and what is not a tile of them: the two containers the
  *             window looks into, the uniform, vest and backpack the unit wears (the very objects), what
  *             lies around (GVAR(nearby)), what was opened from inside a container - and whether it still
@@ -88,7 +89,9 @@ for "_i" from 3 to 5 do {
     };
 };
 
-private _own = str _loadout;
+// And the second primary on the back, which a two-primary mod keeps outside the loadout
+// (aio_storage_fnc_secondPrimary): put there or taken off, it changes nothing the loadout shows.
+private _own = str [_loadout, [GVAR(unit)] call EFUNC(storage,secondPrimary)];
 
 // ----- List -----
 

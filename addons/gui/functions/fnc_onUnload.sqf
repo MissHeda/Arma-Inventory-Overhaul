@@ -50,12 +50,15 @@ _reason = (createHashMapFromArray [
 
 INFO_1("window closed: %1",_reason);
 
-// The volumes set in the sound dropdown are kept, should the window close with it open - and the colours set in the palette.
+// The volumes set in the sound dropdown are kept, should the window close with it open - and the colours set in the palette, and
+// the sizes set in the size popover.
 [] call FUNC(soundSettle);
 [] call FUNC(paletteSettle);
+[] call FUNC(sizeSettle);
 
-// A palette popover that was open went with the display: it must not come back with the next window (fnc_build makes it again).
-if ((GVAR(menuFor) param [0, ""]) isEqualTo "palette") then {
+// A palette or size popover that was open went with the display: it must not come back with the next window (fnc_build makes it
+// again).
+if ((GVAR(menuFor) param [0, ""]) in ["palette", "size"]) then {
     uiNamespace setVariable [QGVAR(menu), []];
     GVAR(menuFor) = [];
     GVAR(menuState) = [];

@@ -32,6 +32,10 @@ if (_person isKindOf QACEGVAR(dragging,clone) || {!isNil {_person getVariable QA
 
 if (_person getVariable ["aio_noAccess", false]) exitWith {""};
 
+// An AI led by a player - the soldiers of a player's squad - opens whole, as the vanilla inventory lets the leader
+// into them from the command menu (fnc_isSubordinate).
+if (!isPlayer _person && {isPlayer leader group _person}) exitWith {"whole"};
+
 // The unconscious always open whole, as ACE's "Inventory" opens them.
 if (
     switch (GVAR(personOpen)) do {
