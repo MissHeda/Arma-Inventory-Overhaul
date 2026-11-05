@@ -168,6 +168,26 @@ if ([] call FUNC(paletteAllowed)) then {
     uiNamespace setVariable [QGVAR(paletteLine), _paletteLine];
 };
 
+// The size: a click opens the popover of the window's sizes under it (fnc_openSizeMenu) - tiles, text, rows per page -, where the
+// window grows and shrinks behind it while a slider moves. Always drawn: they are each player's own CBA settings. Like the palette
+// it shows an accent icon and line while its popover is open (fnc_updateSizeButton).
+private _sizeRect = [_square] call _fnc_place;
+private _sizeLine = [_sizeRect, false] call _fnc_underline;
+
+private _sizeButton = [
+    _display, controlNull, _sizeRect, "size", "", UI_TEX(icon_size_ca), [false] call _fnc_buttonTheme, {
+        // A left click only.
+        if ((_this select 0) < 0) exitWith {};
+
+        // Once per rest for a run of clicks (fnc_coalesce).
+        ["sizemenu", {[uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openSizeMenu)}, [], COALESCE_GAP] call FUNC(coalesce);
+    }
+] call FUNC(uiButton);
+[_sizeButton, LLSTRING(Size_Tooltip)] call _fnc_tooltip;
+
+uiNamespace setVariable [QGVAR(sizeButton), _sizeButton];
+uiNamespace setVariable [QGVAR(sizeLine), _sizeLine];
+
 // The speaker: a click opens the dropdown of the sound volumes under it (fnc_openSoundMenu), a right click
 // mutes everything or brings it all back (fnc_soundSet). It shows the muted speaker, dimmed, while nothing
 // is audible, and an accent icon and line while its dropdown is open (fnc_updateSoundButton, which keeps it up to

@@ -209,6 +209,23 @@ switch (GVAR(hover) param [0, ""]) do {
             // Put on: the slot it belongs to - attachments and magazines on each weapon that takes them.
             private _kind = ([_class] call EFUNC(items,getInfo)) get "kind";
 
+            // A weapon lying here: its parts changed as on a worn one, in the attachments view (#56, fnc_drawInspect) - found again
+            // by its cell (fnc_weaponTile).
+            if (_kind in ["rifle", "handgun", "launcher"] && {_kit isEqualTo ""} && {!isNull _from}) then {
+                _choices pushBack [
+                    LLSTRING(Menu_Modify),
+                    [
+                        _class, 1, -1, _tile getOrDefault ["attachments", []], _from,
+                        createHashMapFromArray [
+                            ["container", _from],
+                            ["cell", [_tile getOrDefault ["col", 0], _tile getOrDefault ["row", 0], _tile getOrDefault ["block", 0]]]
+                        ],
+                        true
+                    ],
+                    {_this call FUNC(inspect)}
+                ];
+            };
+
             if (_kind in ["muzzle", "optic", "rail", "bipod", "magazine", "grenade"]) then {
                 private _parts = [[_kind], ["mag", "mag2"]] select (_kind in ["magazine", "grenade"]);
 
@@ -227,7 +244,7 @@ switch (GVAR(hover) param [0, ""]) do {
                             ];
                         };
                     } forEach _parts;
-                } forEach ["primary", "handgun", "launcher"];
+                } forEach ["primary", "handgun", "launcher", "primary2"];
             } else {
                 private _slot = [_unit, _class] call EFUNC(storage,slotFor);
 
@@ -311,15 +328,32 @@ switch (GVAR(hover) param [0, ""]) do {
             _settingsClass = _record param [1, ""];
         };
 
+        // The player's own backpack slot with BackpackOnChest loaded (aio_compat_boc): to the chest, back onto the
+        // back or swapped with the pack on the chest - also on the empty slot, where the pack on the chest goes.
+        if (_slot isEqualTo "backpack" && {_owner isEqualTo _unit} && {!isNil QEFUNC(compat_boc,menuChoices)}) then {
+            _choices append ([_owner] call EFUNC(compat_boc,menuChoices));
+        };
+
         if (_slot isEqualTo "" || {isNull _owner} || {(_record param [1, ""]) isEqualTo ""}) exitWith {};
 
         private _worn = [_owner, _slot] call EFUNC(storage,getSlot);
+
+        // One of the player's own weapons: Attachments opens it with its parts to change (#56, fnc_drawHotspots); Inspect only looks.
+        private _ownWeapon = _owner isEqualTo _unit && {_slot in ["primary", "handgun", "launcher", "primary2"]};
 
         _choices pushBack [
             LLSTRING(Menu_Inspect),
             [_record param [1, ""], 1, _worn getOrDefault ["ammo", -1], _worn getOrDefault ["attachments", []]],
             {_this call FUNC(inspect)}
         ];
+
+        if (_ownWeapon) then {
+            _choices pushBack [
+                LLSTRING(Menu_Modify),
+                [_record param [1, ""], 1, -1, _worn getOrDefault ["attachments", []], objNull, _slot, true],
+                {_this call FUNC(inspect)}
+            ];
+        };
 
         // Waiting to be taken off (fnc_queueMoves): it can be cancelled, and nothing else is offered for it.
         private _queuedId = [_owner, _slot] call FUNC(queuedSlot);
@@ -349,6 +383,20 @@ switch (GVAR(hover) param [0, ""]) do {
             [_owner, _slot, "ground", []] call FUNC(doUnequip);
         }];
 
+        // The primary and the second primary on the back (a two-primary mod, aio_storage_fnc_secondPrimary) trade
+        // places - what that mod's own key does, without the hands having to be free of anything else.
+        if (_slot in ["primary", "primary2"]) then {
+            private _other = ["primary2", "primary"] select (_slot isEqualTo "primary2");
+
+            if (([[_owner, _slot], _owner, _other] call FUNC(canSwap)) isEqualTo "") then {
+                _choices pushBack [
+                    [LLSTRING(Menu_SwapSecondPrimary), LLSTRING(Menu_SwapPrimary)] select (_slot isEqualTo "primary2"),
+                    [[_owner, _slot], _owner, _other],
+                    {_this call FUNC(doSwap)}
+                ];
+            };
+        };
+
         // A magazine loaded in one of the player's weapons: all of its kind in the gear repacked, the loaded
         // one stays as it is (aio_magazines, when loaded).
         if (!isNil QEFUNC(magazines,menuChoices) && {_owner isEqualTo _unit} && {_slot in ["primary_mag", "primary_mag2", "handgun_mag", "launcher_mag"]}) then {
@@ -356,7 +404,7 @@ switch (GVAR(hover) param [0, ""]) do {
         };
 
         // A weapon: each of its parts on its own.
-        if (_slot in ["primary", "handgun", "launcher"]) then {
+        if (_slot in ["primary", "handgun", "launcher", "primary2"]) then {
             private _weapon = ([_owner] call EFUNC(storage,getEquipment)) getOrDefault [_slot, []];
 
             {

@@ -21,7 +21,9 @@ GVAR(ops) = createHashMapFromArray [
     ["normalize", QFUNC(opNormalize)], ["move", QFUNC(opMove)], ["take", QFUNC(opTake)],
     ["put", QFUNC(opPut)], ["putGround", QFUNC(opPutGround)], ["takeOff", QFUNC(opTakeOff)],
     ["putOn", QFUNC(opPutOn)], ["repack", QFUNC(opRepack)], ["migrate", QFUNC(opMigrate)],
-    ["strict", QFUNC(opStrict)], ["split", QFUNC(opSplit)]
+    ["strict", QFUNC(opStrict)], ["split", QFUNC(opSplit)],
+    // A part put on or taken off a weapon that lies in a container, between its take and its put (aio_gui_fnc_doFit).
+    ["fit", QFUNC(opFit)]
 ];
 
 // Checks every op passes on the machine that runs it: CODE [op, args, requester, root] -> "" or a reason.
@@ -60,6 +62,15 @@ GVAR(stackRoomy) = createHashMap;
 // lower case class names it takes (fnc_slotAccepts). Read from config once per weapon: config does not change
 // during a mission, and asking the engine for the compatible magazines of every slot at every lift is not cheap.
 GVAR(compatSets) = createHashMap;
+
+// The second primary weapon on the back that WebKnight's or KJW's Two Primary Weapons keeps outside the
+// loadout, as a slot of its own ("primary2", fnc_secondPrimary, fnc_setSecondPrimary). Empty unless one of
+// those mods is loaded: its compat addon fills it in its preInit - "name" STRING, the mod's name for the log;
+// "get" CODE [unit] -> [has the slot <BOOL>, weapon as weaponsItems gives it or [] <ARRAY>]; "set" CODE
+// [unit, weapon or []] -> nothing, done the mod's own way (its holder on the back, its variables); "accepts"
+// CODE [unit, class] -> BOOL, what the mod lets go there (left out, every rifle); "keybind" [CBA category,
+// action] of the mod's own switch key, which the weapon card names (aio_gui_fnc_drawEquipmentCards).
+GVAR(secondPrimaryMod) = createHashMap;
 
 // Where a unit's uniform, vest and backpack keep their things travels inside its loadouts, in the extended
 // info CBA keeps with them: written when a loadout is read, read back when one is set (fnc_onLoadoutGet,

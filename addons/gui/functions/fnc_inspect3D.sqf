@@ -15,8 +15,10 @@
  * frame is the item's size, at most INSPECT_3D_FRAME. The lights shine by day too; the aperture is left to the engine - set,
  * it lit or darkened the whole world behind the window as well.
  *
- * The state is GVAR(scene3D): the class and attachments it shows, the camera, the lights, every object made, the target
- * [ASL], the turn (dir, pitch), the distance and its limits.
+ * The state is GVAR(scene3D): the class and attachments it shows, the camera and where it stands, the lights, every object
+ * made, the target [ASL], the turn (dir, pitch), the distance and its limits - and for the modding view where the weapon's
+ * parts sit (fnc_weaponPoints). Started again for the same weapon with other parts, only the holder is fitted out anew: the
+ * view stays as it was turned.
  *
  * Arguments:
  * 0: What to do <STRING>
@@ -61,6 +63,9 @@ private _fnc_camera = {
     _camera camSetFov INSPECT_3D_FOV;
     _camera camCommit 0;
 
+    // Where it films from, for the modding view's points (fnc_placeHotspots).
+    _scene set ["cameraPos", _cameraPos];
+
     (_scene get "lights") params ["_key", "_fill", "_rim"];
 
     private _side = [cos _dir, -(sin _dir), 0];
@@ -71,16 +76,57 @@ private _fnc_camera = {
     _rim setPosASL ((_target vectorAdd ((_target vectorDiff _cameraPos) vectorMultiply 0.8)) vectorAdd [0, 0, 0.5 * _distance]);
 };
 
+// A weapon as the holder takes it, [class, muzzle, pointer, optic, magazine, magazine, bipod]: with what it carries, else as its
+// config fits it out - a magazine full: some belt-fed weapons show their box by the rounds.
+private _fnc_fitOut = {
+    params ["_class", "_attachments"];
+
+    private _itemConfig = configFile >> "CfgWeapons" >> _class;
+
+    _attachments params ["", ["_muzzle", ""], ["_pointer", ""], ["_optic", ""], ["_magazine", []], ["_magazine2", []], ["_bipod", ""]];
+
+    if (_attachments isEqualTo []) then {
+        private _linked = _itemConfig >> "LinkedItems";
+
+        _muzzle = getText (_linked >> "LinkedItemsMuzzle" >> "item");
+        _pointer = getText (_linked >> "LinkedItemsAcc" >> "item");
+        _optic = getText (_linked >> "LinkedItemsOptic" >> "item");
+        _bipod = getText (_linked >> "LinkedItemsUnder" >> "item");
+
+        private _magazines = getArray (_itemConfig >> "magazines");
+
+        if (_magazines isNotEqualTo []) then {
+            private _first = _magazines select 0;
+            _magazine = [_first, (getNumber (configFile >> "CfgMagazines" >> _first >> "count")) max 1];
+        };
+    };
+
+    if !(_magazine isEqualType [] && {count _magazine >= 2} && {(_magazine param [0, ""]) isNotEqualTo ""}) then {_magazine = []};
+    if !(_magazine2 isEqualType [] && {count _magazine2 >= 2} && {(_magazine2 param [0, ""]) isNotEqualTo ""}) then {_magazine2 = []};
+
+    [_class, _muzzle, _pointer, _optic, _magazine, _magazine2, _bipod]
+};
+
 switch (_mode) do {
     case "start": {
         _arguments params [["_class", "", [""]], ["_attachments", [], [[]]]];
 
         if (_class isEqualTo "") exitWith {};
 
-        if (
-            (_scene getOrDefault ["class", ""]) isEqualTo _class && {(_scene getOrDefault ["attachments", []]) isEqualTo _attachments}
-            && {!isNull (_scene getOrDefault ["camera", objNull])}
-        ) exitWith {};
+        private _running = (_scene getOrDefault ["class", ""]) isEqualTo _class && {!isNull (_scene getOrDefault ["camera", objNull])};
+
+        if (_running && {(_scene getOrDefault ["attachments", []]) isEqualTo _attachments}) exitWith {};
+
+        // The same weapon on the holder with other parts - one put on or taken off in the modding view (fnc_drawHotspots): only
+        // what lies on the holder changes, the view stays as the player turned it.
+        if (_running && {_scene getOrDefault ["onHolder", false]}) exitWith {
+            private _holder = (_scene get "objects") param [1, objNull];
+
+            clearWeaponCargo _holder;
+            clearMagazineCargo _holder;
+            _holder addWeaponWithAttachmentsCargo [[_class, _attachments] call _fnc_fitOut, 1];
+            _scene set ["attachments", +_attachments];
+        };
 
         ["stop"] call FUNC(inspect3D);
 
@@ -116,28 +162,8 @@ switch (_mode) do {
         // as it does backpacks, glasses and magazines.
         private _holderTakes = _isWeapon || {isClass _itemConfig && {!(_class isKindOf ["Binocular", _weapons])}};
 
-        // A weapon with what it carries, else as its config fits it out - a magazine full: some belt-fed weapons show
-        // their box by the rounds.
-        _attachments params ["", ["_muzzle", ""], ["_pointer", ""], ["_optic", ""], ["_magazine", []], ["_magazine2", []], ["_bipod", ""]];
-
-        if (_attachments isEqualTo []) then {
-            private _linked = _itemConfig >> "LinkedItems";
-
-            _muzzle = getText (_linked >> "LinkedItemsMuzzle" >> "item");
-            _pointer = getText (_linked >> "LinkedItemsAcc" >> "item");
-            _optic = getText (_linked >> "LinkedItemsOptic" >> "item");
-            _bipod = getText (_linked >> "LinkedItemsUnder" >> "item");
-
-            private _magazines = getArray (_itemConfig >> "magazines");
-
-            if (_magazines isNotEqualTo []) then {
-                private _first = _magazines select 0;
-                _magazine = [_first, (getNumber (configFile >> "CfgMagazines" >> _first >> "count")) max 1];
-            };
-        };
-
-        if (count _magazine < 2 || {(_magazine param [0, ""]) isEqualTo ""}) then {_magazine = []};
-        if (count _magazine2 < 2 || {(_magazine2 param [0, ""]) isEqualTo ""}) then {_magazine2 = []};
+        // A weapon with what it carries, else as its config fits it out.
+        ([_class, _attachments] call _fnc_fitOut) params ["", "_muzzle", "_pointer", "_optic", "_magazine", "_magazine2", "_bipod"];
 
         // The model, where the class lives - a magazine's real one rather than the box it lies on the ground as (fnc_itemModel).
         private _model = [_class] call FUNC(itemModel);
@@ -202,6 +228,7 @@ switch (_mode) do {
 
                 if (_onHolder) then {
                     _holder addWeaponWithAttachmentsCargo [[_class, _muzzle, _pointer, _optic, _magazine, _magazine2, _bipod], 1];
+                    _scene set ["onHolder", true];
 
                     private _base = [[0.25, 0] select _isWeapon] call _fnc_base;
 

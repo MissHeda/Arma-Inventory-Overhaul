@@ -107,6 +107,10 @@
 // in seconds (XEH_postInit, fnc_guardVanilla).
 #define GUARD_INTERVAL 0.25
 
+// How often the soldiers the player leads are given the inventory handler, in seconds (XEH_postInit,
+// fnc_isSubordinate): one who joined the group since gets it at the next look.
+#define SUBORDINATE_INTERVAL 2
+
 // How many frames fnc_open waits for a vanilla inventory to go before it makes the window: made while
 // one is open, the window would be its child dialog and close with it (fnc_guardVanilla).
 #define OPEN_TRIES 10
@@ -428,6 +432,11 @@
 // them, and they match the game's items better than anything drawn for this mod.
 #define GEAR_ICON(NAME) QUOTE(\A3\ui_f\data\GUI\Rsc\RscDisplayGear\NAME.paa)
 
+// An attachment's mark on a weapon's picture (fnc_drawAttachments): the weapon's own shape for the slot, at most this share of the
+// picture's size, in this colour.
+#define ATTACHMENT_MARK 0.18
+#define ATTACHMENT_MARK_COLOR [1, 1, 1, 0.9]
+
 // What the config classes start with. Every control gets its real colours from the theme.
 #define C_CLEAR         {0, 0, 0, 0}
 #define C_WHITE         {1, 1, 1, 1}
@@ -509,6 +518,24 @@
 #define TEXT_MIN_PX 12
 #define TEXT_SCALE (call aio_gui_fnc_textScale)
 #define TEXT_UNIT (UNIT * TEXT_SCALE)
+
+// The player's text size (aio_gui_textSize) on top of that: a share of the words the tiles give, for a player who wants
+// smaller tiles with words still easy to read, or the other way round (a Steam user, 0.6.32: the words nearly unreadable,
+// the window too big). TEXT_MIN_PX stays the floor whatever it says.
+#define TEXT_SIZE_MIN 0.8
+// The most of a slot's height one line of its words takes (fnc_drawSlot): a small box keeps its words inside however large
+// the tile and text sizes make them.
+#define SLOT_LINE_MAX 0.3
+#define TEXT_SIZE_MAX 1.4
+
+// The defaults of the three sizes the size popover sets (fnc_openSizeMenu) - the CBA settings' own (initSettings.inc.sqf), and
+// what its Default button takes them back to.
+#define CELL_SCALE_DEFAULT 1.1
+#define TEXT_SIZE_DEFAULT 1
+#define PAGE_ROWS_DEFAULT 10
+
+// The tile and text sliders of the size popover (fnc_sizeSlide) move in steps of SIZE_STEP; the rows per page in whole rows.
+#define SIZE_STEP 0.05
 
 // The room between two compartments of a container, a share of a cell rounded to whole pixels: between
 // blocks that flow side by side or one under another (fnc_flowCompartments).

@@ -100,6 +100,12 @@ if (_trash isNotEqualTo []) then {
     uiNamespace setVariable [QGVAR(windowTrash), []];
 };
 
+// A weapon card held by its grip (fnc_cardGrip): its drop line follows the mouse, and the release - over whatever
+// control it happens - puts it there.
+if ((uiNamespace getVariable [QGVAR(cardDrag), []]) isNotEqualTo []) then {
+    [["move", "end"] select (inputMouse 0 == 0)] call FUNC(cardGrip);
+};
+
 // Clip groups of pictures the wheel turned over: the engine scrolled them after the handler put them back, so
 // they go back to the top again before this frame is drawn, for UNSCROLL_FRAMES frames (fnc_unscroll).
 private _unscroll = uiNamespace getVariable [QGVAR(unscroll), []];
@@ -423,6 +429,11 @@ if (_middle && {!GVAR(middleWas)} && {GVAR(inspect3DPan) isEqualTo []} && {count
 
 GVAR(middleWas) = _middle;
 
+// The modding view's points follow the weapon as it is turned, moved and zoomed (fnc_drawHotspots).
+if ((uiNamespace getVariable [QGVAR(hotspots), []]) isNotEqualTo []) then {
+    call FUNC(placeHotspots);
+};
+
 if (GVAR(inspect3DPan) isNotEqualTo []) then {
     if (inputMouse 2 == 0) then {
         GVAR(inspect3DPan) = [];
@@ -567,6 +578,16 @@ if (_tipUp && {GVAR(tooltipAt) isNotEqualTo _mouse}) then {
 
     if (_tipY + _height > safezoneY + safezoneH - TOOLTIP_MARGIN) then {
         _tipY = (_mouseY - UNIT * 0.3 - _height) max safezoneY;
+    };
+
+    // In a popup's layer (fnc_raiseTooltip) its place counts from the layer's corner.
+    private _home = ctrlParentControlsGroup _tip;
+
+    if (!isNull _home) then {
+        (ctrlPosition _home) params ["_homeX", "_homeY"];
+
+        _tipX = _tipX - _homeX;
+        _tipY = _tipY - _homeY;
     };
 
     _tip ctrlSetPosition [_tipX, _tipY];
