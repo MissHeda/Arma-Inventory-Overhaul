@@ -274,11 +274,11 @@ _group ctrlAddEventHandler ["MouseButtonUp", {[false, _this] call FUNC(onMouseBu
     _theme getOrDefault ["inspectBg", [0.06, 0.06, 0.06, 0.98]], _theme getOrDefault ["radius", 0]
 ] call FUNC(uiPanel);
 
-// A line in the accent colour round it: it stands out from the window and the world behind.
+// A faint line in the accent colour round it: it stands out a little from the window and the world behind.
 private _cardRadius = round ((_theme getOrDefault ["radius", 0]) / pixelH);
 
 [
-    _display, _group, [0, 0, _width, _height], _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]],
+    _display, _group, [0, 0, _width, _height], ((_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3]) + [0.3],
     [[], [_cardRadius, [true, true, true, true]]] select (_cardRadius > 0), 1
 ] call FUNC(uiOutline);
 

@@ -2,6 +2,18 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.62 - beta
+
+### Changed
+
+- The line round the Inspect and Attachments cards is much fainter.
+- Attachments, Attach to and Load into in the right-click menu have clear white pictures of their own.
+- Double click: the setting is now for items with none of their own. Your weapons always open Attachments, and what a mod or the mission set for an item always applies.
+
+### Fixed
+
+- Your settings: no names and values cut off, and a smaller hint line.
+
 ## 0.6.61 - beta
 
 ### Added

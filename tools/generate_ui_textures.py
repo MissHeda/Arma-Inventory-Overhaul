@@ -287,6 +287,23 @@ def icon_size(d, s, w):
     line(d, [(s * 0.24, s * 0.46), (s * 0.24, s * 0.76), (s * 0.54, s * 0.76)], w)
 
 
+def icon_attachments(d, s, w):
+    # A scope on its rail: what goes on a weapon. The Attachments row of the right-click menu.
+    line(d, [(s * 0.14, s * 0.3), (s * 0.3, s * 0.38), (s * 0.3, s * 0.52), (s * 0.14, s * 0.6), (s * 0.14, s * 0.3)], w)
+    line(d, [(s * 0.86, s * 0.26), (s * 0.7, s * 0.36), (s * 0.7, s * 0.54), (s * 0.86, s * 0.64), (s * 0.86, s * 0.26)], w)
+    line(d, [(s * 0.3, s * 0.45), (s * 0.7, s * 0.45)], w)
+    line(d, [(s * 0.14, s * 0.78), (s * 0.86, s * 0.78)], w)
+    line(d, [(s * 0.42, s * 0.52), (s * 0.42, s * 0.78)], w)
+    line(d, [(s * 0.58, s * 0.52), (s * 0.58, s * 0.78)], w)
+
+
+def icon_magazine(d, s, w):
+    # A curved magazine with a round on top. The rows that load one.
+    line(d, [(s * 0.36, s * 0.26), (s * 0.62, s * 0.26), (s * 0.72, s * 0.84), (s * 0.48, s * 0.88), (s * 0.36, s * 0.26)], w)
+    line(d, [(s * 0.44, s * 0.14), (s * 0.54, s * 0.14)], w)
+    line(d, [(s * 0.42, s * 0.48), (s * 0.65, s * 0.45)], w)
+
+
 def icon_server(d, s, w):
     # A rack of two servers, each with its light: the server's setup wizard in the header, beside the player's own cog.
     for top in (0.2, 0.55):
@@ -1110,6 +1127,8 @@ def build_images():
         "icon_palette_ca": stroke_icon(icon_palette),
         "icon_size_ca": stroke_icon(icon_size),
         "icon_server_ca": stroke_icon(icon_server),
+        "icon_attachments_ca": stroke_icon(icon_attachments),
+        "icon_magazine_ca": stroke_icon(icon_magazine),
         "icon_weight_ca": stroke_icon(icon_weight),
         # The setup wizard: its cog in the inventory's header and in Eden's Tools menu, and its controls.
         "icon_setup_ca": stroke_icon(icon_setup),

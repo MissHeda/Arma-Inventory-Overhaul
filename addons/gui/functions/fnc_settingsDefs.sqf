@@ -35,7 +35,7 @@ private _rows = [
     ],
     [
         QGVAR(lootSide), LLSTRING(Setting_LootSide), LLSTRING(Setting_LootSide_Desc), "list", "left",
-        [["left", "right"], [LLSTRING(Setting_LootSide_Left), LLSTRING(Setting_LootSide_Right)]]
+        [["left", "right"], [LLSTRING(SettingsMenu_LootLeft), LLSTRING(SettingsMenu_LootRight)]]
     ],
     ["", LLSTRING(SettingsMenu_Tiles)],
     [QGVAR(tileNames), LLSTRING(Setting_TileNames), LLSTRING(Setting_TileNames_Desc), "check", false],

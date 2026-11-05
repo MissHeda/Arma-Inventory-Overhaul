@@ -98,7 +98,7 @@ private _gapX = SQUARE(UNIT * 0.45);
 private _extras = call FUNC(settingsDefs);
 private _extraRowH = UNIT * 0.92;
 private _extraH = _extraRowH * count _extras;
-private _listW = SQUARE(UNIT * 17);
+private _listW = SQUARE(UNIT * 23);
 private _previewW = SQUARE(UNIT * 12);
 private _width = _listW + _previewW;
 private _height = _padY * 2 + _headH + _count * _rowH + _extraH;
@@ -140,7 +140,7 @@ private _tips = _defs apply {
 };
 
 // The hint line at the bottom: as many lines as the longest tip wraps to, at least two.
-private _hintSize = _size * 0.8;
+private _hintSize = _size * 0.6;
 private _hintW = _listW - _padX * 2;
 private _hintLines = 2;
 
@@ -299,7 +299,7 @@ private _extraTop = _headTop + _headH + _count * _rowH;
 private _boxH = UNIT * 0.5;
 private _boxW = SQUARE(_boxH);
 private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
-private _extraNameW = SQUARE(UNIT * 7.6);
+private _extraNameW = SQUARE(UNIT * 13);
 
 {
     _x params ["_setting", "_name", "", ["_kind", ""], "_default", ["_data", []]];
@@ -450,7 +450,7 @@ private _shares = createHashMapFromArray [["equipment", 0.3], ["loot", 0.23], ["
 private _shotNote = [_display, "AIO_StructuredText", _layer, [_shotX, _shotY + _shotH + _padY / 2, _shotW, _small * 6]] call FUNC(uiCreate);
 
 _shotNote ctrlEnable false;
-_shotNote setVariable [QGVAR(hintSize), _small];
+_shotNote setVariable [QGVAR(hintSize), _small * 0.8];
 [_shotNote, LLSTRING(SettingsMenu_PreviewNote)] call FUNC(setMenuHint);
 
 private _hintTop = _extraTop + _extraH + _padY / 2;

@@ -582,8 +582,12 @@ private _fnc_groundOpen = {
     count _tile > 0 && {!isNull (_tile getOrDefault ["container", objNull])}
 };
 
-// Set to do nothing (aio_gui_doubleClick), a double click is two clicks.
-if (GVAR(doubleClick) isEqualTo "none") then {
+// What has a double click of its own does that whatever the player set: one of the player's own weapons opens Attachments (below), an
+// item a mod or the mission set one for does that (fnc_doubleClickRule). The setting (aio_gui_doubleClick) is for the rest.
+if (_double && {!_ownWeapon} && {_gridIndex >= 0} && {[_gridIndex, _tileIndex] call FUNC(doubleClickRule)}) exitWith {true};
+
+// Set to do nothing, a double click is two clicks.
+if (!_ownWeapon && {GVAR(doubleClick) isEqualTo "none"}) then {
     _double = false;
 };
 
@@ -592,9 +596,6 @@ if (GVAR(doubleClick) isEqualTo "none") then {
 // own weapons it opens Attachments instead of a quick move (fnc_inspect, as the menu's row does).
 if (_double) exitWith {
     switch (true) do {
-        case (GVAR(doubleClick) isEqualTo "menu"): {
-            [{[_this] call FUNC(contextMenu)}, _display] call FUNC(later);
-        };
         case (_ownWeapon): {
             _slotSource params ["_slotOwner", "_slotName"];
 
@@ -604,6 +605,9 @@ if (_double) exitWith {
             if (_class isNotEqualTo "") then {
                 [{_this call FUNC(inspect)}, [_class, 1, -1, _worn getOrDefault ["attachments", []], objNull, _slotName, true]] call FUNC(later);
             };
+        };
+        case (GVAR(doubleClick) isEqualTo "menu"): {
+            [{[_this] call FUNC(contextMenu)}, _display] call FUNC(later);
         };
         default {
             [_gridIndex, _tileIndex] call FUNC(quickAction);

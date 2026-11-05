@@ -161,7 +161,7 @@ private _fnc_icon = {
 };
 
 private _iconInspect = [UI_TEX(icon_eye_ca), [], "inspect"] call _fnc_icon;
-private _iconAttachments = [GEAR_ICON(ui_gear_top_gs), [], "attachments"] call _fnc_icon;
+private _iconAttachments = [UI_TEX(icon_attachments_ca), [], "attachments"] call _fnc_icon;
 private _iconDrop = [UI_TEX(icon_ground_ca), [], "drop"] call _fnc_icon;
 
 // Everything in a section selected - in the inventory only, for the grids of the columns. Set apart by a
@@ -280,11 +280,8 @@ switch (GVAR(hover) param [0, ""]) do {
             if (_kind in ["muzzle", "optic", "rail", "bipod", "magazine", "grenade"]) then {
                 private _parts = [[_kind], ["mag", "mag2"]] select (_kind in ["magazine", "grenade"]);
 
-                // The row's picture: a magazine to load, the shape of the part to attach.
-                private _partIcon = createHashMapFromArray [
-                    ["muzzle", GEAR_ICON(ui_gear_muzzle_gs)], ["optic", GEAR_ICON(ui_gear_top_gs)],
-                    ["rail", GEAR_ICON(ui_gear_side_gs)], ["bipod", GEAR_ICON(ui_gear_bipod_gs)]
-                ] getOrDefault [_kind, GEAR_ICON(ui_gear_magazine_gs)];
+                // The row's picture: a magazine to load, the weapon's parts to attach.
+                private _partIcon = [UI_TEX(icon_attachments_ca), UI_TEX(icon_magazine_ca)] select (_kind in ["magazine", "grenade"]);
 
                 {
                     private _base = _x;
