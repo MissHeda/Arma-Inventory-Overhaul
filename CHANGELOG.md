@@ -2,6 +2,33 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.32 - beta
+
+### Added
+
+- Size menu in the window (issue #51): a new button in the header, beside the palette, opens a popover with a slider for **Tiles** (the tile scale), **Text** and **Rows per page**. The window grows and shrinks behind it while you drag - no reopening. "Default" takes all three back. They are your CBA client settings, both ways: what you set here is saved there, and a change in CBA's Addon Options shows at once in an open window and in the popover. A size the server forces is greyed out.
+- Text size (`aio_gui_textSize`, client, 0.8 to 1.4, default 1): the window's words on top of what the tile scale gives them - larger words on small tiles, or smaller ones. The 12-pixel floor that keeps them readable stays.
+
+### Changed
+
+- The tile scale (`aio_gui_cellScale`) and the rows per page (`aio_gui_pageRows`) take effect at once in an open window instead of at the next opening; the tile scale moves in steps of 0.05.
+
+## 0.6.31 - beta
+
+### Changed
+
+- Quick move (double click, F) with nothing being looted no longer drops the item at your feet: it moves it within your own gear - out of the backpack into the vest, then the uniform; out of the vest or the uniform into the backpack, then the other one (issue #50). Dropping stays on G. Seated, it still goes into the vehicle.
+
+### Fixed
+
+- Telling a soldier you lead to open his inventory (command menu) opened your own gear instead: the window now shows your gear with his beside it, whole, as for any person - he has to stand next to you (issue #48).
+
+## 0.6.30 - beta
+
+### Fixed
+
+- Without ACE, the line that says why a reload or a throw was held back ("Use items from ..." set to Nothing or Only whitelisted) and the arsenal's "removed, as they did not fit" came as the game's hint box in the corner of the screen, which stays there; they are CBA notifications now, as every other short message without ACE.
+
 ## 0.6.29 - beta
 
 ### Added
