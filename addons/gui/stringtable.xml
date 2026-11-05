@@ -19,6 +19,21 @@
         <Key ID="STR_aio_gui_Close">
             <English>Close</English>
         </Key>
+        <Key ID="STR_aio_gui_ColumnOrder_Apart">
+            <English>Gear left, equipment right</English>
+        </Key>
+        <Key ID="STR_aio_gui_ColumnOrder_Default">
+            <English>Equipment left, gear right</English>
+        </Key>
+        <Key ID="STR_aio_gui_ColumnOrder_Left">
+            <English>All on the left</English>
+        </Key>
+        <Key ID="STR_aio_gui_ColumnOrder_Middle">
+            <English>Equipment beside the loot, gear right</English>
+        </Key>
+        <Key ID="STR_aio_gui_ColumnOrder_Right">
+            <English>All on the right, equipment last</English>
+        </Key>
         <Key ID="STR_aio_gui_Column_Equipment">
             <English>Equipment</English>
         </Key>
@@ -862,6 +877,12 @@
         <Key ID="STR_aio_gui_Setting_CellScale_Desc">
             <English>Size of cells, pictures and text (default 1.1).\nAlso set live in the window:\nthe size button in the header.</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_ColumnOrder">
+            <English>Column order</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ColumnOrder_Desc">
+            <English>Which column stands where, from left\nto right.\n\nLoot and your gear swap with\nWhere other storage opens.</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_CompareTooltip">
             <English>Compare gear at the mouse</English>
         </Key>
@@ -1074,11 +1095,41 @@ Options of other mods (CBA) by their id.</English>
         <Key ID="STR_aio_gui_Setting_SearchZeus_Desc">
             <English>Crates and vehicles placed with Zeus are searched like any other.\nOff: they show their loot at once. Needs "Search crates and vehicles" on.</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_ShowFooter">
+            <English>Show the footer</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowFooter_Desc">
+            <English>The line of keys and hints along the\nbottom of the window.\n\nOff, the columns get its room.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowGear">
+            <English>Show the gear slots</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowGear_Desc">
+            <English>Headgear, uniform, vest and backpack\nin the equipment column.\n\nOff, the weapons get their room. Your\ncontainers stay in Your gear.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowHotbar">
+            <English>Show the hotbar</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowHotbar_Desc">
+            <English>The hotbar in the window, its hint in\nthe footer and its rows in the menu.\n\nItems already on a key keep working\nwith that key.</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_ShowNearby">
             <English>Show everything nearby</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_ShowNearby_Desc">
             <English>Show piles and crates within reach in the loot column.\nOff: only what you opened.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowSmallSlots">
+            <English>Show the small slots</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowSmallSlots_Desc">
+            <English>Goggles, night vision, binocular, map,\nGPS, radio, compass and watch.\n\nOff, the weapons get their room.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowWeight">
+            <English>Show the weight</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowWeight_Desc">
+            <English>The weight card on top of the\nequipment column.\n\nOff, the weapons get its room.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_SoundsWorld">
             <English>Others hear looting</English>

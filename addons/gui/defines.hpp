@@ -484,7 +484,9 @@
 #define CONTENT_X (safezoneX + MARGIN_X)
 #define CONTENT_W (safezoneW - MARGIN_X * 2)
 #define CONTENT_Y (safezoneY + UNIT * 3)
-#define CONTENT_B (safezoneY + safezoneH - UNIT * 2.6)
+// Without the footer (aio_gui_showFooter, the literal name as this is included by other addons as well) the columns take its room.
+#define CONTENT_B (safezoneY + safezoneH - UNIT * ([0.6, 2.6] select (missionNamespace getVariable ["aio_gui_showFooter", true])))
+#define COLUMN_ORDER_DEFAULT "equipment,free,loot,storage"
 #define CONTENT_H (CONTENT_B - CONTENT_Y)
 
 #define FOOT_Y (safezoneY + safezoneH - UNIT * 2)

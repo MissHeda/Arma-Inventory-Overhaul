@@ -72,7 +72,7 @@ private _keys = if (_inventory) then {
         [LLSTRING(Key_Escape), LLSTRING(Close)],
         [[_quickKey, ["", "@double"] select (GVAR(doubleClick) isEqualTo "move")] select (_quickKey isEqualTo ""), LLSTRING(QuickMove)],
         [_dropKey, LLSTRING(Drop)],
-        (if (!isNil QEFUNC(hotbar,footerHint)) then {call EFUNC(hotbar,footerHint)} else {["", ""]}),
+        (if (!isNil QEFUNC(hotbar,footerHint) && {missionNamespace getVariable [QGVAR(showHotbar), true]}) then {call EFUNC(hotbar,footerHint)} else {["", ""]}),
         ["Ctrl+@left", LLSTRING(Select)],
         ["@right", LLSTRING(Menu)]
     ]

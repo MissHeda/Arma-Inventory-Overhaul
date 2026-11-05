@@ -320,7 +320,7 @@ switch (GVAR(hover) param [0, ""]) do {
             };
 
             // The hotbar: put it on a key, or take it off (aio_hotbar - only when that addon is loaded).
-            if (call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,menuChoices)}) then {
+            if (call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,menuChoices)} && {missionNamespace getVariable [QGVAR(showHotbar), true]}) then {
                 private _n = count _choices;
                 _choices append ([_class, ["grid", _grid]] call EFUNC(hotbar,menuChoices));
                 [_n, "hotbar"] call _fnc_tag;

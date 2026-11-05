@@ -70,6 +70,73 @@
     0
 ] call CBA_fnc_addSetting;
 
+// Each player's own window: what it shows. What is switched off gives its room to the rest (fnc_drawEquipmentCards, CONTENT_B).
+[
+    QGVAR(showWeight),
+    "CHECKBOX",
+    [LLSTRING(Setting_ShowWeight), LLSTRING(Setting_ShowWeight_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(showGear),
+    "CHECKBOX",
+    [LLSTRING(Setting_ShowGear), LLSTRING(Setting_ShowGear_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(showSmallSlots),
+    "CHECKBOX",
+    [LLSTRING(Setting_ShowSmallSlots), LLSTRING(Setting_ShowSmallSlots_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(showHotbar),
+    "CHECKBOX",
+    [LLSTRING(Setting_ShowHotbar), LLSTRING(Setting_ShowHotbar_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(showFooter),
+    "CHECKBOX",
+    [LLSTRING(Setting_ShowFooter), LLSTRING(Setting_ShowFooter_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// Each player's own window: which column stands where, left to right (fnc_layoutGlass). "free" is the middle left empty, where an
+// open kit's window and the inspect card go.
+[
+    QGVAR(columnOrder),
+    "LIST",
+    [LLSTRING(Setting_ColumnOrder), LLSTRING(Setting_ColumnOrder_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [
+        ["equipment,free,loot,storage", "equipment,loot,storage,free", "free,loot,storage,equipment", "loot,storage,free,equipment", "loot,equipment,free,storage"],
+        [LLSTRING(ColumnOrder_Default), LLSTRING(ColumnOrder_Left), LLSTRING(ColumnOrder_Right), LLSTRING(ColumnOrder_Apart), LLSTRING(ColumnOrder_Middle)],
+        0
+    ],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
 // Each player's own taste: where the loot column opens - left of their storage column, which then never moves
 // (default), or at the right edge with the storage column moving in, as it did before. Read at every build
 // (fnc_layoutGlass), so an open window follows at its next one.

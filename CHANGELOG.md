@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.60 - beta
+
+### Added
+
+- Switch off what you do not use (client settings): the weight, the gear slots, the small slots, the hotbar and the footer. What is off gives its room to the rest; hotbar keys keep working (#66).
+- **Column order** (client setting): place equipment, loot and your gear - for example equipment on the right with your gear beside it (#66).
+
 ## 0.6.59 - beta
 
 ### Added

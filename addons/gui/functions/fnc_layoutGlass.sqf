@@ -6,6 +6,8 @@
  *
  *   | equipment |        free        | loot | storage |
  *
+ * That is the order by default; each player can have another (aio_gui_columnOrder, below).
+ *
  * On the left what the unit wears, as cards (fnc_drawEquipmentCards). On the right its uniform, vest
  * and backpack stacked in one scrolling column titled "Your gear", and while it loots a second column for
  * that, titled with what is looted ("Loot - Miller", "Loot - Nearby" when it only shows what lies around) and
@@ -84,60 +86,72 @@ if (_reserved) then {
     _rightW = _columnW + (_grow min (_growBy * _columnW));
 };
 
-private _right = CONTENT_X + CONTENT_W;
+// The columns from left to right are each player's own (the setting aio_gui_columnOrder), the free middle one of them: it takes
+// what the others leave. Where the loot column goes beside the storage column is the setting aio_gui_lootSide: right swaps the
+// two. A window that kept the right edge for itself ("rightColumn") has no say in it: the usual order, its column at that edge.
+// The middle gives way first where the screen is too narrow, then the equipment column - nothing overlaps.
+private _keepRight = _context getOrDefault ["rightColumn", false];
+private _order = (missionNamespace getVariable [QGVAR(columnOrder), COLUMN_ORDER_DEFAULT]) splitString ",";
 
-// Where the loot column goes is the player's own taste (the setting aio_gui_lootSide): by default it opens
-// left of the storage column, which then never moves - looting or not, the storage column stands at the right
-// edge - and the other way round, the loot column takes the right edge and the storage column moves in. A
-// window that kept the right edge for itself ("rightColumn") has no say in it: its column stays there. The
-// column widths and the gaps are the same either way, so the free middle is just as wide, only it lies
-// against the loot column instead of the storage column.
-private _lootLeft = _looting
-    && {!(_context getOrDefault ["rightColumn", false])}
-    && {GVAR(lootSide) isNotEqualTo "right"};
-
-private _lootX = 0;
-private _storageX = 0;
-
-if (_lootLeft) then {
-    _storageX = _right - _columnW;
-    _lootX = _storageX - _gap - _rightW;
-    _right = _lootX - _gap;
-} else {
-    _lootX = _right - _rightW;
-
-    if (_reserved) then {
-        _right = _lootX - _gap;
-    };
-
-    _storageX = _right - _columnW;
-    _right = _storageX - _gap;
+if (_keepRight || {count _order != 4}) then {
+    _order = COLUMN_ORDER_DEFAULT splitString ",";
 };
+
+if (_keepRight || {(missionNamespace getVariable [QGVAR(lootSide), "left"]) isEqualTo "right"}) then {
+    private _lootAt = _order find "loot";
+
+    _order set [_order find "storage", "loot"];
+    _order set [_lootAt, "storage"];
+};
+
+if (!_reserved) then {
+    _order = _order - ["loot"];
+};
+
+private _freeW = CONTENT_W - _leftW - _columnW - ([0, _rightW] select _reserved) - _gap * (count _order - 1);
+
+if (_freeW < 0) then {
+    _leftW = (_leftW + _freeW) max 0;
+    _freeW = 0;
+};
+
+private _cursorX = CONTENT_X;
+private _equipX = CONTENT_X;
+private _lootX = CONTENT_X;
+private _storageX = CONTENT_X;
+private _middleX = CONTENT_X;
+
+{
+    switch (_x) do {
+        case "equipment": {_equipX = _cursorX; _cursorX = _cursorX + _leftW + _gap};
+        case "loot": {_lootX = _cursorX; _cursorX = _cursorX + _rightW + _gap};
+        case "storage": {_storageX = _cursorX; _cursorX = _cursorX + _columnW + _gap};
+        default {_middleX = _cursorX; _cursorX = _cursorX + _freeW + _gap};
+    };
+} forEach _order;
 
 if (_reserved) then {
     _context set ["rightRect", [_lootX, CONTENT_Y, _rightW, CONTENT_H]];
 };
 
-_leftW = _leftW min ((_right - CONTENT_X) max 0);
-
 // ----- Equipment -----
 
-GVAR(panels) pushBack [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H];
+GVAR(panels) pushBack [_equipX, CONTENT_Y, _leftW, CONTENT_H];
 
 // Anything let go over it goes into the slot that takes it (fnc_updateDrag).
-GVAR(equipmentRect) = [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H];
+GVAR(equipmentRect) = [_equipX, CONTENT_Y, _leftW, CONTENT_H];
 
 private _cardsRect = if (_theme getOrDefault ["equipmentPanel", true]) then {
     [
-        _display, controlNull, [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["panel", []],
+        _display, controlNull, [_equipX, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["panel", []],
         _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
     ] call FUNC(uiPanel);
 
-    [_display, controlNull, [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
+    [_display, controlNull, [_equipX, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
 
-    [CONTENT_X + _padX, CONTENT_Y + _padY, _leftW - _padX * 2, CONTENT_H - _padY * 2]
+    [_equipX + _padX, CONTENT_Y + _padY, _leftW - _padX * 2, CONTENT_H - _padY * 2]
 } else {
-    [CONTENT_X, CONTENT_Y + _padY, _leftW, CONTENT_H - _padY * 2]
+    [_equipX, CONTENT_Y + _padY, _leftW, CONTENT_H - _padY * 2]
 };
 
 [_display, controlNull, _cardsRect, _context, _theme] call FUNC(drawEquipmentCards);
@@ -203,9 +217,6 @@ if (_looting) then {
 
 // ----- The free middle -----
 
-private _middleX = CONTENT_X + _leftW + _gap;
-private _middleW = _right - _middleX;
+if (_freeW < SQUARE(UNIT * 5)) exitWith {[]};
 
-if (_middleW < SQUARE(UNIT * 5)) exitWith {[]};
-
-[_middleX, CONTENT_Y, _middleW, CONTENT_H]
+[_middleX, CONTENT_Y, _freeW, CONTENT_H]

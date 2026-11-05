@@ -448,7 +448,10 @@ if (_timed) then {_marks pushBack ["columns", diag_tickTime]};
 if ("footer" in GVAR(hooks)) then {
     ["footer", [_display, _theme]] call FUNC(hook);
 } else {
-    [_display, _theme] call FUNC(drawFooter);
+    // Unless the player switched it off (aio_gui_showFooter): the columns have its room then (CONTENT_B).
+    if (missionNamespace getVariable [QGVAR(showFooter), true]) then {
+        [_display, _theme] call FUNC(drawFooter);
+    };
 };
 
 // What is still to be searched, one container after the other, each from the top left.

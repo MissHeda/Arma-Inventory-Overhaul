@@ -101,7 +101,12 @@ private _gapH = UNIT * 0.25;
 private _gapW = SQUARE(_gapH);
 private _groupGap = UNIT * 0.5;
 private _rowGap = UNIT * 0.2;
-private _statH = _textUnit * 2.2;
+// What the player switched off goes, and the weapons get its room (aio_gui_showWeight, showGear, showSmallSlots, showHotbar). Read
+// from the mission namespace: this is drawn in Eden as well, where CBA runs no settings.
+private _showWeight = missionNamespace getVariable [QGVAR(showWeight), true];
+private _showGear = missionNamespace getVariable [QGVAR(showGear), true];
+private _showSmall = missionNamespace getVariable [QGVAR(showSmallSlots), true];
+private _statH = [0, _textUnit * 2.2] select _showWeight;
 private _labelH = _textUnit * 0.8;
 private _gearGap = UNIT * 0.3;
 
@@ -115,7 +120,8 @@ private _gearH = UNSQUARE(_gearW);
 
 // The hotbar's row under the gear (aio_hotbar - only when that addon is loaded and on, and only in the
 // inventory, not in the Arsenal): a caption over seven small slots.
-private _hotbar = call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,drawStrip)} && {call EFUNC(hotbar,isActive)};
+private _hotbar = call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,drawStrip)} && {call EFUNC(hotbar,isActive)}
+    && {missionNamespace getVariable [QGVAR(showHotbar), true]};
 
 // The column's sections fold to their caption as the weapon cards do (fnc_toggleWeaponFold): what they hold is not
 // drawn, and the weapons get the height it leaves.
@@ -123,7 +129,13 @@ private _equipFolded = GVAR(weaponFolds) getOrDefault ["equipment", false];
 private _gearFolded = GVAR(weaponFolds) getOrDefault ["gear", false];
 private _hotbarFolded = GVAR(weaponFolds) getOrDefault ["hotbar", false];
 private _hotbarH = [0, _labelH + ([_smallH, 0] select _hotbarFolded) + _groupGap] select _hotbar;
-private _gearBlockH = [_capH + _gearH + _gearGap + _smallH, 0] select _gearFolded;
+private _gearBlockH = 0;
+
+if (!_gearFolded) then {
+    _gearBlockH = ([0, _capH + _gearH] select _showGear) + ([0, _smallH] select _showSmall) + ([0, _gearGap] select (_showGear && _showSmall));
+};
+
+private _gearSection = _showGear || _showSmall;
 
 // A fourth card for the second primary on the back, when a two-primary mod gives the unit that slot.
 private _second = _equipment getOrDefault ["primary2", -1];
@@ -141,7 +153,7 @@ private _headH = _lineH + _textUnit * 0.12;
 
 // Each open weapon card shares the height that is left - as high as the two rows of parts beside it were at most, and never
 // higher than half its width, as a weapon's picture is twice as wide as high.
-private _fixed = _statH + _groupGap * 2 + _labelH * 2 + _rowGap * (_cards - 1) + _headH * _cards + _gearBlockH + _hotbarH;
+private _fixed = _statH + _groupGap * 2 + _labelH * ([1, 2] select _gearSection) + _rowGap * (_cards - 1) + _headH * _cards + _gearBlockH + _hotbarH;
 private _cardH = (((_height - _fixed) / (_open max 1)) min (UNIT * 5.65) min UNSQUARE(_width * 0.5)) max (UNIT * 2.6);
 private _cardW = _width;
 
@@ -476,13 +488,15 @@ private _fnc_label = {
 private _cursor = _top;
 private _weightRect = [_left, _cursor, _width, _statH];
 
-if (isNull _parent) then {
-    [_display, "weight", controlNull, _weightRect, {_this call FUNC(drawWeightCard)}, [_unit, _theme]] call FUNC(drawPart);
-} else {
-    [_display, _parent, _weightRect, _unit, _theme] call FUNC(drawWeightCard);
-};
+if (_showWeight) then {
+    if (isNull _parent) then {
+        [_display, "weight", controlNull, _weightRect, {_this call FUNC(drawWeightCard)}, [_unit, _theme]] call FUNC(drawPart);
+    } else {
+        [_display, _parent, _weightRect, _unit, _theme] call FUNC(drawWeightCard);
+    };
 
-_cursor = _cursor + _statH + _groupGap;
+    _cursor = _cursor + _statH + _groupGap;
+};
 
 // ---------------------------------------------------------------------------
 // Weapons, from the top down
@@ -536,11 +550,13 @@ if (!_equipFolded) then {
 // Gear, from the bottom of the column up. Both rows spread over the full width.
 // ---------------------------------------------------------------------------
 private _smallY = _top + _height - _hotbarH - _smallH;
-private _gearY = _smallY - _gearGap - _gearH;
+private _gearY = _top + _height - _hotbarH - _gearH - ([0, _smallH + _gearGap] select _showSmall);
 
-[_top + _height - _hotbarH - _gearBlockH - _labelH, LLSTRING(Column_Gear), "gear", _gearFolded] call _fnc_label;
+if (_gearSection) then {
+    [_top + _height - _hotbarH - _gearBlockH - _labelH, LLSTRING(Column_Gear), "gear", _gearFolded] call _fnc_label;
+};
 
-if (!_gearFolded) then {
+if (!_gearFolded && {_showGear}) then {
     {
         _x params ["_slot", "_slotCaption", "_slotIcon"];
 
@@ -556,7 +572,9 @@ if (!_gearFolded) then {
         ["vest", LLSTRING(Slot_Vest), GEAR_ICON(ui_gear_vest_gs)],
         ["backpack", LLSTRING(Slot_Backpack), GEAR_ICON(ui_gear_backpack_gs)]
     ];
+};
 
+if (!_gearFolded && {_showSmall}) then {
     {
         _x params ["_slot", "_slotCaption", "_slotIcon"];
 

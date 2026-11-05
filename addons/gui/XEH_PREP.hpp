@@ -228,6 +228,7 @@ PREP(sizeSet);
 PREP(sizeSlide);
 PREP(sizeSettle);
 PREP(sizeChanged);
+PREP(elementsChanged);
 PREP(openSizeMenu);
 PREP(updateSizeMenu);
 PREP(updateSizeButton);

@@ -3291,6 +3291,8 @@ out of them (kept once the scenario is saved). The wizard's Import still reads a
 | `aio_gui_compareTooltip` | CHECKBOX | client | on | the comparison card for vests, uniforms, helmets, backpacks |
 | `aio_gui_tileNames` | CHECKBOX | client | off | the item's short name in the top corner of every tile (`fnc_createTile`, a name that does not fit set a fifth smaller before it is cut; the setup wizard's preview always has it); the name at the mouse stays; ACE Arsenal's panel follows |
 | `aio_gui_doubleClick` | LIST | client | `move` | what a double click on a tile does (`fnc_onMouseButton`): `move` the quick move (`fnc_quickAction`), `menu` the right-click menu with other mods' CBA options (`fnc_contextMenu`), `none` nothing, two clicks. The quick move key stays. |
+| `aio_gui_showWeight`, `showGear`, `showSmallSlots`, `showHotbar`, `showFooter` | CHECKBOX | client | on | what the window shows; what is off gives its room to the rest (`fnc_drawEquipmentCards`, `CONTENT_B`, `fnc_build`). The hotbar's keys keep working. |
+| `aio_gui_columnOrder` | LIST | client | `equipment,free,loot,storage` | the columns from left to right, `free` the empty middle (`fnc_layoutGlass`). A window with `rightColumn` keeps the default. |
 | `aio_gui_lootSide` | LIST | client | `left` | where the loot column opens: `left` of the storage column, which never moves (default), or `right`, at the right edge with the storage column moving in (`fnc_layoutGlass`); read at every build |
 | `aio_gui_showNearby` | CHECKBOX | client | on | nearby piles and crates as boxes in the loot column |
 | `aio_gui_magazineFillBar` | CHECKBOX | client | on | the bar on magazines that are not full |
