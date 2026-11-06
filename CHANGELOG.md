@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.70 - beta
+
+### Fixed
+
+- Right-click menu: "Put on the hotbar" and "Take off the hotbar" have an icon, as the other rows.
+
 ## 0.6.69 - beta
 
 ### Fixed

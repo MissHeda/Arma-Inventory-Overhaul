@@ -380,6 +380,14 @@ def icon_layer_down(d, s, w):
     _layer_stack(d, s, w, False)
 
 
+def icon_hotbar(d, s, w):
+    # A strip of three slots with a key over the first: the hotbar. Its rows in the right-click menu.
+    line(d, [(s * 0.1, s * 0.42), (s * 0.9, s * 0.42), (s * 0.9, s * 0.76), (s * 0.1, s * 0.76), (s * 0.1, s * 0.42)], w)
+    line(d, [(s * 0.37, s * 0.42), (s * 0.37, s * 0.76)], w)
+    line(d, [(s * 0.63, s * 0.42), (s * 0.63, s * 0.76)], w)
+    line(d, [(s * 0.2, s * 0.22), (s * 0.27, s * 0.18), (s * 0.27, s * 0.32)], w)
+
+
 def icon_server(d, s, w):
     # A rack of two servers, each with its light: the server's setup wizard in the header, beside the player's own cog.
     for top in (0.2, 0.55):
@@ -1210,6 +1218,7 @@ def build_images():
         "icon_resize_nwse_ca": stroke_icon(icon_resize_nwse),
         "icon_resize_nesw_ca": stroke_icon(icon_resize_nesw),
         "icon_move_ca": stroke_icon(icon_move),
+        "icon_hotbar_ca": stroke_icon(icon_hotbar, width=8),
         "icon_layer_up_ca": stroke_icon(icon_layer_up, width=8),
         "icon_layer_down_ca": stroke_icon(icon_layer_down, width=8),
         "icon_weight_ca": stroke_icon(icon_weight),

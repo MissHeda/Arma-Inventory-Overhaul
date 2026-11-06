@@ -321,6 +321,10 @@ switch (GVAR(hover) param [0, ""]) do {
                 private _n = count _choices;
                 _choices append ([_class, ["grid", _grid]] call EFUNC(hotbar,menuChoices));
                 [_n, "hotbar"] call _fnc_tag;
+
+                for "_i" from _n to (count _choices - 1) do {
+                    ((_choices select _i) select 3) merge [[UI_TEX(icon_hotbar_ca)] call _fnc_icon, true];
+                };
             };
 
             // Moving it over is a double click (fnc_quickMove) or a drag: no row for it here.
