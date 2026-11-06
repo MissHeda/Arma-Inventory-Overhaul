@@ -370,11 +370,14 @@
         <Key ID="STR_aio_gui_Keybind_Rotate_Tooltip">
             <English>Turns the item you are dragging a quarter round.</English>
         </Key>
+        <Key ID="STR_aio_gui_Layout_Attach">
+            <English>Back into the equipment column</English>
+        </Key>
         <Key ID="STR_aio_gui_Layout_Done">
             <English>Done</English>
         </Key>
         <Key ID="STR_aio_gui_Layout_Drag">
-            <English>Drag to move, corners to resize</English>
+            <English>Drag a frame to move it, an edge or a corner to resize it</English>
         </Key>
         <Key ID="STR_aio_gui_Layout_Edit">
             <English>Edit layout</English>

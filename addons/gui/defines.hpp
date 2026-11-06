@@ -487,6 +487,9 @@
 // Without the footer (aio_gui_showFooter, the literal name as this is included by other addons as well) the columns take its room.
 #define CONTENT_B (safezoneY + safezoneH - UNIT * ([0.6, 2.6] select (missionNamespace getVariable ["aio_gui_showFooter", true])))
 #define COLUMN_ORDER_DEFAULT "equipment,free,loot,storage"
+
+// The parts of the equipment column that can be placed on their own in the edit mode (fnc_columnRects, fnc_drawEquipmentCards).
+#define EQUIPMENT_PARTS ["weight", "weapons", "gear", "hotbar"]
 #define CONTENT_H (CONTENT_B - CONTENT_Y)
 
 #define FOOT_Y (safezoneY + safezoneH - UNIT * 2)

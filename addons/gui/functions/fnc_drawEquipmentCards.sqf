@@ -52,6 +52,10 @@
  * 2: Position [x, y, w, h] <ARRAY>
  * 3: Context, see fnc_build - "unit" and "equipment" are read <HASHMAP>
  * 4: Theme <HASHMAP>
+ * 5: The parts to draw, of "weight", "weapons", "gear", "hotbar" (EQUIPMENT_PARTS): a part the player placed on its own in the edit
+ *    mode is drawn alone in its own panel (fnc_layoutGlass), and the column keeps the others <ARRAY> (default: all)
+ *
+ * Where each part was drawn goes to aio_gui_partRects, part -> [x, y, w, h], for the edit mode's frames (fnc_openLayoutEditor).
  *
  * Return Value:
  * None
@@ -64,7 +68,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_rect", "_context", "_theme"];
+params ["_display", "_parent", "_rect", "_context", "_theme", ["_only", EQUIPMENT_PARTS, [[]]]];
 _rect params ["_left", "_top", "_width", "_height"];
 
 private _unit = _context getOrDefault ["unit", objNull];
@@ -103,9 +107,10 @@ private _groupGap = UNIT * 0.5;
 private _rowGap = UNIT * 0.2;
 // What the player switched off goes, and the weapons get its room (aio_gui_showWeight, showGear, showSmallSlots, showHotbar). Read
 // from the mission namespace: this is drawn in Eden as well, where CBA runs no settings.
-private _showWeight = missionNamespace getVariable [QGVAR(showWeight), true];
-private _showGear = missionNamespace getVariable [QGVAR(showGear), true];
-private _showSmall = missionNamespace getVariable [QGVAR(showSmallSlots), true];
+private _showWeight = (missionNamespace getVariable [QGVAR(showWeight), true]) && {"weight" in _only};
+private _showGear = (missionNamespace getVariable [QGVAR(showGear), true]) && {"gear" in _only};
+private _showSmall = (missionNamespace getVariable [QGVAR(showSmallSlots), true]) && {"gear" in _only};
+private _showWeapons = "weapons" in _only;
 private _statH = [0, _textUnit * 2.2] select _showWeight;
 private _labelH = _textUnit * 0.8;
 private _gearGap = UNIT * 0.3;
@@ -121,7 +126,7 @@ private _gearH = UNSQUARE(_gearW);
 // The hotbar's row under the gear (aio_hotbar - only when that addon is loaded and on, and only in the
 // inventory, not in the Arsenal): a caption over seven small slots.
 private _hotbar = call FUNC(isInventoryMode) && {!isNil QEFUNC(hotbar,drawStrip)} && {call EFUNC(hotbar,isActive)}
-    && {missionNamespace getVariable [QGVAR(showHotbar), true]};
+    && {missionNamespace getVariable [QGVAR(showHotbar), true]} && {"hotbar" in _only};
 
 // The column's sections fold to their caption as the weapon cards do (fnc_toggleWeaponFold): what they hold is not
 // drawn, and the weapons get the height it leaves.
@@ -143,7 +148,7 @@ private _hasSecond = _second isEqualType [];
 
 // The weapon cards in the player's order (GVAR(weaponOrder)), and which of them are folded to their header: as the
 // player chose (GVAR(weaponFolds)), or until then the second primary while nothing is on the back.
-private _shownOrder = GVAR(weaponOrder) select {_x isNotEqualTo "primary2" || _hasSecond};
+private _shownOrder = [[], GVAR(weaponOrder) select {_x isNotEqualTo "primary2" || _hasSecond}] select _showWeapons;
 private _cards = count _shownOrder;
 private _foldedSlots = _shownOrder select {GVAR(weaponFolds) getOrDefault [_x, _x isEqualTo "primary2" && {_second isEqualTo []}]};
 private _open = _cards - count _foldedSlots;
@@ -153,7 +158,7 @@ private _headH = _lineH + _textUnit * 0.12;
 
 // Each open weapon card shares the height that is left - as high as the two rows of parts beside it were at most, and never
 // higher than half its width, as a weapon's picture is twice as wide as high.
-private _fixed = _statH + _groupGap * 2 + _labelH * ([1, 2] select _gearSection) + _rowGap * (_cards - 1) + _headH * _cards + _gearBlockH + _hotbarH;
+private _fixed = _statH + _groupGap * 2 + _labelH * (([0, 1] select _showWeapons) + ([0, 1] select _gearSection)) + _rowGap * ((_cards - 1) max 0) + _headH * _cards + _gearBlockH + _hotbarH;
 private _cardH = (((_height - _fixed) / (_open max 1)) min (UNIT * 5.65) min UNSQUARE(_width * 0.5)) max (UNIT * 2.6);
 private _cardW = _width;
 
@@ -495,14 +500,19 @@ if (_showWeight) then {
         [_display, _parent, _weightRect, _unit, _theme] call FUNC(drawWeightCard);
     };
 
+    GVAR(partRects) set ["weight", _weightRect];
     _cursor = _cursor + _statH + _groupGap;
 };
 
 // ---------------------------------------------------------------------------
 // Weapons, from the top down
 // ---------------------------------------------------------------------------
-[_cursor, LLSTRING(Column_Equipment), "equipment", _equipFolded] call _fnc_label;
-_cursor = _cursor + _labelH;
+private _weaponsTop = _cursor;
+
+if (_showWeapons) then {
+    [_cursor, LLSTRING(Column_Equipment), "equipment", _equipFolded] call _fnc_label;
+    _cursor = _cursor + _labelH;
+};
 
 // The second primary's corner names the two-primary mod's own key that switches to it - when that key is short
 // enough for the cap (a key with modifiers is left off).
@@ -536,7 +546,7 @@ private _rows = createHashMapFromArray [
 ];
 
 // In the player's order (see above) - none while the section is folded.
-if (!_equipFolded) then {
+if (_showWeapons && {!_equipFolded}) then {
     {
         (_rows get _x) params ["_rowCaption", "_rowIcon", "_rowNumber"];
 
@@ -544,6 +554,10 @@ if (!_equipFolded) then {
             _cursor, _x, _rowCaption, _rowIcon, _rowNumber, _x in _foldedSlots
         ] call _fnc_weaponRow);
     } forEach _shownOrder;
+};
+
+if (_showWeapons) then {
+    GVAR(partRects) set ["weapons", [_left, _weaponsTop, _width, (_cursor - _weaponsTop) max _labelH]];
 };
 
 // ---------------------------------------------------------------------------
@@ -554,6 +568,8 @@ private _gearY = _top + _height - _hotbarH - _gearH - ([0, _smallH + _gearGap] s
 
 if (_gearSection) then {
     [_top + _height - _hotbarH - _gearBlockH - _labelH, LLSTRING(Column_Gear), "gear", _gearFolded] call _fnc_label;
+
+    GVAR(partRects) set ["gear", [_left, _top + _height - _hotbarH - _gearBlockH - _labelH, _width, _gearBlockH + _labelH]];
 };
 
 if (!_gearFolded && {_showGear}) then {
@@ -610,6 +626,8 @@ if (!_gearFolded && {_showSmall}) then {
 // again with the weight card (fnc_drawPart, fnc_refresh).
 if (_hotbar) then {
     [_top + _height - ([_smallH, 0] select _hotbarFolded) - _labelH, LELSTRING(hotbar,Strip_Title), "hotbar", _hotbarFolded] call _fnc_label;
+
+    GVAR(partRects) set ["hotbar", [_left, _top + _height - ([_smallH, 0] select _hotbarFolded) - _labelH, _width, _labelH + ([_smallH, 0] select _hotbarFolded)]];
 
     if (_hotbarFolded) exitWith {};
 

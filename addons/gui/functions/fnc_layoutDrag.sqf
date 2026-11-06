@@ -2,14 +2,18 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Moves or resizes a column's frame in the edit mode (fnc_openLayoutEditor), as the sliders of the settings card follow the mouse
- * (fnc_sizeSlide): from the press, with the display's mouse handlers, a light box shows where it would go, on a grid of half a UNIT;
- * at the release its place goes to aio_gui_layoutRects, as shares of the content area (fnc_columnRects), written to CBA, and the
- * window is built again. It stays on the screen and no smaller than fnc_columnMinimum says.
+ * Moves or resizes a frame in the edit mode (fnc_openLayoutEditor) - a column, or a part of the equipment column - as a window on
+ * the desktop: its title or body moves it, an edge resizes it one way, a corner both. From the press, with the display's mouse
+ * handlers, an outline follows the mouse with the size it would have, on a grid of a quarter UNIT; nothing is built until the
+ * release. Then its place goes to aio_gui_layoutRects, as shares of the content area (fnc_columnRects), written to CBA, and the window
+ * is built again. It stays on the screen and no smaller than fnc_columnMinimum says.
+ *
+ * A part of the equipment column moved out of it stands on its own from then on (fnc_layoutGlass); "attach" puts it back.
  *
  * Arguments:
- * 0: What: "begin" [display, [column, "move" or a corner "tl", "tr", "bl", "br"], layer], "move", "up", "end" (without writing), "reset",
- *    or "step" [index of the size, step] for the size buttons of the edit mode's bar <STRING>
+ * 0: What: "begin" [display, [id, mode, start rect], layer] - mode "move", a corner "tl", "tr", "bl", "br" or an edge "l", "r",
+ *    "t", "b" -, "move", "up", "end" (without writing), "reset", "attach" [id], or "step" [index of the size, step] for the size
+ *    buttons of the edit mode's bar <STRING>
  * 1: Its argument <ANY> (default: [])
  *
  * Return Value:
@@ -37,23 +41,25 @@ private _fnc_write = {
     [] call FUNC(elementsChanged);
 };
 
+// The entries of aio_gui_layoutRects but the one for this id.
+private _fnc_others = {
+    params ["_id"];
+
+    ((missionNamespace getVariable [QGVAR(layoutRects), ""]) splitString ";") select {((_x splitString ":") param [0, ""]) isNotEqualTo _id}
+};
+
 // Where the frame would be with the mouse where it is.
 private _fnc_rect = {
     params ["_state"];
-    _state params ["", "_id", "_mode", "_startMouse", "_startRect"];
+    _state params ["", "", "_mode", "_startMouse", "_startRect", "", "", "_least"];
     _startRect params ["_x0", "_y0", "_w0", "_h0"];
+    _least params ["_leastW", "_leastH"];
 
     private _mouse = getMousePosition;
-    private _snapH = UNIT * 0.5;
+    private _snapH = UNIT * 0.25;
     private _snapW = SQUARE(_snapH);
     private _dx = (round (((_mouse select 0) - (_startMouse select 0)) / _snapW)) * _snapW;
     private _dy = (round (((_mouse select 1) - (_startMouse select 1)) / _snapH)) * _snapH;
-
-    (call FUNC(getCell)) params ["_cellW"];
-    ([_id, COLUMN_W(_cellW)] call FUNC(columnMinimum)) params ["_leastW", "_leastH"];
-
-    private _right = _x0 + _w0;
-    private _bottom = _y0 + _h0;
 
     if (_mode isEqualTo "move") exitWith {
         [
@@ -66,20 +72,55 @@ private _fnc_rect = {
 
     private _left = _x0;
     private _top = _y0;
+    private _right = _x0 + _w0;
+    private _bottom = _y0 + _h0;
 
-    if (_mode in ["tl", "bl"]) then {
+    if (_mode in ["tl", "bl", "l"]) then {
         _left = ((_x0 + _dx) max CONTENT_X) min (_right - _leastW);
-    } else {
+    };
+
+    if (_mode in ["tr", "br", "r"]) then {
         _right = ((_right + _dx) min (CONTENT_X + CONTENT_W)) max (_left + _leastW);
     };
 
-    if (_mode in ["tl", "tr"]) then {
+    if (_mode in ["tl", "tr", "t"]) then {
         _top = ((_y0 + _dy) max CONTENT_Y) min (_bottom - _leastH);
-    } else {
+    };
+
+    if (_mode in ["bl", "br", "b"]) then {
         _bottom = ((_bottom + _dy) min CONTENT_B) max (_top + _leastH);
     };
 
     [_left, _top, _right - _left, _bottom - _top]
+};
+
+// The outline: a film, four lines and the size, placed on the layer (screen less the safe zone's corner).
+private _fnc_place = {
+    params ["_ghost", "_rect"];
+    _ghost params ["_fill", "_lines", "_size"];
+    _rect params ["_x0", "_y0", "_w", "_h"];
+
+    private _left = _x0 - safezoneX;
+    private _top = _y0 - safezoneY;
+    private _lineW = pixelW * 2;
+    private _lineH = pixelH * 2;
+
+    _fill ctrlSetPosition [_left, _top, _w, _h];
+
+    {
+        (_lines select _forEachIndex) ctrlSetPosition _x;
+    } forEach [
+        [_left, _top, _w, _lineH],
+        [_left, _top + _h - _lineH, _w, _lineH],
+        [_left, _top, _lineW, _h],
+        [_left + _w - _lineW, _top, _lineW, _h]
+    ];
+
+    // The size in UNITs, as the tiles count it: what the frame would be.
+    _size ctrlSetPosition [_left, _top + _h / 2 - UNIT * 0.4, _w, UNIT * 0.8];
+    _size ctrlSetText format ["%1 x %2", (_w / SQUARE(UNIT)) toFixed 1, (_h / UNIT) toFixed 1];
+
+    {_x ctrlCommit 0} forEach ([_fill, _size] + _lines);
 };
 
 private _fnc_stop = {
@@ -91,7 +132,9 @@ private _fnc_stop = {
 
     _state params ["_display", "", "", "", "", "_ghost", "_ids"];
 
-    ctrlDelete _ghost;
+    _ghost params ["_fill", "_lines", "_size"];
+
+    {ctrlDelete _x} forEach ([_fill, _size] + _lines);
 
     if (!isNull _display) then {
         _display displayRemoveEventHandler ["MouseMoving", _ids select 0];
@@ -106,12 +149,13 @@ switch (_what) do {
 
         if (_state isEqualTo []) exitWith {};
 
-        ([_state] call _fnc_rect) params ["_x0", "_y0", "_w", "_h"];
+        private _rect = [_state] call _fnc_rect;
 
-        private _ghost = _state select 5;
+        // Only where it changed: the mouse events come many to a frame.
+        if (_rect isEqualTo (_state select 8)) exitWith {};
 
-        _ghost ctrlSetPosition [_x0 - safezoneX, _y0 - safezoneY, _w, _h];
-        _ghost ctrlCommit 0;
+        _state set [8, _rect];
+        [_state select 5, _rect] call _fnc_place;
     };
 
     case "up": {
@@ -132,8 +176,8 @@ switch (_what) do {
 
         _rect params ["_x0", "_y0", "_w", "_h"];
 
-        // This column's shares, the others as they are.
-        private _entries = ((missionNamespace getVariable [QGVAR(layoutRects), ""]) splitString ";") select {((_x splitString ":") param [0, ""]) isNotEqualTo _id};
+        // This frame's shares, the others as they are.
+        private _entries = [_id] call _fnc_others;
 
         _entries pushBack format [
             "%1:%2,%3,%4,%5", _id,
@@ -146,6 +190,13 @@ switch (_what) do {
 
     case "end": {
         [] call _fnc_stop;
+    };
+
+    case "attach": {
+        _argument params [["_id", "", [""]]];
+
+        [] call _fnc_stop;
+        [([_id] call _fnc_others) joinString ";"] call _fnc_write;
     };
 
     case "step": {
@@ -165,21 +216,37 @@ switch (_what) do {
 
     case "begin": {
         _argument params ["_display", ["_drag", []], "_layer"];
-        _drag params [["_id", ""], ["_mode", "move"]];
+        _drag params [["_id", ""], ["_mode", "move"], ["_start", []]];
 
         [] call _fnc_stop;
 
-        if (isNull _display || {_id isEqualTo ""}) exitWith {};
+        if (isNull _display || {_id isEqualTo ""} || {count _start != 4}) exitWith {};
 
-        private _start = ([true] call FUNC(columnRects)) get _id;
+        (call FUNC(getCell)) params ["_cellW"];
+
+        private _least = [_id, COLUMN_W(_cellW)] call FUNC(columnMinimum);
         private _accent = (GVAR(theme) getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
-        private _ghost = [
-            _display, "AIO_PanelRect", _layer,
-            [(_start select 0) - safezoneX, (_start select 1) - safezoneY, _start select 2, _start select 3]
-        ] call FUNC(uiCreate);
+        private _fill = [_display, "AIO_PanelRect", _layer, [0, 0, 0, 0]] call FUNC(uiCreate);
 
-        _ghost ctrlSetBackgroundColor (_accent + [0.45]);
-        _ghost ctrlEnable false;
+        _fill ctrlSetBackgroundColor (_accent + [0.18]);
+        _fill ctrlEnable false;
+
+        private _lines = [0, 1, 2, 3] apply {
+            private _line = [_display, "AIO_PanelRect", _layer, [0, 0, 0, 0]] call FUNC(uiCreate);
+
+            _line ctrlSetBackgroundColor (_accent + [1]);
+            _line ctrlEnable false;
+            _line
+        };
+
+        private _font = GVAR(theme) getOrDefault ["fontBold", "PuristaSemibold"];
+        private _size = [_display, _layer, [0, 0, 0, 0], "", UNIT * 0.6, [1, 1, 1, 1], _font, 2, "never"] call FUNC(uiLabel);
+
+        _size ctrlEnable false;
+
+        private _ghost = [_fill, _lines, _size];
+
+        [_ghost, _start] call _fnc_place;
 
         private _ids = [
             _display displayAddEventHandler ["MouseMoving", {["move", _this] call FUNC(layoutDrag); false}],
@@ -187,6 +254,6 @@ switch (_what) do {
             _display displayAddEventHandler ["MouseButtonUp", {["up", _this] call FUNC(layoutDrag); false}]
         ];
 
-        uiNamespace setVariable [QGVAR(layoutDragState), [_display, _id, _mode, getMousePosition, _start, _ghost, _ids]];
+        uiNamespace setVariable [QGVAR(layoutDragState), [_display, _id, _mode, getMousePosition, _start, _ghost, _ids, _least, _start]];
     };
 };

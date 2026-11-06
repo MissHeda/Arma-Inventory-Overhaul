@@ -172,6 +172,8 @@ GVAR(panels) = [];
 // The player's equipment column of the last build, [x, y, w, h] - [] for none: anything let go over it
 // goes into the slot that takes it (fnc_updateDrag).
 GVAR(equipmentRect) = [];
+GVAR(equipmentRects) = [];
+GVAR(partRects) = createHashMap;
 
 // The unit's storage column of the last build, [x, y, w, h] - [] for none (fnc_drawColumn): a uniform,
 // vest or backpack let go on it off its grids is put on; while the unit wears none of them, anything else

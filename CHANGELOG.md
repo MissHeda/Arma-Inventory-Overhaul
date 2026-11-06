@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.66 - beta
+
+### Changed
+
+- Edit layout looks and works like a desktop window: every edge and corner is a grip with the arrows the mouse shows there, a whole edge resizes one way, and the frame follows the mouse as an outline with its size, on a finer grid, until you let go. Each frame has a title chip; the bar on top is tidier, with Done in the accent colour (#67).
+- The parts of the equipment column - weight, weapons, gear and hotbar - have their own frames in the edit mode: drag one out and it stands on its own panel anywhere on the screen; the button on its title puts it back. Items let go over such a panel go into the slot that takes them, as over the column. The settings card's preview shows them.
+
+### Fixed
+
+- Your settings: Edit layout (and Default) could only be pressed right after the card opened. Once the window behind it had been built again, the click never came; they act on the press now.
+
 ## 0.6.65 - beta
 
 ### Fixed

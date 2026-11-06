@@ -233,6 +233,7 @@ PREP(settingsDefs);
 PREP(settingsRow);
 PREP(columnRects);
 PREP(columnMinimum);
+PREP(partShown);
 PREP(openLayoutEditor);
 PREP(layoutDrag);
 PREP(openSizeMenu);

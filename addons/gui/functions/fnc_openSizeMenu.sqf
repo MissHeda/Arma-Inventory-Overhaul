@@ -222,7 +222,7 @@ private _reset = [
         if (_button < 0) exitWith {};
 
         ["reset"] call FUNC(sizeSet);
-    }, false, _chipSize, true
+    }, false, _chipSize, true, [], true
 ] call FUNC(uiButton);
 
 [(_reset param [count _reset - 1, controlNull]), LLSTRING(Size_Default_Tip)] call FUNC(setTooltip);
@@ -406,18 +406,22 @@ private _columns = [true] call FUNC(columnRects);
     private _upper = _colTop + _colH * (_realY - CONTENT_Y) / CONTENT_H;
     private _high = _colH * _realH / CONTENT_H;
     private _word = createHashMapFromArray [
-        ["equipment", LLSTRING(Column_Equipment)], ["loot", LLSTRING(Column_Loot)], ["storage", LLSTRING(Column_Storage)]
+        ["equipment", LLSTRING(Column_Equipment)], ["loot", LLSTRING(Column_Loot)], ["storage", LLSTRING(Column_Storage)],
+        ["weight", LLSTRING(SettingsMenu_PartWeight)], ["weapons", LLSTRING(SettingsMenu_PartWeapons)],
+        ["gear", LLSTRING(SettingsMenu_PartGear)], ["hotbar", LLSTRING(SettingsMenu_PartHotbar)]
     ] get _x;
 
-    [_display, _layer, [_left, _upper, _colW, _high], [[1, 1, 1, 0.1], [_accent select 0, _accent select 1, _accent select 2, 0.18]] select (_x isEqualTo "equipment"), 0] call FUNC(uiPanel);
+    [_display, _layer, [_left, _upper, _colW, _high], [[1, 1, 1, 0.1], [_accent select 0, _accent select 1, _accent select 2, 0.18]] select (_x in (["equipment"] + EQUIPMENT_PARTS)), 0] call FUNC(uiPanel);
     [_display, _layer, [_left, _upper, _colW, _small * 1.2], [_word, _colW, _font, _small] call FUNC(fitText), _small, _text2, _font, 2, "never"] call FUNC(uiLabel);
 
     // The equipment column's parts, those that are on: the weapons take the room the others leave.
     if (_x isEqualTo "equipment") then {
+        // Not those placed on their own: they have their own box (below).
         private _parts = [
-            [QGVAR(showWeight), 0.09, LLSTRING(SettingsMenu_PartWeight)], ["", -1, LLSTRING(SettingsMenu_PartWeapons)], [QGVAR(showGear), 0.2, LLSTRING(SettingsMenu_PartGear)],
-            [QGVAR(showSmallSlots), 0.09, LLSTRING(SettingsMenu_PartSmall)], [QGVAR(showHotbar), 0.09, LLSTRING(SettingsMenu_PartHotbar)]
-        ] select {(_x select 0) isEqualTo "" || {(_x select 0) call _fnc_shown}};
+            [QGVAR(showWeight), 0.09, LLSTRING(SettingsMenu_PartWeight), "weight"], ["", -1, LLSTRING(SettingsMenu_PartWeapons), "weapons"],
+            [QGVAR(showGear), 0.2, LLSTRING(SettingsMenu_PartGear), "gear"], [QGVAR(showSmallSlots), 0.09, LLSTRING(SettingsMenu_PartSmall), "gear"],
+            [QGVAR(showHotbar), 0.09, LLSTRING(SettingsMenu_PartHotbar), "hotbar"]
+        ] select {!((_x select 3) in _columns) && {(_x select 0) isEqualTo "" || {(_x select 0) call _fnc_shown}}};
 
         private _partTop = _upper + _small * 1.3;
         private _partRoom = _upper + _high - _partTop;
@@ -439,7 +443,7 @@ private _columns = [true] call FUNC(columnRects);
             _partTop = _partTop + _partH;
         } forEach _parts;
     };
-} forEach ["equipment", "storage", "loot"];
+} forEach (["equipment", "storage", "loot"] + (EQUIPMENT_PARTS select {_x in _columns}));
 
 // The way into the edit mode: the columns moved and resized by hand.
 private _editY = _shotY + _shotH + _padY;
@@ -452,7 +456,7 @@ private _editH = UNIT * 1;
         if (_button < 0) exitWith {};
 
         [{[uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openLayoutEditor)}] call FUNC(later);
-    }, false, _size * 0.85, true
+    }, false, _size * 0.85, true, [], true
 ] call FUNC(uiButton);
 
 private _shotNote = [_display, "AIO_StructuredText", _layer, [_shotX, _editY + _editH + _padY / 2, _shotW, _small * 6]] call FUNC(uiCreate);

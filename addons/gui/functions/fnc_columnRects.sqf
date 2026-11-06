@@ -13,6 +13,9 @@
  * so it holds on another resolution. It is kept on the screen and no smaller than fnc_columnMinimum says; columns placed by hand may
  * overlap. The free middle is then the widest gap they leave.
  *
+ * A part of the equipment column - the weight, the weapons, the gear, the hotbar (EQUIPMENT_PARTS) - placed on its own has a rect
+ * here too, while it is drawn (fnc_partShown); one that is not stays in the equipment column and has none.
+ *
  * A window that keeps the right edge for itself ("rightColumn", fnc_layoutGlass) has no say in any of it: the usual order, its column
  * at that edge, nothing placed by hand.
  *
@@ -22,7 +25,7 @@
  * 2: The right edge is kept by the window that attached <BOOL> (default: false)
  *
  * Return Value:
- * "equipment", "storage", "loot", "middle" - each [x, y, w, h] <HASHMAP>
+ * "equipment", "storage", "loot", "middle" and the parts placed on their own - each [x, y, w, h] <HASHMAP>
  *
  * Example:
  * private _rects = [true] call aio_gui_fnc_columnRects;
@@ -93,7 +96,7 @@ private _placed = false;
 
         private _shares = (_values splitString ",") apply {parseNumber _x};
 
-        if (count _shares == 4 && {_id in ["equipment", "storage", "loot"]}) then {
+        if (count _shares == 4 && {_id in ["equipment", "storage", "loot"] || {_id in EQUIPMENT_PARTS && {[_id] call FUNC(partShown)}}}) then {
             _shares params ["_shareX", "_shareY", "_shareW", "_shareH"];
 
             ([_id, _columnW] call FUNC(columnMinimum)) params ["_leastW", "_leastH"];
@@ -112,7 +115,7 @@ private _placed = false;
 if (!_placed) exitWith {_rects};
 
 // The free middle: the widest gap the columns leave across the content area.
-private _spans = (["equipment", "storage"] + ([[], ["loot"]] select _reserved)) apply {
+private _spans = ((["equipment", "storage"] + ([[], ["loot"]] select _reserved) + EQUIPMENT_PARTS) select {_x in _rects}) apply {
     (_rects get _x) params ["_x0", "", "_w"];
 
     [_x0, _x0 + _w]

@@ -37,6 +37,9 @@
  *     button and 2 pixels on each side, so that one who just misses the button still hits it -
  *     and no more, so a button does not take the clicks of what lies beside it. A larger request is cut to that;
  *     a smaller one is raised to it <ARRAY> (default: [])
+ * 12: On the press - the code runs on the left button's press, not on its click. A click is a press and a release on the same
+ *     control: where the window is built again in between (a popover kept open over a window that changes, fnc_openSizeMenu), the
+ *     release lands on the new control and the click never comes <BOOL> (default: false)
  *
  * Return Value:
  * The controls, the hit area last <ARRAY>
@@ -49,7 +52,7 @@
 
 disableSerialization;
 
-params ["_display", "_parent", "_rect", "_id", "_text", "_icon", "_theme", "_code", ["_disabled", false], ["_textSize", -1], ["_centred", false], ["_hitPad", []]];
+params ["_display", "_parent", "_rect", "_id", "_text", "_icon", "_theme", "_code", ["_disabled", false], ["_textSize", -1], ["_centred", false], ["_hitPad", []], ["_onPress", false]];
 _rect params ["_left", "_top", "_width", "_height"];
 
 private _normal = _theme getOrDefault ["button", [1, 1, 1, 0.06]];
@@ -171,6 +174,7 @@ if (_disabled) exitWith {
 
 _hit setVariable [QGVAR(id), _id];
 _hit setVariable [QGVAR(code), _code];
+_hit setVariable [QGVAR(onPress), _onPress];
 _hit setVariable [QGVAR(surface), [_rects, _corners, _normal, _hover]];
 
 // In a gradient (fnc_gradientSurface) every piece keeps its own colour: the light under the mouse makes each as much stronger as
@@ -221,6 +225,16 @@ _hit ctrlAddEventHandler ["MouseExit", {
 // is the left button's only, so the right click is taken from the right button's release.
 _hit ctrlAddEventHandler ["ButtonClick", {
     params ["_ctrl"];
+
+    if (_ctrl getVariable [QGVAR(onPress), false]) exitWith {};
+
+    [_ctrl getVariable [QGVAR(code), {}], [1, _ctrl getVariable [QGVAR(id), ""]]] call FUNC(later);
+}];
+
+_hit ctrlAddEventHandler ["MouseButtonDown", {
+    params ["_ctrl", "_button"];
+
+    if (_button != 0 || {!(_ctrl getVariable [QGVAR(onPress), false])}) exitWith {};
 
     [_ctrl getVariable [QGVAR(code), {}], [1, _ctrl getVariable [QGVAR(id), ""]]] call FUNC(later);
 }];

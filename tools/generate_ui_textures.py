@@ -304,6 +304,47 @@ def icon_magazine(d, s, w):
     line(d, [(s * 0.42, s * 0.48), (s * 0.65, s * 0.45)], w)
 
 
+def _double_arrow(d, s, w, a, b):
+    # A line from a to b with an open arrowhead at each end: the pointer Windows shows over an edge or a corner to resize.
+    (ax, ay), (bx, by) = a, b
+    line(d, [(ax, ay), (bx, by)], w)
+    length = math.hypot(bx - ax, by - ay)
+    ux, uy = (bx - ax) / length, (by - ay) / length
+    head = s * 0.17
+    for (tx, ty), sign in (((ax, ay), 1), ((bx, by), -1)):
+        for turn in (0.75, -0.75):
+            cos_t, sin_t = math.cos(turn), math.sin(turn)
+            dx = sign * (ux * cos_t - uy * sin_t)
+            dy = sign * (ux * sin_t + uy * cos_t)
+            line(d, [(tx + dx * head, ty + dy * head), (tx, ty)], w)
+
+
+def icon_resize_h(d, s, w):
+    # Left and right: an edge of a frame in the layout editor.
+    _double_arrow(d, s, w, (s * 0.14, s * 0.5), (s * 0.86, s * 0.5))
+
+
+def icon_resize_v(d, s, w):
+    # Up and down: the top or bottom edge of a frame in the layout editor.
+    _double_arrow(d, s, w, (s * 0.5, s * 0.14), (s * 0.5, s * 0.86))
+
+
+def icon_resize_nwse(d, s, w):
+    # Top left to bottom right: the top left and bottom right corners of a frame.
+    _double_arrow(d, s, w, (s * 0.2, s * 0.2), (s * 0.8, s * 0.8))
+
+
+def icon_resize_nesw(d, s, w):
+    # Top right to bottom left: the other two corners.
+    _double_arrow(d, s, w, (s * 0.8, s * 0.2), (s * 0.2, s * 0.8))
+
+
+def icon_move(d, s, w):
+    # Four ways: a frame's title, which moves it.
+    _double_arrow(d, s, w, (s * 0.12, s * 0.5), (s * 0.88, s * 0.5))
+    _double_arrow(d, s, w, (s * 0.5, s * 0.12), (s * 0.5, s * 0.88))
+
+
 def icon_server(d, s, w):
     # A rack of two servers, each with its light: the server's setup wizard in the header, beside the player's own cog.
     for top in (0.2, 0.55):
@@ -1129,6 +1170,11 @@ def build_images():
         "icon_server_ca": stroke_icon(icon_server),
         "icon_attachments_ca": stroke_icon(icon_attachments),
         "icon_magazine_ca": stroke_icon(icon_magazine),
+        "icon_resize_h_ca": stroke_icon(icon_resize_h),
+        "icon_resize_v_ca": stroke_icon(icon_resize_v),
+        "icon_resize_nwse_ca": stroke_icon(icon_resize_nwse),
+        "icon_resize_nesw_ca": stroke_icon(icon_resize_nesw),
+        "icon_move_ca": stroke_icon(icon_move),
         "icon_weight_ca": stroke_icon(icon_weight),
         # The setup wizard: its cog in the inventory's header and in Eden's Tools menu, and its controls.
         "icon_setup_ca": stroke_icon(icon_setup),

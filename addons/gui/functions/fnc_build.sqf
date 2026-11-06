@@ -80,6 +80,8 @@ uiNamespace setVariable [QGVAR(selectionFrames), []];
 GVAR(searchQueue) = [];
 GVAR(panels) = [];
 GVAR(equipmentRect) = [];
+GVAR(equipmentRects) = [];
+GVAR(partRects) = createHashMap;
 GVAR(storageRect) = [];
 GVAR(lootRect) = [];
 

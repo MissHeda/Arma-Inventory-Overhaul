@@ -601,10 +601,17 @@ if (_hitGrid < 0 && {_onTop isEqualTo ""} && {_dragGroup isEqualTo []}) then {
     };
 };
 
-// Over the player's equipment column (fnc_layoutGlass), in the inventory.
+// Over the player's equipment column (fnc_layoutGlass), or a part of it the player placed on its own, in the inventory - which one,
+// for the footprint over the whole panel (below).
+private _areaRect = [];
 private _inArea = _onTop isEqualTo "" && {_dragGroup isEqualTo []} && {[] call FUNC(isInventoryMode)} && {
-    GVAR(equipmentRect) params [["_areaX", 0], ["_areaY", 0], ["_areaW", 0], ["_areaH", 0]];
-    _mouseX >= _areaX && {_mouseX < _areaX + _areaW} && {_mouseY >= _areaY} && {_mouseY < _areaY + _areaH}
+    private _at = GVAR(equipmentRects) findIf {
+        _x params [["_areaX", 0], ["_areaY", 0], ["_areaW", 0], ["_areaH", 0]];
+        _mouseX >= _areaX && {_mouseX < _areaX + _areaW} && {_mouseY >= _areaY} && {_mouseY < _areaY + _areaH}
+    };
+
+    _areaRect = GVAR(equipmentRects) param [_at, []];
+    _at >= 0
 };
 
 // Off every grid only: the storage column (GVAR(storageRect)), a zone a window that attached drew
@@ -697,7 +704,7 @@ if (_hitGrid >= 0 && {_slotHits isEqualTo []} && {!_inArea} && {_halves isEqualT
         _rectW > 0 && {_rectH > 0} && {_rectX < _right} && {_rectX + _rectW > _left} && {_rectY < _bottom} && {_rectY + _rectH > _top}
     };
 
-    if ((_slotRects findIf {_x call _fnc_meets}) >= 0 || {GVAR(equipmentRect) call _fnc_meets}) exitWith {};
+    if ((_slotRects findIf {_x call _fnc_meets}) >= 0 || {(GVAR(equipmentRects) findIf {_x call _fnc_meets}) >= 0}) exitWith {};
 
     private _clear = true;
 
@@ -1213,7 +1220,7 @@ call {
     // the gear row, the backpack's too, empty or not -, else (nothing here takes it) faintly over the whole
     // column.
     if (_inArea && {(GVAR(dragTarget) param [0, ""]) isNotEqualTo "slot"} && {(_slotSource param [0, objNull]) isNotEqualTo GVAR(unit)}) then {
-        GVAR(equipmentRect) params ["_areaX", "_areaY", "_areaW", "_areaH"];
+        _areaRect params ["_areaX", "_areaY", "_areaW", "_areaH"];
 
         private _player = GVAR(unit);
         private _answer = GVAR(dragRoom) get "equipArea";

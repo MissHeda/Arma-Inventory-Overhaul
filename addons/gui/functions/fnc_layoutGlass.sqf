@@ -101,25 +101,45 @@ if (_reserved) then {
 
 // ----- Equipment -----
 
-GVAR(panels) pushBack [_equipX, _equipY, _leftW, _equipH];
+// A panel with the equipment column's parts in it (fnc_drawEquipmentCards): the column itself, and each part the player placed on
+// its own in the edit mode (fnc_columnRects) - the weight, the weapons, the gear, the hotbar. Anything let go over one goes into the
+// slot that takes it (fnc_updateDrag); the column's own is the first.
+private _fnc_equipmentPanel = {
+    params ["_panelRect", "_parts"];
+    _panelRect params ["_panelX", "_panelY", "_panelW", "_panelH"];
 
-// Anything let go over it goes into the slot that takes it (fnc_updateDrag).
-GVAR(equipmentRect) = [_equipX, _equipY, _leftW, _equipH];
+    GVAR(panels) pushBack _panelRect;
+    GVAR(equipmentRects) pushBack _panelRect;
 
-private _cardsRect = if (_theme getOrDefault ["equipmentPanel", true]) then {
-    [
-        _display, controlNull, [_equipX, _equipY, _leftW, _equipH], _theme getOrDefault ["panel", []],
-        _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
-    ] call FUNC(uiPanel);
+    private _cardsRect = if (_theme getOrDefault ["equipmentPanel", true]) then {
+        [
+            _display, controlNull, _panelRect, _theme getOrDefault ["panel", []],
+            _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
+        ] call FUNC(uiPanel);
 
-    [_display, controlNull, [_equipX, _equipY, _leftW, _equipH], _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
+        [_display, controlNull, _panelRect, _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
 
-    [_equipX + _padX, _equipY + _padY, _leftW - _padX * 2, _equipH - _padY * 2]
-} else {
-    [_equipX, _equipY + _padY, _leftW, _equipH - _padY * 2]
+        [_panelX + _padX, _panelY + _padY, _panelW - _padX * 2, _panelH - _padY * 2]
+    } else {
+        [_panelX, _panelY + _padY, _panelW, _panelH - _padY * 2]
+    };
+
+    [_display, controlNull, _cardsRect, _context, _theme, _parts] call FUNC(drawEquipmentCards);
 };
 
-[_display, controlNull, _cardsRect, _context, _theme] call FUNC(drawEquipmentCards);
+private _alone = EQUIPMENT_PARTS select {_x in _rects};
+private _inColumn = EQUIPMENT_PARTS - _alone;
+
+// The column, while something of it is left in it - all of it placed elsewhere, it is not drawn at all.
+if ((_inColumn findIf {[_x] call FUNC(partShown)}) >= 0) then {
+    [[_equipX, _equipY, _leftW, _equipH], _inColumn] call _fnc_equipmentPanel;
+};
+
+{
+    [_rects get _x, [_x]] call _fnc_equipmentPanel;
+} forEach _alone;
+
+GVAR(equipmentRect) = GVAR(equipmentRects) param [0, []];
 
 // ----- Storage -----
 
