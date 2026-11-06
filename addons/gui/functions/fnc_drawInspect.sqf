@@ -311,10 +311,10 @@ _grip ctrlAddEventHandler ["MouseButtonDown", {
     GVAR(inspectMove) = [_mouseX - _groupX, _mouseY - _groupY];
 }];
 
-// The cross on a round surface, as the card's corners are round - a square one stood out against them.
+// The cross on a square with rounded corners, as the boxes on the parts below (Mia) - not a circle.
 private _closeTheme = +_theme;
 
-_closeTheme set ["radius", _closeH / 2];
+_closeTheme set ["radius", [0, _closeH * 0.25] select ((_theme getOrDefault ["radius", 0]) > 0)];
 
 [_display, _group, [_width - _padX - _closeW, _cursor, _closeW, _closeH], "inspectClose", "", UI_TEX(icon_close_ca), _closeTheme, {
     call FUNC(closeInspect);
