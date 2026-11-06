@@ -288,13 +288,20 @@ def icon_size(d, s, w):
 
 
 def icon_attachments(d, s, w):
-    # A scope on its rail: what goes on a weapon. The Attachments row of the right-click menu.
-    line(d, [(s * 0.14, s * 0.3), (s * 0.3, s * 0.38), (s * 0.3, s * 0.52), (s * 0.14, s * 0.6), (s * 0.14, s * 0.3)], w)
-    line(d, [(s * 0.86, s * 0.26), (s * 0.7, s * 0.36), (s * 0.7, s * 0.54), (s * 0.86, s * 0.64), (s * 0.86, s * 0.26)], w)
-    line(d, [(s * 0.3, s * 0.45), (s * 0.7, s * 0.45)], w)
-    line(d, [(s * 0.14, s * 0.78), (s * 0.86, s * 0.78)], w)
-    line(d, [(s * 0.42, s * 0.52), (s * 0.42, s * 0.78)], w)
-    line(d, [(s * 0.58, s * 0.52), (s * 0.58, s * 0.78)], w)
+    # A rifle scope seen from the side, on its two rings over the rail: what goes on a weapon. The Attachments row of the
+    # right-click menu. The eyepiece on the left, the wider objective bell on the right, a small turret on top.
+    line(d, [(s * 0.3, s * 0.4), (s * 0.66, s * 0.4)], w)
+    line(d, [(s * 0.3, s * 0.52), (s * 0.66, s * 0.52)], w)
+    line(d, [(s * 0.3, s * 0.4), (s * 0.24, s * 0.35), (s * 0.08, s * 0.35), (s * 0.08, s * 0.57), (s * 0.24, s * 0.57), (s * 0.3, s * 0.52)], w)
+    line(d, [(s * 0.66, s * 0.4), (s * 0.76, s * 0.28), (s * 0.92, s * 0.28), (s * 0.92, s * 0.64), (s * 0.76, s * 0.64), (s * 0.66, s * 0.52)], w)
+    line(d, [(s * 0.44, s * 0.4), (s * 0.44, s * 0.3), (s * 0.54, s * 0.3), (s * 0.54, s * 0.4)], w)
+    line(d, [(s * 0.36, s * 0.52), (s * 0.36, s * 0.76)], w)
+    line(d, [(s * 0.6, s * 0.52), (s * 0.6, s * 0.76)], w)
+    line(d, [(s * 0.16, s * 0.78), (s * 0.84, s * 0.78)], w)
+
+
+
+
 
 
 def icon_magazine(d, s, w):
@@ -343,6 +350,34 @@ def icon_move(d, s, w):
     # Four ways: a frame's title, which moves it.
     _double_arrow(d, s, w, (s * 0.12, s * 0.5), (s * 0.88, s * 0.5))
     _double_arrow(d, s, w, (s * 0.5, s * 0.12), (s * 0.5, s * 0.88))
+
+
+def _layer_stack(d, s, w, front_up):
+    # Two sheets lying over each other, seen at a slant, and an arrow: one sheet to the front or to the back.
+    def sheet(dy):
+        line(d, [(s * 0.1, s * (0.5 + dy)), (s * 0.36, s * (0.39 + dy)), (s * 0.62, s * (0.5 + dy)), (s * 0.36, s * (0.61 + dy)),
+                 (s * 0.1, s * (0.5 + dy))], w)
+    sheet(0.17)
+    sheet(-0.13)
+    ax = s * 0.84
+    if front_up:
+        line(d, [(ax, s * 0.78), (ax, s * 0.22)], w)
+        line(d, [(ax - s * 0.1, s * 0.33), (ax, s * 0.22), (ax + s * 0.1, s * 0.33)], w)
+    else:
+        line(d, [(ax, s * 0.22), (ax, s * 0.78)], w)
+        line(d, [(ax - s * 0.1, s * 0.67), (ax, s * 0.78), (ax + s * 0.1, s * 0.67)], w)
+
+
+
+
+def icon_layer_up(d, s, w):
+    # Bring to the front: the layout editor's frames where they overlap.
+    _layer_stack(d, s, w, True)
+
+
+def icon_layer_down(d, s, w):
+    # Send to the back.
+    _layer_stack(d, s, w, False)
 
 
 def icon_server(d, s, w):
@@ -1168,13 +1203,15 @@ def build_images():
         "icon_palette_ca": stroke_icon(icon_palette),
         "icon_size_ca": stroke_icon(icon_size),
         "icon_server_ca": stroke_icon(icon_server),
-        "icon_attachments_ca": stroke_icon(icon_attachments),
+        "icon_attachments_ca": stroke_icon(icon_attachments, width=8),
         "icon_magazine_ca": stroke_icon(icon_magazine),
         "icon_resize_h_ca": stroke_icon(icon_resize_h),
         "icon_resize_v_ca": stroke_icon(icon_resize_v),
         "icon_resize_nwse_ca": stroke_icon(icon_resize_nwse),
         "icon_resize_nesw_ca": stroke_icon(icon_resize_nesw),
         "icon_move_ca": stroke_icon(icon_move),
+        "icon_layer_up_ca": stroke_icon(icon_layer_up, width=8),
+        "icon_layer_down_ca": stroke_icon(icon_layer_down, width=8),
         "icon_weight_ca": stroke_icon(icon_weight),
         # The setup wizard: its cog in the inventory's header and in Eden's Tools menu, and its controls.
         "icon_setup_ca": stroke_icon(icon_setup),

@@ -130,75 +130,91 @@ private _fnc_equipmentPanel = {
 private _alone = EQUIPMENT_PARTS select {_x in _rects};
 private _inColumn = EQUIPMENT_PARTS - _alone;
 
+// What each frame of the edit mode draws, by its id - drawn below in the player's layer order (fnc_layerOrder): what comes later
+// lies over what came before.
+private _draw = createHashMap;
+
 // The column, while something of it is left in it - all of it placed elsewhere, it is not drawn at all.
-if ((_inColumn findIf {[_x] call FUNC(partShown)}) >= 0) then {
-    [[_equipX, _equipY, _leftW, _equipH], _inColumn] call _fnc_equipmentPanel;
-};
+_draw set ["equipment", {
+    if ((_inColumn findIf {[_x] call FUNC(partShown)}) >= 0) then {
+        [[_equipX, _equipY, _leftW, _equipH], _inColumn] call _fnc_equipmentPanel;
+    };
+}];
 
 {
-    [_rects get _x, [_x]] call _fnc_equipmentPanel;
+    _draw set [_x, compile format ["[_rects get '%1', ['%1']] call _fnc_equipmentPanel;", _x]];
 } forEach _alone;
-
-GVAR(equipmentRect) = GVAR(equipmentRects) param [0, []];
 
 // ----- Storage -----
 
-private _ownSections = _context getOrDefault ["storageSections", _context getOrDefault ["ownSections", []]];
+_draw set ["storage", {
 
-[
-    _display, _storageRect, _ownSections, _theme,
-    LLSTRING(Column_Storage), ["", UI_TEX(icon_inventory_ca)] select _titleIcons, QFUNC(drawSection), "storage"
-] call FUNC(drawColumn);
-
-// Without a uniform, vest or backpack the column would stand there empty, as if something had failed.
-if (_ownSections isEqualTo []) then {
-    private _font = _theme getOrDefault ["font", "PuristaMedium"];
-    private _size = TEXT_UNIT * 0.6;
-    private _textW = _columnW - _padX * 4;
+    private _ownSections = _context getOrDefault ["storageSections", _context getOrDefault ["ownSections", []]];
 
     [
-        _display, controlNull, [(_storageRect select 0) + _padX * 2, (_storageRect select 1) + UNIT * 2.4, _textW, UNIT],
-        [LLSTRING(Storage_Empty), _textW, _font, _size] call FUNC(fitText), _size,
-        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2, "hint"
-    ] call FUNC(uiLabel);
-};
+        _display, _storageRect, _ownSections, _theme,
+        LLSTRING(Column_Storage), ["", UI_TEX(icon_inventory_ca)] select _titleIcons, QFUNC(drawSection), "storage"
+    ] call FUNC(drawColumn);
+
+    // Without a uniform, vest or backpack the column would stand there empty, as if something had failed.
+    if (_ownSections isEqualTo []) then {
+        private _font = _theme getOrDefault ["font", "PuristaMedium"];
+        private _size = TEXT_UNIT * 0.6;
+        private _textW = _columnW - _padX * 4;
+
+        [
+            _display, controlNull, [(_storageRect select 0) + _padX * 2, (_storageRect select 1) + UNIT * 2.4, _textW, UNIT],
+            [LLSTRING(Storage_Empty), _textW, _font, _size] call FUNC(fitText), _size,
+            _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2, "hint"
+        ] call FUNC(uiLabel);
+    };
+}];
 
 // ----- Loot -----
 
-if (_looting) then {
-    private _lootSections = _context getOrDefault ["lootSections", []];
+_draw set ["loot", {
+    if (_looting) then {
+        private _lootSections = _context getOrDefault ["lootSections", []];
 
-    // Named after what is looted: the first section is the body, the crate or the ground the window was
-    // opened on - and when that is only something lying nearby, nothing was opened: "Nearby".
-    private _first = _lootSections param [0, createHashMap];
-    private _title = _first getOrDefault ["title", ""];
-    private _icon = switch (_first getOrDefault ["id", ""]) do {
-        case "worn": {UI_TEX(icon_person_ca)};
-        case "ground": {UI_TEX(icon_ground_ca)};
-        case "container": {UI_TEX(icon_crate_ca)};
-        default {UI_TEX(icon_inventory_ca)};
+        // Named after what is looted: the first section is the body, the crate or the ground the window was
+        // opened on - and when that is only something lying nearby, nothing was opened: "Nearby".
+        private _first = _lootSections param [0, createHashMap];
+        private _title = _first getOrDefault ["title", ""];
+        private _icon = switch (_first getOrDefault ["id", ""]) do {
+            case "worn": {UI_TEX(icon_person_ca)};
+            case "ground": {UI_TEX(icon_ground_ca)};
+            case "container": {UI_TEX(icon_crate_ca)};
+            default {UI_TEX(icon_inventory_ca)};
+        };
+
+        // A pile opened on is "Ground" however many others lie around (its section is named by its largest
+        // item then, to tell the piles apart).
+        if ((_first getOrDefault ["id", ""]) isEqualTo "ground") then {
+            _title = localize ELSTRING(storage,Ground);
+        };
+
+        if (_first getOrDefault ["nearby", false]) then {
+            _title = LLSTRING(Column_Nearby);
+            _icon = UI_TEX(icon_ground_ca);
+        };
+
+        // "Loot - Miller", "Loot - Nearby": the column says that it is someone else's before it says whose (issue 7), as the
+        // player's own says "Your gear"; drawColumn gives it the theme's loot look by its id.
+        _title = if (_title isEqualTo "") then {LLSTRING(Column_Loot)} else {format [LLSTRING(Column_LootOf), _title]};
+
+        [
+            _display, _lootRect, _lootSections, _theme, _title, ["", _icon] select _titleIcons,
+            QFUNC(drawSection), "loot"
+        ] call FUNC(drawColumn);
     };
+}];
 
-    // A pile opened on is "Ground" however many others lie around (its section is named by its largest
-    // item then, to tell the piles apart).
-    if ((_first getOrDefault ["id", ""]) isEqualTo "ground") then {
-        _title = localize ELSTRING(storage,Ground);
-    };
+{
+    call (_draw get _x);
+} forEach ([["equipment", "storage", "loot"] + _alone] call FUNC(layerOrder));
 
-    if (_first getOrDefault ["nearby", false]) then {
-        _title = LLSTRING(Column_Nearby);
-        _icon = UI_TEX(icon_ground_ca);
-    };
-
-    // "Loot - Miller", "Loot - Nearby": the column says that it is someone else's before it says whose (issue 7), as the
-    // player's own says "Your gear"; drawColumn gives it the theme's loot look by its id.
-    _title = if (_title isEqualTo "") then {LLSTRING(Column_Loot)} else {format [LLSTRING(Column_LootOf), _title]};
-
-    [
-        _display, _lootRect, _lootSections, _theme, _title, ["", _icon] select _titleIcons,
-        QFUNC(drawSection), "loot"
-    ] call FUNC(drawColumn);
-};
+// The column's own panel first where it is drawn: what fnc_updateDrag falls back to.
+GVAR(equipmentRect) = GVAR(equipmentRects) param [0, []];
 
 // ----- The free middle -----
 

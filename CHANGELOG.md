@@ -2,6 +2,21 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.67 - beta
+
+### Added
+
+- Edit layout: each frame has two buttons, to the front and to the back - where panels overlap, you choose which lies on top (a weapons panel over the loot column, for example).
+
+### Changed
+
+- A new Attachments icon: a scope on its rings over the rail.
+
+### Fixed
+
+- Edit layout: the frames' names and the bar's words (Tiles, Text, the hint, Done) were cut off. The columns' names sit on their top edge now, as tabs, clear of the parts' names inside.
+- Edit layout: the bar's buttons (Reset, Done, the size steps) could not be pressed. The display takes the press now and looks which button was under the mouse.
+
 ## 0.6.66 - beta
 
 ### Changed

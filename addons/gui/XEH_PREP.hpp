@@ -234,6 +234,7 @@ PREP(settingsRow);
 PREP(columnRects);
 PREP(columnMinimum);
 PREP(partShown);
+PREP(layerOrder);
 PREP(openLayoutEditor);
 PREP(layoutDrag);
 PREP(openSizeMenu);

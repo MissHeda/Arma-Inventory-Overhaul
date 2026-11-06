@@ -373,14 +373,20 @@
         <Key ID="STR_aio_gui_Layout_Attach">
             <English>Back into the equipment column</English>
         </Key>
+        <Key ID="STR_aio_gui_Layout_Back">
+            <English>Send to the back, under what it overlaps</English>
+        </Key>
         <Key ID="STR_aio_gui_Layout_Done">
             <English>Done</English>
         </Key>
         <Key ID="STR_aio_gui_Layout_Drag">
-            <English>Drag a frame to move it, an edge or a corner to resize it</English>
+            <English>Drag to move, edges and corners resize</English>
         </Key>
         <Key ID="STR_aio_gui_Layout_Edit">
             <English>Edit layout</English>
+        </Key>
+        <Key ID="STR_aio_gui_Layout_Front">
+            <English>Bring to the front, over what it overlaps</English>
         </Key>
         <Key ID="STR_aio_gui_Layout_Reset">
             <English>Reset</English>

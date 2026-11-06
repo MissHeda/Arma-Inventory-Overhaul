@@ -12,8 +12,8 @@
  *
  * Arguments:
  * 0: What: "begin" [display, [id, mode, start rect], layer] - mode "move", a corner "tl", "tr", "bl", "br" or an edge "l", "r",
- *    "t", "b" -, "move", "up", "end" (without writing), "reset", "attach" [id], or "step" [index of the size, step] for the size
- *    buttons of the edit mode's bar <STRING>
+ *    "t", "b" -, "move", "up", "end" (without writing), "reset", "attach" [id], "front" or "back" [id, ids drawn] for the layer
+ *    order (fnc_layerOrder), or "step" [index of the size, step] for the size buttons of the edit mode's bar <STRING>
  * 1: Its argument <ANY> (default: [])
  *
  * Return Value:
@@ -197,6 +197,26 @@ switch (_what) do {
 
         [] call _fnc_stop;
         [([_id] call _fnc_others) joinString ";"] call _fnc_write;
+    };
+
+    case "front";
+    case "back": {
+        _argument params [["_id", "", [""]], ["_ids", [], [[]]]];
+
+        private _order = ([_ids] call FUNC(layerOrder)) - [_id];
+
+        if (_what isEqualTo "front") then {
+            _order pushBack _id;
+        } else {
+            _order = [_id] + _order;
+        };
+
+        private _entries = ["order"] call _fnc_others;
+
+        _entries pushBack format ["order:%1", _order joinString ","];
+
+        [] call _fnc_stop;
+        [_entries joinString ";"] call _fnc_write;
     };
 
     case "step": {

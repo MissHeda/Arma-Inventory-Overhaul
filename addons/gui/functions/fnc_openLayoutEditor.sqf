@@ -6,14 +6,17 @@
  * window, to be dragged anywhere and resized at its edges and corners as a window on the desktop, each grip with the arrows the
  * mouse shows there (fnc_layoutDrag). The parts of the equipment column - the weight, the weapons, the gear, the hotbar - have a
  * frame of their own inside it: dragged out, a part stands on its own, with its own panel (fnc_layoutGlass), and its title has a
- * button that puts it back. Let go, the window is built again with it there. A bar on top has the tile and text size, which take
+ * button that puts it back. Two buttons beside each title bring that frame to the front or send it to the back, where frames overlap
+ * (fnc_layerOrder). Let go, the window is built again with it there. A bar on top has the tile and text size, which take
  * effect at once, Reset for the usual places, and Done. Escape leaves it as well.
  *
  * The loot column has a frame while nothing is looted too, so that it can be placed. A grid column cannot get narrower than its grid
  * (fnc_columnMinimum): the tile scale is what makes it narrower.
  *
- * Every button here acts on the press, not on the click: a click is a press and a release on the same control, and a window built
- * again in between - the loot nearby, the hotbar - made the release land on a new control, so the click never came.
+ * Every button here acts on the press, not on the click, and the display takes that press, not the button's control: a click is a
+ * press and a release on the same control, and the window behind - the loot nearby, a ring under the mouse - made again in between
+ * makes the editor again, so the release lands on a new control; and a control made under a mouse that stands still does not take
+ * the press at all. The buttons' places are kept (aio_gui_layoutButtons), and one handler on the display looks where the press was.
  *
  * A layer over the screen like the other popovers (aio_gui_menu, aio_gui_menuFor "layout"), which stays open while the window is built
  * again: fnc_build and fnc_raiseMenu make it again.
@@ -85,7 +88,7 @@ private _fnc_button = {
     private _iconH = _height * 0.6;
     private _iconW = [0, SQUARE(_iconH)] select (_icon isNotEqualTo "");
     private _wordSize = _height * 0.5;
-    private _wordW = [0, (_word getTextWidth [_font, _wordSize]) * 1.05] select (_word isNotEqualTo "");
+    private _wordW = [0, (_word getTextWidth [_font, _wordSize]) * TEXT_SLACK] select (_word isNotEqualTo "");
     private _gap = [0, SQUARE(_height * 0.2)] select (_iconW > 0 && {_wordW > 0});
     private _start = _left + (_width - _iconW - _gap - _wordW) / 2;
 
@@ -99,22 +102,12 @@ private _fnc_button = {
 
     private _hit = [_display, "AIO_Hitbox", _layer, _rect] call FUNC(uiCreate);
 
-    _hit setVariable [QGVAR(layoutPress), [_code, _argument]];
+    (uiNamespace getVariable [QGVAR(layoutButtons), []]) pushBack [[_left + safezoneX, _top + safezoneY, _width, _height], _code, _argument];
     _hit setVariable [QGVAR(layoutSurface), [_surface select {ctrlClassName _x isEqualTo "AIO_PanelRect"}, _surface select {ctrlClassName _x isEqualTo "AIO_PanelCorner"}, _normal, _hover]];
 
     if (_tip isNotEqualTo "") then {
         [_hit, _tip] call FUNC(setTooltip);
     };
-
-    _hit ctrlAddEventHandler ["MouseButtonDown", {
-        params ["_ctrl", "_button"];
-
-        if (_button != 0) exitWith {};
-
-        (_ctrl getVariable [QGVAR(layoutPress), [{}, []]]) params ["_code", "_argument"];
-
-        [_code, _argument] call FUNC(later);
-    }];
 
     {
         _x params ["_event", "_which"];
@@ -149,6 +142,30 @@ private _fnc_grip = {
     _hit
 };
 
+uiNamespace setVariable [QGVAR(layoutButtons), []];
+
+// The one handler on the display for every button here (see above); made once per display, it does nothing while the edit mode is closed.
+if (isNil {_display getVariable QGVAR(layoutPressHandler)}) then {
+    _display setVariable [QGVAR(layoutPressHandler), _display displayAddEventHandler ["MouseButtonDown", {
+        params ["", "_button", "_mouseX", "_mouseY"];
+
+        if (_button != 0 || {(GVAR(menuFor) param [0, ""]) isNotEqualTo "layout"}) exitWith {false};
+
+        private _hit = (uiNamespace getVariable [QGVAR(layoutButtons), []]) findIf {
+            (_x select 0) params ["_x0", "_y0", "_w", "_h"];
+
+            _mouseX >= _x0 && {_mouseX < _x0 + _w} && {_mouseY >= _y0} && {_mouseY < _y0 + _h}
+        };
+
+        if (_hit < 0) exitWith {false};
+
+        ((uiNamespace getVariable [QGVAR(layoutButtons), []]) select _hit) params ["", "_code", "_argument"];
+
+        [_code, _argument] call FUNC(later);
+        true
+    }]];
+};
+
 // ----- The frames -----
 
 private _rects = [true] call FUNC(columnRects);
@@ -165,16 +182,15 @@ private _names = createHashMapFromArray [
 
 // [id, screen rect, a part in the column - moved only, which takes it out -, a part on its own - with the button back].
 private _frames = [];
+private _layered = [["equipment", "storage", "loot"] + (EQUIPMENT_PARTS select {_x in _rects && {[_x] call FUNC(partShown)}})] call FUNC(layerOrder);
 
 {
-    _frames pushBack [_x, _rects get _x, false, false];
-} forEach ["equipment", "storage", "loot"];
+    _frames pushBack [_x, _rects get _x, false, _x in EQUIPMENT_PARTS];
+} forEach _layered;
 
 {
     if ([_x] call FUNC(partShown)) then {
-        if (_x in _rects) then {
-            _frames pushBack [_x, _rects get _x, false, true];
-        } else {
+        if !(_x in _rects) then {
             private _inColumn = GVAR(partRects) getOrDefault [_x, []];
 
             if (count _inColumn == 4) then {
@@ -183,6 +199,12 @@ private _frames = [];
         };
     };
 } forEach EQUIPMENT_PARTS;
+
+// The parts still in the column lie with it: right after it.
+private _inColumnFrames = _frames select {_x select 2};
+_frames = _frames - _inColumnFrames;
+_frames = (_frames select [0, (_frames findIf {(_x select 0) isEqualTo "equipment"}) + 1]) + _inColumnFrames
+    + (_frames select [(_frames findIf {(_x select 0) isEqualTo "equipment"}) + 1]);
 
 {
     _x params ["_id", "_screen", "_inColumn", "_alone"];
@@ -203,24 +225,35 @@ private _frames = [];
     // The title: a dark chip at the top left with the four arrows and the name - the frame's handle.
     private _name = _names getOrDefault [_id, _id];
     private _nameSize = _chipH * 0.55;
-    private _chipW = ((SQUARE(_chipH * 0.7) + SQUARE(_chipH * 0.5) + (_name getTextWidth [_fontBold, _nameSize]) * 1.05) min (_w - SQUARE(UNIT * 2.4))) max SQUARE(_chipH);
-    // Clear of the corner's knob.
+    private _chipRoom = [2.4, 4.8] select (_part && {!_inColumn});
+    private _chipW = ((SQUARE(_chipH * 1.3) + (_name getTextWidth [_fontBold, _nameSize]) * TEXT_SLACK) min (_w - SQUARE(UNIT * _chipRoom))) max SQUARE(_chipH);
+    // Clear of the corner's knob. A column's on its top edge, as a tab: inside, it lay on the title of the first part in it.
     private _chipX = _left + SQUARE(UNIT * 0.7);
-    private _chipY = _top + UNIT * 0.25;
+    private _chipY = [_top - _chipH / 2, _top + UNIT * 0.25] select _part;
 
     [_display, _layer, [_chipX, _chipY, _chipW, _chipH], _dark, _chipH * 0.3] call FUNC(uiPanel);
     [_display, _layer, [_chipX + SQUARE(_chipH * 0.2), _chipY + _chipH * 0.2, SQUARE(_chipH * 0.6), _chipH * 0.6], UI_TEX(icon_move_ca), _accent + [1]] call FUNC(uiIcon);
     [
-        _display, _layer, [_chipX + SQUARE(_chipH * 0.95), _chipY, _chipW - SQUARE(_chipH * 1.05), _chipH],
-        [_name, _chipW - SQUARE(_chipH * 1.05), _fontBold, _nameSize] call FUNC(fitText), _nameSize, _text, _fontBold, 0, "never"
+        _display, _layer, [_chipX + SQUARE(_chipH * 0.95), _chipY, _chipW - SQUARE(_chipH * 0.95), _chipH],
+        [_name, _chipW - SQUARE(_chipH * 1.1), _fontBold, _nameSize] call FUNC(fitText), _nameSize, _text, _fontBold, 0, "never"
     ] call FUNC(uiLabel);
 
-    // A part on its own: back into the column, at the top right.
-    if (_alone) then {
-        [
-            [_left + _w - SQUARE(_chipH + UNIT * 0.7), _chipY, SQUARE(_chipH), _chipH], UI_TEX(icon_undo_ca), "",
-            {["attach", _this] call FUNC(layoutDrag)}, [_id], [_dark, [0.2, 0.2, 0.2, 0.95]], _text, LLSTRING(Layout_Attach)
-        ] call _fnc_button;
+    // At the top right: to the front, to the back - and for a part on its own, back into the column.
+    if (!_inColumn) then {
+        private _buttonX = _left + _w - SQUARE(UNIT * 0.7);
+
+        {
+            _x params ["_icon", "_code", "_argument", "_tip"];
+
+            _buttonX = _buttonX - SQUARE(_chipH + UNIT * 0.1);
+
+            [
+                [_buttonX, _top + UNIT * 0.25, SQUARE(_chipH), _chipH], _icon, "", _code, _argument, [_dark, [0.2, 0.2, 0.2, 0.95]], _text, _tip
+            ] call _fnc_button;
+        } forEach ([
+            [UI_TEX(icon_layer_up_ca), {["front", _this] call FUNC(layoutDrag)}, [_id, _layered], LLSTRING(Layout_Front)],
+            [UI_TEX(icon_layer_down_ca), {["back", _this] call FUNC(layoutDrag)}, [_id, _layered], LLSTRING(Layout_Back)]
+        ] + ([[], [[UI_TEX(icon_undo_ca), {["attach", _this] call FUNC(layoutDrag)}, [_id], LLSTRING(Layout_Attach)]]] select _alone));
     };
 
     if (!_inColumn) then {
@@ -268,12 +301,12 @@ private _hintSize = _size * 0.85;
 private _titleSize = _size * 1.05;
 private _title = LLSTRING(Layout_Edit);
 private _stepNames = [LLSTRING(Size_Tiles), LLSTRING(Size_Text)];
-private _stepNameW = selectMax (_stepNames apply {(_x getTextWidth [_font, _size * 0.9]) * 1.1});
+private _stepNameW = selectMax (_stepNames apply {(_x getTextWidth [_font, _size * 0.9]) * TEXT_SLACK}) + SQUARE(UNIT * 0.3);
 private _shownW = SQUARE(UNIT * 1.9);
-private _resetW = SQUARE(UNIT * 1.2) + ((LLSTRING(Layout_Reset) getTextWidth [_font, _buttonH * 0.5]) * 1.1) + SQUARE(UNIT * 0.6);
-private _doneW = SQUARE(UNIT * 1.2) + ((LLSTRING(Layout_Done) getTextWidth [_font, _buttonH * 0.5]) * 1.1) + SQUARE(UNIT * 0.6);
-private _titleW = SQUARE(UNIT * 0.9) + (_title getTextWidth [_fontBold, _titleSize]) * 1.05;
-private _hintW = ((_hint getTextWidth [_font, _hintSize]) * 1.05) min SQUARE(UNIT * 9);
+private _resetW = SQUARE(UNIT * 1.2) + ((LLSTRING(Layout_Reset) getTextWidth [_font, _buttonH * 0.5]) * TEXT_SLACK) + SQUARE(UNIT * 0.6);
+private _doneW = SQUARE(UNIT * 1.2) + ((LLSTRING(Layout_Done) getTextWidth [_font, _buttonH * 0.5]) * TEXT_SLACK) + SQUARE(UNIT * 0.6);
+private _titleW = SQUARE(UNIT * 0.9) + (_title getTextWidth [_fontBold, _titleSize]) * TEXT_SLACK;
+private _hintW = (_hint getTextWidth [_font, _hintSize]) * TEXT_SLACK;
 private _stepW = _stepNameW + _buttonW * 2 + _shownW;
 private _barW = (_padX * 2 + _titleW + _gapX * 6 + _stepW * 2 + _hintW + _resetW + _doneW) min (safezoneW - SQUARE(UNIT));
 private _barX = (safezoneW - _barW) / 2;
