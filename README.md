@@ -58,7 +58,8 @@ ground, the drop key, Drop in the menu) is deployed as a drone, as that mod does
 "Pack up drone" that checks the grid for room. Ukraine FPV Drone works the same: its item dropped through the window is deployed as a drone, and "Pack up drone" shows where only the grid still has room. Works with WebKnight's and KJW's Two Primary Weapons: the weapon on the back is a slot of
 its own under the primary, with its magazine and attachments - drag rifles on and off it, swap it with the primary by dragging one onto the other or
 with "Swap with primary" in the right-click menu, and that mod's own key switches to whatever you put there; it never shows as loot. With Better
-Inventory loaded, its handler for the vanilla inventory stays quiet.
+Inventory loaded, its handler for the vanilla inventory stays quiet. Works with GreenMag Rework: drag loose rounds, a pack or a
+belt onto a magazine in your gear and GreenMag loads it; its right-click entries are in the window's menu.
 
 ## Building
 

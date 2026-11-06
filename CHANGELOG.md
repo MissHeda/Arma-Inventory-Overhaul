@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.72 - beta
+
+### Added
+
+- Works with GreenMag Rework: drag loose rounds, a pack or a belt onto a magazine in your uniform, vest or backpack and GreenMag
+  loads it, as its own drag does in the vanilla inventory. A magazine it cannot load turns red with GreenMag's reason. Its
+  right-click entries (Refill, Unload, Unpack, Pack, the belt's) show in the window as before.
+
 ## 0.6.71 - beta
 
 ### Fixed

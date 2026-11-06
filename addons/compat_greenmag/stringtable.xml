@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="aio">
+    <Package name="compat_greenmag">
+        <Key ID="STR_aio_compat_greenmag_Hint_Full">
+            <English>This magazine is full</English>
+        </Key>
+        <Key ID="STR_aio_compat_greenmag_Hint_OwnGear">
+            <English>Load magazines in your own uniform, vest or backpack</English>
+        </Key>
+    </Package>
+</Project>

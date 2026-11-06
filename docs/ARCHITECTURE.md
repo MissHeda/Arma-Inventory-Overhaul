@@ -78,6 +78,7 @@ The short version; the full list is in [`docs/BRIEFING.md`](BRIEFING.md).
 | `compat_ace_interaction` | ACE interaction "Inventory" on people, the action menu's entry as an ACE action. |
 | `compat_zen` | Zeus Enhanced: the "Inventory lock" menu and module. |
 | `compat_aime` | ACE Interaction Menu Expansion (AIME): its "Change Ammo Type" and inventory actions under this mod's rules. |
+| `compat_greenmag` | GreenMag Rework: its rounds, packs and belts dragged onto a magazine tile load it (drag target `ammoLoad`, `fnc_canLoad`, `fnc_load`); found by its functions, no dependency. |
 | `compat_tfar` | TFAR radios: channel and frequency at the mouse, "Open radio", "Use as active radio", long-range settings kept through moves. |
 | `compat_acre` | the same for ACRE2, and the dummy radio ACRE2 keeps in the radio slot fixed. |
 

@@ -1552,6 +1552,49 @@ call {
         [_kitRect, _fits, DRAG_FOOTPRINT_ALPHA, "", [_target, _kitRect, [_originX, _originY]] call FUNC(cornerRadii)] call _fnc_show;
     };
 
+    // ----- Ammunition on a magazine: loaded into it (GreenMag Rework, aio_compat_greenmag, when loaded) -----
+    // Its loose rounds, a pack or a belt on a magazine they fit: GreenMag loads it, nothing moves here. Red with GreenMag's reason
+    // where it would but cannot; anything that is no ammunition of GreenMag's goes on below.
+    private _loadTile = -1;
+    private _loadAnswer = [false, ""];
+
+    if (!_viaFold && {_slotSource isEqualTo []} && {_dragGroup isEqualTo []} && {!isNil QEFUNC(compat_greenmag,canLoad)}) then {
+        private _underIndex = [_targetIndex, _cell] call _fnc_tileUnder;
+
+        if (_underIndex < 0 || {_targetIndex == _sourceIndex && {_underIndex == _tileIndex}}) exitWith {};
+
+        private _key = format ["ammoLoad|%1|%2", _targetIndex, _underIndex];
+        private _answer = GVAR(dragRoom) get _key;
+
+        if (isNil "_answer") then {
+            _answer = [_sourceGrid, _entry, _target, (_target get "tiles") select _underIndex] call EFUNC(compat_greenmag,canLoad);
+            GVAR(dragRoom) set [_key, _answer];
+        };
+
+        if (_answer isNotEqualTo [false, ""]) then {
+            _loadTile = _underIndex;
+            _loadAnswer = _answer;
+        };
+    };
+
+    if (_loadTile >= 0) exitWith {
+        _loadAnswer params ["_fits", "_why"];
+
+        private _under = (_target get "tiles") select _loadTile;
+
+        GVAR(dragTarget) = ["ammoLoad", _targetIndex, _loadTile, 0, _fits, _why];
+
+        // The footprint lies on that magazine, in the accent colour, as for a repack.
+        (_gridBoxes select _targetIndex) params ["", "_originX", "_originY"];
+
+        private _loadRect = [_target, [_originX, _originY], _under get "col", _under get "row", _under get "w", _under get "h"] call FUNC(spanRect);
+
+        [
+            _loadRect, _fits, DRAG_FOOTPRINT_ALPHA, ["", "accent"] select _fits,
+            [_target, _loadRect, [_originX, _originY]] call FUNC(cornerRadii)
+        ] call _fnc_show;
+    };
+
     // ----- On a magazine of its kind: the two repacked (aio_magazines, when loaded) -----
     // The cell under the mouse decides, as for a kit's tile. Not a slot's item, not the dragged tile itself.
     // A repack the player clearly meant but cannot have is red with its reason; anything that is no repack

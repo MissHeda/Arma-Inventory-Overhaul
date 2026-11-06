@@ -268,6 +268,19 @@ private _sent = call {
         }
     };
 
+    // Ammunition onto a magazine: GreenMag Rework loads it (aio_compat_greenmag), nothing is moved here. Its tile index travels
+    // in the column's place.
+    if (_kind isEqualTo "ammoLoad") exitWith {
+        private _grid = _grids param [_targetIndex, createHashMap];
+        private _under = (_grid getOrDefault ["tiles", []]) param [_col, createHashMap];
+
+        if (!isNil QEFUNC(compat_greenmag,load) && {count _under > 0}) then {
+            [_fromGrid, _entry, _grid, _under] call EFUNC(compat_greenmag,load);
+        };
+
+        false
+    };
+
     // Onto a magazine of its kind: the two are repacked (aio_magazines), nothing is moved here. Its tile
     // index travels in the column's place.
     if (_kind isEqualTo "repack") exitWith {
