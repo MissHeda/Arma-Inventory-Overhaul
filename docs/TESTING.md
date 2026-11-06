@@ -256,6 +256,14 @@ A client can see them and cannot change them.
       pistol, a launcher and the grenade launcher's second muzzle (switch to GL, R). Drag a magazine from the vest onto the empty
       rifle, onto its magazine slot, and use "Load into" in the menu: it loads; read the RPT for `only without a muzzle name` /
       `only as a plain magazine`.
+- [ ] Spent launcher with use limits (0.6.30): backpack on "Only whitelisted", only the launcher's rounds whitelisted for it,
+      rounds in the backpack. Fire the launcher, R: the reload animation plays and the launcher cannot fire until it is done
+      (hold the fire button through it); then it fires once and is empty again. Hold R or press it again during the reload: still
+      one reload. Switch to the rifle in the middle: no round in the launcher afterwards, and R with the launcher in the hands
+      reloads it. The same with the rifle's magazine dragged out in the window, and with a pistol. The hotbar's magazine key and
+      AIME's Change Ammo Type on the empty launcher: the same animation. Inventory after each: no empty rocket left in a
+      container. The RPT: no `did not reload ... loaded by hand` line (if there is one, the game refused the reload and the old
+      instant load ran - send the RPT).
 - [ ] Reload with use limits (issue #2): backpack on "Nothing", a partly used magazine in the rifle, allowed magazines in the vest
       and a full one in the backpack. R once: one animation, the vest's fullest magazine goes in, the old one goes where the game
       puts it (moved to the vest if it landed in the backpack), no hint, no second animation; hold R: still one reload. Fire the

@@ -10,8 +10,8 @@
  *     answer per RELOAD_GUARD_GAP): swallowed, nothing new starts
  *   - the fullest magazine the weapon's muzzle takes that may be used (fnc_reloadPick) - also while the weapon holds a full
  *     magazine, which is swapped as in the game, the full one going back into a container like any ejected one: loaded with
- *     fnc_loadMagazine - the game's own reload action for that one magazine when the muzzle holds one (one
- *     animation; fnc_onReloaded tidies the magazine the game put away, once), by hand into an empty muzzle
+ *     fnc_loadMagazine - the game's own reload action for that one magazine (one animation; fnc_onReloaded
+ *     tidies the magazine the game put away, once), an empty muzzle given an empty magazine first
  *   - none that may be used, but some in containers that are closed to them: nothing loads, and a line says
  *     from where to take one out
  *   - no magazine the muzzle takes at all: the key is the game's, which has nothing to load either

@@ -1028,7 +1028,7 @@ limited.
   the hands, and at least one magazine the muzzle takes (none: the key is the game's, which has nothing to load either). A key held
   down (`RELOAD_GUARD_GAP` 0.6 s, `GVAR(reloadAt)`) or a reload under way (`weaponState` entry 6, the magazine reload phase, above 0)
   is swallowed; otherwise the fullest usable magazine (`fnc_reloadPick` with its swap argument true, so a full magazine in the weapon is swapped for another one as in the game, the full one going back as any ejected magazine does)
-  is loaded with `fnc_loadMagazine` (below: the game's `LoadMagazine` action for that one magazine, or by hand into an empty muzzle).
+  is loaded with `fnc_loadMagazine` (below: the game's `LoadMagazine` action for that one magazine, an empty muzzle given an empty magazine first).
   With only blocked magazines a line names the containers to take one out of. A load that fails swallows the press too (an RPT
   WARNING) and clears the repeat gap - the engine's own reload is never let in while a limit is active. ACE's `isReloading` is
   **not** asked here: ACE sets it in its own KeyDown handler for this very press, and the guard took its own press for a reload
@@ -1036,7 +1036,7 @@ limited.
   game's, untouched. A vehicle's gun is not caught.
 - **One reload, one token** (`GVAR(reloadToken)`). `fnc_loadMagazine` writes `[unit, weapon, "creator:id", class, rounds, old
   magazine, source container, counts of the old magazine per container, until]` right before the `LoadMagazine` action. The
-  first `Reloaded` event of that unit spends it (`fnc_onReloaded`), whatever it shows, so nothing runs twice for one reload: when
+  first `Reloaded` event of that unit spends it (`fnc_onReloaded`), whatever it shows - but an empty magazine loaded, which is no reload (the one `fnc_loadMagazine` puts into an empty muzzle, should that raise the event), leaves it - so nothing runs twice for one reload: when
   the loaded magazine is the one asked for (by id, or by class and rounds when the id cannot be told), the reload stands and a frame
   later `fnc_reloadTidy` moves the magazine the game put away out of a container that is blocked for it into the container the new
   one came from, when that has room - once. When the game loaded another one, an RPT INFO says so and the undo below decides. The
@@ -1065,17 +1065,26 @@ limited.
   it is when the container will not take it) - and a magazine nowhere is put back into the weapon with `addWeaponItem`. Then the old
   magazine (`Reloaded`'s last argument, when it has rounds) is taken out of whichever container holds one with those rounds and put
   into the weapon, and given back to the container when that does not hold. A line says "Cannot reload from the backpack."; if a
-  magazine that may be used is left (`fnc_reloadPick`, the fullest) and the undo left the muzzle empty, `UNDO_RELOAD_WAIT` later it is put in by hand with `fnc_loadMagazine` - an undo never starts a reload of the game's, so it cannot loop. Its own `addWeaponItem` restores are noted as hand loads (`fnc_noteHandLoad`), so a `Reloaded` they raise is not undone in turn. Never done twice (`GVAR(undoUntil)`, a time that runs out), and not when the magazine's origin is unknown. Untested in the game: the exact shape
+  magazine that may be used is left (`fnc_reloadPick`, the fullest) and the undo left the muzzle empty, `UNDO_RELOAD_WAIT` later it is put in by hand with `fnc_loadMagazine` (argument 4 true) - an undo never starts a reload of the game's, so it cannot loop. Its own `addWeaponItem` restores are noted as hand loads (`fnc_noteHandLoad`), so a `Reloaded` they raise is not undone in turn. Never done twice (`GVAR(undoUntil)`, a time that runs out), and not when the magazine's origin is unknown. Untested in the game: the exact shape
   of the `Reloaded` arguments and whether `removePrimaryWeaponItem` returns the magazine to the cargo are checked by counting, not
   assumed.
 - **Loading a chosen magazine** (`aio_storage_fnc_loadMagazine [unit, weapon, muzzle, entry]`, public): the one way every reload of
   this mod ends - the key's guard, the undo of a refused reload, the hotbar, `compat_aime`'s menu. `entry` is a row of
   `magazinesAmmoFull` (seven items). A muzzle that holds a magazine gets the game's `LoadMagazine` action with its animation,
-  after the reload token above is written. An
-  **empty** muzzle - no magazine in the weapon - is loaded by hand: the magazine is taken out of the container it lies in
+  after the reload token above is written. An **empty** muzzle - a spent launcher, a weapon whose magazine was taken out -
+  is first given an empty magazine of the chosen class (`fnc_weaponPart` with 0 rounds; its hand-load note is cleared, the
+  reload is the token's), which is what a weapon fired dry holds, and then gets the same action: the game reloads with its own
+  animation and time, the weapon cannot fire until it is done, and the empty magazine goes as any empty one does. A reload from
+  an empty magazine (that one or a weapon fired dry) is watched (`CBA_fnc_waitUntilAndExecute`): under way (`weaponState` entry
+  6), the token spent or written again, or rounds in the muzzle - done; none of that within `RELOAD_START_WAIT` 1 s and the
+  weapon still in the hands - an RPT WARNING and the load by hand below (argument 4 true). Why (Mia, 0.6.29): the load by hand
+  is in at once and only the gesture shows a reload, so a launcher reloaded with R from a whitelisted backpack fired during its
+  reload, again and again. **By hand** (argument 4 true: the undo's delayed load, which never starts a reload of the game's,
+  and the fallback above; a muzzle that holds rounds is left alone): the magazine is taken out of the container it lies in
   (`addMagazineAmmoCargo [class, -1, rounds]`, counted before and after), put in with `fnc_weaponPart` (below), the window's reload
-  gesture and sound play (`aio_gui_fnc_playReload`, when loaded), `fnc_queueMigrate` and `fnc_useTrack` follow; a magazine that did
-  not go in is put back and only then the action is tried. Why: the reload key's guard used to load its pick with the action alone,
+  gesture and sound play (`aio_gui_fnc_playReload`, when loaded), `fnc_queueMigrate` and `fnc_useTrack` follow; an empty magazine it
+  replaces that the game hands to a container is taken out of it (counted before and after); a magazine that did not go in is put
+  back and only then the action is tried (not by hand). Why: the reload key's guard used to load its pick with the action alone,
   which is not reliable for a weapon with no magazine in it (Mia, 0.5.13: R does nothing with an empty weapon, whatever lies where,
   and a popup says the backpack's magazines do not work). Found by reading, not by running the game: untested in Arma. `fnc_reloadPick` chooses: the fullest usable
   magazine the muzzle takes, ties by uniform, vest, backpack. `fnc_weaponPart` puts a magazine on a weapon (the window's drag onto a

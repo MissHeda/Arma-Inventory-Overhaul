@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.30 - beta
+
+### Fixed
+
+- Reloading a spent launcher (or any weapon with no magazine in it) with R while a "Use items from ..." setting limits something - for example the backpack on "Only whitelisted" with only launcher rounds allowed: the round was in at once while the reload animation still played, so the launcher fired during its reload, again and again. The mod put the magazine in by script and played the animation on top. Now the empty muzzle is given an empty magazine of that class, as a weapon fired dry has, and the game reloads from it as it always does - its animation, its time, no firing until it is done. Should the game not start that reload within a second, the magazine goes in by hand as before (an RPT WARNING `did not reload ... loaded by hand`). The same for the hotbar's magazine keys and AIME's Change Ammo Type. Not tested in the game.
+
 ## 0.6.29 - beta
 
 ### Added
