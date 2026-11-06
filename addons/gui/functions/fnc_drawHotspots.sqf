@@ -212,7 +212,8 @@ private _boxW = SQUARE(_boxH);
 private _dotH = _textUnit * 0.22;
 private _lineColor = [1, 1, 1, 0.55];
 private _nameSize = _textUnit * 0.34;
-private _radius = ((_theme getOrDefault ["radius", 0]) * 0.6) min (_boxH / 5);
+// Clearly round wherever the theme is round (Mia: the boxes read as squares at the theme's own small radius); square only in a square theme.
+private _radius = [0, _boxH * 0.2] select ((_theme getOrDefault ["radius", 0]) > 0);
 
 // The line in three straight pieces - down from the box, across, down to the dot: a turned control is cut to its own box, so a
 // slanted line cannot be drawn.

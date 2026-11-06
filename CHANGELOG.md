@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.69 - beta
+
+### Fixed
+
+- Modify view: the boxes on a weapon's parts have clearly rounded corners, not nearly square ones.
+
 ## 0.6.68 - beta
 
 ### Fixed
