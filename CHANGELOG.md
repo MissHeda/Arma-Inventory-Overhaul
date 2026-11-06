@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.68 - beta
+
+### Fixed
+
+- Inspect card: the close button's surface is round, as the card's corners, not a square.
+
 ## 0.6.67 - beta
 
 ### Added

@@ -311,7 +311,12 @@ _grip ctrlAddEventHandler ["MouseButtonDown", {
     GVAR(inspectMove) = [_mouseX - _groupX, _mouseY - _groupY];
 }];
 
-[_display, _group, [_width - _padX - _closeW, _cursor, _closeW, _closeH], "inspectClose", "", UI_TEX(icon_close_ca), _theme, {
+// The cross on a round surface, as the card's corners are round - a square one stood out against them.
+private _closeTheme = +_theme;
+
+_closeTheme set ["radius", _closeH / 2];
+
+[_display, _group, [_width - _padX - _closeW, _cursor, _closeW, _closeH], "inspectClose", "", UI_TEX(icon_close_ca), _closeTheme, {
     call FUNC(closeInspect);
 }] call FUNC(uiButton);
 
