@@ -36,15 +36,24 @@ if (_chest isEqualTo "" && {_back isEqualTo ""}) exitWith {[]};
 
 private _fnc_name = {getText (configFile >> "CfgVehicles" >> _this >> "displayName")};
 private _action = switch (true) do {
-    case (_chest isNotEqualTo "" && {_back isNotEqualTo ""}): {["actionSwap", format [LLSTRING(Menu_Swap), _chest call _fnc_name]]};
-    case (_back isNotEqualTo ""): {["actionOnChest", LLSTRING(Menu_OnChest)]};
-    default {["actionOnBack", format [LLSTRING(Menu_OnBack), _chest call _fnc_name]]};
+    case (_chest isNotEqualTo "" && {_back isNotEqualTo ""}): {["actionSwap", format [LLSTRING(Menu_Swap), _chest call _fnc_name], "swap"]};
+    case (_back isNotEqualTo ""): {["actionOnChest", LLSTRING(Menu_OnChest), "onchest"]};
+    default {["actionOnBack", format [LLSTRING(Menu_OnBack), _chest call _fnc_name], "onback"]};
 };
 
-_action params ["_function", "_text"];
+_action params ["_function", "_text", "_iconName"];
+
+// The mod's own pictures for its actions, as its ACE menu shows them (Redux, in \x\bocr\addons\main\ui; the original has none
+// this addon knows of), tinted like the window's own icons (fnc_contextMenu).
+private _options = createHashMapFromArray [["id", "boc_" + _iconName]];
+
+if (_prefix isEqualTo "bocr_main") then {
+    _options set ["icon", format ["\x\bocr\addons\main\ui\%1_ca.paa", _iconName]];
+    _options set ["iconColor", []];
+};
 
 [[_text, [_unit, _prefix + "_fnc_" + _function], {
     params ["_unit", "_function"];
 
     [_unit] call (missionNamespace getVariable [_function, {}]);
-}]]
+}, _options]]

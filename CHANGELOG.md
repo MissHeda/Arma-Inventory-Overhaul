@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.102 - beta
+
+### Changed
+
+- BackpackOnChest - Redux: the backpack slot's menu rows (on the chest, on the back, swap) show the mod's own icons.
+
 ## 0.6.101 - beta
 
 ### Fixed
