@@ -602,7 +602,7 @@ if (_showWeapons && {!_equipFolded}) then {
 if (_showWeapons) then {
     GVAR(partRects) set ["weapons", [_left, _weaponsTop, _width, (_cursor - _weaponsTop) max _labelH]];
 
-    ["keep", _scene3DSlots] call FUNC(cardScene);
+    ["keep", [_scene3DSlots]] call FUNC(cardScene);
 };
 
 // ---------------------------------------------------------------------------

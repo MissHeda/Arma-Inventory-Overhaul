@@ -871,9 +871,6 @@
         <Key ID="STR_aio_gui_QuickMove">
             <English>Quick move</English>
         </Key>
-        <Key ID="STR_aio_gui_QuickTarget_Pick">
-            <English>Click: quick moves go here (again: stop)</English>
-        </Key>
         <Key ID="STR_aio_gui_QuickTarget_Tip">
             <English>Quick moves go here. Click a free cell of it again to stop.</English>
         </Key>

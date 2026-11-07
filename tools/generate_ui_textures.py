@@ -403,6 +403,12 @@ def icon_mouse_scroll(d, s, w):
     _mouse(d, s, w, "scroll")
 
 
+def ui_separator(d, s, w):
+    # A thin upright line: the footer's hint line parts the double click from the rest with it, as the keys from the hint
+    # (aio_gui_fnc_updateHover).
+    line(d, [(s * 0.5, s * 0.2), (s * 0.5, s * 0.8)], w)
+
+
 def icon_target(d, s, w):
     # A crosshair: the container a quick move goes into (the inventory's caption line).
     line(d, arc_points(s * 0.5, s * 0.5, s * 0.3, 0, 360), w)
@@ -1279,6 +1285,7 @@ def build_images():
         "icon_resize_nesw_ca": stroke_icon(icon_resize_nesw),
         "icon_move_ca": stroke_icon(icon_move),
         "icon_target_ca": stroke_icon(icon_target),
+        "ui_separator_ca": stroke_icon(ui_separator, width=5),
         "icon_mouse_left_ca": stroke_icon(icon_mouse_left, width=8),
         "icon_mouse_right_ca": stroke_icon(icon_mouse_right, width=8),
         "icon_mouse_scroll_ca": stroke_icon(icon_mouse_scroll, width=8),

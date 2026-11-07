@@ -859,7 +859,15 @@ switch (_shown param [0, ""]) do {
                 default {
                     ([[_hoverGrid getOrDefault ["container", objNull]]] call FUNC(quickTarget)) params [["_picked", objNull]];
 
-                    _double = [LLSTRING(QuickMove), format [LLSTRING(Hint_QuickTargetInto), [_picked] call FUNC(containerName)]] select !isNull _picked;
+                    // With none picked, out of the player's own gear it goes onto the ground (fnc_quickMove).
+                    private _hoverHolder = _hoverGrid getOrDefault ["container", objNull];
+                    private _ownGear = _hoverHolder in [uniformContainer GVAR(unit), vestContainer GVAR(unit), backpackContainer GVAR(unit)];
+
+                    _double = if (isNull _picked) then {
+                        [LLSTRING(QuickMove), LLSTRING(Drop)] select _ownGear
+                    } else {
+                        format [LLSTRING(Hint_QuickTargetInto), [_picked] call FUNC(containerName)]
+                    };
                 };
             };
         };
@@ -977,12 +985,17 @@ switch (_shown param [0, ""]) do {
 // In the footer's text scale where it keeps one (fnc_drawFooter).
 private _hintCtrl = uiNamespace getVariable [QGVAR(hint), controlNull];
 
-// The double click first: its picture, white, its words in the accent colour, and a thin line to what follows.
+// The double click first, as the footer's keys are written - their picture and words in their colour (fnc_uiKeyHint) -, then the same
+// thin upright line as between the keys and the hint (fnc_drawFooter; a picture of a line, UI_TEX(ui_separator_ca)).
 if (_double isNotEqualTo "" && {_parts isNotEqualTo []}) then {
+    private _keyColour = [_theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] call _fnc_hex;
+
     _parts = [
-        image (["double"] call FUNC(mouseIcon)) setAttributes ["color", "#FFFFFF"], " ",
-        text _double setAttributes ["color", [_theme getOrDefault ["accent", [1, 1, 1, 1]]] call _fnc_hex, "font", _font],
-        text "   |   " setAttributes ["color", [_theme getOrDefault ["line", [1, 1, 1, 0.3]]] call _fnc_hex]
+        image (["double"] call FUNC(mouseIcon)) setAttributes ["color", _keyColour], " ",
+        text _double setAttributes ["color", _keyColour, "font", _font],
+        "  ",
+        image UI_TEX(ui_separator_ca) setAttributes ["color", [_theme getOrDefault ["line", [1, 1, 1, 0.14]]] call _fnc_hex, "size", "1.6"],
+        "  "
     ] + _parts;
 };
 

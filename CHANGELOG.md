@@ -2,6 +2,20 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.80 - beta
+
+### Changed
+
+- Quick move with no target picked: out of your own gear onto the ground (seated: the vehicle). Pick a crate or your vest by a
+  click on it to send things there instead. From the loot it still goes into your gear.
+- Footer: the line after the keys sits right after them, the line after the double click looks the same, and the double click is
+  written in the keys' colour.
+- The quick move target's picture keeps only its soft outline: no crosshair in the corner, no tooltip.
+
+### Fixed
+
+- Real weapon pictures stayed empty, with a script error in fnc_cardScene.
+
 ## 0.6.79 - beta
 
 ### Added

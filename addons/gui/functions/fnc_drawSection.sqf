@@ -681,17 +681,15 @@ private _gridX = _blockX + ([0, _boxW + _gapX] select _hasBox) + _stripExtra;
 // The box
 // ---------------------------------------------------------------------------
 // The picture of the container the player picked for quick moves (fnc_quickTarget): a soft outline in the accent colour, half lit
-// - the attachment points' box (fnc_drawHotspots), quieter - and a small crosshair in its corner (Mia, after 0.6.76).
+// - the attachment points' box (fnc_drawHotspots), quieter (Mia, after 0.6.76; the crosshair in its corner went after 0.6.79).
 private _fnc_targetGlow = {
     params ["_display", "_parent", "_rect", "_theme", "_height"];
     _rect params ["_x0", "_y0", "_w0", "_h0"];
 
     private _accentRgb = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
     private _radius = (_theme getOrDefault ["radius", 0]) min (_height / 4);
-    private _iconH = (_h0 * 0.16) max (UNIT * 0.4);
 
     [_display, _parent, _rect, _accentRgb + [0.5], _radius] call FUNC(uiRing);
-    [_display, _parent, [_x0 + _w0 - SQUARE(_iconH) - SQUARE(_iconH * 0.3), _y0 + _iconH * 0.3, SQUARE(_iconH), _iconH], UI_TEX(icon_target_ca), _accentRgb + [0.6]] call FUNC(uiIcon);
 };
 
 if (_hasBox) then {
@@ -753,7 +751,6 @@ if (_hasBox) then {
 
                 [{_this call FUNC(pickTarget)}, [_control getVariable [QGVAR(pick), objNull]]] call FUNC(later);
             }];
-            [_pickHit, LLSTRING(QuickTarget_Pick)] call FUNC(setTooltip);
         };
     };
 

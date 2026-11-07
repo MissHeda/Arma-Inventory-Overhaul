@@ -149,8 +149,9 @@ _keys = _keys select [0, _fits];
 // Right after the key hints, parted from them by a thin upright line, left-aligned, in their size and on their line:
 // structured text starts at the top of its box, so the box starts half a line above the footer's middle, where their
 // words are centred. It takes all the room up to the version, so long item lines are never cut (issue 12).
-private _hintGap = SQUARE(UNIT * 0.45);
-private _hintX = _keyX + _hintGap * 2;
+// The key hints end with the gap after their last one: the line stands in its middle, the hint at its end (Mia, 0.6.79: nearer).
+private _hintGap = SQUARE(_keyH * 0.45);
+private _hintX = _keyX;
 private _hintSize = _textUnit * 0.558;
 private _hintW = (_left + _width - _versionW - SQUARE(UNIT * 0.5)) - _hintX;
 private _hintCtrl = [_display, "AIO_FooterHint", controlNull, [_hintX, FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
@@ -161,7 +162,7 @@ if (_hintW < SQUARE(UNIT * 6)) then {
 } else {
     // The line between the key hints and the hint, half the bar high.
     [
-        _display, controlNull, [_keyX + _hintGap, FOOT_Y + FOOT_H * 0.25, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * 0.5],
+        _display, controlNull, [_keyX - _hintGap, FOOT_Y + FOOT_H * 0.25, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * 0.5],
         _theme getOrDefault ["line", [1, 1, 1, 0.14]]
     ] call FUNC(uiPanel);
 };

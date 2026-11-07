@@ -99,40 +99,8 @@ private _unit = GVAR(unit);
 private _targets = [];
 
 if (_side isEqualTo "own") then {
-    // The loot column's containers, in the order it shows them: the first with room takes what it can.
-    private _seen = [];
-
-    {
-        private _container = _x getOrDefault ["container", objNull];
-
-        if (
-            (_x getOrDefault ["side", ""]) isEqualTo "loot" && {!(_x getOrDefault ["virtual", true])} && {!(_x getOrDefault ["overflow", false])}
-            && {(_x getOrDefault ["window", ""]) isEqualTo ""} && {!isNull _container} && {!(_container in _seen)}
-            && {!([_container] call EFUNC(storage,isGroundHolder))}
-        ) then {
-            _seen pushBack _container;
-
-            if (([_container, "items"] call FUNC(checkTouch)) isEqualTo "") then {
-                _targets pushBack [_container, _x getOrDefault ["root", objNull]];
-            };
-        };
-    } forEach _grids;
-
-    // Nothing looted shown: seated the vehicle (fnc_sendMoves), on foot the unit's other containers, as a single
-    // quick move takes them (fnc_quickMove) - by where the first of them lies, none they come from. Dropping is G's.
-    if (_targets isEqualTo []) then {
-        if (!isNull objectParent _unit) exitWith {
-            _targets = [["ground", objNull]];
-        };
-
-        private _next = switch (_sources select 0) do {
-            case (backpackContainer _unit): {[vestContainer _unit, uniformContainer _unit]};
-            case (vestContainer _unit): {[backpackContainer _unit, uniformContainer _unit]};
-            default {[backpackContainer _unit, vestContainer _unit]};
-        };
-
-        _targets = (_next select {!isNull _x && {!(_x in _sources)}}) apply {[_x, _unit]};
-    };
+    // Out of the player's own gear with no container picked: onto the ground (fnc_quickMove), seated the vehicle (fnc_sendMoves).
+    _targets = [["ground", objNull]];
 } else {
     _targets = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit] select {!isNull _x} apply {[_x, _unit]};
 };
