@@ -65,6 +65,19 @@ def corner(which, size=64):
     return finish(im, size, size)
 
 
+def corner_mask(which, size=64):
+    """The outside of corner(): the tile filled but for the quarter circle - laid over a picture's corner in the colour round it,
+    it rounds the picture (the 3D weapon pictures, fnc_drawEquipmentCards)."""
+    im = canvas(size, size)
+    d = ImageDraw.Draw(im)
+    s = size * SS
+    cx = {"tl": s, "tr": 0, "bl": s, "br": 0}[which]
+    cy = {"tl": s, "tr": s, "bl": 0, "br": 0}[which]
+    d.rectangle([0, 0, s, s], fill=WHITE)
+    d.ellipse([cx - s, cy - s, cx + s, cy + s], fill=CLEAR)
+    return whiten(finish(im, size, size))
+
+
 # How thick the ring corners are, as a share of their size - fnc_uiRing draws its edges to match
 # (RING_SHARE in addons/gui/defines.hpp).
 RING = 0.2
@@ -1251,6 +1264,10 @@ def build_images():
         "corner_tr_ca": corner("tr"),
         "corner_bl_ca": corner("bl"),
         "corner_br_ca": corner("br"),
+        "mask_tl_ca": corner_mask("tl"),
+        "mask_tr_ca": corner_mask("tr"),
+        "mask_bl_ca": corner_mask("bl"),
+        "mask_br_ca": corner_mask("br"),
         "ring_tl_ca": ring_corner("tl"),
         "ring_tr_ca": ring_corner("tr"),
         "ring_bl_ca": ring_corner("bl"),

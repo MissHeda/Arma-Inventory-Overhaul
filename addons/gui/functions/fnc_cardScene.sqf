@@ -139,6 +139,7 @@ switch (_mode) do {
         if (
             count _scene > 0 && {_scene getOrDefault ["frozen", false]} && {(_scene get "fitted") isEqualTo _fitted}
             && {(_scene get "target3D") isEqualTo _target3D} && {(_scene getOrDefault ["shares", []]) isEqualTo _shares}
+            && {(_scene getOrDefault ["background", []]) isEqualTo _background}
         ) exitWith {true};
 
         // The same weapon still being filmed: kept - another target filmed into, other parts put on the holder.
@@ -154,6 +155,19 @@ switch (_mode) do {
             if ((_scene getOrDefault ["shares", []]) isNotEqualTo _shares) then {
                 _scene set ["shares", _shares];
                 [_scene] call _fnc_frame;
+            };
+
+            // Other colours picked: the sphere takes the card's new colour (Mia, 0.6.102).
+            if ((_scene getOrDefault ["background", []]) isNotEqualTo _background) then {
+                private _sphere = (_scene get "objects") param [0, objNull];
+
+                _background params [["_red", 0.05], ["_green", 0.055], ["_blue", 0.065]];
+
+                {
+                    _sphere setObjectTexture [_x, format ["#(argb,8,8,3)color(%1,%2,%3,1)", _red toFixed 3, _green toFixed 3, _blue toFixed 3]];
+                } forEach [0, 1];
+
+                _scene set ["background", _background];
             };
 
             if ((_scene get "fitted") isNotEqualTo _fitted) then {
@@ -178,7 +192,9 @@ switch (_mode) do {
         private _sceneBase = _place + [((getTerrainHeightASL _place) max 0) + 300];
         private _objects = [];
 
-        _scene = createHashMapFromArray [["class", _class], ["fitted", _fitted], ["target3D", _target3D], ["objects", _objects], ["shares", _shares]];
+        _scene = createHashMapFromArray [
+            ["class", _class], ["fitted", _fitted], ["target3D", _target3D], ["objects", _objects], ["shares", _shares], ["background", _background]
+        ];
         GVAR(cardScenes) set [_slot, _scene];
 
         // The sphere in the card's own colour, so the picture sits on the card as the flat one did.

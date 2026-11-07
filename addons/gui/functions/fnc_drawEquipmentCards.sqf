@@ -435,10 +435,17 @@ private _fnc_weaponCard = {
             private _filmAlpha = _film param [3, 0];
             private _background = [0, 1, 2] apply {((_panel param [_x, 0.05]) * (1 - _filmAlpha)) + ((_film param [_x, 1]) * _filmAlpha)};
 
-            // A dark neutral grey behind the weapon: on black the camera's exposure opened up and the weapon came out white; the theme's
-            // tinted grey came out bluish (both seen in game, 0.6.88).
-            _background = [CARD_3D_BACKDROP, CARD_3D_BACKDROP, CARD_3D_BACKDROP];
-            _real = ["show", [_slot, _weapon, _target, _background, [_viewPixelsW / _imagePixelsW, _viewPixelsH / _imagePixelsH]]] call FUNC(cardScene);
+            // Behind the weapon the card's own colour, so the picture follows the player's colours (Mia, 0.6.102). Never darker than
+            // CARD_3D_BACKDROP: on black the camera's exposure opened up and the weapon came out white (seen in game, 0.6.88).
+            _background = _background apply {_x max CARD_3D_BACKDROP};
+
+            // How far each slot's camera stands, the player's own (Layout: weapon picture size per slot): 100 % fits the weapon to
+            // the card, less shows it smaller. Given as the share of the picture the weapon takes, so a change frames it anew.
+            private _zoom = (((missionNamespace getVariable [format ["%1_%2", QGVAR(weapon3DZoom), _slot], 100]) / 100) max 0.3) min 2;
+
+            _real = ["show", [
+                _slot, _weapon, _target, _background, [_zoom * _viewPixelsW / _imagePixelsW, _zoom * _viewPixelsH / _imagePixelsH]
+            ]] call FUNC(cardScene);
 
             if (_real) then {
                 _scene3DSlots pushBack _slot;
@@ -451,6 +458,30 @@ private _fnc_weaponCard = {
 
                 _view ctrlSetText format ["#(argb,%1,%2,1)r2t(%3,%4)", _textureW, _textureH, _target, _aspect toFixed 4];
                 _view ctrlEnable false;
+
+                // The group only cuts the picture to the card: off, the mouse wheel no longer scrolls the picture inside it (Mia,
+                // 0.6.102) and goes on to the column.
+                _clip ctrlEnable false;
+
+                // Round corners as the card's: the outside of a quarter circle in the picture's backdrop colour over each corner.
+                private _maskRadius = (_radius min (_picH / 4)) * 0.8;
+
+                if (_maskRadius >= pixelH * 2) then {
+                    private _maskW = SQUARE(_maskRadius);
+                    private _maskColor = _background + [1];
+
+                    {
+                        _x params ["_texture", "_maskX", "_maskY"];
+
+                        private _mask = [_display, _parent, [_maskX, _maskY, _maskW, _maskRadius], _texture, _maskColor] call FUNC(uiIcon);
+                        _mask ctrlEnable false;
+                    } forEach [
+                        [UI_TEX(mask_tl_ca), _picX, _picY],
+                        [UI_TEX(mask_tr_ca), _picX + _picW - _maskW, _picY],
+                        [UI_TEX(mask_bl_ca), _picX, _picY + _picH - _maskRadius],
+                        [UI_TEX(mask_br_ca), _picX + _picW - _maskW, _picY + _picH - _maskRadius]
+                    ];
+                };
             };
         };
 

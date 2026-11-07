@@ -1242,6 +1242,21 @@ Off does it at once; a drag never waits.</English>
         <Key ID="STR_aio_gui_Setting_Weapon3D">
             <English>Real weapon pictures</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Desc">
+            <English>How large the real weapon picture is\non its card, in % of the card.\n\nLess: the weapon smaller, with more room\nround it. Only with "Real weapon\npictures" on.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Handgun">
+            <English>Weapon picture size: handgun</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Launcher">
+            <English>Weapon picture size: launcher</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Primary">
+            <English>Weapon picture size: primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Primary2">
+            <English>Weapon picture size: second primary</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_Weapon3D_Desc">
             <English>The weapon cards show each weapon as\nit really looks, with its attachments,\nfilmed in 3D.\n\nNeeds Picture-in-Picture. Off: the flat\npicture with white marks.</English>
         </Key>

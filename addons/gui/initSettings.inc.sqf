@@ -134,6 +134,54 @@
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;
 
+// How large the real weapon picture of the primary slot is, in % of the card (fnc_drawEquipmentCards): the MX came too close at 100 %
+// (Mia, 0.6.102), so the primary starts smaller. Read at every build.
+[
+    QGVAR(weapon3DZoom_primary),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DZoom_Primary), LLSTRING(Setting_Weapon3DZoom_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [50, 150, 80, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// How large the real weapon picture of the handgun slot is, in % of the card (fnc_drawEquipmentCards): the MX came too close at 100 %
+// (Mia, 0.6.102), so the primary starts smaller. Read at every build.
+[
+    QGVAR(weapon3DZoom_handgun),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DZoom_Handgun), LLSTRING(Setting_Weapon3DZoom_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [50, 150, 100, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// How large the real weapon picture of the launcher slot is, in % of the card (fnc_drawEquipmentCards): the MX came too close at 100 %
+// (Mia, 0.6.102), so the primary starts smaller. Read at every build.
+[
+    QGVAR(weapon3DZoom_launcher),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DZoom_Launcher), LLSTRING(Setting_Weapon3DZoom_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [50, 150, 100, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// How large the real weapon picture of the primary2 slot is, in % of the card (fnc_drawEquipmentCards): the MX came too close at 100 %
+// (Mia, 0.6.102), so the primary starts smaller. Read at every build.
+[
+    QGVAR(weapon3DZoom_primary2),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DZoom_Primary2), LLSTRING(Setting_Weapon3DZoom_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [50, 150, 100, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
 // Each player's own eyes: the crosshair on the caption line of the container quick moves go into (fnc_quickTarget, fnc_drawSection).
 // Picking one works the same with it off. Read at every build.
 [

@@ -342,8 +342,15 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{[] call FUNC(closeMenu)}] call F
 ] call FUNC(uiPanel);
 
 // A click on the card between its controls is no click beside it: this takes it, and does nothing (the catcher above closes the
-// popover only for a click beside the card).
-[_display, "AIO_Hitbox", _layer, [_cardX, _cardY, _width, _height]] call FUNC(uiCreate);
+// popover only for a click beside the card). It gives the focus straight back to the card's own focus button: focused, it was
+// drawn over the whole card and took every click after it (Mia, 0.6.102: "click beside the switch, nothing clicks any more").
+private _cardHit = [_display, "AIO_Hitbox", _layer, [_cardX, _cardY, _width, _height]] call FUNC(uiCreate);
+
+{
+    _cardHit ctrlAddEventHandler [_x, {
+        [{ctrlSetFocus ((uiNamespace getVariable [QGVAR(menuFocus), []]) param [1, controlNull])}] call FUNC(later);
+    }];
+} forEach ["ButtonClick", "MouseButtonUp", "SetFocus"];
 
 // What the small buttons are drawn with: neutral films, the light ink of the card.
 private _buttonTheme = createHashMapFromArray [

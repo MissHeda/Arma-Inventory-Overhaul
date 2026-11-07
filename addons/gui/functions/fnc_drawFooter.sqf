@@ -162,7 +162,7 @@ private _hintGap = SQUARE(_keyH * 0.65);
 private _hintX = _keyX;
 private _hintSize = _textUnit * 0.558;
 private _hintW = (_left + _width - _versionW - SQUARE(UNIT * 0.5)) - _hintX;
-private _hintCtrl = [_display, "AIO_FooterHint", controlNull, [_hintX, FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
+private _hintCtrl = [_display, "AIO_FooterHint", controlNull, [_hintX, FOOT_Y + (FOOT_H - _hintSize) / 2 + _hintSize * HINT_DROP, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
 
 // Too narrow for words: the line is hidden rather than wrapped over the key hints.
 if (_hintW < SQUARE(UNIT * 6)) then {
@@ -176,7 +176,7 @@ if (_hintW < SQUARE(UNIT * 6)) then {
 };
 
 // One place for every line, short or long (fnc_fitHint puts it back after each write).
-private _hintY = FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH;
+private _hintY = FOOT_Y + (FOOT_H - _hintSize) / 2 + _hintSize * HINT_DROP;
 
 _hintCtrl setVariable [QGVAR(hintCentred), [_hintX, _hintY, _hintW max pixelW, _hintSize * 1.4]];
 _hintCtrl setVariable [QGVAR(hintWide), [_hintX, _hintY, _hintW max pixelW, _hintSize * 1.4]];

@@ -83,19 +83,40 @@ if (_details isNotEqualTo []) then {
 // catches the eye (Mia, 0.6.97). What only tells how a move went (some moved, some went back, copied, waiting) stays as it was.
 private _failed = !(_reason in ["Copied", "Waiting", "MovedSome", "Returned", "Grounded", "PlacedElsewhere", "Skipped"]);
 private _color = [GVAR(theme) getOrDefault ["loss", [0.941, 0.333, 0.353, 1]], [1, 0.22, 0.22, 1]] select _failed;
-private _hex = "#" + ((_color select [0, 3]) apply {
-    private _value = round ((_x max 0 min 1) * 255);
-    ("0123456789ABCDEF" select [floor (_value / 16), 1]) + ("0123456789ABCDEF" select [_value mod 16, 1])
-} joinString "");
 
-_hint ctrlSetStructuredText (text _text setAttributes (
-    ["color", _hex, "size", str (_hint getVariable [QGVAR(textScale), 1])] + ([[], ["font", GVAR(theme) getOrDefault ["fontBold", "PuristaSemibold"]]] select _failed)
-));
+// Written as tags: colour, size and font given with setAttributes did not take - the failure came out white (Mia, 0.6.102).
+private _escaped = ((toArray _text) apply {
+    switch (_x) do {
+        case 38: {"&amp;"};
+        case 60: {"&lt;"};
+        case 62: {"&gt;"};
+        default {toString [_x]};
+    };
+}) joinString "";
+
+private _fnc_write = {
+    params ["_hint", "_escaped", "_color", "_font"];
+
+    private _hex = (_color select [0, 3]) apply {
+        private _value = round ((_x max 0 min 1) * 255);
+        ("0123456789ABCDEF" select [floor (_value / 16), 1]) + ("0123456789ABCDEF" select [_value mod 16, 1])
+    };
+
+    _hint ctrlSetStructuredText parseText format [
+        "<t color='#%1' size='%2'%3>%4</t>", _hex joinString "", _hint getVariable [QGVAR(textScale), 1],
+        [format [" font='%1'", _font], ""] select (_font isEqualTo ""), _escaped
+    ];
+};
+
+private _font = ["", GVAR(theme) getOrDefault ["fontBold", "PuristaSemibold"]] select _failed;
+
+[_hint, _escaped, _color, _font] call _fnc_write;
 [_hint] call FUNC(fitHint);
 
 if (!_failed) exitWith {};
 
-// The shake: left and right a few times, smaller each time, about a third of a second, then back where fnc_fitHint put it. A new
+// The shake: left and right a few times, smaller each time, about a third of a second, then back where fnc_fitHint put it. While it
+// shakes the words light up - nearly white, then down into the red - and a red glow behind them fades (Mia, 0.6.102). A new
 // failure while one shakes starts it again from there.
 private _old = missionNamespace getVariable [QGVAR(hintShake), -1];
 
@@ -107,7 +128,7 @@ private _home = ctrlPosition _hint;
 
 private _shake = [{
     params ["_args", "_handle"];
-    _args params ["_hint", "_home", "_start"];
+    _args params ["_hint", "_home", "_start", "_escaped", "_color", "_font", "_fnc_write"];
 
     private _time = diag_tickTime - _start;
 
@@ -118,6 +139,8 @@ private _shake = [{
         if (!isNull _hint) then {
             _hint ctrlSetPosition _home;
             _hint ctrlCommit 0;
+            _hint ctrlSetBackgroundColor [0, 0, 0, 0];
+            [_hint, _escaped, _color, _font] call _fnc_write;
         };
     };
 
@@ -127,6 +150,11 @@ private _shake = [{
     _pos set [0, (_home select 0) + _offset];
     _hint ctrlSetPosition _pos;
     _hint ctrlCommit 0;
-}, 0, [_hint, _home, diag_tickTime]] call CBA_fnc_addPerFrameHandler;
+
+    private _light = 1 - _time / HINT_SHAKE_TIME;
+
+    _hint ctrlSetBackgroundColor [1, 0.15, 0.15, HINT_GLOW_ALPHA * _light];
+    [_hint, _escaped, [0, 1, 2] apply {(_color select _x) + (1 - (_color select _x)) * 0.75 * _light}, _font] call _fnc_write;
+}, 0, [_hint, _home, diag_tickTime, _escaped, _color, _font, _fnc_write]] call CBA_fnc_addPerFrameHandler;
 
 missionNamespace setVariable [QGVAR(hintShake), _shake];

@@ -2,6 +2,28 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.103 - beta
+
+### Added
+
+- Real weapon pictures: a size per slot (primary, handgun, launcher, second primary) in the Layout tab and the CBA settings,
+  50-150 % in steps of 5. The primary starts at 80 %, since the MX came too close at full size.
+
+### Changed
+
+- Real weapon pictures have round corners like their card, and the colour behind the weapon follows the card's colour when
+  you change your colours.
+- When something fails the footer line now lights up: the words flash nearly white and settle in red, with a red glow behind
+  them that fades as it shakes.
+- The footer's hint line sits on the same line as the key hints' words.
+
+### Fixed
+
+- A failed action's line came out white instead of red.
+- A click on an empty spot of the Colours or Layout card, beside a switch or a button, left the card unclickable until it
+  was opened again.
+- The mouse wheel scrolled a real weapon picture inside its card.
+
 ## 0.6.102 - beta
 
 ### Changed
