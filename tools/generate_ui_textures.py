@@ -373,6 +373,24 @@ def _mouse(d, s, w, part):
         line(d, [(s * 0.5, s * 0.16), (s * 0.5, s * 0.34)], w * 1.8)
 
 
+def icon_mouse_double(d, s, w):
+    # A double click: the mouse with its left button lit, a little to the right, and two short waves off the button's corner -
+    # one picture for the hint line where a double click does something of its own (aio_gui_fnc_mouseIcon "double").
+    shift = s * 0.1
+    left, right, top, bottom, r = s * 0.4, s * 0.82, s * 0.22, s * 0.94, s * 0.21
+    body = (arc_points(left + r, top + r, r, 180, 270, 16) + arc_points(right - r, top + r, r, 270, 360, 16)
+            + arc_points(right - r, bottom - r, r, 0, 90, 16) + arc_points(left + r, bottom - r, r, 90, 180, 16))
+    line(d, body + [body[0]], w)
+    split = s * 0.5
+    mid = s * 0.61
+    line(d, [(left, split), (right, split)], w)
+    line(d, [(mid, top), (mid, split)], w)
+    d.polygon(arc_points(left + r, top + r, r, 180, 270, 16) + [(mid, top), (mid, split), (left, split)], fill=WHITE)
+    for k in (1, 2):
+        rr = r + s * 0.075 * k
+        line(d, arc_points(left + r, top + r, rr, 195, 255, 12), w * 0.8)
+
+
 def icon_mouse_left(d, s, w):
     _mouse(d, s, w, "left")
 
@@ -1264,6 +1282,7 @@ def build_images():
         "icon_mouse_left_ca": stroke_icon(icon_mouse_left, width=8),
         "icon_mouse_right_ca": stroke_icon(icon_mouse_right, width=8),
         "icon_mouse_scroll_ca": stroke_icon(icon_mouse_scroll, width=8),
+        "icon_mouse_double_ca": stroke_icon(icon_mouse_double, width=8),
         "icon_hotbar_ca": stroke_icon(icon_hotbar, width=8),
         "icon_layer_up_ca": stroke_icon(icon_layer_up, width=8),
         "icon_layer_down_ca": stroke_icon(icon_layer_down, width=8),

@@ -637,9 +637,10 @@ private _fnc_add = {
         _parts pushBack "    ";
     };
 
-    // Pictures before the words, in the words' colour: two left mouse buttons for a double click (fnc_mouseIcon).
+    // Pictures before the words, white as they are drawn - not in the words' colour (Mia, 0.6.76): the double click's mouse
+    // (fnc_mouseIcon).
     {
-        _parts pushBack (image _x setAttributes ["color", [_theme getOrDefault [_key, [1, 1, 1, 1]]] call _fnc_hex]);
+        _parts pushBack (image _x setAttributes ["color", "#FFFFFF"]);
     } forEach _pictures;
 
     if (_pictures isNotEqualTo []) then {
@@ -845,16 +846,21 @@ switch (_shown param [0, ""]) do {
         if ([] call FUNC(isInventoryMode)) then {
             private _doubleLabel = [_class] call FUNC(doubleClickLabel);
 
-            private _mouse = ["left"] call FUNC(mouseIcon);
+            // Without one of its own the player's setting decides: a double click set to open the menu says so as well.
+            if (_doubleLabel isEqualTo "" && {GVAR(doubleClick) isEqualTo "menu"}) then {
+                _doubleLabel = LLSTRING(Hint_DoubleClickMenu);
+            };
+
+            private _mouse = ["double"] call FUNC(mouseIcon);
 
             if (_doubleLabel isNotEqualTo "") exitWith {
-                [_doubleLabel, "accent", [_mouse, _mouse]] call _fnc_add;
+                [_doubleLabel, "accent", [_mouse]] call _fnc_add;
             };
 
             ([[_hoverGrid getOrDefault ["container", objNull]]] call FUNC(quickTarget)) params [["_picked", objNull]];
 
             if (!isNull _picked) then {
-                [format [LLSTRING(Hint_QuickTargetInto), [_picked] call FUNC(containerName)], "accent", [_mouse, _mouse]] call _fnc_add;
+                [format [LLSTRING(Hint_QuickTargetInto), [_picked] call FUNC(containerName)], "accent", [_mouse]] call _fnc_add;
             };
         };
 
@@ -923,6 +929,15 @@ switch (_shown param [0, ""]) do {
             if (_names isNotEqualTo "") then {
                 [_names, "text2"] call _fnc_add;
             };
+        };
+
+        // What a double click on it does where it is no quick move (Mia, 0.6.76: always shown): one of the player's own weapons opens
+        // its attachments (fnc_onMouseButton, fnc_inspect).
+        if (
+            [] call FUNC(isInventoryMode) && {_class isNotEqualTo ""} && {(_record param [6, objNull]) isEqualTo GVAR(unit)}
+            && {(_record param [5, ""]) in ["primary", "handgun", "launcher", "primary2"]}
+        ) then {
+            [LLSTRING(Menu_Modify), "accent", [["double"] call FUNC(mouseIcon)]] call _fnc_add;
         };
 
         // A radio's channel, frequency, alternate channel and state - a long-range one on the back by the

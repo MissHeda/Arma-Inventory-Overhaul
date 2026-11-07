@@ -64,6 +64,7 @@ PREP(passWheel);
 PREP(unscroll);
 PREP(quickMove);
 PREP(quickTarget);
+PREP(pickTarget);
 PREP(mouseIcon);
 PREP(dropToGround);
 PREP(applyMove);

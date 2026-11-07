@@ -868,6 +868,9 @@
         <Key ID="STR_aio_gui_QuickMove">
             <English>Quick move</English>
         </Key>
+        <Key ID="STR_aio_gui_QuickTarget_Pick">
+            <English>Click: quick moves go here (again: stop)</English>
+        </Key>
         <Key ID="STR_aio_gui_QuickTarget_Tip">
             <English>Quick moves go here. Click a free cell of it again to stop.</English>
         </Key>
@@ -1069,7 +1072,7 @@ Options of other mods (CBA) by their id.</English>
             <English>Mark the quick move target</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_QuickTargetIcon_Desc">
-            <English>A click on a free cell of a container\nmakes it the target of double clicks\nand the quick move key.\n\nThis shows a crosshair on its caption\nline while it is.</English>
+            <English>A click on a container's picture or a\nfree cell of it makes it the target of\ndouble clicks and the quick move key.\n\nThis outlines its picture while it is.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_SearchBodies">
             <English>Search bodies</English>

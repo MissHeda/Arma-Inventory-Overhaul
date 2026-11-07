@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.77 - beta
+
+### Changed
+
+- Quick move target: the container's picture beside its grid gets a soft accent outline and a small crosshair, instead of a
+  crosshair on the caption line. A click on the picture picks it (again: stops) - for a crate, the ground, and your uniform,
+  vest and backpack, also on the doll.
+- The hint line shows one double click picture, white, instead of two tinted mouse buttons.
+- The hint line always says what a double click does when it is not a quick move: your own weapon's "Modify", an item's own
+  action, or the menu where the setting opens it.
+
 ## 0.6.76 - beta
 
 ### Changed

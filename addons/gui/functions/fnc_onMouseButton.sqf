@@ -507,10 +507,7 @@ if (GVAR(emptyPress) isNotEqualTo []) exitWith {
     ) then {
         call FUNC(clearSelection);
 
-        if (!isNull _pressContainer) then {
-            GVAR(quickTarget) = [_pressContainer, objNull] select (GVAR(quickTarget) isEqualTo _pressContainer);
-            [] call FUNC(requestRebuild);
-        };
+        [_pressContainer] call FUNC(pickTarget);
     };
 
     true
@@ -624,6 +621,20 @@ if (_double) exitWith {
 };
 
 switch (true) do {
+    // A plain click on a uniform, vest or backpack slot - the doll's, or the box beside its grid - picks that container as the quick
+    // moves' target, or lets it go (fnc_pickTarget).
+    case (_slotSource isNotEqualTo [] && {!_ctrl} && {!_ctrlAtPress} && {!_shift} && {!_alt} && {call FUNC(isInventoryMode)}): {
+        _slotSource params [["_slotOwner", objNull], ["_slotName", ""]];
+
+        private _picked = switch (_slotName) do {
+            case "uniform": {uniformContainer _slotOwner};
+            case "vest": {vestContainer _slotOwner};
+            case "backpack": {backpackContainer _slotOwner};
+            default {objNull};
+        };
+
+        [_picked] call FUNC(pickTarget);
+    };
     case (_ctrl || {_ctrlAtPress}): {
         if (_slotSource isNotEqualTo []) then {
             _slotSource call FUNC(quickUnequip);

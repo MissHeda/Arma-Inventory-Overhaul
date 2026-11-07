@@ -7,7 +7,7 @@
  * ACE shows a picture as well, not words.
  *
  * Arguments:
- * 0: "left", "right" or "scroll" <STRING>
+ * 0: "left", "right", "scroll" or "double" - a double click, always this mod's own picture: ACE has none <STRING>
  *
  * Return Value:
  * The picture's path <STRING>
@@ -19,6 +19,8 @@
  */
 
 params [["_button", "left", [""]]];
+
+if (_button isEqualTo "double") exitWith {UI_TEX(icon_mouse_double_ca)};
 
 private _ace = [MOUSE_ICON_PATH + format ["\mouse_%1_ca.paa", _button]] call FUNC(safePicture);
 

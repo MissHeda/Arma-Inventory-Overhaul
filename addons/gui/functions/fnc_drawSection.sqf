@@ -341,13 +341,11 @@ private _tabIconW = [0, SQUARE(_buttonH * 0.95)] select (_tabIcon isNotEqualTo "
 private _lockTip = _section getOrDefault ["lockTip", ""];
 private _lockIconW = [0, SQUARE(_lineH)] select (_lockTip isNotEqualTo "");
 
-// The container quick moves go into (fnc_quickTarget): a crosshair left of the padlock, unless the player switched it off.
+// The container quick moves go into (fnc_quickTarget): its picture beside the grid glows (below), unless the player switched it off.
 private _targeted = !isNull _sectionContainer && {_sectionContainer isEqualTo GVAR(quickTarget)}
     && {missionNamespace getVariable [QGVAR(quickTargetIcon), true]} && {call FUNC(isInventoryMode)};
-private _targetIconW = [0, SQUARE(_lineH)] select _targeted;
 
-// Both pictures of the line's right end, the padlock and the crosshair, are kept clear of the tab and the buttons together.
-private _lockW = _lockIconW + _targetIconW;
+private _lockW = _lockIconW;
 
 // ---------------------------------------------------------------------------
 // The button beside the tab: Sort, for a container the player may change - on every grid of its own, so also on an empty one.
@@ -575,29 +573,7 @@ if (_lockTip isNotEqualTo "") then {
     [_lockHit, _lockTip] call FUNC(setTooltip);
 };
 
-// The crosshair of the quick moves' target, left of the padlock, in the accent colour, in a box with a rounded accent outline as the
-// attachment points of the inspect card have (fnc_drawHotspots).
-if (_targeted) then {
-    private _iconH = _lineH * 0.6;
-    private _targetX = _blockX + _blockW - _closeW - _loadW - _lockW;
-    private _boxH = _lineH * 0.82;
-    private _boxRect = [_targetX + (_targetIconW - SQUARE(_boxH)) / 2, _top + (_lineH - _boxH) / 2, SQUARE(_boxH), _boxH];
-    private _boxRadius = [0, _boxH * 0.2] select ((_theme getOrDefault ["radius", 0]) > 0);
-    private _accentRgb = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
 
-    [_display, _parent, _boxRect, [0.1, 0.1, 0.11, 0.85], _boxRadius] call FUNC(uiPanel);
-    [_display, _parent, _boxRect, _accentRgb + [0.9], _boxRadius] call FUNC(uiRing);
-
-    _iconH = _boxH * 0.68;
-
-    [
-        _display, _parent, [_targetX + (_targetIconW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
-        UI_TEX(icon_target_ca), _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]
-    ] call FUNC(uiIcon);
-
-    private _targetHit = [_display, "AIO_Hitbox", _parent, [_targetX, _top, _targetIconW, _lineH]] call FUNC(uiCreate);
-    [_targetHit, LLSTRING(QuickTarget_Tip)] call FUNC(setTooltip);
-};
 
 // The hint over the caption line says what the contents weigh (fnc_infoHint).
 if (!isNull _sectionContainer && {!_placeholder} && {!_sealed}) then {
@@ -704,6 +680,20 @@ private _gridX = _blockX + ([0, _boxW + _gapX] select _hasBox) + _stripExtra;
 // ---------------------------------------------------------------------------
 // The box
 // ---------------------------------------------------------------------------
+// The picture of the container the player picked for quick moves (fnc_quickTarget): a soft outline in the accent colour, half lit
+// - the attachment points' box (fnc_drawHotspots), quieter - and a small crosshair in its corner (Mia, after 0.6.76).
+private _fnc_targetGlow = {
+    params ["_display", "_parent", "_rect", "_theme", "_height"];
+    _rect params ["_x0", "_y0", "_w0", "_h0"];
+
+    private _accentRgb = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
+    private _radius = (_theme getOrDefault ["radius", 0]) min (_height / 4);
+    private _iconH = (_h0 * 0.16) max (UNIT * 0.4);
+
+    [_display, _parent, _rect, _accentRgb + [0.5], _radius] call FUNC(uiRing);
+    [_display, _parent, [_x0 + _w0 - SQUARE(_iconH) - SQUARE(_iconH * 0.3), _y0 + _iconH * 0.3, SQUARE(_iconH), _iconH], UI_TEX(icon_target_ca), _accentRgb + [0.6]] call FUNC(uiIcon);
+};
+
 if (_hasBox) then {
     private _boxRect = [_blockX, _bodyTop, _boxW, _boxH];
     private _class = _section getOrDefault ["class", ""];
@@ -746,6 +736,24 @@ if (_hasBox) then {
         // The picture of the rules or the editor's (fnc_uiBoxPicture), else the icon of what the box is.
         if (([_display, _parent, _boxRect, _theme, _own, _preview, _boxIcon, _boxRadius] call FUNC(uiBoxPicture)) isEqualTo []) then {
             [_display, _parent, [_blockX + _boxW * 0.25, _bodyTop + _boxH * 0.25, _boxW * 0.5, _boxH * 0.5], _icon, _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]]] call FUNC(uiIcon);
+        };
+
+        // Over the picture: the outline of the quick moves' target.
+        if (_targeted) then {
+            [_display, _parent, _boxRect, _theme, _boxH] call _fnc_targetGlow;
+        };
+
+        // A click on it picks the container as the quick moves' target, or lets it go (fnc_pickTarget).
+        if (!isNull _sectionContainer && {call FUNC(isInventoryMode)}) then {
+            private _pickHit = [_display, "AIO_Hitbox", _parent, _boxRect] call FUNC(uiCreate);
+
+            _pickHit setVariable [QGVAR(pick), _sectionContainer];
+            _pickHit ctrlAddEventHandler ["ButtonClick", {
+                params ["_control"];
+
+                [{_this call FUNC(pickTarget)}, [_control getVariable [QGVAR(pick), objNull]]] call FUNC(later);
+            }];
+            [_pickHit, LLSTRING(QuickTarget_Pick)] call FUNC(setTooltip);
         };
     };
 
@@ -790,6 +798,11 @@ if (_hasBox) then {
     };
 
     [_display, _parent, _boxRect, _class, _boxOptions, _boxTheme] call FUNC(drawSlot);
+
+    // A uniform, vest or backpack picked as the quick moves' target glows as well (below the crate's, in the same way).
+    if (_targeted) then {
+        [_display, _parent, _boxRect, _theme, _boxH] call _fnc_targetGlow;
+    };
 
     if (_class isEqualTo "") exitWith {};
 
