@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.84 - beta
+
+### Changed
+
+- A double click (or the quick move key) that drops out of your own gear drops at once, as a drag does - it no longer waits for
+  the hands like the drop key may.
+
 ## 0.6.83 - beta
 
 ### Changed

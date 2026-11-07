@@ -112,6 +112,11 @@ if (_picked isNotEqualTo []) then {
     _targets = [_picked];
 };
 
+// Onto the ground at once, as a single quick move drops (fnc_quickMove): not into the hands' queue.
+if (_targets isEqualTo [["ground", objNull]]) then {
+    GVAR(instantFrame) = diag_frameNo;
+};
+
 ([_items, _targets] call EFUNC(storage,plan)) params ["_assigned"];
 
 [_assigned, count _items] call FUNC(sendPlan)

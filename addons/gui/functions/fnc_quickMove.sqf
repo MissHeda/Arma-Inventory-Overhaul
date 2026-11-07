@@ -122,6 +122,10 @@ if !(_from in _own) exitWith {
 // unit; on foot the pile at the feet (fnc_dropToGround) - or what a window that attached does with it (the "ground" hook).
 if ((["ground", [[_gridIndex, _tileIndex], -1], false] call FUNC(hook)) isEqualTo true) exitWith {true};
 
+// At once, as a drag drops it: never into the hands' queue, whatever the drop key's waiting is set to (Mia, 0.6.83: "always drops,
+// whatever G does" - fnc_queueTime asks this frame number).
+GVAR(instantFrame) = diag_frameNo;
+
 if (!isNull objectParent _unit) exitWith {
     [_from, "ground", _tile, -1, []] call FUNC(applyMove)
 };
