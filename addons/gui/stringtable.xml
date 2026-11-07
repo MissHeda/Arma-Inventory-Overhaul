@@ -115,9 +115,6 @@
         <Key ID="STR_aio_gui_Filter_Tooltip">
             <English>Fades everything whose name does not match. Escape empties it.</English>
         </Key>
-        <Key ID="STR_aio_gui_Font_Etelka">
-            <English>Etelka</English>
-        </Key>
         <Key ID="STR_aio_gui_Font_Lucida">
             <English>Lucida Console</English>
         </Key>
@@ -988,6 +985,9 @@
         <Key ID="STR_aio_gui_Setting_Font_Desc">
             <English>The font of the window's words.\n\nPurista is Arma's and ACE's own.</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_GroupClicks">
+            <English>Left click: more. Right click: less.</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_HandDrop">
             <English>Time to drop an item</English>
         </Key>
@@ -1269,6 +1269,9 @@ Off does it at once; a drag never waits.</English>
         <Key ID="STR_aio_gui_Setting_Weapon3D">
             <English>Real weapon pictures</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DGroup_Desc">
+            <English>The real weapon picture of this slot: its size, and where it lies on the card.</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Desc">
             <English>Moves the real weapon picture on its card,\nin % of the weapon's length.\n\nMore: to the right. 0: centred.</English>
         </Key>
@@ -1316,6 +1319,18 @@ Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_Weapon3D_Desc">
             <English>The weapon cards show each weapon as\nit really looks, with its attachments,\nfilmed in 3D.\n\nNeeds Picture-in-Picture. Off: the flat\npicture with white marks.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D_Handgun">
+            <English>Weapon picture: handgun</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D_Launcher">
+            <English>Weapon picture: launcher</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D_Primary">
+            <English>Weapon picture: primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D_Primary2">
+            <English>Weapon picture: second primary</English>
         </Key>
         <Key ID="STR_aio_gui_SettingsMenu_Behaviour">
             <English>How it behaves</English>
@@ -1667,6 +1682,9 @@ Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_aio_gui_Title">
             <English>Inventory</English>
+        </Key>
+        <Key ID="STR_aio_gui_Weapon3D_Size">
+            <English>Size</English>
         </Key>
         <Key ID="STR_aio_gui_WeaponCard_Fold">
             <English>Fold away</English>

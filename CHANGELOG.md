@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.109 - beta
+
+### Changed
+
+- Layout tab: a weapon picture's size and place are one row per slot with three values (Size, X, Y; left click more, right
+  click less), and these rows only show while "Real weapon pictures" is on - the card fits the screen again.
+- The font list in the Colours tab shows the names in the card's own font; Etelka is gone (it came out garbled).
+
 ## 0.6.108 - beta
 
 ### Added

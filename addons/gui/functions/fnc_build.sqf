@@ -250,7 +250,6 @@ private _fontPair = (createHashMapFromArray [
     ["puristaLight", ["PuristaLight", "PuristaMedium"]],
     ["roboto", ["RobotoCondensed", "RobotoCondensedBold"]],
     ["robotoLight", ["RobotoCondensedLight", "RobotoCondensed"]],
-    ["etelka", ["EtelkaNarrowMediumPro", "EtelkaNarrowMediumPro"]],
     ["tahoma", ["TahomaB", "TahomaB"]],
     ["lucida", ["LucidaConsoleB", "LucidaConsoleB"]]
 ]) getOrDefault [missionNamespace getVariable [QGVAR(font), "purista"], []];

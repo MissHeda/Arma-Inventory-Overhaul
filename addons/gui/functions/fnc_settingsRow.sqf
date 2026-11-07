@@ -18,9 +18,19 @@
  * Public: No
  */
 
-params ["_index", ["_button", 0]];
+params ["_index", ["_button", 0], ["_part", -1]];
 
 (call FUNC(settingsDefs)) param [_index, []] params [["_setting", ""], "", "", ["_kind", ""], "_default", ["_data", []]];
+
+// One value of a row of several (fnc_openSizeMenu "group"): a step of its own.
+if (_kind isEqualTo "group") then {
+    (_data param [_part, []]) params [["_partSetting", ""], "", ["_least", 0], ["_most", 0], ["_step", 1], "", ["_partDefault", 0]];
+
+    _setting = _partSetting;
+    _kind = "step";
+    _default = _partDefault;
+    _data = [_least, _most, _step];
+};
 
 if (_setting isEqualTo "" || {[_setting] call FUNC(settingForced)}) exitWith {};
 

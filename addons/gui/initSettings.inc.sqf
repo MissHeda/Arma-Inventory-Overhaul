@@ -284,7 +284,7 @@
     "LIST",
     [LLSTRING(Setting_Font), LLSTRING(Setting_Font_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    [["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"], [LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight), LLSTRING(Font_Etelka), LLSTRING(Font_Tahoma), LLSTRING(Font_Lucida)], 0],
+    [["purista", "puristaLight", "roboto", "robotoLight", "tahoma", "lucida"], [LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight), LLSTRING(Font_Tahoma), LLSTRING(Font_Lucida)], 0],
     0,
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;

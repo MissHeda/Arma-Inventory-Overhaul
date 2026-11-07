@@ -215,7 +215,7 @@ private _height = _padY * 2 + _titleH + (_gapY + _headH) + (count _rowDefs) * (_
 
 // The Font row under the Style row, and its list while it is open.
 private _fontsOpen = uiNamespace getVariable [QGVAR(paletteFontsOpen), false];
-private _fontIds = ["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"];
+private _fontIds = ["purista", "puristaLight", "roboto", "robotoLight", "tahoma", "lucida"];
 
 _height = _height + _gapY + _headH;
 
@@ -777,7 +777,7 @@ _y = _y + _gapY;
 ] call FUNC(uiLabel);
 
 private _fontNames = [
-    LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight), LLSTRING(Font_Etelka),
+    LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight),
     LLSTRING(Font_Tahoma), LLSTRING(Font_Lucida)
 ];
 private _fontAt = (_fontIds find (missionNamespace getVariable [QGVAR(font), "purista"])) max 0;
@@ -818,12 +818,9 @@ if (_fontsOpen) then {
     {
         private _current = _forEachIndex == _fontAt;
         private _textX = _cardX + _padX;
-        private _fontPair = [
-            "PuristaMedium", "PuristaLight", "RobotoCondensed", "RobotoCondensedLight", "EtelkaNarrowMediumPro", "TahomaB", "LucidaConsoleB"
-        ] select _forEachIndex;
 
-        // Each name in its own font, so the list shows what it picks.
-        [_display, _layer, [_textX, _y, _cardX + _width - _padX - _textX, _rowH], _x, _small, [_text2, _text] select _current, _fontPair, 0, "menu"] call FUNC(uiLabel);
+        // In the card's own font: each in its own came out cut or garbled for some (Mia, 0.6.108).
+        [_display, _layer, [_textX, _y, _cardX + _width - _padX - _textX, _rowH], _x, _small, [_text2, _text] select _current, _font, 0, "menu"] call FUNC(uiLabel);
 
         if (_current) then {
             [

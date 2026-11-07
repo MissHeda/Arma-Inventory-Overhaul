@@ -361,6 +361,45 @@ private _extraNameW = SQUARE(_cu * 13);
     private _valueX = _cardX + _padX + _extraNameW + _gapX;
     private _valueRoom = _listW - _padX * 2 - _extraNameW - _gapX;
 
+    // Several values on one line, each a chip of its own: a left click raises it, a right click lowers it.
+    if (_kind isEqualTo "group") then {
+        private _chipGap = SQUARE(_cu * 0.25);
+        private _partW = (_valueRoom - _chipGap * ((count _data) - 1)) / ((count _data) max 1);
+        private _rowIndex = _forEachIndex;
+
+        {
+            _x params ["_partSetting", "_partName", "", "", "", ["_unit", ""], ["_partDefault", 0], ["_partTip", ""]];
+
+            private _partX = _valueX + _forEachIndex * (_partW + _chipGap);
+            private _partRect = [_partX, _rowTop + _extraRowH * 0.15, _partW, _extraRowH * 0.7];
+            private _partValue = missionNamespace getVariable [_partSetting, _partDefault];
+
+            [_display, _layer, _partRect, [1, 1, 1, 0.06], _extraRowH * 0.15] call FUNC(uiPanel);
+            [
+                _display, _layer, _partRect, format ["%1  %2 %3", _partName, _partValue, _unit], _size * 0.78, [_text2, _muted] select _forced, _font, 2, "menu"
+            ] call FUNC(uiLabel);
+
+            private _partHit = [_display, "AIO_Hitbox", _layer, _partRect] call FUNC(uiCreate);
+
+            [_partHit, (_partTip regexReplace ["\\n+", " "]) + " " + LLSTRING(Setting_GroupClicks)] call FUNC(setTooltip);
+
+            if (!_forced) then {
+                _partHit setVariable [QGVAR(settingsRow), [_rowIndex, _forEachIndex]];
+                _partHit ctrlAddEventHandler ["MouseButtonDown", {
+                    params ["_ctrl", "_button"];
+
+                    if !(_button in [0, 1]) exitWith {};
+
+                    (_ctrl getVariable [QGVAR(settingsRow), [-1, -1]]) params ["_row", "_part"];
+
+                    [{_this call FUNC(settingsRow)}, [_row, _button, _part]] call FUNC(later);
+                }];
+            };
+        } forEach _data;
+
+        continue;
+    };
+
     if (_kind isEqualTo "check") then {
         private _boxX = _cardX + _listW - _padX - _boxW;
         private _boxY = _rowTop + (_extraRowH - _boxH) / 2;

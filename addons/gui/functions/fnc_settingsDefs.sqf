@@ -9,7 +9,8 @@
  *
  * Return Value:
  * The rows, in their order <ARRAY>: a caption [""," name"], or
- *   [setting, name, tip, kind, default, data] - kind "check" (no data), "list" (data [values, names]) or "step" (data [least, most, step, unit])
+ *   [setting, name, tip, kind, default, data] - kind "check" (no data), "list" (data [values, names]), "step" (data [least, most, step, unit])
+ *   or "group": several steps on one line, each pressed on its own (data [[setting, short name, least, most, step, unit, default, tip], ...])
  *
  * Example:
  * private _rows = call aio_gui_fnc_settingsDefs;
@@ -19,7 +20,7 @@
 
 private _rows = [
     ["", LLSTRING(SettingsMenu_Shown)],
-    [QGVAR(font), LLSTRING(Setting_Font), LLSTRING(Setting_Font_Desc), "list", "purista", [["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"], [LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight), LLSTRING(Font_Etelka), LLSTRING(Font_Tahoma), LLSTRING(Font_Lucida)]]],
+    [QGVAR(font), LLSTRING(Setting_Font), LLSTRING(Setting_Font_Desc), "list", "purista", [["purista", "puristaLight", "roboto", "robotoLight", "tahoma", "lucida"], [LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight), LLSTRING(Font_Tahoma), LLSTRING(Font_Lucida)]]],
     [QGVAR(showWeight), LLSTRING(Setting_ShowWeight), LLSTRING(Setting_ShowWeight_Desc), "check", true],
     [QGVAR(showGear), LLSTRING(Setting_ShowGear), LLSTRING(Setting_ShowGear_Desc), "check", true],
     [QGVAR(showSmallSlots), LLSTRING(Setting_ShowSmallSlots), LLSTRING(Setting_ShowSmallSlots_Desc), "check", true],
@@ -41,18 +42,34 @@ private _rows = [
     ["", LLSTRING(SettingsMenu_Tiles)],
     [QGVAR(tileNames), LLSTRING(Setting_TileNames), LLSTRING(Setting_TileNames_Desc), "check", false],
     [QGVAR(weapon3D), LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc), "check", false],
-    [QGVAR(weapon3DZoom_primary), LLSTRING(Setting_Weapon3DZoom_Primary), LLSTRING(Setting_Weapon3DZoom_Desc), "step", 80, [50, 150, 5, "%"]],
-    [QGVAR(weapon3DZoom_handgun), LLSTRING(Setting_Weapon3DZoom_Handgun), LLSTRING(Setting_Weapon3DZoom_Desc), "step", 100, [50, 150, 5, "%"]],
-    [QGVAR(weapon3DZoom_launcher), LLSTRING(Setting_Weapon3DZoom_Launcher), LLSTRING(Setting_Weapon3DZoom_Desc), "step", 100, [50, 150, 5, "%"]],
-    [QGVAR(weapon3DZoom_primary2), LLSTRING(Setting_Weapon3DZoom_Primary2), LLSTRING(Setting_Weapon3DZoom_Desc), "step", 100, [50, 150, 5, "%"]],
-    [QGVAR(weapon3DOffsetX_primary), LLSTRING(Setting_Weapon3DOffsetX_Primary), LLSTRING(Setting_Weapon3DOffsetX_Desc), "step", 0, [-50, 50, 5, "%"]],
-    [QGVAR(weapon3DOffsetY_primary), LLSTRING(Setting_Weapon3DOffsetY_Primary), LLSTRING(Setting_Weapon3DOffsetY_Desc), "step", 0, [-50, 50, 5, "%"]],
-    [QGVAR(weapon3DOffsetX_handgun), LLSTRING(Setting_Weapon3DOffsetX_Handgun), LLSTRING(Setting_Weapon3DOffsetX_Desc), "step", 0, [-50, 50, 5, "%"]],
-    [QGVAR(weapon3DOffsetY_handgun), LLSTRING(Setting_Weapon3DOffsetY_Handgun), LLSTRING(Setting_Weapon3DOffsetY_Desc), "step", 0, [-50, 50, 5, "%"]],
-    [QGVAR(weapon3DOffsetX_launcher), LLSTRING(Setting_Weapon3DOffsetX_Launcher), LLSTRING(Setting_Weapon3DOffsetX_Desc), "step", 0, [-50, 50, 5, "%"]],
-    [QGVAR(weapon3DOffsetY_launcher), LLSTRING(Setting_Weapon3DOffsetY_Launcher), LLSTRING(Setting_Weapon3DOffsetY_Desc), "step", 0, [-50, 50, 5, "%"]],
-    [QGVAR(weapon3DOffsetX_primary2), LLSTRING(Setting_Weapon3DOffsetX_Primary2), LLSTRING(Setting_Weapon3DOffsetX_Desc), "step", 0, [-50, 50, 5, "%"]],
-    [QGVAR(weapon3DOffsetY_primary2), LLSTRING(Setting_Weapon3DOffsetY_Primary2), LLSTRING(Setting_Weapon3DOffsetY_Desc), "step", 0, [-50, 50, 5, "%"]],
+    [
+        QGVAR(weapon3DZoom_primary), LLSTRING(Setting_Weapon3D_Primary), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 80, [
+            [QGVAR(weapon3DZoom_primary), LLSTRING(Weapon3D_Size), 50, 150, 5, "%", 80, LLSTRING(Setting_Weapon3DZoom_Desc)],
+            [QGVAR(weapon3DOffsetX_primary), "X", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+            [QGVAR(weapon3DOffsetY_primary), "Y", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetY_Desc)]
+        ]
+    ],
+    [
+        QGVAR(weapon3DZoom_handgun), LLSTRING(Setting_Weapon3D_Handgun), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 100, [
+            [QGVAR(weapon3DZoom_handgun), LLSTRING(Weapon3D_Size), 50, 150, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
+            [QGVAR(weapon3DOffsetX_handgun), "X", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+            [QGVAR(weapon3DOffsetY_handgun), "Y", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetY_Desc)]
+        ]
+    ],
+    [
+        QGVAR(weapon3DZoom_launcher), LLSTRING(Setting_Weapon3D_Launcher), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 100, [
+            [QGVAR(weapon3DZoom_launcher), LLSTRING(Weapon3D_Size), 50, 150, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
+            [QGVAR(weapon3DOffsetX_launcher), "X", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+            [QGVAR(weapon3DOffsetY_launcher), "Y", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetY_Desc)]
+        ]
+    ],
+    [
+        QGVAR(weapon3DZoom_primary2), LLSTRING(Setting_Weapon3D_Primary2), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 100, [
+            [QGVAR(weapon3DZoom_primary2), LLSTRING(Weapon3D_Size), 50, 150, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
+            [QGVAR(weapon3DOffsetX_primary2), "X", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+            [QGVAR(weapon3DOffsetY_primary2), "Y", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetY_Desc)]
+        ]
+    ],
     [QGVAR(compareTooltip), LLSTRING(Setting_CompareTooltip), LLSTRING(Setting_CompareTooltip_Desc), "check", true],
     [QGVAR(magazineFillBar), LLSTRING(Setting_MagazineFillBar), LLSTRING(Setting_MagazineFillBar_Desc), "check", true],
     [QGVAR(magazineText), LLSTRING(Setting_MagazineText), LLSTRING(Setting_MagazineText_Desc), "check", true],
@@ -72,4 +89,9 @@ private _rows = [
     [QEGVAR(hotbar,leaderKeys), LELSTRING(hotbar,Setting_LeaderKeys), LELSTRING(hotbar,Setting_LeaderKeys_Desc), "check", true]
 ];
 
-_rows select {(_x select 0) isEqualTo "" || {!isNil {missionNamespace getVariable (_x select 0)}}}
+// The weapon pictures' size and place only while they are on: twelve values in four rows the card has no room for otherwise (Mia,
+// 0.6.108: "list too long").
+_rows select {
+    ((_x select 0) isEqualTo "" || {!isNil {missionNamespace getVariable (_x select 0)}})
+    && {(_x param [3, ""]) isNotEqualTo "group" || {missionNamespace getVariable [QGVAR(weapon3D), false]}}
+}
