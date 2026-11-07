@@ -87,7 +87,8 @@ if ((_key find "@") < 0) then {
 
         _pair params ["_file", "_words", "_times"];
 
-        private _picture = if (_file isEqualTo "") then {""} else {[MOUSE_ICON_PATH + "\" + _file] call FUNC(safePicture)};
+        // ACE's picture, else this mod's own (fnc_mouseIcon): words only for a token that has no picture at all.
+        private _picture = if (_file isEqualTo "") then {""} else {[(_file splitString "_") param [1, "left"]] call FUNC(mouseIcon)};
 
         if (_picture isEqualTo "") then {
             _caps pushBack [_words, "", 1];

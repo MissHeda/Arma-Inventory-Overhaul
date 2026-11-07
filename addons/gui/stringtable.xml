@@ -157,9 +157,6 @@
         <Key ID="STR_aio_gui_Hint_BodyTier">
             <English>+%1 kg: you will be %2 (%3 kg)</English>
         </Key>
-        <Key ID="STR_aio_gui_Hint_DoubleClick">
-            <English>Double click: %1</English>
-        </Key>
         <Key ID="STR_aio_gui_Hint_DoubleClickMenu">
             <English>opens its menu</English>
         </Key>
@@ -260,7 +257,7 @@
             <English>Waiting for your hands - click to cancel</English>
         </Key>
         <Key ID="STR_aio_gui_Hint_QuickTargetInto">
-            <English>Double click: into %1</English>
+            <English>into %1</English>
         </Key>
         <Key ID="STR_aio_gui_Hint_Returned">
             <English>%1 went back - no room any more</English>

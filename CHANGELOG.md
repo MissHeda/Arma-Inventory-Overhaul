@@ -2,6 +2,18 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.76 - beta
+
+### Changed
+
+- The quick move target's crosshair sits in a box with a rounded accent outline, as the inspect card's attachment points.
+- The hint line shows a double click as two mouse pictures instead of the words "Double click".
+- Mouse buttons in the footer and the hint line have pictures of this mod's own where ACE is not loaded (were words).
+
+### Fixed
+
+- GreenMag Rework: a double click on a box of rounds moved it instead of opening it.
+
 ## 0.6.75 - beta
 
 ### Changed

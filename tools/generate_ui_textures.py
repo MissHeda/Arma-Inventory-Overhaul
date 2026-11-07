@@ -352,6 +352,39 @@ def icon_move(d, s, w):
     _double_arrow(d, s, w, (s * 0.5, s * 0.12), (s * 0.5, s * 0.88))
 
 
+def _mouse(d, s, w, part):
+    # A computer mouse seen from above, its button lit: the footer's and the hint line's mouse buttons where ACE's pictures are not
+    # there (aio_gui_fnc_mouseIcon).
+    left, right, top, bottom, r = s * 0.27, s * 0.73, s * 0.08, s * 0.92, s * 0.23
+    body = (arc_points(left + r, top + r, r, 180, 270, 16) + arc_points(right - r, top + r, r, 270, 360, 16)
+            + arc_points(right - r, bottom - r, r, 0, 90, 16) + arc_points(left + r, bottom - r, r, 90, 180, 16))
+    line(d, body + [body[0]], w)
+    split = s * 0.42
+    line(d, [(left, split), (right, split)], w)
+    line(d, [(s * 0.5, top), (s * 0.5, split)], w)
+    if part in ("left", "right"):
+        # The button filled: its rounded corner, the middle line and the split.
+        if part == "left":
+            pts = arc_points(left + r, top + r, r, 180, 270, 16) + [(s * 0.5, top), (s * 0.5, split), (left, split)]
+        else:
+            pts = [(s * 0.5, top)] + arc_points(right - r, top + r, r, 270, 360, 16) + [(right, split), (s * 0.5, split)]
+        d.polygon(pts, fill=WHITE)
+    if part == "scroll":
+        line(d, [(s * 0.5, s * 0.16), (s * 0.5, s * 0.34)], w * 1.8)
+
+
+def icon_mouse_left(d, s, w):
+    _mouse(d, s, w, "left")
+
+
+def icon_mouse_right(d, s, w):
+    _mouse(d, s, w, "right")
+
+
+def icon_mouse_scroll(d, s, w):
+    _mouse(d, s, w, "scroll")
+
+
 def icon_target(d, s, w):
     # A crosshair: the container a quick move goes into (the inventory's caption line).
     line(d, arc_points(s * 0.5, s * 0.5, s * 0.3, 0, 360), w)
@@ -1228,6 +1261,9 @@ def build_images():
         "icon_resize_nesw_ca": stroke_icon(icon_resize_nesw),
         "icon_move_ca": stroke_icon(icon_move),
         "icon_target_ca": stroke_icon(icon_target),
+        "icon_mouse_left_ca": stroke_icon(icon_mouse_left, width=8),
+        "icon_mouse_right_ca": stroke_icon(icon_mouse_right, width=8),
+        "icon_mouse_scroll_ca": stroke_icon(icon_mouse_scroll, width=8),
         "icon_hotbar_ca": stroke_icon(icon_hotbar, width=8),
         "icon_layer_up_ca": stroke_icon(icon_layer_up, width=8),
         "icon_layer_down_ca": stroke_icon(icon_layer_down, width=8),

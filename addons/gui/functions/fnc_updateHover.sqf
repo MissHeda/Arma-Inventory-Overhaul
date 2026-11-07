@@ -631,10 +631,19 @@ private _fnc_hex = {
 private _parts = [];
 
 private _fnc_add = {
-    params ["_text", "_key"];
+    params ["_text", "_key", ["_pictures", []]];
 
     if (_parts isNotEqualTo []) then {
         _parts pushBack "    ";
+    };
+
+    // Pictures before the words, in the words' colour: two left mouse buttons for a double click (fnc_mouseIcon).
+    {
+        _parts pushBack (image _x setAttributes ["color", [_theme getOrDefault [_key, [1, 1, 1, 1]]] call _fnc_hex]);
+    } forEach _pictures;
+
+    if (_pictures isNotEqualTo []) then {
+        _parts pushBack " ";
     };
 
     _parts pushBack (text _text setAttributes [
@@ -836,14 +845,16 @@ switch (_shown param [0, ""]) do {
         if ([] call FUNC(isInventoryMode)) then {
             private _doubleLabel = [_class] call FUNC(doubleClickLabel);
 
+            private _mouse = ["left"] call FUNC(mouseIcon);
+
             if (_doubleLabel isNotEqualTo "") exitWith {
-                [format [LLSTRING(Hint_DoubleClick), _doubleLabel], "accent"] call _fnc_add;
+                [_doubleLabel, "accent", [_mouse, _mouse]] call _fnc_add;
             };
 
             ([[_hoverGrid getOrDefault ["container", objNull]]] call FUNC(quickTarget)) params [["_picked", objNull]];
 
             if (!isNull _picked) then {
-                [format [LLSTRING(Hint_QuickTargetInto), [_picked] call FUNC(containerName)], "accent"] call _fnc_add;
+                [format [LLSTRING(Hint_QuickTargetInto), [_picked] call FUNC(containerName)], "accent", [_mouse, _mouse]] call _fnc_add;
             };
         };
 

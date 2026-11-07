@@ -575,10 +575,20 @@ if (_lockTip isNotEqualTo "") then {
     [_lockHit, _lockTip] call FUNC(setTooltip);
 };
 
-// The crosshair of the quick moves' target, left of the padlock, in the accent colour.
+// The crosshair of the quick moves' target, left of the padlock, in the accent colour, in a box with a rounded accent outline as the
+// attachment points of the inspect card have (fnc_drawHotspots).
 if (_targeted) then {
     private _iconH = _lineH * 0.6;
     private _targetX = _blockX + _blockW - _closeW - _loadW - _lockW;
+    private _boxH = _lineH * 0.82;
+    private _boxRect = [_targetX + (_targetIconW - SQUARE(_boxH)) / 2, _top + (_lineH - _boxH) / 2, SQUARE(_boxH), _boxH];
+    private _boxRadius = [0, _boxH * 0.2] select ((_theme getOrDefault ["radius", 0]) > 0);
+    private _accentRgb = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
+
+    [_display, _parent, _boxRect, [0.1, 0.1, 0.11, 0.85], _boxRadius] call FUNC(uiPanel);
+    [_display, _parent, _boxRect, _accentRgb + [0.9], _boxRadius] call FUNC(uiRing);
+
+    _iconH = _boxH * 0.68;
 
     [
         _display, _parent, [_targetX + (_targetIconW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
