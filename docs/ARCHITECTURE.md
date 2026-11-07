@@ -312,8 +312,8 @@ element, no commas) and `class Groups` (labels and examples of the groups). The 
 is what a text names in `base=`: never rename one. Other mods may add presets as classes there; the wizard offers no choice among them.
 
 - **`default`** (revision 5) is the one preset this mod ships, and it is realism: rifles 4x2 to 7x2 by mass, handguns 2x1,
-  launchers 6x2, magazines 1x1, 1x2 or 2x2 by mass, belts 2x2, rockets 1x3 and 2x3, grenades 1x1, optics, muzzles and small items 1x1 up
-  to 3x2 by mass, belts 2x2, helmets 2x2, uniforms 2x2, vests 3x3, backpacks 4x4, 5x5 and 5x6 by load (up to 160, up to 280, above) - and
+  launchers 6x2, magazines 1x1, 1x2 or 2x2 by mass, belts 3x2, rockets 1x3 and 2x3, grenades 1x1, optics, muzzles and small items 1x1 up
+  to 3x2 by mass, helmets 2x2, uniforms 2x2, vests 3x3, backpacks 4x4, 5x5 and 5x6 by load (up to 160, up to 280, above) - and
   **nothing stacks** but the groups `@stack_20`, `@stack_10`, `@stack_5` and `@stack_2`: consumables of ACE, ACM and the vanilla first aid kit,
   by class (`class=ACE_fieldDressing|ACM_IV_16g+|...`). The rules are keyed by class, so a mod that is not loaded matches nothing; a name with a
   plus is that class and everything built on it, used where all of them are of the same sort. A rule of the text for a class wins over them like

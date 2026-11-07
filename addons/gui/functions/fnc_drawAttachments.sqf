@@ -12,6 +12,9 @@
  * covers half the weapon (Mia, #56: "The IR icon is far too big"), in white. The gear silhouettes tried in 0.6.46 are dark
  * grey: on the weapon's picture they did not show at all.
  *
+ * Not the bipod: its slot's mark hangs under the barrel, below where most weapon pictures end, so it floated off the
+ * weapon on its own (Mia, an LMG with a bipod). The plate beside the name shows it (fnc_drawEquipmentCards).
+ *
  * The slot an attachment sits in is the one whose compatibleItems name it (an array, or a class of
  * item = 1 entries as CBA's joint rails write them); failing that, the slot of the attachment's kind.
  *
@@ -133,8 +136,7 @@ private _fnc_takes = {
 } forEach [
     [_muzzle, "MuzzleSlot"],
     [_rail, "PointerSlot"],
-    [_optic, "CowsSlot"],
-    [_bipod, "UnderBarrelSlot"]
+    [_optic, "CowsSlot"]
 ];
 
 _controls

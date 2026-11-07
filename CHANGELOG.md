@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.73 - beta
+
+### Changed
+
+- Machine gun belts and boxes are 3x2 (were 2x2).
+- GreenMag Rework items: loose rounds stack up to 20 on a 1x1 tile, a speedloader is 1x2, a box of rounds 2x2 and a belt 3x2.
+
+### Fixed
+
+- Weapon cards: a bipod no longer draws a stray mark below the weapon's picture; it still shows as a plate beside the name.
+
 ## 0.6.72 - beta
 
 ### Added
