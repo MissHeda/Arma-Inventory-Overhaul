@@ -377,12 +377,13 @@ def icon_mouse_double(d, s, w):
     # A double click: the mouse with its left button lit, a little to the right, and two short waves off the button's corner -
     # one picture for the hint line where a double click does something of its own (aio_gui_fnc_mouseIcon "double").
     shift = s * 0.1
-    left, right, top, bottom, r = s * 0.4, s * 0.82, s * 0.22, s * 0.94, s * 0.21
+    # Shifted left so the mouse and its waves together sit in the middle of a key cap (Mia, 0.6.81).
+    left, right, top, bottom, r = s * 0.35, s * 0.77, s * 0.21, s * 0.93, s * 0.21
     body = (arc_points(left + r, top + r, r, 180, 270, 16) + arc_points(right - r, top + r, r, 270, 360, 16)
             + arc_points(right - r, bottom - r, r, 0, 90, 16) + arc_points(left + r, bottom - r, r, 90, 180, 16))
     line(d, body + [body[0]], w)
-    split = s * 0.5
-    mid = s * 0.61
+    split = s * 0.49
+    mid = s * 0.56
     line(d, [(left, split), (right, split)], w)
     line(d, [(mid, top), (mid, split)], w)
     d.polygon(arc_points(left + r, top + r, r, 180, 270, 16) + [(mid, top), (mid, split), (left, split)], fill=WHITE)

@@ -988,7 +988,10 @@ private _hintCtrl = uiNamespace getVariable [QGVAR(hint), controlNull];
 // The double click first, a key hint of its own in the footer as the keys are, with the same line after it (fnc_footerDouble) - only
 // for the footer's own hint line, and only while there is something to say.
 if (_hintCtrl isEqualTo (uiNamespace getVariable [QGVAR(hint), controlNull])) then {
-    [[_double, ""] select (_parts isEqualTo [])] call FUNC(footerDouble);
+    // Kept while the mouse is on nothing - it does not come and go (Mia, 0.6.81): only a new action changes it.
+    if (_double isNotEqualTo "" && {_parts isNotEqualTo []}) then {
+        [_double] call FUNC(footerDouble);
+    };
 };
 
 _hintCtrl ctrlSetStructuredText (composeText _parts setAttributes ["align", "left", "size", str (_hintCtrl getVariable [QGVAR(textScale), 1])]);

@@ -60,6 +60,11 @@ if (_label isNotEqualTo "") then {
 uiNamespace setVariable [QGVAR(footerDoubleCtrls), _controls];
 uiNamespace setVariable [QGVAR(footerDoubleShown), _label];
 
+// Shown again as it was when the window is built anew (fnc_drawFooter).
+if (_label isNotEqualTo "") then {
+    uiNamespace setVariable [QGVAR(footerDoubleLast), _label];
+};
+
 private _rect = [_hintX, _hintY, (_right - _hintX) max pixelW, _hintH];
 
 _hint setVariable [QGVAR(hintCentred), _rect];

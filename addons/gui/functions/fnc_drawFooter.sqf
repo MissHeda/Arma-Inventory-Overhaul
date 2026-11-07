@@ -187,3 +187,8 @@ uiNamespace setVariable [QGVAR(footerDoubleLayout), [
 ]];
 uiNamespace setVariable [QGVAR(footerDoubleShown), ""];
 uiNamespace setVariable [QGVAR(footerDoubleCtrls), []];
+
+// There from the start, as the keys are: the last action, or the plain quick move - the hint line updates it (fnc_updateHover).
+if (_inventory) then {
+    [uiNamespace getVariable [QGVAR(footerDoubleLast), LLSTRING(QuickMove)]] call FUNC(footerDouble);
+};

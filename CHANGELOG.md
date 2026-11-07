@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.83 - beta
+
+### Changed
+
+- Real weapon pictures are off by default: a filmed picture cannot be see-through. Switch them on in the Layout tab.
+- Footer: the double click's key hint stays all the time - the last action, or "Quick move" until the mouse was on something -
+  instead of coming and going; its picture sits in the middle of its cap.
+
 ## 0.6.82 - beta
 
 ### Fixed
