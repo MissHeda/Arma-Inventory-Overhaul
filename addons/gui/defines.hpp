@@ -584,6 +584,13 @@
 // INSPECT_3D_MAX_RES; its height the power of two nearest the screen's shape - 2048x1024 on most screens. Each size films
 // into a target of its own name, INSPECT_3D_TARGET and the size, so a target made at one size never shows in a box of another.
 #define INSPECT_3D_TARGET "aio_inspect3d"
+
+// The weapon cards' real pictures (fnc_cardScene, fnc_drawEquipmentCards): the target's name before the slot and size, the largest
+// texture (a card is small - kept low, one camera films per weapon all the time), and how much farther than the inspect card's 3D
+// view the camera stands for the frame - side on, a long weapon fills the card's width.
+#define CARD_3D_TARGET "aio_card3d"
+#define CARD_3D_MAX_RES 1024
+#define CARD_3D_DISTANCE 0.95
 #define INSPECT_3D_ASPECT (getResolution select 4)
 #define INSPECT_3D_SUPER 2
 #define INSPECT_3D_MAX_RES 2048

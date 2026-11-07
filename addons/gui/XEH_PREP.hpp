@@ -192,6 +192,7 @@ PREP(inspect);
 PREP(drawInspect);
 PREP(growSlots);
 PREP(inspect3D);
+PREP(cardScene);
 PREP(weaponPoints);
 PREP(drawHotspots);
 PREP(placeHotspots);

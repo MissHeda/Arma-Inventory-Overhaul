@@ -1242,6 +1242,12 @@ Off moves them at once; a drag never waits.</English>
             <English>Whether putting on and taking off a uniform, vest, backpack or headgear takes the hands' time.
 Off does it at once; a drag never waits.</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D">
+            <English>Real weapon pictures</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D_Desc">
+            <English>The weapon cards show each weapon as\nit really looks, with its attachments,\nfilmed in 3D.\n\nNeeds Picture-in-Picture. Off: the flat\npicture with white marks.</English>
+        </Key>
         <Key ID="STR_aio_gui_SettingsMenu_Behaviour">
             <English>How it behaves</English>
         </Key>

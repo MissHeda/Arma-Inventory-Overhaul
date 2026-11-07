@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.79 - beta
+
+### Added
+
+- Real weapon pictures: the weapon cards show each of your weapons as it really looks - optic, suppressor, light, bipod and
+  magazine on it - filmed in 3D, side on, instead of the flat picture with white marks. Needs Picture-in-Picture; setting
+  "Real weapon pictures" (Layout tab) switches it off.
+
 ## 0.6.78 - beta
 
 ### Changed

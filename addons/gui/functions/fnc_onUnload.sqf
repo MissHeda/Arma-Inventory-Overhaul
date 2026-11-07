@@ -155,6 +155,9 @@ uiNamespace setVariable [QGVAR(inspectRect), []];
 
 // The inspect card's 3D view: its camera, lights and objects go (fnc_inspect3D).
 ["stop"] call FUNC(inspect3D);
+
+// The weapon cards' scenes as well (fnc_cardScene).
+["stop"] call FUNC(cardScene);
 uiNamespace setVariable [QGVAR(windows), []];
 uiNamespace setVariable [QGVAR(turnedPictures), []];
 uiNamespace setVariable [QGVAR(windowTrash), []];

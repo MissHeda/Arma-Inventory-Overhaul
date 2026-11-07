@@ -121,6 +121,19 @@
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;
 
+// Each player's own eyes and machine: the weapon cards show each weapon as it really looks, with its attachments, filmed in a small
+// 3D scene (fnc_cardScene) - one camera per weapon while the window is open, with Picture-in-Picture on. Off, the flat picture with
+// white marks. Read at every build.
+[
+    QGVAR(weapon3D),
+    "CHECKBOX",
+    [LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
 // Each player's own eyes: the crosshair on the caption line of the container quick moves go into (fnc_quickTarget, fnc_drawSection).
 // Picking one works the same with it off. Read at every build.
 [

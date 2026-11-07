@@ -413,11 +413,51 @@ private _fnc_weaponCard = {
         private _pictureBottom = [_nameTop, _cardY + _cardH - _padY] select ((_nameTop - _innerTop) < _cardH * 0.5);
         private _pictureRect = [_contentX, _innerTop, _contentW, (_pictureBottom - _innerTop) max pixelH];
 
-        // As the rules draw it (icon=): larger, smaller or moved, and cut to the card where it would reach out.
-        [_display, _parent, _pictureRect, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _cardRect] call FUNC(uiItemPicture);
+        // The weapon as it really looks, filmed with what it carries (fnc_cardScene) - with Picture-in-Picture on and the player's
+        // setting. The picture has the screen's shape and the card shows its middle, as the inspect card's 3D view (fnc_drawInspect).
+        private _real = false;
 
-        // What is on the weapon shows on its picture, the way Arma's own inventory draws it.
-        [_display, _parent, _pictureRect, _weapon] call FUNC(drawAttachments);
+        if (isPiPEnabled && {missionNamespace getVariable [QGVAR(weapon3D), true]}) then {
+            _pictureRect params ["_picX", "_picY", "_picW", "_picH"];
+
+            private _viewPixelsW = round (_picW / pixelW);
+            private _viewPixelsH = round (_picH / pixelH);
+            private _aspect = INSPECT_3D_ASPECT;
+            private _imagePixelsH = _viewPixelsH max (round (_viewPixelsW / _aspect));
+            private _imagePixelsW = _viewPixelsW max (round (_imagePixelsH * _aspect));
+            private _textureW = (round (2 ^ ceil ((ln ((_imagePixelsW * INSPECT_3D_SUPER) max 64)) / (ln 2)))) min CARD_3D_MAX_RES;
+            private _textureH = round (2 ^ round ((ln (_textureW / _aspect)) / (ln 2)));
+            private _target = format ["%1_%2_%3x%4", CARD_3D_TARGET, _slot, _textureW, _textureH];
+
+            // The card's colour over the panel's, as the sphere round the weapon: the picture sits on the card.
+            private _panel = _theme getOrDefault ["panel", [0.05, 0.055, 0.065, 0.9]];
+            private _film = _theme getOrDefault ["slot", [1, 1, 1, 0.035]];
+            private _filmAlpha = _film param [3, 0];
+            private _background = [0, 1, 2] apply {((_panel param [_x, 0.05]) * (1 - _filmAlpha)) + ((_film param [_x, 1]) * _filmAlpha)};
+
+            _real = ["show", [_slot, _weapon, _target, _background]] call FUNC(cardScene);
+
+            if (_real) then {
+                _scene3DSlots pushBack _slot;
+
+                private _clip = [_display, "AIO_Group", _parent, [_picX, _picY, _viewPixelsW * pixelW, _viewPixelsH * pixelH]] call FUNC(uiCreate);
+                private _view = [
+                    _display, "AIO_PictureTurned", _clip,
+                    [floor ((_viewPixelsW - _imagePixelsW) / 2) * pixelW, floor ((_viewPixelsH - _imagePixelsH) / 2) * pixelH, _imagePixelsW * pixelW, _imagePixelsH * pixelH]
+                ] call FUNC(uiCreate);
+
+                _view ctrlSetText format ["#(argb,%1,%2,1)r2t(%3,%4)", _textureW, _textureH, _target, _aspect toFixed 4];
+                _view ctrlEnable false;
+            };
+        };
+
+        if (!_real) then {
+            // As the rules draw it (icon=): larger, smaller or moved, and cut to the card where it would reach out.
+            [_display, _parent, _pictureRect, _info getOrDefault ["picture", ""], _info getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _cardRect] call FUNC(uiItemPicture);
+
+            // What is on the weapon shows on its picture, the way Arma's own inventory draws it.
+            [_display, _parent, _pictureRect, _weapon] call FUNC(drawAttachments);
+        };
         [_display, _parent, [_contentX, _nameTop, (_partsRight - _contentX) max pixelW, _lineH], _name, _nameSize, _colorText, _font, 0, "weapon"] call FUNC(uiLabel);
     };
 
@@ -545,6 +585,9 @@ private _rows = createHashMapFromArray [
     ["launcher", [LLSTRING(Slot_Launcher), GEAR_ICON(ui_gear_secondary_gs), "3"]]
 ];
 
+// The slots whose cards show the weapon filmed (fnc_cardScene): the scenes of the others go once the cards are drawn.
+private _scene3DSlots = [];
+
 // In the player's order (see above) - none while the section is folded.
 if (_showWeapons && {!_equipFolded}) then {
     {
@@ -558,6 +601,8 @@ if (_showWeapons && {!_equipFolded}) then {
 
 if (_showWeapons) then {
     GVAR(partRects) set ["weapons", [_left, _weaponsTop, _width, (_cursor - _weaponsTop) max _labelH]];
+
+    ["keep", _scene3DSlots] call FUNC(cardScene);
 };
 
 // ---------------------------------------------------------------------------
