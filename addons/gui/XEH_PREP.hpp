@@ -279,6 +279,8 @@ PREP(paletteSettle);
 PREP(paletteSlide);
 PREP(hsv);
 PREP(openPaletteMenu);
+PREP(openDesignMenu);
+PREP(drawDesignTabs);
 PREP(updatePaletteMenu);
 PREP(updatePaletteButton);
 

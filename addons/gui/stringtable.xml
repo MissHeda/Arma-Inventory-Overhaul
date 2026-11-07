@@ -79,6 +79,24 @@
         <Key ID="STR_aio_gui_Compare_Weight">
             <English>Weight</English>
         </Key>
+        <Key ID="STR_aio_gui_Design_Colours">
+            <English>Colours</English>
+        </Key>
+        <Key ID="STR_aio_gui_Design_ColoursLocked">
+            <English>The server sets the colours</English>
+        </Key>
+        <Key ID="STR_aio_gui_Design_Colours_Tip">
+            <English>The window's colours and transparency</English>
+        </Key>
+        <Key ID="STR_aio_gui_Design_Layout">
+            <English>Layout</English>
+        </Key>
+        <Key ID="STR_aio_gui_Design_Layout_Tip">
+            <English>Sizes, spacing, what the window shows and how it behaves</English>
+        </Key>
+        <Key ID="STR_aio_gui_Design_Tooltip">
+            <English>Colours and layout</English>
+        </Key>
         <Key ID="STR_aio_gui_Drop">
             <English>Drop</English>
         </Key>

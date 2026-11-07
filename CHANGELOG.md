@@ -2,6 +2,15 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.75 - beta
+
+### Changed
+
+- One header button for how the window looks: the palette and the settings card are one card with two tabs, Colours and Layout
+  (sizes, spacing, what the window shows and how it behaves). It opens on the tab you used last. Where the server sets the
+  colours it opens on Layout; settings a server or mission forces stay locked as before.
+- "Mark the quick move target" is in the Layout tab too.
+
 ## 0.6.74 - beta
 
 ### Added

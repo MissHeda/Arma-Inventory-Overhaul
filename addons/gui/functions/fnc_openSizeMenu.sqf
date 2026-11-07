@@ -159,6 +159,10 @@ private _hintH = _hintSize * 1.3 * (_hintLines min 5) + _hintSize * 0.4;
 _height = _height + _padY + _hintH;
 
 // The right edge of the window - the header's, where the Close button ends - and a small gap under the header's line, kept on the screen.
+// The tabs on top, Colours and Layout (fnc_drawDesignTabs): one more line on the card.
+private _tabsH = UNIT * 1.1;
+_height = _height + _tabsH;
+
 private _left = ((CONTENT_X + CONTENT_W - _width) min (safezoneX + safezoneW - _width)) max safezoneX;
 private _top = (((HEAD_Y + HEAD_H + UNIT * 0.5) max (safezoneY + UNIT * 2.6 + pixelH * 3)) min (safezoneY + safezoneH - _height)) max safezoneY;
 private _cardX = _left - safezoneX;
@@ -193,6 +197,19 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{[] call FUNC(closeMenu)}] call F
 // A click on the card between its controls is no click beside it: this takes it, and does nothing (the catcher above closes the
 // popover only for a click beside the card).
 [_display, "AIO_Hitbox", _layer, [_cardX, _cardY, _width, _height]] call FUNC(uiCreate);
+
+// ----- The tabs, then everything else a tab lower -----
+
+[
+    _display, _layer, [_cardX + _padX, _cardY + _padY, _listW - _padX * 2, _tabsH], "layout", _chipH, _chipSize,
+    createHashMapFromArray [
+        ["button", [1, 1, 1, 0.08]], ["buttonHover", [1, 1, 1, 0.18]], ["buttonText", _text2], ["font", _font], ["muted", _muted],
+        ["radius", UNIT * 0.3], ["upper", false]
+    ]
+] call FUNC(drawDesignTabs);
+
+_cardY = _cardY + _tabsH;
+_height = _height - _tabsH;
 
 // ----- The top: the title, with Default -----
 

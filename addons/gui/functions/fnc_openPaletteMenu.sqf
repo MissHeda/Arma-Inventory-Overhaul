@@ -298,6 +298,10 @@ private _trackX = _sliderX + _thumbW / 2;
 private _trackW = _sliderW - _thumbW;
 
 // The right edge of the window - the header's, where the Close button ends - and a small gap under the header's line, kept on the screen.
+// The tabs on top, Colours and Layout (fnc_drawDesignTabs): one more line on the card.
+private _tabsH = UNIT * 1.1;
+_height = _height + _tabsH;
+
 private _left = ((CONTENT_X + CONTENT_W - _width) min (safezoneX + safezoneW - _width)) max safezoneX;
 private _top = (((HEAD_Y + HEAD_H + UNIT * 0.5) max (safezoneY + UNIT * 2.6 + pixelH * 3)) min (safezoneY + safezoneH - _height)) max safezoneY;
 private _cardX = _left - safezoneX;
@@ -361,6 +365,13 @@ private _fnc_chip = {
         }, false, _chipSize, true
     ] call FUNC(uiButton)
 };
+
+// ----- The tabs, then everything else a tab lower -----
+
+[_display, _layer, [_cardX + _padX, _cardY + _padY, _width - _padX * 2, _tabsH], "colours", _chipH, _chipSize, _buttonTheme] call FUNC(drawDesignTabs);
+
+_cardY = _cardY + _tabsH;
+_height = _height - _tabsH;
 
 // ----- The title, with Reset all -----
 
@@ -1218,7 +1229,7 @@ uiNamespace setVariable [QGVAR(menuFocus), [_layer, _focus]];
 
 uiNamespace setVariable [QGVAR(menu), [_layer]];
 uiNamespace setVariable [QGVAR(menuFocusBack), _back];
-uiNamespace setVariable [QGVAR(menuRect), [_left, _top, _width, _height]];
+uiNamespace setVariable [QGVAR(menuRect), [_left, _top, _width, _height + _tabsH]];
 
 // What lies in it, to show the values in place (fnc_updatePaletteMenu): the open picker's controls and places, its fields, the
 // open row's sliders' knobs, places, values and fills by their kind ("alpha", "cellAlpha", "tileAlpha"), the swatches and the

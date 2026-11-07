@@ -142,51 +142,28 @@ private _close = [_display, controlNull, _closeRect, "close", "", UI_TEX(icon_cl
 }] call FUNC(uiButton);
 [_close, LLSTRING(Close)] call _fnc_tooltip;
 
-// The palette: a click opens the popover of the colours under it (fnc_openPaletteMenu), where the player picks the accent, the
-// secondary colour, the panels' colour and the transparency and sees them at once. Not drawn where the server does not let players pick their colours
-// (fnc_paletteAllowed). Like the speaker it shows an accent icon and line while its popover is open (fnc_updatePaletteButton, which
-// keeps it up to date without a rebuild - the controls are kept for it).
-uiNamespace setVariable [QGVAR(paletteButton), []];
-uiNamespace setVariable [QGVAR(paletteLine), []];
+// One button for the design card (Mia after 0.6.73): the colours and the player's own layout, spacing and settings in two tabs
+// (fnc_openDesignMenu, fnc_drawDesignTabs) - the palette and the settings card were two buttons before. Always drawn: where the
+// server does not let players pick their colours (fnc_paletteAllowed) it opens on Layout and Colours is dimmed. It shows an accent
+// icon and line while either tab is open (fnc_updatePaletteButton and fnc_updateSizeButton both keep it).
+private _designRect = [_square] call _fnc_place;
+private _designLine = [_designRect, false] call _fnc_underline;
 
-if ([] call FUNC(paletteAllowed)) then {
-    private _paletteRect = [_square] call _fnc_place;
-    private _paletteLine = [_paletteRect, false] call _fnc_underline;
-
-    private _palette = [
-        _display, controlNull, _paletteRect, "palette", "", UI_TEX(icon_palette_ca), [false] call _fnc_buttonTheme, {
-            // A left click only.
-            if ((_this select 0) < 0) exitWith {};
-
-            // Once per rest for a run of clicks (fnc_coalesce).
-            ["palettemenu", {[uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openPaletteMenu)}, [], COALESCE_GAP] call FUNC(coalesce);
-        }
-    ] call FUNC(uiButton);
-    [_palette, LLSTRING(Palette_Tooltip)] call _fnc_tooltip;
-
-    uiNamespace setVariable [QGVAR(paletteButton), _palette];
-    uiNamespace setVariable [QGVAR(paletteLine), _paletteLine];
-};
-
-// The player's settings: a click opens their card under it (fnc_openSizeMenu) - tiles, text, rows per page and the rest -, where the
-// window grows and shrinks behind it while a slider moves. Always drawn: they are each player's own CBA settings. Like the palette
-// it shows an accent icon and line while its popover is open (fnc_updateSizeButton).
-private _sizeRect = [_square] call _fnc_place;
-private _sizeLine = [_sizeRect, false] call _fnc_underline;
-
-private _sizeButton = [
-    _display, controlNull, _sizeRect, "size", "", UI_TEX(icon_setup_ca), [false] call _fnc_buttonTheme, {
+private _designButton = [
+    _display, controlNull, _designRect, "palette", "", UI_TEX(icon_palette_ca), [false] call _fnc_buttonTheme, {
         // A left click only.
         if ((_this select 0) < 0) exitWith {};
 
         // Once per rest for a run of clicks (fnc_coalesce).
-        ["sizemenu", {[uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openSizeMenu)}, [], COALESCE_GAP] call FUNC(coalesce);
+        ["designmenu", {[uiNamespace getVariable [QGVAR(display), displayNull]] call FUNC(openDesignMenu)}, [], COALESCE_GAP] call FUNC(coalesce);
     }
 ] call FUNC(uiButton);
-[_sizeButton, LLSTRING(Size_Tooltip)] call _fnc_tooltip;
+[_designButton, LLSTRING(Design_Tooltip)] call _fnc_tooltip;
 
-uiNamespace setVariable [QGVAR(sizeButton), _sizeButton];
-uiNamespace setVariable [QGVAR(sizeLine), _sizeLine];
+uiNamespace setVariable [QGVAR(paletteButton), _designButton];
+uiNamespace setVariable [QGVAR(paletteLine), _designLine];
+uiNamespace setVariable [QGVAR(sizeButton), _designButton];
+uiNamespace setVariable [QGVAR(sizeLine), _designLine];
 
 // The speaker: a click opens the dropdown of the sound volumes under it (fnc_openSoundMenu), a right click
 // mutes everything or brings it all back (fnc_soundSet). It shows the muted speaker, dimmed, while nothing

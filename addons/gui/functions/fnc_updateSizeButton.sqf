@@ -25,7 +25,8 @@ private _controls = uiNamespace getVariable [QGVAR(sizeButton), []];
 
 if (_controls isEqualTo [] || {isNull (_controls select -1)}) exitWith {};
 
-private _open = (uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) isEqualTo "size"};
+// One button for both tabs of the design card (fnc_openDesignMenu): on while either is open.
+private _open = (uiNamespace getVariable [QGVAR(menu), []]) isNotEqualTo [] && {(GVAR(menuFor) param [0, ""]) in ["palette", "size"]};
 
 ([GVAR(theme), _open] call FUNC(headerStyle)) params ["_fill", "_hover", "_ink"];
 
