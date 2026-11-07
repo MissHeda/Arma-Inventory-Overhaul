@@ -8,6 +8,10 @@ The release of everything since 0.6.29 (the beta builds 0.6.30 to 0.6.113 below)
 Attachments, Edit layout, the quick move target, one Colours and Layout card with your own font, GreenMag Rework and
 BackpackOnChest support, and many fixes.
 
+### Changed
+
+- Real weapon pictures keep more room round the weapon, and a handgun shows at a handgun's size instead of filling its card.
+
 ## 0.6.113 - beta
 
 Tested in game (MX with suppressor, optic and bipod, Mk200, P07 with suppressor, NLAW).

@@ -603,7 +603,9 @@
 #define CARD_3D_MAX_RES 1024
 #define CARD_3D_DISTANCE 0.95
 // How much of what the card shows the weapon fills, across or up and down - whichever it reaches first.
-#define CARD_3D_ROOM 0.9
+#define CARD_3D_ROOM 0.72
+// The shortest length a weapon card's picture is framed for, in metres: a handgun shows at a handgun's size, not card-filling.
+#define CARD_3D_MIN_LENGTH 0.75
 // A weapon's height side on, at most this share of its length: its box is taller than its profile (the MX came out a fifth of its
 // card, Mia 0.6.91).
 #define CARD_3D_PROFILE 0.42

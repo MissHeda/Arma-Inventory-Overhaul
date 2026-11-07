@@ -111,6 +111,11 @@ private _fnc_frame = {
     private _length = _scene getOrDefault ["length", _scene getOrDefault ["frameSize", 1]];
     private _height = _scene getOrDefault ["height", _length / 3];
     private _perMetre = 2 * INSPECT_3D_FOV;
+
+    // Framed as at least CARD_3D_MIN_LENGTH long and with room round it: a handgun filled its card to the edges and every weapon
+    // sat too close (Mia, 0.7.0).
+    _length = _length max CARD_3D_MIN_LENGTH;
+    _height = _height max (CARD_3D_MIN_LENGTH * 0.2);
     private _room = CARD_3D_ROOM;
     // Across, the picture holds less than its height times the screen's shape: CARD_3D_WIDTH_FIX, measured in game (0.6.112).
     private _distance = ((_length * CARD_3D_WIDTH_FIX / (_room * (_widthShare max 0.05) * _perMetre * INSPECT_3D_ASPECT)) max (_height / (_room * (_heightShare max 0.05) * _perMetre))) max 0.2;
