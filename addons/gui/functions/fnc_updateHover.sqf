@@ -985,18 +985,10 @@ switch (_shown param [0, ""]) do {
 // In the footer's text scale where it keeps one (fnc_drawFooter).
 private _hintCtrl = uiNamespace getVariable [QGVAR(hint), controlNull];
 
-// The double click first, as the footer's keys are written - their picture and words in their colour (fnc_uiKeyHint) -, then the same
-// thin upright line as between the keys and the hint (fnc_drawFooter; a picture of a line, UI_TEX(ui_separator_ca)).
-if (_double isNotEqualTo "" && {_parts isNotEqualTo []}) then {
-    private _keyColour = [_theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]]] call _fnc_hex;
-
-    _parts = [
-        image (["double"] call FUNC(mouseIcon)) setAttributes ["color", _keyColour], " ",
-        text _double setAttributes ["color", _keyColour, "font", _font],
-        "  ",
-        image UI_TEX(ui_separator_ca) setAttributes ["color", [_theme getOrDefault ["line", [1, 1, 1, 0.14]]] call _fnc_hex, "size", "1.6"],
-        "  "
-    ] + _parts;
+// The double click first, a key hint of its own in the footer as the keys are, with the same line after it (fnc_footerDouble) - only
+// for the footer's own hint line, and only while there is something to say.
+if (_hintCtrl isEqualTo (uiNamespace getVariable [QGVAR(hint), controlNull])) then {
+    [[_double, ""] select (_parts isEqualTo [])] call FUNC(footerDouble);
 };
 
 _hintCtrl ctrlSetStructuredText (composeText _parts setAttributes ["align", "left", "size", str (_hintCtrl getVariable [QGVAR(textScale), 1])]);

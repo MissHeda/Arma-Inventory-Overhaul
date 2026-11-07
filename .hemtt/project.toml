@@ -51,6 +51,9 @@ workshop = [
 #   hemtt launch greenmag
 [hemtt.launch.greenmag]
 extends = "default"
+workshop = [
+    "820924072", # BackpackOnChest, for the compat_boc addon
+]
 parameters = [
     "-mod=\"C:\\Users\\Heda\\GitHub Repos\\GreenMag-Rework\\.hemttout\\dev\"", # quoted as HEMTT quotes its own -mod
 ]

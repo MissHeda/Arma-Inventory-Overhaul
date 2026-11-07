@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.81 - beta
+
+### Changed
+
+- Footer: what a double click does is a key hint like the others - the double click's mouse in a key cap, its words beside it -
+  followed by the same thin line as after the keys.
+
 ## 0.6.80 - beta
 
 ### Changed

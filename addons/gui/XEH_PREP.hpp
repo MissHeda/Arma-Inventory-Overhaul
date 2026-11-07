@@ -358,6 +358,7 @@ PREP(drawCountBackdrop);
 PREP(drawColumn);
 PREP(drawHeader);
 PREP(drawFooter);
+PREP(footerDouble);
 
 // Floating windows: open kits and pouches
 PREP(flowCompartments);

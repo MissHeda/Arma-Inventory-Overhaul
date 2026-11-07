@@ -179,3 +179,11 @@ _hintCtrl setVariable [QGVAR(hintLine), _hintSize];
 _hintCtrl setVariable [QGVAR(textScale), TEXT_SCALE];
 
 uiNamespace setVariable [QGVAR(hint), _hintCtrl];
+
+// Where the double click's key hint goes when the mouse is on something (fnc_footerDouble): right after the keys, the hint line after
+// it. Nothing shown yet.
+uiNamespace setVariable [QGVAR(footerDoubleLayout), [
+    _hintX, FOOT_Y + (FOOT_H - _keyH) / 2, _keyH, _hintGap, _hintY, _hintSize * 1.4, _left + _width - _versionW - SQUARE(UNIT * 0.5)
+]];
+uiNamespace setVariable [QGVAR(footerDoubleShown), ""];
+uiNamespace setVariable [QGVAR(footerDoubleCtrls), []];
