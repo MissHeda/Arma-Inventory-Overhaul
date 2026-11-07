@@ -56,10 +56,12 @@ private _keySize = _height * 0.56;
 private _textSize = _height * 0.62;
 private _circleW = SQUARE(_height);
 
-// One gap between caps of one key and between the cap and its words; a larger one before the next hint.
-private _gap = SQUARE(_height * 0.3);
-private _capGap = _gap;
-private _entryGap = SQUARE(_height * 0.9);
+// A key's words sit close to its caps and the next hint stands well apart, so each key reads with its own words (Mia, 0.6.94:
+// "easier to see which key does what"). The caps of one key are joined by a small "+" (Ctrl + click).
+private _gap = SQUARE(_height * 0.22);
+private _plusSize = _height * 0.5;
+private _capGap = SQUARE(_height * 0.62);
+private _entryGap = SQUARE(_height * 1.3);
 
 // The caps the key is made of: [text, "", 1] for a key cap, ["", picture, how many] for a mouse button. A key with
 // no token is one cap, as ever.
@@ -161,10 +163,14 @@ private _capX = _left;
     };
 
     _capX = _capX + _capW + _capGap;
+
+    if (_forEachIndex < count _caps - 1) then {
+        [_display, _parent, [_capX - _capGap, _top, _capGap, _height], "+", _plusSize, _theme getOrDefault ["muted", [0.6, 0.6, 0.6, 1]], _fontBold, 2, "keyhint"] call FUNC(uiLabel);
+    };
 } forEach _caps;
 
 if (_text isNotEqualTo "") then {
-    [_display, _parent, [_left + _badgeW + _gap, _top, _textW, _height], _text, _textSize, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _font, 0, "keyhint"] call FUNC(uiLabel);
+    [_display, _parent, [_left + _badgeW + _gap, _top, _textW, _height], _text, _textSize, _theme getOrDefault ["text", [1, 1, 1, 1]], _font, 0, "keyhint"] call FUNC(uiLabel);
 };
 
 _taken

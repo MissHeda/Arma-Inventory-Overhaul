@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.95 - beta
+
+### Changed
+
+- Footer keys are easier to read: a key made of two parts shows a "+" between them (Ctrl + click), each key's words sit
+  close to it in full white, and a short faint line with more room stands between one key and the next.
+
 ## 0.6.94 - beta
 
 ### Fixed

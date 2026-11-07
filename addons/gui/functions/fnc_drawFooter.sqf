@@ -128,6 +128,14 @@ _keys = _keys select [0, _fits];
     };
 
     _keyX = _keyX + _taken;
+
+    // A short faint line between two hints (in the middle of fnc_uiKeyHint's gap after one): each key with its own words.
+    if (_forEachIndex < count _keys - 1) then {
+        [
+            _display, controlNull, [_keyX - SQUARE(_keyH * 0.65), FOOT_Y + FOOT_H * 0.36, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * 0.28],
+            _theme getOrDefault ["line", [1, 1, 1, 0.14]]
+        ] call FUNC(uiPanel);
+    };
 } forEach _keys;
 
 // ----- Version -----
@@ -150,7 +158,7 @@ _keys = _keys select [0, _fits];
 // structured text starts at the top of its box, so the box starts half a line above the footer's middle, where their
 // words are centred. It takes all the room up to the version, so long item lines are never cut (issue 12).
 // The key hints end with the gap after their last one: the line stands in its middle, the hint at its end (Mia, 0.6.79: nearer).
-private _hintGap = SQUARE(_keyH * 0.45);
+private _hintGap = SQUARE(_keyH * 0.65);
 private _hintX = _keyX;
 private _hintSize = _textUnit * 0.558;
 private _hintW = (_left + _width - _versionW - SQUARE(UNIT * 0.5)) - _hintX;
