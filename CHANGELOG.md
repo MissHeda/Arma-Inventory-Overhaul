@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.99 - beta
+
+### Added
+
+- GreenMag Rework stripper clips (GreenMag 1.1 and later): five clips to a 1x1 tile. "Strip rounds off the clip" strips a clip
+  where it lies and a double click does the same, as with a box of rounds; from a stack only one clip is stripped.
+  Boxes of clips take 2x2 like the other boxes, and a double click opens them into clips.
+
 ## 0.6.98 - beta
 
 ### Changed

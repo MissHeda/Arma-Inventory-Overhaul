@@ -22,7 +22,9 @@
 
 params [["_item", "", [""]], ["_displayName", "", [""]], ["_id", "", [""]]];
 
-_id isNotEqualTo "greenmag_unpack"
+!(_id in ["greenmag_unpack", "greenmag_strip"])
     && {!isNil "gmr_handling_fnc_unpack"}
-    && {_displayName isEqualTo localize "STR_gmr_handling_Unpack"}
-    && {_item isKindOf ["gmr_pack_base", configFile >> "CfgWeapons"]}
+    && {
+        (_displayName isEqualTo localize "STR_gmr_handling_Unpack" && {_item isKindOf ["gmr_pack_base", configFile >> "CfgWeapons"]})
+        || {_displayName isEqualTo localize "STR_gmr_handling_StripClip" && {_item isKindOf ["gmr_clip_base", configFile >> "CfgWeapons"]}}
+    }

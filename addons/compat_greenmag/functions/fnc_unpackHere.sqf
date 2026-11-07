@@ -54,6 +54,19 @@ private _round = _facts param [GMR_ITEM_ROUND, ""];
 
 if (_rounds < 1 || {_round isEqualTo ""}) exitWith {};
 
+// One of a stack (stripper clips lie five to a tile): only that one leaves, the stack keeps its cells, the rounds find room.
+if ((_tile getOrDefault ["count", 1]) > 1) exitWith {
+    if (([_container, _tile, 1] call EFUNC(storage,removeEntry)) isEqualTo []) exitWith {
+        ["Failed"] call EFUNC(gui,flashHint);
+    };
+
+    if (([_container, _round, _rounds] call EFUNC(storage,addNew)) isNotEqualTo "") then {
+        [_unit, _round, _rounds] call gmr_main_fnc_giveItem;
+    };
+
+    [] call EFUNC(gui,requestRebuild);
+};
+
 // The box out, its record first: its cells are free for the rounds.
 [_container, _tile, []] call EFUNC(storage,setPlace);
 
