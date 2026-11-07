@@ -129,10 +129,10 @@ _keys = _keys select [0, _fits];
 
     _keyX = _keyX + _taken;
 
-    // A short faint line between two hints (in the middle of fnc_uiKeyHint's gap after one): each key with its own words.
+    // A short faint line between two hints, as long as every line on the bar (FOOT_LINE_H) (in the middle of fnc_uiKeyHint's gap after one): each key with its own words.
     if (_forEachIndex < count _keys - 1) then {
         [
-            _display, controlNull, [_keyX - SQUARE(_keyH * 0.65), FOOT_Y + FOOT_H * 0.36, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * 0.28],
+            _display, controlNull, [_keyX - SQUARE(_keyH * 0.65), FOOT_Y + FOOT_H * FOOT_LINE_TOP, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * FOOT_LINE_H],
             _theme getOrDefault ["line", [1, 1, 1, 0.14]]
         ] call FUNC(uiPanel);
     };
@@ -168,9 +168,9 @@ private _hintCtrl = [_display, "AIO_FooterHint", controlNull, [_hintX, FOOT_Y + 
 if (_hintW < SQUARE(UNIT * 6)) then {
     _hintCtrl ctrlShow false;
 } else {
-    // The line between the key hints and the hint, half the bar high.
+    // The line between the key hints and the hint, as long as the others (FOOT_LINE_H).
     [
-        _display, controlNull, [_keyX - _hintGap, FOOT_Y + FOOT_H * 0.25, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * 0.5],
+        _display, controlNull, [_keyX - _hintGap, FOOT_Y + FOOT_H * FOOT_LINE_TOP, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * FOOT_LINE_H],
         _theme getOrDefault ["line", [1, 1, 1, 0.14]]
     ] call FUNC(uiPanel);
 };

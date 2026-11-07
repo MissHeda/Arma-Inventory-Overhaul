@@ -212,7 +212,7 @@ private _height = _padY * 2 + _titleH + (_gapY + _headH) + (count _rowDefs) * (_
 // The hint line at the bottom: the tip of what the mouse is on, inside the panel (a tip floating over it would lie under the
 // panel, which is drawn over everything while it holds the focus). As many lines as the longest tip the panel has wraps to -
 // two cut the Titles row's tip off in the middle of a sentence.
-private _hintSize = _small * 0.9;
+private _hintSize = _size * 0.9;
 private _hintW = _width - _padX * 2;
 private _hintLines = 2;
 
@@ -231,7 +231,7 @@ private _hintLines = 2;
     LLSTRING(Palette_Channel_Tip), LLSTRING(Palette_Hex_Tip)
 ]);
 
-private _hintH = _hintSize * 1.3 * (_hintLines min 5) + _hintSize * 0.4;
+private _hintH = _hintSize * 1.3 * (_hintLines min 6) + _hintSize * 0.4;
 
 _height = _height + _gapY + _hintH;
 

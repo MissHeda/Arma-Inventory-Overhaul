@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.96 - beta
+
+### Fixed
+
+- The tip line of the Colours and Layout card came out tiny in 0.6.95: its words are now about the size of the rows above,
+  as is the note under the layout preview.
+
+### Changed
+
+- Every upright line on the footer has one length, the ones between keys and the ones before the double click and the tip.
+
 ## 0.6.95 - beta
 
 ### Changed

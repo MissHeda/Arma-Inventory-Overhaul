@@ -48,9 +48,9 @@ if (_label isNotEqualTo "") then {
 
     _controls pushBack _group;
 
-    // The line as the one before it (fnc_drawFooter): in the middle of the gap after the hint, half the bar high.
+    // The line as the one before it (fnc_drawFooter): in the middle of the gap after the hint, as long as the others (FOOT_LINE_H).
     _controls append ([
-        _display, controlNull, [_startX + _taken - _gap, FOOT_Y + FOOT_H * 0.25, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * 0.5],
+        _display, controlNull, [_startX + _taken - _gap, FOOT_Y + FOOT_H * FOOT_LINE_TOP, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * FOOT_LINE_H],
         GVAR(theme) getOrDefault ["line", [1, 1, 1, 0.14]]
     ] call FUNC(uiPanel));
 

@@ -140,7 +140,7 @@ private _tips = _defs apply {
 };
 
 // The hint line at the bottom: as many lines as the longest tip wraps to, at least two.
-private _hintSize = _size * 0.6;
+private _hintSize = _size * 0.9;
 private _hintW = _listW - _padX * 2;
 private _hintLines = 2;
 
@@ -154,7 +154,7 @@ private _hintLines = 2;
     _hintLines = _hintLines max _lines;
 } forEach (_tips + _extraTips + [LLSTRING(Size_Default_Tip), LLSTRING(Size_Note), LLSTRING(Size_PageRows_None)]);
 
-private _hintH = _hintSize * 1.3 * (_hintLines min 5) + _hintSize * 0.4;
+private _hintH = _hintSize * 1.3 * (_hintLines min 6) + _hintSize * 0.4;
 
 _height = _height + _padY + _hintH;
 
@@ -476,10 +476,10 @@ private _editH = UNIT * 1;
     }, false, _size * 0.85, true, [], true
 ] call FUNC(uiButton);
 
-private _shotNote = [_display, "AIO_StructuredText", _layer, [_shotX, _editY + _editH + _padY / 2, _shotW, _small * 6]] call FUNC(uiCreate);
+private _shotNote = [_display, "AIO_StructuredText", _layer, [_shotX, _editY + _editH + _padY / 2, _shotW, _size * 6]] call FUNC(uiCreate);
 
 _shotNote ctrlEnable false;
-_shotNote setVariable [QGVAR(hintSize), _small * 0.8];
+_shotNote setVariable [QGVAR(hintSize), _size * 0.8];
 [_shotNote, LLSTRING(SettingsMenu_PreviewNote)] call FUNC(setMenuHint);
 
 private _hintTop = _extraTop + _extraH + _padY / 2;

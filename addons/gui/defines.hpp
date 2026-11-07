@@ -303,6 +303,10 @@
 // getTextWidth reports less than the engine draws: every measured text gets this much more room.
 #define TEXT_SLACK 1.3
 
+// The upright lines between the footer's hints: all one length, centred on the bar (Mia, 0.6.95).
+#define FOOT_LINE_H 0.32
+#define FOOT_LINE_TOP 0.34
+
 // One turn of the mouse wheel scrolls a column this far when a picture's clip group has taken the turn from it
 // (fnc_passWheel): about the three rows the engine's own step comes to.
 #define WHEEL_STEP (UNIT * 3)

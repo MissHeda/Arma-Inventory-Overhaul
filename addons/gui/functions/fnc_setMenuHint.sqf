@@ -35,15 +35,8 @@ private _escaped = ((toArray _tip) apply {
     };
 }) joinString "";
 
-(ctrlPosition _line) params ["", "", "", ["_room", 0]];
-
-// Still taller than its line - a long tip or a large text scale: a little smaller until it fits, so nothing is cut off.
-for "_i" from 0 to 6 do {
-    _line ctrlSetStructuredText parseText format [
-        "<t font='PuristaMedium' size='%1' color='#C7C7C7' align='left'>%2</t>", _size / (UNIT * 0.7), _escaped
-    ];
-
-    if (_room <= 0 || {ctrlTextHeight _line <= _room}) exitWith {};
-
-    _size = _size * 0.9;
-};
+// The card makes its line as high as its longest tip wraps to at this size (fnc_openSizeMenu, fnc_openPaletteMenu). No shrinking to
+// ctrlTextHeight: it measured too high and the words came out tiny (Mia, 0.6.95).
+_line ctrlSetStructuredText parseText format [
+    "<t font='PuristaMedium' size='%1' color='#C7C7C7' align='left'>%2</t>", _size / (UNIT * 0.7), _escaped
+];
