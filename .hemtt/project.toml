@@ -43,6 +43,16 @@ workshop = [
     # "2893363164", # KJW's Two Primary Weapons, for the compat_kjw_twoprimary addon (instead of WebKnight's, not with it)
 ]
 
+# With GreenMag Rework, for the compat_greenmag addon - built locally, not on the Workshop. Needs a pointer "greenmag" in
+# HEMTT's global config (%APPDATA%\hemtt\config.toml) to GreenMag-Rework's .hemttout folder, and `hemtt build` run there.
+#
+#   hemtt launch greenmag
+[hemtt.launch.greenmag]
+extends = "default"
+workshop = [
+    "greenmag:build", # GreenMag Rework, local build
+]
+
 # A test scene for the inventory (.hemtt/missions/AIO_Test.VR): a soldier with full gear, a crate, an
 # ACE Arsenal box, a vehicle, a body and things on the ground. Opens in Eden - play it from there.
 #
