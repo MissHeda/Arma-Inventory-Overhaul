@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.0 - beta
+
+The release of everything since 0.6.29 (the beta builds 0.6.30 to 0.6.113 below): real 3D weapon pictures, Tarkov-style
+Attachments, Edit layout, the quick move target, one Colours and Layout card with your own font, GreenMag Rework and
+BackpackOnChest support, and many fixes.
+
 ## 0.6.113 - beta
 
 Tested in game (MX with suppressor, optic and bipod, Mk200, P07 with suppressor, NLAW).
