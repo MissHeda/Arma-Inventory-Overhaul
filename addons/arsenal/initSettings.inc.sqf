@@ -4,6 +4,26 @@
 // has no row in CBA's menu but a control on the setup wizard's General page, and its value comes from the one
 // text box aio_main_settings (addons/main). The variable, its name, its kind of value and its script are as they were.
 
+// ----- ACE Arsenal -----
+
+// Each player's own eyes: ACE Arsenal in this mod's look - round glass panels under ACE's lists, boxes and buttons, the theme's
+// words (fnc_aceSkin) - or ACE's own, as it was. Applied when the arsenal opens, at once when it is open.
+[
+    QGVAR(aceStyle),
+    "LIST",
+    [LLSTRING(Setting_AceStyle), LLSTRING(Setting_AceStyle_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LELSTRING(gui,SubCategory_General)],
+    [["aio", "ace"], [LLSTRING(Setting_AceStyle_Aio), LLSTRING(Setting_AceStyle_Ace)], 0],
+    0,
+    {
+        private _display = findDisplay ARSENAL_IDD;
+
+        if (!isNull _display) then {
+            ["apply", [_display]] call FUNC(aceSkin);
+        };
+    }
+] call CBA_fnc_addSetting;
+
 // ----- Vanilla Arsenal -----
 
 // For everyone alike: the mission decides which arsenals it allows. Without ACE, "Open ACE Arsenal" is the vanilla one with grids.

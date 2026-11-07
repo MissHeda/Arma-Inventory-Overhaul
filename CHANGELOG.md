@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.86 - beta
+
+### Added
+
+- ACE Arsenal in this mod's look (setting "ACE Arsenal look", default on): ACE's square backgrounds - the list blocks, the menu
+  buttons, the stats, info, actions and message boxes, the search fields and sort boxes - become round glass panels in your
+  theme's colours, the list frames go, the lists take the theme's font and text colour. Same lists, same order, same buttons;
+  mods that add to ACE Arsenal (ACE Arsenal Extended) keep working. "ACE's own" brings back the look as it was (when the
+  arsenal opens next).
+
 ## 0.6.85 - beta
 
 ### Fixed

@@ -31,6 +31,9 @@
 
 disableSerialization;
 
+// This mod's look of ACE's window goes with it (fnc_aceSkin).
+["remove"] call FUNC(aceSkin);
+
 // The engine is let go of whether or not its frame already saw the display go: only this takes its hooks
 // away.
 if (GVAR(attached)) then {

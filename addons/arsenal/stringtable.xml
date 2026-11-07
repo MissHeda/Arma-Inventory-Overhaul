@@ -82,6 +82,18 @@
         <Key ID="STR_aio_arsenal_Removed">
             <English>Removed, as they did not fit: %1</English>
         </Key>
+        <Key ID="STR_aio_arsenal_Setting_AceStyle">
+            <English>ACE Arsenal look</English>
+        </Key>
+        <Key ID="STR_aio_arsenal_Setting_AceStyle_Ace">
+            <English>ACE's own</English>
+        </Key>
+        <Key ID="STR_aio_arsenal_Setting_AceStyle_Aio">
+            <English>Arma Inventory Overhaul</English>
+        </Key>
+        <Key ID="STR_aio_arsenal_Setting_AceStyle_Desc">
+            <English>ACE Arsenal on this mod's glass: round\npanels under its lists, boxes and\nbuttons, in your colours.\n\nThe same lists in the same order, mods\nthat add to it included. ACE's own is\nthe look as it was.</English>
+        </Key>
         <Key ID="STR_aio_arsenal_Setting_BIArsenal">
             <English>Vanilla Virtual Arsenal</English>
         </Key>
