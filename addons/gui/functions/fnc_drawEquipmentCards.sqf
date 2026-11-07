@@ -435,7 +435,7 @@ private _fnc_weaponCard = {
             private _filmAlpha = _film param [3, 0];
             private _background = [0, 1, 2] apply {((_panel param [_x, 0.05]) * (1 - _filmAlpha)) + ((_film param [_x, 1]) * _filmAlpha)};
 
-            _real = ["show", [_slot, _weapon, _target, _background]] call FUNC(cardScene);
+            _real = ["show", [_slot, _weapon, _target, _background, [_viewPixelsW / _imagePixelsW, _viewPixelsH / _imagePixelsH]]] call FUNC(cardScene);
 
             if (_real) then {
                 _scene3DSlots pushBack _slot;

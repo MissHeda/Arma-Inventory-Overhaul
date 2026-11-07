@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.82 - beta
+
+### Fixed
+
+- Real weapon pictures: the weapon sits in the middle of its card - by its whole model, stock included - and the camera stands so
+  far off that all of it fits what the card shows, at any card size the layout gives it.
+
 ## 0.6.81 - beta
 
 ### Changed

@@ -591,6 +591,8 @@
 #define CARD_3D_TARGET "aio_card3d"
 #define CARD_3D_MAX_RES 1024
 #define CARD_3D_DISTANCE 0.95
+// How much of what the card shows the weapon fills, across or up and down - whichever it reaches first.
+#define CARD_3D_ROOM 0.88
 #define INSPECT_3D_ASPECT (getResolution select 4)
 #define INSPECT_3D_SUPER 2
 #define INSPECT_3D_MAX_RES 2048

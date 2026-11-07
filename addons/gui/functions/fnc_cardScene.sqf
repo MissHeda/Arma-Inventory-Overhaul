@@ -18,7 +18,9 @@
  *
  * Arguments:
  * 0: What to do <STRING>
- *    "show" a slot's scene for this weapon (arguments: [slot, weapon as fnc_getEquipment has it, render target, background RGB])
+ *    "show" a slot's scene for this weapon (arguments: [slot, weapon as fnc_getEquipment has it, render target, background RGB,
+ *           [share of the picture's width the card shows, share of its height]]) - the camera stands so far off that the whole
+ *           weapon fits what the card shows of the picture, whatever size the layout gives the card
  *    "keep" only these slots' scenes stay (arguments: [slots])
  *    "stop" every scene goes
  * 1: Arguments <ARRAY> (default: [])
@@ -92,9 +94,30 @@ private _fnc_camera = {
     _rim setPosASL ((_target vectorAdd ((_target vectorDiff _cameraPos) vectorMultiply 0.8)) vectorAdd [0, 0, 0.5 * _distance]);
 };
 
+// How far off the camera stands: the whole weapon - its length across, its height up and down - inside what the card shows of the
+// picture (its shares of the picture's width and height), with a little room round it. The picture's height at a distance is
+// 2 * INSPECT_3D_FOV of it, its width that times the screen's shape (the target is filmed in the screen's shape).
+private _fnc_frame = {
+    params ["_scene"];
+
+    (_scene getOrDefault ["shares", [1, 1]]) params [["_widthShare", 1], ["_heightShare", 1]];
+
+    private _length = _scene getOrDefault ["length", _scene getOrDefault ["frameSize", 1]];
+    private _height = _scene getOrDefault ["height", _length / 3];
+    private _perMetre = 2 * INSPECT_3D_FOV;
+    private _room = CARD_3D_ROOM;
+    private _distance = ((_length / (_room * (_widthShare max 0.05) * _perMetre * INSPECT_3D_ASPECT)) max (_height / (_room * (_heightShare max 0.05) * _perMetre))) max 0.2;
+
+    _scene set ["distance", _distance min 8];
+
+    [_scene] call _fnc_camera;
+};
+
 switch (_mode) do {
     case "show": {
-        _arguments params [["_slot", "", [""]], ["_weapon", [], [[]]], ["_target3D", "", [""]], ["_background", [0.05, 0.055, 0.065], [[]]]];
+        _arguments params [
+            ["_slot", "", [""]], ["_weapon", [], [[]]], ["_target3D", "", [""]], ["_background", [0.05, 0.055, 0.065], [[]]], ["_shares", [1, 1], [[]]]
+        ];
 
         private _class = _weapon param [0, "", [""]];
 
@@ -122,6 +145,11 @@ switch (_mode) do {
                 _scene set ["target3D", _target3D];
             };
 
+            if ((_scene getOrDefault ["shares", []]) isNotEqualTo _shares) then {
+                _scene set ["shares", _shares];
+                [_scene] call _fnc_frame;
+            };
+
             if ((_scene get "fitted") isNotEqualTo _fitted) then {
                 private _holder = (_scene get "objects") param [1, objNull];
 
@@ -144,7 +172,7 @@ switch (_mode) do {
         private _sceneBase = _place + [((getTerrainHeightASL _place) max 0) + 300];
         private _objects = [];
 
-        _scene = createHashMapFromArray [["class", _class], ["fitted", _fitted], ["target3D", _target3D], ["objects", _objects]];
+        _scene = createHashMapFromArray [["class", _class], ["fitted", _fitted], ["target3D", _target3D], ["objects", _objects], ["shares", _shares]];
         GVAR(cardScenes) set [_slot, _scene];
 
         // The sphere in the card's own colour, so the picture sits on the card as the flat one did.
@@ -181,11 +209,13 @@ switch (_mode) do {
             };
         };
 
-        _scene set ["frame", _frame];
+        // How far weaponPoints keeps a point from the holder: wide - the ends of a long weapon are points here (below).
+        _scene set ["frame", 3];
         _scene set ["target", +_holderPos];
         _scene set ["origin", +_holderPos];
         _scene set ["dir", 45];
         _scene set ["pitch", 6];
+        _scene set ["frameSize", _frame];
         _scene set ["distance", ((_frame * INSPECT_3D_DISTANCE * CARD_3D_DISTANCE) max 0.25) min 6];
 
         _scene set ["lights", [[30, [1, 0.97, 0.92], [1, 0.97, 0.92]], [12, [0.6, 0.7, 0.9], [0.7, 0.8, 1]], [20, [1, 1, 1], [1, 0.9, 0.8]]] apply {
@@ -225,7 +255,7 @@ switch (_mode) do {
                 }
             },
             {
-                params ["_scene", "_fnc_camera"];
+                params ["_scene", "_fnc_camera", "_fnc_frame"];
 
                 if (isNull (_scene getOrDefault ["camera", objNull])) exitWith {};
 
@@ -233,10 +263,62 @@ switch (_mode) do {
                 private _base = _holder modelToWorldWorld (_holder selectionPosition ["proxy:\a3\characters_f\proxies\weapon.001", 0.5]);
                 private _muzzle = ([_scene] call FUNC(weaponPoints)) getOrDefault ["muzzle", []];
 
-                // The middle between the base and the muzzle: the weapon as a whole in the middle of the picture.
-                private _target = if (count _muzzle == 3) then {(_base vectorAdd _muzzle) vectorMultiply 0.5} else {_base};
+                // The weapon's box in its model, its middle and its ends along the barrel and up and down, carried onto the holder
+                // as the parts' places are (fnc_weaponPoints): the middle of the picture is the middle of the weapon - stock and
+                // all, not the middle between its grip and its muzzle (Mia, 0.6.80: "not centred").
+                private _model = [_scene get "class"] call FUNC(itemModel);
+                private _probe = if (_model isEqualTo "") then {objNull} else {createSimpleObject [_model, [0, 0, 0], true]};
+                private _inModel = [_scene, true] call FUNC(weaponPoints);
 
-                _scene set ["target", _target];
+                if (!isNull _probe && {!isNil "_inModel"}) then {
+                    (0 boundingBoxReal _probe) params ["_boxMin", "_boxMax"];
+                    deleteVehicle _probe;
+
+                    private _middle = (_boxMin vectorAdd _boxMax) vectorMultiply 0.5;
+                    private _extent = _boxMax vectorDiff _boxMin;
+                    private _muzzleInModel = _inModel getOrDefault ["muzzle", [0, 1, 0]];
+                    private _along = 0;
+
+                    // The barrel lies along the axis the muzzle is farthest out on; up and down is z, or y for a model laid on z.
+                    {
+                        if (abs (_muzzleInModel select _x) > abs (_muzzleInModel select _along)) then {_along = _x};
+                    } forEach [1, 2];
+
+                    private _upAxis = [2, 1] select (_along == 2);
+                    private _fnc_at = {
+                        params ["_axis", "_sign"];
+
+                        private _point = +_middle;
+                        _point set [_axis, (_point select _axis) + _sign * (_extent select _axis) / 2];
+                        _point
+                    };
+
+                    _inModel set ["centre", _middle];
+                    _inModel set ["front", [_along, 1] call _fnc_at];
+                    _inModel set ["back", [_along, -1] call _fnc_at];
+                    _inModel set ["top", [_upAxis, 1] call _fnc_at];
+                    _inModel set ["bottom", [_upAxis, -1] call _fnc_at];
+
+                    _scene deleteAt "points";
+                } else {
+                    if (!isNull _probe) then {deleteVehicle _probe};
+                };
+
+                private _points = [_scene] call FUNC(weaponPoints);
+
+                if (isNil "_points") then {_points = createHashMap};
+
+                _scene set ["target", _points getOrDefault ["centre", _base]];
+
+                private _front = _points getOrDefault ["front", []];
+                private _back = _points getOrDefault ["back", []];
+                private _top = _points getOrDefault ["top", []];
+                private _bottom = _points getOrDefault ["bottom", []];
+
+                if (count _front == 3 && {count _back == 3}) then {_scene set ["length", _front distance _back]};
+                if (count _top == 3 && {count _bottom == 3}) then {_scene set ["height", _top distance _bottom]};
+
+                [_scene] call _fnc_frame;
 
                 if (count _muzzle == 3) then {
                     private _barrel = _muzzle vectorDiff _base;
@@ -252,7 +334,7 @@ switch (_mode) do {
 
                 [_scene] call _fnc_camera;
             },
-            [_scene, _fnc_camera],
+            [_scene, _fnc_camera, _fnc_frame],
             5
         ] call CBA_fnc_waitUntilAndExecute;
 
