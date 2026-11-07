@@ -213,6 +213,9 @@ private _fieldLabelW = SQUARE(_cu * 1.4);
 // The title, the Style row (and its list), every row folded, and what the open row shows: its picker, its sliders, its note.
 private _height = _padY * 2 + _titleH + (_gapY + _headH) + (count _rowDefs) * (_gapY + _headH) + (count _sectionHeads) * (_gapY + _sectionH);
 
+// The Font row under the Style row.
+_height = _height + _gapY + _headH;
+
 // The hint line at the bottom: the tip of what the mouse is on, inside the panel (a tip floating over it would lie under the
 // panel, which is drawn over everything while it holds the focus). As many lines as the longest tip the panel has wraps to -
 // two cut the Titles row's tip off in the middle of a sentence.
@@ -753,6 +756,53 @@ if (_stylesOpen) then {
 
     _y = _y + _pickPad;
 };
+
+// ----- The font (Mia, 0.6.104: "change the font in the colours tab"): the player's setting aio_gui_font, which the Layout tab
+// and CBA's settings show too. A click takes the next font; the window is built anew in it (fnc_build). -----
+
+_y = _y + _gapY;
+
+[
+    _display, _layer, [_cardX + _nameX, _y, _nameW, _headH], [LLSTRING(Setting_Font), _nameW, _fontBold, _size] call FUNC(fitText), _size, _text,
+    _fontBold, 0, "menu"
+] call FUNC(uiLabel);
+
+private _fontIds = ["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"];
+private _fontNames = [
+    LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight), LLSTRING(Font_Etelka),
+    LLSTRING(Font_Tahoma), LLSTRING(Font_Lucida)
+];
+private _fontAt = (_fontIds find (missionNamespace getVariable [QGVAR(font), "purista"])) max 0;
+
+private _fontButton = [
+    _display, _layer, [_cardX + _swatchX, _y + (_headH - _chipH) / 2, _cardX + _width - _padX - (_cardX + _swatchX), _chipH], "font",
+    _fontNames select _fontAt, UI_TEX(icon_chevron_right_ca), _buttonTheme, {
+        params ["_button"];
+
+        if (_button < 0) exitWith {};
+
+        private _fontIds = ["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"];
+        private _at = (_fontIds find (missionNamespace getVariable [QGVAR(font), "purista"])) max 0;
+
+        private _next = _fontIds select ((_at + 1) mod count _fontIds);
+
+        [{
+            params ["_next"];
+
+            [QGVAR(font), _next, 0, "client"] call CBA_fnc_setSetting;
+
+            private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+            if (!isNull _display) then {
+                [_display] call FUNC(openPaletteMenu);
+            };
+        }, [_next]] call FUNC(later);
+    }, false, _chipSize
+] call FUNC(uiButton);
+
+[(_fontButton param [count _fontButton - 1, controlNull]), LLSTRING(Setting_Font_Desc)] call FUNC(setTooltip);
+
+_y = _y + _headH;
 
 // ----- The rows, the open one with its picker, its sliders and its note under it -----
 

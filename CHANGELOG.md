@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.106 - beta
+
+### Added
+
+- The font can be changed in the Colours tab too: a Font row under Style, a click takes the next font.
+
 ## 0.6.105 - beta
 
 ### Changed
