@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.85 - beta
+
+### Fixed
+
+- Loading a loadout lost heavy things beyond a container's config load (Discord, NandoPBR: the second demolition charge in a
+  Carryall). The top-up after the load only looked at containers nine tenths full; it now adds back whatever the engine turned
+  down because it did not fit the load that was left.
+
 ## 0.6.84 - beta
 
 ### Changed
