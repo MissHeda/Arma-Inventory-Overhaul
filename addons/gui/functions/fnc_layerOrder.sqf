@@ -29,7 +29,12 @@ private _order = [];
     };
 } forEach ((missionNamespace getVariable [QGVAR(layoutRects), ""]) splitString ";");
 
-private _keyed = _ids apply {[_order find _x, _forEachIndex, _x]};
+// forEach, not apply: apply has no _forEachIndex (a script error on every build since 0.6.67, seen in game 0.6.88).
+private _keyed = [];
+
+{
+    _keyed pushBack [_order find _x, _forEachIndex, _x];
+} forEach _ids;
 
 _keyed sort true;
 

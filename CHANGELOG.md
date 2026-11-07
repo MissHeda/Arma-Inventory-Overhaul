@@ -2,6 +2,18 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.89 - beta
+
+Tested in game (an unattended test mission, screenshots).
+
+### Fixed
+
+- A script error on every build of the window since 0.6.67 (`fnc_layerOrder`: `apply` has no `_forEachIndex`).
+- Real weapon pictures: grey once the still was kept - the engine forgets what a camera filmed once the camera goes, so the
+  camera stays while the card is shown. The weapon came out white: softer lights and a dark grey behind it that sits on the card
+  (on black the exposure opened up). A handgun is no longer cut off at the bottom.
+- ACE Arsenal look: the panels are round and outlined whatever the theme's corners (with a sharp theme it looked like ACE's own).
+
 ## 0.6.88 - beta
 
 ### Fixed

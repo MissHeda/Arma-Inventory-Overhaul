@@ -595,6 +595,10 @@
 #define CARD_3D_ROOM 0.88
 // How many frames a weapon is filmed before its picture is kept as a still and the scene goes.
 #define CARD_3D_STILL_FRAMES 6
+// The scene's lights against the inspect card's.
+#define CARD_3D_LIGHT 0.15
+// The grey of the sphere round a weapon (0 to 1).
+#define CARD_3D_BACKDROP 0.09
 #define INSPECT_3D_ASPECT (getResolution select 4)
 #define INSPECT_3D_SUPER 2
 #define INSPECT_3D_MAX_RES 2048

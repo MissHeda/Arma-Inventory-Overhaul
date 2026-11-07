@@ -435,8 +435,9 @@ private _fnc_weaponCard = {
             private _filmAlpha = _film param [3, 0];
             private _background = [0, 1, 2] apply {((_panel param [_x, 0.05]) * (1 - _filmAlpha)) + ((_film param [_x, 1]) * _filmAlpha)};
 
-            // Black behind the weapon: the theme's grey came out bluish in the scene's light; black stays black.
-            _background = [0, 0, 0];
+            // A dark neutral grey behind the weapon: on black the camera's exposure opened up and the weapon came out white; the theme's
+            // tinted grey came out bluish (both seen in game, 0.6.88).
+            _background = [CARD_3D_BACKDROP, CARD_3D_BACKDROP, CARD_3D_BACKDROP];
             _real = ["show", [_slot, _weapon, _target, _background, [_viewPixelsW / _imagePixelsW, _viewPixelsH / _imagePixelsH]]] call FUNC(cardScene);
 
             if (_real) then {

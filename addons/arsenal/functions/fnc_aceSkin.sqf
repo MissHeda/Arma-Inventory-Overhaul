@@ -90,7 +90,9 @@ switch (_mode) do {
         private _field = _theme getOrDefault ["slot", [1, 1, 1, 0.06]];
         private _text = _theme getOrDefault ["text", [1, 1, 1, 1]];
         private _font = _theme getOrDefault ["font", "PuristaMedium"];
-        private _radius = (_theme getOrDefault ["radius", 0]) max 0;
+        // Round as the inspect card's boxes, whatever the theme's own corners (a sharp theme gave ACE's look back - seen in game, 0.6.88).
+        private _unit = safezoneH / 40;
+        private _radius = (_theme getOrDefault ["radius", 0]) max (_unit * 0.45);
         private _clear = [0, 0, 0, 0];
 
         // [ACE's control, the colour under it, how round]: the blocks behind the lists, the boxes, the buttons and fields.
@@ -106,7 +108,7 @@ switch (_mode) do {
         ];
 
         private _pairs = [];
-        private _outline = [1, 1, 1, 0.12];
+        private _outline = [1, 1, 1, 0.16];
 
         {
             _x params ["_idc", "_colour", "_round"];
@@ -153,6 +155,9 @@ switch (_mode) do {
 
         uiNamespace setVariable [QGVAR(skinPairs), _pairs];
 
+        // ACE paints its backgrounds again (on a fill, a tab): what lies on the panels is kept see-through every frame.
+        uiNamespace setVariable [QGVAR(skinClear), (_pairs apply {_x select 0}) + ([13, 14, 15] apply {_display displayCtrl _x})];
+
         GVAR(skinFrame) = [{["frame"] call FUNC(aceSkin)}, 0] call CBA_fnc_addPerFrameHandler;
     };
 
@@ -160,6 +165,10 @@ switch (_mode) do {
         private _pairs = uiNamespace getVariable [QGVAR(skinPairs), []];
 
         if (_pairs isEqualTo []) exitWith {};
+
+        {
+            if (!isNull _x) then {_x ctrlSetBackgroundColor [0, 0, 0, 0]};
+        } forEach (uiNamespace getVariable [QGVAR(skinClear), []]);
 
         {
             _x params ["_control", "_made", "_rect"];

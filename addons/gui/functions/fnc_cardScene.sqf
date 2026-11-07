@@ -106,7 +106,7 @@ private _fnc_frame = {
     private _height = _scene getOrDefault ["height", _length / 3];
     private _perMetre = 2 * INSPECT_3D_FOV;
     private _room = CARD_3D_ROOM;
-    private _distance = ((_length / (_room * (_widthShare max 0.05) * _perMetre * INSPECT_3D_ASPECT)) max (_height / (_room * (_heightShare max 0.05) * _perMetre))) max 0.2;
+    private _distance = ((_length / (_room * (_widthShare max 0.05) * _perMetre * INSPECT_3D_ASPECT)) max (_height / (_room * 0.75 * (_heightShare max 0.05) * _perMetre))) max 0.2;
 
     _scene set ["distance", _distance min 8];
 
@@ -224,7 +224,8 @@ switch (_mode) do {
         _scene set ["frameSize", _frame];
         _scene set ["distance", ((_frame * INSPECT_3D_DISTANCE * CARD_3D_DISTANCE) max 0.25) min 6];
 
-        _scene set ["lights", [[30, [1, 0.97, 0.92], [1, 0.97, 0.92]], [12, [0.6, 0.7, 0.9], [0.7, 0.8, 1]], [20, [1, 1, 1], [1, 0.9, 0.8]]] apply {
+        // Softer than the inspect card's: at its strength a black weapon came out white on the small card (seen in game, 0.6.88).
+        _scene set ["lights", [[CARD_3D_LIGHT * 30, [1, 0.97, 0.92], [1, 0.97, 0.92]], [CARD_3D_LIGHT * 12, [0.6, 0.7, 0.9], [0.7, 0.8, 1]], [CARD_3D_LIGHT * 20, [1, 1, 1], [1, 0.9, 0.8]]] apply {
             _x params ["_brightness", "_ambient", "_colour"];
 
             private _light = "#lightpoint" createVehicleLocal [0, 0, 0];
@@ -346,25 +347,8 @@ switch (_mode) do {
 
                 [_scene] call _fnc_camera;
 
-                // A still, as a photo of the weapon (Mia, 0.6.85: "just take a picture of it"): a few frames to film it, then the
-                // camera and the scene go without ending what it filmed into - the texture keeps its last picture, and nothing
-                // films while the window is open.
-                [{
-                    params ["_scene"];
-
-                    private _camera = _scene getOrDefault ["camera", objNull];
-
-                    if (isNull _camera) exitWith {};
-
-                    camDestroy _camera;
-
-                    {
-                        if (!isNull _x) then {deleteVehicle _x};
-                    } forEach (_scene getOrDefault ["objects", []]);
-
-                    _scene set ["objects", []];
-                    _scene set ["frozen", true];
-                }, [_scene], CARD_3D_STILL_FRAMES] call CBA_fnc_execAfterNFrames;
+                // No still: once its camera goes the engine forgets what it filmed into and the card turns grey (seen in game,
+                // 0.6.88) - the camera stays while the card is shown.
             },
             [_scene, _fnc_camera, _fnc_frame],
             5
