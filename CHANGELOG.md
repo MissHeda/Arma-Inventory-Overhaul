@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.101 - beta
+
+### Fixed
+
+- A failed action showed a script error instead of the red, shaking line of 0.6.98 (seen in game).
+
 ## 0.6.100 - beta
 
 ### Changed

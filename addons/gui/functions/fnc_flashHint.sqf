@@ -89,7 +89,7 @@ private _hex = "#" + ((_color select [0, 3]) apply {
 } joinString "");
 
 _hint ctrlSetStructuredText (text _text setAttributes (
-    ["color", _hex, "size", str (_hint getVariable [QGVAR(textScale), 1])] + (["font", GVAR(theme) getOrDefault ["fontBold", "PuristaSemibold"]] select _failed)
+    ["color", _hex, "size", str (_hint getVariable [QGVAR(textScale), 1])] + ([[], ["font", GVAR(theme) getOrDefault ["fontBold", "PuristaSemibold"]]] select _failed)
 ));
 [_hint] call FUNC(fitHint);
 
