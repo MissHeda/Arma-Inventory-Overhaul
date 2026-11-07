@@ -322,6 +322,27 @@ switch (_mode) do {
                     } forEach [1, 2];
 
                     private _upAxis = [2, 1] select (_along == 2);
+
+                    // A muzzle attachment (a suppressor) reaches out past the barrel: the box made that much longer at the muzzle's
+                    // end, so the whole weapon is in the middle of the card, not the bare gun (Mia, 0.6.110: "auto centre").
+                    private _muzzleItem = (_scene get "fitted") param [1, ""];
+                    private _muzzleModel = if (_muzzleItem isEqualType "" && {_muzzleItem isNotEqualTo ""}) then {[_muzzleItem] call FUNC(itemModel)} else {""};
+
+                    if (_muzzleModel isNotEqualTo "") then {
+                        private _part = createSimpleObject [_muzzleModel, [0, 0, 0], true];
+
+                        if (!isNull _part) then {
+                            (0 boundingBoxReal _part) params ["_partMin", "_partMax"];
+                            deleteVehicle _part;
+
+                            private _partSize = _partMax vectorDiff _partMin;
+                            private _reach = (((_partSize select 0) max (_partSize select 1) max (_partSize select 2)) min 0.6) max 0;
+                            private _side = [-1, 1] select ((_muzzleInModel select _along) >= (_middle select _along));
+
+                            _middle set [_along, (_middle select _along) + _side * _reach / 2];
+                            _extent set [_along, (_extent select _along) + _reach];
+                        };
+                    };
                     private _fnc_at = {
                         params ["_axis", "_sign"];
 

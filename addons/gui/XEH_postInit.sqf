@@ -18,6 +18,23 @@
 
 if (!hasInterface) exitWith {};
 
+// The settings the player set in the window (fnc_settingsRow), put back where they came up otherwise - not where the server or the
+// mission set them (fnc_settingForced). Each one put back says so in the RPT.
+{
+    private _setting = _x;
+    private _saved = _y;
+    private _now = missionNamespace getVariable _setting;
+
+    if (!isNil "_now" && {_now isNotEqualTo _saved} && {!([_setting] call FUNC(settingForced))}) then {
+        INFO_3("Setting %1 came up as %2, put back to the window's %3.",_setting,_now,_saved);
+        missionNamespace setVariable [_setting, _saved];
+
+        if (!isNil "CBA_settings_fnc_set") then {
+            [_setting, _saved, 0, "client", true] call CBA_settings_fnc_set;
+        };
+    };
+} forEach (profileNamespace getVariable [QGVAR(ownSettings), createHashMap]);
+
 #include "initKeybinds.inc.sqf"
 
 // What mods set for the right-click menu and the double click in their config (CfgAioMenu).

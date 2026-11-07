@@ -63,6 +63,16 @@ if (!isNil "CBA_settings_fnc_set") then {
     [_setting, _value, 0, "client", true] call CBA_settings_fnc_set;
 };
 
+// And a copy of the window's own, put back at the next start should the setting come up otherwise (XEH_postInit): "Real weapon
+// pictures" was still off after a restart (Mia, 0.6.110), though CBA had it stored.
+private _own = profileNamespace getVariable [QGVAR(ownSettings), createHashMap];
+
+if !(_own isEqualType createHashMap) then {_own = createHashMap};
+
+_own set [toLowerANSI _setting, _value];
+profileNamespace setVariable [QGVAR(ownSettings), _own];
+saveProfileNamespace;
+
 // An order picked means the columns in that order: what was placed by hand goes.
 if (_setting isEqualTo QGVAR(columnOrder) && {(missionNamespace getVariable [QGVAR(layoutRects), ""]) isNotEqualTo ""}) then {
     ["reset"] call FUNC(layoutDrag);

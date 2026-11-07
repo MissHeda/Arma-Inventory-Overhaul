@@ -2,6 +2,18 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.111 - beta
+
+### Changed
+
+- Real weapon pictures centre the whole weapon with its muzzle attachment: a suppressor no longer pushes the weapon off the
+  middle of its card.
+
+### Fixed
+
+- Settings set in the window are also kept by the window itself and put back at the next start should they come up otherwise
+  (each one put back is named in the RPT) - "Real weapon pictures" was still off after a restart.
+
 ## 0.6.110 - beta
 
 ### Fixed
