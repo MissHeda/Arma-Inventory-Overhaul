@@ -50,6 +50,10 @@ disableSerialization;
 
 params ["_display"];
 
+// The card grows with Arma's interface size, as far as the screen has room (fnc_cardScale): every size on it is _cu, not UNIT.
+private _scale = ["size"] call FUNC(cardScale);
+private _cu = UNIT * _scale;
+
 // A field that had the cursor before the menu took the focus, to have it back when the menu goes (fnc_openMenu).
 private _back = if ((uiNamespace getVariable [QGVAR(menu), []]) isEqualTo []) then {
     private _focused = focusedCtrl _display;
@@ -89,30 +93,30 @@ private _count = count _defs;
 
 // ----- Sizes -----
 
-private _size = UNIT * 0.55;
-private _rowH = UNIT * 1.1;
-private _headH = UNIT * 1.1;
-private _padX = SQUARE(UNIT * 0.6);
-private _padY = UNIT * 0.35;
-private _gapX = SQUARE(UNIT * 0.45);
+private _size = _cu * 0.55;
+private _rowH = _cu * 1.1;
+private _headH = _cu * 1.1;
+private _padX = SQUARE(_cu * 0.6);
+private _padY = _cu * 0.35;
+private _gapX = SQUARE(_cu * 0.45);
 private _extras = call FUNC(settingsDefs);
-private _extraRowH = UNIT * 0.92;
+private _extraRowH = _cu * 0.92;
 private _extraH = _extraRowH * count _extras;
-private _listW = SQUARE(UNIT * 23);
-private _previewW = SQUARE(UNIT * 12);
+private _listW = SQUARE(_cu * 23);
+private _previewW = SQUARE(_cu * 12);
 private _width = _listW + _previewW;
 private _height = _padY * 2 + _headH + _count * _rowH + _extraH;
-private _chipH = UNIT * 0.8;
-private _chipSize = UNIT * 0.44;
+private _chipH = _cu * 0.8;
+private _chipSize = _cu * 0.44;
 
 // Left to right: padding, name, gap, slider, gap, value, padding.
 private _labelX = _padX;
-private _labelW = SQUARE(UNIT * 4.8);
+private _labelW = SQUARE(_cu * 4.8);
 private _sliderX = _labelX + _labelW + _gapX;
-private _valueW = SQUARE(UNIT * 1.8);
+private _valueW = SQUARE(_cu * 1.8);
 private _sliderW = _listW - _padX - _valueW - _gapX - _sliderX;
-private _trackH = UNIT * 0.2;
-private _thumbH = UNIT * 0.55;
+private _trackH = _cu * 0.2;
+private _thumbH = _cu * 0.55;
 private _thumbW = SQUARE(_thumbH);
 
 // The track runs between the knob's middle at the least and at the most: the knob stays inside the slider's room at both ends.
@@ -160,8 +164,13 @@ _height = _height + _padY + _hintH;
 
 // The right edge of the window - the header's, where the Close button ends - and a small gap under the header's line, kept on the screen.
 // The tabs on top, Colours and Layout (fnc_drawDesignTabs): one more line on the card.
-private _tabsH = UNIT * 1.1;
+private _tabsH = _cu * 1.1;
 _height = _height + _tabsH;
+
+// Taller or wider than the screen at this scale: made again next frame at the scale that fits (fnc_cardScale keeps it).
+if (["size", _height, _width, _scale] call FUNC(cardScale)) then {
+    [{[uiNamespace getVariable [QGVAR(display), displayNull], "layout"] call FUNC(openDesignMenu)}] call FUNC(later);
+};
 
 private _left = ((CONTENT_X + CONTENT_W - _width) min (safezoneX + safezoneW - _width)) max safezoneX;
 private _top = (((HEAD_Y + HEAD_H + UNIT * 0.5) max (safezoneY + UNIT * 2.6 + pixelH * 3)) min (safezoneY + safezoneH - _height)) max safezoneY;
@@ -204,7 +213,7 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{[] call FUNC(closeMenu)}] call F
     _display, _layer, [_cardX + _padX, _cardY + _padY, _listW - _padX * 2, _tabsH], "layout", _chipH, _chipSize,
     createHashMapFromArray [
         ["button", [1, 1, 1, 0.08]], ["buttonHover", [1, 1, 1, 0.18]], ["buttonText", _text2], ["font", _font], ["muted", _muted],
-        ["radius", UNIT * 0.3], ["upper", false]
+        ["radius", _cu * 0.3], ["upper", false]
     ]
 ] call FUNC(drawDesignTabs);
 
@@ -224,7 +233,7 @@ private _buttonTheme = createHashMapFromArray [
     ["buttonText", _text2],
     ["font", _font],
     ["muted", _muted],
-    ["radius", UNIT * 0.3],
+    ["radius", _cu * 0.3],
     ["upper", false]
 ];
 
@@ -313,10 +322,10 @@ private _rows = [];
 // ----- The rows of the player's other settings -----
 
 private _extraTop = _headTop + _headH + _count * _rowH;
-private _boxH = UNIT * 0.5;
+private _boxH = _cu * 0.5;
 private _boxW = SQUARE(_boxH);
 private _accent = _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]];
-private _extraNameW = SQUARE(UNIT * 13);
+private _extraNameW = SQUARE(_cu * 13);
 
 {
     _x params ["_setting", "_name", "", ["_kind", ""], "_default", ["_data", []]];
@@ -464,7 +473,7 @@ private _columns = [true] call FUNC(columnRects);
 
 // The way into the edit mode: the columns moved and resized by hand.
 private _editY = _shotY + _shotH + _padY;
-private _editH = UNIT * 1;
+private _editH = _cu * 1;
 
 [
     _display, _layer, [_shotX, _editY, _shotW, _editH], "layoutedit", LLSTRING(Layout_Edit), "", _buttonTheme, {
@@ -476,7 +485,7 @@ private _editH = UNIT * 1;
     }, false, _size * 0.85, true, [], true
 ] call FUNC(uiButton);
 
-private _shotNote = [_display, "AIO_StructuredText", _layer, [_shotX, _editY + _editH + _padY / 2, _shotW, _size * 6]] call FUNC(uiCreate);
+private _shotNote = [_display, "AIO_TextMulti", _layer, [_shotX, _editY + _editH + _padY / 2, _shotW, _size * 6]] call FUNC(uiCreate);
 
 _shotNote ctrlEnable false;
 _shotNote setVariable [QGVAR(hintSize), _size * 0.8];
@@ -486,7 +495,7 @@ private _hintTop = _extraTop + _extraH + _padY / 2;
 
 [_display, _layer, [_cardX + _padX, _hintTop - _padY / 4, _hintW, pixelH], _line] call FUNC(uiPanel);
 
-private _hintLine = [_display, "AIO_StructuredText", _layer, [_cardX + _padX, _hintTop, _hintW, _hintH]] call FUNC(uiCreate);
+private _hintLine = [_display, "AIO_TextMulti", _layer, [_cardX + _padX, _hintTop, _hintW, _hintH]] call FUNC(uiCreate);
 
 _hintLine ctrlEnable false;
 _hintLine setVariable [QGVAR(hintSize), _hintSize];

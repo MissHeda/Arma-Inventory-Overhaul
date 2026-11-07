@@ -23,6 +23,13 @@ if (isNull _line) exitWith {};
 
 private _size = _line getVariable [QGVAR(hintSize), UNIT * 0.45];
 
+// A plain text control (AIO_TextMulti): the words at exactly this height, wrapped over its lines.
+if (ctrlType _line == 0) exitWith {
+    _line ctrlSetFontHeight _size;
+    _line ctrlSetTextColor [0.78, 0.78, 0.78, 1];
+    _line ctrlSetText _tip;
+};
+
 // As tags, as fnc_gradientText writes its words: set with setAttributes the size was not taken and the tip came out at the
 // control's own size, too big for its line and cut off at the card's foot (Mia, 0.6.93).
 private _escaped = ((toArray _tip) apply {

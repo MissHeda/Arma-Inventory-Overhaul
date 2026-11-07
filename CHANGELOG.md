@@ -2,6 +2,18 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.97 - beta
+
+### Changed
+
+- The Colours and Layout card grows with Arma's interface size (Options > Game > Layout): very small as before, each step
+  up larger, as far as the screen has room.
+
+### Fixed
+
+- The card's tip line and the note under the layout preview are drawn as plain text at an exact size: as structured text
+  they came out smaller than asked.
+
 ## 0.6.96 - beta
 
 ### Fixed

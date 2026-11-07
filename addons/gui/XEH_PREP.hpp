@@ -208,6 +208,7 @@ PREP(itemModel);
 PREP(closeInspect);
 PREP(toggleSection);
 PREP(cardGrip);
+PREP(cardScale);
 PREP(toggleWeaponFold);
 PREP(toggleRows);
 PREP(closeNested);
