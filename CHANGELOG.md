@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.98 - beta
+
+### Changed
+
+- When something fails - an item that does not fit, a move that is refused - the footer's line says why in bold red and
+  shakes briefly, so it stands out. Lines that only say how a move went (some moved, some went back) stay as they were.
+
 ## 0.6.97 - beta
 
 ### Changed

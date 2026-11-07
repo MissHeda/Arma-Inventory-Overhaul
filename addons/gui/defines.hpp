@@ -307,6 +307,11 @@
 #define FOOT_LINE_H 0.32
 #define FOOT_LINE_TOP 0.34
 
+// The hint line's shake when something failed (fnc_flashHint): seconds, how far to each side, shakes per second.
+#define HINT_SHAKE_TIME 0.4
+#define HINT_SHAKE_WIDTH (UNIT * 0.22)
+#define HINT_SHAKE_RATE 14
+
 // One turn of the mouse wheel scrolls a column this far when a picture's clip group has taken the turn from it
 // (fnc_passWheel): about the three rows the engine's own step comes to.
 #define WHEEL_STEP (UNIT * 3)

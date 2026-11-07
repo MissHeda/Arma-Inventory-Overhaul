@@ -79,11 +79,54 @@ if (_details isNotEqualTo []) then {
     _text = format ([_text] + _details);
 };
 
-private _color = GVAR(theme) getOrDefault ["loss", [0.941, 0.333, 0.353, 1]];
+// Something that did not happen - an item that does not fit, a move refused: plain red, in the bold font, and the line shakes so it
+// catches the eye (Mia, 0.6.97). What only tells how a move went (some moved, some went back, copied, waiting) stays as it was.
+private _failed = !(_reason in ["Copied", "Waiting", "MovedSome", "Returned", "Grounded", "PlacedElsewhere", "Skipped"]);
+private _color = [GVAR(theme) getOrDefault ["loss", [0.941, 0.333, 0.353, 1]], [1, 0.22, 0.22, 1]] select _failed;
 private _hex = "#" + ((_color select [0, 3]) apply {
     private _value = round ((_x max 0 min 1) * 255);
     ("0123456789ABCDEF" select [floor (_value / 16), 1]) + ("0123456789ABCDEF" select [_value mod 16, 1])
 } joinString "");
 
-_hint ctrlSetStructuredText (text _text setAttributes ["color", _hex, "size", str (_hint getVariable [QGVAR(textScale), 1])]);
+_hint ctrlSetStructuredText (text _text setAttributes (
+    ["color", _hex, "size", str (_hint getVariable [QGVAR(textScale), 1])] + (["font", GVAR(theme) getOrDefault ["fontBold", "PuristaSemibold"]] select _failed)
+));
 [_hint] call FUNC(fitHint);
+
+if (!_failed) exitWith {};
+
+// The shake: left and right a few times, smaller each time, about a third of a second, then back where fnc_fitHint put it. A new
+// failure while one shakes starts it again from there.
+private _old = missionNamespace getVariable [QGVAR(hintShake), -1];
+
+if (_old >= 0) then {
+    [_old] call CBA_fnc_removePerFrameHandler;
+};
+
+private _home = ctrlPosition _hint;
+
+private _shake = [{
+    params ["_args", "_handle"];
+    _args params ["_hint", "_home", "_start"];
+
+    private _time = diag_tickTime - _start;
+
+    if (isNull _hint || {_time >= HINT_SHAKE_TIME}) exitWith {
+        [_handle] call CBA_fnc_removePerFrameHandler;
+        missionNamespace setVariable [QGVAR(hintShake), -1];
+
+        if (!isNull _hint) then {
+            _hint ctrlSetPosition _home;
+            _hint ctrlCommit 0;
+        };
+    };
+
+    private _offset = HINT_SHAKE_WIDTH * (sin (_time * 360 * HINT_SHAKE_RATE)) * (1 - _time / HINT_SHAKE_TIME);
+    private _pos = +_home;
+
+    _pos set [0, (_home select 0) + _offset];
+    _hint ctrlSetPosition _pos;
+    _hint ctrlCommit 0;
+}, 0, [_hint, _home, diag_tickTime]] call CBA_fnc_addPerFrameHandler;
+
+missionNamespace setVariable [QGVAR(hintShake), _shake];
