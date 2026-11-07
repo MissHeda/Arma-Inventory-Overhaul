@@ -198,9 +198,6 @@ A client can see them and cannot change them.
 - [ ] Modders (#65): a test addon with `CfgAioMenu` Entries (own name, `$STR_` key, picture), Hide, Change (a window row's name and picture), DoubleClick.
 - [ ] Edit mode (#67): Your settings > Edit layout: each column a frame; drag one, resize at each corner, the window follows at the release and the picture on the card shows it; tile and text buttons take effect at once; a column stays on the screen and no smaller than its grid; Reset and Done; Escape mid-drag; while looting and not; dragging items, kit windows and Inspect with columns overlapping; another resolution keeps the places.
 - [ ] Edit mode 0.6.66: edge strips and the eight arrow knobs resize, the outline with its size follows smoothly; drag weight, weapons, gear and hotbar out of the equipment column, each gets its own panel (drop gear on it, refresh after a move into the backpack), the undo button on its title puts it back; all four out leaves no empty column panel; Edit layout and Default on the card still work after changing a few rows.
-- [ ] ACE Arsenal look 0.6.86: round panels sit exactly under ACE's lists, boxes, buttons, search fields and sort boxes; they follow Hide
-  (Backspace) and the loadouts screen; nothing blocks a click; ACE Arsenal Extended's options still work; "ACE's own" brings the old look on
-  the next open; Eden and Zeus arsenals.
 - [ ] Real weapon pictures 0.6.79: each weapon card shows the weapon in 3D with its attachments, side on, muzzle left; changing an
   attachment updates it; Picture-in-Picture off or the setting off falls back to the flat picture; frame rate with four weapons.
 - [ ] GreenMag Rework 0.6.72: rounds, a pack and a belt dragged onto a half-empty magazine in the vest light it in the accent colour and load

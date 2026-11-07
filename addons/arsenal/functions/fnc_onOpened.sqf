@@ -59,9 +59,6 @@ _display displayAddEventHandler ["MouseZChanged", {!isNull (uiNamespace getVaria
 // The Close button and Escape ask first when something does not fit (fnc_confirmClose).
 [_display] call FUNC(interceptClose);
 
-// In this mod's look, unless the player keeps ACE's own (fnc_aceSkin) - once ACE has filled its controls.
-[{["apply", [_this]] call FUNC(aceSkin)}, _display] call CBA_fnc_execNextFrame;
-
 // ACE's list, and the kits tab's list where Enhanced First Aid Kits is loaded, each with the "-" and "+" over its row.
 private _lists = [[_display displayCtrl ARSENAL_IDC_LIST, [ARSENAL_IDC_MINUS, ARSENAL_IDC_PLUS]]];
 

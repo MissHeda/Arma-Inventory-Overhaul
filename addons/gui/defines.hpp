@@ -592,7 +592,14 @@
 #define CARD_3D_MAX_RES 1024
 #define CARD_3D_DISTANCE 0.95
 // How much of what the card shows the weapon fills, across or up and down - whichever it reaches first.
-#define CARD_3D_ROOM 0.88
+#define CARD_3D_ROOM 0.9
+// A weapon's height side on, at most this share of its length: its box is taller than its profile (the MX came out a fifth of its
+// card, Mia 0.6.91).
+#define CARD_3D_PROFILE 0.42
+// A handgun is taller for its length: grip and magazine.
+#define CARD_3D_PROFILE_HANDGUN 0.9
+// How far below its box's middle a handgun is aimed at, in metres.
+#define CARD_3D_HANDGUN_DROP 0.035
 // How many frames a weapon is filmed before its picture is kept as a still and the scene goes.
 #define CARD_3D_STILL_FRAMES 6
 // The scene's lights against the inspect card's.

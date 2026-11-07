@@ -2,6 +2,20 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.92 - beta
+
+Tested in game.
+
+### Removed
+
+- The ACE Arsenal look of 0.6.86-0.6.91 (setting "ACE Arsenal look", addon `compat_ace_arsenal`): ACE Arsenal is as it was in
+  0.6.85 again.
+
+### Fixed
+
+- Real weapon pictures: each weapon fills its card - a rifle across, a handgun up and down - and sits in its middle (the MX came
+  out a fifth of its card).
+
 ## 0.6.91 - beta
 
 Tested in game.

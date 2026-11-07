@@ -106,7 +106,7 @@ private _fnc_frame = {
     private _height = _scene getOrDefault ["height", _length / 3];
     private _perMetre = 2 * INSPECT_3D_FOV;
     private _room = CARD_3D_ROOM;
-    private _distance = ((_length / (_room * (_widthShare max 0.05) * _perMetre * INSPECT_3D_ASPECT)) max (_height / (_room * 0.75 * (_heightShare max 0.05) * _perMetre))) max 0.2;
+    private _distance = ((_length / (_room * (_widthShare max 0.05) * _perMetre * INSPECT_3D_ASPECT)) max (_height / (_room * (_heightShare max 0.05) * _perMetre))) max 0.2;
 
     _scene set ["distance", _distance min 8];
 
@@ -321,6 +321,12 @@ switch (_mode) do {
 
                 if (_centre distance _base > 0.6) then {_centre = _base};
 
+                // A handgun's box reaches above it (its sights' and its hit geometry): its middle a little lower, so the grip is not cut
+                // off at the card's foot (seen in game, 0.6.91).
+                if ((_scene get "class") isKindOf ["Pistol", configFile >> "CfgWeapons"]) then {
+                    _centre = _centre vectorAdd [0, 0, -CARD_3D_HANDGUN_DROP];
+                };
+
                 _scene set ["target", _centre];
 
                 private _front = _points getOrDefault ["front", []];
@@ -328,8 +334,8 @@ switch (_mode) do {
                 private _top = _points getOrDefault ["top", []];
                 private _bottom = _points getOrDefault ["bottom", []];
 
-                if (count _front == 3 && {count _back == 3}) then {_scene set ["length", ((_front distance _back) max 0.25) min (INSPECT_3D_FRAME * 1.4)]};
-                if (count _top == 3 && {count _bottom == 3}) then {_scene set ["height", ((_top distance _bottom) max 0.08) min ((_scene getOrDefault ["length", 1]) * 0.6)]};
+                if (count _front == 3 && {count _back == 3}) then {_scene set ["length", ((_front distance _back) max 0.12) min (INSPECT_3D_FRAME * 1.4)]};
+                if (count _top == 3 && {count _bottom == 3}) then {_scene set ["height", ((_top distance _bottom) max 0.08) min ((_scene getOrDefault ["length", 1]) * ([CARD_3D_PROFILE, CARD_3D_PROFILE_HANDGUN] select ((_scene get "class") isKindOf ["Pistol", configFile >> "CfgWeapons"])))]};
 
                 [_scene] call _fnc_frame;
 

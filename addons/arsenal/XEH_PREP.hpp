@@ -29,8 +29,6 @@ PREP(growStaging);
 // Dragging an item out of ACE's list, and putting new things in - into a kit too
 PREP(onListPress);
 PREP(listDrag);
-PREP(aceInfo);
-PREP(aceSkin);
 PREP(addTo);
 PREP(listToKit);
 
