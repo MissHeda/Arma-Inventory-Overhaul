@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.88 - beta
+
+### Fixed
+
+- ACE Arsenal look: its panels were not drawn at all, so the lists lay bare over the world. They now lie in ACE's own background
+  layer (new addon `compat_ace_arsenal`, loaded only with ACE Arsenal), under every ACE control, as the inspect card's: the
+  theme's fill with a faint round outline.
+- Real weapon pictures stayed empty: an item's box blown up by its hit geometry put the camera far off. The framing is held to
+  the weapon's base and to the inspect card's sizes.
+
 ## 0.6.87 - beta
 
 ### Changed

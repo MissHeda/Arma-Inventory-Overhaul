@@ -314,15 +314,21 @@ switch (_mode) do {
 
                 if (isNil "_points") then {_points = createHashMap};
 
-                _scene set ["target", _points getOrDefault ["centre", _base]];
+                // Never far from the weapon's base: a model's box is often blown up by its hit geometry (as the inspect card's frame
+                // says), and a middle or ends far off left the card empty (Mia, 0.6.86).
+                private _centre = _points getOrDefault ["centre", _base];
+
+                if (_centre distance _base > 0.6) then {_centre = _base};
+
+                _scene set ["target", _centre];
 
                 private _front = _points getOrDefault ["front", []];
                 private _back = _points getOrDefault ["back", []];
                 private _top = _points getOrDefault ["top", []];
                 private _bottom = _points getOrDefault ["bottom", []];
 
-                if (count _front == 3 && {count _back == 3}) then {_scene set ["length", _front distance _back]};
-                if (count _top == 3 && {count _bottom == 3}) then {_scene set ["height", _top distance _bottom]};
+                if (count _front == 3 && {count _back == 3}) then {_scene set ["length", ((_front distance _back) max 0.25) min (INSPECT_3D_FRAME * 1.4)]};
+                if (count _top == 3 && {count _bottom == 3}) then {_scene set ["height", ((_top distance _bottom) max 0.08) min ((_scene getOrDefault ["length", 1]) * 0.6)]};
 
                 [_scene] call _fnc_frame;
 

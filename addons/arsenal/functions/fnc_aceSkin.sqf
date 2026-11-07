@@ -7,9 +7,11 @@
  * boxes) are made see-through, and under each lies a panel of the inventory's theme with its round corners (aio_gui_theme); the
  * lists' frames go; their words take the theme's text colour and font.
  *
- * The panels lie on the display under ACE's (its parent - the mission's, Eden's or Zeus'), so they are drawn below ACE's controls
- * and never take a click. Each frame they follow ACE's controls: where each is, whether it is shown and how faded (ACE's Hide,
- * Backspace, and its loadouts screen). They go when the arsenal closes.
+ * The panels lie in controls groups this mod puts into ACE's background layer (aio_compat_ace_arsenal: aio_skin_0 ... - empty and
+ * nought wide until used), the one layer drawn under all of ACE's controls: a control made at run time lies over everything, and
+ * panels on the display under ACE's were not drawn at all (0.6.86, Mia). Each panel is the inspect card's: the theme's fill with a
+ * faint round outline. Each frame they follow ACE's controls: where each is, whether it is shown and how faded (ACE's Hide,
+ * Backspace, its loadouts screen). They are emptied when the arsenal closes. Without that addon (no ACE Arsenal) nothing is done.
  *
  * The player's setting aio_arsenal_aceStyle: "aio" this look, "ace" ACE's own, as before.
  *
@@ -71,13 +73,16 @@ switch (_mode) do {
 
         if (isNull _display || {(missionNamespace getVariable [QGVAR(aceStyle), "aio"]) isNotEqualTo "aio"}) exitWith {};
 
-        private _under = displayParent _display;
+        // The groups in ACE's background layer (aio_compat_ace_arsenal).
+        private _groups = [];
 
-        if (isNull _under) then {
-            _under = findDisplay 46;
+        for "_i" from 0 to 27 do {
+            private _group = _display displayCtrl (99000 + _i);
+
+            if (!isNull _group) then {_groups pushBack _group};
         };
 
-        if (isNull _under) exitWith {};
+        if (_groups isEqualTo []) exitWith {};
 
         private _theme = missionNamespace getVariable [QEGVAR(gui,theme), createHashMap];
         private _panel = _theme getOrDefault ["panel", [0.08, 0.09, 0.11, 0.85]];
@@ -101,22 +106,30 @@ switch (_mode) do {
         ];
 
         private _pairs = [];
+        private _outline = [1, 1, 1, 0.12];
 
         {
             _x params ["_idc", "_colour", "_round"];
 
             private _control = _display displayCtrl _idc;
 
-            if (isNull _control) then {continue};
+            if (isNull _control || {_groups isEqualTo []}) then {continue};
 
+            private _group = _groups deleteAt 0;
             private _rect = [_control] call _fnc_screenRect;
-            private _made = [_under, controlNull, _rect, _colour, _round min ((_rect select 3) / 2)] call EFUNC(gui,uiPanel);
+            _rect params ["", "", "_w", "_h"];
 
-            // Not the window's: a build of the panel sweeps what it made at the top level (aio_gui_fnc_uiCreate) - these stay.
-            uiNamespace setVariable [QEGVAR(gui,created), (uiNamespace getVariable [QEGVAR(gui,created), []]) - _made];
+            _group ctrlSetPosition _rect;
+            _group ctrlCommit 0;
+            _group ctrlShow true;
+
+            private _radiusHere = _round min (_h / 2);
+            private _made = [_display, _group, [0, 0, _w, _h], _colour, _radiusHere] call EFUNC(gui,uiPanel);
+
+            _made append ([_display, _group, [0, 0, _w, _h], _outline, _radiusHere] call EFUNC(gui,uiRing));
 
             _control ctrlSetBackgroundColor _clear;
-            _pairs pushBack [_control, _made, _rect];
+            _pairs pushBack [_control, [_group], _rect, _made];
         } forEach _specs;
 
         // The lists' frames go; the lists themselves lie on the block's panel.
@@ -159,15 +172,10 @@ switch (_mode) do {
             private _shown = [_control] call _fnc_shown;
             private _now = [_control] call _fnc_screenRect;
 
-            // Moved or sized by ACE (its Hide, a resized window): the panel goes with it.
-            if (_now isNotEqualTo _rect) then {
-                (_now select [0, 2]) params ["_toX", "_toY"];
-                (_rect select [0, 2]) params ["_fromX", "_fromY"];
-
+            // Moved by ACE (its Hide, a resized window): the panel's group goes with it.
+            if ((_now select [0, 2]) isNotEqualTo (_rect select [0, 2])) then {
                 {
-                    private _at = ctrlPosition _x;
-
-                    _x ctrlSetPosition [(_at select 0) + _toX - _fromX, (_at select 1) + _toY - _fromY];
+                    _x ctrlSetPosition [_now select 0, _now select 1];
                     _x ctrlCommit 0;
                 } forEach _made;
 
@@ -194,7 +202,14 @@ switch (_mode) do {
         };
 
         {
-            {ctrlDelete _x} forEach (_x select 1);
+            _x params ["", "_groups", "", ["_inside", []]];
+
+            {ctrlDelete _x} forEach _inside;
+
+            {
+                _x ctrlSetPosition [0, 0, 0, 0];
+                _x ctrlCommit 0;
+            } forEach _groups;
         } forEach (uiNamespace getVariable [QGVAR(skinPairs), []]);
 
         uiNamespace setVariable [QGVAR(skinPairs), []];
