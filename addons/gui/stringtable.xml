@@ -19,6 +19,21 @@
         <Key ID="STR_aio_gui_Close">
             <English>Close</English>
         </Key>
+        <Key ID="STR_aio_gui_ColumnOrder_Apart">
+            <English>Gear left, equipment right</English>
+        </Key>
+        <Key ID="STR_aio_gui_ColumnOrder_Default">
+            <English>Equipment left, gear right</English>
+        </Key>
+        <Key ID="STR_aio_gui_ColumnOrder_Left">
+            <English>All left</English>
+        </Key>
+        <Key ID="STR_aio_gui_ColumnOrder_Middle">
+            <English>Loot, equipment, gear</English>
+        </Key>
+        <Key ID="STR_aio_gui_ColumnOrder_Right">
+            <English>All right</English>
+        </Key>
         <Key ID="STR_aio_gui_Column_Equipment">
             <English>Equipment</English>
         </Key>
@@ -64,6 +79,24 @@
         <Key ID="STR_aio_gui_Compare_Weight">
             <English>Weight</English>
         </Key>
+        <Key ID="STR_aio_gui_Design_Colours">
+            <English>Colours</English>
+        </Key>
+        <Key ID="STR_aio_gui_Design_ColoursLocked">
+            <English>The server sets the colours</English>
+        </Key>
+        <Key ID="STR_aio_gui_Design_Colours_Tip">
+            <English>The window's colours and transparency</English>
+        </Key>
+        <Key ID="STR_aio_gui_Design_Layout">
+            <English>Layout</English>
+        </Key>
+        <Key ID="STR_aio_gui_Design_Layout_Tip">
+            <English>Sizes, spacing, what the window shows and how it behaves</English>
+        </Key>
+        <Key ID="STR_aio_gui_Design_Tooltip">
+            <English>Colours and layout</English>
+        </Key>
         <Key ID="STR_aio_gui_Drop">
             <English>Drop</English>
         </Key>
@@ -81,6 +114,24 @@
         </Key>
         <Key ID="STR_aio_gui_Filter_Tooltip">
             <English>Fades everything whose name does not match. Escape empties it.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_Lucida">
+            <English>Lucida Console</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_Purista">
+            <English>Purista</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_PuristaLight">
+            <English>Purista Light</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_Roboto">
+            <English>Roboto Condensed</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_RobotoLight">
+            <English>Roboto Condensed Light</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_Tahoma">
+            <English>Tahoma</English>
         </Key>
         <Key ID="STR_aio_gui_Ground_With">
             <English>Ground - %1</English>
@@ -123,6 +174,12 @@
         </Key>
         <Key ID="STR_aio_gui_Hint_BodyTier">
             <English>+%1 kg: you will be %2 (%3 kg)</English>
+        </Key>
+        <Key ID="STR_aio_gui_Hint_DoubleClickMenu">
+            <English>opens its menu</English>
+        </Key>
+        <Key ID="STR_aio_gui_Hint_DoublePutOn">
+            <English>Put on</English>
         </Key>
         <Key ID="STR_aio_gui_Hint_Empty">
             <English>Empty</English>
@@ -220,6 +277,9 @@
         <Key ID="STR_aio_gui_Hint_Queued">
             <English>Waiting for your hands - click to cancel</English>
         </Key>
+        <Key ID="STR_aio_gui_Hint_QuickTargetInto">
+            <English>into %1</English>
+        </Key>
         <Key ID="STR_aio_gui_Hint_Returned">
             <English>%1 went back - no room any more</English>
         </Key>
@@ -243,6 +303,9 @@
         </Key>
         <Key ID="STR_aio_gui_Hint_StripStay">
             <English>Let go to leave it where it is</English>
+        </Key>
+        <Key ID="STR_aio_gui_Hint_SubordinateFar">
+            <English>%1 is too far away - he has to stand next to you</English>
         </Key>
         <Key ID="STR_aio_gui_Hint_Swap">
             <English>Swap places with %1</English>
@@ -270,6 +333,9 @@
         </Key>
         <Key ID="STR_aio_gui_Inspect_3D">
             <English>3D</English>
+        </Key>
+        <Key ID="STR_aio_gui_Inspect_3DLowPiP">
+            <English>PiP quality %1 - Very High or Ultra in the video options is sharper</English>
         </Key>
         <Key ID="STR_aio_gui_Inspect_3DNoPiP">
             <English>3D needs Picture-in-Picture - turn it on in the video options</English>
@@ -349,6 +415,27 @@
         <Key ID="STR_aio_gui_Keybind_Rotate_Tooltip">
             <English>Turns the item you are dragging a quarter round.</English>
         </Key>
+        <Key ID="STR_aio_gui_Layout_Attach">
+            <English>Back into the equipment column</English>
+        </Key>
+        <Key ID="STR_aio_gui_Layout_Back">
+            <English>Send to the back, under what it overlaps</English>
+        </Key>
+        <Key ID="STR_aio_gui_Layout_Done">
+            <English>Done</English>
+        </Key>
+        <Key ID="STR_aio_gui_Layout_Drag">
+            <English>Drag to move, edges and corners resize</English>
+        </Key>
+        <Key ID="STR_aio_gui_Layout_Edit">
+            <English>Edit layout</English>
+        </Key>
+        <Key ID="STR_aio_gui_Layout_Front">
+            <English>Bring to the front, over what it overlaps</English>
+        </Key>
+        <Key ID="STR_aio_gui_Layout_Reset">
+            <English>Reset</English>
+        </Key>
         <Key ID="STR_aio_gui_Load_Next">
             <English>· %1 at %2 kg</English>
         </Key>
@@ -376,6 +463,9 @@
         <Key ID="STR_aio_gui_Menu_LoadInto">
             <English>Load into %1</English>
         </Key>
+        <Key ID="STR_aio_gui_Menu_Modify">
+            <English>Attachments</English>
+        </Key>
         <Key ID="STR_aio_gui_Menu_OpenContainer">
             <English>Open %1</English>
         </Key>
@@ -384,6 +474,27 @@
         </Key>
         <Key ID="STR_aio_gui_Menu_Settings">
             <English>Settings for %1</English>
+        </Key>
+        <Key ID="STR_aio_gui_Menu_SwapPrimary">
+            <English>Swap with primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Menu_SwapSecondPrimary">
+            <English>Swap with second primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Modify_NoParts">
+            <English>Nothing in your gear or the loot fits here</English>
+        </Key>
+        <Key ID="STR_aio_gui_Modify_None">
+            <English>None</English>
+        </Key>
+        <Key ID="STR_aio_gui_Modify_SpotEmpty">
+            <English>%1 - click to choose a part, or drop one here</English>
+        </Key>
+        <Key ID="STR_aio_gui_Modify_SpotFilled">
+            <English>%1: %2 - click to change it, right click to take it off</English>
+        </Key>
+        <Key ID="STR_aio_gui_Modify_Tip">
+            <English>Click a part to change it, right click to take it off, or drop a part on it</English>
         </Key>
         <Key ID="STR_aio_gui_Notify_Searched">
             <English>%1 is going through your gear</English>
@@ -778,6 +889,9 @@
         <Key ID="STR_aio_gui_QuickMove">
             <English>Quick move</English>
         </Key>
+        <Key ID="STR_aio_gui_QuickTarget_Tip">
+            <English>Quick moves go here. Click a free cell of it again to stop.</English>
+        </Key>
         <Key ID="STR_aio_gui_Rows_Hide">
             <English>Fold the empty rows away</English>
         </Key>
@@ -830,7 +944,13 @@
             <English>Tile scale</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_CellScale_Desc">
-            <English>Size of cells, pictures and text (default 1.1).\nApplies on the next opening.</English>
+            <English>Size of cells, pictures and text (default 1.1).\nAlso set live in the window:\nthe size button in the header.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ColumnOrder">
+            <English>Column order</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ColumnOrder_Desc">
+            <English>Which column stands where, from left\nto right.\n\nLoot and your gear swap with\nWhere other storage opens.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_CompareTooltip">
             <English>Compare gear at the mouse</English>
@@ -843,6 +963,30 @@
         </Key>
         <Key ID="STR_aio_gui_Setting_DebugTiming_Desc">
             <English>Writes build, redraw and frame timings and search and drag costs to the RPT, for FPS reports.\nOff in play.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClick">
+            <English>Double click on other items</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClick_Desc">
+            <English>For items with no double click of\ntheir own. Your weapons always open\nAttachments, and mods can set theirs.\n\nThe quick move key keeps working.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClick_Menu">
+            <English>Open the right-click menu</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClick_Move">
+            <English>Quick move</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_DoubleClick_None">
+            <English>Nothing</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Font">
+            <English>Font</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Font_Desc">
+            <English>The font of the window's words.\n\nPurista is Arma's and ACE's own.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_GroupClicks">
+            <English>Left click: more. Right click: less.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_HandDrop">
             <English>Time to drop an item</English>
@@ -863,6 +1007,12 @@
         <Key ID="STR_aio_gui_Setting_HandMove_Desc">
             <English>Seconds the hands are busy moving one item to another container (quick move, group moves).
 0 moves at once; a drag never waits.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_LayoutRects">
+            <English>Columns placed by hand</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_LayoutRects_Desc">
+            <English>Where the edit mode put your columns.\nSet there: your settings, Edit layout.\n\nEmpty, they follow the column order.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_LootSide">
             <English>Where other storage opens</English>
@@ -888,6 +1038,15 @@
         <Key ID="STR_aio_gui_Setting_MagazineText_Desc">
             <English>Rounds left as text ("17/30") on magazine tiles.\nOff: the fill bar alone.</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_MenuHidden">
+            <English>Hidden menu entries</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_MenuHidden_Desc">
+            <English>Rows of the right-click menu nobody sees, by id, separated by commas,
+e.g. "hotbar, settings". The window's own: inspect, equip, attach, load, detach,
+drop, open, repack, hotbar, kit, radio, selectAll, arsenal, settings.
+Options of other mods (CBA) by their id.</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_MoveToStop">
             <English>Moving stops looting</English>
         </Key>
@@ -898,7 +1057,7 @@
             <English>Rows per page of a container</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_PageRows_Desc">
-            <English>Rows shown at a time for tall crates and vehicles (default 10).\n0 or 40 shows everything. Loot only.</English>
+            <English>Rows shown at a time for tall crates and vehicles (default 10).\n0 or 40 shows everything. Loot only.\nAlso set live in the window:\nthe size button in the header.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_PaletteText">
             <English>Colours (text)</English>
@@ -935,6 +1094,12 @@
         </Key>
         <Key ID="STR_aio_gui_Setting_PlayerColours_Desc">
             <English>Players get the colour panel in the header.\nOff: everyone sees the default look.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_QuickTargetIcon">
+            <English>Mark the quick move target</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_QuickTargetIcon_Desc">
+            <English>A click on a container's picture or a\nfree cell of it makes it the target of\ndouble clicks and the quick move key.\n\nThis outlines its picture while it is.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_SearchBodies">
             <English>Search bodies</English>
@@ -1020,17 +1185,53 @@
         <Key ID="STR_aio_gui_Setting_SearchZeus_Desc">
             <English>Crates and vehicles placed with Zeus are searched like any other.\nOff: they show their loot at once. Needs "Search crates and vehicles" on.</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_ShowFooter">
+            <English>Show the footer</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowFooter_Desc">
+            <English>The line of keys and hints along the\nbottom of the window.\n\nOff, the columns get its room.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowGear">
+            <English>Show the gear slots</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowGear_Desc">
+            <English>Headgear, uniform, vest and backpack\nin the equipment column.\n\nOff, the weapons get their room. Your\ncontainers stay in Your gear.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowHotbar">
+            <English>Show the hotbar</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowHotbar_Desc">
+            <English>The hotbar in the window, its hint in\nthe footer and its rows in the menu.\n\nItems already on a key keep working\nwith that key.</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_ShowNearby">
             <English>Show everything nearby</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_ShowNearby_Desc">
             <English>Show piles and crates within reach in the loot column.\nOff: only what you opened.</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_ShowSmallSlots">
+            <English>Show the small slots</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowSmallSlots_Desc">
+            <English>Goggles, night vision, binocular, map,\nGPS, radio, compass and watch.\n\nOff, the weapons get their room.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowWeight">
+            <English>Show the weight</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_ShowWeight_Desc">
+            <English>The weight card on top of the\nequipment column.\n\nOff, the weapons get its room.</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_SoundsWorld">
             <English>Others hear looting</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_SoundsWorld_Desc">
             <English>Players nearby hear looting (10 to 20 m).\nOff: only the looter hears it.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_TextSize">
+            <English>Text size</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_TextSize_Desc">
+            <English>Size of the window's words and of the\nnames and counts on the tiles, on top of\nthe tile scale (default 1).\nAlso set live in the window:\nthe size button in the header.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_TileNames">
             <English>Item names on tiles</English>
@@ -1064,6 +1265,153 @@ Off moves them at once; a drag never waits.</English>
         <Key ID="STR_aio_gui_Setting_WaitWorn_Desc">
             <English>Whether putting on and taking off a uniform, vest, backpack or headgear takes the hands' time.
 Off does it at once; a drag never waits.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D">
+            <English>Real weapon pictures</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DGroup_Desc">
+            <English>The real weapon picture of this slot: its size, and where it lies on the card.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Desc">
+            <English>Moves the real weapon picture on its card,\nin % of the weapon's length.\n\nMore: to the right. 0: centred.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Handgun">
+            <English>Weapon picture left/right: handgun</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Launcher">
+            <English>Weapon picture left/right: launcher</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Primary">
+            <English>Weapon picture left/right: primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Primary2">
+            <English>Weapon picture left/right: second primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Desc">
+            <English>Moves the real weapon picture on its card,\nin % of the weapon's length.\n\nMore: up. 0: centred.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Handgun">
+            <English>Weapon picture up/down: handgun</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Launcher">
+            <English>Weapon picture up/down: launcher</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Primary">
+            <English>Weapon picture up/down: primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Primary2">
+            <English>Weapon picture up/down: second primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Desc">
+            <English>How large the real weapon picture is\non its card, in % of the card.\n\nLess: the weapon smaller, with more room\nround it. Only with "Real weapon\npictures" on.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Handgun">
+            <English>Weapon picture size: handgun</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Launcher">
+            <English>Weapon picture size: launcher</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Primary">
+            <English>Weapon picture size: primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Primary2">
+            <English>Weapon picture size: second primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D_Desc">
+            <English>The weapon cards show each weapon as\nit really looks, with its attachments,\nfilmed in 3D.\n\nNeeds Picture-in-Picture. Off: the flat\npicture with white marks.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D_Handgun">
+            <English>Weapon picture: handgun</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D_Launcher">
+            <English>Weapon picture: launcher</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D_Primary">
+            <English>Weapon picture: primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3D_Primary2">
+            <English>Weapon picture: second primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_Behaviour">
+            <English>How it behaves</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_LootLeft">
+            <English>Left of my gear</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_LootRight">
+            <English>Right of my gear</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PartGear">
+            <English>Gear</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PartHotbar">
+            <English>Hotbar</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PartSmall">
+            <English>Small slots</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PartWeapons">
+            <English>Weapons</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PartWeight">
+            <English>Weight</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_Place">
+            <English>Where things stand</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_Preview">
+            <English>Preview</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_PreviewNote">
+            <English>The window behind this card changes with each row. Right click goes back through a list.</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_Shown">
+            <English>What the window shows</English>
+        </Key>
+        <Key ID="STR_aio_gui_SettingsMenu_Tiles">
+            <English>On the tiles</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_All">
+            <English>All</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Default">
+            <English>Default</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Default_Tip">
+            <English>Every size back to its default</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Forced">
+            <English>Set by the server.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Note">
+            <English>The same settings as in CBA's Addon Options, always in sync.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_PageRows">
+            <English>Rows per page</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_PageRows_None">
+            <English>Nothing you loot right now is full enough for pages - open a well-filled crate or vehicle to see it.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_PageRows_Tip">
+            <English>Loot only: a crate or vehicle filled with more rows than this shows them in pages. All: no pages.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Text">
+            <English>Text</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Text_Tip">
+            <English>The window's words and the names and counts on the tiles: larger words on small tiles, or smaller ones.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Tiles">
+            <English>Tiles</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Tiles_Tip">
+            <English>The cells and item pictures, and the words with them. Capped where the columns would not fit.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Title">
+            <English>Your settings</English>
+        </Key>
+        <Key ID="STR_aio_gui_Size_Tooltip">
+            <English>Your settings: sizes, what the window shows and where</English>
         </Key>
         <Key ID="STR_aio_gui_Slot_Backpack">
             <English>Backpack</English>
@@ -1118,6 +1466,9 @@ Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_aio_gui_Slot_Rail">
             <English>Rail</English>
+        </Key>
+        <Key ID="STR_aio_gui_Slot_SecondPrimary">
+            <English>Second primary</English>
         </Key>
         <Key ID="STR_aio_gui_Slot_Uniform">
             <English>Uniform</English>
@@ -1331,6 +1682,18 @@ Off does it at once; a drag never waits.</English>
         </Key>
         <Key ID="STR_aio_gui_Title">
             <English>Inventory</English>
+        </Key>
+        <Key ID="STR_aio_gui_Weapon3D_Size">
+            <English>Size</English>
+        </Key>
+        <Key ID="STR_aio_gui_WeaponCard_Fold">
+            <English>Fold away</English>
+        </Key>
+        <Key ID="STR_aio_gui_WeaponCard_HoldToMove">
+            <English>Hold to move</English>
+        </Key>
+        <Key ID="STR_aio_gui_WeaponCard_Unfold">
+            <English>Open</English>
         </Key>
         <Key ID="STR_aio_gui_Zone_Arms">
             <English>arms</English>

@@ -13,15 +13,19 @@
  * never so small that a caption's words (TEXT_REF of a UNIT) are under TEXT_MIN_PX pixels high: on a low resolution
  * the words are the floor's size whatever the tiles are.
  *
- * Kept in uiNamespace aio_gui_textScale with the cell and the UNIT it was worked out for, so it is worked out again
- * only when either changes (a window caps its cell, the resolution changes) and is the same for everything drawn
- * meanwhile.
+ * The player's text size (aio_gui_textSize, TEXT_SIZE_MIN to TEXT_SIZE_MAX, set in the size popover or in CBA's options)
+ * multiplies what the tiles give, before the floor: larger words on small tiles, or smaller ones on large tiles - never under the
+ * floor.
+ *
+ * Kept in uiNamespace aio_gui_textScale with the cell, the UNIT and the text size it was worked out for, so it is worked out
+ * again only when one of them changes (a window caps its cell, the resolution changes, the size popover moves) and is the same
+ * for everything drawn meanwhile.
  *
  * Arguments:
  * None
  *
  * Return Value:
- * The share, TEXT_SCALE_MIN to TEXT_SCALE_MAX <NUMBER>
+ * The share, at most TEXT_SCALE_MAX * TEXT_SIZE_MAX <NUMBER>
  *
  * Example:
  * private _size = UNIT * 0.42 * (call aio_gui_fnc_textScale);
@@ -29,8 +33,17 @@
  * Public: No
  */
 
+// The player's own text size on top (aio_gui_textSize), read from the mission namespace as the tile scale is (fnc_getCell).
+private _size = missionNamespace getVariable [QGVAR(textSize), 1];
+
+if !(_size isEqualType 0) then {
+    _size = 1;
+};
+
+_size = (_size max TEXT_SIZE_MIN) min TEXT_SIZE_MAX;
+
 private _cellH = (call FUNC(getCell)) select 1;
-private _key = [_cellH, UNIT];
+private _key = [_cellH, UNIT, _size];
 private _kept = uiNamespace getVariable [QGVAR(textScale), []];
 
 if ((_kept param [0, []]) isEqualTo _key) exitWith {_kept select 1};
@@ -41,7 +54,7 @@ private _byCell = (_cellH / pixelH) / _base;
 // The caption's words in pixels at the share 1, and the share that brings them up to the floor.
 private _floor = TEXT_MIN_PX / ((UNIT * TEXT_REF / pixelH) max 1);
 
-private _scale = ((_byCell max TEXT_SCALE_MIN) max _floor) min TEXT_SCALE_MAX;
+private _scale = ((((_byCell max TEXT_SCALE_MIN) min TEXT_SCALE_MAX) * _size) max _floor) min (TEXT_SCALE_MAX * TEXT_SIZE_MAX);
 
 uiNamespace setVariable [QGVAR(textScale), [_key, _scale]];
 

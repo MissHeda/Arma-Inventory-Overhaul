@@ -118,6 +118,11 @@
 // (fnc_onReloaded), in seconds - longer than any reload animation; one the game never answered runs out.
 #define RELOAD_TOKEN_MAX 12
 
+// How long the game's reload of a muzzle that holds an empty magazine (fnc_loadMagazine: a weapon fired dry,
+// or an empty muzzle given one) may take to start, in seconds. Not under way by then, the game did not take
+// the action: the magazine goes in by hand after all.
+#define RELOAD_START_WAIT 1
+
 // The magazine a scroll-menu or gamepad reload took from a closed container is taken back a frame after the
 // event (fnc_reloadUndo); a magazine that may be used is then loaded this many seconds later, once the
 // weapon is back as it was.

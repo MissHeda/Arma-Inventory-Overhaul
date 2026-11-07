@@ -70,9 +70,9 @@ private _inventory = call FUNC(isInventoryMode);
 private _keys = if (_inventory) then {
     [
         [LLSTRING(Key_Escape), LLSTRING(Close)],
-        [[_quickKey, "@double"] select (_quickKey isEqualTo ""), LLSTRING(QuickMove)],
+        [[_quickKey, ["", "@double"] select (GVAR(doubleClick) isEqualTo "move")] select (_quickKey isEqualTo ""), LLSTRING(QuickMove)],
         [_dropKey, LLSTRING(Drop)],
-        (if (!isNil QEFUNC(hotbar,footerHint)) then {call EFUNC(hotbar,footerHint)} else {["", ""]}),
+        (if (!isNil QEFUNC(hotbar,footerHint) && {missionNamespace getVariable [QGVAR(showHotbar), true]}) then {call EFUNC(hotbar,footerHint)} else {["", ""]}),
         ["Ctrl+@left", LLSTRING(Select)],
         ["@right", LLSTRING(Menu)]
     ]
@@ -128,6 +128,14 @@ _keys = _keys select [0, _fits];
     };
 
     _keyX = _keyX + _taken;
+
+    // A short faint line between two hints, as long as every line on the bar (FOOT_LINE_H) (in the middle of fnc_uiKeyHint's gap after one): each key with its own words.
+    if (_forEachIndex < count _keys - 1) then {
+        [
+            _display, controlNull, [_keyX - SQUARE(_keyH * 0.65), FOOT_Y + FOOT_H * FOOT_LINE_TOP, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * FOOT_LINE_H],
+            _theme getOrDefault ["line", [1, 1, 1, 0.14]]
+        ] call FUNC(uiPanel);
+    };
 } forEach _keys;
 
 // ----- Version -----
@@ -149,25 +157,26 @@ _keys = _keys select [0, _fits];
 // Right after the key hints, parted from them by a thin upright line, left-aligned, in their size and on their line:
 // structured text starts at the top of its box, so the box starts half a line above the footer's middle, where their
 // words are centred. It takes all the room up to the version, so long item lines are never cut (issue 12).
-private _hintGap = SQUARE(UNIT * 0.45);
-private _hintX = _keyX + _hintGap * 2;
+// The key hints end with the gap after their last one: the line stands in its middle, the hint at its end (Mia, 0.6.79: nearer).
+private _hintGap = SQUARE(_keyH * 0.65);
+private _hintX = _keyX;
 private _hintSize = _textUnit * 0.558;
 private _hintW = (_left + _width - _versionW - SQUARE(UNIT * 0.5)) - _hintX;
-private _hintCtrl = [_display, "AIO_FooterHint", controlNull, [_hintX, FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
+private _hintCtrl = [_display, "AIO_FooterHint", controlNull, [_hintX, FOOT_Y + (FOOT_H - _hintSize) / 2 + _hintSize * HINT_DROP, _hintW max pixelW, _hintSize * 1.4]] call FUNC(uiCreate);
 
 // Too narrow for words: the line is hidden rather than wrapped over the key hints.
 if (_hintW < SQUARE(UNIT * 6)) then {
     _hintCtrl ctrlShow false;
 } else {
-    // The line between the key hints and the hint, half the bar high.
+    // The line between the key hints and the hint, as long as the others (FOOT_LINE_H).
     [
-        _display, controlNull, [_keyX + _hintGap, FOOT_Y + FOOT_H * 0.25, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * 0.5],
+        _display, controlNull, [_keyX - _hintGap, FOOT_Y + FOOT_H * FOOT_LINE_TOP, (1 max round (UNIT * 0.04 / pixelW)) * pixelW, FOOT_H * FOOT_LINE_H],
         _theme getOrDefault ["line", [1, 1, 1, 0.14]]
     ] call FUNC(uiPanel);
 };
 
 // One place for every line, short or long (fnc_fitHint puts it back after each write).
-private _hintY = FOOT_Y + (FOOT_H - _hintSize) / 2 - pixelH;
+private _hintY = FOOT_Y + (FOOT_H - _hintSize) / 2 + _hintSize * HINT_DROP;
 
 _hintCtrl setVariable [QGVAR(hintCentred), [_hintX, _hintY, _hintW max pixelW, _hintSize * 1.4]];
 _hintCtrl setVariable [QGVAR(hintWide), [_hintX, _hintY, _hintW max pixelW, _hintSize * 1.4]];
@@ -178,3 +187,16 @@ _hintCtrl setVariable [QGVAR(hintLine), _hintSize];
 _hintCtrl setVariable [QGVAR(textScale), TEXT_SCALE];
 
 uiNamespace setVariable [QGVAR(hint), _hintCtrl];
+
+// Where the double click's key hint goes when the mouse is on something (fnc_footerDouble): right after the keys, the hint line after
+// it. Nothing shown yet.
+uiNamespace setVariable [QGVAR(footerDoubleLayout), [
+    _hintX, FOOT_Y + (FOOT_H - _keyH) / 2, _keyH, _hintGap, _hintY, _hintSize * 1.4, _left + _width - _versionW - SQUARE(UNIT * 0.5)
+]];
+uiNamespace setVariable [QGVAR(footerDoubleShown), ""];
+uiNamespace setVariable [QGVAR(footerDoubleCtrls), []];
+
+// There from the start, as the keys are: the last action, or the plain quick move - the hint line updates it (fnc_updateHover).
+if (_inventory) then {
+    [uiNamespace getVariable [QGVAR(footerDoubleLast), LLSTRING(QuickMove)]] call FUNC(footerDouble);
+};

@@ -40,6 +40,12 @@ if (count _entry == 0) exitWith {[]};
 private _class = _entry get "class";
 
 private _payload = switch (true) do {
+    // The second primary on the back: off the way the two-primary mod would take it (fnc_setSecondPrimary),
+    // with what is on it. Its parts come off below like any weapon's (fnc_weaponPart).
+    case (_slotId isEqualTo "primary2"): {
+        [_unit, []] call FUNC(setSecondPrimary);
+        ["weapon", [_entry get "attachments"] call FUNC(normalizeWeapon)]
+    };
     case (_part isEqualTo "" && {_base in ["primary", "handgun", "launcher"]}): {
         _unit removeWeapon _class;
         ["weapon", [_entry get "attachments"] call FUNC(normalizeWeapon)]

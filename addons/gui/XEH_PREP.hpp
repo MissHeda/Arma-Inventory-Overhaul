@@ -63,6 +63,9 @@ PREP(onMouseZ);
 PREP(passWheel);
 PREP(unscroll);
 PREP(quickMove);
+PREP(quickTarget);
+PREP(pickTarget);
+PREP(mouseIcon);
 PREP(dropToGround);
 PREP(applyMove);
 PREP(afterAction);
@@ -112,9 +115,22 @@ PREP(cbaSlotTarget);
 PREP(cbaOptions);
 PREP(cbaRun);
 
+// The menu and the double click, as mods and missions set them (CfgAioMenu)
+PREP(menuInit);
+PREP(menuRules);
+PREP(menuFilter);
+PREP(doubleClickRule);
+PREP(doubleClickLabel);
+PREP(addMenuEntry);
+PREP(hideMenuEntry);
+PREP(changeMenuEntry);
+PREP(setDoubleClick);
+
 // Searching loot
 PREP(isSearched);
 PREP(isSealed);
+PREP(isSubordinate);
+PREP(leaveGearPose);
 PREP(searchKind);
 PREP(searchTime);
 PREP(sortSearch);
@@ -176,10 +192,25 @@ PREP(inspect);
 PREP(drawInspect);
 PREP(growSlots);
 PREP(inspect3D);
+PREP(cardScene);
+PREP(modelBox);
+PREP(weaponPoints);
+PREP(drawHotspots);
+PREP(placeHotspots);
+PREP(hotspotAt);
+PREP(partChoices);
+PREP(hotspotClick);
+PREP(doFit);
+PREP(weaponTile);
+PREP(hotspotPress);
+PREP(tilePart);
 PREP(hasModel);
 PREP(itemModel);
 PREP(closeInspect);
 PREP(toggleSection);
+PREP(cardGrip);
+PREP(cardScale);
+PREP(toggleWeaponFold);
 PREP(toggleRows);
 PREP(closeNested);
 
@@ -195,6 +226,27 @@ PREP(openSoundMenu);
 PREP(updateSoundMenu);
 PREP(updateSoundButton);
 PREP(headerStyle);
+
+// The size popover under its button in the header: the tile scale, the text size and the rows per page, live, as CBA client settings
+PREP(settingForced);
+PREP(sizeDefs);
+PREP(sizeValue);
+PREP(sizeSet);
+PREP(sizeSlide);
+PREP(sizeSettle);
+PREP(sizeChanged);
+PREP(elementsChanged);
+PREP(settingsDefs);
+PREP(settingsRow);
+PREP(columnRects);
+PREP(columnMinimum);
+PREP(partShown);
+PREP(layerOrder);
+PREP(openLayoutEditor);
+PREP(layoutDrag);
+PREP(openSizeMenu);
+PREP(updateSizeMenu);
+PREP(updateSizeButton);
 
 // The feel: every kind of gear sounds like itself, others hear the looting, and the soldier looks into his gear
 PREP(soundFamily);
@@ -232,6 +284,8 @@ PREP(paletteSettle);
 PREP(paletteSlide);
 PREP(hsv);
 PREP(openPaletteMenu);
+PREP(openDesignMenu);
+PREP(drawDesignTabs);
 PREP(updatePaletteMenu);
 PREP(updatePaletteButton);
 
@@ -280,6 +334,7 @@ PREP(uiKeyHint);
 PREP(uiHatch);
 PREP(caption);
 PREP(fitText);
+PREP(fitSize);
 PREP(textScale);
 PREP(ownerName);
 
@@ -305,6 +360,7 @@ PREP(drawCountBackdrop);
 PREP(drawColumn);
 PREP(drawHeader);
 PREP(drawFooter);
+PREP(footerDouble);
 
 // Floating windows: open kits and pouches
 PREP(flowCompartments);

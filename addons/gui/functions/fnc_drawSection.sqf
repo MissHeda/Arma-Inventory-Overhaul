@@ -339,7 +339,14 @@ private _tabIconW = [0, SQUARE(_buttonH * 0.95)] select (_tabIcon isNotEqualTo "
 // Open to this player only because of who they are (aio_locks_fnc_decorate): an open padlock left of
 // the weight says so when the mouse rests on it.
 private _lockTip = _section getOrDefault ["lockTip", ""];
-private _lockW = [0, SQUARE(_lineH)] select (_lockTip isNotEqualTo "");
+private _lockIconW = [0, SQUARE(_lineH)] select (_lockTip isNotEqualTo "");
+
+// The container quick moves go into (fnc_quickTarget): its picture beside the grid glows (below), unless the player switched it off.
+// Every container's picture gets the outline, hidden but for the picked one: a pick shows it at once, with no build (fnc_pickTarget -
+// a build per click stuttered, Mia 0.6.85).
+private _targeted = !isNull _sectionContainer && {missionNamespace getVariable [QGVAR(quickTargetIcon), true]} && {call FUNC(isInventoryMode)};
+
+private _lockW = _lockIconW;
 
 // ---------------------------------------------------------------------------
 // The button beside the tab: Sort, for a container the player may change - on every grid of its own, so also on an empty one.
@@ -556,16 +563,18 @@ if (_load isNotEqualTo "") then {
 // The open padlock, left of the weight.
 if (_lockTip isNotEqualTo "") then {
     private _iconH = _lineH * 0.6;
-    private _lockX = _blockX + _blockW - _closeW - _loadW - _lockW;
+    private _lockX = _blockX + _blockW - _closeW - _loadW - _lockIconW;
 
     [
-        _display, _parent, [_lockX + (_lockW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
+        _display, _parent, [_lockX + (_lockIconW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
         UI_TEX(icon_lock_open_ca), _colorText2
     ] call FUNC(uiIcon);
 
-    private _lockHit = [_display, "AIO_Hitbox", _parent, [_lockX, _top, _lockW, _lineH]] call FUNC(uiCreate);
+    private _lockHit = [_display, "AIO_Hitbox", _parent, [_lockX, _top, _lockIconW, _lineH]] call FUNC(uiCreate);
     [_lockHit, _lockTip] call FUNC(setTooltip);
 };
+
+
 
 // The hint over the caption line says what the contents weigh (fnc_infoHint).
 if (!isNull _sectionContainer && {!_placeholder} && {!_sealed}) then {
@@ -610,7 +619,10 @@ private _view = if (isNull _sectionContainer || {_placeholder} || {_sealed} || {
 } else {
     [_layout, _sectionContainer] call FUNC(viewBlocks)
 };
-_view params ["_viewBlocks", "_hiddenRows", "_rowsFoldable", "_hiddenCells", ["_paging", []]];
+_view params ["_viewBlocks", "_hiddenRows", "_rowsFoldable", "_hiddenCells", ["_paging", []], ["_tallest", 0]];
+
+// The tallest compartment of the loot that pages could cut, for the size popover (fnc_openSizeMenu; fnc_build starts it at 0).
+GVAR(tallestLoot) = GVAR(tallestLoot) max _tallest;
 
 // A compartment taller than a page (aio_gui_pageRows) is cut into pages with a bar under it (fnc_drawPageBar); the
 // bar takes room in the flow, below the page's rows. Its page is as tall as the tallest of its pages, so turning one
@@ -669,6 +681,23 @@ private _gridX = _blockX + ([0, _boxW + _gapX] select _hasBox) + _stripExtra;
 // ---------------------------------------------------------------------------
 // The box
 // ---------------------------------------------------------------------------
+// The picture of the container the player picked for quick moves (fnc_quickTarget): a soft outline in the accent colour, half lit
+// - the attachment points' box (fnc_drawHotspots), quieter (Mia, after 0.6.76; the crosshair in its corner went after 0.6.79).
+private _fnc_targetGlow = {
+    params ["_display", "_parent", "_rect", "_theme", "_height"];
+    _rect params ["_x0", "_y0", "_w0", "_h0"];
+
+    private _accentRgb = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
+    private _radius = (_theme getOrDefault ["radius", 0]) min (_height / 4);
+
+    private _ring = [_display, _parent, _rect, _accentRgb + [0.5], _radius] call FUNC(uiRing);
+    private _shown = _sectionContainer isEqualTo GVAR(quickTarget);
+
+    {_x ctrlShow _shown} forEach _ring;
+
+    (uiNamespace getVariable [QGVAR(targetGlows), []]) pushBack [_sectionContainer, _ring];
+};
+
 if (_hasBox) then {
     private _boxRect = [_blockX, _bodyTop, _boxW, _boxH];
     private _class = _section getOrDefault ["class", ""];
@@ -711,6 +740,23 @@ if (_hasBox) then {
         // The picture of the rules or the editor's (fnc_uiBoxPicture), else the icon of what the box is.
         if (([_display, _parent, _boxRect, _theme, _own, _preview, _boxIcon, _boxRadius] call FUNC(uiBoxPicture)) isEqualTo []) then {
             [_display, _parent, [_blockX + _boxW * 0.25, _bodyTop + _boxH * 0.25, _boxW * 0.5, _boxH * 0.5], _icon, _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]]] call FUNC(uiIcon);
+        };
+
+        // Over the picture: the outline of the quick moves' target.
+        if (_targeted) then {
+            [_display, _parent, _boxRect, _theme, _boxH] call _fnc_targetGlow;
+        };
+
+        // A click on it picks the container as the quick moves' target, or lets it go (fnc_pickTarget).
+        if (!isNull _sectionContainer && {call FUNC(isInventoryMode)}) then {
+            private _pickHit = [_display, "AIO_Hitbox", _parent, _boxRect] call FUNC(uiCreate);
+
+            _pickHit setVariable [QGVAR(pick), _sectionContainer];
+            _pickHit ctrlAddEventHandler ["ButtonClick", {
+                params ["_control"];
+
+                [{_this call FUNC(pickTarget)}, [_control getVariable [QGVAR(pick), objNull]]] call FUNC(later);
+            }];
         };
     };
 
@@ -755,6 +801,11 @@ if (_hasBox) then {
     };
 
     [_display, _parent, _boxRect, _class, _boxOptions, _boxTheme] call FUNC(drawSlot);
+
+    // A uniform, vest or backpack picked as the quick moves' target glows as well (below the crate's, in the same way).
+    if (_targeted) then {
+        [_display, _parent, _boxRect, _theme, _boxH] call _fnc_targetGlow;
+    };
 
     if (_class isEqualTo "") exitWith {};
 

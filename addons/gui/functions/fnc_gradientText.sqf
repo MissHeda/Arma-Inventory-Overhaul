@@ -14,6 +14,8 @@
  * 4: The first letter's colour [r, g, b, a] <ARRAY>
  * 5: The last letter's colour [r, g, b] <ARRAY>
  * 6: Keep it on one line: its spaces are ones the line never breaks at (a name, a title) <BOOL> (default: false)
+ * 7: Width to break the lines at, 0 to leave it to the control: broken here, each line runs the whole gradient from its first
+ *    letter to its last (Mia, 0.6.98: "the gradient should start again with every new line") <NUMBER> (default: 0)
  *
  * Return Value:
  * Structured text, for AIO_StructuredText <TEXT>
@@ -24,33 +26,75 @@
  * Public: No
  */
 
-params [["_text", "", [""]], ["_font", "", [""]], ["_size", 0.03, [0]], ["_align", 0, [0]], ["_from", [1, 1, 1, 1], [[]]], ["_to", [1, 1, 1], [[]]], ["_keepLine", false, [false]]];
+params [
+    ["_text", "", [""]], ["_font", "", [""]], ["_size", 0.03, [0]], ["_align", 0, [0]], ["_from", [1, 1, 1, 1], [[]]], ["_to", [1, 1, 1], [[]]],
+    ["_keepLine", false, [false]], ["_wrapWidth", 0, [0]]
+];
 
-private _codes = toArray _text;
-private _last = (count _codes - 1) max 1;
 private _digits = "0123456789ABCDEF";
 private _alpha = _from param [3, 1];
-private _letters = [];
+private _measureFont = [_font, "PuristaMedium"] select (_font isEqualTo "");
+
+// The lines: the text's own breaks, and with a width each one broken at its spaces where the next word would not fit. A little
+// room is kept - a letter of its own in each colour runs a hair wider than the words measure.
+private _lines = [];
 
 {
-    private _at = _forEachIndex / _last;
-    private _bytes = [0, 1, 2] apply {round ((((_from select _x) + ((_to select _x) - (_from select _x)) * _at) max 0 min 1) * 255)};
-    private _hex = (_bytes + [round (_alpha * 255)]) apply {(_digits select [floor (_x / 16), 1]) + (_digits select [_x mod 16, 1])};
-    private _letter = switch (_x) do {
-        case 38: {"&amp;"};
-        case 60: {"&lt;"};
-        case 62: {"&gt;"};
-        // A space the line may not break at: structured text breaks a line between any two of these letters' tags as soon as
-        // the words run a hair wider than their box, and the rest of a one-line box is cut ("MX" showed as "M").
-        case 32: {[" ", toString [160]] select _keepLine};
-        default {toString [_x]};
+    private _paragraph = _x;
+
+    if (_wrapWidth <= 0 || {_keepLine}) then {
+        _lines pushBack _paragraph;
+        continue;
     };
 
-    _letters pushBack format ["<t color='#%1%2%3%4'>%5</t>", _hex select 3, _hex select 0, _hex select 1, _hex select 2, _letter];
-} forEach _codes;
+    private _line = "";
+
+    {
+        private _try = [_line + " " + _x, _x] select (_line isEqualTo "");
+
+        if (_line isNotEqualTo "" && {((_try getTextWidth [_measureFont, _size]) * 1.08) > _wrapWidth}) then {
+            _lines pushBack _line;
+            _line = _x;
+        } else {
+            _line = _try;
+        };
+    } forEach (_paragraph splitString " ");
+
+    _lines pushBack _line;
+} forEach (_text splitString toString [10]);
+
+if (_lines isEqualTo []) then {_lines = [""]};
+
+// Each line from the first colour to the last. Broken here, its spaces are ones the control never breaks at.
+private _noBreak = _keepLine || {_wrapWidth > 0};
+
+private _rows = _lines apply {
+    private _codes = toArray _x;
+    private _last = (count _codes - 1) max 1;
+    private _letters = [];
+
+    {
+        private _at = _forEachIndex / _last;
+        private _bytes = [0, 1, 2] apply {round ((((_from select _x) + ((_to select _x) - (_from select _x)) * _at) max 0 min 1) * 255)};
+        private _hex = (_bytes + [round (_alpha * 255)]) apply {(_digits select [floor (_x / 16), 1]) + (_digits select [_x mod 16, 1])};
+        private _letter = switch (_x) do {
+            case 38: {"&amp;"};
+            case 60: {"&lt;"};
+            case 62: {"&gt;"};
+            // A space the line may not break at: structured text breaks a line between any two of these letters' tags as soon as
+            // the words run a hair wider than their box, and the rest of a one-line box is cut ("MX" showed as "M").
+            case 32: {[" ", toString [160]] select _noBreak};
+            default {toString [_x]};
+        };
+
+        _letters pushBack format ["<t color='#%1%2%3%4'>%5</t>", _hex select 3, _hex select 0, _hex select 1, _hex select 2, _letter];
+    } forEach _codes;
+
+    _letters joinString ""
+};
 
 parseText format [
     "<t font='%1' size='%2' align='%3'>%4</t>",
     [_font, "PuristaMedium"] select (_font isEqualTo ""), _size / (UNIT * 0.7), ["left", "right", "center"] select ((_align max 0) min 2),
-    _letters joinString ""
+    _rows joinString "<br/>"
 ]

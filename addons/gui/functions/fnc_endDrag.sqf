@@ -268,6 +268,19 @@ private _sent = call {
         }
     };
 
+    // Ammunition onto a magazine: GreenMag Rework loads it (aio_compat_greenmag), nothing is moved here. Its tile index travels
+    // in the column's place.
+    if (_kind isEqualTo "ammoLoad") exitWith {
+        private _grid = _grids param [_targetIndex, createHashMap];
+        private _under = (_grid getOrDefault ["tiles", []]) param [_col, createHashMap];
+
+        if (!isNil QEFUNC(compat_greenmag,load) && {count _under > 0}) then {
+            [_fromGrid, _entry, _grid, _under] call EFUNC(compat_greenmag,load);
+        };
+
+        false
+    };
+
     // Onto a magazine of its kind: the two are repacked (aio_magazines), nothing is moved here. Its tile
     // index travels in the column's place.
     if (_kind isEqualTo "repack") exitWith {
@@ -279,6 +292,17 @@ private _sent = call {
         };
 
         false
+    };
+
+    // Onto a weapon's tile: the part put on it (op "fit", fnc_doFit). The tile's index travels in the column's place, the part in
+    // the slot's.
+    if (_kind isEqualTo "fitTile") exitWith {
+        private _grid = _grids param [_targetIndex, createHashMap];
+        private _weaponTile = (_grid getOrDefault ["tiles", []]) param [_col, createHashMap];
+
+        if (count _weaponTile == 0) exitWith {false};
+
+        ([_targetSlot, _grid getOrDefault ["container", objNull], _weaponTile, _fromBox, _entry] call FUNC(doFit)) isEqualTo true
     };
 
     // Onto a kit's tile: into that kit (aio_compat_efak). Its tile index travels in the column's place.
@@ -307,6 +331,24 @@ private _sent = call {
         // The slot it goes in - on a weapon card that of the part a magazine or attachment takes.
         if (_targetSlot isEqualTo "" && {_targetIndex >= 0}) then {
             _targetSlot = ((uiNamespace getVariable [QGVAR(slots), []]) param [_targetIndex, []]) param [5, ""];
+        };
+
+        // A part onto a box of the attachments view of a weapon lying in a container (fnc_weaponTile): op "fit" (fnc_doFit).
+        if ((_targetSlot select [0, 5]) isEqualTo "tile_") exitWith {
+            private _target = GVAR(inspect) param [5, createHashMap];
+
+            if (_slotSource isNotEqualTo [] || {!(_target isEqualType createHashMap)}) exitWith {false};
+
+            (
+                [(_targetSlot splitString "_") select -1, _target getOrDefault ["container", objNull], [_target] call FUNC(weaponTile), _fromBox, _entry]
+                call FUNC(doFit)
+            ) isEqualTo true
+        };
+
+        // A part of a weapon lying in a container goes onto grids and the ground only (fnc_tilePart).
+        if (((_slotSource param [1, ""]) select [0, 5]) isEqualTo "tile_") exitWith {
+            ["NoFit"] call FUNC(flashHint);
+            false
         };
 
         // Worn gear onto another unit's slot: the two exchange it (fnc_doSwap).

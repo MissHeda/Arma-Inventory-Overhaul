@@ -68,6 +68,11 @@ A client can see them and cannot change them.
       crate, the ground and a kit window, and is greyed while a move out of that container is under way;
       none on a body's worn gear, on a living person's gear that the settings keep look-only, nor in the Arsenal; a narrow window
       drops Sort first, then Take all, before the tab is cut under three letters.
+- [ ] Size popover (issue #51): the size button in the header (between the palette and the speaker) opens a card under the header with
+      Tiles, Text and Rows per page. Dragging a slider grows and shrinks the window behind it while the card stays open and the knob
+      keeps following the mouse; "Default" shows only when a size differs and takes all three back. Close it and open CBA's Addon
+      Options: the values are there. Change one there (if the window is open behind it) or reopen the window: the popover shows it.
+      Forced on the server, a row is grey and does not move. Text at 0.8 on 1280x720 stays readable (12 px floor).
 - [ ] Text follows the tile size (issue #10): at 1920x1080 set "Tile scale" (`aio_gui_cellScale`) to 1.3 and open the window -
       section captions and chips (Backpack, Tactical rig, Take all, Put all in, Sort, the weight, the search chip), the column
       titles, the box's name, "+N empty rows", the page bar's words, a kit window's title row, the footer's key hints, hint and
@@ -161,6 +166,44 @@ A client can see them and cannot change them.
       colours" off: no button, the standard look.
 - [ ] Pages: a crate with more than 10 rows of loot shows a bar; arrows turn the page; a dragged item held over an arrow turns it; the search finds an item on another page; holding F over a crate stays smooth.
 - [ ] Hotbar 4 to 0: bind by drag, use, the HUD strip.
+- [ ] Attachments 3D view (0.6.51): open Attachments on the MX (with suppressor, laser, optic, bipod): the weapon starts side on,
+      muzzle to the right, a little from above - not end on. Turn up and down: it stops at about 30 degrees; double click: back
+      to the side view. The picture is not stretched (a round optic tube is round, compare the 0.6.49 screenshot) and its edges
+      are smoother than before; the boxes' dots still sit on the parts, also near the left and right ends of the picture. Open a
+      box's tiles and move the mouse over a part: the weapon shows that part on, off the tile it goes back; NONE shows the part
+      off; close the tiles (click beside them, Escape) - the weapon is as it was. Click a tile: it goes on as before. Drag a
+      suppressor from the backpack: the muzzle box over the weapon and the muzzle box in the row light up green, the optic box
+      does not; the same with a weapon lying in a crate (Attachments from its tile's menu). PiP quality Low or Normal in the video
+      options: the line under the view names it and asks for Very High or Ultra (and does NOT show at Very High / Ultra - if it
+      does, `diag_log getVideoOptions` and send the pipQuality line). A 21:9 or 32:9 screen: the picture fills the box, no
+      bars. Inspect the MX, then Attachments of the same MX with Inspect still open: Attachments starts side on; the other way
+      round Inspect starts front left. Sweep the mouse quickly across the tiles: the weapon always shows the tile under the mouse. Inspect (look only): the 3D view is sharper
+      too, starts front left as before. Look through a PiP scope right after closing the window: its view distance is as
+      before. Compare a screenshot of the same weapon with 0.6.49 for the quality.
+- [ ] Weapon card order by holding its header (0.6.50): no grip at the right end of a weapon card's header any more, the caption
+      runs to the end. A short click on the header folds or opens the card as before. Hold the header still: a bar in the accent
+      colour fills along its foot for 3 s, then the header pops out as an accent plate a little larger than the line and follows
+      the mouse up and down, with the drop line between the cards; let go - the card moves there, the order survives closing the
+      window and a restart, and the card does NOT fold or open on that release. Let go before 3 s: the card folds, no move. Hold
+      without moving at all: the bar fills every time (not only now and then). Move the mouse sideways along the header by
+      more than its height, or off it, while holding: the bar goes away and nothing lifts; let go on the header - it folds.
+      Hold on a folded card's header: it moves too. The section captions (Equipment, Gear, Hotbar) still fold with a click and
+      never lift. The tip on a header reads "Fold away - hold 3 s to move the card"; while a card is lifted no tip or hover
+      ring shows over the plate. Round theme (Glass): the words on the plate stand where the header's stood. While holding or
+      lifted, a new pile appearing nearby (another player drops something) does not rebuild the window until you let go; an
+      Escape or another window opening over it drops the card where it was, no script error.
+- [ ] Your settings (#66): the cog in the header opens the card, the server icon opens the wizard. Each row changes at once behind the card and in the picture beside it; right click goes back in a list; "Default" takes everything back; CBA's Addon Options show the same values, also the other way round; a setting forced by the server is dim and does not change.
+- [ ] Elements off (#66): weight, gear, small slots, hotbar, footer each go and their room goes to the rest, with no gap and no script error; with the hotbar off its menu rows and footer hint are gone and its keys still work; with the footer off the hint line causes no error.
+- [ ] Column order (#66): all five orders, with nothing looted and while looting, with Where other storage opens on both: dragging to every column and to the ground, an open kit's window, Inspect and Attachments, and the orders without a free middle on a narrow window.
+- [ ] Modders (#65): a test addon with `CfgAioMenu` Entries (own name, `$STR_` key, picture), Hide, Change (a window row's name and picture), DoubleClick.
+- [ ] Edit mode (#67): Your settings > Edit layout: each column a frame; drag one, resize at each corner, the window follows at the release and the picture on the card shows it; tile and text buttons take effect at once; a column stays on the screen and no smaller than its grid; Reset and Done; Escape mid-drag; while looting and not; dragging items, kit windows and Inspect with columns overlapping; another resolution keeps the places.
+- [ ] Edit mode 0.6.66: edge strips and the eight arrow knobs resize, the outline with its size follows smoothly; drag weight, weapons, gear and hotbar out of the equipment column, each gets its own panel (drop gear on it, refresh after a move into the backpack), the undo button on its title puts it back; all four out leaves no empty column panel; Edit layout and Default on the card still work after changing a few rows.
+- [ ] Real weapon pictures 0.6.79: each weapon card shows the weapon in 3D with its attachments, side on, muzzle left; changing an
+  attachment updates it; Picture-in-Picture off or the setting off falls back to the flat picture; frame rate with four weapons.
+- [ ] GreenMag Rework 0.6.72: rounds, a pack and a belt dragged onto a half-empty magazine in the vest light it in the accent colour and load
+  it with GreenMag's hold action; a wrong caliber, a full magazine and a magazine on the ground are red with the reason; GreenMag's
+  right-click entries (Refill, Unload, Unpack, Pack) work from the window; a reload still works with both reload guards on.
+- [ ] Edit mode 0.6.67: names and bar words whole; Reset, Done and the size steps press at once, also after a few drags; to front / to back on two overlapping frames changes which panel lies on top in the window, and dragging over the top one hits its tiles; Reset clears the order too.
 - [ ] No vanilla inventory: the Gear key, ACE's "Inventory" on an unconscious soldier, ACE's "Open backpack", a crate and a
       vehicle all open ours; after a respawn, a team switch and in Zeus remote control as well; with Better Inventory
       loaded `findDisplay 602` stays null; the setting "Replace the vanilla inventory" is gone from the CBA menu.
@@ -256,6 +299,14 @@ A client can see them and cannot change them.
       pistol, a launcher and the grenade launcher's second muzzle (switch to GL, R). Drag a magazine from the vest onto the empty
       rifle, onto its magazine slot, and use "Load into" in the menu: it loads; read the RPT for `only without a muzzle name` /
       `only as a plain magazine`.
+- [ ] Spent launcher with use limits (0.6.65): backpack on "Only whitelisted", only the launcher's rounds whitelisted for it,
+      rounds in the backpack. Fire the launcher, R: the reload animation plays and the launcher cannot fire until it is done
+      (hold the fire button through it); then it fires once and is empty again. Hold R or press it again during the reload: still
+      one reload. Switch to the rifle in the middle: no round in the launcher afterwards, and R with the launcher in the hands
+      reloads it. The same with the rifle's magazine dragged out in the window, and with a pistol. The hotbar's magazine key and
+      AIME's Change Ammo Type on the empty launcher: the same animation. Inventory after each: no empty rocket left in a
+      container. The RPT: no `did not reload ... loaded by hand` line (if there is one, the game refused the reload and the old
+      instant load ran - send the RPT).
 - [ ] Reload with use limits (issue #2): backpack on "Nothing", a partly used magazine in the rifle, allowed magazines in the vest
       and a full one in the backpack. R once: one animation, the vest's fullest magazine goes in, the old one goes where the game
       puts it (moved to the vest if it landed in the backpack), no hint, no second animation; hold R: still one reload. Fire the

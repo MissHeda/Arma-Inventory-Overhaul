@@ -87,10 +87,13 @@ private _readList = {
         && {(_wanted select 0) isNotEqualTo ""}
         && {(toLowerANSI (_wanted select 0)) isEqualTo (toLowerANSI _wornClass)}
     ) then {
-        // Only a container the engine filled up can have lost anything to its load: one with room left got
-        // all it was given, and a difference there is a renamed item (an EFAK kit or a radio gets a new
-        // instance class when it is made again), which must not be added a second time.
-        private _full = (maxLoad _container) <= 0 || {(loadAbs _container) >= 0.9 * (maxLoad _container)};
+        // Only what the engine turned down for the container's load can be missing for that reason: it filled the container
+        // until the next one did not fit. A container with room left for a thing got all of it, and a difference there is a
+        // renamed item (an EFAK kit or a radio gets a new instance class when it is made again), which must not be added a
+        // second time. Asked per thing, by its own mass against the room left - not "nine tenths full": a heavy thing (a
+        // demolition charge) is turned down with more than a tenth of the load still free (NandoPBR, Discord 2026-11-07).
+        private _maxLoad = maxLoad _container;
+        private _room = _maxLoad - (loadAbs _container);
         private _have = [(_now param [_index, [], [[]]]) param [1, [], [[]]]] call _readList;
         private _need = [_wanted param [1, [], [[]]]] call _readList;
 
@@ -111,7 +114,10 @@ private _readList = {
 
             private _isKit = (([_class] call (missionNamespace getVariable ["aio_items_fnc_kitOf", {[]}])) isNotEqualTo []);
 
-            if (_missing > 0 && {_full} && {!_isKit}) then {
+            private _mass = (([_class] call (missionNamespace getVariable ["aio_items_fnc_getInfo", {createHashMap}])) getOrDefault ["configMass", 0]) max 0;
+            private _turnedDown = _maxLoad <= 0 || {_room < _mass} || {_room < 0.1 * _maxLoad};
+
+            if (_missing > 0 && {_turnedDown} && {!_isKit}) then {
                 switch (_kind) do {
                     case 2: {
                         if (isClass (configFile >> "CfgWeapons" >> (_what select 0))) then {

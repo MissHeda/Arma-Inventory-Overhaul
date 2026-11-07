@@ -56,10 +56,12 @@ private _keySize = _height * 0.56;
 private _textSize = _height * 0.62;
 private _circleW = SQUARE(_height);
 
-// One gap between caps of one key and between the cap and its words; a larger one before the next hint.
-private _gap = SQUARE(_height * 0.3);
-private _capGap = _gap;
-private _entryGap = SQUARE(_height * 0.9);
+// A key's words sit close to its caps and the next hint stands well apart, so each key reads with its own words (Mia, 0.6.94:
+// "easier to see which key does what"). The caps of one key are joined by a small "+" (Ctrl + click).
+private _gap = SQUARE(_height * 0.22);
+private _plusSize = _height * 0.5;
+private _capGap = SQUARE(_height * 0.62);
+private _entryGap = SQUARE(_height * 1.3);
 
 // The caps the key is made of: [text, "", 1] for a key cap, ["", picture, how many] for a mouse button. A key with
 // no token is one cap, as ever.
@@ -76,18 +78,19 @@ if ((_key find "@") < 0) then {
             continue;
         };
 
-        // The picture in ACE's interaction addon, and words for the same where it is not there.
+        // This mod's own mouse pictures (fnc_mouseIcon) - the double click one picture of its own -, words only for an unknown token.
         private _pair = switch (_part) do {
             case "@left": {["mouse_left_ca.paa", LLSTRING(Key_LeftClick), 1]};
             case "@right": {["mouse_right_ca.paa", LLSTRING(Key_RightClick), 1]};
             case "@scroll": {["mouse_scroll_ca.paa", LLSTRING(Key_Scroll), 1]};
-            case "@double": {["mouse_left_ca.paa", LLSTRING(Key_DoubleClick), 2]};
+            case "@double": {["mouse_double_ca.paa", LLSTRING(Key_DoubleClick), 1]};
             default {["", _part, 1]};
         };
 
         _pair params ["_file", "_words", "_times"];
 
-        private _picture = if (_file isEqualTo "") then {""} else {[MOUSE_ICON_PATH + "\" + _file] call FUNC(safePicture)};
+        // ACE's picture, else this mod's own (fnc_mouseIcon): words only for a token that has no picture at all.
+        private _picture = if (_file isEqualTo "") then {""} else {[(_file splitString "_") param [1, "left"]] call FUNC(mouseIcon)};
 
         if (_picture isEqualTo "") then {
             _caps pushBack [_words, "", 1];
@@ -160,10 +163,14 @@ private _capX = _left;
     };
 
     _capX = _capX + _capW + _capGap;
+
+    if (_forEachIndex < count _caps - 1) then {
+        [_display, _parent, [_capX - _capGap, _top, _capGap, _height], "+", _plusSize, _theme getOrDefault ["muted", [0.6, 0.6, 0.6, 1]], _fontBold, 2, "keyhint"] call FUNC(uiLabel);
+    };
 } forEach _caps;
 
 if (_text isNotEqualTo "") then {
-    [_display, _parent, [_left + _badgeW + _gap, _top, _textW, _height], _text, _textSize, _theme getOrDefault ["text2", [0.78, 0.78, 0.78, 1]], _font, 0, "keyhint"] call FUNC(uiLabel);
+    [_display, _parent, [_left + _badgeW + _gap, _top, _textW, _height], _text, _textSize, _theme getOrDefault ["text", [1, 1, 1, 1]], _font, 0, "keyhint"] call FUNC(uiLabel);
 };
 
 _taken

@@ -2,6 +2,801 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.0 - beta
+
+The release of everything since 0.6.29 (the beta builds 0.6.30 to 0.6.113 below): real 3D weapon pictures, Tarkov-style
+Attachments, Edit layout, the quick move target, one Colours and Layout card with your own font, GreenMag Rework and
+BackpackOnChest support, and many fixes.
+
+### Changed
+
+- Real weapon pictures keep more room round the weapon, and a handgun shows at a handgun's size instead of filling its card.
+
+## 0.6.113 - beta
+
+Tested in game (MX with suppressor, optic and bipod, Mk200, P07 with suppressor, NLAW).
+
+### Fixed
+
+- Real weapon pictures are centred and sized right: Arma's own box of a weapon model reaches a metre or two past the gun (a
+  helper point), so the P07's middle lay 47 cm beside it and the MX measured 4 m high. Each axis now comes from the model's
+  visible, geometry or memory shape, whichever is sane; the suppressor is measured the same way.
+- The width the picture holds was worked out 1.46 times too wide, so long weapons came too close.
+
+### Changed
+
+- Every slot's picture size starts at 100 % again (the primary's 80 % made up for the wrong width).
+
+## 0.6.112 - beta
+
+### Changed
+
+- Real weapon pictures: the size per slot goes up to 200 %.
+
+## 0.6.111 - beta
+
+### Changed
+
+- Real weapon pictures centre the whole weapon with its muzzle attachment: a suppressor no longer pushes the weapon off the
+  middle of its card.
+
+### Fixed
+
+- Settings set in the window are also kept by the window itself and put back at the next start should they come up otherwise
+  (each one put back is named in the RPT) - "Real weapon pictures" was still off after a restart.
+
+## 0.6.110 - beta
+
+### Fixed
+
+- Settings changed in the window (Layout tab, Colours tab font, sizes, palette, the layout editor) were never stored in the
+  profile and were lost on a restart - "Real weapon pictures" among them. They are stored now.
+- Real weapon pictures: the backdrop is painted darker, closer to the card's colour, and the attachments' plates on it are dark
+  and nearly solid, so they show on any backdrop.
+
+## 0.6.109 - beta
+
+### Changed
+
+- Layout tab: a weapon picture's size and place are one row per slot with three values (Size, X, Y; left click more, right
+  click less), and these rows only show while "Real weapon pictures" is on - the card fits the screen again.
+- The font list in the Colours tab shows the names in the card's own font; Etelka is gone (it came out garbled).
+
+## 0.6.108 - beta
+
+### Added
+
+- Real weapon pictures: move each slot's picture left/right and up/down (Layout tab and CBA settings, -50 to 50 % of the
+  weapon's length; 0 is centred).
+
+### Changed
+
+- The Font row in the Colours tab is a dropdown like Style: a click opens the list, each font's name shown in that font.
+
+### Fixed
+
+- A line of the card showed under a real weapon picture's bottom right corner.
+- Settings changed in the Layout tab (such as "Real weapon pictures") are written to the profile at once, so a restart keeps
+  them.
+
+## 0.6.107 - beta
+
+### Changed
+
+- Real weapon pictures fill the whole card, edge to edge, with the card's round corners: the attachments' plates and the name
+  lie wholly on the picture instead of half on it.
+- The footer's hint line sits a little higher, level with the key hints' words.
+
+### Fixed
+
+- The Font row in the Colours tab did nothing when clicked.
+
+## 0.6.106 - beta
+
+### Added
+
+- The font can be changed in the Colours tab too: a Font row under Style, a click takes the next font.
+
+## 0.6.105 - beta
+
+### Changed
+
+- Real weapon pictures fill their card down to its foot; the attachments' plates and the name lie over the picture.
+- A failed action's line flashes and shakes without the red box behind it, in the same font and on the same line as the
+  other footer words.
+
+## 0.6.104 - beta
+
+### Added
+
+- Pick the window's font: Layout tab (and the CBA settings), "Font" - Purista (Arma's and ACE's, the default), Purista Light,
+  Roboto Condensed, Roboto Condensed Light, Etelka, Tahoma or Lucida Console.
+
+## 0.6.103 - beta
+
+### Added
+
+- Real weapon pictures: a size per slot (primary, handgun, launcher, second primary) in the Layout tab and the CBA settings,
+  50-150 % in steps of 5. The primary starts at 80 %, since the MX came too close at full size.
+
+### Changed
+
+- Real weapon pictures have round corners like their card, and the colour behind the weapon follows the card's colour when
+  you change your colours.
+- When something fails the footer line now lights up: the words flash nearly white and settle in red, with a red glow behind
+  them that fades as it shakes.
+- The footer's hint line sits on the same line as the key hints' words.
+
+### Fixed
+
+- A failed action's line came out white instead of red.
+- A click on an empty spot of the Colours or Layout card, beside a switch or a button, left the card unclickable until it
+  was opened again.
+- The mouse wheel scrolled a real weapon picture inside its card.
+
+## 0.6.102 - beta
+
+### Changed
+
+- BackpackOnChest - Redux: the backpack slot's menu rows (on the chest, on the back, swap) show the mod's own icons.
+
+## 0.6.101 - beta
+
+### Fixed
+
+- A failed action showed a script error instead of the red, shaking line of 0.6.98 (seen in game).
+
+## 0.6.100 - beta
+
+### Changed
+
+- A tip in the colour gradient that runs over two or more lines starts the gradient again on each line, instead of running it
+  once across all of them.
+
+## 0.6.99 - beta
+
+### Added
+
+- GreenMag Rework stripper clips (GreenMag 1.1 and later): five clips to a 1x1 tile. "Strip rounds off the clip" strips a clip
+  where it lies and a double click does the same, as with a box of rounds; from a stack only one clip is stripped.
+  Boxes of clips take 2x2 like the other boxes, and a double click opens them into clips.
+
+## 0.6.98 - beta
+
+### Changed
+
+- When something fails - an item that does not fit, a move that is refused - the footer's line says why in bold red and
+  shakes briefly, so it stands out. Lines that only say how a move went (some moved, some went back) stay as they were.
+
+## 0.6.97 - beta
+
+### Changed
+
+- The Colours and Layout card grows with Arma's interface size (Options > Game > Layout): very small as before, each step
+  up larger, as far as the screen has room.
+
+### Fixed
+
+- The card's tip line and the note under the layout preview are drawn as plain text at an exact size: as structured text
+  they came out smaller than asked.
+
+## 0.6.96 - beta
+
+### Fixed
+
+- The tip line of the Colours and Layout card came out tiny in 0.6.95: its words are now about the size of the rows above,
+  as is the note under the layout preview.
+
+### Changed
+
+- Every upright line on the footer has one length, the ones between keys and the ones before the double click and the tip.
+
+## 0.6.95 - beta
+
+### Changed
+
+- Footer keys are easier to read: a key made of two parts shows a "+" between them (Ctrl + click), each key's words sit
+  close to it in full white, and a short faint line with more room stands between one key and the next.
+
+## 0.6.94 - beta
+
+### Fixed
+
+- The tip line at the foot of the Colours and Layout card was cut off: its words came out at the full text size instead of the
+  smaller tip size. They are drawn at their own size again, and a tip that is still too long shrinks until it fits.
+
+## 0.6.93 - beta
+
+### Changed
+
+- Real weapon pictures are off by default: each one keeps a camera filming while the window is open, and its background
+  cannot be see-through. Switch them on in the Layout tab.
+
+## 0.6.92 - beta
+
+Tested in game.
+
+### Removed
+
+- The ACE Arsenal look of 0.6.86-0.6.91 (setting "ACE Arsenal look", addon `compat_ace_arsenal`): ACE Arsenal is as it was in
+  0.6.85 again.
+
+### Fixed
+
+- Real weapon pictures: each weapon fills its card - a rifle across, a handgun up and down - and sits in its middle (the MX came
+  out a fifth of its card).
+
+## 0.6.91 - beta
+
+Tested in game.
+
+### Changed
+
+- ACE Arsenal look, no square corners left: the tabs sit on round tiles and the open one is lit in your accent colour; the picked
+  row of a list is a round accent bar (ACE's own white bar with "ACE's own"); the load bar, weight box, search and sort fields
+  are round; the menu buttons (Hide ... Close) are solid like Close.
+- ACE Arsenal: a card over the menu bar tells of the picked item as the inventory's hint line does - its name, the cells it
+  takes, its weight, how many share a cell, a magazine's rounds.
+- Real weapon pictures: the grey behind the weapon matches the card, so no box shows round it.
+
+## 0.6.90 - beta
+
+### Fixed
+
+- GreenMag Rework: stripper clips and boxes of clips dragged onto a magazine tile did nothing; they load now, and what is dragged is what goes in (GreenMag 1.2: loose rounds only from loose rounds, clips only from clips).
+
+## 0.6.89 - beta
+
+Tested in game (an unattended test mission, screenshots).
+
+### Fixed
+
+- A script error on every build of the window since 0.6.67 (`fnc_layerOrder`: `apply` has no `_forEachIndex`).
+- Real weapon pictures: grey once the still was kept - the engine forgets what a camera filmed once the camera goes, so the
+  camera stays while the card is shown. The weapon came out white: softer lights and a dark grey behind it that sits on the card
+  (on black the exposure opened up). A handgun is no longer cut off at the bottom.
+- ACE Arsenal look: the panels are round and outlined whatever the theme's corners (with a sharp theme it looked like ACE's own).
+
+## 0.6.88 - beta
+
+### Fixed
+
+- ACE Arsenal look: its panels were not drawn at all, so the lists lay bare over the world. They now lie in ACE's own background
+  layer (new addon `compat_ace_arsenal`, loaded only with ACE Arsenal), under every ACE control, as the inspect card's: the
+  theme's fill with a faint round outline.
+- Real weapon pictures stayed empty: an item's box blown up by its hit geometry put the camera far off. The framing is held to
+  the weapon's base and to the inspect card's sizes.
+
+## 0.6.87 - beta
+
+### Changed
+
+- Real weapon pictures are on again, now as a still: each weapon is filmed for a few frames when its card is drawn, then the
+  picture is kept and nothing films any more (no cost while the window is open). On black, which stays black in the light.
+- Picking a quick move target no longer builds the window again: the outline shows at once, without the short stutter.
+- A double click on a uniform, vest or backpack (its picture beside the grid, or on the doll) puts it onto the ground at once.
+- Footer: the double click's key hint goes back to "Quick move" when the mouse leaves an item.
+
+## 0.6.86 - beta
+
+### Added
+
+- ACE Arsenal in this mod's look (setting "ACE Arsenal look", default on): ACE's square backgrounds - the list blocks, the menu
+  buttons, the stats, info, actions and message boxes, the search fields and sort boxes - become round glass panels in your
+  theme's colours, the list frames go, the lists take the theme's font and text colour. Same lists, same order, same buttons;
+  mods that add to ACE Arsenal (ACE Arsenal Extended) keep working. "ACE's own" brings back the look as it was (when the
+  arsenal opens next).
+
+## 0.6.85 - beta
+
+### Fixed
+
+- Loading a loadout lost heavy things beyond a container's config load (Discord, NandoPBR: the second demolition charge in a
+  Carryall). The top-up after the load only looked at containers nine tenths full; it now adds back whatever the engine turned
+  down because it did not fit the load that was left.
+
+## 0.6.84 - beta
+
+### Changed
+
+- A double click (or the quick move key) that drops out of your own gear drops at once, as a drag does - it no longer waits for
+  the hands like the drop key may.
+
+## 0.6.83 - beta
+
+### Changed
+
+- Real weapon pictures are off by default: a filmed picture cannot be see-through. Switch them on in the Layout tab.
+- Footer: the double click's key hint stays all the time - the last action, or "Quick move" until the mouse was on something -
+  instead of coming and going; its picture sits in the middle of its cap.
+
+## 0.6.82 - beta
+
+### Fixed
+
+- Real weapon pictures: the weapon sits in the middle of its card - by its whole model, stock included - and the camera stands so
+  far off that all of it fits what the card shows, at any card size the layout gives it.
+
+## 0.6.81 - beta
+
+### Changed
+
+- Footer: what a double click does is a key hint like the others - the double click's mouse in a key cap, its words beside it -
+  followed by the same thin line as after the keys.
+
+## 0.6.80 - beta
+
+### Changed
+
+- Quick move with no target picked: out of your own gear onto the ground (seated: the vehicle). Pick a crate or your vest by a
+  click on it to send things there instead. From the loot it still goes into your gear.
+- Footer: the line after the keys sits right after them, the line after the double click looks the same, and the double click is
+  written in the keys' colour.
+- The quick move target's picture keeps only its soft outline: no crosshair in the corner, no tooltip.
+
+### Fixed
+
+- Real weapon pictures stayed empty, with a script error in fnc_cardScene.
+
+## 0.6.79 - beta
+
+### Added
+
+- Real weapon pictures: the weapon cards show each of your weapons as it really looks - optic, suppressor, light, bipod and
+  magazine on it - filmed in 3D, side on, instead of the flat picture with white marks. Needs Picture-in-Picture; setting
+  "Real weapon pictures" (Layout tab) switches it off.
+
+## 0.6.78 - beta
+
+### Changed
+
+- Footer: right after the keys comes what a double click does on what the mouse is on - always, also the plain "Quick move",
+  "into <container>" with a target picked, "Put on" on the ground -, then a line, then the item's hints.
+- The footer's mouse buttons are this mod's own pictures, with or without ACE; the double click is one picture of its own.
+
+### Fixed
+
+- Quick move target: picking a container showed nothing until the window was built again for another reason.
+
+## 0.6.77 - beta
+
+### Changed
+
+- Quick move target: the container's picture beside its grid gets a soft accent outline and a small crosshair, instead of a
+  crosshair on the caption line. A click on the picture picks it (again: stops) - for a crate, the ground, and your uniform,
+  vest and backpack, also on the doll.
+- The hint line shows one double click picture, white, instead of two tinted mouse buttons.
+- The hint line always says what a double click does when it is not a quick move: your own weapon's "Modify", an item's own
+  action, or the menu where the setting opens it.
+
+## 0.6.76 - beta
+
+### Changed
+
+- The quick move target's crosshair sits in a box with a rounded accent outline, as the inspect card's attachment points.
+- The hint line shows a double click as two mouse pictures instead of the words "Double click".
+- Mouse buttons in the footer and the hint line have pictures of this mod's own where ACE is not loaded (were words).
+
+### Fixed
+
+- GreenMag Rework: a double click on a box of rounds moved it instead of opening it.
+
+## 0.6.75 - beta
+
+### Changed
+
+- One header button for how the window looks: the palette and the settings card are one card with two tabs, Colours and Layout
+  (sizes, spacing, what the window shows and how it behaves). It opens on the tab you used last. Where the server sets the
+  colours it opens on Layout; settings a server or mission forces stay locked as before.
+- "Mark the quick move target" is in the Layout tab too.
+
+## 0.6.74 - beta
+
+### Added
+
+- Quick move target: click a free cell of a container - a crate, a pile, your vest - and double clicks and the quick move key
+  put items into it from then on, from either side. A crosshair on its caption line shows which one (setting "Mark the quick
+  move target"); click a free cell of it again to stop. An item that lies in it already goes the usual way.
+- The hint line names what a double click does on an item that has its own action ("Double click: Unpack"), or where it goes
+  while a target is picked.
+- GreenMag Rework: a double click on a box of rounds opens it, and the rounds lie on the cells the box took.
+
+## 0.6.73 - beta
+
+### Changed
+
+- Machine gun belts and boxes are 3x2 (were 2x2).
+- GreenMag Rework items: loose rounds stack up to 20 on a 1x1 tile, a speedloader is 1x2, a box of rounds 2x2 and a belt 3x2.
+
+### Fixed
+
+- Weapon cards: a bipod no longer draws a stray mark below the weapon's picture; it still shows as a plate beside the name.
+
+## 0.6.72 - beta
+
+### Added
+
+- Works with GreenMag Rework: drag loose rounds, a pack or a belt onto a magazine in your uniform, vest or backpack and GreenMag
+  loads it, as its own drag does in the vanilla inventory. A magazine it cannot load turns red with GreenMag's reason. Its
+  right-click entries (Refill, Unload, Unpack, Pack, the belt's) show in the window as before.
+
+## 0.6.71 - beta
+
+### Fixed
+
+- Inspect card: the close button is a square with rounded corners, matching the part boxes, not a circle.
+
+## 0.6.70 - beta
+
+### Fixed
+
+- Right-click menu: "Put on the hotbar" and "Take off the hotbar" have an icon, as the other rows.
+
+## 0.6.69 - beta
+
+### Fixed
+
+- Modify view: the boxes on a weapon's parts have clearly rounded corners, not nearly square ones.
+
+## 0.6.68 - beta
+
+### Fixed
+
+- Inspect card: the close button's surface is round, as the card's corners, not a square.
+
+## 0.6.67 - beta
+
+### Added
+
+- Edit layout: each frame has two buttons, to the front and to the back - where panels overlap, you choose which lies on top (a weapons panel over the loot column, for example).
+
+### Changed
+
+- A new Attachments icon: a scope on its rings over the rail.
+
+### Fixed
+
+- Edit layout: the frames' names and the bar's words (Tiles, Text, the hint, Done) were cut off. The columns' names sit on their top edge now, as tabs, clear of the parts' names inside.
+- Edit layout: the bar's buttons (Reset, Done, the size steps) could not be pressed. The display takes the press now and looks which button was under the mouse.
+
+## 0.6.66 - beta
+
+### Changed
+
+- Edit layout looks and works like a desktop window: every edge and corner is a grip with the arrows the mouse shows there, a whole edge resizes one way, and the frame follows the mouse as an outline with its size, on a finer grid, until you let go. Each frame has a title chip; the bar on top is tidier, with Done in the accent colour (#67).
+- The parts of the equipment column - weight, weapons, gear and hotbar - have their own frames in the edit mode: drag one out and it stands on its own panel anywhere on the screen; the button on its title puts it back. Items let go over such a panel go into the slot that takes them, as over the column. The settings card's preview shows them.
+
+### Fixed
+
+- Your settings: Edit layout (and Default) could only be pressed right after the card opened. Once the window behind it had been built again, the click never came; they act on the press now.
+
+## 0.6.65 - beta
+
+### Fixed
+
+- Reloading a spent launcher (or any weapon with no magazine in it) with R while a "Use items from ..." setting limits something - for example the backpack on "Only whitelisted" with only launcher rounds allowed: the round was in at once while the reload animation still played, so the launcher fired during its reload, again and again. The mod put the magazine in by script and played the animation on top. Now the empty muzzle is given an empty magazine of that class, as a weapon fired dry has, and the game reloads from it as it always does - its animation, its time, no firing until it is done. Should the game not start that reload within a second, the magazine goes in by hand as before (an RPT WARNING `did not reload ... loaded by hand`). The same for the hotbar's magazine keys and AIME's Change Ammo Type. Not tested in the game (#63).
+
+## 0.6.64 - beta
+
+### Fixed
+
+- Your settings: "Hotbar shown for" says its unit, seconds.
+
+## 0.6.63 - beta
+
+### Added
+
+- **Edit layout** (Your settings), like Arma's own layout editor: drag the equipment, your gear and the loot column anywhere and resize them at their corners, with the tile and text size at hand. A grid column cannot get narrower than its grid; the tile size makes it narrower (#67).
+
+### Changed
+
+- The picture on Your settings shows the columns at their real places and sizes, so a change of the tile size shows there too (#67).
+
+## 0.6.62 - beta
+
+### Changed
+
+- The line round the Inspect and Attachments cards is much fainter.
+- Attachments, Attach to and Load into in the right-click menu have clear white pictures of their own.
+- Double click: the setting is now for items with none of their own. Your weapons always open Attachments, and what a mod or the mission set for an item always applies.
+
+### Fixed
+
+- Your settings: no names and values cut off, and a smaller hint line.
+
+## 0.6.61 - beta
+
+### Added
+
+- **Your settings**: the size button in the header is now a cog and opens a card with your own settings in one place: sizes, what the window shows, where the columns stand, the tiles and how it behaves. A small picture shows the layout, the window behind changes with each row, and everything stays in sync with CBA's Addon Options (#66).
+
+### Changed
+
+- The setup wizard's button in the header and its row in the right-click menu have a server icon.
+
+## 0.6.60 - beta
+
+### Added
+
+- Switch off what you do not use (client settings): the weight, the gear slots, the small slots, the hotbar and the footer. What is off gives its room to the rest; hotbar keys keep working (#66).
+- **Column order** (client setting): place equipment, loot and your gear - for example equipment on the right with your gear beside it (#66).
+
+## 0.6.59 - beta
+
+### Added
+
+- For modders and mission makers (#65): `CfgAioMenu` in a mod's config adds rows to the right-click menu with their own names (`$STR_` keys work) and pictures, hides rows by id, changes the name or picture of the window's own rows and sets what a double click does on their items. The same from script: `aio_gui_fnc_addMenuEntry`, `aio_gui_fnc_hideMenuEntry`, `aio_gui_fnc_changeMenuEntry`, `aio_gui_fnc_setDoubleClick`.
+- Server setting **Hidden menu entries**: rows of the right-click menu nobody should see, by id.
+
+## 0.6.58 - beta
+
+### Changed
+
+- The right-click menu has pictures on Load into, Attach to and Select all, and the one on Attachments is white (#64).
+- The Inspect and Attachments cards have a line in the accent colour round them, so they stand out from what is behind (#64).
+
+### Fixed
+
+- The hint at the mouse: a text that fits one line got a box for two and sat above its middle; the words now lie in the middle of a box of their height (#64).
+
+## 0.6.57 - beta
+
+### Changed
+
+- Text size also sets the names and counts on the tiles, so they can be made larger without larger tiles. Larger words have less room on a small tile: a name is cut sooner, and a magazine's rounds may show without the capacity (#62).
+
+## 0.6.56 - beta
+
+### Added
+
+- A double click on a weapon you carry opens its Attachments.
+- The right-click menu has pictures on its main rows: Inspect, Attachments (in the accent colour), Drop, Swap and Settings.
+
+### Changed
+
+- Weapon cards: a magazine's rounds are on the same plate as its picture, so it is plain which count belongs to which magazine.
+- The right-click menu of a weapon you carry no longer lists Take off for each part: Attachments has them all. A weapon on a body keeps those rows.
+
+### Fixed
+
+- With a menu open, what lies under it no longer lights up or fills the hint while the mouse is on the menu.
+
+## 0.6.55 - beta
+
+### Changed
+
+- A weapon card lifted by its header is a plate with round corners, as the theme has them; a square theme stays square.
+
+### Fixed
+
+- Attachments: the boxes over the weapon were framed green all the time, NONE too. They are framed in the accent colour again while a part is on them, and light up green only while a part they take is dragged.
+
+## 0.6.54 - beta
+
+### Added
+
+- Setting **Double click on an item** (client, General): quick move as before, open the right-click menu - which also has what other mods add to CBA's item menu, as a double click does in the vanilla inventory - or nothing. The quick move key keeps working either way (#60).
+
+## 0.6.53 - beta
+
+### Added
+
+- Ukraine FPV Drone (Workshop 3475006113) works with the window, new optional addon `compat_fpv` (loads only with that mod): an FPV item dropped on the ground - drag out of the window, the drop key, Drop in the menu - deploys the drone, by the mod's own function. The mod listened for the engine's "Put" event, which a drop through this window never raises, so the item just lay there. Where the mod's own pack-up says there is no room although the grid has a free spot, ACE interaction > Pack up drone packs it into that spot (#59).
+
+## 0.6.52 - beta
+
+### Changed
+
+- Weapon cards: the bar along the header shows only after you held it for 1 second, and the card lifts at 2 seconds. The bar stays inside the header's line, under its words, and no longer runs into the card below.
+- Weapon cards: the header's tip is now just **Fold away | Hold to move**.
+- Attachments: **NONE** is always the first tile of a box's list, what is on the part comes second, framed. With nothing on the part, NONE is framed - and it is there even when nothing fits.
+
+### Fixed
+
+- 3D view (Inspect and Attachments): models did not load at all since 0.6.51. The texture's size was refused by the engine.
+
+## 0.6.51 - beta
+
+### Added
+
+- Attachments, as in Tarkov's weapon builds: point at a part in a box's list and the weapon in the 3D view shows it on, for as long as the mouse stays on its tile - nothing is moved until you click.
+- Attachments, as in Tarkov and Arma Reforger: while you drag a part, every box on the Attachments card that takes it - over the weapon and in the row under it - lights up green, as the slots of your gear do.
+
+### Changed
+
+- Attachments: the weapon starts side on, the muzzle to the right and a little from above, as Tarkov and Reforger show it, and tilts up or down at most 30 degrees so the parts round it stay readable. A double click goes back to that view.
+- 3D view (Inspect and Attachments): sharper. The picture had the shape of the screen stretched into a 2:1 texture, and a 2048 texture drawn into a box of some 600 pixels skipped pixels, so edges stepped and shimmered. The texture now has the screen's shape (the box shows its middle, also on screens wider than 2:1) and twice the box's pixels, placed on whole pixels, so edges are sampled down evenly. While it is open, the Picture-in-Picture view distance is 300 m (yours comes back on close).
+- 3D view: when the Picture-in-Picture quality in the video options is lower than the view needs, the line under it says so instead of how to turn the item.
+
+## 0.6.50 - beta
+
+### Changed
+
+- Weapon cards move by their header now, not by a grip: hold the header still for 3 seconds - a bar fills along it meanwhile - and the header pops out and follows the mouse up or down; let go where the card should go. A short click still folds or opens the card. The grip icon at the right end of the header is gone, so the caption has that room.
+
+## 0.6.49 - beta
+
+### Fixed
+
+- Attachments: a click on the row of parts under the picture opens the parts right there, not at the box over the weapon.
+- Attachments of a weapon lying in a container: its parts can be dragged out too - onto a grid or the ground.
+- A part dragged onto a weapon showed red although it went on: every way of putting a part on - the weapon card, a weapon's tile, the Attachments boxes and row - now asks the very same check for the colour and for the drop.
+
+## 0.6.48 - beta
+
+### Added
+
+- Weapons lying in a container show small pictures of their parts in the bottom right corner of their tile, and their right-click menu has **Attachments**: change their parts as on a weapon you carry. A part dropped straight onto a weapon's tile goes on it where it fits (what was on that part goes where the new one lay), else it shows red.
+- Attached parts of a weapon you carry can be dragged out of the Attachments view's boxes and row - onto a grid or the ground.
+
+### Changed
+
+- **Modify** is now **Attachments**, and its card is as large as Inspect's. **Inspect** only looks again - no part boxes, no row of parts.
+- A part box's tiles start with the part that is on now, framed in the accent colour, then NONE, then what else fits.
+- The drop highlight on the Attachments view's boxes and row has round corners like every other one.
+
+### Fixed
+
+- The marks of the attachments on a weapon's picture were gone in 0.6.46: they show again, as the weapon's own shapes, but never larger than a fixed share of the picture.
+
+## 0.6.47 - beta
+
+### Fixed
+
+- The hint at the mouse lay behind an open popup - the part tiles of the modding view, a context menu, the colour, size and sound popovers. A popup holds the focus and the game draws it after everything else; the hint now moves into the open popup and lies over it, and back once it closes.
+- The part tiles no longer show "Nothing fits" as if it were a part: NONE (only while a part is on) and the parts that fit are the only tiles, and that nothing fits is a line of text under them - or, with nothing on the part either, just the hint.
+
+## 0.6.46 - beta
+
+### Changed
+
+- The white marks of the attachments on a weapon's picture (the weapon cards and tiles) are clean silhouettes of the slot - muzzle, optic, rail, bipod - all of one size that grows and shrinks with the picture, instead of the weapon's own glowing shapes, of which the laser's was far too big.
+
+## 0.6.45 - beta
+
+### Changed
+
+- Modify shows the weapon in the inspect card's own 3D picture again (Picture-in-Picture, as in 0.6.41): the attempts with the game's own camera are gone, the world behind the window stays untouched. The card can be moved again.
+- The part boxes around the weapon are smaller.
+
+## 0.6.44 - beta
+
+### Changed
+
+- Modify's parts look like Tarkov's weapon builds: square glass boxes with rounded corners above and below the weapon, each with the part's picture and short name (NONE when empty), and a thin line to a dot on the part's place. A click on a box opens the parts as picture tiles right under it - NONE first, then what fits from your gear and the loot.
+
+## 0.6.43 - beta
+
+### Changed
+
+- Modify leaves the world around the window as it was: the weapon with its parts is placed, small, right in front of your eye and shows in the card's picture on a dark plate, at full game quality. While the card is open your own figure is hidden for you (it would stand in the way). In a vehicle, or where a wall stands too close, it falls back to the view of 0.6.42.
+- The weapon cards' headers lie closer together.
+- A point's list shows only the parts that fit, with **None** at the top to take the part off - no title row.
+
+### Fixed
+
+- After turning the weapon, its points could not be clicked any more.
+- The weapon cards (and tiles) showed only the optic on the weapon's picture: muzzle devices, lasers and lights show again.
+
+## 0.6.42 - beta
+
+### Changed
+
+- Modify shows the weapon with the game's own camera, at full quality like any weapon in the world, instead of the coarse Picture-in-Picture texture. Its card sits between the equipment column and your gear, over the loot column, which hides while it is open; it also works with Picture-in-Picture switched off. The small Inspect card keeps its 3D picture as before.
+
+## 0.6.41 - beta
+
+### Added
+
+- Weapon modding as in Tarkov (#56): right-click one of your weapons and pick **Modify** - a wide inspect card shows it in 3D with a point on each part (muzzle, optic, rail, bipod, magazine, second magazine), following the weapon as you turn, move and zoom it. Click a point for the parts from your gear and the open loot that fit there, right-click it to take the part off into your gear, or drag a part from any grid onto it. A row under the picture lists the same parts, also for weapons whose model names no place for one, and in 2D. **Inspect** on your own weapon has the points and the row too, on the usual card.
+
+### Changed
+
+- The weapon cards have no attachment and magazine boxes any more - half of them stood empty. A card shows the weapon's picture and name and small pictures of what is on it, the loaded magazines with their rounds. Dropping an attachment or a magazine on the card still puts it on.
+
+## 0.6.40 - beta
+
+### Changed
+
+- A weapon card's attachment boxes are in the same places on every card: muzzle, optic and rail on top; bipod, magazine and second magazine below. The handgun and the launcher leave the places of what they cannot take empty.
+- The grip's two chevrons sit closer together, with a longer dash between them.
+
+### Fixed
+
+- The tip of a fold caption or grip in the equipment column still went away on a click. Those buttons now take the click the way the fold tabs of the gear columns do, and keep their tip.
+
+## 0.6.39 - beta
+
+### Added
+
+- The sections of the equipment column - Equipment, Gear and Hotbar - fold away with a click on their caption, like the weapon cards: hide the hotbar if you never use it. Kept in your profile.
+
+### Changed
+
+- A weapon card's grip shows a chevron up and one down with a dash between them.
+
+### Fixed
+
+- After a click on a fold caption the tip at the mouse went away until the mouse moved; it shows again at once now, for every button that builds the window anew.
+
+## 0.6.38 - beta
+
+### Added
+
+- Each weapon card has a header line now: click its caption to fold the card away to that line and again to open it; the folded line names the weapon and still takes one dragged onto it. The second primary's card starts folded while nothing is on your back. What you fold is kept in your profile.
+- Drag a weapon card by the grip (the six dots at the right end of its header) to put it anywhere in the column - the handgun on top and the primaries at the bottom, say. A line shows where it goes; your order is kept in your profile.
+
+### Fixed
+
+- With a larger text size the handgun's picture vanished from its card and the cards got cramped: the key moved into the header, and a weapon's picture always keeps at least half its card.
+- Setup wizard: the text box of "Message when not allowed" (Vanilla Arsenal) started far right of the other controls; it lines up with them now.
+
+## 0.6.37 - beta
+
+### Changed
+
+- BackpackOnChest Redux: the backpack slot's menu offers its moves only where that mod allows them (not while its setting turns them off, not under a parachute).
+
+## 0.6.36 - beta
+
+### Fixed
+
+- Size popover (issue #51): the tips of its rows lay behind the card. They show on a hint line inside it now, as in the colour popover.
+- Size popover: "Rows per page" seemed to do nothing. It only cuts a crate or vehicle of the loot that is filled with more rows than a page; where nothing looted is, its name is dimmed and its tip - and a press on its slider - say so.
+- With large tiles, the rounds of a loaded magazine ("0/30") in the small boxes beside a weapon were cut off or ran into the box's caption. A slot's words now never take more than its height allows, and the rounds are set smaller where the box is too narrow - at every tile and text size.
+
+## 0.6.35 - beta
+
+### Fixed
+
+- After the first inventory opening the soldier could not walk until V was pressed: the engine left him in its inventory pose, which only its own inventory ends. The window and the closed vanilla inventory now take him out of it (issue #49).
+- Quick move no longer puts things on a pile at your feet that the loot column shows - dropping is G's; with nothing else looted it moves within your own gear (issue #50).
+- A soldier you lead, told to open his inventory, walked back into formation and the window closed at once: he stays put while it is open and follows again when it closes (issue #48).
+
+## 0.6.34 - beta
+
+### Added
+
+- BackpackOnChest (original and Redux): the right-click menu of your backpack slot puts the backpack on your chest, back onto your back, or swaps the two - that mod's own actions (issue #34).
+- Antistasi Ultimate: "Loot around" of a loot truck or crate now takes what lies in this mod's piles on the ground as well - it looted only the engine's own piles by their class and passed over everything dropped or moved out of a body or a box through the window (issue #35).
+
+## 0.6.33 - beta
+
+### Added
+
+- Second primary weapon as a slot of its own (issue #52), with WebKnight's or KJW's Two Primary Weapons loaded: the rifle on your back gets a card under your primary, with its magazine and attachments beside it, as on the primary. Drag a rifle onto it or off it, drop it, Ctrl+click it into your gear, change its optic, magazine and other parts like on any weapon. Drag the primary and the second primary onto each other, or pick "Swap with primary" / "Swap with second primary" in the right-click menu, and they trade places. A double click on a rifle with your hands full puts it on your back when that is free. The card's corner shows that mod's own switch key. Everything goes through that mod's own way of keeping the weapon (its variables, the weapon hanging on your back, with KJW's its weight in ACE), so its key switches to a rifle put there in the window as to one it put there itself; KJW's blacklist and whitelist decide what may go on the back. KJW's mod keeps the back weapon of the player only, WebKnight's of any soldier - your subordinates' too.
+
+### Changed
+
+- With WebKnight's Two Primary Weapons, a move in the window that empties your hands no longer brings the weapon on your back into them: it now has a slot you see and move yourself.
+
+## 0.6.32 - beta
+
+### Added
+
+- Size menu in the window (issue #51): a new button in the header, beside the palette, opens a popover with a slider for **Tiles** (the tile scale), **Text** and **Rows per page**. The window grows and shrinks behind it while you drag - no reopening. "Default" takes all three back. They are your CBA client settings, both ways: what you set here is saved there, and a change in CBA's Addon Options shows at once in an open window and in the popover. A size the server forces is greyed out.
+- Text size (`aio_gui_textSize`, client, 0.8 to 1.4, default 1): the window's words on top of what the tile scale gives them - larger words on small tiles, or smaller ones. The 12-pixel floor that keeps them readable stays.
+
+### Changed
+
+- The tile scale (`aio_gui_cellScale`) and the rows per page (`aio_gui_pageRows`) take effect at once in an open window instead of at the next opening; the tile scale moves in steps of 0.05.
+
+## 0.6.31 - beta
+
+### Changed
+
+- Quick move (double click, F) with nothing being looted no longer drops the item at your feet: it moves it within your own gear - out of the backpack into the vest, then the uniform; out of the vest or the uniform into the backpack, then the other one (issue #50). Dropping stays on G. Seated, it still goes into the vehicle.
+
+### Fixed
+
+- Telling a soldier you lead to open his inventory (command menu) opened your own gear instead: the window now shows your gear with his beside it, whole, as for any person - he has to stand next to you (issue #48).
+
+## 0.6.30 - beta
+
+### Fixed
+
+- Without ACE, the line that says why a reload or a throw was held back ("Use items from ..." set to Nothing or Only whitelisted) and the arsenal's "removed, as they did not fit" came as the game's hint box in the corner of the screen, which stays there; they are CBA notifications now, as every other short message without ACE.
+
 ## 0.6.29 - beta
 
 ### Added

@@ -6,16 +6,34 @@
 
 // ----- General -----
 
+// The three sizes below are also set in the window, in the size popover under its button in the header (fnc_openSizeMenu),
+// which writes them here: each one's script shows a change made here in an open window and in the popover at once
+// (fnc_sizeChanged), and the popover shows what CBA has.
+
 // Each player's own eyes and screen: some find the pictures too small to make out. Read when a window
-// opens (fnc_getCell), so a change shows at the next one; capped where the columns would not fit. A tenth
-// above the plain size by default: at 1 a one-cell tile shows two or three letters of an item's name.
+// opens (fnc_getCell); capped where the columns would not fit. A tenth above the plain size by default: at 1
+// a one-cell tile shows two or three letters of an item's name.
 [
     QGVAR(cellScale),
     "SLIDER",
     [LLSTRING(Setting_CellScale), LLSTRING(Setting_CellScale_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    [CELL_SCALE_MIN, CELL_SCALE_MAX, 1.1, 1],
-    0
+    [CELL_SCALE_MIN, CELL_SCALE_MAX, CELL_SCALE_DEFAULT, 2],
+    0,
+    {[] call FUNC(sizeChanged)}
+] call CBA_fnc_addSetting;
+
+// Each player's own eyes: the window's words grow and shrink with the tiles, and this on top of that (fnc_textScale), the names
+// and counts on the tiles too (fnc_createTile) - larger words on small tiles for a player who found them hard to read, smaller
+// ones for a window that felt too big.
+[
+    QGVAR(textSize),
+    "SLIDER",
+    [LLSTRING(Setting_TextSize), LLSTRING(Setting_TextSize_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [TEXT_SIZE_MIN, TEXT_SIZE_MAX, TEXT_SIZE_DEFAULT, 2],
+    0,
+    {[] call FUNC(sizeChanged)}
 ] call CBA_fnc_addSetting;
 
 // Each player's own eyes: a tall crate or vehicle of what is looted shows this many rows at a time, with a bar that turns
@@ -26,8 +44,9 @@
     "SLIDER",
     [LLSTRING(Setting_PageRows), LLSTRING(Setting_PageRows_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    [0, MAX_ROWS, 10, 0],
-    0
+    [0, MAX_ROWS, PAGE_ROWS_DEFAULT, 0],
+    0,
+    {[] call FUNC(sizeChanged)}
 ] call CBA_fnc_addSetting;
 
 // Each player's own eyes.
@@ -51,6 +70,239 @@
     0
 ] call CBA_fnc_addSetting;
 
+// Each player's own window: what it shows. What is switched off gives its room to the rest (fnc_drawEquipmentCards, CONTENT_B).
+[
+    QGVAR(showWeight),
+    "CHECKBOX",
+    [LLSTRING(Setting_ShowWeight), LLSTRING(Setting_ShowWeight_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(showGear),
+    "CHECKBOX",
+    [LLSTRING(Setting_ShowGear), LLSTRING(Setting_ShowGear_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(showSmallSlots),
+    "CHECKBOX",
+    [LLSTRING(Setting_ShowSmallSlots), LLSTRING(Setting_ShowSmallSlots_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(showHotbar),
+    "CHECKBOX",
+    [LLSTRING(Setting_ShowHotbar), LLSTRING(Setting_ShowHotbar_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(showFooter),
+    "CHECKBOX",
+    [LLSTRING(Setting_ShowFooter), LLSTRING(Setting_ShowFooter_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// Each player's own eyes and machine, off by default (a filmed picture cannot be see-through, Mia 0.6.82): the weapon cards show each weapon as it really looks, with its attachments, filmed in a small
+// 3D scene (fnc_cardScene) - one camera per weapon while the window is open, with Picture-in-Picture on. Off, the flat picture with
+// white marks. Read at every build.
+[
+    QGVAR(weapon3D),
+    "CHECKBOX",
+    [LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    false,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// How large the real weapon picture of the primary slot is, in % of the card (fnc_drawEquipmentCards): 100 % fits the weapon to
+// the card. Read at every build.
+[
+    QGVAR(weapon3DZoom_primary),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DZoom_Primary), LLSTRING(Setting_Weapon3DZoom_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [50, 200, 100, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// How large the real weapon picture of the handgun slot is, in % of the card (fnc_drawEquipmentCards): 100 % fits the weapon to
+// the card. Read at every build.
+[
+    QGVAR(weapon3DZoom_handgun),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DZoom_Handgun), LLSTRING(Setting_Weapon3DZoom_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [50, 200, 100, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// How large the real weapon picture of the launcher slot is, in % of the card (fnc_drawEquipmentCards): 100 % fits the weapon to
+// the card. Read at every build.
+[
+    QGVAR(weapon3DZoom_launcher),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DZoom_Launcher), LLSTRING(Setting_Weapon3DZoom_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [50, 200, 100, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// How large the real weapon picture of the primary2 slot is, in % of the card (fnc_drawEquipmentCards): 100 % fits the weapon to
+// the card. Read at every build.
+[
+    QGVAR(weapon3DZoom_primary2),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DZoom_Primary2), LLSTRING(Setting_Weapon3DZoom_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [50, 200, 100, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// Each player's own eyes: the crosshair on the caption line of the container quick moves go into (fnc_quickTarget, fnc_drawSection).
+// Picking one works the same with it off. Read at every build.
+[
+    QGVAR(quickTargetIcon),
+    "CHECKBOX",
+    [LLSTRING(Setting_QuickTargetIcon), LLSTRING(Setting_QuickTargetIcon_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// Each player's own window: which column stands where, left to right (fnc_layoutGlass). "free" is the middle left empty, where an
+// open kit's window and the inspect card go.
+// Each player's own nudge of a real weapon picture on its card, per slot and axis, in % of the weapon's length (fnc_cardScene).
+// Read at every build.
+[
+    QGVAR(weapon3DOffsetX_primary),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetX_Primary), LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetY_primary),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetY_Primary), LLSTRING(Setting_Weapon3DOffsetY_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetX_handgun),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetX_Handgun), LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetY_handgun),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetY_Handgun), LLSTRING(Setting_Weapon3DOffsetY_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetX_launcher),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetX_Launcher), LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetY_launcher),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetY_Launcher), LLSTRING(Setting_Weapon3DOffsetY_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetX_primary2),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetX_Primary2), LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetY_primary2),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetY_Primary2), LLSTRING(Setting_Weapon3DOffsetY_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// Each player's own font for the window's words (fnc_build). Read at every build.
+[
+    QGVAR(font),
+    "LIST",
+    [LLSTRING(Setting_Font), LLSTRING(Setting_Font_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [["purista", "puristaLight", "roboto", "robotoLight", "tahoma", "lucida"], [LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight), LLSTRING(Font_Tahoma), LLSTRING(Font_Lucida)], 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(columnOrder),
+    "LIST",
+    [LLSTRING(Setting_ColumnOrder), LLSTRING(Setting_ColumnOrder_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [
+        ["equipment,free,loot,storage", "equipment,loot,storage,free", "free,loot,storage,equipment", "loot,storage,free,equipment", "loot,equipment,free,storage"],
+        [LLSTRING(ColumnOrder_Default), LLSTRING(ColumnOrder_Left), LLSTRING(ColumnOrder_Right), LLSTRING(ColumnOrder_Apart), LLSTRING(ColumnOrder_Middle)],
+        0
+    ],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
 // Each player's own taste: where the loot column opens - left of their storage column, which then never moves
 // (default), or at the right edge with the storage column moving in, as it did before. Read at every build
 // (fnc_layoutGlass), so an open window follows at its next one.
@@ -63,6 +315,18 @@
     0
 ] call CBA_fnc_addSetting;
 
+// Each player's own hands: what a double click on a tile does (fnc_onMouseButton) - the quick move, the right-click menu with
+// what other mods add to CBA's item context menu (the vanilla inventory opens that on a double click), or nothing, for a
+// player who clicks twice by habit. Read at each click; the quick move key stays as it is.
+[
+    QGVAR(doubleClick),
+    "LIST",
+    [LLSTRING(Setting_DoubleClick), LLSTRING(Setting_DoubleClick_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [["move", "menu", "none"], [LLSTRING(Setting_DoubleClick_Move), LLSTRING(Setting_DoubleClick_Menu), LLSTRING(Setting_DoubleClick_None)], 0],
+    0
+] call CBA_fnc_addSetting;
+
 // Each player's own: how long the window takes to draw, written to the RPT for a report of stutters
 // (fnc_build, fnc_refresh). Read at every build and redraw.
 [
@@ -72,6 +336,18 @@
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
     false,
     0
+] call CBA_fnc_addSetting;
+
+// Each player's own window: the columns he placed himself in the edit mode (fnc_openLayoutEditor), as shares of the content area
+// (fnc_columnRects). Written there; a text box here so that CBA keeps it with his other settings.
+[
+    QGVAR(layoutRects),
+    "EDITBOX",
+    [LLSTRING(Setting_LayoutRects), LLSTRING(Setting_LayoutRects_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    "",
+    0,
+    {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;
 
 // Each player's colours as text - the colour popover's own, written here whenever it closes (fnc_paletteSettle), so they can
@@ -283,6 +559,17 @@
     "CHECKBOX",
     [LLSTRING(Setting_WaitEquip), LLSTRING(Setting_WaitEquip_Desc)],
     false
+] call EFUNC(main,addSetting);
+
+// ----- Right-click menu and double click -----
+
+// For everyone alike: rows of the right-click menu the server does not want, by id, separated by commas
+// (fnc_menuFilter). Read as a menu opens.
+[
+    QGVAR(menuHidden),
+    "EDITBOX",
+    [LLSTRING(Setting_MenuHidden), LLSTRING(Setting_MenuHidden_Desc)],
+    ""
 ] call EFUNC(main,addSetting);
 
 // ----- Living persons -----

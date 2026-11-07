@@ -109,8 +109,21 @@ GVAR(dragCount) = 1;
 GVAR(middleHeld) = false;
 GVAR(lastWheel) = -1;
 
+// Rows of the right-click menu hidden by id, and what a double click does, by item key (fnc_menuRules): filled
+// from CfgAioMenu (fnc_menuInit) and by aio_gui_fnc_hideMenuEntry / aio_gui_fnc_setDoubleClick, which other
+// mods may call before this preInit ran - so what they put in stays.
+if (isNil QGVAR(menuHideRules)) then {GVAR(menuHideRules) = createHashMap};
+if (isNil QGVAR(menuChangeRules)) then {GVAR(menuChangeRules) = createHashMap};
+if (isNil QGVAR(doubleClickRules)) then {GVAR(doubleClickRules) = createHashMap};
+
 // The last plain click on a tile, [[grid index, tile index], time], to tell a double click.
 GVAR(lastClick) = [[], -1];
+
+// The container quick moves go into, picked by a click on a free cell of it (fnc_quickTarget).
+GVAR(quickTarget) = objNull;
+
+// The slot clicked last and when, for a double click on a uniform, vest or backpack (fnc_onMouseButton).
+GVAR(lastSlotClick) = [[], -1];
 
 // The tiles selected (fnc_select): refs [holder, key, block, col, row] - so they survive every rebuild and
 // another player's rearranging -, the side they are on, "own" or "loot" ("" for none), and the one a
@@ -165,6 +178,8 @@ GVAR(panels) = [];
 // The player's equipment column of the last build, [x, y, w, h] - [] for none: anything let go over it
 // goes into the slot that takes it (fnc_updateDrag).
 GVAR(equipmentRect) = [];
+GVAR(equipmentRects) = [];
+GVAR(partRects) = createHashMap;
 
 // The unit's storage column of the last build, [x, y, w, h] - [] for none (fnc_drawColumn): a uniform,
 // vest or backpack let go on it off its grids is put on; while the unit wears none of them, anything else
@@ -281,7 +296,8 @@ GVAR(statusSecond) = -1;
 // Where the mouse was when the name beside it was last placed (fnc_onFrame).
 GVAR(tooltipAt) = [];
 
-// The inspect card: [class, count, rounds, attachments] or [], where it was last put [x, y] or [], and
+// The inspect card: [class, count, rounds, attachments, container, weapon slot to modify or "", Modify's wide card] or [],
+// where it was last put [x, y] or [], and
 // while its title is held, where the mouse holds it [dx, dy] (fnc_inspect, fnc_drawInspect, fnc_onFrame).
 GVAR(inspect) = [];
 GVAR(inspectPos) = [];
@@ -294,6 +310,9 @@ GVAR(inspectView) = profileNamespace getVariable [QGVAR(inspectView), "2d"];
 GVAR(scene3D) = createHashMap;
 GVAR(inspect3DTurn) = [];
 GVAR(inspect3DPan) = [];
+
+// A press on a point of the modding view that one of the 3D view's turning areas took, [slot, button] or [] (fnc_drawInspect).
+GVAR(spotPress) = [];
 GVAR(middleWas) = false;
 GVAR(lastWheel3D) = -1;
 GVAR(itemModels) = createHashMap;
@@ -381,6 +400,37 @@ if !(GVAR(sortMode) isEqualType "" && {GVAR(sortMode) in SORT_MODES}) then {
 };
 
 uiNamespace setVariable [QGVAR(sortButtons), []];
+
+// The order of the weapon cards in the equipment column, top down (fnc_drawEquipmentCards): each player's own,
+// kept in the profile, changed by holding a card's header and moving it (fnc_cardGrip). An order that does not name
+// each of the four once - an older or a broken one - is the default again.
+GVAR(weaponOrder) = profileNamespace getVariable [QGVAR(weaponOrder), []];
+
+if !(GVAR(weaponOrder) isEqualType [] && {
+    private _sorted = +GVAR(weaponOrder);
+    _sorted sort true;
+    _sorted isEqualTo ["handgun", "launcher", "primary", "primary2"]
+}) then {
+    GVAR(weaponOrder) = ["primary", "primary2", "handgun", "launcher"];
+};
+
+// A hold on a weapon card's header that lifted the card took its release's click (fnc_cardGrip): the slot of that
+// header, whose next click is not a fold - "" for none.
+GVAR(cardHoldTaken) = "";
+
+// Which weapon cards the player folded to their header line, slot -> folded (fnc_toggleWeaponFold), kept in the
+// profile as [slot, folded] pairs - and which sections of the equipment column, under "equipment", "gear" and
+// "hotbar". A card the player never folded or opened is open - but the second primary's,
+// folded while nothing is on the back (fnc_drawEquipmentCards).
+GVAR(weaponFolds) = createHashMap;
+
+{
+    _x params [["_foldSlot", "", [""]], ["_foldOn", false, [false]]];
+
+    if (_foldSlot isNotEqualTo "" && {(_x param [1, -1]) isEqualType false}) then {
+        GVAR(weaponFolds) set [_foldSlot, _foldOn];
+    };
+} forEach (([profileNamespace getVariable [QGVAR(weaponFolds), []]] param [0, [], [[]]]) select {_x isEqualType []});
 
 // The window's moves under way, request id (aio_storage_fnc_request) -> [sources, targets, time, feels,
 // details] (fnc_sendMoves): sources [[holder, key, block, col, row], ...] are faded and cannot be lifted,
@@ -531,6 +581,13 @@ GVAR(style) = "main";
 GVAR(palette) = +PALETTE_DEFAULT;
 GVAR(paletteDirty) = false;
 GVAR(menuRemake) = false;
+
+// The sizes the size popover changed while a slider was dragged, still to be written to CBA when it is let go (fnc_sizeSet).
+GVAR(sizeDirty) = [];
+
+// The most rows a compartment of the loot shows that pages could cut, as the last build drew it (fnc_viewBlocks, fnc_drawSection):
+// the size popover tells where no page size would change anything (fnc_openSizeMenu).
+GVAR(tallestLoot) = 0;
 
 // What the profile holds, read as fnc_paletteRead reads any palette: nothing usable keeps the window as it ships.
 private _savedPalette = [profileNamespace getVariable [QGVAR(palette), []]] call FUNC(paletteRead);
