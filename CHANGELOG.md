@@ -2,6 +2,19 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.91 - beta
+
+Tested in game.
+
+### Changed
+
+- ACE Arsenal look, no square corners left: the tabs sit on round tiles and the open one is lit in your accent colour; the picked
+  row of a list is a round accent bar (ACE's own white bar with "ACE's own"); the load bar, weight box, search and sort fields
+  are round; the menu buttons (Hide ... Close) are solid like Close.
+- ACE Arsenal: a card over the menu bar tells of the picked item as the inventory's hint line does - its name, the cells it
+  takes, its weight, how many share a cell, a magazine's rounds.
+- Real weapon pictures: the grey behind the weapon matches the card, so no box shows round it.
+
 ## 0.6.90 - beta
 
 ### Fixed

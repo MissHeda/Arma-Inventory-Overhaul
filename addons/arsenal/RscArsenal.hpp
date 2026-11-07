@@ -6,6 +6,11 @@ class AIO_ArsenalHint: AIO_FooterHint {
     size = QUOTE(HINT_SIZE);
 };
 
+// The info card's line in this mod's look of ACE Arsenal (fnc_aceSkin, fnc_aceInfo): the picked item's facts.
+class AIO_ArsenalInfo: AIO_FooterHint {
+    size = QUOTE(HINT_SIZE * 1.15);
+};
+
 // The red glass screen for a vanilla Virtual Arsenal that is not allowed (fnc_showBlocked). Its card is
 // built at run time, inside a controls group of its own.
 class AIO_ArsenalBlocked {

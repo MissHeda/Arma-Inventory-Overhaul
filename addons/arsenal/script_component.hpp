@@ -65,3 +65,8 @@
 
 // How often the panel looks for what the vanilla arsenal changed, in frames (fnc_biWatch).
 #define BI_WATCH_FRAMES 3
+
+// The panels of this mod's look of ACE Arsenal (fnc_aceSkin): how many groups aio_compat_ace_arsenal puts into ACE's background
+// layer, and the first one's idc.
+#define SKIN_GROUPS 100
+#define SKIN_IDC 99000

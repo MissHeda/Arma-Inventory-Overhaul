@@ -598,7 +598,7 @@
 // The scene's lights against the inspect card's.
 #define CARD_3D_LIGHT 0.15
 // The grey of the sphere round a weapon (0 to 1).
-#define CARD_3D_BACKDROP 0.09
+#define CARD_3D_BACKDROP 0.04
 #define INSPECT_3D_ASPECT (getResolution select 4)
 #define INSPECT_3D_SUPER 2
 #define INSPECT_3D_MAX_RES 2048
