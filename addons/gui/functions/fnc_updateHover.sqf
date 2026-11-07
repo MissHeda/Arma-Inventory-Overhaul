@@ -630,6 +630,10 @@ private _fnc_hex = {
 
 private _parts = [];
 
+// What a double click does on what the mouse is on, the words of it - shown first, right after the footer's keys, with the double
+// click's picture and a line after it (Mia, after 0.6.77): always, whatever it does. "" where a double click does nothing.
+private _double = "";
+
 private _fnc_add = {
     params ["_text", "_key", ["_pictures", []]];
 
@@ -833,7 +837,7 @@ switch (_shown param [0, ""]) do {
             private _wearSlot = [GVAR(unit), _class] call EFUNC(storage,slotFor);
 
             if (_wearSlot isNotEqualTo "" && {(_wearSlot find "_") < 0}) then {
-                [LLSTRING(Hint_GroundWear), "accent"] call _fnc_add;
+                _double = LLSTRING(Hint_DoublePutOn);
             };
 
             if (!isNull (_tile getOrDefault ["container", objNull])) then {
@@ -841,26 +845,22 @@ switch (_shown param [0, ""]) do {
             };
         };
 
-        // What a double click does where a mod or the mission gave the item one of its own (fnc_doubleClickLabel) - else, while the
-        // player has picked a container for quick moves (fnc_quickTarget), where it goes.
-        if ([] call FUNC(isInventoryMode)) then {
-            private _doubleLabel = [_class] call FUNC(doubleClickLabel);
+        // What a double click does (fnc_onMouseButton): what a mod or the mission gave the item (fnc_doubleClickLabel) - else, by the
+        // player's setting, the menu, nothing, or the quick move: into the container the player picked (fnc_quickTarget), or over.
+        // Putting on from the ground (above) is the ground's own.
+        if ([] call FUNC(isInventoryMode) && {_double isEqualTo ""}) then {
+            _double = [_class] call FUNC(doubleClickLabel);
 
-            // Without one of its own the player's setting decides: a double click set to open the menu says so as well.
-            if (_doubleLabel isEqualTo "" && {GVAR(doubleClick) isEqualTo "menu"}) then {
-                _doubleLabel = LLSTRING(Hint_DoubleClickMenu);
-            };
+            if (_double isNotEqualTo "") exitWith {};
 
-            private _mouse = ["double"] call FUNC(mouseIcon);
+            switch (GVAR(doubleClick)) do {
+                case "menu": {_double = LLSTRING(Hint_DoubleClickMenu)};
+                case "none": {};
+                default {
+                    ([[_hoverGrid getOrDefault ["container", objNull]]] call FUNC(quickTarget)) params [["_picked", objNull]];
 
-            if (_doubleLabel isNotEqualTo "") exitWith {
-                [_doubleLabel, "accent", [_mouse]] call _fnc_add;
-            };
-
-            ([[_hoverGrid getOrDefault ["container", objNull]]] call FUNC(quickTarget)) params [["_picked", objNull]];
-
-            if (!isNull _picked) then {
-                [format [LLSTRING(Hint_QuickTargetInto), [_picked] call FUNC(containerName)], "accent", [_mouse]] call _fnc_add;
+                    _double = [LLSTRING(QuickMove), format [LLSTRING(Hint_QuickTargetInto), [_picked] call FUNC(containerName)]] select !isNull _picked;
+                };
             };
         };
 
@@ -937,7 +937,7 @@ switch (_shown param [0, ""]) do {
             [] call FUNC(isInventoryMode) && {_class isNotEqualTo ""} && {(_record param [6, objNull]) isEqualTo GVAR(unit)}
             && {(_record param [5, ""]) in ["primary", "handgun", "launcher", "primary2"]}
         ) then {
-            [LLSTRING(Menu_Modify), "accent", [["double"] call FUNC(mouseIcon)]] call _fnc_add;
+            _double = LLSTRING(Menu_Modify);
         };
 
         // A radio's channel, frequency, alternate channel and state - a long-range one on the back by the
@@ -976,6 +976,15 @@ switch (_shown param [0, ""]) do {
 
 // In the footer's text scale where it keeps one (fnc_drawFooter).
 private _hintCtrl = uiNamespace getVariable [QGVAR(hint), controlNull];
+
+// The double click first: its picture, white, its words in the accent colour, and a thin line to what follows.
+if (_double isNotEqualTo "" && {_parts isNotEqualTo []}) then {
+    _parts = [
+        image (["double"] call FUNC(mouseIcon)) setAttributes ["color", "#FFFFFF"], " ",
+        text _double setAttributes ["color", [_theme getOrDefault ["accent", [1, 1, 1, 1]]] call _fnc_hex, "font", _font],
+        text "   |   " setAttributes ["color", [_theme getOrDefault ["line", [1, 1, 1, 0.3]]] call _fnc_hex]
+    ] + _parts;
+};
 
 _hintCtrl ctrlSetStructuredText (composeText _parts setAttributes ["align", "left", "size", str (_hintCtrl getVariable [QGVAR(textScale), 1])]);
 [_hintCtrl] call FUNC(fitHint);

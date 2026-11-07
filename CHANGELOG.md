@@ -2,6 +2,18 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.78 - beta
+
+### Changed
+
+- Footer: right after the keys comes what a double click does on what the mouse is on - always, also the plain "Quick move",
+  "into <container>" with a target picked, "Put on" on the ground -, then a line, then the item's hints.
+- The footer's mouse buttons are this mod's own pictures, with or without ACE; the double click is one picture of its own.
+
+### Fixed
+
+- Quick move target: picking a container showed nothing until the window was built again for another reason.
+
 ## 0.6.77 - beta
 
 ### Changed

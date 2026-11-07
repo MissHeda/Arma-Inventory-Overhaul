@@ -160,6 +160,9 @@
         <Key ID="STR_aio_gui_Hint_DoubleClickMenu">
             <English>opens its menu</English>
         </Key>
+        <Key ID="STR_aio_gui_Hint_DoublePutOn">
+            <English>Put on</English>
+        </Key>
         <Key ID="STR_aio_gui_Hint_Empty">
             <English>Empty</English>
         </Key>

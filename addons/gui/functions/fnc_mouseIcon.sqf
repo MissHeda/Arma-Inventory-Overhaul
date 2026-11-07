@@ -2,9 +2,9 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * The picture of a mouse button for the footer's keys (fnc_uiKeyHint) and the hint line (fnc_updateHover): ACE's own from its
- * interaction addon where ACE is loaded, so it looks as ACE's menus do - else this mod's own (icon_mouse_*_ca), so a game without
- * ACE shows a picture as well, not words.
+ * The picture of a mouse button for the footer's keys (fnc_uiKeyHint) and the hint line (fnc_updateHover): this mod's own
+ * (icon_mouse_*_ca), with or without ACE - one look with the double click's, which ACE has none of (Mia, after 0.6.77; ACE's were
+ * used where it was loaded before).
  *
  * Arguments:
  * 0: "left", "right", "scroll" or "double" - a double click, always this mod's own picture: ACE has none <STRING>
@@ -21,10 +21,6 @@
 params [["_button", "left", [""]]];
 
 if (_button isEqualTo "double") exitWith {UI_TEX(icon_mouse_double_ca)};
-
-private _ace = [MOUSE_ICON_PATH + format ["\mouse_%1_ca.paa", _button]] call FUNC(safePicture);
-
-if (_ace isNotEqualTo "") exitWith {_ace};
 
 switch (_button) do {
     case "right": {UI_TEX(icon_mouse_right_ca)};

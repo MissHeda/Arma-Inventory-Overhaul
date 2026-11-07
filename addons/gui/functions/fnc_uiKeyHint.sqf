@@ -76,12 +76,12 @@ if ((_key find "@") < 0) then {
             continue;
         };
 
-        // The picture in ACE's interaction addon, and words for the same where it is not there.
+        // This mod's own mouse pictures (fnc_mouseIcon) - the double click one picture of its own -, words only for an unknown token.
         private _pair = switch (_part) do {
             case "@left": {["mouse_left_ca.paa", LLSTRING(Key_LeftClick), 1]};
             case "@right": {["mouse_right_ca.paa", LLSTRING(Key_RightClick), 1]};
             case "@scroll": {["mouse_scroll_ca.paa", LLSTRING(Key_Scroll), 1]};
-            case "@double": {["mouse_left_ca.paa", LLSTRING(Key_DoubleClick), 2]};
+            case "@double": {["mouse_double_ca.paa", LLSTRING(Key_DoubleClick), 1]};
             default {["", _part, 1]};
         };
 
