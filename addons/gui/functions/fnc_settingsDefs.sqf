@@ -44,28 +44,28 @@ private _rows = [
     [QGVAR(weapon3D), LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc), "check", false],
     [
         QGVAR(weapon3DZoom_primary), LLSTRING(Setting_Weapon3D_Primary), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 80, [
-            [QGVAR(weapon3DZoom_primary), LLSTRING(Weapon3D_Size), 50, 150, 5, "%", 80, LLSTRING(Setting_Weapon3DZoom_Desc)],
+            [QGVAR(weapon3DZoom_primary), LLSTRING(Weapon3D_Size), 50, 200, 5, "%", 80, LLSTRING(Setting_Weapon3DZoom_Desc)],
             [QGVAR(weapon3DOffsetX_primary), "X", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetX_Desc)],
             [QGVAR(weapon3DOffsetY_primary), "Y", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetY_Desc)]
         ]
     ],
     [
         QGVAR(weapon3DZoom_handgun), LLSTRING(Setting_Weapon3D_Handgun), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 100, [
-            [QGVAR(weapon3DZoom_handgun), LLSTRING(Weapon3D_Size), 50, 150, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
+            [QGVAR(weapon3DZoom_handgun), LLSTRING(Weapon3D_Size), 50, 200, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
             [QGVAR(weapon3DOffsetX_handgun), "X", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetX_Desc)],
             [QGVAR(weapon3DOffsetY_handgun), "Y", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetY_Desc)]
         ]
     ],
     [
         QGVAR(weapon3DZoom_launcher), LLSTRING(Setting_Weapon3D_Launcher), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 100, [
-            [QGVAR(weapon3DZoom_launcher), LLSTRING(Weapon3D_Size), 50, 150, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
+            [QGVAR(weapon3DZoom_launcher), LLSTRING(Weapon3D_Size), 50, 200, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
             [QGVAR(weapon3DOffsetX_launcher), "X", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetX_Desc)],
             [QGVAR(weapon3DOffsetY_launcher), "Y", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetY_Desc)]
         ]
     ],
     [
         QGVAR(weapon3DZoom_primary2), LLSTRING(Setting_Weapon3D_Primary2), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 100, [
-            [QGVAR(weapon3DZoom_primary2), LLSTRING(Weapon3D_Size), 50, 150, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
+            [QGVAR(weapon3DZoom_primary2), LLSTRING(Weapon3D_Size), 50, 200, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
             [QGVAR(weapon3DOffsetX_primary2), "X", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetX_Desc)],
             [QGVAR(weapon3DOffsetY_primary2), "Y", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetY_Desc)]
         ]

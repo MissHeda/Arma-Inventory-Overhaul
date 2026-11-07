@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.112 - beta
+
+### Changed
+
+- Real weapon pictures: the size per slot goes up to 200 %.
+
 ## 0.6.111 - beta
 
 ### Changed

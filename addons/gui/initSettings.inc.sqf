@@ -141,7 +141,7 @@
     "SLIDER",
     [LLSTRING(Setting_Weapon3DZoom_Primary), LLSTRING(Setting_Weapon3DZoom_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    [50, 150, 80, 0],
+    [50, 200, 80, 0],
     0,
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;
@@ -153,7 +153,7 @@
     "SLIDER",
     [LLSTRING(Setting_Weapon3DZoom_Handgun), LLSTRING(Setting_Weapon3DZoom_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    [50, 150, 100, 0],
+    [50, 200, 100, 0],
     0,
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;
@@ -165,7 +165,7 @@
     "SLIDER",
     [LLSTRING(Setting_Weapon3DZoom_Launcher), LLSTRING(Setting_Weapon3DZoom_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    [50, 150, 100, 0],
+    [50, 200, 100, 0],
     0,
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;
@@ -177,7 +177,7 @@
     "SLIDER",
     [LLSTRING(Setting_Weapon3DZoom_Primary2), LLSTRING(Setting_Weapon3DZoom_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    [50, 150, 100, 0],
+    [50, 200, 100, 0],
     0,
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;
