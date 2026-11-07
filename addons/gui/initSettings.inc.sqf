@@ -121,6 +121,18 @@
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;
 
+// Each player's own eyes: the crosshair on the caption line of the container quick moves go into (fnc_quickTarget, fnc_drawSection).
+// Picking one works the same with it off. Read at every build.
+[
+    QGVAR(quickTargetIcon),
+    "CHECKBOX",
+    [LLSTRING(Setting_QuickTargetIcon), LLSTRING(Setting_QuickTargetIcon_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
 // Each player's own window: which column stands where, left to right (fnc_layoutGlass). "free" is the middle left empty, where an
 // open kit's window and the inspect card go.
 [

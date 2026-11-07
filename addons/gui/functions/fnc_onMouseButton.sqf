@@ -473,7 +473,7 @@ if (_down) exitWith {
 
             if (isNull _column) exitWith {};
 
-            GVAR(emptyPress) = [_ctrl, _mouse];
+            GVAR(emptyPress) = [_ctrl, _mouse, _grid getOrDefault ["container", objNull]];
         };
     };
 
@@ -491,10 +491,11 @@ if (GVAR(stripDrag) isNotEqualTo []) exitWith {
     true
 };
 
-// A press on an empty cell comes up: a click on it, so the selection goes unless Ctrl is held. A press that
-// moved on (dragged over the cells) does nothing.
+// A press on an empty cell comes up: a click on it, so the selection goes unless Ctrl is held, and its container is the target
+// of quick moves from now on - or no longer, when it was already (fnc_quickTarget). A press that moved on (dragged over the cells)
+// does nothing.
 if (GVAR(emptyPress) isNotEqualTo []) exitWith {
-    GVAR(emptyPress) params ["_ctrlAtPress", "_pressAt"];
+    GVAR(emptyPress) params ["_ctrlAtPress", "_pressAt", ["_pressContainer", objNull]];
 
     private _now = getMousePosition;
 
@@ -505,6 +506,11 @@ if (GVAR(emptyPress) isNotEqualTo []) exitWith {
         && {abs ((_now select 1) - (_pressAt select 1)) <= DRAG_THRESHOLD}
     ) then {
         call FUNC(clearSelection);
+
+        if (!isNull _pressContainer) then {
+            GVAR(quickTarget) = [_pressContainer, objNull] select (GVAR(quickTarget) isEqualTo _pressContainer);
+            [] call FUNC(requestRebuild);
+        };
     };
 
     true

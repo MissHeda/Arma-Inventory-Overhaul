@@ -352,6 +352,15 @@ def icon_move(d, s, w):
     _double_arrow(d, s, w, (s * 0.5, s * 0.12), (s * 0.5, s * 0.88))
 
 
+def icon_target(d, s, w):
+    # A crosshair: the container a quick move goes into (the inventory's caption line).
+    line(d, arc_points(s * 0.5, s * 0.5, s * 0.3, 0, 360), w)
+    line(d, [(s * 0.5, s * 0.06), (s * 0.5, s * 0.32)], w)
+    line(d, [(s * 0.5, s * 0.68), (s * 0.5, s * 0.94)], w)
+    line(d, [(s * 0.06, s * 0.5), (s * 0.32, s * 0.5)], w)
+    line(d, [(s * 0.68, s * 0.5), (s * 0.94, s * 0.5)], w)
+
+
 def _layer_stack(d, s, w, front_up):
     # Two sheets lying over each other, seen at a slant, and an arrow: one sheet to the front or to the back.
     def sheet(dy):
@@ -1218,6 +1227,7 @@ def build_images():
         "icon_resize_nwse_ca": stroke_icon(icon_resize_nwse),
         "icon_resize_nesw_ca": stroke_icon(icon_resize_nesw),
         "icon_move_ca": stroke_icon(icon_move),
+        "icon_target_ca": stroke_icon(icon_target),
         "icon_hotbar_ca": stroke_icon(icon_hotbar, width=8),
         "icon_layer_up_ca": stroke_icon(icon_layer_up, width=8),
         "icon_layer_down_ca": stroke_icon(icon_layer_down, width=8),

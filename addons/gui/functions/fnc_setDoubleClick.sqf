@@ -36,6 +36,9 @@ if (_items isEqualType "") then {_items = [_items]};
 
 if (isNil QGVAR(doubleClickRules)) then {GVAR(doubleClickRules) = createHashMap};
 
+// The hint's words for them are worked out again (fnc_doubleClickLabel).
+GVAR(doubleClickLabels) = createHashMap;
+
 {
     if (_x isEqualType "" && {_x isNotEqualTo ""}) then {
         if (_action isEqualTo "") then {

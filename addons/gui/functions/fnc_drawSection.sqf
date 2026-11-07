@@ -339,7 +339,15 @@ private _tabIconW = [0, SQUARE(_buttonH * 0.95)] select (_tabIcon isNotEqualTo "
 // Open to this player only because of who they are (aio_locks_fnc_decorate): an open padlock left of
 // the weight says so when the mouse rests on it.
 private _lockTip = _section getOrDefault ["lockTip", ""];
-private _lockW = [0, SQUARE(_lineH)] select (_lockTip isNotEqualTo "");
+private _lockIconW = [0, SQUARE(_lineH)] select (_lockTip isNotEqualTo "");
+
+// The container quick moves go into (fnc_quickTarget): a crosshair left of the padlock, unless the player switched it off.
+private _targeted = !isNull _sectionContainer && {_sectionContainer isEqualTo GVAR(quickTarget)}
+    && {missionNamespace getVariable [QGVAR(quickTargetIcon), true]} && {call FUNC(isInventoryMode)};
+private _targetIconW = [0, SQUARE(_lineH)] select _targeted;
+
+// Both pictures of the line's right end, the padlock and the crosshair, are kept clear of the tab and the buttons together.
+private _lockW = _lockIconW + _targetIconW;
 
 // ---------------------------------------------------------------------------
 // The button beside the tab: Sort, for a container the player may change - on every grid of its own, so also on an empty one.
@@ -556,15 +564,29 @@ if (_load isNotEqualTo "") then {
 // The open padlock, left of the weight.
 if (_lockTip isNotEqualTo "") then {
     private _iconH = _lineH * 0.6;
-    private _lockX = _blockX + _blockW - _closeW - _loadW - _lockW;
+    private _lockX = _blockX + _blockW - _closeW - _loadW - _lockIconW;
 
     [
-        _display, _parent, [_lockX + (_lockW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
+        _display, _parent, [_lockX + (_lockIconW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
         UI_TEX(icon_lock_open_ca), _colorText2
     ] call FUNC(uiIcon);
 
-    private _lockHit = [_display, "AIO_Hitbox", _parent, [_lockX, _top, _lockW, _lineH]] call FUNC(uiCreate);
+    private _lockHit = [_display, "AIO_Hitbox", _parent, [_lockX, _top, _lockIconW, _lineH]] call FUNC(uiCreate);
     [_lockHit, _lockTip] call FUNC(setTooltip);
+};
+
+// The crosshair of the quick moves' target, left of the padlock, in the accent colour.
+if (_targeted) then {
+    private _iconH = _lineH * 0.6;
+    private _targetX = _blockX + _blockW - _closeW - _loadW - _lockW;
+
+    [
+        _display, _parent, [_targetX + (_targetIconW - SQUARE(_iconH)) / 2, _top + (_lineH - _iconH) / 2, SQUARE(_iconH), _iconH],
+        UI_TEX(icon_target_ca), _theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]
+    ] call FUNC(uiIcon);
+
+    private _targetHit = [_display, "AIO_Hitbox", _parent, [_targetX, _top, _targetIconW, _lineH]] call FUNC(uiCreate);
+    [_targetHit, LLSTRING(QuickTarget_Tip)] call FUNC(setTooltip);
 };
 
 // The hint over the caption line says what the contents weigh (fnc_infoHint).

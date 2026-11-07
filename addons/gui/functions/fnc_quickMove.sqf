@@ -62,6 +62,21 @@ if (_kit isNotEqualTo "") exitWith {
 private _unit = GVAR(unit);
 private _own = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit] select {!isNull _x};
 
+// The container the player picked (a click on a free cell of it, fnc_quickTarget) comes first, from whichever side: with no room
+// the hint says so - it was asked for by name.
+([[_from]] call FUNC(quickTarget)) params [["_picked", objNull]];
+
+if (!isNull _picked) exitWith {
+    private _intoBackpack = [_picked, _tile] call EFUNC(storage,backpackIntoBackpack);
+
+    if (_intoBackpack || {!([_picked, _tile, true] call FUNC(roomFor))}) exitWith {
+        [["NoRoom", "NoBackpack"] select _intoBackpack] call FUNC(flashHint);
+        false
+    };
+
+    [_from, _picked, _tile, -1, [], createHashMapFromArray [["roomChecked", true]]] call FUNC(applyMove)
+};
+
 // Which of the containers takes it: [container, why not - "NoBackpack" when the only room is in a backpack
 // and it is one, "" for none]. The first with a free spot takes all of it.
 private _fnc_pick = {

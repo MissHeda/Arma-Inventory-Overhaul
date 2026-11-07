@@ -110,6 +110,7 @@ call FUNC(logDrag);
 [""] call FUNC(logFrame);
 
 GVAR(press) = [];
+GVAR(quickTarget) = objNull;
 GVAR(dragging) = false;
 GVAR(stripDrag) = [];
 GVAR(dragTarget) = [];

@@ -96,6 +96,7 @@ private _rows = [];
 
         if (!isNil QEFUNC(compat_efak,hideCbaOption) && {[_item, _displayName] call EFUNC(compat_efak,hideCbaOption)}) then {continue};
         if (!isNil QEFUNC(compat_acre,hideCbaOption) && {[_item, _displayName] call EFUNC(compat_acre,hideCbaOption)}) then {continue};
+        if (!isNil QEFUNC(compat_greenmag,hideCbaOption) && {[_item, _displayName] call EFUNC(compat_greenmag,hideCbaOption)}) then {continue};
         if (!isNil QEFUNC(magazines,hideCbaOption) && {[_item, _displayName] call EFUNC(magazines,hideCbaOption)}) then {continue};
 
         // Using it up is no choice for an item that cannot be used from the container it lies in.

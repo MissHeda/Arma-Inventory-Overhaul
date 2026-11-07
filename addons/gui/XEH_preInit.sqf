@@ -119,6 +119,9 @@ if (isNil QGVAR(doubleClickRules)) then {GVAR(doubleClickRules) = createHashMap}
 // The last plain click on a tile, [[grid index, tile index], time], to tell a double click.
 GVAR(lastClick) = [[], -1];
 
+// The container quick moves go into, picked by a click on a free cell of it (fnc_quickTarget).
+GVAR(quickTarget) = objNull;
+
 // The tiles selected (fnc_select): refs [holder, key, block, col, row] - so they survive every rebuild and
 // another player's rearranging -, the side they are on, "own" or "loot" ("" for none), and the one a
 // Shift+click counts from, a ref or []. The controls that show it are made by fnc_drawSelection and live

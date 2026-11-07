@@ -137,6 +137,13 @@ if (_side isEqualTo "own") then {
     _targets = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit] select {!isNull _x} apply {[_x, _unit]};
 };
 
+// The container the player picked (fnc_quickTarget) takes them instead, from whichever side; what it has no room for stays.
+private _picked = [_sources] call FUNC(quickTarget);
+
+if (_picked isNotEqualTo []) then {
+    _targets = [_picked];
+};
+
 ([_items, _targets] call EFUNC(storage,plan)) params ["_assigned"];
 
 [_assigned, count _items] call FUNC(sendPlan)

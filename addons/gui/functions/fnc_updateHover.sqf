@@ -831,6 +831,22 @@ switch (_shown param [0, ""]) do {
             };
         };
 
+        // What a double click does where a mod or the mission gave the item one of its own (fnc_doubleClickLabel) - else, while the
+        // player has picked a container for quick moves (fnc_quickTarget), where it goes.
+        if ([] call FUNC(isInventoryMode)) then {
+            private _doubleLabel = [_class] call FUNC(doubleClickLabel);
+
+            if (_doubleLabel isNotEqualTo "") exitWith {
+                [format [LLSTRING(Hint_DoubleClick), _doubleLabel], "accent"] call _fnc_add;
+            };
+
+            ([[_hoverGrid getOrDefault ["container", objNull]]] call FUNC(quickTarget)) params [["_picked", objNull]];
+
+            if (!isNull _picked) then {
+                [format [LLSTRING(Hint_QuickTargetInto), [_picked] call FUNC(containerName)], "accent"] call _fnc_add;
+            };
+        };
+
         // A radio's channel, frequency, alternate channel and state (aio_compat_tfar, aio_compat_acre).
         {
             _x call _fnc_add;

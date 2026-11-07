@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.74 - beta
+
+### Added
+
+- Quick move target: click a free cell of a container - a crate, a pile, your vest - and double clicks and the quick move key
+  put items into it from then on, from either side. A crosshair on its caption line shows which one (setting "Mark the quick
+  move target"); click a free cell of it again to stop. An item that lies in it already goes the usual way.
+- The hint line names what a double click does on an item that has its own action ("Double click: Unpack"), or where it goes
+  while a target is picked.
+- GreenMag Rework: a double click on a box of rounds opens it, and the rounds lie on the cells the box took.
+
 ## 0.6.73 - beta
 
 ### Changed

@@ -9,6 +9,7 @@
 #define GMR_MAG_BELT 3
 #define GMR_MAG_CAPACITY 4
 #define GMR_ITEM_KIND 0
+#define GMR_ITEM_ROUNDS 1
 #define GMR_ITEM_ROUND 2
 #define GMR_ITEM_BELT_TYPE 3
 #define GMR_ITEM_CALIBER 7
