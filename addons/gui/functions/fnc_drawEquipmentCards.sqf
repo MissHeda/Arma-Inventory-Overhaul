@@ -391,7 +391,9 @@ private _fnc_weaponCard = {
 
             // Behind the weapon the card's own colour, so the picture follows the player's colours (Mia, 0.6.102). Never darker than
             // CARD_3D_BACKDROP: on black the camera's exposure opened up and the weapon came out white (seen in game, 0.6.88).
-            _background = _background apply {_x max CARD_3D_BACKDROP};
+            // The scene's lights and the camera's own exposure brighten the sphere a lot (a 0.04 grey came out near 0.17, a card's
+            // colour near 0.45 - seen in game, 0.6.107/0.6.109), so it is painted darker by CARD_3D_BACKDROP_GAIN to land near the card.
+            _background = _background apply {(_x * CARD_3D_BACKDROP_GAIN) max CARD_3D_BACKDROP};
 
             // How far each slot's camera stands, the player's own (Layout: weapon picture size per slot): 100 % fits the weapon to
             // the card, less shows it smaller. Given as the share of the picture the weapon takes, so a change frames it anew.
@@ -478,7 +480,15 @@ private _fnc_weaponCard = {
 
             private _partRect = [_partsRight, _partsTop, _partW, _partH];
 
-            [_display, _parent, [_partsRight, _partsTop, _partW + _textW, _partH], _theme getOrDefault ["slotEmpty", [1, 1, 1, 0.05]], _partH * 0.25] call FUNC(uiPanel);
+            // On a real weapon picture the plates are the panel's own dark, nearly solid: a see-through film was lost on a light
+            // backdrop (Mia, 0.6.109).
+            private _plateColor = if (_real) then {
+                ((_theme getOrDefault ["panel", [0.05, 0.05, 0.05, 0.9]]) select [0, 3]) + [0.85]
+            } else {
+                _theme getOrDefault ["slotEmpty", [1, 1, 1, 0.05]]
+            };
+
+            [_display, _parent, [_partsRight, _partsTop, _partW + _textW, _partH], _plateColor, _partH * 0.25] call FUNC(uiPanel);
             [
                 _display, _parent, _partRect, _partInfo getOrDefault ["picture", ""], _partInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _partRect
             ] call FUNC(uiItemPicture);

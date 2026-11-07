@@ -35,7 +35,7 @@ private _fnc_write = {
     missionNamespace setVariable [QGVAR(layoutRects), _value];
 
     if (!isNil "CBA_settings_fnc_set") then {
-        [QGVAR(layoutRects), _value, 0, "client"] call CBA_settings_fnc_set;
+        [QGVAR(layoutRects), _value, 0, "client", true] call CBA_settings_fnc_set;
     };
 
     [] call FUNC(elementsChanged);

@@ -57,13 +57,11 @@ _value = switch (_kind) do {
 
 missionNamespace setVariable [_setting, _value];
 
+// Stored in the profile (the fifth argument): without it CBA only set the value for this session, and "Real weapon pictures"
+// was off again after a restart (Mia, 0.6.108).
 if (!isNil "CBA_settings_fnc_set") then {
-    [_setting, _value, 0, "client"] call CBA_settings_fnc_set;
+    [_setting, _value, 0, "client", true] call CBA_settings_fnc_set;
 };
-
-// Written to the profile at once: "Real weapon pictures" was off again after a restart (Mia, 0.6.107) - the profile is otherwise
-// only saved when the game closes the way it should.
-saveProfileNamespace;
 
 // An order picked means the columns in that order: what was placed by hand goes.
 if (_setting isEqualTo QGVAR(columnOrder) && {(missionNamespace getVariable [QGVAR(layoutRects), ""]) isNotEqualTo ""}) then {

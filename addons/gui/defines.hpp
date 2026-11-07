@@ -616,7 +616,9 @@
 // The scene's lights against the inspect card's.
 #define CARD_3D_LIGHT 0.15
 // The grey of the sphere round a weapon (0 to 1).
-#define CARD_3D_BACKDROP 0.04
+#define CARD_3D_BACKDROP 0.025
+// How much darker the sphere behind a real weapon picture is painted than the card's colour: lit and exposed it comes out lighter.
+#define CARD_3D_BACKDROP_GAIN 0.3
 #define INSPECT_3D_ASPECT (getResolution select 4)
 #define INSPECT_3D_SUPER 2
 #define INSPECT_3D_MAX_RES 2048

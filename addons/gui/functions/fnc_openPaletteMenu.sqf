@@ -844,10 +844,9 @@ if (_fontsOpen) then {
                 missionNamespace setVariable [QGVAR(font), _fontId];
 
                 if (!isNil "CBA_settings_fnc_set") then {
-                    [QGVAR(font), _fontId, 0, "client"] call CBA_settings_fnc_set;
+                    [QGVAR(font), _fontId, 0, "client", true] call CBA_settings_fnc_set;
                 };
 
-                saveProfileNamespace;
                 [] call FUNC(elementsChanged);
 
                 private _display = uiNamespace getVariable [QGVAR(display), displayNull];

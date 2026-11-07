@@ -92,7 +92,7 @@ switch (_mode) do {
                 _rowChanged = true;
 
                 if (!isNil "CBA_settings_fnc_set") then {
-                    [_setting, _default, 0, "client"] call CBA_settings_fnc_set;
+                    [_setting, _default, 0, "client", true] call CBA_settings_fnc_set;
                 };
             };
         } forEach (call FUNC(settingsDefs));
@@ -118,7 +118,7 @@ switch (_mode) do {
             private _value = missionNamespace getVariable _x;
 
             if (!isNil "_value" && {!([_x] call FUNC(settingForced))}) then {
-                [_x, _value, 0, "client"] call CBA_settings_fnc_set;
+                [_x, _value, 0, "client", true] call CBA_settings_fnc_set;
             };
         } forEach _dirty;
     };

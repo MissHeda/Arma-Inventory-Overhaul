@@ -2,6 +2,15 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.110 - beta
+
+### Fixed
+
+- Settings changed in the window (Layout tab, Colours tab font, sizes, palette, the layout editor) were never stored in the
+  profile and were lost on a restart - "Real weapon pictures" among them. They are stored now.
+- Real weapon pictures: the backdrop is painted darker, closer to the card's colour, and the attachments' plates on it are dark
+  and nearly solid, so they show on any backdrop.
+
 ## 0.6.109 - beta
 
 ### Changed
