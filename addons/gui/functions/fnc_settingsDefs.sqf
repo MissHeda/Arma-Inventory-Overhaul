@@ -43,8 +43,8 @@ private _rows = [
     [QGVAR(tileNames), LLSTRING(Setting_TileNames), LLSTRING(Setting_TileNames_Desc), "check", false],
     [QGVAR(weapon3D), LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc), "check", false],
     [
-        QGVAR(weapon3DZoom_primary), LLSTRING(Setting_Weapon3D_Primary), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 80, [
-            [QGVAR(weapon3DZoom_primary), LLSTRING(Weapon3D_Size), 50, 200, 5, "%", 80, LLSTRING(Setting_Weapon3DZoom_Desc)],
+        QGVAR(weapon3DZoom_primary), LLSTRING(Setting_Weapon3D_Primary), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 100, [
+            [QGVAR(weapon3DZoom_primary), LLSTRING(Weapon3D_Size), 50, 200, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
             [QGVAR(weapon3DOffsetX_primary), "X", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetX_Desc)],
             [QGVAR(weapon3DOffsetY_primary), "Y", -50, 50, 5, "%", 0, LLSTRING(Setting_Weapon3DOffsetY_Desc)]
         ]

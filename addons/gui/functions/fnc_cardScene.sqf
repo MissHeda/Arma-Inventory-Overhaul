@@ -112,7 +112,8 @@ private _fnc_frame = {
     private _height = _scene getOrDefault ["height", _length / 3];
     private _perMetre = 2 * INSPECT_3D_FOV;
     private _room = CARD_3D_ROOM;
-    private _distance = ((_length / (_room * (_widthShare max 0.05) * _perMetre * INSPECT_3D_ASPECT)) max (_height / (_room * (_heightShare max 0.05) * _perMetre))) max 0.2;
+    // Across, the picture holds less than its height times the screen's shape: CARD_3D_WIDTH_FIX, measured in game (0.6.112).
+    private _distance = ((_length * CARD_3D_WIDTH_FIX / (_room * (_widthShare max 0.05) * _perMetre * INSPECT_3D_ASPECT)) max (_height / (_room * (_heightShare max 0.05) * _perMetre))) max 0.2;
 
     _scene set ["distance", _distance min 8];
 
@@ -238,7 +239,7 @@ switch (_mode) do {
             private _probe = createSimpleObject [_model, [0, 0, 0], true];
 
             if (!isNull _probe) then {
-                (0 boundingBoxReal _probe) params ["_boxMin", "_boxMax"];
+                ([_probe] call FUNC(modelBox)) params ["_boxMin", "_boxMax"];
                 deleteVehicle _probe;
 
                 _frame = ((vectorMagnitude (_boxMax vectorDiff _boxMin)) max 0.1) min INSPECT_3D_FRAME;
@@ -308,7 +309,7 @@ switch (_mode) do {
                 private _inModel = [_scene, true] call FUNC(weaponPoints);
 
                 if (!isNull _probe && {!isNil "_inModel"}) then {
-                    (0 boundingBoxReal _probe) params ["_boxMin", "_boxMax"];
+                    ([_probe] call FUNC(modelBox)) params ["_boxMin", "_boxMax"];
                     deleteVehicle _probe;
 
                     private _middle = (_boxMin vectorAdd _boxMax) vectorMultiply 0.5;
@@ -332,7 +333,7 @@ switch (_mode) do {
                         private _part = createSimpleObject [_muzzleModel, [0, 0, 0], true];
 
                         if (!isNull _part) then {
-                            (0 boundingBoxReal _part) params ["_partMin", "_partMax"];
+                            ([_part] call FUNC(modelBox)) params ["_partMin", "_partMax"];
                             deleteVehicle _part;
 
                             private _partSize = _partMax vectorDiff _partMin;

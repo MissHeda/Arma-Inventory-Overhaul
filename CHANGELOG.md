@@ -2,6 +2,21 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.113 - beta
+
+Tested in game (MX with suppressor, optic and bipod, Mk200, P07 with suppressor, NLAW).
+
+### Fixed
+
+- Real weapon pictures are centred and sized right: Arma's own box of a weapon model reaches a metre or two past the gun (a
+  helper point), so the P07's middle lay 47 cm beside it and the MX measured 4 m high. Each axis now comes from the model's
+  visible, geometry or memory shape, whichever is sane; the suppressor is measured the same way.
+- The width the picture holds was worked out 1.46 times too wide, so long weapons came too close.
+
+### Changed
+
+- Every slot's picture size starts at 100 % again (the primary's 80 % made up for the wrong width).
+
 ## 0.6.112 - beta
 
 ### Changed

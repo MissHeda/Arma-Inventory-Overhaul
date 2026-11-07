@@ -610,7 +610,10 @@
 // A handgun is taller for its length: grip and magazine.
 #define CARD_3D_PROFILE_HANDGUN 0.9
 // How far below its box's middle a handgun is aimed at, in metres.
-#define CARD_3D_HANDGUN_DROP 0.035
+#define CARD_3D_HANDGUN_DROP 0
+// How much less a weapon card's picture holds across than its height times the screen's shape says (measured in game, 0.6.112:
+// an NLAW of 1.05 m took 79 % of the card's width where the formula gave 54 %).
+#define CARD_3D_WIDTH_FIX 1.46
 // How many frames a weapon is filmed before its picture is kept as a still and the scene goes.
 #define CARD_3D_STILL_FRAMES 6
 // The scene's lights against the inspect card's.
