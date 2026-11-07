@@ -43,14 +43,16 @@ workshop = [
     # "2893363164", # KJW's Two Primary Weapons, for the compat_kjw_twoprimary addon (instead of WebKnight's, not with it)
 ]
 
-# With GreenMag Rework, for the compat_greenmag addon - built locally, not on the Workshop: its last `hemtt build`, loaded
-# by a second -mod parameter. The path is the GreenMag-Rework checkout next to this one on the author's machine.
+# With GreenMag Rework, for the compat_greenmag addon - built locally, not on the Workshop: its last `hemtt dev` (run there
+# after a change), loaded by a second -mod parameter. The dev output, not `hemtt build`: with file patching Arma also reads
+# GreenMag's loose files through the link `hemtt dev` makes (Arma 3\z\gmr), and a build of another state did not match them
+# ("fnc_clipsOf.sqf not found"). The path is the GreenMag-Rework checkout next to this one on the author's machine.
 #
 #   hemtt launch greenmag
 [hemtt.launch.greenmag]
 extends = "default"
 parameters = [
-    "-mod=\"C:\\Users\\Heda\\GitHub Repos\\GreenMag-Rework\\.hemttout\\build\"", # quoted as HEMTT quotes its own -mod
+    "-mod=\"C:\\Users\\Heda\\GitHub Repos\\GreenMag-Rework\\.hemttout\\dev\"", # quoted as HEMTT quotes its own -mod
 ]
 
 # A test scene for the inventory (.hemtt/missions/AIO_Test.VR): a soldier with full gear, a crate, an
