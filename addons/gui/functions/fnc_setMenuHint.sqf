@@ -23,4 +23,27 @@ if (isNull _line) exitWith {};
 
 private _size = _line getVariable [QGVAR(hintSize), UNIT * 0.45];
 
-_line ctrlSetStructuredText (text _tip setAttributes ["size", str (_size / (UNIT * 0.7)), "color", "#C7C7C7", "align", "left"]);
+// A plain text control (AIO_TextMulti): the words at exactly this height, wrapped over its lines.
+if (ctrlType _line == 0) exitWith {
+    _line ctrlSetFontHeight _size;
+    _line ctrlSetTextColor [0.78, 0.78, 0.78, 1];
+    _line ctrlSetText _tip;
+};
+
+// As tags, as fnc_gradientText writes its words: set with setAttributes the size was not taken and the tip came out at the
+// control's own size, too big for its line and cut off at the card's foot (Mia, 0.6.93).
+private _escaped = ((toArray _tip) apply {
+    switch (_x) do {
+        case 38: {"&amp;"};
+        case 60: {"&lt;"};
+        case 62: {"&gt;"};
+        case 10: {"<br/>"};
+        default {toString [_x]};
+    };
+}) joinString "";
+
+// The card makes its line as high as its longest tip wraps to at this size (fnc_openSizeMenu, fnc_openPaletteMenu). No shrinking to
+// ctrlTextHeight: it measured too high and the words came out tiny (Mia, 0.6.95).
+_line ctrlSetStructuredText parseText format [
+    "<t font='PuristaMedium' size='%1' color='#C7C7C7' align='left'>%2</t>", _size / (UNIT * 0.7), _escaped
+];

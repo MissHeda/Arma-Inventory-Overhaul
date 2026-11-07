@@ -5,8 +5,9 @@
  * whole selection moves at once.
  *
  *   Move over - from the unit's own storage to the containers of the loot column in the order it shows
- *               them (a pile on the ground too, like a single quick move; with nothing looted shown, the
- *               ground at the feet - seated, the vehicle), from the loot into the unit's uniform, vest
+ *               them (not a pile on the ground - dropping is the drop key's; with nothing else looted shown, the
+ *               unit's other containers as fnc_quickMove takes them - seated, the vehicle), from the loot into
+ *               the unit's uniform, vest
  *               and backpack. Worked out together (aio_storage_fnc_plan): the largest first, each into
  *               the first container with room, and what finds none stays ("Moved 4 of 6").
  *   Drop      - every selected tile not on the ground yet onto the ground: the surface under the feet,
@@ -37,6 +38,7 @@ if (_tiles isEqualTo [] || {!(call FUNC(isInventoryMode))}) exitWith {false};
 
 private _grids = uiNamespace getVariable [QGVAR(grids), []];
 private _items = [];
+private _sources = [];
 private _side = "";
 private _refused = "";
 
@@ -76,6 +78,7 @@ private _refused = "";
     };
 
     _items pushBack _tile;
+    _sources pushBackUnique (_grid get "container");
 } forEach _tiles;
 
 if (_items isEqualTo []) exitWith {
@@ -96,30 +99,22 @@ private _unit = GVAR(unit);
 private _targets = [];
 
 if (_side isEqualTo "own") then {
-    // The loot column's containers, in the order it shows them: the first with room takes what it can.
-    private _seen = [];
-
-    {
-        private _container = _x getOrDefault ["container", objNull];
-
-        if (
-            (_x getOrDefault ["side", ""]) isEqualTo "loot" && {!(_x getOrDefault ["virtual", true])} && {!(_x getOrDefault ["overflow", false])}
-            && {(_x getOrDefault ["window", ""]) isEqualTo ""} && {!isNull _container} && {!(_container in _seen)}
-        ) then {
-            _seen pushBack _container;
-
-            if (([_container, "items"] call FUNC(checkTouch)) isEqualTo "") then {
-                _targets pushBack [_container, _x getOrDefault ["root", objNull]];
-            };
-        };
-    } forEach _grids;
-
-    // Nothing looted shown: the ground at the feet, or the vehicle while seated (fnc_sendMoves).
-    if (_targets isEqualTo []) then {
-        _targets = [["ground", objNull]];
-    };
+    // Out of the player's own gear with no container picked: onto the ground (fnc_quickMove), seated the vehicle (fnc_sendMoves).
+    _targets = [["ground", objNull]];
 } else {
     _targets = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit] select {!isNull _x} apply {[_x, _unit]};
+};
+
+// The container the player picked (fnc_quickTarget) takes them instead, from whichever side; what it has no room for stays.
+private _picked = [_sources] call FUNC(quickTarget);
+
+if (_picked isNotEqualTo []) then {
+    _targets = [_picked];
+};
+
+// Onto the ground at once, as a single quick move drops (fnc_quickMove): not into the hands' queue.
+if (_targets isEqualTo [["ground", objNull]]) then {
+    GVAR(instantFrame) = diag_frameNo;
 };
 
 ([_items, _targets] call EFUNC(storage,plan)) params ["_assigned"];

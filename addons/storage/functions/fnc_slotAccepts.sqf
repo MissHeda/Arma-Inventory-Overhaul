@@ -39,6 +39,14 @@ if (!isNil QEFUNC(compat_acre,isFixedSlot) && {[_unit, _slotId] call EFUNC(compa
 
 private _kind = ([_class] call EFUNC(items,getInfo)) get "kind";
 
+// The second primary on the back (fnc_secondPrimary): a rifle, on a unit that has the slot, and one the mod
+// lets go there - KJW's keeps lists of the weapons it allows.
+if (_slotId isEqualTo "primary2") exitWith {
+    _kind isEqualTo "rifle"
+    && {(_equipment getOrDefault ["primary2", -1]) isEqualType [] || {([_unit] call FUNC(secondPrimary)) select 0}}
+    && {[_unit, _class] call (GVAR(secondPrimaryMod) getOrDefault ["accepts", {true}])}
+};
+
 if (_part isEqualTo "") exitWith {
     _kind isEqualTo (switch (_base) do {
         case "primary": {"rifle"};
@@ -46,48 +54,16 @@ if (_part isEqualTo "") exitWith {
     })
 };
 
-// The kind decides before the weapon is looked up: only a magazine or grenade goes on a magazine slot,
-// only an attachment of that kind on its own slot.
-private _isMagazine = _part in ["mag", "mag2"];
+if (count _equipment == 0 && {_part in ["muzzle", "rail", "optic", "bipod", "mag", "mag2"]}) then {
+    // The kind first, before the loadout is read: a helmet is no magazine.
+    private _isMagazine = _part in ["mag", "mag2"];
 
-if (_isMagazine && {!(_kind in ["magazine", "grenade"])}) exitWith {false};
-if (!_isMagazine && {_kind isNotEqualTo _part}) exitWith {false};
+    if (_isMagazine && {!(_kind in ["magazine", "grenade"])}) exitWith {};
+    if (!_isMagazine && {_kind isNotEqualTo _part}) exitWith {};
 
-if (count _equipment == 0) then {
     _equipment = [_unit] call FUNC(getEquipment);
 };
 
-private _weapon = (_equipment getOrDefault [_base, []]) param [0, ""];
-
-if (_weapon isEqualTo "") exitWith {false};
-
-// What the weapon takes in this slot, worked out once per weapon: the magazines of the slot's muzzle, or its
-// compatible items (the same for every attachment slot).
-private _setKey = (toLowerANSI _weapon) + (["|items", "|" + _part] select _isMagazine);
-private _set = GVAR(compatSets) get _setKey;
-
-if (isNil "_set") then {
-    private _list = [];
-
-    if (_isMagazine) then {
-        private _muzzles = getArray (configFile >> "CfgWeapons" >> _weapon >> "muzzles");
-        private _muzzle = if (_part isEqualTo "mag") then {"this"} else {
-            (_muzzles select {_x != "this" && {_x != (_muzzles param [0, ""])}}) param [0, ""]
-        };
-
-        if (_muzzle isNotEqualTo "") then {
-            _list = compatibleMagazines [_weapon, _muzzle];
-        };
-    } else {
-        _list = [_weapon] call CBA_fnc_compatibleItems;
-    };
-
-    if (isNil "_list" || {!(_list isEqualType [])}) then {
-        _list = [];
-    };
-
-    _set = createHashMapFromArray (_list apply {[toLowerANSI _x, true]});
-    GVAR(compatSets) set [_setKey, _set];
-};
-
-(toLowerANSI _class) in _set
+// The weapon's part: the same check for a worn weapon as for one lying in a container (fnc_partFits), so what lights up green
+// is what goes on.
+[(_equipment getOrDefault [_base, []]) param [0, ""], _part, _class] call FUNC(partFits)

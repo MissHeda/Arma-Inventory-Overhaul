@@ -21,7 +21,8 @@
  * under way are shown (fnc_drawPending) and the tiles selected (fnc_drawSelection), which survive every
  * build by what they stand for.
  * A repack of magazines in progress is drawn on the tiles last (aio_magazines_fnc_drawJob).
- * The palette popover (fnc_openPaletteMenu), if it was open, is made again after everything else.
+ * The palette popover (fnc_openPaletteMenu) or the size popover (fnc_openSizeMenu), if one was open, is made again after
+ * everything else.
  *
  * The layout is looked up by name, so a look that is missing or broken leaves a window with only its
  * header and footer - still one that can be closed - rather than no window at all.
@@ -79,16 +80,34 @@ uiNamespace setVariable [QGVAR(selectionFrames), []];
 GVAR(searchQueue) = [];
 GVAR(panels) = [];
 GVAR(equipmentRect) = [];
+GVAR(equipmentRects) = [];
+GVAR(partRects) = createHashMap;
 GVAR(storageRect) = [];
 GVAR(lootRect) = [];
 
-// The palette popover stays open across a build - what it sets is this build's colours - and is made again at its end. It is
-// closed here without being written to the profile (aio_gui_menuRemake, fnc_closeMenu).
-private _paletteOpen = !isNull ((uiNamespace getVariable [QGVAR(menu), []]) param [0, controlNull]) && {(GVAR(menuFor) param [0, ""]) isEqualTo "palette"};
+// The palette popover stays open across a build - what it sets is this build's colours - and is made again at its end; so does
+// the size popover, whose sliders build the window at its new size. It is closed here without being written to the profile or to
+// CBA (aio_gui_menuRemake, fnc_closeMenu).
+private _keptMenu = [
+    "", GVAR(menuFor) param [0, ""]
+] select (!isNull ((uiNamespace getVariable [QGVAR(menu), []]) param [0, controlNull]) && {(GVAR(menuFor) param [0, ""]) in ["palette", "size", "layout"]});
 
-GVAR(menuRemake) = _paletteOpen;
+GVAR(menuRemake) = _keptMenu isNotEqualTo "";
 [] call FUNC(closeMenu);
 GVAR(menuRemake) = false;
+
+// The sizes this build is made at (fnc_sizeDefs): where one changed since the last build (the size popover, CBA's options -
+// fnc_sizeChanged), the cell is worked out afresh (fnc_getCell), and the words with it (fnc_textScale).
+private _sizes = (call FUNC(sizeDefs)) apply {missionNamespace getVariable [_x select 0, -1]};
+
+if ((uiNamespace getVariable [QGVAR(sizeBuilt), _sizes]) isNotEqualTo _sizes) then {
+    uiNamespace setVariable [QGVAR(cell), []];
+};
+
+uiNamespace setVariable [QGVAR(sizeBuilt), _sizes];
+
+// The tallest compartment of the loot pages could cut, counted again as the sections are drawn (fnc_drawSection).
+GVAR(tallestLoot) = 0;
 
 // The style, by its id - an unknown one falls back to the first.
 private _index = (GVAR(styles) findIf {(_x select 0) isEqualTo GVAR(style)}) max 0;
@@ -174,6 +193,8 @@ uiNamespace setVariable [QGVAR(foldAreas), []];
 uiNamespace setVariable [QGVAR(pageAreas), []];
 uiNamespace setVariable [QGVAR(zones), []];
 uiNamespace setVariable [QGVAR(slots), []];
+uiNamespace setVariable [QGVAR(cardButtons), []];
+uiNamespace setVariable [QGVAR(cardSpans), []];
 
 // The slots' drag highlights (fnc_glowSlot) went with the sweep above - but for a control a window that
 // attached keeps its group across builds: those are deleted here. They are made again, ahead of time, by
@@ -193,12 +214,17 @@ uiNamespace setVariable [QGVAR(parts), createHashMap];
 // fnc_drawEquipmentCards): what the hint explains, the comparison card and the name at the mouse - their
 // controls went with the sweep above.
 uiNamespace setVariable [QGVAR(infoAreas), []];
+uiNamespace setVariable [QGVAR(targetGlows), []];
 uiNamespace setVariable [QGVAR(weightBar), createHashMap];
 uiNamespace setVariable [QGVAR(weightPreview), controlNull];
 uiNamespace setVariable [QGVAR(compare), controlNull];
 uiNamespace setVariable [QGVAR(tipShown), controlNull];
 GVAR(buildCount) = GVAR(buildCount) + 1;
 GVAR(hover) = [];
+
+// What is under the mouse is looked at again in the next frame, though it did not move: a click that built the window
+// anew (a fold, a sort) left it on a new button whose tip is shown then - not only once the mouse moves on.
+GVAR(lastMouse) = [];
 uiNamespace setVariable [QGVAR(hint), controlNull];
 uiNamespace setVariable [QGVAR(hoverRing), []];
 
@@ -217,6 +243,22 @@ if (isNil "_theme" || {!(_theme isEqualType createHashMap)}) then {
 };
 
 _theme set ["id", _id];
+
+// The player's own font (Layout: Font; Mia, 0.6.103): its regular and its bold cut in place of the theme's, for every word drawn
+// with the theme's font.
+private _fontPair = (createHashMapFromArray [
+    ["puristaLight", ["PuristaLight", "PuristaMedium"]],
+    ["roboto", ["RobotoCondensed", "RobotoCondensedBold"]],
+    ["robotoLight", ["RobotoCondensedLight", "RobotoCondensed"]],
+    ["etelka", ["EtelkaNarrowMediumPro", "EtelkaNarrowMediumPro"]],
+    ["tahoma", ["TahomaB", "TahomaB"]],
+    ["lucida", ["LucidaConsoleB", "LucidaConsoleB"]]
+]) getOrDefault [missionNamespace getVariable [QGVAR(font), "purista"], []];
+
+if (_fontPair isNotEqualTo []) then {
+    _theme set ["font", _fontPair select 0];
+    _theme set ["fontBold", _fontPair select 1];
+};
 
 if ((_theme getOrDefault ["name", ""]) isEqualTo "") then {
     _theme set ["name", localize _nameKey];
@@ -425,7 +467,10 @@ if (_timed) then {_marks pushBack ["columns", diag_tickTime]};
 if ("footer" in GVAR(hooks)) then {
     ["footer", [_display, _theme]] call FUNC(hook);
 } else {
-    [_display, _theme] call FUNC(drawFooter);
+    // Unless the player switched it off (aio_gui_showFooter): the columns have its room then (CONTENT_B).
+    if (missionNamespace getVariable [QGVAR(showFooter), true]) then {
+        [_display, _theme] call FUNC(drawFooter);
+    };
 };
 
 // What is still to be searched, one container after the other, each from the top left.
@@ -493,9 +538,17 @@ if (!isNil QEFUNC(magazines,drawJob)) then {
 // The window that attached has the last word: its own controls, counts and marks on what was just built.
 ["afterBuild", [_display]] call FUNC(hook);
 
-// The palette popover, over everything just built; a slider held in it stays held (fnc_paletteSlide).
-if (_paletteOpen) then {
+// The palette or size popover, over everything just built; a slider held in it stays held (fnc_paletteSlide, fnc_sizeSlide).
+if (_keptMenu isEqualTo "palette") then {
     [_display] call FUNC(openPaletteMenu);
+};
+
+if (_keptMenu isEqualTo "size") then {
+    [_display] call FUNC(openSizeMenu);
+};
+
+if (_keptMenu isEqualTo "layout") then {
+    [_display] call FUNC(openLayoutEditor);
 };
 
 // For the tester's numbers (aio_gui_debugTiming).

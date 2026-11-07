@@ -230,7 +230,7 @@ if (_pick isEqualTo []) then {
         // next press of the key does it (fnc_reloadGuard).
         if (currentMagazine _unit isNotEqualTo "") exitWith {};
 
-        [_unit, _weapon, _muzzle, _best] call FUNC(loadMagazine);
+        [_unit, _weapon, _muzzle, _best, true] call FUNC(loadMagazine);
     }, [_unit, _weapon, _muzzle], UNDO_RELOAD_WAIT] call CBA_fnc_waitAndExecute;
 };
 

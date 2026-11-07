@@ -154,7 +154,8 @@ if (_down) then {
 
 // The inspect card takes the clicks on it (fnc_drawInspect) - the inventory and the kit windows under it
 // get none. A drag let go over it still ends, and what was held goes back (fnc_updateDrag finds no
-// target there); a press let go there is no click.
+// target there) - but on a point of the modding view, where it goes on that part of the weapon (fnc_hotspotAt);
+// a press let go there is no click.
 getMousePosition params ["_clickX", "_clickY"];
 
 private _layer = [[_clickX, _clickY]] call FUNC(topAt);
@@ -162,7 +163,10 @@ private _layer = [[_clickX, _clickY]] call FUNC(topAt);
 if (_layer isEqualTo "inspect") exitWith {
     if (!_down && {_button == 0}) then {
         if (GVAR(dragging)) then {
-            GVAR(dragTarget) = [];
+            if (count ([[_clickX, _clickY]] call FUNC(hotspotAt)) == 0) then {
+                GVAR(dragTarget) = [];
+            };
+
             [_display] call FUNC(endDrag);
         } else {
             GVAR(press) = [];
@@ -189,6 +193,18 @@ if (_menuOpen && {_down} && {_button == 1}) then {
 };
 
 if (_menuOpen) exitWith {false};
+
+// The header line of a weapon card - its fold toggle, which held lifts the card to move it (fnc_drawEquipmentCards,
+// fnc_cardGrip) - has a button of its own: a press there is the header's, not a press on a slot - it neither lifts the
+// weapon nor opens its menu. A drag let go there is still let go on the folded card's slot.
+if (_down && {!GVAR(dragging)} && {
+    (uiNamespace getVariable [QGVAR(cardButtons), []]) findIf {
+        ([_x] call FUNC(gridOrigin)) params ["_areaX", "_areaY"];
+        (_x get "size") params ["_areaW", "_areaH"];
+
+        _clickX >= _areaX && {_clickX < _areaX + _areaW} && {_clickY >= _areaY} && {_clickY < _areaY + _areaH}
+    } >= 0
+}) exitWith {false};
 
 // A window that attached may take the button first - the Arsenal panel takes every press outside its own, so the
 // engine ignores it.
@@ -457,7 +473,7 @@ if (_down) exitWith {
 
             if (isNull _column) exitWith {};
 
-            GVAR(emptyPress) = [_ctrl, _mouse];
+            GVAR(emptyPress) = [_ctrl, _mouse, _grid getOrDefault ["container", objNull]];
         };
     };
 
@@ -475,10 +491,11 @@ if (GVAR(stripDrag) isNotEqualTo []) exitWith {
     true
 };
 
-// A press on an empty cell comes up: a click on it, so the selection goes unless Ctrl is held. A press that
-// moved on (dragged over the cells) does nothing.
+// A press on an empty cell comes up: a click on it, so the selection goes unless Ctrl is held, and its container is the target
+// of quick moves from now on - or no longer, when it was already (fnc_quickTarget). A press that moved on (dragged over the cells)
+// does nothing.
 if (GVAR(emptyPress) isNotEqualTo []) exitWith {
-    GVAR(emptyPress) params ["_ctrlAtPress", "_pressAt"];
+    GVAR(emptyPress) params ["_ctrlAtPress", "_pressAt", ["_pressContainer", objNull]];
 
     private _now = getMousePosition;
 
@@ -489,6 +506,8 @@ if (GVAR(emptyPress) isNotEqualTo []) exitWith {
         && {abs ((_now select 1) - (_pressAt select 1)) <= DRAG_THRESHOLD}
     ) then {
         call FUNC(clearSelection);
+
+        [_pressContainer] call FUNC(pickTarget);
     };
 
     true
@@ -508,6 +527,18 @@ private _now = diag_tickTime;
 private _listening = "click" in GVAR(hooks);
 private _plain = _slotSource isEqualTo [] && {!_ctrl} && {!_ctrlAtPress} && {!_alt} && {!_altAtPress} && {_listening || {!_shift}};
 private _clickKey = [_gridIndex, _tileIndex];
+
+// One of the player's own weapons counts as well, in the inventory: its double click opens its Attachments (below).
+private _ownWeapon = !_listening && {!_ctrl} && {!_ctrlAtPress} && {!_alt} && {!_altAtPress} && {!_shift} && {
+    _slotSource params [["_slotOwner", objNull], ["_slotName", ""]];
+
+    _slotOwner isEqualTo GVAR(unit) && {_slotName in ["primary", "handgun", "launcher", "primary2"]}
+};
+
+if (_ownWeapon) then {
+    _clickKey = +_slotSource;
+    _plain = true;
+};
 
 if (_tileIndex < 0 && {_listening}) then {
     _clickKey append [_target getOrDefault ["type", ""], _target getOrDefault ["slot", -1], _target getOrDefault ["cell", []]];
@@ -554,14 +585,69 @@ private _fnc_groundOpen = {
     count _tile > 0 && {!isNull (_tile getOrDefault ["container", objNull])}
 };
 
-// A double click does what the quick move key does (fnc_quickAction).
+// What has a double click of its own does that whatever the player set: one of the player's own weapons opens Attachments (below), an
+// item a mod or the mission set one for does that (fnc_doubleClickRule). The setting (aio_gui_doubleClick) is for the rest.
+if (_double && {!_ownWeapon} && {_gridIndex >= 0} && {[_gridIndex, _tileIndex] call FUNC(doubleClickRule)}) exitWith {true};
+
+// Set to do nothing, a double click is two clicks.
+if (!_ownWeapon && {GVAR(doubleClick) isEqualTo "none"}) then {
+    _double = false;
+};
+
+// A double click does what the quick move key does (fnc_quickAction) - or, set so, opens the menu a right click opens, where
+// the vanilla inventory has CBA's item context menu on a double click (fnc_contextMenu, fnc_cbaOptions). On one of the player's
+// own weapons it opens Attachments instead of a quick move (fnc_inspect, as the menu's row does).
 if (_double) exitWith {
-    [_gridIndex, _tileIndex] call FUNC(quickAction);
+    switch (true) do {
+        case (_ownWeapon): {
+            _slotSource params ["_slotOwner", "_slotName"];
+
+            private _worn = [_slotOwner, _slotName] call EFUNC(storage,getSlot);
+            private _class = _worn getOrDefault ["class", ""];
+
+            if (_class isNotEqualTo "") then {
+                [{_this call FUNC(inspect)}, [_class, 1, -1, _worn getOrDefault ["attachments", []], objNull, _slotName, true]] call FUNC(later);
+            };
+        };
+        case (GVAR(doubleClick) isEqualTo "menu"): {
+            [{[_this] call FUNC(contextMenu)}, _display] call FUNC(later);
+        };
+        default {
+            [_gridIndex, _tileIndex] call FUNC(quickAction);
+        };
+    };
 
     true
 };
 
 switch (true) do {
+    // A plain click on a uniform, vest or backpack slot - the doll's, or the box beside its grid - picks that container as the quick
+    // moves' target, or lets it go (fnc_pickTarget).
+    case (_slotSource isNotEqualTo [] && {!_ctrl} && {!_ctrlAtPress} && {!_shift} && {!_alt} && {call FUNC(isInventoryMode)}): {
+        _slotSource params [["_slotOwner", objNull], ["_slotName", ""]];
+
+        private _picked = switch (_slotName) do {
+            case "uniform": {uniformContainer _slotOwner};
+            case "vest": {vestContainer _slotOwner};
+            case "backpack": {backpackContainer _slotOwner};
+            default {objNull};
+        };
+
+        // Twice on the same one: the uniform, vest or backpack goes onto the ground at once, as the drop key takes it off - and the
+        // first click's pick is taken back (Mia, 0.6.85: a double click on the backpack did nothing).
+        private _slotKey = [_slotOwner, _slotName];
+        private _slotDouble = !isNull _picked && {(GVAR(lastSlotClick) param [0, []]) isEqualTo _slotKey}
+            && {(diag_tickTime - (GVAR(lastSlotClick) param [1, -1])) < DOUBLE_CLICK};
+
+        GVAR(lastSlotClick) = [[_slotKey, []] select _slotDouble, diag_tickTime];
+
+        [_picked] call FUNC(pickTarget);
+
+        if (_slotDouble) then {
+            GVAR(instantFrame) = diag_frameNo;
+            [_slotOwner, _slotName, "ground", []] call FUNC(doUnequip);
+        };
+    };
     case (_ctrl || {_ctrlAtPress}): {
         if (_slotSource isNotEqualTo []) then {
             _slotSource call FUNC(quickUnequip);

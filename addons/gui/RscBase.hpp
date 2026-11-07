@@ -68,6 +68,13 @@ class AIO_LabelCenter: AIO_Label {
     style = 2;
 };
 
+// Words over several lines at an exact height (ctrlSetFontHeight) - the design card's tip line (fnc_setMenuHint): structured text
+// came out at another size than asked (Mia, 0.6.96: "still very small").
+class AIO_TextMulti: AIO_Label {
+    style = 16;
+    lineSpacing = 1;
+};
+
 // Several colours in one line - the hint. Its parts bring their own colours and font (fnc_updateHover).
 class AIO_StructuredText: RscStructuredText {
     idc = -1;

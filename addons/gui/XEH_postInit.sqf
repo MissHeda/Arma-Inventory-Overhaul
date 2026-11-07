@@ -20,6 +20,9 @@ if (!hasInterface) exitWith {};
 
 #include "initKeybinds.inc.sqf"
 
+// What mods set for the right-click menu and the double click in their config (CfgAioMenu).
+call FUNC(menuInit);
+
 // Someone near loots: the sounds they make reach this machine as resolved layers and play where their hands
 // are (fnc_sendNoise sends them only to players within earshot).
 [QGVAR(noise), {_this call FUNC(onNoise)}] call CBA_fnc_addEventHandler;
@@ -43,6 +46,16 @@ if (!hasInterface) exitWith {};
         [PLAYER_UNIT, true] call FUNC(initUnit);
     }, [], HANDLER_RECHECK] call CBA_fnc_waitAndExecute;
 }] call CBA_fnc_waitUntilAndExecute;
+
+// The soldiers the player leads get the handler too: their inventory, opened from the command menu, is this window
+// as well (fnc_onInventoryOpened, fnc_isSubordinate). Once per unit (fnc_initUnit), so the look costs next to nothing.
+[{
+    {
+        if (local _x && {[_x] call FUNC(isSubordinate)}) then {
+            [_x] call FUNC(initUnit);
+        };
+    } forEach units group PLAYER_UNIT;
+}, SUBORDINATE_INTERVAL] call CBA_fnc_addPerFrameHandler;
 
 // The vanilla inventory is gone for good. The handler above keeps the engine from opening it, and the
 // display's load event (CfgEventHandlers) closes one that comes up anyway; this is the last net, for a

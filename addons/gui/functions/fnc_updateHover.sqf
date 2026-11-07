@@ -69,6 +69,13 @@ disableSerialization;
 
 params ["_display", "_mouse", ["_force", false]];
 
+// On an open menu the mouse is on nothing of what lies under it: only the menu's own rows light up.
+(uiNamespace getVariable [QGVAR(menuRect), []]) params [["_menuX", 0], ["_menuY", 0], ["_menuW", 0], ["_menuH", 0]];
+
+if (count _mouse >= 2 && {(_mouse select 0) >= _menuX} && {(_mouse select 0) < _menuX + _menuW} && {(_mouse select 1) >= _menuY} && {(_mouse select 1) < _menuY + _menuH}) then {
+    _mouse = [];
+};
+
 private _found = [];
 
 // What this call did, for the tally of the timing line (fnc_logFrame): "new" unless it ends sooner.
@@ -575,7 +582,9 @@ if (!isNull _tooltip) then {
 
             // A long tip breaks into lines rather than running across the screen.
             private _maxW = SQUARE(_textUnit * 15);
-            private _lines = ceil (_width / _maxW);
+            // Counted on the words and the room they have (fnc_setTipText's margin), not on the glass with its margin: a line that
+            // fits stays one line on a glass of one line's height.
+            private _lines = ceil (((_width - SQUARE(_textUnit * 0.8)) / (_maxW - SQUARE(_textUnit * 0.6))) max 0.01);
             private _height = _textUnit * 0.85 + (_lines - 1) * _textUnit * 0.62;
 
             _width = _width min _maxW;
@@ -621,11 +630,25 @@ private _fnc_hex = {
 
 private _parts = [];
 
+// What a double click does on what the mouse is on, the words of it - shown first, right after the footer's keys, with the double
+// click's picture and a line after it (Mia, after 0.6.77): always, whatever it does. "" where a double click does nothing.
+private _double = "";
+
 private _fnc_add = {
-    params ["_text", "_key"];
+    params ["_text", "_key", ["_pictures", []]];
 
     if (_parts isNotEqualTo []) then {
         _parts pushBack "    ";
+    };
+
+    // Pictures before the words, white as they are drawn - not in the words' colour (Mia, 0.6.76): the double click's mouse
+    // (fnc_mouseIcon).
+    {
+        _parts pushBack (image _x setAttributes ["color", "#FFFFFF"]);
+    } forEach _pictures;
+
+    if (_pictures isNotEqualTo []) then {
+        _parts pushBack " ";
     };
 
     _parts pushBack (text _text setAttributes [
@@ -814,11 +837,38 @@ switch (_shown param [0, ""]) do {
             private _wearSlot = [GVAR(unit), _class] call EFUNC(storage,slotFor);
 
             if (_wearSlot isNotEqualTo "" && {(_wearSlot find "_") < 0}) then {
-                [LLSTRING(Hint_GroundWear), "accent"] call _fnc_add;
+                _double = LLSTRING(Hint_DoublePutOn);
             };
 
             if (!isNull (_tile getOrDefault ["container", objNull])) then {
                 [LLSTRING(Hint_GroundOpen), "accent"] call _fnc_add;
+            };
+        };
+
+        // What a double click does (fnc_onMouseButton): what a mod or the mission gave the item (fnc_doubleClickLabel) - else, by the
+        // player's setting, the menu, nothing, or the quick move: into the container the player picked (fnc_quickTarget), or over.
+        // Putting on from the ground (above) is the ground's own.
+        if ([] call FUNC(isInventoryMode) && {_double isEqualTo ""}) then {
+            _double = [_class] call FUNC(doubleClickLabel);
+
+            if (_double isNotEqualTo "") exitWith {};
+
+            switch (GVAR(doubleClick)) do {
+                case "menu": {_double = LLSTRING(Hint_DoubleClickMenu)};
+                case "none": {};
+                default {
+                    ([[_hoverGrid getOrDefault ["container", objNull]]] call FUNC(quickTarget)) params [["_picked", objNull]];
+
+                    // With none picked, out of the player's own gear it goes onto the ground (fnc_quickMove).
+                    private _hoverHolder = _hoverGrid getOrDefault ["container", objNull];
+                    private _ownGear = _hoverHolder in [uniformContainer GVAR(unit), vestContainer GVAR(unit), backpackContainer GVAR(unit)];
+
+                    _double = if (isNull _picked) then {
+                        [LLSTRING(QuickMove), LLSTRING(Drop)] select _ownGear
+                    } else {
+                        format [LLSTRING(Hint_QuickTargetInto), [_picked] call FUNC(containerName)]
+                    };
+                };
             };
         };
 
@@ -878,7 +928,7 @@ switch (_shown param [0, ""]) do {
                 if (_worn isNotEqualTo [] && {(_worn select 0) == _class}) exitWith {
                     _weapon = _worn;
                 };
-            } forEach ["primary", "handgun", "launcher", "binocular"];
+            } forEach ["primary", "handgun", "launcher", "primary2", "binocular"];
         };
 
         if (_weapon isNotEqualTo []) then {
@@ -887,6 +937,15 @@ switch (_shown param [0, ""]) do {
             if (_names isNotEqualTo "") then {
                 [_names, "text2"] call _fnc_add;
             };
+        };
+
+        // What a double click on it does where it is no quick move (Mia, 0.6.76: always shown): one of the player's own weapons opens
+        // its attachments (fnc_onMouseButton, fnc_inspect).
+        if (
+            [] call FUNC(isInventoryMode) && {_class isNotEqualTo ""} && {(_record param [6, objNull]) isEqualTo GVAR(unit)}
+            && {(_record param [5, ""]) in ["primary", "handgun", "launcher", "primary2"]}
+        ) then {
+            _double = LLSTRING(Menu_Modify);
         };
 
         // A radio's channel, frequency, alternate channel and state - a long-range one on the back by the
@@ -925,6 +984,13 @@ switch (_shown param [0, ""]) do {
 
 // In the footer's text scale where it keeps one (fnc_drawFooter).
 private _hintCtrl = uiNamespace getVariable [QGVAR(hint), controlNull];
+
+// The double click first, a key hint of its own in the footer as the keys are, with the same line after it (fnc_footerDouble) - only
+// for the footer's own hint line, and only while there is something to say.
+if (_hintCtrl isEqualTo (uiNamespace getVariable [QGVAR(hint), controlNull])) then {
+    // Always there (Mia, 0.6.81) and always current (0.6.85): on nothing, the plain quick move.
+    [[_double, LLSTRING(QuickMove)] select (_double isEqualTo "")] call FUNC(footerDouble);
+};
 
 _hintCtrl ctrlSetStructuredText (composeText _parts setAttributes ["align", "left", "size", str (_hintCtrl getVariable [QGVAR(textScale), 1])]);
 [_hintCtrl] call FUNC(fitHint);

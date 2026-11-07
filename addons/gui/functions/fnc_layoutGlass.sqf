@@ -6,6 +6,8 @@
  *
  *   | equipment |        free        | loot | storage |
  *
+ * That is the order by default; each player can have another or place the columns himself (fnc_columnRects).
+ *
  * On the left what the unit wears, as cards (fnc_drawEquipmentCards). On the right its uniform, vest
  * and backpack stacked in one scrolling column titled "Your gear", and while it loots a second column for
  * that, titled with what is looted ("Loot - Miller", "Loot - Nearby" when it only shows what lies around) and
@@ -84,128 +86,140 @@ if (_reserved) then {
     _rightW = _columnW + (_grow min (_growBy * _columnW));
 };
 
-private _right = CONTENT_X + CONTENT_W;
+// Where they stand: the player's order or his own places (fnc_columnRects), so the settings card's picture and the edit mode show the
+// same. A window that kept the right edge for itself has no say in it.
+private _rects = [_reserved, _rightW, _context getOrDefault ["rightColumn", false]] call FUNC(columnRects);
 
-// Where the loot column goes is the player's own taste (the setting aio_gui_lootSide): by default it opens
-// left of the storage column, which then never moves - looting or not, the storage column stands at the right
-// edge - and the other way round, the loot column takes the right edge and the storage column moves in. A
-// window that kept the right edge for itself ("rightColumn") has no say in it: its column stays there. The
-// column widths and the gaps are the same either way, so the free middle is just as wide, only it lies
-// against the loot column instead of the storage column.
-private _lootLeft = _looting
-    && {!(_context getOrDefault ["rightColumn", false])}
-    && {GVAR(lootSide) isNotEqualTo "right"};
+(_rects get "equipment") params ["_equipX", "_equipY", "_leftW", "_equipH"];
 
-private _lootX = 0;
-private _storageX = 0;
-
-if (_lootLeft) then {
-    _storageX = _right - _columnW;
-    _lootX = _storageX - _gap - _rightW;
-    _right = _lootX - _gap;
-} else {
-    _lootX = _right - _rightW;
-
-    if (_reserved) then {
-        _right = _lootX - _gap;
-    };
-
-    _storageX = _right - _columnW;
-    _right = _storageX - _gap;
-};
+private _storageRect = _rects get "storage";
+private _lootRect = _rects get "loot";
 
 if (_reserved) then {
-    _context set ["rightRect", [_lootX, CONTENT_Y, _rightW, CONTENT_H]];
+    _context set ["rightRect", _lootRect];
 };
-
-_leftW = _leftW min ((_right - CONTENT_X) max 0);
 
 // ----- Equipment -----
 
-GVAR(panels) pushBack [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H];
+// A panel with the equipment column's parts in it (fnc_drawEquipmentCards): the column itself, and each part the player placed on
+// its own in the edit mode (fnc_columnRects) - the weight, the weapons, the gear, the hotbar. Anything let go over one goes into the
+// slot that takes it (fnc_updateDrag); the column's own is the first.
+private _fnc_equipmentPanel = {
+    params ["_panelRect", "_parts"];
+    _panelRect params ["_panelX", "_panelY", "_panelW", "_panelH"];
 
-// Anything let go over it goes into the slot that takes it (fnc_updateDrag).
-GVAR(equipmentRect) = [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H];
+    GVAR(panels) pushBack _panelRect;
+    GVAR(equipmentRects) pushBack _panelRect;
 
-private _cardsRect = if (_theme getOrDefault ["equipmentPanel", true]) then {
-    [
-        _display, controlNull, [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["panel", []],
-        _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
-    ] call FUNC(uiPanel);
+    private _cardsRect = if (_theme getOrDefault ["equipmentPanel", true]) then {
+        [
+            _display, controlNull, _panelRect, _theme getOrDefault ["panel", []],
+            _theme getOrDefault ["radius", 0], _theme getOrDefault ["panelBorder", []]
+        ] call FUNC(uiPanel);
 
-    [_display, controlNull, [CONTENT_X, CONTENT_Y, _leftW, CONTENT_H], _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
+        [_display, controlNull, _panelRect, _theme getOrDefault ["radius", 0]] call FUNC(panelGradient);
 
-    [CONTENT_X + _padX, CONTENT_Y + _padY, _leftW - _padX * 2, CONTENT_H - _padY * 2]
-} else {
-    [CONTENT_X, CONTENT_Y + _padY, _leftW, CONTENT_H - _padY * 2]
+        [_panelX + _padX, _panelY + _padY, _panelW - _padX * 2, _panelH - _padY * 2]
+    } else {
+        [_panelX, _panelY + _padY, _panelW, _panelH - _padY * 2]
+    };
+
+    [_display, controlNull, _cardsRect, _context, _theme, _parts] call FUNC(drawEquipmentCards);
 };
 
-[_display, controlNull, _cardsRect, _context, _theme] call FUNC(drawEquipmentCards);
+private _alone = EQUIPMENT_PARTS select {_x in _rects};
+private _inColumn = EQUIPMENT_PARTS - _alone;
+
+// What each frame of the edit mode draws, by its id - drawn below in the player's layer order (fnc_layerOrder): what comes later
+// lies over what came before.
+private _draw = createHashMap;
+
+// The column, while something of it is left in it - all of it placed elsewhere, it is not drawn at all.
+_draw set ["equipment", {
+    if ((_inColumn findIf {[_x] call FUNC(partShown)}) >= 0) then {
+        [[_equipX, _equipY, _leftW, _equipH], _inColumn] call _fnc_equipmentPanel;
+    };
+}];
+
+{
+    _draw set [_x, compile format ["[_rects get '%1', ['%1']] call _fnc_equipmentPanel;", _x]];
+} forEach _alone;
 
 // ----- Storage -----
 
-private _ownSections = _context getOrDefault ["storageSections", _context getOrDefault ["ownSections", []]];
+_draw set ["storage", {
 
-[
-    _display, [_storageX, CONTENT_Y, _columnW, CONTENT_H], _ownSections, _theme,
-    LLSTRING(Column_Storage), ["", UI_TEX(icon_inventory_ca)] select _titleIcons, QFUNC(drawSection), "storage"
-] call FUNC(drawColumn);
-
-// Without a uniform, vest or backpack the column would stand there empty, as if something had failed.
-if (_ownSections isEqualTo []) then {
-    private _font = _theme getOrDefault ["font", "PuristaMedium"];
-    private _size = TEXT_UNIT * 0.6;
-    private _textW = _columnW - _padX * 4;
+    private _ownSections = _context getOrDefault ["storageSections", _context getOrDefault ["ownSections", []]];
 
     [
-        _display, controlNull, [_storageX + _padX * 2, CONTENT_Y + UNIT * 2.4, _textW, UNIT],
-        [LLSTRING(Storage_Empty), _textW, _font, _size] call FUNC(fitText), _size,
-        _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2, "hint"
-    ] call FUNC(uiLabel);
-};
+        _display, _storageRect, _ownSections, _theme,
+        LLSTRING(Column_Storage), ["", UI_TEX(icon_inventory_ca)] select _titleIcons, QFUNC(drawSection), "storage"
+    ] call FUNC(drawColumn);
+
+    // Without a uniform, vest or backpack the column would stand there empty, as if something had failed.
+    if (_ownSections isEqualTo []) then {
+        private _font = _theme getOrDefault ["font", "PuristaMedium"];
+        private _size = TEXT_UNIT * 0.6;
+        private _textW = _columnW - _padX * 4;
+
+        [
+            _display, controlNull, [(_storageRect select 0) + _padX * 2, (_storageRect select 1) + UNIT * 2.4, _textW, UNIT],
+            [LLSTRING(Storage_Empty), _textW, _font, _size] call FUNC(fitText), _size,
+            _theme getOrDefault ["muted", [0.56, 0.56, 0.56, 1]], _font, 2, "hint"
+        ] call FUNC(uiLabel);
+    };
+}];
 
 // ----- Loot -----
 
-if (_looting) then {
-    private _lootSections = _context getOrDefault ["lootSections", []];
+_draw set ["loot", {
+    if (_looting) then {
+        private _lootSections = _context getOrDefault ["lootSections", []];
 
-    // Named after what is looted: the first section is the body, the crate or the ground the window was
-    // opened on - and when that is only something lying nearby, nothing was opened: "Nearby".
-    private _first = _lootSections param [0, createHashMap];
-    private _title = _first getOrDefault ["title", ""];
-    private _icon = switch (_first getOrDefault ["id", ""]) do {
-        case "worn": {UI_TEX(icon_person_ca)};
-        case "ground": {UI_TEX(icon_ground_ca)};
-        case "container": {UI_TEX(icon_crate_ca)};
-        default {UI_TEX(icon_inventory_ca)};
+        // Named after what is looted: the first section is the body, the crate or the ground the window was
+        // opened on - and when that is only something lying nearby, nothing was opened: "Nearby".
+        private _first = _lootSections param [0, createHashMap];
+        private _title = _first getOrDefault ["title", ""];
+        private _icon = switch (_first getOrDefault ["id", ""]) do {
+            case "worn": {UI_TEX(icon_person_ca)};
+            case "ground": {UI_TEX(icon_ground_ca)};
+            case "container": {UI_TEX(icon_crate_ca)};
+            default {UI_TEX(icon_inventory_ca)};
+        };
+
+        // A pile opened on is "Ground" however many others lie around (its section is named by its largest
+        // item then, to tell the piles apart).
+        if ((_first getOrDefault ["id", ""]) isEqualTo "ground") then {
+            _title = localize ELSTRING(storage,Ground);
+        };
+
+        if (_first getOrDefault ["nearby", false]) then {
+            _title = LLSTRING(Column_Nearby);
+            _icon = UI_TEX(icon_ground_ca);
+        };
+
+        // "Loot - Miller", "Loot - Nearby": the column says that it is someone else's before it says whose (issue 7), as the
+        // player's own says "Your gear"; drawColumn gives it the theme's loot look by its id.
+        _title = if (_title isEqualTo "") then {LLSTRING(Column_Loot)} else {format [LLSTRING(Column_LootOf), _title]};
+
+        [
+            _display, _lootRect, _lootSections, _theme, _title, ["", _icon] select _titleIcons,
+            QFUNC(drawSection), "loot"
+        ] call FUNC(drawColumn);
     };
+}];
 
-    // A pile opened on is "Ground" however many others lie around (its section is named by its largest
-    // item then, to tell the piles apart).
-    if ((_first getOrDefault ["id", ""]) isEqualTo "ground") then {
-        _title = localize ELSTRING(storage,Ground);
-    };
+{
+    call (_draw get _x);
+} forEach ([["equipment", "storage", "loot"] + _alone] call FUNC(layerOrder));
 
-    if (_first getOrDefault ["nearby", false]) then {
-        _title = LLSTRING(Column_Nearby);
-        _icon = UI_TEX(icon_ground_ca);
-    };
-
-    // "Loot - Miller", "Loot - Nearby": the column says that it is someone else's before it says whose (issue 7), as the
-    // player's own says "Your gear"; drawColumn gives it the theme's loot look by its id.
-    _title = if (_title isEqualTo "") then {LLSTRING(Column_Loot)} else {format [LLSTRING(Column_LootOf), _title]};
-
-    [
-        _display, [_lootX, CONTENT_Y, _rightW, CONTENT_H], _lootSections, _theme, _title, ["", _icon] select _titleIcons,
-        QFUNC(drawSection), "loot"
-    ] call FUNC(drawColumn);
-};
+// The column's own panel first where it is drawn: what fnc_updateDrag falls back to.
+GVAR(equipmentRect) = GVAR(equipmentRects) param [0, []];
 
 // ----- The free middle -----
 
-private _middleX = CONTENT_X + _leftW + _gap;
-private _middleW = _right - _middleX;
+private _middle = _rects get "middle";
 
-if (_middleW < SQUARE(UNIT * 5)) exitWith {[]};
+if ((_middle select 2) < SQUARE(UNIT * 5)) exitWith {[]};
 
-[_middleX, CONTENT_Y, _middleW, CONTENT_H]
+_middle

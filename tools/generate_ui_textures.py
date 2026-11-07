@@ -65,6 +65,19 @@ def corner(which, size=64):
     return finish(im, size, size)
 
 
+def corner_mask(which, size=64):
+    """The outside of corner(): the tile filled but for the quarter circle - laid over a picture's corner in the colour round it,
+    it rounds the picture (the 3D weapon pictures, fnc_drawEquipmentCards)."""
+    im = canvas(size, size)
+    d = ImageDraw.Draw(im)
+    s = size * SS
+    cx = {"tl": s, "tr": 0, "bl": s, "br": 0}[which]
+    cy = {"tl": s, "tr": s, "bl": 0, "br": 0}[which]
+    d.rectangle([0, 0, s, s], fill=WHITE)
+    d.ellipse([cx - s, cy - s, cx + s, cy + s], fill=CLEAR)
+    return whiten(finish(im, size, size))
+
+
 # How thick the ring corners are, as a share of their size - fnc_uiRing draws its edges to match
 # (RING_SHARE in addons/gui/defines.hpp).
 RING = 0.2
@@ -277,6 +290,189 @@ def icon_palette(d, s, w):
     dab = w * 0.62
     for x, y in ((0.3, 0.46), (0.43, 0.3), (0.6, 0.3), (0.72, 0.44)):
         d.ellipse([s * x - dab, s * y - dab, s * x + dab, s * y + dab], fill=WHITE)
+
+
+def icon_size(d, s, w):
+    # Bigger and smaller: a double-headed arrow from corner to corner, each head an open corner as on a frame's
+    # handle. The size button in the header, next to the palette.
+    line(d, [(s * 0.28, s * 0.72), (s * 0.72, s * 0.28)], w)
+    line(d, [(s * 0.46, s * 0.24), (s * 0.76, s * 0.24), (s * 0.76, s * 0.54)], w)
+    line(d, [(s * 0.24, s * 0.46), (s * 0.24, s * 0.76), (s * 0.54, s * 0.76)], w)
+
+
+def icon_attachments(d, s, w):
+    # A rifle scope seen from the side, on its two rings over the rail: what goes on a weapon. The Attachments row of the
+    # right-click menu. The eyepiece on the left, the wider objective bell on the right, a small turret on top.
+    line(d, [(s * 0.3, s * 0.4), (s * 0.66, s * 0.4)], w)
+    line(d, [(s * 0.3, s * 0.52), (s * 0.66, s * 0.52)], w)
+    line(d, [(s * 0.3, s * 0.4), (s * 0.24, s * 0.35), (s * 0.08, s * 0.35), (s * 0.08, s * 0.57), (s * 0.24, s * 0.57), (s * 0.3, s * 0.52)], w)
+    line(d, [(s * 0.66, s * 0.4), (s * 0.76, s * 0.28), (s * 0.92, s * 0.28), (s * 0.92, s * 0.64), (s * 0.76, s * 0.64), (s * 0.66, s * 0.52)], w)
+    line(d, [(s * 0.44, s * 0.4), (s * 0.44, s * 0.3), (s * 0.54, s * 0.3), (s * 0.54, s * 0.4)], w)
+    line(d, [(s * 0.36, s * 0.52), (s * 0.36, s * 0.76)], w)
+    line(d, [(s * 0.6, s * 0.52), (s * 0.6, s * 0.76)], w)
+    line(d, [(s * 0.16, s * 0.78), (s * 0.84, s * 0.78)], w)
+
+
+
+
+
+
+def icon_magazine(d, s, w):
+    # A curved magazine with a round on top. The rows that load one.
+    line(d, [(s * 0.36, s * 0.26), (s * 0.62, s * 0.26), (s * 0.72, s * 0.84), (s * 0.48, s * 0.88), (s * 0.36, s * 0.26)], w)
+    line(d, [(s * 0.44, s * 0.14), (s * 0.54, s * 0.14)], w)
+    line(d, [(s * 0.42, s * 0.48), (s * 0.65, s * 0.45)], w)
+
+
+def _double_arrow(d, s, w, a, b):
+    # A line from a to b with an open arrowhead at each end: the pointer Windows shows over an edge or a corner to resize.
+    (ax, ay), (bx, by) = a, b
+    line(d, [(ax, ay), (bx, by)], w)
+    length = math.hypot(bx - ax, by - ay)
+    ux, uy = (bx - ax) / length, (by - ay) / length
+    head = s * 0.17
+    for (tx, ty), sign in (((ax, ay), 1), ((bx, by), -1)):
+        for turn in (0.75, -0.75):
+            cos_t, sin_t = math.cos(turn), math.sin(turn)
+            dx = sign * (ux * cos_t - uy * sin_t)
+            dy = sign * (ux * sin_t + uy * cos_t)
+            line(d, [(tx + dx * head, ty + dy * head), (tx, ty)], w)
+
+
+def icon_resize_h(d, s, w):
+    # Left and right: an edge of a frame in the layout editor.
+    _double_arrow(d, s, w, (s * 0.14, s * 0.5), (s * 0.86, s * 0.5))
+
+
+def icon_resize_v(d, s, w):
+    # Up and down: the top or bottom edge of a frame in the layout editor.
+    _double_arrow(d, s, w, (s * 0.5, s * 0.14), (s * 0.5, s * 0.86))
+
+
+def icon_resize_nwse(d, s, w):
+    # Top left to bottom right: the top left and bottom right corners of a frame.
+    _double_arrow(d, s, w, (s * 0.2, s * 0.2), (s * 0.8, s * 0.8))
+
+
+def icon_resize_nesw(d, s, w):
+    # Top right to bottom left: the other two corners.
+    _double_arrow(d, s, w, (s * 0.8, s * 0.2), (s * 0.2, s * 0.8))
+
+
+def icon_move(d, s, w):
+    # Four ways: a frame's title, which moves it.
+    _double_arrow(d, s, w, (s * 0.12, s * 0.5), (s * 0.88, s * 0.5))
+    _double_arrow(d, s, w, (s * 0.5, s * 0.12), (s * 0.5, s * 0.88))
+
+
+def _mouse(d, s, w, part):
+    # A computer mouse seen from above, its button lit: the footer's and the hint line's mouse buttons where ACE's pictures are not
+    # there (aio_gui_fnc_mouseIcon).
+    left, right, top, bottom, r = s * 0.27, s * 0.73, s * 0.08, s * 0.92, s * 0.23
+    body = (arc_points(left + r, top + r, r, 180, 270, 16) + arc_points(right - r, top + r, r, 270, 360, 16)
+            + arc_points(right - r, bottom - r, r, 0, 90, 16) + arc_points(left + r, bottom - r, r, 90, 180, 16))
+    line(d, body + [body[0]], w)
+    split = s * 0.42
+    line(d, [(left, split), (right, split)], w)
+    line(d, [(s * 0.5, top), (s * 0.5, split)], w)
+    if part in ("left", "right"):
+        # The button filled: its rounded corner, the middle line and the split.
+        if part == "left":
+            pts = arc_points(left + r, top + r, r, 180, 270, 16) + [(s * 0.5, top), (s * 0.5, split), (left, split)]
+        else:
+            pts = [(s * 0.5, top)] + arc_points(right - r, top + r, r, 270, 360, 16) + [(right, split), (s * 0.5, split)]
+        d.polygon(pts, fill=WHITE)
+    if part == "scroll":
+        line(d, [(s * 0.5, s * 0.16), (s * 0.5, s * 0.34)], w * 1.8)
+
+
+def icon_mouse_double(d, s, w):
+    # A double click: the mouse with its left button lit, a little to the right, and two short waves off the button's corner -
+    # one picture for the hint line where a double click does something of its own (aio_gui_fnc_mouseIcon "double").
+    shift = s * 0.1
+    # Shifted left so the mouse and its waves together sit in the middle of a key cap (Mia, 0.6.81).
+    left, right, top, bottom, r = s * 0.35, s * 0.77, s * 0.21, s * 0.93, s * 0.21
+    body = (arc_points(left + r, top + r, r, 180, 270, 16) + arc_points(right - r, top + r, r, 270, 360, 16)
+            + arc_points(right - r, bottom - r, r, 0, 90, 16) + arc_points(left + r, bottom - r, r, 90, 180, 16))
+    line(d, body + [body[0]], w)
+    split = s * 0.49
+    mid = s * 0.56
+    line(d, [(left, split), (right, split)], w)
+    line(d, [(mid, top), (mid, split)], w)
+    d.polygon(arc_points(left + r, top + r, r, 180, 270, 16) + [(mid, top), (mid, split), (left, split)], fill=WHITE)
+    for k in (1, 2):
+        rr = r + s * 0.075 * k
+        line(d, arc_points(left + r, top + r, rr, 195, 255, 12), w * 0.8)
+
+
+def icon_mouse_left(d, s, w):
+    _mouse(d, s, w, "left")
+
+
+def icon_mouse_right(d, s, w):
+    _mouse(d, s, w, "right")
+
+
+def icon_mouse_scroll(d, s, w):
+    _mouse(d, s, w, "scroll")
+
+
+def ui_separator(d, s, w):
+    # A thin upright line: the footer's hint line parts the double click from the rest with it, as the keys from the hint
+    # (aio_gui_fnc_updateHover).
+    line(d, [(s * 0.5, s * 0.2), (s * 0.5, s * 0.8)], w)
+
+
+def icon_target(d, s, w):
+    # A crosshair: the container a quick move goes into (the inventory's caption line).
+    line(d, arc_points(s * 0.5, s * 0.5, s * 0.3, 0, 360), w)
+    line(d, [(s * 0.5, s * 0.06), (s * 0.5, s * 0.32)], w)
+    line(d, [(s * 0.5, s * 0.68), (s * 0.5, s * 0.94)], w)
+    line(d, [(s * 0.06, s * 0.5), (s * 0.32, s * 0.5)], w)
+    line(d, [(s * 0.68, s * 0.5), (s * 0.94, s * 0.5)], w)
+
+
+def _layer_stack(d, s, w, front_up):
+    # Two sheets lying over each other, seen at a slant, and an arrow: one sheet to the front or to the back.
+    def sheet(dy):
+        line(d, [(s * 0.1, s * (0.5 + dy)), (s * 0.36, s * (0.39 + dy)), (s * 0.62, s * (0.5 + dy)), (s * 0.36, s * (0.61 + dy)),
+                 (s * 0.1, s * (0.5 + dy))], w)
+    sheet(0.17)
+    sheet(-0.13)
+    ax = s * 0.84
+    if front_up:
+        line(d, [(ax, s * 0.78), (ax, s * 0.22)], w)
+        line(d, [(ax - s * 0.1, s * 0.33), (ax, s * 0.22), (ax + s * 0.1, s * 0.33)], w)
+    else:
+        line(d, [(ax, s * 0.22), (ax, s * 0.78)], w)
+        line(d, [(ax - s * 0.1, s * 0.67), (ax, s * 0.78), (ax + s * 0.1, s * 0.67)], w)
+
+
+
+
+def icon_layer_up(d, s, w):
+    # Bring to the front: the layout editor's frames where they overlap.
+    _layer_stack(d, s, w, True)
+
+
+def icon_layer_down(d, s, w):
+    # Send to the back.
+    _layer_stack(d, s, w, False)
+
+
+def icon_hotbar(d, s, w):
+    # A strip of three slots with a key over the first: the hotbar. Its rows in the right-click menu.
+    line(d, [(s * 0.1, s * 0.42), (s * 0.9, s * 0.42), (s * 0.9, s * 0.76), (s * 0.1, s * 0.76), (s * 0.1, s * 0.42)], w)
+    line(d, [(s * 0.37, s * 0.42), (s * 0.37, s * 0.76)], w)
+    line(d, [(s * 0.63, s * 0.42), (s * 0.63, s * 0.76)], w)
+    line(d, [(s * 0.2, s * 0.22), (s * 0.27, s * 0.18), (s * 0.27, s * 0.32)], w)
+
+
+def icon_server(d, s, w):
+    # A rack of two servers, each with its light: the server's setup wizard in the header, beside the player's own cog.
+    for top in (0.2, 0.55):
+        line(d, [(s * 0.2, s * top), (s * 0.8, s * top), (s * 0.8, s * (top + 0.25)), (s * 0.2, s * (top + 0.25)), (s * 0.2, s * top)], w)
+        line(d, [(s * 0.32, s * (top + 0.125)), (s * 0.4, s * (top + 0.125))], w)
 
 
 def icon_weight(d, s, w):
@@ -1068,6 +1264,10 @@ def build_images():
         "corner_tr_ca": corner("tr"),
         "corner_bl_ca": corner("bl"),
         "corner_br_ca": corner("br"),
+        "mask_tl_ca": corner_mask("tl"),
+        "mask_tr_ca": corner_mask("tr"),
+        "mask_bl_ca": corner_mask("bl"),
+        "mask_br_ca": corner_mask("br"),
         "ring_tl_ca": ring_corner("tl"),
         "ring_tr_ca": ring_corner("tr"),
         "ring_bl_ca": ring_corner("bl"),
@@ -1093,6 +1293,24 @@ def build_images():
         "icon_sound_off_ca": stroke_icon(icon_sound_off),
         "icon_style_ca": stroke_icon(icon_style),
         "icon_palette_ca": stroke_icon(icon_palette),
+        "icon_size_ca": stroke_icon(icon_size),
+        "icon_server_ca": stroke_icon(icon_server),
+        "icon_attachments_ca": stroke_icon(icon_attachments, width=8),
+        "icon_magazine_ca": stroke_icon(icon_magazine),
+        "icon_resize_h_ca": stroke_icon(icon_resize_h),
+        "icon_resize_v_ca": stroke_icon(icon_resize_v),
+        "icon_resize_nwse_ca": stroke_icon(icon_resize_nwse),
+        "icon_resize_nesw_ca": stroke_icon(icon_resize_nesw),
+        "icon_move_ca": stroke_icon(icon_move),
+        "icon_target_ca": stroke_icon(icon_target),
+        "ui_separator_ca": stroke_icon(ui_separator, width=5),
+        "icon_mouse_left_ca": stroke_icon(icon_mouse_left, width=8),
+        "icon_mouse_right_ca": stroke_icon(icon_mouse_right, width=8),
+        "icon_mouse_scroll_ca": stroke_icon(icon_mouse_scroll, width=8),
+        "icon_mouse_double_ca": stroke_icon(icon_mouse_double, width=8),
+        "icon_hotbar_ca": stroke_icon(icon_hotbar, width=8),
+        "icon_layer_up_ca": stroke_icon(icon_layer_up, width=8),
+        "icon_layer_down_ca": stroke_icon(icon_layer_down, width=8),
         "icon_weight_ca": stroke_icon(icon_weight),
         # The setup wizard: its cog in the inventory's header and in Eden's Tools menu, and its controls.
         "icon_setup_ca": stroke_icon(icon_setup),

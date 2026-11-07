@@ -38,7 +38,24 @@ workshop = [
     "843577117", #RHS
     "1376867375", # ACE Interaction Menu Expansion (AIME), for the compat_aime addon
     "3401580668", # Mavic 3 - Improved, for the compat_mavic addon
+    "3475006113", # Ukraine FPV Drone, for the compat_fpv addon
     "2976569274", # WebKnight's Two Primary Weapons, for the compat_wbk_twoprimary addon
+    # "2893363164", # KJW's Two Primary Weapons, for the compat_kjw_twoprimary addon (instead of WebKnight's, not with it)
+]
+
+# With GreenMag Rework, for the compat_greenmag addon - built locally, not on the Workshop: its last `hemtt dev` (run there
+# after a change), loaded by a second -mod parameter. The dev output, not `hemtt build`: with file patching Arma also reads
+# GreenMag's loose files through the link `hemtt dev` makes (Arma 3\z\gmr), and a build of another state did not match them
+# ("fnc_clipsOf.sqf not found"). The path is the GreenMag-Rework checkout next to this one on the author's machine.
+#
+#   hemtt launch greenmag
+[hemtt.launch.greenmag]
+extends = "default"
+workshop = [
+    "2372036642", # BackpackOnChest - Redux, for the compat_boc addon (the original, 820924072, downloads empty here)
+]
+parameters = [
+    "-mod=\"C:\\Users\\Heda\\GitHub Repos\\GreenMag-Rework\\.hemttout\\dev\"", # quoted as HEMTT quotes its own -mod
 ]
 
 # A test scene for the inventory (.hemtt/missions/AIO_Test.VR): a soldier with full gear, a crate, an

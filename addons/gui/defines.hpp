@@ -107,6 +107,10 @@
 // in seconds (XEH_postInit, fnc_guardVanilla).
 #define GUARD_INTERVAL 0.25
 
+// How often the soldiers the player leads are given the inventory handler, in seconds (XEH_postInit,
+// fnc_isSubordinate): one who joined the group since gets it at the next look.
+#define SUBORDINATE_INTERVAL 2
+
 // How many frames fnc_open waits for a vanilla inventory to go before it makes the window: made while
 // one is open, the window would be its child dialog and close with it (fnc_guardVanilla).
 #define OPEN_TRIES 10
@@ -299,6 +303,17 @@
 // getTextWidth reports less than the engine draws: every measured text gets this much more room.
 #define TEXT_SLACK 1.3
 
+// The upright lines between the footer's hints: all one length, centred on the bar (Mia, 0.6.95).
+#define FOOT_LINE_H 0.32
+#define FOOT_LINE_TOP 0.34
+
+// The hint line's shake when something failed (fnc_flashHint): seconds, how far to each side, shakes per second.
+#define HINT_SHAKE_TIME 0.4
+#define HINT_SHAKE_WIDTH (UNIT * 0.22)
+#define HINT_SHAKE_RATE 14
+// The footer hint's words a little lower than their box's middle, on the line of the key hints' words (Mia, 0.6.102: higher than them).
+#define HINT_DROP 0.02
+
 // One turn of the mouse wheel scrolls a column this far when a picture's clip group has taken the turn from it
 // (fnc_passWheel): about the three rows the engine's own step comes to.
 #define WHEEL_STEP (UNIT * 3)
@@ -327,6 +342,14 @@
 // How far the mouse has to move with the button held before a press on a tile becomes a drag, and how
 // faint the tile it was lifted from stays while it is dragged.
 #define DRAG_THRESHOLD 0.008
+
+// A weapon card's header held this long, in seconds, lifts the card to move it (fnc_cardGrip); let go sooner, the press
+// is a click that folds or opens the card. Its bar shows only after CARD_HOLD_DELAY, so a plain click never flashes it, and
+// fills from there to CARD_HOLD_TIME. The mouse may wander CARD_HOLD_SLACK meanwhile - a hand holding still is not quite
+// still.
+#define CARD_HOLD_TIME 2
+#define CARD_HOLD_DELAY 1
+#define CARD_HOLD_SLACK (DRAG_THRESHOLD * 2)
 
 // The slots whose gear may be exchanged with a body or a person (fnc_canSwap, fnc_doSwap): what one wears,
 // never a weapon - the engine does not hand a body one.
@@ -428,6 +451,11 @@
 // them, and they match the game's items better than anything drawn for this mod.
 #define GEAR_ICON(NAME) QUOTE(\A3\ui_f\data\GUI\Rsc\RscDisplayGear\NAME.paa)
 
+// An attachment's mark on a weapon's picture (fnc_drawAttachments): the weapon's own shape for the slot, at most this share of the
+// picture's size, in this colour.
+#define ATTACHMENT_MARK 0.18
+#define ATTACHMENT_MARK_COLOR [1, 1, 1, 0.9]
+
 // What the config classes start with. Every control gets its real colours from the theme.
 #define C_CLEAR         {0, 0, 0, 0}
 #define C_WHITE         {1, 1, 1, 1}
@@ -467,7 +495,12 @@
 #define CONTENT_X (safezoneX + MARGIN_X)
 #define CONTENT_W (safezoneW - MARGIN_X * 2)
 #define CONTENT_Y (safezoneY + UNIT * 3)
-#define CONTENT_B (safezoneY + safezoneH - UNIT * 2.6)
+// Without the footer (aio_gui_showFooter, the literal name as this is included by other addons as well) the columns take its room.
+#define CONTENT_B (safezoneY + safezoneH - UNIT * ([0.6, 2.6] select (missionNamespace getVariable ["aio_gui_showFooter", true])))
+#define COLUMN_ORDER_DEFAULT "equipment,free,loot,storage"
+
+// The parts of the equipment column that can be placed on their own in the edit mode (fnc_columnRects, fnc_drawEquipmentCards).
+#define EQUIPMENT_PARTS ["weight", "weapons", "gear", "hotbar"]
 #define CONTENT_H (CONTENT_B - CONTENT_Y)
 
 #define FOOT_Y (safezoneY + safezoneH - UNIT * 2)
@@ -510,6 +543,24 @@
 #define TEXT_SCALE (call aio_gui_fnc_textScale)
 #define TEXT_UNIT (UNIT * TEXT_SCALE)
 
+// The player's text size (aio_gui_textSize) on top of that: a share of the words the tiles give, for a player who wants
+// smaller tiles with words still easy to read, or the other way round (a Steam user, 0.6.32: the words nearly unreadable,
+// the window too big). TEXT_MIN_PX stays the floor whatever it says.
+#define TEXT_SIZE_MIN 0.8
+// The most of a slot's height one line of its words takes (fnc_drawSlot): a small box keeps its words inside however large
+// the tile and text sizes make them.
+#define SLOT_LINE_MAX 0.3
+#define TEXT_SIZE_MAX 1.4
+
+// The defaults of the three sizes the size popover sets (fnc_openSizeMenu) - the CBA settings' own (initSettings.inc.sqf), and
+// what its Default button takes them back to.
+#define CELL_SCALE_DEFAULT 1.1
+#define TEXT_SIZE_DEFAULT 1
+#define PAGE_ROWS_DEFAULT 10
+
+// The tile and text sliders of the size popover (fnc_sizeSlide) move in steps of SIZE_STEP; the rows per page in whole rows.
+#define SIZE_STEP 0.05
+
 // The room between two compartments of a container, a share of a cell rounded to whole pixels: between
 // blocks that flow side by side or one under another (fnc_flowCompartments).
 #define COMPARTMENT_GAP 0.22
@@ -531,20 +582,63 @@
 #define COMPARTMENT_PAD_PX(CELLW) ((round ((CELLW) * COMPARTMENT_PAD / pixelW)) max 1)
 
 
-// The inspect card's 3D view (fnc_inspect3D): the render target its camera films into, shown in the card's picture box as
-// #(argb,W,H,1)r2t(INSPECT_3D_TARGET,2.0) at INSPECT_3D_RES - twice the pixels the box has on a 4K screen, so the
-// item is drawn smooth, its edges sampled down; the camera's field of view; where the scene stands, far off any map, high
-// above the sea (its dark sphere would show in the sky of anyone near); the size every item is framed by at most, in metres -
-// the boxes of many mods' models are blown up by their hit geometry - and the distance per metre of it.
+// The inspect card's 3D view (fnc_inspect3D): the render target its camera films into, shown in the card's picture box; the
+// camera's field of view; where the scene stands, far off any map, high above the sea (its dark sphere would show in the sky
+// of anyone near); the size every item is framed by at most, in metres - the boxes of many mods' models are blown up by their
+// hit geometry - and the distance per metre of it.
+//
+// The texture's shape and size. The engine films a render target with the screen's shape whatever the texture string asks
+// (its aspect is ignored). So the picture control has the screen's shape (INSPECT_3D_ASPECT), covers the box - taller on a
+// screen up to 2:1, wider on a wider one - and the box shows its middle, cut to the box by a group: nothing stretched. The
+// texture's sides must be powers of two: the engine refuses any other size ("Cannot load texture", 0.6.51's 1840x1034 left
+// the view empty). Its width is the next power of two over INSPECT_3D_SUPER times the picture's pixels, at most
+// INSPECT_3D_MAX_RES; its height the power of two nearest the screen's shape - 2048x1024 on most screens. Each size films
+// into a target of its own name, INSPECT_3D_TARGET and the size, so a target made at one size never shows in a box of another.
 #define INSPECT_3D_TARGET "aio_inspect3d"
-#define INSPECT_3D_RES [2048, 1024]
+
+// The weapon cards' real pictures (fnc_cardScene, fnc_drawEquipmentCards): the target's name before the slot and size, the largest
+// texture (a card is small - kept low, one camera films per weapon all the time), and how much farther than the inspect card's 3D
+// view the camera stands for the frame - side on, a long weapon fills the card's width.
+#define CARD_3D_TARGET "aio_card3d"
+#define CARD_3D_MAX_RES 1024
+#define CARD_3D_DISTANCE 0.95
+// How much of what the card shows the weapon fills, across or up and down - whichever it reaches first.
+#define CARD_3D_ROOM 0.9
+// A weapon's height side on, at most this share of its length: its box is taller than its profile (the MX came out a fifth of its
+// card, Mia 0.6.91).
+#define CARD_3D_PROFILE 0.42
+// A handgun is taller for its length: grip and magazine.
+#define CARD_3D_PROFILE_HANDGUN 0.9
+// How far below its box's middle a handgun is aimed at, in metres.
+#define CARD_3D_HANDGUN_DROP 0.035
+// How many frames a weapon is filmed before its picture is kept as a still and the scene goes.
+#define CARD_3D_STILL_FRAMES 6
+// The scene's lights against the inspect card's.
+#define CARD_3D_LIGHT 0.15
+// The grey of the sphere round a weapon (0 to 1).
+#define CARD_3D_BACKDROP 0.04
+#define INSPECT_3D_ASPECT (getResolution select 4)
+#define INSPECT_3D_SUPER 2
+#define INSPECT_3D_MAX_RES 2048
 #define INSPECT_3D_FOV 0.35
+
+// While a 3D view is open the Picture-in-Picture view distance is this (setPiPViewDistance, the engine takes 100 at least): the
+// scene stands in its sphere, and the world round it costs only frames. Far enough for the sphere's far wall - some 225 m from
+// the holder, which stands 100 m off its middle - so the dark round stays and no fog shows through; the ground lies 400 m
+// below. Given back when it closes.
+#define INSPECT_3D_PIP_DISTANCE 300
+
+// The Attachments view starts side on, as Tarkov's weapon builds and Reforger's inspection show a weapon: the muzzle to the
+// right, a little from above (INSPECT_3D_SIDE_PITCH, degrees), and it tilts up or down at most INSPECT_3D_SIDE_TILT - so the
+// parts round it stay readable.
+#define INSPECT_3D_SIDE_PITCH 8
+#define INSPECT_3D_SIDE_TILT 30
 #define INSPECT_3D_PLACE [-2048, -2048]
 #define INSPECT_3D_FRAME 1.2
 #define INSPECT_3D_DISTANCE 0.7
 
 // A worn uniform stands as tall as a soldier: its frame is its height times this, so all of it fits the box's height.
-#define INSPECT_3D_TALL 2.3
+#define INSPECT_3D_TALL 2.6
 
 // How far the 3D view's item turns for a drag across the whole screen, in degrees: round, and up or down.
 #define INSPECT_3D_TURN_ACROSS 200

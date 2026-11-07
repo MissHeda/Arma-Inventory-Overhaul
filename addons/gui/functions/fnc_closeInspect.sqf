@@ -30,5 +30,6 @@ GVAR(inspectMove) = [];
 ctrlDelete (uiNamespace getVariable [QGVAR(inspectGroup), controlNull]);
 uiNamespace setVariable [QGVAR(inspectGroup), controlNull];
 uiNamespace setVariable [QGVAR(inspectRect), []];
+uiNamespace setVariable [QGVAR(hotspots), []];
 
 _open

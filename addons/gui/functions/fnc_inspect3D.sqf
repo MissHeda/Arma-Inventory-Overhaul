@@ -15,18 +15,32 @@
  * frame is the item's size, at most INSPECT_3D_FRAME. The lights shine by day too; the aperture is left to the engine - set,
  * it lit or darkened the whole world behind the window as well.
  *
- * The state is GVAR(scene3D): the class and attachments it shows, the camera, the lights, every object made, the target
- * [ASL], the turn (dir, pitch), the distance and its limits.
+ * The state is GVAR(scene3D): the class and attachments it shows, the camera and where it stands, the render target it films
+ * into, the lights, every object made, the target [ASL], the turn (dir, pitch), the distance and its limits - and for the
+ * modding view where the weapon's parts sit (fnc_weaponPoints). Started again for the same weapon with other parts, only the
+ * holder is fitted out anew: the view stays as it was turned.
+ *
+ * The Attachments view ("side") starts side on, as Tarkov's weapon builds and Reforger's inspection show a weapon: once the
+ * weapon's muzzle is known (fnc_placeHotspots asks "face"), the camera stands square to the barrel with the muzzle to the right,
+ * and it tilts at most INSPECT_3D_SIDE_TILT. A part the player points at in its list is shown on the weapon for as long as
+ * the mouse is on it ("preview", as Tarkov does) - only on the holder, nothing is moved.
+ *
+ * While a scene stands, the Picture-in-Picture view distance is INSPECT_3D_PIP_DISTANCE, the player's own given back with
+ * "stop".
  *
  * Arguments:
  * 0: What to do <STRING>
- *    "start"   the scene for the item, unless it stands for it already - the one before goes (arguments: [class, attachments])
+ *    "start"   the scene for the item, unless it stands for it already - the one before goes (arguments: [class, attachments,
+ *              render target, side on]); standing, it only films into the target it is given now
  *    "stop"    the scene goes: camera, lights, objects
  *    "turn"    the camera goes round by how far the mouse moved, a share of the screen (arguments: [across, down])
  *    "zoom"    nearer for a turn of the wheel up, farther for one down (arguments: [turn])
  *    "pan"     the camera and what it looks at move across and up or down, as the middle mouse button drags them - the item
  *              moves with the mouse, at most its frame away from where it was (arguments: [across, down])
  *    "reset"   the view the scene started with
+ *    "face"    side on to the barrel, the muzzle to the right - the start of the Attachments view (arguments: [muzzle ASL])
+ *    "preview" the holder with one part changed, for a look; [] puts back what the scene shows (arguments: [[index in the
+ *              attachments, value] or [], the tile that asks - a put back from another tile is ignored])
  * 1: Arguments <ARRAY> (default: [])
  *
  * Return Value:
@@ -61,6 +75,9 @@ private _fnc_camera = {
     _camera camSetFov INSPECT_3D_FOV;
     _camera camCommit 0;
 
+    // Where it films from, for the modding view's points (fnc_placeHotspots).
+    _scene set ["cameraPos", _cameraPos];
+
     (_scene get "lights") params ["_key", "_fill", "_rim"];
 
     private _side = [cos _dir, -(sin _dir), 0];
@@ -71,21 +88,102 @@ private _fnc_camera = {
     _rim setPosASL ((_target vectorAdd ((_target vectorDiff _cameraPos) vectorMultiply 0.8)) vectorAdd [0, 0, 0.5 * _distance]);
 };
 
+// A weapon as the holder takes it, [class, muzzle, pointer, optic, magazine, magazine, bipod]: with what it carries, else as its
+// config fits it out - a magazine full: some belt-fed weapons show their box by the rounds.
+private _fnc_fitOut = {
+    params ["_class", "_attachments"];
+
+    private _itemConfig = configFile >> "CfgWeapons" >> _class;
+
+    _attachments params ["", ["_muzzle", ""], ["_pointer", ""], ["_optic", ""], ["_magazine", []], ["_magazine2", []], ["_bipod", ""]];
+
+    if (_attachments isEqualTo []) then {
+        private _linked = _itemConfig >> "LinkedItems";
+
+        _muzzle = getText (_linked >> "LinkedItemsMuzzle" >> "item");
+        _pointer = getText (_linked >> "LinkedItemsAcc" >> "item");
+        _optic = getText (_linked >> "LinkedItemsOptic" >> "item");
+        _bipod = getText (_linked >> "LinkedItemsUnder" >> "item");
+
+        private _magazines = getArray (_itemConfig >> "magazines");
+
+        if (_magazines isNotEqualTo []) then {
+            private _first = _magazines select 0;
+            _magazine = [_first, (getNumber (configFile >> "CfgMagazines" >> _first >> "count")) max 1];
+        };
+    };
+
+    if !(_magazine isEqualType [] && {count _magazine >= 2} && {(_magazine param [0, ""]) isNotEqualTo ""}) then {_magazine = []};
+    if !(_magazine2 isEqualType [] && {count _magazine2 >= 2} && {(_magazine2 param [0, ""]) isNotEqualTo ""}) then {_magazine2 = []};
+
+    [_class, _muzzle, _pointer, _optic, _magazine, _magazine2, _bipod]
+};
+
+// The holder fitted out anew with these parts - the same weapon (fnc_fitOut's format).
+private _fnc_refit = {
+    params ["_parts"];
+
+    private _holder = (_scene get "objects") param [1, objNull];
+
+    if (isNull _holder) exitWith {};
+
+    clearWeaponCargo _holder;
+    clearMagazineCargo _holder;
+    _holder addWeaponWithAttachmentsCargo [[_scene get "class", _parts] call _fnc_fitOut, 1];
+};
+
 switch (_mode) do {
     case "start": {
-        _arguments params [["_class", "", [""]], ["_attachments", [], [[]]]];
+        _arguments params [["_class", "", [""]], ["_attachments", [], [[]]], ["_target3D", INSPECT_3D_TARGET, [""]], ["_side", false, [false]]];
 
         if (_class isEqualTo "") exitWith {};
 
-        if (
-            (_scene getOrDefault ["class", ""]) isEqualTo _class && {(_scene getOrDefault ["attachments", []]) isEqualTo _attachments}
-            && {!isNull (_scene getOrDefault ["camera", objNull])}
-        ) exitWith {};
+        private _running = (_scene getOrDefault ["class", ""]) isEqualTo _class && {!isNull (_scene getOrDefault ["camera", objNull])};
+
+        // A card of another size shows another target: the camera films into that one now.
+        if (_running && {(_scene getOrDefault ["target3D", ""]) isNotEqualTo _target3D}) then {
+            private _camera = _scene get "camera";
+
+            _camera cameraEffect ["Terminate", "Back", _scene get "target3D"];
+            _camera cameraEffect ["Internal", "Back", _target3D];
+            _scene set ["target3D", _target3D];
+        };
+
+        // Inspect and Attachments of the same weapon share the scene: from one to the other, the view starts as that card's does.
+        if (_running && {(_scene getOrDefault ["side", false]) isNotEqualTo _side}) then {
+            private _pitch = [15, INSPECT_3D_SIDE_PITCH] select _side;
+
+            _scene set ["side", _side];
+            _scene set ["facing", _side];
+            _scene set ["dir", 45];
+            _scene set ["pitch", _pitch];
+            _scene set ["startDir", 45];
+            _scene set ["startPitch", _pitch];
+
+            call _fnc_camera;
+        };
+
+        if (_running && {(_scene getOrDefault ["attachments", []]) isEqualTo _attachments}) exitWith {};
+
+        // The same weapon on the holder with other parts - one put on or taken off in the modding view (fnc_drawHotspots): only
+        // what lies on the holder changes, the view stays as the player turned it.
+        if (_running && {_scene getOrDefault ["onHolder", false]}) exitWith {
+            [_attachments] call _fnc_refit;
+            _scene set ["attachments", +_attachments];
+            _scene set ["previewing", false];
+        };
 
         ["stop"] call FUNC(inspect3D);
 
-        _scene = createHashMapFromArray [["class", _class], ["attachments", +_attachments]];
+        _scene = createHashMapFromArray [["class", _class], ["attachments", +_attachments], ["target3D", _target3D], ["side", _side]];
         GVAR(scene3D) = _scene;
+
+        // The world round the scene is not looked at: the least view distance the engine takes for it, the player's own kept.
+        if (isNil QGVAR(pipDistance)) then {
+            GVAR(pipDistance) = getPiPViewDistance;
+        };
+
+        setPiPViewDistance INSPECT_3D_PIP_DISTANCE;
 
         private _objects = [];
         _scene set ["objects", _objects];
@@ -116,28 +214,8 @@ switch (_mode) do {
         // as it does backpacks, glasses and magazines.
         private _holderTakes = _isWeapon || {isClass _itemConfig && {!(_class isKindOf ["Binocular", _weapons])}};
 
-        // A weapon with what it carries, else as its config fits it out - a magazine full: some belt-fed weapons show
-        // their box by the rounds.
-        _attachments params ["", ["_muzzle", ""], ["_pointer", ""], ["_optic", ""], ["_magazine", []], ["_magazine2", []], ["_bipod", ""]];
-
-        if (_attachments isEqualTo []) then {
-            private _linked = _itemConfig >> "LinkedItems";
-
-            _muzzle = getText (_linked >> "LinkedItemsMuzzle" >> "item");
-            _pointer = getText (_linked >> "LinkedItemsAcc" >> "item");
-            _optic = getText (_linked >> "LinkedItemsOptic" >> "item");
-            _bipod = getText (_linked >> "LinkedItemsUnder" >> "item");
-
-            private _magazines = getArray (_itemConfig >> "magazines");
-
-            if (_magazines isNotEqualTo []) then {
-                private _first = _magazines select 0;
-                _magazine = [_first, (getNumber (configFile >> "CfgMagazines" >> _first >> "count")) max 1];
-            };
-        };
-
-        if (count _magazine < 2 || {(_magazine param [0, ""]) isEqualTo ""}) then {_magazine = []};
-        if (count _magazine2 < 2 || {(_magazine2 param [0, ""]) isEqualTo ""}) then {_magazine2 = []};
+        // A weapon with what it carries, else as its config fits it out.
+        ([_class, _attachments] call _fnc_fitOut) params ["", "_muzzle", "_pointer", "_optic", "_magazine", "_magazine2", "_bipod"];
 
         // The model, where the class lives - a magazine's real one rather than the box it lies on the ground as (fnc_itemModel).
         private _model = [_class] call FUNC(itemModel);
@@ -202,6 +280,7 @@ switch (_mode) do {
 
                 if (_onHolder) then {
                     _holder addWeaponWithAttachmentsCargo [[_class, _muzzle, _pointer, _optic, _magazine, _magazine2, _bipod], 1];
+                    _scene set ["onHolder", true];
 
                     private _base = [[0.25, 0] select _isWeapon] call _fnc_base;
 
@@ -268,15 +347,21 @@ switch (_mode) do {
         // A little above the item, from the front left; near enough for its size.
         private _distance = ((_frame * INSPECT_3D_DISTANCE) max 0.25) min 6;
 
+        // Side on comes once the muzzle is known ("face"): until then, and for everything but the Attachments view, the front left.
+        private _pitch = [15, INSPECT_3D_SIDE_PITCH] select _side;
+
         _scene set ["dir", 45];
-        _scene set ["pitch", 15];
+        _scene set ["pitch", _pitch];
+        _scene set ["startDir", 45];
+        _scene set ["startPitch", _pitch];
+        _scene set ["facing", _side];
         _scene set ["distance", _distance];
         _scene set ["start", _distance];
         _scene set ["near", _distance * 0.3];
         _scene set ["far", _distance * 3];
 
         private _camera = "camera" camCreate (ASLToAGL _target);
-        _camera cameraEffect ["Internal", "Back", INSPECT_3D_TARGET];
+        _camera cameraEffect ["Internal", "Back", _target3D];
         _camera camSetFocus [-1, -1];
         _scene set ["camera", _camera];
 
@@ -289,8 +374,13 @@ switch (_mode) do {
 
         // Destroying a camera does not end what it films into.
         if (!isNull _camera) then {
-            _camera cameraEffect ["Terminate", "Back", INSPECT_3D_TARGET];
+            _camera cameraEffect ["Terminate", "Back", _scene getOrDefault ["target3D", INSPECT_3D_TARGET]];
             camDestroy _camera;
+        };
+
+        if (!isNil QGVAR(pipDistance)) then {
+            setPiPViewDistance GVAR(pipDistance);
+            GVAR(pipDistance) = nil;
         };
 
         {
@@ -310,7 +400,10 @@ switch (_mode) do {
 
         // The item follows the mouse: dragged to the right, its front turns to the right.
         _scene set ["dir", (_scene get "dir") + _across * INSPECT_3D_TURN_ACROSS];
-        _scene set ["pitch", (((_scene get "pitch") + _down * INSPECT_3D_TURN_DOWN) max -80) min 80];
+        // Side on, it tilts only so far that the parts round it stay readable.
+        private _tilt = [80, INSPECT_3D_SIDE_TILT] select (_scene getOrDefault ["side", false]);
+
+        _scene set ["pitch", (((_scene get "pitch") + _down * INSPECT_3D_TURN_DOWN) max -_tilt) min _tilt];
 
         call _fnc_camera;
     };
@@ -357,10 +450,65 @@ switch (_mode) do {
         if (count _scene == 0) exitWith {};
 
         _scene set ["target", +(_scene get "origin")];
-        _scene set ["dir", 45];
-        _scene set ["pitch", 15];
+        _scene set ["dir", _scene getOrDefault ["startDir", 45]];
+        _scene set ["pitch", _scene getOrDefault ["startPitch", 15]];
         _scene set ["distance", _scene get "start"];
 
         call _fnc_camera;
+    };
+    case "face": {
+        if (count _scene == 0 || {!(_scene getOrDefault ["facing", false])}) exitWith {};
+
+        _arguments params [["_muzzle", [], [[]]]];
+
+        // Asked once: whatever comes of it, the view is the player's to turn from here.
+        _scene set ["facing", false];
+
+        if (count _muzzle != 3) exitWith {};
+
+        // The barrel, level: from the weapon's base to its muzzle.
+        private _barrel = _muzzle vectorDiff (_scene get "origin");
+        _barrel set [2, 0];
+
+        // Too short to tell - a model whose muzzle sits at its base: the front left stays.
+        if (vectorMagnitude _barrel < 0.05) exitWith {};
+
+        _barrel = vectorNormalized _barrel;
+
+        // The camera looks along -[sin dir, cos dir]; its right is [-cos dir, sin dir]. The barrel to the right:
+        // sin dir = barrel y, cos dir = -barrel x.
+        private _dir = (_barrel select 1) atan2 -(_barrel select 0);
+
+        _scene set ["dir", _dir];
+        _scene set ["startDir", _dir];
+
+        call _fnc_camera;
+    };
+    case "preview": {
+        if (count _scene == 0 || {!(_scene getOrDefault ["onHolder", false])}) exitWith {};
+
+        _arguments params [["_change", [], [[]]], ["_from", controlNull, [controlNull]]];
+
+        // Put back: only when something else was shown, and only by the tile that showed it - the mouse may come onto the next
+        // tile before it is heard leaving this one.
+        if (_change isEqualTo []) exitWith {
+            if (!(_scene getOrDefault ["previewing", false])) exitWith {};
+            if (!isNull _from && {_from isNotEqualTo (_scene getOrDefault ["previewBy", controlNull])}) exitWith {};
+
+            _scene set ["previewing", false];
+            [_scene get "attachments"] call _fnc_refit;
+        };
+
+        // [index, value]: the part put into what the scene shows now, not into what it showed when the tiles were made.
+        _change params [["_index", -1, [0]], ["_value", ""]];
+
+        private _parts = +(_scene getOrDefault ["attachments", []]);
+
+        if (count _parts < 7 || {_index < 1}) exitWith {};
+
+        _parts set [_index, _value];
+        _scene set ["previewing", true];
+        _scene set ["previewBy", _from];
+        [_parts] call _fnc_refit;
     };
 };

@@ -60,6 +60,10 @@ disableSerialization;
 
 params ["_display"];
 
+// The card grows with Arma's interface size, as far as the screen has room (fnc_cardScale): every size on it is _cu, not UNIT.
+private _scale = ["palette"] call FUNC(cardScale);
+private _cu = UNIT * _scale;
+
 // The server switched the palette off while it was open: it closes.
 if !([] call FUNC(paletteAllowed)) exitWith {
     [] call FUNC(closeMenu);
@@ -181,38 +185,41 @@ private _fieldDefs = [
 
 // ----- Sizes -----
 
-private _size = UNIT * 0.55;
-private _small = UNIT * 0.5;
-private _titleH = UNIT * 1.1;
-private _headH = UNIT * 0.95;
-private _rowH = UNIT * 0.8;
-private _gapY = UNIT * 0.1;
-private _sectionH = UNIT * 0.72;
-private _padX = SQUARE(UNIT * 0.6);
-private _padY = UNIT * 0.35;
-private _gapX = SQUARE(UNIT * 0.45);
-private _width = SQUARE(UNIT * 15.5);
+private _size = _cu * 0.55;
+private _small = _cu * 0.5;
+private _titleH = _cu * 1.1;
+private _headH = _cu * 0.95;
+private _rowH = _cu * 0.8;
+private _gapY = _cu * 0.1;
+private _sectionH = _cu * 0.72;
+private _padX = SQUARE(_cu * 0.6);
+private _padY = _cu * 0.35;
+private _gapX = SQUARE(_cu * 0.45);
+private _width = SQUARE(_cu * 15.5);
 
 // The picker under the open colour's row: the square and the strip as tall as the four fields are together.
-private _pickH = UNIT * 5.4;
+private _pickH = _cu * 5.4;
 private _pickW = SQUARE(_pickH);
-private _stripW = SQUARE(UNIT * 0.8);
-private _pickGap = SQUARE(UNIT * 0.55);
-private _pickPad = UNIT * 0.3;
-private _knobH = UNIT * 0.8;
+private _stripW = SQUARE(_cu * 0.8);
+private _pickGap = SQUARE(_cu * 0.55);
+private _pickPad = _cu * 0.3;
+private _knobH = _cu * 0.8;
 private _knobW = SQUARE(_knobH);
-private _fieldH = UNIT * 1.2;
+private _fieldH = _cu * 1.2;
 private _fieldSize = _fieldH * 0.48;
-private _fieldPadX = SQUARE(UNIT * 0.3);
-private _fieldLabelW = SQUARE(UNIT * 1.4);
+private _fieldPadX = SQUARE(_cu * 0.3);
+private _fieldLabelW = SQUARE(_cu * 1.4);
 
 // The title, the Style row (and its list), every row folded, and what the open row shows: its picker, its sliders, its note.
 private _height = _padY * 2 + _titleH + (_gapY + _headH) + (count _rowDefs) * (_gapY + _headH) + (count _sectionHeads) * (_gapY + _sectionH);
 
+// The Font row under the Style row.
+_height = _height + _gapY + _headH;
+
 // The hint line at the bottom: the tip of what the mouse is on, inside the panel (a tip floating over it would lie under the
 // panel, which is drawn over everything while it holds the focus). As many lines as the longest tip the panel has wraps to -
 // two cut the Titles row's tip off in the middle of a sentence.
-private _hintSize = _small * 0.9;
+private _hintSize = _size * 0.9;
 private _hintW = _width - _padX * 2;
 private _hintLines = 2;
 
@@ -231,7 +238,7 @@ private _hintLines = 2;
     LLSTRING(Palette_Channel_Tip), LLSTRING(Palette_Hex_Tip)
 ]);
 
-private _hintH = _hintSize * 1.3 * (_hintLines min 5) + _hintSize * 0.4;
+private _hintH = _hintSize * 1.3 * (_hintLines min 6) + _hintSize * 0.4;
 
 _height = _height + _gapY + _hintH;
 
@@ -274,23 +281,23 @@ if (_openDef isNotEqualTo []) then {
 };
 
 // Left to right in a row: padding, arrow, name, swatch, then the button at the right edge.
-private _arrowH = UNIT * 0.5;
+private _arrowH = _cu * 0.5;
 private _arrowW = SQUARE(_arrowH);
-private _nameX = _padX + _arrowW + SQUARE(UNIT * 0.3);
-private _nameW = SQUARE(UNIT * 4.8);
-private _swatchH = UNIT * 0.7;
-private _swatchW = SQUARE(UNIT * 1.4);
+private _nameX = _padX + _arrowW + SQUARE(_cu * 0.3);
+private _nameW = SQUARE(_cu * 4.8);
+private _swatchH = _cu * 0.7;
+private _swatchW = SQUARE(_cu * 1.4);
 private _swatchX = _nameX + _nameW;
-private _chipH = UNIT * 0.8;
-private _chipSize = UNIT * 0.44;
+private _chipH = _cu * 0.8;
+private _chipSize = _cu * 0.44;
 
 // Left to right in a slider's row: padding, name, gap, slider, gap, value, padding.
-private _labelW = SQUARE(UNIT * 3.2);
+private _labelW = SQUARE(_cu * 3.2);
 private _sliderX = _padX + _labelW + _gapX;
-private _valueW = SQUARE(UNIT * 1.6);
+private _valueW = SQUARE(_cu * 1.6);
 private _sliderW = _width - _padX - _valueW - _gapX - _sliderX;
-private _trackH = UNIT * 0.26;
-private _thumbH = UNIT * 0.55;
+private _trackH = _cu * 0.26;
+private _thumbH = _cu * 0.55;
 private _thumbW = SQUARE(_thumbH);
 
 // The track runs between the knob's middle at 0 and at full: the knob stays inside the slider's room at both ends.
@@ -298,6 +305,15 @@ private _trackX = _sliderX + _thumbW / 2;
 private _trackW = _sliderW - _thumbW;
 
 // The right edge of the window - the header's, where the Close button ends - and a small gap under the header's line, kept on the screen.
+// The tabs on top, Colours and Layout (fnc_drawDesignTabs): one more line on the card.
+private _tabsH = _cu * 1.1;
+_height = _height + _tabsH;
+
+// Taller or wider than the screen at this scale: made again next frame at the scale that fits (fnc_cardScale keeps it).
+if (["palette", _height, _width, _scale] call FUNC(cardScale)) then {
+    [{[uiNamespace getVariable [QGVAR(display), displayNull], "colours"] call FUNC(openDesignMenu)}] call FUNC(later);
+};
+
 private _left = ((CONTENT_X + CONTENT_W - _width) min (safezoneX + safezoneW - _width)) max safezoneX;
 private _top = (((HEAD_Y + HEAD_H + UNIT * 0.5) max (safezoneY + UNIT * 2.6 + pixelH * 3)) min (safezoneY + safezoneH - _height)) max safezoneY;
 private _cardX = _left - safezoneX;
@@ -329,8 +345,15 @@ _catcher ctrlAddEventHandler ["ButtonClick", {[{[] call FUNC(closeMenu)}] call F
 ] call FUNC(uiPanel);
 
 // A click on the card between its controls is no click beside it: this takes it, and does nothing (the catcher above closes the
-// popover only for a click beside the card).
-[_display, "AIO_Hitbox", _layer, [_cardX, _cardY, _width, _height]] call FUNC(uiCreate);
+// popover only for a click beside the card). It gives the focus straight back to the card's own focus button: focused, it was
+// drawn over the whole card and took every click after it (Mia, 0.6.102: "click beside the switch, nothing clicks any more").
+private _cardHit = [_display, "AIO_Hitbox", _layer, [_cardX, _cardY, _width, _height]] call FUNC(uiCreate);
+
+{
+    _cardHit ctrlAddEventHandler [_x, {
+        [{ctrlSetFocus ((uiNamespace getVariable [QGVAR(menuFocus), []]) param [1, controlNull])}] call FUNC(later);
+    }];
+} forEach ["ButtonClick", "MouseButtonUp", "SetFocus"];
 
 // What the small buttons are drawn with: neutral films, the light ink of the card.
 private _buttonTheme = createHashMapFromArray [
@@ -339,7 +362,7 @@ private _buttonTheme = createHashMapFromArray [
     ["buttonText", _text2],
     ["font", _font],
     ["muted", _muted],
-    ["radius", UNIT * 0.3],
+    ["radius", _cu * 0.3],
     ["upper", false]
 ];
 
@@ -361,6 +384,13 @@ private _fnc_chip = {
         }, false, _chipSize, true
     ] call FUNC(uiButton)
 };
+
+// ----- The tabs, then everything else a tab lower -----
+
+[_display, _layer, [_cardX + _padX, _cardY + _padY, _width - _padX * 2, _tabsH], "colours", _chipH, _chipSize, _buttonTheme] call FUNC(drawDesignTabs);
+
+_cardY = _cardY + _tabsH;
+_height = _height - _tabsH;
 
 // ----- The title, with Reset all -----
 
@@ -424,7 +454,7 @@ private _fnc_swatch = {
     params ["_rowTop"];
 
     private _rect = [_cardX + _swatchX, _rowTop + (_headH - _swatchH) / 2, _swatchW, _swatchH];
-    private _swatchRadius = UNIT * 0.2;
+    private _swatchRadius = _cu * 0.2;
 
     [
         _display, _layer, [(_rect select 0) - pixelW, (_rect select 1) - pixelH, (_rect select 2) + pixelW * 2, (_rect select 3) + pixelH * 2],
@@ -511,7 +541,7 @@ private _fnc_picker = {
         private _index = _forEachIndex;
         private _rowTop = _pickTop + _index * _fieldPitch;
 
-        [_display, _layer, [_fieldsX, _rowTop, _fieldsW, _fieldH], [1, 1, 1, 0.08], UNIT * 0.25] call FUNC(uiPanel);
+        [_display, _layer, [_fieldsX, _rowTop, _fieldsW, _fieldH], [1, 1, 1, 0.08], _cu * 0.25] call FUNC(uiPanel);
         [_display, _layer, [_fieldsX + _fieldPadX, _rowTop, _fieldLabelW, _fieldH], _label, _fieldSize, _muted, _font, 0, "menu"] call FUNC(uiLabel);
 
         private _hit = [_display, "AIO_Hitbox", _layer, [_fieldsX, _rowTop, _fieldsW, _fieldH]] call FUNC(uiCreate);
@@ -572,11 +602,11 @@ if (_io isNotEqualTo "") then {
     private _copyW = [0, [LLSTRING(Palette_Copy), "", _chipH, _chipSize, _buttonTheme] call FUNC(buttonWidth)] select (_io isEqualTo "export");
     private _fieldRect = [_cardX + _padX, _y, _width - _padX * 2 - _ioButtonW - _gapX - ([0, _copyW + _gapX] select (_copyW > 0)), _rowH];
 
-    [_display, _layer, _fieldRect, [1, 1, 1, 0.08], UNIT * 0.25] call FUNC(uiPanel);
+    [_display, _layer, _fieldRect, [1, 1, 1, 0.08], _cu * 0.25] call FUNC(uiPanel);
 
     private _ioEdit = [
         _display, "AIO_EditLong", _layer,
-        [(_fieldRect select 0) + SQUARE(UNIT * 0.3), _y + (_rowH - _small * 1.4) / 2, (_fieldRect select 2) - SQUARE(UNIT * 0.6), _small * 1.4]
+        [(_fieldRect select 0) + SQUARE(_cu * 0.3), _y + (_rowH - _small * 1.4) / 2, (_fieldRect select 2) - SQUARE(_cu * 0.6), _small * 1.4]
     ] call FUNC(uiCreate);
 
     _ioEdit ctrlSetFont _font;
@@ -727,6 +757,60 @@ if (_stylesOpen) then {
     _y = _y + _pickPad;
 };
 
+// ----- The font (Mia, 0.6.104: "change the font in the colours tab"): the player's setting aio_gui_font, which the Layout tab
+// and CBA's settings show too. A click takes the next font; the window is built anew in it (fnc_build). -----
+
+_y = _y + _gapY;
+
+[
+    _display, _layer, [_cardX + _nameX, _y, _nameW, _headH], [LLSTRING(Setting_Font), _nameW, _fontBold, _size] call FUNC(fitText), _size, _text,
+    _fontBold, 0, "menu"
+] call FUNC(uiLabel);
+
+private _fontIds = ["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"];
+private _fontNames = [
+    LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight), LLSTRING(Font_Etelka),
+    LLSTRING(Font_Tahoma), LLSTRING(Font_Lucida)
+];
+private _fontAt = (_fontIds find (missionNamespace getVariable [QGVAR(font), "purista"])) max 0;
+
+private _fontButton = [
+    _display, _layer, [_cardX + _swatchX, _y + (_headH - _chipH) / 2, _cardX + _width - _padX - (_cardX + _swatchX), _chipH], "font",
+    _fontNames select _fontAt, UI_TEX(icon_chevron_right_ca), _buttonTheme, {
+        params ["_button"];
+
+        if (_button < 0) exitWith {};
+
+        private _fontIds = ["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"];
+        private _at = (_fontIds find (missionNamespace getVariable [QGVAR(font), "purista"])) max 0;
+
+        private _next = _fontIds select ((_at + 1) mod count _fontIds);
+
+        [{
+            params ["_next"];
+
+            // As the Layout tab sets it (fnc_settingsRow): through CBA_fnc_setSetting the click did nothing (Mia, 0.6.106).
+            missionNamespace setVariable [QGVAR(font), _next];
+
+            if (!isNil "CBA_settings_fnc_set") then {
+                [QGVAR(font), _next, 0, "client"] call CBA_settings_fnc_set;
+            };
+
+            [] call FUNC(elementsChanged);
+
+            private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+            if (!isNull _display) then {
+                [_display] call FUNC(openPaletteMenu);
+            };
+        }, [_next]] call FUNC(later);
+    }, false, _chipSize
+] call FUNC(uiButton);
+
+[(_fontButton param [count _fontButton - 1, controlNull]), LLSTRING(Setting_Font_Desc)] call FUNC(setTooltip);
+
+_y = _y + _headH;
+
 // ----- The rows, the open one with its picker, its sliders and its note under it -----
 
 // The swatches and the take-away buttons by row id, and the sliders' parts by their kind.
@@ -771,23 +855,23 @@ private _sliders = createHashMap;
     private _swatchRect = [_y] call _fnc_swatch;
 
     if (_rowSliders isNotEqualTo []) then {
-        [_display, _layer, _swatchRect, [0.55, 0.55, 0.55, 1], UNIT * 0.2] call FUNC(uiPanel);
+        [_display, _layer, _swatchRect, [0.55, 0.55, 0.55, 1], _cu * 0.2] call FUNC(uiPanel);
     };
 
     // With its gradient on, the swatch is both colours: the start's half and the end's.
     if (_gradientOn) then {
-        ([_display, _layer, _swatchRect, UNIT * 0.2] call FUNC(uiSplitSwatch)) params ["_startCtrls", "_endCtrls"];
+        ([_display, _layer, _swatchRect, _cu * 0.2] call FUNC(uiSplitSwatch)) params ["_startCtrls", "_endCtrls"];
 
         _swatches set [_id, _startCtrls];
         _swatches set [_id + "End", _endCtrls];
     } else {
-        _swatches set [_id, [_display, _layer, _swatchRect, [0, 0, 0, 1], UNIT * 0.2] call FUNC(uiPanel)];
+        _swatches set [_id, [_display, _layer, _swatchRect, [0, 0, 0, 1], _cu * 0.2] call FUNC(uiPanel)];
     };
 
     _chips set [_id, [_id, _words, _y, _headH] call _fnc_chip];
 
     // A click on the arrow, the name or the swatch opens the row (the one open before folds), or folds it where it is open.
-    private _nameHit = [_display, "AIO_Hitbox", _layer, [_cardX + _padX, _y, _swatchX + _swatchW + SQUARE(UNIT * 0.3) - _padX, _headH]] call FUNC(uiCreate);
+    private _nameHit = [_display, "AIO_Hitbox", _layer, [_cardX + _padX, _y, _swatchX + _swatchW + SQUARE(_cu * 0.3) - _padX, _headH]] call FUNC(uiCreate);
 
     [_nameHit, _tip] call FUNC(setTooltip);
     _nameHit setVariable [QGVAR(id), _id];
@@ -819,7 +903,7 @@ private _sliders = createHashMap;
 
             [_display, _layer, [_cardX + _padX, _y, _labelW, _rowH], LLSTRING(Palette_Gradient), _small, _text2, _font, 0, "menu"] call FUNC(uiLabel);
 
-            private _switchW = SQUARE(UNIT * 2.2);
+            private _switchW = SQUARE(_cu * 2.2);
 
             private _switch = [
                 _display, _layer, [_cardX + _sliderX, _y + (_rowH - _chipH) / 2, _switchW, _chipH], _id,
@@ -837,7 +921,7 @@ private _sliders = createHashMap;
             [(_switch param [count _switch - 1, controlNull]), LLSTRING(Palette_Gradient_Tip)] call FUNC(setTooltip);
 
             if (_gradientOn) then {
-                private _boxW = SQUARE(UNIT * 2.6);
+                private _boxW = SQUARE(_cu * 2.6);
                 private _boxX = _cardX + _sliderX + _switchW + _gapX;
 
                 {
@@ -846,15 +930,15 @@ private _sliders = createHashMap;
                     private _boxRect = [_boxX, _y + _rowH * 0.1, _boxW, _rowH * 0.8];
                     private _picked = _partPick < 0 && {_isEnd isEqualTo _pickEnd};
 
-                    [_display, _layer, _boxRect, [[1, 1, 1, 0.22], _text] select _picked, UNIT * 0.2] call FUNC(uiPanel);
+                    [_display, _layer, _boxRect, [[1, 1, 1, 0.22], _text] select _picked, _cu * 0.2] call FUNC(uiPanel);
                     _swatches set [_boxId, [
                         _display, _layer, [(_boxRect select 0) + pixelW * 2, (_boxRect select 1) + pixelH * 2, (_boxRect select 2) - pixelW * 4, (_boxRect select 3) - pixelH * 4],
-                        [0, 0, 0, 1], UNIT * 0.2
+                        [0, 0, 0, 1], _cu * 0.2
                     ] call FUNC(uiPanel)];
 
-                    [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0, "menu"] call FUNC(uiLabel);
+                    [_display, _layer, [_boxX + _boxW + SQUARE(_cu * 0.15), _y, SQUARE(_cu * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0, "menu"] call FUNC(uiLabel);
 
-                    private _boxHit = [_display, "AIO_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(UNIT * 1.7), _rowH]] call FUNC(uiCreate);
+                    private _boxHit = [_display, "AIO_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(_cu * 1.7), _rowH]] call FUNC(uiCreate);
 
                     _boxHit setVariable [QGVAR(id), _isEnd];
                     _boxHit ctrlAddEventHandler ["ButtonClick", {
@@ -874,7 +958,7 @@ private _sliders = createHashMap;
                         }, [_ctrl getVariable [QGVAR(id), false]]] call FUNC(later);
                     }];
 
-                    _boxX = _boxX + _boxW + SQUARE(UNIT * 1.9);
+                    _boxX = _boxX + _boxW + SQUARE(_cu * 1.9);
                 } forEach [["gradStart", LLSTRING(Palette_Start), false], ["gradEnd", LLSTRING(Palette_End), true]];
             };
 
@@ -930,12 +1014,12 @@ private _sliders = createHashMap;
                     // part the picker is bound to. A click on it picks the part (the line under the groups).
                     private _partIndex = round (log _bit / log 2);
                     private _pillW = SQUARE(_checkH * 1.6);
-                    private _pillRect = [_cellX + _checkW + SQUARE(UNIT * 0.15), _checkY, _pillW, _checkH];
+                    private _pillRect = [_cellX + _checkW + SQUARE(_cu * 0.15), _checkY, _pillW, _checkH];
 
-                    [_display, _layer, _pillRect, [[1, 1, 1, 0.22], _text] select (_partIndex == _partPick), UNIT * 0.2] call FUNC(uiPanel);
+                    [_display, _layer, _pillRect, [[1, 1, 1, 0.22], _text] select (_partIndex == _partPick), _cu * 0.2] call FUNC(uiPanel);
 
                     ([
-                        _display, _layer, [(_pillRect select 0) + _edgeW, (_pillRect select 1) + _edgeH, _pillW - _edgeW * 2, _checkH - _edgeH * 2], UNIT * 0.15
+                        _display, _layer, [(_pillRect select 0) + _edgeW, (_pillRect select 1) + _edgeH, _pillW - _edgeW * 2, _checkH - _edgeH * 2], _cu * 0.15
                     ] call FUNC(uiSplitSwatch)) params ["_partStartCtrls", "_partEndCtrls"];
 
                     _swatches set [format ["part%1", _partIndex], _partStartCtrls];
@@ -974,7 +1058,7 @@ private _sliders = createHashMap;
                         [[(_pillRect select 0) + _pillW / 2, _cellY, _pillW / 2, _rowH], true]
                     ];
 
-                    private _wordsX = (_pillRect select 0) + _pillW + SQUARE(UNIT * 0.15);
+                    private _wordsX = (_pillRect select 0) + _pillW + SQUARE(_cu * 0.15);
                     private _wordsW = _cellX + _partW - _wordsX;
 
                     private _wordsLabel = [
@@ -1041,7 +1125,7 @@ private _sliders = createHashMap;
                 private _partBit = 2 ^ _partPick;
                 private _partOn = ((floor ((GVAR(theme) getOrDefault ["gradientParts", GRADIENT_PARTS_DEFAULT]) / _partBit)) mod 2) == 1;
                 private _ownEnd = _partOn && {uiNamespace getVariable [QGVAR(paletteEnd), false]};
-                private _switchW = SQUARE(UNIT * 2.2);
+                private _switchW = SQUARE(_cu * 2.2);
                 private _partSwitch = [
                     _display, _layer, [_cardX + _sliderX, _y + (_rowH - _chipH) / 2, _switchW, _chipH], str _partBit,
                     [LLSTRING(Palette_Off), LLSTRING(Palette_On)] select _partOn, "", _buttonTheme, {
@@ -1061,10 +1145,10 @@ private _sliders = createHashMap;
                 // the boxes give way, so Main never lies over End or its word.
                 private _ownSet = _info get "ownSet";
                 private _mainShown = (_ownSet select (_partPick * 2)) || {_ownSet select (_partPick * 2 + 1)};
-                private _mainW = SQUARE(UNIT * 1.8);
+                private _mainW = SQUARE(_cu * 1.8);
                 private _boxX = _cardX + _sliderX + _switchW + _gapX;
                 private _boxRoom = (_cardX + _width - _padX - ([0, _mainW + _gapX] select _mainShown)) - _boxX;
-                private _boxW = (SQUARE(UNIT * 2.6) min ((_boxRoom - SQUARE(UNIT * 1.9) * 2) / 2)) max SQUARE(UNIT * 1);
+                private _boxW = (SQUARE(_cu * 2.6) min ((_boxRoom - SQUARE(_cu * 1.9) * 2) / 2)) max SQUARE(_cu * 1);
 
                 {
                     _x params ["_boxId", "_words", "_isEnd"];
@@ -1074,15 +1158,15 @@ private _sliders = createHashMap;
                     private _boxRect = [_boxX, _y + _rowH * 0.1, _boxW, _rowH * 0.8];
                     private _picked = _isEnd isEqualTo _ownEnd;
 
-                    [_display, _layer, _boxRect, [[1, 1, 1, 0.22], _text] select _picked, UNIT * 0.2] call FUNC(uiPanel);
+                    [_display, _layer, _boxRect, [[1, 1, 1, 0.22], _text] select _picked, _cu * 0.2] call FUNC(uiPanel);
                     _swatches set [_boxId, [
                         _display, _layer, [(_boxRect select 0) + pixelW * 2, (_boxRect select 1) + pixelH * 2, (_boxRect select 2) - pixelW * 4, (_boxRect select 3) - pixelH * 4],
-                        [0, 0, 0, 1], UNIT * 0.2
+                        [0, 0, 0, 1], _cu * 0.2
                     ] call FUNC(uiPanel)];
 
-                    [_display, _layer, [_boxX + _boxW + SQUARE(UNIT * 0.15), _y, SQUARE(UNIT * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0] call FUNC(uiLabel);
+                    [_display, _layer, [_boxX + _boxW + SQUARE(_cu * 0.15), _y, SQUARE(_cu * 1.6), _rowH], _words, _small * 0.9, [_muted, _text] select _picked, _font, 0] call FUNC(uiLabel);
 
-                    private _boxHit = [_display, "AIO_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(UNIT * 1.7), _rowH]] call FUNC(uiCreate);
+                    private _boxHit = [_display, "AIO_Hitbox", _layer, [_boxX, _y, _boxW + SQUARE(_cu * 1.7), _rowH]] call FUNC(uiCreate);
 
                     [_boxHit, LLSTRING(Palette_PartColours_Tip)] call FUNC(setTooltip);
                     _boxHit setVariable [QGVAR(id), _isEnd];
@@ -1102,7 +1186,7 @@ private _sliders = createHashMap;
                         }, [_ctrl getVariable [QGVAR(id), false]]] call FUNC(later);
                     }];
 
-                    _boxX = _boxX + _boxW + SQUARE(UNIT * 1.9);
+                    _boxX = _boxX + _boxW + SQUARE(_cu * 1.9);
                 } forEach [["partStart", [LLSTRING(Palette_PartColour), LLSTRING(Palette_Start)] select _partOn, false], ["partEnd", LLSTRING(Palette_End), true]];
 
                 // Main: only where the part has a colour of its own.
@@ -1198,7 +1282,7 @@ private _hintTop = _cardY + _height - _padY - _hintH;
 
 [_display, _layer, [_cardX + _padX, _hintTop - _gapY / 2, _width - _padX * 2, pixelH], [1, 1, 1, 0.05]] call FUNC(uiPanel);
 
-private _hintLine = [_display, "AIO_StructuredText", _layer, [_cardX + _padX, _hintTop, _hintW, _hintH]] call FUNC(uiCreate);
+private _hintLine = [_display, "AIO_TextMulti", _layer, [_cardX + _padX, _hintTop, _hintW, _hintH]] call FUNC(uiCreate);
 
 _hintLine ctrlEnable false;
 _hintLine setVariable [QGVAR(hintSize), _hintSize];
@@ -1218,7 +1302,7 @@ uiNamespace setVariable [QGVAR(menuFocus), [_layer, _focus]];
 
 uiNamespace setVariable [QGVAR(menu), [_layer]];
 uiNamespace setVariable [QGVAR(menuFocusBack), _back];
-uiNamespace setVariable [QGVAR(menuRect), [_left, _top, _width, _height]];
+uiNamespace setVariable [QGVAR(menuRect), [_left, _top, _width, _height + _tabsH]];
 
 // What lies in it, to show the values in place (fnc_updatePaletteMenu): the open picker's controls and places, its fields, the
 // open row's sliders' knobs, places, values and fills by their kind ("alpha", "cellAlpha", "tileAlpha"), the swatches and the

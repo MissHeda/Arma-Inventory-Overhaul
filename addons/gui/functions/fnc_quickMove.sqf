@@ -5,8 +5,9 @@
  * A double click: moves an item to the other side without dragging (Ctrl+click
  * selects since 0.2.1; several selected tiles move together, fnc_quickMoveGroup). From the unit's own uniform, vest or
  * backpack it goes to what is being looted - the first container shown there with room - then into a
- * kit open in a window, the topmost window first, and to the ground only when neither is shown: the
- * surface under the feet, or the vehicle's cargo while seated. From the loot it goes into the unit's
+ * kit open in a window, the topmost window first. With neither shown it moves within the unit's own gear: out of
+ * the backpack into the vest, then the uniform, out of the vest or the uniform into the backpack, then the other
+ * one - dropping is the drop key's; seated, it goes into the vehicle's cargo. From the loot it goes into the unit's
  * uniform, vest or backpack, the first of them with room. The layout finds it a cell - the authority's,
  * once the move arrives there (fnc_applyMove, fnc_sendMoves).
  *
@@ -61,6 +62,21 @@ if (_kit isNotEqualTo "") exitWith {
 private _unit = GVAR(unit);
 private _own = [uniformContainer _unit, vestContainer _unit, backpackContainer _unit] select {!isNull _x};
 
+// The container the player picked (a click on a free cell of it, fnc_quickTarget) comes first, from whichever side: with no room
+// the hint says so - it was asked for by name.
+([[_from]] call FUNC(quickTarget)) params [["_picked", objNull]];
+
+if (!isNull _picked) exitWith {
+    private _intoBackpack = [_picked, _tile] call EFUNC(storage,backpackIntoBackpack);
+
+    if (_intoBackpack || {!([_picked, _tile, true] call FUNC(roomFor))}) exitWith {
+        [["NoRoom", "NoBackpack"] select _intoBackpack] call FUNC(flashHint);
+        false
+    };
+
+    [_from, _picked, _tile, -1, [], createHashMapFromArray [["roomChecked", true]]] call FUNC(applyMove)
+};
+
 // Which of the containers takes it: [container, why not - "NoBackpack" when the only room is in a backpack
 // and it is one, "" for none]. The first with a free spot takes all of it.
 private _fnc_pick = {
@@ -101,101 +117,17 @@ if !(_from in _own) exitWith {
     [_from, _target, _tile, -1, [], createHashMapFromArray [["roomChecked", true]]] call FUNC(applyMove)
 };
 
-// From the player's own gear: the loot containers in the order the column shows them, then the open
-// kits - the topmost window first, as the player sees them lying over each other. The kit the item is
-// cannot take itself.
-private _loot = [];
-private _kits = [];
-private _class = _tile getOrDefault ["class", ""];
+// From the player's own gear with no container picked: onto the ground (Mia, after 0.6.79: "always on the ground") - a container,
+// the vest or a crate, is picked by a click on it (fnc_pickTarget). Seated, the vehicle's cargo, which the server finds for a seated
+// unit; on foot the pile at the feet (fnc_dropToGround) - or what a window that attached does with it (the "ground" hook).
+if ((["ground", [[_gridIndex, _tileIndex], -1], false] call FUNC(hook)) isEqualTo true) exitWith {true};
 
-private _order = +GVAR(windowOrder);
-reverse _order;
+// At once, as a drag drops it: never into the hands' queue, whatever the drop key's waiting is set to (Mia, 0.6.83: "always drops,
+// whatever G does" - fnc_queueTime asks this frame number).
+GVAR(instantFrame) = diag_frameNo;
 
-{
-    private _key = _x;
-
-    {
-        private _gridKit = _x getOrDefault ["kit", ""];
-
-        if (
-            (_x getOrDefault ["window", ""]) isEqualTo _key && {!(_x getOrDefault ["virtual", true])}
-            && {_gridKit isNotEqualTo ""} && {!(_gridKit in _kits)} && {_gridKit != _class}
-        ) then {
-            _kits pushBack _gridKit;
-        };
-    } forEach _grids;
-} forEach _order;
-
-{
-    private _container = _x getOrDefault ["container", objNull];
-    private _gridKit = _x getOrDefault ["kit", ""];
-
-    if (_x getOrDefault ["virtual", true]) then {continue};
-
-    if (_gridKit isNotEqualTo "") then {
-        if (!(_gridKit in _kits) && {_gridKit != _class}) then {
-            _kits pushBack _gridKit;
-        };
-
-        continue;
-    };
-
-    if (!isNull _container && {!(_container in _own)} && {!(_container in _loot)}) then {
-        _loot pushBack _container;
-    };
-} forEach _grids;
-
-// Nothing looted and no kit open: the ground - the server finds the pile at the feet or makes one.
-if (_loot isEqualTo [] && {_kits isEqualTo []}) exitWith {
-    // Something is being looted, all of it locked to the player (aio_locks): not the ground then either.
-    if ((GVAR(context) getOrDefault ["lootSections", []]) findIf {_x getOrDefault ["locked", false]} >= 0) exitWith {
-        ["Locked"] call FUNC(flashHint);
-        false
-    };
-
-    // A window that attached takes it itself (the "ground" hook: the Arsenal takes it out).
-    if ((["ground", [[_gridIndex, _tileIndex], -1], false] call FUNC(hook)) isEqualTo true) exitWith {true};
-
+if (!isNull objectParent _unit) exitWith {
     [_from, "ground", _tile, -1, []] call FUNC(applyMove)
 };
 
-// Only what the player may put into - a living person's container as the settings say. Refused there,
-// the hint says why.
-private _refused = "";
-
-_loot = _loot select {
-    private _why = [_x, "items"] call FUNC(checkTouch);
-
-    if (_why isNotEqualTo "" && {_refused isEqualTo ""}) then {
-        _refused = _why;
-    };
-
-    _why isEqualTo ""
-};
-
-([_loot] call _fnc_pick) params ["_target", "_packWhy"];
-
-if (!isNull _target) exitWith {
-    [_from, _target, _tile, -1, [], createHashMapFromArray [["roomChecked", true]]] call FUNC(applyMove)
-};
-
-private _kitIndex = -1;
-
-if (!isNil QEFUNC(compat_efak,canDrop)) then {
-    _kitIndex = _kits findIf {(([[_from, ""], _x, _tile, -1] call EFUNC(compat_efak,canDrop)) select 0)};
-};
-
-if (_kitIndex < 0 || {isNil QEFUNC(compat_efak,drop)}) exitWith {
-    // Every container shown was a living person's the player may not put into: that is why. A backpack with
-    // only backpacks to go into: that.
-    private _why = ["NowhereToGo", _refused] select (_loot isEqualTo [] && {_refused isNotEqualTo ""});
-
-    if (_packWhy isNotEqualTo "") then {
-        _why = _packWhy;
-    };
-
-    [_why] call FUNC(flashHint);
-    false
-};
-
-[[_from, ""], [objNull, _kits select _kitIndex], _tile, -1, [], []] call EFUNC(compat_efak,drop)
+[_gridIndex, _tileIndex] call FUNC(dropToGround)

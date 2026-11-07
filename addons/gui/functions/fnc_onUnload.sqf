@@ -50,12 +50,27 @@ _reason = (createHashMapFromArray [
 
 INFO_1("window closed: %1",_reason);
 
-// The volumes set in the sound dropdown are kept, should the window close with it open - and the colours set in the palette.
+// Out of the engine's inventory pose, which its own inventory would have ended (fnc_leaveGearPose).
+[GVAR(unit)] call FUNC(leaveGearPose);
+
+// A soldier the player leads, held for his inventory (fnc_onInventoryOpened): back into formation.
+if (!isNil QGVAR(heldSoldier)) then {
+    if (alive GVAR(heldSoldier)) then {
+        GVAR(heldSoldier) doFollow leader group GVAR(heldSoldier);
+    };
+
+    GVAR(heldSoldier) = nil;
+};
+
+// The volumes set in the sound dropdown are kept, should the window close with it open - and the colours set in the palette, and
+// the sizes set in the size popover.
 [] call FUNC(soundSettle);
 [] call FUNC(paletteSettle);
+[] call FUNC(sizeSettle);
 
-// A palette popover that was open went with the display: it must not come back with the next window (fnc_build makes it again).
-if ((GVAR(menuFor) param [0, ""]) isEqualTo "palette") then {
+// A palette or size popover that was open went with the display: it must not come back with the next window (fnc_build makes it
+// again).
+if ((GVAR(menuFor) param [0, ""]) in ["palette", "size"]) then {
     uiNamespace setVariable [QGVAR(menu), []];
     GVAR(menuFor) = [];
     GVAR(menuState) = [];
@@ -95,6 +110,7 @@ call FUNC(logDrag);
 [""] call FUNC(logFrame);
 
 GVAR(press) = [];
+GVAR(quickTarget) = objNull;
 GVAR(dragging) = false;
 GVAR(stripDrag) = [];
 GVAR(dragTarget) = [];
@@ -120,6 +136,10 @@ GVAR(personMode) = "";
 uiNamespace setVariable [QGVAR(created), []];
 uiNamespace setVariable [QGVAR(grids), []];
 uiNamespace setVariable [QGVAR(slots), []];
+uiNamespace setVariable [QGVAR(cardButtons), []];
+uiNamespace setVariable [QGVAR(cardSpans), []];
+uiNamespace setVariable [QGVAR(cardDrag), []];
+uiNamespace setVariable [QGVAR(cardHold), []];
 uiNamespace setVariable [QGVAR(glowCache), createHashMap];
 uiNamespace setVariable [QGVAR(glowNext), 0];
 uiNamespace setVariable [QGVAR(dragGlow), []];
@@ -135,6 +155,9 @@ uiNamespace setVariable [QGVAR(inspectRect), []];
 
 // The inspect card's 3D view: its camera, lights and objects go (fnc_inspect3D).
 ["stop"] call FUNC(inspect3D);
+
+// The weapon cards' scenes as well (fnc_cardScene).
+["stop"] call FUNC(cardScene);
 uiNamespace setVariable [QGVAR(windows), []];
 uiNamespace setVariable [QGVAR(turnedPictures), []];
 uiNamespace setVariable [QGVAR(windowTrash), []];
