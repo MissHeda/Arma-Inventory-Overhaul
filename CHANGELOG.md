@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.100 - beta
+
+### Changed
+
+- A tip in the colour gradient that runs over two or more lines starts the gradient again on each line, instead of running it
+  once across all of them.
+
 ## 0.6.99 - beta
 
 ### Added

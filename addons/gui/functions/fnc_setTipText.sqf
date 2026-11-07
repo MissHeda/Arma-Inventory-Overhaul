@@ -83,7 +83,7 @@ if (_tooltip getVariable [QGVAR(gradient), false] || {_lines > 1}) then {
     private _pad = [0, SQUARE(TEXT_UNIT * 0.3)] select (_lines > 1);
     private _words = [_display, "AIO_StructuredText", _tooltip, [_pad, (_height - _textH) / 2 + _size * 0.05, _width - _pad * 2, _textH + _size * 0.4]] call FUNC(uiCreate);
 
-    _words ctrlSetStructuredText ([_text, _font, _size, 2, _from + [1], _to, _lines == 1] call FUNC(gradientText));
+    _words ctrlSetStructuredText ([_text, _font, _size, 2, _from + [1], _to, _lines == 1, [_width - _pad * 2, 0] select (_lines == 1)] call FUNC(gradientText));
     _words ctrlEnable false;
 
     // In the middle of the glass, by the lines they really take: the count they were given is an estimate.
