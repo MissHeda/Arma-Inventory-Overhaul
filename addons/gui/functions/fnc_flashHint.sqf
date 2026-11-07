@@ -108,7 +108,8 @@ private _fnc_write = {
     ];
 };
 
-private _font = ["", GVAR(theme) getOrDefault ["fontBold", "PuristaSemibold"]] select _failed;
+// The hint's own font, as every other line on it: in the bold one the words sat lower than the key hints' (Mia, 0.6.104).
+private _font = "";
 
 [_hint, _escaped, _color, _font] call _fnc_write;
 [_hint] call FUNC(fitHint);
@@ -116,7 +117,8 @@ private _font = ["", GVAR(theme) getOrDefault ["fontBold", "PuristaSemibold"]] s
 if (!_failed) exitWith {};
 
 // The shake: left and right a few times, smaller each time, about a third of a second, then back where fnc_fitHint put it. While it
-// shakes the words light up - nearly white, then down into the red - and a red glow behind them fades (Mia, 0.6.102). A new
+// shakes the words light up - nearly white, then down into the red (Mia, 0.6.102). No glow behind them: it showed as a box
+// round the whole line (Mia, 0.6.104). A new
 // failure while one shakes starts it again from there.
 private _old = missionNamespace getVariable [QGVAR(hintShake), -1];
 
@@ -139,7 +141,6 @@ private _shake = [{
         if (!isNull _hint) then {
             _hint ctrlSetPosition _home;
             _hint ctrlCommit 0;
-            _hint ctrlSetBackgroundColor [0, 0, 0, 0];
             [_hint, _escaped, _color, _font] call _fnc_write;
         };
     };
@@ -153,7 +154,6 @@ private _shake = [{
 
     private _light = 1 - _time / HINT_SHAKE_TIME;
 
-    _hint ctrlSetBackgroundColor [1, 0.15, 0.15, HINT_GLOW_ALPHA * _light];
     [_hint, _escaped, [0, 1, 2] apply {(_color select _x) + (1 - (_color select _x)) * 0.75 * _light}, _font] call _fnc_write;
 }, 0, [_hint, _home, diag_tickTime, _escaped, _color, _font, _fnc_write]] call CBA_fnc_addPerFrameHandler;
 

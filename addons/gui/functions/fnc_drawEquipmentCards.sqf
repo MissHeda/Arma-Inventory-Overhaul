@@ -360,65 +360,17 @@ private _fnc_weaponCard = {
         private _nameSize = _textUnit * 0.5;
         private _nameTop = _cardY + _cardH - _padY * 0.5 - _lineH;
 
-        // What is on it, at the right end of the name's line: a small plate with the picture of each attachment, a loaded magazine's
-        // with its rounds on the same plate where it holds more than one, so each count plainly belongs to its magazine - muzzle,
-        // optic, rail, bipod, magazine, second magazine from the left, drawn from the right; nothing for a part it has not.
-        // [class, muzzle, rail, optic, [magazine, rounds] or [], [second magazine, rounds] or [], bipod]
-        private _partH = _lineH * 1.15;
-        private _partW = SQUARE(_partH);
-        private _partsRight = _contentX + _contentW;
-        private _partsTop = _nameTop + _lineH - _partH;
-        private _ammoSize = _textUnit * 0.42;
-
-        {
-            private _value = _weapon param [_x, ""];
-            private _partClass = if (_value isEqualType []) then {_value param [0, "", [""]]} else {_value};
-
-            if !(_partClass isEqualType "" && {_partClass isNotEqualTo ""}) then {continue};
-
-            private _partInfo = [_partClass] call EFUNC(items,getInfo);
-            private _capacity = _partInfo getOrDefault ["capacity", 0];
-
-            // Rounds beside the magazine's picture, as "27/30" - the loss colour when it is empty.
-            private _hasRounds = _value isEqualType [] && {_capacity > 1};
-            private _rounds = if (_hasRounds) then {_value param [1, 0, [0]]} else {0};
-            private _text = if (_hasRounds) then {format ["%1/%2", _rounds, _capacity]} else {""};
-            private _textW = if (_hasRounds) then {(_text getTextWidth [_font, _ammoSize]) * TEXT_SLACK + SQUARE(_textUnit * 0.1)} else {0};
-
-            _partsRight = _partsRight - _partW - _textW;
-
-            private _partRect = [_partsRight, _partsTop, _partW, _partH];
-
-            [_display, _parent, [_partsRight, _partsTop, _partW + _textW, _partH], _theme getOrDefault ["slotEmpty", [1, 1, 1, 0.05]], _partH * 0.25] call FUNC(uiPanel);
-            [
-                _display, _parent, _partRect, _partInfo getOrDefault ["picture", ""], _partInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _partRect
-            ] call FUNC(uiItemPicture);
-
-            if (_hasRounds) then {
-                [
-                    _display, _parent, [_partsRight + _partW, _partsTop, _textW, _partH], _text, _ammoSize,
-                    [_colorText2, _theme getOrDefault ["loss", [0.9, 0.3, 0.25, 1]]] select (_rounds <= 0), _font, 0, "ammo"
-                ] call FUNC(uiLabel);
-            };
-
-            _partsRight = _partsRight - SQUARE(_textUnit * 0.12);
-        } forEach [5, 4, 6, 2, 3, 1];
-
-        private _name = [
-            [_info getOrDefault ["name", _class], _theme] call FUNC(caption), (_partsRight - _contentX - SQUARE(_textUnit * 0.2)) max pixelW, _font, _nameSize
-        ] call FUNC(fitText);
-
-        // The picture keeps at least half the card: where the name's line would leave it less, it reaches to the
-        // card's foot and the name goes over it.
-        private _pictureBottom = [_nameTop, _cardY + _cardH - _padY] select ((_nameTop - _innerTop) < _cardH * 0.5);
-        private _pictureRect = [_contentX, _innerTop, _contentW, (_pictureBottom - _innerTop) max pixelH];
-
         // The weapon as it really looks, filmed with what it carries (fnc_cardScene) - with Picture-in-Picture on and the player's
         // setting. The picture has the screen's shape and the card shows its middle, as the inspect card's 3D view (fnc_drawInspect).
         private _real = false;
 
         if (isPiPEnabled && {missionNamespace getVariable [QGVAR(weapon3D), false]}) then {
-            _pictureRect params ["_picX", "_picY", "_picW", "_picH"];
+            // The whole card below its padding, under the name's line too: the picture as long as the card (Mia, 0.6.104), the
+            // attachments' plates and the name drawn over it after.
+            private _picX = _contentX;
+            private _picY = _innerTop;
+            private _picW = _contentW;
+            private _picH = (_cardY + _cardH - _padY - _innerTop) max pixelH;
 
             private _viewPixelsW = round (_picW / pixelW);
             private _viewPixelsH = round (_picH / pixelH);
@@ -484,6 +436,59 @@ private _fnc_weaponCard = {
                 };
             };
         };
+
+        // What is on it, at the right end of the name's line: a small plate with the picture of each attachment, a loaded magazine's
+        // with its rounds on the same plate where it holds more than one, so each count plainly belongs to its magazine - muzzle,
+        // optic, rail, bipod, magazine, second magazine from the left, drawn from the right; nothing for a part it has not.
+        // [class, muzzle, rail, optic, [magazine, rounds] or [], [second magazine, rounds] or [], bipod]
+        private _partH = _lineH * 1.15;
+        private _partW = SQUARE(_partH);
+        private _partsRight = _contentX + _contentW;
+        private _partsTop = _nameTop + _lineH - _partH;
+        private _ammoSize = _textUnit * 0.42;
+
+        {
+            private _value = _weapon param [_x, ""];
+            private _partClass = if (_value isEqualType []) then {_value param [0, "", [""]]} else {_value};
+
+            if !(_partClass isEqualType "" && {_partClass isNotEqualTo ""}) then {continue};
+
+            private _partInfo = [_partClass] call EFUNC(items,getInfo);
+            private _capacity = _partInfo getOrDefault ["capacity", 0];
+
+            // Rounds beside the magazine's picture, as "27/30" - the loss colour when it is empty.
+            private _hasRounds = _value isEqualType [] && {_capacity > 1};
+            private _rounds = if (_hasRounds) then {_value param [1, 0, [0]]} else {0};
+            private _text = if (_hasRounds) then {format ["%1/%2", _rounds, _capacity]} else {""};
+            private _textW = if (_hasRounds) then {(_text getTextWidth [_font, _ammoSize]) * TEXT_SLACK + SQUARE(_textUnit * 0.1)} else {0};
+
+            _partsRight = _partsRight - _partW - _textW;
+
+            private _partRect = [_partsRight, _partsTop, _partW, _partH];
+
+            [_display, _parent, [_partsRight, _partsTop, _partW + _textW, _partH], _theme getOrDefault ["slotEmpty", [1, 1, 1, 0.05]], _partH * 0.25] call FUNC(uiPanel);
+            [
+                _display, _parent, _partRect, _partInfo getOrDefault ["picture", ""], _partInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _partRect
+            ] call FUNC(uiItemPicture);
+
+            if (_hasRounds) then {
+                [
+                    _display, _parent, [_partsRight + _partW, _partsTop, _textW, _partH], _text, _ammoSize,
+                    [_colorText2, _theme getOrDefault ["loss", [0.9, 0.3, 0.25, 1]]] select (_rounds <= 0), _font, 0, "ammo"
+                ] call FUNC(uiLabel);
+            };
+
+            _partsRight = _partsRight - SQUARE(_textUnit * 0.12);
+        } forEach [5, 4, 6, 2, 3, 1];
+
+        private _name = [
+            [_info getOrDefault ["name", _class], _theme] call FUNC(caption), (_partsRight - _contentX - SQUARE(_textUnit * 0.2)) max pixelW, _font, _nameSize
+        ] call FUNC(fitText);
+
+        // The picture keeps at least half the card: where the name's line would leave it less, it reaches to the
+        // card's foot and the name goes over it.
+        private _pictureBottom = [_nameTop, _cardY + _cardH - _padY] select ((_nameTop - _innerTop) < _cardH * 0.5);
+        private _pictureRect = [_contentX, _innerTop, _contentW, (_pictureBottom - _innerTop) max pixelH];
 
         if (!_real) then {
             // As the rules draw it (icon=): larger, smaller or moved, and cut to the card where it would reach out.

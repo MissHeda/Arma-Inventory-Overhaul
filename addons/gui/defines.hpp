@@ -311,8 +311,6 @@
 #define HINT_SHAKE_TIME 0.4
 #define HINT_SHAKE_WIDTH (UNIT * 0.22)
 #define HINT_SHAKE_RATE 14
-// How strong the red glow behind the hint starts when something failed; it fades with the shake.
-#define HINT_GLOW_ALPHA 0.22
 // The footer hint's words a little lower than their box's middle, on the line of the key hints' words (Mia, 0.6.102: higher than them).
 #define HINT_DROP 0.1
 

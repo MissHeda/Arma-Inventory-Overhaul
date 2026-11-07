@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.105 - beta
+
+### Changed
+
+- Real weapon pictures fill their card down to its foot; the attachments' plates and the name lie over the picture.
+- A failed action's line flashes and shakes without the red box behind it, in the same font and on the same line as the
+  other footer words.
+
 ## 0.6.104 - beta
 
 ### Added
