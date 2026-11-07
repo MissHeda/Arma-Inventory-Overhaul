@@ -367,10 +367,12 @@ private _fnc_weaponCard = {
         if (isPiPEnabled && {missionNamespace getVariable [QGVAR(weapon3D), false]}) then {
             // The whole card, edge to edge and down to its foot: the attachments' plates and the name lie wholly on the picture,
             // not half on it (Mia, 0.6.106), drawn over it after; its corners rounded as the card's.
-            private _picX = _innerX;
-            private _picY = _cardY;
-            private _picW = _cardX + _cardW - _innerX;
-            private _picH = _cardH;
+            // On whole pixels as the card's panel (fnc_uiPanel): else a pixel's line of the card showed under the picture's corner
+            // (Mia, 0.6.107).
+            private _picX = round (_innerX / pixelW) * pixelW;
+            private _picY = round (_cardY / pixelH) * pixelH;
+            private _picW = (round ((_cardX + _cardW) / pixelW) * pixelW) - _picX;
+            private _picH = (round ((_cardY + _cardH) / pixelH) * pixelH) - _picY;
 
             private _viewPixelsW = round (_picW / pixelW);
             private _viewPixelsH = round (_picH / pixelH);
@@ -395,8 +397,11 @@ private _fnc_weaponCard = {
             // the card, less shows it smaller. Given as the share of the picture the weapon takes, so a change frames it anew.
             private _zoom = (((missionNamespace getVariable [format ["%1_%2", QGVAR(weapon3DZoom), _slot], 100]) / 100) max 0.3) min 2;
 
+            // And where on the card it lies, the player's own nudge per slot (Mia, 0.6.107), in % of the weapon's length.
+            private _offset = ["X", "Y"] apply {(missionNamespace getVariable [format ["%1%2_%3", QGVAR(weapon3DOffset), _x, _slot], 0]) / 100};
+
             _real = ["show", [
-                _slot, _weapon, _target, _background, [_zoom * _viewPixelsW / _imagePixelsW, _zoom * _viewPixelsH / _imagePixelsH]
+                _slot, _weapon, _target, _background, [_zoom * _viewPixelsW / _imagePixelsW, _zoom * _viewPixelsH / _imagePixelsH], _offset
             ]] call FUNC(cardScene);
 
             if (_real) then {
@@ -416,10 +421,10 @@ private _fnc_weaponCard = {
                 _clip ctrlEnable false;
 
                 // Round corners as the card's: the outside of a quarter circle in the picture's backdrop colour over each corner.
-                private _maskRadius = _cardRadius;
+                private _maskRadius = round (_cardRadius / pixelH) * pixelH;
 
                 if (_maskRadius >= pixelH * 2) then {
-                    private _maskW = SQUARE(_maskRadius);
+                    private _maskW = round (SQUARE(_maskRadius) / pixelW) * pixelW;
                     // The column round the card shows at its corners: the panel's colour.
                     private _maskColor = ((_panel select [0, 3]) apply {_x max 0}) + [1];
 

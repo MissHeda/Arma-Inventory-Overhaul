@@ -1269,6 +1269,36 @@ Off does it at once; a drag never waits.</English>
         <Key ID="STR_aio_gui_Setting_Weapon3D">
             <English>Real weapon pictures</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Desc">
+            <English>Moves the real weapon picture on its card,\nin % of the weapon's length.\n\nMore: to the right. 0: centred.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Handgun">
+            <English>Weapon picture left/right: handgun</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Launcher">
+            <English>Weapon picture left/right: launcher</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Primary">
+            <English>Weapon picture left/right: primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetX_Primary2">
+            <English>Weapon picture left/right: second primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Desc">
+            <English>Moves the real weapon picture on its card,\nin % of the weapon's length.\n\nMore: up. 0: centred.</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Handgun">
+            <English>Weapon picture up/down: handgun</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Launcher">
+            <English>Weapon picture up/down: launcher</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Primary">
+            <English>Weapon picture up/down: primary</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DOffsetY_Primary2">
+            <English>Weapon picture up/down: second primary</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_Weapon3DZoom_Desc">
             <English>How large the real weapon picture is\non its card, in % of the card.\n\nLess: the weapon smaller, with more room\nround it. Only with "Real weapon\npictures" on.</English>
         </Key>

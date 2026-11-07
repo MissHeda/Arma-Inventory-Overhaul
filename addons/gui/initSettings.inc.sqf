@@ -196,6 +196,88 @@
 
 // Each player's own window: which column stands where, left to right (fnc_layoutGlass). "free" is the middle left empty, where an
 // open kit's window and the inspect card go.
+// Each player's own nudge of a real weapon picture on its card, per slot and axis, in % of the weapon's length (fnc_cardScene).
+// Read at every build.
+[
+    QGVAR(weapon3DOffsetX_primary),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetX_Primary), LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetY_primary),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetY_Primary), LLSTRING(Setting_Weapon3DOffsetY_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetX_handgun),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetX_Handgun), LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetY_handgun),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetY_Handgun), LLSTRING(Setting_Weapon3DOffsetY_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetX_launcher),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetX_Launcher), LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetY_launcher),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetY_Launcher), LLSTRING(Setting_Weapon3DOffsetY_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetX_primary2),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetX_Primary2), LLSTRING(Setting_Weapon3DOffsetX_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+[
+    QGVAR(weapon3DOffsetY_primary2),
+    "SLIDER",
+    [LLSTRING(Setting_Weapon3DOffsetY_Primary2), LLSTRING(Setting_Weapon3DOffsetY_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [-50, 50, 0, 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
 // Each player's own font for the window's words (fnc_build). Read at every build.
 [
     QGVAR(font),

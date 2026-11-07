@@ -213,8 +213,15 @@ private _fieldLabelW = SQUARE(_cu * 1.4);
 // The title, the Style row (and its list), every row folded, and what the open row shows: its picker, its sliders, its note.
 private _height = _padY * 2 + _titleH + (_gapY + _headH) + (count _rowDefs) * (_gapY + _headH) + (count _sectionHeads) * (_gapY + _sectionH);
 
-// The Font row under the Style row.
+// The Font row under the Style row, and its list while it is open.
+private _fontsOpen = uiNamespace getVariable [QGVAR(paletteFontsOpen), false];
+private _fontIds = ["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"];
+
 _height = _height + _gapY + _headH;
+
+if (_fontsOpen) then {
+    _height = _height + _pickPad * 2 + (count _fontIds) * _rowH;
+};
 
 // The hint line at the bottom: the tip of what the mouse is on, inside the panel (a tip floating over it would lie under the
 // panel, which is drawn over everything while it holds the focus). As many lines as the longest tip the panel has wraps to -
@@ -693,6 +700,7 @@ private _drop = [
             if (isNull _display) exitWith {};
 
             uiNamespace setVariable [QGVAR(paletteStylesOpen), !(uiNamespace getVariable [QGVAR(paletteStylesOpen), false])];
+            uiNamespace setVariable [QGVAR(paletteFontsOpen), false];
 
             // One thing open at a time: the style list and an open row together ran the card off the top of the screen.
             if (uiNamespace getVariable [QGVAR(paletteStylesOpen), false]) then {
@@ -743,6 +751,7 @@ if (_stylesOpen) then {
                 if (isNull _display) exitWith {};
 
                 uiNamespace setVariable [QGVAR(paletteStylesOpen), false];
+            uiNamespace setVariable [QGVAR(paletteFontsOpen), false];
 
                 ["style", _styleId] call FUNC(paletteSet);
 
@@ -767,49 +776,96 @@ _y = _y + _gapY;
     _fontBold, 0, "menu"
 ] call FUNC(uiLabel);
 
-private _fontIds = ["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"];
 private _fontNames = [
     LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight), LLSTRING(Font_Etelka),
     LLSTRING(Font_Tahoma), LLSTRING(Font_Lucida)
 ];
 private _fontAt = (_fontIds find (missionNamespace getVariable [QGVAR(font), "purista"])) max 0;
 
+// A dropdown as the Style row's (Mia, 0.6.107): a click opens the list of fonts under it, one at a time with the styles' list
+// and an open row.
 private _fontButton = [
     _display, _layer, [_cardX + _swatchX, _y + (_headH - _chipH) / 2, _cardX + _width - _padX - (_cardX + _swatchX), _chipH], "font",
-    _fontNames select _fontAt, UI_TEX(icon_chevron_right_ca), _buttonTheme, {
+    _fontNames select _fontAt, [UI_TEX(icon_chevron_down_ca), UI_TEX(icon_chevron_right_ca)] select !_fontsOpen, _buttonTheme, {
         params ["_button"];
 
         if (_button < 0) exitWith {};
 
-        private _fontIds = ["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"];
-        private _at = (_fontIds find (missionNamespace getVariable [QGVAR(font), "purista"])) max 0;
-
-        private _next = _fontIds select ((_at + 1) mod count _fontIds);
-
         [{
-            params ["_next"];
-
-            // As the Layout tab sets it (fnc_settingsRow): through CBA_fnc_setSetting the click did nothing (Mia, 0.6.106).
-            missionNamespace setVariable [QGVAR(font), _next];
-
-            if (!isNil "CBA_settings_fnc_set") then {
-                [QGVAR(font), _next, 0, "client"] call CBA_settings_fnc_set;
-            };
-
-            [] call FUNC(elementsChanged);
-
             private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 
-            if (!isNull _display) then {
-                [_display] call FUNC(openPaletteMenu);
+            if (isNull _display) exitWith {};
+
+            uiNamespace setVariable [QGVAR(paletteFontsOpen), !(uiNamespace getVariable [QGVAR(paletteFontsOpen), false])];
+
+            if (uiNamespace getVariable [QGVAR(paletteFontsOpen), false]) then {
+                uiNamespace setVariable [QGVAR(paletteStylesOpen), false];
+                uiNamespace setVariable [QGVAR(paletteOpen), ""];
             };
-        }, [_next]] call FUNC(later);
+
+            [_display] call FUNC(openPaletteMenu);
+        }] call FUNC(later);
     }, false, _chipSize
 ] call FUNC(uiButton);
 
 [(_fontButton param [count _fontButton - 1, controlNull]), LLSTRING(Setting_Font_Desc)] call FUNC(setTooltip);
 
 _y = _y + _headH;
+
+if (_fontsOpen) then {
+    _y = _y + _pickPad;
+
+    {
+        private _current = _forEachIndex == _fontAt;
+        private _textX = _cardX + _padX;
+        private _fontPair = [
+            "PuristaMedium", "PuristaLight", "RobotoCondensed", "RobotoCondensedLight", "EtelkaNarrowMediumPro", "TahomaB", "LucidaConsoleB"
+        ] select _forEachIndex;
+
+        // Each name in its own font, so the list shows what it picks.
+        [_display, _layer, [_textX, _y, _cardX + _width - _padX - _textX, _rowH], _x, _small, [_text2, _text] select _current, _fontPair, 0, "menu"] call FUNC(uiLabel);
+
+        if (_current) then {
+            [
+                _display, _layer, [_cardX + _width - _padX - SQUARE(_rowH * 0.6), _y + _rowH * 0.2, SQUARE(_rowH * 0.6), _rowH * 0.6],
+                UI_TEX(icon_check_ca), _text
+            ] call FUNC(uiIcon);
+        };
+
+        private _hit = [_display, "AIO_Hitbox", _layer, [_cardX + _padX, _y, _width - _padX * 2, _rowH]] call FUNC(uiCreate);
+
+        _hit setVariable [QGVAR(id), _fontIds select _forEachIndex];
+        _hit ctrlAddEventHandler ["ButtonClick", {
+            params ["_ctrl"];
+
+            [{
+                params ["_fontId"];
+
+                uiNamespace setVariable [QGVAR(paletteFontsOpen), false];
+
+                // As the Layout tab sets it (fnc_settingsRow).
+                missionNamespace setVariable [QGVAR(font), _fontId];
+
+                if (!isNil "CBA_settings_fnc_set") then {
+                    [QGVAR(font), _fontId, 0, "client"] call CBA_settings_fnc_set;
+                };
+
+                saveProfileNamespace;
+                [] call FUNC(elementsChanged);
+
+                private _display = uiNamespace getVariable [QGVAR(display), displayNull];
+
+                if (!isNull _display) then {
+                    [_display] call FUNC(openPaletteMenu);
+                };
+            }, [_ctrl getVariable [QGVAR(id), ""]]] call FUNC(later);
+        }];
+
+        _y = _y + _rowH;
+    } forEach _fontNames;
+
+    _y = _y + _pickPad;
+};
 
 // ----- The rows, the open one with its picker, its sliders and its note under it -----
 
@@ -888,6 +944,7 @@ private _sliders = createHashMap;
 
             uiNamespace setVariable [QGVAR(paletteOpen), [_id, ""] select (_id isEqualTo (uiNamespace getVariable [QGVAR(paletteOpen), ""]))];
             uiNamespace setVariable [QGVAR(paletteStylesOpen), false];
+            uiNamespace setVariable [QGVAR(paletteFontsOpen), false];
             uiNamespace setVariable [QGVAR(paletteEnd), false];
 
             [_display] call FUNC(openPaletteMenu);

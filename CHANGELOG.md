@@ -2,6 +2,23 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.108 - beta
+
+### Added
+
+- Real weapon pictures: move each slot's picture left/right and up/down (Layout tab and CBA settings, -50 to 50 % of the
+  weapon's length; 0 is centred).
+
+### Changed
+
+- The Font row in the Colours tab is a dropdown like Style: a click opens the list, each font's name shown in that font.
+
+### Fixed
+
+- A line of the card showed under a real weapon picture's bottom right corner.
+- Settings changed in the Layout tab (such as "Real weapon pictures") are written to the profile at once, so a restart keeps
+  them.
+
 ## 0.6.107 - beta
 
 ### Changed

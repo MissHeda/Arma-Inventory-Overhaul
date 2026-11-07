@@ -73,8 +73,14 @@ private _fnc_camera = {
 
     if (isNull _camera) exitWith {};
 
-    private _target = _scene get "target";
     private _dir = _scene get "dir";
+
+    // The player's own nudge (fnc_drawEquipmentCards, Layout: weapon picture left/right, up/down), in shares of the weapon's length:
+    // the camera goes the other way, so the weapon moves that way on the card.
+    (_scene getOrDefault ["offset", [0, 0]]) params [["_offsetX", 0], ["_offsetY", 0]];
+
+    private _length = _scene getOrDefault ["length", _scene getOrDefault ["frameSize", 1]];
+    private _target = ((_scene get "target") vectorAdd ([-(cos _dir), sin _dir, 0] vectorMultiply (-_offsetX * _length))) vectorAdd [0, 0, -_offsetY * _length];
     private _pitch = _scene get "pitch";
     private _distance = _scene get "distance";
     private _across = (cos _pitch) * _distance;
@@ -116,7 +122,8 @@ private _fnc_frame = {
 switch (_mode) do {
     case "show": {
         _arguments params [
-            ["_slot", "", [""]], ["_weapon", [], [[]]], ["_target3D", "", [""]], ["_background", [0.05, 0.055, 0.065], [[]]], ["_shares", [1, 1], [[]]]
+            ["_slot", "", [""]], ["_weapon", [], [[]]], ["_target3D", "", [""]], ["_background", [0.05, 0.055, 0.065], [[]]], ["_shares", [1, 1], [[]]],
+            ["_offset", [0, 0], [[]]]
         ];
 
         private _class = _weapon param [0, "", [""]];
@@ -140,6 +147,7 @@ switch (_mode) do {
             count _scene > 0 && {_scene getOrDefault ["frozen", false]} && {(_scene get "fitted") isEqualTo _fitted}
             && {(_scene get "target3D") isEqualTo _target3D} && {(_scene getOrDefault ["shares", []]) isEqualTo _shares}
             && {(_scene getOrDefault ["background", []]) isEqualTo _background}
+            && {(_scene getOrDefault ["offset", []]) isEqualTo _offset}
         ) exitWith {true};
 
         // The same weapon still being filmed: kept - another target filmed into, other parts put on the holder.
@@ -155,6 +163,11 @@ switch (_mode) do {
             if ((_scene getOrDefault ["shares", []]) isNotEqualTo _shares) then {
                 _scene set ["shares", _shares];
                 [_scene] call _fnc_frame;
+            };
+
+            if ((_scene getOrDefault ["offset", []]) isNotEqualTo _offset) then {
+                _scene set ["offset", _offset];
+                [_scene] call _fnc_camera;
             };
 
             // Other colours picked: the sphere takes the card's new colour (Mia, 0.6.102).
@@ -193,7 +206,8 @@ switch (_mode) do {
         private _objects = [];
 
         _scene = createHashMapFromArray [
-            ["class", _class], ["fitted", _fitted], ["target3D", _target3D], ["objects", _objects], ["shares", _shares], ["background", _background]
+            ["class", _class], ["fitted", _fitted], ["target3D", _target3D], ["objects", _objects], ["shares", _shares], ["background", _background],
+            ["offset", _offset]
         ];
         GVAR(cardScenes) set [_slot, _scene];
 
