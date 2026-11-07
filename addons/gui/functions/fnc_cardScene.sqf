@@ -121,7 +121,7 @@ switch (_mode) do {
 
         private _class = _weapon param [0, "", [""]];
 
-        if (_slot isEqualTo "" || {_class isEqualTo ""} || {!isPiPEnabled} || {!(missionNamespace getVariable [QGVAR(weapon3D), false])}) exitWith {
+        if (_slot isEqualTo "" || {_class isEqualTo ""} || {!isPiPEnabled} || {!(missionNamespace getVariable [QGVAR(weapon3D), true])}) exitWith {
             private _old = GVAR(cardScenes) getOrDefault [_slot, createHashMap];
 
             if (count _old > 0) then {
@@ -135,7 +135,13 @@ switch (_mode) do {
         private _fitted = [_weapon] call _fnc_fitOut;
         private _scene = GVAR(cardScenes) getOrDefault [_slot, createHashMap];
 
-        // The same weapon: kept - another target filmed into, other parts put on the holder.
+        // A still of this very weapon, parts, target and card size: kept as it is - nothing films any more.
+        if (
+            count _scene > 0 && {_scene getOrDefault ["frozen", false]} && {(_scene get "fitted") isEqualTo _fitted}
+            && {(_scene get "target3D") isEqualTo _target3D} && {(_scene getOrDefault ["shares", []]) isEqualTo _shares}
+        ) exitWith {true};
+
+        // The same weapon still being filmed: kept - another target filmed into, other parts put on the holder.
         if (count _scene > 0 && {(_scene get "class") isEqualTo _class} && {!isNull (_scene getOrDefault ["camera", objNull])}) exitWith {
             if ((_scene get "target3D") isNotEqualTo _target3D) then {
                 private _camera = _scene get "camera";
@@ -333,6 +339,26 @@ switch (_mode) do {
                 };
 
                 [_scene] call _fnc_camera;
+
+                // A still, as a photo of the weapon (Mia, 0.6.85: "just take a picture of it"): a few frames to film it, then the
+                // camera and the scene go without ending what it filmed into - the texture keeps its last picture, and nothing
+                // films while the window is open.
+                [{
+                    params ["_scene"];
+
+                    private _camera = _scene getOrDefault ["camera", objNull];
+
+                    if (isNull _camera) exitWith {};
+
+                    camDestroy _camera;
+
+                    {
+                        if (!isNull _x) then {deleteVehicle _x};
+                    } forEach (_scene getOrDefault ["objects", []]);
+
+                    _scene set ["objects", []];
+                    _scene set ["frozen", true];
+                }, [_scene], CARD_3D_STILL_FRAMES] call CBA_fnc_execAfterNFrames;
             },
             [_scene, _fnc_camera, _fnc_frame],
             5

@@ -342,8 +342,9 @@ private _lockTip = _section getOrDefault ["lockTip", ""];
 private _lockIconW = [0, SQUARE(_lineH)] select (_lockTip isNotEqualTo "");
 
 // The container quick moves go into (fnc_quickTarget): its picture beside the grid glows (below), unless the player switched it off.
-private _targeted = !isNull _sectionContainer && {_sectionContainer isEqualTo GVAR(quickTarget)}
-    && {missionNamespace getVariable [QGVAR(quickTargetIcon), true]} && {call FUNC(isInventoryMode)};
+// Every container's picture gets the outline, hidden but for the picked one: a pick shows it at once, with no build (fnc_pickTarget -
+// a build per click stuttered, Mia 0.6.85).
+private _targeted = !isNull _sectionContainer && {missionNamespace getVariable [QGVAR(quickTargetIcon), true]} && {call FUNC(isInventoryMode)};
 
 private _lockW = _lockIconW;
 
@@ -689,7 +690,12 @@ private _fnc_targetGlow = {
     private _accentRgb = (_theme getOrDefault ["accent", [0.84, 0.54, 0.1, 1]]) select [0, 3];
     private _radius = (_theme getOrDefault ["radius", 0]) min (_height / 4);
 
-    [_display, _parent, _rect, _accentRgb + [0.5], _radius] call FUNC(uiRing);
+    private _ring = [_display, _parent, _rect, _accentRgb + [0.5], _radius] call FUNC(uiRing);
+    private _shown = _sectionContainer isEqualTo GVAR(quickTarget);
+
+    {_x ctrlShow _shown} forEach _ring;
+
+    (uiNamespace getVariable [QGVAR(targetGlows), []]) pushBack [_sectionContainer, _ring];
 };
 
 if (_hasBox) then {

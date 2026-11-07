@@ -593,6 +593,8 @@
 #define CARD_3D_DISTANCE 0.95
 // How much of what the card shows the weapon fills, across or up and down - whichever it reaches first.
 #define CARD_3D_ROOM 0.88
+// How many frames a weapon is filmed before its picture is kept as a still and the scene goes.
+#define CARD_3D_STILL_FRAMES 6
 #define INSPECT_3D_ASPECT (getResolution select 4)
 #define INSPECT_3D_SUPER 2
 #define INSPECT_3D_MAX_RES 2048

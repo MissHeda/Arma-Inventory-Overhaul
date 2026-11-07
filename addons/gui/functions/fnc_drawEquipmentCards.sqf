@@ -417,7 +417,7 @@ private _fnc_weaponCard = {
         // setting. The picture has the screen's shape and the card shows its middle, as the inspect card's 3D view (fnc_drawInspect).
         private _real = false;
 
-        if (isPiPEnabled && {missionNamespace getVariable [QGVAR(weapon3D), false]}) then {
+        if (isPiPEnabled && {missionNamespace getVariable [QGVAR(weapon3D), true]}) then {
             _pictureRect params ["_picX", "_picY", "_picW", "_picH"];
 
             private _viewPixelsW = round (_picW / pixelW);
@@ -435,6 +435,8 @@ private _fnc_weaponCard = {
             private _filmAlpha = _film param [3, 0];
             private _background = [0, 1, 2] apply {((_panel param [_x, 0.05]) * (1 - _filmAlpha)) + ((_film param [_x, 1]) * _filmAlpha)};
 
+            // Black behind the weapon: the theme's grey came out bluish in the scene's light; black stays black.
+            _background = [0, 0, 0];
             _real = ["show", [_slot, _weapon, _target, _background, [_viewPixelsW / _imagePixelsW, _viewPixelsH / _imagePixelsH]]] call FUNC(cardScene);
 
             if (_real) then {

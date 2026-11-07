@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.87 - beta
+
+### Changed
+
+- Real weapon pictures are on again, now as a still: each weapon is filmed for a few frames when its card is drawn, then the
+  picture is kept and nothing films any more (no cost while the window is open). On black, which stays black in the light.
+- Picking a quick move target no longer builds the window again: the outline shows at once, without the short stutter.
+- A double click on a uniform, vest or backpack (its picture beside the grid, or on the doll) puts it onto the ground at once.
+- Footer: the double click's key hint goes back to "Quick move" when the mouse leaves an item.
+
 ## 0.6.86 - beta
 
 ### Added

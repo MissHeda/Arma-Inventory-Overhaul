@@ -129,7 +129,7 @@
     "CHECKBOX",
     [LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    false,
+    true,
     0,
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;

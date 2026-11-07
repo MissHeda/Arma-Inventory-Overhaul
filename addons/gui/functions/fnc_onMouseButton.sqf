@@ -633,7 +633,20 @@ switch (true) do {
             default {objNull};
         };
 
+        // Twice on the same one: the uniform, vest or backpack goes onto the ground at once, as the drop key takes it off - and the
+        // first click's pick is taken back (Mia, 0.6.85: a double click on the backpack did nothing).
+        private _slotKey = [_slotOwner, _slotName];
+        private _slotDouble = !isNull _picked && {(GVAR(lastSlotClick) param [0, []]) isEqualTo _slotKey}
+            && {(diag_tickTime - (GVAR(lastSlotClick) param [1, -1])) < DOUBLE_CLICK};
+
+        GVAR(lastSlotClick) = [[_slotKey, []] select _slotDouble, diag_tickTime];
+
         [_picked] call FUNC(pickTarget);
+
+        if (_slotDouble) then {
+            GVAR(instantFrame) = diag_frameNo;
+            [_slotOwner, _slotName, "ground", []] call FUNC(doUnequip);
+        };
     };
     case (_ctrl || {_ctrlAtPress}): {
         if (_slotSource isNotEqualTo []) then {

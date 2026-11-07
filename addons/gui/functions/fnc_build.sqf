@@ -214,6 +214,7 @@ uiNamespace setVariable [QGVAR(parts), createHashMap];
 // fnc_drawEquipmentCards): what the hint explains, the comparison card and the name at the mouse - their
 // controls went with the sweep above.
 uiNamespace setVariable [QGVAR(infoAreas), []];
+uiNamespace setVariable [QGVAR(targetGlows), []];
 uiNamespace setVariable [QGVAR(weightBar), createHashMap];
 uiNamespace setVariable [QGVAR(weightPreview), controlNull];
 uiNamespace setVariable [QGVAR(compare), controlNull];

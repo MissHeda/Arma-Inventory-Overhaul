@@ -24,4 +24,11 @@ if (isNull _container || {!(call FUNC(isInventoryMode))}) exitWith {};
 
 GVAR(quickTarget) = [_container, objNull] select (GVAR(quickTarget) isEqualTo _container);
 
-[] call FUNC(buildSoon);
+// The outlines are there already (fnc_drawSection): shown and hidden in place - a build per click stuttered (Mia, 0.6.85).
+{
+    _x params ["_holder", "_ring"];
+
+    private _shown = _holder isEqualTo GVAR(quickTarget);
+
+    {_x ctrlShow _shown} forEach _ring;
+} forEach (uiNamespace getVariable [QGVAR(targetGlows), []]);
