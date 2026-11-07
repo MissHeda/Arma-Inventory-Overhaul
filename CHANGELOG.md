@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.93 - beta
+
+### Changed
+
+- Real weapon pictures are off by default: each one keeps a camera filming while the window is open, and its background
+  cannot be see-through. Switch them on in the Layout tab.
+
 ## 0.6.92 - beta
 
 Tested in game.

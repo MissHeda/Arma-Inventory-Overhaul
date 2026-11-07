@@ -39,7 +39,7 @@ private _rows = [
     ],
     ["", LLSTRING(SettingsMenu_Tiles)],
     [QGVAR(tileNames), LLSTRING(Setting_TileNames), LLSTRING(Setting_TileNames_Desc), "check", false],
-    [QGVAR(weapon3D), LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc), "check", true],
+    [QGVAR(weapon3D), LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc), "check", false],
     [QGVAR(compareTooltip), LLSTRING(Setting_CompareTooltip), LLSTRING(Setting_CompareTooltip_Desc), "check", true],
     [QGVAR(magazineFillBar), LLSTRING(Setting_MagazineFillBar), LLSTRING(Setting_MagazineFillBar_Desc), "check", true],
     [QGVAR(magazineText), LLSTRING(Setting_MagazineText), LLSTRING(Setting_MagazineText_Desc), "check", true],

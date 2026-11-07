@@ -417,7 +417,7 @@ private _fnc_weaponCard = {
         // setting. The picture has the screen's shape and the card shows its middle, as the inspect card's 3D view (fnc_drawInspect).
         private _real = false;
 
-        if (isPiPEnabled && {missionNamespace getVariable [QGVAR(weapon3D), true]}) then {
+        if (isPiPEnabled && {missionNamespace getVariable [QGVAR(weapon3D), false]}) then {
             _pictureRect params ["_picX", "_picY", "_picW", "_picH"];
 
             private _viewPixelsW = round (_picW / pixelW);

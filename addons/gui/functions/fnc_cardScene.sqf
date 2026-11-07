@@ -121,7 +121,7 @@ switch (_mode) do {
 
         private _class = _weapon param [0, "", [""]];
 
-        if (_slot isEqualTo "" || {_class isEqualTo ""} || {!isPiPEnabled} || {!(missionNamespace getVariable [QGVAR(weapon3D), true])}) exitWith {
+        if (_slot isEqualTo "" || {_class isEqualTo ""} || {!isPiPEnabled} || {!(missionNamespace getVariable [QGVAR(weapon3D), false])}) exitWith {
             private _old = GVAR(cardScenes) getOrDefault [_slot, createHashMap];
 
             if (count _old > 0) then {
