@@ -244,6 +244,22 @@ if (isNil "_theme" || {!(_theme isEqualType createHashMap)}) then {
 
 _theme set ["id", _id];
 
+// The player's own font (Layout: Font; Mia, 0.6.103): its regular and its bold cut in place of the theme's, for every word drawn
+// with the theme's font.
+private _fontPair = (createHashMapFromArray [
+    ["puristaLight", ["PuristaLight", "PuristaMedium"]],
+    ["roboto", ["RobotoCondensed", "RobotoCondensedBold"]],
+    ["robotoLight", ["RobotoCondensedLight", "RobotoCondensed"]],
+    ["etelka", ["EtelkaNarrowMediumPro", "EtelkaNarrowMediumPro"]],
+    ["tahoma", ["TahomaB", "TahomaB"]],
+    ["lucida", ["LucidaConsoleB", "LucidaConsoleB"]]
+]) getOrDefault [missionNamespace getVariable [QGVAR(font), "purista"], []];
+
+if (_fontPair isNotEqualTo []) then {
+    _theme set ["font", _fontPair select 0];
+    _theme set ["fontBold", _fontPair select 1];
+};
+
 if ((_theme getOrDefault ["name", ""]) isEqualTo "") then {
     _theme set ["name", localize _nameKey];
 };

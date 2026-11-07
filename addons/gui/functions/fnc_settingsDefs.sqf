@@ -19,6 +19,7 @@
 
 private _rows = [
     ["", LLSTRING(SettingsMenu_Shown)],
+    [QGVAR(font), LLSTRING(Setting_Font), LLSTRING(Setting_Font_Desc), "list", "purista", [["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"], [LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight), LLSTRING(Font_Etelka), LLSTRING(Font_Tahoma), LLSTRING(Font_Lucida)]]],
     [QGVAR(showWeight), LLSTRING(Setting_ShowWeight), LLSTRING(Setting_ShowWeight_Desc), "check", true],
     [QGVAR(showGear), LLSTRING(Setting_ShowGear), LLSTRING(Setting_ShowGear_Desc), "check", true],
     [QGVAR(showSmallSlots), LLSTRING(Setting_ShowSmallSlots), LLSTRING(Setting_ShowSmallSlots_Desc), "check", true],

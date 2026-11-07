@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.104 - beta
+
+### Added
+
+- Pick the window's font: Layout tab (and the CBA settings), "Font" - Purista (Arma's and ACE's, the default), Purista Light,
+  Roboto Condensed, Roboto Condensed Light, Etelka, Tahoma or Lucida Console.
+
 ## 0.6.103 - beta
 
 ### Added

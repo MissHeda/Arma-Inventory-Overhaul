@@ -196,6 +196,17 @@
 
 // Each player's own window: which column stands where, left to right (fnc_layoutGlass). "free" is the middle left empty, where an
 // open kit's window and the inspect card go.
+// Each player's own font for the window's words (fnc_build). Read at every build.
+[
+    QGVAR(font),
+    "LIST",
+    [LLSTRING(Setting_Font), LLSTRING(Setting_Font_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    [["purista", "puristaLight", "roboto", "robotoLight", "etelka", "tahoma", "lucida"], [LLSTRING(Font_Purista), LLSTRING(Font_PuristaLight), LLSTRING(Font_Roboto), LLSTRING(Font_RobotoLight), LLSTRING(Font_Etelka), LLSTRING(Font_Tahoma), LLSTRING(Font_Lucida)], 0],
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
 [
     QGVAR(columnOrder),
     "LIST",

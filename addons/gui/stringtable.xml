@@ -115,6 +115,27 @@
         <Key ID="STR_aio_gui_Filter_Tooltip">
             <English>Fades everything whose name does not match. Escape empties it.</English>
         </Key>
+        <Key ID="STR_aio_gui_Font_Etelka">
+            <English>Etelka</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_Lucida">
+            <English>Lucida Console</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_Purista">
+            <English>Purista</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_PuristaLight">
+            <English>Purista Light</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_Roboto">
+            <English>Roboto Condensed</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_RobotoLight">
+            <English>Roboto Condensed Light</English>
+        </Key>
+        <Key ID="STR_aio_gui_Font_Tahoma">
+            <English>Tahoma</English>
+        </Key>
         <Key ID="STR_aio_gui_Ground_With">
             <English>Ground - %1</English>
         </Key>
@@ -960,6 +981,12 @@
         </Key>
         <Key ID="STR_aio_gui_Setting_DoubleClick_None">
             <English>Nothing</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Font">
+            <English>Font</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Font_Desc">
+            <English>The font of the window's words.\n\nPurista is Arma's and ACE's own.</English>
         </Key>
         <Key ID="STR_aio_gui_Setting_HandDrop">
             <English>Time to drop an item</English>
