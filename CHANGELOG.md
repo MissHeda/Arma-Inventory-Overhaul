@@ -2,6 +2,12 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.90 - beta
+
+### Fixed
+
+- GreenMag Rework: stripper clips and boxes of clips dragged onto a magazine tile did nothing; they load now, and what is dragged is what goes in (GreenMag 1.2: loose rounds only from loose rounds, clips only from clips).
+
 ## 0.6.89 - beta
 
 Tested in game (an unattended test mission, screenshots).

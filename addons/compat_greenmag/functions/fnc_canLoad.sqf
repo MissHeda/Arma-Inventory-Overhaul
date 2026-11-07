@@ -42,7 +42,7 @@ if ((toLowerANSI _item) find "gmr_" != 0) exitWith {[false, ""]};
 
 private _facts = [_item] call gmr_main_fnc_itemInfo;
 
-if !((_facts param [GMR_ITEM_KIND, ""]) in ["round", "pack", "belt"]) exitWith {[false, ""]};
+if !((_facts param [GMR_ITEM_KIND, ""]) in ["round", "clip", "pack", "belt"]) exitWith {[false, ""]};
 
 private _class = _targetTile getOrDefault ["class", ""];
 
@@ -91,6 +91,14 @@ if (_amount >= (_magazine param [GMR_MAG_CAPACITY, 0])) exitWith {[false, LLSTRI
 
 // The kind of round the magazine may take (GreenMag's "Ammo rules", a tracer magazine, mixed rounds).
 private _ammunition = [_facts select GMR_ITEM_ROUND, _facts select GMR_ITEM_BELT_TYPE] select _isBelt;
+
+// A box of stripper clips (GreenMag 1.1) holds clips: their rounds are what loads.
+private _inside = [_ammunition] call gmr_main_fnc_itemInfo;
+
+if (!_isBelt && {(_inside param [GMR_ITEM_KIND, ""]) isEqualTo "clip"}) then {
+    _ammunition = _inside select GMR_ITEM_ROUND;
+};
+
 private _why = ([_class, _amount, _ammunition] call gmr_handling_fnc_loadRule) param [1, ""];
 
 if (_why isNotEqualTo "") exitWith {[false, _why]};

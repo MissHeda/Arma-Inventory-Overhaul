@@ -33,7 +33,22 @@ private _item = _entry get "class";
 private _class = _targetTile get "class";
 private _amount = _targetTile getOrDefault ["ammo", 0];
 private _facts = [_item] call gmr_main_fnc_itemInfo;
-private _ammunition = [_facts select GMR_ITEM_ROUND, _facts select GMR_ITEM_BELT_TYPE] select ((_facts select GMR_ITEM_KIND) isEqualTo "belt");
+private _isBelt = (_facts select GMR_ITEM_KIND) isEqualTo "belt";
+private _ammunition = [_facts select GMR_ITEM_ROUND, _facts select GMR_ITEM_BELT_TYPE] select _isBelt;
+
+// What was dragged is what loads (GreenMag 1.2): loose rounds and their boxes only loose rounds, a stripper clip or a box
+// of clips only rounds on clips. A box of clips holds clips, so its rounds are the clips' rounds.
+private _from = ["loose", "clips"] select ((_facts select GMR_ITEM_KIND) isEqualTo "clip");
+private _inside = [_ammunition] call gmr_main_fnc_itemInfo;
+
+if (!_isBelt && {(_inside param [GMR_ITEM_KIND, ""]) isEqualTo "clip"}) then {
+    _ammunition = _inside select GMR_ITEM_ROUND;
+    _from = "clips";
+};
+
+if (_isBelt) then {
+    _from = "auto";
+};
 
 if ((_facts select GMR_ITEM_KIND) isEqualTo "pack") then {
     [_unit, _item, true, _sourceGrid getOrDefault ["container", objNull]] call gmr_handling_fnc_unpack;
@@ -41,15 +56,15 @@ if ((_facts select GMR_ITEM_KIND) isEqualTo "pack") then {
 
 // After this drag has ended: the window closes, and on the frame after GreenMag starts with nothing open, as after its own drag.
 [{
-    params ["_unit", "_class", "_amount", "_ammunition"];
+    params ["_unit", "_class", "_amount", "_ammunition", "_from"];
 
     ["GreenMag loading"] call EFUNC(gui,closeDisplay);
 
     [{
-        params ["_unit", "_class", "_amount", "_ammunition"];
+        params ["_unit", "_class", "_amount", "_ammunition", "_from"];
 
-        [_unit, "fill", _class, [_amount], _ammunition] call gmr_handling_fnc_start;
+        [_unit, "fill", _class, [_amount], _ammunition, _from] call gmr_handling_fnc_start;
     }, _this] call CBA_fnc_execNextFrame;
-}, [_unit, _class, _amount, _ammunition]] call CBA_fnc_execNextFrame;
+}, [_unit, _class, _amount, _ammunition, _from]] call CBA_fnc_execNextFrame;
 
 true
