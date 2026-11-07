@@ -365,12 +365,12 @@ private _fnc_weaponCard = {
         private _real = false;
 
         if (isPiPEnabled && {missionNamespace getVariable [QGVAR(weapon3D), false]}) then {
-            // The whole card below its padding, under the name's line too: the picture as long as the card (Mia, 0.6.104), the
-            // attachments' plates and the name drawn over it after.
-            private _picX = _contentX;
-            private _picY = _innerTop;
-            private _picW = _contentW;
-            private _picH = (_cardY + _cardH - _padY - _innerTop) max pixelH;
+            // The whole card, edge to edge and down to its foot: the attachments' plates and the name lie wholly on the picture,
+            // not half on it (Mia, 0.6.106), drawn over it after; its corners rounded as the card's.
+            private _picX = _innerX;
+            private _picY = _cardY;
+            private _picW = _cardX + _cardW - _innerX;
+            private _picH = _cardH;
 
             private _viewPixelsW = round (_picW / pixelW);
             private _viewPixelsH = round (_picH / pixelH);
@@ -416,11 +416,12 @@ private _fnc_weaponCard = {
                 _clip ctrlEnable false;
 
                 // Round corners as the card's: the outside of a quarter circle in the picture's backdrop colour over each corner.
-                private _maskRadius = (_radius min (_picH / 4)) * 0.8;
+                private _maskRadius = _cardRadius;
 
                 if (_maskRadius >= pixelH * 2) then {
                     private _maskW = SQUARE(_maskRadius);
-                    private _maskColor = _background + [1];
+                    // The column round the card shows at its corners: the panel's colour.
+                    private _maskColor = ((_panel select [0, 3]) apply {_x max 0}) + [1];
 
                     {
                         _x params ["_texture", "_maskX", "_maskY"];
@@ -433,6 +434,12 @@ private _fnc_weaponCard = {
                         [UI_TEX(mask_bl_ca), _picX, _picY + _picH - _maskRadius],
                         [UI_TEX(mask_br_ca), _picX + _picW - _maskW, _picY + _picH - _maskRadius]
                     ];
+                };
+
+                // The weapon in hand's bar down the left edge, which the picture now covers: again on top of it.
+                if (!_flat && {_inHand}) then {
+                    private _bar = [_display, "AIO_PanelRect", _parent, [_cardX, _cardY + _cardRadius, pixelW * 3, _cardH - _cardRadius * 2]] call FUNC(uiCreate);
+                    _bar ctrlSetBackgroundColor _colorAccent;
                 };
             };
         };

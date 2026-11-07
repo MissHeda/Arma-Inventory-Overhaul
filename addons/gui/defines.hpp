@@ -312,7 +312,7 @@
 #define HINT_SHAKE_WIDTH (UNIT * 0.22)
 #define HINT_SHAKE_RATE 14
 // The footer hint's words a little lower than their box's middle, on the line of the key hints' words (Mia, 0.6.102: higher than them).
-#define HINT_DROP 0.1
+#define HINT_DROP 0.02
 
 // One turn of the mouse wheel scrolls a column this far when a picture's clip group has taken the turn from it
 // (fnc_passWheel): about the three rows the engine's own step comes to.

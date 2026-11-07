@@ -789,7 +789,14 @@ private _fontButton = [
         [{
             params ["_next"];
 
-            [QGVAR(font), _next, 0, "client"] call CBA_fnc_setSetting;
+            // As the Layout tab sets it (fnc_settingsRow): through CBA_fnc_setSetting the click did nothing (Mia, 0.6.106).
+            missionNamespace setVariable [QGVAR(font), _next];
+
+            if (!isNil "CBA_settings_fnc_set") then {
+                [QGVAR(font), _next, 0, "client"] call CBA_settings_fnc_set;
+            };
+
+            [] call FUNC(elementsChanged);
 
             private _display = uiNamespace getVariable [QGVAR(display), displayNull];
 

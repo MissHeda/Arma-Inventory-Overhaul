@@ -2,6 +2,18 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.107 - beta
+
+### Changed
+
+- Real weapon pictures fill the whole card, edge to edge, with the card's round corners: the attachments' plates and the name
+  lie wholly on the picture instead of half on it.
+- The footer's hint line sits a little higher, level with the key hints' words.
+
+### Fixed
+
+- The Font row in the Colours tab did nothing when clicked.
+
 ## 0.6.106 - beta
 
 ### Added
