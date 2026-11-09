@@ -34,6 +34,8 @@ GVAR(snapshot) = [objNull, createHashMap];
 // ...], and when to look again (fnc_keepPlaces): ACE makes all three new when one is picked.
 GVAR(kept) = [];
 GVAR(keptAt) = 0;
+// What the soldier wore and held at that look (getUnitLoadout): what a picked container must still hold (fnc_keepPlaces).
+GVAR(keptLoadout) = [];
 
 // The last frame of the quiet time after a loadout was set on ACE's unit: until then nothing is moved out of
 // the containers (fnc_stageOverflow) and no old places are written onto them (fnc_keepPlaces).
@@ -169,6 +171,7 @@ if (hasInterface) then {
         if (GVAR(attached) && {_unit isEqualTo (missionNamespace getVariable [QACEGVAR(arsenal,center), objNull])}) then {
             GVAR(kept) = [];
             GVAR(keptAt) = 0;
+            GVAR(keptLoadout) = [];
             GVAR(loadoutFrame) = diag_frameNo + LOADOUT_QUIET_FRAMES;
 
             [] call FUNC(settle);

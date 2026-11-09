@@ -37,6 +37,8 @@ private _objects = [uniformContainer _center, vestContainer _center, backpackCon
 private _classes = [uniform _center, vest _center, backpack _center];
 private _due = diag_tickTime >= GVAR(keptAt);
 private _next = [];
+// The slots (3 uniform, 4 vest, 5 backpack of a loadout) that hold another class of container than at the last look.
+private _swapped = [];
 
 {
     private _object = _x;
@@ -51,6 +53,10 @@ private _next = [];
         if (_object isNotEqualTo _oldObject) then {
             // A new object, of the same class or another: the arrangement the player had comes back to it, as far
             // as it fits the new grid. The compartments depend on whose it is (aio_storage_fnc_getOwner).
+            if (_oldClass isNotEqualTo "" && {_class isNotEqualTo ""} && {_class isNotEqualTo _oldClass}) then {
+                _swapped pushBack (_forEachIndex + 3);
+            };
+
             if (_oldClass isNotEqualTo "" && {_oldRecords isNotEqualTo []}) then {
                 _object setVariable [QEGVAR(storage,owner), _center];
 
@@ -74,6 +80,66 @@ private _next = [];
 
 GVAR(kept) = _next;
 
+// Another uniform, vest or backpack picked: ACE carries the contents over with setUnitLoadout, which stops filling at the
+// new container's maximumLoad - a smaller vest came back with half the magazines, the rest gone for good (Haiden, Discord
+// 2026-11-09). The grid does not care about that load, so what the engine left out is added again as for any loadout
+// (aio_storage_fnc_topUpLoadout, only what was turned down for the load); what has no cells then moves on to another
+// container or the staging space like any overflow (fnc_stageOverflow). Only when the new container holds nothing that
+// was not there before - a loadout loaded into another vest brings contents of its own and is left alone - and never in a
+// loadout's quiet time.
+if (_swapped isNotEqualTo [] && {GVAR(keptLoadout) isNotEqualTo []} && {diag_frameNo > GVAR(loadoutFrame)}) then {
+    private _now = getUnitLoadout _center;
+    private _wanted = +GVAR(keptLoadout);
+
+    // An entry of a container's list without its count, so the same thing in other numbers is the same key.
+    private _keys = {
+        params ["_list"];
+
+        private _result = createHashMap;
+
+        {
+            if (_x isEqualType [] && {count _x >= 2}) then {
+                private _key = toLowerANSI str ((_x select [0, 1]) + (_x select [2]));
+
+                private _count = _x select 1;
+
+                if (_count isEqualType 0) then {
+                    _result set [_key, (_result getOrDefault [_key, 0]) + (_count max 0)];
+                };
+            };
+        } forEach _list;
+
+        _result
+    };
+
+    private _onlyOld = _swapped findIf {
+        private _index = _x;
+        private _old = [((GVAR(keptLoadout) param [_index, []]) param [1, [], [[]]])] call _keys;
+        private _new = [((_now param [_index, []]) param [1, [], [[]]])] call _keys;
+
+        (keys _new) findIf {(_new get _x) > (_old getOrDefault [_x, 0])} >= 0
+    } < 0;
+
+    if (_onlyOld) then {
+        {
+            private _slot = _wanted param [_x, []];
+
+            if (_slot isEqualType [] && {count _slot >= 2}) then {
+                _slot set [0, _classes select (_x - 3)];
+            };
+        } forEach _swapped;
+
+        private _added = [_center, _wanted] call EFUNC(storage,topUpLoadout);
+
+        if (_added > 0) then {
+            INFO_1("Another container picked in the arsenal: %1 things its load turned down were put back.",_added);
+        };
+    };
+
+    _due = true;
+};
+
 if (_due) then {
     GVAR(keptAt) = diag_tickTime + KEPT_REFRESH;
+    GVAR(keptLoadout) = getUnitLoadout _center;
 };

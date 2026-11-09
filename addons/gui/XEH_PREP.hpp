@@ -276,6 +276,7 @@ PREP(palette);
 PREP(paletteAllowed);
 PREP(paletteForced);
 PREP(paletteImport);
+PREP(paletteParse);
 PREP(paletteRead);
 PREP(panelColour);
 PREP(paletteInfo);

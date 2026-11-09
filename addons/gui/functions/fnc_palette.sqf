@@ -41,7 +41,7 @@ if (missionNamespace getVariable [QGVAR(paletteOff), false]) exitWith {
 
 // The colours a server or mission forces (aio_gui_paletteText): everyone wears those.
 if ([] call FUNC(paletteForced)) exitWith {
-    private _forced = [parseSimpleArray (missionNamespace getVariable [QGVAR(paletteText), ""])] call FUNC(paletteRead);
+    private _forced = [[missionNamespace getVariable [QGVAR(paletteText), ""]] call FUNC(paletteParse)] call FUNC(paletteRead);
 
     [_forced, +PALETTE_DEFAULT] select (_forced isEqualTo [])
 };
