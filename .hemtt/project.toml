@@ -58,6 +58,16 @@ parameters = [
     "-mod=\"C:\\Users\\Heda\\GitHub Repos\\GreenMag-Rework\\.hemttout\\dev\"", # quoted as HEMTT quotes its own -mod
 ]
 
+# Ravage, for the compat_ravage addon: play a Ravage mission (or put Ravage's modules in Eden) and "Search"
+# a fridge, a cupboard or a crate.
+#
+#   hemtt launch ravage
+[hemtt.launch.ravage]
+extends = "default"
+workshop = [
+    "1376636636", # Ravage
+]
+
 # A test scene for the inventory (.hemtt/missions/AIO_Test.VR): a soldier with full gear, a crate, an
 # ACE Arsenal box, a vehicle, a body and things on the ground. Opens in Eden - play it from there.
 #
