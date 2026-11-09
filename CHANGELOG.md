@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.1 - beta
+
+### Fixed
+
+- Picking a smaller vest, uniform or backpack in the arsenal deleted everything beyond its weight limit; what the game left out now comes back into the new container, and what has no room there moves on to another container or the staging space.
+- "parseSimpleArray format error" (fnc_palette.sqf) on servers that force the colours setting empty or with text that is no palette; a forced empty setting now forces nothing.
+
 ## 0.7.0 - beta
 
 The release of everything since 0.6.29 (the beta builds 0.6.30 to 0.6.113 below): real 3D weapon pictures, Tarkov-style

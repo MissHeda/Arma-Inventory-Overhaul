@@ -39,6 +39,7 @@ GVAR(removeZone) = -1;
 GVAR(snapshot) = [objNull, createHashMap];
 GVAR(kept) = [];
 GVAR(keptAt) = 0;
+GVAR(keptLoadout) = [];
 GVAR(loadoutFrame) = -1;
 GVAR(itemsSeen) = false;
 GVAR(cargoPending) = false;
