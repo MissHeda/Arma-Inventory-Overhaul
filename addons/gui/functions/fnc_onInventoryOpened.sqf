@@ -100,6 +100,12 @@ if (_unit isNotEqualTo PLAYER_UNIT) exitWith {
     INFO_1("refused: %1 is not the player's unit (ACE_player) - nothing opens.",typeOf _unit);
 };
 
+// Another mod holds this opening back and asks again itself once its container is ready (GVAR(openingHolds)):
+// nothing opens now - the window would show the container before it is filled and refuse the second asking.
+if (GVAR(openingHolds) findIf {[_unit, _container, _secondary] call _x} >= 0) exitWith {
+    INFO_1("held: %1 is filled by another mod first - it asks again then.",_named select 0);
+};
+
 // A weapon carried on a soldier's back is his, never loot: WebKnight's and KJW's Two Primary (and Secondary) Weapons
 // show it with a holder of the engine's single weapon model hanging on him (taken out here, it would be there twice -
 // that mod still has it). Only those: a holder of another shape hanging on someone (BackpackOnChest's pack) is a mod's

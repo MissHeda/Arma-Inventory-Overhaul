@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.2 - beta
+
+### Added
+
+- Ravage support: searching a Ravage container ("Search" hold action) now shows what was found. The window opened on
+  the pile before Ravage had filled it and then refused Ravage's second opening, so the container looked empty.
+
 ## 0.7.1 - beta
 
 ### Fixed

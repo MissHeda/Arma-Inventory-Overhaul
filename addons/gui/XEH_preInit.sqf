@@ -12,6 +12,11 @@ GVAR(container) = objNull;
 GVAR(secondary) = objNull;
 GVAR(openedAt) = -1;
 
+// Another mod's say before an opening (fnc_onInventoryOpened): codes given [unit, container, secondary], each
+// answering true to hold this opening back - that mod asks again itself once its container is ready (Ravage
+// fills a searched pile only after the engine opened it: compat_ravage). Compat addons push theirs in a preInit.
+GVAR(openingHolds) = [];
+
 // The living person the window looks into and how - "whole" or by the "backpack", "" for none - set by
 // fnc_open, watched by fnc_onFrame: a person walks off by themselves.
 GVAR(person) = objNull;
