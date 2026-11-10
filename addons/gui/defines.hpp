@@ -451,12 +451,8 @@
 // them, and they match the game's items better than anything drawn for this mod.
 #define GEAR_ICON(NAME) QUOTE(\A3\ui_f\data\GUI\Rsc\RscDisplayGear\NAME.paa)
 
-// An attachment's mark on a weapon's picture (fnc_drawAttachments): the weapon's own shape for the slot, at most this share of the
-// picture's size, in this colour.
-#define ATTACHMENT_MARK 0.18
-#define ATTACHMENT_MARK_COLOR [1, 1, 1, 0.9]
-// An attachment's own picture on the weapon's picture: a square of this share of its height (fnc_drawAttachments).
-#define ATTACHMENT_PICTURE 0.4
+// An attachment's mark on a weapon's picture (fnc_drawAttachments): the weapon's own white shape for the slot, as Arma draws it.
+#define ATTACHMENT_MARK_COLOR [1, 1, 1, 1]
 
 // What the config classes start with. Every control gets its real colours from the theme.
 #define C_CLEAR         {0, 0, 0, 0}
@@ -604,20 +600,11 @@
 #define CARD_3D_TARGET "aio_card3d"
 #define CARD_3D_MAX_RES 1024
 #define CARD_3D_DISTANCE 0.95
-// How much of what the card shows the weapon fills, across or up and down - whichever it reaches first.
-#define CARD_3D_ROOM 0.72
+// How much of what the card shows the weapon fills, across or up and down - whichever it reaches first (fnc_cardScene).
+#define CARD_3D_ROOM 0.86
+#define CARD_3D_ROOM_LAUNCHER 0.72
 // The shortest length a weapon card's picture is framed for, in metres: a handgun shows at a handgun's size, not card-filling.
 #define CARD_3D_MIN_LENGTH 0.75
-// A weapon's height side on, at most this share of its length: its box is taller than its profile (the MX came out a fifth of its
-// card, Mia 0.6.91).
-#define CARD_3D_PROFILE 0.42
-// A handgun is taller for its length: grip and magazine.
-#define CARD_3D_PROFILE_HANDGUN 0.9
-// How far below its box's middle a handgun is aimed at, in metres.
-#define CARD_3D_HANDGUN_DROP 0
-// How much less a weapon card's picture holds across than its height times the screen's shape says (measured in game, 0.6.112:
-// an NLAW of 1.05 m took 79 % of the card's width where the formula gave 54 %).
-#define CARD_3D_WIDTH_FIX 1.46
 // How many frames a weapon is filmed before its picture is kept as a still and the scene goes.
 #define CARD_3D_STILL_FRAMES 6
 // The scene's lights against the inspect card's.
@@ -630,6 +617,12 @@
 #define INSPECT_3D_SUPER 2
 #define INSPECT_3D_MAX_RES 2048
 #define INSPECT_3D_FOV 0.35
+// What a scene's camera sees at a distance, up and down from the middle of its picture, as a share of that distance - across it is
+// this times the screen's shape (INSPECT_3D_ASPECT). Three quarters of the camera's FOV: measured in game on the weapon cards with
+// markers of a known distance (0.7.10).
+#define CAMERA_TAN (0.75 * INSPECT_3D_FOV)
+// How much of the inspect card's 3D box a weapon fills where its view starts (fnc_inspect3D "centre").
+#define INSPECT_3D_ROOM 0.86
 
 // While a 3D view is open the Picture-in-Picture view distance is this (setPiPViewDistance, the engine takes 100 at least): the
 // scene stands in its sphere, and the world round it costs only frames. Far enough for the sphere's far wall - some 225 m from

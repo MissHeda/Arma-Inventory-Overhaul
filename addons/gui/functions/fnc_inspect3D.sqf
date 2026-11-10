@@ -38,6 +38,9 @@
  *    "pan"     the camera and what it looks at move across and up or down, as the middle mouse button drags them - the item
  *              moves with the mouse, at most its frame away from where it was (arguments: [across, down])
  *    "reset"   the view the scene started with
+ *    "centre"  a weapon's own middle - with what it carries (fnc_weaponBounds) - is what the camera looks at and turns round,
+ *              not its grip, and the view starts so far off that the whole weapon fits the box (fnc_fitView); asked by the
+ *              scene itself once the holder's model is loaded, and when the weapon's parts change
  *    "face"    side on to the barrel, the muzzle to the right - the start of the Attachments view (arguments: [muzzle ASL])
  *    "preview" the holder with one part changed, for a look; [] puts back what the scene shows (arguments: [[index in the
  *              attachments, value] or [], the tile that asks - a put back from another tile is ignored])
@@ -127,9 +130,12 @@ private _fnc_refit = {
 
     if (isNull _holder) exitWith {};
 
+    private _fitted = [_scene get "class", _parts] call _fnc_fitOut;
+
     clearWeaponCargo _holder;
     clearMagazineCargo _holder;
-    _holder addWeaponWithAttachmentsCargo [[_scene get "class", _parts] call _fnc_fitOut, 1];
+    _holder addWeaponWithAttachmentsCargo [_fitted, 1];
+    _scene set ["fitted", _fitted];
 };
 
 switch (_mode) do {
@@ -171,6 +177,9 @@ switch (_mode) do {
             [_attachments] call _fnc_refit;
             _scene set ["attachments", +_attachments];
             _scene set ["previewing", false];
+
+            // What the view turns round is the middle of the weapon as it is fitted out now.
+            ["centre"] call FUNC(inspect3D);
         };
 
         ["stop"] call FUNC(inspect3D);
@@ -281,6 +290,8 @@ switch (_mode) do {
                 if (_onHolder) then {
                     _holder addWeaponWithAttachmentsCargo [[_class, _muzzle, _pointer, _optic, _magazine, _magazine2, _bipod], 1];
                     _scene set ["onHolder", true];
+                    _scene set ["weapon", _isWeapon];
+                    _scene set ["fitted", [_class, _muzzle, _pointer, _optic, _magazine, _magazine2, _bipod]];
 
                     private _base = [[0.25, 0] select _isWeapon] call _fnc_base;
 
@@ -366,83 +377,54 @@ switch (_mode) do {
         _scene set ["camera", _camera];
 
         call _fnc_camera;
-    };
-    case "stop": {
-        if (count _scene == 0) exitWith {};
 
-        private _camera = _scene getOrDefault ["camera", objNull];
+        // A weapon turns round its own middle, not round its grip: asked for once the holder's model is there ("centre").
+        if (_scene getOrDefault ["weapon", false]) then {
+            [
+                {
+                    params ["_scene"];
 
-        // Destroying a camera does not end what it films into.
-        if (!isNull _camera) then {
-            _camera cameraEffect ["Terminate", "Back", _scene getOrDefault ["target3D", INSPECT_3D_TARGET]];
-            camDestroy _camera;
+                    !(GVAR(scene3D) isEqualRef _scene) || {isNull (_scene getOrDefault ["camera", objNull])} || {!isNil {[_scene] call FUNC(weaponBounds)}}
+                },
+                {
+                    params ["_scene"];
+
+                    if (GVAR(scene3D) isEqualRef _scene && {!isNull (_scene getOrDefault ["camera", objNull])}) then {
+                        ["centre"] call FUNC(inspect3D);
+                    };
+                },
+                [_scene],
+                5
+            ] call CBA_fnc_waitUntilAndExecute;
         };
-
-        if (!isNil QGVAR(pipDistance)) then {
-            setPiPViewDistance GVAR(pipDistance);
-            GVAR(pipDistance) = nil;
-        };
-
-        {
-            if (!isNull _x) then {
-                deleteVehicle _x;
-            };
-        } forEach (_scene getOrDefault ["objects", []]);
-
-        GVAR(scene3D) = createHashMap;
-        GVAR(inspect3DTurn) = [];
-        GVAR(inspect3DPan) = [];
     };
-    case "turn": {
-        if (count _scene == 0) exitWith {};
+    case "centre": {
+        if (count _scene == 0 || {!(_scene getOrDefault ["weapon", false])}) exitWith {};
 
-        _arguments params [["_across", 0, [0]], ["_down", 0, [0]]];
+        private _corners = [_scene] call FUNC(weaponBounds);
 
-        // The item follows the mouse: dragged to the right, its front turns to the right.
-        _scene set ["dir", (_scene get "dir") + _across * INSPECT_3D_TURN_ACROSS];
-        // Side on, it tilts only so far that the parts round it stay readable.
-        private _tilt = [80, INSPECT_3D_SIDE_TILT] select (_scene getOrDefault ["side", false]);
+        if (isNil "_corners" || {_corners isEqualTo []}) exitWith {};
 
-        _scene set ["pitch", (((_scene get "pitch") + _down * INSPECT_3D_TURN_DOWN) max -_tilt) min _tilt];
+        // The whole weapon in the middle of the box and fitted to it from where the view starts - the front left, or side on.
+        (uiNamespace getVariable [QGVAR(inspect3DShown), [1, 1]]) params [["_shownX", 1], ["_shownY", 1]];
 
-        call _fnc_camera;
-    };
-    case "zoom": {
-        if (count _scene == 0) exitWith {};
+        ([
+            _corners, _scene getOrDefault ["startDir", 45], _scene getOrDefault ["startPitch", 15],
+            CAMERA_TAN * INSPECT_3D_ASPECT * (_shownX max 0.05) * INSPECT_3D_ROOM, CAMERA_TAN * (_shownY max 0.05) * INSPECT_3D_ROOM
+        ] call FUNC(fitView)) params ["_centre", "_distance"];
 
-        _arguments params [["_turn", 0, [0]]];
+        _distance = (_distance max 0.25) min 6;
 
-        if (_turn == 0) exitWith {};
+        // Where the player moved the view to stays as far from the middle as it was, and his own zoom stays his.
+        private _moved = (_scene get "target") vectorDiff (_scene get "origin");
+        private _zoomed = (_scene get "distance") / ((_scene get "start") max 0.01);
 
-        // By how far the wheel turned: several notches in one frame come as one turn of that many.
-        private _distance = (_scene get "distance") / (1.15 ^ ((_turn max -6) min 6));
-
-        _scene set ["distance", ((_distance max (_scene get "near")) min (_scene get "far"))];
-
-        call _fnc_camera;
-    };
-    case "pan": {
-        if (count _scene == 0) exitWith {};
-
-        _arguments params [["_across", 0, [0]], ["_down", 0, [0]]];
-
-        private _dir = _scene get "dir";
-        private _distance = _scene get "distance";
-        private _side = [cos _dir, -(sin _dir), 0];
-        private _origin = _scene get "origin";
-
-        // Dragged right, the item goes right: the camera and its target go left - _side points to the camera's left (it looks
-        // along -[sin dir, cos dir]). Dragged down, they go up.
-        private _target = ((_scene get "target") vectorAdd (_side vectorMultiply (_across * _distance * INSPECT_3D_PAN)))
-            vectorAdd [0, 0, _down * _distance * INSPECT_3D_PAN];
-        private _offset = _target vectorDiff _origin;
-        private _limit = _scene getOrDefault ["frame", INSPECT_3D_FRAME];
-
-        if (vectorMagnitude _offset > _limit) then {
-            _target = _origin vectorAdd ((vectorNormalized _offset) vectorMultiply _limit);
-        };
-
-        _scene set ["target", _target];
+        _scene set ["origin", _centre];
+        _scene set ["target", _centre vectorAdd _moved];
+        _scene set ["start", _distance];
+        _scene set ["near", _distance * 0.3];
+        _scene set ["far", _distance * 3];
+        _scene set ["distance", _distance * _zoomed];
 
         call _fnc_camera;
     };
@@ -483,6 +465,9 @@ switch (_mode) do {
         _scene set ["startDir", _dir];
 
         call _fnc_camera;
+
+        // Side on the weapon is wider across the box than from the front left: fitted to it anew.
+        ["centre"] call FUNC(inspect3D);
     };
     case "preview": {
         if (count _scene == 0 || {!(_scene getOrDefault ["onHolder", false])}) exitWith {};

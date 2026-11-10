@@ -65,8 +65,10 @@ private _up = _right vectorCrossProduct _forward;
 // camera's view the box shows.
 (uiNamespace getVariable [QGVAR(inspect3DShown), [1, 1]]) params [["_shownX", 1], ["_shownY", 1]];
 
-private _tanH = INSPECT_3D_FOV * INSPECT_3D_ASPECT * _shownX;
-private _tanV = INSPECT_3D_FOV * _shownY;
+// What the camera sees at a distance is CAMERA_TAN of it up and down, not its FOV (measured in game, 0.7.10): with the FOV the
+// dots lay a quarter nearer the middle of the box than the parts they name.
+private _tanH = CAMERA_TAN * INSPECT_3D_ASPECT * _shownX;
+private _tanV = CAMERA_TAN * _shownY;
 // ----- Each part's place in the card, the middle of its dot -----
 private _onCard = [];
 

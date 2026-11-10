@@ -2,19 +2,20 @@
 #include "..\defines.hpp"
 /*
  * Author: Miss Heda
- * Draws a weapon's attachments onto its picture where Arma's own inventory puts them: every slot of the
- * weapon's WeaponSlotsInfo that holds an attachment and has a positive iconScale marks it on the weapon
- * picture - at iconPosition (fractions of the picture, from its top left), the iconPinpoint of the mark
- * ("Center", "Bottom", "Top", "Left", "Right") on that point.
+ * Draws a weapon's attachments onto its picture as Arma's own inventory does: every slot of the weapon's
+ * WeaponSlotsInfo that holds an attachment and has a positive iconScale marks it on the weapon picture with the
+ * slot's white shape (iconPicture: attachment_muzzle.paa, attachment_top.paa and the like) - at iconPosition
+ * (fractions of the picture, from its top left), the iconPinpoint of the mark ("Center", "Bottom", "Top", "Left",
+ * "Right") on that point.
  *
- * The mark is the attachment's own picture (0.7.6), a square of ATTACHMENT_PICTURE of the weapon picture's height. Only an
- * attachment without a picture falls back to the weapon's own shape for the slot (iconPicture: attachment_top.paa and the like, the Spectrum Device's antennas)
- * at its iconScale of the picture - but never more than ATTACHMENT_MARK of it, so it grows and shrinks with the picture and none
- * covers half the weapon (Mia, #56: "The IR icon is far too big"), in white. The gear silhouettes tried in 0.6.46 are dark
- * grey: on the weapon's picture they did not show at all.
+ * The mark's size is the engine's, measured on the vanilla inventory (0.7.10): its height is iconScale of the
+ * picture's height, its width follows from the shape's own texture - the muzzle's is twice as wide as high, the
+ * optic's four times, the rail's square. So a suppressor's bar reaches out past the picture's left edge and an
+ * optic's lies wide on the receiver, as players know them. Until 0.7.5 every mark was drawn in the picture's 2:1,
+ * which made the rail's twice too wide (Mia, #56: "The IR icon is far too big") and the optic's half as wide; 0.7.6
+ * to 0.7.9 drew the attachments' own pictures instead (Mia, 0.7.10: the white icons again, placed as Arma places them).
  *
- * Not the bipod: its slot's mark hangs under the barrel, below where most weapon pictures end, so it floated off the
- * weapon on its own (Mia, an LMG with a bipod). The plate beside the name shows it (fnc_drawEquipmentCards).
+ * The bipod too, as in Arma: its mark hangs under the barrel (UnderBarrelSlot).
  *
  * The slot an attachment sits in is the one whose compatibleItems name it (an array, or a class of
  * item = 1 entries as CBA's joint rails write them); failing that, the slot of the attachment's kind.
@@ -104,25 +105,22 @@ private _fnc_takes = {
 
     (getArray (_slot >> "iconPosition")) params [["_fx", 0.5], ["_fy", 0.5]];
 
-    // The attachment's own picture (Mia, 0.7.6: the slot's generic white shapes looked the same on every weapon), a square
-    // ATTACHMENT_PICTURE of the picture's height - square in pixels: the picture's area is 2:1, so half its width per
-    // height. An attachment without a picture keeps the slot's shape, as the weapon's own picture draws it, a share of
-    // the picture's size - never more than ATTACHMENT_MARK.
-    private _texture = getText (configFile >> "CfgWeapons" >> _item >> "picture");
-    private _color = [1, 1, 1, 1];
-    private _iconW = 0;
-    private _iconH = 0;
+    // The slot's white shape, as high as iconScale of the picture and as wide as its own texture makes it (the engine's rule,
+    // measured on the vanilla inventory): square in pixels the picture's area is 2:1, so half its width per height.
+    private _texture = [getText (_slot >> "iconPicture")] call FUNC(safePicture);
 
-    if (_texture isEqualTo "") then {
-        _scale = _scale min ATTACHMENT_MARK;
-        _iconW = _w * _scale;
-        _iconH = _h * _scale;
-        _texture = getText (_slot >> "iconPicture");
-        _color = ATTACHMENT_MARK_COLOR;
-    } else {
-        _iconH = _h * ATTACHMENT_PICTURE;
-        _iconW = _iconH * (_w / _h) / 2;
+    if (_texture isEqualTo "") then {continue};
+
+    (getTextureInfo _texture) params [["_textureW", 2], ["_textureH", 1]];
+
+    if (_textureW <= 0 || {_textureH <= 0}) then {
+        _textureW = 2;
+        _textureH = 1;
     };
+
+    private _color = ATTACHMENT_MARK_COLOR;
+    private _iconH = _h * _scale;
+    private _iconW = _iconH * (_w / _h) / 2 * (_textureW / _textureH);
     private _iconX = _x0 + _fx * _w;
     private _iconY = _y0 + _fy * _h;
 
@@ -140,7 +138,7 @@ private _fnc_takes = {
     if (_exact) then {
         private _icon = _display ctrlCreate ["AIO_Picture", -1];
         _icon ctrlSetPosition [_iconX, _iconY, _iconW, _iconH];
-        _icon ctrlSetText ([_texture] call FUNC(safePicture));
+        _icon ctrlSetText _texture;
         _icon ctrlSetTextColor _color;
         _icon ctrlCommit 0;
         _controls pushBack _icon;
@@ -150,7 +148,8 @@ private _fnc_takes = {
 } forEach [
     [_muzzle, "MuzzleSlot"],
     [_rail, "PointerSlot"],
-    [_optic, "CowsSlot"]
+    [_optic, "CowsSlot"],
+    [_bipod, "UnderBarrelSlot"]
 ];
 
 _controls

@@ -2,6 +2,25 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.10 - beta
+
+### Changed
+
+- Attachments on a weapon's flat picture are the white marks again, now drawn as Arma's own inventory draws them: each
+  mark as high as the weapon's config says and as wide as its own shape - the suppressor's bar reaches out past the
+  muzzle, the optic's lies wide on top, the rail's is a small square - and the bipod's mark is back under the barrel.
+  Until 0.7.5 every mark was stretched to the picture's 2:1, which made the laser's mark twice too wide.
+- Weapon cards in 3D: the weapon is now really in the middle of its card and fitted to it, with its suppressor, optic,
+  bipod and magazine counted in, and it stays clear of the name line. Changing an attachment fits it anew. Measured in
+  game on vanilla and RHS weapons: rifles sit within a few pixels of the middle.
+- Inspect card in 3D: a weapon is shown whole and in the middle, and turns round its own middle instead of its grip.
+
+### Fixed
+
+- 3D weapon pictures: weapons sat too high or were cut off at the card's edge, some launchers and pistols came out tiny.
+  The game's size of a weapon model counts helper triangles a metre or two off the gun; those are left out now.
+- Attachments view: the dots lay a little nearer the middle of the picture than the parts they name.
+
 ## 0.7.9 - beta
 
 ### Changed

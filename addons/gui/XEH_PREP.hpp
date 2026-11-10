@@ -195,6 +195,8 @@ PREP(inspect3D);
 PREP(cardScene);
 PREP(modelBox);
 PREP(weaponPoints);
+PREP(weaponBounds);
+PREP(fitView);
 PREP(drawHotspots);
 PREP(placeHotspots);
 PREP(hotspotAt);

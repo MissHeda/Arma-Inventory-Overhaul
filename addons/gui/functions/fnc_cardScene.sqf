@@ -12,15 +12,17 @@
  * A scene stands while its card is shown: drawn again with the same weapon and parts it is kept as it is, with other parts only the
  * holder is fitted out anew, another weapon makes it anew. "keep" takes away the scenes of the slots no card was drawn for, "stop"
  * all of them (the window closing, fnc_onUnload). Until the holder's model is loaded the camera looks from the front left; then it
- * turns side on to the barrel (fnc_weaponPoints finds the muzzle).
+ * turns side on to the barrel (fnc_weaponPoints finds the muzzle) and the whole weapon - with its suppressor, optic, bipod and
+ * magazine (fnc_weaponBounds) - is put in the middle of what the card shows and fitted to it, again whenever its parts change.
  *
  * Only with Picture-in-Picture on (isPiPEnabled) and the player's setting aio_gui_weapon3D: else the cards stay flat.
  *
  * Arguments:
  * 0: What to do <STRING>
  *    "show" a slot's scene for this weapon (arguments: [slot, weapon as fnc_getEquipment has it, render target, background RGB,
- *           [share of the picture's width the card shows, share of its height]]) - the camera stands so far off that the whole
- *           weapon fits what the card shows of the picture, whatever size the layout gives the card
+ *           [share of the picture's width the weapon may take, share of its height], [nudge across, up and down],
+ *           how far above the picture's middle the weapon's middle lies, as a share of its height]) - the camera stands so far
+ *           off that the whole weapon fits those shares, whatever size the layout gives the card
  *    "keep" only these slots' scenes stay (arguments: [slots])
  *    "stop" every scene goes
  * 1: Arguments <ARRAY> (default: [])
@@ -100,27 +102,46 @@ private _fnc_camera = {
     _rim setPosASL ((_target vectorAdd ((_target vectorDiff _cameraPos) vectorMultiply 0.8)) vectorAdd [0, 0, 0.5 * _distance]);
 };
 
-// How far off the camera stands: the whole weapon - its length across, its height up and down - inside what the card shows of the
-// picture (its shares of the picture's width and height), with a little room round it. The picture's height at a distance is
-// 2 * INSPECT_3D_FOV of it, its width that times the screen's shape (the target is filmed in the screen's shape).
-private _fnc_frame = {
+// The whole weapon in the middle of what the card shows, as large as it fits: the weapon's box with what it carries
+// (fnc_weaponBounds) is put in the middle of the picture and the camera stands so far off that it fills CARD_3D_ROOM of what the
+// card shows of the picture, across or up and down, whichever it reaches first (fnc_fitView). What the picture holds at a
+// distance is CAMERA_TAN of it up and down from its middle, that times the screen's shape across (measured in game, 0.7.10).
+//
+// Never closer than a weapon of CARD_3D_MIN_LENGTH would need: a handgun shows at a handgun's size, not card-filling. The card's
+// name line lies over the picture's foot: the weapon is fitted to what is free above it ("shares" is that part) and lifted into
+// its middle ("lift", a share of the picture's height).
+private _fnc_fit = {
     params ["_scene"];
+
+    private _corners = [_scene] call FUNC(weaponBounds);
+
+    if (isNil "_corners" || {_corners isEqualTo []}) exitWith {
+        [_scene] call _fnc_camera;
+    };
 
     (_scene getOrDefault ["shares", [1, 1]]) params [["_widthShare", 1], ["_heightShare", 1]];
 
-    private _length = _scene getOrDefault ["length", _scene getOrDefault ["frameSize", 1]];
-    private _height = _scene getOrDefault ["height", _length / 3];
-    private _perMetre = 2 * INSPECT_3D_FOV;
+    private _dir = _scene get "dir";
+    private _pitch = _scene get "pitch";
+    // A launcher lies a few centimetres off where its model says on the holder (the RPG-42 4 cm higher, measured in game,
+    // 0.7.10): more room round it, so none of it is cut off.
+    private _room = [CARD_3D_ROOM, CARD_3D_ROOM_LAUNCHER] select ((_scene get "class") isKindOf ["Launcher", configFile >> "CfgWeapons"]);
+    private _tanH = CAMERA_TAN * INSPECT_3D_ASPECT * (_widthShare max 0.05) * _room;
+    private _tanV = CAMERA_TAN * (_heightShare max 0.05) * _room;
 
-    // Framed as at least CARD_3D_MIN_LENGTH long and with room round it: a handgun filled its card to the edges and every weapon
-    // sat too close (Mia, 0.7.0).
-    _length = _length max CARD_3D_MIN_LENGTH;
-    _height = _height max (CARD_3D_MIN_LENGTH * 0.2);
-    private _room = CARD_3D_ROOM;
-    // Across, the picture holds less than its height times the screen's shape: CARD_3D_WIDTH_FIX, measured in game (0.6.112).
-    private _distance = ((_length * CARD_3D_WIDTH_FIX / (_room * (_widthShare max 0.05) * _perMetre * INSPECT_3D_ASPECT)) max (_height / (_room * (_heightShare max 0.05) * _perMetre))) max 0.2;
+    ([_corners, _dir, _pitch, _tanH, _tanV] call FUNC(fitView)) params ["_target", "_distance", "_across"];
 
-    _scene set ["distance", _distance min 8];
+    _distance = ((_distance max (CARD_3D_MIN_LENGTH / (2 * _tanH))) max 0.2) min 8;
+
+    private _forward = [-(sin _dir) * (cos _pitch), -(cos _dir) * (cos _pitch), -(sin _pitch)];
+    private _up = [-(cos _dir), sin _dir, 0] vectorCrossProduct _forward;
+
+    // Lifted into the middle of what the name line leaves free: the camera aims that much lower.
+    _target = _target vectorDiff (_up vectorMultiply ((_scene getOrDefault ["lift", 0]) * 2 * CAMERA_TAN * _distance));
+
+    _scene set ["target", _target];
+    _scene set ["distance", _distance];
+    _scene set ["length", _across max 0.1];
 
     [_scene] call _fnc_camera;
 };
@@ -129,7 +150,7 @@ switch (_mode) do {
     case "show": {
         _arguments params [
             ["_slot", "", [""]], ["_weapon", [], [[]]], ["_target3D", "", [""]], ["_background", [0.05, 0.055, 0.065], [[]]], ["_shares", [1, 1], [[]]],
-            ["_offset", [0, 0], [[]]]
+            ["_offset", [0, 0], [[]]], ["_lift", 0, [0]]
         ];
 
         private _class = _weapon param [0, "", [""]];
@@ -154,6 +175,7 @@ switch (_mode) do {
             && {(_scene get "target3D") isEqualTo _target3D} && {(_scene getOrDefault ["shares", []]) isEqualTo _shares}
             && {(_scene getOrDefault ["background", []]) isEqualTo _background}
             && {(_scene getOrDefault ["offset", []]) isEqualTo _offset}
+            && {(_scene getOrDefault ["lift", 0]) isEqualTo _lift}
         ) exitWith {true};
 
         // The same weapon still being filmed: kept - another target filmed into, other parts put on the holder.
@@ -166,9 +188,12 @@ switch (_mode) do {
                 _scene set ["target3D", _target3D];
             };
 
-            if ((_scene getOrDefault ["shares", []]) isNotEqualTo _shares) then {
+            private _refit = false;
+
+            if ((_scene getOrDefault ["shares", []]) isNotEqualTo _shares || {(_scene getOrDefault ["lift", 0]) isNotEqualTo _lift}) then {
                 _scene set ["shares", _shares];
-                [_scene] call _fnc_frame;
+                _scene set ["lift", _lift];
+                _refit = true;
             };
 
             if ((_scene getOrDefault ["offset", []]) isNotEqualTo _offset) then {
@@ -196,6 +221,12 @@ switch (_mode) do {
                 clearMagazineCargo _holder;
                 _holder addWeaponWithAttachmentsCargo [_fitted, 1];
                 _scene set ["fitted", _fitted];
+                _refit = true;
+            };
+
+            // Another size of card, or other parts on the weapon - a suppressor on, an optic off: fitted and put in the middle anew.
+            if (_refit && {_scene getOrDefault ["faced", false]}) then {
+                [_scene] call _fnc_fit;
             };
 
             true
@@ -213,7 +244,7 @@ switch (_mode) do {
 
         _scene = createHashMapFromArray [
             ["class", _class], ["fitted", _fitted], ["target3D", _target3D], ["objects", _objects], ["shares", _shares], ["background", _background],
-            ["offset", _offset]
+            ["offset", _offset], ["lift", _lift]
         ];
         GVAR(cardScenes) set [_slot, _scene];
 
@@ -298,7 +329,7 @@ switch (_mode) do {
                 }
             },
             {
-                params ["_scene", "_fnc_camera", "_fnc_frame"];
+                params ["_scene", "_fnc_camera", "_fnc_fit"];
 
                 if (isNull (_scene getOrDefault ["camera", objNull])) exitWith {};
 
@@ -306,114 +337,30 @@ switch (_mode) do {
                 private _base = _holder modelToWorldWorld (_holder selectionPosition ["proxy:\a3\characters_f\proxies\weapon.001", 0.5]);
                 private _muzzle = ([_scene] call FUNC(weaponPoints)) getOrDefault ["muzzle", []];
 
-                // The weapon's box in its model, its middle and its ends along the barrel and up and down, carried onto the holder
-                // as the parts' places are (fnc_weaponPoints): the middle of the picture is the middle of the weapon - stock and
-                // all, not the middle between its grip and its muzzle (Mia, 0.6.80: "not centred").
-                private _model = [_scene get "class"] call FUNC(itemModel);
-                private _probe = if (_model isEqualTo "") then {objNull} else {createSimpleObject [_model, [0, 0, 0], true]};
-                private _inModel = [_scene, true] call FUNC(weaponPoints);
-
-                if (!isNull _probe && {!isNil "_inModel"}) then {
-                    ([_probe] call FUNC(modelBox)) params ["_boxMin", "_boxMax"];
-                    deleteVehicle _probe;
-
-                    private _middle = (_boxMin vectorAdd _boxMax) vectorMultiply 0.5;
-                    private _extent = _boxMax vectorDiff _boxMin;
-                    private _muzzleInModel = _inModel getOrDefault ["muzzle", [0, 1, 0]];
-                    private _along = 0;
-
-                    // The barrel lies along the axis the muzzle is farthest out on; up and down is z, or y for a model laid on z.
-                    {
-                        if (abs (_muzzleInModel select _x) > abs (_muzzleInModel select _along)) then {_along = _x};
-                    } forEach [1, 2];
-
-                    private _upAxis = [2, 1] select (_along == 2);
-
-                    // A muzzle attachment (a suppressor) reaches out past the barrel: the box made that much longer at the muzzle's
-                    // end, so the whole weapon is in the middle of the card, not the bare gun (Mia, 0.6.110: "auto centre").
-                    private _muzzleItem = (_scene get "fitted") param [1, ""];
-                    private _muzzleModel = if (_muzzleItem isEqualType "" && {_muzzleItem isNotEqualTo ""}) then {[_muzzleItem] call FUNC(itemModel)} else {""};
-
-                    if (_muzzleModel isNotEqualTo "") then {
-                        private _part = createSimpleObject [_muzzleModel, [0, 0, 0], true];
-
-                        if (!isNull _part) then {
-                            ([_part] call FUNC(modelBox)) params ["_partMin", "_partMax"];
-                            deleteVehicle _part;
-
-                            private _partSize = _partMax vectorDiff _partMin;
-                            private _reach = (((_partSize select 0) max (_partSize select 1) max (_partSize select 2)) min 0.6) max 0;
-                            private _side = [-1, 1] select ((_muzzleInModel select _along) >= (_middle select _along));
-
-                            _middle set [_along, (_middle select _along) + _side * _reach / 2];
-                            _extent set [_along, (_extent select _along) + _reach];
-                        };
-                    };
-                    private _fnc_at = {
-                        params ["_axis", "_sign"];
-
-                        private _point = +_middle;
-                        _point set [_axis, (_point select _axis) + _sign * (_extent select _axis) / 2];
-                        _point
-                    };
-
-                    _inModel set ["centre", _middle];
-                    _inModel set ["front", [_along, 1] call _fnc_at];
-                    _inModel set ["back", [_along, -1] call _fnc_at];
-                    _inModel set ["top", [_upAxis, 1] call _fnc_at];
-                    _inModel set ["bottom", [_upAxis, -1] call _fnc_at];
-
-                    _scene deleteAt "points";
-                } else {
-                    if (!isNull _probe) then {deleteVehicle _probe};
-                };
-
-                private _points = [_scene] call FUNC(weaponPoints);
-
-                if (isNil "_points") then {_points = createHashMap};
-
-                // Never far from the weapon's base: a model's box is often blown up by its hit geometry (as the inspect card's frame
-                // says), and a middle or ends far off left the card empty (Mia, 0.6.86).
-                private _centre = _points getOrDefault ["centre", _base];
-
-                if (_centre distance _base > 0.6) then {_centre = _base};
-
-                // A handgun's box reaches above it (its sights' and its hit geometry): its middle a little lower, so the grip is not cut
-                // off at the card's foot (seen in game, 0.6.91).
-                if ((_scene get "class") isKindOf ["Pistol", configFile >> "CfgWeapons"]) then {
-                    _centre = _centre vectorAdd [0, 0, -CARD_3D_HANDGUN_DROP];
-                };
-
-                _scene set ["target", _centre];
-
-                private _front = _points getOrDefault ["front", []];
-                private _back = _points getOrDefault ["back", []];
-                private _top = _points getOrDefault ["top", []];
-                private _bottom = _points getOrDefault ["bottom", []];
-
-                if (count _front == 3 && {count _back == 3}) then {_scene set ["length", ((_front distance _back) max 0.12) min (INSPECT_3D_FRAME * 1.4)]};
-                if (count _top == 3 && {count _bottom == 3}) then {_scene set ["height", ((_top distance _bottom) max 0.08) min ((_scene getOrDefault ["length", 1]) * ([CARD_3D_PROFILE, CARD_3D_PROFILE_HANDGUN] select ((_scene get "class") isKindOf ["Pistol", configFile >> "CfgWeapons"])))]};
-
-                [_scene] call _fnc_frame;
-
+                // Side on to the barrel, the muzzle to the left. The camera looks along -[sin dir, cos dir], its right is
+                // [-cos dir, sin dir].
                 if (count _muzzle == 3) then {
                     private _barrel = _muzzle vectorDiff _base;
                     _barrel set [2, 0];
 
                     if (vectorMagnitude _barrel >= 0.05) then {
                         _barrel = vectorNormalized _barrel;
-
-                        // The camera looks along -[sin dir, cos dir], its right is [-cos dir, sin dir]: the barrel to the left.
                         _scene set ["dir", (-(_barrel select 1)) atan2 (_barrel select 0)];
                     };
                 };
 
-                [_scene] call _fnc_camera;
+                // Until the box is known: aimed at the weapon's base.
+                _scene set ["target", _base];
+                _scene set ["faced", true];
+
+                // The whole weapon, stock, suppressor, optic and magazine and all, in the middle of the card and fitted to it
+                // (Mia, 0.6.80: "not centred", 0.6.110 and 0.7.10: "auto centre").
+                [_scene] call _fnc_fit;
 
                 // No still: once its camera goes the engine forgets what it filmed into and the card turns grey (seen in game,
                 // 0.6.88) - the camera stays while the card is shown.
             },
-            [_scene, _fnc_camera, _fnc_frame],
+            [_scene, _fnc_camera, _fnc_fit],
             5
         ] call CBA_fnc_waitUntilAndExecute;
 

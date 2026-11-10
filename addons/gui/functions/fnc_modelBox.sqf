@@ -1,10 +1,19 @@
 #include "..\script_component.hpp"
 /*
  * Author: Miss Heda
- * The box a model's visible shape takes, axis by axis - for framing a weapon on its card (fnc_cardScene). Arma's own box of a weapon
- * model is no use for that: most of them carry a helper point a metre or two off the gun, so the MX measured 4 m high and the P07's
- * middle lay 47 cm beside the pistol (measured in game, 0.6.112). Each axis is taken from the first of these that is sane there -
- * the visual LOD, the Geometry LOD, the Memory LOD - sane meaning no point farther than a helper's metre from the model's origin.
+ * The box a model's visible shape takes, face by face - for framing a weapon on its card and in the 3D view (fnc_weaponBounds).
+ * Arma's own box of a weapon model is no use for that as it is: every proxy in the model - the muzzle flash, the slots of the
+ * attachments, the magazine - is a triangle with one corner where the proxy sits, one along the proxy's direction and one twice
+ * as far along its up, a metre and two in most models, half or a quarter of that in others - and those far corners count into
+ * the box. So the MX measured 4 m high and the P07's middle lay 47 cm beside the pistol (measured in game, 0.6.112), and a box
+ * without them was guessed from the Memory LOD, whose points say little about the shape: the AKM's lowest is 11 cm under its
+ * grip, and the card showed the weapon too high (measured in game, 0.7.10).
+ *
+ * Each of the box's six faces is taken from the first of these that a proxy's far corner does not make there - the first visual
+ * LOD, the Geometry LOD, the Memory LOD. A face is a proxy's when it lies along that proxy's direction or up from its place, as
+ * far as such a corner lies (PROXY_LEGS of the usual metre, twice that along its up), and whatever lies a metre beside or above
+ * a weapon's own axis is no part of it either. A face no LOD has clean is the farthest proxy's own place on that side - a proxy
+ * sits on the weapon.
  *
  * Arguments:
  * 0: A simple object of the model <OBJECT>
@@ -18,35 +27,132 @@
  * Public: No
  */
 
+// How long a proxy triangle's short leg is, least and most, in metres (its long leg is twice that): 1 in most models, 0.25 to 2
+// measured in others (0.7.10).
+#define PROXY_LEGS [0.2, 2.2]
+// No weapon reaches this far beside or above its own axis (y, z), or along it (x), in metres.
+#define FAR_ACROSS 0.9
+#define FAR_ALONG 2.5
+
 params [["_probe", objNull, [objNull]]];
 
 if (isNull _probe) exitWith {[[-0.3, -0.05, -0.1], [0.3, 0.05, 0.1]]};
 
-private _candidates = [0 boundingBoxReal _probe, boundingBoxReal [_probe, "Geometry"], boundingBoxReal [_probe, "Memory"]];
+// A LOD's box and its proxies: [least, most, proxies as [place, direction, up], has a box at all].
+private _fnc_lod = {
+    params ["_lod", "_box"];
+
+    _box params [["_low", [0, 0, 0]], ["_high", [0, 0, 0]]];
+
+    private _proxies = [];
+
+    {
+        if ("proxy:" in _x) then {
+            // Its place first: selectionPosition loads the LOD of a model nothing shows yet, selectionVectorDirAndUp does not and
+            // took the game down asked first (an attachment's model made a moment before - access violation, 0.7.10).
+            private _place = _probe selectionPosition [_x, _lod];
+
+            (_probe selectionVectorDirAndUp [_x, _lod]) params [["_dir", [0, 1, 0]], ["_up", [0, 0, 1]]];
+
+            _proxies pushBack [_place, _dir, _up];
+        };
+    } forEach (_probe selectionNames _lod);
+
+    [_low, _high, _proxies, _low isNotEqualTo _high]
+};
+
+// The first visual LOD the engine finds by its resolution (not every one is found by it), else the model's whole visual box
+// with no proxies known.
+private _lods = [];
+
+{
+    _x params ["", "", ["_resolution", -1]];
+
+    if (_lods isEqualTo [] && {_resolution >= 0.5} && {_resolution < 900}) then {
+        private _found = [_resolution, boundingBoxReal [_probe, _resolution]] call _fnc_lod;
+
+        if (_found select 3) then {
+            _lods pushBack _found;
+        };
+    };
+} forEach (allLODs _probe);
+
+if (_lods isEqualTo []) then {
+    (0 boundingBoxReal _probe) params [["_low", [0, 0, 0]], ["_high", [0, 0, 0]]];
+
+    _lods pushBack [_low, _high, [], _low isNotEqualTo _high];
+};
+
+_lods pushBack (["Geometry", boundingBoxReal [_probe, "Geometry"]] call _fnc_lod);
+_lods pushBack (["Memory", boundingBoxReal [_probe, "Memory"]] call _fnc_lod);
+
 private _least = [];
 private _most = [];
 
 {
     private _axis = _x;
-    private _picked = [];
+    private _far = [FAR_ALONG, FAR_ACROSS, FAR_ACROSS] select _axis;
 
     {
-        _x params [["_low", [0, 0, 0]], ["_high", [0, 0, 0]]];
+        _x params ["_side", "_into"];
 
-        private _from = _low param [_axis, 0];
-        private _to = _high param [_axis, 0];
+        // What each LOD says of this face, where a proxy's far corner does not make it: [] or [value].
+        private _clean = _lods apply {
+            _x params ["_low", "_high", "_proxies", "_there"];
 
-        if ((_to - _from) > 0.001 && {(_to - _from) < 1.9} && {((abs _from) max (abs _to)) < 0.97}) exitWith {
-            _picked = [_from, _to];
+            private _value = ([_low, _high] select _side) param [_axis, 0];
+
+            // A proxy's far corner: along its direction by a leg, or along its up by two.
+            private _proxys = _proxies findIf {
+                _x params ["_place", "_dir", "_up"];
+
+                private _off = _value - (_place select _axis);
+                private _along = _dir select _axis;
+                private _above = _up select _axis;
+
+                (abs _along > 0.3 && {(_off / _along) >= (PROXY_LEGS select 0)} && {(_off / _along) <= (PROXY_LEGS select 1)})
+                || {abs _above > 0.3 && {(_off / (2 * _above)) >= (PROXY_LEGS select 0)} && {(_off / (2 * _above)) <= (PROXY_LEGS select 1)}}
+            } >= 0;
+
+            [[], [_value]] select (_there && {!_proxys} && {abs _value < _far})
         };
-    } forEach _candidates;
 
-    if (_picked isEqualTo []) then {
-        _picked = [[-0.3, -0.05, -0.1] select _axis, [0.3, 0.05, 0.1] select _axis];
+        _clean params [["_visual", []], ["_geometry", []], ["_memory", []]];
+
+        // The first of them that has it clean. (The Memory LOD's where it lies farther out than the Geometry LOD's was tried:
+        // its lowest points lie well under most rifles, and they sat too high on their cards - measured in game, 0.7.10.)
+        private _picked = call {
+            if (_visual isNotEqualTo []) exitWith {_visual};
+            if (_geometry isNotEqualTo []) exitWith {_geometry};
+
+            _memory
+        };
+
+        // No LOD has this face clean: the farthest proxy's own place on that side.
+        if (_picked isEqualTo []) then {
+            private _places = [];
+
+            {
+                _places append ((_x select 2) apply {(_x select 0) select _axis});
+            } forEach _lods;
+
+            if (_places isNotEqualTo []) then {
+                _picked = [[selectMin _places, selectMax _places] select _side];
+            };
+        };
+
+        _into pushBack (_picked param [0, ([[-0.3, -0.05, -0.1], [0.3, 0.05, 0.1]] select _side) select _axis]);
+    } forEach [[0, _least], [1, _most]];
+} forEach [0, 1, 2];
+
+// Never inside out: a face from one LOD may lie past its opposite from another.
+{
+    if ((_least select _x) > (_most select _x)) then {
+        private _middle = ((_least select _x) + (_most select _x)) / 2;
+
+        _least set [_x, _middle];
+        _most set [_x, _middle];
     };
-
-    _least pushBack (_picked select 0);
-    _most pushBack (_picked select 1);
 } forEach [0, 1, 2];
 
 [_least, _most]

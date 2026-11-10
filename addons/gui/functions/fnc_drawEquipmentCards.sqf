@@ -402,8 +402,14 @@ private _fnc_weaponCard = {
             // And where on the card it lies, the player's own nudge per slot (Mia, 0.6.107), in % of the weapon's length.
             private _offset = ["X", "Y"] apply {(missionNamespace getVariable [format ["%1%2_%3", QGVAR(weapon3DOffset), _x, _slot], 0]) / 100};
 
+            // The name line lies over the picture's foot: the weapon is fitted to what is free above it and lifted into the middle
+            // of that, so no grip or magazine hangs into the name (0.7.10).
+            private _strip = (((_picY + _picH - _nameTop) / _picH) max 0) min 0.5;
+
             _real = ["show", [
-                _slot, _weapon, _target, _background, [_zoom * _viewPixelsW / _imagePixelsW, _zoom * _viewPixelsH / _imagePixelsH], _offset
+                _slot, _weapon, _target, _background,
+                [_zoom * _viewPixelsW / _imagePixelsW, _zoom * (1 - _strip) * _viewPixelsH / _imagePixelsH], _offset,
+                _strip / 2 * _viewPixelsH / _imagePixelsH
             ]] call FUNC(cardScene);
 
             if (_real) then {
