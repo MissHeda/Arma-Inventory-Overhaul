@@ -34,6 +34,9 @@ GVAR(biSeen) = [];
 
 [_display] call FUNC(initState);
 
+// An arsenal with a stock of its own (fnc_poolClaim): the panel's adds and takes are counted against it from here on.
+GVAR(pool) = GVAR(biClaim);
+
 _display displayAddEventHandler ["KeyDown", {_this call FUNC(onKey)}];
 _display displayAddEventHandler ["KeyUp", {(_this + [false]) call FUNC(onKey)}];
 _display displayAddEventHandler ["Unload", {call FUNC(onClosed)}];

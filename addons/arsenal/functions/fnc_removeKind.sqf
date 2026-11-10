@@ -37,6 +37,7 @@ if (_class isEqualTo "" || {isNull _container} || {!local _center}) exitWith {fa
 
 private _key = toLowerANSI _class;
 private _before = [_container, _class] call EFUNC(storage,countClass);
+private _census = call FUNC(poolCensus);
 
 // One tile a turn, at most as many turns as there are things of the class: a tile that will not come out
 // cannot hold this up.
@@ -57,6 +58,9 @@ for "_i" from 1 to _before do {
 };
 
 private _after = [_container, _class] call EFUNC(storage,countClass);
+
+// What went out goes back to the arsenal's stock (none: nothing happens).
+[_census] call FUNC(poolSettle);
 
 if (_after == _before) exitWith {
     ["Failed"] call EFUNC(gui,flashHint);

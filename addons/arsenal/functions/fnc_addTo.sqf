@@ -46,6 +46,20 @@ if (
     || {!(_to in _worn) && {_to isNotEqualTo GVAR(staging)}}
 ) exitWith {"Failed"};
 
+// An arsenal with a stock of its own (GVAR(pool)): no more than it has to give.
+if (count GVAR(pool) > 0) then {
+    private _available = [_class] call (GVAR(pool) get "available");
+
+    if (_available isEqualType 0 && {_available >= 0}) then {
+        _count = _count min _available;
+    };
+};
+
+if (_count < 1) exitWith {
+    [LLSTRING(Hint_NoStock)] call EFUNC(gui,flashHint);
+    "NoStock"
+};
+
 private _intoSoldier = _to isEqualTo _open;
 private _capacity = ([_class] call EFUNC(items,getInfo)) getOrDefault ["capacity", 0];
 
@@ -72,6 +86,7 @@ if (_cell isEqualTo [] && {!([_to, _probe] call EFUNC(storage,hasSpace))}) exitW
 
 [_to] call EFUNC(storage,normalize);
 
+private _census = call FUNC(poolCensus);
 private _before = [_to, _class] call EFUNC(storage,countClass);
 private _arrived = 0;
 
@@ -96,6 +111,9 @@ if (_arrived < _count) then {
 };
 
 private _after = [_to, _class] call EFUNC(storage,countClass);
+
+// What came in is taken from the arsenal's stock (none: nothing happens).
+[_census] call FUNC(poolSettle);
 
 if (_after <= _before) exitWith {
     [[_why, "Failed"] select (_why isEqualTo "")] call EFUNC(gui,flashHint);

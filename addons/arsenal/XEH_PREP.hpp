@@ -96,6 +96,14 @@ PREP(biSafetyNet);
 PREP(biCountHandlers);
 PREP(biMissionHooks);
 PREP(biLeaveAlone);
+
+// Arsenals on the vanilla display with a stock of their own (Antistasi's JNA): the adapters compat addons register,
+// the claim of an open, the census around the panel's adds and takes, and the class of a list row
+PREP(registerPool);
+PREP(poolClaim);
+PREP(poolCensus);
+PREP(poolSettle);
+PREP(rowClass);
 PREP(checkBIOverride);
 PREP(showBlocked);
 PREP(onBlockedLoad);

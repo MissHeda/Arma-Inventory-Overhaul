@@ -2565,6 +2565,43 @@ never blocked. `fnc_biSafetyNet` (an `arsenalOpened` handler) closes a vanilla d
 frame later with exit code 2, and opens ours or blocks. In the inventory, `fnc_isArsenalBox` (ACE's `virtualItems`, or a BI box)
 makes a box never searched and gives it "Open Arsenal" (`fnc_canOpen`, `fnc_open`).
 
+### Arsenals with a stock (pools) and Antistasi's JNA
+
+Some missions build an arsenal with a limited, shared stock on the vanilla display. A compat addon registers it at its
+preInit with **`fnc_registerPool [adapter]`** (public; appended to `GVAR(poolAdapters)`). The adapter is a hash map of code:
+`claims [args]` (this vanilla open is ours: `BIS_fnc_arsenal "Open"`'s arguments, or `[]` at `arsenalOpened`), `panel []`,
+`rowClass [list, row]`, `available [class]` (how many may be taken, -1 no limit), `census [containers]` (what they hold, in the
+stock's terms) and `settle [before, after]` (take what came in, give back what went out), plus `name` for the RPT.
+
+- **Claim** (`fnc_poolClaim`): asked first in `fnc_handleBIOpen` (step 0) and in `fnc_biSafetyNet`'s `arsenalOpened`; the first
+  adapter that answers true is kept in `GVAR(biClaim)` until `arsenalClosed`. A claimed open is always let through
+  (`biLetThrough`), whatever `aio_arsenal_biArsenal` says - never ACE Arsenal, never the red screen - and `fnc_biOpened` attaches
+  the panel when `panel` answers true; `fnc_biLeaveAlone` handles what does not fit afterwards, as for `"grid"`.
+- **Counting** (`GVAR(pool)`, set by `fnc_biOpened` from the claim, emptied by `fnc_onClosed`). Every place the panel makes or
+  destroys items takes `fnc_poolCensus` (uniform, vest, backpack and staging space of the center) before and `fnc_poolSettle`
+  after: `fnc_addTo` (list drag, Ctrl+wheel up; first capped by `available`, none left = hint `Hint_NoStock`, result
+  `"NoStock"`), `fnc_remove`, `fnc_removeKind`, `fnc_reconcile` (what the arsenal's own "+" added beyond the grid and is taken
+  back out) and `fnc_onClosed` (the staging space is emptied into the stock before the crate is deleted). Moves between the
+  containers and the staging space leave the census alike. No kit packing from the list (`fnc_listToKit` answers `[]`): that
+  mod would make the items. `fnc_rowClass` reads a list row's class through `rowClass` while a pool is active (`fnc_listDrag`,
+  `fnc_onWheel`, `fnc_onFrame`, `fnc_syncAce`).
+- **JNA** (`compat_antistasi_arsenal`, requires `aio_arsenal` and `A3A_jeroen_arsenal`, `skipWhenMissingDependencies`; read from
+  Antistasi Ultimate's PBOs, Workshop 3020755032). JNA's action sets uiNamespace `jn_type` `"arsenal"`, asks the server
+  (`jn_fnc_arsenal_requestOpen`, which adds the client to `server`'s `jna_playersInArsenal`) and is sent the stock
+  `jna_dataList` (27 lists of `[class, amount]` by the vanilla tab index; -1 unlimited; magazines in rounds under tab 26),
+  then opens `["Open", [nil, jna_object, player, false]] call BIS_fnc_arsenal`; its `arsenalOpened` handler runs its
+  `CustomInit` on `RscDisplayArsenal`. `fnc_claims` takes exactly that: `jn_type` "arsenal", not `isLoadoutArsenal` (the
+  commander menu's loadout editor), and the cargo `jna_object` (the vehicle arsenal, `"containerArsenal"`, stays alone).
+  Its cargo rows keep `str [class, amount, name, dlc]` in `lnbData [row, 0]` (`fnc_rowClass`, `parseSimpleArray`).
+  `fnc_available` mirrors JNA's "+": the stock less, for a non-member (`A3A_fnc_isMember`), `jna_minItemMember` of the tab or
+  `A3A_arsenalLimits` of the class (magazines times their capacity), in whole magazines. `fnc_census` is
+  `jn_fnc_arsenal_cargoToArray` per container merged with `jn_fnc_arsenal_addToArray` (base weapons, attachments apart,
+  loaded magazines, nested containers). `fnc_settle` sends the positive differences to `jn_fnc_arsenal_removeItem` and the
+  negative ones to `jn_fnc_arsenal_addItem` in their 27-list form; both update the server's stock and every client in
+  the arsenal (this one included) through `jn_fnc_arsenal "UpdateItemRemove"` / `"UpdateItemAdd"`, as JNA's own buttons do.
+  Two players taking the last of a stock at the same moment can both get it, exactly as with JNA's own "+". The setting
+  `aio_compat_antistasi_arsenal_panel` (server, on) answers `panel`.
+
 ## 6. Setup wizard (setup)
 
 The wizard edits the text of `aio_items_rules`, through the rules engine's own functions (`parseRules`, `writeRules`,

@@ -34,6 +34,7 @@ GVAR(snapshot) params ["_known", "_before"];
 private _center = (call FUNC(center));
 private _undone = createHashMap;
 private _refused = "";
+private _census = call FUNC(poolCensus);
 
 if (!isNull _container && {_known isEqualTo _container} && {local _center}) then {
     private _now = [_container] call FUNC(countAll);
@@ -82,6 +83,9 @@ if (!isNull _container && {_known isEqualTo _container} && {local _center}) then
         };
     } forEach (_layout getOrDefault ["overflow", []]);
 };
+
+// What was taken back out goes back to the arsenal's stock (none: nothing happens).
+[_census] call FUNC(poolSettle);
 
 [] call FUNC(snapshot);
 

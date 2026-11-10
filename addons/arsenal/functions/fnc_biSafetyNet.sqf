@@ -33,6 +33,13 @@
 
     if (!hasInterface || {is3DEN}) exitWith {};
 
+    // An arsenal with a stock of its own (fnc_poolClaim): it stays, with the grid panel when its adapter asks for it.
+    if ([] call FUNC(poolClaim)) exitWith {
+        if (([] call (GVAR(biClaim) getOrDefault ["panel", {false}])) isEqualTo true) then {
+            [{_this call FUNC(biOpened)}, [_opened]] call EFUNC(gui,later);
+        };
+    };
+
     private _mode = missionNamespace getVariable [QGVAR(biArsenal), "vanilla"];
     private _passThrough = missionNamespace getVariable ["aio_arsenal_biPassThrough", -1];
 
@@ -83,7 +90,7 @@
 
     private _mode = missionNamespace getVariable [QGVAR(biArsenal), "vanilla"];
 
-    if (_mode in ["vanilla", "grid"] || {!GVAR(ready)}) then {
+    if (_mode in ["vanilla", "grid"] || {!GVAR(ready)} || {[] call FUNC(poolClaim)}) then {
         ["open", _center] call FUNC(biLeaveAlone);
     };
 }] call BIS_fnc_addScriptedEventHandler;
@@ -91,6 +98,7 @@
 [missionNamespace, "arsenalClosed", {
     // The vanilla window is gone: the next open is judged anew.
     GVAR(biLetThrough) = false;
+    GVAR(biClaim) = createHashMap;
 
     ["closed", objNull] call FUNC(biLeaveAlone);
 }] call BIS_fnc_addScriptedEventHandler;

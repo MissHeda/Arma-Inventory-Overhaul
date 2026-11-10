@@ -90,7 +90,7 @@ private _counts = createHashMap;
 } forEach _items;
 
 for "_row" from 0 to ((lnbSize _list) select 0) - 1 do {
-    private _text = str (_counts getOrDefault [toLowerANSI (_list lnbData [_row, 0]), 0]);
+    private _text = str (_counts getOrDefault [toLowerANSI ([_list, _row] call FUNC(rowClass)), 0]);
 
     if ((_list lnbText [_row, 2]) isNotEqualTo _text) then {
         _list lnbSetText [[_row, 2], _text];

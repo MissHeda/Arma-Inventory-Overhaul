@@ -68,7 +68,7 @@ private _known = if (GVAR(kind) isEqualTo "bi") then {
     private _found = false;
 
     for "_row" from 0 to ((lnbSize _list) select 0) - 1 do {
-        if ((_list lnbData [_row, 0]) == _class) exitWith {_found = true};
+        if (([_list, _row] call FUNC(rowClass)) == _class) exitWith {_found = true};
     };
 
     _found

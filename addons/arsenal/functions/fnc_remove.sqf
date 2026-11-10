@@ -87,12 +87,16 @@ if (_class isEqualTo "" || {_expected isNotEqualTo "" && {_class != _expected}})
 
 private _whole = _count < 1 || {_count >= (_entry getOrDefault ["count", 1])};
 private _before = [_container, _class] call EFUNC(storage,countClass);
+private _census = call FUNC(poolCensus);
 
 if (_whole) then {
     [_container, _entry, []] call EFUNC(storage,setPlace);
 };
 
 private _payload = [_container, _entry, [_count, -1] select _whole] call EFUNC(storage,removeEntry);
+
+// What went out goes back to the arsenal's stock (none: nothing happens).
+[_census] call FUNC(poolSettle);
 
 if (_payload isEqualTo []) exitWith {
     ["Failed"] call EFUNC(gui,flashHint);

@@ -61,6 +61,19 @@ with "Swap with primary" in the right-click menu, and that mod's own key switche
 Inventory loaded, its handler for the vanilla inventory stays quiet. Works with GreenMag Rework: drag loose rounds, a pack or a
 belt onto a magazine in your gear and GreenMag loads it; its right-click entries are in the window's menu.
 
+Works with Antistasi Ultimate (optional addon `compat_antistasi_arsenal`, loads only with that mod). Antistasi's arsenal
+(JNA) gets the grid panel beside its list, as ACE Arsenal does: pick the uniform, vest or backpack tab, drag items from
+the list into the grid, onto the other worn containers or into the staging space, rearrange them, Ctrl+wheel to add or
+take one. Everything counts against the rebels' shared stock: what you drag in is taken from it (other players see the
+counts drop at once), what you take out of the panel - dragged out, the drop key, Remove in the menu - goes back to it, and
+what is still in the staging space when the arsenal closes goes back too. The panel gives no more than the arsenal has: a
+row with nothing left says so, non-members keep the minimum the mission leaves in stock, and magazines (kept in rounds)
+come as whole magazines only - take a last partial one with the arsenal's own "+". The vehicle arsenal and the loadout
+arsenal of the commander menu stay as they are. Antistasi's arsenal is always its own window, whatever the vanilla
+arsenal setting says; the server setting "Grids in Antistasi's arsenal" (`aio_compat_antistasi_arsenal_panel`, on by
+default) switches the panel off. Antistasi's "loot around" also picks up the piles this mod drops things into
+(`compat_antistasi`).
+
 ## Building
 
 Built with [HEMTT](https://github.com/BrettMayson/HEMTT) 1.11.2:
@@ -292,6 +305,9 @@ The full grammar and which answer wins are in [docs/ARCHITECTURE.md](docs/ARCHIT
   `true` - always BI's window, `false` - always ACE's, unset - BI's only for missions with their own
   `arsenalOpened` / `arsenalPreOpen` handlers. It is read on each client, so set it with the public flag
   (`missionNamespace setVariable ["aio_arsenal_biPassThrough", true, true]`) or in `initPlayerLocal.sqf`.
+  An arsenal on the vanilla window with a stock of its own is never sent to ACE or blocked: Antistasi's JNA arsenal keeps
+  its window with the grid panel, counted against its stock (`compat_antistasi_arsenal`). Other such arsenals can do the
+  same with `aio_arsenal_fnc_registerPool` (see its header).
 - **Magazines:** a partly filled magazine dropped on another of the same kind is repacked with ACE's Magazine
   Repack, in the window (a click or Escape stops it, what was moved stays moved), and "Repack all" in a
   magazine's menu repacks every one of its kind in your gear. Both magazines have to lie in your own gear or in

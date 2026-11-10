@@ -87,6 +87,20 @@ if (!isNull GVAR(staging) && {!isNull _soldier} && {!isNil QEFUNC(compat_efak,ar
     ] call EFUNC(compat_efak,arsenalFree);
 };
 
+// An arsenal with a stock of its own: what lies in the staging space goes back to it, as the crate goes.
+if (count GVAR(pool) > 0 && {!isNull GVAR(staging)}) then {
+    private _census = call FUNC(poolCensus);
+
+    clearItemCargo GVAR(staging);
+    clearMagazineCargo GVAR(staging);
+    clearWeaponCargo GVAR(staging);
+    clearBackpackCargo GVAR(staging);
+
+    [_census] call FUNC(poolSettle);
+};
+
+GVAR(pool) = createHashMap;
+
 {
     if (!isNull _x) then {
         [{deleteVehicle (_this select 0)}, [_x]] call EFUNC(gui,later);

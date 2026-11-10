@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="aio">
+    <Package name="compat_antistasi_arsenal">
+        <Key ID="STR_aio_compat_antistasi_arsenal_Setting_Panel">
+            <English>Grids in Antistasi's arsenal</English>
+        </Key>
+        <Key ID="STR_aio_compat_antistasi_arsenal_Setting_Panel_Desc">
+            <English>The grid panel beside Antistasi's arsenal,\nas beside ACE Arsenal. What it takes\ncomes from the rebels' stock, what it\nremoves goes back. Off: JNA as it is.</English>
+        </Key>
+    </Package>
+</Project>

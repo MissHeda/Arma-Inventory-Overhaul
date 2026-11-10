@@ -145,6 +145,13 @@ GVAR(biCatalogBase) = [];
 GVAR(biModHandlers) = [0, 0];
 GVAR(biHelper) = objNull;
 
+// Arsenals with a stock of their own on the vanilla display (fnc_registerPool, filled by compat addons at their preInit,
+// which runs after this one); the adapter that claimed the vanilla window now open (fnc_poolClaim, until it closes); and
+// the one the grid panel counts its adds and takes against (fnc_biOpened to fnc_onClosed). Empty: none.
+GVAR(poolAdapters) = [];
+GVAR(biClaim) = createHashMap;
+GVAR(pool) = createHashMap;
+
 // Checked once: ACE's pieces this addon relies on, and that BIS_fnc_arsenal is the one with our file.
 call FUNC(compatCheck);
 call FUNC(biInit);

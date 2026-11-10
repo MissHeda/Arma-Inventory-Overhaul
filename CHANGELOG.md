@@ -2,6 +2,17 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.5 - beta
+
+### Added
+
+- Antistasi Ultimate (new optional addon `compat_antistasi_arsenal`): Antistasi's arsenal (JNA) gets the grid panel beside
+  its list, as ACE Arsenal does. Drag items from the list into your uniform, vest or backpack, the other worn containers
+  or the staging space. What you take comes out of the rebels' shared stock and what you remove goes back into it, the
+  staging space included when the arsenal closes, so nothing is duplicated or lost. Non-members keep the mission's
+  minimum; magazines come as whole magazines only. The server setting "Grids in Antistasi's arsenal" switches it off.
+  Antistasi's arsenal is no longer sent to ACE Arsenal or blocked by the vanilla arsenal setting.
+
 ## 0.7.4 - beta
 
 ### Fixed

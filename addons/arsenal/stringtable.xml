@@ -52,6 +52,9 @@
         <Key ID="STR_aio_arsenal_Hint_ListUnfold">
             <English>Hold it over the title bar to unfold the panel</English>
         </Key>
+        <Key ID="STR_aio_arsenal_Hint_NoStock">
+            <English>The arsenal has none of it left to give</English>
+        </Key>
         <Key ID="STR_aio_arsenal_Hint_NotAllowed">
             <English>ACE does not allow this item here</English>
         </Key>

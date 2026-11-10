@@ -69,7 +69,7 @@ if (_row < 0 || {_row >= _rows}) then {
 if (_row < 0 || {_row >= _rows}) exitWith {false};
 
 // The plain lists' first row "<Empty>" has no class: nothing to drag.
-private _class = if (_isNbox) then {_list lnbData [_row, 0]} else {_list lbData _row};
+private _class = [_list, _row] call FUNC(rowClass);
 
 if (_class isEqualTo "") exitWith {false};
 

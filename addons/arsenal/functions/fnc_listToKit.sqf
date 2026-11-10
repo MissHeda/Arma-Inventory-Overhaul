@@ -28,7 +28,7 @@
 
 params [["_target", [], [[]]], ["_entry", createHashMap, [createHashMap]]];
 
-if (isNil QEFUNC(compat_efak,canPackNew) || {(_target param [0, ""]) isNotEqualTo "grid"}) exitWith {[]};
+if (isNil QEFUNC(compat_efak,canPackNew) || {(_target param [0, ""]) isNotEqualTo "grid"} || {count GVAR(pool) > 0}) exitWith {[]};
 
 private _targetIndex = _target param [1, -1];
 private _grid = (uiNamespace getVariable [QEGVAR(gui,grids), []]) param [_targetIndex, createHashMap];

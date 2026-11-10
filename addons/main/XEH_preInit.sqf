@@ -44,7 +44,7 @@ GVAR(topics) = [
     ["containers", ELSTRING(storage,SubCategory_Containers), ["aio_storage_migrate", "aio_storage_useUniform", "aio_storage_useVest", "aio_storage_useBackpack"]],
     ["weight", ELSTRING(weight,SubCategory_Weight), ["aio_weight_enabled", "aio_weight_heavyAt", "aio_weight_overloadedAt", "aio_weight_criticalAt", "aio_weight_effects"]],
     ["extras", ELSTRING(setup,Topic_extras), ["aio_hotbar_enabled", "aio_magazines_repack", "aio_locks_zeusOpens", "aio_gui_menuHidden"]],
-    ["arsenal", ELSTRING(setup,Topic_arsenal), ["aio_arsenal_biArsenal", "aio_arsenal_biMessage"]],
+    ["arsenal", ELSTRING(setup,Topic_arsenal), ["aio_compat_antistasi_arsenal_panel", "aio_arsenal_biArsenal", "aio_arsenal_biMessage"]],
     ["look", ELSTRING(setup,Topic_look), ["aio_gui_playerColours"]],
     ["grids", ELSTRING(items,SubCategory_Grids), ["aio_items_massPerCell", "aio_items_stackSmall"]]
 ];

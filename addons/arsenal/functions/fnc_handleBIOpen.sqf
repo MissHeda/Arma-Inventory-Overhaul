@@ -25,6 +25,14 @@
 
 params [["_args", [], [[], true]]];
 
+// 0. An arsenal with a stock of its own (Antistasi's JNA, fnc_poolClaim): it is the vanilla window, whatever the setting
+// says - the stock lives in it; the grid panel joins it from the arsenalOpened event (fnc_biSafetyNet).
+if ([_args] call FUNC(poolClaim)) exitWith {
+    GVAR(biLetThrough) = true;
+
+    false
+};
+
 private _mode = missionNamespace getVariable [QGVAR(biArsenal), "vanilla"];
 
 // 1. Left alone, or kept with the grid panel beside its list (fnc_biOpened, from fnc_biSafetyNet): the vanilla arsenal opens (what
