@@ -23,6 +23,7 @@ EGVAR(storage,secondPrimaryMod) = createHashMapFromArray [
     ["get", {_this call FUNC(get)}],
     ["set", {_this call FUNC(set)}],
     ["accepts", {_this call FUNC(accepts)}],
+    ["weighed", true],
     ["keybind", ["KJW's Two Primary Weapons", "KJW_TwoPrimaryWeapons_SwitchToSecondPrimary"]]
 ];
 

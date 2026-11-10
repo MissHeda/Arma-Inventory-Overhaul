@@ -147,4 +147,23 @@ if (_hidden isEqualTypeArray [[], []]) then {
     } forEach (_hidden select 0);
 };
 
+// The second primary on the back, where the two-primary mod's compat says this mod weighs it (KJW's: its own ACE
+// weight drifted with every swap). It is in no cargo and no loadout the engine weighs - its whole mass counts:
+// the weapon, its attachments and its loaded magazines.
+private _secondMod = missionNamespace getVariable [QEGVAR(storage,secondPrimaryMod), createHashMap];
+
+if (_secondMod getOrDefault ["weighed", false] && {!isNil QEFUNC(storage,secondPrimary)}) then {
+    ([_unit] call EFUNC(storage,secondPrimary)) params [["_has", false], ["_back", []]];
+
+    if (_has && {_back isEqualType []} && {_back isNotEqualTo []}) then {
+        {
+            private _class = if (_x isEqualType []) then {_x param [0, ""]} else {_x};
+
+            if (_class isEqualType "" && {_class isNotEqualTo ""}) then {
+                _load = _load + (([_class] call EFUNC(items,getInfo)) getOrDefault ["mass", 0]);
+            };
+        } forEach _back;
+    };
+};
+
 _load

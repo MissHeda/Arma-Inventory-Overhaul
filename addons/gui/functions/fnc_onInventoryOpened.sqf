@@ -203,6 +203,22 @@ if (!isNull _window && {GVAR(openGuess)} && {_namesLoot} && {call FUNC(isInvento
     _window = displayNull;
 };
 
+// Already open, and a script asks for a pile or crate with something in it that the window does not show - a loot
+// mod that opened an empty pile at the feet, filled it and asks again (Ravage's Search, whatever build of it a
+// mission carries; Discord report 0.7.2/0.7.3: the find never showed). The window gives way to it, as to a guess.
+if (
+    !isNull _window && {_namesLoot} && {call FUNC(isInventoryMode)}
+    && {!(_loot in [GVAR(container), GVAR(secondary)])}
+    && {!(_loot isKindOf "CAManBase")}
+) then {
+    private _lootClass = typeOf _loot;
+
+    INFO_1("replaced: the window gives way to %1 - asked for again with something in it now.",_lootClass);
+
+    ["it gave way to a container asked for again (fnc_onInventoryOpened)"] call FUNC(closeDisplay);
+    _window = displayNull;
+};
+
 // Already open: the engine asked again, from a script or a second key press. One window is enough.
 if (!isNull _window) exitWith {
     INFO("refused: the window is open already - nothing more opens.");
@@ -268,6 +284,37 @@ if (!isNull _person) then {
     _container = [backpackContainer _person, _person] select (_mode isEqualTo "whole");
     _secondary = _rest param [0, objNull];
 };
+
+// An empty pile the engine named - a loot mod may fill it a moment later without asking again (a mission's own
+// search script): watched for PILE_WATCH seconds, and the window opens again on it once something lies in it.
+{
+    if (
+        !isNull _x && {_x isNotEqualTo _unit} && {[_x] call EFUNC(storage,isGroundHolder)}
+        && {([_x] call EFUNC(storage,getContents)) isEqualTo []}
+    ) then {
+        [{
+            params ["_pile"];
+
+            isNull _pile || {([_pile] call EFUNC(storage,getContents)) isNotEqualTo []}
+        }, {
+            params ["_pile", "_unit"];
+
+            if (isNull _pile || {!alive _unit} || {(_unit distance _pile) > 5}) exitWith {};
+            if (_pile in [GVAR(container), GVAR(secondary)]) exitWith {};
+
+            private _window = uiNamespace getVariable [QGVAR(display), displayNull];
+
+            // Closed meanwhile: the player is done; a window of another kind (an arsenal) is left alone.
+            if (isNull _window || {!(call FUNC(isInventoryMode))}) exitWith {};
+
+            INFO_1("reopened: the empty pile %1 the window opened beside got something in it.",typeOf _pile);
+
+            ["an empty pile it opened beside was filled (fnc_onInventoryOpened)"] call FUNC(closeDisplay);
+
+            [{_this call FUNC(open)}, [_unit, _pile, objNull]] call CBA_fnc_execNextFrame;
+        }, [_x, _unit], PILE_WATCH] call CBA_fnc_waitUntilAndExecute;
+    };
+} forEach [_container, _secondary];
 
 [{
     params ["_unit", "_container", "_secondary", "_person", "_zipped"];

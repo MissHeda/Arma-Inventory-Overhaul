@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.4 - beta
+
+### Fixed
+
+- Ravage: the find of a search still did not show for some players. When the window is open and a script asks for a
+  pile or crate that now has something in it, the window opens again on it; and an empty pile the window opened
+  beside is watched for a few seconds and shown once something lands in it.
+- KJW's Two Primary Weapons: swapping weapons lowered the weight a little each time, down to a negative load. The
+  weapon on the back is now weighed by this mod (KJW's own ACE weight is switched off while both are loaded).
+
 ## 0.7.3 - beta
 
 ### Added
