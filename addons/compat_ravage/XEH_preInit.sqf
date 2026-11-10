@@ -2,26 +2,26 @@
 
 ADDON = false;
 
-#include "XEH_PREP.hpp"
-
-// A pile Ravage's search made and has not filled yet (_uncheckedLoot): its own handler (fnc_checkLoot, spawned
-// from the player's InventoryOpened) fills it and asks the engine to open it again. The window waits for that:
-// this opening is held back. 0.7.2 relied on Ravage's second asking alone, and in some missions it never came
-// through (Discord report with video, 0.7.2: the window opened on the player's gear only). So the pile is watched
-// here as well (fnc_watchPile): once it is filled the window opens on it if Ravage's own asking has not opened it
-// already, and a pile Ravage did not fill within a moment is filled by Ravage's own function first.
+// A pile Ravage's search made and has not filled yet (_uncheckedLoot): filled right here, by Ravage's own function
+// (fnc_checkLoot), before the window opens on it. Ravage fills it from its own InventoryOpened handler, spawned - a
+// moment later, by when the pile was gone: the engine opened its vanilla inventory on the empty pile first, the
+// window closed that, and the engine deletes an empty pile whose inventory closes (in-game test 0.7.7: the pile was
+// null at once, the window opened on the player's gear only - Discord reports 0.7.2 to 0.7.6). Filled now, it opens
+// as any pile with something in it; Ravage's own handler then finds nothing left to fill, and its second asking for
+// the pile finds the window open on it already.
 EGVAR(gui,openingHolds) pushBack {
-    params ["_unit", "_container"];
+    params ["_unit", "_container", "_secondary"];
 
-    if (isNull _container || {isNil {_container getVariable "_uncheckedLoot"}}) exitWith {false};
-
-    // Ravage's filling function is missing (its player scripts did not run): nothing would ever fill the
-    // pile, and it opens as it is.
     if (isNil "fnc_checkLoot") exitWith {false};
 
-    [_unit, _container] call FUNC(watchPile);
+    {
+        if (!isNull _x && {!isNil {_x getVariable "_uncheckedLoot"}}) then {
+            INFO_1("Ravage's search pile %1 filled now, before the window opens.",typeOf _x);
+            [_unit, _x] call fnc_checkLoot;
+        };
+    } forEach [_container, _secondary];
 
-    true
+    false
 };
 
 ADDON = true;

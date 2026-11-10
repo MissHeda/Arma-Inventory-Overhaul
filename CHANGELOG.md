@@ -2,6 +2,14 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.7 - beta
+
+### Fixed
+
+- Ravage: searching still showed nothing for some players. The game opened its own inventory on the still empty pile
+  for a moment, and closing it deleted the pile before Ravage could fill it. The pile is now filled with Ravage's own
+  loot function the moment it is opened, so the window opens on the find. Tested in game.
+
 ## 0.7.6 - beta
 
 ### Changed
