@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.6 - beta
+
+### Changed
+
+- Weapon cards show the mounted attachments' own pictures on the weapon instead of the generic white slot shapes the
+  game draws (those looked the same on every weapon). An attachment without a picture keeps the shape.
+
 ## 0.7.5 - beta
 
 ### Added

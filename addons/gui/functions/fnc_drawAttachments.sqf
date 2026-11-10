@@ -7,7 +7,8 @@
  * picture - at iconPosition (fractions of the picture, from its top left), the iconPinpoint of the mark
  * ("Center", "Bottom", "Top", "Left", "Right") on that point.
  *
- * The mark is the weapon's own shape for the slot (iconPicture: attachment_top.paa and the like, the Spectrum Device's antennas)
+ * The mark is the attachment's own picture (0.7.6), a square of ATTACHMENT_PICTURE of the weapon picture's height. Only an
+ * attachment without a picture falls back to the weapon's own shape for the slot (iconPicture: attachment_top.paa and the like, the Spectrum Device's antennas)
  * at its iconScale of the picture - but never more than ATTACHMENT_MARK of it, so it grows and shrinks with the picture and none
  * covers half the weapon (Mia, #56: "The IR icon is far too big"), in white. The gear silhouettes tried in 0.6.46 are dark
  * grey: on the weapon's picture they did not show at all.
@@ -103,12 +104,25 @@ private _fnc_takes = {
 
     (getArray (_slot >> "iconPosition")) params [["_fx", 0.5], ["_fy", 0.5]];
 
-    // As the weapon's own picture draws it, a share of the picture's size - never more than ATTACHMENT_MARK.
-    _scale = _scale min ATTACHMENT_MARK;
+    // The attachment's own picture (Mia, 0.7.6: the slot's generic white shapes looked the same on every weapon), a square
+    // ATTACHMENT_PICTURE of the picture's height - square in pixels: the picture's area is 2:1, so half its width per
+    // height. An attachment without a picture keeps the slot's shape, as the weapon's own picture draws it, a share of
+    // the picture's size - never more than ATTACHMENT_MARK.
+    private _texture = getText (configFile >> "CfgWeapons" >> _item >> "picture");
+    private _color = [1, 1, 1, 1];
+    private _iconW = 0;
+    private _iconH = 0;
 
-    private _iconW = _w * _scale;
-    private _iconH = _h * _scale;
-    private _texture = getText (_slot >> "iconPicture");
+    if (_texture isEqualTo "") then {
+        _scale = _scale min ATTACHMENT_MARK;
+        _iconW = _w * _scale;
+        _iconH = _h * _scale;
+        _texture = getText (_slot >> "iconPicture");
+        _color = ATTACHMENT_MARK_COLOR;
+    } else {
+        _iconH = _h * ATTACHMENT_PICTURE;
+        _iconW = _iconH * (_w / _h) / 2;
+    };
     private _iconX = _x0 + _fx * _w;
     private _iconY = _y0 + _fy * _h;
 
@@ -127,11 +141,11 @@ private _fnc_takes = {
         private _icon = _display ctrlCreate ["AIO_Picture", -1];
         _icon ctrlSetPosition [_iconX, _iconY, _iconW, _iconH];
         _icon ctrlSetText ([_texture] call FUNC(safePicture));
-        _icon ctrlSetTextColor ATTACHMENT_MARK_COLOR;
+        _icon ctrlSetTextColor _color;
         _icon ctrlCommit 0;
         _controls pushBack _icon;
     } else {
-        _controls pushBack ([_display, _parent, [_iconX, _iconY, _iconW, _iconH], _texture, ATTACHMENT_MARK_COLOR] call FUNC(uiPicture));
+        _controls pushBack ([_display, _parent, [_iconX, _iconY, _iconW, _iconH], _texture, _color] call FUNC(uiPicture));
     };
 } forEach [
     [_muzzle, "MuzzleSlot"],

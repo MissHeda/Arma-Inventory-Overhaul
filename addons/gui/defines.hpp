@@ -455,6 +455,8 @@
 // picture's size, in this colour.
 #define ATTACHMENT_MARK 0.18
 #define ATTACHMENT_MARK_COLOR [1, 1, 1, 0.9]
+// An attachment's own picture on the weapon's picture: a square of this share of its height (fnc_drawAttachments).
+#define ATTACHMENT_PICTURE 0.4
 
 // What the config classes start with. Every control gets its real colours from the theme.
 #define C_CLEAR         {0, 0, 0, 0}
