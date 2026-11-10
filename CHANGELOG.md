@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.9 - beta
+
+### Changed
+
+- Ravage: "Search" on furniture is now only a short press, and what it finds no longer lands on the floor. It goes
+  into a hidden container in the furniture, which opens in the window and is searched there item by item like any
+  crate, with the server's search time for crates. Ravage's rules stay: the first search of the day decides what the
+  furniture holds, every later search that day opens the same container again, and what you put into it stays there
+  until the next day.
+
 ## 0.7.8 - beta
 
 ### Added

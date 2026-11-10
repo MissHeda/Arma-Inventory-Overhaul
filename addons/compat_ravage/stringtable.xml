@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project name="aio">
+    <Package name="compat_ravage">
+        <Key ID="STR_aio_compat_ravage_Furniture">
+            <English>Furniture</English>
+        </Key>
+    </Package>
+</Project>

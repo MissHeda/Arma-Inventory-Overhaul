@@ -2,7 +2,7 @@
 /*
  * Author: Miss Heda
  * What a container is called in a menu: the uniform, vest or backpack it belongs to by that item's
- * name, the ground, or the crate or vehicle by its own.
+ * name, the ground, or the crate or vehicle by its own - or the name the object was given (aio_name).
  *
  * Arguments:
  * 0: Container <OBJECT>
@@ -17,6 +17,12 @@
  */
 
 params ["_container"];
+
+// A name the object was given (aio_name): a container a mod or mission put in for something that has none - Ravage's
+// furniture (aio_compat_ravage_fnc_search).
+private _named = _container getVariable [QGVARMAIN(name), ""];
+
+if (_named isNotEqualTo "") exitWith {_named};
 
 if ([_container] call EFUNC(storage,isGroundHolder)) exitWith {localize ELSTRING(storage,Ground)};
 

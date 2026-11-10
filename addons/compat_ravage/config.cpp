@@ -1,10 +1,9 @@
 #include "script_component.hpp"
 
 // Loads only with Ravage (Workshop 1376636636): an addon whose required addons are missing is skipped, quietly.
-// Ravage's "Search" (a hold action on furniture and containers) makes an empty ground pile at the player's feet,
-// marks it _uncheckedLoot and opens it; its InventoryOpened handler (fnc_checkLoot) fills it a moment later. By then
-// the pile was gone: the engine deletes an empty pile whose vanilla inventory closes. It is filled at once now, with
-// Ravage's own function, before the window opens on it (see XEH_preInit).
+// Ravage's "Search" (a hold action on furniture) is made over: held only a moment, it opens the window on a hidden
+// box at the furniture that holds what was found, searched there item by item like any crate (fnc_patchAction,
+// fnc_search). A pile Ravage's own search made is filled at once, before the window opens on it (XEH_preInit).
 class CfgPatches {
     class ADDON {
         name = COMPONENT_NAME;

@@ -74,13 +74,24 @@ if (!isClass (configFile >> "CfgPatches" >> "ravage")) exitWith {
             private _target = (_near select 0) select 1;
             rvg_lootTarget = [_target, (getModelInfo _target) select 0];
         };
-    }, 0.1] call CBA_fnc_addPerFrameHandler;
 
-    fnc_lootSearchAction call BIS_fnc_holdActionAdd;
+        // The action on the player while there is a target, as Ravage's scan has it (its player variable) - a mod may
+        // take it off to put its own on.
+        if (!isNil "rvg_lootTarget" && {isNil {player getVariable "rvg_lootSearchAction"}}) then {
+            player setVariable ["rvg_lootSearchAction", fnc_lootSearchAction call BIS_fnc_holdActionAdd];
+        };
+    }, 0.1] call CBA_fnc_addPerFrameHandler;
 
     player addAction ["Reset Ravage searches", {
         {
             private _position = getPosASL _x;
+            private _found = missionNamespace getVariable ["foundLoot" + str _position, objNull];
+
+            // Arma Inventory Overhaul's hidden box, or the pile Ravage's own search left.
+            if (_found isEqualType objNull && {!isNull _found}) then {
+                deleteVehicle _found;
+            };
+
             {
                 missionNamespace setVariable [_x + str _position, nil, true];
             } forEach ["dailyLootManager_", "rvgLootTimeStamp_", "foundLoot"];

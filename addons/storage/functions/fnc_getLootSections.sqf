@@ -178,7 +178,7 @@ private _fnc_add = {
 
     private _section = createHashMapFromArray [
         ["id", "container"],
-        ["title", getText (configOf _object >> "displayName")],
+        ["title", [_object] call EFUNC(gui,containerName)],
         ["class", ""],
         ["container", _object]
     ];
