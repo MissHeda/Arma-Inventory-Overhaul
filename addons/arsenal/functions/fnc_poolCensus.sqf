@@ -10,7 +10,7 @@
  * None
  *
  * Return Value:
- * The census, or nil without a stock <ANY>
+ * The census, or false without a stock <ANY>
  *
  * Example:
  * private _census = call aio_arsenal_fnc_poolCensus;
@@ -18,12 +18,18 @@
  * Public: No
  */
 
-if (count GVAR(pool) == 0) exitWith {nil};
+// No stock of its own: false, never nil - a caller keeps it in a variable and hands it on (fnc_poolSettle), and a nil
+// there was an undefined variable at every add (0.7.5 to 0.7.7).
+if (count GVAR(pool) == 0) exitWith {false};
 
 private _center = call FUNC(center);
 
-if (isNull _center) exitWith {nil};
+if (isNull _center) exitWith {false};
 
 private _containers = [uniformContainer _center, vestContainer _center, backpackContainer _center, GVAR(staging)] select {!isNull _x};
 
-[_containers] call (GVAR(pool) get "census")
+private _census = [_containers] call (GVAR(pool) get "census");
+
+if (isNil "_census") exitWith {false};
+
+_census

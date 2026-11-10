@@ -47,7 +47,8 @@ GVAR(dirty) = false;
 GVAR(dragZone) = "";
 GVAR(folded) = createHashMap;
 GVAR(foldKeys) = [];
-GVAR(foldTab) = "";
+// No tab yet: the first build folds or unfolds the panel for the tab ACE opens on (fnc_layout).
+GVAR(foldTab) = "-";
 GVAR(listPress) = [];
 GVAR(listSel) = [];
 GVAR(watch) = [];

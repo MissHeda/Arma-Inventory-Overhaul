@@ -2,6 +2,22 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.8 - beta
+
+### Added
+
+- ACE Arsenal: the grid panel is there on every tab now, not only on the uniform, vest and backpack tabs. On a
+  container's tab it unfolds with that container open; on any other tab (weapons, headgear, NVG, ...) it starts
+  folded and can be unfolded with its button or by holding an item from the left list over it. Unfolded there it shows
+  the uniform, vest and backpack open and the staging space, so weapons, NVGs and everything else of the left list can
+  be dragged straight into them.
+- Test mission for Ravage's search (`hemtt launch ravage`): furniture to search with Ravage's own scripts, every
+  search finds something, and a scroll-menu action makes all furniture searchable again.
+
+### Fixed
+
+- ACE Arsenal: every item added to the panel logged a script error ("Undefined variable: _census") since 0.7.5.
+
 ## 0.7.7 - beta
 
 ### Fixed

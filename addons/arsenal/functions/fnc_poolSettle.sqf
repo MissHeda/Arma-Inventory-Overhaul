@@ -17,12 +17,12 @@
  * Public: No
  */
 
-params [["_before", nil]];
+params [["_before", false]];
 
-if (count GVAR(pool) == 0 || {isNil "_before"}) exitWith {};
+if (count GVAR(pool) == 0 || {_before isEqualTo false}) exitWith {};
 
 private _after = call FUNC(poolCensus);
 
-if (isNil "_after") exitWith {};
+if (_after isEqualTo false) exitWith {};
 
 [_before, _after] call (GVAR(pool) get "settle");

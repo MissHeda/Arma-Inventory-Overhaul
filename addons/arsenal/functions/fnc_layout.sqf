@@ -5,8 +5,11 @@
  * The layout of the panel (the "layout" hook): the uniform, vest or backpack whose tab is open in ACE's
  * left bar, as one section of the inventory's own (aio_gui_fnc_drawColumn with aio_gui_fnc_drawSection) -
  * its caption with what it holds weighs, its compartments and tiles -, under it the staging space
- * (fnc_staging) as a second section, and at the bottom the line for the hints (fnc_footer). Nothing while
- * another tab is open, that slot is empty, or ACE's panels are hidden (Backspace).
+ * (fnc_staging) as a second section, and at the bottom the line for the hints (fnc_footer). On every other tab of
+ * ACE's left bar (weapons, headgear, NVG, ...) the panel is there as well, titled "Gear": the uniform, vest and backpack
+ * open, and the staging space, so whatever its left list holds can be dragged into them (fnc_listDrag) - folded at
+ * first on those tabs, unfolded at first on a container's. Nothing in the vanilla arsenal's other tabs, with that
+ * slot empty, or while ACE's panels are hidden (Backspace).
  *
  * The panel looks like one of the inventory's columns (the glass, corner radius, fonts and colours of its
  * theme) and is laid out the way they are, on one grid of PANEL_PAD UNITs: one block from the top of ACE's
@@ -80,9 +83,6 @@ GVAR(stagingCount) = 0;
 
 if (!GVAR(shown)) exitWith {[]};
 
-// The whole panel folded to its title row (the button in it).
-private _collapsed = GVAR(collapsed);
-
 // Enhanced First Aid Kits' kits tab over ACE's panels, and the kit picked in its list (fnc_focusedKit) - noted as
 // this build shows it, for the frame hook to see the next pick (fnc_onFrame).
 private _focus = [_display] call FUNC(focusedKit);
@@ -91,6 +91,43 @@ _focus params ["_kitTab", "_picked", "_preparing"];
 
 GVAR(focusSeen) = _focus;
 GVAR(focusBuilt) = _focus;
+
+// Any other tab of ACE's left bar - weapons, headgear, NVG, ... - has the panel too (Mia, 0.7.8: everything of the
+// left list can be dragged in): the soldier's uniform, vest and backpack, all open, and the staging space, with no
+// container of the tab's own. Not in the vanilla arsenal, whose other tabs keep no panel.
+private _anyTab = !_kitTab && {_id isEqualTo ""} && {GVAR(kind) isNotEqualTo "bi"};
+
+// Another tab of ACE's left bar - uniform, vest, backpack, any other -, or the kits tab opened: the panel is folded
+// anew. The section of what was picked is open (the open container, or the kit's), every other container's section
+// folded to its caption, the staging space as it was; folds by hand hold until the next switch. The order of the
+// sections and the column's scroll stay as they are. Another kit picked in the kits tab opens the kit's section
+// again and leaves the rest as it is.
+// The whole panel unfolds by itself on a container's tab and the kits tab, and folds on every other tab - a click
+// on its button, or an item of the left list held over it (fnc_onFrame), unfolds it there; that holds until the
+// next switch (Mia, 0.7.8).
+// Each tab of no container counts as one of its own (ACE's button), so that every switch folds the panel again.
+private _tab = switch (true) do {
+    case _kitTab: {"kits"};
+    case _anyTab: {"tab" + str (missionNamespace getVariable [QACEGVAR(arsenal,currentLeftPanel), -1])};
+    default {_id};
+};
+
+if (_tab isNotEqualTo GVAR(foldTab)) then {
+    GVAR(foldTab) = _tab;
+
+    private _stagingFolded = "staging" in GVAR(folded);
+
+    GVAR(folded) = createHashMap;
+
+    if (_stagingFolded) then {
+        GVAR(folded) set ["staging", true];
+    };
+
+    GVAR(collapsed) = _anyTab;
+};
+
+// The whole panel folded to its title row (the button in it).
+private _collapsed = GVAR(collapsed);
 
 // Folded, no staging space is looked at: the crate is made when the panel unfolds.
 private _holder = if (_collapsed) then {objNull} else {[] call FUNC(staging)};
@@ -115,25 +152,6 @@ if (_kitTab) then {
 
 private _kit = _kitSection getOrDefault ["kit", ""];
 
-// Another tab of ACE's left bar - uniform, vest, backpack, any other -, or the kits tab opened: the panel is folded
-// anew. The section of what was picked is open (the open container, or the kit's), every other container's section
-// folded to its caption, the staging space as it was; folds by hand hold until the next switch. The order of the
-// sections and the column's scroll stay as they are. Another kit picked in the kits tab opens the kit's section
-// again and leaves the rest as it is.
-private _tab = [_id, "kits"] select _kitTab;
-
-if (_tab isNotEqualTo GVAR(foldTab)) then {
-    GVAR(foldTab) = _tab;
-
-    private _stagingFolded = "staging" in GVAR(folded);
-
-    GVAR(folded) = createHashMap;
-
-    if (_stagingFolded) then {
-        GVAR(folded) set ["staging", true];
-    };
-};
-
 if (_kitTab && {_kit isNotEqualTo GVAR(focusKit)}) then {
     GVAR(folded) deleteAt KIT_FOLD_KEY;
 };
@@ -143,9 +161,14 @@ GVAR(focusKit) = _kit;
 
 private _index = (_context getOrDefault ["ownSections", []]) findIf {(_x getOrDefault ["container", objNull]) isEqualTo _container};
 
-if (!_kitTab && {_id isEqualTo "" || {_index < 0}}) exitWith {[]};
+if (!_kitTab && {!_anyTab} && {_id isEqualTo "" || {_index < 0}}) exitWith {[]};
 
-private _section = if (_kitTab) then {_kitSection} else {(_context get "ownSections") select _index};
+// On any other tab the title row names the soldier's gear; the section itself is not drawn.
+private _section = switch (true) do {
+    case _kitTab: {_kitSection};
+    case _anyTab: {createHashMapFromArray [["title", LLSTRING(Panel_Gear)], ["class", ""], ["scrollClass", "gear"], ["container", objNull]]};
+    default {(_context get "ownSections") select _index};
+};
 
 // As wide as what is shown needs: the open container, or the kit's grid and the soldier's containers.
 private _shownHolders = +_worn;
@@ -154,7 +177,7 @@ if (_kit isNotEqualTo "") then {
     _shownHolders pushBack ("kit:" + toLowerANSI _kit);
 };
 
-private _rect = [_display, [_container, _shownHolders] select _kitTab] call FUNC(panelRect);
+private _rect = [_display, [_container, _shownHolders] select (_kitTab || _anyTab)] call FUNC(panelRect);
 
 if (_rect isEqualTo []) exitWith {[]};
 
@@ -208,10 +231,12 @@ if (_kitTab) then {
         GVAR(foldKeys) pushBack [KIT_FOLD_KEY, KIT_FOLD_KEY];
     };
 } else {
-    [_section, toLowerANSI (_section getOrDefault ["class", ""])] call _fnc_fold;
+    if (!_anyTab) then {
+        [_section, toLowerANSI (_section getOrDefault ["class", ""])] call _fnc_fold;
+    };
 };
 
-private _sections = [_section];
+private _sections = [[_section], []] select _anyTab;
 
 // The other worn containers beside it, folded to their captions and unfolded by a click on them, so that things
 // can be dragged between all three; the staging space below is the same one in every tab. The order is always
@@ -229,7 +254,8 @@ if (!_collapsed) then {
             _other set ["box", false];
 
             if (_otherContainer isNotEqualTo _container) then {
-                [_other, "other_" + toLowerANSI (_other getOrDefault ["class", ""]), true] call _fnc_fold;
+                // Open at first on a tab of no container: they are where its things go.
+                [_other, "other_" + toLowerANSI (_other getOrDefault ["class", ""]), !_anyTab] call _fnc_fold;
             };
 
             _all pushBack [_order find _otherContainer, _other];

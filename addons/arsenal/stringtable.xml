@@ -82,6 +82,9 @@
         <Key ID="STR_aio_arsenal_Overflow">
             <English>Not everything fits the grid of %1</English>
         </Key>
+        <Key ID="STR_aio_arsenal_Panel_Gear">
+            <English>Gear</English>
+        </Key>
         <Key ID="STR_aio_arsenal_Removed">
             <English>Removed, as they did not fit: %1</English>
         </Key>
