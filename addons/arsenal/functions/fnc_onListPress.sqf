@@ -56,7 +56,9 @@ GVAR(listPress) = [];
 if (_button != 0 || {isNull _list} || {!GVAR(attached)} || {GVAR(panelRect) isEqualTo []} || {EGVAR(gui,dragging)}) exitWith {};
 
 private _mouse = getMousePosition;
-private _rows = (lnbSize _list) select 0;
+// ACE's item list is a list box with columns; its left list (IDC 13, weapons, uniforms, vests, ...) and the
+// right one for attachments (IDC 14) are plain list boxes.
+private _rows = if (ctrlType _list == 102) then {(lnbSize _list) select 0} else {lbSize _list};
 
 (ctrlPosition _list) params ["_listX", "_listY", "_listW", "_listH"];
 _mouse params ["_mouseX", "_mouseY"];

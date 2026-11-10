@@ -2,6 +2,27 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.3 - beta
+
+### Added
+
+- ACE Arsenal: the entries of the left list (weapons, uniforms, vests, backpacks, headgear, ...) and of the attachments
+  list can be dragged into the panel like the items on the right - a spare rifle into the backpack, a second uniform
+  into the vest. Pressing a row still picks it as in ACE.
+- TSP Animate - Rewrite support (new optional addon `compat_tsp_animate`): mounting or taking off a suppressor, optic,
+  light or bipod in the window plays that mod's attachment gesture, and closing the window plays its close sound.
+- Right-click menu rows from `CfgAioMenu` can have a picture in front of the text (`icon`) and a tooltip; both are now
+  in the README.
+
+### Fixed
+
+- Ravage: a searched container still opened empty in some missions. The window now waits for Ravage to fill the pile,
+  fills it with Ravage's own function if Ravage does not, and opens on it.
+- KJW's and WebKnight's Two Primary Weapons: their switch key (4) also is the first hotbar slot's key, and both ran at
+  once. The hotbar now leaves a key to the two-primary mod when they share it.
+- RHS shotguns (M590 and others with a scripted shell-by-shell reload): with a "Use items from ..." limit active the
+  reload key could stop working after two reloads. Weapons that reload by their own script are left to the game.
+
 ## 0.7.2 - beta
 
 ### Added

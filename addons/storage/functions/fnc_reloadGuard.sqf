@@ -56,6 +56,9 @@ private _weapon = currentWeapon _unit;
 
 if (_weapon isEqualTo "" || {(([primaryWeapon _unit, handgunWeapon _unit, secondaryWeapon _unit]) find _weapon) < 0}) exitWith {false};
 
+// A weapon that reloads by its own script (RHS's shotguns) keeps the key: its script does its own bookkeeping.
+if ([_weapon] call FUNC(scriptedReload)) exitWith {false};
+
 private _muzzle = currentMuzzle _unit;
 private _compatible = (compatibleMagazines [_weapon, _muzzle]) apply {toLowerANSI _x};
 

@@ -367,6 +367,8 @@ class CfgAioMenu {
             enabled = "true";                    // greyed out while false (optional)
             consume = 0;                         // 1: the item is used up first (optional)
             doubleClick = 1;                     // a double click on these items runs it (optional)
+            icon = "\myMod\ui\drink_ca.paa";     // picture in front of the text (optional)
+            tooltip = "Take a sip";              // shown while the mouse rests on the row (optional)
         };
     };
     class Hide {                                 // rows hidden by id
@@ -377,6 +379,10 @@ class CfgAioMenu {
     };
 };
 ```
+
+The picture in front of a row's text is `icon`: the path to a `.paa` in your mod, best a white symbol on a transparent
+square (64x64 or 128x128) - the menu tints it like its own icons. Options of CBA's item context menu
+(`CBA_fnc_addItemContextMenuOption`) show the icon passed to CBA as well, so a mod that uses CBA only needs to give one there.
 
 The same from script, on every machine with a player: `aio_gui_fnc_addMenuEntry`, `aio_gui_fnc_hideMenuEntry`,
 `aio_gui_fnc_setDoubleClick` (see their headers). Ids of the window's own rows: `inspect`, `equip`, `attach`, `load`,

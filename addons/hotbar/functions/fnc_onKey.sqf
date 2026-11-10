@@ -35,6 +35,19 @@ private _class = GVAR(slots) param [_index, ""];
 
 if (_class isEqualTo "") exitWith {false};
 if (commandingMenu isNotEqualTo "") exitWith {false};
+
+// The two-primary mod's switch key (KJW's and WebKnight's both default to 4, the first slot's key): the key is
+// theirs, the slot does nothing - both at once broke the swap (Discord report, 0.7.2).
+private _switch = (missionNamespace getVariable [QEGVAR(storage,secondPrimaryMod), createHashMap]) getOrDefault ["keybind", []];
+
+if (_switch isNotEqualTo []) then {
+    private _theirs = (_switch call CBA_fnc_getKeybind) param [8, []];
+    private _ours = ([CBA_SETTINGS_AIO, format [QGVAR(slot%1), _index + 1]] call CBA_fnc_getKeybind) param [8, []];
+
+    if (_ours findIf {_x in _theirs && {(_x param [0, 0]) > 0}} >= 0) then {_index = -1};
+};
+
+if (_index < 0) exitWith {false};
 if (!isNull curatorCamera || {(call CBA_fnc_getActiveFeatureCamera) isNotEqualTo ""}) exitWith {false};
 
 private _unit = PLAYER_UNIT;

@@ -170,6 +170,7 @@ PREP(useCarried);
 PREP(useBlockedIn);
 PREP(useKindName);
 PREP(reloadGuard);
+PREP(scriptedReload);
 PREP(useHint);
 PREP(useTrack);
 PREP(onReloaded);

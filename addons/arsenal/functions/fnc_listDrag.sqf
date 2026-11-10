@@ -54,26 +54,45 @@ private _list = _display displayCtrl _idc;
 
 if (isNull _list || {_pressed isEqualTo []} || {EGVAR(gui,dragging)} || {GVAR(panelRect) isEqualTo []}) exitWith {false};
 
-private _rows = (lnbSize _list) select 0;
+// ACE's item list and the kits tab's have columns (list boxes with columns); ACE's left list (weapons, uniforms,
+// vests, backpacks, headgear, ...) and its right list of attachments are plain list boxes.
+private _isNbox = ctrlType _list == 102;
+private _rows = if (_isNbox) then {(lnbSize _list) select 0} else {lbSize _list};
 
 // Out of range: the row the list picked, if it picked one since the press - else none.
 if (_row < 0 || {_row >= _rows}) then {
-    _row = [-1, lnbCurSelRow _list] select (
+    _row = [-1, [lbCurSel _list, lnbCurSelRow _list] select _isNbox] select (
         _frame >= 0 && {(GVAR(listSel) param [1, -1]) >= _frame} && {(GVAR(listSel) param [2, ARSENAL_IDC_LIST]) == _idc}
     );
 };
 
 if (_row < 0 || {_row >= _rows}) exitWith {false};
 
-private _class = _list lnbData [_row, 0];
+// The plain lists' first row "<Empty>" has no class: nothing to drag.
+private _class = if (_isNbox) then {_list lnbData [_row, 0]} else {_list lbData _row};
 
 if (_class isEqualTo "") exitWith {false};
 
 // ACE's unique items: what the soldier has and the box does not. ACE would not add one; nor does the panel. In the
 // kits tab's list: what the picked kit cannot take there (its rules, the arsenal does not have it, the type may not
 // be filled) - that tab says why in the row's tooltip.
-if ((_list lnbValue [_row, 2]) == 1) exitWith {
+if (_isNbox && {(_list lnbValue [_row, 2]) == 1}) exitWith {
     [[LLSTRING(Hint_KitRowNotAllowed), LLSTRING(Hint_NotAllowed)] select (_idc == ARSENAL_IDC_LIST)] call EFUNC(gui,flashHint);
+    false
+};
+
+// The plain lists mark nothing: what the soldier wears shows there even when the box does not have it. ACE's flat
+// list of the box's items says (ACE 3.16 and later; without it, everything listed counts as the box's).
+if (!_isNbox) then {
+    private _flat = missionNamespace getVariable ["ace_arsenal_virtualItemsFlat", nil];
+
+    if (!isNil "_flat" && {_flat isEqualType createHashMap} && {count _flat > 0} && {!(_class in _flat) && {!((toLowerANSI _class) in _flat)}}) then {
+        _class = "";
+    };
+};
+
+if (_class isEqualTo "") exitWith {
+    [LLSTRING(Hint_NotAllowed)] call EFUNC(gui,flashHint);
     false
 };
 

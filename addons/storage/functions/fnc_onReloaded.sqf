@@ -69,6 +69,10 @@ if (isNull _unit || {!local _unit} || {_unit isNotEqualTo (missionNamespace getV
 
 if (!alive _unit || {!isNull objectParent _unit} || {([primaryWeapon _unit, handgunWeapon _unit, secondaryWeapon _unit] find _weapon) < 0}) exitWith {false};
 
+// A weapon that reloads by its own script (RHS's shotguns): nothing is taken back, its script puts magazines
+// back and swaps fake ones itself.
+if ([_weapon] call FUNC(scriptedReload)) exitWith {false};
+
 // A magazine the window put into the weapon by hand (a drag onto the weapon, "Load into", fnc_noteHandLoad) was
 // chosen on purpose from wherever it lay: the settings are about using items in the field, not about handling
 // the gear, so nothing is taken back. The note answers one event and runs out by itself.

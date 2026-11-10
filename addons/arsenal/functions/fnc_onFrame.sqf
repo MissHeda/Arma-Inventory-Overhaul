@@ -179,8 +179,10 @@ if (GVAR(collapsed) && {GVAR(listDragClass) isNotEqualTo ""}) then {
 
     private _row = -1;
 
-    for "_i" from 0 to ((lnbSize _list) select 0) - 1 do {
-        if ((_list lnbData [_i, 0]) isEqualTo _class) exitWith {
+    private _isNbox = ctrlType _list == 102;
+
+    for "_i" from 0 to ([lbSize _list, (lnbSize _list) select 0] select _isNbox) - 1 do {
+        if (([_list lbData _i, _list lnbData [_i, 0]] select _isNbox) isEqualTo _class) exitWith {
             _row = _i;
         };
     };

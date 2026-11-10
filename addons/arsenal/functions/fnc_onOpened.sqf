@@ -62,6 +62,12 @@ _display displayAddEventHandler ["MouseZChanged", {!isNull (uiNamespace getVaria
 // ACE's list, and the kits tab's list where Enhanced First Aid Kits is loaded, each with the "-" and "+" over its row.
 private _lists = [[_display displayCtrl ARSENAL_IDC_LIST, [ARSENAL_IDC_MINUS, ARSENAL_IDC_PLUS]]];
 
+// ACE's left list (weapons, uniforms, vests, backpacks, headgear, ...) and its right list of attachments: their
+// rows are dragged into the panel as well - a spare rifle into the backpack, a second uniform into the vest.
+{
+    _lists pushBack [_display displayCtrl _x, []];
+} forEach [ARSENAL_IDC_LEFT_LIST, ARSENAL_IDC_RIGHT_LIST];
+
 if (!isNil QEFUNC(compat_efak,arsenalControls)) then {
     ([_display] call EFUNC(compat_efak,arsenalControls)) params ["_kitList", "", "_kitArrows"];
 
