@@ -1269,6 +1269,12 @@ Off does it at once; a drag never waits.</English>
         <Key ID="STR_aio_gui_Setting_Weapon3D">
             <English>Real weapon pictures</English>
         </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DAuto">
+            <English>Centre weapon pictures</English>
+        </Key>
+        <Key ID="STR_aio_gui_Setting_Weapon3DAuto_Desc">
+            <English>Each real weapon picture is put in the\nmiddle of its card and fitted to it,\nwith everything the weapon carries.\n\nOff: the size and place of each slot's\npicture are yours to set.</English>
+        </Key>
         <Key ID="STR_aio_gui_Setting_Weapon3DGroup_Desc">
             <English>The real weapon picture of this slot: its size, and where it lies on the card.</English>
         </Key>

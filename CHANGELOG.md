@@ -2,6 +2,24 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.12 - beta
+
+### Added
+
+- Layout settings: "Centre weapon pictures", on by default. On, each real weapon picture is put in the middle of its
+  card by itself; only with it off the rows for each slot's size and place show.
+
+### Changed
+
+- Real weapon pictures are on by default now.
+- Weapon cards: the small plates of the attachments have a thin frame in the accent colour, as the parts' boxes of the
+  Attachments view have.
+
+### Fixed
+
+- Layout settings: "Default" did not take back the weapon pictures' place (X, Y), and no value of them while their
+  rows were hidden; a value taken back could also return after a restart.
+
 ## 0.7.11 - beta
 
 ### Changed

@@ -5,7 +5,7 @@
  * and always in sync with them (fnc_settingsRow writes to CBA, the card reads what is set). A row whose addon is not loaded is left out.
  *
  * Arguments:
- * None
+ * None - or ["all"]: the rows that are hidden for now as well (the weapon pictures' own while those are off)
  *
  * Return Value:
  * The rows, in their order <ARRAY>: a caption [""," name"], or
@@ -41,7 +41,8 @@ private _rows = [
     ],
     ["", LLSTRING(SettingsMenu_Tiles)],
     [QGVAR(tileNames), LLSTRING(Setting_TileNames), LLSTRING(Setting_TileNames_Desc), "check", false],
-    [QGVAR(weapon3D), LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc), "check", false],
+    [QGVAR(weapon3D), LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc), "check", true],
+    [QGVAR(weapon3DAuto), LLSTRING(Setting_Weapon3DAuto), LLSTRING(Setting_Weapon3DAuto_Desc), "check", true],
     [
         QGVAR(weapon3DZoom_primary), LLSTRING(Setting_Weapon3D_Primary), LLSTRING(Setting_Weapon3DGroup_Desc), "group", 100, [
             [QGVAR(weapon3DZoom_primary), LLSTRING(Weapon3D_Size), 50, 200, 5, "%", 100, LLSTRING(Setting_Weapon3DZoom_Desc)],
@@ -89,9 +90,19 @@ private _rows = [
     [QEGVAR(hotbar,leaderKeys), LELSTRING(hotbar,Setting_LeaderKeys), LELSTRING(hotbar,Setting_LeaderKeys_Desc), "check", true]
 ];
 
-// The weapon pictures' size and place only while they are on: twelve values in four rows the card has no room for otherwise (Mia,
-// 0.6.108: "list too long").
+// The weapon pictures' own rows only while the pictures are on, and their size and place only while they are not put in the
+// middle by themselves: twelve values in four rows the card has no room for otherwise (Mia, 0.6.108: "list too long"; 0.7.12: the
+// nudges only with "Centre weapon pictures" off). Asked for with ["all"] every row comes - a reset takes the hidden ones back too.
+private _all = _this isEqualTo ["all"];
+private _real = missionNamespace getVariable [QGVAR(weapon3D), false];
+private _auto = missionNamespace getVariable [QGVAR(weapon3DAuto), true];
+
 _rows select {
     ((_x select 0) isEqualTo "" || {!isNil {missionNamespace getVariable (_x select 0)}})
-    && {(_x param [3, ""]) isNotEqualTo "group" || {missionNamespace getVariable [QGVAR(weapon3D), false]}}
+    && {
+        _all || {
+            ((_x param [3, ""]) isNotEqualTo "group" || {_real && {!_auto}})
+            && {(_x select 0) isNotEqualTo QGVAR(weapon3DAuto) || {_real}}
+        }
+    }
 }

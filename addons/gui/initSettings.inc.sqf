@@ -121,15 +121,29 @@
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;
 
-// Each player's own eyes and machine, off by default (a filmed picture cannot be see-through, Mia 0.6.82): the weapon cards show each weapon as it really looks, with its attachments, filmed in a small
-// 3D scene (fnc_cardScene) - one camera per weapon while the window is open, with Picture-in-Picture on. Off, the flat picture with
-// white marks. Read at every build.
+// Each player's own eyes and machine, on by default since 0.7.12 (Mia; off until then - a filmed picture cannot be see-through, Mia
+// 0.6.82): the weapon cards show each weapon as it really looks, with its attachments, filmed in a small 3D scene (fnc_cardScene) -
+// one camera per weapon while the window is open, with Picture-in-Picture on. Off, the flat picture with white marks. Read at
+// every build.
 [
     QGVAR(weapon3D),
     "CHECKBOX",
     [LLSTRING(Setting_Weapon3D), LLSTRING(Setting_Weapon3D_Desc)],
     [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
-    false,
+    true,
+    0,
+    {[] call FUNC(elementsChanged)}
+] call CBA_fnc_addSetting;
+
+// Each player's own: the real weapon pictures are put in the middle of their cards and fitted to them by themselves (fnc_cardScene,
+// fnc_fitView). Off, each slot's size and place are the player's to set (the settings below) - only then the window's settings card
+// shows them (fnc_settingsDefs). Read at every build.
+[
+    QGVAR(weapon3DAuto),
+    "CHECKBOX",
+    [LLSTRING(Setting_Weapon3DAuto), LLSTRING(Setting_Weapon3DAuto_Desc)],
+    [CBA_SETTINGS_AIO_CLIENT, LLSTRING(SubCategory_General)],
+    true,
     0,
     {[] call FUNC(elementsChanged)}
 ] call CBA_fnc_addSetting;

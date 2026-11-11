@@ -397,10 +397,12 @@ private _fnc_weaponCard = {
 
             // How far each slot's camera stands, the player's own (Layout: weapon picture size per slot): 100 % fits the weapon to
             // the card, less shows it smaller. Given as the share of the picture the weapon takes, so a change frames it anew.
-            private _zoom = (((missionNamespace getVariable [format ["%1_%2", QGVAR(weapon3DZoom), _slot], 100]) / 100) max 0.3) min 2;
+            // Both only with "Centre weapon pictures" off (0.7.12): on, the weapon lies in the middle, fitted, and nothing is nudged.
+            private _own = !(missionNamespace getVariable [QGVAR(weapon3DAuto), true]);
+            private _zoom = [1, (((missionNamespace getVariable [format ["%1_%2", QGVAR(weapon3DZoom), _slot], 100]) / 100) max 0.3) min 2] select _own;
 
             // And where on the card it lies, the player's own nudge per slot (Mia, 0.6.107), in % of the weapon's length.
-            private _offset = ["X", "Y"] apply {(missionNamespace getVariable [format ["%1%2_%3", QGVAR(weapon3DOffset), _x, _slot], 0]) / 100};
+            private _offset = ["X", "Y"] apply {[0, (missionNamespace getVariable [format ["%1%2_%3", QGVAR(weapon3DOffset), _x, _slot], 0]) / 100] select _own};
 
             // The name line lies over the picture's foot: the weapon is fitted to what is free above it and lifted into the middle
             // of that, so no grip or magazine hangs into the name (0.7.10).
@@ -495,6 +497,12 @@ private _fnc_weaponCard = {
             };
 
             [_display, _parent, [_partsRight, _partsTop, _partW + _textW, _partH], _plateColor, _partH * 0.25] call FUNC(uiPanel);
+
+            // Framed thinly in the accent colour, as the parts' boxes of the Attachments view are (fnc_drawHotspots) - faint here: the
+            // plates are small and many (Mia, 0.7.12).
+            [
+                _display, _parent, [_partsRight, _partsTop, _partW + _textW, _partH], (_colorAccent select [0, 3]) + [PLATE_RING_ALPHA], _partH * 0.25
+            ] call FUNC(uiRing);
             [
                 _display, _parent, _partRect, _partInfo getOrDefault ["picture", ""], _partInfo getOrDefault ["icon", ICON_PLAIN], [1, 1, 1, 1], _partRect
             ] call FUNC(uiItemPicture);

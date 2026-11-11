@@ -428,6 +428,85 @@ switch (_mode) do {
 
         call _fnc_camera;
     };
+    case "stop": {
+        if (count _scene == 0) exitWith {};
+
+        private _camera = _scene getOrDefault ["camera", objNull];
+
+        // Destroying a camera does not end what it films into.
+        if (!isNull _camera) then {
+            _camera cameraEffect ["Terminate", "Back", _scene getOrDefault ["target3D", INSPECT_3D_TARGET]];
+            camDestroy _camera;
+        };
+
+        if (!isNil QGVAR(pipDistance)) then {
+            setPiPViewDistance GVAR(pipDistance);
+            GVAR(pipDistance) = nil;
+        };
+
+        {
+            if (!isNull _x) then {
+                deleteVehicle _x;
+            };
+        } forEach (_scene getOrDefault ["objects", []]);
+
+        GVAR(scene3D) = createHashMap;
+        GVAR(inspect3DTurn) = [];
+        GVAR(inspect3DPan) = [];
+    };
+    case "turn": {
+        if (count _scene == 0) exitWith {};
+
+        _arguments params [["_across", 0, [0]], ["_down", 0, [0]]];
+
+        // The item follows the mouse: dragged to the right, its front turns to the right.
+        _scene set ["dir", (_scene get "dir") + _across * INSPECT_3D_TURN_ACROSS];
+        // Side on, it tilts only so far that the parts round it stay readable.
+        private _tilt = [80, INSPECT_3D_SIDE_TILT] select (_scene getOrDefault ["side", false]);
+
+        _scene set ["pitch", (((_scene get "pitch") + _down * INSPECT_3D_TURN_DOWN) max -_tilt) min _tilt];
+
+        call _fnc_camera;
+    };
+    case "zoom": {
+        if (count _scene == 0) exitWith {};
+
+        _arguments params [["_turn", 0, [0]]];
+
+        if (_turn == 0) exitWith {};
+
+        // By how far the wheel turned: several notches in one frame come as one turn of that many.
+        private _distance = (_scene get "distance") / (1.15 ^ ((_turn max -6) min 6));
+
+        _scene set ["distance", ((_distance max (_scene get "near")) min (_scene get "far"))];
+
+        call _fnc_camera;
+    };
+    case "pan": {
+        if (count _scene == 0) exitWith {};
+
+        _arguments params [["_across", 0, [0]], ["_down", 0, [0]]];
+
+        private _dir = _scene get "dir";
+        private _distance = _scene get "distance";
+        private _side = [cos _dir, -(sin _dir), 0];
+        private _origin = _scene get "origin";
+
+        // Dragged right, the item goes right: the camera and its target go left - _side points to the camera's left (it looks
+        // along -[sin dir, cos dir]). Dragged down, they go up.
+        private _target = ((_scene get "target") vectorAdd (_side vectorMultiply (_across * _distance * INSPECT_3D_PAN)))
+            vectorAdd [0, 0, _down * _distance * INSPECT_3D_PAN];
+        private _offset = _target vectorDiff _origin;
+        private _limit = _scene getOrDefault ["frame", INSPECT_3D_FRAME];
+
+        if (vectorMagnitude _offset > _limit) then {
+            _target = _origin vectorAdd ((vectorNormalized _offset) vectorMultiply _limit);
+        };
+
+        _scene set ["target", _target];
+
+        call _fnc_camera;
+    };
     case "reset": {
         if (count _scene == 0) exitWith {};
 

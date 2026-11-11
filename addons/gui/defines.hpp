@@ -603,6 +603,8 @@
 // How much of what the card shows the weapon fills, across or up and down - whichever it reaches first (fnc_cardScene).
 #define CARD_3D_ROOM 0.8
 #define CARD_3D_ROOM_LAUNCHER 0.72
+// How strong the thin frame round an attachment's plate on a weapon card is (fnc_drawEquipmentCards), 0 to 1.
+#define PLATE_RING_ALPHA 0.4
 // How much of a bipod's height counts into a weapon's box: folded up it lies under the barrel (fnc_weaponBounds), in metres.
 #define BIPOD_FOLDED 0.05
 // The shortest length a weapon card's picture is framed for, in metres: a handgun shows at a handgun's size, not card-filling.

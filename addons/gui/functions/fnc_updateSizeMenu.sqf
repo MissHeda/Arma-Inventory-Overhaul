@@ -66,12 +66,24 @@ private _changed = false;
 
 // The settings' rows count as well.
 {
-    _x params ["_setting", "", "", "", "_default"];
+    _x params ["_setting", "", "", ["_kind", ""], "_default", ["_data", []]];
 
-    if (_setting isNotEqualTo "" && {!([_setting] call FUNC(settingForced))} && {(missionNamespace getVariable [_setting, _default]) isNotEqualTo _default}) then {
-        _changed = true;
+    // A row of several values: each of them (fnc_sizeSet "reset").
+    // A caption has no setting, and no default.
+    private _pairs = switch (true) do {
+        case (_kind isEqualTo "group"): {_data apply {[_x param [0, ""], _x param [6, 0]]}};
+        case (_setting isEqualTo ""): {[]};
+        default {[[_setting, _default]]};
     };
-} forEach (call FUNC(settingsDefs));
+
+    {
+        _x params ["_one", "_oneDefault"];
+
+        if (_one isNotEqualTo "" && {!([_one] call FUNC(settingForced))} && {(missionNamespace getVariable [_one, _oneDefault]) isNotEqualTo _oneDefault}) then {
+            _changed = true;
+        };
+    } forEach _pairs;
+} forEach (["all"] call FUNC(settingsDefs));
 
 if ((missionNamespace getVariable [QGVAR(layoutRects), ""]) isNotEqualTo "") then {
     _changed = true;

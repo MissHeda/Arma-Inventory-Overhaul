@@ -78,24 +78,51 @@ switch (_mode) do {
 
         ["commit"] call FUNC(sizeSet);
 
-        // And the settings' rows of the card (fnc_settingsDefs), to CBA at once.
+        // And the settings' rows of the card (fnc_settingsDefs), to CBA at once - every one of them: each value of a row of several
+        // (a weapon picture's size and place) and the rows hidden for now. Until 0.7.11 only the first value of such a row went back
+        // and none of a hidden row (Mia: "the custom position does not reset"). The window's own copy of each goes too, or the next
+        // start put the old value back (XEH_postInit).
         private _rowChanged = false;
+        private _own = profileNamespace getVariable [QGVAR(ownSettings), createHashMap];
+
+        if !(_own isEqualType createHashMap) then {_own = createHashMap};
+
+        private _pairs = [];
 
         {
-            _x params ["_setting", "", "", "", "_default"];
+            _x params ["_setting", "", "", ["_kind", ""], "_default", ["_data", []]];
 
-            if (
-                _setting isNotEqualTo "" && {!([_setting] call FUNC(settingForced))}
-                && {(missionNamespace getVariable [_setting, _default]) isNotEqualTo _default}
-            ) then {
-                missionNamespace setVariable [_setting, _default];
-                _rowChanged = true;
-
-                if (!isNil "CBA_settings_fnc_set") then {
-                    [_setting, _default, 0, "client", true] call CBA_settings_fnc_set;
+            if (_kind isEqualTo "group") then {
+                {
+                    _pairs pushBack [_x param [0, ""], _x param [6, 0]];
+                } forEach _data;
+            } else {
+                // A caption has no setting, and no default.
+                if (_setting isNotEqualTo "") then {
+                    _pairs pushBack [_setting, _default];
                 };
             };
-        } forEach (call FUNC(settingsDefs));
+        } forEach (["all"] call FUNC(settingsDefs));
+
+        {
+            _x params ["_setting", "_default"];
+
+            if (_setting isNotEqualTo "" && {!([_setting] call FUNC(settingForced))}) then {
+                _own deleteAt (toLowerANSI _setting);
+
+                if ((missionNamespace getVariable [_setting, _default]) isNotEqualTo _default) then {
+                    missionNamespace setVariable [_setting, _default];
+                    _rowChanged = true;
+
+                    if (!isNil "CBA_settings_fnc_set") then {
+                        [_setting, _default, 0, "client", true] call CBA_settings_fnc_set;
+                    };
+                };
+            };
+        } forEach _pairs;
+
+        profileNamespace setVariable [QGVAR(ownSettings), _own];
+        saveProfileNamespace;
 
         // And the columns placed by hand (fnc_openLayoutEditor).
         if ((missionNamespace getVariable [QGVAR(layoutRects), ""]) isNotEqualTo "") then {
