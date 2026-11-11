@@ -601,8 +601,10 @@
 #define CARD_3D_MAX_RES 1024
 #define CARD_3D_DISTANCE 0.95
 // How much of what the card shows the weapon fills, across or up and down - whichever it reaches first (fnc_cardScene).
-#define CARD_3D_ROOM 0.86
+#define CARD_3D_ROOM 0.8
 #define CARD_3D_ROOM_LAUNCHER 0.72
+// How much of a bipod's height counts into a weapon's box: folded up it lies under the barrel (fnc_weaponBounds), in metres.
+#define BIPOD_FOLDED 0.05
 // The shortest length a weapon card's picture is framed for, in metres: a handgun shows at a handgun's size, not card-filling.
 #define CARD_3D_MIN_LENGTH 0.75
 // How many frames a weapon is filmed before its picture is kept as a still and the scene goes.

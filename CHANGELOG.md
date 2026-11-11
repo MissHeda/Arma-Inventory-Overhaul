@@ -2,6 +2,13 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.11 - beta
+
+### Changed
+
+- Weapon cards in 3D: a little more room round the weapon, so a sight no longer touches the card's edge, and a folded
+  bipod no longer pushes the weapon up on its card. Measured in game again on vanilla and RHS weapons.
+
 ## 0.7.10 - beta
 
 ### Changed

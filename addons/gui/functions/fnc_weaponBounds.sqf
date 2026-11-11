@@ -93,7 +93,7 @@ if ((_scene getOrDefault ["boundsFor", []]) isNotEqualTo _fitted) then {
         };
 
         {
-            _x params ["_partModel", "_slot"];
+            _x params ["_partModel", "_slot", ["_folded", false]];
 
             if (_partModel isEqualTo "" || {_slot isEqualTo []}) then {continue};
 
@@ -103,6 +103,13 @@ if ((_scene getOrDefault ["boundsFor", []]) isNotEqualTo _fitted) then {
 
             ([_part] call FUNC(modelBox)) params ["_partMin", "_partMax"];
             deleteVehicle _part;
+
+            // A bipod's model stands on its legs, but on a weapon that lies somewhere it is folded up under the barrel: only
+            // its top BIPOD_FOLDED counts, or the box reached a leg's length under the weapon and the weapon sat too high (the
+            // M14 EBR with a Harris bipod, measured in game, 0.7.10).
+            if (_folded) then {
+                _partMin set [2, (_partMin select 2) max ((_partMax select 2) - BIPOD_FOLDED)];
+            };
 
             _slot params ["_place", "_dir", "_up"];
 
@@ -127,7 +134,7 @@ if ((_scene getOrDefault ["boundsFor", []]) isNotEqualTo _fitted) then {
             [[[_muzzle, ""] select !(_muzzle isEqualType "")] call FUNC(itemModel), _muzzleSlot],
             [[[_rail, ""] select !(_rail isEqualType "")] call FUNC(itemModel), [["weapon_slots\side"]] call _fnc_slot],
             [[[_optic, ""] select !(_optic isEqualType "")] call FUNC(itemModel), [["weapon_slots\top"]] call _fnc_slot],
-            [[[_bipod, ""] select !(_bipod isEqualType "")] call FUNC(itemModel), [["weapon_slots\underbarrel", "weapon_slots\bipod"]] call _fnc_slot],
+            [[[_bipod, ""] select !(_bipod isEqualType "")] call FUNC(itemModel), [["weapon_slots\underbarrel", "weapon_slots\bipod"]] call _fnc_slot, true],
             [_magazineModel, [["magazineslot"]] call _fnc_slot]
         ];
 
