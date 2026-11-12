@@ -2,6 +2,15 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.14 - beta
+
+### Fixed
+
+- WebKnight's Two Primary Weapons: switching to the weapon on the back with full containers took its loaded magazine
+  away, and the next switch the other weapon's too - that mod puts the magazine into the uniform, vest or backpack
+  first, which a full one refuses. The weapon now always comes off the back with its own magazine and rounds, and the
+  spare magazines stay as they were (#74). Tested in game.
+
 ## 0.7.13 - beta
 
 ### Added
