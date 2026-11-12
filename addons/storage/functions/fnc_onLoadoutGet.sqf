@@ -14,6 +14,8 @@
  *
  * Nothing is written when none of the three has records.
  *
+ * The weapon on the back of a Two Primary Weapons mod goes along under "aio_secondPrimary" (fnc_onLoadoutBack).
+ *
  * Arguments:
  * 0: Unit <OBJECT>
  * 1: The loadout, as getUnitLoadout gives it <ARRAY>
@@ -31,6 +33,14 @@
 params [["_unit", objNull, [objNull]], ["_loadout", [], [[]]], ["_extended", createHashMap, [createHashMap]]];
 
 if (isNull _unit) exitWith {};
+
+// The weapon on the back, where a Two Primary Weapons mod gives the unit that slot: "aio_secondPrimary", [1, weapon
+// or []] - an empty back goes along too, so a loadout saved with one leaves the back empty (fnc_onLoadoutBack).
+private _back = [_unit] call FUNC(secondPrimary);
+
+if (_back select 0) then {
+    _extended set ["aio_secondPrimary", [1, _back select 1]];
+};
 
 private _any = false;
 

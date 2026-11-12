@@ -20,6 +20,9 @@
     [{_this call FUNC(topUpLoadout)}, [_unit, _loadout]] call FUNC(nextFrame);
 }] call CBA_fnc_addEventHandler;
 
+// The weapon on the back of a loadout set on another machine (fnc_onLoadoutBack), put on here.
+[QGVAR(loadoutBack), {_this call FUNC(onLoadoutBack)}] call CBA_fnc_addEventHandler;
+
 // A loadout set for a unit that lives on another machine (aio_storage_fnc_setUnitLoadout), set where it is local.
 [QGVAR(setUnitLoadout), {_this call FUNC(setUnitLoadout)}] call CBA_fnc_addEventHandler;
 

@@ -77,6 +77,14 @@ if (local _unit) then {
     [QGVAR(topUpLoadout), [_unit, _loadout], _unit] call CBA_fnc_targetEvent;
 };
 
+// The weapon on the back the loadout carries (fnc_onLoadoutGet): put on, or the back left empty when it was saved
+// so. A loadout without the key - saved before, or without such a mod - leaves the back as it is.
+private _back = _extended getOrDefault ["aio_secondPrimary", []];
+
+if (_back isEqualType [] && {(_back param [0, 0]) isEqualTo 1} && {(_back param [1, []]) isEqualType []}) then {
+    [_unit, _back select 1] call FUNC(onLoadoutBack);
+};
+
 private _layout = _extended getOrDefault ["aio_layout", []];
 
 if !(_layout isEqualType [] && {(_layout param [0, 0]) isEqualTo 1} && {(_layout param [1, []]) isEqualType []}) exitWith {};

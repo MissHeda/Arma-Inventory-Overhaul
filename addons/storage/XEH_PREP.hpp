@@ -124,6 +124,7 @@ PREP(addNew);
 PREP(countClass);
 PREP(onLoadoutGet);
 PREP(onLoadoutSet);
+PREP(onLoadoutBack);
 PREP(topUpLoadout);
 PREP(setUnitLoadout);
 

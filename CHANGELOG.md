@@ -2,6 +2,16 @@
 
 All notable changes to Enhanced Inventory. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.7.16 - beta
+
+### Added
+
+- WebKnight's and KJW's Two Primary Weapons: the weapon on the back is saved with a loadout - ACE Arsenal, exported
+  loadouts, anything that uses CBA's loadouts - and comes back on the back when the loadout is loaded, with its
+  attachments and magazine. A loadout saved with an empty back leaves the back empty; one saved before this version
+  leaves it as it is. In ACE Arsenal, a weapon or part that arsenal does not have is left out (#74). Tested in game
+  with WebKnight's.
+
 ## 0.7.15 - beta
 
 ### Changed
